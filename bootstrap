@@ -1,9 +1,9 @@
 #!/bin/sh
 
 # required version of autotools
-am_require="1.8.5"
+am_require="1.9.3"
 ac_require="2.59"
-lt_require="1.5.6"
+lt_require="1.5.10"
 
 # location of config.h.in
 config_h_in="src/alps/config.h.in"
@@ -18,11 +18,11 @@ if test "x$am_version" != "x$am_require"; then
   echo "Error: Required automake version $am_require, but found $am_version."
   have_autotools=no
 fi
-if test "x$ac_version" != "x2.59"; then
+if test "x$ac_version" != "x$ac_require"; then
   echo "Error: Required autoconf version $ac_require, but found $ac_version."
   have_autotools=no
 fi
-if test "x$lt_version" != "x1.5.6"; then
+if test "x$lt_version" != "x$lt_require"; then
   echo "Error: Required libtool version $lt_require, but found $lt_version."
   have_autotools=no
 fi
