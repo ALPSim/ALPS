@@ -20,9 +20,9 @@ else
 fi	
 
 if test "$ac_cv_alps_type" = "full"; then
-  AC_MSG_NOTICE([starting configuration for ALPS library version $PACKAGE_VERSION])
+  AC_MSG_NOTICE([starting configuration for ALPS Libraries version $PACKAGE_VERSION])
 else
-  AC_MSG_NOTICE([starting configuration for ALPS light library version $PACKAGE_VERSION])
+  AC_MSG_NOTICE([starting configuration for ALPS Light Libraries version $PACKAGE_VERSION])
 fi
 
 ac_cv_alps_version="$PACKAGE_VERSION"
@@ -36,7 +36,7 @@ AC_CONFIG_HEADERS(src/alps/config.h)
 AC_CONFIG_FILES(Makefile)
 AC_CONFIG_FILES(config/Makefile config/config.site config/arxx config/include.mk)
 AC_CONFIG_FILES(src/Makefile)
-AC_CONFIG_FILES(test/Makefile example/Makefile)
+AC_CONFIG_FILES(test/Makefile)
 AC_CONFIG_FILES(test/fixed_capacity/Makefile)
 AC_CONFIG_FILES(test/osiris/Makefile test/osiris/xdrdump2.input)
 AC_CONFIG_FILES(test/parameter/Makefile)
@@ -47,6 +47,7 @@ if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(test/alea/Makefile)
   AC_CONFIG_FILES(test/lattice/Makefile test/lattice/lattices.xml test/lattice/parameters)
   AC_CONFIG_FILES(test/model/Makefile test/model/lattices.xml test/model/models.xml test/model/parameters)
+  AC_CONFIG_FILES(example/Makefile)
   AC_CONFIG_FILES(example/scheduler/Makefile)
   AC_CONFIG_FILES(example/model/Makefile)
   AC_CONFIG_FILES(tool/Makefile tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text)
@@ -560,8 +561,10 @@ fi
 #
 
 sinclude(config/ac_hdf5.m4)
-AC_HDF5
-test "$ac_cv_have_hdf5" = yes && AC_DEFINE(ALPS_HAVE_HDF5)
+if test "$ac_cv_alps_type" = "full"; then
+  AC_HDF5
+  test "$ac_cv_have_hdf5" = yes && AC_DEFINE(ALPS_HAVE_HDF5)
+fi
 
 #
 # check for XML parser
@@ -686,12 +689,25 @@ dnl
 
 echo
 echo "Summary of configuration:"
-echo "  ALPS version      $PACKAGE_VERSION"
+if test "$ac_cv_alps_type" = "full"; then
+  echo "  ALPS version      $PACKAGE_VERSION"
+else
+  echo "  ALPS version      $PACKAGE_VERSION (Light)"
+fi
 echo "  compiler type     $ac_cv_alps_compiler"
 echo "  exceptions        $ac_cv_alps_compiler_exceptions"
 echo "  optimization      $ac_cv_alps_compiler_optimization"
 echo "  MPI support       $ac_cv_alps_have_mpi"
 echo "  PVM support       $ac_cv_alps_have_pvm"
 echo "  pthread support   $ac_cv_have_pthread"
-echo "  HDF5 support      $ac_cv_have_hdf5"
+if test "$ac_cv_alps_type" = "full"; then
+  echo "  HDF5 support      $ac_cv_have_hdf5"
+fi
 echo "  XML parser        $ac_cv_xml_parser"
+
+echo
+echo "*** This is the \"ALPS Light\" Libraries, public-domain part of the ALPS"
+echo "*** Libraries. If you need the full functionality of the ALPS Libraries,"
+echo "*** such as Lattice, Model, Scheduler, etc, please use the full version of"
+echo "*** ALPS Libraries, which is available from http://alps.comp-phys.org/."
+echo

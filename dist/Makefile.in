@@ -32,6 +32,7 @@ release dist check snapshot : Makefile
 	find $$repository -type d | xargs chmod 755; \
 	(cd $$repository && chmod 755 $(SCRIPTS)); \
 	mv -f $$repository $$distdir; \
+	mv -f $$distdir/README-light README-light; \
 	mv -f $$distdir/LICENSE-light.txt LICENSE-light.txt; \
 	mv -f $$distdir/doc/index-light.html index-light.html; \
 	tar chof - $$distdir | gzip -c > $$distdir.tar.gz; \
@@ -43,6 +44,7 @@ release dist check snapshot : Makefile
 	rm -rf $$lightdir/tool $$lightdir/example; \
 	rm -rf $$lightdir/test/alea $$lightdir/test/lattice  $$lightdir/test/model; \
 	rm -rf $$lightdir/doc/alea $$lightdir/doc/lattice $$lightdir/doc/model $$lightdir/doc/scheduler $$lightdir/doc/tool; \
+	mv -f README-light $$lightdir/README; \
 	mv -f LICENSE-light.txt $$lightdir/LICENSE.txt; \
 	mv -f index-light.html $$lightdir/doc/index.html; \
 	find $$lightdir -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./update_preamble.pl -l; \

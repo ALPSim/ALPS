@@ -1371,11 +1371,11 @@ else
 fi
 
 if test "$ac_cv_alps_type" = "full"; then
-  { echo "$as_me:$LINENO: starting configuration for ALPS library version $PACKAGE_VERSION" >&5
-echo "$as_me: starting configuration for ALPS library version $PACKAGE_VERSION" >&6;}
+  { echo "$as_me:$LINENO: starting configuration for ALPS Libraries version $PACKAGE_VERSION" >&5
+echo "$as_me: starting configuration for ALPS Libraries version $PACKAGE_VERSION" >&6;}
 else
-  { echo "$as_me:$LINENO: starting configuration for ALPS light library version $PACKAGE_VERSION" >&5
-echo "$as_me: starting configuration for ALPS light library version $PACKAGE_VERSION" >&6;}
+  { echo "$as_me:$LINENO: starting configuration for ALPS Light Libraries version $PACKAGE_VERSION" >&5
+echo "$as_me: starting configuration for ALPS Light Libraries version $PACKAGE_VERSION" >&6;}
 fi
 
 ac_cv_alps_version="$PACKAGE_VERSION"
@@ -1399,7 +1399,7 @@ _ACEOF
 
           ac_config_files="$ac_config_files src/Makefile"
 
-                    ac_config_files="$ac_config_files test/Makefile example/Makefile"
+          ac_config_files="$ac_config_files test/Makefile"
 
           ac_config_files="$ac_config_files test/fixed_capacity/Makefile"
 
@@ -1418,6 +1418,8 @@ if test "$ac_cv_alps_type" = "full"; then
                                 ac_config_files="$ac_config_files test/lattice/Makefile test/lattice/lattices.xml test/lattice/parameters"
 
                                           ac_config_files="$ac_config_files test/model/Makefile test/model/lattices.xml test/model/models.xml test/model/parameters"
+
+            ac_config_files="$ac_config_files example/Makefile"
 
             ac_config_files="$ac_config_files example/scheduler/Makefile"
 
@@ -8620,6 +8622,7 @@ fi
 
 
 
+if test "$ac_cv_alps_type" = "full"; then
 
 
 
@@ -9010,10 +9013,11 @@ echo "$as_me: disabling HDF5 support" >&6;}
   fi
 
 
-test "$ac_cv_have_hdf5" = yes && cat >>confdefs.h <<\_ACEOF
+  test "$ac_cv_have_hdf5" = yes && cat >>confdefs.h <<\_ACEOF
 #define ALPS_HAVE_HDF5 1
 _ACEOF
 
+fi
 
 #
 # check for XML parser
@@ -10410,7 +10414,6 @@ do
   "config/include.mk" ) CONFIG_FILES="$CONFIG_FILES config/include.mk" ;;
   "src/Makefile" ) CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
-  "example/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/Makefile" ;;
   "test/fixed_capacity/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/fixed_capacity/Makefile" ;;
   "test/osiris/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/osiris/Makefile" ;;
   "test/osiris/xdrdump2.input" ) CONFIG_FILES="$CONFIG_FILES test/osiris/xdrdump2.input" ;;
@@ -10425,6 +10428,7 @@ do
   "test/model/lattices.xml" ) CONFIG_FILES="$CONFIG_FILES test/model/lattices.xml" ;;
   "test/model/models.xml" ) CONFIG_FILES="$CONFIG_FILES test/model/models.xml" ;;
   "test/model/parameters" ) CONFIG_FILES="$CONFIG_FILES test/model/parameters" ;;
+  "example/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/Makefile" ;;
   "example/scheduler/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/scheduler/Makefile" ;;
   "example/model/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/model/Makefile" ;;
   "tool/Makefile" ) CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
@@ -11074,12 +11078,25 @@ fi
 
 echo
 echo "Summary of configuration:"
-echo "  ALPS version      $PACKAGE_VERSION"
+if test "$ac_cv_alps_type" = "full"; then
+  echo "  ALPS version      $PACKAGE_VERSION"
+else
+  echo "  ALPS version      $PACKAGE_VERSION (Light)"
+fi
 echo "  compiler type     $ac_cv_alps_compiler"
 echo "  exceptions        $ac_cv_alps_compiler_exceptions"
 echo "  optimization      $ac_cv_alps_compiler_optimization"
 echo "  MPI support       $ac_cv_alps_have_mpi"
 echo "  PVM support       $ac_cv_alps_have_pvm"
 echo "  pthread support   $ac_cv_have_pthread"
-echo "  HDF5 support      $ac_cv_have_hdf5"
+if test "$ac_cv_alps_type" = "full"; then
+  echo "  HDF5 support      $ac_cv_have_hdf5"
+fi
 echo "  XML parser        $ac_cv_xml_parser"
+
+echo
+echo "*** This is the \"ALPS Light\" Libraries, public-domain part of the ALPS"
+echo "*** Libraries. If you need the full functionality of the ALPS Libraries,"
+echo "*** such as Lattice, Model, Scheduler, etc, please use the full version of"
+echo "*** ALPS Libraries, which is available from http://alps.comp-phys.org/."
+echo
