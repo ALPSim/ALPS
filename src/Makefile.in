@@ -18,7 +18,7 @@ HEADER_MODEL = alps/model.h alps/model/basisdescriptor.h alps/model/basisstates.
 HEADER_PARSER = alps/xml.h alps/parser/parser.h alps/parser/xmlattributes.h alps/parser/xmlhandler.h alps/parser/xmlparser.h alps/parser/xmlstream.h alps/parser/xslt.h
 HEADER_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h alps/random/rngfactory.h
 HEADER_SCHEDULER = alps/scheduler.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h alps/scheduler/factory.h
-HEADER_BINDINGS = alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/lapack_names.h alps/bindings/syev.hpp
+HEADER_BINDINGS = alps/bindings/gels.hpp alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/lapack_names.h alps/bindings/syev.hpp
 
 HEADER_LIGHT = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_FIXEDCAP) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_BINDINGS)
 HEADER_FULL = $(HEADER_ALEA) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_SCHEDULER)
