@@ -65,9 +65,9 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
-CONFIG_HEADER = $(top_builddir)/src/alps/config.h
-CONFIG_CLEAN_FILES = config/config.site config/include.mk \
-	src/boost/po_utf8_codecvt_facet.cpp
+CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
+	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
+CONFIG_CLEAN_FILES = config/config.site config/include.mk
 SCRIPTS = $(dist_noinst_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
@@ -305,13 +305,21 @@ $(top_srcdir)/src/alps/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	rm -f src/alps/stamp-h1
 	touch $@
 
+src/boost/po_utf8_codecvt_facet.cpp: src/boost/stamp-h2
+	@if test ! -f $@; then \
+	  rm -f src/boost/stamp-h2; \
+	  $(MAKE) src/boost/stamp-h2; \
+	else :; fi
+
+src/boost/stamp-h2: $(top_srcdir)/src/boost/po_utf8_codecvt_facet.cpp.in $(top_builddir)/config.status
+	@rm -f src/boost/stamp-h2
+	cd $(top_builddir) && $(SHELL) ./config.status src/boost/po_utf8_codecvt_facet.cpp
+
 distclean-hdr:
-	-rm -f src/alps/config.h src/alps/stamp-h1
+	-rm -f src/alps/config.h src/alps/stamp-h1 src/boost/po_utf8_codecvt_facet.cpp src/boost/stamp-h2
 config/config.site: $(top_builddir)/config.status $(top_srcdir)/config/config.site.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 config/include.mk: $(top_builddir)/config.status $(top_srcdir)/config/include.mk.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
-src/boost/po_utf8_codecvt_facet.cpp: $(top_builddir)/config.status $(top_srcdir)/src/boost/po_utf8_codecvt_facet.cpp.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:

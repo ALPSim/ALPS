@@ -1,1 +1,7 @@
-#include "@BOOST_SRCDIR@/program_options/src/utf8_codecvt_facet.cpp"
+#undef PO_UTF8_CODECVT_FACET_CPP
+
+#ifdef PO_UTF8_CODECVT_FACET_CPP
+# include PO_UTF8_CODECVT_FACET_CPP
+#else
+# error "PO_UTF8_CODECVT_FACET_CPP not defined"
+#endif

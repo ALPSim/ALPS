@@ -25540,10 +25540,16 @@ if test "$ac_cv_alps_type" = "full"; then
 
 fi
 
-test "$ac_cv_use_precompiled_boost" != yes &&
-  test "$ac_cv_boost_program_options" = yes &&
-              ac_config_files="$ac_config_files src/boost/po_utf8_codecvt_facet.cpp"
+if test "$ac_cv_use_precompiled_boost" != yes; then
+  if test "$ac_cv_boost_program_options" = yes; then
+    cat >>confdefs.h <<_ACEOF
+#define PO_UTF8_CODECVT_FACET_CPP "$boost_srcdir/program_options/src/utf8_codecvt_facet.cpp"
+_ACEOF
 
+              ac_config_headers="$ac_config_headers src/boost/po_utf8_codecvt_facet.cpp"
+
+  fi
+fi
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -26217,9 +26223,9 @@ do
   "tool/convert2text" ) CONFIG_FILES="$CONFIG_FILES tool/convert2text" ;;
   "tool/plot2text" ) CONFIG_FILES="$CONFIG_FILES tool/plot2text" ;;
   "tool/plot2html" ) CONFIG_FILES="$CONFIG_FILES tool/plot2html" ;;
-  "src/boost/po_utf8_codecvt_facet.cpp" ) CONFIG_FILES="$CONFIG_FILES src/boost/po_utf8_codecvt_facet.cpp" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/alps/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/alps/config.h" ;;
+  "src/boost/po_utf8_codecvt_facet.cpp" ) CONFIG_HEADERS="$CONFIG_HEADERS src/boost/po_utf8_codecvt_facet.cpp" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}
    { (exit 1); exit 1; }; };;
