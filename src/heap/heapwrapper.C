@@ -15,6 +15,9 @@ static const char HeapWrapper_cc_RCS_ID[] =
 "$Id$";
 
 //  $Log$
+//  Revision 1.2  2004/09/11 07:08:49  troyer
+//  *** empty log message ***
+//
 //  Revision 1.1  2004/09/03 14:24:32  troyer
 //  *** empty log message ***
 //
@@ -181,7 +184,7 @@ void operator delete [] (void *pUserData, size_t size)
 void deleteFn (void *pUserData)
 {
   // calculate the address of the original Wrapper block
-  int offset = (int)&((Wrapper*)0)->data;
+  long long offset = (long long)&((Wrapper*)0)->data;
   // (offset is now the number of bytes the field
   // data is from the beginning of a Wrapper block)
   Wrapper *pBlock = (Wrapper*)((char*)pUserData - offset);
