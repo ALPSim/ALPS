@@ -686,6 +686,16 @@ dnl
 dnl Experimental Features
 dnl
 
+AC_ARG_ENABLE(libheap,
+  AC_HELP_STRING([--disable-libheap], [not building libheap wrapper]),
+  [
+  if test "x$enableval" = "xno"; then
+    ac_cv_libheap=no
+  fi
+  ]
+)
+test -z "$ac_cv_libheap" && ac_cv_libheap=yes
+AM_CONDITIONAL(BUILD_LIBHEAP, test "$ac_cv_libheap" = yes)
 
 dnl
 dnl Generate files

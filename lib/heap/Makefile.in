@@ -38,6 +38,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
+@BUILD_LIBHEAP_TRUE@am__append_1 = libheap.la
+@BUILD_LIBHEAP_TRUE@am__append_2 = $(top_srcdir)/src/heap/heapwrapper.C
 subdir = lib/heap
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -66,9 +68,11 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libheap_la_LIBADD =
-am__objects_1 = heapwrapper.lo
+am__libheap_la_SOURCES_DIST = $(top_srcdir)/src/heap/heapwrapper.C
+@BUILD_LIBHEAP_TRUE@am__objects_1 = heapwrapper.lo
 am_libheap_la_OBJECTS = $(am__objects_1)
 libheap_la_OBJECTS = $(am_libheap_la_OBJECTS)
+@BUILD_LIBHEAP_TRUE@am_libheap_la_rpath = -rpath $(libdir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -80,7 +84,7 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
 SOURCES = $(libheap_la_SOURCES)
-DIST_SOURCES = $(libheap_la_SOURCES)
+DIST_SOURCES = $(am__libheap_la_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -116,6 +120,8 @@ BUILD_BOOST_SIGNALS_TRUE = @BUILD_BOOST_SIGNALS_TRUE@
 BUILD_BOOST_THREAD_FALSE = @BUILD_BOOST_THREAD_FALSE@
 BUILD_BOOST_THREAD_TRUE = @BUILD_BOOST_THREAD_TRUE@
 BUILD_BOOST_TRUE = @BUILD_BOOST_TRUE@
+BUILD_LIBHEAP_FALSE = @BUILD_LIBHEAP_FALSE@
+BUILD_LIBHEAP_TRUE = @BUILD_LIBHEAP_TRUE@
 CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CFLAGS = @CFLAGS@
@@ -239,9 +245,8 @@ DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
 AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
 AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
-lib_LTLIBRARIES = libheap.la
-SRC = $(top_srcdir)/src/heap/heapwrapper.C
-libheap_la_SOURCES = $(SRC)
+lib_LTLIBRARIES = $(am__append_1)
+libheap_la_SOURCES = $(am__append_2)
 all: all-am
 
 .SUFFIXES:
@@ -303,7 +308,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libheap.la: $(libheap_la_OBJECTS) $(libheap_la_DEPENDENCIES) 
-	$(CXXLINK) -rpath $(libdir) $(libheap_la_LDFLAGS) $(libheap_la_OBJECTS) $(libheap_la_LIBADD) $(LIBS)
+	$(CXXLINK) $(am_libheap_la_rpath) $(libheap_la_LDFLAGS) $(libheap_la_OBJECTS) $(libheap_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
