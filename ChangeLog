@@ -1,3 +1,7 @@
+2004-04-07 Matthias Troyer <troyer@comp-phys.org>
+	
+	* [alps] Fixed bug with expression flatttening and inverses
+
 2004-04-05 Matthias Troyer <troyer@comp-phys.org>
 
 	* [lattice] Merged LatticeFactory, graph_factory into graph_helper
