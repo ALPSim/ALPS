@@ -73,6 +73,14 @@ $(TEST) : $(LIB)
 	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input)'; \
 	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input); \
 	  fi; \
+	elif test -f $(@:.ok=.input); then \
+	  if test -f $(srcdir)/$(@:.ok=.output); then \
+	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -; \
+	  else \
+	    echo './$(@:.ok=) < $(@:.ok=.input)'; \
+	    ./$(@:.ok=) < $(@:.ok=.input); \
+	  fi; \
 	else \
 	  if test -f $(srcdir)/$(@:.ok=.output); then \
 	    echo './$(@:.ok=) | diff $(srcdir)/$(@:.ok=.output) -'; \

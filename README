@@ -1,6 +1,6 @@
-ALPS++ Project
+ALPS Project
 
-The ALPS++ project (Algorithms and Libraries for Physics Simulations)
+The ALPS project (Algorithms and Libraries for Physics Simulations)
 aims at providing generic parallel algorithms for classical and
 quantum lattice models and provides utility classes and algorithm for
 many other problems. It strives to increase software reuse in the
@@ -16,4 +16,4 @@ but WITHOUT ANY WARRANTY; without even the implied warranty of
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 GNU General Public License for more details.
 
-ALPS++ Library Developers
+ALPS Library Developers
