@@ -25,6 +25,7 @@ src_MODEL = \
   $(top_srcdir)/src/alps/model/modellibrary.C \
   $(top_srcdir)/src/alps/model/siteterm.C \
   $(top_srcdir)/src/alps/model/bondterm.C \
+  $(top_srcdir)/src/alps/model/globaloperator.C
 src_RANDOM = \
   $(top_srcdir)/src/alps/random/rngfactory.C
 src_PARSER = \

@@ -90,6 +90,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parser/xmlparser.C \
 	$(top_srcdir)/src/alps/parser/xmlstream.C \
 	$(top_srcdir)/src/alps/parser/path.C \
+	$(top_srcdir)/src/alps/random/rngfactory.C \
 	$(top_srcdir)/src/alps/alea/nan.C \
 	$(top_srcdir)/src/alps/alea/observable.C \
 	$(top_srcdir)/src/alps/alea/observableset.C \
@@ -100,8 +101,8 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/lattice/unitcell.C \
 	$(top_srcdir)/src/alps/model/modellibrary.C \
 	$(top_srcdir)/src/alps/model/siteterm.C \
-	$(top_srcdir)/src/alps/model/bondterm.C src_RANDOM = \
-	$(top_srcdir)/src/alps/random/rngfactory.C \
+	$(top_srcdir)/src/alps/model/bondterm.C \
+	$(top_srcdir)/src/alps/model/globaloperator.C \
 	$(top_srcdir)/src/alps/scheduler/abstract_task.C \
 	$(top_srcdir)/src/alps/scheduler/factory.C \
 	$(top_srcdir)/src/alps/scheduler/info.C \
@@ -123,54 +124,57 @@ am__objects_1 = copyright.lo parameterlist.lo parameters.lo
 am__objects_2 = dump.lo xdrdump.lo
 am__objects_3 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
 	xmlstream.lo path.lo
-am__objects_4 = nan.lo observable.lo observableset.lo
-am__objects_5 = disorder.lo latticedescriptor.lo \
+am__objects_4 = rngfactory.lo
+am__objects_5 = nan.lo observable.lo observableset.lo
+am__objects_6 = disorder.lo latticedescriptor.lo \
 	latticegraphdescriptor.lo latticelibrary.lo unitcell.lo
-am__objects_6 = modellibrary.lo siteterm.lo bondterm.lo rngfactory.lo
-am__objects_7 = abstract_task.lo factory.lo info.lo \
+am__objects_7 = modellibrary.lo siteterm.lo bondterm.lo \
+	globaloperator.lo
+am__objects_8 = abstract_task.lo factory.lo info.lo \
 	master_scheduler.lo montecarlo.lo mpp_scheduler.lo options.lo \
 	remote_task.lo remote_worker.lo scheduler.lo signal.lo \
 	single_scheduler.lo slave_task.lo task.lo worker.lo \
 	workertask.lo
-@ALPS_FULL_TRUE@am__objects_8 = $(am__objects_4) $(am__objects_5) \
-@ALPS_FULL_TRUE@	$(am__objects_6) $(am__objects_7)
-@BUILD_BOOST_TRUE@am__objects_9 = throw_exception.lo
+@ALPS_FULL_TRUE@am__objects_9 = $(am__objects_5) $(am__objects_6) \
+@ALPS_FULL_TRUE@	$(am__objects_7) $(am__objects_8)
+@BUILD_BOOST_TRUE@am__objects_10 = throw_exception.lo
 am_libalps_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
-	$(am__objects_3) $(am__objects_8) $(am__objects_9)
-am__objects_10 = date_generators.lo greg_month.lo greg_weekday.lo \
+	$(am__objects_3) $(am__objects_4) $(am__objects_9) \
+	$(am__objects_10)
+am__objects_11 = date_generators.lo greg_month.lo greg_weekday.lo \
 	gregorian_types.lo posix_time_types.lo
-am__objects_11 = convenience.lo exception.lo \
+am__objects_12 = convenience.lo exception.lo \
 	operations_posix_windows.lo path_posix_windows.lo
-am__objects_12 = c_regex_traits.lo c_regex_traits_common.lo \
+am__objects_13 = c_regex_traits.lo c_regex_traits_common.lo \
 	cpp_regex_traits.lo cregex.lo fileiter.lo instances.lo \
 	posix_api.lo regex.lo regex_debug.lo regex_synch.lo \
 	w32_regex_traits.lo wide_posix_api.lo winstances.lo
-am__objects_13 = cmdline.lo config_file.lo convert.lo \
+am__objects_14 = cmdline.lo config_file.lo convert.lo \
 	options_description.lo parsers.lo positional_options.lo \
 	value_semantic.lo variables_map.lo winmain.lo \
 	po_utf8_codecvt_facet.lo
-am__objects_14 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
+am__objects_15 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
 	basic_serializer_map.lo basic_xml_archive.lo \
 	binary_iarchive.lo binary_oarchive.lo binary_wiarchive.lo \
 	binary_woarchive.lo codecvt_null.lo extended_type_info.lo \
 	extended_type_info_no_rtti.lo extended_type_info_typeid.lo \
 	polymorphic_iarchive.lo polymorphic_oarchive.lo \
 	utf8_codecvt_facet.lo void_cast.lo
-@BUILD_BOOST_TRUE@am__objects_15 = $(am__objects_10) $(am__objects_11) \
-@BUILD_BOOST_TRUE@	$(am__objects_12) $(am__objects_13) \
-@BUILD_BOOST_TRUE@	$(am__objects_14)
-am__objects_16 = connection.lo signal_base.lo slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@am__objects_17 = $(am__objects_16)
-am__objects_18 = named_slot_map.lo
-@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__objects_19 =  \
-@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@	$(am__objects_18)
-am__objects_20 = condition.lo exceptions.lo mutex.lo once.lo \
+@BUILD_BOOST_TRUE@am__objects_16 = $(am__objects_11) $(am__objects_12) \
+@BUILD_BOOST_TRUE@	$(am__objects_13) $(am__objects_14) \
+@BUILD_BOOST_TRUE@	$(am__objects_15)
+am__objects_17 = connection.lo signal_base.lo slot.lo trackable.lo
+@BUILD_BOOST_SIGNALS_TRUE@am__objects_18 = $(am__objects_17)
+am__objects_19 = named_slot_map.lo
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__objects_20 =  \
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@	$(am__objects_19)
+am__objects_21 = condition.lo exceptions.lo mutex.lo once.lo \
 	recursive_mutex.lo thread.lo tss.lo xtime.lo
-am__objects_21 = barrier.lo
-@BUILD_BOOST_THREAD_TRUE@am__objects_22 = $(am__objects_20) \
-@BUILD_BOOST_THREAD_TRUE@	$(am__objects_21)
-nodist_libalps_la_OBJECTS = $(am__objects_15) $(am__objects_17) \
-	$(am__objects_19) $(am__objects_22)
+am__objects_22 = barrier.lo
+@BUILD_BOOST_THREAD_TRUE@am__objects_23 = $(am__objects_21) \
+@BUILD_BOOST_THREAD_TRUE@	$(am__objects_22)
+nodist_libalps_la_OBJECTS = $(am__objects_16) $(am__objects_18) \
+	$(am__objects_20) $(am__objects_23)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -366,6 +370,8 @@ src_MODEL = \
   $(top_srcdir)/src/alps/model/modellibrary.C \
   $(top_srcdir)/src/alps/model/siteterm.C \
   $(top_srcdir)/src/alps/model/bondterm.C \
+  $(top_srcdir)/src/alps/model/globaloperator.C
+
 src_RANDOM = \
   $(top_srcdir)/src/alps/random/rngfactory.C
 
@@ -602,6 +608,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended_type_info_typeid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileiter.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/globaloperator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/greg_month.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/greg_weekday.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/gregorian_types.Plo@am__quote@
@@ -770,6 +777,13 @@ path.lo: $(top_srcdir)/src/alps/parser/path.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o path.lo `test -f '$(top_srcdir)/src/alps/parser/path.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/path.C
 
+rngfactory.lo: $(top_srcdir)/src/alps/random/rngfactory.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT rngfactory.lo -MD -MP -MF "$(DEPDIR)/rngfactory.Tpo" -c -o rngfactory.lo `test -f '$(top_srcdir)/src/alps/random/rngfactory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/random/rngfactory.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/rngfactory.Tpo" "$(DEPDIR)/rngfactory.Plo"; else rm -f "$(DEPDIR)/rngfactory.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/random/rngfactory.C' object='rngfactory.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rngfactory.lo `test -f '$(top_srcdir)/src/alps/random/rngfactory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/random/rngfactory.C
+
 nan.lo: $(top_srcdir)/src/alps/alea/nan.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT nan.lo -MD -MP -MF "$(DEPDIR)/nan.Tpo" -c -o nan.lo `test -f '$(top_srcdir)/src/alps/alea/nan.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/nan.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/nan.Tpo" "$(DEPDIR)/nan.Plo"; else rm -f "$(DEPDIR)/nan.Tpo"; exit 1; fi
@@ -847,12 +861,12 @@ bondterm.lo: $(top_srcdir)/src/alps/model/bondterm.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o bondterm.lo `test -f '$(top_srcdir)/src/alps/model/bondterm.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/model/bondterm.C
 
-rngfactory.lo: $(top_srcdir)/src/alps/random/rngfactory.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT rngfactory.lo -MD -MP -MF "$(DEPDIR)/rngfactory.Tpo" -c -o rngfactory.lo `test -f '$(top_srcdir)/src/alps/random/rngfactory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/random/rngfactory.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/rngfactory.Tpo" "$(DEPDIR)/rngfactory.Plo"; else rm -f "$(DEPDIR)/rngfactory.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/random/rngfactory.C' object='rngfactory.lo' libtool=yes @AMDEPBACKSLASH@
+globaloperator.lo: $(top_srcdir)/src/alps/model/globaloperator.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT globaloperator.lo -MD -MP -MF "$(DEPDIR)/globaloperator.Tpo" -c -o globaloperator.lo `test -f '$(top_srcdir)/src/alps/model/globaloperator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/model/globaloperator.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/globaloperator.Tpo" "$(DEPDIR)/globaloperator.Plo"; else rm -f "$(DEPDIR)/globaloperator.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/model/globaloperator.C' object='globaloperator.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o rngfactory.lo `test -f '$(top_srcdir)/src/alps/random/rngfactory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/random/rngfactory.C
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o globaloperator.lo `test -f '$(top_srcdir)/src/alps/model/globaloperator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/model/globaloperator.C
 
 abstract_task.lo: $(top_srcdir)/src/alps/scheduler/abstract_task.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT abstract_task.lo -MD -MP -MF "$(DEPDIR)/abstract_task.Tpo" -c -o abstract_task.lo `test -f '$(top_srcdir)/src/alps/scheduler/abstract_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/abstract_task.C; \
