@@ -1,5 +1,5 @@
 
-ALPS LIBRARY LICENSE version 1
+ALPS LIBRARY LICENSE version 1.0
 
 Permission is hereby granted, free of charge, to any person or organization 
 obtaining a copy of the library software covered by this license (the "Library")
@@ -9,13 +9,12 @@ non-commercial academic use, all subject to the following conditions:
 
 1. In any scientific publication based wholly or in part on the Library, the use
 of the Library must be acknowledged and the publications listed in the 
-accompanying CITATIONS.TXT document must be cited. The acknowledgment must
-state whether the original or a modified version of the Library was used.
+accompanying CITATIONS.TXT document must be cited.
 
 2. You may copy and distribute verbatim copies of the Library in the form that 
 you received it, as long as all copyright notices and references to this license
-and warranty statement are kept intact, and all recipients also receive a copy 
-of this License, Warranty and CITATIONS.TXT document.
+and warranty disclaimer are kept intact, and all recipients also receive a copy 
+of this license, warranty disclaimer and CITATIONS.TXT document.
 
 3. You may modify your copy or copies of the Library, thus forming a work based 
 on the Library, and use, copy or distribute such modified works under the terms 
@@ -62,8 +61,8 @@ announcement.
 (or a modified work, under section 3) may be distributed in object code or 
 executable form, provided that you also meet all of these conditions:
 
-	a. This complete License, warranty and accompanying CITATIONS.TXT 
-	document is included.
+	a. This complete License, warranty disclaimer and accompanying 
+	CITATIONS.TXT document is included.
 
 	a. The executable program is accompanied with the complete 
 	machine-readable source code to the Library as used in the executable, 
