@@ -248,6 +248,33 @@
   bdag(x)*b(y)+bdag(y)*b(x)
 </BONDOPERATOR>
 
+<GLOBALOPERATOR name="spin_exchange_energy">
+  <BONDTERM type="0" source="i" target="j">
+    Jz*Sz(i)*Sz(j)+Jxy/2*exchange_xy(i,j)
+  </BONDTERM>
+  <BONDTERM type="1" source="i" target="j">
+    Jz'*Sz(i)*Sz(j)+Jxy'/2*exchange_xy(i,j)
+  </BONDTERM>
+</GLOBALOPERATOR>
+
+<GLOBALOPERATOR name="boson_kinetic_energy">
+  <BONDTERM type="0" source="i" target="j">
+    -t*(bdag(i)*b(j)+bdag(j)*b(i))
+  </BONDTERM>
+  <BONDTERM type="1" source="i" target="j">
+    -t'*(bdag(i)*b(j)+bdag(j)*b(i))
+  </BONDTERM>
+</GLOBALOPERATOR>
+
+<GLOBALOPERATOR name="fermion_kinetic_energy">
+  <BONDTERM type="0" source="i" target="j">
+    -t*fermion_hop(i,j)
+  </BONDTERM>
+  <BONDTERM type="1" source="i" target="j">
+    -t'*fermion_hop(i,j)
+  </BONDTERM>
+</GLOBALOPERATOR>
+
 <HAMILTONIAN name="spin">
   <PARAMETER name="Jz" default="J"/>
   <PARAMETER name="Jxy" default="J"/>
