@@ -91,7 +91,7 @@ void convert_params(const std::string& inname, const std::string& outfilename)
 
 void convert_run(const std::string& inname, const std::string& outname)
 {
-  alps::IXDRFileDump dump(inname);
+  alps::IXDRFileDump dump(boost::filesystem::path(inname,boost::filesystem::native));
   std::cout << "Converting run file " << inname << " to " <<  outname+".xml" <<std::endl;
   alps::scheduler::DummyMCRun run;
   run.load_worker(dump);
@@ -100,7 +100,7 @@ void convert_run(const std::string& inname, const std::string& outname)
 
 void convert_simulation(const std::string& inname, const std::string& outname)
 {
-  alps::IXDRFileDump dump(inname);
+  alps::IXDRFileDump dump(boost::filesystem::path(inname,boost::filesystem::native));
   if (static_cast<int>(dump)!=alps::scheduler::MCDump_task)
     boost::throw_exception(std::runtime_error("did not get a simulation on dump"));
   std::string jobname=outname+".xml";
@@ -151,7 +151,7 @@ void convert_scheduler(const std::string& inname, const std::string& outname)
   status_text[alps::scheduler::MasterScheduler::TaskFromDump]="running";
   status_text[alps::scheduler::MasterScheduler::TaskFinished]="finished";
 
-  alps::IXDRFileDump dump(inname);
+  alps::IXDRFileDump dump(boost::filesystem::path(inname,boost::filesystem::native));
   if (static_cast<int>(dump)!=alps::scheduler::MCDump_scheduler)
     boost::throw_exception(std::runtime_error("did not get scheduler on dump"));
   std::string jobname=outname+".xml";
@@ -197,7 +197,7 @@ try {
   for (int i=1;i<argc;++i) {
     std::string inname=argv[i];
     if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
-    alps::IXDRFileDump dump(inname);
+    alps::IXDRFileDump dump(boost::filesystem::path(inname,boost::filesystem::native));
     int type;
     dump >> type;
     switch (type) {

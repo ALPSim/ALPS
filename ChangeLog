@@ -1,3 +1,7 @@
+2004-06-09  Matthias Troyer <troyer@comp-phys.org>
+
+        * [test,tool] Patched for new Boost snapshot and IBM compiler
+
 2004-06-08  Synge Todo  <wistaria@comp-phys.org>
 
         * [config] Turned off maintainer mode for GNU autotools.
