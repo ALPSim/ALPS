@@ -6,7 +6,7 @@
 	  (config/import-bindings.hpp).
 	  Updated to the latest CVS snapshot (tag = BINDINGS_20040820).
 
-	* [itel] Added a script for importing IETL headers
+	* [ietl] Added a script for importing IETL headers
 	  (config/import-ietl.hpp).
 	  Imported IETL version 2.1 (tag = IETL_2_1).
 	
