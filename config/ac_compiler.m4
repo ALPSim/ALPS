@@ -283,10 +283,10 @@ AC_DEFUN([AC_COMPILER],
       #try_CFLAGS_DEBUG="-pthread -g -O0"
       #try_CXXFLAGS_OPT="-w -pthread -ftemplate-depth-90 -O3"
       #try_CXXFLAGS_DEBUG="-pthread -ftemplate-depth-90 -g -O0"
-      try_CFLAGS_OPT="-w -O3 -Wno-long-double"
+      try_CFLAGS_OPT="-w -O -Wno-long-double"
       try_CFLAGS_DEBUG="-g -O0 -Wno-long-double"
-      try_CXXFLAGS_OPT="-w -ftemplate-depth-90 -O3 -Wno-long-double -fabi-version=0"
-      try_CXXFLAGS_DEBUG="-ftemplate-depth-90 -g -O0 -Wno-long-double -fabi-version=0"
+      try_CXXFLAGS_OPT="-w -ftemplate-depth-90 -O -Wno-long-double"
+      try_CXXFLAGS_DEBUG="-ftemplate-depth-90 -g -O0 -Wno-long-double"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
