@@ -1,7 +1,8 @@
 2004-10-12  Matthias Troyer <troyer@comp-phys.org>
 
 	* [parser] Changed default XSLT path to installation directory
-	* [tool] added XSLT style files
+	* [tool] added XSLT style files and changestylesheet to update
+	         stylesheet references in XML files to local XSLT directory
 
 2004-10-10  Matthias Troyer <troyer@comp-phys.org>
 
