@@ -8,7 +8,6 @@
 #   -l : use preamble for light version instead of full version
 
 # written by Synge Todo <wistaria@comp-phys.org>
-# $Id$
 
 $basedir = $0;
 $basedir =~ s/[a-zA-Z\_\.]+$//;
@@ -41,6 +40,7 @@ foreach $file (@ARGV) {
 	open(NEW, "> $file_new") || die "Couldn't open $file_new";
 	foreach $line (<ORIG>) {
 	    $line =~ s/\t/        /g;
+	    $line =~ s/\s+$//g;
 	    chomp($line);
 	    if ($finish_preamble == 0) {
 		if ($line =~ /^\*\s+Copyright.+([0-9]{4})-([0-9]{4})\s+by\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
@@ -125,6 +125,6 @@ foreach $file (@ARGV) {
 	    unlink $file_new;
 	}
     } else {
-	print "Couldn't find $file.  Skipped.\n";
+	print "Couldn't open $file.  Skipped.\n";
     }
 }
