@@ -23,7 +23,7 @@ HEADER_BINDINGS = alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/la
 HEADER_LIGHT = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_FIXEDCAP) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_BINDINGS)
 HEADER_FULL = $(HEADER_ALEA) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_SCHEDULER)
 HEADER = $(HEADER_LIGHT) @HEADER_FULL@
-
+ 
 OBJ_BOOST_DATE_TIME = boost/greg_month.o boost/greg_weekday.o boost/gregorian_types.o boost/posix_time_types.o
 OBJ_BOOST_FILESYSTEM = boost/exception.o boost/operations_posix_windows.o boost/path_posix_windows.o
 OBJ_BOOST_REGEX = boost/c_regex_traits.o boost/c_regex_traits_common.o boost/cpp_regex_traits.o boost/cregex.o boost/fileiter.o boost/instances.o boost/posix_api.o boost/regex.o boost/regex_debug.o boost/regex_synch.o boost/w32_regex_traits.o boost/wide_posix_api.o boost/winstances.o
@@ -33,9 +33,9 @@ OBJ_BOOST = boost/throw_exception.o $(OBJ_BOOST_DATE_TIME) $(OBJ_BOOST_FILESYSTE
 
 OBJ_ALPS = alps/evaluator.o alps/expression.o alps/parameterlist.o alps/parameters.o alps/copyright.o
 OBJ_ALEA = alps/alea/nan.o alps/alea/observable.o alps/alea/observableset.o
-OBJ_OSIRIS = alps/osiris/buffer.o alps/osiris/dump.o alps/osiris/xdrdump.o
+OBJ_OSIRIS = alps/osiris/dump.o alps/osiris/xdrdump.o
 OBJ_OSIRIS_SGL = alps/osiris/os.o alps/osiris/process.o alps/osiris/comm.o alps/osiris/mpdump.o
-OBJ_OSIRIS_MPI = alps/osiris/os.o alps/osiris/process_mpi.o alps/osiris/comm_mpi.o alps/osiris/mpdump_mpi.o
+OBJ_OSIRIS_MPI = alps/osiris/buffer.o alps/osiris/os.o alps/osiris/process_mpi.o alps/osiris/comm_mpi.o alps/osiris/mpdump_mpi.o
 OBJ_OSIRIS_PVM = alps/osiris/os.o alps/osiris/process_pvm.o alps/osiris/comm_pvm.o alps/osiris/mpdump_pvm.o
 OBJ_LATTICE = alps/lattice/disorder.o alps/lattice/latticedescriptor.o alps/lattice/latticegraphdescriptor.o alps/lattice/latticelibrary.o alps/lattice/unitcell.o
 OBJ_MODEL = alps/model/modellibrary.o
