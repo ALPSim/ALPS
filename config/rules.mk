@@ -90,16 +90,16 @@ TEST = $(TESTOK:.ok=)
 $(TEST) : $(LIB)
 
 %.ok : %
-	-@if test -f $(@:.ok=.input); then \
+	-@if test -f $(srcdir)/$(@:.ok=.input); then \
 	  if test -f $(srcdir)/$(@:.ok=.output); then \
-	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -'; \
-	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -; \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -; \
 	  elif test -f $(srcdir)/$(@:.ok=.op); then \
-	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -'; \
-	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -; \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -; \
 	  else \
-	    echo './$(@:.ok=) < $(@:.ok=.input)'; \
-	    ./$(@:.ok=) < $(@:.ok=.input); \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input)'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input); \
 	  fi; \
 	elif test -f $(srcdir)/$(@:.ok=.ip); then \
 	  if test -f $(srcdir)/$(@:.ok=.output); then \
