@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                              xmlns:xslout=" ">
+                              xmlns:xslout="http://xml.comp-phys.org/schema/plot">
 
 <xsl:namespace-alias stylesheet-prefix="xslout" result-prefix="xsl"/>
 <xsl:output method="xml" indent="yes"/>
