@@ -45,16 +45,18 @@
    </xsl:if>
  </tr>
  </xsl:if>
- <tr>
-   <td><xsl:value-of select="x"/></td>
-   <xsl:if test= "dx">
-      <td><xsl:value-of select="dx"/></td>
-   </xsl:if>
-   <td><xsl:value-of select="y"/></td>
-   <xsl:if test= "dy">
-      <td><xsl:value-of select="dy"/></td>
-    </xsl:if>
- </tr> 
+ <xsl:if test="x and y">
+   <tr>
+     <td><xsl:value-of select="x"/></td>
+     <xsl:if test= "dx">
+       <td><xsl:value-of select="dx"/></td>
+     </xsl:if>
+     <td><xsl:value-of select="y"/></td>
+     <xsl:if test= "dy">
+       <td><xsl:value-of select="dy"/></td>
+     </xsl:if>
+   </tr> 
+ </xsl:if>
 </xsl:template>
 
 </xsl:stylesheet>
