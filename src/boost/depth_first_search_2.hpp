@@ -37,7 +37,7 @@ namespace boost {
 	tie(u, ei) = vs.top();
 	bool discover = false;
 	for (ei_end = out_edges(u, g).second; ei != ei_end; ++ei) {
-	  Vertex v = boost::target(*ei, g);       vis.examine_edge(*ei, g);
+	  Vertex v = target(*ei, g);       vis.examine_edge(*ei, g);
 	  ColorValue v_color = get(color, v);
 	  if (v_color == Color::white()) { vis.tree_edge(*ei, g);
 	    vs.top().second = ++ei; // save NEXT out edge
