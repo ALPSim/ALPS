@@ -1322,7 +1322,7 @@ CURRENT_YEAR=2003
 
 # directories
 
-dirs='boost alps/alea alps/lattice alps/model alps/osiris alps/parser alps/scheduler'
+dirs='boost alps/alea alps/lattice alps/model alps/osiris alps/parser alps/random alps/scheduler'
 for d in $dirs; do
   if test -d "src/$d"; then :; else mkdir -p "src/$d"; fi
 done
