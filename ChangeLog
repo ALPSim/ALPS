@@ -1,3 +1,7 @@
+2003-07-15 Matthias Troyer <troyer@comp-phys.org>
+
+	* [doc] Updated documentation from PALM++ to ALPS
+
 2003-07-10 Matthias Troyer <troyer@comp-phys.org>
 
         * [scheduler] converted to new boost random interface, changed to

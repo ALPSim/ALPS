@@ -94,7 +94,7 @@ void HamiltonianMatrix<T,M>::build() const
   ham.set_parameters(p);
   
   // get all site matrices
-  alps::property_map<alps::site_type_t, const graph_type, int>::type
+  alps::property_map<alps::site_type_t, graph_type, int>::const_type
   site_type(alps::get_or_default(alps::site_type_t(), lattice(), 0));
 
   std::map<int,boost::multi_array<T,2> > site_matrix;
@@ -110,7 +110,7 @@ void HamiltonianMatrix<T,M>::build() const
     }
   
   // get all bond matrices
-  alps::property_map<alps::bond_type_t, const graph_type, int>::type
+  alps::property_map<alps::bond_type_t,  graph_type, int>::const_type
   bond_type(alps::get_or_default(alps::bond_type_t(),lattice(),0));
 
   std::map<int,boost::multi_array<T,4> > bond_matrix;
