@@ -8,7 +8,7 @@ include $(top_srcdir)/config/include-build.mk
 pkgincludedir = $(includedir)
 
 HEADER_CONFIG = alps/config.h @BOOST_USER_CONFIG_H@
-HEADER_BOOST = boost/depth_first_search_2.hpp boost/function_objects.hpp
+HEADER_BOOST = boost/function_objects.hpp
 HEADER_ALPS = alps/bitops.h alps/cctype.h alps/evaluator.h alps/expression.h alps/expression_impl.h alps/factory.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/parameterlist.h alps/parameters.h alps/plot.h alps/random.h alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h alps/copyright.h
 HEADER_ALEA = alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nan.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/obsvalue.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h
 HEADER_FIXEDCAP = alps/fixed_capacity_deque.h alps/fixed_capacity_traits.h alps/fixed_capacity_fwd.h alps/fixed_capacity_vector.h alps/fixed_capacity/checking.h alps/fixed_capacity/deque_detail.h alps/fixed_capacity/uninitialized_array.h
