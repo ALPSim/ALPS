@@ -1,3 +1,7 @@
+2004-08-20  Synge Todo  <wistaria@comp-phys.org>
+
+	* [bindings] Removed alps/bindings/gels.hpp
+	
 2004-08-18  Matthias Troyer <troyer@comp-phys.org>
 
 	* [model,example] Added fermion sign support

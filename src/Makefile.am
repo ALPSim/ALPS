@@ -9,7 +9,7 @@ headers_MODEL = alps/model.h alps/model/basisdescriptor.h alps/model/basisstates
 headers_PARSER = alps/xml.h alps/parser/parser.h alps/parser/xmlattributes.h alps/parser/xmlhandler.h alps/parser/xmlparser.h alps/parser/xmlstream.h alps/parser/xslt.h
 headers_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h alps/random/rngfactory.h
 headers_SCHEDULER = alps/scheduler.h alps/scheduler/factory.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h
-headers_BINDINGS = alps/bindings/gels.hpp alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/lapack_names.h alps/bindings/syev.hpp
+headers_BINDINGS = alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/lapack_names.h alps/bindings/syev.hpp
 
 headers = $(headers_BOOST) $(headers_ALPS) $(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) $(headers_RANDOM) $(headers_BINDINGS)
 if ALPS_FULL
