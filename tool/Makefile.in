@@ -8,7 +8,7 @@ include $(top_srcdir)/config/include-build.mk
 pkgincludedir = $(includedir)
 libs_program = -lalps -lcomm-sgl $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 
-PROGRAM = compactrun convert2xml 
+PROGRAM = compactrun convert2xml parameter2xml
 XMLLIB_CONFIG = plot2xsl.xsl
 XMLLIB = archive2plot.xsl plot2html.xsl plot2text.xsl helpers.xsl QMCXML2text.xsl
 SCRIPT_CONFIG = convert2text extracthtml extracttext
