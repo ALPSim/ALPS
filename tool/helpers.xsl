@@ -31,4 +31,18 @@
   <xsl:text disable-output-escaping = "yes">&lt;</xsl:text>
 </xsl:template>
 
+<xsl:template name="NameOrLabel">
+  <xsl:choose>
+    <xsl:when test="@name"><xsl:value-of select="@name"/></xsl:when>
+    <xsl:otherwise><xsl:value-of select="@label"/></xsl:otherwise>
+  </xsl:choose>   
+</xsl:template>
+
+<xsl:template name="LabelOrName">
+  <xsl:choose>
+    <xsl:when test="@label"><xsl:value-of select="@label"/></xsl:when>
+    <xsl:otherwise><xsl:value-of select="@name"/></xsl:otherwise>
+  </xsl:choose>  
+</xsl:template>
+
 </xsl:stylesheet>
