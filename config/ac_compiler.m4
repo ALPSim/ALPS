@@ -290,8 +290,8 @@ AC_DEFUN([AC_COMPILER],
     cray)
       try_CFLAGS_OPT="-O2 -h conform"
       try_CFLAGS_DEBUG="-g -O0 -h conform"
-      try_CXXFLAGS_OPT="-O2 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates -h conform"
-      try_CXXFLAGS_DEBUG="-g -O0 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates -h conform"
+      try_CXXFLAGS_OPT="-O2 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates "
+      try_CXXFLAGS_DEBUG="-g -O0 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates "
       try_CXXFLAGS_EH="-h exceptions"
       try_CXXFLAGS_NOEH="-h noexceptions"
       ;;
