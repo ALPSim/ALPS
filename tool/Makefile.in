@@ -36,3 +36,4 @@ SCRIPT = archivecat xslttransform
 XMLLIB = archive2plot.xsl plot2html.xsl plot2text.xsl
 
 include $(top_srcdir)/config/rules.mk
+include $(srcdir)/Makefile.dep
