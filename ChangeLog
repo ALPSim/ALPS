@@ -1,3 +1,7 @@
+2004-09-23  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.2b1
+	
 2004-09-17  Synge Todo  <wistaria@comp-phys.org>
 
 	* [config] Fixed compile option for icc 8.1.
