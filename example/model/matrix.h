@@ -27,7 +27,7 @@
 
 /* $Id$ */
 
-//#include <alps/parameters.h>
+#include <alps/expression.h>
 #include <alps/model.h>
 #include <alps/lattice.h>
 #include <alps/osiris/os.h>
@@ -39,19 +39,34 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <cmath>
 
-template <class T>
+template<class T>
 struct symbolic_traits {
  BOOST_STATIC_CONSTANT(bool, is_symbolic=false);
 };
 
-template <class T>
+template<class T>
 const bool symbolic_traits<T>::is_symbolic;
+
+#ifndef ALPS_WITH_NEW_EXPRESSION
+
 template<>
 struct symbolic_traits<alps::Expression> {
  BOOST_STATIC_CONSTANT(bool, is_symbolic=true);
 };
 
 const bool symbolic_traits<alps::Expression>::is_symbolic;
+
+#else
+
+template<class T>
+struct symbolic_traits<alps::Expression<T> > {
+ BOOST_STATIC_CONSTANT(bool, is_symbolic=true);
+};
+
+template<class T>
+const bool symbolic_traits<alps::Expression<T> >::is_symbolic;
+
+#endif // ! ALPS_WITH_NEW_EXPRESSION
 
 template <class T, class M = boost::numeric::ublas::matrix<T> >
 class HamiltonianMatrix : public alps::graph_helper<>
@@ -167,7 +182,11 @@ void HamiltonianMatrix<T,M>::build() const
       int is=state[s];                         // get site basis index
       for (int js=0;js<basis[s].size();++js) { // loop over target site states
         T val=mat[is][js];                     // get matrix element
-        if (val) {                             // if matrix element is nonzero
+#ifndef ALPS_WITH_NEW_EXPRESSION
+        if (val) {         // if matrix element is nonzero
+#else
+        if (alps::is_nonzero(val)) {         // if matrix element is nonzero
+#endif
           state_type newstate=state;
 		  newstate[s]=js;					   // build target state
           int j = states.index(newstate);      // lookup target state
@@ -190,7 +209,11 @@ void HamiltonianMatrix<T,M>::build() const
       for (int js1=0;js1<basis[s1].size();++js1) {  // loop over target site states
         for (int js2=0;js2<basis[s2].size();++js2) {
           T val=mat[is1][is2][js1][js2];            // get matrix element
-          if (val) {                                // if nonzero matrix element
+#ifndef ALPS_WITH_NEW_EXPRESSION
+          if (val) {            // if nonzero matrix element
+#else
+          if (alps::is_nonzero(val)) {            // if nonzero matrix element
+#endif
             state_type newstate=state;            // prepare target state
             newstate[s1]=js1;                       // build target state
             newstate[s2]=js2;

@@ -1,3 +1,9 @@
+2004-06-17  Synge Todo  <wistaria@comp-phys.org>
+
+	* [parameter] Added experimental code for new Expression classes,
+	which support complex numbers.  Use --enable-new-expression option
+	to enable the new Expression class.
+
 2004-06-09  Matthias Troyer <troyer@comp-phys.org>
 
         * [test,tool] Patched for new Boost snapshot and IBM compiler

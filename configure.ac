@@ -675,6 +675,21 @@ ac_cv_alps_ldflags_pvm="$ac_cv_alps_ldflags $ac_cv_pvm_ldflags"
 ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 dnl
+dnl Experimental Features
+dnl
+
+AC_ARG_ENABLE(new-expression,
+  AC_HELP_STRING([--enable-new-expression],
+    [use new Expression classsetup Boost configuration header file]),
+  [
+  if test "x$enableval" != "xno"; then
+    ac_cv_alps_with_new_expression=yes
+    AC_DEFINE(ALPS_WITH_NEW_EXPRESSION)
+  fi
+  ]
+)
+
+dnl
 dnl Generate files
 dnl
 
