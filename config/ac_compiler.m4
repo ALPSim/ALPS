@@ -109,8 +109,8 @@ AC_DEFUN([AC_COMPILER],
       try_CXX="icc"
       ;;
     intel64)
-      try_CC="ecc"
-      try_CXX="ecc"
+      try_CC="icc"
+      try_CXX="icc"
       ;;
     como)
       try_CC="como"
