@@ -1,3 +1,7 @@
+2004-08-02  Matthias Troyer <troyer@comp-phys.org>
+
+	* [example] Updated to new version of uBlas in boost CVS
+
 2004-07-22  Synge Todo  <wistaria@comp-phys.org>
 
 	* [parameter] Changed the default Expression class to the new one.
