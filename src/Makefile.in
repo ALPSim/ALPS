@@ -49,8 +49,8 @@ HEADER_MODEL = alps/model.h alps/model/basis.h alps/model/basisstates.h alps/mod
 HEADER_PARSER = alps/xml.h alps/parser/attributes.h alps/parser/parser.h alps/parser/xmlhandler.h alps/parser/xmlparser.h alps/parser/xmlstream.h alps/parser/xslt.h
 HEADER_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h alps/random/rngfactory.h
 HEADER_SCHEDULER = alps/scheduler.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h alps/scheduler/factory.h
-
-HEADER = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_ALEA) $(HEADER_FIXEDCAP) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_SCHEDULER)
+HEADER_BINDINGS = alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/lapack_names.h alps/bindings/syev.hpp
+HEADER = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_ALEA) $(HEADER_FIXEDCAP) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_SCHEDULER) $(HEADER_BINDINGS)
 
 OBJ_BOOST_DATE_TIME = boost/greg_month.o boost/greg_weekday.o boost/gregorian_types.o boost/posix_time_types.o
 OBJ_BOOST_FILESYSTEM = boost/exception.o boost/operations_posix_windows.o boost/path_posix_windows.o
