@@ -1,160 +1,77 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: lattice/graph.h</title>
+  <title>ALPS Project: lattice/graph.h</title>
 </head>
-<body>
-
-<h1>
-ALPS Project: lattice library</h1>
-
+ <body>
+  
+<h1> ALPS Project: lattice library</h1>
+  
 <h2>Header file: lattice/graph.h</h2>
-
-defines functions for graph I/O, inquiry about graph properties,
-and a function to copy a graph. The functions work on all graphs
-modelling the concept of
-<a href="graphconcepts.html#ReflectablePropertyGraph"> ReflectablePropertyGraph</a>.
-
+  defines functions for graph I/O, inquiry about graph properties, and a
+function to copy a graph. The functions work on all graphs modelling the
+concept of <a href="graphconcepts.html#ReflectablePropertyGraph"> ReflectablePropertyGraph</a>. 
+ 
 <h3>Synopsis</h3>
-<blockquote><pre>
-namespace alps {
-
-template &lt;class GRAPH>
-void write_graph_xml(std::ostream&amp; out, const GRAPH&amp; g, const std::string&amp; n="")
-
-std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const lattice::coordinate_graph_type&amp; g);
-
-template &lt;class GRAPH> 
-std::string read_graph_xml(std::istream&amp; p, GRAPH&amp; g)
-
-template &lt;class GRAPH>
-std::string read_graph_xml(const palmxml::XMLTag&amp; intag, std::istream&amp; p, GRAPH&amp; g)
-
-template &lt;class SOURCEGRAPH, class DESTINATIONGRAPH>
-void copy_graph(const SOURCEGRAPH&amp; src, DESTINATIONGRAPH&amp; dst)
-
-template &lt;class GRAPH >
-int constant_degree(const GRAPH&amp; g)
-
-template &lt;class GRAPH>
-int32_t maximum_edge_type(const GRAPH&amp; g)
-
-template &lt;class G>
-int32_t maximum_vertex_type(const GRAPH&amp; g)
-
-template &lt;class G, class MAP, class ORIGINALMAP>
-void disorder_vertices(G& g, MAP& type, ORIGINALMAP& original_type);
-
-template &lt;class G, class MAP>
-void disorder_vertices(G& g, MAP& type);
-
-template &lt;class G, class MAP, class ORIGINALMAP>
-void disorder_edges(G& g, MAP& type, ORIGINALMAP& original_type);
-
-template &lt;class G, class MAP>
-void disorder_edges(G& g, MAP& type);
-
-template &lt;class G, class MAP, class ORIGINALMAP>
-void disorder_bonds(G& g, MAP& type, ORIGINALMAP& original_type);
-
-template &lt;class G, class MAP>
-void disorder_bonds(G& g, MAP& type);
-
-template &lt;class G, class MAP, class ORIGINALMAP>
-void disorder_sites(G& g, MAP& type, ORIGINALMAP& original_type);
-
-template &lt;class G, class MAP>
-void disorder_sites(G& g, MAP& t);
-
-}
-</pre></blockquote>
-<H3>XML I/O functions</H3>
-<blockquote><pre>
-template &lt;class GRAPH>
-void write_graph_xml(std::ostream&amp; out, const GRAPH&amp; g, const std::string&amp; name="")
-</pre></blockquote>
-writes a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>
-to an <tt>std::ostream</tt> using the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. The
-graph can optionally be given a name for the output, which overrides any name property the 
-graph might have.
-<blockquote><pre>
-std::ostream&amp; operator<<(std::ostream&amp; out, const lattice::coordinate_graph_type&amp; g);
-</pre></blockquote>
-writes a <a href="graphproperties.html#coordinate_graph_type ><tt>lattice::coordinate_graph_type</tt></A> using <tt>write_graph_xml</tt>.
-
-<blockquote><pre>
-template &lt;class GRAPH>
-std::string read_graph_xml(std::istream&amp; is, GRAPH&amp; graph)
-</pre></blockquote>
-reads a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>
-from an <tt>std::istream</tt> assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. The name of the graph is returned.
-<blockquote><pre>
-template &lt;class GRAPH>
-std::string read_graph_xml(const palmxml::XMLTag&amp; intag, std::istream&amp; p, GRAPH&amp; g)
-</pre></blockquote>
-same as above, but the start tag <tt>&lt;GRAPH ...></tt> has already been read and is passed
-as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml:: XMLTag</tt>
-</A> argument.
+ 
+<blockquote>
+  <pre>namespace alps {<br><br>template &lt;class GRAPH&gt;<br>void write_graph_xml(std::ostream&amp; out, const GRAPH&amp; g, const std::string&amp; n="")<br><br>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const lattice::coordinate_graph_type&amp; g);<br><br>template &lt;class GRAPH&gt; <br>std::string read_graph_xml(std::istream&amp; p, GRAPH&amp; g)<br><br>template &lt;class GRAPH&gt;<br>std::string read_graph_xml(const XMLTag&amp; intag, std::istream&amp; p, GRAPH&amp; g)<br><br>template &lt;class SOURCEGRAPH, class DESTINATIONGRAPH&gt;<br>void copy_graph(const SOURCEGRAPH&amp; src, DESTINATIONGRAPH&amp; dst)<br><br>template &lt;class GRAPH &gt;<br>int constant_degree(const GRAPH&amp; g)<br><br>template &lt;class GRAPH&gt;<br>int32_t maximum_edge_type(const GRAPH&amp; g)<br><br>template &lt;class G&gt;<br>int32_t maximum_vertex_type(const GRAPH&amp; g)<br><br>}<br></pre>
+</blockquote>
+ 
+<h3>XML I/O functions</h3>
+ 
+<blockquote>
+  <pre>template &lt;class GRAPH&gt;<br>void write_graph_xml(std::ostream&amp; out, const GRAPH&amp; g, const std::string&amp; name="")<br></pre>
+</blockquote>
+ writes a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a> 
+to an <tt>std::ostream</tt> using the <a
+ href="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</a> schema
+on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>. The graph
+can optionally be given a name for the output, which overrides any name property
+the  graph might have. 
+<blockquote>
+  <pre>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const lattice::coordinate_graph_type&amp; g);<br></pre>
+</blockquote>
+ writes a <a
+ href="graphproperties.html#coordinate_graph_type%20%3E%3Ctt%3Elattice::coordinate_graph_type%3C/tt%3E%3C/A%3E%20using%20%3Ctt%3Ewrite_graph_xml%3C/tt%3E.%0A%0A%3Cblockquote%3E%3Cpre%3E%0Atemplate%20%3Cclass%20GRAPH%3E%0Astd::string%20read_graph_xml%28std::istream&amp;%20is,%20GRAPH&amp;%20graph%29%0A%3C/pre%3E%3C/blockquote%3E%0Areads%20a%20%3Ca%20href="
+ graphconcepts.html#reflectablepropertygraph="">ReflectablePropertyGraph</a> 
+from an <tt>std::istream</tt> assuming the <a
+ href="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</a> schema
+on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>. The name
+of the graph is returned. 
+<blockquote>
+  <pre>template &lt;class GRAPH&gt;<br>std::string read_graph_xml(const XMLTag&amp; intag, std::istream&amp; p, GRAPH&amp; g)<br></pre>
+</blockquote>
+ same as above, but the start tag <tt>&lt;GRAPH ...&gt;</tt> has already
+been read and is passed as an <a
+ href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>XMLTag</tt> 
+</a> argument. 
 <h3>Graph functions</h3>
-<blockquote><pre>
-template &lt;class SOURCEGRAPH, class DESTINATIONGRAPH>
-void copy_graph(const SOURCEGRAPH&amp; src, DESTINATIONGRAPH&amp; dst)
-</pre></blockquote>
-copies a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>
-and all its properties defined in <a href="graphproperties.html">graphproperties.h</A>,
-if they exist for both of the graphs.
-<blockquote><pre>
-template &lt;class GRAPH >
-int constant_degree(const GRAPH&amp; g)
-</pre></blockquote>
-determines if all vertices of a Boost graph have the same degree. If they do the
-degree is returned, otherwise -1.
-<blockquote><pre>
-template &lt;class GRAPH>
-int32_t maximum_edge_type(const GRAPH&amp; g)
-</pre></blockquote>
-finds the largest value of the <tt>egde_type_t</tt> property in
-a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>.
-<blockquote><pre>
-template &lt;class G>
-int32_t maximum_vertex_type(const GRAPH&amp; g)
-</pre></blockquote>
-finds the largest value of the <tt>vertex_type_t</tt> property in
-a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>.
-<blockquote><pre>
-template &lt;class G, class MAP, class ORIGINALMAP>
-void disorder_vertices(G& g, MAP& type, ORIGINALMAP& original_type);
-
-template &lt;class G, class MAP>
-void disorder_vertices(G& g, MAP& type);
-</pre></blockquote>
-These functions take a vertex property map specified by the first argument and assign a unique integer identifier to each vertex, effectively "disordering" the vertices and obtaining a disordered lattice where each vertex is distinct. The original contents of the property map is optionally kept in the property map specified as third argument.
-<blockquote><pre>
-template &lt;class G, class MAP, class ORIGINALMAP>
-void disorder_sites(G& g, MAP& type, ORIGINALMAP& original_type);
-
-template &lt;class G, class MAP>
-void disorder_sites(G& g, MAP& t);
-</pre></blockquote>
-are the same as the <tt>disorder_vertices</tt> functions.
-<blockquote><pre>
-template &lt;class G, class MAP, class ORIGINALMAP>
-void disorder_edges(G& g, MAP& type, ORIGINALMAP& original_type);
-
-template &lt;class G, class MAP>
-void disorder_edges(G& g, MAP& type);
-
-template &lt;class G, class MAP, class ORIGINALMAP>
-void disorder_bonds(G& g, MAP& type, ORIGINALMAP& original_type);
-
-template &lt;class G, class MAP>
-void disorder_bonds(G& g, MAP& type);
-</pre></blockquote>
-are similar to the <tt>disorder_vertices</tt> functions but act on edge properties and edges instead of vertex properties and vertices.
-<HR>
-<ADDRESS>copyright (c) 2000-2003 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
-</body>
-</html>
-
+ 
+<blockquote>
+  <pre>template &lt;class SOURCEGRAPH, class DESTINATIONGRAPH&gt;<br>void copy_graph(const SOURCEGRAPH&amp; src, DESTINATIONGRAPH&amp; dst)<br></pre>
+</blockquote>
+ copies a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a> 
+and all its properties defined in <a href="graphproperties.html">graphproperties.h</a>, 
+if they exist for both of the graphs. 
+<blockquote>
+  <pre>template &lt;class GRAPH &gt;<br>int constant_degree(const GRAPH&amp; g)<br></pre>
+</blockquote>
+ determines if all vertices of a Boost graph have the same degree. If they
+do the degree is returned, otherwise -1. 
+<blockquote>
+  <pre>template &lt;class GRAPH&gt;<br>int32_t maximum_edge_type(const GRAPH&amp; g)<br></pre>
+</blockquote>
+ finds the largest value of the <tt>egde_type_t</tt> property in a <a
+ href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>. 
+<blockquote>
+  <pre>template &lt;class G&gt;<br>int32_t maximum_vertex_type(const GRAPH&amp; g)<br></pre>
+</blockquote>
+ finds the largest value of the <tt>vertex_type_t</tt> property in a <a
+ href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>. 
+<hr> 
+<address>copyright (c) 2000-2004 by  <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+ <br>
 </body>
 </html>

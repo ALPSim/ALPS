@@ -1,147 +1,116 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: lattice/coordinatelattice.h</title>
+  <title>ALPS Project: lattice/coordinatelattice.h</title>
+   
 </head>
-<body>
-
-<h1>
-ALPS Project: lattice library</h1>
-
+ <body>
+    
+<h1> ALPS Project: lattice library</h1>
+    
 <h2>Header file: lattice/coordinatelattice.h</h2>
-
-defines a template class <tt>coordinate_lattice</tt> which adds concrete basis vectors to a lattice.
-
+   defines a template class <tt>coordinate_lattice</tt> which adds concrete 
+basis vectors to a lattice.   
 <h3>Synopsis</h3>
-<blockquote><pre>
-namespace alps {
-
-template &lt;class BASE = simple_lattice&lt;>, class Vector = std::vector&lt;double> >
-class coordinate_lattice : public BASE {
-public:
-  typedef BASE parent_lattice_type;
-  typedef Vector vector_type;
-  typedef typename lattice_traits&lt;parent_lattice_type>::unit_cell_type unit_cell_type;
-  typedef typename lattice_traits&lt;parent_lattice_type>::offset_type offset_type;
-  typedef typename lattice_traits&lt;parent_lattice_type>::cell_descriptor cell_descriptor;
-  typedef typename std::vector&lt;vector_type>::const_iterator basis_vector_iterator;
-  
-  coordinate_lattice() {}
-
-  template &lt;class B2,class V2> coordinate_lattice(const coordinate_lattice&lt;B2,V2>&amp; l);
-  
-  template &lt;class InputIterator> coordinate_lattice(const unit_cell_type&amp; u, InputIterator first, InputIterator last);
-  
-  template &lt;class InputIterator1, class InputIterator2> coordinate_lattice(const unit_cell_type&amp; u, InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2);
-
-  coordinate_lattice(const unit_cell_type&amp; u);
-
-  template &lt;class B2, class V2>
-  const coordinate_lattice&amp; operator=(const coordinate_lattice&lt;B2,V2>&amp; l);
-
-  void set_parameters(const Parameters&amp; p);
-
-  void add_basis_vector(const vector_type&amp; v);
-  std::size_t num_basis_vectors() const;
-  std::pair&lt;basis_vector_iterator,basis_vector_iterator> basis_vectors() const;
-
-  void add_reciprocal_basis_vector(const vector_type&amp; v);
-  std::size_t num_reciprocal_basis_vectors() const;
-  std::pair&lt;basis_vector_iterator,basis_vector_iterator> reciprocal_basis_vectors() const;
-};
-
-template &lt;class B, class V>
-struct lattice_traits&lt;coordinate_lattice&lt;B,V> >
-{
-  typedef typename coordinate_lattice&lt;B,V>::unit_cell_type unit_cell_type;
-  typedef typename coordinate_lattice&lt;B,V>::cell_descriptor cell_descriptor;
-  typedef typename coordinate_lattice&lt;B,V>::offset_type offset_type;
-  typedef typename coordinate_lattice&lt;B,V>::vector_type vector_type;
-  typedef typename coordinate_lattice&lt;B,V>::basis_vector_iterator basis_vector_iterator;
-};
-
-}
-<pre></blockquote>
-
-<H3>The <tt>coordinate_lattice</tt> class</H3>
-describes a lattice and fulfills the
-<A href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A> requirements.
-
+   
+<blockquote>   
+  <pre>namespace alps {<br><br>template &lt;class BASE = simple_lattice&lt;&gt;, class Vector = std::vector&lt;double&gt; &gt;<br>class coordinate_lattice : public BASE {<br>public:<br>  typedef BASE parent_lattice_type;<br>  typedef Vector vector_type;<br>  typedef typename lattice_traits&lt;parent_lattice_type&gt;::unit_cell_type unit_cell_type;<br>  typedef typename lattice_traits&lt;parent_lattice_type&gt;::offset_type offset_type;<br>  typedef typename lattice_traits&lt;parent_lattice_type&gt;::cell_descriptor cell_descriptor;<br>  typedef typename std::vector&lt;vector_type&gt;::const_iterator basis_vector_iterator;<br>  <br>  coordinate_lattice() {}<br><br>  template &lt;class B2,class V2&gt; coordinate_lattice(const coordinate_lattice&lt;B2,V2&gt;&amp; l);<br>  <br>  template &lt;class InputIterator&gt; coordinate_lattice(const unit_cell_type&amp; u, InputIterator first, InputIterator last);<br>  <br>  template &lt;class InputIterator1, class InputIterator2&gt; coordinate_lattice(const unit_cell_type&amp; u, InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2);<br><br>  coordinate_lattice(const unit_cell_type&amp; u);<br><br>  template &lt;class B2, class V2&gt;<br>  const coordinate_lattice&amp; operator=(const coordinate_lattice&lt;B2,V2&gt;&amp; l);<br><br>  void set_parameters(const Parameters&amp; p);<br><br>  void add_basis_vector(const vector_type&amp; v);<br>  std::size_t num_basis_vectors() const;<br>  std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; basis_vectors() const;<br><br>  void add_reciprocal_basis_vector(const vector_type&amp; v);<br>  std::size_t num_reciprocal_basis_vectors() const;<br>  std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; reciprocal_basis_vectors() const;<br>};<br><br>template &lt;class B, class V&gt;<br>struct lattice_traits&lt;coordinate_lattice&lt;B,V&gt; &gt;<br>{<br>  typedef typename coordinate_lattice&lt;B,V&gt;::unit_cell_type unit_cell_type;<br>  typedef typename coordinate_lattice&lt;B,V&gt;::cell_descriptor cell_descriptor;<br>  typedef typename coordinate_lattice&lt;B,V&gt;::offset_type offset_type;<br>  typedef typename coordinate_lattice&lt;B,V&gt;::vector_type vector_type;<br>  typedef typename coordinate_lattice&lt;B,V&gt;::basis_vector_iterator basis_vector_iterator;<br>};<br><br>}<br></pre>
+ </blockquote>
+    
+<h3>The <tt>coordinate_lattice</tt> class</h3>
+  describes a lattice and fulfills the <a
+ href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</a> requirements.
+   
 <h4>Template parameters</h4>
-It takes two template arguments:
+  It takes two template arguments:  
 <ul>
-<li>the base type of the lattice. The <tt>coordinate_lattice</tt> is derived
-from this type. It has to fulfill the 
-<A href="latticeconcepts.html#Lattice">Lattice</A> requirements.
-<li>the type of the basis vectors. It has to fulfill the 
-<A href="helperconcepts.html#Coordinate">Coordinate</A> requirements
-and defaults to <tt>std::vector&lt;double></tt>.
+  <li>the base type of the lattice. The <tt>coordinate_lattice</tt> is derived
+ from this type. It has to fulfill the  <a
+ href="latticeconcepts.html#Lattice">Lattice</a> requirements. </li>
+   <li>the type of the basis vectors. It has to fulfill the  <a
+ href="helperconcepts.html#Coordinate">Coordinate</a> requirements and defaults 
+to <tt>std::vector&lt;double&gt;</tt>. </li>
+ 
 </ul>
-
+    
 <h4>Type definitions</h4>
-<blockquote><pre>
-typedef BASE parent_lattice_type;
-typedef Vector vector_type;
-</pre></blockquote>
-typedefs for the template parameters.
-<blockquote><pre>
-typedef typename lattice_traits&lt;parent_lattice_type>::unit_cell_type unit_cell_type;
-typedef typename lattice_traits&lt;parent_lattice_type>::offset_type offset_type;
-typedef typename lattice_traits&lt;parent_lattice_type>::cell_descriptor cell_descriptor;
-</pre></blockquote>
-these types are inherited from the parent lattice.
-<blockquote><pre>
-typedef typename std::vector&lt;vector_type>::const_iterator basis_vector_iterator;
-</pre></blockquote>
-the type for const iterators over the basis vectors
-
+   
+<blockquote>   
+  <pre>typedef BASE parent_lattice_type;<br>typedef Vector vector_type;<br></pre>
+ </blockquote>
+  typedefs for the template parameters.  
+<blockquote>   
+  <pre>typedef typename lattice_traits&lt;parent_lattice_type&gt;::unit_cell_type unit_cell_type;<br>typedef typename lattice_traits&lt;parent_lattice_type&gt;::offset_type offset_type;<br>typedef typename lattice_traits&lt;parent_lattice_type&gt;::cell_descriptor cell_descriptor;<br></pre>
+ </blockquote>
+  these types are inherited from the parent lattice.  
+<blockquote>   
+  <pre>typedef typename std::vector&lt;vector_type&gt;::const_iterator basis_vector_iterator;<br></pre>
+ </blockquote>
+  the type for const iterators over the basis vectors   
 <h4>Constructors</h4>
-<blockquote><pre>
-coordinate_lattice();
-</pre></blockquote>
-does not allocate any basis vectors. Corresponds to a 0-dimensional lattice
-<blockquote><pre>
-template &lt;class InputIterator>
-coordinate_lattice(const unit_cell_type&amp; u, InputIterator first, InputIterator last);
-</pre></blockquote>
-obtains the dimension from the unit cell <tt>u</tt> and initializes the basis vectors
-from the pair of iterators <tt>first</tt> and <tt>last</tt>.
+   
+<blockquote>   
+  <pre>coordinate_lattice();<br></pre>
+ </blockquote>
+  does not allocate any basis vectors. Corresponds to a 0-dimensional lattice
+ 
+<blockquote>   
+  <pre>template &lt;class InputIterator&gt;<br>coordinate_lattice(const unit_cell_type&amp; u, InputIterator first, InputIterator last);<br></pre>
+ </blockquote>
+  obtains the dimension from the unit cell <tt>u</tt> and initializes the 
+basis vectors from the pair of iterators <tt>first</tt> and <tt>last</tt>.
+ 
 <h4>Member functions</h4>
-in addition to those inherited from the parent lattice:
-
-<blockquote><pre>
-void set_parameters(const alps::Parameters&);
-</pre></blockquote>
-sets parameters for the lattice, e.g. parammeters specifying the basis vectors.
-
-<blockquote><pre>
-std::size_t num_basis_vectors() const;
-</pre></blockquote>
-returns the number of basis vectors.
-
-<blockquote><pre>
-std::pair&lt;basis_vector_iterator,basis_vector_iterator> basis_vectors() const;
-</pre></blockquote>
-returns a pair of const iterators giving the basis vectors.
-
+  in addition to those inherited from the parent lattice:   
+<blockquote>   
+  <pre>void set_parameters(const alps::Parameters&amp;);<br></pre>
+ </blockquote>
+  sets parameters for the lattice, e.g. parammeters specifying the basis
+vectors.    
+<blockquote>   
+  <pre>std::size_t num_basis_vectors() const;<br></pre>
+ </blockquote>
+  returns the number of basis vectors.   
+<blockquote>   
+  <pre>std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; basis_vectors() const;<br></pre>
+ </blockquote>
+  returns a pair of const iterators giving the basis vectors.<br>
+ 
+<blockquote>   
+  <pre>void add_basis_vector(const vector_type&amp; v);<br></pre>
+ </blockquote>
+ adds a vector as basis vector to the coordinate lattice. This is needed
+only when manually constructing a coordinate_lattice, instead of using the
+usual ALPS construction of a lattice from an XML file.<br>
+<blockquote>   
+  <pre>std::size_t num_reciprocal_basis_vectors() const;<br></pre>
+ </blockquote>
+   returns the number of reciprocal basis vectors of the dual lattice. This
+will either be the same as <tt>num_basis_vectors()</tt> or zero if no reciprocalo
+basis vector information is available.   
+<blockquote>   
+  <pre>std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; reciprocal_basis_vectors() const;<br></pre>
+ </blockquote>
+   returns a pair of const iterators giving the reciprocal basis vectors.<br>
+  
+<blockquote>   
+  <pre>void add_reciprocal_basis_vector(const vector_type&amp; v);<br></pre>
+ </blockquote>
+  adds a vector as reciprocal basis vector to the coordinate lattice. This
+is needed only when manually constructing a coordinate_lattice, instead of
+using the usual ALPS construction of a lattice from an XML file.<br>
+    
 <h4>Traits class</h4>
-<blockquote><pre>
-template &lt;class B, class V>
-struct lattice_traits&lt;coordinate_lattice&lt;B,V> >
-{
-  typedef typename coordinate_lattice&lt;B,V>::unit_cell_type unit_cell_type;
-  typedef typename coordinate_lattice&lt;B,V>::cell_descriptor cell_descriptor;
-  typedef typename coordinate_lattice&lt;B,V>::offset_type offset_type;
-  typedef typename coordinate_lattice&lt;B,V>::vector_type vector_type;
-  typedef typename coordinate_lattice&lt;B,V>::basis_vector_iterator basis_vector_iterator;
-};
-</pre></blockquote>
-is the traits class for the lattice.
-<HR>
-<ADDRESS>copyright (c) 2000-2004 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A> and
-<A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
-</body>
-</html>
-
+   
+<blockquote>   
+  <pre>template &lt;class B, class V&gt;<br>struct lattice_traits&lt;coordinate_lattice&lt;B,V&gt; &gt;<br>{<br>  typedef typename coordinate_lattice&lt;B,V&gt;::unit_cell_type unit_cell_type;<br>  typedef typename coordinate_lattice&lt;B,V&gt;::cell_descriptor cell_descriptor;<br>  typedef typename coordinate_lattice&lt;B,V&gt;::offset_type offset_type;<br>  typedef typename coordinate_lattice&lt;B,V&gt;::vector_type vector_type;<br>  typedef typename coordinate_lattice&lt;B,V&gt;::basis_vector_iterator basis_vector_iterator;<br>};<br></pre>
+ </blockquote>
+  is the traits class for the lattice.  
+<hr>  
+<address>copyright (c) 2000-2004 by  <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a> and <a
+ href="mailto:wistaria@comp-phys.org">Synge Todo</a></address>
+  <br>
+ 
 </body>
 </html>

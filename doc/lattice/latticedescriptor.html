@@ -1,220 +1,168 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: lattice/latticedescriptor.h</title>
+  <title>ALPS Project: lattice/latticedescriptor.h</title>
 </head>
-<body>
-
-<h1>
-ALPS Project: lattice library</h1>
-
+ <body>
+  
+<h1> ALPS Project: lattice library</h1>
+  
 <h2>Header file: lattice/latticedescriptor.h</h2>
-
-defines two lattice classes which can be constructed from XML input. These are
+  defines two lattice classes which can be constructed from XML input. These
+are 
 <ul>
-<li><b><tt>LatticeDescriptor</tt></b>, a model of 
-<a href="latticeconcepts.html#CoordinateLattice"> CoordinateLattice</A>. It can be constructed
-from the <tt>&lt;LATTICE></tt> element of the 
-<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
-<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>. </li>
-<li><b><tt>FiniteLatticeDescriptor</tt></b>, a model of 
-<a href="latticeconcepts.html#CoordinateLattice">FiniteLattice</A> and
-<a href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A>. 
-It can be constructed
-from the <tt>&lt;FINITELATTICE></tt> element of the 
-<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
-<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>. </li>
-
+ <li><b><tt>LatticeDescriptor</tt></b>, a model of  <a
+ href="latticeconcepts.html#CoordinateLattice"> CoordinateLattice</a>. It
+can be constructed from the <tt>&lt;LATTICE&gt;</tt> element of the  <a
+ href="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</a>
+on  <a href="http://xml.comp-phys.org/">http://xml.comp-phys.org/</a>. </li>
+ <li><b><tt>FiniteLatticeDescriptor</tt></b>, a model of  <a
+ href="latticeconcepts.html#CoordinateLattice">FiniteLattice</a> and <a
+ href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</a>.  It
+can be constructed from the <tt>&lt;FINITELATTICE&gt;</tt> element of the
+ <a href="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</a>
+on  <a href="http://xml.comp-phys.org/">http://xml.comp-phys.org/</a>. </li>
+  
 </ul>
-
+  
 <h3>Synopsis</h3>
-<blockquote><pre>
-namespace alps {
-
-class LatticeDescriptor : public coordinate_lattice&lt;simple_lattice&lt;>,std::vector&lt;alps::StringValue> >
-{
-public:
-  typedef coordinate_lattice&lt;simple_lattice&lt;>,std::vector&lt;alps::StringValue> > base_type;
-  typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
-  typedef lattice_traits&lt;base_type>::offset_type offset_type;
-  typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
-  typedef lattice_traits&lt;base_type>::vector_type vector_type;
-  typedef lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
+ 
+<blockquote>
+  <pre>namespace alps {<br><br>class LatticeDescriptor : public coordinate_lattice&lt;simple_lattice&lt;&gt;,std::vector&lt;alps::StringValue&gt; &gt;<br>{<br>public:<br>  typedef coordinate_lattice&lt;simple_lattice&lt;&gt;,std::vector&lt;alps::StringValue&gt; &gt; base_type;<br>  typedef lattice_traits&lt;base_type&gt;::unit_cell_type unit_cell_type;<br>  typedef lattice_traits&lt;base_type&gt;::offset_type offset_type;<br>  typedef lattice_traits&lt;base_type&gt;::cell_descriptor cell_descriptor;<br>  typedef lattice_traits&lt;base_type&gt;::vector_type vector_type;<br>  typedef lattice_traits&lt;base_type&gt;::basis_vector_iterator basis_vector_iterator;<br>  <br>  LatticeDescriptor() {}<br>  LatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;);<br><br>  void set_parameters(const alps::Parameters&amp;);<br>  template&lt;class T&gt;<br>  void add_default_parameter(const std::string&amp; name, const T&amp; value)<br><br>  void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;<br>  const std::string&amp; name() const;<br>  std::size_t dimension() const;<br>};<br><br>typedef std::map&lt;std::string,LatticeDescriptor&gt; LatticeMap;<br><br>class FiniteLatticeDescriptor : hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;&gt;,std::vector&lt;alps::StringValue&gt; &gt;, std::vector&lt;alps::StringValue&gt; &gt;<br>{<br>public:<br>  typedef hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;&gt;,std::vector&lt;alps::StringValue&gt; &gt;, std::vector&lt;alps::StringValue&gt; &gt; base_type;<br>  typedef lattice_traits&lt;base_type&gt;::unit_cell_type unit_cell_type;<br>  typedef lattice_traits&lt;base_type&gt;::offset_type offset_type;<br>  typedef lattice_traits&lt;base_type&gt;::cell_descriptor cell_descriptor;<br>  typedef lattice_traits&lt;base_type&gt;::vector_type vector_type;<br>  typedef lattice_traits&lt;base_type&gt;::basis_vector_iterator basis_vector_iterator;<br>  typedef lattice_traits&lt;base_type&gt;::cell_iterator cell_iterator; <br>  typedef lattice_traits&lt;base_type&gt;::size_type size_type;<br>  <br>  FiniteLatticeDescriptor() {}<br>  FiniteLatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;, <br>                          const LatticeMap&amp; = LatticeMap());<br><br>  void set_parameters(const palm::Parameters&amp;);<br>  void write_xml(std::ostream&amp;, const std::string&amp; n= "") const;<br>  const std::string&amp; name() const;<br>  std::size_t dimension() const;<br>};<br><br>typedef std::map&lt;std::string,FiniteLatticeDescriptor&gt; FiniteLatticeMap;<br><br>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const LatticeDescriptor&amp; l);<br>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const FiniteLatticeDescriptor&amp; l);<br>}<br><pre></pre></pre>
+</blockquote>
   
-  LatticeDescriptor() {}
-  LatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;);
- void set_parameters(const alps::Parameters&);
-
-  void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;
-  const std::string&amp; name() const;
-  std::size_t dimension() const;
-};
-
-typedef std::map&lt;std::string,LatticeDescriptor> LatticeMap;
-
-class FiniteLatticeDescriptor : hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;>,std::vector&lt;alps::StringValue> >, std::vector&lt;alps::StringValue> >
-{
-public:
-  typedef hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;>,std::vector&lt;alps::StringValue> >, std::vector&lt;alps::StringValue> > base_type;
-  typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
-  typedef lattice_traits&lt;base_type>::offset_type offset_type;
-  typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
-  typedef lattice_traits&lt;base_type>::vector_type vector_type;
-  typedef lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
-  typedef lattice_traits&lt;base_type>::cell_iterator cell_iterator; 
-  typedef lattice_traits&lt;base_type>::size_type size_type;
-  
-  FiniteLatticeDescriptor() {}
-  FiniteLatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;, 
-                          const LatticeMap&amp; = LatticeMap());
-
-  void set_parameters(const palm::Parameters&amp;);
-  void write_xml(std::ostream&amp;, const std::string&amp; n= "") const;
-  const std::string&amp; name() const;
-  std::size_t dimension() const;
-};
-
-typedef std::map&lt;std::string,FiniteLatticeDescriptor> FiniteLatticeMap;
-
-std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const LatticeDescriptor&amp; l);
-std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const FiniteLatticeDescriptor&amp; l);
-}
-<pre></blockquote>
-
-<H3>The <tt>LatticeDesriptor</tt> class</H3>
-describes a lattice and fulfills the
-<A href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A> requirements.
- It can be constructed from the <tt>&lt;LATTICE></tt> element of the 
-<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
-<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
-
+<h3>The <tt>LatticeDesriptor</tt> class</h3>
+ describes a lattice and fulfills the <a
+ href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</a> requirements. 
+ It can be constructed from the <tt>&lt;LATTICE&gt;</tt> element of the  <a
+ href="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</a>
+on  <a href="http://xml.comp-phys.org/">http://xml.comp-phys.org/</a>.  
 <h4>Type definitions</h4>
-<blockquote><pre>
-typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
-typedef lattice_traits&lt;base_type>::offset_type offset_type;
-typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
-typedef lattice_traits&lt;base_type>::vector_type vector_type;
-typedef lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
-</pre></blockquote>
-these types are inherited from <a href="coordinatelattice.html"><tt>coordinate_lattice</tt></a>.
+ 
+<blockquote>
+  <pre>typedef lattice_traits&lt;base_type&gt;::unit_cell_type unit_cell_type;<br>typedef lattice_traits&lt;base_type&gt;::offset_type offset_type;<br>typedef lattice_traits&lt;base_type&gt;::cell_descriptor cell_descriptor;<br>typedef lattice_traits&lt;base_type&gt;::vector_type vector_type;<br>typedef lattice_traits&lt;base_type&gt;::basis_vector_iterator basis_vector_iterator;<br></pre>
+</blockquote>
+ these types are inherited from <a href="coordinatelattice.html"><tt>coordinate_lattice</tt></a>. 
 <h4>Constructors</h4>
-<blockquote><pre>
-LatticeDescriptor() {}
-</pre></blockquote>
-an empty lattice without any information.
-<blockquote><pre>
-LatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;);
-</pre></blockquote>
-reads the <tt>LatticeDescriptor</tt> in XML from a stream
-assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>.
-The start tag <tt>&lt;LATTICE ...></tt> has already been read and is passed
-as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml::XMLTag</tt></a>.
-
+ 
+<blockquote>
+  <pre>LatticeDescriptor() {}<br></pre>
+</blockquote>
+ an empty lattice without any information. 
+<blockquote>
+  <pre>LatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;);<br></pre>
+</blockquote>
+ reads the <tt>LatticeDescriptor</tt> in XML from a stream assuming the <a
+ href="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</a> schema
+on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>. The start
+tag <tt>&lt;LATTICE ...&gt;</tt> has already been read and is passed as a
+<a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml::XMLTag</tt></a>. 
+ 
 <h4>Member functions</h4>
-in addition to those inherited from the parent lattice:
-<blockquote><pre>
-void set_parameters(const alps::Parameters&);
-</pre></blockquote>
-sets parameters for the lattice, e.g. parammeters specifying the basis vectors.
-<blockquote><pre>
-void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;
-</pre></blockquote>
-writes the lattice in XML, using the same <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. It
-can optionally be renamed by passing a new name as the second argument.
-<blockquote><pre>
-const std::string&amp; name() const;
-</pre></blockquote>
-returns the name of the lattice
-<blockquote><pre>
-std::size_t dimension() const;
-</pre></blockquote>
-returns the dimension of the lattice.
-<H3>The <tt>LatticeMap</tt> type</h3>
-<blockquote><pre>
-typedef std::map&lt;std::string,LatticeDescriptor> LatticeMap;
-</pre></blockquote>
-can be used to keep a collection of <tt>LatticeDescriptor</tt>
-objects, indexed by their name.
-
-<H3>The <tt>FiniteLatticeDesriptor</tt> class</H3>
-describes a lattice and fulfills the
-<a href="latticeconcepts.html#CoordinateLattice">FiniteLattice</A> and
-<A href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A> requirements.
- It can be constructed from the <tt>&lt;FINITELATTICE></tt> element of the 
-<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
-<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
-
+ in addition to those inherited from the parent lattice: 
+<blockquote>
+  <pre>void set_parameters(const alps::Parameters&amp;);<br></pre>
+</blockquote>
+ sets parameters for the lattice, e.g. parammeters specifying the basis vectors.<br>
+<pre>  template&lt;class T&gt;<br>  void add_default_parameter(const std::string&amp; name, const T&amp; value)</pre>
+<p>adds a new parameter and default value to the <tt>LatticeDescriptor</tt>.<br>
+</p>
+ 
+<blockquote>
+  <pre>void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;<br></pre>
+</blockquote>
+ writes the lattice in XML, using the same <a
+ href="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</a> schema
+on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>. It can
+optionally be renamed by passing a new name as the second argument. 
+<blockquote>
+  <pre>const std::string&amp; name() const;<br></pre>
+</blockquote>
+ returns the name of the lattice 
+<blockquote>
+  <pre>std::size_t dimension() const;<br></pre>
+</blockquote>
+ returns the dimension of the lattice. 
+<h3>The <tt>LatticeMap</tt> type</h3>
+ 
+<blockquote>
+  <pre>typedef std::map&lt;std::string,LatticeDescriptor&gt; LatticeMap;<br></pre>
+</blockquote>
+ can be used to keep a collection of <tt>LatticeDescriptor</tt> objects,
+indexed by their name.  
+<h3>The <tt>FiniteLatticeDesriptor</tt> class</h3>
+ describes a lattice and fulfills the <a
+ href="latticeconcepts.html#CoordinateLattice">FiniteLattice</a> and <a
+ href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</a> requirements. 
+ It can be constructed from the <tt>&lt;FINITELATTICE&gt;</tt> element of
+the  <a href="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</a>
+on  <a href="http://xml.comp-phys.org/">http://xml.comp-phys.org/</a>.  
 <h4>Type definitions</h4>
-<blockquote><pre>
-typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
-typedef lattice_traits&lt;base_type>::offset_type offset_type;
-typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
-typedef lattice_traits&lt;base_type>::vector_type vector_type;
-typedef lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
-typedef lattice_traits&lt;base_type>::cell_iterator cell_iterator; 
-typedef lattice_traits&lt;base_type>::size_type size_type;
-</pre></blockquote>
-these types are inherited from <a href="hypercubic.html"><tt>hypercubic_lattice</tt></a>.
+ 
+<blockquote>
+  <pre>typedef lattice_traits&lt;base_type&gt;::unit_cell_type unit_cell_type;<br>typedef lattice_traits&lt;base_type&gt;::offset_type offset_type;<br>typedef lattice_traits&lt;base_type&gt;::cell_descriptor cell_descriptor;<br>typedef lattice_traits&lt;base_type&gt;::vector_type vector_type;<br>typedef lattice_traits&lt;base_type&gt;::basis_vector_iterator basis_vector_iterator;<br>typedef lattice_traits&lt;base_type&gt;::cell_iterator cell_iterator; <br>typedef lattice_traits&lt;base_type&gt;::size_type size_type;<br></pre>
+</blockquote>
+ these types are inherited from <a href="hypercubic.html"><tt>hypercubic_lattice</tt></a>. 
 <h4>Constructors</h4>
-<blockquote><pre>
-FiniteLatticeDescriptor() {}
-</pre></blockquote>
-an empty lattice without any information.
-<blockquote><pre>
-FiniteLatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;, 
-                          const LatticeMap&amp; = LatticeMap());
-</pre></blockquote>
-reads the <tt> FiniteLatticeDesriptor</tt> in XML from a stream
-assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>.
-The start tag <tt>&lt;FINITELATTICE ...></tt> has already been read and is passed
-as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml::XMLTag</tt></a>
-<P>In the <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice schema</A>
-the <tt>&lt;FINITELATTICE ...></tt> contains a <tt>&lt;LATTICE ...></tt> element.
-This can either describe the lattice fully, or refer to a lattice by name.
-The optional <tt>LatticeMap</tt> argument can be used to pass the known lattices.
-
+ 
+<blockquote>
+  <pre>FiniteLatticeDescriptor() {}<br></pre>
+</blockquote>
+ an empty lattice without any information. 
+<blockquote>
+  <pre>FiniteLatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;, <br>                          const LatticeMap&amp; = LatticeMap());<br></pre>
+</blockquote>
+ reads the <tt> FiniteLatticeDesriptor</tt> in XML from a stream assuming
+the <a href="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</a> schema
+on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>. The start
+tag <tt>&lt;FINITELATTICE ...&gt;</tt> has already been read and is passed 
+as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml::XMLTag</tt></a> 
+<p>In the <a href="http://xml.comp-phys.org/schemas/lattice/">lattice schema</a> 
+the <tt>&lt;FINITELATTICE ...&gt;</tt> contains a <tt>&lt;LATTICE ...&gt;</tt>
+element. This can either describe the lattice fully, or refer to a lattice
+by name. The optional <tt>LatticeMap</tt> argument can be used to pass the
+known lattices.  </p>
 <h4>Member functions</h4>
-in addition to those inherited from the parent lattice:
-<blockquote><pre>
-void set_parameters(const palm::Parameters&amp;);
-</pre></blockquote>
-The <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice schema</A>
-allows the extent and boundary conditions to be specified by external parameters.
-The <tt>set_parameters</tt> function allows to pass a map of parameters,
-to fill the values of the parameters.
-
-<blockquote><pre>
-void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;
-</pre></blockquote>
-writes the finite lattice in XML, using the same <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. It
-can optionally be renamed by passing a new name as the second argument.
-<blockquote><pre>
-const std::string&amp; name() const;
-</pre></blockquote>
-returns the name of the lattice
-<blockquote><pre>
-std::size_t dimension() const;
-</pre></blockquote>
-returns the dimension of the lattice.
-
-<H3>The <tt>FiniteLatticeMap</tt> type</h3>
-<blockquote><pre>
-typedef std::map&lt;std::string,FiniteLatticeDescriptor> FiniteLatticeMap;
-</pre></blockquote>
-can be used to keep a collection of <tt> FiniteLatticeDescriptor</tt>
-objects, indexed by their name.
-
-<H3>Output operators</h3>
-<blockquote><pre>
-std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const LatticeDescriptor&amp; l);
-std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const FiniteLatticeDescriptor&amp; l);
-</pre></blockquote>
-write the <tt>LatticeDescriptor</tt> and <tt>FiniteLatticeDescriptor</tt> in XML, using
-the <tt>write_xml</tt> member functions.
-<HR>
-<ADDRESS>copyright (c) 2000-2003 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
-</body>
-</html>
-
+ in addition to those inherited from the parent lattice: 
+<blockquote>
+  <pre>void set_parameters(const palm::Parameters&amp;);<br></pre>
+</blockquote>
+ The <a href="http://xml.comp-phys.org/schemas/lattice/">lattice schema</a> 
+allows the extent and boundary conditions to be specified by external parameters. 
+The <tt>set_parameters</tt> function allows to pass a map of parameters, to
+fill the values of the parameters.  
+<blockquote>
+  <pre>void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;<br></pre>
+</blockquote>
+ writes the finite lattice in XML, using the same <a
+ href="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</a> schema
+on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>. It can
+optionally be renamed by passing a new name as the second argument. 
+<blockquote>
+  <pre>const std::string&amp; name() const;<br></pre>
+</blockquote>
+ returns the name of the lattice 
+<blockquote>
+  <pre>std::size_t dimension() const;<br></pre>
+</blockquote>
+ returns the dimension of the lattice.  
+<h3>The <tt>FiniteLatticeMap</tt> type</h3>
+ 
+<blockquote>
+  <pre>typedef std::map&lt;std::string,FiniteLatticeDescriptor&gt; FiniteLatticeMap;<br></pre>
+</blockquote>
+ can be used to keep a collection of <tt> FiniteLatticeDescriptor</tt> objects,
+indexed by their name.  
+<h3>Output operators</h3>
+ 
+<blockquote>
+  <pre>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const LatticeDescriptor&amp; l);<br>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const FiniteLatticeDescriptor&amp; l);<br></pre>
+</blockquote>
+ write the <tt>LatticeDescriptor</tt> and <tt>FiniteLatticeDescriptor</tt>
+in XML, using the <tt>write_xml</tt> member functions. 
+<hr> 
+<address>copyright (c) 2000-2003 by  <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+ <br>
 </body>
 </html>

@@ -10,7 +10,7 @@
 <h2>Header file: lattice/propertymap.h</h2>
    includes traits classes to inquire about the internal properties of a
 graph (implement the <a
- href="file:///Macintosh%20HD/Users/troyer/src/ALPS/doc/lattice/graphconcepts.html#ReflectablePropertyGraph">
+ href="graphconcepts.html#ReflectablePropertyGraph">
 ReflectablePropertyGraph</a> concept) and useful property maps, extending
 the Boost <a href="http://www.boost.org/libs/property_map/index.html">property
 maps</a>.&nbsp;   
@@ -116,7 +116,10 @@ of the<tt> singleton_property_map</tt> is independent of the key type, actually
 accessing with keys of ay type is allowed. The <tt>key_type</tt> is included
 here only because it is required of property maps.<br>
 </p>
-<pre>  singleton_property_map(V =V());<br><br>  operator value_type () const;<br><br>  const singleton_property_map&lt;V&gt;&amp; operator=(const value_type&amp; v);<br><br>  template &lt;class T&gt; V&amp; operator[](T );<br>  template &lt;class T&gt; const V&amp; operator[](T ) const;<br>};<br><br></pre>
+<pre>  singleton_property_map(V =V());<br></pre>
+<p>initializes the property map<br>
+</p>
+<pre><br>  operator value_type () const;<br><br>  const singleton_property_map&lt;V&gt;&amp; operator=(const value_type&amp; v);<br><br>  template &lt;class T&gt; V&amp; operator[](T );<br>  template &lt;class T&gt; const V&amp; operator[](T ) const;<br>};<br><br></pre>
      
 <hr> 
 <address><a name="_">copyright (c) 2000-2004 by  </a><a

@@ -1,116 +1,117 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: lattice/graph_traits.h</title>
+  <title>ALPS Project: lattice/graph_traits.h</title>
 </head>
-<body>
-
-<h1>
-ALPS Project: lattice library</h1>
-
+ <body>
+  
+<h1> ALPS Project: lattice library</h1>
+  
 <h2>Header file: lattice/graph_traits.h</h2>
-
-defines mappings of Boosr Graph library functions and types to names more suited to a lattice model notation.
-
+  defines mappings of Boost Graph library functions and types to names more
+suited to a lattice model notation.  
 <h3>Synopsis</h3>
-<blockquote><pre>
-namespace alps {
-template &lt;class G>
-struct graph_traits : public boost::graph_traits&lt;G>
-{
-  typedef G graph_type;
-  typedef typename boost::graph_traits&lt;graph_type>::vertex_iterator site_iterator;
-  typedef typename boost::graph_traits&lt;graph_type>::edge_iterator bond_iterator;
-  typedef typename boost::graph_traits&lt;graph_type>::out_edge_iterator neighbor_bond_iterator;
-  typedef typename boost::graph_traits&lt;graph_type>::edge_descriptor bond_descriptor;
-  typedef typename boost::graph_traits&lt;graph_type>::vertex_descriptor site_descriptor;
-  typedef typename boost::graph_traits&lt;graph_type>::vertices_size_type sites_size_type;
-  typedef typename boost::graph_traits&lt;graph_type>::edges_size_type bonds_size_type;
-  typedef typename boost::graph_traits&lt;graph_type>::degree_size_type neighbors_size_type;
-  typedef typename boost::graph_traits&lt;graph_type>::adjacency_iterator neighbor_iterator;
-};
-
-template &lt;class G> 
-std::pair&lt;typename graph_traits&lt;G>::site_iterator, typename graph_traits&lt;G>::site_iterator> 
-sites(const G&amp; g);
-          
-template &lt;class G> 
-typename graph_traits&lt;G>::sites_size_type num_sites (const G&amp; g);
-
-template &lt;class G> 
-std::pair&lt;typename graph_traits&lt;G>::bond_iterator, typename graph_traits&lt;G>::bond_iterator> 
-bonds(const G&amp; g);
-          
-template &lt;class G> 
-typename graph_traits&lt;G>::bonds_size_type num_bonds (const G&amp; g);
-
-template &lt;class V, class G> 
-typename graph_traits&lt;G>::degree_size_type
-num_neighbors(const V&amp; v, const G&amp; g);
-
-template &lt;class V, class G> 
-std::pair&lt;typename graph_traits&lt;G>::neighbor_bond_iterator, typename graph_traits&lt;G>::neighbor_bond_iterator>
-neighbor_bonds(const V&amp; v, const G&amp; g);
-
-template &lt;class V, class G> 
-std::pair&lt;typename graph_traits&lt;G>::neighbor_iterator, typename graph_traits&lt;G>::neighbor_iterator>
-neighbors(const V&amp; v, const G&amp; g);
-
-template &lt;class G>
-typename graph_traits&lt;G>::site_descriptor site(typename graph_traits&lt;G>::sites_size_type i, const G&amp; g);
-
-template &lt;class V, class G> 
-typename graph_traits&lt;G>::site_descriptor 
-neighbor (const V&amp; v, typename graph_traits&lt;G>::degree_size_type i, const G&amp; g) 
-
-template &lt;class T>
-const typename graph_traits<T>::graph_type&amp; graph(const T&amp; x);
-
-}
-</pre></blockquote>
-<H3>Description</H3>
-the traits classes and functions rename Boost graph library types and functions to the equivalent notation for lattice models:
+ 
+<blockquote>
+  <pre>namespace alps {<br>template &lt;class G&gt;<br>struct graph_traits : public boost::graph_traits&lt;G&gt;<br>{<br>  typedef G graph_type;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::vertex_iterator site_iterator;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::edge_iterator bond_iterator;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::out_edge_iterator neighbor_bond_iterator;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::edge_descriptor bond_descriptor;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::vertex_descriptor site_descriptor;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::vertices_size_type sites_size_type;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::edges_size_type bonds_size_type;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::degree_size_type neighbors_size_type;<br>  typedef typename boost::graph_traits&lt;graph_type&gt;::adjacency_iterator neighbor_iterator;<br>};<br><br>template &lt;class G&gt; <br>std::pair&lt;typename graph_traits&lt;G&gt;::site_iterator, typename graph_traits&lt;G&gt;::site_iterator&gt; <br>sites(const G&amp; g);<br>          <br>template &lt;class G&gt; <br>typename graph_traits&lt;G&gt;::sites_size_type num_sites (const G&amp; g);<br><br>template &lt;class G&gt; <br>std::pair&lt;typename graph_traits&lt;G&gt;::bond_iterator, typename graph_traits&lt;G&gt;::bond_iterator&gt; <br>bonds(const G&amp; g);<br>          <br>template &lt;class G&gt; <br>typename graph_traits&lt;G&gt;::bonds_size_type num_bonds (const G&amp; g);<br><br>template &lt;class V, class G&gt; <br>typename graph_traits&lt;G&gt;::degree_size_type<br>num_neighbors(const V&amp; v, const G&amp; g);<br><br>template &lt;class V, class G&gt; <br>std::pair&lt;typename graph_traits&lt;G&gt;::neighbor_bond_iterator, typename graph_traits&lt;G&gt;::neighbor_bond_iterator&gt;<br>neighbor_bonds(const V&amp; v, const G&amp; g);<br><br>template &lt;class V, class G&gt; <br>std::pair&lt;typename graph_traits&lt;G&gt;::neighbor_iterator, typename graph_traits&lt;G&gt;::neighbor_iterator&gt;<br>neighbors(const V&amp; v, const G&amp; g);<br><br>template &lt;class G&gt;<br>typename graph_traits&lt;G&gt;::site_descriptor site(typename graph_traits&lt;G&gt;::sites_size_type i, const G&amp; g);<br><br>template &lt;class V, class G&gt; <br>typename graph_traits&lt;G&gt;::site_descriptor <br>neighbor (const V&amp; v, typename graph_traits&lt;G&gt;::degree_size_type i, const G&amp; g) <br><br>template &lt;class T&gt;<br>const typename graph_traits<t>::graph_type&amp; graph(const T&amp; x);<br><br>}<br></t></pre>
+</blockquote>
+ 
+<h3>Description</h3>
+ the traits classes and functions rename Boost graph library types and functions
+to the equivalent notation for lattice models:<br>
+<br>
+ 
 <table width="100%" border="2">
-<thead>
-<tr><td><b>BGL notation</b></td><td><b><B>Lattice model notation</B></td></tr>
-</thead>
-<tbody>
-<tr><td>vertex_iterator</td><td>site_iterator</td></tr>
-<tr><td>edge_iterator</td><td>bond_iterator</td></tr>
-<tr><td>out_edge_iterator</td><td>neighbor_bond_iterator</td></tr>
-<tr><td>edge_descriptor</td><td>bond_descriptor</td></tr>
-<tr><td>vertex_descriptor</td><td>site_descriptor</td></tr>
-<tr><td>vertices_size_type</td><td>sites_size_type</td></tr>
-<tr><td>edges_size_type</td><td>bonds_size_type</td></tr>
-<tr><td>degree_size_type</td><td>neighbors_size_type</td></tr>
-<tr><td>adjacency_iterator</td><td>neighbor_iterator</td></tr>
-<tr><td>vertices</td><td>sites</td></tr>
-<tr><td>num_vertices</td><td>num_sites</td></tr>
-<tr><td>edges</td><td>bonds</td></tr>
-<tr><td>num_edges</td><td>num_bonds</td></tr>
-<tr><td>out_degree</td><td>num_neighbors</td></tr>
-<tr><td>out_edges</td><td>neighbor_bonds</td></tr>
-<tr><td>adjacent_vertices</td><td>neighbors</td></tr>
-<tr><td>vertex</td><td>site</td></tr>
-</tbody>
+ <thead> <tr>
+    <td><b>Boost Graph Library notation</b></td>
+    <td><b><b>Lattice model notation</b></b></td>
+  </tr>
+ </thead> <tbody>
+ <tr>
+      <td>vertex_iterator</td>
+      <td>site_iterator</td>
+    </tr>
+ <tr>
+      <td>edge_iterator</td>
+      <td>bond_iterator</td>
+    </tr>
+ <tr>
+      <td>out_edge_iterator</td>
+      <td>neighbor_bond_iterator</td>
+    </tr>
+ <tr>
+      <td>edge_descriptor</td>
+      <td>bond_descriptor</td>
+    </tr>
+ <tr>
+      <td>vertex_descriptor</td>
+      <td>site_descriptor</td>
+    </tr>
+ <tr>
+      <td>vertices_size_type</td>
+      <td>sites_size_type</td>
+    </tr>
+ <tr>
+      <td>edges_size_type</td>
+      <td>bonds_size_type</td>
+    </tr>
+ <tr>
+      <td>degree_size_type</td>
+      <td>neighbors_size_type</td>
+    </tr>
+ <tr>
+      <td>adjacency_iterator</td>
+      <td>neighbor_iterator</td>
+    </tr>
+ <tr>
+      <td>vertices</td>
+      <td>sites</td>
+    </tr>
+ <tr>
+      <td>num_vertices</td>
+      <td>num_sites</td>
+    </tr>
+ <tr>
+      <td>edges</td>
+      <td>bonds</td>
+    </tr>
+ <tr>
+      <td>num_edges</td>
+      <td>num_bonds</td>
+    </tr>
+ <tr>
+      <td>out_degree</td>
+      <td>num_neighbors</td>
+    </tr>
+ <tr>
+      <td>out_edges</td>
+      <td>neighbor_bonds</td>
+    </tr>
+ <tr>
+      <td>adjacent_vertices</td>
+      <td>neighbors</td>
+    </tr>
+ <tr>
+      <td>vertex</td>
+      <td>site</td>
+    </tr>
+ 
+  </tbody> 
 </table>
-<P>
-In addition we define the following useful functions:
-<blockquote><pre>
-template &lt;class V, class G> 
-typename graph_traits&lt;G>::site_descriptor 
-neighbor (const V&amp; v, typename graph_traits&lt;G>::degree_size_type i, const G&amp; g) 
-</pre></blockquote>
-return the <tt>i</tt>-th neighbor of a site.
-<blockquote><pre>
-template &lt;class T>
-const typename graph_traits<T>::graph_type&amp; graph(const T&amp; x);
-</pre></blockquote>
-extract a graph from an object containing one (e.g. a lattice graph, a graph library, etc.).
-<HR>
-<ADDRESS>copyright (c) 2000-2003 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
-</body>
-</html>
-
+ 
+<p> In addition we define the following useful functions: </p>
+<blockquote>
+  <pre>template &lt;class V, class G&gt; <br>typename graph_traits&lt;G&gt;::site_descriptor <br>neighbor (const V&amp; v, typename graph_traits&lt;G&gt;::degree_size_type i, const G&amp; g) <br></pre>
+</blockquote>
+ return the <tt>i</tt>-th neighbor of a site. 
+<blockquote>
+  <pre>template &lt;class T&gt;<br>const typename graph_traits<t>::graph_type&amp; graph(const T&amp; x);<br></t></pre>
+</blockquote>
+ extract a graph from an object containing one (e.g. a lattice graph, a graph
+library, etc.). 
+<hr> 
+<address>copyright (c) 2000-2003 by  <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+ <br>
 </body>
 </html>

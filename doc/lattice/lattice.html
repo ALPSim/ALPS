@@ -1,90 +1,73 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: lattice/lattice.h</title>
+  <title>ALPS Project: lattice/lattice.h</title>
+   
 </head>
-<body>
-
-<h1>
-ALPS Project: lattice library</h1>
-
-<h2>Header file: lattice/lattice.h</h2>
-
-defines default implemntations for the functions asssociated
-with the <A href="latticeconcepts.html">lattice concepts</A>
-<h3>Synopsis</h3>
-<blockquote><pre>
-template &lt;class L>
-struct lattice_traits {};
-
-template &lt;class Lattice>
-inline const typename lattice_traits&lt;Lattice>::unit_cell_type&amp;
-unit_cell(const Lattice&amp; l);
-
-template &lt;class Lattice>
-inline typename lattice_traits&lt;Lattice>::cell_descriptor
-cell(const typename lattice_traits&lt;Lattice>::offset_type&amp; o,const Lattice&amp; l);
-
-template &lt;class Lattice>
-inline const typename lattice_traits&lt;Lattice>::offset_type&amp;
-offset(const typename lattice_traits&lt;Lattice>::cell_descriptor&amp; c, const Lattice&amp; );
-
-template &lt;class Lattice>
-inline typename lattice_traits&lt;Lattice>::size_type
-volume(const Lattice&amp; l);
-
-template &lt;class Lattice>
-inline bool 
-on_lattice(typename lattice_traits&lt;Lattice>::offset_type o, const Lattice&amp; l);
-
-template &lt;class Lattice>
-inline std::pair&lt;typename lattice_traits&lt;Lattice>::cell_iterator,
-                 typename lattice_traits&lt;Lattice>::cell_iterator>
-cells(const Lattice&amp; l);
-
-template &lt;class Lattice>
-inline std::pair&lt;bool, typename lattice_traits&lt;Lattice>::boundary_crossing_type>
-shift(typename lattice_traits&lt;Lattice>::offset_type&amp; o,
-      const typename lattice_traits&lt;Lattice>::offset_type&amp; s,
-      const Lattice&amp; l);
-      
-template &lt;class Lattice>
-inline typename lattice_traits&lt;Lattice>::size_type
-index(typename lattice_traits&lt;Lattice>::cell_descriptor c, const Lattice&amp; l);
-
-template &lt;class Lattice>
-inline std::pair&lt;typename lattice_traits&lt;Lattice>::basis_vector_iterator,
-                 typename lattice_traits&lt;Lattice>::basis_vector_iterator>
-basis_vectors(const Lattice&amp; l);
+ <body>
     
-template &lt;class Lattice>
-inline typename lattice_traits&lt;Lattice>::vector_type
-origin(const typename lattice_traits&lt;Lattice>::cell_descriptor&amp; c, const Lattice&amp; l);
-<pre></blockquote>
-<H3>The traits class</H3>
-<blockquote><pre>
-template &lt;class L>
-struct lattice_traits {};
-</pre></blockquote>
-needs to be specialized for each lattice type.
-<H3>The functions</H3>
-are all forwarded by default to a member function of the lattice <tt>l</tt>
-with the same name and arguments (excpet for the last lattice argument). See the <a href="latticeconcepts.html">lattice concepts</a> for more detailed description of these functions.
-<P>
-The only exception is:
-<blockquote><pre>
-template &lt;class Lattice>
-inline typename lattice_traits&lt;Lattice>::vector_type
-origin(const typename lattice_traits&lt;Lattice>::cell_descriptor&amp; c, const Lattice&amp; l);
-</pre></blockquote>
-which is defined for a type that is a model
-of <A HREF="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A>. The coordinate of
-the cell origin is calculated as the sum of the product of the basis vectors 
-with the offset.
-<HR>
-<ADDRESS>copyright (c) 2000-2003 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
-</body>
-</html>
-
+<h1> ALPS Project: lattice library</h1>
+    
+<h2>Header file: lattice/lattice.h</h2>
+   defines default implemntations for the functions asssociated with the
+<a href="latticeconcepts.html">lattice concepts</a>  
+<h3>Synopsis</h3>
+   
+<blockquote>   
+  <pre>template &lt;class L&gt;<br>struct lattice_traits {};<br><br>template &lt;class Lattice&gt;<br>inline const typename lattice_traits&lt;Lattice&gt;::unit_cell_type&amp;<br>unit_cell(const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::cell_descriptor<br>cell(const typename lattice_traits&lt;Lattice&gt;::offset_type&amp; o,const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline const typename lattice_traits&lt;Lattice&gt;::offset_type&amp;<br>offset(const typename lattice_traits&lt;Lattice&gt;::cell_descriptor&amp; c, const Lattice&amp; );<br><br>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::size_type<br>volume(const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline bool <br>on_lattice(typename lattice_traits&lt;Lattice&gt;::offset_type o, const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline std::pair&lt;typename lattice_traits&lt;Lattice&gt;::cell_iterator,<br>                 typename lattice_traits&lt;Lattice&gt;::cell_iterator&gt;<br>cells(const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline std::pair&lt;bool, typename lattice_traits&lt;Lattice&gt;::boundary_crossing_type&gt;<br>shift(typename lattice_traits&lt;Lattice&gt;::offset_type&amp; o,<br>      const typename lattice_traits&lt;Lattice&gt;::offset_type&amp; s,<br>      const Lattice&amp; l);<br>      <br>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::size_type<br>index(typename lattice_traits&lt;Lattice&gt;::cell_descriptor c, const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline std::pair&lt;typename lattice_traits&lt;Lattice&gt;::basis_vector_iterator,<br>                 typename lattice_traits&lt;Lattice&gt;::basis_vector_iterator&gt;<br>basis_vectors(const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline std::pair&lt;typename lattice_traits&lt;Lattice&gt;::basis_vector_iterator,<br>                 typename lattice_traits&lt;Lattice&gt;::basis_vector_iterator&gt;<br>reciprocal_basis_vectors(const Lattice&amp; l);<br>    <br>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::vector_type<br>origin(const typename lattice_traits&lt;Lattice&gt;::cell_descriptor&amp; c, const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::vector_type<br>coordinate(const typename lattice_traits&lt;Lattice&gt;::cell_descriptor&amp; c, <br>           const typename lattice_traits&lt;Lattice&gt;::vector_type&amp; p, const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline std::pair&lt;typename lattice_traits&lt;Lattice&gt;::momentum_iterator,<br>                 typename lattice_traits&lt;Lattice&gt;::momentum_iterator&gt;<br>momenta(const Lattice&amp; l);<br><br>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::vector_type<br>momentum(const typename lattice_traits&lt;Lattice&gt;::vector_type&amp; m, const Lattice&amp; l);<br><br></pre>
+ </blockquote>
+   
+<h3>The traits class</h3>
+   
+<blockquote>   
+  <pre>template &lt;class L&gt;<br>struct lattice_traits {};<br></pre>
+ </blockquote>
+  needs to be specialized for each lattice type.  
+<h3>The functions</h3>
+  are all forwarded by default to a member function of the lattice <tt>l</tt>
+ with the same name and arguments (excpet for the last lattice argument). 
+See the <a href="latticeconcepts.html">lattice concepts</a> for more detailed 
+description of these functions.  
+<p> The only exceptions are the functions below, defined for a lattice type 
+that is a model of <a href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</a>. 
+ </p>
+ 
+<blockquote>   
+  <pre>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::vector_type<br>origin(const typename lattice_traits&lt;Lattice&gt;::cell_descriptor&amp; c, const Lattice&amp; l);<br></pre>
+ </blockquote>
+ 
+<p>calculates the coordinate of the cell origin as the sum of the product
+of the basis vectors with the offset. </p>
+ 
+<blockquote>   
+  <pre>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::vector_type<br>coordinate(const typename lattice_traits&lt;Lattice&gt;::cell_descriptor&amp; c, <br>           const typename lattice_traits&lt;Lattice&gt;::vector_type&amp; p, const Lattice&amp; l);<br></pre>
+ </blockquote>
+ 
+<p>adds an offset vector inside the cell (given relative to the basis vectors)
+to the coordinate of the origin to calculate the coordinate of a point in
+the cell. </p>
+<blockquote>   
+  <pre><a name="momenta"></a>template &lt;class Lattice&gt;<br>inline std::pair&lt;typename lattice_traits&lt;Lattice&gt;::momentum_iterator,<br>                 typename lattice_traits&lt;Lattice&gt;::momentum_iterator&gt;<br>momenta(const Lattice&amp; l);<br></pre>
+ </blockquote>
+  
+<p>returns a pair of iterators over all reciprocal vectors (momenta) of the
+reciprocal lattice of a finite lattice. The <tt>value_type</tt> of the iterators
+are momenta with respect to the reciprocal basis vectors. </p>
+<blockquote>   
+  <pre>template &lt;class Lattice&gt;<br>inline typename lattice_traits&lt;Lattice&gt;::vector_type<br>momentum(const typename lattice_traits&lt;Lattice&gt;::vector_type&amp; m, const Lattice&amp; l);<br></pre>
+ </blockquote>
+  
+<p>takes momenta defined with respect to the reciprocal lattice vectors,
+such as given by dereferencing the iterators returned by the <tt>momenta</tt>
+function, and transforms them to momenta in reciprocal space by using the
+reciprocal basis vectors of the lattice. </p>
+<p><br>
+  </p>
+ 
+<hr>  
+<address>copyright (c) 2000-2003 by  <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+  <br>
+ 
 </body>
 </html>

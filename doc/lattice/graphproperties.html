@@ -3,93 +3,106 @@
 <head>
   <title>ALPS Project: lattice/graphproperties.h</title>
 </head>
- <body>
-  
+  <body>
+   
 <h1> ALPS Project: lattice library</h1>
-  
+   
 <h2>Header file: lattice/graphproperties.h</h2>
-  includes property types for the graphs used in the lattice library, as
-well as the default graph type <tt>coordinate_graph_type</tt>.  
+   includes property types for the graphs used in the lattice library, as 
+well as the default graph type <tt>coordinate_graph_type</tt>.   
 <h3>Synopsis</h3>
- 
-<blockquote>
-  <pre>namespace alps {<br><br>  // vertex properties<br>  struct vertex_type_t { typedef boost::vertex_property_tag kind; };<br>  struct coordinate_t { typedef boost::vertex_property_tag kind; };<br>  struct parity_t { typedef boost::vertex_property_tag kind; };<br>  using boost::vertex_index_t;<br>  typedef vertex_type_t site_type_t;<br><br>  // edge properties<br>  struct edge_type_t { typedef boost::edge_property_tag kind; };<br>  struct boundary_crossing_t { typedef boost::edge_property_tag kind; };<br>  struct source_offset_t { typedef boost::edge_property_tag kind; };<br>  struct target_offset_t { typedef boost::edge_property_tag kind; };<br>  using boost::edge_index_t;<br>  typedef edge_type_t bond_type_t;<br><br>  // graph properties<br>  struct graph_name_t { typedef boost::graph_property_tag kind; };<br>  struct dimension_t { typedef boost::graph_property_tag kind; };<br><br>  typedef boost::adjacency_list&lt;boost::vecS,boost::vecS,boost::undirectedS,<br>    /* ...*/,boost::vecS&gt; coordinate_graph_type;<br><br>}<br></pre>
+  
+<blockquote>   
+  <pre>namespace alps {<br><br>  // default types for property values<br>  typedef std::vector&lt;double&gt; coordinate_type;<br>  typedef unsigned int type_type;<br><br>  // vertex properties<br>  struct vertex_type_t { typedef boost::vertex_property_tag kind; };<br>  struct coordinate_t { typedef boost::vertex_property_tag kind; };<br>  struct parity_t { typedef boost::vertex_property_tag kind; };<br>  using boost::vertex_index_t;<br>  typedef vertex_type_t site_type_t;<br><br>  // edge properties<br>  struct edge_type_t { typedef boost::edge_property_tag kind; };<br>  struct boundary_crossing_t { typedef boost::edge_property_tag kind; };<br>  struct source_offset_t { typedef boost::edge_property_tag kind; };<br>  struct target_offset_t { typedef boost::edge_property_tag kind; };<br>  using boost::edge_index_t;<br>  typedef edge_type_t bond_type_t;<br><br>  // graph properties<br>  struct graph_name_t { typedef boost::graph_property_tag kind; };<br>  struct dimension_t { typedef boost::graph_property_tag kind; };<br><br>  typedef boost::adjacency_list&lt;boost::vecS,boost::vecS,boost::undirectedS,<br>    /* ...*/,boost::vecS&gt; coordinate_graph_type;<br><br>}<br></pre>
 </blockquote>
-  The <tt>coordinate_graph_type</tt> type is the default graph type of the
-ALPS library. It is a Boost adjacency list graph implementing the following
-properties as internal properties:<br>
-<br>
-<br>
- 
+<h3>Default types</h3>
+<pre>  typedef std::vector&lt;double&gt; coordinate_type;<br></pre>
+<p>The current implementation stores coordinates as vectors of doubles. This
+might be replaces by a faster and less memory-consuming type if needed.<br>
+</p>
+<pre>  typedef unsigned int type_type;<br></pre>
+<p>The current implementation stores edge and vertex (bond and site) types
+as unsigned integers. This might be replaces by strings if non-numeric types
+are desired in the future.<br>
+</p>
+<h4>The <tt>coordinate_graph</tt>_type class<br>
+</h4>
+The <tt>coordinate_graph_type</tt> type is the default graph type of the ALPS
+library. It is a Boost adjacency list graph implementing the following properties
+as internal properties:<br>
+ <br>
+ <br>
+  
 <table border="1">
- <tbody>
-    <tr>
-      <td><b>Vertex property</b></td>
-      <td><b>Type</b></td>
-      <td><b>Note</b></td>
-    </tr>
- <tr>
-      <td><tt>vertex_type_t</tt></td>
-      <td><tt>unsigned int</tt></td>
- <td>The type (color) of the vertex</td>
-    </tr>
- <tr>
-      <td><tt>coordinate_t</tt></td>
-      <td><tt>std::vector&lt;double&gt;</tt></td>
- <td>The coordinate of the vertex</td>
-    </tr>
- <tr>
-      <td><tt>parity_t</tt></td>
-      <td><tt>int8_t</tt></td>
- <td>The parity of a site (0 or 1) on a bipartite graph</td>
-    </tr>
- <tr>
-      <td><tt>vertex_index_t</tt></td>
-      <td><tt></tt></td>
- <td>The vertex index, predefined for <tt>boost::adjacency_list</tt></td>
-    </tr>
- <tr>
-      <td><b>Edge property</b></td>
-      <td><b>Type</b></td>
-      <td><b>Note</b></td>
-    </tr>
- <tr>
-      <td><tt>edge_type_t</tt></td>
-      <td><tt>unsigned int</tt></td>
- <td>The type (color) of the edge</td>
-    </tr>
- <tr>
-      <td><tt>edge_index_t</tt></td>
-      <td><tt>unsigned int</tt></td>
- <td>The edge index</td>
-    </tr>
- <tr>
-      <td><tt>boundary_crossing_t</tt></td>
-      <td><a href="boundary.html"><tt>boundary_crossing</tt></a></td>
- <td>Indicates whether an edge crosses a boundary of the lattice.</td>
-    </tr>
- <tr>
-      <td><b>Graph property</b></td>
-      <td><b>Type</b></td>
-      <td><b>Note</b></td>
-    </tr>
- <tr>
-      <td><tt>graph_name_t </tt></td>
-      <td><tt>std::string</tt></td>
- <td>The name of the graph</td>
-    </tr>
- <tr>
-      <td><tt>dimension_t</tt></td>
-      <td><tt> std::size_t</tt></td>
- <td>The dimension of the graph (dimension of the vertex coordinates)</td>
-    </tr>
- 
-  </tbody>
+  <tbody>
+     <tr>
+       <td><b>Vertex property</b></td>
+       <td><b>Type</b></td>
+       <td><b>Note</b></td>
+     </tr>
+  <tr>
+       <td><tt>vertex_type_t</tt></td>
+       <td><tt>unsigned int</tt></td>
+  <td>The type (color) of the vertex</td>
+     </tr>
+  <tr>
+       <td><tt>coordinate_t</tt></td>
+       <td><tt>std::vector&lt;double&gt;</tt></td>
+  <td>The coordinate of the vertex</td>
+     </tr>
+  <tr>
+       <td><tt>parity_t</tt></td>
+       <td><tt>int8_t</tt></td>
+  <td>The parity of a site (0 or 1) on a bipartite graph</td>
+     </tr>
+  <tr>
+       <td><tt>vertex_index_t</tt></td>
+       <td><tt></tt></td>
+  <td>The vertex index, predefined for <tt>boost::adjacency_list</tt></td>
+     </tr>
+  <tr>
+       <td><b>Edge property</b></td>
+       <td><b>Type</b></td>
+       <td><b>Note</b></td>
+     </tr>
+  <tr>
+       <td><tt>edge_type_t</tt></td>
+       <td><tt>unsigned int</tt></td>
+  <td>The type (color) of the edge</td>
+     </tr>
+  <tr>
+       <td><tt>edge_index_t</tt></td>
+       <td><tt>unsigned int</tt></td>
+  <td>The edge index</td>
+     </tr>
+  <tr>
+       <td><tt>boundary_crossing_t</tt></td>
+       <td><a href="boundary.html"><tt>boundary_crossing</tt></a></td>
+  <td>Indicates whether an edge crosses a boundary of the lattice.</td>
+     </tr>
+  <tr>
+       <td><b>Graph property</b></td>
+       <td><b>Type</b></td>
+       <td><b>Note</b></td>
+     </tr>
+  <tr>
+       <td><tt>graph_name_t </tt></td>
+       <td><tt>std::string</tt></td>
+  <td>The name of the graph</td>
+     </tr>
+  <tr>
+       <td><tt>dimension_t</tt></td>
+       <td><tt> std::size_t</tt></td>
+  <td>The dimension of the graph (dimension of the vertex coordinates)</td>
+     </tr>
+    
+  </tbody> 
 </table>
- 
+  
 <hr> 
 <address><a name="_">copyright (c) 2000-2003 by  </a><a
  href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+  <br>
  <br>
 </body>
 </html>
