@@ -130,7 +130,7 @@ AC_DEFUN([AC_MPI],
     if test "$mpi" != no; then
       found=no
 
-      if test "$COMPILER" = ibm; then
+      if test "$ac_cv_compiler" = ibm32 || test "$ac_cv_compiler" = ibm64; then
         if test "$found" = no; then
 	  # for IBM LoadLeveler
           MPI_LIBS="-binitfini:poe_remote_main -lmpi -lvtd"

@@ -120,6 +120,23 @@ AC_PROG_CXXCPP
 ac_cv_alps_cpp="$CPP"
 ac_cv_alps_cxxcpp="$CXXCPP"
 
+dnl make --disable-sahred the default for IBM compiler
+if test x"$ac_cv_compiler" = xibm32 || test x"$ac_cv_compiler" = xibm64; then
+  test -z "${enable_shared+set}" && enable_shared=no
+fi
+
+dnl set 64-bit flag for IBM compiler
+if test x"$ac_cv_compiler" = xibm64; then
+  test -z "$AR" && AR="ar -X64"
+  test -z "$NM" && NM="nm -X64 -B"
+fi
+
+dnl disable F77
+test -z "$F77" && F77=no
+
+dnl libtool
+AC_PROG_LIBTOOL
+
 dnl
 dnl System Headers ---------------------------------------------------------
 dnl
@@ -152,36 +169,6 @@ test "$ac_cv_header_sys_time_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TIME_H, [], [sy
 
 AC_CHECK_HEADER([sys/types.h])
 test "$ac_cv_header_sys_types_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TYPES_H, [], [sys/types.h])
-
-# Install script
-# AC_PROG_INSTALL
-# AC_SUBST(ALPS_INSTALL)
-# if test "$INSTALL" = "$ac_install_sh"; then
-#   ALPS_INSTALL='$(install_sh) -c'
-# else
-#   ALPS_INSTALL="$INSTALL"
-# fi
-
-# other tools
-# AC_SUBST(AR)
-# AC_SUBST(ARXX)
-# AR="ar cru"
-# ARXX="$bindir/arxx"
-AC_PROG_LN_S
-
-dnl AC_SUBST(RANLIB)
-dnl test "$ac_cv_alps_compiler" = "sgi32" && RANLIB="/bin/true"
-dnl test "$ac_cv_alps_compiler" = "sgi64" && RANLIB="/bin/true"
-dnl AC_PROG_RANLIB
-
-dnl make --disable-sahred the default for IBM compiler
-if test -z "${enable_shared+set}"; then
-  if test "$ac_cv_compiler" = "ibm"; then
-    enable_shared=no
-  fi
-fi
-
-AC_PROG_LIBTOOL
 
 #
 # checking boost directory
