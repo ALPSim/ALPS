@@ -3,12 +3,10 @@
         * [test] Added ll and ull to long long and unsigned long long
           constants.
 
-        * [stringvalue] Added a new StringValue class implementation
+        * [alps] Added a new StringValue class implementation
           that should be a bit easier to maintain. It is implemented
           by deriving StringValue from std::string, thus keeping all
-          string operations for convenience. It can be enabled by
-          defining NEW_STRINGVALUE_IMPL ( how can one add a configure
-          option like --with-new-stringvalue? )
+          string operations for convenience. 
 
 2003-08-19 Matthias Troyer <troyer@comp-phys.org>
 
