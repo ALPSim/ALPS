@@ -48,7 +48,7 @@ int main(int argc, char** argv)
 try {
 #endif
 
-  alps::scheduler::SimpleFactory<alps::scheduler::DummyMCRun> factory;
+  alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);
   
   if (argc<2 || argc>3) {

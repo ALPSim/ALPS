@@ -46,4 +46,4 @@ private:
   std::vector<int> spins;           // the vector to store the spins
 };
 
-typedef alps::scheduler::SimpleFactory<IsingSimulation> IsingFactory;
+typedef alps::scheduler::SimpleMCFactory<IsingSimulation> IsingFactory;
