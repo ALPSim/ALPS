@@ -7,10 +7,12 @@ Makefile
 compactrun
 convert2text
 convert2xml
+extractgp
 extracthtml
 extracttext
 extractxmgr
 parameter2xml
+plot2gp
 plot2html
 plot2text
 plot2xmgr

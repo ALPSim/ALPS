@@ -1,0 +1,10 @@
+#! /bin/sh
+
+# check correct usage
+if test $# -lt 1;
+then
+  echo Usage: $0 plot.xml
+  exit
+fi 
+
+@bindir@/xslttransform $1 @libdir@/xml/plot2gp.xsl 

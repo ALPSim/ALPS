@@ -25652,7 +25652,7 @@ if test "$ac_cv_alps_type" = "full"; then
 
                                                                         ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/lattices.xml example/model/models.xml example/model/parm_symbolic example/model/parm_numeric"
 
-                                                                                            ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2html tool/plot2text tool/plot2xmgr tool/plot2xsl.xsl"
+                                                                                                                ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/plot2xsl.xsl"
 
 fi
 
@@ -26333,9 +26333,11 @@ do
   "example/model/parm_numeric" ) CONFIG_FILES="$CONFIG_FILES example/model/parm_numeric" ;;
   "tool/Makefile" ) CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
   "tool/convert2text" ) CONFIG_FILES="$CONFIG_FILES tool/convert2text" ;;
+  "tool/extractgp" ) CONFIG_FILES="$CONFIG_FILES tool/extractgp" ;;
   "tool/extracthtml" ) CONFIG_FILES="$CONFIG_FILES tool/extracthtml" ;;
   "tool/extracttext" ) CONFIG_FILES="$CONFIG_FILES tool/extracttext" ;;
   "tool/extractxmgr" ) CONFIG_FILES="$CONFIG_FILES tool/extractxmgr" ;;
+  "tool/plot2gp" ) CONFIG_FILES="$CONFIG_FILES tool/plot2gp" ;;
   "tool/plot2html" ) CONFIG_FILES="$CONFIG_FILES tool/plot2html" ;;
   "tool/plot2text" ) CONFIG_FILES="$CONFIG_FILES tool/plot2text" ;;
   "tool/plot2xmgr" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xmgr" ;;
