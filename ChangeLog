@@ -7,6 +7,11 @@
 2004-03-11 Synge Todo <wistaria@comp-phys.org>
 
 	* [config] Improved support for the precompiled Boost library.
+
+2004-03-09 Matthias Troyer <troyer@comp-phys.org>
+
+	* [lattice] Added code to catch error when extent was not specfied in 
+	  lattice description
 	
 2004-03-04 Synge Todo <wistaria@comp-phys.org>
 
