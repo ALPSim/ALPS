@@ -94,10 +94,6 @@ HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p)
 template <class T, class M>
 void HamiltonianMatrix<T,M>::build() const
 {
-  // check for disorder
-  if (disordered())
-    boost::throw_exception(std::runtime_error("Disordered lattices not supported by the model library example program.\n"));
-
   // get Hamilton operator
   alps::HamiltonianDescriptor<short> ham(models_.hamiltonian(parms_["MODEL"]));
   alps::Parameters p(parms_);
@@ -108,14 +104,33 @@ void HamiltonianMatrix<T,M>::build() const
   // get all site matrices
   std::map<unsigned int,boost::multi_array<T,2> > site_matrix;
   std::map<unsigned int,bool> site_visited;
+  alps::Parameters parms(p);
   for (site_iterator it=sites().first; it!=sites().second ; ++it)
     if (!site_visited[disordered_site_type(*it)]) {
       unsigned int disordered_type=disordered_site_type(*it);
       unsigned int type=site_type(*it);
       std::cout << "Creating site matrix for type " << type << "\n";
       site_visited[disordered_type]=true;
+	  // set coordinate in case of site disorder
+	  if (disordered_sites()) {
+	    // check whether x, y, or z is set
+	    unsigned int dim=alps::dimension(coordinate(*it));
+	    if (dim >= 1 && p.defined("x") ||
+	        dim >= 2 && p.defined("y") ||
+		    dim >= 3 && p.defined("z")) 
+          boost::throw_exception(std::runtime_error("Have disordered latttice but x, y or z is predefined"));
+		// set x, y, and z
+        if (dim>=1) {
+          parms["x"] = coordinate(*it)[0];
+          if (dim>=2) {
+            parms["y"] =  coordinate(*it)[1];
+	        if (dim>=3)
+	          parms["z"] =  coordinate(*it)[2];
+		  }
+        }
+	  }
       site_matrix.insert(std::make_pair(disordered_type,ham.site_term(type).template matrix<T>(
-                ham.basis().site_basis(type),models_.simple_operators(),p)));
+                ham.basis().site_basis(type),models_.simple_operators(),parms)));
     }
 
   // get all bond matrices
@@ -131,10 +146,27 @@ void HamiltonianMatrix<T,M>::build() const
 	boost::tuple<unsigned int,unsigned int,unsigned int> type(disordered_btype,disordered_stype1,disordered_stype2);
     if (!bond_visited[type]) {
       std::cout << "Creating bond matrix for type " << btype << "\n";
+	  if (disordered_bonds()) {
+	    // check whether x, y, or z is set
+	    unsigned int dim=alps::dimension(coordinate(source(*it)));
+	    if (dim >= 1 && p.defined("x") ||
+	        dim >= 2 && p.defined("y") ||
+		    dim >= 3 && p.defined("z")) 
+          boost::throw_exception(std::runtime_error("Have disordered latttice but x, y or z is predefined"));
+		// set x, y, and z
+        if (dim>=1) {
+          parms["x"] = 0.5*(coordinate(source(*it))[0]+coordinate(target(*it))[0]);
+          if (dim>=2) {
+            parms["y"] =  0.5*(coordinate(source(*it))[1]+coordinate(target(*it))[1]);
+	        if (dim>=3)
+	          parms["z"] =  0.5*(coordinate(source(*it))[2]+coordinate(target(*it))[2]);
+		  }
+        }
+	  }
       bond_visited[type]=true;
       bond_matrix.insert(std::make_pair(type,ham.bond_term(btype).template matrix<T>(
                               ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
-                              models_.simple_operators(),p)));
+                              models_.simple_operators(),parms)));
     }
   }  
 
