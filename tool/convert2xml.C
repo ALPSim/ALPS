@@ -168,22 +168,26 @@ try {
     std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename]\n";
     std::exit(-1);
   }
-  std::string name=argv[1];
-  alps::IXDRFileDump dump(name);
+  std::string inname=argv[1];
+  std::string outname=argv[argc-1];
+  if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
+  if (outname.size() >= 2 && outname.substr(0, 2) == "./") outname.erase(0, 2);
+
+  alps::IXDRFileDump dump(inname);
   int type;
   dump >> type;
   switch (type) {
   case alps::scheduler::MCDump_scheduler:
-    convert_scheduler(argv[1],argv[argc-1]);
+    convert_scheduler(inname,outname);
     break;
   case alps::scheduler::MCDump_task:
-    convert_simulation(argv[1],argv[argc-1]);
+    convert_simulation(inname,outname);
     break;
   case alps::scheduler::MCDump_run:
-    convert_run(argv[1],argv[argc-1]);
+    convert_run(inname,outname);
     break;
   default:
-    convert_params(argv[1],argv[argc-1]);
+    convert_params(inname,outname);
   }
 
 #ifndef BOOST_NO_EXCEPTIONS
