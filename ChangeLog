@@ -1,3 +1,11 @@
+2004-07-12  Matthias Troyer <troyer@comp-phys.org>
+
+	* Added ublas bindings to ALPS
+
+2004-07-10  Matthias Troyer <troyer@comp-phys.org>
+
+	* Released 1.1b1
+
 2004-06-29  Matthias Troyer <troyer@comp-phys.org>
 
 	* Ported to Opteron and gcc-3.4
