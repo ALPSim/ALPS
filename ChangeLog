@@ -2,6 +2,8 @@
 
 	* [random] removed alps::lagged_fibonacci
 
+	* [scheduler] added LatticeModelMCRun
+
 2003-05-22 Synge Todo <wistaria@comp-phys.org>
 
 	* [alea] Added write_xml(alps::oxstream&) member function to
