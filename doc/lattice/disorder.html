@@ -14,50 +14,50 @@ member functions to apply the disorder to a graph.<br>
 <h3>Synopsis</h3>
  
 <blockquote>
-  <pre>namespace alps {<br><br>class DisorderDescriptor<br>{<br>public:<br>  DisorderDescriptor() {}<br>  DisorderDescriptor(XMLTag&amp;, std::istream&amp;);<br>  <br>  void write_xml(oxstream&amp;) const;<br>  <br>  bool disordered_vertices() const;<br>  bool disordered_sites() const;<br>  bool disordered_edges() const;<br>  bool disordered_bonds() const;<br>  bool disordered() const;<br>  <br>  template &lt;class G, class M&gt; void disorder_vertices(G&amp; g, M&amp; m) const;<br>  template &lt;class G, class M&gt; void disorder_sites(G&amp; g, M&amp; m) const;<br>  template &lt;class G&gt; void disorder_vertices(G&amp; g) const;<br>  template &lt;class G&gt; void disorder_sites(G&amp; g) const;<br><br>  template &lt;class G, class M&gt; void disorder_edges(G&amp; g, M&amp; m) const;<br>  template &lt;class G, class M&gt; void disorder_bonds(G&amp; g, M&amp; m) const;<br>  template &lt;class G&gt; void disorder_edges(G&amp; g) const;<br>  template &lt;class G&gt; void disorder_bonds(G&amp; g) const;<br>};<br><br><br>template &lt;class G, class MAP&gt; void disorder_vertices(G&amp; g, MAP&amp; m);<br>template &lt;class G, class MAP&gt; void disorder_sites(G&amp; g, MAP&amp; m)<br>template &lt;class G, class MAP&gt; void disorder_edges(G&amp; g, MAP&amp; m);<br>template &lt;class G, class MAP&gt; void disorder_bonds(G&amp; g, MAP&amp; m)<br><br>}<br><br></pre>
+  <pre>namespace alps {<br><br>class InhomogeneityDescriptor<br>{<br>public:<br>  InhomogeneityDescriptor() {}<br>  InhomogeneityDescriptor(XMLTag&amp;, std::istream&amp;);<br>  <br>  void write_xml(oxstream&amp;) const;<br>  <br>  bool inhomogeneous_vertices() const;<br>  bool inhomogeneous_sites() const;<br>  bool inhomogeneous_edges() const;<br>  bool inhomogeneous_bonds() const;<br>  bool inhomogeneous() const;<br>  <br>  template &lt;class G, class M&gt; void disorder_vertices(G&amp; g, M&amp; m) const;<br>  template &lt;class G, class M&gt; void disorder_sites(G&amp; g, M&amp; m) const;<br>  template &lt;class G&gt; void disorder_vertices(G&amp; g) const;<br>  template &lt;class G&gt; void disorder_sites(G&amp; g) const;<br><br>  template &lt;class G, class M&gt; void disorder_edges(G&amp; g, M&amp; m) const;<br>  template &lt;class G, class M&gt; void disorder_bonds(G&amp; g, M&amp; m) const;<br>  template &lt;class G&gt; void disorder_edges(G&amp; g) const;<br>  template &lt;class G&gt; void disorder_bonds(G&amp; g) const;<br>};<br><br><br>template &lt;class G, class MAP&gt; void disorder_vertices(G&amp; g, MAP&amp; m);<br>template &lt;class G, class MAP&gt; void disorder_sites(G&amp; g, MAP&amp; m)<br>template &lt;class G, class MAP&gt; void disorder_edges(G&amp; g, MAP&amp; m);<br>template &lt;class G, class MAP&gt; void disorder_bonds(G&amp; g, MAP&amp; m)<br><br>}<br><br></pre>
 </blockquote>
  
-<h3>The <tt>DisorderDescriptor </tt>class</h3>
+<h3>The <tt>InhomogeneityDescriptor </tt>class</h3>
  
 <blockquote>
-  <pre>DisorderDescriptor() {}<br></pre>
+  <pre>InhomogeneityDescriptor() {}<br></pre>
 </blockquote>
-is the default constructor, not creating any disorder 
+is the default constructor, not creating any inhomogeneity 
 <blockquote>
-  <pre>DisorderDescriptor(XMLTag&amp;, std::istream&amp;);<br></pre>
+  <pre>InhomogeneityDescriptor(XMLTag&amp;, std::istream&amp;);<br></pre>
 </blockquote>
 reads the XML elements <tt>&lt;DISORDER&gt;</tt> and <tt>&lt;CHANGED&gt;</tt>
 of the lattice XML schema. 
 <blockquote>
   <pre>void write_xml(oxstream&amp;) const;<br></pre>
 </blockquote>
-writes the disorder description in XML format.<br>
-<pre>  bool disordered_sites() const;<br>  bool disordered_vertices() const;<br></pre>
+writes the inhomogeneity description in XML format.<br>
+<pre>  bool inhomogeneous_sites() const;<br>  bool inhomogeneous_vertices() const;<br></pre>
  
-<p>return true if the lattice has site (vertex) disorder.</p>
+<p>return true if the lattice has inhomogeneous sites (vertices).</p>
  
-<pre>  bool disordered_bonds() const;<br>  bool disordered_edges() const;<br></pre>
+<pre>  bool inhomogeneous_bonds() const;<br>  bool inhomogeneous_edges() const;<br></pre>
  
-<p>return true if the lattice has bond (edge) disorder.<br>
+<p>return true if the lattice has inhomogeneous bons (edges) disorder.<br>
  </p>
  
-<pre>  bool disordered() const;<br></pre>
+<pre>  bool inhomogeneous() const;<br></pre>
  
-<p>returns true if the lattice has either site or bond disorder.</p>
+<p>returns true if the lattice has either inhomogeneous sites or bonds.</p>
 <pre>  template &lt;class G, class M&gt; void disorder_vertices(G&amp; g, M&amp; m) const;<br>  template &lt;class G, class M&gt; void disorder_sites(G&amp; g, M&amp; m) const;<br></pre>
   
-<p>If sites (vertices) are disordered, they are given new unique types, stored
+<p>If sites (vertices) are inhomogeneous, they are given new unique types, stored
 in the property map passed. At the moment only disordering of all vertices
-is implemented, although the XML schema allows for more specific disorder.</p>
+is implemented, although the XML schema allows for more specific inhomogeneities.</p>
 <pre>  template &lt;class G&gt; void disorder_vertices(G&amp; g) const;<br>  template &lt;class G&gt; void disorder_sites(G&amp; g) const;<br></pre>
   
 <p>is the same as above but stores the vertex (site) types in the property
 map with tag <tt>vertex_type_t</tt> (same as <tt>site_type_t).</tt></p>
 <pre>  template &lt;class G, class M&gt; void disorder_edges(G&amp; g, M&amp; m) const;<br>  template &lt;class G, class M&gt; void disorder_bonds(G&amp; g, M&amp; m) const;<br></pre>
   
-<p>If bonds (edges) are disordered, they are given new unique types, stored 
+<p>If bonds (edges) are inhomogeneous, they are given new unique types, stored 
 in the property map passed. At the moment only disordering of all edges is
-implemented, although the XML schema allows for more specific disorder.</p>
+implemented, although the XML schema allows for more specific inhomogeneities.</p>
 <pre>  template &lt;class G&gt; void disorder_edges(G&amp; g) const;<br>  template &lt;class G&gt; void disorder_bonds(G&amp; g) const;<br></pre>
   
 <p>is the same as above but stores the edge bond) types in the property map
@@ -70,14 +70,14 @@ with tag <tt>edge_type_t</tt> (same as <tt>bond_type_t).</tt></p>
 </blockquote>
  These functions take a graph <tt>g</tt> and a vertex property map <tt>m</tt>
 and assigns a unique integer identifier to each vertex (site), effectively
-"disordering" the vertices and obtaining a disordered lattice where each
+"disordering" the vertices and obtaining an inhomogeneous lattice where each
 vertex (site) is distinct.<br>
 <blockquote>
   <pre>template &lt;class G, class MAP&gt; void disorder_edges(G&amp; g, MAP&amp; M);<br>template &lt;class G, class MAP&gt; void disorder_bonds(G&amp; g, MAP&amp; M);<br></pre>
 </blockquote>
  These functions take a graph <tt>g</tt> and an edge property map <tt>m</tt> 
 and assigns a unique integer identifier to each edge bond), effectively "disordering"
-the edges and obtaining a disordered lattice where each edge bond) is distinct.<br>
+the edges and obtaining an ihomogeneous lattice where each edge bond) is distinct.<br>
 <hr> 
 <address>copyright (c) 2000-2004 by  <a
  href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>

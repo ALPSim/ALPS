@@ -112,16 +112,16 @@ void HamiltonianMatrix<T,M>::build() const
   
   alps::Parameters parms(parms_);
   for (site_iterator it=sites().first; it!=sites().second ; ++it)
-    if (!site_visited[disordered_site_type(*it)]) {
-      unsigned int disordered_type=disordered_site_type(*it);
+    if (!site_visited[inhomogeneous_site_type(*it)]) {
+      unsigned int inhomogeneous_type=inhomogeneous_site_type(*it);
       unsigned int type=site_type(*it);
-      site_visited[disordered_type]=true;
+      site_visited[inhomogeneous_type]=true;
       // set coordinate in case of site disorder
-      if (disordered_sites()) {
+      if (inhomogeneous_sites()) {
         throw_if_xyz_defined(parms_,*it); // check whether x, y, or z is set
         parms << coordinate_as_parameter(*it); // set x, y and z
       }
-      site_matrix.insert(std::make_pair(disordered_type,get_fermionic_matrix(T(),ham.site_term(type),
+      site_matrix.insert(std::make_pair(inhomogeneous_type,get_fermionic_matrix(T(),ham.site_term(type),
         ham.basis().site_basis(type),parms)));
     }
 
@@ -129,15 +129,15 @@ void HamiltonianMatrix<T,M>::build() const
   std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,boost::multi_array<std::pair<T,std::pair<bool,bool> >,4> > bond_matrix;
   std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,bool> bond_visited;
   for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
-    unsigned int disordered_btype  = disordered_bond_type(*it);
-    //unsigned int disordered_stype1 = disordered_site_type(source(*it));
-    //unsigned int disordered_stype2 = disordered_site_type(target(*it));
+    unsigned int inhomogeneous_btype  = inhomogeneous_bond_type(*it);
+    //unsigned int inhomogeneous_stype1 = inhomogeneous_site_type(source(*it));
+    //unsigned int inhomogeneous_stype2 = inhomogeneous_site_type(target(*it));
     unsigned int btype  = bond_type(*it);
     unsigned int stype1 = site_type(source(*it));
     unsigned int stype2 = site_type(target(*it));
-    boost::tuple<unsigned int,unsigned int,unsigned int> type(disordered_btype,stype1,stype2);
+    boost::tuple<unsigned int,unsigned int,unsigned int> type(inhomogeneous_btype,stype1,stype2);
     if (!bond_visited[type]) {
-      if (disordered_bonds()) {
+      if (inhomogeneous_bonds()) {
         throw_if_xyz_defined(parms_,*it); // check whether x, y, or z is set
         parms << coordinate_as_parameter(*it); // set x, y and z
       }
@@ -166,7 +166,7 @@ void HamiltonianMatrix<T,M>::build() const
       state_type state=states[i];              // get source state
   int s=0;
   for (site_iterator it=sites().first; it!=sites().second ; ++it,++s) {
-    boost::multi_array<std::pair<T,bool>,2>& mat = site_matrix[disordered_site_type(*it)];
+    boost::multi_array<std::pair<T,bool>,2>& mat = site_matrix[inhomogeneous_site_type(*it)];
       int is=state[s];                         // get site basis index
       for (int js=0;js<basis[s].size();++js) { // loop over target site states
         T val=mat[is][js].first;               // get matrix element
@@ -198,7 +198,7 @@ void HamiltonianMatrix<T,M>::build() const
     for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
       int s1=source(*it);
       int s2=target(*it);
-      boost::multi_array<std::pair<T,std::pair<bool,bool> >,4>& mat = bond_matrix[boost::make_tuple(disordered_bond_type(*it),site_type(s1),site_type(s2))];
+      boost::multi_array<std::pair<T,std::pair<bool,bool> >,4>& mat = bond_matrix[boost::make_tuple(inhomogeneous_bond_type(*it),site_type(s1),site_type(s2))];
       int is1=state[s1];                           // get source site states
       int is2=state[s2];
       for (int js1=0;js1<basis[s1].size();++js1) { // loop over target site states
