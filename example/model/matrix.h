@@ -104,7 +104,7 @@ void HamiltonianMatrix<T,M>::build() const
   ham.set_parameters(p);
   
   // get all site matrices
-  std::map<unsigned int,boost::multi_array<T,2> > site_matrix;
+  std::map<unsigned int,boost::multi_array<std::pair<T,bool>,2> > site_matrix;
   std::map<unsigned int,bool> site_visited;
   alps::Parameters parms(p);
   for (site_iterator it=sites().first; it!=sites().second ; ++it)
@@ -117,12 +117,12 @@ void HamiltonianMatrix<T,M>::build() const
         throw_if_xyz_defined(p,*it); // check whether x, y, or z is set
         parms << coordinate_as_parameter(*it); // set x, y and z
 	  }
-      site_matrix.insert(std::make_pair(disordered_type,ham.site_term(type).template matrix<T>(
+      site_matrix.insert(std::make_pair(disordered_type,get_fermionic_matrix(T(),ham.site_term(type),
                 ham.basis().site_basis(type),models_.operators(),parms)));
     }
 
   // get all bond matrices
-  std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,boost::multi_array<T,4> > bond_matrix;
+  std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,boost::multi_array<std::pair<T,std::pair<bool,bool> >,4> > bond_matrix;
   std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,bool> bond_visited;
   for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
     unsigned int disordered_btype  = disordered_bond_type(*it);
@@ -138,7 +138,7 @@ void HamiltonianMatrix<T,M>::build() const
         parms << coordinate_as_parameter(*it); // set x, y and z
 	  }
       bond_visited[type]=true;
-      bond_matrix.insert(std::make_pair(type,ham.bond_term(btype).template matrix<T>(
+      bond_matrix.insert(std::make_pair(type,get_fermionic_matrix(T(),ham.bond_term(btype),
                               ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
                               models_.operators(),parms)));
     }
@@ -162,20 +162,31 @@ void HamiltonianMatrix<T,M>::build() const
       state_type state=states[i];              // get source state
   int s=0;
   for (site_iterator it=sites().first; it!=sites().second ; ++it,++s) {
-    boost::multi_array<T,2>& mat = site_matrix[disordered_site_type(*it)];
+    boost::multi_array<std::pair<T,bool>,2>& mat = site_matrix[disordered_site_type(*it)];
       int is=state[s];                         // get site basis index
       for (int js=0;js<basis[s].size();++js) { // loop over target site states
-        T val=mat[is][js];                     // get matrix element
+        T val=mat[is][js].first;                     // get matrix element
 #ifndef ALPS_WITH_NEW_EXPRESSION
-        if (val) {         // if matrix element is nonzero
+        if (val)         // if matrix element is nonzero
 #else
-        if (alps::is_nonzero(val)) {         // if matrix element is nonzero
+        if (alps::is_nonzero(val))         // if matrix element is nonzero
 #endif
+        {
           state_type newstate=state;
 		  newstate[s]=js;					   // build target state
           int j = states.index(newstate);      // lookup target state
-          if (j<states.size())
+          if (j<states.size()) {
+            if (mat[is][js].second) {
+              // calculate fermionic sign
+              bool f=false;
+              for (int i=0;i<s;++i)
+                if (is_fermionic(ham.basis().site_basis(site_type(i)),basis[i][state[i]]))
+                  f=!f;
+              if (f)
+                val=-val;
+            }
             matrix_(i,j)+=val;                 // set matrix element
+          }
         }
       }
     }
@@ -187,23 +198,44 @@ void HamiltonianMatrix<T,M>::build() const
     for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
       int s1=source(*it);
       int s2=target(*it);
-	  boost::multi_array<T,4>& mat = bond_matrix[boost::make_tuple(disordered_bond_type(*it),site_type(s1),site_type(s2))];
+	  boost::multi_array<std::pair<T,std::pair<bool,bool> >,4>& mat = bond_matrix[boost::make_tuple(disordered_bond_type(*it),site_type(s1),site_type(s2))];
       int is1=state[s1];                            // get source site states
       int is2=state[s2];
       for (int js1=0;js1<basis[s1].size();++js1) {  // loop over target site states
         for (int js2=0;js2<basis[s2].size();++js2) {
-          T val=mat[is1][is2][js1][js2];            // get matrix element
+          T val=mat[is1][is2][js1][js2].first;            // get matrix element
 #ifndef ALPS_WITH_NEW_EXPRESSION
-          if (val) {            // if nonzero matrix element
+          if (val)            // if nonzero matrix element
 #else
-          if (alps::is_nonzero(val)) {            // if nonzero matrix element
+          if (alps::is_nonzero(val))            // if nonzero matrix element
 #endif
+          {
             state_type newstate=state;            // prepare target state
             newstate[s1]=js1;                       // build target state
             newstate[s2]=js2;
             int j = states.index(newstate);         // lookup target state
-            if (j<states.size())
+            if (j<states.size()) {
+              if (mat[is1][is2][js1][js2].second.first || mat[is1][is2][js1][js2].second.second) {
+                // calculate fermionic sign
+                int start=0;
+                int end;
+                if (mat[is1][is2][js1][js2].second.first && mat[is1][is2][js1][js2].second.second) {
+                  start = std::min(s1,s2)+1;
+                  end = std::max(s1,s2);
+                }
+                else if (mat[is1][is2][js1][js2].second.first)
+                  end=s1;
+                else
+                  end=s2;
+                bool f=false;
+                for (int i=start;i<end;++i)
+                  if (is_fermionic(ham.basis().site_basis(site_type(i)),basis[i][state[i]]))
+                    f=!f;
+                if (f)
+                  val=-val;
+              }
               matrix_(i,j)+=val;                    // set matrix element
+            }
           }
         }
       }

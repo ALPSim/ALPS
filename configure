@@ -25532,7 +25532,7 @@ if test "$ac_cv_alps_type" = "full"; then
 
                                           ac_config_files="$ac_config_files test/model/Makefile test/model/lattices.xml test/model/models.xml test/model/parameters"
 
-                                ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile"
+                                                                        ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/lattices.xml example/model/models.xml example/model/parm_symbolic example/model/parm_numeric"
 
                                                     ac_config_files="$ac_config_files tool/Makefile tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text"
 
@@ -26198,6 +26198,10 @@ do
   "example/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/Makefile" ;;
   "example/model/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/model/Makefile" ;;
   "example/scheduler/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/scheduler/Makefile" ;;
+  "example/model/lattices.xml" ) CONFIG_FILES="$CONFIG_FILES example/model/lattices.xml" ;;
+  "example/model/models.xml" ) CONFIG_FILES="$CONFIG_FILES example/model/models.xml" ;;
+  "example/model/parm_symbolic" ) CONFIG_FILES="$CONFIG_FILES example/model/parm_symbolic" ;;
+  "example/model/parm_numeric" ) CONFIG_FILES="$CONFIG_FILES example/model/parm_numeric" ;;
   "tool/Makefile" ) CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
   "tool/plot2xsl.xsl" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xsl.xsl" ;;
   "tool/extracttext" ) CONFIG_FILES="$CONFIG_FILES tool/extracttext" ;;
