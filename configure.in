@@ -149,7 +149,7 @@ AC_ARG_WITH(boost,
   ]
 )
 AC_ARG_WITH(boost-incdir,
-  AC_HELP_STRING([--with-boost-incdir=DIR],[Boost include directory]),
+  AC_HELP_STRING([--with-boost-incdir=DIR],[Boost include directory (only for precompiled Boost library)]),
   [
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=yes
@@ -161,7 +161,7 @@ AC_ARG_WITH(boost-incdir,
   ]
 )
 AC_ARG_WITH(boost-libdir,
-  AC_HELP_STRING([--with-boost-libdir=DIR],[Boost library directory]),
+  AC_HELP_STRING([--with-boost-libdir=DIR],[Boost library directory (only for precompiled Boost library)]),
   [
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=yes
@@ -170,12 +170,50 @@ AC_ARG_WITH(boost-libdir,
   ]
 )
 AC_ARG_WITH(boost-libs,
-  AC_HELP_STRING([--with-boost-libs=LIBS],[Boost libraries (default -lboost)]),
+  AC_HELP_STRING([--with-boost-libs=LIBS],[Boost libraries (only for precompiled Boost library)]),
   [
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=yes
     boost_libs=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
   fi
+  ]
+)
+AC_ARG_WITH(boost-toolset,
+  AC_HELP_STRING([--with-boost-toolset=TOOLSET],[Boost toolset abbreviation, e.g. gcc-d for gcc with debugging, il-mt for intel-linux with multi-threading etc (default none) (only for precompiled Boost library)]),
+  [
+  if test "x$withval" != "x"; then
+    ac_use_precompiled_boost=yes
+    boost_toolset=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+  fi
+  ]
+)
+AC_ARG_WITH(boost-all,
+  AC_HELP_STRING([--with-boost-all],[compile all optional Boost libraries]), [
+    if test "x$withval" == "xno"; then
+      ac_cv_boost_signals=no
+      ac_cv_boost_thread=no
+    else
+      ac_cv_boost_signals=yes
+      ac_cv_boost_thread=yes
+    fi
+  ]
+)
+AC_ARG_WITH(boost-signals,
+  AC_HELP_STRING([--with-boost-signals],[compile Boost::signals library]), [
+    if test "x$withval" == "xno"; then
+      ac_cv_boost_signals=no
+    else
+      ac_cv_boost_signals=yes
+    fi
+  ]
+)
+AC_ARG_WITH(boost-thread,
+  AC_HELP_STRING([--with-boost-thread],[compile boost::thread library]), [
+    if test "x$withval" == "xno"; then
+      ac_cv_boost_thread=no
+    else
+      ac_cv_boost_thread=yes
+    fi
   ]
 )
 
@@ -234,6 +272,14 @@ fi
 dnl pre-compiled boost library
 
 if test "$ac_cv_use_precompiled_boost" = no; then :; else
+
+  AC_MSG_CHECKING([for Boost toolset abbreviation])
+  if test -n "$boost_toolset"; then
+    AC_MSG_RESULT([$boost_toolset])
+  else
+    AC_MSG_RESULT([none])
+  fi
+
   AC_MSG_CHECKING([for pre-compiled Boost library])
   found=no
 
@@ -245,15 +291,35 @@ if test "$ac_cv_use_precompiled_boost" = no; then :; else
     BOOST_LIBS="$boost_libs"
     LIBS="$BOOST_LIBS $ac_save_LIBS"
   else
-    BOOST_LIBS="-lboost"
+    if test -z "$boost_toolset"; then
+      BOOST_LIBS="-lboost_date_time -lboost_filesystem -lboost_regex"
+    else
+      BOOST_LIBS="-lboost_date_time-$boost_toolset -lboost_filesystem-$boost_toolset -lboost_regex-$boost_toolset"
+    fi
     LIBS="$BOOST_LIBS $ac_save_LIBS"
   fi
-  
+
   AC_TRY_LINK([
-    #include <boost/filesystem/operations.hpp>
-    #include <boost/filesystem/path.hpp>
-  ],[boost::filesystem::path p(boost::filesystem::initial_path());],
+    #include <boost/date_time/date_generators.hpp>
+  ],[const char *ptr = boost::date_time::nth_as_str(0);],
   found=yes)
+
+  if test "$found" = yes; then
+    found=no
+    AC_TRY_LINK([
+      #include <boost/filesystem/operations.hpp>
+      #include <boost/filesystem/path.hpp>
+    ],[boost::filesystem::path p(boost::filesystem::initial_path());],
+    found=yes)
+  fi
+
+  if test "$found" = yes; then
+    found=no
+    AC_TRY_LINK([
+      #include <boost/regex.hpp>
+    ],[boost::regbase re;],
+    found=yes)
+  fi
 
   if test "$found" = yes; then
     AC_MSG_RESULT([$BOOST_LDFLAGS $BOOST_LIBS])
@@ -265,6 +331,60 @@ if test "$ac_cv_use_precompiled_boost" = no; then :; else
     if test "$ac_cv_use_precompiled_boost" = yes; then
       AC_MSG_ERROR([Boost library not found])
     fi
+  fi
+
+  AC_MSG_CHECKING([for Boost::signals library])
+  ac_cv_boost_signals=no
+  if test -n "$boost_libs"; then
+    BOOST_SIGNALS_LIBS=
+  else
+    if test -z "$boost_toolset"; then
+      BOOST_SIGNALS_LIBS="-lboost_signals"
+    else
+      BOOST_SIGNALS_LIBS="-lboost_signals-$boost_toolset"
+    fi
+  fi
+  LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS $ac_save_LIBS"
+  AC_TRY_LINK([
+    #include <boost/signals/signal2.hpp>
+    #include <string>
+  ],[boost::signal2<void, int, int, boost::last_value<void>, std::string> sig;],
+  ac_cv_boost_signals=yes)
+  if test "$ac_cv_boost_signals" = yes; then
+    if test -n "$BOOST_SIGNALS_LIBS"; then
+      AC_MSG_RESULT([$BOOST_SIGNALS_LIBS])
+      BOOST_LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS"
+    else
+      AC_MSG_RESULT([yes])
+    fi
+  else
+    AC_MSG_RESULT([no])
+  fi
+
+  AC_MSG_CHECKING([for Boost::thread library])
+  ac_cv_boost_thread=no
+  if test -n "$boost_libs"; then
+    BOOST_THREAD_LIBS=
+  else
+    if test -z "$boost_toolset"; then
+      BOOST_THREAD_LIBS="-lboost_thread"
+    else
+      BOOST_THREAD_LIBS="-lboost_thread-$boost_toolset"
+    fi
+  fi
+  LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS $ac_save_LIBS"
+  AC_TRY_LINK([#include <boost/thread/xtime.hpp>],
+    [int x = boost::xtime_get(0, 0);],
+    ac_cv_boost_thread=yes)
+  if test "$ac_cv_boost_thread" = yes; then
+    if test -n "$BOOST_THREAD_LIBS"; then
+      AC_MSG_RESULT([$BOOST_THREAD_LIBS])
+      BOOST_LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS"
+    else
+      AC_MSG_RESULT([yes])
+    fi
+  else
+    AC_MSG_RESULT([no])
   fi
 fi
 
@@ -301,6 +421,7 @@ ac_cv_boost_cppflags="$BOOST_CPPFLAGS"
 ac_cv_boost_ldflags="$BOOST_LDFLAGS"
 ac_cv_boost_libs="$BOOST_LIBS"
 ac_cv_boost_srcdir="$BOOST_SRCDIR"
+
 
 #
 # checking for system headers
@@ -344,7 +465,7 @@ AC_CHECK_HEADER([cstdlib],,
     if test -f "$ac_cv_boost_incdir/boost/compatibility/cpp_c_headers/cstdlib"; then
       CPPFLAGS="-I$ac_cv_boost_incdir/boost/compatibility/cpp_c_headers $CPPFLAGS"
     fi
-    AC_MSG_NOTICE([$ac_cv_boost_dir/boost/compatibility/cpp_c_headers was added to include path])
+    AC_MSG_NOTICE([$ac_cv_boost_incdir/boost/compatibility/cpp_c_headers was added to include path])
   else
     AC_MSG_ERROR([cstdlib not fount])
   fi
@@ -373,7 +494,6 @@ AC_CHECK_FUNC(nanosleep, ,[AC_CHECK_LIB(rt, nanosleep)])
 
 sinclude(config/ac_pthread.m4)
 AC_PTHREAD
-AC_SUBST(OBJ_BOOST_THREAD)
 if test "$ac_cv_have_pthread" = yes; then
   AC_DEFINE(ALPS_HAVE_PTHREAD)
 fi
@@ -427,35 +547,11 @@ test "$ac_cv_xml_parser" = "xerces" && AC_DEFINE(ALPS_HAVE_XERCES_PARSER)
 # boost object libraries
 # 
 
-# check whether all boost libraries are compiled
-AC_ARG_WITH(boost-all,
-  AC_HELP_STRING([--with-boost-all],[compile all optional Boost libraries]), [
-    if test "x$withval" == "xno"; then
-      ac_cv_boost_signals=no
-      ac_cv_boost_thread=no
-    else
-      ac_cv_boost_signals=yes
-      ac_cv_boost_thread=yes
-    fi
-  ]
-)
-
-# check whether boost::signals is compiled
-AC_ARG_WITH(boost-signals,
-  AC_HELP_STRING([--with-boost-signals],[compile boost::signals library]), [
-    if test "x$withval" == "xno"; then
-      ac_cv_boost_signals=no
-    else
-      ac_cv_boost_signals=yes
-    fi
-  ]
-)
+# check whether Boost::signals is compiled
 AC_SUBST(OBJ_BOOST_SIGNALS)
 OBJ_BOOST_SIGNALS=
-if test "$ac_cv_use_precompiled_boost" = yes; then
-  ac_cv_boost_signals=yes
-else
-  AC_MSG_CHECKING([whether boost::signals is compiled])
+if test "$ac_cv_use_precompiled_boost" = yes; then :; else
+  AC_MSG_CHECKING([whether Boost::signals is compiled])
   test -z "$ac_cv_boost_signals" && ac_cv_boost_signals=no
   if test "$ac_cv_boost_signals" = yes; then
     OBJ_BOOST_SIGNALS='$(OBJ_BOOST_SIGNALS)'
@@ -466,20 +562,9 @@ else
 fi
 
 # check whether boost::thread is compiled
-AC_ARG_WITH(boost-thread,
-  AC_HELP_STRING([--with-boost-thread],[compile boost::thread library]), [
-    if test "x$withval" == "xno"; then
-      ac_cv_boost_thread=no
-    else
-      ac_cv_boost_thread=yes
-    fi
-  ]
-)
 AC_SUBST(OBJ_BOOST_THREAD)
 OBJ_BOOST_THREAD=
-if test "$ac_cv_use_precompiled_boost" = yes; then
-  ac_cv_boost_thread=yes
-else
+if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   AC_MSG_CHECKING([whether boost::thread is compiled])
   test -z "$ac_cv_boost_thread" && ac_cv_boost_thread=no
   if test "$ac_cv_have_pthread" = yes; then
@@ -504,30 +589,32 @@ AC_ARG_ENABLE(boost-config,
   fi
   ]
 )
+AC_SUBST(BOOST_USER_CONFIG_H)
+BOOST_USER_CONFIG_H=
 if test "$ac_cv_use_precompiled_boost" = yes; then
   ac_cv_boost_config=no
-fi
-AC_MSG_CHECKING([whether use Boost configuration header file])
-AC_SUBST(BOOST_USER_CONFIG_H)
-test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
-if test "$ac_cv_boost_config" = yes; then
-  ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"
-  if test -f "$ac_cv_boost_dir/libs/config/configure"; then :; else
-    AC_MSG_RESULT
-    AC_MSG_ERROR([Boost configure script was not found.])
+else
+  AC_MSG_CHECKING([whether use Boost configuration header file])
+  test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
+  if test "$ac_cv_boost_config" = yes; then
+    ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"
+    if test -f "$boost_srcdir/config/configure"; then :; else
+      AC_MSG_RESULT
+      AC_MSG_ERROR([Boost configure script was not found.])
+    fi
   fi
+  AC_MSG_RESULT([$ac_cv_boost_config])
 fi
-AC_MSG_RESULT([$ac_cv_boost_config])
   
 #
-# configuring boost
+# configure boost if needed
 #
 
 if test "$ac_cv_boost_config" != no; then
   AC_MSG_NOTICE([running Boost configuration script])
-  boost_configure="sh $ac_cv_boost_dir/libs/config/configure"
+  boost_configure="sh $boost_srcdir/config/configure"
   mkdir -p src/boost
-  command="(cd src/boost && export CXX=\"$CXX\" CXXFLAGS=\"$CXXFLAGS\" CPPFLAGS=\"$CPPFLAGS\" LDFLAGS=\"$LDFLAGS\" && $boost_configure --with-boost=$ac_cv_boost_dir)"
+  command="(cd src/boost && export CXX=\"$CXX\" CXXFLAGS=\"$CXXFLAGS\" CPPFLAGS=\"$CPPFLAGS\" LDFLAGS=\"$LDFLAGS\" && $boost_configure --with-boost=$boost_incdir)"
   echo "$command"
   eval "$command"
   CPPFLAGS="$CPPFLAGS -DBOOST_USER_CONFIG=\<boost/user.hpp\>"

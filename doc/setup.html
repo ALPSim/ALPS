@@ -137,8 +137,16 @@ for MODE.  The default value for MODE is <tt>generic</tt>.</td>
   <tr>
     <td valign="top" bgcolor="#dddddd"><code>--with-boost-libs=LIBS</code></td>
     <td valign="top" bgcolor="#dddddd">Specify Boost C++ libraries
-      (eg. -lboost) to be linked, in case you have a precompiled Boost C++
-      library.  The default value for LIBS is <tt>-lboost</tt>.
+      (eg. -lboost_date_time -lboost_filesystem) to be linked,
+      in case you have a precompiled Boost C++ library.
+    </td>
+  </tr>
+  <tr>
+    <td valign="top" bgcolor="#dddddd"><code>--with-boost-toolset=TOOLSET</code></td>
+    <td valign="top" bgcolor="#dddddd">Specify Boost toolset abbreviation,
+      eg. gcc-d for gcc with debugging, il-mt for intel-linux with
+      multi-threading etc, in case you have a precompiled Boost C++ library.
+      For more details, please see <a href="http://www.boost.org/more/getting_started.html#Results">http://www.boost.org/more/getting_started.html#Results</a>.
     </td>
   </tr>
   <tr>

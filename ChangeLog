@@ -1,3 +1,7 @@
+2004-03-11 Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Improved support for the precompiled Boost library.
+	
 2004-03-04 Synge Todo <wistaria@comp-phys.org>
 
 	* [config] Moved version/year strings from alps/src/copyright.C.in
