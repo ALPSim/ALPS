@@ -8,7 +8,7 @@ dnl disable loading config.site
 define([AC_SITE_LOAD], )dnl
 
 AC_PREREQ(2.54)
-AC_INIT([alps],[1.0b1])
+AC_INIT([alps],[1.0b2])
 AC_CONFIG_AUX_DIR([config])
 
 AC_PREFIX_DEFAULT([$HOME/ALPS])
