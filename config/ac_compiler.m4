@@ -145,12 +145,12 @@ AC_DEFUN([AC_COMPILER],
       try_CXX="xlC"
       ;;
     macos-3.3)
-      try_CC="gcc-3.3 -framework vecLib"
-      try_CXX="g++-3.3 -framework vecLib"
+      try_CC="gcc-3.3"
+      try_CXX="g++-3.3"
       ;;
     macos)
-      try_CC="gcc3 -framework vecLib"
-      try_CXX="g++3 -framework vecLib"
+      try_CC="gcc3"
+      try_CXX="g++3"
       ;;
     generic)
       # nothing to do
@@ -307,8 +307,8 @@ AC_DEFUN([AC_COMPILER],
     macos)
       try_CFLAGS_OPT="-w -O3"
       try_CFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
-      try_CXXFLAGS_OPT="-w -ftemplate-depth-90 -O3"
-      try_CXXFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
+      try_CXXFLAGS_OPT="-DBOOST_DATE_TIME_NO_STD_TRANSFORM -w -ftemplate-depth-90 -O3"
+      try_CXXFLAGS_DEBUG="-DBOOST_DATE_TIME_NO_STD_TRANSFORM -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
