@@ -34,7 +34,9 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   ////////////////////////////////////////////////////////////////
   // ublas::vector<> etc. 
 
+#ifndef BOOST_NUMERIC_BINDINGS_TRAITS_MATRIX_RAW_HPP
   namespace ublas = boost::numeric::ublas; 
+#endif
 
 #if 0
   // MSVC seems to dislike overloads if there is `generic' template 

@@ -23,7 +23,9 @@
 
 namespace boost { namespace numeric { namespace bindings { namespace traits {
 
+#ifndef BOOST_NUMERIC_BINDINGS_TRAITS_VECTOR_RAW_HPP
   namespace ublas = boost::numeric::ublas; 
+#endif
 
   // size: 
 
