@@ -107,7 +107,7 @@
 	     <xsl:value-of select="ERROR * 1000"/>
            </xsl:when>
   	   <xsl:when test="ERROR/@converged = 'maybe'">   
-	     <xsl:value-of select="ERROR * 1000"/>
+	     <xsl:value-of select="ERROR"/>
            </xsl:when>
 	   <xsl:otherwise>
 	     <xsl:value-of select="ERROR"/>
@@ -150,7 +150,7 @@
 	         <xsl:value-of select="ERROR * 1000"/>
                </xsl:when>
   	       <xsl:when test="ERROR/@converged = 'maybe'">   
-	         <xsl:value-of select="ERROR * 1000"/>
+	         <xsl:value-of select="ERROR"/>
                </xsl:when>
 	       <xsl:otherwise>
 	         <xsl:value-of select="ERROR"/>
@@ -226,7 +226,7 @@
 	  <xsl:value-of select="ERROR * 1000"/>
         </xsl:when>
   	<xsl:when test="ERROR/@converged = 'maybe'">   
-	  <xsl:value-of select="ERROR * 1000"/>
+	  <xsl:value-of select="ERROR"/>
         </xsl:when>
 	<xsl:otherwise>
 	  <xsl:value-of select="ERROR"/>
