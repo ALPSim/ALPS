@@ -35,10 +35,13 @@ struct symbolic_traits {
  BOOST_STATIC_CONSTANT(bool, is_symbolic=false);
 };
 
+template <class T>
+const bool symbolic_traits<T>::is_symbolic;
 template<>
 struct symbolic_traits<alps::Expression> {
  BOOST_STATIC_CONSTANT(bool, is_symbolic=true);
 };
+const bool symbolic_traits<alps::Expression>::is_symbolic;
 
 template <class T, class M = boost::numeric::ublas::matrix<T> >
 class HamiltonianMatrix // : public alps::scheduler::Worker
