@@ -71,13 +71,25 @@
 
 <xsl:template name="Print_XMGRACE_SetHeader">
 <xsl:text disable-output-escaping = "yes">
-@    s0 type xydy
-@    s0 symbol 1
-@    s0 symbol size 0.500000
-@    s0 line type 1
-@target G0.S0
-@type xydy
-</xsl:text>   
+@    s</xsl:text><xsl:number/><xsl:text> symbol 1
+@    s</xsl:text><xsl:number/><xsl:text> symbol size 0.500000
+@    s</xsl:text><xsl:number/><xsl:text> line type 1
+@target G0.S</xsl:text><xsl:number/><xsl:text>
+@type </xsl:text>   
+<xsl:if test="./point/x">
+  <xsl:text>x</xsl:text>
+</xsl:if>
+<xsl:if test="./point/dx">
+  <xsl:text>dx</xsl:text>
+</xsl:if>
+<xsl:if test="./point/y">
+  <xsl:text>y</xsl:text>
+</xsl:if>
+<xsl:if test="./point/dy">
+  <xsl:text>dy</xsl:text>
+</xsl:if>
+<xsl:text>
+</xsl:text>
 </xsl:template>
 
 </xsl:stylesheet>
