@@ -1,11 +1,11 @@
 /***************************************************************************
-* PALM++/scheduler example
+* ALPS/alea library
 *
-* scheduler/isingsim.C an example Ising model simulation
+* alps/alea/nan.h  return NaN
 *
 * $Id$
 *
-* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 1994-2003 by Synge Todo <wistaria@comp-phys.org>,
 *
 * Permission is hereby granted, free of charge, to any person or organization 
 * obtaining a copy of the software covered by this license (the "Software") 
@@ -34,33 +34,15 @@
 *
 **************************************************************************/
 
-#include "matrix.h"
+#ifndef ALPS_ALEA_NAN_H
+#define ALPS_ALEA_NAN_H
 
-#ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
-using namespace alps;
-#endif
+namespace alps {
 
-int main()
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+double nan();
 
-  using namespace boost::numeric::ublas ;
-  alps::Parameters parms;
-  std::cin >> parms;
-  HamiltonianMatrix<double,compressed_matrix<double,row_major> > matrix(parms);
-  std::cout << matrix << std::endl;
+double inf();
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-}
+} // namespace alps
+
+#endif // PALM_ALEA_NAN_H

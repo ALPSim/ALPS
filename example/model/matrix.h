@@ -52,7 +52,7 @@ public:
   typedef M matrix_type;
 
   HamiltonianMatrix (const alps::Parameters&);
-  void output(std::ostream& o, bool is_single=false) const 
+  void output(std::ostream& o, bool /* is_single */ = false) const 
   { 
     if (!built_) build(); 
     o << matrix_;
@@ -178,7 +178,6 @@ void HamiltonianMatrix<T,M>::build() const
     }
   }
 
-  double tot=0.;
   // loop over bonds
     for (int i=0;i<states.size();++i) {      // loop over source states
       state_type state=states[i];           // get source state

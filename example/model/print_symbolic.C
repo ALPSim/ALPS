@@ -36,7 +36,7 @@
 
 #include "matrix.h"
 
-int main(int argc, char** argv)
+int main()
 {
 #ifndef BOOST_NO_EXCEPTIONS
 try {
