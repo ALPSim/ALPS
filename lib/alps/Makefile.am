@@ -52,13 +52,14 @@ src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/once.cpp \
   $(BOOST_SRCDIR)/thread/src/recursive_mutex.cpp \
   $(BOOST_SRCDIR)/thread/src/thread.cpp \
-  $(BOOST_SRCDIR)/thread/src/threadmon.cpp \
   $(BOOST_SRCDIR)/thread/src/tss.cpp \
   $(BOOST_SRCDIR)/thread/src/xtime.cpp
+src_boost_THREAD_1_31 = \
+  $(BOOST_SRCDIR)/thread/src/threadmon.cpp
 src_boost_THREAD_1_32 = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp
 src_boost_PROGRAM_OPTIONS_SERIALIZATION= \
-  $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
+  $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
 src_boost_PROGRAM_OPTIONS= \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
@@ -136,5 +137,7 @@ if BUILD_BOOST_THREAD
 nodist_libalps_la_SOURCES += $(src_boost_THREAD)
 if BOOST_1_32
 nodist_libalps_la_SOURCES += $(src_boost_THREAD_1_32)
+else
+nodist_libalps_la_SOURCES += $(src_boost_THREAD_1_31)
 endif
 endif

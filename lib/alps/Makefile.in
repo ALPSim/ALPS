@@ -47,6 +47,7 @@ host_triplet = @host@
 @BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__append_8 = $(src_boost_SIGNALS_1_32)
 @BUILD_BOOST_THREAD_TRUE@am__append_9 = $(src_boost_THREAD)
 @BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__append_10 = $(src_boost_THREAD_1_32)
+@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@am__append_11 = $(src_boost_THREAD_1_31)
 subdir = lib/alps
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -166,14 +167,18 @@ am__objects_23 = named_slot_map.lo
 @BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__objects_24 =  \
 @BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@	$(am__objects_23)
 am__objects_25 = condition.lo exceptions.lo mutex.lo once.lo \
-	recursive_mutex.lo thread.lo threadmon.lo tss.lo xtime.lo
+	recursive_mutex.lo thread.lo tss.lo xtime.lo
 @BUILD_BOOST_THREAD_TRUE@am__objects_26 = $(am__objects_25)
 am__objects_27 = barrier.lo
 @BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__objects_28 =  \
 @BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_27)
+am__objects_29 = threadmon.lo
+@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@am__objects_30 =  \
+@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_29)
 nodist_libalps_la_OBJECTS = $(am__objects_14) $(am__objects_18) \
 	$(am__objects_19) $(am__objects_20) $(am__objects_22) \
-	$(am__objects_24) $(am__objects_26) $(am__objects_28)
+	$(am__objects_24) $(am__objects_26) $(am__objects_28) \
+	$(am__objects_30)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -497,15 +502,17 @@ src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/once.cpp \
   $(BOOST_SRCDIR)/thread/src/recursive_mutex.cpp \
   $(BOOST_SRCDIR)/thread/src/thread.cpp \
-  $(BOOST_SRCDIR)/thread/src/threadmon.cpp \
   $(BOOST_SRCDIR)/thread/src/tss.cpp \
   $(BOOST_SRCDIR)/thread/src/xtime.cpp
+
+src_boost_THREAD_1_31 = \
+  $(BOOST_SRCDIR)/thread/src/threadmon.cpp
 
 src_boost_THREAD_1_32 = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp
 
 src_boost_PROGRAM_OPTIONS_SERIALIZATION = \
-  $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
+  $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
 
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -553,7 +560,7 @@ src_boost_SERIALIZATION = \
 
 lib_LTLIBRARIES = libalps.la 
 libalps_la_SOURCES = $(src_ALPS) $(src_OSIRIS) $(src_PARSER) $(src_RANDOM) $(am__append_1) $(am__append_2)
-nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) $(am__append_5) $(am__append_6) $(am__append_7) $(am__append_8) $(am__append_9) $(am__append_10)
+nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) $(am__append_5) $(am__append_6) $(am__append_7) $(am__append_8) $(am__append_9) $(am__append_10) $(am__append_11)
 all: all-am
 
 .SUFFIXES:
@@ -2228,29 +2235,29 @@ winstances.lo: $(BOOST_SRCDIR)/regex/src/winstances.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o winstances.lo `test -f '$(BOOST_SRCDIR)/regex/src/winstances.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/regex/src/winstances.cpp
 
-utf8_codecvt_facet.o: $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.o -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp; \
+utf8_codecvt_facet.o: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.o -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
 
-utf8_codecvt_facet.obj: $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.obj -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; fi`; \
+utf8_codecvt_facet.obj: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.obj -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; fi`
 
-utf8_codecvt_facet.lo: $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp; \
+utf8_codecvt_facet.lo: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Plo"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Plo' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
 
 cmdline.o: $(BOOST_SRCDIR)/program_options/src/cmdline.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cmdline.o -MD -MP -MF "$(DEPDIR)/cmdline.Tpo" -c -o cmdline.o `test -f '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/cmdline.cpp; \
@@ -3452,30 +3459,6 @@ thread.lo: $(BOOST_SRCDIR)/thread/src/thread.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o thread.lo `test -f '$(BOOST_SRCDIR)/thread/src/thread.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/thread.cpp
 
-threadmon.o: $(BOOST_SRCDIR)/thread/src/threadmon.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT threadmon.o -MD -MP -MF "$(DEPDIR)/threadmon.Tpo" -c -o threadmon.o `test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/threadmon.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/threadmon.Tpo" "$(DEPDIR)/threadmon.Po"; else rm -f "$(DEPDIR)/threadmon.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/threadmon.cpp' object='threadmon.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/threadmon.Po' tmpdepfile='$(DEPDIR)/threadmon.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o threadmon.o `test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/threadmon.cpp
-
-threadmon.obj: $(BOOST_SRCDIR)/thread/src/threadmon.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT threadmon.obj -MD -MP -MF "$(DEPDIR)/threadmon.Tpo" -c -o threadmon.obj `if test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/threadmon.Tpo" "$(DEPDIR)/threadmon.Po"; else rm -f "$(DEPDIR)/threadmon.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/threadmon.cpp' object='threadmon.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/threadmon.Po' tmpdepfile='$(DEPDIR)/threadmon.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o threadmon.obj `if test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; fi`
-
-threadmon.lo: $(BOOST_SRCDIR)/thread/src/threadmon.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT threadmon.lo -MD -MP -MF "$(DEPDIR)/threadmon.Tpo" -c -o threadmon.lo `test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/threadmon.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/threadmon.Tpo" "$(DEPDIR)/threadmon.Plo"; else rm -f "$(DEPDIR)/threadmon.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/threadmon.cpp' object='threadmon.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/threadmon.Plo' tmpdepfile='$(DEPDIR)/threadmon.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o threadmon.lo `test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/threadmon.cpp
-
 tss.o: $(BOOST_SRCDIR)/thread/src/tss.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT tss.o -MD -MP -MF "$(DEPDIR)/tss.Tpo" -c -o tss.o `test -f '$(BOOST_SRCDIR)/thread/src/tss.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/tss.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/tss.Tpo" "$(DEPDIR)/tss.Po"; else rm -f "$(DEPDIR)/tss.Tpo"; exit 1; fi
@@ -3547,6 +3530,30 @@ barrier.lo: $(BOOST_SRCDIR)/thread/src/barrier.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/barrier.Plo' tmpdepfile='$(DEPDIR)/barrier.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o barrier.lo `test -f '$(BOOST_SRCDIR)/thread/src/barrier.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/barrier.cpp
+
+threadmon.o: $(BOOST_SRCDIR)/thread/src/threadmon.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT threadmon.o -MD -MP -MF "$(DEPDIR)/threadmon.Tpo" -c -o threadmon.o `test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/threadmon.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/threadmon.Tpo" "$(DEPDIR)/threadmon.Po"; else rm -f "$(DEPDIR)/threadmon.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/threadmon.cpp' object='threadmon.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/threadmon.Po' tmpdepfile='$(DEPDIR)/threadmon.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o threadmon.o `test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/threadmon.cpp
+
+threadmon.obj: $(BOOST_SRCDIR)/thread/src/threadmon.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT threadmon.obj -MD -MP -MF "$(DEPDIR)/threadmon.Tpo" -c -o threadmon.obj `if test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/threadmon.Tpo" "$(DEPDIR)/threadmon.Po"; else rm -f "$(DEPDIR)/threadmon.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/threadmon.cpp' object='threadmon.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/threadmon.Po' tmpdepfile='$(DEPDIR)/threadmon.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o threadmon.obj `if test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/thread/src/threadmon.cpp'; fi`
+
+threadmon.lo: $(BOOST_SRCDIR)/thread/src/threadmon.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT threadmon.lo -MD -MP -MF "$(DEPDIR)/threadmon.Tpo" -c -o threadmon.lo `test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/threadmon.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/threadmon.Tpo" "$(DEPDIR)/threadmon.Plo"; else rm -f "$(DEPDIR)/threadmon.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/threadmon.cpp' object='threadmon.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/threadmon.Plo' tmpdepfile='$(DEPDIR)/threadmon.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o threadmon.lo `test -f '$(BOOST_SRCDIR)/thread/src/threadmon.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/threadmon.cpp
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
