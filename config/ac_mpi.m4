@@ -20,16 +20,6 @@ AC_DEFUN([AC_MPI],
     fi
     ]
   )
-
-  AC_ARG_WITH(mpi-incdir,
-    AC_HELP_STRING([--with-mpi-incdir=DIR],[MPI include directory]),
-    [mpi_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`])
-  AC_ARG_WITH(mpi-libdir,
-    AC_HELP_STRING([--with-mpi-libdir=DIR],[MPI library directory]),
-    [mpi_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`])
-  AC_ARG_WITH(mpi-libs,
-    AC_HELP_STRING([--with-mpi-libs=LIBS],[MPI libraries]),
-    [mpi_libs="$withval"])
   
   if test "$mpi" != no; then
     AC_MSG_CHECKING([for MPI root directory])
