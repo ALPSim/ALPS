@@ -1,4 +1,9 @@
-1003-11-04 Matthias Troyer <troyer@comp-phys.org>
+1003-11-09 Matthias Troyer <troyer@comp-phys.org>
+
+	* [scheduler] deprecated dclock, using Boost date-time library instead
+	* [model] finished implementing constraints in basis sets
+
+1003-11-05 Matthias Troyer <troyer@comp-phys.org>
 
 	* [alea] Changes for Boost deprecation of compose library
 	* preparing release 1.0b5

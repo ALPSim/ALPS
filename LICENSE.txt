@@ -1,5 +1,5 @@
 
-ALPS LIBRARY LICENSE
+ALPS LIBRARY LICENSE version 1
 
 Permission is hereby granted, free of charge, to any person or organization 
 obtaining a copy of the library software covered by this license (the "Library")
@@ -9,8 +9,8 @@ non-commercial academic use, all subject to the following conditions:
 
 1. In any scientific publication based wholly or in part on the Library, the use
 of the Library must be acknowledged and the publications listed in the 
-accompanying CITATIONS.TXT document must be cited.
-FIXME: Any special acknowledement requirements for modified works?
+accompanying CITATIONS.TXT document must be cited. The acknowledgment must
+state whether the original or a modified version of the Library was used.
 
 2. You may copy and distribute verbatim copies of the Library in the form that 
 you received it, as long as all copyright notices and references to this license
