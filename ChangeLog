@@ -3,6 +3,8 @@
 	* [boost] Added Boost.date_time souces for libalps.a.
 
 	* Added dist directory for preparing distribution.
+
+	* [boost] Removed functional_void.hpp.
 	
 2003-05-24 Matthier Troyer <troyer@comp-phys.org>
 
