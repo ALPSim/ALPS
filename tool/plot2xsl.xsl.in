@@ -117,7 +117,24 @@
     </xslout:template><xsl:value-of select="$newline"/>
     
     <xsl:value-of select="$newline"/>
-    <xsl:value-of select="$newline"/>  
+    <xsl:value-of select="$newline"/> 
+
+    <xslout:template name="CheckHistogramIndexConstraints"><xsl:value-of select="$newline"/>
+    <xsl:text disable-output-escaping = "yes">&lt;xslout:if test='true()</xsl:text>
+      <xsl:for-each select="constraint">
+        <xsl:if test="@type = 'INDEX'">
+          <xsl:text> and @indexvalue</xsl:text>
+          <xsl:value-of select="@condition"/>
+        </xsl:if>
+      </xsl:for-each>
+      <xsl:text disable-output-escaping = "yes">'&gt;</xsl:text><xsl:value-of select="$newline"/>
+      <xslout:call-template name="ExtractHistogramIndexAndValue"/><xsl:value-of select="$newline"/>
+      <xsl:text disable-output-escaping = "yes">&lt;/xslout:if&gt;</xsl:text><xsl:value-of select="$newline"/>
+    </xslout:template><xsl:value-of select="$newline"/>
+
+    <xsl:value-of select="$newline"/>
+    <xsl:value-of select="$newline"/>
+ 
        
     <!-- global constraints -->
     <xslout:template name="ExtractDataFromArchive"><xsl:value-of select="$newline"/>

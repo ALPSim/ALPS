@@ -158,7 +158,7 @@
   </xsl:choose>
 </xsl:template>
 
-<!-- template which extracts index and value of a given vector average -->
+<!-- template which extracts index and value of a given vector average or histogram -->
 <xsl:template name="ExctractIndexAndAxisValue">
   <xsl:param name="axis_type"/>
   <xsl:param name="axis_name"/>
@@ -176,9 +176,20 @@
     </xsl:for-each>
   </xsl:when>
             
+  <!-- histogram -->
+  <xsl:when test="$axis_type = 'HISTOGRAM'">
+    <xsl:for-each select="AVERAGES/HISTOGRAM">
+      <xsl:if test = "@name = $axis_name">
+        <xsl:for-each select="ENTRY">
+          <xsl:call-template name="CheckHistogramIndexConstraints"/>
+        </xsl:for-each>
+      </xsl:if>
+    </xsl:for-each>
+  </xsl:when>
+
   <!-- unknown type -->
   <xsl:otherwise>
-    <xsl:text>ERROR: xaxis INDEX type can only be combined with yaxis VECTOR_AVERAGE type.</xsl:text>
+    <xsl:text>ERROR: xaxis INDEX type can only be combined with yaxis VECTOR_AVERAGE or HISTOGRAM type.</xsl:text>
   </xsl:otherwise>
   
   </xsl:choose>
@@ -190,6 +201,14 @@
     <x><xsl:value-of select="@indexvalue"/></x>
     <y><xsl:apply-templates select="MEAN"/></y>
     <dy><xsl:apply-templates select="ERROR"/></dy>
+  </point>
+  <xsl:value-of select="$newline"/>
+</xsl:template>
+
+<xsl:template name="ExtractHistogramIndexAndValue">     
+  <point>
+    <x><xsl:value-of select="@indexvalue"/></x>
+    <y><xsl:apply-templates select="VALUE"/></y>
   </point>
   <xsl:value-of select="$newline"/>
 </xsl:template>
