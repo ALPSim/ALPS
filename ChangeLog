@@ -1,9 +1,16 @@
-2004-02-25 Synge todo <wistaria@comp-phys.org>
+2004-03-02 Matthias Troyer <troyer@comp-phys.org>
+
+	* [alps] Moved extra Boost bindings from applications to bindings
+	         Support [] in parameter names
+
+	* Release 1.0b7 at the 3rd ALPS developer workshop
+
+2004-02-25 Synge Todo <wistaria@comp-phys.org>
 
 	* [random] fixed BufferedRandomNumberGenerator<>::fill_buffer() in
 	src/alps/random/random.h.
 	
-2004-02-24 Synge todo <wistaria@comp-phys.org>
+2004-02-24 Synge Todo <wistaria@comp-phys.org>
 
 	* [config] supported precompiled Boost library.
 	
