@@ -1,5 +1,5 @@
 LATTICE = "chain lattice"
-L       = 4
+L       = 17
 h       = 0
 J	= 1
 Gamma	= 0

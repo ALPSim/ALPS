@@ -1,7 +1,23 @@
+2003-10-13 Matthias Troyer <troyer@comp-phys.org>
+
+	* Converted model and lattice library to use oxstream for XML output
+        * Added momenta() functions to lattice to provide all momenta. Momenta
+          are for now in units of reciprocal lattice vectors. Calculation of
+	  reciprocal lattice vectors is not done yet since that would need
+	  LAPACK support.
+        * Started optimziation of basis sets for ED. Preliminary speedup > 5.
+	  Now performance bottleneck is in ublas and needs to be worked on
+  
 2003-10-10 Synge Todo <wistaria@comp-phys.org>
 
 	* [fixed_capacity] Added fixed-capacity containers
 	(fixed_capacity_vector, fixed_capacity_deque, etc).
+
+2003-10-06 Matthias Troyer < troyer@comp-phys.org>
+
+	* [alea] Added missing friend declarations to make slicing work
+        and to allow expressions containing both scalar and vector valued
+        observables
 	
 2003-09-25 Synge Todo <wistaria@comp-phys.org>
 

@@ -49,7 +49,7 @@ try {
   alps::Parameters parms;
   std::cin >> parms;
   HamiltonianMatrix<double,boost::numeric::ublas::sparse_matrix<double> > matrix(parms);
-  std::cout << matrix << "\n";
+  std::cout << matrix;
 
 #ifndef BOOST_NO_EXCEPTIONS
 }

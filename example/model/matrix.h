@@ -22,6 +22,7 @@
 //#include <alps/parameters.h>
 #include <alps/model.h>
 #include <alps/lattice.h>
+#include <alps/osiris/os.h>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/multi_array.hpp>
@@ -51,7 +52,11 @@ public:
   typedef M matrix_type;
 
   HamiltonianMatrix (const alps::Parameters&);
-  void output(std::ostream& o) const { if (!built_) build(); o << matrix_;}
+  void output(std::ostream& o, bool is_single=false) const 
+  { 
+    if (!built_) build(); 
+    o << matrix_;
+  }
 
 private:
   typedef alps::graph_factory<>::graph_type graph_type;
@@ -100,6 +105,7 @@ void HamiltonianMatrix<T,M>::build() const
 
   std::map<int,boost::multi_array<T,2> > site_matrix;
   std::map<int,bool> site_visited;
+  double t=alps::dclock();
   for (boost::graph_traits<graph_type>::vertex_iterator it=boost::vertices(lattice()).first; 
        it!=boost::vertices(lattice()).second ; ++it)
     if (!site_visited[site_type[*it]]) {
@@ -109,7 +115,10 @@ void HamiltonianMatrix<T,M>::build() const
       site_matrix.insert(std::make_pair(type,ham.site_term(type).template matrix<T>(
                 ham.basis().site_basis(type),models_.simple_operators(),p)));
     }
-  
+
+  std::cout << "Took " << alps::dclock()-t << " seconds\n";
+  t=alps::dclock();
+
   // get all bond matrices
   alps::property_map<alps::bond_type_t,  graph_type, int>::const_type
   bond_type(alps::get_or_default(alps::bond_type_t(),lattice(),0));
@@ -126,66 +135,77 @@ void HamiltonianMatrix<T,M>::build() const
       bond_visited[boost::make_tuple(btype,stype1,stype2)]=true;
       bond_matrix.insert(std::make_pair(btype,ham.bond_term(btype).template matrix<T>(
                               ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
-			      models_.simple_operators(),p)));
+                              models_.simple_operators(),p)));
     }
   }
+
+  std::cout << "Took " << alps::dclock()-t << " seconds\n";
+  t=alps::dclock();
   
   // create basis set
   std::cout << "Creating basis set\n";
   alps::BasisStatesDescriptor<short> basis(ham.basis(),lattice());
-  alps::BasisStates<short> states(basis);
+  typedef alps::BasisStates<short> basis_states_type;
+  typedef basis_states_type::value_type state_type;
+  basis_states_type states(basis);
+
+  std::cout << "Took " << alps::dclock()-t << " seconds" << std::endl;
+  t=alps::dclock();
   
   // build matrix
   
-  std::cout << "Creating matrix\n";
-  //matrix_.resize(boost::extents[states.size()][states.size()]);
+  std::cerr << "Creating matrix\n";
   matrix_.resize(states.size(),states.size());
 
-  // loop basis states
-  for (int i=0;i<states.size();++i) {
-    // loop over sites
-    int s=0;
-    for (boost::graph_traits<graph_type>::vertex_iterator it=boost::vertices(lattice()).first; 
+  // loop over sites
+    for (int i=0;i<states.size();++i) {        // loop basis states
+      state_type state=states[i];      // get source state
+      state_type newstate=state;       // prepare target state
+  int s=0;
+  for (boost::graph_traits<graph_type>::vertex_iterator it=boost::vertices(lattice()).first; 
       it!=boost::vertices(lattice()).second ; ++it,++s) {
-      // get site basis index
-      int is=basis[s].index(states[i][s]);
-      // loop over target index
-      std::vector<alps::StateDescriptor<short> > state=states[i];
-      for (int js=0;js<basis[s].size();++js)
-        if (site_matrix[site_type[*it]][is][js]) {
-        // build target state
-          state[s]=basis[s][js];
-	// lookup target state
-	  int j = states.index(state);
-	// set matrix element
-	  //matrix_[i][j]+=site_matrix[site_type[*it]][is][js];
-	  matrix_(i,j)+=site_matrix[site_type[*it]][is][js];
-	}
+    boost::multi_array<T,2>& mat = site_matrix[site_type[*it]];
+      int is=state[s];                         // get site basis index
+      for (int js=0;js<basis[s].size();++js) { // loop over target site states
+        T val=mat[is][js];                     // get matrix element
+        if (val) {                             // if matrix element is nonzero
+          newstate[s]=js;                      // build target state
+          int j = states.index(state);         // lookup target state
+          matrix_(i,j)+=val;                   // set matrix element
+        }
+      }
     }
-    
-    // loop over bonds
-    for (boost::graph_traits<graph_type>::edge_iterator it=boost::edges(lattice()).first; 
-      it!=boost::edges(lattice()).second ; ++it,++s) {
-      // get site basis index
-      int s1=boost::source(*it,lattice());
-      int s2=boost::target(*it,lattice());
-      int is1=basis[s1].index(states[i][s1]);
-      int is2=basis[s2].index(states[i][s2]);
-      // loop over target indices
-      std::vector<alps::StateDescriptor<short> > state=states[i];
-      for (int js1=0;js1<basis[s1].size();++js1)
-        for (int js2=0;js2<basis[s2].size();++js2)
-        if (bond_matrix[bond_type[*it]][is1][is2][js1][js2]) {
-        // build target state
-          state[s1]=basis[s1][js1];
-          state[s2]=basis[s2][js2];
-	// lookup target state
-	  int j = states.index(state);
-	// set matrix element
-	  //matrix_[i][j]+=bond_matrix[bond_type[*it]][is1][is2][js1][js2];
-	  matrix_(i,j)+=bond_matrix[bond_type[*it]][is1][is2][js1][js2];
-	}
+  }
+
+  std::cerr << "Took " << alps::dclock()-t << " seconds\n";
+  double tot=0.;
+  // loop over bonds
+    for (int i=0;i<states.size();++i) {             // loop over source states
+      state_type state=states[i];           // get source state
+      state_type newstate=state;            // prepare target state
+      if (i%1000==0)
+        std::cerr << i << "\n";
+  for (boost::graph_traits<graph_type>::edge_iterator it=boost::edges(lattice()).first; 
+      it!=boost::edges(lattice()).second ; ++it) {
+    boost::multi_array<T,4>& mat = bond_matrix[bond_type[*it]];
+    int s1=boost::source(*it,lattice());
+    int s2=boost::target(*it,lattice());
+      int is1=state[s1];                            // get source site states
+      int is2=state[s2];
+      for (int js1=0;js1<basis[s1].size();++js1) {  // loop over target site states
+        for (int js2=0;js2<basis[s2].size();++js2) {
+          T val=mat[is1][is2][js1][js2];            // get matrix element
+          if (val) {                                // if nonzero matrix element
+            newstate[s1]=js1;                       // build target state
+            newstate[s2]=js2;
+            int j = states.index(state);            // lookup target state
+            matrix_(i,j)+=val;                      // set matrix element
+          }
+        }
+      }
     }
   }  
   built_ = true;
+   
+  std::cerr << "Took " << alps::dclock()-t << " seconds\n";
 }
