@@ -65,7 +65,7 @@ void convert_params(const std::string& inname, const std::string& basename)
   }
   baseseed &= ((1<<30)|((1<<30)-1));
 
-  alps::oxstream out((basename+".in.xml").c_str());
+  alps::oxstream out(boost::filesystem::path((basename+".in.xml").c_str(),boost::filesystem::native));
   out << alps::header("UTF-8")
       << alps::stylesheet(alps::xslt_path("job.xsl"))
       << alps::start_tag("JOB")
@@ -94,7 +94,7 @@ void convert_params(const std::string& inname, const std::string& basename)
         << alps::end_tag("OUTPUT")
         << alps::end_tag("TASK");
 
-    alps::oxstream task((taskname+".in.xml").c_str());
+    alps::oxstream task(boost::filesystem::path((taskname+".in.xml").c_str(),boost::filesystem::native));
     task << alps::header("UTF-8")
          << alps::stylesheet(alps::xslt_path("ALPS.xsl"));
     task << alps::start_tag("SIMULATION")

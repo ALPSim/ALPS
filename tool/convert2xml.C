@@ -51,7 +51,7 @@ void convert_params(const std::string& inname, const std::string& outfilename)
   std::cout << "Converting parameter file " << inname << " to "
             <<  basename+".in.xml" << std::endl;
 
-  alps::oxstream out((basename+".in.xml").c_str());
+  alps::oxstream out(boost::filesystem::path((basename+".in.xml").c_str(),boost::filesystem::native));
   out << alps::header("UTF-8")
       << alps::stylesheet(alps::xslt_path("job.xsl"))
       << alps::start_tag("JOB")
@@ -74,7 +74,7 @@ void convert_params(const std::string& inname, const std::string& outfilename)
         << alps::end_tag("OUTPUT")
         << alps::end_tag("TASK");
     //      out << "    <CPUS min=\"1\">\n";
-    alps::oxstream task((taskname+".in.xml").c_str());
+    alps::oxstream task(boost::filesystem::path((taskname+".in.xml").c_str(),boost::filesystem::native));
     task << alps::header("UTF-8")
          << alps::stylesheet(alps::xslt_path("ALPS.xsl"));
     task << alps::start_tag("SIMULATION")
@@ -105,7 +105,7 @@ void convert_simulation(const std::string& inname, const std::string& outname)
     boost::throw_exception(std::runtime_error("did not get a simulation on dump"));
   std::string jobname=outname+".xml";
   std::cout << "Converting simulation file " << inname << " to " <<  jobname << std::endl;
-  alps::oxstream out(jobname);
+  alps::oxstream out(boost::filesystem::path(jobname,boost::filesystem::native));
   out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("QMCXML.xsl"))
       << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
       << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
@@ -156,7 +156,7 @@ void convert_scheduler(const std::string& inname, const std::string& outname)
     boost::throw_exception(std::runtime_error("did not get scheduler on dump"));
   std::string jobname=outname+".xml";
   std::cout << "Converting scheduler file " << inname << " to " <<  jobname << std::endl;
-  alps::oxstream out(jobname);
+  alps::oxstream out(boost::filesystem::path(jobname,boost::filesystem::native));
   out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("job.xsl"))
     << alps::start_tag("JOB") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
     << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2003/8/job.xsd");
