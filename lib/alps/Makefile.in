@@ -40,14 +40,13 @@ host_triplet = @host@
 @ALPS_FULL_TRUE@am__append_1 = $(src_ALEA) $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
 @BUILD_BOOST_TRUE@am__append_2 = $(top_srcdir)/src/boost/throw_exception.C
 @BUILD_BOOST_TRUE@am__append_3 = $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_REGEX)
-@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@@BUILD_BOOST_SERIALIZATION_TRUE@am__append_4 = $(src_boost_PROGRAM_OPTIONS_SERIALIZATION) $(src_boost_PROGRAM_OPTIONS) $(src_boost_SERIALIZATION)
-@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@@BUILD_BOOST_SERIALIZATION_FALSE@am__append_5 = $(src_boost_PROGRAM_OPTIONS_SERIALIZATION) $(src_boost_SERIALIZATION)
-@BUILD_BOOST_PROGRAM_OPTIONS_FALSE@@BUILD_BOOST_SERIALIZATION_TRUE@am__append_6 = $(src_boost_PROGRAM_OPTIONS_SERIALIZATION) $(src_boost_SERIALIZATION)
-@BUILD_BOOST_SIGNALS_TRUE@am__append_7 = $(src_boost_SIGNALS)
-@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__append_8 = $(src_boost_SIGNALS_1_32)
-@BUILD_BOOST_THREAD_TRUE@am__append_9 = $(src_boost_THREAD)
-@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__append_10 = $(src_boost_THREAD_1_32)
-@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@am__append_11 = $(src_boost_THREAD_1_31)
+@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@am__append_4 = $(src_boost_PROGRAM_OPTIONS)
+@BUILD_BOOST_SERIALIZATION_TRUE@am__append_5 = $(src_boost_SERIALIZATION)
+@BUILD_BOOST_SIGNALS_TRUE@am__append_6 = $(src_boost_SIGNALS)
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__append_7 = $(src_boost_SIGNALS_1_32)
+@BUILD_BOOST_THREAD_TRUE@am__append_8 = $(src_boost_THREAD)
+@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__append_9 = $(src_boost_THREAD_1_32)
+@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@am__append_10 = $(src_boost_THREAD_1_31)
 subdir = lib/alps
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -69,17 +68,17 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libalps_la_LIBADD =
-am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/evaluator.C \
+am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
+	$(top_srcdir)/src/alps/evaluator.C \
 	$(top_srcdir)/src/alps/expression.C \
 	$(top_srcdir)/src/alps/parameterlist.C \
 	$(top_srcdir)/src/alps/parameters.C \
-	$(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/osiris/dump.C \
 	$(top_srcdir)/src/alps/osiris/xdrdump.C \
 	$(top_srcdir)/src/alps/parser/parser.C \
-	$(top_srcdir)/src/alps/parser/xmlstream.C \
 	$(top_srcdir)/src/alps/parser/xmlhandler.C \
 	$(top_srcdir)/src/alps/parser/xmlparser.C \
+	$(top_srcdir)/src/alps/parser/xmlstream.C \
 	$(top_srcdir)/src/alps/parser/xslt.C \
 	$(top_srcdir)/src/alps/random/rngfactory.C \
 	$(top_srcdir)/src/alps/alea/nan.C \
@@ -92,36 +91,37 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/evaluator.C \
 	$(top_srcdir)/src/alps/lattice/unitcell.C \
 	$(top_srcdir)/src/alps/model/modellibrary.C \
 	$(top_srcdir)/src/alps/scheduler/abstract_task.C \
+	$(top_srcdir)/src/alps/scheduler/factory.C \
+	$(top_srcdir)/src/alps/scheduler/info.C \
+	$(top_srcdir)/src/alps/scheduler/master_scheduler.C \
+	$(top_srcdir)/src/alps/scheduler/montecarlo.C \
+	$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C \
+	$(top_srcdir)/src/alps/scheduler/options.C \
 	$(top_srcdir)/src/alps/scheduler/remote_task.C \
 	$(top_srcdir)/src/alps/scheduler/remote_worker.C \
 	$(top_srcdir)/src/alps/scheduler/scheduler.C \
-	$(top_srcdir)/src/alps/scheduler/info.C \
-	$(top_srcdir)/src/alps/scheduler/single_scheduler.C \
-	$(top_srcdir)/src/alps/scheduler/master_scheduler.C \
-	$(top_srcdir)/src/alps/scheduler/slave_task.C \
-	$(top_srcdir)/src/alps/scheduler/montecarlo.C \
-	$(top_srcdir)/src/alps/scheduler/task.C \
-	$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C \
-	$(top_srcdir)/src/alps/scheduler/worker.C \
 	$(top_srcdir)/src/alps/scheduler/signal.C \
-	$(top_srcdir)/src/alps/scheduler/options.C \
+	$(top_srcdir)/src/alps/scheduler/single_scheduler.C \
+	$(top_srcdir)/src/alps/scheduler/slave_task.C \
+	$(top_srcdir)/src/alps/scheduler/task.C \
+	$(top_srcdir)/src/alps/scheduler/worker.C \
 	$(top_srcdir)/src/alps/scheduler/workertask.C \
-	$(top_srcdir)/src/alps/scheduler/factory.C \
 	$(top_srcdir)/src/boost/throw_exception.C
-am__objects_1 = evaluator.lo expression.lo parameterlist.lo \
-	parameters.lo copyright.lo
+am__objects_1 = copyright.lo evaluator.lo expression.lo \
+	parameterlist.lo parameters.lo
 am__objects_2 = dump.lo xdrdump.lo
-am__objects_3 = parser.lo xmlstream.lo xmlhandler.lo xmlparser.lo \
+am__objects_3 = parser.lo xmlhandler.lo xmlparser.lo xmlstream.lo \
 	xslt.lo
 am__objects_4 = rngfactory.lo
 am__objects_5 = nan.lo observable.lo observableset.lo
 am__objects_6 = disorder.lo latticedescriptor.lo \
 	latticegraphdescriptor.lo latticelibrary.lo unitcell.lo
 am__objects_7 = modellibrary.lo
-am__objects_8 = abstract_task.lo remote_task.lo remote_worker.lo \
-	scheduler.lo info.lo single_scheduler.lo master_scheduler.lo \
-	slave_task.lo montecarlo.lo task.lo mpp_scheduler.lo worker.lo \
-	signal.lo options.lo workertask.lo factory.lo
+am__objects_8 = abstract_task.lo factory.lo info.lo \
+	master_scheduler.lo montecarlo.lo mpp_scheduler.lo options.lo \
+	remote_task.lo remote_worker.lo scheduler.lo signal.lo \
+	single_scheduler.lo slave_task.lo task.lo worker.lo \
+	workertask.lo
 @ALPS_FULL_TRUE@am__objects_9 = $(am__objects_5) $(am__objects_6) \
 @ALPS_FULL_TRUE@	$(am__objects_7) $(am__objects_8)
 @BUILD_BOOST_TRUE@am__objects_10 = throw_exception.lo
@@ -138,10 +138,11 @@ am__objects_13 = c_regex_traits.lo c_regex_traits_common.lo \
 	w32_regex_traits.lo wide_posix_api.lo winstances.lo
 @BUILD_BOOST_TRUE@am__objects_14 = $(am__objects_11) $(am__objects_12) \
 @BUILD_BOOST_TRUE@	$(am__objects_13)
-am__objects_15 = utf8_codecvt_facet.lo
-am__objects_16 = cmdline.lo config_file.lo convert.lo \
+am__objects_15 = cmdline.lo config_file.lo convert.lo \
 	options_description.lo parsers.lo positional_options.lo \
-	value_semantic.lo variables_map.lo winmain.lo
+	value_semantic.lo variables_map.lo winmain.lo \
+	po_utf8_codecvt_facet.lo
+@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@am__objects_16 = $(am__objects_15)
 am__objects_17 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
 	basic_serializer_map.lo basic_text_iprimitive.lo \
 	basic_text_oprimitive.lo basic_text_wiprimitive.lo \
@@ -151,34 +152,27 @@ am__objects_17 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
 	extended_type_info_no_rtti.lo extended_type_info_typeid.lo \
 	polymorphic_iarchive.lo polymorphic_oarchive.lo \
 	text_iarchive.lo text_oarchive.lo text_wiarchive.lo \
-	text_woarchive.lo void_cast.lo xml_grammar.lo xml_iarchive.lo \
-	xml_oarchive.lo xml_wgrammar.lo xml_wiarchive.lo \
-	xml_woarchive.lo
-@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@@BUILD_BOOST_SERIALIZATION_TRUE@am__objects_18 = $(am__objects_15) \
-@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@@BUILD_BOOST_SERIALIZATION_TRUE@	$(am__objects_16) \
-@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@@BUILD_BOOST_SERIALIZATION_TRUE@	$(am__objects_17)
-@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@@BUILD_BOOST_SERIALIZATION_FALSE@am__objects_19 = $(am__objects_15) \
-@BUILD_BOOST_PROGRAM_OPTIONS_TRUE@@BUILD_BOOST_SERIALIZATION_FALSE@	$(am__objects_17)
-@BUILD_BOOST_PROGRAM_OPTIONS_FALSE@@BUILD_BOOST_SERIALIZATION_TRUE@am__objects_20 = $(am__objects_15) \
-@BUILD_BOOST_PROGRAM_OPTIONS_FALSE@@BUILD_BOOST_SERIALIZATION_TRUE@	$(am__objects_17)
-am__objects_21 = connection.lo signal_base.lo slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@am__objects_22 = $(am__objects_21)
-am__objects_23 = named_slot_map.lo
-@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__objects_24 =  \
-@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@	$(am__objects_23)
-am__objects_25 = condition.lo exceptions.lo mutex.lo once.lo \
+	text_woarchive.lo utf8_codecvt_facet.lo void_cast.lo \
+	xml_grammar.lo xml_iarchive.lo xml_oarchive.lo xml_wgrammar.lo \
+	xml_wiarchive.lo xml_woarchive.lo
+@BUILD_BOOST_SERIALIZATION_TRUE@am__objects_18 = $(am__objects_17)
+am__objects_19 = connection.lo signal_base.lo slot.lo trackable.lo
+@BUILD_BOOST_SIGNALS_TRUE@am__objects_20 = $(am__objects_19)
+am__objects_21 = named_slot_map.lo
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__objects_22 =  \
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@	$(am__objects_21)
+am__objects_23 = condition.lo exceptions.lo mutex.lo once.lo \
 	recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@am__objects_26 = $(am__objects_25)
-am__objects_27 = barrier.lo
-@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__objects_28 =  \
-@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_27)
-am__objects_29 = threadmon.lo
-@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@am__objects_30 =  \
-@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_29)
-nodist_libalps_la_OBJECTS = $(am__objects_14) $(am__objects_18) \
-	$(am__objects_19) $(am__objects_20) $(am__objects_22) \
-	$(am__objects_24) $(am__objects_26) $(am__objects_28) \
-	$(am__objects_30)
+@BUILD_BOOST_THREAD_TRUE@am__objects_24 = $(am__objects_23)
+am__objects_25 = barrier.lo
+@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__objects_26 =  \
+@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_25)
+am__objects_27 = threadmon.lo
+@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@am__objects_28 =  \
+@BOOST_1_32_FALSE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_27)
+nodist_libalps_la_OBJECTS = $(am__objects_14) $(am__objects_16) \
+	$(am__objects_18) $(am__objects_20) $(am__objects_22) \
+	$(am__objects_24) $(am__objects_26) $(am__objects_28)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -241,6 +235,7 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/parameters.Plo ./$(DEPDIR)/parser.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/parsers.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/path_posix_windows.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/po_utf8_codecvt_facet.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/polymorphic_iarchive.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/polymorphic_oarchive.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/positional_options.Plo \
@@ -450,14 +445,60 @@ DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
 AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
 AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
-src_ALPS = $(top_srcdir)/src/alps/evaluator.C $(top_srcdir)/src/alps/expression.C $(top_srcdir)/src/alps/parameterlist.C $(top_srcdir)/src/alps/parameters.C $(top_srcdir)/src/alps/copyright.C
-src_ALEA = $(top_srcdir)/src/alps/alea/nan.C $(top_srcdir)/src/alps/alea/observable.C $(top_srcdir)/src/alps/alea/observableset.C
-src_OSIRIS = $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/xdrdump.C
-src_LATTICE = $(top_srcdir)/src/alps/lattice/disorder.C $(top_srcdir)/src/alps/lattice/latticedescriptor.C $(top_srcdir)/src/alps/lattice/latticegraphdescriptor.C $(top_srcdir)/src/alps/lattice/latticelibrary.C $(top_srcdir)/src/alps/lattice/unitcell.C
-src_MODEL = $(top_srcdir)/src/alps/model/modellibrary.C
-src_RANDOM = $(top_srcdir)/src/alps/random/rngfactory.C
-src_PARSER = $(top_srcdir)/src/alps/parser/parser.C $(top_srcdir)/src/alps/parser/xmlstream.C $(top_srcdir)/src/alps/parser/xmlhandler.C $(top_srcdir)/src/alps/parser/xmlparser.C $(top_srcdir)/src/alps/parser/xslt.C
-src_SCHEDULER = $(top_srcdir)/src/alps/scheduler/abstract_task.C $(top_srcdir)/src/alps/scheduler/remote_task.C $(top_srcdir)/src/alps/scheduler/remote_worker.C $(top_srcdir)/src/alps/scheduler/scheduler.C $(top_srcdir)/src/alps/scheduler/info.C $(top_srcdir)/src/alps/scheduler/single_scheduler.C $(top_srcdir)/src/alps/scheduler/master_scheduler.C $(top_srcdir)/src/alps/scheduler/slave_task.C $(top_srcdir)/src/alps/scheduler/montecarlo.C $(top_srcdir)/src/alps/scheduler/task.C $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C $(top_srcdir)/src/alps/scheduler/worker.C $(top_srcdir)/src/alps/scheduler/signal.C $(top_srcdir)/src/alps/scheduler/options.C $(top_srcdir)/src/alps/scheduler/workertask.C $(top_srcdir)/src/alps/scheduler/factory.C
+src_ALPS = \
+  $(top_srcdir)/src/alps/copyright.C \
+  $(top_srcdir)/src/alps/evaluator.C \
+  $(top_srcdir)/src/alps/expression.C \
+  $(top_srcdir)/src/alps/parameterlist.C \
+  $(top_srcdir)/src/alps/parameters.C
+
+src_ALEA = \
+  $(top_srcdir)/src/alps/alea/nan.C \
+  $(top_srcdir)/src/alps/alea/observable.C \
+  $(top_srcdir)/src/alps/alea/observableset.C
+
+src_OSIRIS = \
+  $(top_srcdir)/src/alps/osiris/dump.C \
+  $(top_srcdir)/src/alps/osiris/xdrdump.C
+
+src_LATTICE = \
+  $(top_srcdir)/src/alps/lattice/disorder.C \
+  $(top_srcdir)/src/alps/lattice/latticedescriptor.C \
+  $(top_srcdir)/src/alps/lattice/latticegraphdescriptor.C \
+  $(top_srcdir)/src/alps/lattice/latticelibrary.C \
+  $(top_srcdir)/src/alps/lattice/unitcell.C
+
+src_MODEL = \
+  $(top_srcdir)/src/alps/model/modellibrary.C
+
+src_RANDOM = \
+  $(top_srcdir)/src/alps/random/rngfactory.C
+
+src_PARSER = \
+  $(top_srcdir)/src/alps/parser/parser.C \
+  $(top_srcdir)/src/alps/parser/xmlhandler.C \
+  $(top_srcdir)/src/alps/parser/xmlparser.C \
+  $(top_srcdir)/src/alps/parser/xmlstream.C \
+  $(top_srcdir)/src/alps/parser/xslt.C
+
+src_SCHEDULER = \
+  $(top_srcdir)/src/alps/scheduler/abstract_task.C \
+  $(top_srcdir)/src/alps/scheduler/factory.C \
+  $(top_srcdir)/src/alps/scheduler/info.C \
+  $(top_srcdir)/src/alps/scheduler/master_scheduler.C \
+  $(top_srcdir)/src/alps/scheduler/montecarlo.C \
+  $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C \
+  $(top_srcdir)/src/alps/scheduler/options.C \
+  $(top_srcdir)/src/alps/scheduler/remote_task.C \
+  $(top_srcdir)/src/alps/scheduler/remote_worker.C \
+  $(top_srcdir)/src/alps/scheduler/scheduler.C \
+  $(top_srcdir)/src/alps/scheduler/signal.C \
+  $(top_srcdir)/src/alps/scheduler/single_scheduler.C \
+  $(top_srcdir)/src/alps/scheduler/slave_task.C \
+  $(top_srcdir)/src/alps/scheduler/task.C \
+  $(top_srcdir)/src/alps/scheduler/worker.C \
+  $(top_srcdir)/src/alps/scheduler/workertask.C
+
 src_boost_DATE_TIME = \
   $(BOOST_SRCDIR)/date_time/src/gregorian/date_generators.cpp \
   $(BOOST_SRCDIR)/date_time/src/gregorian/greg_month.cpp \
@@ -486,34 +527,6 @@ src_boost_REGEX = \
   $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp \
   $(BOOST_SRCDIR)/regex/src/winstances.cpp
 
-src_boost_SIGNALS = \
-  $(BOOST_SRCDIR)/signals/src/connection.cpp \
-  $(BOOST_SRCDIR)/signals/src/signal_base.cpp \
-  $(BOOST_SRCDIR)/signals/src/slot.cpp \
-  $(BOOST_SRCDIR)/signals/src/trackable.cpp
-
-src_boost_SIGNALS_1_32 = \
-  $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
-
-src_boost_THREAD = \
-  $(BOOST_SRCDIR)/thread/src/condition.cpp \
-  $(BOOST_SRCDIR)/thread/src/exceptions.cpp \
-  $(BOOST_SRCDIR)/thread/src/mutex.cpp \
-  $(BOOST_SRCDIR)/thread/src/once.cpp \
-  $(BOOST_SRCDIR)/thread/src/recursive_mutex.cpp \
-  $(BOOST_SRCDIR)/thread/src/thread.cpp \
-  $(BOOST_SRCDIR)/thread/src/tss.cpp \
-  $(BOOST_SRCDIR)/thread/src/xtime.cpp
-
-src_boost_THREAD_1_31 = \
-  $(BOOST_SRCDIR)/thread/src/threadmon.cpp
-
-src_boost_THREAD_1_32 = \
-  $(BOOST_SRCDIR)/thread/src/barrier.cpp
-
-src_boost_PROGRAM_OPTIONS_SERIALIZATION = \
-  $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
-
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
@@ -523,7 +536,8 @@ src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/positional_options.cpp \
   $(BOOST_SRCDIR)/program_options/src/value_semantic.cpp \
   $(BOOST_SRCDIR)/program_options/src/variables_map.cpp \
-  $(BOOST_SRCDIR)/program_options/src/winmain.cpp
+  $(BOOST_SRCDIR)/program_options/src/winmain.cpp \
+  $(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
 
 src_boost_SERIALIZATION = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
@@ -550,6 +564,7 @@ src_boost_SERIALIZATION = \
   $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp \
   $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
@@ -558,9 +573,34 @@ src_boost_SERIALIZATION = \
   $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 
+src_boost_SIGNALS = \
+  $(BOOST_SRCDIR)/signals/src/connection.cpp \
+  $(BOOST_SRCDIR)/signals/src/signal_base.cpp \
+  $(BOOST_SRCDIR)/signals/src/slot.cpp \
+  $(BOOST_SRCDIR)/signals/src/trackable.cpp
+
+src_boost_SIGNALS_1_32 = \
+  $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
+
+src_boost_THREAD = \
+  $(BOOST_SRCDIR)/thread/src/condition.cpp \
+  $(BOOST_SRCDIR)/thread/src/exceptions.cpp \
+  $(BOOST_SRCDIR)/thread/src/mutex.cpp \
+  $(BOOST_SRCDIR)/thread/src/once.cpp \
+  $(BOOST_SRCDIR)/thread/src/recursive_mutex.cpp \
+  $(BOOST_SRCDIR)/thread/src/thread.cpp \
+  $(BOOST_SRCDIR)/thread/src/tss.cpp \
+  $(BOOST_SRCDIR)/thread/src/xtime.cpp
+
+src_boost_THREAD_1_31 = \
+  $(BOOST_SRCDIR)/thread/src/threadmon.cpp
+
+src_boost_THREAD_1_32 = \
+  $(BOOST_SRCDIR)/thread/src/barrier.cpp
+
 lib_LTLIBRARIES = libalps.la 
 libalps_la_SOURCES = $(src_ALPS) $(src_OSIRIS) $(src_PARSER) $(src_RANDOM) $(am__append_1) $(am__append_2)
-nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) $(am__append_5) $(am__append_6) $(am__append_7) $(am__append_8) $(am__append_9) $(am__append_10) $(am__append_11)
+nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) $(am__append_5) $(am__append_6) $(am__append_7) $(am__append_8) $(am__append_9) $(am__append_10)
 all: all-am
 
 .SUFFIXES:
@@ -695,6 +735,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parsers.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path_posix_windows.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/po_utf8_codecvt_facet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polymorphic_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polymorphic_oarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/positional_options.Plo@am__quote@
@@ -770,6 +811,30 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/$*.Plo' tmpdepfile='$(DEPDIR)/$*.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+copyright.o: $(top_srcdir)/src/alps/copyright.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT copyright.o -MD -MP -MF "$(DEPDIR)/copyright.Tpo" -c -o copyright.o `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/copyright.Tpo" "$(DEPDIR)/copyright.Po"; else rm -f "$(DEPDIR)/copyright.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/copyright.C' object='copyright.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/copyright.Po' tmpdepfile='$(DEPDIR)/copyright.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.o `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
+
+copyright.obj: $(top_srcdir)/src/alps/copyright.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT copyright.obj -MD -MP -MF "$(DEPDIR)/copyright.Tpo" -c -o copyright.obj `if test -f '$(top_srcdir)/src/alps/copyright.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/copyright.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/copyright.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/copyright.Tpo" "$(DEPDIR)/copyright.Po"; else rm -f "$(DEPDIR)/copyright.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/copyright.C' object='copyright.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/copyright.Po' tmpdepfile='$(DEPDIR)/copyright.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.obj `if test -f '$(top_srcdir)/src/alps/copyright.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/copyright.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/copyright.C'; fi`
+
+copyright.lo: $(top_srcdir)/src/alps/copyright.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT copyright.lo -MD -MP -MF "$(DEPDIR)/copyright.Tpo" -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/copyright.Tpo" "$(DEPDIR)/copyright.Plo"; else rm -f "$(DEPDIR)/copyright.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/copyright.C' object='copyright.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/copyright.Plo' tmpdepfile='$(DEPDIR)/copyright.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
 
 evaluator.o: $(top_srcdir)/src/alps/evaluator.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluator.o -MD -MP -MF "$(DEPDIR)/evaluator.Tpo" -c -o evaluator.o `test -f '$(top_srcdir)/src/alps/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/evaluator.C; \
@@ -867,30 +932,6 @@ parameters.lo: $(top_srcdir)/src/alps/parameters.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parameters.lo `test -f '$(top_srcdir)/src/alps/parameters.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameters.C
 
-copyright.o: $(top_srcdir)/src/alps/copyright.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT copyright.o -MD -MP -MF "$(DEPDIR)/copyright.Tpo" -c -o copyright.o `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/copyright.Tpo" "$(DEPDIR)/copyright.Po"; else rm -f "$(DEPDIR)/copyright.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/copyright.C' object='copyright.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/copyright.Po' tmpdepfile='$(DEPDIR)/copyright.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.o `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
-
-copyright.obj: $(top_srcdir)/src/alps/copyright.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT copyright.obj -MD -MP -MF "$(DEPDIR)/copyright.Tpo" -c -o copyright.obj `if test -f '$(top_srcdir)/src/alps/copyright.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/copyright.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/copyright.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/copyright.Tpo" "$(DEPDIR)/copyright.Po"; else rm -f "$(DEPDIR)/copyright.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/copyright.C' object='copyright.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/copyright.Po' tmpdepfile='$(DEPDIR)/copyright.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.obj `if test -f '$(top_srcdir)/src/alps/copyright.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/copyright.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/copyright.C'; fi`
-
-copyright.lo: $(top_srcdir)/src/alps/copyright.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT copyright.lo -MD -MP -MF "$(DEPDIR)/copyright.Tpo" -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/copyright.Tpo" "$(DEPDIR)/copyright.Plo"; else rm -f "$(DEPDIR)/copyright.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/copyright.C' object='copyright.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/copyright.Plo' tmpdepfile='$(DEPDIR)/copyright.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
-
 dump.o: $(top_srcdir)/src/alps/osiris/dump.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dump.o -MD -MP -MF "$(DEPDIR)/dump.Tpo" -c -o dump.o `test -f '$(top_srcdir)/src/alps/osiris/dump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/dump.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dump.Tpo" "$(DEPDIR)/dump.Po"; else rm -f "$(DEPDIR)/dump.Tpo"; exit 1; fi
@@ -963,30 +1004,6 @@ parser.lo: $(top_srcdir)/src/alps/parser/parser.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parser.lo `test -f '$(top_srcdir)/src/alps/parser/parser.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/parser.C
 
-xmlstream.o: $(top_srcdir)/src/alps/parser/xmlstream.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlstream.o -MD -MP -MF "$(DEPDIR)/xmlstream.Tpo" -c -o xmlstream.o `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xmlstream.Tpo" "$(DEPDIR)/xmlstream.Po"; else rm -f "$(DEPDIR)/xmlstream.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/xmlstream.C' object='xmlstream.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/xmlstream.Po' tmpdepfile='$(DEPDIR)/xmlstream.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlstream.o `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C
-
-xmlstream.obj: $(top_srcdir)/src/alps/parser/xmlstream.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlstream.obj -MD -MP -MF "$(DEPDIR)/xmlstream.Tpo" -c -o xmlstream.obj `if test -f '$(top_srcdir)/src/alps/parser/xmlstream.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/parser/xmlstream.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/parser/xmlstream.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xmlstream.Tpo" "$(DEPDIR)/xmlstream.Po"; else rm -f "$(DEPDIR)/xmlstream.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/xmlstream.C' object='xmlstream.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/xmlstream.Po' tmpdepfile='$(DEPDIR)/xmlstream.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlstream.obj `if test -f '$(top_srcdir)/src/alps/parser/xmlstream.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/parser/xmlstream.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/parser/xmlstream.C'; fi`
-
-xmlstream.lo: $(top_srcdir)/src/alps/parser/xmlstream.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlstream.lo -MD -MP -MF "$(DEPDIR)/xmlstream.Tpo" -c -o xmlstream.lo `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xmlstream.Tpo" "$(DEPDIR)/xmlstream.Plo"; else rm -f "$(DEPDIR)/xmlstream.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/xmlstream.C' object='xmlstream.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/xmlstream.Plo' tmpdepfile='$(DEPDIR)/xmlstream.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlstream.lo `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C
-
 xmlhandler.o: $(top_srcdir)/src/alps/parser/xmlhandler.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlhandler.o -MD -MP -MF "$(DEPDIR)/xmlhandler.Tpo" -c -o xmlhandler.o `test -f '$(top_srcdir)/src/alps/parser/xmlhandler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlhandler.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xmlhandler.Tpo" "$(DEPDIR)/xmlhandler.Po"; else rm -f "$(DEPDIR)/xmlhandler.Tpo"; exit 1; fi
@@ -1034,6 +1051,30 @@ xmlparser.lo: $(top_srcdir)/src/alps/parser/xmlparser.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/xmlparser.Plo' tmpdepfile='$(DEPDIR)/xmlparser.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlparser.lo `test -f '$(top_srcdir)/src/alps/parser/xmlparser.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlparser.C
+
+xmlstream.o: $(top_srcdir)/src/alps/parser/xmlstream.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlstream.o -MD -MP -MF "$(DEPDIR)/xmlstream.Tpo" -c -o xmlstream.o `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xmlstream.Tpo" "$(DEPDIR)/xmlstream.Po"; else rm -f "$(DEPDIR)/xmlstream.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/xmlstream.C' object='xmlstream.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/xmlstream.Po' tmpdepfile='$(DEPDIR)/xmlstream.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlstream.o `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C
+
+xmlstream.obj: $(top_srcdir)/src/alps/parser/xmlstream.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlstream.obj -MD -MP -MF "$(DEPDIR)/xmlstream.Tpo" -c -o xmlstream.obj `if test -f '$(top_srcdir)/src/alps/parser/xmlstream.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/parser/xmlstream.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/parser/xmlstream.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xmlstream.Tpo" "$(DEPDIR)/xmlstream.Po"; else rm -f "$(DEPDIR)/xmlstream.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/xmlstream.C' object='xmlstream.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/xmlstream.Po' tmpdepfile='$(DEPDIR)/xmlstream.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlstream.obj `if test -f '$(top_srcdir)/src/alps/parser/xmlstream.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/parser/xmlstream.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/parser/xmlstream.C'; fi`
+
+xmlstream.lo: $(top_srcdir)/src/alps/parser/xmlstream.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlstream.lo -MD -MP -MF "$(DEPDIR)/xmlstream.Tpo" -c -o xmlstream.lo `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xmlstream.Tpo" "$(DEPDIR)/xmlstream.Plo"; else rm -f "$(DEPDIR)/xmlstream.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/xmlstream.C' object='xmlstream.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/xmlstream.Plo' tmpdepfile='$(DEPDIR)/xmlstream.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlstream.lo `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C
 
 xslt.o: $(top_srcdir)/src/alps/parser/xslt.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xslt.o -MD -MP -MF "$(DEPDIR)/xslt.Tpo" -c -o xslt.o `test -f '$(top_srcdir)/src/alps/parser/xslt.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xslt.C; \
@@ -1323,6 +1364,150 @@ abstract_task.lo: $(top_srcdir)/src/alps/scheduler/abstract_task.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o abstract_task.lo `test -f '$(top_srcdir)/src/alps/scheduler/abstract_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/abstract_task.C
 
+factory.o: $(top_srcdir)/src/alps/scheduler/factory.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT factory.o -MD -MP -MF "$(DEPDIR)/factory.Tpo" -c -o factory.o `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/factory.Tpo" "$(DEPDIR)/factory.Po"; else rm -f "$(DEPDIR)/factory.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/factory.C' object='factory.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/factory.Po' tmpdepfile='$(DEPDIR)/factory.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o factory.o `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C
+
+factory.obj: $(top_srcdir)/src/alps/scheduler/factory.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT factory.obj -MD -MP -MF "$(DEPDIR)/factory.Tpo" -c -o factory.obj `if test -f '$(top_srcdir)/src/alps/scheduler/factory.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/factory.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/factory.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/factory.Tpo" "$(DEPDIR)/factory.Po"; else rm -f "$(DEPDIR)/factory.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/factory.C' object='factory.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/factory.Po' tmpdepfile='$(DEPDIR)/factory.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o factory.obj `if test -f '$(top_srcdir)/src/alps/scheduler/factory.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/factory.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/factory.C'; fi`
+
+factory.lo: $(top_srcdir)/src/alps/scheduler/factory.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT factory.lo -MD -MP -MF "$(DEPDIR)/factory.Tpo" -c -o factory.lo `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/factory.Tpo" "$(DEPDIR)/factory.Plo"; else rm -f "$(DEPDIR)/factory.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/factory.C' object='factory.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/factory.Plo' tmpdepfile='$(DEPDIR)/factory.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o factory.lo `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C
+
+info.o: $(top_srcdir)/src/alps/scheduler/info.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT info.o -MD -MP -MF "$(DEPDIR)/info.Tpo" -c -o info.o `test -f '$(top_srcdir)/src/alps/scheduler/info.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/info.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/info.Tpo" "$(DEPDIR)/info.Po"; else rm -f "$(DEPDIR)/info.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/info.C' object='info.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/info.Po' tmpdepfile='$(DEPDIR)/info.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o info.o `test -f '$(top_srcdir)/src/alps/scheduler/info.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/info.C
+
+info.obj: $(top_srcdir)/src/alps/scheduler/info.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT info.obj -MD -MP -MF "$(DEPDIR)/info.Tpo" -c -o info.obj `if test -f '$(top_srcdir)/src/alps/scheduler/info.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/info.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/info.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/info.Tpo" "$(DEPDIR)/info.Po"; else rm -f "$(DEPDIR)/info.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/info.C' object='info.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/info.Po' tmpdepfile='$(DEPDIR)/info.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o info.obj `if test -f '$(top_srcdir)/src/alps/scheduler/info.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/info.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/info.C'; fi`
+
+info.lo: $(top_srcdir)/src/alps/scheduler/info.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT info.lo -MD -MP -MF "$(DEPDIR)/info.Tpo" -c -o info.lo `test -f '$(top_srcdir)/src/alps/scheduler/info.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/info.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/info.Tpo" "$(DEPDIR)/info.Plo"; else rm -f "$(DEPDIR)/info.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/info.C' object='info.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/info.Plo' tmpdepfile='$(DEPDIR)/info.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o info.lo `test -f '$(top_srcdir)/src/alps/scheduler/info.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/info.C
+
+master_scheduler.o: $(top_srcdir)/src/alps/scheduler/master_scheduler.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT master_scheduler.o -MD -MP -MF "$(DEPDIR)/master_scheduler.Tpo" -c -o master_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/master_scheduler.Tpo" "$(DEPDIR)/master_scheduler.Po"; else rm -f "$(DEPDIR)/master_scheduler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/master_scheduler.C' object='master_scheduler.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/master_scheduler.Po' tmpdepfile='$(DEPDIR)/master_scheduler.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o master_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C
+
+master_scheduler.obj: $(top_srcdir)/src/alps/scheduler/master_scheduler.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT master_scheduler.obj -MD -MP -MF "$(DEPDIR)/master_scheduler.Tpo" -c -o master_scheduler.obj `if test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/master_scheduler.Tpo" "$(DEPDIR)/master_scheduler.Po"; else rm -f "$(DEPDIR)/master_scheduler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/master_scheduler.C' object='master_scheduler.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/master_scheduler.Po' tmpdepfile='$(DEPDIR)/master_scheduler.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o master_scheduler.obj `if test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; fi`
+
+master_scheduler.lo: $(top_srcdir)/src/alps/scheduler/master_scheduler.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT master_scheduler.lo -MD -MP -MF "$(DEPDIR)/master_scheduler.Tpo" -c -o master_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/master_scheduler.Tpo" "$(DEPDIR)/master_scheduler.Plo"; else rm -f "$(DEPDIR)/master_scheduler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/master_scheduler.C' object='master_scheduler.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/master_scheduler.Plo' tmpdepfile='$(DEPDIR)/master_scheduler.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o master_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C
+
+montecarlo.o: $(top_srcdir)/src/alps/scheduler/montecarlo.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT montecarlo.o -MD -MP -MF "$(DEPDIR)/montecarlo.Tpo" -c -o montecarlo.o `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/montecarlo.Tpo" "$(DEPDIR)/montecarlo.Po"; else rm -f "$(DEPDIR)/montecarlo.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/montecarlo.C' object='montecarlo.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/montecarlo.Po' tmpdepfile='$(DEPDIR)/montecarlo.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o montecarlo.o `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C
+
+montecarlo.obj: $(top_srcdir)/src/alps/scheduler/montecarlo.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT montecarlo.obj -MD -MP -MF "$(DEPDIR)/montecarlo.Tpo" -c -o montecarlo.obj `if test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/montecarlo.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/montecarlo.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/montecarlo.Tpo" "$(DEPDIR)/montecarlo.Po"; else rm -f "$(DEPDIR)/montecarlo.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/montecarlo.C' object='montecarlo.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/montecarlo.Po' tmpdepfile='$(DEPDIR)/montecarlo.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o montecarlo.obj `if test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/montecarlo.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/montecarlo.C'; fi`
+
+montecarlo.lo: $(top_srcdir)/src/alps/scheduler/montecarlo.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT montecarlo.lo -MD -MP -MF "$(DEPDIR)/montecarlo.Tpo" -c -o montecarlo.lo `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/montecarlo.Tpo" "$(DEPDIR)/montecarlo.Plo"; else rm -f "$(DEPDIR)/montecarlo.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/montecarlo.C' object='montecarlo.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/montecarlo.Plo' tmpdepfile='$(DEPDIR)/montecarlo.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o montecarlo.lo `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C
+
+mpp_scheduler.o: $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mpp_scheduler.o -MD -MP -MF "$(DEPDIR)/mpp_scheduler.Tpo" -c -o mpp_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mpp_scheduler.Tpo" "$(DEPDIR)/mpp_scheduler.Po"; else rm -f "$(DEPDIR)/mpp_scheduler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' object='mpp_scheduler.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/mpp_scheduler.Po' tmpdepfile='$(DEPDIR)/mpp_scheduler.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpp_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
+
+mpp_scheduler.obj: $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mpp_scheduler.obj -MD -MP -MF "$(DEPDIR)/mpp_scheduler.Tpo" -c -o mpp_scheduler.obj `if test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mpp_scheduler.Tpo" "$(DEPDIR)/mpp_scheduler.Po"; else rm -f "$(DEPDIR)/mpp_scheduler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' object='mpp_scheduler.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/mpp_scheduler.Po' tmpdepfile='$(DEPDIR)/mpp_scheduler.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpp_scheduler.obj `if test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; fi`
+
+mpp_scheduler.lo: $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mpp_scheduler.lo -MD -MP -MF "$(DEPDIR)/mpp_scheduler.Tpo" -c -o mpp_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mpp_scheduler.Tpo" "$(DEPDIR)/mpp_scheduler.Plo"; else rm -f "$(DEPDIR)/mpp_scheduler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' object='mpp_scheduler.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/mpp_scheduler.Plo' tmpdepfile='$(DEPDIR)/mpp_scheduler.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpp_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
+
+options.o: $(top_srcdir)/src/alps/scheduler/options.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options.o -MD -MP -MF "$(DEPDIR)/options.Tpo" -c -o options.o `test -f '$(top_srcdir)/src/alps/scheduler/options.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/options.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options.Tpo" "$(DEPDIR)/options.Po"; else rm -f "$(DEPDIR)/options.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/options.C' object='options.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options.Po' tmpdepfile='$(DEPDIR)/options.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options.o `test -f '$(top_srcdir)/src/alps/scheduler/options.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/options.C
+
+options.obj: $(top_srcdir)/src/alps/scheduler/options.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options.obj -MD -MP -MF "$(DEPDIR)/options.Tpo" -c -o options.obj `if test -f '$(top_srcdir)/src/alps/scheduler/options.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/options.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/options.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options.Tpo" "$(DEPDIR)/options.Po"; else rm -f "$(DEPDIR)/options.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/options.C' object='options.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options.Po' tmpdepfile='$(DEPDIR)/options.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options.obj `if test -f '$(top_srcdir)/src/alps/scheduler/options.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/options.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/options.C'; fi`
+
+options.lo: $(top_srcdir)/src/alps/scheduler/options.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options.lo -MD -MP -MF "$(DEPDIR)/options.Tpo" -c -o options.lo `test -f '$(top_srcdir)/src/alps/scheduler/options.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/options.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options.Tpo" "$(DEPDIR)/options.Plo"; else rm -f "$(DEPDIR)/options.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/options.C' object='options.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options.Plo' tmpdepfile='$(DEPDIR)/options.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options.lo `test -f '$(top_srcdir)/src/alps/scheduler/options.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/options.C
+
 remote_task.o: $(top_srcdir)/src/alps/scheduler/remote_task.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT remote_task.o -MD -MP -MF "$(DEPDIR)/remote_task.Tpo" -c -o remote_task.o `test -f '$(top_srcdir)/src/alps/scheduler/remote_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/remote_task.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/remote_task.Tpo" "$(DEPDIR)/remote_task.Po"; else rm -f "$(DEPDIR)/remote_task.Tpo"; exit 1; fi
@@ -1395,29 +1580,29 @@ scheduler.lo: $(top_srcdir)/src/alps/scheduler/scheduler.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/scheduler.C
 
-info.o: $(top_srcdir)/src/alps/scheduler/info.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT info.o -MD -MP -MF "$(DEPDIR)/info.Tpo" -c -o info.o `test -f '$(top_srcdir)/src/alps/scheduler/info.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/info.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/info.Tpo" "$(DEPDIR)/info.Po"; else rm -f "$(DEPDIR)/info.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/info.C' object='info.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/info.Po' tmpdepfile='$(DEPDIR)/info.TPo' @AMDEPBACKSLASH@
+signal.o: $(top_srcdir)/src/alps/scheduler/signal.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT signal.o -MD -MP -MF "$(DEPDIR)/signal.Tpo" -c -o signal.o `test -f '$(top_srcdir)/src/alps/scheduler/signal.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/signal.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/signal.Tpo" "$(DEPDIR)/signal.Po"; else rm -f "$(DEPDIR)/signal.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/signal.C' object='signal.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/signal.Po' tmpdepfile='$(DEPDIR)/signal.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o info.o `test -f '$(top_srcdir)/src/alps/scheduler/info.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/info.C
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o signal.o `test -f '$(top_srcdir)/src/alps/scheduler/signal.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/signal.C
 
-info.obj: $(top_srcdir)/src/alps/scheduler/info.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT info.obj -MD -MP -MF "$(DEPDIR)/info.Tpo" -c -o info.obj `if test -f '$(top_srcdir)/src/alps/scheduler/info.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/info.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/info.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/info.Tpo" "$(DEPDIR)/info.Po"; else rm -f "$(DEPDIR)/info.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/info.C' object='info.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/info.Po' tmpdepfile='$(DEPDIR)/info.TPo' @AMDEPBACKSLASH@
+signal.obj: $(top_srcdir)/src/alps/scheduler/signal.C
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT signal.obj -MD -MP -MF "$(DEPDIR)/signal.Tpo" -c -o signal.obj `if test -f '$(top_srcdir)/src/alps/scheduler/signal.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/signal.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/signal.C'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/signal.Tpo" "$(DEPDIR)/signal.Po"; else rm -f "$(DEPDIR)/signal.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/signal.C' object='signal.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/signal.Po' tmpdepfile='$(DEPDIR)/signal.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o info.obj `if test -f '$(top_srcdir)/src/alps/scheduler/info.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/info.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/info.C'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o signal.obj `if test -f '$(top_srcdir)/src/alps/scheduler/signal.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/signal.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/signal.C'; fi`
 
-info.lo: $(top_srcdir)/src/alps/scheduler/info.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT info.lo -MD -MP -MF "$(DEPDIR)/info.Tpo" -c -o info.lo `test -f '$(top_srcdir)/src/alps/scheduler/info.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/info.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/info.Tpo" "$(DEPDIR)/info.Plo"; else rm -f "$(DEPDIR)/info.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/info.C' object='info.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/info.Plo' tmpdepfile='$(DEPDIR)/info.TPlo' @AMDEPBACKSLASH@
+signal.lo: $(top_srcdir)/src/alps/scheduler/signal.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT signal.lo -MD -MP -MF "$(DEPDIR)/signal.Tpo" -c -o signal.lo `test -f '$(top_srcdir)/src/alps/scheduler/signal.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/signal.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/signal.Tpo" "$(DEPDIR)/signal.Plo"; else rm -f "$(DEPDIR)/signal.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/signal.C' object='signal.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/signal.Plo' tmpdepfile='$(DEPDIR)/signal.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o info.lo `test -f '$(top_srcdir)/src/alps/scheduler/info.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/info.C
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o signal.lo `test -f '$(top_srcdir)/src/alps/scheduler/signal.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/signal.C
 
 single_scheduler.o: $(top_srcdir)/src/alps/scheduler/single_scheduler.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT single_scheduler.o -MD -MP -MF "$(DEPDIR)/single_scheduler.Tpo" -c -o single_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/single_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/single_scheduler.C; \
@@ -1443,30 +1628,6 @@ single_scheduler.lo: $(top_srcdir)/src/alps/scheduler/single_scheduler.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o single_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/single_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/single_scheduler.C
 
-master_scheduler.o: $(top_srcdir)/src/alps/scheduler/master_scheduler.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT master_scheduler.o -MD -MP -MF "$(DEPDIR)/master_scheduler.Tpo" -c -o master_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/master_scheduler.Tpo" "$(DEPDIR)/master_scheduler.Po"; else rm -f "$(DEPDIR)/master_scheduler.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/master_scheduler.C' object='master_scheduler.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/master_scheduler.Po' tmpdepfile='$(DEPDIR)/master_scheduler.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o master_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C
-
-master_scheduler.obj: $(top_srcdir)/src/alps/scheduler/master_scheduler.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT master_scheduler.obj -MD -MP -MF "$(DEPDIR)/master_scheduler.Tpo" -c -o master_scheduler.obj `if test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/master_scheduler.Tpo" "$(DEPDIR)/master_scheduler.Po"; else rm -f "$(DEPDIR)/master_scheduler.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/master_scheduler.C' object='master_scheduler.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/master_scheduler.Po' tmpdepfile='$(DEPDIR)/master_scheduler.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o master_scheduler.obj `if test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/master_scheduler.C'; fi`
-
-master_scheduler.lo: $(top_srcdir)/src/alps/scheduler/master_scheduler.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT master_scheduler.lo -MD -MP -MF "$(DEPDIR)/master_scheduler.Tpo" -c -o master_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/master_scheduler.Tpo" "$(DEPDIR)/master_scheduler.Plo"; else rm -f "$(DEPDIR)/master_scheduler.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/master_scheduler.C' object='master_scheduler.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/master_scheduler.Plo' tmpdepfile='$(DEPDIR)/master_scheduler.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o master_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C
-
 slave_task.o: $(top_srcdir)/src/alps/scheduler/slave_task.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT slave_task.o -MD -MP -MF "$(DEPDIR)/slave_task.Tpo" -c -o slave_task.o `test -f '$(top_srcdir)/src/alps/scheduler/slave_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/slave_task.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/slave_task.Tpo" "$(DEPDIR)/slave_task.Po"; else rm -f "$(DEPDIR)/slave_task.Tpo"; exit 1; fi
@@ -1490,30 +1651,6 @@ slave_task.lo: $(top_srcdir)/src/alps/scheduler/slave_task.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/slave_task.Plo' tmpdepfile='$(DEPDIR)/slave_task.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o slave_task.lo `test -f '$(top_srcdir)/src/alps/scheduler/slave_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/slave_task.C
-
-montecarlo.o: $(top_srcdir)/src/alps/scheduler/montecarlo.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT montecarlo.o -MD -MP -MF "$(DEPDIR)/montecarlo.Tpo" -c -o montecarlo.o `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/montecarlo.Tpo" "$(DEPDIR)/montecarlo.Po"; else rm -f "$(DEPDIR)/montecarlo.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/montecarlo.C' object='montecarlo.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/montecarlo.Po' tmpdepfile='$(DEPDIR)/montecarlo.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o montecarlo.o `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C
-
-montecarlo.obj: $(top_srcdir)/src/alps/scheduler/montecarlo.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT montecarlo.obj -MD -MP -MF "$(DEPDIR)/montecarlo.Tpo" -c -o montecarlo.obj `if test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/montecarlo.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/montecarlo.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/montecarlo.Tpo" "$(DEPDIR)/montecarlo.Po"; else rm -f "$(DEPDIR)/montecarlo.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/montecarlo.C' object='montecarlo.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/montecarlo.Po' tmpdepfile='$(DEPDIR)/montecarlo.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o montecarlo.obj `if test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/montecarlo.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/montecarlo.C'; fi`
-
-montecarlo.lo: $(top_srcdir)/src/alps/scheduler/montecarlo.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT montecarlo.lo -MD -MP -MF "$(DEPDIR)/montecarlo.Tpo" -c -o montecarlo.lo `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/montecarlo.Tpo" "$(DEPDIR)/montecarlo.Plo"; else rm -f "$(DEPDIR)/montecarlo.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/montecarlo.C' object='montecarlo.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/montecarlo.Plo' tmpdepfile='$(DEPDIR)/montecarlo.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o montecarlo.lo `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C
 
 task.o: $(top_srcdir)/src/alps/scheduler/task.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT task.o -MD -MP -MF "$(DEPDIR)/task.Tpo" -c -o task.o `test -f '$(top_srcdir)/src/alps/scheduler/task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/task.C; \
@@ -1539,30 +1676,6 @@ task.lo: $(top_srcdir)/src/alps/scheduler/task.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o task.lo `test -f '$(top_srcdir)/src/alps/scheduler/task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/task.C
 
-mpp_scheduler.o: $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mpp_scheduler.o -MD -MP -MF "$(DEPDIR)/mpp_scheduler.Tpo" -c -o mpp_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mpp_scheduler.Tpo" "$(DEPDIR)/mpp_scheduler.Po"; else rm -f "$(DEPDIR)/mpp_scheduler.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' object='mpp_scheduler.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/mpp_scheduler.Po' tmpdepfile='$(DEPDIR)/mpp_scheduler.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpp_scheduler.o `test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
-
-mpp_scheduler.obj: $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mpp_scheduler.obj -MD -MP -MF "$(DEPDIR)/mpp_scheduler.Tpo" -c -o mpp_scheduler.obj `if test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mpp_scheduler.Tpo" "$(DEPDIR)/mpp_scheduler.Po"; else rm -f "$(DEPDIR)/mpp_scheduler.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' object='mpp_scheduler.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/mpp_scheduler.Po' tmpdepfile='$(DEPDIR)/mpp_scheduler.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpp_scheduler.obj `if test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C'; fi`
-
-mpp_scheduler.lo: $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mpp_scheduler.lo -MD -MP -MF "$(DEPDIR)/mpp_scheduler.Tpo" -c -o mpp_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/mpp_scheduler.Tpo" "$(DEPDIR)/mpp_scheduler.Plo"; else rm -f "$(DEPDIR)/mpp_scheduler.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' object='mpp_scheduler.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/mpp_scheduler.Plo' tmpdepfile='$(DEPDIR)/mpp_scheduler.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpp_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C
-
 worker.o: $(top_srcdir)/src/alps/scheduler/worker.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT worker.o -MD -MP -MF "$(DEPDIR)/worker.Tpo" -c -o worker.o `test -f '$(top_srcdir)/src/alps/scheduler/worker.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/worker.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/worker.Tpo" "$(DEPDIR)/worker.Po"; else rm -f "$(DEPDIR)/worker.Tpo"; exit 1; fi
@@ -1587,54 +1700,6 @@ worker.lo: $(top_srcdir)/src/alps/scheduler/worker.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o worker.lo `test -f '$(top_srcdir)/src/alps/scheduler/worker.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/worker.C
 
-signal.o: $(top_srcdir)/src/alps/scheduler/signal.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT signal.o -MD -MP -MF "$(DEPDIR)/signal.Tpo" -c -o signal.o `test -f '$(top_srcdir)/src/alps/scheduler/signal.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/signal.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/signal.Tpo" "$(DEPDIR)/signal.Po"; else rm -f "$(DEPDIR)/signal.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/signal.C' object='signal.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/signal.Po' tmpdepfile='$(DEPDIR)/signal.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o signal.o `test -f '$(top_srcdir)/src/alps/scheduler/signal.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/signal.C
-
-signal.obj: $(top_srcdir)/src/alps/scheduler/signal.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT signal.obj -MD -MP -MF "$(DEPDIR)/signal.Tpo" -c -o signal.obj `if test -f '$(top_srcdir)/src/alps/scheduler/signal.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/signal.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/signal.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/signal.Tpo" "$(DEPDIR)/signal.Po"; else rm -f "$(DEPDIR)/signal.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/signal.C' object='signal.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/signal.Po' tmpdepfile='$(DEPDIR)/signal.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o signal.obj `if test -f '$(top_srcdir)/src/alps/scheduler/signal.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/signal.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/signal.C'; fi`
-
-signal.lo: $(top_srcdir)/src/alps/scheduler/signal.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT signal.lo -MD -MP -MF "$(DEPDIR)/signal.Tpo" -c -o signal.lo `test -f '$(top_srcdir)/src/alps/scheduler/signal.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/signal.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/signal.Tpo" "$(DEPDIR)/signal.Plo"; else rm -f "$(DEPDIR)/signal.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/signal.C' object='signal.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/signal.Plo' tmpdepfile='$(DEPDIR)/signal.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o signal.lo `test -f '$(top_srcdir)/src/alps/scheduler/signal.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/signal.C
-
-options.o: $(top_srcdir)/src/alps/scheduler/options.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options.o -MD -MP -MF "$(DEPDIR)/options.Tpo" -c -o options.o `test -f '$(top_srcdir)/src/alps/scheduler/options.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/options.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options.Tpo" "$(DEPDIR)/options.Po"; else rm -f "$(DEPDIR)/options.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/options.C' object='options.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options.Po' tmpdepfile='$(DEPDIR)/options.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options.o `test -f '$(top_srcdir)/src/alps/scheduler/options.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/options.C
-
-options.obj: $(top_srcdir)/src/alps/scheduler/options.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options.obj -MD -MP -MF "$(DEPDIR)/options.Tpo" -c -o options.obj `if test -f '$(top_srcdir)/src/alps/scheduler/options.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/options.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/options.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options.Tpo" "$(DEPDIR)/options.Po"; else rm -f "$(DEPDIR)/options.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/options.C' object='options.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options.Po' tmpdepfile='$(DEPDIR)/options.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options.obj `if test -f '$(top_srcdir)/src/alps/scheduler/options.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/options.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/options.C'; fi`
-
-options.lo: $(top_srcdir)/src/alps/scheduler/options.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options.lo -MD -MP -MF "$(DEPDIR)/options.Tpo" -c -o options.lo `test -f '$(top_srcdir)/src/alps/scheduler/options.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/options.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options.Tpo" "$(DEPDIR)/options.Plo"; else rm -f "$(DEPDIR)/options.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/options.C' object='options.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options.Plo' tmpdepfile='$(DEPDIR)/options.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options.lo `test -f '$(top_srcdir)/src/alps/scheduler/options.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/options.C
-
 workertask.o: $(top_srcdir)/src/alps/scheduler/workertask.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT workertask.o -MD -MP -MF "$(DEPDIR)/workertask.Tpo" -c -o workertask.o `test -f '$(top_srcdir)/src/alps/scheduler/workertask.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/workertask.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/workertask.Tpo" "$(DEPDIR)/workertask.Po"; else rm -f "$(DEPDIR)/workertask.Tpo"; exit 1; fi
@@ -1658,30 +1723,6 @@ workertask.lo: $(top_srcdir)/src/alps/scheduler/workertask.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/workertask.Plo' tmpdepfile='$(DEPDIR)/workertask.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o workertask.lo `test -f '$(top_srcdir)/src/alps/scheduler/workertask.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/workertask.C
-
-factory.o: $(top_srcdir)/src/alps/scheduler/factory.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT factory.o -MD -MP -MF "$(DEPDIR)/factory.Tpo" -c -o factory.o `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/factory.Tpo" "$(DEPDIR)/factory.Po"; else rm -f "$(DEPDIR)/factory.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/factory.C' object='factory.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/factory.Po' tmpdepfile='$(DEPDIR)/factory.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o factory.o `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C
-
-factory.obj: $(top_srcdir)/src/alps/scheduler/factory.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT factory.obj -MD -MP -MF "$(DEPDIR)/factory.Tpo" -c -o factory.obj `if test -f '$(top_srcdir)/src/alps/scheduler/factory.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/factory.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/factory.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/factory.Tpo" "$(DEPDIR)/factory.Po"; else rm -f "$(DEPDIR)/factory.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/factory.C' object='factory.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/factory.Po' tmpdepfile='$(DEPDIR)/factory.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o factory.obj `if test -f '$(top_srcdir)/src/alps/scheduler/factory.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/scheduler/factory.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/scheduler/factory.C'; fi`
-
-factory.lo: $(top_srcdir)/src/alps/scheduler/factory.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT factory.lo -MD -MP -MF "$(DEPDIR)/factory.Tpo" -c -o factory.lo `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/factory.Tpo" "$(DEPDIR)/factory.Plo"; else rm -f "$(DEPDIR)/factory.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/factory.C' object='factory.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/factory.Plo' tmpdepfile='$(DEPDIR)/factory.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o factory.lo `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C
 
 throw_exception.o: $(top_srcdir)/src/boost/throw_exception.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT throw_exception.o -MD -MP -MF "$(DEPDIR)/throw_exception.Tpo" -c -o throw_exception.o `test -f '$(top_srcdir)/src/boost/throw_exception.C' || echo '$(srcdir)/'`$(top_srcdir)/src/boost/throw_exception.C; \
@@ -2235,30 +2276,6 @@ winstances.lo: $(BOOST_SRCDIR)/regex/src/winstances.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o winstances.lo `test -f '$(BOOST_SRCDIR)/regex/src/winstances.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/regex/src/winstances.cpp
 
-utf8_codecvt_facet.o: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.o -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
-
-utf8_codecvt_facet.obj: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.obj -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; fi`
-
-utf8_codecvt_facet.lo: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Plo"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Plo' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
-
 cmdline.o: $(BOOST_SRCDIR)/program_options/src/cmdline.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cmdline.o -MD -MP -MF "$(DEPDIR)/cmdline.Tpo" -c -o cmdline.o `test -f '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/cmdline.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/cmdline.Tpo" "$(DEPDIR)/cmdline.Po"; else rm -f "$(DEPDIR)/cmdline.Tpo"; exit 1; fi
@@ -2474,6 +2491,30 @@ winmain.lo: $(BOOST_SRCDIR)/program_options/src/winmain.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/winmain.Plo' tmpdepfile='$(DEPDIR)/winmain.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o winmain.lo `test -f '$(BOOST_SRCDIR)/program_options/src/winmain.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/winmain.cpp
+
+po_utf8_codecvt_facet.o: $(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT po_utf8_codecvt_facet.o -MD -MP -MF "$(DEPDIR)/po_utf8_codecvt_facet.Tpo" -c -o po_utf8_codecvt_facet.o `test -f '$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/po_utf8_codecvt_facet.Tpo" "$(DEPDIR)/po_utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/po_utf8_codecvt_facet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp' object='po_utf8_codecvt_facet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/po_utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/po_utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o po_utf8_codecvt_facet.o `test -f '$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
+
+po_utf8_codecvt_facet.obj: $(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT po_utf8_codecvt_facet.obj -MD -MP -MF "$(DEPDIR)/po_utf8_codecvt_facet.Tpo" -c -o po_utf8_codecvt_facet.obj `if test -f '$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/po_utf8_codecvt_facet.Tpo" "$(DEPDIR)/po_utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/po_utf8_codecvt_facet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp' object='po_utf8_codecvt_facet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/po_utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/po_utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o po_utf8_codecvt_facet.obj `if test -f '$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp'; fi`
+
+po_utf8_codecvt_facet.lo: $(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT po_utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/po_utf8_codecvt_facet.Tpo" -c -o po_utf8_codecvt_facet.lo `test -f '$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/po_utf8_codecvt_facet.Tpo" "$(DEPDIR)/po_utf8_codecvt_facet.Plo"; else rm -f "$(DEPDIR)/po_utf8_codecvt_facet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp' object='po_utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/po_utf8_codecvt_facet.Plo' tmpdepfile='$(DEPDIR)/po_utf8_codecvt_facet.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o po_utf8_codecvt_facet.lo `test -f '$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
 
 basic_archive.o: $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_archive.o -MD -MP -MF "$(DEPDIR)/basic_archive.Tpo" -c -o basic_archive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp; \
@@ -3026,6 +3067,30 @@ text_woarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_woarchive.Plo' tmpdepfile='$(DEPDIR)/text_woarchive.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
+
+utf8_codecvt_facet.o: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.o -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+
+utf8_codecvt_facet.obj: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.obj -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp'; fi`
+
+utf8_codecvt_facet.lo: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Plo"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Plo' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
 
 void_cast.o: $(BOOST_SRCDIR)/serialization/src/void_cast.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT void_cast.o -MD -MP -MF "$(DEPDIR)/void_cast.Tpo" -c -o void_cast.o `test -f '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/void_cast.cpp; \

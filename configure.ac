@@ -737,6 +737,10 @@ if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(tool/Makefile tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text tool/plot2text tool/plot2html)
 fi
 
+test "$ac_cv_use_precompiled_boost" != yes &&
+  test "$ac_cv_boost_program_options" = yes &&
+    AC_CONFIG_FILES(src/boost/po_utf8_codecvt_facet.cpp)
+
 AC_OUTPUT
 
 dnl
