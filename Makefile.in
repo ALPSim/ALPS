@@ -766,8 +766,8 @@ release snapshot :
 	  tar zcf alps-$$date.tar.gz alps-$$date; \
 	  rm -rf alps-$$date; \
 	else \
-	  tar zcf $(distdir_light).tar.gz $(distdir_light); \
-	  rm -rf $(distdir_light); \
+	  tar zcf $(distdir).tar.gz $(distdir); \
+	  rm -rf $(distdir); \
 	fi
 
 boost-snapshot boost-sandbox-snapshot : 
