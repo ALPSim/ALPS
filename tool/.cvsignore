@@ -4,3 +4,5 @@ convert2xml
 extracttext
 extracthtml
 plot2xsl.xsl
+convert2text
+.DS_Store
