@@ -18,13 +18,19 @@ depend : Makefile
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
 %.o : $(srcdir)/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+%.o : $(srcdir)/%.cc
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
 %_mpi.o : $(srcdir)/%.C
 	$(CXX) -c $(cppflags_mpi) $(cxxflags) $< -o $@
 %_mpi.o : $(srcdir)/%.cpp
 	$(CXX) -c $(cppflags_mpi) $(cxxflags) $< -o $@
+%_mpi.o : $(srcdir)/%.cc
+	$(CXX) -c $(cppflags_mpi) $(cxxflags) $< -o $@
 %_pvm.o : $(srcdir)/%.C
 	$(CXX) -c $(cppflags_pvm) $(cxxflags) $< -o $@
 %_pvm.o : $(srcdir)/%.cpp
+	$(CXX) -c $(cppflags_pvm) $(cxxflags) $< -o $@
+%_pvm.o : $(srcdir)/%.cc
 	$(CXX) -c $(cppflags_pvm) $(cxxflags) $< -o $@
 
 # programs & examples
@@ -36,13 +42,19 @@ $(EXAMPLE) : $(LIB) $(OBJ_PROGRAM)
 	$(CXX) $(cppflags) $(cxxflags) -o $@ $< $(OBJ_PROGRAM) $(ldflags) $(libs_program) $(libs)
 % : $(srcdir)/%.cpp
 	$(CXX) $(cppflags) $(cxxflags) -o $@ $< $(OBJ_PROGRAM) $(ldflags) $(libs_program) $(libs)
+% : $(srcdir)/%.cc
+	$(CXX) $(cppflags) $(cxxflags) -o $@ $< $(OBJ_PROGRAM) $(ldflags) $(libs_program) $(libs)
 %_mpi : $(srcdir)/%.C
 	$(CXX) $(cppflags_mpi) $(cxxflags) -o $@ $< $(OBJ_PROGRAM_MPI) $(ldflags_mpi) $(libs_program_mpi) $(libs)
 %_mpi : $(srcdir)/%.cpp
 	$(CXX) $(cppflags_mpi) $(cxxflags) -o $@ $< $(OBJ_PROGRAM_MPI) $(ldflags_mpi) $(libs_program_mpi) $(libs)
+%_mpi : $(srcdir)/%.cc
+	$(CXX) $(cppflags_mpi) $(cxxflags) -o $@ $< $(OBJ_PROGRAM_MPI) $(ldflags_mpi) $(libs_program_mpi) $(libs)
 %_pvm : $(srcdir)/%.C
 	$(CXX) $(cppflags_pvm) $(cxxflags) -o $@ $< $(OBJ_PROGRAM_PVM) $(ldflags_pvm) $(libs_program_pvm) $(libs)
 %_pvm : $(srcdir)/%.cpp
+	$(CXX) $(cppflags_pvm) $(cxxflags) -o $@ $< $(OBJ_PROGRAM_PVM) $(ldflags_pvm) $(libs_program_pvm) $(libs)
+%_pvm : $(srcdir)/%.cc
 	$(CXX) $(cppflags_pvm) $(cxxflags) -o $@ $< $(OBJ_PROGRAM_PVM) $(ldflags_pvm) $(libs_program_pvm) $(libs)
 
 # tests
