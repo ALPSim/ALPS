@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2004 by Matthias Troyer <troyer@comp-phys.org>
+* Copyright (C) 1994-2005 by Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -101,16 +101,12 @@ void HamiltonianMatrix<T,M>::build() const
 #endif
 
   // get Hamilton operator
-  alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(parms_["MODEL"]));
-  alps::Parameters p(parms_);
-  if (!symbolic_traits<T>::is_symbolic)
-    p.copy_undefined(ham.default_parameters());
-  ham.set_parameters(p);
-  
+  alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(parms_["MODEL"],parms_,symbolic_traits<T>::is_symbolic));
+    
   // get all site matrices
   std::map<unsigned int,boost::multi_array<std::pair<T,bool>,2> > site_matrix;
   std::map<unsigned int,bool> site_visited;
-  alps::Parameters parms(p);
+  alps::Parameters parms(parms_);
   for (site_iterator it=sites().first; it!=sites().second ; ++it)
     if (!site_visited[disordered_site_type(*it)]) {
       unsigned int disordered_type=disordered_site_type(*it);
@@ -118,7 +114,7 @@ void HamiltonianMatrix<T,M>::build() const
       site_visited[disordered_type]=true;
       // set coordinate in case of site disorder
       if (disordered_sites()) {
-        throw_if_xyz_defined(p,*it); // check whether x, y, or z is set
+        throw_if_xyz_defined(parms_,*it); // check whether x, y, or z is set
         parms << coordinate_as_parameter(*it); // set x, y and z
       }
       site_matrix.insert(std::make_pair(disordered_type,get_fermionic_matrix(T(),ham.site_term(type),
@@ -138,7 +134,7 @@ void HamiltonianMatrix<T,M>::build() const
     boost::tuple<unsigned int,unsigned int,unsigned int> type(disordered_btype,stype1,stype2);
     if (!bond_visited[type]) {
       if (disordered_bonds()) {
-        throw_if_xyz_defined(p,*it); // check whether x, y, or z is set
+        throw_if_xyz_defined(parms_,*it); // check whether x, y, or z is set
         parms << coordinate_as_parameter(*it); // set x, y and z
       }
       bond_visited[type]=true;
@@ -185,6 +181,7 @@ void HamiltonianMatrix<T,M>::build() const
                 val=-val;
             }
             matrix_(i,j)+=val;                 // set matrix element
+            alps::simplify(matrix_(i,j));
           }
         }
       }
@@ -231,6 +228,7 @@ void HamiltonianMatrix<T,M>::build() const
                   val=-val;
               }
               matrix_(i,j)+=val;                    // set matrix element
+              alps::simplify(matrix_(i,j));
             }
           }
         }

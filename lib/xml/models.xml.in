@@ -212,6 +212,22 @@
   <SITEBASIS type="1" ref="spin"/>
 </BASIS>
 
+<SITEOPERATOR name="Sx" site="x">
+  1/2*(Splus(x)+Sminus(x))
+</SITEOPERATOR>
+
+<BONDOPERATOR name="exchange" source="x" target="y">
+  Sz(x)*Sz(y)+1/2*(Splus(x)*Sminus(y)+Sminus(x)*Splus(y))
+</BONDOPERATOR>
+
+<BONDOPERATOR name="exchange_xy" source="x" target="y">
+  1/2*(Splus(x)*Sminus(y)+Sminus(x)*Splus(y))
+</BONDOPERATOR>
+
+<BONDOPERATOR name="fermion_hop" source="x" target="y">
+  cdag_up(x)*c_up(y)+cdag_up(y)*c_up(x)+cdag_down(x)*c_down(y)+cdag_down(y)*c_down(x)
+</BONDOPERATOR>
+
 <HAMILTONIAN name="spin">
   <PARAMETER name="Jz" default="J"/>
   <PARAMETER name="Jxy" default="J"/>
@@ -222,14 +238,14 @@
   <PARAMETER name="h" default="0"/>
   <PARAMETER name="Gamma" default="0"/>
   <BASIS ref="spin"/>
-  <SITETERM>
-    -h*Sz-Gamma/2*(Splus+Sminus)
+  <SITETERM site="i">
+    -h*Sz(i)-Gamma*Sx(i)
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
-    Jz*Sz(i)*Sz(j)+Jxy/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
+    Jz*Sz(i)*Sz(j)+Jxy*exchange_xy(i,j)
   </BONDTERM>
   <BONDTERM type="1" source="i" target="j">
-    Jz'*Sz(i)*Sz(j)+Jxy'/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
+    Jz'*Sz(i)*Sz(j)+Jxy'*exchange_xy(i,j)
   </BONDTERM>
 </HAMILTONIAN>
 
@@ -243,8 +259,8 @@
   <PARAMETER name="h" default="0"/>
   <PARAMETER name="Gamma" default="0"/>
   <BASIS ref="mixed spin"/>
-  <SITETERM>
-    -h*Sz-Gamma/2*(Splus+Sminus)
+  <SITETERM site="i">
+    -h*Sz(i)-Gamma*Sx(i)
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
     Jz*Sz(i)*Sz(j)+Jxy/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
@@ -262,8 +278,8 @@
   <PARAMETER name="V'" default="0"/>
   <PARAMETER name="U" default="0"/>
   <BASIS ref="boson"/>
-  <SITETERM>
-    -mu*n+U*n*(n-1)/2
+  <SITETERM site="i">
+    -mu*n(i)+U*n(i)*(n(i)-1)/2
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
     -t*(bdag(i)*b(j)+bdag(j)*b(i)) + V*n(i)*n(j)
@@ -280,8 +296,8 @@
   <PARAMETER name="t'" default="0"/>
   <PARAMETER name="V'" default="0"/>
   <BASIS ref="hardcore boson"/>
-  <SITETERM>
-    -mu*n
+  <SITETERM site="i">
+    -mu*n(i)
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
     -t*(bdag(i)*b(j)+bdag(j)*b(i)) + V*n(i)*n(j)
@@ -299,16 +315,14 @@
   <PARAMETER name="V'" default="0"/>
   <PARAMETER name="U" default="0"/>
   <BASIS ref="fermion"/>
-  <SITETERM>
-    -mu*n+U*n_up*n_down
+  <SITETERM site="i">
+    -mu*n(i)+U*n_up(i)*n_down(i)
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
-    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    + V*n(i)*n(j)
+    -t*fermion_hop(i,j) + V*n(i)*n(j)
   </BONDTERM>
   <BONDTERM type="1" source="i" target="j">
-    -t'*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    + V'*n(i)*n(j)
+    -t'*fermion_hop(i,j) + V'*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
 
@@ -320,16 +334,14 @@
   <PARAMETER name="V'" default="0"/>
   <PARAMETER name="U" default="0"/>
   <BASIS ref="fermion"/>
-  <SITETERM>
-    -mu*n+U*(n_up-1/2)*(n_down-1/2)
+  <SITETERM site="i">
+    -mu*n(i)+U*(n_up(i)-1/2)*(n_down(i)-1/2)
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
-    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    + V*n(i)*n(j)
+    -t*fermion_hop(i,j) + V*n(i)*n(j)
   </BONDTERM>
   <BONDTERM type="1" source="i" target="j">
-    -t'*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    + V'*n(i)*n(j)
+    -t'*fermion_hop(i,j) + V'*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
 
@@ -340,8 +352,8 @@
   <PARAMETER name="t'" default="0"/>
   <PARAMETER name="V'" default="0"/>
   <BASIS ref="spinless fermion"/>
-  <SITETERM>
-    -mu*n
+  <SITETERM site="i">
+    -mu*n(i)
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
     -t*(cdag(i)*c(j)+cdag(j)*c(i)) + V*n(i)*n(j)
@@ -356,17 +368,17 @@
   <PARAMETER name="t" default="1"/>
   <PARAMETER name="J" default="1"/>
   <BASIS ref="Kondo lattice"/>
-  <SITETERM type="0">
-    -mu*n
+  <SITETERM type="0" site="i">
+    -mu*n(i)
   </SITETERM> 
   <SITETERM type="1">
     0
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
-    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i))
+    -t*fermion_hop(i,j)
   </BONDTERM>
   <BONDTERM type="1" source="i" target="j">
-    J/2*(Splus(j)*cdag_down(i)*c_up(i)+Sminus(j)*cdag_up(i)*c_down(i))+(J/2)*Sz(j)*(n_up(i)-n_down(i))
+    J*exchange(i,j)
   </BONDTERM>
 </HAMILTONIAN>
 
@@ -379,20 +391,17 @@
   <PARAMETER name="t''" default="t"/>
   <PARAMETER name="J''" default="J"/>
   <BASIS ref="t-J"/>
-  <SITETERM type="0">
-    -mu*n
+  <SITETERM type="0" site="i">
+    -mu*n(i)
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
-    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    +J/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))+J*Sz(i)*Sz(j)-J/4*n(i)*n(j)
+    -t*fermion_hop(i,j) + J*exchange(i,j)-J/4*n(i)*n(j)
   </BONDTERM>
   <BONDTERM type="1" source="i" target="j">
-    -t'*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    +J'*Sz(i)*Sz(j)+J'/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))-J'/4*n(i)*n(j)
+    -t'*fermion_hop(i,j) + J'exchange(i,j)-J'/4*n(i)*n(j)
   </BONDTERM>
   <BONDTERM type="2" source="i" target="j">
-    -t''*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    +J''*Sz(i)*Sz(j)+J''/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))-J''/4*n(i)*n(j)
+    -t''*fermion_hop(i,j) + J''*exchange(i,j)-J''/4*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
 
@@ -405,20 +414,17 @@
   <PARAMETER name="t''" default="t"/>
   <PARAMETER name="J''" default="J"/>
   <BASIS ref="alternative t-J"/>
-  <SITETERM type="0">
-    -mu*n
+  <SITETERM type="0" site="i">
+    -mu*n(i)
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
-    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    +J/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))+J*Sz(i)*Sz(j)-J/4*n(i)*n(j)
+    -t*fermion_hop(i,j) + J*exchange(i,j)-J/4*n(i)*n(j)
   </BONDTERM>
   <BONDTERM type="1" source="i" target="j">
-    -t'*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    +J'*Sz(i)*Sz(j)+J'/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))-J'/4*n(i)*n(j)
+    -t'*fermion_hop(i,j) + J'*exchange(i,j)-J'/4*n(i)*n(j)
   </BONDTERM>
   <BONDTERM type="2" source="i" target="j">
-    -t''*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
-    +J''*Sz(i)*Sz(j)+J''/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))-J''/4*n(i)*n(j)
+    -t''*fermion_hop(i,j) + J''*exchange(i,j)-J''/4*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
 

@@ -15,7 +15,7 @@ define([alps_version], [1.3a1])
 
 dnl Latest publication year of ALPS
 
-define([alps_year], [2004])
+define([alps_year], [2005])
 
 dnl Increment lib_revision if source code has changed at all.
 dnl

@@ -22,7 +22,9 @@ src_LATTICE = \
   $(top_srcdir)/src/alps/lattice/latticelibrary.C \
   $(top_srcdir)/src/alps/lattice/unitcell.C
 src_MODEL = \
-  $(top_srcdir)/src/alps/model/modellibrary.C
+  $(top_srcdir)/src/alps/model/modellibrary.C \
+  $(top_srcdir)/src/alps/model/siteterm.C \
+  $(top_srcdir)/src/alps/model/bondterm.C \
 src_RANDOM = \
   $(top_srcdir)/src/alps/random/rngfactory.C
 src_PARSER = \

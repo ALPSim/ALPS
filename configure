@@ -1995,9 +1995,9 @@ _ACEOF
 
 
 
-ac_cv_alps_year=2004
+ac_cv_alps_year=2005
 cat >>confdefs.h <<_ACEOF
-#define ALPS_YEAR "2004"
+#define ALPS_YEAR "2005"
 _ACEOF
 
 
