@@ -1,3 +1,7 @@
+2003-07-27 Matthias Troyer <troyer@comp-phys.org>
+
+	* [scheduler] Converted XML output to use oxstream everywhere
+
 2003-07-25 Matthias Troyer <troyer@comp-phys.org>
 
 	* [scheduler] Fixed a bug with new boost RNG. Now random_01 uses
