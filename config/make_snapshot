@@ -20,7 +20,7 @@ esac
 set -x
 
 rm -rf $module
-cvs -z3 -q -d :pserver:anonymous@cvs.boost.sourceforge.net:/cvsroot/$module export -r HEAD $module
+cvs -z3 -q -d :pserver:anonymous@cvs.sourceforge.net:/cvsroot/$module export -r HEAD $module
 
 if test -d "$module"; then
   chmod -R u+w $module
