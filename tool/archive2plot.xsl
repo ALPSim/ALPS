@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?> 
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
-<xsl:include href="plotsettings.xsl"/>
 <xsl:include href="helpers.xsl"/>
 
 <xsl:output method="xml"/>
@@ -16,7 +15,7 @@
     <yaxis label="{$yaxis_label}"/>
     
     <!-- extract data -->      
-    <xsl:call-template name="CheckConstraints"/>
+    <xsl:call-template name="ExtractDataFromArchive"/>
   </plot>
 </xsl:template>
 
