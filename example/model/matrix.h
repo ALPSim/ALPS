@@ -219,15 +219,17 @@ void HamiltonianMatrix<T,M>::build() const
                 // calculate fermionic sign
                 int start=0;
                 int end;
+                bool f=false;
                 if (mat[is1][is2][js1][js2].second.first && mat[is1][is2][js1][js2].second.second) {
-                  start = std::min(s1,s2)+1;
+                  start = std::min(s1,s2);
                   end = std::max(s1,s2);
+                  if (s2>=s1)
+                    f=true;
                 }
                 else if (mat[is1][is2][js1][js2].second.first)
                   end=s1;
                 else
                   end=s2;
-                bool f=false;
                 for (int i=start;i<end;++i)
                   if (is_fermionic(ham.basis().site_basis(site_type(i)),basis[i][state[i]]))
                     f=!f;

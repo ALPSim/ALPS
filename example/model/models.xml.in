@@ -68,7 +68,7 @@
   <CHANGE quantumnumber="N" change="-1"/>
 </OPERATOR>
 <OPERATOR name="cdag" matrixelement="1">
-  <CHANGE quantumnumber="N" change="-1"/>
+  <CHANGE quantumnumber="N" change="1"/>
 </OPERATOR>
 <OPERATOR name="cdown" matrixelement="1">
   <CHANGE quantumnumber="N" change="-1"/>
