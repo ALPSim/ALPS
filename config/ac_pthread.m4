@@ -4,13 +4,13 @@ AC_DEFUN([AC_PTHREAD],
   AC_SUBST(LIB_PTHREAD)
   AC_SUBST(EXAMPLE_PTHREAD)
 
-  # check for configure option
-  pthread=no
+  # check for configure option (default = yes)
+  pthread=yes
   AC_ARG_WITH(pthread,
     AC_HELP_STRING([--with-pthread=DIR],[use pthread library]),
     [
-    if test "x$withval" != "xno"; then
-      pthread=yes
+    if test "x$withval" = "xno"; then
+      pthread=no
     fi
     ]
   )

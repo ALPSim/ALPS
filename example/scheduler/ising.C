@@ -45,7 +45,7 @@ IsingSimulation::IsingSimulation(const alps::ProcessList& where,const alps::Para
   measurements << alps::RealObservable("Magnetization");
   measurements << alps::RealObservable("Magnetization^2");
   measurements << alps::RealObservable("Magnetization^4");
-#ifdef HAVE_VALARRAY
+#ifdef ALPS_HAVE_VALARRAY
   measurements << alps::RealVectorObservable("Correlations");
 #endif
 }
@@ -126,7 +126,7 @@ void IsingSimulation::dostep()
   measurements.get<alps::RealObservable>("Magnetization") << tmag;
   measurements.get<alps::RealObservable>("Magnetization^2") << tmag*tmag;
   measurements.get<alps::RealObservable>("Magnetization^4") << tmag*tmag*tmag*tmag;
-#ifdef HAVE_VALARRAY
+#ifdef ALPS_HAVE_VALARRAY
   measurements.get<alps::RealVectorObservable>("Correlations") << corr;
 #endif
 }

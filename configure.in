@@ -8,10 +8,10 @@ dnl disable loading config.site
 define([AC_SITE_LOAD], )dnl
 
 AC_PREREQ(2.54)
-AC_INIT([ALPS++],[1.0])
+AC_INIT([ALPS],[1.0])
 AC_CONFIG_AUX_DIR([config])
 
-AC_PREFIX_DEFAULT([$HOME/ALPS++])
+AC_PREFIX_DEFAULT([$HOME/ALPS])
 
 AC_CONFIG_FILES(Makefile config/Makefile config/config.site config/arxx config/include.mk src/Makefile)
 
@@ -161,31 +161,28 @@ fi
 AC_LANG_CPLUSPLUS
 
 AC_CHECK_HEADER([stdint.h])
-# test "$ac_cv_header_stdint_h" = yes && AC_DEFINE(PALM_HAVE_STDINT_H)
+test "$ac_cv_header_stdint_h" = yes && AC_DEFINE(ALPS_HAVE_STDINT_H)
 
 AC_CHECK_HEADER([inttypes.h])
-# test "$ac_cv_header_inttypes_h" = yes && AC_DEFINE(PALM_HAVE_INTTYPES_H)
+test "$ac_cv_header_inttypes_h" = yes && AC_DEFINE(ALPS_HAVE_INTTYPES_H)
 
 AC_CHECK_HEADER([unistd.h])
-# test "$ac_cv_header_unistd_h" = yes && AC_DEFINE(PALM_HAVE_UNISTD_H)
+test "$ac_cv_header_unistd_h" = yes && AC_DEFINE(ALPS_HAVE_UNISTD_H)
 
 AC_CHECK_HEADER([bind/bitypes.h])
-# test "$ac_cv_header_bind_bitypes_h" = yes && AC_DEFINE(PALM_HAVE_BIND_BITYPES_H)
+test "$ac_cv_header_bind_bitypes_h" = yes && AC_DEFINE(ALPS_HAVE_BIND_BITYPES_H)
 
 AC_CHECK_HEADER([sys/int_types.h])
-# test "$ac_cv_header_sys_int_types_h" = yes && AC_DEFINE(PALM_HAVE_SYS_INT_TYPES_H)
-
-AC_CHECK_HEADER([sys/param.h])
-# test "$ac_cv_header_sys_param_h" = yes && AC_DEFINE(PALM_HAVE_SYS_PARAM_H)
+test "$ac_cv_header_sys_int_types_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_INT_TYPES_H)
 
 AC_CHECK_HEADER([sys/systeminfo.h])
-# test "$ac_cv_header_sys_systeminfo_h" = yes && AC_DEFINE(PALM_HAVE_SYS_SYSTEMINFO_H)
+test "$ac_cv_header_sys_systeminfo_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_SYSTEMINFO_H)
 
 AC_CHECK_HEADER([sys/time.h])
-# test "$ac_cv_header_sys_time_h" = yes && AC_DEFINE(PALM_HAVE_SYS_TIME_H)
+test "$ac_cv_header_sys_time_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TIME_H)
 
 AC_CHECK_HEADER([sys/types.h])
-# test "$ac_cv_header_sys_types_h" = yes && AC_DEFINE(PALM_HAVE_SYS_TYPES_H)
+test "$ac_cv_header_sys_types_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TYPES_H)
 
 # checking for other C++ headers
 sinclude(config/ac_cxx_namespaces.m4)
@@ -209,18 +206,6 @@ sinclude(config/ac_cxx_have_valarray.m4)
 AC_CXX_HAVE_VALARRAY
 test "$ac_cv_cxx_have_valarray" = yes && AC_DEFINE(ALPS_HAVE_VALARRAY)
 
-# sinclude(config/ac_cxx_have_complex.m4)
-# AC_CXX_HAVE_COMPLEX
-# test "$ac_cv_cxx_have_complex" = yes && AC_DEFINE(PALM_HAVE_COMPLEX)
-
-# sinclude(config/ac_cxx_have_non_template_complex.m4)
-# AC_CXX_HAVE_NON_TEMPLATE_COMPLEX
-# test "$ac_cv_cxx_have_non_template_complex" = yes && AC_DEFINE(PALM_HAVE_NON_TEMPLATE_COMPLEX)
-
-# sinclude(config/ac_cxx_have_vector_at.m4)
-# AC_CXX_HAVE_VECTOR_AT
-# test "$ac_cv_cxx_have_vector_at" = yes && AC_DEFINE(PALM_HAVE_VECTOR_AT)
-
 #
 # check for libm
 #
@@ -239,6 +224,7 @@ AC_CHECK_FUNC(nanosleep, ,[AC_CHECK_LIB(rt, nanosleep)])
 
 sinclude(config/ac_pthread.m4)
 AC_PTHREAD
+test "$ac_cv_have_pthread" = yes && AC_DEFINE(ALPS_HAVE_PTHREAD)
 
 #
 # check for MPI
@@ -250,6 +236,7 @@ AC_MPI
 if test "$ac_cv_have_mpi" = yes; then
   LIB_MPI='$(LIB_MPI)'
 fi
+test "$ac_cv_have_mpi" = yes && AC_DEFINE(ALPS_HAVE_MPI)
 
 #
 # check for PVM
@@ -261,6 +248,7 @@ AC_PVM
 if test "$ac_cv_have_pvm" = yes; then
   LIB_PVM='$(LIB_PVM)'
 fi
+test "$ac_cv_have_pvm" = yes && AC_DEFINE(ALPS_HAVE_PVM)
 
 #
 # check for HDF5
@@ -268,6 +256,7 @@ fi
 
 sinclude(config/ac_hdf5.m4)
 AC_HDF5
+test "$ac_cv_have_hdf5" = yes && AC_DEFINE(ALPS_HAVE_HDF5)
 
 #
 # check for XML parser
@@ -275,6 +264,8 @@ AC_HDF5
 
 sinclude(config/ac_xmlparser.m4)
 AC_XMLPARSER
+test "$ac_cv_xml_parser" = "expat" && AC_DEFINE(ALPS_HAVE_EXPAT_PARSER)
+test "$ac_cv_xml_parser" = "xerces" && AC_DEFINE(ALPS_HAVE_XERCES_PARSER)
 
 #
 # configuring boost
@@ -311,8 +302,8 @@ dnl
 
 echo
 echo "Summary of configuration:"
-echo "  ALPS++ version    $PACKAGE_VERSION"
-echo "  Compiler type     $ac_cv_compiler"
+echo "  ALPS version      $PACKAGE_VERSION"
+echo "  compiler type     $ac_cv_compiler"
 echo "  exceptions        $ac_cv_compiler_exceptions"
 echo "  optimization      $ac_cv_compiler_optimization"
 echo "  pthread support   $ac_cv_have_pthread"

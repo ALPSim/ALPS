@@ -27,13 +27,13 @@ void evaluate(const boost::filesystem::path& p, std::ostream& out) {
   alps::scheduler::MCSimulation sim(nowhere,p);
   alps::RealObsevaluator m2=sim.get_measurements()["Magnetization^2"];
   alps::RealObsevaluator m4=sim.get_measurements()["Magnetization^4"];
-#ifdef HAVE_VALARRAY
+#ifdef ALPS_HAVE_VALARRAY
   alps::RealVectorObsevaluator corr=sim.get_measurements()["Correlations"];
 #endif
   alps::RealObsevaluator binder=1.-3.*m4/(m2*m2);
  
   binder.rename("Real binder cumulant of Magnetization");
-#ifdef HAVE_VALARRAY
+#ifdef ALPS_HAVE_VALARRAY
   out << corr << "\n";
 #endif
   out << binder << "\n";
