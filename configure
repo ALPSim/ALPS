@@ -1551,12 +1551,12 @@ echo "${ECHO_T}$COMPILER" >&6
       try_CXX="xlC"
       ;;
     macos-3.3)
-      try_CC="gcc-3.3"
-      try_CXX="g++-3.3"
+      try_CC="gcc-3.3 -framework vecLib"
+      try_CXX="g++-3.3 -framework vecLib"
       ;;
     macos)
-      try_CC="gcc3"
-      try_CXX="g++3"
+      try_CC="gcc3 -framework vecLib"
+      try_CXX="g++3 -framework vecLib"
       ;;
     generic)
       # nothing to do
@@ -2894,18 +2894,18 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       try_CXXFLAGS_NOEH=""
       ;;
     macos-3.3)
-      try_CFLAGS_OPT="-framework vecLib -w -O3"
-      try_CFLAGS_DEBUG="-framework vecLib -W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
-      try_CXXFLAGS_OPT="-framework vecLib -fabi-version=0 -w -ftemplate-depth-90 -O3"
-      try_CXXFLAGS_DEBUG="-framework vecLib -fabi-version=0 -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
+      try_CFLAGS_OPT="-w -O3"
+      try_CFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
+      try_CXXFLAGS_OPT="-fabi-version=0 -w -ftemplate-depth-90 -O3"
+      try_CXXFLAGS_DEBUG="-fabi-version=0 -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
     macos)
-      try_CFLAGS_OPT="-framework vecLib -w -O3"
-      try_CFLAGS_DEBUG="-framework vecLib -W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
-      try_CXXFLAGS_OPT="-framework vecLib -w -ftemplate-depth-90 -O3"
-      try_CXXFLAGS_DEBUG="-framework vecLib -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
+      try_CFLAGS_OPT="-w -O3"
+      try_CFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
+      try_CXXFLAGS_OPT="-w -ftemplate-depth-90 -O3"
+      try_CXXFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
