@@ -1,3 +1,10 @@
+2003-07-10 Matthias Troyer <troyer@comp-phys.org>
+
+        * [scheduler] converted to new boost random interface, changed to
+	  Mersenne twister and generic seeding strategy
+
+	* Added a new license to all files
+
 2003-06-27 Matthias Troyer <troyer@comp-phys.org>
 
 	* [alps] Expression::simplify() added to remove unneded () from 
