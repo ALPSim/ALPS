@@ -1,3 +1,7 @@
+2004-12-02  Matthias Troyer <troyer@comp-phys.org>
+
+	* Based scheduler on Boost program_options. 
+
 2004-10-31  Matthias Troyer <troyer@comp-phys.org>
 
 	* Release 1.2.1

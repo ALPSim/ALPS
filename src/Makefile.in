@@ -143,7 +143,7 @@ am__noinst_HEADERS_DIST = boost/function_objects.hpp \
 	alps/osiris/std/vector.h alps/xml.h alps/parser/parser.h \
 	alps/parser/xmlattributes.h alps/parser/xmlhandler.h \
 	alps/parser/xmlparser.h alps/parser/xmlstream.h \
-	alps/parser/xslt.h alps/random/pseudo_des.h \
+	alps/parser/path.h alps/random/pseudo_des.h \
 	alps/random/random.h alps/random/rngfactory.h \
 	ietl/bandlanczos.h ietl/complex.h ietl/config.h.in \
 	ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h \
@@ -351,7 +351,7 @@ headers_FIXEDCAP = alps/fixed_capacity_deque.h alps/fixed_capacity_traits.h alps
 headers_OSIRIS = alps/osiris.h alps/osiris/buffer.h alps/osiris/comm.h alps/osiris/dump.h alps/osiris/mpdump.h alps/osiris/os.h alps/osiris/process.h alps/osiris/xdrdump.h alps/osiris/std/impl.h alps/osiris/std/list.h alps/osiris/std/map.h alps/osiris/std/pair.h alps/osiris/std/set.h alps/osiris/std/string.h alps/osiris/std/valarray.h alps/osiris/std/vector.h
 headers_LATTICE = alps/lattice.h alps/lattice/boundary.h alps/lattice/cell_traits.h alps/lattice/coordinate_traits.h alps/lattice/coordinatelattice.h alps/lattice/dimensional_traits.h alps/lattice/disorder.h alps/lattice/graph.h alps/lattice/graph_helper.h alps/lattice/graph_traits.h alps/lattice/graphproperties.h alps/lattice/hypercubic.h alps/lattice/lattice.h alps/lattice/latticedescriptor.h alps/lattice/latticegraph.h alps/lattice/latticegraphdescriptor.h alps/lattice/latticelibrary.h alps/lattice/parity.h alps/lattice/point_traits.h alps/lattice/propertymap.h alps/lattice/simplecell.h alps/lattice/simplelattice.h alps/lattice/unitcell.h alps/lattice/bond_compare.h
 headers_MODEL = alps/model.h alps/model/basisdescriptor.h alps/model/basisstates.h alps/model/bondterm.h alps/model/half_integer.h alps/model/hamiltonian.h alps/model/integer_state.h alps/model/model_helper.h alps/model/modellibrary.h alps/model/operator.h alps/model/quantumnumber.h alps/model/sign.h alps/model/sitebasisdescriptor.h alps/model/sitebasisstates.h alps/model/sitestate.h alps/model/siteterm.h alps/model/operatordescriptor.h
-headers_PARSER = alps/xml.h alps/parser/parser.h alps/parser/xmlattributes.h alps/parser/xmlhandler.h alps/parser/xmlparser.h alps/parser/xmlstream.h alps/parser/xslt.h
+headers_PARSER = alps/xml.h alps/parser/parser.h alps/parser/xmlattributes.h alps/parser/xmlhandler.h alps/parser/xmlparser.h alps/parser/xmlstream.h alps/parser/path.h
 headers_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h alps/random/rngfactory.h
 headers_SCHEDULER = alps/scheduler.h alps/scheduler/factory.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h
 headers_IETL = ietl/bandlanczos.h ietl/complex.h ietl/config.h.in ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h ietl/interface/blas.h ietl/interface/blitz.h ietl/interface/mtl.h ietl/interface/ublas.h ietl/interface/valarray.h ietl/inverse.h ietl/iteration.h ietl/jacobi.h ietl/krylov_wrapper.h ietl/lanczos.h ietl/matrix.h ietl/power.h ietl/rayleigh.h ietl/tmatrix.h ietl/traits.h ietl/vectorspace.h

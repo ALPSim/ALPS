@@ -88,7 +88,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parser/xmlhandler.C \
 	$(top_srcdir)/src/alps/parser/xmlparser.C \
 	$(top_srcdir)/src/alps/parser/xmlstream.C \
-	$(top_srcdir)/src/alps/parser/xslt.C \
+	$(top_srcdir)/src/alps/parser/path.C \
 	$(top_srcdir)/src/alps/random/rngfactory.C \
 	$(top_srcdir)/src/alps/alea/nan.C \
 	$(top_srcdir)/src/alps/alea/observable.C \
@@ -119,7 +119,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 am__objects_1 = copyright.lo parameterlist.lo parameters.lo
 am__objects_2 = dump.lo xdrdump.lo
 am__objects_3 = parser.lo xmlhandler.lo xmlparser.lo xmlstream.lo \
-	xslt.lo
+	path.lo
 am__objects_4 = rngfactory.lo
 am__objects_5 = nan.lo observable.lo observableset.lo
 am__objects_6 = disorder.lo latticedescriptor.lo \
@@ -375,7 +375,7 @@ src_PARSER = \
   $(top_srcdir)/src/alps/parser/xmlhandler.C \
   $(top_srcdir)/src/alps/parser/xmlparser.C \
   $(top_srcdir)/src/alps/parser/xmlstream.C \
-  $(top_srcdir)/src/alps/parser/xslt.C
+  $(top_srcdir)/src/alps/parser/path.C
 
 src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/abstract_task.C \
@@ -630,6 +630,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameters.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parsers.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path_posix_windows.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/po_utf8_codecvt_facet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polymorphic_iarchive.Plo@am__quote@
@@ -674,7 +675,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlhandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlparser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlstream.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xslt.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xtime.Plo@am__quote@
 
 .C.o:
@@ -761,12 +761,12 @@ xmlstream.lo: $(top_srcdir)/src/alps/parser/xmlstream.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlstream.lo `test -f '$(top_srcdir)/src/alps/parser/xmlstream.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlstream.C
 
-xslt.lo: $(top_srcdir)/src/alps/parser/xslt.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xslt.lo -MD -MP -MF "$(DEPDIR)/xslt.Tpo" -c -o xslt.lo `test -f '$(top_srcdir)/src/alps/parser/xslt.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xslt.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xslt.Tpo" "$(DEPDIR)/xslt.Plo"; else rm -f "$(DEPDIR)/xslt.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/xslt.C' object='xslt.lo' libtool=yes @AMDEPBACKSLASH@
+path.lo: $(top_srcdir)/src/alps/parser/path.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT path.lo -MD -MP -MF "$(DEPDIR)/path.Tpo" -c -o path.lo `test -f '$(top_srcdir)/src/alps/parser/path.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/path.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/path.Tpo" "$(DEPDIR)/path.Plo"; else rm -f "$(DEPDIR)/path.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/path.C' object='path.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xslt.lo `test -f '$(top_srcdir)/src/alps/parser/xslt.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xslt.C
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o path.lo `test -f '$(top_srcdir)/src/alps/parser/path.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/path.C
 
 rngfactory.lo: $(top_srcdir)/src/alps/random/rngfactory.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT rngfactory.lo -MD -MP -MF "$(DEPDIR)/rngfactory.Tpo" -c -o rngfactory.lo `test -f '$(top_srcdir)/src/alps/random/rngfactory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/random/rngfactory.C; \

@@ -30,7 +30,7 @@ src_PARSER = \
   $(top_srcdir)/src/alps/parser/xmlhandler.C \
   $(top_srcdir)/src/alps/parser/xmlparser.C \
   $(top_srcdir)/src/alps/parser/xmlstream.C \
-  $(top_srcdir)/src/alps/parser/xslt.C
+  $(top_srcdir)/src/alps/parser/path.C
 src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/abstract_task.C \
   $(top_srcdir)/src/alps/scheduler/factory.C \
