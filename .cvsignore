@@ -1,3 +1,5 @@
+ALPS.pbproj
+build
 Makefile
 .DS_Store
 alps-*.tar.gz
