@@ -1,11 +1,11 @@
 <html>
 <head>
-   <title>PALM++ Project: palm library vectormath.h</title>
+   <title>ALPS Project vectormath.h</title>
 </head>
 <body>
 
 <h1>
-PALM++ Project: palm library</h1>
+ALPS Project</h1>
 
 <h2>
 Header file <b>vectormath.h</b></h2>
@@ -18,39 +18,39 @@ If performance is an issue expression template based array libraries
 such as the <A href="http://oonumerics.org/blitz/">Blitz++</A>
 should however be used instead.
 <P>
-Once ublas has been included in a Boost release, this header will be deprecated.
+This header will be deprecated as soon as the lattice library has been changed to ublas.
 <h3>Synopsis</h3>
 <blockquote>
 <pre>
 template &lt;class T>
-std::vector&lt;T> operator-(const std::vector&lt;T>& x);
+std::vector&lt;T> operator-(const std::vector&lt;T>&amp; x);
 
 template &lt;class T>
-std::vector&lt;T> operator+(const std::vector&lt;T>& x, const std::vector&lt;T>& y);
+std::vector&lt;T> operator+(const std::vector&lt;T>&amp; x, const std::vector&lt;T>&amp; y);
 
 template &lt;class T>
-std::vector&lt;T> operator-(const std::vector&lt;T>& x, const std::vector&lt;T>& y);
+std::vector&lt;T> operator-(const std::vector&lt;T>&amp; x, const std::vector&lt;T>&amp; y);
 
 template <class T, class S>
-std::vector&lt;T> operator*(S x, const std::vector&lt;T>& y);
+std::vector&lt;T> operator*(S x, const std::vector&lt;T>&amp; y);
 
 template <class T, class S>
-std::vector&lt;T> operator*(const std::vector&lt;T>& x, S y);
+std::vector&lt;T> operator*(const std::vector&lt;T>&amp; x, S y);
 </pre></blockquote>
 
 
 <h3>Operations</h3>
 <blockquote><pre>
 template &lt;class T>
-std::vector&lt;T> operator-(const std::vector&lt;T>& x);
+std::vector&lt;T> operator-(const std::vector&lt;T>&amp; x);
 </pre></blockquote>
 returns a vector with all elements negated.
 <blockquote><pre>
 template &lt;class T>
-std::vector&lt;T> operator+(const std::vector&lt;T>& x, const std::vector&lt;T>& y);
+std::vector&lt;T> operator+(const std::vector&lt;T>&amp; x, const std::vector&lt;T>&amp; y);
 
 template &lt;class T>
-std::vector&lt;T> operator-(const std::vector&lt;T>& x, const std::vector&lt;T>& y);
+std::vector&lt;T> operator-(const std::vector&lt;T>&amp; x, const std::vector&lt;T>&amp; y);
 </pre></blockquote>
 returns the element wise sum or difference of two vectors. The size of the 
 resulting vector is the maximum of the size of the two arguments. If one 
@@ -58,14 +58,14 @@ argument vector is shorter it will be assumed to be padded with the default
 value (usually 0) up to the length of the other vector.
 <blockquote><pre>
 template <class T, class S>
-std::vector&lt;T> operator*(S x, const std::vector&lt;T>& y);
+std::vector&lt;T> operator*(S x, const std::vector&lt;T>&amp; y);
 
 template <class T, class S>
-std::vector&lt;T> operator*(const std::vector&lt;T>& x, S y);
+std::vector&lt;T> operator*(const std::vector&lt;T>&amp; x, S y);
 </pre></blockquote>
 returns a vector element wise multiplied with a scalar.
 <HR>
-<ADDRESS>(c) 2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 2002-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

@@ -1,11 +1,11 @@
 <html>
 <head>
-   <title>PALM++ Project: palm library typetraits.h</title>
+   <title>ALPS Project typetraits.h</title>
 </head>
 <body>
 
 <h1>
-PALM++ Project: palm library</h1>
+ALPS Project</h1>
 
 <h2>
 Header file <b>typetraits.h</b></h2>
@@ -14,7 +14,7 @@ This header contains traits classes for standard types.
 Synopsis</h3>
 
 <blockquote>
-<pre>namespace palm {
+<pre>namespace alps {
 typedef ... type_tag_t;
 template &lt;class T> struct TypeTraits;
 
@@ -67,6 +67,8 @@ yet found in the standard library nor boost.
 <td>for integral types, the unsigned version of the type <tt>T</tt>, otherwise the type itself</td>
 <tr><td><tt>TypeTraits&lt;T>::real_t</tt></td><td></td>
 <td>for complex types, the real base type of type <tt>T</tt>, otherwise the type itself</td>
+<tr><td><tt>TypeTraits&lt;T>::epsilon()</tt></td><td></td>
+<td>the machine precision of <tt>TypeTraits&lt;T>::norm_t</tt></td>
 </tr>
 </table>
 
@@ -79,7 +81,7 @@ of precision when afterwards a numeric operation with type <tt>T</tt> is planned
 As there are far fewer <tt> appropriate_type</tt>s than types <tt>T</tt> code
 proliferation can be reduced.
 <HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

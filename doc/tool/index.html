@@ -1,13 +1,13 @@
 <html>
 <head>
-   <title>PALM++ Project: tools</title>
+   <title>ALPS Project: tools</title>
 </head>
 <body>
 
 <h1>
-PALM++ Project: tools</h1>
+ALPS Project: tools</h1>
 
-A number of <a href="#tools">tools</a> and <a href="#xslt">XSLT stylesheets</a> are being developed to simplify working with the XML files created by the PALM++ libraries and programs. Please checkout some <a href="#examples">XML plot file examples</a>.
+A number of <a href="#tools">tools</a> and <a href="#xslt">XSLT stylesheets</a> are being developed to simplify working with the XML files created by the ALPS libraries and programs. Please checkout some <a href="#examples">XML plot file examples</a>.
 
 <H2>Documentation</H2>
 <H3><a name="tools"/>Tools</H3>
@@ -28,7 +28,7 @@ is a wrapper for XSLT processors to provide a uniform interface. The usage is:
 If the <i>stylesheet</i> argument is not given, the default stylesheet is taken from the XML input file.
 <P>The XSLT processor is chosen as follows:
 <UL>
-<LI>If the environment variable PALM_XSLT_TRANSFORMER is defined, the program it points to is used as transformer
+<LI>If the environment variable ALPS_XSLT_TRANSFORMER is defined, the program it points to is used as transformer
 <LI>Otherwise the standard path is searched for the Gnome <tt>xsltproc</tt> from <a href="http://xmlsoft.org/XSLT/">http://xmlsoft.org/XSLT/</a>.
 <LI>If <tt> xsltproc</tt> is not found, the standard path is searched for <tt>xalan</tt> from the <a href="http://www.apache.org">Apache</a> project.
 </UL>
@@ -58,7 +58,7 @@ Alternative usage:
 <hr>
 
 <h3><a name="xslt"/>XSLT stylesheets</h3>
-XSLT transformations are the easisest way of extracting specific information from the large XML output files produced by thye PALM++ libraries and programs. While we are working on a more flexible set of tools we provide some examples of simple XSLT style sheets that can help the beginning XSLT user:
+XSLT transformations are the easisest way of extracting specific information from the large XML output files produced by thye ALPS libraries and programs. While we are working on a more flexible set of tools we provide some examples of simple XSLT style sheets that can help the beginning XSLT user:
 
 <h4>plot2xsl.xsl</h4>
 is an XSLT stylesheet to extract information from an XML plot file following the XML <a href="http://xml.comp-phys.org/schema/plot">schema for plot data</a> which specifies which information from a Monte Carlo output file should be extracted by the XSLT stylesheet <tt>archive2plot.xsl</tt>. The information is temporarily stored in yet another XSLT stylesheet (<tt>plotsettings.xsl</tt>).
@@ -178,7 +178,7 @@ With the two index constraints shown in this example only Green's functions for 
 </code></blockquote>
 
 <HR>
-<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
 Troyer</A> and <A HREF="mailto:trebst@comp-phys.org">Simon Trebst</A></ADDRESS>
 
 </body>

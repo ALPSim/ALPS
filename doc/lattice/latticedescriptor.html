@@ -1,11 +1,11 @@
 <html>
 <head>
-   <title>PALM++ Project: lattice library latticedescriptor.h</title>
+   <title>ALPS Project: lattice library latticedescriptor.h</title>
 </head>
 <body>
 
 <h1>
-PALM++ Project: lattice library</h1>
+ALPS Project: lattice library</h1>
 
 <h2>Header file: latticedescriptor.h</h2>
 
@@ -106,7 +106,7 @@ LatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;);
 reads the <tt>LatticeDescriptor</tt> in XML from a stream
 assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>.
 The start tag <tt>&lt;LATTICE ...></tt> has already been read and is passed
-as a <a href="http://www.comp-phys.org/software/PALM++/xml/xml.html"><tt>palmxml::XMLTag</tt></a>.
+as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml::XMLTag</tt></a>.
 
 <h4>Member functions</h4>
 in addition to those inherited from the parent lattice:
@@ -161,7 +161,7 @@ FiniteLatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;,
 reads the <tt> FiniteLatticeDesriptor</tt> in XML from a stream
 assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>.
 The start tag <tt>&lt;FINITELATTICE ...></tt> has already been read and is passed
-as a <a href="http://www.comp-phys.org/software/PALM++/xml/xml.html"><tt>palmxml::XMLTag</tt></a>
+as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml::XMLTag</tt></a>
 <P>In the <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice schema</A>
 the <tt>&lt;FINITELATTICE ...></tt> contains a <tt>&lt;LATTICE ...></tt> element.
 This can either describe the lattice fully, or refer to a lattice by name.

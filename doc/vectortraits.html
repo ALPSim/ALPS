@@ -1,11 +1,11 @@
 <html>
 <head>
-   <title>PALM++ Project: palm library vectortraits.h</title>
+   <title>ALPS Project vectortraits.h</title>
 </head>
 <body>
 
 <h1>
-PALM++ Project: palm library</h1>
+ALPS Project</h1>
 
 <h2>
 Header file <b>vectortraits.h</b></h2>
@@ -15,7 +15,7 @@ and support for container free numerical algorithms.
 Synopsis</h3>
 
 <blockquote>
-<pre>namespace palm {
+<pre>namespace alps {
 
 template &lt;class CONTAINER> 
 struct VectorTraits {
@@ -69,7 +69,7 @@ template &lt;class C, class X>
 inline void subtract_scaled(C& c1, const C& c2, X val);
 
 template &lt;class C>
-inline void resize(C& c, STD::size_t n);
+inline void resize(C& c, std::size_t n);
 
 template &lt;class C>
 inline void assign(C& c, typename VectorTraits&lt;C>::value_type x);
@@ -101,11 +101,11 @@ vector-like containers
 <table BORDER=2 >
 <tr><td><b>Member</b></td><td><b>Default value</b></td><td><b>Description</b></td></tr>
 <tr><td><tt>value_type</tt></td><td><tt>C::value_type</tt></td><td>the value type</td></tr>
-<tr><td><tt>norm_type</tt></td><td><tt>palm::TypeTraits&lt;value_type>::norm_t</tt></td><td>a type to store the norm of the vector</td></tr>
+<tr><td><tt>norm_type</tt></td><td><tt>TypeTraits&lt;value_type>::norm_t</tt></td><td>a type to store the norm of the vector</td></tr>
 <tr><td><tt>iterator</tt></td><td><tt>C::value_type</tt></td><td>the iterator type</td></tr>
 <tr><td><tt>const_iterator</tt></td><td><tt>C::value_type</tt></td><td>the const iterator type</td></tr>
 <tr><td><tt>size_type</tt></td><td><tt>C::value_type</tt></td><td>the size type</td></tr>
-<tr><td><tt>is_complex</tt></td><td><tt>palm::TypeTraits&lt;value_type>::is_complex</tt></td><td>a flag indicating whether the vector is complex</td></tr>
+<tr><td><tt>is_complex</tt></td><td><tt>TypeTraits&lt;value_type>::is_complex</tt></td><td>a flag indicating whether the vector is complex</td></tr>
 </table>
 
 The standard template is valid for all standard containers. A specialized 
@@ -184,7 +184,7 @@ inline void subtract_scaled(C& c1, const C& c2, X val);
 subtracts a scaled vector. Acts like <tt>c1-=val*c2</tt>
 <blockquote><pre>
 template &lt;class C>
-inline void resize(C& c, STD::size_t n);
+inline void resize(C& c, std::size_t n);
 </pre></blockquote>
 resizes the vector.
 <blockquote><pre>
@@ -213,7 +213,7 @@ inline void deallocate(C& c);
 </pre></blockquote>
 deallocates the vector (releasing as much memory as possible).
 <HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

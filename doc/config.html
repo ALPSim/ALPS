@@ -1,15 +1,15 @@
 <html>
 <head>
-   <title>PALM++ Project: palm library config.h</title>
+   <title>ALPS Project config.h</title>
 </head>
 <body>
 
 <h1>
-PALM++ Project: palm library</h1>
+ALPS Project</h1>
 
 <h2>Header file <b>config.h</b></h2>
 
-This header contains configuration options determined by the PALM++
+This header contains configuration options determined by the ALPS
 configuration script. In addition please see the <a
 href="http://www.boost.org">Boost</A> configuration macros.
 
@@ -21,23 +21,27 @@ Boost header files.
 <table border=2>
 <tr><td><b>Name</b></td><td><b>Description</b></td></tr>
 
-<tr><td><tt>PALM_WITHOUT_XML</tt></td><td>defined if PALM++ was build without PALM++/xml library</td></tr>
-<tr><td><tt>PALM_WITHOUT_OSIRIS</tt></td><td>defined if PALM++ was build without PALM++/osiris library</td></tr>
-<tr><td><tt>PALM_WITHOUT_ALEA</tt></td><td>defined if PALM++ was build without PALM++/alea library</td></tr>
-<tr><td><tt>PALM_WITHOUT_LATTICE</tt></td><td>defined if PALM++ was build without PALM++/lattice library</td></tr>
-<tr><td><tt>PALM_WITHOUT_SCHEDULER</tt></td><td>defined if PALM++ was build without PALM++/scheduler library</td></tr>
-<tr><td><tt>PALM_HAVE_SYS_SYSTEMINFO_H</tt></td><td>defined if the header <tt>&lt;sys/systeminfo.h></tt> exists </td></tr>
-<tr><td><tt>PALM_HAVE_SYS_PARAM_H</tt></td><td>defined if the header <tt>&lt;sys/param.h></tt> exists </td></tr>
-<tr><td><tt>PALM_HAVE_SYS_TIME_H</tt></td><td>defined if the header <tt>&lt;sys/time.h></tt> exists </td></tr>
-<tr><td><tt>PALM_HAVE_SYS_TYPES_H</tt></td><td>defined if the header <tt>&lt;sys/types.h></tt> exists </td></tr>
-<tr><td><tt>PALM_HAS_INT64</tt></td><td>defined if 64 bit integer types
+<tr><td><tt>ALPS_WITHOUT_XML</tt></td><td>defined if ALPS was build without ALPS/xml library</td></tr>
+<tr><td><tt>ALPS_WITHOUT_OSIRIS</tt></td><td>defined if ALPS was build without ALPS/osiris library</td></tr>
+<tr><td><tt>ALPS_WITHOUT_ALEA</tt></td><td>defined if ALPS was build without ALPS/alea library</td></tr>
+<tr><td><tt>ALPS_WITHOUT_LATTICE</tt></td><td>defined if ALPS was build without ALPS/lattice library</td></tr>
+<tr><td><tt>ALPS_WITHOUT_SCHEDULER</tt></td><td>defined if ALPS was build without ALPS/scheduler library</td></tr>
+<tr><td><tt>ALPS_HAVE_UNISTD_H</tt></td><td>defined if the header <tt>&lt;unistd.h></tt> exists </td></tr>
+<tr><td><tt>ALPS_HAVE_SYS_SYSTEMINFO_H</tt></td><td>defined if the header <tt>&lt;sys/systeminfo.h></tt> exists </td></tr>
+<tr><td><tt>ALPS_HAVE_SYS_TIME_H</tt></td><td>defined if the header <tt>&lt;sys/time.h></tt> exists </td></tr>
+<tr><td><tt>ALPS_HAVE_SYS_TYPES_H</tt></td><td>defined if the header <tt>&lt;sys/types.h></tt> exists </td></tr>
+<tr><td><tt>ALPS_HAVE_INTTYPES_H</tt></td><td>defined if the header <tt>&lt;inttypes.h></tt> exists </td></tr>
+<tr><td><tt>ALPS_HAVE_BIND_BITYPES_H</tt></td><td>defined if the header <tt>&lt;bind/bitypes.h></tt> exists </td></tr>
+<tr><td><tt>ALPS_HAVE_SYS_INT_TYPES_H</tt></td><td>defined if the header <tt>&lt;sys/int_types.h></tt> exists </td></tr>
+<tr><td><tt>ALPS_HAS_INT64</tt></td><td>defined if 64 bit integer types
 exist</td></tr>
-<tr><td><tt>PALM_HAVE_VALARRAY</tt></td><td>defined if the <tt>std::valarray</tt> class exists</td></tr>
-<tr><td><tt>PALM_HAVE_COMPLEX</tt></td><td>defined if the <tt>std::complex&ltT></tt> template class exists</td></tr>
-<tr><td><tt>PALM_HAVE_NON_TEMPLATE_COMPLEX</tt></td><td>defined if a non-template version of <tt>complex</tt> exists</td></tr>
-<tr><td><tt>PALM_HAVE_MPI</tt></td><td>defined if an MPI library exists and was specified in the configuration step.</td></tr>
-<tr><td><tt>PALM_HAVE_PVM</tt></td><td>defined if the PVM library exists and was specified in the configuration step.</td></tr>
-<tr><td><tt>PALM_HAVE_HDF5</tt></td><td>defined if the HDF5 library exists and was specified in the configuration step.</td></tr>
+<tr><td><tt>ALPS_HAVE_VALARRAY</tt></td><td>defined if the <tt>std::valarray</tt> class exists</td></tr>
+<tr><td><tt>ALPS_HAVE_MPI</tt></td><td>defined if an MPI library exists and was specified in the configuration step.</td></tr>
+<tr><td><tt>ALPS_HAVE_PVM</tt></td><td>defined if the PVM library exists and was specified in the configuration step.</td></tr>
+<tr><td><tt>ALPS_HAVE_HDF5</tt></td><td>defined if the HDF5 library exists and was specified in the configuration step.</td></tr>
+<tr><td><tt>ALPS_HAVE_PTHREAD</tt></td><td>defined if the pthread library exists and was specified in the configuration step.</td></tr>
+<tr><td><tt>ALPS_HAVE_EXPAT</tt></td><td>defined if the expat XML parser exists and was specified in the configuration step.</td></tr>
+<tr><td><tt>ALPS_HAVE_XERCES</tt></td><td>defined if the Xerces XML parser exists and was specified in the configuration step.</td></tr>
 
 </table>
 
@@ -53,7 +57,7 @@ The header has to include the system headers defining the types
 <li>uint32_t
 </tt>
 </ul>
-In addition, if <tt>PALM_NO_INT64</tt> is not defined it also has to
+In addition, if <tt>ALPS_NO_INT64</tt> is not defined it also has to
 include definitions for the types
 <ul>
 <tt>

@@ -1,17 +1,16 @@
 <html>
 <head>
-   <title>PALM++ Project: palm library</title>
+   <title>ALPS Project: generally useful tools</title>
 </head>
 <body>
 
 <h1>
-PALM++ Project: palm library</h1>
+ALPS Project: generally useful tools</h1>
 
-The palm library contains code used by more than one of the PALM++
-libraries.  The palm library also sets up comprehensive and consistent
-environment for the other PALM++ libraries and other C++ programs.
+This is a collection of code used by more than one of the ALPS
+libraries. 
 
-The header files and libraries provided by this library should be
+The header files and libraries provided here should be
 considered implementation details for the other officially supported
 libraries and are subject to change without notice.
 <P>
@@ -27,7 +26,7 @@ contact us and we can work together in achieving a good release version.
 
 are discussed <a href="../setup.html">here</a>.
 
-<P> The library will reside in the file <tt>libpalm.a</tt> in the path specifed in the configuration step.
+<P> The library will reside in the file <tt>libalps.a</tt> in the path specifed in the configuration step.
 
 <H2>Documentation</H2>
 <ul>
@@ -54,8 +53,6 @@ are discussed <a href="../setup.html">here</a>.
   </ul></li>
   <li>Mathematical functions and function objects
   <ul>
-    <li><A HREF="complex.html"><B>complex.h</B></A> classes and functions for 
-        portable codes using complex numbers.</li>
     <li><A HREF="functional.html"><B>functional.h</B></A> contains mathematical 
         function objects not found in the standard and boost libraries.</li>
     <li><A HREF="math.html"><B>math.hpp</B></A> contains mathematical functions not 
@@ -66,12 +63,7 @@ are discussed <a href="../setup.html">here</a>.
         randomize a vector and a fast buffered RNG class.</li>
     
   </ul></li>
-  <li>Operating system specific functionality
-  <ul>
-    <li><A HREF="os.html"><B>os.h</B></A> low level operating system call wrappers</li>
-    <li><A HREF="signal.html"><B>signal.hpp</B></A> a signal handler class</li>
-  </ul></li>
-  <li>Classes for I/O
+  <li>Classes for parameters and their evaluation
   <ul>
     <li><A HREF="stringvalue.html"><B>stringvalue.h</B></A> a class that can store any 
     numerical, boolean or string value in a string representation.</li>
@@ -79,7 +71,8 @@ are discussed <a href="../setup.html">here</a>.
     parameters, identified by name</li>
     <li><A HREF="parameterlist.html"><B>parameterlist.h</B></A> a collection of
     <tt>Parameters</tt></li>
-    <li><A HREF="parser.html"><B>parser.h</B></A> functions to help reading parameters and XML files.
+    <li><A HREF="expression.html"><B>expression.h</B></A> the <tt>Expression</tt> class for limited symbolic evaluation of expressions</li>
+    
   </ul></li>
   
 </ul>

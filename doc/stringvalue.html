@@ -1,11 +1,11 @@
 <html>
 <head>
-   <title>PALM++ Project: palm library StringValue.h</title>
+   <title>ALPS Project StringValue.h</title>
 </head>
 <body>
 
 <h1>
-PALM++ Project: palm library</h1>
+ALPS Project</h1>
 
 <h2>
 Header file <b>stringvalue.h</b></h2>
@@ -13,7 +13,7 @@ This header contains the <tt>StringValue</tt> class, a class that
 can store any numerical, boolean or string value in a <tt>std::string</tt>. Conversions are performed by <tt>boost::lexical_cast</tt>. it replaces the deprecated <tt>ValueType</tt> class.
 <h3>Synopsis</h3>
 <blockquote>
-<pre>namespace palm {
+<pre>namespace alps {
 class StringValue {
 public:
   StringValue();
@@ -29,23 +29,17 @@ public:
   bool operator!=(const StringValue&amp;) const;
   
   operator std::string ();
+  operator bool() const;
   template &lt;class T> operator T() const;
   template &lt;class T> T get() const;
 
   const char* c_str() const;
-
-  bool valid() const;
-  
-  double evaluate(const Parameters&amp;) const;
-  bool can_evaluate(const Parameters&amp;) const;
-  double evaluate() const;
-  bool can_evaluate() const;
 };
 
 std::ostream&amp; operator &lt;&lt;(std::ostream&amp; os, const palm::StringValue&amp; v);
 std::istream&amp; operator &gt;&gt;(std::istream&amp; is, palm::StringValue&amp; v);
 }
-/pre></blockquote>
+</pre></blockquote>
 
 
 <h3>The <tt>StringValue</tt> class</h3>
@@ -54,7 +48,7 @@ StringValue();
 </pre></blockquote>
 initialized to an empty string.
 <blockquote><pre>
-StringValue( const std::string& x);
+StringValue( const std::string&amp; x);
 </pre></blockquote>
 initializes from a <tt>std::string</tt>.
 <blockquote><pre>
@@ -66,11 +60,11 @@ template &lt;class T> StringValue(const T&amp; x);
 </pre></blockquote>
 initialize from any other type by converting to a <tt>std::string</tt> using lexical_cast.
 <blockquote><pre>
-StringValue& operator=(const std::string& x);
+StringValue&amp; operator=(const std::string&amp; x);
 </pre></blockquote>
 assigns from a <tt>std::string</tt>.
 <blockquote><pre>
-StringValue& operator=(const char* x);
+StringValue&amp; operator=(const char* x);
 </pre></blockquote>
 assigns from a C-style string.
 <blockquote><pre>
@@ -95,26 +89,13 @@ template &lt;class T> T get() const;
 </pre></blockquote>
 
 <blockquote><pre>
+operator bool() const;
 template &lt;class T> operator T() const;
 template &lt;class T> T get() const ;
 </pre></blockquote>
-converts the underlying string to type <tt>T</tt> using <tt>boost::lexical_cast</tt>.
+converts the underlying string to type <tt>T</tt> using <tt>boost::lexical_cast</tt>. Conversion to bool also interprets the strings <tt>true</tt> and <tt>false</tt> as boolean values.
 <blockquote><pre>
-bool valid() const;
-</pre></blockquote>
-returns <tt>true</tt> if a value is stored in the class, i.e. the string is not empty.
-<blockquote><pre>
-double evaluate() const;
-double evaluate(const Parameters&amp;) const;
-</pre></blockquote>
-interprets the string as an expression and attempts to evaluate the expression. Values of encountered identifiers are taken from the optional <tt>Parameters</tt> object. If the string cannot be evaluated as a floating point expression a <tt>std::runtime_error</tt> is thrown. Legal expressions contain the operators <tt>+</tt>, <tt>-</tt>, <tt>*</tt> and <tt>/</tt> as well as parentheses <tt>()</tt> and the functions <tt>sin</tt>,  <tt>cos</tt>,  <tt>tan</tt>,  <tt>exp</tt>,  <tt>log</tt> and  <tt>sqrt</tt>.
-<blockquote><pre>
-bool can_evaluate() const;
-bool can_evaluate(const Parameters&amp;) const;
-</pre></blockquote>
-returns <tt>true</tt> if a call to <tt>evaluate</tt> will be successful and <tt>false</tt> if it would throw an exception.
-<blockquote><pre>
-std::ostream& operator &lt;&lt;(std::ostream& os, const palm::StringValue& v);
+std::ostream&amp; operator &lt;&lt;(std::ostream&amp; os, const palm::StringValue&amp; v);
 </pre></blockquote>
 writes the stored string to an <tt>ostream</tt>.
 <blockquote><pre>
@@ -122,7 +103,7 @@ std::istream&amp; operator &gt;&gt;(std::istream&amp; is, palm::StringValue&amp;
 </pre></blockquote>
 reads a <tt>std::string</tt> from the stream and stores it in <tt>v</tt>.
 <HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 
