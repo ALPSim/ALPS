@@ -3,91 +3,113 @@
 <head>
   <title>ALPS Project: alea/signedobservable.h</title>
 </head>
- <body>
-  
+  <body>
+     
 <h1> ALPS Project: alea library</h1>
-  
+     
 <h2> Header file <b>alea/signedobservable.h</b></h2>
- This header contains the classes for Monte Carlo measurements for simulations
-with a sign problem. 
+    This header contains the classes for Monte Carlo measurements for simulations 
+ with a sign problem.    
 <h3>Synopsis</h3>
- 
-<blockquote> 
-  <pre>namespace alps {<br><br>template &lt;class OBS, class SIGN=double&gt;<br>class AbstractSignedObservable <br> : public AbstractSimpleObservable&lt;typename OBS::value_type&gt; <br>{<br>public:<br>  typedef OBS                                                    observable_type;<br>  typedef SIGN                                                   sign_type;<br>  typedef typename observable_type::value_type                   value_type;<br>  typedef typename obs_value_traits&lt;obs_value_type&gt;::result_type result_type;<br>  typedef std::size_t                                            count_type;<br>  typedef typename obs_value_traits&lt;value_type&gt;::time_type       time_type;<br>  <br>  template &lt;class X, class Y&gt; friend class AbstractSignedObservable;<br><br>  static const int version=observable_type::version+(1&lt;&lt;24);<br><br>  AbstractSignedObservable(const observable_type&amp; obs, const std::string&amp; s="sign");<br>  AbstractSignedObservable(const std::string&amp; name="", const std::string&amp; s="sign");<br><br>  template &lt;class OBS2&gt;<br>  AbstractSignedObservable(const AbstractSignedObservable&lt;OBS2,SIGN&gt;&amp; obs);<br>  <br>  template &lt;class ARG&gt;<br>  AbstractSignedObservable(const std::string&amp; name,std::string&amp; s, const ARG&amp; arg);<br><br>  template &lt;class ARG&gt;<br>  AbstractSignedObservable(const std::string&amp; name,const ARG&amp; arg);<br>  <br>  ~AbstractSignedObservable();<br><br>  uint32_t version_id() const;<br><br>  void rename(const std::string&amp; newname);<br>  void reset(bool forequilibration);<br>  void output(std::ostream&amp; out) const;<br>  void write_xml(oxstream&amp; oxs, const boost::filesystem::path&amp; p) const;<br><br>  count_type count() const;<br>  result_type mean() const;<br>  result_type error() const;<br>  <br>  bool can_set_thermalization() const;<br>  void set_thermalization(uint32_t todiscard);<br>  uint32_t get_thermalization() const;<br>   <br>  template &lt;class S&gt;<br>  AbstractSignedObservable&lt;SimpleObservableEvaluator&lt;typename obs_value_slice&lt;value_type,S&gt;::value_type&gt;,SIGN&gt;<br>    slice(S s, const std::string&amp; newname="") const;<br><br>  template &lt;class S&gt;<br>  AbstractSignedObservable&lt;SimpleObservableEvaluator&lt;typename obs_value_slice&lt;value_type,S&gt;::value_type&gt;,SIGN&gt;<br>    operator[](S s) const;<br><br>  void save(ODump&amp; dump) const;<br>  void load(IDump&amp; dump);<br>  <br>  Observable* clone() const;<br><br>  bool is_signed() const;<br>  void set_sign_name(const std::string&amp; signname);<br>  void set_sign(const Observable&amp; sign);<br>  void clear_sign();<br>  const Observable&amp; sign() const;<br>  const std::string sign_name() const;<br>  const Observable&amp; signed_observable() const;<br>  <br>  uint32_t number_of_runs() const;<br>  Observable* get_run(uint32_t) const;<br>};<br><br>template &lt;class OBS, class SIGN=double&gt;<br>class SignedObservable <br> : public AbstractSignedObservable&lt;OBS,SIGN&gt;, <br>   public RecordableObservable&lt;typename OBS::value_type,SIGN&gt;<br>{<br>public:<br>  typedef SIGN                                 sign_type;<br>  typedef typename observable_type::value_type value_type;<br><br>  SignedObservable(const observable_type&amp; obs, const std::string&amp; s="sign") : base_type(obs,s);<br>  SignedObservable(const std::string&amp; name="", const std::string&amp; s="sign");<br>  <br>  template &lt;class ARG&gt;<br>  SignedObservable(const std::string&amp; name,const ARG&amp; arg);<br><br>  template &lt;class ARG&gt;<br>  SignedObservable(const std::string&amp; name,std::string&amp; s, const ARG&amp; arg) <br>   : base_type(name,s,arg) {}<br>   <br>  ~SignedObservable() {}<br><br>  Observable* clone() const;<br>   <br>  void operator&lt;&lt;(const value_type&amp; x);<br>  void add(const value_type&amp; x);<br>  void add(const value_type&amp; x, sign_type s);<br>  bool is_thermalized() const;<br>};<br><br><typename
+    
+<blockquote>       
+  <pre>namespace alps {<br><br>template &lt;class OBS, class SIGN=double&gt;<br>class AbstractSignedObservable <br> : public AbstractSimpleObservable&lt;typename OBS::value_type&gt; <br>{<br>public:<br>  typedef OBS                                                    observable_type;<br>  typedef SIGN                                                   sign_type;<br>  typedef typename observable_type::value_type                   value_type;<br>  typedef typename obs_value_traits&lt;obs_value_type&gt;::result_type result_type;<br>  typedef std::size_t                                            count_type;<br>  typedef typename obs_value_traits&lt;value_type&gt;::time_type       time_type;<br>  <br>  template &lt;class X, class Y&gt; friend class AbstractSignedObservable;<br><br>  static const int version=observable_type::version+(1&lt;&lt;24);<br><br>  AbstractSignedObservable(const observable_type&amp; obs, const std::string&amp; s="Sign");<br>  AbstractSignedObservable(const std::string&amp; name="", const std::string&amp; s="Sign");<br><br>  template &lt;class OBS2&gt;<br>  AbstractSignedObservable(const AbstractSignedObservable&lt;OBS2,SIGN&gt;&amp; obs);<br>  <br>  template &lt;class ARG&gt;<br>  AbstractSignedObservable(const std::string&amp; name,std::string&amp; s, const ARG&amp; arg);<br><br>  template &lt;class ARG&gt;<br>  AbstractSignedObservable(const std::string&amp; name,const ARG&amp; arg);<br>  <br>  ~AbstractSignedObservable();<br><br>  uint32_t version_id() const;<br><br>  void rename(const std::string&amp; newname);<br>  void reset(bool forequilibration);<br>  void output(std::ostream&amp; out) const;<br>  void write_xml(oxstream&amp; oxs, const boost::filesystem::path&amp; p) const;<br><br>  count_type count() const;<br>  result_type mean() const;<br>  result_type error() const;<br>  <br>  bool can_set_thermalization() const;<br>  void set_thermalization(uint32_t todiscard);<br>  uint32_t get_thermalization() const;<br>   <br>  template &lt;class S&gt;<br>  AbstractSignedObservable&lt;SimpleObservableEvaluator&lt;typename obs_value_slice&lt;value_type,S&gt;::value_type&gt;,SIGN&gt;<br>    slice(S s, const std::string&amp; newname="") const;<br><br>  template &lt;class S&gt;<br>  AbstractSignedObservable&lt;SimpleObservableEvaluator&lt;typename obs_value_slice&lt;value_type,S&gt;::value_type&gt;,SIGN&gt;<br>    operator[](S s) const;<br><br>  void save(ODump&amp; dump) const;<br>  void load(IDump&amp; dump);<br>  <br>  Observable* clone() const;<br><br>  bool is_signed() const;<br>  void set_sign_name(const std::string&amp; signname);<br>  void set_sign(const Observable&amp; sign);<br>  void clear_sign();<br>  const Observable&amp; sign() const;<br>  const std::string sign_name() const;<br>  const Observable&amp; signed_observable() const;<br>  <br>  uint32_t number_of_runs() const;<br>  Observable* get_run(uint32_t) const;<br>};<br><br>template &lt;class OBS, class SIGN=double&gt;<br>class SignedObservable <br> : public AbstractSignedObservable&lt;OBS,SIGN&gt;, <br>   public RecordableObservable&lt;typename OBS::value_type,SIGN&gt;<br>{<br>public:<br>  typedef SIGN                                 sign_type;<br>  typedef typename observable_type::value_type value_type;<br><br>  SignedObservable(const observable_type&amp; obs, const std::string&amp; s="Sign") : base_type(obs,s);<br>  SignedObservable(const std::string&amp; name="", const std::string&amp; s="Sign");<br>  <br>  template &lt;class ARG&gt;<br>  SignedObservable(const std::string&amp; name,const ARG&amp; arg);<br><br>  template &lt;class ARG&gt;<br>  SignedObservable(const std::string&amp; name,std::string&amp; s, const ARG&amp; arg) <br>   : base_type(name,s,arg) {}<br>   <br>  ~SignedObservable() {}<br><br>  Observable* clone() const;<br>   <br>  void operator&lt;&lt;(const value_type&amp; x);<br>  void add(const value_type&amp; x);<br>  void add(const value_type&amp; x, sign_type s);<br>  bool is_thermalized() const;<br>};<br><br>template &lt;class OBS&gt;<br>boost::shared_ptr&lt;Observable&gt; make_observable(const OBS&amp; obs, bool issigned=false);<br><br><br>template &lt;class OBS, class SIGN&gt;<br>boost::shared_ptr&lt;Observable&gt;  make_observable(const OBS&amp; obs, const std::string&amp; s, SIGN, bool issigned=true);<typename
  obs_value_slice&lt;t,s=""><t>
 
 }
 
 </t></typename></pre>
-</blockquote>
-  
+   </blockquote>
+     
 <h3>The <tt>AbstractSignedObservable</tt> base class</h3>
- is the base class for observables with a sign problem. It takes two templare
-arguments: the type <tt>OBS</tt> of the simple observable, derived from&nbsp;
-<a
- href="abstractsimpleobservable.html"><tt>AbstractSimpleObservable</tt></a>
-to be used to store the measurements, and the type <tt>SIGN</tt> of the sign
-(defaulting to <tt>double</tt>). It implements the appropriate functions
+    is the base class for observables with a sign problem. It takes two templare 
+ arguments: the type <tt>OBS</tt> of the simple observable, derived from&nbsp; 
+<a href="abstractsimpleobservable.html"><tt>AbstractSimpleObservable</tt></a> 
+to be used to store the measurements, and the type <tt>SIGN</tt> of the sign 
+ (defaulting to <tt>double</tt>). It implements the appropriate functions 
 of the <a href="observable.html"><tt>Observable</tt></a> and <a
- href="abstractsimpleobservable.html"><tt>AbstractSimpleObservable</tt></a>
-base classes, and has the following additional members: 
-<blockquote>
+ href="abstractsimpleobservable.html"><tt>AbstractSimpleObservable</tt></a> 
+base classes, and has the following additional members:    
+<blockquote>       
   <pre>typedef OBS observable_type;<br></pre>
-</blockquote>
- is the type of observable (derived from <a
- href="abstractsimpleobservable.html"><tt>AbstractSimpleObservable</tt></a>
-<blockquote>
+   </blockquote>
+    is the type of observable (derived from <a
+ href="abstractsimpleobservable.html"><tt>AbstractSimpleObservable</tt></a> 
+<blockquote>       
   <pre>typedef SIGN sign_type;<br></pre>
-</blockquote>
- is the type used to represent the sign of the signed measurement.<br>
-<blockquote>
+   </blockquote>
+    is the type used to represent the sign of the signed measurement.<br>
+   
+<blockquote>       
   <pre>static const int version=observable_type::version+(1&lt;&lt;24);<br></pre>
-</blockquote>
-is the version id of the observable, adding 2^24 to represent a signed observable. 
-<blockquote>
-  <pre>AbstractSignedObservable(const observable_type&amp; obs, const std::string&amp; s="sign");</pre>
-</blockquote>
-copies the observable <tt>obs</tt>. The name of the observable containing
-the sign, can be passed as the second argument, defaulting to "sign". 
-<blockquote>
-  <pre>AbstractSignedObservable(const std::string&amp; name="", const std::string&amp; s="sign");<br></pre>
-</blockquote>
-creates the observable with the given name.&nbsp;The name of the observable
-containing the sign, can be passed as the second argument, defaulting to
-"sign". 
-<blockquote>
+   </blockquote>
+   is the version id of the observable, adding 2^24 to represent a signed 
+observable.    
+<blockquote>       
+  <pre>AbstractSignedObservable(const observable_type&amp; obs, const std::string&amp; s="Sign");</pre>
+   </blockquote>
+   copies the observable <tt>obs</tt>. The name of the observable containing 
+ the sign, can be passed as the second argument, defaulting to "Sign".  
+ 
+<blockquote>       
+  <pre>AbstractSignedObservable(const std::string&amp; name="", const std::string&amp; s="Sign");<br></pre>
+   </blockquote>
+   creates the observable with the given name.&nbsp;The name of the observable 
+ containing the sign, can be passed as the second argument, defaulting to
+"Sign".    
+<blockquote>       
   <pre>template &lt;class OBS2&gt;<br>AbstractSignedObservable(const AbstractSignedObservable&lt;OBS2,SIGN&gt;&amp; obs);<br></pre>
-</blockquote>
-is a generalized copy constructor. 
-<blockquote>
+   </blockquote>
+   is a generalized copy constructor.    
+<blockquote>       
   <pre>template &lt;class ARG&gt;<br>AbstractSignedObservable(const std::string&amp; name,std::string&amp; s, const ARG&amp; arg);<br><br>template &lt;class ARG&gt;<br>AbstractSignedObservable(const std::string&amp; name,const ARG&amp; arg);<br></pre>
-</blockquote>
-constructs the observable, passing both the <tt>name</tt> and the additional
-argument <tt>arg</tt> to the constructor of the underlying simple observable.
-The name of the observable containing the sign, can be passed as the argument
-<tt>s</tt>, defaulting to "sign" if not specified.   
+   </blockquote>
+   constructs the observable, passing both the <tt>name</tt> and the additional 
+ argument <tt>arg</tt> to the constructor of the underlying simple observable. 
+ The name of the observable containing the sign, can be passed as the argument 
+ <tt>s</tt>, defaulting to <tt>"Sign"</tt> if not specified.      
 <h3>The <tt>SignedObservable</tt>&nbsp; class</h3>
- is derived from <tt>AbstractSignedObservable</tt> and <a
- href="recordableobservable.html"><tt>RecordableObservable</tt></a>, thus
-allowing measurements to be recorded. It provides the following additional
-members, that need documentation 
-<blockquote>
-  <pre>SignedObservable(const observable_type&amp; obs, const std::string&amp; s="sign") : base_type(obs,s);<br>SignedObservable(const std::string&amp; name="", const std::string&amp; s="sign");<br>  <br>template &lt;class ARG&gt;<br>SignedObservable(const std::string&amp; name,const ARG&amp; arg);<br><br>template &lt;class ARG&gt;<br>SignedObservable(const std::string&amp; name,std::string&amp; s, const ARG&amp; arg);<t><br></t></pre>
-</blockquote>
- The arguments to the constructors are just passed on to the base class&nbsp;<tt>AbstractSignedObservable.</tt><tt></tt> 
-<blockquote>
+    is derived from <tt>AbstractSignedObservable</tt> and <a
+ href="recordableobservable.html"><tt>RecordableObservable</tt></a>, thus 
+ allowing measurements to be recorded. It provides the following additional 
+ members, that need documentation    
+<blockquote>       
+  <pre>SignedObservable(const observable_type&amp; obs, const std::string&amp; s="Sign") : base_type(obs,s);<br>SignedObservable(const std::string&amp; name="", const std::string&amp; s="Sign");<br>  <br>template &lt;class ARG&gt;<br>SignedObservable(const std::string&amp; name,const ARG&amp; arg);<br><br>template &lt;class ARG&gt;<br>SignedObservable(const std::string&amp; name,std::string&amp; s, const ARG&amp; arg);<t><br></t></pre>
+   </blockquote>
+    The arguments to the constructors are just passed on to the base class&nbsp;<tt>AbstractSignedObservable.</tt><tt></tt>
+<blockquote>       
   <pre>void operator&lt;&lt;(const value_type&amp; x);<br>void add(const value_type&amp; x);;<br></pre>
-</blockquote>
-both record a measurement. It is assumed that the value <tt>x</tt> is the
-product of the measurement value and the sign. Additionally, the sign needs
-to be recorded separately into the observable whose name matches <tt>sign_name()</tt>. 
-<blockquote>
+   </blockquote>
+   both record a measurement. It is assumed that the value <tt>x</tt> is
+the  product of the measurement value and the sign. Additionally, the sign
+needs  to be recorded separately into the observable whose name matches <tt>sign_name()</tt>.
+    
+<blockquote>       
   <pre>void add(const value_type&amp; x, sign_type s);;<br></pre>
-</blockquote>
-calls <tt>add(x*s)</tt>. 
+   </blockquote>
+   calls <tt>add(x*s)</tt>.<br>
+  <br>
+  
+<h3>Helper functions</h3>
+  
+<pre>template &lt;class OBS&gt;<br>boost::shared_ptr&lt;Observable&gt; make_observable(const OBS&amp; obs, bool issigned=false);<br></pre>
+  
+<p>takes an observable and converts it in to a signed observable if the <tt>issigned</tt>
+argument is <tt>true</tt>. The name of the signed observable is asssumed
+to be "Sign" and the type of sign <tt>double</tt>.</p>
+  
+<pre>template &lt;class OBS, class SIGN&gt;<br>boost::shared_ptr&lt;Observable&gt;  make_observable(const OBS&amp; obs, const std::string&amp; s, SIGN, bool issigned=true);</pre>
+  
+<p>takes an observable and converts it in to a signed observable if the <tt>issigned</tt>
+argument is <tt>true</tt>.&nbsp; Both the name and type of the signed observable
+ can be specified<tt></tt>.</p>
+  
 <hr> 
 <address>copyright (c) 1994-2004 by <a
  href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+    <br>
+   <br>
+  <br>
  <br>
 </body>
 </html>

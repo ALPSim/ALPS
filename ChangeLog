@@ -1,3 +1,10 @@
+2004-07-16  Matthias Troyer <troyer@comp-phys.org>
+	
+	* [alea] Improved creation and output of signed observables. Observables
+		 with zero variance now have an error of 0 instead of NaN.
+
+	* [model] Fixed a bug in check_sign
+
 2004-07-12  Matthias Troyer <troyer@comp-phys.org>
 
 	* Added ublas bindings to ALPS
