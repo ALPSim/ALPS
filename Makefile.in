@@ -762,7 +762,8 @@ release snapshot :
 	cd $(distdir_light); \
 	  rm -f CITATIONS.txt LICENSE.txt README config/preamble.in; \
 	  rm -rf src/alps/alea* src/alps/lattice* src/alps/model* src/alps/plot* src/alps/scheduler* tool example test/alea test/lattice test/model test/plot doc/alea doc/index.html doc/lattice doc/model doc/scheduler doc/tool; \
-	  find . -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./config/update_preamble -l > /dev/null
+	  find . -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./config/update_preamble -l > /dev/null; \
+	  find . -name '*\.txt' -or -name '*\.html' | xargs chmod 644
 	if test "$@" = "snapshot"; then \
 	  date=`date +%Y%m%d`; \
           mv -f $(distdir_light) alps-light-$$date; \
@@ -774,7 +775,8 @@ release snapshot :
 	fi
 	tar zxf $(distdir).tar.gz
 	cd $(distdir); \
-	  rm -f LICENSE-light.txt README-light config/preamble-light.in doc/index-light.html
+	  rm -f LICENSE-light.txt README-light config/preamble-light.in doc/index-light.html; \
+	  find . -name '*\.txt' -or -name '*\.html' | xargs chmod 644
 	rm -f $(distdir).tar.gz
 	if test "$@" = "snapshot"; then \
 	  date=`date +%Y%m%d`; \
