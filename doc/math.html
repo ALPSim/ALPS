@@ -15,13 +15,10 @@ or boost libraries.
 <blockquote>
 <pre>namespace alps {
 template &lt;class T>
-T abs (T x);
-
-template &lt;class T>
 typename TypeTraits&lt;T>::norm_t abs2(T x);
 
 template &lt;class T>
-T abs2(std::complex&lt;T> x);
+T abs2(const std::complex&lt;T>&amp; x);
 
 std::size_t binomial(std::size_t l,std::size_t n);
 }</pre></blockquote>
@@ -30,16 +27,10 @@ std::size_t binomial(std::size_t l,std::size_t n);
 <h3>Functions</h3>
 <blockquote><pre>
 template &lt;class T>
-T abs (T x);
-</pre></blockquote>
-returns the absolute value and allows a consistent call,
-without the need to use <TT>fabs</TT> for floating point numbers.
-<blockquote><pre>
-template &lt;class T>
 typename TypeTraits&lt;T>::norm_t abs2(T x);
 
 template &lt;class T>
-T abs2(std::complex&lt;T> x);
+T abs2(cosnt std::complex&lt;T>&amp; x);
 </pre></blockquote>
 returns the square of the absolute value. It is optimized by specialization
 for complex numbers.
