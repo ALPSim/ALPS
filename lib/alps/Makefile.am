@@ -114,7 +114,7 @@ src_boost_SERIALIZATION= \
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
-# $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
