@@ -37,9 +37,9 @@
 
 typedef boost::adjacency_list<boost::vecS,boost::vecS,boost::undirectedS,
                               // vertex property
-                              boost::property<alps::vertex_type_t,int>,
+                              boost::property<alps::vertex_type_t,unsigned int>,
                               // edge property
-                              boost::property<alps::edge_type_t,int>
+                              boost::property<alps::edge_type_t,unsigned int, boost::property<alps::edge_index_t, unsigned int> >
                               > graph_type;
 
 class IsingSimulation2 : public alps::scheduler::LatticeMCRun<graph_type>

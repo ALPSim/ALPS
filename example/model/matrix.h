@@ -53,7 +53,7 @@ struct symbolic_traits<alps::Expression> {
 const bool symbolic_traits<alps::Expression>::is_symbolic;
 
 template <class T, class M = boost::numeric::ublas::matrix<T> >
-class HamiltonianMatrix // : public alps::scheduler::Worker
+class HamiltonianMatrix : public alps::graph_helper<>
 {
 public:
   typedef T value_type;
@@ -68,11 +68,7 @@ public:
   void build() const;
 
 private:
-  typedef alps::graph_factory<>::graph_type graph_type;
-  
-  const graph_type& lattice() const { return graph_factory_.graph();}
-  
-  alps::graph_factory<graph_type> graph_factory_;
+  typedef alps::graph_helper<>::graph_type graph_type;
   alps::ModelLibrary models_;
   alps::Parameters parms_;
   mutable bool built_;
@@ -88,7 +84,7 @@ std::ostream& operator<<(std::ostream& os, const HamiltonianMatrix<T,M>& mat)
 
 template <class T, class M>
 HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p)
-  : graph_factory_(p),
+  : alps::graph_helper<>(p),
     models_(p),
     parms_(p),
     built_(false)
@@ -98,8 +94,10 @@ HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p)
 template <class T, class M>
 void HamiltonianMatrix<T,M>::build() const
 {
-  // using namespace alps;
-  
+  // check for disorder
+  if (disordered())
+    boost::throw_exception(std::runtime_error("Disordered lattices not supported by the model library example program.\n"));
+
   // get Hamilton operator
   alps::HamiltonianDescriptor<short> ham(models_.hamiltonian(parms_["MODEL"]));
   alps::Parameters p(parms_);
@@ -108,44 +106,41 @@ void HamiltonianMatrix<T,M>::build() const
   ham.set_parameters(p);
   
   // get all site matrices
-  alps::property_map<alps::site_type_t, graph_type, int>::const_type
-  site_type(alps::get_or_default(alps::site_type_t(), lattice(), 0));
-
-  std::map<int,boost::multi_array<T,2> > site_matrix;
-  std::map<int,bool> site_visited;
-  for (boost::graph_traits<graph_type>::vertex_iterator it=boost::vertices(lattice()).first; 
-       it!=boost::vertices(lattice()).second ; ++it)
-    if (!site_visited[site_type[*it]]) {
-      int type=site_type[*it];
+  std::map<unsigned int,boost::multi_array<T,2> > site_matrix;
+  std::map<unsigned int,bool> site_visited;
+  for (site_iterator it=sites().first; it!=sites().second ; ++it)
+    if (!site_visited[disordered_site_type(*it)]) {
+      unsigned int disordered_type=disordered_site_type(*it);
+      unsigned int type=site_type(*it);
       std::cout << "Creating site matrix for type " << type << "\n";
-      site_visited[type]=true;
-      site_matrix.insert(std::make_pair(type,ham.site_term(type).template matrix<T>(
+      site_visited[disordered_type]=true;
+      site_matrix.insert(std::make_pair(disordered_type,ham.site_term(type).template matrix<T>(
                 ham.basis().site_basis(type),models_.simple_operators(),p)));
     }
 
   // get all bond matrices
-  alps::property_map<alps::bond_type_t,  graph_type, int>::const_type
-  bond_type(alps::get_or_default(alps::bond_type_t(),lattice(),0));
-
-  std::map<int,boost::multi_array<T,4> > bond_matrix;
-  std::map<boost::tuple<int,int,int>,bool> bond_visited;
-  for (boost::graph_traits<graph_type>::edge_iterator it=boost::edges(lattice()).first; 
-       it!=boost::edges(lattice()).second ; ++it) {
-    int btype  = bond_type[*it];
-    int stype1 = site_type[boost::source(*it,lattice())];
-    int stype2 = site_type[boost::target(*it,lattice())];
-    if (!bond_visited[boost::make_tuple(btype,stype1,stype2)]) {
+  std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,boost::multi_array<T,4> > bond_matrix;
+  std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,bool> bond_visited;
+  for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
+    unsigned int disordered_btype  = disordered_bond_type(*it);
+    unsigned int disordered_stype1 = disordered_site_type(source(*it));
+    unsigned int disordered_stype2 = disordered_site_type(target(*it));
+    unsigned int btype  = bond_type(*it);
+    unsigned int stype1 = site_type(source(*it));
+    unsigned int stype2 = site_type(target(*it));
+	boost::tuple<unsigned int,unsigned int,unsigned int> type(disordered_btype,disordered_stype1,disordered_stype2);
+    if (!bond_visited[type]) {
       std::cout << "Creating bond matrix for type " << btype << "\n";
-      bond_visited[boost::make_tuple(btype,stype1,stype2)]=true;
-      bond_matrix.insert(std::make_pair(btype,ham.bond_term(btype).template matrix<T>(
+      bond_visited[type]=true;
+      bond_matrix.insert(std::make_pair(type,ham.bond_term(btype).template matrix<T>(
                               ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
                               models_.simple_operators(),p)));
     }
-  }
+  }  
 
   // create basis set
   std::cerr << "Creating basis set\n";
-  alps::BasisStatesDescriptor<short> basis(ham.basis(),lattice());
+  alps::BasisStatesDescriptor<short> basis(ham.basis(),graph());
   //typedef alps::LookupBasisStates<unsigned int> basis_states_type;
   typedef alps::BasisStates<short> basis_states_type;
   typedef basis_states_type::value_type state_type;
@@ -160,15 +155,14 @@ void HamiltonianMatrix<T,M>::build() const
     for (int i=0;i<states.size();++i) {        // loop basis states
       state_type state=states[i];              // get source state
   int s=0;
-  for (boost::graph_traits<graph_type>::vertex_iterator it=boost::vertices(lattice()).first; 
-      it!=boost::vertices(lattice()).second ; ++it,++s) {
-    boost::multi_array<T,2>& mat = site_matrix[site_type[*it]];
+  for (site_iterator it=sites().first; it!=sites().second ; ++it,++s) {
+    boost::multi_array<T,2>& mat = site_matrix[disordered_site_type(*it)];
       int is=state[s];                         // get site basis index
       for (int js=0;js<basis[s].size();++js) { // loop over target site states
         T val=mat[is][js];                     // get matrix element
         if (val) {                             // if matrix element is nonzero
-          state_type newstate=state;           // prepare target state
-          newstate[s]=js;                      // build target state
+          state_type newstate=state;
+		  newstate[s]=js;					   // build target state
           int j = states.index(newstate);      // lookup target state
           if (j<states.size())
             matrix_(i,j)+=val;                 // set matrix element
@@ -178,13 +172,12 @@ void HamiltonianMatrix<T,M>::build() const
   }
 
   // loop over bonds
-    for (int i=0;i<states.size();++i) {      // loop over source states
-      state_type state=states[i];           // get source state
-  for (boost::graph_traits<graph_type>::edge_iterator it=boost::edges(lattice()).first; 
-      it!=boost::edges(lattice()).second ; ++it) {
-    boost::multi_array<T,4>& mat = bond_matrix[bond_type[*it]];
-    int s1=boost::source(*it,lattice());
-    int s2=boost::target(*it,lattice());
+  for (int i=0;i<states.size();++i) {      // loop over source states
+	state_type state=states[i];           // get source state
+    for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
+      int s1=source(*it);
+      int s2=target(*it);
+	  boost::multi_array<T,4>& mat = bond_matrix[boost::make_tuple(disordered_bond_type(*it),disordered_site_type(s1),disordered_site_type(s2))];
       int is1=state[s1];                            // get source site states
       int is2=state[s2];
       for (int js1=0;js1<basis[s1].size();++js1) {  // loop over target site states

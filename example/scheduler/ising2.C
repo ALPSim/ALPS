@@ -110,6 +110,9 @@ double IsingSimulation2::work_done() const
 
 void IsingSimulation2::dostep()
 {  
+  if (disordered())
+    boost::throw_exception(std::runtime_error("Disordered lattices not supported by the Ising example program.\n"));
+
   // increment sweep count
   sweeps++;
   
