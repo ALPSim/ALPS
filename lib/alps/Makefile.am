@@ -61,14 +61,14 @@ src_boost_PROGRAM_OPTIONS_SERIALIZATION= \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp \
-  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp \
-  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp
+  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp 
+#  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp 
 
 lib_LTLIBRARIES = libalps.la 
 
@@ -84,7 +84,7 @@ nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(sr
 endif
 
 #if BUILD_BOOST_SERIALIZATION
-nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS_SERIALIZATION)
+#nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS_SERIALIZATION)
 #endif
 if BUILD_BOOST_SIGNALS
 nodist_libalps_la_SOURCES += $(src_boost_SIGNALS)

@@ -40,6 +40,9 @@ host_triplet = @host@
 @ALPS_FULL_TRUE@am__append_1 = $(src_ALEA) $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
 @BUILD_BOOST_TRUE@am__append_2 = $(top_srcdir)/src/boost/throw_exception.C
 @BUILD_BOOST_TRUE@am__append_3 = $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_REGEX)
+
+#if BUILD_BOOST_SERIALIZATION
+#nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS_SERIALIZATION)
 #endif
 @BUILD_BOOST_SIGNALS_TRUE@am__append_4 = $(src_boost_SIGNALS)
 @BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__append_5 = $(src_boost_SIGNALS_1_32)
@@ -135,59 +138,31 @@ am__objects_13 = c_regex_traits.lo c_regex_traits_common.lo \
 	w32_regex_traits.lo wide_posix_api.lo winstances.lo
 @BUILD_BOOST_TRUE@am__objects_14 = $(am__objects_11) $(am__objects_12) \
 @BUILD_BOOST_TRUE@	$(am__objects_13)
-am__objects_15 = cmdline.lo config_file.lo convert.lo \
-	options_description.lo parsers.lo positional_options.lo \
-	value_semantic.lo variables_map.lo winmain.lo basic_archive.lo \
-	basic_iarchive.lo basic_oarchive.lo basic_serializer_map.lo \
-	basic_text_iprimitive.lo basic_text_oprimitive.lo \
-	basic_text_wiprimitive.lo basic_text_woprimitive.lo \
-	binary_iarchive.lo binary_oarchive.lo binary_wiarchive.lo \
-	binary_woarchive.lo codecvt_null.lo extended_type_info.lo \
-	extended_type_info_no_rtti.lo extended_type_info_typeid.lo \
-	polymorphic_iarchive.lo polymorphic_oarchive.lo \
-	text_iarchive.lo text_oarchive.lo text_wiarchive.lo \
-	text_woarchive.lo utf8_codecvt_facet.lo void_cast.lo
-am__objects_16 = connection.lo signal_base.lo slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@am__objects_17 = $(am__objects_16)
-am__objects_18 = named_slot_map.lo
-@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__objects_19 =  \
-@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@	$(am__objects_18)
-am__objects_20 = condition.lo exceptions.lo mutex.lo once.lo \
+am__objects_15 = connection.lo signal_base.lo slot.lo trackable.lo
+@BUILD_BOOST_SIGNALS_TRUE@am__objects_16 = $(am__objects_15)
+am__objects_17 = named_slot_map.lo
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__objects_18 =  \
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@	$(am__objects_17)
+am__objects_19 = condition.lo exceptions.lo mutex.lo once.lo \
 	recursive_mutex.lo thread.lo threadmon.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@am__objects_21 = $(am__objects_20)
-am__objects_22 = barrier.lo
-@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__objects_23 =  \
-@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_22)
-nodist_libalps_la_OBJECTS = $(am__objects_14) $(am__objects_15) \
-	$(am__objects_17) $(am__objects_19) $(am__objects_21) \
-	$(am__objects_23)
+@BUILD_BOOST_THREAD_TRUE@am__objects_20 = $(am__objects_19)
+am__objects_21 = barrier.lo
+@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__objects_22 =  \
+@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_21)
+nodist_libalps_la_OBJECTS = $(am__objects_14) $(am__objects_16) \
+	$(am__objects_18) $(am__objects_20) $(am__objects_22)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/abstract_task.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/barrier.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/basic_archive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/basic_iarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/basic_oarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/basic_serializer_map.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/basic_text_iprimitive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/basic_text_oprimitive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/basic_text_wiprimitive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/basic_text_woprimitive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/binary_iarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/binary_oarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/binary_wiarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/binary_woarchive.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/c_regex_traits.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/c_regex_traits_common.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/cmdline.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/codecvt_null.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/condition.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/config_file.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/connection.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/convenience.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/convert.Plo ./$(DEPDIR)/copyright.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/copyright.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/cpp_regex_traits.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/cregex.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/date_generators.Plo \
@@ -195,11 +170,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/evaluator.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/exception.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/exceptions.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/expression.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/extended_type_info.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/extended_type_info_no_rtti.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/extended_type_info_typeid.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/factory.Plo ./$(DEPDIR)/fileiter.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/expression.Plo ./$(DEPDIR)/factory.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/fileiter.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/greg_month.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/greg_weekday.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/gregorian_types.Plo \
@@ -217,14 +189,9 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/observableset.Plo ./$(DEPDIR)/once.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/operations_posix_windows.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/options.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/options_description.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/parameterlist.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/parameters.Plo ./$(DEPDIR)/parser.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/parsers.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/path_posix_windows.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/polymorphic_iarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/polymorphic_oarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/positional_options.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/posix_api.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/posix_time_types.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/recursive_mutex.Plo \
@@ -237,23 +204,16 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/signal_base.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/single_scheduler.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/slave_task.Plo ./$(DEPDIR)/slot.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/task.Plo ./$(DEPDIR)/text_iarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/text_oarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/text_wiarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/text_woarchive.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/thread.Plo ./$(DEPDIR)/threadmon.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/task.Plo ./$(DEPDIR)/thread.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/threadmon.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/throw_exception.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/trackable.Plo ./$(DEPDIR)/tss.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/unitcell.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/utf8_codecvt_facet.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/value_semantic.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/variables_map.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/void_cast.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/w32_regex_traits.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/wide_posix_api.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/winmain.Plo ./$(DEPDIR)/winstances.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/worker.Plo ./$(DEPDIR)/workertask.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/xdrdump.Plo ./$(DEPDIR)/xmlhandler.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/winstances.Plo ./$(DEPDIR)/worker.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/workertask.Plo ./$(DEPDIR)/xdrdump.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/xmlhandler.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/xmlparser.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/xmlstream.Plo ./$(DEPDIR)/xslt.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/xtime.Plo
@@ -480,20 +440,18 @@ src_boost_PROGRAM_OPTIONS_SERIALIZATION = \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp \
-  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp \
-  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp
+  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp 
 
+#  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp 
 lib_LTLIBRARIES = libalps.la 
 libalps_la_SOURCES = $(src_ALPS) $(src_OSIRIS) $(src_PARSER) $(src_RANDOM) $(am__append_1) $(am__append_2)
-
-#if BUILD_BOOST_SERIALIZATION
-nodist_libalps_la_SOURCES = $(am__append_3) $(src_boost_PROGRAM_OPTIONS_SERIALIZATION) $(am__append_4) $(am__append_5) $(am__append_6) $(am__append_7)
+nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) $(am__append_5) $(am__append_6) $(am__append_7)
 all: all-am
 
 .SUFFIXES:
@@ -565,27 +523,11 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/abstract_task.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/barrier.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_archive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_iarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_oarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_serializer_map.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_text_iprimitive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_text_oprimitive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_text_wiprimitive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_text_woprimitive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_iarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_oarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_wiarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_woarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_regex_traits_common.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmdline.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/codecvt_null.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/condition.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/config_file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convenience.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copyright.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpp_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cregex.Plo@am__quote@
@@ -596,9 +538,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exceptions.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expression.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended_type_info.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended_type_info_no_rtti.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended_type_info_typeid.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/fileiter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/greg_month.Plo@am__quote@
@@ -621,15 +560,10 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/once.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/operations_posix_windows.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options_description.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameterlist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameters.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parser.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parsers.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path_posix_windows.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polymorphic_iarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polymorphic_oarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/positional_options.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_api.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/posix_time_types.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/recursive_mutex.Plo@am__quote@
@@ -646,23 +580,14 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/slave_task.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/slot.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/task.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_iarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_oarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_wiarchive.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_woarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/threadmon.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/throw_exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trackable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tss.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unitcell.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf8_codecvt_facet.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/value_semantic.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/variables_map.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/void_cast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/w32_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wide_posix_api.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/winmain.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/winstances.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/worker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workertask.Plo@am__quote@
@@ -2160,798 +2085,6 @@ winstances.lo: $(BOOST_SRCDIR)/regex/src/winstances.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/winstances.Plo' tmpdepfile='$(DEPDIR)/winstances.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o winstances.lo `test -f '$(BOOST_SRCDIR)/regex/src/winstances.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/regex/src/winstances.cpp
-
-cmdline.o: $(BOOST_SRCDIR)/program_options/src/cmdline.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cmdline.o -MD -MP -MF "$(DEPDIR)/cmdline.Tpo" -c -o cmdline.o `test -f '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/cmdline.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/cmdline.Tpo" "$(DEPDIR)/cmdline.Po"; else rm -f "$(DEPDIR)/cmdline.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' object='cmdline.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/cmdline.Po' tmpdepfile='$(DEPDIR)/cmdline.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cmdline.o `test -f '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/cmdline.cpp
-
-cmdline.obj: $(BOOST_SRCDIR)/program_options/src/cmdline.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cmdline.obj -MD -MP -MF "$(DEPDIR)/cmdline.Tpo" -c -o cmdline.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/cmdline.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/cmdline.Tpo" "$(DEPDIR)/cmdline.Po"; else rm -f "$(DEPDIR)/cmdline.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' object='cmdline.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/cmdline.Po' tmpdepfile='$(DEPDIR)/cmdline.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cmdline.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/cmdline.cpp'; fi`
-
-cmdline.lo: $(BOOST_SRCDIR)/program_options/src/cmdline.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT cmdline.lo -MD -MP -MF "$(DEPDIR)/cmdline.Tpo" -c -o cmdline.lo `test -f '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/cmdline.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/cmdline.Tpo" "$(DEPDIR)/cmdline.Plo"; else rm -f "$(DEPDIR)/cmdline.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' object='cmdline.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/cmdline.Plo' tmpdepfile='$(DEPDIR)/cmdline.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o cmdline.lo `test -f '$(BOOST_SRCDIR)/program_options/src/cmdline.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/cmdline.cpp
-
-config_file.o: $(BOOST_SRCDIR)/program_options/src/config_file.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT config_file.o -MD -MP -MF "$(DEPDIR)/config_file.Tpo" -c -o config_file.o `test -f '$(BOOST_SRCDIR)/program_options/src/config_file.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/config_file.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/config_file.Tpo" "$(DEPDIR)/config_file.Po"; else rm -f "$(DEPDIR)/config_file.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/config_file.cpp' object='config_file.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/config_file.Po' tmpdepfile='$(DEPDIR)/config_file.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o config_file.o `test -f '$(BOOST_SRCDIR)/program_options/src/config_file.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/config_file.cpp
-
-config_file.obj: $(BOOST_SRCDIR)/program_options/src/config_file.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT config_file.obj -MD -MP -MF "$(DEPDIR)/config_file.Tpo" -c -o config_file.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/config_file.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/config_file.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/config_file.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/config_file.Tpo" "$(DEPDIR)/config_file.Po"; else rm -f "$(DEPDIR)/config_file.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/config_file.cpp' object='config_file.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/config_file.Po' tmpdepfile='$(DEPDIR)/config_file.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o config_file.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/config_file.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/config_file.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/config_file.cpp'; fi`
-
-config_file.lo: $(BOOST_SRCDIR)/program_options/src/config_file.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT config_file.lo -MD -MP -MF "$(DEPDIR)/config_file.Tpo" -c -o config_file.lo `test -f '$(BOOST_SRCDIR)/program_options/src/config_file.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/config_file.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/config_file.Tpo" "$(DEPDIR)/config_file.Plo"; else rm -f "$(DEPDIR)/config_file.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/config_file.cpp' object='config_file.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/config_file.Plo' tmpdepfile='$(DEPDIR)/config_file.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o config_file.lo `test -f '$(BOOST_SRCDIR)/program_options/src/config_file.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/config_file.cpp
-
-convert.o: $(BOOST_SRCDIR)/program_options/src/convert.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT convert.o -MD -MP -MF "$(DEPDIR)/convert.Tpo" -c -o convert.o `test -f '$(BOOST_SRCDIR)/program_options/src/convert.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/convert.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/convert.Tpo" "$(DEPDIR)/convert.Po"; else rm -f "$(DEPDIR)/convert.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/convert.cpp' object='convert.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/convert.Po' tmpdepfile='$(DEPDIR)/convert.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o convert.o `test -f '$(BOOST_SRCDIR)/program_options/src/convert.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/convert.cpp
-
-convert.obj: $(BOOST_SRCDIR)/program_options/src/convert.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT convert.obj -MD -MP -MF "$(DEPDIR)/convert.Tpo" -c -o convert.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/convert.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/convert.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/convert.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/convert.Tpo" "$(DEPDIR)/convert.Po"; else rm -f "$(DEPDIR)/convert.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/convert.cpp' object='convert.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/convert.Po' tmpdepfile='$(DEPDIR)/convert.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o convert.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/convert.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/convert.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/convert.cpp'; fi`
-
-convert.lo: $(BOOST_SRCDIR)/program_options/src/convert.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT convert.lo -MD -MP -MF "$(DEPDIR)/convert.Tpo" -c -o convert.lo `test -f '$(BOOST_SRCDIR)/program_options/src/convert.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/convert.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/convert.Tpo" "$(DEPDIR)/convert.Plo"; else rm -f "$(DEPDIR)/convert.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/convert.cpp' object='convert.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/convert.Plo' tmpdepfile='$(DEPDIR)/convert.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o convert.lo `test -f '$(BOOST_SRCDIR)/program_options/src/convert.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/convert.cpp
-
-options_description.o: $(BOOST_SRCDIR)/program_options/src/options_description.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options_description.o -MD -MP -MF "$(DEPDIR)/options_description.Tpo" -c -o options_description.o `test -f '$(BOOST_SRCDIR)/program_options/src/options_description.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/options_description.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options_description.Tpo" "$(DEPDIR)/options_description.Po"; else rm -f "$(DEPDIR)/options_description.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/options_description.cpp' object='options_description.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options_description.Po' tmpdepfile='$(DEPDIR)/options_description.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options_description.o `test -f '$(BOOST_SRCDIR)/program_options/src/options_description.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/options_description.cpp
-
-options_description.obj: $(BOOST_SRCDIR)/program_options/src/options_description.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options_description.obj -MD -MP -MF "$(DEPDIR)/options_description.Tpo" -c -o options_description.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/options_description.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/options_description.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/options_description.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options_description.Tpo" "$(DEPDIR)/options_description.Po"; else rm -f "$(DEPDIR)/options_description.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/options_description.cpp' object='options_description.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options_description.Po' tmpdepfile='$(DEPDIR)/options_description.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options_description.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/options_description.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/options_description.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/options_description.cpp'; fi`
-
-options_description.lo: $(BOOST_SRCDIR)/program_options/src/options_description.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT options_description.lo -MD -MP -MF "$(DEPDIR)/options_description.Tpo" -c -o options_description.lo `test -f '$(BOOST_SRCDIR)/program_options/src/options_description.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/options_description.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/options_description.Tpo" "$(DEPDIR)/options_description.Plo"; else rm -f "$(DEPDIR)/options_description.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/options_description.cpp' object='options_description.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/options_description.Plo' tmpdepfile='$(DEPDIR)/options_description.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options_description.lo `test -f '$(BOOST_SRCDIR)/program_options/src/options_description.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/options_description.cpp
-
-parsers.o: $(BOOST_SRCDIR)/program_options/src/parsers.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parsers.o -MD -MP -MF "$(DEPDIR)/parsers.Tpo" -c -o parsers.o `test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/parsers.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parsers.Tpo" "$(DEPDIR)/parsers.Po"; else rm -f "$(DEPDIR)/parsers.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/parsers.cpp' object='parsers.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/parsers.Po' tmpdepfile='$(DEPDIR)/parsers.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parsers.o `test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/parsers.cpp
-
-parsers.obj: $(BOOST_SRCDIR)/program_options/src/parsers.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parsers.obj -MD -MP -MF "$(DEPDIR)/parsers.Tpo" -c -o parsers.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parsers.Tpo" "$(DEPDIR)/parsers.Po"; else rm -f "$(DEPDIR)/parsers.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/parsers.cpp' object='parsers.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/parsers.Po' tmpdepfile='$(DEPDIR)/parsers.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parsers.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; fi`
-
-parsers.lo: $(BOOST_SRCDIR)/program_options/src/parsers.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parsers.lo -MD -MP -MF "$(DEPDIR)/parsers.Tpo" -c -o parsers.lo `test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/parsers.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parsers.Tpo" "$(DEPDIR)/parsers.Plo"; else rm -f "$(DEPDIR)/parsers.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/parsers.cpp' object='parsers.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/parsers.Plo' tmpdepfile='$(DEPDIR)/parsers.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parsers.lo `test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/parsers.cpp
-
-positional_options.o: $(BOOST_SRCDIR)/program_options/src/positional_options.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT positional_options.o -MD -MP -MF "$(DEPDIR)/positional_options.Tpo" -c -o positional_options.o `test -f '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/positional_options.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/positional_options.Tpo" "$(DEPDIR)/positional_options.Po"; else rm -f "$(DEPDIR)/positional_options.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/positional_options.cpp' object='positional_options.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/positional_options.Po' tmpdepfile='$(DEPDIR)/positional_options.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o positional_options.o `test -f '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/positional_options.cpp
-
-positional_options.obj: $(BOOST_SRCDIR)/program_options/src/positional_options.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT positional_options.obj -MD -MP -MF "$(DEPDIR)/positional_options.Tpo" -c -o positional_options.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/positional_options.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/positional_options.Tpo" "$(DEPDIR)/positional_options.Po"; else rm -f "$(DEPDIR)/positional_options.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/positional_options.cpp' object='positional_options.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/positional_options.Po' tmpdepfile='$(DEPDIR)/positional_options.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o positional_options.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/positional_options.cpp'; fi`
-
-positional_options.lo: $(BOOST_SRCDIR)/program_options/src/positional_options.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT positional_options.lo -MD -MP -MF "$(DEPDIR)/positional_options.Tpo" -c -o positional_options.lo `test -f '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/positional_options.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/positional_options.Tpo" "$(DEPDIR)/positional_options.Plo"; else rm -f "$(DEPDIR)/positional_options.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/positional_options.cpp' object='positional_options.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/positional_options.Plo' tmpdepfile='$(DEPDIR)/positional_options.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o positional_options.lo `test -f '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/positional_options.cpp
-
-value_semantic.o: $(BOOST_SRCDIR)/program_options/src/value_semantic.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT value_semantic.o -MD -MP -MF "$(DEPDIR)/value_semantic.Tpo" -c -o value_semantic.o `test -f '$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/value_semantic.Tpo" "$(DEPDIR)/value_semantic.Po"; else rm -f "$(DEPDIR)/value_semantic.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp' object='value_semantic.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/value_semantic.Po' tmpdepfile='$(DEPDIR)/value_semantic.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o value_semantic.o `test -f '$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp
-
-value_semantic.obj: $(BOOST_SRCDIR)/program_options/src/value_semantic.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT value_semantic.obj -MD -MP -MF "$(DEPDIR)/value_semantic.Tpo" -c -o value_semantic.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/value_semantic.Tpo" "$(DEPDIR)/value_semantic.Po"; else rm -f "$(DEPDIR)/value_semantic.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp' object='value_semantic.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/value_semantic.Po' tmpdepfile='$(DEPDIR)/value_semantic.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o value_semantic.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp'; fi`
-
-value_semantic.lo: $(BOOST_SRCDIR)/program_options/src/value_semantic.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT value_semantic.lo -MD -MP -MF "$(DEPDIR)/value_semantic.Tpo" -c -o value_semantic.lo `test -f '$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/value_semantic.Tpo" "$(DEPDIR)/value_semantic.Plo"; else rm -f "$(DEPDIR)/value_semantic.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp' object='value_semantic.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/value_semantic.Plo' tmpdepfile='$(DEPDIR)/value_semantic.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o value_semantic.lo `test -f '$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/value_semantic.cpp
-
-variables_map.o: $(BOOST_SRCDIR)/program_options/src/variables_map.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT variables_map.o -MD -MP -MF "$(DEPDIR)/variables_map.Tpo" -c -o variables_map.o `test -f '$(BOOST_SRCDIR)/program_options/src/variables_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/variables_map.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/variables_map.Tpo" "$(DEPDIR)/variables_map.Po"; else rm -f "$(DEPDIR)/variables_map.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/variables_map.cpp' object='variables_map.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/variables_map.Po' tmpdepfile='$(DEPDIR)/variables_map.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o variables_map.o `test -f '$(BOOST_SRCDIR)/program_options/src/variables_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/variables_map.cpp
-
-variables_map.obj: $(BOOST_SRCDIR)/program_options/src/variables_map.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT variables_map.obj -MD -MP -MF "$(DEPDIR)/variables_map.Tpo" -c -o variables_map.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/variables_map.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/variables_map.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/variables_map.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/variables_map.Tpo" "$(DEPDIR)/variables_map.Po"; else rm -f "$(DEPDIR)/variables_map.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/variables_map.cpp' object='variables_map.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/variables_map.Po' tmpdepfile='$(DEPDIR)/variables_map.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o variables_map.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/variables_map.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/variables_map.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/variables_map.cpp'; fi`
-
-variables_map.lo: $(BOOST_SRCDIR)/program_options/src/variables_map.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT variables_map.lo -MD -MP -MF "$(DEPDIR)/variables_map.Tpo" -c -o variables_map.lo `test -f '$(BOOST_SRCDIR)/program_options/src/variables_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/variables_map.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/variables_map.Tpo" "$(DEPDIR)/variables_map.Plo"; else rm -f "$(DEPDIR)/variables_map.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/variables_map.cpp' object='variables_map.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/variables_map.Plo' tmpdepfile='$(DEPDIR)/variables_map.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o variables_map.lo `test -f '$(BOOST_SRCDIR)/program_options/src/variables_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/variables_map.cpp
-
-winmain.o: $(BOOST_SRCDIR)/program_options/src/winmain.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT winmain.o -MD -MP -MF "$(DEPDIR)/winmain.Tpo" -c -o winmain.o `test -f '$(BOOST_SRCDIR)/program_options/src/winmain.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/winmain.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/winmain.Tpo" "$(DEPDIR)/winmain.Po"; else rm -f "$(DEPDIR)/winmain.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/winmain.cpp' object='winmain.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/winmain.Po' tmpdepfile='$(DEPDIR)/winmain.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o winmain.o `test -f '$(BOOST_SRCDIR)/program_options/src/winmain.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/winmain.cpp
-
-winmain.obj: $(BOOST_SRCDIR)/program_options/src/winmain.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT winmain.obj -MD -MP -MF "$(DEPDIR)/winmain.Tpo" -c -o winmain.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/winmain.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/winmain.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/winmain.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/winmain.Tpo" "$(DEPDIR)/winmain.Po"; else rm -f "$(DEPDIR)/winmain.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/winmain.cpp' object='winmain.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/winmain.Po' tmpdepfile='$(DEPDIR)/winmain.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o winmain.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/winmain.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/winmain.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/winmain.cpp'; fi`
-
-winmain.lo: $(BOOST_SRCDIR)/program_options/src/winmain.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT winmain.lo -MD -MP -MF "$(DEPDIR)/winmain.Tpo" -c -o winmain.lo `test -f '$(BOOST_SRCDIR)/program_options/src/winmain.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/winmain.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/winmain.Tpo" "$(DEPDIR)/winmain.Plo"; else rm -f "$(DEPDIR)/winmain.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/winmain.cpp' object='winmain.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/winmain.Plo' tmpdepfile='$(DEPDIR)/winmain.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o winmain.lo `test -f '$(BOOST_SRCDIR)/program_options/src/winmain.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/winmain.cpp
-
-basic_archive.o: $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_archive.o -MD -MP -MF "$(DEPDIR)/basic_archive.Tpo" -c -o basic_archive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_archive.Tpo" "$(DEPDIR)/basic_archive.Po"; else rm -f "$(DEPDIR)/basic_archive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp' object='basic_archive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_archive.Po' tmpdepfile='$(DEPDIR)/basic_archive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_archive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp
-
-basic_archive.obj: $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_archive.obj -MD -MP -MF "$(DEPDIR)/basic_archive.Tpo" -c -o basic_archive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_archive.Tpo" "$(DEPDIR)/basic_archive.Po"; else rm -f "$(DEPDIR)/basic_archive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp' object='basic_archive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_archive.Po' tmpdepfile='$(DEPDIR)/basic_archive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_archive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp'; fi`
-
-basic_archive.lo: $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_archive.lo -MD -MP -MF "$(DEPDIR)/basic_archive.Tpo" -c -o basic_archive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_archive.Tpo" "$(DEPDIR)/basic_archive.Plo"; else rm -f "$(DEPDIR)/basic_archive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp' object='basic_archive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_archive.Plo' tmpdepfile='$(DEPDIR)/basic_archive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_archive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp
-
-basic_iarchive.o: $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_iarchive.o -MD -MP -MF "$(DEPDIR)/basic_iarchive.Tpo" -c -o basic_iarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_iarchive.Tpo" "$(DEPDIR)/basic_iarchive.Po"; else rm -f "$(DEPDIR)/basic_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp' object='basic_iarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_iarchive.Po' tmpdepfile='$(DEPDIR)/basic_iarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_iarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp
-
-basic_iarchive.obj: $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_iarchive.obj -MD -MP -MF "$(DEPDIR)/basic_iarchive.Tpo" -c -o basic_iarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_iarchive.Tpo" "$(DEPDIR)/basic_iarchive.Po"; else rm -f "$(DEPDIR)/basic_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp' object='basic_iarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_iarchive.Po' tmpdepfile='$(DEPDIR)/basic_iarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_iarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp'; fi`
-
-basic_iarchive.lo: $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_iarchive.lo -MD -MP -MF "$(DEPDIR)/basic_iarchive.Tpo" -c -o basic_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_iarchive.Tpo" "$(DEPDIR)/basic_iarchive.Plo"; else rm -f "$(DEPDIR)/basic_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp' object='basic_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_iarchive.Plo' tmpdepfile='$(DEPDIR)/basic_iarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp
-
-basic_oarchive.o: $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_oarchive.o -MD -MP -MF "$(DEPDIR)/basic_oarchive.Tpo" -c -o basic_oarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_oarchive.Tpo" "$(DEPDIR)/basic_oarchive.Po"; else rm -f "$(DEPDIR)/basic_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp' object='basic_oarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_oarchive.Po' tmpdepfile='$(DEPDIR)/basic_oarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_oarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp
-
-basic_oarchive.obj: $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_oarchive.obj -MD -MP -MF "$(DEPDIR)/basic_oarchive.Tpo" -c -o basic_oarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_oarchive.Tpo" "$(DEPDIR)/basic_oarchive.Po"; else rm -f "$(DEPDIR)/basic_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp' object='basic_oarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_oarchive.Po' tmpdepfile='$(DEPDIR)/basic_oarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_oarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp'; fi`
-
-basic_oarchive.lo: $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_oarchive.lo -MD -MP -MF "$(DEPDIR)/basic_oarchive.Tpo" -c -o basic_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_oarchive.Tpo" "$(DEPDIR)/basic_oarchive.Plo"; else rm -f "$(DEPDIR)/basic_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp' object='basic_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_oarchive.Plo' tmpdepfile='$(DEPDIR)/basic_oarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp
-
-basic_serializer_map.o: $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_serializer_map.o -MD -MP -MF "$(DEPDIR)/basic_serializer_map.Tpo" -c -o basic_serializer_map.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_serializer_map.Tpo" "$(DEPDIR)/basic_serializer_map.Po"; else rm -f "$(DEPDIR)/basic_serializer_map.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp' object='basic_serializer_map.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_serializer_map.Po' tmpdepfile='$(DEPDIR)/basic_serializer_map.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_serializer_map.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp
-
-basic_serializer_map.obj: $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_serializer_map.obj -MD -MP -MF "$(DEPDIR)/basic_serializer_map.Tpo" -c -o basic_serializer_map.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_serializer_map.Tpo" "$(DEPDIR)/basic_serializer_map.Po"; else rm -f "$(DEPDIR)/basic_serializer_map.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp' object='basic_serializer_map.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_serializer_map.Po' tmpdepfile='$(DEPDIR)/basic_serializer_map.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_serializer_map.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp'; fi`
-
-basic_serializer_map.lo: $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_serializer_map.lo -MD -MP -MF "$(DEPDIR)/basic_serializer_map.Tpo" -c -o basic_serializer_map.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_serializer_map.Tpo" "$(DEPDIR)/basic_serializer_map.Plo"; else rm -f "$(DEPDIR)/basic_serializer_map.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp' object='basic_serializer_map.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_serializer_map.Plo' tmpdepfile='$(DEPDIR)/basic_serializer_map.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_serializer_map.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp
-
-basic_text_iprimitive.o: $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_iprimitive.o -MD -MP -MF "$(DEPDIR)/basic_text_iprimitive.Tpo" -c -o basic_text_iprimitive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_iprimitive.Tpo" "$(DEPDIR)/basic_text_iprimitive.Po"; else rm -f "$(DEPDIR)/basic_text_iprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' object='basic_text_iprimitive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_iprimitive.Po' tmpdepfile='$(DEPDIR)/basic_text_iprimitive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_iprimitive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
-
-basic_text_iprimitive.obj: $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_iprimitive.obj -MD -MP -MF "$(DEPDIR)/basic_text_iprimitive.Tpo" -c -o basic_text_iprimitive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_iprimitive.Tpo" "$(DEPDIR)/basic_text_iprimitive.Po"; else rm -f "$(DEPDIR)/basic_text_iprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' object='basic_text_iprimitive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_iprimitive.Po' tmpdepfile='$(DEPDIR)/basic_text_iprimitive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_iprimitive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp'; fi`
-
-basic_text_iprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_iprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_iprimitive.Tpo" -c -o basic_text_iprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_iprimitive.Tpo" "$(DEPDIR)/basic_text_iprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_iprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' object='basic_text_iprimitive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_iprimitive.Plo' tmpdepfile='$(DEPDIR)/basic_text_iprimitive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_iprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
-
-basic_text_oprimitive.o: $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_oprimitive.o -MD -MP -MF "$(DEPDIR)/basic_text_oprimitive.Tpo" -c -o basic_text_oprimitive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_oprimitive.Tpo" "$(DEPDIR)/basic_text_oprimitive.Po"; else rm -f "$(DEPDIR)/basic_text_oprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' object='basic_text_oprimitive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_oprimitive.Po' tmpdepfile='$(DEPDIR)/basic_text_oprimitive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_oprimitive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
-
-basic_text_oprimitive.obj: $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_oprimitive.obj -MD -MP -MF "$(DEPDIR)/basic_text_oprimitive.Tpo" -c -o basic_text_oprimitive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_oprimitive.Tpo" "$(DEPDIR)/basic_text_oprimitive.Po"; else rm -f "$(DEPDIR)/basic_text_oprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' object='basic_text_oprimitive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_oprimitive.Po' tmpdepfile='$(DEPDIR)/basic_text_oprimitive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_oprimitive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp'; fi`
-
-basic_text_oprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_oprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_oprimitive.Tpo" -c -o basic_text_oprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_oprimitive.Tpo" "$(DEPDIR)/basic_text_oprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_oprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' object='basic_text_oprimitive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_oprimitive.Plo' tmpdepfile='$(DEPDIR)/basic_text_oprimitive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_oprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
-
-basic_text_wiprimitive.o: $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_wiprimitive.o -MD -MP -MF "$(DEPDIR)/basic_text_wiprimitive.Tpo" -c -o basic_text_wiprimitive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_wiprimitive.Tpo" "$(DEPDIR)/basic_text_wiprimitive.Po"; else rm -f "$(DEPDIR)/basic_text_wiprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' object='basic_text_wiprimitive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_wiprimitive.Po' tmpdepfile='$(DEPDIR)/basic_text_wiprimitive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_wiprimitive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
-
-basic_text_wiprimitive.obj: $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_wiprimitive.obj -MD -MP -MF "$(DEPDIR)/basic_text_wiprimitive.Tpo" -c -o basic_text_wiprimitive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_wiprimitive.Tpo" "$(DEPDIR)/basic_text_wiprimitive.Po"; else rm -f "$(DEPDIR)/basic_text_wiprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' object='basic_text_wiprimitive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_wiprimitive.Po' tmpdepfile='$(DEPDIR)/basic_text_wiprimitive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_wiprimitive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp'; fi`
-
-basic_text_wiprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_wiprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_wiprimitive.Tpo" -c -o basic_text_wiprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_wiprimitive.Tpo" "$(DEPDIR)/basic_text_wiprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_wiprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' object='basic_text_wiprimitive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_wiprimitive.Plo' tmpdepfile='$(DEPDIR)/basic_text_wiprimitive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_wiprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
-
-basic_text_woprimitive.o: $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_woprimitive.o -MD -MP -MF "$(DEPDIR)/basic_text_woprimitive.Tpo" -c -o basic_text_woprimitive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_woprimitive.Tpo" "$(DEPDIR)/basic_text_woprimitive.Po"; else rm -f "$(DEPDIR)/basic_text_woprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' object='basic_text_woprimitive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_woprimitive.Po' tmpdepfile='$(DEPDIR)/basic_text_woprimitive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_woprimitive.o `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
-
-basic_text_woprimitive.obj: $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_woprimitive.obj -MD -MP -MF "$(DEPDIR)/basic_text_woprimitive.Tpo" -c -o basic_text_woprimitive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_woprimitive.Tpo" "$(DEPDIR)/basic_text_woprimitive.Po"; else rm -f "$(DEPDIR)/basic_text_woprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' object='basic_text_woprimitive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_woprimitive.Po' tmpdepfile='$(DEPDIR)/basic_text_woprimitive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_woprimitive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp'; fi`
-
-basic_text_woprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_woprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_woprimitive.Tpo" -c -o basic_text_woprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_woprimitive.Tpo" "$(DEPDIR)/basic_text_woprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_woprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' object='basic_text_woprimitive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/basic_text_woprimitive.Plo' tmpdepfile='$(DEPDIR)/basic_text_woprimitive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_woprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
-
-binary_iarchive.o: $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_iarchive.o -MD -MP -MF "$(DEPDIR)/binary_iarchive.Tpo" -c -o binary_iarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_iarchive.Tpo" "$(DEPDIR)/binary_iarchive.Po"; else rm -f "$(DEPDIR)/binary_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp' object='binary_iarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_iarchive.Po' tmpdepfile='$(DEPDIR)/binary_iarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_iarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp
-
-binary_iarchive.obj: $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_iarchive.obj -MD -MP -MF "$(DEPDIR)/binary_iarchive.Tpo" -c -o binary_iarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_iarchive.Tpo" "$(DEPDIR)/binary_iarchive.Po"; else rm -f "$(DEPDIR)/binary_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp' object='binary_iarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_iarchive.Po' tmpdepfile='$(DEPDIR)/binary_iarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_iarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp'; fi`
-
-binary_iarchive.lo: $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_iarchive.lo -MD -MP -MF "$(DEPDIR)/binary_iarchive.Tpo" -c -o binary_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_iarchive.Tpo" "$(DEPDIR)/binary_iarchive.Plo"; else rm -f "$(DEPDIR)/binary_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp' object='binary_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_iarchive.Plo' tmpdepfile='$(DEPDIR)/binary_iarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp
-
-binary_oarchive.o: $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_oarchive.o -MD -MP -MF "$(DEPDIR)/binary_oarchive.Tpo" -c -o binary_oarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_oarchive.Tpo" "$(DEPDIR)/binary_oarchive.Po"; else rm -f "$(DEPDIR)/binary_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp' object='binary_oarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_oarchive.Po' tmpdepfile='$(DEPDIR)/binary_oarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_oarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp
-
-binary_oarchive.obj: $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_oarchive.obj -MD -MP -MF "$(DEPDIR)/binary_oarchive.Tpo" -c -o binary_oarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_oarchive.Tpo" "$(DEPDIR)/binary_oarchive.Po"; else rm -f "$(DEPDIR)/binary_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp' object='binary_oarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_oarchive.Po' tmpdepfile='$(DEPDIR)/binary_oarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_oarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp'; fi`
-
-binary_oarchive.lo: $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_oarchive.lo -MD -MP -MF "$(DEPDIR)/binary_oarchive.Tpo" -c -o binary_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_oarchive.Tpo" "$(DEPDIR)/binary_oarchive.Plo"; else rm -f "$(DEPDIR)/binary_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp' object='binary_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_oarchive.Plo' tmpdepfile='$(DEPDIR)/binary_oarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp
-
-binary_wiarchive.o: $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_wiarchive.o -MD -MP -MF "$(DEPDIR)/binary_wiarchive.Tpo" -c -o binary_wiarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_wiarchive.Tpo" "$(DEPDIR)/binary_wiarchive.Po"; else rm -f "$(DEPDIR)/binary_wiarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' object='binary_wiarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_wiarchive.Po' tmpdepfile='$(DEPDIR)/binary_wiarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_wiarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp
-
-binary_wiarchive.obj: $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_wiarchive.obj -MD -MP -MF "$(DEPDIR)/binary_wiarchive.Tpo" -c -o binary_wiarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_wiarchive.Tpo" "$(DEPDIR)/binary_wiarchive.Po"; else rm -f "$(DEPDIR)/binary_wiarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' object='binary_wiarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_wiarchive.Po' tmpdepfile='$(DEPDIR)/binary_wiarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_wiarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp'; fi`
-
-binary_wiarchive.lo: $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_wiarchive.lo -MD -MP -MF "$(DEPDIR)/binary_wiarchive.Tpo" -c -o binary_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_wiarchive.Tpo" "$(DEPDIR)/binary_wiarchive.Plo"; else rm -f "$(DEPDIR)/binary_wiarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' object='binary_wiarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_wiarchive.Plo' tmpdepfile='$(DEPDIR)/binary_wiarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp
-
-binary_woarchive.o: $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_woarchive.o -MD -MP -MF "$(DEPDIR)/binary_woarchive.Tpo" -c -o binary_woarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_woarchive.Tpo" "$(DEPDIR)/binary_woarchive.Po"; else rm -f "$(DEPDIR)/binary_woarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' object='binary_woarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_woarchive.Po' tmpdepfile='$(DEPDIR)/binary_woarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_woarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp
-
-binary_woarchive.obj: $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_woarchive.obj -MD -MP -MF "$(DEPDIR)/binary_woarchive.Tpo" -c -o binary_woarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_woarchive.Tpo" "$(DEPDIR)/binary_woarchive.Po"; else rm -f "$(DEPDIR)/binary_woarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' object='binary_woarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_woarchive.Po' tmpdepfile='$(DEPDIR)/binary_woarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_woarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp'; fi`
-
-binary_woarchive.lo: $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_woarchive.lo -MD -MP -MF "$(DEPDIR)/binary_woarchive.Tpo" -c -o binary_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_woarchive.Tpo" "$(DEPDIR)/binary_woarchive.Plo"; else rm -f "$(DEPDIR)/binary_woarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' object='binary_woarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/binary_woarchive.Plo' tmpdepfile='$(DEPDIR)/binary_woarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp
-
-codecvt_null.o: $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT codecvt_null.o -MD -MP -MF "$(DEPDIR)/codecvt_null.Tpo" -c -o codecvt_null.o `test -f '$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/codecvt_null.Tpo" "$(DEPDIR)/codecvt_null.Po"; else rm -f "$(DEPDIR)/codecvt_null.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp' object='codecvt_null.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/codecvt_null.Po' tmpdepfile='$(DEPDIR)/codecvt_null.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o codecvt_null.o `test -f '$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp
-
-codecvt_null.obj: $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT codecvt_null.obj -MD -MP -MF "$(DEPDIR)/codecvt_null.Tpo" -c -o codecvt_null.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/codecvt_null.Tpo" "$(DEPDIR)/codecvt_null.Po"; else rm -f "$(DEPDIR)/codecvt_null.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp' object='codecvt_null.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/codecvt_null.Po' tmpdepfile='$(DEPDIR)/codecvt_null.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o codecvt_null.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp'; fi`
-
-codecvt_null.lo: $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT codecvt_null.lo -MD -MP -MF "$(DEPDIR)/codecvt_null.Tpo" -c -o codecvt_null.lo `test -f '$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/codecvt_null.Tpo" "$(DEPDIR)/codecvt_null.Plo"; else rm -f "$(DEPDIR)/codecvt_null.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp' object='codecvt_null.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/codecvt_null.Plo' tmpdepfile='$(DEPDIR)/codecvt_null.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o codecvt_null.lo `test -f '$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp
-
-extended_type_info.o: $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info.o -MD -MP -MF "$(DEPDIR)/extended_type_info.Tpo" -c -o extended_type_info.o `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info.Tpo" "$(DEPDIR)/extended_type_info.Po"; else rm -f "$(DEPDIR)/extended_type_info.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp' object='extended_type_info.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info.Po' tmpdepfile='$(DEPDIR)/extended_type_info.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info.o `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp
-
-extended_type_info.obj: $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info.obj -MD -MP -MF "$(DEPDIR)/extended_type_info.Tpo" -c -o extended_type_info.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info.Tpo" "$(DEPDIR)/extended_type_info.Po"; else rm -f "$(DEPDIR)/extended_type_info.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp' object='extended_type_info.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info.Po' tmpdepfile='$(DEPDIR)/extended_type_info.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp'; fi`
-
-extended_type_info.lo: $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info.lo -MD -MP -MF "$(DEPDIR)/extended_type_info.Tpo" -c -o extended_type_info.lo `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info.Tpo" "$(DEPDIR)/extended_type_info.Plo"; else rm -f "$(DEPDIR)/extended_type_info.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp' object='extended_type_info.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info.Plo' tmpdepfile='$(DEPDIR)/extended_type_info.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info.lo `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp
-
-extended_type_info_no_rtti.o: $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info_no_rtti.o -MD -MP -MF "$(DEPDIR)/extended_type_info_no_rtti.Tpo" -c -o extended_type_info_no_rtti.o `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info_no_rtti.Tpo" "$(DEPDIR)/extended_type_info_no_rtti.Po"; else rm -f "$(DEPDIR)/extended_type_info_no_rtti.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp' object='extended_type_info_no_rtti.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info_no_rtti.Po' tmpdepfile='$(DEPDIR)/extended_type_info_no_rtti.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info_no_rtti.o `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp
-
-extended_type_info_no_rtti.obj: $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info_no_rtti.obj -MD -MP -MF "$(DEPDIR)/extended_type_info_no_rtti.Tpo" -c -o extended_type_info_no_rtti.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info_no_rtti.Tpo" "$(DEPDIR)/extended_type_info_no_rtti.Po"; else rm -f "$(DEPDIR)/extended_type_info_no_rtti.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp' object='extended_type_info_no_rtti.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info_no_rtti.Po' tmpdepfile='$(DEPDIR)/extended_type_info_no_rtti.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info_no_rtti.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp'; fi`
-
-extended_type_info_no_rtti.lo: $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info_no_rtti.lo -MD -MP -MF "$(DEPDIR)/extended_type_info_no_rtti.Tpo" -c -o extended_type_info_no_rtti.lo `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info_no_rtti.Tpo" "$(DEPDIR)/extended_type_info_no_rtti.Plo"; else rm -f "$(DEPDIR)/extended_type_info_no_rtti.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp' object='extended_type_info_no_rtti.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info_no_rtti.Plo' tmpdepfile='$(DEPDIR)/extended_type_info_no_rtti.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info_no_rtti.lo `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp
-
-extended_type_info_typeid.o: $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info_typeid.o -MD -MP -MF "$(DEPDIR)/extended_type_info_typeid.Tpo" -c -o extended_type_info_typeid.o `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info_typeid.Tpo" "$(DEPDIR)/extended_type_info_typeid.Po"; else rm -f "$(DEPDIR)/extended_type_info_typeid.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp' object='extended_type_info_typeid.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info_typeid.Po' tmpdepfile='$(DEPDIR)/extended_type_info_typeid.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info_typeid.o `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp
-
-extended_type_info_typeid.obj: $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info_typeid.obj -MD -MP -MF "$(DEPDIR)/extended_type_info_typeid.Tpo" -c -o extended_type_info_typeid.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info_typeid.Tpo" "$(DEPDIR)/extended_type_info_typeid.Po"; else rm -f "$(DEPDIR)/extended_type_info_typeid.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp' object='extended_type_info_typeid.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info_typeid.Po' tmpdepfile='$(DEPDIR)/extended_type_info_typeid.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info_typeid.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp'; fi`
-
-extended_type_info_typeid.lo: $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT extended_type_info_typeid.lo -MD -MP -MF "$(DEPDIR)/extended_type_info_typeid.Tpo" -c -o extended_type_info_typeid.lo `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/extended_type_info_typeid.Tpo" "$(DEPDIR)/extended_type_info_typeid.Plo"; else rm -f "$(DEPDIR)/extended_type_info_typeid.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp' object='extended_type_info_typeid.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/extended_type_info_typeid.Plo' tmpdepfile='$(DEPDIR)/extended_type_info_typeid.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o extended_type_info_typeid.lo `test -f '$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp
-
-polymorphic_iarchive.o: $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT polymorphic_iarchive.o -MD -MP -MF "$(DEPDIR)/polymorphic_iarchive.Tpo" -c -o polymorphic_iarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/polymorphic_iarchive.Tpo" "$(DEPDIR)/polymorphic_iarchive.Po"; else rm -f "$(DEPDIR)/polymorphic_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp' object='polymorphic_iarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/polymorphic_iarchive.Po' tmpdepfile='$(DEPDIR)/polymorphic_iarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o polymorphic_iarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp
-
-polymorphic_iarchive.obj: $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT polymorphic_iarchive.obj -MD -MP -MF "$(DEPDIR)/polymorphic_iarchive.Tpo" -c -o polymorphic_iarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/polymorphic_iarchive.Tpo" "$(DEPDIR)/polymorphic_iarchive.Po"; else rm -f "$(DEPDIR)/polymorphic_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp' object='polymorphic_iarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/polymorphic_iarchive.Po' tmpdepfile='$(DEPDIR)/polymorphic_iarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o polymorphic_iarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp'; fi`
-
-polymorphic_iarchive.lo: $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT polymorphic_iarchive.lo -MD -MP -MF "$(DEPDIR)/polymorphic_iarchive.Tpo" -c -o polymorphic_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/polymorphic_iarchive.Tpo" "$(DEPDIR)/polymorphic_iarchive.Plo"; else rm -f "$(DEPDIR)/polymorphic_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp' object='polymorphic_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/polymorphic_iarchive.Plo' tmpdepfile='$(DEPDIR)/polymorphic_iarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o polymorphic_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp
-
-polymorphic_oarchive.o: $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT polymorphic_oarchive.o -MD -MP -MF "$(DEPDIR)/polymorphic_oarchive.Tpo" -c -o polymorphic_oarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/polymorphic_oarchive.Tpo" "$(DEPDIR)/polymorphic_oarchive.Po"; else rm -f "$(DEPDIR)/polymorphic_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp' object='polymorphic_oarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/polymorphic_oarchive.Po' tmpdepfile='$(DEPDIR)/polymorphic_oarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o polymorphic_oarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp
-
-polymorphic_oarchive.obj: $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT polymorphic_oarchive.obj -MD -MP -MF "$(DEPDIR)/polymorphic_oarchive.Tpo" -c -o polymorphic_oarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/polymorphic_oarchive.Tpo" "$(DEPDIR)/polymorphic_oarchive.Po"; else rm -f "$(DEPDIR)/polymorphic_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp' object='polymorphic_oarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/polymorphic_oarchive.Po' tmpdepfile='$(DEPDIR)/polymorphic_oarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o polymorphic_oarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp'; fi`
-
-polymorphic_oarchive.lo: $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT polymorphic_oarchive.lo -MD -MP -MF "$(DEPDIR)/polymorphic_oarchive.Tpo" -c -o polymorphic_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/polymorphic_oarchive.Tpo" "$(DEPDIR)/polymorphic_oarchive.Plo"; else rm -f "$(DEPDIR)/polymorphic_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp' object='polymorphic_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/polymorphic_oarchive.Plo' tmpdepfile='$(DEPDIR)/polymorphic_oarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o polymorphic_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp
-
-text_iarchive.o: $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_iarchive.o -MD -MP -MF "$(DEPDIR)/text_iarchive.Tpo" -c -o text_iarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_iarchive.Tpo" "$(DEPDIR)/text_iarchive.Po"; else rm -f "$(DEPDIR)/text_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' object='text_iarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_iarchive.Po' tmpdepfile='$(DEPDIR)/text_iarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_iarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
-
-text_iarchive.obj: $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_iarchive.obj -MD -MP -MF "$(DEPDIR)/text_iarchive.Tpo" -c -o text_iarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_iarchive.Tpo" "$(DEPDIR)/text_iarchive.Po"; else rm -f "$(DEPDIR)/text_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' object='text_iarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_iarchive.Po' tmpdepfile='$(DEPDIR)/text_iarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_iarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp'; fi`
-
-text_iarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_iarchive.lo -MD -MP -MF "$(DEPDIR)/text_iarchive.Tpo" -c -o text_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_iarchive.Tpo" "$(DEPDIR)/text_iarchive.Plo"; else rm -f "$(DEPDIR)/text_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' object='text_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_iarchive.Plo' tmpdepfile='$(DEPDIR)/text_iarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
-
-text_oarchive.o: $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_oarchive.o -MD -MP -MF "$(DEPDIR)/text_oarchive.Tpo" -c -o text_oarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_oarchive.Tpo" "$(DEPDIR)/text_oarchive.Po"; else rm -f "$(DEPDIR)/text_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' object='text_oarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_oarchive.Po' tmpdepfile='$(DEPDIR)/text_oarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_oarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
-
-text_oarchive.obj: $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_oarchive.obj -MD -MP -MF "$(DEPDIR)/text_oarchive.Tpo" -c -o text_oarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_oarchive.Tpo" "$(DEPDIR)/text_oarchive.Po"; else rm -f "$(DEPDIR)/text_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' object='text_oarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_oarchive.Po' tmpdepfile='$(DEPDIR)/text_oarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_oarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp'; fi`
-
-text_oarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_oarchive.lo -MD -MP -MF "$(DEPDIR)/text_oarchive.Tpo" -c -o text_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_oarchive.Tpo" "$(DEPDIR)/text_oarchive.Plo"; else rm -f "$(DEPDIR)/text_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' object='text_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_oarchive.Plo' tmpdepfile='$(DEPDIR)/text_oarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
-
-text_wiarchive.o: $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_wiarchive.o -MD -MP -MF "$(DEPDIR)/text_wiarchive.Tpo" -c -o text_wiarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_wiarchive.Tpo" "$(DEPDIR)/text_wiarchive.Po"; else rm -f "$(DEPDIR)/text_wiarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' object='text_wiarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_wiarchive.Po' tmpdepfile='$(DEPDIR)/text_wiarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_wiarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
-
-text_wiarchive.obj: $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_wiarchive.obj -MD -MP -MF "$(DEPDIR)/text_wiarchive.Tpo" -c -o text_wiarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_wiarchive.Tpo" "$(DEPDIR)/text_wiarchive.Po"; else rm -f "$(DEPDIR)/text_wiarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' object='text_wiarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_wiarchive.Po' tmpdepfile='$(DEPDIR)/text_wiarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_wiarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp'; fi`
-
-text_wiarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_wiarchive.lo -MD -MP -MF "$(DEPDIR)/text_wiarchive.Tpo" -c -o text_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_wiarchive.Tpo" "$(DEPDIR)/text_wiarchive.Plo"; else rm -f "$(DEPDIR)/text_wiarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' object='text_wiarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_wiarchive.Plo' tmpdepfile='$(DEPDIR)/text_wiarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
-
-text_woarchive.o: $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_woarchive.o -MD -MP -MF "$(DEPDIR)/text_woarchive.Tpo" -c -o text_woarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_woarchive.Tpo" "$(DEPDIR)/text_woarchive.Po"; else rm -f "$(DEPDIR)/text_woarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' object='text_woarchive.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_woarchive.Po' tmpdepfile='$(DEPDIR)/text_woarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_woarchive.o `test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
-
-text_woarchive.obj: $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_woarchive.obj -MD -MP -MF "$(DEPDIR)/text_woarchive.Tpo" -c -o text_woarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_woarchive.Tpo" "$(DEPDIR)/text_woarchive.Po"; else rm -f "$(DEPDIR)/text_woarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' object='text_woarchive.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_woarchive.Po' tmpdepfile='$(DEPDIR)/text_woarchive.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_woarchive.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp'; fi`
-
-text_woarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_woarchive.lo -MD -MP -MF "$(DEPDIR)/text_woarchive.Tpo" -c -o text_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_woarchive.Tpo" "$(DEPDIR)/text_woarchive.Plo"; else rm -f "$(DEPDIR)/text_woarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' object='text_woarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/text_woarchive.Plo' tmpdepfile='$(DEPDIR)/text_woarchive.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
-
-utf8_codecvt_facet.o: $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.o -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.o `test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
-
-utf8_codecvt_facet.obj: $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.obj -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Po"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Po' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp'; fi`
-
-utf8_codecvt_facet.lo: $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Plo"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/utf8_codecvt_facet.Plo' tmpdepfile='$(DEPDIR)/utf8_codecvt_facet.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
-
-void_cast.o: $(BOOST_SRCDIR)/serialization/src/void_cast.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT void_cast.o -MD -MP -MF "$(DEPDIR)/void_cast.Tpo" -c -o void_cast.o `test -f '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/void_cast.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/void_cast.Tpo" "$(DEPDIR)/void_cast.Po"; else rm -f "$(DEPDIR)/void_cast.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/void_cast.cpp' object='void_cast.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/void_cast.Po' tmpdepfile='$(DEPDIR)/void_cast.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o void_cast.o `test -f '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/void_cast.cpp
-
-void_cast.obj: $(BOOST_SRCDIR)/serialization/src/void_cast.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT void_cast.obj -MD -MP -MF "$(DEPDIR)/void_cast.Tpo" -c -o void_cast.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/void_cast.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/void_cast.Tpo" "$(DEPDIR)/void_cast.Po"; else rm -f "$(DEPDIR)/void_cast.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/void_cast.cpp' object='void_cast.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/void_cast.Po' tmpdepfile='$(DEPDIR)/void_cast.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o void_cast.obj `if test -f '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/serialization/src/void_cast.cpp'; fi`
-
-void_cast.lo: $(BOOST_SRCDIR)/serialization/src/void_cast.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT void_cast.lo -MD -MP -MF "$(DEPDIR)/void_cast.Tpo" -c -o void_cast.lo `test -f '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/void_cast.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/void_cast.Tpo" "$(DEPDIR)/void_cast.Plo"; else rm -f "$(DEPDIR)/void_cast.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/void_cast.cpp' object='void_cast.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/void_cast.Plo' tmpdepfile='$(DEPDIR)/void_cast.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o void_cast.lo `test -f '$(BOOST_SRCDIR)/serialization/src/void_cast.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/void_cast.cpp
 
 connection.o: $(BOOST_SRCDIR)/signals/src/connection.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT connection.o -MD -MP -MF "$(DEPDIR)/connection.Tpo" -c -o connection.o `test -f '$(BOOST_SRCDIR)/signals/src/connection.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/connection.cpp; \
