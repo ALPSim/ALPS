@@ -64,81 +64,20 @@ protected:
 };
 
 template &lt;class G=lattice::graph_factory&lt;>::graph_type>
-class LatticeMCRun : public MCRun
+class LatticeMCRun : public MCRun, public graph_helper<G>
 {
-public:
-  typedef G graph_type;
-  typedef typename boost::graph_traits&lt;graph_type>::vertex_iterator vertex_iterator;
-  typedef typename boost::graph_traits&lt;graph_type>::edge_iterator edge_iterator;
-  typedef typename boost::graph_traits&lt;graph_type>::out_edge_iterator out_edge_iterator;
-  typedef typename boost::graph_traits&lt;graph_type>::in_edge_iterator in_edge_iterator;
-  typedef typename boost::graph_traits&lt;graph_type>::edge_descriptor edge_descriptor;
-  typedef typename boost::graph_traits&lt;graph_type>::vertex_descriptor vertex_descriptor;
-  typedef typename graph_traits&lt;graph_type>::vertices_size_type vertices_size_type;
-  typedef typename graph_traits&lt;graph_type>::edges_size_type edges_size_type;
-  typedef typename graph_traits&lt;graph_type>::degree_size_type degree_size_type;
-  typedef typename graph_traits&lt;graph_type>::adjacency_iterator adjacency_iterator;
-  
-  typedef typename graph_traits&lt;graph_type>::site_iterator site_iterator;
-  typedef typename graph_traits&lt;graph_type>::bond_iterator bond_iterator;
-  typedef typename graph_traits&lt;graph_type>::neighbor_bond_iterator neighbor_bond_iterator;
-  typedef typename graph_traits&lt;graph_type>::bond_descriptor bond_descriptor;
-  typedef typename graph_traits&lt;graph_type>::site_descriptor site_descriptor;
-  typedef typename graph_traits&lt;graph_type>::sites_size_type sites_size_type;
-  typedef typename graph_traits&lt;graph_type>::bonds_size_type bonds_size_type;
-  typedef typename graph_traits&lt;graph_type>::neighbors_size_type neighbors_size_type;
-  typedef typename graph_traits&lt;graph_type>::neighbor_iterator neighbor_iterator;
-  
+public:  
   LatticeMCRun(const osiris::ProcessList&amp; w,const alps::Parameters&amp; p,int n);
-   
-  graph_type&amp; graph();
-  const graph_type&amp; graph() const;
-
-  sites_size_type num_sites() const;
-  bonds_size_type num_bonds() const;
-  std::pair&lt;site_iterator,site_iterator> sites() const;
-  std::pair&lt;bond_iterator,bond_iterator> bonds() const;
-  bond_descriptor bond(bonds_size_type i) const;
-  neighbors_size_type num_neighbors (const site_descriptor&amp; v) const;
-  std::pair&lt;neighbor_bond_iterator,neighbor_bond_iterator> neighbor_bonds (const site_descriptor&amp; v) const;  
-  std::pair&lt;neighbor_iterator,neighbor_iterator> neighbors (const site_descriptor&amp; v) const;
-  site_descriptor neighbor (const site_descriptor&amp; v, neighbors_size_type i) const;
-  site_descriptor site(sites_size_type i) const;
-  
-  vertices_size_type num_vertices() const;
-  edges_size_type num_edges() const;
-  std::pair&lt;vertex_iterator,vertex_iterator> vertices() const;
-  std::pair&lt;edge_iterator,edge_iterator> edges() const;
-  degree_size_type out_degree (const vertex_descriptor&amp; v) const;
-  degree_size_type in_degree (const vertex_descriptor&amp; v) const;
-  degree_size_type degree (const vertex_descriptor&amp; v) const;
-  out_edge_iterator out_edges (const vertex_descriptor&amp; v) const;
-  in_edge_iterator in_edges (const vertex_descriptor&amp; v) const;
-  std::pair&lt;adjacency_iterator,adjacency_iterator> adjacent_vertices (const site_descriptor&amp; v) const; 
-  vertex_descriptor vertex(vertices_size_type i) const;
-
-  site_descriptor source(const bond_descriptor&amp; b) const;  
-  site_descriptor target(const bond_descriptor&amp; b) const;  
-  
-  bool is_bipartite() const;
-  double parity(const site_descriptor&amp; v) const;
-  
-  int bond_type(const bond_descriptor&amp; b) const;
 };
 
-template &lt;class G=graph_factory&lt;>::graph_type>
-class LatticeModelMCRun : public LatticeMCRun&lt;G>
+template &lt;class G=graph_factory&lt;>::graph_type, class I=short>
+class LatticeModelMCRun : public LatticeMCRun&lt;G>, public model_helper&lt;I>
 {
 public:  
   LatticeModelMCRun(const ProcessList&amp; w,const alps::Parameters&amp; p,int n);
-  
-  const ModelLibrary::OperatorDescriptorMap&amp; simple_operators() const;
-  
-  HamiltonianDescriptor&lt;short>&amp; model();
-  const HamiltonianDescriptor&lt;short>&amp; model() const;
+  bool has_sign_problem() const;  
 };
 
-}
 }
 </pre></blockquote>
 
@@ -227,33 +166,7 @@ osiris::ProcessList where;</pre></blockquote>
 the processes of which the simulation is running. This is empty if the simulation has been loaded for evaluation purposes and no actual simulations will be performed.
 
 <h3>The <tt>LatticeMCRun</tt> class template</h3>
-is derived from <tt>MCRun</tt> and contains addicitonally a graph object, storing the lattice for a Monte Carlo simulation on a lattice model. The graph type defaults to the default type of <A href="../lattice/library.html">
-lattice::graph_factory</a>.
-
-<blockquote><pre>
-typedef G graph_type;
-typedef typename boost::graph_traits&lt;graph_type>::vertex_iterator vertex_iterator;
-typedef typename boost::graph_traits&lt;graph_type>::edge_iterator edge_iterator;
-typedef typename boost::graph_traits&lt;graph_type>::out_edge_iterator out_edge_iterator;
-typedef typename boost::graph_traits&lt;graph_type>::in_edge_iterator in_edge_iterator;
-typedef typename boost::graph_traits&lt;graph_type>::edge_descriptor edge_descriptor;
-typedef typename boost::graph_traits&lt;graph_type>::vertex_descriptor vertex_descriptor;
-typedef typename graph_traits&lt;graph_type>::vertices_size_type vertices_size_type;
-typedef typename graph_traits&lt;graph_type>::edges_size_type edges_size_type;
-typedef typename graph_traits&lt;graph_type>::degree_size_type degree_size_type;
-typedef typename graph_traits&lt;graph_type>::adjacency_iterator adjacency_iterator;
-  
-typedef typename graph_traits&lt;graph_type>::site_iterator site_iterator;
-typedef typename graph_traits&lt;graph_type>::bond_iterator bond_iterator;
-typedef typename graph_traits&lt;graph_type>::neighbor_bond_iterator neighbor_bond_iterator;
-typedef typename graph_traits&lt;graph_type>::bond_descriptor bond_descriptor;
-typedef typename graph_traits&lt;graph_type>::site_descriptor site_descriptor;
-typedef typename graph_traits&lt;graph_type>::sites_size_type sites_size_type;
-typedef typename graph_traits&lt;graph_type>::bonds_size_type bonds_size_type;
-typedef typename graph_traits&lt;graph_type>::neighbors_size_type neighbors_size_type;
-typedef typename graph_traits&lt;graph_type>::neighbor_iterator neighbor_iterator;
-</pre></blockquote>
-are useful type definitions obtained from <a href="../lattice/graph_traits.html">graph traits</A>.
+is derived from <tt>MCRun</tt> and <a href="../lattice/graph_helper.html"><tt>graph_helper</tt></A>, thus constructing a lattice and providing access to it.
 <blockquote><pre>
 LatticeMCRun(const osiris::ProcessList&amp; w,const alps::Parameters&amp; p,int n);
 </pre></blockquote>
@@ -262,68 +175,30 @@ The constructor creates the graph from the following input parameters:
 <thead><tr><td><b>Parameter</b></td><td><b>Description</b></td></tr></thead>
 <tbody>
 <tr><td>LATTICE_LIBRARY</td><td>The path to an XML file containg lattice descriptions. It will be used to initialize a <a href="../lattice/library.html">lattice library</a>. The default is a file called "lattices.xml" in the current working directory.</td></tr>
-<tr><td>LATTICE</td><td>The name of a lattice or graph in the lattice library. It will be used to create the graph using a <a href="../lattice/library.html">graph factory</a> from the <a href="../lattice/index.html">lattice library</a>.</td></tr>
+<tr><td>LATTICE</td><td>The name of the lattice or graph in the lattice library that will be constructed.</td></tr>
 <tr><td>GRAPH</td><td>A synonym for LATTICE.</td></tr>
 </tbody>
 </table>
-<blockquote><pre>   
-graph_type&amp; graph();
-const graph_type&amp; graph() const;
-</pre></blockquote>
-allow access to the graph on which the Monte Carlo simulation is performed.
-<blockquote><pre>   
-sites_size_type num_sites() const;
-bonds_size_type num_bonds() const;
-std::pair&lt;site_iterator,site_iterator> sites() const;
-std::pair&lt;bond_iterator,bond_iterator> bonds() const;
-bond_descriptor bond(bonds_size_type i) const;
-neighbors_size_type num_neighbors (const site_descriptor&amp; v) const;
-std::pair&lt;neighbor_bond_iterator,neighbor_bond_iterator> neighbor_bonds (const site_descriptor&amp; v) const;
-std::pair&lt;neighbor_iterator,neighbor_iterator> neighbors (const site_descriptor&amp; v) const;
-site_descriptor neighbor (const site_descriptor&amp; v, neighbors_size_type i) const;
-site_descriptor site(sites_size_type i) const;
-
-vertices_size_type num_vertices() const;
-edges_size_type num_edges() const;
-std::pair&lt;vertex_iterator,vertex_iterator> vertices() const;
-std::pair&lt;edge_iterator,edge_iterator> edges() const;
-degree_size_type out_degree (const vertex_descriptor&amp; v) const;
-degree_size_type in_degree (const vertex_descriptor&amp; v) const;
-degree_size_type degree (const vertex_descriptor&amp; v) const;
-out_edge_iterator out_edges (const vertex_descriptor&amp; v) const;
-in_edge_iterator in_edges (const vertex_descriptor&amp; v) const;
-std::pair&lt;adjacency_iterator,adjacency_iterator> adjacent_vertices (const site_descriptor&amp; v) const; 
-vertex_descriptor vertex(vertices_size_type i) const;
-
-site_descriptor source(const bond_descriptor&amp; b) const;
-site_descriptor target(const bond_descriptor&amp; b) const;
-</pre></blockquote>
-are useful short cuts for corresponfing functions of the Boost graph library or renamed functions of the <a href="../lattice/graph_traits.html">lattice</a> library. The functions call the corresponding functions with identical name of the Boost graph library or lattice library which take an additional argument specifying the graph.
-<blockquote><pre>   
-bool is_bipartite() const;
-</pre></blockquote>
-returns <tt>true</tt> if the graph is bipartite.
-<blockquote><pre>   
-double parity(const site_descriptor&amp; v) const;
-</pre></blockquote>
-for a bipartite graph this function returns either +1 or -1 depending on which sublattice the site is on. On a non-bipartite lattice the behavior is undefined.
-<blockquote><pre>   
-int bond_type(const bond_descriptor&amp; b) const;
-</pre></blockquote>
-returns the bond (=egde) type of a bond (=edge), obtained from the <tt>edge_type_t</tt> property of the graph.
 
 <h3>The <tt> LatticeModelMCRun</tt> class</h3>
+is derived from <tt>LatticeMCRun</tt> and <a href="../model/model_helper.html"><tt>model_helper</tt></A>, thus constructing a model and providing access to it.
 <blockquote><pre>   
-const ModelLibrary::OperatorDescriptorMap&amp; simple_operators() const;
+LatticeModelMCRun(const osiris::ProcessList&amp; w,const alps::Parameters&amp; p,int n);
 </pre></blockquote>
-returns a container of operator descriptions used in the model description.
+The constructor additionally creates the model from the following input parameters:
+<table border="1">
+<thead><tr><td><b>Parameter</b></td><td><b>Description</b></td></tr></thead>
+<tbody>
+<tr><td>MODEL_LIBRARY</td><td>The path to an XML file containg lattice descriptions. It will be used to initialize a model. The default is a file called "models.xml" in the current working directory.</td></tr>
+<tr><td>MODEL</td><td>The name of a model.</td></tr>
+</tbody>
+</table>
 <blockquote><pre>   
-HamiltonianDescriptor&lt;short>&amp; model();
-const HamiltonianDescriptor&lt;short>&amp; model() const;
+bool has_sign_problem() const;
 </pre></blockquote>
-returns the model description.
+returns true if the model might suffer from a sign problem.
 <HR>
-<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2004 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

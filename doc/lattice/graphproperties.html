@@ -81,6 +81,16 @@ as internal properties:<br>
   <td>Indicates whether an edge crosses a boundary of the lattice.</td>
      </tr>
   <tr>
+       <td><tt>bond_vector_t</tt></td>
+       <td><tt>std::vector&lt;double&gt;</tt></td>
+  <td>a vector connecting the two sites of a bond</td>
+     </tr>
+  <tr>
+       <td><tt>bond_vector_relative_t</tt></td>
+       <td><tt>std::vector&lt;double&gt;</tt></td>
+  <td>a vector connecting the two sites of a bond, relative to the basis vectors and the extent of the lattice. This is thus always in the range [0,1[^dimension</td>
+     </tr>
+  <tr>
        <td><b>Graph property</b></td>
        <td><b>Type</b></td>
        <td><b>Note</b></td>
@@ -100,7 +110,7 @@ as internal properties:<br>
 </table>
   
 <hr> 
-<address><a name="_">copyright (c) 2000-2003 by  </a><a
+<address><a name="_">copyright (c) 2000-2004 by  </a><a
  href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
   <br>
  <br>
