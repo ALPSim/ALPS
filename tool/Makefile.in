@@ -43,13 +43,12 @@ bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 subdir = tool
 DIST_COMMON = $(dist_bin_SCRIPTS) $(dist_pkgdata_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/changestylesheet.in \
-	$(srcdir)/changestylesheet.xsl.in $(srcdir)/convert2html.in \
+	$(srcdir)/changestylesheet.in $(srcdir)/convert2html.in \
 	$(srcdir)/convert2text.in $(srcdir)/extractgp.in \
 	$(srcdir)/extracthtml.in $(srcdir)/extracttext.in \
 	$(srcdir)/extractxmgr.in $(srcdir)/plot2gp.in \
 	$(srcdir)/plot2html.in $(srcdir)/plot2text.in \
-	$(srcdir)/plot2xmgr.in $(srcdir)/plot2xsl.xsl.in TODO
+	$(srcdir)/plot2xmgr.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_compiler.m4 \
@@ -67,7 +66,7 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
-	plot2xsl.xsl changestylesheet changestylesheet.xsl
+	changestylesheet
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgdatadir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -331,11 +330,7 @@ plot2text: $(top_builddir)/config.status $(srcdir)/plot2text.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 plot2xmgr: $(top_builddir)/config.status $(srcdir)/plot2xmgr.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-plot2xsl.xsl: $(top_builddir)/config.status $(srcdir)/plot2xsl.xsl.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 changestylesheet: $(top_builddir)/config.status $(srcdir)/changestylesheet.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-changestylesheet.xsl: $(top_builddir)/config.status $(srcdir)/changestylesheet.xsl.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)

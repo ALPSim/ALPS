@@ -1,0 +1,16 @@
+ALPS.xsl
+Makefile.am
+Makefile.in
+QMCXML2text.xsl
+archive2plot.xsl
+changestylesheet.xsl.in
+frog
+helpers.xsl
+job.xsl
+lattices.xml.in
+models.xml.in
+plot2gp.xsl
+plot2html.xsl
+plot2text.xsl
+plot2xmgr.xsl
+plot2xsl.xsl.in

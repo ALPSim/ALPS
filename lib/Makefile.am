@@ -1,1 +1,1 @@
-SUBDIRS = alps comm-sgl comm-mpi comm-pvm heap .
+SUBDIRS = alps comm-sgl comm-mpi comm-pvm heap xml .

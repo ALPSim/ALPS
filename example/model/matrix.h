@@ -118,7 +118,7 @@ void HamiltonianMatrix<T,M>::build() const
         parms << coordinate_as_parameter(*it); // set x, y and z
       }
       site_matrix.insert(std::make_pair(disordered_type,get_fermionic_matrix(T(),ham.site_term(type),
-        ham.basis().site_basis(type),models_.operators(),parms)));
+        ham.basis().site_basis(type),parms)));
     }
 
   // get all bond matrices
@@ -139,8 +139,7 @@ void HamiltonianMatrix<T,M>::build() const
       }
       bond_visited[type]=true;
       bond_matrix.insert(std::make_pair(type,get_fermionic_matrix(T(),ham.bond_term(btype),
-        ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
-        models_.operators(),parms)));
+        ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),parms)));
     }
   }
 

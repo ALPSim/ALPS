@@ -42,7 +42,6 @@ check_PROGRAMS = print_numeric$(EXEEXT) print_symbolic$(EXEEXT)
 subdir = example/model
 DIST_COMMON = $(dist_noinst_DATA) $(noinst_HEADERS) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/lattices.xml.in $(srcdir)/models.xml.in \
 	$(srcdir)/parm_numeric.in $(srcdir)/parm_symbolic.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -59,8 +58,7 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
-CONFIG_CLEAN_FILES = lattices.xml models.xml parm_symbolic \
-	parm_numeric
+CONFIG_CLEAN_FILES = parm_symbolic parm_numeric
 am_print_numeric_OBJECTS = print_numeric.$(OBJEXT)
 print_numeric_OBJECTS = $(am_print_numeric_OBJECTS)
 print_numeric_LDADD = $(LDADD)
@@ -291,10 +289,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-lattices.xml: $(top_builddir)/config.status $(srcdir)/lattices.xml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-models.xml: $(top_builddir)/config.status $(srcdir)/models.xml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 parm_symbolic: $(top_builddir)/config.status $(srcdir)/parm_symbolic.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 parm_numeric: $(top_builddir)/config.status $(srcdir)/parm_numeric.in

@@ -25571,13 +25571,15 @@ ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_
 if test "$ac_cv_alps_type" = "full"; then
             ac_config_files="$ac_config_files test/alea/Makefile"
 
-                                ac_config_files="$ac_config_files test/lattice/Makefile test/lattice/lattices.xml test/lattice/parameters"
+                      ac_config_files="$ac_config_files test/lattice/Makefile test/lattice/parameters"
 
-                                ac_config_files="$ac_config_files test/model/Makefile test/model/lattices.xml test/model/models.xml"
+            ac_config_files="$ac_config_files test/model/Makefile"
 
-                                                                        ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/lattices.xml example/model/models.xml example/model/parm_symbolic example/model/parm_numeric"
+                                                    ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric"
 
-                                                                                                                                              ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/plot2xsl.xsl tool/changestylesheet tool/changestylesheet.xsl"
+                                                    ac_config_files="$ac_config_files lib/xml/Makefile lib/xml/changestylesheet.xsl lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl"
+
+                                                                                                                          ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet"
 
 fi
 
@@ -26228,18 +26230,18 @@ do
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
   "test/alea/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/alea/Makefile" ;;
   "test/lattice/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/lattice/Makefile" ;;
-  "test/lattice/lattices.xml" ) CONFIG_FILES="$CONFIG_FILES test/lattice/lattices.xml" ;;
   "test/lattice/parameters" ) CONFIG_FILES="$CONFIG_FILES test/lattice/parameters" ;;
   "test/model/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/model/Makefile" ;;
-  "test/model/lattices.xml" ) CONFIG_FILES="$CONFIG_FILES test/model/lattices.xml" ;;
-  "test/model/models.xml" ) CONFIG_FILES="$CONFIG_FILES test/model/models.xml" ;;
   "example/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/Makefile" ;;
   "example/model/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/model/Makefile" ;;
   "example/scheduler/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/scheduler/Makefile" ;;
-  "example/model/lattices.xml" ) CONFIG_FILES="$CONFIG_FILES example/model/lattices.xml" ;;
-  "example/model/models.xml" ) CONFIG_FILES="$CONFIG_FILES example/model/models.xml" ;;
   "example/model/parm_symbolic" ) CONFIG_FILES="$CONFIG_FILES example/model/parm_symbolic" ;;
   "example/model/parm_numeric" ) CONFIG_FILES="$CONFIG_FILES example/model/parm_numeric" ;;
+  "lib/xml/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/xml/Makefile" ;;
+  "lib/xml/changestylesheet.xsl" ) CONFIG_FILES="$CONFIG_FILES lib/xml/changestylesheet.xsl" ;;
+  "lib/xml/lattices.xml" ) CONFIG_FILES="$CONFIG_FILES lib/xml/lattices.xml" ;;
+  "lib/xml/models.xml" ) CONFIG_FILES="$CONFIG_FILES lib/xml/models.xml" ;;
+  "lib/xml/plot2xsl.xsl" ) CONFIG_FILES="$CONFIG_FILES lib/xml/plot2xsl.xsl" ;;
   "tool/Makefile" ) CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
   "tool/convert2text" ) CONFIG_FILES="$CONFIG_FILES tool/convert2text" ;;
   "tool/convert2html" ) CONFIG_FILES="$CONFIG_FILES tool/convert2html" ;;
@@ -26251,9 +26253,7 @@ do
   "tool/plot2html" ) CONFIG_FILES="$CONFIG_FILES tool/plot2html" ;;
   "tool/plot2text" ) CONFIG_FILES="$CONFIG_FILES tool/plot2text" ;;
   "tool/plot2xmgr" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xmgr" ;;
-  "tool/plot2xsl.xsl" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xsl.xsl" ;;
   "tool/changestylesheet" ) CONFIG_FILES="$CONFIG_FILES tool/changestylesheet" ;;
-  "tool/changestylesheet.xsl" ) CONFIG_FILES="$CONFIG_FILES tool/changestylesheet.xsl" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/alps/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/alps/config.h" ;;
   "src/boost/po_utf8_codecvt_facet.cpp" ) CONFIG_HEADERS="$CONFIG_HEADERS src/boost/po_utf8_codecvt_facet.cpp" ;;
