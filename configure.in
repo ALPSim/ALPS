@@ -189,7 +189,7 @@ AC_ARG_WITH(boost-toolset,
 )
 AC_ARG_WITH(boost-all,
   AC_HELP_STRING([--with-boost-all],[compile all optional Boost libraries]), [
-    if test "x$withval" == "xno"; then
+    if test "x$withval" = "xno"; then
       ac_cv_boost_signals=no
       ac_cv_boost_thread=no
     else
@@ -200,7 +200,7 @@ AC_ARG_WITH(boost-all,
 )
 AC_ARG_WITH(boost-signals,
   AC_HELP_STRING([--with-boost-signals],[compile Boost::signals library]), [
-    if test "x$withval" == "xno"; then
+    if test "x$withval" = "xno"; then
       ac_cv_boost_signals=no
     else
       ac_cv_boost_signals=yes
@@ -209,7 +209,7 @@ AC_ARG_WITH(boost-signals,
 )
 AC_ARG_WITH(boost-thread,
   AC_HELP_STRING([--with-boost-thread],[compile boost::thread library]), [
-    if test "x$withval" == "xno"; then
+    if test "x$withval" = "xno"; then
       ac_cv_boost_thread=no
     else
       ac_cv_boost_thread=yes

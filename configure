@@ -4091,7 +4091,7 @@ fi;
 if test "${with_boost_all+set}" = set; then
   withval="$with_boost_all"
 
-    if test "x$withval" == "xno"; then
+    if test "x$withval" = "xno"; then
       ac_cv_boost_signals=no
       ac_cv_boost_thread=no
     else
@@ -4106,7 +4106,7 @@ fi;
 if test "${with_boost_signals+set}" = set; then
   withval="$with_boost_signals"
 
-    if test "x$withval" == "xno"; then
+    if test "x$withval" = "xno"; then
       ac_cv_boost_signals=no
     else
       ac_cv_boost_signals=yes
@@ -4119,7 +4119,7 @@ fi;
 if test "${with_boost_thread+set}" = set; then
   withval="$with_boost_thread"
 
-    if test "x$withval" == "xno"; then
+    if test "x$withval" = "xno"; then
       ac_cv_boost_thread=no
     else
       ac_cv_boost_thread=yes
