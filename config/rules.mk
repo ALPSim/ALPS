@@ -94,22 +94,31 @@ $(TEST) : $(LIB)
 	  if test -f $(srcdir)/$(@:.ok=.output); then \
 	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -'; \
 	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -; \
+	  elif test -f $(srcdir)/$(@:.ok=.op); then \
+	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -; \
 	  else \
 	    echo './$(@:.ok=) < $(@:.ok=.input)'; \
 	    ./$(@:.ok=) < $(@:.ok=.input); \
 	  fi; \
-	elif test -f $(srcdir)/$(@:.ok=.input); then \
+	elif test -f $(srcdir)/$(@:.ok=.ip); then \
 	  if test -f $(srcdir)/$(@:.ok=.output); then \
-	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -'; \
-	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -; \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.output) -; \
+	  elif test -f $(srcdir)/$(@:.ok=.op); then \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.op) -; \
 	  else \
-	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input)'; \
-	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input); \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.ip)'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip); \
 	  fi; \
 	else \
 	  if test -f $(srcdir)/$(@:.ok=.output); then \
 	    echo './$(@:.ok=) | diff $(srcdir)/$(@:.ok=.output) -'; \
 	    ./$(@:.ok=) | diff $(srcdir)/$(@:.ok=.output) -; \
+	  elif test -f $(srcdir)/$(@:.ok=.op); then \
+	    echo './$(@:.ok=) | diff $(srcdir)/$(@:.ok=.op) -'; \
+	    ./$(@:.ok=) | diff $(srcdir)/$(@:.ok=.op) -; \
 	  else \
 	    echo './$(@:.ok=)'; \
 	    ./$(@:.ok=); \
