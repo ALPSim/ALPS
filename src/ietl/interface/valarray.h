@@ -73,6 +73,11 @@ namespace ietl {
   }
   
   
+  template < class T> 
+    void clear(std::valarray<T>& c) {
+    std::fill(get_data(c),,get_data(c)+c.size(),0.);
+  }  
+
   template < class T, class Gen> 
   void generate(std::valarray<T>& c, Gen& gen)
   {

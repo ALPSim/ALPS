@@ -216,16 +216,8 @@
   1/2*(Splus(x)+Sminus(x))
 </SITEOPERATOR>
 
-<SITEOPERATOR name="density" site="x">
-  n(x)
-</SITEOPERATOR>
-
-<SITEOPERATOR name="magnetization" site="x">
-  Sz(x)
-</SITEOPERATOR>
-
 <SITEOPERATOR name="double_occupancy" site="x">
-  n(x)*(n(x)-1)/1
+  n(x)*(n(x)-1)/2
 </SITEOPERATOR>
 
 <BONDOPERATOR name="exchange" source="x" target="y">

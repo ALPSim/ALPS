@@ -40,5 +40,10 @@ namespace ietl {
     std::generate(c.begin(),c.end(),gen);
   }  
 
+  template < class Cont> 
+    void clear(Cont& c) {
+    std::fill(c.begin(),c.end(),0.);
+  }  
+
 }
 #endif

@@ -269,9 +269,10 @@ private:
       eigenvectors_itr = eigvectors.begin();
       Tvectors_itr = Tvectors.begin();       
       while(eigenvectors_itr !=  eigvectors.end()){
-        if(Tvectors_itr->size() > j)
+        if(Tvectors_itr->size() > j && std::abs((*Tvectors_itr)[j]) > super_type::error_tol) {
           *eigenvectors_itr+=(*Tvectors_itr)[j]*vec2; 
         // vec2 is being added in one vector of eigvectors.
+        }
         eigenvectors_itr++;
         Tvectors_itr++;
       } // end of while loop.      

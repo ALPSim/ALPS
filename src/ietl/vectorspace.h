@@ -47,7 +47,9 @@ namespace ietl {
       return n_;
     }
     vector_type new_vector() const {
-      return vector_type(n_);
+      vector_type v(n_);
+      clear(v);
+      return v;
     }
     
     void project(vector_type&) const {
@@ -99,7 +101,9 @@ namespace ietl {
       return n_;
     }
     vector_type new_vector() const {
-      return vector_wrapper<V>(new V(n_));
+      vector_wrapper<V> v(new V(n_));
+      clear(v.get());
+      return v;
     }
     
     void project(vector_type& src) const {

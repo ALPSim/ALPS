@@ -42,6 +42,12 @@ namespace ietl {
     std::generate(c.begin(),c.end(),gen);
   }  
 
+  template < class T> 
+    inline void clear(boost::numeric::ublas::vector<T>& c) {
+    c.clear();
+  }  
+
+
   template < class T, class S>
   inline T dot(const boost::numeric::ublas::vector<T,S>& x , const boost::numeric::ublas::vector<T,S>& y) {
    return boost::numeric::ublas::inner_prod (boost::numeric::ublas::conj(x), y);

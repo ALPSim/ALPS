@@ -106,6 +106,10 @@ void HamiltonianMatrix<T,M>::build() const
   // get all site matrices
   std::map<unsigned int,boost::multi_array<std::pair<T,bool>,2> > site_matrix;
   std::map<unsigned int,bool> site_visited;
+  
+  alps::Disorder::seed(parms_.value_or_default("DISORDER_SEED",0));
+
+  
   alps::Parameters parms(parms_);
   for (site_iterator it=sites().first; it!=sites().second ; ++it)
     if (!site_visited[disordered_site_type(*it)]) {
