@@ -1,0 +1,11 @@
+#!/bin/sh
+
+DATE=`date +'%Y%m%d'`
+
+rm -rf $1
+cvs -z3 -d :pserver:anonymous@cvs.boost.sourceforge.net:/cvsroot/$1 export -r HEAD $1
+
+chmod -R u+w $1
+mv $1 $1-${DATE}
+tar zcvf $1-${DATE}.tar.gz $1-${DATE}
+rm -rf $1-${DATE}

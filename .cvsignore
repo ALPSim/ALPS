@@ -1,3 +1,7 @@
+include
+bin
+share
+lib
 .DS_Store
 Makefile
 config.log

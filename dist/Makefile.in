@@ -73,6 +73,12 @@ release dist check snapshot : Makefile
 	tar chof - $$distdir | gzip -c > $$distdir.tar.gz; \
 	rm -rf $$distdir
 
+boost-snapshot: Makefile
+	./make_snapshot boost
+
+boost-sandbox-snapshot: Makefile
+	./make_snapshot boost-sandbox
+
 clean :
 distclean :
 	rm -rf alps-* Makefile

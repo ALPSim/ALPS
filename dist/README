@@ -44,6 +44,12 @@ day.
        for version 2.3b1  ->  use tag release_2_3b1
 
 9) (./configure && cd dist && make release) generates
-alps-X.X.tar.gz, where X.X = verison number
 
-10) Copy the tar ball to the web server and update web page.
+   alps-X.X.tar.gz, where X.X = verison number
+
+10) make boost-snapshot boost-sandbox-snapshot
+
+    If the release is not based on an official Boost release make a Boost
+    snapshot.
+
+11) Copy the tar ball to the web server and update web page.
