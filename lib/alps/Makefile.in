@@ -73,8 +73,6 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libalps_la_LIBADD =
 am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
-	$(top_srcdir)/src/alps/evaluator.C \
-	$(top_srcdir)/src/alps/expression.C \
 	$(top_srcdir)/src/alps/parameterlist.C \
 	$(top_srcdir)/src/alps/parameters.C \
 	$(top_srcdir)/src/alps/osiris/dump.C \
@@ -111,8 +109,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/scheduler/worker.C \
 	$(top_srcdir)/src/alps/scheduler/workertask.C \
 	$(top_srcdir)/src/boost/throw_exception.C
-am__objects_1 = copyright.lo evaluator.lo expression.lo \
-	parameterlist.lo parameters.lo
+am__objects_1 = copyright.lo parameterlist.lo parameters.lo
 am__objects_2 = dump.lo xdrdump.lo
 am__objects_3 = parser.lo xmlhandler.lo xmlparser.lo xmlstream.lo \
 	xslt.lo
@@ -201,10 +198,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/cregex.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/date_generators.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/disorder.Plo ./$(DEPDIR)/dump.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/evaluator.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/exception.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/exceptions.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/expression.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/extended_type_info.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/extended_type_info_no_rtti.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/extended_type_info_typeid.Plo \
@@ -433,8 +428,6 @@ AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 src_ALPS = \
   $(top_srcdir)/src/alps/copyright.C \
-  $(top_srcdir)/src/alps/evaluator.C \
-  $(top_srcdir)/src/alps/expression.C \
   $(top_srcdir)/src/alps/parameterlist.C \
   $(top_srcdir)/src/alps/parameters.C
 
@@ -686,10 +679,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/date_generators.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/disorder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dump.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evaluator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exceptions.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/expression.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended_type_info.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended_type_info_no_rtti.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/extended_type_info_typeid.Plo@am__quote@
@@ -814,54 +805,6 @@ copyright.lo: $(top_srcdir)/src/alps/copyright.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/copyright.Plo' tmpdepfile='$(DEPDIR)/copyright.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
-
-evaluator.o: $(top_srcdir)/src/alps/evaluator.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluator.o -MD -MP -MF "$(DEPDIR)/evaluator.Tpo" -c -o evaluator.o `test -f '$(top_srcdir)/src/alps/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/evaluator.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/evaluator.Tpo" "$(DEPDIR)/evaluator.Po"; else rm -f "$(DEPDIR)/evaluator.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/evaluator.C' object='evaluator.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/evaluator.Po' tmpdepfile='$(DEPDIR)/evaluator.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluator.o `test -f '$(top_srcdir)/src/alps/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/evaluator.C
-
-evaluator.obj: $(top_srcdir)/src/alps/evaluator.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluator.obj -MD -MP -MF "$(DEPDIR)/evaluator.Tpo" -c -o evaluator.obj `if test -f '$(top_srcdir)/src/alps/evaluator.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/evaluator.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/evaluator.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/evaluator.Tpo" "$(DEPDIR)/evaluator.Po"; else rm -f "$(DEPDIR)/evaluator.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/evaluator.C' object='evaluator.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/evaluator.Po' tmpdepfile='$(DEPDIR)/evaluator.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluator.obj `if test -f '$(top_srcdir)/src/alps/evaluator.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/evaluator.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/evaluator.C'; fi`
-
-evaluator.lo: $(top_srcdir)/src/alps/evaluator.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluator.lo -MD -MP -MF "$(DEPDIR)/evaluator.Tpo" -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/evaluator.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/evaluator.Tpo" "$(DEPDIR)/evaluator.Plo"; else rm -f "$(DEPDIR)/evaluator.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/evaluator.C' object='evaluator.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/evaluator.Plo' tmpdepfile='$(DEPDIR)/evaluator.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/evaluator.C
-
-expression.o: $(top_srcdir)/src/alps/expression.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT expression.o -MD -MP -MF "$(DEPDIR)/expression.Tpo" -c -o expression.o `test -f '$(top_srcdir)/src/alps/expression.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/expression.Tpo" "$(DEPDIR)/expression.Po"; else rm -f "$(DEPDIR)/expression.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/expression.C' object='expression.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/expression.Po' tmpdepfile='$(DEPDIR)/expression.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o expression.o `test -f '$(top_srcdir)/src/alps/expression.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression.C
-
-expression.obj: $(top_srcdir)/src/alps/expression.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT expression.obj -MD -MP -MF "$(DEPDIR)/expression.Tpo" -c -o expression.obj `if test -f '$(top_srcdir)/src/alps/expression.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/expression.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/expression.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/expression.Tpo" "$(DEPDIR)/expression.Po"; else rm -f "$(DEPDIR)/expression.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/expression.C' object='expression.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/expression.Po' tmpdepfile='$(DEPDIR)/expression.TPo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o expression.obj `if test -f '$(top_srcdir)/src/alps/expression.C'; then $(CYGPATH_W) '$(top_srcdir)/src/alps/expression.C'; else $(CYGPATH_W) '$(srcdir)/$(top_srcdir)/src/alps/expression.C'; fi`
-
-expression.lo: $(top_srcdir)/src/alps/expression.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT expression.lo -MD -MP -MF "$(DEPDIR)/expression.Tpo" -c -o expression.lo `test -f '$(top_srcdir)/src/alps/expression.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/expression.Tpo" "$(DEPDIR)/expression.Plo"; else rm -f "$(DEPDIR)/expression.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/expression.C' object='expression.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/expression.Plo' tmpdepfile='$(DEPDIR)/expression.TPlo' @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o expression.lo `test -f '$(top_srcdir)/src/alps/expression.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression.C
 
 parameterlist.o: $(top_srcdir)/src/alps/parameterlist.C
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parameterlist.o -MD -MP -MF "$(DEPDIR)/parameterlist.Tpo" -c -o parameterlist.o `test -f '$(top_srcdir)/src/alps/parameterlist.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameterlist.C; \

@@ -11,7 +11,7 @@ dnl
 
 dnl Version of ALPS Library
 
-define([alps_version], [1.2.1])
+define([alps_version], [1.3a1])
 
 dnl Latest publication year of ALPS
 
@@ -673,18 +673,6 @@ dnl
 dnl Experimental Features
 dnl
 
-AC_ARG_ENABLE(new-expression,
-  AC_HELP_STRING([--disable-new-expression],
-    [use old Expression class]),
-  [
-  if test "x$enableval" = xno; then
-    ac_cv_alps_with_new_expression=no
-  fi
-  ]
-)
-if test "$ac_cv_alps_with_new_expression" != no; then
-  AC_DEFINE(ALPS_WITH_NEW_EXPRESSION)
-fi
 
 dnl
 dnl Generate files

@@ -6,8 +6,6 @@ LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 
 src_ALPS = \
   $(top_srcdir)/src/alps/copyright.C \
-  $(top_srcdir)/src/alps/evaluator.C \
-  $(top_srcdir)/src/alps/expression.C \
   $(top_srcdir)/src/alps/parameterlist.C \
   $(top_srcdir)/src/alps/parameters.C
 src_ALEA = \
