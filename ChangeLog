@@ -7,7 +7,8 @@
           that should be a bit easier to maintain. It is implemented
           by deriving StringValue from std::string, thus keeping all
           string operations for convenience. It can be enabled by
-          defining NEW_STRINGVALUE_IMPL.
+          defining NEW_STRINGVALUE_IMPL ( how can one add a configure
+          option like --with-new-stringvalue? )
 
 2003-08-19 Matthias Troyer <troyer@comp-phys.org>
 
