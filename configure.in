@@ -163,6 +163,9 @@ fi
 
 AC_LANG_CPLUSPLUS
 
+AC_CHECK_HEADER([stdarg.h])
+test "$ac_cv_header_stdarg_h" = yes && AC_DEFINE(ALPS_HAVE_STDARG_H)
+
 AC_CHECK_HEADER([stdint.h])
 test "$ac_cv_header_stdint_h" = yes && AC_DEFINE(ALPS_HAVE_STDINT_H)
 

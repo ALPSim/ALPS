@@ -158,10 +158,17 @@ AC_DEFUN([AC_MPI],
                     AC_MSG_RESULT(no))
       fi
       if test "$found" = no; then
+        # SGI MIPSpro 7.41 requires <stdarg.h>
+        AC_CHECK_HEADER([stdarg.h])
         MPI_LIBS="-lmpi -lmpi++"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
-        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+        AC_TRY_LINK([
+#ifdef HAVE_STDARG_H
+# include <stdarg.h>
+#endif HAVE_STDARG_H
+#include <mpi.h>
+                    ],[MPI_Finalize();],
                     [AC_MSG_RESULT(yes); found=yes],
                     AC_MSG_RESULT(no))
       fi
