@@ -163,14 +163,18 @@ AC_DEFUN([AC_MPI],
         MPI_LIBS="-lmpi -lmpi++"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
-        AC_TRY_LINK([
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif HAVE_STDARG_H
+        if test "$ac_cv_header_stdarg_h" = yes; then
+          AC_TRY_LINK([
+#include <stdarg.h>
 #include <mpi.h>
-                    ],[MPI_Finalize();],
-                    [AC_MSG_RESULT(yes); found=yes],
-                    AC_MSG_RESULT(no))
+                      ],[MPI_Finalize();],
+                      [AC_MSG_RESULT(yes); found=yes],
+                      AC_MSG_RESULT(no))
+        else
+          AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                      [AC_MSG_RESULT(yes); found=yes],
+                      AC_MSG_RESULT(no))
+        fi
       fi
       if test "$found" = no; then
         MPI_LIBS="-lmpich"

@@ -2855,7 +2855,7 @@ echo "$as_me: error: compiler mode is not set" >&2;}
     dec)
       try_CFLAGS_OPT="-pthread -O4"
       try_CFLAGS_DEBUG="-pthread -g -O0"
-      try_CXXFLAGS_OPT="-std ansi -pthread -D__USE_STD_IOSTREAM -O4"
+      try_CXXFLAGS_OPT="-std ansi -w -pthread -D__USE_STD_IOSTREAM -O4"
       try_CXXFLAGS_DEBUG="-std ansi -pthread -D__USE_STD_IOSTREAM -g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-noexceptions"
@@ -6722,7 +6722,8 @@ fi
         LIBS="$MPI_LIBS $ac_save_LIBS"
         echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
 echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6
-        cat >conftest.$ac_ext <<_ACEOF
+        if test "$ac_cv_header_stdarg_h" = yes; then
+          cat >conftest.$ac_ext <<_ACEOF
 #line $LINENO "configure"
 /* confdefs.h.  */
 _ACEOF
@@ -6730,9 +6731,7 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
-#ifdef HAVE_STDARG_H
-# include <stdarg.h>
-#endif HAVE_STDARG_H
+#include <stdarg.h>
 #include <mpi.h>
 
 int
@@ -6765,6 +6764,46 @@ echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+        else
+          cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <mpi.h>
+int
+main ()
+{
+MPI_Finalize();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; found=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+        fi
       fi
       if test "$found" = no; then
         MPI_LIBS="-lmpich"

@@ -1,22 +1,27 @@
-1003-12-14 Matthias Troyer <troyer@comp-phys.org>
+2004-01-20 Synge todo <wistaria@comp-phys.org>
+
+	* [configure, osiris, lattice] fixed config/ac_mpi.m4,
+	alps/osiris/dump.h, alps/lattice/unitcell.C for SGI MIPSpro 7.41
+	
+2003-12-14 Matthias Troyer <troyer@comp-phys.org>
 
 	* [test] renamed files to be compatible with ICC 8
 
-1003-11-17 Matthias Troyer <troyer@comp-phys.org>
+2003-11-17 Matthias Troyer <troyer@comp-phys.org>
 
 	* [model] refinements to constraints in basis sets
 
-1003-11-09 Matthias Troyer <troyer@comp-phys.org>
+2003-11-09 Matthias Troyer <troyer@comp-phys.org>
 
 	* [scheduler] deprecated dclock, using Boost date-time library instead
 	* [model] finished implementing constraints in basis sets
 
-1003-11-05 Matthias Troyer <troyer@comp-phys.org>
+2003-11-05 Matthias Troyer <troyer@comp-phys.org>
 
 	* [alea] Changes for Boost deprecation of compose library
 	* preparing release 1.0b5
 
-1003-11-04 Matthias Troyer <troyer@comp-phys.org>
+2003-11-04 Matthias Troyer <troyer@comp-phys.org>
 
 	* [config] improved configure for MacOS X
 	* [model] Started implementing constraints in basis creation
