@@ -54,7 +54,7 @@ HEADER_LATTICE = alps/lattice.h alps/lattice/cell_traits.h alps/lattice/coordina
 HEADER_MODEL = alps/model.h alps/model/basis.h alps/model/modellibrary.h alps/model/operator.h alps/model/quantumnumber.h alps/model/sitebasis.h alps/model/sign.h
 HEADER_PARSER = alps/xml.h alps/parser/attributes.h alps/parser/parser.h alps/parser/xmlhandler.h alps/parser/xmlparser.h alps/parser/xmlstream.h alps/parser/xslt.h
 HEADER_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h 
-HEADER_SCHEDULER = alps/scheduler.h alps/scheduler/info.h alps/scheduler/latticeplugin.h alps/scheduler/modelplugin.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h alps/scheduler/factory.h alps/scheduler/copyright.h
+HEADER_SCHEDULER = alps/scheduler.h alps/scheduler/info.h alps/scheduler/latticeplugin.h alps/scheduler/modelplugin.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h alps/scheduler/factory.h
 
 HEADER = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_ALEA) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_SCHEDULER)
 

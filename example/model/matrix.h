@@ -49,8 +49,10 @@ class HamiltonianMatrix // : public alps::scheduler::Worker
 public:
   typedef T value_type;
   typedef M matrix_type;
+
   HamiltonianMatrix (const alps::Parameters&);
-  void output(std::ostream& o)const  { if (!built_) build(); o << matrix_;}
+  void output(std::ostream& o) const { if (!built_) build(); o << matrix_;}
+
 private:
   typedef alps::graph_factory<>::graph_type graph_type;
   
