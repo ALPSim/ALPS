@@ -1,0 +1,6 @@
+The ALPS library is a C++-library which is based on the BOOST library.
+So, if you do not have the latter, you will have to download this
+first (installation of the BOOST library is not necessary - ALPS compiles
+the parts itself that are actually needed). For more details open
+  doc/setup.html
+with an HTML browser to check Prerequisites and Installation instructions.
