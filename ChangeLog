@@ -1,3 +1,13 @@
+2004-10-04  Matthias Troyer <troyer@comp-phys.org>
+
+	* [model] Added operator definitions to site basis
+                  Added parameters to referenced site basis
+
+2004-10-03  Matthias Troyer <troyer@comp-phys.org>
+
+	* [model] Fixed a bug in has_sign_problem with basis sets of differing 
+                  sizes
+
 2004-10-01  Matthias Troyer <troyer@comp-phys.org>
 
 	* [model] Fixed a bug with complex site basis descriptions containing
