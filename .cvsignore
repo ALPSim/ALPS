@@ -1,9 +1,9 @@
+Makefile
+.DS_Store
+config.log
+config.status
 build
 include
 bin
 share
 lib
-.DS_Store
-Makefile
-config.log
-config.status

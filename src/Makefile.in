@@ -93,7 +93,7 @@ libcomm-pvm.a : $(OBJ_PVM)
 
 distclean : distclean-files
 distclean-files:
-	rm -f boost/config.log boost/config.status alps/copyright.C alps/scheduler/scheduler.C
+	rm -f boost/config.log boost/config.status
 
 boost/%.o : $(srcdir)/boost/%.C
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@

@@ -16,13 +16,16 @@ AC_PREFIX_DEFAULT([$HOME/ALPS])
 AC_MSG_NOTICE([starting configuration for ALPS library version $PACKAGE_VERSION])
 ac_cv_alps_version="$PACKAGE_VERSION"
 
+AC_DEFINE_UNQUOTED([ALPS_VERSION], ["$PACKAGE_VERSION"])
+
 CURRENT_YEAR=2004
-AC_SUBST(CURRENT_YEAR)
+AC_DEFINE_UNQUOTED([ALPS_YEAR], ["$CURRENT_YEAR"])
 
-AC_CONFIG_FILES(Makefile config/Makefile config/config.site config/arxx config/include.mk src/Makefile)
+AC_CONFIG_HEADERS(src/alps/config.h)
 
-AC_CONFIG_FILES(src/alps/copyright.C src/alps/scheduler/scheduler.C)
-
+AC_CONFIG_FILES(Makefile)
+AC_CONFIG_FILES(config/Makefile config/config.site config/arxx config/include.mk)
+AC_CONFIG_FILES(src/Makefile)
 AC_CONFIG_FILES(test/Makefile example/Makefile)
 AC_CONFIG_FILES(test/alea/Makefile)
 AC_CONFIG_FILES(test/fixed_capacity/Makefile)
@@ -33,12 +36,12 @@ AC_CONFIG_FILES(test/parameter/Makefile)
 AC_CONFIG_FILES(test/parser/Makefile)
 AC_CONFIG_FILES(example/scheduler/Makefile)
 AC_CONFIG_FILES(example/model/Makefile)
-AC_CONFIG_FILES(tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text)
+AC_CONFIG_FILES(tool/Makefile tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text)
+if test -f "$srcdir/dist/Makefile.in"; then
+  AC_CONFIG_FILES(dist/Makefile)
+fi
 
-AC_CONFIG_HEADERS(src/alps/config.h)
-
-# directories
-
+# making directories if not exist
 dirs='boost alps/alea alps/lattice alps/model alps/osiris alps/parser alps/random alps/scheduler'
 for d in $dirs; do
   if test -d "src/$d"; then :; else mkdir -p "src/$d"; fi
@@ -285,14 +288,6 @@ CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
 LIBS="$ac_save_LIBS"
 AC_LANG_RESTORE
-
-# tools
-AC_CONFIG_FILES(tool/Makefile)
-
-# making distribution
-if test -f "$srcdir/dist/Makefile.in"; then
-  AC_CONFIG_FILES(dist/Makefile)
-fi
 
 #
 # checking for system headers

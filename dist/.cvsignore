@@ -1,3 +1,4 @@
 Makefile
+.DS_Store
 alps-*.tar.gz
 boost-*.tar.gz

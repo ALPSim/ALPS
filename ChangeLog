@@ -1,3 +1,8 @@
+2004-03-04 Synge Todo <wistaria@comp-phys.org>
+
+	* [config] moved version/year strings from alps/src/copyright.C.in
+	to alps/src/config.h.in.  Cleaned up configure script.
+
 2004-03-02 Matthias Troyer <troyer@comp-phys.org>
 
 	* [alps] Moved extra Boost bindings from applications to bindings
