@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>
+* Copyright (C) 1994-2004 by Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -95,7 +95,7 @@ template <class T, class M>
 void HamiltonianMatrix<T,M>::build() const
 {
   // get Hamilton operator
-  alps::HamiltonianDescriptor<short> ham(models_.hamiltonian(parms_["MODEL"]));
+  alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(parms_["MODEL"]));
   alps::Parameters p(parms_);
   if (!symbolic_traits<T>::is_symbolic)
     p.copy_undefined(ham.default_parameters());
@@ -117,7 +117,7 @@ void HamiltonianMatrix<T,M>::build() const
         parms << coordinate_as_parameter(*it); // set x, y and z
 	  }
       site_matrix.insert(std::make_pair(disordered_type,ham.site_term(type).template matrix<T>(
-                ham.basis().site_basis(type),models_.simple_operators(),parms)));
+                ham.basis().site_basis(type),models_.operators(),parms)));
     }
 
   // get all bond matrices
@@ -140,15 +140,15 @@ void HamiltonianMatrix<T,M>::build() const
       bond_visited[type]=true;
       bond_matrix.insert(std::make_pair(type,ham.bond_term(btype).template matrix<T>(
                               ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
-                              models_.simple_operators(),parms)));
+                              models_.operators(),parms)));
     }
   }  
 
   // create basis set
   std::cerr << "Creating basis set\n";
-  alps::BasisStatesDescriptor<short> basis(ham.basis(),graph());
+  alps::basis_states_descriptor<short> basis(ham.basis(),graph());
   //typedef alps::LookupBasisStates<unsigned int> basis_states_type;
-  typedef alps::BasisStates<short> basis_states_type;
+  typedef alps::basis_states<short> basis_states_type;
   typedef basis_states_type::value_type state_type;
   basis_states_type states(basis);
 
