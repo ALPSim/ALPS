@@ -183,8 +183,8 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
     kai)
-      try_CFLAGS_OPT="--c --thread_safe -w +K3 -O3"
-      try_CFLAGS_DEBUG="--c --thread_safe -g +K0 -O0"
+      try_CFLAGS_OPT="-O3"
+      try_CFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_OPT="--restrict --one_instantiation_per_object --thread_safe -w +K3 -O3 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
       try_CXXFLAGS_DEBUG="--restrict --one_instantiation_per_object --thread_safe --display_error_number -g +K0 -O0 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
       try_CXXFLAGS_EH="--exceptions"
