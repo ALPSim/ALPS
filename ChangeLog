@@ -1,3 +1,8 @@
+2004-10-01  Matthias Troyer <troyer@comp-phys.org>
+
+	* [model] Fixed a bug with complex site basis descriptions containing
+	  dependent quantum numbers
+
 2004-09-29  Synge Todo <wistaria@comp-phys.org>
 
 	* [config] Fixed --with-mpi-libs configure option.

@@ -156,6 +156,7 @@ void HamiltonianMatrix<T,M>::build() const
   
   matrix_.resize(states.size(),states.size(),false);
   matrix_.clear();
+  std::cout << states << "\n";
 
   // loop over sites
     for (int i=0;i<states.size();++i) {        // loop basis states
