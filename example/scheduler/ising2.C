@@ -51,7 +51,7 @@ IsingSimulation2::IsingSimulation2(const alps::ProcessList& where,const alps::Pa
   spins.resize(num_sites()); // number of vertices = number of lattice sites
   // initialize random spin configuration
   for(int i=0;i<spins.size();i++)
-    spins[i]=(random_01() <0.5 ? 1 : -1);
+    spins[i]=(random_real() <0.5 ? 1 : -1);
 
   // create measurement objects
   measurements << alps::RealObservable("Energy");
@@ -100,14 +100,14 @@ void IsingSimulation2::dostep()
   // perform updates
   for (int j=0;j<spins.size();j++)  {
     // choose a random site and determine the neighbors
-    site_descriptor s = site(boost::uniform_int<>(0,num_sites()-1)(random));
+    site_descriptor s = site(boost::uniform_int<>(0,num_sites()-1)(random_01.base()));
 
     // Metropolis updates
     neighbor_iterator it,end;
     double de=0;
     for (boost::tie(it,end)=neighbors(s);it!=end; ++it)
       de += spins[s]*spins[*it];
-    if (de <0. || random_01() < exp(-2.*beta*de))
+    if (de <0. || random_real() < exp(-2.*beta*de))
       spins[s]=-spins[s];
     }
     

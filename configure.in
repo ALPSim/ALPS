@@ -8,7 +8,7 @@ dnl disable loading config.site
 define([AC_SITE_LOAD], )dnl
 
 AC_PREREQ(2.54)
-AC_INIT([alps],[1.0])
+AC_INIT([alps],[1.0b1])
 AC_CONFIG_AUX_DIR([config])
 
 AC_PREFIX_DEFAULT([$HOME/ALPS])
@@ -24,7 +24,7 @@ AC_CONFIG_FILES(test/parameter/Makefile)
 AC_CONFIG_FILES(test/parser/Makefile)
 AC_CONFIG_FILES(example/scheduler/Makefile)
 AC_CONFIG_FILES(example/model/Makefile)
-AC_CONFIG_FILES(tool/plot2xsl.xsl tool/extracttext tool/extracthtml)
+AC_CONFIG_FILES(tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text)
 
 AC_CONFIG_HEADERS(src/alps/config.h)
 

@@ -1,3 +1,12 @@
+2003-07-25 Matthias Troyer <troyer@comp-phys.org>
+
+	* [scheduler] Fixed a bug with new boost RNG. Now random_01 uses
+          the same generator as random_int and random
+         
+  	* [alea] Changed binning to use at elast 128 bins for error estimates 
+
+  	* [tool] Added convert2text to view output without XML browser
+
 2003-07-15 Matthias Troyer <troyer@comp-phys.org>
 
 	* [doc] Updated documentation from PALM++ to ALPS

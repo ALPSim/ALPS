@@ -47,8 +47,8 @@ pkgincludedir = $(includedir)
 libs_program = -lalps -lcomm-sgl $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 
 PROGRAM = compactrun convert2xml
-SCRIPT = archivecat xslttransform transformall extracttext extracthtml
-XMLLIB = archive2plot.xsl plot2html.xsl plot2text.xsl plot2xsl.xsl helpers.xsl
+SCRIPT = archivecat xslttransform transformall extracttext extracthtml convert2text
+XMLLIB = archive2plot.xsl plot2html.xsl plot2text.xsl plot2xsl.xsl helpers.xsl QMCXML2text.xsl
 
 include $(top_srcdir)/config/rules.mk
 include $(srcdir)/Makefile.dep

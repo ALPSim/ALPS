@@ -38,7 +38,7 @@ IsingSimulation::IsingSimulation(const alps::ProcessList& where,const alps::Para
 {
   // initialize random spin configuration
   for(int i=0;i<length;i++)
-    spins[i]=(random_01() <0.5 ? 1 : -1);
+    spins[i]=(random_real() <0.5 ? 1 : -1);
 
   // create measurement objects
   measurements << alps::RealObservable("Energy");
@@ -92,7 +92,7 @@ void IsingSimulation::dostep()
   // perform updates
   for (int j=0;j<length;j++)  {
       // choose a random site and determine the neighbors
-      int i = int(double(length)*random_01());
+      int i = int(double(length)*random_real());
       int right=(i+1 < length ? i+1 : 0);
       int left=( i-1 < 0 ? length-1 : i-1);
 
@@ -100,7 +100,7 @@ void IsingSimulation::dostep()
       double p=exp(2.*beta*spins[i]*(spins[right]+spins[left]));
 
       // Metropolis updating: accept if random number is smaller than p
-      if (p>=1. || random_01() < p)
+      if (p>=1. || random_real() < p)
 	spins[i]=-spins[i];
     }
     

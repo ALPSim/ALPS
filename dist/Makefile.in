@@ -79,3 +79,5 @@ distclean :
 
 Makefile : $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status)
+
+depend:

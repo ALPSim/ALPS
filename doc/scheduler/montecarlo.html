@@ -37,10 +37,9 @@ public:
   
 protected:
   typedef boost::mt19937 random_type;
-  typedef boost::uniform_01&lt;random_type> random_01_type;
 
   random_type random;
-  random_01_type random_01;
+  double random_real(double a=0., double b=1.,);
   int random_int(int a, int b);
 
   alps::Parameters parms;
@@ -197,22 +196,19 @@ typedef boost::mt19937 random_type;
 </pre></blockquote>
 is the type of random number generator used.
 <blockquote><pre>
-typedef boost::uniform_01&lt;random_type> random_01_type;
+double random_real(double a=0., double b=1.);
 </pre></blockquote>
-is the type an adaptor to provide random numbers in the interval [0,1).
+</pre></blockquote>
+provides floating point random numbers in the range <tt>a</tt> to <tt>b</tt>, inclusive the limiting value <tt>a</tt> but excluding <tt>b</tt>.
 <blockquote><pre>
 int random_int(int a, int b);
 </pre></blockquote>
-provides integer random numbers in the range <tt>a</tt> to <tt>b</tt>
+provides integer random numbers in the range <tt>a</tt> to <tt>b</tt>, inclusive the limiting values <tt>a</tt> and <tt>b</tt>.
 <h4>Data members</h4>
 <blockquote><pre>
 random_type random;
 </pre></blockquote>
 is the random number generator
-<blockquote><pre>
-random_01_type random_01;
-</pre></blockquote>
-is an adaptor to provide random numbers in the interval [0,1).
 <blockquote><pre>
 alea::ObservableSet measurements;
 </pre></blockquote>
