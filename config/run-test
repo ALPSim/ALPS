@@ -7,6 +7,23 @@ fi
 
 srcdir="$1"
 prog=`basename $2`
+dir=`echo $2 | sed 's/^\(\.\/\)*//g'` # remove preceding './'
+if test -n "$dir"; then
+  dir=`dirname ${dir}`
+  srcdir="${srcdir}/${dir}"
+  if test -d "$srcdir"; then :; else
+    echo error: $srcdir not found
+    exit -1
+  fi
+  if test -d "$dir"; then :; else
+    echo error: $dir not found
+    exit -1
+  fi
+  if test "$dir" != "."; then
+    echo -n "[$dir] "
+  fi
+  cd $dir
+fi
 
 if test -f ${prog}.input; then
   if test -f ${prog}.output; then
