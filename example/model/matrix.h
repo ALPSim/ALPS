@@ -105,7 +105,6 @@ void HamiltonianMatrix<T,M>::build() const
 
   std::map<int,boost::multi_array<T,2> > site_matrix;
   std::map<int,bool> site_visited;
-  double t=alps::dclock();
   for (boost::graph_traits<graph_type>::vertex_iterator it=boost::vertices(lattice()).first; 
        it!=boost::vertices(lattice()).second ; ++it)
     if (!site_visited[site_type[*it]]) {
@@ -115,9 +114,6 @@ void HamiltonianMatrix<T,M>::build() const
       site_matrix.insert(std::make_pair(type,ham.site_term(type).template matrix<T>(
                 ham.basis().site_basis(type),models_.simple_operators(),p)));
     }
-
-  std::cerr << "Took " << alps::dclock()-t << " seconds\n";
-  t=alps::dclock();
 
   // get all bond matrices
   alps::property_map<alps::bond_type_t,  graph_type, int>::const_type
@@ -139,9 +135,6 @@ void HamiltonianMatrix<T,M>::build() const
     }
   }
 
-  std::cerr << "Took " << alps::dclock()-t << " seconds\n";
-  t=alps::dclock();
-  
   // create basis set
   std::cerr << "Creating basis set\n";
   alps::BasisStatesDescriptor<short> basis(ham.basis(),lattice());
@@ -150,9 +143,6 @@ void HamiltonianMatrix<T,M>::build() const
   typedef basis_states_type::value_type state_type;
   basis_states_type states(basis);
 
-  std::cerr << "Took " << alps::dclock()-t << " seconds" << std::endl;
-  t=alps::dclock();
-  
   // build matrix
   
   std::cerr << "Creating matrix\n";
@@ -160,8 +150,7 @@ void HamiltonianMatrix<T,M>::build() const
 
   // loop over sites
     for (int i=0;i<states.size();++i) {        // loop basis states
-      state_type state=states[i];      // get source state
-      state_type newstate=state;       // prepare target state
+      state_type state=states[i];              // get source state
   int s=0;
   for (boost::graph_traits<graph_type>::vertex_iterator it=boost::vertices(lattice()).first; 
       it!=boost::vertices(lattice()).second ; ++it,++s) {
@@ -170,6 +159,7 @@ void HamiltonianMatrix<T,M>::build() const
       for (int js=0;js<basis[s].size();++js) { // loop over target site states
         T val=mat[is][js];                     // get matrix element
         if (val) {                             // if matrix element is nonzero
+          state_type newstate=state;           // prepare target state
           newstate[s]=js;                      // build target state
           int j = states.index(newstate);      // lookup target state
           if (j<states.size())
@@ -205,6 +195,4 @@ void HamiltonianMatrix<T,M>::build() const
     }
   }  
   built_ = true;
-   
-  std::cerr << "Took " << alps::dclock()-t << " seconds\n";
 }
