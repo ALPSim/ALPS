@@ -1,5 +1,5 @@
-LATTICE_LIBRARY = "@top_builddir@lib/xml/lattices.xml"
-MODEL_LIBRARY = "@top_builddir@lib/xml/models.xml"
+LATTICE_LIBRARY = "../../lib/xml/lattices.xml"
+MODEL_LIBRARY = "../../lib/xml/models.xml"
 LATTICE = "chain lattice"
 L       = 4
 MODEL   = "spin"
