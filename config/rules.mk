@@ -244,13 +244,29 @@ install : $(LIB) $(PROGRAM)
 	  $(INSTALL_DATA) $$d$$p $(datadir)/$$p; \
 	done
 	@list='$(PKGDATA_CONFIG) $(PKGDATA)'; for p in $$list; do \
-          if test -d $(pkgdatadir); then :; else \
+	  if test -d $(pkgdatadir); then :; else \
 	    echo "$(mkinstalldirs) $(pkgdatadir)"; \
 	    $(mkinstalldirs) $(pkgdatadir); \
 	  fi; \
 	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
 	  echo "$(INSTALL_DATA) $$d$$p $(pkgdatadir)/$$p"; \
 	  $(INSTALL_DATA) $$d$$p $(pkgdatadir)/$$p; \
+	done
+	@list='$(PKGDOC_CONFIG) $(PKGDOC)'; for p in $$list; do \
+	  if test -d $(pkgdocdir); then :; else \
+	    echo "$(mkinstalldirs) $(pkgdocdir)"; \
+	    $(mkinstalldirs) $(pkgdocdir); \
+	  fi; \
+	  sd=`dirname $$p`; \
+	  if test "$$sd" != "."; then \
+	    if test -d "$(pkgdocdir)/$$sd"; then :; else \
+	      echo "$(mkinstalldirs) $(pkgdocdir)/$$sd"; \
+	      $(mkinstalldirs) $(pkgdocdir)/$$sd; \
+	    fi; \
+	  fi; \
+	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
+	  echo "$(INSTALL_DOC) $$d$$p $(pkgdocdir)/$$p"; \
+	  $(INSTALL_DOC) $$d$$p $(pkgdocdir)/$$p; \
 	done
 uninstall :
 	@list='$(HEADER_CONFIG) $(HEADER)'; for p in $$list; do \
@@ -277,6 +293,10 @@ uninstall :
 	  echo "rm -f $(pkgdatadir)/$$p"; \
 	  rm -f $(pkgdatadir)/$$p; \
 	done
+	@list='$(PKGDOC_CONFIG) $(PKGDOC)'; for p in $$list; do \
+	  echo "rm -f $(pkgdocdir)/$$p"; \
+	  rm -f $(pkgdocdir)/$$p; \
+	done
 
 # clean & distclean
 
@@ -284,7 +304,7 @@ clean :
 	-rm -f *.a *.ti */*.ti */*/*.ti *.ii */*.ii */*/*.ii *.o */*.o */*/*.o *~ */*~ icc??????gas $(PROGRAM) $(EXAMPLE) $(TEST) $(TESTOK) a.out core
 	-rm -rf ti_files */ti_files */*/ti_files ii_files */ii_files */*/ii_files cxx_repository TemplateDir 
 distclean : clean
-	-rm -f Makefile config.log config.status $(HEADER_CONFIG) $(XMLLIB_CONFIG) $(SCRIPT_CONFIG) $(DATA_CONFIG) $(PKGDATA_CONFIG) $(LOCAL_CONFIG)
+	-rm -f Makefile config.log config.status $(HEADER_CONFIG) $(XMLLIB_CONFIG) $(SCRIPT_CONFIG) $(DATA_CONFIG) $(PKGDATA_CONFIG) $(PKGDOC_CONFIG) $(LOCAL_CONFIG)
 
 # Makefile & dependency
 

@@ -1,7 +1,10 @@
 2004-03-04 Synge Todo <wistaria@comp-phys.org>
 
-	* [config] moved version/year strings from alps/src/copyright.C.in
-	to alps/src/config.h.in.  Cleaned up configure script.
+	* [config] Moved version/year strings from alps/src/copyright.C.in
+                   to alps/src/config.h.in.  Cleaned up configure script.
+
+	* [doc] Changed Makefile's so that `make install' installs the
+                documentations into $PREFIX/doc/alps too.
 
 2004-03-02 Matthias Troyer <troyer@comp-phys.org>
 
@@ -19,7 +22,7 @@
 
 	* [config] supported precompiled Boost library.
 	
-2004-01-20 Synge todo <wistaria@comp-phys.org>
+2004-01-20 Synge Todo <wistaria@comp-phys.org>
 
 	* [configure, osiris, lattice] fixed config/ac_mpi.m4,
 	alps/osiris/dump.h, alps/lattice/unitcell.C for SGI MIPSpro 7.41

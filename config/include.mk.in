@@ -40,6 +40,7 @@ bindir = @bindir@
 datadir = @datadir@
 libdir = @libdir@
 includedir = @includedir@
+docdir = @docdir@
 
 # Makefiles
 
@@ -55,6 +56,7 @@ INSTALL_SCRIPT = @INSTALL_SCRIPT@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_LIB = $(INSTALL_DATA)
 INSTALL_HEADER = $(INSTALL_DATA)
+INSTALL_DOC = $(INSTALL_DATA)
 install_sh = $(bindir)/install-sh
 mkinstalldirs = $(SHELL) $(bindir)/mkinstalldirs
 

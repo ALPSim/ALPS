@@ -37,6 +37,7 @@ AC_CONFIG_FILES(test/parser/Makefile)
 AC_CONFIG_FILES(example/scheduler/Makefile)
 AC_CONFIG_FILES(example/model/Makefile)
 AC_CONFIG_FILES(tool/Makefile tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text)
+AC_CONFIG_FILES(doc/Makefile)
 if test -f "$srcdir/dist/Makefile.in"; then
   AC_CONFIG_FILES(dist/Makefile)
 fi
@@ -60,12 +61,17 @@ test "$datadir" = '${prefix}/share' && datadir="$prefix/share"
 test "$libdir" = '${exec_prefix}/lib' && libdir="$exec_prefix/lib"
 test "$includedir" = '${prefix}/include' && includedir="$prefix/include"
 
+# directory for documentation
+AC_SUBST(docdir)
+docdir="$prefix/doc"
+
 ac_cv_alps_prefix="$prefix"
 ac_cv_alps_exec_prefix="$exec_prefix"
 ac_cv_alps_bindir="$bindir"
 ac_cv_alps_datadir="$datadir"
 ac_cv_alps_libdir="$libdir"
 ac_cv_alps_includedir="$includedir"
+ac_cv_alps_docdir="$docdir"
 
 ac_cv_alps_include_mk="$datadir/$PACKAGE_NAME/include.mk"
 ac_cv_alps_rules_mk="$datadir/$PACKAGE_NAME/rules.mk"
