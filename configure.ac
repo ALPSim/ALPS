@@ -11,9 +11,9 @@ dnl
 
 dnl Version of ALPS Library
 
-define([alps_version], [1.1b1])
+define([alps_version], [1.1b2])
 
-dnl Latest publish year of ALPS
+dnl Latest publication year of ALPS
 
 define([alps_year], [2004])
 
