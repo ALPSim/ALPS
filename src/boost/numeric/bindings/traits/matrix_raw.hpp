@@ -182,7 +182,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename T, typename F, typename A>
   BOOST_UBLAS_INLINE
-  typename ublas::matrix<T,F,A>::const_pointer 
+  const typename ublas::matrix<T,F,A>::value_type *
   matrix_storage (const ublas::matrix<T,F,A> &m) {
     return &m.data().begin()[0];
   }
@@ -191,13 +191,13 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   // But how shall we write portable code otherwise?
   template <typename T, typename F, typename A>
   BOOST_UBLAS_INLINE
-  typename ublas::matrix<T,F,A>::const_pointer 
+  const typename ublas::matrix<T,F,A>::value_type *
   matrix_storage_const (const ublas::matrix<T,F,A> &m) {
     return &m.data().begin()[0];
   }
   template <typename T, typename F, typename A>
   BOOST_UBLAS_INLINE
-  typename ublas::matrix<T,F,A>::pointer 
+  typename ublas::matrix<T,F,A>::value_type *
   matrix_storage (ublas::matrix<T,F,A> &m) {
     return &m.data().begin()[0];
   }
@@ -228,7 +228,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename M>
   BOOST_UBLAS_INLINE
-  typename M::const_pointer 
+  const typename M::value_type *
   matrix_storage (const ublas::matrix_reference<M> &m) {
     return matrix_storage (m.expression ());
   }
@@ -237,13 +237,13 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   // But how shall we write portable code otherwise?
   template <typename M>
   BOOST_UBLAS_INLINE
-  typename M::const_pointer 
+  const typename M::value_type *
   matrix_storage_const (const ublas::matrix_reference<M> &m) {
     return matrix_storage_const (m.expression ());
   }
   template <typename M>
   BOOST_UBLAS_INLINE
-  typename M::pointer matrix_storage (ublas::matrix_reference<M> &m) {
+  typename M::value_type * matrix_storage (ublas::matrix_reference<M> &m) {
     return matrix_storage (m.expression ());
   }
 

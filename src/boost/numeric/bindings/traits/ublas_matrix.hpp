@@ -62,6 +62,9 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     typedef T                                           value_type; 
     typedef typename detail::generate_const<M,T>::type* pointer; 
 
+      typedef typename identifier_type::orientation_category                      orientation_category; 
+      typedef typename detail::ublas_ordering<orientation_category>::functor_type functor_t ;
+
     static pointer storage (matrix_type& m) {
       typedef typename detail::generate_const<M,ArrT>::type array_type ;
       return vector_traits<array_type>::storage (m.data()); 
@@ -72,18 +75,15 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     static int leading_dimension (matrix_type& m) {
       // g++ 2.95.4 and 3.0.4 (with -pedantic) dislike 
       //   identifier_type::functor_type::size2()
-      typedef typename identifier_type::functor_type functor_t; 
       return functor_t::size2 (m.size1(), m.size2());
     }
 
     // stride1 == distance (m (i, j), m (i+1, j)) 
     static int stride1 (matrix_type& m) { 
-      typedef typename identifier_type::functor_type functor_t; 
       return functor_t::one1 (m.size1(), m.size2());
     } 
     // stride2 == distance (m (i, j), m (i, j+1)) 
     static int stride2 (matrix_type& m) { 
-      typedef typename identifier_type::functor_type functor_t; 
       return functor_t::one2 (m.size1(), m.size2());
     }
   }; 

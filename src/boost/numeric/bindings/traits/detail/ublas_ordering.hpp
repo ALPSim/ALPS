@@ -14,8 +14,8 @@
  *
  */
 
-#ifndef BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_ORDERING_H
-#define BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_ORDERING_H
+#ifndef BOOST_NUMERIC_BINDINGS_TRAITS_DETAIL_UBLAS_ORDERING_H
+#define BOOST_NUMERIC_BINDINGS_TRAITS_DETAIL_UBLAS_ORDERING_H
 
 #include <boost/numeric/ublas/config.hpp> 
 
@@ -28,11 +28,13 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     
     template<> 
     struct ublas_ordering<boost::numeric::ublas::row_major_tag> {
-      typedef row_major_t type; 
+      typedef row_major_t                        type; 
+      typedef boost::numeric::ublas::row_major   functor_type; 
     };
     template<> 
     struct ublas_ordering<boost::numeric::ublas::column_major_tag> {
-      typedef column_major_t type; 
+      typedef column_major_t                        type; 
+      typedef boost::numeric::ublas::column_major   functor_type; 
     };
 
   }
