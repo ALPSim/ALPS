@@ -88,14 +88,17 @@ ac_cv_alps_compiler="$ac_cv_compiler"
 ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"
 ac_cv_alps_compiler_optimization="$ac_cv_compiler_optimization"
 ac_cv_alps_compiler="$ac_cv_compiler"
-ac_cv_alps_compiler_cc="$ac_cv_compiler_cc"
-ac_cv_alps_compiler_cflags="$ac_cv_compiler_cflags"
-ac_cv_alps_compiler_cxx="$ac_cv_compiler_cxx"
-ac_cv_alps_compiler_cxxflags="$ac_cv_compiler_cxxflags"
+ac_cv_alps_cc="$ac_cv_compiler_cc"
+ac_cv_alps_cflags="$ac_cv_compiler_cflags"
+ac_cv_alps_cxx="$ac_cv_compiler_cxx"
+ac_cv_alps_cxxflags="$ac_cv_compiler_cxxflags"
 
 # C/C++ preprocessor
 AC_PROG_CPP
 AC_PROG_CXXCPP
+
+ac_cv_alps_cpp="$CPP"
+ac_cv_alps_cxxcpp="$CXXCPP"
 
 # Install script
 AC_PROG_INSTALL
@@ -121,6 +124,10 @@ AC_PROG_RANLIB
 #
 # checking boost directory
 #
+
+AC_SUBST(BOOST_CPPFLAGS)
+AC_SUBST(BOOST_LDFLAGS)
+AC_SUBST(BOOST_LIBS)
 
 ac_cv_use_precompiled_boost=
 
@@ -192,8 +199,6 @@ ac_save_CPPFLAGS=$CPPFLAGS
 ac_save_LDFLAGS=$LDFLAGS
 ac_save_LIBS=$LIBS
 
-AC_SUBST(BOOST_CPPFLAGS)
-
 AC_MSG_CHECKING([for Boost include files])
 found=no
 
@@ -227,9 +232,6 @@ else
 fi
 
 dnl pre-compiled boost library
-
-AC_SUBST(BOOST_LDFLAGS)
-AC_SUBST(BOOST_LIBS)
 
 if test "$ac_cv_use_precompiled_boost" = no; then :; else
   AC_MSG_CHECKING([for pre-compiled Boost library])
@@ -294,6 +296,11 @@ CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
 LIBS="$ac_save_LIBS"
 AC_LANG_RESTORE
+
+ac_cv_boost_cppflags="$BOOST_CPPFLAGS"
+ac_cv_boost_ldflags="$BOOST_LDFLAGS"
+ac_cv_boost_libs="$BOOST_LIBS"
+ac_cv_boost_srcdir="$BOOST_SRCDIR"
 
 #
 # checking for system headers
@@ -528,15 +535,28 @@ if test "$ac_cv_boost_config" != no; then
 fi
 
 # setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
+
 AC_SUBST(BASE_CPPFLAGS)
 BASE_CPPFLAGS="$CPPFLAGS"
-ac_cv_alps_CPPFLAGS="$CPPFLAGS"
+ac_cv_base_cppflags="$CPPFLAGS"
 AC_SUBST(BASE_LDFLAGS)
 BASE_LDFLAGS="$LDFLAGS"
-ac_cv_alps_LDFLAGS="$LDFLAGS"
+ac_cv_base_ldflags="$LDFLAGS"
 AC_SUBST(BASE_LIBS)
 BASE_LIBS="$LIBS"
-ac_cv_alps_LIBS="$LIBS"
+ac_cv_base_libs="$LIBS"
+
+ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_xml_cppflags $ac_cv_hdf5_cppflags $ac_cv_boost_cppflags -I$ac_cv_alps_includedir"
+ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_xml_ldflags $ac_cv_hdf5_ldflags $ac_cv_boost_ldflags -L$ac_cv_alps_libdir"
+ac_cv_alps_libs="-lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
+
+ac_cv_alps_cppflags_mpi="$ac_cv_alps_cppflags $ac_cv_mpi_cppflags"
+ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
+ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
+
+ac_cv_alps_cppflags_pvm="$ac_cv_alps_cppflags $ac_cv_pvm_cppflags"
+ac_cv_alps_ldflags_pvm="$ac_cv_alps_ldflags $ac_cv_pvm_ldflags"
+ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 #
 # Generate files

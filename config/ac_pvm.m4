@@ -168,6 +168,9 @@ AC_DEFUN([AC_PVM],
   
   if test "$pvm" != no; then
     ac_cv_have_pvm=yes
+    ac_cv_pvm_cppflags="$PVM_CPPFLAGS"
+    ac_cv_pvm_ldflags="$PVM_LDFLAGS"
+    ac_cv_pvm_libs="$PVM_LIBS"
     AC_DEFINE(HAVE_PVM)
     OBJ_PVM='$(OBJ_PVM)'
     LIB_PVM='$(LIB_PVM)'
@@ -175,6 +178,9 @@ AC_DEFUN([AC_PVM],
     AC_MSG_NOTICE([enabling PVM support])
   else
     ac_cv_have_pvm=no
+    ac_cv_pvm_cppflags=
+    ac_cv_pvm_ldflags=
+    ac_cv_pvm_libs=
     PVM_CPPFLAGS=
     PVM_LDFLAGS=
     PVM_LIBS=

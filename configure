@@ -3327,10 +3327,10 @@ ac_cv_alps_compiler="$ac_cv_compiler"
 ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"
 ac_cv_alps_compiler_optimization="$ac_cv_compiler_optimization"
 ac_cv_alps_compiler="$ac_cv_compiler"
-ac_cv_alps_compiler_cc="$ac_cv_compiler_cc"
-ac_cv_alps_compiler_cflags="$ac_cv_compiler_cflags"
-ac_cv_alps_compiler_cxx="$ac_cv_compiler_cxx"
-ac_cv_alps_compiler_cxxflags="$ac_cv_compiler_cxxflags"
+ac_cv_alps_cc="$ac_cv_compiler_cc"
+ac_cv_alps_cflags="$ac_cv_compiler_cflags"
+ac_cv_alps_cxx="$ac_cv_compiler_cxx"
+ac_cv_alps_cxxflags="$ac_cv_compiler_cxxflags"
 
 # C/C++ preprocessor
 ac_ext=c
@@ -3798,6 +3798,9 @@ ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
+ac_cv_alps_cpp="$CPP"
+ac_cv_alps_cxxcpp="$CXXCPP"
+
 # Install script
 # Find a good install program.  We prefer a C program (faster),
 # so one script is as good as another.  But avoid the broken or
@@ -3990,6 +3993,10 @@ fi
 # checking boost directory
 #
 
+
+
+
+
 ac_cv_use_precompiled_boost=
 
 
@@ -4083,8 +4090,6 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 ac_save_CPPFLAGS=$CPPFLAGS
 ac_save_LDFLAGS=$LDFLAGS
 ac_save_LIBS=$LIBS
-
-
 
 echo "$as_me:$LINENO: checking for Boost include files" >&5
 echo $ECHO_N "checking for Boost include files... $ECHO_C" >&6
@@ -4211,9 +4216,6 @@ echo "$as_me: error: Boost include files not found" >&2;}
 fi
 
 
-
-
-
 if test "$ac_cv_use_precompiled_boost" = no; then :; else
   echo "$as_me:$LINENO: checking for pre-compiled Boost library" >&5
 echo $ECHO_N "checking for pre-compiled Boost library... $ECHO_C" >&6
@@ -4335,6 +4337,11 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
+
+ac_cv_boost_cppflags="$BOOST_CPPFLAGS"
+ac_cv_boost_ldflags="$BOOST_LDFLAGS"
+ac_cv_boost_libs="$BOOST_LIBS"
+ac_cv_boost_srcdir="$BOOST_SRCDIR"
 
 #
 # checking for system headers
@@ -7811,6 +7818,9 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
   if test "$mpi" != no; then
     ac_cv_have_mpi=yes
+    ac_cv_mpi_cppflags="$MPI_CPPFLAGS"
+    ac_cv_mpi_ldflags="$MPI_LDFLAGS"
+    ac_cv_mpi_libs="$MPI_LIBS"
     cat >>confdefs.h <<\_ACEOF
 #define HAVE_MPI 1
 _ACEOF
@@ -7822,6 +7832,9 @@ _ACEOF
 echo "$as_me: enabling MPI support" >&6;}
   else
     ac_cv_have_mpi=no
+    ac_cv_mpi_cppflags=
+    ac_cv_mpi_ldflags=
+    ac_cv_mpi_libs=
     MPI_CPPFLAGS=
     MPI_LDFLAGS=
     MPI_LIBS=
@@ -8405,6 +8418,9 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
   if test "$pvm" != no; then
     ac_cv_have_pvm=yes
+    ac_cv_pvm_cppflags="$PVM_CPPFLAGS"
+    ac_cv_pvm_ldflags="$PVM_LDFLAGS"
+    ac_cv_pvm_libs="$PVM_LIBS"
     cat >>confdefs.h <<\_ACEOF
 #define HAVE_PVM 1
 _ACEOF
@@ -8416,6 +8432,9 @@ _ACEOF
 echo "$as_me: enabling PVM support" >&6;}
   else
     ac_cv_have_pvm=no
+    ac_cv_pvm_cppflags=
+    ac_cv_pvm_ldflags=
+    ac_cv_pvm_libs=
     PVM_CPPFLAGS=
     PVM_LDFLAGS=
     PVM_LIBS=
@@ -8806,20 +8825,26 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   fi
 
   if test "$hdf5" != no; then
-    { echo "$as_me:$LINENO: enabling HDF5 support" >&5
-echo "$as_me: enabling HDF5 support" >&6;}
+    ac_cv_have_hdf5=yes
+    ac_cv_hdf5_cppflags="$HDF5_CPPFLAGS"
+    ac_cv_hdf5_ldflags="$HDF5_LDFLAGS"
+    ac_cv_hdf5_libs="$HDF5_LIBS"
     cat >>confdefs.h <<\_ACEOF
 #define HAVE_HDF5 1
 _ACEOF
 
-    ac_cv_have_hdf5=yes
+    { echo "$as_me:$LINENO: enabling HDF5 support" >&5
+echo "$as_me: enabling HDF5 support" >&6;}
   else
-    { echo "$as_me:$LINENO: disabling HDF5 support" >&5
-echo "$as_me: disabling HDF5 support" >&6;}
     ac_cv_have_hdf5=no
+    ac_cv_hdf5_cppflags=
+    ac_cv_hdf5_ldflags=
+    ac_cv_hdf5_libs=
     HDF5_CPPFLAGS=
     HDF5_LDFLAGS=
     HDF5_LIBS=
+    { echo "$as_me:$LINENO: disabling HDF5 support" >&5
+echo "$as_me: disabling HDF5 support" >&6;}
   fi
 
 
@@ -9529,8 +9554,10 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
   fi
 
   if test -n "$xml_parser"; then
-    { echo "$as_me:$LINENO: using XML parser : $xml_parser" >&5
-echo "$as_me: using XML parser : $xml_parser" >&6;}
+    ac_cv_xml_parser=$xml_parser
+    ac_cv_xml_cppflags="$XML_CPPFLAGS"
+    ac_cv_xml_ldflags="$XML_LDFLAGS"
+    ac_cv_xml_libs="$XML_LIBS"
     if test "$xml_parser" = "expat"; then
       cat >>confdefs.h <<\_ACEOF
 #define HAVE_EXPAT_PARSER 1
@@ -9543,16 +9570,20 @@ _ACEOF
 _ACEOF
 
     fi
-    ac_cv_xml_parser=$xml_parser
+    { echo "$as_me:$LINENO: using XML parser : $xml_parser" >&5
+echo "$as_me: using XML parser : $xml_parser" >&6;}
   else
+    ac_cv_xml_parser=native
+    ac_cv_xml_cppflags=
+    ac_cv_xml_ldflags=
+    ac_cv_xml_libs=
+    XML_CPPFLAGS=
+    XML_LDFLAGS=
+    XML_LIBS=
     { echo "$as_me:$LINENO: XML parser not found" >&5
 echo "$as_me: XML parser not found" >&6;}
     { echo "$as_me:$LINENO: using native XML parser" >&5
 echo "$as_me: using native XML parser" >&6;}
-    ac_cv_xml_parser=native
-    XML_CPPFLAGS=
-    XML_LDFLAGS=
-    XML_LIBS=
   fi
 
 
@@ -9704,14 +9735,27 @@ fi
 
 # setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
 
+
 BASE_CPPFLAGS="$CPPFLAGS"
-ac_cv_alps_CPPFLAGS="$CPPFLAGS"
+ac_cv_base_cppflags="$CPPFLAGS"
 
 BASE_LDFLAGS="$LDFLAGS"
-ac_cv_alps_LDFLAGS="$LDFLAGS"
+ac_cv_base_ldflags="$LDFLAGS"
 
 BASE_LIBS="$LIBS"
-ac_cv_alps_LIBS="$LIBS"
+ac_cv_base_libs="$LIBS"
+
+ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_xml_cppflags $ac_cv_hdf5_cppflags $ac_cv_boost_cppflags -I$ac_cv_alps_includedir"
+ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_xml_ldflags $ac_cv_hdf5_ldflags $ac_cv_boost_ldflags -L$ac_cv_alps_libdir"
+ac_cv_alps_libs="-lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
+
+ac_cv_alps_cppflags_mpi="$ac_cv_alps_cppflags $ac_cv_mpi_cppflags"
+ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
+ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
+
+ac_cv_alps_cppflags_pvm="$ac_cv_alps_cppflags $ac_cv_pvm_cppflags"
+ac_cv_alps_ldflags_pvm="$ac_cv_alps_ldflags $ac_cv_pvm_ldflags"
+ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 #
 # Generate files

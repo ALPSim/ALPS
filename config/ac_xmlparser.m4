@@ -220,21 +220,27 @@ AC_DEFUN([AC_XMLPARSER],
   fi
   
   if test -n "$xml_parser"; then
-    AC_MSG_NOTICE([using XML parser : $xml_parser])
+    ac_cv_xml_parser=$xml_parser
+    ac_cv_xml_cppflags="$XML_CPPFLAGS"
+    ac_cv_xml_ldflags="$XML_LDFLAGS"
+    ac_cv_xml_libs="$XML_LIBS"
     if test "$xml_parser" = "expat"; then
       AC_DEFINE(HAVE_EXPAT_PARSER)
     fi
     if test "$xml_parser" = "xerces"; then
       AC_DEFINE(HAVE_XERCES_PARSER)
     fi
-    ac_cv_xml_parser=$xml_parser
+    AC_MSG_NOTICE([using XML parser : $xml_parser])
   else
-    AC_MSG_NOTICE([XML parser not found])
-    AC_MSG_NOTICE([using native XML parser])
     ac_cv_xml_parser=native
+    ac_cv_xml_cppflags=
+    ac_cv_xml_ldflags=
+    ac_cv_xml_libs=
     XML_CPPFLAGS=
     XML_LDFLAGS=
     XML_LIBS=
+    AC_MSG_NOTICE([XML parser not found])
+    AC_MSG_NOTICE([using native XML parser])
   fi
   ]
 )

@@ -234,6 +234,9 @@ AC_DEFUN([AC_MPI],
   
   if test "$mpi" != no; then
     ac_cv_have_mpi=yes
+    ac_cv_mpi_cppflags="$MPI_CPPFLAGS"
+    ac_cv_mpi_ldflags="$MPI_LDFLAGS"
+    ac_cv_mpi_libs="$MPI_LIBS"
     AC_DEFINE(HAVE_MPI)
     OBJ_MPI='$(OBJ_MPI)'
     LIB_MPI='$(LIB_MPI)'
@@ -241,6 +244,9 @@ AC_DEFUN([AC_MPI],
     AC_MSG_NOTICE([enabling MPI support])
   else
     ac_cv_have_mpi=no
+    ac_cv_mpi_cppflags=
+    ac_cv_mpi_ldflags=
+    ac_cv_mpi_libs=
     MPI_CPPFLAGS=
     MPI_LDFLAGS=
     MPI_LIBS=

@@ -110,15 +110,21 @@ AC_DEFUN([AC_HDF5],
   fi
 
   if test "$hdf5" != no; then
-    AC_MSG_NOTICE([enabling HDF5 support])
-    AC_DEFINE(HAVE_HDF5)
     ac_cv_have_hdf5=yes
+    ac_cv_hdf5_cppflags="$HDF5_CPPFLAGS"
+    ac_cv_hdf5_ldflags="$HDF5_LDFLAGS"
+    ac_cv_hdf5_libs="$HDF5_LIBS"
+    AC_DEFINE(HAVE_HDF5)
+    AC_MSG_NOTICE([enabling HDF5 support])
   else
-    AC_MSG_NOTICE([disabling HDF5 support])
     ac_cv_have_hdf5=no
+    ac_cv_hdf5_cppflags=
+    ac_cv_hdf5_ldflags=
+    ac_cv_hdf5_libs=
     HDF5_CPPFLAGS=
     HDF5_LDFLAGS=
     HDF5_LIBS=
+    AC_MSG_NOTICE([disabling HDF5 support])
   fi
   ]
 )
