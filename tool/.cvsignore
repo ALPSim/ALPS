@@ -3,6 +3,7 @@ compactrun
 convert2xml
 extracttext
 extracthtml
+parameter2xml
 plot2xsl.xsl
 convert2text
 checksign
