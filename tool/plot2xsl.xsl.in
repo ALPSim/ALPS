@@ -12,7 +12,7 @@
     <xsl:value-of select="$newline"/>
   
     <!-- PALM_DIR should be inserted here automatically -->
-    <xslout:include href="@libdir@/xml/archive2plot.xsl"/>
+    <xslout:include href="file://localhost/@libdir@/xml/archive2plot.xsl"/>
     <xsl:value-of select="$newline"/>
 
     <!-- general plot description -->
