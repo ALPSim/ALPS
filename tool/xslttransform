@@ -17,7 +17,7 @@ else
   fi
 fi
 #is it Gnome xsltproc?
-if test `$transformer | grep xmlsoft | wc -l` == 2; then
+if test `$transformer | grep xsltproc | wc -l` == 1; then
 #is xsltproc
   $transformer $2 $1
 else
