@@ -8,7 +8,7 @@ dnl disable loading config.site
 define([AC_SITE_LOAD], )dnl
 
 AC_PREREQ(2.54)
-AC_INIT([alps],[1.0b5])
+AC_INIT([alps],[1.0b6])
 AC_CONFIG_AUX_DIR([config])
 
 AC_PREFIX_DEFAULT([$HOME/ALPS])
@@ -16,7 +16,7 @@ AC_PREFIX_DEFAULT([$HOME/ALPS])
 AC_MSG_NOTICE([starting configuration for ALPS library version $PACKAGE_VERSION])
 ac_cv_alps_version="$PACKAGE_VERSION"
 
-CURRENT_YEAR=2003
+CURRENT_YEAR=2004
 AC_SUBST(CURRENT_YEAR)
 
 AC_CONFIG_FILES(Makefile config/Makefile config/config.site config/arxx config/include.mk src/Makefile)

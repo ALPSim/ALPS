@@ -1,94 +1,97 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>The ALPS Project</title>
+  <title>The ALPS Libraries</title>
 </head>
-<body>
-
-<h1>The ALPS Project</h1>
-
-The ALPS project (<B>P</B>arallel <B>A</B>lgorithms for <B>L</B>attice <B>M</B>odels)
-aims at providing generic parallel algorithms for classical
-and quantum lattice models and provides utility classes and algorithm
-for many other problems. It strives to increase software reuse
-in the physics community. 
-
+ <body>
+  
+<h1>The ALPS Libraries</h1>
+  The ALPS libraries are part of the ALPS project (<b>P</b>arallel <b>A</b>lgorithms
+for <b>L</b>attice <b>M</b>odels), which aims at providing generic parallel
+algorithms for classical and quantum lattice models and provides utility
+classes and algorithm for many other problems. It strives to increase software
+reuse in the physics community.   
 <h2>Libraries</h2>
-<p>Currently the following libraries are publicly available as part of the ALPS library project
+ 
+<p>Currently the following libraries are publicly available as part of the
+ALPS library project </p>
 <ul>
-<li><B><a href="index_general.html">alps</a></B> generally usefull classes and traits</li>
-<li><B><a href="osiris/index.html">alps/osiris</a></B> serialization and communication</li>
-<li><B><a href="alea/index.html">alps/alea</a></B> Monte Carlo measurements and evaluation</tt>
-<li><B><a href="parser/index.html">alps/parser</a></B> helper functions to parse and write XML files</li>
-<li><B><a href="lattice/index.html">alps/lattice</a></B> lattices and graphs</li>
-<li><B><a href="model/index.html">alps/model</a></B> quantum lattice models</li>
-<li><B><a href="scheduler/index.html">alps/scheduler</a></B> an automatically parallelizing scheduler for Monte Carlo simulations</li>
+ <li><b><a href="index_general.html">alps</a></b> generally usefull classes
+and traits</li>
+ <li><b><a href="osiris/index.html">alps/osiris</a></b> serialization and
+communication</li>
+ <li><b><a href="alea/index.html">alps/alea</a></b> (*) Monte Carlo measurements
+and evaluation </li>
+  <li><b><a href="parser/index.html">alps/parser</a></b> helper functions
+to parse and write XML files</li>
+ <li><b><a href="lattice/index.html">alps/lattice</a></b> (*) lattices and
+graphs</li>
+ <li><b><a href="model/index.html">alps/model</a></b> (*) quantum lattice
+models</li>
+ <li><b><a href="scheduler/index.html">alps/scheduler</a></b> (*) an automatically
+parallelizing scheduler for Monte Carlo simulations</li>
+ 
 </ul>
+ 
 <h2>License</h2>
-The ALPS libraries and applications are free for non-commerical use but require acknowledgements and citations in any publication produced even partially using these ALPS libraries and applications. See <a href="license.html">here</a> for details.
+ The ALPS libraries are free for non-commerical use but those marked by an
+asterisk (*) above require acknowledgements and citations in any publication
+produced even partially using these ALPS libraries. See the license text&nbsp;
+<a href="../LICENSE.txt">LICENSE.txt</a> and the citations file <a
+ href="../CITATIONS.txt">CITATIONS.txt</a> for details. 
 <h2>Download, Configuring, Building and Installing</h2>
-
-are discussed <a href="setup.html">here</a>.
+  are discussed <a href="setup.html">here</a>. 
 <h2>Tools</h2>
-Besides the helper tools for the <a href="scheduler/index.html">scheduler library</a> we have provided a few <a href="tool/index.html">sample tools</a> for the manipulation of the XML files created by the ALPS programs.
+ Besides the helper tools for the <a href="scheduler/index.html">scheduler
+library</a> we have provided a few <a href="tool/index.html">sample tools</a>
+for the manipulation of the XML files created by the ALPS programs. 
 <h2>Programs</h2>
-are not yet available publicly, but you can contact us if you are 
-interested. Current projects include
+ based on the ALPS library are available separately.  
+<h2>Mailing lists</h2>
+ We offer the following mailing lists related to the libraries in the ALPS
+project: 
 <ul>
-<li>Classical Monte Carlo simulations
-<ul>
-<li>Generic local update and cluster Monte Carlo algorithms for classical 
-lattice models (beta-release avaliable)</li></ul></li>
-<li>Quantum Monte Carlo simulations
-<ul>
-<li>Loop algorithm (beta-release avaliable soon)
-<li>Directed loop algorithm (beta-release avaliable soon)
-<li>Worm algorithm (beta-release avaliable soon)
-</ul></li>
-<li>Diagonalization of quantum lattice models
-<ul>
-<li>Exact diagonalization using expression templates</li>
-<li>Full diagonalization using expression templates</li>
-<li>Parallel exact diagonalization</li>
-</ul></li>
-<li>Series expansions on quantum lattice models
-<ul>
-<li>High temperature series</li>
-<li>Perturbation series</li>
-</ul></li>
-
-<li>
+ <li>Announcements of new releases: <a
+ href="https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-announce">
+comp-phys-alps-announce@list.comp-phys.org</a> </li>
+  <li>Discussion of the ALPS libraries and their development: <a
+ href="https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-devel">comp-phys-alps-devel@list.comp-phys.org</a></li>
+ 
 </ul>
-
-<H2>Mailing lists</H2>
-We offer the following mailing lists related to the libraries in the ALPS project:
+  
+<h2>Support</h2>
+   For questions about the library please contact <a
+ href="mailto:alps-support@comp-phys.org">alps-support@comp-phys.org</a>. 
+<h2>Contributors</h2>
+ The following people (in alphabetical order) have contributed to the ALPS
+project: 
 <ul>
-<li>Announcements of new releases:
-<A HREF="https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-palm-announce"
-> comp-phys-palm-announce@list.comp-phys.org</A>
-<li>General discussion on the ALPS library components and their development:
-<A HREF="https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-palm-devel">comp-phys-palm-devel@list.comp-phys.org</A></li>
+ <li> <a href="http://www.itp.phys.ethz.ch/staff/alet/">Fabien Alet</a> (<a
+ href="mailto:alet@comp-phys.org">alet@comp-phys.org</a>)</li>
+ <li> Beat Ammon (<a href="mailto:beat.ammon@citadelgroup.com">beat.ammon@citadelgroup.com</a>)</li>
+ <li> <a href="http://www.itp.phys.ethz.ch/staff/prakash/">Prakash Dayal</a>
+(<a href="mailto:prakash@comp-phys.org">prakash@comp-phys.org</a>)</li>
+ <li> <a href="http://theorie.physik.uni-wuerzburg.de/%7Eardornei/">Ansgar
+Dorneich</a> (<a href="mailto:dorneich@de.ibm.com">dorneich@de.ibm.com</a>)</li>
+ <li>Axel Grzesik (<a href="mailto:axel@th.physik.uni-bonn.de">axel@th.physik.uni-bonn.de</a>)</li>
+ <li> <a href="http://w3-phystheo.ups-tlse.fr/%7Elaeuchli/">Andreas L&auml;uchli</a>
+(<a href="mailto:laeuchli@comp-phys.org">laeuchli@comp-phys.org</a>)</li>
+ <li> <a href="http://www.itp.phys.ethz.ch/staff/gschmid/">Guido Schmid</a>
+(<a href="mailto:gschmid@gschmid@comp-phys.org">gschmid@comp-phys.org</a>)</li>
+ <li> <a href="http://wistaria.ap.t.u-tokyo.ac.jp/">Synge Todo</a> (<a
+ href="mailto:wistaria@comp-phys.org">wistaria@comp-phys.org</a>)</li>
+ <li> <a href="http://www.itp.phys.ethz.ch/staff/trebst/">Simon Trebst</a>
+(<a href="mailto:trebst@comp-phys.org">trebst@comp-phys.org</a>)</li>
+ <li> <a href="http://www.itp.phys.ethz.ch/staff/troyer/">Matthias Troyer</a>
+(<a href="mailto:troyer@comp-phys.org">troyer@comp-phys.org</a>)</li>
+ <li> <a href="http://www.itp.phys.ethz.ch/staff/wessel/">Stefan Wessel</a>
+(<a href="mailto:wessel@comp-phys.org">wessel@comp-phys.org</a>)</li>
+  
 </ul>
-
-<H2>Support</H2>  
-For questions about the library please contact <A 
-HREF="mailto:palm-support@comp-phys.org">palm-support@comp-phys.org</A>.
-<H2>Contributors</H2>
-The following people (in alphabetical order) have contributed to the ALPS project:
-<ul>
-<li> <a href="http://www.itp.phys.ethz.ch/staff/alet/">Fabien Alet</a> (<a href="mailto:alet@comp-phys.org">alet@comp-phys.org</a>)</li>
-<li> Beat Ammon (<a href="mailto:beat.ammon@citadelgroup.com">beat.ammon@citadelgroup.com</a>)</li>
-<li> <a href="http://www.itp.phys.ethz.ch/staff/prakash/">Prakash Dayal</a> (<a href="mailto:prakash@comp-phys.org">prakash@comp-phys.org</a>)</li>
-<li> <a href="http://theorie.physik.uni-wuerzburg.de/~ardornei/">Ansgar Dorneich</a> (<a href="mailto:dorneich@de.ibm.com">dorneich@de.ibm.com</a>)</li>
-<li>Axel Grzesik (<A HREF="mailto:axel@th.physik.uni-bonn.de">axel@th.physik.uni-bonn.de</a>)</li>
-<li> <a href="http://w3-phystheo.ups-tlse.fr/~laeuchli/">Andreas L&auml;uchli</a> (<a href="mailto:laeuchli@comp-phys.org">laeuchli@comp-phys.org</a>)</li>
-<li> <a href="http://www.itp.phys.ethz.ch/staff/gschmid/">Guido Schmid</a> (<a href="mailto:gschmid@gschmid@comp-phys.org">gschmid@comp-phys.org</a>)</li>
-<li> <a href="http://wistaria.ap.t.u-tokyo.ac.jp/">Synge Todo</a> (<a href="mailto:wistaria@comp-phys.org">wistaria@comp-phys.org</a>)</li>
-<li> <a href="http://www.itp.phys.ethz.ch/staff/trebst/">Simon Trebst</a> (<a href="mailto:trebst@comp-phys.org">trebst@comp-phys.org</a>)</li>
-<li> <a href="http://www.itp.phys.ethz.ch/staff/troyer/">Matthias Troyer</a> (<a href="mailto:troyer@comp-phys.org">troyer@comp-phys.org</a>)</li>
-<li> <a href="http://www.itp.phys.ethz.ch/staff/wessel/">Stefan Wessel</a> (<a href="mailto:wessel@comp-phys.org">wessel@comp-phys.org</a>)</li>
-
-</ul>
-<HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+ 
+<hr> 
+<address>(c) 1994-2004 by <a href="mailto:troyer@comp-phys.org">Matthias
+Troyer</a></address>
+ <br>
 </body>
 </html>
