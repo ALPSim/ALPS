@@ -23,6 +23,7 @@ AC_CONFIG_FILES(test/osiris/Makefile test/osiris/xdrdump2.input)
 AC_CONFIG_FILES(test/parameter/Makefile)
 AC_CONFIG_FILES(test/parser/Makefile)
 AC_CONFIG_FILES(example/scheduler/Makefile)
+AC_CONFIG_FILES(tool/plot2xsl.xsl tool/extracttext tool/extracthtml)
 
 AC_CONFIG_HEADERS(src/alps/config.h)
 
