@@ -3049,10 +3049,6 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       try_CXXFLAGS_NOEH="-noexceptions"
       ;;
     sgi32)
-      # try_CFLAGS_OPT="-n32 -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -Ofast -INLINE"
-      # try_CFLAGS_DEBUG="-n32 -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -g -O0"
-      # try_CXXFLAGS_OPT="-n32 -LANG:std -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -w -Ofast -INLINE"
-      # try_CXXFLAGS_DEBUG="-n32 -LANG:std -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -g -O0"
       try_CFLAGS_OPT="-n32 -diag_error 1035 -Ofast -INLINE"
       try_CFLAGS_DEBUG="-n32 -diag_error 1035 -g -O0"
       try_CXXFLAGS_OPT="-n32 -LANG:std -w -diag_error 1035 -Ofast -INLINE"
@@ -3060,15 +3056,10 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
       if test -n "$TOOLROOT"; then
-        try_CXXFLAGS_OPT="$try_CXXFLAGS_OPT -I$TOOLROOT/usr/include/CC"
-        try_CXXFLAGS_DEBUG="$try_CXXFLAGS_DEBUG -I$TOOLROOT/usr/include/CC"
+        CPPFLAGS="$CPPFLAGS -I$TOOLROOT/usr/include/CC"
       fi
       ;;
     sgi64)
-      # try_CFLAGS_OPT="-64 -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -Ofast -INLINE"
-      # try_CFLAGS_DEBUG="-64 -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -g -O0"
-      # try_CXXFLAGS_OPT="-64 -LANG:std -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -w -Ofast -INLINE"
-      # try_CXXFLAGS_DEBUG="-64 -LANG:std -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -g -O0"
       try_CFLAGS_OPT="-64 -diag_error 1035 -Ofast -INLINE"
       try_CFLAGS_DEBUG="-64 -diag_error 1035 -g -O0"
       try_CXXFLAGS_OPT="-64 -LANG:std -w -diag_error 1035 -Ofast -INLINE"
@@ -3076,8 +3067,7 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
       if test -n "$TOOLROOT"; then
-        try_CXXFLAGS_OPT="$try_CXXFLAGS_OPT -I$TOOLROOT/usr/include/CC"
-        try_CXXFLAGS_DEBUG="$try_CXXFLAGS_DEBUG -I$TOOLROOT/usr/include/CC"
+        CPPFLAGS="$CPPFLAGS -I$TOOLROOT/usr/include/CC"
       fi
       ;;
     cray)
@@ -3135,10 +3125,8 @@ echo "$as_me: error: unknown mode $COMPILER" >&2;}
       ;;
   esac
 
-  if test -z "$CPPFLAGS"; then
-    if test "$ac_cv_compiler_optimization" = yes; then
-      CPPFLAGS="-DNDEBUG"
-    fi
+  if test "$ac_cv_compiler_optimization" = yes; then
+    CPPFLAGS="$CPPFLAGS -DNDEBUG"
   fi
 
   if test -n "$save_CFLAGS"; then
