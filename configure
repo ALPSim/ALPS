@@ -1510,7 +1510,7 @@ echo "${ECHO_T}$COMPILER" >&6
       try_CXX="xlC"
       ;;
     macos)
-      try_CC="cc"
+      try_CC="gcc"
       try_CXX="c++"
       ;;
     generic)
