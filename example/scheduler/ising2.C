@@ -115,7 +115,7 @@ void IsingSimulation2::dostep()
   // perform updates
   for (int j=0;j<spins.size();j++)  {
     // choose a random site and determine the neighbors
-    site_descriptor s = site(boost::variate_generator<random_base_type&,boost::uniform_int<> >(random,boost::uniform_int<>(0,num_sites()-1))());
+    site_descriptor s = site(random_int(0,num_sites()-1));
 
     // Metropolis updates
     neighbor_iterator it,end;
