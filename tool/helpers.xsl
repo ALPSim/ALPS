@@ -45,4 +45,42 @@
   </xsl:choose>  
 </xsl:template>
 
+<xsl:template name="Print_XMGRACE_PlotHeader">
+<xsl:text disable-output-escaping = "yes">
+# Grace project file
+#
+@g0 on
+@with g0
+@    frame linewidth 2.0
+@    title "</xsl:text>   
+<xsl:value-of select='/plot/@name'/>
+<xsl:text disable-output-escaping = "yes">"
+@    xaxis  label "</xsl:text>
+<xsl:value-of select='/plot/xaxis/@label'/>
+<xsl:text disable-output-escaping = "yes">"
+@    xaxis  label char size 1.500000
+@    xaxis  ticklabel char size 1.250000
+@    xaxis  tick minor ticks 4
+@    yaxis  label "</xsl:text>
+<xsl:value-of select='/plot/yaxis/@label'/>
+<xsl:text disable-output-escaping = "yes">"
+@    yaxis  label char size 1.500000
+@    yaxis  ticklabel char size 1.250000
+@    yaxis  tick minor ticks 4</xsl:text>
+</xsl:template>
+
+<xsl:template name="Print_XMGRACE_SetHeader">
+<xsl:text disable-output-escaping = "yes">
+@    s0 type xydy
+@    s0 symbol 1
+@    s0 symbol size 0.500000
+@    s0 symbol color 2
+@    s0 line type 1
+@    s0 line color 2
+@    s0 errorbar color 2
+@target G0.S0
+@type xydy
+</xsl:text>   
+</xsl:template>
+
 </xsl:stylesheet>
