@@ -109,11 +109,11 @@ AC_DEFUN([AC_COMPILER],
       ;;
     intel)
       try_CC="icc"
-      try_CXX="icc"
+      try_CXX="icc -Kc++"
       ;;
     intel64)
       try_CC="icc"
-      try_CXX="icc"
+      try_CXX="icc -Kc++"
       ;;
     como)
       try_CC="como"

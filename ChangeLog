@@ -1,5 +1,9 @@
-2004-08-20  Synge Todo  <wistaria@comp-phys.org>
+2004-09-17  Synge Todo  <wistaria@comp-phys.org>
 
+	* [config] Fixed compile option for icc 8.1.
+	
+2004-08-20  Synge Todo  <wistaria@comp-phys.org>
+	
 	* [alps/bindings] Removed alps/bindings/gels.hpp
 
 	* [boost/bindings] Added a script for importing bindings headers
