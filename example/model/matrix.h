@@ -32,12 +32,12 @@
 
 template <class T>
 struct symbolic_traits {
- static const bool is_symbolic=false;
+ BOOST_STATIC_CONSTANT(bool, is_symbolic=false);
 };
 
 template<>
 struct symbolic_traits<alps::Expression> {
- static const bool is_symbolic=true;
+ BOOST_STATIC_CONSTANT(bool, is_symbolic=true);
 };
 
 template <class T, class M = boost::numeric::ublas::matrix<T> >
