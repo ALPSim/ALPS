@@ -80,3 +80,6 @@ Makefile : $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status)
 
 depend:
+
+update-preamble:
+	find ./.. -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs perl update_preamble.pl
