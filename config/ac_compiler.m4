@@ -263,6 +263,7 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_DEBUG="-n32 -LANG:std -diag_error 1035 -g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
+      CPPFLAGS="$CPPFLAGS -DBOOST_UBLAS_REVERSE_ITERATOR_OVERLOADS"
       if test -n "$TOOLROOT"; then
         CPPFLAGS="$CPPFLAGS -I$TOOLROOT/usr/include/CC"
       fi
@@ -274,6 +275,7 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_DEBUG="-64 -LANG:std -diag_error 1035 -g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
+      CPPFLAGS="$CPPFLAGS -DBOOST_UBLAS_REVERSE_ITERATOR_OVERLOADS"
       if test -n "$TOOLROOT"; then
         CPPFLAGS="$CPPFLAGS -I$TOOLROOT/usr/include/CC"
       fi
