@@ -14,22 +14,23 @@ if test x$PALM_DIR = x; then
   exit
 fi
 
-dir=$PALM_DIR/tools
+bindir=$PALM_DIR/bin
+xsldir=$PALM_DIR/lib/xml
 
 # define xsl-settings from xml-plot input  
-xslttransform $1 $dir/plot2xsl.xsl > $dir/plotsettings.xsl 
+$bindir/xslttransform $1 $xsldir/plot2xsl.xsl > $xsldir/plotsettings.xsl 
 
 # generate xml-plot output from archive or list of task files
 if test $# -gt 2;
 then
-  archivecat `echo ${*:1} | cut -d' ' -f2-` > /tmp/archive$$
-  xslttransform /tmp/archive$$ $dir/archive2plot.xsl > /tmp/plot$$
+  $bindir/archivecat `echo ${*:1} | cut -d' ' -f2-` > /tmp/archive$$
+  $bindir/xslttransform /tmp/archive$$ $xsldir/archive2plot.xsl > /tmp/plot$$
   rm /tmp/archive$$
 else
-  xslttransform $2 $dir/archive2plot.xsl > /tmp/plot$$  
+  xslttransform $2 $xsldir/archive2plot.xsl > /tmp/plot$$  
 fi
-# rm $dir/plotsettings.xsl
+# rm $xsldir/plotsettings.xsl
 
 # generate text output from previously generated xml-plot
-xslttransform /tmp/plot$$ $dir/plot2text.xsl 
+xslttransform /tmp/plot$$ $xsldir/plot2text.xsl 
 rm /tmp/plot$$
