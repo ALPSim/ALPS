@@ -41,7 +41,9 @@ host_triplet = @host@
 @BUILD_BOOST_TRUE@am__append_2 = $(top_srcdir)/src/boost/throw_exception.C
 @BUILD_BOOST_TRUE@am__append_3 = $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_REGEX)
 @BUILD_BOOST_SIGNALS_TRUE@am__append_4 = $(src_boost_SIGNALS)
-@BUILD_BOOST_THREAD_TRUE@am__append_5 = $(src_boost_THREAD)
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__append_5 = $(src_boost_SIGNALS_1_32)
+@BUILD_BOOST_THREAD_TRUE@am__append_6 = $(src_boost_THREAD)
+@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__append_7 = $(src_boost_THREAD_1_32)
 subdir = lib/alps
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -134,16 +136,23 @@ am__objects_13 = c_regex_traits.lo c_regex_traits_common.lo \
 @BUILD_BOOST_TRUE@	$(am__objects_13)
 am__objects_15 = connection.lo signal_base.lo slot.lo trackable.lo
 @BUILD_BOOST_SIGNALS_TRUE@am__objects_16 = $(am__objects_15)
-am__objects_17 = condition.lo exceptions.lo mutex.lo once.lo \
+am__objects_17 = named_slot_map.lo
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@am__objects_18 =  \
+@BOOST_1_32_TRUE@@BUILD_BOOST_SIGNALS_TRUE@	$(am__objects_17)
+am__objects_19 = condition.lo exceptions.lo mutex.lo once.lo \
 	recursive_mutex.lo thread.lo threadmon.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@am__objects_18 = $(am__objects_17)
+@BUILD_BOOST_THREAD_TRUE@am__objects_20 = $(am__objects_19)
+am__objects_21 = barrier.lo
+@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@am__objects_22 =  \
+@BOOST_1_32_TRUE@@BUILD_BOOST_THREAD_TRUE@	$(am__objects_21)
 nodist_libalps_la_OBJECTS = $(am__objects_14) $(am__objects_16) \
-	$(am__objects_18)
+	$(am__objects_18) $(am__objects_20) $(am__objects_22)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 @AMDEP_TRUE@DEP_FILES = ./$(DEPDIR)/abstract_task.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/barrier.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/c_regex_traits.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/c_regex_traits_common.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/condition.Plo \
@@ -170,7 +179,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/modellibrary.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/montecarlo.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/mpp_scheduler.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/mutex.Plo ./$(DEPDIR)/nan.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/mutex.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/named_slot_map.Plo ./$(DEPDIR)/nan.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/observable.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/observableset.Plo ./$(DEPDIR)/once.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/operations_posix_windows.Plo \
@@ -232,6 +242,8 @@ AWK = @AWK@
 BASE_CPPFLAGS = @BASE_CPPFLAGS@
 BASE_LDFLAGS = @BASE_LDFLAGS@
 BASE_LIBS = @BASE_LIBS@
+BOOST_1_32_FALSE = @BOOST_1_32_FALSE@
+BOOST_1_32_TRUE = @BOOST_1_32_TRUE@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_LIBS = @BOOST_LIBS@
@@ -375,11 +387,32 @@ src_SCHEDULER = $(top_srcdir)/src/alps/scheduler/abstract_task.C $(top_srcdir)/s
 src_boost_DATE_TIME = $(BOOST_SRCDIR)/date_time/src/gregorian/date_generators.cpp $(BOOST_SRCDIR)/date_time/src/gregorian/greg_month.cpp $(BOOST_SRCDIR)/date_time/src/gregorian/greg_weekday.cpp $(BOOST_SRCDIR)/date_time/src/gregorian/gregorian_types.cpp $(BOOST_SRCDIR)/date_time/src/posix_time/posix_time_types.cpp
 src_boost_FILESYSTEM = $(BOOST_SRCDIR)/filesystem/src/convenience.cpp $(BOOST_SRCDIR)/filesystem/src/exception.cpp $(BOOST_SRCDIR)/filesystem/src/operations_posix_windows.cpp $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
 src_boost_REGEX = $(BOOST_SRCDIR)/regex/src/c_regex_traits.cpp $(BOOST_SRCDIR)/regex/src/c_regex_traits_common.cpp $(BOOST_SRCDIR)/regex/src/cpp_regex_traits.cpp $(BOOST_SRCDIR)/regex/src/cregex.cpp $(BOOST_SRCDIR)/regex/src/fileiter.cpp $(BOOST_SRCDIR)/regex/src/instances.cpp $(BOOST_SRCDIR)/regex/src/posix_api.cpp $(BOOST_SRCDIR)/regex/src/regex.cpp $(BOOST_SRCDIR)/regex/src/regex_debug.cpp $(BOOST_SRCDIR)/regex/src/regex_synch.cpp $(BOOST_SRCDIR)/regex/src/w32_regex_traits.cpp $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp $(BOOST_SRCDIR)/regex/src/winstances.cpp
-src_boost_SIGNALS = $(BOOST_SRCDIR)/signals/src/connection.cpp $(BOOST_SRCDIR)/signals/src/signal_base.cpp $(BOOST_SRCDIR)/signals/src/slot.cpp $(BOOST_SRCDIR)/signals/src/trackable.cpp
-src_boost_THREAD = $(BOOST_SRCDIR)/thread/src/condition.cpp $(BOOST_SRCDIR)/thread/src/exceptions.cpp $(BOOST_SRCDIR)/thread/src/mutex.cpp $(BOOST_SRCDIR)/thread/src/once.cpp $(BOOST_SRCDIR)/thread/src/recursive_mutex.cpp $(BOOST_SRCDIR)/thread/src/thread.cpp $(BOOST_SRCDIR)/thread/src/threadmon.cpp $(BOOST_SRCDIR)/thread/src/tss.cpp $(BOOST_SRCDIR)/thread/src/xtime.cpp
+src_boost_SIGNALS = \
+  $(BOOST_SRCDIR)/signals/src/connection.cpp \
+  $(BOOST_SRCDIR)/signals/src/signal_base.cpp \
+  $(BOOST_SRCDIR)/signals/src/slot.cpp \
+  $(BOOST_SRCDIR)/signals/src/trackable.cpp
+
+src_boost_SIGNALS_1_32 = \
+  $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
+
+src_boost_THREAD = \
+  $(BOOST_SRCDIR)/thread/src/condition.cpp \
+  $(BOOST_SRCDIR)/thread/src/exceptions.cpp \
+  $(BOOST_SRCDIR)/thread/src/mutex.cpp \
+  $(BOOST_SRCDIR)/thread/src/once.cpp \
+  $(BOOST_SRCDIR)/thread/src/recursive_mutex.cpp \
+  $(BOOST_SRCDIR)/thread/src/thread.cpp \
+  $(BOOST_SRCDIR)/thread/src/threadmon.cpp \
+  $(BOOST_SRCDIR)/thread/src/tss.cpp \
+  $(BOOST_SRCDIR)/thread/src/xtime.cpp
+
+src_boost_THREAD_1_32 = \
+  $(BOOST_SRCDIR)/thread/src/barrier.cpp
+
 lib_LTLIBRARIES = libalps.la
 libalps_la_SOURCES = $(src_ALPS) $(src_OSIRIS) $(src_PARSER) $(src_RANDOM) $(am__append_1) $(am__append_2)
-nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) $(am__append_5)
+nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) $(am__append_5) $(am__append_6) $(am__append_7)
 all: all-am
 
 .SUFFIXES:
@@ -450,6 +483,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/abstract_task.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/barrier.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_regex_traits_common.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/condition.Plo@am__quote@
@@ -480,6 +514,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/montecarlo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpp_scheduler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mutex.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/named_slot_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nan.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/observable.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/observableset.Plo@am__quote@
@@ -2108,6 +2143,30 @@ trackable.lo: $(BOOST_SRCDIR)/signals/src/trackable.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o trackable.lo `test -f '$(BOOST_SRCDIR)/signals/src/trackable.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/trackable.cpp
 
+named_slot_map.o: $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT named_slot_map.o -MD -MP -MF "$(DEPDIR)/named_slot_map.Tpo" -c -o named_slot_map.o `test -f '$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/named_slot_map.Tpo" "$(DEPDIR)/named_slot_map.Po"; else rm -f "$(DEPDIR)/named_slot_map.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp' object='named_slot_map.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/named_slot_map.Po' tmpdepfile='$(DEPDIR)/named_slot_map.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o named_slot_map.o `test -f '$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
+
+named_slot_map.obj: $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT named_slot_map.obj -MD -MP -MF "$(DEPDIR)/named_slot_map.Tpo" -c -o named_slot_map.obj `if test -f '$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/named_slot_map.Tpo" "$(DEPDIR)/named_slot_map.Po"; else rm -f "$(DEPDIR)/named_slot_map.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp' object='named_slot_map.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/named_slot_map.Po' tmpdepfile='$(DEPDIR)/named_slot_map.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o named_slot_map.obj `if test -f '$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp'; fi`
+
+named_slot_map.lo: $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT named_slot_map.lo -MD -MP -MF "$(DEPDIR)/named_slot_map.Tpo" -c -o named_slot_map.lo `test -f '$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/named_slot_map.Tpo" "$(DEPDIR)/named_slot_map.Plo"; else rm -f "$(DEPDIR)/named_slot_map.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp' object='named_slot_map.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/named_slot_map.Plo' tmpdepfile='$(DEPDIR)/named_slot_map.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o named_slot_map.lo `test -f '$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
+
 condition.o: $(BOOST_SRCDIR)/thread/src/condition.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT condition.o -MD -MP -MF "$(DEPDIR)/condition.Tpo" -c -o condition.o `test -f '$(BOOST_SRCDIR)/thread/src/condition.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/condition.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/condition.Tpo" "$(DEPDIR)/condition.Po"; else rm -f "$(DEPDIR)/condition.Tpo"; exit 1; fi
@@ -2323,6 +2382,30 @@ xtime.lo: $(BOOST_SRCDIR)/thread/src/xtime.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/xtime.Plo' tmpdepfile='$(DEPDIR)/xtime.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xtime.lo `test -f '$(BOOST_SRCDIR)/thread/src/xtime.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/xtime.cpp
+
+barrier.o: $(BOOST_SRCDIR)/thread/src/barrier.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT barrier.o -MD -MP -MF "$(DEPDIR)/barrier.Tpo" -c -o barrier.o `test -f '$(BOOST_SRCDIR)/thread/src/barrier.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/barrier.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/barrier.Tpo" "$(DEPDIR)/barrier.Po"; else rm -f "$(DEPDIR)/barrier.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/barrier.cpp' object='barrier.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/barrier.Po' tmpdepfile='$(DEPDIR)/barrier.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o barrier.o `test -f '$(BOOST_SRCDIR)/thread/src/barrier.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/barrier.cpp
+
+barrier.obj: $(BOOST_SRCDIR)/thread/src/barrier.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT barrier.obj -MD -MP -MF "$(DEPDIR)/barrier.Tpo" -c -o barrier.obj `if test -f '$(BOOST_SRCDIR)/thread/src/barrier.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/thread/src/barrier.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/thread/src/barrier.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/barrier.Tpo" "$(DEPDIR)/barrier.Po"; else rm -f "$(DEPDIR)/barrier.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/barrier.cpp' object='barrier.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/barrier.Po' tmpdepfile='$(DEPDIR)/barrier.TPo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o barrier.obj `if test -f '$(BOOST_SRCDIR)/thread/src/barrier.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/thread/src/barrier.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/thread/src/barrier.cpp'; fi`
+
+barrier.lo: $(BOOST_SRCDIR)/thread/src/barrier.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT barrier.lo -MD -MP -MF "$(DEPDIR)/barrier.Tpo" -c -o barrier.lo `test -f '$(BOOST_SRCDIR)/thread/src/barrier.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/barrier.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/barrier.Tpo" "$(DEPDIR)/barrier.Plo"; else rm -f "$(DEPDIR)/barrier.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/thread/src/barrier.cpp' object='barrier.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/barrier.Plo' tmpdepfile='$(DEPDIR)/barrier.TPlo' @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o barrier.lo `test -f '$(BOOST_SRCDIR)/thread/src/barrier.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/thread/src/barrier.cpp
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

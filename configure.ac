@@ -476,6 +476,7 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   fi
 fi
 AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
+AM_CONDITIONAL(BOOST_1_32, test -f "$BOOST_SRCDIR/thread/src/barrier.cpp")
 
 CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
