@@ -4,5 +4,9 @@ Makefile
 .libs
 *.la
 *.lo
-print_symbolic
 print_numeric
+print_symbolic
+lattices.xml
+models.xml
+parm_numeric
+parm_symbolic
