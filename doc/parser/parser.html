@@ -26,6 +26,7 @@ struct XMLTag
 };
 
 std::string parse_identifier(std::istream&amp; in);
+std::string parse_parameter_name(std::istream&amp; in);
 std::string read_until(std::istream&amp; in, char end);
 void check_character(std::istream&amp; in, char c, const std::string&amp; error);
 
@@ -81,6 +82,10 @@ returns <tt>true</tt> if the tag is neither a comment nor a processing instructi
 std::string parse_identifier(std::istream&amp; in)
 </pre></blockquote>
 reads an identifier. An identifier is defined to start with a letter, follwoed by any number of alphanumeric characters, or the characters colon (:), underscore(_) and single quote (').
+<blockquote><pre>
+std::string parse_parameter_name(std::istream&amp; in)
+</pre></blockquote>
+reads a paramter name. A parameter name is an identifier, where additionally any arbitrary sequence of characters can be contained within square brackets [], such as in <tt>MEASURE[Staggered Magnetization^2]</tt>.
 <blockquote><pre>
 std::string read_until(std::istream&amp; in, char end);
 </pre></blockquote>
