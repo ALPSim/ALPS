@@ -141,10 +141,10 @@ AC_DEFUN([AC_PVM],
       found=no
 
       if test -n "$pvm_libs"; then
-        PVM_LIBS="$mpi_libs"
+        PVM_LIBS="$pvm_libs"
         LIBS="$PVM_LIBS $ac_save_LIBS"
         AC_MSG_CHECKING([for pvm_barrier() in $PVM_LIBS])
-        AC_TRY_LINK([#include <pvm.h>],[pvm_barrier(0,0);],
+        AC_TRY_LINK([#include <pvm3.h>],[pvm_barrier(0,0);],
                     [AC_MSG_RESULT(yes); found=yes],
                     [AC_MSG_RESULT(no);
                      AC_MSG_ERROR([check for PVM library failed])])

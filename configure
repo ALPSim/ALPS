@@ -23968,7 +23968,7 @@ fi
       found=no
 
       if test -n "$pvm_libs"; then
-        PVM_LIBS="$mpi_libs"
+        PVM_LIBS="$pvm_libs"
         LIBS="$PVM_LIBS $ac_save_LIBS"
         echo "$as_me:$LINENO: checking for pvm_barrier() in $PVM_LIBS" >&5
 echo $ECHO_N "checking for pvm_barrier() in $PVM_LIBS... $ECHO_C" >&6
@@ -23978,7 +23978,7 @@ _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <pvm.h>
+#include <pvm3.h>
 int
 main ()
 {
