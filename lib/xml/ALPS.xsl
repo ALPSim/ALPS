@@ -6,7 +6,7 @@
 			<body>
 				<xsl:for-each select="SIMULATION">
           <br/>
-          <H1>Monte Carlo Simulation</H1>
+          <H1>ALPS Simulation</H1>
             <H2>Parameters</H2>
 						<table border="1">
 							<thead><tr><td>
@@ -184,6 +184,42 @@
 							</TBODY>
 							</TABLE>
 </xsl:for-each>
+          <H2>Eigenvalues</H2>
+          <xsl:for-each select="EIGENVALUES">
+            <xsl:for-each select="QUANTUMNUMBER">
+              <B> Quantum number <xsl:value-of select="@name"/>=<xsl:value-of select="@value"/></B><BR/>
+            </xsl:for-each>
+            <PRE><xsl:value-of select="."/></PRE>
+          </xsl:for-each>
+          <H2>Eigen states</H2>
+          <xsl:for-each select="EIGENSTATES">
+            <H3>Sector</H3>
+            <xsl:for-each select="QUANTUMNUMBER">
+              <B> Quantum number <xsl:value-of select="@name"/>=<xsl:value-of select="@value"/></B><BR/>
+            </xsl:for-each>
+          <xsl:for-each select="EIGENSTATE">
+            <H4>Eigenstate #<xsl:value-of select="position()"/></H4>
+            <TABLE BORDER="1" COLS="5" WIDTH="800">
+							<THEAD><TR><TD><B>Name</B></TD><TD><B>Expectation value</B></TD></TR></THEAD>
+							<TBODY>
+							  <xsl:for-each select="SCALAR_AVERAGE">
+							  <TR>
+							    <TD><B><xsl:value-of select="@name"/></B></TD>
+							    <TD><xsl:value-of select="MEAN"/></TD>
+							  </TR>
+							  </xsl:for-each>
+							  <xsl:for-each select="VECTOR_AVERAGE">
+							    <xsl:for-each select="SCALAR_AVERAGE">
+							    <TR>
+							      <TD><B><xsl:value-of select="../@name"/></B>[<xsl:value-of select="@indexvalue"/>]</TD>
+							      <TD><xsl:value-of select="MEAN"/></TD>
+							    </TR>
+                </xsl:for-each>
+              </xsl:for-each>
+            </TBODY>
+          </TABLE>
+				</xsl:for-each>
+				</xsl:for-each>
 				</xsl:for-each>
 			</body>
 		</html>
