@@ -114,13 +114,13 @@ src_boost_SERIALIZATION= \
   $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp \
-  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
+  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp 
+# $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/signal_base.cpp \
@@ -152,15 +152,15 @@ endif
 
 if BUILD_BOOST
 libalps_la_SOURCES += $(top_srcdir)/src/boost/throw_exception.C
-nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_REGEX)
+nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_REGEX) $(src_boost_PROGRAM_OPTIONS)  $(src_boost_SERIALIZATION)
 endif
 
-if BUILD_BOOST_PROGRAM_OPTIONS
-nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS)
-endif
-if BUILD_BOOST_SERIALIZATION
-nodist_libalps_la_SOURCES += $(src_boost_SERIALIZATION)
-endif
+#if BUILD_BOOST_PROGRAM_OPTIONS
+#nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS)
+#endif
+#if BUILD_BOOST_SERIALIZATION
+#nodist_libalps_la_SOURCES += $(src_boost_SERIALIZATION)
+#endif
 if BUILD_BOOST_SIGNALS
 nodist_libalps_la_SOURCES += $(src_boost_SIGNALS)
 if BOOST_1_32
@@ -168,10 +168,5 @@ nodist_libalps_la_SOURCES += $(src_boost_SIGNALS_1_32)
 endif
 endif
 if BUILD_BOOST_THREAD
-nodist_libalps_la_SOURCES += $(src_boost_THREAD)
-if BOOST_1_32
-nodist_libalps_la_SOURCES += $(src_boost_THREAD_1_32)
-else
-nodist_libalps_la_SOURCES += $(src_boost_THREAD_1_31)
-endif
+nodist_libalps_la_SOURCES += $(src_boost_THREAD) $(src_boost_THREAD_1_32)
 endif

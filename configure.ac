@@ -250,33 +250,11 @@ AC_ARG_WITH(boost-toolset,
 AC_ARG_WITH(boost-all,
   AC_HELP_STRING([--with-boost-all],[compile all optional Boost libraries]), [
     if test "x$withval" = "xno"; then
-      ac_cv_boost_program_options=no
-      ac_cv_boost_serialization=no
       ac_cv_boost_signals=no
       ac_cv_boost_thread=no
     else
-      ac_cv_boost_program_options=yes
-      ac_cv_boost_serialization=yes
       ac_cv_boost_signals=yes
       ac_cv_boost_thread=yes
-    fi
-  ]
-)
-AC_ARG_WITH(boost-program-options,
-  AC_HELP_STRING([--with-boost-program-options],[compile Boost::program_options library]), [
-    if test "x$withval" = "xno"; then
-      ac_cv_boost_program_options=no
-    else
-      ac_cv_boost_program_options=yes
-    fi
-  ]
-)
-AC_ARG_WITH(boost-serialization,
-  AC_HELP_STRING([--with-boost-serialization],[compile Boost::serialization library]), [
-    if test "x$withval" = "xno"; then
-      ac_cv_boost_serialization=no
-    else
-      ac_cv_boost_serialization=yes
     fi
   ]
 )
@@ -597,18 +575,6 @@ test "$ac_cv_xml_parser" = "xerces" && AC_DEFINE(ALPS_HAVE_XERCES_PARSER, [], [x
 # boost object libraries
 # 
 
-# check whether Boost::program_options is compiled
-if test -f "$BOOST_SRCDIR/program_options/src/cmdline.cpp"; then :; else
-  ac_cv_boost_program_options=no
-fi
-AM_CONDITIONAL(BUILD_BOOST_PROGRAM_OPTIONS, test "$ac_cv_use_precompiled_boost" != yes -a "$ac_cv_boost_program_options" = yes)
-
-# check whether Boost::serialization is compiled
-if test -f "$BOOST_SRCDIR/serialization/src/basic_archive.cpp"; then :; else
-  ac_cv_boost_serialization=no
-fi
-AM_CONDITIONAL(BUILD_BOOST_SERIALIZATION, test "$ac_cv_use_precompiled_boost" != yes -a "$ac_cv_boost_serialization" = yes)
-
 # check whether Boost::signals is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   AC_MSG_CHECKING([whether Boost::signals is compiled])
@@ -743,10 +709,8 @@ if test "$ac_cv_alps_type" = "full"; then
 fi
 
 if test "$ac_cv_use_precompiled_boost" != yes; then
-  if test "$ac_cv_boost_program_options" = yes; then
     AC_DEFINE_UNQUOTED(PO_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/program_options/src/utf8_codecvt_facet.cpp")
     AC_CONFIG_HEADERS(src/boost/po_utf8_codecvt_facet.cpp)
-  fi
 fi
 
 AC_OUTPUT
