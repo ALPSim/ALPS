@@ -1,3 +1,10 @@
+2003-05-17 Matthias Troyer <troyer@comp-phys.org>
+
+	* [osiris] Fixed path construction in xdrdump2.C
+
+	* [scheduler] Do not collect time series when writing XML sumulation
+	checkpoint file to avoid memory allocation problems
+
 2003-05-16 Matthias Troyer <troyer@comp-phys.org>
 
 	* [alps] Added evaluator objects to expressions to make them useful
