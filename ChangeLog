@@ -1,3 +1,12 @@
+2004-04-05 Matthias Troyer <troyer@comp-phys.org>
+
+	* [lattice] Merged LatticeFactory, graph_factory into graph_helper
+	            Added support for disordered lattices
+
+	* [model] Renamed ModelFactory to model_helper
+
+	* [example/model] Added support for disordered lattices
+
 2004-03-23 Synge Todo <wistaria@comp-phys.org>
 
 	* [lattice] Added interfaces for generating lattices
