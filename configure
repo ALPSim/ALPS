@@ -25905,7 +25905,7 @@ ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_
 
                                                             ac_config_files="$ac_config_files lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mpi/Makefile lib/comm-pvm/Makefile lib/heap/Makefile"
 
-                                                            ac_config_files="$ac_config_files test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/parameter/Makefile test/parser/Makefile"
+                                                                      ac_config_files="$ac_config_files test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile"
 
           ac_config_files="$ac_config_files doc/Makefile"
 
@@ -26574,6 +26574,7 @@ do
   "test/fixed_capacity/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/fixed_capacity/Makefile" ;;
   "test/osiris/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/osiris/Makefile" ;;
   "test/osiris/xdrdump2.input" ) CONFIG_FILES="$CONFIG_FILES test/osiris/xdrdump2.input" ;;
+  "test/osiris/boostdump2.input" ) CONFIG_FILES="$CONFIG_FILES test/osiris/boostdump2.input" ;;
   "test/parameter/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/parameter/Makefile" ;;
   "test/parser/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/parser/Makefile" ;;
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;

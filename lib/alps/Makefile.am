@@ -117,13 +117,13 @@ src_boost_SERIALIZATION= \
   $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp \
   $(BOOST_SRCDIR)/serialization/src/void_cast.cpp 
-src_boost_SERIALIZATION_1_32=
-#  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
-#  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
+src_boost_SERIALIZATION_1_32= \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp 
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
-#  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
-#  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \

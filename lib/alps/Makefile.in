@@ -161,7 +161,8 @@ am__objects_15 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
 @BUILD_BOOST_TRUE@	$(am__objects_13) $(am__objects_14) \
 @BUILD_BOOST_TRUE@	$(am__objects_15)
 am__objects_17 = c_regex_traits_common.lo regex_synch.lo
-am__objects_18 =
+am__objects_18 = basic_text_iprimitive.lo basic_text_oprimitive.lo \
+	text_iarchive.lo text_oarchive.lo
 @BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__objects_19 = $(am__objects_17) \
 @BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_18)
 am__objects_20 = icu.lo regex_raw_buffer.lo regex_traits_defaults.lo \
@@ -484,13 +485,14 @@ src_boost_SERIALIZATION = \
   $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp \
   $(BOOST_SRCDIR)/serialization/src/void_cast.cpp 
 
-src_boost_SERIALIZATION_1_32 = 
-#  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
-#  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
+src_boost_SERIALIZATION_1_32 = \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp 
+
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
-#  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
-#  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
@@ -1393,6 +1395,34 @@ regex_synch.lo: $(BOOST_SRCDIR)/regex/src/regex_synch.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o regex_synch.lo `test -f '$(BOOST_SRCDIR)/regex/src/regex_synch.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/regex/src/regex_synch.cpp
 
+basic_text_iprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_iprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_iprimitive.Tpo" -c -o basic_text_iprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_iprimitive.Tpo" "$(DEPDIR)/basic_text_iprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_iprimitive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' object='basic_text_iprimitive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_iprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
+
+basic_text_oprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_oprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_oprimitive.Tpo" -c -o basic_text_oprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_oprimitive.Tpo" "$(DEPDIR)/basic_text_oprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_oprimitive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' object='basic_text_oprimitive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_oprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
+
+text_iarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_iarchive.lo -MD -MP -MF "$(DEPDIR)/text_iarchive.Tpo" -c -o text_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_iarchive.Tpo" "$(DEPDIR)/text_iarchive.Plo"; else rm -f "$(DEPDIR)/text_iarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' object='text_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
+
+text_oarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_oarchive.lo -MD -MP -MF "$(DEPDIR)/text_oarchive.Tpo" -c -o text_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_oarchive.Tpo" "$(DEPDIR)/text_oarchive.Plo"; else rm -f "$(DEPDIR)/text_oarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' object='text_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
+
 icu.lo: $(BOOST_SRCDIR)/regex/src/icu.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT icu.lo -MD -MP -MF "$(DEPDIR)/icu.Tpo" -c -o icu.lo `test -f '$(BOOST_SRCDIR)/regex/src/icu.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/regex/src/icu.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/icu.Tpo" "$(DEPDIR)/icu.Plo"; else rm -f "$(DEPDIR)/icu.Tpo"; exit 1; fi
@@ -1463,20 +1493,6 @@ basic_pointer_oserializer.lo: $(BOOST_SRCDIR)/serialization/src/basic_pointer_os
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_pointer_oserializer.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp
 
-basic_text_iprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_iprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_iprimitive.Tpo" -c -o basic_text_iprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_iprimitive.Tpo" "$(DEPDIR)/basic_text_iprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_iprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' object='basic_text_iprimitive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_iprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp
-
-basic_text_oprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_oprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_oprimitive.Tpo" -c -o basic_text_oprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_oprimitive.Tpo" "$(DEPDIR)/basic_text_oprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_oprimitive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' object='basic_text_oprimitive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_oprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp
-
 basic_text_wiprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_wiprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_wiprimitive.Tpo" -c -o basic_text_wiprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_wiprimitive.Tpo" "$(DEPDIR)/basic_text_wiprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_wiprimitive.Tpo"; exit 1; fi
@@ -1490,20 +1506,6 @@ basic_text_woprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_woprimit
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' object='basic_text_woprimitive.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_woprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
-
-text_iarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_iarchive.lo -MD -MP -MF "$(DEPDIR)/text_iarchive.Tpo" -c -o text_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_iarchive.Tpo" "$(DEPDIR)/text_iarchive.Plo"; else rm -f "$(DEPDIR)/text_iarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' object='text_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp
-
-text_oarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_oarchive.lo -MD -MP -MF "$(DEPDIR)/text_oarchive.Tpo" -c -o text_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_oarchive.Tpo" "$(DEPDIR)/text_oarchive.Plo"; else rm -f "$(DEPDIR)/text_oarchive.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' object='text_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp
 
 text_wiarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_wiarchive.lo -MD -MP -MF "$(DEPDIR)/text_wiarchive.Tpo" -c -o text_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp; \
