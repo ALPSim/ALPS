@@ -4,18 +4,18 @@
 <LATTICE name="chain lattice" dimension="1">
   <PARAMETER name="a" default="1"/>
   <BASIS><VECTOR>a</VECTOR></BASIS>
-  <RECIPROCALBASIS><VECTOR>2*pi</VECTOR></RECIPROCALBASIS>
+  <RECIPROCALBASIS><VECTOR>2*pi/a</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="square lattice" dimension="2">
   <PARAMETER name="a" default="1"/>
-  <BASIS><VECTOR>1 0</VECTOR><VECTOR>0 1</VECTOR></BASIS>
+  <BASIS><VECTOR>a 0</VECTOR><VECTOR>0 a</VECTOR></BASIS>
   <RECIPROCALBASIS><VECTOR>2*pi/a 0</VECTOR><VECTOR>0 2*pi/a</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="rectangular lattice" dimension="2">
   <PARAMETER name="a" default="1"/>
-  <PARAMETER name="b" default="1"/>
+  <PARAMETER name="b" default="a"/>
   <BASIS><VECTOR>a 0</VECTOR><VECTOR>0 b</VECTOR></BASIS>
   <RECIPROCALBASIS><VECTOR>2*pi/a 0</VECTOR><VECTOR>0 2*pi/b</VECTOR></RECIPROCALBASIS>
 </LATTICE>
