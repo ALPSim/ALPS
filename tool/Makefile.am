@@ -8,8 +8,6 @@ pkgdatadir = $(libdir)/xml
 bin_PROGRAMS = compactrun convert2xml parameter2xml
 dist_bin_SCRIPTS = archivecat xslttransform transformall 
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
-dist_pkgdata_DATA = archive2plot.xsl helpers.xsl plot2gp.xsl plot2html.xsl plot2text.xsl plot2xmgr.xsl QMCXML2text.xsl ALPS.xsl job.xsl
-pkgdata_DATA = plot2xsl.xsl changestylesheet.xsl
 
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C

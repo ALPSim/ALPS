@@ -15,7 +15,6 @@
 @SET_MAKE@
 
 
-
 SOURCES = $(compactrun_SOURCES) $(convert2xml_SOURCES) $(parameter2xml_SOURCES)
 
 srcdir = @srcdir@
@@ -41,14 +40,13 @@ host_triplet = @host@
 bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 	parameter2xml$(EXEEXT)
 subdir = tool
-DIST_COMMON = $(dist_bin_SCRIPTS) $(dist_pkgdata_DATA) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/changestylesheet.in $(srcdir)/convert2html.in \
-	$(srcdir)/convert2text.in $(srcdir)/extractgp.in \
-	$(srcdir)/extracthtml.in $(srcdir)/extracttext.in \
-	$(srcdir)/extractxmgr.in $(srcdir)/plot2gp.in \
-	$(srcdir)/plot2html.in $(srcdir)/plot2text.in \
-	$(srcdir)/plot2xmgr.in TODO
+DIST_COMMON = $(dist_bin_SCRIPTS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(srcdir)/changestylesheet.in \
+	$(srcdir)/convert2html.in $(srcdir)/convert2text.in \
+	$(srcdir)/extractgp.in $(srcdir)/extracthtml.in \
+	$(srcdir)/extracttext.in $(srcdir)/extractxmgr.in \
+	$(srcdir)/plot2gp.in $(srcdir)/plot2html.in \
+	$(srcdir)/plot2text.in $(srcdir)/plot2xmgr.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_compiler.m4 \
@@ -67,7 +65,7 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 CONFIG_CLEAN_FILES = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
 	changestylesheet
-am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgdatadir)"
+am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
 am_compactrun_OBJECTS = compactrun.$(OBJEXT)
@@ -112,9 +110,6 @@ SOURCES = $(compactrun_SOURCES) $(convert2xml_SOURCES) \
 	$(parameter2xml_SOURCES)
 DIST_SOURCES = $(compactrun_SOURCES) $(convert2xml_SOURCES) \
 	$(parameter2xml_SOURCES)
-dist_pkgdataDATA_INSTALL = $(INSTALL_DATA)
-pkgdataDATA_INSTALL = $(INSTALL_DATA)
-DATA = $(dist_pkgdata_DATA) $(pkgdata_DATA)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -272,8 +267,6 @@ AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 dist_bin_SCRIPTS = archivecat xslttransform transformall 
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
-dist_pkgdata_DATA = archive2plot.xsl helpers.xsl plot2gp.xsl plot2html.xsl plot2text.xsl plot2xmgr.xsl QMCXML2text.xsl ALPS.xsl job.xsl
-pkgdata_DATA = plot2xsl.xsl changestylesheet.xsl
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
@@ -451,40 +444,6 @@ clean-libtool:
 distclean-libtool:
 	-rm -f libtool
 uninstall-info-am:
-install-dist_pkgdataDATA: $(dist_pkgdata_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(pkgdatadir)" || $(mkdir_p) "$(DESTDIR)$(pkgdatadir)"
-	@list='$(dist_pkgdata_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " $(dist_pkgdataDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgdatadir)/$$f'"; \
-	  $(dist_pkgdataDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgdatadir)/$$f"; \
-	done
-
-uninstall-dist_pkgdataDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(dist_pkgdata_DATA)'; for p in $$list; do \
-	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " rm -f '$(DESTDIR)$(pkgdatadir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(pkgdatadir)/$$f"; \
-	done
-install-pkgdataDATA: $(pkgdata_DATA)
-	@$(NORMAL_INSTALL)
-	test -z "$(pkgdatadir)" || $(mkdir_p) "$(DESTDIR)$(pkgdatadir)"
-	@list='$(pkgdata_DATA)'; for p in $$list; do \
-	  if test -f "$$p"; then d=; else d="$(srcdir)/"; fi; \
-	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " $(pkgdataDATA_INSTALL) '$$d$$p' '$(DESTDIR)$(pkgdatadir)/$$f'"; \
-	  $(pkgdataDATA_INSTALL) "$$d$$p" "$(DESTDIR)$(pkgdatadir)/$$f"; \
-	done
-
-uninstall-pkgdataDATA:
-	@$(NORMAL_UNINSTALL)
-	@list='$(pkgdata_DATA)'; for p in $$list; do \
-	  f="`echo $$p | sed -e 's|^.*/||'`"; \
-	  echo " rm -f '$(DESTDIR)$(pkgdatadir)/$$f'"; \
-	  rm -f "$(DESTDIR)$(pkgdatadir)/$$f"; \
-	done
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -563,9 +522,9 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(DATA)
+all-am: Makefile $(PROGRAMS) $(SCRIPTS)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgdatadir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
 	done
 install: install-am
@@ -612,7 +571,7 @@ info: info-am
 
 info-am:
 
-install-data-am: install-dist_pkgdataDATA install-pkgdataDATA
+install-data-am:
 
 install-exec-am: install-binPROGRAMS install-binSCRIPTS \
 	install-dist_binSCRIPTS
@@ -642,24 +601,21 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-dist_binSCRIPTS uninstall-dist_pkgdataDATA \
-	uninstall-info-am uninstall-pkgdataDATA
+	uninstall-dist_binSCRIPTS uninstall-info-am
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic clean-libtool ctags distclean distclean-compile \
 	distclean-generic distclean-libtool distclean-tags distdir dvi \
 	dvi-am html html-am info info-am install install-am \
 	install-binPROGRAMS install-binSCRIPTS install-data \
-	install-data-am install-dist_binSCRIPTS \
-	install-dist_pkgdataDATA install-exec install-exec-am \
-	install-info install-info-am install-man install-pkgdataDATA \
+	install-data-am install-dist_binSCRIPTS install-exec \
+	install-exec-am install-info install-info-am install-man \
 	install-strip installcheck installcheck-am installdirs \
 	maintainer-clean maintainer-clean-generic mostlyclean \
 	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
 	pdf pdf-am ps ps-am tags uninstall uninstall-am \
 	uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-dist_binSCRIPTS uninstall-dist_pkgdataDATA \
-	uninstall-info-am uninstall-pkgdataDATA
+	uninstall-dist_binSCRIPTS uninstall-info-am
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.
 # Otherwise a system limit (for SysV at least) may be exceeded.
