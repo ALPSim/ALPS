@@ -1303,6 +1303,8 @@ ac_configure="$SHELL $ac_aux_dir/configure" # This should be Cygnus configure.
 
           ac_config_files="$ac_config_files example/scheduler/Makefile"
 
+          ac_config_files="$ac_config_files example/model/Makefile"
+
                               ac_config_files="$ac_config_files tool/plot2xsl.xsl tool/extracttext tool/extracthtml"
 
 
@@ -8052,6 +8054,7 @@ do
   "test/parameter/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/parameter/Makefile" ;;
   "test/parser/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/parser/Makefile" ;;
   "example/scheduler/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/scheduler/Makefile" ;;
+  "example/model/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/model/Makefile" ;;
   "tool/plot2xsl.xsl" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xsl.xsl" ;;
   "tool/extracttext" ) CONFIG_FILES="$CONFIG_FILES tool/extracttext" ;;
   "tool/extracthtml" ) CONFIG_FILES="$CONFIG_FILES tool/extracthtml" ;;
