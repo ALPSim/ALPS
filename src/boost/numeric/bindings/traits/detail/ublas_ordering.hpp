@@ -17,7 +17,7 @@
 #ifndef BOOST_NUMERIC_BINDINGS_TRAITS_DETAIL_UBLAS_ORDERING_H
 #define BOOST_NUMERIC_BINDINGS_TRAITS_DETAIL_UBLAS_ORDERING_H
 
-#include <boost/numeric/ublas/config.hpp> 
+#include <boost/numeric/ublas/fwd.hpp> 
 
 namespace boost { namespace numeric { namespace bindings { namespace traits {
 

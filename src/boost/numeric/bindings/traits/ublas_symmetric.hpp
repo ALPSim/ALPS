@@ -51,9 +51,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     typedef typename detail::ublas_ordering<
       typename F2::orientation_category
     >::type ordering_type; 
-    typedef typename detail::ublas_uplo<
-      typename F1::packed_category 
-    >::type uplo_type; 
+    typedef typename detail::ublas_uplo< F1 >::type uplo_type; 
 
     typedef T                                           value_type ; 
     typedef typename detail::generate_const<M,T>::type* pointer ; 
@@ -82,9 +80,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     typedef MA                                              matrix_type;
     typedef symmetric_t                                     matrix_structure; 
     typedef typename matrix_traits<M>::ordering_type        ordering_type; 
-    typedef typename detail::ublas_uplo<
-      typename F1::packed_category 
-    >::type                                                 uplo_type; 
+    typedef typename detail::ublas_uplo< F1 >::type         uplo_type; 
 
     typedef typename M::value_type                                 value_type; 
     typedef typename detail::generate_const<MA, value_type>::type* pointer; 

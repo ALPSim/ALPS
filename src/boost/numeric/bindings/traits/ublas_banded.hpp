@@ -81,12 +81,14 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 
     // stride1 == distance (m (i, j), m (i+1, j)) 
     static int stride1 (matrix_type& m) { 
-      typedef typename identifier_type::functor_type functor_t; 
+      typedef typename identifier_type::orientation_category                      orientation_category; 
+      typedef typename detail::ublas_ordering<orientation_category>::functor_type functor_t ;
       return functor_t::one2 ( std::max(m.size1(), m.size2()), leading_dimension(m)-1 ) ;
     } 
     // stride2 == distance (m (i, j), m (i, j+1)) 
     static int stride2 (matrix_type& m) { 
-      typedef typename identifier_type::functor_type functor_t; 
+      typedef typename identifier_type::orientation_category                      orientation_category; 
+      typedef typename detail::ublas_ordering<orientation_category>::functor_type functor_t ;
       return functor_t::one1 ( std::max(m.size1(), m.size2()), leading_dimension(m)-1 ) ;
     }
   }; 

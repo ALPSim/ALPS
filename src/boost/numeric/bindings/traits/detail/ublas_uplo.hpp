@@ -17,7 +17,7 @@
 #ifndef BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_UPLO_H
 #define BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_UPLO_H
 
-#include <boost/numeric/ublas/config.hpp> 
+#include <boost/numeric/ublas/fwd.hpp> 
 
 namespace boost { namespace numeric { namespace bindings { namespace traits {
 
@@ -27,11 +27,11 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     struct ublas_uplo {};
     
     template<> 
-    struct ublas_uplo<boost::numeric::ublas::lower_tag> {
+    struct ublas_uplo<boost::numeric::ublas::lower> {
       typedef lower_t type; 
     };
     template<> 
-    struct ublas_uplo<boost::numeric::ublas::upper_tag> {
+    struct ublas_uplo<boost::numeric::ublas::upper> {
       typedef upper_t type; 
     };
 
