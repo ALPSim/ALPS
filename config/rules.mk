@@ -90,41 +90,92 @@ TEST = $(TESTOK:.ok=)
 $(TEST) : $(LIB)
 
 %.ok : %
-	-@if test -f $(srcdir)/$(@:.ok=.input); then \
-	  if test -f $(srcdir)/$(@:.ok=.output); then \
+	-@if test -f $(@:.ok=.input); then \
+	  if test -f $(@:.ok=.output); then \
+	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(@:.ok=.output) - && touch $@; \
+	  elif test -f $(srcdir)/$(@:.ok=.output); then \
+	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) - && touch $@; \
+	  elif test -f $(@:.ok=.op); then \
+	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(@:.ok=.op) - && touch $@; \
+	  elif test -f $(srcdir)/$(@:.ok=.op); then \
+	    echo './$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) - && touch $@; \
+	  else \
+	    echo './$(@:.ok=) < $(@:.ok=.input)'; \
+	    ./$(@:.ok=) < $(@:.ok=.input) && touch $@; \
+	  fi; \
+	elif test -f $(srcdir)/$(@:.ok=.input); then \
+	  if test -f $(@:.ok=.output); then \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(@:.ok=.output) - && touch $@; \
+	  elif test -f $(srcdir)/$(@:.ok=.output); then \
 	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -'; \
-	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) -; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.output) - && touch $@; \
 	  elif test -f $(srcdir)/$(@:.ok=.op); then \
 	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -'; \
-	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) -; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(srcdir)/$(@:.ok=.op) - && touch $@; \
+	  elif test -f $(@:.ok=.op); then \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) | diff $(@:.ok=.op) - && touch $@; \
 	  else \
 	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.input)'; \
-	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input); \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.input) && touch $@; \
+	  fi; \
+	elif test -f $(@:.ok=.ip); then \
+	  if test -f $(@:.ok=.output); then \
+	    echo './$(@:.ok=) < $(@:.ok=.ip) | diff $(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.ip) | diff $(@:.ok=.output) - && touch $@; \
+	  elif test -f $(srcdir)/$(@:.ok=.output); then \
+	    echo './$(@:.ok=) < $(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.output) - && touch $@; \
+	  elif test -f $(@:.ok=.op); then \
+	    echo './$(@:.ok=) < $(@:.ok=.ip) | diff $(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.ip) | diff $(@:.ok=.op) - && touch $@; \
+	  elif test -f $(srcdir)/$(@:.ok=.op); then \
+	    echo './$(@:.ok=) < $(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.op) - && touch $@; \
+	  else \
+	    echo './$(@:.ok=) < $(@:.ok=.ip)'; \
+	    ./$(@:.ok=) < $(@:.ok=.ip) && touch $@; \
 	  fi; \
 	elif test -f $(srcdir)/$(@:.ok=.ip); then \
-	  if test -f $(srcdir)/$(@:.ok=.output); then \
+	  if test -f $(@:.ok=.output); then \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(@:.ok=.output) -'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(@:.ok=.output) - && touch $@; \
+	  elif test -f $(srcdir)/$(@:.ok=.output); then \
 	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.output) -'; \
-	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.output) -; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.output) - && touch $@; \
 	  elif test -f $(srcdir)/$(@:.ok=.op); then \
 	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.op) -'; \
-	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.op) -; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(srcdir)/$(@:.ok=.op) - && touch $@; \
+	  elif test -f $(@:.ok=.op); then \
+	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(@:.ok=.op) -'; \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) | diff $(@:.ok=.op) - && touch $@; \
 	  else \
 	    echo './$(@:.ok=) < $(srcdir)/$(@:.ok=.ip)'; \
-	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip); \
+	    ./$(@:.ok=) < $(srcdir)/$(@:.ok=.ip) && touch $@; \
 	  fi; \
 	else \
-	  if test -f $(srcdir)/$(@:.ok=.output); then \
+	  if test -f $(@:.ok=.output); then \
+	    echo './$(@:.ok=) | diff $(@:.ok=.output) -'; \
+	    ./$(@:.ok=) | diff $(@:.ok=.output) - && touch $@; \
+	  elif test -f $(srcdir)/$(@:.ok=.output); then \
 	    echo './$(@:.ok=) | diff $(srcdir)/$(@:.ok=.output) -'; \
-	    ./$(@:.ok=) | diff $(srcdir)/$(@:.ok=.output) -; \
+	    ./$(@:.ok=) | diff $(srcdir)/$(@:.ok=.output) - && touch $@; \
 	  elif test -f $(srcdir)/$(@:.ok=.op); then \
 	    echo './$(@:.ok=) | diff $(srcdir)/$(@:.ok=.op) -'; \
-	    ./$(@:.ok=) | diff $(srcdir)/$(@:.ok=.op) -; \
+	    ./$(@:.ok=) | diff $(srcdir)/$(@:.ok=.op) - && touch $@; \
+	  elif test -f $(@:.ok=.op); then \
+	    echo './$(@:.ok=) | diff $(@:.ok=.op) -'; \
+	    ./$(@:.ok=) | diff $(@:.ok=.op) - && touch $@; \
 	  else \
 	    echo './$(@:.ok=)'; \
-	    ./$(@:.ok=); \
+	    ./$(@:.ok=) && touch $@; \
 	  fi; \
 	fi
-	@touch $@
 
 # install
 
