@@ -705,9 +705,10 @@ if test "$ac_cv_alps_type" = "full"; then
 fi
 echo "  XML parser        $ac_cv_xml_parser"
 
-echo
-echo "*** This is the \"ALPS Light\" Libraries, public-domain part of the ALPS"
-echo "*** Libraries. If you need the full functionality of the ALPS Libraries,"
-echo "*** such as Lattice, Model, Scheduler, etc, please use the full version of"
-echo "*** ALPS Libraries, which is available from http://alps.comp-phys.org/."
-echo
+if test "$ac_cv_alps_type" = "light"; then
+  echo
+  echo "*** This is the \"ALPS Light\" Libraries, public-domain part of the ALPS"
+  echo "*** Libraries. If you need the full functionality of the ALPS Libraries,"
+  echo "*** such as Lattice, Model, Scheduler, etc, please use the full version of"
+  echo "*** ALPS Libraries, which is available from http://alps.comp-phys.org/."
+fi
