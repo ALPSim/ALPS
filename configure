@@ -5515,7 +5515,7 @@ fi;
   if test "$mpi" != no; then
     echo "$as_me:$LINENO: checking for MPI root directory" >&5
 echo $ECHO_N "checking for MPI root directory... $ECHO_C" >&6
-    ll_root = "/usr/lpp/ppe.poe"
+    ll_root="/usr/lpp/ppe.poe"
     if test "x$MP_PREFIX" != x; then
       ll_root="$MP_PREFIX/ppe.poe"
     fi
@@ -5741,6 +5741,48 @@ fi
     if test "$mpi" != no; then
       found=no
 
+      if test "$COMPILER" = ibm; then
+        if test "$found" = no; then
+	  # for IBM LoadLeveler
+          MPI_LIBS="-binitfini:poe_remote_main -lmpi -lvtd"
+          LIBS="$MPI_LIBS $ac_save_LIBS"
+          echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
+echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6
+          cat >conftest.$ac_ext <<_ACEOF
+#line $LINENO "configure"
+#include "confdefs.h"
+#include <mpi.h>
+int
+main ()
+{
+MPI_Finalize();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+         { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; found=yes
+else
+  echo "$as_me: failed program was:" >&5
+cat conftest.$ac_ext >&5
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
+        fi
+      fi
       if test "$found" = no; then
         MPI_LIBS=
         LIBS="$MPI_LIBS $ac_save_LIBS"
@@ -5782,46 +5824,6 @@ rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
       fi
       if test "$found" = no; then
         MPI_LIBS="-lmpi"
-        LIBS="$MPI_LIBS $ac_save_LIBS"
-        echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
-echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6
-        cat >conftest.$ac_ext <<_ACEOF
-#line $LINENO "configure"
-#include "confdefs.h"
-#include <mpi.h>
-int
-main ()
-{
-MPI_Finalize();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-         { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; found=yes
-else
-  echo "$as_me: failed program was:" >&5
-cat conftest.$ac_ext >&5
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f conftest.$ac_objext conftest$ac_exeext conftest.$ac_ext
-      fi
-      if test "$found" = no; then
-	# for IBM LoadLeveler
-        MPI_LIBS="-binitfini:poe_remote_main -lmpi -lvtd"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
 echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6

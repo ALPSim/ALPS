@@ -33,7 +33,7 @@ AC_DEFUN([AC_MPI],
   
   if test "$mpi" != no; then
     AC_MSG_CHECKING([for MPI root directory])
-    ll_root = "/usr/lpp/ppe.poe"
+    ll_root="/usr/lpp/ppe.poe"
     if test "x$MP_PREFIX" != x; then
       ll_root="$MP_PREFIX/ppe.poe"
     fi
@@ -126,6 +126,17 @@ AC_DEFUN([AC_MPI],
     if test "$mpi" != no; then
       found=no
 
+      if test "$COMPILER" = ibm; then
+        if test "$found" = no; then
+	  # for IBM LoadLeveler
+          MPI_LIBS="-binitfini:poe_remote_main -lmpi -lvtd"
+          LIBS="$MPI_LIBS $ac_save_LIBS"
+          AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
+          AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                    [AC_MSG_RESULT(yes); found=yes],
+                    AC_MSG_RESULT(no))
+        fi
+      fi
       if test "$found" = no; then
         MPI_LIBS=
         LIBS="$MPI_LIBS $ac_save_LIBS"
@@ -136,15 +147,6 @@ AC_DEFUN([AC_MPI],
       fi
       if test "$found" = no; then
         MPI_LIBS="-lmpi"
-        LIBS="$MPI_LIBS $ac_save_LIBS"
-        AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
-        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
-                    [AC_MSG_RESULT(yes); found=yes],
-                    AC_MSG_RESULT(no))
-      fi
-      if test "$found" = no; then
-	# for IBM LoadLeveler
-        MPI_LIBS="-binitfini:poe_remote_main -lmpi -lvtd"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
         AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
