@@ -1,3 +1,14 @@
+1003-11-04 Matthias Troyer <troyer@comp-phys.org>
+
+	* [alea] Changes for Boost deprecation of compose library
+	* preparing release 1.0b5
+
+1003-11-04 Matthias Troyer <troyer@comp-phys.org>
+
+	* [config] improved configure for MacOS X
+	* [model] Started implementing constraints in basis creation
+	* preparing release 1.0b4
+
 2003-10-14 Matthias Troyer <troyer@comp-phys.org>
 
 	* [model,lattice] Converted model and lattice library to use oxstream 
