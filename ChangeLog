@@ -1,5 +1,14 @@
-2003-05-28 Synge Todo <wistaria@comp-phys.org>
+2003-05-29 Synge Todo <wistaria@comp-phys.org>
 
+	* [boost] Added non-recursive version of depth first search
+	(boost/depth_first_search_2.hpp) since the original recursive
+	version in BGL crashes in case of large number (\sim 2^16) of
+	vertices.
+
+	* [lattice] set_parity uses depth_first_search_2.
+	
+2003-05-28 Synge Todo <wistaria@comp-phys.org>
+	
 	* [boost] Added Boost.date_time souces for libalps.a.
 
 	* Added dist directory for preparing distribution.

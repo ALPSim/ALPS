@@ -31,7 +31,7 @@ include $(top_srcdir)/config/include-build.mk
 pkgincludedir = $(includedir)
 
 HEADER_CONFIG = alps/config.h @BOOST_USER_CONFIG_H@
-HEADER_BOOST = boost/functional_void.hpp boost/function_objects.hpp
+HEADER_BOOST = boost/depth_first_search_2.hpp boost/function_objects.hpp
 HEADER_ALPS = alps/cctype.h alps/evaluator.h alps/expression.h alps/expression_impl.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/parameterlist.h alps/parameters.h alps/random.h alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h
 HEADER_ALEA = alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/obsvalue.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h
 HEADER_OSIRIS = alps/osiris.h alps/osiris/buffer.h alps/osiris/comm.h alps/osiris/dump.h alps/osiris/mpdump.h alps/osiris/os.h alps/osiris/process.h alps/osiris/xdrdump.h alps/osiris/std/impl.h alps/osiris/std/list.h alps/osiris/std/map.h alps/osiris/std/pair.h alps/osiris/std/string.h alps/osiris/std/valarray.h alps/osiris/std/vector.h
