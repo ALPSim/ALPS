@@ -10,4 +10,6 @@ convert2xml
 extracthtml
 extracttext
 parameter2xml
+plot2html
+plot2text
 plot2xsl.xsl
