@@ -95,7 +95,7 @@ AC_DEFUN([AC_COMPILER],
       try_CXX="g++"
       ;;
     kai)
-      try_CC="KCC"
+      try_CC="cc"
       try_CXX="KCC"
       ;;
     intel)

@@ -1493,7 +1493,7 @@ echo "${ECHO_T}$COMPILER" >&6
       try_CXX="g++"
       ;;
     kai)
-      try_CC="KCC"
+      try_CC="cc"
       try_CXX="KCC"
       ;;
     intel)
