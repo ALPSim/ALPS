@@ -53,3 +53,6 @@ catch (...) {
 }
 #endif
 }
+
+template <class T, class O, std::size_t N, class U, class S>
+const std::size_t boost::numeric::ublas::compressed_matrix<T,O,N,U,S>::index_base_;

@@ -38,9 +38,10 @@ void evaluate(const boost::filesystem::path& p, std::ostream& out) {
 #ifdef ALPS_HAVE_VALARRAY
   alps::RealVectorObsevaluator corr=sim.get_measurements()["Correlations"];
 #endif
-  alps::RealObsevaluator binder=1.-3.*m4/(m2*m2);
+  alps::RealObsevaluator binder=3.*m4/(m2*m2);
+  //alps::RealObsevaluator binder=1.-3.*m4/(m2*m2);
  
-  binder.rename("Real binder cumulant of Magnetization");
+  binder.rename("Binder cumulant of Magnetization");
 #ifdef ALPS_HAVE_VALARRAY
   out << corr << "\n";
 #endif

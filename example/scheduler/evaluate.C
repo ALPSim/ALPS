@@ -1,11 +1,11 @@
 /***************************************************************************
-* PALM++/scheduler library
+* ALPS++/scheduler library
 *
 * scheduler/convert2xml.C   convert old scheduler files to XML
 *
 * $Id$
 *
-* Copyright (C) 2002 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 2002-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
 *
 * This software is part of the ALPS library, published under the 
 * ALPS Library License; you can use, redistribute it and/or modify 
@@ -35,13 +35,13 @@ void evaluate(const boost::filesystem::path& p, std::ostream& out) {
   alps::scheduler::MCSimulation sim(nowhere,p);
   alps::RealObsevaluator m2=sim.get_measurements()["Magnetization^2"];
   alps::RealObsevaluator m4=sim.get_measurements()["Magnetization^4"];
-#ifdef PALM_HAVE_VALARRAY
+#ifdef ALPS_HAVE_VALARRAY
   alps::RealVectorObsevaluator corr=sim.get_measurements()["Correlations"];
 #endif
   alps::RealObsevaluator binder=m4/(m2*m2);
  
   binder.rename("Binder cumulant of Magnetization");
-#ifdef PALM_HAVE_VALARRAY
+#ifdef ALPS_HAVE_VALARRAY
   out << corr << "\n";
 #endif
   out << binder << "\n";

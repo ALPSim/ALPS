@@ -58,7 +58,6 @@ catch (...) {
 #endif
 }
 
-double boost::numeric::ublas::compressed_matrix<double,
-boost::numeric::ublas::row_major, (unsigned long)0,
-boost::numeric::ublas::unbounded_array<unsigned long>,
-boost::numeric::ublas::unbounded_array<double> >::zero_=0.;
+template <class T, class R, std::size_t N, class U, class S>
+const std::size_t boost::numeric::ublas::compressed_matrix<T,R,N,U,S>::index_base_;
+
