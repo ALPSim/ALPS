@@ -54,7 +54,7 @@ public:
   bool is_thermalized() const;
   double work_done() const;
   bool change_parameter(const std::string& name, const alps::StringValue& value);
-  
+
 private:
   double beta;                      // the inverse temperature
   uint32_t sweeps;                  // the number of sweeps done
@@ -62,3 +62,5 @@ private:
   uint32_t total_sweeps;            // the total number of sweeps to be done after equilibration
   std::vector<int> spins;           // the vector to store the spins
 };
+
+typedef alps::scheduler::SimpleMCFactory<IsingSimulation2> IsingFactory2;
