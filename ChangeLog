@@ -1,3 +1,11 @@
+2004-09-29  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Fixed --with-mpi-libs configure option.
+
+2004-09-27  Matthias Troyer <troyer@comp-phys.org>
+
+        * Release 1.2b3
+
 2004-09-24  Matthias Troyer <troyer@comp-phys.org>
 
 	* Release 1.2b2

@@ -130,15 +130,25 @@ AC_DEFUN([AC_MPI],
     if test "$mpi" != no; then
       found=no
 
-      if test "$ac_cv_compiler" = ibm32 || test "$ac_cv_compiler" = ibm64; then
-        if test "$found" = no; then
+      if test -n "$mpi_libs"; then
+        MPI_LIBS="$mpi_libs"
+        LIBS="$MPI_LIBS $ac_save_LIBS"
+        AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
+        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                    [AC_MSG_RESULT(yes); found=yes],
+                    [AC_MSG_RESULT(no);
+                     AC_MSG_ERROR([check for MPI library failed])])
+      fi
+
+      if test "$found" = no; then
+        if test "$ac_cv_compiler" = ibm32 || test "$ac_cv_compiler" = ibm64; then
 	  # for IBM LoadLeveler
           MPI_LIBS="-binitfini:poe_remote_main -lmpi -lvtd"
           LIBS="$MPI_LIBS $ac_save_LIBS"
           AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
           AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
-                    [AC_MSG_RESULT(yes); found=yes],
-                    AC_MSG_RESULT(no))
+                      [AC_MSG_RESULT(yes); found=yes],
+                      AC_MSG_RESULT(no))
         fi
       fi
       if test "$found" = no; then
