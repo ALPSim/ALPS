@@ -51,18 +51,18 @@ public:
   typedef T value_type;
   typedef M matrix_type;
 
-  HamiltonianMatrix (const alps::Parameters&);
+  HamiltonianMatrix (const alps::Parameters&, std::size_t s=1);
   void output(std::ostream& o, bool is_single=false) const 
   { 
     if (!built_) build(); 
     o << matrix_;
   }
+  void build() const;
 
 private:
   typedef alps::graph_factory<>::graph_type graph_type;
   
   const graph_type& lattice() const { return graph_factory_.graph();}
-  void build() const;
   
   alps::graph_factory<graph_type> graph_factory_;
   alps::ModelLibrary models_;
@@ -79,11 +79,12 @@ std::ostream& operator<<(std::ostream& os, const HamiltonianMatrix<T,M>& mat)
 }
 
 template <class T, class M>
-HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p)
+HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p, std::size_t s)
   : graph_factory_(p),
     models_(p),
     parms_(p),
-    built_(false)
+    built_(false),
+    matrix_(s,s)
 {
 }
 
@@ -145,7 +146,7 @@ void HamiltonianMatrix<T,M>::build() const
   // create basis set
   std::cout << "Creating basis set\n";
   alps::BasisStatesDescriptor<short> basis(ham.basis(),lattice());
-  typedef alps::BasisStates<short> basis_states_type;
+  typedef alps::LookupBasisStates<unsigned int> basis_states_type;
   typedef basis_states_type::value_type state_type;
   basis_states_type states(basis);
 
@@ -170,8 +171,9 @@ void HamiltonianMatrix<T,M>::build() const
         T val=mat[is][js];                     // get matrix element
         if (val) {                             // if matrix element is nonzero
           newstate[s]=js;                      // build target state
-          int j = states.index(state);         // lookup target state
-          matrix_(i,j)+=val;                   // set matrix element
+          int j = states.index(newstate);      // lookup target state
+          if (j<states.size())
+            matrix_(i,j)+=val;                 // set matrix element
         }
       }
     }
@@ -180,11 +182,9 @@ void HamiltonianMatrix<T,M>::build() const
   std::cerr << "Took " << alps::dclock()-t << " seconds\n";
   double tot=0.;
   // loop over bonds
-    for (int i=0;i<states.size();++i) {             // loop over source states
+    for (int i=0;i<states.size();++i) {      // loop over source states
       state_type state=states[i];           // get source state
       state_type newstate=state;            // prepare target state
-      if (i%1000==0)
-        std::cerr << i << "\n";
   for (boost::graph_traits<graph_type>::edge_iterator it=boost::edges(lattice()).first; 
       it!=boost::edges(lattice()).second ; ++it) {
     boost::multi_array<T,4>& mat = bond_matrix[bond_type[*it]];
@@ -198,8 +198,9 @@ void HamiltonianMatrix<T,M>::build() const
           if (val) {                                // if nonzero matrix element
             newstate[s1]=js1;                       // build target state
             newstate[s2]=js2;
-            int j = states.index(state);            // lookup target state
-            matrix_(i,j)+=val;                      // set matrix element
+            int j = states.index(newstate);         // lookup target state
+            if (j<states.size())
+              matrix_(i,j)+=val;                    // set matrix element
           }
         }
       }
