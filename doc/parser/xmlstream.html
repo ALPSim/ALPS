@@ -1,0 +1,82 @@
+<html>
+<head>
+   <title>PALM++ Project: xml library xmlstream.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: xml library</h1>
+
+<h2>Header file <b>xmlstream.h</b></h2>
+
+This header contains a stream class and helper functions to output a XML document into a </tt>std::ostream</tt>.
+
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+namespace palmxml {
+
+class oxstream
+{
+public:
+  oxstream(std::ostream&amp; os = std::cout, boost::uint32_t incl = 2);
+  oxstream(const boost::filesystem::path&amp; file, boost::uint32_t incl = 2);
+  ~oxstream();
+
+  oxstream&amp; operator&lt;&lt;(const std::string&amp; t);
+  oxstream&amp; operator&lt;&lt;(const char t);
+  oxstream&amp; operator&lt;&lt;(const char * t);
+  oxstream&amp; operator&lt;&lt;(const bool t);
+  oxstream&amp; operator&lt;&lt;(const int16_t t);
+  oxstream&amp; operator&lt;&lt;(const uint16_t t);
+  oxstream&amp; operator&lt;&lt;(const int32_t t);
+  oxstream&amp; operator&lt;&lt;(const uint32_t t);
+  oxstream&amp; operator&lt;&lt;(const int64_t t);
+  oxstream&amp; operator&lt;&lt;(const uint64_t t);
+  oxstream&amp; operator&lt;&lt;(const float t);
+  oxstream&amp; operator&lt;&lt;(const double t);
+  oxstream&amp; operator&lt;&lt;(const long double t);
+};
+
+std::string convert(const std::string&amp; str);
+
+}
+</pre></blockquote>
+
+<h3>The oxmlstream class</h3>
+
+default constructor
+<blockquote>
+<pre>
+oxstream(std::ostream&amp; os = std::cout, boost::uint32_t incl = 2);
+</pre>
+</blockquote>
+sets the output stream to os.  The indent
+
+<h2>Functions</h2>
+<blockquote><pre>
+void write_xml(std::ostream&amp;, const palm::Parameters&);
+</pre></blockquote>
+writes the contents
+of a <tt>Parameters</tt> object of the
+<A HREF="../palm/index.html">palm</A> library into a </tt>std::ostream</tt>, following the
+<A HREF="http://xml.comp-phys.org/schemas/parameter">schema</A> presented at 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>
+<blockquote><pre>
+void read_xml(XMLTag tag, palm::Parser&amp;, palm::Parameters&amp;);
+</pre></blockquote>
+parses a &lt;PARAMETERS> element from the parser, assuming the <A HREF="http://xml.comp-phys.org/schemas/parameter">schema</A> presented at 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+ The opening tag is passed as first argument.
+<blockquote><pre>
+void read_xml(palm::Parser&amp;, palm::Parameters&amp;);
+</pre></blockquote>
+reads the first tag from the parser and calls above function
+<blockquote><pre>
+void read_xml(std::istream&amp;, palm::Parameters&amp;);
+</pre></blockquote>
+opens a <tt>palm::Parser</tt> on the <tt>istream</tt> and calls above function.
+<HR>
+<ADDRESS>(c) 2003 by <A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
+</body>
+</html>

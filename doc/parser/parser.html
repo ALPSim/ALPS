@@ -1,0 +1,41 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library parser.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>
+Header file <b>parser.h</b></h2>
+This header contains a few helper functions to help reading parameter and XML files.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace palm {
+extern std::string parse_identifier(std::istream&amp; in);
+extern std::string read_until(std::istream&amp; in, char end);
+extern void check_character(std::istream&amp; in, char c, const std::string&amp; error);
+}</pre></blockquote>
+
+
+<h3>Functions</h3>
+<blockquote><pre>
+std::string parse_identifier(std::istream&amp; in)
+</pre></blockquote>
+reads an identifier. An identifier is defined to start with a letter, follwoed by any number of alphanumeric characters, or the characters colon (:), underscore(_) and single quote (').
+<blockquote><pre>
+extern std::string read_until(std::istream&amp; in, char end);
+</pre></blockquote>
+returns until the next occurence of the character <tt>end</tt> or until thye end of the stream is reached. The function returns a string containing the characters read (excluding leading and trailing whitespace and excluding the terminating character <tt>end</tt>.
+<blockquote><pre>
+extern void check_character(std::istream&amp; in, char c, const std::string&amp; error);
+</pre></blockquote>
+checks that the next character read from the stream (skipping whitespace characters) is the character passed as <tt>c</tt> and throws a <tt>std::runtime_error(error)</tt> otherwise.
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

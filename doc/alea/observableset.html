@@ -1,0 +1,188 @@
+<html>
+<head>
+   <title>PALM++ Project: alea library observableset.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: alea library</h1>
+
+<h2>
+Header file <b>observable.h</b></h2>
+This header contains a class to store a collection of Monte
+Carlo measurements, each identified by a name.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+namespace alea {
+class ObservableSet: public std::map&lt;std::string,Observable*>, public osiris::Dumpable
+{
+public:
+  template <class T>  static void register_type();
+
+  ObservableSet() {};
+  ObservableSet(const ObservableSet& m);
+  const ObservableSet& operator=(const ObservableSet& m);
+  ~ObservableSet();
+ 
+  void save(osiris::ODump& dump) const;
+  void load(osiris::IDump& dump);
+ 
+  const ObservableSet& operator<<(const ObservableSet& obs);
+  const ObservableSet& operator<<(const Observable& obs);
+  
+  void addObservable(Observable *obs);
+  void removeObservable(const std::string& name);
+  
+  bool has(const std::string& name) const;
+
+  Observable&       operator[](const std::string& name);
+  const Observable& operator[](const std::string& name) const;
+
+  template &lt;class T>  T& get(const std::string& name);
+  template &lt;class T>  const T& get(const std::string& name) const;
+  
+  template &lt;class F>  void do_for_all(F f) const;
+  template &lt;class F>  void do_for_all(F f);
+
+  bool can_set_thermalization_all() const;
+  bool can_set_thermalization_any() const;
+  void set_thermalization(uint32_t todiscard);
+  uint32_t get_thermalization() const;
+
+  uint32_t number_of_runs() const;
+  ObservableSet get_run(uint32_t) const;
+
+  void reset(bool flag=false);
+  void compact();
+};
+}
+
+std::ostream& operator&lt;&lt;(std::ostream& out,const alea::ObservableSet& obs)
+</pre></blockquote>
+
+
+<h3>The <tt> ObservableSet</tt> class</h3>
+is a container for observables, identified by name, implemented as associative array
+of pointers to the base class <tt>Observable</tt>.
+<blockquote><pre>
+template <class T>  static void register_type();
+</pre></blockquote>
+Since objects derived from <tt>Observable</tt> are polymorphic, a factor has to exist to
+call the right constructor when an observable needs to be deserialized. The <tt>register</tt>
+function creates a factory for the type, and thus allows deserializing of objects of that type.
+<blockquote><pre>
+ObservableSet() {};
+ObservableSet(const ObservableSet& m);
+const ObservableSet& operator=(const ObservableSet& m);
+~ObservableSet();
+</pre></blockquote>
+Since <tt>ObservableSet</tt> is implemented as an associative array of pointers, a nontrivial
+copy constructor, destructor and assignment operatir is needed.
+<blockquote><pre>
+void save(osiris::ODump& dump) const;
+void load(osiris::IDump& dump);
+</pre></blockquote>
+are the (de)serialization functions using the <A 
+HREF="../../osiris/doc/index.html">osiris</A> library.
+<blockquote><pre>
+const ObservableSet& operator<<(const ObservableSet& obs);
+</pre></blockquote>
+adds observables from another <tt>ObservableSet</tt>. If an observable with a given
+name does not yet exist, it gets copied into the set. Otherwise it is added to the
+observable with the same name in the set. Throws a <tt>std::runtime_error</tt>
+if the adding of two observables fails.
+<blockquote><pre>
+const ObservableSet& operator<<(const Observable& obs);
+</pre></blockquote>
+adds an <tt>Observable</tt> to the <tt>ObservableSet</tt>. If an observable with the
+name does not yet exist, it gets copied into the set. Otherwise it is added to the
+observable with the same name in the set. Throws a <tt>std::runtime_error</tt>
+if the adding of the two observables fails.
+<blockquote><pre>
+void addObservable(Observable *obs);
+</pre></blockquote>
+adds an <tt>Observable</tt> to the <tt>ObservableSet</tt>. The <tt>ObservableSet</tt>
+assumes ownership of the <tt>Observable</tt> and deletes it when it itself is destroyed.
+<blockquote><pre>
+void removeObservable(const std::string& name);
+</pre></blockquote>
+removes the <tt>Observable</tt> with the given name. Throws <tt>std::out_of_range</tt>
+if no observable with the given name exists.
+<blockquote><pre>
+bool has(const std::string& name) const;
+</pre></blockquote>
+checks if an observable with the given name is contained in the <tt>ObservableSet</tt>.
+<blockquote><pre>
+Observable&       operator[](const std::string& name);
+const Observable& operator[](const std::string& name) const;
+</pre></blockquote>
+returns the observable with the given name or throws a <tt>std::out_of_range</tt>
+exception if no observable with the given name exists.
+<blockquote><pre>
+template &lt;class T>  T& get(const std::string& name);
+template &lt;class T>  const T& get(const std::string& name) const;
+</pre></blockquote>
+Same as <tt>operator[]</tt> but attempts a cast to the given type and throws a
+<tt>std::runtime_error</tt> if the cast fails.
+<blockquote><pre>
+template &lt;class F>  void do_for_all(F f) const;
+template &lt;class F>  void do_for_all(F f);
+</pre></blockquote>
+apply a function object to all observables.
+<blockquote><pre>
+bool can_set_thermalization_all() const;
+</pre></blockquote>
+checks if for the thermalization time can be changed for all 
+<tt>Observable</tt>s in the <tt>ObservableSet</tt>.
+<blockquote><pre>
+bool can_set_thermalization_all() const;
+</pre></blockquote>
+checks if for the thermalization time can be changed for any 
+<tt>Observable</tt>s in the <tt>ObservableSet</tt>.
+<blockquote><pre>
+void set_thermalization(uint32_t todiscard);
+</pre></blockquote>
+discards at least the number of measurements passed as parameter, in order
+to set the thermalization time.
+<blockquote><pre>
+uint32_t get_thermalization() const;
+</pre></blockquote>
+returns the minimum number of thermalization steps for any of the 
+observables.
+<blockquote><pre>
+uint32_t number_of_runs() const;
+</pre></blockquote>
+returns the number of Monte Carlo time series (runs) which contributed to 
+the <tt>ObservableSet</tt>.
+<blockquote><pre>
+ObservableSet get_run(uint32_t) const;
+</pre></blockquote>
+returns a new <tt>ObservableSet</tt>, containing only data from one 
+Monte Carlo time series (run). Throws <tt>std::out_of_range</tt> if
+the number passed is larger than the number of runs.
+<blockquote><pre>
+void reset(bool flag=false);
+</pre></blockquote>
+calls the <tt>reset</tt> function with the given argument for all
+<tt>Observable</tt>s in the <tt>ObservableSet</tt>.
+<blockquote><pre>
+void compact();
+</pre></blockquote>
+calls the <tt>compact</tt> function for all
+<tt>Observable</tt>s in the <tt>ObservableSet</tt>. This  the memory allocation, while
+still enabling access to the most important results. Usually the 
+ability to modify the observable and more complex functions
+(e.g. change thermalization, get crosscorrelations, ...) get lost though.
+<blockquote><pre>
+std::ostream& operator&lt;&lt;(std::ostream& out,const alea::ObservableSet& obs)
+</pre></blockquote>
+prints all <tt>Observable</tt>s in an <tt>ObservableSet</tt> by calling the
+output operator for each of them.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

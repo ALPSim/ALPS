@@ -1,0 +1,178 @@
+<html>
+<head>
+   <title>PALM++ Project: alea library simpleobseval.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: alea library</h1>
+
+<h2>
+Header file <b>simpleobseval.h</b></h2>
+This header contains the class for evaluation of and arithmetic operations
+on observables.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+namespace alea {
+
+template &lt;class T>
+class SimpleObservableEvaluator : public AbstractSimpleObservable&lt;T>
+{
+ public:
+  typedef T           value_type;
+  typedef ...         time_type;
+  typedef std::size_t count_type;
+  typedef ...         result_type;
+  
+  enum { version=...};
+
+  SimpleObservableEvaluator(std::string="");
+  SimpleObservableEvaluator(const Observable&,  std::string n="");
+
+  const SimpleObservableEvaluator&lt;T>& operator = (const AbstractSimpleObservable&lt;T>& obs);
+
+  SimpleObservableEvaluator&lt;T>& operator<< (const AbstractSimpleObservable&lt;T>&  obs) 
+
+  template &lt;class S>
+  SimpleObservableEvaluator&lt;typename obs_value_slice&lt;T,S>::value_type>
+    slice(S ,const std::string="") const;
+
+
+  SimpleObservableEvaluator&lt;T> operator-() const;
+
+  template &lt;class X> const SimpleObservableEvaluator&lt;T>& operator+=(X);
+  template &lt;class X> const SimpleObservableEvaluator&lt;T>& operator-=(X);
+  template &lt;class X> const SimpleObservableEvaluator&lt;T>& operator*=(X);
+  template &lt;class X> const SimpleObservableEvaluator&lt;T>& operator/=(X);
+
+  const SimpleObservableEvaluator&lt;T>& operator+=(const SimpleObservableEvaluator&lt;T>&);
+  const SimpleObservableEvaluator&lt;T>& operator-=(const SimpleObservableEvaluator&lt;T>&);
+
+  template &lt;class X>
+  const SimpleObservableEvaluator&lt;T>& operator*=(const SimpleObservableEvaluator&lt;X>&);
+
+  template &lt;class X>
+  const SimpleObservableEvaluator&lt;T>& operator/=(const SimpleObservableEvaluator&lt;X>&);
+};
+
+template &lt;class T, class Y>
+inline SimpleObservableEvaluator&lt;T> operator+(const SimpleObservableEvaluator&lt;T>& x, const Y& y);
+
+template &lt;class T, class Y>
+inline SimpleObservableEvaluator&lt;T> operator-(const SimpleObservableEvaluator&lt;T>& x, const Y& y);
+
+template &lt;class T, class Y>
+inline SimpleObservableEvaluator&lt;T> operator*(const SimpleObservableEvaluator&lt;T>& x, const Y& y);
+
+template &lt;class T, class Y>
+inline SimpleObservableEvaluator&lt;T> operator/(const SimpleObservableEvaluator&lt;T>& x, const Y& y);
+
+template &lt;class T>
+inline SimpleObservableEvaluator&lt;T> operator+(const T& x, const SimpleObservableEvaluator&lt;T>& y);
+
+template &lt;class T>
+inline SimpleObservableEvaluator&lt;T> operator-(const T& x, const SimpleObservableEvaluator&lt;T>& y);
+
+template &lt;class T>
+inline SimpleObservableEvaluator&lt;T> operator*(const T& x, const SimpleObservableEvaluator&lt;T>& y);
+
+template &lt;class T>
+inline SimpleObservableEvaluator&lt;T> operator/(const T& x, const SimpleObservableEvaluator&lt;T>& y);
+
+template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
+exp (const alea::SimpleObservableEvaluator&lt;T>& x);
+
+template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
+log (const alea::SimpleObservableEvaluator&lt;T>& x);
+
+template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
+sqrt (const alea::SimpleObservableEvaluator&lt;T>& x);
+
+template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
+sin (const alea::SimpleObservableEvaluator&lt;T>& x);
+
+template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
+cos (const alea::SimpleObservableEvaluator&lt;T>& x);
+
+
+typedef SimpleObservableEvaluator&lt;double> RealObsevaluator;
+typedef SimpleObservableEvaluator&lt;int32_t> IntObsevaluator;
+typedef SimpleObservableEvaluator&lt;std::complex&lt;double> > ComplexObsevaluator;
+typedef SimpleObservableEvaluator&lt;std::valarray&lt;double> > RealVectorObsevaluator;
+}
+</pre></blockquote>
+
+<h3>The <tt>SimpleObservableEvaluator</tt> class</h3>
+is a class for the evaluation of standard observables.
+<P>
+It can be constructed from any <tt>SimpleObservable</tt>.
+<P>
+In addition to the same evaluation interface as 
+<tt>AbstractSimpleObservable</tt>, the <tt>SimpleObservableEvaluator</tt>
+objects can be merged from more than one Monte Carlo simulation,
+and arithmetic evaluations like sums and products can be performed.
+<P>
+Depending on the original <A HREF="binning.html">binning strategy</A>, a full and reliable error
+analysis using jack-knife is possible on functions of one or more
+variables.
+<P>
+In addition to the basic algebraic operations, such as addition, 
+subtraction, multiplication and division of observables and observables
+and of observables and scalars (or objects of type <tt>value_type</tt>)
+a few basic functions are implemented for the 
+<tt>SimpleObservableEvaluator</tt>:
+<UL>
+    <LI><TT>exp</TT></LI>
+    <LI><TT>log</TT></LI>
+    <LI><TT>sin</TT></LI>
+    <LI><TT>cos</TT></LI>
+    <LI><TT>sqrt</TT></LI>
+</UL>
+It is straightforward to extend this to other functions. Look at the
+source code for details.
+<P>
+The following additional members are defined
+<blockquote><pre>
+enum { version=...};
+</pre></blockquote>
+is a compile-time constant, same as <tt>version_id()</tt>.
+<blockquote><pre>
+  SimpleObservableEvaluator(std::string n="");
+</pre></blockquote>
+the default constructor with an optional argument to name the observable.
+<blockquote><pre>
+  SimpleObservableEvaluator(const Observable&,  std::string n="");
+</pre></blockquote>
+creates a <tt>SimpleObservableEvaluator</tt> from an <tt>Observable</tt>, 
+optionally renaming it.
+<blockquote><pre>
+const SimpleObservableEvaluator&lt;T>& operator = (const AbstractSimpleObservable&lt;T>& obs);
+</pre></blockquote>
+assigns an observable to the 
+<tt>SimpleObservableEvaluator</tt>.
+<blockquote><pre>
+SimpleObservableEvaluator&lt;T>& operator<< (const AbstractSimpleObservable&lt;T>&  obs) 
+</pre></blockquote>
+merges additional observables (e.g. from additional Monte carlo 
+simulations for the same system) to the <tt>SimpleObservableEvaluator</tt>, 
+to facilitate an evaluation of the combined measurements.
+<blockquote><pre>
+template &lt;class S>
+SimpleObservableEvaluator&lt;typename obs_value_slice&lt;T,S>::value_type>
+  slice(S ,const std::string n="") const;
+</pre></blockquote>
+extracts a slice from a <tt>SimpleObservableEvaluator</tt>. E.g. for a 
+vector-valued observable an evaluator for just one index can be extracted.
+The slice can optionally be given a new name.
+<blockquote><pre>
+typedef SimpleObservableEvaluator&lt;double> RealObsevaluator;
+typedef SimpleObservableEvaluator&lt;int32_t> IntObsevaluator;
+typedef SimpleObservableEvaluator&lt;std::complex&lt;double> > ComplexObsevaluator;
+typedef SimpleObservableEvaluator&lt;std::valarray&lt;double> > RealVectorObsevaluator;
+</pre></blockquote>
+are <tt>typdedef</tt>s for the commonly used <tt>SimpleObservableEvaluator</tt>s.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>

@@ -1,0 +1,322 @@
+dnl Process this file with autoconf to produce a configure script.
+
+dnl
+dnl Initialization
+dnl
+
+dnl disable loading config.site
+define([AC_SITE_LOAD], )dnl
+
+AC_PREREQ(2.54)
+AC_INIT([ALPS++],[1.0])
+AC_CONFIG_AUX_DIR([config])
+
+AC_PREFIX_DEFAULT([$HOME/ALPS++])
+
+AC_CONFIG_FILES(Makefile config/Makefile config/config.site config/arxx config/include.mk src/Makefile)
+
+AC_CONFIG_FILES(test/Makefile example/Makefile)
+AC_CONFIG_FILES(test/alea/Makefile)
+AC_CONFIG_FILES(test/lattice/Makefile test/lattice/parameters)
+AC_CONFIG_FILES(test/model/Makefile test/model/parameters)
+AC_CONFIG_FILES(test/osiris/Makefile)
+AC_CONFIG_FILES(test/parameter/Makefile)
+AC_CONFIG_FILES(test/parser/Makefile)
+AC_CONFIG_FILES(example/scheduler/Makefile)
+
+AC_CONFIG_HEADERS(src/alps/config.h)
+
+# directories
+
+dirs='boost alps/alea alps/lattice alps/model alps/osiris alps/parser alps/scheduler'
+for d in $dirs; do
+  if test -d "src/$d"; then :; else mkdir -p "src/$d"; fi
+done
+
+# setting up cache file
+cache_file='config/config.cache'
+if test -d "config"; then :; else mkdir config; fi
+if test -f $cache_file; then :; else touch $cache_file; fi
+
+# fix directories
+test "$prefix" = NONE && prefix=$ac_default_prefix
+test "$exec_prefix" = NONE && exec_prefix=$prefix
+test "$bindir" = '${exec_prefix}/bin' && bindir="$exec_prefix/bin"
+test "$datadir" = '${prefix}/share' && datadir="$prefix/share"
+test "$libdir" = '${exec_prefix}/lib' && libdir="$exec_prefix/lib"
+test "$includedir" = '${prefix}/include' && includedir="$prefix/include"
+
+ac_cv_alps_prefix="$prefix"
+ac_cv_alps_exec_prefix="$exec_prefix"
+ac_cv_alps_bindir="$bindir"
+ac_cv_alps_datadir="$datadir"
+ac_cv_alps_libdir="$libdir"
+ac_cv_alps_includedir="$includedir"
+
+ac_cv_alps_include_mk="$datadir/$PACKAGE_NAME/include.mk"
+ac_cv_alps_rules_mk="$datadir/$PACKAGE_NAME/rules.mk"
+ac_cv_alps_rules_lib_mk="$datadir/$PACKAGE_NAME/rules-lib.mk"
+
+#
+# Tools/Programs
+#
+
+# C/C++ compiler
+sinclude(config/ac_compiler.m4)
+AC_COMPILER
+
+# C/C++ preprocessor
+AC_PROG_CPP
+AC_PROG_CXXCPP
+
+# Install script
+AC_PROG_INSTALL
+
+# other tools
+AC_SUBST(AR)
+AC_SUBST(ARXX)
+AR="ar cru"
+ARXX="$bindir/arxx"
+AC_PROG_LN_S
+
+AC_SUBST(RANLIB)
+test "$ac_cv_compiler" = "sgi32" && RANLIB="/bin/true"
+test "$ac_cv_compiler" = "sgi64" && RANLIB="/bin/true"
+AC_PROG_RANLIB
+
+#
+# checking boost directory
+#
+
+AC_ARG_WITH(boost,
+  AC_HELP_STRING([--with-boost=DIR],[path to the boost main tree]),
+  [
+  if test "x$withval" != "x"; then
+    ac_cv_boost_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    if test -f "$ac_cv_boost_dir/boost/config.hpp"; then :; else
+      ac_cv_boost_dir=
+    fi
+  fi
+  ]
+)
+AC_MSG_CHECKING([for boost main tree])
+if test -z "$ac_cv_boost_dir"; then
+  for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
+  do
+    if test -f "$d/boost/boost/config.hpp"; then
+      ac_cv_boost_dir="$d/boost"
+      break
+    fi
+  done
+fi
+if test -d "$ac_cv_boost_dir"; then
+  AC_MSG_RESULT([$ac_cv_boost_dir])
+else
+  AC_MSG_RESULT([not found])
+  AC_MSG_ERROR([The boost main tree was not found.
+  Specify its location by the --with-boost option.])
+fi
+
+# check for Boost::filesystem source code
+if test -f "$ac_cv_boost_dir/libs/filesystem/src/exception.cpp"; then :; else
+  AC_MSG_ERROR([Source code of Boost::filesystem library not found.])
+fi
+AC_SUBST(BOOST_DIR)
+BOOST_DIR="$ac_cv_boost_dir"
+
+# check whether Boost::configure is used or not
+AC_SUBST(BOOST_USER_CONFIG_H)
+AC_ARG_ENABLE(boost-config,
+  AC_HELP_STRING([--enable-boost-config],
+    [setup boost configuration header file]),
+  [
+  if test "x$enableval" != "xno"; then
+    ac_cv_boost_config=yes
+  fi
+  ]
+)
+AC_MSG_CHECKING([whether use boost configuration header file])
+test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
+if test "$ac_cv_boost_config" = yes; then
+  ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"
+  if test -f "$ac_cv_boost_dir/libs/config/configure"; then :; else
+    AC_MSG_RESULT
+    AC_MSG_ERROR([boost configure script was not found.])
+  fi
+fi
+AC_MSG_RESULT([$ac_cv_boost_config])
+  
+# tools
+AC_CONFIG_FILES(tool/Makefile)
+
+# development environment
+if test -f "$srcdir/devel/Makefile.in"; then
+  AC_CONFIG_FILES(devel/Makefile)
+fi
+
+#
+# checking for system headers
+#
+
+AC_LANG_CPLUSPLUS
+
+AC_CHECK_HEADER([stdint.h])
+# test "$ac_cv_header_stdint_h" = yes && AC_DEFINE(PALM_HAVE_STDINT_H)
+
+AC_CHECK_HEADER([inttypes.h])
+# test "$ac_cv_header_inttypes_h" = yes && AC_DEFINE(PALM_HAVE_INTTYPES_H)
+
+AC_CHECK_HEADER([unistd.h])
+# test "$ac_cv_header_unistd_h" = yes && AC_DEFINE(PALM_HAVE_UNISTD_H)
+
+AC_CHECK_HEADER([bind/bitypes.h])
+# test "$ac_cv_header_bind_bitypes_h" = yes && AC_DEFINE(PALM_HAVE_BIND_BITYPES_H)
+
+AC_CHECK_HEADER([sys/int_types.h])
+# test "$ac_cv_header_sys_int_types_h" = yes && AC_DEFINE(PALM_HAVE_SYS_INT_TYPES_H)
+
+AC_CHECK_HEADER([sys/param.h])
+# test "$ac_cv_header_sys_param_h" = yes && AC_DEFINE(PALM_HAVE_SYS_PARAM_H)
+
+AC_CHECK_HEADER([sys/systeminfo.h])
+# test "$ac_cv_header_sys_systeminfo_h" = yes && AC_DEFINE(PALM_HAVE_SYS_SYSTEMINFO_H)
+
+AC_CHECK_HEADER([sys/time.h])
+# test "$ac_cv_header_sys_time_h" = yes && AC_DEFINE(PALM_HAVE_SYS_TIME_H)
+
+AC_CHECK_HEADER([sys/types.h])
+# test "$ac_cv_header_sys_types_h" = yes && AC_DEFINE(PALM_HAVE_SYS_TYPES_H)
+
+# checking for other C++ headers
+sinclude(config/ac_cxx_namespaces.m4)
+
+AC_CHECK_HEADER([cstdlib],,
+  [
+  if test -f "$ac_cv_boost_dir/boost/compatibility/cpp_c_headers/cstdlib"; then
+    if test -z "$CPPFLAGS"; then
+      CPPFLAGS="-I$ac_cv_boost_dir/boost/compatibility/cpp_c_headers"
+    else
+      CPPFLAGS="-I$ac_cv_boost_dir/boost/compatibility/cpp_c_headers $CPPFLAGS"
+    fi
+    AC_MSG_NOTICE([$ac_cv_boost_dir/boost/compatibility/cpp_c_headers was added to include path])
+  else
+    AC_MSG_ERROR([cstdlib not fount])
+  fi
+  ]
+)
+
+sinclude(config/ac_cxx_have_valarray.m4)
+AC_CXX_HAVE_VALARRAY
+test "$ac_cv_cxx_have_valarray" = yes && AC_DEFINE(ALPS_HAVE_VALARRAY)
+
+# sinclude(config/ac_cxx_have_complex.m4)
+# AC_CXX_HAVE_COMPLEX
+# test "$ac_cv_cxx_have_complex" = yes && AC_DEFINE(PALM_HAVE_COMPLEX)
+
+# sinclude(config/ac_cxx_have_non_template_complex.m4)
+# AC_CXX_HAVE_NON_TEMPLATE_COMPLEX
+# test "$ac_cv_cxx_have_non_template_complex" = yes && AC_DEFINE(PALM_HAVE_NON_TEMPLATE_COMPLEX)
+
+# sinclude(config/ac_cxx_have_vector_at.m4)
+# AC_CXX_HAVE_VECTOR_AT
+# test "$ac_cv_cxx_have_vector_at" = yes && AC_DEFINE(PALM_HAVE_VECTOR_AT)
+
+#
+# check for libm
+#
+
+AC_CHECK_LIB(m, sqrt)
+
+#
+# check for nanosleep
+#
+
+AC_CHECK_FUNC(nanosleep, ,[AC_CHECK_LIB(rt, nanosleep)])
+
+#
+# check for pthread
+#
+
+sinclude(config/ac_pthread.m4)
+AC_PTHREAD
+
+#
+# check for MPI
+#
+
+AC_SUBST(LIB_MPI)
+sinclude(config/ac_mpi.m4)
+AC_MPI
+if test "$ac_cv_have_mpi" = yes; then
+  LIB_MPI='$(LIB_MPI)'
+fi
+
+#
+# check for PVM
+#
+
+AC_SUBST(LIB_PVM)
+sinclude(config/ac_pvm.m4)
+AC_PVM
+if test "$ac_cv_have_pvm" = yes; then
+  LIB_PVM='$(LIB_PVM)'
+fi
+
+#
+# check for HDF5
+#
+
+sinclude(config/ac_hdf5.m4)
+AC_HDF5
+
+#
+# check for XML parser
+#
+
+sinclude(config/ac_xmlparser.m4)
+AC_XMLPARSER
+
+#
+# configuring boost
+#
+
+if test "$ac_cv_boost_config" != no; then
+  AC_MSG_NOTICE([running boost configuration script])
+  boost_configure="sh $ac_cv_boost_dir/libs/config/configure"
+  mkdir -p src/boost
+  command="(cd src/boost && export CXX=\"$CXX\" CXXFLAGS=\"$CXXFLAGS\" CPPFLAGS=\"$CPPFLAGS\" LDFLAGS=\"$LDFLAGS\" && $boost_configure --with-boost=$ac_cv_boost_dir)"
+  echo "$command"
+  eval "$command"
+  CPPFLAGS="$CPPFLAGS -DBOOST_USER_CONFIG=\<boost/user.hpp\>"
+  BOOST_USER_CONFIG_H="boost/user.hpp"
+fi
+
+# setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
+AC_SUBST(BASE_CPPFLAGS)
+BASE_CPPFLAGS="$CPPFLAGS"
+AC_SUBST(BASE_LDFLAGS)
+BASE_LDFLAGS="$LDFLAGS"
+AC_SUBST(BASE_LIBS)
+BASE_LIBS="$LIBS"
+
+#
+# Generate files
+#
+
+AC_OUTPUT
+
+dnl
+dnl output summary
+dnl
+
+echo
+echo "Summary of configuration:"
+echo "  ALPS++ version    $PACKAGE_VERSION"
+echo "  Compiler type     $ac_cv_compiler"
+echo "  exceptions        $ac_cv_compiler_exceptions"
+echo "  optimization      $ac_cv_compiler_optimization"
+echo "  pthread support   $ac_cv_have_pthread"
+echo "  MPI support       $ac_cv_have_mpi"
+echo "  PVM support       $ac_cv_have_pvm"
+echo "  HDF5 support      $ac_cv_have_hdf5"
+echo "  XML parser        $ac_cv_xml_parser"

@@ -1,0 +1,68 @@
+<html>
+<head>
+   <title>PALM++ Project: alea library</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: alea library</h1>
+
+The alea library contains code for Monte Carlo measurements.
+
+<h2>Download, Configuring, Building and Installing</h2>
+
+are discussed <a href="../setup.html">here</a>.
+
+<P> The library will reside in the file <tt>libalea.a</tt> in the path specifed in the configuration step.
+
+<H2>Documentation</H2>
+<ul>
+<li>Observable classes
+<ul>
+<li><A HREF="observable.html">observable.h</A> contains the base class for
+Monte Carlo measurements.</li>
+<li><A HREF="observableset.html">observableset.h</A> is a collection of 
+observables.</li>
+<li><A HREF="obsvalue.html">obsvalue.h</A> contains traits classes for 
+Monte Carlo measurements.</li>
+<li><A HREF="simpleobservable.html">simpleobservable.h</A> contains a basic 
+observable class.</li>
+<li><A HREF="simpleobseval.html">simpleobseval.h</A> contains evaluator
+classes for basic observables.</li>
+</ul></li>
+<li><A HREF="binning.html">Binning strategies</A>
+<ul>
+<li><A HREF="binning.html#nobinning">nobinning.h</A> does not do any binning.</li>
+<li><A HREF="binning.html#simplebinning">simplebinning.h</A> does rudimentary 
+binning, using as little memory as possible.</li>
+<li><A HREF="binning.html#detailedbinning">detailedbinning.h</A> does elaborate
+binning, including the possibility to save full time series.
+</li>
+  </ul></li>
+</ul>
+<H2>Example</H2>
+
+The easiest way to learn a new library is to study an example
+first. We have provided a simple <A
+HREF="../../example/alea/detailedbinning.C">example</A>, showing the
+most common usage features.
+
+<P>
+To build the example go to the <tt>example/alea</tt> subdirectory of PALM++ directory and type
+<blockquote><pre>
+make examples
+</blockquote></pre>
+The source code and  of the examples is well documented and self-explanatory.
+<P>To run the example type
+<blockquote><pre>
+./detailedbinning < detailedbinning.input
+</blockquote></pre>
+
+<HR>
+
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
+Troyer</A> and <A HREF="mailto:wistaria@comp-phys.org">Synge
+Todo</A></ADDRESS>
+
+</body>
+</html>

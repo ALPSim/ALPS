@@ -1,0 +1,6 @@
+#!/bin/sh
+
+echo "autoconf --force"
+autoconf --force
+
+rm -rf autom4te*.cache

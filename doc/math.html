@@ -1,0 +1,56 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library math.hpp</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>
+Header file <b>math.hpp</b></h2>
+This header contains mathematical functions not present in the standard
+or boost libraries.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace palm {
+template &lt;class T>
+T abs (T x);
+
+template &lt;class T>
+typename TypeTraits&lt;T>::norm_t abs2(T x);
+
+template &lt;class T>
+T abs2(std::complex&lt;T> x);
+
+std::size_t binomial(std::size_t l,std::size_t n);
+}</pre></blockquote>
+
+
+<h3>Functions</h3>
+<blockquote><pre>
+template &lt;class T>
+T abs (T x);
+</pre></blockquote>
+returns the absolute value and allows a consistent call,
+without the need to use <TT>fabs</TT> for floating point numbers.
+<blockquote><pre>
+template &lt;class T>
+typename TypeTraits&lt;T>::norm_t abs2(T x);
+
+template &lt;class T>
+T abs2(std::complex&lt;T> x);
+</pre></blockquote>
+returns the square of the absolute value. It is optimized by specialization
+for complex numbers.
+<blockquote><pre>
+std::size_t binomial(std::size_t l,std::size_t n);
+</pre></blockquote>
+returns the binomial of of l and n.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

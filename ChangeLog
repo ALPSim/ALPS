@@ -1,0 +1,527 @@
+2003-05-07 Synge Todo <wistaria@comp-phys.org>
+
+	* Migrating into new library name ALPS++.  Documentations are not
+	completed.
+	
+2003-05-04 Matthier Troyer <troyer@comp-phys.org>
+	
+	* [lattice] Fixed parity.hpp by adding the missing two-parameter 
+          set_parity function
+
+2003-05-01 Matthier Troyer <troyer@comp-phys.org>
+
+	* [palm] Fixed reading parameters
+
+	* [alea, scheduler] Added new features: results of calculations with
+	observables can be stored back into a simulation and will get written
+	to XML and read back from XML.
+
+	* [lattice] Added functions to site and bond disorder a lattice
+          
+2003-04-26 Synge Todo <wistaria@comp-phys.org>
+
+	* [palm] Fixed std::istream& palm::operator>>(std::istream& in,
+	  ParameterList& p).  Added test program for ParameterList class.
+
+2003-04-22 Matthias Troyer <troyer@comp-phys.org>
+	
+	* Release 2.0b3 for the RGP-II lecture
+
+2003-04-22 Matthias Troyer <troyer@comp-phys.org>
+
+	* [model] added description of Hamiltonian
+
+	* [palm] Added flatten() function to expression to multiply out
+          all products of terms. This is needed for the implementation of
+          quantum operators
+
+2003-04-18 Matthias Troyer <troyer@comp-phys.org>
+
+	* [palm, xml, lattice, scheduler] Removed palm::Parser and replaced
+        it by direct reading from a std::istream. Only a few helper functions
+        remain to parse files.
+
+	* [palm] added value_or_default member to Parameters
+
+	* [lattice] added support for expressions in lattice descriptions.
+	This also removes the need for parameter specifications extent
+        or boundary elements, but adds a PARAMETER element for default values
+        of parameters.
+
+	* [model] Started work on model library
+
+2003-04-16 Synge Todo <wistaria@comp-phys.org>
+
+	* [boost, palm] Moved palm/exceptions.C into
+	boost/throw_exception.C
+
+	* [xml] Interface of XMLprinter class has been changed
+	(manipulator support etc) and is renamed as oxstream.  Added
+	DummyXMLHandler and SimpleXMLHandler classes.
+	
+2003-04-14 Synge Todo <wistaria@comp-phys.org>
+
+	* [configure] Removed -D_POSIX_C_SOURCE=199506L from compiler
+	options for KCC.
+
+2003-04-09 Synge Todo <wistaria@comp-phys.org>
+
+	* [configure] Fixed XML parser detection in config/xmlparser.m4
+	(renamed from ac_palm_xml.m4).  Removed palm/boost.h.
+
+	* [xml] Namespace support for Xerces C++ version 2.2
+
+	* [tools] Fixed Makefile.in
+
+	* [scheduler] Fixed convert2xml.C, compactrun.C, and evaluate.C
+	for compiling with --disable-exceptions (require patch to
+	boost::lexical_cast and boost::thread)
+
+	* [palm] Moved implementation of boost::throw_exception into
+	expressions.C.  Removed palm/exceptions.h.
+
+	* Removed most of warning messages from g++
+	
+2003-04-08 Matthias Troyer <troyer@comp-phys.org>
+
+        * [palm,osiris] Added support for boost::multi_array, docs missing
+
+	* [alea] Added multi_array based observables
+
+2003-04-06 Matthias Troyer <troyer@comp-phys.org>
+
+        * [palm] Removed obsolete ValueType class and lexical_cast.hpp
+
+        * [osiris] Removed obsolete ValueType class
+
+	* [alea] Got vector valued observables with integer value type to work
+
+	* [lattice] Added property for boundary crossings of periodic lattices
+
+2003-04-04 Matthias Troyer <troyer@comp-phys.org>
+
+        * [scheduler] Added compactrun tool
+
+        * [tools,config,doc]Added tools directory for XML tools and Makefile
+
+	* [alea] enabled O(N) jackknife
+
+2003-04-03 Matthias Troyer <troyer@comp-phys.org>
+
+	* [scheduler] start() now returns 1 if the scheduler stooped because of
+	  a time limit and 0 if it stopped becuase all simulations wee finished
+
+2003-04-01 Matthias Troyer <troyer@comp-phys.org>
+
+	* [alea] SimpleObservableData now changes number of bins to < 128 only 
+	  if the bin size is larger than one in order to keep full time series
+	   when they are stored with bin size equal to one
+
+2003-03-25  Matthias Troyer <troyer@comp-phys.org>
+
+     	* Release 2.0b2
+
+2003-03-25  Matthias Troyer <troyer@comp-phys.org>
+
+     	* [scheduler] Fixed bug with directory path for some checkpoints
+
+2003-03-24  Matthias Troyer <troyer@comp-phys.org>
+
+        * [alea] Changed alea tests to integer random number generators. Some 
+        differences in output remain between compilers and will need to be 
+	investigated.
+
+2003-03-24  Simon Trebst <trebst@comp-phys.org>
+
+        * [palm] Renamed math.h to math.hpp and signal.h to signal.hpp to avoid 
+	problems with gcc-3.2.2
+
+2003-03-23  Matthias Troyer <troyer@comp-phys.org>
+
+        * Checked with boost final release 1.30.0 
+          Found a problem with boost and KCC, to be fixed in release 1.30.1
+
+	* [doc] Fixed some incorrect links
+
+	* [config] Fixed command line options for MacOS X; fixed command line
+          options for KCC in order to compile boost::regex
+
+2003-03-19  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Updated configure script and related files for
+	  supporting Boost.thread library.  Since it's still experimental,
+	  and pthread support is currently turned off by default.  For the
+	  meantime use --with-pthread option to enable pthread support.
+	  Note that if you enable pthread, you must be sure that
+	  -DBOOST_USER_CONFIG=\<palm/boost.h\> option is always passed to
+	  the compiler.
+
+	* [palm] Added operator+=() to class pseudo_des.
+	
+2003-03-18  Matthias Troyer <troyer@comp-phys.org>
+
+	* [lattice] Fixed bug with negative cell offsets
+
+	* [scheduler] Fixed bug with starting task that is finished but not 
+          marked as such
+
+2003-03-13  Simon Trebst <trebst@comp-phys.org>
+
+	* [boost] Added boost::regex to sources for libboost.a
+
+2003-03-11  Matthias Troyer <troyer@comp-phys.org>
+
+	* [alea] Fixed bug that caused crash when calculating error of
+        an observable with less than 32 measurements
+
+2003-03-11  Synge Todo <wistaria@comp-phys.org>
+
+	* [alea] More tests and fixes on SimpleObservableEvaluator and
+	SimpleObservableData.  Introduced automatic_naming_ variable for
+	improving naming scheme
+
+	* [lattice] Added missing inline keywords
+	
+2003-03-08  Matthias Troyer <troyer@comp-phys.org>
+
+        * Checked with Boost beta release 1.30.b1
+
+	* [alea] Fixed bug in simpleobsdata.h which tried to reduce number
+          of bins for jackknifing even after a nonlinear operation. Now it
+          
+	* [scheduler] Fixed bug with restarting from a checkpoint in parallel
+	
+2003-03-03  Synge Todo <wistaria@comp-phys.org>
+
+	* [alea] Fixed simpleobseval.h for Intel C++ 7.0 build 20030212Z.
+	
+2003-01-19  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release version 2.0b1 is published
+
+2003-01-19  Matthias Troyer <troyer@comp-phys.org>
+
+	* [config,palm,osiris,lattice] Added experimental support for 
+        Cray C++ v. 3.6; due to bugs in Cray C++ this does not work at this 
+        moment.
+        
+2003-01-16  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Updated documentation.  Information for download,
+	configuring, building and installing has been moved into
+	doc/setup.html.  Information for compiling user applications is
+	also added.  Old files (doc/configure.html and
+	doc/palm/configure.html) have been removed.
+
+	* [config] Fixed Makefile.in's.
+	
+2003-01-07  Synge Todo <wistaria@comp-phys.org>
+	
+	* [osiris] Removed IXDRFileDump::IXDRFileDump(const std::string&)
+	and OXDRFileDump::OXDRFileDump(const std::string&), since
+	boost::filesystem::path has a constructor, which takes const
+	std::string& or const char* as an argument.
+
+2002-12-22  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Added experimental support for Intel C++ compiler for
+	Itanium2 processor (--with-compiler=intel64).
+	
+2002-12-17  Matthias Troyer <troyer@comp-phys.org>
+	
+        * [scheduler] finished documentation
+ 
+2002-12-14  Matthias Troyer <troyer@comp-phys.org>
+
+	* [boost] Need Boost snapshot of December 14, 2002 or later for
+          post-review version of boost::filesystem
+
+	* [osiris] added support for boost::filesystem to xdrdump.h.
+          Removed dump references and supsension/continuing of dumps
+          since this is no longer needed for the scheduler.
+        
+	* [alea] all file paths now given as boost::filesystem::path
+
+        * [scheduler] changed to post-review version of boost::filesystem
+          all file paths now given as boost::filesystem::path
+ 
+2002-11-25  Matthias Troyer <troyer@comp-phys.org>
+
+	* [scheduler] Added load() function and removed constructor from IDump
+          to simplify examples. Added a second Ising example using the lattice
+          library. Documentation not yet up-to-date.
+
+	* [lattice] Made default graph type coordinate_lattice_graph easier
+          to understand
+
+2002-11-25  Matthias Troyer <troyer@comp-phys.org>
+
+	* [scheduler] Added an example using the lattice factory
+
+	* [palm] Added seed_with_sequence function to seed any random
+          number generator with an integer seed, employing palm::pseudo_des
+          to generate seed blocks.
+
+2002-11-8  Matthias Troyer <troyer@comp-phys.org>
+
+	* [scheduler] Wrote documentation for scheduler and simplified
+          the interface. The most important changes are that the save()
+          function should not call the base class version now, and that
+          random() refers to the generator, which is now not necessarily
+          a floating point one. random_01(), going with the boost convention,
+          now gives random numbers in the interval [0,1). Also, a default
+          templated factory has been added.
+	
+2002-10-31  Synge Todo  <wistaria@comp-phys.org>
+
+	* [config] Fixed ac_palm_pvm.m4 for SGI.
+	
+2002-10-24  Matthias Troyer <troyer@comp-phys.org>
+
+	* [palm] Added lagged_fibonacci.hpp header to read old-style Fibonacci
+        serialization. This should be fixed in a final booost::random
+
+2002-10-24  Synge Todo  <wistaria@comp-phys.org>
+
+	* [scheduler] Fixed include header name in src/scheduler/info.C,
+	and updated Makefile.dep.
+
+	* [alea] Fixed AbstractSimpleObservable<T>::write_xml_vector() in
+	src/alea/simpleobservable.h.
+	
+	* [palm] Replaced function template palm::StringValue::operator
+	T() by explicit conversion functions (operator int(), operator
+	double(), etc) for GCC 3.1.1 and MIPSpro Compiler.
+	
+2002-10-24  Matthias Troyer <troyer@comp-phys.org>
+
+	* [palm] Removed file system functions, have been replaced by 
+        boost::filesystem
+
+	* [alea] Improved interface for HDF5 dumping of observables
+
+	* [xml] Fixed a bug in reading of attributed with namespaces
+
+	* [lattice] Inserted dummy function call to prevent optimizer bug
+        with gcc-3
+
+	* [scheduler] Major changes, changed to XML file format and abstracted
+        from pure Monte Carlo scheduler. Documentation remains to be written
+        as well as better archiving tools. Currently not all of the information
+        recorded in alea observables is written in XML.
+
+2002-10-23  Synge Todo  <wistaria@comp-phys.org>
+
+	* [config] Reconstructed Makefile structure, so that MPI and PVM
+	versions of example files are built as well as single version.
+
+	* [boost] Added new directory src/boost, in which Boost object
+	library (currently Boost::filesystem library) will be build.
+	
+	* [config] Removed macro PALM_HAVE_XML_PARSER, OSIRIS_MPI,
+	OSIRIS_PVM, ALEA_WITH_OSIRIS_DUMPS, etc, and replaced with
+	PALM_WITHOUT_XML, PALM_MPI, PALM_PVM, PALM_WITHOUT_OSIRIS, etc,
+	respectively.  Removed src/alea/config.h.in
+
+	* [config] Removed config/boost directry from distribution and
+	changed configure script so that configure script in boost source
+	tree will be used instead if --enable-boost-config option is
+	specified.
+	
+2002-10-16  Synge Todo  <wistaria@comp-phys.org>
+	
+	* [lattice] Fixed functions and traits classes, so that
+	adjacency_list class with template parameter EdgeListS=vecS is
+	handled properly as coordinate_graph_type (EdgeListS=listS).
+
+	* [lattice] Added example program demonstrating usage of parity.
+	
+2002-10-11  Synge Todo  <wistaria@comp-phys.org>
+
+	* [xml] Added new XML parser, which uses Xerces C++, Expat, or
+	native PALM++ XML parser, and handler classes for parameters.
+	
+2002-10-10  Synge Todo  <wistaria@comp-phys.org>
+
+	* [xml] Fixed src/xml/xml.C.
+
+	* [lattice,scheduler] Replaced all palm::get<T> by static_cast<T>
+	in src/lattice/latticedescriptor.h, src/lattice/vectorio.h,
+	src/scheduler/MCRun.C, and src/scheduler/MCSimulation.C.
+
+	* [config] Added Makefile.dep files in each directory and
+	config/makedepend.pl script, which helps to generates
+	Makefile.dep's.  Added config/rules.mk and config/rules-lib.mk,
+	and adopted Makefile.in's to use them.  Added new entries:
+	examples, tests, and depend in top Makefile.
+	
+2002-10-09  Matthias troyer <troyer@comp-phys.org>
+	
+	* [config] Fixed config/ac_palm_mpi.m4 for Darwin (Mac OS X)
+
+ 	* [doc] Updated documentation of the libraries.
+	Documentation of the configuration and installation is
+	still missing
+
+	* [palm] removed palm::get function since static_cast does the same
+	All occurences of the function have been converted to static_cast
+
+	* [xml] renamed skip_comments to skip_comment
+
+        * [scheduler] added documentation, referring to future rewrite and 
+	simplified the example
+
+2002-10-01  Synge Todo  <wistaria@comp-phys.org>
+
+	* [palm] Fixed src/palm/Makefile.in.
+	
+2002-09-27  Synge Todo  <wistaria@comp-phys.org>
+	
+	* [config] Changed compile option for DEC compiler.  Fixed
+	config/ac_palm_mpi.m4 for SGI.
+
+	* [palm] Introduced PALM_HAVE_UNISTD_H and
+	PALM_HAVE_SYS_SYSTEMINFO_H to src/palm/os.C.  PALM_NO_HOSTNAME,
+	PALM_SYSV, etc have been removed.
+	
+2002-09-25 Prakash Dayal <prakash@comp-phys.org>
+
+	*  [palm,xml] parseTag() from src/palm/parser.h moved to 
+	   xml_parse_tag_name(...) in src/xml/xml.C.
+	
+   	*  parse_content(...), skip_comments(...), & skip_element(...) 
+	   are added in src/xml/xml.h. 
+
+2002-09-18  Matthias Troyer <troyer@comp-phys.org>
+
+	* [alea,scheduler] Fixed scheduler examplse and return value in alea
+
+2002-08-25  Matthias Troyer <troyer@comp-phys.org>
+
+	* [palm] Fixed exceptions.h to work with KCC
+
+2002-08-21  Matthias Troyer <troyer@comp-phys.org>
+
+	* Changed to new boost support for disabling exception handling
+          PALM_ERROR, PALM_THROW, PALM_ENABLE_EXCEPTIONS 
+          and PALM_DISABLE_EXCEPTIONS have been removed.
+
+2002-08-13  Synge Todo  <wistaria@comp-phys.org>
+
+	* [palm] Fixed STD macro defined in src/palm/config.h.in for Intel
+	C++ 6.0.
+	
+	* [lattice] Fixed src/lattice/parity.h
+	
+2002-07-19  Matthias Troyer <troyer@comp-phys.org>
+
+	* [alea] fixed a type problem in the observable evaluators
+        which prevented correct multiplication and division of
+        observables with integral value_type
+
+2002-07-10  Synge Todo  <wistaria@comp-phys.org>
+
+	* [config] Fixed HDF5 configuration for Intel C++ compiler.
+	Separated CPPFLAGS, LDFLAGS, and LIBS compiler options for HDF5
+	library into HDF5_* respectively.
+
+	* [palm] Fixed src/palm/parameters_impl.h and stringvalue.h for SGI.
+
+	* [lattice] Replaced const_property_map by specialized version of
+	property_map.
+	
+2002-06-06 Guido Schmid <gschmid@itp.phys.ethz.ch>
+
+	* [scheduler] added a second argument of type bool to
+	'write_xml'. In case of 'write_xml(...,true)', all timeseries 
+	data will be dumped in hdf5 format.
+
+	* [alea] changed the 'write_xml' members to support
+	dumping of timeseries data in hdf5 format.
+
+	* [config] added --disable-hdf5 to turn off the
+	use of the hdf5 library.
+
+	* [palm/config.h.in] added macro PALM_HAVE_HDF5
+
+	* [config] modified configure script for LAM-MPI
+
+2002-06-03  Matthias Troyer <troyer@comp-phys.org>
+
+	* [scheduler] Fixed a bug in terminating slaves when using the 
+	parallel scheduler
+
+2002-06-01  Synge Todo  <wistaria@comp-phys.org>
+
+	* Fixed Makefile.in's for `make install'.
+
+2002-05-24  Synge Todo  <wistaria@comp-phys.org>
+
+	* [config] Fixed --enable-boost-config option handling in
+	configure script and Makefile.in's.
+
+	* [devel] Added `devel' directory for development, which contains
+	Makefile generating distribution files of released version of the
+	library.
+
+2002-05-24  Matthias Troyer  <troyer@comp-phys.org>
+
+	* [palm,xml,osiris] Replaced ValueType class by a simpler
+	string-storage based class StringValue.
+
+2002-05-23  Synge Todo  <wistaria@comp-phys.org>
+
+	* Makefile.in's for examples.
+
+	* [config] Fixed configure script for LAM-MPI.
+	
+2002-05-22  Synge Todo  <wistaria@comp-phys.org>
+
+	* Merged all the PALM++ libraries into one source tree (PALM++).
+	alea1_5 library was added and renamed as `scheduler'.
+
+	* [alea] Fixed some macro names.
+
+2002-05-21  Synge Todo  <wistaria@comp-phys.org>
+
+	* [config] Fixed arxx.in for sgi32 and sgi64.
+	
+        * [lattice] Added template<> parameter to struct
+	lattice_traits<LatticeGraphDescriptor> in
+	latticegraphdescriptor.h.
+
+        * [osiris] Removed unused parameters in Comm.C
+	(osiris::start_all_processes).
+
+	* [alea] Fixed alea/Makefile.in.
+
+2002-05-17  Synge Todo  <wistaria@comp-phys.org>
+	
+	* [config,palm] Fixed configure.in, Makefile.in, and
+	palm/Makefile.in.
+	
+	* [config] Changed arxx.in to use libtool for MODE=macos.
+
+	* [palm] Fixed lexical_cast.hpp, math.h, complex.h.
+
+        * [osiris] Removed commsignal.C and commsignal.h.
+
+	* [alea] Replaced the macro PALM_VOID_RETURN_BUG by
+	BOOST_NO_VOID_RETURNS.
+
+2002-05-16  Synge Todo  <wistaria@comp-phys.org>
+
+	* Moved macro definition for exception handling from command line
+	(config/include.mk) to palm/config.h.in.  Fixed
+	--disable-exceptions and --disable-optimization option handling in
+	configure script.
+
+	* Added documentation for configure script (doc/configure.html).
+	Updated doc/index.html.
+
+2002-05-15  Synge Todo  <wistaria@comp-phys.org>
+
+	* Added configure script and change the directory structure.
+	
+	* All the logs are removed from each files.  Hereafter we will use
+	this ChangeLog instead.

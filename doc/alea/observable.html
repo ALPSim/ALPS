@@ -1,0 +1,196 @@
+<html>
+<head>
+   <title>PALM++ Project: alea library observable.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: alea library</h1>
+
+<h2>
+Header file <b>observable.h</b></h2>
+This header contains the abstract base class for Monte
+Carlo measurements.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+namespace alea {
+class NoMeasurementsError : public std::runtime_error {
+public:
+  NoMeasurementsError();
+};
+
+class Observable : public osiris::Dumpable
+{
+public:
+  typedef uint32_t version_type;
+
+  Observable(const std::string& n);
+
+  virtual Observable* clone() const = 0;
+
+  const std::string& name() const;
+  void rename (const std::string& newname);
+
+  virtual void reset(bool equilibrated=false) = 0;
+
+  virtual void output(std::ostream&) const = 0;
+  virtual void write_xml(std::ostream&, const std::string& hdffile="") const; 
+
+  virtual uint32_t version_id() const =0;
+
+  virtual bool can_set_thermalization() const;
+  virtual void set_thermalization(uint32_t todiscard);
+  virtual uint32_t get_thermalization() const=0;
+
+  virtual bool is_signed() const;
+  virtual void set_sign_name(const std::string& signname);
+  virtual void set_sign(const Observable& sign);
+  virtual void clear_sign();
+  virtual const Observable& sign() const;
+  virtual const std::string& sign_name() const;
+
+  virtual uint32_t number_of_runs() const;
+  virtual Observable* get_run(uint32_t) const;
+
+  virtual void compact();
+};
+
+}
+std::ostream& operator<<(std::ostream& out, const alea::Observable& o);
+</pre></blockquote>
+
+
+<h3>The <tt>NoMeasurementsError</tt> class</h3>
+An exception of type <tt>NoMeasurementsError</tt> gets thrown when
+results of measurements are accessed for an observable which has
+not stored any measurement. E.g. the mean value being accessed before
+the equilibration phase has finished.
+<h3>The <tt>Observable</tt> abstract base class</h3>
+<blockquote><pre>
+typedef uint32_t version_type;
+</pre></blockquote>
+is an integer storing a unique integer identifier of the derived leaf class.
+<blockquote><pre>
+Observable(const std::string& n);
+</pre></blockquote>
+creates an observable with a given name. Every observable has a name.
+<blockquote><pre>
+virtual Observable* clone() const = 0;
+</pre></blockquote>
+copies the observable and returns a pointer to the copy.
+<blockquote><pre>
+const std::string& name() const;
+</pre></blockquote>
+returns the name of the observable.
+<blockquote><pre>
+void rename(const std::string& newname);
+</pre></blockquote>
+renames the observable. This is only possible for an <tt>Observable</tt> not in an <tt>ObservableSet</tt>, otherwise a <tt>std::runtime_error</tt> is thrown.
+<blockquote><pre>
+virtual void reset(bool equilibrated=false) = 0;
+</pre></blockquote>
+resets the observable and restarts the collection of measurements.
+If the argument is false, the observable collects information during
+an equilibration phase, while it collects real measurements of the
+argument is true.
+<P>
+<B>Note:</B> This function has to be called with a <tt>true</tt> argument
+before any real measurements are recorded.
+<blockquote><pre>
+virtual void output(std::ostream&) const = 0;
+</pre></blockquote>
+writes the results of the collected measurements to a <tt>std::ostream</tt>.
+<blockquote><pre>
+virtual void write_xml(std::ostream&,const std::string& hdffile="") const; 
+</pre></blockquote>
+writes the results of the measurement in XML, using the schema presented
+at <A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org</A>
+to a  <tt>std::ostream</tt>. If time series information is present and a second nonempty argument the time series information is written into a file specified by that name.
+<blockquote><pre>
+virtual uint32_t version_id() const =0;
+</pre></blockquote>
+returns a unique integer identifier for the leaf class, used in 
+serialization and deserialization of inhomogeneous collections of
+observables.
+<blockquote><pre>
+virtual bool can_set_thermalization() const;
+</pre></blockquote>
+returns true if the thermalization (equilibration) time
+can be changed after the measurements have been performed.
+<blockquote><pre>
+virtual void set_thermalization(uint32_t todiscard);
+</pre></blockquote>
+sets the thermalization (equilibration) time to discard the given number
+of measurements. Throws <tt>std::logic_error</tt> if the
+thermalization (equilibration)  time cannot be changed for the observable.
+<blockquote><pre>
+virtual uint32_t get_thermalization() const=0;
+</pre></blockquote>
+returns the thermalization (equilibration) time. 
+<blockquote><pre>
+virtual bool is_signed() const;
+</pre></blockquote>
+returns <tt>true</tt> if the observable has a sign or phase problem.
+<blockquote><pre>
+virtual void set_sign_name(const std::string& signname);
+</pre></blockquote>
+sets the name of the observable containing the sign or phase.
+Throws a <tt>std::logic_error</tt> for observables without a sign or
+phase problem.
+<blockquote><pre>
+virtual void set_sign(const Observable& sign);
+</pre></blockquote>
+sets the observable containing the sign or phase. A pointer
+is stored with the observable. Throws a <tt>std::logic_error</tt> 
+for observables without a sign or
+phase problem.
+<blockquote><pre>
+virtual void clear_sign();
+</pre></blockquote>
+removes any previously set sign or phase observable.
+Throws a <tt>std::logic_error</tt> for observables without a sign or
+phase problem.
+<blockquote><pre>
+virtual const Observable& sign() const;
+</pre></blockquote>
+returns a reference to the sign or phase observable. 
+Throws a <tt>std::runtime_error</tt> if no sign or phase observable
+has been set.
+Throws a <tt>std::logic_error</tt> for observables without a sign or
+phase problem.
+<blockquote><pre>
+virtual const std::string& sign_name() const;
+</pre></blockquote>
+returns the name of the sign or phase observables.
+Throws a <tt>std::logic_error</tt> for observables without a sign or
+phase problem.
+<blockquote><pre>
+virtual uint32_t number_of_runs() const;
+</pre></blockquote>
+returns the number of runs (time series) which have contributed to
+this observable.
+<blockquote><pre>
+virtual Observable* get_run(uint32_t) const;
+</pre></blockquote>
+creates an observable containing data from only one specified
+run (time series).
+<blockquote><pre>
+virtual void compact();
+</pre></blockquote>
+compacts the observable, reducing the memory allocation, while
+still enabling access to the most important results. Usually the 
+ability to modify the observable (e.g. change thermalization,
+get crosscorrelations, ...) gets lost though.
+<blockquote><pre>
+std::ostream& operator<<(std::ostream& out, const alea::Observable& o);
+</pre></blockquote>
+calls the <tt>output</tt> function of an <tt>Observable</tt> to write it
+to a <tt>std::ostream</tt>.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

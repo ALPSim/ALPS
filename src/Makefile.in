@@ -1,0 +1,155 @@
+###########################################################################
+# ALPS++ library
+#
+# src/Makefile.in
+#
+# $Id$
+#
+# Copyright (C) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>,
+#                            Synge Todo <wistaria@comp-phys.org>,
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+###########################################################################
+
+# directories
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+builddir = @builddir@
+top_builddir = ./@top_builddir@
+
+include $(top_srcdir)/config/include-build.mk
+
+pkgincludedir = $(includedir)
+
+HEADER_CONFIG = alps/config.h @BOOST_USER_CONFIG_H@
+HEADER_BOOST = boost/functional_void.hpp
+HEADER_ALPS = alps/cctype.h alps/expression.h alps/expression_impl.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/parameterlist.h alps/parameters.h alps/random.h alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h
+HEADER_ALEA = alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/obsvalue.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h
+HEADER_OSIRIS = alps/osiris.h alps/osiris/buffer.h alps/osiris/comm.h alps/osiris/dump.h alps/osiris/mpdump.h alps/osiris/os.h alps/osiris/process.h alps/osiris/xdrdump.h alps/osiris/std/impl.h alps/osiris/std/list.h alps/osiris/std/map.h alps/osiris/std/pair.h alps/osiris/std/string.h alps/osiris/std/valarray.h alps/osiris/std/vector.h
+HEADER_LATTICE = alps/lattice.h alps/lattice/cell_traits.h alps/lattice/coordinate_traits.h alps/lattice/coordinatelattice.h alps/lattice/dimensional_traits.h alps/lattice/graph.h alps/lattice/graph_traits.h alps/lattice/graphproperties.h alps/lattice/hypercubic.h alps/lattice/lattice.h alps/lattice/latticedescriptor.h alps/lattice/latticegraph.h alps/lattice/latticegraphdescriptor.h alps/lattice/latticelibrary.h alps/lattice/parity.h alps/lattice/point_traits.h alps/lattice/propertymap.h alps/lattice/simplecell.h alps/lattice/simplelattice.h alps/lattice/unitcell.h
+HEADER_MODEL = alps/model.h alps/model/basis.h alps/model/modellibrary.h alps/model/operator.h alps/model/quantumnumber.h alps/model/sitebasis.h
+HEADER_PARSER = alps/xml.h alps/parser/attributes.h alps/parser/parser.h alps/parser/xmlhandler.h alps/parser/xmlparser.h alps/parser/xmlstream.h
+HEADER_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h
+HEADER_SCHEDULER = alps/scheduler.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h
+
+HEADER = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_ALEA) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_SCHEDULER)
+
+OBJ_BOOST = boost/exception.o boost/operations_posix_windows.o boost/path_posix_windows.o \
+	boost/c_regex_traits.o boost/c_regex_traits_common.o boost/cpp_regex_traits.o boost/cregex.o boost/fileiter.o boost/instances.o boost/posix_api.o boost/regex.o boost/regex_debug.o boost/regex_synch.o boost/w32_regex_traits.o boost/wide_posix_api.o boost/winstances.o \
+	boost/condition.o boost/exceptions.o boost/mutex.o boost/once.o boost/recursive_mutex.o boost/thread.o boost/threadmon.o boost/tss.o boost/xtime.o \
+	 boost/throw_exception.o
+OBJ_ALPS = alps/expression.o alps/parameterlist.o alps/parameters.o
+OBJ_ALEA = alps/alea/observable.o alps/alea/observableset.o
+OBJ_OSIRIS = alps/osiris/buffer.o alps/osiris/dump.o alps/osiris/os.o alps/osiris/xdrdump.o
+OBJ_OSIRIS_SGL = alps/osiris/process.o alps/osiris/comm.o alps/osiris/mpdump.o
+OBJ_OSIRIS_MPI = alps/osiris/process_mpi.o alps/osiris/comm_mpi.o alps/osiris/mpdump_mpi.o
+OBJ_OSIRIS_PVM = alps/osiris/process_pvm.o alps/osiris/comm_pvm.o alps/osiris/mpdump_pvm.o
+OBJ_LATTICE = alps/lattice/graph.o alps/lattice/latticedescriptor.o alps/lattice/latticegraphdescriptor.o alps/lattice/latticelibrary.o alps/lattice/unitcell.o
+OBJ_MODEL = alps/model/modellibrary.o
+OBJ_PARSER = alps/parser/parser.o alps/parser/xmlstream.o alps/parser/xmlhandler.o alps/parser/xmlparser.o
+OBJ_SCHEDULER = alps/scheduler/abstract_task.o alps/scheduler/remote_task.o alps/scheduler/remote_worker.o alps/scheduler/scheduler.o alps/scheduler/info.o alps/scheduler/single_scheduler.o alps/scheduler/master_scheduler.o alps/scheduler/slave_task.o alps/scheduler/montecarlo.o alps/scheduler/task.o alps/scheduler/mpp_scheduler.o alps/scheduler/worker.o alps/scheduler/signal.o alps/scheduler/options.o
+OBJ = $(OBJ_BOOST) $(OBJ_ALPS) $(OBJ_ALEA) $(OBJ_LATTICE) $(OBJ_MODEL) $(OBJ_OSIRIS) $(OBJ_PARSER) $(OBJ_SCHEDULER)
+OBJ_SGL = $(OBJ_OSIRIS_SGL)
+OBJ_MPI = $(OBJ_OSIRIS_MPI)
+OBJ_PVM = $(OBJ_OSIRIS_PVM)
+
+LIB_MPI = libcomm-mpi.a
+LIB_PVM = libcomm-pvm.a
+LIB = libalps.a libcomm-sgl.a @LIB_MPI@ @LIB_PVM@
+
+include $(top_srcdir)/config/rules.mk
+include $(srcdir)/Makefile.dep
+
+libalps.a : $(OBJ)
+	$(ARXX) $(cxxflags) $(ldflags) -o $@ $(OBJ) $(libs)
+libcomm-sgl.a : $(OBJ_SGL)
+	$(ARXX) $(cxxflags) $(ldflags) -o $@ $(OBJ_SGL) $(libs)
+libcomm-mpi.a : $(OBJ_MPI)
+	$(ARXX) $(cxxflags) $(ldflags) -o $@ $(OBJ_MPI) $(libs)
+libcomm-pvm.a : $(OBJ_PVM)
+	$(ARXX) $(cxxflags) $(ldflags) -o $@ $(OBJ_PVM) $(libs)
+
+distclean : distclean-files
+distclean-files:
+	rm -f boost/config.log boost/config.status
+
+# for boost
+
+boost/%.o : $(srcdir)/boost/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+
+# for Boost::filesystem
+boost/exception.o : $(BOOST_DIR)/libs/filesystem/src/exception.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/operations_posix_windows.o : $(BOOST_DIR)/libs/filesystem/src/operations_posix_windows.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/path_posix_windows.o : $(BOOST_DIR)/libs/filesystem/src/path_posix_windows.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+
+# for Boost::regex
+boost/c_regex_traits.o: $(BOOST_DIR)/libs/regex/src/c_regex_traits.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/c_regex_traits_common.o: $(BOOST_DIR)/libs/regex/src/c_regex_traits_common.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/cpp_regex_traits.o: $(BOOST_DIR)/libs/regex/src/cpp_regex_traits.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/cregex.o: $(BOOST_DIR)/libs/regex/src/cregex.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/fileiter.o: $(BOOST_DIR)/libs/regex/src/fileiter.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/instances.o: $(BOOST_DIR)/libs/regex/src/instances.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/posix_api.o: $(BOOST_DIR)/libs/regex/src/posix_api.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/regex.o: $(BOOST_DIR)/libs/regex/src/regex.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/regex_debug.o: $(BOOST_DIR)/libs/regex/src/regex_debug.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/regex_synch.o: $(BOOST_DIR)/libs/regex/src/regex_synch.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/w32_regex_traits.o: $(BOOST_DIR)/libs/regex/src/w32_regex_traits.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/wide_posix_api.o: $(BOOST_DIR)/libs/regex/src/wide_posix_api.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/winstances.o: $(BOOST_DIR)/libs/regex/src/winstances.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+
+# for Boost::thread
+boost/condition.o : $(BOOST_DIR)/libs/thread/src/condition.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/exceptions.o : $(BOOST_DIR)/libs/thread/src/exceptions.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/mutex.o : $(BOOST_DIR)/libs/thread/src/mutex.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/once.o : $(BOOST_DIR)/libs/thread/src/once.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/recursive_mutex.o : $(BOOST_DIR)/libs/thread/src/recursive_mutex.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/thread.o : $(BOOST_DIR)/libs/thread/src/thread.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/threadmon.o : $(BOOST_DIR)/libs/thread/src/threadmon.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/tss.o : $(BOOST_DIR)/libs/thread/src/tss.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/xtime.o : $(BOOST_DIR)/libs/thread/src/xtime.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+
+alps/%.o : $(srcdir)/alps/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+alps/osiris/%.o : $(srcdir)/alps/osiris/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+alps/osiris/%_mpi.o : $(srcdir)/alps/osiris/%.C
+	$(CXX) -c $(cppflags_mpi) $(cxxflags) $< -o $@
+alps/osiris/%_pvm.o : $(srcdir)/alps/osiris/%.C
+	$(CXX) -c $(cppflags_pvm) $(cxxflags) $< -o $@
+alps/parser/%.o : $(srcdir)/alps/parser/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@

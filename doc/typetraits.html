@@ -1,0 +1,87 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library typetraits.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>
+Header file <b>typetraits.h</b></h2>
+This header contains traits classes for standard types.
+<h3>
+Synopsis</h3>
+
+<blockquote>
+<pre>namespace palm {
+typedef ... type_tag_t;
+template &lt;class T> struct TypeTraits;
+
+template &lt;> struct TypeTraits&lt;int8_t>;
+template &lt;> struct TypeTraits&lt;uint8_t>;
+template &lt;> struct TypeTraits&lt;int16_t>;
+template &lt;> struct TypeTraits&lt;uint16_t>;
+template &lt;> struct TypeTraits&lt;int32_t>;
+template &lt;> struct TypeTraits&lt;uint32_t>;
+template &lt;> struct TypeTraits&lt;int64_t>;
+template &lt;> struct TypeTraits&lt;uint64_t>;
+template &lt;> struct TypeTraits&lt;float>;
+template &lt;> struct TypeTraits&lt;double>;
+template &lt;> struct TypeTraits&lt;long double>;
+template &lt;> struct TypeTraits&lt;std::complex&lt;float> >;
+template &lt;> struct TypeTraits&lt;std::complex&lt;double> >;
+template &lt;> struct TypeTraits&lt;std::complex&lt;long double> >;
+template &lt;> struct TypeTraits&lt;bool>;
+template &lt;> struct TypeTraits&lt;std::string>;
+
+template &lt;class T> struct NumericTypeConversion;
+}</pre></blockquote>
+
+
+<h3>The <tt>TypeTraits</tt> traits class</h3>
+The <tt>TypeTraits </tt>traits class encodes useful type properties not
+yet found in the standard library nor boost.
+<table BORDER=2 >
+<tr>
+<td><b>Member</b></td>
+
+<td><b>Type</b></td>
+
+<td><b>Description</b></td>
+</tr>
+
+<tr><td><tt>TypeTraits&lt;T>::is_specialized</tt></td><td><tt>bool</tt></td>
+<td><tt>true</tt> if the template has been specialized for the template parameter</td></tr>
+<tr><td><tt>TypeTraits&lt;T>::is_complex</tt></td><td><tt>bool</tt></td>
+<td><tt>true</tt> if the type <tt>T</tt> is complex</td></tr>
+<tr><td><tt>TypeTraits&lt;T>::type_tag</tt></td><td><tt>palm::type_tag_t</tt></td>
+<td>a unique integral identifier for all types for which the template has been specialized</td></tr>
+<tr><td><tt>TypeTraits&lt;T>::norm_t</tt></td><td></td>
+<td>type to store the norm of a number of type<tt>T</tt></td></tr>
+<tr><td><tt>TypeTraits&lt;T>::average_t</tt></td><td></td>
+<td>type to store averages of numbers of type<tt>T</tt></td>
+<tr><td><tt>TypeTraits&lt;T>::signed_t</tt></td><td></td>
+<td>for integral types, the signed version of the type <tt>T</tt>, otherwise the type itself</td>
+<tr><td><tt>TypeTraits&lt;T>::unsigned_t</tt></td><td></td>
+<td>for integral types, the unsigned version of the type <tt>T</tt>, otherwise the type itself</td>
+<tr><td><tt>TypeTraits&lt;T>::real_t</tt></td><td></td>
+<td>for complex types, the real base type of type <tt>T</tt>, otherwise the type itself</td>
+</tr>
+</table>
+
+<h3>The <tt>NumericTypeConversion</tt> traits class</h3>
+The <tt> NumericTypeConversion</tt> traits class helps reduce code proliferation by reducing the
+number of types for which a template needs to be instantiated.
+<blockquote><pre> NumericTypeConversion&lt;T,X>::appropriate_type</pre></blockquote>
+The <tt>appropriate_type</tt> is a type to which <tt>X</tt> can be converted without loss
+of precision when afterwards a numeric operation with type <tt>T</tt> is planned.
+As there are far fewer <tt> appropriate_type</tt>s than types <tt>T</tt> code
+proliferation can be reduced.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

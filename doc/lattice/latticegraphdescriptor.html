@@ -1,0 +1,157 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library latticegraphdescriptor.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>Header file: latticegraphdescriptor.h</h2>
+
+defines a lattice graph class <tt>LatticeGraphDescriptor</tt> which
+can be constructed from XML input. It is a model of 
+<a href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A> and
+<a href="latticeconcepts.html#FiniteLattice">FiniteLattice</A>. 
+It can be constructed
+from the <tt>&lt;LATTICEGRAPH></tt> element of the 
+<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>. </li>
+<p>
+<h3>Synopsis</h3>
+<blockquote><pre>
+namespace lattice {
+
+class LatticeGraphDescriptor
+  : public hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;GraphUnitCell> > >
+{
+public:
+  typedef hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;GraphUnitCell> > > base_type;
+  typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
+  typedef lattice_traits&lt;base_type>::offset_type offset_type;
+  typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
+  typedef lattice_traits&lt;base_type>::vector_type vector_type;
+  typedef lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
+  typedef lattice_traits&lt;base_type>::cell_iterator cell_iterator; 
+  typedef lattice_traits&lt;base_type>::size_type size_type;
+  typedef lattice_traits&lt;base_type>::boundary_crossing_type boundary_crossing_type;
+
+  LatticeGraphDescriptor() {}
+  LatticeGraphDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;, 
+       const LatticeMap&amp; = LatticeMap(), 
+       const FiniteLatticeMap&amp; = FiniteLatticeMap(), 
+       const UnitCellMap&amp; = UnitCellMap());
+
+  void set_parameters(const palm::Parameters&amp;);
+  void write_xml(std::ostream&amp;, const std::string&amp; new_name= "");
+  const std::string&amp; name() const;
+};
+
+std::ostream&amp; operator&lt;&lt; (std::ostream&amp; out, const LatticeGraphDescriptor&amp; l);
+
+struct lattice_traits&lt;LatticeGraphDescriptor>
+{
+  typedef LatticeGraphDescriptor::unit_cell_type unit_cell_type;
+  typedef LatticeGraphDescriptor::cell_descriptor cell_descriptor;
+  typedef LatticeGraphDescriptor::offset_type offset_type;
+  typedef LatticeGraphDescriptor::basis_vector_iterator basis_vector_iterator;
+  typedef LatticeGraphDescriptor::cell_iterator cell_iterator;
+  typedef LatticeGraphDescriptor::size_type size_type;
+  typedef LatticeGraphDescriptor::vector_type vector_type;
+  typedef LatticeGraphDescriptor::boundary_crossing_type boundary_crossing_type;
+};
+
+typedef lattice_graph&lt;LatticeGraphDescriptor,coordinate_graph_type> HypercubicLatticeGraph;
+
+}
+<pre></blockquote>
+
+<H3>The <tt>LatticeGraphDescriptor</tt> class</H3>
+<h4>Type definitions</h4>
+<blockquote><pre>
+typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
+typedef lattice_traits&lt;base_type>::offset_type offset_type;
+typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
+typedef lattice_traits&lt;base_type>::vector_type vector_type;
+typedef lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
+typedef lattice_traits&lt;base_type>::cell_iterator cell_iterator; 
+typedef lattice_traits&lt;base_type>::size_type size_type;
+typedef lattice_traits&lt;base_type>::boundary_crossing_type boundary_crossing_type;
+</pre></blockquote>
+these types are inherited from <a href="hypercubic.html"><tt>hypercubic_lattice</tt></a>.
+<h4>Constructors</h4>
+<blockquote><pre>
+LatticeGraphDescriptor() {}
+</pre></blockquote>
+an empty lattice without any information.
+<blockquote><pre>
+  LatticeGraphDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;, 
+       const LatticeMap&amp; = LatticeMap(), 
+       const FiniteLatticeMap&amp; = FiniteLatticeMap(), 
+       const UnitCellMap&amp; = UnitCellMap());
+</pre></blockquote>
+reads the <tt>LatticeGraphDescriptor</tt> in XML from a stream
+assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>.
+The start tag <tt>&lt;LATTICEGRAPH ...></tt> has already been read and is passed
+as a <a href="http://www.comp-phys.org/software/PALM++/xml/xml.html"><tt>palmxml::XMLTag</tt></a>
+<P>In the <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice schema</A>
+the <tt>&lt; LATTICEGRAPH ...></tt> contain <tt>&lt;LATTICE ...></tt>,
+<tt>&lt;FINITELATTICE ...></tt> and <tt>&lt;UNITCELL ...></tt> elements.
+These can either describe the lattice or unit cell fully, or refer to a lattice resp. unit cell by name.
+The optional <tt>LatticeMap</tt>, <tt>FiniteLatticeMap</tt> and <tt>UnitCellMaps</tt> 
+argument can be used to pass the known lattices and unit cells.
+
+<h4>Member functions</h4>
+in addition to those inherited from the parent lattice:
+<blockquote><pre>
+void set_parameters(const palm::Parameters&amp;);
+</pre></blockquote>
+The <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice schema</A>
+allows the extent and boundary conditions to be specified by external parameters.
+The <tt>set_parameters</tt> function allows to pass a map of parameters,
+to fill the values of the parameters.
+<blockquote><pre>
+void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;
+</pre></blockquote>
+writes the finite lattice in XML, using the same <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. It
+can optionally be renamed by passing a new name as the second argument.
+<blockquote><pre>
+const std::string&amp; name() const;
+</pre></blockquote>
+returns the name of the lattice.
+<H4>Output operator</H4>
+<blockquote><pre>
+std::ostream&amp; operator&lt;&lt; (std::ostream&amp; out, const LatticeGraphDescriptor&amp; l);
+</pre></blockquote>
+writes the <tt>LatticeGraphDescriptor</tt> in XML, using
+the <tt>write_xml</tt> member function.
+<H4>Traits classes</h4>
+<blockquote><pre>
+struct lattice_traits&lt;LatticeGraphDescriptor>
+{
+  typedef LatticeGraphDescriptor::unit_cell_type unit_cell_type;
+  typedef LatticeGraphDescriptor::cell_descriptor cell_descriptor;
+  typedef LatticeGraphDescriptor::offset_type offset_type;
+  typedef LatticeGraphDescriptor::basis_vector_iterator basis_vector_iterator;
+  typedef LatticeGraphDescriptor::cell_iterator cell_iterator;
+  typedef LatticeGraphDescriptor::size_type size_type;
+  typedef LatticeGraphDescriptor::vector_type vector_type;
+  typedef LatticeGraphDescriptor::boundary_crossing_type boundary_crossing_type;
+};
+</pre></blockquote>
+define the lattice traits.
+
+<H3>The <tt>HypercubicLatticeGraph</tt> type</h3>
+<blockquote><pre>
+typedef lattice_graph&lt;LatticeGraphDescriptor,coordinate_graph_type> HypercubicLatticeGraph;
+</pre></blockquote>
+is a useful typedef for a default <a href="latticegraph.html"><tt>lattice_graph</tt></a>
+class. It can be used to create a graph from a <tt>LatticeGraphDescriptor</tt>.
+<HR>
+<ADDRESS>(c) 2000-2003 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,26 @@
+#! /bin/sh -f
+# find the transformer
+if test x$PALM_XSLT_TRANSFORMER != x; then
+  transformer=$PALM_XSLT_TRANSFORMER
+else 
+  tryxsltproc=`which xsltproc`
+  if test x$tryxsltproc != x; then
+    transformer=$tryxsltproc
+  else
+    tryxalan=`which Xalan`
+    if test x$tryxalan != x; then
+      transformer=$tryxalan
+    else
+      echo Could not find XSLT transformer. Please set the PALM_XSLT_TRANSFORMER environment variable
+      exit
+    fi
+  fi
+fi
+#is it Gnome xsltproc?
+if test `$transformer | grep xmlsoft | wc -l` == 2; then
+#is xsltproc
+  $transformer $2 $1
+else
+#is xalan
+  $transformer $1 $2
+fi

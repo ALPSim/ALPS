@@ -1,0 +1,152 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+For the simulation of lattice models the graph concepts of the <A HREF="http://www.boost.org/">Boost Graph 
+Library</A> (BGL) provide a good foundation. However, as discussed
+with the corresponding <A href="http://xml.comp-phys.org/schemas/lattice/">lattice schema
+</A> at <A href="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+We want to be able to automatically
+create a "lattice" graph by translating a "unit cell".
+<P>
+This library defines concepts, traits, generic functions and some
+concrete classes to implement this idea. Lattices, Finite lattices,
+unit cells, and graphs as presented for the 
+<A href="http://xml.comp-phys.org/schemas/lattice/">lattice schema</A>
+can be created from an XML description, and a graph generated
+from them. The generic concepts presented below make the library
+extensible.
+<P>
+The lattice library contains code for the automatic generation of a 
+graph from a lattice description.
+<P>
+The usual usage scenario will be to create a <a href="library.html">library</a> of lattices
+and graphs by reading an XML file. The library can then be asked to create
+a graph, if one passes the graph name and optionally parameters. We refer to the <A href="#example">
+example</a> for a self-explaining usage example.
+
+<h2>Download, Configuring, Building and Installing</h2>
+
+are discussed <a href="../setup.html">here</a>.
+
+<P> The library will reside in the file <tt>liblattice.a</tt> in the path specifed in the configuration step.
+
+<H2>Documentation</H2>
+
+<H3>Concepts</H3>
+<ul>
+  <li><a href="helperconcepts.html">Helper concepts</a>
+  <ul>
+    <li><a href="helperconcepts.html#Dimensional">Dimensional</a>
+    </li>
+    <li><a href="helperconcepts.html#FixedDimensional">FixedDimensional</a>
+    </li>
+    <li><a href="helperconcepts.html#Point">Point</a>
+    </li>
+    <li><a href="helperconcepts.html#Vector">Vector</a>
+    </li>
+    <li><a href="helperconcepts.html#Coordinate">Coordinate</a>
+    </li>
+    <li><a href="helperconcepts.html#Coordinate">Refinements and combinations</a>
+    </li>
+  </ul>
+  </li>
+  <li><a href="latticeconcepts.html">Lattice concepts</a>
+  <ul>
+    <li><a href="latticeconcepts.html#UnitCell">UnitCell</a>
+    </li>
+    <li><a href="latticeconcepts.html#Cell">Cell</a>
+    </li>
+    <li><a href="latticeconcepts.html#Lattice">Lattice</a>
+    </li>
+    <li><a href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</a>
+    </li>
+    <li><a href="latticeconcepts.html#FiniteLattice">FiniteLattice</a>
+    </li>
+  </ul>
+  </li>
+  <li><a href="graphconcepts.html">Concepts for lattices with graphs</a>
+  <ul>
+    <li><a href="graphconcepts.html#LatticeGraph">LatticeGraph</a>
+    </li>
+    <li><a href="graphconcepts.html#UnitCellGraph">UnitCellGraph and GraphUnitCell</a>
+    </li>
+    <li><a href="graphconcepts.html#ReflectablePropertyGraph"> ReflectablePropertyGraph</a>
+    </li>
+  </ul>
+  </li>
+</ul>
+
+<H3>Headers</H3>
+<ul>
+<li>Traits classes
+<ul>
+<li><A HREF="helperconcepts.html#dimensional_traits.h">dimensional_traits.h</A> defines traits and functions for the <A HREF="helperconcepts.html#Dimensional">Dimensional</A> concept.</li>
+<li><A HREF="helperconcepts.html#point_traits.h">point_traits.h</A>
+defines traits for the <A HREF="helperconcepts.html#Point">Point</A> concept.</li>
+<li><A HREF="helperconcepts.html#coordinate_traits.h"> coordinate_traits.h</A>
+defines traits  and functions for the <A HREF="helperconcepts.html#Coordinate">Coordinate </A> concept.</li>
+<li><A HREF="latticeconcepts.html#cell_traits.h">cell_traits.h</A>
+defines traits for the <A HREF="latticeconcepts.html#Cell">Cell</A> concept.</li>
+<li><A HREF="graphconcepts.html#graph_traits.h"> graph_traits.h</A>
+defines traits  and functions for the <A HREF="graphconcepts.html#LatticeGraph">LatticeGraph</A>
+and  <A HREF="graphconcepts.html#UnitCellGraph"> UnitCellGraph</A> concepts.</li>
+</ul>
+<li>Generic functions and template classes
+<ul>
+<li><A HREF="graphproperties.html">graphproperties.h</A> defines property types used in the lattice library.
+<li><A HREF="graph.html">graph.h</A> defines functions for XML I/O, copying and some property
+calculation functions of graphs.
+<li><A HREF="parity.html">parity.h</A> functions for bipartite graphs.
+<li><A href="lattice.html">lattice.h</A> defines some basic functions for lattices.
+<li><A href="latticegraph.html">latticegraph.h</a> defines a function to create a graph from a lattice, and a template class
+that decorates a lattice with a graph.
+
+</ul>
+<li>Classes
+<ul>
+<li><a href="unitcell.html">unitcell.h</a> defines two unit cell classes: <tt>EmptyUnitCell</tt> and <tt>GraphUnitCell</tt>
+<li><a href="simplecell.html">simplecell.h</a> defines a template class <tt>simple_cell</tt>
+making a cell from a unit cell.
+<li><a href="simplelattice.html">simplelattice.h</a> defines a template class <tt>simple_lattice</tt>
+making a lattice from a 
+cell and unit cell.
+<li><a href="coordinatelattice.html">coordinatelattice.h</a> defines a template class <tt>coordinate_lattice</tt> which adds concrete basis vectors to a lattice.
+<li><a href="hypercubic.html">hypercubic.h</a> defines a template class <tt>hypercubic_lattice</tt>
+which makes a hypercubic finite lattice with open or periodic boundary conditions from an
+infinite lattice.
+<li><a href="latticedescriptor.html">latticedescriptor.h</a> defines lattice classes which
+can be constructed from <TT>&lt;LATTICE></TT> and <TT>&lt;FINITELATTICE></TT> elements
+of XML input.
+<li><a href="latticegraphdescriptor.html"> latticegraphdescriptor.h</a> defines a class which
+can be constructed from <TT>&lt;LATTICEGRAPH></TT> elements of XML input and can be used to create
+graphs.
+<li><a href="library.html">library.h</a> defines a class to hold a colection of graphs and lattices,
+read from XML, and a factory to create graphs from this collection.
+</ul>
+</ul>
+<H2><a name="example"/>Examples</H2>
+
+To build the examples go to the <tt>example/lattice</tt> subdirectory of PALM++ directory and type
+<blockquote><pre>
+make examples
+</blockquote></pre>
+The source code and  of the examples is well documented and self-explanatory.
+<P>To run the examples type
+<blockquote><pre>
+./example1 &lt; example1.input
+./example2 &lt; example2.input
+./example3 &lt; example3.input
+./example4 &lt; example4.input
+</blockquote></pre>
+
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
+Troyer</A> and <A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
+</body>
+</html>

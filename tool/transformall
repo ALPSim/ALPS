@@ -1,0 +1,6 @@
+#! /bin/bash -f
+files=`echo $* | cut -d' ' -f3-`
+archivecat `echo $* | cut -d' ' -f3-` > /tmp/archive$$
+./xslttransform /tmp/archive$$ $1 > /tmp/plot$$
+./xslttransform /tmp/plot$$ $2
+rm /tmp/archive$$ /tmp/plot$$

@@ -1,0 +1,140 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library unitcell.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>Header file: unitcell.h</h2>
+
+defines an empty unite cell class <tt>EmptyUnitCell</tt> and a unit cell
+decorated with a graph <tt>GraphUnitCell</tt>.
+
+<h3>Synopsis</h3>
+<blockquote><pre>
+namespace lattice {
+
+class EmptyUnitCell {
+public:
+  EmptyUnitCell(std::size_t dim=0);
+  std::size_t dimension() const;
+};
+
+dimensional_traits&lt;EmptyUnitCell>::dimension_type dimension(EmptyUnitCell c);
+
+class GraphUnitCell
+{
+public:
+  boost::adjacency_list&lt;boost::vecS,boost::vecS,boost::directedS,/*...*/> graph_type;
+
+  GraphUnitCell() {}
+  GraphUnitCell(const palmxml::XMLTag&amp;, std::istream&);
+
+  void write_xml(std::ostream&amp;, const std::string&amp; = "") const;
+  const graph_type&amp; graph() const;
+  std::size_t dimension() const;
+  const std::string&amp; name() const;
+};
+
+dimensional_traits&lt; GraphUnitCell>::dimension_type dimension(const GraphUnitCell&amp; c);
+
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const lattice:: GraphUnitCell&amp; u)
+
+typedef std::map&lt;std::string,GraphUnitCell> UnitCellMap;
+}
+<pre></blockquote>
+<H3>The <tt>EmptyUnitCell</tt> class</H3>
+describes an empty unit cell and 
+fulfills the <A href="helperconcepts.html#Dimensional">Dimensional</A>
+and <A href="latticeconcepts.html#UnitCell">UnitCell</A> requirements.
+The dimension is the only property of this unit cell.
+<h4>Constructor</h4>
+<blockquote><pre>
+EmptyUnitCell(std::size_t dim=0);
+</pre></blockquote>
+The constrictors takes an optional dimension argument.
+<h4>Member functions</h4>
+<blockquote><pre>
+std::size_t dimension() const;
+</pre></blockquote>
+returns the dimension of the unit cell.
+<H3>The <tt>GraphUnitCell</tt> class</H3>
+describes a unit cell with a graph and fulfills the <A href="helperconcepts.html#Dimensional">Dimensional</A>
+and <A href="graphconcepts.html#UnitCellGraph">GraphUnitCell</A> requirements.
+It is created from XML input.
+<h4>Type definitions</h4>
+<blockquote><pre>
+boost::adjacency_list&lt;boost::vecS,boost::vecS,boost::directedS,/*...*/> graph_type;
+</pre></blockquote>
+The graph is a directed adjacency list graph. The directed property is necessary
+for a graph with more than one edge between two vertices. The internal properties
+are:
+<table border="1">
+<tr><td><b>Vertex property</b></td><td><b>Type</b></td><td><b>Note</b></td></tr>
+<tr><td><tt>vertex_type_t</tt></td><td><tt>int32_t</tt></td>
+<td>The type (color) of the vertex</td></tr>
+<tr><td><tt>coordinate_t</tt></td><td><tt>std::vector&lt;double></tt></td>
+<td>The coordinate of the vertex</td></tr>
+<tr><td><tt>vertex_index_t</tt></td><td><tt></tt></td>
+<td>The vertex index, predefined for <tt>boost::adjacency_list</tt></td></tr>
+<tr><td><b>Edge property</b></td><td><b>Type</b></td><td><b>Note</b></td></tr>
+<tr><td><tt>edge_type_t</tt></td><td><tt>int32_t</tt></td>
+<td>The type (color) of the edge</td></tr>
+<tr><td><tt>edge_index_t</tt></td><td><tt>int32_t</tt></td>
+<td>The edge index</td></tr>
+<tr><td><tt>source_offset_t</tt></td><td><tt>std::vector&lt;int></tt></td>
+<td>cell offset of the source vertex</td></tr>
+<tr><td><tt>target_offset_t</tt></td><td><tt>std::vector&lt;int></tt></td>
+<td>cell offset of the target vertex</td></tr>
+</table>
+<h4>Constructors</h4>
+<blockquote><pre>
+GraphUnitCell() {}
+</pre></blockquote>
+the default constructor.
+<blockquote><pre>
+GraphUnitCell(const palmxml::XMLTag&amp;, std::istream&);
+</pre></blockquote>
+reads the unit cell in XML from a stream assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>.
+The start tag <tt>&lt;UNITCELL ...></tt> has already been read and is passed
+as a <a href="http://www.comp-phys.org/software/PALM++/xml/xml.html"><tt>palmxml::XMLTag</tt>
+</A> argument.
+<h4>Member functions</h4>
+<blockquote><pre>
+void write_xml(std::ostream&amp;, const std::string&amp; name= "") const;
+</pre></blockquote>
+writes the unit cell in XML, using the same <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. It
+can optionally be renamed by passing a new name as the second argument.
+<blockquote><pre>
+const graph_type&amp; graph() const;
+</pre></blockquote>
+returns the graph associated with the unit cell.
+<blockquote><pre>
+std::size_t dimension() const;
+</pre></blockquote>
+the dimension of the unit cell
+<blockquote><pre>
+const std::string&amp; name() const;
+</pre></blockquote>
+the name of the unit cell, as read from the XML input.
+<h4>Operators</h4>
+<blockquote><pre>
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const lattice:: GraphUnitCell&amp; u)
+</pre></blockquote>
+The output to a <tt>std::ostream</tt> uses the <tt>write_xml</tt> member function.
+<H3>The <tt>UnitCellMap</tt> type</H3>
+<blockquote><pre>
+typedef std::map&lt;std::string,GraphUnitCell> UnitCellMap;
+</pre></blockquote>
+is a map from the name of unit cells, to a <tt>GraphUnitCell</tt>, used when
+parsing XML input for lattices.
+<HR>
+<ADDRESS>(c) 2000-2003 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

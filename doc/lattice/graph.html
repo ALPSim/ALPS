@@ -1,0 +1,106 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library graph.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>Header file: graph.h</h2>
+
+defines functions for graph I/O, inquiry about graph properties,
+and a function to copy a graph. The functions work on all graphs
+modelling the concept of
+<a href="graphconcepts.html#ReflectablePropertyGraph"> ReflectablePropertyGraph</a>.
+
+<h3>Synopsis</h3>
+<blockquote><pre>
+namespace lattice {
+
+template &lt;class GRAPH>
+void write_graph_xml(std::ostream&amp; out, const GRAPH&amp; g, const std::string&amp; n="")
+
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const lattice::coordinate_graph_type&amp; g);
+
+template &lt;class GRAPH> 
+std::string read_graph_xml(std::istream&amp; p, GRAPH&amp; g)
+
+template &lt;class GRAPH>
+std::string read_graph_xml(const palmxml::XMLTag&amp; intag, std::istream&amp; p, GRAPH&amp; g)
+
+template &lt;class SOURCEGRAPH, class DESTINATIONGRAPH>
+void copy_graph(const SOURCEGRAPH&amp; src, DESTINATIONGRAPH&amp; dst)
+
+template &lt;class GRAPH >
+int constant_degree(const GRAPH&amp; g)
+
+template &lt;class GRAPH>
+int32_t maximum_edge_type(const GRAPH&amp; g)
+
+template &lt;class G>
+int32_t maximum_vertex_type(const GRAPH&amp; g)
+
+}
+</pre></blockquote>
+<H3>XML I/O functions</H3>
+<blockquote><pre>
+template &lt;class GRAPH>
+void write_graph_xml(std::ostream&amp; out, const GRAPH&amp; g, const std::string&amp; name="")
+</pre></blockquote>
+writes a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>
+to an <tt>std::ostream</tt> using the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. The
+graph can optionally be given a name for the output, which overrides any name property the 
+graph might have.
+<blockquote><pre>
+std::ostream&amp; operator<<(std::ostream&amp; out, const lattice::coordinate_graph_type&amp; g);
+</pre></blockquote>
+writes a <a href="graphproperties.html#coordinate_graph_type ><tt>lattice::coordinate_graph_type</tt></A> using <tt>write_graph_xml</tt>.
+
+<blockquote><pre>
+template &lt;class GRAPH>
+std::string read_graph_xml(std::istream&amp; is, GRAPH&amp; graph)
+</pre></blockquote>
+reads a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>
+from an <tt>std::istream</tt> assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. The name of the graph is returned.
+<blockquote><pre>
+template &lt;class GRAPH>
+std::string read_graph_xml(const palmxml::XMLTag&amp; intag, std::istream&amp; p, GRAPH&amp; g)
+</pre></blockquote>
+same as above, but the start tag <tt>&lt;GRAPH ...></tt> has already been read and is passed
+as a <a href="http://www.comp-phys.org/software/PALM++/xml/xml.html"><tt>palmxml:: XMLTag</tt>
+</A> argument.
+<h3>Graph functions</h3>
+<blockquote><pre>
+template &lt;class SOURCEGRAPH, class DESTINATIONGRAPH>
+void copy_graph(const SOURCEGRAPH&amp; src, DESTINATIONGRAPH&amp; dst)
+</pre></blockquote>
+copies a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>
+and all its properties defined in <a href="graphproperties.html">graphproperties.h</A>,
+if they exist for both of the graphs.
+<blockquote><pre>
+template &lt;class GRAPH >
+int constant_degree(const GRAPH&amp; g)
+</pre></blockquote>
+determines if all vertices of a Boost graph have the same degree. If they do the
+degree is returned, otherwise -1.
+<blockquote><pre>
+template &lt;class GRAPH>
+int32_t maximum_edge_type(const GRAPH&amp; g)
+</pre></blockquote>
+finds the largest value of the <tt>egde_type_t</tt> property in
+a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>.
+<blockquote><pre>
+template &lt;class G>
+int32_t maximum_vertex_type(const GRAPH&amp; g)
+</pre></blockquote>
+finds the largest value of the <tt>vertex_type_t</tt> property in
+a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>.
+<HR>
+<ADDRESS>(c) 2000-2002 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

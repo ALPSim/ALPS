@@ -1,0 +1,263 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library lattice concepts</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2> Lattice Concepts</h2>
+A lattice is built from cells, created by translating a unit cell an integral
+number of times along any of the basis vectors. See the corresponding
+discussion in the documentation of the <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+<P>
+A lattice graph can similarly be constructed by taking a graph on a unit 
+cell and copying it to all the cells in the lattice, which will be discussed
+<A HREF="graphconcepts.html">later</A>.
+<P>
+Here we will present the concepts related to lattices:
+  <ul>
+    <li><a href="#UnitCell">UnitCell</a>
+    </li>
+    <li><a href="#Cell">Cell</a>
+    </li>
+    <li><a href="#Lattice">Lattice</a>
+    </li>
+    <li><a href="#CoordinateLattice">CoordinateLattice</a>
+    </li>
+    <li><a href="#FiniteLattice">FiniteLattice</a>
+    </li>
+  </ul>
+
+<h3><a name="UnitCell"></a>
+ UnitCell</h3>
+is <a href="#Dimensional">Dimensional</a>, and describes the unit cell 
+from which a lattice is built. It is 
+possible to construct a lattice just from a unit cell and the 
+basis vectors.
+<P>For more information see the documentation of the <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+<h4> Example Implementation</h4>
+see in the file <a href="unitcell.html">unitcell.h</a>
+
+
+<h3><a name="Cell"></a>Cell</h3>
+is a refinement of  <a href="#Dimensional">Dimensional</a> and 
+describes a translated unit cell, one building block of a lattice.
+<P>For more information see the documentation of the <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+<P>Accessing cell properties could be added similar
+ to accessing vertex properties in the BGL. </p>
+<h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>C</TT></TD><TD>a type that is a model of <i>Cell</i></TD></TR>
+</TABLE>
+<h4> Associated Types</h4>
+<table border="1">
+<tr><td><tt>lattice::cell_traits&lt;C&gt;::offset_type</tt>
+<br><br> a type modelling the concept <a href="helperconcepts.html#Vector">Vector</a>
+with usually integral value_type. It can store the number of translations along
+each of the basis vectors needed to reach a cell from the unit cell at the origin.
+</td>
+</tr>  
+</table>
+<h4> Expressions</h4>
+see below under the <a href="#Lattice">Lattice</a> concept.
+<h4> Cell properties</h4>
+it could be useful to have cell properties like the vertex and edge properties
+of the Boost Graph Library.
+<h4><a name="cell_traits.h">Example Implementation: cell_traits.h</a></h4>
+The default implementation of the traits class in the file cell_traits.h assumes
+that the type <tt>C</tt> has a corresponding type member:
+<blockquote><pre>
+namespace lattice {
+
+  template &lt;class C>
+  struct cell_traits 
+  {
+    typedef typename C::offset_type offset_type;
+  };
+
+}
+</pre></blockquote>
+
+For a reference implementation of a cell see <A HREF="simplecell.html">simplecell.h</A>.
+
+
+<h3><a name="Lattice">Lattice</a></h3>
+is a refinement of <a href="#Dimensional">Dimensional</a>. It describes
+a (finite) dimensional lattice. It is built from cells created by
+a translation of a unit cell by integer multiples of the basis
+vectors. For more information see the documentation of the 
+<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+
+<h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>L</TT></TD><TD>a type that is a model of <i>Lattice</i></TD></TR>
+<TR><TD><tt>C</TT></TD><TD>the type <tt>lattice::lattice_traits&lt;L>::cell_descriptor</tt><br>
+a type that is a model of <i>Cell</i></TD></TR>
+<TR><TD><tt>l</TT></TD><TD>an object of type <tt>L</tt></TD></TR>
+<TR><TD><tt>c</TT></TD><TD>an object of type <tt>lattice::lattice_traits&lt;L>::cell_descriptor</tt></TD></TR>
+<TR><TD><tt>o</TT></TD><TD>an object of type <tt>lattice::cell_traits&lt;C>::offset_type</tt></TD></TR>
+</TABLE>
+
+<h4> Associated Types</h4>
+<table border="1">
+<tr><td><tt>lattice::lattice_traits&lt;L&gt;::unit_cell_type</tt><br><br>
+a model of <a href="#UnitCell">UnitCell</a></td></tr>
+<tr><td><tt>lattice::lattice_traits&lt;L&gt;::cell_descriptor</tt><br><br>
+a model of <a href="#Cell">Cell</a></td></tr>
+<tr><td><tt>lattice::lattice_traits&lt;L&gt;::offset_type</tt><br>
+same as<br><tt>lattice::cell_traits&lt;typename lattice::lattice_traits&lt;L>::cell_descriptor>::offset_type</tt><br>
+a type modelling the concept <a href="#Vector">Vector</a> with usually integral value_type.
+It can store the number of translations along the basis vectors needed 
+to reach a cell from the unit cell at the origin.</td></tr>
+</table>
+
+<h4> Expressions</h4>
+<table border="1">
+<tr><td><tt>lattice::unit_cell(l)</tt></td>
+<td>return type <tt>lattice::lattice_traits&lt;L&gt;::unit_cell_type</tt><br>
+the unit cell of the lattice.</td><tr>
+<tr><td><tt>lattice::cell(o,l)</tt></td>
+<td>return type <tt>lattice::lattice_traits&lt;L&gt;::cell_descriptor</tt><br>
+the cell arrived at by translating the unit cell along <tt>o</tt> times the basis 
+vectors.</td></tr>
+<tr><td><tt>lattice::offset(c,l)</tt></td>
+<td>return type <tt>lattice_traits&lt;L&gt;::cell_descriptor</tt><br>
+returns the offset by which the unit cell must be translated to arrive at 
+cell <tt>c</tt><br>
+<B>Invariant:</B> <tt>lattice::offset(lattice::cell(o,l),l) == o</tt></td></tr>
+</table>
+<h4>Example Implementation</h4>
+
+For a default implementation of the functions see <A HREF="lattice.html">lattice.h</A>.
+<P>
+For a reference implementation of a simple lattice see <A HREF="simplelattice.h"> simplelattice.h</A>.
+
+<h3><a name="CoordinateLattice"></a>CoordinateLattice</h3>
+is a refinement of <a href="#Lattice">Lattice</a> andmakes sense only for finite dimensional lattices. It provides basis vectors as models of 
+<A href="helperconcepts.html#CoordinateVector">CoordinateVector</A>.  
+
+<h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>L</TT></TD><TD>a type that is a model of <i>CoordinateLattice</i></TD></TR>
+<TR><TD><tt>l</TT></TD><TD>an object of type <tt>L</tt></TD></TR>
+<TR><TD><tt>c</TT></TD><TD>an object of type <tt>lattice::lattice_traits&lt;L>::cell_descriptor</tt></TD></TR>
+</TABLE>
+
+<h4> Associated Types</h4>
+<table border="1">
+<tr><td><tt>lattice::lattice_traits&lt;L&gt;::vector_type</tt><br><br>
+a type modelling the concept 
+<a href="helperconcepts.html#CoordinateVector">CoordinateVector</a>.
+It can store a basis vector of the lattice.</td></tr> 
+<tr><td><tt>lattice::lattice_traits&lt;L&gt;::basis_vector_iterator</tt><br><br>
+a const iterator type to iterate through the basis vectors the value_type
+of the iterator is <tt>const lattice::coordinatelattice_traits&lt;L&gt;::vector_type</tt>
+</td></tr></table>
+<h4> Expressions</h4>
+<table border="1">
+<tr><td><tt>lattice::basis_vectors(l)</tt></td>
+<td>return type is  <tt>std::pair&lt;<br>typename lattice::lattice_traits&lt;L&gt;::basis_vector_iterator, <br>typename
+lattice::lattice_traits&lt;L&gt;::basis_vector_iterator&gt;</tt><br>
+the first entry points to the first basis vector, the second entry one 
+past the last basis vector.</td></tr>
+<tr><td><tt>lattice::origin(c,l)</tt></td>
+<td>return type <tt>lattice::lattice_traits&lt;L&gt;::vector_type</tt><br>
+the coordinates of the cell. This can be calculated by adding up
+the basis vectors multiplied by the corresponding entry in the cell offset</td></tr></table>
+
+<h4>Example Implementation</h4>
+
+For a default implementation of the functions see <A HREF="lattice.html">lattice.h</A>.
+<P>
+For a reference implementation see <A HREF="coordinatelattice.html">coordinatelattice.h</A>.
+
+
+
+<h3><a name="FiniteLattice"></a>FiniteLattice</h3>
+is a refinement of <a href="#Lattice">Lattice</a>. It describes
+a finite set of cells cut out from an infinite lattice. Boundary conditions 
+can specify neighbor relations of cells on the boundary
+of the finite lattice.
+<P>For more information see the documentation of the 
+<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+
+<h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>L</TT></TD><TD>a type that is a model of <i>FiniteLattice</i></TD></TR>
+<TR><TD><tt>C</TT></TD><TD>the type <tt>lattice::lattice_traits&lt;L>::cell_descriptor</tt><br>
+a type that is a model of <i>Cell</i></TD></TR>
+<TR><TD><tt>l</TT></TD><TD>an object of type <tt>L</tt></TD></TR>
+<TR><TD><tt>c</TT></TD><TD>an object of type <tt>lattice::lattice_traits&lt;L>::cell_descriptor</tt></TD></TR>
+<TR><TD><tt>o</TT>, <tt>s</tt></TD><TD>objects of type <tt>lattice::cell_traits&lt;C>::offset_type</tt></TD></TR>
+<TR><TD><tt>i</TT></TD><TD>an object of type <tt>lattice::lattice_traits&lt;C>::size_type</tt></TD></TR>
+</TABLE>
+
+
+<h4>Associated types</h4>
+<table border="1">
+<tr><td><tt>lattice::lattice_traits&lt;L&gt;::cell_iterator<br><br>
+the type of iterators over cells in the FiniteLattice</td></tr>
+<tr><td><tt>lattice::lattice_traits&lt;L&gt;::size_type</tt><br><br>
+an integral type large enough to represent the number of cells in the lattice
+<tr><td><tt>lattice::lattice_traits&lt;L&gt;::boundary_crossing_type</tt><br><br>
+a property type to describe whether shifting a cellmoved it across a boundary of a periodic lattice.
+</td></tr></td></tr></table>
+ 
+<h4> Expressions</h4>
+<table border="1">
+<tr><td><tt>lattice::volume(l)</tt></td>
+<td>return type <tt>lattice::lattice_traits&lt;L&gt;::size_type</tt><br>
+the number of cells in the lattice.</td></tr>
+<tr><td><tt>lattice::on_lattice(o,l)</tt></td>
+<td> return type <tt>bool</tt> specifies whether the cell with given offset is on the (finite) lattice.</td></tr>
+<tr><td><tt>lattice::cell(o,l)</tt></td>
+<td>same as for <A HREF="#Lattice">Lattice</A>, except that result is unspecified if <tt>lattice::on_lattice(l,o)==false</tt> and the cell is not on the lattice</td></tr>
+<tr><td><tt>lattice::shift(o,s,l)</tt></td>
+<td>return type <tt>std::pair&lt;bool,lattice::lattice_traits&lt;L&gt;::boundary_crossing_type> ></tt>. shifts the offset <tt>o</tt> by the vector <tt>s</tt>, taking into account boundary conditions of the lattice. <br>
+If the shifted offset is on the lattice the first part of the value is <tt>true</tt> and <tt>o</tt>
+contains the shifted offset. Otherwise the return value is <tt>false</tt> and the value 
+of <tt>o</tt> undefined. <BR>On an infinite lattice this would be equivalent to
+<tt>o = o + s</tt>. <br>The second argument specifies which boundaries of a periodic lattice were crossed in which directions, if the resulting cell was actually on the lattice.
+</td></tr>
+<tr><td><tt>lattice::index(c,l)</tt></td>
+<td>return type <tt>lattice::lattice_traits&lt;L&gt;::size_type</tt><br>
+the index of the cell, <tt>0 &lt;= lattice::index(l,c) &lt; lattice::volume(l)</tt></td></tr>
+<tr><td><tt>lattice::cells(l)</tt></td>
+<td>return type <tt>std::pair&lt;typename lattice::lattice_traits&lt;L&gt;::cell_iterator,
+ typename lattice::lattice_traits&lt;L&gt;::cell_iterator&gt;</tt><br>
+ returns a pair of iterators over all the cells in the lattice, the first iterator 
+points to the first cell in the lattice, the second iterator one past the 
+last cell.</td>
+</table>
+ 
+<h4>Example Implementation</h4>
+
+For a default implementation of the functions see <A HREF="lattice.h">lattice.h</A>.
+<P>
+For a reference implementation of a hypercubic lattice see 
+<A HREF="hypercubic.html"> hypercubic.h</A>.
+
+<h4>Remarks</h4>
+Other useful expressions that could be added include functions like 
+<tt>lattice::neighbors(l,c)</tt>, to return iterators over neighboring cells, etc.
+This is useful, however duplicates some of the functionality
+of the Boost Graph Library. 
+The same functionality could be added by decorating the lattice
+with a graph having one vertex per cell an edges between all neighboring
+cells.
+
+<HR>
+<ADDRESS>(c) 2000-2003 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,90 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library lattice.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>Header file: lattice.h</h2>
+
+defines default implemntations for the functions asssociated
+with the <A href="latticeconcepts.html">lattice concepts</A>
+<h3>Synopsis</h3>
+<blockquote><pre>
+template &lt;class L>
+struct lattice_traits {};
+
+template &lt;class Lattice>
+inline const typename lattice_traits&lt;Lattice>::unit_cell_type&amp;
+unit_cell(const Lattice&amp; l);
+
+template &lt;class Lattice>
+inline typename lattice_traits&lt;Lattice>::cell_descriptor
+cell(const typename lattice_traits&lt;Lattice>::offset_type&amp; o,const Lattice&amp; l);
+
+template &lt;class Lattice>
+inline const typename lattice_traits&lt;Lattice>::offset_type&amp;
+offset(const typename lattice_traits&lt;Lattice>::cell_descriptor&amp; c, const Lattice&amp; );
+
+template &lt;class Lattice>
+inline typename lattice_traits&lt;Lattice>::size_type
+volume(const Lattice&amp; l);
+
+template &lt;class Lattice>
+inline bool 
+on_lattice(typename lattice_traits&lt;Lattice>::offset_type o, const Lattice&amp; l);
+
+template &lt;class Lattice>
+inline std::pair&lt;typename lattice_traits&lt;Lattice>::cell_iterator,
+                 typename lattice_traits&lt;Lattice>::cell_iterator>
+cells(const Lattice&amp; l);
+
+template &lt;class Lattice>
+inline std::pair&lt;bool, typename lattice_traits&lt;Lattice>::boundary_crossing_type>
+shift(typename lattice_traits&lt;Lattice>::offset_type&amp; o,
+      const typename lattice_traits&lt;Lattice>::offset_type&amp; s,
+      const Lattice&amp; l);
+      
+template &lt;class Lattice>
+inline typename lattice_traits&lt;Lattice>::size_type
+index(typename lattice_traits&lt;Lattice>::cell_descriptor c, const Lattice&amp; l);
+
+template &lt;class Lattice>
+inline std::pair&lt;typename lattice_traits&lt;Lattice>::basis_vector_iterator,
+                 typename lattice_traits&lt;Lattice>::basis_vector_iterator>
+basis_vectors(const Lattice&amp; l);
+    
+template &lt;class Lattice>
+inline typename lattice_traits&lt;Lattice>::vector_type
+origin(const typename lattice_traits&lt;Lattice>::cell_descriptor&amp; c, const Lattice&amp; l);
+<pre></blockquote>
+<H3>The traits class</H3>
+<blockquote><pre>
+template &lt;class L>
+struct lattice_traits {};
+</pre></blockquote>
+needs to be specialized for each lattice type.
+<H3>The functions</H3>
+are all forwarded by default to a member function of the lattice <tt>l</tt>
+with the same name and arguments (excpet for the last lattice argument). See the <a href="latticeconcepts.html">lattice concepts</a> for more detailed description of these functions.
+<P>
+The only exception is:
+<blockquote><pre>
+template &lt;class Lattice>
+inline typename lattice_traits&lt;Lattice>::vector_type
+origin(const typename lattice_traits&lt;Lattice>::cell_descriptor&amp; c, const Lattice&amp; l);
+</pre></blockquote>
+which is defined for a type that is a model
+of <A HREF="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A>. The coordinate of
+the cell origin is calculated as tyhe sum of the product of the basis vectors 
+with the offset.
+<HR>
+<ADDRESS>(c) 2000-2003 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

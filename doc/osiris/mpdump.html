@@ -1,0 +1,122 @@
+<html>
+<head>
+   <title>PALM++ Project: osiris library mpdump.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: osiris library</h1>
+
+<h2>
+Header file <b>mpdump.h</b></h2>
+This header contains classes for message passing using the
+Osiris serialization mechanism.
+<h3>Synopsis</h3>
+<blockquote><pre>namespace osiris {
+
+class OMPDump : public ODump
+{
+public:
+  OMPDump(); 
+  void init(); 
+  void send(const Process& p,int32_t tag);
+  void send(const ProcessList& p,int32_t tag);
+};
+
+class IMPDump : public IDump
+{
+public:
+  static int32_t probe(int32_t tag=-1);
+  static int32_t probe(const Process& p, int32_t tag=-1); 
+
+  IMPDump(); 
+  IMPDump(int32_t tag); 
+  IMPDump(const Process& p, int32_t tag); 
+  void init();
+  const Process& sender() const; 
+  void receive(const Process& p,int32_t tag);
+  void receive(int32_t tag);
+};
+}</pre></blockquote>
+
+
+<h3>The <tt>OMPDump</tt> class</h3>
+allows sending of messages using the serialization mechanism.
+
+<blockquote><pre>
+OMPDump(); 
+</pre></blockquote>
+creates a new buffer into which the message content can be written using
+the serialization mechanism, and then sent to other nodes.
+<blockquote><pre>
+void init(); 
+</pre></blockquote>
+re-initializes the buffer for a new message. 
+<blockquote><pre>
+void send(const Process& p,int32_t tag);
+</pre></blockquote>
+sends the message previously stored using the serialization mechanism
+to the given process with the given tag.
+<blockquote><pre>
+void send(const ProcessList& p,int32_t tag);
+</pre></blockquote>
+multicasts the message previously stored using the serialization mechanism
+to the given processes with the given tag.
+<h3>The <tt>IMPDump</tt> class</h3>
+allows receiving of messages using the serialization mechansim.
+After a message has been sucessfully received it can be read using
+the serialization mechanism.
+
+<blockquote><pre>
+static int probe(int32_t tag=-1);
+</pre></blockquote>
+probes if a message with a given tag waits to be received. If no tag
+is given, messages of any tag are probed for. The function returns
+the tag of any matched message, or 0 if no message is found.
+<blockquote><pre>
+static int probe(const Process& p, int32_t tag=-1); 
+</pre></blockquote>
+probes if a message with a given tag waits to be received from a given
+process. If no tag
+is given, messages of any tag are probed for. The function returns
+the tag of any matched message, or 0 if no message is found.
+<blockquote><pre>
+IMPDump(); 
+</pre></blockquote>
+creates a new buffer to receive a message.
+<blockquote><pre>
+IMPDump(int32_t tag); 
+</pre></blockquote>
+creates a new buffer and starts a blocking receive for a message
+with the given tag.
+<blockquote><pre>
+IMPDump(const Process& p, int32_t tag); 
+</pre></blockquote>
+creates a new buffer and starts a blocking receive for a message
+with the given tag from the given process.
+<blockquote><pre>
+void init();
+</pre></blockquote>
+reinitializes the buffer for a new message.
+<blockquote><pre>
+const Process& sender() const; 
+</pre></blockquote>
+returns the process which sent the last succesfully received message. If no
+message has been received an invalid <tt>Process</tt> object is returned.
+<blockquote><pre>
+void receive(const Process& p,int32_t tag);
+</pre></blockquote>
+starts a blocking receive for a message from the given process with the 
+given tag.
+<blockquote><pre>
+void receive(int32_t tag);
+</pre></blockquote>
+starts a blocking receive for a message from any process with the 
+given tag.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

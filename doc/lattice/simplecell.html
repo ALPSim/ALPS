@@ -1,0 +1,79 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library simplecell.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>Header file: simplecell.h</h2>
+
+defines a template class <tt>simple_cell</tt>, which makes a descriptor for a cell with finite 
+offset for a unit cell.
+
+<h3>Synopsis</h3>
+<blockquote><pre>
+namespace lattice {
+
+  template &lt;class UnitCell=EmptyUnitCell, class Offset=typename std::vector&lt;int> >
+  class simple_cell  {
+  public:
+    typedef UnitCell unit_cell_type;
+    typedef Offset offset_type;
+    typedef typename lattice::dimensional_traits&lt;UnitCell>::dimension_type dimension_type;
+  
+    simple_cell(const unit_cell_type&amp; u, const offset_type&amp; o);
+  
+    const offset_type&amp; offset() const;
+    dimension_type dimension();
+  };
+
+}
+<pre></blockquote>
+<H3>The <tt>simple_cell</tt> class</H3>
+describes a cell and 
+fulfills the <A href="helperconcepts.html#Dimensional">Dimensional</A>
+and <A href="latticeconcepts.html#Cell">Cell</A> requirements.
+<h4>Template paramaters</h4>
+It takes two template arguments:
+<ul>
+<li><tt>UnitCell</tt>: the type of the unit cell. This type has to fulfill the 
+<A href="latticeconcepts.html#UnitCell">UnitCell</A> requirements.
+<li><tt>Offset</tt>: the type of the cell offset. It has to fulfill the 
+<A href="helperconcepts.html#Coordinate">Coordinate</A> requirements
+with usually integer-valued <tt>value_type</tt>.
+</ul>
+<blockquote><pre>
+</h4>Type definitions</h4>
+typedef UnitCell unit_cell_type;
+typedef Offset offset_type;
+</pre></blockquote>
+typedefs for the template parameters.
+<blockquote><pre>
+typedef typename lattice::dimensional_traits&lt;UnitCell>::dimension_type dimension_type;
+</pre></blockquote>
+the type for the dimension of the cell.
+<h4>Constructor</h4>
+<blockquote><pre>
+simple_cell(const unit_cell_type&amp; u, const offset_typeamp;& o);
+</pre></blockquote>
+the constructor takes the unit cell (to obtain the dimension of the cell),
+and an offset.
+<h4>Member functions</h4>
+<blockquote><pre>
+const offset_type&amp; offset() const;
+</pre></blockquote>
+returns the offset of the cell.
+<blockquote><pre>
+dimension_type dimension();
+</pre></blockquote>
+returns the dimension of the cell.
+<HR>
+<ADDRESS>(c) 2000-2002 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

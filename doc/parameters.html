@@ -1,0 +1,120 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library parameters.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>
+Header file <b>parameters.h</b></h2>
+This header contains the <tt>Parameters</tt> a class that can store 
+parameters, identified by name.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace palm {
+class Parameters : public std::map&lt;std::string,ValueType> {
+public:
+  Parameters();
+  Parameters(std::istream&amp; is);
+  Parameters&amp; operator&lt;&lt;(const Parameters&amp; p ) 
+  inline ValueType&amp; operator[](const std::string&amp; name);
+  inline const ValueType&amp; operator[](const std::string&amp; name) const;
+  inline bool defined(const std::string&amp; name) const;
+  template &lt;class T> inline T value_or_default(const std::string&amp; name, T x) const;
+};
+}
+
+std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const palm::Parameters&amp; p);
+std::istream&amp; operator >> (std::istream&amp; is, palm::Parameters&amp; parameters);
+</pre></blockquote>
+
+
+<h3>The <tt>Parameters</tt> class</h3>
+is a <tt>std::map</tt> with a string as key-type and a <tt>ValueType</tt>
+object as value type. Any numerical, boolean or string value can thus
+be stored as value of a parameter, identified by a string. 
+<p>Parameters can be read from a <tt>std::istream</tt> and be written to a <tt>std::ostream</tt>.
+<p>
+Parameters are defined using a C++-like syntax
+<blockquote><pre>
+<i>identifier</i> = <i>value</i>;
+</pre></blockquote>
+where the trailing ';' can be replaced by a ',' and is optional
+at the end of a line. Identifier names start with a letter and
+can contain letters, numbers and a single quote ('). 
+<p>
+Values can be
+integers, floating point or complex numbers, booleans or strings.
+Strings need to be enclosed in double quotes ("). The expressions
+<tt>true</tt>, <tt>TRUE</tt>, <tt>yes</tt> and <tt>YES</tt>
+will be parsed as boolean true values, while <tt>false</tt>,
+<tt>FALSE</tt>, <tt>no</tt> and <tt>NO</tt> as boolean false
+values. 
+<p>
+Examples are:
+<blockquote><pre>
+Model = "Heisenberg"
+L = 10, W = 2
+T = 0.5
+measure = yes;
+</pre></blockquote>
+
+
+<blockquote><pre>
+Parameters();
+</pre></blockquote>
+the default constructor
+<blockquote><pre>
+Parameters(std::istream& is);
+</pre></blockquote>
+parses parameters from an <tt>std::istream</tt>.
+<blockquote><pre>
+Parameters& operator&lt;&lt;(const Parameters& p ) 
+</pre></blockquote>
+copies parameter values from another parameter object.
+<blockquote><pre>
+ValueType& operator[](const std::string& name);
+const ValueType& operator[](const std::string& name) const;
+</pre></blockquote>
+access the parameter with a given name. Note the const-version 
+which extends the <tt>std::map</tt> interface
+<blockquote><pre>
+bool defined(const std::string& name) const;
+</pre></blockquote>
+returns true if a parameter value exists for the given
+parameter name.
+<blockquote><pre>
+template &lt;class T> inline T value_or_default(const std::string&amp; name, T x) const;
+</pre></blockquote>
+returns the parameter with the given name cast to type <tt>T</tt> if the parameter is defined, or the given default value <tt>x</tt> otherwise.
+<blockquote><pre>
+std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const palm::Parameters&amp; p);
+</pre></blockquote>
+writes parameter names and values to a <tt>std::ostream</tt>. 
+Each parameter is written to a new line, in the format
+<blockquote><pre>
+<i>identifier</i> = <i>value</i>
+</pre></blockquote>
+The above example
+would thus be written as:
+<blockquote><pre>
+measure = true
+Model = "Heisenberg"
+L = 10
+T = 0.5
+W = 2
+</pre></blockquote>
+This allows the output to be read again . 
+<blockquote><pre>
+std::istream&amp; operator >> (std::istream&amp; is, palm::Parameters&amp; parameters);
+</pre></blockquote>
+reads parameters from a <tt>std::istream</tt>
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

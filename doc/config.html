@@ -1,0 +1,71 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library config.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>Header file <b>config.h</b></h2>
+
+This header contains configuration options determined by the PALM++
+configuration script. In addition please see the <a
+href="http://www.boost.org">Boost</A> configuration macros.
+
+<p>Note that this header file should be included <i>before</i> any
+Boost header files.
+
+<h3>Macros</h3>
+
+<table border=2>
+<tr><td><b>Name</b></td><td><b>Description</b></td></tr>
+
+<tr><td><tt>PALM_WITHOUT_XML</tt></td><td>defined if PALM++ was build without PALM++/xml library</td></tr>
+<tr><td><tt>PALM_WITHOUT_OSIRIS</tt></td><td>defined if PALM++ was build without PALM++/osiris library</td></tr>
+<tr><td><tt>PALM_WITHOUT_ALEA</tt></td><td>defined if PALM++ was build without PALM++/alea library</td></tr>
+<tr><td><tt>PALM_WITHOUT_LATTICE</tt></td><td>defined if PALM++ was build without PALM++/lattice library</td></tr>
+<tr><td><tt>PALM_WITHOUT_SCHEDULER</tt></td><td>defined if PALM++ was build without PALM++/scheduler library</td></tr>
+<tr><td><tt>PALM_HAVE_SYS_SYSTEMINFO_H</tt></td><td>defined if the header <tt>&lt;sys/systeminfo.h></tt> exists </td></tr>
+<tr><td><tt>PALM_HAVE_SYS_PARAM_H</tt></td><td>defined if the header <tt>&lt;sys/param.h></tt> exists </td></tr>
+<tr><td><tt>PALM_HAVE_SYS_TIME_H</tt></td><td>defined if the header <tt>&lt;sys/time.h></tt> exists </td></tr>
+<tr><td><tt>PALM_HAVE_SYS_TYPES_H</tt></td><td>defined if the header <tt>&lt;sys/types.h></tt> exists </td></tr>
+<tr><td><tt>PALM_HAS_INT64</tt></td><td>defined if 64 bit integer types
+exist</td></tr>
+<tr><td><tt>PALM_HAVE_VALARRAY</tt></td><td>defined if the <tt>std::valarray</tt> class exists</td></tr>
+<tr><td><tt>PALM_HAVE_COMPLEX</tt></td><td>defined if the <tt>std::complex&ltT></tt> template class exists</td></tr>
+<tr><td><tt>PALM_HAVE_NON_TEMPLATE_COMPLEX</tt></td><td>defined if a non-template version of <tt>complex</tt> exists</td></tr>
+<tr><td><tt>PALM_HAVE_MPI</tt></td><td>defined if an MPI library exists and was specified in the configuration step.</td></tr>
+<tr><td><tt>PALM_HAVE_PVM</tt></td><td>defined if the PVM library exists and was specified in the configuration step.</td></tr>
+<tr><td><tt>PALM_HAVE_HDF5</tt></td><td>defined if the HDF5 library exists and was specified in the configuration step.</td></tr>
+
+</table>
+
+<h3>Types</h3>
+The header has to include the system headers defining the types
+<ul>
+<tt>
+<li>int8_t
+<li>uint8_t
+<li>int16_t
+<li>uint16_t
+<li>int32_t
+<li>uint32_t
+</tt>
+</ul>
+In addition, if <tt>PALM_NO_INT64</tt> is not defined it also has to
+include definitions for the types
+<ul>
+<tt>
+<li>int64_t
+<li>uint64_t
+</tt>
+</ul>
+
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A> and <A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

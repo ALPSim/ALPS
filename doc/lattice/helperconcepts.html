@@ -1,0 +1,311 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library helper concepts</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>
+Helper concepts</h2>
+
+To get started we need  dimensions of geometrical objects, locations of points, 
+vectors between points, vector arithmetic and coordinates. We thus introduce
+the following concepts, which should preferable be defined some time
+in a broader contect:
+  <ul>
+    <li><a href="#Dimensional">Dimensional</a>
+    </li>
+    <li><a href="#FixedDimensional">FixedDimensional</a>
+    </li>
+    <li><a href="#Point">Point</a>
+    </li>
+    <li><a href="#Vector">Vector</a>
+    </li>
+    <li><a href="#Coordinate">Coordinate</a>
+    </li>
+    <li><a href="#Refinements">Refinements and combinations</a>
+    </li>
+  </ul>
+
+
+Unless mentioned otherwise all functions and traits classes below are declared
+in namespace <tt>lattice</tt><br>
+
+<h3><a name="Dimensional"></a>
+ Dimensional</h3>
+is an entity which has a dimension. Models are all containers.
+<h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>X</TT></TD><TD>a type that is a model of <i>Dimensional</i></TD></TR>
+<TR><TD><tt>x</tt></td><td>an object of type <tt>X</tt></TD></TR>
+</TABLE>
+<h4> Associated Types</h4>
+<table border="1">
+<tr><td><tt>lattice::dimensional_traits&lt;X&gt;::dimension_type</tt>
+<br><br>an integral type large enough to store the dimension of <tt>X</tt></td>
+</tr>  
+</table>
+
+<h4> Expressions</h4>
+<table border="1">
+<tr>
+<td><tt>lattice::dimensional_traits&lt;X&gt;::infinity()</tt></td>
+<td>return type <tt>dimensional_traits&lt;X&gt;::dimension_type</tt><br>the value
+ used
+ to represent an infinite lattice</td></tr>
+ <tr><td>
+<tt>lattice::dimensional_traits&lt;X&gt;::fixed_dimension</tt></td>
+<td>type <tt>bool</tt>, is true if the dimension is a compile time constant<br>
+See the concept <A HREF="#FixedDimensional">FixedDimensional</A> for additional
+information in that case</td> 
+</tr><tr><td><tt>dimension(x)</tt></td>
+<td>return type <tt>lattice::dimensional_traits&lt;X&gt;::dimension_type</tt><br>
+ the dimension of <tt>x</tt></td></tr>
+</table>
+<P>
+Note that
+<blockquote><tt>lattice::dimension(x) == lattice::dimensional_traits&lt;X&gt;::infinity()</tt>
+</blockquote>
+is true for
+infinite-dimensional lattices.
+
+<h4><A name="dimensional_traits.h"></A>Example Implementation: dimensional_traits.h</h4>
+The example implementation in the file dimensional_traits.h works for
+standard containers and defines the <tt>dimension(x)</tt> by the <tt>size()</tt>
+member function of the container:
+
+<pre>
+namespace lattice {
+
+  template &lt;class Dimensional>
+  struct dimensional_traits {
+    typedef std::size_t dimension_type;
+    static const bool fixed_dimension=false;
+    static dimension_type infinity()
+    {
+      return std::numeric_limits&lt;dimension_type>::max();
+    }
+  };
+
+  template &lt;class Dimensional>
+  inline typename dimensional_traits<Dimensional>::dimension_type
+  dimension(const Dimensional& d)
+  {
+    return d.size();
+  }
+}
+</pre>
+
+<h3><a name="FixedDimensional">
+</a>FixedDimensional</h3>
+
+is a refinement of <A href="#Dimensional"><i>Dimensional</i></A>.
+ Models are C-arrays and <tt>blitz::TinyVector</tt>. <br>
+ <h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>X</TT></TD><TD>a type that is a model of <i>FixedDimensional</i></TD></TR>
+<TR><TD><tt>x</tt></td><td>an object of type <tt>X</tt></TD></TR>
+</TABLE>
+<br>
+<h4> Expressions</h4>
+<table border="1">
+<tr><td><tt>dimensional_traits&lt;X&gt;::fixed_dimension</tt></td><td>
+  evaluates to <tt>true</tt></td><tr>  
+<tr><td><tt>dimensional_traits&lt;X&gt;::dimension</tt></td><td>
+same as <tt>dimension(x)</tt></td></tr></table>
+<h4> Example Implementations</h4>
+<pre>template &lt;class T,&nbsp;int sz&gt;<br>struct dimensional_traits&lt;T[sz]&gt; {<br>  typedef&nbsp;int dimension_type;<br>  bool fixed_dimension=true;<br>  dimension_type dimension=sz;<br>};<br>  <br>template &lt;class T,&nbsp;int sz&gt;<br>typename dimensional_traits&lt;T[sz]&gt;::dimension_type<br>dimension(const T[sz]&amp; d) <br>{<br>  return sz;<br>}<br><br>template &lt;class T, int sz&gt;<br>struct dimensional_traits&lt;blitz::TinyVector&lt;T,sz&gt; &gt; {<br>  typedef int dimension_type;<br>  bool fixed_dimension=true;<br>  dimension_type dimension=sz;<br>};<br><br>template &lt;class T, int sz&gt;<br>typename dimensional_traits&lt;blitz::TinyVector&lt;T,sz&gt; &gt;::dimension_type<br>dimension(const T[sz]&amp; d) <br>{<br>  return sz;<br>}</pre>
+<h3><a name="Point"></a>
+ Point</h3>
+describes a geometrical point, is a refinement of <a href="#Dimensional">Dimensional</a>, 
+<p>Models are <tt>std::valarray, blitz::TinyVector, blitz::Array</tt> and others </p>
+ <h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>P</TT></TD><TD>a type that is a model of <i>Point</i></TD></TR>
+<TR><TD><tt>p</tt>, <t>q</tt></td><td>objects of type <tt>P</tt></TD></TR>
+<TR><TD><tt>v</tt></td><td>object of type <tt>lattice::point_traits&lt;P&gt;::vector_type</tt></TD></TR>
+</TABLE>
+
+<h4> Associated Type</h4>
+<table border="1"><tr><td>
+<tt>lattice::point_traits&lt;P&gt;::vector_type</tt><br><br>
+a type that is a model of the concept <a href="#Vector">Vector</a>,
+the result type of the difference of two points  
+</td></tr></table>
+
+<h4> Expressions</h4>
+<table border="1">
+<tr><td><tt>p-q</tt></td><td>
+return type <tt>lattice::point_traits&lt;P&gt;::vector_type</tt><br>
+a vector pointing from <tt>q</tt> to <tt>p</tt></td></tr>
+<tr><td><tt>p+v<br>v+p</td><td>
+return type <tt>P</tt><br>
+the point <tt>p</tt> shifted by the vector <tt>v</tt></td></tr>  
+<tr><td><tt>p-v</td><td>
+return type <tt>P</tt><br>
+the point <tt>p</tt> shifted by the vector <tt>-v</tt></td></tr>  
+</table>
+
+<h4><a name="point_traits.h">Example Implementation: point_traits.h</a></h4>
+The example implementation in the file point_traits.h assumes that
+we have a type that can represent both points and vectors. An improved
+implementation should make sure that operations not defined (such
+ as <tt>p+p</tt>) cause compile time errors.
+<blockquote><pre>
+namespace lattice {
+
+template <class P>
+struct point_traits
+{
+  typedef P vector_type;	
+};
+
+}
+</pre></blockquote>
+
+
+<h3><a name="Vector"></a>
+Vector</h3> describes a vector, is a refinement of <a href="#Dimensional">Dimensional</a>
+<p>models are <tt>std::valarray</tt>, <tt>blitz::TinyVector</tt>, <tt>blitz::Array</tt>
+<h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>V</TT></TD><TD>a type that is a model of <i>Vector</i></TD></TR>
+<TR><TD><tt>v</tt>, <t>w</tt></td><td>objects of type <tt>V</tt></TD></TR>
+<TR><TD><tt>t</tt></td><td>an object of a scalar type (integer or floating
+point number)</TD></TR>
+</TABLE>
+<h4> Expressions</h4>
+in addition to expressions mentioned in connection with the concept <a href="#Point">
+ Point</a> we require the following:
+<table border="1">
+<tr><td><tt>v+w</tt></td><td>
+return type <tt>V</tt>, the sum of two vectors</td></tr>  
+<tr><td><tt>v-w</tt></td><td>
+return type <tt>V</tt>, the difference of two vectors</td></tr>
+<tr><td><tt>t*v<br/>v*t</tt></td><td>
+return type <tt>V</tt>, the vector <tt>v</tt> scaled by the facor <tt>t</tt></td></tr>
+<tr><td><tt>v/t</tt></td><td>
+return type <tt>V</tt>, the vector <tt>v</tt> scaled by the facor <tt>1/t</tt></td></tr>
+<tr><td><tt>-v</tt></td><td>
+return type <tt>V</tt>, the inverted vector</td></tr>
+</table>
+
+
+<h3><a name="Coordinate"></a>Coordinate</h3>
+refinement of <a href="#Dimensional">Dimensional</a>, describes coordinates of a point, vector, etc.. Models are all containers </p>
+<h4>Notation</h4>
+<TABLE border="1">
+<TR><TD><tt>C</TT></TD><TD>a type that is a model of <i>Coordinate</i></TD></TR>
+<TR><TD><tt>c</tt></td><td>an object of type <tt>C</tt></TD></TR>
+<TR><TD><tt>const_c</tt></td><td>an object of type <tt>const C</tt></TD></TR>
+<TR><TD><tt>i</tt></td><td>an object of type <tt>lattice::dimension_traits&lt;C&gt;::dimension_type</tt></TD></TR>
+</TABLE>
+
+<h4> Associated Types</h4>
+<table border=1>
+<tr><td>
+<tt>lattice::coordinate_traits&lt;C&gt;::iterator</tt><br><br>
+an iterator type for <tt>C</tt> </td></tr>
+<tr><td><tt>lattice::coordinate_traits&lt;C&gt;::const_iterator</tt><br><br>
+  a const iterator type for <tt>C</tt> </td></tr>
+  <tr><td> 
+<tt>lattice::coordinate_traits&lt;C&gt;::value_type</tt><br><br>
+a type able to store a coordinate in one of the dimensions,<br>
+same as <tt>std::iterator_traits&lt;typename lattice::coordinate_traits&lt;C&gt;::iterator>::value_type</tt></td></tr></table>
+
+<h4> Expressions</h4>
+<table border="1">
+<tr><td><tt>c[i]</tt></td><td>
+return type <tt>lattice::coordinate_traits&lt;C&gt;::value_type</tt><br>
+ the i-th coordinate, <tt>0&lt;=i&lt;dimensions(c)</tt><br>
+<i>comment: is this actually needed or just convenient?</i></td></tr>
+<tr><td><tt>lattice::coordinates(c)<tt></td><td>
+return type <tt>std::pair&lt;typename lattice::coordinate_traits&lt;C&gt;::iterator,typename
+ lattice::coordinate_traits&lt;C&gt;::iterator&gt;</tt><br>
+the pair consists of two iterators, pointing to the first and one past the 
+last coordinate</td></tr>
+<tr><td><tt>lattice::coordinates(const_c)<tt></td><td>
+return type <tt>std::pair&lt;typename lattice::coordinate_traits&lt;C&gt;::const_iterator, typename
+ lattice::coordinate_traits&lt;C&gt;::const_iterator&gt;</tt><br>
+the pair consists of two iterators, pointing to the first and one past the 
+last coordinate</td></tr>
+</table>
+<h4><A name="coordinate_traits.h">Example Implementation: coordinate_traits.h</a></h4>
+The example implementation in the file coordinate_traits.h implements
+the functions and traits for standard containers and for <tt>std::valarray</tt>:
+<blockquote>
+<pre>
+namespace lattice {
+  template &lt;class C&gt;
+  struct coordinate_traits {
+    typedef typename C::value_type value_type;
+    typedef typename C::iterator iterator;
+    typedef typename C::const_iterator const_iterator;
+  };
+  
+  template &lt;class C&gt;
+  inline std::pair&lt;typename coordinate_traits&lt;C&gt;::iterator, typename   coordinate_traits&lt;C&gt;::iterator&gt;
+  coordinates(C&amp; c)
+  {
+    return std::make_pair(c.begin(),c.end());
+  }
+
+  template &lt;class C&gt;
+  inline std::pair&lt;typename coordinate_traits&lt;C&gt;::const_iterator, typename coordinate_traits&lt;C&gt;::const_iterator&gt;
+  coordinates(const C&amp; c)
+  {
+    return std::make_pair(c.begin(),c.end());
+  }
+
+
+  template &lt;class T&gt;
+  struct coordinate_traits&lt;std::valarray&lt;T&gt; &gt; {
+    typedef typename T value_type;
+    typedef typename T* iterator;
+    typedef typename const T* const_iterator;
+  };
+  
+  template &lt;class T&gt;
+  inline std::pair&lt;T*, T*&gt; coordinates(std::valarray&lt;T&gt;&amp; c)
+  {
+    return make_pair(&amp;(c[0]),&amp;(c[0])+c.size());
+  }
+
+  template &lt;class T&gt;
+  inline std::pair&lt;const T*, const T*&gt; coordinates(std::valarray&lt;T&gt;&amp; c)
+  {
+    return std::pair&lt;const T*, const T*&gt;
+      (&amp;(const_cast&lt;std::valarray&lt;T&gt;&amp;&gt;(c)[0]),
+      &amp;(const_cast&lt;std::valarray&lt;T&gt;&amp;&gt;(c)[0])+c.size());
+  }
+}
+</pre>
+</blockquote>
+<h3><a name="Refinements"></a>Refinements</h3>
+Useful concepts will be those which combine the above
+concepts <a href="#FixedDimensional"> FixedDimensional</a>
+and <a href="#Coordinate">Coordinate</a>
+with  <a href="#Point">Point</a> and <a href="#Vector">Vector</a>:
+<ul>
+  <li> CoordinatePoint</li>
+  <li> CoordinateVector</li>
+  <li> FixedDimensionalVector</li>
+  <li> FixedDimensionalPoint</li>
+  <li> FixedDimensionalCoordinate</li>
+  <li> FixedDimensionalCoordinateVector</li>
+  <li> FixedDimensionalCoordinatePoint</li>
+</ul>
+These are all straight forward refinements of above concepts.
+We can imagine the addition of extra member functions
+for the calculation of norms, etc. to CoordinateVector,
+but refrain from doing so until we see the need for such
+traits or functions in our applications.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

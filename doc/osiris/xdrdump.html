@@ -1,0 +1,119 @@
+<html>
+<head>
+   <title>PALM++ Project: osiris library xdrdump.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: osiris library</h1>
+
+<h2>
+Header file <b>xdrdump.h</b></h2>
+This header contains the classes for object serialization into
+files using the binary, platform independent XDR format.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace osiris {
+class OXDRDump : public ODump
+{
+public:
+  OXDRDump();   
+  uint32_t getPosition() const;
+  void setPosition(uint32_t pos);  
+};
+
+class IXDRDump : public IDump
+{
+public:
+  IXDRDump();
+  uint32_t getPosition() const;
+  void setPosition(uint32_t pos);
+};
+
+class OXDRFileDump: public OXDRDump
+{
+public:
+  enum Direction {FRONT,BACK};
+  OXDRFileDump(const std::string& n);
+  OXDRFileDump(const boost::filesystem::path& p);
+};
+
+class IXDRFileDump: public IXDRDump
+{
+public:
+  IXDRFileDump(const std::string&amp n);
+  IXDRFileDump(const boost::filesystem::path& p);
+#ifdef BOOST_NO_EXCEPTIONS
+  bool couldOpen() const;
+#endif
+};
+}
+</pre></blockquote>
+
+
+<h3>The<tt>OXDRDump</tt> class</h3>
+is the base class for <tt>OXDRFileDump</tt>. It implements serialization
+using the XDR format.
+
+<blockquote><pre>
+uint32_t getPosition() const;
+</pre></blockquote>
+returns the current position in the XDR dump.
+<blockquote><pre>
+void setPosition(uint32_t pos);  
+</pre></blockquote>
+sets the XDR dump to a new position.
+
+<h3>The<tt>IXDRDump</tt> class</h3>
+is the base class for <tt>IXDRFileDump</tt>. It implements deserialization
+using the XDR format.
+<blockquote><pre>
+uint32_t getPosition() const;
+</pre></blockquote>
+returns the current position in the XDR dump.
+<blockquote><pre>
+void setPosition(uint32_t pos);  
+</pre></blockquote>
+sets the XDR dump to a new position.
+
+<h3>The<tt>OXDRFileDump</tt> class</h3>
+
+implements writing to a file in XDR format using the serialization
+mechanism.
+<blockquote><pre>
+OXDRFileDump(const std::string&amp; n);
+OXDRFileDump(const boost::filesystem::path&amp; p);
+</pre></blockquote>
+opens a file with the given name for writing using the serialization
+mechansim.
+
+<h3>The<tt>IXDRFileDump</tt> class</h3>
+
+implements reading from a file in XDR format using the serialization
+mechanism.
+
+<blockquote><pre>
+IXDRFileDump(const std::string& n);
+IXDRFileDump(const boost::filesystem::path& p);
+</pre></blockquote>
+opens a file with the given name for reading using the serialization
+mechansim. If opening fails and exceptions are implemented/enabled
+a <tt>std::runtime_error</tt> is thrown. If opening fails and 
+exceptions are disabled, the function <tt>couldOpen()</tt>
+returns false.
+<blockquote><pre>
+#ifdef BOOST_NO_EXCEPTIONS
+bool couldOpen() const;
+#endif
+</pre></blockquote>
+is implemented only when exceptions are disabled. It returns
+true if the opening of a file succeeded, and false otherwise.
+A failure to open a file results in a <tt>std::runtime_error</tt>
+if exceptions are implemented.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

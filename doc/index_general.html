@@ -1,0 +1,91 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+The palm library contains code used by more than one of the PALM++
+libraries.  The palm library also sets up comprehensive and consistent
+environment for the other PALM++ libraries and other C++ programs.
+
+The header files and libraries provided by this library should be
+considered implementation details for the other officially supported
+libraries and are subject to change without notice.
+<P>
+We hope to move the functionality of the headers in this library to
+standardized libraries such as the Boost C++ library, or to split
+some components off into domain-specific libraries.
+<P>
+We welcome your ideas, suggestions and contributions. If you are
+interested in using some of the components in this library, please
+contact us and we can work together in achieving a good release version.
+
+<h2>Download, Configuring, Building and Installing</h2>
+
+are discussed <a href="../setup.html">here</a>.
+
+<P> The library will reside in the file <tt>libpalm.a</tt> in the path specifed in the configuration step.
+
+<H2>Documentation</H2>
+<ul>
+  <li>Configuration
+  <ul>
+    <li><A HREF="config.html"><B>config.h</B></A> contains configuration options.</li>
+  </ul></li>
+  <li>Traits classes
+  <ul>
+    <li><A HREF="typetraits.html"><B>typetraits.h</B></A> contains type traits 
+    not found in the standard and boost libraries.</li>
+    <li><A HREF="vectortraits.html"><B>vectortraits.h</B></A> contains vector type traits 
+    and support for container free numerical algorithms.</li>
+  </ul></li>
+  <li>Character functions
+  <ul>
+    <li><B>cctype.h</B> includes &lt;cctype> and undefines harmful macros that some implementations forget to undefinf.</li>
+</ul>
+ 
+  <li>Bit operations
+  <ul>
+    <li><A HREF="bitops.html"><B>bitops.h</B></A> contains bit operations modeled 
+        after the Cray intrinsics.</li>
+  </ul></li>
+  <li>Mathematical functions and function objects
+  <ul>
+    <li><A HREF="complex.html"><B>complex.h</B></A> classes and functions for 
+        portable codes using complex numbers.</li>
+    <li><A HREF="functional.html"><B>functional.h</B></A> contains mathematical 
+        function objects not found in the standard and boost libraries.</li>
+    <li><A HREF="math.html"><B>math.hpp</B></A> contains mathematical functions not 
+        found in the standard and boost libraries.</li>
+    <li><A HREF="vectormath.html"><B>vectormath.h</B></A> contains a few 
+        basic mathematical operations on std::vector.</li>
+    <li><A HREF="random.html"><B>random.h</B></A> contains functions to
+        randomize a vector and a fast buffered RNG class.</li>
+    
+  </ul></li>
+  <li>Operating system specific functionality
+  <ul>
+    <li><A HREF="os.html"><B>os.h</B></A> low level operating system call wrappers</li>
+    <li><A HREF="signal.html"><B>signal.hpp</B></A> a signal handler class</li>
+  </ul></li>
+  <li>Classes for I/O
+  <ul>
+    <li><A HREF="stringvalue.html"><B>stringvalue.h</B></A> a class that can store any 
+    numerical, boolean or string value in a string representation.</li>
+    <li><A HREF="parameters.html"><B>parameters.h</B></A> a class that can store 
+    parameters, identified by name</li>
+    <li><A HREF="parameterlist.html"><B>parameterlist.h</B></A> a collection of
+    <tt>Parameters</tt></li>
+    <li><A HREF="parser.html"><B>parser.h</B></A> functions to help reading parameters and XML files.
+  </ul></li>
+  
+</ul>
+
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
+Troyer</A> and <A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
+</body>
+</html>

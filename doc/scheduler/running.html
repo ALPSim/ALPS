@@ -1,0 +1,137 @@
+<html>
+<head>
+   <title>PALM++ Project: scheduler library running a simulation</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: scheduler library</h1>
+
+<h2>Running a simulation</h2>
+
+Here we discuss how to run a Monte Carlo simulation based on the scheduler library. The source code and input files are provided in the <a href="../../example/scheduler">example</a> directory.
+<h3>Preparing the job file</h3>
+The first step is to prepare a job file, following the <a href="http://xml.comp-phys.org/schemas/job">schema<a> at <A href="http://xml.comp-phys.org/">http://xml.comp-phys.org</a>.
+<h4>The XML job file</h4>
+The job file in the example looks as follows (without processing instructions):
+<blockquote><pre>
+&lt;JOB>
+  &lt;OUTPUT file="parm.xml"/>
+  &lt;TASK status="new">
+    &lt;INPUT file="parm.task1.in.xml"/>
+    &lt;OUTPUT file="parm.task1.xml"/>
+  &lt;/TASK>
+  &lt;TASK status="new">
+    &lt;INPUT file="parm.task2.in.xml"/>
+    &lt;OUTPUT file="parm.task2.xml"/>
+  &lt;/TASK>
+  &lt;TASK status="new">
+    &lt;INPUT file="parm.task3.in.xml"/>
+    &lt;OUTPUT file="parm.task3.xml"/>
+  &lt;/TASK>
+&lt;/JOB>
+</pre></blockquote>
+The optional <tt>OUTPUT</tt> element gives a new name to the output job file writtem after checkpoints. It then contains a list of tasks. In each <tt>TASK</tt> element, the <tt>INPUT</tt> element specifies an input file for the tasks. Optionally a new file name for the checkpoints can be given by <tt>OUTPUT</tt> elements. 
+
+<h4>The XML task files</h4>
+Currently the only used task file format is the format for Monte Carlo simulations, given by the <a href="http://xml.comp-phys.org/schemas/QMCXML">schema<a> at <A href="http://xml.comp-phys.org/">http://xml.comp-phys.org</a>
+<blockquote><pre>
+&lt;SIMULATION>
+  &lt;PARAMETERS>
+    &lt;PARAMETER name="L">100&lt;/PARAMETER>
+    &lt;PARAMETER name="SWEEPS">10000&lt;/PARAMETER>
+    &lt;PARAMETER name="T">0.5&lt;/PARAMETER>
+    &lt;PARAMETER name="THERMALIZATION">100&lt;/PARAMETER>
+    &lt;PARAMETER name="WORK_FACTOR">SWEEPS * L&lt;/PARAMETER>
+  &lt;/PARAMETERS>
+&lt;/SIMULATION>
+</pre></blockquote>
+Before a simulation starts, this file just lists all simulation parameters. Afterwards results and checkpoint information will be added. See the <a href="http://xml.comp-phys.org/schemas/QMCXML">schema documentation<a> for more details. 
+<P>Two parameters have a special meaning:</P>
+<table border="1">
+<thead><tr><td><B>Parameter</b></td><td><b>Default</b></td><td><b>Meaning</b></td></tr></thead>
+<tbody><tr><td>SEED</td><td>0</td><td>The random number seed used in the next Monte Carlo run created. After using a seed in the creation of a Monte Carlo run, this value gets incremented by one.</td></tr>
+<tr><td>WORK_FACTOR</td><td>1</td><td>A factor by which the work that needs to be done for a simulation is multiplied in load balancing.</td></tr></tbody></table> 
+<h4>Converting old-style parameter files to XML</h4>
+Versions 1.0 - 1.5 of the old ALEA library, which forms the basis of the current library had simple plain text-based parameter files, consisting of a number of parameter assignments of the form:
+<pre><blockquote>
+MODEL="Ising";
+SWEEPS=1000;
+THERMALIZATION=100;
+WORK_FACTOR=[L*SWEEPS];
+{ L=10; T=0.1; }
+{ L=20; T=0.05; }
+</pre></blockquote>
+where each group of assignments inside a block of curly braces <tt>{...}</tt> indicated a set of parameters for a single simulation. Assignments outside of a block of curly braces are valid globally for all simulation after the point of definition. Strings are given in double quotes, as in <tt>"Ising"</tt> and expressions in square brackets, as in  <tt>[L*SWEEPS]</tt>.
+
+To ensure backwards compatibility, and also because this is a format which is easier to enter than a set of XML files, we provide a tool <tt>convert2xml</tt> which can convert these parameter files into XML files. The syntax is:
+<pre><blockquote>
+convert2xml parameterfile [xmlfileprefix]
+</pre></blockquote>
+which converts a parameterfile into a set of XML files, starting with the prefix given as optional second argument. The default for the second argument is the name as the parameterfile.
+<h3>Running the simulation on a serial machine</h3>
+The simulation is started by first creating the job filse, and then giving the name of the XML job file as argument to the program. In our example, the program is called <tt>main</tt> and the sequence for running it is:
+<pre><blockquote>
+convert2xml parm job
+main job.in.xml
+</pre></blockquote>
+The results will be stored in a file <tt>job.out.xml</tt>, which refers to the files <tt>job.task1.out.xml</tt>, <tt>job.task2.out.xml</tt> and <tt>job.task3.out.xml</tt> for the results of the three simulations.
+<h4>Command line options</h4>
+The program takes a number of command line options, to control the behavior of the scheduler:
+<P>
+<table border="1">
+<thead>
+<tr><td><B>Option</B></td><td><B>Default</B></td><td><B>Description</B></td></tr>
+</thead>
+<tbody>
+<tr><td><TT>-T</tt>&nbsp;<i>timelimit</i></tt></td><td><i>infinity</i></td><td>gives the time (in seconds) which the program should run before writing a final checkpoint and exiting.</td></tr>
+</P>
+<tr><td><TT>-Tc</tt>&nbsp;<i>checkpointtime</i></tt></td><td>1800</td><td>gives the time (in seconds) after which the program should write a checkpoint.</td></tr>
+<tr><td><TT>-Tmin</tt>&nbsp;<i>checkingtime</i></tt></td><td>60</td><td>gives the minimum time (in seconds) which the scheduler waits before checking (again) whether a simulation is finished.</td></tr>
+<tr><td><TT>-Tmax</tt>&nbsp;<i>checkingtime</i></tt></td><td>900</td><td>gives the maximum time (in seconds) which the scheduler waits before checking (again) whether a simulation is finished.</td></tr>
+</tbody>
+</table>
+<h3>Running the simulation on a parallel machine</h3>
+is as easy as running it on a single machine. We will give the example using MPI. After starting the MPI environment (using e.g. <tt>lamboot</tt> for <A href="http://www.lam-mpi.org">LAM MPI</A>, you run the program in parallel using <tt>mpirun</tt>. In our example, e.g. to run it on four processes you do:
+<pre><blockquote>
+convert2xml parm job
+mpirun -np 4 main job.in.xml
+</pre></blockquote>
+<h4>Command line options</h4>
+In addition to the command line options for the sequential program there are two more for the parallel program:
+<P>
+<table border="1">
+<thead>
+<tr><td><B>Option</B></td><td><B>Default</B></td><td><B>Description</B></td></tr>
+</thead>
+<tbody>
+<tr><td><TT>-Nmin</tt>&nbsp;<i>numprocs</i></tt></td><td>1</td><td>gives the minimum number of processes to assign to a simulation.</td></tr>
+<tr><td><TT>-Nmax</tt>&nbsp;<i>numprocs</i></tt></td><td><i>infinity</i></td><td>gives the maximum number of processes to assign to a simulation.</td></tr>
+</tbody>
+</table>
+</P>
+If there are more processors available than simulations, more than one Monte Carlo run will be started for each simulation.
+<h3>Extracting full output from the checkpoints</h3>
+At the moment, the simulation output files (in this example called <tt>job.task1.xml</tt>, <tt>job.task2.xml</tt> and <tt>job.task3.xml</tt>) only contain the collected measurements from all runs. Details about the individual Monte Carlo runs for each simulation can be obtained by converting the checkpoint files to XML, again using the <tt>convert2xml</tt> tool, e.g.:
+<pre><blockquote>
+convert2xml job.task1.run1
+</pre></blockquote>
+This will produce a file job.task1.run1.xml, containing information extracted from this Monte Carlo run.
+<h3>Compacting the simulation output</h3>
+When after running a simulation you are certain that you do not want to continue running it, all the simulation specific information about the configuration of the Monte Carlo simulation can be removed from the checkpoint files , ending with <tt>.run</tt> followed by a number. This is done using the <tt>compactrun</tt> tool:
+<pre><blockquote>
+compactrun job.task1.run1
+</pre></blockquote>
+Optionally, the compacted file can be given a new name:
+<pre><blockquote>
+compactrun job.task1.run1 compacted.task1.run1
+</pre></blockquote>
+<h3>Converting legacy checkpoints</h3>
+The old ALEA library (version 1.0-1.5) and preliminary versions of this library used binary checkpoint files not only for the Monte Carlo runs, but also for simulations and for checkpoints of the scheduler. <tt>convert2xml</tt> can be used to read the checkpoint files of version ALEA version 1.5 and later and convert them to XML.
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

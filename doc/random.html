@@ -1,0 +1,143 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library random.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>
+Header file <b>random.h</b></h2>
+This header contains helper functions to generically seed random number generators and
+a class for fast buffered random number generators, suitable for compile time polymorphism.
+<h3>
+Synopsis</h3>
+
+<blockquote>
+<pre>namespace palm {
+template &lt;class RNG>
+void seed_with_sequence(RNG&amp; rng, uint32_t seed);
+
+template &lt;class T=double>
+class BufferedRandomNumberGeneratorBase
+{
+public:
+  typedef T result_type;
+  BufferedRandomNumberGeneratorBase(std::size_t b=10240);
+
+  inline T operator()();
+
+  virtual void seed(uint32_t) = 0;
+  virtual void seed() =0;
+};
+
+template &lt;class RNG> class BufferedRandomNumberGeneratorAdaptor
+ : public BufferedRandomNumberGeneratorBase&lt;typename RNG::result_type>
+{
+public:
+  typedef typename RNG::result_type result_type;
+
+  BufferedRandomNumberGeneratorAdaptor(RNG&&amp; rng);
+  
+  template &lt;class IT> void seed(IT start, IT end);
+  void seed(uint32_t);
+  void seed();
+};
+
+template &lt;class RNG> class BufferedRandomNumberGenerator
+ : public BufferedRandomNumberGeneratorAdaptor&lt;typename RNG::result_type>
+{
+public:
+  typedef typename RNG::result_type result_type;
+
+  BufferedRandomNumberGenerator();
+  BufferedRandomNumberGenerator(const RNG&amp; r);
+};
+
+}
+</pre></blockquote>
+<H3>Function <tt>seed_with_sequence</tt></H3>
+The function
+<blockquote><pre>
+template &lt;class RNG>
+void seed_with_sequence(RNG&amp; rng, uint32_t seed);
+</pre></blockquote>
+seeds a random number generator following the Boost library proposed for the next version of the C++ standard library with a unique sequence, initialized from the given seed using a Pseudo-DES generator. 
+This allows generic seeding of all conforming random number generators.
+
+<H3>Class <tt>BufferedRandomNumberGeneratorBase</tt></H3>
+is the abstract base class for buffered random number generators.
+A buffered random number generator generates a block of random
+numbers at a time, possibly achieving speedup by vectorizing
+or pipelining the generation. Access to random numbers is
+inlined and fast. This also allows using runtime polymorphism of the random number generator
+without much overhead.
+<blockquote><pre>
+typedef T result_type;
+</pre></blockquote>
+is the type of random numbers generated
+<blockquote><pre>
+BufferedRandomNumberGeneratorBase(std::size_t b=10240);
+</pre></blockquote>
+the buffer size is passed to the constructor.
+<blockquote><pre>
+inline T operator()();
+</pre></blockquote>
+returns the next random number.
+<blockquote><pre>
+virtual void seed(uint32_t) = 0;
+</pre></blockquote>
+seeds the generator with an integer seed.
+<blockquote><pre>
+virtual void seed() =0;
+</pre></blockquote>
+seeds the generator with the default seed.
+
+<H3>Class <tt>BufferedRandomNumberGeneratorAdaptor</tt></H3>
+is an implementation of a buffered random number generator
+adaptor, taking a random number generator following the
+<A HREF="http://www.boost.org/libs/random/">boost</A> random number generator interface
+and converting it into a buffered generator. 
+<blockquote><pre>
+typedef typename RNG::result_type result_type;
+</pre></blockquote>
+is the type of random numbers generated, taken from the base generator.
+<blockquote><pre>
+BufferedRandomNumberGeneratorAdaptor(RNG& rng);
+</pre></blockquote>
+The constructor takes the base generator as argument.
+<blockquote><pre>
+inline T operator()();
+</pre></blockquote>
+returns the next random number.
+<blockquote><pre>
+virtual void seed(uint32_t);
+</pre></blockquote>
+seeds the generator with an integer seed, using the function <tt>seed_with_sequence</tt>
+<blockquote><pre>
+virtual void seed();
+</pre></blockquote>
+seeds the generator with the default seed.
+<blockquote><pre>
+template &lt;class IT> void seed(IT start, IT end);
+</pre></blockquote>
+seeds the generator from a buffer given by a pair if iterators, following the new Boost random number generator concepts proposed for the next revision of the C++ standard.
+<H3>Class <tt>BufferedRandomNumberGenerator</tt></H3>
+is like <tt>BufferedRandomNumberGenerator</tt> but contains the base generator itself instead of a reference to it. 
+<blockquote><pre>
+BufferedRandomNumberGenerator();
+</pre></blockquote>
+seeds the generator with its default seed.
+<blockquote><pre>
+BufferedRandomNumberGenerator(const RNG& rng);
+</pre></blockquote>
+seeds the generator with a copy of the argument.
+
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

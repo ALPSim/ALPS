@@ -1,0 +1,35 @@
+<html>
+<head>
+   <title>PALM++ Project: osiris library std/vector.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: osiris library</h1>
+
+<h2>
+Header file <b>std/vector.h</b></h2>
+This header contains serialization functions for <tt>std::vector</tt> and 
+an optimized version for <tt>std::vector&lt;bool></tt>
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+template &lt;class T, class Allocator>
+osiris::IDump& operator >> (osiris::IDump& dump, STD::vector&lt;T,Allocator>& x);
+
+template &lt;class T, class Allocator>
+osiris::ODump& operator << (osiris::ODump& dump, const STD:: vector&lt;T,Allocator>& x);
+
+template &lt;class Allocator>
+osiris::IDump& operator >> (osiris::IDump& dump, STD::vector&lt;bool,Allocator>& x);
+
+template &lt;class Allocator>
+osiris::ODump& operator << (osiris::ODump& dump, const STD:: vector&lt;bool,Allocator>& x);
+</pre></blockquote>
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

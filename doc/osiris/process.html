@@ -1,0 +1,162 @@
+<html>
+<head>
+   <title>PALM++ Project: osiris library process.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: osiris library</h1>
+
+<h2>
+Header file <b>process.h</b></h2>
+This header contains classes for describing processes and hosts in a 
+parallel machine or grid.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace osiris {
+class Host : public Dumpable {
+public:	
+  Host(); 
+  Host(int32_t id, const std::string& name="", double speed=1.0);
+  void load(IDump&);
+  void save(ODump&) const;
+  bool operator==(const Host& h) const;
+  bool operator!=(const Host& h) const;
+  bool valid() const; 
+  const std::string& name() const;
+  operator int32_t () const;
+  double speed() const;
+};
+
+class Process : public Host
+{
+public:
+  Process();
+  Process(const Host&, const int);
+  Process(const int);
+  void load(IDump&);
+  void save(ODump&) const;
+  bool valid() const;
+  bool on_host(const Host& h) const;
+  bool local() const;
+  operator uint32_t ();
+  bool operator==(const osiris::Process& p);
+  bool operator!=(const osiris::Process& p); 
+  bool operator&lt;(const osiris::Process& p);
+};
+
+typedef std::vector&lt;Host> HostList;
+typedef std::vector&lt;Process> ProcessList;
+}
+
+std::ostream& operator &lt;&lt; (std::ostream&, const osiris::Host&);
+std::ostream& operator &lt;&lt; (std::ostream&, const osiris::Process&);
+</pre></blockquote>
+
+
+<h3>The <tt>Host</tt> class</h3>
+describes a host machine for a parallel program.
+<blockquote><pre>
+Host(); 
+</pre></blockquote>
+creates a <tt>Host</tt> object referring to no machine. The member function 
+<tt>valid</tt> will return false.
+<blockquote><pre>
+Host(int32_t id, const std::string& name="", double speed=1.0);
+</pre></blockquote>
+creates a <tt>Host</tt> object referring to the machine with given ID
+number, and optional name and relative speed. The relative speed
+can be used by load balancing algorithms.
+<blockquote><pre>
+void save(ODump&) const;
+void load(IDump&);
+</pre></blockquote>
+Serialization and deserialization.
+<blockquote><pre>
+bool operator==(const Host& h) const;
+bool operator!=(const Host& h) const;
+</pre></blockquote>
+comparison operators for host machines.
+<blockquote><pre>
+bool valid() const; 
+</pre></blockquote>
+checks if the object refers to a valid and running machine.
+<blockquote><pre>
+const std::string& name() const;
+</pre></blockquote>
+the name of the machine.
+<blockquote><pre>
+operator int32_t () const;
+</pre></blockquote>
+The ID of the host machine.
+<blockquote><pre>
+double speed() const;
+</pre></blockquote>
+The relative speed of the machine.
+
+<h3>The <tt>Process</tt> class</h3>
+describes a process running on a machine. It is derived from the 
+<tt>Host</tt> describing the machine.
+<blockquote><pre>
+Process();
+</pre></blockquote>
+creates a <tt>Process</tt> object referring to no process. The member function 
+<tt>valid</tt> will return false.
+<blockquote><pre>
+Process(const Host&, const int pid);
+</pre></blockquote>
+creates a <tt>Process</tt> object for the process with given process id on 
+a given <tt>Host</tt>.
+<blockquote><pre>
+Process(const int);
+</pre></blockquote>
+creates a <tt>Process</tt> object for the process with given process id on 
+an unknown host.
+<blockquote><pre>
+void save(ODump&) const;
+void load(IDump&);
+</pre></blockquote>
+Serialization and deserialization.
+<blockquote><pre>
+bool valid() const;
+</pre></blockquote>
+checks if the process referred to by the object is valid and running.
+<blockquote><pre>
+bool on_host(const Host& h) const;
+</pre></blockquote>
+checks if the process runs on the given host machine.
+<blockquote><pre>
+bool local() const;
+</pre></blockquote>
+checks if the process runs on the local machine.
+<blockquote><pre>
+operator uint32_t ();
+</pre></blockquote>
+the process id.
+<blockquote><pre>
+bool operator==(const osiris::Process& p);
+bool operator!=(const osiris::Process& p); 
+bool operator&lt;(const osiris::Process& p);
+</pre></blockquote>
+Comparison operators. <tt>Process</tt> objects are sorted
+by process id.
+<h3>Types</h3>
+<blockquote><pre>
+typedef std::vector&lt;Host> HostList;
+typedef std::vector&lt;Process> ProcessList;
+</pre></blockquote>
+useful type definitions for vectors of <tt>Host</tt> and <tt>Process</tt>
+objects.
+<h3>Output operators</h3>
+<blockquote><pre>
+std::ostream& operator &lt;&lt; (std::ostream&, const osiris::Host&);
+std::ostream& operator &lt;&lt; (std::ostream&, const osiris::Process&);
+</pre></blockquote>
+writes information about the host and process to a <tt>std::ostream</tt>.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,43 @@
+###########################################################################
+# ALPS++/scheduler library
+#
+# example/scheduler/Makefile.in
+#
+# $Id$
+#
+# Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+#                            Synge Todo <wistaria@comp-phys.org>,
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License
+# as published by the Free Software Foundation; either version 2
+# of the License, or (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+###########################################################################
+
+# directories
+srcdir = @srcdir@
+top_srcdir = @top_srcdir@
+builddir = @builddir@
+top_builddir = ./@top_builddir@
+
+include $(top_srcdir)/config/include-build.mk
+
+libs_program = -lalps -lcomm-sgl $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
+libs_program_mpi = -lalps -lcomm-mpi $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
+libs_program_pvm = -lalps -lcomm-pvm $(HDF5_LIBS) $(XML_LIBS) $(PVM_LIBS) $(BASE_LIBS)
+
+OBJ_PROGRAM = ising.o ising2.o
+OBJ_PROGRAM_MPI = $(OBJ_PROGRAM)
+OBJ_PROGRAM_PVM = $(OBJ_PROGRAM)
+EXAMPLE_MPI = main_mpi
+EXAMPLE_PVM = main_pvm
+EXAMPLE = main @EXAMPLE_MPI@ @EXAMPLE_PVM@ main2 evaluate evaluate2
+
+include $(top_srcdir)/config/rules.mk
+include $(srcdir)/Makefile.dep

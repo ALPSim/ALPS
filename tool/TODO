@@ -1,0 +1,5 @@
+* Replace archivecat by an XSLT based to to allow also archives to be included
+* Use an environment variable or configure to set the location of tools and 
+  stylesheets
+* Add more archive2plot examples
+* Create an XSLT script to create the archive2plot scripts

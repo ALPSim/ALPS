@@ -1,0 +1,239 @@
+<html>
+<head>
+   <title>PALM++ Project: alea library simpleobservable.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: alea library</h1>
+
+<h2>
+Header file <b>simpleobservable.h</b></h2>
+This header contains the classes for standard Monte Carlo measurements.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+namespace alea {
+
+template &lt;class T> class SimpleObservableEvaluator;
+
+template &lt;class T>
+class AbstractSimpleObservable: public Observable
+{
+public:
+  typedef T           value_type;
+  typedef ...         result_type;
+  typedef std::size_t count_type;
+  typedef ...         time_type;
+
+  AbstractSimpleObservable(const std::string& name);
+  
+  virtual count_type count() const =0;
+  virtual result_type mean() const =0;
+  virtual result_type error() const =0;
+
+  virtual bool has_variance() const =0;
+  virtual result_type variance() const =0;
+
+  virtual bool has_minmax() const = 0;
+  virtual value_type min() const =0;
+  virtual value_type max() const =0;
+
+  virtual bool has_tau() const =0;
+  virtual time_type tau() const =0;
+
+  virtual count_type bin_number() const =0;
+  virtual count_type bin_size() const =0;
+  virtual const value_type& bin_value(count_type n) const =0;
+       
+  template &lt;class S>
+  SimpleObservableEvaluator<typename obs_value_slice&lt;T,S>::value_type>
+    slice(S s, const std::string& newname="") const;
+};
+
+
+template &lt;class T=double>
+class SimpleObservable: public AbstractSimpleObservable&lt;T>
+{
+public:
+  typedef ... value_type;
+  typedef ... time_type;
+  typedef ... count_type;
+  typedef ... result_type;
+
+  SimpleObservable(const std::string& name);
+  
+  virtual SimpleObservable&lt;T>& operator<<(const T& x) =0;
+
+  virtual bool is_thermalized() const =0;
+ 
+  virtual count_type bin_number2() const =0;
+  virtual const value_type& bin_value2(count_type n) const =0;
+ };
+
+
+template &lt;class T,class BINNING>
+class BasicSimpleObservable: public SimpleObservable<T>
+{
+public:
+  typedef ...     value_type;
+  typedef ...     time_type;
+  typedef ...     count_type;
+  typedef ...     result_type;
+  typedef BINNING binning_type;
+
+  enum { version=...};
+
+  BasicSimpleObservable(const std::string& name ,const binning_type&);
+  BasicSimpleObservable(const std::string& name ,uint32_t s=0);
+};
+
+}
+
+</pre></blockquote>
+
+<h3>The <tt>AbstractSimpleObservable</tt> templated abstract base class</h3>
+is an abstract base class for standard observables, bot for evaluation
+objects and for observables to perform measurements with. It is templated on the
+data type of the observables. In addition to the members of the base
+class <tt>Observable</tt> it provides the following members:
+<blockquote><pre>
+typedef T value_type;
+</pre></blockquote>
+is the data type of the observable.
+<blockquote><pre>
+typedef ... result_type;
+</pre></blockquote>
+is a type appropriate to store averages and errors of values of
+type <tt>value_type</tt>.
+<blockquote><pre>
+typedef std::size_t count_type;
+</pre></blockquote>
+is an integral type large enough to store the number of measurements
+for the observable.
+<blockquote><pre>
+typedef ... time_type;
+</pre></blockquote>
+is a type appropriate to store autocorrelation times.
+<blockquote><pre>
+AbstractSimpleObservable(const std::string& name);
+</pre></blockquote>
+The constructor takes the name as argument.
+<blockquote><pre>
+virtual count_type count() const =0;
+</pre></blockquote>
+returns the number of measurements
+<blockquote><pre>
+virtual result_type mean() const =0;
+</pre></blockquote>
+returns the mean value of the measurements.
+<blockquote><pre>
+virtual result_type error() const =0;
+</pre></blockquote>
+returns the best error estimate.
+<blockquote><pre>
+virtual bool has_variance() const =0;
+</pre></blockquote>
+returns <tt>true</tt> if the variance is available.
+<blockquote><pre>
+virtual result_type variance() const =0;
+</pre></blockquote>
+returns the variance, if <tt>has_variance()</tt> evaluates to <tt>true</tt>.
+Otherwise a <tt>NoMeasurementsError</tt> is thrown.
+<blockquote><pre>
+virtual bool has_minmax() const = 0;
+</pre></blockquote>
+returns <tt>true</tt> if the minimum and maximum values are available.
+<blockquote><pre>
+virtual value_type min() const =0;
+virtual value_type max() const =0;
+</pre></blockquote>
+return the minimum and maximum value, if <tt>has_minmax()</tt> evaluates to <tt>true</tt>.
+Otherwise a <tt>NoMeasurementsError</tt> is thrown.
+<blockquote><pre>
+virtual bool has_tau() const =0;
+</pre></blockquote>
+returns <tt>true</tt> if the autocorrelation time is available.
+<blockquote><pre>
+virtual time_type tau() const =0;
+</pre></blockquote>
+returns the autocorrelation time, if <tt>has_tau()</tt> evaluates to <tt>true</tt>.
+Otherwise a <tt>NoMeasurementsError</tt> is thrown.
+<blockquote><pre>
+virtual uint32_t bin_number() const =0;
+</pre></blockquote>
+returns the number of available bins, if binning is implemented for the 
+observable, or zero otherwise. A bin consists of the average ofer a certain 
+number of measurements.
+<blockquote><pre>
+virtual uint32_t bin_size() const =0;
+</pre></blockquote>
+returns the number of measurements in a bin. 
+<blockquote><pre>
+virtual const value_type& bin_value(uint32_t n) const =0;
+</pre></blockquote>
+returns the mean value of the measurements in a bin. <tt>n</tt> needs to be 
+lass than <tt>bin_number()</tt> or undefined behavior can result.
+<blockquote><pre>
+template <class S>
+SimpleObservableEvaluator<typename obs_value_slice<T,S>::value_type>
+    slice(S s, const std::string& newname="") const;
+</pre></blockquote>
+returns an observable containing a slice (e.g. in case of an array-valued
+observable just one entry) of the observable.
+
+<h3>The <tt>SimpleObservable</tt> templated abstract base class</h3>
+is an abstract base class for standard observables to perform measurements with. 
+In addition to members of the base class <tt>AbstractSimpleObservable</tt> 
+it provides the following members:
+<blockquote><pre>
+virtual SimpleObservable<T>& operator<<(const T& x) =0;
+</pre></blockquote>
+records a new measurement <tt>x</tt>
+<blockquote><pre>
+virtual bool is_thermalized() const =0;
+</pre></blockquote>
+returns <tt>true</tt> if the observable has been reset from
+equilibration (thermalization) mode to measurement mode, and
+values recorded using <tt>operator<<</tt> are used for actual
+measurements and not for storing information on equilibration.
+<blockquote><pre>
+virtual count_type bin_number2() const =0;
+</pre></blockquote>
+returns the number of bins for the squares of the values.
+This is often used for error estimates, and will be either
+the same as <tt>bin_number</tt> or 0.
+<blockquote><pre>
+virtual const value_type& bin_value2(count_type n) const =0;
+</pre></blockquote>
+returns the mean square value of measurements in a bin. <tt>n</tt> has to 
+less
+than <tt>bin_value2</tt> or undefined behavior will result.
+
+<h3>The <tt>BasicSimpleObservable</tt> templated class</h3>
+is the actual class for standard observables to perform measurements with.
+It is templated on the data type for the measurements and on the 
+<A HREF="binning.html">binning strategy</A>
+In addition to implementations to all virtual
+function members of the base class 
+it provides the following members:
+<blockquote><pre>
+typedef BINNING binning_type;
+</pre></blockquote>
+the binning strategy type.
+<blockquote><pre>
+enum { version=...};
+</pre></blockquote>
+a compile-time constant, same as <tt>version_id</tt>
+<blockquote><pre>
+BasicSimpleObservable(const std::string& name ,const binning_type&);
+BasicSimpleObservable(const std::string& name ,uint32_t s=0);
+</pre></blockquote>
+The constructors take a second argument which is used to initialize the
+binning startegies. See the documentation for <A HREF="binning.html">
+binning strategies</A> for more information.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+

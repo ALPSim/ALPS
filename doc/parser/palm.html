@@ -1,0 +1,50 @@
+<html>
+<head>
+   <title>PALM++ Project: xml library palm.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: xml library</h1>
+
+<h2>
+Header file <b>palm.h</b></h2>
+This header contains a function to read and write a <tt>Parameters</tt> object of the
+<A HREF="../palm/index.html">palm</A> library into a </tt>std::ostream</tt>, following the
+<A HREF="http://xml.comp-phys.org/schemas/parameter">schema</A> presented at 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+namespace palmxml {
+  void write_xml(std::ostream&amp;, const palm::Parameters&amp;);
+  void read_xml(XMLTag, std::istream&amp;, palm::Parameters&amp;);
+  void read_xml(std::istream&amp;, palm::Parameters&amp;);
+}
+</pre></blockquote>
+<h2>Functions</h2>
+<blockquote><pre>
+void write_xml(std::ostream&amp;, const palm::Parameters&);
+</pre></blockquote>
+writes the contents
+of a <tt>Parameters</tt> object of the
+<A HREF="../palm/index.html">palm</A> library into a </tt>std::ostream</tt>, following the
+<A HREF="http://xml.comp-phys.org/schemas/parameter">schema</A> presented at 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>
+<blockquote><pre>
+void read_xml(XMLTag tag, std::istream&amp;, palm::Parameters&amp;);
+</pre></blockquote>
+parses a &lt;PARAMETERS> element from an input stream, assuming the <A HREF="http://xml.comp-phys.org/schemas/parameter">schema</A> presented at 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+The opening tag is passed as first argument.
+<blockquote><pre>
+void read_xml(std::istream&amp;, palm::Parameters&amp;);
+</pre></blockquote>
+reads the opening tag of the <tt><PARAMETER</tt> element and calls above function.
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

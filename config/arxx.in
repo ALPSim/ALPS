@@ -1,0 +1,144 @@
+#! /bin/sh
+
+# Tools
+compiler='@COMPILER@'
+cxx='@CXX@'
+ar='@AR@'
+ranlib='@RANLIB@'
+
+# Setup
+if expr a : '\(a\)' >/dev/null 2>&1; then
+  arxx_expr=expr
+else
+  arxx_expr=false
+fi
+if test -n "${ZSH_VERSION+set}" && (emulate sh) >/dev/null 2>&1; then
+  emulate sh
+  NULLCMD=:
+elif test -n "${BASH_VERSION+set}" && (set -o posix) >/dev/null 2>&1; then
+  set -o posix
+fi
+arxx_me=`(basename "$0") 2>/dev/null ||
+$arxx_expr X/"$0" : '.*/\([^/][^/]*\)/*$' \| \
+         X"$0" : 'X\(//\)$' \| \
+         X"$0" : 'X\(/\)$' \| \
+         .     : '\(.\)' 2>/dev/null ||
+echo X/"$0" |
+    sed '/^.*\/\([^/][^/]*\)\/*$/{ s//\1/; q; }
+          /^X\/\(\/\/\)$/{ s//\1/; q; }
+          /^X\/\(\/\).*/{ s//\1/; q; }
+          s/.*/./; q'`
+cr_letters='abcdefghijklmnopqrstuvwxyz'
+cr_LETTERS='ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+cr_Letters=$cr_letters$cr_LETTERS
+cr_digits='0123456789'
+cr_alnum=$cr_Letters$cr_digits
+
+
+# Check options
+all=${1+"$@"}
+output=
+objs=
+for arxx_option
+do
+  # If the previous option needs an argument, assign it.
+  if test -n "$arxx_prev"; then
+    eval "$arxx_prev=\$arxx_option"
+    arxx_prev=
+    continue
+  fi
+
+  arxx_optarg=`expr "x$arxx_option" : 'x[^=]*=\(.*\)'`
+
+  case $arxx_option in
+
+  -output | -o | --outpu | --outp | --out | --ou | --o)
+    arxx_prev=output ;;
+  -output=* | -o=* | --outpu=* | --outp=* | --out=* | --ou=* | --o=*)
+    output=$arxx_optarg ;;
+
+  *.o)
+    if test -z "$objs"; then
+      objs="$arxx_option"
+    else
+      objs="$objs $arxx_option"
+    fi ;;
+
+  esac
+
+done
+
+if test -n "$arxx_prev"; then
+  arxx_option=--`echo $arxx_prev | sed 's/_/-/g'`
+  { echo "$arxx_me: error: missing argument to $arxx_option" >&2
+   { (exit 1); exit 1; }; }
+fi
+
+if test "x$output" = "x"; then
+  { echo "$arxx_me: error: missing output file" >&2
+   { (exit 1); exit 1; }; }
+fi
+
+if test -n "$objs"; then
+  case $compiler in 
+  
+  kai)
+    echo "$cxx $all"
+    eval "$cxx $all"
+    echo "$ranlib $output"
+    eval "$ranlib $output"
+    ;;
+  
+  dec)
+    echo "$ar $output $objs"
+    eval "$ar $output $objs"
+    if test -d "cxx_repository"; then
+      echo "find cxx_repository -name '*.o' | xargs $ar $output"
+      eval "find cxx_repository -name '*.o' | xargs $ar $output"
+    fi
+    echo "$ranlib $output"
+    eval "$ranlib $output"
+    ;;
+  
+  como)
+    echo "$cxx --prelink_objects $objs"
+    eval "$cxx --prelink_objects $objs"
+    echo "$ar $output $objs"
+    eval "$ar $output $objs"
+    echo "$ranlib $output"
+    eval "$ranlib $output"
+    ;;
+  
+  sgi32 | sgi64)
+    echo "$cxx -ar $all"
+    eval "$cxx -ar $all"
+    ;;
+
+  macos)
+    echo "libtool -o $output $objs"  
+    eval "libtool -o $output $objs"  
+    ;;
+
+  cray)
+    dummy="dummy_main_$$.C"
+    echo "echo \"int main() { return 0; }\" > $dummy"
+    echo "int main() { return 0; }" > $dummy
+    echo "$cxx $all"
+    eval "$cxx $all"
+    echo "rm -f $output"
+    eval "rm -f $output"
+    echo "bld -q $output $objs TemplateDir/*.o"
+    eval "bld -q $output $objs TemplateDir/*.o"
+    echo "rm -f $dummy"
+    eval "rm -f $dummy"
+    ;;
+
+  *)
+    echo "$ar $output $objs"
+    eval "$ar $output $objs"
+    echo "$ranlib $output"
+    eval "$ranlib $output"
+    ;;
+  
+  esac
+fi

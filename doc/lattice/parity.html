@@ -1,0 +1,48 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library parity.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>Header file: parity.h</h2>
+
+defines a parity function for bipartitie graphs.
+A bipartite graph that separates into two subgraphs, with edges only between
+but he two subgraphs but not within either of them.
+
+<h3>Synopsis</h3>
+<blockquote><pre>
+namespace lattice {
+template &lt;class G, class ParityMap> 
+bool set_parity(ParityMap&amp; map, const G&amp; g)
+
+template &lt;class G> 
+bool set_parity(G&amp; g);
+}
+</pre></blockquote>
+<H3>The <tt>set_parity</tt> functions</H3>
+<blockquote><pre>
+template &lt;class G, class ParityMap> 
+bool set_parity(ParityMap&amp; map, const G&amp; g)
+</pre></blockquote>
+checks whether a graph is bipartite and returns <tt>true</tt> if it is. In addition,
+if the graph is bipartite the vertex property map
+<tt>map</tt> is set to 0 and 1 for vertices in the two subgraphs of the bipartite graph.
+<blockquote><pre>
+template &lt;class G> 
+bool set_parity(G&amp; g);
+</pre></blockquote>
+same as above, but gets the property map of type <tt>parity_t</tt>
+from the graph itself. <tt>G</tt> must be a model of 
+<a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>
+<HR>
+<ADDRESS>(c) 2000-2002 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

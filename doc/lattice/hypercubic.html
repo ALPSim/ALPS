@@ -1,0 +1,227 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library hypercubic.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>Header file: hypercubic.h</h2>
+
+defines a template class <tt>hypercubic_lattice</tt>
+which makes a hypercubic finite lattice with open or periodic boundary conditions from an
+infinite lattice.
+<h3>Synopsis</h3>
+<blockquote><pre>
+namespace lattice {
+
+enum  boundary_condition { UNDEFINED, OPEN, PERIODIC};
+
+template &lt;class BASE>
+class hypercubic_lattice : public BASE {
+public:
+  typedef BASE parent_lattice_type;
+  typedef typename lattice_traits&lt;parent_lattice_type>::unit_cell_type unit_cell_type;
+  typedef typename lattice_traits&lt;parent_lattice_type>::cell_descriptor cell_descriptor;
+  typedef typename lattice_traits&lt;parent_lattice_type>::offset_type offset_type;
+  typedef typename lattice_traits&lt;parent_lattice_type>::basis_vector_iterator basis_vector_iterator;
+  typedef typename lattice_traits&lt;parent_lattice_type>::vector_type vector_type;
+  typedef boundary_crossing boundary_crossing_type;
+  typedef std::size_t size_type;  
+  typedef /*...*/ cell_iterator;
+
+  hypercubic_lattice();
+  hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, boundary_condition bc=PERIODIC);
+  
+  template &lt;class InputIterator>
+  hypercubic_lattice(const parent_lattice_type&amp; p, InputIterator first, InputIterator last, 
+                     boundary_condition bc=PERIODIC );
+  
+  template &lt;class InputIterator2>
+  hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, 
+                     InputIterator2 first2, InputIterator2 last2);
+
+  template &lt;class InputIterator, class InputIterator2>
+  hypercubic_lattice(const parent_lattice_type&amp; p, InputIterator first, InputIterator last, 
+                     InputIterator2 first2, InputIterator2 last2);
+ 
+  std::pair&lt;cell_iterator,cell_iterator> cells() const;
+  size_type volume() const'
+  size_type index(const cell_descriptor&amp; c) const;
+  bool on_lattice(const cell_descriptor&amp; c) const;
+  cell_descriptor cell(offset_type o) const;
+  bool shift(offset_type&amp; o,const offset_type&amp; s) const;
+
+  boundary_condition boundary(uint32_t dim) const;
+  const std::vector&lt;boundary_condition>&amp; boundary() const;
+
+  uint32_t extent(uint32_t dim) const;
+  const offset_type&amp; extent() const;
+};
+
+template &lt;class BASE>
+struct lattice_traits&lt;hypercubic_lattice&lt;BASE> >
+{
+  typedef typename hypercubic_lattice&lt;BASE>::unit_cell_type unit_cell_type;
+  typedef typename hypercubic_lattice&lt;BASE>::cell_descriptor cell_descriptor;
+  typedef typename hypercubic_lattice&lt;BASE>::offset_type offset_type;
+  typedef typename hypercubic_lattice&lt;BASE>::basis_vector_iterator basis_vector_iterator;
+  typedef typename hypercubic_lattice&lt;BASE>::cell_iterator cell_iterator;
+  typedef typename hypercubic_lattice&lt;BASE>::size_type size_type;
+  typedef typename hypercubic_lattice&lt;BASE>::vector_type vector_type;
+  typedef typename hypercubic_lattice&lt;BASE>::boundary_crossing_type boundary_crossing_type;
+};
+
+}
+<pre></blockquote>
+<H3>Boundary conditions</h3>
+<blockquote><pre>
+enum  boundary_condition { UNDEFINED, OPEN, PERIODIC};
+</pre></blockquote>
+are the two boundary conditions implemented at the moment.
+For a valid lattice the boundary conditions are not allowed to be
+undefined.
+<H3>The <tt>hypercubic_lattice</tt> class</H3>
+describes a finite hypercubic lattice and fulfills the
+<A href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A> and 
+<A href="latticeconcepts.html#FiniteLattice">FiniteLattice</A>requirements.
+<h4>Template parameters</h4>
+It takes one template arguments, the base type of the lattice which has to fulfill the 
+<A href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A> requirements.
+<h4>Type definitions</h4>
+<blockquote><pre>
+typedef BASE parent_lattice_type;
+</pre></blockquote>
+typedef for the template parameter, which is also the lattice from which this type is
+derived.
+<blockquote><pre>
+typedef BASE parent_lattice_type;
+typedef typename lattice_traits&lt;parent_lattice_type>::unit_cell_type unit_cell_type;
+typedef typename lattice_traits&lt;parent_lattice_type>::cell_descriptor cell_descriptor;
+typedef typename lattice_traits&lt;parent_lattice_type>::offset_type offset_type;
+typedef typename lattice_traits&lt;parent_lattice_type>::basis_vector_iterator basis_vector_iterator;
+typedef typename lattice_traits&lt;parent_lattice_type>::vector_type vector_type;
+</pre></blockquote>
+these types are inherited from the parent lattice.
+<blockquote><pre>
+typedef boundary_crossing boundary_crossing_type;
+</pre></blockquote>
+as an implementation of a periodic lattice, the type for the <a href="graphproperties.html#boundary_crossing">boundary crossing property</A> is defined.
+
+<blockquote><pre>
+typedef std::size_t size_type;  
+</pre></blockquote>
+an integral type appropriate to store the volume (number of cells) of the lattice.
+<blockquote><pre>
+typedef /*...*/ cell_iterator;
+</pre></blockquote>
+the type for const iterators over the cells of the finite lattice.
+<h4>Constructors</h4>
+<blockquote><pre>
+hypercubic_lattice();
+</pre></blockquote>
+an empty lattice without any cells.
+<blockquote><pre>
+hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, boundary_condition bc=PERIODIC);
+</pre></blockquote>
+obtains the dimension from the infinite parent lattice <tt>p</tt> and
+creates a hypercubic lattice with extent <tt>length</tt> in each of the dimensions. The boundary
+conditions <tt>bc</tt> can be passed optionally and default to periodic.
+<blockquote><pre>
+template &lt;class InputIterator>
+hypercubic_lattice(const parent_lattice_type&amp; p, InputIterator first, InputIterator last,      
+		   boundary_condition bc=PERIODIC );
+</pre></blockquote>
+obtains the dimension from the infinite parent lattice <tt>p</tt> and
+creates a hypercubic lattice where the extent in each of the dimensions is given
+by a pair of iterators. The boundary conditions <tt>bc</tt> can be passed optionally and
+default to periodic.
+<blockquote><pre>
+template &lt;class InputIterator2>
+hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, 
+                   InputIterator2 first2, InputIterator2 last2);
+</pre></blockquote>
+obtains the dimension from the infinite parent lattice <tt>p</tt> and
+creates a hypercubic lattice with extent <tt>length</tt> in each of the dimensions. 
+The boundary conditions for each of the dimensions are given
+by a pair of iterators.
+<blockquote><pre>
+  template &lt;class InputIterator, class InputIterator2>
+  hypercubic_lattice(const parent_lattice_type&amp; p, InputIterator first, InputIterator last, 
+                     InputIterator2 first2, InputIterator2 last2);
+</pre></blockquote>
+obtains the dimension from the infinite parent lattice <tt>p</tt> and
+creates a hypercubic lattice where the extent in each of the dimensions is given
+by a pair of iterators. The second pair of iterators gives the boundary conditions.
+<h4>Member functions</h4>
+in addition to those inherited from the parent lattice:
+<blockquote><pre>
+std::pair&lt;cell_iterator,cell_iterator> cells() const;
+</pre></blockquote>
+returns a pair of iterators, pointing to the first and one past
+the last cell in the lattice.
+<blockquote><pre>
+size_type volume() const'
+</pre></blockquote>
+returns the volume (number of cells) in the lattice. This is the product
+of the extents in each of the dimensions.
+<blockquote><pre>
+size_type index(const cell_descriptor&amp; c) const;
+</pre></blockquote>
+returns the index of a cell. Cells are numbered consecutively from
+0, in the same order as the iterators.
+<blockquote><pre>
+bool on_lattice(const cell_descriptor&amp; c) const;
+</pre></blockquote>
+checks whether a cell is on the finite lattice.
+<blockquote><pre>
+cell_descriptor cell(offset_type o) const;
+</pre></blockquote>
+returns a cell with a given offset. <tt>on_lattice</tt> can be used
+to check whether this cell is on the finite lattice or outside.
+<blockquote><pre>
+bool shift(offset_type&amp; o,const offset_type&amp; s) const;
+</pre></blockquote>
+shifts a cell by an offset <tt>s</tt>, taking into account the boundary
+conditions and returns <tt>true</tt> if the shifted cell is on the
+finite lattice.
+<blockquote><pre>
+boundary_condition boundary(uint32_t dim) const;
+</pre></blockquote>
+returns the boundary condition for one of the dimensions. <tt>0&lt; dim &lt; dimension(lattice)-1</tt>
+<blockquote><pre>
+const std::vector&lt;boundary_condition>&amp; boundary() const;
+</pre></blockquote>
+returns a vector of the boundary conditions for all dimensions.
+<blockquote><pre>
+uint32_t extent(uint32_t dim) const;
+</pre></blockquote>
+returns the extent for one of the dimensions. <tt>0&lt; dim &lt; dimension(lattice)-1</tt>
+<blockquote><pre>
+const offset_type&amp; extent() const;
+</pre></blockquote>
+returns a vector of the extent for all dimensions.
+<h4>Traits class</h4>
+<blockquote><pre>
+template &lt;class BASE>
+struct lattice_traits&lt;hypercubic_lattice&lt;BASE> >
+{
+  typedef typename hypercubic_lattice&lt;BASE>::unit_cell_type unit_cell_type;
+  typedef typename hypercubic_lattice&lt;BASE>::cell_descriptor cell_descriptor;
+  typedef typename hypercubic_lattice&lt;BASE>::offset_type offset_type;
+  typedef typename hypercubic_lattice&lt;BASE>::basis_vector_iterator basis_vector_iterator;
+  typedef typename hypercubic_lattice&lt;BASE>::cell_iterator cell_iterator;
+  typedef typename hypercubic_lattice&lt;BASE>::size_type size_type;
+  typedef typename hypercubic_lattice&lt;BASE>::vector_type vector_type;
+};
+</pre></blockquote>
+is the traits class for the lattice.
+<HR>
+<ADDRESS>(c) 2000-2003 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,97 @@
+# shell
+
+SHELL = @SHELL@
+
+# path
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+bindir = @bindir@
+datadir = @datadir@
+libdir = @libdir@
+includedir = @includedir@
+
+# Makefiles
+
+INCLUDE_MK = $(datadir)/@PACKAGE_NAME@/include.mk
+RULES_MK = $(datadir)/@PACKAGE_NAME@/rules.mk
+RULES_LIB_MK = $(datadir)/@PACKAGE_NAME@/rules-lib.mk
+
+# installer
+
+INSTALL = @INSTALL@
+INSTALL_PROGRAM = @INSTALL_PROGRAM@
+INSTALL_SCRIPT = @INSTALL_SCRIPT@
+INSTALL_DATA = @INSTALL_DATA@
+INSTALL_LIB = $(INSTALL_DATA)
+INSTALL_HEADER = $(INSTALL_DATA)
+install_sh = $(bindir)/install-sh
+mkinstalldirs = $(SHELL) $(bindir)/mkinstalldirs
+
+# tools
+
+AR = @AR@
+ARXX = @ARXX@
+LN_S = @LN_S@
+MAKEDEPEND = makedepend
+MAKEDEPEND_PL = perl $(bindir)/makedepend.pl
+RANLIB = @RANLIB@
+
+# for Boost
+
+BOOST_DIR = @BOOST_DIR@
+
+# base
+
+BASE_CPPFLAGS = @BASE_CPPFLAGS@ -I$(BOOST_DIR)
+BASE_LDFLAGS = @BASE_LDFLAGS@
+BASE_LIBS = @BASE_LIBS@
+
+# for MPI
+
+MPI_CPPFLAGS = @MPI_CPPFLAGS@
+MPI_LDFLAGS = @MPI_LDFLAGS@
+MPI_LIBS = @MPI_LIBS@
+
+# for PVM
+
+PVM_CPPFLAGS = @PVM_CPPFLAGS@
+PVM_LDFLAGS = @PVM_LDFLAGS@
+PVM_LIBS = @PVM_LIBS@
+
+# for HDF5 library
+
+HDF5_CPPFLAGS = @HDF5_CPPFLAGS@
+HDF5_LDFLAGS = @HDF5_LDFLAGS@
+HDF5_LIBS = @HDF5_LIBS@
+
+# for XML parser
+
+XML_CPPFLAGS = @XML_CPPFLAGS@
+XML_LDFLAGS = @XML_LDFLAGS@
+XML_LIBS = @XML_LIBS@
+
+# C/C++ compiler
+
+COMPILER = @COMPILER@
+
+CC = @CC@
+CFLAGS = @CFLAGS@
+
+CXX = @CXX@
+CXXFLAGS = @CXXFLAGS@
+
+CPP = @CPP@
+CXXCPP = @CXXCPP@
+
+CPPFLAGS = $(BASE_CPPFLAGS) -I$(includedir) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
+LDFLAGS = $(BASE_LDFLAGS) -L$(libdir) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
+LIBS = @LIB_SCHEDULER@ @LIB_LATTICE@ @LIB_ALEA@ @LIB_COMM_SGL@ @LIB_OSIRIS@ @LIB_XML@ -lpalm -lboost $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
+
+CPPFLAGS_MPI = $(CPPFLAGS) $(MPI_CPPFLAGS)
+LDFLAGS_MPI = $(LDFLAGS) $(MPI_LDFLAGS)
+LIBS_MPI = @LIB_SCHEDULER@ @LIB_LATTICE@ @LIB_ALEA@ @LIB_COMM_MPI@ @LIB_OSIRIS@ @LIB_XML@ -lpalm -lboost $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
+
+CPPFLAGS_PVM = $(CPPFLAGS) $(PVM_CPPFLAGS)
+LDFLAGS_PVM = $(LDFLAGS) $(PVM_LDFLAGS)
+LIBS_PVM = @LIB_SCHEDULER@ @LIB_LATTICE@ @LIB_ALEA@ @LIB_COMM_PVM@ @LIB_OSIRIS@ @LIB_XML@ -lpalm -lboost $(HDF5_LIBS) $(XML_LIBS) $(PVM_LIBS) $(BASE_LIBS)

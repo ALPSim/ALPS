@@ -1,0 +1,78 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library signal.hpp</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>
+Header file <b>signal.hpp</b></h2>
+This header contains a signal handler class.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace palm {
+class SignalHandler 
+{
+public:
+  enum SignalInfo { NOSIGNAL, USER1, USER2, STOP, TERMINATE };
+
+  SignalHandler();
+   
+  SignalInfo operator()(); 
+  
+  static void stopprocess();  
+};
+}</pre></blockquote>
+
+
+<h3>The <tt>SignalHandler</tt> class</h3>
+<blockquote><pre>
+SignalHandler();
+</pre></blockquote>
+The first time an object of type <tt>SignalHandler</tt> is constructed,
+it installs functions to catch the signals <tt>SIGINT</tt>, <tt>SIGQUIT</tt>,
+<tt>SIGTERM</tt>, <tt>SIGTSTP</tt>, <tt>SIGUSR1</tt> and <tt>SIGUSR2</tt>
+if they exist on the operating system. These signal handler remain
+installed until the program terminates. Any  <tt>SignalHandler</tt>
+object allows inquiry about signal caught. Note that at the moment
+this is not thread-safe.
+<blockquote><pre>
+enum SignalInfo { NOSIGNAL, USER1, USER2, STOP, TERMINATE };
+</pre></blockquote>
+To ensure independence from the operating system the signals get
+mapped to type <tt>SignalInfo</tt>. The standard mapping on Unix-like
+operating systems is:
+<center>
+<table border=2>
+<tr><td><b>Signal</b></td><td><b><tt>SignalInfo</tt></b></td></tr>
+<tr><td><tt>SIGINT</tt></td><td><tt>TERMINATE</tt></td></tr>
+<tr><td><tt>SIGQUIT</tt></td><td><tt>TERMINATE</tt></td></tr>
+<tr><td><tt>SIGTERM</tt></td><td><tt>TERMINATE</tt></td></tr>
+<tr><td><tt>SIGTSTP</tt></td><td><tt>STOP</tt></td></tr>
+<tr><td><tt>SIGUSR1</tt></td><td><tt>USER1</tt></td></tr>
+<tr><td><tt>SIGUSR2</tt></td><td><tt>USER2</tt></td></tr>
+</table>
+</center>
+<blockquote><pre>
+SignalInfo operator()(); 
+</pre></blockquote>
+returns a caught signal or <tt>NOSIGNAL</tt> if no signal was caught.
+If more than one signal was caught the signal with highest priority
+is returned first, where the priority decreases as
+<tt>USER1</tt> > <tt>USER2</tt> > <tt>STOP</tt> > <tt>TERMINATE</tt>.
+This allows user signals to be processed before the process is
+stopped or interrupted.
+<blockquote><pre>
+static void stopprocess();  
+</pre></blockquote>
+send its own process a noncatchable stop signal. This is useful to
+actually stop the process after intercepting a stop signal.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,96 @@
+<html>
+<head>
+   <title>PALM++ Project: osiris library comm.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: osiris library</h1>
+
+<h2>
+Header file <b>comm.h</b></h2>
+This header contains functions used for message passing.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace osiris {
+void comm_init(int* argcp, char*** argvp, bool force_master=false);
+void comm_exit(bool kill=false);
+bool runs_parallel();
+bool is_master(); 
+Host local_host();
+Process local_process();
+Process master_process();
+Process process_from_id(const int);
+ProcessList all_processes();
+Process start_process(const Host&, const STD::string&);
+ProcessList start_processes(const HostList&, const STD::string&);
+ProcessList start_all_processes(const STD::string&, unsigned short procs_per_node=1);
+}</pre></blockquote>
+<h3>Functions</h3>
+<blockquote><pre>
+void comm_init(int* argcp, char*** argvp, bool force_master=false);
+</pre></blockquote>
+initializes the underlying message passing library. One process is usually 
+determined as the master process for master/slave style programs. If this 
+cannot be done automatically (such as when using xpvm), the last flag can 
+be set to <tt>true</tt> on one of the processes to identify one process
+as the master.
+<blockquote><pre>
+void comm_exit(bool kill=false);
+</pre></blockquote>
+cleans up and exits the message passing library. If called with a 
+<tt>true</tt> argument an attempt is made to kill all other processes.
+<blockquote><pre>
+bool runs_parallel();
+</pre></blockquote>
+checks whether the program is running in parallel.
+<blockquote><pre>
+bool is_master(); 
+</pre></blockquote>
+checks whether the current process is the master process.
+<blockquote><pre>
+Host local_host();
+</pre></blockquote>
+returns the host the process is running on.
+<blockquote><pre>
+Process local_process();
+</pre></blockquote>
+returns the current process.
+<blockquote><pre>
+Process master_process();
+</pre></blockquote>
+returns the master process.
+<blockquote><pre>
+Process process_from_id(const int);
+</pre></blockquote>
+returns the process with the given id.
+<blockquote><pre>
+ProcessList all_processes();
+</pre></blockquote>
+returns all processes available to the program.
+<blockquote><pre>
+Process start_process(const Host& host, const STD::string& executable);
+</pre></blockquote>
+starts a process on a host by launching the given executable and returns a 
+<tt>Process</tt> object describing the process. If launching of the 
+executable fails an invalid process descriptor is returned.
+<blockquote><pre>
+ProcessList start_processes(const HostList&, const STD::string&);
+</pre></blockquote>
+starts one process each a host by launching the given executable and returns
+a <tt>ProcessList</tt> object describing the processes. If launching of the 
+executable fails an invalid process descriptor is returned.
+<blockquote><pre>
+ProcessList start_all_processes(const STD::string&, unsigned short procs_per_node=1);
+</pre></blockquote>
+attempts to start <tt>procs_per_node</tt> processes on each available host 
+and returns
+a <tt>ProcessList</tt> object describing the processes. If launching of the 
+executable fails an invalid process descriptor is returned. 
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

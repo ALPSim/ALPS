@@ -1,0 +1,76 @@
+<html>
+<head>
+   <title>PALM++ Project: osiris library</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: osiris library</h1>
+
+The osiris library contains code for (de)serialization and message passing.
+<P>
+We aim for the serialization part to be soon superseded by a Boost library.
+
+<h2>Download, Configuring, Building and Installing</h2>
+
+are discussed <a href="../setup.html">here</a>.
+
+<P>
+The following libraries will be built and installed . The libraries
+using message passing will only be built if the underlying message
+passing libraries are available and have been specified in the
+configuration step.
+
+<ul>
+<li>The serialization library : <tt>libosiris.a</tt></li>
+<li>The dummy communication library for non-parallel programs : <tt>libcomm-sgl.a</tt></li>
+<li>The communication library using MPI : <tt>libcomm-mpi.a</tt></li>
+<li>The communication library using PVM : <tt>libcomm-pvm.a</tt></li>
+</ul>
+
+<H2>Documentation</H2>
+<ul>
+  <li>Serialization
+  <ul>
+    <li><A HREF="dump.html">dump.h</A> contains the base classes for the
+    osiris serialization mechanism.</li>
+    <li><A HREF="xdrdump.html">xdrdump.h</A> contains classes for 
+    serialization (e.g. into binary files) using the XDR format</li>
+  </ul></li>
+  <li>Message passing
+  <ul>
+    <li><A HREF="process.html">process.h</A> contains classes describing
+    processes and host machines.</li>
+    <li><A HREF="comm.html">comm.h</A> contains wrappers to low level
+    message passing routines.</li>
+    <li><A HREF="mpdump.html">mpdump.h</A> contains classes for serialization into messages.</li>
+  </ul></li>
+  <li>Support of other libraries
+  <ul>
+    <li><A HREF="stringvalue.html">stringvalue.h</A> contains serialization 
+    for <tt>palm::StringValue</tt>.</li>
+    <li><A HREF="parameters.html">parameters.h</A> contains serialization 
+    for <tt>palm::Parameters</tt>.</li>
+    <li><A HREF="parameterlist.html">parameterlist.h</A> contains serialization 
+    for <tt>palm::Parameterlist</tt>.</li>
+    <li><A HREF="stdpair.html">std/pair.h</A> contains serialization 
+    for <tt>std::pair</tt>.</li>
+    <li><A HREF="stdvector.html">std/vector.h</A> contains serialization 
+    for <tt>std::vector</tt>.</li>
+    <li><A HREF="stdvalarray.html">std/valarray.h</A> contains serialization 
+    for <tt>std::valarray</tt>.</li>
+    <li><A HREF="stdmap.html">std/map.h</A> contains serialization 
+    for <tt>std::map</tt>.</li>
+    <li><A HREF="stdstring.html">std/string.h</A> contains serialization 
+    for <tt>std::string</tt>.</li>
+  </ul></li>
+  </ul></li>
+  
+</ul>
+
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
+Troyer</A> and <A HREF="mailto:wistaria@comp-phys.org">Synge
+Todo</A></ADDRESS>
+</body>
+</html>

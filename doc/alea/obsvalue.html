@@ -1,0 +1,215 @@
+<html>
+<head>
+   <title>PALM++ Project: alea library obsvalue.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: alea library</h1>
+
+<h2>
+Header file <b>obsvalue.h</b></h2>
+This header contains traits classes to facilitate generic implementation
+of observables. It is of interest only to users wanting to extend the 
+functionality beyond the basic floating point and integral types, 
+<tt>std::complex</tt> and <tt>std::valarray</tt>.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+namespace alea {
+
+template &lt;class T>
+struct obs_value_traits
+{
+  typedef T value_type; 
+  typedef double count_type;
+  typedef double time_type;
+  typedef typename palm::TypeTraits&lt;value_type>::average_t result_type;
+  typedef T element_type;
+  typedef double time_element_type;
+  typedef uint32_t size_type;
+  typedef uint32_t slice_iterator;
+
+  static const uint32_t magic_id = palm::TypeTraits&lt;value_type>::type_tag;
+
+  static element_type max();
+  static element_type min();
+  static element_type epsilon();
+  static time_element_type t_max();
+
+  static void check_for_max(const value_type&amp; a,value_type&amp; b);
+  static void check_for_min(const value_type&amp; a,value_type&amp; b);
+
+  static void variance_check(const value_type&amp; a,time_type&amp; b, time_element_type eps);
+
+  static time_type check_divide(const result_type&amp; a,const result_type&amp; b);
+
+  template &lt;class X> static void resize(X&amp; x,size_type s);
+  template &lt;class X, class Y> static void resize_same_as(X&amp; x,const Y&amp; y);
+  template &lt;class X, class Y> static void copy(X&amp; x,const Y&amp; y);
+  template &lt;class X> static std::size_t size(const X&amp; x);
+
+  template &lt;class X> static T convert(const X&amp; );
+
+  static slice_iterator slice_begin(const value_type&);
+  static slice_iterator slice_end(const value_type&);
+  static std::string slice_name(const value_type&,slice_iterator);
+  static value_type slice_value(const value_type&amp; x, slice_iterator);
+  
+};
+
+template &lt;class T>
+struct obs_value_traits&lt;std::complex&lt;T> >
+{
+  ...
+};
+
+template &lt;class T>
+struct obs_value_traits&lt;std::valarray&lt;T> >
+{
+  ...
+};
+
+template &lt;class DST,class SRC> DST obs_value_cast(const SRC&amp; s) 
+{
+  return obs_value_traits&lt;DST>::convert(s);
+}
+
+} // end namespace alea
+</pre></blockquote>
+
+
+<h3>The <tt>obs_value_traits</tt> traits class</h3>
+is a traits class to facilitate a generic implementation of observables for
+real, complex, integral and array-valued data types. Currently all built in
+numeric data types, <tt>std::complex</tt> complex numbers and 
+<tt>std::valarray</tt> are supported. Plans exist to also add support for
+array data types from the Blitz++ and MTL libraries.
+<h4>Type members</h4>
+The following type members have to be defined
+<TABLE BORDER=2>
+<TR><TD>Type</TD><TD>Explanation</TD></TR>
+<TR><TD><TT>value_type</TT></TD><TD>The type for which the <tt>obs_value_traits</TT> 
+are specialized</TD></TR>
+<TR><TD><TT>count_type</TT></TD><TD>a floating point type appropriate to store the 
+number of measurements</TD></TR>
+<TR><TD><TT>time_type</TT></TD><TD>a type appropriate to store autocorrelation 
+times for the observables. This is typically a floating point type for 
+scalar types, and an array of floating point types for array valued types.
+</TD></TR>
+<TR><TD><TT>result_type</TT></TD><TD>a type appropriate to store averages. Typically 
+<TT>value_type</TT> except for integral types, where it must be a floating 
+point type</TD></TR>
+<TR><TD><TT>element_type</TT></TD><TD>for array-valued types, the type of a single 
+elements (usually <TT>typename value_type::value_type</TT>). For scalar types, 
+the same as <TT>value_type</TT></TD></TR>
+<TR><TD><TT>size_type</TT></TD><TD>for array-valued types, an integral type large enough to store 
+the size or extent of the array (typically <TT>typename 
+value_type::size_type</TT>). For scalar types, an arbitrary integral type.</TD></TR>
+<TR><TD><TT>slice_iterator</TT></TD><TD>an iterator to iterate through all 
+elements in the <TT>value_type</TT>. Important for array-valued 
+types.</TD></TR>
+</TABLE>
+The <tt>slice_iterator</tt> need not be a full iterator, but has to 
+implement only the operators <tt>++</tt> and <tt>!=</tt>.
+<H4>Data members</H4>
+<blockquote><pre>
+static const uint32_t magic_id;
+</pre></blockquote>
+is a unique identifier for the <TT>value_type</TT>.
+<H4>General member functions</H4>
+<blockquote><pre>
+static element_type max();
+static element_type min();
+static element_type epsilon();
+</pre></blockquote>
+return the largest positive number, the largest negative number, and tge 
+floating point epsilon for the <TT>element_type</TT>, which is the same 
+as <TT>value_type</TT> for scalar types, but the <TT>value_type</TT> of the 
+array for array types.
+<blockquote><pre>
+static time_element_type t_max();
+</pre></blockquote>
+returns the largest possible time
+<blockquote><pre>
+static void check_for_max(const value_type&amp; a,value_type&amp; b);
+static void check_for_min(const value_type&amp; a,value_type&amp; b);
+</pre></blockquote>
+replace <TT>b</TT> by the maximum (minimum) of <TT>a</TT> and <TT>b</TT>.
+For complex numbers the absolute value is used. For array types it is 
+performed element wise.
+<blockquote><pre>
+static void variance_check(const value_type&amp; a,time_type&amp; b, time_element_type eps);
+</pre></blockquote>
+replaces the 
+<blockquote><pre>
+static time_type check_divide(const result_type&amp; a,const result_type&amp; b);
+</pre></blockquote>
+<H4>Copying and resizing</H4>
+<blockquote><pre>
+template &lt;class X> static void resize(X&amp; x,size_type s);
+</pre></blockquote>
+resizes an array-valued <tt>x</tt> to size <tt>s</tt>. Should also
+be implemented for scalar types, where it is a no-op. The type <tt>X</tt>
+is either <TT>value_type</TT>, <TT>time_type</TT>, <TT>count_type</TT> or
+<TT>result_type</TT>.
+<blockquote><pre>
+template &lt;class X, class Y> static void resize_same_as(X&amp; x,const Y&amp; y);
+</pre></blockquote>
+resizes an array-valued <tt>x</tt> to the same size as <tt>y</tt>. Should also
+be implemented for scalar types, where it is a no-op. The types <tt>X</tt>
+are either <TT>value_type</TT>, <TT>time_type</TT>, <TT>count_type</TT> or
+<TT>result_type</TT>.
+<blockquote><pre>
+template &lt;class X, class Y> static void copy(X&amp; x,const Y&amp; y);
+</pre></blockquote>
+Copies <tt>x</tt> to <tt>y</tt>, resizing the destination if needed. Note 
+that this is needed since no such resizing is done for 
+<tt>std::valarray</tt> when the assignment operator is used. Should also
+be implemented for scalar types. The types <tt>X</tt>
+are either <TT>value_type</TT>, <TT>time_type</TT>, <TT>count_type</TT> or
+<TT>result_type</TT>.
+<blockquote><pre>
+template &lt;class X> static std::size_t size(const X&amp; x);
+</pre></blockquote>
+returns the size of the array <TT>x</TT> or 1 for scalar types <TT>X</TT>.
+The type <tt>X</tt> is either <TT>value_type</TT>, <TT>time_type</TT>, <TT>count_type</TT> or
+<TT>result_type</TT>.
+<blockquote><pre>
+template &lt;class X> T convert(const X&amp; );
+</pre></blockquote>
+converts the argument to type <tt>T</tt>, performing e.g. <tt>static_cast&lt;T></tt> if defined.
+<H4>Slicing</H4>
+<blockquote><pre>
+static slice_iterator slice_begin(const value_type&);
+</pre></blockquote>
+returns an iterator to the first element in the array-valued observable.
+<blockquote><pre>
+static slice_iterator slice_end(const value_type&);
+</pre></blockquote>
+returns an iterator pointing past the last element in the array-valued observable.
+<blockquote><pre>
+static std::string slice_name(const value_type&,slice_iterator);
+</pre></blockquote>
+returns a string, expressing the slice index in string form. E.g. for a 
+<tt>std::valarray</tt>, the <I>i</I>-th slice is expressed by the string 
+<TT>"[<I>i</I>]"</TT>.
+<blockquote><pre>
+static value_type slice_value(const value_type&amp; x, slice_iterator);
+</pre></blockquote>
+returns the value at the position pointed to by the <tt>slice_iterator</tt>.
+<H4>Function <tt>obs_value_cast</tt></h4>
+<blockquote><pre>
+template &lt;class DST,class SRC> DST obs_value_cast(const SRC&amp; s) 
+{
+  return obs_value_traits&lt;DST>::convert(s);
+}
+</pre></blockquote>
+converts an object of type <tt>SRC</tt> to type <tt>DST</tt>, using the <tt>obs_value_traits</tt> class.
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,194 @@
+<html>
+<head>
+   <title>PALM++ Project: scheduler library montecarlo.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: scheduler library</h1>
+
+<h2>
+Header file <b> montecarlo.h</b></h2>
+This header contains <tt>Worker</tt>, the base class for the user simulation object, and <tt>MCRun</tt> the derived
+base class for a Monte Carlo simulation.
+
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace scheduler {
+
+class Worker
+{
+public:		
+  virtual void dostep()=0;
+  virtual double work_done() const =0;
+  
+  virtual void start();
+  virtual void halt();
+
+  virtual bool change_parameter(const std::string&amp; name, const palm::StringValue&amp; value);
+  
+protected:
+  typedef palm::lagged_fibonacci607 random_type;
+  typedef boost::uniform_01&lt;random_type> random_01_type;
+
+  random_type random;
+  random_01_type random_01;
+
+  palm::Parameters parms;
+  
+  osiris::ProcessList where;
+};
+
+class MCRun : public Worker
+{
+public:
+  MCRun(const osiris::ProcessList&amp; w, const palm::Parameters&amp; p,int node);
+
+  virtual void save(osiris::ODump&amp; dump) const;
+  virtual void load(osiris::IDump&amp; dump) const;
+  
+  virtual void write_xml(const std::string&amp; name, const std::string&amp; dumpname="") const;
+  alea::ObservableSet get_measurements() const;
+
+  virtual bool is_thermalized() const=0;
+protected:
+  alea::ObservableSet measurements;
+};
+
+template &lt;class G=lattice::graph_factory&lt;>::graph_type>
+class LatticeMCRun : public MCRun
+{
+public:
+  typedef G graph_type;
+  typedef typename boost::graph_traits&lt;graph_type>::vertex_iterator vertex_iterator;
+  typedef typename boost::graph_traits&lt;graph_type>::edge_iterator edge_iterator;
+  typedef typename boost::graph_traits&lt;graph_type>::out_edge_iterator out_edge_iterator;
+  typedef typename boost::graph_traits&lt;graph_type>::in_edge_iterator in_edge_iterator;
+  typedef typename boost::graph_traits&lt;graph_type>::edge_descriptor edge_descriptor;
+  typedef typename boost::graph_traits&lt;graph_type>::vertex_descriptor vertex_descriptor;
+  
+  LatticeMCRun(const osiris::ProcessList&amp; w,const palm::Parameters&amp; p,int n);
+   
+  graph_type&amp; graph();
+  const graph_type&amp; graph() const;
+};
+
+}
+</pre></blockquote>
+
+
+<h3>The <tt>Worker</tt> and <tt>MCRun</tt> class</h3>
+
+is the base class for all user simulations, containing the features not specific to Monte Carlo simulations. At the moment the only use is for Monte Carlo simulations through the derived class <tt>MCRun</tt> but further applications will be added in the future. For now we will thus discuss the members of both classes together.
+<h4>Member functions</h4>
+<blockquote><pre>
+MCRun(iconst osiris::ProcessList&amp; w, const palm::Parameters&amp; p,int node;
+</pre></blockquote>
+is the constructor of a new Monte Carlo run. 
+<P>The argument <tt>w</tt> gives the processor nodes on which the <tt>MCRun</tt> is created, and the argument <tt>node</tt> the index into this list in case of future multi-CPU simulations. The simulation parameters are given in <p>. These three arguments are passed to the <a href="scheduler.html">factory</a> and will just be passed on to the constructor here.
+<blockquote><pre>
+virtual void dostep()=0;
+</pre></blockquote>
+does one simulation step. This needs to be <A href="implementing.html">implemented</A> by the user of the library.
+<blockquote><pre>
+virtual double work_done() const =0;
+</pre></blockquote>
+returns the fraction of work that is already done for the simulation. A value of one means that the simulation is finished. This also needs to be <A href="implement.html">implemented</A> by the user of the library.
+<blockquote><pre>
+virtual void start();
+</pre></blockquote>
+is called at the start of the simulation and can be overriden to do some initial work.
+<blockquote><pre>
+virtual void halt();
+</pre></blockquote>
+is called at the end of the simulation and can be overriden to do some final work.
+<blockquote><pre>
+virtual bool change_parameter(const std::string&amp; name, const palm::StringValue&amp; value);
+</pre></blockquote>
+is called when the user changes the parameter given by <tt>name</tt> to a new <tt>value</tt>. If the change is allowed or irrelevant the function should do the appropriate changes and return <tt>true</tt>, while <tt>false</tt> should be returned if the parameter change is not valid.
+<blockquote><pre>
+virtual void save(osiris::ODump&amp; dump) const;
+</pre></blockquote>
+should be overriden to save the user data into a checkpoint. In contrast to previous library versions the base class function <tt>MCRun::save</tt> should no longer be called from the derived user class.
+<blockquote><pre>
+virtual void load(osiris::IDump&amp; dump);
+</pre></blockquote>
+should be overrideen to read a Monte Carlo run from a checkpoint, if checkpointing support is desired.
+<blockquote><pre>
+virtual bool is_thermalized() const=0;
+</pre></blockquote>
+needs to be overridden to give a criterion for equilibration of the Monte Carlo simulation and to determine when real measurements should start.
+<blockquote><pre>
+alea::ObservableSet get_measurements() const;
+</pre></blockquote>
+returns the collected measurements.
+<h4>Type members</h4>
+<blockquote><pre>
+typedef palm::lagged_fibonacci607 random_type;
+</pre></blockquote>
+is the type of random number generator used.
+<blockquote><pre>
+typedef boost::uniform_01&lt;random_type> random_01_type;
+</pre></blockquote>
+is the type an adaptor to provide random numbers in the interval [0,1).
+
+<h4>Data members</h4>
+<blockquote><pre>
+random_type random;
+</pre></blockquote>
+is the random number generator
+<blockquote><pre>
+random_01_type random_01;
+</pre></blockquote>
+is an adaptor to provide random numbers in the interval [0,1).
+<blockquote><pre>
+alea::ObservableSet measurements;
+</pre></blockquote>
+the collected measurements into which measurements should be stored.
+<blockquote><pre>
+palm::Parameters parms;</pre></blockquote>
+</pre></blockquote>
+The simulation parameters.
+<blockquote><pre>
+osiris::ProcessList where;</pre></blockquote>
+</pre></blockquote>
+the processes of which the simulation is running. This is empty if the simulation has been loaded for evaluation purposes and no actual simulations will be performed.
+
+<h3>The <tt>LatticeMCRun</tt> class template</h3>
+is derived from <tt>MCRun</tt> and contains addicitonally a graph object, storing the lattice for a Monte Carlo simulation on a lattice model. The graph type defaults to the default type of <A href="../lattice/library.html">
+lattice::graph_factory</a>.
+
+<blockquote><pre>
+typedef G graph_type;
+typedef typename boost::graph_traits&lt;graph_type>::vertex_iterator vertex_iterator;
+typedef typename boost::graph_traits&lt;graph_type>::edge_iterator edge_iterator;
+typedef typename boost::graph_traits&lt;graph_type>::out_edge_iterator out_edge_iterator;
+typedef typename boost::graph_traits&lt;graph_type>::in_edge_iterator in_edge_iterator;
+typedef typename boost::graph_traits&lt;graph_type>::edge_descriptor edge_descriptor;
+typedef typename boost::graph_traits&lt;graph_type>::vertex_descriptor vertex_descriptor;
+</pre></blockquote>
+are useful type definitions obtained from <a href="http://www.boost.org/libs/graph/">graph traits</A>.
+<blockquote><pre>
+LatticeMCRun(const osiris::ProcessList&amp; w,const palm::Parameters&amp; p,int n);
+</pre></blockquote>
+The constructor creates the graph from the following input parameters:
+<table border="1">
+<thead><tr><td><b>Parameter</b></td><td><b>Description</b></td></tr></thead>
+<tbody>
+<tr><td>LATTICE_LIBRARY</td><td>The path to an XML file containg lattice descriptions. It will be used to initialize a <a href="../lattice/library.html">lattice library</a>. The default is a file called "lattices.xml" in the current working directory.</td></tr>
+<tr><td>LATTICE</td><td>The name of a lattice or graph in the lattice library. It will be used to create the graph using a <a href="../lattice/library.html">graph factory</a> from the <a href="../lattice/index.html">lattice library</a>.</td></tr>
+<tr><td>GRAPH</td><td>A synonym for LATTICE.</td></tr>
+</tbody>
+</table>
+<blockquote><pre>   
+graph_type&amp; graph();
+const graph_type&amp; graph() const;
+</pre></blockquote>
+allow access to the graphs.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

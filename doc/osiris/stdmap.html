@@ -1,0 +1,40 @@
+<html>
+<head>
+   <title>PALM++ Project: osiris library std/map.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: osiris library</h1>
+
+<h2>
+Header file <b>std/map.h</b></h2>
+This header contains serialization functions for <tt>std::map</tt> and <tt>std::multimap</tt>.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+template &lt;class Key, class T, class Compare, class Allocator>
+osiris::IDump& operator >> (osiris::IDump& dump,
+		     std::map&lt;Key,T,Compare,Allocator>& x);
+		     	
+template &lt;class Key, class T, class Compare, class Allocator>
+osiris::ODump& operator &lt;&lt; (osiris::ODump& dump,
+		    const std::map&lt;Key,T,Compare,Allocator>& x);
+		    
+template &lt;class Key, class T, class Compare, class Allocator>
+osiris::IDump& operator >> (osiris::IDump& dump,
+		    std::multimap&lt;Key,T,Compare,Allocator>& x);
+		    
+			  
+template &lt;class Key, class T, class Compare, class Allocator>
+osiris::ODump& operator &lt;&lt; (osiris::ODump& dump,
+		    const std::multimap&lt;Key,T,Compare,Allocator>& x)l
+</pre></blockquote>
+
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

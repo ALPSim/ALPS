@@ -1,0 +1,176 @@
+<html>
+<head>
+   <title>PALM++ Project: scheduler library implementation instructions</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: scheduler library</h1>
+
+<h2>
+Implementing a Monte Carlo simulation</h2>
+
+Here we discuss how to implement a Monte Carlo simulation based on the scheduler library. The full source code is provided in the <a href="../../example/scheduler">example</a> directory.
+
+<h3>The classes</h3>
+Two classes need to be provided: a simulation class derived from <a href="montecarlo.html"><tt>MCRun</tt></a> and an object factory derived from  <a href="scheduler.html"><tt>Factory</tt></a>. If only a single simulation object is needed, such as here, the templated single-object Factory <tt>SimpleFactory</tt> can be used.
+<blockquote><pre>class IsingSimulation : public scheduler::MCRun
+{
+public:
+  IsingSimulation(const osiris::ProcessList&amp;,const palm::Parameters&amp;,int);
+  void save(osiris::ODump&amp;) const;
+  void load(osiris::IDump&amp;);
+  void dostep();
+  bool is_thermalized() const;
+  double work_done() const;
+  bool change_parameter(const std::string&amp; name, const palm::StringValue&amp; value);
+  
+private:
+  uint32_t length;                  // the system size
+  double beta;                      // the inverse temperatre
+  uint32_t sweeps;                  // the number of sweeps done
+  uint32_t thermalization_sweeps;   // the number of sweeps to be done for equilibration
+  uint32_t total_sweeps;            // the total number of sweeps to be done after equilibration
+  std::vector&lt;int> spins;        // the vector to store the spins
+}; 
+
+typedef scheduler::SimpleFactory&lt;IsingSimulation> IsingFactory;
+</pre></blockquote>
+
+
+<h2>The main program</h2>
+just starts a scheduler and catches exceptions:
+<blockquote><pre>
+int main(int argc, char** argv)
+{
+  try {
+   return scheduler::start(argc,argv,IsingFactory());
+  }
+  catch (std::exception&amp; exc) {
+    return -1;
+  }
+}
+</pre></blockquote>
+
+<h2>Implementation of the functions</h2>
+<h3>The constructor</h3>
+initializes the data members from the parameters. It then starts from a random configuration and creates two objects to measure energy and magnetization.
+<blockquote><pre>
+IsingSimulation::IsingSimulation(const osiris::ProcessList&amp; w,const palm::Parameters&amp; p,int node)
+  : scheduler::MCRun(0,w,p,node),
+    length(static_cast&lt;uint32_t>(parms["L"])),
+    beta(1./static_cast&lt;double>(parms["T"])),
+    thermalization_sweeps(static_cast&lt;uint32_t>(parms["THERMALIZATION"])),
+    total_sweeps(static_cast&lt;uint32_t>(parms["SWEEPS"])),
+    sweeps(0),
+    spins(where.empty() ? 0 : length)
+{
+  // initialize random spin configuration
+  for(int i=0;i&lt;spins.size();i++)   
+    spins[i]=(random_01() &lt; 0.5 ? 1 : -1);
+
+  // create measurement objects
+  measurements &lt;&lt; alea::RealObservable("Energy");
+  measurements &lt;&lt; alea::RealObservable("Magnetization");
+}
+</pre></blockquote>
+If the object is just created to evaluate the simulation but not to perform actual simulations, the <tt>where</tt> data member of the simulation, specifying the processes on which a simulation will performed, will be empty. In that case the <tt>spins</tt> vectoring, storing the spins of the simulation can be resized to zero.
+
+<h3>The member functions</h3>
+<blockquote><pre>
+void IsingSimulation::save(osiris::ODump&amp; dump) const
+{
+  dump &lt;&lt; sweeps &lt;&lt; spins;
+}
+</pre></blockquote>
+saves the simulation data into a checkpoint.
+
+<blockquote><pre>
+void IsingSimulation::load(osiris::IDump&amp; dump)
+{
+  dump >> sweeps;
+  if(!where.empty()) // skip reading the spins if we are just evaluating
+    dump >> spins;
+}
+</pre></blockquote>
+This loads the simulation data from a checkpoint. If the object is just loaded to evaluate the simulation but not to perform actual simulations, the <tt>where</tt> data member of the simulation, specifying the processes on which a simulation will performed, will be empty. In that case reading the spin configuration can be omitted to save memory.
+
+<blockquote><pre>
+bool IsingSimulation::change_parameter(const std::string&amp; name, const palm::StringValue&amp; value)
+{
+  if(name=="SWEEPS") {
+    total_sweeps=static_cast&lt;uint32_t>(value);
+    return true; // can do it.
+  }
+  else
+    return false; // cannot do it.
+}
+</pre></blockquote>
+is called when the user tries to change a parameter while the simulation is running. In this example we only allow changes to the total number of sweeps.
+<P><B>Note:</B>The implementation of this function is optional.
+<blockquote><pre>
+bool IsingSimulation::is_thermalized() const
+{
+  return (sweeps >= thermalization_sweeps);
+}
+</pre></blockquote>
+determines thermalization. Here the simulation is thermalized when a certain number of sweeps, given by the user has been performed.
+<blockquote><pre>
+double IsingSimulation::work_done() const
+{
+  return (is_thermalized() ? (sweeps-thermalization_sweeps)/double(total_sweeps) :0.);
+}
+</pre></blockquote>
+returns the fraction of total work performed.
+<blockquote><pre>
+void IsingSimulation::dostep()
+{
+  // increment sweep count
+  sweeps++;
+  
+  // perform updates
+  for (int j=0;j&lt;length;j++)  {
+    // choose a random site and determine the neighbors
+    int i = int(double(length)*random_01());
+    int right=(i+1 &lt; length ? i+1 : 0);
+    int left=( i-1 &lt; 0 ? length-1 : i-1);
+
+    // calculate change in the weight of the configuration
+    double p=exp(2.*beta*spins[i]*(spins[right]+spins[left]));
+
+    // Metropolis updating: accept if random number is smaller than p
+    if (p>=1. || random_01() &lt; p)
+      spins[i]=-spins[i];
+  }
+  
+  // perform measurements
+  int tmag=0;
+  int ten=0;
+  for (int i=0;i&lt;length;i++) {
+    int right=(i +1 &lt; length ? i+1 : 0);
+    tmag += spins[i];
+    ten += -spins[i]*spins[right];
+  }
+  
+  // normalize measurements and add them to the observables
+  measurements.get&lt;alea::RealObservable>("Energy") &lt;&lt; double(ten)/length;
+  measurements.get&lt;alea::RealObservable>("Magnetization") &lt;&lt; double(tmag)/length;
+}
+</pre></blockquote>
+performs the actual simulations and measurements.
+
+<h3>Further member functions</h3>
+
+The member functions
+<blockquote><pre>
+void MCRun::start() const;
+void MCRun::halt() const;
+</pre></blockquote>
+can be overridden to perform extra tasks when the simulation is started and halted (e.g. opening and closing of files or (de)allocation of extra resources.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

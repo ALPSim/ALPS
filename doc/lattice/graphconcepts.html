@@ -1,0 +1,126 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library graph concepts</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2> Graph Concepts</h2>
+Now that we have lattices we can adorn them by graphs, and thus create
+a regular graph from a graph on a unit cell of a lattice. 
+See the corresponding discussion in the documentation of the 
+<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+<P>
+Ee will present the following concepts related to graphs on lattices:
+  <ul>
+    <li><a href="#LatticeGraph">LatticeGraph</a>
+    </li>
+    <li><a href="#UnitCellGraph">UnitCellGraph and GraphUnitCell</a>
+    </li>
+    <li><a href="#ReflectablePropertyGraph"> ReflectablePropertyGraph</a>
+  </ul>
+
+<h3><a name="LatticeGraph"></a>LatticeGraph</h3>
+is a refinement of <a href="#FiniteLattice">FiniteLattice</a>.
+It is a lattice that contains a graph.
+Infinite lattices are not allowed as long as the graph concept 
+is restricted to finite graphs.
+<h4>Notation</h4>
+<table border="1">
+<tr><td><tt>L</tt></td><td>a type that is a a model of <i>LatticeGraph</i></td></tr>
+<tr><td><tt>l</tt></td><td>an object of type <tt>L</tt></td></tr>
+</table>
+<h4>Associated Type</h4>
+<table border="1">
+<tr><td><tt>lattice::graph_traits&lt;L>::graph_type</tt><br><br>
+A type that is a model of Graph.</td></tr></table>
+<h4> Expressions</h4>
+<table border="1">
+<tr><td><tt>lattice::graph(l)</tt></td><td>return type <tt>lattice::graph_traits&lt;L>::graph_type&amp;</tt>,
+the graph associated with the <i>LatticeGraph</i>. A similar
+expression returning a const reference exists for const <tt>l</tt></td></tr></table>
+<h4><A name="graph_traits.h">Example Implementation</h4>
+A default implementation of the traits class and the <tt>lattice::graph</tt> function,
+relying on appropriate member functions exists in the file graph_traits.h:
+<blockquote>
+<pre>
+namespace lattice {
+
+  template &lt;class T>
+  struct graph_traits
+  {
+    typedef typename T::graph_type graph_type;
+  };
+
+  template &lt;class T>
+  const typename graph_traits&lt;T>::graph_type& graph(const T& x)
+  {
+    return x.graph();
+  }
+
+}
+</pre>
+</blockquote>
+An example implementation of a lattice graph can be found in <A HREF="latticegraph.html">latticegraph.h</A>.
+
+<h3><a name="UnitCellGraph"></a>GraphUnitCell and UnitCellGraph</h3>
+In order to build a <A HREF="#LatticeGraph">LatticeGraoh</A> from a unit cell,
+we need a unit cell adorned with a special graph. This <i>GraphUnitCell</i>
+is a refinement of <A href="latticeconcepts.html">UnitCell</a>, and the <i>UnitCellGraph</i>
+associated with the unit cell, a refinement of an <i>PropertyGraph</i>
+allowing parallel edges and providing two special edge properties.
+As edges can connect two different cells
+each edge contains two edge properties denoting the cell offstes
+for the source and target vertices. The offset of a cell has to be shifted by
+these shifts to obtain the cell of the source or target vertex. Usually one
+or both of them are zero offsets. 
+
+ See the corresponding
+discussion in the documentation of the <A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A> for more details and examples.
+
+<h4>Notation</h4>
+<table border="1">
+<tr><td><tt>U</tt></td><td>a type that is a a model of <i>GraphUnitCell</i></td></tr>
+<tr><td><tt>u</tt></td><td>an object of type <tt>U</tt></td></tr>
+</table>
+
+<h4> Associated Types</h4>
+<table border="1">
+<tr><td><tt>lattice::source_offset_t</tt></td><td>the edge property type for the source vertex offset</td></tr>
+<tr><td><tt>lattice::target_offset_t</tt></td><td>the edge property type for the target vertex offset</td></tr>
+<tr><td><tt>lattice::graph_traits&lt;U>::graph_type</tt></td><td>a type that is a model of <i>UnitCellGraph</i></td></tr>
+</table>
+
+<h4>Expressions</h4>
+<table border="1">
+<tr><td><tt>lattice::graph(u)</tt></td><td>return type <tt>lattice::graph_traits&lt;U>::graph_type&amp;</tt>,
+the graph associated with the <i>UnitCellGraph</i>. A similar
+expression returning a const reference exists for const <tt>u</tt></td></tr></table>
+<h4>Example Implementation</h4>
+A default implementation of the traits class and the <tt>lattice::graph</tt> function,
+relying on appropriate member functions exists in the file 
+<A HREF="#graph_traits.h">graph_traits.h</A>.
+<P>
+An example implementation of a unit cell graph can be found in <A HREF="unitcell.html">unitcell.h</A>.
+
+<h3><a name="ReflectablePropertyGraph"></a>ReflectablePropertyGraph</h3>
+
+is a refinement of a Boost <i>PropertyGraph</i>. Additionally it allows
+reflection on the existence of properties. At the moment no flexible generic
+interface has been finalized. We encourage discussion on this point.
+<P>
+Thus for now the only model is <tt>boost::adjacency_list</tt>. For properties
+that are used in the lattice library see <A HREF="graphproperties.html">graphproperties.h</A>
+
+<HR>
+<ADDRESS>(c) 2000-2002 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

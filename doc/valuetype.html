@@ -1,0 +1,184 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library valuetype.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>
+Header file <b>valuetype.h</b></h2>
+This header contains the <tt>ValueType</tt> class, a class that
+can store any numerical, boolean or string value.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace palm {
+class ValueType {
+public:
+  ValueType();
+  ValueType( bool x);
+  ValueType( int8_t x);
+  ValueType( int16_t x);
+  ValueType( int32_t x);
+  ValueType( int64_t x);
+  ValueType( uint8_t x);
+  ValueType( uint16_t x);
+  ValueType( uint32_t x);
+  ValueType( uint64_t x);
+  ValueType( float x);
+  ValueType( double x);
+  ValueType( long double x);
+  template &lt;class T> ValueType( std::complex&lt;T> x);
+  ValueType( const std::string& x);
+  ValueType( const char* x);
+
+  inline operator bool () const;
+  inline operator int8_t () const;
+  inline operator int16_t () const;
+  inline operator int32_t () const;
+  inline operator int64_t () const;
+  inline operator uint8_t () const;
+  inline operator uint16_t () const;
+  inline operator uint32_t () const;
+  inline operator uint64_t () const;
+  inline operator float () const;
+  inline operator double () const;
+  inline operator long double () const;
+  template &lt;class T> inline operator std::complex&lt;T> () const;
+  inline operator std::string () const;
+  inline const char* c_str() const;
+
+  inline ValueType& operator=(bool x);
+  inline ValueType& operator=(int8_t x);
+  inline ValueType& operator=(int16_t x);
+  inline ValueType& operator=(int32_t x);
+  inline ValueType& operator=(int64_t x);
+  inline ValueType& operator=(uint8_t x);
+  inline ValueType& operator=(uint16_t x);
+  inline ValueType& operator=(uint32_t x);
+  inline ValueType& operator=(uint64_t x);
+  inline ValueType& operator=(float x);
+  inline ValueType& operator=(double x);
+  inline ValueType& operator=(long double x);
+  template &lt;class T> inline ValueType& operator=(std::complex&lt;T> x);
+  inline ValueType& operator=(const std::string& x);
+  inline ValueType& operator=(const char* x);
+
+  type_tag_t getType() const;
+  
+  inline bool valid() const;
+
+  template <class T> T get() const ;
+};
+
+} // end namespace
+
+STD::ostream& operator &lt;&lt;(STD::ostream& os, const palm::ValueType& v);
+</pre></blockquote>
+
+
+<h3>The <tt>ValueType</tt> class</h3>
+<blockquote><pre>
+ValueType();
+</pre></blockquote>
+initialized to an invalid value.
+<blockquote><pre>
+ValueType( bool x);
+ValueType( int8_t x);
+ValueType( int16_t x);
+ValueType( int32_t x);
+ValueType( int64_t x);
+ValueType( uint8_t x);
+ValueType( uint16_t x);
+ValueType( uint32_t x);
+ValueType( uint64_t x);
+ValueType( float x);
+ValueType( double x);
+ValueType( long double x);
+template &lt;class T> ValueType( std::complex&lt;T> x);
+</pre></blockquote>
+initialize from a numerical or boolean value.
+<blockquote><pre>
+ValueType( const std::string& x);
+</pre></blockquote>
+initializes from a <tt>std::string</tt>.
+<blockquote><pre>
+ValueType( const char* x);
+</pre></blockquote>
+initializes from a C-style string.
+<blockquote><pre>
+ValueType& operator=(bool x);
+ValueType& operator=(int8_t x);
+ValueType& operator=(int16_t x);
+ValueType& operator=(int32_t x);
+ValueType& operator=(int64_t x);
+ValueType& operator=(uint8_t x);
+ValueType& operator=(uint16_t x);
+ValueType& operator=(uint32_t x);
+ValueType& operator=(uint64_t x);
+ValueType& operator=(float x);
+ValueType& operator=(double x);
+ValueType& operator=(long double x);
+template &lt;class T> inline ValueType& operator=(std::complex&lt;T> x);
+</pre></blockquote>
+assign a numerical value
+<blockquote><pre>
+ValueType& operator=(const std::string& x);
+</pre></blockquote>
+assigns from a <tt>std::string</tt>.
+<blockquote><pre>
+ValueType& operator=(const char* x);
+</pre></blockquote>
+assigns from a C-style string.
+<blockquote><pre>
+operator bool () const;
+operator int8_t () const;
+operator int16_t () const;
+operator int32_t () const;
+operator int64_t () const;
+operator uint8_t () const;
+operator uint16_t () const;
+operator uint32_t () const;
+operator uint64_t () const;
+operator float () const;
+operator double () const;
+operator long double () const;
+template &lt;class T> inline operator std::complex&lt;T> () const;
+operator std::string () const;
+</pre></blockquote>
+attempt a conversion to the type. If this is impossible
+a <tt>std::runtime_error</tt> is thrown.
+<blockquote><pre>
+const char* c_str() const;
+</pre></blockquote>
+attempts a conversion to the type. If this is impossible
+a <tt>std::runtime_error</tt> is thrown.
+<blockquote><pre>
+template <class T> T get() const ;
+</pre></blockquote>
+attempts a conversion to the type <tt>T</tt>. If this is impossible
+a <tt>std::runtime_error</tt> is thrown.
+<blockquote><pre>
+type_tag_t getType() const;
+</pre></blockquote>
+returns the value <tt>palm::TypeTraits&lt;T>::type_tag</tt> for the
+type <tt>T</tt> which is currently stored in the class, or
+<tt>palm::TypeTraits&lt;void>::type_tag</tt> if no valid value 
+is stored.
+<blockquote><pre>
+bool valid() const;
+</pre></blockquote>
+returns <tt>true</tt> if a value is stored in the class.
+<blockquote><pre>
+std::ostream& operator &lt;&lt;(std::ostream& os, const palm::ValueType& v);
+</pre></blockquote>
+writes the stored value to an <tt>ostream</tt> if a valid value is stored.
+Nothing is written otherwise.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

@@ -1,0 +1,161 @@
+<html>
+<head>
+   <title>PALM++ Project: lattice library latticegraph.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: lattice library</h1>
+
+<h2>Header file: latticegraph.h</h2>
+
+defines a function to create a graph from a lattice, and a template class
+that decorates a lattice with a graph.
+<h3>Synopsis</h3>
+<blockquote><pre>
+namespace lattice {
+
+template &lt;class LATTICE, class GRAPH>
+void make_graph_from_lattice(GRAPH&amp; g,const LATTICE&amp; l);
+
+template &lt;class LATTICE, class GRAPH> 
+class lattice_graph : public LATTICE
+{
+public:
+  typedef LATTICE base_type;
+  typedef GRAPH graph_type;
+
+  typedef typename lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
+  typedef typename lattice_traits&lt;base_type>::offset_type offset_type;
+  typedef typename lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
+  typedef typename lattice_traits&lt;base_type>::vector_type vector_type;
+  typedef typename lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
+  typedef typename lattice_traits&lt;base_type>::cell_iterator cell_iterator;
+  typedef typename lattice_traits&lt;base_type>::boundary_crossing_type boundary_crossing_type;
+
+  lattice_graph();
+  lattice_graph(const base_type&amp;);
+
+  const graph_type&amp; graph() const { return graph_;}
+  graph_type&amp; graph() { return graph_;}
+};
+
+
+template &lt;class L, class G>
+struct lattice_traits&lt;lattice_graph&lt;L,G> >
+{
+  typedef typename lattice_graph&lt;L,G>::unit_cell_type unit_cell_type;
+  typedef typename lattice_graph&lt;L,G>::cell_descriptor cell_descriptor;
+  typedef typename lattice_graph&lt;L,G>::offset_type offset_type;
+  typedef typename lattice_graph&lt;L,G>::basis_vector_iterator basis_vector_iterator;
+  typedef typename lattice_graph&lt;L,G>::cell_iterator cell_iterator;
+  typedef typename lattice_graph&lt;L,G>::size_type size_type;
+  typedef typename lattice_graph&lt;L,G>::vector_type vector_type;
+  typedef typename lattice_graph&lt;L,G>::boundary_crossing_type boundary_crossing_type;
+};
+
+}
+<pre></blockquote>
+<H3>The <tt>make_graph_from_lattice</tt> function</H3>
+<blockquote><pre>
+template &lt;class L, class G>
+void make_graph_from_lattice(G&amp; G,const L&amp; l);
+</pre></blockquote>
+creates a graph from a lattice <tt>l</tt> that is a model of
+<A href="latticeconcepts.html#FiniteLattice">FiniteLattice</A>
+and of <A href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A>.
+The unitcell of the graph has to be a model of
+<A href="graphconcepts.html#UnitCellGraph">GraphUnitCell</A>. The graph type <tt>G</tt> has to be a model of
+<A HREF="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</A>.
+<P>
+The function takes the unit cell graph <tt>lattice::graph(lattice::unit_cell(l))</tt>
+and decorates all cells with this graph, as discussed in the
+documentation of the the 
+<A HREF="http://xml.comp-phys.org/schemas/lattice/">lattice XML schema</A> on 
+<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
+<P>
+The following properties are set if the graph type <tt>G</tt> supports them:
+<ul><li>Vertex properties<ul>
+<li>The property <tt>vertex_index_t</tt> is assumed to be set automatically when a vertex is added</li>
+<li>The property <tt>coordinate_t</tt> is set to the coordinate of the vertex, calculated
+from the coordinate of the vertex in the unit cell shifted by the origin of each cell.
+<li>The property <tt>vertex_type_t</tt> is set to the type (color) of the vertex</li>
+</ul>
+<li>Edge properties<ul>
+<li>The property <tt>edge_index_t</tt> is set to the index (number) of the edge when it is added</li>
+<li>The property <tt>edge_type_t</tt> is set to the type (color) of the edge</li>
+<li>The property <tt>boundary_crossing_t</tt> is set to indicate whether an edge crosses the boundary of a periodic lattice.</li>
+</ul>
+<li>Graph properties<ul>
+<li>The property <tt>dimension_t</tt> is set to the dimension of the lattice</li>
+</ul>
+</li>
+</ul>
+
+<H3>The <tt>lattice_graph</tt> adaptor class</H3>
+takes a lattice and adorns it with a graph. The graph is created by the
+<tt>make_graph_from_lattice</tt> function.
+<h4>Type defintions</h4>
+<blockquote><pre>
+typedef LATTICE base_type;
+</pre></blockquote>
+is the underlying lattice type, and also the type from which  <tt>lattice_graph</tt>
+is derived.
+<blockquote><pre>
+typedef GRAPH graph_type;
+</pre></blockquote>
+is the type of graph that is attached to the lattice. It has to model the 
+<A HREF="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</A>
+concept.
+<blockquote><pre>
+typedef typename lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
+typedef typename lattice_traits&lt;base_type>::offset_type offset_type;
+typedef typename lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
+typedef typename lattice_traits&lt;base_type>::vector_type vector_type;
+typedef typename lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
+typedef typename lattice_traits&lt;base_type>::cell_iterator cell_iterator;
+typedef typename lattice_traits&lt;base_type>::boundary_crossing_type boundary_crossing_type;
+</pre></blockquote>
+have the same meaning as the corresponding members of the <tt>lattice_traits</tt>
+class discussed for the <A HREF="latticeconcepts.html">lattice concepts</A>.
+<h4>Constructors</h4>
+<blockquote><pre>
+lattice_graph();
+</pre></blockquote>
+The default constructor.
+<blockquote><pre>
+lattice_graph(const base_type&amp;);
+</pre></blockquote>
+copies the lattice given as argument and creates a graph of type <tt>graph_type</tt>
+by calling <tt>make_graph_from_lattice</tt>.
+<h4>Member functions</h4>
+<blockquote><pre>
+const graph_type&amp; graph() const { return graph_;}
+graph_type&amp; graph() { return graph_;}
+</pre></blockquote>
+returns the graph associated with the lattice and are used to implement
+the <tt>lattice::graph(l)</tt> function.
+<h4>Traits class</h4>
+<blockquote><pre>
+template &lt;class L, class G>
+struct lattice_traits&lt;lattice_graph&lt;L,G> >
+{
+  typedef typename lattice_graph&lt;L,G>::unit_cell_type unit_cell_type;
+  typedef typename lattice_graph&lt;L,G>::cell_descriptor cell_descriptor;
+  typedef typename lattice_graph&lt;L,G>::offset_type offset_type;
+  typedef typename lattice_graph&lt;L,G>::basis_vector_iterator basis_vector_iterator;
+  typedef typename lattice_graph&lt;L,G>::cell_iterator cell_iterator;
+  typedef typename lattice_graph&lt;L,G>::size_type size_type;
+  typedef typename lattice_graph&lt;L,G>::vector_type vector_type;
+  typedef typename lattice_graph&lt;L,G>::boundary_crossing_type boundary_crossing_type;
+};
+</pre></blockquote>
+is the traits class for the lattice.
+<HR>
+<ADDRESS>(c) 2000-2003 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

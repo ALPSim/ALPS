@@ -1,0 +1,118 @@
+<html>
+<head>
+   <title>PALM++ Project: palm library parameters.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: palm library</h1>
+
+<h2>
+Header file <b>parameters.h</b></h2>
+This header contains the <tt>ParameterList</tt> class a vector
+of <tt>Parameters</tt>.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace palm {
+class ParameterList : public STD::vector&lt;palm::Parameters>
+{
+public:
+  ParameterList() {}
+  ParameterList(std::istream&amp; is);
+};
+
+}
+
+std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const palm::ParameterList&amp; p);
+
+std::istream&amp; operator >> (std::istream&amp; is, palm::ParameterList&amp; p);
+</pre></blockquote>
+
+
+<h3>The <tt>ParameterList</tt> class</h3>
+is a <tt>std::vector</tt> of <tt>Parameters</tt> 
+<p>A <tt>ParameterList</tt> can be read from a
+<tt>std::istream</tt> and be written to a <tt>std::ostream</tt>.
+<p>
+ParameterList are defined using a C++-like syntax
+<blockquote><pre>
+<i>global_parameters</i>
+{
+<i>parameters0</i>
+}
+<i>global_parameters</i>
+{
+<i>parameters1</i>
+}
+...
+</pre></blockquote>
+where the parameter definitions in <i>global_parameters</i>
+up to the opening brace { and all the parameter definitions in 
+<i>parametersn</i> will define one entry of the <tt>ParameterList</tt>.
+<p>
+An example is:
+<blockquote><pre>
+Model = "Heisenberg"
+L=10
+{ T=0.1, measure=yes}
+{
+  T=0.2
+  measure=no
+}
+L = 20;
+{ T=0.1, measure=yes}
+{ T=0.2, measure=no}
+</pre></blockquote>
+This will be parsed into a vector of size four.
+
+<blockquote><pre>
+ParameterList();
+</pre></blockquote>
+the default constructor
+<blockquote><pre>
+ParameterList(std::istream&amp; is);
+</pre></blockquote>
+parses parameters from an <tt>std::istream</tt>.
+<blockquote><pre>
+std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const palm::ParameterList&amp; p);
+</pre></blockquote>
+writes the <tt>ParameterList to a <tt>std::ostream</tt>. 
+The above example be written as:
+<blockquote><pre>
+{
+measure = true
+Model = "Heisenberg"
+L = 10
+T = 0.1
+}
+{
+measure = false
+Model = "Heisenberg"
+L = 10
+T = 0.2
+}
+{
+measure = true
+Model = "Heisenberg"
+L = 20
+T = 0.2
+}
+{
+measure = false
+Model = "Heisenberg"
+L = 20
+T = 0.2
+}
+</pre></blockquote>
+This allows the output to be read again. 
+<blockquote><pre>
+STD::istream&amp; operator >> (std::istream&amp; is, palm::ParameterList&amp; p);
+</pre></blockquote>
+reads from a <tt>std::istream</tt>.
+<HR>
+<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>

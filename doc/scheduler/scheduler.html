@@ -1,0 +1,59 @@
+open sch	<html>
+<head>
+   <title>PALM++ Project: scheduler library scheduler.h</title>
+</head>
+<body>
+
+<h1>
+PALM++ Project: scheduler library</h1>
+
+<h2>
+Header file <b> scheduler.h</b></h2>
+This header contains the base class for the factory to create user objects and the function to start the simulation.
+
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace scheduler {
+
+class Factory
+{
+public:
+  virtual Worker* make_worker(const osiris::ProcessList&amp; where,const palm::Parameters&amp; parms,int node) const=0;
+};
+
+template &lt;class WORKER>
+class SimpleFactory : public Factory
+{
+public:
+  virtual Worker* make_worker(const osiris::ProcessList&amp; where,const palm::Parameters&amp; parms,int node) const;
+};
+
+int start(int argc, char** argv ,const Factory&amp;);
+
+}
+</pre></blockquote>
+
+
+<h3>The <tt>Factory</tt> class</h3>
+
+is a factory to create user <a href="montecarlo.html"><tt>Worker</tt></A> objects. Both of the functions need to be overloaded by the user of the library.
+<P>The <tt>SimpleFactory</tt> template can be used for factories that just create a single type of simulation, which might be the most common case. They expect a constructor with the same signature as the function.
+
+<blockquote><pre>
+virtual Worker* make_worker(const osiris::ProcessList&amp; where,const palm::Parameters&amp; parms,int node) const;
+</pre></blockquote>
+creates a new user object derived from <tt>Worker</tt> on the nodes given by the argument <tt>where</tt> and with the parameters given by <tt>parms</tt>. The last argument <tt>node</tt> will be used in a future release to support multi-node workers spread over more than one node. The argument (which is alway 0 at the moment) will be the index into the <tt> ProcessList</tt> for which the object should be constructed. The parameters object <tt>parms</tt> can be used to distinguish bewteen different types of simulations in a program that does more than one type of simulations.
+
+<h3>Functions</h3>
+
+<blockquote><pre>
+int start(int argc, char** argv, const Factory&amp; user_factory);
+</pre></blockquote>
+runs the simulation(s). <tt>argc</tt> and <tt>argv</tt> are the parameters passed to program by the operating system (see the section about <a href="running.html">running</a> a simulation). The <tt>user_factory</tt> object will be used to create and load the <tt>Worker</tt> objects of the simulations. It should be an object of a class derived from <tt>Factory</tt>.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>
