@@ -267,6 +267,10 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_DEBUG="-n32 -LANG:std -diag_error 1035 -g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
+      if test -n "$TOOLROOT"; then
+        try_CXXFLAGS_OPT="$try_CXXFLAGS_OPT -I$TOOLROOT/usr/include/CC"
+        try_CXXFLAGS_DEBUG="$try_CXXFLAGS_DEBUG -I$TOOLROOT/usr/include/CC"
+      fi
       ;;
     sgi64)
       # try_CFLAGS_OPT="-64 -D_POSIX_C_SOURCE=199506L -D_BSD_COMPAT -Ofast -INLINE"
@@ -279,6 +283,10 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_DEBUG="-64 -LANG:std -diag_error 1035 -g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
+      if test -n "$TOOLROOT"; then
+        try_CXXFLAGS_OPT="$try_CXXFLAGS_OPT -I$TOOLROOT/usr/include/CC"
+        try_CXXFLAGS_DEBUG="$try_CXXFLAGS_DEBUG -I$TOOLROOT/usr/include/CC"
+      fi
       ;;
     cray)
       try_CFLAGS_OPT="-O2 -h conform"
