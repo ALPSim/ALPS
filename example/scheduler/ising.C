@@ -1,11 +1,12 @@
 /***************************************************************************
-* PALM++/scheduler example
+* ALPS/scheduler example
 *
 * scheduler/ising.C an example Ising model simulation
 *
 * $Id$
 *
-* Copyright (C) 1994-2002 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>,
 *
 * Permission is hereby granted, free of charge, to any person or organization 
 * obtaining a copy of the software covered by this license (the "Software") 
@@ -42,7 +43,7 @@
 #include "ising.h"
 #include <cmath>
 
-static void IsingSimulation::print_copyright(std::ostream& out)
+void IsingSimulation::print_copyright(std::ostream& out)
 {
   out << "Ising simulation example program using the ALPS lattice library\n"
       << "  copyright(c) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>\n\n";

@@ -73,7 +73,7 @@ OBJ_OSIRIS_PVM = alps/osiris/process_pvm.o alps/osiris/comm_pvm.o alps/osiris/mp
 OBJ_LATTICE = alps/lattice/graph.o alps/lattice/latticedescriptor.o alps/lattice/latticegraphdescriptor.o alps/lattice/latticelibrary.o alps/lattice/unitcell.o
 OBJ_MODEL = alps/model/modellibrary.o
 OBJ_PARSER = alps/parser/parser.o alps/parser/xmlstream.o alps/parser/xmlhandler.o alps/parser/xmlparser.o alps/parser/xslt.o
-OBJ_SCHEDULER = alps/scheduler/abstract_task.o alps/scheduler/remote_task.o alps/scheduler/remote_worker.o alps/scheduler/scheduler.o alps/scheduler/info.o alps/scheduler/single_scheduler.o alps/scheduler/master_scheduler.o alps/scheduler/slave_task.o alps/scheduler/montecarlo.o alps/scheduler/task.o alps/scheduler/mpp_scheduler.o alps/scheduler/worker.o alps/scheduler/signal.o alps/scheduler/options.o alps/scheduler/workertask.o alps/scheduler/factory.o alps/scheduler/copyright.o
+OBJ_SCHEDULER = alps/scheduler/abstract_task.o alps/scheduler/remote_task.o alps/scheduler/remote_worker.o alps/scheduler/scheduler.o alps/scheduler/info.o alps/scheduler/single_scheduler.o alps/scheduler/master_scheduler.o alps/scheduler/slave_task.o alps/scheduler/montecarlo.o alps/scheduler/task.o alps/scheduler/mpp_scheduler.o alps/scheduler/worker.o alps/scheduler/signal.o alps/scheduler/options.o alps/scheduler/workertask.o alps/scheduler/factory.o
 OBJ = $(OBJ_BOOST) $(OBJ_ALPS) $(OBJ_ALEA) $(OBJ_LATTICE) $(OBJ_MODEL) $(OBJ_OSIRIS) $(OBJ_PARSER) $(OBJ_SCHEDULER)
 OBJ_SGL = $(OBJ_OSIRIS_SGL)
 OBJ_MPI = $(OBJ_OSIRIS_MPI)
@@ -97,7 +97,7 @@ libcomm-pvm.a : $(OBJ_PVM)
 
 distclean : distclean-files
 distclean-files:
-	rm -f boost/config.log boost/config.status
+	rm -f boost/config.log boost/config.status alps/copyright.C alps/scheduler/scheduler.C
 
 boost/%.o : $(srcdir)/boost/%.C
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
@@ -114,6 +114,14 @@ boost/%.o : $(BOOST_DIR)/libs/thread/src/%.cpp
 
 alps/%.o : $(srcdir)/alps/%.C
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+alps/%.o : $(builddir)/alps/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+alps/alea/%.o : $(srcdir)/alps/alea/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+alps/lattice/%.o : $(srcdir)/alps/lattice/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+alps/model/%.o : $(srcdir)/alps/model/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
 alps/osiris/%.o : $(srcdir)/alps/osiris/%.C
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
 alps/osiris/%_mpi.o : $(srcdir)/alps/osiris/%.C
@@ -121,4 +129,8 @@ alps/osiris/%_mpi.o : $(srcdir)/alps/osiris/%.C
 alps/osiris/%_pvm.o : $(srcdir)/alps/osiris/%.C
 	$(CXX) -c $(cppflags_pvm) $(cxxflags) $< -o $@
 alps/parser/%.o : $(srcdir)/alps/parser/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+alps/scheduler/%.o : $(srcdir)/alps/scheduler/%.C
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+alps/scheduler/%.o : $(builddir)/alps/scheduler/%.C
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@

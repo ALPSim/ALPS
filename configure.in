@@ -14,14 +14,16 @@ AC_CONFIG_AUX_DIR([config])
 AC_PREFIX_DEFAULT([$HOME/ALPS])
 
 CURRENT_YEAR=2003
-
 AC_SUBST(CURRENT_YEAR)
+
 AC_CONFIG_FILES(Makefile config/Makefile config/config.site config/arxx config/include.mk src/Makefile)
-AC_CONFIG_FILES(src/alps/copyright.C src/alps/scheduler/copyright.C)
+
+AC_CONFIG_FILES(src/alps/copyright.C src/alps/scheduler/scheduler.C)
+
 AC_CONFIG_FILES(test/Makefile example/Makefile)
 AC_CONFIG_FILES(test/alea/Makefile)
-AC_CONFIG_FILES(test/lattice/Makefile test/lattice/parameters)
-AC_CONFIG_FILES(test/model/Makefile test/model/parameters)
+AC_CONFIG_FILES(test/lattice/Makefile test/lattice/lattices.xml test/lattice/parameters)
+AC_CONFIG_FILES(test/model/Makefile test/model/lattices.xml test/model/models.xml test/model/parameters)
 AC_CONFIG_FILES(test/osiris/Makefile test/osiris/xdrdump2.input)
 AC_CONFIG_FILES(test/parameter/Makefile)
 AC_CONFIG_FILES(test/parser/Makefile)
@@ -30,7 +32,6 @@ AC_CONFIG_FILES(example/model/Makefile)
 AC_CONFIG_FILES(tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text)
 
 AC_CONFIG_HEADERS(src/alps/config.h)
-
 
 # directories
 
@@ -106,10 +107,6 @@ AC_ARG_WITH(boost,
   [
   if test "x$withval" != "x"; then
     ac_cv_boost_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-    case $ac_cv_boost_dir in
-      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
-      *) AC_MSG_ERROR([expected an absolute directory name for --with-boost.]);;
-    esac
     if test -f "$ac_cv_boost_dir/boost/config.hpp"; then :; else
       ac_cv_boost_dir=
     fi
