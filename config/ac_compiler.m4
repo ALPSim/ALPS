@@ -303,7 +303,7 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_EH=""
       try_CXXFLAGS_NOEH=""
       ;;
-    ibm32)
+    ibm64)
       try_CFLAGS_OPT="-q64 -O2"
       try_CFLAGS_DEBUG=-"-q64 -g"
       try_CXXFLAGS_OPT="-q64 -qlanglvl=extended -O2"
