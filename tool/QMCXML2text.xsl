@@ -43,13 +43,20 @@ Total:
 </xsl:text>
         <xsl:for-each select="AVERAGES/SCALAR_AVERAGE">
           <xsl:value-of select="@name"/>: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/>, count=<xsl:value-of select="COUNT"/>, tau=<xsl:value-of select="AUTOCORR"/>
-          <xsl:if test= "MEAN/@converged = 'maybe'"> WARNING: check error convergence</xsl:if><xsl:text>
+          <xsl:if test= "ERROR/@converged = 'maybe'"> <xsl:text>
+</xsl:text>WARNING: check error convergence</xsl:if>
+          <xsl:if test= "ERROR/@converged = 'no'"> <xsl:text>
+</xsl:text>WARNING: ERRORS NOT CONVERGED!!!</xsl:if><xsl:text>
     
 </xsl:text>
         </xsl:for-each>
         <xsl:for-each select="AVERAGES/VECTOR_AVERAGE/SCALAR_AVERAGE">
 					 <xsl:value-of select="../@name"/>: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/>, count=<xsl:value-of select="COUNT"/>, tau=<xsl:value-of select="AUTOCORR"/>
-                     <xsl:if test= "MEAN/@converged = 'maybe'"> WARNING: ERRORS NOT CONVERGED!!!</xsl:if><xsl:text>
+                     <xsl:if test= "ERROR/@converged = 'maybe'"> <xsl:text>
+</xsl:text>WARNING: check error convergence</xsl:if>
+                     <xsl:if test= "ERROR/@converged = 'no'"> <xsl:text>
+</xsl:text>WARNING: ERRORS NOT CONVERGED!!!</xsl:if>
+                     <xsl:text>
            
 </xsl:text>
         </xsl:for-each>
@@ -62,7 +69,11 @@ Run :<xsl:text>
 
 </xsl:text>
         <xsl:for-each select="SCALAR_AVERAGE">
-          <xsl:value-of select="@name"/>: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/>, count=<xsl:value-of select="COUNT"/>, tau=<xsl:value-of select="AUTOCORR"/>        <xsl:text>    
+          <xsl:value-of select="@name"/>: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/>, count=<xsl:value-of select="COUNT"/>, tau=<xsl:value-of select="AUTOCORR"/>        
+          <xsl:if test= "ERROR/@converged = 'maybe'"> <xsl:text>
+</xsl:text>WARNING: check error convergence</xsl:if>
+          <xsl:if test= "ERROR/@converged = 'no'"> <xsl:text>
+</xsl:text>WARNING: ERRORS NOT CONVERGED!!!</xsl:if><xsl:text>    
 </xsl:text>
           <xsl:for-each select="BINNED">
              <xsl:text>    </xsl:text><xsl:value-of select="COUNT"/> bins: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/><xsl:text>    
@@ -72,10 +83,15 @@ Run :<xsl:text>
 </xsl:text>
         </xsl:for-each>
         <xsl:for-each select="VECTOR_AVERAGE/SCALAR_AVERAGE">
-					 <xsl:value-of select="../@name"/>: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/>, count=<xsl:value-of select="COUNT"/>, tau=<xsl:value-of select="AUTOCORR"/>        <xsl:text>
+					 <xsl:value-of select="../@name"/>: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/>, count=<xsl:value-of select="COUNT"/>, tau=<xsl:value-of select="AUTOCORR"/>        
+                     <xsl:if test= "ERROR/@converged = 'maybe'"> <xsl:text>
+</xsl:text>WARNING: check error convergence</xsl:if>
+          <xsl:if test= "ERROR/@converged = 'no'"> <xsl:text>
+</xsl:text>WARNING: ERRORS NOT CONVERGED!!!</xsl:if><xsl:text>
 </xsl:text>
           <xsl:for-each select="BINNED">
-             <xsl:text>    </xsl:text><xsl:value-of select="COUNT"/> bins: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/><xsl:text>    
+             <xsl:text>    </xsl:text><xsl:value-of select="COUNT"/> bins: <xsl:value-of select="MEAN"/> +/- <xsl:value-of select="ERROR"/>
+             <xsl:text>    
 </xsl:text>
           </xsl:for-each>
           <xsl:text>    
