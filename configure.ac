@@ -11,7 +11,7 @@ dnl
 
 dnl Version of ALPS Library
 
-define([alps_version], [1.2b7])
+define([alps_version], [1.2])
 
 dnl Latest publication year of ALPS
 
