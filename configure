@@ -3643,9 +3643,9 @@ echo "${ECHO_T}$ac_cv_boost_config" >&6
           ac_config_files="$ac_config_files tool/Makefile"
 
 
-# development environment
-if test -f "$srcdir/devel/Makefile.in"; then
-            ac_config_files="$ac_config_files devel/Makefile"
+# making distribution
+if test -f "$srcdir/dist/Makefile.in"; then
+            ac_config_files="$ac_config_files dist/Makefile"
 
 fi
 
@@ -8056,7 +8056,7 @@ do
   "tool/extracttext" ) CONFIG_FILES="$CONFIG_FILES tool/extracttext" ;;
   "tool/extracthtml" ) CONFIG_FILES="$CONFIG_FILES tool/extracthtml" ;;
   "tool/Makefile" ) CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
-  "devel/Makefile" ) CONFIG_FILES="$CONFIG_FILES devel/Makefile" ;;
+  "dist/Makefile" ) CONFIG_FILES="$CONFIG_FILES dist/Makefile" ;;
   "src/alps/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/alps/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5
 echo "$as_me: error: invalid argument: $ac_config_target" >&2;}

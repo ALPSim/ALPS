@@ -1,3 +1,9 @@
+2003-05-28 Synge Todo <wistaria@comp-phys.org>
+
+	* [boost] Added Boost.date_time souces for libalps.a.
+
+	* Added dist directory for preparing distribution.
+	
 2003-05-24 Matthier Troyer <troyer@comp-phys.org>
 
 	* [random] removed alps::lagged_fibonacci

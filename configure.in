@@ -150,9 +150,9 @@ AC_MSG_RESULT([$ac_cv_boost_config])
 # tools
 AC_CONFIG_FILES(tool/Makefile)
 
-# development environment
-if test -f "$srcdir/devel/Makefile.in"; then
-  AC_CONFIG_FILES(devel/Makefile)
+# making distribution
+if test -f "$srcdir/dist/Makefile.in"; then
+  AC_CONFIG_FILES(dist/Makefile)
 fi
 
 #

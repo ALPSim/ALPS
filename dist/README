@@ -1,0 +1,43 @@
+README for ALPS developers
+
+$Id$
+
+
+* How to release a new version and prepare distribution files?
+
+1) Edit line 11 of configure.in.  ex)
+
+     AC_INIT([ALPS],[1.5]
+
+   The second argument to AC_INIT should be a correct version number.
+
+2) Regenerate configure script by typing
+
+     ./bootstrap
+
+   at the top-level source directory.
+
+3) Check documentations and ChangeLog file once again.
+
+4) Check whether all the files and directories you do NOT want
+   distribute are listed in ERASE in dist/Makefile.in.
+
+5) ./configure && make depend && make all
+
+6) cvs commit
+
+7) (cd dist && make check)
+
+   Check dist/alps-*.tar.gz
+
+8) cvs tag release_X_X_X
+
+   ex) for version 2.0    ->  use tag release_2_0
+       for version 2.3b1  ->  use tag release_2_3b1
+
+9) (./configure && cd dist && make release) generates the following
+   files: (X.X = verison number)
+
+   alps-X.X.tar.gz             contains all the libraries
+
+10) Update web page.
