@@ -66,7 +66,6 @@ src_boost_FILESYSTEM = \
   $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
 src_boost_REGEX = \
   $(BOOST_SRCDIR)/regex/src/c_regex_traits.cpp \
-  $(BOOST_SRCDIR)/regex/src/c_regex_traits_common.cpp \
   $(BOOST_SRCDIR)/regex/src/cpp_regex_traits.cpp \
   $(BOOST_SRCDIR)/regex/src/cregex.cpp \
   $(BOOST_SRCDIR)/regex/src/fileiter.cpp \
@@ -74,10 +73,19 @@ src_boost_REGEX = \
   $(BOOST_SRCDIR)/regex/src/posix_api.cpp \
   $(BOOST_SRCDIR)/regex/src/regex.cpp \
   $(BOOST_SRCDIR)/regex/src/regex_debug.cpp \
-  $(BOOST_SRCDIR)/regex/src/regex_synch.cpp \
   $(BOOST_SRCDIR)/regex/src/w32_regex_traits.cpp \
   $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp \
   $(BOOST_SRCDIR)/regex/src/winstances.cpp
+src_boost_REGEX_1_32 = \
+  $(BOOST_SRCDIR)/regex/src/c_regex_traits_common.cpp \
+  $(BOOST_SRCDIR)/regex/src/regex_synch.cpp
+src_boost_REGEX_1_33 = \
+  $(BOOST_SRCDIR)/regex/src/icu.cpp \
+  $(BOOST_SRCDIR)/regex/src/regex_raw_buffer.cpp \
+  $(BOOST_SRCDIR)/regex/src/regex_traits_defaults.cpp \
+  $(BOOST_SRCDIR)/regex/src/static_mutex.cpp \
+  $(BOOST_SRCDIR)/regex/src/usinstances.cpp \
+  $(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp
 
 src_boost_PROGRAM_OPTIONS= \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -125,12 +133,12 @@ src_boost_SERIALIZATION= \
 #  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
+  $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp \
   $(BOOST_SRCDIR)/signals/src/signal_base.cpp \
   $(BOOST_SRCDIR)/signals/src/slot.cpp \
   $(BOOST_SRCDIR)/signals/src/trackable.cpp
-src_boost_SIGNALS_1_32 = \
-  $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp
 src_boost_THREAD = \
+  $(BOOST_SRCDIR)/thread/src/barrier.cpp \
   $(BOOST_SRCDIR)/thread/src/condition.cpp \
   $(BOOST_SRCDIR)/thread/src/exceptions.cpp \
   $(BOOST_SRCDIR)/thread/src/mutex.cpp \
@@ -139,10 +147,6 @@ src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/thread.cpp \
   $(BOOST_SRCDIR)/thread/src/tss.cpp \
   $(BOOST_SRCDIR)/thread/src/xtime.cpp
-src_boost_THREAD_1_31 = \
-  $(BOOST_SRCDIR)/thread/src/threadmon.cpp
-src_boost_THREAD_1_32 = \
-  $(BOOST_SRCDIR)/thread/src/barrier.cpp
 
 lib_LTLIBRARIES = libalps.la 
 
@@ -154,21 +158,21 @@ endif
 
 if BUILD_BOOST
 libalps_la_SOURCES += $(top_srcdir)/src/boost/throw_exception.C
-nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_REGEX) $(src_boost_PROGRAM_OPTIONS)  $(src_boost_SERIALIZATION)
+nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_PROGRAM_OPTIONS)  $(src_boost_SERIALIZATION)
+
+nodist_libalps_la_SOURCES += $(src_boost_REGEX)
+if BOOST_1_32
+nodist_libalps_la_SOURCES += $(src_boost_REGEX_1_32)
+endif
+if BOOST_1_33
+nodist_libalps_la_SOURCES += $(src_boost_REGEX_1_33)
 endif
 
-#if BUILD_BOOST_PROGRAM_OPTIONS
-#nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS)
-#endif
-#if BUILD_BOOST_SERIALIZATION
-#nodist_libalps_la_SOURCES += $(src_boost_SERIALIZATION)
-#endif
 if BUILD_BOOST_SIGNALS
 nodist_libalps_la_SOURCES += $(src_boost_SIGNALS)
-if BOOST_1_32
-nodist_libalps_la_SOURCES += $(src_boost_SIGNALS_1_32)
-endif
 endif
 if BUILD_BOOST_THREAD
-nodist_libalps_la_SOURCES += $(src_boost_THREAD) $(src_boost_THREAD_1_32)
+nodist_libalps_la_SOURCES += $(src_boost_THREAD)
+endif
+
 endif

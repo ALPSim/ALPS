@@ -463,7 +463,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE docdir ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS SRC_BOOST BOOST_SRCDIR BUILD_BOOST_TRUE BUILD_BOOST_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI HAVE_MPI_TRUE HAVE_MPI_FALSE LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HAVE_PVM_TRUE HAVE_PVM_FALSE HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BOOST_USER_CONFIG_H BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE docdir ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS SRC_BOOST BOOST_SRCDIR BUILD_BOOST_TRUE BUILD_BOOST_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI HAVE_MPI_TRUE HAVE_MPI_FALSE LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HAVE_PVM_TRUE HAVE_PVM_FALSE HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BOOST_USER_CONFIG_H BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -22079,6 +22079,17 @@ echo "$as_me: error: Boost source files not found" >&2;}
    { (exit 1); exit 1; }; }
     fi
   fi
+  echo "$as_me:$LINENO: checking for Boost version" >&5
+echo $ECHO_N "checking for Boost version... $ECHO_C" >&6
+  if test -f "$BOOST_SRCDIR/regex/src/c_regex_traits_common.cpp"; then
+     echo "$as_me:$LINENO: result: 1.32" >&5
+echo "${ECHO_T}1.32" >&6
+     ac_cv_boost_version=1_32
+  else
+     echo "$as_me:$LINENO: result: 1.33" >&5
+echo "${ECHO_T}1.33" >&6
+     ac_cv_boost_version=1_33
+  fi
 fi
 
 
@@ -22092,12 +22103,22 @@ fi
 
 
 
-if test -f "$BOOST_SRCDIR/thread/src/barrier.cpp"; then
+if test "$ac_cv_boost_version" = 1_32; then
   BOOST_1_32_TRUE=
   BOOST_1_32_FALSE='#'
 else
   BOOST_1_32_TRUE='#'
   BOOST_1_32_FALSE=
+fi
+
+
+
+if test "$ac_cv_boost_version" = 1_33; then
+  BOOST_1_33_TRUE=
+  BOOST_1_33_FALSE='#'
+else
+  BOOST_1_33_TRUE='#'
+  BOOST_1_33_FALSE=
 fi
 
 
@@ -26060,6 +26081,13 @@ echo "$as_me: error: conditional \"BOOST_1_32\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
+if test -z "${BOOST_1_33_TRUE}" && test -z "${BOOST_1_33_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"BOOST_1_33\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"BOOST_1_33\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
 if test -z "${HAVE_MPI_TRUE}" && test -z "${HAVE_MPI_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"HAVE_MPI\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
@@ -26748,6 +26776,8 @@ s,@BUILD_BOOST_TRUE@,$BUILD_BOOST_TRUE,;t t
 s,@BUILD_BOOST_FALSE@,$BUILD_BOOST_FALSE,;t t
 s,@BOOST_1_32_TRUE@,$BOOST_1_32_TRUE,;t t
 s,@BOOST_1_32_FALSE@,$BOOST_1_32_FALSE,;t t
+s,@BOOST_1_33_TRUE@,$BOOST_1_33_TRUE,;t t
+s,@BOOST_1_33_FALSE@,$BOOST_1_33_FALSE,;t t
 s,@OBJ_PTHREAD@,$OBJ_PTHREAD,;t t
 s,@LIB_PTHREAD@,$LIB_PTHREAD,;t t
 s,@EXAMPLE_PTHREAD@,$EXAMPLE_PTHREAD,;t t

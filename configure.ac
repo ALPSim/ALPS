@@ -478,9 +478,18 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
       AC_MSG_ERROR([Boost source files not found])
     fi
   fi
+  AC_MSG_CHECKING([for Boost version])
+  if test -f "$BOOST_SRCDIR/regex/src/c_regex_traits_common.cpp"; then
+     AC_MSG_RESULT([1.32])
+     ac_cv_boost_version=1_32
+  else
+     AC_MSG_RESULT([1.33])
+     ac_cv_boost_version=1_33
+  fi
 fi
 AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
-AM_CONDITIONAL(BOOST_1_32, test -f "$BOOST_SRCDIR/thread/src/barrier.cpp")
+AM_CONDITIONAL(BOOST_1_32, test "$ac_cv_boost_version" = 1_32)
+AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
 
 CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
