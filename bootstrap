@@ -12,7 +12,7 @@ fi
 if test "x$ac_version" != "x2.59"; then
   have_autotools=no
 fi
-if test "x$lt_version" != "x1.5.6"; then
+if test "x$lt_version" != "x1.5.8"; then
   have_autotools=no
 fi
 
