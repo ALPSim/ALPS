@@ -3910,7 +3910,7 @@ echo "$as_me: error: compiler mode is not set" >&2;}
     intel64)
       try_CFLAGS_OPT="-w -O3"
       try_CFLAGS_DEBUG=" -O0"
-      try_CXXFLAGS_OPT="-D_REENTRANT -restrict -w -O3 -U__GNUC__"
+      try_CXXFLAGS_OPT="-D_REENTRANT -restrict -w -O3"
       try_CXXFLAGS_DEBUG="-D_REENTRANT -restrict -g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-DBOOST_NO_EXCEPTIONS"
