@@ -22,17 +22,20 @@ public:
   std::size_t dimension() const;
 };
 
-dimensional_traits&lt;EmptyUnitCell>::dimension_type dimension(EmptyUnitCell c);
+dimensional_traits&lt;EmptyUnitCell>::dimension_type dimension(const EmptyUnitCell&amp; c);
 
 class GraphUnitCell
 {
 public:
   boost::adjacency_list&lt;boost::vecS,boost::vecS,boost::directedS,/*...*/> graph_type;
 
-  GraphUnitCell() {}
-  GraphUnitCell(const palmxml::XMLTag&amp;, std::istream&);
+  GraphUnitCell();
+  GraphUnitCell(const XMLTag&amp;, std::istream&);
 
-  void write_xml(std::ostream&amp;, const std::string&amp; = "") const;
+  const GraphUnitCell&amp; operator=(const EmptyUnitCell&amp; e);
+
+  void write_xml(oxstream&amp;) const;
+  graph_type&amp; graph();
   const graph_type&amp; graph() const;
   std::size_t dimension() const;
   const std::string&amp; name() const;
@@ -40,10 +43,13 @@ public:
 
 dimensional_traits&lt; GraphUnitCell>::dimension_type dimension(const GraphUnitCell&amp; c);
 
-std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const lattice:: GraphUnitCell&amp; u)
+oxstream&amp; operator&lt;&lt;(oxstream&amp; out, const GraphUnitCell&amp; u)
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const GraphUnitCell&amp; u)
 
 typedef std::map&lt;std::string,GraphUnitCell> UnitCellMap;
+
 }
+
 <pre></blockquote>
 <H3>The <tt>EmptyUnitCell</tt> class</H3>
 describes an empty unit cell and 
@@ -91,26 +97,27 @@ are:
 </table>
 <h4>Constructors</h4>
 <blockquote><pre>
-GraphUnitCell() {}
+GraphUnitCell();
 </pre></blockquote>
 the default constructor.
 <blockquote><pre>
-GraphUnitCell(const palmxml::XMLTag&amp;, std::istream&);
+GraphUnitCell(const XMLTag&amp;, std::istream&);
 </pre></blockquote>
 reads the unit cell in XML from a stream assuming the <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>.
 The start tag <tt>&lt;UNITCELL ...></tt> has already been read and is passed
-as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml::XMLTag</tt>
+as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>XMLTag</tt>
 </A> argument.
 <h4>Member functions</h4>
 <blockquote><pre>
-void write_xml(std::ostream&amp;, const std::string&amp; name= "") const;
+void write_xml(oxstream&amp;, const std::string&amp; name= "") const;
 </pre></blockquote>
 writes the unit cell in XML, using the same <A HREF="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</A> schema on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</A>. It
 can optionally be renamed by passing a new name as the second argument.
 <blockquote><pre>
+graph_type&amp; graph();
 const graph_type&amp; graph() const;
 </pre></blockquote>
-returns the graph associated with the unit cell.
+return the graph associated with the unit cell.
 <blockquote><pre>
 std::size_t dimension() const;
 </pre></blockquote>
@@ -121,9 +128,11 @@ const std::string&amp; name() const;
 the name of the unit cell, as read from the XML input.
 <h4>Operators</h4>
 <blockquote><pre>
+oxstream&amp; operator&lt;&lt;(oxstream&amp; out, const lattice:: GraphUnitCell&amp; u)
 std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const lattice:: GraphUnitCell&amp; u)
 </pre></blockquote>
-The output to a <tt>std::ostream</tt> uses the <tt>write_xml</tt> member function.
+The output to an <tt>oxstream</tt> or <tt>std::ostream</tt> uses the <tt>write_xml</tt> member function.
+
 <H3>The <tt>UnitCellMap</tt> type</H3>
 <blockquote><pre>
 typedef std::map&lt;std::string,GraphUnitCell> UnitCellMap;
@@ -131,10 +140,8 @@ typedef std::map&lt;std::string,GraphUnitCell> UnitCellMap;
 is a map from the name of unit cells, to a <tt>GraphUnitCell</tt>, used when
 parsing XML input for lattices.
 <HR>
-<ADDRESS>copyright (c) 2000-2003 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
-</body>
-</html>
-
+<ADDRESS>copyright (c) 2000-2004 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A> and
+<A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
 </body>
 </html>
