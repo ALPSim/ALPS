@@ -38,6 +38,7 @@
 #include <alps/osiris.h>
 #include <alps/scheduler.h>
 #include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 #include <fstream>
@@ -56,9 +57,10 @@ void convert_params(const std::string& inname, const std::string& outfilename)
     << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2003/8/job.xsd")
     << alps::start_tag("OUTPUT") << alps::attribute("file",outfilename+".out.xml") << alps::end_tag("OUTPUT");
   for (int i=0;i<list.size();++i) {
-    std::string outname = outfilename;
+    std::string outname = boost::filesystem::path(outfilename,boost::filesystem::native).leaf();
     outname +=".task" + boost::lexical_cast<std::string,int>(i+1);
     std::string inname = outname + ".in.xml";
+    std::string fullinname = outfilename + ".task" + boost::lexical_cast<std::string,int>(i+1) + ".in.xml";
     outname+=".out.xml";
     out << alps::start_tag("TASK") << alps::attribute("status","new")
       << alps::start_tag("INPUT") << alps::attribute("file",inname) << alps::end_tag("INPUT")
@@ -66,7 +68,7 @@ void convert_params(const std::string& inname, const std::string& outfilename)
       << alps::end_tag("TASK");
     //      out << "    <CPUS min=\"1\">\n";
     alps::oxstream task (inname.c_str());
-    task << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("QMCXML.xsl"));
+    task << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("ALPS.xsl"));
     task << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
          << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
     task << list[i];
