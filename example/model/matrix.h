@@ -154,8 +154,7 @@ void HamiltonianMatrix<T,M>::build() const
 
   // build matrix
   
-  std::cerr << "Creating matrix\n";
-  matrix_.resize(states.size(),states.size());
+  matrix_.resize(states.size(),states.size(),false);
   matrix_.clear();
 
   // loop over sites

@@ -38,8 +38,10 @@ try {
 
   alps::Parameters parms;
   std::cin >> parms;
+
   HamiltonianMatrix<alps::Expression,
     compressed_matrix<alps::Expression,row_major> > matrix(parms);
+//  HamiltonianMatrix<alps::Expression> matrix(parms);
 
   std::cout << matrix << "\n";
 
