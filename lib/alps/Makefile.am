@@ -13,9 +13,31 @@ src_RANDOM = $(top_srcdir)/src/alps/random/rngfactory.C
 src_PARSER = $(top_srcdir)/src/alps/parser/parser.C $(top_srcdir)/src/alps/parser/xmlstream.C $(top_srcdir)/src/alps/parser/xmlhandler.C $(top_srcdir)/src/alps/parser/xmlparser.C $(top_srcdir)/src/alps/parser/xslt.C
 src_SCHEDULER = $(top_srcdir)/src/alps/scheduler/abstract_task.C $(top_srcdir)/src/alps/scheduler/remote_task.C $(top_srcdir)/src/alps/scheduler/remote_worker.C $(top_srcdir)/src/alps/scheduler/scheduler.C $(top_srcdir)/src/alps/scheduler/info.C $(top_srcdir)/src/alps/scheduler/single_scheduler.C $(top_srcdir)/src/alps/scheduler/master_scheduler.C $(top_srcdir)/src/alps/scheduler/slave_task.C $(top_srcdir)/src/alps/scheduler/montecarlo.C $(top_srcdir)/src/alps/scheduler/task.C $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C $(top_srcdir)/src/alps/scheduler/worker.C $(top_srcdir)/src/alps/scheduler/signal.C $(top_srcdir)/src/alps/scheduler/options.C $(top_srcdir)/src/alps/scheduler/workertask.C $(top_srcdir)/src/alps/scheduler/factory.C
 
-src_boost_DATE_TIME = $(BOOST_SRCDIR)/date_time/src/gregorian/date_generators.cpp $(BOOST_SRCDIR)/date_time/src/gregorian/greg_month.cpp $(BOOST_SRCDIR)/date_time/src/gregorian/greg_weekday.cpp $(BOOST_SRCDIR)/date_time/src/gregorian/gregorian_types.cpp $(BOOST_SRCDIR)/date_time/src/posix_time/posix_time_types.cpp
-src_boost_FILESYSTEM = $(BOOST_SRCDIR)/filesystem/src/convenience.cpp $(BOOST_SRCDIR)/filesystem/src/exception.cpp $(BOOST_SRCDIR)/filesystem/src/operations_posix_windows.cpp $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
-src_boost_REGEX = $(BOOST_SRCDIR)/regex/src/c_regex_traits.cpp $(BOOST_SRCDIR)/regex/src/c_regex_traits_common.cpp $(BOOST_SRCDIR)/regex/src/cpp_regex_traits.cpp $(BOOST_SRCDIR)/regex/src/cregex.cpp $(BOOST_SRCDIR)/regex/src/fileiter.cpp $(BOOST_SRCDIR)/regex/src/instances.cpp $(BOOST_SRCDIR)/regex/src/posix_api.cpp $(BOOST_SRCDIR)/regex/src/regex.cpp $(BOOST_SRCDIR)/regex/src/regex_debug.cpp $(BOOST_SRCDIR)/regex/src/regex_synch.cpp $(BOOST_SRCDIR)/regex/src/w32_regex_traits.cpp $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp $(BOOST_SRCDIR)/regex/src/winstances.cpp
+src_boost_DATE_TIME = \
+  $(BOOST_SRCDIR)/date_time/src/gregorian/date_generators.cpp \
+  $(BOOST_SRCDIR)/date_time/src/gregorian/greg_month.cpp \
+  $(BOOST_SRCDIR)/date_time/src/gregorian/greg_weekday.cpp \
+  $(BOOST_SRCDIR)/date_time/src/gregorian/gregorian_types.cpp \
+  $(BOOST_SRCDIR)/date_time/src/posix_time/posix_time_types.cpp
+src_boost_FILESYSTEM = \
+  $(BOOST_SRCDIR)/filesystem/src/convenience.cpp \
+  $(BOOST_SRCDIR)/filesystem/src/exception.cpp \
+  $(BOOST_SRCDIR)/filesystem/src/operations_posix_windows.cpp \
+  $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
+src_boost_REGEX = \
+  $(BOOST_SRCDIR)/regex/src/c_regex_traits.cpp \
+  $(BOOST_SRCDIR)/regex/src/c_regex_traits_common.cpp \
+  $(BOOST_SRCDIR)/regex/src/cpp_regex_traits.cpp \
+  $(BOOST_SRCDIR)/regex/src/cregex.cpp \
+  $(BOOST_SRCDIR)/regex/src/fileiter.cpp \
+  $(BOOST_SRCDIR)/regex/src/instances.cpp \
+  $(BOOST_SRCDIR)/regex/src/posix_api.cpp \
+  $(BOOST_SRCDIR)/regex/src/regex.cpp \
+  $(BOOST_SRCDIR)/regex/src/regex_debug.cpp \
+  $(BOOST_SRCDIR)/regex/src/regex_synch.cpp \
+  $(BOOST_SRCDIR)/regex/src/w32_regex_traits.cpp \
+  $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp \
+  $(BOOST_SRCDIR)/regex/src/winstances.cpp
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/signal_base.cpp \
@@ -36,6 +58,8 @@ src_boost_THREAD = \
 src_boost_THREAD_1_32 = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp
 src_boost_PROGRAM_OPTIONS_SERIALIZATION= \
+  $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp
+src_boost_PROGRAM_OPTIONS= \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
   $(BOOST_SRCDIR)/program_options/src/convert.cpp \
@@ -44,7 +68,8 @@ src_boost_PROGRAM_OPTIONS_SERIALIZATION= \
   $(BOOST_SRCDIR)/program_options/src/positional_options.cpp \
   $(BOOST_SRCDIR)/program_options/src/value_semantic.cpp \
   $(BOOST_SRCDIR)/program_options/src/variables_map.cpp \
-  $(BOOST_SRCDIR)/program_options/src/winmain.cpp \
+  $(BOOST_SRCDIR)/program_options/src/winmain.cpp
+src_boost_SERIALIZATION= \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp \
@@ -53,6 +78,8 @@ src_boost_PROGRAM_OPTIONS_SERIALIZATION= \
   $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_xml_grammar.ipp \
   $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
@@ -61,14 +88,19 @@ src_boost_PROGRAM_OPTIONS_SERIALIZATION= \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp \
+  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
-  $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp \
-  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp 
-#  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
-#  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp 
+  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 
 lib_LTLIBRARIES = libalps.la 
 
@@ -83,9 +115,17 @@ libalps_la_SOURCES += $(top_srcdir)/src/boost/throw_exception.C
 nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_REGEX)
 endif
 
-#if BUILD_BOOST_SERIALIZATION
-#nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS_SERIALIZATION)
-#endif
+if BUILD_BOOST_PROGRAM_OPTIONS
+if BUILD_BOOST_SERIALIZATION
+nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS_SERIALIZATION) $(src_boost_PROGRAM_OPTIONS) $(src_boost_SERIALIZATION)
+else
+nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS_SERIALIZATION) $(src_boost_SERIALIZATION)
+endif
+else
+if BUILD_BOOST_SERIALIZATION
+nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS_SERIALIZATION) $(src_boost_SERIALIZATION)
+endif
+endif
 if BUILD_BOOST_SIGNALS
 nodist_libalps_la_SOURCES += $(src_boost_SIGNALS)
 if BOOST_1_32

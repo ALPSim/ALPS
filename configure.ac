@@ -243,11 +243,33 @@ AC_ARG_WITH(boost-toolset,
 AC_ARG_WITH(boost-all,
   AC_HELP_STRING([--with-boost-all],[compile all optional Boost libraries]), [
     if test "x$withval" = "xno"; then
+      ac_cv_boost_program_options=no
+      ac_cv_boost_serialization=no
       ac_cv_boost_signals=no
       ac_cv_boost_thread=no
     else
+      ac_cv_boost_program_options=yes
+      ac_cv_boost_serialization=yes
       ac_cv_boost_signals=yes
       ac_cv_boost_thread=yes
+    fi
+  ]
+)
+AC_ARG_WITH(boost-program-options,
+  AC_HELP_STRING([--with-boost-program-options],[compile Boost::program_options library]), [
+    if test "x$withval" = "xno"; then
+      ac_cv_boost_program_options=no
+    else
+      ac_cv_boost_program_options=yes
+    fi
+  ]
+)
+AC_ARG_WITH(boost-serialization,
+  AC_HELP_STRING([--with-boost-serialization],[compile Boost::serialization library]), [
+    if test "x$withval" = "xno"; then
+      ac_cv_boost_serialization=no
+    else
+      ac_cv_boost_serialization=yes
     fi
   ]
 )
@@ -387,6 +409,10 @@ if test "$ac_cv_use_precompiled_boost" = no; then :; else
   fi
 
   if test "$ac_cv_use_precompiled_boost" = yes; then
+    #
+    # TODO: check for Boost::program_options and Boost::serialization libraries
+    #
+
     AC_MSG_CHECKING([for Boost::signals library])
     ac_cv_boost_signals=no
     if test -n "$boost_libs"; then
@@ -454,12 +480,10 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   if test -n "$boost_srcdir"; then
     AC_MSG_RESULT([$boost_srcdir])
     BOOST_SRCDIR="$boost_srcdir"
-    # SRC_BOOST='$(SRC_BOOST)'
   else
     if test -n "$boost_srcdir_s"; then
       AC_MSG_RESULT([$boost_srcdir_s])
       BOOST_SRCDIR="$boost_srcdir_s"
-      # SRC_BOOST='$(SRC_BOOST)'
     else
       AC_MSG_RESULT([no])
       AC_MSG_ERROR([Boost source files not found])
@@ -566,14 +590,23 @@ test "$ac_cv_xml_parser" = "xerces" && AC_DEFINE(ALPS_HAVE_XERCES_PARSER, [], [x
 # boost object libraries
 # 
 
+# check whether Boost::program_options is compiled
+if test -f "$BOOST_SRCDIR/program_options/src/cmdline.cpp"; then :; else
+  ac_cv_boost_program_options=no
+fi
+AM_CONDITIONAL(BUILD_BOOST_PROGRAM_OPTIONS, test "$ac_cv_use_precompiled_boost" != yes -a "$ac_cv_boost_program_options" = yes)
+
+# check whether Boost::serialization is compiled
+if test -f "$BOOST_SRCDIR/serialization/src/basic_archive.cpp"; then :; else
+  ac_cv_boost_serialization=no
+fi
+AM_CONDITIONAL(BUILD_BOOST_SERIALIZATION, test "$ac_cv_use_precompiled_boost" != yes -a "$ac_cv_boost_serialization" = yes)
+
 # check whether Boost::signals is compiled
-# AC_SUBST(SRC_BOOST_SIGNALS)
-# SRC_BOOST_SIGNALS=
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   AC_MSG_CHECKING([whether Boost::signals is compiled])
   test -z "$ac_cv_boost_signals" && ac_cv_boost_signals=no
   if test "$ac_cv_boost_signals" = yes; then
-    # SRC_BOOST_SIGNALS='$(SRC_BOOST_SIGNALS)'
     AC_MSG_RESULT([yes])
   else
     AC_MSG_RESULT([no])
@@ -582,14 +615,11 @@ fi
 AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_use_precompiled_boost" != yes -a "$ac_cv_boost_signals" = yes)
 
 # check whether boost::thread is compiled
-# AC_SUBST(SRC_BOOST_THREAD)
-# SRC_BOOST_THREAD=
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   AC_MSG_CHECKING([whether boost::thread is compiled])
   test -z "$ac_cv_boost_thread" && ac_cv_boost_thread=no
   if test "$ac_cv_have_pthread" = yes; then
     if test "$ac_cv_boost_thread" = yes; then
-      # SRC_BOOST_THREAD='$(SRC_BOOST_THREAD)'
       AC_MSG_RESULT([yes])
     else
       AC_MSG_RESULT([no])
