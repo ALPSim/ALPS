@@ -21,6 +21,10 @@
 
 #include "matrix.h"
 
+#ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
+using namespace alps;
+#endif
+
 int main(int argc, char** argv)
 {
 #ifndef BOOST_NO_EXCEPTIONS

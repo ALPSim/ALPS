@@ -84,18 +84,18 @@ HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p)
 template <class T, class M>
 void HamiltonianMatrix<T,M>::build() const
 {
-  using namespace alps;
+  // using namespace alps;
   
   // get Hamilton operator
-  HamiltonianDescriptor<short> ham(models_.hamiltonian(parms_["MODEL"]));
+  alps::HamiltonianDescriptor<short> ham(models_.hamiltonian(parms_["MODEL"]));
   alps::Parameters p(parms_);
   if (!symbolic_traits<T>::is_symbolic)
     p.copy_undefined(ham.default_parameters());
   ham.set_parameters(p);
   
   // get all site matrices
-  property_map<site_type_t,const graph_type,int>::type site_type(
-            get_or_default(site_type_t(),lattice(),0));
+  alps::property_map<alps::site_type_t, const graph_type, int>::type
+  site_type(alps::get_or_default(alps::site_type_t(), lattice(), 0));
 
   std::map<int,boost::multi_array<T,2> > site_matrix;
   std::map<int,bool> site_visited;
@@ -110,8 +110,8 @@ void HamiltonianMatrix<T,M>::build() const
     }
   
   // get all bond matrices
-  property_map<bond_type_t,const graph_type,int>::type bond_type(
-            get_or_default(bond_type_t(),lattice(),0));
+  alps::property_map<alps::bond_type_t, const graph_type, int>::type
+  bond_type(alps::get_or_default(alps::bond_type_t(),lattice(),0));
 
   std::map<int,boost::multi_array<T,4> > bond_matrix;
   std::map<boost::tuple<int,int,int>,bool> bond_visited;
@@ -131,8 +131,8 @@ void HamiltonianMatrix<T,M>::build() const
   
   // create basis set
   std::cout << "Creating basis set\n";
-  BasisStatesDescriptor<short> basis(ham.basis(),lattice());
-  BasisStates<short> states(basis);
+  alps::BasisStatesDescriptor<short> basis(ham.basis(),lattice());
+  alps::BasisStates<short> states(basis);
   
   // build matrix
   
@@ -149,7 +149,7 @@ void HamiltonianMatrix<T,M>::build() const
       // get site basis index
       int is=basis[s].index(states[i][s]);
       // loop over target index
-      std::vector<StateDescriptor<short> > state=states[i];
+      std::vector<alps::StateDescriptor<short> > state=states[i];
       for (int js=0;js<basis[s].size();++js)
         if (site_matrix[site_type[*it]][is][js]) {
         // build target state
@@ -171,7 +171,7 @@ void HamiltonianMatrix<T,M>::build() const
       int is1=basis[s1].index(states[i][s1]);
       int is2=basis[s2].index(states[i][s2]);
       // loop over target indices
-      std::vector<StateDescriptor<short> > state=states[i];
+      std::vector<alps::StateDescriptor<short> > state=states[i];
       for (int js1=0;js1<basis[s1].size();++js1)
         for (int js2=0;js2<basis[s2].size();++js2)
         if (bond_matrix[bond_type[*it]][is1][is2][js1][js2]) {
