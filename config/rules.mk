@@ -147,7 +147,7 @@ install : $(LIB) $(PROGRAM)
 	  echo "$(RANLIB) $(libdir)/$$p"; \
 	  $(RANLIB) $(libdir)/$$p; \
 	done
-	@list='$(XMLLIB)'; for p in $$list; do \
+	@list='$(XMLLIB_CONFIG) $(XMLLIB)'; for p in $$list; do \
           if test -d $(libdir)/xml ; then :; else \
 	    echo "$(mkinstalldirs) $(libdir)/xml "; \
 	    $(mkinstalldirs) $(libdir)/xml ; \
@@ -201,6 +201,10 @@ uninstall :
 	  echo "rm -f $(libdir)/$$p"; \
 	  rm -f $(libdir)/$$p; \
 	done
+	@list='$(XMLLIB_CONFIG) $(XMLLIB)'; for p in $$list; do \
+	  echo "rm -f $(libdir)/xml/$$p"; \
+	  rm -f $(libdir)/xml/$$p; \
+	done
 	@list='$(PROGRAM) $(SCRIPT_CONFIG) $(SCRIPT)'; for p in $$list; do \
 	  echo "rm -f $(bindir)/$$p"; \
 	  rm -f $(bindir)/$$p; \
@@ -220,7 +224,7 @@ clean :
 	-rm -f *.a *.ti */*.ti */*/*.ti *.ii */*.ii */*/*.ii *.o */*.o */*/*.o *~ */*~ icc??????gas $(PROGRAM) $(EXAMPLE) $(TEST) $(TESTOK) a.out core
 	-rm -rf ti_files */ti_files */*/ti_files ii_files */ii_files */*/ii_files cxx_repository TemplateDir 
 distclean : clean
-	-rm -f Makefile config.log $(HEADER_CONFIG) $(SCRIPT_CONFIG) $(DATA_CONFIG) $(PKGDATA_CONFIG) $(LOCAL_CONFIG)
+	-rm -f Makefile config.log config.status $(HEADER_CONFIG) $(XMLLIB_CONFIG) $(SCRIPT_CONFIG) $(DATA_CONFIG) $(PKGDATA_CONFIG) $(LOCAL_CONFIG)
 
 # Makefile & dependency
 
