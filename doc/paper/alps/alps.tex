@@ -73,7 +73,7 @@ Carlo\cite{cluster} and extended ensemble (broad histogram)
 algorithms to quantum systems,\cite{QWL} the simulation of fermionic
 systems still presents major difficulties. 
 Indeed, it has recently been shown that the negative sign
-problem of fermionic quantum Monte Carlo simulations is
+problem of fermionic quantum Monte Carlo simulations (QMC) is
 NP-hard,\cite{nphard} and that a general algorithm with polynomial
 scaling most likely does not exist. The most promising
 approach therefore appears to 
@@ -164,7 +164,7 @@ common archive.
 </PARAMETERS>
 \end{verbatim}
 \end{small}
-\caption{Excerpt from an XML file for simulation input parameters .}
+\caption{Excerpt from an XML file for simulation input parameters.}
 \label{fig:parm}
 \end{figure}
 
@@ -225,7 +225,7 @@ formats. The resemblance to HTML is not accidental; in fact, HTML
 \end{small}
 \caption{The definition of a square lattice with one site (vertex) per
 unit cell and bonds (edges) only to nearest neighbors. First the
-dimension, extent, and boundary conditions of the Bravais lattice is
+dimension, extent, and boundary conditions of the Bravais lattice are
 described in the {\tt <FINITELATTICE>} element, then the unit cell
 including the bonds in the lattice is defined.}
 \label{fig:lattice}
@@ -253,7 +253,7 @@ including the bonds in the lattice is defined.}
 <HAMILTONIAN name="spin">
   <BASIS ref="spin"/>
   <SITETERM> -h*Sz </SITETERM>   
-  <BONDTERM source="i" target="jÓ>
+  <BONDTERM source="i" target="j">
     Jxy/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
     + Jz*Sz(i)*Sz(j)
   </BONDTERM>
@@ -434,7 +434,7 @@ bosons.\cite{hcbosons} The optimized directed loop and worm algorithm
 QMC programs were applied to determine properties of ultra-cold
 bosonic atoms in optical lattices\cite{boson} and to calculate
 magnetization curves of spin systems.\cite{magn} The ALPS libraries
-were also employed recently in a simulation of dissipative quantum
+were also employed recently in simulations of dissipative quantum
 phase transitions\cite{dissipation}, in a spin-wave analysis of
 quantum magnetic quasicrystals,\cite{quasicrystal} and in a
 multi-scale approach to the simulation of nanomagnets.\cite{multi}
@@ -614,7 +614,7 @@ B {\bf 48} (1993) 10345.
 \bibitem{WangLandau} F. Wang and D.P. Landau, Phys. Rev. Lett. {\bf 86} (2001) 2050; Phys. Rev. E {\bf 64} (2001) 056101. 
 \bibitem{lanczos} C. Lanczos, J. Res. Natl. Bur. Stand. {\bf 45} (1950) 225. 
 \bibitem{noninteracting} M.A. Martin-Delgado, G. Sierra, and R. M. Noack, J. Phys. A {\bf 32} (1999) 6079;
- and chapter 2 of Ref.\cite{dmrgbook}
+ and chapter 2 of Ref. \citen{dmrgbook}.
 \bibitem{determinental} F. F. Assaad in: J. Grotendorst, D. Marx, and A. Muramatsu (Eds): {\it Lecture notes of the Winter School on Quantum Simulations of Complex
 Many-Body Systems: From Theory to Algorithms}, Publication Series
 of the John von Neumann Institute for Computing (NIC). NIC series Vol. 10.
