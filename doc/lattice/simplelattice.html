@@ -14,27 +14,30 @@ defines a template class <tt>simple_lattice</tt>, which makes a lattice from a u
 <blockquote><pre>
 namespace alps {
 
-  template &lt;class UnitCell=EmptyUnitCell, class Cell = simple_cell&lt;U> >
+  template &lt;class UnitCell=EmptyUnitCell, class Cell = simple_cell&lt;UnitCell&gt; &gt;
   class simple_lattice {
   public:
     typedef UnitCell unit_cell_type;
     typedef Cell cell_descriptor;
-    typedef typename lattice::dimensional_traits&lt;unit_cell_type>::dimension_type dimension_type;
-    typedef typename cell_traits&lt; cell_descriptor>::offset_type offset_type;
+    typedef typename lattice::dimensional_traits&lt;unit_cell_type&gt;::dimension_type dimension_type;
+    typedef typename cell_traits&lt; cell_descriptor&gt;::offset_type offset_type;
   
     simple_lattice();
+    template&lt;class U2, class C2&gt; simple_lattice(const simple_lattice&lt;U2,C2&gt;&amp; l);
+    simple_lattice(const unit_cell_type&amp; c);
 
+    unit_cell_type&amp; unit_cell();
     const unit_cell_type&amp; unit_cell() const;
     cell_descriptor cell(offset_type o) const;
     dimension_type dimension() const;
   };
 
-  template &lt;class UnitCell, class Cell>
-  struct lattice_traits&lt;simple_lattice&lt;UnitCell,Cell> >
+  template &lt;class UnitCell, class Cell&gt;
+  struct lattice_traits&lt;simple_lattice&lt;UnitCell,Cell&gt; &gt;
   {
-    typedef typename simple_lattice&lt;UnitCell,Cell>::unit_cell_type unit_cell_type;
-    typedef typename simple_lattice&lt;UnitCell,Cell>::cell_descriptor cell_descriptor;
-    typedef typename simple_lattice&lt;UnitCell,Cell>::offset_type offset_type;
+    typedef typename simple_lattice&lt;UnitCell,Cell&gt;::unit_cell_type unit_cell_type;
+    typedef typename simple_lattice&lt;UnitCell,Cell&gt;::cell_descriptor cell_descriptor;
+    typedef typename simple_lattice&lt;UnitCell,Cell&gt;::offset_type offset_type;
   };
 
 }
@@ -51,6 +54,7 @@ It takes two template arguments:
 <A href="latticeconcepts.html#Cell">Cell</A> requirements
 and defaults to <tt><A href="simplecell.html">simple_cell</a></tt>.
 </ul>
+
 <h4>Type definitions</h4>
 <blockquote><pre>
 typedef UnitCell unit_cell_type;
@@ -58,24 +62,35 @@ typedef Cell cell_descriptor;
 </pre></blockquote>
 typedefs for the template parameters.
 <blockquote><pre>
-typedef typename lattice::dimensional_traits&lt;unit_cell_type>::dimension_type dimension_type;
+typedef typename lattice::dimensional_traits&lt;unit_cell_type&gt;::dimension_type dimension_type;
 </pre></blockquote>
 the type for the dimension of the lattice.
 <blockquote><pre>
-typedef typename cell_traits&lt; cell_descriptor>::offset_type offset_type;
+typedef typename cell_traits&lt; cell_descriptor&gt;::offset_type offset_type;
 </pre></blockquote>
 the offset type of the cell.
-<h4>Constructor</h4>
+
+<h4>Constructors</h4>
+
 <blockquote><pre>
 simple_lattice();
 </pre></blockquote>
-the default constructor is the only constructor, besides the implicitly
-generated copy constructor.
+the default constructor.
+<blockquote><pre>
+template&lt;class U2, class C2&gt; simple_lattice(const simple_lattice&lt;U2,C2&gt;&amp; l);
+</pre></blockquote>
+the copy constructors.
+<blockquote><pre>
+simple_lattice(const unit_cell_type&amp; c);
+</pre></blockquote>
+constracts from a unitcell.
+
 <h4>Member functions</h4>
 <blockquote><pre>
+unit_cell_type&amp; unit_cell();
 const unit_cell_type&amp; unit_cell() const;
 </pre></blockquote>
-returns the unit cell.
+return the unit cell.
 <blockquote><pre>
 cell_descriptor cell(offset_type o) const;
 </pre></blockquote>
@@ -84,20 +99,22 @@ returns a cell with a given offset
 dimension_type dimension();
 </pre></blockquote>
 returns the dimension of the lattice.
+
 <h4>Traits class</h4>
 <blockquote><pre>
-template &lt;class UnitCell, class Cell>
-struct lattice_traits&lt;simple_lattice&lt;UnitCell,Cell> >
+template &lt;class UnitCell, class Cell&gt;
+struct lattice_traits&lt;simple_lattice&lt;UnitCell,Cell&gt; &gt;
 {
-  typedef typename simple_lattice&lt;UnitCell,Cell>::unit_cell_type unit_cell_type;
-  typedef typename simple_lattice&lt;UnitCell,Cell>::cell_descriptor cell_descriptor;
-  typedef typename simple_lattice&lt;UnitCell,Cell>::offset_type offset_type;
+  typedef typename simple_lattice&lt;UnitCell,Cell&gt;::unit_cell_type unit_cell_type;
+  typedef typename simple_lattice&lt;UnitCell,Cell&gt;::cell_descriptor cell_descriptor;
+  typedef typename simple_lattice&lt;UnitCell,Cell&gt;::offset_type offset_type;
 };
 </pre></blockquote>
 is the traits class for the lattice.
 <HR>
-<ADDRESS>copyright (c) 2000-2003 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 2000-2004 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A> and
+<A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
 </body>
 </html>
 

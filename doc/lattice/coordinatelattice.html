@@ -16,7 +16,7 @@ defines a template class <tt>coordinate_lattice</tt> which adds concrete basis v
 namespace alps {
 
 template &lt;class BASE = simple_lattice&lt;>, class Vector = std::vector&lt;double> >
-class coordinate_lattice: public BASE {
+class coordinate_lattice : public BASE {
 public:
   typedef BASE parent_lattice_type;
   typedef Vector vector_type;
@@ -26,10 +26,27 @@ public:
   typedef typename std::vector&lt;vector_type>::const_iterator basis_vector_iterator;
   
   coordinate_lattice() {}
-  template &lt;class InputIterator>
-  coordinate_lattice(const unit_cell_type&amp; u, InputIterator first, InputIterator last);
+
+  template &lt;class B2,class V2> coordinate_lattice(const coordinate_lattice&lt;B2,V2>&amp; l);
   
+  template &lt;class InputIterator> coordinate_lattice(const unit_cell_type&amp; u, InputIterator first, InputIterator last);
+  
+  template &lt;class InputIterator1, class InputIterator2> coordinate_lattice(const unit_cell_type&amp; u, InputIterator1 first1, InputIterator1 last1, InputIterator2 first2, InputIterator2 last2);
+
+  coordinate_lattice(const unit_cell_type&amp; u);
+
+  template &lt;class B2, class V2>
+  const coordinate_lattice&amp; operator=(const coordinate_lattice&lt;B2,V2>&amp; l);
+
+  void set_parameters(const Parameters&amp; p);
+
+  void add_basis_vector(const vector_type&amp; v);
+  std::size_t num_basis_vectors() const;
   std::pair&lt;basis_vector_iterator,basis_vector_iterator> basis_vectors() const;
+
+  void add_reciprocal_basis_vector(const vector_type&amp; v);
+  std::size_t num_reciprocal_basis_vectors() const;
+  std::pair&lt;basis_vector_iterator,basis_vector_iterator> reciprocal_basis_vectors() const;
 };
 
 template &lt;class B, class V>
@@ -44,9 +61,11 @@ struct lattice_traits&lt;coordinate_lattice&lt;B,V> >
 
 }
 <pre></blockquote>
+
 <H3>The <tt>coordinate_lattice</tt> class</H3>
 describes a lattice and fulfills the
 <A href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A> requirements.
+
 <h4>Template parameters</h4>
 It takes two template arguments:
 <ul>
@@ -57,6 +76,7 @@ from this type. It has to fulfill the
 <A href="helperconcepts.html#Coordinate">Coordinate</A> requirements
 and defaults to <tt>std::vector&lt;double></tt>.
 </ul>
+
 <h4>Type definitions</h4>
 <blockquote><pre>
 typedef BASE parent_lattice_type;
@@ -73,6 +93,7 @@ these types are inherited from the parent lattice.
 typedef typename std::vector&lt;vector_type>::const_iterator basis_vector_iterator;
 </pre></blockquote>
 the type for const iterators over the basis vectors
+
 <h4>Constructors</h4>
 <blockquote><pre>
 coordinate_lattice();
@@ -86,10 +107,22 @@ obtains the dimension from the unit cell <tt>u</tt> and initializes the basis ve
 from the pair of iterators <tt>first</tt> and <tt>last</tt>.
 <h4>Member functions</h4>
 in addition to those inherited from the parent lattice:
+
+<blockquote><pre>
+void set_parameters(const alps::Parameters&);
+</pre></blockquote>
+sets parameters for the lattice, e.g. parammeters specifying the basis vectors.
+
+<blockquote><pre>
+std::size_t num_basis_vectors() const;
+</pre></blockquote>
+returns the number of basis vectors.
+
 <blockquote><pre>
 std::pair&lt;basis_vector_iterator,basis_vector_iterator> basis_vectors() const;
 </pre></blockquote>
-a pair of const iterators giving the basis vectors.
+returns a pair of const iterators giving the basis vectors.
+
 <h4>Traits class</h4>
 <blockquote><pre>
 template &lt;class B, class V>
@@ -104,8 +137,9 @@ struct lattice_traits&lt;coordinate_lattice&lt;B,V> >
 </pre></blockquote>
 is the traits class for the lattice.
 <HR>
-<ADDRESS>copyright (c) 2000-2003 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 2000-2004 by 
+<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A> and
+<A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
 </body>
 </html>
 
