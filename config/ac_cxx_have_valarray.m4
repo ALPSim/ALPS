@@ -10,7 +10,8 @@ ac_cv_cxx_have_valarray,
 [AC_REQUIRE([AC_CXX_NAMESPACES])
  AC_LANG_SAVE
  AC_LANG_CPLUSPLUS
- AC_TRY_COMPILE([#include <valarray>
+ AC_TRY_COMPILE([#include <cstdlib>
+#include <valarray>
 #ifdef HAVE_NAMESPACES
 using namespace std;
 #endif],[valarray<float> x(100); return 0;],
