@@ -1,3 +1,7 @@
+2003-05-29 Matthias Troyer <troyer@comp-phys.org>
+
+	* [alea] Added reading of NaN mean values and variances
+
 2003-05-29 Synge Todo <wistaria@comp-phys.org>
 
 	* [boost] Added non-recursive version of depth first search
