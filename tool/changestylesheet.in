@@ -1,0 +1,7 @@
+#! /bin/sh
+for f in $*; do
+  if test -f $f; then
+    @bindir@/xslttransform $f @libdir@/xml/changesylesheet.xsl > /tmp/tmp$$
+    mv /tmp/tmp$$ $f
+  fi
+done

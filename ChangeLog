@@ -1,3 +1,20 @@
+2004-10-12  Matthias Troyer <troyer@comp-phys.org>
+
+	* [parser] Changed default XSLT path to installation directory
+	* [tool] added XSLT style files
+
+2004-10-10  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.2b5
+
+2004-10-10  Matthias Troyer <troyer@comp-phys.org>
+
+ 	* [model] fixed problem with looper
+
+2004-10-08  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.2b4
+
 2004-10-06  Synge Todo <wistaria@comp-phys.org>
 
 	* [tool] Added new extract tools for gnuplot (extractgp, plot2gp)

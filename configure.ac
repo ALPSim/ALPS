@@ -11,7 +11,7 @@ dnl
 
 dnl Version of ALPS Library
 
-define([alps_version], [1.2b5])
+define([alps_version], [1.2b6])
 
 dnl Latest publication year of ALPS
 
@@ -93,10 +93,15 @@ ac_cv_alps_exec_prefix="$exec_prefix"
 ac_cv_alps_bindir="$bindir"
 ac_cv_alps_datadir="$datadir"
 ac_cv_alps_libdir="$libdir"
+ac_cv_alps_xmldir="$libdir/xml"
 ac_cv_alps_includedir="$includedir"
 ac_cv_alps_docdir="$docdir"
 ac_cv_alps_include_mk="$datadir/$PACKAGE_NAME/include.mk"
 
+dnl XSLT path
+AC_DEFINE_UNQUOTED([ALPS_XML_DIR], ["$ac_cv_alps_xmldir"])
+ALPS_XML_DIR=$ac_cv_alps_xmldir
+AC_SUBST(ALPS_XML_DIR)
 dnl
 dnl Compilers --------------------------------------------------------
 dnl
@@ -734,7 +739,7 @@ if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(test/lattice/Makefile test/lattice/lattices.xml test/lattice/parameters)
   AC_CONFIG_FILES(test/model/Makefile test/model/lattices.xml test/model/models.xml)
   AC_CONFIG_FILES(example/Makefile example/model/Makefile example/scheduler/Makefile example/model/lattices.xml example/model/models.xml example/model/parm_symbolic example/model/parm_numeric)
-  AC_CONFIG_FILES(tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/plot2xsl.xsl)
+  AC_CONFIG_FILES(tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/plot2xsl.xsl tool/changestylesheet tool/changestylesheet.xsl)
 fi
 
 if test "$ac_cv_use_precompiled_boost" != yes; then

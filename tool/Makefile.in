@@ -43,12 +43,13 @@ bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 subdir = tool
 DIST_COMMON = $(dist_bin_SCRIPTS) $(dist_pkgdata_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(srcdir)/convert2html.in $(srcdir)/convert2text.in \
-	$(srcdir)/extractgp.in $(srcdir)/extracthtml.in \
-	$(srcdir)/extracttext.in $(srcdir)/extractxmgr.in \
-	$(srcdir)/plot2gp.in $(srcdir)/plot2html.in \
-	$(srcdir)/plot2text.in $(srcdir)/plot2xmgr.in \
-	$(srcdir)/plot2xsl.xsl.in TODO
+	$(srcdir)/changestylesheet.in \
+	$(srcdir)/changestylesheet.xsl.in $(srcdir)/convert2html.in \
+	$(srcdir)/convert2text.in $(srcdir)/extractgp.in \
+	$(srcdir)/extracthtml.in $(srcdir)/extracttext.in \
+	$(srcdir)/extractxmgr.in $(srcdir)/plot2gp.in \
+	$(srcdir)/plot2html.in $(srcdir)/plot2text.in \
+	$(srcdir)/plot2xmgr.in $(srcdir)/plot2xsl.xsl.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_compiler.m4 \
@@ -66,7 +67,7 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
-	plot2xsl.xsl
+	plot2xsl.xsl changestylesheet changestylesheet.xsl
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgdatadir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -124,6 +125,7 @@ ALPS_FULL_FALSE = @ALPS_FULL_FALSE@
 ALPS_FULL_TRUE = @ALPS_FULL_TRUE@
 ALPS_LIGHT_FALSE = @ALPS_LIGHT_FALSE@
 ALPS_LIGHT_TRUE = @ALPS_LIGHT_TRUE@
+ALPS_XML_DIR = @ALPS_XML_DIR@
 AMDEP_FALSE = @AMDEP_FALSE@
 AMDEP_TRUE = @AMDEP_TRUE@
 AMTAR = @AMTAR@
@@ -273,10 +275,10 @@ DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
 AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
 AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
-dist_bin_SCRIPTS = archivecat xslttransform transformall
+dist_bin_SCRIPTS = archivecat xslttransform transformall 
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr
-dist_pkgdata_DATA = archive2plot.xsl helpers.xsl plot2gp.xsl plot2html.xsl plot2text.xsl plot2xmgr.xsl QMCXML2text.xsl ALPS.xsl
-pkgdata_DATA = plot2xsl.xsl
+dist_pkgdata_DATA = archive2plot.xsl helpers.xsl plot2gp.xsl plot2html.xsl plot2text.xsl plot2xmgr.xsl QMCXML2text.xsl ALPS.xsl job.xsl
+pkgdata_DATA = plot2xsl.xsl changestylesheet.xsl
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
@@ -334,6 +336,10 @@ plot2text: $(top_builddir)/config.status $(srcdir)/plot2text.in
 plot2xmgr: $(top_builddir)/config.status $(srcdir)/plot2xmgr.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 plot2xsl.xsl: $(top_builddir)/config.status $(srcdir)/plot2xsl.xsl.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+changestylesheet: $(top_builddir)/config.status $(srcdir)/changestylesheet.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+changestylesheet.xsl: $(top_builddir)/config.status $(srcdir)/changestylesheet.xsl.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
