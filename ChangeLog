@@ -1,3 +1,10 @@
+2004-04-27 Matthias Troyer <troyer@comp-phys.org>
+
+	* [alea] Added first tests for sign problem
+
+	* [scheduler] Fixed a problem with changing dump format during
+	  a simulation run
+
 2004-04-12 Matthias Troyer <troyer@comp-phys.org>
 
 	* [alea] Added support for sign problem (still untested!)
