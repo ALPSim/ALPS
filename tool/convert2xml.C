@@ -54,7 +54,7 @@ void convert_params(const std::string& inname, const std::string& outfilename)
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
       << "<?xml-stylesheet type=\"text/xsl\" href=\"http://xml.comp-phys.org/2002/10/job.xsl\"?>\n"
       << "<JOB xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-      << "xsi:noNamespaceSchemaLocation=\"http://xml.comp-phys.org/2002/10/job.xsd\">\n";
+      << "xsi:noNamespaceSchemaLocation=\"http://xml.comp-phys.org/2003/8/job.xsd\">\n";
   out << "  <OUTPUT file=\"" << outfilename+".out.xml" << "\"/>\n";
   for (int i=0;i<list.size();++i) {
     std::string outname = outfilename;
@@ -151,7 +151,7 @@ void convert_scheduler(const std::string& inname, const std::string& outname)
   out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
       << "<?xml-stylesheet type=\"text/xsl\" href=\"http://xml.comp-phys.org/2002/10/job.xsl\"?>\n"
       << "<JOB xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-      << "xsi:noNamespaceSchemaLocation=\"http://xml.comp-phys.org/2002/10/job.xsd\">\n";
+      << "xsi:noNamespaceSchemaLocation=\"http://xml.comp-phys.org/2003/8/job.xsd\">\n";
   int dummy_i;
   double dummy_d;
   dump >> dummy_i; // version
