@@ -2,6 +2,8 @@
 
 	* [alea] Added reading of NaN mean values and variances
 
+        * [example] Added example for model library, printing Hamiltonian matrix
+
 2003-05-29 Synge Todo <wistaria@comp-phys.org>
 
 	* [boost] Added non-recursive version of depth first search
