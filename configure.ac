@@ -98,7 +98,7 @@ ac_cv_alps_docdir="$docdir"
 ac_cv_alps_include_mk="$datadir/$PACKAGE_NAME/include.mk"
 
 dnl
-dnl Tools/Programs --------------------------------------------------------
+dnl Compilers --------------------------------------------------------
 dnl
 
 AC_CANONICAL_HOST
@@ -120,22 +120,8 @@ AC_PROG_CXXCPP
 ac_cv_alps_cpp="$CPP"
 ac_cv_alps_cxxcpp="$CXXCPP"
 
-dnl make --disable-sahred the default for IBM compiler
-if test x"$ac_cv_compiler" = xibm32 || test x"$ac_cv_compiler" = xibm64; then
-  test -z "${enable_shared+set}" && enable_shared=no
-fi
-
-dnl set 64-bit flag for IBM compiler
-if test x"$ac_cv_compiler" = xibm64; then
-  test -z "$AR" && AR="ar -X64"
-  test -z "$NM" && NM="nm -X64 -B"
-fi
-
 dnl disable F77
 test -z "$F77" && F77=no
-
-dnl libtool
-AC_PROG_LIBTOOL
 
 dnl
 dnl System Headers ---------------------------------------------------------
@@ -169,6 +155,24 @@ test "$ac_cv_header_sys_time_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TIME_H, [], [sy
 
 AC_CHECK_HEADER([sys/types.h])
 test "$ac_cv_header_sys_types_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TYPES_H, [], [sys/types.h])
+
+dnl
+dnl Other tools --------------------------------------------------------
+dnl
+
+dnl make --disable-sahred the default for IBM compiler
+if test x"$ac_cv_compiler" = xibm32 || test x"$ac_cv_compiler" = xibm64; then
+  test -z "${enable_shared+set}" && enable_shared=no
+fi
+
+dnl set 64-bit flag for IBM compiler
+if test x"$ac_cv_compiler" = xibm64; then
+  test -z "$AR" && AR="ar -X64"
+  test -z "$NM" && NM="nm -X64 -B"
+fi
+
+dnl libtool
+AC_PROG_LIBTOOL
 
 #
 # checking boost directory
