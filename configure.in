@@ -72,6 +72,14 @@ ac_cv_alps_rules_lib_mk="$datadir/$PACKAGE_NAME/rules-lib.mk"
 # C/C++ compiler
 sinclude(config/ac_compiler.m4)
 AC_COMPILER
+ac_cv_alps_compiler="$ac_cv_compiler"
+ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"
+ac_cv_alps_compiler_optimization="$ac_cv_compiler_optimization"
+ac_cv_alps_compiler="$ac_cv_compiler"
+ac_cv_alps_compiler_cc="$ac_cv_compiler_cc"
+ac_cv_alps_compiler_cflags="$ac_cv_compiler_cflags"
+ac_cv_alps_compiler_cxx="$ac_cv_compiler_cxx"
+ac_cv_alps_compiler_cxxflags="$ac_cv_compiler_cxxflags"
 
 # C/C++ preprocessor
 AC_PROG_CPP
@@ -86,17 +94,17 @@ else
   ALPS_INSTALL="$INSTALL"
 fi
 
-
 # other tools
 AC_SUBST(AR)
 AC_SUBST(ARXX)
 AR="ar cru"
 ARXX="$bindir/arxx"
 AC_PROG_LN_S
+AC_PROG_EGREP
 
 AC_SUBST(RANLIB)
-test "$ac_cv_compiler" = "sgi32" && RANLIB="/bin/true"
-test "$ac_cv_compiler" = "sgi64" && RANLIB="/bin/true"
+test "$ac_cv_alps_compiler" = "sgi32" && RANLIB="/bin/true"
+test "$ac_cv_alps_compiler" = "sgi64" && RANLIB="/bin/true"
 AC_PROG_RANLIB
 
 #
@@ -250,9 +258,11 @@ fi
 #
 
 AC_SUBST(LIB_MPI)
+ac_cv_alps_have_mpi=no
 sinclude(config/ac_mpi.m4)
 AC_MPI
 if test "$ac_cv_have_mpi" = yes; then
+  ac_cv_alps_have_mpi=yes
   AC_DEFINE(ALPS_HAVE_MPI)
   LIB_MPI='$(LIB_MPI)'
 fi
@@ -262,9 +272,11 @@ fi
 #
 
 AC_SUBST(LIB_PVM)
+ac_cv_alps_have_pvm=no
 sinclude(config/ac_pvm.m4)
 AC_PVM
 if test "$ac_cv_have_pvm" = yes; then
+  ac_cv_alps_have_pvm=yes
   AC_DEFINE(ALPS_HAVE_PVM)
   LIB_PVM='$(LIB_PVM)'
 fi
@@ -328,11 +340,11 @@ dnl
 echo
 echo "Summary of configuration:"
 echo "  ALPS version      $PACKAGE_VERSION"
-echo "  compiler type     $ac_cv_compiler"
-echo "  exceptions        $ac_cv_compiler_exceptions"
-echo "  optimization      $ac_cv_compiler_optimization"
+echo "  compiler type     $ac_cv_alps_compiler"
+echo "  exceptions        $ac_cv_alps_compiler_exceptions"
+echo "  optimization      $ac_cv_alps_compiler_optimization"
+echo "  MPI support       $ac_cv_alps_have_mpi"
+echo "  PVM support       $ac_cv_alps_have_pvm"
 echo "  pthread support   $ac_cv_have_pthread"
-echo "  MPI support       $ac_cv_have_mpi"
-echo "  PVM support       $ac_cv_have_pvm"
 echo "  HDF5 support      $ac_cv_have_hdf5"
 echo "  XML parser        $ac_cv_xml_parser"

@@ -48,7 +48,22 @@ pkgdatadir = $(datadir)/@PACKAGE_NAME@
 SCRIPT_CONFIG = arxx
 SCRIPT = install-sh makedepend.pl mkinstalldirs
 DATA_CONFIG = config.site
-PKGDATA_CONFIG = include.mk config.cache
+PKGDATA_CONFIG = include.mk
 PKGDATA = rules.mk rules-lib.mk
 
+EGREP = @EGREP@
+
 include $(top_srcdir)/config/rules.mk
+
+install : install-config-cache
+install-config-cache :
+	@if test -d $(pkgdatadir); then :; else \
+	  echo "$(mkinstalldirs) $(pkgdatadir)"; \
+	  $(mkinstalldirs) $(pkgdatadir); \
+	fi; \
+	echo "$(EGREP) ac_cv_alps config.cache > $(pkgdatadir)/config.cache"; \
+	$(EGREP) ac_cv_alps config.cache > $(pkgdatadir)/config.cache
+uninstall : uninstall-config-cache
+uninstall-config-cache :
+	@echo "rm -f $(pkgdatadir)/config.cache"; \
+	rm -f $(pkgdatadir)/config.cache
