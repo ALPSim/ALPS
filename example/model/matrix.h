@@ -165,13 +165,8 @@ void HamiltonianMatrix<T,M>::build() const
     boost::multi_array<std::pair<T,bool>,2>& mat = site_matrix[disordered_site_type(*it)];
       int is=state[s];                         // get site basis index
       for (int js=0;js<basis[s].size();++js) { // loop over target site states
-        T val=mat[is][js].first;                     // get matrix element
-#ifndef ALPS_WITH_NEW_EXPRESSION
-        if (val)         // if matrix element is nonzero
-#else
-        if (alps::is_nonzero(val))         // if matrix element is nonzero
-#endif
-        {
+        T val=mat[is][js].first;               // get matrix element
+        if (alps::is_nonzero(val)) {           // if matrix element is nonzero
           state_type newstate=state;
 		  newstate[s]=js;					   // build target state
           int j = states.index(newstate);      // lookup target state
@@ -204,12 +199,7 @@ void HamiltonianMatrix<T,M>::build() const
       for (int js1=0;js1<basis[s1].size();++js1) {  // loop over target site states
         for (int js2=0;js2<basis[s2].size();++js2) {
           T val=mat[is1][is2][js1][js2].first;            // get matrix element
-#ifndef ALPS_WITH_NEW_EXPRESSION
-          if (val)            // if nonzero matrix element
-#else
-          if (alps::is_nonzero(val))            // if nonzero matrix element
-#endif
-          {
+          if (alps::is_nonzero(val)) {            // if nonzero matrix element
             state_type newstate=state;            // prepare target state
             newstate[s1]=js1;                       // build target state
             newstate[s2]=js2;
