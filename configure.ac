@@ -651,7 +651,7 @@ else
   test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
   if test "$ac_cv_boost_config" = yes; then
     ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"
-    if test -f "$boost_srcdir/config/configure"; then :; else
+    if test -f "$BOOST_SRCDIR/config/configure"; then :; else
       AC_MSG_RESULT
       AC_MSG_ERROR([Boost configure script was not found.])
     fi
@@ -665,7 +665,7 @@ fi
 
 if test "$ac_cv_boost_config" != no; then
   AC_MSG_NOTICE([running Boost configuration script])
-  boost_configure="sh $boost_srcdir/config/configure"
+  boost_configure="sh $BOOST_SRCDIR/config/configure"
   mkdir -p src/boost
   command="(cd src/boost && export CXX=\"$CXX\" CXXFLAGS=\"$CXXFLAGS\" CPPFLAGS=\"$CPPFLAGS\" LDFLAGS=\"$LDFLAGS\" && $boost_configure --with-boost=$boost_incdir)"
   echo "$command"
@@ -739,7 +739,7 @@ fi
 
 if test "$ac_cv_use_precompiled_boost" != yes; then
   if test "$ac_cv_boost_program_options" = yes; then
-    AC_DEFINE_UNQUOTED(PO_UTF8_CODECVT_FACET_CPP, "$boost_srcdir/program_options/src/utf8_codecvt_facet.cpp")
+    AC_DEFINE_UNQUOTED(PO_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/program_options/src/utf8_codecvt_facet.cpp")
     AC_CONFIG_HEADERS(src/boost/po_utf8_codecvt_facet.cpp)
   fi
 fi

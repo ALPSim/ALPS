@@ -25442,7 +25442,7 @@ echo $ECHO_N "checking whether use Boost configuration header file... $ECHO_C" >
   test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
   if test "$ac_cv_boost_config" = yes; then
     ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"
-    if test -f "$boost_srcdir/config/configure"; then :; else
+    if test -f "$BOOST_SRCDIR/config/configure"; then :; else
       echo "$as_me:$LINENO: result: " >&5
 echo "${ECHO_T}" >&6
       { { echo "$as_me:$LINENO: error: Boost configure script was not found." >&5
@@ -25461,7 +25461,7 @@ fi
 if test "$ac_cv_boost_config" != no; then
   { echo "$as_me:$LINENO: running Boost configuration script" >&5
 echo "$as_me: running Boost configuration script" >&6;}
-  boost_configure="sh $boost_srcdir/config/configure"
+  boost_configure="sh $BOOST_SRCDIR/config/configure"
   mkdir -p src/boost
   command="(cd src/boost && export CXX=\"$CXX\" CXXFLAGS=\"$CXXFLAGS\" CPPFLAGS=\"$CPPFLAGS\" LDFLAGS=\"$LDFLAGS\" && $boost_configure --with-boost=$boost_incdir)"
   echo "$command"
@@ -25543,7 +25543,7 @@ fi
 if test "$ac_cv_use_precompiled_boost" != yes; then
   if test "$ac_cv_boost_program_options" = yes; then
     cat >>confdefs.h <<_ACEOF
-#define PO_UTF8_CODECVT_FACET_CPP "$boost_srcdir/program_options/src/utf8_codecvt_facet.cpp"
+#define PO_UTF8_CODECVT_FACET_CPP "$BOOST_SRCDIR/program_options/src/utf8_codecvt_facet.cpp"
 _ACEOF
 
               ac_config_headers="$ac_config_headers src/boost/po_utf8_codecvt_facet.cpp"
