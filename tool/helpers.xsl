@@ -74,10 +74,7 @@
 @    s0 type xydy
 @    s0 symbol 1
 @    s0 symbol size 0.500000
-@    s0 symbol color 2
 @    s0 line type 1
-@    s0 line color 2
-@    s0 errorbar color 2
 @target G0.S0
 @type xydy
 </xsl:text>   

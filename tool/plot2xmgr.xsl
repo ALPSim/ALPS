@@ -9,10 +9,6 @@
  
   <xsl:for-each select="set">
     <xsl:call-template name = "Print_XMGRACE_SetHeader"/>
-    <xsl:if test= "../legend/@show = 'true' and @label">
-      <xsl:value-of select="@label"/>
-      <xsl:value-of select="$newline"/>
-    </xsl:if>
 
     <xsl:apply-templates select="point">
       <xsl:sort select="x" data-type="number"/>
