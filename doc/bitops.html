@@ -1,0 +1,64 @@
+<html>
+<head>
+   <title>ALPS Project: alps library bitops.h</title>
+</head>
+<body>
+
+<h1>
+ALPS Project: alps library</h1>
+
+<h2>
+Header file <b>bitops.h</b></h2>
+This header contains bit operations modeled after Cray intrinsics.
+On Cray machines they are replaced by the intrinsic functions
+with the same name.
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace alps {
+template &lt;class T, class N>
+inline T gbit(T x, N n);
+
+template &lt;class T, class N>
+inline T gbits(T x, N m, long n);
+
+inline uint32_t maskr(uint16_t i);
+
+inline uint32_t popcnt(uint32_t x);
+
+}</pre></blockquote>
+
+
+<h3>Functions</h3>
+<blockquote><pre>
+template &lt;class T, class N>
+inline T gbit(T x, N n);
+</pre></blockquote>
+extracts the <TT>n</TT>-th bit from a word. On Cray hardware
+this template is replaced by the intrinsic function of the same
+name.
+<blockquote><pre>
+template &lt;class T, class N>
+inline T gbits(T x, N m, long n);
+</pre></blockquote>
+extracts <TT>m</TT> bits starting at position <TT>n</TT>. On Cray hardware
+this template is replaced by the intrinsic function of the same
+name.
+<blockquote><pre>
+inline uint32_t maskr(uint16_t i);
+</pre></blockquote>
+generates a 32-bit mask with the rightmost <tt>i</tt> bits set to 1.
+On Cray hardware
+this function is replaced by the 64-bit intrinsic function of the same
+name.
+<blockquote><pre>
+inline uint32_t popcnt(uint32_t x);
+</pre></blockquote>
+counts the number of 1-bits in a 32-bit integer.
+On Cray hardware
+this function is replaced by the 64-bit intrinsic function of the same
+name.
+<HR>
+<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+

@@ -1,0 +1,81 @@
+<html>
+<head>
+   <title>ALPS Project expression.h</title>
+</head>
+<body>
+
+<h1>
+ALPS Project</h1>
+
+<h2>
+Header file <b>expression.h</b></h2>
+This header contains the <tt>Expression</tt> class, a class to evaluate and simplify symbolic expression and to perform limited symbolic computations
+
+<h3>Synopsis</h3>
+<blockquote>
+<pre>namespace alps {
+class Expression;
+
+class Evaluator {
+public:
+  enum Direction { left_to_right, right_to_left};
+  Evaluator() {}
+  virtual bool can_evaluate(const std::string&) const;
+  virtual bool can_evaluate_function(const std::string&, const Expression& ) const;
+  virtual double evaluate(const std::string&) const;
+  virtual double evaluate_function(const std::string&, const Expression&) const;
+  virtual Expression partial_evaluate(const std::string& name) const;
+  virtual Expression partial_evaluate_function(const std::string& name, const Expression&) const;
+  virtual Direction direction() const;
+};
+
+class ParameterEvaluator : public Evaluator {
+public:
+  ParameterEvaluator(const Parameters&amp; p);
+};
+
+class Expression : public detail::Evaluatable {
+public:
+  typedef std::vector<Term>::const_iterator term_iterator;
+  Expression() {}
+  Expression(const std::string&amp;);
+  Expression(std::istream&amp;);
+  Expression(double val) {}
+  operator bool() const;
+  bool can_evaluate(const Evaluator&amp; p=Evaluator()) const;
+  void partial_evaluate(const Evaluator&amp; p=Evaluator());
+  double value(const Evaluator&amp; p=Evaluator()) const;
+  void flatten();
+  const Expression&amp; operator +=(const Expression&amp; e);
+  inline operator std::string () const;
+  void simplify();
+};
+
+extern Parameters evaluate(const Parameters& in);
+
+inline bool can_evaluate(const StringValue& v, const Evaluator& eval= Evaluator())
+inline double evaluate(const StringValue& v, const Evaluator& p = Evaluator())
+inline bool can_evaluate(const StringValue& v, const Parameters& p)
+inline double evaluate(const StringValue& v, const Parameters& p)
+
+inline std::ostream& operator<<(std::ostream& os, const Expression& e)
+inline std::istream& operator>>(std::istream& is, Expression& e)
+
+inline bool operator==(const std::string& s, const alps::Expression& e)
+inline bool operator==(const alps::Expression& e, const std::string& s)
+inline bool operator==(const alps::Expression& e1, const alps::Expression& e2)
+
+}
+</pre></blockquote>
+
+
+<h3>The <tt>Evaluator</tt> class</h3>
+<blockquote><pre>
+</pre></blockquote>
+<HR>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+</body>
+</html>
+
+</body>
+</html>
