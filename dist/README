@@ -11,6 +11,14 @@ dist/alps-YYYYMMDD.tar.gz, where YYYY = year, MM = month, and DD =
 day.
 
 
+* How to update preamble of files?
+
+1) Edit preamble.in.  Note that keywords @COPYRIGHT@ and @ID@ will be
+   replaced by appropriate strings.
+
+2) Type make update-preamble in 'dist' directory.
+
+
 * How to release a new version and prepare the distribution file?
 
 1) Edit line 11 of configure.in.  ex)

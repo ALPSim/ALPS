@@ -1,34 +1,3 @@
-###########################################################################
-# ALPS library
-#
-# dist/Makefile.in
-#
-# $Id$
-#
-# Copyright (C) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>,
-#                            Synge Todo <wistaria@comp-phys.org>,
-#
-# This software is part of the ALPS library, published under the 
-# ALPS Library License; you can use, redistribute it and/or modify 
-# it under the terms of the License, either version 1 or (at your option) 
-# any later version.
-#
-# You should have received a copy of the ALPS Library License along with 
-# the ALPS Library; see the file License.txt. If not, the license is also 
-# available from http://alps.comp-phys.org/. 
-#
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-# FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-# SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-# FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-# DEALINGS IN THE SOFTWARE.
-#
-###########################################################################
-
-# directories
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 builddir = @builddir@
@@ -38,7 +7,7 @@ version = @PACKAGE_VERSION@
 distdir = alps-$(version)
 
 SCRIPTS = configure config/install-sh config/makedepend.pl config/mkinstalldirs tool/archivecat tool/transformall tool/xslttransform
-ERASE = bootstrap dist
+ERASE = bootstrap dist TODO
 
 default all libs programs examples tests install uninstall :
 
@@ -63,8 +32,23 @@ release dist check snapshot : Makefile
 	find $$repository -type d | xargs chmod 755; \
 	(cd $$repository && chmod 755 $(SCRIPTS)); \
 	mv -f $$repository $$distdir; \
+	mv -f $$distdir/LICENSE-light.txt LICENSE-light.txt; \
+	mv -f $$distdir/doc/index-light.html index-light.html; \
 	tar chof - $$distdir | gzip -c > $$distdir.tar.gz; \
-	rm -rf $$distdir
+	\
+	lightdir=@PACKAGE_NAME@-light-$$version; \
+	mv -f $$distdir $$lightdir; \
+	rm -f $$lightdir/CITATIONS.txt; \
+	rm -rf $$lightdir/src/alps/alea* $$lightdir/src/alps/lattice* $$lightdir/src/alps/model* $$lightdir/src/alps/scheduler*; \
+	rm -rf $$lightdir/tool $$lightdir/example; \
+	rm -rf $$lightdir/test/alea $$lightdir/test/lattice  $$lightdir/test/model; \
+	rm -rf $$lightdir/doc/alea $$lightdir/doc/lattice $$lightdir/doc/model $$lightdir/doc/scheduler $$lightdir/doc/tool; \
+	mv -f LICENSE-light.txt $$lightdir/LICENSE.txt; \
+	mv -f index-light.html $$lightdir/doc/index.html; \
+	find $$lightdir -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./update_preamble.pl -l; \
+	tar chof - $$lightdir | gzip -c > $$lightdir.tar.gz; \
+	\
+	rm -rf $$lightdir
 
 boost-snapshot: Makefile
 	./make_snapshot boost
@@ -82,4 +66,4 @@ Makefile : $(srcdir)/Makefile.in
 depend:
 
 update-preamble:
-	find ./.. -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs perl update_preamble.pl
+	find ./.. -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./update_preamble.pl

@@ -14,7 +14,7 @@
   <li><a href="#prerequisites">Prerequistites</a>  </li>
   <li><a href="#installation">Installation</a>  </li>
   <li><a href="#options">Configure Options</a>  </li>
-  <li><a href="#user">Compiling user application</a> </li>
+  <li><a href="#user">Compiling User ApplicationS</a> </li>
 </ul>
   <a name="download"></a> 
 <h3>Download</h3>
@@ -24,8 +24,8 @@
 <h3>Supported Platforms and Compilers</h3>
   The ALPS libraries have been tested on the following platforms and compilers: 
 <ul>
-  <li>Linux with GNU (g++ version &gt;= 3.1), and Intel C++ (icc version
-&gt;= 7.0, ecc) compilers  </li>
+  <li>Linux with GNU (g++ version &gt;= 3.1), and Intel C++ (icc and ecc version
+&gt;= 7.0) compilers  </li>
   <li>Compaq Tru64 UNIX with Compq C++ Compiler (cxx)  </li>
   <li>SGI IRIX with MIPSpro C++ Compiler (CC)  </li>
   <li>HP-UX with HP C++ Compiler (aCC)  </li>
@@ -179,53 +179,7 @@ handling.   </td>
     </table>
   </p>
   </li>
-  <li>Selective building and installation  
-    <p>By default, all the ALPS libraries (palm, xml, osiris, alea, lattice,
-and scheduler) are built and installed.  Instead, you can decide whether
-each ALPS library is built or not separately by specifying the following
-configure options (except for ALPS/palm library).  Note that the ALPS/scheduler
-library depends on the other libraries.  If you disable one of them, ALPS/scheduler
-is also disabled automatically.  </p>
-    <p> 
-    <table border="0" cellpadding="7" cellspacing="1" width="90%">
-  <tbody>
-        <tr>
-   <td valign="top" bgcolor="#00ccff" width="35%">
-          <p align="center"><b>Option</b></p>
-   </td>
-   <td valign="top" bgcolor="#00ccff">
-          <p align="center"><b>Description</b></p>
-   </td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--disable-xml</code></td>
-   <td valign="top" bgcolor="#dddddd">Disable ALPS/xml library.  ALPS/scheduler
-library is also disabled automatically.</td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--disable-osiris</code></td>
-   <td valign="top" bgcolor="#dddddd">Disable ALPS/osiris library.  ALPS/scheduler
-library is also disabled automatically.</td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--disable-alea</code></td>
-   <td valign="top" bgcolor="#dddddd">Disable ALPS/alea library.  ALPS/scheduler
-library is also disabled automatically.</td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--disable-lattice</code></td>
-   <td valign="top" bgcolor="#dddddd">Disable ALPS/lattice library.  ALPS/scheduler
-library is also disabled automatically.</td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--disable-scheduler</code></td>
-   <td valign="top" bgcolor="#dddddd">Disable ALPS/scheculer library.</td>
-  </tr>
- 
-      </tbody>
-    </table>
-  </p>
-  </li>
+
   <li>Optional libraries  
     <p>Normally <tt>configure</tt> script will automatically find optional 
 libraries (MPI, PVM, HDF5, etc) installed in your system.  However, if these
@@ -330,13 +284,15 @@ be installed in DIR/include and DIR/lib, respectivly.</td>
   </li>
 </ul>
   <a name="user"></a> 
-<h3>Compiling user application</h3>
+<h3>Compiling User Applications</h3>
   
-<p>In order to develop and compile user applications on top of the ALPS library,
-user programs must include ALPS headers and be linked with ALPS libraries. 
- ALPS header files are installed under <t>PREFIX/include</t>, where <t>PREFIX</t>
-is the path specified by the option to the configure script (see <a
- href="#options">Configure Options</a>).  ALPS libraries are installed under
+<p>In order to develop and compile user applications on top of the
+ALPS libraries, user programs must include ALPS headers and be linked
+with ALPS libraries.  ALPS header files are installed
+under <t>PREFIX/include</t>, where <t>PREFIX</t> is the path specified
+by the option to the configure script (see <a
+href="#options">Configure Options</a>).  ALPS libraries are installed
+under
 <t>PREFIX/lib</t>.  For example, you can compile and link your program as 
  </p>
 <blockquote>
@@ -353,7 +309,7 @@ for <t>make</t> (such as <t>$(CPPFLAGS)</t> and <t>$(LIBS)</t>) are predefined.
  By using this file, which is installed as <t>PREFIX/share/ALPS/include.mk<t>,
 you can write a simple makefile for your application like  </t></t></p>
 <blockquote>
-  <pre>include $HOME/ALPS/share/alps/include.mk<br>myprog : myprog.C<br>        $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)<br>myprog_mpi : myprog.C<br>        $(CXX) $(CPPFLAGS_MPI) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS_MPI) $(LIBS_MPI)<br>myprog_pvm : myprog.C<br>        $(CXX) $(CPPFLAGS_PVM) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS_PVM) $(LIBS_PVM)<br></pre>
+  <pre>include $HOME/ALPS/share/alps/include.mk<br>myprog : myprog.C<br>        $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)<br>myprog_mpi : myprog.C<br>        $(CXX) $(CPPFLAGS_MPI) $(CXXFLAGS) -o myprog_mpi myprog.C $(LDFLAGS_MPI) $(LIBS_MPI)<br>myprog_pvm : myprog.C<br>        $(CXX) $(CPPFLAGS_PVM) $(CXXFLAGS) -o myprog_pvm myprog.C $(LDFLAGS_PVM) $(LIBS_PVM)<br></pre>
 </blockquote>
   
 <hr>  

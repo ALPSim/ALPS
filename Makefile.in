@@ -5,7 +5,7 @@ top_builddir = ./@top_builddir@
 
 DIR = src tool test example doc dist
 
-default all libs programs examples tests install uninstall clean distclean depend : Makefile
+default all libs programs examples tests install uninstall clean distclean depend: Makefile
 	@if test "$@" != "distclean"; then \
 	  if test -f "config/Makefile"; then $(MAKE) -C config $@; fi; \
 	fi
@@ -19,7 +19,11 @@ default all libs programs examples tests install uninstall clean distclean depen
 	  if test -f "config/Makefile"; then $(MAKE) -C config $@; fi; \
 	  $(MAKE) distclean-top; \
 	fi
-distclean-top :
+distclean-top:
 	-rm -f Makefile config.log config.status devel/Makefile
-Makefile : $(srcdir)/Makefile.in
+Makefile: $(srcdir)/Makefile.in
 	(cd $(top_builddir) && ./config.status)
+bootstrap:
+	autoconf --force
+	rm -rf autom4te*.cache
+.PHONY: bootstrap

@@ -57,7 +57,7 @@ foreach $file (@ARGV) {
 		    @emails[$#emails + 1] = $2;
 		} elsif ($line =~ /(\$Id\:\C+\$)/) {
 		    $id = $1;
-		} elsif ($line =~ /(^[\s\*\/])|(^$)/) {
+		} elsif ($line =~ /(^\s*$)|(^$)|(^\*)|(^\/\*)/) {
 		    ## nothing to do
 		} else {
 		    $finish_preamble = 1;
@@ -69,7 +69,7 @@ foreach $file (@ARGV) {
 			$skip = 1;
 		    } else {
 			if ($year1 eq $year0) { $year1 = ""; }
-			if ($id eq "") { $id = "\$Id$"; }
+			if ($id eq "") { $id = join("", "\$I", "d: \$"); }
 			
 			## print out preamble
 			open(SKEL, "< $skel") || die "Couldn't open $skel";
@@ -93,7 +93,8 @@ foreach $file (@ARGV) {
 				    print NEW "\n";
 				}
 			    } elsif ($sk =~ /\@ID\@/) {
-				print NEW "// $id\n";
+				$sk =~ s/\@ID\@/$id/;
+				print NEW "$sk\n";
 			    } else {
 				print NEW "$sk\n";
 			    }
