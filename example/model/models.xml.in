@@ -37,6 +37,7 @@
 </BASIS>
 <BASIS name="spinless fermion">
   <SITEBASIS ref="spinless fermion"/>
+  <CONSTRAINT quantumnumber="N" value="N_total"/>
 </BASIS>
 <BASIS name="hardcore boson">
   <SITEBASIS ref="hardcore boson"/>
@@ -136,7 +137,6 @@
     Jz*Sz(i)*Sz(j)+Jxy/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
   </BONDTERM>
 </HAMILTONIAN>
-</MODELS>
 <HAMILTONIAN name="spinless fermions">
   <PARAMETER name="mu" default="0"/>
   <PARAMETER name="t" default="1"/>
@@ -154,4 +154,4 @@
     -t'*(cdag(i)*c(j)+cdag(j)*c(i)) + V'*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
-
+</MODELS>

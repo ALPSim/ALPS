@@ -1,7 +1,6 @@
 LATTICE = "chain lattice"
-N	= 20
-L       = 20
-h       = 0
-J	= 1
-Gamma	= 0
-MODEL   = "spin"
+N_total	= 2
+L       = 4
+mu       = 0
+t	= 1
+MODEL   = "spinless fermions"
