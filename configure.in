@@ -22,6 +22,7 @@ AC_CONFIG_FILES(src/alps/copyright.C src/alps/scheduler/scheduler.C)
 
 AC_CONFIG_FILES(test/Makefile example/Makefile)
 AC_CONFIG_FILES(test/alea/Makefile)
+AC_CONFIG_FILES(test/fixed_capacity/Makefile)
 AC_CONFIG_FILES(test/lattice/Makefile test/lattice/lattices.xml test/lattice/parameters)
 AC_CONFIG_FILES(test/model/Makefile test/model/lattices.xml test/model/models.xml test/model/parameters)
 AC_CONFIG_FILES(test/osiris/Makefile test/osiris/xdrdump2.input)

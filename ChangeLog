@@ -1,3 +1,8 @@
+2003-10-10 Synge Todo <wistaria@comp-phys.org>
+
+	* [fixed_capacity] Added fixed-capacity containers
+	(fixed_capacity_vector, fixed_capacity_deque, etc).
+	
 2003-09-25 Synge Todo <wistaria@comp-phys.org>
 
 	* [model] Fixed half_integer<>::distance() for soft-core bosons.

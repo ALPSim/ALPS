@@ -1,0 +1,289 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+  <meta name="author" content="Synge Todo, mailto:wistaria@comp-phys.org">
+  <title>ALPS Project: Fixed-Capacity STL Container Library</title>
+</head>
+
+<h1>ALPS Project</h1>
+
+<h2>Fixed-Capacity STL Containers</h2>
+
+This library provides STL-compliant containers of fixed capacity but of
+variable size.
+
+<h2>Rationale</h2>
+
+<p>Sometimes we need a light-weight vector-like container in our
+applications.  The <a
+href="http://www.boost.org/libs/array/index.htm">array</a> class in
+the Boost library is a good candidate for such purposes.  However,
+since the size of vector is fixed at the compile time, sometimes it is
+difficult to use it together with generic algorithms.</p>
+
+<p>For example, in the <a
+href="http://www.boost.org/libs/graph/doc/adjacency_list.html">adjacency_list</a>
+class in the <a
+href="http://www.boost.org/libs/graph/doc/table_of_contents.html">Boost
+Graph Library (BGL)</a>, if one can replace the container for
+out-edges (std::vector by default) to a light-weight vector like
+array, it is expected that overhead in memory allocation will be
+reduced greatly.  Actually, in most applications (at least in our
+research field), the maximum number of out-edges in a graph is
+strictly limited to a certain small integer of O(1)-O(10).  In such
+cases we could fix the capacity of the container safely at compile
+time.  However, clearly the <a
+href="http://www.boost.org/libs/array/index.htm">array</a> class can
+not be used instead of std::vector in this case, since the number of
+out-edges can change if we add/remove edges to/from a graph.  Similar
+situations would be commonly observed in many applications in many
+fields.</p>
+
+<p>The <a
+href="../src/alps/fixed_capacity_vector.h">fixed_capacity_vector</a> is a
+kind of sequence that, like a std::vector, supports random access
+iterators, constant time insert and erase operations at the end, etc.
+It could be used almost everywhere instead of std::vector, except that
+its capacity is fixed to a (small) constant integer determined through
+the template parameter at compile time.  Unlike std::vector, it does
+<i>not</i> rely on dynamic memory allocation at all.  Instead, it has a
+static array as its member.  In some applications, this tiny trick could
+have a great impact on performance (and possibly on space).</p>
+
+<p>The <a
+href="../src/alps/fixed_capacity_deque.h">fixed_capacity_deque</a>,
+which is based on the same concept as the <a
+href="../src/alps/fixed_capacity_vector.h">fixed_capacity_vector</a>,
+is an alternative of std::deque.
+
+In addition, this library also provides a traits class <a
+href="../src/alps/fixed_capacity_traits.h">fixed_capacity_traits</a>.
+
+<h2>Recommendation</h2>
+
+<p><font color="red">Use a standard STL container (std::vector, etc) as
+long as possible.</font> The standard STL containers are (expected to
+be) well-tested, exception-safe, and efficient enough for most
+applications.  Use a fixed-capacity container, if and only if the
+efficiency or the space of the container is crucial for your
+application, and you are sure of the maximum number of elements.</p>
+
+<h2>Synopsis</h2>
+
+<h3>Header &lt;<a href="../src/alps/fixed_capacity_vector.h">alps/fixed_capacity_vector.h</a>&gt; synopsis</h3>
+
+<pre>
+namespace alps {
+namespace fixed_capacity {
+  struct no_checking;
+  struct capacity_checking;
+  struct strict_checking;
+}
+  template&lt;class T, std::size_t N, class CheckingPolicy = fixed_capacity::no_checking&gt;
+    class fixed_capacity_vector;
+  template&lt;class T, std::size_t N&gt;
+  bool operator==(const fixed_capacity_vector&lt;T,N&gt;& x,
+                  const fixed_capacity_vector&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator&lt; (const fixed_capacity_vector&lt;T,N&gt;& x,
+                  const fixed_capacity_vector&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator!=(const fixed_capacity_vector&lt;T,N&gt;& x,
+                  const fixed_capacity_vector&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator&gt; (const fixed_capacity_vector&lt;T,N&gt;& x,
+                  const fixed_capacity_vector&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator&lt;=(const fixed_capacity_vector&lt;T,N&gt;& x,
+                  const fixed_capacity_vector&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator&gt;=(const fixed_capacity_vector&lt;T,N&gt;& x,
+                  const fixed_capacity_vector&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  void swap(fixed_capacity_vector&lt;T,N&gt;& x,
+            fixed_capacity_vector&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+}
+</pre>
+
+<h3>Header &lt;<a href="../src/alps/fixed_capacity_deque.h">alps/fixed_capacity_deque.h</a>&gt; synopsis</h3>
+
+<pre>
+namespace alps {
+namespace fixed_capacity {
+  struct no_checking;
+  struct capacity_checking;
+  struct strict_checking;
+}
+  template&lt;class T, std::size_t N, class CheckingPolicy = fixed_capacity::no_checking&gt;
+    class fixed_capacity_deque;
+  template&lt;class T, std::size_t N&gt;
+  bool operator==(const fixed_capacity_deque&lt;T,N&gt;& x,
+                  const fixed_capacity_deque&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator&lt; (const fixed_capacity_deque&lt;T,N&gt;& x,
+                  const fixed_capacity_deque&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator!=(const fixed_capacity_deque&lt;T,N&gt;& x,
+                  const fixed_capacity_deque&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator&gt; (const fixed_capacity_deque&lt;T,N&gt;& x,
+                  const fixed_capacity_deque&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator&lt;=(const fixed_capacity_deque&lt;T,N&gt;& x,
+                  const fixed_capacity_deque&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  bool operator&gt;=(const fixed_capacity_deque&lt;T,N&gt;& x,
+                  const fixed_capacity_deque&lt;T,N&gt;& y);
+  template&lt;class T, std::size_t N&gt;
+  void swap(fixed_capacity_deque&lt;T,N&gt;& x,
+            fixed_capacity_deque&lt;T,N&gt;& y);
+}
+</pre>
+
+<h3>Header &lt;<a href="../src/alps/fixed_capacity_traits.h">alps/fixed_capacity_traits.h</a>&gt; synopsis</h3>
+
+<pre>
+namespace alps {
+  template&lt;class T&gt; class fixed_capacity_traits;
+}
+</pre>
+
+<h2>Semantics</h2>
+
+<p>The fixed-capacity containers have almost the equivalent semantics
+as the corresponding standard containers.  For details see the C++
+Standard (Sections 23.2.4 [lib.vector] and 23.2.1 [lib.deque]).</p>
+
+<p>The fixed_capcity_vector and fixed_capacity_deque do <i>not</i>
+provide get_allocator() member function, since they have no
+allocator.</p>
+
+<p>A fixed-capacity container provides a compile-time constant:
+<pre>
+  static const std::size_t static_max_size;
+</pre>
+which value is equal to its capacity, i.e. the second template parameter
+N.  In addition, the capacity() (in fixed_capacity_vector) and
+max_size() (in fixed_capacity_vector and fixed_capacity_deque) member
+functions are declared as static.
+
+<h2>Complexity</h2>
+
+<p>All the member functions should be the same complexity as those of
+the corresponding standard containers, except that the swap() member
+function as well as the global swap() function has a <i>linear</i>
+complexity (not a constant time) unlike the standard ones.</p>
+
+<h2>Checking Policy and Exceptions</h2>
+
+<p>By default the member functions of the fixed-capacity containers do
+not check the validity of arguments (indices and iterators) and they do
+not throw any exception by themselves.  For the compatibility with
+std::vector and std::deque at() member function is still remained, but
+it is completely equivalent to operator[] (i.e. never throws even for
+out-of-bound access).  This default checking policy can be modified by
+specifying a policy class as the third template parameter
+(CheckingPolicy).</p>
+
+<table border="0" cellpadding="7" cellspacing="1" width="100%">
+ <tr>
+  <td valign="top" width="5%">&nbsp;</td>
+  <td valign="top" width="37%" bgcolor="#008080"><p
+   align="center">Policy Class</p>
+  </td>
+  <td valign="top" width="53%" bgcolor="#008080"><p
+   align="center">Description</p>
+  </td>
+  <td valign="top" width="5%">&nbsp;</td>
+ </tr>
+ <tr>
+  <td valign="top" width="5%">&nbsp;</td>
+  <td valign="top" width="27%" bgcolor="#C0C0C0"><code>::alps::fixed_capacity::no_checking</code></td>
+  <td valign="top" width="53%" bgcolor="#C0C0C0">Default checking
+   policy.    No checking even in at() member function.</td>
+  <td valign="top" width="5%">&nbsp;</td>
+ </tr>
+ <tr>
+  <td valign="top" width="5%">&nbsp;</td>
+  <td valign="top" width="27%"
+  bgcolor="#C0C0C0"><code>::alps::fixed_capacity::capacity_checking</code></td>
+  <td valign="top" width="53%" bgcolor="#C0C0C0">The validity of indices
+   passed to operator[] and at() is checked.  In addition if one try to
+   add elements more than the fixed capacity by insert(), push_back(),
+   etc, an exception will be thrown.</td>
+  <td valign="top" width="5%">&nbsp;</td>
+ </tr>
+ <tr>
+  <td valign="top" width="5%">&nbsp;</td>
+  <td valign="top" width="27%" bgcolor="#C0C0C0"><code>::alps::fixed_capacity::strict_checking</code></td>
+  <td valign="top" width="53%" bgcolor="#C0C0C0">In addition to
+   capacity_checking the validity of iterator is checked in insert(),
+   erase(), and others.</td>
+  <td valign="top" width="5%">&nbsp;</td>
+ </tr>
+</table>
+
+<p>If a check fails at run time, the std::range_error exception will be
+thrown.</p>
+
+<h2>Traits class</h2>
+
+<p>A traits class <a
+href="../src/alps/fixed_capacity_traits.h">fixed_capacity_traits&lt;T&gt;</a>
+(defined in the header &lt;<a
+href="../src/alps/fixed_capacity_traits.h">alps/fixed_capacity_traits.h</a>&gt;
+provides a static bool constant &quot;capacity_is_fixed&quot;, which
+takes true if the capacity of container class T is fixed.  In addition,
+if T is a fixed-capacity container (i.e. capacity_is_fixed = true), it
+also provides a static integer constant &quot;static_max_size&quot;,
+which value is equal to the capacity of class T.
+</p>
+
+<h2>Forward declarations</h2>
+
+<p>The header &lt;<a
+href="../src/alps/fixed_capacity_fwd.h">alps/fixed_capacity_fwd.h</a>&gt;
+provides forward declarations of fixed_capacity_vector,
+fixed_capacity_deque, and fixed_capacity_traits.
+</p>
+
+
+<h2>Examples</h2>
+
+<ul>
+ <li> <a href="../test/fixed_capacity/fixed_capacity_vector.C">fixed_capacity_vector.C</a>:
+      simple example for using fixed_capacity_vector.
+ <li> <a href="../test/fixed_capacity/fixed_capacity_deque.C">fixed_capacity_deque.C</a>:
+      simple example for using fixed_capacity_deque.
+ <li> <a href="../test/fixed_capacity/fixed_capacity_traits.C">fixed_capacity_traits.C</a>:
+      simple example for using fixed_capacity_traits.
+ <li> <a href="../test/fixed_capacity/test_vector.C">test_vector.C</a>: regression test for
+      fixed_capacity_vector.
+ <li> <a href="../test/fixed_capacity/test_deque.C">test_deque.C</a>: regression test for
+      fixed_capacity_deque.
+ <li> <a href="../test/fixed_capacity/timing_vector.C">timing_vector.C</a>: performance
+      comparison between fixed_capacity_vector and std::vector.
+ <li> <a href="../test/fixed_capacity/timing_stack.C">timing_stack.C</a>: performance
+      comparison of std::stack's using fixed_capacity_vector and
+      std::deque.
+ <li> <a href="../test/fixed_capacity/timing_queue.C">timing_queue.C</a>: performance
+      comparison of std::queue's using fixed_capacity_deque and
+      std::deque.
+</ul>
+
+<h2>Acknowledgment</h2>
+
+<p>I would like to thank Matthias Troyer, Darin Adler, Andrei
+Alexandrescu and Ralf Grosse-Kunstleve for helpful suggestions and
+comments.</p>
+
+<hr>
+
+<address>
+Copyright &copy 2002-2003 &nbsp; Synge Todo <a href="mailto:wistaria@comp-phys.org">&lt;wistaria@comp-phys.org&gt;</a>
+</address>
+
+</body>
+</html>

@@ -1298,6 +1298,8 @@ CURRENT_YEAR=2003
 
           ac_config_files="$ac_config_files test/alea/Makefile"
 
+          ac_config_files="$ac_config_files test/fixed_capacity/Makefile"
+
                               ac_config_files="$ac_config_files test/lattice/Makefile test/lattice/lattices.xml test/lattice/parameters"
 
                                         ac_config_files="$ac_config_files test/model/Makefile test/model/lattices.xml test/model/models.xml test/model/parameters"
@@ -8122,6 +8124,7 @@ do
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
   "example/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/Makefile" ;;
   "test/alea/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/alea/Makefile" ;;
+  "test/fixed_capacity/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/fixed_capacity/Makefile" ;;
   "test/lattice/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/lattice/Makefile" ;;
   "test/lattice/lattices.xml" ) CONFIG_FILES="$CONFIG_FILES test/lattice/lattices.xml" ;;
   "test/lattice/parameters" ) CONFIG_FILES="$CONFIG_FILES test/lattice/parameters" ;;
