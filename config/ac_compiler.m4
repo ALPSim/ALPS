@@ -258,8 +258,8 @@ AC_DEFUN([AC_COMPILER],
     dec)
       try_CFLAGS_OPT="-pthread -O4"
       try_CFLAGS_DEBUG="-pthread -g -O0"
-      try_CXXFLAGS_OPT="-std ansi -w -pthread -D__USE_STD_IOSTREAM -O4"
-      try_CXXFLAGS_DEBUG="-std ansi -pthread -D__USE_STD_IOSTREAM -g -O0"
+      try_CXXFLAGS_OPT="-std ansi -model ansi -noimplicit_include -nousing_std -tlocal -w -pthread -D__USE_STD_IOSTREAM -O4"
+      try_CXXFLAGS_DEBUG="-std ansi -model ansi -noimplicit_include -nousing_std -tlocal -pthread -D__USE_STD_IOSTREAM -g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-noexceptions"
       ;;
