@@ -35,8 +35,42 @@ src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/xtime.cpp
 src_boost_THREAD_1_32 = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp
+src_boost_PROGRAM_OPTIONS_SERIALIZATION= \
+  $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
+  $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
+  $(BOOST_SRCDIR)/program_options/src/convert.cpp \
+  $(BOOST_SRCDIR)/program_options/src/options_description.cpp \
+  $(BOOST_SRCDIR)/program_options/src/parsers.cpp \
+  $(BOOST_SRCDIR)/program_options/src/positional_options.cpp \
+  $(BOOST_SRCDIR)/program_options/src/value_semantic.cpp \
+  $(BOOST_SRCDIR)/program_options/src/variables_map.cpp \
+  $(BOOST_SRCDIR)/program_options/src/winmain.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp \
+  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
+  $(BOOST_SRCDIR)/program_options/src/utf8_codecvt_facet.cpp \
+  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp
 
-lib_LTLIBRARIES = libalps.la
+lib_LTLIBRARIES = libalps.la 
 
 libalps_la_SOURCES = $(src_ALPS) $(src_OSIRIS) $(src_PARSER) $(src_RANDOM)
 nodist_libalps_la_SOURCES =
@@ -48,6 +82,10 @@ if BUILD_BOOST
 libalps_la_SOURCES += $(top_srcdir)/src/boost/throw_exception.C
 nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_FILESYSTEM) $(src_boost_REGEX)
 endif
+
+#if BUILD_BOOST_SERIALIZATION
+nodist_libalps_la_SOURCES += $(src_boost_PROGRAM_OPTIONS_SERIALIZATION)
+#endif
 if BUILD_BOOST_SIGNALS
 nodist_libalps_la_SOURCES += $(src_boost_SIGNALS)
 if BOOST_1_32
