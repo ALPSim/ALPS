@@ -16,7 +16,7 @@
 #define BOOST_NUMERIC_BINDINGS_TRAITS_VECTOR_RAW_HPP
 
 #include <cstddef> 
-#include <boost/numeric/ublas/config.hpp> 
+// #include <boost/numeric/ublas/config.hpp> 
 #ifndef BOOST_UBLAS_HAVE_BINDINGS
 #  include <boost/numeric/ublas/vector.hpp> 
 #endif 
