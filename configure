@@ -305,7 +305,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT CXX ac_ct_CXX CPP CXXCPP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR ARXX LN_S RANLIB ac_ct_RANLIB BOOST_DIR BOOST_USER_CONFIG_H EGREP OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT CXX ac_ct_CXX CPP CXXCPP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA AR ARXX LN_S RANLIB ac_ct_RANLIB BOOST_DIR BOOST_USER_CONFIG_H EGREP OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD OBJ_BOOST_THREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -5417,10 +5417,14 @@ echo "$as_me: disabling pthread support" >&6;}
   fi
 
 
-test "$ac_cv_have_pthread" = yes && cat >>confdefs.h <<\_ACEOF
+
+if test "$ac_cv_have_pthread" = yes; then
+  cat >>confdefs.h <<\_ACEOF
 #define ALPS_HAVE_PTHREAD 1
 _ACEOF
 
+  OBJ_BOOST_THREAD='$(OBJ_BOOST_THREAD)'
+fi
 
 #
 # check for MPI
@@ -6015,12 +6019,12 @@ echo "$as_me: disabling MPI support" >&6;}
 
 
 if test "$ac_cv_have_mpi" = yes; then
-  LIB_MPI='$(LIB_MPI)'
-fi
-test "$ac_cv_have_mpi" = yes && cat >>confdefs.h <<\_ACEOF
+  cat >>confdefs.h <<\_ACEOF
 #define ALPS_HAVE_MPI 1
 _ACEOF
 
+  LIB_MPI='$(LIB_MPI)'
+fi
 
 #
 # check for PVM
@@ -6526,12 +6530,12 @@ echo "$as_me: disabling PVM support" >&6;}
 
 
 if test "$ac_cv_have_pvm" = yes; then
-  LIB_PVM='$(LIB_PVM)'
-fi
-test "$ac_cv_have_pvm" = yes && cat >>confdefs.h <<\_ACEOF
+  cat >>confdefs.h <<\_ACEOF
 #define ALPS_HAVE_PVM 1
 _ACEOF
 
+  LIB_PVM='$(LIB_PVM)'
+fi
 
 #
 # check for HDF5
@@ -8142,6 +8146,7 @@ s,@EGREP@,$EGREP,;t t
 s,@OBJ_PTHREAD@,$OBJ_PTHREAD,;t t
 s,@LIB_PTHREAD@,$LIB_PTHREAD,;t t
 s,@EXAMPLE_PTHREAD@,$EXAMPLE_PTHREAD,;t t
+s,@OBJ_BOOST_THREAD@,$OBJ_BOOST_THREAD,;t t
 s,@LIB_MPI@,$LIB_MPI,;t t
 s,@MPI_CPPFLAGS@,$MPI_CPPFLAGS,;t t
 s,@MPI_LDFLAGS@,$MPI_LDFLAGS,;t t

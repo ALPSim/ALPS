@@ -224,7 +224,11 @@ AC_CHECK_FUNC(nanosleep, ,[AC_CHECK_LIB(rt, nanosleep)])
 
 sinclude(config/ac_pthread.m4)
 AC_PTHREAD
-test "$ac_cv_have_pthread" = yes && AC_DEFINE(ALPS_HAVE_PTHREAD)
+AC_SUBST(OBJ_BOOST_THREAD)
+if test "$ac_cv_have_pthread" = yes; then
+  AC_DEFINE(ALPS_HAVE_PTHREAD)
+  OBJ_BOOST_THREAD='$(OBJ_BOOST_THREAD)'
+fi
 
 #
 # check for MPI
@@ -234,9 +238,9 @@ AC_SUBST(LIB_MPI)
 sinclude(config/ac_mpi.m4)
 AC_MPI
 if test "$ac_cv_have_mpi" = yes; then
+  AC_DEFINE(ALPS_HAVE_MPI)
   LIB_MPI='$(LIB_MPI)'
 fi
-test "$ac_cv_have_mpi" = yes && AC_DEFINE(ALPS_HAVE_MPI)
 
 #
 # check for PVM
@@ -246,9 +250,9 @@ AC_SUBST(LIB_PVM)
 sinclude(config/ac_pvm.m4)
 AC_PVM
 if test "$ac_cv_have_pvm" = yes; then
+  AC_DEFINE(ALPS_HAVE_PVM)
   LIB_PVM='$(LIB_PVM)'
 fi
-test "$ac_cv_have_pvm" = yes && AC_DEFINE(ALPS_HAVE_PVM)
 
 #
 # check for HDF5

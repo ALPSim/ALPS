@@ -43,10 +43,11 @@ HEADER_SCHEDULER = alps/scheduler.h alps/scheduler/info.h alps/scheduler/monteca
 
 HEADER = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_ALEA) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_SCHEDULER)
 
-OBJ_BOOST = boost/exception.o boost/operations_posix_windows.o boost/path_posix_windows.o \
-	boost/c_regex_traits.o boost/c_regex_traits_common.o boost/cpp_regex_traits.o boost/cregex.o boost/fileiter.o boost/instances.o boost/posix_api.o boost/regex.o boost/regex_debug.o boost/regex_synch.o boost/w32_regex_traits.o boost/wide_posix_api.o boost/winstances.o \
-	boost/condition.o boost/exceptions.o boost/mutex.o boost/once.o boost/recursive_mutex.o boost/thread.o boost/threadmon.o boost/tss.o boost/xtime.o \
-	 boost/throw_exception.o
+OBJ_BOOST_FS = boost/exception.o boost/operations_posix_windows.o boost/path_posix_windows.o
+OBJ_BOOST_REGEX = boost/c_regex_traits.o boost/c_regex_traits_common.o boost/cpp_regex_traits.o boost/cregex.o boost/fileiter.o boost/instances.o boost/posix_api.o boost/regex.o boost/regex_debug.o boost/regex_synch.o boost/w32_regex_traits.o boost/wide_posix_api.o boost/winstances.o
+OBJ_BOOST_THREAD = boost/condition.o boost/exceptions.o boost/mutex.o boost/once.o boost/recursive_mutex.o boost/thread.o boost/threadmon.o boost/tss.o boost/xtime.o
+OBJ_BOOST = boost/throw_exception.o $(OBJ_BOOST_FS) $(OBJ_BOOST_REGEX) @OBJ_BOOST_THREAD@
+
 OBJ_ALPS = alps/expression.o alps/parameterlist.o alps/parameters.o
 OBJ_ALEA = alps/alea/observable.o alps/alea/observableset.o
 OBJ_OSIRIS = alps/osiris/buffer.o alps/osiris/dump.o alps/osiris/os.o alps/osiris/xdrdump.o
