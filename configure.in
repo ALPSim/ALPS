@@ -333,58 +333,60 @@ if test "$ac_cv_use_precompiled_boost" = no; then :; else
     fi
   fi
 
-  AC_MSG_CHECKING([for Boost::signals library])
-  ac_cv_boost_signals=no
-  if test -n "$boost_libs"; then
-    BOOST_SIGNALS_LIBS=
-  else
-    if test -z "$boost_toolset"; then
-      BOOST_SIGNALS_LIBS="-lboost_signals"
+  if test "$ac_cv_use_precompiled_boost" = yes; then
+    AC_MSG_CHECKING([for Boost::signals library])
+    ac_cv_boost_signals=no
+    if test -n "$boost_libs"; then
+      BOOST_SIGNALS_LIBS=
     else
-      BOOST_SIGNALS_LIBS="-lboost_signals-$boost_toolset"
+      if test -z "$boost_toolset"; then
+        BOOST_SIGNALS_LIBS="-lboost_signals"
+      else
+        BOOST_SIGNALS_LIBS="-lboost_signals-$boost_toolset"
+      fi
     fi
-  fi
-  LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS $ac_save_LIBS"
-  AC_TRY_LINK([
-    #include <boost/signals/signal2.hpp>
-    #include <string>
-  ],[boost::signal2<void, int, int, boost::last_value<void>, std::string> sig;],
-  ac_cv_boost_signals=yes)
-  if test "$ac_cv_boost_signals" = yes; then
-    if test -n "$BOOST_SIGNALS_LIBS"; then
-      AC_MSG_RESULT([$BOOST_SIGNALS_LIBS])
-      BOOST_LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS"
+    LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS $ac_save_LIBS"
+    AC_TRY_LINK([
+      #include <boost/signals/signal2.hpp>
+      #include <string>
+    ],[boost::signal2<void, int, int, boost::last_value<void>, std::string> sig;],
+    ac_cv_boost_signals=yes)
+    if test "$ac_cv_boost_signals" = yes; then
+      if test -n "$BOOST_SIGNALS_LIBS"; then
+        AC_MSG_RESULT([$BOOST_SIGNALS_LIBS])
+        BOOST_LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS"
+      else
+        AC_MSG_RESULT([yes])
+      fi
     else
-      AC_MSG_RESULT([yes])
+      AC_MSG_RESULT([no])
     fi
-  else
-    AC_MSG_RESULT([no])
-  fi
 
-  AC_MSG_CHECKING([for Boost::thread library])
-  ac_cv_boost_thread=no
-  if test -n "$boost_libs"; then
-    BOOST_THREAD_LIBS=
-  else
-    if test -z "$boost_toolset"; then
-      BOOST_THREAD_LIBS="-lboost_thread"
+    AC_MSG_CHECKING([for Boost::thread library])
+    ac_cv_boost_thread=no
+    if test -n "$boost_libs"; then
+      BOOST_THREAD_LIBS=
     else
-      BOOST_THREAD_LIBS="-lboost_thread-$boost_toolset"
+      if test -z "$boost_toolset"; then
+        BOOST_THREAD_LIBS="-lboost_thread"
+      else
+        BOOST_THREAD_LIBS="-lboost_thread-$boost_toolset"
+      fi
     fi
-  fi
-  LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS $ac_save_LIBS"
-  AC_TRY_LINK([#include <boost/thread/xtime.hpp>],
-    [int x = boost::xtime_get(0, 0);],
-    ac_cv_boost_thread=yes)
-  if test "$ac_cv_boost_thread" = yes; then
-    if test -n "$BOOST_THREAD_LIBS"; then
-      AC_MSG_RESULT([$BOOST_THREAD_LIBS])
-      BOOST_LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS"
+    LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS $ac_save_LIBS"
+    AC_TRY_LINK([#include <boost/thread/xtime.hpp>],
+      [int x = boost::xtime_get(0, 0);],
+      ac_cv_boost_thread=yes)
+    if test "$ac_cv_boost_thread" = yes; then
+      if test -n "$BOOST_THREAD_LIBS"; then
+        AC_MSG_RESULT([$BOOST_THREAD_LIBS])
+        BOOST_LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS"
+      else
+        AC_MSG_RESULT([yes])
+      fi
     else
-      AC_MSG_RESULT([yes])
+      AC_MSG_RESULT([no])
     fi
-  else
-    AC_MSG_RESULT([no])
   fi
 fi
 

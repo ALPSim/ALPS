@@ -1,82 +1,288 @@
 <html>
 <head>
-   <title>ALPS Project: xml library xmlstream.h</title>
+   <title>ALPS Project parser/xmlstream.h</title>
 </head>
 <body>
 
-<h1>
-ALPS Project: xml library</h1>
+<h1>ALPS Project</h1>
 
-<h2>Header file <b>xmlstream.h</b></h2>
+<h2>Header file <b>parser/xmlstream.h</b></h2>
 
-This header contains a stream class and helper functions to output a XML document into a </tt>std::ostream</tt>.
+This header contains a stream class and helper functions to output a
+well-formatted XML document.
 
 <h3>Synopsis</h3>
 <blockquote>
 <pre>
-namespace alpsxml {
+namespace alps {
 
 class oxstream
 {
 public:
-  oxstream(std::ostream&amp; os = std::cout, boost::uint32_t incl = 2);
-  oxstream(const boost::filesystem::path&amp; file, boost::uint32_t incl = 2);
-  ~oxstream();
+  oxstream();
+  oxstream(std::ostream&amp; os, boost::uint32_t incr = 2);
+  oxstream(const boost::filesystem::path&amp; file, boost::uint32_t incr = 2);
 
   oxstream&amp; operator&lt;&lt;(const std::string&amp; t);
   oxstream&amp; operator&lt;&lt;(const char t);
   oxstream&amp; operator&lt;&lt;(const char * t);
   oxstream&amp; operator&lt;&lt;(const bool t);
-  oxstream&amp; operator&lt;&lt;(const int16_t t);
-  oxstream&amp; operator&lt;&lt;(const uint16_t t);
-  oxstream&amp; operator&lt;&lt;(const int32_t t);
-  oxstream&amp; operator&lt;&lt;(const uint32_t t);
-  oxstream&amp; operator&lt;&lt;(const int64_t t);
-  oxstream&amp; operator&lt;&lt;(const uint64_t t);
+  oxstream&amp; operator&lt;&lt;(const signed char t);
+  oxstream&amp; operator&lt;&lt;(const unsigned char t);
+  oxstream&amp; operator&lt;&lt;(const short t);
+  oxstream&amp; operator&lt;&lt;(const unsigned short t);
+  oxstream&amp; operator&lt;&lt;(const int t);
+  oxstream&amp; operator&lt;&lt;(const unsigned int t);
+  oxstream&amp; operator&lt;&lt;(const long t);
+  oxstream&amp; operator&lt;&lt;(const unsigned long t);
+  oxstream&amp; operator&lt;&lt;(const long long t);
+  oxstream&amp; operator&lt;&lt;(const unsigned long long t);
   oxstream&amp; operator&lt;&lt;(const float t);
   oxstream&amp; operator&lt;&lt;(const double t);
   oxstream&amp; operator&lt;&lt;(const long double t);
+
+  oxstream&amp; operator<<(const XMLAttribute&amp; c);
+  oxstream&amp; operator<<(const XMLAttributes&amp; c);
+
+  // for manipulators
+  template&lt;class T&gt; oxstream&amp; operator&lt;&lt;(T (*fn)(const std::string&amp;));
+  oxstream&amp; operator&lt;&lt;(oxstream&amp; (*fn)(oxstream&amp; oxs));
+
+  std::ostream&amp; stream();
 };
+
+// manipulator functions
+
+detail::header_t header(const std::string&amp; enc);
+detail::start_tag_t start_tag(const std::string&amp; name);
+detail::stylesheet_t stylesheet(const std::string&amp; url);
+detail::end_tag_t end_tag(const std::string&amp; name = "");
+template&lt;class T&gt; detail::attribute_t attribute(const std::string&amp; name, const T&amp; value);
+detail::pi_t processing_instruction(const std::string&amp; name);
+detail::attribute_t xml_namespace(const std::string&amp; name, const std::string&amp; url);
+oxstream&amp; start_comment(oxstream&amp; oxs);
+oxstream&amp; end_comment(oxstream&amp; oxs);
+oxstream&amp; start_cdata(oxstream&amp; oxs);
+oxstream&amp; end_cdata(oxstream&amp; oxs);
+oxstream&amp; no_linebreak(oxstream&amp; oxs);
 
 std::string convert(const std::string&amp; str);
 
-}
+} // namespace alps
 </pre></blockquote>
 
 <h3>The oxmlstream class</h3>
 
-default constructor
+The <tt>oxstream</tt> class is a stream class to output a
+well-formatted XML document.  Normally the data output into
+the <tt>oxstream</tt> are simply redirected to the output stream
+(<tt>std::cout</tt> by default).  The <tt>oxstream</tt> class also
+accepts various <a href="#manipulator">manipulators</a> for printing
+tags, attributes, comments, etc in a well-formatted way.
+
+<h4>Member functions</h4>
+
+<blockquote><pre>
+oxstream();
+</pre></blockquote>
+default constructor.  By default, the output stream
+is <tt>std::cout</tt>.
+
+<blockquote><pre>
+oxstream(std::ostream&amp; os, boost::uint32_t incr = 2);
+</pre></blockquote> 
+constracts an oxstream with the output stream set to <tt>os</tt>.
+If <tt>incr</tt> is provided, the offset increment is set
+to <tt>incr</tt>.
+
+<blockquote><pre>
+oxstream(const boost::filesystem::path&amp; file, boost::uint32_t incr = 2);
+</pre></blockquote> 
+constracts an oxstream which outputs into a file <tt>file</tt>.
+If <tt>incr</tt> is provided, the offset increment is set
+to <tt>incr</tt>.
+
+<blockquote><pre>
+oxstream&amp; operator&lt;&lt;(const std::string&amp; t);
+</blockquote></pre>
+outputs a string to the stream.  Note that special characters, such as
+"&amp;"and "&lt;", are <i>not</i> automatically replaced by the
+character entities.  Use the <a href="#convert"><tt>convert</tt></a>
+helper function explicitly for escaping special characters.
+
+<blockquote><pre>
+oxstream&amp; operator&lt;&lt;(const char t);
+oxstream&amp; operator&lt;&lt;(const char * t);
+oxstream&amp; operator&lt;&lt;(const bool t);
+oxstream&amp; operator&lt;&lt;(const signed char t);
+oxstream&amp; operator&lt;&lt;(const unsigned char t);
+oxstream&amp; operator&lt;&lt;(const short t);
+oxstream&amp; operator&lt;&lt;(const unsigned short t);
+oxstream&amp; operator&lt;&lt;(const int t);
+oxstream&amp; operator&lt;&lt;(const unsigned int t);
+oxstream&amp; operator&lt;&lt;(const long t);
+oxstream&amp; operator&lt;&lt;(const unsigned long t);
+oxstream&amp; operator&lt;&lt;(const long long t);
+oxstream&amp; operator&lt;&lt;(const unsigned long long t);
+oxstream&amp; operator&lt;&lt;(const float t);
+oxstream&amp; operator&lt;&lt;(const double t);
+oxstream&amp; operator&lt;&lt;(const long double t);
+</pre></blockquote>
+outputs POD data to the stream.  Note that special characters, such as
+"&amp;"and "&lt;", are <i>not</i> automatically replaced by the
+character entities.  Use the <a href="#convert"><tt>convert</tt></a>
+helper function explicitly for escaping special characters.
+
+<blockquote><pre>
+oxstream&amp; operator<<(const XMLAttribute&amp; c);
+</pre></blockquote>
+adds an attribute to the current start tag (see also <a
+href="#manipulator">Manipulators</a>).
+
+<blockquote><pre>
+oxstream&amp; operator<<(const XMLAttributes&amp; c);
+</pre></blockquote>
+adds attribute tos the current start tag (see also <a
+href="#manipulator">Manipulators</a>).
+
+<h3>Functions</h3>
+
+<h4><tt><a name="convert">std::string convert(const std::string&amp;
+str);</a></tt></h4>
+
+The <tt>convert</tt> helper function converts special characters
+(&amp;, ', &gt;, &lt;, &quot;) in the string into the character
+entities (&amp;amp;, &amp;apos;, &amp;gt;, &amp;lt;, &amp;quot;).
+
+<h4><tt><a name="precision">template&lt;class T&gt; std::string precision(const T&amp; d, int n)</a></tt></h4>
+
+The <tt>precision</tt> helper function generates a string with a given
+precision from a floating point number.
+
+<h3><a name="manipulator">Manipulators</a></h3>
+
+The following manipulators are provided for helping XML formating.
+
+<h4><tt>header</tt></h4>
+outputs a standard XML header, eg.
+<blockquote><pre>
+&lt;?xml version="1.0"?&gt;
+</blockquote></pre>
+
+<h4><tt>header(const std::string&amp; enc)</tt></h4>
+outputs a standard XML header with the attribute encoding, eg.
+<blockquote><pre>
+&lt;?xml version="1.0" encoding="enc"?&gt;
+</blockquote></pre>
+
+<h4><tt>styleseet(const std::string&amp; url)</tt></h4>
+outputs a styleseet tag, eg.
+<blockquote><pre>
+&lt;?xml-stylesheet type="text/xsl" href="URL to my stylesheet"?&gt;
+</blockquote></pre>
+
+<h4><tt>processing_instruction(const std::string&amp; name)</tt></h4>
+outputs a processing instruction, eg.
+<blockquote><pre>
+&lt;?my-processing-instruction?&gt;
+</blockquote></pre>
+
+<h4><tt>start_tag(const std::string&amp; name)</tt></h4>
+outputs a start tag with a given name.
+
+<h4><tt>template&lt;class T&gt; attribute(const std::string&amp; name, const T&amp; value)</tt></h4>
+adds an attribute with a given name and a value to the current start tag.
+
+<h4><tt>xml_namespace(const std::string&amp; name, const std::string&amp; url)</tt></h4>
+adds a namespace attribute to the current start tag, eg.
+<blockquote><pre>
+&lt;mytag xmlns:MyNameSpace="MyURL"&gt;
+</blockquote></pre>
+
+<h4><tt>end_tag</tt></h4>
+closes the current tag.
+
+<h4><tt>end_tag(const std::string&amp; name)</tt></h4>
+
+closes the current tag, if <tt>name</tt> is not consistent with the
+start tag, an exception will be thrown.
+
+<h4><tt>start_comment</tt></h4>
+starts a comment.  Texts until the next <tt>end_comment</tt>
+manipulator will be treated as a comment.
+
+<h4><tt>end_comment</tt></h4>
+ends the current comment.
+
+<h4><tt>start_cdata</tt></h4>
+starts a CDATA section.
+
+<h4><tt>end_cdata</tt></h4>
+ends the current CDATA section.
+
+<h4><tt>no_linebreak</tt></h4> By default, <tt>oxstream</tt> starts a
+new line after each start tag and before each end tag with a proper
+indent.  This manipulator tells to <tt>oxstream</tt> that the contents
+of the current tag should be printed out on the same line without
+linebreaks.
+
+<h3>Examples</h3>
+
 <blockquote>
 <pre>
-oxstream(std::ostream&amp; os = std::cout, boost::uint32_t incl = 2);
+double x = 3.14;
+alps::oxstream oxs;
+oxs &lt;&lt; alps::header(&quot;MyEncoding&quot;);
+oxs &lt;&lt; alps::stylesheet(&quot;URL to my stylesheet&quot;)
+    &lt;&lt; alps::processing_instruction(&quot;my_pi&quot;);
+oxs &lt;&lt; alps::start_tag(&quot;tag0&quot;)
+    &lt;&lt; alps::attribute(&quot;name0&quot;, 1)
+    &lt;&lt; &quot;this is a text&quot;
+    &lt;&lt; alps::start_tag(&quot;tag1&quot;)
+    &lt;&lt; alps::start_tag(&quot;tag2&quot;)
+    &lt;&lt; alps::xml_namespace(&quot;MyNameSpace&quot;, &quot;MyURL&quot;)
+    &lt;&lt; &quot;text 2 &quot;
+    &lt;&lt; &quot;text 3 &quot; &lt;&lt; std::endl
+    &lt;&lt; alps::precision(3.14159265358979323846, 3) &lt;&lt; &apos; &apos;
+    &lt;&lt; alps::precision(3.14159265358979323846, 6) &lt;&lt; &apos;\n&apos;
+    &lt;&lt; &quot;text 4&quot; &lt;&lt; std::endl
+    &lt;&lt; alps::convert(&quot;text &lt;&amp;\&quot;&gt;&apos;&quot;)
+    &lt;&lt; alps::start_tag(&quot;tag3&quot;)
+    &lt;&lt; alps::end_tag
+    &lt;&lt; x
+    &lt;&lt; alps::start_tag(&quot;tag4&quot;) &lt;&lt; alps::no_linebreak
+    &lt;&lt; &quot;no linebreak&quot;
+    &lt;&lt; alps::end_tag
+    &lt;&lt; alps::end_tag(&quot;tag2&quot;)
+    &lt;&lt; alps::end_tag(&quot;tag1&quot;)
+    &lt;&lt; alps::end_tag;
 </pre>
 </blockquote>
-sets the output stream to os.  The indent
 
-<h2>Functions</h2>
-<blockquote><pre>
-void write_xml(std::ostream&amp;, const palm::Parameters&);
-</pre></blockquote>
-writes the contents
-of a <tt>Parameters</tt> object of the
-<A HREF="../palm/index.html">palm</A> library into a </tt>std::ostream</tt>, following the
-<A HREF="http://xml.comp-phys.org/schemas/parameter">schema</A> presented at 
-<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>
-<blockquote><pre>
-void read_xml(XMLTag tag, palm::Parser&amp;, palm::Parameters&amp;);
-</pre></blockquote>
-parses a &lt;PARAMETERS> element from the parser, assuming the <A HREF="http://xml.comp-phys.org/schemas/parameter">schema</A> presented at 
-<A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org/</A>.
- The opening tag is passed as first argument.
-<blockquote><pre>
-void read_xml(palm::Parser&amp;, palm::Parameters&amp;);
-</pre></blockquote>
-reads the first tag from the parser and calls above function
-<blockquote><pre>
-void read_xml(std::istream&amp;, palm::Parameters&amp;);
-</pre></blockquote>
-opens a <tt>palm::Parser</tt> on the <tt>istream</tt> and calls above function.
+will print out the following XML to the standard output.
+<blockquote>
+<pre>
+&lt;?xml version=&quot;1.0&quot; encoding=&quot;MyEncoding&quot;?&gt;
+&lt;?xml-stylesheet type=&quot;text/xsl&quot; href=&quot;URL to my stylesheet&quot;?&gt;
+&lt;?my_pi?&gt;
+&lt;tag0 name0=&quot;1&quot;&gt;
+  this is a text
+  &lt;tag1&gt;
+    &lt;tag2 xmlns:MyNameSpace=&quot;MyURL&quot;&gt;
+      text 2 text 3 
+      3.14 3.14159
+      text 4
+      text &amp;lt;&amp;amp;&amp;quot;&amp;gt;&amp;apos;
+      &lt;tag3/&gt;
+      3.14
+      &lt;tag4&gt;no linebreak&lt;/tag4&gt;
+    &lt;/tag2&gt;
+  &lt;/tag1&gt;
+&lt;/tag0&gt;
+</pre>
+</blockquote>
+
 <HR>
-<ADDRESS>(c) 2003 by <A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
+<ADDRESS>(c) 2003-2004 by <A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
 </body>
 </html>

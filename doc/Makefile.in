@@ -41,7 +41,7 @@ DOC_ALEA = alea/binning.html alea/index.html alea/observable.html alea/observabl
 DOC_LATTICE = lattice/coordinatelattice.html lattice/graph.html lattice/graph_traits.html lattice/graphconcepts.html lattice/graphproperties.html lattice/helperconcepts.html lattice/hypercubic.html lattice/index.html lattice/lattice.html lattice/latticeconcepts.html lattice/latticedescriptor.html lattice/latticegraph.html lattice/latticegraphdescriptor.html lattice/latticelibrary.html lattice/parity.html lattice/simplecell.html lattice/simplelattice.html lattice/unitcell.html
 DOC_MODEL = model/index.html
 DOC_OSIRIS = osiris/comm.html osiris/dump.html osiris/index.html osiris/mpdump.html osiris/os.html osiris/parameterlist.html osiris/parameters.html osiris/process.html osiris/stdmap.html osiris/stdpair.html osiris/stdstring.html osiris/stdvalarray.html osiris/stdvector.html osiris/valuetype.html osiris/xdrdump.html
-DOC_PARSER = parser/index.html parser/parser.html parser/xmlstream.html
+DOC_PARSER = parser/index.html parser/parser.html parser/xmlattributes.html parser/xmlstream.html
 DOC_SCHEDULER = scheduler/implementing.html scheduler/index.html scheduler/montecarlo.html scheduler/running.html scheduler/scheduler.html scheduler/signal.html
 DOC_TOOL = tool/index.html
 

@@ -1,0 +1,203 @@
+<html>
+<head>
+   <title>ALPS Project parser/xmlattributes.h</title>
+</head>
+<body>
+
+<h1>ALPS Project</h1>
+
+<h2>Header file <b>parser/xmlattributes.h</b></h2>
+
+This header contains the <tt>XMLAttribute</tt>
+and <tt>XMLAttributes</tt> classes that can store attributes of XML tags.
+
+<h3>Synopsis</h3>
+<blockquote>
+<pre>
+namespace alps {
+
+class XMLAttribute
+{
+public:
+  typedef std::string key_type;
+  typedef std::string value_type;
+
+  XMLAttribute();
+  XMLAttribute(const XMLAttribute&amp; attr);
+  XMLAttribute(const key_type&amp; k);
+  XMLAttribute(const key_type&amp; k, const value_type&amp; v);
+  XMLAttribute(const key_type&amp; k, const char * v);
+  template&lt;class T&gt; XMLAttribute(const key_type&amp; k, const T&amp; v);
+
+  key_type&amp; key();
+  const key_type&amp; key() const;
+  value_type&amp; value();
+  const value_type&amp; value() const;
+};
+
+class XMLAttributes
+{
+public:
+  typedef XMLAttribute::key_type    key_type;
+  typedef XMLAttribute::value_type  value_type;
+  typedef std::vector&lt;XMLAttribute&gt; list_type;
+  typedef list_type::size_type      size_type;
+
+  typedef list_type::iterator       iterator;
+  typedef list_type::const_iterator const_iterator;
+
+  XMLAttributes();
+
+  void clear();
+  size_type size() const;
+
+  bool defined(const key_type&amp; k);
+
+  // accessing elements by key
+  value_type&amp; operator[](const key_type&amp; k);
+  const value_type&amp; operator[](const key_type&amp; k) const;
+  value_type value_or_default(const key_type&amp; k, const value_type&amp; v) const;
+
+  iterator begin();
+  const_iterator begin() const;
+  iterator end();
+  const_iterator end() const;
+
+  void push_back(const XMLAttribute&amp; attr);
+  void push_back(const key_type&amp; k, const value_type&amp; v);
+  XMLAttributes&amp; operator<<(const XMLAttribute&amp; a);
+  XMLAttributes&amp; operator<<(const XMLAttributes&amp; attr);
+};
+
+} // namespace alps
+</pre>
+</blockquote>
+
+<!-- XMLAttribute class ------------------------------------------------ -->
+
+<h3><tt>XMLAttribute</tt> class</h3>
+
+<tt>XMLAttribute</tt> class is a pair of strings which stores an
+attribute of a XML tag.
+
+<h4>Member functions</h4>
+
+<blockquote><pre>
+XMLAttribute();
+</pre></blockquote>
+the default constructor
+
+<blockquote><pre>
+XMLAttribute(const XMLAttribute&amp; attr);
+</pre></blockquote>
+the copy constructor
+
+<blockquote><pre>
+XMLAttribute(const key_type&amp; k);
+</pre></blockquote>
+constructor with a given name (key) but an empty value
+
+<blockquote><pre>
+XMLAttribute(const key_type&amp; k, const value_type&amp; v);
+XMLAttribute(const key_type&amp; k, const char * v);
+template&lt;class T&gt; XMLAttribute(const key_type&amp; k, const T&amp; v);
+</pre></blockquote>
+constructors from a pair of a name (key) and a value
+
+<blockquote><pre>
+key_type&amp; key();
+const key_type&amp; key() const;
+</pre></blockquote>
+access the name of the attribute
+
+<blockquote><pre>
+value_type&amp; value();
+const value_type&amp; value() const;
+</pre></blockquote>
+access the value of the attribute
+
+<!-- XMLAttribute class ------------------------------------------------ -->
+
+<h3><tt>XMLAttributes</tt> class</h3>
+
+<tt>XMLAttributes</tt> class is a set of <tt>XMLAttribute</tt>'s.
+Each <tt>XMLAttribute</tt> element can be accessed directly by a name
+(key), or sequentially by using iterators.  The difference
+from <tt>std::map&lt;XMLAttribute&gt;</tt> is that the order of
+attributes in the set is preserved as defined.
+
+<h4>Member functions</h4>
+
+<blockquote><pre>
+XMLAttributes();
+</pre></blockquote>
+the default constructor
+
+<blockquote><pre>
+void clear();
+</pre></blockquote>
+clears the contents
+
+<blockquote><pre>
+size_type size();
+</pre></blockquote>
+returns the number of attributes
+
+<blockquote><pre>
+bool defined(const key_type&amp; k);
+</pre></blockquote>
+returns <tt>true</tt> if an attribute exists for the given attribute name.
+
+<blockquote><pre>
+value_type&amp; operator[](const key_type&amp; k);
+const value_type&amp; operator[](const key_type&amp; k) const;
+</pre></blockquote>
+
+access the attribute value with a given name.  Note that if the
+attribute does not exists, a new attribute with the given name will be
+created and appended at the last of the set.
+
+<blockquote><pre>
+value_type value_or_default(const key_type&amp; k, const value_type&amp; v) const;
+</pre></blockquote>
+
+returns the attribute value with a given name.  If the attribute does
+not exists, the default value specified by the second argument will be
+returned.
+
+<blockquote><pre>
+iterator begin();
+const_iterator begin() const;
+iterator end();
+const_iterator end() const;
+</pre></blockquote>
+
+return iterators pointing the first element in the set, or the next to
+the last element.
+
+<blockquote><pre>
+void push_back(const XMLAttribute&amp; attr);
+void push_back(const key_type&amp; k, const value_type&amp; v);
+</pre></blockquote>
+
+append a new attribute.  If there already exists an attribute with the
+same name, an exception will be thrown.
+
+<blockquote><pre>
+XMLAttributes&amp; operator<<(const XMLAttribute&amp; a);
+</pre></blockquote>
+
+appends a new attribute.  If there already exists an attribute with the
+same name, the attribute value will be replaced by a new one.
+
+<blockquote><pre>
+XMLAttributes&amp; operator<<(const XMLAttributes&amp; attr);
+</pre></blockquote>
+
+appends new attributes.  If there already exist attributes with the
+same names, the attribute values will be replaced by new ones.
+
+<HR>
+<ADDRESS>Copyright (C) 2001-2004 by <A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
+</body>
+</html>

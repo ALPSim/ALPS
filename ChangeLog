@@ -1,3 +1,9 @@
+2004-03-12 Synge Todo <wistaria@comp-phys.org>
+
+	* [parser] Renamed parser/attributes.h as parser/xmlattributes.h.
+
+	* [doc] Added parser/xmlattributes.html.  Updated parser/xmlstream.html.
+	
 2004-03-11 Synge Todo <wistaria@comp-phys.org>
 
 	* [config] Improved support for the precompiled Boost library.

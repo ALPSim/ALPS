@@ -4478,28 +4478,29 @@ echo "$as_me: error: Boost library not found" >&2;}
     fi
   fi
 
-  echo "$as_me:$LINENO: checking for Boost::signals library" >&5
+  if test "$ac_cv_use_precompiled_boost" = yes; then
+    echo "$as_me:$LINENO: checking for Boost::signals library" >&5
 echo $ECHO_N "checking for Boost::signals library... $ECHO_C" >&6
-  ac_cv_boost_signals=no
-  if test -n "$boost_libs"; then
-    BOOST_SIGNALS_LIBS=
-  else
-    if test -z "$boost_toolset"; then
-      BOOST_SIGNALS_LIBS="-lboost_signals"
+    ac_cv_boost_signals=no
+    if test -n "$boost_libs"; then
+      BOOST_SIGNALS_LIBS=
     else
-      BOOST_SIGNALS_LIBS="-lboost_signals-$boost_toolset"
+      if test -z "$boost_toolset"; then
+        BOOST_SIGNALS_LIBS="-lboost_signals"
+      else
+        BOOST_SIGNALS_LIBS="-lboost_signals-$boost_toolset"
+      fi
     fi
-  fi
-  LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS $ac_save_LIBS"
-  cat >conftest.$ac_ext <<_ACEOF
+    LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS $ac_save_LIBS"
+    cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 
-    #include <boost/signals/signal2.hpp>
-    #include <string>
+      #include <boost/signals/signal2.hpp>
+      #include <string>
 
 int
 main ()
@@ -4539,34 +4540,34 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-  if test "$ac_cv_boost_signals" = yes; then
-    if test -n "$BOOST_SIGNALS_LIBS"; then
-      echo "$as_me:$LINENO: result: $BOOST_SIGNALS_LIBS" >&5
+    if test "$ac_cv_boost_signals" = yes; then
+      if test -n "$BOOST_SIGNALS_LIBS"; then
+        echo "$as_me:$LINENO: result: $BOOST_SIGNALS_LIBS" >&5
 echo "${ECHO_T}$BOOST_SIGNALS_LIBS" >&6
-      BOOST_LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS"
-    else
-      echo "$as_me:$LINENO: result: yes" >&5
+        BOOST_LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS"
+      else
+        echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-    fi
-  else
-    echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-  fi
-
-  echo "$as_me:$LINENO: checking for Boost::thread library" >&5
-echo $ECHO_N "checking for Boost::thread library... $ECHO_C" >&6
-  ac_cv_boost_thread=no
-  if test -n "$boost_libs"; then
-    BOOST_THREAD_LIBS=
-  else
-    if test -z "$boost_toolset"; then
-      BOOST_THREAD_LIBS="-lboost_thread"
+      fi
     else
-      BOOST_THREAD_LIBS="-lboost_thread-$boost_toolset"
+      echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
     fi
-  fi
-  LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS $ac_save_LIBS"
-  cat >conftest.$ac_ext <<_ACEOF
+
+    echo "$as_me:$LINENO: checking for Boost::thread library" >&5
+echo $ECHO_N "checking for Boost::thread library... $ECHO_C" >&6
+    ac_cv_boost_thread=no
+    if test -n "$boost_libs"; then
+      BOOST_THREAD_LIBS=
+    else
+      if test -z "$boost_toolset"; then
+        BOOST_THREAD_LIBS="-lboost_thread"
+      else
+        BOOST_THREAD_LIBS="-lboost_thread-$boost_toolset"
+      fi
+    fi
+    LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS $ac_save_LIBS"
+    cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -4611,18 +4612,19 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-  if test "$ac_cv_boost_thread" = yes; then
-    if test -n "$BOOST_THREAD_LIBS"; then
-      echo "$as_me:$LINENO: result: $BOOST_THREAD_LIBS" >&5
+    if test "$ac_cv_boost_thread" = yes; then
+      if test -n "$BOOST_THREAD_LIBS"; then
+        echo "$as_me:$LINENO: result: $BOOST_THREAD_LIBS" >&5
 echo "${ECHO_T}$BOOST_THREAD_LIBS" >&6
-      BOOST_LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS"
-    else
-      echo "$as_me:$LINENO: result: yes" >&5
+        BOOST_LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS"
+      else
+        echo "$as_me:$LINENO: result: yes" >&5
 echo "${ECHO_T}yes" >&6
-    fi
-  else
-    echo "$as_me:$LINENO: result: no" >&5
+      fi
+    else
+      echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
+    fi
   fi
 fi
 
