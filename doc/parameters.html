@@ -26,11 +26,11 @@ public:
 
   void copy_undefined(const Parameters&amp; p)l
 
-  void write_xml(std::ostream&amp; xml) const;
   void read_xml(XMLTag tag, std::istream&amp; xml);
 };
 
-std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const Parameters&amp; p);
+std::ostream&amp; operator &lt;&lt; (oxstream&amp; os, const Parameters&amp; p);
+
 std::istream&amp; operator >> (std::istream&amp; is, Parameters&amp; parameters);
 
 ODump&amp; operator &lt;&lt; (ODump&amp; od, const Parameters&amp; p);

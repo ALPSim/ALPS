@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 	<xsl:template match="/">
+<xsl:for-each select="JOB/TASK">Task <xsl:value-of select="position()"/>: <xsl:value-of select="@status"/>, <xsl:for-each select="INPUT">input: <xsl:value-of select="@file"/></xsl:for-each><xsl:for-each select="OUTPUT">, output: <xsl:value-of select="@file"/></xsl:for-each><xsl:text>
+</xsl:text></xsl:for-each>
+
     <xsl:for-each select="SIMULATION">
       <xsl:text>
 Monte Carlo Simulation

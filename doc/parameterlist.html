@@ -21,7 +21,8 @@ public:
   ParameterList(std::istream&amp; is);
 };
 
-std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const ParameterList&amp; p);
+std::ostream&amp; operator &lt;&lt; (oxstream&amp; os, const ParameterList&amp; p);
+
 std::istream&amp; operator >> (std::istream&amp; is, ParameterList&amp; p);
 
 ODump& operator &lt;&lt;(ODump& od, const ParameterList& p);
