@@ -33,7 +33,7 @@ AC_DEFUN([AC_COMPILER],
 
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
-      [set compiler mode (MODE = gnu, kai, intel, intel64, como, hp, dec, sgi32, sgi64, cray, macos, generic)]),
+      [set compiler mode (MODE = gnu, kai, intel, intel64, como, hp, dec, sgi32, sgi64, cray, ibm, macos, generic)]),
     [
     case "x$withval" in
       xgnu* | xGNU* | xgcc* | xg++* )
@@ -71,6 +71,9 @@ AC_DEFUN([AC_COMPILER],
         ;;
       xmacos* | xmac* | xosx*)
         COMPILER="macos"
+        ;;
+      xibm* | xIBM* | xvacpp* | xxlC*)
+        COMPILER="ibm"
         ;;
       xgeneric*)
         COMPILER="generic"
@@ -130,6 +133,10 @@ AC_DEFUN([AC_COMPILER],
     cray)
       try_CC="cc"
       try_CXX="CC"
+      ;;
+    ibm)
+      try_CC="xlc"
+      try_CXX="xlC"
       ;;
     macos)
       try_CC="cc"
@@ -262,6 +269,14 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_DEBUG="-g -O0 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates"
       try_CXXFLAGS_EH="-h exceptions"
       try_CXXFLAGS_NOEH="-h noexceptions"
+      ;;
+    ibm)
+      try_CFLAGS_OPT="-O2"
+      try_CFLAGS_DEBUG=-"-g"
+      try_CXXFLAGS_OPT="-qlanglvl=extended -O2"
+      try_CXXFLAGS_DEBUG="-qlanglvl=extended -g"
+      try_CXXFLAGS_EH=""
+      try_CXXFLAGS_NOEH=""
       ;;
     macos)
       #try_CFLAGS_OPT="-w -pthread -O3"
