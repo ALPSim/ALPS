@@ -15,28 +15,11 @@ docdir = @docdir@
 # Makefiles
 
 INCLUDE_MK = $(datadir)/@PACKAGE_NAME@/include.mk
-RULES_MK = $(datadir)/@PACKAGE_NAME@/rules.mk
-RULES_LIB_MK = $(datadir)/@PACKAGE_NAME@/rules-lib.mk
-
-# installer
-
-INSTALL = @ALPS_INSTALL@
-INSTALL_PROGRAM = @INSTALL_PROGRAM@
-INSTALL_SCRIPT = @INSTALL_SCRIPT@
-INSTALL_DATA = @INSTALL_DATA@
-INSTALL_LIB = $(INSTALL_DATA)
-INSTALL_HEADER = $(INSTALL_DATA)
-INSTALL_DOC = $(INSTALL_DATA)
-install_sh = $(bindir)/install-sh
-mkinstalldirs = $(SHELL) $(bindir)/mkinstalldirs
 
 # tools
 
 AR = @AR@
-ARXX = @ARXX@
 LN_S = @LN_S@
-MAKEDEPEND = makedepend
-MAKEDEPEND_PL = perl $(bindir)/makedepend.pl
 RANLIB = @RANLIB@
 
 # base
