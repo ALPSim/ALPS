@@ -174,6 +174,13 @@ dnl test "$ac_cv_alps_compiler" = "sgi32" && RANLIB="/bin/true"
 dnl test "$ac_cv_alps_compiler" = "sgi64" && RANLIB="/bin/true"
 dnl AC_PROG_RANLIB
 
+dnl make --disable-sahred the default for IBM compiler
+if test -z "${enable_shared+set}"; then
+  if test "$ac_cv_compiler" = "ibm"; then
+    enable_shared=no
+  fi
+fi
+
 AC_PROG_LIBTOOL
 
 #
