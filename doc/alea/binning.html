@@ -1,159 +1,106 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: alea library binning</title>
+  <title>ALPS Project: alea library binning</title>
 </head>
-<body>
-
-<h1>
-ALPS Project: alea library</h1>
-
-<h2>
-Binning strategies</h2>
-Depending on the type of Monte Carlo simulation and the intended 
-evaluations, different amount of information needs to be stored
-for the evaluation. In order of increasing memory and time complexity
-we have implemented three strategies:
-<OL>
-    <LI> <A HREF="#nobinning"><B>NoBinning</B></A> is appropriate for 
-    simulations without any correlations between subsequent 
-    measurements.</LI>
-    <LI><A HREF="#nobinning"><B>SimpleBinning</B></A> can estimate
-    autocorrelations and calculate error estimates taking into account 
-    autocorrelation effects of observables.
-    </LI>
-    <LI><A HREF="#detailedbinning"><B>DetailedBinning</B> and 
-    <B>FixedBinning</B></A> can estimate crosscorrelations in addition to 
-    autocorrelations. They store full or binned time series and can 
-    evaluate error estimates for expressions containing functions of more 
-    than one observable in a jack-knife procedure, taking into account also
-    cross-correlations.
-    </LI>
-</OL>
-
-
-<h3><A name="nobinning">Header file <b>nobinning.h</b></h3>
-This header contains a strategy without binning, where only
-the number of measurements,
-variance, mean value, minimum and maximum value are kept.
-It is the most space-saving binning strategy, but this is paid for
-by restricted evaluation options.
-<BR>
-<P>
-The error is calculated from the variance assuming no autocorrelations.
-Thus it should <B>not</B> be used for Markov-chain like Monte Carlo
-procedures, where autocorrelation effects are important. Also,
-equilibration (thermalization) times cannot be changed after the 
-measurements.
-<P>
-<blockquote>
-<pre>
-namespace alps {
-template <class T=double> class NoBinning
-{
-  NoBinning();
-};
-
-typedef BasicSimpleObservable&lt;int32_t, NoBinning&lt;int32_t> > SimpleIntObservable;
-typedef BasicSimpleObservable&lt;double, NoBinning&lt;double> > SimpleRealObservable;
-
-typedef BasicSimpleObservable&lt;std::valarray&lt;int32_t>, NoBinning&lt;std::valarray&lt;int32_t> > > SimpleIntVectorObservable;
-typedef BasicSimpleObservable&lt;std::valarray&lt;double>, NoBinning&lt;std::valarray&lt;double> > > SimpleRealVectorObservable;
-}
-</pre></blockquote>
-There is only a default constructor and no argument needs to be passed to 
-the constructor of <A HREF="simpleobservable.html">
-<tt>BasicSimpleObservable&lt;T,NoBinning&lt;T> ></tt></A>.
-<P>
-The <tt>typedef</tt>s define useful short-cut names for the most common 
-observables without any binning.
-<h3><A name="simplebinning">Header file <b>simplebinning.h</b></h3>
-This header contains the simplest binning strategy, where in addition to
-the number of measurements,
-variance, mean value, minimum and maximum value, also the
-means and mean squares of bins (averages of consecutive measurements)
-with sizes of powers of 2 are kept. This allows the calculation of
-autocorrelation times, and the judgement of convergence of a simulation.
-If the error estimates converge as a function of bin size (as seens in the 
-output), the autocorrelation time, and the errors can be assumed to be reliable.
-On the other hand if the errors do not converge with increased bin size, 
-neither error nor autocorrelation estimate are reliable and the simulation
-has to be run for much longer times.
-<P>
-We wish to emphasize that this is not a black-box library but the user has
-to bring his own judgement to evaluate the results of any Monte Carlo 
-simulation.
-<P>
-<blockquote>
-<pre>
-namespace alps {
-template <class T=double> class SimpleBinning
-{
-  SimpleBinning();
-};
-}
-</pre></blockquote>
-There is only a default constructor and no argument needs to be passed to 
-the constructor of <A HREF="simpleobservable.html">
-<tt>BasicSimpleObservable&lt;T,SimpleBinning&lt;T> ></tt></A>.
-
-<h3><A name="detailedbinning">Header file <b>detailedbinning.h</b></h3>
-This header contains elaborate binning strategies, storing full or binned
-time series of the measurements. This allows for reliable error estimates 
-for expressions containing functions of more than one observable in a jack-knife 
-procedure, taking into account also cross-correlations.
-<P>
-<blockquote>
-<pre>
-namespace alps {
-template&lt; class T> class FixedBinning
-{
-public:
-  typedef T value_type;
-  FixedBinning(uint32_t binsize=1)'
-};
-
-template&lt; class T> class DetailedBinning
-{
-public:
-  typedef T value_type;
-  DetailedBinning(uint32_t binnum=128);
-};
-
-typedef BasicSimpleObservable&lt;int32_t,DetailedBinning&lt;int32_t> > IntObservable;
-typedef BasicSimpleObservable&lt;double,DetailedBinning&lt;double> > RealObservable;
-
-typedef BasicSimpleObservable&lt;int32_t,FixedBinning&lt;int32_t> > IntTimeSeriesObservable;
-typedef BasicSimpleObservable&lt;double,FixedBinning&lt;double> > RealTimeSeriesObservable;
-
-typedef BasicSimpleObservable&lt; std::valarray&lt;int32_t> , 
-        DetailedBinning&lt;std::valarray&lt;int32_t> > > IntVectorObservable;
-typedef BasicSimpleObservable&lt; std::valarray&lt;double> , 
-        DetailedBinning&lt;std::valarray&lt;double> > > RealVectorObservable;
-}
-</pre></blockquote>
-The first strategy, <TT>FixedBinning</TT> keeps a time series
-of all measurements, averaging <tt>binsize</tt> values into one bin. The
-storage requirements for <I>N</I> measurements scales as 
-2*<TT>typeof(T)</tt>*<I>N</I>/<TT>binsize</tt>.
-<P>
-The second strategy, <TT>DetailedBinning</tt> has a fixed maximum number of 
-bins instead of a fixed bin size. It starts by filling bins with one 
-number per bin until <TT>binnum</tt> measurements have been recorded, 
-whereupon the number of measurements per bin is doubled and the number of 
-bins halfed, until again all bins are filled and their size doubled.
-<P>
-We again wish to emphasize that this is not a black-box library but the user has
-to bring his own judgement to evaluate the results of any Monte Carlo 
-simulation. In order for a jack-knifer analysis of errors to be reliable the
-bin-size has to be much larger than the autocorrelation time and at least 
-about thirty bins have to be available. Also since the jack-knife analysis
-scales with the square of the number of bins care has to be taken in the 
-choice of parameters.
-<P>
-The <tt>typedef</tt>s define useful short-cut names for the most common 
-observables with binning.
-
-<HR>
-<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+ <body>
+  
+<h1> ALPS Project: alea library</h1>
+  
+<h2> Binning strategies</h2>
+ Depending on the type of Monte Carlo simulation and the intended  evaluations,
+different amount of information needs to be stored for the evaluation. In
+order of increasing memory and time complexity we have implemented three
+strategies: 
+<ol>
+     <li> <a href="#nobinning"><b>NoBinning</b></a> is appropriate for  
+   simulations without any correlations between subsequent      measurements.</li>
+     <li><a href="#nobinning"><b>SimpleBinning</b></a> can estimate     autocorrelations
+and calculate error estimates taking into account      autocorrelation effects
+of observables.     </li>
+     <li><a href="#detailedbinning"><b>DetailedBinning</b> and      <b>FixedBinning</b></a>
+can estimate crosscorrelations in addition to      autocorrelations. They
+store full or binned time series and can      evaluate error estimates for
+expressions containing functions of more      than one observable in a jack-knife
+procedure, taking into account also     cross-correlations.     </li>
+ 
+</ol>
+   
+<h3><a name="nobinning">Header file <b>nobinning.h</b></a></h3>
+ <a name="nobinning">This header contains a strategy without binning, where
+only the number of measurements, variance, mean value, minimum and maximum
+value are kept. It is the most space-saving binning strategy, but this is
+paid for by restricted evaluation options. <br>
+ </a>
+<p> <a name="nobinning">The error is calculated from the variance assuming
+no autocorrelations. Thus it should <b>not</b> be used for Markov-chain like
+Monte Carlo procedures, where autocorrelation effects are important. Also, 
+equilibration (thermalization) times cannot be changed after the  measurements. 
+</a></p>
+<p> </p>
+<blockquote> 
+  <pre><a name="nobinning">namespace alps {<br>template<class t="double"> &lt;class T&gt; class NoBinning<br>{<br>  NoBinning();<br>};<br><br>typedef BasicSimpleObservable&lt;int32_t, NoBinning&lt;int32_t&gt; &gt; SimpleIntObservable;<br>typedef BasicSimpleObservable&lt;double, NoBinning&lt;double&gt; &gt; SimpleRealObservable;<br><br>typedef BasicSimpleObservable&lt;std::valarray&lt;int32_t&gt;, NoBinning&lt;std::valarray&lt;int32_t&gt; &gt; &gt; SimpleIntVectorObservable;<br>typedef BasicSimpleObservable&lt;std::valarray&lt;double&gt;, NoBinning&lt;std::valarray&lt;double&gt; &gt; &gt; SimpleRealVectorObservable;<br>}<br></class></a></pre>
+</blockquote>
+ <a name="nobinning">There is only a default constructor and no argument
+needs to be passed to  the constructor of </a><a
+ href="simpleobservable.html"> <tt>BasicSimpleObservable&lt;T,NoBinning&lt;T&gt;
+&gt;</tt></a>. 
+<p> The <tt>typedef</tt>s define useful short-cut names for the most common
+ observables without any binning. </p>
+<h3><a name="simplebinning">Header file <b>simplebinning.h</b></a></h3>
+ <a name="simplebinning">This header contains the simplest binning strategy,
+where in addition to the number of measurements, variance, mean value, minimum
+and maximum value, also the means and mean squares of bins (averages of consecutive
+measurements) with sizes of powers of 2 are kept. This allows the calculation
+of autocorrelation times, and the judgement of convergence of a simulation. 
+If the error estimates converge as a function of bin size (as seens in the
+ output), the autocorrelation time, and the errors can be assumed to be reliable. 
+On the other hand if the errors do not converge with increased bin size,
+ neither error nor autocorrelation estimate are reliable and the simulation 
+has to be run for much longer times. </a>
+<p> <a name="simplebinning">We wish to emphasize that this is not a black-box
+library but the user has to bring his own judgement to evaluate the results
+of any Monte Carlo  simulation. </a></p>
+<p> </p>
+<blockquote> 
+  <pre><a name="simplebinning">namespace alps {<br>template <class
+ t="double">&lt;class T&gt; class SimpleBinning<br>{<br>  SimpleBinning();<br>};<br>}<br></class></a></pre>
+</blockquote>
+ <a name="simplebinning">There is only a default constructor and no argument
+needs to be passed to  the constructor of </a><a
+ href="simpleobservable.html"> <tt>BasicSimpleObservable&lt;T,SimpleBinning&lt;T&gt;
+&gt;</tt></a>.  
+<h3><a name="detailedbinning">Header file <b>detailedbinning.h</b></a></h3>
+ <a name="detailedbinning">This header contains elaborate binning strategies,
+storing full or binned time series of the measurements. This allows for reliable
+error estimates  for expressions containing functions of more than one observable
+in a jack-knife  procedure, taking into account also cross-correlations. </a>
+<p> </p>
+<blockquote> 
+  <pre><a name="detailedbinning">namespace alps {<br>template&lt; class T&gt; class FixedBinning<br>{<br>public:<br>  typedef T value_type;<br>  FixedBinning(uint32_t binsize=1)'<br>};<br><br>template&lt; class T&gt; class DetailedBinning<br>{<br>public:<br>  typedef T value_type;<br>  DetailedBinning(uint32_t binnum=128);<br>};<br><br>typedef BasicSimpleObservable&lt;int32_t,DetailedBinning&lt;int32_t&gt; &gt; IntObservable;<br>typedef BasicSimpleObservable&lt;double,DetailedBinning&lt;double&gt; &gt; RealObservable;<br><br>typedef BasicSimpleObservable&lt;int32_t,FixedBinning&lt;int32_t&gt; &gt; IntTimeSeriesObservable;<br>typedef BasicSimpleObservable&lt;double,FixedBinning&lt;double&gt; &gt; RealTimeSeriesObservable;<br><br>typedef BasicSimpleObservable&lt; std::valarray&lt;int32_t&gt; , <br>        DetailedBinning&lt;std::valarray&lt;int32_t&gt; &gt; &gt; IntVectorObservable;<br>typedef BasicSimpleObservable&lt; std::valarray&lt;double&gt; , <br>        DetailedBinning&lt;std::valarray&lt;double&gt; &gt; &gt; RealVectorObservable;<br>}<br></a></pre>
+</blockquote>
+ <a name="detailedbinning">The first strategy, <tt>FixedBinning</tt> keeps
+a time series of all measurements, averaging <tt>binsize</tt> values into
+one bin. The storage requirements for <i>N</i> measurements scales as  2*<tt>typeof(T)</tt>*<i>N</i>/<tt>binsize</tt>. 
+</a>
+<p> <a name="detailedbinning">The second strategy, <tt>DetailedBinning</tt>
+has a fixed maximum number of  bins instead of a fixed bin size. It starts
+by filling bins with one  number per bin until <tt>binnum</tt> measurements
+have been recorded,  whereupon the number of measurements per bin is doubled
+and the number of  bins halfed, until again all bins are filled and their
+size doubled. </a></p>
+<p> <a name="detailedbinning">We again wish to emphasize that this is not
+a black-box library but the user has to bring his own judgement to evaluate
+the results of any Monte Carlo  simulation. In order for a jack-knifer analysis
+of errors to be reliable the bin-size has to be much larger than the autocorrelation
+time and at least  about thirty bins have to be available. Also since the
+jack-knife analysis scales with the square of the number of bins care has
+to be taken in the  choice of parameters. </a></p>
+<p> <a name="detailedbinning">The <tt>typedef</tt>s define useful short-cut
+names for the most common  observables with binning.  </a></p>
+<hr> 
+<address><a name="detailedbinning">copyright (c) 1994-2003 by </a><a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+ <br>
 </body>
 </html>

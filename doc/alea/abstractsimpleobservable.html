@@ -1,0 +1,143 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>ALPS Project: alea/abstractsimpleobservable.h</title>
+</head>
+  <body>
+   
+<h1> ALPS Project: alea library</h1>
+   
+<h2> Header file <b>alea/abstractsimpleobservable.h</b></h2>
+  This header contains the base class for standard Monte Carlo measurements.
+ 
+<h3>Synopsis</h3>
+  
+<blockquote>   
+  <pre>namespace alps {<br><br>template &lt;class T&gt; class SimpleObservableEvaluator;<br><br>template &lt;class T&gt;<br>class AbstractSimpleObservable: public Observable<br>{<br>public:<br>  typedef T                                         value_type;<br>  typedef typename obs_value_traits&lt;T&gt;::result_type result_type;<br>  typedef std::size_t                               count_type;<br>  typedef typename obs_value_traits&lt;T&gt;::time_type   time_type;<br><br><br>  AbstractSimpleObservable(const std::string&amp; name="");<br>  virtual ~AbstractSimpleObservable();<br><br>  virtual count_type count() const =0;<br>  virtual result_type mean() const =0;<br>  virtual result_type error() const =0;<br><br>  virtual bool has_variance() const;<br>  virtual result_type variance() const;<br><br>  virtual bool has_minmax() const;<br>  virtual value_type min() const;<br>  virtual value_type max() const;<br><br>  virtual bool has_tau() const;<br>  virtual time_type tau() const;<br><br>  virtual count_type bin_number() const;<br>  virtual count_type bin_size() const;<br>  virtual const value_type&amp; bin_value(count_type n) const;<br>  virtual count_type bin_number2() const;<br>  virtual count_type bin_size2() const;<br>       <br>  template &lt;class S&gt;<br>  SimpleObservableEvaluator<typename
+ obs_value_slice&lt;t,s="">::value_type&gt;<br>    slice(S s, const std::string&amp; newname="") const;<br><br>  operator SimpleObservableEvaluator&lt;value_type&gt; () const;<br>};<br> <br><br><t>
+
+}
+
+</t></typename></pre>
+ </blockquote>
+   
+<h3>The <tt>AbstractSimpleObservable</tt>&nbsp; abstract base class</h3>
+  is an abstract base class for standard observables, both for evaluation
+objects and for observables to perform measurements with. It is templated
+on the data type of the observables. In addition to the members of the base
+class <tt>Observable</tt> it provides the following members:  
+<blockquote>   
+  <pre>typedef T value_type;<br></pre>
+ </blockquote>
+  is the data type of the observable.  
+<blockquote>   
+  <pre>typedef typename obs_value_traits&lt;T&gt;::result_type result_type;<br></pre>
+ </blockquote>
+  is a type appropriate to store averages and errors of values of type <tt>value_type</tt>.
+ 
+<blockquote>   
+  <pre>typedef std::size_t count_type;<br></pre>
+ </blockquote>
+  is an integral type large enough to store the number of measurements for 
+the observable.  
+<blockquote>   
+  <pre>typedef typename obs_value_traits&lt;T&gt;::time_type time_type;<br></pre>
+ </blockquote>
+  is a type appropriate to store autocorrelation times.<br>
+  
+<blockquote>   
+  <pre>AbstractSimpleObservable(const std::string&amp; name="");<br></pre>
+ </blockquote>
+  The constructor takes the name as argument.  
+<blockquote>   
+  <pre>virtual count_type count() const =0;<br></pre>
+ </blockquote>
+  returns the number of measurements  
+<blockquote>   
+  <pre>virtual result_type mean() const =0;<br></pre>
+ </blockquote>
+  returns the mean value of the measurements.  
+<blockquote>   
+  <pre>virtual result_type error() const =0;<br></pre>
+ </blockquote>
+  returns the best error estimate.  
+<blockquote>   
+  <pre>virtual bool has_variance() const;<br></pre>
+ </blockquote>
+  returns <tt>true</tt> if the variance is available.  
+<blockquote>   
+  <pre>virtual result_type variance() const;<br></pre>
+ </blockquote>
+  returns the variance, if <tt>has_variance()</tt> evaluates to <tt>true</tt>.
+ Otherwise a <tt>NoMeasurementsError</tt> is thrown.  
+<blockquote>   
+  <pre>virtual bool has_minmax() const ;<br></pre>
+ </blockquote>
+  returns <tt>true</tt> if the minimum and maximum values are available.
+ 
+<blockquote>   
+  <pre>virtual value_type min() const;<br>virtual value_type max() const;<br></pre>
+ </blockquote>
+  return the minimum and maximum value, if <tt>has_minmax()</tt> evaluates 
+to <tt>true</tt>. Otherwise a&nbsp;<tt>std::logic_error</tt> is thrown.  
+<blockquote>   
+  <pre>virtual bool has_tau() const;<br></pre>
+ </blockquote>
+  returns <tt>true</tt> if the autocorrelation time is available.  
+<blockquote>   
+  <pre>virtual time_type tau() const;<br></pre>
+ </blockquote>
+  returns the autocorrelation time, if <tt>has_tau()</tt> evaluates to <tt>true</tt>.
+ Otherwise a <tt>std::logic_error</tt> is thrown.  
+<blockquote>   
+  <pre>virtual uint32_t bin_number() const;<br></pre>
+ </blockquote>
+  returns the number of available bins, if binning is implemented for the 
+ observable, or zero otherwise. A bin consists of the average of <tt>bin_size</tt>&nbsp;&nbsp;
+measurements.  
+<blockquote>   
+  <pre>virtual uint32_t bin_size();<br></pre>
+ </blockquote>
+  returns the number of measurements in a bin.   
+<blockquote>   
+  <pre>virtual const value_type&amp; bin_value(uint32_t n) const =0;<br></pre>
+ </blockquote>
+  returns the mean value of the measurements in a bin. <tt>n</tt> needs to 
+be  lass than <tt>bin_number()</tt> or undefined behavior can result.<br>
+<blockquote>   
+  <pre>virtual const value_type&amp; bin_value2(uint32_t n) const =0;<br></pre>
+ </blockquote>
+  returns the mean value of the squared measurements in a bin. <tt>n</tt>
+needs to be  lass than <tt>bin_number()</tt> or undefined behavior can result.<br>
+ 
+<blockquote>   
+  <pre>virtual uint32_t bin_number2() const =0;<br></pre>
+ </blockquote>
+   returns the number of available bins containing squares of the measurements,
+if binning is implemented for the  observable, or zero otherwise.  
+<blockquote>
+  <pre>template &lt;class S&gt;<class s="">
+SimpleObservableEvaluator<typename
+ obs_value_slice<t,s="">::value_type&gt; slice(S s, const std::string&amp; newname="") const;<br></typename></class></pre>
+ </blockquote>
+  returns an observable containing a slice (e.g. in case of an array-valued
+ observable just one entry) of the observable.<br>
+<blockquote>
+  <pre>template &lt;class S&gt;<class s=""><br>SimpleObservableEvaluator<typename
+ obs_value_slice<t,s="">::value_type&gt; operator[](S s) const;<br></typename></class></pre>
+ </blockquote>
+  returns an observable containing a slice (e.g. in case of an array-valued
+ observable just one entry) of the observable, by calling <tt>slice(s)</tt>.<br>
+<blockquote>
+  <pre>operator SimpleObservableEvaluator&lt;value_type&gt; () const<class
+ s=""><typename obs_value_slice<t,s="">;<br></typename></class></pre>
+ </blockquote>
+creates a <tt>SimpleObservableEvaluator</tt> object, allowing calculations
+to be performed on the observable.<br>
+<hr> 
+<address>copyright (c) 1994-2004 by <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+  <br>
+ <br>
+</body>
+</html>

@@ -1,53 +1,87 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: alea library</title>
+  <title>ALPS Project: alea library</title>
+   
 </head>
-<body>
-
-<h1>
-ALPS Project: alea library</h1>
-
-The alea library contains code for Monte Carlo measurements.
-
-<H2>Documentation</H2>
+ <body>
+    
+<h1> ALPS Project: alea library</h1>
+   The alea library contains code for Monte Carlo measurements.   
+<h2>Documentation</h2>
+   
 <ul>
-<li>General header</li>
-<ul><li><B>alea.h</B> includes all header files of the alea library.</li></ul>
-<li>Observable classes
-<ul>
-<li><A HREF="observable.html"><B>alea/observable.h</B></A> contains the base class for
-Monte Carlo measurements.</li>
-<li><A HREF="observableset.html"><B>alea/observableset.h</B></A> is a collection of 
-observables.</li>
-<li><A HREF="obsvalue.html"><B>alea/obsvalue.h</B></A> contains traits classes for 
-Monte Carlo measurements.</li>
-<li><A HREF="simpleobservable.html"><B>alea/simpleobservable.h</B></A> contains a basic 
-observable class.</li>
-<li><A HREF="simpleobseval.html"><B>alea/simpleobseval.h</B></A> contains evaluator
-classes for basic observables.</li>
-</ul></li>
-<li><A HREF="binning.html">Binning strategies</B></A>
-<ul>
-<li><A HREF="binning.html#nobinning"><B>alea/nobinning.h</B></A> does not do any binning.</li>
-<li><A HREF="binning.html#simplebinning"><B>alea/simplebinning.h</B></A> does rudimentary 
-binning, using as little memory as possible.</li>
-<li><A HREF="binning.html#detailedbinning"><B>alea/detailedbinning.h</B></A> does elaborate
-binning, including the possibility to save full time series.
-</li>
-  </ul></li>
+  <li>General header</li>
+     
+  <ul>
+     <li><b>alea.h</b> includes all header files of the alea library.</li>
+   
+  </ul>
+  <li>General Observable classes      
+    <ul>
+  <li><a href="observable.html"><b>alea/observable.h</b></a> contains the 
+base class for Monte Carlo measurements.</li>
+       <li><a href="recordableobservable.html"><b>alea/recordableobservable.h</b></a> 
+contains the interface class for recording Monte Carlo measurements<br>
+       </li>
+  <li><a href="observableset.html"><b>alea/observableset.h</b></a> is a collection 
+of  observables.</li>
+     
+    </ul>
+     
+    <ul>
+  <li><a href="obsvalue.html"><b>alea/obsvalue.h</b></a> contains traits
+classes for  Monte Carlo measurements.</li>
+    </ul>
+       </li>
+  <li>Simple observables</li>
+  <ul>
+       <li><a href="abstractsimpleobservable.html"><b>alea/abstractsimpleobservable.h</b></a> 
+contains the interface for the basic  observable class<br>
+       </li>
+  <li><a href="simpleobservable.html"><b>alea/simpleobservable.h</b></a>
+contains a basic  observable class for measurements without a sign problem</li>
+         
+  </ul>
+  <ul>
+    <li><a href="signedobservable.html"><b>alea/signedobservable.h</b></a>
+contains classes for measurements with a sign problem.</li>
+    <li><a
+ href="simpleobseval.html"><b>alea/simpleobseval.h</b></a>
+contains evaluator classes for basic observables</li>
+  </ul>
+     <li><a href="binning.html">Binning strategies</a></li>
+     
+  <ul>
+    <li><a href="binning.html#nobinning"><b>alea/nobinning.h</b></a> does
+not do any binning.</li>
+  </ul>
+  
+  <ul>
+    <li><a href="binning.html#simplebinning"><b>alea/simplebinning.h</b></a> 
+does rudimentary  binning, using as little memory as possible.</li>
+  </ul>
+  
+  <ul>
+    <li><a href="binning.html#detailedbinning"><b>alea/detailedbinning.h</b></a> 
+does elaborate binning, including the possibility to save full time series.
+       </li>
+  </ul>
+         
 </ul>
-<H2>Example</H2>
-
-The easiest way to learn a new library is to study an example
-first. We have provided a simple <A
-HREF="../../test/alea/detailedbinning.C">example</A>, showing the
-most common usage features.
-
-<HR>
-
-<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
-Troyer</A> and <A HREF="mailto:wistaria@comp-phys.org">Synge
-Todo</A></ADDRESS>
-
+<ul>
+      
+</ul>
+   
+<h2>Example</h2>
+   The easiest way to learn a new library is to study an example first. We 
+have provided a simple <a href="../../test/alea/detailedbinning.C">example</a>, 
+showing the most common usage features.   
+<hr>   
+<address>copyright (c) 1994-2003 by <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a> and <a
+ href="mailto:wistaria@comp-phys.org">Synge Todo</a></address>
+   <br>
+ 
 </body>
 </html>

@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>ALPS Project: alea/recordableobservable.h</title>
+</head>
+ <body>
+  
+<h1> ALPS Project: alea library</h1>
+  
+<h2> Header file <b>alea/simpleobservable.h</b></h2>
+ This header contains the classes for standard Monte Carlo measurements. 
+<h3>Synopsis</h3>
+ 
+<blockquote> 
+  <pre>namespace alps {<br><br>template &lt;class T=double, class SIGN=double&gt;<br>class RecordableObservable<br>{<br>public:<br>  typedef T value_type;<br>  typedef SIGN sign_type;<br><br>  RecordableObservable();<br><br>  virtual void operator&lt;&lt;(const value_type&amp; x) =0;<br>  virtual void add(const value_type&amp; x);<br>  virtual void add(const value_type&amp; x, sign_type s);<br><br>  virtual bool is_thermalized() const =0;<br> };<br>}<br><typename
+ obs_value_slice&lt;t,s=""><t>
+
+}
+
+</t></typename></pre>
+</blockquote>
+  
+<h3>The RecordableObservable interface class</h3>
+ is an abstract base class for observables classes used to record new measurements.
+Such observables are usually multiply inhertited from <a
+ href="observable.html"><tt>Observable</tt></a> and <tt>RecordableObservable</tt>. 
+<blockquote>
+  <pre>typedef T value_type;<br></pre>
+</blockquote>
+ is the data type of the observable. 
+<blockquote>
+  <pre>typedef SIGN sign_type;<br></pre>
+</blockquote>
+ is the data type used to store signs in case of a simulation with a sign
+problem. It defaults to double.  
+<blockquote>
+  <pre>RecordableObservable();<br></pre>
+</blockquote>
+ The default constructor. 
+<blockquote>
+  <pre>virtual void operator&lt;&lt;(const value_type&amp; x) =0;<br></pre>
+</blockquote>
+is a function that must be implemented by the derived class. It records a
+measurement/ 
+<blockquote>
+  <pre>virtual void add(const value_type&amp; x);<br></pre>
+</blockquote>
+defaults to <tt>operator&lt;&lt;</tt>, recording a measurement. 
+<blockquote>
+  <pre>virtual void add(const value_type&amp; x, sign_type s);<br></pre>
+</blockquote>
+reords a measurement for a simulation with a sign problem. This needs to
+be overridden by an observable class supporting the sign problem. The default
+implementation calls <tt>add(x) </tt>if the sign <tt>s</tt> is one, and throws
+a <tt>std::logic_error</tt> otherwise. 
+<blockquote>
+  <pre>virtual bool is_thermalized() const =0;<br></pre>
+</blockquote>
+returns true if the observable has recorded measurements after the thermalization
+(equilibration) steps.  
+<hr> 
+<address>copyright (c) 1994-2004 by <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+ <br>
+</body>
+</html>

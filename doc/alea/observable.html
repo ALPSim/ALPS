@@ -1,217 +1,196 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: alea/observable.h</title>
+  <title>ALPS Project: alea/observable.h</title>
 </head>
-<body>
-
-<h1>
-ALPS Project: alps library</h1>
-
-<h2>
-Header file <b>observable.h</b></h2>
-This header contains the abstract base class for Monte
-Carlo measurements.
+ <body>
+  
+<h1> ALPS Project: alps library</h1>
+  
+<h2> Header file <b>observable.h</b></h2>
+ This header contains the abstract base class for Monte Carlo measurements. 
 <h3>Synopsis</h3>
-<blockquote>
-<pre>
-namespace alps {
-
-class NoMeasurementsError : public std::runtime_error {
-public:
-  NoMeasurementsError();
-};
-
-class Observable
-{
-public:
-  typedef uint32_t version_type;
-
-  Observable(const std::string&amp; n);
-
-  virtual Observable* clone() const = 0;
-
-  const std::string&amp; name() const;
-  void rename (const std::string&amp; newname);
-
-  virtual void reset(bool equilibrated=false) = 0;
-
-  virtual void output(std::ostream&) const = 0;
-  virtual void write_xml(std::ostream&, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const; 
-  virtual void write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const;
-
-  virtual uint32_t version_id() const =0;
-  virtual void save(ODump& dump) const;
-  virtual void load(IDump& dump);
-
-  virtual bool can_set_thermalization() const;
-  virtual void set_thermalization(uint32_t todiscard);
-  virtual uint32_t get_thermalization() const=0;
-
-  virtual bool is_signed() const;
-  virtual void set_sign_name(const std::string&amp; signname);
-  virtual void set_sign(const Observable&amp; sign);
-  virtual void clear_sign();
-  virtual const Observable&amp; sign() const;
-  virtual const std::string&amp; sign_name() const;
-
-  virtual uint32_t number_of_runs() const;
-  virtual Observable* get_run(uint32_t) const;
-
-  virtual void compact();
-};
-
-std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const Observable&amp; o);
-
-ODump& operator&lt;&lt;(ODump& od, const Observable& m);
-IDump& operator>>(IDump& id, Observable& m);
-
-}
-</pre></blockquote>
-
-
+ 
+<blockquote> 
+  <pre>namespace alps {<br><br>class NoMeasurementsError : public std::runtime_error {<br>public:<br>  NoMeasurementsError();<br>};<br><br>class Observable<br>{<br>public:<br>  typedef uint32_t version_type;<br><br>  Observable();<br>  Observable(const std::string&amp; n);<br>  Observable(const Observable&amp; o);<br>  virtual ~Observable();<br><br>  virtual Observable* clone() const = 0;<br><br>  const std::string&amp; name() const;<br>  void rename (const std::string&amp; newname);<br><br>  virtual void reset(bool equilibrated=false) = 0;<br><br>  virtual void output(std::ostream&amp;) const = 0;<br>  virtual void write_xml(std::ostream&amp;, const boost::filesystem::path&amp; fn_hdf5=boost::filesystem::path()) const; <br>  virtual void write_xml(oxstream&amp; oxs, const boost::filesystem::path&amp; fn_hdf5=boost::filesystem::path()) const;<br><br>  virtual uint32_t version_id() const =0;<br>  virtual void save(ODump&amp; dump) const;<br>  virtual void load(IDump&amp; dump);<br><br>  virtual bool can_set_thermalization() const;<br>  virtual void set_thermalization(uint32_t todiscard);<br>  virtual uint32_t get_thermalization() const=0;<br><br>  virtual bool is_signed() const;<br>  virtual void set_sign_name(const std::string&amp; signname);<br>  virtual void set_sign(const Observable&amp; sign);<br>  virtual void clear_sign();<br>  virtual const Observable&amp; sign() const;  <br>  virtual const Observable&amp; signed_observable() const;<br>  virtual const std::string&amp; sign_name() const;<br><br>  virtual uint32_t number_of_runs() const;<br>  virtual Observable* get_run(uint32_t) const;<br><br>  virtual void compact();<br><br>  template &lt;class T&gt; void operator&lt;&lt;(const T&amp; x);<br>};<br><br>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const Observable&amp; o);<br><br>ODump&amp; operator&lt;&lt;(ODump&amp; od, const Observable&amp; m);<br>IDump&amp; operator&gt;&gt;(IDump&amp; id, Observable&amp; m);<br><br>}<br></pre>
+</blockquote>
+   
 <h3>The <tt>NoMeasurementsError</tt> class</h3>
-An exception of type <tt>NoMeasurementsError</tt> gets thrown when
-results of measurements are accessed for an observable which has
-not stored any measurement. E.g. the mean value being accessed before
-the equilibration phase has finished.
+ An exception of type <tt>NoMeasurementsError</tt> gets thrown when results
+of measurements are accessed for an observable which has not stored any measurement.
+E.g. the mean value being accessed before the equilibration phase has finished. 
 <h3>The <tt>Observable</tt> abstract base class</h3>
+ 
 <h4>Member functions</h4>
-<blockquote><pre>
-typedef uint32_t version_type;
-</pre></blockquote>
-is an integer storing a unique integer identifier of the derived leaf class.
-<blockquote><pre>
-Observable(const std::string&amp; n);
-</pre></blockquote>
-creates an observable with a given name. Every observable has a name.
-<blockquote><pre>
-virtual Observable* clone() const = 0;
-</pre></blockquote>
-copies the observable and returns a pointer to the copy.
-<blockquote><pre>
-const std::string&amp; name() const;
-</pre></blockquote>
-returns the name of the observable.
-<blockquote><pre>
-void rename(const std::string&amp; newname);
-</pre></blockquote>
-renames the observable. This is only possible for an <tt>Observable</tt> not in an <tt>ObservableSet</tt>, otherwise a <tt>std::runtime_error</tt> is thrown.
-<blockquote><pre>
-virtual void reset(bool equilibrated=false) = 0;
-</pre></blockquote>
-resets the observable and restarts the collection of measurements.
-If the argument is false, the observable collects information during
-an equilibration phase, while it collects real measurements of the
-argument is true.
-<P>
-<B>Note:</B> This function has to be called with a <tt>true</tt> argument
-before any real measurements are recorded.
-<blockquote><pre>
-virtual void output(std::ostream&) const = 0;
-</pre></blockquote>
-writes the results of the collected measurements to a <tt>std::ostream</tt>.
-<blockquote><pre>
-virtual void write_xml(std::ostream&, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const; 
-virtual void write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const;
-</pre></blockquote>
-writes the results of the measurement in XML, using the schema presented
-at <A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org</A>
-to a  <tt>std::ostream</tt>. If time series information is present and a second nonempty argument the time series information is written into a file specified by that name.
-<blockquote><pre>
-virtual uint32_t version_id() const =0;
-</pre></blockquote>
-returns a unique integer identifier for the leaf class, used in 
-serialization and deserialization of inhomogeneous collections of
-observables.
-<blockquote><pre>
-virtual void save(ODump& dump) const;
-virtual void load(IDump& dump);
-</pre></blockquote>
-are virtual functions used to implement serialization and deserialization.
-<blockquote><pre>
-virtual bool can_set_thermalization() const;
-</pre></blockquote>
-returns true if the thermalization (equilibration) time
-can be changed after the measurements have been performed.
-<blockquote><pre>
-virtual void set_thermalization(uint32_t todiscard);
-</pre></blockquote>
-sets the thermalization (equilibration) time to discard the given number
-of measurements. Throws <tt>std::logic_error</tt> if the
-thermalization (equilibration)  time cannot be changed for the observable.
-<blockquote><pre>
-virtual uint32_t get_thermalization() const=0;
-</pre></blockquote>
-returns the thermalization (equilibration) time. 
-<blockquote><pre>
-virtual bool is_signed() const;
-</pre></blockquote>
-returns <tt>true</tt> if the observable has a sign or phase problem.
-<blockquote><pre>
-virtual void set_sign_name(const std::string&amp; signname);
-</pre></blockquote>
-sets the name of the observable containing the sign or phase.
-Throws a <tt>std::logic_error</tt> for observables without a sign or
-phase problem.
-<blockquote><pre>
-virtual void set_sign(const Observable&amp; sign);
-</pre></blockquote>
-sets the observable containing the sign or phase. A pointer
-is stored with the observable. Throws a <tt>std::logic_error</tt> 
-for observables without a sign or
-phase problem.
-<blockquote><pre>
-virtual void clear_sign();
-</pre></blockquote>
-removes any previously set sign or phase observable.
-Throws a <tt>std::logic_error</tt> for observables without a sign or
-phase problem.
-<blockquote><pre>
-virtual const Observable&amp; sign() const;
-</pre></blockquote>
-returns a reference to the sign or phase observable. 
-Throws a <tt>std::runtime_error</tt> if no sign or phase observable
-has been set.
-Throws a <tt>std::logic_error</tt> for observables without a sign or
-phase problem.
-<blockquote><pre>
-virtual const std::string&amp; sign_name() const;
-</pre></blockquote>
-returns the name of the sign or phase observables.
-Throws a <tt>std::logic_error</tt> for observables without a sign or
-phase problem.
-<blockquote><pre>
-virtual uint32_t number_of_runs() const;
-</pre></blockquote>
-returns the number of runs (time series) which have contributed to
-this observable.
-<blockquote><pre>
-virtual Observable* get_run(uint32_t) const;
-</pre></blockquote>
-creates an observable containing data from only one specified
-run (time series).
-<blockquote><pre>
-virtual void compact();
-</pre></blockquote>
-compacts the observable, reducing the memory allocation, while
-still enabling access to the most important results. Usually the 
-ability to modify the observable (e.g. change thermalization,
-get crosscorrelations, ...) gets lost though.
+ 
+<blockquote>
+  <pre>typedef uint32_t version_type;<br></pre>
+</blockquote>
+ is an integer storing a unique integer identifier of the derived leaf class.<br>
+<blockquote>
+  <pre>Observable();<br></pre>
+</blockquote>
+the default constructor. Note that the observable needs to be given a name
+before it can be used in an <a href="observableset.html"><tt>ObservableSet</tt></a>.<br>
+ 
+<blockquote>
+  <pre>Observable(const std::string&amp; n);<br></pre>
+</blockquote>
+ creates an observable with a given name. Every observable has a name.<br>
+  
+<blockquote>
+  <pre>Observable(const Observable&amp; o);<br></pre>
+</blockquote>
+is the copy constructor. A special copy constructor is needed, because information
+about which  <a
+ href="observableset.html"><tt>ObservableSet</tt></a>
+an observable belongs to is invalidated when copying.<br>
+<br>
+ creates an observable with a given name. Every observable has a name. 
+<blockquote>
+  <pre>virtual Observable* clone() const = 0;<br></pre>
+</blockquote>
+ copies the observable and returns a pointer to the copy. 
+<blockquote>
+  <pre>const std::string&amp; name() const;<br></pre>
+</blockquote>
+ returns the name of the observable. 
+<blockquote>
+  <pre>void rename(const std::string&amp; newname);<br></pre>
+</blockquote>
+ renames the observable. This is only possible for an <tt>Observable</tt>
+not in an&nbsp; <a
+ href="observableset.html"><tt>ObservableSet</tt></a>,
+otherwise a <tt>std::runtime_error</tt> is thrown. 
+<blockquote>
+  <pre>virtual void reset(bool equilibrated=false) = 0;<br></pre>
+</blockquote>
+ resets the observable and restarts the collection of measurements. If the
+argument is false, the observable collects information during an equilibration
+phase, while it collects real measurements of the argument is true. 
+<p> <b>Important note:</b> This function has to be called with a <tt>true</tt>
+argument before any real measurements are recorded. </p>
+<blockquote>
+  <pre>virtual void output(std::ostream&amp;) const = 0;<br></pre>
+</blockquote>
+ writes the results of the collected measurements to a <tt>std::ostream</tt>.
+<blockquote>
+  <pre>virtual void write_xml(oxstream&amp; oxs, const boost::filesystem::path&amp; fn_hdf5=boost::filesystem::path()) const;<br></pre>
+</blockquote>
+ writes the results of the measurement in XML, using the schema presented 
+at <a href="http://xml.comp-phys.org/">http://xml.comp-phys.org</a> to an
+ X. If time series information is present and a second nonempty argument
+the time series information is written into a file specified by that name. 
+<blockquote>
+  <pre>virtual uint32_t version_id() const =0;<br></pre>
+</blockquote>
+ returns a unique integer identifier for the leaf class, used in  serialization
+and deserialization of inhomogeneous collections of observables. 
+<blockquote>
+  <pre>virtual void save(ODump&amp; dump) const;<br>virtual void load(IDump&amp; dump);<br></pre>
+</blockquote>
+ are virtual functions used to implement serialization and deserialization. 
+<blockquote>
+  <pre>virtual bool can_set_thermalization() const;<br></pre>
+</blockquote>
+ returns true if the thermalization (equilibration) time can be changed after
+the measurements have been performed. 
+<blockquote>
+  <pre>virtual void set_thermalization(uint32_t todiscard);<br></pre>
+</blockquote>
+ sets the thermalization (equilibration) time to discard the given number 
+of measurements. Throws <tt>std::logic_error</tt> if the thermalization (equilibration)
+ time cannot be changed for the observable. 
+<blockquote>
+  <pre>virtual uint32_t get_thermalization() const=0;<br></pre>
+</blockquote>
+ returns the thermalization (equilibration) time.  
+<blockquote>
+  <pre>virtual bool is_signed() const;<br></pre>
+</blockquote>
+ returns <tt>true</tt> if the observable has a sign or phase problem. 
+<blockquote>
+  <pre>virtual void set_sign_name(const std::string&amp; signname);<br></pre>
+</blockquote>
+ sets the name of the observable containing the sign or phase. Throws a <tt>std::logic_error</tt>
+for observables without a sign or phase problem. 
+<blockquote>
+  <pre>virtual void set_sign(const Observable&amp; sign);<br></pre>
+</blockquote>
+ sets the observable containing the sign or phase. A pointer is stored with
+the observable. Throws a <tt>std::logic_error</tt>  for observables without
+a sign or phase problem. 
+<blockquote>
+  <pre>virtual void clear_sign();<br></pre>
+</blockquote>
+ removes any previously set sign or phase observable. Throws a <tt>std::logic_error</tt>
+for observables without a sign or phase problem. 
+<blockquote>
+  <pre>virtual const Observable&amp; sign() const;<br></pre>
+</blockquote>
+ returns a reference to the sign or phase observable.  Throws a <tt>std::runtime_error</tt>
+if no sign or phase observable has been set. Throws a <tt>std::logic_error</tt>
+for observables without a sign or phase problem.<br>
+<blockquote>
+  <pre>virtual const Observable&amp; signed_observable() const;<br></pre>
+</blockquote>
+ returns a reference to the observable which records the signed measurements
+(i.e. recording the product of sign an observable, before division by the
+average sign). Throws a <tt>std::logic_error</tt> for observables without
+a sign or phase problem. 
+<blockquote>
+  <pre>virtual const std::string&amp; sign_name() const;<br></pre>
+</blockquote>
+ returns the name of the sign or phase observables. Throws a <tt>std::logic_error</tt>
+for observables without a sign or phase problem. 
+<blockquote>
+  <pre>virtual uint32_t number_of_runs() const;<br></pre>
+</blockquote>
+ returns the number of runs (time series) which have contributed to this
+observable. 
+<blockquote>
+  <pre>virtual Observable* get_run(uint32_t) const;<br></pre>
+</blockquote>
+ creates an observable containing data from only one specified run (time
+series). 
+<blockquote>
+  <pre>virtual void compact();<br></pre>
+</blockquote>
+ compacts the observable, reducing the memory allocation, while still enabling
+access to the most important results. Usually the  ability to modify the
+observable (e.g. change thermalization, get crosscorrelations, ...) gets
+lost though.<br>
+<blockquote>
+  <pre>template &lt;class T&gt; void operator&lt;&lt;(const T&amp; x);<br></pre>
+</blockquote>
+is a helper function, dispatiching to the derived class:<br>
+<ul>
+  <li>if the type <tt>T</tt> is derived from <tt>Observable</tt>, it is attempted
+to merge the observable <tt>x</tt> with the current object, combining the
+measurements.</li>
+  <li>for any other type, if the current object is also derived from <a
+ href="recordableobservable.html"><tt>RecordableObservable&lt;T&gt;</tt></a>,
+a typecast to RecordableObservable is performed, and a measurement is recorded.
+This allows easy recording of measurements without the need of a type cast.</li>
+  <li>in all other cases a <tt>std::logic_error</tt> is thrown.<br>
+  </li>
+</ul>
+ 
 <h4>I/O operators</h4>
-<blockquote><pre>
-std::ostream&amp; operator<<(std::ostream&amp; out, const alps::Observable&amp; o);
-</pre></blockquote>
-calls the <tt>output</tt> function of an <tt>Observable</tt> to write it
-to a <tt>std::ostream</tt>.
-<blockquote><pre>
-ODump& operator&lt;&lt;(ODump& od, const Observable& m);
-IDump& operator>>(IDump& id, Observable& m);
-</pre></blockquote>
-serializes and deserializes an <tt>Obseravble</tt> object. They call the <tt>save</tt> and <tt>load</tt> functions of the obseravble.
-<HR>
-<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
-</body>
-</html>
-
+ 
+<blockquote>
+  <pre>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const alps::Observable&amp; o);<br></pre>
+</blockquote>
+ calls the <tt>output</tt> function of an <tt>Observable</tt> to write it 
+to a <tt>std::ostream</tt>. 
+<blockquote>
+  <pre>ODump&amp; operator&lt;&lt;(ODump&amp; od, const Observable&amp; m);<br>IDump&amp; operator&gt;&gt;(IDump&amp; id, Observable&amp; m);<br></pre>
+</blockquote>
+ serializes and deserializes an <tt>Obseravble</tt> object. They call the
+<tt>save</tt> and <tt>load</tt> functions of the obseravble. 
+<hr> 
+<address>copyright (c) 1994-2003 by <a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+ <br>
 </body>
 </html>
