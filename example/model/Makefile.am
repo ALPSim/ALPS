@@ -9,7 +9,7 @@ print_numeric_SOURCES = print_numeric.C matrix.h
 print_symbolic_SOURCES = print_symbolic.C matrix.h 
 
 noinst_HEADERS = matrix.h
-dist_noinst_DATA = lattices.xml models.xml parm_numeric parm_symbolic
+dist_noinst_DATA = parm_numeric parm_symbolic
 
 .PHONY : test tests example examples
 test tests :
