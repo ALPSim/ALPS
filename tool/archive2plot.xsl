@@ -101,8 +101,18 @@
          <xsl:call-template name="PrintToken">
            <xsl:with-param name="token" select="$axis_token"/>
            <xsl:with-param name="error" select="'true'"/>
-         </xsl:call-template>         
-         <xsl:apply-templates select="ERROR"/>
+         </xsl:call-template>      
+	 <xsl:choose>
+  	   <xsl:when test="ERROR/@converged = 'no'">   
+	     <xsl:value-of select="ERROR * 1000"/>
+           </xsl:when>
+  	   <xsl:when test="ERROR/@converged = 'maybe'">   
+	     <xsl:value-of select="ERROR * 1000"/>
+           </xsl:when>
+	   <xsl:otherwise>
+	     <xsl:value-of select="ERROR"/>
+           </xsl:otherwise>
+         </xsl:choose>
          <xsl:call-template name="PrintToken">
            <xsl:with-param name="token" select="$axis_token"/>
            <xsl:with-param name="close" select="'true'"/>
@@ -135,7 +145,17 @@
                <xsl:with-param name="token" select="$axis_token"/>
                <xsl:with-param name="error" select="'true'"/>
              </xsl:call-template>         
-             <xsl:apply-templates select="ERROR"/>
+   	     <xsl:choose>
+  	       <xsl:when test="ERROR/@converged = 'no'">   
+	         <xsl:value-of select="ERROR * 1000"/>
+               </xsl:when>
+  	       <xsl:when test="ERROR/@converged = 'maybe'">   
+	         <xsl:value-of select="ERROR * 1000"/>
+               </xsl:when>
+	       <xsl:otherwise>
+	         <xsl:value-of select="ERROR"/>
+               </xsl:otherwise>
+             </xsl:choose>
              <xsl:call-template name="PrintToken">
                <xsl:with-param name="token" select="$axis_token"/>
                <xsl:with-param name="close" select="'true'"/>
@@ -200,7 +220,19 @@
   <point>
     <x><xsl:value-of select="@indexvalue"/></x>
     <y><xsl:apply-templates select="MEAN"/></y>
-    <dy><xsl:apply-templates select="ERROR"/></dy>
+    <dy>
+      <xsl:choose>
+        <xsl:when test="ERROR/@converged = 'no'">   
+	  <xsl:value-of select="ERROR * 1000"/>
+        </xsl:when>
+  	<xsl:when test="ERROR/@converged = 'maybe'">   
+	  <xsl:value-of select="ERROR * 1000"/>
+        </xsl:when>
+	<xsl:otherwise>
+	  <xsl:value-of select="ERROR"/>
+        </xsl:otherwise>
+      </xsl:choose>
+    </dy>
   </point>
   <xsl:value-of select="$newline"/>
 </xsl:template>
