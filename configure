@@ -2003,13 +2003,13 @@ LIB_VERSION_INFO="-version-info 1:0:0"
 
 
 if test -f "$srcdir/src/alps/lattice.h"; then
-   ac_cv_alps_type="full"
+  ac_cv_alps_type="full"
   { echo "$as_me:$LINENO: starting configuration for ALPS Libraries version $PACKAGE_VERSION" >&5
 echo "$as_me: starting configuration for ALPS Libraries version $PACKAGE_VERSION" >&6;}
 else
+  ac_cv_alps_type="light"
   { echo "$as_me:$LINENO: starting configuration for ALPS Light Libraries version $PACKAGE_VERSION" >&5
 echo "$as_me: starting configuration for ALPS Light Libraries version $PACKAGE_VERSION" >&6;}
-  ac_cv_alps_type="light"
 fi
 
 
@@ -21096,6 +21096,8 @@ LIBTOOL='$(SHELL) $(top_builddir)/libtool'
 
 
 
+ac_cv_enable_shared="$enable_shared"
+ac_cv_enable_static="$enable_static"
 
 #
 # checking boost directory

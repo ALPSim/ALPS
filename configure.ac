@@ -61,11 +61,11 @@ undefine([lib_age])
 
 dnl Full or Light version
 if test -f "$srcdir/src/alps/lattice.h"; then
-   ac_cv_alps_type="full"
+  ac_cv_alps_type="full"
   AC_MSG_NOTICE([starting configuration for ALPS Libraries version $PACKAGE_VERSION])
 else
-  AC_MSG_NOTICE([starting configuration for ALPS Light Libraries version $PACKAGE_VERSION])
   ac_cv_alps_type="light"
+  AC_MSG_NOTICE([starting configuration for ALPS Light Libraries version $PACKAGE_VERSION])
 fi	
 AM_CONDITIONAL(ALPS_FULL, test "$ac_cv_alps_type" = "full")
 AM_CONDITIONAL(ALPS_LIGHT, test "$ac_cv_alps_type" = "light")
@@ -173,6 +173,8 @@ fi
 
 dnl libtool
 AC_PROG_LIBTOOL
+ac_cv_enable_shared="$enable_shared"
+ac_cv_enable_static="$enable_static"
 
 #
 # checking boost directory
