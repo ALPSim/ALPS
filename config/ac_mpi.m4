@@ -33,8 +33,12 @@ AC_DEFUN([AC_MPI],
   
   if test "$mpi" != no; then
     AC_MSG_CHECKING([for MPI root directory])
+    ll_root = "/usr/lpp/ppe.poe"
+    if test "x$MP_PREFIX" != x then
+      ll_root="$MP_PREFIX/ppe.poe"
+    fi
     if test -z "$mpi_dir"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local /usr/local/src; do
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local /usr/local/src $ll_root; do
         if test -f "$d/include/mpi.h" && test -d "$d/lib"; then
           mpi_dir="$d"
           break
