@@ -96,6 +96,10 @@ HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p)
 template <class T, class M>
 void HamiltonianMatrix<T,M>::build() const
 {
+#ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
+  using namespace alps;
+#endif
+
   // get Hamilton operator
   alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(parms_["MODEL"]));
   alps::Parameters p(parms_);
