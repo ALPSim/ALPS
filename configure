@@ -25648,7 +25648,7 @@ if test "$ac_cv_alps_type" = "full"; then
 
                                 ac_config_files="$ac_config_files test/lattice/Makefile test/lattice/lattices.xml test/lattice/parameters"
 
-                                          ac_config_files="$ac_config_files test/model/Makefile test/model/lattices.xml test/model/models.xml test/model/parameters"
+                                ac_config_files="$ac_config_files test/model/Makefile test/model/lattices.xml test/model/models.xml"
 
                                                                         ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/lattices.xml example/model/models.xml example/model/parm_symbolic example/model/parm_numeric"
 
@@ -26324,7 +26324,6 @@ do
   "test/model/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/model/Makefile" ;;
   "test/model/lattices.xml" ) CONFIG_FILES="$CONFIG_FILES test/model/lattices.xml" ;;
   "test/model/models.xml" ) CONFIG_FILES="$CONFIG_FILES test/model/models.xml" ;;
-  "test/model/parameters" ) CONFIG_FILES="$CONFIG_FILES test/model/parameters" ;;
   "example/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/Makefile" ;;
   "example/model/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/model/Makefile" ;;
   "example/scheduler/Makefile" ) CONFIG_FILES="$CONFIG_FILES example/scheduler/Makefile" ;;
