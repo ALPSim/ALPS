@@ -1,36 +1,41 @@
 #!/bin/sh
 
+# required version of autotools
+am_require="1.8.5"
+ac_require="2.59"
+lt_require="1.5.6"
+
+# location of config.h.in
+config_h_in="src/alps/config.h.in"
+
 have_autotools=yes
 
 am_version=`automake --version 2>&1 | head -1 | cut -d ' ' -f 4`
 ac_version=`autoconf --version 2>&1 | head -1 | cut -d ' ' -f 4`
 lt_version=`libtoolize --version 2>&1 | head -1 | cut -d ' ' -f 4`
 
-if test "x$am_version" != "x1.8.5"; then
+if test "x$am_version" != "x$am_require"; then
+  echo "Error: Required automake version $am_require, but found $am_version."
   have_autotools=no
 fi
 if test "x$ac_version" != "x2.59"; then
+  echo "Error: Required autoconf version $ac_require, but found $ac_version."
   have_autotools=no
 fi
 if test "x$lt_version" != "x1.5.6"; then
+  echo "Error: Required libtool version $lt_require, but found $lt_version."
   have_autotools=no
 fi
 
-if test "$have_autotools" = yes; then
-  set -x
-  aclocal -I config
-  libtoolize --force --copy
-  # autoheader
-  test -f src/alps/config.h.in && touch src/alps/config.h.in
-  automake --foreign --add-missing --copy
-  autoconf
-  rm -rf autom4te.cache
-else
-  echo "GNU Autotools not found, or version is too old.  Stop."
-  # set -x
-  # test -f aclocal.m4 && touch aclocal.m4
-  # test -f src/alps/config.h.in && touch src/alps/config.h.in
-  # find . -name Makefile.in | xargs touch
-  # test -f configure && touch configure
+if test "$have_autotools" = no; then
+  echo "Stop."
   exit -1
 fi
+
+set -x
+aclocal -I config
+libtoolize --force --copy
+test -f "$config_h_in" && touch "$config_h_in"
+automake --foreign --add-missing --copy
+autoconf
+rm -rf autom4te.cache

@@ -1,25 +1,32 @@
-/* This file contains wrapper-objects for the functions given in */
-/* the "itl/krylov" directory from the itl librarry version 4.0.0. */
-/* This wrapper-objects will be used in rayleigh.h, the Rayleigh */
-/* Quotient Iteration Algorithm, to solve the linear system  */
-/* y=(A-rho*I)^(-1)*x  */
-/* The containd algorithms are */
-/* cg         Conjugate Gradient(CG)  */
-/* cgs        Conjugate Gradient Squared  */
-/* bicg       BiConjugate Gradient  */
-/* gmres      Generalized Minimum Residual  */
-/* bicgstab   BiConjugate Gradient Stabilized  */
-/* qmr        Quasi-Minimal Residual  */
-/* tfqmr      Transpose Free Quasi-Minimal Residual  */
-/* gcr        Generalized Conjugate Residual  */
-/* cheby      Chebyshev Iteration  */
-/* richardson Preconditioned Richardson  */
-/* written by Mario R"utti for a project in Rechnergestuetzte Physik II */
-/* by M.Troyer at ETH Zurich, 4.July 2002 */
+/*****************************************************************************
+*
+* ALPS Project: Algorithms and Libraries for Physics Simulations
+*
+* ALPS Libraries
+*
+* Copyright (C) 2002 by Matthias Troyer <troyer@comp-phys.org>
+*
+* This software is part of the ALPS libraries, published under the ALPS
+* Library License; you can use, redistribute it and/or modify it under
+* the terms of the license, either version 1 or (at your option) any later
+* version.
+* 
+* You should have received a copy of the ALPS Library License along with
+* the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
+* available from http://alps.comp-phys.org/.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+* DEALINGS IN THE SOFTWARE.
+*
+*****************************************************************************/
 
 #ifndef KRYLOV_WRAPPER_H
 #define KRYLOV_WRAPPER_H
-
 
 #include <itl/krylov/cg.h>
 
@@ -50,7 +57,7 @@ template < class scalar_type >
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -105,7 +112,7 @@ class cgs_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -160,7 +167,7 @@ class bicg_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -216,7 +223,7 @@ class gmres_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -271,7 +278,7 @@ class bicgstab_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -327,7 +334,7 @@ class qmr_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -349,21 +356,21 @@ class qmr_wrapper
       switch (qmr_error_code)
       {
       case 1:
-	  throw std::runtime_error("ERROR in QMR_WRAPPER: no convergence after maximum iterations");
+          throw std::runtime_error("ERROR in QMR_WRAPPER: no convergence after maximum iterations");
       case 2:
-	  throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in rho");
+          throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in rho");
       case 3:
-	  throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in beta");
+          throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in beta");
       case 4:
-	  throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in gamma");
+          throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in gamma");
       case 5:
-	  throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in delta");
+          throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in delta");
       case 6:
-	  throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in ep");
+          throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in ep");
       case 7:
-	  throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in x");
+          throw std::runtime_error("ERROR in QMR_WRAPPER: breakdown in x");
       default:
-	throw std::runtime_error("ERROR in QMR_WRAPPER");
+        throw std::runtime_error("ERROR in QMR_WRAPPER");
       }
     }
   }
@@ -401,7 +408,7 @@ class tfqmr_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -423,17 +430,17 @@ class tfqmr_wrapper
       switch (error_code)
       {
       case 1:
-	  throw std::runtime_error("ERROR in TFQMR_WRAPPER: no convergence after maximum iterations");
+          throw std::runtime_error("ERROR in TFQMR_WRAPPER: no convergence after maximum iterations");
       case 2:
-	  throw std::runtime_error("ERROR in TFQMR_WRAPPER: breakdown in tau");
+          throw std::runtime_error("ERROR in TFQMR_WRAPPER: breakdown in tau");
       case 3:
-	  throw std::runtime_error("ERROR in TFQMR_WRAPPER: breakdown in alpha");
+          throw std::runtime_error("ERROR in TFQMR_WRAPPER: breakdown in alpha");
       case 4:
-	  throw std::runtime_error("ERROR in TFQMR_WRAPPER: breakdown in gamma");
+          throw std::runtime_error("ERROR in TFQMR_WRAPPER: breakdown in gamma");
       case 5:
-	  throw std::runtime_error("ERROR in TFQMR_WRAPPER: breakdown in rho");
+          throw std::runtime_error("ERROR in TFQMR_WRAPPER: breakdown in rho");
       default:
-	throw std::runtime_error("ERROR in TFQMR_WRAPPER");
+        throw std::runtime_error("ERROR in TFQMR_WRAPPER");
       }
     }
   }
@@ -471,7 +478,7 @@ class gcr_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -529,7 +536,7 @@ class cheby_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }
@@ -584,7 +591,7 @@ class richardson_wrapper
       Matrix unit(N_, N_);
       for(int i = 0; i < N_; i++)
       {
-	unit(i,i) = 1;
+        unit(i,i) = 1;
       }
       unit_ = unit;
     }

@@ -36,6 +36,7 @@ foreach $file (@ARGV) {
 	@emails = ();
 	$finish_preamble = 0;
 	$skip = 0;
+	$print_id = 0;
 	open(ORIG, "< $file") || die "Couldn't open $file";
 	open(NEW, "> $file_new") || die "Couldn't open $file_new";
 	foreach $line (<ORIG>) {
@@ -95,12 +96,15 @@ foreach $file (@ARGV) {
 				if ($id ne "") {
 				    $sk =~ s/\@ID\@/$id/;
 				    print NEW "$sk\n";
+				    $print_id=1;
 				}
 			    } else {
 				print NEW "$sk\n";
 			    }
 			}
-			print NEW "\n";
+			if ($print_id == 1) {
+			    print NEW "\n";
+			}
 		    }
 		}
 	    }

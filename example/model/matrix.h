@@ -112,13 +112,13 @@ void HamiltonianMatrix<T,M>::build() const
       unsigned int disordered_type=disordered_site_type(*it);
       unsigned int type=site_type(*it);
       site_visited[disordered_type]=true;
-	  // set coordinate in case of site disorder
-	  if (disordered_sites()) {
+      // set coordinate in case of site disorder
+      if (disordered_sites()) {
         throw_if_xyz_defined(p,*it); // check whether x, y, or z is set
         parms << coordinate_as_parameter(*it); // set x, y and z
-	  }
+      }
       site_matrix.insert(std::make_pair(disordered_type,get_fermionic_matrix(T(),ham.site_term(type),
-                ham.basis().site_basis(type),models_.operators(),parms)));
+        ham.basis().site_basis(type),models_.operators(),parms)));
     }
 
   // get all bond matrices
@@ -131,18 +131,18 @@ void HamiltonianMatrix<T,M>::build() const
     unsigned int btype  = bond_type(*it);
     unsigned int stype1 = site_type(source(*it));
     unsigned int stype2 = site_type(target(*it));
-	boost::tuple<unsigned int,unsigned int,unsigned int> type(disordered_btype,stype1,stype2);
+    boost::tuple<unsigned int,unsigned int,unsigned int> type(disordered_btype,stype1,stype2);
     if (!bond_visited[type]) {
-	  if (disordered_bonds()) {
+      if (disordered_bonds()) {
         throw_if_xyz_defined(p,*it); // check whether x, y, or z is set
         parms << coordinate_as_parameter(*it); // set x, y and z
-	  }
+      }
       bond_visited[type]=true;
       bond_matrix.insert(std::make_pair(type,get_fermionic_matrix(T(),ham.bond_term(btype),
-                              ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
-                              models_.operators(),parms)));
+        ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
+        models_.operators(),parms)));
     }
-  }  
+  }
 
   // create basis set
   std::cerr << "Creating basis set\n";
@@ -169,7 +169,7 @@ void HamiltonianMatrix<T,M>::build() const
         T val=mat[is][js].first;               // get matrix element
         if (alps::is_nonzero(val)) {           // if matrix element is nonzero
           state_type newstate=state;
-		  newstate[s]=js;					   // build target state
+          newstate[s]=js;                      // build target state
           int j = states.index(newstate);      // lookup target state
           if (j<states.size()) {
             if (mat[is][js].second) {
@@ -189,22 +189,22 @@ void HamiltonianMatrix<T,M>::build() const
   }
 
   // loop over bonds
-  for (int i=0;i<states.size();++i) {      // loop over source states
-	state_type state=states[i];           // get source state
+  for (int i=0;i<states.size();++i) {     // loop over source states
+    state_type state=states[i];           // get source state
     for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
       int s1=source(*it);
       int s2=target(*it);
-	  boost::multi_array<std::pair<T,std::pair<bool,bool> >,4>& mat = bond_matrix[boost::make_tuple(disordered_bond_type(*it),site_type(s1),site_type(s2))];
-      int is1=state[s1];                            // get source site states
+      boost::multi_array<std::pair<T,std::pair<bool,bool> >,4>& mat = bond_matrix[boost::make_tuple(disordered_bond_type(*it),site_type(s1),site_type(s2))];
+      int is1=state[s1];                           // get source site states
       int is2=state[s2];
-      for (int js1=0;js1<basis[s1].size();++js1) {  // loop over target site states
+      for (int js1=0;js1<basis[s1].size();++js1) { // loop over target site states
         for (int js2=0;js2<basis[s2].size();++js2) {
-          T val=mat[is1][is2][js1][js2].first;            // get matrix element
-          if (alps::is_nonzero(val)) {            // if nonzero matrix element
-            state_type newstate=state;            // prepare target state
-            newstate[s1]=js1;                       // build target state
+          T val=mat[is1][is2][js1][js2].first;     // get matrix element
+          if (alps::is_nonzero(val)) {             // if nonzero matrix element
+            state_type newstate=state;             // prepare target state
+            newstate[s1]=js1;                      // build target state
             newstate[s2]=js2;
-            int j = states.index(newstate);         // lookup target state
+            int j = states.index(newstate);        // lookup target state
             if (j<states.size()) {
               if (mat[is1][is2][js1][js2].second.first || mat[is1][is2][js1][js2].second.second) {
                 // calculate fermionic sign

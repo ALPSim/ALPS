@@ -749,8 +749,8 @@ uninstall-local :
 
 .PHONY : update-preamble
 update-preamble:
-	if test -f config/update_preamble; then \
-	  find . -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./config/update_preamble; \
+	if test -x "$(top_srcdir)/config/update_preamble"; then \
+	  find $(top_srcdir) -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs $(top_srcdir)/config/update_preamble; \
 	fi
 
 .PHONY : release snapshot boost-snapshot boost-sandbox-snapshot
