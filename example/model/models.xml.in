@@ -1,4 +1,14 @@
 <MODELS>
+<SITEBASIS name="spin">
+  <PARAMETER name="local_S" default="1/2"/>
+  <QUANTUMNUMBER name="S" min="local_S" max="local_S"/>
+  <QUANTUMNUMBER name="Sz" min="-S" max="S"/>
+</SITEBASIS>
+<SITEBASIS name="spin'">
+  <PARAMETER name="local_S" default="1/2"/>
+  <QUANTUMNUMBER name="S" min="local_S'" max="local_S'"/>
+  <QUANTUMNUMBER name="Sz" min="-S" max="S"/>
+</SITEBASIS>
 <SITEBASIS name="fermion">
   <QUANTUMNUMBER name="Nup" min="0" max="1" type="fermionic"/>
   <QUANTUMNUMBER name="Ndown" min="0" max="1" type="fermionic"/>
@@ -15,39 +25,44 @@
 </SITEBASIS>
 <SITEBASIS name="spin-1">
   <QUANTUMNUMBER name="Sz" min="-1" max="1"/>
+  <QUANTUMNUMBER name="S" min="1" max="1"/>
 </SITEBASIS>
 <SITEBASIS name="spin-1/2">
   <QUANTUMNUMBER name="Sz" min="-1/2" max="1/2"/>
+  <QUANTUMNUMBER name="S" min="1/2" max="1/2"/>
 </SITEBASIS>
 <SITEBASIS name="spin-3/2">
   <QUANTUMNUMBER name="Sz" min="-3/2" max="3/2"/>
+  <QUANTUMNUMBER name="S" min="3/2" max="3/2"/>
 </SITEBASIS>
-<SITEBASIS name="spin">
-  <PARAMETER name="S" default="1/2"/>
-  <QUANTUMNUMBER name="Sz" min="-S" max="S"/>
-</SITEBASIS>
-<BASIS name="spin-1/2">
-  <SITEBASIS ref="spin-1/2"/>
-</BASIS>
+
 <BASIS name="spin">
-  <SITEBASIS ref="spin"/>
+  <SITEBASIS type="0" ref="spin"/>
+  <SITEBASIS type="1" ref="spin'"/>
+  <CONSTRAINT quantumnumber="Sz" value="Sz_total"/>
 </BASIS>
 <BASIS name="boson">
   <SITEBASIS ref="boson"/>
+  <CONSTRAINT quantumnumber="N" value="N_total"/>
+</BASIS>
+<BASIS name="hardcore boson">
+  <SITEBASIS ref="hardcore boson"/>
+  <CONSTRAINT quantumnumber="N" value="N_total"/>
 </BASIS>
 <BASIS name="spinless fermion">
   <SITEBASIS ref="spinless fermion"/>
   <CONSTRAINT quantumnumber="N" value="N_total"/>
 </BASIS>
-<BASIS name="hardcore boson">
-  <SITEBASIS ref="hardcore boson"/>
+<BASIS name="fermion">
+  <SITEBASIS ref="fermion"/>
+  <CONSTRAINT quantumnumber="Nup" value="N_total/2+Sz_total"/>
+  <CONSTRAINT quantumnumber="Ndown" value="N_total/2-Sz_total"/>
 </BASIS>
 <BASIS name="Kondo lattice">
   <SITEBASIS type="0" ref="fermion"/>
-  <SITEBASIS type="1">
-    <QUANTUMNUMBER name="Sz" min="-1/2" max="1/2"/>
-  </SITEBASIS>
+  <SITEBASIS type="1" ref="spin-1/2"/>
 </BASIS>
+
 <OPERATOR name="Splus" matrixelement="sqrt(S*(S+1)-Sz*(Sz+1))">
   <CHANGE quantumnumber="Sz" change="1"/>
 </OPERATOR>
@@ -55,39 +70,62 @@
   <CHANGE quantumnumber="Sz" change="-1"/>
 </OPERATOR>
 <OPERATOR name="Sz" matrixelement="Sz"/>
-<OPERATOR name="bdag" matrixelement="sqrt(N+1)">
-  <CHANGE quantumnumber="N" change="1"/>
-</OPERATOR>
+
 <OPERATOR name="b" matrixelement="sqrt(N)">
   <CHANGE quantumnumber="N" change="-1"/>
 </OPERATOR>
 <OPERATOR name="bdag" matrixelement="sqrt(N+1)">
-  <CHANGE quantumnumber="N" change="-1"/>
+  <CHANGE quantumnumber="N" change="1"/>
 </OPERATOR>
+
 <OPERATOR name="c" matrixelement="1">
   <CHANGE quantumnumber="N" change="-1"/>
 </OPERATOR>
 <OPERATOR name="cdag" matrixelement="1">
   <CHANGE quantumnumber="N" change="1"/>
 </OPERATOR>
-<OPERATOR name="cdown" matrixelement="1">
-  <CHANGE quantumnumber="N" change="-1"/>
-  <CHANGE quantumnumber="Sz" change="1/2"/>
+
+<OPERATOR name="c_down" matrixelement="1">
+  <CHANGE quantumnumber="Ndown" change="-1"/>
 </OPERATOR>
-<OPERATOR name="cdown_dag" matrixelement="1">
-  <CHANGE quantumnumber="N" change="1"/>
-  <CHANGE quantumnumber="Sz" change="-1/2"/>
+<OPERATOR name="cdag_down" matrixelement="1">
+  <CHANGE quantumnumber="Ndown" change="1"/>
 </OPERATOR>
-<OPERATOR name="cup" matrixelement="1">
-  <CHANGE quantumnumber="N" change="-1"/>
-  <CHANGE quantumnumber="Sz" change="-1/2"/>
+<OPERATOR name="c_up" matrixelement="1">
+  <CHANGE quantumnumber="Nup" change="-1"/>
 </OPERATOR>
-<OPERATOR name="cup_dag" matrixelement="1">
-  <CHANGE quantumnumber="N" change="1"/>
-  <CHANGE quantumnumber="Sz" change="1/2"/>
+<OPERATOR name="cdag_up" matrixelement="1">
+  <CHANGE quantumnumber="Nup" change="1"/>
 </OPERATOR>
+
 <OPERATOR name="n" matrixelement="N"/>
-<HAMILTONIAN name="boson">
+<OPERATOR name="n_up" matrixelement="Nup"/>
+<OPERATOR name="n_down" matrixelement="Ndown"/>
+
+<HAMILTONIAN name="spin">
+  <PARAMETER name="Jz" default="J"/>
+  <PARAMETER name="Jxy" default="J"/>
+  <PARAMETER name="J" default="1"/>
+  <PARAMETER name="Jz'" default="J'"/>
+  <PARAMETER name="Jxy'" default="J'"/>
+  <PARAMETER name="J'" default="0"/>
+  <PARAMETER name="h" default="0"/>
+  <PARAMETER name="Gamma" default="0"/>
+  <PARAMETER name="local_S" default="1/2"/>
+  <PARAMETER name="local_S'" default="1/2"/>
+  <BASIS ref="spin"/>
+  <SITETERM>
+    -h*Sz-Gamma/2*(Splus+Sminus)
+  </SITETERM> 
+  <BONDTERM type="0" source="i" target="j">
+    Jz*Sz(i)*Sz(j)+Jxy/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
+  </BONDTERM>
+  <BONDTERM type="1" source="i" target="j">
+    Jz'*Sz(i)*Sz(j)+Jxy'/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
+  </BONDTERM>
+</HAMILTONIAN>
+
+<HAMILTONIAN name="boson Hubbard">
   <PARAMETER name="mu" default="0"/>
   <PARAMETER name="t" default="1"/>
   <PARAMETER name="V" default="0"/>
@@ -105,6 +143,7 @@
     -t'*(bdag(i)*b(j)+bdag(j)*b(i)) + V'*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
+
 <HAMILTONIAN name="hardcore boson">
   <PARAMETER name="mu" default="0"/>
   <PARAMETER name="t" default="1"/>
@@ -122,21 +161,26 @@
     -t'*(bdag(i)*b(j)+bdag(j)*b(i)) + V'*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
-<HAMILTONIAN name="spin">
-  <PARAMETER name="Jz" default="J"/>
-  <PARAMETER name="Jxy" default="J"/>
-  <PARAMETER name="J" default="1"/>
-  <PARAMETER name="h" default="0"/>
-  <PARAMETER name="Gamma" default="0"/>
-  <PARAMETER name="S" default="1/2"/>
-  <BASIS ref="spin"/>
+
+<HAMILTONIAN name="fermion Hubbard">
+  <PARAMETER name="mu" default="0"/>
+  <PARAMETER name="t" default="1"/>
+  <PARAMETER name="V" default="0"/>
+  <PARAMETER name="t'" default="0"/>
+  <PARAMETER name="V'" default="0"/>
+  <PARAMETER name="U" default="0"/>
+  <BASIS ref="fermion"/>
   <SITETERM>
-    -h*Sz-Gamma/2*(Splus+Sminus)
+    -mu*n+U*n*(n-1)/2
   </SITETERM> 
-  <BONDTERM source="i" target="j">
-    Jz*Sz(i)*Sz(j)+Jxy/2*(Splus(i)*Sminus(j)+Sminus(i)*Splus(j))
+  <BONDTERM type="0" source="i" target="j">
+    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) + V*n(i)*n(j)
+  </BONDTERM>
+  <BONDTERM type="1" source="i" target="j">
+    -t'*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) + V'*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
+
 <HAMILTONIAN name="spinless fermions">
   <PARAMETER name="mu" default="0"/>
   <PARAMETER name="t" default="1"/>
@@ -154,4 +198,25 @@
     -t'*(cdag(i)*c(j)+cdag(j)*c(i)) + V'*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
+</MODELS>
+
+<HAMILTONIAN name="Kondo lattice">
+  <PARAMETER name="mu" default="0"/>
+  <PARAMETER name="t" default="1"/>
+  <PARAMETER name="J'" default="1"/>
+  <BASIS ref="Kondo lattice"/>
+  <SITETERM type="0">
+    -mu*n
+  </SITETERM> 
+  <SITETERM type="1">
+    0
+  </SITETERM> 
+  <BONDTERM type="0" source="i" target="j">
+    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i))
+  </BONDTERM>
+  <BONDTERM type="1" source="i" target="j">
+    J/2*(Splus(j)*cdag_down(i)*c_up(i)+Sminus(j)*cdag_up(i)*c_down(i))+(J/2)*Sz(j)*(n_up(i)-n_down(i))
+  </BONDTERM>
+</HAMILTONIAN>
+
 </MODELS>
