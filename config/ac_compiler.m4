@@ -33,7 +33,7 @@ AC_DEFUN([AC_COMPILER],
 
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
-      [set compiler mode (MODE = gnu, gnu-3.3, kai, intel, intel64, como, hp, dec, sgi32, sgi64, cray, ibm, macos, macos-3.3, generic)]),
+      [set compiler mode (MODE = gnu, gnu-3.3, kai, intel, intel64, como, hp, dec, sgi32, sgi64, cray, ibm32, ibm64, macos, macos-3.3, generic)]),
     [
     case "x$withval" in
       xgnu-3.3 | xGNU-3.3 | xgcc-3.3 | xg++-3.3 )
@@ -78,8 +78,11 @@ AC_DEFUN([AC_COMPILER],
       xmacos* | xmac* | xosx*)
         COMPILER="macos"
         ;;
-      xibm* | xIBM* | xvacpp* | xxlC*)
-        COMPILER="ibm"
+      xibm | xibm32* | xIBM32* | xvacpp* | xxlC*)
+        COMPILER="ibm32"
+        ;;
+      xibm64* | xIBM64*)
+        COMPILER="ibm64"
         ;;
       xgeneric*)
         COMPILER="generic"
@@ -140,7 +143,11 @@ AC_DEFUN([AC_COMPILER],
       try_CC="cc"
       try_CXX="CC"
       ;;
-    ibm)
+    ibm32)
+      try_CC="xlc"
+      try_CXX="xlC"
+      ;;
+    ibm64)
       try_CC="xlc"
       try_CXX="xlC"
       ;;
@@ -288,11 +295,19 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_EH="-h exceptions"
       try_CXXFLAGS_NOEH="-h noexceptions"
       ;;
-    ibm)
-      try_CFLAGS_OPT="-O2"
-      try_CFLAGS_DEBUG=-"-g"
-      try_CXXFLAGS_OPT="-qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-qlanglvl=extended -g"
+    ibm32)
+      try_CFLAGS_OPT="-q32 -O2"
+      try_CFLAGS_DEBUG=-"-q32 -g"
+      try_CXXFLAGS_OPT="-q32 -qlanglvl=extended -O2"
+      try_CXXFLAGS_DEBUG="-q32 -qlanglvl=extended -g"
+      try_CXXFLAGS_EH=""
+      try_CXXFLAGS_NOEH=""
+      ;;
+    ibm32)
+      try_CFLAGS_OPT="-q64 -O2"
+      try_CFLAGS_DEBUG=-"-q64 -g"
+      try_CXXFLAGS_OPT="-q64 -qlanglvl=extended -O2"
+      try_CXXFLAGS_DEBUG="-q64 -qlanglvl=extended -g"
       try_CXXFLAGS_EH=""
       try_CXXFLAGS_NOEH=""
       ;;

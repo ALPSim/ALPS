@@ -4,6 +4,11 @@
 	which support complex numbers.  Use --enable-new-expression option
 	to enable the new Expression class.
 
+2004-06-13 Matthias Troyer <troyer@comp-phys.org>
+
+	* [alea] Simplified interface and added documentation for new interface
+	         and for signed observables.
+
 2004-06-09  Matthias Troyer <troyer@comp-phys.org>
 
         * [test,tool] Patched for new Boost snapshot and IBM compiler
