@@ -49,18 +49,9 @@ try {
   using namespace boost::numeric::ublas ;
   alps::Parameters parms;
   std::cin >> parms;
-  std::size_t s=(1<<int(parms["N"]));
-  std::cout << "compressed_matrix\n";
-  {
-  HamiltonianMatrix<double,compressed_matrix<double,row_major> > matrix(parms,s);
-  matrix.build();
-  }
-  std::cout << "vector_of_compressed_vector\n";
-  {
-  HamiltonianMatrix<double,generalized_vector_of_vector< double,
-	  row_major, vector<compressed_vector<double> > > > matrix(parms,s);
-  matrix.build();
-  }
+  HamiltonianMatrix<double,compressed_matrix<double,row_major> > matrix(parms);
+  std::cout << matrix << std::endl;
+
 #ifndef BOOST_NO_EXCEPTIONS
 }
 catch (std::exception& exc) {

@@ -1,12 +1,14 @@
-2003-10-13 Matthias Troyer <troyer@comp-phys.org>
+2003-10-14 Matthias Troyer <troyer@comp-phys.org>
 
-	* Converted model and lattice library to use oxstream for XML output
-        * Added momenta() functions to lattice to provide all momenta. Momenta
-          are for now in units of reciprocal lattice vectors. Calculation of
-	  reciprocal lattice vectors is not done yet since that would need
-	  LAPACK support.
-        * Started optimziation of basis sets for ED. Preliminary speedup > 5.
-	  Now performance bottleneck is in ublas and needs to be worked on
+	* [model,lattice] Converted model and lattice library to use oxstream 
+	  for XML output
+        * [lattice] Added momenta(), momentum()  and reciprocal_basis_vectors()
+ 	  functions to lattice to provide all momenta. 
+	* [lattice] Added XML support for changed sites and bonds (impurities)
+	  and site and bond disorder. Implementation of these features in
+  	  the graph creation is not yet done, and neither is depletion.
+        * [model] Started optimziation of basis sets for ED. Preliminary 
+	  speedup > 20. Now bottleneck is memory requirement for sparse matrix.
   
 2003-10-10 Synge Todo <wistaria@comp-phys.org>
 

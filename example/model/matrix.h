@@ -51,7 +51,7 @@ public:
   typedef T value_type;
   typedef M matrix_type;
 
-  HamiltonianMatrix (const alps::Parameters&, std::size_t s=1);
+  HamiltonianMatrix (const alps::Parameters&);
   void output(std::ostream& o, bool is_single=false) const 
   { 
     if (!built_) build(); 
@@ -79,12 +79,11 @@ std::ostream& operator<<(std::ostream& os, const HamiltonianMatrix<T,M>& mat)
 }
 
 template <class T, class M>
-HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p, std::size_t s)
+HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p)
   : graph_factory_(p),
     models_(p),
     parms_(p),
-    built_(false),
-    matrix_(s,s)
+    built_(false)
 {
 }
 
@@ -117,7 +116,7 @@ void HamiltonianMatrix<T,M>::build() const
                 ham.basis().site_basis(type),models_.simple_operators(),p)));
     }
 
-  std::cout << "Took " << alps::dclock()-t << " seconds\n";
+  std::cerr << "Took " << alps::dclock()-t << " seconds\n";
   t=alps::dclock();
 
   // get all bond matrices
@@ -140,17 +139,17 @@ void HamiltonianMatrix<T,M>::build() const
     }
   }
 
-  std::cout << "Took " << alps::dclock()-t << " seconds\n";
+  std::cerr << "Took " << alps::dclock()-t << " seconds\n";
   t=alps::dclock();
   
   // create basis set
-  std::cout << "Creating basis set\n";
+  std::cerr << "Creating basis set\n";
   alps::BasisStatesDescriptor<short> basis(ham.basis(),lattice());
   typedef alps::LookupBasisStates<unsigned int> basis_states_type;
   typedef basis_states_type::value_type state_type;
   basis_states_type states(basis);
 
-  std::cout << "Took " << alps::dclock()-t << " seconds" << std::endl;
+  std::cerr << "Took " << alps::dclock()-t << " seconds" << std::endl;
   t=alps::dclock();
   
   // build matrix
@@ -179,7 +178,6 @@ void HamiltonianMatrix<T,M>::build() const
     }
   }
 
-  std::cerr << "Took " << alps::dclock()-t << " seconds\n";
   double tot=0.;
   // loop over bonds
     for (int i=0;i<states.size();++i) {      // loop over source states
