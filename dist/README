@@ -3,11 +3,19 @@ README for ALPS developers
 $Id$
 
 
-* How to release a new version and prepare distribution files?
+* How to make a snapshot?
+
+1) Just type `make snapshot' in directory `dist', which generates the
+snapshot of the current CVS repository.  The file name is
+dist/alps-YYYYMMDD.tar.gz, where YYYY = year, MM = month, and DD =
+day.
+
+
+* How to release a new version and prepare the distribution file?
 
 1) Edit line 11 of configure.in.  ex)
 
-     AC_INIT([ALPS],[1.5]
+     AC_INIT([alps],[1.5]
 
    The second argument to AC_INIT should be a correct version number.
 
@@ -35,9 +43,7 @@ $Id$
    ex) for version 2.0    ->  use tag release_2_0
        for version 2.3b1  ->  use tag release_2_3b1
 
-9) (./configure && cd dist && make release) generates the following
-   files: (X.X = verison number)
+9) (./configure && cd dist && make release) generates
+alps-X.X.tar.gz, where X.X = verison number
 
-   alps-X.X.tar.gz             contains all the libraries
-
-10) Update web page.
+10) Copy the tar ball to the web server and update web page.
