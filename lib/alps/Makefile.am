@@ -27,6 +27,7 @@ src_RANDOM = \
   $(top_srcdir)/src/alps/random/rngfactory.C
 src_PARSER = \
   $(top_srcdir)/src/alps/parser/parser.C \
+  $(top_srcdir)/src/alps/parser/xmlattributes.C \
   $(top_srcdir)/src/alps/parser/xmlhandler.C \
   $(top_srcdir)/src/alps/parser/xmlparser.C \
   $(top_srcdir)/src/alps/parser/xmlstream.C \

@@ -85,6 +85,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/osiris/dump.C \
 	$(top_srcdir)/src/alps/osiris/xdrdump.C \
 	$(top_srcdir)/src/alps/parser/parser.C \
+	$(top_srcdir)/src/alps/parser/xmlattributes.C \
 	$(top_srcdir)/src/alps/parser/xmlhandler.C \
 	$(top_srcdir)/src/alps/parser/xmlparser.C \
 	$(top_srcdir)/src/alps/parser/xmlstream.C \
@@ -118,8 +119,8 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/boost/throw_exception.C
 am__objects_1 = copyright.lo parameterlist.lo parameters.lo
 am__objects_2 = dump.lo xdrdump.lo
-am__objects_3 = parser.lo xmlhandler.lo xmlparser.lo xmlstream.lo \
-	path.lo
+am__objects_3 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
+	xmlstream.lo path.lo
 am__objects_4 = rngfactory.lo
 am__objects_5 = nan.lo observable.lo observableset.lo
 am__objects_6 = disorder.lo latticedescriptor.lo \
@@ -372,6 +373,7 @@ src_RANDOM = \
 
 src_PARSER = \
   $(top_srcdir)/src/alps/parser/parser.C \
+  $(top_srcdir)/src/alps/parser/xmlattributes.C \
   $(top_srcdir)/src/alps/parser/xmlhandler.C \
   $(top_srcdir)/src/alps/parser/xmlparser.C \
   $(top_srcdir)/src/alps/parser/xmlstream.C \
@@ -672,6 +674,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/worker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workertask.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdrdump.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlattributes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlhandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlparser.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlstream.Plo@am__quote@
@@ -739,6 +742,13 @@ parser.lo: $(top_srcdir)/src/alps/parser/parser.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/parser.C' object='parser.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parser.lo `test -f '$(top_srcdir)/src/alps/parser/parser.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/parser.C
+
+xmlattributes.lo: $(top_srcdir)/src/alps/parser/xmlattributes.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlattributes.lo -MD -MP -MF "$(DEPDIR)/xmlattributes.Tpo" -c -o xmlattributes.lo `test -f '$(top_srcdir)/src/alps/parser/xmlattributes.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlattributes.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xmlattributes.Tpo" "$(DEPDIR)/xmlattributes.Plo"; else rm -f "$(DEPDIR)/xmlattributes.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parser/xmlattributes.C' object='xmlattributes.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xmlattributes.lo `test -f '$(top_srcdir)/src/alps/parser/xmlattributes.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlattributes.C
 
 xmlhandler.lo: $(top_srcdir)/src/alps/parser/xmlhandler.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xmlhandler.lo -MD -MP -MF "$(DEPDIR)/xmlhandler.Tpo" -c -o xmlhandler.lo `test -f '$(top_srcdir)/src/alps/parser/xmlhandler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/xmlhandler.C; \
