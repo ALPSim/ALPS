@@ -1,3 +1,13 @@
+2004-06-02 Synge Todo <wistaria@comp-phys.org>
+
+	* ss_20040519_am branch (tag ss_20040602_am) merged into the
+	trunk.
+	
+2004-05-19 Synge Todo <wistaria@comp-phys.org>
+
+	* [config] New configuration scripts with Automake and Libtool
+	(ss_20040519_am branch).
+	
 2004-04-27 Matthias Troyer <troyer@comp-phys.org>
 
 	* [alea] Added first tests for sign problem

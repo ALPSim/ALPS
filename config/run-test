@@ -1,0 +1,96 @@
+#! /bin/sh
+
+if test -z "$2"; then
+  echo usage: $0 srcdir program
+  exit -1
+fi
+
+srcdir="$1"
+prog=`basename $2`
+
+if test -f ${prog}.input; then
+  if test -f ${prog}.output; then
+    echo ./${prog} '<' ${prog}.input '|' diff ${prog}.output -
+    ./${prog} < ${prog}.input | diff ${prog}.output -
+  elif test -f ${srcdir}/${prog}.output; then
+    echo ./${prog} '<' ${prog}.input '|' diff ${srcdir}/${prog}.output -
+    ./${prog} < ${prog}.input | diff ${srcdir}/${prog}.output -
+  elif test -f ${prog}.op; then
+    echo ./${prog} '<' ${prog}.input '|' diff ${prog}.op -
+    ./${prog} < ${prog}.input | diff ${prog}.op -
+  elif test -f ${srcdir}/${prog}.op; then
+    echo ./${prog} '<' ${prog}.input '|' diff ${srcdir}/${prog}.op -
+    ./${prog} < ${prog}.input | diff ${srcdir}/${prog}.op -
+  else
+    echo ./${prog} '<' ${prog}.input
+    ./${prog} < ${prog}.input
+  fi
+elif test -f ${srcdir}/${prog}.input; then
+  if test -f ${prog}.output; then
+    echo ./${prog} '<' ${srcdir}/${prog}.input '|' diff ${prog}.output -
+    ./${prog} < ${srcdir}/${prog}.input | diff ${prog}.output -
+  elif test -f ${srcdir}/${prog}.output; then
+    echo ./${prog} '<' ${srcdir}/${prog}.input '|' diff ${srcdir}/${prog}.output -
+    ./${prog} < ${srcdir}/${prog}.input | diff ${srcdir}/${prog}.output -
+  elif test -f ${prog}.op; then
+    echo ./${prog} '<' ${srcdir}/${prog}.input '|' diff ${prog}.op -
+    ./${prog} < ${srcdir}/${prog}.input | diff ${prog}.op -
+  elif test -f ${srcdir}/${prog}.op; then
+    echo ./${prog} '<' ${srcdir}/${prog}.input '|' diff ${srcdir}/${prog}.op -
+    ./${prog} < ${srcdir}/${prog}.input | diff ${srcdir}/${prog}.op -
+  else
+    echo ./${prog} '<' ${srcdir}/${prog}.input
+    ./${prog} < ${srcdir}/${prog}.input
+  fi
+elif test -f ${prog}.ip; then
+  if test -f ${prog}.output; then
+    echo ./${prog} '<' ${prog}.ip '|' diff ${prog}.output -
+    ./${prog} < ${prog}.ip | diff ${prog}.output -
+  elif test -f ${srcdir}/${prog}.output; then
+    echo ./${prog} '<' ${prog}.ip '|' diff ${srcdir}/${prog}.output -
+    ./${prog} < ${prog}.ip | diff ${srcdir}/${prog}.output -
+  elif test -f ${prog}.op; then
+    echo ./${prog} '<' ${prog}.ip '|' diff ${prog}.op -
+    ./${prog} < ${prog}.ip | diff ${prog}.op -
+  elif test -f ${srcdir}/${prog}.op; then
+    echo ./${prog} '<' ${prog}.ip '|' diff ${srcdir}/${prog}.op -
+    ./${prog} < ${prog}.ip | diff ${srcdir}/${prog}.op -
+  else
+    echo ./${prog} '<' ${prog}.ip
+    ./${prog} < ${prog}.ip
+  fi
+elif test -f ${srcdir}/${prog}.ip; then
+  if test -f ${prog}.output; then
+    echo ./${prog} '<' ${srcdir}/${prog}.ip '|' diff ${prog}.output -
+    ./${prog} < ${srcdir}/${prog}.ip | diff ${prog}.output -
+  elif test -f ${srcdir}/${prog}.output; then
+    echo ./${prog} '<' ${srcdir}/${prog}.ip '|' diff ${srcdir}/${prog}.output -
+    ./${prog} < ${srcdir}/${prog}.ip | diff ${srcdir}/${prog}.output -
+  elif test -f ${prog}.op; then
+    echo ./${prog} '<' ${srcdir}/${prog}.ip '|' diff ${prog}.op -
+    ./${prog} < ${srcdir}/${prog}.ip | diff ${prog}.op -
+  elif test -f ${srcdir}/${prog}.op; then
+    echo ./${prog} '<' ${srcdir}/${prog}.ip '|' diff ${srcdir}/${prog}.op -
+    ./${prog} < ${srcdir}/${prog}.ip | diff ${srcdir}/${prog}.op -
+  else
+    echo ./${prog} '<' ${srcdir}/${prog}.ip
+    ./${prog} < ${srcdir}/${prog}.ip
+  fi
+else
+  if test -f ${prog}.output; then
+    echo ./${prog} '|' diff ${prog}.output -
+    ./${prog} | diff ${prog}.output -
+  elif test -f ${srcdir}/${prog}.output; then
+    echo ./${prog} '|' diff ${srcdir}/${prog}.output -
+    ./${prog} | diff ${srcdir}/${prog}.output -
+  elif test -f ${prog}.op; then
+    echo ./${prog} '|' diff ${prog}.op -
+    ./${prog} | diff ${prog}.op -
+  elif test -f ${srcdir}/${prog}.op; then
+    echo ./${prog} '|' diff ${srcdir}/${prog}.op -
+    ./${prog} | diff ${srcdir}/${prog}.op -
+  else
+    echo ./${prog}
+    ./${prog}
+  fi
+fi

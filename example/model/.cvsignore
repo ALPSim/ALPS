@@ -1,4 +1,8 @@
 Makefile
 .DS_Store
+.deps
+.libs
+*.la
+*.lo
 print_symbolic
 print_numeric

@@ -6,3 +6,5 @@
 
 * test/alea/simpleobseval.C fails
   (boost::random implementation change ?)
+
+* Compile fails in 64-bit mode for SGI

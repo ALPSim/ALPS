@@ -1,6 +1,35 @@
 #!/bin/sh
 
-echo "autoconf --force"
-autoconf --force
+have_autotools=yes
 
-rm -rf autom4te*.cache
+am_version=`automake --version 2>&1 | head -1 | cut -d ' ' -f 4`
+ac_version=`autoconf --version 2>&1 | head -1 | cut -d ' ' -f 4`
+lt_version=`libtoolize --version 2>&1 | head -1 | cut -d ' ' -f 4`
+
+if test "x$am_version" != "x1.8.5"; then
+  have_autotools=no
+fi
+if test "x$ac_version" != "x2.59"; then
+  have_autotools=no
+fi
+if test "x$lt_version" != "x1.5.6"; then
+  have_autotools=no
+fi
+
+if test "$have_autotools" = yes; then
+  set -x
+  aclocal -I config
+  libtoolize --force --copy
+  # autoheader
+  test -f src/alps/config.h.in && touch src/alps/config.h.in
+  automake --foreign --add-missing --copy
+  autoconf
+  rm -rf autom4te.cache
+else
+  echo "GNU Autotools not found, or version is too old"
+  set -x
+  test -f aclocal.m4 && touch aclocal.m4
+  test -f src/alps/config.h.in && touch src/alps/config.h.in
+  find . -name Makefile.in | xargs touch
+  test -f configure && touch configure
+fi

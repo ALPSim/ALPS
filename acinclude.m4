@@ -1,0 +1,8 @@
+sinclude(config/ac_compiler.m4)
+sinclude(config/ac_cxx_have_valarray.m4)
+sinclude(config/ac_cxx_namespaces.m4)
+sinclude(config/ac_hdf5.m4)
+sinclude(config/ac_mpi.m4)
+sinclude(config/ac_pthread.m4)
+sinclude(config/ac_pvm.m4)
+sinclude(config/ac_xmlparser.m4)

@@ -1,10 +1,16 @@
 Makefile
 .DS_Store
+.deps
+.libs
+*.la
+*.lo
 evaluate
 evaluate2
 main
 main_mpi
 main_pvm
 main2
+main2_mpi
+main2_pvm
 *.xml
 *.run*

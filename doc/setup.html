@@ -3,7 +3,7 @@
 <head>
   <title>ALPS Libraries: setup and installation</title>
 </head>
- <body>
+<body>
   
 <h1>ALPS Project</h1>
   
@@ -19,14 +19,18 @@
 
 <a name="download"></a> 
 <h3>Download</h3>
-  The latest version of the ALPS libraries can be downloaded from <a
- href="http://alps.comp-phys.org/">http://alps.comp-phys.org/</a> .  <a
- name="platforms"></a> 
 
+<p>The latest version of the ALPS libraries can be downloaded from <a
+href="http://alps.comp-phys.org/">http://alps.comp-phys.org/</a> .</p>
+
+<a name="platforms"></a>
 <h3>Supported Platforms and Compilers</h3>
-  The ALPS libraries have been tested on the following platforms and compilers: 
+
+<p>The ALPS libraries have been tested on the following platforms and
+compilers:
 <ul>
-  <li>Linux with GNU (g++ version &gt;= 3.1), and Intel C++ (icc version &gt;= 7.0) compilers  </li>
+  <li>Linux with GNU (g++ version &gt;= 3.1), and Intel C++ (icc
+  version &gt;= 7.0) compilers </li>
   <li>Compaq Tru64 UNIX with Compq C++ Compiler (cxx)  </li>
   <li>SGI IRIX with MIPSpro C++ Compiler (CC)  </li>
   <li>HP-UX with HP C++ Compiler (aCC)  </li>
@@ -34,40 +38,53 @@
   <li>IBM AIX with Visual Age C++ (xlC version 6.0) and GNU (g++ version
 &gt;= 3.1) compilers </li>
 </ul>
-  <a name="prerequisites"></a> 
+</p>
+
+<a name="prerequisites"></a> 
 <h3>Prerequisites</h3>
-  The ALPS libraries requires version 1.31 of the Boost C++ library, available
-at <a href="http://www.boost.org/">www.boost.org</a>.  
-<p>If support for additional features is desired, the following libraries
-are needed as well:  </p>
+
+<p>The ALPS libraries requires version 1.31 of the Boost C++ library,
+available at <a href="http://www.boost.org/">www.boost.org</a>.</p>
+
+<p>If support for additional features is desired, the following
+libraries are needed as well:
 <ul>
   <li>An XSLT transformer, such as <a
- href="http://xml.apache.org/xalan-c/index.html">Xalan</a> of the Apache
-project  or xsltproc of the Gnome <a href="http://xmlsoft.org/XSLT/">libxslt</a>
-for XML processing.  Xalan or xsltproc have to be in the standard path for
-executables.  </li>
-  <li><a href="http://www-unix.mcs.anl.gov/mpi/">MPI (Message Passing Interface)</a>
-and/or <a href="http://www.csm.ornl.gov/pvm/pvm_home.html">PVM (Parallel
-Virtual Machines)</a> libraries for message passing support  </li>
+  href="http://xml.apache.org/xalan-c/index.html">Xalan</a> of the
+  Apache project or xsltproc of the Gnome <a
+  href="http://xmlsoft.org/XSLT/">libxslt</a> for XML processing.
+  Xalan or xsltproc have to be in the standard path for
+  executables.</li>
+  <li><a href="http://www-unix.mcs.anl.gov/mpi/">MPI (Message Passing
+  Interface)</a> and/or <a
+  href="http://www.csm.ornl.gov/pvm/pvm_home.html">PVM (Parallel
+  Virtual Machines)</a> libraries for message passing support</li>
   <li><a href="http://hdf.ncsa.uiuc.edu/HDF5/">HDF5 (Hierarchical Data Format
-version 5)</a> library for efficient large-scale storage support   <!-- <li><a href="http://xml.apache.org/xerces-c/">Xerces C++</a> or <a href="http://expat.sourceforge.net/">Expat</a> XML parser for additional XML support --> 
-<!-- <li>POSIX Thread Library (pthread) for multi-thread support --> </li>
+version 5)</a> library for efficient large-scale storage support</li>
+  <li>[experimental] <a href="http://xml.apache.org/xerces-c/">Xerces
+  C++</a> or <a href="http://expat.sourceforge.net/">Expat</a> XML
+  parser for additional XML support</li>
+  <li>[experimental] POSIX Thread Library (pthread) for multi-thread
+  support</li>
 </ul>
-  <a name="installation"></a> 
+</p>
+
+<a name="installation"></a> 
 <h3>Installation</h3>
-  For easy setup, we have provided a <tt>configure</tt> script.  Just type 
- 
+
+<p>For easy setup, we have provided a <tt>configure</tt> script.  Just type 
 <blockquote>
   <pre>./configure<br></pre>
 </blockquote>
-  in the top directory of ALPS source tree.  The <tt>configure</tt> script
-accepts several command-line options.  See <a href="#options">Configure Options</a>
-for details.  After configuration, type  
+in the top directory of ALPS source tree.  The <tt>configure</tt>
+script accepts several command-line options.  See <a
+href="#options">Configure Options</a> for details.  After
+configuration, type
 <blockquote>
   <pre>make<br>make install<br></pre>
 </blockquote>
-  to build and install all the header files, libraries, and tools.  To compile
-example files, type  
+to build and install all the header files, libraries, and tools.  To
+compile example files, type
 <blockquote>
   <pre>make examples<br></pre>
 </blockquote>
@@ -75,26 +92,27 @@ example files, type
 <blockquote>
   <pre>make tests<br></pre>
 </blockquote>
-   <a name="options"></a> 
+</p>
+
+<a name="options"></a> 
 <h3>Configure Options</h3>
-  In this section we explain important options for ALPS <tt>configure</tt>
-script.  For complete list of options see the output of  
+
+<p>In this section we explain important options for
+ALPS <tt>configure</tt> script.  For complete list of options see the
+output of
 <blockquote>
   <pre>./configure --help<br></pre>
 </blockquote>
+</p>
   
 <ul>
- <li>Basic options  
-    <p> 
-    <table border="0" cellpadding="7" cellspacing="1" width="90%">
-  <tbody>
-        <tr>
-   <td valign="top" bgcolor="#00ccff" width="35%">
-          <p align="center"><b>Option</b></p>
-   </td>
-   <td valign="top" bgcolor="#00ccff">
-          <p align="center"><b>Description</b></p>
-   </td>
+<li>Basic options
+<p> 
+<table border="0" cellpadding="7" cellspacing="1" width="90%">
+<tbody>
+  <tr>
+    <td valign="top" bgcolor="#00ccff" width="35%"><p align="center"><b>Option</b></p></td>
+   <td valign="top" bgcolor="#00ccff"><p align="center"><b>Description</b></p></td>
   </tr>
   <tr>
    <td valign="top" bgcolor="#dddddd"><code>--prefix=PREFIX</code></td>
@@ -170,33 +188,24 @@ is <i>enabled</i>.</td>
     <td valign="top" bgcolor="#dddddd">By default the library is build  
           <i>with exception handling</i>.  This option disable exception
 handling.   </td>
-   </tr>
-  <tr>
-    <td valign="top" bgcolor="#dddddd"><code>--with-pthread</code></td>
-    <td valign="top" bgcolor="#dddddd">Enable pthread support.</td>
-   </tr>
- 
-      </tbody>
-    </table>
-  </p>
-  </li>
+  </tr>
+</tbody>
+</table>
+</p>
+</li>
 
-  <li>Optional libraries  
-    <p>Normally <tt>configure</tt> script will automatically find optional 
-libraries (MPI, PVM, HDF5, etc) installed in your system.  However, if these
-libraries are installed in the places different from usual ones, you must
-specify them by the following options.</p>
+<li>Optional libraries  
+<p>Normally <tt>configure</tt> script will automatically find optional
+libraries (MPI, PVM, HDF5, etc) installed in your system.  However, if
+these libraries are installed in the places different from usual ones,
+you must specify them by the following options.</p>
   
-    <p> 
-    <table border="0" cellpadding="7" cellspacing="1" width="90%">
-  <tbody>
-        <tr>
-   <td valign="top" bgcolor="#00ccff" width="35%">
-          <p align="center"><b>Option</b></p>
-   </td>
-   <td valign="top" bgcolor="#00ccff">
-          <p align="center"><b>Description</b></p>
-   </td>
+<p> 
+<table border="0" cellpadding="7" cellspacing="1" width="90%">
+<tbody>
+  <tr>
+   <td valign="top" bgcolor="#00ccff" width="35%"><p align="center"><b>Option</b></p></td>
+   <td valign="top" bgcolor="#00ccff"><p align="center"><b>Description</b></p></td>
   </tr>
   <tr>
    <td valign="top" bgcolor="#dddddd"><code>--with-mpi=DIR</code></td>
@@ -262,29 +271,25 @@ be installed in DIR/include and DIR/lib, respectivly.</td>
    <td valign="top" bgcolor="#dddddd"><code>--without-hdf5</code></td>
    <td valign="top" bgcolor="#dddddd">Disable HDF5 support.</td>
   </tr>
-  <!--
-
- <tr>
-  <td valign="top" bgcolor="#dddddd"><code>--with-palmxml</code></td>
-  <td valign="top" bgcolor="#dddddd">Use ALPS native XML parser.</td>
- </tr>
- <tr>
-  <td valign="top" bgcolor="#dddddd"><code>--with-expat</code><br><code>--with-expat=DIR</code></td>
-  <td valign="top" bgcolor="#dddddd">Use Expat XML parser.  Headers (eg. expat.h) and libraries (eg. libexpat.a) are assumed to be installed in DIR/include and DIR/lib, respectivly, if DIR is specified.</td>
- </tr>
- <tr>
-  <td valign="top" bgcolor="#dddddd"><code>--with-xerces</code><br><code>--with-xerces=DIR</code></td>
-  <td valign="top" bgcolor="#dddddd">Use Xerces C++ XML parser.  Headers (eg. xercesc/parsers/SAXParser.hpp) and libraries (eg. libxerces-c.a) are assumed to be installed in DIR/include and DIR/lib, respectivly, if DIR is specified.</td>
- </tr>
-
---> 
- 
-      </tbody>
-    </table>
-  </p>
-  </li>
+  <tr>
+    <td valign="top" bgcolor="#dddddd"><code>--with-expat</code><br><code>--with-expat=DIR</code></td>
+    <td valign="top" bgcolor="#dddddd">Use Expat XML parser.  Headers (eg. expat.h) and libraries (eg. libexpat.a) are assumed to be installed in DIR/include and DIR/lib, respectivly, if DIR is specified.</td>
+  </tr>
+  <tr>
+    <td valign="top" bgcolor="#dddddd"><code>--with-xerces</code><br><code>--with-xerces=DIR</code></td>
+    <td valign="top" bgcolor="#dddddd">Use Xerces C++ XML parser.  Headers (eg. xercesc/parsers/SAXParser.hpp) and libraries (eg. libxerces-c.a) are assumed to be installed in DIR/include and DIR/lib, respectivly, if DIR is specified.</td>
+  </tr>
+  <tr>
+    <td valign="top" bgcolor="#dddddd"><code>--with-pthread</code></td>
+    <td valign="top" bgcolor="#dddddd">Enable pthread support.</td>
+  </tr>
+</tbody>
+</table>
+</p>
+</li>
 </ul>
-  <a name="user"></a> 
+
+<a name="user"></a> 
 <h3>Compiling User Applications</h3>
   
 <p>In order to develop and compile user applications on top of the
@@ -293,29 +298,39 @@ with ALPS libraries.  ALPS header files are installed
 under <t>PREFIX/include</t>, where <t>PREFIX</t> is the path specified
 by the option to the configure script (see <a
 href="#options">Configure Options</a>).  ALPS libraries are installed
-under
-<t>PREFIX/lib</t>.  For example, you can compile and link your program as 
- </p>
+under <t>PREFIX/lib</t>.  For example, you can compile and link your
+program as
 <blockquote>
   <pre>CC -I/home/ALPS/include -L/home/ALPS/lib -o myprog myprog.C -lalps -lcomm-sgl -lm<br></pre>
 </blockquote>
-  For parallel applications using MPI (PVM), -lcomm-sgl should be replaced
-by <t>-lcomm-mpi</t> (<t>-lcomm-pvm</t>), and appropriate linker flags for
-MPI (PVM) should be appended (eg -lmpi).  You should link the ALPS libraries
-exactly in this order.  Otherwise you will have an error message from the
-linker.  
-<p>Note that during the ALPS setup and installation, a script file named
-<t>include.mk</t> is also prepared and installed, in which useful macros
-for <t>make</t> (such as <t>$(CPPFLAGS)</t> and <t>$(LIBS)</t>) are predefined.
- By using this file, which is installed as <t>PREFIX/share/ALPS/include.mk<t>,
-you can write a simple makefile for your application like  </t></t></p>
+For parallel applications using MPI (PVM), -lcomm-sgl should be
+replaced by <t>-lcomm-mpi</t> (<t>-lcomm-pvm</t>), and appropriate
+linker flags for MPI (PVM) should be appended (e.g. -lmpi).  You
+should link the ALPS libraries exactly in this order.  Otherwise you
+will have an error message from the linker.</p>
+
+<p>Note that during the ALPS setup and installation, a script file
+named <t>include.mk</t> is also prepared and installed, in which
+useful macros for <t>make</t> (such as <t>$(CPPFLAGS)</t>
+and <t>$(LIBS)</t>) are predefined.  By using this file, which is
+installed as <t>PREFIX/share/ALPS/include.mk<t>, you can write a
+simple makefile for your application, e.g.</t></t>
 <blockquote>
-  <pre>include $HOME/ALPS/share/alps/include.mk<br>myprog : myprog.C<br>        $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)<br>myprog_mpi : myprog.C<br>        $(CXX) $(CPPFLAGS_MPI) $(CXXFLAGS) -o myprog_mpi myprog.C $(LDFLAGS_MPI) $(LIBS_MPI)<br>myprog_pvm : myprog.C<br>        $(CXX) $(CPPFLAGS_PVM) $(CXXFLAGS) -o myprog_pvm myprog.C $(LDFLAGS_PVM) $(LIBS_PVM)<br></pre>
+  <pre>
+include $HOME/ALPS/share/alps/include.mk
+myprog : myprog.C
+        $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)
+myprog_mpi : myprog.C
+        $(CXX) $(CPPFLAGS_MPI) $(CXXFLAGS) -o myprog_mpi myprog.C $(LDFLAGS_MPI) $(LIBS_MPI)
+myprog_pvm : myprog.C
+        $(CXX) $(CPPFLAGS_PVM) $(CXXFLAGS) -o myprog_pvm myprog.C $(LDFLAGS_PVM) $(LIBS_PVM)
+  </pre>
 </blockquote>
+</p>
   
 <hr>  
-<address>(c) 1994-2004 by <a href="mailto:troyer@comp-phys.org">Matthias Troyer</a>
-and <a href="mailto:wistaria@comp-phys.org">Synge Todo</a></address>
-  <br>
+<address>Copyright (C) 1994-2004 by <a
+href="mailto:troyer@comp-phys.org">Matthias Troyer</a> and <a
+href="mailto:wistaria@comp-phys.org">Synge Todo</a></address>
 </body>
 </html>

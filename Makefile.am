@@ -1,0 +1,80 @@
+SUBDIRS = lib
+if ALPS_FULL
+SUBDIRS += tool example
+endif
+SUBDIRS += test src doc .
+
+distdir = alps-$(VERSION)
+distdir_light = alps-light-$(VERSION)
+
+dist_noinst_SCRIPTS = config/make_snapshot config/run-test config/update_preamble
+dist_noinst_DATA = ChangeLog ChangeLog.0 INSTALL TODO
+if ALPS_FULL
+dist_noinst_DATA += CITATIONS.txt LICENSE.txt README config/preamble.in
+endif
+if ALPS_LIGHT
+dist_noinst_DATA += LICENSE-light.txt README-light config/preamble-light.in
+endif
+
+nodist_data_DATA = config/config.site
+nodist_pkgdata_DATA = config/include.mk
+
+.PHONY : lib libs tool tools test tests example examples
+lib libs :
+	$(MAKE) -C lib all
+tool tools : libs
+	$(MAKE) -C tool all
+test tests : libs
+	$(MAKE) -C test check
+example examples : libs
+	$(MAKE) -C example check
+
+install-data-local : config/config.cache
+	@$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
+	sed s/ac_cv_env/save_ac_cv_env/ config/config.cache > $(pkgdatadir)/config.cache
+uninstall-local :
+	rm -f $(pkgdatadir)/config.cache
+
+.PHONY : update-preamble
+update-preamble:
+	if test -f config/update_preamble; then \
+	  find . -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./config/update_preamble; \
+	fi
+
+.PHONY : release snapshot boost-snapshot boost-sandbox-snapshot
+release snapshot :
+	rm -rf $(distdir) $(distdir_light)
+	$(MAKE) dist
+	tar zxf $(distdir).tar.gz
+	mv $(distdir) $(distdir_light)
+	cd $(distdir_light); \
+	  rm -f CITATIONS.txt LICENSE.txt README config/preamble.in; \
+	  rm -rf src/alps/alea* src/alps/lattice* src/alps/model* src/alps/plot* src/alps/scheduler* tool example test/alea test/lattice test/model test/plot doc/alea doc/index.html doc/lattice doc/model doc/scheduler doc/tool; \
+	  find . -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./config/update_preamble -l > /dev/null
+	if test "$@" = "snapshot"; then \
+	  date=`date +%Y%m%d`; \
+          mv -f $(distdir_light) alps-light-$$date; \
+	  tar zcf alps-light-$$date.tar.gz alps-light-$$date; \
+	  rm -rf alps-light-$$date; \
+	else \
+	  tar zcf $(distdir_light).tar.gz $(distdir_light); \
+	  rm -rf $(distdir_light); \
+	fi
+	tar zxf $(distdir).tar.gz
+	cd $(distdir); \
+	  rm -f LICENSE-light.txt README-light config/preamble-light.in doc/index-light.html
+	rm -f $(distdir).tar.gz
+	if test "$@" = "snapshot"; then \
+	  date=`date +%Y%m%d`; \
+          mv -f $(distdir) alps-$$date; \
+	  tar zcf alps-$$date.tar.gz alps-$$date; \
+	  rm -rf alps-$$date; \
+	else \
+	  tar zcf $(distdir_light).tar.gz $(distdir_light); \
+	  rm -rf $(distdir_light); \
+	fi
+
+boost-snapshot boost-sandbox-snapshot : 
+	if test -f $(top_srcdir)/config/make_snapshot; then \
+	  $(SHELL) $(top_srcdir)/config/make_snapshot $@; \
+	fi

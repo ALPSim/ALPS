@@ -1,10 +1,13 @@
 Makefile
+.DS_Store
+.deps
+.libs
+*.la
+*.lo
 compactrun
+convert2text
 convert2xml
-extracttext
 extracthtml
+extracttext
 parameter2xml
 plot2xsl.xsl
-convert2text
-checksign
-.DS_Store
