@@ -3,22 +3,26 @@
 
 <LATTICE name="chain lattice" dimension="1">
   <BASIS><VECTOR>1</VECTOR></BASIS>
+  <RECIPROCALBASIS><VECTOR>2*pi</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="square lattice" dimension="2">
   <PARAMETER name="a" default="1"/>
   <BASIS><VECTOR>a 0</VECTOR><VECTOR>0 a</VECTOR></BASIS>
+  <RECIPROCALBASIS><VECTOR>2*pi/a 0</VECTOR><VECTOR>0 2*pi/a</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="rectangular lattice" dimension="2">
   <PARAMETER name="a" default="1"/>
   <PARAMETER name="b" default="1"/>
   <BASIS><VECTOR>a 0</VECTOR><VECTOR>0 b</VECTOR></BASIS>
+  <RECIPROCALBASIS><VECTOR>2*pi/a 0</VECTOR><VECTOR>0 2*pi/b</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="triangular lattice" dimension="2">
   <PARAMETER name="a" default="1"/>
-  <BASIS><VECTOR>a 0</VECTOR><VECTOR>a*sqrt(3)/2 a/2</VECTOR></BASIS>
+  <BASIS><VECTOR>a 0</VECTOR><VECTOR>a/2 a*sqrt(3)/2</VECTOR></BASIS>
+  <RECIPROCALBASIS><VECTOR>0 4*pi/a/sqrt(3)</VECTOR><VECTOR>2*pi/a -2*pi/a/sqrt(3)</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="centered rectangular lattice" dimension="2">
@@ -32,6 +36,7 @@
   <PARAMETER name="b" default="1"/>
   <PARAMETER name="phi" default="Pi/2"/>
   <BASIS><VECTOR>a 0</VECTOR><VECTOR>b*sin(phi) b*cos(phi)</VECTOR></BASIS>
+  <RECIPROCALBASIS><VECTOR>2*pi/a -2*pi/a/tan(phi)</VECTOR><VECTOR>0 2*pi/b/cos(phi)</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="simple cubic lattice" dimension="3">
@@ -41,6 +46,11 @@
     <VECTOR>0 a 0</VECTOR>
     <VECTOR>0 0 a</VECTOR>
   </BASIS>
+  <RECIPROCALBASIS>
+    <VECTOR>2*pi/a 0 0</VECTOR>
+    <VECTOR>0 2*pi/a 0</VECTOR>
+    <VECTOR>0 0 2*pi/a</VECTOR>
+  </RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="face-centered cubic lattice" dimension="3">
@@ -50,6 +60,11 @@
     <VECTOR>a/2 0   a/2</VECTOR>
     <VECTOR>0   a/2 a/2</VECTOR>
   </BASIS>
+  <RECIPROCALBASIS>
+    <VECTOR>2*pi/a 2*pi/a -2*pi/a  </VECTOR>
+    <VECTOR>2*pi/a -2*pi/a   2*pi/a </VECTOR>
+    <VECTOR>-2*pi/a   2*pi/a 2*pi/a </VECTOR>
+  </RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="body-centered cubic lattice" dimension="3">
@@ -59,6 +74,11 @@
     <VECTOR> a/2 -a/2  a/2</VECTOR>
     <VECTOR>-a/2  a/2  a/2</VECTOR>
   </BASIS>
+  <RECIPROCALBASIS>
+    <VECTOR> 2*pi/a  2*pi/a 0</VECTOR>
+    <VECTOR> 2*pi/a 0  2*pi/a</VECTOR>
+    <VECTOR> 0  2*pi/a  2*pi/a</VECTOR>
+  </RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="tetragonal lattice" dimension="3">
@@ -69,6 +89,11 @@
     <VECTOR>0 a 0</VECTOR>
     <VECTOR>0 0 c</VECTOR>
   </BASIS>
+  <RECIPROCALBASIS>
+    <VECTOR>2*pi/a 0 0</VECTOR>
+    <VECTOR>0 2*pi/a 0</VECTOR>
+    <VECTOR>0 0 2*pi/c</VECTOR>
+  </RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="orthorhombic lattice" dimension="3">
@@ -80,17 +105,26 @@
     <VECTOR>0 b 0</VECTOR>
     <VECTOR>0 0 c</VECTOR>
   </BASIS>
+  <RECIPROCALBASIS>
+    <VECTOR>2*pi/a 0 0</VECTOR>
+    <VECTOR>0 2*pi/b 0</VECTOR>
+    <VECTOR>0 0 2*pi/c</VECTOR>
+  </RECIPROCALBASIS>
 </LATTICE>
-
 
 <LATTICE name="hexagonal lattice" dimension="2">
   <PARAMETER name="a" default="1"/>
   <PARAMETER name="c" default="1"/>
   <BASIS>
     <VECTOR>a           0   0</VECTOR>
-    <VECTOR>a*sqrt(3)/2 a/2 0</VECTOR>
+    <VECTOR>a/2 a*sqrt(3)/2 0</VECTOR>
     <VECTOR>0           0   c</VECTOR>
   </BASIS>
+  <RECIPROCALBASIS>
+    <VECTOR>2*pi/a    2*pi/a/sqrt(3)  0</VECTOR>
+    <VECTOR>0 4*pi/a/sqrt(3) 0</VECTOR>
+    <VECTOR>0           0   2*pi/c</VECTOR>
+  </RECIPROCALBASIS>
 </LATTICE>
 
 
