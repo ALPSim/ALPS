@@ -1,3 +1,9 @@
+2003-06-27 Matthias Troyer <troyer@comp-phys.org>
+
+	* [alps] Expression::simplify() added to remove unneded () from 
+          expressions. If there is demand further symbolic manipulations could
+          be added later (e.g. sorting, combining common factors, ...)
+
 2003-05-29 Matthias Troyer <troyer@comp-phys.org>
 
 	* [alea] Added reading of NaN mean values and variances
