@@ -1,6 +1,6 @@
-2004-08-13  Matthias Troyer <troyer@comp-phys.org>
+2004-08-18  Matthias Troyer <troyer@comp-phys.org>
 
-	* [model,example] Added preliminary fermion sign support
+	* [model,example] Added fermion sign support
 
 2004-08-11  Matthias Troyer <troyer@comp-phys.org>
 
