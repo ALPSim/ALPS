@@ -150,28 +150,6 @@ fi
 AC_SUBST(BOOST_DIR)
 BOOST_DIR="$ac_cv_boost_dir"
 
-# check whether Boost::configure is used or not
-AC_SUBST(BOOST_USER_CONFIG_H)
-AC_ARG_ENABLE(boost-config,
-  AC_HELP_STRING([--enable-boost-config],
-    [setup boost configuration header file]),
-  [
-  if test "x$enableval" != "xno"; then
-    ac_cv_boost_config=yes
-  fi
-  ]
-)
-AC_MSG_CHECKING([whether use boost configuration header file])
-test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
-if test "$ac_cv_boost_config" = yes; then
-  ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"
-  if test -f "$ac_cv_boost_dir/libs/config/configure"; then :; else
-    AC_MSG_RESULT
-    AC_MSG_ERROR([boost configure script was not found.])
-  fi
-fi
-AC_MSG_RESULT([$ac_cv_boost_config])
-  
 # tools
 AC_CONFIG_FILES(tool/Makefile)
 
@@ -253,7 +231,6 @@ AC_PTHREAD
 AC_SUBST(OBJ_BOOST_THREAD)
 if test "$ac_cv_have_pthread" = yes; then
   AC_DEFINE(ALPS_HAVE_PTHREAD)
-  OBJ_BOOST_THREAD='$(OBJ_BOOST_THREAD)'
 fi
 
 #
@@ -301,6 +278,89 @@ AC_XMLPARSER
 test "$ac_cv_xml_parser" = "expat" && AC_DEFINE(ALPS_HAVE_EXPAT_PARSER)
 test "$ac_cv_xml_parser" = "xerces" && AC_DEFINE(ALPS_HAVE_XERCES_PARSER)
 
+#
+# boost object libraries
+# 
+
+# check whether all boost libraries are compiled
+AC_ARG_WITH(boost-all,
+  AC_HELP_STRING([--with-boost-all],[compile all optional boost libraries]), [
+    if test "x$withval" == "xno"; then
+      ac_cv_boost_signals=no
+      ac_cv_boost_thread=no
+    else
+      ac_cv_boost_signals=yes
+      ac_cv_boost_thread=yes
+    fi
+  ]
+)
+
+# check whether boost::signals is compiled
+AC_ARG_WITH(boost-signals,
+  AC_HELP_STRING([--with-boost-signals],[compile boost::signals library]), [
+    if test "x$withval" == "xno"; then
+      ac_cv_boost_signals=no
+    else
+      ac_cv_boost_signals=yes
+    fi
+  ]
+)
+AC_MSG_CHECKING([whether boost::signals is compiled])
+AC_SUBST(OBJ_BOOST_SIGNALS)
+test -z "$ac_cv_boost_signals" && ac_cv_boost_signals=no
+if test "$ac_cv_boost_signals" = yes; then
+  OBJ_BOOST_SIGNALS='$(OBJ_BOOST_SIGNALS)'
+  AC_MSG_RESULT([yes])
+else
+  AC_MSG_RESULT([no])
+fi
+
+# check whether boost::thread is compiled
+AC_ARG_WITH(boost-thread,
+  AC_HELP_STRING([--with-boost-thread],[compile boost::thread library]), [
+    if test "x$withval" == "xno"; then
+      ac_cv_boost_thread=no
+    else
+      ac_cv_boost_thread=yes
+    fi
+  ]
+)
+AC_MSG_CHECKING([whether boost::thread is compiled])
+AC_SUBST(OBJ_BOOST_THREAD)
+test -z "$ac_cv_boost_thread" && ac_cv_boost_thread=no
+if test "$ac_cv_have_pthread" = yes; then
+  if test "$ac_cv_boost_thread" = yes; then
+    OBJ_BOOST_THREAD='$(OBJ_BOOST_THREAD)'
+    AC_MSG_RESULT([yes])
+  else
+    AC_MSG_RESULT([no])
+  fi
+else
+  AC_MSG_RESULT([no])
+fi
+
+# check whether Boost::configure is used or not
+AC_SUBST(BOOST_USER_CONFIG_H)
+AC_ARG_ENABLE(boost-config,
+  AC_HELP_STRING([--enable-boost-config],
+    [setup boost configuration header file]),
+  [
+  if test "x$enableval" != "xno"; then
+    ac_cv_boost_config=yes
+  fi
+  ]
+)
+AC_MSG_CHECKING([whether use boost configuration header file])
+test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
+if test "$ac_cv_boost_config" = yes; then
+  ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"
+  if test -f "$ac_cv_boost_dir/libs/config/configure"; then :; else
+    AC_MSG_RESULT
+    AC_MSG_ERROR([boost configure script was not found.])
+  fi
+fi
+AC_MSG_RESULT([$ac_cv_boost_config])
+  
 #
 # configuring boost
 #

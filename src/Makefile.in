@@ -52,11 +52,12 @@ HEADER_SCHEDULER = alps/scheduler.h alps/scheduler/info.h alps/scheduler/monteca
 
 HEADER = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_ALEA) $(HEADER_FIXEDCAP) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_SCHEDULER)
 
-OBJ_BOOST_DT = boost/greg_month.o boost/greg_weekday.o boost/gregorian_types.o boost/posix_time_types.o
-OBJ_BOOST_FS = boost/exception.o boost/operations_posix_windows.o boost/path_posix_windows.o
+OBJ_BOOST_DATE_TIME = boost/greg_month.o boost/greg_weekday.o boost/gregorian_types.o boost/posix_time_types.o
+OBJ_BOOST_FILESYSTEM = boost/exception.o boost/operations_posix_windows.o boost/path_posix_windows.o
 OBJ_BOOST_REGEX = boost/c_regex_traits.o boost/c_regex_traits_common.o boost/cpp_regex_traits.o boost/cregex.o boost/fileiter.o boost/instances.o boost/posix_api.o boost/regex.o boost/regex_debug.o boost/regex_synch.o boost/w32_regex_traits.o boost/wide_posix_api.o boost/winstances.o
+OBJ_BOOST_SIGNALS = boost/connection.o boost/signal_base.o boost/slot.o boost/trackable.o
 OBJ_BOOST_THREAD = boost/condition.o boost/exceptions.o boost/mutex.o boost/once.o boost/recursive_mutex.o boost/thread.o boost/threadmon.o boost/tss.o boost/xtime.o
-OBJ_BOOST = boost/throw_exception.o $(OBJ_BOOST_DT) $(OBJ_BOOST_FS) $(OBJ_BOOST_REGEX) @OBJ_BOOST_THREAD@
+OBJ_BOOST = boost/throw_exception.o $(OBJ_BOOST_DATE_TIME) $(OBJ_BOOST_FILESYSTEM) $(OBJ_BOOST_REGEX) @OBJ_BOOST_SIGNALS@ @OBJ_BOOST_THREAD@
 
 OBJ_ALPS = alps/evaluator.o alps/expression.o alps/parameterlist.o alps/parameters.o alps/copyright.o
 OBJ_ALEA = alps/alea/nan.o alps/alea/observable.o alps/alea/observableset.o
@@ -103,6 +104,8 @@ boost/%.o : $(BOOST_DIR)/libs/date_time/src/posix_time/%.cpp
 boost/%.o : $(BOOST_DIR)/libs/filesystem/src/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
 boost/%.o: $(BOOST_DIR)/libs/regex/src/%.cpp
+	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
+boost/%.o: $(BOOST_DIR)/libs/signals/src/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
 boost/%.o : $(BOOST_DIR)/libs/thread/src/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
