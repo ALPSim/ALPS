@@ -4,229 +4,238 @@
   <title>ALPS Project: lattice/graph_helper.h</title>
 </head>
   <body>
-    
+     
 <h1> ALPS Project: lattice library</h1>
-    
+     
 <h2>Header file: lattice/graph_helper.h</h2>
-    defines a class <tt>graph_helper</tt> which given a set of parameters 
-and an XML file containing lattices creates a lattice graph and provides easy
-access to its properties. By deriving from this class, all the graph functionality
-can easily be included in a simulation program.    
+     defines a class <tt>graph_helper</tt> which given a set of parameters
+ and an XML file containing lattices creates a lattice graph and provides
+easy access to its properties. By deriving from this class, all the graph
+functionality can easily be included in a simulation program.     
 <h3>Synopsis</h3>
-   
-<blockquote>     
-  <pre>namespace alps {<br>{<br><br>template &lt;class G=coordinate_graph_type&gt;<br>class graph_helper : public LatticeLibrary<br>{<br>public:<br>  typedef G graph_type;<br><br>  typedef typename graph_traits&lt;graph_type&gt;::vertex_iterator vertex_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::edge_iterator edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::out_edge_iterator out_edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::in_edge_iterator in_edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::edge_descriptor edge_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::vertex_descriptor vertex_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::vertices_size_type vertices_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::edges_size_type edges_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::degree_size_type degree_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::adjacency_iterator adjacency_iterator;<br>  <br>  typedef typename graph_traits&lt;graph_type&gt;::site_iterator site_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::bond_iterator bond_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbor_bond_iterator neighbor_bond_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::bond_descriptor bond_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::site_descriptor site_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::sites_size_type sites_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::bonds_size_type bonds_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbors_size_type neighbors_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbor_iterator neighbor_iterator;<br><br>  typedef typename lattice_traits&lt;lattice_type&gt;::unit_cell_type unit_cell_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_descriptor cell_descriptor;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::offset_type offset_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::vector_type vector_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::size_type size_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator cell_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator momentum_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator basis_vector_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator boundary_crossing_type;<br><br><br>  graph_helper(std::istream&amp; in, const Parameters&amp; p);<br>  graph_helper(const alps::Parameters&amp; p);<br>  ~graph_helper();<br><br>  lattice_type&amp; lattice();<br>  const lattice_type&amp; lattice() const;<br><br>  graph_type&amp; graph();<br>  const graph_type&amp; graph() const;<br>  <br>  size_type volume() const;<br>  const unit_cell_type&amp; unit_cell() const;<br>  cell_descriptor cell(const offset_type&amp; o) const;<br>  std::pair&lt;cell_iterator,cell_iterator&gt; cells() const;<br>  const offset_type&amp; offset(const cell_descriptor&amp; c) const;<br>  bool on_lattice(const offset_type&amp; o) const;<br>  std::pair&lt;bool,boundary_crossing_type&gt; shift(offset_type&amp; o, const offset_type&amp; s) const;<br>  size_type index(const cell_descriptor&amp; c) const;<br>  std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; basis_vectors() const;<br>  std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; reciprocal_basis_vectors() const;<br>  vector_type origin(const cell_descriptor&amp; c) const;<br>  vector_type coordinate(const cell_descriptor&amp; c, const vector_type&amp; p) const;<br>  vector_type momentum(const vector_type&amp; m) const;<br><br>  sites_size_type num_sites() const;<br>  bonds_size_type num_bonds() const;<br>  std::pair&lt;site_iterator,site_iterator&gt; sites() const;<br>  std::pair&lt;bond_iterator,bond_iterator&gt; bonds() const;<br>  bond_descriptor bond(bonds_size_type i) const;<br>  neighbors_size_type num_neighbors (const site_descriptor&amp; v) const;<br>  std::pair&lt;neighbor_bond_iterator,neighbor_bond_iterator&gt; neighbor_bonds (const site_descriptor&amp; v) const;<br>  std::pair&lt;neighbor_iterator,neighbor_iterator&gt; neighbors (const site_descriptor&amp; v) const;<br>  site_descriptor neighbor (const site_descriptor&amp; v, neighbors_size_type i) const;<br><br>  site_descriptor source(const edge_descriptor&amp; b) const;<br>  site_descriptor target(const edge_descriptor&amp; b) const;<br>  <br>  vertices_size_type num_vertices() const;<br>  edges_size_type num_edges() const;<br>  std::pair&lt;vertex_iterator,vertex_iterator&gt; vertices() const;<br>  std::pair&lt;edge_iterator,edge_iterator&gt; edges() const;<br>  degree_size_type out_degree (const vertex_descriptor&amp; v) const;<br>  degree_size_type in_degree (const vertex_descriptor&amp; v) const;<br>  degree_size_type degree (const vertex_descriptor&amp; v) const;<br>  out_edge_iterator out_edges (const vertex_descriptor&amp; v) const;<br>  in_edge_iterator in_edges (const vertex_descriptor&amp; v) const;<br>  std::pair&lt;adjacency_iterator,adjacency_iterator&gt; adjacent_vertices (const site_descriptor&amp; v) const;<br>  <br>  vertex_descriptor vertex(vertices_size_type i) const;<br>  site_descriptor site(sites_size_type i) const;<br>  <br>  double parity(const site_descriptor&amp; v) const;<br>  bool is_bipartite() const;<br><br>  unsigned int bond_type(const bond_descriptor&amp; b) const;<br>  unsigned int edge_type(const edge_descriptor&amp; e) const;<br>  unsigned int site_type(const site_descriptor&amp; s) const;<br>  unsigned int vertex_type(const vertex_descriptor&amp; v) const;<br>  const vector_type&amp; bond_vector(const bond_descriptor&amp; b) const;<br>  const vector_type&amp; bond_vector_relative(const bond_descriptor&amp; b) const;<br><br><br>  unsigned int disordered_edge_type(const edge_descriptor&amp; e) const;<br>  unsigned int disordered_bond_type(const bond_descriptor&amp; b) const;<br>  unsigned int disordered_vertex_type(const vertex_descriptor&amp; v) const;<br>  unsigned int disordered_site_type(const site_descriptor&amp; s) const;<br><br>  bool disordered() const;<br>  bool disordered_sites() const;<br>  bool disordered_bonds() const;<br>  bool disordered_vertices() const;<br>  bool disordered_edges() const;<br><br>  const std::vector&lt;double&gt;&amp; coordinate(const site_descriptor&amp; s) const;<br>  Parameters coordinate_as_parameter(const bond_descriptor&amp; e) const;<br>  Parameters coordinate_as_parameter(const site_descriptor&amp; v) const;<br>};<br><br>}<br><pre></pre></pre>
-  </blockquote>
     
+<blockquote>       
+  <pre>namespace alps {<br>{<br><br>template &lt;class G=coordinate_graph_type&gt;<br>class graph_helper : public LatticeLibrary<br>{<br>public:<br>  typedef G graph_type;<br><br>  typedef typename graph_traits&lt;graph_type&gt;::vertex_iterator vertex_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::edge_iterator edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::out_edge_iterator out_edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::in_edge_iterator in_edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::edge_descriptor edge_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::vertex_descriptor vertex_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::vertices_size_type vertices_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::edges_size_type edges_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::degree_size_type degree_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::adjacency_iterator adjacency_iterator;<br>  <br>  typedef typename graph_traits&lt;graph_type&gt;::site_iterator site_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::bond_iterator bond_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbor_bond_iterator neighbor_bond_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::bond_descriptor bond_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::site_descriptor site_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::sites_size_type sites_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::bonds_size_type bonds_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbors_size_type neighbors_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbor_iterator neighbor_iterator;<br><br>  typedef typename lattice_traits&lt;lattice_type&gt;::unit_cell_type unit_cell_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_descriptor cell_descriptor;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::offset_type offset_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::vector_type vector_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::size_type size_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator cell_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator momentum_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator basis_vector_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator boundary_crossing_type;<br><br><br>  graph_helper(std::istream&amp; in, const Parameters&amp; p);<br>  graph_helper(const alps::Parameters&amp; p);<br>  ~graph_helper();<br><br>  lattice_type&amp; lattice();<br>  const lattice_type&amp; lattice() const;<br><br>  graph_type&amp; graph();<br>  const graph_type&amp; graph() const;<br>  <br>  size_type volume() const;<br>  const unit_cell_type&amp; unit_cell() const;<br>  cell_descriptor cell(const offset_type&amp; o) const;<br>  std::pair&lt;cell_iterator,cell_iterator&gt; cells() const;<br>  const offset_type&amp; offset(const cell_descriptor&amp; c) const;<br>  bool on_lattice(const offset_type&amp; o) const;<br>  std::pair&lt;bool,boundary_crossing_type&gt; shift(offset_type&amp; o, const offset_type&amp; s) const;<br>  size_type index(const cell_descriptor&amp; c) const;<br>  std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; basis_vectors() const;<br>  std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; reciprocal_basis_vectors() const;<br>  vector_type origin(const cell_descriptor&amp; c) const;<br>  vector_type coordinate(const cell_descriptor&amp; c, const vector_type&amp; p) const;<br>  vector_type momentum(const vector_type&amp; m) const;<br><br>  sites_size_type num_sites() const;<br>  bonds_size_type num_bonds() const;<br>  std::pair&lt;site_iterator,site_iterator&gt; sites() const;<br>  std::pair&lt;bond_iterator,bond_iterator&gt; bonds() const;<br>  bond_descriptor bond(bonds_size_type i) const;<br>  neighbors_size_type num_neighbors (const site_descriptor&amp; v) const;<br>  std::pair&lt;neighbor_bond_iterator,neighbor_bond_iterator&gt; neighbor_bonds (const site_descriptor&amp; v) const;<br>  std::pair&lt;neighbor_iterator,neighbor_iterator&gt; neighbors (const site_descriptor&amp; v) const;<br>  site_descriptor neighbor (const site_descriptor&amp; v, neighbors_size_type i) const;<br><br>  site_descriptor source(const edge_descriptor&amp; b) const;<br>  site_descriptor target(const edge_descriptor&amp; b) const;<br>  <br>  vertices_size_type num_vertices() const;<br>  edges_size_type num_edges() const;<br>  std::pair&lt;vertex_iterator,vertex_iterator&gt; vertices() const;<br>  std::pair&lt;edge_iterator,edge_iterator&gt; edges() const;<br>  degree_size_type out_degree (const vertex_descriptor&amp; v) const;<br>  degree_size_type in_degree (const vertex_descriptor&amp; v) const;<br>  degree_size_type degree (const vertex_descriptor&amp; v) const;<br>  out_edge_iterator out_edges (const vertex_descriptor&amp; v) const;<br>  in_edge_iterator in_edges (const vertex_descriptor&amp; v) const;<br>  std::pair&lt;adjacency_iterator,adjacency_iterator&gt; adjacent_vertices (const site_descriptor&amp; v) const;<br>  <br>  vertex_descriptor vertex(vertices_size_type i) const;<br>  site_descriptor site(sites_size_type i) const;<br>  <br>  double parity(const site_descriptor&amp; v) const;<br>  bool is_bipartite() const;<br><br>  unsigned int bond_type(const bond_descriptor&amp; b) const;<br>  unsigned int edge_type(const edge_descriptor&amp; e) const;<br>  unsigned int site_type(const site_descriptor&amp; s) const;<br>  unsigned int vertex_type(const vertex_descriptor&amp; v) const;<br>  const vector_type&amp; bond_vector(const bond_descriptor&amp; b) const;<br>  const vector_type&amp; bond_vector_relative(const bond_descriptor&amp; b) const;<br><br>  size_type index(const vertex_descriptor&amp; ) const;<br>  size_type index(const edge_descriptor&amp; ) const;<br><br>  unsigned int disordered_edge_type(const edge_descriptor&amp; e) const;<br>  unsigned int disordered_bond_type(const bond_descriptor&amp; b) const;<br>  unsigned int disordered_vertex_type(const vertex_descriptor&amp; v) const;<br>  unsigned int disordered_site_type(const site_descriptor&amp; s) const;<br><br>  bool disordered() const;<br>  bool disordered_sites() const;<br>  bool disordered_bonds() const;<br>  bool disordered_vertices() const;<br>  bool disordered_edges() const;<br><br>  const std::vector&lt;double&gt;&amp; coordinate(const site_descriptor&amp; s) const;<br>  Parameters coordinate_as_parameter(const bond_descriptor&amp; e) const;<br>  Parameters coordinate_as_parameter(const site_descriptor&amp; v) const;<br>};<br><br>}<br><pre></pre></pre>
+   </blockquote>
+     
 <h3>The <tt>graph_helper</tt> class</h3>
-  is derived from <a href="latticelibrary.html"><tt>LatticeLibrary</tt></a>
+   is derived from <a href="latticelibrary.html"><tt>LatticeLibrary</tt></a> 
 and templated on the graph type, which defaults to <a
- href="graphproperties.html"><tt>coordinate_graph_type</tt></a>. An application
- deriving from this class gets easy construction of a graph from parameters
+ href="graphproperties.html"><tt>coordinate_graph_type</tt></a>. An application 
+ deriving from this class gets easy construction of a graph from parameters 
  and XML lattice specifications as well as easy access the the graph's properties.<br>
-  
+   
 <h4>Type members<br>
-  </h4>
-  
+   </h4>
+   
 <pre>  typedef G graph_type;<br></pre>
-  is the type of graphs created by the <tt>graph_helper</tt>.<br>
- 
+   is the type of graphs created by the <tt>graph_helper</tt>.<br>
+  
 <pre>  typedef lattice_graph&lt;hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;GraphUnitCell&gt; &gt; &gt;,graph_type&gt; lattice_type;<br></pre>
-  is the type of lattice currently supported by the <tt>graph_helper</tt>. 
-Addition of new lattuce types (besides <tt>hypercubic_lattice</tt>) will require
-redesigning this class.<br>
-  
+   is the type of lattice currently supported by the <tt>graph_helper</tt>.
+ Addition of new lattuce types (besides <tt>hypercubic_lattice</tt>) will
+require redesigning this class.<br>
+   
 <pre>  typedef typename graph_traits&lt;graph_type&gt;::vertex_iterator vertex_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::edge_iterator edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::out_edge_iterator out_edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::in_edge_iterator in_edge_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::edge_descriptor edge_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::vertex_descriptor vertex_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::vertices_size_type vertices_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::edges_size_type edges_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::degree_size_type degree_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::adjacency_iterator adjacency_iterator;<br></pre>
-  are typedefs for the common types associated with graphs, obtained from 
-the <a href="graph_traits.html"><tt>graph_traits</tt></a> class.<br>
-  
+   are typedefs for the common types associated with graphs, obtained from
+ the <a href="graph_traits.html"><tt>graph_traits</tt></a> class.<br>
+   
 <pre>  typedef typename graph_traits&lt;graph_type&gt;::site_iterator site_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::bond_iterator bond_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbor_bond_iterator neighbor_bond_iterator;<br>  typedef typename graph_traits&lt;graph_type&gt;::bond_descriptor bond_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::site_descriptor site_descriptor;<br>  typedef typename graph_traits&lt;graph_type&gt;::sites_size_type sites_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::bonds_size_type bonds_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbors_size_type neighbors_size_type;<br>  typedef typename graph_traits&lt;graph_type&gt;::neighbor_iterator neighbor_iterator;<br></pre>
-  are typedefs using the alternative lattice model language of sites and
+   are typedefs using the alternative lattice model language of sites and 
 bonds  instead of vertices and edges, as discussed under the <a
  href="graph_traits.html"><tt>graph_traits</tt></a> class.<br>
- 
+  
 <pre>  typedef typename lattice_traits&lt;lattice_type&gt;::unit_cell_type unit_cell_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_descriptor cell_descriptor;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::offset_type offset_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::vector_type vector_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::size_type size_type;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator cell_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator momentum_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator basis_vector_iterator;<br>  typedef typename lattice_traits&lt;lattice_type&gt;::cell_iterator boundary_crossing_type;<br></pre>
-  are typedefs for the common types associated with lattices, obtained from 
-the the <a href="latticeconcepts.html"><tt>lattice_traits</tt></a> class.<br>
-  
+   are typedefs for the common types associated with lattices, obtained from
+ the the <a href="latticeconcepts.html"><tt>lattice_traits</tt></a> class.<br>
+   
 <h4>Constructors and Destructor<br>
-  </h4>
-  
+   </h4>
+   
 <pre>  graph_helper(std::istream&amp; in, const Parameters&amp; p);<br></pre>
-  
-<p>constructs the <tt>graph_helper</tt> and builds a graph, given an input
+   
+<p>constructs the <tt>graph_helper</tt> and builds a graph, given an input 
  stream <tt>in</tt> and a set of parameters <tt>p</tt>. </p>
-  
-<p>The&nbsp; input stream is expected to be in XML format,&nbsp; containing
+   
+<p>The&nbsp; input stream is expected to be in XML format,&nbsp; containing 
  a <tt>&lt;LATTICES&gt;</tt> element, as given by the <a
- href="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</a> schema
-on  <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>. This
-is used to construct a <tt><a href="latticelibrary.html">LatticeLibrary</a></tt>.
- Once the  <tt><a href="latticelibrary.html">LatticeLibrary</a></tt> is constructed, 
-the graph is constructed. The graph is picked in the following way: </p>
-  
+ href="http://xml.comp-phys.org/schemas/lattice/">Lattice XML</a> schema on
+ <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>. This is
+used to construct a <tt><a href="latticelibrary.html">LatticeLibrary</a></tt>. 
+ Once the  <tt><a href="latticelibrary.html">LatticeLibrary</a></tt> is constructed,
+ the graph is constructed. The graph is picked in the following way: </p>
+   
 <ul>
-    <li>If the parameter <tt>GRAPH</tt> is set, the graph with the corresponding
+     <li>If the parameter <tt>GRAPH</tt> is set, the graph with the corresponding 
  name is created. </li>
-    <li>If the parameter <tt>LATTICE</tt> is set, the <tt>set_parameters</tt>
-function of the  <a href=".html"><tt>LatticeGraphDescriptor</tt></a> with 
-the same name is called to set the parameters (extent and boundary condition)
- of the lattice. Then the graph is created from the LatticeGraphDescriptor. 
-   </li>
-  
+     <li>If the parameter <tt>LATTICE</tt> is set, the <tt>set_parameters</tt> 
+function of the  <a href=".html"><tt>LatticeGraphDescriptor</tt></a> with
+ the same name is called to set the parameters (extent and boundary condition) 
+ of the lattice. Then the graph is created from the LatticeGraphDescriptor.
+    </li>
+   
 </ul>
-   If both or none of these parameters are set, or there is not a graph or
- lattice with the name, a <tt>std::runtime_error</tt> is thrown.  
+    If both or none of these parameters are set, or there is not a graph
+or  lattice with the name, a <tt>std::runtime_error</tt> is thrown.   
 <p><tt> </tt></p>
-  
+   
 <pre>  graph_helper(const alps::Parameters&amp; p);<br><br></pre>
-  
-<p>this constructor first checks for a <tt>LATTICE_LIBRARY</tt> parameter
- and opens the file given by the parameter. If no such parameter is defined,
- it tries to open a file called "lattices.xml". Then the contents of the
-file  are read into a&nbsp;<tt><a href="latticelibrary.html">LatticeLibrary</a></tt>,
+   
+<p>this constructor first checks for a <tt>LATTICE_LIBRARY</tt> parameter 
+ and opens the file given by the parameter. If no such parameter is defined, 
+ it tries to open a file called "lattices.xml". Then the contents of the file
+ are read into a&nbsp;<tt><a href="latticelibrary.html">LatticeLibrary</a></tt>, 
  and the graph created as discussed above.<br>
-  </p>
-  
+   </p>
+   
 <pre>  ~graph_helper();<br></pre>
-  
+   
 <p>destroys the lattuce library and the graph.<br>
-  </p>
-  
+   </p>
+   
 <h4>Member functions<br>
-  </h4>
-  
+   </h4>
+   
 <pre>  lattice_type&amp; lattice();<br>  const lattice_type&amp; lattice() const;<br></pre>
-  
+   
 <p>provide access to the lattice, if the graph was constructed from a lattice.<br>
- </p>
- 
-<pre>  graph_type&amp; graph();<br>  const graph_type&amp; graph() const;<br></pre>
-  
-<p>provide access to the graph.</p>
-  
-<pre>  bool disordered_sites() const;<br>  bool disordered_vertices() const;<br></pre>
-  
-<p>return true if the lattice has site disorder.</p>
-  
-<pre>  bool disordered_bonds() const;<br>  bool disordered_edges() const;<br></pre>
-  
-<p>return true if the lattice has bond disorder.<br>
   </p>
   
+<pre>  graph_type&amp; graph();<br>  const graph_type&amp; graph() const;<br></pre>
+   
+<p>provide access to the graph.</p>
+   
+<pre>  bool disordered_sites() const;<br>  bool disordered_vertices() const;<br></pre>
+   
+<p>return true if the lattice has site disorder.</p>
+   
+<pre>  bool disordered_bonds() const;<br>  bool disordered_edges() const;<br></pre>
+   
+<p>return true if the lattice has bond disorder.<br>
+   </p>
+   
 <pre>  bool disordered() const;<br></pre>
-  
+   
 <p>returns true if the lattice has either site or bond disorder.</p>
-  
+   
 <pre>  Parameters coordinate_as_parameter(const site_descriptor&amp; v) const;<br></pre>
-  
+   
+<p>returns a <a href="../parameters.html"><tt>Parameters</tt></a> object setting
+the values of the <tt>x</tt>, <tt>y</tt> (for 2-and 3-dimensional graphs),
+and <tt>z</tt> (for 3-dimensional graphs) to the values of the <tt>x</tt>, 
+ <tt>y</tt>, and <tt>z</tt> coordinate of the site (vertex) passed to the 
+function.<br>
+   </p>
+   
+<pre>&nbsp; Parameters coordinate_as_parameter(const bond_descriptor&amp; e) const;<br></pre>
+   
 <p>returns a <a href="../parameters.html"><tt>Parameters</tt></a> object
 setting the values of the <tt>x</tt>, <tt>y</tt> (for 2-and 3-dimensional
-graphs), and <tt>z</tt> (for 3-dimensional graphs) to the values of the <tt>x</tt>,
- <tt>y</tt>, and <tt>z</tt> coordinate of the site (vertex) passed to the
-function.<br>
-  </p>
-  
-<pre>&nbsp; Parameters coordinate_as_parameter(const bond_descriptor&amp; e) const;<br></pre>
-  
-<p>returns a <a href="../parameters.html"><tt>Parameters</tt></a> object setting
-the values of the <tt>x</tt>, <tt>y</tt> (for 2-and 3-dimensional  graphs),
-and <tt>z</tt> (for 3-dimensional graphs) to the values each of the mean
-value of the <tt>x</tt>, <tt>y</tt>, and <tt>z</tt> coordinate of the sites
-(vertices) connected by the bond (edge) passed to the function.<br>
-   </p>
-  
+ graphs), and <tt>z</tt> (for 3-dimensional graphs) to the values each of
+the mean value of the <tt>x</tt>, <tt>y</tt>, and <tt>z</tt> coordinate of
+the sites (vertices) connected by the bond (edge) passed to the function.<br>
+    </p>
+   
 <h4> </h4>
+ 
 <h4>Lattice member functions </h4>
-    
+     
 <pre>  size_type volume() const;<br>  const unit_cell_type&amp; unit_cell() const;<br>  cell_descriptor cell(const offset_type&amp; o) const;<br>  std::pair&lt;cell_iterator,cell_iterator&gt; cells() const;<br>  const offset_type&amp; offset(const cell_descriptor&amp; c) const;<br>  bool on_lattice(const offset_type&amp; o) const;<br>  std::pair&lt;bool,boundary_crossing_type&gt; shift(offset_type&amp; o, const offset_type&amp; s) const;<br>  size_type index(const cell_descriptor&amp; c) const;<br>  std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; basis_vectors() const;<br>  std::pair&lt;basis_vector_iterator,basis_vector_iterator&gt; reciprocal_basis_vectors() const;<br>  vector_type origin(const cell_descriptor&amp; c) const;<br>  vector_type coordinate(const cell_descriptor&amp; c, const vector_type&amp; p) const;<br>  vector_type momentum(const vector_type&amp; m) const;<br></pre>
- provide shortcuts to the corresponding lattuce&nbsp; library functions in 
-<a href="lattice.html">lattice.h</a> which take the lattice as additional 
-argument. 
+  provide shortcuts to the corresponding lattuce&nbsp; library functions
+in  <a href="lattice.html">lattice.h</a> which take the lattice as additional
+ argument.  
 <h4>Graph member functions </h4>
-  
+   
 <pre>  vertices_size_type num_vertices() const;<br>  edges_size_type num_edges() const;<br>  std::pair&lt;vertex_iterator,vertex_iterator&gt; vertices() const;<br>  std::pair&lt;edge_iterator,edge_iterator&gt; edges() const;<br>  degree_size_type out_degree (const vertex_descriptor&amp; v) const;<br>  degree_size_type in_degree (const vertex_descriptor&amp; v) const;<br>  degree_size_type degree (const vertex_descriptor&amp; v) const;<br>  out_edge_iterator out_edges (const vertex_descriptor&amp; v) const;<br>  in_edge_iterator in_edges (const vertex_descriptor&amp; v) const;<br>  std::pair&lt;adjacency_iterator,adjacency_iterator&gt; adjacent_vertices (const site_descriptor&amp; v) const;<br> &nbsp;site_descriptor source(const edge_descriptor&amp; b) const;<br>  site_descriptor target(const edge_descriptor&amp; b) const;<br></pre>
-  
-<p>provide shortcuts to the corresponding Boost graph library functions which
+   
+<p>provide shortcuts to the corresponding Boost graph library functions which 
  take the graph as additional argument.<br>
-  </p>
-  
+   </p>
+   
 <pre>  sites_size_type num_sites() const;<br>  bonds_size_type num_bonds() const;<br>  std::pair&lt;site_iterator,site_iterator&gt; sites() const;<br>  std::pair&lt;bond_iterator,bond_iterator&gt; bonds() const;<br>  bond_descriptor bond(bonds_size_type i) const;<br>  neighbors_size_type num_neighbors (const site_descriptor&amp; v) const;<br>  std::pair&lt;neighbor_bond_iterator,neighbor_bond_iterator&gt; neighbor_bonds (const site_descriptor&amp; v) const;<br>  std::pair&lt;neighbor_iterator,neighbor_iterator&gt; neighbors (const site_descriptor&amp; v) const;<br>  site_descriptor neighbor (const site_descriptor&amp; v, neighbors_size_type i) const;<br></pre>
-  
-<p>are the same as above, but using the lattice model notation instead of
+   
+<p>are the same as above, but using the lattice model notation instead of 
  the Boost graph library notation, as discussed under the  <a
  href="graph_traits.html"><tt>graph_traits</tt></a> class.</p>
-  
+   
 <pre>  vertex_descriptor vertex(vertices_size_type i) const;<br>  site_descriptor site(sites_size_type i) const;<br></pre>
-  
-<p>creates a vertex (site) descriptor for the <i>i</i>-th vertex (site) on
+   
+<p>creates a vertex (site) descriptor for the <i>i</i>-th vertex (site) on 
  the graph.</p>
-  
+   
 <pre>  bool is_bipartite() const;<br></pre>
-  
+   
 <p>checks whether the graph is bipartite.</p>
-  
+   
 <pre>  double parity(const site_descriptor&amp; v) const;<br></pre>
-  
-<p>reads the <tt>parity_t</tt> property of the graph and returns +1 or -1
+   
+<p>reads the <tt>parity_t</tt> property of the graph and returns +1 or -1 
  depending on whcih sublattice the site vertex) is located on.</p>
-  
+   
 <pre>  type_type bond_type(const bond_descriptor&amp; b) const;<br>  type_type edge_type(const edge_descriptor&amp; e) const;<br></pre>
-  
-<p>returns the bond type (same as edge type) of the bond (edge) passed by
- reading the <tt>bond_type_t</tt> (same as <tt>edge_type_t</tt>) property.
- Note that, even when disorder has been applied to the graph, this still
-returns  the original type. The return type <tt>type_type</tt> is defined
-under <a href="graphproperties.html">graphproperties.h</a>.<br>
-  </p>
-  
+   
+<p>returns the bond type (same as edge type) of the bond (edge) passed by 
+ reading the <tt>bond_type_t</tt> (same as <tt>edge_type_t</tt>) property. 
+ Note that, even when disorder has been applied to the graph, this still returns
+ the original type. The return type <tt>type_type</tt> is defined under <a
+ href="graphproperties.html">graphproperties.h</a>.<br>
+   </p>
+   
 <pre>  type_type site_type(const site_descriptor&amp; s) const;<br>  type_type vertex_type(const edge_descriptor&amp; v) const;<br></pre>
-  
-<p>returns the site type (same as vertex type) of the site vertex) passed
- by reading the <tt>site_type_t</tt> (same as <tt>vertex_type_t</tt>) property.
- Note that, even when disorder has been applied to the graph, this still
-returns  the original type. The return type <tt>type_type</tt> is defined
-under <a href="graphproperties.html">graphproperties.h</a>.<br>
-   </p>
-  
+   
+<p>returns the site type (same as vertex type) of the site vertex) passed 
+ by reading the <tt>site_type_t</tt> (same as <tt>vertex_type_t</tt>) property. 
+ Note that, even when disorder has been applied to the graph, this still returns
+ the original type. The return type <tt>type_type</tt> is defined under <a
+ href="graphproperties.html">graphproperties.h</a>.<br>
+    </p>
+   
 <pre>  type_type disordered_bond_type(const bond_descriptor&amp; b) const;<br>  type_type disordered_edge_type(const edge_descriptor&amp; e) const;<br></pre>
-  
-<p>returns the <tt>bond_type</tt> (<tt>egde_type</tt>) of a bond (edge) of
- the graph, after optional disordering has been applied. For non-disordered
- graphs this is the same as <tt>bond_type(b) </tt>or <tt>edge_type(e)</tt>.
+   
+<p>returns the <tt>bond_type</tt> (<tt>egde_type</tt>) of a bond (edge) of 
+ the graph, after optional disordering has been applied. For non-disordered 
+ graphs this is the same as <tt>bond_type(b) </tt>or <tt>edge_type(e)</tt>. 
+ The return type <tt>type_type</tt> is defined under <a
+ href="graphproperties.html">graphproperties.h</a>.<br>
+    </p>
+   
+<pre>  type_type disordered_vertex_type(const vertex_descriptor&amp; v) const;<br>  type_type disordered_site_type(const site_descriptor&amp; s) const;<br></pre>
+   
+<p>returns the <tt>site_type</tt> (<tt>vertex_type</tt>) of a site (vertex) 
+ of the graph, after optional disordering has been applied. For non-disordered
+  graphs this is the same as <tt>site_type(s) </tt>or <tt>vertex_type(v)</tt>. 
  The return type <tt>type_type</tt> is defined under <a
  href="graphproperties.html">graphproperties.h</a>.<br>
    </p>
-  
-<pre>  type_type disordered_vertex_type(const vertex_descriptor&amp; v) const;<br>  type_type disordered_site_type(const site_descriptor&amp; s) const;<br></pre>
-  
-<p>returns the <tt>site_type</tt> (<tt>vertex_type</tt>) of a site (vertex)
- of the graph, after optional disordering has been applied. For non-disordered 
- graphs this is the same as <tt>site_type(s) </tt>or <tt>vertex_type(v)</tt>.
- The return type <tt>type_type</tt> is defined under <a
- href="graphproperties.html">graphproperties.h</a>.<br>
-  </p>
-  
+   
 <pre>  const std::coordinate_type&amp; coordinate(const site_descriptor&amp; s) const;</pre>
-  
-<p>returns the coordinate of a site or vertex.  The return type <tt>coordinate_type</tt>
+   
+<p>returns the coordinate of a site or vertex.  The return type <tt>coordinate_type</tt> 
 is defined under <a href="graphproperties.html">graphproperties.h</a>.<br>
-</p>
-<pre>  const vector_type&amp; bond_vector(const bond_descriptor&amp; b) const;<br></pre>
-<p>returns the vector connecting the two sites of the bond<br>
-</p>
-<pre>  const vector_type&amp; bond_vector_relative(const bond_descriptor&amp; b) const;<br></pre>
+ </p>
  
-<p>returns the vector connecting the two sites of the bond, each coordinate
-represents the component in the direction of the corresponding basis vector
-of the lattice and the length is relative to the extent of the lattice in
-that direction.<br>
-  </p>
+<pre>  const vector_type&amp; bond_vector(const bond_descriptor&amp; b) const;<br></pre>
+ 
+<p>returns the vector connecting the two sites of the bond<br>
+ </p>
+ 
+<pre>  const vector_type&amp; bond_vector_relative(const bond_descriptor&amp; b) const;<br></pre>
   
+<p>returns the vector connecting the two sites of the bond, each coordinate 
+represents the component in the direction of the corresponding basis vector 
+of the lattice and the length is relative to the extent of the lattice in 
+that direction.<br>
+</p>
+<pre>  size_type index(const vertex_descriptor&amp; ) const;<br>  size_type index(const edge_descriptor&amp; ) const;<br></pre>
+<p>return the index (number) of the vertex or edge in the graph by accessing
+the <tt>vertex_index_t</tt> or <tt>edge_index_t</tt> property map.<br>
+   </p>
+   
 <hr width="100%" size="2"> 
 <address>copyright (c) 2000-2004 by  <a
  href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
-     <br>
+      <br>
+   <br>
   <br>
  <br>
 </body>

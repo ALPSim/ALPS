@@ -64,6 +64,9 @@ IsingSimulation2::IsingSimulation2(const alps::ProcessList& where,const alps::Pa
     thermalization_sweeps(static_cast<uint32_t>(p["THERMALIZATION"])),
     total_sweeps(static_cast<uint32_t>(p["SWEEPS"]))
 {
+  if (disordered())
+    boost::throw_exception(std::runtime_error("Disordered lattices not supported by the Ising example program.\n"));
+
   spins.resize(num_sites()); // number of vertices = number of lattice sites
   // initialize random spin configuration
   for(int i=0;i<spins.size();i++)
@@ -110,9 +113,6 @@ double IsingSimulation2::work_done() const
 
 void IsingSimulation2::dostep()
 {  
-  if (disordered())
-    boost::throw_exception(std::runtime_error("Disordered lattices not supported by the Ising example program.\n"));
-
   // increment sweep count
   sweeps++;
   
@@ -141,6 +141,6 @@ void IsingSimulation2::dostep()
   for (boost::tie(b,b_end)=bonds(); b!=b_end;++b)
     ten -= spins[source(*b)]*spins[target(*b)];
   
-  measurements.get<alps::RealObservable>("Energy") << ten/spins.size();
-  measurements.get<alps::RealObservable>("Magnetization") << tmag/spins.size();
+  measurements["Energy"] << ten/spins.size();
+  measurements["Magnetization"] << tmag/spins.size();
 }
