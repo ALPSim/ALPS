@@ -25,6 +25,9 @@
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/multi_array.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/io.hpp>
 #include <cmath>
 
 template <class T>
@@ -37,10 +40,12 @@ struct symbolic_traits<alps::Expression> {
  static const bool is_symbolic=true;
 };
 
-template <class T>
+template <class T, class M = boost::numeric::ublas::matrix<T> >
 class HamiltonianMatrix // : public alps::scheduler::Worker
 {
 public:
+  typedef T value_type;
+  typedef M matrix_type;
   //FullDiag(const alps::ProcessList&,const alps::Parameters&,int);
   HamiltonianMatrix (const alps::Parameters&);
   //void dostep();
@@ -56,18 +61,19 @@ private:
   alps::ModelLibrary models_;
   alps::Parameters parms_;
   mutable bool built_;
-  mutable boost::multi_array<T,2> matrix_;
+  //mutable boost::multi_array<T,2> matrix_;
+  mutable matrix_type matrix_;
 };
 
-template <class T>
-std::ostream& operator<<(std::ostream& os, const HamiltonianMatrix<T>& mat)
+template <class T, class M>
+std::ostream& operator<<(std::ostream& os, const HamiltonianMatrix<T,M>& mat)
 {
   mat.output(os);
   return os;
 }
 
-template <class T>
-HamiltonianMatrix<T>::HamiltonianMatrix(const alps::Parameters& p)
+template <class T, class M>
+HamiltonianMatrix<T,M>::HamiltonianMatrix(const alps::Parameters& p)
   : graph_factory_(p),
     models_(p),
     parms_(p),
@@ -75,8 +81,8 @@ HamiltonianMatrix<T>::HamiltonianMatrix(const alps::Parameters& p)
 {
 }
 
-template <class T>
-void HamiltonianMatrix<T>::build() const
+template <class T, class M>
+void HamiltonianMatrix<T,M>::build() const
 {
   using namespace alps;
   
@@ -123,14 +129,15 @@ void HamiltonianMatrix<T>::build() const
   }
   
   // create basis set
-  std::cerr << "Creating basis set\n";
+  std::cout << "Creating basis set\n";
   BasisStatesDescriptor<short> basis(ham.basis(),lattice());
   BasisStates<short> states(basis);
   
   // build matrix
   
-  std::cerr << "Building matrix\n";
-  matrix_.resize(boost::extents[states.size()][states.size()]);
+  std::cout << "Creating matrix\n";
+  //matrix_.resize(boost::extents[states.size()][states.size()]);
+  matrix_.resize(states.size(),states.size());
 
   // loop basis states
   for (int i=0;i<states.size();++i) {
@@ -143,13 +150,14 @@ void HamiltonianMatrix<T>::build() const
       // loop over target index
       std::vector<StateDescriptor<short> > state=states[i];
       for (int js=0;js<basis[s].size();++js)
-        if (is_non_zero(site_matrix[site_type[*it]][is][js])) {
+        if (site_matrix[site_type[*it]][is][js]) {
         // build target state
           state[s]=basis[s][js];
 	// lookup target state
 	  int j = states.index(state);
 	// set matrix element
-	  matrix_[i][j]+=site_matrix[site_type[*it]][is][js];
+	  //matrix_[i][j]+=site_matrix[site_type[*it]][is][js];
+	  matrix_(i,j)+=site_matrix[site_type[*it]][is][js];
 	}
     }
     
@@ -165,14 +173,15 @@ void HamiltonianMatrix<T>::build() const
       std::vector<StateDescriptor<short> > state=states[i];
       for (int js1=0;js1<basis[s1].size();++js1)
         for (int js2=0;js2<basis[s2].size();++js2)
-        if (is_non_zero(bond_matrix[bond_type[*it]][is1][is2][js1][js2])) {
+        if (bond_matrix[bond_type[*it]][is1][is2][js1][js2]) {
         // build target state
           state[s1]=basis[s1][js1];
           state[s2]=basis[s2][js2];
 	// lookup target state
 	  int j = states.index(state);
 	// set matrix element
-	  matrix_[i][j]+=bond_matrix[bond_type[*it]][is1][is2][js1][js2];
+	  //matrix_[i][j]+=bond_matrix[bond_type[*it]][is1][is2][js1][js2];
+	  matrix_(i,j)+=bond_matrix[bond_type[*it]][is1][is2][js1][js2];
 	}
     }
   }  

@@ -30,7 +30,7 @@ try {
   //return alps::scheduler::start(argc,argv,alps::scheduler::SimpleFactory<FullDiag>());
   alps::Parameters parms;
   std::cin >> parms;
-  HamiltonianMatrix<alps::Expression> matrix(parms);
+  HamiltonianMatrix<alps::Expression,boost::numeric::ublas::sparse_matrix<alps::Expression> > matrix(parms);
   std::cout << matrix << "\n";
 
 #ifndef BOOST_NO_EXCEPTIONS
