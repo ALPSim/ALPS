@@ -3955,8 +3955,8 @@ echo "$as_me: error: compiler mode is not set" >&2;}
     dec)
       try_CFLAGS_OPT="-pthread -O4"
       try_CFLAGS_DEBUG="-pthread -g -O0"
-      try_CXXFLAGS_OPT="-std ansi -model ansi -noimplicit_include -nousing_std -tlocal -w -pthread -D__USE_STD_IOSTREAM -O4"
-      try_CXXFLAGS_DEBUG="-std ansi -model ansi -noimplicit_include -nousing_std -tlocal -pthread -D__USE_STD_IOSTREAM -g -O0"
+      try_CXXFLAGS_OPT="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -w -pthread -D__USE_STD_IOSTREAM -O4"
+      try_CXXFLAGS_DEBUG="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -msg_display_number -msg_disable 461 -pthread -D__USE_STD_IOSTREAM -g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-noexceptions"
       ;;
