@@ -49,10 +49,7 @@ class HamiltonianMatrix // : public alps::scheduler::Worker
 public:
   typedef T value_type;
   typedef M matrix_type;
-  //FullDiag(const alps::ProcessList&,const alps::Parameters&,int);
   HamiltonianMatrix (const alps::Parameters&);
-  //void dostep();
-  //void run();
   void output(std::ostream& o)const  { if (!built_) build(); o << matrix_;}
 private:
   typedef alps::graph_factory<>::graph_type graph_type;
@@ -64,7 +61,6 @@ private:
   alps::ModelLibrary models_;
   alps::Parameters parms_;
   mutable bool built_;
-  //mutable boost::multi_array<T,2> matrix_;
   mutable matrix_type matrix_;
 };
 

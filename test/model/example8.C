@@ -1,11 +1,11 @@
 /***************************************************************************
-* PALM++/scheduler example
+* PALM++/model library
 *
-* scheduler/isingsim.C an example Ising model simulation
+* example/example8.C
 *
 * $Id$
 *
-* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>
 *
 * Permission is hereby granted, free of charge, to any person or organization 
 * obtaining a copy of the software covered by this license (the "Software") 
@@ -34,18 +34,32 @@
 *
 **************************************************************************/
 
-#include "matrix.h"
+#include <alps/model.h>
+#include <alps/lattice.h>
+#include <alps/parameterlist.h>
+#include <iostream>
+#include <string>
 
-int main(int argc, char** argv)
+
+int main()
 {
 #ifndef BOOST_NO_EXCEPTIONS
-try {
+  try {
 #endif
-
-  alps::Parameters parms;
-  std::cin >> parms;
-  HamiltonianMatrix<alps::Expression,boost::numeric::ublas::sparse_matrix<alps::Expression> > matrix(parms);
-  std::cout << matrix << "\n";
+ 
+    alps::ParameterList parms;
+    std::cin >> parms;
+    for (int i=0;i<parms.size();++i) {
+      alps::ModelLibrary models(parms[i]);
+      alps::graph_factory<> lattices(parms[i]);
+      alps::HamiltonianDescriptor<short> ham(models.hamiltonian(parms[i]["MODEL"]));
+      parms[i].copy_undefined(ham.default_parameters());
+      ham.set_parameters(parms[i]);
+      if (has_sign_problem(ham,lattices.graph(),models.simple_operators(),parms[i]))
+        std::cout << "Model " << i+1 << " has a sign problem.\n";
+      else
+        std::cout << "Model " << i+1 << " has no sign problem.\n";
+    }
 
 #ifndef BOOST_NO_EXCEPTIONS
 }

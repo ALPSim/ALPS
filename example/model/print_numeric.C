@@ -46,7 +46,6 @@ int main(int argc, char** argv)
 try {
 #endif
 
-  //return alps::scheduler::start(argc,argv,alps::scheduler::SimpleFactory<FullDiag>());
   alps::Parameters parms;
   std::cin >> parms;
   HamiltonianMatrix<double,boost::numeric::ublas::sparse_matrix<double> > matrix(parms);
@@ -56,7 +55,6 @@ try {
 }
 catch (std::exception& exc) {
   std::cerr << exc.what() << "\n";
-  //alps::comm_exit(true);
   return -1;
 }
 catch (...) {

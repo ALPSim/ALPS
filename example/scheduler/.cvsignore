@@ -6,4 +6,5 @@ main_mpi
 main_pvm
 main2
 *.xml
+*.run*
 .DS_Store

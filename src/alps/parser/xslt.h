@@ -1,11 +1,12 @@
 /***************************************************************************
-* PALM++/scheduler example
+* ALPS++ library
 *
-* scheduler/isingsim.C an example Ising model simulation
+* parser/xslt.h   functions to set path for XSLT stylefiles
 *
 * $Id$
 *
-* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 2001-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>,
 *
 * Permission is hereby granted, free of charge, to any person or organization 
 * obtaining a copy of the software covered by this license (the "Software") 
@@ -34,28 +35,16 @@
 *
 **************************************************************************/
 
-#include "matrix.h"
+#ifndef ALPS_PARSER_XSLT_H
+#define ALPS_PARSER_XSLT_H
 
-int main(int argc, char** argv)
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+#include <cstdlib>
+#include <string>
 
-  alps::Parameters parms;
-  std::cin >> parms;
-  HamiltonianMatrix<alps::Expression,boost::numeric::ublas::sparse_matrix<alps::Expression> > matrix(parms);
-  std::cout << matrix << "\n";
+namespace alps {
 
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-}
+extern std::string xslt_path(const std::string& stylefile);
+  
+} // end namespace alps
+
+#endif // PALM_PARSER_PARSER_H

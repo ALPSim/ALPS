@@ -50,32 +50,29 @@ void convert_params(const std::string& inname, const std::string& outfilename)
   in >> list;
   std::string jobname=outfilename+".in.xml";
   std::cout << "Converting parameter file " << inname << " to " <<  jobname << std::endl;
-  std::ofstream out (jobname.c_str());
-  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-      << "<?xml-stylesheet type=\"text/xsl\" href=\"http://xml.comp-phys.org/2002/10/job.xsl\"?>\n"
-      << "<JOB xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-      << "xsi:noNamespaceSchemaLocation=\"http://xml.comp-phys.org/2003/8/job.xsd\">\n";
-  out << "  <OUTPUT file=\"" << outfilename+".out.xml" << "\"/>\n";
+  alps::oxstream out (jobname.c_str());
+  out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("job.xsl"));
+  out << alps::start_tag("JOB") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
+    << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2003/8/job.xsd")
+    << alps::start_tag("OUTPUT") << alps::attribute("file",outfilename+".out.xml") << alps::end_tag("OUTPUT");
   for (int i=0;i<list.size();++i) {
     std::string outname = outfilename;
     outname +=".task" + boost::lexical_cast<std::string,int>(i+1);
     std::string inname = outname + ".in.xml";
     outname+=".out.xml";
-    out << "  <TASK status=\"new\">\n";
-    out << "    <INPUT file=\"" << inname << "\"/>\n";
-    out << "    <OUTPUT file=\"" << outname << "\"/>\n";
-//      out << "    <CPUS min=\"1\">\n";
-    out << "  </TASK>\n";
+    out << alps::start_tag("TASK") << alps::attribute("status","new")
+      << alps::start_tag("INPUT") << alps::attribute("file",inname) << alps::end_tag("INPUT")
+      << alps::start_tag("OUTPUT") << alps::attribute("file",outname) << alps::end_tag("OUTPUT")
+      << alps::end_tag("TASK");
+    //      out << "    <CPUS min=\"1\">\n";
     alps::oxstream task (inname.c_str());
-    task << alps::header("UTF-8")
-         << alps::processing_instruction("xml-stylesheet") << alps::attribute("type","text/xsl") 
-         << alps::attribute("href","http://xml.comp-phys.org/2002/10/QMCXML.xsl")
-         << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
+    task << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("QMCXML.xsl"));
+    task << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
          << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
     task << list[i];
     task << alps::end_tag("SIMULATION");
   }
-  out << "</JOB>\n";
+  out << alps::end_tag("JOB");
 }
 
 void convert_run(const std::string& inname, const std::string& outname)
@@ -95,9 +92,7 @@ void convert_simulation(const std::string& inname, const std::string& outname)
   std::string jobname=outname+".xml";
   std::cout << "Converting simulation file " << inname << " to " <<  jobname << std::endl;
   alps::oxstream out (jobname.c_str());
-  out << alps::header("UTF-8")
-      << alps::processing_instruction("xml-stylesheet") << alps::attribute("type","text/xsl") 
-      << alps::attribute("href","http://xml.comp-phys.org/2002/10/QMCXML.xsl")
+  out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("QMCXML.xsl"))
       << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
       << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
   int dummy_i;
@@ -147,11 +142,10 @@ void convert_scheduler(const std::string& inname, const std::string& outname)
     boost::throw_exception(std::runtime_error("did not get scheduler on dump"));
   std::string jobname=outname+".xml";
   std::cout << "Converting scheduler file " << inname << " to " <<  jobname << std::endl;
-  std::ofstream out (jobname.c_str());
-  out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
-      << "<?xml-stylesheet type=\"text/xsl\" href=\"http://xml.comp-phys.org/2002/10/job.xsl\"?>\n"
-      << "<JOB xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"\n"
-      << "xsi:noNamespaceSchemaLocation=\"http://xml.comp-phys.org/2003/8/job.xsd\">\n";
+  alps::oxstream out (jobname.c_str());
+  out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("job.xsl"))
+    << alps::start_tag("JOB") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
+    << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2003/8/job.xsd");
   int dummy_i;
   double dummy_d;
   dump >> dummy_i; // version
@@ -166,15 +160,14 @@ void convert_scheduler(const std::string& inname, const std::string& outname)
       std::string dumpname = inname;
       xmlname += ".task" + boost::lexical_cast<std::string,int>(i+1);
       dumpname += "Sim" + boost::lexical_cast<std::string,int>(i+1);
-      if(boost::filesystem::exists(dumpname))
-      {
-        out << "  <TASK status=\"" << status_text[status[i]] << "\">\n";
-        out << "    <INPUT file=\"" << xmlname+".xml" << "\"/>\n";
-        out << "  </TASK>\n";
+      if(boost::filesystem::exists(dumpname)) {
+        out << alps::start_tag("TASK") << alps::attribute("status",status_text[status[i]])
+          << alps::start_tag("INPUT") << alps::attribute("file",xmlname+".xml")
+          << alps::end_tag("INPUT") << alps::end_tag("TASK");
         convert_simulation(dumpname,xmlname);
       }
     }
-  out << "</JOB>\n";
+   out << alps::end_tag("JOB");
 }
 
 int main(int argc, char** argv)
@@ -183,30 +176,29 @@ int main(int argc, char** argv)
 try {
 #endif
     
-  if (argc<2 || argc>3) {
-    std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename]\n";
+  if (argc<2) {
+    std::cerr << "Usage: " << argv[0] << " inputfile [inputfile ...]]\n";
     std::exit(-1);
   }
-  std::string inname=argv[1];
-  std::string outname=argv[argc-1];
-  if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
-  if (outname.size() >= 2 && outname.substr(0, 2) == "./") outname.erase(0, 2);
-
-  alps::IXDRFileDump dump(inname);
-  int type;
-  dump >> type;
-  switch (type) {
-  case alps::scheduler::MCDump_scheduler:
-    convert_scheduler(inname,outname);
-    break;
-  case alps::scheduler::MCDump_task:
-    convert_simulation(inname,outname);
-    break;
-  case alps::scheduler::MCDump_run:
-    convert_run(inname,outname);
-    break;
-  default:
-    convert_params(inname,outname);
+  for (int i=1;i<argc;++i) {    
+    std::string inname=argv[i];
+    if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
+    alps::IXDRFileDump dump(inname);
+    int type;
+    dump >> type;
+    switch (type) {
+    case alps::scheduler::MCDump_scheduler:
+      convert_scheduler(inname,inname);
+      break;
+    case alps::scheduler::MCDump_task:
+      convert_simulation(inname,inname);
+      break;
+    case alps::scheduler::MCDump_run:
+      convert_run(inname,inname);
+      break;
+    default:
+      convert_params(inname,inname);
+    }
   }
 
 #ifndef BOOST_NO_EXCEPTIONS

@@ -5,4 +5,5 @@ extracttext
 extracthtml
 plot2xsl.xsl
 convert2text
+checksign
 .DS_Store

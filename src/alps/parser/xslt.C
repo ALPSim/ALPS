@@ -1,11 +1,12 @@
 /***************************************************************************
-* PALM++/scheduler example
+* ALPS++ library
 *
-* scheduler/isingsim.C an example Ising model simulation
+* parser/xslt.C   functions to set path for XSLT stylefiles
 *
 * $Id$
 *
-* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 2001-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>,
 *
 * Permission is hereby granted, free of charge, to any person or organization 
 * obtaining a copy of the software covered by this license (the "Software") 
@@ -34,28 +35,19 @@
 *
 **************************************************************************/
 
-#include "matrix.h"
+#include <alps/parser/xslt.h>
 
-int main(int argc, char** argv)
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
-
-  alps::Parameters parms;
-  std::cin >> parms;
-  HamiltonianMatrix<alps::Expression,boost::numeric::ublas::sparse_matrix<alps::Expression> > matrix(parms);
-  std::cout << matrix << "\n";
-
-#ifndef BOOST_NO_EXCEPTIONS
+std::string alps::xslt_path(const std::string& stylefile) {
+  char* p =getenv("ALPS_XSLT_PATH");
+  if (p)
+    return std::string(p)+"/"+stylefile;
+else if (stylefile == "job.xsl")
+  return "http://xml.comp-phys.org/2002/10/job.xsl";
+else if (stylefile == "QMCXML.xsl")
+  return "http://xml.comp-phys.org/2002/10/QMCXML.xsl";
+  else if (stylefile == "plot2html.xsl")
+    return "http://xml.comp-phys.org/2003/4/plot2html.xsl";
+else
+  return "http://xml.comp-phys.org/"+stylefile;
 }
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-}
+  
