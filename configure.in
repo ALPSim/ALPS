@@ -102,6 +102,10 @@ AC_ARG_WITH(boost,
   [
   if test "x$withval" != "x"; then
     ac_cv_boost_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    case $ac_cv_boost_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *) AC_MSG_ERROR([expected an absolute directory name for --with-boost.]);;
+    esac
     if test -f "$ac_cv_boost_dir/boost/config.hpp"; then :; else
       ac_cv_boost_dir=
     fi
