@@ -1,9 +1,14 @@
-#! /bin/csh -f
+#! /bin/sh
+
 echo '<?xml version="1.0" encoding="UTF-8"?>'
 echo '<?xml-stylesheet type="text/xsl" href="http://xml.comp-phys.org/2002/10/QMCXML.xsl"?>'
 echo '<ARCHIVE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2002/10/QMCXML.xsd">'
-foreach i ($*)
-echo '<SIMULATION>'
-tail +`grep -n "<PARAMETERS>" $i | cut -d: -f1` $i
-end
+
+for f in $*; do
+  if test -f $f; then
+    echo '<SIMULATION>'
+    tail +`grep -n "<PARAMETERS>" $f | cut -d: -f1` $f
+  fi
+done
+
 echo '</ARCHIVE>'
