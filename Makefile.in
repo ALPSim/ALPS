@@ -727,7 +727,7 @@ example examples : libs
 
 install-data-local : config/config.cache
 	@$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
-	sed s/ac_cv_env/save_ac_cv_env/ config/config.cache > $(pkgdatadir)/config.cache
+	sed s/ac_cv_env/save_ac_cv_env/ config/config.cache | sed s/\^\\\'\^/^/g > $(pkgdatadir)/config.cache
 uninstall-local :
 	rm -f $(pkgdatadir)/config.cache
 
