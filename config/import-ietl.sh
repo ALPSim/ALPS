@@ -3,10 +3,10 @@
 branch=ietl
 taghead=IETL
 checkfile=ietl/lanczos.h
-
 dir=src
 files='ietl'
 files_remove='ietl/Makefile.in'
+convert_preamble=yes
 import_option="-m '' -ko"
 
 srcdir=$1
@@ -31,7 +31,7 @@ REPOSITORY=`cat ../$dir/CVS/Repository`
 echo "CVS root = $ROOT"
 echo "CVS repository = $REPOSITORY"
 
-OLD_TAG=`(cd ../$dir && cvs status -v $checkfile | grep $taghead | head -1 | awk '{print $1}')`
+OLD_TAG=`(cd ../$dir && cvs status -v $checkfile | awk 'NF==3' | grep $taghead | head -1 | awk '{print $1}')`
 echo -n "Tag for previously imported source files [$OLD_TAG] ? : "
 read answer &> /dev/null
 if test -n "$answer"; then
@@ -62,16 +62,17 @@ for i in $files_remove; do
   rm -f $tmpdir/$i
 done
 
-echo "Converting preambles..."
-find $tmpdir -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./update_preamble
+if test "$convert_preamble" = yes; then
+  echo "Converting preambles..."
+  find $tmpdir -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./update_preamble
+fi
 
 set -x
 
-# (cd $tmpdir && cvs -d ${ROOT} import ${import_option} ${REPOSITORY} ${branch} ${NEW_TAG})
-echo "(cd $tmpdir && cvs -d ${ROOT} import ${import_option} ${REPOSITORY} ${branch} ${NEW_TAG})"
+(cd $tmpdir && cvs -d ${ROOT} import ${import_option} ${REPOSITORY} ${branch} ${NEW_TAG})
 
-# (cd ../$dir && cvs up -j $OLD_TAG -j $NEW_TAG)
+(cd ../$dir && cvs up -j $OLD_TAG -j $NEW_TAG)
 
 set +x
 
-# rm -rf $tmpdir
+rm -rf $tmpdir

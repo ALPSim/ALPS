@@ -3,9 +3,10 @@
 branch=bindings
 taghead=BINDINGS
 checkfile=lapack/syev.hpp
-
 dir=src/boost/numeric/bindings
 files='blas lapack traits'
+files_remove=
+convert_preamble=no
 import_option="-m '' -ko"
 
 srcdir=$1
@@ -30,7 +31,7 @@ REPOSITORY=`cat ../$dir/CVS/Repository`
 echo "CVS root = $ROOT"
 echo "CVS repository = $REPOSITORY"
 
-OLD_TAG=`(cd ../$dir && cvs status -v $checkfile | grep $taghead | head -1 | awk '{print $1}')`
+OLD_TAG=`(cd ../$dir && cvs status -v $checkfile | awk 'NF==3' | grep $taghead | head -1 | awk '{print $1}')`
 echo -n "Tag for previously imported source files [$OLD_TAG] ? : "
 read answer &> /dev/null
 if test -n "$answer"; then
@@ -57,6 +58,14 @@ echo "Copying files into $tmpdir..."
 for i in $files; do
   cp -rp $srcdir/$i $tmpdir/
 done
+for i in $files_remove; do
+  rm -f $tmpdir/$i
+done
+
+if test "$convert_preamble" = yes; then
+  echo "Converting preambles..."
+  find $tmpdir -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./update_preamble
+fi
 
 set -x
 
