@@ -1,11 +1,15 @@
 
 ALPS LIBRARY LICENSE version 1.0
+Copyright (C) 2003-2004 Ian McCulloch.  Everyone is permitted to copy and
+distribute this license document.
 
-Permission is hereby granted, free of charge, to any person or organization 
-obtaining a copy of the library software covered by this license (the "Library")
-to use, reproduce, display, distribute, execute and transmit the Library, and to
-prepare derivative works of the Library, and to permit others to do so for 
-non-commercial academic use, all subject to the following conditions:
+This License applies to any software containing a notice placed by the copyright
+holder saying that it may be distributed under the terms of the ALPS Library
+License version 1.0.  Such software is herein referred to as the "Library".
+This license grants permission to use, reproduce, display, distribute, execute 
+and transmit the Library, and to prepare derivative works of the Library, and to 
+permit others to do so for non-commercial academic use, all subject to the 
+following conditions:
 
 1. In any scientific publication based wholly or in part on the Library, the use
 of the Library must be acknowledged and the publications listed in the 
