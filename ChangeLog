@@ -1,3 +1,11 @@
+2003-05-16 Matthias Troyer <troyer@comp-phys.org>
+
+	* [alps] Added evaluator objects to expressions to make them useful
+        for quantum operators
+
+	* [model] Added evaluation of matrix elements. Now bosonic and spin
+	Hamiltonians can be calculated.
+	
 2003-05-07 Synge Todo <wistaria@comp-phys.org>
 
 	* Migrating into new library name ALPS.  Documentations are not

@@ -32,7 +32,7 @@ pkgincludedir = $(includedir)
 
 HEADER_CONFIG = alps/config.h @BOOST_USER_CONFIG_H@
 HEADER_BOOST = boost/functional_void.hpp boost/function_objects.hpp
-HEADER_ALPS = alps/cctype.h alps/expression.h alps/expression_impl.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/parameterlist.h alps/parameters.h alps/random.h alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h
+HEADER_ALPS = alps/cctype.h alps/evaluator.h alps/expression.h alps/expression_impl.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/parameterlist.h alps/parameters.h alps/random.h alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h
 HEADER_ALEA = alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/obsvalue.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h
 HEADER_OSIRIS = alps/osiris.h alps/osiris/buffer.h alps/osiris/comm.h alps/osiris/dump.h alps/osiris/mpdump.h alps/osiris/os.h alps/osiris/process.h alps/osiris/xdrdump.h alps/osiris/std/impl.h alps/osiris/std/list.h alps/osiris/std/map.h alps/osiris/std/pair.h alps/osiris/std/string.h alps/osiris/std/valarray.h alps/osiris/std/vector.h
 HEADER_LATTICE = alps/lattice.h alps/lattice/cell_traits.h alps/lattice/coordinate_traits.h alps/lattice/coordinatelattice.h alps/lattice/dimensional_traits.h alps/lattice/graph.h alps/lattice/graph_traits.h alps/lattice/graphproperties.h alps/lattice/hypercubic.h alps/lattice/lattice.h alps/lattice/latticedescriptor.h alps/lattice/latticegraph.h alps/lattice/latticegraphdescriptor.h alps/lattice/latticelibrary.h alps/lattice/parity.h alps/lattice/point_traits.h alps/lattice/propertymap.h alps/lattice/simplecell.h alps/lattice/simplelattice.h alps/lattice/unitcell.h
@@ -48,7 +48,7 @@ OBJ_BOOST_REGEX = boost/c_regex_traits.o boost/c_regex_traits_common.o boost/cpp
 OBJ_BOOST_THREAD = boost/condition.o boost/exceptions.o boost/mutex.o boost/once.o boost/recursive_mutex.o boost/thread.o boost/threadmon.o boost/tss.o boost/xtime.o
 OBJ_BOOST = boost/throw_exception.o $(OBJ_BOOST_FS) $(OBJ_BOOST_REGEX) @OBJ_BOOST_THREAD@
 
-OBJ_ALPS = alps/expression.o alps/parameterlist.o alps/parameters.o
+OBJ_ALPS = alps/evaluator.o alps/expression.o alps/parameterlist.o alps/parameters.o
 OBJ_ALEA = alps/alea/observable.o alps/alea/observableset.o
 OBJ_OSIRIS = alps/osiris/buffer.o alps/osiris/dump.o alps/osiris/os.o alps/osiris/xdrdump.o
 OBJ_OSIRIS_SGL = alps/osiris/process.o alps/osiris/comm.o alps/osiris/mpdump.o
