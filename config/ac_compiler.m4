@@ -139,8 +139,8 @@ AC_DEFUN([AC_COMPILER],
       try_CXX="xlC"
       ;;
     macos)
-      try_CC="gcc"
-      try_CXX="c++"
+      try_CC="gcc3"
+      try_CXX="g++3"
       ;;
     generic)
       # nothing to do
