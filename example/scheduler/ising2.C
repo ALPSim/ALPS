@@ -56,6 +56,13 @@ using boost::source;
 using boost::target;
 #endif
 
+static void IsingSimulation2::print_copyright(std::ostream& out)
+{
+  out << "Ising simulation example program using the ALPS lattice library\n"
+      << "  copyright(c) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>\n\n";
+}
+
+
 IsingSimulation2::IsingSimulation2(const alps::ProcessList& where,const alps::Parameters& p,int node)
   : alps::scheduler::LatticeMCRun<graph_type>(where,p,node),
     beta(1./static_cast<double>(parms["T"])),

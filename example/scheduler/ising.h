@@ -29,6 +29,8 @@
 class IsingSimulation : public alps::scheduler::MCRun
 {
 public:
+  static void print_copyright(std::ostream&);
+  
   IsingSimulation(const alps::ProcessList&,const alps::Parameters&,int);
   void save(alps::ODump&) const;
   void load(alps::IDump&);

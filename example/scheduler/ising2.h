@@ -37,6 +37,8 @@ typedef boost::adjacency_list<boost::vecS,boost::vecS,boost::undirectedS,
 class IsingSimulation2 : public alps::scheduler::LatticeMCRun<graph_type>
 {
 public:
+  static void print_copyright(std::ostream&);
+
   IsingSimulation2(const alps::ProcessList&,const alps::Parameters&,int);
   void save(alps::ODump&) const;
   void load(alps::IDump&);

@@ -13,8 +13,11 @@ AC_CONFIG_AUX_DIR([config])
 
 AC_PREFIX_DEFAULT([$HOME/ALPS])
 
-AC_CONFIG_FILES(Makefile config/Makefile config/config.site config/arxx config/include.mk src/Makefile)
+CURRENT_YEAR=2003
 
+AC_SUBST(CURRENT_YEAR)
+AC_CONFIG_FILES(Makefile config/Makefile config/config.site config/arxx config/include.mk src/Makefile)
+AC_CONFIG_FILES(src/alps/copyright.C src/alps/scheduler/copyright.C)
 AC_CONFIG_FILES(test/Makefile example/Makefile)
 AC_CONFIG_FILES(test/alea/Makefile)
 AC_CONFIG_FILES(test/lattice/Makefile test/lattice/parameters)
@@ -27,6 +30,7 @@ AC_CONFIG_FILES(example/model/Makefile)
 AC_CONFIG_FILES(tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text)
 
 AC_CONFIG_HEADERS(src/alps/config.h)
+
 
 # directories
 

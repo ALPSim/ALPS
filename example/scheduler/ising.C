@@ -42,6 +42,12 @@
 #include "ising.h"
 #include <cmath>
 
+static void IsingSimulation::print_copyright(std::ostream& out)
+{
+  out << "Ising simulation example program using the ALPS lattice library\n"
+      << "  copyright(c) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>\n\n";
+}
+
 IsingSimulation::IsingSimulation(const alps::ProcessList& where,const alps::Parameters& p,int node)
   : alps::scheduler::MCRun(where,p,node),
     length(static_cast<uint32_t>(parms["L"])),
