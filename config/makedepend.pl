@@ -56,19 +56,21 @@ while (<>) {
 	foreach $header (@elems) {
 	    # remove preceding '../'
 	    $header =~ s/(\.\.\/)//g;
-	    if ($header =~ /^src/ || $header =~ /^include/) {
-		if ($header =~ /config\.h$/) {
-		    $header = "$TOP_BUILDDIR/$header";
-		} else {
-		    $header = "$TOP_SRCDIR/$header";
-		}
+	    if ($header =~ /config\.h$/) {
+		$header = "$TOP_BUILDDIR/$header";
 	    } else {
-		if ($header =~ /\//) {
+		if ($header =~ /^src/ || $header =~ /^include/) {
 		    $header = "$TOP_SRCDIR/$header";
 		} else {
-		    $header = "$SRCDIR/$header";
+		    if ($header =~ /\//) {
+			$header = "$TOP_SRCDIR/$header";
+		    } else {
+			$header = "$SRCDIR/$header";
+		    }
 		}
 	    }
+	    # remove './'
+	    $header =~ s/(\/\.\/)/\//g;
 	    $headers{$base} = "$headers{$base} $header";
 	}
     }
