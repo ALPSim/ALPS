@@ -21796,6 +21796,7 @@ ac_cv_boost_ldflags="$BOOST_LDFLAGS"
 ac_cv_boost_libs="$BOOST_LIBS"
 ac_cv_boost_srcdir="$BOOST_SRCDIR"
 
+
 # checking for other C++ headers
 
 if test "${ac_cv_header_cstdlib+set}" = set; then
@@ -25487,10 +25488,6 @@ if test "$ac_cv_alps_type" = "full"; then
 
 fi
 
-## workaround for SGI MIPSpro
-          ac_config_files="$ac_config_files src/boost/po-parsers.cpp"
-
-
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
 # tests run on this system so they can be shared between configure
@@ -26142,7 +26139,6 @@ do
   "tool/extracttext" ) CONFIG_FILES="$CONFIG_FILES tool/extracttext" ;;
   "tool/extracthtml" ) CONFIG_FILES="$CONFIG_FILES tool/extracthtml" ;;
   "tool/convert2text" ) CONFIG_FILES="$CONFIG_FILES tool/convert2text" ;;
-  "src/boost/po-parsers.cpp" ) CONFIG_FILES="$CONFIG_FILES src/boost/po-parsers.cpp" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/alps/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/alps/config.h" ;;
   *) { { echo "$as_me:$LINENO: error: invalid argument: $ac_config_target" >&5

@@ -136,7 +136,7 @@ am__objects_13 = c_regex_traits.lo c_regex_traits_common.lo \
 @BUILD_BOOST_TRUE@am__objects_14 = $(am__objects_11) $(am__objects_12) \
 @BUILD_BOOST_TRUE@	$(am__objects_13)
 am__objects_15 = cmdline.lo config_file.lo convert.lo \
-	options_description.lo po-parsers.lo positional_options.lo \
+	options_description.lo parsers.lo positional_options.lo \
 	value_semantic.lo variables_map.lo winmain.lo basic_archive.lo \
 	basic_iarchive.lo basic_oarchive.lo basic_serializer_map.lo \
 	basic_text_iprimitive.lo basic_text_oprimitive.lo \
@@ -220,8 +220,8 @@ am__depfiles_maybe = depfiles
 @AMDEP_TRUE@	./$(DEPDIR)/options_description.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/parameterlist.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/parameters.Plo ./$(DEPDIR)/parser.Plo \
+@AMDEP_TRUE@	./$(DEPDIR)/parsers.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/path_posix_windows.Plo \
-@AMDEP_TRUE@	./$(DEPDIR)/po-parsers.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/polymorphic_iarchive.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/polymorphic_oarchive.Plo \
 @AMDEP_TRUE@	./$(DEPDIR)/positional_options.Plo \
@@ -459,7 +459,7 @@ src_boost_PROGRAM_OPTIONS_SERIALIZATION = \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
   $(BOOST_SRCDIR)/program_options/src/convert.cpp \
   $(BOOST_SRCDIR)/program_options/src/options_description.cpp \
-  $(top_builddir)/src/boost/po-parsers.cpp \
+  $(BOOST_SRCDIR)/program_options/src/parsers.cpp \
   $(BOOST_SRCDIR)/program_options/src/positional_options.cpp \
   $(BOOST_SRCDIR)/program_options/src/value_semantic.cpp \
   $(BOOST_SRCDIR)/program_options/src/variables_map.cpp \
@@ -625,8 +625,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameterlist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameters.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parser.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parsers.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/path_posix_windows.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/po-parsers.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polymorphic_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/polymorphic_oarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/positional_options.Plo@am__quote@
@@ -2257,29 +2257,29 @@ options_description.lo: $(BOOST_SRCDIR)/program_options/src/options_description.
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o options_description.lo `test -f '$(BOOST_SRCDIR)/program_options/src/options_description.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/options_description.cpp
 
-po-parsers.o: $(top_builddir)/src/boost/po-parsers.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT po-parsers.o -MD -MP -MF "$(DEPDIR)/po-parsers.Tpo" -c -o po-parsers.o `test -f '$(top_builddir)/src/boost/po-parsers.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/po-parsers.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/po-parsers.Tpo" "$(DEPDIR)/po-parsers.Po"; else rm -f "$(DEPDIR)/po-parsers.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/po-parsers.cpp' object='po-parsers.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/po-parsers.Po' tmpdepfile='$(DEPDIR)/po-parsers.TPo' @AMDEPBACKSLASH@
+parsers.o: $(BOOST_SRCDIR)/program_options/src/parsers.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parsers.o -MD -MP -MF "$(DEPDIR)/parsers.Tpo" -c -o parsers.o `test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/parsers.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parsers.Tpo" "$(DEPDIR)/parsers.Po"; else rm -f "$(DEPDIR)/parsers.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/parsers.cpp' object='parsers.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/parsers.Po' tmpdepfile='$(DEPDIR)/parsers.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o po-parsers.o `test -f '$(top_builddir)/src/boost/po-parsers.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/po-parsers.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parsers.o `test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/parsers.cpp
 
-po-parsers.obj: $(top_builddir)/src/boost/po-parsers.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT po-parsers.obj -MD -MP -MF "$(DEPDIR)/po-parsers.Tpo" -c -o po-parsers.obj `if test -f '$(top_builddir)/src/boost/po-parsers.cpp'; then $(CYGPATH_W) '$(top_builddir)/src/boost/po-parsers.cpp'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/boost/po-parsers.cpp'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/po-parsers.Tpo" "$(DEPDIR)/po-parsers.Po"; else rm -f "$(DEPDIR)/po-parsers.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/po-parsers.cpp' object='po-parsers.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/po-parsers.Po' tmpdepfile='$(DEPDIR)/po-parsers.TPo' @AMDEPBACKSLASH@
+parsers.obj: $(BOOST_SRCDIR)/program_options/src/parsers.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parsers.obj -MD -MP -MF "$(DEPDIR)/parsers.Tpo" -c -o parsers.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; fi`; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parsers.Tpo" "$(DEPDIR)/parsers.Po"; else rm -f "$(DEPDIR)/parsers.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/parsers.cpp' object='parsers.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/parsers.Po' tmpdepfile='$(DEPDIR)/parsers.TPo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o po-parsers.obj `if test -f '$(top_builddir)/src/boost/po-parsers.cpp'; then $(CYGPATH_W) '$(top_builddir)/src/boost/po-parsers.cpp'; else $(CYGPATH_W) '$(srcdir)/$(top_builddir)/src/boost/po-parsers.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parsers.obj `if test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; then $(CYGPATH_W) '$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_SRCDIR)/program_options/src/parsers.cpp'; fi`
 
-po-parsers.lo: $(top_builddir)/src/boost/po-parsers.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT po-parsers.lo -MD -MP -MF "$(DEPDIR)/po-parsers.Tpo" -c -o po-parsers.lo `test -f '$(top_builddir)/src/boost/po-parsers.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/po-parsers.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/po-parsers.Tpo" "$(DEPDIR)/po-parsers.Plo"; else rm -f "$(DEPDIR)/po-parsers.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/po-parsers.cpp' object='po-parsers.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/po-parsers.Plo' tmpdepfile='$(DEPDIR)/po-parsers.TPlo' @AMDEPBACKSLASH@
+parsers.lo: $(BOOST_SRCDIR)/program_options/src/parsers.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parsers.lo -MD -MP -MF "$(DEPDIR)/parsers.Tpo" -c -o parsers.lo `test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/parsers.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parsers.Tpo" "$(DEPDIR)/parsers.Plo"; else rm -f "$(DEPDIR)/parsers.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/program_options/src/parsers.cpp' object='parsers.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	depfile='$(DEPDIR)/parsers.Plo' tmpdepfile='$(DEPDIR)/parsers.TPlo' @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	$(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o po-parsers.lo `test -f '$(top_builddir)/src/boost/po-parsers.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/po-parsers.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parsers.lo `test -f '$(BOOST_SRCDIR)/program_options/src/parsers.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/parsers.cpp
 
 positional_options.o: $(BOOST_SRCDIR)/program_options/src/positional_options.cpp
 @am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT positional_options.o -MD -MP -MF "$(DEPDIR)/positional_options.Tpo" -c -o positional_options.o `test -f '$(BOOST_SRCDIR)/program_options/src/positional_options.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/program_options/src/positional_options.cpp; \
