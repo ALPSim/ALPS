@@ -1,0 +1,66 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>ALPS Project: lattice/graphproperties.h</title>
+</head>
+  <body>
+   
+<h1> ALPS Project: lattice library</h1>
+   
+<h2>Header file: lattice/boundary.h</h2>
+   includes the <tt>boundary_crossing</tt> class to describe which lattice
+boundaries on a periodic lattice are crossed by a bond (an edge)   
+<h3>Synopsis</h3>
+  
+<blockquote>   
+  <pre>namespace alps {<br><br>  struct boundary_crossing {<br>    typedef unsigned int dimension_type;<br>    typedef int direction_type;<br><br>    boundary_crossing();<br>    operator bool() const;  <br>    direction_type crosses(dimension_type dim) const;<br>    const boundary_crossing&amp; set_crossing(dimension_type dim, direction_type dir);<br>    const boundary_crossing&amp; invert();<br>  };<br><br>}<br><br><br><a
+ name="boundary_crossing"></a></pre>
+ </blockquote>
+    <a name="boundary_crossing"><tt>boundary_crossing</tt> is used for edge
+properties to store whether an edge goes across a lattice boundary (of a
+periodic lattice) in one or more dimensions. For each dimension an egde can
+cross either in the negative or posiove direction, where the direction is
+defined relatice to the (for undirected graphs artificial) choice of source
+and target vertex when the edge is accessed by iterating over all edges of
+the graph.  </a> 
+<p> <a name="boundary_crossing">If more than one implementation should be 
+useful, this type could be abstracted and described by a concept instead of
+a concrete implementation. </a></p>
+  
+<blockquote>   
+  <pre><a name="boundary_crossing"> <br>boundary_crossing();<br></a></pre>
+ </blockquote>
+  <a name="boundary_crossing">The property object constructed by default
+describes an edge not crossing any boundary. </a> 
+<blockquote>   
+  <pre><a name="boundary_crossing"> <br>operator bool() const;  <br></a></pre>
+ </blockquote>
+  <a name="boundary_crossing">returns true if the edge crosses any boundary 
+and false otherwise. </a> 
+<blockquote>   
+  <pre><a name="boundary_crossing"> <br>direction_type crosses(dimension_type dim) const;<br></a></pre>
+ </blockquote>
+  <a name="boundary_crossing">returns +1 or -1 if the edge crosses a boundary 
+in the <tt>dim</tt>-th dimension in the positive or negative direction and 
+0 if it does not cross the boundary. </a> 
+<blockquote>   
+  <pre><a name="boundary_crossing"> <br>const boundary_crossing&amp; set_crossing(dimension_type dim, direction_type dir);<br></a></pre>
+ </blockquote>
+  <a name="boundary_crossing">sets the property to a corssing of the <tt>dim</tt>-th 
+dimensional boundary in the positive direction for <tt>dir</tt>=+1, in the 
+negative direction for <tt>dir</tt>=-1, or to no crossing for  <tt>dir</tt>=0. 
+In the current implementation <tt>dim</tt> is restricted to values between 
+0 and 3.  </a> 
+<blockquote>   
+  <pre><a name="boundary_crossing"> <br>const boundary_crossing&amp; invert();<br></a></pre>
+ </blockquote>
+  <a name="boundary_crossing">inverts the direction of all boundary crossings. 
+This is the boundary crossing property for an edge going in the opposite direction.
+ </a> 
+<hr> 
+<address><a name="boundary_crossing">copyright (c) 2000-2003 by  </a><a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+  <br>
+ <br>
+</body>
+</html>

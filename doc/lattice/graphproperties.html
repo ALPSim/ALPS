@@ -1,120 +1,95 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
 <html>
 <head>
-   <title>ALPS Project: lattice/graphproperties.h</title>
+  <title>ALPS Project: lattice/graphproperties.h</title>
 </head>
-<body>
-
-<h1>
-ALPS Project: lattice library</h1>
-
+ <body>
+  
+<h1> ALPS Project: lattice library</h1>
+  
 <h2>Header file: lattice/graphproperties.h</h2>
-
-includes property types for the graphs used in the lattice library,
-as well as undocumented internal traits classes to implement the
-unfinished <a href="graphconcepts.html#ReflectablePropertyGraph"> ReflectablePropertyGraph</a>
-concept.
-
+  includes property types for the graphs used in the lattice library, as
+well as the default graph type <tt>coordinate_graph_type</tt>.  
 <h3>Synopsis</h3>
-<blockquote><pre>
-namespace alps {
-
-  struct vertex_type_t { typedef boost::vertex_property_tag kind; };
-  struct original_vertex_type_t { typedef boost::vertex_property_tag kind; };
-  struct coordinate_t { typedef boost::vertex_property_tag kind; };
-  struct parity_t { typedef boost::vertex_property_tag kind; };
-  using boost::vertex_index_t;
-  typedef vertex_type_t site_type_t;
-  typedef original_vertex_type_t original_site_type_t;
-
-  struct edge_type_t { typedef boost::edge_property_tag kind; };
-  struct original_edge_type_t { typedef boost::edge_property_tag kind; };
-  struct boundary_crossing_t { typedef boost::edge_property_tag kind; };
-  struct source_offset_t { typedef boost::edge_property_tag kind; };
-  struct target_offset_t { typedef boost::edge_property_tag kind; };
-  using boost::edge_index_t;
-  typedef edge_type_t bond_type_t;
-  typedef original_edge_type_t original_bond_type_t;
-
-  struct graph_name_t { typedef boost::graph_property_tag kind; };
-  struct dimension_t { typedef boost::graph_property_tag kind; };
-
-  typedef boost::adjacency_list&lt;boost::vecS,boost::vecS,boost::undirectedS,
-    /* ...*/,boost::vecS> coordinate_graph_type;
-
-}
-
-
-</pre></blockquote>
-<H3 name="coordinate_graph_type">Property types and the <tt>coordinate_graph_type</tt> type</H3>
-The <tt>coordinate_graph_type</tt> type is a Boost adjacency list graph
-implementing the following properties as internal properties. These are:
+ 
+<blockquote>
+  <pre>namespace alps {<br><br>  // vertex properties<br>  struct vertex_type_t { typedef boost::vertex_property_tag kind; };<br>  struct coordinate_t { typedef boost::vertex_property_tag kind; };<br>  struct parity_t { typedef boost::vertex_property_tag kind; };<br>  using boost::vertex_index_t;<br>  typedef vertex_type_t site_type_t;<br><br>  // edge properties<br>  struct edge_type_t { typedef boost::edge_property_tag kind; };<br>  struct boundary_crossing_t { typedef boost::edge_property_tag kind; };<br>  struct source_offset_t { typedef boost::edge_property_tag kind; };<br>  struct target_offset_t { typedef boost::edge_property_tag kind; };<br>  using boost::edge_index_t;<br>  typedef edge_type_t bond_type_t;<br><br>  // graph properties<br>  struct graph_name_t { typedef boost::graph_property_tag kind; };<br>  struct dimension_t { typedef boost::graph_property_tag kind; };<br><br>  typedef boost::adjacency_list&lt;boost::vecS,boost::vecS,boost::undirectedS,<br>    /* ...*/,boost::vecS&gt; coordinate_graph_type;<br><br>}<br></pre>
+</blockquote>
+  The <tt>coordinate_graph_type</tt> type is the default graph type of the
+ALPS library. It is a Boost adjacency list graph implementing the following
+properties as internal properties:<br>
+<br>
+<br>
+ 
 <table border="1">
-<tr><td><b>Vertex property</b></td><td><b>Type</b></td><td><b>Note</b></td></tr>
-<tr><td><tt>vertex_type_t</tt></td><td><tt>int32_t</tt></td>
-<td>The type (color) of the vertex</td></tr>
-<tr><td><tt>coordinate_t</tt></td><td><tt>std::vector&lt;double></tt></td>
-<td>The coordinate of the vertex</td></tr>
-<tr><td><tt>parity_t</tt></td><td><tt>int8_t</tt></td>
-<td>The parity of a site (0 or 1) on a bipartite graph</tt></td></tr>
-<tr><td><tt>vertex_index_t</tt></td><td><tt></tt></td>
-<td>The vertex index, predefined for <tt>boost::adjacency_list</tt></td></tr>
-<tr><td><b>Edge property</b></td><td><b>Type</b></td><td><b>Note</b></td></tr>
-<tr><td><tt>edge_type_t</tt></td><td><tt>int32_t</tt></td>
-<td>The type (color) of the edge</td></tr>
-<tr><td><tt>edge_index_t</tt></td><td><tt>int32_t</tt></td>
-<td>The edge index</td></tr>
-<tr><td><tt>boundary_crossing_t</tt></td><td><tt>boundary_crossing</tt></td>
-<td>Indicates whether an edge crosses a boundary of the lattice.</td></tr>
-<tr><td><b>Graph property</b></td><td><b>Type</b></td><td><b>Note</b></td></tr>
-<tr><td><tt>graph_name_t </tt></td><td><tt>std::string</tt></td>
-<td>The name of the graph</td></tr>
-<tr><td><tt>dimension_t</tt></td><td><tt> std::size_t</tt></td>
-<td>The dimension of the graph (dimension of the vertex coordinates)</td></tr>
+ <tbody>
+    <tr>
+      <td><b>Vertex property</b></td>
+      <td><b>Type</b></td>
+      <td><b>Note</b></td>
+    </tr>
+ <tr>
+      <td><tt>vertex_type_t</tt></td>
+      <td><tt>unsigned int</tt></td>
+ <td>The type (color) of the vertex</td>
+    </tr>
+ <tr>
+      <td><tt>coordinate_t</tt></td>
+      <td><tt>std::vector&lt;double&gt;</tt></td>
+ <td>The coordinate of the vertex</td>
+    </tr>
+ <tr>
+      <td><tt>parity_t</tt></td>
+      <td><tt>int8_t</tt></td>
+ <td>The parity of a site (0 or 1) on a bipartite graph</td>
+    </tr>
+ <tr>
+      <td><tt>vertex_index_t</tt></td>
+      <td><tt></tt></td>
+ <td>The vertex index, predefined for <tt>boost::adjacency_list</tt></td>
+    </tr>
+ <tr>
+      <td><b>Edge property</b></td>
+      <td><b>Type</b></td>
+      <td><b>Note</b></td>
+    </tr>
+ <tr>
+      <td><tt>edge_type_t</tt></td>
+      <td><tt>unsigned int</tt></td>
+ <td>The type (color) of the edge</td>
+    </tr>
+ <tr>
+      <td><tt>edge_index_t</tt></td>
+      <td><tt>unsigned int</tt></td>
+ <td>The edge index</td>
+    </tr>
+ <tr>
+      <td><tt>boundary_crossing_t</tt></td>
+      <td><a href="boundary.html"><tt>boundary_crossing</tt></a></td>
+ <td>Indicates whether an edge crosses a boundary of the lattice.</td>
+    </tr>
+ <tr>
+      <td><b>Graph property</b></td>
+      <td><b>Type</b></td>
+      <td><b>Note</b></td>
+    </tr>
+ <tr>
+      <td><tt>graph_name_t </tt></td>
+      <td><tt>std::string</tt></td>
+ <td>The name of the graph</td>
+    </tr>
+ <tr>
+      <td><tt>dimension_t</tt></td>
+      <td><tt> std::size_t</tt></td>
+ <td>The dimension of the graph (dimension of the vertex coordinates)</td>
+    </tr>
+ 
+  </tbody>
 </table>
-<H3 name="coordinate_graph_type"><A name="boundary_crossing"/>The <tt>boundary_crossing</tt> type</H3>
-is used for edge properties to store whether an edge goes across a lattice boundary (of a periodic lattice) in one or more dimensions. For each dimension an egde can cross either in the negative or posiove direction, where the direction is defined relatice to the (for undirected graphs artificial) choice of source and target vertex when the edge is accessed by iterating over all edges of the graph. 
-<P>
-If more than one implementation should be useful, this type could be abstracted and described by a concept instead of a concrete implementation.
-<H4>Synopsis</H4>
-<blockquote><pre> 
-struct boundary_crossing {
-  typedef unsigned int dimension_type;
-  typedef int direction_type;
-
-  boundary_crossing();
-  operator bool() const;  
-  direction_type crosses(dimension_type dim) const;
-  const boundary_crossing&amp; set_crossing(dimension_type dim, direction_type dir);
-  const boundary_crossing&amp; invert();
-};
-</pre></blockquote>
-<H4>Member functions</H4>
-<blockquote><pre> 
-boundary_crossing();
-</pre></blockquote>
-The property object constructed by default describes an edge not crossing any boundary.
-<blockquote><pre> 
-operator bool() const;  
-</pre></blockquote>
-returns true if the edge crosses any boundary and false otherwise.
-<blockquote><pre> 
-direction_type crosses(dimension_type dim) const;
-</pre></blockquote>
-returns +1 or -1 if the edge crosses a boundary in the <tt>dim</tt>-th dimension in the positive or negative direction and 0 if it does not cross the boundary.
-<blockquote><pre> 
-const boundary_crossing&amp; set_crossing(dimension_type dim, direction_type dir);
-</pre></blockquote>
-sets the property to a corssing of the <tt>dim</tt>-th dimensional boundary in the positive direction for <tt>dir</tt>=+1, in the negative direction for <tt>dir</tt>=-1, or to no crossing for  <tt>dir</tt>=0. In the current implementation <tt>dim</tt> is restricted to values between 0 and 3. 
-<blockquote><pre> 
-const boundary_crossing&amp; invert();
-</pre></blockquote>
-inverts the direction of all boundary crossings. This is the boundary crossing property for an edge going in the opposite direction.
-
-<HR>
-<ADDRESS>copyright (c) 2000-2003 by 
-<A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
-</body>
-</html>
-
+ 
+<hr> 
+<address><a name="_">copyright (c) 2000-2003 by  </a><a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+ <br>
 </body>
 </html>

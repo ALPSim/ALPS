@@ -1,0 +1,127 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+  <title>ALPS Project: lattice/graphproperties.h</title>
+</head>
+  <body>
+   
+<h1> ALPS Project: lattice library</h1>
+   
+<h2>Header file: lattice/propertymap.h</h2>
+   includes traits classes to inquire about the internal properties of a
+graph (implement the <a
+ href="file:///Macintosh%20HD/Users/troyer/src/ALPS/doc/lattice/graphconcepts.html#ReflectablePropertyGraph">
+ReflectablePropertyGraph</a> concept) and useful property maps, extending
+the Boost <a href="http://www.boost.org/libs/property_map/index.html">property
+maps</a>.&nbsp;   
+<h3>Synopsis</h3>
+<pre>namespace alps {<br><br>template &lt;class PropertyTag, class Graph, class Default=int&gt;<br>struct has_property {<br>  static const bool edge_property   = false;<br>  static const bool vertex_property = false;<br>  static const bool graph_property  = false;<br>  static const bool any_property    = false;<br>  typedef Default vertex_property_type;<br>  typedef Default edge_property_type;<br>  typedef Default graph_property_type;<br>  typedef Default property_type;<br>  typedef property_type type;<br>};<br><br>template &lt;class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D&gt;<br>struct has_property&lt;P, boost::adjacency_list&lt;s1,s2,s3,VP,EP,GP,s4&gt;, D&gt;<br>{<br>  ...<br>};<br><br>template &lt;class s1, class s2, class s3, class VP, class EP, class GP, class s4, class P, class D&gt;<br>struct has_property&lt;P, const boost::adjacency_list&lt;s1,s2,s3,VP,EP,GP,s4&gt;, D&gt;<br>{<br>  ...<br>};<br><br>template &lt;class PropertyTag, class Graph, class Default&gt;<br>struct property_map<br>{<br>  typedef ... type;<br>  typedef ... const_type;<br>};<br><br>template &lt;class PropertyTag, class Graph, class Default&gt;<br>struct property_map&lt;PropertyTag, const Graph, Default&gt;<br>{<br>  typedef ... type;<br>  typedef ... const_type;<br>};<br><br><br>template &lt;class PropertTag, class Graph, class Default&gt;<br>typename property_map&lt;PropertTag,Graph,Default&gt;::type get_or_default(P p, G&amp; g, const Default&amp; v)<br><br><br>template &lt;class V, class K=std::size_t&gt;<br>class singleton_property_map {<br>public:<br>  typedef K key_type;<br>  typedef V value_type;<br>  typedef V&amp; reference;<br>  typedef boost::lvalue_property_map_tag category;<br><br>  singleton_property_map(V v=V());<br><br>  operator value_type () const;<br><br>  const singleton_property_map&lt;V&gt;&amp; operator=(const value_type&amp; v);<br><br>  template &lt;class T&gt; V&amp; operator[](T );<br>  template &lt;class T&gt; const V&amp; operator[](T ) const;<br>};<br><br>}<br></pre>
+<h3>The <tt>has_property</tt> traits class</h3>
+can be used to reflect upton the property types in a graph:<br>
+<pre>template &lt;class PropertyTag, class Graph, class Default=int&gt;<br>struct has_property<br></pre>
+<p><tt>has_property</tt> is templated on the property and graph type. A default
+type can be provided for which a <tt>singleton_property_map</tt> is constructed
+if a property is not available. The traits class is currently specialized
+only for the <tt>boost::adjacency_list</tt> graph type and has the following
+members:<br>
+</p>
+<table cellpadding="2" cellspacing="2" border="1" width="100%">
+  <tbody>
+    <tr>
+      <td valign="top">edge_property<br>
+      </td>
+      <td valign="top">is <tt>true</tt> if the property is an edge property
+of the graph<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">vertex_property<br>
+      </td>
+      <td valign="top">is <tt>true</tt> if the property is a vertex property
+of the graph<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">graph_property<br>
+      </td>
+      <td valign="top">is <tt>true</tt> if the property is a graph property
+of the graph<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">any_property<br>
+      </td>
+      <td valign="top">is <tt>true</tt> if the property is either a graph,
+edge of vertex property<br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">vertex_property_type<br>
+      </td>
+      <td valign="top">is the type of property map if it is a vertex property,
+otherwise a <tt>singleton_property_map&lt;Default&gt;</tt><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">edge_property_type<br>
+      </td>
+      <td valign="top">is the type of property map if it is an edge property,
+otherwise a <tt>singleton_property_map&lt;Default&gt;</tt><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">graph_property_type<br>
+      </td>
+      <td valign="top">is the type of property map if it is a graph property,
+otherwise a <tt>singleton_property_map&lt;Default&gt;</tt><br>
+      </td>
+    </tr>
+    <tr>
+      <td valign="top">property_type<br>
+      </td>
+      <td valign="top">is the type of property map if it is a vertex, edge
+or graph property, otherwise a <tt>singleton_property_map&lt;Default&gt;</tt><br>
+      </td>
+    </tr>
+  </tbody>
+</table>
+<h3>The <tt>property_map</tt> traits class</h3>
+<p>The property_map class is an extension of the <a
+ href="http://www.boost.org/libs/graph/doc/property_map.html"><tt>property_map</tt></a>
+class in the Boost graph library. While the Boost <tt>property_map</tt> requires
+that the graph has the requested property, the ALPS version provides a <tt>singleton_property_map</tt>
+as a default if the property does not exist. This is useful for generic functions
+if one does not want to specialize on the existence of a certain property.<br>
+</p>
+<pre>template &lt;class PropertyTag, class Graph, class Default&gt;<br>struct property_map<br>{<br>  typedef ... type;<br>  typedef ... const_type;<br>};</pre>
+<p>The type members <tt>type</tt> and <tt>const_type</tt> are the types of
+property maps provided by <tt>boost::property_map</tt> if the property exists
+in the graph (i.e. if <tt>has_property&lt;PropertyTag,Graph&gt;::any_property</tt>
+is <tt>true</tt>. Otherwise it is <tt>singleton_property_map&lt;Default&gt;</tt>.<br>
+</p>
+<h3>The <tt>singleton_property_map</tt> class</h3>
+is a property map for which the value is independent of the key. Accessing
+it with any key will give the same value and setting the value for one key
+(or globally by using <tt>operator=</tt> of the property map) will set that
+value. <br>
+  
+<pre>template &lt;class V, class K=std::size_t&gt;<br>class singleton_property_map<br></pre>
+<p>The first type <tt>V</tt> is the type of the value stored in the property
+map. The second type is the type used as <tt>key_type</tt>. Note that since
+the value of the<tt> singleton_property_map</tt> is independent of the key
+type, actually accessing with keys of ay type is allowed.</p>
+<pre>  typedef K key_type;<br>  typedef V value_type;<br>  typedef V&amp; reference;<br>  typedef boost::lvalue_property_map_tag category;<br></pre>
+<p>are the usual type defintions for property maps. Note that since the value
+of the<tt> singleton_property_map</tt> is independent of the key type, actually
+accessing with keys of ay type is allowed. The <tt>key_type</tt> is included
+here only because it is required of property maps.<br>
+</p>
+<pre>  singleton_property_map(V =V());<br><br>  operator value_type () const;<br><br>  const singleton_property_map&lt;V&gt;&amp; operator=(const value_type&amp; v);<br><br>  template &lt;class T&gt; V&amp; operator[](T );<br>  template &lt;class T&gt; const V&amp; operator[](T ) const;<br>};<br><br></pre>
+     
+<hr> 
+<address><a name="_">copyright (c) 2000-2004 by  </a><a
+ href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
+  <br>
+ <br>
+</body>
+</html>
