@@ -51,6 +51,10 @@ AC_DEFUN([AC_MPI],
           mpi_dir="$d/mpich"
           break
         fi
+        if test -f "$d/lammpi/include/mpi.h" && test -d "$d/lammpi/lib"; then
+          mpi_dir="$d/lammpi"
+          break
+        fi
       done
       if test -n "$mpi_dir"; then
         AC_MSG_RESULT([$mpi_dir])
@@ -179,6 +183,15 @@ AC_DEFUN([AC_MPI],
       fi
       if test "$found" = no; then
         MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam"
+        LIBS="$MPI_LIBS $ac_save_LIBS"
+        AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
+        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                    [AC_MSG_RESULT(yes); found=yes],
+                    AC_MSG_RESULT(no))
+      fi
+      if test "$found" = no; then
+        # for lammpi 7.0.2 on MacOSX
+        MPI_LIBS="-llammpi++ -llammpio -lmpi -llam"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
         AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
