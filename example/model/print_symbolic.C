@@ -41,10 +41,11 @@ int main()
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
+  using namespace boost::numeric::ublas ;
 
   alps::Parameters parms;
   std::cin >> parms;
-  HamiltonianMatrix<alps::Expression,boost::numeric::ublas::sparse_matrix<alps::Expression> > matrix(parms);
+  HamiltonianMatrix<alps::Expression,compressed_matrix<alps::Expression,row_major> > matrix(parms);
   std::cout << matrix << "\n";
 
 #ifndef BOOST_NO_EXCEPTIONS

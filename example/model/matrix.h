@@ -145,7 +145,8 @@ void HamiltonianMatrix<T,M>::build() const
   // create basis set
   std::cerr << "Creating basis set\n";
   alps::BasisStatesDescriptor<short> basis(ham.basis(),lattice());
-  typedef alps::LookupBasisStates<unsigned int> basis_states_type;
+  //typedef alps::LookupBasisStates<unsigned int> basis_states_type;
+  typedef alps::BasisStates<short> basis_states_type;
   typedef basis_states_type::value_type state_type;
   basis_states_type states(basis);
 
@@ -181,7 +182,6 @@ void HamiltonianMatrix<T,M>::build() const
   // loop over bonds
     for (int i=0;i<states.size();++i) {      // loop over source states
       state_type state=states[i];           // get source state
-      state_type newstate=state;            // prepare target state
   for (boost::graph_traits<graph_type>::edge_iterator it=boost::edges(lattice()).first; 
       it!=boost::edges(lattice()).second ; ++it) {
     boost::multi_array<T,4>& mat = bond_matrix[bond_type[*it]];
@@ -193,6 +193,7 @@ void HamiltonianMatrix<T,M>::build() const
         for (int js2=0;js2<basis[s2].size();++js2) {
           T val=mat[is1][is2][js1][js2];            // get matrix element
           if (val) {                                // if nonzero matrix element
+            state_type newstate=state;            // prepare target state
             newstate[s1]=js1;                       // build target state
             newstate[s2]=js2;
             int j = states.index(newstate);         // lookup target state

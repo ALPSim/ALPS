@@ -64,3 +64,8 @@ catch (...) {
 }
 #endif
 }
+
+double boost::numeric::ublas::compressed_matrix<double,
+boost::numeric::ublas::row_major, (unsigned long)0,
+boost::numeric::ublas::unbounded_array<unsigned long>,
+boost::numeric::ublas::unbounded_array<double> >::zero_=0.;
