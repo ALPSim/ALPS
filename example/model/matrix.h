@@ -88,9 +88,10 @@ void HamiltonianMatrix<T,M>::build() const
   
   // get Hamilton operator
   HamiltonianDescriptor<short> ham(models_.hamiltonian(parms_["MODEL"]));
+  alps::Parameters p(parms_);
   if (!symbolic_traits<T>::is_symbolic)
-    parms_.copy_undefined(ham.default_parameters());
-  ham.set_parameters(parms_);
+    p.copy_undefined(ham.default_parameters());
+  ham.set_parameters(p);
   
   // get all site matrices
   property_map<site_type_t,const graph_type,int>::type site_type(
@@ -105,7 +106,7 @@ void HamiltonianMatrix<T,M>::build() const
       std::cout << "Creating site matrix for type " << type << "\n";
       site_visited[type]=true;
       site_matrix.insert(std::make_pair(type,ham.site_term(type).template matrix<T>(
-                ham.basis().site_basis(type),models_.simple_operators(),parms_)));
+                ham.basis().site_basis(type),models_.simple_operators(),p)));
     }
   
   // get all bond matrices
@@ -124,7 +125,7 @@ void HamiltonianMatrix<T,M>::build() const
       bond_visited[boost::make_tuple(btype,stype1,stype2)]=true;
       bond_matrix.insert(std::make_pair(btype,ham.bond_term(btype).template matrix<T>(
                               ham.basis().site_basis(stype1),ham.basis().site_basis(stype2),
-			      models_.simple_operators(),parms_)));
+			      models_.simple_operators(),p)));
     }
   }
   
