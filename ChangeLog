@@ -1,3 +1,8 @@
+2003-07-30 Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Fixed configure script and include.mk.in for platforms
+	which do not have a BSD-style install command.
+	
 2003-07-29 Matthias Troyer <troyer@comp-phys.org>
 
 	* [scheduler,alea,osiris,config] Added support for IBM platforms

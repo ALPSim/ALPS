@@ -73,6 +73,13 @@ AC_PROG_CXXCPP
 
 # Install script
 AC_PROG_INSTALL
+AC_SUBST(ALPS_INSTALL)
+if test "$INSTALL" = "$ac_install_sh"; then
+  ALPS_INSTALL='$(install_sh) -c'
+else
+  ALPS_INSTALL="$INSTALL"
+fi
+
 
 # other tools
 AC_SUBST(AR)
