@@ -1,3 +1,7 @@
+1003-11-17 Matthias Troyer <troyer@comp-phys.org>
+
+	* [model] refinements to constraints in basis sets
+
 1003-11-09 Matthias Troyer <troyer@comp-phys.org>
 
 	* [scheduler] deprecated dclock, using Boost date-time library instead
