@@ -1,3 +1,12 @@
+2003-05-19 Synge Todo <wistaria@comp-phys.org>
+
+	* [alps] Fixed Expression, Term, and ParameterEvaluator classes
+	for g++ 3.2 and icc 7.1.
+
+	* [model] Fixed BasisDescriptor, HamiltonianDescriptor,
+	QuantumNumber, and SiteBasisDescriptor to compile for g++ 3.2 and
+	icc 7.1.
+	
 2003-05-18 Matthias Troyer <troyer@comp-phys.org>
 
 	* [model] Added parametrization of basis sets (e.g. spin-S, or bosons
