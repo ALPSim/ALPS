@@ -84,11 +84,11 @@ The program takes a number of command line options, to control the behavior of t
 <tr><td><B>Option</B></td><td><B>Default</B></td><td><B>Description</B></td></tr>
 </thead>
 <tbody>
-<tr><td><TT>-T</tt>&nbsp;<i>timelimit</i></tt></td><td><i>infinity</i></td><td>gives the time (in seconds) which the program should run before writing a final checkpoint and exiting.</td></tr>
+<tr><td><TT>-T</tt> or <tt>--time-limit</tt>&nbsp;<i>timelimit</i></tt></td><td><i>infinity</i></td><td>gives the time (in seconds) which the program should run before writing a final checkpoint and exiting.</td></tr>
 </P>
-<tr><td><TT>-Tc</tt>&nbsp;<i>checkpointtime</i></tt></td><td>1800</td><td>gives the time (in seconds) after which the program should write a checkpoint.</td></tr>
-<tr><td><TT>-Tmin</tt>&nbsp;<i>checkingtime</i></tt></td><td>60</td><td>gives the minimum time (in seconds) which the scheduler waits before checking (again) whether a simulation is finished.</td></tr>
-<tr><td><TT>-Tmax</tt>&nbsp;<i>checkingtime</i></tt></td><td>900</td><td>gives the maximum time (in seconds) which the scheduler waits before checking (again) whether a simulation is finished.</td></tr>
+<tr><td><TT>--Tc</tt>&nbsp;<i>checkpointtime</i></tt></td><td>1800</td><td>gives the time (in seconds) after which the program should write a checkpoint.</td></tr>
+<tr><td><TT>--Tmin</tt>&nbsp;<i>checkingtime</i></tt></td><td>60</td><td>gives the minimum time (in seconds) which the scheduler waits before checking (again) whether a simulation is finished.</td></tr>
+<tr><td><TT>--Tmax</tt>&nbsp;<i>checkingtime</i></tt></td><td>900</td><td>gives the maximum time (in seconds) which the scheduler waits before checking (again) whether a simulation is finished.</td></tr>
 </tbody>
 </table>
 <h3>Running the simulation on a parallel machine</h3>
@@ -105,8 +105,8 @@ In addition to the command line options for the sequential program there are two
 <tr><td><B>Option</B></td><td><B>Default</B></td><td><B>Description</B></td></tr>
 </thead>
 <tbody>
-<tr><td><TT>-Nmin</tt>&nbsp;<i>numprocs</i></tt></td><td>1</td><td>gives the minimum number of processes to assign to a simulation.</td></tr>
-<tr><td><TT>-Nmax</tt>&nbsp;<i>numprocs</i></tt></td><td><i>infinity</i></td><td>gives the maximum number of processes to assign to a simulation.</td></tr>
+<tr><td><TT>--Nmin</tt>&nbsp;<i>numprocs</i></tt></td><td>1</td><td>gives the minimum number of processes to assign to a simulation.</td></tr>
+<tr><td><TT>--Nmax</tt>&nbsp;<i>numprocs</i></tt></td><td><i>infinity</i></td><td>gives the maximum number of processes to assign to a simulation.</td></tr>
 </tbody>
 </table>
 </P>
