@@ -234,8 +234,8 @@ depend :
 	@if test -f Makefile.dep; then \
 	  echo "rm -f Makefile.dep && touch Makefile.dep"; \
 	  rm -f Makefile.dep && touch Makefile.dep; \
-	  echo "$(MAKEDEPEND) -f Makefile.dep -- -Y -I$(top_srcdir)/src -- \`find * -name '*.C' -o -name '*.cpp'\` > /dev/null 2>&1"; \
-	  $(MAKEDEPEND) -f Makefile.dep -- -Y -I$(top_srcdir)/src -- `find * -name '*.C' -o -name '*.cpp'` > /dev/null 2>&1; \
+	  echo "$(MAKEDEPEND) -f Makefile.dep -- -Y -I$(top_srcdir)/src -I$(top_srcdir) -- \`find * -name '*.C' -o -name '*.cpp'\` > /dev/null 2>&1"; \
+	  $(MAKEDEPEND) -f Makefile.dep -- -Y -I$(top_srcdir)/src -I$(top_srcdir) -- `find * -name '*.C' -o -name '*.cpp'` > /dev/null 2>&1; \
 	  echo "mv -f Makefile.dep makedepend.tmp"; \
 	  mv -f Makefile.dep makedepend.tmp; \
 	  echo "cat makedepend.tmp | $(MAKEDEPEND_PL) | sort > Makefile.dep"; \

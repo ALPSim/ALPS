@@ -63,7 +63,11 @@ while (<>) {
 		    $header = "$TOP_SRCDIR/$header";
 		}
 	    } else {
-		$header = "$SRCDIR/$header";
+		if ($header =~ /\//) {
+		    $header = "$TOP_SRCDIR/$header";
+		} else {
+		    $header = "$SRCDIR/$header";
+		}
 	    }
 	    $headers{$base} = "$headers{$base} $header";
 	}
