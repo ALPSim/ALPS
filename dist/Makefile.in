@@ -1,11 +1,11 @@
 ###########################################################################
 # ALPS library
 #
-# devel/Makefile.in
+# dist/Makefile.in
 #
 # $Id$
 #
-# Copyright (C) 1994-2002 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+# Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
 #                            Synge Todo <wistaria@comp-phys.org>,
 #
 # This program is free software; you can redistribute it and/or
@@ -32,7 +32,7 @@ distdir = alps-$(version)
 SCRIPTS = configure config/install-sh config/makedepend.pl config/mkinstalldirs tool/archivecat tool/transformall tool/xslttransform
 ERASE = bootstrap dist
 
-default : Makefile
+default all libs programs examples tests install uninstall :
 
 release dist check snapshot : Makefile
 	@root=`cat $(top_srcdir)/CVS/Root`; \
@@ -58,7 +58,6 @@ release dist check snapshot : Makefile
 	tar chof - $$distdir | gzip -c > $$distdir.tar.gz; \
 	rm -rf $$distdir
 
-uninstall :
 clean :
 distclean :
 	rm -rf alps-* Makefile
