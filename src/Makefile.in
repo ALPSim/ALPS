@@ -5,7 +5,7 @@
 #
 # $Id$
 #
-# Copyright (C) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>,
+# Copyright (C) 1994-2004 by Matthias Troyer <troyer@comp-phys.org>,
 #                            Synge Todo <wistaria@comp-phys.org>,
 #
 # This software is part of the ALPS library, published under the 
@@ -70,7 +70,7 @@ OBJ_MODEL = alps/model/modellibrary.o
 OBJ_RANDOM = alps/random/rngfactory.o
 OBJ_PARSER = alps/parser/parser.o alps/parser/xmlstream.o alps/parser/xmlhandler.o alps/parser/xmlparser.o alps/parser/xslt.o
 OBJ_SCHEDULER = alps/scheduler/abstract_task.o alps/scheduler/remote_task.o alps/scheduler/remote_worker.o alps/scheduler/scheduler.o alps/scheduler/info.o alps/scheduler/single_scheduler.o alps/scheduler/master_scheduler.o alps/scheduler/slave_task.o alps/scheduler/montecarlo.o alps/scheduler/task.o alps/scheduler/mpp_scheduler.o alps/scheduler/worker.o alps/scheduler/signal.o alps/scheduler/options.o alps/scheduler/workertask.o alps/scheduler/factory.o
-OBJ = $(OBJ_BOOST) $(OBJ_ALPS) $(OBJ_ALEA) $(OBJ_LATTICE) $(OBJ_MODEL) $(OBJ_OSIRIS) $(OBJ_PARSER) $(OBJ_RANDOM) $(OBJ_SCHEDULER)
+OBJ = @OBJ_BOOST@ $(OBJ_ALPS) $(OBJ_ALEA) $(OBJ_LATTICE) $(OBJ_MODEL) $(OBJ_OSIRIS) $(OBJ_PARSER) $(OBJ_RANDOM) $(OBJ_SCHEDULER)
 OBJ_SGL = $(OBJ_OSIRIS_SGL)
 OBJ_MPI = $(OBJ_OSIRIS_MPI)
 OBJ_PVM = $(OBJ_OSIRIS_PVM)
@@ -97,17 +97,17 @@ distclean-files:
 
 boost/%.o : $(srcdir)/boost/%.C
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
-boost/%.o : $(BOOST_DIR)/libs/date_time/src/gregorian/%.cpp
+boost/%.o : $(BOOST_SRCDIR)/date_time/src/gregorian/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
-boost/%.o : $(BOOST_DIR)/libs/date_time/src/posix_time/%.cpp
+boost/%.o : $(BOOST_SRCDIR)/date_time/src/posix_time/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
-boost/%.o : $(BOOST_DIR)/libs/filesystem/src/%.cpp
+boost/%.o : $(BOOST_SRCDIR)/filesystem/src/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
-boost/%.o: $(BOOST_DIR)/libs/regex/src/%.cpp
+boost/%.o: $(BOOST_SRCDIR)/regex/src/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
-boost/%.o: $(BOOST_DIR)/libs/signals/src/%.cpp
+boost/%.o: $(BOOST_SRCDIR)/signals/src/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
-boost/%.o : $(BOOST_DIR)/libs/thread/src/%.cpp
+boost/%.o : $(BOOST_SRCDIR)/thread/src/%.cpp
 	$(CXX) -c $(cppflags) $(cxxflags) $< -o $@
 
 alps/%.o : $(srcdir)/alps/%.C

@@ -5,7 +5,7 @@
 #
 # $Id$
 #
-# Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+# Copyright (C) 1994-2004 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
 #                            Synge Todo <wistaria@comp-phys.org>,
 #
 # This software is part of the ALPS library, published under the 
@@ -36,9 +36,9 @@ top_builddir = ./@top_builddir@
 
 include $(top_srcdir)/config/include-build.mk
 
-libs_program = -lalps -lcomm-sgl $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
-libs_program_mpi = -lalps -lcomm-mpi $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
-libs_program_pvm = -lalps -lcomm-pvm $(HDF5_LIBS) $(XML_LIBS) $(PVM_LIBS) $(BASE_LIBS)
+libs_program = -lalps -lcomm-sgl $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
+libs_program_mpi = -lalps -lcomm-mpi $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
+libs_program_pvm = -lalps -lcomm-pvm $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(PVM_LIBS) $(BASE_LIBS)
 
 OBJ_PROGRAM = ising.o ising2.o
 OBJ_PROGRAM_MPI = $(OBJ_PROGRAM)

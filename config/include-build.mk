@@ -5,7 +5,7 @@
 #
 # $Id$
 #
-# Copyright (C) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>,
+# Copyright (C) 1994-2004 by Matthias Troyer <troyer@comp-phys.org>,
 #                            Synge Todo <wistaria@comp-phys.org>,
 #
 # Permission is hereby granted, free of charge, to any person or organization 
@@ -46,10 +46,10 @@ mkinstalldirs = $(top_srcdir)/config/mkinstalldirs
 ARXX = $(SHELL) $(top_builddir)config/arxx
 MAKEDEPEND_PL = perl $(top_srcdir)/config/makedepend.pl
 
-cppflags = -I$(top_builddir)src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
+cppflags = -I$(top_builddir)src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
 cppflags_mpi = $(cppflags) $(MPI_CPPFLAGS) -DALPS_MPI
 cppflags_pvm = $(cppflags) $(PVM_CPPFLAGS) -DALPS_PVM
 cxxflags = $(CXXFLAGS)
-ldflags = -L$(builddir) -L$(top_builddir)src $(BASE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS)
+ldflags = -L$(builddir) -L$(top_builddir)src $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS)
 ldflags_mpi = $(ldflags) $(MPI_LDFLAGS)
 ldflags_pvm = $(ldflags) $(PVM_LDFLAGS)

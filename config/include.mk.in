@@ -5,7 +5,7 @@
 #
 # $Id$
 #
-# Copyright (C) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>,
+# Copyright (C) 1994-2004 by Matthias Troyer <troyer@comp-phys.org>,
 #                            Synge Todo <wistaria@comp-phys.org>,
 #
 # This software is part of the ALPS library, published under the 
@@ -67,15 +67,18 @@ MAKEDEPEND = makedepend
 MAKEDEPEND_PL = perl $(bindir)/makedepend.pl
 RANLIB = @RANLIB@
 
-# for Boost
-
-BOOST_DIR = @BOOST_DIR@
-
 # base
 
-BASE_CPPFLAGS = @BASE_CPPFLAGS@ -I$(BOOST_DIR)
+BASE_CPPFLAGS = @BASE_CPPFLAGS@
 BASE_LDFLAGS = @BASE_LDFLAGS@
 BASE_LIBS = @BASE_LIBS@
+
+# for Boost
+
+BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
+BOOST_LDFLAGS = @BOOST_LDFLAGS@
+BOOST_LIBS = @BOOST_LIBS@
+BOOST_SRCDIR = @BOOST_SRCDIR@
 
 # for MPI
 
@@ -114,14 +117,14 @@ CXXFLAGS = @CXXFLAGS@
 CPP = @CPP@
 CXXCPP = @CXXCPP@
 
-CPPFLAGS = $(BASE_CPPFLAGS) -I$(includedir) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
-LDFLAGS = $(BASE_LDFLAGS) -L$(libdir) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
-LIBS = -lalps -lcomm-sgl $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
+CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) -I$(includedir) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
+LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) -L$(libdir) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
+LIBS = -lalps -lcomm-sgl $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 
 CPPFLAGS_MPI = $(CPPFLAGS) $(MPI_CPPFLAGS)
 LDFLAGS_MPI = $(LDFLAGS) $(MPI_LDFLAGS)
-LIBS_MPI = -lalps -lcomm-mpi $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
+LIBS_MPI = -lalps -lcomm-mpi $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
 CPPFLAGS_PVM = $(CPPFLAGS) $(PVM_CPPFLAGS)
 LDFLAGS_PVM = $(LDFLAGS) $(PVM_LDFLAGS)
-LIBS_PVM = -lalps -lcomm-pvm $(HDF5_LIBS) $(XML_LIBS) $(PVM_LIBS) $(BASE_LIBS)
+LIBS_PVM = -lalps -lcomm-pvm $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(PVM_LIBS) $(BASE_LIBS)
