@@ -40,7 +40,7 @@ src_boost_PROGRAM_OPTIONS_SERIALIZATION= \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
   $(BOOST_SRCDIR)/program_options/src/convert.cpp \
   $(BOOST_SRCDIR)/program_options/src/options_description.cpp \
-  $(BOOST_SRCDIR)/program_options/src/parsers.cpp \
+  $(top_builddir)/src/boost/po-parsers.cpp \
   $(BOOST_SRCDIR)/program_options/src/positional_options.cpp \
   $(BOOST_SRCDIR)/program_options/src/value_semantic.cpp \
   $(BOOST_SRCDIR)/program_options/src/variables_map.cpp \

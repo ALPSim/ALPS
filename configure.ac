@@ -488,7 +488,6 @@ ac_cv_boost_ldflags="$BOOST_LDFLAGS"
 ac_cv_boost_libs="$BOOST_LIBS"
 ac_cv_boost_srcdir="$BOOST_SRCDIR"
 
-
 # checking for other C++ headers
 
 AC_CHECK_HEADER([cstdlib],,
@@ -713,6 +712,9 @@ if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(example/Makefile example/model/Makefile example/scheduler/Makefile)
   AC_CONFIG_FILES(tool/Makefile tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text)
 fi
+
+## workaround for SGI MIPSpro
+AC_CONFIG_FILES(src/boost/po-parsers.cpp)
 
 AC_OUTPUT
 

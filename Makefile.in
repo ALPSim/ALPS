@@ -44,8 +44,9 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/config.site.in \
 	$(top_srcdir)/config/include.mk.in $(top_srcdir)/configure \
-	$(top_srcdir)/src/alps/config.h.in ChangeLog INSTALL TODO \
-	config/config.guess config/config.sub config/depcomp \
+	$(top_srcdir)/src/alps/config.h.in \
+	$(top_srcdir)/src/boost/po-parsers.cpp.in ChangeLog INSTALL \
+	TODO config/config.guess config/config.sub config/depcomp \
 	config/install-sh config/ltmain.sh config/missing \
 	config/mkinstalldirs
 subdir = .
@@ -65,7 +66,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h
-CONFIG_CLEAN_FILES = config/config.site config/include.mk
+CONFIG_CLEAN_FILES = config/config.site config/include.mk \
+	src/boost/po-parsers.cpp
 SCRIPTS = $(dist_noinst_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
@@ -305,6 +307,8 @@ config/config.site: $(top_builddir)/config.status $(top_srcdir)/config/config.si
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 config/include.mk: $(top_builddir)/config.status $(top_srcdir)/config/include.mk.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
+src/boost/po-parsers.cpp: $(top_builddir)/config.status $(top_srcdir)/src/boost/po-parsers.cpp.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -473,7 +477,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/config $(distdir)/src/alps $(distdir)/test/lattice $(distdir)/test/model $(distdir)/test/osiris $(distdir)/tool
+	$(mkdir_p) $(distdir)/config $(distdir)/src/alps $(distdir)/src/boost $(distdir)/test/lattice $(distdir)/test/model $(distdir)/test/osiris $(distdir)/tool
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
