@@ -1,3 +1,8 @@
+2003-05-22 Synge Todo <wistaria@comp-phys.org>
+
+	* [alea] Added write_xml(alps::oxstream&) member function to
+	measurements
+	
 2003-05-19 Synge Todo <wistaria@comp-phys.org>
 
 	* [alps] Fixed Expression, Term, and ParameterEvaluator classes
