@@ -31,6 +31,7 @@
 #ifndef IETL_UBLAS_H
 #define IETL_UBLAS_H
 
+#include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector.hpp>
 #include <ietl/traits.h>
 
