@@ -4,8 +4,9 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2002-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
-*                            Simon Trebst <trebst@itp.phys.ethz.ch>
+* Copyright (C) 2002-2004 by Matthias Troyer <troyer@comp-phys.org>,
+*                            Simon Trebst <trebst@comp-phys.org>,
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -39,34 +40,52 @@
 
 void convert_params(const std::string& inname, const std::string& outfilename)
 {
-  std::ifstream in(inname.c_str());
   alps::ParameterList list;
-  in >> list;
-  std::string jobname=outfilename+".in.xml";
-  std::cout << "Converting parameter file " << inname << " to " <<  jobname << std::endl;
-  alps::oxstream out (jobname.c_str());
-  out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("job.xsl"));
-  out << alps::start_tag("JOB") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
-    << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2003/8/job.xsd")
-    << alps::start_tag("OUTPUT") << alps::attribute("file",outfilename+".out.xml") << alps::end_tag("OUTPUT");
-  for (int i=0;i<list.size();++i) {
-    std::string outname = boost::filesystem::path(outfilename,boost::filesystem::native).leaf();
-    outname +=".task" + boost::lexical_cast<std::string,int>(i+1);
-    std::string inname = outname + ".in.xml";
-    std::string fullinname = outfilename + ".task" + boost::lexical_cast<std::string,int>(i+1) + ".in.xml";
-    outname+=".out.xml";
+  {
+    std::ifstream in(inname.c_str());
+    in >> list;
+  }
+
+  std::string basename = boost::filesystem::path(outfilename,
+    boost::filesystem::native).leaf();
+  std::cout << "Converting parameter file " << inname << " to "
+            <<  basename+".in.xml" << std::endl;
+
+  alps::oxstream out((basename+".in.xml").c_str());
+  out << alps::header("UTF-8")
+      << alps::stylesheet(alps::xslt_path("job.xsl"))
+      << alps::start_tag("JOB")
+      << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
+      << alps::attribute("xsi:noNamespaceSchemaLocation",
+                         "http://xml.comp-phys.org/2003/8/job.xsd")
+      << alps::start_tag("OUTPUT")
+      << alps::attribute("file", basename+".out.xml")
+      << alps::end_tag("OUTPUT");
+
+  for (int i = 0; i < list.size(); ++i) {
+    std::string taskname =
+      basename+".task"+boost::lexical_cast<std::string,int>(i+1);
     out << alps::start_tag("TASK") << alps::attribute("status","new")
-      << alps::start_tag("INPUT") << alps::attribute("file",inname) << alps::end_tag("INPUT")
-      << alps::start_tag("OUTPUT") << alps::attribute("file",outname) << alps::end_tag("OUTPUT")
-      << alps::end_tag("TASK");
+        << alps::start_tag("INPUT")
+        << alps::attribute("file", taskname + ".in.xml")
+        << alps::end_tag("INPUT")
+        << alps::start_tag("OUTPUT")
+        << alps::attribute("file", taskname + ".out.xml")
+        << alps::end_tag("OUTPUT")
+        << alps::end_tag("TASK");
     //      out << "    <CPUS min=\"1\">\n";
-    alps::oxstream task (inname.c_str());
-    task << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("ALPS.xsl"));
-    task << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
-         << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
+    alps::oxstream task((taskname+".in.xml").c_str());
+    task << alps::header("UTF-8")
+         << alps::stylesheet(alps::xslt_path("ALPS.xsl"));
+    task << alps::start_tag("SIMULATION")
+         << alps::xml_namespace("xsi",
+                                "http://www.w3.org/2001/XMLSchema-instance")
+         << alps::attribute("xsi:noNamespaceSchemaLocation",
+                            "http://xml.comp-phys.org/2002/10/QMCXML.xsd");
     task << list[i];
     task << alps::end_tag("SIMULATION");
   }
+
   out << alps::end_tag("JOB");
 }
 
@@ -86,7 +105,7 @@ void convert_simulation(const std::string& inname, const std::string& outname)
     boost::throw_exception(std::runtime_error("did not get a simulation on dump"));
   std::string jobname=outname+".xml";
   std::cout << "Converting simulation file " << inname << " to " <<  jobname << std::endl;
-  alps::oxstream out (jobname.c_str());
+  alps::oxstream out(jobname);
   out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("QMCXML.xsl"))
       << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
       << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
@@ -115,14 +134,14 @@ void convert_simulation(const std::string& inname, const std::string& outname)
       boost::filesystem::remove(dstname);
       boost::filesystem::copy_file(srcname,dstname);
     }
-    out << alps::start_tag("MCRUN") << alps::start_tag("CHECKPOINT") 
+    out << alps::start_tag("MCRUN") << alps::start_tag("CHECKPOINT")
         << alps::attribute("format","osiris") << alps::attribute("file=","dstname")
         << alps::end_tag("CHECKPOINT") << alps::end_tag("MCRUN");
     convert_run(srcname,dstname);
   }
   out << alps::end_tag("SIMULATION");
 }
-  
+
 void convert_scheduler(const std::string& inname, const std::string& outname)
 {
   std::map<int,std::string> status_text;
@@ -137,7 +156,7 @@ void convert_scheduler(const std::string& inname, const std::string& outname)
     boost::throw_exception(std::runtime_error("did not get scheduler on dump"));
   std::string jobname=outname+".xml";
   std::cout << "Converting scheduler file " << inname << " to " <<  jobname << std::endl;
-  alps::oxstream out (jobname.c_str());
+  alps::oxstream out(jobname);
   out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("job.xsl"))
     << alps::start_tag("JOB") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
     << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2003/8/job.xsd");
@@ -149,7 +168,7 @@ void convert_scheduler(const std::string& inname, const std::string& outname)
   dump >> list;
   std::vector<int> status;
   dump >> status;
-  for (int i=0;i<list.size();++i) 
+  for (int i=0;i<list.size();++i)
     if (status[i]) {
       std::string xmlname = outname;
       std::string dumpname = inname;
@@ -170,12 +189,12 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
-    
+
   if (argc<2) {
     std::cerr << "Usage: " << argv[0] << " inputfile [inputfile ...]]\n";
     std::exit(-1);
   }
-  for (int i=1;i<argc;++i) {    
+  for (int i=1;i<argc;++i) {
     std::string inname=argv[i];
     if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
     alps::IXDRFileDump dump(inname);
