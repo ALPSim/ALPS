@@ -14,8 +14,8 @@ each identified by a name.
  
 <blockquote> 
   <pre>namespace alps {<br>class ObservableSet: public std::map&lt;std::string,Observable*&gt;<br>{<br>public:<br>  template <class
- t="">  static void register_type();<br><br>  ObservableSet() {};<br>  ObservableSet(const ObservableSet&amp; m);<br>  const ObservableSet&amp; operator=(const ObservableSet&amp; m);<br>  ~ObservableSet();<br> <br>  void save(osiris::ODump&amp; dump) const;<br>  void load(osiris::IDump&amp; dump);<br> <br>  const ObservableSet&amp; operator&lt;&lt;(const ObservableSet&amp; obs);<br>  const ObservableSet&amp; operator&lt;&lt;(const Observable&amp; obs);<br></class>  const ObservableSet&amp; operator&lt;&lt;(const boost::shared_ptr&lt;Observable&gt;&amp; ptr);<class
- t=""><br>  <br>  void addObservable(Observable *obs);<br>  void removeObservable(const std::string&amp; name);<br>  <br>  bool has(const std::string&amp; name) const;<br><br>  Observable&amp;       operator[](const std::string&amp; name);<br>  const Observable&amp; operator[](const std::string&amp; name) const;<br><br>  template &lt;class T&gt;  T&amp; get(const std::string&amp; name);<br>  template &lt;class T&gt;  const T&amp; get(const std::string&amp; name) const;<br>  <br>  template &lt;class F&gt;  void do_for_all(F f) const;<br>  template &lt;class F&gt;  void do_for_all(F f);<br><br>  bool can_set_thermalization_all() const;<br>  bool can_set_thermalization_any() const;<br>  void set_thermalization(uint32_t todiscard);<br>  uint32_t get_thermalization() const;<br><br>  uint32_t number_of_runs() const;<br>  ObservableSet get_run(uint32_t) const;<br><br>  void reset(bool flag=false);<br>  void compact();<br>  <br>  void write_xml(std::ostream&amp; xml, const boost::filesystem::path&amp; =boost::filesystem::path()) const;<br>  void write_xml(oxstream&amp; oxs, const boost::filesystem::path&amp; =boost::filesystem::path()) const;<br>  void read_xml(std::istream&amp; infile, const XMLTag&amp; tag);<br><br>};<br><br>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out,const ObservableSet&amp; obs)<br><br>ODump&amp; operator&lt;&lt;(ODump&amp; od, const ObservableSet&amp;);<br>IDump&amp; operator&gt;&gt;(IDump&amp; id, ObservableSet&amp;);<br>}<br><br></class></pre>
+ t="">  static void register_type();<br><br>  ObservableSet() {};<br>  ObservableSet(const ObservableSet&amp; m);<br>  ObservableSet&amp; operator=(const ObservableSet&amp; m);<br>  ~ObservableSet();<br> <br>  void save(osiris::ODump&amp; dump) const;<br>  void load(osiris::IDump&amp; dump);<br> <br>  ObservableSet&amp; operator&lt;&lt;(const ObservableSet&amp; obs);<br>  ObservableSet&amp; operator&lt;&lt;(const Observable&amp; obs);<br></class>  ObservableSet&amp; operator&lt;&lt;(const boost::shared_ptr&lt;Observable&gt;&amp; ptr);<class
+ t=""><br>  <br>  void addObservable(Observable *obs);<br>  void removeObservable(const std::string&amp; name);<br>  <br>  bool has(const std::string&amp; name) const;<br><br>  Observable&amp; operator[](const std::string&amp; name);<br>  const Observable&amp; operator[](const std::string&amp; name) const;<br><br>  template &lt;class T&gt;  T&amp; get(const std::string&amp; name);<br>  template &lt;class T&gt;  const T&amp; get(const std::string&amp; name) const;<br>  <br>  template &lt;class F&gt;  void do_for_all(F f) const;<br>  template &lt;class F&gt;  void do_for_all(F f);<br><br>  bool can_set_thermalization_all() const;<br>  bool can_set_thermalization_any() const;<br>  void set_thermalization(uint32_t todiscard);<br>  uint32_t get_thermalization() const;<br><br>  uint32_t number_of_runs() const;<br>  ObservableSet get_run(uint32_t) const;<br><br>  void reset(bool flag=false);<br>  void compact();<br>  <br>  void write_xml(std::ostream&amp; xml, const boost::filesystem::path&amp; =boost::filesystem::path()) const;<br>  void write_xml(oxstream&amp; oxs, const boost::filesystem::path&amp; =boost::filesystem::path()) const;<br>  void read_xml(std::istream&amp; infile, const XMLTag&amp; tag);<br><br>};<br><br>std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out,const ObservableSet&amp; obs)<br><br>ODump&amp; operator&lt;&lt;(ODump&amp; od, const ObservableSet&amp;);<br>IDump&amp; operator&gt;&gt;(IDump&amp; id, ObservableSet&amp;);<br>}<br><br></class></pre>
 </blockquote>
    
 <h3>The <tt> ObservableSet</tt> class</h3>
@@ -33,7 +33,7 @@ and thus allows deserializing of objects of that type.
 <h4>Member functions</h4>
  
 <blockquote>
-  <pre>ObservableSet() {};<br>ObservableSet(const ObservableSet&amp; m);<br>const ObservableSet&amp; operator=(const ObservableSet&amp; m);<br>~ObservableSet();<br></pre>
+  <pre>ObservableSet() {};<br>ObservableSet(const ObservableSet&amp; m);<br>ObservableSet&amp; operator=(const ObservableSet&amp; m);<br>~ObservableSet();<br></pre>
 </blockquote>
  Since <tt>ObservableSet</tt> is implemented as an associative array of pointers,
 a nontrivial copy constructor, destructor and assignment operatir is needed. 
@@ -43,14 +43,14 @@ a nontrivial copy constructor, destructor and assignment operatir is needed.
  are the (de)serialization functions using the <a
  href="../../osiris/doc/index.html">osiris</a> library. 
 <blockquote>
-  <pre>const ObservableSet&amp; operator&lt;&lt;(const ObservableSet&amp; obs);<br></pre>
+  <pre>ObservableSet&amp; operator&lt;&lt;(const ObservableSet&amp; obs);<br></pre>
 </blockquote>
  adds observables from another <tt>ObservableSet</tt>. If an observable with
 a given name does not yet exist, it gets copied into the set. Otherwise it
 is added to the observable with the same name in the set. Throws a <tt>std::runtime_error</tt> 
 if the adding of two observables fails. 
 <blockquote>
-  <pre>const ObservableSet&amp; operator&lt;&lt;(const Observable&amp; obs);<br>const ObservableSet&amp; operator&lt;&lt;(const boost::shared_ptr&lt;Observable&gt;&amp; ptr);<br></pre>
+  <pre>ObservableSet&amp; operator&lt;&lt;(const Observable&amp; obs);<br>ObservableSet&amp; operator&lt;&lt;(const boost::shared_ptr&lt;Observable&gt;&amp; ptr);<br></pre>
 </blockquote>
  adds an <tt>Observable</tt> to the <tt>ObservableSet</tt>. If an observable
 with the name does not yet exist, it gets copied into the set. Otherwise
@@ -72,7 +72,7 @@ if no observable with the given name exists.
 </blockquote>
  checks if an observable with the given name is contained in the <tt>ObservableSet</tt>. 
 <blockquote>
-  <pre>Observable&amp;       operator[](const std::string&amp; name);<br>const Observable&amp; operator[](const std::string&amp; name) const;<br></pre>
+  <pre>Observable&amp; operator[](const std::string&amp; name);<br>const Observable&amp; operator[](const std::string&amp; name) const;<br></pre>
 </blockquote>
  returns the observable with the given name or throws a <tt>std::out_of_range</tt> 
 exception if no observable with the given name exists. 
