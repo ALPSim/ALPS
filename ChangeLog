@@ -6,6 +6,9 @@
 	* [model] Fixed BasisDescriptor, HamiltonianDescriptor,
 	QuantumNumber, and SiteBasisDescriptor to compile for g++ 3.2 and
 	icc 7.1.
+
+	* [lattice] Fixed constructor of GraphUnitCell and simple_cell,
+	and function read_graph_xml.
 	
 2003-05-18 Matthias Troyer <troyer@comp-phys.org>
 
