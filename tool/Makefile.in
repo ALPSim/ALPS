@@ -62,8 +62,8 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
-CONFIG_CLEAN_FILES = plot2xsl.xsl extracttext extractxmgr extracthtml \
-	convert2text plot2text plot2html plot2xmgr
+CONFIG_CLEAN_FILES = convert2text extracthtml extracttext extractxmgr \
+	plot2html plot2text plot2xmgr plot2xsl.xsl
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgdatadir)" "$(DESTDIR)$(pkgdatadir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
@@ -271,8 +271,8 @@ AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS
 AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 dist_bin_SCRIPTS = archivecat xslttransform transformall
-bin_SCRIPTS = convert2text extracthtml extracttext extractxmgr plot2text plot2html plot2xmgr
-dist_pkgdata_DATA = archive2plot.xsl helpers.xsl plot2html.xsl plot2text.xsl QMCXML2text.xsl
+bin_SCRIPTS = convert2text extracthtml extracttext extractxmgr plot2html plot2text plot2xmgr
+dist_pkgdata_DATA = archive2plot.xsl helpers.xsl plot2html.xsl plot2text.xsl plot2xmgr.xsl QMCXML2text.xsl
 pkgdata_DATA = plot2xsl.xsl
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
@@ -310,21 +310,21 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
-plot2xsl.xsl: $(top_builddir)/config.status $(srcdir)/plot2xsl.xsl.in
+convert2text: $(top_builddir)/config.status $(srcdir)/convert2text.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+extracthtml: $(top_builddir)/config.status $(srcdir)/extracthtml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 extracttext: $(top_builddir)/config.status $(srcdir)/extracttext.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 extractxmgr: $(top_builddir)/config.status $(srcdir)/extractxmgr.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-extracthtml: $(top_builddir)/config.status $(srcdir)/extracthtml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-convert2text: $(top_builddir)/config.status $(srcdir)/convert2text.in
+plot2html: $(top_builddir)/config.status $(srcdir)/plot2html.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 plot2text: $(top_builddir)/config.status $(srcdir)/plot2text.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 plot2xmgr: $(top_builddir)/config.status $(srcdir)/plot2xmgr.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-plot2html: $(top_builddir)/config.status $(srcdir)/plot2html.in
+plot2xsl.xsl: $(top_builddir)/config.status $(srcdir)/plot2xsl.xsl.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)

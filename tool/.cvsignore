@@ -9,7 +9,9 @@ convert2text
 convert2xml
 extracthtml
 extracttext
+extractxmgr
 parameter2xml
 plot2html
 plot2text
+plot2xmgr
 plot2xsl.xsl

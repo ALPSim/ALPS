@@ -25536,7 +25536,7 @@ if test "$ac_cv_alps_type" = "full"; then
 
                                                                         ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/lattices.xml example/model/models.xml example/model/parm_symbolic example/model/parm_numeric"
 
-                                                                        ac_config_files="$ac_config_files tool/Makefile tool/plot2xsl.xsl tool/extracttext tool/extracthtml tool/convert2text tool/plot2text tool/plot2html"
+                                                                                            ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2html tool/plot2text tool/plot2xmgr tool/plot2xsl.xsl"
 
 fi
 
@@ -26217,12 +26217,14 @@ do
   "example/model/parm_symbolic" ) CONFIG_FILES="$CONFIG_FILES example/model/parm_symbolic" ;;
   "example/model/parm_numeric" ) CONFIG_FILES="$CONFIG_FILES example/model/parm_numeric" ;;
   "tool/Makefile" ) CONFIG_FILES="$CONFIG_FILES tool/Makefile" ;;
-  "tool/plot2xsl.xsl" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xsl.xsl" ;;
-  "tool/extracttext" ) CONFIG_FILES="$CONFIG_FILES tool/extracttext" ;;
-  "tool/extracthtml" ) CONFIG_FILES="$CONFIG_FILES tool/extracthtml" ;;
   "tool/convert2text" ) CONFIG_FILES="$CONFIG_FILES tool/convert2text" ;;
-  "tool/plot2text" ) CONFIG_FILES="$CONFIG_FILES tool/plot2text" ;;
+  "tool/extracthtml" ) CONFIG_FILES="$CONFIG_FILES tool/extracthtml" ;;
+  "tool/extracttext" ) CONFIG_FILES="$CONFIG_FILES tool/extracttext" ;;
+  "tool/extractxmgr" ) CONFIG_FILES="$CONFIG_FILES tool/extractxmgr" ;;
   "tool/plot2html" ) CONFIG_FILES="$CONFIG_FILES tool/plot2html" ;;
+  "tool/plot2text" ) CONFIG_FILES="$CONFIG_FILES tool/plot2text" ;;
+  "tool/plot2xmgr" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xmgr" ;;
+  "tool/plot2xsl.xsl" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xsl.xsl" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/alps/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/alps/config.h" ;;
   "src/boost/po_utf8_codecvt_facet.cpp" ) CONFIG_HEADERS="$CONFIG_HEADERS src/boost/po_utf8_codecvt_facet.cpp" ;;
