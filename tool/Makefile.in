@@ -44,7 +44,8 @@ subdir = tool
 DIST_COMMON = $(dist_bin_SCRIPTS) $(dist_pkgdata_DATA) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(srcdir)/convert2text.in $(srcdir)/extracthtml.in \
-	$(srcdir)/extracttext.in $(srcdir)/plot2html.in \
+	$(srcdir)/extracttext.in $(srcdir)/extractxmgr.in \
+	$(srcdir)/plot2html.in \
 	$(srcdir)/plot2text.in $(srcdir)/plot2xsl.xsl.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
