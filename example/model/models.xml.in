@@ -171,13 +171,15 @@
   <PARAMETER name="U" default="0"/>
   <BASIS ref="fermion"/>
   <SITETERM>
-    -mu*n+U*n*(n-1)/2
+    -mu*(n_up+n_down)+U*n_up*n_down
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
-    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) + V*n(i)*n(j)
+    -t*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
+    + V*(n_up(i)+n_down(i))*(n_up(j)+n_down(j))
   </BONDTERM>
   <BONDTERM type="1" source="i" target="j">
-    -t'*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) + V'*n(i)*n(j)
+    -t'*(cdag_up(i)*c_up(j)+cdag_up(j)*c_up(i)+cdag_down(i)*c_down(j)+cdag_down(j)*c_down(i)) 
+    + V'*(n_up(i)+n_down(i))*(n_up(j)+n_down(j))
   </BONDTERM>
 </HAMILTONIAN>
 
