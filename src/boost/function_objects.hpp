@@ -47,12 +47,12 @@ namespace boost
     Result operator () (const Arg1& x, const Arg2& y) const { return x % y; }
   };
 
-  template <class Arg1, class Arg2=Arg1, class Result=Arg1>
+  template <class Arg1, class Arg2=Arg1, class Result=bool>
   struct logical_and : std::binary_function<Arg1, Arg2, Result> {
     Result operator () (const Arg1& x, const Arg2& y) const { return x && y; }
   };
 
-  template <class Arg1, class Arg2=Arg1, class Result=Arg1>
+  template <class Arg1, class Arg2=Arg1, class Result=bool>
   struct logical_or : std::binary_function<Arg1, Arg2, Result> {
     Result operator () (const Arg1& x, const Arg2& y) const { return x || y; }
   };
