@@ -40,24 +40,23 @@ foreach $file (@ARGV) {
 	open(NEW, "> $file_new") || die "Couldn't open $file_new";
 	foreach $line (<ORIG>) {
 	    $line =~ s/\t/        /g;
-	    $line =~ s/\s+$//g;
 	    chomp($line);
 	    if ($finish_preamble == 0) {
-		if ($line =~ /^\*\s+Copyright.+([0-9]{4})-([0-9]{4})\s+by\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
+		if ($line =~ /^\s*\*\s+Copyright.+([0-9]{4})-([0-9]{4})\s+by\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
 		    $year0 = $1;
 		    $year1 = $2;
 		    @authors[$#authors+1] = $3;
 		    @emails[$#emails+1] = $4;
-		} elsif ($line =~ /^\*\s+Copyright.+([0-9]{4})\s+by\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
+		} elsif ($line =~ /^\s*\*\s+Copyright.+([0-9]{4})\s+by\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
 		    $year0 = $1;
 		    @authors[$#authors+1] = $2;
 		    @emails[$#emails+1] = $3;
-		} elsif ($line =~ /^\*\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
+		} elsif ($line =~ /^\s*\*\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
 		    @authors[$#authors + 1] = $1;
 		    @emails[$#emails + 1] = $2;
 		} elsif ($line =~ /(\$Id\:\C+\$)/) {
 		    $id = $1;
-		} elsif ($line =~ /(^\s*$)|(^$)|(^\*)|(^\/\*)/) {
+		} elsif ($line =~ /(^\s*$)|(^$)|(^\*)|(^ \*)|(^\/\*)/) {
 		    ## nothing to do
 		} else {
 		    $finish_preamble = 1;
@@ -69,7 +68,7 @@ foreach $file (@ARGV) {
 			$skip = 1;
 		    } else {
 			if ($year1 eq $year0) { $year1 = ""; }
-			if ($id eq "") { $id = join("", "\$I", "d: \$"); }
+			# if ($id eq "") { $id = join("", "\$I", "d: \$"); }
 			
 			## print out preamble
 			open(SKEL, "< $skel") || die "Couldn't open $skel";
@@ -93,8 +92,10 @@ foreach $file (@ARGV) {
 				    print NEW "\n";
 				}
 			    } elsif ($sk =~ /\@ID\@/) {
-				$sk =~ s/\@ID\@/$id/;
-				print NEW "$sk\n";
+				if ($id ne "") {
+				    $sk =~ s/\@ID\@/$id/;
+				    print NEW "$sk\n";
+				}
 			    } else {
 				print NEW "$sk\n";
 			    }

@@ -10,8 +10,9 @@ headers_PARSER = alps/xml.h alps/parser/parser.h alps/parser/xmlattributes.h alp
 headers_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h alps/random/rngfactory.h
 headers_SCHEDULER = alps/scheduler.h alps/scheduler/factory.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h
 headers_BINDINGS = alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/lapack_names.h alps/bindings/syev.hpp
+headers_IETL = ietl/bandlanczos.h ietl/complex.h ietl/config.h.in ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h ietl/interface/blas.h ietl/interface/blitz.h ietl/interface/mtl.h ietl/interface/ublas.h ietl/interface/valarray.h ietl/inverse.h ietl/iteration.h ietl/jacobi.h ietl/krylov_wrapper.h ietl/lanczos.h ietl/matrix.h ietl/power.h ietl/rayleigh.h ietl/tmatrix.h ietl/traits.h ietl/vectorspace.h
 
-headers = $(headers_BOOST) $(headers_ALPS) $(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) $(headers_RANDOM) $(headers_BINDINGS)
+headers = $(headers_BOOST) $(headers_ALPS) $(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) $(headers_RANDOM) $(headers_BINDINGS) $(headers_IETL)
 if ALPS_FULL
 headers += $(headers_ALEA) $(headers_LATTICE) $(headers_MODEL) $(headers_SCHEDULER)
 endif

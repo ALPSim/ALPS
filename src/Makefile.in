@@ -147,7 +147,15 @@ am__noinst_HEADERS_DIST = boost/function_objects.hpp \
 	alps/random/random.h alps/random/rngfactory.h \
 	alps/bindings/heev.hpp alps/bindings/lapack.h \
 	alps/bindings/lapack_names.h alps/bindings/syev.hpp \
-	alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h \
+	ietl/bandlanczos.h ietl/complex.h ietl/config.h.in \
+	ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h \
+	ietl/interface/blas.h ietl/interface/blitz.h \
+	ietl/interface/mtl.h ietl/interface/ublas.h \
+	ietl/interface/valarray.h ietl/inverse.h ietl/iteration.h \
+	ietl/jacobi.h ietl/krylov_wrapper.h ietl/lanczos.h \
+	ietl/matrix.h ietl/power.h ietl/rayleigh.h ietl/tmatrix.h \
+	ietl/traits.h ietl/vectorspace.h alps/alea.h \
+	alps/alea/detailedbinning.h alps/alea/histogram.h \
 	alps/alea/nan.h alps/alea/nobinning.h alps/alea/observable.h \
 	alps/alea/observableset.h alps/alea/obsvalue.h \
 	alps/alea/simplebinning.h alps/alea/simpleobsdata.h \
@@ -348,7 +356,8 @@ headers_PARSER = alps/xml.h alps/parser/parser.h alps/parser/xmlattributes.h alp
 headers_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h alps/random/rngfactory.h
 headers_SCHEDULER = alps/scheduler.h alps/scheduler/factory.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h
 headers_BINDINGS = alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/lapack_names.h alps/bindings/syev.hpp
-headers = $(headers_BOOST) $(headers_ALPS) $(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) $(headers_RANDOM) $(headers_BINDINGS) $(am__append_1)
+headers_IETL = ietl/bandlanczos.h ietl/complex.h ietl/config.h.in ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h ietl/interface/blas.h ietl/interface/blitz.h ietl/interface/mtl.h ietl/interface/ublas.h ietl/interface/valarray.h ietl/inverse.h ietl/iteration.h ietl/jacobi.h ietl/krylov_wrapper.h ietl/lanczos.h ietl/matrix.h ietl/power.h ietl/rayleigh.h ietl/tmatrix.h ietl/traits.h ietl/vectorspace.h
+headers = $(headers_BOOST) $(headers_ALPS) $(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) $(headers_RANDOM) $(headers_BINDINGS) $(headers_IETL) $(am__append_1)
 noinst_HEADERS = $(headers)
 all: all-am
 
@@ -442,7 +451,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/alps $(distdir)/alps/alea $(distdir)/alps/bindings $(distdir)/alps/fixed_capacity $(distdir)/alps/lattice $(distdir)/alps/model $(distdir)/alps/osiris $(distdir)/alps/osiris/std $(distdir)/alps/parser $(distdir)/alps/random $(distdir)/alps/scheduler $(distdir)/boost $(distdir)/boost/numeric/bindings/blas $(distdir)/boost/numeric/bindings/lapack $(distdir)/boost/numeric/bindings/traits $(distdir)/boost/numeric/bindings/traits/detail
+	$(mkdir_p) $(distdir)/alps $(distdir)/alps/alea $(distdir)/alps/bindings $(distdir)/alps/fixed_capacity $(distdir)/alps/lattice $(distdir)/alps/model $(distdir)/alps/osiris $(distdir)/alps/osiris/std $(distdir)/alps/parser $(distdir)/alps/random $(distdir)/alps/scheduler $(distdir)/boost $(distdir)/boost/numeric/bindings/blas $(distdir)/boost/numeric/bindings/lapack $(distdir)/boost/numeric/bindings/traits $(distdir)/boost/numeric/bindings/traits/detail $(distdir)/ietl $(distdir)/ietl/interface
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
