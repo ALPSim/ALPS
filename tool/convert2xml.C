@@ -69,7 +69,7 @@ void convert_params(const std::string& inname, const std::string& outfilename)
     alps::oxstream task (inname.c_str());
     task << alps::header("UTF-8")
          << alps::processing_instruction("xml-stylesheet") << alps::attribute("type","text/xsl") 
-         << alps::attribute("href","http://xml.comp-phys.org/2002/10/job.xsl")
+         << alps::attribute("href","http://xml.comp-phys.org/2002/10/QMCXML.xsl")
          << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
          << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
     task << list[i];
@@ -97,7 +97,7 @@ void convert_simulation(const std::string& inname, const std::string& outname)
   alps::oxstream out (jobname.c_str());
   out << alps::header("UTF-8")
       << alps::processing_instruction("xml-stylesheet") << alps::attribute("type","text/xsl") 
-      << alps::attribute("href","http://xml.comp-phys.org/2002/10/job.xsl")
+      << alps::attribute("href","http://xml.comp-phys.org/2002/10/QMCXML.xsl")
       << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
       << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
   int dummy_i;
