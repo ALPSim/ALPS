@@ -40,6 +40,7 @@ AC_INIT([alps], alps_version)
 AC_CONFIG_AUX_DIR([config])
 AM_INIT_AUTOMAKE
 AC_PREFIX_DEFAULT([$HOME/ALPS])
+AM_MAINTAINER_MODE
 
 dnl version
 ac_cv_alps_version=alps_version

@@ -26,10 +26,11 @@ if test "$have_autotools" = yes; then
   autoconf
   rm -rf autom4te.cache
 else
-  echo "GNU Autotools not found, or version is too old"
-  set -x
-  test -f aclocal.m4 && touch aclocal.m4
-  test -f src/alps/config.h.in && touch src/alps/config.h.in
-  find . -name Makefile.in | xargs touch
-  test -f configure && touch configure
+  echo "GNU Autotools not found, or version is too old.  Stop."
+  # set -x
+  # test -f aclocal.m4 && touch aclocal.m4
+  # test -f src/alps/config.h.in && touch src/alps/config.h.in
+  # find . -name Makefile.in | xargs touch
+  # test -f configure && touch configure
+  exit -1
 fi

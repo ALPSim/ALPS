@@ -1,3 +1,7 @@
+2004-06-08  Synge Todo  <wistaria@comp-phys.org>
+
+        * [config] Turned off maintainer mode for GNU autotools.
+
 2004-06-02 Synge Todo <wistaria@comp-phys.org>
 
 	* ss_20040519_am branch (tag ss_20040602_am) merged into the
