@@ -78,11 +78,11 @@ AC_DEFUN([AC_COMPILER],
       xmacos* | xmac* | xosx*)
         COMPILER="macos"
         ;;
-      xibm | xibm32* | xIBM32* | xvacpp* | xxlC*)
-        COMPILER="ibm32"
-        ;;
-      xibm64* | xIBM64*)
+      xibm | xibm64* | xIBM64* | xvacpp* | xxlC*)
         COMPILER="ibm64"
+        ;;
+      xibm32* | xIBM32*)
+        COMPILER="ibm32"
         ;;
       xgeneric*)
         COMPILER="generic"
