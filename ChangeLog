@@ -1,3 +1,9 @@
+2003-05-18 Matthias Troyer <troyer@comp-phys.org>
+
+	* [model] Added parametrization of basis sets (e.g. spin-S, or bosons
+        with at most Nmax bosons per site) and default parameters.
+	Now spin-S models and softcore bosons with cutoff exist.
+
 2003-05-17 Matthias Troyer <troyer@comp-phys.org>
 
 	* [osiris] Fixed path construction in xdrdump2.C
