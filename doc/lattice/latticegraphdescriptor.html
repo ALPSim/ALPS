@@ -1,13 +1,13 @@
 <html>
 <head>
-   <title>ALPS Project: lattice library latticegraphdescriptor.h</title>
+   <title>ALPS Project: lattice/latticegraphdescriptor.h</title>
 </head>
 <body>
 
 <h1>
 ALPS Project: lattice library</h1>
 
-<h2>Header file: latticegraphdescriptor.h</h2>
+<h2>Header file: lattice/latticegraphdescriptor.h</h2>
 
 defines a lattice graph class <tt>LatticeGraphDescriptor</tt> which
 can be constructed from XML input. It is a model of 
@@ -20,13 +20,13 @@ from the <tt>&lt;LATTICEGRAPH></tt> element of the
 <p>
 <h3>Synopsis</h3>
 <blockquote><pre>
-namespace lattice {
+namespace alps {
 
 class LatticeGraphDescriptor
-  : public hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;GraphUnitCell> > >
+  : public hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;GraphUnitCell>,std::vector&lt;alps::StringValue> >, std::vector&lt; alps::StringValue> >
 {
 public:
-  typedef hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;GraphUnitCell> > > base_type;
+  typedef hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;GraphUnitCell>,std::vector&lt;alps::StringValue> >, std::vector&lt; alps::StringValue> > base_type;
   typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
   typedef lattice_traits&lt;base_type>::offset_type offset_type;
   typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
@@ -148,7 +148,7 @@ typedef lattice_graph&lt;LatticeGraphDescriptor,coordinate_graph_type> Hypercubi
 is a useful typedef for a default <a href="latticegraph.html"><tt>lattice_graph</tt></a>
 class. It can be used to create a graph from a <tt>LatticeGraphDescriptor</tt>.
 <HR>
-<ADDRESS>(c) 2000-2003 by 
+<ADDRESS>copyright (c) 2000-2003 by 
 <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

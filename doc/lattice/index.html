@@ -84,49 +84,52 @@ are discussed <a href="../setup.html">here</a>.
 
 <H3>Headers</H3>
 <ul>
+<li>General header
+<ul><li><B>lattice.h</B> includes all headers of the lattice library.</li></ul></li>
 <li>Traits classes
 <ul>
-<li><A HREF="helperconcepts.html#dimensional_traits.h">dimensional_traits.h</A> defines traits and functions for the <A HREF="helperconcepts.html#Dimensional">Dimensional</A> concept.</li>
-<li><A HREF="helperconcepts.html#point_traits.h">point_traits.h</A>
-defines traits for the <A HREF="helperconcepts.html#Point">Point</A> concept.</li>
-<li><A HREF="helperconcepts.html#coordinate_traits.h"> coordinate_traits.h</A>
-defines traits  and functions for the <A HREF="helperconcepts.html#Coordinate">Coordinate </A> concept.</li>
-<li><A HREF="latticeconcepts.html#cell_traits.h">cell_traits.h</A>
-defines traits for the <A HREF="latticeconcepts.html#Cell">Cell</A> concept.</li>
-<li><A HREF="graphconcepts.html#graph_traits.h"> graph_traits.h</A>
-defines traits  and functions for the <A HREF="graphconcepts.html#LatticeGraph">LatticeGraph</A>
-and  <A HREF="graphconcepts.html#UnitCellGraph"> UnitCellGraph</A> concepts.</li>
+<li><A HREF="helperconcepts.html#dimensional_traits.h"><B>lattice/dimensional_traits.h</B></A> defines traits and functions for the <A HREF="helperconcepts.html#Dimensional"><B>Dimensional</B></A> concept.</li>
+<li><A HREF="helperconcepts.html#point_traits.h"><B>lattice/point_traits.h</B></A>
+defines traits for the <A HREF="helperconcepts.html#Point"><B>Point</B></A> concept.</li>
+<li><A HREF="helperconcepts.html#coordinate_traits.h"><B>lattice/coordinate_traits.h</B></A>
+defines traits  and functions for the <A HREF="helperconcepts.html#Coordinate"><B>Coordinate </B></A> concept.</li>
+<li><A HREF="latticeconcepts.html#cell_traits.h"><B>lattice/cell_traits.h</B></A>
+defines traits for the <A HREF="latticeconcepts.html#Cell">Cell</B></A> concept.</li>
+<li><A HREF="graphconcepts.html#graph_traits.h"><B>lattice/graph_traits.h</B></A>
+defines traits  and functions for the <A HREF="graphconcepts.html#LatticeGraph">LatticeGraph</B></A>
+and  <A HREF="graphconcepts.html#UnitCellGraph"> UnitCellGraph</B></A> concepts.</li>
 </ul>
 <li>Generic functions and template classes
 <ul>
-<li><A HREF="graphproperties.html">graphproperties.h</A> defines property types used in the lattice library.
-<li><A HREF="graph.html">graph.h</A> defines functions for XML I/O, copying and some property
+<li><A HREF="graph_traits.html"><B>lattice/graph_traits.h</B></A> map the BGL notation to that of lattice models.
+<li><A HREF="graphproperties.html"><B>lattice/graphproperties.h</B></A> defines property types used in the lattice library.
+<li><A HREF="graph.html"><B>lattice/graph.h</B></A> defines functions for XML I/O, copying and some property
 calculation functions of graphs.
-<li><A HREF="parity.html">parity.h</A> functions for bipartite graphs.
-<li><A href="lattice.html">lattice.h</A> defines some basic functions for lattices.
-<li><A href="latticegraph.html">latticegraph.h</a> defines a function to create a graph from a lattice, and a template class
+<li><A HREF="parity.html"><B>lattice/parity.h</B></A> functions for bipartite graphs.
+<li><A href="lattice.html"><B>lattice/lattice.h</B></A> defines some basic functions for lattices.
+<li><A href="latticegraph.html"><B>lattice/latticegraph.h</b></B></A> defines a function to create a graph from a lattice, and a template class
 that decorates a lattice with a graph.
 
 </ul>
 <li>Classes
 <ul>
-<li><a href="unitcell.html">unitcell.h</a> defines two unit cell classes: <tt>EmptyUnitCell</tt> and <tt>GraphUnitCell</tt>
-<li><a href="simplecell.html">simplecell.h</a> defines a template class <tt>simple_cell</tt>
+<li><a href="unitcell.html"><B>lattice/unitcell.h</B></A> defines two unit cell classes: <tt>EmptyUnitCell</tt> and <tt>GraphUnitCell</tt>
+<li><a href="simplecell.html"><B>lattice/simplecell.h</B></A> defines a template class <tt>simple_cell</tt>
 making a cell from a unit cell.
-<li><a href="simplelattice.html">simplelattice.h</a> defines a template class <tt>simple_lattice</tt>
+<li><a href="simplelattice.html"><B>lattice/simplelattice.h</B></A> defines a template class <tt>simple_lattice</tt>
 making a lattice from a 
 cell and unit cell.
-<li><a href="coordinatelattice.html">coordinatelattice.h</a> defines a template class <tt>coordinate_lattice</tt> which adds concrete basis vectors to a lattice.
-<li><a href="hypercubic.html">hypercubic.h</a> defines a template class <tt>hypercubic_lattice</tt>
+<li><a href="coordinatelattice.html"><B>lattice/coordinatelattice.h</B></A> defines a template class <tt>coordinate_lattice</tt> which adds concrete basis vectors to a lattice.
+<li><a href="hypercubic.html"><B>lattice/hypercubic.h</B></A> defines a template class <tt>hypercubic_lattice</tt>
 which makes a hypercubic finite lattice with open or periodic boundary conditions from an
 infinite lattice.
-<li><a href="latticedescriptor.html">latticedescriptor.h</a> defines lattice classes which
+<li><a href="latticedescriptor.html"><B>lattice/latticedescriptor.h</B></A> defines lattice classes which
 can be constructed from <TT>&lt;LATTICE></TT> and <TT>&lt;FINITELATTICE></TT> elements
 of XML input.
-<li><a href="latticegraphdescriptor.html"> latticegraphdescriptor.h</a> defines a class which
+<li><a href="latticegraphdescriptor.html"><B>lattice/latticegraphdescriptor.h</B></A> defines a class which
 can be constructed from <TT>&lt;LATTICEGRAPH></TT> elements of XML input and can be used to create
 graphs.
-<li><a href="library.html">library.h</a> defines a class to hold a colection of graphs and lattices,
+<li><a href="latticelibrary.html"><B>lattice/latticelibrary.h</B></A> defines a class to hold a colection of graphs and lattices,
 read from XML, and a factory to create graphs from this collection.
 </ul>
 </ul>
@@ -146,7 +149,7 @@ The source code and  of the examples is well documented and self-explanatory.
 </blockquote></pre>
 
 <HR>
-<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias
 Troyer</A> and <A HREF="mailto:wistaria@comp-phys.org">Synge Todo</A></ADDRESS>
 </body>
 </html>

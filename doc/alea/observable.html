@@ -1,11 +1,11 @@
 <html>
 <head>
-   <title>ALPS Project: alea library observable.h</title>
+   <title>ALPS Project: alea/observable.h</title>
 </head>
 <body>
 
 <h1>
-ALPS Project: alea library</h1>
+ALPS Project: alps library</h1>
 
 <h2>
 Header file <b>observable.h</b></h2>
@@ -14,41 +14,45 @@ Carlo measurements.
 <h3>Synopsis</h3>
 <blockquote>
 <pre>
-namespace alea {
+namespace alps {
+
 class NoMeasurementsError : public std::runtime_error {
 public:
   NoMeasurementsError();
 };
 
-class Observable : public osiris::Dumpable
+class Observable
 {
 public:
   typedef uint32_t version_type;
 
-  Observable(const std::string& n);
+  Observable(const std::string&amp; n);
 
   virtual Observable* clone() const = 0;
 
-  const std::string& name() const;
-  void rename (const std::string& newname);
+  const std::string&amp; name() const;
+  void rename (const std::string&amp; newname);
 
   virtual void reset(bool equilibrated=false) = 0;
 
   virtual void output(std::ostream&) const = 0;
-  virtual void write_xml(std::ostream&, const std::string& hdffile="") const; 
+  virtual void write_xml(std::ostream&, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const; 
+  virtual void write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const;
 
   virtual uint32_t version_id() const =0;
+  virtual void save(ODump& dump) const;
+  virtual void load(IDump& dump);
 
   virtual bool can_set_thermalization() const;
   virtual void set_thermalization(uint32_t todiscard);
   virtual uint32_t get_thermalization() const=0;
 
   virtual bool is_signed() const;
-  virtual void set_sign_name(const std::string& signname);
-  virtual void set_sign(const Observable& sign);
+  virtual void set_sign_name(const std::string&amp; signname);
+  virtual void set_sign(const Observable&amp; sign);
   virtual void clear_sign();
-  virtual const Observable& sign() const;
-  virtual const std::string& sign_name() const;
+  virtual const Observable&amp; sign() const;
+  virtual const std::string&amp; sign_name() const;
 
   virtual uint32_t number_of_runs() const;
   virtual Observable* get_run(uint32_t) const;
@@ -56,8 +60,12 @@ public:
   virtual void compact();
 };
 
+std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const Observable&amp; o);
+
+ODump& operator&lt;&lt;(ODump& od, const Observable& m);
+IDump& operator>>(IDump& id, Observable& m);
+
 }
-std::ostream& operator<<(std::ostream& out, const alea::Observable& o);
 </pre></blockquote>
 
 
@@ -67,12 +75,13 @@ results of measurements are accessed for an observable which has
 not stored any measurement. E.g. the mean value being accessed before
 the equilibration phase has finished.
 <h3>The <tt>Observable</tt> abstract base class</h3>
+<h4>Member functions</h4>
 <blockquote><pre>
 typedef uint32_t version_type;
 </pre></blockquote>
 is an integer storing a unique integer identifier of the derived leaf class.
 <blockquote><pre>
-Observable(const std::string& n);
+Observable(const std::string&amp; n);
 </pre></blockquote>
 creates an observable with a given name. Every observable has a name.
 <blockquote><pre>
@@ -80,11 +89,11 @@ virtual Observable* clone() const = 0;
 </pre></blockquote>
 copies the observable and returns a pointer to the copy.
 <blockquote><pre>
-const std::string& name() const;
+const std::string&amp; name() const;
 </pre></blockquote>
 returns the name of the observable.
 <blockquote><pre>
-void rename(const std::string& newname);
+void rename(const std::string&amp; newname);
 </pre></blockquote>
 renames the observable. This is only possible for an <tt>Observable</tt> not in an <tt>ObservableSet</tt>, otherwise a <tt>std::runtime_error</tt> is thrown.
 <blockquote><pre>
@@ -102,7 +111,8 @@ virtual void output(std::ostream&) const = 0;
 </pre></blockquote>
 writes the results of the collected measurements to a <tt>std::ostream</tt>.
 <blockquote><pre>
-virtual void write_xml(std::ostream&,const std::string& hdffile="") const; 
+virtual void write_xml(std::ostream&, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const; 
+virtual void write_xml(oxstream& oxs, const boost::filesystem::path& fn_hdf5=boost::filesystem::path()) const;
 </pre></blockquote>
 writes the results of the measurement in XML, using the schema presented
 at <A HREF="http://xml.comp-phys.org/">http://xml.comp-phys.org</A>
@@ -113,6 +123,11 @@ virtual uint32_t version_id() const =0;
 returns a unique integer identifier for the leaf class, used in 
 serialization and deserialization of inhomogeneous collections of
 observables.
+<blockquote><pre>
+virtual void save(ODump& dump) const;
+virtual void load(IDump& dump);
+</pre></blockquote>
+are virtual functions used to implement serialization and deserialization.
 <blockquote><pre>
 virtual bool can_set_thermalization() const;
 </pre></blockquote>
@@ -133,13 +148,13 @@ virtual bool is_signed() const;
 </pre></blockquote>
 returns <tt>true</tt> if the observable has a sign or phase problem.
 <blockquote><pre>
-virtual void set_sign_name(const std::string& signname);
+virtual void set_sign_name(const std::string&amp; signname);
 </pre></blockquote>
 sets the name of the observable containing the sign or phase.
 Throws a <tt>std::logic_error</tt> for observables without a sign or
 phase problem.
 <blockquote><pre>
-virtual void set_sign(const Observable& sign);
+virtual void set_sign(const Observable&amp; sign);
 </pre></blockquote>
 sets the observable containing the sign or phase. A pointer
 is stored with the observable. Throws a <tt>std::logic_error</tt> 
@@ -152,7 +167,7 @@ removes any previously set sign or phase observable.
 Throws a <tt>std::logic_error</tt> for observables without a sign or
 phase problem.
 <blockquote><pre>
-virtual const Observable& sign() const;
+virtual const Observable&amp; sign() const;
 </pre></blockquote>
 returns a reference to the sign or phase observable. 
 Throws a <tt>std::runtime_error</tt> if no sign or phase observable
@@ -160,7 +175,7 @@ has been set.
 Throws a <tt>std::logic_error</tt> for observables without a sign or
 phase problem.
 <blockquote><pre>
-virtual const std::string& sign_name() const;
+virtual const std::string&amp; sign_name() const;
 </pre></blockquote>
 returns the name of the sign or phase observables.
 Throws a <tt>std::logic_error</tt> for observables without a sign or
@@ -182,13 +197,19 @@ compacts the observable, reducing the memory allocation, while
 still enabling access to the most important results. Usually the 
 ability to modify the observable (e.g. change thermalization,
 get crosscorrelations, ...) gets lost though.
+<h4>I/O operators</h4>
 <blockquote><pre>
-std::ostream& operator<<(std::ostream& out, const alea::Observable& o);
+std::ostream&amp; operator<<(std::ostream&amp; out, const alps::Observable&amp; o);
 </pre></blockquote>
 calls the <tt>output</tt> function of an <tt>Observable</tt> to write it
 to a <tt>std::ostream</tt>.
+<blockquote><pre>
+ODump& operator&lt;&lt;(ODump& od, const Observable& m);
+IDump& operator>>(IDump& id, Observable& m);
+</pre></blockquote>
+serializes and deserializes an <tt>Obseravble</tt> object. They call the <tt>save</tt> and <tt>load</tt> functions of the obseravble.
 <HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

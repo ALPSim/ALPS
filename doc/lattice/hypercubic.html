@@ -1,22 +1,20 @@
 <html>
 <head>
-   <title>ALPS Project: lattice library hypercubic.h</title>
+   <title>ALPS Project: lattice/hypercubic.h</title>
 </head>
 <body>
 
 <h1>
 ALPS Project: lattice library</h1>
 
-<h2>Header file: hypercubic.h</h2>
+<h2>Header file: lattice/hypercubic.h</h2>
 
 defines a template class <tt>hypercubic_lattice</tt>
 which makes a hypercubic finite lattice with open or periodic boundary conditions from an
 infinite lattice.
 <h3>Synopsis</h3>
 <blockquote><pre>
-namespace lattice {
-
-enum  boundary_condition { UNDEFINED, OPEN, PERIODIC};
+namespace alps {
 
 template &lt;class BASE>
 class hypercubic_lattice : public BASE {
@@ -32,11 +30,11 @@ public:
   typedef /*...*/ cell_iterator;
 
   hypercubic_lattice();
-  hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, boundary_condition bc=PERIODIC);
+  hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, std::string bc="periodic");
   
   template &lt;class InputIterator>
   hypercubic_lattice(const parent_lattice_type&amp; p, InputIterator first, InputIterator last, 
-                     boundary_condition bc=PERIODIC );
+                     std::string bc="periodic" );
   
   template &lt;class InputIterator2>
   hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, 
@@ -53,11 +51,13 @@ public:
   cell_descriptor cell(offset_type o) const;
   bool shift(offset_type&amp; o,const offset_type&amp; s) const;
 
-  boundary_condition boundary(uint32_t dim) const;
-  const std::vector&lt;boundary_condition>&amp; boundary() const;
+  const std::string&amp; boundary(uint32_t dim) const;
+  const std::vector&lt;std::string>&amp; boundary() const;
 
   uint32_t extent(uint32_t dim) const;
   const offset_type&amp; extent() const;
+
+  std::vector&lt;size_type> distance_vector(const offset_type& x, const offset_type& y)
 };
 
 template &lt;class BASE>
@@ -75,13 +75,6 @@ struct lattice_traits&lt;hypercubic_lattice&lt;BASE> >
 
 }
 <pre></blockquote>
-<H3>Boundary conditions</h3>
-<blockquote><pre>
-enum  boundary_condition { UNDEFINED, OPEN, PERIODIC};
-</pre></blockquote>
-are the two boundary conditions implemented at the moment.
-For a valid lattice the boundary conditions are not allowed to be
-undefined.
 <H3>The <tt>hypercubic_lattice</tt> class</H3>
 describes a finite hypercubic lattice and fulfills the
 <A href="latticeconcepts.html#CoordinateLattice">CoordinateLattice</A> and 
@@ -123,7 +116,7 @@ hypercubic_lattice();
 </pre></blockquote>
 an empty lattice without any cells.
 <blockquote><pre>
-hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, boundary_condition bc=PERIODIC);
+hypercubic_lattice(const parent_lattice_type&amp; p, size_type length, std::string bc="periodic");
 </pre></blockquote>
 obtains the dimension from the infinite parent lattice <tt>p</tt> and
 creates a hypercubic lattice with extent <tt>length</tt> in each of the dimensions. The boundary
@@ -131,7 +124,7 @@ conditions <tt>bc</tt> can be passed optionally and default to periodic.
 <blockquote><pre>
 template &lt;class InputIterator>
 hypercubic_lattice(const parent_lattice_type&amp; p, InputIterator first, InputIterator last,      
-		   boundary_condition bc=PERIODIC );
+		   std::string bc="periodic" );
 </pre></blockquote>
 obtains the dimension from the infinite parent lattice <tt>p</tt> and
 creates a hypercubic lattice where the extent in each of the dimensions is given
@@ -202,6 +195,10 @@ returns the extent for one of the dimensions. <tt>0&lt; dim &lt; dimension(latti
 const offset_type&amp; extent() const;
 </pre></blockquote>
 returns a vector of the extent for all dimensions.
+<blockquote><pre>
+std::vector<size_type> distance_vector(const offset_type& x, const offset_type& y)
+</pre></blockquote>
+returns a vector representing the distance between two cells specified by their offsets <tt>x</tt> and <tt>y</tt>, taking into account the boundary conditions of the lattice.
 <h4>Traits class</h4>
 <blockquote><pre>
 template &lt;class BASE>
@@ -218,7 +215,7 @@ struct lattice_traits&lt;hypercubic_lattice&lt;BASE> >
 </pre></blockquote>
 is the traits class for the lattice.
 <HR>
-<ADDRESS>(c) 2000-2003 by 
+<ADDRESS>copyright (c) 2000-2003 by 
 <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

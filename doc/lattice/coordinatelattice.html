@@ -1,19 +1,19 @@
 <html>
 <head>
-   <title>ALPS Project: lattice library coordinatelattice.h</title>
+   <title>ALPS Project: lattice/coordinatelattice.h</title>
 </head>
 <body>
 
 <h1>
 ALPS Project: lattice library</h1>
 
-<h2>Header file: coordinatelattice.h</h2>
+<h2>Header file: lattice/coordinatelattice.h</h2>
 
 defines a template class <tt>coordinate_lattice</tt> which adds concrete basis vectors to a lattice.
 
 <h3>Synopsis</h3>
 <blockquote><pre>
-namespace lattice {
+namespace alps {
 
 template &lt;class BASE = simple_lattice&lt;>, class Vector = std::vector&lt;double> >
 class coordinate_lattice: public BASE {
@@ -104,7 +104,7 @@ struct lattice_traits&lt;coordinate_lattice&lt;B,V> >
 </pre></blockquote>
 is the traits class for the lattice.
 <HR>
-<ADDRESS>(c) 2000-2002 by 
+<ADDRESS>copyright (c) 2000-2003 by 
 <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

@@ -1,13 +1,13 @@
 <html>
 <head>
-   <title>ALPS Project: lattice library latticedescriptor.h</title>
+   <title>ALPS Project: lattice/latticedescriptor.h</title>
 </head>
 <body>
 
 <h1>
 ALPS Project: lattice library</h1>
 
-<h2>Header file: latticedescriptor.h</h2>
+<h2>Header file: lattice/latticedescriptor.h</h2>
 
 defines two lattice classes which can be constructed from XML input. These are
 <ul>
@@ -28,12 +28,12 @@ from the <tt>&lt;FINITELATTICE></tt> element of the
 
 <h3>Synopsis</h3>
 <blockquote><pre>
-namespace lattice {
+namespace alps {
 
-class LatticeDescriptor : public coordinate_lattice&lt;>
+class LatticeDescriptor : public coordinate_lattice&lt;simple_lattice&lt;>,std::vector&lt;alps::StringValue> >
 {
 public:
-  typedef coordinate_lattice&lt;> base_type;
+  typedef coordinate_lattice&lt;simple_lattice&lt;>,std::vector&lt;alps::StringValue> > base_type;
   typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
   typedef lattice_traits&lt;base_type>::offset_type offset_type;
   typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
@@ -42,6 +42,7 @@ public:
   
   LatticeDescriptor() {}
   LatticeDescriptor(const palmxml::XMLTag&amp;, std::istream&amp;);
+ void set_parameters(const alps::Parameters&);
 
   void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;
   const std::string&amp; name() const;
@@ -50,10 +51,10 @@ public:
 
 typedef std::map&lt;std::string,LatticeDescriptor> LatticeMap;
 
-class FiniteLatticeDescriptor : public hypercubic_lattice&lt;coordinate_lattice&lt;> >
+class FiniteLatticeDescriptor : hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;>,std::vector&lt;alps::StringValue> >, std::vector&lt;alps::StringValue> >
 {
 public:
-  typedef hypercubic_lattice&lt;coordinate_lattice&lt;> > base_type;
+  typedef hypercubic_lattice&lt;coordinate_lattice&lt;simple_lattice&lt;>,std::vector&lt;alps::StringValue> >, std::vector&lt;alps::StringValue> > base_type;
   typedef lattice_traits&lt;base_type>::unit_cell_type unit_cell_type;
   typedef lattice_traits&lt;base_type>::offset_type offset_type;
   typedef lattice_traits&lt;base_type>::cell_descriptor cell_descriptor;
@@ -110,6 +111,10 @@ as a <a href="http://www.comp-phys.org/software/ALPS/xml/xml.html"><tt>palmxml::
 
 <h4>Member functions</h4>
 in addition to those inherited from the parent lattice:
+<blockquote><pre>
+void set_parameters(const alps::Parameters&);
+</pre></blockquote>
+sets parameters for the lattice, e.g. parammeters specifying the basis vectors.
 <blockquote><pre>
 void write_xml(std::ostream&amp;, const std::string&amp; new_name= "") const;
 </pre></blockquote>
@@ -206,7 +211,7 @@ std::ostream&amp; operator&lt;&lt;(std::ostream&amp; out, const FiniteLatticeDes
 write the <tt>LatticeDescriptor</tt> and <tt>FiniteLatticeDescriptor</tt> in XML, using
 the <tt>write_xml</tt> member functions.
 <HR>
-<ADDRESS>(c) 2000-2002 by 
+<ADDRESS>copyright (c) 2000-2003 by 
 <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

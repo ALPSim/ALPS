@@ -14,7 +14,15 @@ base class for a Monte Carlo simulation.
 
 <h3>Synopsis</h3>
 <blockquote>
-<pre>namespace scheduler {
+<pre>namespace alps {
+namespace scheduler {
+
+template &lt;class WORKER>
+class SimpleMCFactory : public SimpleFactory&lt;WORKER,MCSimulation>
+{
+public:
+  SimpleMCFactory() {}
+};
 
 class Worker
 {
@@ -25,16 +33,17 @@ public:
   virtual void start();
   virtual void halt();
 
-  virtual bool change_parameter(const std::string&amp; name, const palm::StringValue&amp; value);
+  virtual bool change_parameter(const std::string&amp; name, const alps::StringValue&amp; value);
   
 protected:
-  typedef palm::lagged_fibonacci607 random_type;
+  typedef boost::mt19937 random_type;
   typedef boost::uniform_01&lt;random_type> random_01_type;
 
   random_type random;
   random_01_type random_01;
+  int random_int(int a, int b);
 
-  palm::Parameters parms;
+  alps::Parameters parms;
   
   osiris::ProcessList where;
 };
@@ -42,7 +51,7 @@ protected:
 class MCRun : public Worker
 {
 public:
-  MCRun(const osiris::ProcessList&amp; w, const palm::Parameters&amp; p,int node);
+  MCRun(const osiris::ProcessList&amp; w, const alps::Parameters&amp; p,int node);
 
   virtual void save(osiris::ODump&amp; dump) const;
   virtual void load(osiris::IDump&amp; dump) const;
@@ -66,23 +75,83 @@ public:
   typedef typename boost::graph_traits&lt;graph_type>::in_edge_iterator in_edge_iterator;
   typedef typename boost::graph_traits&lt;graph_type>::edge_descriptor edge_descriptor;
   typedef typename boost::graph_traits&lt;graph_type>::vertex_descriptor vertex_descriptor;
+  typedef typename graph_traits&lt;graph_type>::vertices_size_type vertices_size_type;
+  typedef typename graph_traits&lt;graph_type>::edges_size_type edges_size_type;
+  typedef typename graph_traits&lt;graph_type>::degree_size_type degree_size_type;
+  typedef typename graph_traits&lt;graph_type>::adjacency_iterator adjacency_iterator;
   
-  LatticeMCRun(const osiris::ProcessList&amp; w,const palm::Parameters&amp; p,int n);
+  typedef typename graph_traits&lt;graph_type>::site_iterator site_iterator;
+  typedef typename graph_traits&lt;graph_type>::bond_iterator bond_iterator;
+  typedef typename graph_traits&lt;graph_type>::neighbor_bond_iterator neighbor_bond_iterator;
+  typedef typename graph_traits&lt;graph_type>::bond_descriptor bond_descriptor;
+  typedef typename graph_traits&lt;graph_type>::site_descriptor site_descriptor;
+  typedef typename graph_traits&lt;graph_type>::sites_size_type sites_size_type;
+  typedef typename graph_traits&lt;graph_type>::bonds_size_type bonds_size_type;
+  typedef typename graph_traits&lt;graph_type>::neighbors_size_type neighbors_size_type;
+  typedef typename graph_traits&lt;graph_type>::neighbor_iterator neighbor_iterator;
+  
+  LatticeMCRun(const osiris::ProcessList&amp; w,const alps::Parameters&amp; p,int n);
    
   graph_type&amp; graph();
   const graph_type&amp; graph() const;
+
+  sites_size_type num_sites() const;
+  bonds_size_type num_bonds() const;
+  std::pair&lt;site_iterator,site_iterator> sites() const;
+  std::pair&lt;bond_iterator,bond_iterator> bonds() const;
+  bond_descriptor bond(bonds_size_type i) const;
+  neighbors_size_type num_neighbors (const site_descriptor&amp; v) const;
+  std::pair&lt;neighbor_bond_iterator,neighbor_bond_iterator> neighbor_bonds (const site_descriptor&amp; v) const;  
+  std::pair&lt;neighbor_iterator,neighbor_iterator> neighbors (const site_descriptor&amp; v) const;
+  site_descriptor neighbor (const site_descriptor&amp; v, neighbors_size_type i) const;
+  site_descriptor site(sites_size_type i) const;
+  
+  vertices_size_type num_vertices() const;
+  edges_size_type num_edges() const;
+  std::pair&lt;vertex_iterator,vertex_iterator> vertices() const;
+  std::pair&lt;edge_iterator,edge_iterator> edges() const;
+  degree_size_type out_degree (const vertex_descriptor&amp; v) const;
+  degree_size_type in_degree (const vertex_descriptor&amp; v) const;
+  degree_size_type degree (const vertex_descriptor&amp; v) const;
+  out_edge_iterator out_edges (const vertex_descriptor&amp; v) const;
+  in_edge_iterator in_edges (const vertex_descriptor&amp; v) const;
+  std::pair&lt;adjacency_iterator,adjacency_iterator> adjacent_vertices (const site_descriptor&amp; v) const; 
+  vertex_descriptor vertex(vertices_size_type i) const;
+
+  site_descriptor source(const bond_descriptor&amp; b) const;  
+  site_descriptor target(const bond_descriptor&amp; b) const;  
+  
+  bool is_bipartite() const;
+  double parity(const site_descriptor&amp; v) const;
+  
+  int bond_type(const bond_descriptor&amp; b) const;
+};
+
+template &lt;class G=graph_factory&lt;>::graph_type>
+class LatticeModelMCRun : public LatticeMCRun&lt;G>
+{
+public:  
+  LatticeModelMCRun(const ProcessList&amp; w,const alps::Parameters&amp; p,int n);
+  
+  const ModelLibrary::OperatorDescriptorMap&amp; simple_operators() const;
+  
+  HamiltonianDescriptor&lt;short>&amp; model();
+  const HamiltonianDescriptor&lt;short>&amp; model() const;
 };
 
 }
+}
 </pre></blockquote>
 
+<h3>The <tt>SimpleMCFactory</tt> class</h3>
+is a factory fo Monte Carlo simulations, supporting one type of simulation. The <tt>WORKKER</tt> object passed as template argument is assumed to be derived from <tt>MCRun</tt> below and will be created by the factory.
 
 <h3>The <tt>Worker</tt> and <tt>MCRun</tt> class</h3>
 
-is the base class for all user simulations, containing the features not specific to Monte Carlo simulations. At the moment the only use is for Monte Carlo simulations through the derived class <tt>MCRun</tt> but further applications will be added in the future. For now we will thus discuss the members of both classes together.
+The <tt>Worker</tt> class is the base class for all user simulations, containing the features not specific to Monte Carlo simulations. At the moment the only use is for Monte Carlo simulations through the derived class <tt>MCRun</tt> but further applications will be added in the future. For now we will thus discuss the members of both classes together.
 <h4>Member functions</h4>
 <blockquote><pre>
-MCRun(iconst osiris::ProcessList&amp; w, const palm::Parameters&amp; p,int node;
+MCRun(const osiris::ProcessList&amp; w, const alps::Parameters&amp; p,int node;
 </pre></blockquote>
 is the constructor of a new Monte Carlo run. 
 <P>The argument <tt>w</tt> gives the processor nodes on which the <tt>MCRun</tt> is created, and the argument <tt>node</tt> the index into this list in case of future multi-CPU simulations. The simulation parameters are given in <p>. These three arguments are passed to the <a href="scheduler.html">factory</a> and will just be passed on to the constructor here.
@@ -103,7 +172,7 @@ virtual void halt();
 </pre></blockquote>
 is called at the end of the simulation and can be overriden to do some final work.
 <blockquote><pre>
-virtual bool change_parameter(const std::string&amp; name, const palm::StringValue&amp; value);
+virtual bool change_parameter(const std::string&amp; name, const alps::StringValue&amp; value);
 </pre></blockquote>
 is called when the user changes the parameter given by <tt>name</tt> to a new <tt>value</tt>. If the change is allowed or irrelevant the function should do the appropriate changes and return <tt>true</tt>, while <tt>false</tt> should be returned if the parameter change is not valid.
 <blockquote><pre>
@@ -124,14 +193,17 @@ alea::ObservableSet get_measurements() const;
 returns the collected measurements.
 <h4>Type members</h4>
 <blockquote><pre>
-typedef palm::lagged_fibonacci607 random_type;
+typedef boost::mt19937 random_type;
 </pre></blockquote>
 is the type of random number generator used.
 <blockquote><pre>
 typedef boost::uniform_01&lt;random_type> random_01_type;
 </pre></blockquote>
 is the type an adaptor to provide random numbers in the interval [0,1).
-
+<blockquote><pre>
+int random_int(int a, int b);
+</pre></blockquote>
+provides integer random numbers in the range <tt>a</tt> to <tt>b</tt>
 <h4>Data members</h4>
 <blockquote><pre>
 random_type random;
@@ -146,7 +218,7 @@ alea::ObservableSet measurements;
 </pre></blockquote>
 the collected measurements into which measurements should be stored.
 <blockquote><pre>
-palm::Parameters parms;</pre></blockquote>
+alps::Parameters parms;</pre></blockquote>
 </pre></blockquote>
 The simulation parameters.
 <blockquote><pre>
@@ -166,10 +238,24 @@ typedef typename boost::graph_traits&lt;graph_type>::out_edge_iterator out_edge_
 typedef typename boost::graph_traits&lt;graph_type>::in_edge_iterator in_edge_iterator;
 typedef typename boost::graph_traits&lt;graph_type>::edge_descriptor edge_descriptor;
 typedef typename boost::graph_traits&lt;graph_type>::vertex_descriptor vertex_descriptor;
+typedef typename graph_traits&lt;graph_type>::vertices_size_type vertices_size_type;
+typedef typename graph_traits&lt;graph_type>::edges_size_type edges_size_type;
+typedef typename graph_traits&lt;graph_type>::degree_size_type degree_size_type;
+typedef typename graph_traits&lt;graph_type>::adjacency_iterator adjacency_iterator;
+  
+typedef typename graph_traits&lt;graph_type>::site_iterator site_iterator;
+typedef typename graph_traits&lt;graph_type>::bond_iterator bond_iterator;
+typedef typename graph_traits&lt;graph_type>::neighbor_bond_iterator neighbor_bond_iterator;
+typedef typename graph_traits&lt;graph_type>::bond_descriptor bond_descriptor;
+typedef typename graph_traits&lt;graph_type>::site_descriptor site_descriptor;
+typedef typename graph_traits&lt;graph_type>::sites_size_type sites_size_type;
+typedef typename graph_traits&lt;graph_type>::bonds_size_type bonds_size_type;
+typedef typename graph_traits&lt;graph_type>::neighbors_size_type neighbors_size_type;
+typedef typename graph_traits&lt;graph_type>::neighbor_iterator neighbor_iterator;
 </pre></blockquote>
-are useful type definitions obtained from <a href="http://www.boost.org/libs/graph/">graph traits</A>.
+are useful type definitions obtained from <a href="../lattice/graph_traits.html">graph traits</A>.
 <blockquote><pre>
-LatticeMCRun(const osiris::ProcessList&amp; w,const palm::Parameters&amp; p,int n);
+LatticeMCRun(const osiris::ProcessList&amp; w,const alps::Parameters&amp; p,int n);
 </pre></blockquote>
 The constructor creates the graph from the following input parameters:
 <table border="1">
@@ -184,9 +270,60 @@ The constructor creates the graph from the following input parameters:
 graph_type&amp; graph();
 const graph_type&amp; graph() const;
 </pre></blockquote>
-allow access to the graphs.
+allow access to the graph on which the Monte Carlo simulation is performed.
+<blockquote><pre>   
+sites_size_type num_sites() const;
+bonds_size_type num_bonds() const;
+std::pair&lt;site_iterator,site_iterator> sites() const;
+std::pair&lt;bond_iterator,bond_iterator> bonds() const;
+bond_descriptor bond(bonds_size_type i) const;
+neighbors_size_type num_neighbors (const site_descriptor&amp; v) const;
+std::pair&lt;neighbor_bond_iterator,neighbor_bond_iterator> neighbor_bonds (const site_descriptor&amp; v) const;
+std::pair&lt;neighbor_iterator,neighbor_iterator> neighbors (const site_descriptor&amp; v) const;
+site_descriptor neighbor (const site_descriptor&amp; v, neighbors_size_type i) const;
+site_descriptor site(sites_size_type i) const;
+
+vertices_size_type num_vertices() const;
+edges_size_type num_edges() const;
+std::pair&lt;vertex_iterator,vertex_iterator> vertices() const;
+std::pair&lt;edge_iterator,edge_iterator> edges() const;
+degree_size_type out_degree (const vertex_descriptor&amp; v) const;
+degree_size_type in_degree (const vertex_descriptor&amp; v) const;
+degree_size_type degree (const vertex_descriptor&amp; v) const;
+out_edge_iterator out_edges (const vertex_descriptor&amp; v) const;
+in_edge_iterator in_edges (const vertex_descriptor&amp; v) const;
+std::pair&lt;adjacency_iterator,adjacency_iterator> adjacent_vertices (const site_descriptor&amp; v) const; 
+vertex_descriptor vertex(vertices_size_type i) const;
+
+site_descriptor source(const bond_descriptor&amp; b) const;
+site_descriptor target(const bond_descriptor&amp; b) const;
+</pre></blockquote>
+are useful short cuts for corresponfing functions of the Boost graph library or renamed functions of the <a href="../lattice/graph_traits.html">lattice</a> library. The functions call the corresponding functions with identical name of the Boost graph library or lattice library which take an additional argument specifying the graph.
+<blockquote><pre>   
+bool is_bipartite() const;
+</pre></blockquote>
+returns <tt>true</tt> if the graph is bipartite.
+<blockquote><pre>   
+double parity(const site_descriptor&amp; v) const;
+</pre></blockquote>
+for a bipartite graph this function returns either +1 or -1 depending on which sublattice the site is on. On a non-bipartite lattice the behavior is undefined.
+<blockquote><pre>   
+int bond_type(const bond_descriptor&amp; b) const;
+</pre></blockquote>
+returns the bond (=egde) type of a bond (=edge), obtained from the <tt>edge_type_t</tt> property of the graph.
+
+<h3>The <tt> LatticeModelMCRun</tt> class</h3>
+<blockquote><pre>   
+const ModelLibrary::OperatorDescriptorMap&amp; simple_operators() const;
+</pre></blockquote>
+returns a container of operator descriptions used in the model description.
+<blockquote><pre>   
+HamiltonianDescriptor&lt;short>&amp; model();
+const HamiltonianDescriptor&lt;short>&amp; model() const;
+</pre></blockquote>
+returns the model description.
 <HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

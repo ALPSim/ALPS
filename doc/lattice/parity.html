@@ -1,13 +1,13 @@
 <html>
 <head>
-   <title>ALPS Project: lattice library parity.h</title>
+   <title>ALPS Project: lattice/parity.h</title>
 </head>
 <body>
 
 <h1>
 ALPS Project: lattice library</h1>
 
-<h2>Header file: parity.h</h2>
+<h2>Header file: lattice/parity.h</h2>
 
 defines a parity function for bipartitie graphs.
 A bipartite graph that separates into two subgraphs, with edges only between
@@ -15,7 +15,7 @@ but he two subgraphs but not within either of them.
 
 <h3>Synopsis</h3>
 <blockquote><pre>
-namespace lattice {
+namespace alps {
 template &lt;class G, class ParityMap> 
 bool set_parity(ParityMap&amp; map, const G&amp; g)
 
@@ -39,7 +39,7 @@ same as above, but gets the property map of type <tt>parity_t</tt>
 from the graph itself. <tt>G</tt> must be a model of 
 <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>
 <HR>
-<ADDRESS>(c) 2000-2002 by 
+<ADDRESS>copyright (c) 2000-2003 by 
 <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

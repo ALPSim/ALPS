@@ -1,16 +1,16 @@
 <html>
 <head>
-   <title>ALPS Project: osiris library dump.h</title>
+   <title>ALPS Project: alps library osiris/dump.h</title>
 </head>
 <body>
 
 <h1>
-ALPS Project: osiris library</h1>
+ALPS Project: alps library</h1>
 
 <h2>
-Header file <b>dump.h</b></h2>
+Header file <b>osiris/dump.h</b></h2>
 This header contains the abstract base classes for object serialization.
-<h3>The osiris serialization mechanism</h3>
+<h3>The alps serialization mechanism</h3>
 The foundation of the dump mechanism are the two abstract classes 
 <tt>ODump</tt> and <tt>IDump</tt> that are used to write a representation of an 
 object or to reconstruct an object respectively. The actual classes used (
@@ -56,125 +56,108 @@ them from <tt>Dumpable</tt> and implementing the <tt>save</tt> and
 and <tt>operator>></tt>.
 <h3>Synopsis</h3>
 <blockquote>
-<pre>namespace osiris {
-class Dumpable
-{
-public:
-  Dumpable();
-  virtual void save(ODump& dump) const = 0;
-  virtual void load(IDump&) = 0;
-};
-
+<pre>namespace alps {
 class ODump
 {
 public:
   ODump(uint32_t v=0);
   uint32_t version();
+  
+  virtual void write_simple(bool x) ;
+  virtual void write_simple(char x);
+  virtual void write_simple(signed char x);
+  virtual void write_simple(unsigned char x);
+  virtual void write_simple(short x);
+  virtual void write_simple(unsigned short x);
+  virtual void write_simple(int x) = 0;
+  virtual void write_simple(unsigned int x);
+  virtual void write_simple(long x);
+  virtual void write_simple(unsigned long x);
+  virtual void write_simple(long long x);
+  virtual void write_simple(unsigned long long x);
+  virtual void write_simple(float x);
+  virtual void write_simple(double x) = 0;
+  virtual void write_simple(long double x) ;
 
-  ODump& operator&lt;&lt;(int64_t x);
-  ODump& operator&lt;&lt;(int32_t x);
-  ODump& operator&lt;&lt;(int16_t x);
-  ODump& operator&lt;&lt;(int8_t x);
-  ODump& operator&lt;&lt;(uint64_t x);
-  ODump& operator&lt;&lt;(uint32_t x);
-  ODump& operator&lt;&lt;(uint16_t x);
-  ODump& operator&lt;&lt;(uint8_t x);
-  ODump& operator&lt;&lt;(float x);
-  ODump& operator&lt;&lt;(double x);
-  ODump& operator&lt;&lt;(long double x);
-  ODump& operator&lt;&lt;(bool x);
-  template &lt;class T> ODump& operator&lt;&lt;(std::complex&lt;T> x);
- 
-  ODump& operator&lt;&lt;(osiris::Dumpable& dump) const;
-
-  virtual void write_array(std::size_t n, const int64_t* p);
-  virtual void write_array(std::size_t n, const int32_t* p);
-  virtual void write_array(std::size_t n, const int16_t* p);
-  virtual void write_array(std::size_t n, const int8_t* p);
-  virtual void write_array(std::size_t n, const uint64_t* p);
-  virtual void write_array(std::size_t n, const uint32_t* p);
-  virtual void write_array(std::size_t n, const uint16_t* p);
-  virtual void write_array(std::size_t n, const uint8_t* p);
+  virtual void write_array(std::size_t n, const bool* p);
+  virtual void write_array(std::size_t n, const char* p);
+  virtual void write_array(std::size_t n, const signed char* p);
+  virtual void write_array(std::size_t n, const unsigned char* p);
+  virtual void write_array(std::size_t n, const short* p);
+  virtual void write_array(std::size_t n, const unsigned short* p);
+  virtual void write_array(std::size_t n, const int* p);
+  virtual void write_array(std::size_t n, const unsigned int* p);
+  virtual void write_array(std::size_t n, const long* p);
+  virtual void write_array(std::size_t n, const unsigned long* p);
+  virtual void write_array(std::size_t n, const long long* p);
+  virtual void write_array(std::size_t n, const unsigned long long* p);
   virtual void write_array(std::size_t n, const float* p);
   virtual void write_array(std::size_t n, const double* p);
   virtual void write_array(std::size_t n, const long double* p);
   virtual void write_array(std::size_t n, const bool* p);
-  virtual void write_string(std::size_t n, const char* s);
-
   template &lt;class T> void write_array(std::size_t n, const std::complex&lt;T>* p);
+  
+  virtual void write_string(std::size_t n, const char* s);
 
   void registerObjectAddress(void* p);
   void writePointer(void* p);
-  
-protected:
-  virtual void write_simple(int64_t x) ;
-  virtual void write_simple(int32_t x) = 0;
-  virtual void write_simple(int16_t x);
-  virtual void write_simple(int8_t x);
-  virtual void write_simple(uint64_t x);
-  virtual void write_simple(uint32_t x);
-  virtual void write_simple(uint16_t x);
-  virtual void write_simple(uint8_t x);
-  virtual void write_simple(float x);
-  virtual void write_simple(double x) = 0;
-  virtual void write_simple(long double x) ;
-  virtual void write_simple(bool x);
 };
 
 class IDump
 {
 public:
   IDump(uint32_t v=0);
-
   uint32_t version();
 
-#if defined(ALPS_LINUX) && defined(__GNUC__)
-  IDump& operator>>(char& x);
-#endif
-  IDump& operator>>(int64_t& x);
-  IDump& operator>>(int32_t& x);
-  IDump& operator>>(int16_t& x);
-  IDump& operator>>(int8_t& x);
-  IDump& operator>>(uint64_t& x);
-  IDump& operator>>(uint32_t& x);
-  IDump& operator>>(uint16_t& x);
-  IDump& operator>>(uint8_t& x);
-  IDump& operator>>(float& x);
-  IDump& operator>>(double& x);
-  IDump& operator>>(long double& x);
-  IDump& operator>>(bool& x);
-  template &lt;class T> IDump& operator>>(std::complex&lt;T>& x);
+  virtual void read_simple(bool&amp; x);
+  virtual void read_simple(char&amp; x);
+  virtual void read_simple(signed char&amp; x);
+  virtual void read_simple(unsigned char&amp; x);
+  virtual void read_simple(short&amp; x);
+  virtual void read_simple(unsigned short&amp; x);
+  virtual void read_simple(int&amp; x) =0;
+  virtual void read_simple(unsigned int&amp; x);
+  virtual void read_simple(long&amp; x);
+  virtual void read_simple(unsigned long&amp; x);
+  virtual void read_simple(long long&amp; x);
+  virtual void read_simple(unsigned long long&amp; x);
+  virtual void read_simple(float&amp; x);
+  virtual void read_simple(double&amp; x) =0;
+  virtual void read_simple(long double&amp; x);
 
-  IDump& operator>>(Dumpable& x);
-
-  virtual void read_array(std::size_t n, int64_t* p);
-  virtual void read_array(std::size_t n, int32_t* p);
-  virtual void read_array(std::size_t n, int16_t* p);
-  virtual void read_array(std::size_t n, int8_t* p);
-  virtual void read_array(std::size_t n, uint64_t* p);
-  virtual void read_array(std::size_t n, uint32_t* p);
-  virtual void read_array(std::size_t n, uint16_t* p);
-  virtual void read_array(std::size_t n, uint8_t* p);
+  virtual void read_array(std::size_t n, bool* p);
+  virtual void read_array(std::size_t n, char* p);
+  virtual void read_array(std::size_t n, signed char* p);
+  virtual void read_array(std::size_t n, unsigned char* p);
+  virtual void read_array(std::size_t n, short* p);
+  virtual void read_array(std::size_t n, unsigned short* p);
+  virtual void read_array(std::size_t n, int* p);
+  virtual void read_array(std::size_t n, unsigned int* p);
+  virtual void read_array(std::size_t n, long* p);
+  virtual void read_array(std::size_t n, unsigned long* p);
+  virtual void read_array(std::size_t n, long long* p);
+  virtual void read_array(std::size_t n, unsigned long long* p);
   virtual void read_array(std::size_t n, float* p);
   virtual void read_array(std::size_t n, double* p);
   virtual void read_array(std::size_t n, long double* p);
   virtual void read_array(std::size_t n, bool* p);
-  virtual void read_string(std::size_t n, char* s);
-
   template &lt;class T> void read_array(std::size_t n, std::complex&lt;T>* p);
 
-  operator int8_t();
-  operator int16_t();
-  operator int32_t();
-  operator int64_t();
-  operator uint8_t();
-  operator uint16_t();
-  operator uint32_t();
-  operator uint64_t();
+  operator bool();
+  operator char();
+  operator signed char();
+  operator unsigned char();
+  operator short();
+  operator unsigned short();
+  operator int();
+  operator unsigned int();
+  operator long();
+  operator unsigned long();
+  operator long long();
+  operator unsigned long long();
   operator float();
   operator double();
   operator long double();
-  operator bool();
   template &lt;class T> operator std::complex&lt;T>();
 
   template &lt;class T> T get();
@@ -182,39 +165,45 @@ public:
   bool test();
 
   void registerObjectAddress(void* p);
-
   void* readPointer();
-  
-protected:
-  virtual void read_simple(char& x);
-  virtual void read_simple(int64_t& x) = 0;
-  virtual void read_simple(int32_t& x) = 0;
-  virtual void read_simple(int16_t& x);
-  virtual void read_simple(int8_t& x);
-  virtual void read_simple(uint64_t& x);
-  virtual void read_simple(uint32_t& x);
-  virtual void read_simple(uint16_t& x);
-  virtual void read_simple(uint8_t& x);
-  virtual void read_simple(float& x);
-  virtual void read_simple(double& x) = 0;
-  virtual void read_simple(long double& x);
-  virtual void read_simple(bool& x);
 };
 
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, bool x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, signed char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, short x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned short x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, int x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned int x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, float x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned long long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, double x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long double x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, bool x);
+template &lt;class T> ODump&amp; operator&lt;&lt;(ODump&amp; dump, std::complex&lt;T> x);
+ 
+IDump&amp; operator>>(IDump&amp; dump, bool&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, char&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, signed char&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, unsigned char&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, short&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, unsigned short&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, int&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, unsigned int&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, long&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, unsigned long&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, long long&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, unsigned long long&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, float&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, double&amp; x);
+IDump&amp; operator>>(IDump&amp; dump, long double&amp; x);
+template &lt;class T> IDump&amp; operator>>(IDump&amp; dump, std::complex&lt;T>&amp; x);
 }</pre></blockquote>
 
-
-<h3>The <tt>Dumpable</tt> class</h3>
-is an abstract base class providing the interface for using serialization
-with polymorphic objects.
-<blockquote><pre>
-virtual void save(ODump& dump) const = 0;
-</pre></blockquote>
-serializes the object into an <tt>ODump</tt>.
-<blockquote><pre>
-virtual void load(IDump&) = 0;
-</pre></blockquote>
-deserializes the object from an <tt>IDump</tt>.
 
 <h3>The <tt>ODump</tt> class</h3>
 is the abstract base class for serialization.
@@ -234,41 +223,42 @@ output file.
 <H4>Serializing objects</H4>
 Objects are serialized using the <tt>operator&lt;&lt;</tt>.
 <blockquote><pre>
-ODump& operator&lt;&lt;(int64_t x);
-ODump& operator&lt;&lt;(int32_t x);
-ODump& operator&lt;&lt;(int16_t x);
-ODump& operator&lt;&lt;(int8_t x);
-ODump& operator&lt;&lt;(uint64_t x);
-ODump& operator&lt;&lt;(uint32_t x);
-ODump& operator&lt;&lt;(uint16_t x);
-ODump& operator&lt;&lt;(uint8_t x);
-ODump& operator&lt;&lt;(float x);
-ODump& operator&lt;&lt;(double x);
-ODump& operator&lt;&lt;(long double x);
-ODump& operator&lt;&lt;(bool x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, bool x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, signed char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, short x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned short x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, int x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned int x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, float x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned long long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, double x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long double x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, bool x);
 </pre></blockquote>
-serialize the basic simple data types. On Linux using gcc-2.95 additionally a
-version for <tt>char</tt> is needed, since <tt>char</tt> there is distinct 
-from <tt>uint8_t</tt> and <tt>int8_t</tt>.
+serialize the basic simple data types.
 <blockquote><pre>
-template &lt;class T> ODump& operator&lt;&lt;(std::complex&lt;T> x);
+template &lt;class T> ODump&amp; operator&lt;&lt;(ODump&amp; dump, std::complex&lt;T> x);
 </pre></blockquote>
 serializes complex numbers by serializing their real and imaginary 
 parts.
 <blockquote><pre>
-ODump& operator&lt;&lt;(const osiris::Dumpable& dump);
-</pre></blockquote>
-serializes objects derived from <tt>Dumpable</tt> by calling their 
-<tt>save</tt> function.
-<blockquote><pre>
-virtual void write_array(std::size_t n, const int64_t* p);
-virtual void write_array(std::size_t n, const int32_t* p);
-virtual void write_array(std::size_t n, const int16_t* p);
-virtual void write_array(std::size_t n, const int8_t* p);
-virtual void write_array(std::size_t n, const uint64_t* p);
-virtual void write_array(std::size_t n, const uint32_t* p);
-virtual void write_array(std::size_t n, const uint16_t* p);
-virtual void write_array(std::size_t n, const uint8_t* p);
+virtual void write_array(std::size_t n, const bool* p);
+virtual void write_array(std::size_t n, const char* p);
+virtual void write_array(std::size_t n, const signed char* p);
+virtual void write_array(std::size_t n, const unsigned char* p);
+virtual void write_array(std::size_t n, const short* p);
+virtual void write_array(std::size_t n, const unsigned short* p);
+virtual void write_array(std::size_t n, const int* p);
+virtual void write_array(std::size_t n, const unsigned int* p);
+virtual void write_array(std::size_t n, const long* p);
+virtual void write_array(std::size_t n, const unsigned long* p);
+virtual void write_array(std::size_t n, const long long* p);
+virtual void write_array(std::size_t n, const unsigned long long* p);
 virtual void write_array(std::size_t n, const float* p);
 virtual void write_array(std::size_t n, const double* p);
 virtual void write_array(std::size_t n, const long double* p);
@@ -276,8 +266,6 @@ virtual void write_array(std::size_t n, const bool* p);
 </pre></blockquote>
 serialize a C-style array of basic data types with <tt>n</tt> elements. The default version just 
 calls the corresponding <tt>operator&lt;&lt;</tt> <tt>n</tt> times. 
-On Linux using gcc-2.95 additionally a version for <tt>char</tt> is needed, since 
-<tt>char</tt> there is distinct from <tt>uint8_t</tt> and <tt>int8_t</tt>.
 <blockquote><pre>
 template &lt;class T> void write_array(std::size_t n, const std::complex&lt;T>* p);
 </pre></blockquote>
@@ -288,7 +276,7 @@ virtual void write_string(std::size_t n, const char* s);
 </pre></blockquote>
 serializes a C-style string, optionally performing character translations.
 Note that the string need <I>not</I> be null-terminated. The default version 
-just calls <tt>operator>>(char&)</tt> 
+just calls <tt>operator>>(char&amp;)</tt> 
 <tt>n</tt> times.
 <H4>Serializing pointers</H4>
 <blockquote><pre>
@@ -306,28 +294,29 @@ deserialization. If the pointer has not been registered a
 <tt>std::runtime_error</tt> is thrown.
 <H4>Functions for implementors</H4>
 <blockquote><pre>
-virtual void write_simple(int64_t x) ;
-virtual void write_simple(int32_t x) =0;
-virtual void write_simple(int16_t x);
-virtual void write_simple(int8_t x);
-virtual void write_simple(uint64_t x);
-virtual void write_simple(uint32_t x);
-virtual void write_simple(uint16_t x);
-virtual void write_simple(uint8_t x);
+virtual void write_simple(bool x) ;
+virtual void write_simple(char x);
+virtual void write_simple(signed char x);
+virtual void write_simple(unsigned char x);
+virtual void write_simple(short x);
+virtual void write_simple(unsigned short x);
+virtual void write_simple(int x) = 0;
+virtual void write_simple(unsigned int x);
+virtual void write_simple(long x);
+virtual void write_simple(unsigned long x);
+virtual void write_simple(long long x);
+virtual void write_simple(unsigned long long x);
 virtual void write_simple(float x);
 virtual void write_simple(double x) = 0;
 virtual void write_simple(long double x) ;
-virtual void write_simple(bool x);
 </pre></blockquote>
 implement serialization of basic data types. It is recommended that all 
 these functions be implemented and optimized versions of 
 <tt>write_array</tt> and <tt>write_string</tt> be provided. The minimal requirement is an 
-implementation for <tt>int32_t</tt> and for <tt>double</tt>. The default 
+implementation for <tt>int32</tt> and for <tt>double</tt>. The default 
 versions of the other types call the signed version for unsigned integers, 
-the 32-bit version for other integer sizes, and the <tt>double</tt> version 
-for other floating point types. On Linux using gcc-2.95 additionally a version for <tt>char</tt> is needed, since 
-<tt>char</tt> there is distinct from <tt>uint8_t</tt> and <tt>int8_t</tt>.
-
+the <tt>int</tt> version for other integer sizes, and the <tt>double</tt> version 
+for other floating point types. 
 <h3>The <tt>IDump</tt> class</h3>
 is the abstract base class for deserialization.
 <blockquote><pre>
@@ -346,41 +335,42 @@ output file.
 <H4>Deserializing objects</H4>
 Objects are serialized using the <tt>operator>></tt>.
 <blockquote><pre>
-IDump& operator>>(int64_t& x);
-IDump& operator>>(int32_t& x);
-IDump& operator>>(int16_t& x);
-IDump& operator>>(int8_t& x);
-IDump& operator>>(uint64_t& x);
-IDump& operator>>(uint32_t& x);
-IDump& operator>>(uint16_t& x);
-IDump& operator>>(uint8_t& x);
-IDump& operator>>(float& x);
-IDump& operator>>(double& x);
-IDump& operator>>(long double& x);
-IDump& operator>>(bool& x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, bool x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, signed char x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, short x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned short x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, int x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned int x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, float x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, unsigned long long x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, double x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, long double x);
+ODump&amp; operator&lt;&lt;(ODump&amp; dump, bool x);
 </pre></blockquote>
-deserialize the basic simple data types. On Linux using gcc-2.95 additionally a
-version for <tt>char</tt> is needed, since <tt>char</tt> there is distinct 
-from <tt>uint8_t</tt> and <tt>int8_t</tt>.
+deserialize the basic simple data types.
 <blockquote><pre>
-template &lt;class T> IDump& operator>>(std::complex&lt;T>& x);
+template &lt;class T> ODump&amp; operator&lt;&lt;(ODump&amp; dump, std::complex&lt;T> x);
 </pre></blockquote>
 deserializes complex numbers by deserializing their real and imaginary 
 parts.
 <blockquote><pre>
-IDump& operator>>(osiris::Dumpable& dump) const;
-</pre></blockquote>
-deserializes objects derived from <tt>Dumpable</tt> by calling their 
-<tt>load</tt> function.
-<blockquote><pre>
-virtual void read_array(std::size_t n, int64_t* p);
-virtual void read_array(std::size_t n, int32_t* p);
-virtual void read_array(std::size_t n, int16_t* p);
-virtual void read_array(std::size_t n, int8_t* p);
-virtual void read_array(std::size_t n, uint64_t* p);
-virtual void read_array(std::size_t n, uint32_t* p);
-virtual void read_array(std::size_t n, uint16_t* p);
-virtual void read_array(std::size_t n, uint8_t* p);
+virtual void read_array(std::size_t n, bool* p);
+virtual void read_array(std::size_t n, char* p);
+virtual void read_array(std::size_t n, signed char* p);
+virtual void read_array(std::size_t n, unsigned char* p);
+virtual void read_array(std::size_t n, short* p);
+virtual void read_array(std::size_t n, unsigned short* p);
+virtual void read_array(std::size_t n, int* p);
+virtual void read_array(std::size_t n, unsigned int* p);
+virtual void read_array(std::size_t n, long* p);
+virtual void read_array(std::size_t n, unsigned long* p);
+virtual void read_array(std::size_t n, long long* p);
+virtual void read_array(std::size_t n, unsigned long long* p);
 virtual void read_array(std::size_t n, float* p);
 virtual void read_array(std::size_t n, double* p);
 virtual void read_array(std::size_t n, long double* p);
@@ -390,10 +380,6 @@ deserializes a C-style array of basic data types with <tt>n</tt>
 elements. Enough memory must have been allocated before calling this 
 function. The default version just 
 calls the corresponding <tt>operator>></tt> <tt>n</tt> times. 
-On Linux using gcc-2.95 additionally a version for <tt>char</tt> is needed, since 
-<tt>char</tt> there is distinct from <tt>uint8_t</tt> and <tt>int8_t</tt>.
-serializes a C-style string, optionally performing character translations.
-Note that the string need <I>not</I> be null-terminated.
 <BR><I>Note to implementors:</I> optimized functions for serializing 
 C-style arrays can be provided by overriding these virtual functions.
 <blockquote><pre>
@@ -406,23 +392,26 @@ virtual void read_string(std::size_t n, char* s);
 </pre></blockquote>
 deserialzes a C-style string and places a trailing 0 into the string, if 
 it is not present. Enough memory must have been allocated before calling this 
-function. The default version just calls <tt>operator>>(char&)</tt> 
+function. The default version just calls <tt>operator>>(char&amp;)</tt> 
 <tt>n</tt> times.
 
 <H4>Conversion operators</H4>
 <blockquote><pre>
-operator int8_t();
-operator int16_t();
-operator int32_t();
-operator int64_t();
-operator uint8_t();
-operator uint16_t();
-operator uint32_t();
-operator uint64_t();
+operator bool();
+operator char();
+operator signed char();
+operator unsigned char();
+operator short();
+operator unsigned short();
+operator int();
+operator unsigned int();
+operator long();
+operator unsigned long();
+operator long long();
+operator unsigned long long();
 operator float();
 operator double();
 operator long double();
-operator bool();
 template &lt;class T> operator std::complex&lt;T>();
 </pre></blockquote>
 use the corresponding <tt>operator>></tt> to read an object of the type from the 
@@ -430,7 +419,7 @@ use the corresponding <tt>operator>></tt> to read an object of the type from the
 <blockquote><pre>
 template &lt;class T> T get();
 </pre></blockquote>
-use the corresponding <tt>operator>>(T&)</tt> to read an object of the type from the 
+use the corresponding <tt>operator>>(T&amp;)</tt> to read an object of the type from the 
 <tt>IDump</tt> and return it.
 <blockquote><pre>
 bool test();
@@ -453,29 +442,31 @@ pointer has not been registered a <tt>std::runtime_error</tt> is thrown.
 
 <H4>Functions for implementors</H4>
 <blockquote><pre>
-virtual void read_simple(int64_t& x) ;
-virtual void read_simple(int32_t& x) =0;
-virtual void read_simple(int16_t& x);
-virtual void read_simple(int8_t& x);
-virtual void read_simple(uint64_t& x);
-virtual void read_simple(uint32_t& x);
-virtual void read_simple(uint16_t& x);
-virtual void read_simple(uint8_t& x);
-virtual void read_simple(float& x);
-virtual void read_simple(double& x) = 0;
-virtual void read_simple(long double& x) ;
-virtual void read_simple(bool& x);
+virtual void read_simple(bool&amp; x);
+virtual void read_simple(char&amp; x);
+virtual void read_simple(signed char&amp; x);
+virtual void read_simple(unsigned char&amp; x);
+virtual void read_simple(short&amp; x);
+virtual void read_simple(unsigned short&amp; x);
+virtual void read_simple(int&amp; x) =0;
+virtual void read_simple(unsigned int&amp; x);
+virtual void read_simple(long&amp; x);
+virtual void read_simple(unsigned long&amp; x);
+virtual void read_simple(long long&amp; x);
+virtual void read_simple(unsigned long long&amp; x);
+virtual void read_simple(float&amp; x);
+virtual void read_simple(double&amp; x) =0;
+virtual void read_simple(long double&amp; x);
 </pre></blockquote>
 implement deserialization of basic data types. It is recommended that all 
 these functions be implemented and optimized versions of 
 <tt>read_array</tt> and <tt>read_string</tt>be provided. The minimal requirement is an 
-implementation for <tt>int32_t</tt> and for <tt>double</tt>. The default 
+implementation for <tt>int32</tt> and for <tt>double</tt>. The default 
 versions of the other types call the signed version for unsigned integers, 
-the 32-bit version for other integer sizes, and the <tt>double</tt> version 
-for other floating point types. On Linux using gcc-2.95 additionally a version for <tt>char</tt> is needed, since 
-<tt>char</tt> there is distinct from <tt>uint8_t</tt> and <tt>int8_t</tt>.
+the <tt>int</tt> version for other integer sizes, and the <tt>double</tt> version 
+for other floating point types. 
 <HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>Copytight (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

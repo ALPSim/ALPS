@@ -23,11 +23,21 @@ public:
   inline const ValueType&amp; operator[](const std::string&amp; name) const;
   inline bool defined(const std::string&amp; name) const;
   template &lt;class T> inline T value_or_default(const std::string&amp; name, T x) const;
+
+  void copy_undefined(const Parameters&amp; p)l
+
+  void write_xml(std::ostream&amp; xml) const;
+  void read_xml(XMLTag tag, std::istream&amp; xml);
 };
+
+std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const Parameters&amp; p);
+std::istream&amp; operator >> (std::istream&amp; is, Parameters&amp; parameters);
+
+ODump&amp; operator &lt;&lt; (ODump&amp; od, const Parameters&amp; p);
+IDump&amp; operator &gt;&gt; (IDump&amp; id, Parameters&amp; p);
+
 }
 
-std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const palm::Parameters&amp; p);
-std::istream&amp; operator >> (std::istream&amp; is, palm::Parameters&amp; parameters);
 </pre></blockquote>
 
 
@@ -61,27 +71,27 @@ T = 0.5
 measure = yes;
 </pre></blockquote>
 
-
+<h4>Member functions</h4>
 <blockquote><pre>
 Parameters();
 </pre></blockquote>
 the default constructor
 <blockquote><pre>
-Parameters(std::istream& is);
+Parameters(std::istream&amp; is);
 </pre></blockquote>
 parses parameters from an <tt>std::istream</tt>.
 <blockquote><pre>
-Parameters& operator&lt;&lt;(const Parameters& p ) 
+Parameters&amp; operator&lt;&lt;(const Parameters&amp; p ) 
 </pre></blockquote>
 copies parameter values from another parameter object.
 <blockquote><pre>
-ValueType& operator[](const std::string& name);
-const ValueType& operator[](const std::string& name) const;
+ValueType&amp; operator[](const std::string&amp; name);
+const ValueType&amp; operator[](const std::string&amp; name) const;
 </pre></blockquote>
 access the parameter with a given name. Note the const-version 
 which extends the <tt>std::map</tt> interface
 <blockquote><pre>
-bool defined(const std::string& name) const;
+bool defined(const std::string&amp; name) const;
 </pre></blockquote>
 returns true if a parameter value exists for the given
 parameter name.
@@ -90,7 +100,17 @@ template &lt;class T> inline T value_or_default(const std::string&amp; name, T x
 </pre></blockquote>
 returns the parameter with the given name cast to type <tt>T</tt> if the parameter is defined, or the given default value <tt>x</tt> otherwise.
 <blockquote><pre>
-std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const palm::Parameters&amp; p);
+void copy_undefined(const Parameters&amp; p);
+</pre></blockquote>
+sets all parameter values that are defined in the argument <tt>p</tt> to be the same as in <tt>p</tt>. This is useful to set default values from an object <tt>p</tt>.
+<blockquote><pre>
+void write_xml(std::ostream&amp; xml) const;
+void read_xml(XMLTag tag, std::istream&amp; xml);
+</pre></blockquote>
+write and read the <tt>Parameters</tt> object using the XML schema specified on <a href="http://xml.comp-phys.org">http://xml.comp-phys.org</a>.
+<H4>I/O operators</h4>
+<blockquote><pre>
+std::ostream&amp; operator &lt;&lt; (std::ostream&amp; os, const Parameters&amp; p);
 </pre></blockquote>
 writes parameter names and values to a <tt>std::ostream</tt>. 
 Each parameter is written to a new line, in the format
@@ -108,9 +128,14 @@ W = 2
 </pre></blockquote>
 This allows the output to be read again . 
 <blockquote><pre>
-std::istream&amp; operator >> (std::istream&amp; is, palm::Parameters&amp; parameters);
+std::istream&amp; operator >> (std::istream&amp; is, Parameters&amp; parameters);
 </pre></blockquote>
 reads parameters from a <tt>std::istream</tt>
+<blockquote><pre>
+ODump&amp; operator &lt;&lt; (ODump&amp; od, const Parameters&amp; p);
+IDump&amp; operator &gt;&gt; (IDump&amp; id, Parameters&amp; p);
+</pre></blockquote>
+serialize and deserialize the <tt>Parameters</tt> object.
 <HR>
 <ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>

@@ -1,6 +1,6 @@
 <html>
 <head>
-   <title>ALPS Project: alea library obsvalue.h</title>
+   <title>ALPS Project: osiris/obsvalue.h</title>
 </head>
 <body>
 
@@ -8,7 +8,7 @@
 ALPS Project: alea library</h1>
 
 <h2>
-Header file <b>obsvalue.h</b></h2>
+Header file <b>osiris/obsvalue.h</b></h2>
 This header contains traits classes to facilitate generic implementation
 of observables. It is of interest only to users wanting to extend the 
 functionality beyond the basic floating point and integral types, 
@@ -16,7 +16,7 @@ functionality beyond the basic floating point and integral types,
 <h3>Synopsis</h3>
 <blockquote>
 <pre>
-namespace alea {
+namespace alps {
 
 template &lt;class T>
 struct obs_value_traits
@@ -24,14 +24,15 @@ struct obs_value_traits
   typedef T value_type; 
   typedef double count_type;
   typedef double time_type;
-  typedef typename palm::TypeTraits&lt;value_type>::average_t result_type;
+  typedef typename TypeTraits&lt;value_type>::average_t result_type;
   typedef T element_type;
   typedef double time_element_type;
   typedef uint32_t size_type;
   typedef uint32_t slice_iterator;
 
-  static const uint32_t magic_id = palm::TypeTraits&lt;value_type>::type_tag;
-
+  static const uint32_t magic_id = TypeTraits&lt;value_type>::type_tag;
+  static const bool array_valued;
+  
   static element_type max();
   static element_type min();
   static element_type epsilon();
@@ -44,7 +45,6 @@ struct obs_value_traits
 
   static time_type check_divide(const result_type&amp; a,const result_type&amp; b);
 
-  template &lt;class X> static void resize(X&amp; x,size_type s);
   template &lt;class X, class Y> static void resize_same_as(X&amp; x,const Y&amp; y);
   template &lt;class X, class Y> static void copy(X&amp; x,const Y&amp; y);
   template &lt;class X> static std::size_t size(const X&amp; x);
@@ -70,12 +70,18 @@ struct obs_value_traits&lt;std::valarray&lt;T> >
   ...
 };
 
+template&lt;typename T, std::size_t NumDims, typename Allocator>
+  struct obs_value_traits&lt;alps::multi_array&lt;T,NumDims,Allocator> >
+{
+  ...
+};
+  
 template &lt;class DST,class SRC> DST obs_value_cast(const SRC&amp; s) 
 {
   return obs_value_traits&lt;DST>::convert(s);
 }
 
-} // end namespace alea
+} // end namespace alps
 </pre></blockquote>
 
 
@@ -117,13 +123,17 @@ implement only the operators <tt>++</tt> and <tt>!=</tt>.
 static const uint32_t magic_id;
 </pre></blockquote>
 is a unique identifier for the <TT>value_type</TT>.
+<blockquote><pre>
+static const bool array_valued;
+</pre></blockquote>
+is <tt>true</tt> if the type is array-valued and can be sliced.
 <H4>General member functions</H4>
 <blockquote><pre>
 static element_type max();
 static element_type min();
 static element_type epsilon();
 </pre></blockquote>
-return the largest positive number, the largest negative number, and tge 
+return the largest positive number, the largest negative number, and the 
 floating point epsilon for the <TT>element_type</TT>, which is the same 
 as <TT>value_type</TT> for scalar types, but the <TT>value_type</TT> of the 
 array for array types.
@@ -146,13 +156,6 @@ replaces the
 static time_type check_divide(const result_type&amp; a,const result_type&amp; b);
 </pre></blockquote>
 <H4>Copying and resizing</H4>
-<blockquote><pre>
-template &lt;class X> static void resize(X&amp; x,size_type s);
-</pre></blockquote>
-resizes an array-valued <tt>x</tt> to size <tt>s</tt>. Should also
-be implemented for scalar types, where it is a no-op. The type <tt>X</tt>
-is either <TT>value_type</TT>, <TT>time_type</TT>, <TT>count_type</TT> or
-<TT>result_type</TT>.
 <blockquote><pre>
 template &lt;class X, class Y> static void resize_same_as(X&amp; x,const Y&amp; y);
 </pre></blockquote>
@@ -207,7 +210,7 @@ template &lt;class DST,class SRC> DST obs_value_cast(const SRC&amp; s)
 </pre></blockquote>
 converts an object of type <tt>SRC</tt> to type <tt>DST</tt>, using the <tt>obs_value_traits</tt> class.
 <HR>
-<ADDRESS>(c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

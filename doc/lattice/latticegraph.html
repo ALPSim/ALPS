@@ -1,19 +1,19 @@
 <html>
 <head>
-   <title>ALPS Project: lattice library latticegraph.h</title>
+   <title>ALPS Project: lattice/latticegraph.h</title>
 </head>
 <body>
 
 <h1>
 ALPS Project: lattice library</h1>
 
-<h2>Header file: latticegraph.h</h2>
+<h2>Header file: lattice/latticegraph.h</h2>
 
 defines a function to create a graph from a lattice, and a template class
 that decorates a lattice with a graph.
 <h3>Synopsis</h3>
 <blockquote><pre>
-namespace lattice {
+namespace alps {
 
 template &lt;class LATTICE, class GRAPH>
 void make_graph_from_lattice(GRAPH&amp; g,const LATTICE&amp; l);
@@ -32,6 +32,9 @@ public:
   typedef typename lattice_traits&lt;base_type>::basis_vector_iterator basis_vector_iterator;
   typedef typename lattice_traits&lt;base_type>::cell_iterator cell_iterator;
   typedef typename lattice_traits&lt;base_type>::boundary_crossing_type boundary_crossing_type;
+
+  typedef typename boost::graph_traits&lt;graph_type>::vertex_iterator vertex_iterator;
+  typedef typename boost::graph_traits&lt;graph_type>::edge_iterator edge_iterator;
 
   lattice_graph();
   lattice_graph(const base_type&amp;);
@@ -118,6 +121,11 @@ typedef typename lattice_traits&lt;base_type>::boundary_crossing_type boundary_c
 </pre></blockquote>
 have the same meaning as the corresponding members of the <tt>lattice_traits</tt>
 class discussed for the <A HREF="latticeconcepts.html">lattice concepts</A>.
+<blockquote><pre>
+typedef typename boost::graph_traits<graph_type>::vertex_iterator vertex_iterator;
+typedef typename boost::graph_traits<graph_type>::edge_iterator edge_iterator;
+</pre></blockquote>
+are iterators over the edges and vertices of the graph.
 <h4>Constructors</h4>
 <blockquote><pre>
 lattice_graph();
@@ -152,7 +160,7 @@ struct lattice_traits&lt;lattice_graph&lt;L,G> >
 </pre></blockquote>
 is the traits class for the lattice.
 <HR>
-<ADDRESS>(c) 2000-2003 by 
+<ADDRESS>copyright (c) 2000-2003 by 
 <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

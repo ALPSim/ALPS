@@ -20,12 +20,12 @@ class Evaluator {
 public:
   enum Direction { left_to_right, right_to_left};
   Evaluator() {}
-  virtual bool can_evaluate(const std::string&) const;
-  virtual bool can_evaluate_function(const std::string&, const Expression& ) const;
-  virtual double evaluate(const std::string&) const;
-  virtual double evaluate_function(const std::string&, const Expression&) const;
-  virtual Expression partial_evaluate(const std::string& name) const;
-  virtual Expression partial_evaluate_function(const std::string& name, const Expression&) const;
+  virtual bool can_evaluate(const std::string&amp; name) const;
+  virtual double evaluate(const std::string&amp; name) const;
+  virtual Expression partial_evaluate(const std::string&amp; name) const;
+  virtual bool can_evaluate_function(const std::string&amp; name, const Expression&amp; arg) const;
+  virtual double evaluate_function(const std::string&amp; name, const Expression&amp; arg) const;
+  virtual Expression partial_evaluate_function(const std::string&amp; name, const Expression&amp; arg) const;
   virtual Direction direction() const;
 };
 
@@ -36,42 +36,137 @@ public:
 
 class Expression : public detail::Evaluatable {
 public:
-  typedef std::vector<Term>::const_iterator term_iterator;
   Expression() {}
   Expression(const std::string&amp;);
   Expression(std::istream&amp;);
-  Expression(double val) {}
+  Expression(double val);
+  const Expression&amp; operator +=(const Expression&amp; e);
+  operator std::string () const;
   operator bool() const;
   bool can_evaluate(const Evaluator&amp; p=Evaluator()) const;
   void partial_evaluate(const Evaluator&amp; p=Evaluator());
   double value(const Evaluator&amp; p=Evaluator()) const;
   void flatten();
-  const Expression&amp; operator +=(const Expression&amp; e);
-  inline operator std::string () const;
   void simplify();
 };
 
-extern Parameters evaluate(const Parameters& in);
+std::ostream&amp; operator<<(std::ostream&amp;, const Expression&amp;);
+std::istream&amp; operator>>(std::istream&amp;, Expression&amp;);
 
-inline bool can_evaluate(const StringValue& v, const Evaluator& eval= Evaluator())
-inline double evaluate(const StringValue& v, const Evaluator& p = Evaluator())
-inline bool can_evaluate(const StringValue& v, const Parameters& p)
-inline double evaluate(const StringValue& v, const Parameters& p)
+bool operator==(const std::string&amp;, const alps::Expression&amp;);
+bool operator==(const alps::Expression&amp;, const std::string&amp;);
+bool operator==(const alps::Expression&amp;, const alps::Expression&amp;);
 
-inline std::ostream& operator<<(std::ostream& os, const Expression& e)
-inline std::istream& operator>>(std::istream& is, Expression& e)
+bool can_evaluate(const StringValue&amp; v, const Evaluator&amp; eval= Evaluator());
+double evaluate(const StringValue&amp; v, const Evaluator&amp; p = Evaluator());
+bool can_evaluate(const StringValue&amp; v, const Parameters&amp; p);
+double evaluate(const StringValue&amp; v, const Parameters&amp; p);
 
-inline bool operator==(const std::string& s, const alps::Expression& e)
-inline bool operator==(const alps::Expression& e, const std::string& s)
-inline bool operator==(const alps::Expression& e1, const alps::Expression& e2)
-
+Parameters evaluate(const Parameters&amp; in);
 }
 </pre></blockquote>
 
 
 <h3>The <tt>Evaluator</tt> class</h3>
+The <tt>Evaluator</tt> class is used to simplify and evaluate symbolic expressions. It is used to specify how symbols and functions are evalauted
 <blockquote><pre>
+enum Direction { left_to_right, right_to_left};
+virtual Direction direction() const;
 </pre></blockquote>
+specifies whether an expression should be evaluated from left to right (the default) or right to left (used when symbols can be operators acting on the expression to the right of them).
+<blockquote><pre>
+virtual bool can_evaluate(const std::string&amp; name) const;
+</pre></blockquote>
+returns true if the symbol passed as argument can be evaluated to a numerical value. The default implementation evaluates the symbols <tt>PI</tt>, <tt>Pi</tt> and <tt>pi</tt>.
+<blockquote><pre>
+virtual double evaluate(const std::string&amp; name) const;
+</pre></blockquote>
+returns the numerical value of the symbol passed as argument if <tt> can_evaluate(name)</tt> is true, and throws an exception otherwise. The default implementation evaluates the symbols <tt>PI</tt>, <tt>Pi</tt> and <tt>pi</tt>.
+<blockquote><pre>
+virtual Expression partial_evaluate(const std::string&amp; name) const;
+</pre></blockquote>
+returns an expression for the value of the symbol <tt>name</tt>, evaluated as far as possible. The default implementation evaluates the symbols <tt>PI</tt>, <tt>Pi</tt> and <tt>pi</tt> to numerical values and leaves all other symbols untouched.
+<blockquote><pre>
+virtual bool can_evaluate_function(const std::string&amp; name, const Expression&amp; arg) const;
+virtual double evaluate_function(const std::string&amp; name, const Expression&amp; arg) const;
+virtual Expression partial_evaluate_function(const std::string&amp; name, const Expression&amp; arg) const;
+</pre></blockquote>
+are similar to the three previous functions, but apply to functions <tt>name(arg)</tt>. The default implementation evaluates the argument as far as possible. In addition, if the function is <tt>sin</tt>, <tt>cos</tt>, <tt>tan</tt>, <tt>log</tt>, <tt>exp</tt> or <tt>sqrt</tt> and <tt>can_evaluate(arg)</tt> is true, then the function can be evaluated to a number.
+<h3>The <tt>ParameterEvaluator</tt> class</h3>
+is derived from <tt>Evaluator</tt> and uses a <tt>Parameters</tt> argument given to the constructor to evaluate symbols.
+
+<h3>The <tt>Expression</tt> class</h3>
+can store a symbolic algebraic expression and perform manipulations on it.
+<h4>Member functions</h4>
+<blockquote><pre>
+Expression() {}
+</pre></blockquote>
+creates an empty expression (value 0).
+<blockquote><pre>
+Expression(const std::string&amp;);
+Expression(std::istream&amp;);
+Expression(double val);
+</pre></blockquote>
+create an expression from the argument passed.
+<blockquote><pre>
+const Expression&amp; operator +=(const Expression&amp; e);
+</pre></blockquote>
+adds an expression.
+<blockquote><pre>
+operator std::string () const;
+</pre></blockquote>
+returns a text representation of the expressions.
+<blockquote><pre>
+operator bool() const;
+</pre></blockquote>
+returns <tt>true</tt> if the expression can be non-zero and <tt>false</tt> if it can be detected that the expression is always zero.
+<blockquote><pre>
+bool can_evaluate(const Evaluator&amp; p=Evaluator()) const;
+</pre></blockquote>
+returns <tt>true</tt> if the expre4ssion can be evaluated to a floating point number.
+<blockquote><pre>
+void partial_evaluate(const Evaluator&amp; p=Evaluator());
+</pre></blockquote>
+evaluates the expression as far as possible, using the optional <tt>Evaluator</tt> object to evaluate functions and symbols.
+<blockquote><pre>
+double value(const Evaluator&amp; p=Evaluator()) const;
+</pre></blockquote>
+returns the numerical value of the expression if <tt>can_evaluate()</tt> is <tt>true</tt> and throws a <tt>std::runtime_error</tt> otherwise.
+<blockquote><pre>
+void flatten();
+</pre></blockquote>
+multiplies out all blocks of parentheses in the expression. E.g. <tt>(a+b)*(1+d)</tt> is converted to <tt>a+b+a*d+b*d</tt>.
+<blockquote><pre>
+void simplify();
+</pre></blockquote>
+simplifies the expression by removing all unneeded parentheses.
+<h4>Operators</h4>
+<blockquote><pre>
+std::ostream&amp; operator<<(std::ostream&amp;, const Expression&amp;);
+std::istream&amp; operator>>(std::istream&amp;, Expression&amp;);
+</pre></blockquote>
+write and read an expression in textual form.
+<blockquote><pre>
+bool operator==(const std::string&amp;, const alps::Expression&amp;);
+bool operator==(const alps::Expression&amp;, const std::string&amp;);
+bool operator==(const alps::Expression&amp;, const alps::Expression&amp;);
+</pre></blockquote>
+compare two expressions.
+<H3>Functions to evaluate parameters</H3>
+<blockquote><pre>
+bool can_evaluate(const StringValue&amp; v, const Evaluator&amp; eval= Evaluator());
+bool can_evaluate(const StringValue&amp; v, const Parameters&amp; p);
+</pre></blockquote>
+test whether a parameter value given as a <tt>StringValue</tt> object can be evaluated, with optionally given an <tt>Evaluator</tt> object or a set of <tt>Parameters</tt>.
+<blockquote><pre>
+double evaluate(const StringValue&amp; v, const Evaluator&amp; p = Evaluator());
+double evaluate(const StringValue&amp; v, const Parameters&amp; p);
+</pre></blockquote>
+evaluate a parameter value given as a <tt>StringValue</tt>, with optionally given an <tt>Evaluator</tt> object or a set of <tt>Parameters</tt>. A <tt>std::runtime_error</tt> is thrown if the corresponding <tt>can_evaluate</tt> functions return false.
+<blockquote><pre>
+Parameters evaluate(const Parameters&amp; in);
+</pre></blockquote>
+evaluates all parameters given as argument as far as possible.
 <HR>
 <ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>

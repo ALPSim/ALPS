@@ -1,13 +1,13 @@
 <html>
 <head>
-   <title>ALPS Project: lattice library graph.h</title>
+   <title>ALPS Project: lattice/graph.h</title>
 </head>
 <body>
 
 <h1>
 ALPS Project: lattice library</h1>
 
-<h2>Header file: graph.h</h2>
+<h2>Header file: lattice/graph.h</h2>
 
 defines functions for graph I/O, inquiry about graph properties,
 and a function to copy a graph. The functions work on all graphs
@@ -16,7 +16,7 @@ modelling the concept of
 
 <h3>Synopsis</h3>
 <blockquote><pre>
-namespace lattice {
+namespace alps {
 
 template &lt;class GRAPH>
 void write_graph_xml(std::ostream&amp; out, const GRAPH&amp; g, const std::string&amp; n="")
@@ -40,6 +40,30 @@ int32_t maximum_edge_type(const GRAPH&amp; g)
 
 template &lt;class G>
 int32_t maximum_vertex_type(const GRAPH&amp; g)
+
+template &lt;class G, class MAP, class ORIGINALMAP>
+void disorder_vertices(G& g, MAP& type, ORIGINALMAP& original_type);
+
+template &lt;class G, class MAP>
+void disorder_vertices(G& g, MAP& type);
+
+template &lt;class G, class MAP, class ORIGINALMAP>
+void disorder_edges(G& g, MAP& type, ORIGINALMAP& original_type);
+
+template &lt;class G, class MAP>
+void disorder_edges(G& g, MAP& type);
+
+template &lt;class G, class MAP, class ORIGINALMAP>
+void disorder_bonds(G& g, MAP& type, ORIGINALMAP& original_type);
+
+template &lt;class G, class MAP>
+void disorder_bonds(G& g, MAP& type);
+
+template &lt;class G, class MAP, class ORIGINALMAP>
+void disorder_sites(G& g, MAP& type, ORIGINALMAP& original_type);
+
+template &lt;class G, class MAP>
+void disorder_sites(G& g, MAP& t);
 
 }
 </pre></blockquote>
@@ -96,8 +120,38 @@ int32_t maximum_vertex_type(const GRAPH&amp; g)
 </pre></blockquote>
 finds the largest value of the <tt>vertex_type_t</tt> property in
 a <a href="graphconcepts.html#ReflectablePropertyGraph">ReflectablePropertyGraph</a>.
+<blockquote><pre>
+template &lt;class G, class MAP, class ORIGINALMAP>
+void disorder_vertices(G& g, MAP& type, ORIGINALMAP& original_type);
+
+template &lt;class G, class MAP>
+void disorder_vertices(G& g, MAP& type);
+</pre></blockquote>
+These functions take a vertex property map specified by the first argument and assign a unique integer identifier to each vertex, effectively "disordering" the vertices and obtaining a disordered lattice where each vertex is distinct. The original contents of the property map is optionally kept in the property map specified as third argument.
+<blockquote><pre>
+template &lt;class G, class MAP, class ORIGINALMAP>
+void disorder_sites(G& g, MAP& type, ORIGINALMAP& original_type);
+
+template &lt;class G, class MAP>
+void disorder_sites(G& g, MAP& t);
+</pre></blockquote>
+are the same as the <tt>disorder_vertices</tt> functions.
+<blockquote><pre>
+template &lt;class G, class MAP, class ORIGINALMAP>
+void disorder_edges(G& g, MAP& type, ORIGINALMAP& original_type);
+
+template &lt;class G, class MAP>
+void disorder_edges(G& g, MAP& type);
+
+template &lt;class G, class MAP, class ORIGINALMAP>
+void disorder_bonds(G& g, MAP& type, ORIGINALMAP& original_type);
+
+template &lt;class G, class MAP>
+void disorder_bonds(G& g, MAP& type);
+</pre></blockquote>
+are similar to the <tt>disorder_vertices</tt> functions but act on edge properties and edges instead of vertex properties and vertices.
 <HR>
-<ADDRESS>(c) 2000-2002 by 
+<ADDRESS>copyright (c) 2000-2003 by 
 <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

@@ -9,21 +9,16 @@ ALPS Project: scheduler library</h1>
 
 The scheduler library contains schedulers for parallel Monte Carlo simulations.
 
-<h2>Download, Configuring, Building and Installing</h2>
-
-are discussed <a href="../setup.html">here</a>.
-
-<P> The library will reside in the file <tt>libscheduler.a</tt> in the path specifed in the configuration step.
-
 <H2>Documentation</H2>
 <H3>The header files</h3>
 <ul>
-<li><A HREF="signal.html"><B>signal.hpp</B></A> a signal handler class</li>
-<li><B><A HREF="scheduler.html">scheduler.h</A></B> contains the factory for user objects and the function to start a set of simulations.</li>
-<li><B><A HREF="montecarlo.html"> montecarlo.h</A></B> contains the classes for Monte Carlo simulations.</li>
+<li><B>scheduler.h</B> includes all headers of the scheduler library</li>
+<li><A HREF="signal.html"><B>scheduler/signal.hpp</B></A> a signal handler class</li>
+<li><B><A HREF="scheduler.html">scheduler/scheduler.h</A></B> contains the factory for user objects and the function to start a set of simulations.</li>
+<li><B><A HREF="montecarlo.html">scheduler/montecarlo.h</A></B> contains the classes for Monte Carlo simulations.</li>
 </ul>
 <h3>Implementing a simulation</h3>
-Implementing the user class for Monte Carlo simulations is discussed <a href="implementing.html">here</A> using the <A HREF="../../example/scheduler/">Ising model example</A> provided with the library. The directory contains a second example, using the <A href="../lattice/">Lattice</A> library, which is not discussed in detail here.
+Implementing the user class for Monte Carlo simulations is discussed <a href="implementing.html">here</A> using the <A HREF="../../example/scheduler/">Ising model example</A> provided with the library. The directory contains a second example, using the <A href="../lattice/index.html">Lattice</A> library, which is not discussed in detail here.
 <h3>Running a simulation</h3>
 <a href="running.html">Here</A> we discuss how to run Monte Carlo simulations with the library.
 
@@ -37,7 +32,7 @@ The usage of both tools is explained with the <a href="running.html">example pro
 
 To build the examples go to the <tt>example/scheduler</tt> subdirectory of ALPS directory and type
 <blockquote><pre>
-make examples
+make all
 </blockquote></pre>
 The source code and  of the examples is well documented and self-explanatory.
 

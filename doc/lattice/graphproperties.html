@@ -1,13 +1,13 @@
 <html>
 <head>
-   <title>ALPS Project: lattice library graphproperties.h</title>
+   <title>ALPS Project: lattice/graphproperties.h</title>
 </head>
 <body>
 
 <h1>
 ALPS Project: lattice library</h1>
 
-<h2>Header file: graphproperties.h</h2>
+<h2>Header file: lattice/graphproperties.h</h2>
 
 includes property types for the graphs used in the lattice library,
 as well as undocumented internal traits classes to implement the
@@ -16,24 +16,30 @@ concept.
 
 <h3>Synopsis</h3>
 <blockquote><pre>
-namespace lattice {
+namespace alps {
 
   struct vertex_type_t { typedef boost::vertex_property_tag kind; };
+  struct original_vertex_type_t { typedef boost::vertex_property_tag kind; };
   struct coordinate_t { typedef boost::vertex_property_tag kind; };
   struct parity_t { typedef boost::vertex_property_tag kind; };
   using boost::vertex_index_t;
+  typedef vertex_type_t site_type_t;
+  typedef original_vertex_type_t original_site_type_t;
 
   struct edge_type_t { typedef boost::edge_property_tag kind; };
+  struct original_edge_type_t { typedef boost::edge_property_tag kind; };
   struct boundary_crossing_t { typedef boost::edge_property_tag kind; };
   struct source_offset_t { typedef boost::edge_property_tag kind; };
   struct target_offset_t { typedef boost::edge_property_tag kind; };
   using boost::edge_index_t;
+  typedef edge_type_t bond_type_t;
+  typedef original_edge_type_t original_bond_type_t;
 
   struct graph_name_t { typedef boost::graph_property_tag kind; };
   struct dimension_t { typedef boost::graph_property_tag kind; };
 
   typedef boost::adjacency_list&lt;boost::vecS,boost::vecS,boost::undirectedS,
-    /* ...*/ > coordinate_graph_type;
+    /* ...*/,boost::vecS> coordinate_graph_type;
 
 }
 
@@ -48,6 +54,8 @@ implementing the following properties as internal properties. These are:
 <td>The type (color) of the vertex</td></tr>
 <tr><td><tt>coordinate_t</tt></td><td><tt>std::vector&lt;double></tt></td>
 <td>The coordinate of the vertex</td></tr>
+<tr><td><tt>parity_t</tt></td><td><tt>int8_t</tt></td>
+<td>The parity of a site (0 or 1) on a bipartite graph</tt></td></tr>
 <tr><td><tt>vertex_index_t</tt></td><td><tt></tt></td>
 <td>The vertex index, predefined for <tt>boost::adjacency_list</tt></td></tr>
 <tr><td><b>Edge property</b></td><td><b>Type</b></td><td><b>Note</b></td></tr>
@@ -103,7 +111,7 @@ const boundary_crossing&amp; invert();
 inverts the direction of all boundary crossings. This is the boundary crossing property for an edge going in the opposite direction.
 
 <HR>
-<ADDRESS>(c) 2000-2003 by 
+<ADDRESS>copyright (c) 2000-2003 by 
 <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

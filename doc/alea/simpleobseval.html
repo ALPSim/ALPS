@@ -1,6 +1,6 @@
 <html>
 <head>
-   <title>ALPS Project: alea library simpleobseval.h</title>
+   <title>ALPS Project: alea/simpleobseval.h</title>
 </head>
 <body>
 
@@ -8,13 +8,13 @@
 ALPS Project: alea library</h1>
 
 <h2>
-Header file <b>simpleobseval.h</b></h2>
+Header file <b>alea/simpleobseval.h</b></h2>
 This header contains the class for evaluation of and arithmetic operations
 on observables.
 <h3>Synopsis</h3>
 <blockquote>
 <pre>
-namespace alea {
+namespace alps {
 
 template &lt;class T>
 class SimpleObservableEvaluator : public AbstractSimpleObservable&lt;T>
@@ -30,9 +30,9 @@ class SimpleObservableEvaluator : public AbstractSimpleObservable&lt;T>
   SimpleObservableEvaluator(std::string="");
   SimpleObservableEvaluator(const Observable&,  std::string n="");
 
-  const SimpleObservableEvaluator&lt;T>& operator = (const AbstractSimpleObservable&lt;T>& obs);
+  const SimpleObservableEvaluator&lt;T>&amp; operator = (const AbstractSimpleObservable&lt;T>&amp; obs);
 
-  SimpleObservableEvaluator&lt;T>& operator<< (const AbstractSimpleObservable&lt;T>&  obs) 
+  SimpleObservableEvaluator&lt;T>&amp; operator<< (const AbstractSimpleObservable&lt;T>&amp;  obs) 
 
   template &lt;class S>
   SimpleObservableEvaluator&lt;typename obs_value_slice&lt;T,S>::value_type>
@@ -41,59 +41,59 @@ class SimpleObservableEvaluator : public AbstractSimpleObservable&lt;T>
 
   SimpleObservableEvaluator&lt;T> operator-() const;
 
-  template &lt;class X> const SimpleObservableEvaluator&lt;T>& operator+=(X);
-  template &lt;class X> const SimpleObservableEvaluator&lt;T>& operator-=(X);
-  template &lt;class X> const SimpleObservableEvaluator&lt;T>& operator*=(X);
-  template &lt;class X> const SimpleObservableEvaluator&lt;T>& operator/=(X);
+  template &lt;class X> const SimpleObservableEvaluator&lt;T>&amp; operator+=(X);
+  template &lt;class X> const SimpleObservableEvaluator&lt;T>&amp; operator-=(X);
+  template &lt;class X> const SimpleObservableEvaluator&lt;T>&amp; operator*=(X);
+  template &lt;class X> const SimpleObservableEvaluator&lt;T>&amp; operator/=(X);
 
-  const SimpleObservableEvaluator&lt;T>& operator+=(const SimpleObservableEvaluator&lt;T>&);
-  const SimpleObservableEvaluator&lt;T>& operator-=(const SimpleObservableEvaluator&lt;T>&);
-
-  template &lt;class X>
-  const SimpleObservableEvaluator&lt;T>& operator*=(const SimpleObservableEvaluator&lt;X>&);
+  const SimpleObservableEvaluator&lt;T>&amp; operator+=(const SimpleObservableEvaluator&lt;T>&);
+  const SimpleObservableEvaluator&lt;T>&amp; operator-=(const SimpleObservableEvaluator&lt;T>&);
 
   template &lt;class X>
-  const SimpleObservableEvaluator&lt;T>& operator/=(const SimpleObservableEvaluator&lt;X>&);
+  const SimpleObservableEvaluator&lt;T>&amp; operator*=(const SimpleObservableEvaluator&lt;X>&);
+
+  template &lt;class X>
+  const SimpleObservableEvaluator&lt;T>&amp; operator/=(const SimpleObservableEvaluator&lt;X>&);
 };
 
 template &lt;class T, class Y>
-inline SimpleObservableEvaluator&lt;T> operator+(const SimpleObservableEvaluator&lt;T>& x, const Y& y);
+inline SimpleObservableEvaluator&lt;T> operator+(const SimpleObservableEvaluator&lt;T>&amp; x, const Y&amp; y);
 
 template &lt;class T, class Y>
-inline SimpleObservableEvaluator&lt;T> operator-(const SimpleObservableEvaluator&lt;T>& x, const Y& y);
+inline SimpleObservableEvaluator&lt;T> operator-(const SimpleObservableEvaluator&lt;T>&amp; x, const Y&amp; y);
 
 template &lt;class T, class Y>
-inline SimpleObservableEvaluator&lt;T> operator*(const SimpleObservableEvaluator&lt;T>& x, const Y& y);
+inline SimpleObservableEvaluator&lt;T> operator*(const SimpleObservableEvaluator&lt;T>&amp; x, const Y&amp; y);
 
 template &lt;class T, class Y>
-inline SimpleObservableEvaluator&lt;T> operator/(const SimpleObservableEvaluator&lt;T>& x, const Y& y);
+inline SimpleObservableEvaluator&lt;T> operator/(const SimpleObservableEvaluator&lt;T>&amp; x, const Y&amp; y);
 
 template &lt;class T>
-inline SimpleObservableEvaluator&lt;T> operator+(const T& x, const SimpleObservableEvaluator&lt;T>& y);
+inline SimpleObservableEvaluator&lt;T> operator+(const T&amp; x, const SimpleObservableEvaluator&lt;T>&amp; y);
 
 template &lt;class T>
-inline SimpleObservableEvaluator&lt;T> operator-(const T& x, const SimpleObservableEvaluator&lt;T>& y);
+inline SimpleObservableEvaluator&lt;T> operator-(const T&amp; x, const SimpleObservableEvaluator&lt;T>&amp; y);
 
 template &lt;class T>
-inline SimpleObservableEvaluator&lt;T> operator*(const T& x, const SimpleObservableEvaluator&lt;T>& y);
+inline SimpleObservableEvaluator&lt;T> operator*(const T&amp; x, const SimpleObservableEvaluator&lt;T>&amp; y);
 
 template &lt;class T>
-inline SimpleObservableEvaluator&lt;T> operator/(const T& x, const SimpleObservableEvaluator&lt;T>& y);
+inline SimpleObservableEvaluator&lt;T> operator/(const T&amp; x, const SimpleObservableEvaluator&lt;T>&amp; y);
 
-template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
-exp (const alea::SimpleObservableEvaluator&lt;T>& x);
+template &lt;class T> alps::SimpleObservableEvaluator&lt;T> 
+exp (const alps::SimpleObservableEvaluator&lt;T>&amp; x);
 
-template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
-log (const alea::SimpleObservableEvaluator&lt;T>& x);
+template &lt;class T> alps::SimpleObservableEvaluator&lt;T> 
+log (const alps::SimpleObservableEvaluator&lt;T>&amp; x);
 
-template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
-sqrt (const alea::SimpleObservableEvaluator&lt;T>& x);
+template &lt;class T> alps::SimpleObservableEvaluator&lt;T> 
+sqrt (const alps::SimpleObservableEvaluator&lt;T>&amp; x);
 
-template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
-sin (const alea::SimpleObservableEvaluator&lt;T>& x);
+template &lt;class T> alps::SimpleObservableEvaluator&lt;T> 
+sin (const alps::SimpleObservableEvaluator&lt;T>&amp; x);
 
-template &lt;class T> alea::SimpleObservableEvaluator&lt;T> 
-cos (const alea::SimpleObservableEvaluator&lt;T>& x);
+template &lt;class T> alps::SimpleObservableEvaluator&lt;T> 
+cos (const alps::SimpleObservableEvaluator&lt;T>&amp; x);
 
 
 typedef SimpleObservableEvaluator&lt;double> RealObsevaluator;
@@ -147,12 +147,12 @@ the default constructor with an optional argument to name the observable.
 creates a <tt>SimpleObservableEvaluator</tt> from an <tt>Observable</tt>, 
 optionally renaming it.
 <blockquote><pre>
-const SimpleObservableEvaluator&lt;T>& operator = (const AbstractSimpleObservable&lt;T>& obs);
+const SimpleObservableEvaluator&lt;T>&amp; operator = (const AbstractSimpleObservable&lt;T>&amp; obs);
 </pre></blockquote>
 assigns an observable to the 
 <tt>SimpleObservableEvaluator</tt>.
 <blockquote><pre>
-SimpleObservableEvaluator&lt;T>& operator<< (const AbstractSimpleObservable&lt;T>&  obs) 
+SimpleObservableEvaluator&lt;T>&amp; operator<< (const AbstractSimpleObservable&lt;T>&amp;  obs) 
 </pre></blockquote>
 merges additional observables (e.g. from additional Monte carlo 
 simulations for the same system) to the <tt>SimpleObservableEvaluator</tt>, 
@@ -173,6 +173,6 @@ typedef SimpleObservableEvaluator&lt;std::valarray&lt;double> > RealVectorObseva
 </pre></blockquote>
 are <tt>typdedef</tt>s for the commonly used <tt>SimpleObservableEvaluator</tt>s.
 <HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>

@@ -1,6 +1,6 @@
 <html>
 <head>
-   <title>ALPS Project: osiris library std/vector.h</title>
+   <title>ALPS Project: osiris/std/vector.h</title>
 </head>
 <body>
 
@@ -8,26 +8,26 @@
 ALPS Project: osiris library</h1>
 
 <h2>
-Header file <b>std/vector.h</b></h2>
+Header file <b>osiris/std/vector.h</b></h2>
 This header contains serialization functions for <tt>std::vector</tt> and 
 an optimized version for <tt>std::vector&lt;bool></tt>
 <h3>Synopsis</h3>
 <blockquote>
 <pre>
 template &lt;class T, class Allocator>
-osiris::IDump& operator >> (osiris::IDump& dump, STD::vector&lt;T,Allocator>& x);
+alps::IDump& operator >> (alps::IDump& dump, std::vector&lt;T,Allocator>& x);
 
 template &lt;class T, class Allocator>
-osiris::ODump& operator << (osiris::ODump& dump, const STD:: vector&lt;T,Allocator>& x);
+alps::ODump& operator << (alps::ODump& dump, const std:: vector&lt;T,Allocator>& x);
 
 template &lt;class Allocator>
-osiris::IDump& operator >> (osiris::IDump& dump, STD::vector&lt;bool,Allocator>& x);
+alps::IDump& operator >> (alps::IDump& dump, std::vector&lt;bool,Allocator>& x);
 
 template &lt;class Allocator>
-osiris::ODump& operator << (osiris::ODump& dump, const STD:: vector&lt;bool,Allocator>& x);
+alps::ODump& operator << (alps::ODump& dump, const std:: vector&lt;bool,Allocator>& x);
 </pre></blockquote>
 <HR>
-<ADDRESS>(c) 1994-2002 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

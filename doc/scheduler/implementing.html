@@ -13,17 +13,17 @@ Implementing a Monte Carlo simulation</h2>
 Here we discuss how to implement a Monte Carlo simulation based on the scheduler library. The full source code is provided in the <a href="../../example/scheduler">example</a> directory.
 
 <h3>The classes</h3>
-Two classes need to be provided: a simulation class derived from <a href="montecarlo.html"><tt>MCRun</tt></a> and an object factory derived from  <a href="scheduler.html"><tt>Factory</tt></a>. If only a single simulation object is needed, such as here, the templated single-object Factory <tt>SimpleFactory</tt> can be used.
-<blockquote><pre>class IsingSimulation : public scheduler::MCRun
+Two classes need to be provided: a simulation class derived from <a href="montecarlo.html"><tt>MCRun</tt></a> and an object factory derived from  <a href="scheduler.html"><tt>Factory</tt></a>. If only a single simulation object is needed, such as here, the templated single-object Factory <tt>SimpleMCFactory</tt> can be used.
+<blockquote><pre>class IsingSimulation : public alps::scheduler::MCRun
 {
 public:
-  IsingSimulation(const osiris::ProcessList&amp;,const palm::Parameters&amp;,int);
-  void save(osiris::ODump&amp;) const;
-  void load(osiris::IDump&amp;);
+  IsingSimulation(const alps::ProcessList&amp;,const alps::Parameters&amp;,int);
+  void save(alps::ODump&amp;) const;
+  void load(alps::IDump&amp;);
   void dostep();
   bool is_thermalized() const;
   double work_done() const;
-  bool change_parameter(const std::string&amp; name, const palm::StringValue&amp; value);
+  bool change_parameter(const std::string&amp; name, const alps::StringValue&amp; value);
   
 private:
   uint32_t length;                  // the system size
@@ -34,7 +34,7 @@ private:
   std::vector&lt;int> spins;        // the vector to store the spins
 }; 
 
-typedef scheduler::SimpleFactory&lt;IsingSimulation> IsingFactory;
+typedef alps::scheduler::SimpleMCFactory&lt;IsingSimulation> IsingFactory;
 </pre></blockquote>
 
 
@@ -44,7 +44,7 @@ just starts a scheduler and catches exceptions:
 int main(int argc, char** argv)
 {
   try {
-   return scheduler::start(argc,argv,IsingFactory());
+   return alps::scheduler::start(argc,argv,IsingFactory());
   }
   catch (std::exception&amp; exc) {
     return -1;
@@ -56,7 +56,7 @@ int main(int argc, char** argv)
 <h3>The constructor</h3>
 initializes the data members from the parameters. It then starts from a random configuration and creates two objects to measure energy and magnetization.
 <blockquote><pre>
-IsingSimulation::IsingSimulation(const osiris::ProcessList&amp; w,const palm::Parameters&amp; p,int node)
+IsingSimulation::IsingSimulation(const alps::ProcessList&amp; w,const alps::Parameters&amp; p,int node)
   : scheduler::MCRun(0,w,p,node),
     length(static_cast&lt;uint32_t>(parms["L"])),
     beta(1./static_cast&lt;double>(parms["T"])),
@@ -78,7 +78,7 @@ If the object is just created to evaluate the simulation but not to perform actu
 
 <h3>The member functions</h3>
 <blockquote><pre>
-void IsingSimulation::save(osiris::ODump&amp; dump) const
+void IsingSimulation::save(alps::ODump&amp; dump) const
 {
   dump &lt;&lt; sweeps &lt;&lt; spins;
 }
@@ -86,7 +86,7 @@ void IsingSimulation::save(osiris::ODump&amp; dump) const
 saves the simulation data into a checkpoint.
 
 <blockquote><pre>
-void IsingSimulation::load(osiris::IDump&amp; dump)
+void IsingSimulation::load(alps::IDump&amp; dump)
 {
   dump >> sweeps;
   if(!where.empty()) // skip reading the spins if we are just evaluating
@@ -96,7 +96,7 @@ void IsingSimulation::load(osiris::IDump&amp; dump)
 This loads the simulation data from a checkpoint. If the object is just loaded to evaluate the simulation but not to perform actual simulations, the <tt>where</tt> data member of the simulation, specifying the processes on which a simulation will performed, will be empty. In that case reading the spin configuration can be omitted to save memory.
 
 <blockquote><pre>
-bool IsingSimulation::change_parameter(const std::string&amp; name, const palm::StringValue&amp; value)
+bool IsingSimulation::change_parameter(const std::string&amp; name, const alps::StringValue&amp; value)
 {
   if(name=="SWEEPS") {
     total_sweeps=static_cast&lt;uint32_t>(value);
