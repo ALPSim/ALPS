@@ -1,3 +1,8 @@
+2004-02-25 Synge todo <wistaria@comp-phys.org>
+
+	* [random] fixed BufferedRandomNumberGenerator<>::fill_buffer() in
+	src/alps/random/random.h.
+	
 2004-02-24 Synge todo <wistaria@comp-phys.org>
 
 	* [config] supported precompiled Boost library.
