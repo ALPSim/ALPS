@@ -38,13 +38,8 @@ try {
 
   alps::Parameters parms;
   std::cin >> parms;
-#ifndef ALPS_WITH_NEW_EXPRESSION
   HamiltonianMatrix<alps::Expression,
     compressed_matrix<alps::Expression,row_major> > matrix(parms);
-#else
-  HamiltonianMatrix<alps::Expression<>,
-    compressed_matrix<alps::Expression<>,row_major> > matrix(parms);
-#endif
 
   std::cout << matrix << "\n";
 

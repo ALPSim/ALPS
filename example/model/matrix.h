@@ -47,26 +47,12 @@ struct symbolic_traits {
 template<class T>
 const bool symbolic_traits<T>::is_symbolic;
 
-#ifndef ALPS_WITH_NEW_EXPRESSION
-
 template<>
 struct symbolic_traits<alps::Expression> {
  BOOST_STATIC_CONSTANT(bool, is_symbolic=true);
 };
 
 const bool symbolic_traits<alps::Expression>::is_symbolic;
-
-#else
-
-template<class T>
-struct symbolic_traits<alps::Expression<T> > {
- BOOST_STATIC_CONSTANT(bool, is_symbolic=true);
-};
-
-template<class T>
-const bool symbolic_traits<alps::Expression<T> >::is_symbolic;
-
-#endif // ! ALPS_WITH_NEW_EXPRESSION
 
 template <class T, class M = boost::numeric::ublas::matrix<T> >
 class HamiltonianMatrix : public alps::graph_helper<>
