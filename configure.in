@@ -103,7 +103,6 @@ AC_SUBST(ARXX)
 AR="ar cru"
 ARXX="$bindir/arxx"
 AC_PROG_LN_S
-AC_PROG_EGREP
 
 AC_SUBST(RANLIB)
 test "$ac_cv_alps_compiler" = "sgi32" && RANLIB="/bin/true"
@@ -386,9 +385,6 @@ ac_cv_alps_LDFLAGS="$LDFLAGS"
 AC_SUBST(BASE_LIBS)
 BASE_LIBS="$LIBS"
 ac_cv_alps_LIBS="$LIBS"
-
-ac_cv_alps_CXX="$CXX"
-ac_cv_alps_CXXFLAGS="$CXXFLAGS"
 
 #
 # Generate files

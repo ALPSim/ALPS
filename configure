@@ -308,7 +308,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CURRENT_YEAR COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT CXX ac_ct_CXX CPP CXXCPP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA ALPS_INSTALL AR ARXX LN_S EGREP RANLIB ac_ct_RANLIB BOOST_DIR OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD OBJ_BOOST_THREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS OBJ_BOOST_SIGNALS BOOST_USER_CONFIG_H BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS CURRENT_YEAR COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT CXX ac_ct_CXX CPP CXXCPP INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA ALPS_INSTALL AR ARXX LN_S RANLIB ac_ct_RANLIB BOOST_DIR EGREP OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD OBJ_BOOST_THREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS OBJ_BOOST_SIGNALS BOOST_USER_CONFIG_H BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -3132,8 +3132,8 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
       echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-      { { echo "$as_me:$LINENO: error: compiler flags check failed.  Please set CXXFLAGS and explicitly." >&5
-echo "$as_me: error: compiler flags check failed.  Please set CXXFLAGS and explicitly." >&2;}
+      { { echo "$as_me:$LINENO: error: compiler flags check failed.  Please set CXXFLAGS explicitly." >&5
+echo "$as_me: error: compiler flags check failed.  Please set CXXFLAGS explicitly." >&2;}
    { (exit 1); exit 1; }; }
 
 
@@ -3153,6 +3153,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   ac_cv_compiler_cflags="$CFLAGS"
   ac_cv_compiler_cxx="$CXX"
   ac_cv_compiler_cxxflags="$CXXFLAGS"
+
+  ac_cv_prog_ac_ct_CC="$CC"
+  ac_cv_prog_ac_ct_CXX="$CXX"
 
 ac_cv_alps_compiler="$ac_cv_compiler"
 ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"
@@ -3730,21 +3733,6 @@ else
 echo "${ECHO_T}no, using $LN_S" >&6
 fi
 
-echo "$as_me:$LINENO: checking for egrep" >&5
-echo $ECHO_N "checking for egrep... $ECHO_C" >&6
-if test "${ac_cv_prog_egrep+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  if echo a | (grep -E '(a|b)') >/dev/null 2>&1
-    then ac_cv_prog_egrep='grep -E'
-    else ac_cv_prog_egrep='egrep'
-    fi
-fi
-echo "$as_me:$LINENO: result: $ac_cv_prog_egrep" >&5
-echo "${ECHO_T}$ac_cv_prog_egrep" >&6
- EGREP=$ac_cv_prog_egrep
-
-
 
 
 test "$ac_cv_alps_compiler" = "sgi32" && RANLIB="/bin/true"
@@ -3901,6 +3889,21 @@ ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
+
+
+echo "$as_me:$LINENO: checking for egrep" >&5
+echo $ECHO_N "checking for egrep... $ECHO_C" >&6
+if test "${ac_cv_prog_egrep+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  if echo a | (grep -E '(a|b)') >/dev/null 2>&1
+    then ac_cv_prog_egrep='grep -E'
+    else ac_cv_prog_egrep='egrep'
+    fi
+fi
+echo "$as_me:$LINENO: result: $ac_cv_prog_egrep" >&5
+echo "${ECHO_T}$ac_cv_prog_egrep" >&6
+ EGREP=$ac_cv_prog_egrep
 
 
 echo "$as_me:$LINENO: checking for ANSI C header files" >&5
@@ -8512,9 +8515,6 @@ ac_cv_alps_LDFLAGS="$LDFLAGS"
 BASE_LIBS="$LIBS"
 ac_cv_alps_LIBS="$LIBS"
 
-ac_cv_alps_CXX="$CXX"
-ac_cv_alps_CXXFLAGS="$CXXFLAGS"
-
 #
 # Generate files
 #
@@ -9180,10 +9180,10 @@ s,@ALPS_INSTALL@,$ALPS_INSTALL,;t t
 s,@AR@,$AR,;t t
 s,@ARXX@,$ARXX,;t t
 s,@LN_S@,$LN_S,;t t
-s,@EGREP@,$EGREP,;t t
 s,@RANLIB@,$RANLIB,;t t
 s,@ac_ct_RANLIB@,$ac_ct_RANLIB,;t t
 s,@BOOST_DIR@,$BOOST_DIR,;t t
+s,@EGREP@,$EGREP,;t t
 s,@OBJ_PTHREAD@,$OBJ_PTHREAD,;t t
 s,@LIB_PTHREAD@,$LIB_PTHREAD,;t t
 s,@EXAMPLE_PTHREAD@,$EXAMPLE_PTHREAD,;t t

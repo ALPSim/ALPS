@@ -437,7 +437,7 @@ AC_DEFUN([AC_COMPILER],
       AC_MSG_RESULT(yes),
       [
       AC_MSG_RESULT(no)
-      AC_MSG_ERROR([compiler flags check failed.  Please set CXXFLAGS and explicitly.])
+      AC_MSG_ERROR([compiler flags check failed.  Please set CXXFLAGS explicitly.])
       ]
     )
     AC_LANG_RESTORE
@@ -449,4 +449,7 @@ AC_DEFUN([AC_COMPILER],
   ac_cv_compiler_cflags="$CFLAGS"
   ac_cv_compiler_cxx="$CXX"
   ac_cv_compiler_cxxflags="$CXXFLAGS"
+
+  ac_cv_prog_ac_ct_CC="$CC"
+  ac_cv_prog_ac_ct_CXX="$CXX"
 )

@@ -44,8 +44,6 @@ DATA_CONFIG = config.site
 PKGDATA_CONFIG = include.mk
 PKGDATA = rules.mk rules-lib.mk
 
-EGREP = @EGREP@
-
 include $(top_srcdir)/config/rules.mk
 
 install : install-config-cache
@@ -54,8 +52,8 @@ install-config-cache :
 	  echo "$(mkinstalldirs) $(pkgdatadir)"; \
 	  $(mkinstalldirs) $(pkgdatadir); \
 	fi; \
-	echo "$(EGREP) ac_cv_alps config.cache > $(pkgdatadir)/config.cache"; \
-	$(EGREP) ac_cv_alps config.cache > $(pkgdatadir)/config.cache
+	echo "sed s/ac_cv_env/save_ac_cv_env/ config.cache > $(pkgdatadir)/config.cache"; \
+	sed s/ac_cv_env/save_ac_cv_env/ config.cache > $(pkgdatadir)/config.cache
 uninstall : uninstall-config-cache
 uninstall-config-cache :
 	@echo "rm -f $(pkgdatadir)/config.cache"; \
