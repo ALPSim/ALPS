@@ -1,3 +1,15 @@
+2005-2-08  Matthias Troyer <troyer@comp-phys.org>
+
+	* [expression] Added functions of an arbitrary number of arguments.
+                   Added atan2 and random number generation functions.
+	* [model] Added separate classes and XML descriptions for
+              site operators, bond operators, and sums of these operators
+              Require the use of site indices also for site operators
+    * [model,random] added a global random number generator for the
+                     expression library for implementing the RNG in expressions
+    * [alea] Added labels to vector observables to be used instead of a numerical
+             index
+
 2004-12-09  Synge Todo <wistaria@comp-phys.org>
 
 	* [parser] Added support for processing instructions and stylesheets.
