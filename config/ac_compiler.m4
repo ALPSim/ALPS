@@ -33,9 +33,12 @@ AC_DEFUN([AC_COMPILER],
 
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
-      [set compiler mode (MODE = gnu, kai, intel, intel64, como, hp, dec, sgi32, sgi64, cray, ibm, macos, generic)]),
+      [set compiler mode (MODE = gnu, gnu-3.3, kai, intel, intel64, como, hp, dec, sgi32, sgi64, cray, ibm, macos, macos-3.3, generic)]),
     [
     case "x$withval" in
+      xgnu-3.3 | xGNU-3.3 | xgcc-3.3 | xg++-3.3 )
+        COMPILER="gnu-3.3"
+        ;;
       xgnu* | xGNU* | xgcc* | xg++* )
         COMPILER="gnu"
         ;;
@@ -69,6 +72,9 @@ AC_DEFUN([AC_COMPILER],
       xcray* | xCRAY*)
         COMPILER="cray"
         ;;
+      xmacos-10.3 | xmac-10.3 | xosx-10.3 | xmacos-gcc-3.3 | xmacos-g++-3.3)
+        COMPILER="macos-3.3"
+        ;;
       xmacos* | xmac* | xosx*)
         COMPILER="macos"
         ;;
@@ -90,7 +96,7 @@ AC_DEFUN([AC_COMPILER],
   AC_MSG_RESULT([$COMPILER])
 
   case "$COMPILER" in
-    gnu)
+    gnu | gnu-3.3)
       try_CC="gcc"
       try_CXX="g++"
       ;;
@@ -138,9 +144,13 @@ AC_DEFUN([AC_COMPILER],
       try_CC="xlc"
       try_CXX="xlC"
       ;;
+    macos-3.3)
+      try_CC="gcc-3.3 -framework vecLib"
+      try_CXX="g++-3.3 -framework vecLib"
+      ;;
     macos)
-      try_CC="gcc3"
-      try_CXX="g++3"
+      try_CC="gcc3 -framework vecLib"
+      try_CXX="g++3 -framework vecLib"
       ;;
     generic)
       # nothing to do
@@ -179,6 +189,14 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-sign-compare -g -O0"
       try_CXXFLAGS_OPT="-pthread -w -ftemplate-depth-90 -O3"
       try_CXXFLAGS_DEBUG="-pthread -W -Wall -Wno-sign-compare -ftemplate-depth-90 -g -O0"
+      try_CXXFLAGS_EH="-fexceptions"
+      try_CXXFLAGS_NOEH="-fno-exceptions"
+      ;;
+    gnu-3.3)
+      try_CFLAGS_OPT="-pthread -w -O3"
+      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-sign-compare -g -O0"
+      try_CXXFLAGS_OPT="-fabi-version=0 -pthread -w -ftemplate-depth-90 -O3"
+      try_CXXFLAGS_DEBUG="-fabi-version=0 -pthread -W -Wall -Wno-sign-compare -ftemplate-depth-90 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
@@ -278,15 +296,19 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_EH=""
       try_CXXFLAGS_NOEH=""
       ;;
-    macos)
-      #try_CFLAGS_OPT="-w -pthread -O3"
-      #try_CFLAGS_DEBUG="-pthread -g -O0"
-      #try_CXXFLAGS_OPT="-w -pthread -ftemplate-depth-90 -O3"
-      #try_CXXFLAGS_DEBUG="-pthread -ftemplate-depth-90 -g -O0"
+    macos-3.3)
       try_CFLAGS_OPT="-w -O3"
       try_CFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
-      try_CXXFLAGS_OPT="-w -ftemplate-depth-90 -O3"
-      try_CXXFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
+      try_CXXFLAGS_OPT="-framework vecLib -fabi-version=0 -w -ftemplate-depth-90 -O3"
+      try_CXXFLAGS_DEBUG="-framework vecLib -fabi-version=0 -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
+      try_CXXFLAGS_EH="-fexceptions"
+      try_CXXFLAGS_NOEH="-fno-exceptions"
+      ;;
+    macos)
+      try_CFLAGS_OPT="-w -O3"
+      try_CFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
+      try_CXXFLAGS_OPT="-framework vecLib -w -ftemplate-depth-90 -O3"
+      try_CXXFLAGS_DEBUG="-framework vecLib -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-90 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
