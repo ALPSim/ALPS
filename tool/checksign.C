@@ -41,7 +41,7 @@
 #include <iostream>
 #include <string>
 
-void check_parameters(const std::string& n, int i, const alps::Parameters& p)
+void check_parameters(const std::string& n, int i, alps::Parameters& p)
 {
   alps::ModelLibrary models(p);
   alps::graph_factory<> lattices(p);
