@@ -5516,7 +5516,7 @@ fi;
     echo "$as_me:$LINENO: checking for MPI root directory" >&5
 echo $ECHO_N "checking for MPI root directory... $ECHO_C" >&6
     ll_root = "/usr/lpp/ppe.poe"
-    if test "x$MP_PREFIX" != x then
+    if test "x$MP_PREFIX" != x; then
       ll_root="$MP_PREFIX/ppe.poe"
     fi
     if test -z "$mpi_dir"; then

@@ -34,7 +34,7 @@ AC_DEFUN([AC_MPI],
   if test "$mpi" != no; then
     AC_MSG_CHECKING([for MPI root directory])
     ll_root = "/usr/lpp/ppe.poe"
-    if test "x$MP_PREFIX" != x then
+    if test "x$MP_PREFIX" != x; then
       ll_root="$MP_PREFIX/ppe.poe"
     fi
     if test -z "$mpi_dir"; then
