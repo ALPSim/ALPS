@@ -44,11 +44,11 @@ void IsingSimulation::print_copyright(std::ostream& out)
 
 IsingSimulation::IsingSimulation(const alps::ProcessList& where,const alps::Parameters& p,int node)
   : alps::scheduler::MCRun(where,p,node),
-    length(static_cast<uint32_t>(parms["L"])),
-    beta(1./static_cast<double>(parms["T"])),
+    length(static_cast<uint32_t>(p["L"])),
+    beta(1./static_cast<double>(p["T"])),
     sweeps(0),
-    thermalization_sweeps(static_cast<uint32_t>(parms["THERMALIZATION"])),
-    total_sweeps(static_cast<uint32_t>(parms["SWEEPS"])),
+    thermalization_sweeps(static_cast<uint32_t>(p["THERMALIZATION"])),
+    total_sweeps(static_cast<uint32_t>(p["SWEEPS"])),
     spins(length)
 {
   // initialize random spin configuration
@@ -137,11 +137,11 @@ void IsingSimulation::dostep()
   corr /= double(length);
   ten/=length;
   tmag/=length;
-  measurements.get<alps::RealObservable>("Energy") << ten;
-  measurements.get<alps::RealObservable>("Magnetization") << tmag;
-  measurements.get<alps::RealObservable>("Magnetization^2") << tmag*tmag;
-  measurements.get<alps::RealObservable>("Magnetization^4") << tmag*tmag*tmag*tmag;
+  measurements["Energy"] << ten;
+  measurements["Magnetization"] << tmag;
+  measurements["Magnetization^2"] << tmag*tmag;
+  measurements["Magnetization^4"] << tmag*tmag*tmag*tmag;
 #ifdef ALPS_HAVE_VALARRAY
-  measurements.get<alps::RealVectorObservable>("Correlations") << corr;
+  measurements["Correlations"] << corr;
 #endif
 }

@@ -59,10 +59,10 @@ void IsingSimulation2::print_copyright(std::ostream& out)
 
 IsingSimulation2::IsingSimulation2(const alps::ProcessList& where,const alps::Parameters& p,int node)
   : alps::scheduler::LatticeMCRun<graph_type>(where,p,node),
-    beta(1./static_cast<double>(parms["T"])),
+    beta(1./static_cast<double>(p["T"])),
     sweeps(0),
-    thermalization_sweeps(static_cast<uint32_t>(parms["THERMALIZATION"])),
-    total_sweeps(static_cast<uint32_t>(parms["SWEEPS"]))
+    thermalization_sweeps(static_cast<uint32_t>(p["THERMALIZATION"])),
+    total_sweeps(static_cast<uint32_t>(p["SWEEPS"]))
 {
   spins.resize(num_sites()); // number of vertices = number of lattice sites
   // initialize random spin configuration
