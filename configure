@@ -6036,7 +6036,7 @@ else
 
   if test -n "$ac_cv_boost_incdir"; then
     if test -f "$ac_cv_boost_incdir/boost/compatibility/cpp_c_headers/cstdlib"; then
-      BOOST_CPPFLAGS="-I$ac_cv_boost_incdir/boost/compatibility/cpp_c_headers $CPPFLAGS"
+      BOOST_CPPFLAGS="-I$ac_cv_boost_incdir/boost/compatibility/cpp_c_headers $BOOST_CPPFLAGS"
     fi
     { echo "$as_me:$LINENO: $ac_cv_boost_dir/boost/compatibility/cpp_c_headers was added to include path" >&5
 echo "$as_me: $ac_cv_boost_dir/boost/compatibility/cpp_c_headers was added to include path" >&6;}
