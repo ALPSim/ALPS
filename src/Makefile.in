@@ -1,34 +1,3 @@
-###########################################################################
-# ALPS library
-#
-# src/Makefile.in
-#
-# $Id$
-#
-# Copyright (C) 1994-2004 by Matthias Troyer <troyer@comp-phys.org>,
-#                            Synge Todo <wistaria@comp-phys.org>,
-#
-# This software is part of the ALPS library, published under the 
-# ALPS Library License; you can use, redistribute it and/or modify 
-# it under the terms of the License, either version 1 or (at your option) 
-# any later version.
-#
-# You should have received a copy of the ALPS Library License along with 
-# the ALPS Library; see the file License.txt. If not, the license is also 
-# available from http://alps.comp-phys.org/. 
-#
-#
-# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-# FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-# SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-# FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-# DEALINGS IN THE SOFTWARE.
-#
-###########################################################################
-
-# directories
 srcdir = @srcdir@
 top_srcdir = @top_srcdir@
 builddir = @builddir@
@@ -50,7 +19,10 @@ HEADER_PARSER = alps/xml.h alps/parser/parser.h alps/parser/xmlattributes.h alps
 HEADER_RANDOM = alps/random.h alps/random/pseudo_des.h alps/random/random.h alps/random/rngfactory.h
 HEADER_SCHEDULER = alps/scheduler.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h alps/scheduler/factory.h
 HEADER_BINDINGS = alps/bindings/heev.hpp alps/bindings/lapack.h alps/bindings/lapack_names.h alps/bindings/syev.hpp
-HEADER = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_ALEA) $(HEADER_FIXEDCAP) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_SCHEDULER) $(HEADER_BINDINGS)
+
+HEADER_LIGHT = $(HEADER_BOOST) $(HEADER_ALPS) $(HEADER_FIXEDCAP) $(HEADER_OSIRIS) $(HEADER_PARSER) $(HEADER_RANDOM) $(HEADER_BINDINGS)
+HEADER_FULL = $(HEADER_ALEA) $(HEADER_LATTICE) $(HEADER_MODEL) $(HEADER_SCHEDULER)
+HEADER = $(HEADER_LIGHT) @HEADER_FULL@
 
 OBJ_BOOST_DATE_TIME = boost/greg_month.o boost/greg_weekday.o boost/gregorian_types.o boost/posix_time_types.o
 OBJ_BOOST_FILESYSTEM = boost/exception.o boost/operations_posix_windows.o boost/path_posix_windows.o
@@ -70,7 +42,11 @@ OBJ_MODEL = alps/model/modellibrary.o
 OBJ_RANDOM = alps/random/rngfactory.o
 OBJ_PARSER = alps/parser/parser.o alps/parser/xmlstream.o alps/parser/xmlhandler.o alps/parser/xmlparser.o alps/parser/xslt.o
 OBJ_SCHEDULER = alps/scheduler/abstract_task.o alps/scheduler/remote_task.o alps/scheduler/remote_worker.o alps/scheduler/scheduler.o alps/scheduler/info.o alps/scheduler/single_scheduler.o alps/scheduler/master_scheduler.o alps/scheduler/slave_task.o alps/scheduler/montecarlo.o alps/scheduler/task.o alps/scheduler/mpp_scheduler.o alps/scheduler/worker.o alps/scheduler/signal.o alps/scheduler/options.o alps/scheduler/workertask.o alps/scheduler/factory.o
-OBJ = @OBJ_BOOST@ $(OBJ_ALPS) $(OBJ_ALEA) $(OBJ_LATTICE) $(OBJ_MODEL) $(OBJ_OSIRIS) $(OBJ_PARSER) $(OBJ_RANDOM) $(OBJ_SCHEDULER)
+
+OBJ_LIGHT = @OBJ_BOOST@ $(OBJ_ALPS) $(OBJ_OSIRIS) $(OBJ_PARSER) $(OBJ_RANDOM)
+OBJ_FULL = $(OBJ_ALEA) $(OBJ_LATTICE) $(OBJ_MODEL) $(OBJ_SCHEDULER)
+OBJ = $(OBJ_LIGHT) @OBJ_FULL@
+
 OBJ_SGL = $(OBJ_OSIRIS_SGL)
 OBJ_MPI = $(OBJ_OSIRIS_MPI)
 OBJ_PVM = $(OBJ_OSIRIS_PVM)

@@ -1,15 +1,33 @@
 #!/usr/local/bin/perl
 
 # Script for updating preamble of *.h and *.C
-# by Synge Todo <wistaria@comp-phys.org>
+#
+# Usage: 
+#   update_preamble.pl [-l] [files]
+# Options:
+#   -l : use preamble for light version instead of full version
+
+# written by Synge Todo <wistaria@comp-phys.org>
+# $Id$
 
 $basedir = $0;
-$basedir =~ s/[a-zA-Z\_\.]+$//g;
-$skel = join('', $basedir, "preamble.in");
+$basedir =~ s/[a-zA-Z\_\.]+$//;
+
+if (@ARGV[0] ne '-l') {
+    # ALPS full version
+    $skel = join('', $basedir, "preamble.in");
+} else {
+    # ALPS-light
+    shift @ARGV;
+    $skel = join('', $basedir, "preamble-light.in");
+}
+if (!-f $skel) {
+    die "Couldn't find $skel.";
+}
 
 foreach $file (@ARGV) {
     if (-f $file) {
-	$file_new = "$file.new";
+	$file_new = "$file.$$.tmp";
 
 	# scan
 	$year0 = "";
@@ -19,8 +37,8 @@ foreach $file (@ARGV) {
 	@emails = ();
 	$finish_preamble = 0;
 	$skip = 0;
-	open(ORIG, "< $file");
-	open(NEW, "> $file.new");
+	open(ORIG, "< $file") || die "Couldn't open $file";
+	open(NEW, "> $file_new") || die "Couldn't open $file_new";
 	foreach $line (<ORIG>) {
 	    $line =~ s/\t/        /g;
 	    chomp($line);
@@ -44,10 +62,10 @@ foreach $file (@ARGV) {
 		} else {
 		    $finish_preamble = 1;
 		}
-		if ($finish_preamble == 1) {
 
-		    ## check
+		if ($finish_preamble == 1) {
 		    if ($year0 eq "" || @authors[0] eq "") {
+			## Year and authors not found.  Skip this file.
 			$skip = 1;
 		    } else {
 			if ($year1 eq $year0) { $year1 = ""; }
@@ -105,5 +123,7 @@ foreach $file (@ARGV) {
 	    print "$file does not obey ALPS standard.  Skipped.\n";
 	    unlink $file_new;
 	}
+    } else {
+	print "Couldn't find $file.  Skipped.\n";
     }
 }
