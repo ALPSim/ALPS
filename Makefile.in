@@ -23,7 +23,7 @@ top_srcdir = @top_srcdir@
 builddir = @builddir@
 top_builddir = ./@top_builddir@
 
-DIR = src tool test example
+DIR = src tool test example dist
 
 default all libs programs examples tests install uninstall clean distclean depend : Makefile
 	@if test "$@" != "distclean"; then \
