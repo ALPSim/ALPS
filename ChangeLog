@@ -1,3 +1,7 @@
+2004-03-19 Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.0
+
 2004-03-12 Synge Todo <wistaria@comp-phys.org>
 
 	* [parser] Renamed parser/attributes.h as parser/xmlattributes.h.
