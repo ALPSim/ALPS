@@ -1,6 +1,6 @@
 //
-//  Copyright (c) 2002-2003
-//  Toon Knapen, Kresimir Fresl, Joerg Walter
+//  Copyright (c) 2002,2003,2004
+//  Toon Knapen, Kresimir Fresl, Joerg Walter, Karl Meerbergen
 //
 //  Permission to use, copy, modify, distribute and sell this software
 //  and its documentation for any purpose is hereby granted without fee,
@@ -34,9 +34,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   ////////////////////////////////////////////////////////////////
   // ublas::vector<> etc. 
 
-#ifndef BOOST_NUMERIC_BINDINGS_TRAITS_MATRIX_RAW_HPP
   namespace ublas = boost::numeric::ublas; 
-#endif
 
 #if 0
   // MSVC seems to dislike overloads if there is `generic' template 
@@ -81,7 +79,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename T, typename A>
   BOOST_UBLAS_INLINE
-  typename ublas::vector<T,A>::const_pointer 
+  typename ublas::vector<T,A>::value_type const* 
   vector_storage (const ublas::vector<T,A> &v) {
     return &v.data().begin()[0];
   }
@@ -90,13 +88,13 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   // But how shall we write portable code otherwise?
   template <typename T, typename A>
   BOOST_UBLAS_INLINE
-  typename ublas::vector<T,A>::const_pointer 
+  typename ublas::vector<T,A>::value_type const* 
   vector_storage_const (const ublas::vector<T,A> &v) {
     return &v.data().begin()[0];
   }
   template <typename T, typename A>
   BOOST_UBLAS_INLINE
-  typename ublas::vector<T,A>::pointer 
+  typename ublas::vector<T,A>::value_type* 
   vector_storage (ublas::vector<T,A> &v) {
     return &v.data().begin()[0];
   }
@@ -127,7 +125,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::const_pointer 
+  typename V::value_type const* 
   vector_storage (const ublas::vector_reference<V> &v) {
     return vector_storage (v.expression());
   }
@@ -136,20 +134,20 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   // But how shall we write portable code otherwise?
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::const_pointer 
+  typename V::value_type const* 
   vector_storage_const (const ublas::vector_reference<V> &v) {
     return vector_storage_const (v.expression());
   }
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::pointer vector_storage (ublas::vector_reference<V> &v) {
+  typename V::value_type* vector_storage (ublas::vector_reference<V> &v) {
     return vector_storage (v.expression());
   }
 
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename T, std::size_t N>
   BOOST_UBLAS_INLINE
-  typename ublas::c_vector<T, N>::const_pointer 
+  typename ublas::c_vector<T, N>::value_type const* 
   vector_storage (const ublas::c_vector<T, N> &v) {
     return v.data();
   }
@@ -159,13 +157,13 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   // But how shall we write portable code otherwise?
   template <typename T, std::size_t N>
   BOOST_UBLAS_INLINE
-  typename ublas::c_vector<T, N>::const_pointer 
+  typename ublas::c_vector<T, N>::value_type const* 
   vector_storage_const (const ublas::c_vector<T, N> &v) {
     return v.data();
   }
   template <typename T, std::size_t N>
   BOOST_UBLAS_INLINE
-  typename ublas::c_vector<T, N>::pointer 
+  typename ublas::c_vector<T, N>::value_type* 
   vector_storage (ublas::c_vector<T, N> &v) {
     return v.data();
   }
@@ -173,18 +171,18 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename V>
-  typename V::const_pointer vector_storage (const ublas::vector_slice<V>&);
+  typename V::value_type const* vector_storage (const ublas::vector_slice<V>&);
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::const_pointer vector_storage (const ublas::vector_range<V> &v) {
-    typename V::const_pointer ptr = vector_storage (v.data());
+  typename V::value_type const* vector_storage (const ublas::vector_range<V> &v) {
+    typename V::value_type const* ptr = vector_storage (v.data());
     ptr += v.start() * vector_stride (v.data());
     return ptr;
   }
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::const_pointer vector_storage (const ublas::vector_slice<V> &v) {
-    typename V::const_pointer ptr = vector_storage (v.data());
+  typename V::value_type const* vector_storage (const ublas::vector_slice<V> &v) {
+    typename V::value_type const* ptr = vector_storage (v.data());
     ptr += v.start() * vector_stride (v.data());
     return ptr;
   }
@@ -192,37 +190,37 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   // We need storage_const() mostly due to MSVC 6.0.
   // But how shall we write portable code otherwise?
   template <typename V>
-  typename V::const_pointer 
+  typename V::value_type const* 
   vector_storage_const (const ublas::vector_slice<V>&);
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::const_pointer 
+  typename V::value_type const* 
   vector_storage_const (const ublas::vector_range<V> &v) {
-    typename V::const_pointer ptr = vector_storage_const (v.data());
+    typename V::value_type const* ptr = vector_storage_const (v.data());
     ptr += v.start() * vector_stride (v.data());
     return ptr;
   }
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::const_pointer 
+  typename V::value_type const* 
   vector_storage_const (const ublas::vector_slice<V> &v) {
-    typename V::const_pointer ptr = vector_storage_const (v.data());
+    typename V::value_type const* ptr = vector_storage_const (v.data());
     ptr += v.start() * vector_stride (v.data());
     return ptr;
   }
   template <typename V>
-  typename V::pointer vector_storage (ublas::vector_slice<V>&);
+  typename V::value_type* vector_storage (ublas::vector_slice<V>&);
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::pointer vector_storage (ublas::vector_range<V> &v) {
-    typename V::pointer ptr = vector_storage (v.data());
+  typename V::value_type* vector_storage (ublas::vector_range<V> &v) {
+    typename V::value_type* ptr = vector_storage (v.data());
     ptr += v.start() * vector_stride (v.data());
     return ptr;
   }
   template <typename V>
   BOOST_UBLAS_INLINE
-  typename V::pointer vector_storage (ublas::vector_slice<V> &v) {
-    typename V::pointer ptr = vector_storage (v.data());
+  typename V::value_type* vector_storage (ublas::vector_slice<V> &v) {
+    typename V::value_type* ptr = vector_storage (v.data());
     ptr += v.start() * vector_stride (v.data());
     return ptr;
   }
@@ -238,18 +236,18 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename T, typename A>
   BOOST_UBLAS_INLINE
-  typename std::vector<T, A>::const_pointer 
+  typename std::vector<T, A>::value_type const* 
   vector_storage (const std::vector<T, A> &v) { return &v.front(); }
 #endif
   // We need storage_const() mostly due to MSVC 6.0.
   // But how shall we write portable code otherwise?
   template <typename T, typename A>
   BOOST_UBLAS_INLINE
-  typename std::vector<T, A>::const_pointer 
+  typename std::vector<T, A>::value_type const* 
   vector_storage_const (const std::vector<T, A> &v) { return &v.front(); }
   template <typename T, typename A>
   BOOST_UBLAS_INLINE
-  typename std::vector<T, A>::pointer vector_storage (std::vector<T, A> &v) {
+  typename std::vector<T, A>::value_type* vector_storage (std::vector<T, A> &v) {
     return &v.front();
   }
 
