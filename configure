@@ -7505,10 +7505,16 @@ fi
 # setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
 
 BASE_CPPFLAGS="$CPPFLAGS"
+ac_cv_alps_CPPFLAGS="$CPPFLAGS"
 
 BASE_LDFLAGS="$LDFLAGS"
+ac_cv_alps_LDFLAGS="$LDFLAGS"
 
 BASE_LIBS="$LIBS"
+ac_cv_alps_LIBS="$LIBS"
+
+ac_cv_alps_CXX="$CXX"
+ac_cv_alps_CXXFLAGS="$CXXFLAGS"
 
 #
 # Generate files
