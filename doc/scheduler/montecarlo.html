@@ -36,11 +36,11 @@ public:
   virtual bool change_parameter(const std::string&amp; name, const alps::StringValue&amp; value);
   
 protected:
-  typedef boost::mt19937 random_type;
-
+  typedef boost::lagged_fibonacci607 random_type;
   random_type random;
   double random_real(double a=0., double b=1.,);
   int random_int(int a, int b);
+  int random_int(int n);
 
   alps::Parameters parms;
   
@@ -192,7 +192,7 @@ alea::ObservableSet get_measurements() const;
 returns the collected measurements.
 <h4>Type members</h4>
 <blockquote><pre>
-typedef boost::mt19937 random_type;
+typedef boost::lagged_fibonacci607 random_type;
 </pre></blockquote>
 is the type of random number generator used.
 <blockquote><pre>
@@ -204,6 +204,10 @@ provides floating point random numbers in the range <tt>a</tt> to <tt>b</tt>, in
 int random_int(int a, int b);
 </pre></blockquote>
 provides integer random numbers in the range <tt>a</tt> to <tt>b</tt>, inclusive the limiting values <tt>a</tt> and <tt>b</tt>.
+<blockquote><pre>
+int random_int(int n);
+</pre></blockquote>
+provides integer random numbers in the range <tt>0</tt> to <tt>n-1</tt>, inclusive the limiting values <tt>0</tt> and <tt>n-1</tt>.
 <h4>Data members</h4>
 <blockquote><pre>
 random_type random;
