@@ -680,15 +680,17 @@ dnl Experimental Features
 dnl
 
 AC_ARG_ENABLE(new-expression,
-  AC_HELP_STRING([--enable-new-expression],
-    [use new Expression classsetup Boost configuration header file]),
+  AC_HELP_STRING([--disable-new-expression],
+    [use old Expression class]),
   [
-  if test "x$enableval" != "xno"; then
-    ac_cv_alps_with_new_expression=yes
-    AC_DEFINE(ALPS_WITH_NEW_EXPRESSION)
+  if test "x$enableval" = xno; then
+    ac_cv_alps_with_new_expression=no
   fi
   ]
 )
+if test "$ac_cv_alps_with_new_expression" != no; then
+  AC_DEFINE(ALPS_WITH_NEW_EXPRESSION)
+fi
 
 dnl
 dnl Generate files

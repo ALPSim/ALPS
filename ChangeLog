@@ -1,3 +1,8 @@
+2004-07-22  Synge Todo  <wistaria@comp-phys.org>
+
+	* [parameter] Changed the default Expression class to the new one.
+	Use --disable-new-expression option to use the old Expression class.
+
 2004-07-18  Matthias Troyer <troyer@comp-phys.org>
 
 	* Release 1.1

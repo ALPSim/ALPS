@@ -1039,8 +1039,8 @@ Optional Features:
                           optimize for fast installation [default=yes]
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-boost-config   setup Boost configuration header file
-  --enable-new-expression use new Expression classsetup Boost configuration
-                          header file
+  --disable-new-expression
+                          use old Expression class
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
@@ -25447,16 +25447,18 @@ ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_
 if test "${enable_new_expression+set}" = set; then
   enableval="$enable_new_expression"
 
-  if test "x$enableval" != "xno"; then
-    ac_cv_alps_with_new_expression=yes
-    cat >>confdefs.h <<\_ACEOF
-#define ALPS_WITH_NEW_EXPRESSION 1
-_ACEOF
-
+  if test "x$enableval" = xno; then
+    ac_cv_alps_with_new_expression=no
   fi
 
 
 fi;
+if test "$ac_cv_alps_with_new_expression" != no; then
+  cat >>confdefs.h <<\_ACEOF
+#define ALPS_WITH_NEW_EXPRESSION 1
+_ACEOF
+
+fi
 
 
           ac_config_headers="$ac_config_headers src/alps/config.h"
