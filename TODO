@@ -1,3 +1,8 @@
 * tutorial for lattice and alea library
+
 * Documentation for disorder_sites, ...
+
 * alea/observableset.C does not compile with --with-hdf5
+
+* test/alea/simpleobseval.C fails
+  (boost::random implementation change ?)
