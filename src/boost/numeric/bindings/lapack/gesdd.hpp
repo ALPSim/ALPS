@@ -163,19 +163,23 @@ namespace boost { namespace numeric { namespace bindings {
           minw = maxmn < m7 ? m7 : maxmn;
           minw += m3; 
         }
-        if (jobz == 'O') {
+        else if (jobz == 'O') {
           // LWORK >= 3*min(M,N)*min(M,N) 
           //          + max(max(M,N), 5*min(M,N)*min(M,N)+4*min(M,N))
           int m5 = 5 * minmn * minmn + m4; 
           minw = maxmn < m5 ? m5 : maxmn;
           minw += m3 * minmn; 
         }
-        if (jobz == 'S' || jobz == 'A') {
+        else if (jobz == 'S' || jobz == 'A') {
           // LWORK >= 3*min(M,N)*min(M,N) 
           //          + max(max(M,N), 4*min(M,N)*min(M,N)+4*min(M,N)).
           int m44 = m4 * minmn + m4; 
           minw = maxmn < m44 ? m44 : maxmn;
           minw += m3 * minmn; 
+        }
+        else {
+          std::cerr << "Invalid option passed to gesdd" << std::endl ;  
+          return 0 ;
         }
         return minw; 
       }
@@ -555,7 +559,9 @@ namespace boost { namespace numeric { namespace bindings {
 
       int const m = traits::matrix_size1 (a);
       int const n = traits::matrix_size2 (a);
+#ifndef NDEBUG
       int const minmn = m < n ? m : n; 
+#endif // NDEBUG
 
       assert (minmn == traits::vector_size (s)); 
       assert ((jobz == 'N')

@@ -1,6 +1,10 @@
 2004-08-20  Synge Todo  <wistaria@comp-phys.org>
 
-	* [bindings] Removed alps/bindings/gels.hpp
+	* [alps/bindings] Removed alps/bindings/gels.hpp
+
+	* [boost/bindings] Added a script for importing bindings headers
+	(config/import-bindings.hpp).  Updated to the latest CVS snapshot
+	(tag = BINDINGS_20040820).
 	
 2004-08-18  Matthias Troyer <troyer@comp-phys.org>
 

@@ -288,6 +288,26 @@ extern "C" {
                      const int * ldvs, dcomplex_t* work, const int * lwork, double* rwork,
                      bool* bwork, int* info );
 
+
+  void LAPACK_SGEEV( const char* jobvl, const char* jobvr, const int* n, float* a,
+                    const int* lda, float* wr, float* wi, float* vl, const int* ldvl,
+                    float* vr, const int* ldvr, float* work, const int* lwork, int* info );
+
+  void LAPACK_DGEEV( const char* jobvl, const char* jobvr, const int* n, double* a,
+                    const int* lda, double* wr, double* wi, double* vl, const int* ldvl,
+                    double* vr, const int* ldvr, double* work, const int* lwork, int* info );
+
+  void LAPACK_CGEEV( const char* jobvl, const char* jobvr, const int* n, fcomplex_t* a,
+                    const int* lda, fcomplex_t* w, fcomplex_t* vl, const int* ldvl,
+                    fcomplex_t* vr, const int* ldvr, fcomplex_t* work, const int* lwork,
+                    float* rwork, int* info );
+
+  void LAPACK_ZGEEV( const char* jobvl, const char* jobvr, const int* n, dcomplex_t* a,
+                    const int* lda, dcomplex_t* w, dcomplex_t* vl, const int* ldvl,
+                    dcomplex_t* vr, const int* ldvr, dcomplex_t* work, const int* lwork,
+                    double* rwork, int* info );
+
+
   void LAPACK_SSYEV( const char* jobz, const char* uplo, const int *n,
                      float* a, const int * lda, float* w,
                      float* work, const int * lwork, int* info );
