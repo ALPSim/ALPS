@@ -1,4 +1,4 @@
-#! /bin/bash -f
+#! /bin/sh
 
 # check correct usage
 if test $# -lt 2;

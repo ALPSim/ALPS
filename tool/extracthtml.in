@@ -1,4 +1,4 @@
-#! /bin/bash -f
+#! /bin/sh
 
 # check correct usage
 if test $# -lt 2;
@@ -22,6 +22,6 @@ else
 fi
 rm /tmp/archive2plot$$.xsl
 
-# generate text output from previously generated xml-plot
+# generate html output from previously generated xml-plot
 @bindir@/xslttransform /tmp/plot$$ @libdir@/xml/plot2html.xsl 
 rm /tmp/plot$$
