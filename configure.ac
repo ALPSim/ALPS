@@ -356,9 +356,9 @@ if test "$ac_cv_use_precompiled_boost" = no; then :; else
     LIBS="$BOOST_LIBS $ac_save_LIBS"
   else
     if test -z "$boost_toolset"; then
-      BOOST_LIBS="-lboost_date_time -lboost_filesystem -lboost_regex"
+      BOOST_LIBS="-lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization"
     else
-      BOOST_LIBS="-lboost_date_time-$boost_toolset -lboost_filesystem-$boost_toolset -lboost_regex-$boost_toolset"
+      BOOST_LIBS="-lboost_date_time-$boost_toolset -lboost_filesystem-$boost_toolset -lboost_program_options-$boost_toolset -lboost_regex-$boost_toolset -lboost_serialization-$boost_toolset"
     fi
     LIBS="$BOOST_LIBS $ac_save_LIBS"
   fi
