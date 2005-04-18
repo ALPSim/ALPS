@@ -317,7 +317,7 @@ installed as <t>PREFIX/share/alps/include.mk<t>, you can write a
 simple makefile for your application, e.g.</t></t>
 <blockquote>
   <pre>
-include $HOME/ALPS/share/alps/include.mk
+include $(HOME)/ALPS/share/alps/include.mk
 myprog : myprog.C
         $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)
 myprog_mpi : myprog.C
