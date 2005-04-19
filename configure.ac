@@ -567,6 +567,12 @@ if test "$ac_cv_have_pvm" = yes; then
 fi
 AM_CONDITIONAL(HAVE_PVM, test "$ac_cv_have_pvm" = yes)
 
+dnl
+dnl check for LAPACK
+dnl
+
+AC_LAPACK
+
 #
 # check for HDF5
 #
@@ -670,17 +676,17 @@ AC_SUBST(BASE_LIBS)
 BASE_LIBS="$LIBS"
 ac_cv_base_libs="$LIBS"
 
-ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_xml_cppflags $ac_cv_hdf5_cppflags -I$ac_cv_alps_includedir $ac_cv_boost_cppflags"
-ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_xml_ldflags $ac_cv_hdf5_ldflags -L$ac_cv_alps_libdir $ac_cv_boost_ldflags"
-ac_cv_alps_libs="-lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
+ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_xml_cppflags $ac_cv_lapack_cppflags $ac_cv_hdf5_cppflags -I$ac_cv_alps_includedir $ac_cv_boost_cppflags"
+ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_xml_ldflags $ac_cv_lapack_ldflags $ac_cv_hdf5_ldflags -L$ac_cv_alps_libdir $ac_cv_boost_ldflags"
+ac_cv_alps_libs="-lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 ac_cv_alps_cppflags_mpi="$ac_cv_alps_cppflags $ac_cv_mpi_cppflags"
 ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
-ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
+ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 ac_cv_alps_cppflags_pvm="$ac_cv_alps_cppflags $ac_cv_pvm_cppflags"
 ac_cv_alps_ldflags_pvm="$ac_cv_alps_ldflags $ac_cv_pvm_ldflags"
-ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_xml_libs $ac_cv_base_libs"
+ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 dnl
 dnl Experimental Features
@@ -738,16 +744,17 @@ if test "$ac_cv_alps_type" = "full"; then
 else
   echo "  ALPS version      $PACKAGE_VERSION (Light)"
 fi
-echo "  compiler type     $ac_cv_alps_compiler"
-echo "  exceptions        $ac_cv_alps_compiler_exceptions"
-echo "  optimization      $ac_cv_alps_compiler_optimization"
-echo "  MPI support       $ac_cv_alps_have_mpi"
-echo "  PVM support       $ac_cv_alps_have_pvm"
-echo "  pthread support   $ac_cv_have_pthread"
+echo "  compiler type       $ac_cv_alps_compiler"
+echo "  exceptions          $ac_cv_alps_compiler_exceptions"
+echo "  optimization        $ac_cv_alps_compiler_optimization"
+echo "  MPI support         $ac_cv_alps_have_mpi"
+echo "  PVM support         $ac_cv_alps_have_pvm"
+echo "  BLAS/LAPACK support $ac_cv_have_lapack"
+echo "  pthread support     $ac_cv_have_pthread"
 if test "$ac_cv_alps_type" = "full"; then
-  echo "  HDF5 support      $ac_cv_have_hdf5"
+  echo "  HDF5 support        $ac_cv_have_hdf5"
 fi
-echo "  XML parser        $ac_cv_xml_parser"
+echo "  XML parser          $ac_cv_xml_parser"
 
 if test "$ac_cv_alps_type" = "light"; then
   echo
