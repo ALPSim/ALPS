@@ -278,10 +278,14 @@
   <PARAMETER name="Gamma" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
+  <!-- comment -->
     -h*Sz(i)-Gamma*Sx(i)
+  <!-- comment -->
   </SITETERM> 
   <BONDTERM type="0" source="i" target="j">
+  <!-- comment -->
     Jz*Sz(i)*Sz(j)+Jxy*exchange_xy(i,j)
+  <!-- comment -->
   </BONDTERM>
   <BONDTERM type="1" source="i" target="j">
     Jz'*Sz(i)*Sz(j)+Jxy'*exchange_xy(i,j)
