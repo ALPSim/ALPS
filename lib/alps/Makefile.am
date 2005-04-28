@@ -141,10 +141,6 @@ src_boost_SERIALIZATION_1_33= \
   $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
@@ -152,6 +148,10 @@ src_boost_SERIALIZATION_1_33= \
   $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
+#  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
+#  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp 
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp \

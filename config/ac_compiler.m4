@@ -322,8 +322,8 @@ AC_DEFUN([AC_COMPILER],
     macos)
       try_CFLAGS_OPT="-w -O3"
       try_CFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
-      try_CXXFLAGS_OPT="-w -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
+      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -w -ftemplate-depth-150 -O3"
+      try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
