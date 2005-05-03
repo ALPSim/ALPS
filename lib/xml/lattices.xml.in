@@ -131,7 +131,7 @@
 </LATTICE>
 
 
-<UNITCELL name="isolated">
+<UNITCELL name="isolated" dimension="1">
   <VERTEX/>
 </UNITCELL>
 
