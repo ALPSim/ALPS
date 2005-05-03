@@ -719,7 +719,7 @@ AC_CONFIG_FILES(doc/Makefile)
 
 if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(test/alea/Makefile)
-  AC_CONFIG_FILES(test/lattice/Makefile test/lattice/parameters)
+  AC_CONFIG_FILES(test/lattice/Makefile test/lattice/parameters  test/lattice/parameters_complex)
   AC_CONFIG_FILES(test/model/Makefile)
   AC_CONFIG_FILES(example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric)
   AC_CONFIG_FILES(lib/xml/Makefile lib/xml/changestylesheet.xsl lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl)
