@@ -16,31 +16,31 @@ Synopsis</h3>
 <blockquote>
 <pre>namespace alps {
 typedef ... type_tag_t;
-template &lt;class T> struct TypeTraits;
+template &lt;class T> struct type_traits;
 
-template &lt;> struct TypeTraits&lt;int8_t>;
-template &lt;> struct TypeTraits&lt;uint8_t>;
-template &lt;> struct TypeTraits&lt;int16_t>;
-template &lt;> struct TypeTraits&lt;uint16_t>;
-template &lt;> struct TypeTraits&lt;int32_t>;
-template &lt;> struct TypeTraits&lt;uint32_t>;
-template &lt;> struct TypeTraits&lt;int64_t>;
-template &lt;> struct TypeTraits&lt;uint64_t>;
-template &lt;> struct TypeTraits&lt;float>;
-template &lt;> struct TypeTraits&lt;double>;
-template &lt;> struct TypeTraits&lt;long double>;
-template &lt;> struct TypeTraits&lt;std::complex&lt;float> >;
-template &lt;> struct TypeTraits&lt;std::complex&lt;double> >;
-template &lt;> struct TypeTraits&lt;std::complex&lt;long double> >;
-template &lt;> struct TypeTraits&lt;bool>;
-template &lt;> struct TypeTraits&lt;std::string>;
+template &lt;> struct type_traits&lt;int8_t>;
+template &lt;> struct type_traits&lt;uint8_t>;
+template &lt;> struct type_traits&lt;int16_t>;
+template &lt;> struct type_traits&lt;uint16_t>;
+template &lt;> struct type_traits&lt;int32_t>;
+template &lt;> struct type_traits&lt;uint32_t>;
+template &lt;> struct type_traits&lt;int64_t>;
+template &lt;> struct type_traits&lt;uint64_t>;
+template &lt;> struct type_traits&lt;float>;
+template &lt;> struct type_traits&lt;double>;
+template &lt;> struct type_traits&lt;long double>;
+template &lt;> struct type_traits&lt;std::complex&lt;float> >;
+template &lt;> struct type_traits&lt;std::complex&lt;double> >;
+template &lt;> struct type_traits&lt;std::complex&lt;long double> >;
+template &lt;> struct type_traits&lt;bool>;
+template &lt;> struct type_traits&lt;std::string>;
 
 template &lt;class T> struct NumericTypeConversion;
 }</pre></blockquote>
 
 
-<h3>The <tt>TypeTraits</tt> traits class</h3>
-The <tt>TypeTraits </tt>traits class encodes useful type properties not
+<h3>The <tt>type_traits</tt> traits class</h3>
+The <tt>type_traits </tt>traits class encodes useful type properties not
 yet found in the standard library nor boost.
 <table BORDER=2 >
 <tr>
@@ -51,24 +51,24 @@ yet found in the standard library nor boost.
 <td><b>Description</b></td>
 </tr>
 
-<tr><td><tt>TypeTraits&lt;T>::is_specialized</tt></td><td><tt>bool</tt></td>
+<tr><td><tt>type_traits&lt;T>::is_specialized</tt></td><td><tt>bool</tt></td>
 <td><tt>true</tt> if the template has been specialized for the template parameter</td></tr>
-<tr><td><tt>TypeTraits&lt;T>::is_complex</tt></td><td><tt>bool</tt></td>
+<tr><td><tt>type_traits&lt;T>::is_complex</tt></td><td><tt>bool</tt></td>
 <td><tt>true</tt> if the type <tt>T</tt> is complex</td></tr>
-<tr><td><tt>TypeTraits&lt;T>::type_tag</tt></td><td><tt>palm::type_tag_t</tt></td>
+<tr><td><tt>type_traits&lt;T>::type_tag</tt></td><td><tt>palm::type_tag_t</tt></td>
 <td>a unique integral identifier for all types for which the template has been specialized</td></tr>
-<tr><td><tt>TypeTraits&lt;T>::norm_t</tt></td><td></td>
+<tr><td><tt>type_traits&lt;T>::norm_t</tt></td><td></td>
 <td>type to store the norm of a number of type<tt>T</tt></td></tr>
-<tr><td><tt>TypeTraits&lt;T>::average_t</tt></td><td></td>
+<tr><td><tt>type_traits&lt;T>::average_t</tt></td><td></td>
 <td>type to store averages of numbers of type<tt>T</tt></td>
-<tr><td><tt>TypeTraits&lt;T>::signed_t</tt></td><td></td>
+<tr><td><tt>type_traits&lt;T>::signed_t</tt></td><td></td>
 <td>for integral types, the signed version of the type <tt>T</tt>, otherwise the type itself</td>
-<tr><td><tt>TypeTraits&lt;T>::unsigned_t</tt></td><td></td>
+<tr><td><tt>type_traits&lt;T>::unsigned_t</tt></td><td></td>
 <td>for integral types, the unsigned version of the type <tt>T</tt>, otherwise the type itself</td>
-<tr><td><tt>TypeTraits&lt;T>::real_t</tt></td><td></td>
+<tr><td><tt>type_traits&lt;T>::real_t</tt></td><td></td>
 <td>for complex types, the real base type of type <tt>T</tt>, otherwise the type itself</td>
-<tr><td><tt>TypeTraits&lt;T>::epsilon()</tt></td><td></td>
-<td>the machine precision of <tt>TypeTraits&lt;T>::norm_t</tt></td>
+<tr><td><tt>type_traits&lt;T>::epsilon()</tt></td><td></td>
+<td>the machine precision of <tt>type_traits&lt;T>::norm_t</tt></td>
 </tr>
 </table>
 
