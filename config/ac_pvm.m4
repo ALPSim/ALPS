@@ -69,6 +69,17 @@ AC_DEFUN([AC_PVM],
         pvm_arch=`$pvm_dir/lib/pvmgetarch`
       fi
     fi
+    # workaround for PVM in Fedora Core
+    if test "$pvm_arch" = LINUX; then
+      if test -d "$pvm_dir/lib/LINUXI386"; then
+        pvm_arch="LINUXI386"
+      fi
+    fi
+    if test "$pvm_arch" = LINUX64; then
+      if test -d "$pvm_dir/lib/LINUXX86_64"; then
+        pvm_arch="LINUXX86_64"
+      fi
+    fi
     if test -n "$pvm_arch"; then
       AC_MSG_RESULT([$pvm_arch])
     else

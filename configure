@@ -23795,6 +23795,61 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
       fi
       if test "$found" = no; then
+        # for lammpi 7.1 in Fedora Core 3
+        MPI_LIBS="-llammpi++ -llammpio -llamf77mpi -lmpi -llam -ldl"
+        LIBS="$MPI_LIBS $ac_save_LIBS"
+        echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
+echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <mpi.h>
+int
+main ()
+{
+MPI_Finalize();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; found=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+      fi
+      if test "$found" = no; then
         # for lammpi 7.0.2 on MacOSX
         MPI_LIBS="-llammpi++ -llammpio -lmpi -llam"
         LIBS="$MPI_LIBS $ac_save_LIBS"
@@ -24064,6 +24119,17 @@ echo $ECHO_N "checking for PVM arch... $ECHO_C" >&6
     else
       if test -x "$pvm_dir/lib/pvmgetarch"; then
         pvm_arch=`$pvm_dir/lib/pvmgetarch`
+      fi
+    fi
+    # workaround for PVM in Fedora Core
+    if test "$pvm_arch" = LINUX; then
+      if test -d "$pvm_dir/lib/LINUXI386"; then
+        pvm_arch="LINUXI386"
+      fi
+    fi
+    if test "$pvm_arch" = LINUX64; then
+      if test -d "$pvm_dir/lib/LINUXX86_64"; then
+        pvm_arch="LINUXX86_64"
       fi
     fi
     if test -n "$pvm_arch"; then
@@ -25014,6 +25080,9 @@ echo "$as_me: error: MKL directory not found." >&2;}
         xi686)
           mkl_proc="p4"
           ;;
+        xx86_64)
+          mkl_proc="x86_64"
+          ;;
         xia64)
           mkl_proc="itp"
           ;;
@@ -25036,6 +25105,13 @@ echo "${ECHO_T}$mkl_procname" >&6
         mkl_procname="Pentium 4"
         mkl_bits="32"
         mkl_lib="mkl_p4"
+        echo "$as_me:$LINENO: result: $mkl_procname" >&5
+echo "${ECHO_T}$mkl_procname" >&6
+        ;;
+      xx86_64)
+        mkl_procname="Pentium 4 with EM64T"
+        mkl_bits="em64t"
+        mkl_lib="mkl_em64t"
         echo "$as_me:$LINENO: result: $mkl_procname" >&5
 echo "${ECHO_T}$mkl_procname" >&6
         ;;

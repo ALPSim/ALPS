@@ -276,6 +276,9 @@ AC_DEFUN([AC_LAPACK],
         xi686)
           mkl_proc="p4"
           ;;
+        xx86_64)
+          mkl_proc="x86_64"
+          ;;
         xia64)
           mkl_proc="itp"
           ;;
@@ -296,6 +299,12 @@ AC_DEFUN([AC_LAPACK],
         mkl_procname="Pentium 4"
         mkl_bits="32"
         mkl_lib="mkl_p4"
+        AC_MSG_RESULT([$mkl_procname])
+        ;;
+      xx86_64)
+        mkl_procname="Pentium 4 with EM64T"
+        mkl_bits="em64t"
+        mkl_lib="mkl_em64t"
         AC_MSG_RESULT([$mkl_procname])
         ;;
       xitp)
