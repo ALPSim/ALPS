@@ -482,9 +482,11 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   if test -f "$BOOST_SRCDIR/regex/src/c_regex_traits_common.cpp"; then
      AC_MSG_RESULT([1.32])
      ac_cv_boost_version=1_32
+     AC_DEFINE([ALPS_BOOST_VERSION], 132)
   else
      AC_MSG_RESULT([1.33])
      ac_cv_boost_version=1_33
+     AC_DEFINE([ALPS_BOOST_VERSION], 133)
   fi
 fi
 AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)

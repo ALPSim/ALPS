@@ -22098,10 +22098,18 @@ echo $ECHO_N "checking for Boost version... $ECHO_C" >&6
      echo "$as_me:$LINENO: result: 1.32" >&5
 echo "${ECHO_T}1.32" >&6
      ac_cv_boost_version=1_32
+     cat >>confdefs.h <<\_ACEOF
+#define ALPS_BOOST_VERSION 132
+_ACEOF
+
   else
      echo "$as_me:$LINENO: result: 1.33" >&5
 echo "${ECHO_T}1.33" >&6
      ac_cv_boost_version=1_33
+     cat >>confdefs.h <<\_ACEOF
+#define ALPS_BOOST_VERSION 133
+_ACEOF
+
   fi
 fi
 
