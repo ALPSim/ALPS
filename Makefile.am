@@ -28,6 +28,8 @@ test tests : libs
 	$(MAKE) -C test check
 example examples : libs
 	$(MAKE) -C example check
+doc docs :
+	$(MAKE) -C src docs
 
 install-data-local : config/config.cache
 	@$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)

@@ -59,6 +59,8 @@ undefine([lib_current])
 undefine([lib_revision])
 undefine([lib_age])
 
+AC_SUBST(SRC_DIR)
+SRC_DIR=$srcdir
 dnl Full or Light version
 if test -f "$srcdir/src/alps/lattice.h"; then
   ac_cv_alps_type="full"
@@ -306,9 +308,12 @@ found=no
 
 ac_cv_boost_incdir=
 
+AC_SUBST(BOOST_INC_DIR)
+
 if test -n "$boost_incdir"; then
   ac_cv_boost_incdir="$boost_incdir"
   BOOST_CPPFLAGS="-I$boost_incdir"
+  BOOST_INC_DIR=$boost_incdir
   CPPFLAGS="$BOOST_CPPFLAGS $ac_save_CPPFLAGS"
 fi
 AC_TRY_COMPILE([#include <boost/config.hpp>],,found=yes)
@@ -319,6 +324,7 @@ if test "$found" = no; then
     BOOST_CPPFLAGS="-I$boost_incdir_s"
     CPPFLAGS="$BOOST_CPPFLAGS $ac_save_CPPFLAGS"
     AC_TRY_COMPILE([#include <boost/config.hpp>],,found=yes)
+    BOOST_INC_DIR=$boost_incdir_s
   fi
 fi
 
@@ -718,6 +724,9 @@ AC_CONFIG_FILES(src/Makefile)
 AC_CONFIG_FILES(lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mpi/Makefile lib/comm-pvm/Makefile lib/heap/Makefile)
 AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile)
 AC_CONFIG_FILES(doc/Makefile)
+
+dnl doc generation
+AC_CONFIG_FILES(doc/doxygen.conf)
 
 if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(test/alea/Makefile)

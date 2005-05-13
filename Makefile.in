@@ -127,6 +127,7 @@ BOOST_1_32_TRUE = @BOOST_1_32_TRUE@
 BOOST_1_33_FALSE = @BOOST_1_33_FALSE@
 BOOST_1_33_TRUE = @BOOST_1_33_TRUE@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
+BOOST_INC_DIR = @BOOST_INC_DIR@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_LIBS = @BOOST_LIBS@
 BOOST_SRCDIR = @BOOST_SRCDIR@
@@ -212,6 +213,7 @@ RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
 SRC_BOOST = @SRC_BOOST@
+SRC_DIR = @SRC_DIR@
 STRIP = @STRIP@
 VERSION = @VERSION@
 XML_CPPFLAGS = @XML_CPPFLAGS@
@@ -504,7 +506,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/config $(distdir)/example/model $(distdir)/lib/xml $(distdir)/src/alps $(distdir)/src/boost $(distdir)/test/lattice $(distdir)/test/osiris $(distdir)/tool
+	$(mkdir_p) $(distdir)/config $(distdir)/doc $(distdir)/example/model $(distdir)/lib/xml $(distdir)/src/alps $(distdir)/src/boost $(distdir)/test/lattice $(distdir)/test/osiris $(distdir)/tool
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -757,6 +759,8 @@ test tests : libs
 	$(MAKE) -C test check
 example examples : libs
 	$(MAKE) -C example check
+doc docs :
+	$(MAKE) -C src docs
 
 install-data-local : config/config.cache
 	@$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
