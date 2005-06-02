@@ -751,9 +751,9 @@ dnl
 echo
 echo "Summary of configuration:"
 if test "$ac_cv_alps_type" = "full"; then
-  echo "  ALPS version      $PACKAGE_VERSION"
+  echo "  ALPS version        $PACKAGE_VERSION"
 else
-  echo "  ALPS version      $PACKAGE_VERSION (Light)"
+  echo "  ALPS version        $PACKAGE_VERSION (Light)"
 fi
 echo "  compiler type       $ac_cv_alps_compiler"
 echo "  exceptions          $ac_cv_alps_compiler_exceptions"

@@ -187,17 +187,17 @@ AC_DEFUN([AC_COMPILER],
   case "$COMPILER" in
     gnu)
       try_CFLAGS_OPT="-pthread -w -O3"
-      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-sign-compare -g -O0"
+      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -g -O0"
       try_CXXFLAGS_OPT="-pthread -w -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-pthread -W -Wall -Wno-sign-compare -ftemplate-depth-150 -g -O0"
+      try_CXXFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
     gnu-3.3)
       try_CFLAGS_OPT="-pthread -w -O3"
-      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-sign-compare -g -O0"
+      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -g -O0"
       try_CXXFLAGS_OPT="-fabi-version=0 -pthread -w -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-fabi-version=0 -pthread -W -Wall -Wno-sign-compare -ftemplate-depth-150 -g -O0"
+      try_CXXFLAGS_DEBUG="-fabi-version=0 -pthread -W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
@@ -317,17 +317,25 @@ AC_DEFUN([AC_COMPILER],
       ;;
     macos)
       try_CFLAGS_OPT="-w -O3"
-      try_CFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
+      try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
       try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -w -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
+      try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
-    macos-gcc-3.3 | macos-gcc-4.0)
+    macos-gcc-3.3)
       try_CFLAGS_OPT="-w -O3"
-      try_CFLAGS_DEBUG="-W -Wall -Wno-sign-compare -Wno-long-double -g -O0"
+      try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
       try_CXXFLAGS_OPT="-fabi-version=0 -w -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-fabi-version=0 -W -Wall -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
+      try_CXXFLAGS_DEBUG="-fabi-version=0 -W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -ftemplate-depth-150 -g -O0"
+      try_CXXFLAGS_EH="-fexceptions"
+      try_CXXFLAGS_NOEH="-fno-exceptions"
+      ;;
+    macos-gcc-4.0)
+      try_CFLAGS_OPT="-w -O3"
+      try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-sign-compare -g -O0"
+      try_CXXFLAGS_OPT="-w -ftemplate-depth-150 -O3"
+      try_CXXFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
