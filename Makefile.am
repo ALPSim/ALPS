@@ -1,8 +1,8 @@
-SUBDIRS = lib
+SUBDIRS = lib src
 if ALPS_FULL
 SUBDIRS += tool example
 endif
-SUBDIRS += test src doc .
+SUBDIRS += test doc .
 
 distdir = alps-$(VERSION)
 distdir_light = alps-light-$(VERSION)
