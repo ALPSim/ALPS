@@ -33,7 +33,7 @@ AC_DEFUN([AC_COMPILER],
 
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
-      [set compiler mode (MODE = gnu, gnu-3.3, kai, intel, intel-cxxlib, intel64, como, hp, dec, sgi32, sgi64, cray, ibm32, ibm64, macos, macos-gcc-3.3, macos-gcc-4.0, generic)]),
+      [set compiler mode (MODE = gnu, gnu-3.3, kai, intel, intel-cxxlib, intel64, como, hp, dec, sgi32, sgi64, cray, ibm32, ibm64, macos, macos-gcc-3.3, generic)]),
     [
     case "x$withval" in
       xgnu-3.3 | xGNU-3.3 | xgcc-3.3 | xg++-3.3 )
@@ -74,9 +74,6 @@ AC_DEFUN([AC_COMPILER],
         ;;
       xcray* | xCRAY*)
         COMPILER="cray"
-        ;;
-      xmacos-gcc-4* | xmacos-g++-4* | xmacos-10.4 | xmac-10.4 | xosx-10.4 | xosx-tiger)
-        COMPILER="macos-gcc-4.0"
         ;;
       xmacos-gcc-3.3 | xmacos-g++-3.3 | xmacos-10.3 | xmac-10.3 | xosx-10.3 | xosx-panther)
         COMPILER="macos-gcc-3.3"
@@ -142,16 +139,12 @@ AC_DEFUN([AC_COMPILER],
       try_CXX="xlC"
       ;;
     macos)
-      try_CC="gcc3"
-      try_CXX="g++3"
+      try_CC="gcc-4.0"
+      try_CXX="g++-4.0"
       ;;
     macos-gcc-3.3)
       try_CC="gcc-3.3"
       try_CXX="g++-3.3"
-      ;;
-    macos-gcc-4.0)
-      try_CC="gcc-4.0"
-      try_CXX="g++-4.0"
       ;;
     generic)
       # nothing to do
@@ -328,14 +321,6 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
       try_CXXFLAGS_OPT="-fabi-version=0 -w -ftemplate-depth-150 -O3"
       try_CXXFLAGS_DEBUG="-fabi-version=0 -W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -ftemplate-depth-150 -g -O0"
-      try_CXXFLAGS_EH="-fexceptions"
-      try_CXXFLAGS_NOEH="-fno-exceptions"
-      ;;
-    macos-gcc-4.0)
-      try_CFLAGS_OPT="-w -O3"
-      try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-w -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
