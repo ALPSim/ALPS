@@ -168,12 +168,13 @@ am__objects_18 = basic_text_iprimitive.lo basic_text_oprimitive.lo \
 @BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_18)
 am__objects_20 = icu.lo regex_raw_buffer.lo regex_traits_defaults.lo \
 	static_mutex.lo usinstances.lo wc_regex_traits.lo
-am__objects_21 = basic_iserializer.lo basic_oserializer.lo \
-	basic_pointer_iserializer.lo basic_pointer_oserializer.lo \
-	basic_text_iprimitive.lo basic_text_oprimitive.lo \
-	basic_text_wiprimitive.lo basic_text_woprimitive.lo \
-	stl_port.lo xml_grammar.lo xml_iarchive.lo xml_oarchive.lo \
-	xml_wgrammar.lo xml_wiarchive.lo xml_woarchive.lo
+am__objects_21 = basic_archive_impl.lo basic_iserializer.lo \
+	basic_oserializer.lo basic_pointer_iserializer.lo \
+	basic_pointer_oserializer.lo basic_text_iprimitive.lo \
+	basic_text_oprimitive.lo basic_text_wiprimitive.lo \
+	basic_text_woprimitive.lo stl_port.lo xml_grammar.lo \
+	xml_iarchive.lo xml_oarchive.lo xml_wgrammar.lo \
+	xml_wiarchive.lo xml_woarchive.lo
 @BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__objects_22 = $(am__objects_20) \
 @BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_21)
 am__objects_23 = connection.lo named_slot_map.lo signal_base.lo \
@@ -508,6 +509,7 @@ src_boost_SERIALIZATION_1_32 = \
 #  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 src_boost_SERIALIZATION_1_33 = \
+  $(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
@@ -623,6 +625,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/abstract_task.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/barrier.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_archive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_archive_impl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_iserializer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_oarchive.Plo@am__quote@
@@ -1468,6 +1471,13 @@ wc_regex_traits.lo: $(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp' object='wc_regex_traits.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o wc_regex_traits.lo `test -f '$(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp
+
+basic_archive_impl.lo: $(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_archive_impl.lo -MD -MP -MF "$(DEPDIR)/basic_archive_impl.Tpo" -c -o basic_archive_impl.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_archive_impl.Tpo" "$(DEPDIR)/basic_archive_impl.Plo"; else rm -f "$(DEPDIR)/basic_archive_impl.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp' object='basic_archive_impl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_archive_impl.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp
 
 basic_iserializer.lo: $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_iserializer.lo -MD -MP -MF "$(DEPDIR)/basic_iserializer.Tpo" -c -o basic_iserializer.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp; \
