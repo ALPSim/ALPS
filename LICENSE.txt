@@ -1,6 +1,6 @@
 
-ALPS LIBRARY LICENSE version 1.0
-Copyright (C) 2003-2004 Ian McCulloch.  Everyone is permitted to copy and
+ALPS LIBRARY LICENSE version 1.1
+Copyright (C) 2003-2005 Ian McCulloch.  Everyone is permitted to copy and
 distribute this license document.
 
 This License applies to any software containing a notice placed by the copyright
@@ -36,10 +36,17 @@ of sections 1 and 2 above, provided that you also meet all of these conditions:
 	thereof, to be licensed as a whole at no charge to all third parties 
 	under terms compatible with this License.
 
-4. This Library is a source library; distribution of the Library in object form
-(or a work based on it, under section 3) is neither practicable nor allowed.
-Exception: Application programs which use this Library may be distributed in 
-object form as described in section 7.
+4. This Software, or modifications under section 3 above, may be distributed in
+object code or executable form, provided that you meet all of these conditions:
+
+	a. This complete License, warranty disclaimer and accompanying 
+	CITATIONS.txt document is included.
+
+	a. The executable program is accompanied with the complete
+	machine-readable source code to the Library as used in the executable, 
+	which must be distributed under the terms of sections 2 and 3 above.
+	Alternatively, you may provide instructions for obtaining the source 
+	code at no cost (for example, a hyper-text link).
 
 5. A program that contains no derivative of any portion of the Library, but is
 designed to work with the Library by being compiled or linked with it, is not 
@@ -60,19 +67,6 @@ Exception: if the announcement would not normally be visible to the user, or
 the announcement would interfere with normal operations of the executable 
 application, then the executable program is not required to print an 
 announcement.
-
-7. As an exception to section 4, a program that contains portions of the Library
-(or a modified work, under section 3) may be distributed in object code or 
-executable form, provided that you also meet all of these conditions:
-
-	a. This complete License, warranty disclaimer and accompanying 
-	CITATIONS.txt document is included.
-
-	a. The executable program is accompanied with the complete 
-	machine-readable source code to the Library as used in the executable, 
-	which must be distributed under the terms of sections 2 and 3 above.
-	Alternatively, you may provide instructions for obtaining the source 
-	code at no cost (for example, a hyper-text link).
 
 THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
