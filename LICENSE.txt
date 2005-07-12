@@ -5,7 +5,7 @@ distribute this license document.
 
 This License applies to any software containing a notice placed by the copyright
 holder saying that it may be distributed under the terms of the ALPS Library
-License version 1.0.  Such software is herein referred to as the "Library".
+License version 1.1.  Such software is herein referred to as the "Library".
 This license grants permission to use, reproduce, display, distribute, execute 
 and transmit the Library, and to prepare derivative works of the Library, and to 
 permit others to do so for non-commercial academic use, all subject to the 
@@ -55,7 +55,7 @@ License.
 
 However, linking such a work with the Library creates an executable that is a 
 derivative of the Library (because it contains portions of the Library).  The 
-executable is therefore covered by this License.  Section 7 states terms for 
+executable is therefore covered by this License.  Section 4 states terms for 
 distribution of such executables.
 
 6. You must cause executable programs that utilize this Library to print or 
