@@ -32,7 +32,7 @@
 // simulation of a one-dimensional Ising model
 //=======================================================================
 
-#include <alps/scheduler.h>
+#include <alps/scheduler/montecarlo.h>
 
 class IsingSimulation : public alps::scheduler::MCRun
 {

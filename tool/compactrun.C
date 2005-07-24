@@ -27,7 +27,8 @@
 
 /* $Id$ */
 
-#include <alps/scheduler.h>
+#include <alps/scheduler/montecarlo.h>
+#include <alps/osiris/xdrdump.h>
 #include <boost/filesystem/operations.hpp>
 
 int main(int argc, char** argv)

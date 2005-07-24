@@ -27,7 +27,8 @@
 
 /* $Id$ */
 
-#include <alps/scheduler.h>
+#include <alps/scheduler/montecarlo.h>
+#include <alps/alea.h>
 #include <fstream>
 
 void evaluate(const boost::filesystem::path& p, std::ostream& out) {

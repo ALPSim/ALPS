@@ -29,8 +29,8 @@
 
 /* $Id$ */
 
-#include <alps/osiris.h>
-#include <alps/scheduler.h>
+#include <alps/osiris/xdrdump.h>
+#include <alps/scheduler/montecarlo.h>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>

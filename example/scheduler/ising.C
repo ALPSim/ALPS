@@ -34,6 +34,7 @@
 //=======================================================================
 
 #include "ising.h"
+#include <alps/alea/detailedbinning.h>
 #include <cmath>
 
 void IsingSimulation::print_copyright(std::ostream& out)

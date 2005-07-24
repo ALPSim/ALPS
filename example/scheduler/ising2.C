@@ -34,6 +34,7 @@
 //=======================================================================
 
 #include "ising2.h"
+#include <alps/alea/detailedbinning.h>
 #include <cmath>
 
 using namespace std;

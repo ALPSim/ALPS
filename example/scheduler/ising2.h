@@ -32,8 +32,7 @@
 // simulation of a one-dimensional Ising model
 //=======================================================================
 
-#include <alps/scheduler.h>
-#include <alps/lattice.h>
+#include <alps/scheduler/montecarlo.h>
 
 typedef boost::adjacency_list<boost::vecS,boost::vecS,boost::undirectedS,
                               // vertex property

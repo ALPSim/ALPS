@@ -28,8 +28,8 @@
 /* $Id$ */
 
 #include <alps/expression.h>
-#include <alps/model.h>
-#include <alps/lattice.h>
+#include <alps/model/model_helper.h>
+#include <alps/lattice/graph_helper.h>
 #include <alps/osiris/os.h>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>

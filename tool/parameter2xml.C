@@ -29,14 +29,15 @@
 
 /* $Id$ */
 
-#include <alps/osiris.h>
-#include <alps/scheduler.h>
+#include <alps/xml.h>
+#include <alps/parameterlist.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
 #include <boost/throw_exception.hpp>
 #include <fstream>
+#include <iostream>
 #include <stdexcept>
 
 void convert_params(const std::string& inname, const std::string& basename)

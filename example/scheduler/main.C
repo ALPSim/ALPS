@@ -28,6 +28,7 @@
 /* $Id$ */
 
 #include "ising.h"
+#include <alps/osiris/comm.h>
 
 int main(int argc, char** argv)
 {
