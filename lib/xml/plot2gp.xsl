@@ -76,7 +76,7 @@
                   <xsl:text>notitle </xsl:text>
                 </xsl:otherwise>
               </xsl:choose>
-              <xsl:text>with linepoints</xsl:text>
+              <xsl:text>with linespoints</xsl:text>
             </xsl:otherwise>
           </xsl:choose>
         </xsl:otherwise>
