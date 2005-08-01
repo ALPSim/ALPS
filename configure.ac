@@ -59,8 +59,6 @@ undefine([lib_current])
 undefine([lib_revision])
 undefine([lib_age])
 
-AC_SUBST(SRC_DIR)
-SRC_DIR=$srcdir
 dnl Full or Light version
 if test -f "$srcdir/src/alps/lattice.h"; then
   ac_cv_alps_type="full"
@@ -89,6 +87,8 @@ test "$libdir" = '${exec_prefix}/lib' && libdir="$exec_prefix/lib"
 test "$includedir" = '${prefix}/include' && includedir="$prefix/include"
 AC_SUBST(docdir)
 docdir="$prefix/doc"
+AC_SUBST(SRC_DIR)
+SRC_DIR="$srcdir"
 
 ac_cv_alps_prefix="$prefix"
 ac_cv_alps_exec_prefix="$exec_prefix"
@@ -99,11 +99,13 @@ ac_cv_alps_xmldir="$libdir/xml"
 ac_cv_alps_includedir="$includedir"
 ac_cv_alps_docdir="$docdir"
 ac_cv_alps_include_mk="$datadir/$PACKAGE_NAME/include.mk"
+ac_cv_alps_srcdir="$srcdir"
 
 dnl XSLT path
 AC_DEFINE_UNQUOTED([ALPS_XML_DIR], ["$ac_cv_alps_xmldir"])
 ALPS_XML_DIR=$ac_cv_alps_xmldir
 AC_SUBST(ALPS_XML_DIR)
+
 dnl
 dnl Compilers --------------------------------------------------------
 dnl
