@@ -4,28 +4,28 @@
 
   <xsl:template match="plot">
    <xsl:text disable-output-escaping = "yes">
-&lt;?xml-stylesheet type="text/xsl" href="file:@libdir@/xml/plot2html.xsl"?>
+&lt;?xml-stylesheet type="text/xsl" href="file://@libdir@/xml/plot2html.xsl"?>
 </xsl:text>   
     <xsl:copy-of select="."/>
   </xsl:template>
 
   <xsl:template match="ARCHIVE">
    <xsl:text disable-output-escaping = "yes">
-&lt;?xml-stylesheet type="text/xsl" href="file:@libdir@/xml/ALPS.xsl"?>
+&lt;?xml-stylesheet type="text/xsl" href="file://@libdir@/xml/ALPS.xsl"?>
 </xsl:text>   
     <xsl:copy-of select="."/>
   </xsl:template>
 
   <xsl:template match="SIMULATION">
    <xsl:text disable-output-escaping = "yes">
-&lt;?xml-stylesheet type="text/xsl" href="file:@libdir@/xml/ALPS.xsl"?>
+&lt;?xml-stylesheet type="text/xsl" href="file://@libdir@/xml/ALPS.xsl"?>
 </xsl:text>   
     <xsl:copy-of select="."/>
   </xsl:template>
 
   <xsl:template match="JOB">
    <xsl:text disable-output-escaping = "yes">
-&lt;?xml-stylesheet type="text/xsl" href="file:@libdir@/xml/job.xsl"?>
+&lt;?xml-stylesheet type="text/xsl" href="file://@libdir@/xml/job.xsl"?>
 </xsl:text>   
     <xsl:copy-of select="."/>
   </xsl:template>
