@@ -209,6 +209,15 @@ AC_DEFUN([AC_MPI],
                     AC_MSG_RESULT(no))
       fi
       if test "$found" = no; then
+        # for lammpi 7.0.6 in Fedora Core 4
+        MPI_LIBS="-llammpi++ -llammpio -llamf77mpi -lmpi -llam -ldl -lutil"
+        LIBS="$MPI_LIBS $ac_save_LIBS"
+        AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
+        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                    [AC_MSG_RESULT(yes); found=yes],
+                    AC_MSG_RESULT(no))
+      fi
+      if test "$found" = no; then
         # for lammpi 7.0.2 on MacOSX
         MPI_LIBS="-llammpi++ -llammpio -lmpi -llam"
         LIBS="$MPI_LIBS $ac_save_LIBS"
