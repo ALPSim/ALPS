@@ -284,7 +284,7 @@ AC_ARG_WITH(boost-thread,
 boost_dir_s=
 
 for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
-  for b in boost boost_1_32_0; do
+  for b in boost boost_1_33_0 boost_1_32_0; do
     if test -f "$d/$b/boost/config.hpp"; then
       if test -f "$d/$b/libs/filesystem/src/exception.cpp"; then
         boost_dir_s="$d/$b"
