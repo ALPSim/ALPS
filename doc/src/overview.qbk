@@ -16,19 +16,27 @@ increase software reuse in the physics community.
 Currently the following libraries are publicly available as part of
 the ALPS library project:
 
-* [link alps_general alps/general](*): generally usefull classes and traits
-* [link alps_osiris alps/osiris](*): serialization and communication
-* [link alps_parser alps/parser](*): helper functions to parse and write XML
-  files
-* [link alps_alea alps/alea]: Monte Carlo measurements and evaluation
-* [link alps_lattice alps/lattice]: lattices and graphs
-* [link alps_model alps/model]: quantum lattice models
-* [link alps_scheduler alps/scheduler]: an automatically parallelizing 
-  scheduler for Monte Carlo simulations
+* [link general alps/general](*): generally usefull
+  classes and traits
 
-Besides the helper tools for the [link alps_scheduler scheduler
-library] we have provided a few [link tools sample tools] for the
-manipulation of the XML files created by the ALPS programs.
+* [link osiris alps/osiris](*): serialization and
+  communication
+
+* [link parser alps/parser](*): helper functions to parse and write
+  XML files
+
+* [link alea alps/alea]: Monte Carlo measurements and evaluation
+
+* [link lattice alps/lattice]: lattices and graphs
+
+* [link model alps/model]: quantum lattice models
+
+* [link scheduler alps/scheduler]: an automatically
+  parallelizing scheduler for Monte Carlo simulations
+
+Besides the helper tools for the [link scheduler scheduler library] we
+have provided a few [link tools sample tools] for the manipulation of
+the XML files created by the ALPS programs.
 
 [h1 Applications]
 

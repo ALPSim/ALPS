@@ -1,7 +1,9 @@
 [chapter Getting Started
-	 [authors [Todo, Synge], [Troyer, Matthias]]
-	 [copyright 2002 2003 2004 2005 Synge Todo, Matthias Troyer]
-	 [last-revision $Date$]
+    [id start]
+    [dirname start]
+    [authors [Todo, Synge], [Troyer, Matthias]]
+    [copyright 2002 2003 2004 2005 Synge Todo, Matthias Troyer]
+    [last-revision $Date$]
 ]
 
 [/ some links]
@@ -86,7 +88,9 @@ For easy setup, a =configure= script is provided.  Just type
   ./configure
 
 in the top directory of ALPS source tree.  The =configure= script
-accepts several command-line options.  See [link getting_started.configure_options Configure Options] for details.  After configuration, type
+accepts several command-line options.  See [link
+start.configure_options Configure Options] for details.  After
+configuration, type
 
   make install
 
@@ -152,9 +156,9 @@ In order to develop and compile user applications on top of the ALPS
 libraries, user programs must include ALPS headers and be linked with
 ALPS libraries.  ALPS header files are installed under
 /PREFIX/=/include=, where /PREFIX/ is the path specified by the option
-to the configure script (see [link getting_started.configure_options
-Configure Options]).  ALPS libraries are installed under
-/PREFIX/=/lib=.  For example, you can compile and link your program as
+to the configure script (see [link start.configure_options Configure
+Options]).  ALPS libraries are installed under /PREFIX/=/lib=.  For
+example, you can compile and link your program as
 
 [pre
 CC -I${HOME}/ALPS/include -L${HOME}/ALPS/lib -o myprog myprog.C -lalps -lcomm-sgl -lm

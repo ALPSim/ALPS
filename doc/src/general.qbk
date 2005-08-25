@@ -1,4 +1,6 @@
 [library Alps/General Library
+    [id general]
+    [dirname general]
     [copyright 1994 2002 2003 2004 2005 Matthias Troyer, Synge Todo]
     [last-revision $Date$]
 ]
@@ -21,8 +23,8 @@ version.
 
 * Configuration
 
-  * [link general.config_h alps/config.h] contains configuration
-    options.
+  * [link general.config_h alps/config.h] contains
+    configuration options.
 
 * Traits classes
 
