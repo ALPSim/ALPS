@@ -820,6 +820,7 @@ if test "$build_doc" = yes; then
   AC_CONFIG_FILES(doc/bb2db)
   AC_CONFIG_FILES(doc/db2html)
   AC_CONFIG_FILES(doc/db2pdf)
+  AC_CONFIG_FILES(doc/singledoc)
 fi
 
 AC_OUTPUT

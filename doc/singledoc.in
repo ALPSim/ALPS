@@ -1,0 +1,32 @@
+#!/bin/sh
+
+INPUT=$1
+BASENAME=`basename $INPUT | sed 's/\./_/g'`
+AUTODOC="$BASENAME.autodoc"
+QB="$BASENAME.qbk"
+BB="$BASENAME.xml"
+DB="$BASENAME.dockbook"
+OUTPUT="$BASENAME"
+
+sh autodoc $AUTODOC $INPUT
+
+cat << EOF > $QB
+[library $BASENAME
+   [id $BASENAME]
+   [dirname $BASENAME]
+]
+
+[xinclude $AUTODOC]
+EOF
+
+../tool/quickbook $QB
+
+sh bb2db $BB $DB
+
+mkdir -p $OUTPUT
+sh db2html $DB $OUTPUT/
+
+cp -fp @top_srcdir@/doc/src/alps_logo.gif $OUTPUT
+cp -fp @BOOST_INC_DIR@/doc/html/boostbook.css $OUTPUT
+mkdir -p $OUTPUT/images
+cp -fp @BOOST_INC_DIR@/doc/html/images/*.png $OUTPUT/images
