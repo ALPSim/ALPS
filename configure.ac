@@ -815,7 +815,11 @@ fi
 dnl doc generation
 AC_CONFIG_FILES(doc/doxygen.conf)
 if test "$build_doc" = yes; then
+  AC_CONFIG_FILES(doc/catalog.xml)
   AC_CONFIG_FILES(doc/autodoc)
+  AC_CONFIG_FILES(doc/bb2db)
+  AC_CONFIG_FILES(doc/db2html)
+  AC_CONFIG_FILES(doc/db2pdf)
 fi
 
 AC_OUTPUT

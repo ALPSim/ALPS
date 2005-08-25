@@ -20,14 +20,21 @@ echo "GENERATE_XML = YES" >> $CONF
 echo "OUTPUT_DIRECTORY = $TMPDIR" >> $CONF
 echo "INPUT = $INPUTS" >> $CONF
 
-set -x
-
+echo @DOXYGEN@ $CONF
 @DOXYGEN@ $CONF
+
+[ "$?" -ne 0 ] && exit $?
 
 export XML_CATALOG_FILES=catalog.xml
 
+echo @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
 @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
 
+[ "$?" -ne 0 ] && exit $?
+
+echo @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
 @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
+
+[ "$?" -ne 0 ] && exit $?
 
 rm -rf $CONF $TEMPDIR

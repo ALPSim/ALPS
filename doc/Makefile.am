@@ -13,7 +13,6 @@ DOCBOOK_XSL_DIR = @DOCBOOK_XSL_DIR@
 FOP_DIR = @FOP_DIR@
 
 QUICKBOOK = $(top_builddir)/tool/quickbook
-AUTODOC = $(SHELL) $(top_builddir)/doc/autodoc
 XSLTPROC = @XSLTPROC@
 
 DOC_ROOT = $(top_srcdir)/doc
@@ -204,38 +203,30 @@ SUFFIXES = .xml .qbk
 
 # *.h -> *.autodoc
 
-$(DOC_SRCDIR)/general.autodoc : $(AUTODOC_GENERAL_SRC)
-	$(AUTODOC) $@ $(AUTODOC_GENERAL_SRC)
-$(DOC_SRCDIR)/osiris.autodoc : $(AUTODOC_OSIRIS_SRC)
-	$(AUTODOC) $@ $(AUTODOC_OSIRIS_SRC)
-$(DOC_SRCDIR)/parser.autodoc : $(AUTODOC_PARSER_SRC)
-	$(AUTODOC) $@ $(AUTODOC_PARSER_SRC)
-$(DOC_SRCDIR)/alea.autodoc : $(AUTODOC_ALEAS_SRC)
-	$(AUTODOC) $@ $(AUTODOC_ALEA_SRC)
-$(DOC_SRCDIR)/lattice.autodoc : $(AUTODOC_LATTICE_SRC)
-	$(AUTODOC) $@ $(AUTODOC_LATTICE_SRC)
-$(DOC_SRCDIR)/model.autodoc : $(AUTODOC_MODEL_SRC)
-	$(AUTODOC) $@ $(AUTODOC_MODEL_SRC)
-$(DOC_SRCDIR)/scheduler.autodoc : $(AUTODOC_SCHEDULER_SRC)
-	$(AUTODOC) $@ $(AUTODOC_SCHEDULER_SRC)
+$(DOC_SRCDIR)/general.autodoc : autodoc $(AUTODOC_GENERAL_SRC)
+	$(SHELL) autodoc $@ $(AUTODOC_GENERAL_SRC)
+$(DOC_SRCDIR)/osiris.autodoc : autodoc $(AUTODOC_OSIRIS_SRC)
+	$(SHELL) autodoc $@ $(AUTODOC_OSIRIS_SRC)
+$(DOC_SRCDIR)/parser.autodoc : autodoc $(AUTODOC_PARSER_SRC)
+	$(SHELL) autodoc $@ $(AUTODOC_PARSER_SRC)
+$(DOC_SRCDIR)/alea.autodoc : autodoc $(AUTODOC_ALEAS_SRC)
+	$(SHELL) autodoc $@ $(AUTODOC_ALEA_SRC)
+$(DOC_SRCDIR)/lattice.autodoc : autodoc $(AUTODOC_LATTICE_SRC)
+	$(SHELL) autodoc $@ $(AUTODOC_LATTICE_SRC)
+$(DOC_SRCDIR)/model.autodoc : autodoc $(AUTODOC_MODEL_SRC)
+	$(SHELL) autodoc $@ $(AUTODOC_MODEL_SRC)
+$(DOC_SRCDIR)/scheduler.autodoc : autodoc $(AUTODOC_SCHEDULER_SRC)
+	$(SHELL) autodoc $@ $(AUTODOC_SCHEDULER_SRC)
 
 # boostbook -> docbook
 
-$(DOC_SRCDIR)/alps.docbook : $(XMLDOCS) $(AUTODOCS)
-	XML_CATALOG_FILES=catalog.xml \
-	$(XSLTPROC) --xinclude -o $@ $(BOOST_ROOT)/tools/boostbook/xsl/docbook.xsl $(DOC_SRCDIR)/alps.xml
+$(DOC_SRCDIR)/alps.docbook : bb2db $(XMLDOCS) $(AUTODOCS)
+	$(SHELL) bb2db $(DOC_SRCDIR)/alps.xml $@
 
-# boostbook -> html
+# docbook -> html
 
-$(DOC_HTMLDIR)/index.html : html-setup $(DOC_SRCDIR)/alps.docbook
-	XML_CATALOG_FILES=catalog.xml \
-	$(XSLTPROC) \
-	--stringparam boost.root . \
-	--stringparam boost.image.src alps_logo.gif \
-	--stringparam boost.image.alt ALPS \
-	--stringparam boost.image.w 197 \
-	--stringparam boost.image.h 70 \
-	--xinclude -o $(DOC_HTMLDIR)/ $(BOOST_ROOT)/tools/boostbook/xsl/html.xsl $(DOC_SRCDIR)/alps.docbook
+$(DOC_HTMLDIR)/index.html : db2html $(DOC_SRCDIR)/alps.docbook html-setup
+	$(SHELL) db2html $(DOC_SRCDIR)/alps.docbook $(DOC_HTMLDIR)/
 
 html-setup :
 	$(mkdir_p) $(DOC_HTMLDIR)
@@ -244,21 +235,14 @@ html-setup :
 	$(mkdir_p) $(DOC_HTMLDIR)/images
 	cp -fp $(BOOST_ROOT)/doc/html/images/*.png $(DOC_HTMLDIR)/images
 
-# boostbook -> pdf
+# docbook -> pdf
 
-$(DOC_SRCDIR)/alps.fo : $(DOC_SRCDIR)/alps.docbook
-	XML_CATALOG_FILES=catalog.xml \
-	$(XSLTPROC) \
-	--stringparam paper.type A4 \
-	--xinclude -o $(DOC_SRCDIR)/alps.fo $(BOOST_ROOT)/tools/boostbook/xsl/fo.xsl $(DOC_SRCDIR)/alps.docbook
-
-$(DOC_PDFDIR)/alps.pdf : $(DOC_SRCDIR)/alps.fo
-	JAVACMD=$(JAVA) \
-	$(FOP_DIR)/fop.sh $(DOC_SRCDIR)/alps.fo $@
+$(DOC_PDFDIR)/alps.pdf : db2pdf $(DOC_SRCDIR)/alps.docbook
+	$(SHELL) db2pdf $(DOC_SRCDIR)/alps.docbook $@
 
 docclean :
 	rm -f $(XMLDOCS_QBK:.qbk=.xml) $(AUTODOCS)
-	rm -f $(DOC_SRCDIR)/*.docbook $(DOC_SRCDIR)/alps.fo $(DOC_PDFDIR)/alps.pdf
+	rm -f $(DOC_SRCDIR)/*.docbook $(DOC_SRCDIR)/*.fo $(DOC_PDFDIR)/alps.pdf
 	rm -rf $(DOC_HTMLDIR)
 
 #

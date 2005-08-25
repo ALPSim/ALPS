@@ -30022,7 +30022,15 @@ fi
           ac_config_files="$ac_config_files doc/doxygen.conf"
 
 if test "$build_doc" = yes; then
+            ac_config_files="$ac_config_files doc/catalog.xml"
+
             ac_config_files="$ac_config_files doc/autodoc"
+
+            ac_config_files="$ac_config_files doc/bb2db"
+
+            ac_config_files="$ac_config_files doc/db2html"
+
+            ac_config_files="$ac_config_files doc/db2pdf"
 
 fi
 
@@ -30726,7 +30734,11 @@ do
   "tool/plot2xmgr" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xmgr" ;;
   "tool/changestylesheet" ) CONFIG_FILES="$CONFIG_FILES tool/changestylesheet" ;;
   "doc/doxygen.conf" ) CONFIG_FILES="$CONFIG_FILES doc/doxygen.conf" ;;
+  "doc/catalog.xml" ) CONFIG_FILES="$CONFIG_FILES doc/catalog.xml" ;;
   "doc/autodoc" ) CONFIG_FILES="$CONFIG_FILES doc/autodoc" ;;
+  "doc/bb2db" ) CONFIG_FILES="$CONFIG_FILES doc/bb2db" ;;
+  "doc/db2html" ) CONFIG_FILES="$CONFIG_FILES doc/db2html" ;;
+  "doc/db2pdf" ) CONFIG_FILES="$CONFIG_FILES doc/db2pdf" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/alps/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/alps/config.h" ;;
   "src/boost/po_utf8_codecvt_facet.cpp" ) CONFIG_HEADERS="$CONFIG_HEADERS src/boost/po_utf8_codecvt_facet.cpp" ;;
