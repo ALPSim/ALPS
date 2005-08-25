@@ -463,7 +463,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE docdir SRC_DIR ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS BOOST_INC_DIR SRC_BOOST BOOST_SRCDIR BUILD_BOOST_TRUE BUILD_BOOST_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI HAVE_MPI_TRUE HAVE_MPI_FALSE LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HAVE_PVM_TRUE HAVE_PVM_FALSE LAPACK_CPPFLAGS LAPACK_LDFLAGS LAPACK_LIBS HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BOOST_USER_CONFIG_H BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS BUILD_LIBHEAP_TRUE BUILD_LIBHEAP_FALSE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE docdir SRC_DIR ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS BOOST_INC_DIR BOOST_SRCDIR BUILD_BOOST_TRUE BUILD_BOOST_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI HAVE_MPI_TRUE HAVE_MPI_FALSE LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HAVE_PVM_TRUE HAVE_PVM_FALSE LAPACK_CPPFLAGS LAPACK_LDFLAGS LAPACK_LIBS HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BOOST_USER_CONFIG_H DOXYGEN ac_cv_prog_doxygen ac_cv_prog_xsltproc XSLTPROC JAVA ac_cv_prog_java HAVE_JAVA_TRUE HAVE_JAVA_FALSE DOCBOOK_DTD_DIR DOCBOOK_XSL_DIR FOP_DIR BUILD_DOC_TRUE BUILD_DOC_FALSE BUILD_PDF_TRUE BUILD_PDF_FALSE BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS BUILD_LIBHEAP_TRUE BUILD_LIBHEAP_FALSE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1091,6 +1091,10 @@ Optional Packages:
   --with-expat=DIR        use Expat XML parser by James Clark
   --with-xerces=DIR       use Xerces C++ XML parser by Apache Software
                           Foundation
+  --with-xsltproc=PATH    specify the path to xsltproc
+  --with-docbook-dtd=DIR  path to DocBook DTD
+  --with-docbook-xsl=DIR  path to DocBook XSL
+  --with-fop=DIR          path to Apache FOP
 
 Some influential environment variables:
   CC          C compiler command
@@ -6899,7 +6903,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6902 "configure"' > conftest.$ac_ext
+  echo '#line 6906 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7541,7 +7545,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:7544:" \
+echo "$as_me:7548:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -8639,11 +8643,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8642: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8646: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8646: \$? = $ac_status" >&5
+   echo "$as_me:8650: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8901,11 +8905,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8904: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8908: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8908: \$? = $ac_status" >&5
+   echo "$as_me:8912: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8963,11 +8967,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8966: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8970: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8970: \$? = $ac_status" >&5
+   echo "$as_me:8974: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11203,7 +11207,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11206 "configure"
+#line 11210 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11301,7 +11305,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11304 "configure"
+#line 11308 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13549,11 +13553,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13552: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13556: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13556: \$? = $ac_status" >&5
+   echo "$as_me:13560: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13611,11 +13615,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13614: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13618: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13618: \$? = $ac_status" >&5
+   echo "$as_me:13622: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14980,7 +14984,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 14983 "configure"
+#line 14987 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15078,7 +15082,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15081 "configure"
+#line 15085 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15963,11 +15967,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15966: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15970: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15970: \$? = $ac_status" >&5
+   echo "$as_me:15974: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16025,11 +16029,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16028: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16032: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16032: \$? = $ac_status" >&5
+   echo "$as_me:16036: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18147,11 +18151,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18150: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18154: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18154: \$? = $ac_status" >&5
+   echo "$as_me:18158: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18409,11 +18413,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18412: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18416: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18416: \$? = $ac_status" >&5
+   echo "$as_me:18420: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18471,11 +18475,11 @@ else
    -e 's:.*FLAGS}? :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18474: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18478: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18478: \$? = $ac_status" >&5
+   echo "$as_me:18482: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20711,7 +20715,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20714 "configure"
+#line 20718 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20809,7 +20813,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20812 "configure"
+#line 20816 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -22502,7 +22506,6 @@ echo "${ECHO_T}no" >&6
     fi
   fi
 fi
-
 
 
 
@@ -29466,7 +29469,470 @@ echo "$as_me: running Boost configuration script" >&6;}
   BOOST_USER_CONFIG_H="boost/user.hpp"
 fi
 
-# setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
+
+
+# Extract the first word of "doxygen", so it can be a program name with args.
+set dummy doxygen; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_ac_cv_prog_doxygen+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $ac_cv_prog_doxygen in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_cv_prog_doxygen="$ac_cv_prog_doxygen" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ac_cv_prog_doxygen="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+ac_cv_prog_doxygen=$ac_cv_path_ac_cv_prog_doxygen
+
+if test -n "$ac_cv_prog_doxygen"; then
+  echo "$as_me:$LINENO: result: $ac_cv_prog_doxygen" >&5
+echo "${ECHO_T}$ac_cv_prog_doxygen" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+if test -n "$ac_cv_prog_doxygen"; then
+  DOXYGEN="$ac_cv_prog_doxygen"
+else
+  { { echo "$as_me:$LINENO: error: Doxygen not found." >&5
+echo "$as_me: error: Doxygen not found." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+
+
+
+# Check whether --with-xsltproc or --without-xsltproc was given.
+if test "${with_xsltproc+set}" = set; then
+  withval="$with_xsltproc"
+
+    if test "x$withval" = "xno"; then
+      ac_cv_have_xsltproc=no
+    else
+      if test "x$withval" != "xyes"; then
+        xsltproc_path=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+      fi
+    fi
+
+
+fi;
+
+  if test -n "$ac_cv_have_xsltproc"; then
+    echo "$as_me:$LINENO: checking for xsltproc" >&5
+echo $ECHO_N "checking for xsltproc... $ECHO_C" >&6
+    echo "$as_me:$LINENO: result: $ac_cv_have_xsltproc" >&5
+echo "${ECHO_T}$ac_cv_have_xsltproc" >&6
+  else
+    if test -z "$xsltproc_path"; then
+      # Extract the first word of "xsltproc", so it can be a program name with args.
+set dummy xsltproc; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_ac_cv_prog_xsltproc+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $ac_cv_prog_xsltproc in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_cv_prog_xsltproc="$ac_cv_prog_xsltproc" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ac_cv_prog_xsltproc="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+ac_cv_prog_xsltproc=$ac_cv_path_ac_cv_prog_xsltproc
+
+if test -n "$ac_cv_prog_xsltproc"; then
+  echo "$as_me:$LINENO: result: $ac_cv_prog_xsltproc" >&5
+echo "${ECHO_T}$ac_cv_prog_xsltproc" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+    else
+      if test -x "$xsltproc_path"; then
+        echo "$as_me:$LINENO: checking for $xsltproc_path" >&5
+echo $ECHO_N "checking for $xsltproc_path... $ECHO_C" >&6
+        echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6
+        ac_cv_prog_xsltproc="$xsltproc_path"
+      else
+        # Extract the first word of "$xsltproc_path", so it can be a program name with args.
+set dummy $xsltproc_path; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_ac_cv_prog_xsltproc+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $ac_cv_prog_xsltproc in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_cv_prog_xsltproc="$ac_cv_prog_xsltproc" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ac_cv_prog_xsltproc="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+ac_cv_prog_xsltproc=$ac_cv_path_ac_cv_prog_xsltproc
+
+if test -n "$ac_cv_prog_xsltproc"; then
+  echo "$as_me:$LINENO: result: $ac_cv_prog_xsltproc" >&5
+echo "${ECHO_T}$ac_cv_prog_xsltproc" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+      fi
+    fi
+    if test -n "$ac_cv_prog_xsltproc"; then
+      ac_cv_have_xsltproc=yes
+      cat >>confdefs.h <<_ACEOF
+#define XSLTPROC "$ac_cv_prog_xsltproc"
+_ACEOF
+
+    else
+      ac_cv_have_xsltproc=no
+    fi
+  fi
+
+
+
+if test -n "$ac_cv_have_xsltproc"; then
+  XSLTPROC="$ac_cv_prog_xsltproc"
+else
+  { echo "$as_me:$LINENO: xsltproc not found." >&5
+echo "$as_me: xsltproc not found." >&6;}
+fi
+
+
+
+
+# Extract the first word of "java", so it can be a program name with args.
+set dummy java; ac_word=$2
+echo "$as_me:$LINENO: checking for $ac_word" >&5
+echo $ECHO_N "checking for $ac_word... $ECHO_C" >&6
+if test "${ac_cv_path_ac_cv_prog_java+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  case $ac_cv_prog_java in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_ac_cv_prog_java="$ac_cv_prog_java" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if $as_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
+    ac_cv_path_ac_cv_prog_java="$as_dir/$ac_word$ac_exec_ext"
+    echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+
+  ;;
+esac
+fi
+ac_cv_prog_java=$ac_cv_path_ac_cv_prog_java
+
+if test -n "$ac_cv_prog_java"; then
+  echo "$as_me:$LINENO: result: $ac_cv_prog_java" >&5
+echo "${ECHO_T}$ac_cv_prog_java" >&6
+else
+  echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+
+if test -n "$ac_cv_prog_java"; then
+  JAVA="$ac_cv_prog_java"
+else
+  { echo "$as_me:$LINENO: Java not found." >&5
+echo "$as_me: Java not found." >&6;}
+fi
+
+
+if test -n "$JAVA"; then
+  HAVE_JAVA_TRUE=
+  HAVE_JAVA_FALSE='#'
+else
+  HAVE_JAVA_TRUE='#'
+  HAVE_JAVA_FALSE=
+fi
+
+
+
+
+
+# Check whether --with-docbook-dtd or --without-docbook-dtd was given.
+if test "${with_docbook_dtd+set}" = set; then
+  withval="$with_docbook_dtd"
+
+    if test "x$withval" = xno; then
+      docbook_dtd=no
+    else
+      docbook_dtd=yes
+      if test "x$withval" != xyes; then
+        docbook_dtd_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+      fi
+    fi
+
+
+fi;
+
+  found=no
+
+  if test "x$docbook_dtd" != xno; then
+    echo "$as_me:$LINENO: checking for DocBook DTD" >&5
+echo $ECHO_N "checking for DocBook DTD... $ECHO_C" >&6
+    if test -n "$docbook_dtd_dir"; then
+      if test -f "$docbook_dtd_dir/docbookx.dtd"; then
+        found=yes
+      else
+        docbook_dtd_dir=no
+      fi
+    else
+      docbook_dtd_dir=no
+      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
+      do
+        for s in docbook-dtd-4.4
+        do
+          if test -f "$d/$s/docbookx.dtd"; then
+            found=yes
+            docbook_dtd_dir="$d/$s"
+            break
+          fi
+        done
+        if test "$found" = yes; then
+          break
+        fi
+      done
+    fi
+    echo "$as_me:$LINENO: result: $docbook_dtd_dir" >&5
+echo "${ECHO_T}$docbook_dtd_dir" >&6
+  fi
+
+  if test "$found" = yes; then
+    ac_cv_have_docbook_dtd=yes
+    ac_cv_docbook_dtd_dir="$docbook_dtd_dir"
+  else
+    ac_cv_have_docbook_dtd=no
+    ac_cv_docbook_dtd_dir=
+  fi
+
+
+
+test "$ac_cv_have_docbook_dtd" = yes && DOCBOOK_DTD_DIR="$ac_cv_docbook_dtd_dir"
+
+
+
+# Check whether --with-docbook-xsl or --without-docbook-xsl was given.
+if test "${with_docbook_xsl+set}" = set; then
+  withval="$with_docbook_xsl"
+
+    if test "x$withval" = xno; then
+      docbook_xsl=no
+    else
+      docbook_xsl=yes
+      if test "x$withval" != xyes; then
+        docbook_xsl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+      fi
+    fi
+
+
+fi;
+
+  found=no
+
+  if test "x$docbook_xsl" != xno; then
+    echo "$as_me:$LINENO: checking for DocBook XSL" >&5
+echo $ECHO_N "checking for DocBook XSL... $ECHO_C" >&6
+    if test -n "$docbook_xsl_dir"; then
+      if test -f "$docbook_xsl_dir/fo/docbook.xsl"; then
+        found=yes
+      else
+        docbook_xsl_dir=no
+      fi
+    else
+      docbook_xsl_dir=no
+      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
+      do
+        for s in docbook-xsl-1.69.1
+        do
+          if test -f "$d/$s/fo/docbook.xsl"; then
+            found=yes
+            docbook_xsl_dir="$d/$s"
+            break
+          fi
+        done
+        if test "$found" = yes; then
+          break
+        fi
+      done
+    fi
+    echo "$as_me:$LINENO: result: $docbook_xsl_dir" >&5
+echo "${ECHO_T}$docbook_xsl_dir" >&6
+  fi
+
+  if test "$found" = yes; then
+    ac_cv_have_docbook_xsl=yes
+    ac_cv_docbook_xsl_dir="$docbook_xsl_dir"
+  else
+    ac_cv_have_docbook_xsl=no
+    ac_cv_docbook_xsl_dir=
+  fi
+
+
+
+test "$ac_cv_have_docbook_xsl" = yes && DOCBOOK_XSL_DIR="$ac_cv_docbook_xsl_dir"
+
+
+
+# Check whether --with-fop or --without-fop was given.
+if test "${with_fop+set}" = set; then
+  withval="$with_fop"
+
+    if test "x$withval" = xno; then
+      fop=no
+    else
+      fop=yes
+      if test "x$withval" != xyes; then
+        fop_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+      fi
+    fi
+
+
+fi;
+
+  found=no
+
+  if test "x$fop" != xno; then
+    echo "$as_me:$LINENO: checking for Apache FOP" >&5
+echo $ECHO_N "checking for Apache FOP... $ECHO_C" >&6
+    if test -n "$fop_dir"; then
+      if test -f "$fop_dir/fop.sh"; then
+        found=yes
+      else
+        fop_dir=no
+      fi
+    else
+      fop_dir=no
+      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
+      do
+        for s in fop-0.20.5
+        do
+          if test -f "$d/$s/fop.sh"; then
+            found=yes
+            fop_dir="$d/$s"
+            break
+          fi
+        done
+        if test "$found" = yes; then
+          break
+        fi
+      done
+    fi
+    echo "$as_me:$LINENO: result: $fop_dir" >&5
+echo "${ECHO_T}$fop_dir" >&6
+  fi
+
+  if test "$found" = yes; then
+    ac_cv_have_fop=yes
+    ac_cv_fop_dir="$fop_dir"
+  else
+    ac_cv_have_fop=no
+    ac_cv_fop_dir=
+  fi
+
+
+
+test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir"
+
+if test -f "$srcdir/LICENSE.txt" && test -f "$srcdir/LICENSE-light.txt" && test -n "$BOOST_SRCDIR" && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
+  build_doc=yes
+  if test "$ac_cv_have_fop" = yes; then
+    build_pdf=yes
+  else
+    build_pdf=no
+    { echo "$as_me:$LINENO: PDF documentation will no be built." >&5
+echo "$as_me: PDF documentation will no be built." >&6;}
+  fi
+else
+  build_doc=no
+  build_pdf=no
+  { echo "$as_me:$LINENO: Documentation will no be built." >&5
+echo "$as_me: Documentation will no be built." >&6;}
+fi
+
+
+if test "$build_doc" = yes; then
+  BUILD_DOC_TRUE=
+  BUILD_DOC_FALSE='#'
+else
+  BUILD_DOC_TRUE='#'
+  BUILD_DOC_FALSE=
+fi
+
+
+
+if test "$build_pdf" = yes; then
+  BUILD_PDF_TRUE=
+  BUILD_PDF_FALSE='#'
+else
+  BUILD_PDF_TRUE='#'
+  BUILD_PDF_FALSE=
+fi
+
+
 
 
 BASE_CPPFLAGS="$CPPFLAGS"
@@ -29528,8 +29994,6 @@ fi
           ac_config_files="$ac_config_files doc/Makefile"
 
 
-          ac_config_files="$ac_config_files doc/doxygen.conf"
-
 
 if test "$ac_cv_alps_type" = "full"; then
             ac_config_files="$ac_config_files test/alea/Makefile"
@@ -29552,6 +30016,13 @@ if test "$ac_cv_use_precompiled_boost" != yes; then
 _ACEOF
 
               ac_config_headers="$ac_config_headers src/boost/po_utf8_codecvt_facet.cpp"
+
+fi
+
+          ac_config_files="$ac_config_files doc/doxygen.conf"
+
+if test "$build_doc" = yes; then
+            ac_config_files="$ac_config_files doc/autodoc"
 
 fi
 
@@ -29734,6 +30205,27 @@ if test -z "${BUILD_BOOST_THREAD_TRUE}" && test -z "${BUILD_BOOST_THREAD_FALSE}"
   { { echo "$as_me:$LINENO: error: conditional \"BUILD_BOOST_THREAD\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"BUILD_BOOST_THREAD\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_JAVA_TRUE}" && test -z "${HAVE_JAVA_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"HAVE_JAVA\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"HAVE_JAVA\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${BUILD_DOC_TRUE}" && test -z "${BUILD_DOC_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"BUILD_DOC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"BUILD_DOC\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${BUILD_PDF_TRUE}" && test -z "${BUILD_PDF_FALSE}"; then
+  { { echo "$as_me:$LINENO: error: conditional \"BUILD_PDF\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+echo "$as_me: error: conditional \"BUILD_PDF\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -30206,7 +30698,6 @@ do
   "test/parameter/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/parameter/Makefile" ;;
   "test/parser/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/parser/Makefile" ;;
   "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
-  "doc/doxygen.conf" ) CONFIG_FILES="$CONFIG_FILES doc/doxygen.conf" ;;
   "test/alea/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/alea/Makefile" ;;
   "test/lattice/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/lattice/Makefile" ;;
   "test/lattice/parameters" ) CONFIG_FILES="$CONFIG_FILES test/lattice/parameters" ;;
@@ -30234,6 +30725,8 @@ do
   "tool/plot2text" ) CONFIG_FILES="$CONFIG_FILES tool/plot2text" ;;
   "tool/plot2xmgr" ) CONFIG_FILES="$CONFIG_FILES tool/plot2xmgr" ;;
   "tool/changestylesheet" ) CONFIG_FILES="$CONFIG_FILES tool/changestylesheet" ;;
+  "doc/doxygen.conf" ) CONFIG_FILES="$CONFIG_FILES doc/doxygen.conf" ;;
+  "doc/autodoc" ) CONFIG_FILES="$CONFIG_FILES doc/autodoc" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/alps/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/alps/config.h" ;;
   "src/boost/po_utf8_codecvt_facet.cpp" ) CONFIG_HEADERS="$CONFIG_HEADERS src/boost/po_utf8_codecvt_facet.cpp" ;;
@@ -30403,7 +30896,6 @@ s,@BOOST_CPPFLAGS@,$BOOST_CPPFLAGS,;t t
 s,@BOOST_LDFLAGS@,$BOOST_LDFLAGS,;t t
 s,@BOOST_LIBS@,$BOOST_LIBS,;t t
 s,@BOOST_INC_DIR@,$BOOST_INC_DIR,;t t
-s,@SRC_BOOST@,$SRC_BOOST,;t t
 s,@BOOST_SRCDIR@,$BOOST_SRCDIR,;t t
 s,@BUILD_BOOST_TRUE@,$BUILD_BOOST_TRUE,;t t
 s,@BUILD_BOOST_FALSE@,$BUILD_BOOST_FALSE,;t t
@@ -30444,6 +30936,21 @@ s,@BUILD_BOOST_SIGNALS_FALSE@,$BUILD_BOOST_SIGNALS_FALSE,;t t
 s,@BUILD_BOOST_THREAD_TRUE@,$BUILD_BOOST_THREAD_TRUE,;t t
 s,@BUILD_BOOST_THREAD_FALSE@,$BUILD_BOOST_THREAD_FALSE,;t t
 s,@BOOST_USER_CONFIG_H@,$BOOST_USER_CONFIG_H,;t t
+s,@DOXYGEN@,$DOXYGEN,;t t
+s,@ac_cv_prog_doxygen@,$ac_cv_prog_doxygen,;t t
+s,@ac_cv_prog_xsltproc@,$ac_cv_prog_xsltproc,;t t
+s,@XSLTPROC@,$XSLTPROC,;t t
+s,@JAVA@,$JAVA,;t t
+s,@ac_cv_prog_java@,$ac_cv_prog_java,;t t
+s,@HAVE_JAVA_TRUE@,$HAVE_JAVA_TRUE,;t t
+s,@HAVE_JAVA_FALSE@,$HAVE_JAVA_FALSE,;t t
+s,@DOCBOOK_DTD_DIR@,$DOCBOOK_DTD_DIR,;t t
+s,@DOCBOOK_XSL_DIR@,$DOCBOOK_XSL_DIR,;t t
+s,@FOP_DIR@,$FOP_DIR,;t t
+s,@BUILD_DOC_TRUE@,$BUILD_DOC_TRUE,;t t
+s,@BUILD_DOC_FALSE@,$BUILD_DOC_FALSE,;t t
+s,@BUILD_PDF_TRUE@,$BUILD_PDF_TRUE,;t t
+s,@BUILD_PDF_FALSE@,$BUILD_PDF_FALSE,;t t
 s,@BASE_CPPFLAGS@,$BASE_CPPFLAGS,;t t
 s,@BASE_LDFLAGS@,$BASE_LDFLAGS,;t t
 s,@BASE_LIBS@,$BASE_LIBS,;t t

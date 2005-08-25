@@ -1,3 +1,8 @@
+2005-8-25  Synge Todo <wistaria@comp-phys.org>
+
+	* [doc] Added prototype for new documentation system based on
+	  boostbook.
+
 2005-4-18  Matthias Troyer <troyer@comp-phys.org>
 
 	* [model] Removed support for unphysical single fermion creation.

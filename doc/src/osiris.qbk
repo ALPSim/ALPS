@@ -1,0 +1,9 @@
+[library Alps/Osiris Library
+    [copyright 1994 2002 2003 2004 2005 Matthias Troyer, Synge Todo]
+    [last-revision $Date$]
+]
+
+[section Introduction]
+[endsect]
+
+[xinclude osiris.autodoc]

@@ -468,7 +468,6 @@ fi
 
 dnl boost sources
 
-AC_SUBST(SRC_BOOST)
 AC_SUBST(BOOST_SRCDIR)
 
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
@@ -672,7 +671,80 @@ if test "$ac_cv_boost_config" != no; then
   BOOST_USER_CONFIG_H="boost/user.hpp"
 fi
 
-# setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
+dnl
+dnl Doxygen
+dnl
+
+AC_SUBST(DOXYGEN)
+AC_PATH_PROG([ac_cv_prog_doxygen], [doxygen])
+if test -n "$ac_cv_prog_doxygen"; then
+  DOXYGEN="$ac_cv_prog_doxygen"
+else
+  AC_MSG_ERROR([Doxygen not found.])
+fi
+
+dnl
+dnl xsltproc
+dnl
+
+AC_XSLTPROC
+AC_SUBST(XSLTPROC)
+if test -n "$ac_cv_have_xsltproc"; then
+  XSLTPROC="$ac_cv_prog_xsltproc"
+else
+  AC_MSG_NOTICE([xsltproc not found.])
+fi
+
+
+dnl
+dnl Java
+dnl
+
+AC_SUBST(JAVA)
+AC_PATH_PROG([ac_cv_prog_java], [java])
+if test -n "$ac_cv_prog_java"; then
+  JAVA="$ac_cv_prog_java"
+else
+  AC_MSG_NOTICE([Java not found.])
+fi
+AM_CONDITIONAL(HAVE_JAVA, test -n "$JAVA")
+
+dnl
+dnl for Generating Documentation (DocBook DTD, XSL, Apache FOP)
+dnl
+
+AC_DOCBOOK_DTD
+AC_SUBST(DOCBOOK_DTD_DIR)
+test "$ac_cv_have_docbook_dtd" = yes && DOCBOOK_DTD_DIR="$ac_cv_docbook_dtd_dir"
+
+AC_DOCBOOK_XSL
+AC_SUBST(DOCBOOK_XSL_DIR)
+test "$ac_cv_have_docbook_xsl" = yes && DOCBOOK_XSL_DIR="$ac_cv_docbook_xsl_dir"
+
+AC_FOP
+AC_SUBST(FOP_DIR)
+test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir"
+
+dnl check if all the required tools are present
+if test -f "$srcdir/LICENSE.txt" && test -f "$srcdir/LICENSE-light.txt" && test -n "$BOOST_SRCDIR" && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
+  build_doc=yes
+  if test "$ac_cv_have_fop" = yes; then
+    build_pdf=yes
+  else
+    build_pdf=no
+    AC_MSG_NOTICE([PDF documentation will no be built.])
+  fi
+else
+  build_doc=no
+  build_pdf=no
+  AC_MSG_NOTICE([Documentation will no be built.])
+fi
+AM_CONDITIONAL(BUILD_DOC, test "$build_doc" = yes)
+AM_CONDITIONAL(BUILD_PDF, test "$build_pdf" = yes)
+
+dnl
+dnl # setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
+dnl
 
 AC_SUBST(BASE_CPPFLAGS)
 BASE_CPPFLAGS="$CPPFLAGS"
@@ -725,8 +797,6 @@ AC_CONFIG_FILES(lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mp
 AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile)
 AC_CONFIG_FILES(doc/Makefile)
 
-dnl doc generation
-AC_CONFIG_FILES(doc/doxygen.conf)
 
 if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(test/alea/Makefile)
@@ -740,6 +810,12 @@ fi
 if test "$ac_cv_use_precompiled_boost" != yes; then
     AC_DEFINE_UNQUOTED(PO_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/program_options/src/utf8_codecvt_facet.cpp")
     AC_CONFIG_HEADERS(src/boost/po_utf8_codecvt_facet.cpp)
+fi
+
+dnl doc generation
+AC_CONFIG_FILES(doc/doxygen.conf)
+if test "$build_doc" = yes; then
+  AC_CONFIG_FILES(doc/autodoc)
 fi
 
 AC_OUTPUT

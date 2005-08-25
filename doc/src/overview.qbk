@@ -1,0 +1,229 @@
+[chapter Overview
+    [last-revision $Date$]
+]
+
+[def __alps_paper [@http://jpsj.ipap.jp/journal/supplement/74/pdf/030.pdf F. Alet /et al/., J. Phys. Soc. Jpn. Suppl., *74*, 30 (2005)]]
+
+The ALPS libraries are part of the ALPS project (Parallel Algorithms
+for Lattice Models), which aims at providing generic parallel
+algorithms for classical and quantum lattice models and provides
+utility classes and algorithm for many other problems. It strives to
+increase software reuse in the physics community.
+
+
+[section Libraries]
+
+Currently the following libraries are publicly available as part of
+the ALPS library project:
+
+* [link alps_general alps/general](*): generally usefull classes and traits
+* [link alps_osiris alps/osiris](*): serialization and communication
+* [link alps_parser alps/parser](*): helper functions to parse and write XML
+  files
+* [link alps_alea alps/alea]: Monte Carlo measurements and evaluation
+* [link alps_lattice alps/lattice]: lattices and graphs
+* [link alps_model alps/model]: quantum lattice models
+* [link alps_scheduler alps/scheduler]: an automatically parallelizing 
+  scheduler for Monte Carlo simulations
+
+Besides the helper tools for the [link alps_scheduler scheduler
+library] we have provided a few [link tools sample tools] for the
+manipulation of the XML files created by the ALPS programs.
+
+[h1 Applications]
+
+Applications based on the ALPS libraries are available separately from
+[@http://alps.comp-phys.org/software/applications/doc/index.html].
+
+[endsect]
+
+
+[section License]
+
+The ALPS libraries are free for non-commerical use but require
+acknowledgements and citations in any publication produced even
+partially using the ALPS Libraries.  See the license text [link
+license.license_txt LICENSE.txt] and the citations file [link
+license.citations_txt CITATIONS.txt] for details.
+
+Basic libraries marked by an asterisk (*) in the previous section
+(i.e., alps/general, osiris, and parser libraries) are also published
+as the [@http://alps.comp-phys.org/softwares/alps-light/ ALPS Light
+Libraries] under the [@http://www.boost.org/LICENSE_1_0.txt Boost
+Software License (Version 1.0)] without acknowledgement/citation
+requirement.
+
+[h1 LICENSE.txt]
+
+['*ALPS LIBRARY LICENSE version 1.1*]
+
+Copyright (C) 2003-2005 Ian McCulloch.  Everyone is permitted to copy and
+distribute this license document.
+
+This License applies to any software containing a notice placed by the
+copyright holder saying that it may be distributed under the terms of
+the ALPS Library License version 1.1.  Such software is herein
+referred to as the "Library".  This license grants permission to use,
+reproduce, display, distribute, execute and transmit the Library, and
+to prepare derivative works of the Library, and to permit others to do
+so for non-commercial academic use, all subject to the following
+conditions:
+
+# In any scientific publication based wholly or in part on the
+  Library, the use of the Library must be acknowledged and the
+  publications listed in the accompanying CITATIONS.txt document must
+  be cited.
+
+# You may copy and distribute verbatim copies of the Library in the
+  form that you received it, as long as all copyright notices and
+  references to this license and warranty disclaimer are kept intact,
+  and all recipients also receive a copy of this license, warranty
+  disclaimer and CITATIONS.txt document.
+
+# You may modify your copy or copies of the Library, thus forming a
+  work based on the Library, and use, copy or distribute such modified
+  works under the terms of sections 1 and 2 above, provided that you
+  also meet all of these conditions:
+
+  # You must cause the modified files to carry prominent notices
+    stating that you changed the files and the date of any change.
+
+  # All citations listed in the CITATIONS.txt document that refer to
+    sections of the Library that exist in the modified work must be
+    preserved irrespective of the extent of the modification.
+
+  # You must cause any work that you distribute or publish, that in
+    whole or in part contains or is derived from the Library or any
+    part thereof, to be licensed as a whole at no charge to all third
+    parties under terms compatible with this License.
+
+# This Software, or modifications under section 3 above, may be
+  distributed in object code or executable form, provided that you
+  meet all of these conditions:
+
+  # This complete License, warranty disclaimer and accompanying 
+    CITATIONS.txt document is included.
+
+  # The executable program is accompanied with the complete
+    machine-readable source code to the Library as used in the
+    executable, which must be distributed under the terms of sections
+    2 and 3 above.  Alternatively, you may provide instructions for
+    obtaining the source code at no cost (for example, a hyper-text
+    link).
+
+# A program that contains no derivative of any portion of the Library,
+  but is designed to work with the Library by being compiled or linked
+  with it, is not a derivative work of the Library, and therefore
+  falls outside the scope of this License.\n
+  However, linking such a work with the Library creates an executable
+  that is a derivative of the Library (because it contains portions of
+  the Library).  The executable is therefore covered by this License.
+  Section 4 states terms for distribution of such executables.
+
+# You must cause executable programs that utilize this Library to
+  print or display, when started in the most basic way, a prominent
+  announcement including a copyright notice and citation requirements
+  as listed in the accompanying CITATIONS.txt document.  If the
+  executable program utilizes the Library in a modified form (under
+  section 3 above), then the announcement must state this.  Exception:
+  if the announcement would not normally be visible to the user, or
+  the announcement would interfere with normal operations of the
+  executable application, then the executable program is not required
+  to print an announcement.
+
+THIS SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE AND
+NON-INFRINGEMENT.  IN NO EVENT SHALL THE COPYRIGHT HOLDERS OR ANYONE
+DISTRIBUTING THE SOFTWARE BE LIABLE FOR DAMAGES OR OTHER LIABILITY,
+WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+[h1 CITATIONS.txt]
+
+Any publication for which one of the following libraries are used has
+to acknowledge the use of the ALPS libraries, and the papers listed
+below:
+
+When alps/model.h or any header in alps/model was used: reference
+the web page [@http://alps.comp-phys.org/] and cite the publication:
+
+* __alps_paper.
+
+When alps/lattice.h or any header in alps/lattice was used:
+reference the web page [@http://alps.comp-phys.org/] and cite the
+publication: 
+
+* __alps_paper.
+
+When alps/alea.h or any header in alps/alea was used: reference the
+web page [@http://alps.comp-phys.org/] and cite the publications:
+
+* __alps_paper.
+
+* M. Troyer /et al/., Lecture Notes in Computer Science, *1505*, 191
+  (1998).
+
+When alps/scheduler.h or any header in alps/scheduler was used:
+reference the web page [@http://alps.comp-phys.org/] and cite the
+publications:
+
+* __alps_paper.
+
+* M. Troyer /et al/., Lecture Notes in Computer Science, *1505*, 191
+  (1998).
+
+The use of any other library, in particular those with headers in
+the subdirectories alps/parser, alps/osiris, alps/random do not
+carry any citation requirement but acknowledgment of the ALPS
+project is encouraged.
+
+[endsect]
+  
+
+[section Support]
+
+[h1 Mailing List]
+
+We offer the following mailing lists related to the libraries in
+the ALPS project:
+
+* Announcements of new releases:
+  [@https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-announce
+  comp-phys-alps-announce@lists.comp-phys.org]
+
+* Discussion and questions regarding the use of the ALPS libraries:
+  [@https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-users
+  comp-phys-alps-users@lists.comp-phys.org] 
+
+* Discussion of the ALPS libraries and their development:
+  [https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-devel
+  comp-phys-alps-devel@lists.comp-phys.org]
+
+[h1 Support]
+
+For questions about the libraries please contact
+[@mailto:alps-support@comp-phys.org alps-support@comp-phys.org].
+
+[endsect]
+
+
+[section Contributors]
+
+The following people (in alphabetical order) have contributed to the
+ALPS project:
+
+* [@http://www.itp.phys.ethz.ch/staff/alet/ Fabien Alet] (alet@comp-phys.org)
+* Beat Ammon (beat.ammon@citadelgroup.com)
+* [@http://www.itp.phys.ethz.ch/staff/prakash/ Prakash Dayal] (prakash@comp-phys.org)
+* [@http://theorie.physik.uni-wuerzburg.de/%7Eardornei/ Ansgar Dorneich] (dorneich@de.ibm.com)
+* Axel Grzesik (axel@th.physik.uni-bonn.de)
+* [@http://w3-phystheo.ups-tlse.fr/%7Elaeuchli/ Andreas Läuchli] (laeuchli@comp-phys.org)
+* [@http://www.itp.phys.ethz.ch/staff/gschmid/ Guido Schmid] (gschmid@comp-phys.org)
+* [@http://wistaria.comp-phys.org Synge Todo] (wistaria@comp-phys.org)
+* [@http://www.itp.phys.ethz.ch/staff/trebst/ Simon Trebst] (trebst@comp-phys.org)
+* [@http://www.itp.phys.ethz.ch/staff/troyer/ Matthias Troyer] (troyer@comp-phys.org)
+* [@http://www.itp.phys.ethz.ch/staff/wessel/ Stefan Wessel] (wessel@comp-phys.org)
+
+[endsect]

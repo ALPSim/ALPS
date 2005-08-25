@@ -1,4 +1,3 @@
-
 ALPS LIBRARY LICENSE version 1.1
 Copyright (C) 2003-2005 Ian McCulloch.  Everyone is permitted to copy and
 distribute this license document.
@@ -42,7 +41,7 @@ object code or executable form, provided that you meet all of these conditions:
 	a. This complete License, warranty disclaimer and accompanying 
 	CITATIONS.txt document is included.
 
-	a. The executable program is accompanied with the complete
+	b. The executable program is accompanied with the complete
 	machine-readable source code to the Library as used in the executable, 
 	which must be distributed under the terms of sections 2 and 3 above.
 	Alternatively, you may provide instructions for obtaining the source 

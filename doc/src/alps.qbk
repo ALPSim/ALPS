@@ -1,0 +1,14 @@
+[book The ALPS Libraries
+    [last-revision $Date$]
+]
+
+[xinclude overview.xml]
+[xinclude getting_started.xml]
+[xinclude general.xml]
+[xinclude osiris.xml]
+[xinclude parser.xml]
+[xinclude alea.xml]
+[xinclude lattice.xml]
+[xinclude model.xml]
+[xinclude scheduler.xml]
+[xinclude tools.xml]

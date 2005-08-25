@@ -1,0 +1,33 @@
+#!/bin/sh
+
+OUTPUT=$1
+shift
+INPUTS="$*"
+
+CONF=/tmp/doxygen.conf.$$
+TMPDIR=/tmp/doxygen.$$
+
+echo "ENABLE_PREPROCESSING = YES" > $CONF
+echo "EXPAND_ONLY_PREDEF = YES" >> $CONF
+echo "EXTRACT_PRIVATE = NO" >> $CONF
+echo "HIDE_UNDOC_MEMBERS = NO" >> $CONF
+echo "MACRO_EXPANSION = YES" >> $CONF
+echo "SEARCH_INCLUDES = YES" >> $CONF
+echo "GENERATE_HTML = NO" >> $CONF
+echo "GENERATE_LATEX = NO" >> $CONF
+echo "GENERATE_XML = YES" >> $CONF
+
+echo "OUTPUT_DIRECTORY = $TMPDIR" >> $CONF
+echo "INPUT = $INPUTS" >> $CONF
+
+set -x
+
+@DOXYGEN@ $CONF
+
+export XML_CATALOG_FILES=catalog.xml
+
+@XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
+
+@XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
+
+rm -rf $CONF $TEMPDIR

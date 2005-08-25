@@ -1,0 +1,141 @@
+[library Alps/General Library
+    [copyright 1994 2002 2003 2004 2005 Matthias Troyer, Synge Todo]
+    [last-revision $Date$]
+]
+
+[section Introduction]
+
+This is a collection of code used by more than one of the ALPS
+libraries. The header files and libraries provided here should be
+considered implementation details for the other officially supported
+libraries and are subject to change without notice.
+
+We hope to move the functionality of the headers in this library to
+standardized libraries such as the Boost C++ library, or to split some
+components off into domain-specific libraries.
+
+We welcome your ideas, suggestions and contributions. If you are
+interested in using some of the components in this library, please
+contact us and we can work together in achieving a good release
+version.
+
+* Configuration
+
+  * [link general.config_h alps/config.h] contains configuration
+    options.
+
+* Traits classes
+
+  * [headerref alps/typetraits.h] contains type traits not found in
+    the standard and boost libraries.
+
+  * [headerref alps/vectortraits.h] contains vector type traits and
+    support for container free numerical algorithms.
+
+* Character functions
+
+  * [headerref alps/cctype.h] includes <cctype> and undefines harmful
+    macros that some implementations forget to undefinf.
+
+* Bit operations
+
+  * [headerref alps/bitops.h] contains bit operations modeled after
+    the Cray intrinsics.
+
+* Mathematical functions and function objects
+
+  * [headerref alps/functional.h] contains mathematical function
+    objects not found in the standard and boost libraries.
+
+  * [headerref alps/math.hpp] contains mathematical functions not
+    found in the standard and boost libraries.
+
+  * [headerref alps/vectormath.h] contains a few basic mathematical operations on std::vector.
+
+  * [headerref alps/random.h] contains functions to randomize a vector
+    and a fast buffered RNG class.
+
+* Classes for parameters and their evaluation
+
+  * [headerref alps/stringvalue.h] a class that can store any
+    numerical, boolean or string value in a string representation.
+
+  * [headerref alps/parameters.h] a class that can store parameters,
+    identified by name
+
+  * [headerref alps/parameterlist.h] a collection of Parameters
+
+  * [headerref alps/expression.h] the Expression class for limited
+    symbolic evaluation of expressions
+
+* Fixed-Capacity STL Containers
+
+  * [headerref alps/fixed_capacity_vector.h] an STL-compliant vector
+    class with fixed capcity.
+
+  * [headerref alps/fixed_capacity_deque.h] an STL-compliant deque
+    class with fixed capcity.
+
+  * [headerref alps/fixed_capacity_traits.h] a traits class for fixed
+    capcity containers.
+
+  * [headerref alps/fixed_capacity_fwd.h] forward declarations of
+    fixed capcity containers.* Configuration
+
+[endsect]
+
+[section:config_h alps/config.h]
+
+Header alps/config.h contains configuration options determined by the
+ALPS configure script.  In addition please see the
+[@http://www.boost.org/ Boost] configuration macros.
+
+Note that this header file should be included /before/ any Boost
+header files.
+
+[h1 Macros]
+
+[table macros defined/undefined in alps/config.h
+       [[Name] [Description]]
+       [[ALPS_WITHOUT_XML]	[defined if ALPS was build without ALPS/xml library]]
+       [[ALPS_WITHOUT_OSIRIS]	[defined if ALPS was build without ALPS/osiris library]]
+       [[ALPS_WITHOUT_ALEA]	[defined if ALPS was build without ALPS/alea library]]
+       [[ALPS_WITHOUT_LATTICE]	[defined if ALPS was build without ALPS/lattice library]]
+       [[ALPS_WITHOUT_SCHEDULER]	[defined if ALPS was build without ALPS/scheduler library]]
+       [[ALPS_HAVE_UNISTD_H]	[defined if the header <unistd.h> exists]]
+       [[ALPS_HAVE_SYS_SYSTEMINFO_H]	[defined if the header <sys/systeminfo.h> exists]]
+       [[ALPS_HAVE_SYS_TIME_H]	[defined if the header <sys/time.h> exists]]
+       [[ALPS_HAVE_SYS_TYPES_H]	[defined if the header <sys/types.h> exists]]
+       [[ALPS_HAVE_INTTYPES_H]	[defined if the header <inttypes.h> exists]]
+       [[ALPS_HAVE_BIND_BITYPES_H]	[defined if the header <bind/bitypes.h> exists]]
+       [[ALPS_HAVE_SYS_INT_TYPES_H]	[defined if the header <sys/int_types.h> exists]]
+       [[ALPS_HAS_INT64]	[defined if 64 bit integer types exist]]
+       [[ALPS_HAVE_VALARRAY]	[defined if the std::valarray class exists]]
+       [[ALPS_HAVE_MP]	[defined if an MPI library exists and was specified in the configuration step.]]
+       [[ALPS_HAVE_PVM]	[defined if the PVM library exists and was specified in the configuration step.]]
+       [[ALPS_HAVE_HDF5]	[defined if the HDF5 library exists and was specified in the configuration step.]]
+       [[ALPS_HAVE_PTHREAD]	[defined if the pthread library exists and was specified in the configuration step.]]
+       [[ALPS_HAVE_EXPAT]	[defined if the expat XML parser exists and was specified in the configuration step.]]
+       [[ALPS_HAVE_XERCES]	[defined if the Xerces XML parser exists and was specified in the configuration step.]]
+]
+
+[h1 Types]
+
+The header has to include the system headers defining the types
+
+* =int8_t=
+* =uint8_t=
+* =int16_t=
+* =uint16_t=
+* =int32_t=
+* =uint32_t=
+
+In addition, if =ALPS_NO_INT64= is not defined it also has to include
+definitions for the types
+
+* =int64_t=
+* ==uint64_t=
+
+[endsect]
+
+[xinclude general.autodoc]
