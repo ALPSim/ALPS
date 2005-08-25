@@ -1,4 +1,6 @@
 [library Alps/Alea Library
+    [id alea]
+    [dirname alea]
     [copyright 1994 2002 2003 2004 2005 Matthias Troyer, Synge Todo]
     [last-revision $Date$]
 ]
