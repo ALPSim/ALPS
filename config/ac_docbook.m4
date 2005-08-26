@@ -33,7 +33,7 @@ AC_DEFUN([AC_DOCBOOK_DTD],
       docbook_dtd_dir=no
       for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
       do
-        for s in docbook-dtd-4.4
+        for s in docbook-dtd docbook-dtd-4.4
         do
           if test -f "$d/$s/docbookx.dtd"; then
             found=yes
@@ -90,7 +90,7 @@ AC_DEFUN([AC_DOCBOOK_XSL],
       docbook_xsl_dir=no
       for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
       do
-        for s in docbook-xsl-1.69.1
+        for s in docbook-xsl docbook-xsl-1.69.1
         do
           if test -f "$d/$s/fo/docbook.xsl"; then
             found=yes

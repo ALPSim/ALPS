@@ -4,8 +4,8 @@ export XML_CATALOG_FILES=catalog.xml
 export JAVACMD=@JAVA@
 FO=`dirname "$1"`/`basename "$1" .docbook`.fo
 
-echo @XSLTPROC@ --stringparam paper.type A4 --xinclude -o "$FO" @BOOST_INC_DIR@/tools/boostbook/xsl/fo.xsl "$1"
-@XSLTPROC@ --stringparam paper.type A4 --xinclude -o "$FO" @BOOST_INC_DIR@/tools/boostbook/xsl/fo.xsl "$1"
+echo @XSLTPROC@ --stringparam paper.type A4 --xinclude -o "$FO" @BOOST_DIR@/tools/boostbook/xsl/fo.xsl "$1"
+@XSLTPROC@ --stringparam paper.type A4 --xinclude -o "$FO" @BOOST_DIR@/tools/boostbook/xsl/fo.xsl "$1"
 
 [ "$?" -ne 0 ] && exit $?
 

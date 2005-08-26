@@ -310,12 +310,12 @@ found=no
 
 ac_cv_boost_incdir=
 
-AC_SUBST(BOOST_INC_DIR)
+AC_SUBST(BOOST_INCDIR)
 
 if test -n "$boost_incdir"; then
   ac_cv_boost_incdir="$boost_incdir"
   BOOST_CPPFLAGS="-I$boost_incdir"
-  BOOST_INC_DIR=$boost_incdir
+  BOOST_INCDIR=$boost_incdir
   CPPFLAGS="$BOOST_CPPFLAGS $ac_save_CPPFLAGS"
 fi
 AC_TRY_COMPILE([#include <boost/config.hpp>],,found=yes)
@@ -326,7 +326,7 @@ if test "$found" = no; then
     BOOST_CPPFLAGS="-I$boost_incdir_s"
     CPPFLAGS="$BOOST_CPPFLAGS $ac_save_CPPFLAGS"
     AC_TRY_COMPILE([#include <boost/config.hpp>],,found=yes)
-    BOOST_INC_DIR=$boost_incdir_s
+    BOOST_INCDIR=$boost_incdir_s
   fi
 fi
 
@@ -468,6 +468,7 @@ fi
 
 dnl boost sources
 
+AC_SUBST(BOOST_DIR)
 AC_SUBST(BOOST_SRCDIR)
 
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
@@ -475,10 +476,12 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   ac_cv_use_precompiled_boost=no
   if test -n "$boost_srcdir"; then
     AC_MSG_RESULT([$boost_srcdir])
+    BOOST_DIR="$boost_dir"
     BOOST_SRCDIR="$boost_srcdir"
   else
     if test -n "$boost_srcdir_s"; then
       AC_MSG_RESULT([$boost_srcdir_s])
+      BOOST_DIR="$boost_dir_s"
       BOOST_SRCDIR="$boost_srcdir_s"
     else
       AC_MSG_RESULT([no])
@@ -821,6 +824,7 @@ if test "$build_doc" = yes; then
   AC_CONFIG_FILES(doc/db2html)
   AC_CONFIG_FILES(doc/db2pdf)
   AC_CONFIG_FILES(doc/singledoc)
+  AC_CONFIG_FILES(doc/xsl/doxygen2boostbook.xsl)
 fi
 
 AC_OUTPUT

@@ -145,7 +145,8 @@ BOOST_1_32_TRUE = @BOOST_1_32_TRUE@
 BOOST_1_33_FALSE = @BOOST_1_33_FALSE@
 BOOST_1_33_TRUE = @BOOST_1_33_TRUE@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
-BOOST_INC_DIR = @BOOST_INC_DIR@
+BOOST_DIR = @BOOST_DIR@
+BOOST_INCDIR = @BOOST_INCDIR@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_LIBS = @BOOST_LIBS@
 BOOST_SRCDIR = @BOOST_SRCDIR@
@@ -299,13 +300,12 @@ DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
 AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
 AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
-BOOST_ROOT = @BOOST_INC_DIR@
 dist_bin_SCRIPTS = archivecat xslttransform transformall 
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
-quickbook_SOURCES = $(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp 
+quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp 
 all: all-am
 
 .SUFFIXES:
@@ -472,19 +472,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-quickbook.o: $(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quickbook.o -MD -MP -MF "$(DEPDIR)/quickbook.Tpo" -c -o quickbook.o `test -f '$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp' || echo '$(srcdir)/'`$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp; \
+quickbook.o: $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quickbook.o -MD -MP -MF "$(DEPDIR)/quickbook.Tpo" -c -o quickbook.o `test -f '$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp' || echo '$(srcdir)/'`$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/quickbook.Tpo" "$(DEPDIR)/quickbook.Po"; else rm -f "$(DEPDIR)/quickbook.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp' object='quickbook.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp' object='quickbook.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quickbook.o `test -f '$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp' || echo '$(srcdir)/'`$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quickbook.o `test -f '$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp' || echo '$(srcdir)/'`$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp
 
-quickbook.obj: $(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quickbook.obj -MD -MP -MF "$(DEPDIR)/quickbook.Tpo" -c -o quickbook.obj `if test -f '$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp'; then $(CYGPATH_W) '$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp'; fi`; \
+quickbook.obj: $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp
+@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT quickbook.obj -MD -MP -MF "$(DEPDIR)/quickbook.Tpo" -c -o quickbook.obj `if test -f '$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp'; then $(CYGPATH_W) '$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp'; fi`; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/quickbook.Tpo" "$(DEPDIR)/quickbook.Po"; else rm -f "$(DEPDIR)/quickbook.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp' object='quickbook.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp' object='quickbook.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quickbook.obj `if test -f '$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp'; then $(CYGPATH_W) '$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_ROOT)/tools/quickbook/detail/quickbook.cpp'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o quickbook.obj `if test -f '$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp'; then $(CYGPATH_W) '$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \

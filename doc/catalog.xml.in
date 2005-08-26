@@ -5,7 +5,7 @@
 <catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
   <rewriteURI
     uriStartString="http://www.boost.org/tools/boostbook/dtd/"
-    rewritePrefix="file://@BOOST_INC_DIR@/tools/boostbook/dtd/"/>
+    rewritePrefix="file://@BOOST_DIR@/tools/boostbook/dtd/"/>
   <rewriteURI
     uriStartString="http://www.oasis-open.org/docbook/xml/4.2/"
     rewritePrefix="file://@DOCBOOK_DTD_DIR@/"/>

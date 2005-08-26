@@ -125,7 +125,12 @@ BOOST_1_32_TRUE = @BOOST_1_32_TRUE@
 BOOST_1_33_FALSE = @BOOST_1_33_FALSE@
 BOOST_1_33_TRUE = @BOOST_1_33_TRUE@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
-BOOST_INC_DIR = @BOOST_INC_DIR@
+
+#
+#
+#
+BOOST_DIR = @BOOST_DIR@
+BOOST_INCDIR = @BOOST_INCDIR@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_LIBS = @BOOST_LIBS@
 BOOST_SRCDIR = @BOOST_SRCDIR@
@@ -277,18 +282,11 @@ sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 dist_noinst_DATA = $(doc_ALPS) $(doc_OSIRIS) $(doc_PARSER) \
 	$(am__append_3) $(am__append_4)
-
-#
-#
-#
-BOOST_ROOT = @BOOST_INC_DIR@
-ALPS_ROOT = $(top_srcdir)
-ALPS_SRCDIR = $(ALPS_ROOT)/src/alps
+ALPS_SRCDIR = $(top_srcdir)/src/alps
+DOC_SRCDIR = $(top_srcdir)/doc/src
+DOC_HTMLDIR = $(top_srcdir)/doc/html
+DOC_PDFDIR = $(top_srcdir)/doc
 QUICKBOOK = $(top_builddir)/tool/quickbook
-DOC_ROOT = $(top_srcdir)/doc
-DOC_SRCDIR = $(DOC_ROOT)/src
-DOC_HTMLDIR = $(DOC_ROOT)/html
-DOC_PDFDIR = $(DOC_ROOT)
 DOCS = $(am__append_1) $(am__append_2)
 XMLDOCS = $(XMLDOCS_QBK:.qbk=.xml) $(XMLDOCS_GEN)
 XMLDOCS_QBK = \
@@ -305,12 +303,6 @@ XMLDOCS_QBK = \
 	$(DOC_SRCDIR)/tools.qbk
 
 XMLDOCS_GEN = 
-
-# 	$(ALPS_SRCDIR)/osiris/archivedump.h \
-#	$(ALPS_SRCDIR)/osiris/dump.h \
-#	$(ALPS_SRCDIR)/osiris/dumparchive.h \
-#	$(ALPS_SRCDIR)/osiris/mpdump.h \
-#	$(ALPS_SRCDIR)/osiris/xdrdump.h
 AUTODOCS = $(DOC_SRCDIR)/general.autodoc $(DOC_SRCDIR)/osiris.autodoc \
 	$(DOC_SRCDIR)/parser.autodoc $(DOC_SRCDIR)/alea.autodoc \
 	$(DOC_SRCDIR)/lattice.autodoc $(DOC_SRCDIR)/model.autodoc \
@@ -346,8 +338,12 @@ AUTODOC_GENERAL_SRC = \
 
 AUTODOC_OSIRIS_SRC = \
 	$(ALPS_SRCDIR)/osiris.h \
+	$(ALPS_SRCDIR)/osiris/archivedump.h \
 	$(ALPS_SRCDIR)/osiris/buffer.h \
 	$(ALPS_SRCDIR)/osiris/comm.h \
+	$(ALPS_SRCDIR)/osiris/dump.h \
+	$(ALPS_SRCDIR)/osiris/dumparchive.h \
+	$(ALPS_SRCDIR)/osiris/mpdump.h \
 	$(ALPS_SRCDIR)/osiris/os.h \
 	$(ALPS_SRCDIR)/osiris/process.h \
 	$(ALPS_SRCDIR)/osiris/std/list.h \
@@ -356,7 +352,8 @@ AUTODOC_OSIRIS_SRC = \
 	$(ALPS_SRCDIR)/osiris/std/set.h \
 	$(ALPS_SRCDIR)/osiris/std/string.h \
 	$(ALPS_SRCDIR)/osiris/std/valarray.h \
-	$(ALPS_SRCDIR)/osiris/std/vector.h
+	$(ALPS_SRCDIR)/osiris/std/vector.h \
+	$(ALPS_SRCDIR)/osiris/xdrdump.h
 
 AUTODOC_PARSER_SRC = \
 	$(ALPS_SRCDIR)/xml.h \
@@ -711,9 +708,9 @@ $(DOC_HTMLDIR)/index.html : db2html $(DOC_SRCDIR)/alps.docbook html-setup
 html-setup :
 	$(mkdir_p) $(DOC_HTMLDIR)
 	cp -fp $(DOC_SRCDIR)/alps_logo.gif $(DOC_HTMLDIR)
-	cp -fp $(BOOST_ROOT)/doc/html/boostbook.css $(DOC_HTMLDIR)
+	cp -fp $(BOOST_DIR)/doc/html/boostbook.css $(DOC_HTMLDIR)
 	$(mkdir_p) $(DOC_HTMLDIR)/images
-	cp -fp $(BOOST_ROOT)/doc/html/images/*.png $(DOC_HTMLDIR)/images
+	cp -fp $(BOOST_DIR)/doc/html/images/*.png $(DOC_HTMLDIR)/images
 
 # docbook -> pdf
 

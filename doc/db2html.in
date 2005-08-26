@@ -7,7 +7,7 @@ PARAMS="--stringparam boost.root . \
 	--stringparam boost.image.w 197 \
 	--stringparam boost.image.h 70"
 
-echo @XSLTPROC@ $PARAMS --xinclude -o "$2" @BOOST_INC_DIR@/tools/boostbook/xsl/html.xsl "$1"
-@XSLTPROC@ $PARAMS --xinclude -o "$2" @BOOST_INC_DIR@/tools/boostbook/xsl/html.xsl "$1"
+echo @XSLTPROC@ $PARAMS --xinclude -o "$2" @BOOST_DIR@/tools/boostbook/xsl/html.xsl "$1"
+@XSLTPROC@ $PARAMS --xinclude -o "$2" @BOOST_DIR@/tools/boostbook/xsl/html.xsl "$1"
 
 exit $?

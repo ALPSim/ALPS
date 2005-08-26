@@ -4,9 +4,11 @@ dist_noinst_DATA =
 #
 #
 
-BOOST_ROOT = @BOOST_INC_DIR@
-ALPS_ROOT = $(top_srcdir)
-ALPS_SRCDIR = $(ALPS_ROOT)/src/alps
+BOOST_DIR = @BOOST_DIR@
+ALPS_SRCDIR = $(top_srcdir)/src/alps
+DOC_SRCDIR = $(top_srcdir)/doc/src
+DOC_HTMLDIR = $(top_srcdir)/doc/html
+DOC_PDFDIR = $(top_srcdir)/doc
 
 DOCBOOK_DTD_DIR = @DOCBOOK_DTD_DIR@
 DOCBOOK_XSL_DIR = @DOCBOOK_XSL_DIR@
@@ -14,11 +16,6 @@ FOP_DIR = @FOP_DIR@
 
 QUICKBOOK = $(top_builddir)/tool/quickbook
 XSLTPROC = @XSLTPROC@
-
-DOC_ROOT = $(top_srcdir)/doc
-DOC_SRCDIR = $(DOC_ROOT)/src
-DOC_HTMLDIR = $(DOC_ROOT)/html
-DOC_PDFDIR = $(DOC_ROOT)
 
 DOCS =
 if BUILD_DOC
@@ -80,8 +77,12 @@ AUTODOC_GENERAL_SRC = \
 AUTODOCS += $(DOC_SRCDIR)/osiris.autodoc
 AUTODOC_OSIRIS_SRC = \
 	$(ALPS_SRCDIR)/osiris.h \
+	$(ALPS_SRCDIR)/osiris/archivedump.h \
 	$(ALPS_SRCDIR)/osiris/buffer.h \
 	$(ALPS_SRCDIR)/osiris/comm.h \
+	$(ALPS_SRCDIR)/osiris/dump.h \
+	$(ALPS_SRCDIR)/osiris/dumparchive.h \
+	$(ALPS_SRCDIR)/osiris/mpdump.h \
 	$(ALPS_SRCDIR)/osiris/os.h \
 	$(ALPS_SRCDIR)/osiris/process.h \
 	$(ALPS_SRCDIR)/osiris/std/list.h \
@@ -90,13 +91,8 @@ AUTODOC_OSIRIS_SRC = \
 	$(ALPS_SRCDIR)/osiris/std/set.h \
 	$(ALPS_SRCDIR)/osiris/std/string.h \
 	$(ALPS_SRCDIR)/osiris/std/valarray.h \
-	$(ALPS_SRCDIR)/osiris/std/vector.h
-
-# 	$(ALPS_SRCDIR)/osiris/archivedump.h \
-#	$(ALPS_SRCDIR)/osiris/dump.h \
-#	$(ALPS_SRCDIR)/osiris/dumparchive.h \
-#	$(ALPS_SRCDIR)/osiris/mpdump.h \
-#	$(ALPS_SRCDIR)/osiris/xdrdump.h
+	$(ALPS_SRCDIR)/osiris/std/vector.h \
+	$(ALPS_SRCDIR)/osiris/xdrdump.h
 
 AUTODOCS += $(DOC_SRCDIR)/parser.autodoc
 AUTODOC_PARSER_SRC = \
@@ -231,9 +227,9 @@ $(DOC_HTMLDIR)/index.html : db2html $(DOC_SRCDIR)/alps.docbook html-setup
 html-setup :
 	$(mkdir_p) $(DOC_HTMLDIR)
 	cp -fp $(DOC_SRCDIR)/alps_logo.gif $(DOC_HTMLDIR)
-	cp -fp $(BOOST_ROOT)/doc/html/boostbook.css $(DOC_HTMLDIR)
+	cp -fp $(BOOST_DIR)/doc/html/boostbook.css $(DOC_HTMLDIR)
 	$(mkdir_p) $(DOC_HTMLDIR)/images
-	cp -fp $(BOOST_ROOT)/doc/html/images/*.png $(DOC_HTMLDIR)/images
+	cp -fp $(BOOST_DIR)/doc/html/images/*.png $(DOC_HTMLDIR)/images
 
 # docbook -> pdf
 

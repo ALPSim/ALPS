@@ -4,36 +4,39 @@ OUTPUT=$1
 shift
 INPUTS="$*"
 
+DIR=`dirname $0`
 CONF=/tmp/doxygen.conf.$$
 TMPDIR=/tmp/doxygen.$$
 
-echo "ENABLE_PREPROCESSING = YES" > $CONF
-echo "EXPAND_ONLY_PREDEF = YES" >> $CONF
-echo "EXTRACT_PRIVATE = NO" >> $CONF
-echo "HIDE_UNDOC_MEMBERS = NO" >> $CONF
-echo "MACRO_EXPANSION = YES" >> $CONF
-echo "SEARCH_INCLUDES = YES" >> $CONF
-echo "GENERATE_HTML = NO" >> $CONF
-echo "GENERATE_LATEX = NO" >> $CONF
-echo "GENERATE_XML = YES" >> $CONF
-
-echo "OUTPUT_DIRECTORY = $TMPDIR" >> $CONF
-echo "INPUT = $INPUTS" >> $CONF
+cat <<EOF > $CONF
+ENABLE_PREPROCESSING = YES
+EXPAND_ONLY_PREDEF = YES
+EXTRACT_PRIVATE = NO
+HIDE_UNDOC_MEMBERS = NO
+MACRO_EXPANSION = YES
+SEARCH_INCLUDES = YES
+GENERATE_HTML = NO
+GENERATE_LATEX = NO
+GENERATE_XML = YES
+OUTPUT_DIRECTORY = $TMPDIR
+INPUT = $INPUTS
+EOF
 
 echo @DOXYGEN@ $CONF
 @DOXYGEN@ $CONF
 
 [ "$?" -ne 0 ] && exit $?
 
-export XML_CATALOG_FILES=catalog.xml
+echo export XML_CATALOG_FILES=$DIR/catalog.xml
+export XML_CATALOG_FILES=$DIR/catalog.xml
 
-echo @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
-@XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
+echo @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
+@XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
 
 [ "$?" -ne 0 ] && exit $?
 
-echo @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
-@XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_INC_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
+echo @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT $DIR/xsl/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
+@XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT $DIR/xsl/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
 
 [ "$?" -ne 0 ] && exit $?
 

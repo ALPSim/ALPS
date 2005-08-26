@@ -33,7 +33,7 @@ AC_DEFUN([AC_FOP],
       fop_dir=no
       for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
       do
-        for s in fop-0.20.5
+        for s in fop fop-0.20.5
         do
           if test -f "$d/$s/fop.sh"; then
             found=yes

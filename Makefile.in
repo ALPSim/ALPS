@@ -45,6 +45,7 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/config.site.in \
 	$(top_srcdir)/config/include.mk.in $(top_srcdir)/configure \
+	$(top_srcdir)/doc/xsl/doxygen2boostbook.xsl.in \
 	$(top_srcdir)/src/alps/config.h.in \
 	$(top_srcdir)/src/boost/po_utf8_codecvt_facet.cpp.in ChangeLog \
 	INSTALL TODO config/config.guess config/config.sub \
@@ -71,7 +72,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
-CONFIG_CLEAN_FILES = config/config.site config/include.mk
+CONFIG_CLEAN_FILES = config/config.site config/include.mk \
+	doc/xsl/doxygen2boostbook.xsl
 SCRIPTS = $(dist_noinst_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
@@ -129,7 +131,8 @@ BOOST_1_32_TRUE = @BOOST_1_32_TRUE@
 BOOST_1_33_FALSE = @BOOST_1_33_FALSE@
 BOOST_1_33_TRUE = @BOOST_1_33_TRUE@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
-BOOST_INC_DIR = @BOOST_INC_DIR@
+BOOST_DIR = @BOOST_DIR@
+BOOST_INCDIR = @BOOST_INCDIR@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_LIBS = @BOOST_LIBS@
 BOOST_SRCDIR = @BOOST_SRCDIR@
@@ -354,6 +357,8 @@ config/config.site: $(top_builddir)/config.status $(top_srcdir)/config/config.si
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 config/include.mk: $(top_builddir)/config.status $(top_srcdir)/config/include.mk.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
+doc/xsl/doxygen2boostbook.xsl: $(top_builddir)/config.status $(top_srcdir)/doc/xsl/doxygen2boostbook.xsl.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -534,7 +539,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/config $(distdir)/doc $(distdir)/example/model $(distdir)/lib/xml $(distdir)/src/alps $(distdir)/src/boost $(distdir)/test/lattice $(distdir)/test/osiris $(distdir)/tool
+	$(mkdir_p) $(distdir)/config $(distdir)/doc $(distdir)/doc/xsl $(distdir)/example/model $(distdir)/lib/xml $(distdir)/src/alps $(distdir)/src/boost $(distdir)/test/lattice $(distdir)/test/osiris $(distdir)/tool
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

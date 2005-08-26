@@ -463,7 +463,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE docdir SRC_DIR ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS BOOST_INC_DIR BOOST_SRCDIR BUILD_BOOST_TRUE BUILD_BOOST_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI HAVE_MPI_TRUE HAVE_MPI_FALSE LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HAVE_PVM_TRUE HAVE_PVM_FALSE LAPACK_CPPFLAGS LAPACK_LDFLAGS LAPACK_LIBS HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BOOST_USER_CONFIG_H DOXYGEN ac_cv_prog_doxygen ac_cv_prog_xsltproc XSLTPROC JAVA ac_cv_prog_java HAVE_JAVA_TRUE HAVE_JAVA_FALSE DOCBOOK_DTD_DIR DOCBOOK_XSL_DIR FOP_DIR BUILD_DOC_TRUE BUILD_DOC_FALSE BUILD_PDF_TRUE BUILD_PDF_FALSE BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS BUILD_LIBHEAP_TRUE BUILD_LIBHEAP_FALSE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE docdir SRC_DIR ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS BOOST_INCDIR BOOST_DIR BOOST_SRCDIR BUILD_BOOST_TRUE BUILD_BOOST_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI HAVE_MPI_TRUE HAVE_MPI_FALSE LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HAVE_PVM_TRUE HAVE_PVM_FALSE LAPACK_CPPFLAGS LAPACK_LDFLAGS LAPACK_LIBS HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BOOST_USER_CONFIG_H DOXYGEN ac_cv_prog_doxygen ac_cv_prog_xsltproc XSLTPROC JAVA ac_cv_prog_java HAVE_JAVA_TRUE HAVE_JAVA_FALSE DOCBOOK_DTD_DIR DOCBOOK_XSL_DIR FOP_DIR BUILD_DOC_TRUE BUILD_DOC_FALSE BUILD_PDF_TRUE BUILD_PDF_FALSE BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS BUILD_LIBHEAP_TRUE BUILD_LIBHEAP_FALSE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -22036,7 +22036,7 @@ ac_cv_boost_incdir=
 if test -n "$boost_incdir"; then
   ac_cv_boost_incdir="$boost_incdir"
   BOOST_CPPFLAGS="-I$boost_incdir"
-  BOOST_INC_DIR=$boost_incdir
+  BOOST_INCDIR=$boost_incdir
   CPPFLAGS="$BOOST_CPPFLAGS $ac_save_CPPFLAGS"
 fi
 cat >conftest.$ac_ext <<_ACEOF
@@ -22133,7 +22133,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-    BOOST_INC_DIR=$boost_incdir_s
+    BOOST_INCDIR=$boost_incdir_s
   fi
 fi
 
@@ -22510,6 +22510,7 @@ fi
 
 
 
+
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   echo "$as_me:$LINENO: checking for Boost source files" >&5
 echo $ECHO_N "checking for Boost source files... $ECHO_C" >&6
@@ -22517,11 +22518,13 @@ echo $ECHO_N "checking for Boost source files... $ECHO_C" >&6
   if test -n "$boost_srcdir"; then
     echo "$as_me:$LINENO: result: $boost_srcdir" >&5
 echo "${ECHO_T}$boost_srcdir" >&6
+    BOOST_DIR="$boost_dir"
     BOOST_SRCDIR="$boost_srcdir"
   else
     if test -n "$boost_srcdir_s"; then
       echo "$as_me:$LINENO: result: $boost_srcdir_s" >&5
 echo "${ECHO_T}$boost_srcdir_s" >&6
+      BOOST_DIR="$boost_dir_s"
       BOOST_SRCDIR="$boost_srcdir_s"
     else
       echo "$as_me:$LINENO: result: no" >&5
@@ -29744,7 +29747,7 @@ echo $ECHO_N "checking for DocBook DTD... $ECHO_C" >&6
       docbook_dtd_dir=no
       for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
       do
-        for s in docbook-dtd-4.4
+        for s in docbook-dtd docbook-dtd-4.4
         do
           if test -f "$d/$s/docbookx.dtd"; then
             found=yes
@@ -29806,7 +29809,7 @@ echo $ECHO_N "checking for DocBook XSL... $ECHO_C" >&6
       docbook_xsl_dir=no
       for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
       do
-        for s in docbook-xsl-1.69.1
+        for s in docbook-xsl docbook-xsl-1.69.1
         do
           if test -f "$d/$s/fo/docbook.xsl"; then
             found=yes
@@ -29868,7 +29871,7 @@ echo $ECHO_N "checking for Apache FOP... $ECHO_C" >&6
       fop_dir=no
       for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src
       do
-        for s in fop-0.20.5
+        for s in fop fop-0.20.5
         do
           if test -f "$d/$s/fop.sh"; then
             found=yes
@@ -30033,6 +30036,8 @@ if test "$build_doc" = yes; then
             ac_config_files="$ac_config_files doc/db2pdf"
 
             ac_config_files="$ac_config_files doc/singledoc"
+
+            ac_config_files="$ac_config_files doc/xsl/doxygen2boostbook.xsl"
 
 fi
 
@@ -30742,6 +30747,7 @@ do
   "doc/db2html" ) CONFIG_FILES="$CONFIG_FILES doc/db2html" ;;
   "doc/db2pdf" ) CONFIG_FILES="$CONFIG_FILES doc/db2pdf" ;;
   "doc/singledoc" ) CONFIG_FILES="$CONFIG_FILES doc/singledoc" ;;
+  "doc/xsl/doxygen2boostbook.xsl" ) CONFIG_FILES="$CONFIG_FILES doc/xsl/doxygen2boostbook.xsl" ;;
   "depfiles" ) CONFIG_COMMANDS="$CONFIG_COMMANDS depfiles" ;;
   "src/alps/config.h" ) CONFIG_HEADERS="$CONFIG_HEADERS src/alps/config.h" ;;
   "src/boost/po_utf8_codecvt_facet.cpp" ) CONFIG_HEADERS="$CONFIG_HEADERS src/boost/po_utf8_codecvt_facet.cpp" ;;
@@ -30910,7 +30916,8 @@ s,@LIBTOOL@,$LIBTOOL,;t t
 s,@BOOST_CPPFLAGS@,$BOOST_CPPFLAGS,;t t
 s,@BOOST_LDFLAGS@,$BOOST_LDFLAGS,;t t
 s,@BOOST_LIBS@,$BOOST_LIBS,;t t
-s,@BOOST_INC_DIR@,$BOOST_INC_DIR,;t t
+s,@BOOST_INCDIR@,$BOOST_INCDIR,;t t
+s,@BOOST_DIR@,$BOOST_DIR,;t t
 s,@BOOST_SRCDIR@,$BOOST_SRCDIR,;t t
 s,@BUILD_BOOST_TRUE@,$BUILD_BOOST_TRUE,;t t
 s,@BUILD_BOOST_FALSE@,$BUILD_BOOST_FALSE,;t t
