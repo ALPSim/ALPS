@@ -1,16 +1,20 @@
 #include "externalsolver.h"
 
-ExternalSolver::multiple_vector_type ExternalSolver::solve(const multiple_vector_type& G0, const alps::Parameters& parms) 
+multiple_vector_type ExternalSolver::solve(const multiple_vector_type& G0, const alps::Parameters& parms) 
 {
-  std::string infile = std::tmpnam("impurity_input");
-  std::string outfile = std::tmpnam("impurity_output");
+  std::string infile = "infile"; // = std::tmpnam("infile");
+  std::string outfile = "outfile"; // = std::tmpnam("outfile);
  
-.... write XML files... into file
+//.... write XML files... into file
   
-  system(exe_.native_file_string() + " " + infile + " " + outfile);
+  std::string command = exe_.native_file_string();
+  std::cerr << command << "\n";
+  command += " " + infile + " " + outfile;
+  
+  system(command.c_str());
  
   multiple_vector_type g;
-  .... read g from output file
+ // .... read g from output file
   
   return g;
 }

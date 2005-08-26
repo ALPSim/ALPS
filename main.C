@@ -1,5 +1,8 @@
 #include <alps/parameters.h>
 #include "selfconsistency.h"
+#include "hirschfye.h"
+#include "externalsolver.h"
+#include "hilberttransformer.h"
 
 int main(int argc, char** argv)
 {
@@ -8,8 +11,9 @@ int main(int argc, char** argv)
   std::cin >> parms;
   
   boost::shared_ptr<ImpuritySolver> solver_ptr;
+
   if (parms["SOLVER"]=="Hirsch-Fye")
-    solver_ptr.reset(new HirschFyeSolver(parms));
+    solver_ptr.reset(new HirschFyeSolver());
   else 
     solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
   

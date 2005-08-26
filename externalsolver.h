@@ -11,4 +11,5 @@ public:
     
 private:
   boost::filesystem::path exe_;
-}
+};
+

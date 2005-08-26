@@ -1,11 +1,15 @@
+#ifndef ALPS_DMFT_SOLVER_H
+#define ALPS_DMFT_SOLVER_H
+
 #include <alps/parameters.h>
-#include <valrray>
-#include <utilities>
+#include <valarray>
+#include <utility>
+
+typedef std::valarray<double> vector_type;
+typedef std::pair<vector_type,vector_type> multiple_vector_type;
 
 class ImpuritySolver {
 public:
-  typedef std::valarray<double> vector_type;
-  typedef std::pair<vector_type> multiple_vector_type;
   ImpuritySolver() {}
   
   /** solves the impurity problem
@@ -20,3 +24,5 @@ public:
   virtual multiple_vector_type solve(const multiple_vector_type& G0, const alps::Parameters& parms)=0;
   virtual ~ImpuritySolver() {}
 };
+
+#endif
