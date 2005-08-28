@@ -26,6 +26,10 @@
 
 /* $Id$ */
 
+/// @file externalsolver.C
+/// @brief implements the external solver
+/// @sa ExternalSolver
+
 #include "externalsolver.h"
 #include <alps/xml.h>
 #include <alps/parser/parser.h>

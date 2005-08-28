@@ -25,6 +25,11 @@
 
 /* $Id$ */
 
+/// @file hirschfyesim.h
+/// @brief the actual Hirsch-Fye simulation
+///
+/// @todo needs to be implemented as soon as possible by Philipp Werner
+
 #ifndef ALPS_DMFT_HIRSCHFYESIM_H
 #define ALPS_DMFT_HIRSCHFYESIM_H
 

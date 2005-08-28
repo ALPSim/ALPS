@@ -29,9 +29,17 @@
 #ifndef ALPS_DMFT_SELFCONSISTENCY_H
 #define ALPS_DMFT_SELFCONSISTENCY_H
 
+/// @file selfconsistency.h
+/// @brief declares the selfconsistency loop functions
+
 #include "solver.h"
 #include "hilberttransformer.h"
 
+/// performs a DMFT self-conistency loop until convergence
+///
+/// @param parms the input parameters for the simulation
+/// @param solver the impurity solver. It is left in the state after the final iteration to retrieve additional information
+/// @param hilbert a Hilbert transformation object. It performs the Hilbert transformation for the density of states of the given model.
 extern void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, const HilbertTransformer& hilbert);
 
 #endif

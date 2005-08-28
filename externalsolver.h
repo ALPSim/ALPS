@@ -29,6 +29,10 @@
 #ifndef ALPS_DMFT_EXTERNALSOLVER_H
 #define ALPS_DMFT_EXTERNALSOLVER_H
 
+/// @file externalsolver.h
+/// @brief declares the external solver
+/// @sa ExternalSolver
+
 #include "solver.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -40,6 +44,8 @@
 /// will be called to solve the impurity problem. The executable should take two arguments:
 /// the name of an input file and the name of an output file. Both files have to conform to the
 /// XML schema for impurity solvers that is currently being developed
+///
+/// @todo the XML formats need to be discussed and documented. responsible: Matthias Troyer
   
 class ExternalSolver : public ImpuritySolver {
 public:

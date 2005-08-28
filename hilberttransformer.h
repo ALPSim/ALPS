@@ -29,19 +29,39 @@
 #ifndef ALPS_DMFT_HILBERTTRANSFORMER_H
 #define ALPS_DMFT_HILBERTTRANSFORMER_H
 
+/// @file hilberttransformer.h
+/// @brief Hilbert transformations
+///
+/// declares the abstract base class and concrete realizations for the Hilbert transformations
+/// @sa HilbertTransformer, SemicircleHilbertTransformer, SquarelatticeHilbertTransformer, GeneralHilbertTransformer
+///
+/// @todo the transformations need to be implemented. responsible: Philipp Werner and Hartmut Monien
+
 #include "solver.h"
 #include <functional>
 
-
+/// @brief performs a Hilbert transformation
+///
+/// The HilbertTransformer performs a Hilbert transformation for the self energy and density of states
 class HilbertTransformer : public std::binary_function<const vector_type&,double,vector_type>
 {
 public:
+/// the function call operator performs a Hilbert transformation of the self energy 
+/// and chemical potential given as parameters. The density of states is constant for
+/// each object and usually specified in the constructor
+///
+/// @param Sigma the frequency dependent self energy as a funbction of Matsubara frequency
+/// @param mu the chemical potential, including the magnetic field for a given value of spin
+/// @return the result of the Hilbert transform of the self energy (equation to be added)
   virtual result_type operator()(first_argument_type Sigma, second_argument_type mu) =0; 
   virtual ~HilbertTransformer() {}
 };
 
+/// A Hilbert transformation for a semcircle density of states
+/// @todo the transformation need to be implemented. responsible: Philipp Werner
 class SemicircleHilbertTransformer : public HilbertTransformer {
 public:
+/// the constructor accepts the bandwidth
   SemicircleHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
   result_type operator()(first_argument_type Sigma, second_argument_type mu)
   {
@@ -53,8 +73,11 @@ private:
   double bw_; // or band width
 };
 
+/// A Hilbert transformation for a square lattice density of states
+/// @todo the transformation need to be implemented. responsible: Philipp Werner and Hartmut Monien
 class SquarelatticeHilbertTransformer : public HilbertTransformer {
 public:
+/// the constructor accepts the bandwidth
   SquarelatticeHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
   result_type operator()(first_argument_type Sigma, second_argument_type mu)
   {
@@ -68,8 +91,14 @@ private:
 
 // ...
 
+/// A Hilbert transformation for a general density of states, specified in the constructor
+/// @todo the transformation need to be implemented. responsible: Philipp Werner
 class GeneralHilbertTransformer : public HilbertTransformer {
 public:
+/// the constructor accepts the desity of states
+/// @param D the density of states. 
+///          Note that issues such as units are still undecided and might require further 
+///          additions to the interface
   GeneralHilbertTransformer(const vector_type& D) : D_(D) {}
   result_type operator()(first_argument_type Sigma, second_argument_type mu)
   {

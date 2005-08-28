@@ -33,6 +33,15 @@
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>
 
+/// @file solver_main.C
+/// @brief example main program for a Hirsch-Fye solver
+
+
+/// @brief parse the XML input file for an impurity solver
+///
+/// @param inputfile name of the input XML file
+/// @param G0 contains on return the Weiss field read from the input file
+/// @param parms contains on return the simulation parameter read from the input file
 
 void read_input(const std::string& inputfile, multiple_vector_type& G0,  alps::Parameters& parms)
 {
@@ -74,6 +83,12 @@ void read_input(const std::string& inputfile, multiple_vector_type& G0,  alps::P
 }
 
 
+/// @brief write the XML output file for an impurity solver
+///
+/// @param outputfile name of the input XML file
+/// @param G0 the Weiss field used in the solver
+/// @param G the Green's function (in Matsubara frequqncies) calculated by the impurity solver
+/// @param parms the simulation parameter used in the solver
 void write_output(const std::string& outputfile, const multiple_vector_type& G0, const multiple_vector_type& G, const alps::Parameters& parms)
 {
   alps::oxstream output(outputfile);
@@ -98,6 +113,15 @@ void write_output(const std::string& outputfile, const multiple_vector_type& G0,
   output << alps::end_tag("SIMULATION");
 }
 
+/// @brief parse the command line options
+///
+/// @param argc the number of arguments
+/// @param argv the array of strings containing the arguments
+/// @param infile contains on return the name of the input file, which was the first argument
+/// @param outfile contains on return the name of the output file, which was the second argument
+/// @return returns true if the simulation should continue to run and false otherwise. 
+///         False is returned if the user just wants to see the help or license information
+///         by specifying the --help or --license option
 
 bool parse_options(int argc, char** argv, std::string& infile, std::string& outfile)
 {
@@ -111,7 +135,7 @@ bool parse_options(int argc, char** argv, std::string& infile, std::string& outf
     ("help", "produce help message")
     ("license,l", "print license conditions") 
     ("input-file", po::value<std::string>(&infile), "input file")
-    ("output-file", po::value<std::string>(&outfile), "input file");
+    ("output-file", po::value<std::string>(&outfile), "output file");
   po::positional_options_description p;
   p.add("input-file", 1);
   p.add("output-file", 1);
@@ -133,6 +157,10 @@ bool parse_options(int argc, char** argv, std::string& infile, std::string& outf
   return valid;
 }
 
+/// @brief The main program of the impurity solver
+///
+/// The program must be called with at least two command line parameters: the name of the input and output files.
+/// Additional command line options are --help to print the usage information and --license to print license information
 
 int main(int argc, char** argv)
 {

@@ -26,6 +26,10 @@
 
 /* $Id$ */
 
+/// @file selfconsistency.C
+/// @brief implements the selfconsistency loop functions
+/// @todo needs to be implemented. responsible: Philipp Werner
+
 #include "selfconsistency.h"
 
 void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, const HilbertTransformer& hilbert)

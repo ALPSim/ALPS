@@ -28,10 +28,16 @@
 
 #ifndef ALPS_DMFT_HIRSCHFYE_H
 #define ALPS_DMFT_HIRSCHFYE_H
+
+/// @file hirschfye.h
+/// @brief declares the Hirsch-Fye solver
+/// @sa HirschFyeSolver
+
 #include "solver.h"
 #include <boost/filesystem/path.hpp>
 #include <cstdio>
 
+/// An impurity solver using the Hirsch-Fye algorithm
 class HirschFyeSolver : public ImpuritySolver {
 public:
   HirschFyeSolver() {}

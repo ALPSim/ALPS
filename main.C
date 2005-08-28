@@ -26,12 +26,26 @@
 
 /* $Id$ */
 
+/// @file main.C
+/// @brief main program of the DMFT program
+
 #include "selfconsistency.h"
 #include "hirschfye.h"
 #include "externalsolver.h"
 #include "hilberttransformer.h"
 #include <alps/parameters.h>
 #include <alps/copyright.h>
+
+/// @brief The main program of the DMFT program
+///
+/// The program takes (at the moment) no command line options and reads the parameters 
+/// of the simulation from the standard input. Parameters are read in the short ALPS text format where
+/// each line contains one parameter definition in the format name=value .
+///
+/// The following parameters have special meaning at this time: 
+/// 
+/// If SOLVER is Hirsch-Fye, a Hirsch-Fye solver is used, otherwise the value of SOLVER is assumed
+/// to be the name of an external executable to be used as impurity solver.
 
 int main(int argc, char** argv)
 {

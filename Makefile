@@ -14,6 +14,11 @@ dmft : $(OBJECTS_DMFT)
 
 hirschfye : $(OBJECTS_HIRSCHFYE)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o hirschfye $(OBJECTS_HIRSCHFYE) $(LDFLAGS) $(LIBS)
+	
+docs:
+	doxygen doxygen.conf
+	cd doc/latex; $(MAKE)
+	
 # DO NOT DELETE
 
 externalsolver.o: externalsolver.h solver.h

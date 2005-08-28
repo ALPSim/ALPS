@@ -26,6 +26,10 @@
 
 /* $Id$ */
 
+/// @file hirschfye.C
+/// @brief implements the Hirsch-Fye solver
+/// @sa HirschFyeSolver
+
 #include "hirschfye.h"
 #include "hirschfyesim.h" // your old hirschfye.h
 #include <alps/osiris.h>
