@@ -47,7 +47,7 @@
 /// If SOLVER is Hirsch-Fye, a Hirsch-Fye solver is used, otherwise the value of SOLVER is assumed
 /// to be the name of an external executable to be used as impurity solver.
 
-int main(int argc, char** argv)
+int main()
 {
 #ifndef BOOST_NO_EXCEPTIONS
   try {

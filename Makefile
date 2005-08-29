@@ -7,6 +7,7 @@ OBJECTS=hirschfye.o externalsolver.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
 
+
 all: dmft hirschfye
 
 dmft : $(OBJECTS_DMFT)
@@ -18,6 +19,9 @@ hirschfye : $(OBJECTS_HIRSCHFYE)
 docs:
 	doxygen doxygen.conf
 	cd doc/latex; $(MAKE)
+	
+clean:
+	$(RM) $(RMFLAGS) *.o dmft hirschfye
 	
 # DO NOT DELETE
 
