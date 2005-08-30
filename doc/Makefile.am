@@ -25,7 +25,8 @@ DOCS += $(DOC_PDFDIR)/alps.pdf
 endif
 endif
 
-docs : $(DOCS)
+.PHONY : doc docs
+doc docs : $(DOCS)
 
 dist_noinst_DATA += $(XMLDOCS_QBK) \
 	src/alps_logo.gif \

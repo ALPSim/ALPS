@@ -678,13 +678,9 @@ dnl
 dnl Doxygen
 dnl
 
-AC_SUBST(DOXYGEN)
 AC_PATH_PROG([ac_cv_prog_doxygen], [doxygen])
-if test -n "$ac_cv_prog_doxygen"; then
-  DOXYGEN="$ac_cv_prog_doxygen"
-else
-  AC_MSG_ERROR([Doxygen not found.])
-fi
+AC_SUBST(DOXYGEN)
+test -n "$ac_cv_prog_doxygen" && DOXYGEN="$ac_cv_prog_doxygen"
 
 dnl
 dnl xsltproc
@@ -692,25 +688,15 @@ dnl
 
 AC_XSLTPROC
 AC_SUBST(XSLTPROC)
-if test -n "$ac_cv_have_xsltproc"; then
-  XSLTPROC="$ac_cv_prog_xsltproc"
-else
-  AC_MSG_NOTICE([xsltproc not found.])
-fi
-
+test -n "$ac_cv_have_xsltproc" && XSLTPROC="$ac_cv_prog_xsltproc"
 
 dnl
 dnl Java
 dnl
 
-AC_SUBST(JAVA)
 AC_PATH_PROG([ac_cv_prog_java], [java])
-if test -n "$ac_cv_prog_java"; then
-  JAVA="$ac_cv_prog_java"
-else
-  AC_MSG_NOTICE([Java not found.])
-fi
-AM_CONDITIONAL(HAVE_JAVA, test -n "$JAVA")
+AC_SUBST(JAVA)
+test -n "$ac_cv_prog_java" && JAVA="$ac_cv_prog_java"
 
 dnl
 dnl for Generating Documentation (DocBook DTD, XSL, Apache FOP)
@@ -729,7 +715,7 @@ AC_SUBST(FOP_DIR)
 test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir"
 
 dnl check if all the required tools are present
-if test -f "$srcdir/LICENSE.txt" && test -f "$srcdir/LICENSE-light.txt" && test -n "$BOOST_SRCDIR" && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
+if test -n "$BOOST_SRCDIR" && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
   build_doc=yes
   if test "$ac_cv_have_fop" = yes; then
     build_pdf=yes

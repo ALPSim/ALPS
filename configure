@@ -463,7 +463,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE docdir SRC_DIR ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS BOOST_INCDIR BOOST_DIR BOOST_SRCDIR BUILD_BOOST_TRUE BUILD_BOOST_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI HAVE_MPI_TRUE HAVE_MPI_FALSE LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HAVE_PVM_TRUE HAVE_PVM_FALSE LAPACK_CPPFLAGS LAPACK_LDFLAGS LAPACK_LIBS HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BOOST_USER_CONFIG_H DOXYGEN ac_cv_prog_doxygen ac_cv_prog_xsltproc XSLTPROC JAVA ac_cv_prog_java HAVE_JAVA_TRUE HAVE_JAVA_FALSE DOCBOOK_DTD_DIR DOCBOOK_XSL_DIR FOP_DIR BUILD_DOC_TRUE BUILD_DOC_FALSE BUILD_PDF_TRUE BUILD_PDF_FALSE BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS BUILD_LIBHEAP_TRUE BUILD_LIBHEAP_FALSE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE docdir SRC_DIR ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS BOOST_INCDIR BOOST_DIR BOOST_SRCDIR BUILD_BOOST_TRUE BUILD_BOOST_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI HAVE_MPI_TRUE HAVE_MPI_FALSE LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM HAVE_PVM_TRUE HAVE_PVM_FALSE LAPACK_CPPFLAGS LAPACK_LDFLAGS LAPACK_LIBS HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BOOST_USER_CONFIG_H ac_cv_prog_doxygen DOXYGEN ac_cv_prog_xsltproc XSLTPROC ac_cv_prog_java JAVA DOCBOOK_DTD_DIR DOCBOOK_XSL_DIR FOP_DIR BUILD_DOC_TRUE BUILD_DOC_FALSE BUILD_PDF_TRUE BUILD_PDF_FALSE BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS BUILD_LIBHEAP_TRUE BUILD_LIBHEAP_FALSE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -29473,7 +29473,6 @@ echo "$as_me: running Boost configuration script" >&6;}
 fi
 
 
-
 # Extract the first word of "doxygen", so it can be a program name with args.
 set dummy doxygen; ac_word=$2
 echo "$as_me:$LINENO: checking for $ac_word" >&5
@@ -29513,13 +29512,8 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-if test -n "$ac_cv_prog_doxygen"; then
-  DOXYGEN="$ac_cv_prog_doxygen"
-else
-  { { echo "$as_me:$LINENO: error: Doxygen not found." >&5
-echo "$as_me: error: Doxygen not found." >&2;}
-   { (exit 1); exit 1; }; }
-fi
+
+test -n "$ac_cv_prog_doxygen" && DOXYGEN="$ac_cv_prog_doxygen"
 
 
 
@@ -29647,14 +29641,7 @@ _ACEOF
 
 
 
-if test -n "$ac_cv_have_xsltproc"; then
-  XSLTPROC="$ac_cv_prog_xsltproc"
-else
-  { echo "$as_me:$LINENO: xsltproc not found." >&5
-echo "$as_me: xsltproc not found." >&6;}
-fi
-
-
+test -n "$ac_cv_have_xsltproc" && XSLTPROC="$ac_cv_prog_xsltproc"
 
 
 # Extract the first word of "java", so it can be a program name with args.
@@ -29696,22 +29683,8 @@ else
 echo "${ECHO_T}no" >&6
 fi
 
-if test -n "$ac_cv_prog_java"; then
-  JAVA="$ac_cv_prog_java"
-else
-  { echo "$as_me:$LINENO: Java not found." >&5
-echo "$as_me: Java not found." >&6;}
-fi
 
-
-if test -n "$JAVA"; then
-  HAVE_JAVA_TRUE=
-  HAVE_JAVA_FALSE='#'
-else
-  HAVE_JAVA_TRUE='#'
-  HAVE_JAVA_FALSE=
-fi
-
+test -n "$ac_cv_prog_java" && JAVA="$ac_cv_prog_java"
 
 
 
@@ -29900,7 +29873,7 @@ echo "${ECHO_T}$fop_dir" >&6
 
 test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir"
 
-if test -f "$srcdir/LICENSE.txt" && test -f "$srcdir/LICENSE-light.txt" && test -n "$BOOST_SRCDIR" && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
+if test -n "$BOOST_SRCDIR" && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
   build_doc=yes
   if test "$ac_cv_have_fop" = yes; then
     build_pdf=yes
@@ -30220,13 +30193,6 @@ if test -z "${BUILD_BOOST_THREAD_TRUE}" && test -z "${BUILD_BOOST_THREAD_FALSE}"
   { { echo "$as_me:$LINENO: error: conditional \"BUILD_BOOST_THREAD\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"BUILD_BOOST_THREAD\" was never defined.
-Usually this means the macro was only invoked conditionally." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test -z "${HAVE_JAVA_TRUE}" && test -z "${HAVE_JAVA_FALSE}"; then
-  { { echo "$as_me:$LINENO: error: conditional \"HAVE_JAVA\" was never defined.
-Usually this means the macro was only invoked conditionally." >&5
-echo "$as_me: error: conditional \"HAVE_JAVA\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -30958,14 +30924,12 @@ s,@BUILD_BOOST_SIGNALS_FALSE@,$BUILD_BOOST_SIGNALS_FALSE,;t t
 s,@BUILD_BOOST_THREAD_TRUE@,$BUILD_BOOST_THREAD_TRUE,;t t
 s,@BUILD_BOOST_THREAD_FALSE@,$BUILD_BOOST_THREAD_FALSE,;t t
 s,@BOOST_USER_CONFIG_H@,$BOOST_USER_CONFIG_H,;t t
-s,@DOXYGEN@,$DOXYGEN,;t t
 s,@ac_cv_prog_doxygen@,$ac_cv_prog_doxygen,;t t
+s,@DOXYGEN@,$DOXYGEN,;t t
 s,@ac_cv_prog_xsltproc@,$ac_cv_prog_xsltproc,;t t
 s,@XSLTPROC@,$XSLTPROC,;t t
-s,@JAVA@,$JAVA,;t t
 s,@ac_cv_prog_java@,$ac_cv_prog_java,;t t
-s,@HAVE_JAVA_TRUE@,$HAVE_JAVA_TRUE,;t t
-s,@HAVE_JAVA_FALSE@,$HAVE_JAVA_FALSE,;t t
+s,@JAVA@,$JAVA,;t t
 s,@DOCBOOK_DTD_DIR@,$DOCBOOK_DTD_DIR,;t t
 s,@DOCBOOK_XSL_DIR@,$DOCBOOK_XSL_DIR,;t t
 s,@FOP_DIR@,$FOP_DIR,;t t

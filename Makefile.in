@@ -98,7 +98,6 @@ nodist_pkgdataDATA_INSTALL = $(INSTALL_DATA)
 DATA = $(dist_noinst_DATA) $(nodist_data_DATA) $(nodist_pkgdata_DATA)
 ETAGS = etags
 CTAGS = ctags
-DIST_SUBDIRS = lib src tool example test doc .
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 top_distdir = $(distdir)
 am__remove_distdir = \
@@ -177,8 +176,6 @@ EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FOP_DIR = @FOP_DIR@
-HAVE_JAVA_FALSE = @HAVE_JAVA_FALSE@
-HAVE_JAVA_TRUE = @HAVE_JAVA_TRUE@
 HAVE_MPI_FALSE = @HAVE_MPI_FALSE@
 HAVE_MPI_TRUE = @HAVE_MPI_TRUE@
 HAVE_PVM_FALSE = @HAVE_PVM_FALSE@
@@ -283,6 +280,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 SUBDIRS = lib src $(am__append_1) test doc .
+DIST_SUBDIRS = $(SUBDIRS)
 distdir = alps-$(VERSION)
 distdir_light = alps-light-$(VERSION)
 dist_noinst_SCRIPTS = config/make_snapshot config/run-test config/update_preamble
@@ -783,7 +781,9 @@ uninstall-info: uninstall-info-recursive
 	uninstall-nodist_dataDATA uninstall-nodist_pkgdataDATA
 
 
-.PHONY : lib libs tool tools test tests example examples
+.PHONY : doc docs lib libs tool tools test tests example examples
+doc docs :
+	$(MAKE) -C doc doc
 lib libs :
 	$(MAKE) -C lib all
 tool tools : libs

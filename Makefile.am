@@ -3,6 +3,7 @@ if ALPS_FULL
 SUBDIRS += tool example
 endif
 SUBDIRS += test doc .
+DIST_SUBDIRS = $(SUBDIRS)
 
 distdir = alps-$(VERSION)
 distdir_light = alps-light-$(VERSION)
@@ -19,7 +20,9 @@ endif
 nodist_data_DATA = config/config.site
 nodist_pkgdata_DATA = config/include.mk
 
-.PHONY : lib libs tool tools test tests example examples
+.PHONY : doc docs lib libs tool tools test tests example examples
+doc docs :
+	$(MAKE) -C doc doc
 lib libs :
 	$(MAKE) -C lib all
 tool tools : libs
