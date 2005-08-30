@@ -1,5 +1,8 @@
 #!/bin/sh
 
+DOCBOOK=$1
+DIR=$2
+
 export XML_CATALOG_FILES=catalog.xml
 PARAMS="--stringparam boost.root . \
 	--stringparam boost.image.src alps_logo.gif \
@@ -7,7 +10,7 @@ PARAMS="--stringparam boost.root . \
 	--stringparam boost.image.w 197 \
 	--stringparam boost.image.h 70"
 
-echo @XSLTPROC@ $PARAMS --xinclude -o "$2" @BOOST_DIR@/tools/boostbook/xsl/html.xsl "$1"
-@XSLTPROC@ $PARAMS --xinclude -o "$2" @BOOST_DIR@/tools/boostbook/xsl/html.xsl "$1"
+echo @XSLTPROC@ $PARAMS --xinclude -o $DIR @BOOST_DIR@/tools/boostbook/xsl/html.xsl $DOCBOOK
+@XSLTPROC@ $PARAMS --xinclude -o $DIR @BOOST_DIR@/tools/boostbook/xsl/html.xsl $DOCBOOK
 
 exit $?

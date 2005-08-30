@@ -27,6 +27,10 @@ endif
 
 docs : $(DOCS)
 
+dist_noinst_DATA += $(XMLDOCS_QBK) \
+	src/alps_logo.gif \
+	src/images/home.png src/images/next.png src/images/note.png src/images/prev.png src/images/up.png
+
 XMLDOCS = $(XMLDOCS_QBK:.qbk=.xml) $(XMLDOCS_GEN)
 
 XMLDOCS_QBK = \
@@ -48,7 +52,6 @@ AUTODOCS = $(DOC_SRCDIR)/general.autodoc
 AUTODOC_GENERAL_SRC = \
 	$(ALPS_SRCDIR)/bitops.h \
 	$(ALPS_SRCDIR)/cctype.h \
-	$(ALPS_SRCDIR)/config.h.in \
 	$(ALPS_SRCDIR)/copyright.h \
 	$(ALPS_SRCDIR)/expression.h \
 	$(ALPS_SRCDIR)/factory.h \
@@ -73,6 +76,7 @@ AUTODOC_GENERAL_SRC = \
 	$(ALPS_SRCDIR)/vectorio.h \
 	$(ALPS_SRCDIR)/vectormath.h \
 	$(ALPS_SRCDIR)/vectortraits.h
+# $(ALPS_SRCDIR)/config.h.in
 
 AUTODOCS += $(DOC_SRCDIR)/osiris.autodoc
 AUTODOC_OSIRIS_SRC = \
@@ -199,46 +203,61 @@ SUFFIXES = .xml .qbk
 
 # *.h -> *.autodoc
 
-$(DOC_SRCDIR)/general.autodoc : autodoc $(AUTODOC_GENERAL_SRC)
+$(DOC_SRCDIR)/general.autodoc : $(AUTODOC_GENERAL_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_GENERAL_SRC)
-$(DOC_SRCDIR)/osiris.autodoc : autodoc $(AUTODOC_OSIRIS_SRC)
+$(DOC_SRCDIR)/osiris.autodoc : $(AUTODOC_OSIRIS_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_OSIRIS_SRC)
-$(DOC_SRCDIR)/parser.autodoc : autodoc $(AUTODOC_PARSER_SRC)
+$(DOC_SRCDIR)/parser.autodoc : $(AUTODOC_PARSER_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_PARSER_SRC)
-$(DOC_SRCDIR)/alea.autodoc : autodoc $(AUTODOC_ALEAS_SRC)
+$(DOC_SRCDIR)/alea.autodoc : $(AUTODOC_ALEAS_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_ALEA_SRC)
-$(DOC_SRCDIR)/lattice.autodoc : autodoc $(AUTODOC_LATTICE_SRC)
+$(DOC_SRCDIR)/lattice.autodoc : $(AUTODOC_LATTICE_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_LATTICE_SRC)
-$(DOC_SRCDIR)/model.autodoc : autodoc $(AUTODOC_MODEL_SRC)
+$(DOC_SRCDIR)/model.autodoc : $(AUTODOC_MODEL_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_MODEL_SRC)
-$(DOC_SRCDIR)/scheduler.autodoc : autodoc $(AUTODOC_SCHEDULER_SRC)
+$(DOC_SRCDIR)/scheduler.autodoc : $(AUTODOC_SCHEDULER_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_SCHEDULER_SRC)
 
 # boostbook -> docbook
 
-$(DOC_SRCDIR)/alps.docbook : bb2db $(XMLDOCS) $(AUTODOCS)
+$(DOC_SRCDIR)/alps.docbook : $(XMLDOCS) $(AUTODOCS)
 	$(SHELL) bb2db $(DOC_SRCDIR)/alps.xml $@
 
 # docbook -> html
 
-$(DOC_HTMLDIR)/index.html : db2html $(DOC_SRCDIR)/alps.docbook html-setup
+CSS = $(DOC_HTMLDIR)/boostbook.css
+HTML_IMAGES = $(DOC_HTMLDIR)/alps_logo.gif \
+	$(DOC_HTMLDIR)/images/home.png \
+	$(DOC_HTMLDIR)/images/next.png \
+	$(DOC_HTMLDIR)/images/note.png \
+	$(DOC_HTMLDIR)/images/prev.png \
+	$(DOC_HTMLDIR)/images/up.png
+
+$(DOC_HTMLDIR)/index.html : $(DOC_SRCDIR)/alps.docbook $(CSS) $(HTML_IMAGES)
 	$(SHELL) db2html $(DOC_SRCDIR)/alps.docbook $(DOC_HTMLDIR)/
 
-html-setup :
+$(DOC_HTMLDIR)/boostbook.css : $(BOOST_DIR)/doc/html/boostbook.css
 	$(mkdir_p) $(DOC_HTMLDIR)
-	cp -fp $(DOC_SRCDIR)/alps_logo.gif $(DOC_HTMLDIR)
-	cp -fp $(BOOST_DIR)/doc/html/boostbook.css $(DOC_HTMLDIR)
+	cp -fp $< $@
+
+$(DOC_HTMLDIR)/alps_logo.gif : $(DOC_SRCDIR)/alps_logo.gif
+	$(mkdir_p) $(DOC_HTMLDIR)
+	cp -fp $< $@
+
+$(DOC_HTMLDIR)/images/%.png : $(DOC_SRCDIR)/images/%.png
 	$(mkdir_p) $(DOC_HTMLDIR)/images
-	cp -fp $(BOOST_DIR)/doc/html/images/*.png $(DOC_HTMLDIR)/images
+	cp -fp $< $@
 
 # docbook -> pdf
 
-$(DOC_PDFDIR)/alps.pdf : db2pdf $(DOC_SRCDIR)/alps.docbook
+$(DOC_PDFDIR)/alps.pdf : $(DOC_SRCDIR)/alps.docbook
 	$(SHELL) db2pdf $(DOC_SRCDIR)/alps.docbook $@
+
+# clean
 
 docclean :
 	rm -f $(XMLDOCS_QBK:.qbk=.xml) $(AUTODOCS)
-	rm -f $(DOC_SRCDIR)/*.docbook $(DOC_SRCDIR)/*.fo $(DOC_PDFDIR)/alps.pdf
+	rm -f $(DOC_SRCDIR)/*.docbook $(DOC_SRCDIR)/*.png $(DOC_SRCDIR)/*.fo $(DOC_PDFDIR)/alps.pdf
 	rm -rf $(DOC_HTMLDIR)
 
 #

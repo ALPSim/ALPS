@@ -68,10 +68,18 @@ CONFIG_CLEAN_FILES = doxygen.conf catalog.xml autodoc bb2db db2html \
 	db2pdf singledoc
 SOURCES =
 DIST_SOURCES =
-am__dist_noinst_DATA_DIST = bitops.html config.html expression.html \
-	fixed_capacity.html functional.html index_general.html \
-	math.html parameterlist.html parameters.html random.html \
-	setup.html stringvalue.html typetraits.html valuetype.html \
+am__dist_noinst_DATA_DIST = $(DOC_SRCDIR)/alps.qbk \
+	$(DOC_SRCDIR)/overview.qbk $(DOC_SRCDIR)/getting_started.qbk \
+	$(DOC_SRCDIR)/general.qbk $(DOC_SRCDIR)/osiris.qbk \
+	$(DOC_SRCDIR)/parser.qbk $(DOC_SRCDIR)/alea.qbk \
+	$(DOC_SRCDIR)/lattice.qbk $(DOC_SRCDIR)/model.qbk \
+	$(DOC_SRCDIR)/scheduler.qbk $(DOC_SRCDIR)/tools.qbk \
+	src/alps_logo.gif src/images/home.png src/images/next.png \
+	src/images/note.png src/images/prev.png src/images/up.png \
+	bitops.html config.html expression.html fixed_capacity.html \
+	functional.html index_general.html math.html \
+	parameterlist.html parameters.html random.html setup.html \
+	stringvalue.html typetraits.html valuetype.html \
 	vectormath.html vectortraits.html osiris/comm.html \
 	osiris/dump.html osiris/index.html osiris/mpdump.html \
 	osiris/os.html osiris/parameterlist.html \
@@ -280,8 +288,10 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-dist_noinst_DATA = $(doc_ALPS) $(doc_OSIRIS) $(doc_PARSER) \
-	$(am__append_3) $(am__append_4)
+dist_noinst_DATA = $(XMLDOCS_QBK) src/alps_logo.gif \
+	src/images/home.png src/images/next.png src/images/note.png \
+	src/images/prev.png src/images/up.png $(doc_ALPS) \
+	$(doc_OSIRIS) $(doc_PARSER) $(am__append_3) $(am__append_4)
 ALPS_SRCDIR = $(top_srcdir)/src/alps
 DOC_SRCDIR = $(top_srcdir)/doc/src
 DOC_HTMLDIR = $(top_srcdir)/doc/html
@@ -303,6 +313,7 @@ XMLDOCS_QBK = \
 	$(DOC_SRCDIR)/tools.qbk
 
 XMLDOCS_GEN = 
+# $(ALPS_SRCDIR)/config.h.in
 AUTODOCS = $(DOC_SRCDIR)/general.autodoc $(DOC_SRCDIR)/osiris.autodoc \
 	$(DOC_SRCDIR)/parser.autodoc $(DOC_SRCDIR)/alea.autodoc \
 	$(DOC_SRCDIR)/lattice.autodoc $(DOC_SRCDIR)/model.autodoc \
@@ -310,7 +321,6 @@ AUTODOCS = $(DOC_SRCDIR)/general.autodoc $(DOC_SRCDIR)/osiris.autodoc \
 AUTODOC_GENERAL_SRC = \
 	$(ALPS_SRCDIR)/bitops.h \
 	$(ALPS_SRCDIR)/cctype.h \
-	$(ALPS_SRCDIR)/config.h.in \
 	$(ALPS_SRCDIR)/copyright.h \
 	$(ALPS_SRCDIR)/expression.h \
 	$(ALPS_SRCDIR)/factory.h \
@@ -451,6 +461,16 @@ AUTODOC_SCHEDULER_SRC = \
 # quickbook -> boostbook
 SUFFIXES = .xml .qbk
 
+# docbook -> html
+CSS = $(DOC_HTMLDIR)/boostbook.css
+HTML_IMAGES = $(DOC_HTMLDIR)/alps_logo.gif \
+	$(DOC_HTMLDIR)/images/home.png \
+	$(DOC_HTMLDIR)/images/next.png \
+	$(DOC_HTMLDIR)/images/note.png \
+	$(DOC_HTMLDIR)/images/prev.png \
+	$(DOC_HTMLDIR)/images/up.png
+
+
 #
 #
 #
@@ -562,7 +582,7 @@ CTAGS:
 
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/alea $(distdir)/lattice $(distdir)/model $(distdir)/osiris $(distdir)/parser $(distdir)/scheduler $(distdir)/tool
+	$(mkdir_p) $(distdir)/$(DOC_SRCDIR) $(distdir)/alea $(distdir)/lattice $(distdir)/model $(distdir)/osiris $(distdir)/parser $(distdir)/scheduler $(distdir)/src $(distdir)/src/images $(distdir)/tool
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \
@@ -680,46 +700,51 @@ docs : $(DOCS)
 
 # *.h -> *.autodoc
 
-$(DOC_SRCDIR)/general.autodoc : autodoc $(AUTODOC_GENERAL_SRC)
+$(DOC_SRCDIR)/general.autodoc : $(AUTODOC_GENERAL_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_GENERAL_SRC)
-$(DOC_SRCDIR)/osiris.autodoc : autodoc $(AUTODOC_OSIRIS_SRC)
+$(DOC_SRCDIR)/osiris.autodoc : $(AUTODOC_OSIRIS_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_OSIRIS_SRC)
-$(DOC_SRCDIR)/parser.autodoc : autodoc $(AUTODOC_PARSER_SRC)
+$(DOC_SRCDIR)/parser.autodoc : $(AUTODOC_PARSER_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_PARSER_SRC)
-$(DOC_SRCDIR)/alea.autodoc : autodoc $(AUTODOC_ALEAS_SRC)
+$(DOC_SRCDIR)/alea.autodoc : $(AUTODOC_ALEAS_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_ALEA_SRC)
-$(DOC_SRCDIR)/lattice.autodoc : autodoc $(AUTODOC_LATTICE_SRC)
+$(DOC_SRCDIR)/lattice.autodoc : $(AUTODOC_LATTICE_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_LATTICE_SRC)
-$(DOC_SRCDIR)/model.autodoc : autodoc $(AUTODOC_MODEL_SRC)
+$(DOC_SRCDIR)/model.autodoc : $(AUTODOC_MODEL_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_MODEL_SRC)
-$(DOC_SRCDIR)/scheduler.autodoc : autodoc $(AUTODOC_SCHEDULER_SRC)
+$(DOC_SRCDIR)/scheduler.autodoc : $(AUTODOC_SCHEDULER_SRC)
 	$(SHELL) autodoc $@ $(AUTODOC_SCHEDULER_SRC)
 
 # boostbook -> docbook
 
-$(DOC_SRCDIR)/alps.docbook : bb2db $(XMLDOCS) $(AUTODOCS)
+$(DOC_SRCDIR)/alps.docbook : $(XMLDOCS) $(AUTODOCS)
 	$(SHELL) bb2db $(DOC_SRCDIR)/alps.xml $@
 
-# docbook -> html
-
-$(DOC_HTMLDIR)/index.html : db2html $(DOC_SRCDIR)/alps.docbook html-setup
+$(DOC_HTMLDIR)/index.html : $(DOC_SRCDIR)/alps.docbook $(CSS) $(HTML_IMAGES)
 	$(SHELL) db2html $(DOC_SRCDIR)/alps.docbook $(DOC_HTMLDIR)/
 
-html-setup :
+$(DOC_HTMLDIR)/boostbook.css : $(BOOST_DIR)/doc/html/boostbook.css
 	$(mkdir_p) $(DOC_HTMLDIR)
-	cp -fp $(DOC_SRCDIR)/alps_logo.gif $(DOC_HTMLDIR)
-	cp -fp $(BOOST_DIR)/doc/html/boostbook.css $(DOC_HTMLDIR)
+	cp -fp $< $@
+
+$(DOC_HTMLDIR)/alps_logo.gif : $(DOC_SRCDIR)/alps_logo.gif
+	$(mkdir_p) $(DOC_HTMLDIR)
+	cp -fp $< $@
+
+$(DOC_HTMLDIR)/images/%.png : $(DOC_SRCDIR)/images/%.png
 	$(mkdir_p) $(DOC_HTMLDIR)/images
-	cp -fp $(BOOST_DIR)/doc/html/images/*.png $(DOC_HTMLDIR)/images
+	cp -fp $< $@
 
 # docbook -> pdf
 
-$(DOC_PDFDIR)/alps.pdf : db2pdf $(DOC_SRCDIR)/alps.docbook
+$(DOC_PDFDIR)/alps.pdf : $(DOC_SRCDIR)/alps.docbook
 	$(SHELL) db2pdf $(DOC_SRCDIR)/alps.docbook $@
+
+# clean
 
 docclean :
 	rm -f $(XMLDOCS_QBK:.qbk=.xml) $(AUTODOCS)
-	rm -f $(DOC_SRCDIR)/*.docbook $(DOC_SRCDIR)/*.fo $(DOC_PDFDIR)/alps.pdf
+	rm -f $(DOC_SRCDIR)/*.docbook $(DOC_SRCDIR)/*.png $(DOC_SRCDIR)/*.fo $(DOC_PDFDIR)/alps.pdf
 	rm -rf $(DOC_HTMLDIR)
 
 install-data-local:
