@@ -20,9 +20,9 @@ endif
 
 noinst_HEADERS = $(headers)
 
-docs:
-	$(mkinstalldirs) @docdir@/alps/doxygen
-	doxygen ../doc/doxygen.conf	
+# docs:
+# 	$(mkinstalldirs) @docdir@/alps/doxygen
+# 	doxygen ../doc/doxygen.conf	
 
 install-data-local:
 	@for f in $(headers_CONFIG) $(headers); do \

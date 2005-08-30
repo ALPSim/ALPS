@@ -20,9 +20,7 @@ endif
 nodist_data_DATA = config/config.site
 nodist_pkgdata_DATA = config/include.mk
 
-.PHONY : doc docs lib libs tool tools test tests example examples
-doc docs :
-	$(MAKE) -C doc doc
+.PHONY : lib libs tool tools test tests example examples doc docs
 lib libs :
 	$(MAKE) -C lib all
 tool tools : libs
@@ -31,8 +29,8 @@ test tests : libs
 	$(MAKE) -C test check
 example examples : libs
 	$(MAKE) -C example check
-doc docs :
-	$(MAKE) -C src docs
+doc docs : lib tool
+	$(MAKE) -C doc doc
 
 install-data-local : config/config.cache
 	@$(mkinstalldirs) $(DESTDIR)$(pkgdatadir)
