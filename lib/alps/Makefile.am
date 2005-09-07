@@ -12,6 +12,8 @@ src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
   $(top_srcdir)/src/alps/alea/observable.C \
   $(top_srcdir)/src/alps/alea/observableset.C
+src_EXPRESSION = \
+  $(top_srcdir)/src/alps/expression/evaluator.C
 src_OSIRIS = \
   $(top_srcdir)/src/alps/osiris/dump.C \
   $(top_srcdir)/src/alps/osiris/xdrdump.C
@@ -172,7 +174,7 @@ src_boost_THREAD = \
 
 lib_LTLIBRARIES = libalps.la 
 
-libalps_la_SOURCES = $(src_ALPS) $(src_OSIRIS) $(src_PARSER) $(src_RANDOM)
+libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARSER) $(src_RANDOM)
 nodist_libalps_la_SOURCES =
 if ALPS_FULL
 libalps_la_SOURCES += $(src_ALEA) $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
