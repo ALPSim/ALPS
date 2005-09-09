@@ -341,6 +341,41 @@ else
   AC_MSG_ERROR([Boost include files not found])
 fi
 
+dnl Boost version
+
+AC_MSG_CHECKING([for Boost version])
+AC_TRY_COMPILE([#include <boost/foreach.hpp>],,ac_cv_boost_version=cvs)
+if test -z "$ac_cv_boost_version"; then
+  AC_TRY_COMPILE([#include <boost/version.hpp>
+#if BOOST_VERSION != 103300
+#error
+#endif],,ac_cv_boost_version=1_33)
+fi
+if test -z "$ac_cv_boost_version"; then
+  AC_TRY_COMPILE([#include <boost/version.hpp>
+#if BOOST_VERSION != 103200
+#error
+#endif],,ac_cv_boost_version=1_32)
+fi
+case "x$ac_cv_boost_version" in
+  xcvs )
+    AC_MSG_RESULT([CVS])
+    ;;
+  x1_33 )
+    AC_MSG_RESULT([1.33.0])
+    ;;
+  x1_32 )
+    AC_MSG_RESULT([1.32.0])
+    ;;
+  * )
+    AC_MSG_RESULT([unknown])
+    AC_MSG_ERROR([Boost library is too old])
+    ;;
+esac
+AM_CONDITIONAL(BOOST_CVS, test "$ac_cv_boost_version" = cvs)
+AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
+AM_CONDITIONAL(BOOST_1_32, test "$ac_cv_boost_version" = 1_32)
+
 dnl pre-compiled boost library
 
 if test "$ac_cv_use_precompiled_boost" = no; then :; else
@@ -488,18 +523,8 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
       AC_MSG_ERROR([Boost source files not found])
     fi
   fi
-  AC_MSG_CHECKING([for Boost version])
-  if test -f "$BOOST_SRCDIR/regex/src/c_regex_traits_common.cpp"; then
-     AC_MSG_RESULT([1.32])
-     ac_cv_boost_version=1_32
-  else
-     AC_MSG_RESULT([1.33])
-     ac_cv_boost_version=1_33
-  fi
 fi
 AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
-AM_CONDITIONAL(BOOST_1_32, test "$ac_cv_boost_version" = 1_32)
-AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
 
 CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
@@ -715,7 +740,7 @@ AC_SUBST(FOP_DIR)
 test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir"
 
 dnl check if all the required tools are present
-if test -n "$BOOST_SRCDIR" && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
+if test -n "$BOOST_SRCDIR" && test "$ac_cv_boost_version" != 1_32 && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
   build_doc=yes
   if test "$ac_cv_have_fop" = yes; then
     build_pdf=yes

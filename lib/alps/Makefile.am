@@ -88,8 +88,9 @@ src_boost_REGEX_1_33 = \
   $(BOOST_SRCDIR)/regex/src/static_mutex.cpp \
   $(BOOST_SRCDIR)/regex/src/usinstances.cpp \
   $(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp
+src_boost_REGEX_CVS = $(src_boost_REGEX_1_33)
 
-src_boost_PROGRAM_OPTIONS= \
+src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
   $(BOOST_SRCDIR)/program_options/src/convert.cpp \
@@ -100,7 +101,7 @@ src_boost_PROGRAM_OPTIONS= \
   $(BOOST_SRCDIR)/program_options/src/variables_map.cpp \
   $(BOOST_SRCDIR)/program_options/src/winmain.cpp \
   $(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
-src_boost_SERIALIZATION= \
+src_boost_SERIALIZATION = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp \
@@ -119,7 +120,7 @@ src_boost_SERIALIZATION= \
   $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp \
   $(BOOST_SRCDIR)/serialization/src/void_cast.cpp 
-src_boost_SERIALIZATION_1_32= \
+src_boost_SERIALIZATION_1_32 = \
   $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
@@ -134,7 +135,7 @@ src_boost_SERIALIZATION_1_32= \
 #  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
-src_boost_SERIALIZATION_1_33= \
+src_boost_SERIALIZATION_1_33 = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
@@ -155,12 +156,15 @@ src_boost_SERIALIZATION_1_33= \
 #  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp 
+src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_33)
+
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp \
   $(BOOST_SRCDIR)/signals/src/signal_base.cpp \
   $(BOOST_SRCDIR)/signals/src/slot.cpp \
   $(BOOST_SRCDIR)/signals/src/trackable.cpp
+
 src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp \
   $(BOOST_SRCDIR)/thread/src/condition.cpp \
@@ -190,6 +194,9 @@ nodist_libalps_la_SOURCES += $(src_boost_REGEX_1_32) $(src_boost_SERIALIZATION_1
 endif
 if BOOST_1_33
 nodist_libalps_la_SOURCES += $(src_boost_REGEX_1_33) $(src_boost_SERIALIZATION_1_33)
+endif
+if BOOST_CVS
+nodist_libalps_la_SOURCES += $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS)
 endif
 
 if BUILD_BOOST_SIGNALS

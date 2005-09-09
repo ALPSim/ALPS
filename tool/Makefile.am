@@ -7,13 +7,17 @@ BOOST_DIR = @BOOST_DIR@
 pkgdatadir = $(libdir)/xml
 
 bin_PROGRAMS = compactrun convert2xml parameter2xml
-if BUILD_DOC
-bin_PROGRAMS += quickbook
-endif
 dist_bin_SCRIPTS = archivecat xslttransform transformall 
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
 
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
+
+if BUILD_DOC
+bin_PROGRAMS += quickbook
 nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp 
+if BOOST_CVS
+nodist_quickbook_SOURCES += $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp
+endif
+endif

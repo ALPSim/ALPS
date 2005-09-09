@@ -45,8 +45,9 @@ host_triplet = @host@
 @BUILD_BOOST_TRUE@	$(src_boost_SERIALIZATION)
 @BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__append_4 = $(src_boost_REGEX_1_32) $(src_boost_SERIALIZATION_1_32)
 @BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__append_5 = $(src_boost_REGEX_1_33) $(src_boost_SERIALIZATION_1_33)
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__append_6 = $(src_boost_SIGNALS)
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__append_7 = $(src_boost_THREAD)
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__append_6 = $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS)
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__append_7 = $(src_boost_SIGNALS)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__append_8 = $(src_boost_THREAD)
 subdir = lib/alps
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -179,16 +180,21 @@ am__objects_22 = basic_archive_impl.lo basic_iserializer.lo \
 	xml_wiarchive.lo xml_woarchive.lo
 @BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__objects_23 = $(am__objects_21) \
 @BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_22)
-am__objects_24 = connection.lo named_slot_map.lo signal_base.lo \
+am__objects_24 = $(am__objects_21)
+am__objects_25 = $(am__objects_22)
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_26 = $(am__objects_24) \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25)
+am__objects_27 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_25 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_24)
-am__objects_26 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_28 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_27)
+am__objects_29 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_27 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_30 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_29)
 nodist_libalps_la_OBJECTS = $(am__objects_17) $(am__objects_20) \
-	$(am__objects_23) $(am__objects_25) $(am__objects_27)
+	$(am__objects_23) $(am__objects_26) $(am__objects_28) \
+	$(am__objects_30)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -228,6 +234,8 @@ BOOST_1_32_TRUE = @BOOST_1_32_TRUE@
 BOOST_1_33_FALSE = @BOOST_1_33_FALSE@
 BOOST_1_33_TRUE = @BOOST_1_33_TRUE@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
+BOOST_CVS_FALSE = @BOOST_CVS_FALSE@
+BOOST_CVS_TRUE = @BOOST_CVS_TRUE@
 BOOST_DIR = @BOOST_DIR@
 BOOST_INCDIR = @BOOST_INCDIR@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
@@ -478,6 +486,7 @@ src_boost_REGEX_1_33 = \
   $(BOOST_SRCDIR)/regex/src/usinstances.cpp \
   $(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp
 
+src_boost_REGEX_CVS = $(src_boost_REGEX_1_33)
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
@@ -548,6 +557,7 @@ src_boost_SERIALIZATION_1_33 = \
 #  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp 
+src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_33)
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp \
@@ -570,7 +580,8 @@ lib_LTLIBRARIES = libalps.la
 libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) \
 	$(src_PARSER) $(src_RANDOM) $(am__append_1) $(am__append_2)
 nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) \
-	$(am__append_5) $(am__append_6) $(am__append_7)
+	$(am__append_5) $(am__append_6) $(am__append_7) \
+	$(am__append_8)
 all: all-am
 
 .SUFFIXES:
