@@ -851,7 +851,7 @@ if test "$ac_cv_alps_type" = "full"; then
 else
   echo "  ALPS version        $PACKAGE_VERSION (Light)"
 fi
-echo "  compiler type       $ac_cv_alps_compiler"
+echo "  compiler type       $ac_cv_alps_compiler ($ac_cv_alps_cxx)"
 echo "  exceptions          $ac_cv_alps_compiler_exceptions"
 echo "  optimization        $ac_cv_alps_compiler_optimization"
 echo "  MPI support         $ac_cv_alps_have_mpi"
