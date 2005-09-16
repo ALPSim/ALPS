@@ -15,196 +15,24 @@ or boost libraries.
 <blockquote><pre>
 namespace alps {
 
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct plus : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct minus : std::binary_function&lt;Arg1, Arg2, Result>  {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct multiplies : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct divides : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct modulus : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct bit_and : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct bit_or : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct bit_xor : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class T, class X>
-struct plus_scaled : std::binary_function&lt;T, T, T> {
-    plus_scaled(X x) : val(x) {}
-    T operator () (const T&amp; x, const T&amp; y) const;
-private:
-    X val;
-};
-
-template &lt;class T, class X>
-struct minus_scaled : public std::binary_function&lt;T, T, T> {
-    minus_scaled(X x) : val(x) {}
-    T operator () (const T&amp; x, const T&amp; y) const;
-private:
-    X val;
+template &lt;class T>
+struct conj_mult 
+{
+  inline T operator()(const T&amp; a, const T&amp; b) const
 };
 
 template &lt;class T>
-struct absmax : public std::binary_function&lt;T, T, typename TypeTraits&lt;T>::norm_t> {
-    typename TypeTraits&lt;T>::norm_t operator () (const T&amp; x, const T&amp; y);
-};
-
-template &lt;class T>
-struct conj_mult : std::binary_function&lt;T,T,T> {
-inline T operator()(const T&amp; a, const T&amp; b) const
-};
-
-template &lt;class T>
-struct conj_mult<std::complex&lt;T> > : 
-  std::binary_function<std::complex&lt;T>,std::complex&lt;T>,std::complex&lt;T> > {
-inline std::complex&lt;T> operator()(const std::complex&lt;T>&amp; a, const std::complex&lt;T>&amp; b) const;
-};
-
-template&lt;class T> 
-struct add_abs : public std::binary_function&lt;T,typename TypeTraits&lt;T>::norm_t,typename TypeTraits&lt;T>::norm_t> {
-inline typename TypeTraits&lt;T>::norm_t operator()(typename TypeTraits&lt;T>::norm_t sum, T val) const;
-};
-
-template&lt;class T> 
-struct add_abs2 : public std::binary_function&lt;T,typename TypeTraits&lt;T>::norm_t,typename TypeTraits&lt;T>::norm_t> {
-inline typename TypeTraits&lt;T>::norm_t operator()(typename TypeTraits&lt;T>::norm_t sum, T val) const;
+struct conj_mult<std::complex&lt;T> > 
+{
+  inline std::complex&lt;T> operator()(const std::complex&lt;T>&amp; a, const std::complex&lt;T>&amp; b) const;
 };
 </pre></blockquote>
 
-
-<h3>Function objects</h3>
-<blockquote><pre>
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct plus : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct minus : std::binary_function&lt;Arg1, Arg2, Result>  {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct multiplies : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct divides : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct modulus : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct bit_and : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct bit_or : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-
-template &lt;class Arg1, class Arg2=Arg1, class Result=Arg1>
-struct bit_xor : std::binary_function&lt;Arg1, Arg2, Result> {
-  Result operator () (const Arg1&amp; x, const Arg2&amp; y) const;
-};
-</pre></blockquote>
-are similar to the corresponding classes from the standard library, but
-can take arguments of different type and extend the standard function obejcts with bit functions.
-<blockquote><pre>
-template &lt;class T, class S>
-struct plus_scaled : std::binary_function&lt;T, T, T> 
-{
-  plus_scaled(S s);
-  T operator () (const T&amp; x, const T&amp; y) const;
-};
-
-template &lt;class T, class S>
-struct minus_scaled : public std::binary_function&lt;T, T, T> 
-{
-  minus_scaled(S s);
-  T operator () (const T&amp; x, const T&amp; y) const;
-};
-</pre></blockquote>
-are like <TT>std::plus</TT> and <TT>std::minus</TT> but multiply
-the second argument with the scale factor given in the constructor. 
-
-<blockquote><pre>
-template &lt;class T>
-struct conj_mult : std::binary_function&lt;T,T,T>
-{
-  T operator()(const T&amp; x, const T&amp; y);
-};
-
-template &lt;class T> struct conj_mult<std::complex&lt;T> > : 
-  std::binary_function<std::complex&lt;T>,std::complex&lt;T>,std::complex&lt;T> > 
-{
-  std::complex&lt;T> operator()(const std::complex&lt;T>&amp; x const std::complex&lt;T>&amp; y);
-};
-</pre></blockquote>
-is like <TT>std::multiplies</TT> but takes the complex conjugate of the
+are like <TT>std::multiplies</TT> but take the complex conjugate of the
 first argument if the type <TT>T</TT> is complex.
-<blockquote><pre>
-template &lt;class T>
-struct absmax : public std::binary_function&lt;T, T, typename TypeTraits&lt;T>::norm_t> 
-{
-  typename TypeTraits&lt;T>::norm_t operator () (const T&amp; x, const T&amp; y) const;
-};
-</pre></blockquote>
-returns the maximum of the absolute values of the arguments.
-<blockquote><pre>
-template&lt;class T> 
-struct add_abs : public std::binary_function&lt;T,typename TypeTraits&lt;T>::norm_t,typename TypeTraits&lt;T>::norm_t> 
-{
-  typename TypeTraits&lt;T>::norm_t operator()(typename TypeTraits&lt;T>::norm_t sum, T val);
-};
-</pre></blockquote>
-adds the absolute value of the second argument to the first.
-<blockquote><pre>
-template&lt;class T> 
-struct add_abs2 : public std::binary_function&lt;T,typename TypeTraits&lt;T>::norm_t,typename TypeTraits&lt;T>::norm_t> 
-{
-  typename TypeTraits&lt;T>::norm_t operator()(typename TypeTraits&lt;T>::norm_t sum, T val);
-};
-</pre></blockquote>
-adds the square of the absolute value of the second argument to the first.
 
 <HR>
-<ADDRESS>copyright (c) 1994-2003 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
+<ADDRESS>copyright (c) 1994-2005 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
 </body>
 </html>
 

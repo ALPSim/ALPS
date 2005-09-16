@@ -13,7 +13,7 @@ src_ALEA = \
   $(top_srcdir)/src/alps/alea/observable.C \
   $(top_srcdir)/src/alps/alea/observableset.C
 src_EXPRESSION = \
-  $(top_srcdir)/src/alps/expression/evaluator.C
+  $(top_srcdir)/src/alps/expression/evaluator.C 
 src_OSIRIS = \
   $(top_srcdir)/src/alps/osiris/dump.C \
   $(top_srcdir)/src/alps/osiris/xdrdump.C
