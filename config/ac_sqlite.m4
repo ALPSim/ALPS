@@ -11,6 +11,17 @@ AC_DEFUN([AC_SQLITE],
     AC_HELP_STRING([--with-sqlite-libdir=DIR],[SQLite library directory]),
     [sqlite_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`])
 
+  if test -z "$sqlite_incdir"; then
+    for d in /usr/local; do
+      if test -f "$d/include/sqlite3.h"; then
+        sqlite_incdir="$d/include"
+        if test -z "$sqlite_libdir"; then
+          sqlite_libdir="$d/lib"
+        fi
+      fi
+    done
+  fi
+
   AC_LANG_SAVE
   AC_LANG_CPLUSPLUS
   ac_save_CPPFLAGS="$CPPFLAGS"

@@ -27066,6 +27066,17 @@ if test "${with_sqlite_libdir+set}" = set; then
   sqlite_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
 fi;
 
+  if test -z "$sqlite_incdir"; then
+    for d in /usr/local; do
+      if test -f "$d/include/sqlite3.h"; then
+        sqlite_incdir="$d/include"
+        if test -z "$sqlite_libdir"; then
+          sqlite_libdir="$d/lib"
+        fi
+      fi
+    done
+  fi
+
 
 
   ac_ext=cc
