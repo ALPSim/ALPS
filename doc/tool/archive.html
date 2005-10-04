@@ -1,0 +1,332 @@
+<h1>Documantation</h1>
+<h2>Content</h2>
+
+<a href="#a1">1 Installation</a><br />
+<a href="#a11">1.1 SQLite Database</a><br />
+<a href="#a12">1.2 Preprocessor Options</a><br />
+<a href="#a121">1.2.1 USEPATTERN</a><br />
+<a href="#a122">1.2.2 DEBUG</a><br />
+
+<a href="#a2">2 HowTo</a><br />
+<a href="#a21">2.1 Create Database</a><br />
+<a href="#a22">2.2 Fill In The Database</a><br />
+<a href="#a23">2.3 Generate The Liste</a><br />
+<a href="#a24">2.4 Generate The Output</a><br />
+
+<a href="#a3">3 The Config File</a><br />
+
+<a href="#a4">4 Opions</a><br />
+
+<a href="#a5">5 Plot File</a><br />
+<a href="#a51">5.1 The Plot Tag</a><br />
+<a href="#a52">5.2 For-Each Tag</a><br />
+<a href="#a53">5.3 Axis</a><br />
+<a href="#a54">5.4 Constraints</a><br />
+
+<a href="#a6">6 Performance</a><br />
+<a href="#a61">6.1 -c rebuild</a><br />
+<a href="#a62">6.2 -c list</a><br />
+<a href="#a63">6.3 -c plot</a>
+
+<a name="a1"\><h2>1 Installation</h2>
+<p>The installation ist done by the automake script of the Alps-Libary. A short description of the steps to generate plots out of simmulations datas
+is given in <a href="#a2">Chapter 2</a></p>
+
+<a name="a11"\><h3>1.1 SQLite Database</h3>
+<p>Why has SQLite been taken?</p>
+
+<p>SQLite is easy to install. The whole database is only a C-Libary, which is included in the source of this application. There is no need to install
+any other components. A database only constist of a single file. Becase the program is a singleuserapplication this is a big advantage. The database 
+can easily be shared with other users by copiing the file. SQLite is in the public domain licence, the is compatible with the ALPS-Licende. 
+The <a href="#a6">Performance</a> is discussed in <a href="#a6">chapter 6</a>.</p>
+
+<p>There is no need to create the database by hand. It will be created automaticly by using the option --command=install.</p>
+
+<a name="a12"\><h3>1.2 Preprocessor Options</h3>
+<p>The following options are avalable:</p>
+
+<a name="a121"\><h4>1.2.1 USEPATTERN</h4>
+<p>In normal use every parameter and measurement is stored in the database. So the database can grow large and the output can take some time. 
+With the compiler option -DUSEPATTERN the parameter and mesurements are filtered. There is no speedup in writeing data to the database, but
+extracting data is improved.</p>
+
+<p>The Patterfile specifies the parameter and measurements written in the database. The Patternfile is written in a XML like format
+to specify the possible parameters and measurements. A example is written below.</p>
+
+<p>The structure of the database depents on this preprocessoroption. That means that a database cannot be shared by a programm compiled with this
+option and one compiled without it!</p>
+
+<p>Example of a plotfile:</p>
+<pre>
+&lt;PATTERN&gt;
+	&lt;PARAMETERS&gt;
+		&lt;PARAMETER&gt;L&lt;/PARAMETER&gt;
+		&lt;PARAMETER&gt;J&lt;/PARAMETER&gt;
+		&lt;PARAMETER&gt;J'&lt;/PARAMETER&gt;
+		&lt;PARAMETER&gt;T&lt;/PARAMETER&gt;
+	&lt;/PARAMETERS&gt;
+	&lt;MESUREMENTS&gt;
+	    &lt;MESUREMENT&gt;Energy&lt;/MESUREMENT&gt;
+	    &lt;MESUREMENT&gt;Magnetization&lt;/MESUREMENT&gt;
+	    &lt;MESUREMENT&gt;Green's Function&lt;/MESUREMENT&gt;
+	&lt;/MESUREMENTS&gt;
+&lt;/PATTERN&gt;
+</pre>
+
+<a name="a122"\><h4>1.2.2 DEBUG</h4>
+<p>This preprocessor option improves the progrm option --verbose. This option has no influence to the databasescructure, the portability is preserved. 
+Normaly there will be no need of this option.</p>
+
+<a name="a2"\><h2>2 HowTo</h2>
+<p>In this chapter we will see how to generate output out of somme simmulationfiles. All options can be found in the folger 'test'.
+The commands given below can be used in the rootdirectory of the index. The options are described precisely in
+<a href="#a3">chapter 3</a>.</p>
+
+<a name="a21"\><h3>2.1 Create Database</h3>
+<pre>archive --verbose --command=install --db-file=db/test.db</pre>
+<p>The option install creates an empty database ready to fill in data.</p>
+
+<a name="a22"\><h3>2.2 Fill In The Database</h3>
+<pre>archive --verbose --command=rebuild --db-file=db/test.db --xml-path=test/data/parm3d.task576.out.xml
+archive --verbose --command=append --db-file=db/test.db --xml-path=test/data/part1
+archive --verbose --command=append --db-file=db/test.db --xml-path=test/data</pre>
+<p>To fill data into the database, to options are avalable: rebuild and append. rebuild empty the database first, then calls
+the program with the option append. Append reads in datas given by the parameter xml-path. xml-path can be the name of a file
+or a directory. If a directory is passed all files with the extention .xml from the directory and all subdirectories will 
+be read. If a file is alreay index in the database, it will be skipt. If the file has changed, the program must be called 
+with the option rebuild!</p>
+
+<a name="a23"\><h3>2.3 Generate The List</h3>
+<pre>archive --verbose --command=list --db-file=db/test.db 
+archive --verbose --full-list --command=list --db-file=db/test.db </pre>
+<p>To get an overview over the parameters and mesurements in the database the parameter list generates a summary of the
+datas in the database. This is usefull to define the constraints.</p>
+
+<a name="a24"\><h3>2.4 Generate The Output</h3>
+<pre>archive --verbose --command=plot --db-file=db/test.db --output-path=test/out --plot-file=test/plottext.xml
+archive --verbose --command=plot --db-file=db/test.db --output-path=test/out --plot-file=test/plotxmgr.xml
+archive --verbose --command=plot --db-file=db/test.db --output-path=test/out --plot-file=test/plothtml.xml</pre>
+<p>The mayor task of this program is to generate output out of the database. The structure of the the plot
+file is described in <a href="#a5">chapter 5</a>. The tree commands above generates three times the same output 
+in different formats: text, HTML, xmgrace. The output in xmgrace is:</p>
+<img src="plot.png">
+
+<a name="a3"\><h2>3 The Config File</h2>
+<p>Somme options will rest the same every time the programm is called. These options can be moved to a config file.
+The options in the config file are overwritten by the commandline options. This means that the config file defines
+default value, which can be overwritten by the commandline. The following options can be given in the configfile:
+db-file, pattern-file, xml-path, plot-file, output-path. This options will wie described in the next chapter. The 
+config file is alway located conf/index.cfg.</p>
+
+<p>Example of a config file:</p>
+<pre>
+db-file = db/index.db
+pattern-file = conf/pattern.xml
+xml-path = xml
+plot-file = plot.xml
+output-path = out
+</pre>
+
+<a name="a4"\><h2>4 Options</h2>
+<p>Options are passed to the appication by the config file or the command line. The options in the commandline overwrites
+the options in the config file. The Configfile is described in <a href="#a3">chapter 3</a>.</p>
+
+<table border="0">
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-h, --help</font></td>
+<td colspan="2">Alias for --command=help.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-v, --verbose</font></td>
+<td colspan="2">Lists the nuber of paresed files in the commans append or rebuild, else it shows the number of queries.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">--version</font></td>
+<td colspan="2">Prints the versionnumber of the program.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-d, --db-file</font></td>
+<td colspan="2">Relative path to the databasefile. The SQLite database is stored in a file. If no database with the given name
+exist, a error will be thrown. To create a new database use the option --command=install.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-x, --xml-path</font></td>
+<td colspan="2">Path to the XML-Files. xml-path can be the name of a file or a directory. If a directory is passed all 
+files with the extention .xml from the directory and all subdirectories will be read.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-p, --plot-file</font></td>
+<td colspan="2">Path to the plot file. The Structure of the plot file is described in <a href="#a5">chapter 5</a>.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-o, --output-path &nbsp;</font></td>
+<td colspan="2">Relative path to the directory where to save the output.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-i, --pattern-file</font></td>
+<td colspan="2">Relative path to the pattern file. The patternfile is described in <a href="#a121">chapter 1.2.1</a>.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-l, --full-list</font></td>
+<td colspan="2">Specifies if all values of the prameters are plotted or only the first and last five.</td></tr>
+
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">-c, --command</font></td>
+<td colspan="2">This command specifies the action of the application. It is also possible to pass the command 
+as argument in the commandline. The following options are possible:</td></tr>
+
+<tr><td>&nbsp;</td><td valign="top" nowrap="nowrap"><font face="sans-serif">h, help</font></td>
+<td><p>The option displays a quick overview over the options:</p>
+<pre>
+Allowed options:
+
+Generic options:
+  --version              : print version string
+  -v [ --verbose ]       : Prints what's done
+  -h [ --help ]          : produce help message
+
+Configuration:
+  -d [ --db-file ] arg      : database file
+  -x [ --xml-path ] arg     : sourcefile path
+  -p [ --plot-file ] arg    : plotfile
+  -o [ --output-path ] arg  : output path
+  -i [ --pattern-file ] arg : index file, only used by 
+         installation and if compiled with -DUSEPATTERN
+  -l [ --full-list ] arg    : plots the whole list
+
+Commands:
+  -c [ --command ] arg (=plot) : possible commands: 
+         'help(h)', 'install(i)', 'plot'(p), 'append'(a), 
+         'rebuilt'(r), 'list'(l)
+</pre></td></tr>
+
+<tr><td>&nbsp;</td><td valign="top" nowrap="nowrap"><font face="sans-serif">i, install</font></td>
+<td><p>Required options: --db-file</p>
+<p>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Erstellt eine neue Datenbank mit den erforderlichen Tabellen. Falls die Datenbank bereits existiert, wird ein Fehler 
+ausgegeben.</p></td></tr>
+
+<tr><td>&nbsp;</td><td valign="top" nowrap="nowrap"><font face="sans-serif">p, plot</font></td>
+<td><p>Verlangte Optionen: --db-file, --plot-file, --output-path</p>
+<p>Die Datenbank generiert die, im Plotfile beschriebene, Grafik und speichert sie in dem, in output-path ergebenen, Pfad. Die Ausgabedatei
+hat den Namen &lt;name_des_plotfiles&gt;.&lt;ausgabetype&gt;. D.h. Falls die Applikation mit --plot-file=plot.xml aufgerufen wurde, wird
+eine Datei Namens plot.xml.text erzeugt.</p></td></tr>
+
+<tr><td>&nbsp;</td><td valign="top" nowrap="nowrap"><font face="sans-serif">a, append &nbsp;</font></td>
+<td><p>Verlangte Optionen: --db-file, --xml-path</p>
+<p>Der Datenbank werden zusçÕzliche Dateien hinzugeft. Dateien, die bereits in der Datanbank indexiert sind, werden ersprungen.
+Als xml-path kann entweder eine Datei oder ein Verzeichnis angegeben werden. Falls ein Verzeichnis ergeben wurde, werden alle
+Dateien die sich im Verzeichnis oder in Unterverzeichnissen befinden und die Endung .xml besizen eingelesen.</p></td></tr>
+
+<tr><td>&nbsp;</td><td valign="top" nowrap="nowrap"><font face="sans-serif">r, rebuild</font></td>
+<td><p>Verlangte Optionen: --db-file, --xml-path</p>
+<p>Die gesamte Datenbank wird gelcht, anschliessend wird die Applikation mit der option --command=append ausgefrt.</p>
+
+<tr><td>&nbsp;</td><td valign="top" nowrap="nowrap"><font face="sans-serif">l, list</font></td>
+<td><p>Verlangte Optionen: --db-file</p>
+<p>Generiert eine Liste aller Daten der Datenbank. Falls der Parameter full-list gesetzt wurde, werden alle Werte der 
+Parameter ausgegeben, sonst werden nur die ersten und die letzten ff ausgegeben.</p>
+<p>Die Liste hat folgenden Aufbau. Die Ausgabe ist in zwei Abschnitte aufgeteilt. Oben werden alle Parameter ausgegeben, unten die Messwerte.
+Bei jedem Eintrag wird die Anzahl des Auftretens des Parameters oder des Messwertes in der Datenbank ausgegeben, wobei Vektoraverages nur einmal 
+gezçÉlt werden. Anschliessend kommt der Name. Bei Parametern wird angegeben, welche Werte wie oft in der Datenbank vorkommen.</p>
+<pre>
+Parameters {Values(Occurrence)*}
+    99 J {1(99)}
+    99 L {12(24), 16(41), 20(24), 4(10)}
+    99 T {0.05(3), 0.1(2), 0.15(2), 0.2(2), 0.25(2), ..., 
+          1.8(2), 1.85(2), 1.9(2), 1.95(2), 2.0(2)}
+    99 local_S {1/2(99)}
+
+Measurements
+    99 J
+    99 L
+    99 MEASURE[Correlations]
+    99 MEASURE[Green Function]
+    99 T
+    99 local_S
+</pre>
+</td></tr>
+</table>
+
+<a name="a4"\><h2>5 Plotfile</h2>
+<p>Die Plotdatei bestimmt welche Daten aus der Datenbank gelesen und ausgegeben werden. Die Plotdatei ist
+ein XML-Dokument und enthçÍt alle Daten, die zum Erstellen der Ausgabe nig sind.</p>
+
+<p>Beispiel einer Plotdatei</p>
+<pre>
+&lt;?xml version="1.0" encoding="UTF-8"?&gt;
+&lt;!DOCTYPE plot SYSTEM "conf/plot.dtd"&gt;
+&lt;plot name="Energy versus temperature" output="xmgr"&gt;
+    &lt;for-each name="L"&gt;
+        &lt;xaxis name="T" type="parameter" /&gt;
+        &lt;yaxis name="Spin Correlations" type="mean" error="true" index="( 0 ) -- ( 0 )" /&gt;
+        &lt;constraint name="Energy" type="mean" operator="lessThan" value="0" /&gt;
+        &lt;constraint name="Energy" type="error" operator="lessThan" value="0.1" /&gt;
+        &lt;constraint name="L" type="parameter" operator="lessThan" value="20" /&gt;
+    &lt;/for-each&gt;
+&lt;/plot&gt;
+</pre>
+
+<a name="a51"\><h3>5.1 Plot-Tag</h3>
+<p>Der Plot Tag umschliesst die Informationen, die zum Erstellen des Plots nig sind und bestimmt den Titel und das Ausgabeformat. Der Titel wird 
+mit dem Attribut Name festgelegt, das Ausgabeformat wird im Attribut output ergeben. Die Ausgabe kann ein Text- (text), ein Xmgrace- (xmgr) oder 
+ein HTML-Dokument (html) sein.</p>
+
+<a name="a52"\><h3>5.2 For-Each-Tag</h3>
+<p>Der For-Each-Tag erstellt eine Schleife er die Werte eines Parameters. Der Name des Parameters wird dem Attribut Name ergeben. Es
+knen beliebig viele For-Each-Tags innenander verschachtelt werden. </p>
+
+<a name="a53"\><h3>5.3 Achsen</h3>
+<p>Die x- und y-Achse werden durch die Tags xaxis bzw. yaxis angesprochen. Mliche Attribute der Achsen sind:</p>
+
+<table>
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">name &nbsp;</font></td><td valign="top" nowrap="nowrap">obligatorisch &nbsp;</td>
+<td>Name des Parameters oder des Messwertes, der ausgegeben werden soll.</td></tr>
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">type</font></td><td valign="top" nowrap="nowrap">obligatorisch</td>
+<td>Typ des ausgegebenen Wertes. Folgende Werte sind mlich: parameter, count, mean, error, variance, autocorr, index.</td></tr>
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">error</font></td><td valign="top" nowrap="nowrap">optional</td>
+<td>Wenn ein Fehlerbalken ausgegeben werden soll, muss das Attribut den Wert true annehmen.</td></tr>
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">index</font></td><td valign="top" nowrap="nowrap">optional</td>
+<td>Bei der Ausgabe von Vectoraverages ist es mlich zu bestimmen welcher Index der jeweiligen Messung ausgegeben werden soll.</td></tr>
+</table>
+
+<a name="a54"\><h3>5.4 Constraints</h3>
+<p>Die Bedingungen an die Ausgabe werden mit dem constraint Tag ergeben. Die mit diesem Tag gemachten EinschrçÏkungen werden von allen
+ausgegebenen Daten erflt. Der Tag hat folgende Parameter:</p>
+
+<table>
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">name</font></td><td valign="top" nowrap="nowrap">obligatorisch &nbsp;</td>
+<td>Name des Parameters oder des Messwertes, der eingeschrçÏkt werden soll</td></tr>
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">type</font></td><td valign="top" nowrap="nowrap">obligatorisch</td>
+<td>Typ des ausgegebenen Wertes. Folgende Werte sind mlich: parameter, count, mean, error, variance, autocorr, index.</td></tr>
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">operator &nbsp;</font></td><td valign="top" nowrap="nowrap">obligatorisch</td>
+<td>Operator, der auf die Daten angewendet werden soll. Folgende Werte sind erlaubt. lessthan, lessorequalthan, greaterthan, 
+greaterorequalthan, notequal und equal. Falls es sich bei den Werten der Messung nicht um numerische Werte handelt, knen nur die Operatoren
+notequal und equal verwendet werden.</td></tr>
+<tr><td valign="top" nowrap="nowrap"><font face="sans-serif">value</font></td><td valign="top" nowrap="nowrap">obligatorisch</td>
+<td>Wert, mit dem der Parameter oder die Messung verglichen wird.</td></tr>
+</table>
+
+<a name="a6"\><h2>6. Performance</h2>
+<p>Es wurden einige kleine Benchmarks durchgefrt. Zur Messung wurde ein Pentium M 1.7 GHz mit 512 MB Ram unter Windwos verwendet. 
+Als Compiler diente der g++ 3.4.4 unter Cygwin. Gemessen wurden die Kommandos der folgenden Optionen:</p>
+
+<a name="a61"\><h3>6.1 -c rebuild</h3>
+<img src="rebuild.kb.png">
+<img src="rebuild.tuple.png">
+<p>Wie man anhand der beiden Grafiken leicht sehen kann, ist das Einlesen der Daten linear bezlich der Anzahl eingelesener Tupel und der Datengrse. Auf dem 
+oben genannten System ist es mlich 225 KB oder 200 Tupel pro Sekunde einzulesen.</p>
+
+<a name="a62"\><h3>6.2 -c list</h3>
+<img src="browse.png">
+<p>Das Augeben einer Liste ist annçÉernd linear bezlich der Dateigrse. Bei einer Extrapolation auf eine Sekunde ist ersichtlich, dass eine Liste von 
+etwa 1 Million Tupel in dieser Zeit ausgegeben werden kann.</p>
+
+<a name="a63"\><h3>6.3 -c plot</h3>
+<img src="extract.png">
+<p>Das Erstellen eines Plots ist linear bezlich der Datengröóse. Geschwindigkeiten köînen von Datei zu Datei variieren.</p>

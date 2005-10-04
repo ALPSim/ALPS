@@ -1,3 +1,7 @@
+2005-10-04  Synge Todo <wistaria@comp-phys.org>
+
+	* [tools] Added new tool 'archive' written by Lukas Gamper.
+	
 2005-8-25  Synge Todo <wistaria@comp-phys.org>
 
 	* [doc] Added prototype for new documentation system based on

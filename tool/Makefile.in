@@ -37,9 +37,10 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
-	parameter2xml$(EXEEXT) $(am__EXEEXT_1)
-@BUILD_DOC_TRUE@am__append_1 = quickbook
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@am__append_2 = $(BOOST_DIR)/tools/quickbook/detail/actions.cpp $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
+	parameter2xml$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
+@BUILD_ARCHIVE_TRUE@am__append_1 = archive
+@BUILD_DOC_TRUE@am__append_2 = quickbook
+@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@am__append_3 = $(BOOST_DIR)/tools/quickbook/detail/actions.cpp $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 subdir = tool
 DIST_COMMON = $(dist_bin_SCRIPTS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/changestylesheet.in \
@@ -59,6 +60,7 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_lapack.m4 \
 	$(top_srcdir)/config/ac_pthread.m4 \
 	$(top_srcdir)/config/ac_pvm.m4 \
+	$(top_srcdir)/config/ac_sqlite.m4 \
 	$(top_srcdir)/config/ac_xmlparser.m4 \
 	$(top_srcdir)/config/ac_xsltp.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
@@ -69,15 +71,25 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 CONFIG_CLEAN_FILES = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
 	changestylesheet
-@BUILD_DOC_TRUE@am__EXEEXT_1 = quickbook$(EXEEXT)
+@BUILD_ARCHIVE_TRUE@am__EXEEXT_1 = archive$(EXEEXT)
+@BUILD_DOC_TRUE@am__EXEEXT_2 = quickbook$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
 	"$(DESTDIR)$(bindir)"
 binPROGRAMS_INSTALL = $(INSTALL_PROGRAM)
 PROGRAMS = $(bin_PROGRAMS)
+am_archive_OBJECTS = archive.$(OBJEXT) archive_index.$(OBJEXT) \
+	archive_node.$(OBJEXT) archive_plot.$(OBJEXT) \
+	archive_sqlite.$(OBJEXT) archive_xml.$(OBJEXT)
+archive_OBJECTS = $(am_archive_OBJECTS)
+archive_LDADD = $(LDADD)
+am__DEPENDENCIES_1 =
+archive_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
+	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_compactrun_OBJECTS = compactrun.$(OBJEXT)
 compactrun_OBJECTS = $(am_compactrun_OBJECTS)
 compactrun_LDADD = $(LDADD)
-am__DEPENDENCIES_1 =
 compactrun_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
 	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
@@ -120,10 +132,19 @@ LTCXXCOMPILE = $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) \
 CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX --mode=link $(CXXLD) $(AM_CXXFLAGS) \
 	$(CXXFLAGS) $(AM_LDFLAGS) $(LDFLAGS) -o $@
-SOURCES = $(compactrun_SOURCES) $(convert2xml_SOURCES) \
-	$(parameter2xml_SOURCES) $(nodist_quickbook_SOURCES)
-DIST_SOURCES = $(compactrun_SOURCES) $(convert2xml_SOURCES) \
-	$(parameter2xml_SOURCES)
+COMPILE = $(CC) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) \
+	$(CPPFLAGS) $(AM_CFLAGS) $(CFLAGS)
+LTCOMPILE = $(LIBTOOL) --tag=CC --mode=compile $(CC) $(DEFS) \
+	$(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) \
+	$(AM_CFLAGS) $(CFLAGS)
+CCLD = $(CC)
+LINK = $(LIBTOOL) --tag=CC --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
+	$(AM_LDFLAGS) $(LDFLAGS) -o $@
+SOURCES = $(archive_SOURCES) $(compactrun_SOURCES) \
+	$(convert2xml_SOURCES) $(parameter2xml_SOURCES) \
+	$(nodist_quickbook_SOURCES)
+DIST_SOURCES = $(archive_SOURCES) $(compactrun_SOURCES) \
+	$(convert2xml_SOURCES) $(parameter2xml_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -158,6 +179,8 @@ BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_LIBS = @BOOST_LIBS@
 BOOST_SRCDIR = @BOOST_SRCDIR@
 BOOST_USER_CONFIG_H = @BOOST_USER_CONFIG_H@
+BUILD_ARCHIVE_FALSE = @BUILD_ARCHIVE_FALSE@
+BUILD_ARCHIVE_TRUE = @BUILD_ARCHIVE_TRUE@
 BUILD_BOOST_FALSE = @BUILD_BOOST_FALSE@
 BUILD_BOOST_SIGNALS_FALSE = @BUILD_BOOST_SIGNALS_FALSE@
 BUILD_BOOST_SIGNALS_TRUE = @BUILD_BOOST_SIGNALS_TRUE@
@@ -247,6 +270,9 @@ PVM_LIBS = @PVM_LIBS@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
+SQLITE_CPPFLAGS = @SQLITE_CPPFLAGS@
+SQLITE_LDFLAGS = @SQLITE_LDFLAGS@
+SQLITE_LIBS = @SQLITE_LIBS@
 SRC_DIR = @SRC_DIR@
 STRIP = @STRIP@
 VERSION = @VERSION@
@@ -302,16 +328,17 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
-AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
-AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
-LDADD = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
+AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLAGS) 
+AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS)
+LDADD = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS)
 dist_bin_SCRIPTS = archivecat xslttransform transformall 
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
+archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.cpp archive_node.hpp archive_plot.cpp archive_plot.hpp archive_sqlite.cpp archive_sqlite.hpp archive_xml.cpp archive_xml.hpp
 @BUILD_DOC_TRUE@nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp \
-@BUILD_DOC_TRUE@	$(am__append_2)
+@BUILD_DOC_TRUE@	$(am__append_3)
 all: all-am
 
 .SUFFIXES:
@@ -395,6 +422,9 @@ clean-binPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
+archive$(EXEEXT): $(archive_OBJECTS) $(archive_DEPENDENCIES) 
+	@rm -f archive$(EXEEXT)
+	$(CXXLINK) $(archive_LDFLAGS) $(archive_OBJECTS) $(archive_LDADD) $(LIBS)
 compactrun$(EXEEXT): $(compactrun_OBJECTS) $(compactrun_DEPENDENCIES) 
 	@rm -f compactrun$(EXEEXT)
 	$(CXXLINK) $(compactrun_LDFLAGS) $(compactrun_OBJECTS) $(compactrun_LDADD) $(LIBS)
@@ -453,6 +483,12 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/actions.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive_index.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive_node.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive_plot.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive_sqlite.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive_xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compactrun.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert2xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameter2xml.Po@am__quote@

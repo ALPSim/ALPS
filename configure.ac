@@ -67,8 +67,6 @@ else
   ac_cv_alps_type="light"
   AC_MSG_NOTICE([starting configuration for ALPS Light Libraries version $PACKAGE_VERSION])
 fi	
-AM_CONDITIONAL(ALPS_FULL, test "$ac_cv_alps_type" = "full")
-AM_CONDITIONAL(ALPS_LIGHT, test "$ac_cv_alps_type" = "light")
 
 dnl setting up cache file
 cache_file='config/config.cache'
@@ -372,9 +370,6 @@ case "x$ac_cv_boost_version" in
     AC_MSG_ERROR([Boost library is too old])
     ;;
 esac
-AM_CONDITIONAL(BOOST_CVS, test "$ac_cv_boost_version" = cvs)
-AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
-AM_CONDITIONAL(BOOST_1_32, test "$ac_cv_boost_version" = 1_32)
 
 dnl pre-compiled boost library
 
@@ -524,7 +519,6 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
     fi
   fi
 fi
-AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
 
 CPPFLAGS="$ac_save_CPPFLAGS"
 LDFLAGS="$ac_save_LDFLAGS"
@@ -575,6 +569,35 @@ AC_PTHREAD
 test "$ac_cv_have_pthread" = yes && AC_DEFINE(ALPS_HAVE_PTHREAD, [], [pthread])
 
 #
+# check for HDF5
+#
+
+if test "$ac_cv_alps_type" = "full"; then
+  AC_HDF5
+  test "$ac_cv_have_hdf5" = yes && AC_DEFINE(ALPS_HAVE_HDF5, [], [hdf5])
+fi
+
+dnl
+dnl check for LAPACK
+dnl
+
+AC_LAPACK
+
+#
+# check for SQLite
+#
+
+AC_SQLITE
+
+#
+# check for XML parser
+#
+
+AC_XMLPARSER
+test "$ac_cv_xml_parser" = "expat" && AC_DEFINE(ALPS_HAVE_EXPAT_PARSER, [], [expat])
+test "$ac_cv_xml_parser" = "xerces" && AC_DEFINE(ALPS_HAVE_XERCES_PARSER, [], [xerces])
+
+#
 # check for MPI
 #
 
@@ -586,7 +609,6 @@ if test "$ac_cv_have_mpi" = yes; then
   AC_DEFINE(ALPS_HAVE_MPI, [], [mpi])
   LIB_MPI='$(LIB_MPI)'
 fi
-AM_CONDITIONAL(HAVE_MPI, test "$ac_cv_have_mpi" = yes)
 
 #
 # check for PVM
@@ -600,30 +622,6 @@ if test "$ac_cv_have_pvm" = yes; then
   AC_DEFINE(ALPS_HAVE_PVM, [], [pvm])
   LIB_PVM='$(LIB_PVM)'
 fi
-AM_CONDITIONAL(HAVE_PVM, test "$ac_cv_have_pvm" = yes)
-
-dnl
-dnl check for LAPACK
-dnl
-
-AC_LAPACK
-
-#
-# check for HDF5
-#
-
-if test "$ac_cv_alps_type" = "full"; then
-  AC_HDF5
-  test "$ac_cv_have_hdf5" = yes && AC_DEFINE(ALPS_HAVE_HDF5, [], [hdf5])
-fi
-
-#
-# check for XML parser
-#
-
-AC_XMLPARSER
-test "$ac_cv_xml_parser" = "expat" && AC_DEFINE(ALPS_HAVE_EXPAT_PARSER, [], [expat])
-test "$ac_cv_xml_parser" = "xerces" && AC_DEFINE(ALPS_HAVE_XERCES_PARSER, [], [xerces])
 
 #
 # boost object libraries
@@ -639,7 +637,6 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
     AC_MSG_RESULT([no])
   fi
 fi
-AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_use_precompiled_boost" != yes -a "$ac_cv_boost_signals" = yes)
 
 # check whether boost::thread is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
@@ -655,7 +652,6 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
     AC_MSG_RESULT([no])
   fi
 fi
-AM_CONDITIONAL(BUILD_BOOST_THREAD, test "$ac_cv_use_precompiled_boost" != yes -a "$ac_cv_boost_thread" = yes)
 
 # check whether Boost::configure is used or not
 AC_ARG_ENABLE(boost-config,
@@ -753,8 +749,6 @@ else
   build_pdf=no
   AC_MSG_NOTICE([Documentation will no be built.])
 fi
-AM_CONDITIONAL(BUILD_DOC, test "$build_doc" = yes)
-AM_CONDITIONAL(BUILD_PDF, test "$build_pdf" = yes)
 
 dnl
 dnl # setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
@@ -770,17 +764,17 @@ AC_SUBST(BASE_LIBS)
 BASE_LIBS="$LIBS"
 ac_cv_base_libs="$LIBS"
 
-ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_xml_cppflags $ac_cv_lapack_cppflags $ac_cv_hdf5_cppflags -I$ac_cv_alps_includedir $ac_cv_boost_cppflags"
-ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_xml_ldflags $ac_cv_lapack_ldflags $ac_cv_hdf5_ldflags -L$ac_cv_alps_libdir $ac_cv_boost_ldflags"
-ac_cv_alps_libs="-lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_xml_libs $ac_cv_base_libs"
+ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_hdf5_cppflags $ac_cv_lapack_cppflags $ac_cv_sqlite_cppflags $ac_cv_xml_cppflags -I$ac_cv_alps_includedir $ac_cv_boost_cppflags"
+ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_hdf5_ldflags $ac_cv_lapack_ldflags $ac_cv_xml_ldflags -L$ac_cv_alps_libdir $ac_cv_boost_ldflags"
+ac_cv_alps_libs="-lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 ac_cv_alps_cppflags_mpi="$ac_cv_alps_cppflags $ac_cv_mpi_cppflags"
 ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
-ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_xml_libs $ac_cv_base_libs"
+ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 ac_cv_alps_cppflags_pvm="$ac_cv_alps_cppflags $ac_cv_pvm_cppflags"
 ac_cv_alps_ldflags_pvm="$ac_cv_alps_ldflags $ac_cv_pvm_ldflags"
-ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_xml_libs $ac_cv_base_libs"
+ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
 dnl
 dnl Experimental Features
@@ -795,7 +789,25 @@ AC_ARG_ENABLE(libheap,
   ]
 )
 test -z "$ac_cv_libheap" && ac_cv_libheap=yes
+
+dnl
+dnl Conditionals
+dnl
+
+AM_CONDITIONAL(ALPS_FULL, test "$ac_cv_alps_type" = "full")
+AM_CONDITIONAL(ALPS_LIGHT, test "$ac_cv_alps_type" = "light")
+AM_CONDITIONAL(BOOST_1_32, test "$ac_cv_boost_version" = 1_32)
+AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
+AM_CONDITIONAL(BOOST_CVS, test "$ac_cv_boost_version" = cvs)
+AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
+AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_boost_signals" = yes)
+AM_CONDITIONAL(BUILD_BOOST_THREAD, test "$ac_cv_boost_thread" = yes)
+AM_CONDITIONAL(BUILD_DOC, test "$build_doc" = yes)
+AM_CONDITIONAL(BUILD_PDF, test "$build_pdf" = yes)
 AM_CONDITIONAL(BUILD_LIBHEAP, test "$ac_cv_libheap" = yes)
+AM_CONDITIONAL(BUILD_ARCHIVE, test "$ac_cv_have_sqlite" = yes)
+AM_CONDITIONAL(HAVE_MPI, test "$ac_cv_have_mpi" = yes)
+AM_CONDITIONAL(HAVE_PVM, test "$ac_cv_have_pvm" = yes)
 
 dnl
 dnl Generate files
@@ -856,11 +868,9 @@ echo "  exceptions          $ac_cv_alps_compiler_exceptions"
 echo "  optimization        $ac_cv_alps_compiler_optimization"
 echo "  MPI support         $ac_cv_alps_have_mpi"
 echo "  PVM support         $ac_cv_alps_have_pvm"
-echo "  BLAS/LAPACK support $ac_cv_have_lapack"
-echo "  pthread support     $ac_cv_have_pthread"
-if test "$ac_cv_alps_type" = "full"; then
-  echo "  HDF5 support        $ac_cv_have_hdf5"
-fi
+echo "  HDF5 support        $ac_cv_have_hdf5"
+echo "  LAPACK support      $ac_cv_have_lapack"
+echo "  SQLite support      $ac_cv_have_sqlite"
 echo "  XML parser          $ac_cv_xml_parser"
 
 if test "$ac_cv_alps_type" = "light"; then

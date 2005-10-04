@@ -1,7 +1,7 @@
 DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
-AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
-AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
-LDADD = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
+AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLAGS) 
+AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS)
+LDADD = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS)
 BOOST_DIR = @BOOST_DIR@
 
 pkgdatadir = $(libdir)/xml
@@ -14,6 +14,11 @@ compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
 
+if BUILD_ARCHIVE
+bin_PROGRAMS += archive
+endif
+archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.cpp archive_node.hpp archive_plot.cpp archive_plot.hpp archive_sqlite.cpp archive_sqlite.hpp archive_xml.cpp archive_xml.hpp
+
 if BUILD_DOC
 bin_PROGRAMS += quickbook
 nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp 
@@ -21,3 +26,4 @@ if BOOST_CVS
 nodist_quickbook_SOURCES += $(BOOST_DIR)/tools/quickbook/detail/actions.cpp $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 endif
 endif
+
