@@ -43,6 +43,7 @@
 #include <cmath>
 #include <boost/numeric/bindings/lapack/lapack.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include "solver.h"
 
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
@@ -50,7 +51,9 @@ typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major
 void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l);
 
 // attempt single spin flip and (if successful) compute Green's function matrix for the new configuration
-template<class RNG> void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green_down, std::vector<int> & spins, double lambda) {
+template<class RNG> 
+void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green_down, std::vector<int> & spins, double lambda) 
+{
 
   int N(spins.size());
   

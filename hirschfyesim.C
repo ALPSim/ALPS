@@ -32,6 +32,7 @@
 
 
 #include "hirschfyesim.h"
+#include <alps/alea.h>
 #include <cmath>
 using namespace std;
 using namespace alps;
@@ -71,7 +72,7 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
 }
 
 
-HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const alps::Parameters& p,int node, multiple_vector_type& G0)
+HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const alps::Parameters& p,int node, const multiple_vector_type& G0)
   : alps::scheduler::MCRun(where,p,node),  
     sweeps(0),
     thermalization_sweeps(static_cast<int>(parms["THERMALIZATION"])),
@@ -95,7 +96,7 @@ HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const al
 {
 
   // initialize G0
-  for (int i=0; i<G0.fist.size(); i++) {
+  for (int i=0; i<G0.first.size(); i++) {
     G0_up[i] = G0.first[i];
 	G0_down[i] = G0.second[i];
   }
@@ -176,7 +177,7 @@ void HirschFyeSimulation::dostep()
  
   // do local update
   for (int i=0; i<N; i++)
-    update_single_spin(random_01(), Green_up, Green_down, spins, lambda);
+    update_single_spin(random_01, Green_up, Green_down, spins, lambda);
 	  
   // calculate Greens function	
   std::valarray<double> G_tmp_up(N), G_tmp_down(N);			
@@ -234,7 +235,7 @@ multiple_vector_type HirschFyeSimulation::get_G() {
   alps::RealVectorObsevaluator G_meas_down=get_measurements()["G_meas_down"];  
   
   // not sure how to implement this correctly
-  for (int i=0; i<G_meas_up.size(); i++) {
+  for (int i=0; i<G_meas_up.mean().size(); i++) {
     g.first[i] = G_meas_up.mean()[i];
 	g.second[i] = G_meas_down.mean()[i];
   }
