@@ -37,7 +37,7 @@
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <alps/parameters.h>
+#include <alps/scheduler/montecarlo.h>
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 #include <cmath>
@@ -93,7 +93,7 @@ template<class RNG> void update_single_spin(RNG & rng, dense_matrix & Green_up, 
 class HirschFyeSimulation : public alps::scheduler::MCRun
 {
 public:
-  HirschFyeSimulation(const alps::ProcessList&,const alps::Parameters&,int, multiple_vector_type&);
+  HirschFyeSimulation(const alps::ProcessList&,const alps::Parameters&,int, const multiple_vector_type&);
   HirschFyeSimulation(int,const alps::ProcessList&,alps::IDump&,int);
   void save(alps::ODump&) const;
   void load(alps::IDump&);

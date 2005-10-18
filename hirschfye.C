@@ -31,16 +31,16 @@
 /// @sa HirschFyeSolver
 
 #include "hirschfye.h"
-#include "hirschfyesim.h" // your old hirschfye.h
+#include "hirschfyesim.h"
 #include <alps/osiris.h>
 #include <cstdio>
 
 
 multiple_vector_type HirschFyeSolver::solve(const multiple_vector_type& G0, const alps::Parameters& parms)
 {
-  alps::ProcessList where(1,alps::local_process());
+  alps::ProcessList here(1,alps::local_process());
   
-  HirschFyeSimulation sim(where, parms, 0, G0);
+  HirschFyeSimulation sim(here, parms, 0, G0);
   
   while (sim.work_done() <1.)
     sim.run();

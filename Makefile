@@ -1,9 +1,9 @@
 include $(HOME)/ALPS/share/alps/include.mk
 
-SOURCES=hirschfye.C externalsolver.C
+SOURCES=hirschfye.C externalsolver.C hirschfyesim.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
 
-OBJECTS=hirschfye.o externalsolver.o
+OBJECTS=hirschfye.o externalsolver.hirschfyesim.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
 
