@@ -27,9 +27,6 @@
 
 /// @file hirschfyesim.h
 /// @brief the actual Hirsch-Fye simulation
-///
-/// @todo needs to be implemented as soon as possible by Philipp Werner
-
 
 #include "hirschfyesim.h"
 #include <alps/alea.h>
@@ -83,19 +80,19 @@ HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const al
 	N_check(1000), // value is automatically adjusted during the simulation
 	check_counter(0),
 	tolerance(static_cast<double>(parms["TOLERANCE"])),	
-	G0_up(static_cast<int>(parms["N"])),	
-	G_up(static_cast<int>(parms["N"]),0.),
+	G_up(static_cast<int>(parms["N"])),
 	Green0_up(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),
 	Green_up(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),
-	G0_down(static_cast<int>(parms["N"])),	
-	G_down(static_cast<int>(parms["N"]),0.),
+	G_down(static_cast<int>(parms["N"])),
 	Green0_down(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),
 	Green_down(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),			
-    spins(static_cast<int>(parms["N"]), 0) // at the beginning, spins are formally set to 0
+    spins(static_cast<int>(parms["N"]))
 
 {
 
   // initialize G0
+  std::vector<double> G0_up(G0.first.size());
+  std::vector<double> G0_down(G0.first.size());
   for (int i=0; i<G0.first.size(); i++) {
     G0_up[i] = G0.first[i];
 	G0_down[i] = G0.second[i];
@@ -133,19 +130,23 @@ HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const al
   
 }
 
+
+// in principle, need only save spins (and do update_from_zero after loading)
 void HirschFyeSimulation::load(alps::IDump& dump) {
   dump >> sweeps;
   if(!where.empty()) {// skip reading the spins if we are just evaluating
-    dump >> G0_up >> G_up >> G0_down >> G_down >> spins; 	 
+    dump >> Green_up >> Green_down >> spins; 	 
   }
   else
     measurements.compact(); // and throw away time series
 }
 
+
 void HirschFyeSimulation::save(alps::ODump& dump) const
 {
-  dump << G0_up << G_up << G0_down << G_down << spins;
+  dump << Green_up << Green_down << spins;
 }
+
 
 bool HirschFyeSimulation::change_parameter(const std::string& name, const alps::StringValue& value)
 {
@@ -158,15 +159,18 @@ bool HirschFyeSimulation::change_parameter(const std::string& name, const alps::
   return true; // could do it
 }
 
+
 bool HirschFyeSimulation::is_thermalized() const
 {
   return (sweeps >= thermalization_sweeps);
 }
 
+
 double HirschFyeSimulation::work_done() const
 {
   return (is_thermalized() ? (sweeps-thermalization_sweeps)/double(total_sweeps) : 0.);
 }
+
 
 void HirschFyeSimulation::dostep()
 {
@@ -180,29 +184,28 @@ void HirschFyeSimulation::dostep()
     update_single_spin(random_01, Green_up, Green_down, spins, lambda);
 	  
   // calculate Greens function	
-  std::valarray<double> G_tmp_up(N), G_tmp_down(N);			
-  G_tmp_up = 0.;
-  G_tmp_down = 0.;
+  //std::valarray<double> G_tmp_up(N), G_tmp_down(N);			
+  G_up = 0.;
+  G_down = 0.;
   
   for (int i=0; i<N; i++) {
     for (int j=i; j<N; j++) {
-      G_tmp_up[j-i] += Green_up(j,i);
-	  G_tmp_down[j-i] += Green_down(j,i); 
+      G_up[j-i] += Green_up(j,i);
+	  G_down[j-i] += Green_down(j,i); 
 	  
 	  if (j>i) {
-        G_tmp_up[N-(j-i)] += -Green_up(i,j);
-	    G_tmp_down[N-(j-i)] += -Green_down(i,j); 	  
+        G_up[N-(j-i)] += -Green_up(i,j);
+	    G_down[N-(j-i)] += -Green_down(i,j); 	  
 	  }
 	  
     }
   }
-  
-  G_tmp_up /= N;
-  G_tmp_down /= N;
+  G_up /= N;
+  G_down /= N;
   
   // measure Greens function
-  measurements.get<RealVectorObservable>("G_meas_up") << G_tmp_up;
-  measurements.get<RealVectorObservable>("G_meas_down") << G_tmp_down;
+  measurements.get<RealVectorObservable>("G_meas_up") << G_up;
+  measurements.get<RealVectorObservable>("G_meas_down") << G_down;
 
   // check if precision has deteriorated
   if (check_counter%N_check == 0) {

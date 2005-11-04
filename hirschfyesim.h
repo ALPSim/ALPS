@@ -47,6 +47,29 @@
 
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
+inline alps::ODump& operator << (alps::ODump& odump, const dense_matrix& m) {
+  odump << m.size1() << m.size2();
+  for (int i=0; i<m.size1(); i++) {
+    for (int j=0; j<m.size2(); j++) {
+          odump << m(i,j);
+        }
+  }
+  return odump;
+}
+
+inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
+  int size1, size2;
+  idump >> size1;
+  idump >> size2;
+  m.resize(size1, size2);
+  for (int i=0; i<m.size1(); i++) {
+    for (int j=0; j<m.size2(); j++) {
+          idump >> m(i,j);
+        }
+  }  
+  return idump;
+}
+
 // compute Green's function matrix for a given spin configuration, from Greens function for spins set to zero
 void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l);
 
@@ -119,13 +142,10 @@ private:
   int check_counter;				// counts the number of single-spin updates
   double tolerance;					// tolerance for deterioration of precision
                                     // (maximum deviation of Green's function matrix elements)
-
-  std::vector<double> G0_up;		// bath Green's function for up spins
-  std::vector<double> G_up;			// Green's function for up spins
+  std::valarray<double> G_up;		// Green's function for up spins
   dense_matrix Green0_up;       	// bath Green's function matrix for up spins
   dense_matrix Green_up;        	// Green's function matrix for up spins  
-  std::vector<double> G0_down;		// bath Green's function for down spins
-  std::vector<double> G_down;		// Green's function for down spins
+  std::valarray<double> G_down;		// Green's function for down spins
   dense_matrix Green0_down;	        // bath Green's function matrix for down spins
   dense_matrix Green_down;      	// Green's function matrix for down spins     
   std::vector<int> spins;		    // auxiliary Ising spins
