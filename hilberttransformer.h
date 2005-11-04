@@ -50,7 +50,7 @@ public:
 /// and chemical potential given as parameters. The density of states is constant for
 /// each object and usually specified in the constructor
 ///
-/// @param Sigma the frequency dependent self energy as a funbction of Matsubara frequency
+/// @param Sigma the frequency dependent self energy as a function of Matsubara frequency
 /// @param mu the chemical potential, including the magnetic field for a given value of spin
 /// @return the result of the Hilbert transform of the self energy (equation to be added)
   virtual result_type operator()(first_argument_type Sigma, second_argument_type mu) =0; 
@@ -58,7 +58,7 @@ public:
 };
 
 /// A Hilbert transformation for a semcircle density of states
-/// @todo the transformation need to be implemented. responsible: Philipp Werner
+/// @todo the transformation needs to be implemented. responsible: Philipp Werner
 class SemicircleHilbertTransformer : public HilbertTransformer {
 public:
 /// the constructor accepts the bandwidth
