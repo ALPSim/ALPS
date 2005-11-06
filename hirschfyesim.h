@@ -120,7 +120,6 @@ class HirschFyeSimulation : public alps::scheduler::MCRun
 {
 public:
   HirschFyeSimulation(const alps::ProcessList&,const alps::Parameters&,int, const multiple_vector_type&);
-  HirschFyeSimulation(int,const alps::ProcessList&,alps::IDump&,int);
   void save(alps::ODump&) const;
   void load(alps::IDump&);
   void dostep();

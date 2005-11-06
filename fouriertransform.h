@@ -25,43 +25,10 @@
 *****************************************************************************/
 
 #include "hirschfyesim.h"
-#include "complex.h"
+#include <complex>
 
 
-void generate_spline_matrix(dense_matrix & spline_matrix) {
-
-  // spline_matrix has dimension (N+1)x(N+1)
-  int Np1 = spline_matrix.size1();
-
-  // A is the matrix whose inverse defines spline_matrix
-  //   
-  //      6                   6
-  //      1  4  1
-  //         1  4  1
-  // A =        ...
-  //
-  //                    1  4  1
-  //     -2 -1             1  2    
-  
-  dense_matrix A = 4*boost::numeric::ublas::identity_matrix<double>(Np1);
-  
-  for (int i=1; i<Np1-1; i++) {
-    A(i,i-1) = 1;
-    A(i,i+1) = 1;
-  }
-  A(0,0) = 6;
-  A(0, Np1-1) = 6;
-  A(Np1-1, 0) = -2;
-  A(Np1-1, 1) = -1;
-  A(Np1-1, Np1-2) = 1;
-  A(Np1-1, Np1-1) = 2;
-    
-  // solve A*spline_matrix=I
-  // gesv solves A*X=B, input for B is I, output (=solution X) is spline_matrix
-  spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);   
-  boost::numeric::bindings::lapack::gesv(A, spline_matrix);
-  
-}
+void generate_spline_matrix(dense_matrix & spline_matrix);
 
 
 //void evaluate_second_derivatives(double dt, double bw, double mu, double h, dense_matrix & spline_matrix, multiple_vector_type & g, multiple_vector_type & second_derivatives) {
@@ -121,7 +88,7 @@ template <class V, class W> void forward_FT(double BETA, double bw, double mu, d
   evaluate_second_derivatives(dt, bw, mu, h, spline_matrix, v, v2);
 
   for (int k=0; k<N; k++) {
-	complex<double> iw(0, (2*k+1)*M_PI/BETA);
+	std::complex<double> iw(0, (2*k+1)*M_PI/BETA);
 	v_omega.first[k] = 0;
 	v_omega.second[k] = 0;
 	

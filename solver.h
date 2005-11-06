@@ -33,11 +33,11 @@
 /// @brief declares the abstract base class for the impurity solver
 
 #include <alps/parameters.h>
-#include <valarray>
+#include <vector>
 #include <utility>
 
 /// the array (vector) type to store frequence dependent Green's functions and Weiss fields
-typedef std::valarray<double> vector_type;
+typedef std::vector<double> vector_type;
 /// two arrays are needed for a single site problem: one for up and one for down spins
 typedef std::pair<vector_type,vector_type> multiple_vector_type;
 
@@ -48,7 +48,8 @@ public:
   
   ///  @brief solves the impurity problem
   ///
-  ///  @param G0 the inverse Weiss field (without i * omega), as a function of Matsubara frequence omega_n
+  ///  @param G0 the inverse Weiss field (without i * omega), as a function of Matsubara 
+  ///               frequency omega_n
   ///  @param parms the simulation parameters
   ///  
   ///  Note that we mu, U and h are passed as simulation as simulation parameters.
