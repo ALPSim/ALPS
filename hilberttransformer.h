@@ -40,10 +40,13 @@
 #include "solver.h"
 #include <functional>
 
+#include "fouriertransform.h"
+
 /// @brief performs a Hilbert transformation
 ///
 /// The HilbertTransformer performs a Hilbert transformation for the self energy and density of states
-class HilbertTransformer : public std::binary_function<const vector_type&,double,vector_type>
+//class HilbertTransformer : public std::binary_function<const vector_type&,double,vector_type>
+class HilbertTransformer : public std::binary_function<const pair_vector_type&,double,pair_vector_type>
 {
 public:
 /// the function call operator performs a Hilbert transformation of the self energy 
@@ -51,23 +54,41 @@ public:
 /// each object and usually specified in the constructor
 ///
 /// @param Sigma the frequency dependent self energy as a function of Matsubara frequency
-/// @param mu the chemical potential, including the magnetic field for a given value of spin
+/// @param mu the chemical potential, h the magnetic field
 /// @return the result of the Hilbert transform of the self energy (equation to be added)
-  virtual result_type operator()(first_argument_type Sigma, second_argument_type mu) =0; 
+  //virtual result_type operator()(first_argument_type Sigma, second_argument_type mu)=0;
+  virtual result_type operator()(first_argument_type G, second_argument_type mu, third_argument_type h)=0; 
   virtual ~HilbertTransformer() {}
 };
 
 /// A Hilbert transformation for a semcircle density of states
-/// @todo the transformation needs to be implemented. responsible: Philipp Werner
+/// It receives G(\tau) as input and returns G0(\tau)
 class SemicircleHilbertTransformer : public HilbertTransformer {
 public:
 /// the constructor accepts the bandwidth
   SemicircleHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-  result_type operator()(first_argument_type Sigma, second_argument_type mu)
+  //result_type operator()(first_argument_type Sigma, second_argument_type mu)
+  result_type operator()(first_argument_type G, second_argument_type mu, third_argument_type h)
   {
-   // to implement
-  return vector_type();
+
+  double BETA=1; // shall we use this convention?
+  std::pair<std::vector<std::complex<double> >, std::vector<std::complex<double> > > G_omega(G.size());
+  std::pair<std::vector<std::complex<double> >, std::vector<std::complex<double> > > G0_omega(G.size());
   
+  forward_FT(BETA, bw_, mu, h, G, G_omega);
+  for(int i=0; i<G_omega.size(); i++) {
+    complex<double> iw(0.,(2*i+1)*M_PI/BETA);
+	G0_omega.first[i] = iw + mu + h/2. - std::pow(bw_,2)*G_omega.second[i];
+	G0_omega.second[i] = iw + mu - h/2. - std::pow(bw_,2)*G_omega.first[i];
+  }
+  
+  first_argument_type G0(G.size());
+  backward_FT(BETA, bw_, mu, h, G0, G0_omega);
+   
+  return G0;
+   
+  // to implement
+  //return vector_type();
   }
 private:
   double bw_; // or band width
