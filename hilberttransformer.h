@@ -52,11 +52,10 @@ public:
 /// and chemical potential given as parameters. The density of states is constant for
 /// each object and usually specified in the constructor
 ///
-/// @param Sigma the frequency dependent self energy as a function of Matsubara frequency
-/// @param mu the chemical potential, h the magnetic field
-/// @return the result of the Hilbert transform of the self energy (equation to be added)
-  //virtual result_type operator()(first_argument_type Sigma, second_argument_type mu)=0;
-  virtual multiple_vector_type operator()(const multiple_vector_type& G, double mu, double h)=0; 
+/// @param G the Greens function as a function of tau 
+/// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
+/// @return the result of the Hilbert transform (G0)
+  virtual multiple_vector_type operator()(const multiple_vector_type& G, double mu, double h, double beta)=0; 
   virtual ~HilbertTransformer() {}
 };
 
@@ -66,38 +65,34 @@ class SemicircleHilbertTransformer : public HilbertTransformer {
 public:
 /// the constructor accepts the bandwidth
   SemicircleHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-  //result_type operator()(first_argument_type Sigma, second_argument_type mu)
-  multiple_vector_type operator()(const multiple_vector_type& G, double mu, double h)
+  multiple_vector_type operator()(const multiple_vector_type& G, double mu, double h, double beta)
   {
-
-  double BETA=1; // shall we use this convention?
 
   multiple_vector_type G0(G);
 /*
   /// this needs more work: do you really want complex vectors here?
   multiple_vector_type G_omega(G); // remember these are pairs now!,
-  
+*/  
   // variant if you want complex vectors
+  typedef std::vector<std::complex<double> > complex_vector_type;
+  typedef std::pair<complex_vector_type,complex_vector_type> multiple_complex_vector_type;
   multiple_complex_vector_type G_omega;
   G_omega.first.resize(G.first.size()); // remember these are pairs now!
   G_omega.second.resize(G.second.size()); // remember these are pairs now!
   
-  multiple_vector_type G0_omega(G); 
+  multiple_complex_vector_type G0_omega(G_omega); 
   
-  forward_FT(BETA, bw_, mu, h, G, G_omega);
+  forward_FT(beta, bw_, mu, h, G, G_omega);
   for(int i=0; i<G_omega.first.size(); i++) {
-    std::complex<double> iw(0.,(2*i+1)*M_PI/BETA);
+    std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
 	G0_omega.first[i] = iw + mu + h/2. - std::pow(bw_,2)*G_omega.second[i];
 	G0_omega.second[i] = iw + mu - h/2. - std::pow(bw_,2)*G_omega.first[i];
   }
   
-  backward_FT(BETA, bw_, mu, h, G0, G0_omega);
-*/
+  backward_FT(beta, bw_, mu, h, G0, G0_omega);
    
   return G0;
    
-  // to implement
-  //return vector_type();
   }
 private:
   double bw_; // or band width
