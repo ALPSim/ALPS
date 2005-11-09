@@ -24366,7 +24366,7 @@ echo "$as_me: checking for Math Kernel Library" >&6;}
       echo "$as_me:$LINENO: checking MKL directory" >&5
 echo $ECHO_N "checking MKL directory... $ECHO_C" >&6
       if test -z "$mkl_dir"; then
-        for d in mkl721 mkl72 mkl70 mkl61 mkl; do
+        for d in "mkl/8.0" mkl721 mkl72 mkl70 mkl61 mkl; do
           if test -d "/opt/intel/$d"; then
             mkl_dir="/opt/intel/$d"
             echo "$as_me:$LINENO: result: $mkl_dir" >&5
