@@ -55,7 +55,7 @@ public:
 /// @param G the Greens function as a function of tau 
 /// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
 /// @return the result of the Hilbert transform (G0)
-  virtual multiple_vector_type operator()(const multiple_vector_type& G, double mu, double h, double beta)=0; 
+  virtual multiple_vector_type operator()(multiple_vector_type& G, double mu, double h, double beta)=0; 
   virtual ~HilbertTransformer() {}
 };
 
@@ -65,7 +65,7 @@ class SemicircleHilbertTransformer : public HilbertTransformer {
 public:
 /// the constructor accepts the bandwidth
   SemicircleHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-  multiple_vector_type operator()(const multiple_vector_type& G, double mu, double h, double beta)
+  multiple_vector_type operator()(multiple_vector_type& G, double mu, double h, double beta)
   {
 
   multiple_vector_type G0(G);
@@ -73,9 +73,6 @@ public:
   /// this needs more work: do you really want complex vectors here?
   multiple_vector_type G_omega(G); // remember these are pairs now!,
 */  
-  // variant if you want complex vectors
-  typedef std::vector<std::complex<double> > complex_vector_type;
-  typedef std::pair<complex_vector_type,complex_vector_type> multiple_complex_vector_type;
   multiple_complex_vector_type G_omega;
   G_omega.first.resize(G.first.size()); // remember these are pairs now!
   G_omega.second.resize(G.second.size()); // remember these are pairs now!

@@ -26,11 +26,12 @@
 
 #include "hirschfyesim.h"
 #include <complex>
+#include "solver.h" // for the multiple_vector_type
 
 
 void generate_spline_matrix(dense_matrix & spline_matrix);
 
-
+//example:  V = std::pair<vector_type, vector_type>
 template <class V> void evaluate_second_derivatives(double dt, double bw, double mu, double h, dense_matrix & spline_matrix, V & g, V & second_derivatives) {
 
   // g, rhs and second_derivatives have dimension N+1
@@ -48,10 +49,12 @@ template <class V> void evaluate_second_derivatives(double dt, double bw, double
   //                   yNp1-3 - 2*yNp1-2 + yNp1-1
   //                   (G'(0)+G'(beta))*(dt)^2 + y0 - y1 + yNp1-2 - yNp1-1     
 
-  V rhs(Np1);
+  V rhs;
+  rhs.first.reserve(Np1);
+  rhs.second.reserve(Np1);
   
   rhs.first[0] = std::pow(bw*dt,2); 
-  rhs.second[0] = rhs.first()[0];
+  rhs.second[0] = rhs.first[0];
   for (int i=1; i<Np1-1; i++) {
     rhs.first[i] = g.first[i-1]-2*g.first[i]+g.first[i+1];
 	rhs.second[i]= g.second[i-1]-2*g.second[i]+g.second[i+1];
@@ -61,26 +64,31 @@ template <class V> void evaluate_second_derivatives(double dt, double bw, double
 
   for (int i=0; i<Np1; i++) {
     for (int j=0; j<Np1; j++) {
-      second_derivatives.first[i] += spline_matrix(i,j)*rhs.first()[j];
-	  second_derivatives.second[i] += spline_matrix(i,j)*rhs.second()[j];
+      second_derivatives.first[i] += spline_matrix(i,j)*rhs.first[j];
+	  second_derivatives.second[i] += spline_matrix(i,j)*rhs.second[j];
 	}
 	second_derivatives.first[i] *= 6./std::pow(dt,2);
 	second_derivatives.second[i] *= 6./std::pow(dt,2);
   }
 }
 
-
+//example class V type:  multiple_vector_type.
+//example class W type:  multiple_complex_vector_type
+//is it really meaningful to have this as a template function?!?
 template <class V, class W> void forward_FT(double beta, double bw, double mu, double h, V & v, W & v_omega) {
 
   int N=v.first.size();
   double dt = beta/N;
-  dense_matrix & spline_matrix(N+1, N+1);
+  dense_matrix spline_matrix(N+1, N+1);
   generate_spline_matrix(spline_matrix);
   
   // v2 is the matrix containing the second derivatives y'' of interpolated y=v[tau] at points tau_n	 
-  V v2(N+1);
-  std::pair<double, double> last(1-v.first[0], 1-v.second[0]);
-  v.push_back(last); 
+  multiple_vector_type v2;
+  v2.first.reserve(N+1);	//allocate memory for both vector 1 and 2. We will need a vector class that implements reserve()
+  v2.second.reserve(N+1);
+
+  v.first.push_back(1-v.first[0]); 
+  v.second.push_back(1-v.second[0]); 
   evaluate_second_derivatives(dt, bw, mu, h, spline_matrix, v, v2);
 
   for (int k=0; k<N; k++) {
@@ -97,8 +105,9 @@ template <class V, class W> void forward_FT(double beta, double bw, double mu, d
 	v_omega.first[k] *= 1./(dt*pow(iw,4));
 	v_omega.second[k] *= 1./(dt*pow(iw,4));
   }
-  v.pop_back();
-} 
+  v.first.pop_back();
+  v.second.pop_back();
+ } 
 
 inline std::complex<double> f_omega(std::complex<double> iw, double mu) {
   return 1./iw + mu/std::pow(iw,2);
@@ -110,7 +119,7 @@ inline double f_tau(double tau_beta, double mu) {
 
 template <class V, class W> void backward_FT(double beta, double bw, double mu, double h, V & v, W v_omega) {
   
-  int N = v.size();
+  int N = v.first.size();
   double dt = beta/N;
   
   for (int k=0; k<N; k++) {
