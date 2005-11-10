@@ -80,7 +80,8 @@ public:
   
   multiple_complex_vector_type G0_omega(G_omega); 
   
-  forward_FT(beta, bw_, mu, h, G, G_omega);
+  forward_FT(beta, bw_, mu, h, G.first, G_omega.first);
+  forward_FT(beta, bw_, mu, h, G.first, G_omega.first);
   double bwsq=bw_*bw_;
   for(int i=0; i<G_omega.first.size(); i++) {
     std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
@@ -88,7 +89,8 @@ public:
 	G0_omega.second[i] = iw + mu - h/2. - bwsq*G_omega.first[i];
   }
   
-  backward_FT(beta, bw_, mu, h, G0, G0_omega);
+  backward_FT(beta, bw_, mu, h, G0.first, G0_omega.first);
+  backward_FT(beta, bw_, mu, h, G0.first, G0_omega.first);
    
   return G0;
    

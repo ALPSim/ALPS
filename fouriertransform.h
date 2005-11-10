@@ -31,7 +31,7 @@
 
 void generate_spline_matrix(dense_matrix & spline_matrix);
 
-//example:  V = std::pair<vector_type, vector_type>
+//example:  V = vector_type
 template <class V> void evaluate_second_derivatives(double dt, double bw, double mu, double h, dense_matrix & spline_matrix, V & g, V & second_derivatives) {
 
   // g, rhs and second_derivatives have dimension N+1
@@ -52,64 +52,52 @@ template <class V> void evaluate_second_derivatives(double dt, double bw, double
 
   V rhs;
   
-  rhs.first.reserve(Np1);
-  rhs.second.reserve(Np1);
-  
-  rhs.first[0] = bwsq*dtsq; 
-  rhs.second[0] = rhs.first[0];
+  rhs.reserve(Np1);
+
+  rhs[0] = bwsq*dtsq; 
   for (int i=1; i<Np1-1; i++) {
-    rhs.first[i] = g.first[i-1]-2*g.first[i]+g.first[i+1];
-	rhs.second[i]= g.second[i-1]-2*g.second[i]+g.second[i+1];
+    rhs[i] = g[i-1]-2*g[i]+g[i+1];
   }
-  rhs.first[Np1-1] = dtsq*(mu+h/2.) + g.first[0] - g.first[1] + g.first[Np1-2] - g.first[Np1-1];
-  rhs.second[Np1-1] = dtsq*(mu-h/2.) + g.second[0] - g.second[1] + g.second[Np1-2] - g.second[Np1-1];
+  rhs[Np1-1] = dtsq*(mu+h/2.) + g[0] - g[1] + g[Np1-2] - g[Np1-1];
 
   for (int i=0; i<Np1; i++) {
     for (int j=0; j<Np1; j++) {
-      second_derivatives.first[i] += spline_matrix(i,j)*rhs.first[j];
-	  second_derivatives.second[i] += spline_matrix(i,j)*rhs.second[j];
+      second_derivatives[i] += spline_matrix(i,j)*rhs[j];
 	}
-	second_derivatives.first[i] *= 6./dtsq;
-	second_derivatives.second[i] *= 6./dtsq;
+	second_derivatives[i] *= 6./dtsq;
   }
 }
 
-//example class V type:  multiple_vector_type.
-//example class W type:  multiple_complex_vector_type
+//example class V type:  vector_type.
+//example class W type:  complex_vector_type
 //is it really meaningful to have this as a template function?!?
 template <class V, class W> void forward_FT(double beta, double bw, double mu, double h, V & v, W & v_omega) {
 
-  int N=v.first.size();
+
+  int N=v.size();
   double dt = beta/N;
   dense_matrix spline_matrix(N+1, N+1);
   generate_spline_matrix(spline_matrix);
   
   // v2 is the matrix containing the second derivatives y'' of interpolated y=v[tau] at points tau_n	 
-  multiple_vector_type v2;
-  v2.first.reserve(N+1);	//allocate memory for both vector 1 and 2. We will need a vector class that implements reserve()
-  v2.second.reserve(N+1);
-
-  v.first.push_back(1-v.first[0]); 
-  v.second.push_back(1-v.second[0]); 
+  V v2;
+  v2.reserve(N+1);	//allocate memory for both vector. We will need a vector class that implements reserve()
+ 
+  v.push_back(1-v[0]); 
   evaluate_second_derivatives(dt, bw, mu, h, spline_matrix, v, v2);
 
   for (int k=0; k<N; k++) {
 	std::complex<double> iw(0, (2*k+1)*M_PI/beta);
-	v_omega.first[k] = 0;
-	v_omega.second[k] = 0;
+	v_omega[k] = 0;
 	
 	for (int n=1; n<N; n++) {
-	  v_omega.first[k] += exp(iw*(n*dt))*(v2.first[n+1]-2*v2.first[n]+v2.first[n-1]);
-	  v_omega.second[k] += exp(iw*(n*dt))*(v2.second[n+1]-2*v2.second[n]+v2.second[n-1]);
+	  v_omega[k] += exp(iw*(n*dt))*(v2[n+1]-2*v2[n]+v2[n-1]);
 	}
-	v_omega.first[k] += v2.first[1] - v2.first[0] + v2.first[N] - v2.first[N-1];
-	v_omega.second[k] += v2.second[1] - v2.second[0] + v2.second[N] - v2.second[N-1];
-	v_omega.first[k] *= 1./(dt*pow(iw,4));
-	v_omega.second[k] *= 1./(dt*pow(iw,4));
+	v_omega[k] += v2[1] - v2[0] + v2[N] - v2[N-1];
+	v_omega[k] *= 1./(dt*pow(iw,4));
   }
-  v.first.pop_back();
-  v.second.pop_back();
- } 
+  v.pop_back();
+} 
 
 inline std::complex<double> f_omega(std::complex<double> iw, double mu) {
   return 1./iw + mu/(iw*iw);
@@ -119,24 +107,23 @@ inline double f_tau(double tau_beta, double mu) {
   return 1 + 0.25*(1-2*tau_beta);
 }
 
+//example class V type:  vector_type.
+//example class W type:  complex_vector_type
 template <class V, class W> void backward_FT(double beta, double bw, double mu, double h, V & v, W v_omega) {
   
-  int N = v.first.size();
+  int N = v.size();
   double dt = beta/N;
   
   for (int k=0; k<N; k++) {
     std::complex<double> iw(0,(2*k+1)*M_PI/beta);
-    v_omega.first[k] -= f_omega(iw, mu+h/2.);
-	v_omega.second[k] -= f_omega(iw, mu-h/2.);
+    v_omega[k] -= f_omega(iw, mu+h/2.);
   }	
   
   for (int i=0; i<N; i++) {
-    v.first[i] = f_tau(i*dt, mu+h/2.);
-	v.second[i] = f_tau(i*dt, mu-h/2.);
+    v[i] = f_tau(i*dt, mu+h/2.);
 	for (int k=0; k<N; k++) {
 	  double wt((2*k+1)*i*M_PI/N);
-	  v.first[i] += 2/beta*(cos(wt)*v_omega.first[k].real()+sin(wt)*v_omega.first[k].imag());
-	  v.second[i] += 2/beta*(cos(wt)*v_omega.second[k].real()+sin(wt)*v_omega.second[k].imag());
+	  v[i] += 2/beta*(cos(wt)*v_omega[k].real()+sin(wt)*v_omega[k].imag());
 	}
   }  
 }
