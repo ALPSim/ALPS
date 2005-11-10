@@ -65,6 +65,7 @@ class SemicircleHilbertTransformer : public HilbertTransformer {
 public:
 /// the constructor accepts the bandwidth
   SemicircleHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
+///operator() implements abstract virtual operator() of base class HilbertTransformer.
   multiple_vector_type operator()(multiple_vector_type& G, double mu, double h, double beta)
   {
 
@@ -80,10 +81,11 @@ public:
   multiple_complex_vector_type G0_omega(G_omega); 
   
   forward_FT(beta, bw_, mu, h, G, G_omega);
+  double bwsq=bw_*bw_;
   for(int i=0; i<G_omega.first.size(); i++) {
     std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-	G0_omega.first[i] = iw + mu + h/2. - std::pow(bw_,2)*G_omega.second[i];
-	G0_omega.second[i] = iw + mu - h/2. - std::pow(bw_,2)*G_omega.first[i];
+	G0_omega.first[i] = iw + mu + h/2. - bwsq*G_omega.second[i];
+	G0_omega.second[i] = iw + mu - h/2. - bwsq*G_omega.first[i];
   }
   
   backward_FT(beta, bw_, mu, h, G0, G0_omega);
@@ -92,7 +94,7 @@ public:
    
   }
 private:
-  double bw_; // or band width
+  double bw_; /// band width
 };
 
 /// A Hilbert transformation for a square lattice density of states
@@ -133,4 +135,4 @@ private:
 };
 
 
-#endif
+#endif /*ALPS_DMFT_HILBERTTRANSFORMER_H*/

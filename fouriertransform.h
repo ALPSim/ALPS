@@ -36,7 +36,8 @@ template <class V> void evaluate_second_derivatives(double dt, double bw, double
 
   // g, rhs and second_derivatives have dimension N+1
   int Np1 = spline_matrix.size1();
-  
+  double dtsq=dt*dt;
+  double bwsq=bw*bw;
   // rhs is the vector containing the data of the curve y = g(tau), which allows to 
   // compute the vector of second derivatives y'' at times tau_n by evaluating
   // y'' = spline_matrix * rhs(y)
@@ -50,25 +51,26 @@ template <class V> void evaluate_second_derivatives(double dt, double bw, double
   //                   (G'(0)+G'(beta))*(dt)^2 + y0 - y1 + yNp1-2 - yNp1-1     
 
   V rhs;
+  
   rhs.first.reserve(Np1);
   rhs.second.reserve(Np1);
   
-  rhs.first[0] = std::pow(bw*dt,2); 
+  rhs.first[0] = bwsq*dtsq; 
   rhs.second[0] = rhs.first[0];
   for (int i=1; i<Np1-1; i++) {
     rhs.first[i] = g.first[i-1]-2*g.first[i]+g.first[i+1];
 	rhs.second[i]= g.second[i-1]-2*g.second[i]+g.second[i+1];
   }
-  rhs.first[Np1-1] = std::pow(dt,2)*(mu+h/2.) + g.first[0] - g.first[1] + g.first[Np1-2] - g.first[Np1-1];
-  rhs.second[Np1-1] = std::pow(dt,2)*(mu-h/2.) + g.second[0] - g.second[1] + g.second[Np1-2] - g.second[Np1-1];
+  rhs.first[Np1-1] = dtsq*(mu+h/2.) + g.first[0] - g.first[1] + g.first[Np1-2] - g.first[Np1-1];
+  rhs.second[Np1-1] = dtsq*(mu-h/2.) + g.second[0] - g.second[1] + g.second[Np1-2] - g.second[Np1-1];
 
   for (int i=0; i<Np1; i++) {
     for (int j=0; j<Np1; j++) {
       second_derivatives.first[i] += spline_matrix(i,j)*rhs.first[j];
 	  second_derivatives.second[i] += spline_matrix(i,j)*rhs.second[j];
 	}
-	second_derivatives.first[i] *= 6./std::pow(dt,2);
-	second_derivatives.second[i] *= 6./std::pow(dt,2);
+	second_derivatives.first[i] *= 6./dtsq;
+	second_derivatives.second[i] *= 6./dtsq;
   }
 }
 
@@ -110,7 +112,7 @@ template <class V, class W> void forward_FT(double beta, double bw, double mu, d
  } 
 
 inline std::complex<double> f_omega(std::complex<double> iw, double mu) {
-  return 1./iw + mu/std::pow(iw,2);
+  return 1./iw + mu/(iw*iw);
 }
 
 inline double f_tau(double tau_beta, double mu) {

@@ -56,7 +56,7 @@ public:
   ///               frequency omega_n
   ///  @param parms the simulation parameters
   ///  
-  ///  Note that we mu, U and h are passed as simulation as simulation parameters.
+  ///  Note that  mu, U and h are passed as simulation parameters.
   ///  
   ///  @return the Green's functions for up and down spins as function of Matsubara frequency */
     

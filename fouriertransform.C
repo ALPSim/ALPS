@@ -23,7 +23,7 @@
 * DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-
+/*fouriertransform.C*/
 #include "fouriertransform.h"
 
 void generate_spline_matrix(dense_matrix & spline_matrix) {
