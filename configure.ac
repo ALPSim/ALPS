@@ -345,6 +345,12 @@ AC_MSG_CHECKING([for Boost version])
 AC_TRY_COMPILE([#include <boost/foreach.hpp>],,ac_cv_boost_version=cvs)
 if test -z "$ac_cv_boost_version"; then
   AC_TRY_COMPILE([#include <boost/version.hpp>
+#if BOOST_VERSION != 103301
+#error
+#endif],,ac_cv_boost_version=1_33_1)
+fi
+if test -z "$ac_cv_boost_version"; then
+  AC_TRY_COMPILE([#include <boost/version.hpp>
 #if BOOST_VERSION != 103300
 #error
 #endif],,ac_cv_boost_version=1_33)
@@ -358,6 +364,9 @@ fi
 case "x$ac_cv_boost_version" in
   xcvs )
     AC_MSG_RESULT([CVS])
+    ;;
+  x1_33_1 )
+    AC_MSG_RESULT([1.33.1])
     ;;
   x1_33 )
     AC_MSG_RESULT([1.33.0])
@@ -797,7 +806,7 @@ dnl
 AM_CONDITIONAL(ALPS_FULL, test "$ac_cv_alps_type" = "full")
 AM_CONDITIONAL(ALPS_LIGHT, test "$ac_cv_alps_type" = "light")
 AM_CONDITIONAL(BOOST_1_32, test "$ac_cv_boost_version" = 1_32)
-AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
+AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33 || test "$ac_cv_boost_version" = 1_33_1)
 AM_CONDITIONAL(BOOST_CVS, test "$ac_cv_boost_version" = cvs)
 AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
 AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_boost_signals" = yes)
