@@ -50,15 +50,18 @@ double norm_max(dense_matrix & m) {
 void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l) {
 
   int N(spins.size());
-
+  std::vector<double> e_ls(N);
+  for(int i=0;i<N;++i){
+  	e_ls[i]=exp(l*spins[i]);
+  }
   // calculate a = 1 + (1-g)*(exp(v')-1) 
   dense_matrix a(N, N);
   
   for (int i=0; i<N; i++) {
     for (int j=0; j<N; j++) {
-	  a(i,j) = -Green0(i,j)*(exp(l*spins[j])-1);
+	  a(i,j) = -Green0(i,j)*(e_ls[j]-1);
 	}
-	a(i,i) += exp(l*spins[i]); 
+	a(i,i) += e_ls[i]; 
   }
   
   // solve a*Green=Green0
@@ -91,8 +94,8 @@ HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const al
 {
 
   // initialize G0
-  std::vector<double> G0_up(G0.first.size());
-  std::vector<double> G0_down(G0.first.size());
+  std::valarray<double> G0_up(G0.first.size());
+  std::valarray<double> G0_down(G0.first.size());
   for (int i=0; i<G0.first.size(); i++) {
     G0_up[i] = G0.first[i];
 	G0_down[i] = G0.second[i];
@@ -100,21 +103,11 @@ HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const al
 
   // initialize lambda
   double tmp = exp(beta/N*u/2);
-  lambda = log(tmp + sqrt(pow(tmp,2)-1));
+  lambda = log(tmp + sqrt(tmp*tmp-1));
 
   // initialize bath Green's function matrices
-  for (int i=0; i<N; i++) {
-    for (int j=i; j<N; j++) {	  
-      Green0_up(j,i) = G0_up[j-i];
-      Green0_down(j,i) = G0_down[j-i];
-    }
-  }
-  for (int i=0; i<N; i++) {
-    for (int j=i+1; j<N; j++) {
-      Green0_up(i,j) = -G0_up[N-(j-i)];
-      Green0_down(i,j) = -G0_down[N-(j-i)];
-	}
-  }
+  green_matrix_from_vector(G0_up, Green0_up);
+  green_matrix_from_vector(G0_down, Green0_down);
 
   // choose random spin configuration
   for (int i=0; i<spins.size(); i++)
@@ -184,24 +177,10 @@ void HirschFyeSimulation::dostep()
     update_single_spin(random_01, Green_up, Green_down, spins, lambda);
 	  
   // calculate Greens function	
-  //std::valarray<double> G_tmp_up(N), G_tmp_down(N);			
-  G_up = 0.;
-  G_down = 0.;
-  
-  for (int i=0; i<N; i++) {
-    for (int j=i; j<N; j++) {
-      G_up[j-i] += Green_up(j,i);
-	  G_down[j-i] += Green_down(j,i); 
-	  
-	  if (j>i) {
-        G_up[N-(j-i)] += -Green_up(i,j);
-	    G_down[N-(j-i)] += -Green_down(i,j); 	  
-	  }
-	  
-    }
-  }
-  G_up /= N;
-  G_down /= N;
+  //std::valarray<double> G_tmp_up(N), G_tmp_down(N);		
+  green_vector_from_matrix(G_up, Green_up);
+  green_vector_from_matrix(G_down,Green_down);	
+
   
   // measure Greens function
   measurements.get<RealVectorObservable>("G_meas_up") << G_up;
@@ -246,4 +225,32 @@ multiple_vector_type HirschFyeSimulation::get_G() {
   return g;
 
 }
-
+///take a Green's function in vector form G(\tau-\tau') and create a matrix G(\tau, \tau') out of it
+void HirschFyeSimulation::green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const{
+	for (int i=0; i<N; i++) {
+    for (int j=i; j<N; j++) {	  
+      green_matrix(j,i) = green_vector[j-i];
+    }
+  }
+  for (int i=0; i<N; i++) {
+    for (int j=i+1; j<N; j++) {//consider antisymmetry (Fermions)
+      green_matrix(i,j) -= green_vector[N-(j-i)];
+ 	}
+  }
+}
+///take a Green's function in matrix form and transform it back into vector form.
+void HirschFyeSimulation::green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const{
+  green_vector = 0.;
+ 
+  for (int i=0; i<N; i++) {
+    for (int j=i; j<N; j++) {
+      green_vector[j-i] += green_matrix(j,i);
+	  
+	  if (j>i) {//consider antisymmetry (Fermions)
+        green_vector[N-(j-i)] -= green_matrix(i,j);
+	  }
+	  
+    }
+  }
+  green_vector /= N;
+}
