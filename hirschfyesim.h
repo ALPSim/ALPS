@@ -27,8 +27,6 @@
 
 /// @file hirschfyesim.h
 /// @brief the actual Hirsch-Fye simulation
-///
-/// @todo needs to be implemented as soon as possible by Philipp Werner
 
 #ifndef ALPS_DMFT_HIRSCHFYESIM_H
 
@@ -52,10 +50,11 @@ inline alps::ODump& operator << (alps::ODump& odump, const dense_matrix& m) {
   for (int i=0; i<m.size1(); i++) {
     for (int j=0; j<m.size2(); j++) {
           odump << m(i,j);
-        }
+	}
   }
   return odump;
 }
+
 
 inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
   int size1, size2;
@@ -65,10 +64,11 @@ inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
   for (int i=0; i<m.size1(); i++) {
     for (int j=0; j<m.size2(); j++) {
           idump >> m(i,j);
-        }
+    }
   }  
   return idump;
 }
+
 
 // compute Green's function matrix for a given spin configuration, from Greens function for spins set to zero
 void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l);
@@ -98,17 +98,16 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
     // update Green's function
     dense_matrix Green_new_up(Green_up), Green_new_down(Green_down);
 	
-	double tmp = exp(-2*lambda*spins[site]);
-	double tmp2= 1./tmp-1;
-	tmp -=1;
+	double tmp1 = exp(-2*lambda*spins[site])-1;
+	double tmp2 = exp(+2*lambda*spins[site])-1;
 	for (int i=0; i<N; i++) {
 	  for (int j=0; j<N; j++) {	
-        Green_new_up(i,j)   += (Green_up(i,site)  -(i==site))*(tmp)  /(1+(1-Green_up (site,site))*(tmp))    *Green_up(site,j);
-        Green_new_down(i,j) += (Green_down(i,site)-(i==site))*(tmp2) /(1+(1-Green_down(site,site))*(1/tmp2))*Green_down(site,j);			
+        Green_new_up(i,j)   += (Green_up(i,site)-(i==site))*tmp1/(1+(1-Green_up(site,site))*tmp1)*Green_up(site,j);
+        Green_new_down(i,j) += (Green_down(i,site)-(i==site))*tmp2/(1+(1-Green_down(site,site))*tmp2)*Green_down(site,j);			
       }	
 	}
   
-    Green_up.swap( Green_new_up); //avoid copying again. never mind the contents of Green_new_up now.
+    Green_up.swap(Green_new_up); //avoid copying again. never mind the contents of Green_new_up now.
 	Green_down.swap(Green_new_down);
 	
 	// update spin
@@ -130,9 +129,9 @@ public:
   bool change_parameter(const std::string& name, const alps::StringValue& value);
   multiple_vector_type get_G();
 
-///compute matrix Green's function from the vector.
-	void green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const;
-	void green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const;
+  ///compute matrix Green's function from the vector.
+  void green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const;
+  void green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const;
   
   
 private:

@@ -32,12 +32,12 @@
 void generate_spline_matrix(dense_matrix & spline_matrix);
 
 //example:  V = vector_type
-template <class V> void evaluate_second_derivatives(double dt, double bw, double mu, double h, dense_matrix & spline_matrix, V & g, V & second_derivatives) {
+template <class V> void evaluate_second_derivatives(double dt, double c2, double c3, dense_matrix & spline_matrix, V & g, V & second_derivatives) {
 
   // g, rhs and second_derivatives have dimension N+1
   int Np1 = spline_matrix.size1();
   double dtsq=dt*dt;
-  double bwsq=bw*bw;
+  
   // rhs is the vector containing the data of the curve y = g(tau), which allows to 
   // compute the vector of second derivatives y'' at times tau_n by evaluating
   // y'' = spline_matrix * rhs(y)
@@ -54,11 +54,11 @@ template <class V> void evaluate_second_derivatives(double dt, double bw, double
   
   rhs.reserve(Np1);
 
-  rhs[0] = bwsq*dtsq; 
+  rhs[0] = c3*dtsq; 
   for (int i=1; i<Np1-1; i++) {
     rhs[i] = g[i-1]-2*g[i]+g[i+1];
   }
-  rhs[Np1-1] = dtsq*(mu+h/2.) + g[0] - g[1] + g[Np1-2] - g[Np1-1];
+  rhs[Np1-1] = c2*dtsq + g[0] - g[1] + g[Np1-2] - g[Np1-1];
 
   for (int i=0; i<Np1; i++) {
     for (int j=0; j<Np1; j++) {
@@ -71,20 +71,33 @@ template <class V> void evaluate_second_derivatives(double dt, double bw, double
 //example class V type:  vector_type.
 //example class W type:  complex_vector_type
 //is it really meaningful to have this as a template function?!?
-template <class V, class W> void forward_FT(double beta, double bw, double mu, double h, V & v, W & v_omega) {
-
+template <class V, class W> void forward_FT(double beta, double c2, double c3, V & v, W & v_omega) {
 
   int N=v.size();
   double dt = beta/N;
   dense_matrix spline_matrix(N+1, N+1);
   generate_spline_matrix(spline_matrix);
   
+/*  
+  //std::pair<double, double> last(1-v.first[0], 1-v.second[0]);
+  //v.push_back(last);
+  v.first.push_back(1-v.first[0]);
+  v.second.push_back(1-v.second[0]); 
   // v2 is the matrix containing the second derivatives y'' of interpolated y=v[tau] at points tau_n	 
+<<<<<<< fouriertransform.h
+  (-mu-h/2.)*(-mu-h/2.)+bw*bw
+=======
   V v2;
   v2.reserve(N+1);	//allocate memory for both vector. We will need a vector class that implements reserve()
  
   v.push_back(1-v[0]); 
-  evaluate_second_derivatives(dt, bw, mu, h, spline_matrix, v, v2);
+>>>>>>> 1.7
+*/
+
+  v.push_back(1-v[0]);
+  V v2(v);
+
+  evaluate_second_derivatives(dt, c2, c3, spline_matrix, v, v2);
 
   for (int k=0; k<N; k++) {
 	std::complex<double> iw(0, (2*k+1)*M_PI/beta);
@@ -99,28 +112,28 @@ template <class V, class W> void forward_FT(double beta, double bw, double mu, d
   v.pop_back();
 } 
 
-inline std::complex<double> f_omega(std::complex<double> iw, double mu) {
-  return 1./iw + mu/(iw*iw);
+inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c3) {
+  return 1./iw + c2/(iw*iw) + c3/pow(iw,3);
 }
 
-inline double f_tau(double tau_beta, double mu) {
-  return 1 + 0.25*(1-2*tau_beta);
+inline double f_tau(double tau, double beta, double c2, double c3) {
+  return -0.5 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
 }
 
 //example class V type:  vector_type.
 //example class W type:  complex_vector_type
-template <class V, class W> void backward_FT(double beta, double bw, double mu, double h, V & v, W v_omega) {
+template <class V, class W> void backward_FT(double beta, double c2, double c3, V & v, W v_omega) {
   
   int N = v.size();
   double dt = beta/N;
   
   for (int k=0; k<N; k++) {
     std::complex<double> iw(0,(2*k+1)*M_PI/beta);
-    v_omega[k] -= f_omega(iw, mu+h/2.);
+    v_omega[k] -= f_omega(iw, c2, c3);
   }	
   
   for (int i=0; i<N; i++) {
-    v[i] = f_tau(i*dt, mu+h/2.);
+    v[i] = f_tau(i*dt, beta, c2, c3);
 	for (int k=0; k<N; k++) {
 	  double wt((2*k+1)*i*M_PI/N);
 	  v[i] += 2/beta*(cos(wt)*v_omega[k].real()+sin(wt)*v_omega[k].imag());

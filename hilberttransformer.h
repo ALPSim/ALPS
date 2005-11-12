@@ -69,28 +69,29 @@ public:
   multiple_vector_type operator()(multiple_vector_type& G, double mu, double h, double beta)
   {
 
+  double bwsq=bw_*bw_;
+  double mu_up = mu+h/2.;
+  double mu_down = mu-h/2.;
+
   multiple_vector_type G0(G);
-/*
-  /// this needs more work: do you really want complex vectors here?
-  multiple_vector_type G_omega(G); // remember these are pairs now!,
-*/  
   multiple_complex_vector_type G_omega;
-  G_omega.first.resize(G.first.size()); // remember these are pairs now!
-  G_omega.second.resize(G.second.size()); // remember these are pairs now!
+  G_omega.first.resize(G.first.size());
+  G_omega.second.resize(G.second.size());
   
   multiple_complex_vector_type G0_omega(G_omega); 
   
-  forward_FT(beta, bw_, mu, h, G.first, G_omega.first);
-  forward_FT(beta, bw_, mu, h, G.first, G_omega.first);
-  double bwsq=bw_*bw_;
+  forward_FT(beta, -mu_up, mu_up*mu_up+bwsq, G.first, G_omega.first);
+  forward_FT(beta, -mu_down, mu_down*mu_down+bwsq, G.second, G_omega.second);
+  
+
   for(int i=0; i<G_omega.first.size(); i++) {
     std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-	G0_omega.first[i] = iw + mu + h/2. - bwsq*G_omega.second[i];
-	G0_omega.second[i] = iw + mu - h/2. - bwsq*G_omega.first[i];
+	G0_omega.first[i] = 1./(iw + mu_up - bwsq*G_omega.second[i]);
+	G0_omega.second[i] = 1./(iw + mu_down - bwsq*G_omega.first[i]);
   }
   
-  backward_FT(beta, bw_, mu, h, G0.first, G0_omega.first);
-  backward_FT(beta, bw_, mu, h, G0.first, G0_omega.first);
+  backward_FT(beta, -mu_up, mu_up*mu_up+bwsq, G0.first, G0_omega.first);
+  backward_FT(beta, -mu_down, mu_down*mu_down+bwsq, G0.second, G0_omega.second);
    
   return G0;
    
