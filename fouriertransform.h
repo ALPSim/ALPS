@@ -78,22 +78,6 @@ template <class V, class W> void forward_FT(double beta, double c2, double c3, V
   dense_matrix spline_matrix(N+1, N+1);
   generate_spline_matrix(spline_matrix);
   
-/*  
-  //std::pair<double, double> last(1-v.first[0], 1-v.second[0]);
-  //v.push_back(last);
-  v.first.push_back(1-v.first[0]);
-  v.second.push_back(1-v.second[0]); 
-  // v2 is the matrix containing the second derivatives y'' of interpolated y=v[tau] at points tau_n	 
-<<<<<<< fouriertransform.h
-  (-mu-h/2.)*(-mu-h/2.)+bw*bw
-=======
-  V v2;
-  v2.reserve(N+1);	//allocate memory for both vector. We will need a vector class that implements reserve()
- 
-  v.push_back(1-v[0]); 
->>>>>>> 1.7
-*/
-
   v.push_back(1-v[0]);
   V v2(v);
 
