@@ -1,4 +1,5 @@
 SOLVER="hirschfye";
+PARAMAGNET=1;
 t=1;
 MU=0;
 H=0;

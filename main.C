@@ -36,6 +36,11 @@
 #include <alps/parameters.h>
 #include <alps/copyright.h>
 
+#include <stdio.h>
+#include <iostream>
+#include <fstream>
+
+
 /// @brief The main program of the DMFT program
 ///
 /// The program takes (at the moment) no command line options and reads the parameters 
@@ -59,6 +64,19 @@ int main()
   alps::Parameters parms;
   std::cin >> parms;
   
+  int N=boost::lexical_cast<int>(parms["N"]);
+  multiple_vector_type G0, G;
+  G0.first.resize(N);
+  G0.second.resize(N);
+  /*
+  // read initial guess
+  ifstream infile_up("G_input_up");
+  ifstream infile_down("G_input_down");
+  for (int i=0; i<N; i++) {
+    infile_up >> G0.first[i];
+	infile_down >> G0.second[i];
+  }
+  */
   boost::shared_ptr<ImpuritySolver> solver_ptr;
 
   if (parms["SOLVER"]=="Hirsch-Fye")
@@ -66,9 +84,18 @@ int main()
   else 
     solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
   
-  SemicircleHilbertTransformer transform(2.*sqrt(2.)*double(parms["t"]));
+  SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 
-  selfconsistency_loop(parms,*solver_ptr,transform);
+  selfconsistency_loop(parms, *solver_ptr, transform, G0, G);
+  
+  // write final result
+  FILE * outfile_up = fopen("G_output_up","w");
+  FILE * outfile_down = fopen("G_output_down","w");
+  for (int i=0; i<N; i++) {
+	fprintf(outfile_up, "%5d   %9.6e\n", i, G.first[i]);
+	fprintf(outfile_down, "%5d   %9.6e\n", i, G.second[i]);
+  }  
+  
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) {

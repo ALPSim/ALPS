@@ -47,7 +47,9 @@ extern void selfconsistency_loop
                (
                    alps::Parameters& parms, 
                    ImpuritySolver& solver, 
-                   HilbertTransformer& hilbert
+                   HilbertTransformer& hilbert,
+				   multiple_vector_type& G0, 
+				   multiple_vector_type& G
                );
 
 #endif

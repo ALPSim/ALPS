@@ -31,11 +31,8 @@
 /// @todo needs to be implemented. responsible: Philipp Werner
 
 #include "selfconsistency.h"
-#include <iostream>
-#include <fstream>
-#include <stdio.h>
 
-void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert)
+void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, multiple_vector_type& G0, multiple_vector_type& G)
 {
   
   int N = static_cast<int>(parms["N"]);
@@ -43,27 +40,15 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   double mu = static_cast<double>(parms["MU"]);
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
+  int paramagnet = static_cast<int>(parms["PARAMAGNET"]);
   
-  multiple_vector_type G0;
-  G0.first.resize(N);
-  G0.second.resize(N);
-  multiple_vector_type G0_old(G0), G(G0);
-  
-  /*
-  // initial guess
-  ifstream infile_up("G_input_up");
-  ifstream infile_down("G_input_down");
-  for (int i=0; i<N; i++) {
-    infile_up >> G0_old.first[i];
-	infile_down >> G0_old.second[i];
-  }
-  */
+  multiple_vector_type G0_old(G0);
     
   double max_diff;	
   do {
     G0_old = G0;
     G = solver.solve(G0, parms);
-    G0 = hilbert(G, mu, h, beta);
+    G0 = hilbert(G, mu, h, beta, paramagnet);
 	
 	max_diff=0;
     for(int i=0; i<N; i++) {
@@ -74,4 +59,5 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
 	}	
 	
   } while (max_diff > converged);
+  
 }
