@@ -35,16 +35,7 @@
 #include <alps/parameters.h>
 #include <vector>
 #include <utility>
-
-/// the array (vector) type to store frequence dependent Green's functions and Weiss fields
-typedef std::vector<double> vector_type;
-/// two arrays are needed for a single site problem: one for up and one for down spins
-typedef std::pair<vector_type,vector_type> multiple_vector_type;
-/// variant if you want complex vectors
-typedef std::vector<std::complex<double> > complex_vector_type;
-/// variant for two complex vectors.
-typedef std::pair<complex_vector_type,complex_vector_type> multiple_complex_vector_type;
-
+#include "types.h"
 /// the base class for all impurity solvers
 class ImpuritySolver {
 public:

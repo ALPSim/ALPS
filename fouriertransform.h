@@ -26,7 +26,7 @@
 
 #include "hirschfyesim.h"
 #include <complex>
-#include "solver.h" // for the multiple_vector_type
+#include "types.h" // for the multiple_vector_type
 
 
 void generate_spline_matrix(dense_matrix & spline_matrix);

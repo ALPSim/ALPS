@@ -37,7 +37,7 @@
 ///
 /// @todo the transformations need to be implemented. responsible: Philipp Werner and Hartmut Monien
 
-#include "solver.h"
+#include "types.h"
 #include <functional>
 
 #include "fouriertransform.h"
