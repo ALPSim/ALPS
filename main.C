@@ -68,15 +68,15 @@ int main()
   multiple_vector_type G0, G;
   G0.first.resize(N);
   G0.second.resize(N);
-  /*
+  
   // read initial guess
-  ifstream infile_up("G_input_up");
-  ifstream infile_down("G_input_down");
+  std::ifstream infile_up("G_input_up");
+  std::ifstream infile_down("G_input_down");
   for (int i=0; i<N; i++) {
     infile_up >> G0.first[i];
 	infile_down >> G0.second[i];
   }
-  */
+  
   boost::shared_ptr<ImpuritySolver> solver_ptr;
 
   if (parms["SOLVER"]=="Hirsch-Fye")
