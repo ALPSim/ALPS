@@ -43,7 +43,6 @@
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include "types.h"
 
-typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
 inline alps::ODump& operator << (alps::ODump& odump, const dense_matrix& m) {
   odump << m.size1() << m.size2();

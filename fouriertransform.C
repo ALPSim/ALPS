@@ -25,6 +25,8 @@
 *****************************************************************************/
 /*fouriertransform.C*/
 #include "fouriertransform.h"
+#include <boost/numeric/bindings/lapack/lapack.hpp>
+#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 
 void generate_spline_matrix(dense_matrix & spline_matrix) {
 
