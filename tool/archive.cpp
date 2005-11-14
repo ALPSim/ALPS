@@ -125,7 +125,8 @@ int main(int ac, char* av[]) {
                                 fs::path plotPath = fs::path(fs::initial_path() / vm["plot-file"].as<std::string>());
                                 if (vm.count("positional-arg"))
                                         plotPath = fs::path(fs::initial_path() / vm["positional-arg"].as<std::string>());
-                                Plot(fs::path(fs::initial_path() / vm["output-path"].as<std::string>()), db).exec(XML(true)(plotPath, true), plotPath.leaf());
+                                fs::path outputPath(fs::initial_path() / vm["output-path"].as<std::string>());
+                                Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.leaf());
 
                         } else {
                                 if (!vm.count("xml-path") && !vm.count("positional-arg"))
