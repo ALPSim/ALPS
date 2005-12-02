@@ -44,7 +44,18 @@ typedef std::pair<complex_vector_type,complex_vector_type> multiple_complex_vect
 
 ///dense matrix
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
+typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_matrix;
 
+///silly vector types
+typedef std::vector<std::complex<double> > complex_vector;
+typedef std::vector<double> double_vector;
+typedef std::vector<int> int_vector;
+///convenient names
+enum  {up=0, down=1} ;
+typedef unsigned int site_t;
+typedef unsigned int spin_t;
+typedef double itime_t;
+typedef unsigned int frequency_t;
 
 
 #endif /*TYPES_H_*/
