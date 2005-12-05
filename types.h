@@ -55,6 +55,7 @@ enum  {up=0, down=1} ;
 typedef unsigned int site_t;
 typedef unsigned int spin_t;
 typedef double itime_t;
+typedef unsigned int itime_index_t;
 typedef unsigned int frequency_t;
 
 
