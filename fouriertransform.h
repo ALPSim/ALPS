@@ -69,8 +69,8 @@ template <class V> void evaluate_second_derivatives(double dt, double c2, double
   }
 }
 
-//example class V type:  vector_type.
-//example class W type:  complex_vector_type
+//example class V type:  vector_type. Used to store G(tau)
+//example class W type:  complex_vector_type, used to store G(iomega)
 //is it really meaningful to have this as a template function?!?
 template <class V, class W> void forward_FT(double beta, double c2, double c3, V & v, W & v_omega) {
 
@@ -98,15 +98,16 @@ template <class V, class W> void forward_FT(double beta, double c2, double c3, V
 } 
 
 inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c3) {
-  return 1./iw + c2/(iw*iw) + c3/pow(iw,3);
+	double iwsq=iw*iw;
+	return 1./iw + c2/(iwsq) + c3/(iw*iwsq);
 }
 
 inline double f_tau(double tau, double beta, double c2, double c3) {
   return -0.5 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
 }
 
-//example class V type:  vector_type.
-//example class W type:  complex_vector_type
+//example class V type:  vector_type, used to store G(tau)
+//example class W type:  complex_vector_type, used to store G(iomega)
 template <class V, class W> void backward_FT(double beta, double c2, double c3, V & v, W v_omega) {
   
   int N = v.size();

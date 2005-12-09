@@ -6,16 +6,20 @@ SOURCES_DMFT= main.C selfconsistency.C $(SOURCES)
 OBJECTS=hirschfye.o externalsolver.o hirschfyesim.o fouriertransform.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
+OBJECTS_RUBTSOV=rubtsov.o rubtsov_io.o rubtsov_solver.o rubtsov_auxiliary.o rubtsov_splines.o
 
-
-all: dmft hirschfye
+all: rubtsov
 
 dmft : $(OBJECTS_DMFT)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o dmft $(OBJECTS_DMFT) $(LDFLAGS) $(LIBS)
 
 hirschfye : $(OBJECTS_HIRSCHFYE)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o hirschfye $(OBJECTS_HIRSCHFYE) $(LDFLAGS) $(LIBS)
-	
+
+rubtsov : $(OBJECTS_RUBTSOV)
+	g++ -o rubtsov $(OBJECTS_RUBTSOV) $(LDFLAGS) $(LIBS)
+rubtsov_direct : $(OBJECTS_RUBTSOV)
+	g++ -o rubtsov_direct $(OBJECTS_RUBTSOV) $(LDFLAGS) $(LIBS)
 docs:
 	doxygen doxygen.conf
 	cd doc/latex; $(MAKE)
