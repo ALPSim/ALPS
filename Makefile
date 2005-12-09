@@ -8,7 +8,7 @@ OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
 OBJECTS_RUBTSOV=rubtsov.o rubtsov_io.o rubtsov_solver.o rubtsov_auxiliary.o rubtsov_splines.o
 
-all: rubtsov
+all: dmft hirschfye
 
 dmft : $(OBJECTS_DMFT)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o dmft $(OBJECTS_DMFT) $(LDFLAGS) $(LIBS)
