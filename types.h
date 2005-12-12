@@ -71,6 +71,6 @@ typedef unsigned int frequency_t;
 ///typedef to easily distinguish imaginary time and frequency (multiple) vectors
 typedef  multiple_vector_type itime_multiple_vector_t;
 ///typedef to easily distinguish imaginary time and frequency (multiple) vectors
-typedef  multiple_vector_type freq_multiple_vector_t;
+typedef  multiple_complex_vector_type freq_multiple_vector_t;
 
 #endif /*TYPES_H_*/
