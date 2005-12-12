@@ -29,11 +29,16 @@
 
 /// @file selfconsistency.C
 /// @brief implements the selfconsistency loop functions
-/// @todo needs to be implemented. responsible: Philipp Werner
 
 #include "selfconsistency.h"
-
-void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, multiple_vector_type& G0, multiple_vector_type& G)
+/// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
+///
+/// @param parms contains the ALPS parameters needed for the simulation.
+/// @param solver is the impurity solver (e.g. Hirsch Fye) that creates G out of G0.
+/// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates G0 out of G
+/// @param G0 is the bare Green's function in imaginary time. It has to be provided as an initial guess
+/// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
+void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_multiple_vector_t& G0, itime_multiple_vector_t& G)
 {
   
   int N = static_cast<int>(parms["N"]);

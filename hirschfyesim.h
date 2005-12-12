@@ -44,29 +44,33 @@
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include "types.h"
 
-
+///@brief Save a matrix
+///@parm odump Alps dump
+///@parm m The dense matrix to be stored
 inline alps::ODump& operator << (alps::ODump& odump, const dense_matrix& m) {
-  odump << m.size1() << m.size2();
-  for (int i=0; i<m.size1(); i++) {
-    for (int j=0; j<m.size2(); j++) {
-          odump << m(i,j);
+	odump << m.size1() << m.size2();
+	for (uint i=0; i<m.size1(); i++) {
+		for (uint j=0; j<m.size2(); j++) {
+			odump << m(i,j);
+		}
 	}
-  }
-  return odump;
+	return odump;
 }
 
-
+///@brief Restore a matrix
+///@parm idump Alps dump
+///@parm m The matrix to be restored
 inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
-  int size1, size2;
-  idump >> size1;
-  idump >> size2;
-  m.resize(size1, size2);
-  for (int i=0; i<m.size1(); i++) {
-    for (int j=0; j<m.size2(); j++) {
-          idump >> m(i,j);
-    }
-  }  
-  return idump;
+	int size1, size2;
+	idump >> size1;
+	idump >> size2;
+	m.resize(size1, size2);
+	for (uint i=0; i<m.size1(); i++) {
+		for (uint j=0; j<m.size2(); j++) {
+			idump >> m(i,j);
+		}
+	}  
+	return idump;
 }
 
 
@@ -78,82 +82,91 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
 template<class RNG> 
 void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green_down, std::vector<int> & spins, double lambda) 
 {
-
-  int N(spins.size());
-  
-  // choose random site
-  int site = (int)(N*rng());
-
-  // calculate ratio of determinants
-  double r_up = 1 + (1-Green_up(site,site))*(exp(-2*lambda*spins[site])-1);
-  double r_down = 1 + (1-Green_down(site,site))*(exp(2*lambda*spins[site])-1);
-  double det_rat = r_up*r_down; 
-
-  // what about sign changes?
-  det_rat = fabs(det_rat);
-  
-  // if update successful ...
-  if (rng() < det_rat/(1+det_rat)) {
-  
-    // update Green's function
-    dense_matrix Green_new_up(Green_up), Green_new_down(Green_down);
 	
-	double tmp1 = exp(-2*lambda*spins[site])-1;
-	double tmp2 = exp(+2*lambda*spins[site])-1;
-	for (int i=0; i<N; i++) {
-	  for (int j=0; j<N; j++) {	
-        Green_new_up(i,j)   += (Green_up(i,site)-(i==site))*tmp1/(1+(1-Green_up(site,site))*tmp1)*Green_up(site,j);
-        Green_new_down(i,j) += (Green_down(i,site)-(i==site))*tmp2/(1+(1-Green_down(site,site))*tmp2)*Green_down(site,j);			
-      }	
+	unsigned int N(spins.size());
+	
+	// choose random site
+	unsigned int site = (unsigned int)(N*rng());
+	
+	// calculate ratio of determinants
+	double r_up = 1 + (1-Green_up(site,site))*(exp(-2*lambda*spins[site])-1);
+	double r_down = 1 + (1-Green_down(site,site))*(exp(2*lambda*spins[site])-1);
+	double det_rat = r_up*r_down; 
+	
+	// what about sign changes?
+	det_rat = fabs(det_rat);
+	
+	// if update successful ...
+	if (rng() < det_rat/(1+det_rat)) {
+		
+		// update Green's function
+		dense_matrix Green_new_up(Green_up), Green_new_down(Green_down);
+		
+		double tmp1 = exp(-2*lambda*spins[site])-1;
+		double tmp2 = exp(+2*lambda*spins[site])-1;
+		for (int i=0; i<N; i++) {
+			for (int j=0; j<N; j++) {	
+				Green_new_up(i,j)   += (Green_up(i,site)-(i==site))*tmp1/(1+(1-Green_up(site,site))*tmp1)*Green_up(site,j);
+				Green_new_down(i,j) += (Green_down(i,site)-(i==site))*tmp2/(1+(1-Green_down(site,site))*tmp2)*Green_down(site,j);			
+			}	
+		}
+		
+		Green_up.swap(Green_new_up); //avoid copying again. never mind the contents of Green_new_up now.
+		Green_down.swap(Green_new_down);
+		
+		// update spin
+		spins[site] = -spins[site];
+		
 	}
-  
-    Green_up.swap(Green_new_up); //avoid copying again. never mind the contents of Green_new_up now.
-	Green_down.swap(Green_new_down);
-	
-	// update spin
-	spins[site] = -spins[site];
-  
-  }
 }
 
-
+///This class implements the Hirsch Fye algorithm.
 class HirschFyeSimulation : public alps::scheduler::MCRun
 {
 public:
-  HirschFyeSimulation(const alps::ProcessList&,const alps::Parameters&,int, const multiple_vector_type&);
-  void save(alps::ODump&) const;
-  void load(alps::IDump&);
-  void dostep();
-  bool is_thermalized() const;
-  double work_done() const;
-  bool change_parameter(const std::string& name, const alps::StringValue& value);
-  multiple_vector_type get_G();
-
-  ///compute matrix Green's function from the vector.
-  void green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const;
-  void green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const;
-  
-  
+	///
+	HirschFyeSimulation(const alps::ProcessList&,const alps::Parameters&,int, const multiple_vector_type&);
+	///store a dump of this simulation
+	void save(alps::ODump&) const;
+	///load a previously saved simulation
+	void load(alps::IDump&);
+	///perform one Hirsch Fye step
+	void dostep();
+	///return true if the simulation has been thermalized
+	bool is_thermalized() const;
+	///return a value between zero and one, one meaning that the simulation is about to end.
+	double work_done() const;
+	///?
+	bool change_parameter(const std::string& name, const alps::StringValue& value);
+	///return the Green's function G
+	multiple_vector_type get_G();
+	
+	///compute vector Green's function from a matrix.
+	void green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const;
+	///compute matrix Green's function from the vector.
+	void green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const;
+	
+	
 private:
-  int sweeps;						// sweeps done
-  int thermalization_sweeps;		// sweeps to be done for equilibration
-  int total_sweeps;					// sweeps to be done after equilibration
-  double beta;						// inverse temperature
-  int N;							// number of time slices
-  double u;							// on-site interaction
-  double lambda;					// cosh(lambda) = exp(delta_tau*u/2)
-  int N_check;						// number of sweeps with single-spin updates
-  int check_counter;				// counts the number of single-spin updates
-  double tolerance;					// tolerance for deterioration of precision
-                                    // (maximum deviation of Green's function matrix elements)
-  std::valarray<double> G_up;		// Green's function for up spins
-  dense_matrix Green0_up;       	// bath Green's function matrix for up spins
-  dense_matrix Green_up;        	// Green's function matrix for up spins  
-  std::valarray<double> G_down;		// Green's function for down spins
-  dense_matrix Green0_down;	        // bath Green's function matrix for down spins
-  dense_matrix Green_down;      	// Green's function matrix for down spins     
-  std::vector<int> spins;		    // auxiliary Ising spins
-  
+	int sweeps;					// sweeps done
+	int thermalization_sweeps;		// sweeps to be done for equilibration
+	int total_sweeps;				// sweeps to be done after equilibration
+	double beta;					// inverse temperature
+	int N;							// number of time slices
+	double u;						// on-site interaction
+	double lambda;					// cosh(lambda) = exp(delta_tau*u/2)
+	int N_check;					// number of sweeps with single-spin updates
+	int check_counter;				// counts the number of single-spin updates
+	double tolerance;				// tolerance for deterioration of precision
+									// (maximum deviation of Green's function matrix elements)
+	std::valarray<double> G_up;		// Green's function for up spins
+	dense_matrix Green0_up;       	// bath Green's function matrix for up spins
+	dense_matrix Green_up;        	// Green's function matrix for up spins  
+	std::valarray<double> G_down;	// Green's function for down spins
+	dense_matrix Green0_down;	    // bath Green's function matrix for down spins
+	dense_matrix Green_down;      	// Green's function matrix for down spins     
+	std::vector<int> spins;		    // auxiliary Ising spins
+	
 };
 
 #define ALPS_DMFT_HIRSCHFYESIM_H

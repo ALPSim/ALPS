@@ -40,13 +40,16 @@
 #include <stdio.h>
 #include <iostream>
 #include <fstream>
+#include <cassert>
 
-
-/// @brief The main program of the DMFT program
+/// @brief The DMFT main program
 ///
 /// The program takes (at the moment) no command line options and reads the parameters 
 /// of the simulation from the standard input. Parameters are read in the short ALPS text format where
 /// each line contains one parameter definition in the format name=value .
+///
+/// At the moment the bare imaginary time green's function is assumed to be present in G_input_up and
+/// G_input_down.
 ///
 /// The following parameters have special meaning at this time: 
 /// 
@@ -66,16 +69,17 @@ int main()
   std::cin >> parms;
   
   int N=boost::lexical_cast<int>(parms["N"]);
-  multiple_vector_type G0, G;
-  G0.first.resize(N);
-  G0.second.resize(N);
+  multiple_vector_type G0_tau, G_tau;
+  G0_tau.first.resize(N);
+  G0_tau.second.resize(N);
   
   // read initial guess
-  std::ifstream infile_up("G_input_up");
-  std::ifstream infile_down("G_input_down");
+  std::ifstream infile_up("G_input_up");		//Bare Green's function in Imaginary time for spin up
+  std::ifstream infile_down("G_input_down");	//Bare Green's function in Imaginary time for spin down
+  assert(infile_up.is_open() && infile_down.is_open());
   for (int i=0; i<N; i++) {
-    infile_up >> G0.first[i];
-	infile_down >> G0.second[i];
+    infile_up >> G0_tau.first[i];
+	infile_down >> G0_tau.second[i];
   }
   
   boost::shared_ptr<ImpuritySolver> solver_ptr;
@@ -87,14 +91,14 @@ int main()
   
   SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 
-  selfconsistency_loop(parms, *solver_ptr, transform, G0, G);
+  selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
   
   // write final result
   FILE * outfile_up = fopen("G_output_up","w");
   FILE * outfile_down = fopen("G_output_down","w");
   for (int i=0; i<N; i++) {
-	fprintf(outfile_up, "%5d   %9.6e\n", i, G.first[i]);
-	fprintf(outfile_down, "%5d   %9.6e\n", i, G.second[i]);
+	fprintf(outfile_up, "%5d   %9.6e\n", i, G_tau.first[i]);
+	fprintf(outfile_down, "%5d   %9.6e\n", i, G_tau.second[i]);
   }  
   
 #ifndef BOOST_NO_EXCEPTIONS

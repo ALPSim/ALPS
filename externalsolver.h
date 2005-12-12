@@ -47,17 +47,18 @@
 /// XML schema for impurity solvers that is currently being developed
 ///
 /// @todo the XML formats need to be discussed and documented. responsible: Matthias Troyer
-  
+
 class ExternalSolver : public ImpuritySolver {
 public:
-  /// @param executable the path to the executable
-  ExternalSolver(const boost::filesystem::path& executable) 
+	/// @param executable the path to the executable
+	ExternalSolver(const boost::filesystem::path& executable) 
     : exe_(boost::filesystem::complete(executable)) {}
-
-  multiple_vector_type solve(const multiple_vector_type& G0, const alps::Parameters& parms);
+	
+	multiple_vector_type solve(const multiple_vector_type& G0, const alps::Parameters& parms);
     
 private:
-  boost::filesystem::path exe_;
+	///path to the solver executable
+	boost::filesystem::path exe_;
 };
 
 #endif

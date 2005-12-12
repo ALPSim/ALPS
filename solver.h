@@ -37,22 +37,22 @@
 #include <vector>
 #include <utility>
 #include "types.h"
-/// the base class for all impurity solvers
+/// the base class for all impurity solvers taking a Green's function in imaginary time and returning one also in imaginary time.
 class ImpuritySolver {
 public:
   ImpuritySolver() {}
   
   ///  @brief solves the impurity problem
   ///
-  ///  @param G0 the inverse Weiss field (without i * omega), as a function of Matsubara 
-  ///               frequency omega_n
+  ///  @param G0 the bare Green's function in imaginary time, provided as an input
+  ///              
   ///  @param parms the simulation parameters
   ///  
-  ///  Note that  mu, U and h are passed as simulation parameters.
+  ///  Note that  mu, U and h are passed as simulation parameters inside parms.
   ///  
-  ///  @return the Green's functions for up and down spins as function of Matsubara frequency */
+  ///  @return the Green's functions for up and down spins as function of imaginary time 
     
-  virtual multiple_vector_type solve(const multiple_vector_type& G0, const alps::Parameters& parms)=0;
+  virtual multiple_vector_type solve(const itime_multiple_vector_t& G0, const alps::Parameters& parms)=0;
   virtual ~ImpuritySolver() {}
 };
 

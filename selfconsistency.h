@@ -37,20 +37,22 @@
 
 /// performs a DMFT self-conistency loop until convergence
 ///
-/// @param parms the input parameters for the simulation
-/// @param solver   the impurity solver. It is left in the state after the final iteration to 
-///                 retrieve additional information
-/// @param hilbert  a Hilbert transformation object. It performs the Hilbert transformation 
+/// @param parms The input parameters for the simulation.
+/// @param solver   The impurity solver. It is left in the state after the final iteration to 
+///                 retrieve additional information.
+/// @param hilbert  a Hilbert transformation object. It performs the Hilbert transformation.
 ///                 for the density of states of the given model.
+/// @param G0_tau The bare Green's function in imaginary time.
+/// @param G_tau  The Green's function G in imaginary time.
 
 extern void selfconsistency_loop
                (
                    alps::Parameters& parms, 
                    ImpuritySolver& solver, 
                    HilbertTransformer& hilbert,
-				   multiple_vector_type& G0, 
-				   multiple_vector_type& G
+				   itime_multiple_vector_t& G0_tau, 
+				   itime_multiple_vector_t& G_tau
                );
-
+//why would we want this to be extern?
 #endif
 

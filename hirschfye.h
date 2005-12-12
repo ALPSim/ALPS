@@ -42,7 +42,7 @@
 class HirschFyeSolver : public ImpuritySolver {
 public:
   HirschFyeSolver() {}
-  multiple_vector_type solve(const multiple_vector_type& G0, const alps::Parameters& parms);
+  itime_multiple_vector_t solve(const itime_multiple_vector_t& G0_tau, const alps::Parameters& parms);
 };
 
 #endif
