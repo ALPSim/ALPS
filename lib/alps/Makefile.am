@@ -36,7 +36,7 @@ src_PARSER = \
   $(top_srcdir)/src/alps/parser/xmlhandler.C \
   $(top_srcdir)/src/alps/parser/xmlparser.C \
   $(top_srcdir)/src/alps/parser/xmlstream.C \
-  $(top_srcdir)/src/alps/parser/path.C
+  $(top_srcdir)/src/alps/parser/xslt_path.C
 src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/abstract_task.C \
   $(top_srcdir)/src/alps/scheduler/factory.C \
@@ -68,12 +68,12 @@ src_boost_FILESYSTEM_1_33 = \
   $(BOOST_SRCDIR)/filesystem/src/operations_posix_windows.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
 
-src_BOOST_FILESYSTEM_CVS = \
+src_boost_FILESYSTEM_CVS = \
   $(BOOST_SRCDIR)/filesystem/src/exception.cpp \
   $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
-  $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
-  $(BOOST_SRCDIR)/filesystem/src/utf8_codecvt_facet.cpp
+  $(BOOST_SRCDIR)/filesystem/src/portability.cpp 
+# $(BOOST_SRCDIR)/filesystem/src/utf8_codecvt_facet.cpp
 
 src_boost_REGEX = \
   $(BOOST_SRCDIR)/regex/src/c_regex_traits.cpp \
@@ -128,9 +128,9 @@ src_boost_SERIALIZATION = \
   $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp 
-#  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
-#  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp  \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp 
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
 #  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
