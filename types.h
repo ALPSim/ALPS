@@ -73,4 +73,7 @@ typedef  multiple_vector_type itime_multiple_vector_t;
 ///typedef to easily distinguish imaginary time and frequency (multiple) vectors
 typedef  multiple_complex_vector_type freq_multiple_vector_t;
 
+
+std::ostream &operator<<(std::ostream &os, const multiple_vector_type v);
+std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type v);
 #endif /*TYPES_H_*/
