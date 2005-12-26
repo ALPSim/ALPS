@@ -295,16 +295,16 @@ AC_DEFUN([AC_COMPILER],
     ibm32)
       try_CFLAGS_OPT="-q32 -O2"
       try_CFLAGS_DEBUG=-"-q32 -g"
-      try_CXXFLAGS_OPT="-q32 -qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-q32 -qlanglvl=extended -g"
+      try_CXXFLAGS_OPT="-DBOOST_NO_FUNCTION_TEMPLATE_ORDERING -q32 -qlanglvl=extended -O2"
+      try_CXXFLAGS_DEBUG="-DBOOST_NO_FUNCTION_TEMPLATE_ORDERING -q32 -qlanglvl=extended -g"
       try_CXXFLAGS_EH=""
       try_CXXFLAGS_NOEH=""
       ;;
     ibm64)
       try_CFLAGS_OPT="-q64 -O2"
       try_CFLAGS_DEBUG=-"-q64 -g"
-      try_CXXFLAGS_OPT="-q64 -qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-q64 -qlanglvl=extended -g"
+      try_CXXFLAGS_OPT="-DBOOST_NO_FUNCTION_TEMPLATE_ORDERING -q64 -qlanglvl=extended -O2"
+      try_CXXFLAGS_DEBUG="-DBOOST_NO_FUNCTION_TEMPLATE_ORDERING -q64 -qlanglvl=extended -g"
       try_CXXFLAGS_EH=""
       try_CXXFLAGS_NOEH=""
       ;;
