@@ -469,6 +469,7 @@ AC_DEFUN([AC_LAPACK],
     fi
   fi
 
+  found_essl=no;
   # for ESSL on IBM AIX
   if test "$found_blas" = no; then
     if test "x$essl" != xno; then
@@ -482,6 +483,9 @@ AC_DEFUN([AC_LAPACK],
     if test "x$essl" = xyes; then
       if test "$found_blas" = no; then
         AC_MSG_ERROR([ESSL not found.])
+      else
+        found_essl=yes;
+        AC_DEFINE(HAVE_ESSL, [], [Define if you have the IBM ESSL library.])
       fi
     fi
   fi
@@ -630,41 +634,17 @@ AC_DEFUN([AC_LAPACK],
           lapack_libs="$lapack_flags"
           LDFLAGS="$lapack_ldflags $LAPACK_LDFLAGS $ac_save_LDFLAGS"
           LIBS="$lapack_libs $LAPACK_LIBS $ac_save_LIBS"
-          if test "$ac_cv_compiler" = ibm32; then
-	    AC_MSG_CHECKING([for dsyev in $lapack_ldflags $lapack_libs])
-	    AC_TRY_LINK([extern "C" char dsyev();],[dsyev();],
-                        [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
-	  else
-	    if test "$ac_cv_compiler" = ibm64; then
-	      AC_MSG_CHECKING([for dsyev in $lapack_ldflags $lapack_libs])
-	      AC_TRY_LINK([extern "C" char dsyev();],[dsyev();],
+          AC_MSG_CHECKING([for dsyev_ in $lapack_ldflags $lapack_libs])
+          AC_TRY_LINK([extern "C" char dsyev_();],[dsyev_();],
                           [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
-	    else
-              AC_MSG_CHECKING([for dsyev_ in $lapack_ldflags $lapack_libs])
-              AC_TRY_LINK([extern "C" char dsyev_();],[dsyev_();],
-                          [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
-	    fi
-	  fi
         fi
         if test "$found" = no; then
           for lapack_libs in '-llapack' '-llapack -lf2c' '-llapack -lg2c'; do
             LDFLAGS="$lapack_ldflags $LAPACK_LDFLAGS $ac_save_LDFLAGS"
             LIBS="$lapack_libs $LAPACK_LIBS $ac_save_LIBS"
-            if test "$ac_cv_compiler" = ibm32; then
-              AC_MSG_CHECKING([for dsyev in $lapack_ldflags $lapack_libs])
-              AC_TRY_LINK([extern "C" char dsyev();],[dsyev();],
-                          [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
-	    else 
-	      if test "$ac_cv_compiler" = ibm64; then
-                AC_MSG_CHECKING([for dsyev in $lapack_ldflags $lapack_libs])
-                AC_TRY_LINK([extern "C" char dsyev();],[dsyev();],
+            AC_MSG_CHECKING([for dsyev_ in $lapack_ldflags $lapack_libs])
+            AC_TRY_LINK([extern "C" char dsyev_();],[dsyev_();],
                             [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
-	      else
-                AC_MSG_CHECKING([for dsyev_ in $lapack_ldflags $lapack_libs])
-                AC_TRY_LINK([extern "C" char dsyev_();],[dsyev_();],
-                            [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
-	      fi
-	    fi
             if test "$found" = no; then
               if test -z "$lapack_dir"; then
                 for d in $HOME $HOME/src $prefix /usr/local /usr/local/src; do
@@ -723,6 +703,10 @@ AC_DEFUN([AC_LAPACK],
   else
     ac_cv_have_blas=no
     AC_MSG_NOTICE([disabling BLAS support])
+  fi
+
+  if test "$found_essl" = yes; then
+    found_lapack=yes
   fi
 
   if test "$found_lapack" = yes; then

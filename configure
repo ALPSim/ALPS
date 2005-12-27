@@ -4010,16 +4010,16 @@ echo "$as_me: error: compiler mode is not set" >&2;}
     ibm32)
       try_CFLAGS_OPT="-q32 -O2"
       try_CFLAGS_DEBUG=-"-q32 -g"
-      try_CXXFLAGS_OPT="-DBOOST_NO_FUNCTION_TEMPLATE_ORDERING -q32 -qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-DBOOST_NO_FUNCTION_TEMPLATE_ORDERING -q32 -qlanglvl=extended -g"
+      try_CXXFLAGS_OPT="-q32 -qlanglvl=extended -O2"
+      try_CXXFLAGS_DEBUG="-q32 -qlanglvl=extended -g"
       try_CXXFLAGS_EH=""
       try_CXXFLAGS_NOEH=""
       ;;
     ibm64)
       try_CFLAGS_OPT="-q64 -O2"
       try_CFLAGS_DEBUG=-"-q64 -g"
-      try_CXXFLAGS_OPT="-DBOOST_NO_FUNCTION_TEMPLATE_ORDERING -q64 -qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-DBOOST_NO_FUNCTION_TEMPLATE_ORDERING -q64 -qlanglvl=extended -g"
+      try_CXXFLAGS_OPT="-q64 -qlanglvl=extended -O2"
+      try_CXXFLAGS_DEBUG="-q64 -qlanglvl=extended -g"
       try_CXXFLAGS_EH=""
       try_CXXFLAGS_NOEH=""
       ;;
@@ -26027,6 +26027,7 @@ echo "$as_me: error: Mac OS X vecLib framework not found." >&2;}
     fi
   fi
 
+  found_essl=no;
   # for ESSL on IBM AIX
   if test "$found_blas" = no; then
     if test "x$essl" != xno; then
@@ -26109,6 +26110,13 @@ fi
         { { echo "$as_me:$LINENO: error: ESSL not found." >&5
 echo "$as_me: error: ESSL not found." >&2;}
    { (exit 1); exit 1; }; }
+      else
+        found_essl=yes;
+
+cat >>confdefs.h <<\_ACEOF
+#define HAVE_ESSL
+_ACEOF
+
       fi
     fi
   fi
@@ -26555,113 +26563,9 @@ echo "$as_me: error: $lapack_dir not found." >&2;}
           lapack_libs="$lapack_flags"
           LDFLAGS="$lapack_ldflags $LAPACK_LDFLAGS $ac_save_LDFLAGS"
           LIBS="$lapack_libs $LAPACK_LIBS $ac_save_LIBS"
-          if test "$ac_cv_compiler" = ibm32; then
-	    echo "$as_me:$LINENO: checking for dsyev in $lapack_ldflags $lapack_libs" >&5
-echo $ECHO_N "checking for dsyev in $lapack_ldflags $lapack_libs... $ECHO_C" >&6
-	    cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-extern "C" char dsyev();
-int
-main ()
-{
-dsyev();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; found=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	  else
-	    if test "$ac_cv_compiler" = ibm64; then
-	      echo "$as_me:$LINENO: checking for dsyev in $lapack_ldflags $lapack_libs" >&5
-echo $ECHO_N "checking for dsyev in $lapack_ldflags $lapack_libs... $ECHO_C" >&6
-	      cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-extern "C" char dsyev();
-int
-main ()
-{
-dsyev();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; found=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	    else
-              echo "$as_me:$LINENO: checking for dsyev_ in $lapack_ldflags $lapack_libs" >&5
+          echo "$as_me:$LINENO: checking for dsyev_ in $lapack_ldflags $lapack_libs" >&5
 echo $ECHO_N "checking for dsyev_ in $lapack_ldflags $lapack_libs... $ECHO_C" >&6
-              cat >conftest.$ac_ext <<_ACEOF
+          cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -26709,120 +26613,14 @@ echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-	    fi
-	  fi
         fi
         if test "$found" = no; then
           for lapack_libs in '-llapack' '-llapack -lf2c' '-llapack -lg2c'; do
             LDFLAGS="$lapack_ldflags $LAPACK_LDFLAGS $ac_save_LDFLAGS"
             LIBS="$lapack_libs $LAPACK_LIBS $ac_save_LIBS"
-            if test "$ac_cv_compiler" = ibm32; then
-              echo "$as_me:$LINENO: checking for dsyev in $lapack_ldflags $lapack_libs" >&5
-echo $ECHO_N "checking for dsyev in $lapack_ldflags $lapack_libs... $ECHO_C" >&6
-              cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-extern "C" char dsyev();
-int
-main ()
-{
-dsyev();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; found=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	    else
-	      if test "$ac_cv_compiler" = ibm64; then
-                echo "$as_me:$LINENO: checking for dsyev in $lapack_ldflags $lapack_libs" >&5
-echo $ECHO_N "checking for dsyev in $lapack_ldflags $lapack_libs... $ECHO_C" >&6
-                cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-extern "C" char dsyev();
-int
-main ()
-{
-dsyev();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; found=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-	      else
-                echo "$as_me:$LINENO: checking for dsyev_ in $lapack_ldflags $lapack_libs" >&5
+            echo "$as_me:$LINENO: checking for dsyev_ in $lapack_ldflags $lapack_libs" >&5
 echo $ECHO_N "checking for dsyev_ in $lapack_ldflags $lapack_libs... $ECHO_C" >&6
-                cat >conftest.$ac_ext <<_ACEOF
+            cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -26870,8 +26668,6 @@ echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-	      fi
-	    fi
             if test "$found" = no; then
               if test -z "$lapack_dir"; then
                 for d in $HOME $HOME/src $prefix /usr/local /usr/local/src; do
@@ -27079,6 +26875,10 @@ _ACEOF
     ac_cv_have_blas=no
     { echo "$as_me:$LINENO: disabling BLAS support" >&5
 echo "$as_me: disabling BLAS support" >&6;}
+  fi
+
+  if test "$found_essl" = yes; then
+    found_lapack=yes
   fi
 
   if test "$found_lapack" = yes; then
