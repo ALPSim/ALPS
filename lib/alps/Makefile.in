@@ -58,7 +58,6 @@ am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_mpi.m4 \
 	$(top_srcdir)/config/ac_lapack.m4 \
 	$(top_srcdir)/config/ac_pthread.m4 \
-	$(top_srcdir)/config/ac_pvm.m4 \
 	$(top_srcdir)/config/ac_sqlite.m4 \
 	$(top_srcdir)/config/ac_xmlparser.m4 \
 	$(top_srcdir)/config/ac_xsltp.m4 $(top_srcdir)/configure.ac
@@ -115,6 +114,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/scheduler/scheduler.C \
 	$(top_srcdir)/src/alps/scheduler/signal.C \
 	$(top_srcdir)/src/alps/scheduler/single_scheduler.C \
+	$(top_srcdir)/src/alps/scheduler/serial_scheduler.C \
 	$(top_srcdir)/src/alps/scheduler/slave_task.C \
 	$(top_srcdir)/src/alps/scheduler/task.C \
 	$(top_srcdir)/src/alps/scheduler/worker.C \
@@ -134,8 +134,8 @@ am__objects_8 = modellibrary.lo siteterm.lo bondterm.lo \
 am__objects_9 = abstract_task.lo factory.lo info.lo \
 	master_scheduler.lo montecarlo.lo mpp_scheduler.lo options.lo \
 	remote_task.lo remote_worker.lo scheduler.lo signal.lo \
-	single_scheduler.lo slave_task.lo task.lo worker.lo \
-	workertask.lo
+	single_scheduler.lo serial_scheduler.lo slave_task.lo task.lo \
+	worker.lo workertask.lo
 @ALPS_FULL_TRUE@am__objects_10 = $(am__objects_6) $(am__objects_7) \
 @ALPS_FULL_TRUE@	$(am__objects_8) $(am__objects_9)
 @BUILD_BOOST_TRUE@am__objects_11 = throw_exception.lo
@@ -264,15 +264,12 @@ ECHO_T = @ECHO_T@
 EGREP = @EGREP@
 EXAMPLE_MPI = @EXAMPLE_MPI@
 EXAMPLE_PTHREAD = @EXAMPLE_PTHREAD@
-EXAMPLE_PVM = @EXAMPLE_PVM@
 EXEEXT = @EXEEXT@
 F77 = @F77@
 FFLAGS = @FFLAGS@
 FOP_DIR = @FOP_DIR@
 HAVE_MPI_FALSE = @HAVE_MPI_FALSE@
 HAVE_MPI_TRUE = @HAVE_MPI_TRUE@
-HAVE_PVM_FALSE = @HAVE_PVM_FALSE@
-HAVE_PVM_TRUE = @HAVE_PVM_TRUE@
 HDF5_CPPFLAGS = @HDF5_CPPFLAGS@
 HDF5_LDFLAGS = @HDF5_LDFLAGS@
 HDF5_LIBS = @HDF5_LIBS@
@@ -290,7 +287,6 @@ LIBS = @LIBS@
 LIBTOOL = @LIBTOOL@
 LIB_MPI = @LIB_MPI@
 LIB_PTHREAD = @LIB_PTHREAD@
-LIB_PVM = @LIB_PVM@
 LIB_VERSION_INFO = @LIB_VERSION_INFO@
 LN_S = @LN_S@
 LTLIBOBJS = @LTLIBOBJS@
@@ -304,7 +300,6 @@ MPI_LIBS = @MPI_LIBS@
 OBJEXT = @OBJEXT@
 OBJ_MPI = @OBJ_MPI@
 OBJ_PTHREAD = @OBJ_PTHREAD@
-OBJ_PVM = @OBJ_PVM@
 PACKAGE = @PACKAGE@
 PACKAGE_BUGREPORT = @PACKAGE_BUGREPORT@
 PACKAGE_NAME = @PACKAGE_NAME@
@@ -312,9 +307,6 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
-PVM_CPPFLAGS = @PVM_CPPFLAGS@
-PVM_LDFLAGS = @PVM_LDFLAGS@
-PVM_LIBS = @PVM_LIBS@
 RANLIB = @RANLIB@
 SET_MAKE = @SET_MAKE@
 SHELL = @SHELL@
@@ -433,6 +425,7 @@ src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/scheduler.C \
   $(top_srcdir)/src/alps/scheduler/signal.C \
   $(top_srcdir)/src/alps/scheduler/single_scheduler.C \
+  $(top_srcdir)/src/alps/scheduler/serial_scheduler.C \
   $(top_srcdir)/src/alps/scheduler/slave_task.C \
   $(top_srcdir)/src/alps/scheduler/task.C \
   $(top_srcdir)/src/alps/scheduler/worker.C \
@@ -705,6 +698,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/remote_worker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/rngfactory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scheduler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serial_scheduler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signal_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/single_scheduler.Plo@am__quote@
@@ -1018,6 +1012,13 @@ single_scheduler.lo: $(top_srcdir)/src/alps/scheduler/single_scheduler.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/single_scheduler.C' object='single_scheduler.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o single_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/single_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/single_scheduler.C
+
+serial_scheduler.lo: $(top_srcdir)/src/alps/scheduler/serial_scheduler.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT serial_scheduler.lo -MD -MP -MF "$(DEPDIR)/serial_scheduler.Tpo" -c -o serial_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/serial_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/serial_scheduler.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/serial_scheduler.Tpo" "$(DEPDIR)/serial_scheduler.Plo"; else rm -f "$(DEPDIR)/serial_scheduler.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/serial_scheduler.C' object='serial_scheduler.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o serial_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/serial_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/serial_scheduler.C
 
 slave_task.lo: $(top_srcdir)/src/alps/scheduler/slave_task.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT slave_task.lo -MD -MP -MF "$(DEPDIR)/slave_task.Tpo" -c -o slave_task.lo `test -f '$(top_srcdir)/src/alps/scheduler/slave_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/slave_task.C; \

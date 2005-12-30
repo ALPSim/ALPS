@@ -8,17 +8,10 @@ CPPFLAGS_MPI = $(CPPFLAGS_SGL) $(MPI_CPPFLAGS)
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
-CPPFLAGS_PVM = $(CPPFLAGS_SGL) $(PVM_CPPFLAGS)
-LDFLAGS_PVM = $(LDFLAGS_SGL) $(PVM_LDFLAGS)
-LIBS_PVM = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-pvm/libcomm-pvm.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(PVM_LIBS) $(BASE_LIBS)
-
 TESTS = 
 TESTS_norun = evaluate evaluate2 main main2
 if HAVE_MPI
 TESTS_norun += main_mpi main2_mpi
-endif
-if HAVE_PVM
-TESTS_norun += main_pvm main2_pvm
 endif
 check_PROGRAMS = $(TESTS) $(TESTS_norun)
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
@@ -52,16 +45,6 @@ main2_mpi_SOURCES = main2.C ising2.h ising2.C
 main2_mpi_CPPFLAGS = $(CPPFLAGS_MPI)
 main2_mpi_LDFLAGS = $(LDFLAGS_MPI)
 main2_mpi_LDADD = $(LIBS_MPI)
-
-main_pvm_SOURCES = main.C ising.h ising.C
-main_pvm_CPPFLAGS = $(CPPFLAGS_PVM)
-main_pvm_LDFLAGS = $(LDFLAGS_PVM)
-main_pvm_LDADD = $(LIBS_PVM)
-
-main2_pvm_SOURCES = main2.C ising2.h ising2.C
-main2_pvm_CPPFLAGS = $(CPPFLAGS_PVM)
-main2_pvm_LDFLAGS = $(LDFLAGS_PVM)
-main2_pvm_LDADD = $(LIBS_PVM)
 
 dist_noinst_DATA = parm parm2
 

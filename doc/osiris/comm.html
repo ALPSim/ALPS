@@ -28,13 +28,9 @@ ProcessList start_all_processes(const std::string&, unsigned short procs_per_nod
 }</pre></blockquote>
 <h3>Functions</h3>
 <blockquote><pre>
-void comm_init(int* argcp, char*** argvp, bool force_master=false);
+void comm_init(int* argcp, char*** argvp)
 </pre></blockquote>
-initializes the underlying message passing library. One process is usually 
-determined as the master process for master/slave style programs. If this 
-cannot be done automatically (such as when using xpvm), the last flag can 
-be set to <tt>true</tt> on one of the processes to identify one process
-as the master.
+initializes the underlying message passing library.
 <blockquote><pre>
 void comm_exit(bool kill=false);
 </pre></blockquote>

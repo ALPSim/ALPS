@@ -56,9 +56,7 @@ libraries are needed as well:
   Xalan or xsltproc have to be in the standard path for
   executables.</li>
   <li><a href="http://www-unix.mcs.anl.gov/mpi/">MPI (Message Passing
-  Interface)</a> and/or <a
-  href="http://www.csm.ornl.gov/pvm/pvm_home.html">PVM (Parallel
-  Virtual Machines)</a> libraries for message passing support</li>
+  Interface)</a> library for message passing support</li>
   <li><a href="http://hdf.ncsa.uiuc.edu/HDF5/">HDF5 (Hierarchical Data Format
 version 5)</a> library for efficient large-scale storage support</li>
   <li>[experimental] <a href="http://xml.apache.org/xerces-c/">Xerces
@@ -196,7 +194,7 @@ handling.   </td>
 
 <li>Optional libraries  
 <p>Normally <tt>configure</tt> script will automatically find optional
-libraries (MPI, PVM, HDF5, etc) installed in your system.  However, if
+libraries (MPI, HDF5, etc) installed in your system.  However, if
 these libraries are installed in the places different from usual ones,
 you must specify them by the following options.</p>
   
@@ -233,34 +231,6 @@ be linked.</td>
    <td valign="top" bgcolor="#dddddd">Disable MPI support.</td>
   </tr>
   <tr>
-        </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--with-pvm=DIR</code></td>
-   <td valign="top" bgcolor="#dddddd">Specify the place where PVM is installed.
- PVM headers (eg. pvm3.h) and libraries (eg. libpvm3.a) are assumed to be
-installed in DIR/include and DIR/lib, respectivly.</td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--with-pvm-incdir=DIR</code></td>
-   <td valign="top" bgcolor="#dddddd">Specify the place where PVM headers
-(eg. pvm3.h) are installed.</td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--with-pvm-libdir=DIR</code></td>
-   <td valign="top" bgcolor="#dddddd">Specify the place where PVM libraries
-(eg. libpvm3.a) are installed.</td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--with-pvm-libs=DIR</code></td>
-   <td valign="top" bgcolor="#dddddd">Specify PVM libraries (eg. -lpvm3)
-to be linked.</td>
-  </tr>
-  <tr>
-   <td valign="top" bgcolor="#dddddd"><code>--without-pvm</code></td>
-   <td valign="top" bgcolor="#dddddd">Disable PVM support.</td>
-  </tr>
-  <tr>
-        </tr>
   <tr>
    <td valign="top" bgcolor="#dddddd"><code>--with-hdf5=DIR</code></td>
    <td valign="top" bgcolor="#dddddd">Specify the place where HDF5 is installed.
@@ -303,9 +273,9 @@ program as
 <blockquote>
   <pre>CC -I/home/ALPS/include -L/home/ALPS/lib -o myprog myprog.C -lalps -lcomm-sgl -lm<br></pre>
 </blockquote>
-For parallel applications using MPI (PVM), -lcomm-sgl should be
-replaced by <t>-lcomm-mpi</t> (<t>-lcomm-pvm</t>), and appropriate
-linker flags for MPI (PVM) should be appended (e.g. -lmpi).  You
+For parallel applications using MPI -lcomm-sgl should be
+replaced by <t>-lcomm-mpi</t>, and appropriate
+linker flags for MPI should be appended (e.g. -lmpi).  You
 should link the ALPS libraries exactly in this order.  Otherwise you
 will have an error message from the linker.</p>
 
@@ -322,8 +292,6 @@ myprog : myprog.C
         $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)
 myprog_mpi : myprog.C
         $(CXX) $(CPPFLAGS_MPI) $(CXXFLAGS) -o myprog_mpi myprog.C $(LDFLAGS_MPI) $(LIBS_MPI)
-myprog_pvm : myprog.C
-        $(CXX) $(CPPFLAGS_PVM) $(CXXFLAGS) -o myprog_pvm myprog.C $(LDFLAGS_PVM) $(LIBS_PVM)
   </pre>
 </blockquote>
 </p>

@@ -50,6 +50,7 @@ src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/scheduler.C \
   $(top_srcdir)/src/alps/scheduler/signal.C \
   $(top_srcdir)/src/alps/scheduler/single_scheduler.C \
+  $(top_srcdir)/src/alps/scheduler/serial_scheduler.C \
   $(top_srcdir)/src/alps/scheduler/slave_task.C \
   $(top_srcdir)/src/alps/scheduler/task.C \
   $(top_srcdir)/src/alps/scheduler/worker.C \

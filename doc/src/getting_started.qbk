@@ -69,8 +69,7 @@ libraries are needed as well:
   for XML processing.  [/ Xalan or xsltproc have to be in the standard
   path for executables.]
 * [@http://www-unix.mcs.anl.gov/mpi/ MPI (Message Passing Interface)]
-  and\/or [@http://www.csm.ornl.gov/pvm/pvm_home.html PVM (Parallel
-  Virtual Machines)] libraries for message passing support
+  library for message passing support
 * [@http://hdf.ncsa.uiuc.edu/HDF5/ HDF5 (Hierarchical Data Format
   version 5)] library for efficient large-scale storage
   support
@@ -131,7 +130,7 @@ script.  For complete list of options see the output of
 ]
 
 Normally =configure= script will automatically find optional libraries
-(MPI, PVM, HDF5, etc) installed in your system.  However, if these
+(MPI, HDF5, etc) installed in your system.  However, if these
 libraries are installed in the places different from usual ones, you
 must specify them by the following options.
 
@@ -164,9 +163,9 @@ example, you can compile and link your program as
 CC -I${HOME}/ALPS/include -L${HOME}/ALPS/lib -o myprog myprog.C -lalps -lcomm-sgl -lm
 ]
 
-For parallel applications using MPI (PVM), =-lcomm-sgl= should be
-replaced by =-lcomm-mpi= (=-lcomm-pvm=), and appropriate linker flags
-for MPI (PVM) should be appended (e.g. =-lmpi=).  You should link the
+For parallel applications using MPI, =-lcomm-sgl= should be
+replaced  =-lcomm-mpi=,  and appropriate linker flags
+for MPI should be appended (e.g. =-lmpi=).  You should link the
 ALPS libraries exactly in this order.  Otherwise you will have an
 error message from the linker.
 
@@ -183,8 +182,6 @@ myprog : myprog.C
         $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)
 myprog_mpi : myprog.C
         $(CXX) $(CPPFLAGS_MPI) $(CXXFLAGS) -o myprog_mpi myprog.C $(LDFLAGS_MPI) $(LIBS_MPI)
-myprog_pvm : myprog.C
-        $(CXX) $(CPPFLAGS_PVM) $(CXXFLAGS) -o myprog_pvm myprog.C $(LDFLAGS_PVM) $(LIBS_PVM)
 ]
 
 [endsect]

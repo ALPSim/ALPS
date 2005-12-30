@@ -463,7 +463,7 @@ ac_includes_default="\
 # include <unistd.h>
 #endif"
 
-ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO docdir SRC_DIR ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS BOOST_INCDIR BOOST_DIR BOOST_SRCDIR OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS LAPACK_CPPFLAGS LAPACK_LDFLAGS LAPACK_LIBS SQLITE_CPPFLAGS SQLITE_LDFLAGS SQLITE_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI LIB_PVM PVM_CPPFLAGS PVM_LDFLAGS PVM_LIBS OBJ_PVM EXAMPLE_PVM BOOST_USER_CONFIG_H ac_cv_prog_doxygen DOXYGEN ac_cv_prog_xsltproc XSLTPROC ac_cv_prog_java JAVA DOCBOOK_DTD_DIR DOCBOOK_XSL_DIR FOP_DIR BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE BOOST_CVS_TRUE BOOST_CVS_FALSE BUILD_BOOST_TRUE BUILD_BOOST_FALSE BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BUILD_DOC_TRUE BUILD_DOC_FALSE BUILD_PDF_TRUE BUILD_PDF_FALSE BUILD_LIBHEAP_TRUE BUILD_LIBHEAP_FALSE BUILD_ARCHIVE_TRUE BUILD_ARCHIVE_FALSE HAVE_MPI_TRUE HAVE_MPI_FALSE HAVE_PVM_TRUE HAVE_PVM_FALSE LIBOBJS LTLIBOBJS'
+ac_subst_vars='SHELL PATH_SEPARATOR PACKAGE_NAME PACKAGE_TARNAME PACKAGE_VERSION PACKAGE_STRING PACKAGE_BUGREPORT exec_prefix prefix program_transform_name bindir sbindir libexecdir datadir sysconfdir sharedstatedir localstatedir libdir includedir oldincludedir infodir mandir build_alias host_alias target_alias DEFS ECHO_C ECHO_N ECHO_T LIBS INSTALL_PROGRAM INSTALL_SCRIPT INSTALL_DATA CYGPATH_W PACKAGE VERSION ACLOCAL AUTOCONF AUTOMAKE AUTOHEADER MAKEINFO install_sh STRIP ac_ct_STRIP INSTALL_STRIP_PROGRAM mkdir_p AWK SET_MAKE am__leading_dot AMTAR am__tar am__untar MAINTAINER_MODE_TRUE MAINTAINER_MODE_FALSE MAINT LIB_VERSION_INFO docdir SRC_DIR ALPS_XML_DIR build build_cpu build_vendor build_os host host_cpu host_vendor host_os COMPILER CPPFLAGS CFLAGS CXXFLAGS CC LDFLAGS ac_ct_CC EXEEXT OBJEXT DEPDIR am__include am__quote AMDEP_TRUE AMDEP_FALSE AMDEPBACKSLASH CCDEPMODE am__fastdepCC_TRUE am__fastdepCC_FALSE CXX ac_ct_CXX CXXDEPMODE am__fastdepCXX_TRUE am__fastdepCXX_FALSE CPP CXXCPP EGREP LN_S ECHO AR ac_ct_AR RANLIB ac_ct_RANLIB F77 FFLAGS ac_ct_F77 LIBTOOL BOOST_CPPFLAGS BOOST_LDFLAGS BOOST_LIBS BOOST_INCDIR BOOST_DIR BOOST_SRCDIR OBJ_PTHREAD LIB_PTHREAD EXAMPLE_PTHREAD HDF5_CPPFLAGS HDF5_LDFLAGS HDF5_LIBS LAPACK_CPPFLAGS LAPACK_LDFLAGS LAPACK_LIBS SQLITE_CPPFLAGS SQLITE_LDFLAGS SQLITE_LIBS XML_CPPFLAGS XML_LDFLAGS XML_LIBS LIB_MPI MPI_CPPFLAGS MPI_LDFLAGS MPI_LIBS OBJ_MPI EXAMPLE_MPI BOOST_USER_CONFIG_H ac_cv_prog_doxygen DOXYGEN ac_cv_prog_xsltproc XSLTPROC ac_cv_prog_java JAVA DOCBOOK_DTD_DIR DOCBOOK_XSL_DIR FOP_DIR BASE_CPPFLAGS BASE_LDFLAGS BASE_LIBS ALPS_FULL_TRUE ALPS_FULL_FALSE ALPS_LIGHT_TRUE ALPS_LIGHT_FALSE BOOST_1_32_TRUE BOOST_1_32_FALSE BOOST_1_33_TRUE BOOST_1_33_FALSE BOOST_CVS_TRUE BOOST_CVS_FALSE BUILD_BOOST_TRUE BUILD_BOOST_FALSE BUILD_BOOST_SIGNALS_TRUE BUILD_BOOST_SIGNALS_FALSE BUILD_BOOST_THREAD_TRUE BUILD_BOOST_THREAD_FALSE BUILD_DOC_TRUE BUILD_DOC_FALSE BUILD_PDF_TRUE BUILD_PDF_FALSE BUILD_LIBHEAP_TRUE BUILD_LIBHEAP_FALSE BUILD_ARCHIVE_TRUE BUILD_ARCHIVE_FALSE HAVE_MPI_TRUE HAVE_MPI_FALSE LIBOBJS LTLIBOBJS'
 ac_subst_files=''
 
 # Initialize some variables set by options.
@@ -1091,10 +1091,6 @@ Optional Packages:
   --with-mpi-incdir=DIR   MPI include directory
   --with-mpi-libdir=DIR   MPI library directory
   --with-mpi-libs=LIBS    MPI libraries
-  --with-pvm=DIR          use PVM library
-  --with-pvm-incdir=DIR   PVM include directory
-  --with-pvm-libdir=DIR   PVM library directory
-  --with-pvm-libs=LIBS    PVM libraries
   --with-xsltproc=PATH    specify the path to xsltproc
   --with-docbook-dtd=DIR  path to DocBook DTD
   --with-docbook-xsl=DIR  path to DocBook XSL
@@ -6887,7 +6883,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6890 "configure"' > conftest.$ac_ext
+  echo '#line 6886 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7529,7 +7525,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:7532:" \
+echo "$as_me:7528:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -8627,11 +8623,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8630: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8626: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8634: \$? = $ac_status" >&5
+   echo "$as_me:8630: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8889,11 +8885,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8892: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8888: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8896: \$? = $ac_status" >&5
+   echo "$as_me:8892: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8951,11 +8947,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8954: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8950: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8958: \$? = $ac_status" >&5
+   echo "$as_me:8954: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11199,7 +11195,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11202 "configure"
+#line 11198 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11297,7 +11293,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11300 "configure"
+#line 11296 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13552,11 +13548,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13555: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13551: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13559: \$? = $ac_status" >&5
+   echo "$as_me:13555: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13614,11 +13610,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13617: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13613: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13621: \$? = $ac_status" >&5
+   echo "$as_me:13617: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14991,7 +14987,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 14994 "configure"
+#line 14990 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15089,7 +15085,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 15092 "configure"
+#line 15088 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15974,11 +15970,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15977: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15973: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15981: \$? = $ac_status" >&5
+   echo "$as_me:15977: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16036,11 +16032,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16039: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16035: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16043: \$? = $ac_status" >&5
+   echo "$as_me:16039: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18166,11 +18162,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18169: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18165: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18173: \$? = $ac_status" >&5
+   echo "$as_me:18169: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18428,11 +18424,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18431: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18427: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18435: \$? = $ac_status" >&5
+   echo "$as_me:18431: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18490,11 +18486,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18493: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18489: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18497: \$? = $ac_status" >&5
+   echo "$as_me:18493: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -20738,7 +20734,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20741 "configure"
+#line 20737 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -20836,7 +20832,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 20839 "configure"
+#line 20835 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -28974,674 +28970,6 @@ _ACEOF
 fi
 
 #
-# check for PVM
-#
-
-
-ac_cv_alps_have_pvm=no
-
-
-
-
-
-
-
-
-
-# Check whether --with-pvm or --without-pvm was given.
-if test "${with_pvm+set}" = set; then
-  withval="$with_pvm"
-
-    if test "x$withval" = "xno"; then
-      pvm=no
-    else
-      pvm=yes
-      if test "x$withval" != "xyes"; then
-        pvm_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-      fi
-    fi
-
-
-fi;
-
-
-# Check whether --with-pvm-incdir or --without-pvm-incdir was given.
-if test "${with_pvm_incdir+set}" = set; then
-  withval="$with_pvm_incdir"
-  pvm_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-fi;
-
-# Check whether --with-pvm-libdir or --without-pvm-libdir was given.
-if test "${with_pvm_libdir+set}" = set; then
-  withval="$with_pvm_libdir"
-  pvm_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-fi;
-
-# Check whether --with-pvm-libs or --without-pvm-libs was given.
-if test "${with_pvm_libs+set}" = set; then
-  withval="$with_pvm_libs"
-  pvm_libs="$withval"
-fi;
-
-  if test "$pvm" != no; then
-    echo "$as_me:$LINENO: checking for PVM root directory" >&5
-echo $ECHO_N "checking for PVM root directory... $ECHO_C" >&6
-    if test -z "$pvm_dir"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/share /usr/array/PVM /usr/local /usr/local /usr/local/src; do
-        if test -f "$d/include/pvm3.h" && test -d "$d/lib"; then
-          pvm_dir="$d"
-          break
-        fi
-        if test -f "$d/pvm/include/pvm3.h" && test -d "$d/pvm/lib"; then
-          pvm_dir="$d/pvm"
-          break
-        fi
-        if test -f "$d/pvm3/include/pvm3.h" && test -d "$d/pvm3/lib"; then
-          pvm_dir="$d/pvm3"
-          break
-        fi
-      done
-      if test -n "$pvm_dir"; then
-        echo "$as_me:$LINENO: result: $pvm_dir" >&5
-echo "${ECHO_T}$pvm_dir" >&6
-      else
-        echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6
-      fi
-    else
-      echo "$as_me:$LINENO: result: $pvm_dir" >&5
-echo "${ECHO_T}$pvm_dir" >&6
-      if test -f "$pvm_dir/include/pvm3.h"; then :; else
-        { { echo "$as_me:$LINENO: error: $pvm_dir/include/pvmh3.h not found" >&5
-echo "$as_me: error: $pvm_dir/include/pvmh3.h not found" >&2;}
-   { (exit 1); exit 1; }; }
-      fi
-    fi
-
-    echo "$as_me:$LINENO: checking for PVM arch" >&5
-echo $ECHO_N "checking for PVM arch... $ECHO_C" >&6
-    if test -n "$PVM_ARCH"; then
-      pvm_arch="$PVM_ARCH"
-    else
-      if test -x "$pvm_dir/lib/pvmgetarch"; then
-        pvm_arch=`$pvm_dir/lib/pvmgetarch`
-      fi
-    fi
-    # workaround for PVM in Fedora Core
-    if test "$pvm_arch" = LINUX; then
-      if test -d "$pvm_dir/lib/LINUXI386"; then
-        pvm_arch="LINUXI386"
-      fi
-    fi
-    if test "$pvm_arch" = LINUX64; then
-      if test -d "$pvm_dir/lib/LINUXX86_64"; then
-        pvm_arch="LINUXX86_64"
-      fi
-    fi
-    if test -n "$pvm_arch"; then
-      echo "$as_me:$LINENO: result: $pvm_arch" >&5
-echo "${ECHO_T}$pvm_arch" >&6
-    else
-      echo "$as_me:$LINENO: result: unknown" >&5
-echo "${ECHO_T}unknown" >&6
-    fi
-
-    if test -n "$pvm_incdir"; then
-      echo "$as_me:$LINENO: checking for PVM header directory" >&5
-echo $ECHO_N "checking for PVM header directory... $ECHO_C" >&6
-      echo "$as_me:$LINENO: result: $pvm_incdir" >&5
-echo "${ECHO_T}$pvm_incdir" >&6
-      if test -f "$pvm_incdir/pvm3.h"; then :; else
-        { { echo "$as_me:$LINENO: error: $pvm_incdir/pvm3.h not found" >&5
-echo "$as_me: error: $pvm_incdir/pvm3.h not found" >&2;}
-   { (exit 1); exit 1; }; }
-      fi
-    else
-      if test -n "$pvm_dir"; then
-        pvm_incdir="$pvm_dir/include"
-        echo "$as_me:$LINENO: checking for PVM header directory" >&5
-echo $ECHO_N "checking for PVM header directory... $ECHO_C" >&6
-        echo "$as_me:$LINENO: result: $pvm_incdir" >&5
-echo "${ECHO_T}$pvm_incdir" >&6
-      fi
-    fi
-
-    if test -n "$pvm_libdir"; then
-      echo "$as_me:$LINENO: checking for PVM library directory" >&5
-echo $ECHO_N "checking for PVM library directory... $ECHO_C" >&6
-      echo "$as_me:$LINENO: result: $pvm_libdir" >&5
-echo "${ECHO_T}$pvm_libdir" >&6
-      if test -d "$pvm_libdir"; then :; else
-        { { echo "$as_me:$LINENO: error: $pvm_libdir not found" >&5
-echo "$as_me: error: $pvm_libdir not found" >&2;}
-   { (exit 1); exit 1; }; }
-      fi
-    else
-      if test -n "$pvm_dir"; then
-        if test -n "$pvm_arch"; then
-          if test -d "$pvm_dir/lib/$pvm_arch"; then
-            pvm_libdir="$pvm_dir/lib/$pvm_arch"
-          fi
-        else
-          if test -d "$pvm_dir/lib"; then
-            pvm_libdir="$pvm_dir/lib"
-          fi
-        fi
-        if test -n "$pvm_libdir"; then
-          echo "$as_me:$LINENO: checking for PVM library directory" >&5
-echo $ECHO_N "checking for PVM library directory... $ECHO_C" >&6
-          echo "$as_me:$LINENO: result: $pvm_libdir" >&5
-echo "${ECHO_T}$pvm_libdir" >&6
-        fi
-      fi
-    fi
-
-    if test -n "$pvm_incdir"; then
-      PVM_CPPFLAGS="-I$pvm_incdir"
-    fi
-    if test -n "$pvm_libdir"; then
-      PVM_LDFLAGS="-L$pvm_libdir"
-    fi
-
-
-
-    ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    ac_save_CPPFLAGS=$CPPFLAGS
-    ac_save_LDFLAGS=$LDFLAGS
-    ac_save_LIBS=$LIBS
-    CPPFLAGS="$PVM_CPPFLAGS $CPPFLAGS"
-    LDFLAGS="$PVM_LDFLAGS $LDFLAGS"
-
-    if test "${ac_cv_header_pvm3_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for pvm3.h" >&5
-echo $ECHO_N "checking for pvm3.h... $ECHO_C" >&6
-if test "${ac_cv_header_pvm3_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_pvm3_h" >&5
-echo "${ECHO_T}$ac_cv_header_pvm3_h" >&6
-else
-  # Is the header compilable?
-echo "$as_me:$LINENO: checking pvm3.h usability" >&5
-echo $ECHO_N "checking pvm3.h usability... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-$ac_includes_default
-#include <pvm3.h>
-_ACEOF
-rm -f conftest.$ac_objext
-if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest.$ac_objext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_header_compiler=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_header_compiler=no
-fi
-rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
-echo "${ECHO_T}$ac_header_compiler" >&6
-
-# Is the header present?
-echo "$as_me:$LINENO: checking pvm3.h presence" >&5
-echo $ECHO_N "checking pvm3.h presence... $ECHO_C" >&6
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <pvm3.h>
-_ACEOF
-if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
-  (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } >/dev/null; then
-  if test -s conftest.err; then
-    ac_cpp_err=$ac_cxx_preproc_warn_flag
-    ac_cpp_err=$ac_cpp_err$ac_cxx_werror_flag
-  else
-    ac_cpp_err=
-  fi
-else
-  ac_cpp_err=yes
-fi
-if test -z "$ac_cpp_err"; then
-  ac_header_preproc=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-  ac_header_preproc=no
-fi
-rm -f conftest.err conftest.$ac_ext
-echo "$as_me:$LINENO: result: $ac_header_preproc" >&5
-echo "${ECHO_T}$ac_header_preproc" >&6
-
-# So?  What about this header?
-case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
-  yes:no: )
-    { echo "$as_me:$LINENO: WARNING: pvm3.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: pvm3.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pvm3.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: pvm3.h: proceeding with the compiler's result" >&2;}
-    ac_header_preproc=yes
-    ;;
-  no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: pvm3.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: pvm3.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pvm3.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: pvm3.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pvm3.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: pvm3.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pvm3.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: pvm3.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pvm3.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: pvm3.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: pvm3.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: pvm3.h: in the future, the compiler will take precedence" >&2;}
-    (
-      cat <<\_ASBOX
-## ------------------------------- ##
-## Report this to the alps lists.  ##
-## ------------------------------- ##
-_ASBOX
-    ) |
-      sed "s/^/$as_me: WARNING:     /" >&2
-    ;;
-esac
-echo "$as_me:$LINENO: checking for pvm3.h" >&5
-echo $ECHO_N "checking for pvm3.h... $ECHO_C" >&6
-if test "${ac_cv_header_pvm3_h+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_cv_header_pvm3_h=$ac_header_preproc
-fi
-echo "$as_me:$LINENO: result: $ac_cv_header_pvm3_h" >&5
-echo "${ECHO_T}$ac_cv_header_pvm3_h" >&6
-
-fi
-if test $ac_cv_header_pvm3_h = yes; then
-  :
-else
-
-                    if test "$pvm" = yes; then
-                      { { echo "$as_me:$LINENO: error: check for PVM library failed" >&5
-echo "$as_me: error: check for PVM library failed" >&2;}
-   { (exit 1); exit 1; }; }
-                    else
-                      pvm=no
-                    fi
-
-fi
-
-
-
-    if test "$pvm" != no; then
-      found=no
-
-      if test -n "$pvm_libs"; then
-        PVM_LIBS="$pvm_libs"
-        LIBS="$PVM_LIBS $ac_save_LIBS"
-        echo "$as_me:$LINENO: checking for pvm_barrier() in $PVM_LIBS" >&5
-echo $ECHO_N "checking for pvm_barrier() in $PVM_LIBS... $ECHO_C" >&6
-        cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <pvm3.h>
-int
-main ()
-{
-pvm_barrier(0,0);
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; found=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6;
-                     { { echo "$as_me:$LINENO: error: check for PVM library failed" >&5
-echo "$as_me: error: check for PVM library failed" >&2;}
-   { (exit 1); exit 1; }; }
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-      fi
-
-      if test "$found" = no; then
-        echo "$as_me:$LINENO: checking for pvm_spawn in -lpvm3" >&5
-echo $ECHO_N "checking for pvm_spawn in -lpvm3... $ECHO_C" >&6
-if test "${ac_cv_lib_pvm3_pvm_spawn+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpvm3  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char pvm_spawn ();
-int
-main ()
-{
-pvm_spawn ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_pvm3_pvm_spawn=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_pvm3_pvm_spawn=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_pvm3_pvm_spawn" >&5
-echo "${ECHO_T}$ac_cv_lib_pvm3_pvm_spawn" >&6
-if test $ac_cv_lib_pvm3_pvm_spawn = yes; then
-
-        LIBS="-lpvm3 $ac_save_LIBS"
-        echo "$as_me:$LINENO: checking for pvm_barrier in -lpvm3" >&5
-echo $ECHO_N "checking for pvm_barrier in -lpvm3... $ECHO_C" >&6
-if test "${ac_cv_lib_pvm3_pvm_barrier+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lpvm3  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char pvm_barrier ();
-int
-main ()
-{
-pvm_barrier ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_pvm3_pvm_barrier=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_pvm3_pvm_barrier=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_pvm3_pvm_barrier" >&5
-echo "${ECHO_T}$ac_cv_lib_pvm3_pvm_barrier" >&6
-if test $ac_cv_lib_pvm3_pvm_barrier = yes; then
-  PVM_LIBS="-lpvm3"; found=yes
-else
-
-        echo "$as_me:$LINENO: checking for pvm_barrier in -lgpvm3" >&5
-echo $ECHO_N "checking for pvm_barrier in -lgpvm3... $ECHO_C" >&6
-if test "${ac_cv_lib_gpvm3_pvm_barrier+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lgpvm3  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char pvm_barrier ();
-int
-main ()
-{
-pvm_barrier ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  ac_cv_lib_gpvm3_pvm_barrier=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-ac_cv_lib_gpvm3_pvm_barrier=no
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_gpvm3_pvm_barrier" >&5
-echo "${ECHO_T}$ac_cv_lib_gpvm3_pvm_barrier" >&6
-if test $ac_cv_lib_gpvm3_pvm_barrier = yes; then
-  PVM_LIBS="-lgpvm3 -lpvm3"; found=yes
-fi
-
-
-fi
-
-
-fi
-
-      fi
-
-      if test "$found" = no; then
-        if test "$pvm" = yes; then
-          { { echo "$as_me:$LINENO: error: check for PVM library failed" >&5
-echo "$as_me: error: check for PVM library failed" >&2;}
-   { (exit 1); exit 1; }; }
-        fi
-        pvm=no
-      fi
-
-      CPPFLAGS=$ac_save_CPPFLAGS
-      LDFLAGS=$ac_save_LDFLAGS
-      LIBS=$ac_save_LIBS
-      ac_ext=cc
-ac_cpp='$CXXCPP $CPPFLAGS'
-ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
-
-    fi
-  fi
-
-  if test "$pvm" != no; then
-    ac_cv_have_pvm=yes
-    ac_cv_pvm_cppflags="$PVM_CPPFLAGS"
-    ac_cv_pvm_ldflags="$PVM_LDFLAGS"
-    ac_cv_pvm_libs="$PVM_LIBS"
-    cat >>confdefs.h <<\_ACEOF
-#define HAVE_PVM 1
-_ACEOF
-
-    OBJ_PVM='$(OBJ_PVM)'
-    LIB_PVM='$(LIB_PVM)'
-    EXAMPLE_PVM='$(EXAMPLE_PVM)'
-    { echo "$as_me:$LINENO: enabling PVM support" >&5
-echo "$as_me: enabling PVM support" >&6;}
-  else
-    ac_cv_have_pvm=no
-    ac_cv_pvm_cppflags=
-    ac_cv_pvm_ldflags=
-    ac_cv_pvm_libs=
-    PVM_CPPFLAGS=
-    PVM_LDFLAGS=
-    PVM_LIBS=
-    { echo "$as_me:$LINENO: disabling PVM support" >&5
-echo "$as_me: disabling PVM support" >&6;}
-  fi
-
-
-if test "$ac_cv_have_pvm" = yes; then
-  ac_cv_alps_have_pvm=yes
-
-cat >>confdefs.h <<\_ACEOF
-#define ALPS_HAVE_PVM
-_ACEOF
-
-  LIB_PVM='$(LIB_PVM)'
-fi
-
-#
 # boost object libraries
 #
 
@@ -30163,10 +29491,6 @@ ac_cv_alps_cppflags_mpi="$ac_cv_alps_cppflags $ac_cv_mpi_cppflags"
 ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
 ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
-ac_cv_alps_cppflags_pvm="$ac_cv_alps_cppflags $ac_cv_pvm_cppflags"
-ac_cv_alps_ldflags_pvm="$ac_cv_alps_ldflags $ac_cv_pvm_ldflags"
-ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
-
 
 # Check whether --enable-libheap or --disable-libheap was given.
 if test "${enable_libheap+set}" = set; then
@@ -30313,16 +29637,6 @@ fi
 
 
 
-if test "$ac_cv_have_pvm" = yes; then
-  HAVE_PVM_TRUE=
-  HAVE_PVM_FALSE='#'
-else
-  HAVE_PVM_TRUE='#'
-  HAVE_PVM_FALSE=
-fi
-
-
-
           ac_config_headers="$ac_config_headers src/alps/config.h"
 
 
@@ -30330,7 +29644,8 @@ fi
 
           ac_config_files="$ac_config_files src/Makefile"
 
-                                                            ac_config_files="$ac_config_files lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mpi/Makefile lib/comm-pvm/Makefile lib/heap/Makefile"
+                                                  ac_config_files="$ac_config_files lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mpi/Makefile lib/heap/Makefile"
+
 
                                                                       ac_config_files="$ac_config_files test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile"
 
@@ -30588,13 +29903,6 @@ if test -z "${HAVE_MPI_TRUE}" && test -z "${HAVE_MPI_FALSE}"; then
   { { echo "$as_me:$LINENO: error: conditional \"HAVE_MPI\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 echo "$as_me: error: conditional \"HAVE_MPI\" was never defined.
-Usually this means the macro was only invoked conditionally." >&2;}
-   { (exit 1); exit 1; }; }
-fi
-if test -z "${HAVE_PVM_TRUE}" && test -z "${HAVE_PVM_FALSE}"; then
-  { { echo "$as_me:$LINENO: error: conditional \"HAVE_PVM\" was never defined.
-Usually this means the macro was only invoked conditionally." >&5
-echo "$as_me: error: conditional \"HAVE_PVM\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -31050,7 +30358,6 @@ do
   "lib/alps/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/alps/Makefile" ;;
   "lib/comm-sgl/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/comm-sgl/Makefile" ;;
   "lib/comm-mpi/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/comm-mpi/Makefile" ;;
-  "lib/comm-pvm/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/comm-pvm/Makefile" ;;
   "lib/heap/Makefile" ) CONFIG_FILES="$CONFIG_FILES lib/heap/Makefile" ;;
   "test/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
   "test/fixed_capacity/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/fixed_capacity/Makefile" ;;
@@ -31283,12 +30590,6 @@ s,@MPI_LDFLAGS@,$MPI_LDFLAGS,;t t
 s,@MPI_LIBS@,$MPI_LIBS,;t t
 s,@OBJ_MPI@,$OBJ_MPI,;t t
 s,@EXAMPLE_MPI@,$EXAMPLE_MPI,;t t
-s,@LIB_PVM@,$LIB_PVM,;t t
-s,@PVM_CPPFLAGS@,$PVM_CPPFLAGS,;t t
-s,@PVM_LDFLAGS@,$PVM_LDFLAGS,;t t
-s,@PVM_LIBS@,$PVM_LIBS,;t t
-s,@OBJ_PVM@,$OBJ_PVM,;t t
-s,@EXAMPLE_PVM@,$EXAMPLE_PVM,;t t
 s,@BOOST_USER_CONFIG_H@,$BOOST_USER_CONFIG_H,;t t
 s,@ac_cv_prog_doxygen@,$ac_cv_prog_doxygen,;t t
 s,@DOXYGEN@,$DOXYGEN,;t t
@@ -31328,8 +30629,6 @@ s,@BUILD_ARCHIVE_TRUE@,$BUILD_ARCHIVE_TRUE,;t t
 s,@BUILD_ARCHIVE_FALSE@,$BUILD_ARCHIVE_FALSE,;t t
 s,@HAVE_MPI_TRUE@,$HAVE_MPI_TRUE,;t t
 s,@HAVE_MPI_FALSE@,$HAVE_MPI_FALSE,;t t
-s,@HAVE_PVM_TRUE@,$HAVE_PVM_TRUE,;t t
-s,@HAVE_PVM_FALSE@,$HAVE_PVM_FALSE,;t t
 s,@LIBOBJS@,$LIBOBJS,;t t
 s,@LTLIBOBJS@,$LTLIBOBJS,;t t
 CEOF
@@ -32060,7 +31359,6 @@ echo "  compiler type       $ac_cv_alps_compiler ($ac_cv_alps_cxx)"
 echo "  exceptions          $ac_cv_alps_compiler_exceptions"
 echo "  optimization        $ac_cv_alps_compiler_optimization"
 echo "  MPI support         $ac_cv_alps_have_mpi"
-echo "  PVM support         $ac_cv_alps_have_pvm"
 echo "  HDF5 support        $ac_cv_have_hdf5"
 echo "  LAPACK support      $ac_cv_have_lapack"
 echo "  SQLite support      $ac_cv_have_sqlite"

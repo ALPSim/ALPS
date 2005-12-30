@@ -1,6 +1,9 @@
-2005-10-04  Synge Todo <wistaria@comp-phys.org>
+2005-12-30  Matthias Troyer <troyer@comp-phys.org>
 
-	* [tools] Added new tool 'archive' written by Lukas Gamper.
+	* [scheduler] Started adding new single task scheduler, as well as tasks
+          started from parameters instead of a file.
+
+	* removed PVM support
 	
 2005-8-25  Synge Todo <wistaria@comp-phys.org>
 

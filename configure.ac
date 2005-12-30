@@ -620,19 +620,6 @@ if test "$ac_cv_have_mpi" = yes; then
 fi
 
 #
-# check for PVM
-#
-
-AC_SUBST(LIB_PVM)
-ac_cv_alps_have_pvm=no
-AC_PVM
-if test "$ac_cv_have_pvm" = yes; then
-  ac_cv_alps_have_pvm=yes
-  AC_DEFINE(ALPS_HAVE_PVM, [], [pvm])
-  LIB_PVM='$(LIB_PVM)'
-fi
-
-#
 # boost object libraries
 # 
 
@@ -781,10 +768,6 @@ ac_cv_alps_cppflags_mpi="$ac_cv_alps_cppflags $ac_cv_mpi_cppflags"
 ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
 ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
 
-ac_cv_alps_cppflags_pvm="$ac_cv_alps_cppflags $ac_cv_pvm_cppflags"
-ac_cv_alps_ldflags_pvm="$ac_cv_alps_ldflags $ac_cv_pvm_ldflags"
-ac_cv_alps_libs_pvm="-lalps -lcomm-pvm $ac_cv_pvm_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
-
 dnl
 dnl Experimental Features
 dnl
@@ -816,7 +799,6 @@ AM_CONDITIONAL(BUILD_PDF, test "$build_pdf" = yes)
 AM_CONDITIONAL(BUILD_LIBHEAP, test "$ac_cv_libheap" = yes)
 AM_CONDITIONAL(BUILD_ARCHIVE, test "$ac_cv_have_sqlite" = yes)
 AM_CONDITIONAL(HAVE_MPI, test "$ac_cv_have_mpi" = yes)
-AM_CONDITIONAL(HAVE_PVM, test "$ac_cv_have_pvm" = yes)
 
 dnl
 dnl Generate files
@@ -828,7 +810,8 @@ AC_CONFIG_HEADERS([src/alps/config.h])
 dnl Makefiles
 AC_CONFIG_FILES(Makefile config/config.site config/include.mk)
 AC_CONFIG_FILES(src/Makefile)
-AC_CONFIG_FILES(lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mpi/Makefile lib/comm-pvm/Makefile lib/heap/Makefile)
+AC_CONFIG_FILES(lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mpi/Makefile lib/heap/Makefile)
+
 AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile)
 AC_CONFIG_FILES(doc/Makefile)
 
@@ -876,7 +859,6 @@ echo "  compiler type       $ac_cv_alps_compiler ($ac_cv_alps_cxx)"
 echo "  exceptions          $ac_cv_alps_compiler_exceptions"
 echo "  optimization        $ac_cv_alps_compiler_optimization"
 echo "  MPI support         $ac_cv_alps_have_mpi"
-echo "  PVM support         $ac_cv_alps_have_pvm"
 echo "  HDF5 support        $ac_cv_have_hdf5"
 echo "  LAPACK support      $ac_cv_have_lapack"
 echo "  SQLite support      $ac_cv_have_sqlite"
