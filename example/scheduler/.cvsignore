@@ -12,5 +12,8 @@ main_pvm
 main2
 main2_mpi
 main2_pvm
+main3
+main3_mpi
+main3_pvm
 *.xml
 *.run*

@@ -9,9 +9,9 @@ LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
 TESTS = 
-TESTS_norun = evaluate evaluate2 main main2
+TESTS_norun = evaluate evaluate2 main main2 main3
 if HAVE_MPI
-TESTS_norun += main_mpi main2_mpi
+TESTS_norun += main_mpi main2_mpi main3_mpi
 endif
 check_PROGRAMS = $(TESTS) $(TESTS_norun)
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
@@ -36,6 +36,11 @@ main2_CPPFLAGS = $(CPPFLAGS_SGL)
 main2_LDFLAGS = $(LDFLAGS_SGL)
 main2_LDADD = $(LIBS_SGL)
 
+main3_SOURCES = main3.C ising.h ising.C
+main3_CPPFLAGS = $(CPPFLAGS_SGL)
+main3_LDFLAGS = $(LDFLAGS_SGL)
+main3_LDADD = $(LIBS_SGL)
+
 main_mpi_SOURCES = main.C ising.h ising.C
 main_mpi_CPPFLAGS = $(CPPFLAGS_MPI)
 main_mpi_LDFLAGS = $(LDFLAGS_MPI)
@@ -46,7 +51,12 @@ main2_mpi_CPPFLAGS = $(CPPFLAGS_MPI)
 main2_mpi_LDFLAGS = $(LDFLAGS_MPI)
 main2_mpi_LDADD = $(LIBS_MPI)
 
-dist_noinst_DATA = parm parm2
+main3_mpi_SOURCES = main3.C ising.h ising.C
+main3_mpi_CPPFLAGS = $(CPPFLAGS_MPI)
+main3_mpi_LDFLAGS = $(LDFLAGS_MPI)
+main3_mpi_LDADD = $(LIBS_MPI)
+
+dist_noinst_DATA = parm parm2 parm3
 
 .PHONY : test tests example examples
 test tests :

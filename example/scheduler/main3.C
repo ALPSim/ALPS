@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>
+* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -27,38 +27,44 @@
 
 /* $Id$ */
 
-#include <alps/scheduler/factory.h>
+#include "ising.h"
+#include <alps/osiris/comm.h>
 
-namespace alps {
-namespace scheduler {
-
-Worker* Factory::make_worker(const ProcessList&,const Parameters&,int) const
+int main(int argc, char** argv)
 {
-  boost::throw_exception(std::logic_error("Factory::make_worker() needs to be implemented"));
-  return 0;
-}
+#ifndef BOOST_NO_EXCEPTIONS
+try {
+#endif
 
-Task* Factory::make_task(const ProcessList& w,const boost::filesystem::path& fn) const
-{
-  alps::Parameters parms;
-  { // scope to close file
-    boost::filesystem::ifstream infile(fn);
-    parms.extract_from_xml(infile);
+  int res=0;
+  IsingFactory factory;
+  
+  alps::scheduler::SingleScheduler* s= alps::scheduler::start_single(factory,argc,argv);
+  
+  if (s) {
+    // I'm the master and should actually do something
+    alps::Parameters parms;
+    std::cin >> parms;
+    s->create_task(parms);
+    res = s->run();
+    std::cout << "Results: " << dynamic_cast<alps::scheduler::MCSimulation*>(s->get_task())->get_measurements();
+    s->destroy_task();
   }
-  return make_task(w,fn,parms);
+  
+  alps::scheduler::stop_single();
+  
+  return res;
+  
+#ifndef BOOST_NO_EXCEPTIONS
 }
-
-Task* Factory::make_task(const ProcessList&,const boost::filesystem::path&,const Parameters&) const
-{
-  boost::throw_exception(std::logic_error("Factory::make_task(const ProcessList&,const boost::filesystem::path&,const Parameters&) needs to be implemented"));
-  return 0;
+catch (std::exception& exc) {
+  std::cerr << exc.what() << "\n";
+  alps::comm_exit(true);
+  return -1;
 }
-
-Task* Factory::make_task(const ProcessList&,const Parameters&) const
-{
-  boost::throw_exception(std::logic_error("Factory::make_task(const ProcessList&,const Parameters&) needs to be implemented"));
-  return 0;
+catch (...) {
+  std::cerr << "Fatal Error: Unknown Exception!\n";
+  return -2;
 }
-
-} // namespace scheduler
-} // namespace alps
+#endif
+}
