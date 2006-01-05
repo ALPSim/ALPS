@@ -826,8 +826,14 @@ if test "$ac_cv_alps_type" = "full"; then
 fi
 
 if test "$ac_cv_use_precompiled_boost" != yes; then
-    AC_DEFINE_UNQUOTED(PO_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/program_options/src/utf8_codecvt_facet.cpp")
-    AC_CONFIG_HEADERS(src/boost/po_utf8_codecvt_facet.cpp)
+  AC_DEFINE_UNQUOTED(PO_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/program_options/src/utf8_codecvt_facet.cpp")
+  AC_CONFIG_HEADERS(src/boost/po_utf8_codecvt_facet.cpp)
+  AC_DEFINE_UNQUOTED(SR_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/serialization/src/utf8_codecvt_facet.cpp")
+  AC_CONFIG_HEADERS(src/boost/sr_utf8_codecvt_facet.cpp)
+  if test "$ac_cv_boost_version" = cvs; then
+    AC_DEFINE_UNQUOTED(FS_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/filesystem/src/utf8_codecvt_facet.cpp")
+    AC_CONFIG_HEADERS(src/boost/fs_utf8_codecvt_facet.cpp)
+  fi
 fi
 
 dnl doc generation

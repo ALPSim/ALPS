@@ -47,7 +47,9 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(top_srcdir)/config/include.mk.in $(top_srcdir)/configure \
 	$(top_srcdir)/doc/xsl/doxygen2boostbook.xsl.in \
 	$(top_srcdir)/src/alps/config.h.in \
-	$(top_srcdir)/src/boost/po_utf8_codecvt_facet.cpp.in ChangeLog \
+	$(top_srcdir)/src/boost/fs_utf8_codecvt_facet.cpp.in \
+	$(top_srcdir)/src/boost/po_utf8_codecvt_facet.cpp.in \
+	$(top_srcdir)/src/boost/sr_utf8_codecvt_facet.cpp.in ChangeLog \
 	INSTALL TODO config/config.guess config/config.sub \
 	config/depcomp config/install-sh config/ltmain.sh \
 	config/missing config/mkinstalldirs
@@ -71,7 +73,9 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno configure.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/config/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
-	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
+	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp \
+	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
+	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES = config/config.site config/include.mk \
 	doc/xsl/doxygen2boostbook.xsl
 SCRIPTS = $(dist_noinst_SCRIPTS)
@@ -348,8 +352,28 @@ src/boost/stamp-h2: $(top_srcdir)/src/boost/po_utf8_codecvt_facet.cpp.in $(top_b
 	@rm -f src/boost/stamp-h2
 	cd $(top_builddir) && $(SHELL) ./config.status src/boost/po_utf8_codecvt_facet.cpp
 
+src/boost/sr_utf8_codecvt_facet.cpp: src/boost/stamp-h3
+	@if test ! -f $@; then \
+	  rm -f src/boost/stamp-h3; \
+	  $(MAKE) src/boost/stamp-h3; \
+	else :; fi
+
+src/boost/stamp-h3: $(top_srcdir)/src/boost/sr_utf8_codecvt_facet.cpp.in $(top_builddir)/config.status
+	@rm -f src/boost/stamp-h3
+	cd $(top_builddir) && $(SHELL) ./config.status src/boost/sr_utf8_codecvt_facet.cpp
+
+src/boost/fs_utf8_codecvt_facet.cpp: src/boost/stamp-h4
+	@if test ! -f $@; then \
+	  rm -f src/boost/stamp-h4; \
+	  $(MAKE) src/boost/stamp-h4; \
+	else :; fi
+
+src/boost/stamp-h4: $(top_srcdir)/src/boost/fs_utf8_codecvt_facet.cpp.in $(top_builddir)/config.status
+	@rm -f src/boost/stamp-h4
+	cd $(top_builddir) && $(SHELL) ./config.status src/boost/fs_utf8_codecvt_facet.cpp
+
 distclean-hdr:
-	-rm -f src/alps/config.h src/alps/stamp-h1 src/boost/po_utf8_codecvt_facet.cpp src/boost/stamp-h2
+	-rm -f src/alps/config.h src/alps/stamp-h1 src/boost/po_utf8_codecvt_facet.cpp src/boost/stamp-h2 src/boost/sr_utf8_codecvt_facet.cpp src/boost/stamp-h3 src/boost/fs_utf8_codecvt_facet.cpp src/boost/stamp-h4
 config/config.site: $(top_builddir)/config.status $(top_srcdir)/config/config.site.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 config/include.mk: $(top_builddir)/config.status $(top_srcdir)/config/include.mk.in
