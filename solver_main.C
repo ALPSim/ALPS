@@ -2,9 +2,9 @@
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2005 by Philipp Werner <werner@comp-phys.org>,
-*                       Matthias Troyer <troyer@comp-phys.org>
-*                       Emanuel Gull <gullc@comp-phys.org>
+* Copyright (C) 2005-2006 by Philipp Werner <werner@comp-phys.org>,
+*                            Matthias Troyer <troyer@comp-phys.org>
+*                            Emanuel Gull <gullc@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -27,7 +27,8 @@
 
 /* $Id$ */
 
-#include "hirschfye.h"
+#include "hirschfyesim.h"
+#include "xml.h"
 #include <alps/parameters.h>
 #include <alps/copyright.h>
 #include <alps/vectorio.h>
@@ -61,26 +62,7 @@ void read_input(const std::string& inputfile, multiple_vector_type& G0,  alps::P
 		tag=alps::parse_tag(input);
 	}
 	
-	bool first_is_up = (tag.attributes["spin"]=="up");
-	if (tag.type==alps::XMLTag::OPENING) {
-		alps::read_vector_resize(alps::parse_content(input), first_is_up ? G0.first : G0.second);
-		alps::skip_element(input,tag);
-	}
-	
-    // search for second
-	tag=alps::parse_tag(input);
-	while (tag.name != "G0") {
-		if (tag.name=="/SIMULATION")
-			boost::throw_exception(std::runtime_error("Element <G0> missing in input file"));
-		else
-			alps::skip_element(input,tag);
-		tag=alps::parse_tag(input);
-	}
-	
-	if (tag.type==alps::XMLTag::OPENING) {
-		alps::read_vector_resize(alps::parse_content(input), first_is_up ? G0.second : G0.first);
-		alps::skip_element(input,tag);
-	}
+    read_itime(input,G0);
 }
 
 
@@ -88,29 +70,21 @@ void read_input(const std::string& inputfile, multiple_vector_type& G0,  alps::P
 ///
 /// @param outputfile name of the input XML file
 /// @param G0 the Weiss field used in the solver
-/// @param G the Green's function (in Matsubara frequqncies) calculated by the impurity solver
+/// @param G the Green's function calculated by the impurity solver
 /// @param parms the simulation parameter used in the solver
 void write_output(const std::string& outputfile, const multiple_vector_type& G0, const multiple_vector_type& G, const alps::Parameters& parms)
 {
 	alps::oxstream output(outputfile);
 	
 	output << alps::start_tag("SIMULATION") << parms;
-	output << alps::start_tag("G0") << alps::attribute("spin","up");
-	for (std::size_t i=0;i<G0.first.size();++i)
-		output << G0.first[i];
-	output << alps::end_tag("G0");
-	output << alps::start_tag("G0") << alps::attribute("spin","down");
-	for (std::size_t i=0;i<G0.second.size();++i)
-		output << G0.second[i];
-	output << alps::end_tag("G0");
-	output << alps::start_tag("GREENFUNCTION") << alps::attribute("spin","up");
-	for (std::size_t i=0;i<G.first.size();++i)
-		output << G.first[i];
-	output << alps::end_tag("GREENFUNCTION");
-	output << alps::start_tag("GREENFUNCTION") << alps::attribute("spin","down");
-	for (std::size_t i=0;i<G.second.size();++i)
-		output << G.second[i];
-	output << alps::end_tag("GREENFUNCTION");
+    
+    output << alps::start_tag("G0");
+    write_itime(output,G0);
+    output << alps::end_tag("G0");
+	
+    output << alps::start_tag("GREENFUNCTION") ;
+    write_itime(output,G);
+    output << alps::end_tag("GREENFUNCTION");
 	output << alps::end_tag("SIMULATION");
 }
 
@@ -180,7 +154,8 @@ int main(int argc, char** argv)
 		alps::Parameters parms;
 		read_input(infile,G0,parms);
 		
-		HirschFyeSolver solver;
+        alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
+		alps::ImpuritySolver solver(factory,argc,argv);
 		
 		// write g into output file
 		multiple_vector_type G = solver.solve(G0,parms);

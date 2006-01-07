@@ -43,11 +43,11 @@ multiple_vector_type HirschFyeSolver::solve(const multiple_vector_type& G0, cons
   
   HirschFyeSimulation sim(here, parms, 0, G0);
   
-  while (sim.work_done() <1.)
-    sim.run();
-  
+  while (sim.work_done() <1.){
+    sim.dostep();
+    //sim.run();
+  }
   multiple_vector_type g = sim.get_G(); 
-
   // .... maybe write a checkpoint ....
   return g;
 }

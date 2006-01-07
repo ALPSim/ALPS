@@ -1,10 +1,10 @@
-/*****************************************************************************
+/*******************************************************************************
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2005 by Philipp Werner <werner@comp-phys.org>,
-*                       Matthias Troyer <troyer@comp-phys.org>
-*                       Emanuel Gull <gullc@comp-phys.org>
+* Copyright (C) 2005-2006 by Philipp Werner <werner@comp-phys.org>,
+*                            Matthias Troyer <troyer@comp-phys.org>
+*                            Emanuel Gull <gullc@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -39,26 +39,43 @@
 #include <boost/filesystem/operations.hpp>
 #include <cstdio>
 
-/// @brief An impurity solver calling an external executable to solve the impurity problem
+/// @brief An impurity solver calling an external executable to solve the 
+///        impurity problem
 /// 
-/// The ExternalSolver receives the path to an executable in the constructor. This executable
-/// will be called to solve the impurity problem. The executable should take two arguments:
-/// the name of an input file and the name of an output file. Both files have to conform to the
-/// XML schema for impurity solvers that is currently being developed
+/// The ExternalSolver receives the path to an executable in the constructor. 
+/// This executable will be called to solve the impurity problem. The executable
+/// should take two arguments: the name of an input file and the name of an 
+/// output file. Both files have to conform to the XML schema for impurity 
+/// solvers that is currently being developed
 ///
-/// @todo the XML formats need to be discussed and documented. responsible: Matthias Troyer
+/// @todo the XML formats need to be discussed and documented. 
+///        responsible: MT, EG and PW
 
-class ExternalSolver : public ImpuritySolver {
+class ExternalSolver 
+ : public ImpuritySolver
+ , public FrequencyTimeImpuritySolver 
+{
 public:
 	/// @param executable the path to the executable
 	ExternalSolver(const boost::filesystem::path& executable) 
     : exe_(boost::filesystem::complete(executable)) {}
 	
-	multiple_vector_type solve(const multiple_vector_type& G0, const alps::Parameters& parms);
+	ImpuritySolver::result_type solve(
+              const multiple_vector_type& G0
+            , const alps::Parameters& parms);
     
+    FrequencyTimeImpuritySolver::result_type solve_omega(
+              const freq_multiple_vector_t& G0_omega
+            , const itime_multiple_vector_t& G0_tau
+            , const alps::Parameters& parms =alps::Parameters());
+            
 private:
+    /// call the executable
+    void call(std::string const& infile, std::string const& outfile);
+      
 	///path to the solver executable
 	boost::filesystem::path exe_;
 };
+
 
 #endif

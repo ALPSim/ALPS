@@ -53,10 +53,10 @@ public:
 	/// and chemical potential given as parameters. The density of states is constant for
 	/// each object and usually specified in the constructor of a derived class
 	///
-	/// @param G the Greens function as a function of imaginary time tau 
+	/// @param G_tau the Greens function as a function of imaginary time tau 
 	/// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
-	/// @return the result of the Hilbert transform (G0)
-	virtual itime_multiple_vector_t operator()(itime_multiple_vector_t& G, double mu, double h, double beta, int paramagnet)=0; 
+	/// @return the result of the Hilbert transform (G0_tau)
+	virtual itime_multiple_vector_t operator()(itime_multiple_vector_t& G_tau, double mu, double h, double beta, bool paramagnet)=0; 
 	virtual ~HilbertTransformer() {}
 };
 
@@ -67,7 +67,7 @@ public:
 	/// the constructor accepts the bandwidth
 	SemicircleHilbertTransformer(double t) : t_(t) {}
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
-	multiple_vector_type operator()(multiple_vector_type& G, double mu, double h, double beta, int paramagnet)
+	multiple_vector_type operator()(multiple_vector_type& G, double mu, double h, double beta, bool paramagnet)
 	{
 		
 		double tsq=t_*t_;
@@ -165,5 +165,68 @@ private:
 	vector_type D_; // or band width
 };
 
+// definition of Hilbert transformers living in Fourier (Matsubara) space
+
+/// @brief performs a Hilbert transformation
+///
+/// The FrequencySpaceHilbertTransformer performs a Hilbert transformation for the self energy and density of states. Arguments are expected to be in Matsubara Frequencies.
+/// See FrequencySpaceHilbertTransformer for a class that takes its arguments in imaginary time space.
+class FrequencySpaceHilbertTransformer{
+public:
+	/// the function call operator performs a Hilbert transformation of the self energy 
+	/// and chemical potential given as parameters. The density of states is constant for
+	/// each object and usually specified in the constructor of a derived class
+	///
+	/// @param G_omega the Greens function as a function of Matsubara Frequency omega 
+	/// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
+	/// @return the result of the Hilbert transform: the bare Green's function G0 in Matsubara frequencies
+	virtual freq_multiple_vector_t operator()(const freq_multiple_vector_t& G_omega, const double mu, const double h, const double beta,const bool paramagnet)=0; 
+	virtual ~FrequencySpaceHilbertTransformer() {}
+	
+};
+
+/// A Hilbert transformation for a semcircle density of states
+/// It receives the dressed Green's function G(\omega) as input and returns tha bare GF G0(\omega)
+class FSSemicircleHilbertTransformer : public FrequencySpaceHilbertTransformer {
+public:
+	/// the constructor accepts the bandwidth
+	FSSemicircleHilbertTransformer(double t) : t_(t) {}
+	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
+	freq_multiple_vector_t operator()(const freq_multiple_vector_t& G_omega,const double mu, const double h, const double beta, const bool paramagnet)
+	{
+		
+		double tsq=t_*t_;
+		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; G(tau)=G(beta-tau).
+		if (paramagnet) {
+		        freq_multiple_vector_t G0_omega(G_omega);                
+                        for(uint i=0; i<G_omega.first.size(); i++) {
+                                std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+				//minus sign necessary in order to get reasonable results. check, we might have the wrong convention!
+				G0_omega.first[i]=std::complex<double>(0, - 1./(iw.imag() + mu - tsq*0.5*(G_omega.first[i].imag()+G_omega.second[i].imag())));
+				G0_omega.second[i]=std::complex<double>(0, - 1./(iw.imag() + mu - tsq*0.5*(G_omega.first[i].imag()+G_omega.second[i].imag())));
+                        }
+                        return G0_omega;
+		}
+		else {
+		//formula according to review, p. 61, formula 223 'antiferromagnetic Neel phase'	
+		//derived properly in formula 95 on page 32. Minus sign still not clear.
+			double mu_up = mu+h/2.;
+			double mu_down = mu-h/2.;
+			
+			freq_multiple_vector_t G0_omega(G_omega);
+			
+			for(uint i=0; i<G_omega.first.size(); i++) {
+				std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+				//check: is the zero justified in the AFM case?
+				G0_omega.first[i]= std::complex<double>(0,- 1./(iw.imag() + mu_up   - tsq*G_omega.second[i].imag()));
+				G0_omega.second[i]= std::complex<double>(0,- 1./(iw.imag() + mu_down - tsq*G_omega.first[i].imag() ));
+			}
+			return G0_omega;
+		}
+		
+	}
+private:
+	double t_; 
+};
 
 #endif /*ALPS_DMFT_HILBERTTRANSFORMER_H*/

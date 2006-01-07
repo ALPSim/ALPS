@@ -1,10 +1,10 @@
-/*****************************************************************************
+/*******************************************************************************
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2005 by Philipp Werner <werner@comp-phys.org>,
-*                       Matthias Troyer <troyer@comp-phys.org>
-*                       Emanuel Gull <gullc@comp-phys.org>
+* Copyright (C) 2005-2006 by Philipp Werner <werner@comp-phys.org>,
+*                            Matthias Troyer <troyer@comp-phys.org>
+*                            Emanuel Gull <gullc@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -32,13 +32,16 @@
 /// @sa ExternalSolver
 
 #include "externalsolver.h"
+#include "xml.h"
 #include <alps/xml.h>
 #include <alps/parser/parser.h>
 #include <alps/vectorio.h>
 #include <cstdlib>
 #include <fstream>
 
-multiple_vector_type ExternalSolver::solve(const multiple_vector_type& G0, const alps::Parameters& parms) 
+ImpuritySolver::result_type ExternalSolver::solve(
+      const multiple_vector_type& G0
+    , const alps::Parameters& parms) 
 {
   std::string infile = std::tmpnam(0); // the input file name
   std::string outfile = std::tmpnam(0); // the output file name
@@ -51,39 +54,23 @@ multiple_vector_type ExternalSolver::solve(const multiple_vector_type& G0, const
     alps::oxstream input(inpath);
   
     input << alps::start_tag("SIMULATION") << parms;
-	input << alps::start_tag("G0") << alps::attribute("spin","up");
-	for (std::size_t i=0;i<G0.first.size();++i)
-	  input << G0.first[i];
+	input << alps::start_tag("G0");
+    write_itime(input,G0);
     input << alps::end_tag("G0");
-	input << alps::start_tag("G0") << alps::attribute("spin","down");
-	for (std::size_t i=0;i<G0.second.size();++i)
-	  input << G0.second[i];
-    input << alps::end_tag("G0");
-		  
     input << alps::end_tag("SIMULATION");
 	
     // scope to force closing of file
   }
   
-  // call the external solver program
-  std::string command = exe_.native_file_string() + " " + infile + " " + outfile;
-  std::cerr << "Calling external solver " << exe_.native_file_string() << "\n\n";
-  int result = std::system(command.c_str());
-  if (result)
-    boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
-  std::cerr << "\nFinished call to external solver.\n";
-	                                           
-  boost::filesystem::remove(inpath);
+  call(infile,outfile);
 
-  // read the Green's function g from the output file
-  multiple_vector_type g;
+  // read the output
   
-  if (!boost::filesystem::exists(outpath))
-    boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
-
-  { 	
+  ImpuritySolver::result_type g;
+  
+  {
     std::ifstream output(outfile.c_str());
-	alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
+    alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
 	
 	// search for up and down spin Green's function
 	tag=alps::parse_tag(output);
@@ -95,13 +82,51 @@ multiple_vector_type ExternalSolver::solve(const multiple_vector_type& G0, const
 	  tag=alps::parse_tag(output);
 	}
 
-	bool first_is_up = (tag.attributes["spin"]=="up");
-	if (tag.type==alps::XMLTag::OPENING) {
-	  alps::read_vector_resize(alps::parse_content(output), first_is_up ? g.first : g.second);
-      alps::skip_element(output,tag);
-	}
+    read_itime(output,g);	
+    
+  } // scope to force closing of file
+  
+  boost::filesystem::remove(outpath);
+  
+  return g;
+}
+
+FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
+              const freq_multiple_vector_t& G0_omega
+            , const itime_multiple_vector_t& G0_tau
+            , const alps::Parameters& parms)
+{
+  std::string infile = std::tmpnam(0); // the input file name
+  std::string outfile = std::tmpnam(0); // the output file name
+ 
+  boost::filesystem::path inpath(infile,boost::filesystem::native);
+  boost::filesystem::path outpath(outfile,boost::filesystem::native);
+ 
+  // write input XML file
+  {
+    alps::oxstream input(inpath);
+  
+    input << alps::start_tag("SIMULATION") << parms;
+	input << alps::start_tag("G0");
+    write_freq(input,G0_omega);
+    write_itime(input,G0_tau);
+    input << alps::end_tag("G0");
+    input << alps::end_tag("SIMULATION");
 	
-    // search for second
+    // scope to force closing of file
+  }
+  
+  call(infile,outfile);
+
+  // read the output
+  
+  FrequencyTimeImpuritySolver::result_type g;
+  
+  {
+    std::ifstream output(outfile.c_str());
+    alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
+	
+	// search for up and down spin Green's function
 	tag=alps::parse_tag(output);
 	while (tag.name != "GREENFUNCTION") {
 	  if (tag.name=="/SIMULATION")
@@ -110,14 +135,35 @@ multiple_vector_type ExternalSolver::solve(const multiple_vector_type& G0, const
 	    alps::skip_element(output,tag);
 	  tag=alps::parse_tag(output);
 	}
-	if (tag.type==alps::XMLTag::OPENING) {
-	  alps::read_vector_resize(alps::parse_content(output), first_is_up ? g.second : g.first);
-      alps::skip_element(output,tag);
-	}
-	
+
+    read_freq(output,g.first);	
+    read_itime(output,g.second);	
+    
   } // scope to force closing of file
   
   boost::filesystem::remove(outpath);
   
   return g;
+}
+
+
+
+void ExternalSolver::call(std::string const& infile, std::string const& outfile)
+{
+  boost::filesystem::path inpath(infile,boost::filesystem::native);
+  boost::filesystem::path outpath(outfile,boost::filesystem::native);
+  
+  // call the external solver program
+  std::string command = exe_.native_file_string() + " " + infile + " " + outfile;
+  std::cerr << "Calling external solver " << exe_.native_file_string() << "\n\n";
+  int result = std::system(command.c_str());
+  if (result)
+    boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
+  std::cerr << "\nFinished call to external solver.\n";
+	                                           
+  boost::filesystem::remove(inpath);
+
+  if (!boost::filesystem::exists(outpath))
+    boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
+
 }

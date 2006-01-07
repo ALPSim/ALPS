@@ -42,39 +42,39 @@ void generate_spline_matrix(dense_matrix & spline_matrix);
 ///@param g The vector that has to be interpolated. Usually the Green's function or bath Green's function in imaginary time.
 ///@param second_derivatives The 2nd derivatives that are being computed in this function.
 template <class V> void evaluate_second_derivatives(const double dt,const  double c2,const double c3,const dense_matrix & spline_matrix,const V & g, V & second_derivatives) {
-
-  // g, rhs and second_derivatives have dimension N+1
-  int Np1 = spline_matrix.size1();
-  double dtsq=dt*dt;
-  
-  // rhs is the vector containing the data of the curve y = g(tau), which allows to 
-  // compute the vector of second derivatives y'' at times tau_n by evaluating
-  // y'' = spline_matrix * rhs(y)
-  //
-  //                   (G''(0)+G''(beta))*(dt)^2                                
-  //                   y0 - 2*y1 + y2
-  //                   y1 - 2*y2 + y3
-  // rhs = 6/(dt)^2 * ...
-  //
-  //                   yNp1-3 - 2*yNp1-2 + yNp1-1
-  //                   (G'(0)+G'(beta))*(dt)^2 + y0 - y1 + yNp1-2 - yNp1-1     
-
-  V rhs;
-  
-  rhs.reserve(Np1);
-
-  rhs[0] = c3*dtsq; 
-  for (int i=1; i<Np1-1; i++) {
-    rhs[i] = g[i-1]-2*g[i]+g[i+1];
-  }
-  rhs[Np1-1] = c2*dtsq + g[0] - g[1] + g[Np1-2] - g[Np1-1];
-
-  for (int i=0; i<Np1; i++) {
-    for (int j=0; j<Np1; j++) {
-      second_derivatives[i] += spline_matrix(i,j)*rhs[j];
+	
+	// g, rhs and second_derivatives have dimension N+1
+	int Np1 = spline_matrix.size1();
+	double dtsq=dt*dt;
+	
+	// rhs is the vector containing the data of the curve y = g(tau), which allows to 
+	// compute the vector of second derivatives y'' at times tau_n by evaluating
+	// y'' = spline_matrix * rhs(y)
+	//
+	//                   (G''(0)+G''(beta))*(dt)^2                                
+	//                   y0 - 2*y1 + y2
+	//                   y1 - 2*y2 + y3
+	// rhs = 6/(dt)^2 * ...
+	//
+	//                   yNp1-3 - 2*yNp1-2 + yNp1-1
+	//                   (G'(0)+G'(beta))*(dt)^2 + y0 - y1 + yNp1-2 - yNp1-1     
+	
+	V rhs;
+	
+	rhs.reserve(Np1);
+	
+	rhs[0] = c3*dtsq; 
+	for (int i=1; i<Np1-1; i++) {
+		rhs[i] = g[i-1]-2*g[i]+g[i+1];
 	}
-	second_derivatives[i] *= 6./dtsq;
-  }
+	rhs[Np1-1] = c2*dtsq + g[0] - g[1] + g[Np1-2] - g[Np1-1];
+	
+	for (int i=0; i<Np1; i++) {
+		for (int j=0; j<Np1; j++) {
+			second_derivatives[i] += spline_matrix(i,j)*rhs[j];
+		}
+		second_derivatives[i] *= 6./dtsq;
+	}
 }
 
 ///@brief An implementation of a forward FT that takes care of the jump of the Green's function at zero and beta. V and W are usually vector types, though not
@@ -85,28 +85,28 @@ template <class V> void evaluate_second_derivatives(const double dt,const  doubl
 ///@param v some Green's function or bath Green's function in imaginary time. This is expected as an input.
 ///@param v_omega the respective  Green's function or bath Green's function in Matsubara frequencies. This vector will be written.
 template <class V, class W> void forward_FT(const double beta, const double c2, const double c3, V & v, W & v_omega) {
-
-  int N=v.size();
-  double dt = beta/N;
-  dense_matrix spline_matrix(N+1, N+1);
-  generate_spline_matrix(spline_matrix);
-  
-  v.push_back(1-v[0]);	//this is the reason why v cannot be chosen constant.
-  V v2(v);
-
-  evaluate_second_derivatives(dt, c2, c3, spline_matrix, v, v2);
-
-  for (int k=0; k<N; k++) {
-	std::complex<double> iw(0, (2*k+1)*M_PI/beta);
-	v_omega[k] = 0;
 	
-	for (int n=1; n<N; n++) {
-	  v_omega[k] += exp(iw*(n*dt))*(v2[n+1]-2*v2[n]+v2[n-1]);
+	int N=v.size();
+	double dt = beta/N;
+	dense_matrix spline_matrix(N+1, N+1);
+	generate_spline_matrix(spline_matrix);
+	
+	v.push_back(1-v[0]);	//this is the reason why v cannot be chosen constant.
+	V v2(v);
+	
+	evaluate_second_derivatives(dt, c2, c3, spline_matrix, v, v2);
+	
+	for (int k=0; k<N; k++) {
+		std::complex<double> iw(0, (2*k+1)*M_PI/beta);
+		v_omega[k] = 0;
+		
+		for (int n=1; n<N; n++) {
+			v_omega[k] += exp(iw*(n*dt))*(v2[n+1]-2*v2[n]+v2[n-1]);
+		}
+		v_omega[k] += v2[1] - v2[0] + v2[N] - v2[N-1];
+		v_omega[k] *= 1./(dt*pow(iw,4));
 	}
-	v_omega[k] += v2[1] - v2[0] + v2[N] - v2[N-1];
-	v_omega[k] *= 1./(dt*pow(iw,4));
-  }
-  v.pop_back();
+	v.pop_back();
 } 
 
 inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c3) {
@@ -115,31 +115,33 @@ inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c
 }
 
 inline double f_tau(double tau, double beta, double c2, double c3) {
-  return -0.5 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
+	return -0.5 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
 }
 
-///@brief The backward Fourier transformation, taking a GF in Matsubara frequencies and transforming it to the respective GF in imaginary time. This 
-///can be done quite naively. V and W are vector types. We only compute the real part (!) of the Fourier transform.
+///@brief The backward Fourier transformation, taking a GF in Matsubara frequencies and transforming it to the respective GF in imaginary time. 
+///       V and W are vector types. We only compute the real part (!) of the Fourier transform.
 ///@param beta The inverse temperature
 ///@param c2 ??
 ///@param c3 ???
 ///@param v the vector v is in imaginary time space, it is going to be overwritten
-///@param v_omega This vector is in frequency space, the input.
+///@param v_omega This vector is in frequency space, the input. A copy is passed.
 template <class V, class W> void backward_FT(double beta, double c2, double c3, V & v, W v_omega) {
-  
-  int N = v.size();
-  double dt = beta/N;
-  
-  for (int k=0; k<N; k++) {
-    std::complex<double> iw(0,(2*k+1)*M_PI/beta);
-    v_omega[k] -= f_omega(iw, c2, c3);
-  }	
-  
-  for (int i=0; i<N; i++) {
-    v[i] = f_tau(i*dt, beta, c2, c3);
-	for (int k=0; k<N; k++) {
-	  double wt((2*k+1)*i*M_PI/N);
-	  v[i] += 2/beta*(cos(wt)*v_omega[k].real()+sin(wt)*v_omega[k].imag());
+	
+	int N_tau = v.size();
+	int N_omega = v_omega.size();
+	double dt = beta/N_tau;
+	//assert(v.size()==v_omega.size());
+	for (int k=0; k<N_omega; k++) {
+		std::complex<double> iw(0,(2*k+1)*M_PI/beta);
+		v_omega[k] -= f_omega(iw, c2, c3);
 	}
-  }  
+	
+	for (int i=0; i<N_tau; i++) {
+		v[i] = f_tau(i*dt, beta, c2, c3);
+        	for (int k=0; k<N_omega; k++) {
+			double wt((2*k+1)*i*M_PI/N_tau);
+			v[i] += 2/beta*(cos(wt)*v_omega[k].real()+sin(wt)*v_omega[k].imag());
+       		}
+	}
 }
+	

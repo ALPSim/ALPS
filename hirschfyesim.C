@@ -2,8 +2,9 @@
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2005 by Philipp Werner <werner@comp-phys.org>,
-*                       Emanuel Gull <gullc@comp-phys.org>
+* Copyright (C) 2005-2006 by Philipp Werner <werner@comp-phys.org>,
+*                            Emanuel Gull <gullc@comp-phys.org>
+*                            Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -30,6 +31,7 @@
 /// @brief the actual Hirsch-Fye simulation
 
 #include "hirschfyesim.h"
+#include "xml.h"
 #include <alps/alea.h>
 #include <cmath>
 using namespace std;
@@ -73,7 +75,7 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
 }
 
 
-HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const alps::Parameters& p,int node, const multiple_vector_type& G0)
+HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters& p,int node)
   : alps::scheduler::MCRun(where,p,node),  
     sweeps(0),
     thermalization_sweeps(static_cast<int>(parms["THERMALIZATION"])),
@@ -95,9 +97,13 @@ HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const al
 {
 
   // initialize G0
+  multiple_vector_type G0;
+  std::istringstream in(parms["G0"]);
+  read_itime(in,G0);
+  
   std::valarray<double> G0_up(G0.first.size());
   std::valarray<double> G0_down(G0.first.size());
-  for (int i=0; i<G0.first.size(); i++) {
+  for (uint i=0; i<G0.first.size(); i++) {
     G0_up[i] = G0.first[i];
 	G0_down[i] = G0.second[i];
   }
@@ -111,7 +117,7 @@ HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const al
   green_matrix_from_vector(G0_down, Green0_down);
 
   // choose random spin configuration
-  for (int i=0; i<spins.size(); i++)
+  for (uint i=0; i<spins.size(); i++)
     spins[i] = (random_01()<0.5 ? 1 : -1);
 
   // initialize Green's function matrices
@@ -122,11 +128,16 @@ HirschFyeSimulation::HirschFyeSimulation(const alps::ProcessList& where,const al
   measurements << RealVectorObservable("G_meas_up");
   measurements << RealVectorObservable("G_meas_down");  
   
+  //reset the measurment objects
+
+  measurements.get<RealVectorObservable>("G_meas_up").reset(true);
+  measurements.get<RealVectorObservable>("G_meas_down").reset(true);
+  
 }
 
 
 // in principle, need only save spins (and do update_from_zero after loading)
-void HirschFyeSimulation::load(alps::IDump& dump) {
+void HirschFyeRun::load(alps::IDump& dump) {
   dump >> sweeps;
   if(!where.empty()) {// skip reading the spins if we are just evaluating
     dump >> Green_up >> Green_down >> spins; 	 
@@ -136,43 +147,31 @@ void HirschFyeSimulation::load(alps::IDump& dump) {
 }
 
 
-void HirschFyeSimulation::save(alps::ODump& dump) const
+void HirschFyeRun::save(alps::ODump& dump) const
 {
   dump << Green_up << Green_down << spins;
 }
 
 
-bool HirschFyeSimulation::change_parameter(const std::string& name, const alps::StringValue& value)
-{
-  if(name=="SWEEPS")
-    total_sweeps=static_cast<uint32_t>(value);
-  else if (name=="THERMALIZATION" && !is_thermalized())
-    thermalization_sweeps=static_cast<uint32_t>(value);
-  else
-    return false; // cannot do it
-  return true; // could do it
-}
-
-
-bool HirschFyeSimulation::is_thermalized() const
+bool HirschFyeRun::is_thermalized() const
 {
   return (sweeps >= thermalization_sweeps);
 }
 
 
-double HirschFyeSimulation::work_done() const
+double HirschFyeRun::work_done() const
 {
   return (is_thermalized() ? (sweeps-thermalization_sweeps)/double(total_sweeps) : 0.);
 }
 
 
-void HirschFyeSimulation::dostep()
+void HirschFyeRun::dostep()
 {
 
   // increment sweep count
   sweeps++;
   check_counter++;
- 
+  std::cout<<"."<<std::flush; 
   // do local update
   for (int i=0; i<N; i++)
     update_single_spin(random_01, Green_up, Green_down, spins, lambda);
@@ -184,9 +183,12 @@ void HirschFyeSimulation::dostep()
 
   
   // measure Greens function
-  measurements.get<RealVectorObservable>("G_meas_up") << G_up;
-  measurements.get<RealVectorObservable>("G_meas_down") << G_down;
-
+  if(is_thermalized()){
+  	measurements.get<RealVectorObservable>("G_meas_up") << G_up;
+  	measurements.get<RealVectorObservable>("G_meas_down") << G_down;
+	  
+  }
+	
   // check if precision has deteriorated
   if (check_counter%N_check == 0) {
   
@@ -210,24 +212,27 @@ void HirschFyeSimulation::dostep()
 }
 
 
-multiple_vector_type HirschFyeSimulation::get_G() {
+multiple_vector_type HirschFyeRun::get_result() const {
 
   multiple_vector_type g;
-
   alps::RealVectorObsevaluator G_meas_up=get_measurements()["G_meas_up"];
   alps::RealVectorObsevaluator G_meas_down=get_measurements()["G_meas_down"];  
   
-  // not sure how to implement this correctly
-  for (int i=0; i<G_meas_up.mean().size(); i++) {
-    g.first[i] = G_meas_up.mean()[i];
-	g.second[i] = G_meas_down.mean()[i];
+  std::valarray<double> g_up_mean_vector(G_meas_up.mean());
+  std::valarray<double> g_down_mean_vector(G_meas_down.mean());
+  
+  for(uint i=0;i<g_up_mean_vector.size();++i){
+  	g.first.push_back(g_up_mean_vector[i]);
+  	g.second.push_back(g_down_mean_vector[i]);
   }
   
-  return g;
+   return g;
 
 }
+
+
 ///take a Green's function in vector form G(\tau-\tau') and create a matrix G(\tau, \tau') out of it
-void HirschFyeSimulation::green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const{
+void HirschFyeRun::green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const{
 	for (int i=0; i<N; i++) {
     for (int j=i; j<N; j++) {	  
       green_matrix(j,i) = green_vector[j-i];
@@ -240,7 +245,7 @@ void HirschFyeSimulation::green_matrix_from_vector(const std::valarray<double> &
   }
 }
 ///take a Green's function in matrix form and transform it back into vector form.
-void HirschFyeSimulation::green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const{
+void HirschFyeRun::green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const{
   green_vector = 0.;
  
   for (int i=0; i<N; i++) {
@@ -255,3 +260,23 @@ void HirschFyeSimulation::green_vector_from_matrix(std::valarray<double> &green_
   }
   green_vector /= N;
 }
+
+
+multiple_vector_type HirschFyeSim::get_result() const {
+
+  multiple_vector_type g;
+  alps::ObservableSet meas = get_measurements();
+  alps::RealVectorObsevaluator G_meas_up=meas["G_meas_up"];
+  alps::RealVectorObsevaluator G_meas_down=meas["G_meas_down"];  
+  
+  std::valarray<double> g_up_mean_vector(G_meas_up.mean());
+  std::valarray<double> g_down_mean_vector(G_meas_down.mean());
+  
+  for(uint i=0;i<g_up_mean_vector.size();++i){
+  	g.first.push_back(g_up_mean_vector[i]);
+  	g.second.push_back(g_down_mean_vector[i]);
+  }
+  
+   return g;
+}
+

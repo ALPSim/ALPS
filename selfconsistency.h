@@ -40,19 +40,30 @@
 /// @param parms The input parameters for the simulation.
 /// @param solver   The impurity solver. It is left in the state after the final iteration to 
 ///                 retrieve additional information.
-/// @param hilbert  a Hilbert transformation object. It performs the Hilbert transformation.
+/// @param hilbert  a Hilbert transformation object. It performs the Hilbert transformation
 ///                 for the density of states of the given model.
-/// @param G0_tau The bare Green's function in imaginary time.
+/// @param G0_tau The bare Green's function in imaginary time
 /// @param G_tau  The Green's function G in imaginary time.
 
 extern void selfconsistency_loop
-               (
-                   alps::Parameters& parms, 
-                   ImpuritySolver& solver, 
-                   HilbertTransformer& hilbert,
-				   itime_multiple_vector_t& G0_tau, 
-				   itime_multiple_vector_t& G_tau
-               );
-//why would we want this to be extern?
+(
+ alps::Parameters& parms, 
+ ImpuritySolver& solver, 
+ HilbertTransformer& hilbert,
+ itime_multiple_vector_t& G0_tau, 
+ itime_multiple_vector_t& G_tau
+ );
+
+/// performs a DMFT self-conistency loop until convergence
+///
+/// @param parms The input parameters for the simulation.
+/// @param solver   An impurity solver that takes both the bare GF in imaginary time AND in Matsubara freqencies, but returns
+/// @param hilbert  a Hilbert transformation object. It performs the Hilbert transformation, taking its arguments in Frequency space.
+/// @param G0_omega The bare Green's function in Matsubara frequencies.
+/// @param G_omega  The dressed Green's function G in Matsubara frequencies.
+void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTimeImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert,
+									freq_multiple_vector_t& G0_omega, freq_multiple_vector_t& G_omega);
+
+
 #endif
 

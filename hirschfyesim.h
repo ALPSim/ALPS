@@ -2,8 +2,9 @@
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2005 by Philipp Werner <werner@comp-phys.org>,
-*                       Emanuel Gull <gullc@comp-phys.org>
+* Copyright (C) 2005-2006 by Philipp Werner <werner@comp-phys.org>,
+*                            Emanuel Gull <gullc@comp-phys.org>
+*                            Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -30,102 +31,51 @@
 /// @brief the actual Hirsch-Fye simulation
 
 #ifndef ALPS_DMFT_HIRSCHFYESIM_H
+#define ALPS_DMFT_HIRSCHFYESIM_H
+
+#include "types.h"
+#include "hirschfyeaux.h"
+#include "alps_solver.h"
+
+#include <alps/scheduler/montecarlo.h>
+#include <alps/osiris/dump.h>
+#include <alps/osiris/std/vector.h>
+
+#include <boost/numeric/bindings/lapack/lapack.hpp>
 
 #include <stack>
 #include <queue>
 #include <vector>
 #include <iostream>
 #include <algorithm>
-#include <alps/scheduler/montecarlo.h>
-#include <alps/osiris/dump.h>
-#include <alps/osiris/std/vector.h>
 #include <cmath>
-#include <boost/numeric/bindings/lapack/lapack.hpp>
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include "types.h"
-
-///@brief Save a matrix
-///@parm odump Alps dump
-///@parm m The dense matrix to be stored
-inline alps::ODump& operator << (alps::ODump& odump, const dense_matrix& m) {
-	odump << m.size1() << m.size2();
-	for (uint i=0; i<m.size1(); i++) {
-		for (uint j=0; j<m.size2(); j++) {
-			odump << m(i,j);
-		}
-	}
-	return odump;
-}
-
-///@brief Restore a matrix
-///@parm idump Alps dump
-///@parm m The matrix to be restored
-inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
-	int size1, size2;
-	idump >> size1;
-	idump >> size2;
-	m.resize(size1, size2);
-	for (uint i=0; i<m.size1(); i++) {
-		for (uint j=0; j<m.size2(); j++) {
-			idump >> m(i,j);
-		}
-	}  
-	return idump;
-}
 
 
-// compute Green's function matrix for a given spin configuration, from Greens function for spins set to zero
-void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l);
-
-
-// attempt single spin flip and (if successful) compute Green's function matrix for the new configuration
-template<class RNG> 
-void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green_down, std::vector<int> & spins, double lambda) 
+class HirschFyeSim : public alps::scheduler::MCSimulation, public alps::ImpurityTask
 {
-	
-	unsigned int N(spins.size());
-	
-	// choose random site
-	unsigned int site = (unsigned int)(N*rng());
-	
-	// calculate ratio of determinants
-	double r_up = 1 + (1-Green_up(site,site))*(exp(-2*lambda*spins[site])-1);
-	double r_down = 1 + (1-Green_down(site,site))*(exp(2*lambda*spins[site])-1);
-	double det_rat = r_up*r_down; 
-	
-	// what about sign changes?
-	det_rat = fabs(det_rat);
-	
-	// if update successful ...
-	if (rng() < det_rat/(1+det_rat)) {
-		
-		// update Green's function
-		dense_matrix Green_new_up(Green_up), Green_new_down(Green_down);
-		
-		double tmp1 = exp(-2*lambda*spins[site])-1;
-		double tmp2 = exp(+2*lambda*spins[site])-1;
-		for (int i=0; i<N; i++) {
-			for (int j=0; j<N; j++) {	
-				Green_new_up(i,j)   += (Green_up(i,site)-(i==site))*tmp1/(1+(1-Green_up(site,site))*tmp1)*Green_up(site,j);
-				Green_new_down(i,j) += (Green_down(i,site)-(i==site))*tmp2/(1+(1-Green_down(site,site))*tmp2)*Green_down(site,j);			
-			}	
-		}
-		
-		Green_up.swap(Green_new_up); //avoid copying again. never mind the contents of Green_new_up now.
-		Green_down.swap(Green_new_down);
-		
-		// update spin
-		spins[site] = -spins[site];
-		
-	}
-}
+public:
+  HirschFyeSim(const alps::ProcessList& w, const boost::filesystem::path& p) 
+      : alps::scheduler::MCSimulation(w,p)\
+  { 
+  }
+
+  HirschFyeSim(const alps::ProcessList& w, const alps::Parameters& p) 
+      : alps::scheduler::MCSimulation(w,p) 
+  {
+  }
+
+	///return the Green's function G
+	multiple_vector_type get_result() const;
+
+};
+
 
 ///This class implements the Hirsch Fye algorithm.
-class HirschFyeSimulation : public alps::scheduler::MCRun
+class HirschFyeRun : public alps::scheduler::MCRun
 {
 public:
 	///
-	HirschFyeSimulation(const alps::ProcessList&,const alps::Parameters&,int, const multiple_vector_type&);
+	HirschFyeRun(const alps::ProcessList&,const alps::Parameters&,int);
 	///store a dump of this simulation
 	void save(alps::ODump&) const;
 	///load a previously saved simulation
@@ -136,10 +86,9 @@ public:
 	bool is_thermalized() const;
 	///return a value between zero and one, one meaning that the simulation is about to end.
 	double work_done() const;
-	///?
-	bool change_parameter(const std::string& name, const alps::StringValue& value);
+
 	///return the Green's function G
-	multiple_vector_type get_G();
+	multiple_vector_type get_result() const;
 	
 	///compute vector Green's function from a matrix.
 	void green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const;
@@ -168,7 +117,5 @@ private:
 	std::vector<int> spins;		    // auxiliary Ising spins
 	
 };
-
-#define ALPS_DMFT_HIRSCHFYESIM_H
 
 #endif
