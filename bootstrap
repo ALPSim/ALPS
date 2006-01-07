@@ -8,7 +8,7 @@ fi
 # required version of autotools
 am_require=1.9.6
 ac_require=2.59
-lt_require=1.5.20
+lt_require=1.5.22
 
 if test -f configure.ac; then :; else
   echo "configure.ac not found.  Stop."

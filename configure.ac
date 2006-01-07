@@ -752,12 +752,15 @@ dnl
 
 AC_SUBST(BASE_CPPFLAGS)
 BASE_CPPFLAGS="$CPPFLAGS"
+CPPFLAGS=
 ac_cv_base_cppflags="$CPPFLAGS"
 AC_SUBST(BASE_LDFLAGS)
 BASE_LDFLAGS="$LDFLAGS"
+LDFLAGS=
 ac_cv_base_ldflags="$LDFLAGS"
 AC_SUBST(BASE_LIBS)
 BASE_LIBS="$LIBS"
+LIBS=
 ac_cv_base_libs="$LIBS"
 
 ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_hdf5_cppflags $ac_cv_lapack_cppflags $ac_cv_sqlite_cppflags $ac_cv_xml_cppflags -I$ac_cv_alps_includedir $ac_cv_boost_cppflags"
@@ -814,7 +817,6 @@ AC_CONFIG_FILES(lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mp
 
 AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile)
 AC_CONFIG_FILES(doc/Makefile)
-
 
 if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(test/alea/Makefile)
