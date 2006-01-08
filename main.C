@@ -92,14 +92,23 @@ int main(int argc, char** argv)
 			}
 			
 			boost::shared_ptr<ImpuritySolver> solver_ptr;
-			if (parms["SOLVER"]=="Hirsch-Fye")
+			if (parms["SOLVER"]=="Hirsch-Fye") {
 				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-			else 
+				SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+				selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+			}
+			else if (parms["SOLVER"]=="Werner") {
+			    /*
+				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
+				F_SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+				F_selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+				*/			
+			}
+			else {
 				solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
-		
-			SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-		
-			selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+				SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+				selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+		    }
 		
 			// write final result
 			FILE * outfile_up = fopen("G_output_up","w");

@@ -46,31 +46,71 @@
 void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_multiple_vector_t& G0, itime_multiple_vector_t& G)
 {
   
-  int N = static_cast<int>(parms["N"]);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   
-  multiple_vector_type G0_old(G0);
-    
-  double max_diff;	
+  multiple_vector_type G_old(G0);
+  G = G0;	  
+  double max_diff;
+  	
   do {
-    G0_old = G0;
+    G_old = G;
     std::cout<<"running solver"<<std::endl;
     G = solver.solve(G0, parms);
     std::cout<<"running Hilbert transform"<<std::endl;
     G0 = hilbert(G, mu, h, beta, paramagnet);
     std::cout<<"comparing old and new results"<<std::endl;
 	max_diff=0;
-    for(int i=0; i<N; i++) {
-	  if (fabs(G0.first[i]-G0_old.first[i]) > max_diff)
-	    max_diff = fabs(G0.first[i]-G0_old.first[i]);
-	  if (fabs(G0.second[i]-G0_old.second[i]) > max_diff)
-	    max_diff = fabs(G0.second[i]-G0_old.second[i]);	
+    for(int i=0; i<G.first.size(); i++) {
+	  if (fabs(G.first[i]-G_old.first[i]) > max_diff)
+	    max_diff = fabs(G.first[i]-G_old.first[i]);
+	  if (fabs(G.second[i]-G_old.second[i]) > max_diff)
+	    max_diff = fabs(G.second[i]-G_old.second[i]);	
 	}	
-  std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
+    std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
+  } while (max_diff > converged);
+  
+}
+
+/// @brief Run the self consistency loop for G and F in imaginary time. Perform Fourier transform if needed.
+///
+/// @param parms contains the ALPS parameters needed for the simulation.
+/// @param solver is the impurity solver that creates G out of F.
+/// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates F out of G
+/// @param F is the F-function in imaginary time. The initial guess for F is computed from the initial guess for G0
+/// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
+void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_multiple_vector_t& G0, itime_multiple_vector_t& G)
+{
+  
+  double beta = static_cast<double>(parms["BETA"]);
+  double mu = static_cast<double>(parms["MU"]);
+  double h = static_cast<double>(parms["H"]);
+  double converged = static_cast<double>(parms["CONVERGED"]);
+  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  
+  itime_multiple_vector_t F = hilbert(G0, mu, h, beta, paramagnet);
+  itime_multiple_vector_t G_old(G0);
+  G = G0;
+  double max_diff;	
+
+  do {
+    G_old = G;
+    std::cout<<"running solver"<<std::endl;
+    G = solver.solve(F, parms);
+    std::cout<<"running Hilbert transform"<<std::endl;
+    F = hilbert(G, mu, h, beta, paramagnet); // mu, h, beta not needed for semi-circle, but for other densities of states
+    std::cout<<"comparing old and new results"<<std::endl;
+	max_diff=0;
+    for(int i=0; i<G.first.size(); i++) {
+	  if (fabs(G.first[i]-G_old.first[i]) > max_diff)
+	    max_diff = fabs(G.first[i]-G_old.first[i]);
+	  if (fabs(G.second[i]-G_old.second[i]) > max_diff)
+	    max_diff = fabs(G.second[i]-G_old.second[i]);	
+	}
+    std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
   } while (max_diff > converged);
   
 }
