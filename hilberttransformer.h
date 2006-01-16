@@ -165,53 +165,6 @@ private:
 	vector_type D_; // or band width
 };
 
-//-------------------------------------------------------------------------------------------------
-
-// Hilbert transformers for the F-functions 
-
-/// A Hilbert transformation for a semcircle density of states
-/// It receives G(\tau) as input and returns F(\tau)
-class F_SemicircleHilbertTransformer : public HilbertTransformer {
-public:
-	/// the constructor accepts the bandwidth
-	F_SemicircleHilbertTransformer(double t) : t_(t) {}
-	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
-	multiple_vector_type operator()(multiple_vector_type& G, double dummy1, double dummy2, double dummy3, bool paramagnet)
-	{
-	
-	    int Np1=G.first.size();
-	
-		if (paramagnet) {
-			
-			vector_type Gpara(G.first.size());
-			
-			for (uint i=0; i<Np1; i++)
-				Gpara[i] = 0.5*(G.first[i]+G.second[i]);
-						
-			multiple_vector_type F(G);
-			for (int i=0; i<Np1; i++) {
-				F.first[i] = -t_*t_*Gpara[Np1-1-i];		// Green-function must include \tau=\beta !!!
-				F.second[i] = -t_*t_*Gpara[Np1-1-i];
-			}
-			return F;
-		}
-		else {
-
-			multiple_vector_type F(G);
-			for (int i=0; i<Np1; i++) {
-				F.first[i] = -t_*t_*G.second[Np1-1-i];
-				F.second[i] = -t_*t_*G.first[Np1-1-i];
-			}			
-			return F;
-		}
-		
-	}
-private:
-	double t_; 
-};
-
-//-------------------------------------------------------------------------------------------------
-
 // definition of Hilbert transformers living in Fourier (Matsubara) space
 
 /// @brief performs a Hilbert transformation
@@ -243,7 +196,7 @@ public:
 	{
 		
 		double tsq=t_*t_;
-		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; G(tau)=G(beta-tau).
+		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
 		if (paramagnet) {
 		        freq_multiple_vector_t G0_omega(G_omega);                
                         for(uint i=0; i<G_omega.first.size(); i++) {

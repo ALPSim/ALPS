@@ -33,7 +33,6 @@
 //includes
 #include <vector>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-
 /// the array (vector) type to store frequence dependent Green's functions and Weiss fields
 typedef std::vector<double> vector_type;
 /// two arrays are needed for a single site problem: one for up and one for down spins
@@ -73,9 +72,11 @@ typedef  multiple_vector_type itime_multiple_vector_t;
 ///typedef to easily distinguish imaginary time and frequency (multiple) vectors
 typedef  multiple_complex_vector_type freq_multiple_vector_t;
 
+
 std::ostream &operator<<(std::ostream &os, const multiple_vector_type &v);
 std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type &v);
 void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta);
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta);
-
+void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &bare_green_matsubara, const multiple_complex_vector_type &dressed_green_matsubara, const multiple_vector_type &bare_green_itime, const multiple_vector_type &dressed_green_itime, const double beta);
+	
 #endif /*TYPES_H_*/

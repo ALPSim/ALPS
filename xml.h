@@ -38,10 +38,11 @@
 template <class T>
 void write_freq(alps::oxstream& xml, std::vector<T> const& v)
 {
+  
   xml << alps::start_tag("VECTOR") 
       << alps::attribute("index","Matsubara frequency")
       << alps::attribute("size",v.size());
-  xml << alps::write_vector(v,"\n");
+  xml << alps::write_vector(v," ");
   xml << alps::end_tag();
 }
 
@@ -58,7 +59,7 @@ void write_itime(alps::oxstream& xml, std::vector<T> const& v)
   xml << alps::start_tag("VECTOR") 
       << alps::attribute("index","imaginary time")
       << alps::attribute("size",v.size());
-  xml << alps::write_vector(v,"\n");
+  xml << alps::write_vector(v," ");
   xml << alps::end_tag();
 }
 
@@ -76,7 +77,7 @@ void read_itime(std::istream& in, std::vector<T>& v)
   alps::XMLTag tag = alps::parse_tag(in);
   if (tag.attributes["index"] !="imaginary time")
     boost::throw_exception(std::runtime_error("Vector not in imaginary time"));
-  alps::read_vector_resize(alps::parse_content(in),v);
+  alps::read_vector(alps::parse_content(in),v);
   tag = alps::parse_tag(in);
   if (tag.type !=alps::XMLTag::CLOSING)
     boost::throw_exception(std::runtime_error("Missing closing tag after reading vector"));
@@ -95,11 +96,12 @@ void read_freq(std::istream& in, std::vector<T>& v)
 {
   alps::XMLTag tag = alps::parse_tag(in);
   if (tag.attributes["index"] !="Matsubara frequency")
-    boost::throw_exception(std::runtime_error("Vector not in imaginary time"));
-  alps::read_vector_resize(alps::parse_content(in),v);
+    boost::throw_exception(std::runtime_error("Vector not in Matsubara frequency"));
+  alps::read_vector(alps::parse_content(in),v);
   tag = alps::parse_tag(in);
   if (tag.type !=alps::XMLTag::CLOSING)
     boost::throw_exception(std::runtime_error("Missing closing tag after reading vector"));
+
 }
 
 
