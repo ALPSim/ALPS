@@ -33,9 +33,6 @@
 #include "selfconsistency.h"
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
-#include <unistd.h>
-#include <fstream>
-#include <sstream>
 /// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
 ///
 /// @param parms contains the ALPS parameters needed for the simulation.
@@ -46,71 +43,31 @@
 void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_multiple_vector_t& G0, itime_multiple_vector_t& G)
 {
   
+  int N = static_cast<int>(parms["N"]);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   
-  multiple_vector_type G_old(G0);
-  G = G0;	  
-  double max_diff;
-  	
+  multiple_vector_type G0_old(G0);
+    
+  double max_diff;	
   do {
-    G_old = G;
+    G0_old = G0;
     std::cout<<"running solver"<<std::endl;
     G = solver.solve(G0, parms);
     std::cout<<"running Hilbert transform"<<std::endl;
     G0 = hilbert(G, mu, h, beta, paramagnet);
     std::cout<<"comparing old and new results"<<std::endl;
 	max_diff=0;
-    for(int i=0; i<G.first.size(); i++) {
-	  if (fabs(G.first[i]-G_old.first[i]) > max_diff)
-	    max_diff = fabs(G.first[i]-G_old.first[i]);
-	  if (fabs(G.second[i]-G_old.second[i]) > max_diff)
-	    max_diff = fabs(G.second[i]-G_old.second[i]);	
+    for(int i=0; i<N; i++) {
+	  if (fabs(G0.first[i]-G0_old.first[i]) > max_diff)
+	    max_diff = fabs(G0.first[i]-G0_old.first[i]);
+	  if (fabs(G0.second[i]-G0_old.second[i]) > max_diff)
+	    max_diff = fabs(G0.second[i]-G0_old.second[i]);	
 	}	
-    std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
-  } while (max_diff > converged);
-  
-}
-
-/// @brief Run the self consistency loop for G and F in imaginary time. Perform Fourier transform if needed.
-///
-/// @param parms contains the ALPS parameters needed for the simulation.
-/// @param solver is the impurity solver that creates G out of F.
-/// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates F out of G
-/// @param F is the F-function in imaginary time. The initial guess for F is computed from the initial guess for G0
-/// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
-void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_multiple_vector_t& G0, itime_multiple_vector_t& G)
-{
-  
-  double beta = static_cast<double>(parms["BETA"]);
-  double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms["H"]);
-  double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
-  
-  itime_multiple_vector_t F = hilbert(G0, mu, h, beta, paramagnet);
-  itime_multiple_vector_t G_old(G0);
-  G = G0;
-  double max_diff;	
-
-  do {
-    G_old = G;
-    std::cout<<"running solver"<<std::endl;
-    G = solver.solve(F, parms);
-    std::cout<<"running Hilbert transform"<<std::endl;
-    F = hilbert(G, mu, h, beta, paramagnet); // mu, h, beta not needed for semi-circle, but for other densities of states
-    std::cout<<"comparing old and new results"<<std::endl;
-	max_diff=0;
-    for(int i=0; i<G.first.size(); i++) {
-	  if (fabs(G.first[i]-G_old.first[i]) > max_diff)
-	    max_diff = fabs(G.first[i]-G_old.first[i]);
-	  if (fabs(G.second[i]-G_old.second[i]) > max_diff)
-	    max_diff = fabs(G.second[i]-G_old.second[i]);	
-	}
-    std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
+  std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
   } while (max_diff > converged);
   
 }
@@ -131,7 +88,7 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 	double mu = static_cast<double>(parms["MU"]);
 	double h = static_cast<double>(parms["H"]);
 	double converged = static_cast<double>(parms["CONVERGED"]);
-	int paramagnet = static_cast<int>(parms["PARAMAGNET"]);
+	bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
 	double t=static_cast<double>(parms["t"]);
 					
 	double mu_up = mu+h/2.;
@@ -161,22 +118,15 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, G0_tau,parms);
 		std::cout<<"running Hilbert transformer."<<std::endl<<std::flush;
 		G0_omega = hilbert(G_omega, mu, h, beta, paramagnet);
-		std::cout<<"comparing old and new result."<<std::endl<<std::flush;
-		max_diff=0;
 		
 		if(!parms.defined("DIRECT_GREEN_ITIME")){
 			backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G_tau.first,  G_omega.first);
 			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
 		}
+
+		std::cout<<"comparing old and new result."<<std::endl<<std::flush;
+		max_diff=0;
 		if(iteration_ctr>1){
-			//comparison for the dressed Green's function in imaginary time.
-		/*	for(int i=0; i<N; i++) {
-				if (fabs((G_tau.first[i]-G_old_tau.first[i])) > max_diff)
-					max_diff = fabs((G_tau.first[i]-G_old_tau.first[i]));
-				if (fabs((G_tau.second[i]-G_old_tau.second[i])) > max_diff)
-					max_diff = fabs((G_tau.second[i]-G_old_tau.second[i]));	
-			}
-			std::cerr<<"convergence loop: max diff in dressed Green (imag time): "<<max_diff<<"\tconverged: "<<converged<<std::endl;*/
 			//comparison for the dressed Green's function in Matsubara freq.
 			for(uint i=0; i<G_omega.first.size(); i++) {
 				if (fabs((G_omega.first[i]-G_old_omega.first[i]).imag()) > max_diff)
@@ -187,27 +137,7 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 			std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "<<max_diff<<"\tconverged: "<<converged<<std::endl;
 		}
 		//write checkpoint - clean this up in the future!
-		std::ostringstream G0omega_name, G0tau_name, Gomega_name, Gtau_name, Gtau_name_2, Gomega_name_2;
-		G0omega_name<<"G0_omega_"<<iteration_ctr;//<<"_"<<process_id;
-		G0tau_name<<"G0_tau_"<<iteration_ctr;//<<"_"<<process_id;
-		Gomega_name<<"G_omega_"<<iteration_ctr;//<<"_"<<process_id;
-		Gtau_name<<"G_tau_"<<iteration_ctr;//<<"_"<<process_id;
-		Gomega_name_2<<"G_omega";//<<"_"<<process_id;
-		Gtau_name_2<<"G_tau";//<<"_"<<process_id;
-		std::ofstream G0_omega_file(G0omega_name.str().c_str());
-		std::ofstream G0_tau_file(G0tau_name.str().c_str());
-		std::ofstream G_omega_file(Gomega_name.str().c_str());
-		std::ofstream G_tau_file(Gtau_name.str().c_str());
-		std::ofstream G_omega_file_2(Gomega_name_2.str().c_str());
-		std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
-		assert(G0_omega_file.is_open() && G0_tau_file.is_open() && G_omega_file.is_open() && G_tau_file.is_open());
-		print_imag_green_matsubara(G0_omega_file, G0_omega,beta);
-		print_green_itime(G0_tau_file,G0_tau,beta);
-		print_imag_green_matsubara(G_omega_file,G_omega,beta);
-		print_green_itime(G_tau_file,G_tau,beta);
-		print_imag_green_matsubara(G_omega_file_2,G_omega,beta);
-		print_green_itime(G_tau_file_2,G_tau,beta);
-		G0_omega_file.close(); G_omega_file.close(); G0_tau_file.close(); G_tau_file.close(); G_tau_file_2.close(); G_omega_file_2.close();
+		print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
 	}while (max_diff > converged || iteration_ctr <= 1); 
 	
 }

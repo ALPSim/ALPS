@@ -103,7 +103,7 @@ alps::ImpuritySolver::solve_omega(
     boost::throw_exception(
       std::runtime_error(" solver finished with nonzero exit code"));
     
-  // now extract the resuls
+  // now extract the results
   std::pair<freq_multiple_vector_t,itime_multiple_vector_t>  G = 
       dynamic_cast<FrequencyTimeImpurityTask*>(get_task())
         ->get_result();

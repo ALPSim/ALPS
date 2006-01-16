@@ -67,8 +67,6 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
 	try {
 #endif
-        // we need a factory to create Hirsch-Fye simulations
-        alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
 		
 		std::cout << "ALPS DMFT solver for the single site impurity problem.\n\n";
 		alps::print_copyright(std::cout);
@@ -77,6 +75,7 @@ int main(int argc, char** argv)
 		std::cin >> parms;
 		//perform selfconsistency loop in...
 		if(!parms.defined("OMEGA_LOOP")){
+        		alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> hf_factory;
 			//...imaginary time tau
 			int N=boost::lexical_cast<int>(parms["N"]);
 			multiple_vector_type G0_tau, G_tau;
@@ -92,23 +91,17 @@ int main(int argc, char** argv)
 			}
 			
 			boost::shared_ptr<ImpuritySolver> solver_ptr;
-			if (parms["SOLVER"]=="Hirsch-Fye") {
-				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-				SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-				selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+			if (parms["SOLVER"]=="Hirsch-Fye"){
+        			// we need a factory to create Hirsch-Fye simulations
+				solver_ptr.reset(new alps::ImpuritySolver(hf_factory,argc,argv));
+			
 			}
-			else if (parms["SOLVER"]=="Werner") {
-			    /*
-				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-				F_SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-				F_selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
-				*/			
-			}
-			else {
+			else 
 				solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
-				SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-				selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
-		    }
+		
+			SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+		
+			selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
 		
 			// write final result
 			FILE * outfile_up = fopen("G_output_up","w");
@@ -119,6 +112,7 @@ int main(int argc, char** argv)
 				fprintf(outfile_down, "%5d   %9.6e\n", i, G_tau.second[i]);
 			}  
 		}else{
+        		alps::scheduler::BasicFactory<RubtsovSim,RubtsovRun> rubtsov_factory;
 			//perform self consistency loop in Matsubara frequency omega
 			int Nmatsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
 			freq_multiple_vector_t G0_omega, G_omega;
@@ -139,11 +133,13 @@ int main(int argc, char** argv)
 			}
 
 			boost::shared_ptr<FrequencyTimeImpuritySolver> solver_ptr;	//construct a solver that takes the GF in both imaginary time and Matsubara freq
-			if (parms["SOLVER"]=="Rubtsov")
-				solver_ptr.reset(new RubtsovSolver(parms));
+			if (parms["SOLVER"]=="Rubtsov"){
+				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory,argc,argv));
+			}
 			else{
 				//throw exception or commit suicide or even better: create an external solver that takes its arguments in frequency space.
 				//solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+				boost::throw_exception(std::logic_error("there is no such solver!"));	
 			}
 			FSSemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 			
