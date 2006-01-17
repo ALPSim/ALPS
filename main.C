@@ -75,7 +75,7 @@ int main(int argc, char** argv)
 		std::cin >> parms;
 		//perform selfconsistency loop in...
 		if(!parms.defined("OMEGA_LOOP")){
-        		alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> hf_factory;
+        		
 			//...imaginary time tau
 			int N=boost::lexical_cast<int>(parms["N"]);
 			multiple_vector_type G0_tau, G_tau;
@@ -92,15 +92,24 @@ int main(int argc, char** argv)
 			
 			boost::shared_ptr<ImpuritySolver> solver_ptr;
 			if (parms["SOLVER"]=="Hirsch-Fye"){
-        			// we need a factory to create Hirsch-Fye simulations
-				solver_ptr.reset(new alps::ImpuritySolver(hf_factory,argc,argv));
-			
+				// we need a factory to create Hirsch-Fye simulations
+				alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;	
+				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
+				SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+				selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
 			}
+			/*
+			else if (parms["SOLVER"]=="Werner") {
+			    alps::scheduler::BasicFactory<WernerSim,WernerRun> factory;
+				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
+				F_SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+				F_selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+			}
+			*/
 			else 
 				solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
 		
 			SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-		
 			selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
 		
 			// write final result
@@ -112,7 +121,7 @@ int main(int argc, char** argv)
 				fprintf(outfile_down, "%5d   %9.6e\n", i, G_tau.second[i]);
 			}  
 		}else{
-        		alps::scheduler::BasicFactory<RubtsovSim,RubtsovRun> rubtsov_factory;
+			alps::scheduler::BasicFactory<RubtsovSim,RubtsovRun> rubtsov_factory;
 			//perform self consistency loop in Matsubara frequency omega
 			int Nmatsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
 			freq_multiple_vector_t G0_omega, G_omega;
