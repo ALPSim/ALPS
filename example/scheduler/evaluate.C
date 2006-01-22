@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2002-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>
+* Copyright (C) 2002-2006 by Matthias Troyer <troyer@itp.phys.ethz.ch>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -46,7 +46,7 @@ void evaluate(const boost::filesystem::path& p, std::ostream& out) {
   out << corr << "\n";
 #endif
   out << binder << "\n";
-  sim << binder;
+  sim.addObservable(binder);
   sim.checkpoint(p);
 }
 
