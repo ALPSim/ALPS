@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2005-2006 by Lukas Gamper <mistral@student.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -112,7 +113,7 @@ class SQLite {
                  * @param str String to Quote
                  * @return Quoted string
                  */
-                std::string quote(std::string str);
+                static std::string quote(std::string str);
 
                 /**
                  * Replace all &apos; by ' make results von database readable.
@@ -120,7 +121,7 @@ class SQLite {
                  * @param str String to be unquoted
                  * @return Unquoted string
                  */
-                std::string unQuote(std::string str);
+                static std::string unQuote(std::string str);
 
                 /**
                  * Send a Query to the database. The Result is saved as list<name => value>

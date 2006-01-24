@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2005-2006 by Lukas Gamper <mistral@student.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -126,7 +127,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
                         forNames[*it] = std::string("x") + boost::lexical_cast<std::string>(distinguish);
                         preSQLFrom += std::string(preSQLFrom == "" ? "" : ", ") 
                                 + (constraints[*it].front()["type"] == "parameter" ? "parameter" : "mesurement") + " AS x" + boost::lexical_cast<std::string>(distinguish);
-                        preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND x") + boost::lexical_cast<std::string>(distinguish) + ".name='" + *it + "'";
+                        preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND x") + boost::lexical_cast<std::string>(distinguish) + ".name='" + SQLite::quote(*it) + "'";
                         if (distinguish > 0)
                                 preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND ") + "x0.fID=x" + boost::lexical_cast<std::string>(distinguish) + ".fID";
                         distinguish++;
@@ -136,7 +137,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
         // define Order
         std::string type = strToLower(bodyNode.nodeTest("xaxis").front().getAttribute("type"));
         preSQLFrom += std::string(preSQLFrom == "" ? "" : ", ") + (type == "parameter" ? "parameter" : "mesurement") + " AS o";
-        preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND ") + "x0.fID=o.fID AND o.name='" + bodyNode.nodeTest("xaxis").front().getAttribute("name") + "'";
+        preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND ") + "x0.fID=o.fID AND o.name='" + SQLite::quote(bodyNode.nodeTest("xaxis").front().getAttribute("name")) + "'";
         preSQLOrder = "o." + (type == "parameter" ? "value" : (type == "index" ? "indexvalue" : type));
 
         // parse For-Tags
@@ -159,7 +160,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
                                 where += std::string(" AND value") + (*it)["operator"] + "'" + (*it)["value"] + "'";
                         constraints.erase(context.getAttribute("name"));
                 }
-                rs = mDB(std::string("SELECT DISTINCT value FROM parameter WHERE name='") + context.getAttribute("name")  + "'" + where + ";", true);
+                rs = mDB(std::string("SELECT DISTINCT value FROM parameter WHERE name='") + SQLite::quote(context.getAttribute("name"))  + "'" + where + ";", true);
                 for (std::list<std::map<std::string, std::string> >::iterator it = rs.begin(); it != rs.end(); it++)
                         forData[pos].push_back((*it)["value"]);
         }
@@ -173,7 +174,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
                         std::string from = preSQLFrom;
                         for (unsigned int pos = 0; pos < forData.size(); pos++) {
                                 where += std::string(preSQLWhere == "" ? "" : " AND ") + "x0.fID=" + forNames[forVector[pos]] + ".fID AND " 
-                                        + forNames[forVector[pos]] + ".name='" + forVector[pos] + "' AND "
+                                        + forNames[forVector[pos]] + ".name='" + SQLite::quote(forVector[pos]) + "' AND "
                                         + forNames[forVector[pos]] + ".value='" + forData[pos][forCount[pos]] + "'";
                                 forMeta[pos].push_back(forVector[pos] + "=" + forData[pos][forCount[pos]]);
                         }
@@ -237,7 +238,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
                         buffer += std::string("\n#");
                         for (unsigned int pos = 0; pos < forMeta.size(); pos++)
                                 buffer += std::string(" ") + forMeta[pos][forCount[pos]];
-                        buffer += std::string("\n#") + bodyNode.nodeTest("xaxis").front().getAttribute("name") + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" 
+                        buffer += std::string("\n# ") + bodyNode.nodeTest("xaxis").front().getAttribute("name") + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" 
                                         ? "\terror(" + bodyNode.nodeTest("xaxis").front().getAttribute("name") + ")\t" : "\t")
                                 + bodyNode.nodeTest("yaxis").front().getAttribute("name") + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" 
                                         ? "\terror(" + bodyNode.nodeTest("yaxis").front().getAttribute("name") + ")" : "") + std::string("\n");
@@ -280,8 +281,8 @@ void Plot::exec(Node inNode, std::string inInFile) {
                                         + (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "parameter" ? "parameter" : "mesurement") + " AS u, "
                                         + (bodyNode.nodeTest("yaxis").front().getAttribute("type") == "parameter" ? "parameter" : "mesurement") + " AS v "
                                 + "WHERE u.fID='" + (*it) + "' AND v.FID='" + (*it) + "'"
-                                        + " AND u.name='" + bodyNode.nodeTest("xaxis").front().getAttribute("name") + "'"
-                                        + " AND v.name='" + bodyNode.nodeTest("yaxis").front().getAttribute("name") + "'"
+                                        + " AND u.name='" + SQLite::quote(bodyNode.nodeTest("xaxis").front().getAttribute("name")) + "'"
+                                        + " AND v.name='" + SQLite::quote(bodyNode.nodeTest("yaxis").front().getAttribute("name")) + "'"
                                         + (bodyNode.nodeTest("xaxis").front().getAttribute("index") != "" ? " AND u.indexvalue='" 
                                                 + bodyNode.nodeTest("xaxis").front().getAttribute("index") + "'" : "")
                                         + (bodyNode.nodeTest("yaxis").front().getAttribute("index") != "" ? " AND v.indexvalue='" 
