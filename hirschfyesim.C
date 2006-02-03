@@ -37,7 +37,7 @@
 using namespace std;
 using namespace alps;
 
-// compute largest element of a matrix
+/// compute largest element of a matrix
 double norm_max(dense_matrix & m) {
 
   double max(0);
@@ -49,7 +49,7 @@ double norm_max(dense_matrix & m) {
 
 }
 
-// compute Green's function for given spin configuration from Green0
+/// compute Green's function for given spin configuration from Green0
 void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l) {
 
   int N(spins.size());
@@ -66,7 +66,6 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
 	}
 	a(i,i) += e_ls[i]; 
   }
-  
   // solve a*Green=Green0
   // gesv solves A*X=B, input for B is Green0, output (=solution X) is Green   
   Green = Green0; 
@@ -95,9 +94,10 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
     spins(static_cast<int>(parms["N"]))
 
 {
-
   // initialize G0
   multiple_vector_type G0;
+  G0.first.resize(N);
+  G0.second.resize(N);
   std::istringstream in(parms["G0"]);
   read_itime(in,G0);
   
@@ -105,7 +105,7 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
   std::valarray<double> G0_down(G0.first.size());
   for (uint i=0; i<G0.first.size(); i++) {
     G0_up[i] = G0.first[i];
-	G0_down[i] = G0.second[i];
+    G0_down[i] = G0.second[i];
   }
 
   // initialize lambda
@@ -120,9 +120,11 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
   for (uint i=0; i<spins.size(); i++)
     spins[i] = (random_01()<0.5 ? 1 : -1);
 
+ 
   // initialize Green's function matrices
   update_from_zero(Green_up, Green0_up, spins, lambda);
   update_from_zero(Green_down, Green0_down, spins, -lambda);
+
  
   // create measurement objects
   measurements << RealVectorObservable("G_meas_up");
@@ -173,9 +175,9 @@ void HirschFyeRun::dostep()
   check_counter++;
   std::cout<<"."<<std::flush; 
   // do local update
-  for (int i=0; i<N; i++)
+  for (int i=0; i<N; i++){
     update_single_spin(random_01, Green_up, Green_down, spins, lambda);
-	  
+	  }
   // calculate Greens function	
   //std::valarray<double> G_tmp_up(N), G_tmp_down(N);		
   green_vector_from_matrix(G_up, Green_up);
@@ -186,7 +188,6 @@ void HirschFyeRun::dostep()
   if(is_thermalized()){
   	measurements.get<RealVectorObservable>("G_meas_up") << G_up;
   	measurements.get<RealVectorObservable>("G_meas_down") << G_down;
-	  
   }
 	
   // check if precision has deteriorated
