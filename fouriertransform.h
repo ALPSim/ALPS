@@ -80,10 +80,16 @@ template <class V> void evaluate_second_derivatives(const double dt,const  doubl
 ///@brief An implementation of a forward FT that takes care of the jump of the Green's function at zero and beta. V and W are usually vector types, though not
 /// necessarily of the same type.
 ///@param beta the inverse temperature
-///@param c2 ??
-///@param c3 ??
+///@param c2 coefficient of the 1/(iw)^2 term 
+///@param c3 coefficient of the 1/(iw)^3 term 
 ///@param v some Green's function or bath Green's function in imaginary time. This is expected as an input.
 ///@param v_omega the respective  Green's function or bath Green's function in Matsubara frequencies. This vector will be written.
+
+inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c3) {
+	std::complex<double> iwsq=iw*iw;
+	return 1./iw + c2/(iwsq) + c3/(iw*iwsq);
+}
+
 template <class V, class W> void forward_FT(const double beta, const double c2, const double c3, V & v, W & v_omega) {
 	
 	int N=v.size();
@@ -105,14 +111,11 @@ template <class V, class W> void forward_FT(const double beta, const double c2, 
 		}
 		v_omega[k] += v2[1] - v2[0] + v2[N] - v2[N-1];
 		v_omega[k] *= 1./(dt*pow(iw,4));
+		
+		v_omega[k] += f_omega(iw, c2, c3);
 	}
 	v.pop_back();
 } 
-
-inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c3) {
-	std::complex<double> iwsq=iw*iw;
-	return 1./iw + c2/(iwsq) + c3/(iw*iwsq);
-}
 
 inline double f_tau(double tau, double beta, double c2, double c3) {
 	return -0.5 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
@@ -121,8 +124,8 @@ inline double f_tau(double tau, double beta, double c2, double c3) {
 ///@brief The backward Fourier transformation, taking a GF in Matsubara frequencies and transforming it to the respective GF in imaginary time. 
 ///       V and W are vector types. We only compute the real part (!) of the Fourier transform.
 ///@param beta The inverse temperature
-///@param c2 ??
-///@param c3 ???
+///@param c2 coefficient of the 1/(iw)^2 term 
+///@param c3 coefficient of the 1/(iw)^3 term
 ///@param v the vector v is in imaginary time space, it is going to be overwritten
 ///@param v_omega This vector is in frequency space, the input. A copy is passed.
 template <class V, class W> void backward_FT(double beta, double c2, double c3, V & v, W v_omega) {
@@ -130,18 +133,19 @@ template <class V, class W> void backward_FT(double beta, double c2, double c3, 
 	int N_tau = v.size();
 	int N_omega = v_omega.size();
 	double dt = beta/N_tau;
-	//assert(v.size()==v_omega.size());
+	// subtract model function
 	for (int k=0; k<N_omega; k++) {
 		std::complex<double> iw(0,(2*k+1)*M_PI/beta);
 		v_omega[k] -= f_omega(iw, c2, c3);
 	}
 	
 	for (int i=0; i<N_tau; i++) {
+		// add back model function
 		v[i] = f_tau(i*dt, beta, c2, c3);
-        	for (int k=0; k<N_omega; k++) {
-			double wt((2*k+1)*i*M_PI/N_tau);
+		for (int k=0; k<N_omega; k++) {
+		    double wt((2*k+1)*i*M_PI/N_tau);
 			v[i] += 2/beta*(cos(wt)*v_omega[k].real()+sin(wt)*v_omega[k].imag());
-       		}
+		}
 	}
 }
 	
