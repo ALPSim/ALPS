@@ -1,7 +1,5 @@
 #! /bin/sh
 
-set -o pipefail
-
 if test -z "$2"; then
   echo usage: $0 srcdir program
   exit -1
@@ -49,20 +47,29 @@ elif test -f "${srcdir}/${prog}.op"; then
   OUTPUT="${srcdir}/${prog}.op"
 fi
 
+exec 3>&1
 if test -n "$INPUT"; then
   if test -n "$OUTPUT"; then
     echo "./${prog} < ${INPUT} | diff ${OUTPUT} -"
-    ./${prog} < ${INPUT} | diff ${OUTPUT} -
+    res=`((./${prog} < ${INPUT} 3>&- 4>&-; echo $? 1>&4 3>&- 4>&-) | diff ${OUTPUT} - 1>&3 3>&- 4>&-) 4>&1`
+    res2=$?
+    test $res = 0 && res=$res2
   else
     echo "./${prog} < ${INPUT}"
     ./${prog} < ${INPUT}
+    res=$?
   fi
 else
   if test -n "$OUTPUT"; then
     echo "./${prog} | diff ${OUTPUT} -"
-    ./${prog} | diff ${OUTPUT} -
+    res=`((./${prog} 3>&- 4>&-; echo $? 1>&4 3>&- 4>&-) | diff ${OUTPUT} - 1>&3 3>&- 4>&-) 4>&1`
+    res2=$?
+    test $res = 0 && res=$res2
   else
     echo "./${prog}"
     ./${prog}
+    res=$?
   fi
 fi
+
+exit $res
