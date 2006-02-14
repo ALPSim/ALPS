@@ -51,6 +51,18 @@ void print_all_green_functions(const int iteration_ctr, const multiple_complex_v
 	print_imag_green_matsubara(G_omega_file_2,G_omega,beta);
 	print_green_itime(G_tau_file_2,G_tau,beta);
 }
+void print_tau_green_functions(const int iteration_ctr, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta){
+	std::ostringstream G0tau_name, Gtau_name, Gtau_name_2;
+	G0tau_name<<"G0_tau_"<<iteration_ctr;//<<"_"<<process_id;
+	Gtau_name<<"G_tau_"<<iteration_ctr;//<<"_"<<process_id;
+	Gtau_name_2<<"G_tau";//<<"_"<<process_id;
+	std::ofstream G0_tau_file(G0tau_name.str().c_str());
+	std::ofstream G_tau_file(Gtau_name.str().c_str());
+	std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
+	print_green_itime(G0_tau_file,G0_tau,beta);
+	print_green_itime(G_tau_file,G_tau,beta);
+	print_green_itime(G_tau_file_2,G_tau,beta);
+}
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
         for(uint o=0;o<v.nfreq();++o){
          os<<o<<"\t";
