@@ -57,20 +57,25 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
   for(int i=0;i<N;++i){
   	e_ls[i]=exp(l*spins[i]);
   }
+  /*std::cout<<"spins: "<<std::endl;
+    for(int i=0;i<N;++i)
+          std::cout<<spins[i]<<std::endl;
+  */
   // calculate a = 1 + (1-g)*(exp(v')-1) 
   dense_matrix a(N, N);
-  
   for (int i=0; i<N; i++) {
     for (int j=0; j<N; j++) {
 	  a(i,j) = -Green0(i,j)*(e_ls[j]-1);
+            //std::cout<<"aij: "<<a(i,j)<<"\tels: "<<exp(l*spins[j])<<"\t"<<e_ls[j]<<std::endl;
 	}
 	a(i,i) += e_ls[i]; 
   }
   // solve a*Green=Green0
   // gesv solves A*X=B, input for B is Green0, output (=solution X) is Green   
   Green = Green0; 
+  //std::cout<<"green0: "<<Green0<<std::endl;
   boost::numeric::bindings::lapack::gesv(a,Green);
-  
+  //std::cout<<"updatefz: a"<<a<<"Green0: "<<Green0<<" Green: "<<Green<<std::endl;
 }
 
 
@@ -96,6 +101,8 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
 {
   // initialize G0
   multiple_vector_type G0;
+  //outside HF solver we use sizeof(G0)=N+1, inside we only compute with N imag
+  //time positions.
   G0.first.resize(N);
   G0.second.resize(N);
   std::istringstream in(parms["G0"]);
@@ -104,10 +111,10 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
   std::valarray<double> G0_up(G0.first.size());
   std::valarray<double> G0_down(G0.first.size());
   for (uint i=0; i<G0.first.size(); i++) {
-    G0_up[i] = G0.first[i];
-    G0_down[i] = G0.second[i];
+    G0_up[i] = -G0.first[i];
+    G0_down[i] = -G0.second[i];
+    //std::cout<<i<<"\t"<<G0_up[i]<<std::endl;
   }
-
   // initialize lambda
   double tmp = exp(beta/N*u/2);
   lambda = log(tmp + sqrt(tmp*tmp-1));
@@ -115,7 +122,8 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
   // initialize bath Green's function matrices
   green_matrix_from_vector(G0_up, Green0_up);
   green_matrix_from_vector(G0_down, Green0_down);
-
+  //std::cout<<"Green0 down: "<<Green0_down<<std::endl;
+  //std::cout<<"Green0 up: "<<Green0_up<<std::endl;
   // choose random spin configuration
   for (uint i=0; i<spins.size(); i++)
     spins[i] = (random_01()<0.5 ? 1 : -1);
@@ -173,7 +181,6 @@ void HirschFyeRun::dostep()
   // increment sweep count
   sweeps++;
   check_counter++;
-  std::cout<<"."<<std::flush; 
   // do local update
   for (int i=0; i<N; i++){
     update_single_spin(random_01, Green_up, Green_down, spins, lambda);
@@ -183,7 +190,7 @@ void HirschFyeRun::dostep()
   green_vector_from_matrix(G_up, Green_up);
   green_vector_from_matrix(G_down,Green_down);	
 
-  
+  //std::cout<<"in dostep"<<std::endl;
   // measure Greens function
   if(is_thermalized()){
   	measurements.get<RealVectorObservable>("G_meas_up") << G_up;
@@ -226,7 +233,9 @@ multiple_vector_type HirschFyeRun::get_result() const {
   	g.first.push_back(g_up_mean_vector[i]);
   	g.second.push_back(g_down_mean_vector[i]);
   }
-  
+  //also take into account G(beta)
+  g.first.push_back(-1.-g_up_mean_vector[0]);
+  g.second.push_back(-1.-g_down_mean_vector[0]);
    return g;
 
 }
@@ -234,6 +243,7 @@ multiple_vector_type HirschFyeRun::get_result() const {
 
 ///take a Green's function in vector form G(\tau-\tau') and create a matrix G(\tau, \tau') out of it
 void HirschFyeRun::green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const{
+  green_matrix.clear();
 	for (int i=0; i<N; i++) {
     for (int j=i; j<N; j++) {	  
       green_matrix(j,i) = green_vector[j-i];
@@ -272,12 +282,17 @@ multiple_vector_type HirschFyeSim::get_result() const {
   
   std::valarray<double> g_up_mean_vector(G_meas_up.mean());
   std::valarray<double> g_down_mean_vector(G_meas_down.mean());
-  
+  std::cout<<"measured: "<<std::endl;
   for(uint i=0;i<g_up_mean_vector.size();++i){
-  	g.first.push_back(g_up_mean_vector[i]);
-  	g.second.push_back(g_down_mean_vector[i]);
+  	g.first.push_back(-g_up_mean_vector[i]);
+  	g.second.push_back(-g_down_mean_vector[i]);
+        std::cout<<i<<"\t"<<-g_up_mean_vector[i]<<"\t"<<G_meas_up.error()[i]<<std::endl;
   }
-  
+   //also take into account G(beta)
+    g.first.push_back(-1.+g_up_mean_vector[0]);
+    g.second.push_back(-1.+g_down_mean_vector[0]);
+      
+  std::cout<<"returning: "<<g<<std::endl;
    return g;
 }
 
