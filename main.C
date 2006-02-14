@@ -79,19 +79,21 @@ int main(int argc, char** argv)
 			//...imaginary time tau
 			int N=boost::lexical_cast<int>(parms["N"]);
 			multiple_vector_type G0_tau, G_tau;
-			G0_tau.first.resize(N);
-			G0_tau.second.resize(N);
+			G0_tau.first.resize(N+1);
+			G0_tau.second.resize(N+1);
 			// read initial guess
 			std::ifstream infile_up("G_input_up");		//Bare Green's function in Imaginary time for spin up
 			std::ifstream infile_down("G_input_down");	//Bare Green's function in Imaginary time for spin down
 			assert(infile_up.is_open() && infile_down.is_open());
-			for (int i=0; i<N; i++) {
+			for (int i=0; i<N+1; i++) {
 				infile_up >> G0_tau.first[i];
 				infile_down >> G0_tau.second[i];
 			}
-			
+			std::cout<<"N="<<N<<std::endl;
+			std::cout<<"starting value for G is: "<<G0_tau<<std::endl;
 			boost::shared_ptr<ImpuritySolver> solver_ptr;
 			if (parms["SOLVER"]=="Hirsch-Fye"){
+				std::cout<<"solving Hirsch Fye"<<std::endl;
 				// we need a factory to create Hirsch-Fye simulations
 				alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;	
 				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
@@ -106,12 +108,12 @@ int main(int argc, char** argv)
 				F_selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
 			}
 			*/
-			else 
+			else {
 				solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
 		
-			SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-			selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
-		
+                                SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+                                selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+                        }
 			// write final result
 			FILE * outfile_up = fopen("G_output_up","w");
 			FILE * outfile_down = fopen("G_output_down","w");
