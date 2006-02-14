@@ -38,6 +38,7 @@
 #include <alps/osiris/std/vector.h>
 
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 #include <stack>
 #include <queue>
@@ -76,25 +77,24 @@ inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
 }
 
 
-// compute Green's function matrix for a given spin configuration, from Greens function for spins set to zero
+/// compute Green's function matrix for a given spin configuration, from Greens function for spins set to zero
 void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l);
 
 
-// attempt single spin flip and (if successful) compute Green's function matrix for the new configuration
+/// attempt single spin flip and (if successful) compute Green's function matrix for the new configuration
 template<class RNG> 
 void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green_down, std::vector<int> & spins, double lambda) 
 {
-	
 	unsigned int N(spins.size());
 	
 	// choose random site
 	unsigned int site = (unsigned int)(N*rng());
-	
 	// calculate ratio of determinants
 	double r_up = 1 + (1-Green_up(site,site))*(exp(-2*lambda*spins[site])-1);
 	double r_down = 1 + (1-Green_down(site,site))*(exp(2*lambda*spins[site])-1);
 	double det_rat = r_up*r_down; 
-	
+  //std::cout<<"site: "<<site<<" det_rat: "<<det_rat<<" Green_up: "<<Green_up(site, site)<<std::endl;
+
 	// what about sign changes?
 	det_rat = fabs(det_rat);
 	
@@ -118,7 +118,6 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
 		
 		// update spin
 		spins[site] = -spins[site];
-		
 	}
 }
 
