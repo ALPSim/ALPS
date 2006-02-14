@@ -42,7 +42,6 @@
 /// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_multiple_vector_t& G0, itime_multiple_vector_t& G)
 {
-  
   int N = static_cast<int>(parms["N"]);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
@@ -51,12 +50,15 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   
   multiple_vector_type G0_old(G0);
+  int iteration_ctr=0;
     
   double max_diff;	
   do {
     G0_old = G0;
     std::cout<<"running solver"<<std::endl;
+    std::cout<<"G0: "<<G0<<std::endl;
     G = solver.solve(G0, parms);
+    std::cout<<"G: "<<G<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
     G0 = hilbert(G, mu, h, beta, paramagnet);
     std::cout<<"comparing old and new results"<<std::endl;
@@ -68,8 +70,9 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
 	    max_diff = fabs(G0.second[i]-G0_old.second[i]);	
 	}	
   std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
+  print_tau_green_functions(iteration_ctr++, G0, G, beta);
   } while (max_diff > converged);
-  
+  std::cout<<"converged!"<<std::endl;
 }
 
 /// @brief Run the self consistency loop for G and G0 mainly in Matsubara frequency space. Perform Fourier transformations where needed.
@@ -83,7 +86,6 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
 void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTimeImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert,
 									freq_multiple_vector_t& G0_omega, freq_multiple_vector_t& G_omega){
 	int N=boost::lexical_cast<int>(parms["N"]);
-	int NMATSUBARA = static_cast<int>(parms["NMATSUBARA"]);
 	double beta = static_cast<double>(parms["BETA"]);
 	double mu = static_cast<double>(parms["MU"]);
 	double h = static_cast<double>(parms["H"]);
@@ -95,8 +97,7 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 	double mu_down = mu-h/2.;
 	double tsq=t*t;
 	int iteration_ctr = 0;
-	pid_t process_id=getpid();
-		
+        std::cout<<"selfconsistency: using N"<<N<<" beta:"<<beta<<"mu: "<<mu<<" H: "<<h<<" t: "<<t<<" paramagnet: "<<paramagnet<<std::endl;
 	freq_multiple_vector_t G_old_omega(G0_omega);
     	itime_multiple_vector_t G0_tau;
 	itime_multiple_vector_t G_tau;
@@ -108,18 +109,41 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
 		G_old_omega = G_omega;
 		G_old_tau = G_tau;
-		G0_tau.first.resize(N);
-		G0_tau.second.resize(N);
+		G0_tau.first.resize(N+1);
+		G0_tau.second.resize(N+1);
 
-		backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G0_tau.first,  G0_omega.first);
+		backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G0_tau.first,  G0_omega.first); //make G0(tau) out of G0(iomega)
 		backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G0_tau.second, G0_omega.second);
 		
 		std::cout<<"running solver."<<std::endl<<std::flush;
+                std::cout<<"G_tau has size: "<<G_tau.first.size();
+                std::cout<<"G_omega has size: "<<G_omega.first.size();
 		boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, G0_tau,parms);
+                //if Green_itime_m is defined we know G in tau but not in
+                //omega. Compute G in omega via fourier transform
+                if(parms.defined("DIRECT_GREEN_ITIME")|| parms.defined("GREEN_ITIME_M")){
+                  if(paramagnet){
+                    complex_vector G_omega_para(G_tau.first.size()-1);
+                    double_vector G_para(G_tau.first.size());
+                    std::cout<<"G_para has size: "<<G_para.size()<<std::endl;
+                    std::cout<<"G_omega_para has size: "<<G_omega_para.size()<<std::endl;
+                    for (uint i=0; i<G_para.size(); i++){
+                      G_para[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
+                    }
+                    forward_FT(beta, -mu, mu*mu+tsq, G_para, G_omega_para); //make G(iomega) out of G(tau)
+                    G_omega.first=G_omega_para;
+                    G_omega.second=G_omega_para;
+                  }
+                  else{
+                    forward_FT(beta, -mu_up  , mu_up*mu_up+tsq    , G_tau.first, G_omega.first);
+                    forward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
+                                                                    
+                  }
+                }
 		std::cout<<"running Hilbert transformer."<<std::endl<<std::flush;
 		G0_omega = hilbert(G_omega, mu, h, beta, paramagnet);
 		
-		if(!parms.defined("DIRECT_GREEN_ITIME")){
+		if(!parms.defined("DIRECT_GREEN_ITIME") && !parms.defined("GREEN_ITIME_M")){
 			backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G_tau.first,  G_omega.first);
 			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
 		}
