@@ -176,13 +176,13 @@ class F_SemicircleHilbertTransformer : public HilbertTransformer {
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
 	multiple_vector_type operator()(multiple_vector_type& G, double dummy1, double dummy2, double dummy3, bool paramagnet)
 	{
-		int Np1=G.first.size();
+		uint Np1=G.first.size();
 		if (paramagnet) {
 			vector_type Gpara(G.first.size());
                         for (uint i=0; i<Np1; i++)
                               Gpara[i] = 0.5*(G.first[i]+G.second[i]);
                         multiple_vector_type F(G);
-                        for (int i=0; i<Np1; i++) {
+                        for (uint i=0; i<Np1; i++) {
                               F.first[i] = -t_*t_*Gpara[Np1-1-i];             // Green-function must include \tau=\beta !!!
                               F.second[i] = -t_*t_*Gpara[Np1-1-i];
                         }
@@ -190,7 +190,7 @@ class F_SemicircleHilbertTransformer : public HilbertTransformer {
 		}
 		else {
 			multiple_vector_type F(G);
-			for (int i=0; i<Np1; i++) {
+			for (uint i=0; i<Np1; i++) {
 				F.first[i] = -t_*t_*G.second[Np1-1-i];
 				F.second[i] = -t_*t_*G.first[Np1-1-i];
 			}

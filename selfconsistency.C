@@ -97,7 +97,6 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 	double mu_down = mu-h/2.;
 	double tsq=t*t;
 	int iteration_ctr = 0;
-        std::cout<<"selfconsistency: using N"<<N<<" beta:"<<beta<<"mu: "<<mu<<" H: "<<h<<" t: "<<t<<" paramagnet: "<<paramagnet<<std::endl;
 	freq_multiple_vector_t G_old_omega(G0_omega);
     	itime_multiple_vector_t G0_tau;
 	itime_multiple_vector_t G_tau;

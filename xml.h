@@ -104,7 +104,6 @@ void read_freq(std::istream& in, std::vector<T>& v)
 
 }
 
-
 template <class T>
 void read_freq(std::istream& in, std::pair<T,T>& p)
 {
