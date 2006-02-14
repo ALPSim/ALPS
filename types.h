@@ -75,8 +75,10 @@ typedef  multiple_complex_vector_type freq_multiple_vector_t;
 
 std::ostream &operator<<(std::ostream &os, const multiple_vector_type &v);
 std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type &v);
+std::ostream &operator<<(std::ostream &os, const double_vector &v);
+std::ostream &operator<<(std::ostream &os, const complex_vector &v);
 void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta);
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta);
 void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &bare_green_matsubara, const multiple_complex_vector_type &dressed_green_matsubara, const multiple_vector_type &bare_green_itime, const multiple_vector_type &dressed_green_itime, const double beta);
-	
+void print_tau_green_functions(const int iteration_ctr, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta);
 #endif /*TYPES_H_*/
