@@ -1,6 +1,7 @@
 #include<iostream>
 #include<fstream>
 #include<cmath>
+#include<cassert>
 
 int main(int argc, char** argv){
 	
