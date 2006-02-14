@@ -28,6 +28,7 @@
 #include "fouriertransform.h"
 #include <boost/numeric/bindings/lapack/lapack.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 void generate_spline_matrix(dense_matrix & spline_matrix) {
 
@@ -56,11 +57,27 @@ void generate_spline_matrix(dense_matrix & spline_matrix) {
   A(Np1-1, 1) = -1;
   A(Np1-1, Np1-2) = 1;
   A(Np1-1, Np1-1) = 2;
-    
+  //std::cout<<A<<std::endl;  
   // solve A*spline_matrix=I
   // gesv solves A*X=B, input for B is I, output (=solution X) is spline_matrix
-  spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);   
+  /*spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);   
   boost::numeric::bindings::lapack::gesv(A, spline_matrix);
-  
+  std::cout<<prec_prod(A, spline_matrix)<<std::endl;
+*/
+  //Emanuel avoid inversion of matrix
+  spline_matrix=A;
 }
-
+void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs){
+  //avoid matrix inversion and instead solve the system of equations: S *v2 =
+  //rhs for v2. The result will be found in rhs as we use the LAPACK call dgesv
+  dense_matrix v(rhs.size(), 1);
+  //std::cout<<v<<std::endl;
+  for(int i=0;i<rhs.size();++i){
+    v(i,0)=rhs[i];
+  }
+  boost::numeric::bindings::lapack::gesv(spline_matrix, v);
+  //std::cout<<rhs<<std::endl;
+  for(int i=0;i<rhs.size();++i){
+    rhs[i]=v(i,0);
+  }
+}
