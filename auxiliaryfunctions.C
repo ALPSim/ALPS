@@ -13,6 +13,12 @@ std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type &v
 		os<<i<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
 	return os;
 }
+std::ostream &operator<<(std::ostream &os, const double_vector &v){
+	for(uint i=0;i<v.size();++i)
+		//os<<i<<"\t"<<v.first[i].real()<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].real()<<"\t"<<v.second[i].imag()<<std::endl;
+		os<<i<<"\t"<<v[i]<<std::endl;
+	return os;
+}
 void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
 	for(uint i=0;i<v.first.size();++i)
                 os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
@@ -23,7 +29,7 @@ void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_
 }
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta){
         for(uint i=0;i<v.first.size();++i)
-                os<<i*beta/v.first.size()<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
+                os<<i*beta/(v.first.size()-1)<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
 
 }
 void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &G0_omega, const multiple_complex_vector_type &G_omega, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta){
