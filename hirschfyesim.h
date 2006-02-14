@@ -42,6 +42,7 @@
 #include <alps/osiris/std/vector.h>
 
 #include <boost/numeric/bindings/lapack/lapack.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
 #include <stack>
 #include <queue>
