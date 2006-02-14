@@ -71,29 +71,27 @@ public:
 	{
 		
 		double tsq=t_*t_;
-		
 		if (paramagnet) {
+                  //std::cout<<"paramagnet!: "<<std::endl;
+			vector_type Gpara(G.first.size()); //G_tau in paramagnetic case
+			complex_vector_type G_omega(G.first.size()-1);
+			complex_vector_type G0_omega(G.first.size()-1);
 			
-			vector_type Gpara(G.first.size());
-			complex_vector_type G_omega(G.first.size());
-			complex_vector_type G0_omega(G.first.size());
-			
-			for (uint i=0; i<Gpara.size(); i++)
+			for (uint i=0; i<Gpara.size(); i++) //average results of solver for up and down spins
 				Gpara[i] = 0.5*(G.first[i]+G.second[i]);
 			
-			forward_FT(beta, -mu, mu*mu+tsq, Gpara, G_omega);
+			forward_FT(beta, -mu, mu*mu+tsq, Gpara, G_omega); //generate G_omega
 			
 			for(uint i=0; i<G_omega.size(); i++) {
 				std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
 				G0_omega[i] = 1./(iw + mu - tsq*G_omega[i]);
 			}
-			
-			backward_FT(beta, -mu, mu*mu+tsq, Gpara, G0_omega);
-			
+                        //std::cout<<"G0 omega: "<<G0_omega<<std::endl;
+			backward_FT(beta, -mu, mu*mu+tsq, Gpara, G0_omega); //generate G0
+                        //std::cout<<"G0para: "<<Gpara<<std::endl;
 			multiple_vector_type G0(G);
-			G0.first = Gpara;
+			G0.first = Gpara; //write out G0 and return it
 			G0.second = Gpara;
-			
 			return G0;
 		}
 		else {
@@ -103,8 +101,8 @@ public:
 			
 			multiple_vector_type G0(G);
 			multiple_complex_vector_type G_omega;
-			G_omega.first.resize(G.first.size());
-			G_omega.second.resize(G.second.size());
+			G_omega.first.resize(G.first.size()-1);
+			G_omega.second.resize(G.second.size()-1);
 			
 			multiple_complex_vector_type G0_omega(G_omega); 
 			
@@ -233,6 +231,7 @@ public:
 	freq_multiple_vector_t operator()(const freq_multiple_vector_t& G_omega,const double mu, const double h, const double beta, const bool paramagnet)
 	{
 		
+                std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" paramagnet: "<<paramagnet<<std::endl;
 		double tsq=t_*t_;
 		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
 		if (paramagnet) {
