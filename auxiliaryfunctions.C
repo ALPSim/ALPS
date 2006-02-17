@@ -97,4 +97,14 @@ std::ostream &operator<<(std::ostream &os, const green_function<std::complex<dou
         }
         return os;
 }
-
+double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, const double &t){
+  //compute kinetic energy according to Philipp Werner, formula below formula
+  //11: E_{kin} = 2t^2\int_0^\beta d\tau G(\tau)G(-\tau)
+  double e_kin=0;
+  double dtau=beta/G_tau.first.size();
+  for(uint i=0;i<G_tau.first.size();++i){
+    e_kin+=dtau*G_tau.first[i]*G_tau.first[G_tau.first.size()-1-i];
+    e_kin+=dtau*G_tau.second[i]*G_tau.second[G_tau.second.size()-1-i];
+  }
+  e_kin*=2.*t*t;
+}
