@@ -24,7 +24,7 @@ template <typename T> class green_function{
 		delete [] err_;
 	}
 	///copy constructor
-	green_function(const green_function &g){
+	green_function(const green_function &g):nt_(g.nt_), ns_(g.ns_), nf_(g.nf_), ntnsns_(g.ntnsns_), ntns_(g.ntns_){
 		green_function(g.ntime(), g.nsite(), g.nflavor());
 		operator=(g);
 	}
@@ -90,3 +90,5 @@ typedef green_function<double> itime_green_function_t;
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v);
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v);
 
+
+double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, const double &t);
