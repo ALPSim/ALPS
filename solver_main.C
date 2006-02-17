@@ -144,7 +144,6 @@ int main(int argc, char** argv)
 #endif
 		std::string infile;
 		std::string outfile;
-		
 		if (!parse_options(argc,argv,infile,outfile))
 			return 0;
 		
@@ -154,7 +153,7 @@ int main(int argc, char** argv)
 		alps::Parameters parms;
 		read_input(infile,G0,parms);
 		
-        alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
+                alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
 		alps::ImpuritySolver solver(factory,argc,argv);
 		
 		// write g into output file

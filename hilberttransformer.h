@@ -255,6 +255,7 @@ public:
 			for(uint i=0; i<G_omega.first.size(); i++) {
 				std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
 				//check: is the zero justified in the AFM case?
+                                //and how about mu != 0?
 				G0_omega.first[i]= std::complex<double>(0,- 1./(iw.imag() + mu_up   - tsq*G_omega.second[i].imag()));
 				G0_omega.second[i]= std::complex<double>(0,- 1./(iw.imag() + mu_down - tsq*G_omega.first[i].imag() ));
 			}
