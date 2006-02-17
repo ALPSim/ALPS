@@ -31,6 +31,7 @@
 /// @brief implements the selfconsistency loop functions
 
 #include "selfconsistency.h"
+#include "green_function.h"
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
 /// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
@@ -130,8 +131,10 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                       G_para[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
                     }
                     forward_FT(beta, -mu, mu*mu+tsq, G_para, G_omega_para); //make G(iomega) out of G(tau)
-                    G_omega.first=G_omega_para;
-                    G_omega.second=G_omega_para;
+                    for(uint i=0;i<G_omega_para.size();++i){
+                      G_omega.first[i]=G_omega_para[i];
+                      G_omega.second[i]=G_omega_para[i];
+                    }
                   }
                   else{
                     forward_FT(beta, -mu_up  , mu_up*mu_up+tsq    , G_tau.first, G_omega.first);
@@ -141,8 +144,8 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                 }
 		std::cout<<"running Hilbert transformer."<<std::endl<<std::flush;
 		G0_omega = hilbert(G_omega, mu, h, beta, paramagnet);
-		
-		if(!parms.defined("DIRECT_GREEN_ITIME") && !parms.defined("GREEN_ITIME_M")){
+                std::cout<<"kinetic energy is: "<<kinetic_energy(G_tau, beta, t);
+		if(!parms.defined("GREEN_ITIME_M")){
 			backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G_tau.first,  G_omega.first);
 			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
 		}
