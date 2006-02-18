@@ -238,9 +238,8 @@ public:
 		        freq_multiple_vector_t G0_omega(G_omega);                
                         for(uint i=0; i<G_omega.first.size(); i++) {
                                 std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-				//minus sign necessary in order to get reasonable results. check, we might have the wrong convention!
-				G0_omega.first[i]=std::complex<double>(0, - 1./(iw.imag() + mu - tsq*0.5*(G_omega.first[i].imag()+G_omega.second[i].imag())));
-				G0_omega.second[i]=std::complex<double>(0, - 1./(iw.imag() + mu - tsq*0.5*(G_omega.first[i].imag()+G_omega.second[i].imag())));
+				G0_omega.first[i]=1./(iw + mu - tsq*0.5*(G_omega.first[i]+G_omega.second[i])); //careful: mu is real, iw is imag, and G is only imag when averaged
+				G0_omega.second[i]=G_omega.first[i];
                         }
                         return G0_omega;
 		}
@@ -254,10 +253,8 @@ public:
 			
 			for(uint i=0; i<G_omega.first.size(); i++) {
 				std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-				//check: is the zero justified in the AFM case?
-                                //and how about mu != 0?
-				G0_omega.first[i]= std::complex<double>(0,- 1./(iw.imag() + mu_up   - tsq*G_omega.second[i].imag()));
-				G0_omega.second[i]= std::complex<double>(0,- 1./(iw.imag() + mu_down - tsq*G_omega.first[i].imag() ));
+				G0_omega.first[i] =1./(iw + mu - tsq*G_omega.second[i]); //careful: mu is real, iw is imag, and G is both real and imag
+				G0_omega.second[i]=1./(iw + mu - tsq*G_omega.first [i]); 
 			}
 			return G0_omega;
 		}

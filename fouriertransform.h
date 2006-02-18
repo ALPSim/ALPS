@@ -131,5 +131,9 @@ template <class V, class W> void backward_FT(double beta, double c2, double c3, 
 	  double wt((2*k+1)*i*M_PI/N);
 	  v[i] += 2/beta*(cos(wt)*v_omega[k].real()+sin(wt)*v_omega[k].imag());
 	}
-  }  
+  }
+  v[N]=-1-v[0];
+  for(uint i=0;i<=N;++i){
+    std::cout<<i<<"\t"<<v[i]<<std::endl;
+  }
 }
