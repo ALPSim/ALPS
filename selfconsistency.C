@@ -116,8 +116,6 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G0_tau.second, G0_omega.second);
 		
 		std::cout<<"running solver."<<std::endl<<std::flush;
-                std::cout<<"G_tau has size: "<<G_tau.first.size();
-                std::cout<<"G_omega has size: "<<G_omega.first.size();
 		boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, G0_tau,parms);
                 //if Green_itime_m is defined we know G in tau but not in
                 //omega. Compute G in omega via fourier transform
@@ -125,8 +123,6 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                   if(paramagnet){
                     complex_vector G_omega_para(G_tau.first.size()-1);
                     double_vector G_para(G_tau.first.size());
-                    std::cout<<"G_para has size: "<<G_para.size()<<std::endl;
-                    std::cout<<"G_omega_para has size: "<<G_omega_para.size()<<std::endl;
                     for (uint i=0; i<G_para.size(); i++){
                       G_para[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
                     }
