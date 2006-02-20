@@ -133,7 +133,7 @@ template <class V, class W> void backward_FT(double beta, double c2, double c3, 
 	}
   }
   v[N]=-1-v[0];
-  for(uint i=0;i<=N;++i){
+  /*for(uint i=0;i<=N;++i){
     std::cout<<i<<"\t"<<v[i]<<std::endl;
-  }
+  }*/
 }
