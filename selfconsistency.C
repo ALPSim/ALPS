@@ -145,7 +145,14 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 			backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G_tau.first,  G_omega.first);
 			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
 		}
-
+                if(paramagnet){
+                  for(uint i=0;i<G_tau.first.size();++i){
+                    G_tau.first[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
+                    G0_tau.first[i]=0.5*(G0_tau.first[i]+G0_tau.second[i]);
+                    G_tau.second[i]=G_tau.first[i];
+                    G0_tau.second[i]=G0_tau.first[i];
+                  }
+                }
 		std::cout<<"comparing old and new result."<<std::endl<<std::flush;
 		max_diff=0;
 		if(iteration_ctr>1){
