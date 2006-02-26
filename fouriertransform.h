@@ -117,22 +117,23 @@ inline double f_tau(double tau, double beta, double c2, double c3) {
 //example class W type:  complex_vector_type, used to store G(iomega)
 template <class V, class W> void backward_FT(double beta, double c2, double c3, V & v, W v_omega) {
   
-  int N = v.size()-1;
-  double dt = beta/N;
+  int N_tau = v.size()-1;
+  int N_omega = v_omega.size();
+  double dt = beta/N_tau;
   
-  for (int k=0; k<N; k++) {
+  for (int k=0; k<N_omega; k++) {
     std::complex<double> iw(0,(2*k+1)*M_PI/beta);
     v_omega[k] -= f_omega(iw, c2, c3);
   }	
   
-  for (int i=0; i<N; i++) {
+  for (int i=0; i<N_tau; i++) {
     v[i] = f_tau(i*dt, beta, c2, c3);
-	for (int k=0; k<N; k++) {
-	  double wt((2*k+1)*i*M_PI/N);
+	for (int k=0; k<N_omega; k++) {
+	  double wt((2*k+1)*i*M_PI/N_tau);
 	  v[i] += 2/beta*(cos(wt)*v_omega[k].real()+sin(wt)*v_omega[k].imag());
 	}
   }
-  v[N]=-1-v[0];
+  v[N_tau]=-1-v[0];
   /*for(uint i=0;i<=N;++i){
     std::cout<<i<<"\t"<<v[i]<<std::endl;
   }*/
