@@ -245,7 +245,7 @@ public:
 		}
 		else {
 		//formula according to review, p. 61, formula 223 'antiferromagnetic Neel phase'	
-		//derived properly in formula 95 on page 32. Minus sign still not clear.
+		//derived properly in formula 95 on page 32.
 			double mu_up = mu+h/2.;
 			double mu_down = mu-h/2.;
 			

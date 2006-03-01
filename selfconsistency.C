@@ -86,7 +86,8 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
 
 void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTimeImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert,
 									freq_multiple_vector_t& G0_omega, freq_multiple_vector_t& G_omega){
-	int N=boost::lexical_cast<int>(parms["N"]);
+	int n_tau=boost::lexical_cast<int>(parms["N"]);
+	int n_matsubara=boost::lexical_cast<int>(parms["N"]);
 	double beta = static_cast<double>(parms["BETA"]);
 	double mu = static_cast<double>(parms["MU"]);
 	double h = static_cast<double>(parms["H"]);
@@ -109,8 +110,8 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
 		G_old_omega = G_omega;
 		G_old_tau = G_tau;
-		G0_tau.first.resize(N+1);
-		G0_tau.second.resize(N+1);
+		G0_tau.first.resize(n_tau+1);
+		G0_tau.second.resize(n_tau+1);
 
 		backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G0_tau.first,  G0_omega.first); //make G0(tau) out of G0(iomega)
 		backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G0_tau.second, G0_omega.second);
@@ -121,16 +122,19 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                 //omega. Compute G in omega via fourier transform
                 if(parms.defined("DIRECT_GREEN_ITIME")|| parms.defined("GREEN_ITIME_M")){
                   if(paramagnet){
-                    complex_vector G_omega_para(G_tau.first.size()-1);
-                    double_vector G_para(G_tau.first.size());
-                    for (uint i=0; i<G_para.size(); i++){
+                    complex_vector G_omega_para(n_matsubara);
+                    double_vector G_para(n_tau+1);
+                    for (uint i=0; i<n_tau+1; i++){
                       G_para[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
                     }
                     forward_FT(beta, -mu, mu*mu+tsq, G_para, G_omega_para); //make G(iomega) out of G(tau)
-                    for(uint i=0;i<G_omega_para.size();++i){
+                    std::cout<<"immediately after ft: G_omega_para: "<<G_omega_para<<std::endl;
+                    for(uint i=0;i<n_matsubara;++i){
                       G_omega.first[i]=G_omega_para[i];
                       G_omega.second[i]=G_omega_para[i];
                     }
+                    std::cout<<"after ft: "<<G_omega<<std::endl;
+                    std::cout<<"after ft: "<<G_tau<<std::endl;
                   }
                   else{
                     forward_FT(beta, -mu_up  , mu_up*mu_up+tsq    , G_tau.first, G_omega.first);
@@ -140,24 +144,27 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                 }
 		std::cout<<"running Hilbert transformer."<<std::endl<<std::flush;
 		G0_omega = hilbert(G_omega, mu, h, beta, paramagnet);
+                std::cout<<"after ht: "<<G_omega<<std::endl;
                 std::cout<<"kinetic energy is: "<<kinetic_energy(G_tau, beta, t);
 		if(!parms.defined("GREEN_ITIME_M")){
 			backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G_tau.first,  G_omega.first);
 			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
 		}
+                std::cout<<"before para: "<<G_tau<<std::endl;
                 if(paramagnet){
-                  for(uint i=0;i<G_tau.first.size();++i){
+                  for(uint i=0;i<n_tau+1;++i){
                     G_tau.first[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
                     G0_tau.first[i]=0.5*(G0_tau.first[i]+G0_tau.second[i]);
                     G_tau.second[i]=G_tau.first[i];
                     G0_tau.second[i]=G0_tau.first[i];
                   }
                 }
+                std::cout<<"after para: "<<G_tau<<std::endl;
 		std::cout<<"comparing old and new result."<<std::endl<<std::flush;
 		max_diff=0;
 		if(iteration_ctr>1){
 			//comparison for the dressed Green's function in Matsubara freq.
-			for(uint i=0; i<G_omega.first.size(); i++) {
+			for(uint i=0; i<n_matsubara; i++) {
 				if (fabs((G_omega.first[i]-G_old_omega.first[i]).imag()) > max_diff)
 					max_diff = fabs((G_omega.first[i]-G_old_omega.first[i]).imag());
 				if (fabs((G_omega.second[i]-G_old_omega.second[i]).imag()) > max_diff)

@@ -33,7 +33,7 @@
 void generate_spline_matrix(dense_matrix & spline_matrix);
 void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs);
 //example:  V = vector_type
-template <class V> void evaluate_second_derivatives(double dt, double c2, double c3, dense_matrix & spline_matrix, V & g, V & second_derivatives) {
+template <class V> void evaluate_second_derivatives(double dt, double c2, double c3, dense_matrix & spline_matrix, const V & g, V & second_derivatives) {
 
   // g, rhs and second_derivatives have dimension N+1
   int Np1 = spline_matrix.size1();
@@ -83,13 +83,13 @@ inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c
 //example class V type:  vector_type. Used to store G(tau)
 //example class W type:  complex_vector_type, used to store G(iomega)
 //is it really meaningful to have this as a template function?!?
-template <class V, class W> void forward_FT(double beta, double c2, double c3, V & v, W & v_omega) {
+template <class V, class W> void forward_FT(double beta, double c2, double c3,const V & v, W & v_omega) {
 
   int N=v.size() -1;
   double dt = beta/N;
   dense_matrix spline_matrix(N+1, N+1);
   generate_spline_matrix(spline_matrix);
-  
+  assert(v_omega.size()==N); //we implicitely assume that we have as many imag time slices as matsubara frequencies. If this is not the case: interpolate, then use oversampling.
   V v2(v);
 
   evaluate_second_derivatives(dt, c2, c3, spline_matrix, v, v2);

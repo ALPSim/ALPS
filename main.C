@@ -127,6 +127,8 @@ int main(int argc, char** argv)
 			//perform self consistency loop in Matsubara frequency omega
 			int Nmatsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
 			freq_multiple_vector_t G0_omega, G_omega;
+                        G_omega.first.resize(Nmatsubara);
+                        G_omega.second.resize(Nmatsubara);
 			G0_omega.first.resize(Nmatsubara);
 			G0_omega.second.resize(Nmatsubara);
 			
