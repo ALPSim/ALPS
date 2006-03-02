@@ -72,12 +72,12 @@ void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &
   //rhs for v2. The result will be found in rhs as we use the LAPACK call dgesv
   dense_matrix v(rhs.size(), 1);
   //std::cout<<v<<std::endl;
-  for(int i=0;i<rhs.size();++i){
+  for(uint i=0;i<rhs.size();++i){
     v(i,0)=rhs[i];
   }
   boost::numeric::bindings::lapack::gesv(spline_matrix, v);
   //std::cout<<rhs<<std::endl;
-  for(int i=0;i<rhs.size();++i){
+  for(uint i=0;i<rhs.size();++i){
     rhs[i]=v(i,0);
   }
 }

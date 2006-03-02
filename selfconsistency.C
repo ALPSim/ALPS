@@ -57,9 +57,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   do {
     G0_old = G0;
     std::cout<<"running solver"<<std::endl;
-    std::cout<<"G0: "<<G0<<std::endl;
     G = solver.solve(G0, parms);
-    std::cout<<"G: "<<G<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
     G0 = hilbert(G, mu, h, beta, paramagnet);
     std::cout<<"comparing old and new results"<<std::endl;
@@ -128,13 +126,10 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                       G_para[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
                     }
                     forward_FT(beta, -mu, mu*mu+tsq, G_para, G_omega_para); //make G(iomega) out of G(tau)
-                    std::cout<<"immediately after ft: G_omega_para: "<<G_omega_para<<std::endl;
                     for(uint i=0;i<n_matsubara;++i){
                       G_omega.first[i]=G_omega_para[i];
                       G_omega.second[i]=G_omega_para[i];
                     }
-                    std::cout<<"after ft: "<<G_omega<<std::endl;
-                    std::cout<<"after ft: "<<G_tau<<std::endl;
                   }
                   else{
                     forward_FT(beta, -mu_up  , mu_up*mu_up+tsq    , G_tau.first, G_omega.first);
@@ -144,13 +139,11 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                 }
 		std::cout<<"running Hilbert transformer."<<std::endl<<std::flush;
 		G0_omega = hilbert(G_omega, mu, h, beta, paramagnet);
-                std::cout<<"after ht: "<<G_omega<<std::endl;
                 std::cout<<"kinetic energy is: "<<kinetic_energy(G_tau, beta, t);
 		if(!parms.defined("GREEN_ITIME_M")){
 			backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G_tau.first,  G_omega.first);
 			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
 		}
-                std::cout<<"before para: "<<G_tau<<std::endl;
                 if(paramagnet){
                   for(uint i=0;i<n_tau+1;++i){
                     G_tau.first[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
@@ -159,7 +152,6 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                     G0_tau.second[i]=G0_tau.first[i];
                   }
                 }
-                std::cout<<"after para: "<<G_tau<<std::endl;
 		std::cout<<"comparing old and new result."<<std::endl<<std::flush;
 		max_diff=0;
 		if(iteration_ctr>1){
@@ -173,7 +165,7 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 			std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "<<max_diff<<"\tconverged: "<<converged<<std::endl;
 		}
 		//write checkpoint - clean this up in the future!
-		print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+		print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, paramagnet);
 	}while (max_diff > converged || iteration_ctr <= 1); 
 	
 }
