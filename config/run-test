@@ -29,7 +29,7 @@ INPUT=
 if test -f "${prog}.input"; then
   INPUT="${prog}.input"
 elif test -f "${prog}.ip"; then
-  INPUT="${srcdir}/${prog}.ip"
+  INPUT="${prog}.ip"
 elif test -f "${srcdir}/${prog}.input"; then
   INPUT="${srcdir}/${prog}.input"
 elif test -f "${srcdir}/${prog}.ip"; then
@@ -40,7 +40,7 @@ OUTPUT=
 if test -f "${prog}.output"; then
   OUTPUT="${prog}.output"
 elif test -f "${prog}.op"; then
-  OUTPUT="${srcdir}/${prog}.op"
+  OUTPUT="${prog}.op"
 elif test -f "${srcdir}/${prog}.output"; then
   OUTPUT="${srcdir}/${prog}.output"
 elif test -f "${srcdir}/${prog}.op"; then
