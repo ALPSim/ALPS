@@ -58,6 +58,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     G0_old = G0;
     std::cout<<"running solver"<<std::endl;
     G = solver.solve(G0, parms);
+    std::cout<<"G after solver: "<<G<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
     G0 = hilbert(G, mu, h, beta, paramagnet);
     std::cout<<"comparing old and new results"<<std::endl;
@@ -84,41 +85,67 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
 
 void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTimeImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert,
 									freq_multiple_vector_t& G0_omega, freq_multiple_vector_t& G_omega){
-	int n_tau=boost::lexical_cast<int>(parms["N"]);
-	int n_matsubara=boost::lexical_cast<int>(parms["N"]);
+	uint n_tau=boost::lexical_cast<uint>(parms["N"]);
+	uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
 	double beta = static_cast<double>(parms["BETA"]);
 	double mu = static_cast<double>(parms["MU"]);
 	double h = static_cast<double>(parms["H"]);
 	double converged = static_cast<double>(parms["CONVERGED"]);
 	bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
 	double t=static_cast<double>(parms["t"]);
+	double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
+	int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
 					
 	double mu_up = mu+h/2.;
 	double mu_down = mu-h/2.;
 	double tsq=t*t;
 	int iteration_ctr = 0;
+        bool result_in_omega=true;
+        if(parms.defined("DIRECT_ITIME_MEASUREMENT")|| parms.defined("FACTORIZED_ITIME_MEASUREMENT") || parms.defined("WERNER_ITIME_MEASUREMENT")){
+          result_in_omega=false;
+        }
+        //define multiple vectors
 	freq_multiple_vector_t G_old_omega(G0_omega);
-    	itime_multiple_vector_t G0_tau;
+	freq_multiple_vector_t G0_old_omega(G0_omega);
 	itime_multiple_vector_t G_tau;
+    	itime_multiple_vector_t G0_tau;
 	itime_multiple_vector_t G_old_tau;
-	
+	itime_multiple_vector_t G0_old_tau;
+	//initialize space for multiple vectors
+        G_tau.first.resize(n_tau+1);      G_tau.second.resize(n_tau+1);
+        G0_tau.first.resize(n_tau+1);     G0_tau.second.resize(n_tau+1);
+        G_old_tau.first.resize(n_tau+1);  G_old_tau.second.resize(n_tau+1);
+        G0_old_tau.first.resize(n_tau+1); G0_old_tau.second.resize(n_tau+1);
 	double max_diff;	
 	do {
 		iteration_ctr++;
 		std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
 		G_old_omega = G_omega;
+		G0_old_omega = G0_omega;
 		G_old_tau = G_tau;
-		G0_tau.first.resize(n_tau+1);
-		G0_tau.second.resize(n_tau+1);
-
-		backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G0_tau.first,  G0_omega.first); //make G0(tau) out of G0(iomega)
-		backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G0_tau.second, G0_omega.second);
-		
+		G0_old_tau = G0_tau;
+                
+                if(!parms.defined("READ_G0TAU")){
+                  backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G0_tau.first,  G0_omega.first); //make G0(tau) out of G0(iomega)
+                  backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G0_tau.second, G0_omega.second);
+                }
+                else{ //read in G_tau
+                  std::ifstream infile("G0tau_input");
+                  assert(infile.is_open());
+                  for(int i=0;i<n_tau+1;++i){
+                    assert(!infile.eof());
+                    double tau, real_up, real_dn;
+                    infile>>tau>>real_up>>real_dn;
+                    //std::cout<<tau<<" "<<n_tau<<" "<<real_up<<" "<<real_dn<<std::endl;
+                    G0_tau.first[i]=real_up;
+                    G0_tau.second[i]=real_dn;
+                  }
+                  std::cout<<"using bare Green's function G0_tau: "<<G0_tau<<std::endl;
+                }
+                
 		std::cout<<"running solver."<<std::endl<<std::flush;
 		boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, G0_tau,parms);
-                //if Green_itime_m is defined we know G in tau but not in
-                //omega. Compute G in omega via fourier transform
-                if(parms.defined("DIRECT_GREEN_ITIME")|| parms.defined("GREEN_ITIME_M")){
+                if(!result_in_omega){ //result is computed not in Matsubara frequencies but imaginary time.
                   if(paramagnet){
                     complex_vector G_omega_para(n_matsubara);
                     double_vector G_para(n_tau+1);
@@ -139,8 +166,16 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                 }
 		std::cout<<"running Hilbert transformer."<<std::endl<<std::flush;
 		G0_omega = hilbert(G_omega, mu, h, beta, paramagnet);
+                //relaxation to speed up /slow down convergence
+                if(relax_rate !=1){
+                  std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
+                  for(uint i=0;i<n_matsubara;++i){
+                    G0_omega.first[i]=relax_rate* G0_omega.first[i]+(1-relax_rate)*G0_old_omega.first[i];
+                    G0_omega.second[i]=relax_rate*G0_omega.second[i]+(1-relax_rate)*G0_old_omega.second[i];
+                  }
+                }
                 std::cout<<"kinetic energy is: "<<kinetic_energy(G_tau, beta, t);
-		if(!parms.defined("GREEN_ITIME_M")){
+		if(result_in_omega){
 			backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G_tau.first,  G_omega.first);
 			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
 		}
@@ -166,6 +201,6 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		}
 		//write checkpoint - clean this up in the future!
 		print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, paramagnet);
-	}while (max_diff > converged || iteration_ctr <= 1); 
+	}while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
 	
 }

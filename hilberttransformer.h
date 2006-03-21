@@ -216,7 +216,7 @@ public:
 	/// @param G_omega the Greens function as a function of Matsubara Frequency omega 
 	/// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
 	/// @return the result of the Hilbert transform: the bare Green's function G0 in Matsubara frequencies
-	virtual freq_multiple_vector_t operator()(const freq_multiple_vector_t& G_omega, const double mu, const double h, const double beta,const bool paramagnet)=0; 
+	virtual freq_multiple_vector_t operator()(freq_multiple_vector_t& G_omega, const double mu, const double h, const double beta,const bool paramagnet)=0; 
 	virtual ~FrequencySpaceHilbertTransformer() {}
 	
 };
@@ -228,18 +228,24 @@ public:
 	/// the constructor accepts the bandwidth
 	FSSemicircleHilbertTransformer(double t) : t_(t) {}
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
-	freq_multiple_vector_t operator()(const freq_multiple_vector_t& G_omega,const double mu, const double h, const double beta, const bool paramagnet)
+	freq_multiple_vector_t operator()(freq_multiple_vector_t& G_omega,const double mu, const double h, const double beta, const bool paramagnet)
 	{
 		
                 std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" paramagnet: "<<paramagnet<<std::endl;
 		double tsq=t_*t_;
 		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
 		if (paramagnet) {
-		        freq_multiple_vector_t G0_omega(G_omega);                
+		        freq_multiple_vector_t G0_omega(G_omega);         
+                        /*for(uint i=0;i<G_omega.first.size();++i){
+                          G_omega.first[i] =std::complex<double>( 0.5*(G_omega.first[i]-G_omega.second[i]).real(), 0.5*(G_omega.first[i]+G_omega.second[i]).imag());
+                          G_omega.second[i]=std::complex<double>(-0.5*(G_omega.first[i]-G_omega.second[i]).real(), 0.5*(G_omega.first[i]+G_omega.second[i]).imag());
+                        }*/
                         for(uint i=0; i<G_omega.first.size(); i++) {
                                 std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-				G0_omega.first[i]=1./(iw + mu - tsq*0.5*(G_omega.first[i]+G_omega.second[i])); //careful: mu is real, iw is imag, and G is only imag when averaged
-				G0_omega.second[i]=G_omega.first[i];
+				//G0_omega.first[i] =1./(iw + mu - tsq*G_omega.first[i] ); //careful: mu is real, iw is imag, and G is only imag when averaged
+				//G0_omega.second[i]=1./(iw + mu - tsq*G_omega.second[i]); //careful: mu is real, iw is imag, and G is only imag when averaged
+				G0_omega.first[i] =1./(iw + mu - tsq*0.5*(G_omega.first[i]+G_omega.second[i] )); //careful: mu is real, iw is imag, and G is only imag when averaged
+				G0_omega.second[i]=1./(iw + mu - tsq*0.5*(G_omega.second[i]+G_omega.first[i] )); //careful: mu is real, iw is imag, and G is only imag when averaged
                         }
                         return G0_omega;
 		}

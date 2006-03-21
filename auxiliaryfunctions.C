@@ -19,6 +19,11 @@ std::ostream &operator<<(std::ostream &os, const double_vector &v){
 		os<<i<<"\t"<<v[i]<<std::endl;
 	return os;
 }
+std::ostream &operator<<(std::ostream &os, const complex_vector &v){
+	for(uint i=0;i<v.size();++i)
+		os<<i<<"\t"<<v[i].real()<<"\t"<<v[i].imag()<<std::endl;
+	return os;
+}
 void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
 	for(uint i=0;i<v.first.size();++i)
                 os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
@@ -65,7 +70,7 @@ void print_all_green_functions(const int iteration_ctr, const multiple_complex_v
 	print_imag_green_matsubara(G0_omega_file, G0_omega,beta);
 	print_green_itime(G0_tau_file,G0_tau,beta);
 	print_imag_green_matsubara(G_omega_file,G_omega,beta);
-	if(!paramagnet) print_real_green_matsubara(G_omegareal_file,G_omega,beta);
+	print_real_green_matsubara(G_omegareal_file,G_omega,beta);
 	print_green_itime(G_tau_file,G_tau,beta);
 	print_imag_green_matsubara(G_omega_file_2,G_omega,beta);
 	print_green_itime(G_tau_file_2,G_tau,beta);
@@ -87,23 +92,23 @@ void print_tau_green_functions(const int iteration_ctr, const multiple_vector_ty
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
         for(uint o=0;o<v.nfreq();++o){
          os<<o<<"\t";
-         for(uint i=0;i<v.nsite();++i){
-          for(uint j=0;j<v.nsite();++j){
-           for(uint z=0;z<v.nflavor();++z){
+         for(uint z=0;z<v.nflavor();++z){
+           for(uint i=0;i<v.nsite();++i){
+             for(uint j=0;j<v.nsite();++j){
                 os<<v(o,i,j,z)<<"\t";
-           }
+             }
+            }
           }
-         }
-         std::cout<<std::endl;
+          std::cout<<std::endl;
         }
-        return os;
+       return os;
 }
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v){
         for(uint o=0;o<v.nfreq();++o){
          os<<o<<"\t";
-         for(uint i=0;i<v.nsite();++i){
-          for(uint j=0;j<v.nsite();++j){
-           for(uint z=0;z<v.nflavor();++z){
+         for(uint z=0;z<v.nflavor();++z){
+          for(uint i=0;i<v.nsite();++i){
+            for(uint j=0;j<v.nsite();++j){
                 os<<v(o,i,j,z).imag()<<"\t";
            }
           }

@@ -123,7 +123,7 @@ int main(int argc, char** argv)
 				fprintf(outfile_down, "%5d   %9.6e\n", i, G_tau.second[i]);
 			}  
 		}else{
-			alps::scheduler::BasicFactory<RubtsovSim,RubtsovRun> rubtsov_factory;
+			alps::scheduler::BasicFactory<RubtsovSim,SSHubbardRubtsovRun> rubtsov_factory;
 			//perform self consistency loop in Matsubara frequency omega
 			int Nmatsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
 			freq_multiple_vector_t G0_omega, G_omega;
@@ -133,6 +133,7 @@ int main(int argc, char** argv)
 			G0_omega.second.resize(Nmatsubara);
 			
 			// read initial guess
+                        if(parms.defined("OLD_INPUT_FILE")){
 			std::ifstream infile_up("G0omega_input_up");		//Bare Green's function in Matsubara freq for spin up
 			std::ifstream infile_down("G0omega_input_down");	//Bare Green's function in Matsubara freq for spin down
 			assert(infile_up.is_open() && infile_down.is_open());
@@ -143,7 +144,18 @@ int main(int argc, char** argv)
 				infile_down >> second;
 				G0_omega.first[i]=std::complex<double>(0,first);
 				G0_omega.second[i]=std::complex<double>(0,second);
-			}
+			}} else{
+                          std::ifstream infile("G0omega_input");
+                          assert(infile.is_open());
+                          for(int i=0;i<Nmatsubara;++i){
+                            assert(!infile.eof());
+                            double omegan, real_up, imag_up, real_dn, imag_dn;
+                            infile>>omegan>>real_up>>imag_up>>real_dn>>imag_dn;
+                            G0_omega.first[i]=std::complex<double>(real_up, imag_up);
+                            G0_omega.second[i]=std::complex<double>(real_dn, imag_dn);
+                          }
+                        }
+                        std::cout<<G0_omega<<std::endl;
 
 			boost::shared_ptr<FrequencyTimeImpuritySolver> solver_ptr;	//construct a solver that takes the GF in both imaginary time and Matsubara freq
 			if (parms["SOLVER"]=="Rubtsov"){
