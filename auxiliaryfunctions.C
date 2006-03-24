@@ -99,7 +99,7 @@ std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
              }
             }
           }
-          std::cout<<std::endl;
+          os<<std::endl;
         }
        return os;
 }
@@ -113,7 +113,7 @@ std::ostream &operator<<(std::ostream &os, const green_function<std::complex<dou
            }
           }
          }
-         std::cout<<std::endl;
+         os<<std::endl;
         }
         return os;
 }
