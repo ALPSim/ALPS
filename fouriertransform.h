@@ -28,6 +28,7 @@
 //#include "hirschfyesim.h"
 #include <complex>
 #include "types.h" // for the multiple_vector_type
+#include "green_function.h" // for the multiple_vector_type
 
 
 void generate_spline_matrix(dense_matrix & spline_matrix);
@@ -115,6 +116,7 @@ inline double f_tau(double tau, double beta, double c2, double c3) {
 
 //example class V type:  vector_type, used to store G(tau)
 //example class W type:  complex_vector_type, used to store G(iomega)
+void backward_FT_gf(double beta, double c2, double c3, itime_green_function_t &G_tau, matsubara_green_function_t G_omega);
 template <class V, class W> void backward_FT(double beta, double c2, double c3, V & v, W v_omega) {
   
   uint N_tau = v.size()-1;
@@ -134,7 +136,4 @@ template <class V, class W> void backward_FT(double beta, double c2, double c3, 
 	}
   }
   v[N_tau]=-1-v[0];
-  /*for(uint i=0;i<=N;++i){
-    std::cout<<i<<"\t"<<v[i]<<std::endl;
-  }*/
 }

@@ -120,13 +120,14 @@ int main(int argc, char** argv)
 			
 			// read initial guess
                         G0_omega.read(parms.value_or_default("G0OMEGA_INPUT", "G0omega_input").c_str());
-                        std::cout<<G0_omega<<std::endl;
 
 			boost::shared_ptr<FrequencyTimeImpuritySolver> solver_ptr;	//construct a solver that takes the GF in both imaginary time and Matsubara freq
 			if ((parms["SOLVER"]=="Rubtsov") && n_orbital==1){
+                          std::cout<<"using single site Hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
 			}
                         else if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("NSITE", "1") =="1")){
+                          std::cout<<"using multi band hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
 			}
 			else{
@@ -137,7 +138,9 @@ int main(int argc, char** argv)
 			FrequencySpaceHilbertTransformer *transform_ptr;
                         if(!parms.defined("DOSFILE")){
                               transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
+                              std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
                         }else{
+                              std::cout<<"using DOS Hilbert transform"<<std::endl;
                               transform_ptr= new FSDOSHilbertTransformer(parms);
                         }
 			selfconsistency_loop_omega_tau(parms, *solver_ptr, *transform_ptr, G0_omega, G_omega);

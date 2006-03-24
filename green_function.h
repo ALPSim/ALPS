@@ -129,12 +129,10 @@ template<typename T> void green_function<T>::read(const char *filename){
   double ignored;
   for(uint i=0;i<nt_;++i){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
-    std::cout<<"\n"<<ignored<<" ";
     for(uint f=0;f<nf_;++f){
       for(uint s0=0;s0<ns_;++s0){
         for(uint s1=0;s1<ns_;++s1){
           in_file>>operator()(i, s0, s1, f); //read the actual value
-          std::cout<<operator()(i, s0, s1, f)<<" ";
         }
       }
     }

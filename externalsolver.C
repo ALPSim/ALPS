@@ -149,7 +149,7 @@ FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
   
   boost::filesystem::remove(outpath);
   
-  std::pair<matsubara_green_function_t, itime_green_function_t>(G_omega, G_tau);
+  return std::make_pair(G_omega, G_tau);
 }
 
 

@@ -48,7 +48,7 @@ void print_green_itime(std::ostream &os, const multiple_vector_type &v, const do
                 os<<i*beta/(v.first.size()-1)<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
         }
 }
-void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &G0_omega, const multiple_complex_vector_type &G_omega, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta, const bool paramagnet){
+void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &G0_omega, const multiple_complex_vector_type &G_omega, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta){
 	std::ostringstream G0omega_name, G0tau_name, Gomega_name, Gomegareal_name, Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name;
 	G0omega_name<<"G0_omega_"<<iteration_ctr;//<<"_"<<process_id;
 	G0tau_name<<"G0_tau_"<<iteration_ctr;//<<"_"<<process_id;
@@ -127,4 +127,5 @@ double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, con
     e_kin+=dtau*G_tau.second[i]*G_tau.second[G_tau.second.size()-1-i];
   }
   e_kin*=2.*t*t;
+  return e_kin;
 }

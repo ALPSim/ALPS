@@ -135,7 +135,8 @@ public:
 	multiple_vector_type operator()(multiple_vector_type Sigma, double mu)
 	{
 		//to implement
-		
+          std::cout<<Sigma;
+          std::cout<<mu;
 		return multiple_vector_type();
 	}
 private:
@@ -156,7 +157,8 @@ public:
 	multiple_vector_type operator()(multiple_vector_type Sigma, double mu)
 	{
 		//to implement
-		
+          std::cout<<Sigma;
+          std::cout<<mu;
 		return multiple_vector_type();
 	}
 private:
@@ -174,6 +176,7 @@ class F_SemicircleHilbertTransformer : public HilbertTransformer {
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
 	multiple_vector_type operator()(multiple_vector_type& G, double dummy1, double dummy2, double dummy3, bool paramagnet)
 	{
+          dummy1=0; dummy2=0; dummy3=0; //avoid warnings.
 		uint Np1=G.first.size();
 		if (paramagnet) {
 			vector_type Gpara(G.first.size());
@@ -258,8 +261,8 @@ public:
 		else {
 		//formula according to review, p. 61, formula 223 'antiferromagnetic Neel phase'	
 		//derived properly in formula 95 on page 32.
-			double mu_up = mu+h/2.;
-			double mu_down = mu-h/2.;
+			//double mu_up = mu+h/2.;
+			//double mu_down = mu-h/2.;
 			
 			freq_multiple_vector_t G0_omega(G_omega);
 			
@@ -299,13 +302,38 @@ class FSDOSHilbertTransformer: public FrequencySpaceHilbertTransformer{
         dos.push_back(d);
         std::cout<<eps<<" "<<d<<std::endl;
       }
+      //normalize DOS to one:
+      double s=0;
+      for(uint i=0;i<epsilon.size()-1;++i){
+        s+=dos[i]*(epsilon[i+1]-epsilon[i]); //later: use simpson if this turns out to be bad.
+      }
+      //std::cout<<"normalization constant: "<<s<<std::endl;
+      for(uint i=0;i<epsilon.size()-1;++i){
+        dos[i]/=s;
+      }
+      //compute mu from filling if required.
+      if(params.defined("FILLING")){
+        assert(false); //implement this properly!!
+        /*double filling=parms["FILLING"];
+        assert(filling>0 && filling<1);
+        s=0;
+        for(uint i=0;i<epsilon.size()-1;++i){
+          s+=dos[i]*(epsilon[i+1]-epsilon[i]);
+          mu_=epsilon[i];
+          if(s>filling)
+            break;
+        }
+        std::cout<<"using mu=: "<<mu_<<" for filling: "<<filling<<std::endl;*/
+      }else{
+        //mu_=params.value_or_default("MU",0);
+      }
     }
     /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
     /// using integration over D(epsilon).
     /// We perform the HT G <- \int \frac{D(e)}{A - e} de
     matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, matsubara_green_function_t &G0_omega, const double mu, const double h, const double beta, const bool paramagnet){
       assert(G_omega.nsite()==1);
-      assert(h=0);
+      assert(h==0);
       if(paramagnet && G_omega.nflavor()==1){ for(uint i=0;i<G_omega.nfreq();++i) G_omega(i,0)=std::complex<double>(0, G_omega(i,0).imag());}
       if(paramagnet && G_omega.nflavor()==2){ for(uint i=0;i<G_omega.nfreq();++i){ G_omega(i,0)=0.5*(G_omega(i,0)+G_omega(i,1)); G_omega(i,1)=G_omega(i,0);}}
       //matsubara_green_function_t G0_omega(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());

@@ -127,12 +127,7 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		G_old_tau = G_tau;
 		G0_old_tau = G0_tau;
 
-                itime_multiple_vector_t G0_tau_mv; G0_tau_mv.first.resize(n_tau+1); G0_tau_mv.second.resize(n_tau+1);
-                freq_multiple_vector_t G0_omega_mv=G0_omega.to_multiple_vector();
-                backward_FT(beta, -mu, mu*mu+tsq, G0_tau_mv.first,  G0_omega_mv.first); //make G0(tau) out of G0(iomega)
-                backward_FT(beta, -mu, mu*mu+tsq, G0_tau_mv.second, G0_omega_mv.second);
-                G0_tau.from_multiple_vector(G0_tau_mv);
-
+                backward_FT_gf(beta, -mu, mu*mu+tsq, G0_tau, G0_omega);
                 
 		std::cout<<"running solver."<<std::endl<<std::flush;
 		boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, G0_tau,parms);
@@ -189,7 +184,7 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 			std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "<<max_diff<<"\tconverged: "<<converged<<std::endl;
 		}
 		//write checkpoint - clean this up in the future!
-		print_all_green_functions(iteration_ctr, G0_omega.to_multiple_vector(), G_omega.to_multiple_vector(), G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta, paramagnet);
+		print_all_green_functions(iteration_ctr, G0_omega.to_multiple_vector(), G_omega.to_multiple_vector(), G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
 	}while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
 	
 }

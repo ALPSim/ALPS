@@ -81,3 +81,28 @@ void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &
     rhs[i]=v(i,0);
   }
 }
+
+///same as the template function in fouriertransform.h, but not for the
+//multiple vectors. Use green_function_t instead.
+void backward_FT_gf(double beta, double c2, double c3, itime_green_function_t &G_tau, matsubara_green_function_t G_omega) {
+  assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite() && G_tau.nsite()==1);
+  uint N_tau = G_tau.ntime();
+  uint N_omega = G_omega.nfreq();
+  double dt = beta/N_tau;
+             
+  for(uint f=0;f<G_omega.nflavor();++f){
+    for (uint k=0; k<N_omega; k++) {
+      std::complex<double> iw(0,(2*k+1)*M_PI/beta);
+      G_omega(k,f) -= f_omega(iw, c2, c3);
+    }     
+                  
+    for (uint i=0; i<N_tau; i++) {
+      G_tau(i,f) = f_tau(i*dt, beta, c2, c3); 
+      for (uint k=0; k<N_omega; k++) {
+        double wt((2*k+1)*i*M_PI/N_tau);
+        G_tau(i,f) += 2/beta*(cos(wt)*G_omega(k,f).real()+sin(wt)*G_omega(k,f).imag());
+      }
+    }
+    G_tau(N_tau,f)=-1-G_tau(0,f);
+  }
+}
