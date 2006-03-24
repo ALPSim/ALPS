@@ -65,8 +65,8 @@ public:
             , const alps::Parameters& parms);
     
     FrequencyTimeImpuritySolver::result_type solve_omega(
-              const freq_multiple_vector_t& G0_omega
-            , const itime_multiple_vector_t& G0_tau
+              const matsubara_green_function_t& G0_omega
+            , const itime_green_function_t& G0_tau
             , const alps::Parameters& parms =alps::Parameters());
             
 private:

@@ -38,6 +38,7 @@
 #include <alps/vectorio.h>
 #include <cstdlib>
 #include <fstream>
+#include <boost/tuple/tuple.hpp>
 
 ImpuritySolver::result_type ExternalSolver::solve(
       const multiple_vector_type& G0
@@ -92,8 +93,8 @@ ImpuritySolver::result_type ExternalSolver::solve(
 }
 
 FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
-              const freq_multiple_vector_t& G0_omega
-            , const itime_multiple_vector_t& G0_tau
+              const matsubara_green_function_t& G0_omega
+            , const itime_green_function_t& G0_tau
             , const alps::Parameters& parms)
 {
   std::string infile = std::tmpnam(0); // the input file name
@@ -120,8 +121,13 @@ FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
 
   // read the output
   
-  FrequencyTimeImpuritySolver::result_type g;
-  
+  //FrequencyTimeImpuritySolver::result_type g;
+  uint n_matsubara=(uint)parms["NMATSUBARA"];
+  uint n_tau      =(uint)parms["N"];
+  uint n_site     =(uint)parms.value_or_default("NSITE", 1);
+  uint n_orbital  =(uint)parms.value_or_default("NORBIT", 2);
+  matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
+  itime_green_function_t     G_tau(n_tau, n_site, n_orbital);
   {
     std::ifstream output(outfile.c_str());
     alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
@@ -136,14 +142,14 @@ FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
 	  tag=alps::parse_tag(output);
 	}
 
-    read_freq(output,g.first);	
-    read_itime(output,g.second);	
+    read_freq(output,G_omega);	
+    read_itime(output,G_tau);	
     
   } // scope to force closing of file
   
   boost::filesystem::remove(outpath);
   
-  return g;
+  std::pair<matsubara_green_function_t, itime_green_function_t>(G_omega, G_tau);
 }
 
 

@@ -34,6 +34,7 @@
 
 #include "solver.h"
 #include "hilberttransformer.h"
+#include "green_function.h"
 
 /// performs a DMFT self-conistency loop until convergence
 ///
@@ -50,8 +51,8 @@ extern void selfconsistency_loop
  alps::Parameters& parms, 
  ImpuritySolver& solver, 
  HilbertTransformer& hilbert,
- itime_multiple_vector_t& G0_tau, 
- itime_multiple_vector_t& G_tau
+ itime_green_function_t& G0_tau, 
+ itime_green_function_t& G_tau
  );
 
 /// performs a DMFT self-conistency loop until convergence
@@ -62,7 +63,7 @@ extern void selfconsistency_loop
 /// @param G0_omega The bare Green's function in Matsubara frequencies.
 /// @param G_omega  The dressed Green's function G in Matsubara frequencies.
 void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTimeImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert,
-									freq_multiple_vector_t& G0_omega, freq_multiple_vector_t& G_omega);
+									matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega);
 
 
 #endif

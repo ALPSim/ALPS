@@ -80,10 +80,10 @@ multiple_vector_type alps::ImpuritySolver::solve(
   return G;
 }
 
-std::pair<freq_multiple_vector_t,itime_multiple_vector_t> 
+std::pair<matsubara_green_function_t,itime_green_function_t> 
 alps::ImpuritySolver::solve_omega(
-                 const freq_multiple_vector_t& G0_omega
-               , const itime_multiple_vector_t& G0_tau
+                 const matsubara_green_function_t& G0_omega
+               , const itime_green_function_t& G0_tau
                , const Parameters& p)
 {
   BOOST_ASSERT(is_master());
@@ -104,7 +104,7 @@ alps::ImpuritySolver::solve_omega(
       std::runtime_error(" solver finished with nonzero exit code"));
     
   // now extract the results
-  std::pair<freq_multiple_vector_t,itime_multiple_vector_t>  G = 
+  std::pair<matsubara_green_function_t,itime_green_function_t>  G = 
       dynamic_cast<FrequencyTimeImpurityTask*>(get_task())
         ->get_result();
 

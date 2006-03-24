@@ -34,6 +34,7 @@
 /// @brief declares the abstract base class for the impurity solver
 
 #include "types.h"
+#include "green_function.h"
 
 #include <alps/parameters.h>
 #include <vector>
@@ -71,7 +72,7 @@ class FrequencyTimeImpuritySolver{
 public:
   FrequencyTimeImpuritySolver() {}
     
-  typedef std::pair<freq_multiple_vector_t,itime_multiple_vector_t>  result_type;
+  typedef std::pair<matsubara_green_function_t,itime_green_function_t>  result_type;
 	
 	///  @brief solves the impurity problem taking both G0_tau and G0_omega
 	///
@@ -85,8 +86,8 @@ public:
     ///          Matsubara frequency
     
   virtual result_type solve_omega(
-              const freq_multiple_vector_t& G0_omega
-            , const itime_multiple_vector_t& G0_tau
+              const matsubara_green_function_t& G0_omega
+            , const itime_green_function_t& G0_tau
             , const alps::Parameters& parms =alps::Parameters())=0;
             
   virtual ~FrequencyTimeImpuritySolver() {}

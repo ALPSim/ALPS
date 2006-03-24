@@ -54,6 +54,22 @@ void write_freq(alps::oxstream& xml, std::pair<T,T> const& p)
 }
 
 template <class T>
+void write_freq(alps::oxstream& xml, green_function<T> const& g)
+{
+  for(uint f=0;f<g.nflavor();++f){
+    for(uint s1=0;s1<g.nsite();++s1){
+      for(uint s2=0;s2<g.nsite();++s2){
+        std::vector<std::complex<double> > g_f_s1_s2;
+        for(uint w=0;w<g.nfreq();++w){
+          g_f_s1_s2.push_back(g(w,s1,s2,f));
+        }
+        write_freq(xml,g_f_s1_s2);
+      }
+    }
+  }
+}
+
+template <class T>
 void write_itime(alps::oxstream& xml, std::vector<T> const& v)
 {
   xml << alps::start_tag("VECTOR") 
@@ -69,6 +85,21 @@ void write_itime(alps::oxstream& xml, std::pair<T,T> const& p)
 {
   write_itime(xml,p.first);
   write_itime(xml,p.second);
+}
+template <class T>
+void write_itime(alps::oxstream& xml, green_function<T> const& g)
+{
+  for(uint f=0;f<g.nflavor();++f){
+    for(uint s1=0;s1<g.nsite();++s1){
+      for(uint s2=0;s2<g.nsite();++s2){
+        std::vector<double> g_f_s1_s2;
+        for(uint t=0;t<g.ntime();++t){
+          g_f_s1_s2.push_back(g(t,s1,s2,f));
+        }
+        write_itime(xml,g_f_s1_s2);
+      }
+    }
+  }
 }
 
 template <class T>
@@ -90,6 +121,22 @@ void read_itime(std::istream& in, std::pair<T,T>& p)
   read_itime(in,p.first);
   read_itime(in,p.second);
 }
+template <class T>
+void read_itime(std::istream& in, green_function<T>& g)
+{
+  for(uint f=0;f<g.nflavor();++f){
+    for(uint s1=0;s1<g.nsite();++s1){
+      for(uint s2=0;s2<g.nsite();++s2){
+        std::vector<double> g_f_s1_s2;
+        g_f_s1_s2.resize(g.ntime());
+        read_itime(in,g_f_s1_s2);
+        for(uint t=0;t<g.ntime();++t){
+          g(t,s1,s2,f)=g_f_s1_s2[t];
+        }
+      }
+    }
+  }
+}
 
 template <class T>
 void read_freq(std::istream& in, std::vector<T>& v)
@@ -109,6 +156,22 @@ void read_freq(std::istream& in, std::pair<T,T>& p)
 {
   read_freq(in,p.first);
   read_freq(in,p.second);
+}
+template <class T>
+void read_freq(std::istream& in, green_function<T>& g)
+{
+  for(uint f=0;f<g.nflavor();++f){
+    for(uint s1=0;s1<g.nsite();++s1){
+      for(uint s2=0;s2<g.nsite();++s2){
+        std::vector<std::complex<double> > g_f_s1_s2;
+        g_f_s1_s2.resize(g.nfreq());
+        read_freq(in,g_f_s1_s2);
+        for(uint w=0;w<g.nfreq();++w){
+          g(w,s1,s2,f)=g_f_s1_s2[w];
+        }
+      }
+    }
+  }
 }
 
 

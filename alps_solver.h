@@ -72,9 +72,9 @@ public:
     const itime_multiple_vector_t& G0, 
     const Parameters& parms =Parameters());
     
-  std::pair<freq_multiple_vector_t,itime_multiple_vector_t> solve_omega(
-      const freq_multiple_vector_t& G0_omega
-    , const itime_multiple_vector_t& G0_tau
+  std::pair<matsubara_green_function_t,itime_green_function_t> solve_omega(
+      const matsubara_green_function_t& G0_omega
+    , const itime_green_function_t& G0_tau
     , const Parameters& parms=Parameters());
 
 protected:
@@ -96,7 +96,7 @@ class FrequencyTimeImpurityTask
 public:
   FrequencyTimeImpurityTask() {}
   virtual ~FrequencyTimeImpurityTask() {}
-  virtual std::pair<freq_multiple_vector_t,itime_multiple_vector_t> get_result() const =0;
+  virtual std::pair<matsubara_green_function_t,itime_green_function_t> get_result() const =0;
 };
 
 

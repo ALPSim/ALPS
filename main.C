@@ -77,19 +77,11 @@ int main(int argc, char** argv)
 		if(!parms.defined("OMEGA_LOOP")){
         		
 			//...imaginary time tau
-			int N=boost::lexical_cast<int>(parms["N"]);
-			multiple_vector_type G0_tau, G_tau;
-			G0_tau.first.resize(N+1);
-			G0_tau.second.resize(N+1);
+			int n_tau=boost::lexical_cast<int>(parms["N"]);
+			int n_orbital=parms.value_or_default("NORBIT", 2);
+			itime_green_function_t G0_tau(n_tau+1, 1, n_orbital), G_tau(n_tau+1, 1, n_orbital);
 			// read initial guess
-			std::ifstream infile_up("G_input_up");		//Bare Green's function in Imaginary time for spin up
-			std::ifstream infile_down("G_input_down");	//Bare Green's function in Imaginary time for spin down
-			assert(infile_up.is_open() && infile_down.is_open());
-			for (int i=0; i<N+1; i++) {
-				infile_up >> G0_tau.first[i];
-				infile_down >> G0_tau.second[i];
-			}
-			std::cout<<"N="<<N<<std::endl;
+                        G0_tau.read(parms.value_or_default("G0TAU_INPUT", "G0tau_input").c_str());
 			std::cout<<"starting value for G is: "<<G0_tau<<std::endl;
 			boost::shared_ptr<ImpuritySolver> solver_ptr;
 			if (parms["SOLVER"]=="Hirsch-Fye"){
@@ -115,70 +107,46 @@ int main(int argc, char** argv)
                                 selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
                         }
 			// write final result
-			FILE * outfile_up = fopen("G_output_up","w");
-			FILE * outfile_down = fopen("G_output_down","w");
-			assert((outfile_up != NULL) && (outfile_down !=NULL));
-			for (int i=0; i<N; i++) {
-				fprintf(outfile_up, "%5d   %9.6e\n", i, G_tau.first[i]);
-				fprintf(outfile_down, "%5d   %9.6e\n", i, G_tau.second[i]);
-			}  
+                        std::ofstream out_file("G_output");
+			assert(out_file.is_open());
+                        out_file<<G_tau<<std::endl;
 		}else{
-			alps::scheduler::BasicFactory<RubtsovSim,SSHubbardRubtsovRun> rubtsov_factory;
+			alps::scheduler::BasicFactory<RubtsovSim,SSHubbardRubtsovRun> rubtsov_factory_ss; //for single site problems
+			alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; //for multi orbital problems, but only density density
 			//perform self consistency loop in Matsubara frequency omega
-			int Nmatsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-			freq_multiple_vector_t G0_omega, G_omega;
-                        G_omega.first.resize(Nmatsubara);
-                        G_omega.second.resize(Nmatsubara);
-			G0_omega.first.resize(Nmatsubara);
-			G0_omega.second.resize(Nmatsubara);
+			int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+			int n_orbital=parms.value_or_default("NORBIT", 2);
+			matsubara_green_function_t G0_omega(n_matsubara,1,n_orbital), G_omega(n_matsubara,1,n_orbital);
 			
 			// read initial guess
-                        if(parms.defined("OLD_INPUT_FILE")){
-			std::ifstream infile_up("G0omega_input_up");		//Bare Green's function in Matsubara freq for spin up
-			std::ifstream infile_down("G0omega_input_down");	//Bare Green's function in Matsubara freq for spin down
-			assert(infile_up.is_open() && infile_down.is_open());
-			for (int i=0; i<Nmatsubara; i++) {
-				assert(!infile_up.eof());
-				double first, second;
-				infile_up >> first;
-				infile_down >> second;
-				G0_omega.first[i]=std::complex<double>(0,first);
-				G0_omega.second[i]=std::complex<double>(0,second);
-			}} else{
-                          std::ifstream infile("G0omega_input");
-                          assert(infile.is_open());
-                          for(int i=0;i<Nmatsubara;++i){
-                            assert(!infile.eof());
-                            double omegan, real_up, imag_up, real_dn, imag_dn;
-                            infile>>omegan>>real_up>>imag_up>>real_dn>>imag_dn;
-                            G0_omega.first[i]=std::complex<double>(real_up, imag_up);
-                            G0_omega.second[i]=std::complex<double>(real_dn, imag_dn);
-                          }
-                        }
+                        G0_omega.read(parms.value_or_default("G0OMEGA_INPUT", "G0omega_input").c_str());
                         std::cout<<G0_omega<<std::endl;
 
 			boost::shared_ptr<FrequencyTimeImpuritySolver> solver_ptr;	//construct a solver that takes the GF in both imaginary time and Matsubara freq
-			if (parms["SOLVER"]=="Rubtsov"){
-				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory,argc,argv));
+			if ((parms["SOLVER"]=="Rubtsov") && n_orbital==1){
+				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
+			}
+                        else if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("NSITE", "1") =="1")){
+				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
 			}
 			else{
 				//throw exception or commit suicide or even better: create an external solver that takes its arguments in frequency space.
 				//solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
 				boost::throw_exception(std::logic_error("there is no such solver!"));	
 			}
-			FSSemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-			
-			selfconsistency_loop_omega_tau(parms, *solver_ptr, transform, G0_omega, G_omega);
+			FrequencySpaceHilbertTransformer *transform_ptr;
+                        if(!parms.defined("DOSFILE")){
+                              transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
+                        }else{
+                              transform_ptr= new FSDOSHilbertTransformer(parms);
+                        }
+			selfconsistency_loop_omega_tau(parms, *solver_ptr, *transform_ptr, G0_omega, G_omega);
 				
 			// write final result
-			std::ofstream outfile_up("Gomega_output_up");
-			std::ofstream outfile_down("Gomega_output_down");
-			assert(outfile_up.is_open() && outfile_down.is_open());
-			for (int i=0; i<Nmatsubara; i++) {
-				outfile_up  <<i<<"\t"<<G_omega.first[i]<<std::endl;
-				outfile_down<<i<<"\t"<<G_omega.second[i]<<std::endl;
-			} 
-			outfile_up.close(); outfile_down.close();
+			std::ofstream outfile("Gomega_output");
+			assert(outfile.is_open());
+                        outfile<<G_omega<<std::endl;
+			outfile.close();
 		}
 #ifndef BOOST_NO_EXCEPTIONS
 	}

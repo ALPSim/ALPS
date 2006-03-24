@@ -41,7 +41,7 @@
 /// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates G0 out of G
 /// @param G0 is the bare Green's function in imaginary time. It has to be provided as an initial guess
 /// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
-void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_multiple_vector_t& G0, itime_multiple_vector_t& G)
+void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
 {
   int N = static_cast<int>(parms["N"]);
   double beta = static_cast<double>(parms["BETA"]);
@@ -50,9 +50,10 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   
+  itime_multiple_vector_t G0=G0_tau.to_multiple_vector();
+  itime_multiple_vector_t G = G_tau.to_multiple_vector();
   multiple_vector_type G0_old(G0);
   int iteration_ctr=0;
-    
   double max_diff;	
   do {
     G0_old = G0;
@@ -73,6 +74,8 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   print_tau_green_functions(iteration_ctr++, G0, G, beta);
   } while (max_diff > converged);
   std::cout<<"converged!"<<std::endl;
+  G0_tau.from_multiple_vector(G0);
+  G_tau.from_multiple_vector(G);
 }
 
 /// @brief Run the self consistency loop for G and G0 mainly in Matsubara frequency space. Perform Fourier transformations where needed.
@@ -84,38 +87,37 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
 /// @param G_omega is the dressed Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 
 void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTimeImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert,
-									freq_multiple_vector_t& G0_omega, freq_multiple_vector_t& G_omega){
+									matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega){
 	uint n_tau=boost::lexical_cast<uint>(parms["N"]);
 	uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
+	uint n_orbital=parms.value_or_default("NORBIT", 2);
+	uint n_site=parms.value_or_default("NSITE", 1);
+        
 	double beta = static_cast<double>(parms["BETA"]);
 	double mu = static_cast<double>(parms["MU"]);
 	double h = static_cast<double>(parms["H"]);
 	double converged = static_cast<double>(parms["CONVERGED"]);
 	bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
 	double t=static_cast<double>(parms["t"]);
+
 	double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
 	int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
-					
-	double mu_up = mu+h/2.;
-	double mu_down = mu-h/2.;
+        
 	double tsq=t*t;
 	int iteration_ctr = 0;
         bool result_in_omega=true;
+
         if(parms.defined("DIRECT_ITIME_MEASUREMENT")|| parms.defined("FACTORIZED_ITIME_MEASUREMENT") || parms.defined("WERNER_ITIME_MEASUREMENT")){
           result_in_omega=false;
         }
         //define multiple vectors
-	freq_multiple_vector_t G_old_omega(G0_omega);
-	freq_multiple_vector_t G0_old_omega(G0_omega);
-	itime_multiple_vector_t G_tau;
-    	itime_multiple_vector_t G0_tau;
-	itime_multiple_vector_t G_old_tau;
-	itime_multiple_vector_t G0_old_tau;
+	matsubara_green_function_t G_old_omega(G0_omega);
+	matsubara_green_function_t G0_old_omega(G0_omega);
+	itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
+    	itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
+	itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
+	itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
 	//initialize space for multiple vectors
-        G_tau.first.resize(n_tau+1);      G_tau.second.resize(n_tau+1);
-        G0_tau.first.resize(n_tau+1);     G0_tau.second.resize(n_tau+1);
-        G_old_tau.first.resize(n_tau+1);  G_old_tau.second.resize(n_tau+1);
-        G0_old_tau.first.resize(n_tau+1); G0_old_tau.second.resize(n_tau+1);
 	double max_diff;	
 	do {
 		iteration_ctr++;
@@ -124,83 +126,70 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		G0_old_omega = G0_omega;
 		G_old_tau = G_tau;
 		G0_old_tau = G0_tau;
-                
-                if(!parms.defined("READ_G0TAU")){
-                  backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G0_tau.first,  G0_omega.first); //make G0(tau) out of G0(iomega)
-                  backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G0_tau.second, G0_omega.second);
-                }
-                else{ //read in G_tau
-                  std::ifstream infile("G0tau_input");
-                  assert(infile.is_open());
-                  for(int i=0;i<n_tau+1;++i){
-                    assert(!infile.eof());
-                    double tau, real_up, real_dn;
-                    infile>>tau>>real_up>>real_dn;
-                    //std::cout<<tau<<" "<<n_tau<<" "<<real_up<<" "<<real_dn<<std::endl;
-                    G0_tau.first[i]=real_up;
-                    G0_tau.second[i]=real_dn;
-                  }
-                  std::cout<<"using bare Green's function G0_tau: "<<G0_tau<<std::endl;
-                }
+
+                itime_multiple_vector_t G0_tau_mv; G0_tau_mv.first.resize(n_tau+1); G0_tau_mv.second.resize(n_tau+1);
+                freq_multiple_vector_t G0_omega_mv=G0_omega.to_multiple_vector();
+                backward_FT(beta, -mu, mu*mu+tsq, G0_tau_mv.first,  G0_omega_mv.first); //make G0(tau) out of G0(iomega)
+                backward_FT(beta, -mu, mu*mu+tsq, G0_tau_mv.second, G0_omega_mv.second);
+                G0_tau.from_multiple_vector(G0_tau_mv);
+
                 
 		std::cout<<"running solver."<<std::endl<<std::flush;
 		boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, G0_tau,parms);
-                if(!result_in_omega){ //result is computed not in Matsubara frequencies but imaginary time.
-                  if(paramagnet){
-                    complex_vector G_omega_para(n_matsubara);
-                    double_vector G_para(n_tau+1);
-                    for (uint i=0; i<n_tau+1; i++){
-                      G_para[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
-                    }
-                    forward_FT(beta, -mu, mu*mu+tsq, G_para, G_omega_para); //make G(iomega) out of G(tau)
-                    for(uint i=0;i<n_matsubara;++i){
-                      G_omega.first[i]=G_omega_para[i];
-                      G_omega.second[i]=G_omega_para[i];
-                    }
-                  }
-                  else{
-                    forward_FT(beta, -mu_up  , mu_up*mu_up+tsq    , G_tau.first, G_omega.first);
-                    forward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
-                                                                    
-                  }
-                }
-		std::cout<<"running Hilbert transformer."<<std::endl<<std::flush;
-		G0_omega = hilbert(G_omega, mu, h, beta, paramagnet);
+                std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
+                //freq_multiple_vector_t G_omega_mv=G_omega.to_multiple_vector();
+                //std::cout<<G_omega_mv<<std::endl;
+		G0_omega = hilbert(G_omega, G0_omega, mu, h, beta, paramagnet);
+                //std::cout<<G0_omega_mv<<std::endl;
+                //G0_omega.from_multiple_vector(G0_omega_mv);
+                //std::cout<<G0_omega<<std::endl;
                 //relaxation to speed up /slow down convergence
                 if(relax_rate !=1){
                   std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
-                  for(uint i=0;i<n_matsubara;++i){
-                    G0_omega.first[i]=relax_rate* G0_omega.first[i]+(1-relax_rate)*G0_old_omega.first[i];
-                    G0_omega.second[i]=relax_rate*G0_omega.second[i]+(1-relax_rate)*G0_old_omega.second[i];
+                  for(uint orbital=0;orbital<n_orbital;++orbital){
+                    for(uint site1=0;site1<n_site;++site1){
+                      for(uint site2=0;site2<n_site;++site2){
+                        for(uint i=0;i<n_matsubara;++i){
+                         G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+(1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
+                        }
+                      }
+                    }
                   }
                 }
-                std::cout<<"kinetic energy is: "<<kinetic_energy(G_tau, beta, t);
-		if(result_in_omega){
-			backward_FT(beta, -mu_up,   mu_up*mu_up+tsq,     G_tau.first,  G_omega.first);
-			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G_tau.second, G_omega.second);
-		}
-                if(paramagnet){
+                itime_multiple_vector_t G_tau_mv;
+                G_tau_mv.first.resize(n_tau+1);
+                G_tau_mv.second.resize(n_tau+1);
+                backward_FT(beta, -mu, mu*mu+tsq, G_tau_mv.first,  G_omega.to_multiple_vector().first);
+		backward_FT(beta, -mu, mu*mu+tsq, G_tau_mv.second, G_omega.to_multiple_vector().second);
+		G_tau.from_multiple_vector(G_tau_mv);
+                if(paramagnet && n_orbital >1){
+                  assert(n_orbital==2 && n_site==1);
                   for(uint i=0;i<n_tau+1;++i){
-                    G_tau.first[i]=0.5*(G_tau.first[i]+G_tau.second[i]);
-                    G0_tau.first[i]=0.5*(G0_tau.first[i]+G0_tau.second[i]);
-                    G_tau.second[i]=G_tau.first[i];
-                    G0_tau.second[i]=G0_tau.first[i];
+                    G_tau(i,up)=0.5*(G_tau(i,up)+G_tau(i,down));
+                    G_tau(i,down)=G_tau(i,up);
+                    G0_tau(i,up)=0.5*(G0_tau(i,up)+G0_tau(i,down));
+                    G0_tau(i,down)=G0_tau(i,up);
                   }
                 }
-		std::cout<<"comparing old and new result."<<std::endl<<std::flush;
+		
+                std::cout<<"comparing old and new result."<<std::endl<<std::flush;
 		max_diff=0;
 		if(iteration_ctr>1){
 			//comparison for the dressed Green's function in Matsubara freq.
-			for(uint i=0; i<n_matsubara; i++) {
-				if (fabs((G_omega.first[i]-G_old_omega.first[i]).imag()) > max_diff)
-					max_diff = fabs((G_omega.first[i]-G_old_omega.first[i]).imag());
-				if (fabs((G_omega.second[i]-G_old_omega.second[i]).imag()) > max_diff)
-					max_diff = fabs((G_omega.second[i]-G_old_omega.second[i]).imag());	
-			}
+			for(uint w=0; w<n_matsubara; w++) {
+			  for(uint i1=0; i1<n_site; i1++) {
+			    for(uint i2=0; i2<n_site; i2++) {
+			      for(uint o=0; o<n_orbital; o++) {
+				if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
+					max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
+			      }
+                            }
+                          }
+                        }
 			std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "<<max_diff<<"\tconverged: "<<converged<<std::endl;
 		}
 		//write checkpoint - clean this up in the future!
-		print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, paramagnet);
+		print_all_green_functions(iteration_ctr, G0_omega.to_multiple_vector(), G_omega.to_multiple_vector(), G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta, paramagnet);
 	}while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
 	
 }

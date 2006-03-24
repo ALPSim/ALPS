@@ -1,5 +1,7 @@
+#ifndef GREEN_FUNCTION_H
+#define GREEN_FUNCTION_H
 #include "types.h"
-//proposal: use this class for the storage of Green's functions.
+#include <fstream>
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
 template <typename T> class green_function{
@@ -25,7 +27,8 @@ template <typename T> class green_function{
 	}
 	///copy constructor
 	green_function(const green_function &g):nt_(g.nt_), ns_(g.ns_), nf_(g.nf_), ntnsns_(g.ntnsns_), ntns_(g.ntns_){
-		green_function(g.ntime(), g.nsite(), g.nflavor());
+		val_=new T[nt_*ns_*ns_*nf_];
+		err_=new T[nt_*ns_*ns_*nf_];
 		operator=(g);
 	}
 	///operator= (assignement operator)
@@ -72,13 +75,33 @@ template <typename T> class green_function{
 	///return # of matsubara frequencies. Exactly equivalent to ntime().
 	///In the case of a Matsubara GF 'ntime' sounds odd -> define 'nfreq' instead.
 	inline const uint &nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
+
+        void read(const char *filename);
+        std::pair<std::vector<T>,std::vector<T> > to_multiple_vector() const;
+        void from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> > &mv);
+
+        ///hobby implementation of an iterator with begin, end, and operator++
+        //that goes through all entries of the GF
+        /*class iterator{
+          public:
+            iterator(){}
+            iterator(uint i){pos_=i;}
+            static iterator begin() {return iterator(0);}
+            static iterator end()   {return iterator(nf_*ns_*nt_);}
+            void operator++(){pos_++;}
+            T &operator&()            {return val_[pos_];
+            const T &operator&()const {return val_[pos_];
+            iterator &operator=(const iterator &it){pos_=it.pos_;}
+          private:
+            uint pos_;
+        };*/
 	private:
 	//const values
-	const uint nt_;
-	const uint ns_;
-	const uint nf_;
-	const uint ntnsns_;
-	const uint ntns_;
+	const uint nt_; ///imag time points
+	const uint ns_; ///number of sites
+	const uint nf_; ///number of flavors
+	const uint ntnsns_; ///nt*ns*ns
+	const uint ntns_; ///nt*ns
 
 	// the actual values and errors.
         T *val_;
@@ -87,8 +110,55 @@ template <typename T> class green_function{
 };
 typedef green_function<std::complex<double> > matsubara_green_function_t;
 typedef green_function<double> itime_green_function_t;
+///write out imag time Green function
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v);
+///read in imag time Green function
+std::istream &operator>>(std::istream &is, const green_function<double> &v);
+///write out Matsubara Green function
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v);
+///read in Matsubara Green function
+std::istream &operator>>(std::istream &is, const green_function<std::complex<double> > &v);
 
-
+///compute kinetic energy
 double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, const double &t);
+
+template<typename T> void green_function<T>::read(const char *filename){
+  std::ifstream in_file(filename);
+  assert(in_file.is_open()); //this is not good enough when people use -DNDEBUG.
+  if(!in_file.is_open()){ std::cerr<<"input file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
+  double ignored;
+  for(uint i=0;i<nt_;++i){
+    in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
+    std::cout<<"\n"<<ignored<<" ";
+    for(uint f=0;f<nf_;++f){
+      for(uint s0=0;s0<ns_;++s0){
+        for(uint s1=0;s1<ns_;++s1){
+          in_file>>operator()(i, s0, s1, f); //read the actual value
+          std::cout<<operator()(i, s0, s1, f)<<" ";
+        }
+      }
+    }
+  }
+}
+
+///for the transition period from multiple vectors to this data structure only.
+template<typename T> std::pair<std::vector<T>,std::vector<T> > green_function<T>::to_multiple_vector() const{
+  assert(ns_==1 && nf_<=2);
+  std::pair<std::vector<T>,std::vector<T> > mv;
+  mv.first.resize(nt_);
+  mv.second.resize(nt_);
+  for(uint i=0;i<nt_;++i){
+    mv.first[i]=operator()(i,0,0,0);
+    mv.second[i]=nf_==1?operator()(i,0,0,0):operator()(i,0,0,1);
+  }
+  return mv;
+}
+template<typename T> void green_function<T>::from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> >&mv){
+  assert(ns_==1 && nf_<=2);
+  for(uint i=0;i<nt_;++i){
+    operator()(i,0,0,0)=mv.first[i];
+    if(nf_==2)
+      operator()(i,0,0,1)=mv.second[i];
+  }
+}
+#endif

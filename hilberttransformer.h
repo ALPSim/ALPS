@@ -216,7 +216,7 @@ public:
 	/// @param G_omega the Greens function as a function of Matsubara Frequency omega 
 	/// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
 	/// @return the result of the Hilbert transform: the bare Green's function G0 in Matsubara frequencies
-	virtual freq_multiple_vector_t operator()(freq_multiple_vector_t& G_omega, const double mu, const double h, const double beta,const bool paramagnet)=0; 
+	virtual matsubara_green_function_t operator()(matsubara_green_function_t & G_omega, matsubara_green_function_t &G0_omega, const double mu, const double h, const double beta,const bool paramagnet)=0; 
 	virtual ~FrequencySpaceHilbertTransformer() {}
 	
 };
@@ -228,14 +228,18 @@ public:
 	/// the constructor accepts the bandwidth
 	FSSemicircleHilbertTransformer(double t) : t_(t) {}
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
-	freq_multiple_vector_t operator()(freq_multiple_vector_t& G_omega,const double mu, const double h, const double beta, const bool paramagnet)
+	matsubara_green_function_t operator()(matsubara_green_function_t& G_omega_mgf, matsubara_green_function_t &G0_omega_ignored, const double mu, const double h, const double beta, const bool paramagnet)
 	{
-		
+		freq_multiple_vector_t G_omega;
+                G_omega.first .resize(G_omega_mgf.nfreq());
+                G_omega.second.resize(G_omega_mgf.nfreq());
+                G_omega=G_omega_mgf.to_multiple_vector();
                 std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" paramagnet: "<<paramagnet<<std::endl;
 		double tsq=t_*t_;
 		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
 		if (paramagnet) {
 		        freq_multiple_vector_t G0_omega(G_omega);         
+                        if(G_omega_mgf.nflavor()==1){ for(uint i=0;i<G_omega.first.size();++i) G_omega.second[i].real()*=-1;}
                         /*for(uint i=0;i<G_omega.first.size();++i){
                           G_omega.first[i] =std::complex<double>( 0.5*(G_omega.first[i]-G_omega.second[i]).real(), 0.5*(G_omega.first[i]+G_omega.second[i]).imag());
                           G_omega.second[i]=std::complex<double>(-0.5*(G_omega.first[i]-G_omega.second[i]).real(), 0.5*(G_omega.first[i]+G_omega.second[i]).imag());
@@ -247,7 +251,9 @@ public:
 				G0_omega.first[i] =1./(iw + mu - tsq*0.5*(G_omega.first[i]+G_omega.second[i] )); //careful: mu is real, iw is imag, and G is only imag when averaged
 				G0_omega.second[i]=1./(iw + mu - tsq*0.5*(G_omega.second[i]+G_omega.first[i] )); //careful: mu is real, iw is imag, and G is only imag when averaged
                         }
-                        return G0_omega;
+                        matsubara_green_function_t G0_omega_mgf(G_omega_mgf.nfreq(), G_omega_mgf.nsite(), G_omega_mgf.nflavor());
+                        G0_omega_mgf.from_multiple_vector(G0_omega);
+                        return G0_omega_mgf;
 		}
 		else {
 		//formula according to review, p. 61, formula 223 'antiferromagnetic Neel phase'	
@@ -262,12 +268,74 @@ public:
 				G0_omega.first[i] =1./(iw + mu - tsq*G_omega.second[i]); //careful: mu is real, iw is imag, and G is both real and imag
 				G0_omega.second[i]=1./(iw + mu - tsq*G_omega.first [i]); 
 			}
-			return G0_omega;
+                        matsubara_green_function_t G0_omega_mgf(G_omega_mgf.nfreq(), G_omega_mgf.nsite(), G_omega_mgf.nflavor());
+                        G0_omega_mgf.from_multiple_vector(G0_omega);
+                        return G0_omega_mgf;
 		}
 		
 	}
 private:
 	double t_; 
 };
-
+class FSHamiltonianHilbertTransformer: public FrequencySpaceHilbertTransformer{
+  public:
+    /// the constructor reads in the LDA Hamiltonian from a file
+    FSHamiltonianHilbertTransformer(const alps::Parameters& params);
+    /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
+    /// via summation in k-space. The k-points are defined in the Hamiltonian.
+    matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, matsubara_green_function_t &G0_omega, const double mu, const double h, const double beta, const bool paramagnet);
+};
+class FSDOSHilbertTransformer: public FrequencySpaceHilbertTransformer{
+  public:
+    /// the constructor reads in the DOS from a file
+    FSDOSHilbertTransformer(const alps::Parameters& params){
+      assert(params.defined("DOSFILE"));
+      std::ifstream dos_file(params["DOSFILE"].c_str());
+      assert(dos_file.is_open());
+      double eps, d;
+      std::cout<<"using density of states: "<<std::endl;
+      while(dos_file>>eps>>d){
+        epsilon.push_back(eps);
+        dos.push_back(d);
+        std::cout<<eps<<" "<<d<<std::endl;
+      }
+    }
+    /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
+    /// using integration over D(epsilon).
+    /// We perform the HT G <- \int \frac{D(e)}{A - e} de
+    matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, matsubara_green_function_t &G0_omega, const double mu, const double h, const double beta, const bool paramagnet){
+      assert(G_omega.nsite()==1);
+      assert(h=0);
+      if(paramagnet && G_omega.nflavor()==1){ for(uint i=0;i<G_omega.nfreq();++i) G_omega(i,0)=std::complex<double>(0, G_omega(i,0).imag());}
+      if(paramagnet && G_omega.nflavor()==2){ for(uint i=0;i<G_omega.nfreq();++i){ G_omega(i,0)=0.5*(G_omega(i,0)+G_omega(i,1)); G_omega(i,1)=G_omega(i,0);}}
+      //matsubara_green_function_t G0_omega(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+      matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+      matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+      matsubara_green_function_t sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+      for(spin_t f=0;f<G_omega.nflavor();++f){
+        for(frequency_t w=0;w<G_omega.nfreq();++w){
+          std::complex<double> g=0;
+          sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); //self energy
+          std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu -sigma(w, f);
+          for(uint n=0;n<dos.size()-1;++n){
+            double delta_epsilon = epsilon[n]-epsilon[n+1];
+            double delta_dos     = dos[n]    -dos    [n+1];
+            //perform analytic integration of D(e)/(A-e) for D known at points
+            //e0, e1 at the end of the interval.
+            g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])*(log(A-epsilon[n]) - log(A-epsilon[n+1])));
+          }
+          G_omega_new(w, f)=g;
+        }
+      }
+      for(spin_t f=0;f<G_omega.nflavor();++f){
+        for(frequency_t w=0;w<G_omega.nfreq();++w){
+          G0_omega_new(w,f)=1./(sigma(w,f)+1./G_omega_new(w,f));
+        }
+      }
+      return G0_omega_new;
+    }
+  private:
+    std::vector<double> epsilon;
+    std::vector<double> dos;
+};
 #endif /*ALPS_DMFT_HILBERTTRANSFORMER_H*/
