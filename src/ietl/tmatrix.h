@@ -72,6 +72,8 @@ namespace ietl {
         return multiplicty;
     }
     
+    std::vector<magnitude_type> const& diagonal() const { return alpha;}
+    std::vector<magnitude_type> const& subdiagonal() const { return beta;}
     protected:
     std::vector<magnitude_type> alpha;
     std::vector<magnitude_type> beta;

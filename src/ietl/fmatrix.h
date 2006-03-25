@@ -35,6 +35,7 @@
 #include <cstddef>
 
 #undef minor
+#undef data
 
 namespace ietl
 {

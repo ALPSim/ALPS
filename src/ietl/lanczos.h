@@ -94,6 +94,8 @@ private:
     
     template <class IN, class OUT, class GEN>
     void eigenvectors(IN in_eigvals_start, IN in_eigvals_end , OUT eig_vectors, Info<magnitude_type>& inf, GEN gen, int maxiter=0);    
+
+    std::vector<magnitude_type> const& t_eigenvectors() { return Tvectors;}
   private:
     template <class IN> void find_m1m2(IN in_eigvals_start, IN in_eigvals_end);
     // m1 m2 finder for eigen vector calculation.
@@ -111,6 +113,7 @@ private:
     vector_type vec2;
     unsigned int n; // index of vec2
     std::vector<int> M1, M2, Ma;
+    std::vector<std::vector<magnitude_type> > Tvectors; // contains eigenvectors of T matrix.
     
   }; // end of class lanczos.
   
@@ -132,9 +135,8 @@ private:
     void lanczos<MATRIX, VS>::eigenvectors(IN in_eigvals_start, 
          IN in_eigvals_end , OUT eig_vectors, Info<magnitude_type>& inf, GEN gen_, int maxiter) {
     vector_type vec3 = new_vector(vecspace_); // a temporary vector.
+    Tvectors.resize(0);
     std::vector<vector_type> eigvectors; // contains ritz vectors.
-    std::vector<std::vector<magnitude_type> > Tvectors; // contains
-                                             // eigenvectors of T matrix.
     // calculation of eigen vectors of T matrix(consists of alphas & betas):    
     int n1 =  super_type::alpha.size();
     magnitude_type mamax, error, lambda;
