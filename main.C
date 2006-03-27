@@ -127,7 +127,7 @@ int main(int argc, char** argv)
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
 			}
                         else if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("NSITE", "1") =="1")){
-                          std::cout<<"using multi band hubbard solver"<<std::endl;
+                          std::cout<<"using multiband Hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
 			}
 			else{

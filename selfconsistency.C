@@ -132,7 +132,15 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		std::cout<<"running solver."<<std::endl<<std::flush;
 		boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, G0_tau,parms);
                 std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
-                //freq_multiple_vector_t G_omega_mv=G_omega.to_multiple_vector();
+                if(!result_in_omega){
+                  std::cout<<"G tau:"<<G_tau<<std::endl;
+                  freq_multiple_vector_t G_omega_mv; G_omega_mv.first.resize(n_matsubara); G_omega_mv.second.resize(n_matsubara);
+                  itime_multiple_vector_t G_tau_mv=G_tau.to_multiple_vector();
+                  forward_FT(beta, -mu, mu*mu+tsq, G_tau.to_multiple_vector().first,  G_omega_mv.first);
+                  forward_FT(beta, -mu, mu*mu+tsq, G_tau.to_multiple_vector().second, G_omega_mv.second);
+                  G_omega.from_multiple_vector(G_omega_mv);
+                  std::cout<<"G omega: "<<G_omega<<std::endl;
+                }
                 //std::cout<<G_omega_mv<<std::endl;
 		G0_omega = hilbert(G_omega, G0_omega, mu, h, beta, paramagnet);
                 //std::cout<<G0_omega_mv<<std::endl;
@@ -151,11 +159,9 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                     }
                   }
                 }
-                itime_multiple_vector_t G_tau_mv;
-                G_tau_mv.first.resize(n_tau+1);
-                G_tau_mv.second.resize(n_tau+1);
+                itime_multiple_vector_t G_tau_mv; G_tau_mv.first.resize(n_tau+1); G_tau_mv.second.resize(n_tau+1);
                 backward_FT(beta, -mu, mu*mu+tsq, G_tau_mv.first,  G_omega.to_multiple_vector().first);
-		backward_FT(beta, -mu, mu*mu+tsq, G_tau_mv.second, G_omega.to_multiple_vector().second);
+                backward_FT(beta, -mu, mu*mu+tsq, G_tau_mv.second, G_omega.to_multiple_vector().second);
 		G_tau.from_multiple_vector(G_tau_mv);
                 if(paramagnet && n_orbital >1){
                   assert(n_orbital==2 && n_site==1);
