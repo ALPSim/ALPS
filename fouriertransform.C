@@ -86,7 +86,7 @@ void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &
 //multiple vectors. Use green_function_t instead.
 void backward_FT_gf(double beta, double c2, double c3, itime_green_function_t &G_tau, matsubara_green_function_t G_omega) {
   assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite() && G_tau.nsite()==1);
-  uint N_tau = G_tau.ntime();
+  uint N_tau = G_tau.ntime()-1;
   uint N_omega = G_omega.nfreq();
   double dt = beta/N_tau;
              
