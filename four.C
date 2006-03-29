@@ -28,5 +28,8 @@ int main(int argc, char** argv){
   }
   std::cerr<<"using G_tau: "<<G_tau<<std::endl;
   forward_FT(beta, -mu, mu*mu+t*t, G_tau, G_omega); 
-  std::cout<<G_omega<<std::endl;
+  for (int i=0; i<N; i++) {
+    std::cout<<(2*i+1)*M_PI/beta<<" "<<G_omega[i].imag()<<std::endl;
+  }
+  //std::cout<<G_omega<<std::endl;
 }
