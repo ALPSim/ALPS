@@ -1,8 +1,5 @@
-
-
-all:
-	difftest
-	test
+all: difftest test
+	echo "tests done. exiting."
 difftest: difftest.cpp
 	g++ -o difftest difftest.cpp
 
