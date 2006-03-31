@@ -41,7 +41,7 @@
 #include <boost/tuple/tuple.hpp>
 
 ImpuritySolver::result_type ExternalSolver::solve(
-      const multiple_vector_type& G0
+      const itime_green_function_t& G0
     , const alps::Parameters& parms) 
 {
   std::string infile = std::tmpnam(0); // the input file name
@@ -66,8 +66,11 @@ ImpuritySolver::result_type ExternalSolver::solve(
   call(infile,outfile);
 
   // read the output
-  
-  ImpuritySolver::result_type g;
+  uint N=(uint)parms["N"];
+  uint sites     =(uint)parms.value_or_default("SITES", 1);
+  uint flavors   =(uint)parms.value_or_default("FLAVORS", 2);
+ 
+  itime_green_function_t g(N+1, sites, flavors);
   
   {
     std::ifstream output(outfile.c_str());
@@ -124,8 +127,8 @@ FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
   //FrequencyTimeImpuritySolver::result_type g;
   uint n_matsubara=(uint)parms["NMATSUBARA"];
   uint n_tau      =(uint)parms["N"];
-  uint n_site     =(uint)parms.value_or_default("NSITE", 1);
-  uint n_orbital  =(uint)parms.value_or_default("NORBIT", 2);
+  uint n_site     =(uint)parms.value_or_default("SITES", 1);
+  uint n_orbital  =(uint)parms.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t     G_tau(n_tau, n_site, n_orbital);
   {

@@ -54,8 +54,8 @@ int alps::ImpuritySolver::solve_it(Parameters const& p)
 }
 
 
-multiple_vector_type alps::ImpuritySolver::solve(
-               const itime_multiple_vector_t& G0, 
+itime_green_function_t  alps::ImpuritySolver::solve(
+               const itime_green_function_t & G0, 
                const alps::Parameters& p)
 {
   BOOST_ASSERT(is_master());
@@ -73,7 +73,7 @@ multiple_vector_type alps::ImpuritySolver::solve(
       std::runtime_error(" solver finished with nonzero exit code"));
     
   // now extract the resuls
-  multiple_vector_type G = 
+  itime_green_function_t G = 
       dynamic_cast<ImpurityTask*>(get_task())->get_result();
   
   clear(); // destroy the simulation

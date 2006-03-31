@@ -68,8 +68,8 @@ public:
       the_scheduler->destroy_task();
   }
   
-  multiple_vector_type solve(
-    const itime_multiple_vector_t& G0, 
+  itime_green_function_t solve(
+    const itime_green_function_t& G0, 
     const Parameters& parms =Parameters());
     
   std::pair<matsubara_green_function_t,itime_green_function_t> solve_omega(
@@ -88,7 +88,7 @@ class ImpurityTask
 public:
   ImpurityTask() {}
   virtual ~ImpurityTask() {}
-  virtual multiple_vector_type get_result() const =0;
+  virtual itime_green_function_t get_result() const =0;
 };
 
 class FrequencyTimeImpurityTask

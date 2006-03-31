@@ -45,7 +45,7 @@ class ImpuritySolver {
 public:
   ImpuritySolver() {}
   
-  typedef multiple_vector_type result_type;
+  typedef itime_green_function_t result_type;
   
   ///  @brief solves the impurity problem
   ///
@@ -60,7 +60,7 @@ public:
   ///          imaginary time 
     
   virtual result_type solve(
-              const itime_multiple_vector_t& G0
+              const itime_green_function_t& G0
             , const alps::Parameters& parms)=0;
             
   virtual ~ImpuritySolver() {}

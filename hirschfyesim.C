@@ -100,13 +100,15 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
 
 {
   // initialize G0
+  itime_green_function_t multiple_G0(N+1, 1, 2);
   multiple_vector_type G0;
   //outside HF solver we use sizeof(G0)=N+1, inside we only compute with N imag
   //time positions.
   G0.first.resize(N);
   G0.second.resize(N);
   std::istringstream in(parms["G0"]);
-  read_itime(in,G0);
+  read_itime(in,multiple_G0);
+  G0=multiple_G0.to_multiple_vector();
   
   std::valarray<double> G0_up(G0.first.size());
   std::valarray<double> G0_down(G0.first.size());
@@ -220,7 +222,7 @@ void HirschFyeRun::dostep()
 }
 
 
-multiple_vector_type HirschFyeRun::get_result() const {
+itime_green_function_t HirschFyeRun::get_result() const {
 
   multiple_vector_type g;
   alps::RealVectorObsevaluator G_meas_up=get_measurements()["G_meas_up"];
@@ -236,7 +238,9 @@ multiple_vector_type HirschFyeRun::get_result() const {
   //also take into account G(beta)
   g.first.push_back(-1.-g_up_mean_vector[0]);
   g.second.push_back(-1.-g_down_mean_vector[0]);
-   return g;
+  itime_green_function_t multiple_G(N+1,1,2);
+  multiple_G.from_multiple_vector(g);
+   return multiple_G;
 
 }
 
@@ -273,9 +277,10 @@ void HirschFyeRun::green_vector_from_matrix(std::valarray<double> &green_vector,
 }
 
 
-multiple_vector_type HirschFyeSim::get_result() const {
+itime_green_function_t HirschFyeSim::get_result() const {
 
   multiple_vector_type g;
+  int N(static_cast<int>(parms["N"]));
   alps::ObservableSet meas = get_measurements();
   alps::RealVectorObsevaluator G_meas_up=meas["G_meas_up"];
   alps::RealVectorObsevaluator G_meas_down=meas["G_meas_down"];  
@@ -292,7 +297,8 @@ multiple_vector_type HirschFyeSim::get_result() const {
     g.first.push_back(-1.+g_up_mean_vector[0]);
     g.second.push_back(-1.+g_down_mean_vector[0]);
       
-  std::cout<<"returning: "<<g<<std::endl;
-   return g;
+	itime_green_function_t multiple_G(N+1, 1, 2);
+	multiple_G.from_multiple_vector(g);
+   return multiple_G;
 }
 

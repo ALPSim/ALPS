@@ -55,6 +55,16 @@ extern void selfconsistency_loop
  itime_green_function_t& G_tau
  );
 
+extern void F_selfconsistency_loop
+(
+ alps::Parameters& parms, 
+ ImpuritySolver& solver, 
+ HilbertTransformer& hilbert,
+ itime_green_function_t& G0_tau, 
+ itime_green_function_t& G_tau
+ );
+
+
 /// performs a DMFT self-conistency loop until convergence
 ///
 /// @param parms The input parameters for the simulation.

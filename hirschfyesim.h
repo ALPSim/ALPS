@@ -36,6 +36,7 @@
 #include "types.h"
 #include "hirschfyeaux.h"
 #include "alps_solver.h"
+#include "green_function.h"
 
 #include <alps/scheduler/montecarlo.h>
 #include <alps/osiris/dump.h>
@@ -56,7 +57,7 @@ class HirschFyeSim : public alps::scheduler::MCSimulation, public alps::Impurity
 {
 public:
   HirschFyeSim(const alps::ProcessList& w, const boost::filesystem::path& p) 
-      : alps::scheduler::MCSimulation(w,p)\
+      : alps::scheduler::MCSimulation(w,p)
   { 
   }
 
@@ -66,7 +67,7 @@ public:
   }
 
 	///return the Green's function G
-	multiple_vector_type get_result() const;
+	itime_green_function_t get_result() const;
 
 };
 
@@ -89,7 +90,7 @@ public:
 	double work_done() const;
 
 	///return the Green's function G
-	multiple_vector_type get_result() const;
+	itime_green_function_t get_result() const;
 	
 	///compute vector Green's function from a matrix.
 	void green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const;

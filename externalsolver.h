@@ -61,7 +61,7 @@ public:
     : exe_(boost::filesystem::complete(executable)) {}
 	
 	ImpuritySolver::result_type solve(
-              const multiple_vector_type& G0
+              const itime_green_function_t& G0
             , const alps::Parameters& parms);
     
     FrequencyTimeImpuritySolver::result_type solve_omega(

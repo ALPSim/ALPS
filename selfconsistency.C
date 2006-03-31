@@ -44,39 +44,78 @@
 void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
 {
   int N = static_cast<int>(parms["N"]);
+  int flavors = static_cast<int>(parms["FLAVORS"]);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   
-  itime_multiple_vector_t G0=G0_tau.to_multiple_vector();
-  itime_multiple_vector_t G = G_tau.to_multiple_vector();
-  multiple_vector_type G0_old(G0);
+  itime_green_function_t G0_tau_old(G0_tau);
   int iteration_ctr=0;
   double max_diff;	
   do {
-    G0_old = G0;
+    G0_tau_old = G0_tau;
     std::cout<<"running solver"<<std::endl;
-    G = solver.solve(G0, parms);
-    std::cout<<"G after solver: "<<G<<std::endl;
+    G_tau = solver.solve(G0_tau, parms);
+    std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
-    G0 = hilbert(G, mu, h, beta, paramagnet);
+    itime_multiple_vector_t G0_tau_mv; G0_tau_mv.first.resize(N+1); G0_tau_mv.second.resize(N+1);
+    itime_multiple_vector_t G_tau_mv=G_tau.to_multiple_vector();
+    G0_tau_mv = hilbert(G_tau_mv, mu, h, beta, paramagnet);
+    G0_tau.from_multiple_vector(G0_tau_mv);
     std::cout<<"comparing old and new results"<<std::endl;
 	max_diff=0;
-    for(int i=0; i<N; i++) {
-	  if (fabs(G0.first[i]-G0_old.first[i]) > max_diff)
-	    max_diff = fabs(G0.first[i]-G0_old.first[i]);
-	  if (fabs(G0.second[i]-G0_old.second[i]) > max_diff)
-	    max_diff = fabs(G0.second[i]-G0_old.second[i]);	
-	}	
+    for(int f=0; f<flavors;++f){
+      for(int i=0; i<N; i++) {
+	  if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
+	    max_diff = fabs(G0_tau(i,f)-G0_tau_old(i,f));
+	}
+    }	
   std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
-  print_tau_green_functions(iteration_ctr++, G0, G, beta);
+  print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged);
   std::cout<<"converged!"<<std::endl;
-  G0_tau.from_multiple_vector(G0);
-  G_tau.from_multiple_vector(G);
 }
+
+void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
+{
+  int N = static_cast<int>(parms["N"]);
+  int flavors = static_cast<int>(parms["FLAVORS"]);
+  double beta = static_cast<double>(parms["BETA"]);
+  double mu = static_cast<double>(parms["MU"]);
+  double h = static_cast<double>(parms["H"]);
+  double converged = static_cast<double>(parms["CONVERGED"]);
+  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+
+  itime_green_function_t G0_tau_old(G0_tau);
+  int iteration_ctr=0;
+  double max_diff;
+  do {
+    G0_tau_old = G0_tau;
+    std::cout<<"running solver"<<std::endl;
+    G_tau = solver.solve(G0_tau, parms);
+    std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
+    std::cout<<"running Hilbert transform"<<std::endl;
+    itime_multiple_vector_t G0_tau_mv; G0_tau_mv.first.resize(N+1); G0_tau_mv.second.resize(N+1);
+    itime_multiple_vector_t G_tau_mv=G_tau.to_multiple_vector();
+    G0_tau_mv = hilbert(G_tau_mv, mu, h, beta, paramagnet);
+    G0_tau.from_multiple_vector(G0_tau_mv);
+    std::cout<<"comparing old and new results"<<std::endl;
+        max_diff=0;
+    for(int f=0; f<flavors;++f){
+      for(int i=0; i<N; i++) {
+          if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
+            max_diff = fabs(G0_tau(i,f)-G0_tau_old(i,f));
+        }
+    }
+  std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
+  print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
+  } while (max_diff > converged);
+  std::cout<<"converged!"<<std::endl;
+}
+
+
 
 /// @brief Run the self consistency loop for G and G0 mainly in Matsubara frequency space. Perform Fourier transformations where needed.
 ///
@@ -90,8 +129,8 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 									matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega){
 	uint n_tau=boost::lexical_cast<uint>(parms["N"]);
 	uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
-	uint n_orbital=parms.value_or_default("NORBIT", 2);
-	uint n_site=parms.value_or_default("NSITE", 1);
+	uint n_orbital=parms.value_or_default("FLAVORS", 2);
+	uint n_site=parms.value_or_default("SITES", 1);
         
 	double beta = static_cast<double>(parms["BETA"]);
 	double mu = static_cast<double>(parms["MU"]);

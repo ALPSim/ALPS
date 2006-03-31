@@ -35,6 +35,7 @@
 #include "externalsolver.h"
 #include "hilberttransformer.h"
 #include "../DMFT-solvers/Rubtsov/rubtsov.h"
+#include "../DMFT-solvers/Werner/impurity.h"
 
 #include <alps/parameters.h>
 #include <alps/copyright.h>
@@ -78,7 +79,7 @@ int main(int argc, char** argv)
         		
 			//...imaginary time tau
 			int n_tau=boost::lexical_cast<int>(parms["N"]);
-			int n_orbital=parms.value_or_default("NORBIT", 2);
+			int n_orbital=parms.value_or_default("FLAVORS", 2);
 			itime_green_function_t G0_tau(n_tau+1, 1, n_orbital), G_tau(n_tau+1, 1, n_orbital);
 			// read initial guess
                         G0_tau.read(parms.value_or_default("G0TAU_INPUT", "G0tau_input").c_str());
@@ -92,14 +93,13 @@ int main(int argc, char** argv)
 				SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 				selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
 			}
-			/*
 			else if (parms["SOLVER"]=="Werner") {
+				std::cout<<"solving Werner"<<std::endl;
 			    alps::scheduler::BasicFactory<WernerSim,WernerRun> factory;
 				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
 				F_SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 				F_selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
 			}
-			*/
 			else {
 				solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
 		
@@ -115,7 +115,7 @@ int main(int argc, char** argv)
 			alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; //for multi orbital problems, but only density density
 			//perform self consistency loop in Matsubara frequency omega
 			int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-			int n_orbital=parms.value_or_default("NORBIT", 2);
+			int n_orbital=parms.value_or_default("FLAVORS", 2);
 			matsubara_green_function_t G0_omega(n_matsubara,1,n_orbital), G_omega(n_matsubara,1,n_orbital);
 			
 			// read initial guess
@@ -126,7 +126,7 @@ int main(int argc, char** argv)
                           std::cout<<"using single site Hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
 			}
-                        else if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("NSITE", "1") =="1")){
+                        else if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("SITES", "1") =="1")){
                           std::cout<<"using multiband Hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
 			}

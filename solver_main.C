@@ -45,7 +45,7 @@
 /// @param G0 contains on return the Weiss field read from the input file, in Matsubara frequencies
 /// @param parms contains on return the simulation parameter read from the input file
 
-void read_input(const std::string& inputfile, multiple_vector_type& G0,  alps::Parameters& parms)
+void read_input(const std::string& inputfile, itime_green_function_t& G0,  alps::Parameters& parms)
 {
 	std::ifstream input(inputfile.c_str());
 	alps::XMLTag tag=alps::parse_tag(input); // skip outermost element <SIMULATION>
@@ -72,7 +72,7 @@ void read_input(const std::string& inputfile, multiple_vector_type& G0,  alps::P
 /// @param G0 the Weiss field used in the solver
 /// @param G the Green's function calculated by the impurity solver
 /// @param parms the simulation parameter used in the solver
-void write_output(const std::string& outputfile, const multiple_vector_type& G0, const multiple_vector_type& G, const alps::Parameters& parms)
+void write_output(const std::string& outputfile, const itime_green_function_t& G0, const itime_green_function_t& G, const alps::Parameters& parms)
 {
 	alps::oxstream output(outputfile);
 	
@@ -149,15 +149,18 @@ int main(int argc, char** argv)
 		
 		// read parameters and G0
 		
-		multiple_vector_type G0;
 		alps::Parameters parms;
+		int N=(int)parms["N"];
+		int flavors=(int)parms["FLAVORS"];
+		int sites=(int)parms["SITES"];
+		itime_green_function_t G0(N+1, sites, flavors);
 		read_input(infile,G0,parms);
 		
                 alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
 		alps::ImpuritySolver solver(factory,argc,argv);
 		
 		// write g into output file
-		multiple_vector_type G = solver.solve(G0,parms);
+		itime_green_function_t G = solver.solve(G0,parms);
 		write_output(outfile,G0,G,parms);
 #ifndef BOOST_NO_EXCEPTIONS
 	}
