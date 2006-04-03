@@ -1,4 +1,4 @@
-include $(HOME)/share/alps/include.mk
+include $(HOME)/ALPS/share/alps/include.mk
 CXXFLAGS +=-W -funroll-loops  -g
 SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
