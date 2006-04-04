@@ -24,7 +24,8 @@
 * DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-
+#ifndef FOURIER_TRANSFORM_H
+#define FOURIER_TRANSFORM_H
 //#include "hirschfyesim.h"
 #include <complex>
 #include "types.h" // for the multiple_vector_type
@@ -81,59 +82,38 @@ inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c
   std::complex<double> iwsq=iw*iw;
 	return 1./iw + c2/(iwsq) + c3/(iw*iwsq);
 }
-//example class V type:  vector_type. Used to store G(tau)
-//example class W type:  complex_vector_type, used to store G(iomega)
-//is it really meaningful to have this as a template function?!?
-template <class V, class W> void forward_FT(double beta, double c2, double c3,const V & v, W & v_omega) {
-
-  uint N=v.size() -1;
-  double dt = beta/N;
-  dense_matrix spline_matrix(N+1, N+1);
-  generate_spline_matrix(spline_matrix);
-  assert(v_omega.size()==N); //we implicitely assume that we have as many imag time slices as matsubara frequencies. If this is not the case: interpolate, then use oversampling.
-  V v2(v);
-
-  evaluate_second_derivatives(dt, c2, c3, spline_matrix, v, v2);
-  //std::cout<<"second derivatives: "<<v2<<std::endl;
-  for (uint k=0; k<N; k++) {
-	std::complex<double> iw(0, (2*k+1)*M_PI/beta);
-	v_omega[k] = 0;
-	
-	for (uint n=1; n<N; n++) {
-	  v_omega[k] += exp(iw*(n*dt))*(v2[n+1]-2*v2[n]+v2[n-1]);
-	}
-	v_omega[k] += v2[1] - v2[0] + v2[N] - v2[N-1];
-	v_omega[k] *= 1./(dt*pow(iw,4));
-        v_omega[k] += f_omega(iw, c2, c3);
-  }
-  //std::cout<<"v_omega: "<<v_omega<<std::endl;
-} 
-
 
 inline double f_tau(double tau, double beta, double c2, double c3) {
   return -0.5 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
 }
 
-//example class V type:  vector_type, used to store G(tau)
-//example class W type:  complex_vector_type, used to store G(iomega)
-void backward_FT_gf(double beta, double c2, double c3, itime_green_function_t &G_tau, matsubara_green_function_t G_omega);
-template <class V, class W> void backward_FT(double beta, double c2, double c3, V & v, W v_omega) {
-  
-  uint N_tau = v.size()-1;
-  uint N_omega = v_omega.size();
-  double dt = beta/N_tau;
-  
-  for (uint k=0; k<N_omega; k++) {
-    std::complex<double> iw(0,(2*k+1)*M_PI/beta);
-    v_omega[k] -= f_omega(iw, c2, c3);
-  }	
-  
-  for (uint i=0; i<N_tau; i++) {
-    v[i] = f_tau(i*dt, beta, c2, c3);
-	for (uint k=0; k<N_omega; k++) {
-	  double wt((2*k+1)*i*M_PI/N_tau);
-	  v[i] += 2/beta*(cos(wt)*v_omega[k].real()+sin(wt)*v_omega[k].imag());
-	}
+class FourierTransformer{
+  public:
+    FourierTransformer(double beta, double mu){
+      beta_=beta;
+      mu_=mu;
+      c2_=-mu;
+      c3_=0;
+    }
+    virtual ~FourierTransformer(){}
+    virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
+    virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
+  protected:
+    double beta_;
+    double mu_;
+    double c2_;
+    double c3_;
+};
+
+class BetheFourierTransformer:public FourierTransformer{
+  public:
+  BetheFourierTransformer(double beta, double mu, double t):FourierTransformer(beta, mu){
+    t_=t;
+    c3_=mu_*mu_-t_*t_;
   }
-  v[N_tau]=-1-v[0];
-}
+  virtual ~BetheFourierTransformer(){}
+  private:
+  double t_;
+};
+
+#endif FOURIER_TRANSFORM_H

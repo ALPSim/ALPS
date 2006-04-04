@@ -74,6 +74,14 @@ int main(int argc, char** argv)
 		
 		alps::Parameters parms;
 		std::cin >> parms;
+                boost::shared_ptr<FourierTransformer> fourier_ptr;
+                if(parms.defined("GENERAL_FOURIER")){
+                  std::cout<<"using General Fourier transform"<<std::endl;
+                  fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"]));
+                } else{
+                  std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
+                  fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], parms["MU"], parms["t"]));
+                }
 		//perform selfconsistency loop in...
 		if(!parms.defined("OMEGA_LOOP")){
         		
@@ -91,20 +99,20 @@ int main(int argc, char** argv)
 				alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;	
 				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
 				SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-				selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+				selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
 			}
 			else if (parms["SOLVER"]=="Werner") {
 				std::cout<<"solving Werner"<<std::endl;
 			    alps::scheduler::BasicFactory<WernerSim,WernerRun> factory;
 				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
 				F_SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-				F_selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+				F_selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
 			}
 			else {
 				solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
 		
                                 SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-                                selfconsistency_loop(parms, *solver_ptr, transform, G0_tau, G_tau);
+                                selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
                         }
 			// write final result
                         std::ofstream out_file("G_output");
@@ -121,7 +129,7 @@ int main(int argc, char** argv)
 			// read initial guess
                         G0_omega.read(parms.value_or_default("G0OMEGA_INPUT", "G0omega_input").c_str());
 
-			boost::shared_ptr<FrequencyTimeImpuritySolver> solver_ptr;	//construct a solver that takes the GF in both imaginary time and Matsubara freq
+			boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	//construct a solver that takes the GF in both imaginary time and Matsubara freq
 			if ((parms["SOLVER"]=="Rubtsov") && n_orbital==1){
                           std::cout<<"using single site Hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
@@ -143,7 +151,7 @@ int main(int argc, char** argv)
                               std::cout<<"using DOS Hilbert transform"<<std::endl;
                               transform_ptr= new FSDOSHilbertTransformer(parms);
                         }
-			selfconsistency_loop_omega_tau(parms, *solver_ptr, *transform_ptr, G0_omega, G_omega);
+			selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr, *fourier_ptr, G0_omega, G_omega);
 				
 			// write final result
 			std::ofstream outfile("Gomega_output");

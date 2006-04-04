@@ -32,6 +32,7 @@
 
 #include "selfconsistency.h"
 #include "green_function.h"
+#include "fouriertransform.h"
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
 /// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
@@ -41,13 +42,13 @@
 /// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates G0 out of G
 /// @param G0 is the bare Green's function in imaginary time. It has to be provided as an initial guess
 /// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
-void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
+void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, FourierTransformer &fourier, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
 {
   int N = static_cast<int>(parms["N"]);
-  int flavors = static_cast<int>(parms["FLAVORS"]);
+  int flavors = parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms["H"]);
+  double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   
@@ -60,12 +61,9 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     G_tau = solver.solve(G0_tau, parms);
     std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
-    itime_multiple_vector_t G0_tau_mv; G0_tau_mv.first.resize(N+1); G0_tau_mv.second.resize(N+1);
-    itime_multiple_vector_t G_tau_mv=G_tau.to_multiple_vector();
-    G0_tau_mv = hilbert(G_tau_mv, mu, h, beta, paramagnet);
-    G0_tau.from_multiple_vector(G0_tau_mv);
+    G0_tau= hilbert(G_tau, fourier, mu, h, beta, paramagnet);
     std::cout<<"comparing old and new results"<<std::endl;
-	max_diff=0;
+    max_diff=0;
     for(int f=0; f<flavors;++f){
       for(int i=0; i<N; i++) {
 	  if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
@@ -78,13 +76,13 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   std::cout<<"converged!"<<std::endl;
 }
 
-void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
+void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, FourierTransformer &fourier, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
 {
   int N = static_cast<int>(parms["N"]);
-  int flavors = static_cast<int>(parms["FLAVORS"]);
+  int flavors = parms.value_or_default("FLAVORS", 2);;
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms["H"]);
+  double h = parms.value_or_default("H", 0);;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
 
@@ -97,12 +95,9 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hil
     G_tau = solver.solve(G0_tau, parms);
     std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
-    itime_multiple_vector_t G0_tau_mv; G0_tau_mv.first.resize(N+1); G0_tau_mv.second.resize(N+1);
-    itime_multiple_vector_t G_tau_mv=G_tau.to_multiple_vector();
-    G0_tau_mv = hilbert(G_tau_mv, mu, h, beta, paramagnet);
-    G0_tau.from_multiple_vector(G0_tau_mv);
+    G0_tau= hilbert(G_tau, fourier, mu, h, beta, paramagnet);
     std::cout<<"comparing old and new results"<<std::endl;
-        max_diff=0;
+    max_diff=0;
     for(int f=0; f<flavors;++f){
       for(int i=0; i<N; i++) {
           if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
@@ -125,7 +120,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hil
 /// @param G0_omega is the bare Green's function in Matsubara frequency. It has to be provided as an initial guess
 /// @param G_omega is the dressed Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 
-void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTimeImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert,
+void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert, FourierTransformer &fourier,
 									matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega){
 	uint n_tau=boost::lexical_cast<uint>(parms["N"]);
 	uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
@@ -137,12 +132,10 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 	double h = static_cast<double>(parms["H"]);
 	double converged = static_cast<double>(parms["CONVERGED"]);
 	bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
-	double t=static_cast<double>(parms["t"]);
 
 	double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
 	int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
         
-	double tsq=t*t;
 	int iteration_ctr = 0;
         bool result_in_omega=true;
 
@@ -166,20 +159,11 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
 		G_old_tau = G_tau;
 		G0_old_tau = G0_tau;
 
-                backward_FT_gf(beta, -mu, mu*mu+tsq, G0_tau, G0_omega);
+                fourier.backward_ft(G0_tau, G0_omega);
                 
 		std::cout<<"running solver."<<std::endl<<std::flush;
-		boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, G0_tau,parms);
+		G_omega = solver.solve_omega(G0_omega,parms);
                 std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
-                if(!result_in_omega){
-                  std::cout<<"G tau:"<<G_tau<<std::endl;
-                  freq_multiple_vector_t G_omega_mv; G_omega_mv.first.resize(n_matsubara); G_omega_mv.second.resize(n_matsubara);
-                  itime_multiple_vector_t G_tau_mv=G_tau.to_multiple_vector();
-                  forward_FT(beta, -mu, mu*mu+tsq, G_tau.to_multiple_vector().first,  G_omega_mv.first);
-                  forward_FT(beta, -mu, mu*mu+tsq, G_tau.to_multiple_vector().second, G_omega_mv.second);
-                  G_omega.from_multiple_vector(G_omega_mv);
-                  std::cout<<"G omega: "<<G_omega<<std::endl;
-                }
                 //std::cout<<G_omega_mv<<std::endl;
 		G0_omega = hilbert(G_omega, G0_omega, mu, h, beta, paramagnet);
                 //std::cout<<G0_omega_mv<<std::endl;
@@ -198,10 +182,8 @@ void selfconsistency_loop_omega_tau(const alps::Parameters& parms, FrequencyTime
                     }
                   }
                 }
-                itime_multiple_vector_t G_tau_mv; G_tau_mv.first.resize(n_tau+1); G_tau_mv.second.resize(n_tau+1);
-                backward_FT(beta, -mu, mu*mu+tsq, G_tau_mv.first,  G_omega.to_multiple_vector().first);
-                backward_FT(beta, -mu, mu*mu+tsq, G_tau_mv.second, G_omega.to_multiple_vector().second);
-		G_tau.from_multiple_vector(G_tau_mv);
+                fourier.backward_ft(G_tau,  G_omega);
+                fourier.backward_ft(G0_tau,  G0_omega);
                 if(paramagnet && n_orbital >1){
                   assert(n_orbital==2 && n_site==1);
                   for(uint i=0;i<n_tau+1;++i){

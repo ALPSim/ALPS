@@ -84,25 +84,54 @@ void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &
 
 ///same as the template function in fouriertransform.h, but not for the
 //multiple vectors. Use green_function_t instead.
-void backward_FT_gf(double beta, double c2, double c3, itime_green_function_t &G_tau, matsubara_green_function_t G_omega) {
+void FourierTransformer::backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const {
   assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite() && G_tau.nsite()==1);
   uint N_tau = G_tau.ntime()-1;
   uint N_omega = G_omega.nfreq();
-  double dt = beta/N_tau;
+  matsubara_green_function_t G_omega_no_model(G_omega);
+  double dt = beta_/N_tau;
              
   for(uint f=0;f<G_omega.nflavor();++f){
     for (uint k=0; k<N_omega; k++) {
-      std::complex<double> iw(0,(2*k+1)*M_PI/beta);
-      G_omega(k,f) -= f_omega(iw, c2, c3);
+      std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+      G_omega_no_model(k,f) -= f_omega(iw, c2_, c3_);
     }     
                   
     for (uint i=0; i<N_tau; i++) {
-      G_tau(i,f) = f_tau(i*dt, beta, c2, c3); 
+      G_tau(i,f) = f_tau(i*dt, beta_, c2_, c3_); 
       for (uint k=0; k<N_omega; k++) {
         double wt((2*k+1)*i*M_PI/N_tau);
-        G_tau(i,f) += 2/beta*(cos(wt)*G_omega(k,f).real()+sin(wt)*G_omega(k,f).imag());
+        G_tau(i,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,f).real()+sin(wt)*G_omega_no_model(k,f).imag());
       }
     }
     G_tau(N_tau,f)=-1-G_tau(0,f);
   }
 }
+void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
+
+  uint N=G_tau.ntime()-1;
+  double dt = beta_/N;
+  dense_matrix spline_matrix(N+1, N+1);
+  assert(G_omega.nfreq()==N); //we implicitely assume that we have as many imag time slices as matsubara frequencies. If this is not the case: interpolate,
+  std::vector<double> G_tau_vector(G_tau.ntime());
+  std::vector<double> G_tau_derivatives(G_tau.ntime());
+  for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
+    generate_spline_matrix(spline_matrix);
+    for(uint i=0;i<G_tau.ntime();++i){
+      G_tau_vector[i]=G_tau(i,flavor);
+    }
+    evaluate_second_derivatives(dt, c2_, c3_, spline_matrix, G_tau_vector, G_tau_derivatives);
+    for (uint k=0; k<N; k++) {
+      std::complex<double> iw(0, (2*k+1)*M_PI/beta_);
+      G_omega(k,flavor) = 0;
+                                            
+      for (uint n=1; n<N; n++) {
+        G_omega(k,flavor) += exp(iw*(n*dt))*(G_tau_derivatives[n+1]-2*G_tau_derivatives[n]+G_tau_derivatives[n-1]);
+      }
+      G_omega(k,flavor) += G_tau_derivatives[1] - G_tau_derivatives[0] + G_tau_derivatives[N] - G_tau_derivatives[N-1];
+      G_omega(k,flavor) *= 1./(dt*pow(iw,4));
+      G_omega(k,flavor) += f_omega(iw, c2_, c3_);
+    }
+  }
+} 
+

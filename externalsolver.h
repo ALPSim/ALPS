@@ -53,7 +53,7 @@
 
 class ExternalSolver 
  : public ImpuritySolver
- , public FrequencyTimeImpuritySolver 
+ , public MatsubaraImpuritySolver 
 {
 public:
 	/// @param executable the path to the executable
@@ -64,9 +64,8 @@ public:
               const itime_green_function_t& G0
             , const alps::Parameters& parms);
     
-    FrequencyTimeImpuritySolver::result_type solve_omega(
+    MatsubaraImpuritySolver::result_type solve_omega(
               const matsubara_green_function_t& G0_omega
-            , const itime_green_function_t& G0_tau
             , const alps::Parameters& parms =alps::Parameters());
             
 private:

@@ -95,9 +95,8 @@ ImpuritySolver::result_type ExternalSolver::solve(
   return g;
 }
 
-FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
+MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
               const matsubara_green_function_t& G0_omega
-            , const itime_green_function_t& G0_tau
             , const alps::Parameters& parms)
 {
   std::string infile = std::tmpnam(0); // the input file name
@@ -113,7 +112,6 @@ FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
     input << alps::start_tag("SIMULATION") << parms;
 	input << alps::start_tag("G0");
     write_freq(input,G0_omega);
-    write_itime(input,G0_tau);
     input << alps::end_tag("G0");
     input << alps::end_tag("SIMULATION");
 	
@@ -124,13 +122,11 @@ FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
 
   // read the output
   
-  //FrequencyTimeImpuritySolver::result_type g;
   uint n_matsubara=(uint)parms["NMATSUBARA"];
   uint n_tau      =(uint)parms["N"];
   uint n_site     =(uint)parms.value_or_default("SITES", 1);
   uint n_orbital  =(uint)parms.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
-  itime_green_function_t     G_tau(n_tau, n_site, n_orbital);
   {
     std::ifstream output(outfile.c_str());
     alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
@@ -146,13 +142,12 @@ FrequencyTimeImpuritySolver::result_type ExternalSolver::solve_omega(
 	}
 
     read_freq(output,G_omega);	
-    read_itime(output,G_tau);	
     
   } // scope to force closing of file
   
   boost::filesystem::remove(outpath);
   
-  return std::make_pair(G_omega, G_tau);
+  return G_omega;
 }
 
 

@@ -68,11 +68,11 @@ public:
 
 /// the base class for all impurity solvers taking a Green's function in imaginary 
 /// time and Matsubara frequency and returning one in Matsubara frequency.
-class FrequencyTimeImpuritySolver{
+class MatsubaraImpuritySolver{
 public:
-  FrequencyTimeImpuritySolver() {}
+  MatsubaraImpuritySolver() {}
     
-  typedef std::pair<matsubara_green_function_t,itime_green_function_t>  result_type;
+  typedef matsubara_green_function_t  result_type;
 	
 	///  @brief solves the impurity problem taking both G0_tau and G0_omega
 	///
@@ -87,10 +87,9 @@ public:
     
   virtual result_type solve_omega(
               const matsubara_green_function_t& G0_omega
-            , const itime_green_function_t& G0_tau
             , const alps::Parameters& parms =alps::Parameters())=0;
             
-  virtual ~FrequencyTimeImpuritySolver() {}
+  virtual ~MatsubaraImpuritySolver() {}
 };
 
 

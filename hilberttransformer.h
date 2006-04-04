@@ -56,7 +56,7 @@ public:
 	/// @param G_tau the Greens function as a function of imaginary time tau 
 	/// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
 	/// @return the result of the Hilbert transform (G0_tau)
-	virtual itime_multiple_vector_t operator()(itime_multiple_vector_t& G_tau, double mu, double h, double beta, bool paramagnet)=0; 
+	virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier_ignored, double mu, double h, double beta, bool paramagnet)=0; 
 	virtual ~HilbertTransformer() {}
 };
 
@@ -67,60 +67,31 @@ public:
 	/// the constructor accepts the bandwidth
 	SemicircleHilbertTransformer(double t) : t_(t) {}
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
-	multiple_vector_type operator()(multiple_vector_type& G, double mu, double h, double beta, bool paramagnet)
+	itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier, double mu, double h, double beta, bool paramagnet)
 	{
 		
 		double tsq=t_*t_;
+                matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
+                matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
+                itime_green_function_t G0_tau(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
 		if (paramagnet) {
-                  //std::cout<<"paramagnet!: "<<std::endl;
-			vector_type Gpara(G.first.size()); //G_tau in paramagnetic case
-			complex_vector_type G_omega(G.first.size()-1);
-			complex_vector_type G0_omega(G.first.size()-1);
-			
-			for (uint i=0; i<Gpara.size(); i++) //average results of solver for up and down spins
-				Gpara[i] = 0.5*(G.first[i]+G.second[i]);
-			
-			forward_FT(beta, -mu, mu*mu+tsq, Gpara, G_omega); //generate G_omega
-			
-			for(uint i=0; i<G_omega.size(); i++) {
-				std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-				G0_omega[i] = 1./(iw + mu - tsq*G_omega[i]);
-			}
-                        //std::cout<<"G0 omega: "<<G0_omega<<std::endl;
-			backward_FT(beta, -mu, mu*mu+tsq, Gpara, G0_omega); //generate G0
-                        //std::cout<<"G0para: "<<Gpara<<std::endl;
-			multiple_vector_type G0(G);
-			G0.first = Gpara; //write out G0 and return it
-			G0.second = Gpara;
-			return G0;
+                  assert(G_tau.nflavor()%2==0);
+                  for(spin_t flavor=0;flavor<G_tau.nflavor(); flavor+=2){
+                    for(itime_index_t tau=0;tau<G_tau.ntime();++tau){
+                      G_tau(tau, flavor  )=0.5*(G_tau(tau, flavor)+G_tau(tau, flavor+1));
+                      G_tau(tau, flavor+1)=G_tau(tau, flavor);
+                    }
+                  }
 		}
-		else {
-			
-			double mu_up = mu+h/2.;
-			double mu_down = mu-h/2.;
-			
-			multiple_vector_type G0(G);
-			multiple_complex_vector_type G_omega;
-			G_omega.first.resize(G.first.size()-1);
-			G_omega.second.resize(G.second.size()-1);
-			
-			multiple_complex_vector_type G0_omega(G_omega); 
-			
-			forward_FT(beta, -mu_up, mu_up*mu_up+tsq, G.first, G_omega.first);
-			forward_FT(beta, -mu_down, mu_down*mu_down+tsq, G.second, G_omega.second);
-			
-			for(uint i=0; i<G_omega.first.size(); i++) {
-				std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-				G0_omega.first[i] = 1./(iw + mu_up - tsq*G_omega.second[i]);
-				G0_omega.second[i] = 1./(iw + mu_down - tsq*G_omega.first[i]);
-			}
-			
-			backward_FT(beta, -mu_up, mu_up*mu_up+tsq, G0.first, G0_omega.first);
-			backward_FT(beta, -mu_down, mu_down*mu_down+tsq, G0.second, G0_omega.second);
-			
-			return G0;
+                fourier.forward_ft(G_tau, G_omega);
+		for(uint i=0; i<G_omega.nfreq(); i++) {
+		  std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+                  for(spin_t flavor=0;flavor<G_omega.nflavor(); flavor++){
+                    G0_omega(i, flavor) = 1./(iw + mu - tsq*G_omega(i, flavor%2==0?flavor+1:flavor-1));
+                  }
 		}
-		
+                fourier.backward_ft(G0_tau, G0_omega);
+		return G0_tau;
 	}
 private:
 	double t_; 
@@ -132,12 +103,12 @@ class SquarelatticeHilbertTransformer : public HilbertTransformer {
 public:
 	/// the constructor accepts the bandwidth
 	SquarelatticeHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-	multiple_vector_type operator()(multiple_vector_type Sigma, double mu)
+	itime_green_function_t operator()(itime_green_function_t Sigma, double mu)
 	{
 		//to implement
           std::cout<<Sigma;
           std::cout<<mu;
-		return multiple_vector_type();
+		return itime_green_function_t(0,0,0);
 	}
 private:
 	double bw_; // or band width
@@ -154,12 +125,12 @@ public:
 	///          Note that issues such as units are still undecided and might require further 
 	///          additions to the interface
 	GeneralHilbertTransformer(const vector_type& D) : D_(D) {}
-	multiple_vector_type operator()(multiple_vector_type Sigma, double mu)
+	itime_green_function_t operator()(itime_green_function_t Sigma, double mu)
 	{
 		//to implement
           std::cout<<Sigma;
           std::cout<<mu;
-		return multiple_vector_type();
+		return itime_green_function_t(0,0,0);
 	}
 private:
 	vector_type D_; // or band width
@@ -174,30 +145,28 @@ class F_SemicircleHilbertTransformer : public HilbertTransformer {
 	/// the constructor accepts the bandwidth
 	F_SemicircleHilbertTransformer(double t) : t_(t) {}
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
-	multiple_vector_type operator()(multiple_vector_type& G, double dummy1, double dummy2, double dummy3, bool paramagnet)
+	itime_green_function_t operator()(itime_green_function_t & G, FourierTransformer &fourier_ignored, double dummy1, double dummy2, double dummy3, bool paramagnet)
 	{
           dummy1=0; dummy2=0; dummy3=0; //avoid warnings.
-		uint Np1=G.first.size();
-		if (paramagnet) {
-			vector_type Gpara(G.first.size());
-                        for (uint i=0; i<Np1; i++)
-                              Gpara[i] = 0.5*(G.first[i]+G.second[i]);
-                        multiple_vector_type F(G);
-                        for (uint i=0; i<Np1; i++) {
-                              F.first[i] = -t_*t_*Gpara[Np1-1-i];             // Green-function must include \tau=\beta !!!
-                              F.second[i] = -t_*t_*Gpara[Np1-1-i];
-                        }
-                        return F;
-		}
-		else {
-			multiple_vector_type F(G);
-			for (uint i=0; i<Np1; i++) {
-				F.first[i] = -t_*t_*G.second[Np1-1-i];
-				F.second[i] = -t_*t_*G.first[Np1-1-i];
-			}
-			return F;
-		}
-
+          itime_green_function_t F(G.ntime(), G.nsite(), G.nflavor());
+          uint Np1=G.ntime();
+	  if (paramagnet) {
+            assert(G.nflavor()%2 ==0);
+            for(uint flavor=0;flavor<G.nflavor();flavor+=2){
+		for(uint tau=0;tau<G.ntime();++tau){
+                  G(tau,flavor  ) = 0.5*(G(tau, flavor)+G(tau, flavor+1));
+                  G(tau,flavor+1) = G(tau, flavor);
+                }
+            }
+          }
+          assert(F.nflavor()%2==0);
+          for(uint flavor=0;flavor<F.nflavor();flavor+=2){
+            for (uint i=0; i<F.ntime(); i++) {
+		F(i,flavor)= -t_*t_*G(Np1-1-i,flavor+1);
+		F(i,flavor)= -t_*t_*G(Np1-1-i,flavor  );
+            }
+          }
+          return F;
 	}
 	private:
 	double t_;
@@ -231,51 +200,40 @@ public:
 	/// the constructor accepts the bandwidth
 	FSSemicircleHilbertTransformer(double t) : t_(t) {}
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
-	matsubara_green_function_t operator()(matsubara_green_function_t& G_omega_mgf, matsubara_green_function_t &G0_omega_ignored, const double mu, const double h, const double beta, const bool paramagnet)
+	matsubara_green_function_t operator()(matsubara_green_function_t& G_omega, matsubara_green_function_t &G0_omega_ignored, const double mu, const double h, const double beta, const bool paramagnet)
 	{
-		freq_multiple_vector_t G_omega;
-                G_omega.first .resize(G_omega_mgf.nfreq());
-                G_omega.second.resize(G_omega_mgf.nfreq());
-                G_omega=G_omega_mgf.to_multiple_vector();
                 std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" paramagnet: "<<paramagnet<<std::endl;
 		double tsq=t_*t_;
+                matsubara_green_function_t G0_omega(G_omega);
 		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
+                std::cout<<G_omega<<std::endl;
 		if (paramagnet) {
-		        freq_multiple_vector_t G0_omega(G_omega);         
-                        if(G_omega_mgf.nflavor()==1){ for(uint i=0;i<G_omega.first.size();++i) G_omega.second[i].real()*=-1;}
-                        /*for(uint i=0;i<G_omega.first.size();++i){
-                          G_omega.first[i] =std::complex<double>( 0.5*(G_omega.first[i]-G_omega.second[i]).real(), 0.5*(G_omega.first[i]+G_omega.second[i]).imag());
-                          G_omega.second[i]=std::complex<double>(-0.5*(G_omega.first[i]-G_omega.second[i]).real(), 0.5*(G_omega.first[i]+G_omega.second[i]).imag());
-                        }*/
-                        for(uint i=0; i<G_omega.first.size(); i++) {
-                                std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-				//G0_omega.first[i] =1./(iw + mu - tsq*G_omega.first[i] ); //careful: mu is real, iw is imag, and G is only imag when averaged
-				//G0_omega.second[i]=1./(iw + mu - tsq*G_omega.second[i]); //careful: mu is real, iw is imag, and G is only imag when averaged
-				G0_omega.first[i] =1./(iw + mu - tsq*0.5*(G_omega.first[i]+G_omega.second[i] )); //careful: mu is real, iw is imag, and G is only imag when averaged
-				G0_omega.second[i]=1./(iw + mu - tsq*0.5*(G_omega.second[i]+G_omega.first[i] )); //careful: mu is real, iw is imag, and G is only imag when averaged
-                        }
-                        matsubara_green_function_t G0_omega_mgf(G_omega_mgf.nfreq(), G_omega_mgf.nsite(), G_omega_mgf.nflavor());
-                        G0_omega_mgf.from_multiple_vector(G0_omega);
-                        return G0_omega_mgf;
-		}
-		else {
-		//formula according to review, p. 61, formula 223 'antiferromagnetic Neel phase'	
-		//derived properly in formula 95 on page 32.
-			//double mu_up = mu+h/2.;
-			//double mu_down = mu-h/2.;
-			
-			freq_multiple_vector_t G0_omega(G_omega);
-			
-			for(uint i=0; i<G_omega.first.size(); i++) {
-				std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-				G0_omega.first[i] =1./(iw + mu - tsq*G_omega.second[i]); //careful: mu is real, iw is imag, and G is both real and imag
-				G0_omega.second[i]=1./(iw + mu - tsq*G_omega.first [i]); 
-			}
-                        matsubara_green_function_t G0_omega_mgf(G_omega_mgf.nfreq(), G_omega_mgf.nsite(), G_omega_mgf.nflavor());
-                        G0_omega_mgf.from_multiple_vector(G0_omega);
-                        return G0_omega_mgf;
-		}
-		
+                  if(G_omega.nflavor()>1 && G_omega.nflavor()%2==0){
+                    for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
+                      for(uint i=0;i<G_omega.nfreq();++i){
+                        G_omega(i,flavor  )= 0.5*(G_omega(i,flavor)+G_omega(i,flavor+1));
+                        G_omega(i,flavor+1)=G_omega(i,flavor);
+                      }
+                    }
+                  }
+                }
+                if(G_omega.nflavor()==1){ //special case. Paramagnet built in.
+                  for(uint i=0; i<G_omega.ntime(); i++) {
+                    std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+                    G0_omega(i,0) =1./(iw + mu - tsq*G_omega(i,0));
+                  }
+                }
+                else{
+                  assert(G_omega.nflavor()%2==0);
+                  for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
+                    for(uint i=0; i<G_omega.nfreq(); i++) {
+                      std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+                      G0_omega(i,flavor  ) =1./(iw + mu - tsq*G_omega(i,flavor+1)); //careful: mu is real, iw is imag, and G is only imag when averaged
+                      G0_omega(i,flavor+1) =1./(iw + mu - tsq*G_omega(i,flavor  )); //careful: mu is real, iw is imag, and G is only imag when averaged
+                    }
+                  }
+                }
+		return G0_omega;
 	}
 private:
 	double t_; 
@@ -310,22 +268,6 @@ class FSDOSHilbertTransformer: public FrequencySpaceHilbertTransformer{
       //std::cout<<"normalization constant: "<<s<<std::endl;
       for(uint i=0;i<epsilon.size()-1;++i){
         dos[i]/=s;
-      }
-      //compute mu from filling if required.
-      if(params.defined("FILLING")){
-        assert(false); //implement this properly!!
-        /*double filling=parms["FILLING"];
-        assert(filling>0 && filling<1);
-        s=0;
-        for(uint i=0;i<epsilon.size()-1;++i){
-          s+=dos[i]*(epsilon[i+1]-epsilon[i]);
-          mu_=epsilon[i];
-          if(s>filling)
-            break;
-        }
-        std::cout<<"using mu=: "<<mu_<<" for filling: "<<filling<<std::endl;*/
-      }else{
-        //mu_=params.value_or_default("MU",0);
       }
     }
     /// take G_iomegan as the input and construct G0_iomegan out of it. Do this

@@ -49,7 +49,7 @@ namespace alps {
 /// Please note that only one such solver may exist. If you have more solvers, 
 /// please use a combined factory.
 
-class ImpuritySolver : public ::ImpuritySolver, public ::FrequencyTimeImpuritySolver
+class ImpuritySolver : public ::ImpuritySolver, public ::MatsubaraImpuritySolver
 {
 public:
   ImpuritySolver(const scheduler::Factory& f, int argc=0, char** argv=0);
@@ -72,9 +72,8 @@ public:
     const itime_green_function_t& G0, 
     const Parameters& parms =Parameters());
     
-  std::pair<matsubara_green_function_t,itime_green_function_t> solve_omega(
+  matsubara_green_function_t solve_omega(
       const matsubara_green_function_t& G0_omega
-    , const itime_green_function_t& G0_tau
     , const Parameters& parms=Parameters());
 
 protected:
@@ -91,12 +90,12 @@ public:
   virtual itime_green_function_t get_result() const =0;
 };
 
-class FrequencyTimeImpurityTask
+class MatsubaraImpurityTask
 {
 public:
-  FrequencyTimeImpurityTask() {}
-  virtual ~FrequencyTimeImpurityTask() {}
-  virtual std::pair<matsubara_green_function_t,itime_green_function_t> get_result() const =0;
+  MatsubaraImpurityTask() {}
+  virtual ~MatsubaraImpurityTask() {}
+  virtual matsubara_green_function_t get_result() const =0;
 };
 
 

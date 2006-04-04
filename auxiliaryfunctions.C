@@ -1,5 +1,6 @@
 #include "types.h"
 #include "green_function.h"
+#include "U_matrix.h"
 #include <fstream>
 #include <sstream>
 std::ostream &operator<<(std::ostream &os, const multiple_vector_type &v){
@@ -126,7 +127,7 @@ double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, con
   //do this using a simpson integrator and G(-tau)=1-G(beta-tau)
   double e_kin=0;
   int sgn=-1;
-  int N=G_tau.first.size()-1;
+  uint N=G_tau.first.size()-1;
   double dtau=beta/G_tau.first.size();
   for(uint i=1;i<N;++i){
     e_kin+=(3 - sgn)*G_times_minusG(i, N, G_tau);
@@ -136,3 +137,16 @@ double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, con
   e_kin*=beta/(3.*N)*2.*t*t;
   return e_kin;
 }
+std::ostream &operator<<(std::ostream &os, const U_matrix &U){
+  os<<"[ ";
+  for(spin_t flavor_i=0;flavor_i<U.nf();++flavor_i){
+    os<<"[ ";
+    for(spin_t flavor_j=0;flavor_j<U.nf();++flavor_j){
+      os<<U(flavor_i,flavor_j)<<"\t";
+    }
+    os<<"] "<<std::endl;
+  }
+  os<<"]"<<std::endl;
+  return os;
+}
+

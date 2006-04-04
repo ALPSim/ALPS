@@ -80,32 +80,27 @@ itime_green_function_t  alps::ImpuritySolver::solve(
   return G;
 }
 
-std::pair<matsubara_green_function_t,itime_green_function_t> 
+matsubara_green_function_t 
 alps::ImpuritySolver::solve_omega(
                  const matsubara_green_function_t& G0_omega
-               , const itime_green_function_t& G0_tau
                , const Parameters& p)
 {
   BOOST_ASSERT(is_master());
   
   alps::Parameters parms(p);
   std::ostringstream G0_omega_text;
-  std::ostringstream G0_tau_text;
   alps::oxstream G0_omega_xml(G0_omega_text);
-  alps::oxstream G0_tau_xml(G0_tau_text);
   
   write_freq(G0_omega_xml,G0_omega);
-  write_itime(G0_tau_xml,G0_tau);
   parms["G0(omega)"] = G0_omega_text.str();
-  parms["G0(tau)"] = G0_tau_text.str();
   int res=solve_it(parms);
   if (res)
     boost::throw_exception(
       std::runtime_error(" solver finished with nonzero exit code"));
     
   // now extract the results
-  std::pair<matsubara_green_function_t,itime_green_function_t>  G = 
-      dynamic_cast<FrequencyTimeImpurityTask*>(get_task())
+  matsubara_green_function_t  G = 
+      dynamic_cast<MatsubaraImpurityTask*>(get_task())
         ->get_result();
 
   clear(); // destroy the simulation
