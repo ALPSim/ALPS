@@ -208,6 +208,7 @@ public:
 		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
                 std::cout<<G_omega<<std::endl;
 		if (paramagnet) {
+                  if(G_omega.nflavor()==1){ for(uint i=0;i<G_omega.nfreq();++i) G_omega(i,0)=std::complex<double>(0, G_omega(i,0).imag());}
                   if(G_omega.nflavor()>1 && G_omega.nflavor()%2==0){
                     for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
                       for(uint i=0;i<G_omega.nfreq();++i){

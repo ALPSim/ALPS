@@ -123,7 +123,6 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   // read the output
   
   uint n_matsubara=(uint)parms["NMATSUBARA"];
-  uint n_tau      =(uint)parms["N"];
   uint n_site     =(uint)parms.value_or_default("SITES", 1);
   uint n_orbital  =(uint)parms.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);

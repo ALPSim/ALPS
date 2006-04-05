@@ -121,7 +121,7 @@ std::ostream &operator<<(std::ostream &os, const green_function<std::complex<dou
 inline double G_times_minusG(const int i, const int N, const multiple_vector_type &G_tau){
   return G_tau.first[i]*(-1 -G_tau.first[N-i]);
 }
-double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, const double &t){
+/*double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, const double &t){
   //compute kinetic energy according to Philipp Werner, formula below formula
   //11: E_{kin} = 2t^2\int_0^\beta d\tau G(\tau)G(-\tau)
   //do this using a simpson integrator and G(-tau)=1-G(beta-tau)
@@ -136,7 +136,7 @@ double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, con
   e_kin+=G_times_minusG(0, N, G_tau) + G_times_minusG(N, N, G_tau);
   e_kin*=beta/(3.*N)*2.*t*t;
   return e_kin;
-}
+}*/
 std::ostream &operator<<(std::ostream &os, const U_matrix &U){
   os<<"[ ";
   for(spin_t flavor_i=0;flavor_i<U.nf();++flavor_i){
