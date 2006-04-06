@@ -96,7 +96,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
     G_tau= solver.solve(G_tau, parms); //the Werner solver WANTS a G_tau as an input. It then makes an F function out of it.
     //symmetrize
     if(paramagnet){
-      for(uint f=0;f<G_tau.nflavor();++f){
+      for(uint f=0;f<G_tau.nflavor();f+=2){
         for(uint i=0;i<G_tau.ntime();++i){
           G_tau(i,f  )=0.5*(G_tau(i,f)+G_tau(i,f+1));
           G_tau(i,f+1)=G_tau(i,f);
