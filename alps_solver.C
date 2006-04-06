@@ -49,7 +49,9 @@ alps::ImpuritySolver::~ImpuritySolver()
 
 int alps::ImpuritySolver::solve_it(Parameters const& p)
 {
+  std::cout<<"creating task"<<std::endl;
   the_scheduler->create_task(p);
+  std::cout<<"running task"<<std::endl;
   return the_scheduler->run();
 }
 
@@ -80,7 +82,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(
   return G;
 }
 
-matsubara_green_function_t 
+std::pair<matsubara_green_function_t, itime_green_function_t>
 alps::ImpuritySolver::solve_omega(
                  const matsubara_green_function_t& G0_omega
                , const Parameters& p)
@@ -99,7 +101,7 @@ alps::ImpuritySolver::solve_omega(
       std::runtime_error(" solver finished with nonzero exit code"));
     
   // now extract the results
-  matsubara_green_function_t  G = 
+  std::pair<matsubara_green_function_t, itime_green_function_t> G = 
       dynamic_cast<MatsubaraImpurityTask*>(get_task())
         ->get_result();
 

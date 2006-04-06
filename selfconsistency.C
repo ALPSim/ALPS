@@ -76,7 +76,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   std::cout<<"converged!"<<std::endl;
 }
 
-void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, FourierTransformer &fourier, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
+void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, itime_green_function_t& G_tau)
 {
   int N = static_cast<int>(parms["N"]);
   int flavors = parms.value_or_default("FLAVORS", 2);;
@@ -86,26 +86,33 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hil
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
 
-  itime_green_function_t G0_tau_old(G0_tau);
+  matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
+  itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
   int iteration_ctr=0;
   double max_diff;
   do {
-    G0_tau_old = G0_tau;
     std::cout<<"running solver"<<std::endl;
-    G_tau = solver.solve(G0_tau, parms);
-    std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
-    std::cout<<"running Hilbert transform"<<std::endl;
-    G0_tau= hilbert(G_tau, fourier, mu, h, beta, paramagnet);
+    G_tau_old=G_tau;
+    G_tau= solver.solve(G_tau, parms); //the Werner solver WANTS a G_tau as an input. It then makes an F function out of it.
+    //symmetrize
+    if(paramagnet){
+      for(uint f=0;f<G_tau.nflavor();++f){
+        for(uint i=0;i<G_tau.ntime();++i){
+          G_tau(i,f  )=0.5*(G_tau(i,f)+G_tau(i,f+1));
+          G_tau(i,f+1)=G_tau(i,f);
+        }
+      }
+    }
     std::cout<<"comparing old and new results"<<std::endl;
     max_diff=0;
     for(int f=0; f<flavors;++f){
       for(int i=0; i<N; i++) {
-          if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
-            max_diff = fabs(G0_tau(i,f)-G0_tau_old(i,f));
+          if (fabs(G_tau(i,f)-G_tau_old(i,f)) > max_diff)
+            max_diff = fabs(G_tau(i,f)-G_tau_old(i,f));
         }
     }
-  std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
-  print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
+    std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
+    print_tau_green_functions(iteration_ctr++, G_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged);
   std::cout<<"converged!"<<std::endl;
 }
@@ -162,7 +169,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
                 fourier.backward_ft(G0_tau, G0_omega);
                 
 		std::cout<<"running solver."<<std::endl<<std::flush;
-		G_omega = solver.solve_omega(G0_omega,parms);
+                boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
                 std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
                 //std::cout<<G_omega_mv<<std::endl;
 		G0_omega = hilbert(G_omega, G0_omega, mu, h, beta, paramagnet);
@@ -182,7 +189,6 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
                     }
                   }
                 }
-                fourier.backward_ft(G_tau,  G_omega);
                 fourier.backward_ft(G0_tau,  G0_omega);
                 if(paramagnet && n_orbital >1){
                   assert(n_orbital==2 && n_site==1);

@@ -137,41 +137,6 @@ private:
 };
 
 
-// Hilbert transformers for the F-functions
-/// A Hilbert transformation for a semcircle density of states
-/// It receives G(\tau) as input and returns F(\tau)
-class F_SemicircleHilbertTransformer : public HilbertTransformer {
-	public:
-	/// the constructor accepts the bandwidth
-	F_SemicircleHilbertTransformer(double t) : t_(t) {}
-	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
-	itime_green_function_t operator()(itime_green_function_t & G, FourierTransformer &fourier_ignored, double dummy1, double dummy2, double dummy3, bool paramagnet)
-	{
-          dummy1=0; dummy2=0; dummy3=0; //avoid warnings.
-          itime_green_function_t F(G.ntime(), G.nsite(), G.nflavor());
-          uint Np1=G.ntime();
-	  if (paramagnet) {
-            assert(G.nflavor()%2 ==0);
-            for(uint flavor=0;flavor<G.nflavor();flavor+=2){
-		for(uint tau=0;tau<G.ntime();++tau){
-                  G(tau,flavor  ) = 0.5*(G(tau, flavor)+G(tau, flavor+1));
-                  G(tau,flavor+1) = G(tau, flavor);
-                }
-            }
-          }
-          assert(F.nflavor()%2==0);
-          for(uint flavor=0;flavor<F.nflavor();flavor+=2){
-            for (uint i=0; i<F.ntime(); i++) {
-		F(i,flavor)= -t_*t_*G(Np1-1-i,flavor+1);
-		F(i,flavor)= -t_*t_*G(Np1-1-i,flavor  );
-            }
-          }
-          return F;
-	}
-	private:
-	double t_;
- };
-
 
 // definition of Hilbert transformers living in Fourier (Matsubara) space
 

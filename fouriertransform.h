@@ -30,7 +30,7 @@
 #include <complex>
 #include "types.h" // for the multiple_vector_type
 #include "green_function.h" // for the multiple_vector_type
-
+#include <alps/parameters.h>
 
 void generate_spline_matrix(dense_matrix & spline_matrix);
 void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs);
@@ -86,7 +86,6 @@ inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c
 inline double f_tau(double tau, double beta, double c2, double c3) {
   return -0.5 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
 }
-
 class FourierTransformer{
   public:
     FourierTransformer(double beta, double mu){
@@ -98,6 +97,7 @@ class FourierTransformer{
     virtual ~FourierTransformer(){}
     virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
     virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
+    static void generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr);
   protected:
     double beta_;
     double mu_;

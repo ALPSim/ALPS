@@ -72,7 +72,7 @@ public:
     const itime_green_function_t& G0, 
     const Parameters& parms =Parameters());
     
-  matsubara_green_function_t solve_omega(
+  std::pair<matsubara_green_function_t, itime_green_function_t> solve_omega(
       const matsubara_green_function_t& G0_omega
     , const Parameters& parms=Parameters());
 
@@ -95,7 +95,7 @@ class MatsubaraImpurityTask
 public:
   MatsubaraImpurityTask() {}
   virtual ~MatsubaraImpurityTask() {}
-  virtual matsubara_green_function_t get_result() const =0;
+  virtual std::pair<matsubara_green_function_t,itime_green_function_t> get_result() const =0;
 };
 
 

@@ -75,13 +75,7 @@ int main(int argc, char** argv)
 		alps::Parameters parms;
 		std::cin >> parms;
                 boost::shared_ptr<FourierTransformer> fourier_ptr;
-                if(parms.defined("GENERAL_FOURIER")){
-                  std::cout<<"using General Fourier transform"<<std::endl;
-                  fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"]));
-                } else{
-                  std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
-                  fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], parms["MU"], parms["t"]));
-                }
+                FourierTransformer::generate_transformer(parms, fourier_ptr);
 		//perform selfconsistency loop in...
 		if(!parms.defined("OMEGA_LOOP")){
         		
@@ -103,10 +97,11 @@ int main(int argc, char** argv)
 			}
 			else if (parms["SOLVER"]=="Werner") {
 				std::cout<<"solving Werner"<<std::endl;
-			    alps::scheduler::BasicFactory<WernerSim,WernerRun> factory;
+			        alps::scheduler::BasicFactory<WernerSim,WernerRun> factory;
 				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-				F_SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-				F_selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
+                                std::cout<<"interpreting input value as G_tau, not G0"<<std::endl;
+                                G_tau=G0_tau;
+				F_selfconsistency_loop(parms, *solver_ptr, G_tau);
 			}
 			else {
 				solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
@@ -121,6 +116,7 @@ int main(int argc, char** argv)
 		}else{
 			alps::scheduler::BasicFactory<RubtsovSim,SSHubbardRubtsovRun> rubtsov_factory_ss; //for single site problems
 			alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; //for multi orbital problems, but only density density
+			alps::scheduler::BasicFactory<WernerSim,WernerRun> werner_factory;
 			//perform self consistency loop in Matsubara frequency omega
 			int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
 			int n_orbital=parms.value_or_default("FLAVORS", 2);
@@ -138,9 +134,14 @@ int main(int argc, char** argv)
                           std::cout<<"using multiband Hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
 			}
+			else if (parms["SOLVER"]=="Werner") {
+				std::cout<<"solving Werner -- using omega loop"<<std::endl;
+				solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
+			}
 			else{
 				//throw exception or commit suicide or even better: create an external solver that takes its arguments in frequency space.
 				//solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+                                std::cout<<parms["SOLVER"]<<std::endl;
 				boost::throw_exception(std::logic_error("there is no such solver!"));	
 			}
 			FrequencySpaceHilbertTransformer *transform_ptr;

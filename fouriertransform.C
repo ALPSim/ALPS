@@ -29,6 +29,7 @@
 #include <boost/numeric/bindings/lapack/lapack.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
+#include <alps/parameters.h>
 
 void generate_spline_matrix(dense_matrix & spline_matrix) {
 
@@ -134,4 +135,13 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
     }
   }
 } 
+void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr){
+  if(parms.defined("GENERAL_FOURIER")){
+    std::cout<<"using General Fourier transform"<<std::endl;
+    fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"]));
+  } else{
+    std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
+    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], parms["MU"], parms["t"]));
+  }
+}
 

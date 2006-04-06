@@ -123,9 +123,11 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   // read the output
   
   uint n_matsubara=(uint)parms["NMATSUBARA"];
+  uint n_tau=(uint)parms["N"];
   uint n_site     =(uint)parms.value_or_default("SITES", 1);
   uint n_orbital  =(uint)parms.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
+  itime_green_function_t G_tau(n_tau, n_site, n_orbital);
   {
     std::ifstream output(outfile.c_str());
     alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
@@ -141,12 +143,13 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
 	}
 
     read_freq(output,G_omega);	
+    read_itime(output,G_tau);	
     
   } // scope to force closing of file
   
   boost::filesystem::remove(outpath);
   
-  return G_omega;
+  return std::make_pair(G_omega, G_tau);
 }
 
 

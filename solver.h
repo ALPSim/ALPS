@@ -72,7 +72,7 @@ class MatsubaraImpuritySolver{
 public:
   MatsubaraImpuritySolver() {}
     
-  typedef matsubara_green_function_t  result_type;
+  typedef std::pair<matsubara_green_function_t,itime_green_function_t> result_type;
 	
 	///  @brief solves the impurity problem taking both G0_tau and G0_omega
 	///

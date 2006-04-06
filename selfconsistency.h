@@ -61,9 +61,6 @@ extern void F_selfconsistency_loop
 (
  alps::Parameters& parms, 
  ImpuritySolver& solver, 
- HilbertTransformer& hilbert,
- FourierTransformer& fourier,
- itime_green_function_t& G0_tau, 
  itime_green_function_t& G_tau
  );
 
