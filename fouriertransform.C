@@ -95,11 +95,11 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau, const matsub
   for(uint f=0;f<G_omega.nflavor();++f){
     for (uint k=0; k<N_omega; k++) {
       std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-      G_omega_no_model(k,f) -= f_omega(iw, c2_, c3_);
+      G_omega_no_model(k,f) -= f_omega(iw, c1_,c2_, c3_);
     }     
                   
     for (uint i=0; i<N_tau; i++) {
-      G_tau(i,f) = f_tau(i*dt, beta_, c2_, c3_); 
+      G_tau(i,f) = f_tau(i*dt, beta_, c1_, c2_, c3_); 
       for (uint k=0; k<N_omega; k++) {
         double wt((2*k+1)*i*M_PI/N_tau);
         G_tau(i,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,f).real()+sin(wt)*G_omega_no_model(k,f).imag());
@@ -116,6 +116,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
   assert(G_omega.nfreq()==N); //we implicitely assume that we have as many imag time slices as matsubara frequencies. If this is not the case: interpolate,
   std::vector<double> G_tau_vector(G_tau.ntime());
   std::vector<double> G_tau_derivatives(G_tau.ntime());
+  assert(c1_==1); //otherwise change evaluate_second_derivatives!
   for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
     generate_spline_matrix(spline_matrix);
     for(uint i=0;i<G_tau.ntime();++i){
@@ -131,7 +132,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
       }
       G_omega(k,flavor) += G_tau_derivatives[1] - G_tau_derivatives[0] + G_tau_derivatives[N] - G_tau_derivatives[N-1];
       G_omega(k,flavor) *= 1./(dt*pow(iw,4));
-      G_omega(k,flavor) += f_omega(iw, c2_, c3_);
+      G_omega(k,flavor) += f_omega(iw, c1_, c2_, c3_);
     }
   }
 } 

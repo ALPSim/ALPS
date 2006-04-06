@@ -78,19 +78,20 @@ template <class V> void evaluate_second_derivatives(double dt, double c2, double
   }*/
 }
 
-inline std::complex<double> f_omega(std::complex<double> iw, double c2, double c3) {
+inline std::complex<double> f_omega(std::complex<double> iw, double c1, double c2, double c3) {
   std::complex<double> iwsq=iw*iw;
-	return 1./iw + c2/(iwsq) + c3/(iw*iwsq);
+	return c1/iw + c2/(iwsq) + c3/(iw*iwsq);
 }
 
-inline double f_tau(double tau, double beta, double c2, double c3) {
-  return -0.5 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
+inline double f_tau(double tau, double beta, double c1, double c2, double c3) {
+  return -0.5*c1 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
 }
 class FourierTransformer{
   public:
     FourierTransformer(double beta, double mu){
       beta_=beta;
       mu_=mu;
+      c1_=1;
       c2_=-mu;
       c3_=0;
     }
@@ -101,6 +102,7 @@ class FourierTransformer{
   protected:
     double beta_;
     double mu_;
+    double c1_;
     double c2_;
     double c3_;
 };
@@ -114,6 +116,28 @@ class BetheFourierTransformer:public FourierTransformer{
   virtual ~BetheFourierTransformer(){}
   private:
   double t_;
+};
+class FFunctionFourierTransformer:public FourierTransformer{
+  public:
+    FFunctionFourierTransformer(double beta, double mu, double t):FourierTransformer(beta,mu){
+      t_=t;
+      c1_=-t*t;
+      c2_=-2*t*t*mu-mu*mu*mu;
+      c3_=t*t*t*t-t*t*mu*mu-mu*mu*mu*mu;
+    }
+    virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const{
+      std::cerr<<"implement 2nd derivatives for F function before using this!"<<std::endl;
+    }
+    virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
+      FourierTransformer::backward_ft(G_tau, G_omega);
+      std::cout<<"correcting for F function"<<std::endl;
+      for(uint j=0;j<G_tau.nflavor();++j){
+        G_tau(0,j)*=-1; G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);
+      }
+    }
+    virtual ~FFunctionFourierTransformer(){}
+  private:
+    double t_;
 };
 
 #endif FOURIER_TRANSFORM_H
