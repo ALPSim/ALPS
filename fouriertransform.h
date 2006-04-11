@@ -127,6 +127,7 @@ class FFunctionFourierTransformer:public FourierTransformer{
     }
     virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const{
       std::cerr<<"implement 2nd derivatives for F function before using this!"<<std::endl;
+      FourierTransformer::forward_ft(G_tau, G_omega);
     }
     virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
       FourierTransformer::backward_ft(G_tau, G_omega);

@@ -97,7 +97,7 @@ int main(int argc, char** argv)
 			}
 			else if (parms["SOLVER"]=="Werner") {
 				std::cout<<"solving Werner"<<std::endl;
-			        alps::scheduler::BasicFactory<WernerSim,WernerRun> factory;
+			        alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
 				solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
                                 std::cout<<"interpreting input value as G_tau, not G0"<<std::endl;
                                 G_tau=G0_tau;
@@ -116,7 +116,7 @@ int main(int argc, char** argv)
 		}else{
 			alps::scheduler::BasicFactory<RubtsovSim,SSHubbardRubtsovRun> rubtsov_factory_ss; //for single site problems
 			alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; //for multi orbital problems, but only density density
-			alps::scheduler::BasicFactory<WernerSim,WernerRun> werner_factory;
+			alps::scheduler::BasicFactory<WernerSimFrequency,WernerRun> werner_factory;
 			//perform self consistency loop in Matsubara frequency omega
 			int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
 			int n_orbital=parms.value_or_default("FLAVORS", 2);

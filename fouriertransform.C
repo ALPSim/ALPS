@@ -97,7 +97,6 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau, const matsub
       std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
       G_omega_no_model(k,f) -= f_omega(iw, c1_,c2_, c3_);
     }     
-                  
     for (uint i=0; i<N_tau; i++) {
       G_tau(i,f) = f_tau(i*dt, beta_, c1_, c2_, c3_); 
       for (uint k=0; k<N_omega; k++) {
