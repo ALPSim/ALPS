@@ -167,16 +167,13 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
 		G0_old_tau = G0_tau;
 
                 fourier.backward_ft(G0_tau, G0_omega);
-                
+		
 		std::cout<<"running solver."<<std::endl<<std::flush;
                 boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
                 std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
-                //std::cout<<G_omega_mv<<std::endl;
 		G0_omega = hilbert(G_omega, G0_omega, mu, h, beta, paramagnet);
-                //std::cout<<G0_omega_mv<<std::endl;
-                //G0_omega.from_multiple_vector(G0_omega_mv);
-                //std::cout<<G0_omega<<std::endl;
-                //relaxation to speed up /slow down convergence
+                
+		//relaxation to speed up /slow down convergence
                 if(relax_rate !=1){
                   std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
                   for(uint orbital=0;orbital<n_orbital;++orbital){
@@ -189,17 +186,6 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
                     }
                   }
                 }
-                fourier.backward_ft(G0_tau,  G0_omega);
-                if(paramagnet && n_orbital >1){
-                  assert(n_orbital==2 && n_site==1);
-                  for(uint i=0;i<n_tau+1;++i){
-                    G_tau(i,up)=0.5*(G_tau(i,up)+G_tau(i,down));
-                    G_tau(i,down)=G_tau(i,up);
-                    G0_tau(i,up)=0.5*(G0_tau(i,up)+G0_tau(i,down));
-                    G0_tau(i,down)=G0_tau(i,up);
-                  }
-                }
-		
                 std::cout<<"comparing old and new result."<<std::endl<<std::flush;
 		max_diff=0;
 		if(iteration_ctr>1){
@@ -217,7 +203,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
 			std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "<<max_diff<<"\tconverged: "<<converged<<std::endl;
 		}
 		//write checkpoint - clean this up in the future!
-		print_all_green_functions(iteration_ctr, G0_omega.to_multiple_vector(), G_omega.to_multiple_vector(), G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
+		print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
 	}while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
 	
 }

@@ -159,4 +159,6 @@ template<typename T> void green_function<T>::from_multiple_vector(const std::pai
       operator()(i,0,0,1)=mv.second[i];
   }
 }
+
+void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega, const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta);
 #endif

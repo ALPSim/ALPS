@@ -84,16 +84,16 @@ inline std::complex<double> f_omega(std::complex<double> iw, double c1, double c
 }
 
 inline double f_tau(double tau, double beta, double c1, double c2, double c3) {
-  return -0.5*c1 + (c2/4.)*(-beta+2.*tau) + (c3/4.)*(beta*tau-tau*tau);
+  return -0.5*c1 + (c2*0.25)*(-beta+2.*tau) + (c3*0.25)*(beta*tau-tau*tau);
 }
 class FourierTransformer{
   public:
     FourierTransformer(double beta, double mu){
       beta_=beta;
       mu_=mu;
-      c1_=1;
+      c1_=1.;
       c2_=-mu;
-      c3_=0;
+      c3_=0.;
     }
     virtual ~FourierTransformer(){}
     virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
@@ -111,7 +111,7 @@ class BetheFourierTransformer:public FourierTransformer{
   public:
   BetheFourierTransformer(double beta, double mu, double t):FourierTransformer(beta, mu){
     t_=t;
-    c3_=mu_*mu_-t_*t_;
+    c3_=mu_*mu_+t_*t_;
   }
   virtual ~BetheFourierTransformer(){}
   private:

@@ -49,7 +49,7 @@ void print_green_itime(std::ostream &os, const multiple_vector_type &v, const do
                 os<<i*beta/(v.first.size()-1)<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
         }
 }
-void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &G0_omega, const multiple_complex_vector_type &G_omega, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta){
+void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega, const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta){
 	std::ostringstream G0omega_name, G0tau_name, Gomega_name, Gomegareal_name, Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name;
 	G0omega_name<<"G0_omega_"<<iteration_ctr;//<<"_"<<process_id;
 	G0tau_name<<"G0_tau_"<<iteration_ctr;//<<"_"<<process_id;
@@ -68,15 +68,15 @@ void print_all_green_functions(const int iteration_ctr, const multiple_complex_v
 	std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
 	std::ofstream selfenergy_file(selfenergy_name.str().c_str());
 	assert(G0_omega_file.is_open() && G0_tau_file.is_open() && G_omega_file.is_open() && G_tau_file.is_open());
-	print_imag_green_matsubara(G0_omega_file, G0_omega,beta);
-	print_green_itime(G0_tau_file,G0_tau,beta);
-	print_imag_green_matsubara(G_omega_file,G_omega,beta);
-	print_real_green_matsubara(G_omegareal_file,G_omega,beta);
-	print_green_itime(G_tau_file,G_tau,beta);
-	print_imag_green_matsubara(G_omega_file_2,G_omega,beta);
-	print_green_itime(G_tau_file_2,G_tau,beta);
-	print_selfenergy_matsubara(selfenergy_file,G_omega, G0_omega, beta);
-        print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
+	print_imag_green_matsubara(G0_omega_file, G0_omega.to_multiple_vector(),beta);
+	print_green_itime(G0_tau_file,G0_tau.to_multiple_vector(),beta);
+	print_imag_green_matsubara(G_omega_file,G_omega.to_multiple_vector(),beta);
+	print_real_green_matsubara(G_omegareal_file,G_omega.to_multiple_vector(),beta);
+	print_green_itime(G_tau_file,G_tau.to_multiple_vector(),beta);
+	print_imag_green_matsubara(G_omega_file_2,G_omega.to_multiple_vector(),beta);
+	print_green_itime(G_tau_file_2,G_tau.to_multiple_vector(),beta);
+	print_selfenergy_matsubara(selfenergy_file,G_omega.to_multiple_vector(), G0_omega.to_multiple_vector(), beta);
+        print_quasiparticle_estimate(std::cout, G_omega.to_multiple_vector(), G0_omega.to_multiple_vector(), beta);
 }
 void print_tau_green_functions(const int iteration_ctr, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta){
 	std::ostringstream G0tau_name, Gtau_name, Gtau_name_2;
