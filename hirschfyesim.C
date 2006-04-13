@@ -198,6 +198,11 @@ void HirschFyeRun::dostep()
   	measurements.get<RealVectorObservable>("G_meas_up") << G_up;
   	measurements.get<RealVectorObservable>("G_meas_down") << G_down;
   }
+  //only for equilibration measurement
+  if(is_thermalized() && sweeps % 10000 ==0){
+    static std::ofstream equ_file("equilibration.dat");
+    equ_file<<sweeps<<"\t"<<measurements.get<RealVectorObservable>("G_meas_up").mean()[0]<<"\t"<<measurements.get<RealVectorObservable>("G_meas_up").error()[0]<<std::endl;
+  }
 	
   // check if precision has deteriorated
   if (check_counter%N_check == 0) {
