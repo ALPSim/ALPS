@@ -33,7 +33,7 @@ AC_DEFUN([AC_COMPILER],
 
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
-      [set compiler mode (MODE = gnu, gnu-3.3, kai, intel, intel-cxxlib, intel64, como, hp, dec, sgi32, sgi64, cray, ibm32, ibm64, macos, macos-gcc-3, generic)]),
+      [set compiler mode (MODE = gnu, gnu-3.3, kai, intel, como, hp, dec, sgi32, sgi64, cray, ibm32, ibm64, macos, macos-gcc-3, generic)]),
     [
     case "x$withval" in
       xgnu-3.3 | xGNU-3.3 | xgcc-3.3 | xg++-3.3 )
@@ -45,14 +45,8 @@ AC_DEFUN([AC_COMPILER],
       xkai* | xKAI*)
         COMPILER="kai"
         ;;
-      xintel32*-cxxlib | xintel-cxxlib | xicc32*-cxxlib | xicc-cxxlib)
-        COMPILER="intel-cxxlib"
-        ;;
-      xintel32* | xintel | xicc32* | xicc)
+      xintel* | xicc* )
         COMPILER="intel"
-        ;;
-      xintel64* | xicc64*)
-        COMPILER="intel64"
         ;;
       xcomo*)
         COMPILER="como"
@@ -112,7 +106,7 @@ AC_DEFUN([AC_COMPILER],
       ;;
     intel*)
       try_CC="icc"
-      try_CXX="icc -Kc++"
+      try_CXX="icpc"
       ;;
     como)
       try_CC="como"
@@ -203,24 +197,6 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_NOEH="--no_exceptions"
       ;;
     intel)
-      try_CFLAGS_OPT="-w -O3"
-      try_CFLAGS_DEBUG=" -O0"
-      try_CXXFLAGS_OPT="-D_REENTRANT -restrict -w -O3"
-      try_CXXFLAGS_DEBUG="-D_REENTRANT -restrict -g -O0"
-      try_CXXFLAGS_EH=
-      try_CXXFLAGS_NOEH="-DBOOST_NO_EXCEPTIONS"
-      ;;
-    intel-cxxlib)
-      try_CFLAGS_OPT="-w -O3"
-      try_CFLAGS_DEBUG=" -O0"
-      try_CXXFLAGS_OPT="-D_REENTRANT -restrict -w -O3"
-      try_CXXFLAGS_DEBUG="-D_REENTRANT -restrict -g -O0"
-      try_CXXFLAGS_EH=
-      try_CXXFLAGS_NOEH="-DBOOST_NO_EXCEPTIONS"
-      CPPFLAGS="$CPPFLAGS -I/opt/intel_cc_80/include/c++"
-      LDFLAGS="$LDFLAGS -cxxlib-icc"
-      ;;
-    intel64)
       try_CFLAGS_OPT="-w -O3"
       try_CFLAGS_DEBUG=" -O0"
       try_CXXFLAGS_OPT="-D_REENTRANT -restrict -w -O3"
