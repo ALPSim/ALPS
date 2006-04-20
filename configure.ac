@@ -574,7 +574,7 @@ AC_CHECK_FUNC(nanosleep, ,[AC_CHECK_LIB(rt, nanosleep)])
 # check for pthread
 #
 
-AC_PTHREAD
+test "$ac_cv_boost_thread" = yes && AC_PTHREAD
 test "$ac_cv_have_pthread" = yes && AC_DEFINE(ALPS_HAVE_PTHREAD, [], [pthread])
 
 #

@@ -22263,7 +22263,7 @@ fi
 # check for pthread
 #
 
-
+test "$ac_cv_boost_thread" = yes &&
 
 
 
