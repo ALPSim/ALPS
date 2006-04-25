@@ -73,7 +73,14 @@ int main(int argc, char** argv)
 		alps::print_copyright(std::cout);
 		
 		alps::Parameters parms;
-		std::cin >> parms;
+		if(argc ==2){
+			std::ifstream is(argv[1]);
+			assert(is.is_open());
+			is>>parms;
+		}else{
+			std::cin >> parms;
+		}
+		std::cout<<parms<<std::endl;
                 boost::shared_ptr<FourierTransformer> fourier_ptr;
                 FourierTransformer::generate_transformer(parms, fourier_ptr);
 		//perform selfconsistency loop in...

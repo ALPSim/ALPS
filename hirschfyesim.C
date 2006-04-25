@@ -96,7 +96,9 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
 	G_down(static_cast<int>(parms["N"])),
 	Green0_down(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),
 	Green_down(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),			
-    spins(static_cast<int>(parms["N"]))
+    spins(static_cast<int>(parms["N"])),
+    start_time(time(NULL)),
+    max_time(static_cast<int>(parms.value_or_default("MAX_TIME", 86400)))
 
 {
   // initialize G0
@@ -173,6 +175,11 @@ bool HirschFyeRun::is_thermalized() const
 
 double HirschFyeRun::work_done() const
 {
+  if(time(NULL)-start_time> max_time){
+    std::cout<<"we ran out of time!"<<std::endl<<"sweeps: "<<sweeps-thermalization_sweeps<<std::endl;
+    return 1;
+  }
+
   return (is_thermalized() ? (sweeps-thermalization_sweeps)/double(total_sweeps) : 0.);
 }
 

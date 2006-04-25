@@ -117,6 +117,8 @@ private:
 	dense_matrix Green0_down;	    // bath Green's function matrix for down spins
 	dense_matrix Green_down;      	// Green's function matrix for down spins     
 	std::vector<int> spins;		    // auxiliary Ising spins
+	double max_time;
+	double start_time;
 	
 };
 

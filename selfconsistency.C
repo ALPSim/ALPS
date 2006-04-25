@@ -51,7 +51,8 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
-  
+  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+ 
   itime_green_function_t G0_tau_old(G0_tau);
   int iteration_ctr=0;
   double max_diff;	
@@ -72,7 +73,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     }	
   std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
   print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
-  } while (max_diff > converged);
+  } while (max_diff > converged  && iteration_ctr < max_it);
   std::cout<<"converged!"<<std::endl;
 }
 
