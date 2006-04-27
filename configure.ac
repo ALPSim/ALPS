@@ -719,20 +719,36 @@ dnl
 dnl for Generating Documentation (DocBook DTD, XSL, Apache FOP)
 dnl
 
-AC_DOCBOOK_DTD
-AC_SUBST(DOCBOOK_DTD_DIR)
-test "$ac_cv_have_docbook_dtd" = yes && DOCBOOK_DTD_DIR="$ac_cv_docbook_dtd_dir"
+AC_ARG_ENABLE(boostbook,
+  AC_HELP_STRING([--enable-boostbook],
+    [setup boostbook documentation system]),
+  [
+  if test "x$enableval" != "xno"; then
+    ac_cv_boostbook=yes
+  fi
+  ]
+)
+test -z "$ac_cv_boostbook" && ac_cv_boostbook=no
+if test -z "$BOOST_SRCDIR" || test "$ac_cv_boost_version" = 1_32; then
+  ac_cv_boostbook=no
+fi
 
-AC_DOCBOOK_XSL
-AC_SUBST(DOCBOOK_XSL_DIR)
-test "$ac_cv_have_docbook_xsl" = yes && DOCBOOK_XSL_DIR="$ac_cv_docbook_xsl_dir"
+if test "$ac_cv_boostbook" = yes; then
+  AC_DOCBOOK_DTD
+  AC_SUBST(DOCBOOK_DTD_DIR)
+  test "$ac_cv_have_docbook_dtd" = yes && DOCBOOK_DTD_DIR="$ac_cv_docbook_dtd_dir"
 
-AC_FOP
-AC_SUBST(FOP_DIR)
-test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir"
+  AC_DOCBOOK_XSL
+  AC_SUBST(DOCBOOK_XSL_DIR)
+  test "$ac_cv_have_docbook_xsl" = yes && DOCBOOK_XSL_DIR="$ac_cv_docbook_xsl_dir"
+
+  AC_FOP
+  AC_SUBST(FOP_DIR)
+  test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir"
+fi
 
 dnl check if all the required tools are present
-if test -n "$BOOST_SRCDIR" && test "$ac_cv_boost_version" != 1_32 && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
+if test "$ac_cv_boostbook" = yes && test -n "$ac_cv_prog_doxygen" && test -n "$ac_cv_prog_xsltproc" && test "$ac_cv_have_docbook_dtd" = yes && test "$ac_cv_have_docbook_xsl" = yes; then
   build_doc=yes
   if test "$ac_cv_have_fop" = yes; then
     build_pdf=yes
