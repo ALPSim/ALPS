@@ -31,13 +31,28 @@
 #include "xml.h"
 #include "types.h"
 #include <boost/assert.hpp>
+#include <alps/osiris/comm.h>
+#include <alps/scheduler/options.h>
 #include <vector>
 #include <utility>
 #include <sstream>
 
-alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& f, int argc, char** argv)
- : the_scheduler(scheduler::start_single(f,argc,argv))
+alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
+// : the_scheduler(scheduler::start_single(f,argc,argv))
 {
+	comm_init(argc,argv);
+	if(is_master()){
+          alps::scheduler::NoJobfileOptions opt(1,argv);
+          master_scheduler = new alps::scheduler::SingleScheduler(opt,factory);
+	} else{ //a slave lives for many iterations...
+            alps::scheduler::NoJobfileOptions opt(argc,argv);
+	    int res=0;
+	    alps::scheduler::Scheduler *slave_scheduler = new alps::scheduler::Scheduler(opt,factory);
+	    res = slave_scheduler->run();
+            delete slave_scheduler;
+	    comm_exit();
+	    exit(0);
+	}
 }
 
 
@@ -49,10 +64,19 @@ alps::ImpuritySolver::~ImpuritySolver()
 
 int alps::ImpuritySolver::solve_it(Parameters const& p)
 {
-  std::cout<<"creating task"<<std::endl;
+  if (is_master())
+  {
+      master_scheduler->create_task(p);
+      return master_scheduler->run();
+  }
+  else{
+	std::cerr<<"a slave should never reach this section."<<std::endl;
+	exit(1);
+  }
+  /*std::cout<<"creating task"<<std::endl;
   the_scheduler->create_task(p);
   std::cout<<"running task"<<std::endl;
-  return the_scheduler->run();
+  return the_scheduler->run();*/
 }
 
 
