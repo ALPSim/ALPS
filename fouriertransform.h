@@ -141,4 +141,5 @@ class FFunctionFourierTransformer:public FourierTransformer{
     double t_;
 };
 
-#endif FOURIER_TRANSFORM_H
+//FOURIER_TRANSFORM_H
+#endif 
