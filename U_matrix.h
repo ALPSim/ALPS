@@ -82,4 +82,5 @@ typedef class U_matrix{
 } U_matrix;
 
 std::ostream &operator<<(std::ostream &os, const U_matrix &U);
-#endif U_MATRIX_H
+//U_MATRIX_H
+#endif 
