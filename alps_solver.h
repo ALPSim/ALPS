@@ -55,17 +55,17 @@ public:
   ImpuritySolver(const scheduler::Factory& f, int argc=0, char** argv=0);
   ~ImpuritySolver();
   
-  bool is_master() const { return the_scheduler!=0;}
+  //bool is_master() const { return master_scheduler!=0;}
   
   scheduler::AbstractTask* get_task() const 
   { 
-    return the_scheduler ? the_scheduler->get_task() : 0;
+    return master_scheduler ? master_scheduler->get_task() : 0;
   }
   
   void clear()
   {
-    if (the_scheduler)
-      the_scheduler->destroy_task();
+    if (master_scheduler)
+      master_scheduler->destroy_task();
   }
   
   itime_green_function_t solve(
@@ -78,7 +78,9 @@ public:
 
 protected:
   int solve_it(Parameters const& p);
-  scheduler::SingleScheduler* the_scheduler;
+  scheduler::SingleScheduler* master_scheduler;
+  int argc_;
+  char **argv_;
 };
 
 
