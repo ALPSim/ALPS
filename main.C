@@ -68,18 +68,17 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
 	try {
 #endif
-		
+		if(argc !=2){
+			std::cout<<"use: program_name parameter_file. Under MPI to pass argument to nodes use"<<std::endl;
+			std::cout<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
+		}
 		std::cout << "ALPS DMFT solver for the single site impurity problem.\n\n";
 		alps::print_copyright(std::cout);
-		
 		alps::Parameters parms;
-		if(argc ==2){
-			std::ifstream is(argv[1]);
-			assert(is.is_open());
-			is>>parms;
-		}else{
-			std::cin >> parms;
-		}
+		std::ifstream is(argv[1]);
+		assert(is.is_open());
+		is>>parms;
+		std::cout<<"done reading is!"<<std::endl;
 		std::cout<<parms<<std::endl;
                 boost::shared_ptr<FourierTransformer> fourier_ptr;
                 FourierTransformer::generate_transformer(parms, fourier_ptr);
