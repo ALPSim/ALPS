@@ -29,9 +29,27 @@ void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_
 	for(uint i=0;i<v.first.size();++i)
                 os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
 }
+void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta){
+	for(uint i=0;i<v.nfreq();++i){
+          os<<(2*i+1)*M_PI/beta<<"\t";
+          for(uint f=0;f<v.nflavor();++f){
+            os<<v(i,f).imag()<<"\t";
+          }
+          os<<std::endl;
+        }
+}
 void print_selfenergy_matsubara(std::ostream &os, const multiple_complex_vector_type &g_bare, const multiple_complex_vector_type &g_dressed, const double beta){
 	for(uint i=0;i<g_bare.first.size();++i)
                 os<<(2*i+1)*M_PI/beta<<"\t"<<(1./g_bare.first[i].imag() - 1./g_dressed.first[i].imag())<<std::endl;
+}
+void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function_t &g_bare, const matsubara_green_function_t g_dressed, const double beta){
+	for(uint i=0;i<g_bare.nfreq();++i){
+          os<<(2*i+1)*M_PI/beta<<"\t";
+          for(uint f=0;f<g_bare.nflavor();++f){
+            os<<(1./g_bare(i,f).imag() - 1./g_dressed(i,f).imag())<<"\t";
+          }
+          os<<std::endl;
+        }
 }
 void print_quasiparticle_estimate(std::ostream &os, const multiple_complex_vector_type &g_bare, const multiple_complex_vector_type &g_dressed, const double beta){
         os<<"Quasiparticle weight estimate Zeta for Z, using sigma(pi T) and sigma(3 Pi T):"<<std::endl;
@@ -39,15 +57,43 @@ void print_quasiparticle_estimate(std::ostream &os, const multiple_complex_vecto
         double sigma_2=1./g_bare.first[1].imag() - 1./g_dressed.first[1].imag();
         os<<"1: "<<"\t"<<1./(1.-sigma_1*beta/M_PI)<<"\t"<<1./(1.-(sigma_2)*beta/M_PI/3.)<<std::endl;
 }
+void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_function_t &g_bare, const matsubara_green_function_t &g_dressed, const double beta){
+        os<<"Quasiparticle weight estimate Zeta for Z, using sigma(pi T) and sigma(3 Pi T):"<<std::endl;
+        for(uint f=0;f<g_bare.nflavor();++f){
+          double sigma_1=1./g_bare(0,f).imag() - 1./g_dressed(0,f).imag();
+          double sigma_2=1./g_bare(1,f).imag() - 1./g_dressed(1,f).imag();
+          os<<"1: "<<"\t"<<1./(1.-sigma_1*beta/M_PI)<<"\t"<<1./(1.-(sigma_2)*beta/M_PI/3.)<<std::endl;
+        }
+}
 void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
 	for(uint i=0;i<v.first.size();++i){
                 os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].real()<<"\t"<<v.second[i].real()<<std::endl;
+        }
+}
+void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta){
+  assert(v.nsite()==1);
+	for(uint i=0;i<v.nfreq();++i){
+                os<<(2*i+1)*M_PI/beta<<"\t";
+                for(uint f=0;f<v.nflavor();++f){
+                  os<<v(i,f).real()<<"\t";
+                }
+                os<<std::endl;
         }
 }
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta){
         for(uint i=0;i<v.first.size();++i){
                 os<<i*beta/(v.first.size()-1)<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
         }
+}
+void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta){
+    assert(v.nsite()==1);
+    for(uint i=0;i<v.ntime();++i){
+      os<<beta*i/(v.ntime()-1)<<"\t";
+      for(uint f=0;f<v.nflavor();++f){
+        os<<v(i,f)<<"\t";
+      }
+      os<<std::endl;
+    }
 }
 void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega, const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta){
 	std::ostringstream G0omega_name, G0tau_name, Gomega_name, Gomegareal_name, Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name;
@@ -68,15 +114,15 @@ void print_all_green_functions(const int iteration_ctr, const matsubara_green_fu
 	std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
 	std::ofstream selfenergy_file(selfenergy_name.str().c_str());
 	assert(G0_omega_file.is_open() && G0_tau_file.is_open() && G_omega_file.is_open() && G_tau_file.is_open());
-	print_imag_green_matsubara(G0_omega_file, G0_omega.to_multiple_vector(),beta);
-	print_green_itime(G0_tau_file,G0_tau.to_multiple_vector(),beta);
-	print_imag_green_matsubara(G_omega_file,G_omega.to_multiple_vector(),beta);
-	print_real_green_matsubara(G_omegareal_file,G_omega.to_multiple_vector(),beta);
-	print_green_itime(G_tau_file,G_tau.to_multiple_vector(),beta);
-	print_imag_green_matsubara(G_omega_file_2,G_omega.to_multiple_vector(),beta);
-	print_green_itime(G_tau_file_2,G_tau.to_multiple_vector(),beta);
-	print_selfenergy_matsubara(selfenergy_file,G_omega.to_multiple_vector(), G0_omega.to_multiple_vector(), beta);
-        print_quasiparticle_estimate(std::cout, G_omega.to_multiple_vector(), G0_omega.to_multiple_vector(), beta);
+	print_imag_green_matsubara(G0_omega_file, G0_omega, beta);
+	print_green_itime(G0_tau_file,G0_tau, beta);
+	print_imag_green_matsubara(G_omega_file,G_omega,beta);
+	print_real_green_matsubara(G_omegareal_file,G_omega,beta);
+	print_green_itime(G_tau_file,G_tau,beta);
+	print_imag_green_matsubara(G_omega_file_2,G_omega,beta);
+	print_green_itime(G_tau_file_2,G_tau,beta);
+	print_selfenergy_matsubara(selfenergy_file,G_omega, G0_omega, beta);
+        print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
 }
 void print_tau_green_functions(const int iteration_ctr, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta){
 	std::ostringstream G0tau_name, Gtau_name, Gtau_name_2;
