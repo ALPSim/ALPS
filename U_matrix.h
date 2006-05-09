@@ -13,6 +13,7 @@ typedef class U_matrix{
       ns_=n_site;
       nf_=n_flavor;
       val_=new double[nf_*nf_];
+      for(uint i=0;i<nf_*nf_;++i){val_[i]=0;} //default: non-interacting.
       if(parms.defined("U_MATRIX")){
         std::ifstream u_file(std::string(parms["U_MATRIX"]).c_str());
         int i;
