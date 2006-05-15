@@ -121,9 +121,9 @@ class FFunctionFourierTransformer:public FourierTransformer{
   public:
     FFunctionFourierTransformer(double beta, double mu, double t):FourierTransformer(beta,mu){
       t_=t;
-      c1_=-t*t;
-      c2_=-2*t*t*mu-mu*mu*mu;
-      c3_=t*t*t*t-t*t*mu*mu-mu*mu*mu*mu;
+      c1_=t*t;
+      c2_=+(2*t*t*mu+mu*mu*mu);
+      c3_=0;//t*t*t*t-t*t*mu*mu-mu*mu*mu*mu; //recheck this term!
     }
     virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const{
       std::cerr<<"implement 2nd derivatives for F function before using this!"<<std::endl;
@@ -133,7 +133,7 @@ class FFunctionFourierTransformer:public FourierTransformer{
       FourierTransformer::backward_ft(G_tau, G_omega);
       std::cout<<"correcting for F function"<<std::endl;
       for(uint j=0;j<G_tau.nflavor();++j){
-        G_tau(0,j)*=-1; G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);
+        G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);
       }
     }
     virtual ~FFunctionFourierTransformer(){}
