@@ -79,6 +79,18 @@ template <typename T> class green_function{
         void read(const char *filename);
         std::pair<std::vector<T>,std::vector<T> > to_multiple_vector() const;
         void from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> > &mv);
+        ///mirror a GF at zero.
+        /*void mirror_real(){
+            for(uint i=0;i<ntnsns_*nf_;++i){
+              val_[i].real()*=-1;
+            }
+        }
+        void mirror_imag(){
+            for(uint i=0;i<ntnsns_*nf_;++i){
+              val_[i].imag()*=-1;
+            }
+        }*/
+              
 
         ///hobby implementation of an iterator with begin, end, and operator++
         //that goes through all entries of the GF
@@ -161,4 +173,7 @@ template<typename T> void green_function<T>::from_multiple_vector(const std::pai
 }
 
 void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega, const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta);
+void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta);
+void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta);
+void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta);
 #endif
