@@ -57,16 +57,11 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
   for(int i=0;i<N;++i){
   	e_ls[i]=exp(l*spins[i]);
   }
-  /*std::cout<<"spins: "<<std::endl;
-    for(int i=0;i<N;++i)
-          std::cout<<spins[i]<<std::endl;
-  */
   // calculate a = 1 + (1-g)*(exp(v')-1) 
   dense_matrix a(N, N);
   for (int i=0; i<N; i++) {
     for (int j=0; j<N; j++) {
 	  a(i,j) = -Green0(i,j)*(e_ls[j]-1);
-            //std::cout<<"aij: "<<a(i,j)<<"\tels: "<<exp(l*spins[j])<<"\t"<<e_ls[j]<<std::endl;
 	}
 	a(i,i) += e_ls[i]; 
   }
@@ -115,9 +110,9 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
   std::valarray<double> G0_up(G0.first.size());
   std::valarray<double> G0_down(G0.first.size());
   for (uint i=0; i<G0.first.size(); i++) {
-    G0_up[i] = -G0.first[i];
-    G0_down[i] = -G0.second[i];
-    //std::cout<<i<<"\t"<<G0_up[i]<<std::endl;
+    G0_up[i] = -G0.first[G0.first.size()-1-i];
+    G0_down[i] = -G0.second[G0.second.size()-1-i];
+    std::cout<<i<<"\t"<<G0_up[i]<<" "<<G0_down[i]<<std::endl;
   }
   // initialize lambda
   double tmp = exp(beta/N*u/2);
@@ -300,17 +295,17 @@ itime_green_function_t HirschFyeSim::get_result() const {
   std::valarray<double> g_up_mean_vector(G_meas_up.mean());
   std::valarray<double> g_down_mean_vector(G_meas_down.mean());
   std::cout<<"measured: "<<std::endl;
+  //also take into account G(beta)
+  g.first.push_back(-1.+g_up_mean_vector[0]);
+  g.second.push_back(-1.+g_down_mean_vector[0]);
   for(uint i=0;i<g_up_mean_vector.size();++i){
-  	g.first.push_back(-g_up_mean_vector[i]);
-  	g.second.push_back(-g_down_mean_vector[i]);
-        std::cout<<i<<"\t"<<-g_up_mean_vector[i]<<"\t"<<G_meas_up.error()[i]<<std::endl;
+  	g.first.push_back(-g_up_mean_vector[g_up_mean_vector.size()-1-i]);
+  	g.second.push_back(-g_down_mean_vector[g_up_mean_vector.size()-1-i]);
+        std::cout<<i<<"\t"<<-g_up_mean_vector[g_up_mean_vector.size()-1-i]<<"\t"<<G_meas_up.error()[g_up_mean_vector.size()-1-i]<<std::endl;
   }
-   //also take into account G(beta)
-    g.first.push_back(-1.+g_up_mean_vector[0]);
-    g.second.push_back(-1.+g_down_mean_vector[0]);
       
-	itime_green_function_t multiple_G(N+1, 1, 2);
-	multiple_G.from_multiple_vector(g);
-   return multiple_G;
+  itime_green_function_t multiple_G(N+1, 1, 2);
+  multiple_G.from_multiple_vector(g);
+  return multiple_G;
 }
 
