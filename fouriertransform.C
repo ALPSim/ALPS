@@ -95,10 +95,14 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau, const matsub
   for(uint f=0;f<G_omega.nflavor();++f){
     for (uint k=0; k<N_omega; k++) {
       std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+      //std::cout<<G_omega_no_model(k,f)<<std::endl;
       G_omega_no_model(k,f) -= f_omega(iw, c1_,c2_, c3_);
+      //std::cout<<k<<" "<<G_omega_no_model(k,f)<<std::endl;
     }     
+    //std::cout<<c1_<<" "<<c2_<<" "<<c3_<<std::endl;
     for (uint i=0; i<N_tau; i++) {
       G_tau(i,f) = f_tau(i*dt, beta_, c1_, c2_, c3_); 
+      //std::cout<<i<<" "<<G_tau(i,f)<<std::endl;
       for (uint k=0; k<N_omega; k++) {
         double wt((2*k+1)*i*M_PI/N_tau);
         G_tau(i,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,f).real()+sin(wt)*G_omega_no_model(k,f).imag());
@@ -110,18 +114,45 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau, const matsub
 void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
 
   uint N=G_tau.ntime()-1;
-  double dt = beta_/N;
-  dense_matrix spline_matrix(N+1, N+1);
+  //double dt = beta_/N;
+  int n_oversampling=30;
+  int N_large=N*n_oversampling;
+  double dt=beta_/N_large;
   assert(G_omega.nfreq()==N); //we implicitely assume that we have as many imag time slices as matsubara frequencies. If this is not the case: interpolate,
-  std::vector<double> G_tau_vector(G_tau.ntime());
-  std::vector<double> G_tau_derivatives(G_tau.ntime());
+  double *G_tau_vector=new double[N_large];
+  //std::vector<double> G_tau_derivatives(G_tau.ntime());
   assert(c1_==1); //otherwise change evaluate_second_derivatives!
   for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
-    generate_spline_matrix(spline_matrix);
     for(uint i=0;i<G_tau.ntime();++i){
-      G_tau_vector[i]=G_tau(i,flavor);
+      for(uint j=0;j<n_oversampling;++j){
+        G_tau_vector[i*n_oversampling+j]=(1./n_oversampling*(G_tau(i,flavor)*(n_oversampling-j)+G_tau(i+1,flavor)*j));
+      }
     }
-    evaluate_second_derivatives(dt, c2_, c3_, spline_matrix, G_tau_vector, G_tau_derivatives);
+    /*for(uint k=0;k<N_large;++k){
+      std::cout<<k<<" "<<G_tau_vector[k]<<" "<<f_tau(dt*k,beta_, c1_, c2_, c3_)<<" "<<(G_tau_vector[k]-f_tau(dt*k,beta_, c1_, c2_, c3_))<<std::endl;
+    }*/
+    for (uint n=0; n<N; n++) {
+      std::complex<double> iw_n(0, (2*n+1)*M_PI/beta_);
+      G_omega(n,flavor)=0;
+      for(uint i=0;i<N*n_oversampling;++i){
+        G_omega(n,flavor) += dt*exp(iw_n*(i*dt))*(G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_));
+        //G_omega(n,flavor) += dt*exp(iw_n*(i*dt))*G_tau(i,flavor);
+      }
+      //std::cout<<n<<" "<<G_omega(n,flavor).real()<<" "<<G_omega(n,flavor).imag()<<std::endl;
+      G_omega(n,flavor)+=f_omega(iw_n, c1_,c2_, c3_);
+    }
+  }
+  delete[] G_tau_vector;
+          
+    /*evaluate_second_derivatives(dt, c2_, c3_, spline_matrix, G_tau_vector, G_tau_derivatives);
+    //G_tau_derivatives[0]=-c3_/2./(dt*dt)*beta_*beta_;
+    //G_tau_derivatives[N]=-c3_/2./(dt*dt)*beta_*beta_;
+    //G_tau_derivatives[  1]=1/dt*(1/dt*( 1/dt*(G_tau(1,flavor)-G_tau(0  ,flavor))) -(c2_/2 + beta_*c3_/4));
+    //G_tau_derivatives[N-1]=1/dt*(1/dt*(-1/dt*(G_tau(N,flavor)-G_tau(N-1,flavor))) +(c2_/2 - beta_*c3_/4));
+    for(uint i=1;i<N;++i){
+      G_tau_derivatives[i]=1/(dt*dt)*(G_tau(i-1, flavor)-2*G_tau(i,flavor)+G_tau(i+1,flavor));
+    }
+    std::cout<<"derivatives: "<<G_tau_derivatives<<std::endl;
     for (uint k=0; k<N; k++) {
       std::complex<double> iw(0, (2*k+1)*M_PI/beta_);
       G_omega(k,flavor) = 0;
@@ -129,11 +160,12 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
       for (uint n=1; n<N; n++) {
         G_omega(k,flavor) += exp(iw*(n*dt))*(G_tau_derivatives[n+1]-2*G_tau_derivatives[n]+G_tau_derivatives[n-1]);
       }
-      G_omega(k,flavor) += G_tau_derivatives[1] - G_tau_derivatives[0] + G_tau_derivatives[N] - G_tau_derivatives[N-1];
+      G_omega(k,flavor) += G_tau_derivatives[1] -G_tau_derivatives[0] + G_tau_derivatives[N] - G_tau_derivatives[N-1];
       G_omega(k,flavor) *= 1./(dt*pow(iw,4));
       G_omega(k,flavor) += f_omega(iw, c1_, c2_, c3_);
     }
-  }
+      std::cout<<"deriv: "<<G_tau_derivatives[1] -G_tau_derivatives[0] + G_tau_derivatives[N] - G_tau_derivatives[N-1]<<" "<<G_tau_derivatives[0] <<" "<<G_tau_derivatives[1]<<" "<< G_tau_derivatives[N-1]<<" "<< G_tau_derivatives[N]<<std::endl;
+  }*/
 } 
 void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr){
   if(parms.defined("GENERAL_FOURIER")){
