@@ -96,8 +96,9 @@ void print_green_itime(std::ostream &os, const itime_green_function_t &v, const 
     }
 }
 void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega, const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta){
-	std::ostringstream G0omega_name, G0tau_name, Gomega_name, Gomegareal_name, Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name;
+	std::ostringstream G0omega_name, G0omegareal_name, G0tau_name, Gomega_name, Gomegareal_name, Gtau_name, Gtau_name_2, Gomega_name_2, selfenergy_name;
 	G0omega_name<<"G0_omega_"<<iteration_ctr;//<<"_"<<process_id;
+	G0omegareal_name<<"G0_omegareal_"<<iteration_ctr;//<<"_"<<process_id;
 	G0tau_name<<"G0_tau_"<<iteration_ctr;//<<"_"<<process_id;
 	Gomega_name<<"G_omega_"<<iteration_ctr;//<<"_"<<process_id;
 	Gomegareal_name<<"G_omegareal_"<<iteration_ctr;//<<"_"<<process_id;
@@ -106,6 +107,7 @@ void print_all_green_functions(const int iteration_ctr, const matsubara_green_fu
 	Gtau_name_2<<"G_tau";//<<"_"<<process_id;
 	selfenergy_name<<"selfenergy"<<"_"<<iteration_ctr;//<<"_"<<process_id;
 	std::ofstream G0_omega_file(G0omega_name.str().c_str());
+	std::ofstream G0_omegareal_file(G0omegareal_name.str().c_str());
 	std::ofstream G0_tau_file(G0tau_name.str().c_str());
 	std::ofstream G_omega_file(Gomega_name.str().c_str());
 	std::ofstream G_omegareal_file(Gomegareal_name.str().c_str());
@@ -115,6 +117,7 @@ void print_all_green_functions(const int iteration_ctr, const matsubara_green_fu
 	std::ofstream selfenergy_file(selfenergy_name.str().c_str());
 	assert(G0_omega_file.is_open() && G0_tau_file.is_open() && G_omega_file.is_open() && G_tau_file.is_open());
 	print_imag_green_matsubara(G0_omega_file, G0_omega, beta);
+	print_real_green_matsubara(G0_omegareal_file,G0_omega,beta);
 	print_green_itime(G0_tau_file,G0_tau, beta);
 	print_imag_green_matsubara(G_omega_file,G_omega,beta);
 	print_real_green_matsubara(G_omegareal_file,G_omega,beta);
@@ -133,6 +136,15 @@ void print_tau_green_functions(const int iteration_ctr, const multiple_vector_ty
 	std::ofstream G_tau_file(Gtau_name.str().c_str());
 	std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
 	print_green_itime(G0_tau_file,G0_tau,beta);
+	print_green_itime(G_tau_file,G_tau,beta);
+	print_green_itime(G_tau_file_2,G_tau,beta);
+}
+void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta){
+	std::ostringstream Gtau_name, Gtau_name_2;
+	Gtau_name<<"G_tau_"<<iteration_ctr;//<<"_"<<process_id;
+	Gtau_name_2<<"G_tau";//<<"_"<<process_id;
+	std::ofstream G_tau_file(Gtau_name.str().c_str());
+	std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
 	print_green_itime(G_tau_file,G_tau,beta);
 	print_green_itime(G_tau_file_2,G_tau,beta);
 }
