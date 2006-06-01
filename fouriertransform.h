@@ -58,12 +58,12 @@ template <class V> void evaluate_second_derivatives(double dt, double c2, double
   for(uint i=0;i<Np1;++i){
     second_derivatives[i]=0;
   }
-  rhs[0] = -c3*dtsq; 
+  rhs[0] = -c3*dtsq;  //think more about this!
   for (uint i=1; i<Np1-1; i++) {
     rhs[i] = g[i-1]-2*g[i]+g[i+1];
   }
   rhs[Np1-1] = c2*dtsq + g[0] - g[1] + g[Np1-2] - g[Np1-1];
-  //std::cout<<"rhs: "<<rhs<<std::endl;
+  std::cout<<"rhs: "<<rhs<<std::endl;
   solve_second_derivatives(spline_matrix, rhs);
   //std::cout<<"rhs: "<<rhs<<std::endl;
   for(uint i=0;i<Np1;++i){
@@ -92,7 +92,7 @@ class FourierTransformer{
       beta_=beta;
       mu_=mu;
       c1_=1.;
-      c2_=-mu;
+      c2_=mu/beta;
       c3_=0.;
     }
     virtual ~FourierTransformer(){}
@@ -111,7 +111,7 @@ class BetheFourierTransformer:public FourierTransformer{
   public:
   BetheFourierTransformer(double beta, double mu, double t):FourierTransformer(beta, mu){
     t_=t;
-    c3_=mu_*mu_+t_*t_;
+    c3_=(mu_*mu_+t_*t_)/(beta*beta);
   }
   virtual ~BetheFourierTransformer(){}
   private:
@@ -120,9 +120,10 @@ class BetheFourierTransformer:public FourierTransformer{
 class FFunctionFourierTransformer:public FourierTransformer{
   public:
     FFunctionFourierTransformer(double beta, double mu, double t):FourierTransformer(beta,mu){
+      std::cout<<"FFFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"t: "<<t<<std::endl;
       t_=t;
       c1_=t*t;
-      c2_=+(2*t*t*mu+mu*mu*mu);
+      c2_=-(2*t*t*mu+mu*mu*mu);
       c3_=0;//t*t*t*t-t*t*mu*mu-mu*mu*mu*mu; //recheck this term!
     }
     virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const{
@@ -134,6 +135,8 @@ class FFunctionFourierTransformer:public FourierTransformer{
       std::cout<<"correcting for F function"<<std::endl;
       for(uint j=0;j<G_tau.nflavor();++j){
         G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);
+        /*G_tau(0,j)=-t_*t_*(0.5+0.25*mu_);
+        G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);*/
       }
     }
     virtual ~FFunctionFourierTransformer(){}

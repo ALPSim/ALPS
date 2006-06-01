@@ -83,14 +83,20 @@ public:
                     }
                   }
 		}
+                std::cout<<"G tau: "<<G_tau<<std::endl;
                 fourier.forward_ft(G_tau, G_omega);
+                std::cout<<"G omega: "<<G_omega<<std::endl;
+                print_real_green_matsubara(std::cout, G_omega, beta);
 		for(uint i=0; i<G_omega.nfreq(); i++) {
 		  std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
                   for(spin_t flavor=0;flavor<G_omega.nflavor(); flavor++){
                     G0_omega(i, flavor) = 1./(iw + mu - tsq*G_omega(i, flavor%2==0?flavor+1:flavor-1));
                   }
 		}
+                std::cout<<"G0 omega: "<<G0_omega<<std::endl;
+                print_real_green_matsubara(std::cout, G0_omega, beta);
                 fourier.backward_ft(G0_tau, G0_omega);
+                std::cout<<G0_tau<<std::endl;
 		return G0_tau;
 	}
 private:
@@ -173,7 +179,12 @@ public:
 		//formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
                 //std::cout<<G_omega<<std::endl;
 		if (paramagnet) {
-                  if(G_omega.nflavor()==1){ for(uint i=0;i<G_omega.nfreq();++i) G_omega(i,0)=std::complex<double>(0, G_omega(i,0).imag());} //fix for only 1 zone and half filling.
+                  //if(G_omega.nflavor()==1){
+                  /*for(uint f=0;f<G_omega.nflavor();++f){
+                    for(uint i=0;i<G_omega.nfreq();++i){
+                      G_omega(i,f)=std::complex<double>(0, G_omega(i,f).imag());
+                    } //fix for only 1 zone and half filling.
+                  }*/
                   if(G_omega.nflavor()>1 && G_omega.nflavor()%2==0){
                     for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
                       for(uint i=0;i<G_omega.nfreq();++i){
@@ -188,8 +199,15 @@ public:
                     std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
                     G0_omega(i,0) =1./(iw + mu - tsq*G_omega(i,0));
                   }
+                  std::cout<<"new G0: "<<std::endl;
+                  print_imag_green_matsubara(std::cout, G0_omega, beta);
+                  print_real_green_matsubara(std::cout, G0_omega, beta);
                 }
                 else{
+                  std::cout<<"G omega for hilbert: "<<std::endl;
+                  print_imag_green_matsubara(std::cout, G_omega, beta);
+                  std::cout<<"G omega real for hilbert: "<<std::endl;
+                  print_real_green_matsubara(std::cout, G_omega, beta);
                   assert(G_omega.nflavor()%2==0);
                   for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
                     for(uint i=0; i<G_omega.nfreq(); i++) {
@@ -198,6 +216,9 @@ public:
                       G0_omega(i,flavor+1) =1./(iw + mu - tsq*G_omega(i,flavor  )); 
                     }
                   }
+                  std::cout<<"new G0: "<<std::endl;
+                  print_imag_green_matsubara(std::cout, G0_omega, beta);
+                  print_real_green_matsubara(std::cout, G0_omega, beta);
                 }
 		return G0_omega;
 	}
