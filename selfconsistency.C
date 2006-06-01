@@ -113,7 +113,8 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
         }
     }
     std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
-    print_tau_green_functions(iteration_ctr++, G_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
+    print_dressed_tau_green_functions(iteration_ctr++, G_tau, beta);
+    //print_tau_green_functions(iteration_ctr++, G_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged);
   std::cout<<"converged!"<<std::endl;
 }
@@ -203,7 +204,6 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
                         }
 			std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "<<max_diff<<"\tconverged: "<<converged<<std::endl;
 		}
-		//write checkpoint - clean this up in the future!
 		print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
 	}while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
 	
