@@ -13,8 +13,11 @@ int main(int argc, char** argv){
   double beta=atof(argv[2]);
   double mu=atof(argv[3]);
   double t=atof(argv[4]);
+  double c2=mu/beta;
+  double c3=(mu*mu+t*t)/(beta*beta);
   std::cerr<<"using N: "<<N<<" beta ="<<beta<<" mu= "<<mu<<" and t= "<<t<<std::endl;
-  BetheFourierTransformer trans(beta, mu, t);
+  BetheFourierTransformer trans1(beta, c2, c3);
+  BetheFourierTransformer trans2(beta, c2, c3);
   std::ifstream G_tau_file(argv[5]);
   assert(G_tau_file.is_open());
   itime_green_function_t G_tau(N+1,1,1);
@@ -25,10 +28,16 @@ int main(int argc, char** argv){
     G_tau_file >> G_tau(i,0);
   }
   std::cerr<<"using G_tau: "<<G_tau<<std::endl;
-  trans.forward_ft(G_tau, G_omega); 
+  trans1.forward_ft(G_tau, G_omega); 
   for (int i=0; i<N; i++) {
     std::cout.precision(20);
-    std::cout<<(2*i+1)*M_PI/beta<<" "<<G_omega(i,0).imag()<<std::endl;
+    std::cout<<(2*i+1)*M_PI/beta<<" "<<G_omega(i,0).real()<<" "<<G_omega(i,0).imag()<<" "<<f_omega(std::complex<double>(0, (2*i+1)*M_PI/beta),1,c2,c3)<<std::endl;
+    //G_omega(i,0).real()=0;
   }
-  //std::cout<<G_omega<<std::endl;
+  trans2.backward_ft(G_tau, G_omega);
+  std::cout.precision(20);
+  for (int i=0; i<N+1; i++) {
+    std::cout.precision(20);
+    std::cout<<i*beta/N<<" "<<G_tau(i,0)<<" "<<f_tau(beta*i/N, beta, 1, c2, c3)<<std::endl;
+  }
 }
