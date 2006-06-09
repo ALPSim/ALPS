@@ -75,7 +75,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     static int leading_dimension (matrix_type& m) {
       // g++ 2.95.4 and 3.0.4 (with -pedantic) dislike 
       //   identifier_type::functor_type::size2()
-      return functor_t::size2 (m.size1(), m.size2());
+      return functor_t::size_M (m.size1(), m.size2());
     }
 
     // stride1 == distance (m (i, j), m (i+1, j)) 
