@@ -63,7 +63,7 @@ template <class V> void evaluate_second_derivatives(double dt, double c2, double
     rhs[i] = g[i-1]-2*g[i]+g[i+1];
   }
   rhs[Np1-1] = c2*dtsq + g[0] - g[1] + g[Np1-2] - g[Np1-1];
-  std::cout<<"rhs: "<<rhs<<std::endl;
+  //std::cout<<"rhs: "<<rhs<<std::endl;
   solve_second_derivatives(spline_matrix, rhs);
   //std::cout<<"rhs: "<<rhs<<std::endl;
   for(uint i=0;i<Np1;++i){
@@ -120,7 +120,7 @@ class BetheFourierTransformer:public FourierTransformer{
 class FFunctionFourierTransformer:public FourierTransformer{
   public:
     FFunctionFourierTransformer(double beta, double mu, double t):FourierTransformer(beta,mu){
-      std::cout<<"FFFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"t: "<<t<<std::endl;
+      std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"t: "<<t<<std::endl;
       t_=t;
       c1_=t*t;
       c2_=-(2*t*t*mu+mu*mu*mu);

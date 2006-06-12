@@ -115,11 +115,11 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
 
   uint N=G_tau.ntime()-1;
   //double dt = beta_/N;
-  int n_oversampling=30;
-  int N_large=N*n_oversampling;
+  uint n_oversampling=30;
+  uint N_large=G_tau.ntime()*n_oversampling;
   double dt=beta_/N_large;
   assert(G_omega.nfreq()==N); //we implicitely assume that we have as many imag time slices as matsubara frequencies. If this is not the case: interpolate,
-  double *G_tau_vector=new double[N_large];
+  double G_tau_vector[N_large];
   //std::vector<double> G_tau_derivatives(G_tau.ntime());
   assert(c1_==1); //otherwise change evaluate_second_derivatives!
   for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
@@ -142,7 +142,6 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
       G_omega(n,flavor)+=f_omega(iw_n, c1_,c2_, c3_);
     }
   }
-  delete[] G_tau_vector;
           
     /*evaluate_second_derivatives(dt, c2_, c3_, spline_matrix, G_tau_vector, G_tau_derivatives);
     //G_tau_derivatives[0]=-c3_/2./(dt*dt)*beta_*beta_;

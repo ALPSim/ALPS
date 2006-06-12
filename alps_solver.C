@@ -45,7 +45,7 @@ alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc
           alps::scheduler::NoJobfileOptions opt(1,argv);
           master_scheduler = new alps::scheduler::SingleScheduler(opt,factory);
 	} else{ //a slave lives for many iterations...
-            alps::scheduler::NoJobfileOptions opt(argc,argv);
+            alps::scheduler::NoJobfileOptions opt(1,argv);
 	    int res=0;
 	    alps::scheduler::Scheduler *slave_scheduler = new alps::scheduler::Scheduler(opt,factory);
 	    res = slave_scheduler->run();
