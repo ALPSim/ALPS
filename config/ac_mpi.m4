@@ -23,10 +23,26 @@ AC_DEFUN([AC_MPI],
   
   AC_ARG_WITH(mpi-incdir,
     AC_HELP_STRING([--with-mpi-incdir=DIR],[MPI include directory]),
-    [mpi_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`])
+    [
+    mpi_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $mpi_incdir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-mpi-incdir : $mpi_incdir]);;
+    esac
+    ]
+  )
   AC_ARG_WITH(mpi-libdir,
     AC_HELP_STRING([--with-mpi-libdir=DIR],[MPI library directory]),
-    [mpi_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`])
+    [
+    mpi_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $mpi_libdir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-mpi-libdir : $mpi_libdir]);;
+    esac
+    ]
+  )
   AC_ARG_WITH(mpi-libs,
     AC_HELP_STRING([--with-mpi-libs=LIBS],[MPI libraries]),
     [mpi_libs="$withval"])

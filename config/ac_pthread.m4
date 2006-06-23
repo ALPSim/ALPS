@@ -7,7 +7,7 @@ AC_DEFUN([AC_PTHREAD],
   # check for configure option (default = yes)
   pthread=yes
   AC_ARG_WITH(pthread,
-    AC_HELP_STRING([--with-pthread=DIR],[use pthread library]),
+    AC_HELP_STRING([--with-pthread],[use pthread library]),
     [
     if test "x$withval" = "xno"; then
       pthread=no

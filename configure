@@ -1067,7 +1067,7 @@ Optional Packages:
   --with-boost-all        compile all optional Boost libraries
   --with-boost-signals    compile Boost::signals library
   --with-boost-thread     compile boost::thread library
-  --with-pthread=DIR      use pthread library
+  --with-pthread          use pthread library
   --with-hdf5=DIR         use HDF5 library
   --with-atlas=LIBS       use ATLAS Library
   --with-atlas-dir=DIR    ATLAS lib directory
@@ -20797,6 +20797,13 @@ if test "${with_boost+set}" = set; then
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=no
     boost_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $boost_dir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-boost : $boost_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-boost : $boost_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
     if test -f "$boost_dir/boost/config.hpp"; then :; else
       { { echo "$as_me:$LINENO: error: Boost main tree not found" >&5
 echo "$as_me: error: Boost main tree not found" >&2;}
@@ -20821,6 +20828,13 @@ if test "${with_boost_incdir+set}" = set; then
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=yes
     boost_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $boost_incdir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-boost-incdir : $boost_incdir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-boost-incdir : $boost_incdir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
     if test -f "$boost_incdir/boost/config.hpp"; then :; else
       { { echo "$as_me:$LINENO: error: Boost include files not found" >&5
 echo "$as_me: error: Boost include files not found" >&2;}
@@ -20838,6 +20852,13 @@ if test "${with_boost_libdir+set}" = set; then
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=yes
     boost_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $boost_libdir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-boost-libdir : $boost_libdir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-boost-libdir : $boost_libdir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
   fi
 
 
@@ -22583,6 +22604,13 @@ if test "${with_hdf5+set}" = set; then
       hdf5=yes
       if test "x$withval" != "xyes"; then
         hdf5_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $hdf5_dir in
+          [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+          *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-hdf5 : $hdf5_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-hdf5 : $hdf5_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+        esac
       fi
     fi
 
@@ -22992,7 +23020,16 @@ fi;
 # Check whether --with-atlas-dir or --without-atlas-dir was given.
 if test "${with_atlas_dir+set}" = set; then
   withval="$with_atlas_dir"
-  atlas_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+
+    atlas_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $atlas_dir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-atlas-dir : $atlas_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-atlas-dir : $atlas_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
+
 
 fi;
 
@@ -23016,7 +23053,16 @@ fi;
 # Check whether --with-blas-dir or --without-blas-dir was given.
 if test "${with_blas_dir+set}" = set; then
   withval="$with_blas_dir"
-  blas_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+
+    blas_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $blas_dir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-blas-dir : $blas_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-blas-dir : $blas_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
+
 
 fi;
 
@@ -23054,7 +23100,16 @@ fi;
 # Check whether --with-lapack-dir or --without-lapack-dir was given.
 if test "${with_lapack_dir+set}" = set; then
   withval="$with_lapack_dir"
-  lapack_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+
+    lapack_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $lapack_dir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-lapack-dir : $lapack_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-lapack-dir : $lapack_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
+
 
 fi;
 
@@ -23091,7 +23146,16 @@ fi;
 # Check whether --with-mkl-dir or --without-mkl-dir was given.
 if test "${with_mkl_dir+set}" = set; then
   withval="$with_mkl_dir"
-  mkl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+
+    mkl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $mkl_dir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-mkl-dir : $atlas_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-mkl-dir : $atlas_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
+
 
 fi;
 
@@ -25800,13 +25864,33 @@ echo "$as_me: disabling LAPACK support" >&6;}
 # Check whether --with-sqlite-incdir or --without-sqlite-incdir was given.
 if test "${with_sqlite_incdir+set}" = set; then
   withval="$with_sqlite_incdir"
-  sqlite_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+
+    sqlite_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $sqlite_incdir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-sqlite-incdir : $sqlite_incdir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-sqlite-incdir : $sqlite_incdir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
+
+
 fi;
 
 # Check whether --with-sqlite-libdir or --without-sqlite-libdir was given.
 if test "${with_sqlite_libdir+set}" = set; then
   withval="$with_sqlite_libdir"
-  sqlite_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+
+    sqlite_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $sqlite_libdir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-sqlite-libdir : $sqlite_libdir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-sqlite-libdir : $sqlite_libdir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
+
+
 fi;
 
   if test -z "$sqlite_incdir"; then
@@ -26110,6 +26194,13 @@ echo "$as_me: error: two (or more) XML parsers are specified." >&2;}
       xml_parser="expat"
       if test "x$withval" != "xyes"; then
         expat_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $expat_dir in
+          [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+          *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-expat : $expat_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-expat : $expat_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+        esac
       fi
     fi
 
@@ -26133,6 +26224,13 @@ echo "$as_me: error: two (or more) XML parsers are specified." >&2;}
       xml_parser="xerces"
       if test "x$withval" != "xyes"; then
         xerces_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $xerces_dir in
+          [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+          *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-xerces : $xerces_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-xerces : $xerces_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+        esac
       fi
     fi
 
@@ -26862,13 +26960,33 @@ fi;
 # Check whether --with-mpi-incdir or --without-mpi-incdir was given.
 if test "${with_mpi_incdir+set}" = set; then
   withval="$with_mpi_incdir"
-  mpi_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+
+    mpi_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $mpi_incdir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-mpi-incdir : $mpi_incdir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-mpi-incdir : $mpi_incdir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
+
+
 fi;
 
 # Check whether --with-mpi-libdir or --without-mpi-libdir was given.
 if test "${with_mpi_libdir+set}" = set; then
   withval="$with_mpi_libdir"
-  mpi_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+
+    mpi_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $mpi_libdir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-mpi-libdir : $mpi_libdir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-mpi-libdir : $mpi_libdir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
+
+
 fi;
 
 # Check whether --with-mpi-libs or --without-mpi-libs was given.
@@ -28004,6 +28122,13 @@ if test "${with_xsltproc+set}" = set; then
     else
       if test "x$withval" != "xyes"; then
         xsltproc_path=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $xsltproc_path in
+          [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+          *)  { { echo "$as_me:$LINENO: error: expected an absolute path name for --with-xsltproc : $xsltproc_path" >&5
+echo "$as_me: error: expected an absolute path name for --with-xsltproc : $xsltproc_path" >&2;}
+   { (exit 1); exit 1; }; };;
+        esac
       fi
     fi
 
@@ -28192,6 +28317,13 @@ if test "${with_docbook_dtd+set}" = set; then
       docbook_dtd=yes
       if test "x$withval" != xyes; then
         docbook_dtd_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $docbook_dtd_dir in
+          [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+          *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-docbook-dtd : $docbook_dtd_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-docbook-dtd : $docbook_dtd_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+        esac
       fi
     fi
 
@@ -28254,6 +28386,13 @@ if test "${with_docbook_xsl+set}" = set; then
       docbook_xsl=yes
       if test "x$withval" != xyes; then
         docbook_xsl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $docbook_xsl_dir in
+          [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+          *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-docbook-xsl : $docbook_xsl_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-docbook-xsl : $docbook_xsl_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+        esac
       fi
     fi
 
@@ -28316,6 +28455,13 @@ if test "${with_fop+set}" = set; then
       fop=yes
       if test "x$withval" != xyes; then
         fop_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $fop_dir in
+          [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+          *)  { { echo "$as_me:$LINENO: error: expected an absolute directory name for --with-fop : $fop_dir" >&5
+echo "$as_me: error: expected an absolute directory name for --with-fop : $fop_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+        esac
       fi
     fi
 

@@ -199,6 +199,11 @@ AC_ARG_WITH(boost,
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=no
     boost_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $boost_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-boost : $boost_dir]);;
+    esac
     if test -f "$boost_dir/boost/config.hpp"; then :; else
       AC_MSG_ERROR([Boost main tree not found])
     fi
@@ -216,6 +221,11 @@ AC_ARG_WITH(boost-incdir,
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=yes
     boost_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $boost_incdir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-boost-incdir : $boost_incdir]);;
+    esac
     if test -f "$boost_incdir/boost/config.hpp"; then :; else
       AC_MSG_ERROR([Boost include files not found])
     fi
@@ -228,6 +238,11 @@ AC_ARG_WITH(boost-libdir,
   if test "x$withval" != "x"; then
     ac_cv_use_precompiled_boost=yes
     boost_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $boost_libdir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-boost-libdir : $boost_libdir]);;
+    esac
   fi
   ]
 )

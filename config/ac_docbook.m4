@@ -14,6 +14,11 @@ AC_DEFUN([AC_DOCBOOK_DTD],
       docbook_dtd=yes
       if test "x$withval" != xyes; then
         docbook_dtd_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $docbook_dtd_dir in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute directory name for --with-docbook-dtd : $docbook_dtd_dir]);;
+        esac
       fi
     fi
     ]
@@ -71,6 +76,11 @@ AC_DEFUN([AC_DOCBOOK_XSL],
       docbook_xsl=yes
       if test "x$withval" != xyes; then
         docbook_xsl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $docbook_xsl_dir in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute directory name for --with-docbook-xsl : $docbook_xsl_dir]);;
+        esac
       fi
     fi
     ]

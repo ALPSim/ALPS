@@ -12,6 +12,11 @@ AC_DEFUN([AC_LIBXSLT],
     else
       if test "x$withval" != "xyes"; then
         libxslt_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $libxslt_dir in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute directory name for --with-libxslt : $libxslt_dir]);;
+        esac
       fi
     fi
     ]
@@ -115,6 +120,11 @@ AC_DEFUN([AC_LIBXALAN],
     else
       if test "x$withval" != "xyes"; then
         libxalan_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $libxalan_dir in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute directory name for --with-libxalan : $libxalan_dir]);;
+        esac
       fi
     fi
     ]
@@ -205,6 +215,11 @@ AC_DEFUN([AC_XSLTPROC],
     else
       if test "x$withval" != "xyes"; then
         xsltproc_path=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $xsltproc_path in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute path name for --with-xsltproc : $xsltproc_path]);;
+        esac
       fi
     fi
     ]
@@ -251,6 +266,11 @@ AC_DEFUN([AC_XALAN],
     else
       if test "x$withval" != "xyes"; then
         xalan_path=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $xalan_path in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute path name for --with-xalan : $xalan_path]);;
+        esac
       fi
     fi
     ]

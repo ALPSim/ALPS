@@ -21,7 +21,14 @@ AC_DEFUN([AC_LAPACK],
   )
   AC_ARG_WITH(atlas-dir,
     AC_HELP_STRING([--with-atlas-dir=DIR],[ATLAS lib directory]),
-    [atlas_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`]
+    [
+    atlas_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $atlas_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-atlas-dir : $atlas_dir]);;
+    esac
+    ]
   )
   
   AC_ARG_WITH(blas,
@@ -39,7 +46,14 @@ AC_DEFUN([AC_LAPACK],
   )
   AC_ARG_WITH(blas-dir,
     AC_HELP_STRING([--with-blas-dir=DIR],[BLAS lib directory]),
-    [blas_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`]
+    [
+    blas_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $blas_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-blas-dir : $blas_dir]);;
+    esac
+    ]
   )
 
   AC_ARG_WITH(dxml,
@@ -68,7 +82,14 @@ AC_DEFUN([AC_LAPACK],
   )
   AC_ARG_WITH(lapack-dir,
     AC_HELP_STRING([--with-lapack-dir=DIR],[LAPACK lib directory]),
-    [lapack_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`]
+    [
+    lapack_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $lapack_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-lapack-dir : $lapack_dir]);;
+    esac
+    ]
   )
 
   AC_ARG_WITH(mkl,
@@ -100,7 +121,14 @@ AC_DEFUN([AC_LAPACK],
   )
   AC_ARG_WITH(mkl-dir,
     AC_HELP_STRING([--with-mkl-dir=DIR],[MKL lib directory]),
-    [mkl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`]
+    [
+    mkl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $mkl_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-mkl-dir : $atlas_dir]);;
+    esac
+    ]
   )
 
   AC_ARG_WITH(scsl,

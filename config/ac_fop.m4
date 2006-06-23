@@ -14,6 +14,11 @@ AC_DEFUN([AC_FOP],
       fop=yes
       if test "x$withval" != xyes; then
         fop_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $fop_dir in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute directory name for --with-fop : $fop_dir]);;
+        esac
       fi
     fi
     ]

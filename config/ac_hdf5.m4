@@ -13,6 +13,11 @@ AC_DEFUN([AC_HDF5],
       hdf5=yes
       if test "x$withval" != "xyes"; then
         hdf5_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $hdf5_dir in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute directory name for --with-hdf5 : $hdf5_dir]);;
+        esac
       fi
     fi
     ]

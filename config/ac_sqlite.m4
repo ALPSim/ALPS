@@ -6,10 +6,26 @@ AC_DEFUN([AC_SQLITE],
   [
   AC_ARG_WITH(sqlite-incdir,
     AC_HELP_STRING([--with-sqlite-incdir=DIR],[SQLite include directory]),
-    [sqlite_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`])
+    [
+    sqlite_incdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $sqlite_incdir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-sqlite-incdir : $sqlite_incdir]);;
+    esac
+    ]
+  )
   AC_ARG_WITH(sqlite-libdir,
     AC_HELP_STRING([--with-sqlite-libdir=DIR],[SQLite library directory]),
-    [sqlite_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`])
+    [
+    sqlite_libdir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $sqlite_libdir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-sqlite-libdir : $sqlite_libdir]);;
+    esac
+    ]
+  )
 
   if test -z "$sqlite_incdir"; then
     for d in /usr/local; do

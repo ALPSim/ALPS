@@ -17,6 +17,11 @@ AC_DEFUN([AC_XMLPARSER],
       xml_parser="expat"
       if test "x$withval" != "xyes"; then
         expat_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $expat_dir in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute directory name for --with-expat : $expat_dir]);;
+        esac
       fi
     fi
     ]
@@ -35,6 +40,11 @@ AC_DEFUN([AC_XMLPARSER],
       xml_parser="xerces"
       if test "x$withval" != "xyes"; then
         xerces_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+        # Be sure to have absolute paths.
+        case $xerces_dir in
+          [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+          *)  AC_MSG_ERROR([expected an absolute directory name for --with-xerces : $xerces_dir]);;
+        esac
       fi
     fi
     ]
