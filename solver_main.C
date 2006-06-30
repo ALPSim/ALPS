@@ -45,7 +45,7 @@
 /// @param G0 contains on return the Weiss field read from the input file, in Matsubara frequencies
 /// @param parms contains on return the simulation parameter read from the input file
 
-void read_input(const std::string& inputfile, itime_green_function_t& G0,  alps::Parameters& parms)
+itime_green_function_t read_input(const std::string& inputfile,  alps::Parameters& parms)
 {
 	std::ifstream input(inputfile.c_str());
 	alps::XMLTag tag=alps::parse_tag(input); // skip outermost element <SIMULATION>
@@ -61,8 +61,12 @@ void read_input(const std::string& inputfile, itime_green_function_t& G0,  alps:
 			alps::skip_element(input,tag);
 		tag=alps::parse_tag(input);
 	}
-	
-    read_itime(input,G0);
+        int N=(int)parms["N"];
+        int flavors=parms.value_or_default("FLAVORS", 2);
+        int sites=parms.value_or_default("SITES", 1);
+        itime_green_function_t G0(N+1, sites, flavors);
+        read_itime(input,G0);
+        return G0;
 }
 
 
@@ -146,16 +150,10 @@ int main(int argc, char** argv)
 		std::string outfile;
 		if (!parse_options(argc,argv,infile,outfile))
 			return 0;
-		
 		// read parameters and G0
 		
 		alps::Parameters parms;
-		int N=(int)parms["N"];
-		int flavors=(int)parms["FLAVORS"];
-		int sites=(int)parms["SITES"];
-		itime_green_function_t G0(N+1, sites, flavors);
-		read_input(infile,G0,parms);
-		
+		itime_green_function_t G0=read_input(infile,parms);
                 alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
 		alps::ImpuritySolver solver(factory,argc,argv);
 		
