@@ -115,26 +115,27 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
 
   uint N=G_tau.ntime()-1;
   //double dt = beta_/N;
-  uint n_oversampling=30;
-  uint N_large=G_tau.ntime()*n_oversampling;
+  uint n_oversampling=300;
+  uint N_large=(G_tau.ntime()-1)*n_oversampling+1;
   double dt=beta_/N_large;
   assert(G_omega.nfreq()==N); //we implicitely assume that we have as many imag time slices as matsubara frequencies. If this is not the case: interpolate,
   double G_tau_vector[N_large];
   //std::vector<double> G_tau_derivatives(G_tau.ntime());
   assert(c1_==1); //otherwise change evaluate_second_derivatives!
   for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
-    for(uint i=0;i<G_tau.ntime();++i){
+    for(uint i=0;i<N;++i){
       for(uint j=0;j<n_oversampling;++j){
         G_tau_vector[i*n_oversampling+j]=(1./n_oversampling*(G_tau(i,flavor)*(n_oversampling-j)+G_tau(i+1,flavor)*j));
       }
+        G_tau_vector[N_large-1]=G_tau(N,flavor);
     }
-    /*for(uint k=0;k<N_large;++k){
-      std::cout<<k<<" "<<G_tau_vector[k]<<" "<<f_tau(dt*k,beta_, c1_, c2_, c3_)<<" "<<(G_tau_vector[k]-f_tau(dt*k,beta_, c1_, c2_, c3_))<<std::endl;
-    }*/
+    for(uint k=0;k<N_large;++k){
+      //std::cout<<k<<" "<<G_tau_vector[k]<<" "<<f_tau(dt*k,beta_, c1_, c2_, c3_)<<" "<<(G_tau_vector[k]-f_tau(dt*k,beta_, c1_, c2_, c3_))<<std::endl;
+    }
     for (uint n=0; n<N; n++) {
       std::complex<double> iw_n(0, (2*n+1)*M_PI/beta_);
       G_omega(n,flavor)=0;
-      for(uint i=0;i<N*n_oversampling;++i){
+      for(uint i=0;i<N_large;++i){
         G_omega(n,flavor) += dt*exp(iw_n*(i*dt))*(G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_));
         //G_omega(n,flavor) += dt*exp(iw_n*(i*dt))*G_tau(i,flavor);
       }
