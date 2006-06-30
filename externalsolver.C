@@ -165,7 +165,7 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   int result = std::system(command.c_str());
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
-  std::cerr << "\nFinished call to external solver.\n";
+  //std::cerr << "\nFinished call to external solver.\n";
 	                                           
   boost::filesystem::remove(inpath);
 
