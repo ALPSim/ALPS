@@ -294,14 +294,14 @@ itime_green_function_t HirschFyeSim::get_result() const {
   
   std::valarray<double> g_up_mean_vector(G_meas_up.mean());
   std::valarray<double> g_down_mean_vector(G_meas_down.mean());
-  std::cout<<"measured: "<<std::endl;
+  //std::cout<<"measured: "<<std::endl;
   //also take into account G(beta)
   g.first.push_back(-1.+g_up_mean_vector[0]);
   g.second.push_back(-1.+g_down_mean_vector[0]);
   for(uint i=0;i<g_up_mean_vector.size();++i){
   	g.first.push_back(-g_up_mean_vector[g_up_mean_vector.size()-1-i]);
   	g.second.push_back(-g_down_mean_vector[g_up_mean_vector.size()-1-i]);
-        std::cout<<i<<"\t"<<-g_up_mean_vector[g_up_mean_vector.size()-1-i]<<"\t"<<G_meas_up.error()[g_up_mean_vector.size()-1-i]<<std::endl;
+        //std::cout<<i<<"\t"<<-g_up_mean_vector[g_up_mean_vector.size()-1-i]<<"\t"<<G_meas_up.error()[g_up_mean_vector.size()-1-i]<<std::endl;
   }
       
   itime_green_function_t multiple_G(N+1, 1, 2);
