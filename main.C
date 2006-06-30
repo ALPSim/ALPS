@@ -34,8 +34,12 @@
 #include "selfconsistency.h"
 #include "externalsolver.h"
 #include "hilberttransformer.h"
+#ifdef RUBTSOV
 #include "../DMFT-solvers/Rubtsov/rubtsov.h"
+#endif
+#ifdef WERNER
 #include "../DMFT-solvers/Werner/impurity.h"
+#endif
 
 #include <alps/parameters.h>
 #include <alps/copyright.h>
@@ -101,6 +105,7 @@ int main(int argc, char** argv)
 				SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 				selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
 			}
+#ifdef WERNER
 			else if (parms["SOLVER"]=="Werner") {
 				std::cout<<"solving Werner"<<std::endl;
 			        alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
@@ -109,6 +114,7 @@ int main(int argc, char** argv)
                                 G_tau=G0_tau;
 				F_selfconsistency_loop(parms, *solver_ptr, G_tau);
 			}
+#endif
 			else {
 				solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
 		
@@ -120,10 +126,14 @@ int main(int argc, char** argv)
 			assert(out_file.is_open());
                         out_file<<G_tau<<std::endl;
 		}else{
+#ifdef RUBTSOV
 			alps::scheduler::BasicFactory<RubtsovSim,SSHubbardRubtsovRun> rubtsov_factory_ss; //for single site problems
 			alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; //for multi orbital problems, but only density density
-			alps::scheduler::BasicFactory<WernerSimFrequency,WernerRun> werner_factory;
-			//perform self consistency loop in Matsubara frequency omega
+#endif
+#ifdef WERNER
+                        alps::scheduler::BasicFactory<WernerSimFrequency,WernerRun> werner_factory;
+#endif
+                        //perform self consistency loop in Matsubara frequency omega
 			int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
 			int n_orbital=parms.value_or_default("FLAVORS", 2);
 			matsubara_green_function_t G0_omega(n_matsubara,1,n_orbital), G_omega(n_matsubara,1,n_orbital);
@@ -132,7 +142,8 @@ int main(int argc, char** argv)
                         G0_omega.read(parms.value_or_default("G0OMEGA_INPUT", "G0omega_input").c_str());
 
 			boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	//construct a solver that takes the GF in both imaginary time and Matsubara freq
-			if ((parms["SOLVER"]=="Rubtsov") && n_orbital==1){
+#ifdef RUBTSOV
+                        if ((parms["SOLVER"]=="Rubtsov") && n_orbital==1){
                           std::cout<<"using single site Hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
 			}
@@ -140,6 +151,8 @@ int main(int argc, char** argv)
                           std::cout<<"using multiband Hubbard solver"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
 			}
+#endif
+#ifdef WERNER
 			else if (parms["SOLVER"]=="Werner") {
 				std::cout<<"solving Werner -- using omega loop"<<std::endl;
 				solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
@@ -150,6 +163,7 @@ int main(int argc, char** argv)
                                 std::cout<<parms["SOLVER"]<<std::endl;
 				boost::throw_exception(std::logic_error("there is no such solver!"));	
 			}
+#endif
 			FrequencySpaceHilbertTransformer *transform_ptr;
                         if(!parms.defined("DOSFILE")){
                               transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
