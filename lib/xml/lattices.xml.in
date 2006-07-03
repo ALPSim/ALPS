@@ -341,7 +341,7 @@
     <BOUNDARY type="open"/>
   </FINITELATTICE>
   <UNITCELL ref="simple2d"/>
-  <DISORDER><VERTEX/></DISORDER>
+  <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>
 </LATTICEGRAPH>
 
 <LATTICEGRAPH name = "depleted square lattice">
@@ -353,7 +353,9 @@
     <BOUNDARY type="periodic"/>
   </FINITELATTICE>
   <UNITCELL ref="simple2d"/>
-  <DEPLETION type="site" probability="DEPLETION"/>
+  <DEPLETION>
+    <VERTEX probability="DEPLETION" seed="DEPLETION_SEED"/>
+  </DEPLETION>
 </LATTICEGRAPH>
 
 <GRAPH name="5-site dimerized" vertices="5">

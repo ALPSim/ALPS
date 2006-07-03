@@ -3885,17 +3885,17 @@ echo "$as_me: error: compiler mode is not set" >&2;}
 
   case "$COMPILER" in
     gnu)
-      try_CFLAGS_OPT="-pthread -w -O3"
+      try_CFLAGS_OPT="-pthread -O3"
       try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-pthread -w -ftemplate-depth-150 -O3"
+      try_CXXFLAGS_OPT="-pthread -ftemplate-depth-150 -O3"
       try_CXXFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
     gnu-3.3)
-      try_CFLAGS_OPT="-pthread -w -O3"
+      try_CFLAGS_OPT="-pthread -O3"
       try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-fabi-version=0 -pthread -w -ftemplate-depth-150 -O3"
+      try_CXXFLAGS_OPT="-fabi-version=0 -pthread -ftemplate-depth-150 -O3"
       try_CXXFLAGS_DEBUG="-fabi-version=0 -pthread -W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
@@ -3903,15 +3903,15 @@ echo "$as_me: error: compiler mode is not set" >&2;}
     kai)
       try_CFLAGS_OPT="-O3"
       try_CFLAGS_DEBUG="-g -O0"
-      try_CXXFLAGS_OPT="--restrict --one_instantiation_per_object --thread_safe -w +K3 -O3 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
+      try_CXXFLAGS_OPT="--restrict --one_instantiation_per_object --thread_safe +K3 -O3 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
       try_CXXFLAGS_DEBUG="--restrict --one_instantiation_per_object --thread_safe --display_error_number -g +K0 -O0 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
       try_CXXFLAGS_EH="--exceptions"
       try_CXXFLAGS_NOEH="--no_exceptions"
       ;;
     intel)
-      try_CFLAGS_OPT="-w -O3"
+      try_CFLAGS_OPT="-O3"
       try_CFLAGS_DEBUG=" -O0"
-      try_CXXFLAGS_OPT="-D_REENTRANT -restrict -w -O3"
+      try_CXXFLAGS_OPT="-D_REENTRANT -restrict -O3"
       try_CXXFLAGS_DEBUG="-D_REENTRANT -restrict -g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-DBOOST_NO_EXCEPTIONS"
@@ -3943,7 +3943,7 @@ echo "$as_me: error: compiler mode is not set" >&2;}
     dec)
       try_CFLAGS_OPT="-pthread -O4"
       try_CFLAGS_DEBUG="-pthread -g -O0"
-      try_CXXFLAGS_OPT="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -w -pthread -D__USE_STD_IOSTREAM -O4"
+      try_CXXFLAGS_OPT="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -pthread -D__USE_STD_IOSTREAM -O4"
       try_CXXFLAGS_DEBUG="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -msg_display_number -msg_disable 461 -pthread -D__USE_STD_IOSTREAM -g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-noexceptions"
@@ -3951,7 +3951,7 @@ echo "$as_me: error: compiler mode is not set" >&2;}
     sgi32)
       try_CFLAGS_OPT="-n32 -diag_error 1035 -Ofast -INLINE"
       try_CFLAGS_DEBUG="-n32 -diag_error 1035 -g -O0"
-      try_CXXFLAGS_OPT="-n32 -LANG:std -w -diag_error 1035 -Ofast -INLINE"
+      try_CXXFLAGS_OPT="-n32 -LANG:std -diag_error 1035 -Ofast -INLINE"
       try_CXXFLAGS_DEBUG="-n32 -LANG:std -diag_error 1035 -g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
@@ -3963,7 +3963,7 @@ echo "$as_me: error: compiler mode is not set" >&2;}
     sgi64)
       try_CFLAGS_OPT="-64 -diag_error 1035 -Ofast -INLINE"
       try_CFLAGS_DEBUG="-64 -diag_error 1035 -g -O0"
-      try_CXXFLAGS_OPT="-64 -LANG:std -w -diag_error 1035 -Ofast -INLINE"
+      try_CXXFLAGS_OPT="-64 -LANG:std -diag_error 1035 -Ofast -INLINE"
       try_CXXFLAGS_DEBUG="-64 -LANG:std -diag_error 1035 -g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
@@ -3997,17 +3997,17 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       try_CXXFLAGS_NOEH=""
       ;;
     macos)
-      try_CFLAGS_OPT="-w -O3"
+      try_CFLAGS_OPT="-O3"
       try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -w -ftemplate-depth-150 -O3"
+      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150 -O3"
       try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
     macos-gcc-3)
-      try_CFLAGS_OPT="-w -O3"
+      try_CFLAGS_OPT="-O3"
       try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -w -ftemplate-depth-150 -O3"
+      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150 -O3"
       try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
