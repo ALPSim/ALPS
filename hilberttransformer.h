@@ -96,7 +96,7 @@ public:
                 //std::cout<<"G0 omega: "<<G0_omega<<std::endl;
                 //print_real_green_matsubara(std::cout, G0_omega, beta);
                 fourier.backward_ft(G0_tau, G0_omega);
-                std::cout<<G0_tau<<std::endl;
+                //std::cout<<G0_tau<<std::endl;
 		return G0_tau;
 	}
 private:
