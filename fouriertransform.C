@@ -138,14 +138,14 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
       for(uint i=0;i<N_large;++i){
         G_omega(n,flavor) += dt*std::complex<double>(cos(w_n*(i*dt)), sin(w_n*(i*dt)))*(G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_));
         //debug
-        if(n==0){
+        /*if(n==0){
           std::cout<<i<<" "<<(dt*std::complex<double>(cos(w_n*(i*dt)), sin(w_n*(i*dt)))*(G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_))).real()<<" "<<G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_)<<std::endl;;
-        }
+        }*/
         //G_omega(n,flavor) += dt*exp(iw_n*(i*dt))*G_tau(i,flavor);
       }
-      std::cout<<n<<" "<<G_omega(n,flavor).real()<<" "<<G_omega(n,flavor).imag()<<std::endl;
+      //std::cout<<n<<" "<<G_omega(n,flavor).real()<<" "<<G_omega(n,flavor).imag()<<std::endl;
       G_omega(n,flavor)+=f_omega(std::complex<double>(0,w_n), c1_,c2_, c3_);
-      std::cout<<n<<" "<<G_omega(n,flavor).real()<<" "<<G_omega(n,flavor).imag()<<std::endl;
+      //std::cout<<n<<" "<<G_omega(n,flavor).real()<<" "<<G_omega(n,flavor).imag()<<std::endl;
       
     }
   }
