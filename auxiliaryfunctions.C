@@ -4,32 +4,38 @@
 #include <fstream>
 #include <sstream>
 std::ostream &operator<<(std::ostream &os, const multiple_vector_type &v){
+	os<<std::setprecision(20);
 	for(uint i=0;i<v.first.size();++i)
 		os<<i<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
 	return os;
 }
 std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type &v){
+	os<<std::setprecision(20);
 	for(uint i=0;i<v.first.size();++i)
 		//os<<i<<"\t"<<v.first[i].real()<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].real()<<"\t"<<v.second[i].imag()<<std::endl;
 		os<<i<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
 	return os;
 }
 std::ostream &operator<<(std::ostream &os, const double_vector &v){
+	os<<std::setprecision(20);
 	for(uint i=0;i<v.size();++i)
 		//os<<i<<"\t"<<v.first[i].real()<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].real()<<"\t"<<v.second[i].imag()<<std::endl;
 		os<<i<<"\t"<<v[i]<<std::endl;
 	return os;
 }
 std::ostream &operator<<(std::ostream &os, const complex_vector &v){
+	os<<std::setprecision(20);
 	for(uint i=0;i<v.size();++i)
 		os<<i<<"\t"<<v[i].real()<<"\t"<<v[i].imag()<<std::endl;
 	return os;
 }
 void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
+	os<<std::setprecision(20);
 	for(uint i=0;i<v.first.size();++i)
                 os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
 }
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta){
+	os<<std::setprecision(20);
 	for(uint i=0;i<v.nfreq();++i){
           os<<(2*i+1)*M_PI/beta<<"\t";
           for(uint f=0;f<v.nflavor();++f){
@@ -39,10 +45,12 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
         }
 }
 void print_selfenergy_matsubara(std::ostream &os, const multiple_complex_vector_type &g_bare, const multiple_complex_vector_type &g_dressed, const double beta){
+	os<<std::setprecision(20);
 	for(uint i=0;i<g_bare.first.size();++i)
                 os<<(2*i+1)*M_PI/beta<<"\t"<<(1./g_bare.first[i].imag() - 1./g_dressed.first[i].imag())<<std::endl;
 }
 void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function_t &g_bare, const matsubara_green_function_t g_dressed, const double beta){
+	os<<std::setprecision(20);
 	for(uint i=0;i<g_bare.nfreq();++i){
           os<<(2*i+1)*M_PI/beta<<"\t";
           for(uint f=0;f<g_bare.nflavor();++f){
@@ -66,11 +74,13 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
         }
 }
 void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
+	os<<std::setprecision(20);
 	for(uint i=0;i<v.first.size();++i){
                 os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].real()<<"\t"<<v.second[i].real()<<std::endl;
         }
 }
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta){
+	os<<std::setprecision(20);
   assert(v.nsite()==1);
 	for(uint i=0;i<v.nfreq();++i){
                 os<<(2*i+1)*M_PI/beta<<"\t";
@@ -81,11 +91,13 @@ void print_real_green_matsubara(std::ostream &os, const matsubara_green_function
         }
 }
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta){
+	os<<std::setprecision(20);
         for(uint i=0;i<v.first.size();++i){
                 os<<i*beta/(v.first.size()-1)<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
         }
 }
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta){
+	os<<std::setprecision(20);
     assert(v.nsite()==1);
     for(uint i=0;i<v.ntime();++i){
       os<<beta*i/(v.ntime()-1)<<"\t";
@@ -149,6 +161,7 @@ void print_dressed_tau_green_functions(const int iteration_ctr, const itime_gree
 	print_green_itime(G_tau_file_2,G_tau,beta);
 }
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
+	os<<std::setprecision(20);
         for(uint o=0;o<v.nfreq();++o){
          os<<o<<"\t";
          for(uint z=0;z<v.nflavor();++z){
@@ -163,6 +176,7 @@ std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
        return os;
 }
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v){
+	os<<std::setprecision(20);
         for(uint o=0;o<v.nfreq();++o){
          os<<o<<"\t";
          for(uint z=0;z<v.nflavor();++z){
