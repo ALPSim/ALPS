@@ -115,9 +115,9 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
 
   uint N=G_tau.ntime()-1;
   //double dt = beta_/N;
-  uint n_oversampling=300;
+  uint n_oversampling=500; //not sure that helps... check again!
   uint N_large=(G_tau.ntime()-1)*n_oversampling+1;
-  double dt=beta_/N_large;
+  double dt=beta_/(N_large-1);
   assert(G_omega.nfreq()==N); //we implicitely assume that we have as many imag time slices as matsubara frequencies. If this is not the case: interpolate,
   double G_tau_vector[N_large];
   //std::vector<double> G_tau_derivatives(G_tau.ntime());
@@ -129,18 +129,24 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
       }
         G_tau_vector[N_large-1]=G_tau(N,flavor);
     }
-    for(uint k=0;k<N_large;++k){
-      //std::cout<<k<<" "<<G_tau_vector[k]<<" "<<f_tau(dt*k,beta_, c1_, c2_, c3_)<<" "<<(G_tau_vector[k]-f_tau(dt*k,beta_, c1_, c2_, c3_))<<std::endl;
-    }
+    /*for(uint k=0;k<N_large;++k){
+      std::cout<<k<<" "<<G_tau_vector[k]<<" "<<f_tau(dt*k,beta_, c1_, c2_, c3_)<<" "<<(G_tau_vector[k]-f_tau(dt*k,beta_, c1_, c2_, c3_))<<std::endl;
+    }*/
     for (uint n=0; n<N; n++) {
-      std::complex<double> iw_n(0, (2*n+1)*M_PI/beta_);
+      double w_n=(2*n+1)*M_PI/beta_;
       G_omega(n,flavor)=0;
       for(uint i=0;i<N_large;++i){
-        G_omega(n,flavor) += dt*exp(iw_n*(i*dt))*(G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_));
+        G_omega(n,flavor) += dt*std::complex<double>(cos(w_n*(i*dt)), sin(w_n*(i*dt)))*(G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_));
+        //debug
+        if(n==0){
+          std::cout<<i<<" "<<(dt*std::complex<double>(cos(w_n*(i*dt)), sin(w_n*(i*dt)))*(G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_))).real()<<" "<<G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_)<<std::endl;;
+        }
         //G_omega(n,flavor) += dt*exp(iw_n*(i*dt))*G_tau(i,flavor);
       }
-      //std::cout<<n<<" "<<G_omega(n,flavor).real()<<" "<<G_omega(n,flavor).imag()<<std::endl;
-      G_omega(n,flavor)+=f_omega(iw_n, c1_,c2_, c3_);
+      std::cout<<n<<" "<<G_omega(n,flavor).real()<<" "<<G_omega(n,flavor).imag()<<std::endl;
+      G_omega(n,flavor)+=f_omega(std::complex<double>(0,w_n), c1_,c2_, c3_);
+      std::cout<<n<<" "<<G_omega(n,flavor).real()<<" "<<G_omega(n,flavor).imag()<<std::endl;
+      
     }
   }
           
