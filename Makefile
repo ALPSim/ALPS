@@ -1,5 +1,5 @@
 include $(HOME)/ALPS/share/alps/include.mk
-CXXFLAGS +=-W -funroll-loops  -g
+CXXFLAGS +=-W -funroll-loops  -g -DWERNER -DRUBTSOV
 SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
 
