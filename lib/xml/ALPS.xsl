@@ -76,6 +76,9 @@
                               <xsl:when test="ERROR/@converged = 'no'">
 								<TD bgcolor="#ff0000"><blink><xsl:value-of select="ERROR"/><BR/>not converged</blink></TD>
                               </xsl:when>
+                              <xsl:when test="ERROR/@underflow = 'true'">
+								<TD bgcolor="#00ff00"><xsl:value-of select="ERROR"/><BR/>possible underflow</TD>
+                              </xsl:when>
                               <xsl:otherwise>
 								<TD ><xsl:value-of select="ERROR"/></TD>
                               </xsl:otherwise>
@@ -98,6 +101,9 @@
                               </xsl:when>
                               <xsl:when test="ERROR/@converged = 'no'">
 								<TD bgcolor="#ff0000"><blink><xsl:value-of select="ERROR"/><BR/>not converged</blink></TD>
+                              </xsl:when>
+                              <xsl:when test="ERROR/@underflow = 'true'">
+								<TD bgcolor="#00ff00"><xsl:value-of select="ERROR"/><BR/>possible underflow</TD>
                               </xsl:when>
                               <xsl:otherwise>
 								<TD ><xsl:value-of select="ERROR"/></TD>
