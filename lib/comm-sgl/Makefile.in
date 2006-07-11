@@ -69,7 +69,7 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libcomm_sgl_la_LIBADD =
-am__objects_1 = os.lo process.lo comm.lo mpdump.lo
+am__objects_1 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo
 am_libcomm_sgl_la_OBJECTS = $(am__objects_1)
 libcomm_sgl_la_OBJECTS = $(am_libcomm_sgl_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -262,7 +262,7 @@ AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS
 AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 lib_LTLIBRARIES = libcomm-sgl.la
-SRC = $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
+SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
 libcomm_sgl_la_SOURCES = $(SRC)
 all: all-am
 
@@ -333,7 +333,9 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpdump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/os.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
@@ -358,6 +360,20 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
+
+buffer.lo: $(top_srcdir)/src/alps/osiris/buffer.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT buffer.lo -MD -MP -MF "$(DEPDIR)/buffer.Tpo" -c -o buffer.lo `test -f '$(top_srcdir)/src/alps/osiris/buffer.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/buffer.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/buffer.Tpo" "$(DEPDIR)/buffer.Plo"; else rm -f "$(DEPDIR)/buffer.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/buffer.C' object='buffer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o buffer.lo `test -f '$(top_srcdir)/src/alps/osiris/buffer.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/buffer.C
+
+dump.lo: $(top_srcdir)/src/alps/osiris/dump.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dump.lo -MD -MP -MF "$(DEPDIR)/dump.Tpo" -c -o dump.lo `test -f '$(top_srcdir)/src/alps/osiris/dump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/dump.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dump.Tpo" "$(DEPDIR)/dump.Plo"; else rm -f "$(DEPDIR)/dump.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/dump.C' object='dump.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dump.lo `test -f '$(top_srcdir)/src/alps/osiris/dump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/dump.C
 
 os.lo: $(top_srcdir)/src/alps/osiris/os.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT os.lo -MD -MP -MF "$(DEPDIR)/os.Tpo" -c -o os.lo `test -f '$(top_srcdir)/src/alps/osiris/os.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/os.C; \

@@ -15,7 +15,6 @@ src_ALEA = \
 src_EXPRESSION = \
   $(top_srcdir)/src/alps/expression/evaluator.C 
 src_OSIRIS = \
-  $(top_srcdir)/src/alps/osiris/dump.C \
   $(top_srcdir)/src/alps/osiris/xdrdump.C
 src_LATTICE = \
   $(top_srcdir)/src/alps/lattice/disorder.C \

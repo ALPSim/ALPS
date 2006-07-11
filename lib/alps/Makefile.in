@@ -81,7 +81,6 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parameterlist.C \
 	$(top_srcdir)/src/alps/parameters.C \
 	$(top_srcdir)/src/alps/expression/evaluator.C \
-	$(top_srcdir)/src/alps/osiris/dump.C \
 	$(top_srcdir)/src/alps/osiris/xdrdump.C \
 	$(top_srcdir)/src/alps/parser/parser.C \
 	$(top_srcdir)/src/alps/parser/xmlattributes.C \
@@ -122,7 +121,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/boost/throw_exception.C
 am__objects_1 = copyright.lo parameterlist.lo parameters.lo
 am__objects_2 = evaluator.lo
-am__objects_3 = dump.lo xdrdump.lo
+am__objects_3 = xdrdump.lo
 am__objects_4 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
 	xmlstream.lo xslt_path.lo
 am__objects_5 = rngfactory.lo
@@ -402,7 +401,6 @@ src_EXPRESSION = \
   $(top_srcdir)/src/alps/expression/evaluator.C 
 
 src_OSIRIS = \
-  $(top_srcdir)/src/alps/osiris/dump.C \
   $(top_srcdir)/src/alps/osiris/xdrdump.C
 
 src_LATTICE = \
@@ -686,7 +684,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cregex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/date_generators.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/disorder.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evaluator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exceptions.Plo@am__quote@
@@ -828,13 +825,6 @@ evaluator.lo: $(top_srcdir)/src/alps/expression/evaluator.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/expression/evaluator.C' object='evaluator.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/expression/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression/evaluator.C
-
-dump.lo: $(top_srcdir)/src/alps/osiris/dump.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT dump.lo -MD -MP -MF "$(DEPDIR)/dump.Tpo" -c -o dump.lo `test -f '$(top_srcdir)/src/alps/osiris/dump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/dump.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/dump.Tpo" "$(DEPDIR)/dump.Plo"; else rm -f "$(DEPDIR)/dump.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/dump.C' object='dump.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dump.lo `test -f '$(top_srcdir)/src/alps/osiris/dump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/dump.C
 
 xdrdump.lo: $(top_srcdir)/src/alps/osiris/xdrdump.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xdrdump.lo -MD -MP -MF "$(DEPDIR)/xdrdump.Tpo" -c -o xdrdump.lo `test -f '$(top_srcdir)/src/alps/osiris/xdrdump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/xdrdump.C; \
