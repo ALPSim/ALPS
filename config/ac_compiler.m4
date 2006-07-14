@@ -227,10 +227,10 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_NOEH="--no_exceptions"
       ;;
     intel)
-      try_CFLAGS_WARN="-W -Wall -Wno-comment"
+      try_CFLAGS_WARN=
       try_CFLAGS_NOWARN="-w"
       try_CXXFLAGS="-D_REENTRANT -restrict"
-      try_CXXFLAGS_WARN="-W -Wall -Wno-comment"
+      try_CXXFLAGS_WARN=
       try_CXXFLAGS_NOWARN="-w"
       ;;
     como)
