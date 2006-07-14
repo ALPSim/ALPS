@@ -1027,8 +1027,9 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
-  --disable-exceptions    disable exception handling
-  --disable-optimization  disable optimization flags
+  --enable-optimization   enable optimization [default=yes]
+  --enable-exceptions     enable exception handling [default=yes]
+  --enable-warnings       enable warning messages
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
   --enable-shared[=PKGS]
@@ -1040,14 +1041,15 @@ Optional Features:
   --disable-libtool-lock  avoid locking (might break parallel builds)
   --enable-boost-config   setup Boost configuration header file
   --enable-boostbook      setup boostbook documentation system
-  --disable-libheap       not building libheap wrapper
+  --enable-libheap        building libheap wrapper [default=yes]
 
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
-  --with-compiler=MODE    set compiler mode (MODE = gnu, gnu-3.3, kai, intel,
-                          como, hp, dec, sgi32, sgi64, cray, ibm32, ibm64,
-                          macos, macos-gcc-3, generic)
+  --with-compiler=MODE    set compiler mode (MODE = gnu, kai, intel, como,
+                          hp32, hp64, dec, sgi32, sgi64, cray, ibm32, ibm64,
+                          macos, macos-gcc-3, macos-gcc-3.3, macos-gcc-4.0,
+                          generic)
   --with-gnu-ld           assume the C compiler uses GNU ld [default=no]
   --with-pic              try to use only PIC/non-PIC objects [default=use
                           both]
@@ -2199,22 +2201,6 @@ fi
 
 
 
-  echo "$as_me:$LINENO: checking for exception handling" >&5
-echo $ECHO_N "checking for exception handling... $ECHO_C" >&6
-  # Check whether --enable-exceptions or --disable-exceptions was given.
-if test "${enable_exceptions+set}" = set; then
-  enableval="$enable_exceptions"
-
-    if test "x$enableval" = "xno"; then
-      ac_cv_compiler_exceptions=no
-    fi
-
-
-fi;
-  test -z "$ac_cv_compiler_exceptions" && ac_cv_compiler_exceptions=yes
-  echo "$as_me:$LINENO: result: $ac_cv_compiler_exceptions" >&5
-echo "${ECHO_T}$ac_cv_compiler_exceptions" >&6
-
   echo "$as_me:$LINENO: checking for optimization" >&5
 echo $ECHO_N "checking for optimization... $ECHO_C" >&6
   # Check whether --enable-optimization or --disable-optimization was given.
@@ -2231,15 +2217,44 @@ fi;
   echo "$as_me:$LINENO: result: $ac_cv_compiler_optimization" >&5
 echo "${ECHO_T}$ac_cv_compiler_optimization" >&6
 
+  echo "$as_me:$LINENO: checking for exception handling" >&5
+echo $ECHO_N "checking for exception handling... $ECHO_C" >&6
+  # Check whether --enable-exceptions or --disable-exceptions was given.
+if test "${enable_exceptions+set}" = set; then
+  enableval="$enable_exceptions"
+
+    if test "x$enableval" = "xno"; then
+      ac_cv_compiler_exceptions=no
+    fi
+
+
+fi;
+  test -z "$ac_cv_compiler_exceptions" && ac_cv_compiler_exceptions=yes
+  echo "$as_me:$LINENO: result: $ac_cv_compiler_exceptions" >&5
+echo "${ECHO_T}$ac_cv_compiler_exceptions" >&6
+
+  echo "$as_me:$LINENO: checking for warning messages" >&5
+echo $ECHO_N "checking for warning messages... $ECHO_C" >&6
+  # Check whether --enable-warnings or --disable-warnings was given.
+if test "${enable_warnings+set}" = set; then
+  enableval="$enable_warnings"
+
+    if test "x$enableval" = "xyes"; then
+      ac_cv_compiler_warnings=yes
+    fi
+
+
+fi;
+  test -z "$ac_cv_compiler_warnings" && ac_cv_compiler_warnings=no
+  echo "$as_me:$LINENO: result: $ac_cv_compiler_warnings" >&5
+echo "${ECHO_T}$ac_cv_compiler_warnings" >&6
+
 
 # Check whether --with-compiler or --without-compiler was given.
 if test "${with_compiler+set}" = set; then
   withval="$with_compiler"
 
     case "x$withval" in
-      xgnu-3.3 | xGNU-3.3 | xgcc-3.3 | xg++-3.3 )
-        COMPILER="gnu-3.3"
-        ;;
       xgnu* | xGNU* | xgcc* | xg++* )
         COMPILER="gnu"
         ;;
@@ -2252,7 +2267,7 @@ if test "${with_compiler+set}" = set; then
       xcomo*)
         COMPILER="como"
         ;;
-      xhp32* | xaCC32*)
+      xhp32* | xaCC32* | xhp | xaCC)
         COMPILER="hp32"
         ;;
       xhp64* | xaCC64*)
@@ -2270,17 +2285,23 @@ if test "${with_compiler+set}" = set; then
       xcray* | xCRAY*)
         COMPILER="cray"
         ;;
-      xmacos-gcc-3 | xmacos-g++-3 | xmacos-10.3 | xmac-10.3 | xosx-10.3 | xosx-panther)
+      xibm32* | xIBM32*)
+        COMPILER="ibm32"
+        ;;
+      xibm64* | xIBM64* | xibm* | xIBM* | xvacpp* | xxlC*)
+        COMPILER="ibm64"
+        ;;
+      xmacos-gcc-3 | xmacos-gnu-3 | xmacos-g++-3)
         COMPILER="macos-gcc-3"
+        ;;
+      xmacos-gcc-3.3 | xmacos-gnu-3.3 | xmacos-g++-3.3)
+        COMPILER="macos-gcc-3.3"
+        ;;
+      xmacos-gcc-4.0 | xmacos-gnu-4.0 | xmacos-g++-4.0)
+        COMPILER="macos-gcc-4.0"
         ;;
       xmacos* | xmac* | xosx*)
         COMPILER="macos"
-        ;;
-      xibm | xibm64* | xIBM64* | xvacpp* | xxlC*)
-        COMPILER="ibm64"
-        ;;
-      xibm32* | xIBM32*)
-        COMPILER="ibm32"
         ;;
       xgeneric*)
         COMPILER="generic"
@@ -2302,7 +2323,7 @@ echo $ECHO_N "checking for compiler mode... $ECHO_C" >&6
 echo "${ECHO_T}$COMPILER" >&6
 
   case "$COMPILER" in
-    gnu | gnu-3.3)
+    gnu)
       try_CC="gcc"
       try_CXX="g++"
       ;;
@@ -2345,6 +2366,14 @@ echo "${ECHO_T}$COMPILER" >&6
     macos-gcc-3)
       try_CC="gcc3"
       try_CXX="g++3"
+      ;;
+    macos-gcc-3.3)
+      try_CC="gcc-3.3"
+      try_CXX="g++-3.3"
+      ;;
+    macos-gcc-4.0)
+      try_CC="gcc-4.0"
+      try_CXX="g++-4.0"
       ;;
     generic)
       # nothing to do
@@ -3883,76 +3912,75 @@ echo "$as_me: compiler mode is reset to $COMPILER" >&6;}
 echo "$as_me: error: compiler mode is not set" >&2;}
    { (exit 1); exit 1; }; }
 
+  # default options
+  try_CFLAGS=
+  try_CFLAGS_OPT="-O3"
+  try_CFLAGS_DEBUG="-g -O0"
+  try_CFLAGS_WARN=
+  try_CFLAGS_NOWARN=
+  try_CXXFLAGS=
+  try_CXXFLAGS_OPT="-O3"
+  try_CXXFLAGS_DEBUG="-g -O0"
+  try_CXXFLAGS_WARN=
+  try_CXXFLAGS_NOWARN=
+  try_CXXFLAGS_EH=
+  try_CXXFLAGS_NOEH=
   case "$COMPILER" in
     gnu)
-      try_CFLAGS_OPT="-pthread -O3"
-      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-pthread -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
-      try_CXXFLAGS_EH="-fexceptions"
-      try_CXXFLAGS_NOEH="-fno-exceptions"
-      ;;
-    gnu-3.3)
-      try_CFLAGS_OPT="-pthread -O3"
-      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-fabi-version=0 -pthread -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-fabi-version=0 -pthread -W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
+      try_CFLAGS="-pthread"
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-pthread -ftemplate-depth-150"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
     kai)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG="-g -O0"
-      try_CXXFLAGS_OPT="--restrict --one_instantiation_per_object --thread_safe +K3 -O3 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
-      try_CXXFLAGS_DEBUG="--restrict --one_instantiation_per_object --thread_safe --display_error_number -g +K0 -O0 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
+      try_CXXFLAGS="--restrict --one_instantiation_per_object --thread_safe -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
+      try_CXXFLAGS_OPT="+K3 -O3"
+      try_CXXFLAGS_DEBUG="-g +K0 -O0"
       try_CXXFLAGS_EH="--exceptions"
       try_CXXFLAGS_NOEH="--no_exceptions"
       ;;
     intel)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG=" -O0"
-      try_CXXFLAGS_OPT="-D_REENTRANT -restrict -O3"
-      try_CXXFLAGS_DEBUG="-D_REENTRANT -restrict -g -O0"
-      try_CXXFLAGS_EH=
-      try_CXXFLAGS_NOEH="-DBOOST_NO_EXCEPTIONS"
+      try_CFLAGS_WARN="-W -Wall -Wno-comment"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-D_REENTRANT -restrict"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment"
+      try_CXXFLAGS_NOWARN="-w"
       ;;
     como)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG="-g -O0"
-      try_CXXFLAGS_OPT="-O3"
-      try_CXXFLAGS_DEBUG="-g -O0"
-      try_CXXFLAGS_EH=
-      try_CXXFLAGS_NOEH=
       ;;
     hp32)
-      try_CFLAGS_OPT="-Aa +DA1.1 -O3 -D_HPUX_SOURCE"
-      try_CFLAGS_DEBUG="-Aa +DA1.1 -g -O0 -D_HPUX_SOURCE"
-      try_CXXFLAGS_OPT="-Aa +DA1.1 -O3 -D_HPUX_SOURCE"
-      try_CXXFLAGS_DEBUG="-Aa +DA1.1 -g -O0 -D_HPUX_SOURCE"
+      try_CFLAGS="-Aa +DA1.1 -D_HPUX_SOURCE"
+      try_CXXFLAGS="-Aa +DA1.1 -D_HPUX_SOURCE"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="+noeh"
       ;;
     hp64)
-      try_CFLAGS_OPT="-Aa +DA2.0W -O3 -D_HPUX_SOURCE"
-      try_CFLAGS_DEBUG="-Aa +DA2.0W -g -O0 -D_HPUX_SOURCE"
-      try_CXXFLAGS_OPT="-Aa +DA2.0W -O3 -D_HPUX_SOURCE"
-      try_CXXFLAGS_DEBUG="-Aa +DA2.0W -g -O0 -D_HPUX_SOURCE"
+      try_CFLAGS="-Aa +DA2.0W -D_HPUX_SOURCE"
+      try_CXXFLAGS="-Aa +DA2.0W -D_HPUX_SOURCE"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="+noeh"
       ;;
     dec)
-      try_CFLAGS_OPT="-pthread -O4"
-      try_CFLAGS_DEBUG="-pthread -g -O0"
-      try_CXXFLAGS_OPT="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -pthread -D__USE_STD_IOSTREAM -O4"
-      try_CXXFLAGS_DEBUG="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -msg_display_number -msg_disable 461 -pthread -D__USE_STD_IOSTREAM -g -O0"
+      try_CFLAGS="-pthread"
+      try_CFLAGS_OPT="-O4"
+      try_CFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -pthread -D__USE_STD_IOSTREAM"
+      try_CXXFLAGS_OPT="-O4"
+      try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-noexceptions"
       ;;
     sgi32)
-      try_CFLAGS_OPT="-n32 -diag_error 1035 -Ofast -INLINE"
-      try_CFLAGS_DEBUG="-n32 -diag_error 1035 -g -O0"
-      try_CXXFLAGS_OPT="-n32 -LANG:std -diag_error 1035 -Ofast -INLINE"
-      try_CXXFLAGS_DEBUG="-n32 -LANG:std -diag_error 1035 -g -O0"
+      try_CFLAGS="-n32 -diag_error 1035"
+      try_CFLAGS_OPT="-Ofast -INLINE"
+      try_CFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS="-n32 -LANG:std -diag_error 1035"
+      try_CXXFLAGS_OPT="-Ofast -INLINE"
+      try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
       CPPFLAGS="$CPPFLAGS -DBOOST_UBLAS_REVERSE_ITERATOR_OVERLOADS"
@@ -3961,10 +3989,12 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       fi
       ;;
     sgi64)
-      try_CFLAGS_OPT="-64 -diag_error 1035 -Ofast -INLINE"
-      try_CFLAGS_DEBUG="-64 -diag_error 1035 -g -O0"
-      try_CXXFLAGS_OPT="-64 -LANG:std -diag_error 1035 -Ofast -INLINE"
-      try_CXXFLAGS_DEBUG="-64 -LANG:std -diag_error 1035 -g -O0"
+      try_CFLAGS="-64 -diag_error 1035"
+      try_CFLAGS_OPT="-Ofast -INLINE"
+      try_CFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS="-64 -LANG:std -diag_error 1035"
+      try_CXXFLAGS_OPT="-Ofast -INLINE"
+      try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
       CPPFLAGS="$CPPFLAGS -DBOOST_UBLAS_REVERSE_ITERATOR_OVERLOADS"
@@ -3973,42 +4003,48 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       fi
       ;;
     cray)
-      try_CFLAGS_OPT="-O2 -h conform"
-      try_CFLAGS_DEBUG="-g -O0 -h conform"
-      try_CXXFLAGS_OPT="-O2 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates "
-      try_CXXFLAGS_DEBUG="-g -O0 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates "
+      try_CFLAGS="-h conform"
+      try_CFLAGS_OPT="-O2"
+      try_CFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS="-h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates"
+      try_CXXFLAGS_OPT="-O2"
+      try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-h exceptions"
       try_CXXFLAGS_NOEH="-h noexceptions"
       ;;
     ibm32)
-      try_CFLAGS_OPT="-q32 -O2"
-      try_CFLAGS_DEBUG=-"-q32 -g"
-      try_CXXFLAGS_OPT="-q32 -qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-q32 -qlanglvl=extended -g"
-      try_CXXFLAGS_EH=""
-      try_CXXFLAGS_NOEH=""
+      try_CFLAGS="-q32"
+      try_CFLAGS_OPT="-O2"
+      try_CFLAGS_DEBUG=-"-g"
+      try_CXXFLAGS="-q32 -qlanglvl=extended"
+      try_CXXFLAGS_OPT="-O2"
+      try_CXXFLAGS_DEBUG="-g"
       ;;
     ibm64)
-      try_CFLAGS_OPT="-q64 -O2"
-      try_CFLAGS_DEBUG=-"-q64 -g"
-      try_CXXFLAGS_OPT="-q64 -qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-q64 -qlanglvl=extended -g"
-      try_CXXFLAGS_EH=""
-      try_CXXFLAGS_NOEH=""
+      try_CFLAGS="-q62"
+      try_CFLAGS_OPT="-O2"
+      try_CFLAGS_DEBUG=-"-g"
+      try_CXXFLAGS="-q62 -qlanglvl=extended"
+      try_CXXFLAGS_OPT="-O2"
+      try_CXXFLAGS_DEBUG="-g"
       ;;
-    macos)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
+    macos | macos-gcc-3 | macos-gcc-4.0)
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double"
+      try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
-    macos-gcc-3)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
+    macos-gcc-3.3)
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-ftemplate-depth-150"
+      try_CXXFLAGS_OPT="-fabi-version=0 -O3"
+      try_CXXFLAGS_DEBUG="-fabi-version=0 -g -O0"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
@@ -4025,8 +4061,6 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       else
         try_CXXFLAGS_DEBUG="$CXXFLAGS"
       fi
-      try_CXXFLAGS_EH=
-      try_CXXFLAGS_NOEH="-DBOOST_NO_EXCEPTIONS"
       ;;
     *)
       { { echo "$as_me:$LINENO: error: unknown mode $COMPILER" >&5
@@ -4038,6 +4072,10 @@ echo "$as_me: error: unknown mode $COMPILER" >&2;}
   if test "$ac_cv_compiler_optimization" = yes; then
     CPPFLAGS="$CPPFLAGS -DNDEBUG"
   fi
+  if test "$ac_cv_compiler_exceptions" = no; then
+    CPPFLAGS="$CPPFLAGS -DBOOST_NO_EXCEPTIONS"
+  fi
+  CPPFLAGS=`echo $CPPFLAGS | sed 's/^ *//' | sed 's/ *$//' | sed 's/  */ /'`
 
   if test -n "$save_CFLAGS"; then
     CFLAGS="$save_CFLAGS"
@@ -4047,20 +4085,24 @@ echo "$as_me: error: unknown mode $COMPILER" >&2;}
     else
       CFLAGS="$try_CFLAGS_DEBUG"
     fi
+    if test "$ac_cv_compiler_warnings" = yes; then
+      CFLAGS="$CFLAGS $try_CFLAGS_WARN"
+    else
+      CFLAGS="$CFLAGS $try_CFLAGS_NOWARN"
+    fi
   fi
+  CFLAGS=`echo $CFLAGS | sed 's/^ *//' | sed 's/ *$//' | sed 's/  */ /'`
 
-  if test "$CFLAGS" != "$save_CFLAGS"; then
 
-
-    ac_ext=c
+  ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-    echo "$as_me:$LINENO: checking whether $CC accepts $CFLAGS" >&5
+  echo "$as_me:$LINENO: checking whether $CC accepts $CFLAGS" >&5
 echo $ECHO_N "checking whether $CC accepts $CFLAGS... $ECHO_C" >&6
-    cat >conftest.$ac_ext <<_ACEOF
+  cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -4104,101 +4146,54 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
 
-      echo "$as_me:$LINENO: result: no" >&5
+    echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-      { { echo "$as_me:$LINENO: error: compiler flags check failed.  Please set CFLAGS explicitly." >&5
+    { { echo "$as_me:$LINENO: error: compiler flags check failed.  Please set CFLAGS explicitly." >&5
 echo "$as_me: error: compiler flags check failed.  Please set CFLAGS explicitly." >&2;}
    { (exit 1); exit 1; }; }
 
 
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-    ac_ext=c
+  ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-  fi
 
   if test -n "$save_CXXFLAGS"; then
     CXXFLAGS="$save_CXXFLAGS"
   else
+    CXXFLAGS="$try_CXXFLAGS"
     if test "$ac_cv_compiler_optimization" = yes; then
-      if test "$ac_cv_compiler_exceptions" = yes; then
-        if test -n "$try_CXXFLAGS_OPT"; then
-          if test -n "$try_CXXFLAGS_EH"; then
-            CXXFLAGS="$try_CXXFLAGS_OPT $try_CXXFLAGS_EH"
-          else
-            CXXFLAGS="$try_CXXFLAGS_OPT"
-          fi
-        else
-          if test -n "$try_CXXFLAGS_EH"; then
-            CXXFLAGS="$try_CXXFLAGS_EH"
-          else
-            CXXFLAGS=
-          fi
-        fi
-      else
-        if test -n "$try_CXXFLAGS_OPT"; then
-          if test -n "$try_CXXFLAGS_NOEH"; then
-            CXXFLAGS="$try_CXXFLAGS_OPT $try_CXXFLAGS_NOEH"
-          else
-            CXXFLAGS="$try_CXXFLAGS_OPT"
-          fi
-        else
-          if test -n "$try_CXXFLAGS_NOEH"; then
-            CXXFLAGS="$try_CXXFLAGS_NOEH"
-          else
-            CXXFLAGS=
-          fi
-        fi
-      fi
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_OPT"
     else
-      if test "$ac_cv_compiler_exceptions" = yes; then
-        if test -n "$try_CXXFLAGS_DEBUG"; then
-          if test -n "$try_CXXFLAGS_EH"; then
-            CXXFLAGS="$try_CXXFLAGS_DEBUG $try_CXXFLAGS_EH"
-          else
-            CXXFLAGS="$try_CXXFLAGS_DEBUG"
-          fi
-        else
-          if test -n "$try_CXXFLAGS_EH"; then
-            CXXFLAGS="$try_CXXFLAGS_EH"
-          else
-            CXXFLAGS=
-          fi
-        fi
-      else
-        if test -n "$try_CXXFLAGS_DEBUG"; then
-          if test -n "$try_CXXFLAGS_NOEH"; then
-            CXXFLAGS="$try_CXXFLAGS_DEBUG $try_CXXFLAGS_NOEH"
-          else
-            CXXFLAGS="$try_CXXFLAGS_DEBUG"
-          fi
-        else
-          if test -n "$try_CXXFLAGS_NOEH"; then
-            CXXFLAGS="$try_CXXFLAGS_NOEH"
-          else
-            CXXFLAGS=
-          fi
-        fi
-      fi
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_DEBUG"
+    fi
+    if test "$ac_cv_compiler_exceptions" = yes; then
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_EH"
+    else
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_NOEH"
+    fi
+    if test "$ac_cv_compiler_warnings" = yes; then
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_WARN"
+    else
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_NOWARN"
     fi
   fi
+  CXXFLAGS=`echo $CXXFLAGS | sed 's/^ *//' | sed 's/ *$//' | sed 's/  */ /'`
 
-  if test "$CXXFLAGS" != "$save_CXXFLAGS"; then
 
-
-    ac_ext=cc
+  ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-    echo "$as_me:$LINENO: checking whether $CXX accepts $CXXFLAGS" >&5
+  echo "$as_me:$LINENO: checking whether $CXX accepts $CXXFLAGS" >&5
 echo $ECHO_N "checking whether $CXX accepts $CXXFLAGS... $ECHO_C" >&6
-    cat >conftest.$ac_ext <<_ACEOF
+  cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -4242,23 +4237,22 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
 
-      echo "$as_me:$LINENO: result: no" >&5
+    echo "$as_me:$LINENO: result: no" >&5
 echo "${ECHO_T}no" >&6
-      { { echo "$as_me:$LINENO: error: compiler flags check failed.  Please set CXXFLAGS explicitly." >&5
+    { { echo "$as_me:$LINENO: error: compiler flags check failed.  Please set CXXFLAGS explicitly." >&5
 echo "$as_me: error: compiler flags check failed.  Please set CXXFLAGS explicitly." >&2;}
    { (exit 1); exit 1; }; }
 
 
 fi
 rm -f conftest.err conftest.$ac_objext conftest.$ac_ext
-    ac_ext=c
+  ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
 ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
 
-  fi
 
   ac_cv_compiler="$COMPILER"
   ac_cv_compiler_cc="$CC"
@@ -4270,9 +4264,9 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
   ac_cv_prog_ac_ct_CXX="$CXX"
 
 ac_cv_alps_compiler="$ac_cv_compiler"
-ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"
 ac_cv_alps_compiler_optimization="$ac_cv_compiler_optimization"
-ac_cv_alps_compiler="$ac_cv_compiler"
+ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"
+ac_cv_alps_compiler_warnings="$ac_cv_compiler_warnings"
 ac_cv_alps_cc="$ac_cv_compiler_cc"
 ac_cv_alps_cflags="$ac_cv_compiler_cflags"
 ac_cv_alps_cxx="$ac_cv_compiler_cxx"
@@ -6874,7 +6868,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 6877 "configure"' > conftest.$ac_ext
+  echo '#line 6871 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -7536,7 +7530,7 @@ fi
 
 
 # Provide some information about the compiler.
-echo "$as_me:7539:" \
+echo "$as_me:7533:" \
      "checking for Fortran 77 compiler version" >&5
 ac_compiler=`set X $ac_compile; echo $2`
 { (eval echo "$as_me:$LINENO: \"$ac_compiler --version </dev/null >&5\"") >&5
@@ -8599,11 +8593,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8602: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8596: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8606: \$? = $ac_status" >&5
+   echo "$as_me:8600: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8867,11 +8861,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8870: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8864: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:8874: \$? = $ac_status" >&5
+   echo "$as_me:8868: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -8971,11 +8965,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:8974: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:8968: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:8978: \$? = $ac_status" >&5
+   echo "$as_me:8972: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11316,7 +11310,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11319 "configure"
+#line 11313 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11416,7 +11410,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11419 "configure"
+#line 11413 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13756,11 +13750,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13759: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13753: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13763: \$? = $ac_status" >&5
+   echo "$as_me:13757: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -13860,11 +13854,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13863: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13857: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:13867: \$? = $ac_status" >&5
+   echo "$as_me:13861: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15430,11 +15424,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15433: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15427: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15437: \$? = $ac_status" >&5
+   echo "$as_me:15431: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15534,11 +15528,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15537: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15531: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15541: \$? = $ac_status" >&5
+   echo "$as_me:15535: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17737,11 +17731,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17740: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17734: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17744: \$? = $ac_status" >&5
+   echo "$as_me:17738: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18005,11 +17999,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18008: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18002: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18012: \$? = $ac_status" >&5
+   echo "$as_me:18006: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18109,11 +18103,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18112: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18106: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18116: \$? = $ac_status" >&5
+   echo "$as_me:18110: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -27596,61 +27590,8 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
       fi
       if test "$found" = no; then
-        MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam -lnsl -lutil"
-        LIBS="$MPI_LIBS $ac_save_LIBS"
-        echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
-echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6
-        cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-#include <mpi.h>
-int
-main ()
-{
-MPI_Finalize();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
-  (eval $ac_link) 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } &&
-	 { ac_try='test -z "$ac_cxx_werror_flag"
-			 || test ! -s conftest.err'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; } &&
-	 { ac_try='test -s conftest$ac_exeext'
-  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
-  (eval $ac_try) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; }; then
-  echo "$as_me:$LINENO: result: yes" >&5
-echo "${ECHO_T}yes" >&6; found=yes
-else
-  echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-echo "$as_me:$LINENO: result: no" >&5
-echo "${ECHO_T}no" >&6
-fi
-rm -f conftest.err conftest.$ac_objext \
-      conftest$ac_exeext conftest.$ac_ext
-      fi
-      if test "$found" = no; then
-        MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam"
+        # for lammpi 7.0.2 on MacOSX
+        MPI_LIBS="-llammpi++ -llammpio -lmpi -llam"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
 echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6
@@ -27814,8 +27755,61 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
       fi
       if test "$found" = no; then
-        # for lammpi 7.0.2 on MacOSX
-        MPI_LIBS="-llammpi++ -llammpio -lmpi -llam"
+        MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam"
+        LIBS="$MPI_LIBS $ac_save_LIBS"
+        echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
+echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <mpi.h>
+int
+main ()
+{
+MPI_Finalize();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; found=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+      fi
+      if test "$found" = no; then
+        MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam -lnsl -lutil"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
 echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6
@@ -30430,9 +30424,10 @@ if test "$ac_cv_alps_type" = "full"; then
 else
   echo "  ALPS version        $PACKAGE_VERSION (Light)"
 fi
-echo "  compiler type       $ac_cv_alps_compiler ($ac_cv_alps_cxx)"
-echo "  exceptions          $ac_cv_alps_compiler_exceptions"
+echo "  compiler type       $ac_cv_alps_compiler [$ac_cv_alps_cxx]"
 echo "  optimization        $ac_cv_alps_compiler_optimization"
+echo "  exceptions          $ac_cv_alps_compiler_exceptions"
+echo "  warnings            $ac_cv_alps_compiler_warnings"
 echo "  MPI support         $ac_cv_alps_have_mpi"
 echo "  HDF5 support        $ac_cv_have_hdf5"
 echo "  LAPACK support      $ac_cv_have_lapack"

@@ -200,15 +200,8 @@ AC_DEFUN([AC_MPI],
                     AC_MSG_RESULT(no))
       fi
       if test "$found" = no; then
-        MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam -lnsl -lutil"
-        LIBS="$MPI_LIBS $ac_save_LIBS"
-        AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
-        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
-                    [AC_MSG_RESULT(yes); found=yes],
-                    AC_MSG_RESULT(no))
-      fi
-      if test "$found" = no; then
-        MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam"
+        # for lammpi 7.0.2 on MacOSX
+        MPI_LIBS="-llammpi++ -llammpio -lmpi -llam"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
         AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
@@ -234,8 +227,15 @@ AC_DEFUN([AC_MPI],
                     AC_MSG_RESULT(no))
       fi
       if test "$found" = no; then
-        # for lammpi 7.0.2 on MacOSX
-        MPI_LIBS="-llammpi++ -llammpio -lmpi -llam"
+        MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam"
+        LIBS="$MPI_LIBS $ac_save_LIBS"
+        AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
+        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                    [AC_MSG_RESULT(yes); found=yes],
+                    AC_MSG_RESULT(no))
+      fi
+      if test "$found" = no; then
+        MPI_LIBS="-llammpi++ -llammpio -lpmpi -llamf77mpi -lmpi -llam -lnsl -lutil"
         LIBS="$MPI_LIBS $ac_save_LIBS"
         AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
         AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],

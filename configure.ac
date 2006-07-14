@@ -113,9 +113,9 @@ AC_CANONICAL_HOST
 dnl C/C++ compiler
 AC_COMPILER
 ac_cv_alps_compiler="$ac_cv_compiler"
-ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"
 ac_cv_alps_compiler_optimization="$ac_cv_compiler_optimization"
-ac_cv_alps_compiler="$ac_cv_compiler"
+ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"
+ac_cv_alps_compiler_warnings="$ac_cv_compiler_warnings"
 ac_cv_alps_cc="$ac_cv_compiler_cc"
 ac_cv_alps_cflags="$ac_cv_compiler_cflags"
 ac_cv_alps_cxx="$ac_cv_compiler_cxx"
@@ -807,7 +807,7 @@ dnl Experimental Features
 dnl
 
 AC_ARG_ENABLE(libheap,
-  AC_HELP_STRING([--disable-libheap], [not building libheap wrapper]),
+  AC_HELP_STRING([--enable-libheap], [building libheap wrapper @<:@default=yes@:>@]),
   [
   if test "x$enableval" = "xno"; then
     ac_cv_libheap=no
@@ -894,9 +894,10 @@ if test "$ac_cv_alps_type" = "full"; then
 else
   echo "  ALPS version        $PACKAGE_VERSION (Light)"
 fi
-echo "  compiler type       $ac_cv_alps_compiler ($ac_cv_alps_cxx)"
-echo "  exceptions          $ac_cv_alps_compiler_exceptions"
+echo "  compiler type       $ac_cv_alps_compiler @<:@$ac_cv_alps_cxx@:>@"
 echo "  optimization        $ac_cv_alps_compiler_optimization"
+echo "  exceptions          $ac_cv_alps_compiler_exceptions"
+echo "  warnings            $ac_cv_alps_compiler_warnings"
 echo "  MPI support         $ac_cv_alps_have_mpi"
 echo "  HDF5 support        $ac_cv_have_hdf5"
 echo "  LAPACK support      $ac_cv_have_lapack"

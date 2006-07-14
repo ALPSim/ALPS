@@ -5,23 +5,10 @@ AC_DEFUN([AC_COMPILER],
   AC_SUBST(CFLAGS)
   AC_SUBST(CXXFLAGS)
 
-  AC_MSG_CHECKING([for exception handling])
-  AC_ARG_ENABLE(exceptions,
-    AC_HELP_STRING([--disable-exceptions],
-      [disable exception handling]),
-    [
-    if test "x$enableval" = "xno"; then
-      ac_cv_compiler_exceptions=no
-    fi
-    ]
-  )
-  test -z "$ac_cv_compiler_exceptions" && ac_cv_compiler_exceptions=yes
-  AC_MSG_RESULT($ac_cv_compiler_exceptions)
-
   AC_MSG_CHECKING([for optimization])
   AC_ARG_ENABLE(optimization,
-    AC_HELP_STRING([--disable-optimization],
-      [disable optimization flags]),
+    AC_HELP_STRING([--enable-optimization],
+      [enable optimization @<:@default=yes@:>@]),
     [
     if test "x$enableval" = "xno"; then
       ac_cv_compiler_optimization=no
@@ -31,14 +18,37 @@ AC_DEFUN([AC_COMPILER],
   test -z "$ac_cv_compiler_optimization" && ac_cv_compiler_optimization=yes
   AC_MSG_RESULT($ac_cv_compiler_optimization)
 
+  AC_MSG_CHECKING([for exception handling])
+  AC_ARG_ENABLE(exceptions,
+    AC_HELP_STRING([--enable-exceptions],
+      [enable exception handling @<:@default=yes@:>@]),
+    [
+    if test "x$enableval" = "xno"; then
+      ac_cv_compiler_exceptions=no
+    fi
+    ]
+  )
+  test -z "$ac_cv_compiler_exceptions" && ac_cv_compiler_exceptions=yes
+  AC_MSG_RESULT($ac_cv_compiler_exceptions)
+
+  AC_MSG_CHECKING([for warning messages])
+  AC_ARG_ENABLE(warnings,
+    AC_HELP_STRING([--enable-warnings],
+      [enable warning messages]),
+    [
+    if test "x$enableval" = "xyes"; then
+      ac_cv_compiler_warnings=yes
+    fi
+    ]
+  )
+  test -z "$ac_cv_compiler_warnings" && ac_cv_compiler_warnings=no
+  AC_MSG_RESULT($ac_cv_compiler_warnings)
+
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
-      [set compiler mode (MODE = gnu, gnu-3.3, kai, intel, como, hp, dec, sgi32, sgi64, cray, ibm32, ibm64, macos, macos-gcc-3, generic)]),
+      [set compiler mode (MODE = gnu, kai, intel, como, hp32, hp64, dec, sgi32, sgi64, cray, ibm32, ibm64, macos, macos-gcc-3, macos-gcc-3.3, macos-gcc-4.0, generic)]),
     [
     case "x$withval" in
-      xgnu-3.3 | xGNU-3.3 | xgcc-3.3 | xg++-3.3 )
-        COMPILER="gnu-3.3"
-        ;;
       xgnu* | xGNU* | xgcc* | xg++* )
         COMPILER="gnu"
         ;;
@@ -51,7 +61,7 @@ AC_DEFUN([AC_COMPILER],
       xcomo*)
         COMPILER="como"
         ;;
-      xhp32* | xaCC32*)
+      xhp32* | xaCC32* | xhp | xaCC)
         COMPILER="hp32"
         ;;
       xhp64* | xaCC64*)
@@ -69,17 +79,23 @@ AC_DEFUN([AC_COMPILER],
       xcray* | xCRAY*)
         COMPILER="cray"
         ;;
-      xmacos-gcc-3 | xmacos-g++-3 | xmacos-10.3 | xmac-10.3 | xosx-10.3 | xosx-panther)
+      xibm32* | xIBM32*)
+        COMPILER="ibm32"
+        ;;
+      xibm64* | xIBM64* | xibm* | xIBM* | xvacpp* | xxlC*)
+        COMPILER="ibm64"
+        ;;
+      xmacos-gcc-3 | xmacos-gnu-3 | xmacos-g++-3)
         COMPILER="macos-gcc-3"
+        ;;
+      xmacos-gcc-3.3 | xmacos-gnu-3.3 | xmacos-g++-3.3)
+        COMPILER="macos-gcc-3.3"
+        ;;
+      xmacos-gcc-4.0 | xmacos-gnu-4.0 | xmacos-g++-4.0)
+        COMPILER="macos-gcc-4.0"
         ;;
       xmacos* | xmac* | xosx*)
         COMPILER="macos"
-        ;;
-      xibm | xibm64* | xIBM64* | xvacpp* | xxlC*)
-        COMPILER="ibm64"
-        ;;
-      xibm32* | xIBM32*)
-        COMPILER="ibm32"
         ;;
       xgeneric*)
         COMPILER="generic"
@@ -96,7 +112,7 @@ AC_DEFUN([AC_COMPILER],
   AC_MSG_RESULT([$COMPILER])
 
   case "$COMPILER" in
-    gnu | gnu-3.3)
+    gnu)
       try_CC="gcc"
       try_CXX="g++"
       ;;
@@ -140,6 +156,14 @@ AC_DEFUN([AC_COMPILER],
       try_CC="gcc3"
       try_CXX="g++3"
       ;;
+    macos-gcc-3.3)
+      try_CC="gcc-3.3"
+      try_CXX="g++-3.3"
+      ;;
+    macos-gcc-4.0)
+      try_CC="gcc-4.0"
+      try_CXX="g++-4.0"
+      ;;
     generic)
       # nothing to do
       ;;
@@ -171,76 +195,75 @@ AC_DEFUN([AC_COMPILER],
 
   test -z "$COMPILER" && AC_MSG_ERROR([compiler mode is not set])
 
+  # default options
+  try_CFLAGS=
+  try_CFLAGS_OPT="-O3"
+  try_CFLAGS_DEBUG="-g -O0"
+  try_CFLAGS_WARN=
+  try_CFLAGS_NOWARN=
+  try_CXXFLAGS=
+  try_CXXFLAGS_OPT="-O3"
+  try_CXXFLAGS_DEBUG="-g -O0"
+  try_CXXFLAGS_WARN=
+  try_CXXFLAGS_NOWARN=
+  try_CXXFLAGS_EH=
+  try_CXXFLAGS_NOEH=
   case "$COMPILER" in
     gnu)
-      try_CFLAGS_OPT="-pthread -O3"
-      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-pthread -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
-      try_CXXFLAGS_EH="-fexceptions"
-      try_CXXFLAGS_NOEH="-fno-exceptions"
-      ;;
-    gnu-3.3)
-      try_CFLAGS_OPT="-pthread -O3"
-      try_CFLAGS_DEBUG="-pthread -W -Wall -Wno-comment -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-fabi-version=0 -pthread -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-fabi-version=0 -pthread -W -Wall -Wno-comment -Wno-sign-compare -ftemplate-depth-150 -g -O0"
+      try_CFLAGS="-pthread"
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-pthread -ftemplate-depth-150"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
     kai)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG="-g -O0"
-      try_CXXFLAGS_OPT="--restrict --one_instantiation_per_object --thread_safe +K3 -O3 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
-      try_CXXFLAGS_DEBUG="--restrict --one_instantiation_per_object --thread_safe --display_error_number -g +K0 -O0 -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
+      try_CXXFLAGS="--restrict --one_instantiation_per_object --thread_safe -DBOOST_REGEX_NO_EXTERNAL_TEMPLATES"
+      try_CXXFLAGS_OPT="+K3 -O3"
+      try_CXXFLAGS_DEBUG="-g +K0 -O0"
       try_CXXFLAGS_EH="--exceptions"
       try_CXXFLAGS_NOEH="--no_exceptions"
       ;;
     intel)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG=" -O0"
-      try_CXXFLAGS_OPT="-D_REENTRANT -restrict -O3"
-      try_CXXFLAGS_DEBUG="-D_REENTRANT -restrict -g -O0"
-      try_CXXFLAGS_EH=
-      try_CXXFLAGS_NOEH="-DBOOST_NO_EXCEPTIONS"
+      try_CFLAGS_WARN="-W -Wall -Wno-comment"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-D_REENTRANT -restrict"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment"
+      try_CXXFLAGS_NOWARN="-w"
       ;;
     como)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG="-g -O0"
-      try_CXXFLAGS_OPT="-O3"
-      try_CXXFLAGS_DEBUG="-g -O0"
-      try_CXXFLAGS_EH=
-      try_CXXFLAGS_NOEH=
       ;;
     hp32)
-      try_CFLAGS_OPT="-Aa +DA1.1 -O3 -D_HPUX_SOURCE"
-      try_CFLAGS_DEBUG="-Aa +DA1.1 -g -O0 -D_HPUX_SOURCE"
-      try_CXXFLAGS_OPT="-Aa +DA1.1 -O3 -D_HPUX_SOURCE"
-      try_CXXFLAGS_DEBUG="-Aa +DA1.1 -g -O0 -D_HPUX_SOURCE"
+      try_CFLAGS="-Aa +DA1.1 -D_HPUX_SOURCE"
+      try_CXXFLAGS="-Aa +DA1.1 -D_HPUX_SOURCE"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="+noeh"
       ;;
     hp64)
-      try_CFLAGS_OPT="-Aa +DA2.0W -O3 -D_HPUX_SOURCE"
-      try_CFLAGS_DEBUG="-Aa +DA2.0W -g -O0 -D_HPUX_SOURCE"
-      try_CXXFLAGS_OPT="-Aa +DA2.0W -O3 -D_HPUX_SOURCE"
-      try_CXXFLAGS_DEBUG="-Aa +DA2.0W -g -O0 -D_HPUX_SOURCE"
+      try_CFLAGS="-Aa +DA2.0W -D_HPUX_SOURCE"
+      try_CXXFLAGS="-Aa +DA2.0W -D_HPUX_SOURCE"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="+noeh"
       ;;
     dec)
-      try_CFLAGS_OPT="-pthread -O4"
-      try_CFLAGS_DEBUG="-pthread -g -O0"
-      try_CXXFLAGS_OPT="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -pthread -D__USE_STD_IOSTREAM -O4"
-      try_CXXFLAGS_DEBUG="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -msg_display_number -msg_disable 461 -pthread -D__USE_STD_IOSTREAM -g -O0"
+      try_CFLAGS="-pthread"
+      try_CFLAGS_OPT="-O4"
+      try_CFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -pthread -D__USE_STD_IOSTREAM"
+      try_CXXFLAGS_OPT="-O4"
+      try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-noexceptions"
       ;;
     sgi32)
-      try_CFLAGS_OPT="-n32 -diag_error 1035 -Ofast -INLINE"
-      try_CFLAGS_DEBUG="-n32 -diag_error 1035 -g -O0"
-      try_CXXFLAGS_OPT="-n32 -LANG:std -diag_error 1035 -Ofast -INLINE"
-      try_CXXFLAGS_DEBUG="-n32 -LANG:std -diag_error 1035 -g -O0"
+      try_CFLAGS="-n32 -diag_error 1035"
+      try_CFLAGS_OPT="-Ofast -INLINE"
+      try_CFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS="-n32 -LANG:std -diag_error 1035"
+      try_CXXFLAGS_OPT="-Ofast -INLINE"
+      try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
       CPPFLAGS="$CPPFLAGS -DBOOST_UBLAS_REVERSE_ITERATOR_OVERLOADS"
@@ -249,10 +272,12 @@ AC_DEFUN([AC_COMPILER],
       fi
       ;;
     sgi64)
-      try_CFLAGS_OPT="-64 -diag_error 1035 -Ofast -INLINE"
-      try_CFLAGS_DEBUG="-64 -diag_error 1035 -g -O0"
-      try_CXXFLAGS_OPT="-64 -LANG:std -diag_error 1035 -Ofast -INLINE"
-      try_CXXFLAGS_DEBUG="-64 -LANG:std -diag_error 1035 -g -O0"
+      try_CFLAGS="-64 -diag_error 1035"
+      try_CFLAGS_OPT="-Ofast -INLINE"
+      try_CFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS="-64 -LANG:std -diag_error 1035"
+      try_CXXFLAGS_OPT="-Ofast -INLINE"
+      try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
       CPPFLAGS="$CPPFLAGS -DBOOST_UBLAS_REVERSE_ITERATOR_OVERLOADS"
@@ -261,42 +286,48 @@ AC_DEFUN([AC_COMPILER],
       fi
       ;;
     cray)
-      try_CFLAGS_OPT="-O2 -h conform"
-      try_CFLAGS_DEBUG="-g -O0 -h conform"
-      try_CXXFLAGS_OPT="-O2 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates "
-      try_CXXFLAGS_DEBUG="-g -O0 -h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates "
+      try_CFLAGS="-h conform"
+      try_CFLAGS_OPT="-O2"
+      try_CFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS="-h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates"
+      try_CXXFLAGS_OPT="-O2"
+      try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-h exceptions"
       try_CXXFLAGS_NOEH="-h noexceptions"
       ;;
     ibm32)
-      try_CFLAGS_OPT="-q32 -O2"
-      try_CFLAGS_DEBUG=-"-q32 -g"
-      try_CXXFLAGS_OPT="-q32 -qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-q32 -qlanglvl=extended -g"
-      try_CXXFLAGS_EH=""
-      try_CXXFLAGS_NOEH=""
+      try_CFLAGS="-q32"
+      try_CFLAGS_OPT="-O2"
+      try_CFLAGS_DEBUG=-"-g"
+      try_CXXFLAGS="-q32 -qlanglvl=extended"
+      try_CXXFLAGS_OPT="-O2"
+      try_CXXFLAGS_DEBUG="-g"
       ;;
     ibm64)
-      try_CFLAGS_OPT="-q64 -O2"
-      try_CFLAGS_DEBUG=-"-q64 -g"
-      try_CXXFLAGS_OPT="-q64 -qlanglvl=extended -O2"
-      try_CXXFLAGS_DEBUG="-q64 -qlanglvl=extended -g"
-      try_CXXFLAGS_EH=""
-      try_CXXFLAGS_NOEH=""
+      try_CFLAGS="-q62"
+      try_CFLAGS_OPT="-O2"
+      try_CFLAGS_DEBUG=-"-g"
+      try_CXXFLAGS="-q62 -qlanglvl=extended"
+      try_CXXFLAGS_OPT="-O2"
+      try_CXXFLAGS_DEBUG="-g"
       ;;
-    macos)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
+    macos | macos-gcc-3 | macos-gcc-4.0)
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double"
+      try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
-    macos-gcc-3)
-      try_CFLAGS_OPT="-O3"
-      try_CFLAGS_DEBUG="-W -Wall -Wno-comment -Wno-long-double -Wno-sign-compare -g -O0"
-      try_CXXFLAGS_OPT="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150 -O3"
-      try_CXXFLAGS_DEBUG="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double -ftemplate-depth-150 -g -O0"
+    macos-gcc-3.3)
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-ftemplate-depth-150"
+      try_CXXFLAGS_OPT="-fabi-version=0 -O3"
+      try_CXXFLAGS_DEBUG="-fabi-version=0 -g -O0"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
@@ -313,8 +344,6 @@ AC_DEFUN([AC_COMPILER],
       else
         try_CXXFLAGS_DEBUG="$CXXFLAGS"
       fi
-      try_CXXFLAGS_EH=
-      try_CXXFLAGS_NOEH="-DBOOST_NO_EXCEPTIONS"
       ;;
     *)
       AC_MSG_ERROR([unknown mode $COMPILER])
@@ -324,6 +353,10 @@ AC_DEFUN([AC_COMPILER],
   if test "$ac_cv_compiler_optimization" = yes; then
     CPPFLAGS="$CPPFLAGS -DNDEBUG"
   fi
+  if test "$ac_cv_compiler_exceptions" = no; then
+    CPPFLAGS="$CPPFLAGS -DBOOST_NO_EXCEPTIONS"
+  fi
+  CPPFLAGS=`echo $CPPFLAGS | sed 's/^ *//' | sed 's/ *$//' | sed 's/  */ /'`
 
   if test -n "$save_CFLAGS"; then
     CFLAGS="$save_CFLAGS"
@@ -333,102 +366,58 @@ AC_DEFUN([AC_COMPILER],
     else
       CFLAGS="$try_CFLAGS_DEBUG"
     fi
+    if test "$ac_cv_compiler_warnings" = yes; then
+      CFLAGS="$CFLAGS $try_CFLAGS_WARN"
+    else
+      CFLAGS="$CFLAGS $try_CFLAGS_NOWARN"
+    fi
   fi
-
-  if test "$CFLAGS" != "$save_CFLAGS"; then
-    AC_LANG_SAVE
-    AC_LANG_C
-    AC_MSG_CHECKING([whether $CC accepts $CFLAGS])
-    AC_TRY_COMPILE([],[],
-      AC_MSG_RESULT(yes),
-      [
-      AC_MSG_RESULT(no)
-      AC_MSG_ERROR([compiler flags check failed.  Please set CFLAGS explicitly.])
-      ]
-    )
-    AC_LANG_RESTORE
-  fi
+  CFLAGS=`echo $CFLAGS | sed 's/^ *//' | sed 's/ *$//' | sed 's/  */ /'`
+  AC_LANG_SAVE
+  AC_LANG_C
+  AC_MSG_CHECKING([whether $CC accepts $CFLAGS])
+  AC_TRY_COMPILE([],[],
+    AC_MSG_RESULT(yes),
+    [
+    AC_MSG_RESULT(no)
+    AC_MSG_ERROR([compiler flags check failed.  Please set CFLAGS explicitly.])
+    ]
+  )
+  AC_LANG_RESTORE
 
   if test -n "$save_CXXFLAGS"; then
     CXXFLAGS="$save_CXXFLAGS"
   else
+    CXXFLAGS="$try_CXXFLAGS"
     if test "$ac_cv_compiler_optimization" = yes; then
-      if test "$ac_cv_compiler_exceptions" = yes; then
-        if test -n "$try_CXXFLAGS_OPT"; then
-          if test -n "$try_CXXFLAGS_EH"; then
-            CXXFLAGS="$try_CXXFLAGS_OPT $try_CXXFLAGS_EH"
-          else
-            CXXFLAGS="$try_CXXFLAGS_OPT"
-          fi
-        else
-          if test -n "$try_CXXFLAGS_EH"; then
-            CXXFLAGS="$try_CXXFLAGS_EH"
-          else
-            CXXFLAGS=
-          fi
-        fi
-      else
-        if test -n "$try_CXXFLAGS_OPT"; then
-          if test -n "$try_CXXFLAGS_NOEH"; then
-            CXXFLAGS="$try_CXXFLAGS_OPT $try_CXXFLAGS_NOEH"
-          else
-            CXXFLAGS="$try_CXXFLAGS_OPT"
-          fi
-        else
-          if test -n "$try_CXXFLAGS_NOEH"; then
-            CXXFLAGS="$try_CXXFLAGS_NOEH"
-          else
-            CXXFLAGS=
-          fi
-        fi
-      fi
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_OPT"
     else
-      if test "$ac_cv_compiler_exceptions" = yes; then
-        if test -n "$try_CXXFLAGS_DEBUG"; then
-          if test -n "$try_CXXFLAGS_EH"; then
-            CXXFLAGS="$try_CXXFLAGS_DEBUG $try_CXXFLAGS_EH"
-          else
-            CXXFLAGS="$try_CXXFLAGS_DEBUG"
-          fi
-        else
-          if test -n "$try_CXXFLAGS_EH"; then
-            CXXFLAGS="$try_CXXFLAGS_EH"
-          else
-            CXXFLAGS=
-          fi
-        fi
-      else
-        if test -n "$try_CXXFLAGS_DEBUG"; then
-          if test -n "$try_CXXFLAGS_NOEH"; then
-            CXXFLAGS="$try_CXXFLAGS_DEBUG $try_CXXFLAGS_NOEH"
-          else
-            CXXFLAGS="$try_CXXFLAGS_DEBUG"
-          fi
-        else
-          if test -n "$try_CXXFLAGS_NOEH"; then
-            CXXFLAGS="$try_CXXFLAGS_NOEH"
-          else
-            CXXFLAGS=
-          fi
-        fi
-      fi
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_DEBUG"
+    fi
+    if test "$ac_cv_compiler_exceptions" = yes; then
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_EH"
+    else
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_NOEH"
+    fi
+    if test "$ac_cv_compiler_warnings" = yes; then
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_WARN"
+    else
+      CXXFLAGS="$CXXFLAGS $try_CXXFLAGS_NOWARN"
     fi
   fi
-
-  if test "$CXXFLAGS" != "$save_CXXFLAGS"; then
-    AC_LANG_SAVE
-    AC_LANG_CPLUSPLUS
-    AC_MSG_CHECKING([whether $CXX accepts $CXXFLAGS])
-    AC_TRY_COMPILE([],[],
-      AC_MSG_RESULT(yes),
-      [
-      AC_MSG_RESULT(no)
-      AC_MSG_ERROR([compiler flags check failed.  Please set CXXFLAGS explicitly.])
-      ]
-    )
-    AC_LANG_RESTORE
+  CXXFLAGS=`echo $CXXFLAGS | sed 's/^ *//' | sed 's/ *$//' | sed 's/  */ /'`
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  AC_MSG_CHECKING([whether $CXX accepts $CXXFLAGS])
+  AC_TRY_COMPILE([],[],
+    AC_MSG_RESULT(yes),
+    [
+    AC_MSG_RESULT(no)
+    AC_MSG_ERROR([compiler flags check failed.  Please set CXXFLAGS explicitly.])
     ]
-  fi
+  )
+  AC_LANG_RESTORE
+  ]
 
   ac_cv_compiler="$COMPILER"
   ac_cv_compiler_cc="$CC"
