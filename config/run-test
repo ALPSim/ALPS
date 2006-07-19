@@ -23,6 +23,7 @@ if test -n "$dir"; then
     echo -n "[$dir] "
   fi
   cd $dir
+  srcdir=`echo $srcdir | sed 's/^\./..\/./g'` # add '../' in case of relative path
 fi
 
 INPUT=
