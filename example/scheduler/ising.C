@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 1994-2006 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -34,13 +34,13 @@
 //=======================================================================
 
 #include "ising.h"
-#include <alps/alea/detailedbinning.h>
+#include <alps/alea.h>
 #include <cmath>
 
 void IsingSimulation::print_copyright(std::ostream& out)
 {
   out << "Ising simulation example program using the ALPS Monte Carlo library\n"
-      << "  copyright(c) 1994-2003 by Matthias Troyer <troyer@comp-phys.org>\n\n";
+      << "  copyright(c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>\n\n";
 }
 
 IsingSimulation::IsingSimulation(const alps::ProcessList& where,const alps::Parameters& p,int node)
@@ -61,9 +61,7 @@ IsingSimulation::IsingSimulation(const alps::ProcessList& where,const alps::Para
   measurements << alps::RealObservable("Magnetization");
   measurements << alps::RealObservable("Magnetization^2");
   measurements << alps::RealObservable("Magnetization^4");
-#ifdef ALPS_HAVE_VALARRAY
   measurements << alps::RealVectorObservable("Correlations");
-#endif
 }
 
 void IsingSimulation::load(alps::IDump& dump)
@@ -142,7 +140,5 @@ void IsingSimulation::dostep()
   measurements["Magnetization"] << tmag;
   measurements["Magnetization^2"] << tmag*tmag;
   measurements["Magnetization^4"] << tmag*tmag*tmag*tmag;
-#ifdef ALPS_HAVE_VALARRAY
   measurements["Correlations"] << corr;
-#endif
 }
