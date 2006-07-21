@@ -16,6 +16,7 @@ typedef class U_matrix{
       for(uint i=0;i<nf_*nf_;++i){val_[i]=0;} //default: non-interacting.
       if(parms.defined("U_MATRIX")){
         std::ifstream u_file(std::string(parms["U_MATRIX"]).c_str());
+        assert(u_file.is_open());
         int i;
         int j;
         double U_ij;
@@ -36,6 +37,10 @@ typedef class U_matrix{
         double U=(double)(parms["U"]);
         double J=(double)(parms["J"]);
         assemble(n_site, n_flavor, U, J);
+      }
+      n_nonzero_=0;
+      for(uint i=0;i<nf_*nf_;++i){
+        if(val_[i]!=0) n_nonzero_++;
       }
     }
     void assemble(site_t n_site, spin_t n_flavor, double U, double J){
@@ -75,11 +80,12 @@ typedef class U_matrix{
     }
     spin_t nf()const {return nf_;}
     spin_t ns()const {return ns_;}
+    inline int n_nonzero() const{return n_nonzero_;}
   private:
     double *val_;
     site_t ns_;
     spin_t nf_;
-
+    int n_nonzero_;
 } U_matrix;
 
 std::ostream &operator<<(std::ostream &os, const U_matrix &U);

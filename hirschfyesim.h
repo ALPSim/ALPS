@@ -119,6 +119,7 @@ private:
 	std::vector<int> spins;		    // auxiliary Ising spins
 	double max_time;
 	double start_time;
+        bool measure_fourpoint;
 	
 };
 
