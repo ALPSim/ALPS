@@ -1,6 +1,6 @@
 #! /bin/sh
 
 echo '<?xml version="1.0" encoding="UTF-8"?>' > /tmp/input$$
-tail +3 $1 >> /tmp/input$$
+tail -n +3 $1 >> /tmp/input$$
 xslttransform /tmp/input$$ @libdir@/xml/QMCXML2text.xsl
 rm /tmp/input$$
