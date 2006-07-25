@@ -7,7 +7,7 @@ echo '<ARCHIVE xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNames
 for f in $*; do
   if test -f $f; then
     echo '<SIMULATION>'
-    tail +`grep -n "<PARAMETERS>" $f | cut -d: -f1` $f
+    tail -n +`grep -n "<PARAMETERS>" $f | cut -d: -f1` $f
   fi
 done
 
