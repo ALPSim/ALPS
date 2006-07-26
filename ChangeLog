@@ -1,5 +1,11 @@
-2005-12-30  Matthias Troyer <troyer@comp-phys.org>
+2006-07-26  Synge Todo <wistaria@comp-phys.org>
 
+	* [config] Added macros, ALPS_HAVE_BLAS, ALPS_HAVE_LAPACK, 
+	ALPS_HAVE_MKL, ALPS_HAVE_DXML, ALPS_HAVE_SCSL, ALPS_HAVE_VECLIB,
+	ALPS_HAVE_ESSL, and ALPS_HAVE_ATLAS, in alps/src/config.h.in.
+
+2005-12-30  Matthias Troyer <troyer@comp-phys.org>
+	
 	* [scheduler] Started adding new single task scheduler, as well as tasks
           started from parameters instead of a file.
 

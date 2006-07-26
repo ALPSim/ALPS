@@ -68,7 +68,7 @@ AC_DEFUN([AC_LAPACK],
   )
 
   AC_ARG_WITH(lapack,
-    AC_HELP_STRING([--with-lapack=LIBS],[use LAPACK library]),
+    AC_HELP_STRING([--with-lapack=LIBS],[use LAPACK Library]),
     [
     if test "x$withval" = xno; then
       lapack=no
@@ -132,7 +132,7 @@ AC_DEFUN([AC_LAPACK],
   )
 
   AC_ARG_WITH(scsl,
-    AC_HELP_STRING([--with-scsl], [use SGI SCSL Scientific Library]),
+    AC_HELP_STRING([--with-scsl], [use SGI SCSL Library]),
     [
     if test "x$withval" = xno; then
       scsl=no
@@ -143,7 +143,7 @@ AC_DEFUN([AC_LAPACK],
   )
 
   AC_ARG_WITH(essl,
-    AC_HELP_STRING([--with-essl], [use ESSL library on IBM AIX]),
+    AC_HELP_STRING([--with-essl], [use ESSL Library on IBM AIX]),
     [
     if test "x$withval" = xno; then
       essl=no
@@ -429,6 +429,9 @@ AC_DEFUN([AC_LAPACK],
         AC_MSG_ERROR([Math Kernel Library not found.])
       fi
     fi
+    if test "$found_blas" = yes; then
+      AC_DEFINE(ALPS_HAVE_MKL, [], [Define if you have Intel Math Kernel Library.])
+    fi
   fi
 
   # for Digital Extended Math Library
@@ -449,6 +452,9 @@ AC_DEFUN([AC_LAPACK],
         AC_MSG_ERROR([Digital Extended Math Library not found.])
       fi
     fi
+    if test "$found_blas" = yes; then
+      AC_DEFINE(ALPS_HAVE_DXML, [], [Define if you have the Digital Extended Math Library.])
+    fi
   fi
 
   # for SGI SCSL
@@ -468,6 +474,9 @@ AC_DEFUN([AC_LAPACK],
       if test "$found_blas" = no; then
         AC_MSG_ERROR([SCSL Library not found.])
       fi
+    fi
+    if test "$found_blas" = yes; then
+      AC_DEFINE(ALPS_HAVE_SCSL, [], [Define if you have SGI SCSL Library.])
     fi
   fi
 
@@ -495,9 +504,11 @@ AC_DEFUN([AC_LAPACK],
         AC_MSG_ERROR([Mac OS X vecLib framework not found.])
       fi
     fi
+    if test "$found_blas" = yes; then
+      AC_DEFINE(ALPS_HAVE_VECLIB, [], [Define if you have Mac OS X vecLib framework.])
+    fi
   fi
 
-  found_essl=no;
   # for ESSL on IBM AIX
   if test "$found_blas" = no; then
     if test "x$essl" != xno; then
@@ -505,16 +516,19 @@ AC_DEFUN([AC_LAPACK],
       LDFLAGS="$ac_save_LDFLAGS"
       LIBS="$ac_save_LIBS"
       AC_CHECK_LIB(essl, dgemm_, 
+        [AC_CHECK_LIB(essl, dsyev_,
           [LAPACK_LDFLAGS=; LAPACK_LIBS="-lessl";
-           found_blas=yes;])
+           found_blas=yes; found_lapack=yes])
+        ]
+      )
     fi
     if test "x$essl" = xyes; then
       if test "$found_blas" = no; then
-        AC_MSG_ERROR([ESSL not found.])
-      else
-        found_essl=yes;
-        AC_DEFINE(HAVE_ESSL, [], [Define if you have the IBM ESSL library.])
+        AC_MSG_ERROR([IBM ESSL Library not found.])
       fi
+    fi
+    if test "$found_blas" = yes; then
+      AC_DEFINE(ALPS_HAVE_ESSL, [], [Define if you have IBM ESSL Library.])
     fi
   fi
 
@@ -577,6 +591,9 @@ AC_DEFUN([AC_LAPACK],
         LAPACK_LDFLAGS="$atlas_ldflags"
         LAPACK_LIBS="$atlas_libs"
       fi
+    fi
+    if test "$found_blas" = yes; then
+      AC_DEFINE(ALPS_HAVE_ATLAS, [], [Define if you have ATLAS library.])
     fi
   fi 
 
@@ -727,14 +744,10 @@ AC_DEFUN([AC_LAPACK],
   if test "$found_blas" = yes; then
     ac_cv_have_blas=yes
     AC_MSG_NOTICE([enabling BLAS support])
-    AC_DEFINE(HAVE_BLAS, [], [Define if you have a BLAS library.])
+    AC_DEFINE(ALPS_HAVE_BLAS, [], [Define if you have a BLAS library.])
   else
     ac_cv_have_blas=no
     AC_MSG_NOTICE([disabling BLAS support])
-  fi
-
-  if test "$found_essl" = yes; then
-    found_lapack=yes
   fi
 
   if test "$found_lapack" = yes; then
@@ -743,7 +756,7 @@ AC_DEFUN([AC_LAPACK],
     ac_cv_lapack_ldflags="$LAPACK_LDFLAGS"
     ac_cv_lapack_libs="$LAPACK_LIBS"
     AC_MSG_NOTICE([enabling LAPACK support])
-    AC_DEFINE(HAVE_LAPACK, [], [Define if you have a LAPACK library.])
+    AC_DEFINE(ALPS_HAVE_LAPACK, [], [Define if you have a LAPACK library.])
   else
     ac_cv_have_lapack=no
     AC_MSG_NOTICE([disabling LAPACK support])

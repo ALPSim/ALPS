@@ -1076,12 +1076,12 @@ Optional Packages:
   --with-blas=LIBS        use BLAS Library
   --with-blas-dir=DIR     BLAS lib directory
   --with-dxml             use Digital Extended Math Library
-  --with-lapack=LIBS      use LAPACK library
+  --with-lapack=LIBS      use LAPACK Library
   --with-lapack-dir=DIR   LAPACK lib directory
   --with-mkl=PROC         use Intel Math Kernel Library (PROC=p3, p4, itp)
   --with-mkl-dir=DIR      MKL lib directory
-  --with-scsl             use SGI SCSL Scientific Library
-  --with-essl             use ESSL library on IBM AIX
+  --with-scsl             use SGI SCSL Library
+  --with-essl             use ESSL Library on IBM AIX
   --with-veclib           use vecLib framework on Mac OS X
   --with-sqlite-incdir=DIR
                           SQLite include directory
@@ -24542,6 +24542,13 @@ echo "$as_me: error: Math Kernel Library not found." >&2;}
    { (exit 1); exit 1; }; }
       fi
     fi
+    if test "$found_blas" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ALPS_HAVE_MKL
+_ACEOF
+
+    fi
   fi
 
   # for Digital Extended Math Library
@@ -24696,6 +24703,13 @@ fi
 echo "$as_me: error: Digital Extended Math Library not found." >&2;}
    { (exit 1); exit 1; }; }
       fi
+    fi
+    if test "$found_blas" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ALPS_HAVE_DXML
+_ACEOF
+
     fi
   fi
 
@@ -24852,6 +24866,13 @@ echo "$as_me: error: SCSL Library not found." >&2;}
    { (exit 1); exit 1; }; }
       fi
     fi
+    if test "$found_blas" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ALPS_HAVE_SCSL
+_ACEOF
+
+    fi
   fi
 
   # for vecLib on Mac OS X
@@ -24973,9 +24994,15 @@ echo "$as_me: error: Mac OS X vecLib framework not found." >&2;}
    { (exit 1); exit 1; }; }
       fi
     fi
+    if test "$found_blas" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ALPS_HAVE_VECLIB
+_ACEOF
+
+    fi
   fi
 
-  found_essl=no;
   # for ESSL on IBM AIX
   if test "$found_blas" = no; then
     if test "x$essl" != xno; then
@@ -25048,24 +25075,93 @@ fi
 echo "$as_me:$LINENO: result: $ac_cv_lib_essl_dgemm_" >&5
 echo "${ECHO_T}$ac_cv_lib_essl_dgemm_" >&6
 if test $ac_cv_lib_essl_dgemm_ = yes; then
+  echo "$as_me:$LINENO: checking for dsyev_ in -lessl" >&5
+echo $ECHO_N "checking for dsyev_ in -lessl... $ECHO_C" >&6
+if test "${ac_cv_lib_essl_dsyev_+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lessl  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char dsyev_ ();
+int
+main ()
+{
+dsyev_ ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_essl_dsyev_=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_essl_dsyev_=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_essl_dsyev_" >&5
+echo "${ECHO_T}$ac_cv_lib_essl_dsyev_" >&6
+if test $ac_cv_lib_essl_dsyev_ = yes; then
   LAPACK_LDFLAGS=; LAPACK_LIBS="-lessl";
-           found_blas=yes;
+           found_blas=yes; found_lapack=yes
+fi
+
+
+
 fi
 
     fi
     if test "x$essl" = xyes; then
       if test "$found_blas" = no; then
-        { { echo "$as_me:$LINENO: error: ESSL not found." >&5
-echo "$as_me: error: ESSL not found." >&2;}
+        { { echo "$as_me:$LINENO: error: IBM ESSL Library not found." >&5
+echo "$as_me: error: IBM ESSL Library not found." >&2;}
    { (exit 1); exit 1; }; }
-      else
-        found_essl=yes;
+      fi
+    fi
+    if test "$found_blas" = yes; then
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_ESSL
+#define ALPS_HAVE_ESSL
 _ACEOF
 
-      fi
     fi
   fi
 
@@ -25274,6 +25370,13 @@ rm -f conftest.err conftest.$ac_objext \
         LAPACK_LDFLAGS="$atlas_ldflags"
         LAPACK_LIBS="$atlas_libs"
       fi
+    fi
+    if test "$found_blas" = yes; then
+
+cat >>confdefs.h <<\_ACEOF
+#define ALPS_HAVE_ATLAS
+_ACEOF
+
     fi
   fi
 
@@ -25816,17 +25919,13 @@ ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 echo "$as_me: enabling BLAS support" >&6;}
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_BLAS
+#define ALPS_HAVE_BLAS
 _ACEOF
 
   else
     ac_cv_have_blas=no
     { echo "$as_me:$LINENO: disabling BLAS support" >&5
 echo "$as_me: disabling BLAS support" >&6;}
-  fi
-
-  if test "$found_essl" = yes; then
-    found_lapack=yes
   fi
 
   if test "$found_lapack" = yes; then
@@ -25838,7 +25937,7 @@ echo "$as_me: disabling BLAS support" >&6;}
 echo "$as_me: enabling LAPACK support" >&6;}
 
 cat >>confdefs.h <<\_ACEOF
-#define HAVE_LAPACK
+#define ALPS_HAVE_LAPACK
 _ACEOF
 
   else
