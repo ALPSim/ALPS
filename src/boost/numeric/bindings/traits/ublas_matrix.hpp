@@ -17,6 +17,7 @@
 #ifndef BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_MATRIX_H
 #define BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_MATRIX_H
 
+#inlcude <boost/version.hpp>
 #include <boost/numeric/bindings/traits/traits.hpp>
 
 #ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS 
@@ -76,7 +77,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
       // g++ 2.95.4 and 3.0.4 (with -pedantic) dislike 
       //   identifier_type::functor_type::size2()
 #if BOOST_VERSION >= 103500
-      return functor_t::size_M (m.size1(), m.size2());
+      return functor_t::size_m (m.size1(), m.size2());
 #else
       return functor_t::size2 (m.size1(), m.size2());
 #endif
