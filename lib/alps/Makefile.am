@@ -41,6 +41,7 @@ src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/factory.C \
   $(top_srcdir)/src/alps/scheduler/info.C \
   $(top_srcdir)/src/alps/scheduler/master_scheduler.C \
+  $(top_srcdir)/src/alps/scheduler/measurement_operators.C \
   $(top_srcdir)/src/alps/scheduler/montecarlo.C \
   $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C \
   $(top_srcdir)/src/alps/scheduler/options.C \

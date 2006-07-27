@@ -105,6 +105,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/scheduler/factory.C \
 	$(top_srcdir)/src/alps/scheduler/info.C \
 	$(top_srcdir)/src/alps/scheduler/master_scheduler.C \
+	$(top_srcdir)/src/alps/scheduler/measurement_operators.C \
 	$(top_srcdir)/src/alps/scheduler/montecarlo.C \
 	$(top_srcdir)/src/alps/scheduler/mpp_scheduler.C \
 	$(top_srcdir)/src/alps/scheduler/options.C \
@@ -131,10 +132,10 @@ am__objects_7 = disorder.lo latticedescriptor.lo \
 am__objects_8 = modellibrary.lo siteterm.lo bondterm.lo \
 	globaloperator.lo
 am__objects_9 = abstract_task.lo factory.lo info.lo \
-	master_scheduler.lo montecarlo.lo mpp_scheduler.lo options.lo \
-	remote_task.lo remote_worker.lo scheduler.lo signal.lo \
-	single_scheduler.lo serial_scheduler.lo slave_task.lo task.lo \
-	worker.lo workertask.lo
+	master_scheduler.lo measurement_operators.lo montecarlo.lo \
+	mpp_scheduler.lo options.lo remote_task.lo remote_worker.lo \
+	scheduler.lo signal.lo single_scheduler.lo serial_scheduler.lo \
+	slave_task.lo task.lo worker.lo workertask.lo
 @ALPS_FULL_TRUE@am__objects_10 = $(am__objects_6) $(am__objects_7) \
 @ALPS_FULL_TRUE@	$(am__objects_8) $(am__objects_9)
 @BUILD_BOOST_TRUE@am__objects_11 = throw_exception.lo
@@ -432,6 +433,7 @@ src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/factory.C \
   $(top_srcdir)/src/alps/scheduler/info.C \
   $(top_srcdir)/src/alps/scheduler/master_scheduler.C \
+  $(top_srcdir)/src/alps/scheduler/measurement_operators.C \
   $(top_srcdir)/src/alps/scheduler/montecarlo.C \
   $(top_srcdir)/src/alps/scheduler/mpp_scheduler.C \
   $(top_srcdir)/src/alps/scheduler/options.C \
@@ -704,6 +706,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/latticegraphdescriptor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/latticelibrary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/master_scheduler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/measurement_operators.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/modellibrary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/montecarlo.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpp_scheduler.Plo@am__quote@
@@ -993,6 +996,13 @@ master_scheduler.lo: $(top_srcdir)/src/alps/scheduler/master_scheduler.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/master_scheduler.C' object='master_scheduler.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o master_scheduler.lo `test -f '$(top_srcdir)/src/alps/scheduler/master_scheduler.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/master_scheduler.C
+
+measurement_operators.lo: $(top_srcdir)/src/alps/scheduler/measurement_operators.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT measurement_operators.lo -MD -MP -MF "$(DEPDIR)/measurement_operators.Tpo" -c -o measurement_operators.lo `test -f '$(top_srcdir)/src/alps/scheduler/measurement_operators.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/measurement_operators.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/measurement_operators.Tpo" "$(DEPDIR)/measurement_operators.Plo"; else rm -f "$(DEPDIR)/measurement_operators.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/measurement_operators.C' object='measurement_operators.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o measurement_operators.lo `test -f '$(top_srcdir)/src/alps/scheduler/measurement_operators.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/measurement_operators.C
 
 montecarlo.lo: $(top_srcdir)/src/alps/scheduler/montecarlo.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT montecarlo.lo -MD -MP -MF "$(DEPDIR)/montecarlo.Tpo" -c -o montecarlo.lo `test -f '$(top_srcdir)/src/alps/scheduler/montecarlo.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/montecarlo.C; \
