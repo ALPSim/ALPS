@@ -17,7 +17,7 @@
 #ifndef BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_MATRIX_H
 #define BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_MATRIX_H
 
-#inlcude <boost/version.hpp>
+#include <boost/version.hpp>
 #include <boost/numeric/bindings/traits/traits.hpp>
 
 #ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS 
