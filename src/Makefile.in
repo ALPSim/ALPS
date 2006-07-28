@@ -37,6 +37,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @ALPS_FULL_TRUE@am__append_1 = $(headers_ALEA) $(headers_LATTICE) $(headers_MODEL) $(headers_PLOT) $(headers_SCHEDULER)
+@BOOST_1_33_TRUE@am__append_2 = $(headers_BOOST_PRE134)
+@BOOST_1_32_TRUE@am__append_3 = $(headers_BOOST_PRE134)
 subdir = src
 DIST_COMMON = $(am__noinst_HEADERS_DIST) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -207,7 +209,7 @@ am__noinst_HEADERS_DIST = boost/function_objects.hpp \
 	alps/scheduler/options.h alps/scheduler/scheduler.h \
 	alps/scheduler/signal.hpp alps/scheduler/task.h \
 	alps/scheduler/types.h alps/scheduler/worker.h \
-	alps/scheduler/measurement_operators.h
+	alps/scheduler/measurement_operators.h boost/foreach.hpp
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -383,6 +385,7 @@ sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
 headers_CONFIG = alps/config.h @BOOST_USER_CONFIG_H@
+headers_BOOST_PRE134 = boost/foreach.hpp 
 headers_BOOST = boost/function_objects.hpp \
 	boost/numeric/bindings/blas/blas.h \
 	boost/numeric/bindings/blas/blas.hpp \
@@ -465,7 +468,7 @@ headers_HEAP = heap/heapwrapper.h
 headers = $(headers_BOOST) $(headers_ALPS) $(headers_EXPRESSION) \
 	$(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) \
 	$(headers_RANDOM) $(headers_IETL) $(headers_HEAP) \
-	$(am__append_1)
+	$(am__append_1) $(am__append_2) $(am__append_3)
 noinst_HEADERS = $(headers)
 all: all-am
 
