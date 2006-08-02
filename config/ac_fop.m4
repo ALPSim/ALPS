@@ -29,22 +29,32 @@ AC_DEFUN([AC_FOP],
   if test "x$fop" != xno; then
     AC_MSG_CHECKING([for Apache FOP])
     if test -n "$fop_dir"; then
-      if test -f "$fop_dir/fop.sh"; then
-        found=yes
-      else
-        fop_dir=no
-      fi
+      for s in fop fop.sh
+      do
+      	if test -f "$fop_dir/$s"; then
+          found=yes
+	  fop_bin="$s"
+        else
+          fop_dir=no
+	  fop_bin=no
+        fi
+      done
     else
       fop_dir=no
+      fop_bin=no
       for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src /usr
       do
         for s in fop fop-0.20.5 bin
         do
-          if test -f "$d/$s/fop.sh" -o -f "$d/$s/fop"; then
-            found=yes
-            fop_dir="$d/$s"
-            break
-          fi
+	  for k in fop fop.sh
+	  do
+            if test -f "$d/$s/$k"; then
+              found=yes
+              fop_dir="$d/$s"
+	      fop_bin="$k"
+              break
+            fi
+	  done
         done
         if test "$found" = yes; then
           break
@@ -57,9 +67,11 @@ AC_DEFUN([AC_FOP],
   if test "$found" = yes; then
     ac_cv_have_fop=yes
     ac_cv_fop_dir="$fop_dir"
+    ac_cv_fop_bin="$fop_bin"
   else
     ac_cv_have_fop=no
     ac_cv_fop_dir=
+    ac_cv_fop_bin=
   fi
   ]
 )

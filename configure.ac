@@ -759,7 +759,8 @@ if test "$ac_cv_boostbook" = yes; then
 
   AC_FOP
   AC_SUBST(FOP_DIR)
-  test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir"
+  AC_SUBST(FOP_BIN)
+  test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir" && FOP_BIN="$ac_cv_fop_bin"
 fi
 
 dnl check if all the required tools are present

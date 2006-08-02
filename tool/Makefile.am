@@ -23,7 +23,13 @@ if BUILD_DOC
 bin_PROGRAMS += quickbook
 nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp 
 if BOOST_CVS
-nodist_quickbook_SOURCES += $(BOOST_DIR)/tools/quickbook/detail/actions.cpp $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
+nodist_quickbook_SOURCES += \
+ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 endif
 endif
 

@@ -9,7 +9,7 @@ echo @XSLTPROC@ --stringparam paper.type A4 --xinclude -o "$FO" @BOOST_DIR@/tool
 
 [ "$?" -ne 0 ] && exit $?
 
-echo @FOP_DIR@/fop.sh "$FO" "$2"
-@FOP_DIR@/fop.sh "$FO" "$2"
+echo @FOP_DIR@/@FOP_BIN@ "$FO" "$2"
+@FOP_DIR@/@FOP_BIN@ "$FO" "$2"
 
 exit $?
