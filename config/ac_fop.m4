@@ -42,7 +42,7 @@ AC_DEFUN([AC_FOP],
     else
       fop_dir=no
       fop_bin=no
-      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src /usr
+      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src /usr $BOOST_DIR/tools/boostbook
       do
         for s in fop fop-0.20.5 bin
         do
