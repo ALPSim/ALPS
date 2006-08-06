@@ -311,7 +311,7 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_OPT="-O2"
       try_CXXFLAGS_DEBUG="-g"
       ;;
-    macos | macos-gcc-3 | macos-gcc-4.0)
+    macos-gcc-3)
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double"
       try_CFLAGS_NOWARN="-w"
       try_CXXFLAGS="-DUSE_DATE_TIME_PRE_1_33_FACET_IO -DBOOST_DATE_TIME_NO_LOCALE -ftemplate-depth-150"
@@ -326,6 +326,15 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS="-ftemplate-depth-150"
       try_CXXFLAGS_OPT="-fabi-version=0 -O3"
       try_CXXFLAGS_DEBUG="-fabi-version=0 -g -O0"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CXXFLAGS_NOWARN="-w"
+      try_CXXFLAGS_EH="-fexceptions"
+      try_CXXFLAGS_NOEH="-fno-exceptions"
+      ;;
+    macos*)
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-ftemplate-depth-150"
       try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"

@@ -45,7 +45,6 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
 	$(top_srcdir)/config/config.site.in \
 	$(top_srcdir)/config/include.mk.in $(top_srcdir)/configure \
-	$(top_srcdir)/doc/xsl/doxygen2boostbook.xsl.in \
 	$(top_srcdir)/src/alps/config.h.in \
 	$(top_srcdir)/src/boost/fs_utf8_codecvt_facet.cpp.in \
 	$(top_srcdir)/src/boost/po_utf8_codecvt_facet.cpp.in \
@@ -76,8 +75,7 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-CONFIG_CLEAN_FILES = config/config.site config/include.mk \
-	doc/xsl/doxygen2boostbook.xsl
+CONFIG_CLEAN_FILES = config/config.site config/include.mk
 SCRIPTS = $(dist_noinst_SCRIPTS)
 SOURCES =
 DIST_SOURCES =
@@ -379,8 +377,6 @@ config/config.site: $(top_builddir)/config.status $(top_srcdir)/config/config.si
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 config/include.mk: $(top_builddir)/config.status $(top_srcdir)/config/include.mk.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
-doc/xsl/doxygen2boostbook.xsl: $(top_builddir)/config.status $(top_srcdir)/doc/xsl/doxygen2boostbook.xsl.in
-	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -561,7 +557,7 @@ distclean-tags:
 distdir: $(DISTFILES)
 	$(am__remove_distdir)
 	mkdir $(distdir)
-	$(mkdir_p) $(distdir)/config $(distdir)/doc $(distdir)/doc/xsl $(distdir)/example/model $(distdir)/lib/xml $(distdir)/src/alps $(distdir)/src/boost $(distdir)/test/lattice $(distdir)/test/osiris $(distdir)/tool
+	$(mkdir_p) $(distdir)/config $(distdir)/doc $(distdir)/example/model $(distdir)/lib/xml $(distdir)/src/alps $(distdir)/src/boost $(distdir)/test/lattice $(distdir)/test/osiris $(distdir)/tool
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

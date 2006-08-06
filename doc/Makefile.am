@@ -27,7 +27,8 @@ doc docs : $(DOCS)
 
 dist_noinst_DATA += $(XMLDOCS_QBK) \
 	src/alps_logo.gif \
-	src/images/home.png src/images/next.png src/images/note.png src/images/prev.png src/images/up.png
+	src/images/home.png src/images/next.png src/images/note.png src/images/prev.png src/images/up.png \
+	xsl/html.xsl xsl/navbar.xsl
 
 XMLDOCS_QBK = \
 	src/alps.qbk \

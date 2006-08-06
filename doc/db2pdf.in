@@ -1,15 +1,25 @@
 #!/bin/sh
 
-export XML_CATALOG_FILES=catalog.xml
-export JAVACMD=@JAVA@
+DOCBOOK=$1
+PDF=$2
+
+if test -z "$2"; then
+  echo $0 docbook_file pdf_file
+  exit -1
+fi
+
 FO=`dirname "$1"`/`basename "$1" .docbook`.fo
 
-echo @XSLTPROC@ --stringparam paper.type A4 --xinclude -o "$FO" @BOOST_DIR@/tools/boostbook/xsl/fo.xsl "$1"
-@XSLTPROC@ --stringparam paper.type A4 --xinclude -o "$FO" @BOOST_DIR@/tools/boostbook/xsl/fo.xsl "$1"
+export XML_CATALOG_FILES=catalog.xml
+export JAVACMD=@JAVA@
+PARAMS="--stringparam paper.type A4"
+
+echo @XSLTPROC@ $PARAMS --load-trace --path @top_srcdir@/doc/xsl:@BOOST_DIR@/tools/boostbook/xsl --xinclude -o $FO fo.xsl $DOCBOOK
+@XSLTPROC@ $PARAMS --load-trace --path @top_srcdir@/doc/xsl:@BOOST_DIR@/tools/boostbook/xsl --xinclude -o $FO fo.xsl $DOCBOOK
 
 [ "$?" -ne 0 ] && exit $?
 
-echo @FOP_DIR@/@FOP_BIN@ "$FO" "$2"
-@FOP_DIR@/@FOP_BIN@ "$FO" "$2"
+echo @FOP_DIR@/@FOP_BIN@ $FO $PDF
+@FOP_DIR@/@FOP_BIN@ $FO $PDF
 
 exit $?

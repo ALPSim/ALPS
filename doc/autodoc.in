@@ -35,8 +35,8 @@ echo @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR
 
 [ "$?" -ne 0 ] && exit $?
 
-echo @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT $DIR/xsl/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
-@XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT $DIR/xsl/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
+echo @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
+@XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
 
 [ "$?" -ne 0 ] && exit $?
 

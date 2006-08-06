@@ -879,7 +879,6 @@ if test "$build_doc" = yes; then
   AC_CONFIG_FILES(doc/db2html)
   AC_CONFIG_FILES(doc/db2pdf)
   AC_CONFIG_FILES(doc/singledoc)
-  AC_CONFIG_FILES(doc/xsl/doxygen2boostbook.xsl)
 fi
 
 AC_OUTPUT
