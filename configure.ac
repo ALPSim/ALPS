@@ -904,6 +904,7 @@ echo "  HDF5 support        $ac_cv_have_hdf5"
 echo "  LAPACK support      $ac_cv_have_lapack"
 echo "  SQLite support      $ac_cv_have_sqlite"
 echo "  XML parser          $ac_cv_xml_parser"
+echo "  Documentation       $build_doc"
 
 if test "$ac_cv_alps_type" = "light"; then
   echo
