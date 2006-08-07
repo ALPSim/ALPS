@@ -249,9 +249,6 @@ $(DOC_HTMLDIR)/images/%.png : $(DOC_SRCDIR)/src/images/%.png
 # docbook -> pdf
 
 $(DOC_PDFDIR)/alps.pdf : $(DOC_XMLDIR)/alps.docbook
-	test -d src/images || mkdir -p src/images
-	test -f src/images/note.png || \
-	$(LN_S) $(DOC_SRCDIR)/src/images/note.png src/images/note.png
 	$(SHELL) db2pdf $(DOC_XMLDIR)/alps.docbook $@
 
 # clean
