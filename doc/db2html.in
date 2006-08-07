@@ -8,7 +8,9 @@ if test -z "$2"; then
   exit -1
 fi
 
+echo export XML_CATALOG_FILES=catalog.xml
 export XML_CATALOG_FILES=catalog.xml
+
 PARAMS="--stringparam boost.root . \
 	--stringparam boost.image.src alps_logo.gif \
 	--stringparam boost.image.alt ALPS \

@@ -1,8 +1,8 @@
 dist_noinst_DATA =
 
 BOOST_DIR = @BOOST_DIR@
-ALPS_SRCDIR = $(top_srcdir)/src/alps
-DOC_SRCDIR = $(top_srcdir)/doc/src
+ALPS_SRCDIR = $(abs_top_srcdir)/src/alps
+DOC_SRCDIR = $(abs_top_srcdir)/doc
 DOC_XMLDIR = src
 DOC_HTMLDIR = html
 DOC_PDFDIR = .
@@ -194,38 +194,9 @@ AUTODOC_SCHEDULER_SRC = \
 
 # quickbook -> boostbook
 
-src/alps.xml : $(DOC_SRCDIR)/alps.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/overview.xml : $(DOC_SRCDIR)/overview.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/getting_started.xml : $(DOC_SRCDIR)/getting_started.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/general.xml : $(DOC_SRCDIR)/general.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/osiris.xml : $(DOC_SRCDIR)/osiris.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/parser.xml : $(DOC_SRCDIR)/parser.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/alea.xml : $(DOC_SRCDIR)/alea.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/lattice.xml : $(DOC_SRCDIR)/lattice.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/model.xml : $(DOC_SRCDIR)/model.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/scheduler.xml : $(DOC_SRCDIR)/scheduler.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
-	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
-src/tools.xml : $(DOC_SRCDIR)/tools.qbk
-	test -f $(@:.xml=.qbk) || $(LN_S) $< src
+src/%.xml : src/%.qbk
+	test -f $(@:.xml=.qbk) || \
+	  $(LN_S) $(DOC_SRCDIR)/$(@:.xml=.qbk) $(@:.xml=.qbk)
 	$(QUICKBOOK) --input-file $(@:.xml=.qbk)
 
 # *.h -> *.autodoc
@@ -267,17 +238,20 @@ $(DOC_HTMLDIR)/boostbook.css : $(BOOST_DIR)/doc/html/boostbook.css
 	$(mkdir_p) $(DOC_HTMLDIR)
 	cp -fp $< $@
 
-$(DOC_HTMLDIR)/alps_logo.gif : $(DOC_SRCDIR)/alps_logo.gif
+$(DOC_HTMLDIR)/alps_logo.gif : $(DOC_SRCDIR)/src/alps_logo.gif
 	$(mkdir_p) $(DOC_HTMLDIR)
 	cp -fp $< $@
 
-$(DOC_HTMLDIR)/images/%.png : $(DOC_SRCDIR)/images/%.png
+$(DOC_HTMLDIR)/images/%.png : $(DOC_SRCDIR)/src/images/%.png
 	$(mkdir_p) $(DOC_HTMLDIR)/images
 	cp -fp $< $@
 
 # docbook -> pdf
 
 $(DOC_PDFDIR)/alps.pdf : $(DOC_XMLDIR)/alps.docbook
+	test -d src/images || mkdir -p src/images
+	test -f src/images/note.png || \
+	$(LN_S) $(DOC_SRCDIR)/src/images/note.png src/images/note.png
 	$(SHELL) db2pdf $(DOC_XMLDIR)/alps.docbook $@
 
 # clean

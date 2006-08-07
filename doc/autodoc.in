@@ -4,7 +4,6 @@ OUTPUT=$1
 shift
 INPUTS="$*"
 
-DIR=`dirname $0`
 CONF=/tmp/doxygen.conf.$$
 TMPDIR=/tmp/doxygen.$$
 
@@ -24,11 +23,11 @@ EOF
 
 echo @DOXYGEN@ $CONF
 @DOXYGEN@ $CONF
+rm -rf $CONF
 
 [ "$?" -ne 0 ] && exit $?
 
-echo export XML_CATALOG_FILES=$DIR/catalog.xml
-export XML_CATALOG_FILES=$DIR/catalog.xml
+export XML_CATALOG_FILES="catalog.xml"
 
 echo @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
 @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR/autodoc.doxygen @BOOST_DIR@/tools/boostbook/xsl/doxygen/collect.xsl $TMPDIR/xml/index.xml
@@ -37,7 +36,6 @@ echo @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR
 
 echo @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
 @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
+rm -rf $TEMPDIR
 
-[ "$?" -ne 0 ] && exit $?
-
-rm -rf $CONF $TEMPDIR
+exit $?

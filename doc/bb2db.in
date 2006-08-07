@@ -1,8 +1,11 @@
 #!/bin/sh
 
-export XML_CATALOG_FILES=catalog.xml
+INPUT="$1"
+OUTPUT="$2"
 
-echo @XSLTPROC@ --xinclude -o "$2" @BOOST_DIR@/tools/boostbook/xsl/docbook.xsl "$1"
-@XSLTPROC@ --xinclude -o "$2" @BOOST_DIR@/tools/boostbook/xsl/docbook.xsl "$1"
+export XML_CATALOG_FILES="catalog.xml"
+
+echo @XSLTPROC@ --xinclude -o $OUTPUT @BOOST_DIR@/tools/boostbook/xsl/docbook.xsl $INPUT
+@XSLTPROC@ --xinclude -o $OUTPUT @BOOST_DIR@/tools/boostbook/xsl/docbook.xsl $INPUT
 
 exit $?

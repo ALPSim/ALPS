@@ -760,7 +760,18 @@ if test "$ac_cv_boostbook" = yes; then
   AC_FOP
   AC_SUBST(FOP_DIR)
   AC_SUBST(FOP_BIN)
-  test "$ac_cv_have_fop" = yes && FOP_DIR="$ac_cv_fop_dir" && FOP_BIN="$ac_cv_fop_bin"
+  AC_SUBST(FOP_OPTS)
+  if test "$ac_cv_have_fop" = yes; then
+    FOP_DIR="$ac_cv_fop_dir"
+    FOP_BIN="$ac_cv_fop_bin"
+    case "x$build_os" in
+      xdarwin*)
+        FOP_OPTS="-Xmx128000000"
+        ;;
+      *)
+        ;;
+    esac
+  fi
 fi
 
 dnl check if all the required tools are present
@@ -818,6 +829,13 @@ AC_ARG_ENABLE(libheap,
 test -z "$ac_cv_libheap" && ac_cv_libheap=yes
 
 dnl
+dnl Absolute paths
+dnl
+
+AC_SUBST(abs_top_srcdir)
+abs_top_srcdir=`(cd $top_srcdir && pwd)`
+
+dnl
 dnl Conditionals
 dnl
 
@@ -873,8 +891,8 @@ fi
 dnl doc generation
 AC_CONFIG_FILES(doc/doxygen.conf)
 if test "$build_doc" = yes; then
-  AC_CONFIG_FILES(doc/catalog.xml)
   AC_CONFIG_FILES(doc/autodoc)
+  AC_CONFIG_FILES(doc/catalog.xml)
   AC_CONFIG_FILES(doc/bb2db)
   AC_CONFIG_FILES(doc/db2html)
   AC_CONFIG_FILES(doc/db2pdf)

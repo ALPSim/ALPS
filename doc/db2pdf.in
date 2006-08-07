@@ -10,8 +10,15 @@ fi
 
 FO=`dirname "$1"`/`basename "$1" .docbook`.fo
 
+echo export XML_CATALOG_FILES=catalog.xml
 export XML_CATALOG_FILES=catalog.xml
+
+echo export JAVACMD=@JAVA@
 export JAVACMD=@JAVA@
+
+echo export FOP_OPTS=@FOP_OPTS@
+export FOP_OPTS=@FOP_OPTS@
+
 PARAMS="--stringparam paper.type A4"
 
 echo @XSLTPROC@ $PARAMS --load-trace --path @top_srcdir@/doc/xsl:@BOOST_DIR@/tools/boostbook/xsl --xinclude -o $FO fo.xsl $DOCBOOK
