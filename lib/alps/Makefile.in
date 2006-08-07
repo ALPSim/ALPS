@@ -41,9 +41,10 @@ host_triplet = @host@
 @BUILD_BOOST_TRUE@am__append_3 = $(src_boost_DATE_TIME) $(src_boost_PROGRAM_OPTIONS)
 @BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__append_4 = $(src_boost_FILESYSTEM_1_32) $(src_boost_REGEX_1_32) $(src_boost_SERIALIZATION_1_32)
 @BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__append_5 = $(src_boost_FILESYSTEM_1_33) $(src_boost_REGEX_1_33) $(src_boost_SERIALIZATION_1_33)
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__append_6 = $(src_boost_FILESYSTEM_CVS) $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS)
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__append_7 = $(src_boost_SIGNALS)
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__append_8 = $(src_boost_THREAD)
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__append_6 = $(src_boost_FILESYSTEM_1_34) $(src_boost_REGEX_1_34) $(src_boost_SERIALIZATION_1_34)
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__append_7 = $(src_boost_FILESYSTEM_CVS) $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS)
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__append_8 = $(src_boost_SIGNALS)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__append_9 = $(src_boost_THREAD)
 subdir = lib/alps
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -183,20 +184,24 @@ am__objects_23 = exception.lo operations.lo path.lo portability.lo \
 	fs_utf8_codecvt_facet.lo
 am__objects_24 = $(am__objects_20)
 am__objects_25 = $(am__objects_21)
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_26 = $(am__objects_23) \
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_26 = $(am__objects_23) \
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_24) \
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25)
+am__objects_27 = $(am__objects_23)
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_28 = $(am__objects_27) \
 @BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_24) \
 @BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25)
-am__objects_27 = connection.lo named_slot_map.lo signal_base.lo \
+am__objects_29 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_28 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_27)
-am__objects_29 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_30 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_29)
+am__objects_31 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_30 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_29)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_32 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_31)
 nodist_libalps_la_OBJECTS = $(am__objects_14) $(am__objects_18) \
 	$(am__objects_22) $(am__objects_26) $(am__objects_28) \
-	$(am__objects_30)
+	$(am__objects_30) $(am__objects_32)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -235,6 +240,8 @@ BOOST_1_32_FALSE = @BOOST_1_32_FALSE@
 BOOST_1_32_TRUE = @BOOST_1_32_TRUE@
 BOOST_1_33_FALSE = @BOOST_1_33_FALSE@
 BOOST_1_33_TRUE = @BOOST_1_33_TRUE@
+BOOST_1_34_FALSE = @BOOST_1_34_FALSE@
+BOOST_1_34_TRUE = @BOOST_1_34_TRUE@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
 BOOST_CVS_FALSE = @BOOST_CVS_FALSE@
 BOOST_CVS_TRUE = @BOOST_CVS_TRUE@
@@ -465,13 +472,14 @@ src_boost_FILESYSTEM_1_32 = \
   $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
 
 src_boost_FILESYSTEM_1_33 = $(src_boost_FILESYSTEM_1_32)
-src_boost_FILESYSTEM_CVS = \
+src_boost_FILESYSTEM_1_34 = \
   $(BOOST_SRCDIR)/filesystem/src/exception.cpp \
   $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 
+src_boost_FILESYSTEM_CVS = $(src_boost_FILESYSTEM_1_34)
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
@@ -518,6 +526,7 @@ src_boost_REGEX_1_33 = \
   $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp \
   $(BOOST_SRCDIR)/regex/src/winstances.cpp
 
+src_boost_REGEX_1_34 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_CVS = $(src_boost_REGEX_1_33)
 src_boost_SERIALIZATION_1_32 = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
@@ -561,9 +570,8 @@ src_boost_SERIALIZATION_1_33 = \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
 
-src_boost_SERIALIZATION_CVS = \
-  $(src_boost_SERIALIZATION_1_33)
-
+src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
+src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_33)
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp \
@@ -587,7 +595,7 @@ libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) \
 	$(src_PARSER) $(src_RANDOM) $(am__append_1) $(am__append_2)
 nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) \
 	$(am__append_5) $(am__append_6) $(am__append_7) \
-	$(am__append_8)
+	$(am__append_8) $(am__append_9)
 all: all-am
 
 .SUFFIXES:

@@ -69,12 +69,13 @@ src_boost_FILESYSTEM_1_32 = \
   $(BOOST_SRCDIR)/filesystem/src/operations_posix_windows.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
 src_boost_FILESYSTEM_1_33 = $(src_boost_FILESYSTEM_1_32)
-src_boost_FILESYSTEM_CVS = \
+src_boost_FILESYSTEM_1_34 = \
   $(BOOST_SRCDIR)/filesystem/src/exception.cpp \
   $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
+src_boost_FILESYSTEM_CVS = $(src_boost_FILESYSTEM_1_34)
 
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -120,6 +121,7 @@ src_boost_REGEX_1_33 = \
   $(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp \
   $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp \
   $(BOOST_SRCDIR)/regex/src/winstances.cpp
+src_boost_REGEX_1_34 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_CVS = $(src_boost_REGEX_1_33)
 
 src_boost_SERIALIZATION_1_32 = \
@@ -163,8 +165,8 @@ src_boost_SERIALIZATION_1_33 = \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
-src_boost_SERIALIZATION_CVS = \
-  $(src_boost_SERIALIZATION_1_33)
+src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
+src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_33)
 
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
@@ -204,6 +206,10 @@ endif
 
 if BOOST_1_33
 nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_33) $(src_boost_REGEX_1_33) $(src_boost_SERIALIZATION_1_33)
+endif
+
+if BOOST_1_34
+nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_34) $(src_boost_REGEX_1_34) $(src_boost_SERIALIZATION_1_34)
 endif
 
 if BOOST_CVS

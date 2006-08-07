@@ -22,6 +22,12 @@ archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.c
 if BUILD_DOC
 bin_PROGRAMS += quickbook
 nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp 
+if BOOST_1_34
+nodist_quickbook_SOURCES += \
+ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
+endif
 if BOOST_CVS
 nodist_quickbook_SOURCES += \
  $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
