@@ -36,6 +36,6 @@ echo @XSLTPROC@ --stringparam doxygen.xml.path $TMPDIR/xml --xinclude -o $TMPDIR
 
 echo @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
 @XSLTPROC@ --stringparam boost.doxygen.header.prefix "alps" --xinclude -o $OUTPUT @BOOST_DIR@/tools/boostbook/xsl/doxygen/doxygen2boostbook.xsl $TMPDIR/autodoc.doxygen
-rm -rf $TEMPDIR
+rm -rf $TMPDIR
 
 exit $?
