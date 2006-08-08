@@ -19,6 +19,9 @@ export JAVACMD=@JAVA@
 echo export FOP_OPTS=@FOP_OPTS@
 export FOP_OPTS=@FOP_OPTS@
 
+echo export JAVA_OPTS=@JAVA_OPTS@
+export JAVA_OPTS=@JAVA_OPTS@
+
 PARAMS="--stringparam paper.type A4"
 
 echo @XSLTPROC@ $PARAMS --load-trace --path @top_srcdir@/doc/xsl:@BOOST_DIR@/tools/boostbook/xsl --xinclude -o $FO fo.xsl $DOCBOOK

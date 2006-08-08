@@ -764,6 +764,7 @@ if test "$ac_cv_boostbook" = yes; then
   AC_SUBST(FOP_DIR)
   AC_SUBST(FOP_BIN)
   AC_SUBST(FOP_OPTS)
+  AC_SUBST(JAVA_OPTS)
   if test "$ac_cv_have_fop" = yes; then
     FOP_DIR="$ac_cv_fop_dir"
     FOP_BIN="$ac_cv_fop_bin"
@@ -771,6 +772,11 @@ if test "$ac_cv_boostbook" = yes; then
       xdarwin*)
         FOP_OPTS="-Xmx128000000"
         ;;
+      x*linux*)
+        if test -f "/etc/debian_version"; then
+          JAVA_OPTS="-Xmx128000000"
+	fi
+	;;
       *)
         ;;
     esac
