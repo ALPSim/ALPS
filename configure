@@ -28889,7 +28889,7 @@ _ACEOF
 
             ac_config_headers="$ac_config_headers src/boost/sr_utf8_codecvt_facet.cpp"
 
-  if test "$ac_cv_boost_version" = cvs; then
+  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = cvs; then
     cat >>confdefs.h <<_ACEOF
 #define FS_UTF8_CODECVT_FACET_CPP "$BOOST_SRCDIR/filesystem/src/utf8_codecvt_facet.cpp"
 _ACEOF
