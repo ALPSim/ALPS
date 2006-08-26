@@ -67,7 +67,7 @@ am__EXEEXT_1 =
 @HAVE_MPI_TRUE@	main3_mpi$(EXEEXT)
 am__EXEEXT_3 = evaluate$(EXEEXT) evaluate2$(EXEEXT) main$(EXEEXT) \
 	main2$(EXEEXT) main3$(EXEEXT) $(am__EXEEXT_2)
-am_evaluate_OBJECTS = evaluate-evaluate.$(OBJEXT)
+am_evaluate_OBJECTS = evaluate.$(OBJEXT)
 evaluate_OBJECTS = $(am_evaluate_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libalps.la \
@@ -75,17 +75,16 @@ am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libalps.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 evaluate_DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_evaluate2_OBJECTS = evaluate2-evaluate2.$(OBJEXT)
+am_evaluate2_OBJECTS = evaluate2.$(OBJEXT)
 evaluate2_OBJECTS = $(am_evaluate2_OBJECTS)
 evaluate2_DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_main_OBJECTS = main-main.$(OBJEXT) main-ising.$(OBJEXT)
+am_main_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
 main_OBJECTS = $(am_main_OBJECTS)
 main_DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_main2_OBJECTS = main2-main2.$(OBJEXT) main2-ising2.$(OBJEXT)
+am_main2_OBJECTS = main2.$(OBJEXT) ising2.$(OBJEXT)
 main2_OBJECTS = $(am_main2_OBJECTS)
 main2_DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_main2_mpi_OBJECTS = main2_mpi-main2.$(OBJEXT) \
-	main2_mpi-ising2.$(OBJEXT)
+am_main2_mpi_OBJECTS = main2.$(OBJEXT) ising2.$(OBJEXT)
 main2_mpi_OBJECTS = $(am_main2_mpi_OBJECTS)
 am__DEPENDENCIES_3 = $(top_builddir)/lib/alps/libalps.la \
 	$(top_builddir)/lib/comm-mpi/libcomm-mpi.la \
@@ -93,14 +92,13 @@ am__DEPENDENCIES_3 = $(top_builddir)/lib/alps/libalps.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
 main2_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
-am_main3_OBJECTS = main3-main3.$(OBJEXT) main3-ising.$(OBJEXT)
+am_main3_OBJECTS = main3.$(OBJEXT) ising.$(OBJEXT)
 main3_OBJECTS = $(am_main3_OBJECTS)
 main3_DEPENDENCIES = $(am__DEPENDENCIES_2)
-am_main3_mpi_OBJECTS = main3_mpi-main3.$(OBJEXT) \
-	main3_mpi-ising.$(OBJEXT)
+am_main3_mpi_OBJECTS = main3.$(OBJEXT) ising.$(OBJEXT)
 main3_mpi_OBJECTS = $(am_main3_mpi_OBJECTS)
 main3_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
-am_main_mpi_OBJECTS = main_mpi-main.$(OBJEXT) main_mpi-ising.$(OBJEXT)
+am_main_mpi_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
 main_mpi_OBJECTS = $(am_main_mpi_OBJECTS)
 main_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -307,46 +305,36 @@ sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 sysconfdir = @sysconfdir@
 target_alias = @target_alias@
-DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
-CPPFLAGS_SGL = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
+DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
 LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LIBS_SGL = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
-CPPFLAGS_MPI = $(CPPFLAGS_SGL) $(MPI_CPPFLAGS)
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 TESTS = 
 TESTS_norun = evaluate evaluate2 main main2 main3 $(am__append_1)
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 evaluate_SOURCES = evaluate.C
-evaluate_CPPFLAGS = $(CPPFLAGS_SGL)
 evaluate_LDFLAGS = $(LDFLAGS_SGL)
 evaluate_LDADD = $(LIBS_SGL)
 evaluate2_SOURCES = evaluate2.C
-evaluate2_CPPFLAGS = $(CPPFLAGS_SGL)
 evaluate2_LDFLAGS = $(LDFLAGS_SGL)
 evaluate2_LDADD = $(LIBS_SGL)
 main_SOURCES = main.C ising.h ising.C
-main_CPPFLAGS = $(CPPFLAGS_SGL)
 main_LDFLAGS = $(LDFLAGS_SGL)
 main_LDADD = $(LIBS_SGL)
 main2_SOURCES = main2.C ising2.h ising2.C
-main2_CPPFLAGS = $(CPPFLAGS_SGL)
 main2_LDFLAGS = $(LDFLAGS_SGL)
 main2_LDADD = $(LIBS_SGL)
 main3_SOURCES = main3.C ising.h ising.C
-main3_CPPFLAGS = $(CPPFLAGS_SGL)
 main3_LDFLAGS = $(LDFLAGS_SGL)
 main3_LDADD = $(LIBS_SGL)
 main_mpi_SOURCES = main.C ising.h ising.C
-main_mpi_CPPFLAGS = $(CPPFLAGS_MPI)
 main_mpi_LDFLAGS = $(LDFLAGS_MPI)
 main_mpi_LDADD = $(LIBS_MPI)
 main2_mpi_SOURCES = main2.C ising2.h ising2.C
-main2_mpi_CPPFLAGS = $(CPPFLAGS_MPI)
 main2_mpi_LDFLAGS = $(LDFLAGS_MPI)
 main2_mpi_LDADD = $(LIBS_MPI)
 main3_mpi_SOURCES = main3.C ising.h ising.C
-main3_mpi_CPPFLAGS = $(CPPFLAGS_MPI)
 main3_mpi_LDFLAGS = $(LDFLAGS_MPI)
 main3_mpi_LDADD = $(LIBS_MPI)
 dist_noinst_DATA = parm parm2 parm3
@@ -421,20 +409,13 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evaluate-evaluate.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evaluate2-evaluate2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main-ising.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main-main.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main2-ising2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main2-main2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main2_mpi-ising2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main2_mpi-main2.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main3-ising.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main3-main3.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main3_mpi-ising.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main3_mpi-main3.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main_mpi-ising.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main_mpi-main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evaluate.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evaluate2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ising.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ising2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main2.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main3.Po@am__quote@
 
 .C.o:
 @am__fastdepCXX_TRUE@	if $(CXXCOMPILE) -MT $@ -MD -MP -MF "$(DEPDIR)/$*.Tpo" -c -o $@ $<; \
@@ -456,202 +437,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
-
-evaluate-evaluate.o: evaluate.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(evaluate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluate-evaluate.o -MD -MP -MF "$(DEPDIR)/evaluate-evaluate.Tpo" -c -o evaluate-evaluate.o `test -f 'evaluate.C' || echo '$(srcdir)/'`evaluate.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/evaluate-evaluate.Tpo" "$(DEPDIR)/evaluate-evaluate.Po"; else rm -f "$(DEPDIR)/evaluate-evaluate.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='evaluate.C' object='evaluate-evaluate.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(evaluate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluate-evaluate.o `test -f 'evaluate.C' || echo '$(srcdir)/'`evaluate.C
-
-evaluate-evaluate.obj: evaluate.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(evaluate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluate-evaluate.obj -MD -MP -MF "$(DEPDIR)/evaluate-evaluate.Tpo" -c -o evaluate-evaluate.obj `if test -f 'evaluate.C'; then $(CYGPATH_W) 'evaluate.C'; else $(CYGPATH_W) '$(srcdir)/evaluate.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/evaluate-evaluate.Tpo" "$(DEPDIR)/evaluate-evaluate.Po"; else rm -f "$(DEPDIR)/evaluate-evaluate.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='evaluate.C' object='evaluate-evaluate.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(evaluate_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluate-evaluate.obj `if test -f 'evaluate.C'; then $(CYGPATH_W) 'evaluate.C'; else $(CYGPATH_W) '$(srcdir)/evaluate.C'; fi`
-
-evaluate2-evaluate2.o: evaluate2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(evaluate2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluate2-evaluate2.o -MD -MP -MF "$(DEPDIR)/evaluate2-evaluate2.Tpo" -c -o evaluate2-evaluate2.o `test -f 'evaluate2.C' || echo '$(srcdir)/'`evaluate2.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/evaluate2-evaluate2.Tpo" "$(DEPDIR)/evaluate2-evaluate2.Po"; else rm -f "$(DEPDIR)/evaluate2-evaluate2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='evaluate2.C' object='evaluate2-evaluate2.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(evaluate2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluate2-evaluate2.o `test -f 'evaluate2.C' || echo '$(srcdir)/'`evaluate2.C
-
-evaluate2-evaluate2.obj: evaluate2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(evaluate2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluate2-evaluate2.obj -MD -MP -MF "$(DEPDIR)/evaluate2-evaluate2.Tpo" -c -o evaluate2-evaluate2.obj `if test -f 'evaluate2.C'; then $(CYGPATH_W) 'evaluate2.C'; else $(CYGPATH_W) '$(srcdir)/evaluate2.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/evaluate2-evaluate2.Tpo" "$(DEPDIR)/evaluate2-evaluate2.Po"; else rm -f "$(DEPDIR)/evaluate2-evaluate2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='evaluate2.C' object='evaluate2-evaluate2.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(evaluate2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluate2-evaluate2.obj `if test -f 'evaluate2.C'; then $(CYGPATH_W) 'evaluate2.C'; else $(CYGPATH_W) '$(srcdir)/evaluate2.C'; fi`
-
-main-main.o: main.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main-main.o -MD -MP -MF "$(DEPDIR)/main-main.Tpo" -c -o main-main.o `test -f 'main.C' || echo '$(srcdir)/'`main.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main-main.Tpo" "$(DEPDIR)/main-main.Po"; else rm -f "$(DEPDIR)/main-main.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main.C' object='main-main.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main-main.o `test -f 'main.C' || echo '$(srcdir)/'`main.C
-
-main-main.obj: main.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main-main.obj -MD -MP -MF "$(DEPDIR)/main-main.Tpo" -c -o main-main.obj `if test -f 'main.C'; then $(CYGPATH_W) 'main.C'; else $(CYGPATH_W) '$(srcdir)/main.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main-main.Tpo" "$(DEPDIR)/main-main.Po"; else rm -f "$(DEPDIR)/main-main.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main.C' object='main-main.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main-main.obj `if test -f 'main.C'; then $(CYGPATH_W) 'main.C'; else $(CYGPATH_W) '$(srcdir)/main.C'; fi`
-
-main-ising.o: ising.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main-ising.o -MD -MP -MF "$(DEPDIR)/main-ising.Tpo" -c -o main-ising.o `test -f 'ising.C' || echo '$(srcdir)/'`ising.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main-ising.Tpo" "$(DEPDIR)/main-ising.Po"; else rm -f "$(DEPDIR)/main-ising.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising.C' object='main-ising.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main-ising.o `test -f 'ising.C' || echo '$(srcdir)/'`ising.C
-
-main-ising.obj: ising.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main-ising.obj -MD -MP -MF "$(DEPDIR)/main-ising.Tpo" -c -o main-ising.obj `if test -f 'ising.C'; then $(CYGPATH_W) 'ising.C'; else $(CYGPATH_W) '$(srcdir)/ising.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main-ising.Tpo" "$(DEPDIR)/main-ising.Po"; else rm -f "$(DEPDIR)/main-ising.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising.C' object='main-ising.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main-ising.obj `if test -f 'ising.C'; then $(CYGPATH_W) 'ising.C'; else $(CYGPATH_W) '$(srcdir)/ising.C'; fi`
-
-main2-main2.o: main2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main2-main2.o -MD -MP -MF "$(DEPDIR)/main2-main2.Tpo" -c -o main2-main2.o `test -f 'main2.C' || echo '$(srcdir)/'`main2.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main2-main2.Tpo" "$(DEPDIR)/main2-main2.Po"; else rm -f "$(DEPDIR)/main2-main2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main2.C' object='main2-main2.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main2-main2.o `test -f 'main2.C' || echo '$(srcdir)/'`main2.C
-
-main2-main2.obj: main2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main2-main2.obj -MD -MP -MF "$(DEPDIR)/main2-main2.Tpo" -c -o main2-main2.obj `if test -f 'main2.C'; then $(CYGPATH_W) 'main2.C'; else $(CYGPATH_W) '$(srcdir)/main2.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main2-main2.Tpo" "$(DEPDIR)/main2-main2.Po"; else rm -f "$(DEPDIR)/main2-main2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main2.C' object='main2-main2.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main2-main2.obj `if test -f 'main2.C'; then $(CYGPATH_W) 'main2.C'; else $(CYGPATH_W) '$(srcdir)/main2.C'; fi`
-
-main2-ising2.o: ising2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main2-ising2.o -MD -MP -MF "$(DEPDIR)/main2-ising2.Tpo" -c -o main2-ising2.o `test -f 'ising2.C' || echo '$(srcdir)/'`ising2.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main2-ising2.Tpo" "$(DEPDIR)/main2-ising2.Po"; else rm -f "$(DEPDIR)/main2-ising2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising2.C' object='main2-ising2.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main2-ising2.o `test -f 'ising2.C' || echo '$(srcdir)/'`ising2.C
-
-main2-ising2.obj: ising2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main2-ising2.obj -MD -MP -MF "$(DEPDIR)/main2-ising2.Tpo" -c -o main2-ising2.obj `if test -f 'ising2.C'; then $(CYGPATH_W) 'ising2.C'; else $(CYGPATH_W) '$(srcdir)/ising2.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main2-ising2.Tpo" "$(DEPDIR)/main2-ising2.Po"; else rm -f "$(DEPDIR)/main2-ising2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising2.C' object='main2-ising2.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main2-ising2.obj `if test -f 'ising2.C'; then $(CYGPATH_W) 'ising2.C'; else $(CYGPATH_W) '$(srcdir)/ising2.C'; fi`
-
-main2_mpi-main2.o: main2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main2_mpi-main2.o -MD -MP -MF "$(DEPDIR)/main2_mpi-main2.Tpo" -c -o main2_mpi-main2.o `test -f 'main2.C' || echo '$(srcdir)/'`main2.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main2_mpi-main2.Tpo" "$(DEPDIR)/main2_mpi-main2.Po"; else rm -f "$(DEPDIR)/main2_mpi-main2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main2.C' object='main2_mpi-main2.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main2_mpi-main2.o `test -f 'main2.C' || echo '$(srcdir)/'`main2.C
-
-main2_mpi-main2.obj: main2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main2_mpi-main2.obj -MD -MP -MF "$(DEPDIR)/main2_mpi-main2.Tpo" -c -o main2_mpi-main2.obj `if test -f 'main2.C'; then $(CYGPATH_W) 'main2.C'; else $(CYGPATH_W) '$(srcdir)/main2.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main2_mpi-main2.Tpo" "$(DEPDIR)/main2_mpi-main2.Po"; else rm -f "$(DEPDIR)/main2_mpi-main2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main2.C' object='main2_mpi-main2.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main2_mpi-main2.obj `if test -f 'main2.C'; then $(CYGPATH_W) 'main2.C'; else $(CYGPATH_W) '$(srcdir)/main2.C'; fi`
-
-main2_mpi-ising2.o: ising2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main2_mpi-ising2.o -MD -MP -MF "$(DEPDIR)/main2_mpi-ising2.Tpo" -c -o main2_mpi-ising2.o `test -f 'ising2.C' || echo '$(srcdir)/'`ising2.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main2_mpi-ising2.Tpo" "$(DEPDIR)/main2_mpi-ising2.Po"; else rm -f "$(DEPDIR)/main2_mpi-ising2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising2.C' object='main2_mpi-ising2.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main2_mpi-ising2.o `test -f 'ising2.C' || echo '$(srcdir)/'`ising2.C
-
-main2_mpi-ising2.obj: ising2.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main2_mpi-ising2.obj -MD -MP -MF "$(DEPDIR)/main2_mpi-ising2.Tpo" -c -o main2_mpi-ising2.obj `if test -f 'ising2.C'; then $(CYGPATH_W) 'ising2.C'; else $(CYGPATH_W) '$(srcdir)/ising2.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main2_mpi-ising2.Tpo" "$(DEPDIR)/main2_mpi-ising2.Po"; else rm -f "$(DEPDIR)/main2_mpi-ising2.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising2.C' object='main2_mpi-ising2.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main2_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main2_mpi-ising2.obj `if test -f 'ising2.C'; then $(CYGPATH_W) 'ising2.C'; else $(CYGPATH_W) '$(srcdir)/ising2.C'; fi`
-
-main3-main3.o: main3.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main3-main3.o -MD -MP -MF "$(DEPDIR)/main3-main3.Tpo" -c -o main3-main3.o `test -f 'main3.C' || echo '$(srcdir)/'`main3.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main3-main3.Tpo" "$(DEPDIR)/main3-main3.Po"; else rm -f "$(DEPDIR)/main3-main3.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main3.C' object='main3-main3.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main3-main3.o `test -f 'main3.C' || echo '$(srcdir)/'`main3.C
-
-main3-main3.obj: main3.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main3-main3.obj -MD -MP -MF "$(DEPDIR)/main3-main3.Tpo" -c -o main3-main3.obj `if test -f 'main3.C'; then $(CYGPATH_W) 'main3.C'; else $(CYGPATH_W) '$(srcdir)/main3.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main3-main3.Tpo" "$(DEPDIR)/main3-main3.Po"; else rm -f "$(DEPDIR)/main3-main3.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main3.C' object='main3-main3.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main3-main3.obj `if test -f 'main3.C'; then $(CYGPATH_W) 'main3.C'; else $(CYGPATH_W) '$(srcdir)/main3.C'; fi`
-
-main3-ising.o: ising.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main3-ising.o -MD -MP -MF "$(DEPDIR)/main3-ising.Tpo" -c -o main3-ising.o `test -f 'ising.C' || echo '$(srcdir)/'`ising.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main3-ising.Tpo" "$(DEPDIR)/main3-ising.Po"; else rm -f "$(DEPDIR)/main3-ising.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising.C' object='main3-ising.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main3-ising.o `test -f 'ising.C' || echo '$(srcdir)/'`ising.C
-
-main3-ising.obj: ising.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main3-ising.obj -MD -MP -MF "$(DEPDIR)/main3-ising.Tpo" -c -o main3-ising.obj `if test -f 'ising.C'; then $(CYGPATH_W) 'ising.C'; else $(CYGPATH_W) '$(srcdir)/ising.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main3-ising.Tpo" "$(DEPDIR)/main3-ising.Po"; else rm -f "$(DEPDIR)/main3-ising.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising.C' object='main3-ising.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main3-ising.obj `if test -f 'ising.C'; then $(CYGPATH_W) 'ising.C'; else $(CYGPATH_W) '$(srcdir)/ising.C'; fi`
-
-main3_mpi-main3.o: main3.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main3_mpi-main3.o -MD -MP -MF "$(DEPDIR)/main3_mpi-main3.Tpo" -c -o main3_mpi-main3.o `test -f 'main3.C' || echo '$(srcdir)/'`main3.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main3_mpi-main3.Tpo" "$(DEPDIR)/main3_mpi-main3.Po"; else rm -f "$(DEPDIR)/main3_mpi-main3.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main3.C' object='main3_mpi-main3.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main3_mpi-main3.o `test -f 'main3.C' || echo '$(srcdir)/'`main3.C
-
-main3_mpi-main3.obj: main3.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main3_mpi-main3.obj -MD -MP -MF "$(DEPDIR)/main3_mpi-main3.Tpo" -c -o main3_mpi-main3.obj `if test -f 'main3.C'; then $(CYGPATH_W) 'main3.C'; else $(CYGPATH_W) '$(srcdir)/main3.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main3_mpi-main3.Tpo" "$(DEPDIR)/main3_mpi-main3.Po"; else rm -f "$(DEPDIR)/main3_mpi-main3.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main3.C' object='main3_mpi-main3.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main3_mpi-main3.obj `if test -f 'main3.C'; then $(CYGPATH_W) 'main3.C'; else $(CYGPATH_W) '$(srcdir)/main3.C'; fi`
-
-main3_mpi-ising.o: ising.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main3_mpi-ising.o -MD -MP -MF "$(DEPDIR)/main3_mpi-ising.Tpo" -c -o main3_mpi-ising.o `test -f 'ising.C' || echo '$(srcdir)/'`ising.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main3_mpi-ising.Tpo" "$(DEPDIR)/main3_mpi-ising.Po"; else rm -f "$(DEPDIR)/main3_mpi-ising.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising.C' object='main3_mpi-ising.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main3_mpi-ising.o `test -f 'ising.C' || echo '$(srcdir)/'`ising.C
-
-main3_mpi-ising.obj: ising.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main3_mpi-ising.obj -MD -MP -MF "$(DEPDIR)/main3_mpi-ising.Tpo" -c -o main3_mpi-ising.obj `if test -f 'ising.C'; then $(CYGPATH_W) 'ising.C'; else $(CYGPATH_W) '$(srcdir)/ising.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main3_mpi-ising.Tpo" "$(DEPDIR)/main3_mpi-ising.Po"; else rm -f "$(DEPDIR)/main3_mpi-ising.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising.C' object='main3_mpi-ising.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main3_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main3_mpi-ising.obj `if test -f 'ising.C'; then $(CYGPATH_W) 'ising.C'; else $(CYGPATH_W) '$(srcdir)/ising.C'; fi`
-
-main_mpi-main.o: main.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main_mpi-main.o -MD -MP -MF "$(DEPDIR)/main_mpi-main.Tpo" -c -o main_mpi-main.o `test -f 'main.C' || echo '$(srcdir)/'`main.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main_mpi-main.Tpo" "$(DEPDIR)/main_mpi-main.Po"; else rm -f "$(DEPDIR)/main_mpi-main.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main.C' object='main_mpi-main.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main_mpi-main.o `test -f 'main.C' || echo '$(srcdir)/'`main.C
-
-main_mpi-main.obj: main.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main_mpi-main.obj -MD -MP -MF "$(DEPDIR)/main_mpi-main.Tpo" -c -o main_mpi-main.obj `if test -f 'main.C'; then $(CYGPATH_W) 'main.C'; else $(CYGPATH_W) '$(srcdir)/main.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main_mpi-main.Tpo" "$(DEPDIR)/main_mpi-main.Po"; else rm -f "$(DEPDIR)/main_mpi-main.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='main.C' object='main_mpi-main.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main_mpi-main.obj `if test -f 'main.C'; then $(CYGPATH_W) 'main.C'; else $(CYGPATH_W) '$(srcdir)/main.C'; fi`
-
-main_mpi-ising.o: ising.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main_mpi-ising.o -MD -MP -MF "$(DEPDIR)/main_mpi-ising.Tpo" -c -o main_mpi-ising.o `test -f 'ising.C' || echo '$(srcdir)/'`ising.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main_mpi-ising.Tpo" "$(DEPDIR)/main_mpi-ising.Po"; else rm -f "$(DEPDIR)/main_mpi-ising.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising.C' object='main_mpi-ising.o' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main_mpi-ising.o `test -f 'ising.C' || echo '$(srcdir)/'`ising.C
-
-main_mpi-ising.obj: ising.C
-@am__fastdepCXX_TRUE@	if $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT main_mpi-ising.obj -MD -MP -MF "$(DEPDIR)/main_mpi-ising.Tpo" -c -o main_mpi-ising.obj `if test -f 'ising.C'; then $(CYGPATH_W) 'ising.C'; else $(CYGPATH_W) '$(srcdir)/ising.C'; fi`; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/main_mpi-ising.Tpo" "$(DEPDIR)/main_mpi-ising.Po"; else rm -f "$(DEPDIR)/main_mpi-ising.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='ising.C' object='main_mpi-ising.obj' libtool=no @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(main_mpi_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o main_mpi-ising.obj `if test -f 'ising.C'; then $(CYGPATH_W) 'ising.C'; else $(CYGPATH_W) '$(srcdir)/ising.C'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo
