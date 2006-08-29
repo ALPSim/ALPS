@@ -99,6 +99,7 @@ class FourierTransformer{
     virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
     virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
     static void generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr);
+    static void generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr);
   protected:
     double beta_;
     double mu_;
@@ -112,10 +113,22 @@ class BetheFourierTransformer:public FourierTransformer{
   BetheFourierTransformer(double beta, double mu, double t):FourierTransformer(beta, mu){
     t_=t;
     c3_=(mu_*mu_+t_*t_)/(beta*beta);
+    U_=0;
+  }
+  BetheFourierTransformer(double beta, double mu, double t, double U):FourierTransformer(beta, mu){
+    t_=t;
+    U_=U;
+    c3_=(mu_*mu_+t_*t_+ U_*U_/4.)/(beta*beta); //the U-trick: for the GF (not bgf)
+    std::cerr<<"using Bethe Fourier Transformer! "<<std::endl;
+    std::cerr<<"mu=: "<<mu_<<std::endl;
+    std::cerr<<"beta=: "<<beta_<<std::endl;
+    std::cerr<<"U=: "<<U_<<std::endl;
+    std::cerr<<"c3=: "<<c3_<<std::endl;
   }
   virtual ~BetheFourierTransformer(){}
   private:
   double t_;
+  double U_;
 };
 class FFunctionFourierTransformer:public FourierTransformer{
   public:
