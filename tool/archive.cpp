@@ -103,13 +103,13 @@ int main(int ac, char* av[]) {
                         
                 else {
                         db.setVerbose(vm.count("verbose"));
-                          db.open(fs::path(fs::initial_path() / vm["db-file"].as<std::string>()));
+                          db.open(complete(fs::path(vm["db-file"].as<std::string>())));
 
                         if (vm["command"].as<std::string>() == "install" || vm["command"].as<std::string>() == "i") {
                                 #ifdef USEPATTERN                        
                                         if (!vm.count("pattern-file"))
                                                 throw std::runtime_error("no index-file specified!");
-                                        Index(db, vm.count("verbose")).install(fs::path(fs::initial_path() / vm["pattern-file"].as<std::string>()));
+                                        Index(db, vm.count("verbose")).install(complte(fs::path(vm["pattern-file"].as<std::string>())));
                                 #else
                                         Index(db, vm.count("verbose")).install();
                                 #endif
@@ -121,11 +121,12 @@ int main(int ac, char* av[]) {
                                 if (!vm.count("plot-file") && !vm.count("positional-arg"))
                                         throw std::runtime_error("no plot-file specified");
                                 else if (!vm.count("output-path"))
-                                        throw std::runtime_error("no output-file specified");
-                                fs::path plotPath = fs::path(fs::initial_path() / vm["plot-file"].as<std::string>());
+                                        throw std::runtime_error("no output-path specified");
+                                fs::path plotPath = complete(fs::path(vm["plot-file"].as<std::string>()));
                                 if (vm.count("positional-arg"))
                                         plotPath = fs::path(fs::initial_path() / vm["positional-arg"].as<std::string>());
-                                fs::path outputPath(fs::initial_path() / vm["output-path"].as<std::string>());
+                                fs::path outputPath = complete(fs::path(vm["output-path"].as<std::string>()));
+                                std::cout << plotPath.string() << std::endl;
                                 Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.leaf());
 
                         } else {
@@ -136,7 +137,7 @@ int main(int ac, char* av[]) {
                                                 throw std::runtime_error("Could not clear tables!");
                                 } else if (vm["command"].as<std::string>() != "append" && vm["command"].as<std::string>() != "a")
                                         throw std::runtime_error(std::string("Unknown command '") + vm["command"].as<std::string>() + std::string("'"));
-                                Index(db, vm.count("verbose")).exec(fs::path(fs::initial_path() / vm["xml-path"].as<std::string>()));
+                                Index(db, vm.count("verbose")).exec(complete(fs::path(vm["xml-path"].as<std::string>())));
                         }
                 }
         } catch(std::exception& e) {
