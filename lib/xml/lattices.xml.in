@@ -157,11 +157,11 @@
   <VERTEX/>
   <EDGE type="0">
     <SOURCE vertex="1" offset="0 0"/>
-    <TARGET vertex="1" offset="0 1"/>
+    <TARGET vertex="1" offset="1 0"/>
   </EDGE>
   <EDGE type="1">
     <SOURCE vertex="1" offset="0 0"/>
-    <TARGET vertex="1" offset="1 0"/>
+    <TARGET vertex="1" offset="0 1"/>
   </EDGE>
 </UNITCELL>
 
