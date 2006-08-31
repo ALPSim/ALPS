@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2006 by Lukas Gamper <mistral@student.ethz.ch>,
+*                       Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -191,12 +192,12 @@ void Index::exec(fs::path xmlPath) {
                                         std::cout << fileCnt << " Files scanned" << std::endl;
                                 #ifdef DEBUG
                                     if (mVerbose)
-                                                std::cout << "Index created on " << path.string() << " (" << std::setiosflags(std::ios_base::fixed) << std::setprecision (2) << std::difftime(std::clock(), timer)/1000 << "s)" << std::endl;
+                                                std::cout << "Index created on " << path.string() << " (" << std::setiosflags(std::ios_base::fixed) << std::setprecision (2) << std::difftime(std::clock(), timer)/1000000 << "s)" << std::endl;
                                 #endif
                         }
                 } else if (mVerbose)
                         std::cout << "File " << path.string() << " already indexed" << std::endl;
         }
         if (mVerbose) 
-                std::cout << fileCnt << " files scanned in " << std::setiosflags(std::ios_base::fixed) << std::setprecision (2) << std::difftime(std::clock(), fulltime) / 1000 << "s" << std::endl;
+                std::cout << fileCnt << " files scanned in " << std::setiosflags(std::ios_base::fixed) << std::setprecision (2) << std::difftime(std::clock(), fulltime) / 1000000 << "s" << std::endl;
 }
