@@ -11,7 +11,7 @@ dnl
 
 dnl Version of ALPS Library
 
-define([alps_version], [1.3a3])
+define([alps_version], [1.3b1])
 
 dnl Latest publication year of ALPS
 
@@ -790,7 +790,7 @@ if test "$ac_cv_boostbook" = yes && test -n "$ac_cv_prog_doxygen" && test -n "$a
     build_pdf=yes
   else
     build_pdf=no
-    AC_MSG_NOTICE([PDF documentation will no be built.])
+    AC_MSG_NOTICE([PDF documentation will not be built.])
   fi
 else
   build_doc=no

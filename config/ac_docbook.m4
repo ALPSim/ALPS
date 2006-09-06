@@ -36,9 +36,9 @@ AC_DEFUN([AC_DOCBOOK_DTD],
       fi
     else
       docbook_dtd_dir=no
-      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src $BOOST_DIR/tools/boostbook
+      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src $BOOST_DIR/tools/boostbook /sw/share/xml
       do
-        for s in docbook-dtd docbook-dtd-4.4 docbook-dtd-4.2
+        for s in docbook-dtd docbook-dtd-4.4 docbook-dtd-4.2 dtd/docbookx/4.4.0
         do
           if test -f "$d/$s/docbookx.dtd"; then
             found=yes
@@ -98,7 +98,7 @@ AC_DEFUN([AC_DOCBOOK_XSL],
       fi
     else
       docbook_xsl_dir=no
-      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src $BOOST_DIR/tools/boostbook
+      for d in $prefix $prefix/src $HOME $HOME/src /usr/local /usr/local/src $BOOST_DIR/tools/boostbook  /sw/share/xml/xsl/
       do
         for s in docbook-xsl docbook-xsl-1.69.1 docbook-xsl-1.68.1
         do
