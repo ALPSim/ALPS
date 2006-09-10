@@ -101,7 +101,7 @@ void HamiltonianMatrix<T,M>::build() const
 #endif
 
   // get Hamilton operator
-  alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(parms_["MODEL"],parms_,symbolic_traits<T>::is_symbolic));
+  alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(*this,parms_,symbolic_traits<T>::is_symbolic));
     
   // get all site matrices
   std::map<unsigned int,boost::multi_array<T,2> > site_matrix;
