@@ -143,13 +143,27 @@ AC_DEFUN([AC_LAPACK],
   )
 
   AC_ARG_WITH(essl,
-    AC_HELP_STRING([--with-essl], [use ESSL Library on IBM AIX]),
+    AC_HELP_STRING([--with-essl=LIBS],[use ESSL Library on IBM AIX \(implies AIX symbols used\)]),
     [
     if test "x$withval" = xno; then
       essl=no
     else
       essl=yes
+      if test "x$withval" != xyes; then
+        essl_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+      fi
     fi
+    ]
+  )
+  AC_ARG_WITH(essl-dir,
+    AC_HELP_STRING([--with-essl-dir=DIR],[ESSL lib directory]),
+    [
+    essl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $essl_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-essl-dir : $atlas_dir]);;
+    esac
     ]
   )
 
@@ -513,12 +527,27 @@ AC_DEFUN([AC_LAPACK],
   if test "$found_blas" = no; then
     if test "x$essl" != xno; then
       AC_MSG_NOTICE([checking for ESSL on IBM AIX])
-      LDFLAGS="$ac_save_LDFLAGS"
-      LIBS="$ac_save_LIBS"
+      if test -n "$essl_dir"; then
+        AC_MSG_CHECKING([for ESSL library directory])
+        if test -d "$essl_dir"; then
+          AC_MSG_RESULT([$essl_dir])
+          essl_ldflags="-L$essl_dir"
+        else
+          AC_MSG_RESULT([no])
+          AC_MSG_ERROR([$essl_dir not found.])
+        fi
+      fi
+      if test -n "$essl_flags"; then
+        essl_libs="$essl_flags"
+      else
+ 	essl_libs="-lessl"
+      fi
+      LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
+      LIBS="$essl_libs $ac_save_LIBS"
       AC_CHECK_LIB(essl, dgemm_, 
-        [AC_CHECK_LIB(essl, dsyev_,
-          [LAPACK_LDFLAGS=; LAPACK_LIBS="-lessl";
-           found_blas=yes; found_lapack=yes])
+        [AC_CHECK_LIB(essl, dsyev,
+          [LAPACK_LDFLAGS="$essl_ldflags"; LAPACK_LIBS="$essl_libs";
+	   found_blas=yes; found_lapack=yes])
         ]
       )
     fi

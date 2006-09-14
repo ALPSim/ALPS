@@ -19,7 +19,7 @@ AC_DEFUN([AC_MPI],
       fi
     fi
     ]
-)
+  )
   
   AC_ARG_WITH(mpi-incdir,
     AC_HELP_STRING([--with-mpi-incdir=DIR],[MPI include directory]),
