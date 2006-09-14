@@ -83,6 +83,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parameters.C \
 	$(top_srcdir)/src/alps/expression/evaluator.C \
 	$(top_srcdir)/src/alps/osiris/xdrdump.C \
+	$(top_srcdir)/src/alps/osiris/xdrcore.C \
 	$(top_srcdir)/src/alps/parser/parser.C \
 	$(top_srcdir)/src/alps/parser/xmlattributes.C \
 	$(top_srcdir)/src/alps/parser/xmlhandler.C \
@@ -123,7 +124,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/boost/throw_exception.C
 am__objects_1 = copyright.lo parameterlist.lo parameters.lo
 am__objects_2 = evaluator.lo
-am__objects_3 = xdrdump.lo
+am__objects_3 = xdrdump.lo xdrcore.lo
 am__objects_4 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
 	xmlstream.lo xslt_path.lo
 am__objects_5 = rngfactory.lo
@@ -413,7 +414,8 @@ src_EXPRESSION = \
   $(top_srcdir)/src/alps/expression/evaluator.C 
 
 src_OSIRIS = \
-  $(top_srcdir)/src/alps/osiris/xdrdump.C
+  $(top_srcdir)/src/alps/osiris/xdrdump.C \
+  $(top_srcdir)/src/alps/osiris/xdrcore.C
 
 src_LATTICE = \
   $(top_srcdir)/src/alps/lattice/disorder.C \
@@ -784,6 +786,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/winstances.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/worker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workertask.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdrcore.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdrdump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlattributes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlhandler.Plo@am__quote@
@@ -847,6 +850,13 @@ xdrdump.lo: $(top_srcdir)/src/alps/osiris/xdrdump.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/xdrdump.C' object='xdrdump.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xdrdump.lo `test -f '$(top_srcdir)/src/alps/osiris/xdrdump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/xdrdump.C
+
+xdrcore.lo: $(top_srcdir)/src/alps/osiris/xdrcore.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xdrcore.lo -MD -MP -MF "$(DEPDIR)/xdrcore.Tpo" -c -o xdrcore.lo `test -f '$(top_srcdir)/src/alps/osiris/xdrcore.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/xdrcore.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xdrcore.Tpo" "$(DEPDIR)/xdrcore.Plo"; else rm -f "$(DEPDIR)/xdrcore.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/xdrcore.C' object='xdrcore.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xdrcore.lo `test -f '$(top_srcdir)/src/alps/osiris/xdrcore.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/xdrcore.C
 
 parser.lo: $(top_srcdir)/src/alps/parser/parser.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parser.lo -MD -MP -MF "$(DEPDIR)/parser.Tpo" -c -o parser.lo `test -f '$(top_srcdir)/src/alps/parser/parser.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/parser.C; \

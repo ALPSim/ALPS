@@ -163,6 +163,9 @@ test "$ac_cv_header_sys_time_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TIME_H, [], [sy
 AC_CHECK_HEADER([sys/types.h])
 test "$ac_cv_header_sys_types_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TYPES_H, [], [sys/types.h])
 
+AC_CHECK_HEADER([rpc/xdr.h])
+test "$ac_cv_header_rpc_xdr_h" = yes && AC_DEFINE(ALPS_HAVE_RPC_XDR_H, [], [rpc/xdr.h])
+
 dnl
 dnl Other tools --------------------------------------------------------
 dnl
