@@ -67,6 +67,17 @@ AC_DEFUN([AC_LAPACK],
     ]
   )
 
+  AC_ARG_WITH(cray_sci,
+    AC_HELP_STRING([--with-cray-sci], [use Cray SCI Math Library]),
+    [
+    if test "x$withval" = xno; then
+      cray_sci=no
+    else
+      cray_sci=yes
+    fi
+    ]
+  )
+
   AC_ARG_WITH(lapack,
     AC_HELP_STRING([--with-lapack=LIBS],[use LAPACK Library]),
     [
@@ -468,6 +479,29 @@ AC_DEFUN([AC_LAPACK],
     fi
     if test "$found_blas" = yes; then
       AC_DEFINE(ALPS_HAVE_DXML, [], [Define if you have the Digital Extended Math Library.])
+    fi
+  fi
+
+  # for Cray SCI 
+  if test "$found_blas" = no; then
+    if test "x$cray_sci" != xno; then
+      AC_MSG_NOTICE([checking for Cray SCI Library])
+      LDFLAGS="$ac_save_LDFLAGS"
+      LIBS="$ac_save_LIBS"
+      AC_CHECK_LIB(sci, dgemm_, 
+        [AC_CHECK_LIB(sci, dsyev_,
+          [LAPACK_LDFLAGS=; LAPACK_LIBS="-lsci";
+           found_blas=yes; found_lapack=yes])
+        ]
+      )
+    fi
+    if test "x$cray_sci" = xyes; then
+      if test "$found_blas" = no; then
+        AC_MSG_ERROR([Cray SCI Library not found.])
+      fi
+    fi
+    if test "$found_blas" = yes; then
+      AC_DEFINE(ALPS_HAVE_CRAY_SCI, [], [Define if you have Cray SCI Library.])
     fi
   fi
 
