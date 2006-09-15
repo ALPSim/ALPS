@@ -6320,18 +6320,18 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
 
-if test "${ac_cv_header_rpc_xdr_h+set}" = set; then
-  echo "$as_me:$LINENO: checking for rpc/xdr.h" >&5
-echo $ECHO_N "checking for rpc/xdr.h... $ECHO_C" >&6
-if test "${ac_cv_header_rpc_xdr_h+set}" = set; then
+if test "${ac_cv_header_rpc_rpc_h+set}" = set; then
+  echo "$as_me:$LINENO: checking for rpc/rpc.h" >&5
+echo $ECHO_N "checking for rpc/rpc.h... $ECHO_C" >&6
+if test "${ac_cv_header_rpc_rpc_h+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 fi
-echo "$as_me:$LINENO: result: $ac_cv_header_rpc_xdr_h" >&5
-echo "${ECHO_T}$ac_cv_header_rpc_xdr_h" >&6
+echo "$as_me:$LINENO: result: $ac_cv_header_rpc_rpc_h" >&5
+echo "${ECHO_T}$ac_cv_header_rpc_rpc_h" >&6
 else
   # Is the header compilable?
-echo "$as_me:$LINENO: checking rpc/xdr.h usability" >&5
-echo $ECHO_N "checking rpc/xdr.h usability... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking rpc/rpc.h usability" >&5
+echo $ECHO_N "checking rpc/rpc.h usability... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -6339,7 +6339,7 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 $ac_includes_default
-#include <rpc/xdr.h>
+#include <rpc/rpc.h>
 _ACEOF
 rm -f conftest.$ac_objext
 if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
@@ -6375,15 +6375,15 @@ echo "$as_me:$LINENO: result: $ac_header_compiler" >&5
 echo "${ECHO_T}$ac_header_compiler" >&6
 
 # Is the header present?
-echo "$as_me:$LINENO: checking rpc/xdr.h presence" >&5
-echo $ECHO_N "checking rpc/xdr.h presence... $ECHO_C" >&6
+echo "$as_me:$LINENO: checking rpc/rpc.h presence" >&5
+echo $ECHO_N "checking rpc/rpc.h presence... $ECHO_C" >&6
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-#include <rpc/xdr.h>
+#include <rpc/rpc.h>
 _ACEOF
 if { (eval echo "$as_me:$LINENO: \"$ac_cpp conftest.$ac_ext\"") >&5
   (eval $ac_cpp conftest.$ac_ext) 2>conftest.er1
@@ -6417,25 +6417,25 @@ echo "${ECHO_T}$ac_header_preproc" >&6
 # So?  What about this header?
 case $ac_header_compiler:$ac_header_preproc:$ac_cxx_preproc_warn_flag in
   yes:no: )
-    { echo "$as_me:$LINENO: WARNING: rpc/xdr.h: accepted by the compiler, rejected by the preprocessor!" >&5
-echo "$as_me: WARNING: rpc/xdr.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
-    { echo "$as_me:$LINENO: WARNING: rpc/xdr.h: proceeding with the compiler's result" >&5
-echo "$as_me: WARNING: rpc/xdr.h: proceeding with the compiler's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: rpc/rpc.h: accepted by the compiler, rejected by the preprocessor!" >&5
+echo "$as_me: WARNING: rpc/rpc.h: accepted by the compiler, rejected by the preprocessor!" >&2;}
+    { echo "$as_me:$LINENO: WARNING: rpc/rpc.h: proceeding with the compiler's result" >&5
+echo "$as_me: WARNING: rpc/rpc.h: proceeding with the compiler's result" >&2;}
     ac_header_preproc=yes
     ;;
   no:yes:* )
-    { echo "$as_me:$LINENO: WARNING: rpc/xdr.h: present but cannot be compiled" >&5
-echo "$as_me: WARNING: rpc/xdr.h: present but cannot be compiled" >&2;}
-    { echo "$as_me:$LINENO: WARNING: rpc/xdr.h:     check for missing prerequisite headers?" >&5
-echo "$as_me: WARNING: rpc/xdr.h:     check for missing prerequisite headers?" >&2;}
-    { echo "$as_me:$LINENO: WARNING: rpc/xdr.h: see the Autoconf documentation" >&5
-echo "$as_me: WARNING: rpc/xdr.h: see the Autoconf documentation" >&2;}
-    { echo "$as_me:$LINENO: WARNING: rpc/xdr.h:     section \"Present But Cannot Be Compiled\"" >&5
-echo "$as_me: WARNING: rpc/xdr.h:     section \"Present But Cannot Be Compiled\"" >&2;}
-    { echo "$as_me:$LINENO: WARNING: rpc/xdr.h: proceeding with the preprocessor's result" >&5
-echo "$as_me: WARNING: rpc/xdr.h: proceeding with the preprocessor's result" >&2;}
-    { echo "$as_me:$LINENO: WARNING: rpc/xdr.h: in the future, the compiler will take precedence" >&5
-echo "$as_me: WARNING: rpc/xdr.h: in the future, the compiler will take precedence" >&2;}
+    { echo "$as_me:$LINENO: WARNING: rpc/rpc.h: present but cannot be compiled" >&5
+echo "$as_me: WARNING: rpc/rpc.h: present but cannot be compiled" >&2;}
+    { echo "$as_me:$LINENO: WARNING: rpc/rpc.h:     check for missing prerequisite headers?" >&5
+echo "$as_me: WARNING: rpc/rpc.h:     check for missing prerequisite headers?" >&2;}
+    { echo "$as_me:$LINENO: WARNING: rpc/rpc.h: see the Autoconf documentation" >&5
+echo "$as_me: WARNING: rpc/rpc.h: see the Autoconf documentation" >&2;}
+    { echo "$as_me:$LINENO: WARNING: rpc/rpc.h:     section \"Present But Cannot Be Compiled\"" >&5
+echo "$as_me: WARNING: rpc/rpc.h:     section \"Present But Cannot Be Compiled\"" >&2;}
+    { echo "$as_me:$LINENO: WARNING: rpc/rpc.h: proceeding with the preprocessor's result" >&5
+echo "$as_me: WARNING: rpc/rpc.h: proceeding with the preprocessor's result" >&2;}
+    { echo "$as_me:$LINENO: WARNING: rpc/rpc.h: in the future, the compiler will take precedence" >&5
+echo "$as_me: WARNING: rpc/rpc.h: in the future, the compiler will take precedence" >&2;}
     (
       cat <<\_ASBOX
 ## ------------------------------- ##
@@ -6446,20 +6446,20 @@ _ASBOX
       sed "s/^/$as_me: WARNING:     /" >&2
     ;;
 esac
-echo "$as_me:$LINENO: checking for rpc/xdr.h" >&5
-echo $ECHO_N "checking for rpc/xdr.h... $ECHO_C" >&6
-if test "${ac_cv_header_rpc_xdr_h+set}" = set; then
+echo "$as_me:$LINENO: checking for rpc/rpc.h" >&5
+echo $ECHO_N "checking for rpc/rpc.h... $ECHO_C" >&6
+if test "${ac_cv_header_rpc_rpc_h+set}" = set; then
   echo $ECHO_N "(cached) $ECHO_C" >&6
 else
-  ac_cv_header_rpc_xdr_h=$ac_header_preproc
+  ac_cv_header_rpc_rpc_h=$ac_header_preproc
 fi
-echo "$as_me:$LINENO: result: $ac_cv_header_rpc_xdr_h" >&5
-echo "${ECHO_T}$ac_cv_header_rpc_xdr_h" >&6
+echo "$as_me:$LINENO: result: $ac_cv_header_rpc_rpc_h" >&5
+echo "${ECHO_T}$ac_cv_header_rpc_rpc_h" >&6
 
 fi
 
 
-test "$ac_cv_header_rpc_xdr_h" = yes &&
+test "$ac_cv_header_rpc_rpc_h" = yes &&
 cat >>confdefs.h <<\_ACEOF
 #define ALPS_HAVE_RPC_XDR_H
 _ACEOF
@@ -10587,31 +10587,10 @@ linux*)
   # before this can be enabled.
   hardcode_into_libs=yes
 
-  # find out which ABI we are using
-  libsuff=
-  case "$host_cpu" in
-  x86_64*|s390x*|powerpc64*)
-    echo '#line 10594 "configure"' > conftest.$ac_ext
-    if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
-      case `/usr/bin/file conftest.$ac_objext` in
-      *64-bit*)
-        libsuff=64
-        sys_lib_search_path_spec="/lib${libsuff} /usr/lib${libsuff} /usr/local/lib${libsuff}"
-        ;;
-      esac
-    fi
-    rm -rf conftest*
-    ;;
-  esac
-
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="/lib${libsuff} /usr/lib${libsuff} $lt_ld_extra"
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on
@@ -11488,7 +11467,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11491 "configure"
+#line 11470 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -11588,7 +11567,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 11591 "configure"
+#line 11570 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13928,11 +13907,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:13931: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:13910: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:13935: \$? = $ac_status" >&5
+   echo "$as_me:13914: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14032,11 +14011,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14035: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14014: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14039: \$? = $ac_status" >&5
+   echo "$as_me:14018: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14564,31 +14543,10 @@ linux*)
   # before this can be enabled.
   hardcode_into_libs=yes
 
-  # find out which ABI we are using
-  libsuff=
-  case "$host_cpu" in
-  x86_64*|s390x*|powerpc64*)
-    echo '#line 14571 "configure"' > conftest.$ac_ext
-    if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
-      case `/usr/bin/file conftest.$ac_objext` in
-      *64-bit*)
-        libsuff=64
-        sys_lib_search_path_spec="/lib${libsuff} /usr/lib${libsuff} /usr/local/lib${libsuff}"
-        ;;
-      esac
-    fi
-    rm -rf conftest*
-    ;;
-  esac
-
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="/lib${libsuff} /usr/lib${libsuff} $lt_ld_extra"
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on
@@ -15623,11 +15581,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15626: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15584: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15630: \$? = $ac_status" >&5
+   echo "$as_me:15588: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15727,11 +15685,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15730: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15688: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15734: \$? = $ac_status" >&5
+   echo "$as_me:15692: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17172,31 +17130,10 @@ linux*)
   # before this can be enabled.
   hardcode_into_libs=yes
 
-  # find out which ABI we are using
-  libsuff=
-  case "$host_cpu" in
-  x86_64*|s390x*|powerpc64*)
-    echo '#line 17179 "configure"' > conftest.$ac_ext
-    if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
-      case `/usr/bin/file conftest.$ac_objext` in
-      *64-bit*)
-        libsuff=64
-        sys_lib_search_path_spec="/lib${libsuff} /usr/lib${libsuff} /usr/local/lib${libsuff}"
-        ;;
-      esac
-    fi
-    rm -rf conftest*
-    ;;
-  esac
-
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="/lib${libsuff} /usr/lib${libsuff} $lt_ld_extra"
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on
@@ -17951,11 +17888,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17954: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17891: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17958: \$? = $ac_status" >&5
+   echo "$as_me:17895: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18219,11 +18156,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18222: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18159: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18226: \$? = $ac_status" >&5
+   echo "$as_me:18163: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18323,11 +18260,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18326: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18263: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:18330: \$? = $ac_status" >&5
+   echo "$as_me:18267: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19788,31 +19725,10 @@ linux*)
   # before this can be enabled.
   hardcode_into_libs=yes
 
-  # find out which ABI we are using
-  libsuff=
-  case "$host_cpu" in
-  x86_64*|s390x*|powerpc64*)
-    echo '#line 19795 "configure"' > conftest.$ac_ext
-    if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
-  (eval $ac_compile) 2>&5
-  ac_status=$?
-  echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); }; then
-      case `/usr/bin/file conftest.$ac_objext` in
-      *64-bit*)
-        libsuff=64
-        sys_lib_search_path_spec="/lib${libsuff} /usr/lib${libsuff} /usr/local/lib${libsuff}"
-        ;;
-      esac
-    fi
-    rm -rf conftest*
-    ;;
-  esac
-
   # Append ld.so.conf contents to the search path
   if test -f /etc/ld.so.conf; then
     lt_ld_extra=`awk '/^include / { system(sprintf("cd /etc; cat %s", \$2)); skip = 1; } { if (!skip) print \$0; skip = 0; }' < /etc/ld.so.conf | $SED -e 's/#.*//;s/[:,	]/ /g;s/=[^=]*$//;s/=[^= ]* / /g;/^$/d' | tr '\n' ' '`
-    sys_lib_dlsearch_path_spec="/lib${libsuff} /usr/lib${libsuff} $lt_ld_extra"
+    sys_lib_dlsearch_path_spec="/lib /usr/lib $lt_ld_extra"
   fi
 
   # We used to test for /lib/ld.so.1 and disable shared libraries on

@@ -164,7 +164,7 @@ AC_CHECK_HEADER([sys/types.h])
 test "$ac_cv_header_sys_types_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TYPES_H, [], [sys/types.h])
 
 AC_CHECK_HEADER([rpc/rpc.h])
-test "$ac_cv_header_rpc_xdr_h" = yes && AC_DEFINE(ALPS_HAVE_RPC_XDR_H, [], [rpc/rpc.h])
+test "$ac_cv_header_rpc_rpc_h" = yes && AC_DEFINE(ALPS_HAVE_RPC_XDR_H, [], [rpc/rpc.h])
 
 dnl
 dnl Other tools --------------------------------------------------------
