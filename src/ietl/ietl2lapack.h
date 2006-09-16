@@ -38,7 +38,6 @@
 #include <stdexcept>
 #include <cassert>
 
-#define MTL_FCALL(x) x##_
 #undef minor
 
 namespace ietl {
@@ -95,7 +94,7 @@ namespace ietl2lapack {
     int lwork=4*dim;
     int info;
     double* work = new double[lwork];
-    dsyev_(jobz, uplo, dim, a, dim, w, work, lwork, info);
+    MTL_FCALL(dsyev)(jobz, uplo, dim, a, dim, w, work, lwork, info);
     delete[] work;
     if (info)
       throw std::runtime_error("Error return from dsyev");
@@ -106,7 +105,7 @@ namespace ietl2lapack {
     int lwork=4*dim;
     int info;
     float* work = new float[lwork];
-    ssyev_(jobz, uplo, dim, a, dim, w, work, lwork, info);
+    MTL_FCALL(ssyev)(jobz, uplo, dim, a, dim, w, work, lwork, info);
     delete[] work;
     if (info)
       throw std::runtime_error("Error return from ssyev");
@@ -118,7 +117,7 @@ namespace ietl2lapack {
     int info;
     std::complex<double>* work = new std::complex<double>[lwork];
     double* rwork = new double[lwork];
-    zheev_(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
+    MTL_FCALL(zheev)(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
     delete[] work;
     delete[] rwork;
     if (info)
@@ -138,7 +137,7 @@ namespace ietl2lapack {
     int info;
     std::complex<float>* work = new std::complex<float>[lwork];
     float* rwork = new float[lwork];
-    cheev_(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
+    MTL_FCALL(cheev)(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
     delete[] work;
     delete[] rwork;
     if (info)
