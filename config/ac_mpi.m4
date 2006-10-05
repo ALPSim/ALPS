@@ -80,7 +80,7 @@ AC_DEFUN([AC_MPI],
     else
       AC_MSG_RESULT([$mpi_dir])
       if test -f "$mpi_dir/include/mpi.h"; then :; else
-        AC_MSG_ERROR([$mpi_dir/include/mpih.h not found])
+        AC_MSG_ERROR([$mpi_dir/include/mpi.h not found])
       fi
       if test -d "$mpi_dir/lib"; then :; else
         AC_MSG_ERROR([$mpi_dir/lib not found])

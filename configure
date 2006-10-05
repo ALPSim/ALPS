@@ -27500,7 +27500,7 @@ echo "${ECHO_T}yes" >&6
       echo "$as_me:$LINENO: result: $mpi_dir" >&5
 echo "${ECHO_T}$mpi_dir" >&6
       if test -f "$mpi_dir/include/mpi.h"; then :; else
-        { { echo "$as_me:$LINENO: error: $mpi_dir/include/mpih.h not found" >&5
+        { { echo "$as_me:$LINENO: error: $mpi_dir/include/mpi.h not found" >&5
 echo "$as_me: error: $mpi_dir/include/mpih.h not found" >&2;}
    { (exit 1); exit 1; }; }
       fi
