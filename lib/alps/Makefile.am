@@ -5,9 +5,7 @@ AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 
 src_ALPS = \
-  $(top_srcdir)/src/alps/copyright.C \
-  $(top_srcdir)/src/alps/parameterlist.C \
-  $(top_srcdir)/src/alps/parameters.C
+  $(top_srcdir)/src/alps/copyright.C
 src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
   $(top_srcdir)/src/alps/alea/observable.C \
@@ -30,6 +28,10 @@ src_MODEL = \
   $(top_srcdir)/src/alps/model/globaloperator.C
 src_RANDOM = \
   $(top_srcdir)/src/alps/random/rngfactory.C
+src_PARAMETER = \
+  $(top_srcdir)/src/alps/parameter/parameter.C \
+  $(top_srcdir)/src/alps/parameter/parameterlist.C \
+  $(top_srcdir)/src/alps/parameter/parameters.C
 src_PARSER = \
   $(top_srcdir)/src/alps/parser/parser.C \
   $(top_srcdir)/src/alps/parser/xmlattributes.C \
@@ -189,7 +191,7 @@ src_boost_THREAD = \
 
 lib_LTLIBRARIES = libalps.la 
 
-libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARSER) $(src_RANDOM)
+libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARAMETER) $(src_PARSER) $(src_RANDOM)
 nodist_libalps_la_SOURCES =
 
 if ALPS_FULL

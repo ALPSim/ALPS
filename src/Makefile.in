@@ -133,19 +133,22 @@ am__noinst_HEADERS_DIST = boost/function_objects.hpp \
 	boost/numeric/bindings/traits/vector_traits.hpp alps/bitops.h \
 	alps/cctype.h alps/copyright.h alps/expression.h \
 	alps/factory.h alps/functional.h alps/math.hpp \
-	alps/multi_array.hpp alps/parameterlist.h alps/parameters.h \
-	alps/stringvalue.h alps/typetraits.h alps/vectorio.h \
-	alps/vectormath.h alps/vectortraits.h alps/matrix_as_vector.h \
-	alps/expression/block.h alps/expression/evaluatable.h \
-	alps/expression/evaluate.h alps/expression/evaluate_helper.h \
-	alps/expression/evaluator.h alps/expression/expression.h \
-	alps/expression/expression_fwd.h alps/expression/factor.h \
-	alps/expression/function.h alps/expression/number.h \
-	alps/expression/parameterevaluator.h alps/expression/symbol.h \
-	alps/expression/term.h alps/expression/traits.h \
-	alps/fixed_capacity_deque.h alps/fixed_capacity_traits.h \
-	alps/fixed_capacity_fwd.h alps/fixed_capacity_vector.h \
-	alps/fixed_capacity/checking.h \
+	alps/multi_array.hpp alps/stringvalue.h alps/typetraits.h \
+	alps/vectorio.h alps/vectormath.h alps/vectortraits.h \
+	alps/matrix_as_vector.h alps/parameter.h \
+	alps/parameter/parameter.h alps/parameter/parameter_p.h \
+	alps/parameter/parameterlist.h \
+	alps/parameter/parameterlist_p.h alps/parameter/parameters.h \
+	alps/parameter/parameters_p.h alps/expression/block.h \
+	alps/expression/evaluatable.h alps/expression/evaluate.h \
+	alps/expression/evaluate_helper.h alps/expression/evaluator.h \
+	alps/expression/expression.h alps/expression/expression_fwd.h \
+	alps/expression/factor.h alps/expression/function.h \
+	alps/expression/number.h alps/expression/parameterevaluator.h \
+	alps/expression/symbol.h alps/expression/term.h \
+	alps/expression/traits.h alps/fixed_capacity_deque.h \
+	alps/fixed_capacity_traits.h alps/fixed_capacity_fwd.h \
+	alps/fixed_capacity_vector.h alps/fixed_capacity/checking.h \
 	alps/fixed_capacity/deque_detail.h \
 	alps/fixed_capacity/uninitialized_array.h alps/osiris.h \
 	alps/osiris/buffer.h alps/osiris/comm.h alps/osiris/dump.h \
@@ -459,7 +462,8 @@ headers_BOOST = boost/function_objects.hpp \
 	boost/numeric/bindings/traits/ublas_vector2.hpp \
 	boost/numeric/bindings/traits/vector_raw.hpp \
 	boost/numeric/bindings/traits/vector_traits.hpp
-headers_ALPS = alps/bitops.h alps/cctype.h alps/copyright.h alps/expression.h alps/factory.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/parameterlist.h alps/parameters.h alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h alps/matrix_as_vector.h
+headers_ALPS = alps/bitops.h alps/cctype.h alps/copyright.h alps/expression.h alps/factory.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h alps/matrix_as_vector.h
+headers_PARAMETER = alps/parameter.h alps/parameter/parameter.h alps/parameter/parameter_p.h alps/parameter/parameterlist.h alps/parameter/parameterlist_p.h alps/parameter/parameters.h alps/parameter/parameters_p.h 
 headers_EXPRESSION = alps/expression/block.h alps/expression/evaluatable.h alps/expression/evaluate.h alps/expression/evaluate_helper.h alps/expression/evaluator.h alps/expression/expression.h alps/expression/expression_fwd.h alps/expression/factor.h alps/expression/function.h alps/expression/number.h alps/expression/parameterevaluator.h alps/expression/symbol.h alps/expression/term.h alps/expression/traits.h
 headers_ALEA = alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nan.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/obsvalue.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h alps/alea/signedobservable.h alps/alea/hdf5.h alps/alea/recordableobservable.h alps/alea/abstractsimpleobservable.h alps/alea/abstractbinning.h alps/alea/output_helper.h alps/alea/histogramdata.h alps/alea/histogrameval.h
 headers_FIXEDCAP = alps/fixed_capacity_deque.h alps/fixed_capacity_traits.h alps/fixed_capacity_fwd.h alps/fixed_capacity_vector.h alps/fixed_capacity/checking.h alps/fixed_capacity/deque_detail.h alps/fixed_capacity/uninitialized_array.h
@@ -472,10 +476,11 @@ headers_RANDOM = alps/random.h alps/random/buffered_rng.h alps/random/pseudo_des
 headers_SCHEDULER = alps/scheduler.h alps/scheduler/factory.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h alps/scheduler/measurement_operators.h
 headers_IETL = ietl/bandlanczos.h ietl/complex.h ietl/config.h.in ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h ietl/interface/blas.h ietl/interface/blitz.h ietl/interface/mtl.h ietl/interface/ublas.h ietl/interface/valarray.h ietl/inverse.h ietl/iteration.h ietl/jacobi.h ietl/krylov_wrapper.h ietl/lanczos.h ietl/matrix.h ietl/power.h ietl/rayleigh.h ietl/tmatrix.h ietl/traits.h ietl/vectorspace.h
 headers_HEAP = heap/heapwrapper.h
-headers = $(headers_BOOST) $(headers_ALPS) $(headers_EXPRESSION) \
-	$(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) \
-	$(headers_RANDOM) $(headers_IETL) $(headers_HEAP) \
-	$(am__append_1) $(am__append_2) $(am__append_3)
+headers = $(headers_BOOST) $(headers_ALPS) $(headers_PARAMETER) \
+	$(headers_EXPRESSION) $(headers_FIXEDCAP) $(headers_OSIRIS) \
+	$(headers_PARSER) $(headers_RANDOM) $(headers_IETL) \
+	$(headers_HEAP) $(am__append_1) $(am__append_2) \
+	$(am__append_3)
 noinst_HEADERS = $(headers)
 all: all-am
 
@@ -569,7 +574,7 @@ distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
 distdir: $(DISTFILES)
-	$(mkdir_p) $(distdir)/alps $(distdir)/alps/alea $(distdir)/alps/expression $(distdir)/alps/fixed_capacity $(distdir)/alps/lattice $(distdir)/alps/model $(distdir)/alps/osiris $(distdir)/alps/osiris/std $(distdir)/alps/parser $(distdir)/alps/random $(distdir)/alps/scheduler $(distdir)/boost $(distdir)/boost/numeric/bindings/blas $(distdir)/boost/numeric/bindings/lapack $(distdir)/boost/numeric/bindings/traits $(distdir)/boost/numeric/bindings/traits/detail $(distdir)/heap $(distdir)/ietl $(distdir)/ietl/interface
+	$(mkdir_p) $(distdir)/alps $(distdir)/alps/alea $(distdir)/alps/expression $(distdir)/alps/fixed_capacity $(distdir)/alps/lattice $(distdir)/alps/model $(distdir)/alps/osiris $(distdir)/alps/osiris/std $(distdir)/alps/parameter $(distdir)/alps/parser $(distdir)/alps/random $(distdir)/alps/scheduler $(distdir)/boost $(distdir)/boost/numeric/bindings/blas $(distdir)/boost/numeric/bindings/lapack $(distdir)/boost/numeric/bindings/traits $(distdir)/boost/numeric/bindings/traits/detail $(distdir)/heap $(distdir)/ietl $(distdir)/ietl/interface
 	@srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's|.|.|g'`; \
 	list='$(DISTFILES)'; for file in $$list; do \

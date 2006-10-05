@@ -30,7 +30,7 @@
 /* $Id$ */
 
 #include <alps/xml.h>
-#include <alps/parameterlist.h>
+#include <alps/parameter.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>

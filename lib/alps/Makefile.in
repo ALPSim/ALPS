@@ -79,11 +79,12 @@ libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libalps_la_LIBADD =
 am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
-	$(top_srcdir)/src/alps/parameterlist.C \
-	$(top_srcdir)/src/alps/parameters.C \
 	$(top_srcdir)/src/alps/expression/evaluator.C \
 	$(top_srcdir)/src/alps/osiris/xdrdump.C \
 	$(top_srcdir)/src/alps/osiris/xdrcore.C \
+	$(top_srcdir)/src/alps/parameter/parameter.C \
+	$(top_srcdir)/src/alps/parameter/parameterlist.C \
+	$(top_srcdir)/src/alps/parameter/parameters.C \
 	$(top_srcdir)/src/alps/parser/parser.C \
 	$(top_srcdir)/src/alps/parser/xmlattributes.C \
 	$(top_srcdir)/src/alps/parser/xmlhandler.C \
@@ -122,42 +123,43 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/scheduler/worker.C \
 	$(top_srcdir)/src/alps/scheduler/workertask.C \
 	$(top_srcdir)/src/boost/throw_exception.C
-am__objects_1 = copyright.lo parameterlist.lo parameters.lo
+am__objects_1 = copyright.lo
 am__objects_2 = evaluator.lo
 am__objects_3 = xdrdump.lo xdrcore.lo
-am__objects_4 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
+am__objects_4 = parameter.lo parameterlist.lo parameters.lo
+am__objects_5 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
 	xmlstream.lo xslt_path.lo
-am__objects_5 = rngfactory.lo
-am__objects_6 = nan.lo observable.lo observableset.lo
-am__objects_7 = disorder.lo latticedescriptor.lo \
+am__objects_6 = rngfactory.lo
+am__objects_7 = nan.lo observable.lo observableset.lo
+am__objects_8 = disorder.lo latticedescriptor.lo \
 	latticegraphdescriptor.lo latticelibrary.lo unitcell.lo
-am__objects_8 = modellibrary.lo siteterm.lo bondterm.lo \
+am__objects_9 = modellibrary.lo siteterm.lo bondterm.lo \
 	globaloperator.lo
-am__objects_9 = abstract_task.lo factory.lo info.lo \
+am__objects_10 = abstract_task.lo factory.lo info.lo \
 	master_scheduler.lo measurement_operators.lo montecarlo.lo \
 	mpp_scheduler.lo options.lo remote_task.lo remote_worker.lo \
 	scheduler.lo signal.lo single_scheduler.lo serial_scheduler.lo \
 	slave_task.lo task.lo worker.lo workertask.lo
-@ALPS_FULL_TRUE@am__objects_10 = $(am__objects_6) $(am__objects_7) \
-@ALPS_FULL_TRUE@	$(am__objects_8) $(am__objects_9)
-@BUILD_BOOST_TRUE@am__objects_11 = throw_exception.lo
+@ALPS_FULL_TRUE@am__objects_11 = $(am__objects_7) $(am__objects_8) \
+@ALPS_FULL_TRUE@	$(am__objects_9) $(am__objects_10)
+@BUILD_BOOST_TRUE@am__objects_12 = throw_exception.lo
 am_libalps_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_10) $(am__objects_11)
-am__objects_12 = date_generators.lo greg_month.lo greg_weekday.lo \
+	$(am__objects_6) $(am__objects_11) $(am__objects_12)
+am__objects_13 = date_generators.lo greg_month.lo greg_weekday.lo \
 	gregorian_types.lo posix_time_types.lo
-am__objects_13 = cmdline.lo config_file.lo convert.lo \
+am__objects_14 = cmdline.lo config_file.lo convert.lo \
 	options_description.lo parsers.lo positional_options.lo \
 	value_semantic.lo variables_map.lo winmain.lo \
 	po_utf8_codecvt_facet.lo
-@BUILD_BOOST_TRUE@am__objects_14 = $(am__objects_12) $(am__objects_13)
-am__objects_15 = convenience.lo exception.lo \
+@BUILD_BOOST_TRUE@am__objects_15 = $(am__objects_13) $(am__objects_14)
+am__objects_16 = convenience.lo exception.lo \
 	operations_posix_windows.lo path_posix_windows.lo
-am__objects_16 = c_regex_traits.lo c_regex_traits_common.lo \
+am__objects_17 = c_regex_traits.lo c_regex_traits_common.lo \
 	cpp_regex_traits.lo cregex.lo fileiter.lo instances.lo \
 	posix_api.lo regex.lo regex_debug.lo regex_synch.lo \
 	w32_regex_traits.lo wide_posix_api.lo winstances.lo
-am__objects_17 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
+am__objects_18 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
 	basic_serializer_map.lo basic_text_iprimitive.lo \
 	basic_text_oprimitive.lo binary_iarchive.lo binary_oarchive.lo \
 	binary_wiarchive.lo binary_woarchive.lo codecvt_null.lo \
@@ -165,44 +167,44 @@ am__objects_17 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
 	extended_type_info_typeid.lo polymorphic_iarchive.lo \
 	polymorphic_oarchive.lo text_iarchive.lo text_oarchive.lo \
 	void_cast.lo sr_utf8_codecvt_facet.lo
-@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__objects_18 = $(am__objects_15) \
-@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_16) \
-@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_17)
-am__objects_19 = $(am__objects_15)
-am__objects_20 = c_regex_traits.lo cpp_regex_traits.lo cregex.lo \
+@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__objects_19 = $(am__objects_16) \
+@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_17) \
+@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_18)
+am__objects_20 = $(am__objects_16)
+am__objects_21 = c_regex_traits.lo cpp_regex_traits.lo cregex.lo \
 	fileiter.lo icu.lo instances.lo posix_api.lo regex.lo \
 	regex_debug.lo regex_raw_buffer.lo regex_traits_defaults.lo \
 	static_mutex.lo usinstances.lo w32_regex_traits.lo \
 	wc_regex_traits.lo wide_posix_api.lo winstances.lo
-am__objects_21 = $(am__objects_17) basic_archive_impl.lo \
+am__objects_22 = $(am__objects_18) basic_archive_impl.lo \
 	basic_iserializer.lo basic_oserializer.lo \
 	basic_pointer_iserializer.lo basic_pointer_oserializer.lo \
 	stl_port.lo
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__objects_22 = $(am__objects_19) \
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_20) \
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_21)
-am__objects_23 = exception.lo operations.lo path.lo portability.lo \
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__objects_23 = $(am__objects_20) \
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_21) \
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_22)
+am__objects_24 = exception.lo operations.lo path.lo portability.lo \
 	fs_utf8_codecvt_facet.lo
-am__objects_24 = $(am__objects_20)
 am__objects_25 = $(am__objects_21)
-@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_26 = $(am__objects_23) \
-@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_24) \
-@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25)
-am__objects_27 = $(am__objects_23)
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_28 = $(am__objects_27) \
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_24) \
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25)
-am__objects_29 = connection.lo named_slot_map.lo signal_base.lo \
+am__objects_26 = $(am__objects_22)
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_27 = $(am__objects_24) \
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25) \
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26)
+am__objects_28 = $(am__objects_24)
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_29 = $(am__objects_28) \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25) \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26)
+am__objects_30 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_30 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_29)
-am__objects_31 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_31 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_30)
+am__objects_32 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_32 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_31)
-nodist_libalps_la_OBJECTS = $(am__objects_14) $(am__objects_18) \
-	$(am__objects_22) $(am__objects_26) $(am__objects_28) \
-	$(am__objects_30) $(am__objects_32)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_33 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_32)
+nodist_libalps_la_OBJECTS = $(am__objects_15) $(am__objects_19) \
+	$(am__objects_23) $(am__objects_27) $(am__objects_29) \
+	$(am__objects_31) $(am__objects_33)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -401,9 +403,7 @@ AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS
 AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 src_ALPS = \
-  $(top_srcdir)/src/alps/copyright.C \
-  $(top_srcdir)/src/alps/parameterlist.C \
-  $(top_srcdir)/src/alps/parameters.C
+  $(top_srcdir)/src/alps/copyright.C
 
 src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
@@ -432,6 +432,11 @@ src_MODEL = \
 
 src_RANDOM = \
   $(top_srcdir)/src/alps/random/rngfactory.C
+
+src_PARAMETER = \
+  $(top_srcdir)/src/alps/parameter/parameter.C \
+  $(top_srcdir)/src/alps/parameter/parameterlist.C \
+  $(top_srcdir)/src/alps/parameter/parameters.C
 
 src_PARSER = \
   $(top_srcdir)/src/alps/parser/parser.C \
@@ -595,7 +600,8 @@ src_boost_THREAD = \
 
 lib_LTLIBRARIES = libalps.la 
 libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) \
-	$(src_PARSER) $(src_RANDOM) $(am__append_1) $(am__append_2)
+	$(src_PARAMETER) $(src_PARSER) $(src_RANDOM) $(am__append_1) \
+	$(am__append_2)
 nodist_libalps_la_SOURCES = $(am__append_3) $(am__append_4) \
 	$(am__append_5) $(am__append_6) $(am__append_7) \
 	$(am__append_8) $(am__append_9)
@@ -734,6 +740,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/operations_posix_windows.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/options_description.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameter.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameterlist.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameters.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parser.Plo@am__quote@
@@ -823,20 +830,6 @@ copyright.lo: $(top_srcdir)/src/alps/copyright.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
 
-parameterlist.lo: $(top_srcdir)/src/alps/parameterlist.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parameterlist.lo -MD -MP -MF "$(DEPDIR)/parameterlist.Tpo" -c -o parameterlist.lo `test -f '$(top_srcdir)/src/alps/parameterlist.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameterlist.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parameterlist.Tpo" "$(DEPDIR)/parameterlist.Plo"; else rm -f "$(DEPDIR)/parameterlist.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parameterlist.C' object='parameterlist.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parameterlist.lo `test -f '$(top_srcdir)/src/alps/parameterlist.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameterlist.C
-
-parameters.lo: $(top_srcdir)/src/alps/parameters.C
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parameters.lo -MD -MP -MF "$(DEPDIR)/parameters.Tpo" -c -o parameters.lo `test -f '$(top_srcdir)/src/alps/parameters.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameters.C; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parameters.Tpo" "$(DEPDIR)/parameters.Plo"; else rm -f "$(DEPDIR)/parameters.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parameters.C' object='parameters.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parameters.lo `test -f '$(top_srcdir)/src/alps/parameters.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameters.C
-
 evaluator.lo: $(top_srcdir)/src/alps/expression/evaluator.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluator.lo -MD -MP -MF "$(DEPDIR)/evaluator.Tpo" -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/expression/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression/evaluator.C; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/evaluator.Tpo" "$(DEPDIR)/evaluator.Plo"; else rm -f "$(DEPDIR)/evaluator.Tpo"; exit 1; fi
@@ -857,6 +850,27 @@ xdrcore.lo: $(top_srcdir)/src/alps/osiris/xdrcore.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/xdrcore.C' object='xdrcore.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xdrcore.lo `test -f '$(top_srcdir)/src/alps/osiris/xdrcore.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/xdrcore.C
+
+parameter.lo: $(top_srcdir)/src/alps/parameter/parameter.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parameter.lo -MD -MP -MF "$(DEPDIR)/parameter.Tpo" -c -o parameter.lo `test -f '$(top_srcdir)/src/alps/parameter/parameter.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameter/parameter.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parameter.Tpo" "$(DEPDIR)/parameter.Plo"; else rm -f "$(DEPDIR)/parameter.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parameter/parameter.C' object='parameter.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parameter.lo `test -f '$(top_srcdir)/src/alps/parameter/parameter.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameter/parameter.C
+
+parameterlist.lo: $(top_srcdir)/src/alps/parameter/parameterlist.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parameterlist.lo -MD -MP -MF "$(DEPDIR)/parameterlist.Tpo" -c -o parameterlist.lo `test -f '$(top_srcdir)/src/alps/parameter/parameterlist.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameter/parameterlist.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parameterlist.Tpo" "$(DEPDIR)/parameterlist.Plo"; else rm -f "$(DEPDIR)/parameterlist.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parameter/parameterlist.C' object='parameterlist.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parameterlist.lo `test -f '$(top_srcdir)/src/alps/parameter/parameterlist.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameter/parameterlist.C
+
+parameters.lo: $(top_srcdir)/src/alps/parameter/parameters.C
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parameters.lo -MD -MP -MF "$(DEPDIR)/parameters.Tpo" -c -o parameters.lo `test -f '$(top_srcdir)/src/alps/parameter/parameters.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameter/parameters.C; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/parameters.Tpo" "$(DEPDIR)/parameters.Plo"; else rm -f "$(DEPDIR)/parameters.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parameter/parameters.C' object='parameters.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parameters.lo `test -f '$(top_srcdir)/src/alps/parameter/parameters.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parameter/parameters.C
 
 parser.lo: $(top_srcdir)/src/alps/parser/parser.C
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parser.lo -MD -MP -MF "$(DEPDIR)/parser.Tpo" -c -o parser.lo `test -f '$(top_srcdir)/src/alps/parser/parser.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parser/parser.C; \

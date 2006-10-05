@@ -332,8 +332,10 @@ AUTODOC_GENERAL_SRC = \
 	$(ALPS_SRCDIR)/math.hpp \
 	$(ALPS_SRCDIR)/matrix_as_vector.h \
 	$(ALPS_SRCDIR)/multi_array.hpp \
-	$(ALPS_SRCDIR)/parameterlist.h \
-	$(ALPS_SRCDIR)/parameters.h \
+	$(ALPS_SRCDIR)/parameter.h \
+	$(ALPS_SRCDIR)/parameter/parameter.h \
+	$(ALPS_SRCDIR)/parameter/parameterlist.h \
+	$(ALPS_SRCDIR)/parameter/parameters.h \
 	$(ALPS_SRCDIR)/random.h \
 	$(ALPS_SRCDIR)/random/buffered_rng.h \
 	$(ALPS_SRCDIR)/random/pseudo_des.h \
