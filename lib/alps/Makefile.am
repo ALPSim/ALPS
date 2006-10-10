@@ -136,8 +136,6 @@ src_boost_SERIALIZATION_1_32 = \
   $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
@@ -169,7 +167,12 @@ src_boost_SERIALIZATION_1_33 = \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
 src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
-src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_33)
+src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_32) \
+  $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
 
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
