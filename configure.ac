@@ -798,7 +798,7 @@ if test "$ac_cv_boostbook" = yes && test -n "$ac_cv_prog_doxygen" && test -n "$a
 else
   build_doc=no
   build_pdf=no
-  AC_MSG_NOTICE([Documentation will no be built.])
+  AC_MSG_NOTICE([Documentation will not be built.])
 fi
 
 dnl

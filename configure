@@ -29023,8 +29023,8 @@ echo "$as_me: PDF documentation will not be built." >&6;}
 else
   build_doc=no
   build_pdf=no
-  { echo "$as_me:$LINENO: Documentation will no be built." >&5
-echo "$as_me: Documentation will no be built." >&6;}
+  { echo "$as_me:$LINENO: Documentation will not be built." >&5
+echo "$as_me: Documentation will not be built." >&6;}
 fi
 
 

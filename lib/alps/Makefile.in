@@ -186,25 +186,53 @@ am__objects_22 = $(am__objects_18) basic_archive_impl.lo \
 am__objects_24 = exception.lo operations.lo path.lo portability.lo \
 	fs_utf8_codecvt_facet.lo
 am__objects_25 = $(am__objects_21)
-am__objects_26 = $(am__objects_22)
+am__objects_26 = basic_archive.lo basic_archive_impl.lo \
+	basic_iarchive.lo basic_iserializer.lo basic_oarchive.lo \
+	basic_oserializer.lo basic_pointer_iserializer.lo \
+	basic_pointer_oserializer.lo basic_serializer_map.lo \
+	basic_text_iprimitive.lo basic_text_oprimitive.lo \
+	basic_text_wiprimitive.lo basic_text_woprimitive.lo \
+	basic_xml_archive.lo binary_iarchive.lo binary_oarchive.lo \
+	binary_wiarchive.lo binary_woarchive.lo codecvt_null.lo \
+	extended_type_info.lo extended_type_info_no_rtti.lo \
+	extended_type_info_typeid.lo polymorphic_iarchive.lo \
+	polymorphic_oarchive.lo stl_port.lo text_iarchive.lo \
+	text_oarchive.lo text_wiarchive.lo text_woarchive.lo \
+	void_cast.lo xml_grammar.lo xml_iarchive.lo xml_oarchive.lo \
+	xml_wgrammar.lo xml_wiarchive.lo xml_woarchive.lo \
+	sr_utf8_codecvt_facet.lo
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_27 = $(am__objects_24) \
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25) \
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26)
 am__objects_28 = $(am__objects_24)
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_29 = $(am__objects_28) \
+am__objects_29 = basic_archive.lo basic_iarchive.lo \
+	basic_iserializer.lo basic_oarchive.lo basic_oserializer.lo \
+	basic_pointer_iserializer.lo basic_pointer_oserializer.lo \
+	basic_serializer_map.lo basic_text_iprimitive.lo \
+	basic_text_oprimitive.lo basic_text_wiprimitive.lo \
+	basic_text_woprimitive.lo basic_xml_archive.lo \
+	binary_iarchive.lo binary_oarchive.lo binary_wiarchive.lo \
+	binary_woarchive.lo codecvt_null.lo extended_type_info.lo \
+	extended_type_info_no_rtti.lo extended_type_info_typeid.lo \
+	polymorphic_iarchive.lo polymorphic_oarchive.lo stl_port.lo \
+	text_iarchive.lo text_oarchive.lo text_wiarchive.lo \
+	text_woarchive.lo void_cast.lo xml_grammar.lo xml_iarchive.lo \
+	xml_oarchive.lo xml_wgrammar.lo xml_wiarchive.lo \
+	xml_woarchive.lo sr_utf8_codecvt_facet.lo
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_30 = $(am__objects_28) \
 @BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25) \
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26)
-am__objects_30 = connection.lo named_slot_map.lo signal_base.lo \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_29)
+am__objects_31 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_31 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_30)
-am__objects_32 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_32 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_31)
+am__objects_33 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_33 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_32)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_34 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_33)
 nodist_libalps_la_OBJECTS = $(am__objects_15) $(am__objects_19) \
-	$(am__objects_23) $(am__objects_27) $(am__objects_29) \
-	$(am__objects_31) $(am__objects_33)
+	$(am__objects_23) $(am__objects_27) $(am__objects_30) \
+	$(am__objects_32) $(am__objects_34)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -576,8 +604,83 @@ src_boost_SERIALIZATION_1_33 = \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
 
-src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
-src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_33)
+src_boost_SERIALIZATION_1_34 = \
+  $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp \
+  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
+  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
+
+src_boost_SERIALIZATION_CVS = \
+  $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
+  $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp \
+  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
+  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
+
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp \
@@ -685,8 +788,13 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_serializer_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_text_iprimitive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_text_oprimitive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_text_wiprimitive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_text_woprimitive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_xml_archive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_oarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_wiarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/binary_woarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/bondterm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/c_regex_traits_common.Plo@am__quote@
@@ -773,6 +881,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/task.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_oarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_wiarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_woarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/thread.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/throw_exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/trackable.Plo@am__quote@
@@ -791,6 +901,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workertask.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdrcore.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdrdump.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_grammar.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_iarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_oarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_wgrammar.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_wiarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_woarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlattributes.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlhandler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xmlparser.Plo@am__quote@
@@ -1595,6 +1711,97 @@ fs_utf8_codecvt_facet.lo: $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp' object='fs_utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fs_utf8_codecvt_facet.lo `test -f '$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
+
+basic_text_wiprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_wiprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_wiprimitive.Tpo" -c -o basic_text_wiprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_wiprimitive.Tpo" "$(DEPDIR)/basic_text_wiprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_wiprimitive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' object='basic_text_wiprimitive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_wiprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
+
+basic_text_woprimitive.lo: $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_text_woprimitive.lo -MD -MP -MF "$(DEPDIR)/basic_text_woprimitive.Tpo" -c -o basic_text_woprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_text_woprimitive.Tpo" "$(DEPDIR)/basic_text_woprimitive.Plo"; else rm -f "$(DEPDIR)/basic_text_woprimitive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' object='basic_text_woprimitive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_text_woprimitive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
+
+basic_xml_archive.lo: $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_xml_archive.lo -MD -MP -MF "$(DEPDIR)/basic_xml_archive.Tpo" -c -o basic_xml_archive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_xml_archive.Tpo" "$(DEPDIR)/basic_xml_archive.Plo"; else rm -f "$(DEPDIR)/basic_xml_archive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp' object='basic_xml_archive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_xml_archive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp
+
+binary_wiarchive.lo: $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_wiarchive.lo -MD -MP -MF "$(DEPDIR)/binary_wiarchive.Tpo" -c -o binary_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_wiarchive.Tpo" "$(DEPDIR)/binary_wiarchive.Plo"; else rm -f "$(DEPDIR)/binary_wiarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' object='binary_wiarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp
+
+binary_woarchive.lo: $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT binary_woarchive.lo -MD -MP -MF "$(DEPDIR)/binary_woarchive.Tpo" -c -o binary_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/binary_woarchive.Tpo" "$(DEPDIR)/binary_woarchive.Plo"; else rm -f "$(DEPDIR)/binary_woarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' object='binary_woarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o binary_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp
+
+text_wiarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_wiarchive.lo -MD -MP -MF "$(DEPDIR)/text_wiarchive.Tpo" -c -o text_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_wiarchive.Tpo" "$(DEPDIR)/text_wiarchive.Plo"; else rm -f "$(DEPDIR)/text_wiarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' object='text_wiarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
+
+text_woarchive.lo: $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_woarchive.lo -MD -MP -MF "$(DEPDIR)/text_woarchive.Tpo" -c -o text_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/text_woarchive.Tpo" "$(DEPDIR)/text_woarchive.Plo"; else rm -f "$(DEPDIR)/text_woarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' object='text_woarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
+
+xml_grammar.lo: $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xml_grammar.lo -MD -MP -MF "$(DEPDIR)/xml_grammar.Tpo" -c -o xml_grammar.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xml_grammar.Tpo" "$(DEPDIR)/xml_grammar.Plo"; else rm -f "$(DEPDIR)/xml_grammar.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp' object='xml_grammar.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_grammar.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp
+
+xml_iarchive.lo: $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xml_iarchive.lo -MD -MP -MF "$(DEPDIR)/xml_iarchive.Tpo" -c -o xml_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xml_iarchive.Tpo" "$(DEPDIR)/xml_iarchive.Plo"; else rm -f "$(DEPDIR)/xml_iarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp' object='xml_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_iarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp
+
+xml_oarchive.lo: $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xml_oarchive.lo -MD -MP -MF "$(DEPDIR)/xml_oarchive.Tpo" -c -o xml_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xml_oarchive.Tpo" "$(DEPDIR)/xml_oarchive.Plo"; else rm -f "$(DEPDIR)/xml_oarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp' object='xml_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_oarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp
+
+xml_wgrammar.lo: $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xml_wgrammar.lo -MD -MP -MF "$(DEPDIR)/xml_wgrammar.Tpo" -c -o xml_wgrammar.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xml_wgrammar.Tpo" "$(DEPDIR)/xml_wgrammar.Plo"; else rm -f "$(DEPDIR)/xml_wgrammar.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp' object='xml_wgrammar.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_wgrammar.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp
+
+xml_wiarchive.lo: $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xml_wiarchive.lo -MD -MP -MF "$(DEPDIR)/xml_wiarchive.Tpo" -c -o xml_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xml_wiarchive.Tpo" "$(DEPDIR)/xml_wiarchive.Plo"; else rm -f "$(DEPDIR)/xml_wiarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp' object='xml_wiarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_wiarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp
+
+xml_woarchive.lo: $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xml_woarchive.lo -MD -MP -MF "$(DEPDIR)/xml_woarchive.Tpo" -c -o xml_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/xml_woarchive.Tpo" "$(DEPDIR)/xml_woarchive.Plo"; else rm -f "$(DEPDIR)/xml_woarchive.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp' object='xml_woarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 
 connection.lo: $(BOOST_SRCDIR)/signals/src/connection.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT connection.lo -MD -MP -MF "$(DEPDIR)/connection.Tpo" -c -o connection.lo `test -f '$(BOOST_SRCDIR)/signals/src/connection.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/connection.cpp; \
