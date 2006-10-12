@@ -167,12 +167,7 @@ src_boost_SERIALIZATION_1_33 = \
   $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
 src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
-src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_32) \
-  $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
+src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_33)
 
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \

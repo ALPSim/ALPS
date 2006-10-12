@@ -191,23 +191,20 @@ am__objects_26 = $(am__objects_22)
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25) \
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26)
 am__objects_28 = $(am__objects_24)
-am__objects_29 = $(am__objects_18) basic_iserializer.lo \
-	basic_oserializer.lo basic_pointer_iserializer.lo \
-	basic_pointer_oserializer.lo stl_port.lo
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_30 = $(am__objects_28) \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_29 = $(am__objects_28) \
 @BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_25) \
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_29)
-am__objects_31 = connection.lo named_slot_map.lo signal_base.lo \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26)
+am__objects_30 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_32 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_31)
-am__objects_33 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_31 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_30)
+am__objects_32 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_34 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_33)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_33 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_32)
 nodist_libalps_la_OBJECTS = $(am__objects_15) $(am__objects_19) \
-	$(am__objects_23) $(am__objects_27) $(am__objects_30) \
-	$(am__objects_32) $(am__objects_34)
+	$(am__objects_23) $(am__objects_27) $(am__objects_29) \
+	$(am__objects_31) $(am__objects_33)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -580,13 +577,7 @@ src_boost_SERIALIZATION_1_33 = \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
 
 src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
-src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_32) \
-  $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
-
+src_boost_SERIALIZATION_CVS = $(src_boost_SERIALIZATION_1_33)
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp \
