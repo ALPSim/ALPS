@@ -28,7 +28,7 @@ AC_DEFUN([AC_SQLITE],
   )
 
   if test -z "$sqlite_incdir"; then
-    for d in /usr/local; do
+    for d in $PREFIX /usr/local; do
       if test -f "$d/include/sqlite3.h"; then
         sqlite_incdir="$d/include"
         if test -z "$sqlite_libdir"; then
