@@ -6,13 +6,10 @@ LIBS_SGL = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libc
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
-TESTS = 
-TESTS_norun = evaluate evaluate2 main main2 main3
+check_PROGRAMS = evaluate evaluate2 main main2 main3
 if HAVE_MPI
-TESTS_norun += main_mpi main2_mpi main3_mpi
+check_PROGRAMS += main_mpi main2_mpi main3_mpi
 endif
-check_PROGRAMS = $(TESTS) $(TESTS_norun)
-TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 
 evaluate_SOURCES = evaluate.C
 evaluate_LDFLAGS = $(LDFLAGS_SGL)
