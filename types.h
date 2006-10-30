@@ -43,7 +43,7 @@ typedef std::vector<std::complex<double> > complex_vector_type;
 typedef std::pair<complex_vector_type,complex_vector_type> multiple_complex_vector_type;
 
 ///dense matrix
-typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
+//typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 ///complex matrix
 typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_matrix;
 
