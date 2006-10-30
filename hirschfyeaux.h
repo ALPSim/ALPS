@@ -47,6 +47,7 @@
 #include <algorithm>
 #include <cmath>
 
+typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 ///@brief Save a matrix
 ///@parm odump Alps dump
 ///@parm m The dense matrix to be stored

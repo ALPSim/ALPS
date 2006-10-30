@@ -53,6 +53,8 @@
 #include <cmath>
 
 
+typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
+
 class HirschFyeSim : public alps::scheduler::MCSimulation, public alps::ImpurityTask
 {
 public:
