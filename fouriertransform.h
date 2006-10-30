@@ -31,6 +31,7 @@
 #include "types.h" // for the multiple_vector_type
 #include "green_function.h" // for the multiple_vector_type
 #include <alps/parameters.h>
+typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
 void generate_spline_matrix(dense_matrix & spline_matrix);
 void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs);
@@ -92,7 +93,7 @@ class FourierTransformer{
       beta_=beta;
       mu_=mu;
       c1_=1.;
-      c2_=mu/beta;
+      c2_=mu/*/beta*/;
       c3_=0.;
     }
     virtual ~FourierTransformer(){}
@@ -112,13 +113,13 @@ class BetheFourierTransformer:public FourierTransformer{
   public:
   BetheFourierTransformer(double beta, double mu, double t):FourierTransformer(beta, mu){
     t_=t;
-    c3_=(mu_*mu_+t_*t_)/(beta*beta);
+    c3_=(mu_*mu_+t_*t_)/*/(beta*beta)*/;
     U_=0;
   }
   BetheFourierTransformer(double beta, double mu, double t, double U):FourierTransformer(beta, mu){
     t_=t;
     U_=U;
-    c3_=(mu_*mu_+t_*t_+ U_*U_/4.)/(beta*beta); //the U-trick: for the GF (not bgf)
+    c3_=(mu_*mu_+t_*t_+ U_*U_/4.)/*/(beta*beta)*/; //the U-trick: for the GF (not bgf)
     std::cerr<<"using Bethe Fourier Transformer! "<<std::endl;
     std::cerr<<"mu=: "<<mu_<<std::endl;
     std::cerr<<"beta=: "<<beta_<<std::endl;
@@ -156,6 +157,4 @@ class FFunctionFourierTransformer:public FourierTransformer{
   private:
     double t_;
 };
-
-//FOURIER_TRANSFORM_H
-#endif 
+#endif
