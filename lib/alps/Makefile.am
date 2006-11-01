@@ -120,10 +120,13 @@ src_boost_REGEX_1_33 = \
   $(BOOST_SRCDIR)/regex/src/regex_traits_defaults.cpp \
   $(BOOST_SRCDIR)/regex/src/static_mutex.cpp \
   $(BOOST_SRCDIR)/regex/src/usinstances.cpp \
-  $(BOOST_SRCDIR)/regex/src/w32_regex_traits.cpp \
+  $(BOOST_SRCDIR)/regex/src/w32_regex_traits.cpp
+if BUILD_BOOST_WCHAR
+src_boost_REGEX_1_33 += \
   $(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp \
   $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp \
   $(BOOST_SRCDIR)/regex/src/winstances.cpp
+endif
 src_boost_REGEX_1_34 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_CVS = $(src_boost_REGEX_1_33)
 
@@ -177,13 +180,9 @@ src_boost_SERIALIZATION_1_34 = \
   $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
@@ -193,16 +192,23 @@ src_boost_SERIALIZATION_1_34 = \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
+  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
+if BUILD_BOOST_WCHAR
+src_boost_SERIALIZATION_1_34 += \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
-  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
+  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
+endif
 src_boost_SERIALIZATION_CVS = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
@@ -214,13 +220,9 @@ src_boost_SERIALIZATION_CVS = \
   $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
   $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
@@ -230,16 +232,23 @@ src_boost_SERIALIZATION_CVS = \
   $(BOOST_SRCDIR)/serialization/src/stl_port.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
+  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
+if BUILD_BOOST_WCHAR
+src_boost_SERIALIZATION_CVS += \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
-  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
+  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
+endif
 
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \

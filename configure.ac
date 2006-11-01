@@ -296,6 +296,15 @@ AC_ARG_WITH(boost-thread,
     fi
   ]
 )
+AC_ARG_WITH(boost-wchar,
+  AC_HELP_STRING([--without-boost-wchar],[compile without wchar support in boost::regex and boost::serialization libraries]), [
+    if test "x$withval" = "xno"; then
+      ac_cv_boost_wchar=no
+    else
+      ac_cv_boost_wchar=yes
+    fi
+  ]
+)
 
 boost_dir_s=
 
@@ -670,6 +679,13 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   fi
 fi
 
+# check whether boost::thread is compiled
+if test "$ac_cv_use_precompiled_boost" = yes; then :; else
+  AC_MSG_CHECKING([for wchar support in boost::regex and boost::serialization])
+  test -z "$ac_cv_boost_wchar" && ac_cv_boost_wchar=yes
+  AC_MSG_RESULT([$ac_cv_boost_wchar])
+fi
+
 # check whether Boost::configure is used or not
 AC_ARG_ENABLE(boost-config,
   AC_HELP_STRING([--enable-boost-config],
@@ -860,6 +876,7 @@ AM_CONDITIONAL(BOOST_CVS, test "$ac_cv_boost_version" = cvs)
 AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
 AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_boost_signals" = yes)
 AM_CONDITIONAL(BUILD_BOOST_THREAD, test "$ac_cv_boost_thread" = yes)
+AM_CONDITIONAL(BUILD_BOOST_WCHAR, test "$ac_cv_boost_wchar" = yes)
 AM_CONDITIONAL(BUILD_DOC, test "$build_doc" = yes)
 AM_CONDITIONAL(BUILD_PDF, test "$build_pdf" = yes)
 AM_CONDITIONAL(BUILD_LIBHEAP, test "$ac_cv_libheap" = yes)
