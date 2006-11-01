@@ -1069,7 +1069,7 @@ Optional Packages:
   --with-boost-all        compile all optional Boost libraries
   --with-boost-signals    compile Boost::signals library
   --with-boost-thread     compile boost::thread library
-  --without-boost-wchar   compile without wchar support in boost::regex and
+  --with-boost-wchar      compile with wchar support in boost::regex and
                           boost::serialization libraries
   --with-pthread          use pthread library
   --with-hdf5=DIR         use HDF5 library
@@ -28470,8 +28470,8 @@ fi
 
 # check whether Boost::signals is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  echo "$as_me:$LINENO: checking whether Boost::signals is compiled" >&5
-echo $ECHO_N "checking whether Boost::signals is compiled... $ECHO_C" >&6
+  echo "$as_me:$LINENO: checking whether to build boost::signals" >&5
+echo $ECHO_N "checking whether to build boost::signals... $ECHO_C" >&6
   test -z "$ac_cv_boost_signals" && ac_cv_boost_signals=no
   if test "$ac_cv_boost_signals" = yes; then
     echo "$as_me:$LINENO: result: yes" >&5
@@ -28484,8 +28484,8 @@ fi
 
 # check whether boost::thread is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  echo "$as_me:$LINENO: checking whether boost::thread is compiled" >&5
-echo $ECHO_N "checking whether boost::thread is compiled... $ECHO_C" >&6
+  echo "$as_me:$LINENO: checking whether to build boost::thread" >&5
+echo $ECHO_N "checking whether to build boost::thread... $ECHO_C" >&6
   test -z "$ac_cv_boost_thread" && ac_cv_boost_thread=no
   if test "$ac_cv_have_pthread" = yes; then
     if test "$ac_cv_boost_thread" = yes; then
@@ -28503,9 +28503,9 @@ fi
 
 # check whether boost::thread is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  echo "$as_me:$LINENO: checking for wchar support in boost::regex and boost::serialization" >&5
-echo $ECHO_N "checking for wchar support in boost::regex and boost::serialization... $ECHO_C" >&6
-  test -z "$ac_cv_boost_wchar" && ac_cv_boost_wchar=yes
+  echo "$as_me:$LINENO: checking whether to enable wchar support in boost::regex and boost::serialization" >&5
+echo $ECHO_N "checking whether to enable wchar support in boost::regex and boost::serialization... $ECHO_C" >&6
+  test -z "$ac_cv_boost_wchar" && ac_cv_boost_wchar=no
   echo "$as_me:$LINENO: result: $ac_cv_boost_wchar" >&5
 echo "${ECHO_T}$ac_cv_boost_wchar" >&6
 fi
@@ -28526,8 +28526,8 @@ BOOST_USER_CONFIG_H=
 if test "$ac_cv_use_precompiled_boost" = yes; then
   ac_cv_boost_config=no
 else
-  echo "$as_me:$LINENO: checking whether use Boost configuration header file" >&5
-echo $ECHO_N "checking whether use Boost configuration header file... $ECHO_C" >&6
+  echo "$as_me:$LINENO: checking whether to run Boost configure script" >&5
+echo $ECHO_N "checking whether to run Boost configure script... $ECHO_C" >&6
   test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
   if test "$ac_cv_boost_config" = yes; then
     ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"

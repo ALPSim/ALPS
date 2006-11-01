@@ -297,7 +297,7 @@ AC_ARG_WITH(boost-thread,
   ]
 )
 AC_ARG_WITH(boost-wchar,
-  AC_HELP_STRING([--without-boost-wchar],[compile without wchar support in boost::regex and boost::serialization libraries]), [
+  AC_HELP_STRING([--with-boost-wchar],[compile with wchar support in boost::regex and boost::serialization libraries]), [
     if test "x$withval" = "xno"; then
       ac_cv_boost_wchar=no
     else
@@ -655,7 +655,7 @@ fi
 
 # check whether Boost::signals is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  AC_MSG_CHECKING([whether Boost::signals is compiled])
+  AC_MSG_CHECKING([whether to build boost::signals])
   test -z "$ac_cv_boost_signals" && ac_cv_boost_signals=no
   if test "$ac_cv_boost_signals" = yes; then
     AC_MSG_RESULT([yes])
@@ -666,7 +666,7 @@ fi
 
 # check whether boost::thread is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  AC_MSG_CHECKING([whether boost::thread is compiled])
+  AC_MSG_CHECKING([whether to build boost::thread])
   test -z "$ac_cv_boost_thread" && ac_cv_boost_thread=no
   if test "$ac_cv_have_pthread" = yes; then
     if test "$ac_cv_boost_thread" = yes; then
@@ -681,8 +681,8 @@ fi
 
 # check whether boost::thread is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  AC_MSG_CHECKING([for wchar support in boost::regex and boost::serialization])
-  test -z "$ac_cv_boost_wchar" && ac_cv_boost_wchar=yes
+  AC_MSG_CHECKING([whether to enable wchar support in boost::regex and boost::serialization])
+  test -z "$ac_cv_boost_wchar" && ac_cv_boost_wchar=no
   AC_MSG_RESULT([$ac_cv_boost_wchar])
 fi
 
@@ -701,7 +701,7 @@ BOOST_USER_CONFIG_H=
 if test "$ac_cv_use_precompiled_boost" = yes; then
   ac_cv_boost_config=no
 else
-  AC_MSG_CHECKING([whether use Boost configuration header file])
+  AC_MSG_CHECKING([whether to run Boost configure script])
   test -z "$ac_cv_boost_config" && ac_cv_boost_config=no
   if test "$ac_cv_boost_config" = yes; then
     ac_cv_boost_config="$includedir/$PACKAGE_NAME/boost-user.hpp"
