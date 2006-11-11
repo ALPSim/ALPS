@@ -69,7 +69,7 @@ host_triplet = @host@
 @BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__append_7 = $(src_boost_FILESYSTEM_1_32) $(src_boost_REGEX_1_32) $(src_boost_SERIALIZATION_1_32)
 @BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__append_8 = $(src_boost_FILESYSTEM_1_33) $(src_boost_REGEX_1_33) $(src_boost_SERIALIZATION_1_33)
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__append_9 = $(src_boost_FILESYSTEM_1_34) $(src_boost_REGEX_1_34) $(src_boost_SERIALIZATION_1_34)
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__append_10 = $(src_boost_FILESYSTEM_CVS) $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS)
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__append_10 = $(src_boost_FILESYSTEM_CVS) $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS) $(src_BOOST_SYSTEM_CVS)
 @BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__append_11 = $(src_boost_SIGNALS)
 @BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__append_12 = $(src_boost_THREAD)
 subdir = lib/alps
@@ -236,7 +236,8 @@ am__objects_28 = basic_archive.lo basic_archive_impl.lo \
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_29 = $(am__objects_25) \
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26) \
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_28)
-am__objects_30 = $(am__objects_25)
+am__objects_30 = operations.lo path.lo portability.lo \
+	fs_utf8_codecvt_facet.lo
 am__objects_31 = basic_archive.lo basic_iarchive.lo \
 	basic_iserializer.lo basic_oarchive.lo basic_oserializer.lo \
 	basic_pointer_iserializer.lo basic_pointer_oserializer.lo \
@@ -248,20 +249,22 @@ am__objects_31 = basic_archive.lo basic_iarchive.lo \
 	polymorphic_oarchive.lo stl_port.lo text_iarchive.lo \
 	text_oarchive.lo void_cast.lo xml_grammar.lo xml_iarchive.lo \
 	xml_oarchive.lo sr_utf8_codecvt_facet.lo $(am__objects_27)
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_32 = $(am__objects_30) \
+am__objects_32 = error_code.lo
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_33 = $(am__objects_30) \
 @BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26) \
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_31)
-am__objects_33 = connection.lo named_slot_map.lo signal_base.lo \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_31) \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_32)
+am__objects_34 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_34 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_33)
-am__objects_35 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_35 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_34)
+am__objects_36 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_36 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_35)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_37 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_36)
 nodist_libalps_la_OBJECTS = $(am__objects_15) $(am__objects_19) \
-	$(am__objects_24) $(am__objects_29) $(am__objects_32) \
-	$(am__objects_34) $(am__objects_36)
+	$(am__objects_24) $(am__objects_29) $(am__objects_33) \
+	$(am__objects_35) $(am__objects_37)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -546,7 +549,15 @@ src_boost_FILESYSTEM_1_34 = \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 
-src_boost_FILESYSTEM_CVS = $(src_boost_FILESYSTEM_1_34)
+src_boost_FILESYSTEM_CVS = \
+  $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
+  $(BOOST_SRCDIR)/filesystem/src/path.cpp \
+  $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
+  $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
+
+src_BOOST_SYSTEM_CVS = \
+  $(BOOST_SRCDIR)/system/src/error_code.cpp
+
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
   $(BOOST_SRCDIR)/program_options/src/config_file.cpp \
@@ -818,6 +829,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cregex.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/date_generators.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/disorder.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error_code.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evaluator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exceptions.Plo@am__quote@
@@ -1810,6 +1822,13 @@ xml_woarchive.lo: $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp' object='xml_woarchive.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
+
+error_code.lo: $(BOOST_SRCDIR)/system/src/error_code.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT error_code.lo -MD -MP -MF "$(DEPDIR)/error_code.Tpo" -c -o error_code.lo `test -f '$(BOOST_SRCDIR)/system/src/error_code.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/system/src/error_code.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/error_code.Tpo" "$(DEPDIR)/error_code.Plo"; else rm -f "$(DEPDIR)/error_code.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/system/src/error_code.cpp' object='error_code.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o error_code.lo `test -f '$(BOOST_SRCDIR)/system/src/error_code.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/system/src/error_code.cpp
 
 connection.lo: $(BOOST_SRCDIR)/signals/src/connection.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT connection.lo -MD -MP -MF "$(DEPDIR)/connection.Tpo" -c -o connection.lo `test -f '$(BOOST_SRCDIR)/signals/src/connection.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/connection.cpp; \

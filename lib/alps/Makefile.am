@@ -78,7 +78,14 @@ src_boost_FILESYSTEM_1_34 = \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-src_boost_FILESYSTEM_CVS = $(src_boost_FILESYSTEM_1_34)
+src_boost_FILESYSTEM_CVS = \
+  $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
+  $(BOOST_SRCDIR)/filesystem/src/path.cpp \
+  $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
+  $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
+  
+src_BOOST_SYSTEM_CVS = \
+  $(BOOST_SRCDIR)/system/src/error_code.cpp
 
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -295,7 +302,7 @@ nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_34) $(src_boost_REGEX_1_34
 endif
 
 if BOOST_CVS
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_CVS) $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS)
+nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_CVS) $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS) $(src_BOOST_SYSTEM_CVS)
 endif
 
 if BUILD_BOOST_SIGNALS
