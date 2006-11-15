@@ -69,7 +69,7 @@ public:
 	///operator() implements abstract virtual operator() of base class HilbertTransformer and performs the actual Hilbert transformation.
 	itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier, double mu, double h, double beta, bool paramagnet)
 	{
-		
+		if(h!=0) std::cerr<<"ignoring magnetic field!"<<std::endl;
 		double tsq=t_*t_;
                 matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
                 matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());

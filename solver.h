@@ -36,7 +36,7 @@
 #include "types.h"
 #include "green_function.h"
 
-#include <alps/parameters.h>
+#include <alps/parameter.h>
 #include <vector>
 #include <utility>
 

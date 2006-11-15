@@ -33,7 +33,6 @@ int main(int argc, char** argv){
   trans1.forward_ft(G_tau, G_omega); 
   std::cout.precision(20);
   for (int i=0; i<N; i++) {
-    //std::cout<<(2*i+1)*M_PI/beta<<" "<<G_omega(i,0).real()<<" "<<G_omega(i,0).imag()<<" "<<f_omega(std::complex<double>(0, (2*i+1)*M_PI/beta),1,c2,c3)<<std::endl;
     std::cout<<(2*i+1)*M_PI/beta<<" "<<G_omega(i,0).imag()<<std::endl;
     //G_omega(i,0).real()=0;
   }

@@ -41,7 +41,7 @@
 #include "../DMFT-solvers/Werner/impurity.h"
 #endif
 
-#include <alps/parameters.h>
+#include <alps/parameter.h>
 #include <alps/copyright.h>
 
 #include <iostream>

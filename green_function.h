@@ -114,7 +114,6 @@ template <typename T> class green_function{
 	const uint nf_; ///number of flavors
 	const uint ntnsns_; ///nt*ns*ns
 	const uint ntns_; ///nt*ns
-
 	// the actual values and errors.
         T *val_;
         T *err_;

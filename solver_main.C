@@ -29,7 +29,7 @@
 
 #include "hirschfyesim.h"
 #include "xml.h"
-#include <alps/parameters.h>
+#include <alps/parameter.h>
 #include <alps/copyright.h>
 #include <alps/vectorio.h>
 #include <boost/throw_exception.hpp>
