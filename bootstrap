@@ -9,6 +9,11 @@ fi
 am_require=1.9.6
 ac_require=2.59
 lt_require=1.5.22
+if `(glibtoolize --version) > /dev/null 2>&1`; then
+  LIBTOOLIZE=glibtoolize
+else
+  LIBTOOLIZE=libtoolize
+fi
 
 if test -f configure.ac; then :; else
   echo "Error: configure.ac not found." 1>&2
@@ -18,7 +23,7 @@ fi
 if test "x$force_version" = xyes; then
   am_version=`automake --version 2>&1 | head -1 | cut -d ' ' -f 4`
   ac_version=`autoconf --version 2>&1 | head -1 | cut -d ' ' -f 4`
-  lt_version=`libtoolize --version 2>&1 | head -1 | cut -d ' ' -f 4`
+  lt_version=`$LIBTOOLIZE --version 2>&1 | head -1 | cut -d ' ' -f 4`
 
   have_autotools=yes
   if test "x$am_version" != "x$am_require"; then
@@ -46,8 +51,8 @@ echo aclocal $aclocal_flags
      aclocal $aclocal_flags
 [ "$?" -ne 0 ] && exit $?
 
-echo libtoolize --force --copy
-     libtoolize --force --copy
+echo $LIBTOOLIZE --force --copy
+     $LIBTOOLIZE --force --copy
 [ "$?" -ne 0 ] && exit $?
 
 find . -name config.h.in | xargs touch
