@@ -137,13 +137,19 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
   // create measurement objects
   measurements << RealVectorObservable("G_meas_up");
   measurements << RealVectorObservable("G_meas_down");  
-  measurements << SimpleRealVectorObservable("G_fourpoint");  
+  measurements << SimpleRealVectorObservable("G_fourpoint_uu");  
+  measurements << SimpleRealVectorObservable("G_fourpoint_dd");  
+  measurements << SimpleRealVectorObservable("G_fourpoint_ud");  
+  measurements << SimpleRealVectorObservable("G_fourpoint_du");  
   
   //reset the measurment objects
 
   measurements.get<RealVectorObservable>("G_meas_up").reset(true);
   measurements.get<RealVectorObservable>("G_meas_down").reset(true);
-  measurements.get<SimpleRealVectorObservable>("G_fourpoint").reset(true);
+  measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").reset(true);
+  measurements.get<SimpleRealVectorObservable>("G_fourpoint_dd").reset(true);
+  measurements.get<SimpleRealVectorObservable>("G_fourpoint_ud").reset(true);
+  measurements.get<SimpleRealVectorObservable>("G_fourpoint_du").reset(true);
   
 }
 
@@ -203,28 +209,50 @@ void HirschFyeRun::dostep()
   	measurements.get<RealVectorObservable>("G_meas_down") << G_down;
   }
   if(is_thermalized() && measure_fourpoint){
-    std::valarray<double> G_ijkl(N*N*N*N);
-    std::valarray<double> G_ij_up(N*N);
-    std::valarray<double> G_ij_dn(N*N);
-    int N2=N*N;
-    for(int i=0;i<N;++i){
+    int s=Green_up.size1();
+    int s3=s*s*s;
+    int s2=s*s;
+    std::valarray<double> G_ijkl_uu(s*s*s*s);
+    std::valarray<double> G_ijkl_dd(s*s*s*s);
+    std::valarray<double> G_ijkl_ud(s*s*s*s);
+    std::valarray<double> G_ijkl_du(s*s*s*s);
+    /*for(int i=0;i<N;++i){
       for(int j=0;j<N;++j){
         G_ij_up[N*i+j]=Green_up  (i,j); //G_up(tau_i - tau_j)
         G_ij_dn[N*i+j]=Green_down(i,j); //G_down(tau_i - tau_j)
        //std::cout<<i<<" "<<j<<"\t"<<G_ij_up[N*i+j]<<" "<<G_ij_dn[N*i+j]<<std::endl;
       }
-    }
-    for(int i=0;i<N2;++i){
-      for(int k=0;k<N2;++k){
-        G_ijkl[i*N2+k]=G_ij_up[i]*G_ij_dn[k];
+    }*/
+    //std::cout<<"size s is: "<<s<<std::endl;
+    for(int i=0;i<s;++i){
+      for(int j=0;j<s;++j){
+        for(int k=0;k<s;++k){
+          for(int l=0;l<s;++l){
+            //std::cout<<i<<" "<<j<<" "<<k<<" "<<l<<std::endl;
+            G_ijkl_uu[i*s3+j*s2+k*s+l]=Green_up(j,i)*Green_up(l,k)-Green_up(j,k)*Green_up(l,i); //check review formula 154
+            G_ijkl_dd[i*s3+j*s2+k*s+l]=Green_down(j,i)*Green_down(l,k)-Green_down(j,k)*Green_down(l,i);
+            G_ijkl_ud[i*s3+j*s2+k*s+l]=Green_up(j,i)*Green_down(l,k);
+            G_ijkl_du[i*s3+j*s2+k*s+l]=Green_down(j,i)*Green_up(l,k);
+          }
+        }
       }
     }
-    measurements.get<SimpleRealVectorObservable>("G_fourpoint")<<G_ijkl;
+    if(sweeps % 100 == 0){
+      std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
+    std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<G_ijkl_uu[16+1]<<std::endl;
+    }
+    //std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<std::endl;
+    measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu")<<G_ijkl_uu;
+    measurements.get<SimpleRealVectorObservable>("G_fourpoint_dd")<<G_ijkl_dd;
+    measurements.get<SimpleRealVectorObservable>("G_fourpoint_ud")<<G_ijkl_ud;
+    measurements.get<SimpleRealVectorObservable>("G_fourpoint_du")<<G_ijkl_du;
+    //std::cout<<"mean of 0: "<<measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").mean()[0]<<" "<<measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").mean()[s3]<<std::endl;
   }
   //only for equilibration measurement
   if(is_thermalized() && sweeps % 10000 ==0){
     static std::ofstream equ_file("equilibration.dat");
     equ_file<<sweeps<<"\t"<<measurements.get<RealVectorObservable>("G_meas_up").mean()[0]<<"\t"<<measurements.get<RealVectorObservable>("G_meas_up").error()[0]<<std::endl;
+    //std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
   }
 	
   // check if precision has deteriorated
@@ -313,17 +341,34 @@ itime_green_function_t HirschFyeSim::get_result() const {
   alps::RealVectorObsevaluator G_meas_up=meas["G_meas_up"];
   alps::RealVectorObsevaluator G_meas_down=meas["G_meas_down"];  
   if(parms.defined("MEASURE_FOURPOINT_FUNCTION")){
-    alps::RealVectorObsevaluator G_fourp=meas["G_fourpoint"];  
-    std::ofstream fourp("fourpoint.dat");
-    std::valarray<double> mean_array(G_fourp.mean());
-    std::valarray<double> error_array(G_fourp.error());
-    int N3=N*N*N;
-    int N2=N*N;
-    for(int i=0;i<N;++i){
-      for(int j=0;j<N;++j){
-        for(int k=0;k<N;++k){
-          for(int l=0;l<N;++l){
-            fourp<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array[i*N3+j*N2+k*N+l]<<" "<<error_array[i*N3+j*N2+k*N+l]<<std::endl;
+    int s=N;
+    alps::RealVectorObsevaluator G_fourp_uu=meas["G_fourpoint_uu"];  
+    alps::RealVectorObsevaluator G_fourp_dd=meas["G_fourpoint_dd"];  
+    alps::RealVectorObsevaluator G_fourp_ud=meas["G_fourpoint_ud"];  
+    alps::RealVectorObsevaluator G_fourp_du=meas["G_fourpoint_du"];  
+    std::ofstream fourp_uu("fourpoint_uu.dat");
+    std::ofstream fourp_dd("fourpoint_dd.dat");
+    std::ofstream fourp_ud("fourpoint_ud.dat");
+    std::ofstream fourp_du("fourpoint_du.dat");
+    std::valarray<double> mean_array_uu(G_fourp_uu.mean());
+    std::valarray<double> mean_array_dd(G_fourp_dd.mean());
+    std::valarray<double> mean_array_ud(G_fourp_ud.mean());
+    std::valarray<double> mean_array_du(G_fourp_du.mean());
+    std::valarray<double> error_array_uu(G_fourp_uu.error());
+    std::valarray<double> error_array_dd(G_fourp_dd.error());
+    std::valarray<double> error_array_ud(G_fourp_ud.error());
+    std::valarray<double> error_array_du(G_fourp_du.error());
+    int s3=s*s*s;
+    int s2=s*s;
+    std::cout<<"fourpoint size: "<<mean_array_uu.size()<<" "<<s*s*s*s<<std::endl;
+    for(int i=0;i<s;++i){
+      for(int j=0;j<s;++j){
+        for(int k=0;k<s;++k){
+          for(int l=0;l<s;++l){
+            fourp_uu<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array_uu[i*s3+j*s2+k*s+l]<<" "<<error_array_uu[i*s3+j*s2+k*s+l]<<std::endl;
+            fourp_dd<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array_dd[i*s3+j*s2+k*s+l]<<" "<<error_array_dd[i*s3+j*s2+k*s+l]<<std::endl;
+            fourp_ud<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array_ud[i*s3+j*s2+k*s+l]<<" "<<error_array_ud[i*s3+j*s2+k*s+l]<<std::endl;
+            fourp_du<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array_du[i*s3+j*s2+k*s+l]<<" "<<error_array_du[i*s3+j*s2+k*s+l]<<std::endl;
           }
         }
       }
