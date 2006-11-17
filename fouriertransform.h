@@ -31,7 +31,7 @@
 #include "types.h" // for the multiple_vector_type
 #include "green_function.h" // for the multiple_vector_type
 #include <alps/parameter.h>
-
+typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 void generate_spline_matrix(dense_matrix & spline_matrix);
 void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs);
 //example:  V = vector_type
