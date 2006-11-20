@@ -34,6 +34,7 @@
 #include "xml.h"
 #include <alps/alea.h>
 #include <cmath>
+#include "../blas_classes/vector.h"
 using namespace std;
 using namespace alps;
 
@@ -212,10 +213,10 @@ void HirschFyeRun::dostep()
     int s=Green_up.size1();
     int s3=s*s*s;
     int s2=s*s;
-    std::valarray<double> G_ijkl_uu(s*s*s*s);
-    std::valarray<double> G_ijkl_dd(s*s*s*s);
-    std::valarray<double> G_ijkl_ud(s*s*s*s);
-    std::valarray<double> G_ijkl_du(s*s*s*s);
+    static blas::vector G_ijkl_uu(s*s*s*s, 0);
+    static blas::vector G_ijkl_dd(s*s*s*s, 0);
+    static blas::vector G_ijkl_du(s*s*s*s, 0);
+    static blas::vector G_ijkl_ud(s*s*s*s, 0);
     /*for(int i=0;i<N;++i){
       for(int j=0;j<N;++j){
         G_ij_up[N*i+j]=Green_up  (i,j); //G_up(tau_i - tau_j)
@@ -226,26 +227,51 @@ void HirschFyeRun::dostep()
     //std::cout<<"size s is: "<<s<<std::endl;
     for(int i=0;i<s;++i){
       for(int j=0;j<s;++j){
+        double guji=Green_up(j, i);
+        double gdji=Green_down(j, i);
         for(int k=0;k<s;++k){
+          double gujk=Green_up(j, k);
+          double gdjk=Green_down(j, k);
           for(int l=0;l<s;++l){
+          double gulk=Green_up(l, k);
+          double gdlk=Green_down(l, k);
+          double guli=Green_up(l, i);
+          double gdli=Green_down(l, i);
             //std::cout<<i<<" "<<j<<" "<<k<<" "<<l<<std::endl;
-            G_ijkl_uu[i*s3+j*s2+k*s+l]=Green_up(j,i)*Green_up(l,k)-Green_up(j,k)*Green_up(l,i); //check review formula 154
-            G_ijkl_dd[i*s3+j*s2+k*s+l]=Green_down(j,i)*Green_down(l,k)-Green_down(j,k)*Green_down(l,i);
-            G_ijkl_ud[i*s3+j*s2+k*s+l]=Green_up(j,i)*Green_down(l,k);
-            G_ijkl_du[i*s3+j*s2+k*s+l]=Green_down(j,i)*Green_up(l,k);
+            G_ijkl_uu(i*s3+j*s2+k*s+l)+=guji*gulk-gujk*guli; //check review formula 154
+            G_ijkl_dd(i*s3+j*s2+k*s+l)+=gdji*gdlk-gdjk*gdli;
+            G_ijkl_ud(i*s3+j*s2+k*s+l)+=guji*gdlk;;
+            G_ijkl_du(i*s3+j*s2+k*s+l)+=gdji*gulk;
           }
         }
       }
     }
-    if(sweeps % 100 == 0){
-      std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
-    std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<G_ijkl_uu[16+1]<<std::endl;
+    int meas_int=100;
+    if(sweeps % meas_int == 0){
+      //std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
+      //std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<G_ijkl_uu[16+1]<<std::endl;
+      std::valarray<double> G_ijkl_uu_va(s*s*s*s);
+      std::valarray<double> G_ijkl_dd_va(s*s*s*s);
+      std::valarray<double> G_ijkl_ud_va(s*s*s*s);
+      std::valarray<double> G_ijkl_du_va(s*s*s*s);
+      for(int i=0;i<s*s*s*s;++i){
+        G_ijkl_uu_va[i]=G_ijkl_uu(i)/meas_int;
+        G_ijkl_ud_va[i]=G_ijkl_ud(i)/meas_int;
+        G_ijkl_du_va[i]=G_ijkl_du(i)/meas_int;
+        G_ijkl_dd_va[i]=G_ijkl_dd(i)/meas_int;
+      }
+
+      measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu")<<G_ijkl_uu_va;
+      measurements.get<SimpleRealVectorObservable>("G_fourpoint_dd")<<G_ijkl_dd_va;
+      measurements.get<SimpleRealVectorObservable>("G_fourpoint_ud")<<G_ijkl_ud_va;
+      measurements.get<SimpleRealVectorObservable>("G_fourpoint_du")<<G_ijkl_du_va;
+     
+      G_ijkl_uu=0;
+      G_ijkl_du=0;
+      G_ijkl_ud=0;
+      G_ijkl_dd=0;
     }
     //std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<std::endl;
-    measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu")<<G_ijkl_uu;
-    measurements.get<SimpleRealVectorObservable>("G_fourpoint_dd")<<G_ijkl_dd;
-    measurements.get<SimpleRealVectorObservable>("G_fourpoint_ud")<<G_ijkl_ud;
-    measurements.get<SimpleRealVectorObservable>("G_fourpoint_du")<<G_ijkl_du;
     //std::cout<<"mean of 0: "<<measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").mean()[0]<<" "<<measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").mean()[s3]<<std::endl;
   }
   //only for equilibration measurement
