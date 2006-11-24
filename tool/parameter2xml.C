@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2002-2004 by Matthias Troyer <troyer@comp-phys.org>,
+* Copyright (C) 2002-2006 by Matthias Troyer <troyer@comp-phys.org>,
 *                            Simon Trebst <trebst@comp-phys.org>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
@@ -62,11 +62,12 @@ void convert_params(const std::string& inname, const std::string& basename)
   } else {
     baseseed =
       boost::posix_time::microsec_clock::local_time().time_of_day().
-      total_microseconds() << 24;
+      total_microseconds();
+    baseseed = ((baseseed << 10) | (baseseed >> 22));
   }
-  baseseed &= ((1<<30)|((1<<30)-1));
 
-  alps::oxstream out(boost::filesystem::path((basename+".in.xml").c_str(),boost::filesystem::native));
+  alps::oxstream
+    out(boost::filesystem::path((basename+".in.xml").c_str(), boost::filesystem::native));
   out << alps::header("UTF-8")
       << alps::stylesheet(alps::xslt_path("job.xsl"))
       << alps::start_tag("JOB")
@@ -82,7 +83,9 @@ void convert_params(const std::string& inname, const std::string& basename)
       basename+".task"+boost::lexical_cast<std::string,int>(i+1);
 
     if (!list[i].defined("SEED")) {
-      uint32_t seed = baseseed ^ (i << bits);
+      uint32_t seed = baseseed;
+      for (int j = 0; j <= (32/bits); ++j) seed ^= (i << (j * bits));
+      seed &= ((1<<30) | ((1<<30)-1));
       list[i]["SEED"] = seed;
     }
 
