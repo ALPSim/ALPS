@@ -213,10 +213,10 @@ void HirschFyeRun::dostep()
     int s=Green_up.size1();
     int s3=s*s*s;
     int s2=s*s;
-    static blas::vector G_ijkl_uu(s*s*s*s, 0);
-    static blas::vector G_ijkl_dd(s*s*s*s, 0);
-    static blas::vector G_ijkl_du(s*s*s*s, 0);
-    static blas::vector G_ijkl_ud(s*s*s*s, 0);
+    static blas::vector G_ijkl_uu(s*s*s, 0);
+    static blas::vector G_ijkl_dd(s*s*s, 0);
+    static blas::vector G_ijkl_du(s*s*s, 0);
+    static blas::vector G_ijkl_ud(s*s*s, 0);
     /*for(int i=0;i<N;++i){
       for(int j=0;j<N;++j){
         G_ij_up[N*i+j]=Green_up  (i,j); //G_up(tau_i - tau_j)
@@ -225,36 +225,34 @@ void HirschFyeRun::dostep()
       }
     }*/
     //std::cout<<"size s is: "<<s<<std::endl;
-    for(int i=0;i<s;++i){
       for(int j=0;j<s;++j){
-        double guji=Green_up(j, i);
-        double gdji=Green_down(j, i);
+        double guji=Green_up(j, 0);
+        double gdji=Green_down(j, 0);
         for(int k=0;k<s;++k){
           double gujk=Green_up(j, k);
           double gdjk=Green_down(j, k);
           for(int l=0;l<s;++l){
           double gulk=Green_up(l, k);
           double gdlk=Green_down(l, k);
-          double guli=Green_up(l, i);
-          double gdli=Green_down(l, i);
+          double guli=Green_up(l, 0);
+          double gdli=Green_down(l, 0);
             //std::cout<<i<<" "<<j<<" "<<k<<" "<<l<<std::endl;
-            G_ijkl_uu(i*s3+j*s2+k*s+l)+=guji*gulk-gujk*guli; //check review formula 154
-            G_ijkl_dd(i*s3+j*s2+k*s+l)+=gdji*gdlk-gdjk*gdli;
-            G_ijkl_ud(i*s3+j*s2+k*s+l)+=guji*gdlk;;
-            G_ijkl_du(i*s3+j*s2+k*s+l)+=gdji*gulk;
+            G_ijkl_uu(j*s2+k*s+l)+=guji*gulk-gujk*guli; //check review formula 154
+            G_ijkl_dd(j*s2+k*s+l)+=gdji*gdlk-gdjk*gdli;
+            G_ijkl_ud(j*s2+k*s+l)+=guji*gdlk;;
+            G_ijkl_du(j*s2+k*s+l)+=gdji*gulk;
           }
         }
       }
-    }
     int meas_int=100;
     if(sweeps % meas_int == 0){
       //std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
       //std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<G_ijkl_uu[16+1]<<std::endl;
-      std::valarray<double> G_ijkl_uu_va(s*s*s*s);
-      std::valarray<double> G_ijkl_dd_va(s*s*s*s);
-      std::valarray<double> G_ijkl_ud_va(s*s*s*s);
-      std::valarray<double> G_ijkl_du_va(s*s*s*s);
-      for(int i=0;i<s*s*s*s;++i){
+      std::valarray<double> G_ijkl_uu_va(s*s*s);
+      std::valarray<double> G_ijkl_dd_va(s*s*s);
+      std::valarray<double> G_ijkl_ud_va(s*s*s);
+      std::valarray<double> G_ijkl_du_va(s*s*s);
+      for(int i=0;i<s*s*s;++i){
         G_ijkl_uu_va[i]=G_ijkl_uu(i)/meas_int;
         G_ijkl_ud_va[i]=G_ijkl_ud(i)/meas_int;
         G_ijkl_du_va[i]=G_ijkl_du(i)/meas_int;
