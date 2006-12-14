@@ -242,8 +242,7 @@ src_boost_SERIALIZATION_CVS = \
   $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
-  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
+  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp
 if BUILD_BOOST_WCHAR
 src_boost_SERIALIZATION_CVS += \
   $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
@@ -254,7 +253,8 @@ src_boost_SERIALIZATION_CVS += \
   $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
+  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
 endif
 
 src_boost_SIGNALS = \

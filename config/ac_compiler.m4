@@ -229,6 +229,7 @@ AC_DEFUN([AC_COMPILER],
     intel)
       try_CFLAGS_WARN=
       try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS_OPT="-O2"
       try_CXXFLAGS="-D_REENTRANT -restrict"
       try_CXXFLAGS_WARN=
       try_CXXFLAGS_NOWARN="-w"
