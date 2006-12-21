@@ -95,7 +95,8 @@ HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters
     spins(static_cast<int>(parms["N"])),
     start_time(time(NULL)),
     max_time(static_cast<int>(parms.value_or_default("MAX_TIME", 86400))),
-    measure_fourpoint(static_cast<bool>(parms.value_or_default("MEASURE_FOURPOINT_FUNCTION", false)))
+    measure_fourpoint(static_cast<bool>(parms.value_or_default("MEASURE_FOURPOINT_FUNCTION", false))),
+    fp_interval(static_cast<int>(parms.value_or_default("FOURPOINT_INTERVAL", 1000)))
 
 {
   // initialize G0
@@ -209,7 +210,7 @@ void HirschFyeRun::dostep()
   	measurements.get<RealVectorObservable>("G_meas_up") << G_up;
   	measurements.get<RealVectorObservable>("G_meas_down") << G_down;
   }
-  if(is_thermalized() && measure_fourpoint){
+  if(is_thermalized() && measure_fourpoint && (sweeps %fp_interval==0)){
     int s=Green_up.size1();
     int s3=s*s*s;
     int s2=s*s;
@@ -245,7 +246,7 @@ void HirschFyeRun::dostep()
         }
       }
     int meas_int=100;
-    if(sweeps % meas_int == 0){
+    if(fpsteps% meas_int == 0){
       //std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
       //std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<G_ijkl_uu[16+1]<<std::endl;
       std::valarray<double> G_ijkl_uu_va(s*s*s);
