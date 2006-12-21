@@ -110,6 +110,7 @@ private:
 	double lambda;					// cosh(lambda) = exp(delta_tau*u/2)
 	int N_check;					// number of sweeps with single-spin updates
 	int check_counter;				// counts the number of single-spin updates
+	int fp_interval;				// counts the interval between measurements of the fourpoint function
 	double tolerance;				// tolerance for deterioration of precision
 									// (maximum deviation of Green's function matrix elements)
 	std::valarray<double> G_up;		// Green's function for up spins
