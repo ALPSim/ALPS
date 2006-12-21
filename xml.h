@@ -36,11 +36,12 @@
 #include <alps/vectorio.h>
 
 template <class T>
-void write_freq(alps::oxstream& xml, std::vector<T> const& v)
+void write_freq(alps::oxstream& xml, std::vector<T> const& v, int flavor)
 {
   
   xml << alps::start_tag("VECTOR") 
       << alps::attribute("index","Matsubara frequency")
+      << alps::attribute("flavor",flavor)
       << alps::attribute("size",v.size());
   xml << alps::write_vector(v," ");
   xml << alps::end_tag();
@@ -49,8 +50,8 @@ void write_freq(alps::oxstream& xml, std::vector<T> const& v)
 template <class T>
 void write_freq(alps::oxstream& xml, std::pair<T,T> const& p)
 {
-  write_freq(xml,p.first);
-  write_freq(xml,p.second);
+  write_freq(xml,p.first, 0);
+  write_freq(xml,p.second, 1);
 }
 
 template <class T>
@@ -63,17 +64,18 @@ void write_freq(alps::oxstream& xml, green_function<T> const& g)
         for(uint w=0;w<g.nfreq();++w){
           g_f_s1_s2.push_back(g(w,s1,s2,f));
         }
-        write_freq(xml,g_f_s1_s2);
+        write_freq(xml,g_f_s1_s2, f);
       }
     }
   }
 }
 
 template <class T>
-void write_itime(alps::oxstream& xml, std::vector<T> const& v)
+void write_itime(alps::oxstream& xml, std::vector<T> const& v, int flavor)
 {
   xml << alps::start_tag("VECTOR") 
       << alps::attribute("index","imaginary time")
+      << alps::attribute("flavor",flavor)
       << alps::attribute("size",v.size());
   xml << alps::write_vector(v," ");
   xml << alps::end_tag();
@@ -83,8 +85,8 @@ void write_itime(alps::oxstream& xml, std::vector<T> const& v)
 template <class T>
 void write_itime(alps::oxstream& xml, std::pair<T,T> const& p)
 {
-  write_itime(xml,p.first);
-  write_itime(xml,p.second);
+  write_itime(xml,p.first, 0);
+  write_itime(xml,p.second, 1);
 }
 template <class T>
 void write_itime(alps::oxstream& xml, green_function<T> const& g)
@@ -96,7 +98,7 @@ void write_itime(alps::oxstream& xml, green_function<T> const& g)
         for(uint t=0;t<g.ntime();++t){
           g_f_s1_s2.push_back(g(t,s1,s2,f));
         }
-        write_itime(xml,g_f_s1_s2);
+        write_itime(xml,g_f_s1_s2, f);
       }
     }
   }
