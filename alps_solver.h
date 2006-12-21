@@ -61,7 +61,9 @@ public:
   { 
     return master_scheduler ? master_scheduler->get_task() : 0;
   }
-  
+  void checkpoint(const boost::filesystem::path &fn){
+    if(master_scheduler) master_scheduler->checkpoint();
+  }
   void clear()
   {
     if (master_scheduler)
@@ -79,6 +81,7 @@ public:
 protected:
   int solve_it(Parameters const& p);
   scheduler::SingleScheduler* master_scheduler;
+  //scheduler::SingleScheduler* master_scheduler;
   int argc_;
   char **argv_;
 };
