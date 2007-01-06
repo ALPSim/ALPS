@@ -22,8 +22,8 @@
 
 <LATTICE name="triangular lattice" dimension="2">
   <PARAMETER name="a" default="1"/>
-  <BASIS><VECTOR>a 0</VECTOR><VECTOR>a*sqrt(3)/2 a/2</VECTOR></BASIS>
-  <RECIPROCALBASIS><VECTOR>0 4*pi/a/sqrt(3)</VECTOR><VECTOR>2*pi/a -2*pi/a/sqrt(3)</VECTOR></RECIPROCALBASIS>
+  <BASIS><VECTOR>a 0</VECTOR><VECTOR>a/2 a*sqrt(3)/2</VECTOR></BASIS>
+  <RECIPROCALBASIS><VECTOR>2*pi/a -2*pi/a/sqrt(3)</VECTOR><VECTOR>0 4*pi/a/sqrt(3)</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
 <LATTICE name="centered rectangular lattice" dimension="2">
@@ -119,14 +119,14 @@
   <PARAMETER name="a" default="1"/>
   <PARAMETER name="c" default="1"/>
   <BASIS>
-    <VECTOR>a           0   0</VECTOR>
-    <VECTOR>a*sqrt(3)/2 a/2 0</VECTOR>
-    <VECTOR>0           0   c</VECTOR>
+    <VECTOR>a   0           0</VECTOR>
+    <VECTOR>a/2 a*sqrt(3)/2 0</VECTOR>
+    <VECTOR>0   0           c</VECTOR>
   </BASIS>
   <RECIPROCALBASIS>
-    <VECTOR>2*pi/a    2*pi/a/sqrt(3)  0</VECTOR>
-    <VECTOR>0 4*pi/a/sqrt(3) 0</VECTOR>
-    <VECTOR>0           0   2*pi/c</VECTOR>
+    <VECTOR>2*pi/a -2*pi/a/sqrt(3) 0     </VECTOR>
+    <VECTOR>0      4*pi/a/sqrt(3)  0     </VECTOR>
+    <VECTOR>0      0               2*pi/c</VECTOR>
   </RECIPROCALBASIS>
 </LATTICE>
 

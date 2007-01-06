@@ -83,9 +83,6 @@ src_boost_FILESYSTEM_CVS = \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-  
-src_BOOST_SYSTEM_CVS = \
-  $(BOOST_SRCDIR)/system/src/error_code.cpp
 
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -263,6 +260,9 @@ src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/signal_base.cpp \
   $(BOOST_SRCDIR)/signals/src/slot.cpp \
   $(BOOST_SRCDIR)/signals/src/trackable.cpp
+
+src_BOOST_SYSTEM_CVS = \
+  $(BOOST_SRCDIR)/system/src/error_code.cpp
 
 src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp \
