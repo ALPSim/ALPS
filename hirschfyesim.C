@@ -210,6 +210,7 @@ void HirschFyeRun::dostep()
   	measurements.get<RealVectorObservable>("G_meas_up") << G_up;
   	measurements.get<RealVectorObservable>("G_meas_down") << G_down;
   }
+#ifdef FOURPOINT
   if(is_thermalized() && measure_fourpoint && (sweeps %fp_interval==0)){
     int s=Green_up.size1();
     int s3=s*s*s;
@@ -275,6 +276,7 @@ void HirschFyeRun::dostep()
     //std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<std::endl;
     //std::cout<<"mean of 0: "<<measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").mean()[0]<<" "<<measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").mean()[s3]<<std::endl;
   }
+#endif
   //only for equilibration measurement
   if(is_thermalized() && sweeps % 10000 ==0){
     static std::ofstream equ_file("equilibration.dat");
@@ -367,6 +369,7 @@ itime_green_function_t HirschFyeSim::get_result() const {
   alps::ObservableSet meas = get_measurements();
   alps::RealVectorObsevaluator G_meas_up=meas["G_meas_up"];
   alps::RealVectorObsevaluator G_meas_down=meas["G_meas_down"];  
+#ifdef FOURPOINT
   if(parms.defined("MEASURE_FOURPOINT_FUNCTION")){
     int s=N;
     alps::RealVectorObsevaluator G_fourp_uu=meas["G_fourpoint_uu"];  
@@ -401,6 +404,7 @@ itime_green_function_t HirschFyeSim::get_result() const {
       }
     }
   }
+#endif //FOURPOINT
   std::valarray<double> g_up_mean_vector(G_meas_up.mean());
   std::valarray<double> g_down_mean_vector(G_meas_down.mean());
   //std::cout<<"measured: "<<std::endl;
