@@ -218,6 +218,8 @@ void HirschFyeRun::dostep()
     static blas::vector G_ijkl_dd(s*s*s, 0);
     static blas::vector G_ijkl_du(s*s*s, 0);
     static blas::vector G_ijkl_ud(s*s*s, 0);
+    static int fpsteps=0;
+    fpsteps++;
     /*for(int i=0;i<N;++i){
       for(int j=0;j<N;++j){
         G_ij_up[N*i+j]=Green_up  (i,j); //G_up(tau_i - tau_j)
