@@ -34,7 +34,9 @@
 #include "xml.h"
 #include <alps/alea.h>
 #include <cmath>
+#ifdef FOURPOINT
 #include "../blas_classes/vector.h"
+#endif
 using namespace std;
 using namespace alps;
 
