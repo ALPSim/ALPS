@@ -237,7 +237,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS=""
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CFLAGS_NOWARN="-w"
-      try_CXXFLAGS="-DMPICH_SKIP_MPICXX -ftemplate-depth-150"
+      try_CXXFLAGS="-fabi-version=0 -DMPICH_SKIP_MPICXX -ftemplate-depth-150"
       try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
