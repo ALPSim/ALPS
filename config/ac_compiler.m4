@@ -46,11 +46,14 @@ AC_DEFUN([AC_COMPILER],
 
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
-      [set compiler mode (MODE = gnu, kai, intel, como, hp32, hp64, dec, sgi32, sgi64, cray, ibm32, ibm64, macos, macos-gcc-3, macos-gcc-3.3, macos-gcc-4.0, generic)]),
+      [set compiler mode (MODE = gnu, kai, intel, como, hp32, hp64, dec, sgi32, sgi64, cray, cray-gcc, ibm32, ibm64, macos, macos-gcc-3, macos-gcc-3.3, macos-gcc-4.0, cygwin, generic)]),
     [
     case "x$withval" in
       xgnu* | xGNU* | xgcc* | xg++* )
         COMPILER="gnu"
+        ;;
+      xcygwin* )
+        COMPILER="cygwin"
         ;;
       xkai* | xKAI*)
         COMPILER="kai"
@@ -75,6 +78,9 @@ AC_DEFUN([AC_COMPILER],
         ;;
       xsgi64* | xirix64*)
         COMPILER="sgi64"
+        ;;
+      xcray-gcc* | xCRAY-gcc*)
+        COMPILER="cray-gcc"
         ;;
       xcray* | xCRAY*)
         COMPILER="cray"
@@ -116,6 +122,10 @@ AC_DEFUN([AC_COMPILER],
       try_CC="gcc"
       try_CXX="g++"
       ;;
+    cygwin)
+      try_CC="gcc"
+      try_CXX="g++"
+      ;;
     kai)
       try_CC="cc"
       try_CXX="KCC"
@@ -141,6 +151,10 @@ AC_DEFUN([AC_COMPILER],
       try_CXX="CC"
       ;;
     cray)
+      try_CC="cc"
+      try_CXX="CC"
+      ;;
+    cray-gcc)
       try_CC="cc"
       try_CXX="CC"
       ;;
@@ -214,6 +228,26 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CFLAGS_NOWARN="-w"
       try_CXXFLAGS="-pthread -ftemplate-depth-150"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CXXFLAGS_NOWARN="-w"
+      try_CXXFLAGS_EH="-fexceptions"
+      try_CXXFLAGS_NOEH="-fno-exceptions"
+      ;;
+    cray-gcc)
+      try_CFLAGS=""
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-DMPICH_SKIP_MPICXX -ftemplate-depth-150"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CXXFLAGS_NOWARN="-w"
+      try_CXXFLAGS_EH="-fexceptions"
+      try_CXXFLAGS_NOEH="-fno-exceptions"
+      ;;
+    cygwin)
+      try_CFLAGS="-mthreads"
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
+      try_CFLAGS_NOWARN="-w"
+      try_CXXFLAGS="-mthreads -ftemplate-depth-150"
       try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
