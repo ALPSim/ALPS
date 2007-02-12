@@ -339,10 +339,10 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_DEBUG="-g"
       ;;
     ibm64)
-      try_CFLAGS="-q62"
+      try_CFLAGS="-q64"
       try_CFLAGS_OPT="-O2"
       try_CFLAGS_DEBUG=-"-g"
-      try_CXXFLAGS="-q62 -qlanglvl=extended"
+      try_CXXFLAGS="-q64 -qlanglvl=extended"
       try_CXXFLAGS_OPT="-O2"
       try_CXXFLAGS_DEBUG="-g"
       ;;
