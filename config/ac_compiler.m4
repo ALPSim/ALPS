@@ -334,7 +334,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS="-q32"
       try_CFLAGS_OPT="-O2"
       try_CFLAGS_DEBUG=-"-g"
-      try_CXXFLAGS="-q32 -qlanglvl=extended"
+      try_CXXFLAGS="-q32"
       try_CXXFLAGS_OPT="-O2"
       try_CXXFLAGS_DEBUG="-g"
       ;;
@@ -342,7 +342,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS="-q64"
       try_CFLAGS_OPT="-O2"
       try_CFLAGS_DEBUG=-"-g"
-      try_CXXFLAGS="-q64 -qlanglvl=extended"
+      try_CXXFLAGS="-q64"
       try_CXXFLAGS_OPT="-O2"
       try_CXXFLAGS_DEBUG="-g"
       ;;
