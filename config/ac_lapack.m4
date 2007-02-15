@@ -589,7 +589,7 @@ AC_DEFUN([AC_LAPACK],
                       [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
           if test "$found" = no; then
             if test -z "$essl_dir"; then
-              for d in '/opt/ibmcmp/xlf/10.1/lib64' '/opt/ibmcmp/xlf/10.1/lib64'; do
+              for d in '/opt/ibmcmp/xlf/10.1/lib64' '/opt/ibmcmp/xlf/10.1/lib'; do
                 if test -d "$d"; then
                   essl_ldflags="-L$d"
                   LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
