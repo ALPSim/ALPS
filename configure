@@ -26124,7 +26124,7 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
         fi
         if test "$found" = no; then
-          for lapack_libs in '-llapack' '-llapack -lf2c' '-llapack -lg2c' 'lapack_ppc64'; do
+          for lapack_libs in '-llapack' '-llapack -lf2c' '-llapack -lg2c' '-llapack_ppc64'; do
             LDFLAGS="$lapack_ldflags $LAPACK_LDFLAGS $ac_save_LDFLAGS"
             LIBS="$lapack_libs $LAPACK_LIBS $ac_save_LIBS"
             echo "$as_me:$LINENO: checking for dsyev_ in $lapack_ldflags $lapack_libs" >&5

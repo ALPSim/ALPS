@@ -774,7 +774,7 @@ AC_DEFUN([AC_LAPACK],
                           [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
         fi
         if test "$found" = no; then
-          for lapack_libs in '-llapack' '-llapack -lf2c' '-llapack -lg2c' 'lapack_ppc64'; do
+          for lapack_libs in '-llapack' '-llapack -lf2c' '-llapack -lg2c' '-llapack_ppc64'; do
             LDFLAGS="$lapack_ldflags $LAPACK_LDFLAGS $ac_save_LDFLAGS"
             LIBS="$lapack_libs $LAPACK_LIBS $ac_save_LIBS"
             AC_MSG_CHECKING([for dsyev_ in $lapack_ldflags $lapack_libs])
