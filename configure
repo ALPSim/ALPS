@@ -25411,8 +25411,9 @@ _ACEOF
   # for ESSL on IBM AIX
   if test "$found_blas" = no; then
     if test "x$essl" != xno; then
-      { echo "$as_me:$LINENO: checking for ESSL on IBM AIX" >&5
-echo "$as_me: checking for ESSL on IBM AIX" >&6;}
+      { echo "$as_me:$LINENO: checking for ESSL Library" >&5
+echo "$as_me: checking for ESSL Library" >&6;}
+      found=no
       if test -n "$essl_dir"; then
         echo "$as_me:$LINENO: checking for ESSL library directory" >&5
 echo $ECHO_N "checking for ESSL library directory... $ECHO_C" >&6
@@ -25430,36 +25431,76 @@ echo "$as_me: error: $essl_dir not found." >&2;}
       fi
       if test -n "$essl_flags"; then
         essl_libs="$essl_flags"
-      else
- 	essl_libs="-lessl"
+        LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
+        LIBS="$essl_libs $ac_save_LIBS"
+        echo "$as_me:$LINENO: checking for dgemm_ in $essl_ldflags $essl_libs" >&5
+echo $ECHO_N "checking for dgemm_ in $essl_ldflags $essl_libs... $ECHO_C" >&6
+        cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+extern "C" char dgemm_();
+int
+main ()
+{
+dgemm_();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; found=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
       fi
-      LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
-      LIBS="$essl_libs $ac_save_LIBS"
-      echo "$as_me:$LINENO: checking for dgemm_ in -lessl" >&5
-echo $ECHO_N "checking for dgemm_ in -lessl... $ECHO_C" >&6
-if test "${ac_cv_lib_essl_dgemm_+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lessl  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
+      if test "$found" = no; then
+        for essl_libs in '-lesslsmp -lxlf90_r  -lxlsmp -lxlfmath' '-lessl -lxlf90_r  -lxlomp_ser -lxlfmath'; do
+          LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
+          LIBS="$essl_libs $ac_save_LIBS"
+          echo "$as_me:$LINENO: checking for dgemm_ in $essl_ldflags $essl_libs" >&5
+echo $ECHO_N "checking for dgemm_ in $essl_ldflags $essl_libs... $ECHO_C" >&6
+          cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char dgemm_ ();
+extern "C" char dgemm_();
 int
 main ()
 {
-dgemm_ ();
+dgemm_();
   ;
   return 0;
 }
@@ -25486,45 +25527,36 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_lib_essl_dgemm_=yes
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; found=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_lib_essl_dgemm_=no
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_essl_dgemm_" >&5
-echo "${ECHO_T}$ac_cv_lib_essl_dgemm_" >&6
-if test $ac_cv_lib_essl_dgemm_ = yes; then
-  echo "$as_me:$LINENO: checking for dsyev in -lessl" >&5
-echo $ECHO_N "checking for dsyev in -lessl... $ECHO_C" >&6
-if test "${ac_cv_lib_essl_dsyev+set}" = set; then
-  echo $ECHO_N "(cached) $ECHO_C" >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lessl  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
+          if test "$found" = no; then
+            if test -z "$essl_dir"; then
+              for d in '/opt/ibmcmp/xlf/10.1/lib64' '/opt/ibmcmp/xlf/10.1/lib64'; do
+                if test -d "$d"; then
+                  essl_ldflags="-L$d"
+                  LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
+                  echo "$as_me:$LINENO: checking for dgemm_ in $essl_ldflags $essl_libs" >&5
+echo $ECHO_N "checking for dgemm_ in $essl_ldflags $essl_libs... $ECHO_C" >&6
+                  cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
-
-/* Override any gcc2 internal prototype to avoid an error.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-/* We use char because int might match the return type of a gcc2
-   builtin and then its argument prototype would still apply.  */
-char dsyev ();
+extern "C" char dgemm_();
 int
 main ()
 {
-dsyev ();
+dgemm_();
   ;
   return 0;
 }
@@ -25551,34 +25583,35 @@ if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
   ac_status=$?
   echo "$as_me:$LINENO: \$? = $ac_status" >&5
   (exit $ac_status); }; }; then
-  ac_cv_lib_essl_dsyev=yes
+  echo "$as_me:$LINENO: result: yes" >&5
+echo "${ECHO_T}yes" >&6; found=yes
 else
   echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-ac_cv_lib_essl_dsyev=no
+echo "$as_me:$LINENO: result: no" >&5
+echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-echo "$as_me:$LINENO: result: $ac_cv_lib_essl_dsyev" >&5
-echo "${ECHO_T}$ac_cv_lib_essl_dsyev" >&6
-if test $ac_cv_lib_essl_dsyev = yes; then
-  LAPACK_LDFLAGS="$essl_ldflags"; LAPACK_LIBS="$essl_libs";
-	   found_blas=yes; found_lapack=yes
-fi
+                  if test "$found" = yes; then
+                    break
+                  fi
+                  essl_ldflags=
+                fi
+              done
+            fi
+          fi
+          if test "$found" = yes; then
+            break
+          fi
+        done
+      fi
 
-
-
-fi
-
-    fi
-    if test "x$essl" = xyes; then
-      if test "$found_blas" = no; then
-        { { echo "$as_me:$LINENO: error: IBM ESSL Library not found." >&5
-echo "$as_me: error: IBM ESSL Library not found." >&2;}
-   { (exit 1); exit 1; }; }
+      if test "$found" = yes; then
+        found_blas=yes
+        LAPACK_LDFLAGS="$essl_ldflags"
+        LAPACK_LDFLAGS="$essl_libs"
       fi
     fi
     if test "$found_blas" = yes; then

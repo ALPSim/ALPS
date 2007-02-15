@@ -560,10 +560,11 @@ AC_DEFUN([AC_LAPACK],
   # for ESSL on IBM AIX
   if test "$found_blas" = no; then
     if test "x$essl" != xno; then
-      AC_MSG_NOTICE([checking for ESSL on IBM AIX])
+      AC_MSG_NOTICE([checking for ESSL Library])
+      found=no
       if test -n "$essl_dir"; then
         AC_MSG_CHECKING([for ESSL library directory])
-        if test -d "$essl_dir"; then
+        if test -d "$essl_dir"; then 
           AC_MSG_RESULT([$essl_dir])
           essl_ldflags="-L$essl_dir"
         else
@@ -573,27 +574,53 @@ AC_DEFUN([AC_LAPACK],
       fi
       if test -n "$essl_flags"; then
         essl_libs="$essl_flags"
-      else
- 	essl_libs="-lessl"
+        LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
+        LIBS="$essl_libs $ac_save_LIBS"
+        AC_MSG_CHECKING([for dgemm_ in $essl_ldflags $essl_libs])
+        AC_TRY_LINK([extern "C" char dgemm_();],[dgemm_();],
+                    [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
       fi
-      LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
-      LIBS="$essl_libs $ac_save_LIBS"
-      AC_CHECK_LIB(essl, dgemm_, 
-        [AC_CHECK_LIB(essl, dsyev,
-          [LAPACK_LDFLAGS="$essl_ldflags"; LAPACK_LIBS="$essl_libs";
-	   found_blas=yes; found_lapack=yes])
-        ]
-      )
-    fi
-    if test "x$essl" = xyes; then
-      if test "$found_blas" = no; then
-        AC_MSG_ERROR([IBM ESSL Library not found.])
+      if test "$found" = no; then
+        for essl_libs in '-lesslsmp -lxlf90_r  -lxlsmp -lxlfmath' '-lessl -lxlf90_r  -lxlomp_ser -lxlfmath'; do
+          LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
+          LIBS="$essl_libs $ac_save_LIBS"
+          AC_MSG_CHECKING([for dgemm_ in $essl_ldflags $essl_libs])
+          AC_TRY_LINK([extern "C" char dgemm_();],[dgemm_();],
+                      [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
+          if test "$found" = no; then
+            if test -z "$essl_dir"; then
+              for d in '/opt/ibmcmp/xlf/10.1/lib64' '/opt/ibmcmp/xlf/10.1/lib64'; do
+                if test -d "$d"; then
+                  essl_ldflags="-L$d"
+                  LDFLAGS="$essl_ldflags $ac_save_LDFLAGS"
+                  AC_MSG_CHECKING([for dgemm_ in $essl_ldflags $essl_libs])
+                  AC_TRY_LINK([extern "C" char dgemm_();],[dgemm_();],
+                              [AC_MSG_RESULT(yes); found=yes],
+                              [AC_MSG_RESULT(no)])
+                  if test "$found" = yes; then
+                    break
+                  fi
+                  essl_ldflags=
+                fi
+              done
+            fi
+          fi
+          if test "$found" = yes; then
+            break
+          fi
+        done
+      fi
+    
+      if test "$found" = yes; then
+        found_blas=yes
+        LAPACK_LDFLAGS="$essl_ldflags"
+        LAPACK_LDFLAGS="$essl_libs"
       fi
     fi
     if test "$found_blas" = yes; then
-      AC_DEFINE(ALPS_HAVE_ESSL, [], [Define if you have IBM ESSL Library.])
+      AC_DEFINE(ALPS_HAVE_ESSL, [], [Define if you have ESSL library.])
     fi
-  fi
+  fi 
 
   # for ATLAS
   if test "$found_blas" = no; then
