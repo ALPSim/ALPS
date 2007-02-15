@@ -774,7 +774,7 @@ AC_DEFUN([AC_LAPACK],
                           [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
         fi
         if test "$found" = no; then
-          for lapack_libs in '-llapack' '-llapack -lf2c' '-llapack -lg2c'; do
+          for lapack_libs in '-llapack' '-llapack -lf2c' '-llapack -lg2c' 'lapack_ppc64'; do
             LDFLAGS="$lapack_ldflags $LAPACK_LDFLAGS $ac_save_LDFLAGS"
             LIBS="$lapack_libs $LAPACK_LIBS $ac_save_LIBS"
             AC_MSG_CHECKING([for dsyev_ in $lapack_ldflags $lapack_libs])
@@ -782,9 +782,9 @@ AC_DEFUN([AC_LAPACK],
                             [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
             if test "$found" = no; then
               if test -z "$lapack_dir"; then
-                for d in $HOME $HOME/src $prefix /usr/local /usr/local/src; do
-                  if test -d "$d/lib"; then
-                    lapack_ldflags="-L$d/lib"
+                for d in $HOME/lib $HOME/src/lib $prefix/lib /usr/local/lib /usr/local/src/lib /apps/lapack/64/lib /apps/lapack/32/lib; do
+                  if test -d "$d"; then
+                    lapack_ldflags="-L$d"
                     LDFLAGS="$lapack_ldflags $LAPACK_LDFLAGS $ac_save_LDFLAGS"
                     if test "$ac_cv_compiler" = ibm32; then
                       AC_MSG_CHECKING([for dsyev in $lapack_ldflags $lapack_libs])
@@ -797,6 +797,12 @@ AC_DEFUN([AC_LAPACK],
                         AC_TRY_LINK([extern "C" char dsyev();],[dsyev();],
                                     [AC_MSG_RESULT(yes); found=yes],
                                     [AC_MSG_RESULT(no)])
+		    else
+		      if test "$ac_cv_compiler" = ibm; then
+                        AC_MSG_CHECKING([for dsyev in $lapack_ldflags $lapack_libs])
+                        AC_TRY_LINK([extern "C" char dsyev();],[dsyev();],
+                                    [AC_MSG_RESULT(yes); found=yes],
+                                    [AC_MSG_RESULT(no)])
 		      else
                         AC_MSG_CHECKING([for dsyev_ in $lapack_ldflags $lapack_libs])
                         AC_TRY_LINK([extern "C" char dsyev_();],[dsyev_();],
@@ -804,6 +810,7 @@ AC_DEFUN([AC_LAPACK],
                                     [AC_MSG_RESULT(no)])
 		      fi
 		    fi
+          fi
                     if test "$found" = yes; then
                       break
                     fi
@@ -826,6 +833,7 @@ AC_DEFUN([AC_LAPACK],
       fi
     fi
   fi 
+
 
   LDFLAGS=$ac_save_LDFLAGS
   LIBS=$ac_save_LIBS
