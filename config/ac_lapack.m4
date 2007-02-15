@@ -614,7 +614,7 @@ AC_DEFUN([AC_LAPACK],
       if test "$found" = yes; then
         found_blas=yes
         LAPACK_LDFLAGS="$essl_ldflags"
-        LAPACK_LDFLAGS="$essl_libs"
+        LAPACK_LIBS="$essl_libs"
       fi
     fi
     if test "$found_blas" = yes; then

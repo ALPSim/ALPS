@@ -20,6 +20,9 @@
 #ifndef BOOST_NUMERIC_BINDINGS_USE_CLAPACK
 #  include <boost/numeric/bindings/traits/fortran.h>
 #else
+#ifdef __IBMCPP__
+#  define FORTRAN_ID( id ) id
+#else
 #  define FORTRAN_ID( id ) id##_
 #endif 
 
