@@ -138,7 +138,7 @@ namespace ietl {
       throw std::runtime_error("LAPACK error, stev function failed.");
     
     // tolerance values:
-    multol = std::max(alpha_max,beta_max) * 2 * std::numeric_limits<magnitude_type>::epsilon() * (1000 + n); 
+    multol = std::max(alpha_max,beta_max) * 2 * std::numeric_limits<magnitude_type>::epsilon() * (10000 + n); 
     thold = std::max(eval[0],eval[n-1]);
     thold = std::max(error_tol * thold, 5 * multol);
     
