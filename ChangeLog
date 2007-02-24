@@ -1,3 +1,7 @@
+2006-12-19  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.3b3
+
 2006-10-04  Synge Todo <wistaria@comp-phys.org>
 
 	* [parameter] Added support for comments in text form (/* ... */ or // ...)

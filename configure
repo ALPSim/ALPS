@@ -2020,9 +2020,9 @@ _ACEOF
 
 
 
-ac_cv_alps_year=2006
+ac_cv_alps_year=2007
 cat >>confdefs.h <<_ACEOF
-#define ALPS_YEAR "2006"
+#define ALPS_YEAR "2007"
 _ACEOF
 
 
