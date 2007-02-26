@@ -55,7 +55,11 @@ echo $LIBTOOLIZE --force --copy
      $LIBTOOLIZE --force --copy
 [ "$?" -ne 0 ] && exit $?
 
-find . -name config.h.in | xargs touch
+CONFIG_H=`find . -name config.h.in`
+for c in $CONFIG_H; do
+  echo touch $c
+       touch $c
+done
 
 echo automake --foreign --add-missing --copy
      automake --foreign --add-missing --copy
