@@ -33,7 +33,7 @@
 #define IETL_LAPACK_INTERFACE_H
 #include <complex>
 
-#if defined(_AIX) || defined(__blrts__) || defined(hpux)
+#if defined(_AIX) || defined(__blrts__) || defined(hpux) || defined(__IBMCPP__)
 #define MTL_FCALL(x) x
 #else
 #define MTL_FCALL(x) x##_
