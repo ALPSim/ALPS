@@ -335,16 +335,16 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_OPT="-O2"
       try_CFLAGS_DEBUG=-"-g"
       try_CXXFLAGS="-q32"
-      try_CXXFLAGS_OPT="-O2"
-      try_CXXFLAGS_DEBUG="-g"
+      try_CXXFLAGS_OPT="-O2 -qrtti=all"
+      try_CXXFLAGS_DEBUG="-g -qrtti=all"
       ;;
     ibm64)
       try_CFLAGS="-q64"
       try_CFLAGS_OPT="-O2"
       try_CFLAGS_DEBUG=-"-g"
       try_CXXFLAGS="-q64"
-      try_CXXFLAGS_OPT="-O2"
-      try_CXXFLAGS_DEBUG="-g"
+      try_CXXFLAGS_OPT="-O2 -qrtti=all"
+      try_CXXFLAGS_DEBUG="-g -qrtti=all"
       ;;
     macos-gcc-3)
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double"
