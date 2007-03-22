@@ -42,8 +42,9 @@ template <typename T> class green_function{
 	inline T &operator()(uint t, uint flavor){return val_[t+nt_*flavor];}
 	///specialization for only one site: return const reference to element with given time and flavor
 	inline const T &operator()(uint t, uint flavor)const{return val_[t+nt_*flavor];}
-	///specialization for only one site: return an entire vector of times for a given flavor
-	inline T *operator()(uint flavor){return val_+nt_*flavor;}
+
+	///return an entire vector of times for a given flavor
+	inline T *operator()(uint flavor){return val_+ntnsns_*flavor;}
 	
 	//error access
 	inline T &error(uint t, uint flavor){return err_[t+nt_*flavor];}
@@ -140,11 +141,11 @@ template<typename T> void green_function<T>::read(const char *filename){
   double ignored;
   for(uint i=0;i<nt_;++i){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
-    for(uint f=0;f<nf_;++f){
-      for(uint s0=0;s0<ns_;++s0){
-        for(uint s1=0;s1<ns_;++s1){
-          in_file>>operator()(i, s0, s1, f); //read the actual value
-        }
+    for(uint s0=0; s0<ns_; ++s0) {
+      for(uint s1=0; s1<ns_; ++s1){
+	for(uint f=0; f<nf_; ++f) {
+	  in_file>>operator()(i, s0, s1, f); //read the actual value
+	}
       }
     }
   }
@@ -171,8 +172,12 @@ template<typename T> void green_function<T>::from_multiple_vector(const std::pai
   }
 }
 
-void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega, const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta);
-void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta);
-void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta);
-void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta);
+void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega,
+			       const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, 
+			       const itime_green_function_t &G_tau, const double beta, const bool diagonal=true,
+			       const std::string suffix="");
+void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const bool diagonal=true);
+void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const bool diagonal=true);
+void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
+				       const bool diagonal=true, const std::string suffix="");
 #endif

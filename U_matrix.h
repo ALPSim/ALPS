@@ -9,7 +9,7 @@ typedef class U_matrix{
     U_matrix(const alps::Parameters &parms){
       uint n_site=parms.value_or_default("SITES", 1);
       uint n_flavor=parms.value_or_default("FLAVORS", 2);
-      assert(n_site==1); //we do NOT know how to build U if nsite != 0.
+      //assert(n_site==1); //we do NOT know how to build U if nsite != 0.
       ns_=n_site;
       nf_=n_flavor;
       val_=new double[nf_*nf_];

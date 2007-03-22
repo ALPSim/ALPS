@@ -1,9 +1,9 @@
-include $(HOME)/ALPS/share/alps/include.mk
-CXXFLAGS +=-W -funroll-loops  -g -DWERNER -DRUBTSOV
-SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C
+include $(HOME)/code/cvs/alpslib/share/alps/include.mk
+CXXFLAGS += -g -DWERNER -DRUBTSOV
+SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C clustertransformer.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
 
-OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o auxiliaryfunctions.o alps_solver.o
+OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o auxiliaryfunctions.o alps_solver.o clustertransformer.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
 RUBTSOV_DIR=../DMFT-solvers/Rubtsov

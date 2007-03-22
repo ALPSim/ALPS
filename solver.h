@@ -85,9 +85,8 @@ public:
 	///  @return the Green's functions for up and down spins as function of 
     ///          Matsubara frequency
     
-  virtual result_type solve_omega(
-              const matsubara_green_function_t& G0_omega
-            , const alps::Parameters& parms =alps::Parameters())=0;
+  virtual result_type solve_omega(const matsubara_green_function_t& G0_omega,
+				  const alps::Parameters& parms =alps::Parameters())=0;
             
   virtual ~MatsubaraImpuritySolver() {}
 };

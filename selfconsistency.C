@@ -129,82 +129,184 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
 /// @param G0_omega is the bare Green's function in Matsubara frequency. It has to be provided as an initial guess
 /// @param G_omega is the dressed Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 
-void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, FrequencySpaceHilbertTransformer& hilbert, FourierTransformer &fourier,
-									matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega){
-	uint n_tau=boost::lexical_cast<uint>(parms["N"]);
-	uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
-	uint n_orbital=parms.value_or_default("FLAVORS", 2);
-	uint n_site=parms.value_or_default("SITES", 1);
-        
-	double beta = static_cast<double>(parms["BETA"]);
-	double mu = static_cast<double>(parms["MU"]);
-	double h = static_cast<double>(parms["H"]);
-	double converged = static_cast<double>(parms["CONVERGED"]);
-	bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
+				FrequencySpaceHilbertTransformer& hilbert, FourierTransformer &fourier,
+				matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
+{
+  uint n_tau=boost::lexical_cast<uint>(parms["N"]);
+  uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
+  uint n_orbital=parms.value_or_default("FLAVORS", 2);
+  uint n_site=parms.value_or_default("SITES", 1);
+  
+  double beta = static_cast<double>(parms["BETA"]);
+  double mu = static_cast<double>(parms["MU"]);
+  double h = static_cast<double>(parms["H"]);
+  double converged = static_cast<double>(parms["CONVERGED"]);
+  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  
+  double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
+  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  
+  int iteration_ctr = 0;
+  bool result_in_omega=true;
+  
+  if(parms.defined("DIRECT_ITIME_MEASUREMENT") || 
+     parms.defined("FACTORIZED_ITIME_MEASUREMENT") || 
+     parms.defined("WERNER_ITIME_MEASUREMENT")) {
+    result_in_omega=false;
+  }
+  //define multiple vectors
+  matsubara_green_function_t G_old_omega(G0_omega);
+  matsubara_green_function_t G0_old_omega(G0_omega);
+  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
+  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
+  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
+  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
+  //initialize space for multiple vectors
+  double max_diff;	
+  do {
+    iteration_ctr++;
+    std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+    G_old_omega = G_omega;
+    G0_old_omega = G0_omega;
+    G_old_tau = G_tau;
+    G0_old_tau = G0_tau;
+    
+    fourier.backward_ft(G0_tau, G0_omega);
+    
+    std::cout<<"running solver."<<std::endl<<std::flush;
+    boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
+    std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
+    G0_omega = hilbert(G_omega, G0_omega, mu, h, beta, paramagnet);
+    
+    //relaxation to speed up /slow down convergence
+    if(relax_rate !=1){
+      std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
+      for(uint orbital=0;orbital<n_orbital;++orbital){
+	for(uint site1=0;site1<n_site;++site1){
+	  for(uint site2=0;site2<n_site;++site2){
+	    for(uint i=0;i<n_matsubara;++i){
+	      G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
+		(1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
+	    }
+	  }
+	}
+      }
+    }
+    std::cout<<"comparing old and new result."<<std::endl<<std::flush;
+    max_diff=0;
+    if(iteration_ctr>1){
+      //comparison for the dressed Green's function in Matsubara freq.
+      for(uint w=0; w<n_matsubara; w++) {
+	for(uint i1=0; i1<n_site; i1++) {
+	  for(uint i2=0; i2<n_site; i2++) {
+	    for(uint o=0; o<n_orbital; o++) {
+	      if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
+		max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
+	    }
+	  }
+	}
+      }
+      std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "
+	       <<max_diff<<"\tconverged: "<<converged<<std::endl;
+    }
+    print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+  }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
+  
+}
 
-	double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
-	int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
-        
-	int iteration_ctr = 0;
-        bool result_in_omega=true;
 
-        if(parms.defined("DIRECT_ITIME_MEASUREMENT")|| parms.defined("FACTORIZED_ITIME_MEASUREMENT") || parms.defined("WERNER_ITIME_MEASUREMENT")){
-          result_in_omega=false;
-        }
-        //define multiple vectors
-	matsubara_green_function_t G_old_omega(G0_omega);
-	matsubara_green_function_t G0_old_omega(G0_omega);
-	itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
-    	itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
-	itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
-	itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
-	//initialize space for multiple vectors
-	double max_diff;	
-	do {
-		iteration_ctr++;
-		std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-		G_old_omega = G_omega;
-		G0_old_omega = G0_omega;
-		G_old_tau = G_tau;
-		G0_old_tau = G0_tau;
-
-                fourier.backward_ft(G0_tau, G0_omega);
-		
-		std::cout<<"running solver."<<std::endl<<std::flush;
-                boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
-                std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
-		G0_omega = hilbert(G_omega, G0_omega, mu, h, beta, paramagnet);
-                
-		//relaxation to speed up /slow down convergence
-                if(relax_rate !=1){
-                  std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
-                  for(uint orbital=0;orbital<n_orbital;++orbital){
-                    for(uint site1=0;site1<n_site;++site1){
-                      for(uint site2=0;site2<n_site;++site2){
-                        for(uint i=0;i<n_matsubara;++i){
-                         G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+(1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
-                        }
-                      }
-                    }
-                  }
-                }
-                std::cout<<"comparing old and new result."<<std::endl<<std::flush;
-		max_diff=0;
-		if(iteration_ctr>1){
-			//comparison for the dressed Green's function in Matsubara freq.
-			for(uint w=0; w<n_matsubara; w++) {
-			  for(uint i1=0; i1<n_site; i1++) {
-			    for(uint i2=0; i2<n_site; i2++) {
-			      for(uint o=0; o<n_orbital; o++) {
-				if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
-					max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
-			      }
-                            }
-                          }
-                        }
-			std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "<<max_diff<<"\tconverged: "<<converged<<std::endl;
-		}
-		print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
-	}while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
-	
+void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
+			      ClusterTransformer& clustertrans, FourierTransformer &fourier,
+			      matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
+{
+  uint n_tau=boost::lexical_cast<uint>(parms["N"]);
+  uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
+  uint n_orbital=parms.value_or_default("FLAVORS", 2);
+  uint n_site=parms.value_or_default("SITES", 1);
+  
+  double beta = static_cast<double>(parms["BETA"]);
+  double mu = static_cast<double>(parms["MU"]);
+  double h = static_cast<double>(parms["H"]);
+  double converged = static_cast<double>(parms["CONVERGED"]);
+  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  
+  double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
+  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  
+  int iteration_ctr = 0;
+  bool result_in_omega=true;
+  
+  if(parms.defined("DIRECT_ITIME_MEASUREMENT") || 
+     parms.defined("FACTORIZED_ITIME_MEASUREMENT") || 
+     parms.defined("WERNER_ITIME_MEASUREMENT")) {
+    result_in_omega=false;
+  }
+  matsubara_green_function_t G_old_omega(G0_omega);
+  matsubara_green_function_t G0_old_omega(G0_omega);
+  itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
+  itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
+  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
+  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
+  //initialize space for multiple vectors
+  double max_diff;	
+  do {
+    iteration_ctr++;
+    std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+    G_old_omega = G_omega;
+    G0_old_omega = G0_omega;
+    G_old_tau = G_tau;
+    G0_old_tau = G0_tau;
+    
+    fourier.backward_ft(G0_tau, G0_omega);
+    //G0_omega = clustertrans.transform_into_real_space(G0_omega);
+    //G0_tau = clustertrans.transform_into_real_space(G0_tau);
+    std::cout<<"running solver."<<std::endl<<std::flush;
+    boost::tie(G_omega, G_tau) = solver.solve_omega(clustertrans.transform_into_real_space(G0_omega),parms);
+    //G0_omega = clustertrans.transform_into_k_space(G0_omega);
+    //G0_tau = clustertrans.transform_into_k_space(G0_tau);
+    G_omega = clustertrans.transform_into_k_space(G_omega);
+    G_tau = clustertrans.transform_into_k_space(G_tau);
+    std::cout<<"running cluster transform"<<std::endl<<std::flush;
+    G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta, paramagnet);
+    
+    //relaxation to speed up /slow down convergence
+    if(relax_rate !=1){
+      std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
+      for(uint orbital=0;orbital<n_orbital;++orbital){
+	for(uint site1=0;site1<n_site;++site1){
+	  for(uint site2=0;site2<n_site;++site2){
+	    for(uint i=0;i<n_matsubara;++i){
+	      G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
+		(1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
+	    }
+	  }
+	}
+      }
+    }
+    std::cout<<"comparing old and new result."<<std::endl<<std::flush;
+    max_diff=0;
+    if(iteration_ctr>1){
+      //comparison for the dressed Green's function in Matsubara freq.
+      for(uint w=0; w<n_matsubara; w++) {
+	for(uint i1=0; i1<n_site; i1++) {
+	  for(uint i2=0; i2<n_site; i2++) {
+	    for(uint o=0; o<n_orbital; o++) {
+	      if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
+		max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
+	    }
+	  }
+	}
+      }
+      std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "
+	       <<max_diff<<"\tconverged: "<<converged<<std::endl;
+    }
+    print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+    matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
+    matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
+    itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
+    itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
+    print_all_green_functions(iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, false, "_realspace");
+  }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
+  
 }
