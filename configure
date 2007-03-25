@@ -2375,8 +2375,8 @@ echo "${ECHO_T}$COMPILER" >&6
       try_CXX="CC"
       ;;
     ibm*)
-      try_CC="xlc"
-      try_CXX="xlC"
+      try_CC="xlc_r"
+      try_CXX="xlC_r"
       ;;
     macos)
       try_CC="gcc"
@@ -27934,7 +27934,7 @@ rm -f conftest.err conftest.$ac_objext \
       if test "$found" = no; then
         if test "$ac_cv_compiler" = ibm32 || test "$ac_cv_compiler" = ibm64; then
 	  # for IBM LoadLeveler
-          MPI_LIBS="-binitfini:poe_remote_main -lmpi -lvtd"
+          MPI_LIBS="-binitfini:poe_remote_main -lmpi_r -lvtd_r"
           LIBS="$MPI_LIBS $ac_save_LIBS"
           echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
 echo $ECHO_N "checking for MPI_Finalize() in $MPI_LIBS... $ECHO_C" >&6

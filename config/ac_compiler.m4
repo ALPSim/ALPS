@@ -159,8 +159,8 @@ AC_DEFUN([AC_COMPILER],
       try_CXX="CC"
       ;;
     ibm*)
-      try_CC="xlc"
-      try_CXX="xlC"
+      try_CC="xlc_r"
+      try_CXX="xlC_r"
       ;;
     macos)
       try_CC="gcc"
