@@ -356,6 +356,20 @@
   <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>
 </LATTICEGRAPH>
 
+<LATTICEGRAPH name = "inhomogeneous simple cubic lattice">
+  <FINITELATTICE>
+    <LATTICE ref="simple cubic lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <PARAMETER name="H" default="W"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <EXTENT dimension="3" size="H"/>
+    <BOUNDARY type="open"/>
+  </FINITELATTICE>
+  <UNITCELL ref="simple3d"/>
+  <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>
+</LATTICEGRAPH>
+
 <LATTICEGRAPH name = "depleted square lattice">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
