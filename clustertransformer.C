@@ -373,6 +373,24 @@ matsubara_green_function_t ClusterHelper::transform_into_k_space(const matsubara
 }
 
 
+std::complex<double> *ClusterHelper::exp_iksite(const int sign) const
+{
+  std::complex<double> *m = new std::complex<double>[n_cluster_sites()*n_cluster_sites()];
+  vertex_iterator itv_k, itv_k_end;
+  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
+    vertex_iterator itv_i, itv_i_end;
+    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
+      double phase = 0.;
+      for (int d=0; d<dimension(); ++d) 
+	phase += cluster_momentum(*itv_k)[d]*cluster_coordinate(*itv_i)[d];
+      phase *= sign;
+      m[vertex_index(*itv_k)+n_cluster_sites()*vertex_index(*itv_i)].real() = cos(phase);
+      m[vertex_index(*itv_k)+n_cluster_sites()*vertex_index(*itv_i)].imag() = sin(phase);
+    }
+  }
+  return m;
+}
+
 matsubara_green_function_t ClusterTransformer::calculate_initial_G0(const alps::Parameters& parms)
 {
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);

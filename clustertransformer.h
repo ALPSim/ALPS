@@ -43,6 +43,7 @@ public:
   itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const;
   matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const;
   itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const;
+  std::complex<double> *exp_iksite(const int sign) const;
   
 protected:
   
