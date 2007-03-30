@@ -55,7 +55,7 @@ void newDoc(char const*, char const*)
 void startElem(char const* str, char const* end)
 {
   std::string name = std::string(str, end);
-  transform (name.begin(), name.end(), name.begin(), tolower);
+  std::transform (name.begin(), name.end(), name.begin(), tolower);
   mContext->addElement(name);
   mContext = mContext->getLastElement();
 }

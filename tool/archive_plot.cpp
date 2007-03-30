@@ -38,7 +38,7 @@
 #include <boost/lexical_cast.hpp>
 
 std::string Plot::strToLower(std::string inStr) {
-        transform (inStr.begin(), inStr.end(), inStr.begin(), tolower);
+        std::transform (inStr.begin(), inStr.end(), inStr.begin(), tolower);
         return inStr;
 }
 

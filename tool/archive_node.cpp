@@ -37,17 +37,17 @@ void Node::addElement(Node inChild) {
 }
 
 void Node::addElement(std::string inName) { 
-        transform (inName.begin(), inName.end(), inName.begin(), tolower);
+        std::transform (inName.begin(), inName.end(), inName.begin(), tolower);
         addElement(Node(inName, this)); 
 }
                 
 void Node::addAttribute(std::string inName, std::string inValue) {
-        transform (inName.begin(), inName.end(), inName.begin(), tolower);
+        std::transform (inName.begin(), inName.end(), inName.begin(), tolower);
         mAttr[inName] = inValue; 
 }
                 
 std::string Node::getAttribute(std::string inName) { 
-        transform (inName.begin(), inName.end(), inName.begin(), tolower);
+        std::transform (inName.begin(), inName.end(), inName.begin(), tolower);
     if (mAttr.find(inName) == mAttr.end())
             return "";
     else
@@ -62,7 +62,7 @@ std::string Node::string() {
 }
                 
 std::list<Node> Node::nodeTest(std::string nodeName) {
-        transform (nodeName.begin(), nodeName.end(), nodeName.begin(), tolower);
+        std::transform (nodeName.begin(), nodeName.end(), nodeName.begin(), tolower);
         std::list<Node> context;
         for (std::list<Node>::iterator it = mElem.begin(); it != mElem.end(); it++)
                 if (it->getName() == nodeName)
@@ -71,7 +71,7 @@ std::list<Node> Node::nodeTest(std::string nodeName) {
 }
 
 Node Node::getElement(std::string nodeName) {
-        transform (nodeName.begin(), nodeName.end(), nodeName.begin(), tolower);
+        std::transform (nodeName.begin(), nodeName.end(), nodeName.begin(), tolower);
         for (std::list<Node>::iterator it = mElem.begin(); it != mElem.end(); it++)
                 if (it->getName() == nodeName)
                         return *it;
