@@ -384,8 +384,7 @@ std::complex<double> *ClusterHelper::exp_iksite(const int sign) const
       for (int d=0; d<dimension(); ++d) 
 	phase += cluster_momentum(*itv_k)[d]*cluster_coordinate(*itv_i)[d];
       phase *= sign;
-      m[vertex_index(*itv_k)+n_cluster_sites()*vertex_index(*itv_i)].real() = cos(phase);
-      m[vertex_index(*itv_k)+n_cluster_sites()*vertex_index(*itv_i)].imag() = sin(phase);
+      m[vertex_index(*itv_k)+n_cluster_sites()*vertex_index(*itv_i)]=std::complex<double>(cos(phase), sin(phase));
     }
   }
   return m;

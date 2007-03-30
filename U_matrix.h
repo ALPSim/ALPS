@@ -15,7 +15,8 @@ typedef class U_matrix{
       val_=new double[nf_*nf_];
       for(uint i=0;i<nf_*nf_;++i){val_[i]=0;} //default: non-interacting.
       if(parms.defined("U_MATRIX")){
-        std::ifstream u_file(std::string(parms["U_MATRIX"]).c_str());
+        std::string ufilename(parms["U_MATRIX"]);
+        std::ifstream u_file(ufilename.c_str());
         assert(u_file.is_open());
         int i;
         int j;
