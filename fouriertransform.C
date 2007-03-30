@@ -26,6 +26,7 @@
 *****************************************************************************/
 /*fouriertransform.C*/
 #include "fouriertransform.h"
+#include <valarray>
 #include <boost/numeric/bindings/lapack/lapack.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
@@ -137,7 +138,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
   //we implicitely assume that we have as many imag time slices as matsubara frequencies. 
   //If this is not the case: interpolate,
   double G_tau_vector[N_large_t];
-  std::complex<double> G_omega_vector[N_large_w];
+  std::valarray<std::complex<double> > G_omega_vector(N_large_w);
   //std::vector<double> G_tau_derivatives(G_tau.ntime());
   assert(c1_==1); //otherwise change evaluate_second_derivatives!
   for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
