@@ -25915,7 +25915,7 @@ rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
       fi
       if test "$found" = no ;  then
-        for blas_libs in '-lsci' '-lacml -lacml_mv -lgfortran' -lblas' '-lblas -lf2c' '-lblas -lg2c' '-lblas -lpgftnrtl -lpgc' '-lblas /usr/lib/libg2c.so.0.0.0'; do
+        for blas_libs in '-lsci' '-lacml -lacml_mv -lgfortran' '-lblas' '-lblas -lf2c' '-lblas -lg2c' '-lblas -lpgftnrtl -lpgc' '-lblas /usr/lib/libg2c.so.0.0.0'; do
           LDFLAGS="$blas_ldflags $ac_save_LDFLAGS"
           LIBS="$blas_libs $ac_save_LIBS"
           echo "$as_me:$LINENO: checking for dgemm_ in $blas_ldflags $blas_libs" >&5
