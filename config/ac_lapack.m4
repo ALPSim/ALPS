@@ -711,7 +711,7 @@ AC_DEFUN([AC_LAPACK],
                     [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
       fi
       if test "$found" = no ;  then
-        for blas_libs in '-lsci' '-lblas' '-lblas -lf2c' '-lblas -lg2c' '-lblas -lpgftnrtl -lpgc' '-lblas /usr/lib/libg2c.so.0.0.0'; do
+        for blas_libs in '-lsci' '-lacml -lacml_mv -lgfortran' -lblas' '-lblas -lf2c' '-lblas -lg2c' '-lblas -lpgftnrtl -lpgc' '-lblas /usr/lib/libg2c.so.0.0.0'; do
           LDFLAGS="$blas_ldflags $ac_save_LDFLAGS"
           LIBS="$blas_libs $ac_save_LIBS"
           AC_MSG_CHECKING([for dgemm_ in $blas_ldflags $blas_libs])
