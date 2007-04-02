@@ -261,7 +261,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     
     fourier.backward_ft(G0_tau, G0_omega);
     std::cout<<"running solver."<<std::endl<<std::flush;
-    boost::tie(G_omega, G_tau) = solver.solve_omega(clustertrans.transform_into_real_space(G0_omega),parms);
+    boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
     //G_omega = clustertrans.transform_into_k_space(G_omega);
     //G_tau = clustertrans.transform_into_k_space(G_tau);
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
