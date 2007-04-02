@@ -123,10 +123,8 @@ int main(int argc, char** argv)
 	  SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 	  selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
 	}
-	// write final result
-	std::ofstream out_file("G_output");
-	assert(out_file.is_open());
-	out_file<<G_tau<<std::endl;
+	// write G0 (to be read in as an input for a new simulation)
+	G0_tau.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
       } 
       else {
 #ifdef RUBTSOV
@@ -180,11 +178,8 @@ int main(int argc, char** argv)
 	}
 	selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr, *fourier_ptr, G0_omega, G_omega);
       
-	// write final result
-	std::ofstream outfile("Gomega_output");
-	assert(outfile.is_open());
-	outfile<<G_omega<<std::endl;
-	outfile.close();
+	// write G0 (to be read as an input Green function)
+	G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
       }
     }
     else { //CLUSTER_LOOP
@@ -244,18 +239,8 @@ int main(int argc, char** argv)
 	}
 #endif
 	selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr, *fourier_ptr, G0_omega, G_omega);
-	/*ClusterHelper clusterhelp(parms);
-	G0_omega=clusterhelp.transform_into_real_space(G0_omega);
-	std::ofstream outdeb("g0trans.dat");  
-	outdeb<<G0_omega<<std::endl;
-	outdeb.close();
-	G0_omega=clusterhelp.transform_into_k_space(G0_omega);
-	G_omega = G0_omega;*/
-	// write final result
- 	std::ofstream outfile("Gomega_output");  
-	assert(outfile.is_open());
-	outfile<<G_omega<<std::endl;
-	outfile.close();
+	// write G0
+	G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
       }
       else {
 	std::cout<<parms["CLUSTER_LOOP"]<<std::endl;

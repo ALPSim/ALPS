@@ -78,6 +78,7 @@ template <typename T> class green_function{
 	inline const uint &nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
 
         void read(const char *filename);
+        void write(const char *filename);
         std::pair<std::vector<T>,std::vector<T> > to_multiple_vector() const;
         void from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> > &mv);
         ///mirror a GF at zero.
@@ -148,6 +149,23 @@ template<typename T> void green_function<T>::read(const char *filename){
 	}
       }
     }
+  }
+}
+
+template<typename T> void green_function<T>::write(const char *filename){
+  std::ofstream out_file(filename);
+  assert(out_file.is_open()); //this is not good enough when people use -DNDEBUG.
+  if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
+  for(uint i=0;i<nt_;++i){
+    out_file << i << " ";
+    for(uint s0=0; s0<ns_; ++s0) {
+      for(uint s1=0; s1<ns_; ++s1){
+	for(uint f=0; f<nf_; ++f) {
+	  out_file<<operator()(i, s0, s1, f) << " "; 
+	}
+      }
+    }
+    out_file << std::endl;
   }
 }
 
