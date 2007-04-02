@@ -2,9 +2,10 @@
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2005-2006 by Philipp Werner <werner@comp-phys.org>,
-*                            Matthias Troyer <troyer@comp-phys.org>
+* Copyright (C) 2005-2007 by Philipp Werner <werner@comp-phys.org>,
 *                            Emanuel Gull <gullc@comp-phys.org>
+*                            Sebastian Fuchs <fuchs@comp-phys.org>
+*                            Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
