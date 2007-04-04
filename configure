@@ -4054,19 +4054,23 @@ echo "$as_me: error: compiler mode is not set" >&2;}
       ;;
     ibm32)
       try_CFLAGS="-q32"
+      try_CFLAGS_NOWARN="-w"
       try_CFLAGS_OPT="-O2"
-      try_CFLAGS_DEBUG=-"-g"
+      try_CFLAGS_DEBUG="-g"
       try_CXXFLAGS="-q32"
-      try_CXXFLAGS_OPT="-O2 -qrtti=all"
-      try_CXXFLAGS_DEBUG="-g -qrtti=all"
+      try_CXXFLAGS_NOWARN="-w"
+      try_CXXFLAGS_OPT="-O2 -qrtti"
+      try_CXXFLAGS_DEBUG="-g -qrtti"
       ;;
     ibm64)
       try_CFLAGS="-q64"
+      try_CFLAGS_NOWARN="-w"
       try_CFLAGS_OPT="-O2"
-      try_CFLAGS_DEBUG=-"-g"
+      try_CFLAGS_DEBUG="-g"
       try_CXXFLAGS="-q64"
-      try_CXXFLAGS_OPT="-O2 -qrtti=all"
-      try_CXXFLAGS_DEBUG="-g -qrtti=all"
+      try_CXXFLAGS_NOWARN="-w"
+      try_CXXFLAGS_OPT="-O2 -qrtti"
+      try_CXXFLAGS_DEBUG="-g -qrtti"
       ;;
     macos-gcc-3)
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-long-double"
@@ -6507,10 +6511,6 @@ if test x"$ac_cv_compiler" = xibm32 || test x"$ac_cv_compiler" = xibm64; then
   test -z "${enable_shared+set}" && enable_shared=no
 fi
 
-if test x"$ac_cv_compiler" = xibm64; then
-  test -z "$AR" && AR="ar -X64"
-  test -z "$NM" && NM="nm -X64 -B"
-fi
 
 # Check whether --enable-shared or --disable-shared was given.
 if test "${enable_shared+set}" = set; then

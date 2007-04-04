@@ -176,10 +176,10 @@ if test x"$ac_cv_compiler" = xibm32 || test x"$ac_cv_compiler" = xibm64; then
 fi
 
 dnl set 64-bit flag for IBM compiler
-if test x"$ac_cv_compiler" = xibm64; then
-  test -z "$AR" && AR="ar -X64"
-  test -z "$NM" && NM="nm -X64 -B"
-fi
+dnl if test x"$ac_cv_compiler" = xibm64; then
+dnl   test -z "$AR" && AR="ar -X64"
+dnl   test -z "$NM" && NM="nm -X64 -B"
+dnl fi
 
 dnl libtool
 AC_PROG_LIBTOOL
