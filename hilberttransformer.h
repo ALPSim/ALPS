@@ -72,7 +72,7 @@ public:
   SemicircleHilbertTransformer(double t) : t_(t) {}
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
-  itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier, 
+  virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier, 
 				    double mu, double h, double beta, bool paramagnet)
   {
     if(h!=0) std::cerr<<"ignoring magnetic field!"<<std::endl;
@@ -114,7 +114,7 @@ class SquarelatticeHilbertTransformer : public HilbertTransformer {
 public:
   /// the constructor accepts the bandwidth
   SquarelatticeHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-  itime_green_function_t operator()(itime_green_function_t Sigma, double mu)
+  virtual itime_green_function_t operator()(itime_green_function_t Sigma, double mu)
   {
     //to implement
     std::cout<<Sigma;
@@ -137,7 +137,7 @@ public:
   ///          Note that issues such as units are still undecided and might require further 
   ///          additions to the interface
   GeneralHilbertTransformer(const vector_type& D) : D_(D) {}
-  itime_green_function_t operator()(itime_green_function_t Sigma, double mu)
+  virtual itime_green_function_t operator()(itime_green_function_t Sigma, double mu)
   {
     //to implement
     std::cout<<Sigma;
@@ -182,7 +182,7 @@ public:
   FSSemicircleHilbertTransformer(double t) : t_(t) {}
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
-  matsubara_green_function_t operator()(matsubara_green_function_t& G_omega, 
+  virtual matsubara_green_function_t operator()(matsubara_green_function_t& G_omega, 
 					matsubara_green_function_t &G0_omega_ignored, 
 					const double mu, const double h, const double beta, const bool paramagnet)
   {
@@ -229,7 +229,7 @@ public:
   FSHamiltonianHilbertTransformer(const alps::Parameters& params);
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// via summation in k-space. The k-points are defined in the Hamiltonian.
-  matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
+  virtual matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
 					matsubara_green_function_t &G0_omega, 
 					const double mu, const double h, const double beta, const bool paramagnet);
 };
@@ -262,7 +262,7 @@ public:
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// using integration over D(epsilon).
   /// We perform the HT G <- \int \frac{D(e)}{A - e} de
-  matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
+  virtual matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
 					matsubara_green_function_t &G0_omega, 
 					const double mu, const double h, const double beta, const bool paramagnet)
   {
