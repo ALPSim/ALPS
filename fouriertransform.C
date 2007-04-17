@@ -129,7 +129,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
   uint N=G_tau.ntime()-1;
   uint N_site=G_tau.nsite();
   //double dt = beta_/N;
-  uint n_oversampling_t=10; //not sure that helps... check again!
+  uint n_oversampling_t=1; //not sure that helps... check again!
   uint n_oversampling_w=1; //not sure that helps... check again!
   uint N_large_t=(G_tau.ntime()-1)*n_oversampling_t+1;
   uint N_large_w=(G_tau.ntime()-1)*n_oversampling_w+1;
@@ -157,9 +157,10 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
 	  for(uint i=0;i<N_large_t-1;++i){
 	    //if(n==0)
 	    //std::cout<<i<<" "<<dt<<" "<<i*dt<<std::endl;
+            double phi=w_n*i*dt;
 	    if (s1==s2) 
-	      G_omega_vector[n] += dt*std::exp((std::complex<double>(0,1))*(w_n*i*dt))*
-		(G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_));
+	      G_omega_vector[n] += std::complex<double>(cos(phi), sin(phi))*
+		((G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_))*dt);
 	    else
 	      G_omega_vector[n] += dt*std::exp((std::complex<double>(0,1))*(w_n*i*dt))*G_tau_vector[i];
 	  }
