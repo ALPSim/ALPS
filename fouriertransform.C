@@ -129,7 +129,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
   uint N=G_tau.ntime()-1;
   uint N_site=G_tau.nsite();
   //double dt = beta_/N;
-  uint n_oversampling_t=1; //not sure that helps... check again!
+  uint n_oversampling_t=10; //not sure that helps... check again!
   uint n_oversampling_w=1; //not sure that helps... check again!
   uint N_large_t=(G_tau.ntime()-1)*n_oversampling_t+1;
   uint N_large_w=(G_tau.ntime()-1)*n_oversampling_w+1;
