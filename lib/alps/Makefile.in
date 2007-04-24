@@ -50,7 +50,8 @@ host_triplet = @host@
 @BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
 @BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
 @BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
-@BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
+@BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
+@BUILD_BOOST_WCHAR_TRUE@  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
 
 @BUILD_BOOST_WCHAR_TRUE@am__append_3 = \
 @BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
@@ -62,7 +63,7 @@ host_triplet = @host@
 @BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
 @BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
 @BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
-@BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+@BUILD_BOOST_WCHAR_TRUE@  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
 
 @ALPS_FULL_TRUE@am__append_4 = $(src_ALEA) $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
 @BUILD_BOOST_TRUE@am__append_5 = $(top_srcdir)/src/boost/throw_exception.C
@@ -206,23 +207,14 @@ am__objects_22 = c_regex_traits.lo cpp_regex_traits.lo cregex.lo \
 	regex_debug.lo regex_raw_buffer.lo regex_traits_defaults.lo \
 	static_mutex.lo usinstances.lo w32_regex_traits.lo \
 	$(am__objects_21)
-am__objects_23 = $(am__objects_18) basic_archive_impl.lo \
-	basic_iserializer.lo basic_oserializer.lo \
-	basic_pointer_iserializer.lo basic_pointer_oserializer.lo \
-	stl_port.lo
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__objects_24 = $(am__objects_20) \
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_22) \
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_23)
-am__objects_25 = exception.lo operations.lo path.lo portability.lo \
-	fs_utf8_codecvt_facet.lo
-am__objects_26 = $(am__objects_22)
-@BUILD_BOOST_WCHAR_TRUE@am__objects_27 = basic_text_wiprimitive.lo \
+@BUILD_BOOST_WCHAR_TRUE@am__objects_23 = basic_text_wiprimitive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	basic_text_woprimitive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	binary_wiarchive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	binary_woarchive.lo text_wiarchive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	text_woarchive.lo xml_wgrammar.lo \
-@BUILD_BOOST_WCHAR_TRUE@	xml_wiarchive.lo xml_woarchive.lo
-am__objects_28 = basic_archive.lo basic_archive_impl.lo \
+@BUILD_BOOST_WCHAR_TRUE@	xml_wiarchive.lo xml_woarchive.lo \
+@BUILD_BOOST_WCHAR_TRUE@	sr_utf8_codecvt_facet.lo
+am__objects_24 = basic_archive.lo basic_archive_impl.lo \
 	basic_iarchive.lo basic_iserializer.lo basic_oarchive.lo \
 	basic_oserializer.lo basic_pointer_iserializer.lo \
 	basic_pointer_oserializer.lo basic_serializer_map.lo \
@@ -232,21 +224,20 @@ am__objects_28 = basic_archive.lo basic_archive_impl.lo \
 	extended_type_info_no_rtti.lo extended_type_info_typeid.lo \
 	polymorphic_iarchive.lo polymorphic_oarchive.lo stl_port.lo \
 	text_iarchive.lo text_oarchive.lo void_cast.lo xml_grammar.lo \
-	xml_iarchive.lo xml_oarchive.lo sr_utf8_codecvt_facet.lo \
-	$(am__objects_27)
-@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_29 = $(am__objects_25) \
-@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26) \
+	xml_iarchive.lo xml_oarchive.lo $(am__objects_23)
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__objects_25 = $(am__objects_20) \
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_22) \
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_24)
+am__objects_26 = exception.lo operations.lo path.lo portability.lo \
+	fs_utf8_codecvt_facet.lo
+am__objects_27 = $(am__objects_22)
+am__objects_28 = $(am__objects_24)
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_29 = $(am__objects_26) \
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_27) \
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_28)
 am__objects_30 = operations.lo path.lo portability.lo \
 	fs_utf8_codecvt_facet.lo
-@BUILD_BOOST_WCHAR_TRUE@am__objects_31 = basic_text_wiprimitive.lo \
-@BUILD_BOOST_WCHAR_TRUE@	basic_text_woprimitive.lo \
-@BUILD_BOOST_WCHAR_TRUE@	binary_wiarchive.lo \
-@BUILD_BOOST_WCHAR_TRUE@	binary_woarchive.lo text_wiarchive.lo \
-@BUILD_BOOST_WCHAR_TRUE@	text_woarchive.lo xml_wgrammar.lo \
-@BUILD_BOOST_WCHAR_TRUE@	xml_wiarchive.lo xml_woarchive.lo \
-@BUILD_BOOST_WCHAR_TRUE@	utf8_codecvt_facet.lo
-am__objects_32 = basic_archive.lo basic_iarchive.lo \
+am__objects_31 = basic_archive.lo basic_iarchive.lo \
 	basic_iserializer.lo basic_oarchive.lo basic_oserializer.lo \
 	basic_pointer_iserializer.lo basic_pointer_oserializer.lo \
 	basic_serializer_map.lo basic_text_iprimitive.lo \
@@ -256,23 +247,23 @@ am__objects_32 = basic_archive.lo basic_iarchive.lo \
 	extended_type_info_typeid.lo polymorphic_iarchive.lo \
 	polymorphic_oarchive.lo stl_port.lo text_iarchive.lo \
 	text_oarchive.lo void_cast.lo xml_grammar.lo xml_iarchive.lo \
-	xml_oarchive.lo $(am__objects_31)
-am__objects_33 = error_code.lo
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_34 = $(am__objects_30) \
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_26) \
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_32) \
-@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_33)
-am__objects_35 = connection.lo named_slot_map.lo signal_base.lo \
+	xml_oarchive.lo $(am__objects_23)
+am__objects_32 = error_code.lo
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@am__objects_33 = $(am__objects_30) \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_27) \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_31) \
+@BOOST_CVS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_32)
+am__objects_34 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_36 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_35)
-am__objects_37 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_35 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_34)
+am__objects_36 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_38 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_37)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_37 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_36)
 nodist_libalps_la_OBJECTS = $(am__objects_15) $(am__objects_19) \
-	$(am__objects_24) $(am__objects_29) $(am__objects_34) \
-	$(am__objects_36) $(am__objects_38)
+	$(am__objects_25) $(am__objects_29) $(am__objects_33) \
+	$(am__objects_35) $(am__objects_37)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -637,16 +628,7 @@ src_boost_SERIALIZATION_1_32 = \
 #  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp
 #  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp
 #  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
-src_boost_SERIALIZATION_1_33 = \
-  $(src_boost_SERIALIZATION_1_32) \
-  $(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
-
-src_boost_SERIALIZATION_1_34 =  \
+src_boost_SERIALIZATION_1_33 =  \
 	$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
 	$(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp \
 	$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
@@ -674,8 +656,8 @@ src_boost_SERIALIZATION_1_34 =  \
 	$(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
 	$(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
 	$(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
-	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(am__append_2)
+src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
 src_boost_SERIALIZATION_CVS =  \
 	$(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
 	$(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
@@ -916,7 +898,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tss.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/unitcell.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/usinstances.Plo@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utf8_codecvt_facet.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/value_semantic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/variables_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/void_cast.Plo@am__quote@
@@ -1705,47 +1686,19 @@ basic_pointer_oserializer.lo: $(BOOST_SRCDIR)/serialization/src/basic_pointer_os
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_pointer_oserializer.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp
 
-stl_port.lo: $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT stl_port.lo -MD -MP -MF "$(DEPDIR)/stl_port.Tpo" -c -o stl_port.lo `test -f '$(BOOST_SRCDIR)/serialization/src/stl_port.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/stl_port.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/stl_port.Tpo" "$(DEPDIR)/stl_port.Plo"; else rm -f "$(DEPDIR)/stl_port.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/stl_port.cpp' object='stl_port.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o stl_port.lo `test -f '$(BOOST_SRCDIR)/serialization/src/stl_port.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/stl_port.cpp
-
-operations.lo: $(BOOST_SRCDIR)/filesystem/src/operations.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT operations.lo -MD -MP -MF "$(DEPDIR)/operations.Tpo" -c -o operations.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/operations.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/operations.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/operations.Tpo" "$(DEPDIR)/operations.Plo"; else rm -f "$(DEPDIR)/operations.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/filesystem/src/operations.cpp' object='operations.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o operations.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/operations.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/operations.cpp
-
-path.lo: $(BOOST_SRCDIR)/filesystem/src/path.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT path.lo -MD -MP -MF "$(DEPDIR)/path.Tpo" -c -o path.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/path.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/path.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/path.Tpo" "$(DEPDIR)/path.Plo"; else rm -f "$(DEPDIR)/path.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/filesystem/src/path.cpp' object='path.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o path.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/path.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/path.cpp
-
-portability.lo: $(BOOST_SRCDIR)/filesystem/src/portability.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT portability.lo -MD -MP -MF "$(DEPDIR)/portability.Tpo" -c -o portability.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/portability.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/portability.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/portability.Tpo" "$(DEPDIR)/portability.Plo"; else rm -f "$(DEPDIR)/portability.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/filesystem/src/portability.cpp' object='portability.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o portability.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/portability.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/portability.cpp
-
-fs_utf8_codecvt_facet.lo: $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fs_utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/fs_utf8_codecvt_facet.Tpo" -c -o fs_utf8_codecvt_facet.lo `test -f '$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/fs_utf8_codecvt_facet.Tpo" "$(DEPDIR)/fs_utf8_codecvt_facet.Plo"; else rm -f "$(DEPDIR)/fs_utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp' object='fs_utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fs_utf8_codecvt_facet.lo `test -f '$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-
 basic_xml_archive.lo: $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT basic_xml_archive.lo -MD -MP -MF "$(DEPDIR)/basic_xml_archive.Tpo" -c -o basic_xml_archive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp; \
 @am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/basic_xml_archive.Tpo" "$(DEPDIR)/basic_xml_archive.Plo"; else rm -f "$(DEPDIR)/basic_xml_archive.Tpo"; exit 1; fi
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp' object='basic_xml_archive.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o basic_xml_archive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp
+
+stl_port.lo: $(BOOST_SRCDIR)/serialization/src/stl_port.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT stl_port.lo -MD -MP -MF "$(DEPDIR)/stl_port.Tpo" -c -o stl_port.lo `test -f '$(BOOST_SRCDIR)/serialization/src/stl_port.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/stl_port.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/stl_port.Tpo" "$(DEPDIR)/stl_port.Plo"; else rm -f "$(DEPDIR)/stl_port.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/stl_port.cpp' object='stl_port.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o stl_port.lo `test -f '$(BOOST_SRCDIR)/serialization/src/stl_port.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/stl_port.cpp
 
 xml_grammar.lo: $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xml_grammar.lo -MD -MP -MF "$(DEPDIR)/xml_grammar.Tpo" -c -o xml_grammar.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp; \
@@ -1831,12 +1784,33 @@ xml_woarchive.lo: $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_woarchive.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
 
-utf8_codecvt_facet.lo: $(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
-@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/utf8_codecvt_facet.Tpo" -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp; \
-@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/utf8_codecvt_facet.Tpo" "$(DEPDIR)/utf8_codecvt_facet.Plo"; else rm -f "$(DEPDIR)/utf8_codecvt_facet.Tpo"; exit 1; fi
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' object='utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
+operations.lo: $(BOOST_SRCDIR)/filesystem/src/operations.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT operations.lo -MD -MP -MF "$(DEPDIR)/operations.Tpo" -c -o operations.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/operations.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/operations.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/operations.Tpo" "$(DEPDIR)/operations.Plo"; else rm -f "$(DEPDIR)/operations.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/filesystem/src/operations.cpp' object='operations.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o utf8_codecvt_facet.lo `test -f '$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/utf8_codecvt_facet.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o operations.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/operations.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/operations.cpp
+
+path.lo: $(BOOST_SRCDIR)/filesystem/src/path.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT path.lo -MD -MP -MF "$(DEPDIR)/path.Tpo" -c -o path.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/path.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/path.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/path.Tpo" "$(DEPDIR)/path.Plo"; else rm -f "$(DEPDIR)/path.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/filesystem/src/path.cpp' object='path.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o path.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/path.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/path.cpp
+
+portability.lo: $(BOOST_SRCDIR)/filesystem/src/portability.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT portability.lo -MD -MP -MF "$(DEPDIR)/portability.Tpo" -c -o portability.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/portability.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/portability.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/portability.Tpo" "$(DEPDIR)/portability.Plo"; else rm -f "$(DEPDIR)/portability.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/filesystem/src/portability.cpp' object='portability.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o portability.lo `test -f '$(BOOST_SRCDIR)/filesystem/src/portability.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/filesystem/src/portability.cpp
+
+fs_utf8_codecvt_facet.lo: $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
+@am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fs_utf8_codecvt_facet.lo -MD -MP -MF "$(DEPDIR)/fs_utf8_codecvt_facet.Tpo" -c -o fs_utf8_codecvt_facet.lo `test -f '$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp; \
+@am__fastdepCXX_TRUE@	then mv -f "$(DEPDIR)/fs_utf8_codecvt_facet.Tpo" "$(DEPDIR)/fs_utf8_codecvt_facet.Plo"; else rm -f "$(DEPDIR)/fs_utf8_codecvt_facet.Tpo"; exit 1; fi
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp' object='fs_utf8_codecvt_facet.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fs_utf8_codecvt_facet.lo `test -f '$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp' || echo '$(srcdir)/'`$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 
 error_code.lo: $(BOOST_SRCDIR)/system/src/error_code.cpp
 @am__fastdepCXX_TRUE@	if $(LIBTOOL) --tag=CXX --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT error_code.lo -MD -MP -MF "$(DEPDIR)/error_code.Tpo" -c -o error_code.lo `test -f '$(BOOST_SRCDIR)/system/src/error_code.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/system/src/error_code.cpp; \
