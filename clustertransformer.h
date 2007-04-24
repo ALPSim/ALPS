@@ -83,7 +83,7 @@ class ClusterTransformer : public ClusterHelper
 public:
   ClusterTransformer(const alps::Parameters& params) :
     ClusterHelper(params) {}
-
+  virtual ~ClusterTransformer(){}
   virtual matsubara_green_function_t operator()(matsubara_green_function_t & G_omega, 
 						matsubara_green_function_t &G0_omega, 
 						const double mu, const double h, 
@@ -99,7 +99,7 @@ public:
 
   DCATransformer(const alps::Parameters& params) :
     ClusterTransformer(params), t_(boost::lexical_cast<double>(params["t"])) {}
-
+  virtual ~DCATransformer(){}
 
   matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
 					matsubara_green_function_t &G0_omega, 
