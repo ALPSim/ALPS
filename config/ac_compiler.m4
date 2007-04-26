@@ -247,7 +247,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS="-mthreads"
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CFLAGS_NOWARN="-w"
-      try_CXXFLAGS="-mthreads -ftemplate-depth-150"
+      try_CXXFLAGS="-mthreads -ftemplate-depth-150 -DBOOST_POSIX"
       try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"

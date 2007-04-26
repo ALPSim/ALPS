@@ -6,7 +6,7 @@ if test -z "$2"; then
 fi
 
 srcdir="$1"
-prog=`basename $2`
+prog=`basename $2 .exe`
 dir=`echo $2 | sed 's/^\(\.\/\)*//g'` # remove preceding './'
 if test -n "$dir"; then
   dir=`dirname ${dir}`
