@@ -216,7 +216,7 @@ AC_DEFUN([AC_COMPILER],
   try_CFLAGS_WARN=
   try_CFLAGS_NOWARN=
   try_CXXFLAGS=
-  try_CXXFLAGS_OPT="-O3"
+  try_CXXFLAGS_OPT="-O3 -DBOOST_DISABLE_ASSERTS"
   try_CXXFLAGS_DEBUG="-g -O0"
   try_CXXFLAGS_WARN=
   try_CXXFLAGS_NOWARN=
@@ -263,7 +263,7 @@ AC_DEFUN([AC_COMPILER],
     intel)
       try_CFLAGS_WARN=
       try_CFLAGS_NOWARN="-w"
-      try_CXXFLAGS_OPT="-O2"
+      try_CXXFLAGS_OPT="-O2 -DBOOST_DISABLE_ASSERTS"
       try_CXXFLAGS="-D_REENTRANT -restrict"
       try_CXXFLAGS_WARN=
       try_CXXFLAGS_NOWARN="-w"
@@ -284,10 +284,10 @@ AC_DEFUN([AC_COMPILER],
       ;;
     dec)
       try_CFLAGS="-pthread"
-      try_CFLAGS_OPT="-O4"
+      try_CFLAGS_OPT="-O4 "
       try_CFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS="-std ansi -model ansi -noimplicit_include -nousing_std -tweak -pthread -D__USE_STD_IOSTREAM"
-      try_CXXFLAGS_OPT="-O4"
+      try_CXXFLAGS_OPT="-O4 -DBOOST_DISABLE_ASSERTS"
       try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH=
       try_CXXFLAGS_NOEH="-noexceptions"
@@ -297,7 +297,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_OPT="-Ofast -INLINE"
       try_CFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS="-n32 -LANG:std -diag_error 1035"
-      try_CXXFLAGS_OPT="-Ofast -INLINE"
+      try_CXXFLAGS_OPT="-Ofast -INLINE -DBOOST_DISABLE_ASSERTS"
       try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
@@ -311,7 +311,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_OPT="-Ofast -INLINE"
       try_CFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS="-64 -LANG:std -diag_error 1035"
-      try_CXXFLAGS_OPT="-Ofast -INLINE"
+      try_CXXFLAGS_OPT="-Ofast -INLINE -DBOOST_DISABLE_ASSERTS"
       try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-LANG:exceptions=ON"
       try_CXXFLAGS_NOEH="-LANG:exceptions=OFF"
@@ -325,7 +325,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_OPT="-O2"
       try_CFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS="-h one_instantiation_per_object -h new_for_init -h nodep_name -h parse_templates"
-      try_CXXFLAGS_OPT="-O2"
+      try_CXXFLAGS_OPT="-O2 -DBOOST_DISABLE_ASSERTS"
       try_CXXFLAGS_DEBUG="-g -O0"
       try_CXXFLAGS_EH="-h exceptions"
       try_CXXFLAGS_NOEH="-h noexceptions"
@@ -337,7 +337,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_DEBUG="-g"
       try_CXXFLAGS="-q32"
       try_CXXFLAGS_NOWARN="-w"
-      try_CXXFLAGS_OPT="-O2 -qrtti"
+      try_CXXFLAGS_OPT="-O2 -qrtti -DBOOST_DISABLE_ASSERTS"
       try_CXXFLAGS_DEBUG="-g -qrtti"
       ;;
     ibm64)
@@ -347,7 +347,7 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_DEBUG="-g"
       try_CXXFLAGS="-q64"
       try_CXXFLAGS_NOWARN="-w"
-      try_CXXFLAGS_OPT="-O2 -qrtti"
+      try_CXXFLAGS_OPT="-O2 -qrtti -DBOOST_DISABLE_ASSERTS"
       try_CXXFLAGS_DEBUG="-g -qrtti"
       ;;
     macos-gcc-3)
