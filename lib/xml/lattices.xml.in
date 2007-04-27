@@ -188,6 +188,20 @@
   <EDGE type="2"><SOURCE vertex="2" offset="0"/><TARGET vertex="2" offset="1"/></EDGE>
 </UNITCELL>
 
+<UNITCELL name="Kagome" dimension="2">
+  <VERTEX><COORDINATE>0 0</COORDINATE></VERTEX>
+  <VERTEX><COORDINATE>0.5 0</COORDINATE></VERTEX>
+  <VERTEX><COORDINATE>0 0.5</COORDINATE></VERTEX>
+
+  <EDGE><SOURCE vertex="1"/><TARGET vertex="2"/></EDGE>
+  <EDGE><SOURCE vertex="1"/><TARGET vertex="3"/></EDGE>
+  <EDGE><SOURCE vertex="2"/><TARGET vertex="3"/></EDGE>
+  <EDGE><SOURCE vertex="1"/><TARGET vertex="2" offset="-1 0"/></EDGE>
+  <EDGE><SOURCE vertex="2"/><TARGET vertex="3" offset="1 -1"/></EDGE>
+  <EDGE><SOURCE vertex="1"/><TARGET vertex="3" offset="0 -1"/></EDGE>
+</UNITCELL>
+
+
 <LATTICEGRAPH name = "square lattice 3x3">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
@@ -382,6 +396,17 @@
   <DEPLETION>
     <VERTEX probability="DEPLETION" seed="DEPLETION_SEED"/>
   </DEPLETION>
+</LATTICEGRAPH>
+
+<LATTICEGRAPH name = "Kagome lattice">
+  <FINITELATTICE>
+    <LATTICE ref="triangular lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <BOUNDARY type="periodic"/>
+  </FINITELATTICE>
+  <UNITCELL ref="Kagome"/>
 </LATTICEGRAPH>
 
 <GRAPH name="5-site dimerized" vertices="5">
