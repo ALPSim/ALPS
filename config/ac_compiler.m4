@@ -248,6 +248,8 @@ AC_DEFUN([AC_COMPILER],
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CFLAGS_NOWARN="-w"
       try_CXXFLAGS="-mthreads -ftemplate-depth-150 -DBOOST_POSIX -DBOOST_POSIX_API -DBOOST_POSIX_PATH"
+      # -DBOOST_POSIX for boost 1.33
+      # -DBOOST_POSIX_API -DBOOST_POSIX_PATH for boost 1.34 or later
       try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
       try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
