@@ -11,7 +11,7 @@ dnl
 
 dnl Version of ALPS Library
 
-define([alps_version], [1.3b4])
+define([alps_version], [1.3b5])
 
 dnl Latest publication year of ALPS
 
@@ -30,7 +30,7 @@ dnl cf. http://www.gnu.org/software/libtool/manual.html#SEC32
 
 define([lib_current],  [1])
 define([lib_revision], [5])
-define([lib_age],      [0])
+define([lib_age],      [1])
 
 dnl
 dnl Initialization ---------------------------------------------------------
