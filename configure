@@ -22823,6 +22823,9 @@ echo "$as_me: error: expected an absolute directory name for --with-hdf5 : $hdf5
 
 fi;
 
+  # default is 'without HDF5'
+  test -z "$hdf5" && hdf5=no
+
   if test "$hdf5" != "no"; then
     echo "$as_me:$LINENO: checking for HDF5 root directory" >&5
 echo $ECHO_N "checking for HDF5 root directory... $ECHO_C" >&6

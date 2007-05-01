@@ -23,6 +23,9 @@ AC_DEFUN([AC_HDF5],
     ]
   )
 
+  # default is 'without HDF5'
+  test -z "$hdf5" && hdf5=no
+
   if test "$hdf5" != "no"; then
     AC_MSG_CHECKING([for HDF5 root directory])
     if test "x$hdf5_dir" = "x"; then
