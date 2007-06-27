@@ -26847,59 +26847,58 @@ echo "$as_me: error: expected an absolute directory name for --with-xerces : $xe
 
 fi;
 
-  if test "$xerces" != "no"; then
-    if test -z "$xml_parser" || test "$xml_parser" = "xerces"; then
-      echo "$as_me:$LINENO: checking for Xerces C++ root directory" >&5
+  if test "$xml_parser" = "xerces"; then
+    echo "$as_me:$LINENO: checking for Xerces C++ root directory" >&5
 echo $ECHO_N "checking for Xerces C++ root directory... $ECHO_C" >&6
-      if test "x$xerces_dir" = "x"; then
-        for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
-        do
-          if test -f "$d/include/xercesc/parsers/SAXParser.hpp"; then
-            xerces_dir="$d"
-            break
-          fi
-          if test -f "$d/xercesc/include/xercesc/parsers/SAXParser.hpp"; then
-            xerces_dir="$d/xercesc"
-            break
-          fi
-        done
-        if test -n "$xerces_dir"; then
-          echo "$as_me:$LINENO: result: $xerces_dir" >&5
-echo "${ECHO_T}$xerces_dir" >&6
-        else
-          echo "$as_me:$LINENO: result: " >&5
-echo "${ECHO_T}" >&6
+    if test "x$xerces_dir" = "x"; then
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
+      do
+        if test -f "$d/include/xercesc/parsers/SAXParser.hpp"; then
+          xerces_dir="$d"
+          break
         fi
-      else
+        if test -f "$d/xercesc/include/xercesc/parsers/SAXParser.hpp"; then
+          xerces_dir="$d/xercesc"
+          break
+        fi
+      done
+      if test -n "$xerces_dir"; then
         echo "$as_me:$LINENO: result: $xerces_dir" >&5
 echo "${ECHO_T}$xerces_dir" >&6
-        if test -f "$xerces_dir/include/xercesc/parsers/SAXParser.hpp"; then :; else
-          { { echo "$as_me:$LINENO: error: $xerces_dir/include/xercesc/parsers/SAXParser.hpp not found" >&5
+      else
+        echo "$as_me:$LINENO: result: " >&5
+echo "${ECHO_T}" >&6
+      fi
+    else
+      echo "$as_me:$LINENO: result: $xerces_dir" >&5
+echo "${ECHO_T}$xerces_dir" >&6
+      if test -f "$xerces_dir/include/xercesc/parsers/SAXParser.hpp"; then :; else
+        { { echo "$as_me:$LINENO: error: $xerces_dir/include/xercesc/parsers/SAXParser.hpp not found" >&5
 echo "$as_me: error: $xerces_dir/include/xercesc/parsers/SAXParser.hpp not found" >&2;}
    { (exit 1); exit 1; }; }
-        fi
       fi
+    fi
 
-      if test -n "$xerces_dir"; then
-        XML_CPPFLAGS="-I$xerces_dir/include"
-        XML_LDFLAGS="-L$xerces_dir/lib"
-      fi
+    if test -n "$xerces_dir"; then
+      XML_CPPFLAGS="-I$xerces_dir/include"
+      XML_LDFLAGS="-L$xerces_dir/lib"
+    fi
 
 
 
-      ac_ext=cc
+    ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-      ac_save_CPPFLAGS=$CPPFLAGS
-      ac_save_LDFLAGS=$LDFLAGS
-      ac_save_LIBS=$LIBS
-      CPPFLAGS="$XML_CPPFLAGS $CPPFLAGS"
-      LDFLAGS="$XML_LDFLAGS $LDFLAGS"
+    ac_save_CPPFLAGS=$CPPFLAGS
+    ac_save_LDFLAGS=$LDFLAGS
+    ac_save_LIBS=$LIBS
+    CPPFLAGS="$XML_CPPFLAGS $CPPFLAGS"
+    LDFLAGS="$XML_LDFLAGS $LDFLAGS"
 
-      if test "${ac_cv_header_xercesc_parsers_SAXParser_hpp+set}" = set; then
+    if test "${ac_cv_header_xercesc_parsers_SAXParser_hpp+set}" = set; then
   echo "$as_me:$LINENO: checking for xercesc/parsers/SAXParser.hpp" >&5
 echo $ECHO_N "checking for xercesc/parsers/SAXParser.hpp... $ECHO_C" >&6
 if test "${ac_cv_header_xercesc_parsers_SAXParser_hpp+set}" = set; then
@@ -27039,42 +27038,35 @@ fi
 if test $ac_cv_header_xercesc_parsers_SAXParser_hpp = yes; then
   :
 else
-
-                      if test "$xerces" = yes; then
-                        { { echo "$as_me:$LINENO: error: check for Xerces C++ XML parser failed" >&5
+  { { echo "$as_me:$LINENO: error: check for Xerces C++ XML parser failed" >&5
 echo "$as_me: error: check for Xerces C++ XML parser failed" >&2;}
    { (exit 1); exit 1; }; }
-                      else
-                        xerces=no
-                      fi
-
 fi
 
 
 
-      if test "$xerces" != no; then
-        echo "$as_me:$LINENO: checking for Xerces C++ version" >&5
+    echo "$as_me:$LINENO: checking for Xerces C++ version" >&5
 echo $ECHO_N "checking for Xerces C++ version... $ECHO_C" >&6
-        xerces_version_maj=`grep "^#define XERCES_VERSION_MAJOR" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
-	xerces_version_min=`grep "^#define XERCES_VERSION_MINOR" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
-	xerces_version_rev=`grep "^#define XERCES_VERSION_REVISION" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
-	if test -n "$xerces_version_maj"; then
- 	  xerces_version="$xerces_version_maj.$xerces_version_min.$xerces_version_rev"
-          echo "$as_me:$LINENO: result: $xerces_version" >&5
+    xerces_version_maj=`grep "^#define XERCES_VERSION_MAJOR" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
+    xerces_version_min=`grep "^#define XERCES_VERSION_MINOR" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
+    xerces_version_rev=`grep "^#define XERCES_VERSION_REVISION" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
+    if test -n "$xerces_version_maj"; then
+      xerces_version="$xerces_version_maj.$xerces_version_min.$xerces_version_rev"
+      echo "$as_me:$LINENO: result: $xerces_version" >&5
 echo "${ECHO_T}$xerces_version" >&6
-	else
-          echo "$as_me:$LINENO: result: unknown" >&5
+    else
+      echo "$as_me:$LINENO: result: unknown" >&5
 echo "${ECHO_T}unknown" >&6
-        fi
+    fi
 
-        found=no
+    found=no
 
-        if test "$found" = no; then
-          XML_LIBS="-lxerces-c"
-          LIBS="$XML_LIBS $ac_save_LIBS"
-          echo "$as_me:$LINENO: checking for SAXParser in $XML_LIBS" >&5
+    if test "$found" = no; then
+      XML_LIBS="-lxerces-c"
+      LIBS="$XML_LIBS $ac_save_LIBS"
+      echo "$as_me:$LINENO: checking for SAXParser in $XML_LIBS" >&5
 echo $ECHO_N "checking for SAXParser in $XML_LIBS... $ECHO_C" >&6
-          cat >conftest.$ac_ext <<_ACEOF
+      cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -27122,14 +27114,14 @@ echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-        fi
+    fi
 
-        if test "$found" = no; then
-          XML_LIBS="-lxerces-c$xerces_version"
-          LIBS="$XML_LIBS $ac_save_LIBS"
-          echo "$as_me:$LINENO: checking for SAXParser in $XML_LIBS" >&5
+    if test "$found" = no; then
+      XML_LIBS="-lxerces-c$xerces_version"
+      LIBS="$XML_LIBS $ac_save_LIBS"
+      echo "$as_me:$LINENO: checking for SAXParser in $XML_LIBS" >&5
 echo $ECHO_N "checking for SAXParser in $XML_LIBS... $ECHO_C" >&6
-          cat >conftest.$ac_ext <<_ACEOF
+      cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -27177,85 +27169,75 @@ echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-        fi
-
-        if test "$found" = no; then
-          if test "$xerces" = yes; then
-            { { echo "$as_me:$LINENO: error: check for Xerces C++ XML library failed" >&5
+    fi
+    if test "$found" = no; then
+      { { echo "$as_me:$LINENO: error: check for Xerces C++ XML library failed" >&5
 echo "$as_me: error: check for Xerces C++ XML library failed" >&2;}
    { (exit 1); exit 1; }; }
-          fi
-          xerces=no
-        else
-          xml_parser="xerces"
-        fi
-      fi
-
-      CPPFLAGS=$ac_save_CPPFLAGS
-      LDFLAGS=$ac_save_LDFLAGS
-      LIBS=$ac_save_LIBS
-      ac_ext=cc
+    fi
+    CPPFLAGS=$ac_save_CPPFLAGS
+    LDFLAGS=$ac_save_LDFLAGS
+    LIBS=$ac_save_LIBS
+    ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-    fi
   fi
 
-  if test "$expat" != "no"; then
-    if test -z "$xml_parser" || test "$xml_parser" = "expat"; then
-      echo "$as_me:$LINENO: checking for expat root directory" >&5
+  if test "$xml_parser" = "expat"; then
+    echo "$as_me:$LINENO: checking for expat root directory" >&5
 echo $ECHO_N "checking for expat root directory... $ECHO_C" >&6
-      if test "x$expat_dir" = "x"; then
-        for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
-        do
-          if test -f "$d/include/expat.h"; then
-            expat_dir="$d"
-            break
-          fi
-          if test -f "$d/expat/include/expat.h"; then
-            expat_dir="$d/expat"
-            break
-          fi
-        done
-        if test -n "$expat_dir"; then
-          echo "$as_me:$LINENO: result: $expat_dir" >&5
-echo "${ECHO_T}$expat_dir" >&6
-        else
-          echo "$as_me:$LINENO: result: " >&5
-echo "${ECHO_T}" >&6
+    if test "x$expat_dir" = "x"; then
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
+      do
+        if test -f "$d/include/expat.h"; then
+          expat_dir="$d"
+          break
         fi
-      else
+        if test -f "$d/expat/include/expat.h"; then
+          expat_dir="$d/expat"
+          break
+        fi
+      done
+      if test -n "$expat_dir"; then
         echo "$as_me:$LINENO: result: $expat_dir" >&5
 echo "${ECHO_T}$expat_dir" >&6
-        if test -f "$expat_dir/include/expat.h"; then :; else
-          { { echo "$as_me:$LINENO: error: $expat_dir/include/expat.h not found" >&5
+      else
+        echo "$as_me:$LINENO: result: " >&5
+echo "${ECHO_T}" >&6
+      fi
+    else
+      echo "$as_me:$LINENO: result: $expat_dir" >&5
+echo "${ECHO_T}$expat_dir" >&6
+      if test -f "$expat_dir/include/expat.h"; then :; else
+        { { echo "$as_me:$LINENO: error: $expat_dir/include/expat.h not found" >&5
 echo "$as_me: error: $expat_dir/include/expat.h not found" >&2;}
    { (exit 1); exit 1; }; }
-        fi
       fi
+    fi
 
-      if test -n "$expat_dir"; then
-        XML_CPPFLAGS="-I$expat_dir/include"
-        XML_LDFLAGS="-L$expat_dir/lib"
-      fi
+    if test -n "$expat_dir"; then
+      XML_CPPFLAGS="-I$expat_dir/include"
+      XML_LDFLAGS="-L$expat_dir/lib"
+    fi
 
 
 
-      ac_ext=cc
+    ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-      ac_save_CPPFLAGS=$CPPFLAGS
-      ac_save_LDFLAGS=$LDFLAGS
-      ac_save_LIBS=$LIBS
-      CPPFLAGS="$XML_CPPFLAGS $CPPFLAGS"
-      LDFLAGS="$XML_LDFLAGS $LDFLAGS"
+    ac_save_CPPFLAGS=$CPPFLAGS
+    ac_save_LDFLAGS=$LDFLAGS
+    ac_save_LIBS=$LIBS
+    CPPFLAGS="$XML_CPPFLAGS $CPPFLAGS"
+    LDFLAGS="$XML_LDFLAGS $LDFLAGS"
 
-      if test "${ac_cv_header_expat_h+set}" = set; then
+    if test "${ac_cv_header_expat_h+set}" = set; then
   echo "$as_me:$LINENO: checking for expat.h" >&5
 echo $ECHO_N "checking for expat.h... $ECHO_C" >&6
 if test "${ac_cv_header_expat_h+set}" = set; then
@@ -27395,28 +27377,20 @@ fi
 if test $ac_cv_header_expat_h = yes; then
   :
 else
-
-                      if test "$expat" = yes; then
-                        { { echo "$as_me:$LINENO: error: check for expat XML parser failed" >&5
+  { { echo "$as_me:$LINENO: error: check for expat XML parser failed" >&5
 echo "$as_me: error: check for expat XML parser failed" >&2;}
    { (exit 1); exit 1; }; }
-                      else
-                        expat=no
-                      fi
-
 fi
 
 
 
-      if test "$expat" != no; then
-        found=no
-
-        if test "$found" = no; then
-          XML_LIBS="-lexpat"
-          LIBS="$XML_LIBS $LIBS"
-          echo "$as_me:$LINENO: checking for XML_ParserCreate() in $XML_LIBS" >&5
+    found=no
+    if test "$found" = no; then
+      XML_LIBS="-lexpat"
+      LIBS="$XML_LIBS $LIBS"
+      echo "$as_me:$LINENO: checking for XML_ParserCreate() in $XML_LIBS" >&5
 echo $ECHO_N "checking for XML_ParserCreate() in $XML_LIBS... $ECHO_C" >&6
-          cat >conftest.$ac_ext <<_ACEOF
+      cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -27464,30 +27438,23 @@ echo "${ECHO_T}no" >&6
 fi
 rm -f conftest.err conftest.$ac_objext \
       conftest$ac_exeext conftest.$ac_ext
-        fi
+    fi
 
-        if test "$found" = no; then
-          if test "$expat" = yes; then
-            { { echo "$as_me:$LINENO: error: check for expat XML library failed" >&5
+    if test "$found" = no; then
+      { { echo "$as_me:$LINENO: error: check for expat XML library failed" >&5
 echo "$as_me: error: check for expat XML library failed" >&2;}
    { (exit 1); exit 1; }; }
-          fi
-          expat=no
-        else
-          xml_parser="expat"
-        fi
-      fi
+    fi
 
-      CPPFLAGS=$ac_save_CPPFLAGS
-      LDFLAGS=$ac_save_LDFLAGS
-      LIBS=$ac_save_LIBS
-      ac_ext=cc
+    CPPFLAGS=$ac_save_CPPFLAGS
+    LDFLAGS=$ac_save_LDFLAGS
+    LIBS=$ac_save_LIBS
+    ac_ext=cc
 ac_cpp='$CXXCPP $CPPFLAGS'
 ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
-    fi
   fi
 
   if test -n "$xml_parser"; then
@@ -27517,8 +27484,6 @@ echo "$as_me: using XML parser : $xml_parser" >&6;}
     XML_CPPFLAGS=
     XML_LDFLAGS=
     XML_LIBS=
-    { echo "$as_me:$LINENO: XML parser not found" >&5
-echo "$as_me: XML parser not found" >&6;}
     { echo "$as_me:$LINENO: using native XML parser" >&5
 echo "$as_me: using native XML parser" >&6;}
   fi
@@ -27613,7 +27578,7 @@ echo $ECHO_N "checking for MPI root directory... $ECHO_C" >&6
       ll_root="$MP_PREFIX/ppe.poe"
     fi
     if test -z "$mpi_dir"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local /usr/local/src /usr/lib $ll_root; do
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local /usr/local/src /usr/lib /usr $ll_root; do
         if test -f "$d/include/mpi.h" && test -d "$d/lib"; then
           mpi_dir="$d"
           break
@@ -27632,6 +27597,17 @@ echo $ECHO_N "checking for MPI root directory... $ECHO_C" >&6
         fi
         if test -f "$d/lam/include/mpi.h" && test -d "$d/lam/lib"; then
           mpi_dir="$d/lam"
+          break
+        fi
+        # for lam 7.1 on CentOS 5
+        if test -f "$d/include/lam/mpi.h" && test -d "$d/lib64/lam"; then
+          mpi_incdir="$d/include/lam"
+          mpi_libdir="$d/lib64/lam"
+          break
+        fi
+        if test -f "$d/include/lam/mpi.h" && test -d "$d/lib/lam"; then
+          mpi_incdir="$d/include/lam"
+          mpi_libdir="$d/lib/lam"
           break
         fi
       done
@@ -27700,6 +27676,10 @@ echo "${ECHO_T}$mpi_libdir" >&6
     if test -n "$mpi_incdir"; then
       if test -d "$mpi_incdir/mpi2c++"; then
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/mpi2c++" # for LAM MPI
+      elif test -d "$mpi_incdir/64"; then
+        MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/64"
+      elif test -d "$mpi_incdir/32"; then
+        MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/32"
       else
         MPI_CPPFLAGS="-I$mpi_incdir"
       fi

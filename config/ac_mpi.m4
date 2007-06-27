@@ -54,7 +54,7 @@ AC_DEFUN([AC_MPI],
       ll_root="$MP_PREFIX/ppe.poe"
     fi
     if test -z "$mpi_dir"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local /usr/local/src /usr/lib $ll_root; do
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local /usr/local/src /usr/lib /usr $ll_root; do
         if test -f "$d/include/mpi.h" && test -d "$d/lib"; then
           mpi_dir="$d"
           break
@@ -73,6 +73,17 @@ AC_DEFUN([AC_MPI],
         fi
         if test -f "$d/lam/include/mpi.h" && test -d "$d/lam/lib"; then
           mpi_dir="$d/lam"
+          break
+        fi
+        # for lam 7.1 on CentOS 5
+        if test -f "$d/include/lam/mpi.h" && test -d "$d/lib64/lam"; then
+          mpi_incdir="$d/include/lam"
+          mpi_libdir="$d/lib64/lam"
+          break
+        fi
+        if test -f "$d/include/lam/mpi.h" && test -d "$d/lib/lam"; then
+          mpi_incdir="$d/include/lam"
+          mpi_libdir="$d/lib/lam"
           break
         fi
       done
@@ -122,6 +133,10 @@ AC_DEFUN([AC_MPI],
     if test -n "$mpi_incdir"; then
       if test -d "$mpi_incdir/mpi2c++"; then
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/mpi2c++" # for LAM MPI
+      elif test -d "$mpi_incdir/64"; then
+        MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/64"
+      elif test -d "$mpi_incdir/32"; then
+        MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/32"
       else
         MPI_CPPFLAGS="-I$mpi_incdir"
       fi

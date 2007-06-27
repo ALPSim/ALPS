@@ -50,183 +50,150 @@ AC_DEFUN([AC_XMLPARSER],
     ]
   )
 
-  if test "$xerces" != "no"; then
-    if test -z "$xml_parser" || test "$xml_parser" = "xerces"; then
-      AC_MSG_CHECKING([for Xerces C++ root directory])
-      if test "x$xerces_dir" = "x"; then
-        for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
-        do
-          if test -f "$d/include/xercesc/parsers/SAXParser.hpp"; then
-            xerces_dir="$d"
-            break
-          fi
-          if test -f "$d/xercesc/include/xercesc/parsers/SAXParser.hpp"; then
-            xerces_dir="$d/xercesc"
-            break
-          fi
-        done
-        if test -n "$xerces_dir"; then
-          AC_MSG_RESULT([$xerces_dir])
-        else
-          AC_MSG_RESULT()
+  if test "$xml_parser" = "xerces"; then
+    AC_MSG_CHECKING([for Xerces C++ root directory])
+    if test "x$xerces_dir" = "x"; then
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
+      do
+        if test -f "$d/include/xercesc/parsers/SAXParser.hpp"; then
+          xerces_dir="$d"
+          break
         fi
-      else
-        AC_MSG_RESULT([$xerces_dir])
-        if test -f "$xerces_dir/include/xercesc/parsers/SAXParser.hpp"; then :; else
-          AC_MSG_ERROR([$xerces_dir/include/xercesc/parsers/SAXParser.hpp not found])
+        if test -f "$d/xercesc/include/xercesc/parsers/SAXParser.hpp"; then
+          xerces_dir="$d/xercesc"
+          break
         fi
-      fi
-
+      done
       if test -n "$xerces_dir"; then
-        XML_CPPFLAGS="-I$xerces_dir/include"
-        XML_LDFLAGS="-L$xerces_dir/lib"
+        AC_MSG_RESULT([$xerces_dir])
+      else
+        AC_MSG_RESULT()
       fi
-
-      AC_LANG_SAVE
-      AC_LANG_CPLUSPLUS
-      ac_save_CPPFLAGS=$CPPFLAGS
-      ac_save_LDFLAGS=$LDFLAGS
-      ac_save_LIBS=$LIBS
-      CPPFLAGS="$XML_CPPFLAGS $CPPFLAGS"
-      LDFLAGS="$XML_LDFLAGS $LDFLAGS"
-
-      AC_CHECK_HEADER([xercesc/parsers/SAXParser.hpp],,
-                      [
-                      if test "$xerces" = yes; then
-                        AC_MSG_ERROR([check for Xerces C++ XML parser failed])
-                      else
-                        xerces=no
-                      fi
-                      ])
-
-      if test "$xerces" != no; then
-        AC_MSG_CHECKING([for Xerces C++ version])
-        xerces_version_maj=`grep "^#define XERCES_VERSION_MAJOR" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
-	xerces_version_min=`grep "^#define XERCES_VERSION_MINOR" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
-	xerces_version_rev=`grep "^#define XERCES_VERSION_REVISION" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
-	if test -n "$xerces_version_maj"; then
- 	  xerces_version="$xerces_version_maj.$xerces_version_min.$xerces_version_rev"
-          AC_MSG_RESULT([$xerces_version])
-	else
-          AC_MSG_RESULT([unknown])
-        fi
-
-        found=no
-
-        if test "$found" = no; then
-          XML_LIBS="-lxerces-c"
-          LIBS="$XML_LIBS $ac_save_LIBS"
-          AC_MSG_CHECKING([for SAXParser in $XML_LIBS])
-          AC_TRY_LINK([#include <xercesc/parsers/SAXParser.hpp>],
-                      [XERCES_CPP_NAMESPACE_QUALIFIER SAXParser();],
-                      [AC_MSG_RESULT(yes); found=yes],
-                      AC_MSG_RESULT(no))
-        fi
-
-        if test "$found" = no; then
-          XML_LIBS="-lxerces-c$xerces_version"
-          LIBS="$XML_LIBS $ac_save_LIBS"
-          AC_MSG_CHECKING([for SAXParser in $XML_LIBS])
-          AC_TRY_LINK([#include <xercesc/parsers/SAXParser.hpp>],
-                      [XERCES_CPP_NAMESPACE_QUALIFIER SAXParser();],
-                      [AC_MSG_RESULT(yes); found=yes],
-                      AC_MSG_RESULT(no))
-        fi
-
-        if test "$found" = no; then
-          if test "$xerces" = yes; then
-            AC_MSG_ERROR([check for Xerces C++ XML library failed])
-          fi
-          xerces=no
-        else
-          xml_parser="xerces"
-        fi
+    else
+      AC_MSG_RESULT([$xerces_dir])
+      if test -f "$xerces_dir/include/xercesc/parsers/SAXParser.hpp"; then :; else
+        AC_MSG_ERROR([$xerces_dir/include/xercesc/parsers/SAXParser.hpp not found])
       fi
-
-      CPPFLAGS=$ac_save_CPPFLAGS
-      LDFLAGS=$ac_save_LDFLAGS
-      LIBS=$ac_save_LIBS
-      AC_LANG_RESTORE
     fi
+
+    if test -n "$xerces_dir"; then
+      XML_CPPFLAGS="-I$xerces_dir/include"
+      XML_LDFLAGS="-L$xerces_dir/lib"
+    fi
+
+    AC_LANG_SAVE
+    AC_LANG_CPLUSPLUS
+    ac_save_CPPFLAGS=$CPPFLAGS
+    ac_save_LDFLAGS=$LDFLAGS
+    ac_save_LIBS=$LIBS
+    CPPFLAGS="$XML_CPPFLAGS $CPPFLAGS"
+    LDFLAGS="$XML_LDFLAGS $LDFLAGS"
+
+    AC_CHECK_HEADER([xercesc/parsers/SAXParser.hpp],,
+                    [AC_MSG_ERROR([check for Xerces C++ XML parser failed])])
+
+    AC_MSG_CHECKING([for Xerces C++ version])
+    xerces_version_maj=`grep "^#define XERCES_VERSION_MAJOR" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
+    xerces_version_min=`grep "^#define XERCES_VERSION_MINOR" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
+    xerces_version_rev=`grep "^#define XERCES_VERSION_REVISION" $xerces_dir/include/xercesc/util/XercesVersion.hpp | awk "{print $ 3}" | sed 's/\"//g'`
+    if test -n "$xerces_version_maj"; then
+      xerces_version="$xerces_version_maj.$xerces_version_min.$xerces_version_rev"
+      AC_MSG_RESULT([$xerces_version])
+    else
+      AC_MSG_RESULT([unknown])
+    fi
+
+    found=no
+
+    if test "$found" = no; then
+      XML_LIBS="-lxerces-c"
+      LIBS="$XML_LIBS $ac_save_LIBS"
+      AC_MSG_CHECKING([for SAXParser in $XML_LIBS])
+      AC_TRY_LINK([#include <xercesc/parsers/SAXParser.hpp>],
+                  [XERCES_CPP_NAMESPACE_QUALIFIER SAXParser();],
+                  [AC_MSG_RESULT(yes); found=yes],
+                  AC_MSG_RESULT(no))
+    fi
+
+    if test "$found" = no; then
+      XML_LIBS="-lxerces-c$xerces_version"
+      LIBS="$XML_LIBS $ac_save_LIBS"
+      AC_MSG_CHECKING([for SAXParser in $XML_LIBS])
+      AC_TRY_LINK([#include <xercesc/parsers/SAXParser.hpp>],
+                  [XERCES_CPP_NAMESPACE_QUALIFIER SAXParser();],
+                  [AC_MSG_RESULT(yes); found=yes],
+                  AC_MSG_RESULT(no))
+    fi
+    if test "$found" = no; then
+      AC_MSG_ERROR([check for Xerces C++ XML library failed])
+    fi
+    CPPFLAGS=$ac_save_CPPFLAGS
+    LDFLAGS=$ac_save_LDFLAGS
+    LIBS=$ac_save_LIBS
+    AC_LANG_RESTORE
   fi
 
-  if test "$expat" != "no"; then
-    if test -z "$xml_parser" || test "$xml_parser" = "expat"; then
-      AC_MSG_CHECKING([for expat root directory])
-      if test "x$expat_dir" = "x"; then
-        for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
-        do
-          if test -f "$d/include/expat.h"; then
-            expat_dir="$d"
-            break
-          fi
-          if test -f "$d/expat/include/expat.h"; then
-            expat_dir="$d/expat"
-            break
-          fi
-        done
-        if test -n "$expat_dir"; then
-          AC_MSG_RESULT([$expat_dir])
-        else
-          AC_MSG_RESULT()
+  if test "$xml_parser" = "expat"; then
+    AC_MSG_CHECKING([for expat root directory])
+    if test "x$expat_dir" = "x"; then
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src
+      do
+        if test -f "$d/include/expat.h"; then
+          expat_dir="$d"
+          break
         fi
-      else
-        AC_MSG_RESULT([$expat_dir])
-        if test -f "$expat_dir/include/expat.h"; then :; else
-          AC_MSG_ERROR([$expat_dir/include/expat.h not found])
+        if test -f "$d/expat/include/expat.h"; then
+          expat_dir="$d/expat"
+          break
         fi
-      fi
-
+      done
       if test -n "$expat_dir"; then
-        XML_CPPFLAGS="-I$expat_dir/include"
-        XML_LDFLAGS="-L$expat_dir/lib"
+        AC_MSG_RESULT([$expat_dir])
+      else
+        AC_MSG_RESULT()
       fi
-
-      AC_LANG_SAVE
-      AC_LANG_CPLUSPLUS
-      ac_save_CPPFLAGS=$CPPFLAGS
-      ac_save_LDFLAGS=$LDFLAGS
-      ac_save_LIBS=$LIBS
-      CPPFLAGS="$XML_CPPFLAGS $CPPFLAGS"
-      LDFLAGS="$XML_LDFLAGS $LDFLAGS"
-
-      AC_CHECK_HEADER([expat.h],,
-                      [
-                      if test "$expat" = yes; then
-                        AC_MSG_ERROR([check for expat XML parser failed])
-                      else
-                        expat=no
-                      fi
-                      ])
-
-      if test "$expat" != no; then
-        found=no
-
-        if test "$found" = no; then
-          XML_LIBS="-lexpat"
-          LIBS="$XML_LIBS $LIBS"
-          AC_MSG_CHECKING([for XML_ParserCreate() in $XML_LIBS])
-          AC_TRY_LINK([#include <expat.h>],
-                      [XML_Parser p = XML_ParserCreate(NULL);],
-                      [AC_MSG_RESULT(yes); found=yes],
-                      AC_MSG_RESULT(no))
-        fi
-
-        if test "$found" = no; then
-          if test "$expat" = yes; then
-            AC_MSG_ERROR([check for expat XML library failed])
-          fi
-          expat=no
-        else
-          xml_parser="expat"
-        fi
+    else
+      AC_MSG_RESULT([$expat_dir])
+      if test -f "$expat_dir/include/expat.h"; then :; else
+        AC_MSG_ERROR([$expat_dir/include/expat.h not found])
       fi
-
-      CPPFLAGS=$ac_save_CPPFLAGS
-      LDFLAGS=$ac_save_LDFLAGS
-      LIBS=$ac_save_LIBS
-      AC_LANG_RESTORE
     fi
+
+    if test -n "$expat_dir"; then
+      XML_CPPFLAGS="-I$expat_dir/include"
+      XML_LDFLAGS="-L$expat_dir/lib"
+    fi
+
+    AC_LANG_SAVE
+    AC_LANG_CPLUSPLUS
+    ac_save_CPPFLAGS=$CPPFLAGS
+    ac_save_LDFLAGS=$LDFLAGS
+    ac_save_LIBS=$LIBS
+    CPPFLAGS="$XML_CPPFLAGS $CPPFLAGS"
+    LDFLAGS="$XML_LDFLAGS $LDFLAGS"
+
+    AC_CHECK_HEADER([expat.h],,
+                    [AC_MSG_ERROR([check for expat XML parser failed])])
+
+    found=no
+    if test "$found" = no; then
+      XML_LIBS="-lexpat"
+      LIBS="$XML_LIBS $LIBS"
+      AC_MSG_CHECKING([for XML_ParserCreate() in $XML_LIBS])
+      AC_TRY_LINK([#include <expat.h>],
+                  [XML_Parser p = XML_ParserCreate(NULL);],
+                  [AC_MSG_RESULT(yes); found=yes],
+                  AC_MSG_RESULT(no))
+    fi
+
+    if test "$found" = no; then
+      AC_MSG_ERROR([check for expat XML library failed])
+    fi
+
+    CPPFLAGS=$ac_save_CPPFLAGS
+    LDFLAGS=$ac_save_LDFLAGS
+    LIBS=$ac_save_LIBS
+    AC_LANG_RESTORE
   fi
   
   if test -n "$xml_parser"; then
@@ -249,7 +216,6 @@ AC_DEFUN([AC_XMLPARSER],
     XML_CPPFLAGS=
     XML_LDFLAGS=
     XML_LIBS=
-    AC_MSG_NOTICE([XML parser not found])
     AC_MSG_NOTICE([using native XML parser])
   fi
   ]
