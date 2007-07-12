@@ -131,7 +131,10 @@ AC_DEFUN([AC_MPI],
     fi
 
     if test -n "$mpi_incdir"; then
-      if test -d "$mpi_incdir/mpi2c++"; then
+      mpi_cppflags_compile=`mpic++ -showme:compile`
+      if test $? -eq 0; then
+        MPI_CPPFLAGS=$mpi_cppflags_compile # for openmpi and recent LAM
+      elif test -d "$mpi_incdir/mpi2c++"; then
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/mpi2c++" # for LAM MPI
       elif test -d "$mpi_incdir/64"; then
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/64"
@@ -181,6 +184,18 @@ AC_DEFUN([AC_MPI],
           MPI_LIBS="-binitfini:poe_remote_main -lmpi_r -lvtd_r"
           LIBS="$MPI_LIBS $ac_save_LIBS"
           AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
+          AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                      [AC_MSG_RESULT(yes); found=yes],
+                      AC_MSG_RESULT(no))
+        fi
+      fi
+      if test "$found" = no; then
+        # for openmpi and recent LAM
+        mpi_libs_link=`mpic++ -showme:link`
+        if test $? -eq 0; then
+          MPI_LIBS=$mpi_libs_link
+          LIBS="$MPI_LIBS $ac_save_LIBS"
+          AC_MSG_CHECKING([for MPI_Finalize()])
           AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
                       [AC_MSG_RESULT(yes); found=yes],
                       AC_MSG_RESULT(no))
