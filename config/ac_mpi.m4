@@ -77,13 +77,13 @@ AC_DEFUN([AC_MPI],
         fi
         # for lam 7.1 on CentOS 5
         if test -f "$d/include/lam/mpi.h" && test -d "$d/lib64/lam"; then
-          mpi_incdir="$d/include/lam"
-          mpi_libdir="$d/lib64/lam"
+          test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
+          test -z "$mpi_libdir" && mpi_libdir="$d/lib64/lam"
           break
         fi
         if test -f "$d/include/lam/mpi.h" && test -d "$d/lib/lam"; then
-          mpi_incdir="$d/include/lam"
-          mpi_libdir="$d/lib/lam"
+          test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
+          test -z "$mpi_libdir" && mpi_libdir="$d/lib/lam"
           break
         fi
       done
@@ -131,10 +131,7 @@ AC_DEFUN([AC_MPI],
     fi
 
     if test -n "$mpi_incdir"; then
-      mpi_cppflags_compile=`mpic++ -showme:compile`
-      if test $? -eq 0; then
-        MPI_CPPFLAGS=$mpi_cppflags_compile # for openmpi and recent LAM
-      elif test -d "$mpi_incdir/mpi2c++"; then
+      if test -d "$mpi_incdir/mpi2c++"; then
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/mpi2c++" # for LAM MPI
       elif test -d "$mpi_incdir/64"; then
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/64"
@@ -142,6 +139,11 @@ AC_DEFUN([AC_MPI],
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/32"
       else
         MPI_CPPFLAGS="-I$mpi_incdir"
+      fi
+    else
+      mpi_cppflags_compile=`mpic++ -showme:compile`
+      if test $? -eq 0; then
+        MPI_CPPFLAGS=$mpi_cppflags_compile # for openmpi and recent LAM
       fi
     fi
     if test -n "$mpi_libdir"; then
