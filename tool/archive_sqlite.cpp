@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2005-2007 by Lukas Gamper <mistral@student.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -81,7 +82,7 @@ void SQLite::close(bool commit) {
 bool SQLite::clear() {
         return sqlite3_exec(mDB, "DELETE FROM uri;", NULL, 0, &mErrMsg) == SQLITE_OK &&
                 sqlite3_exec(mDB, "DELETE FROM parameter;", NULL, 0, &mErrMsg) == SQLITE_OK &&
-                sqlite3_exec(mDB, "DELETE FROM mesurement;", NULL, 0, &mErrMsg) == SQLITE_OK;
+                sqlite3_exec(mDB, "DELETE FROM measurement;", NULL, 0, &mErrMsg) == SQLITE_OK;
 }
 
 std::string SQLite::quote(std::string str) {

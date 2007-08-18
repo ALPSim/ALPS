@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005-2006 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2005-2007 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -126,7 +126,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
                 if (create) {
                         forNames[*it] = std::string("x") + boost::lexical_cast<std::string>(distinguish);
                         preSQLFrom += std::string(preSQLFrom == "" ? "" : ", ") 
-                                + (constraints[*it].front()["type"] == "parameter" ? "parameter" : "mesurement") + " AS x" + boost::lexical_cast<std::string>(distinguish);
+                                + (constraints[*it].front()["type"] == "parameter" ? "parameter" : "measurement") + " AS x" + boost::lexical_cast<std::string>(distinguish);
                         preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND x") + boost::lexical_cast<std::string>(distinguish) + ".name='" + SQLite::quote(*it) + "'";
                         if (distinguish > 0)
                                 preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND ") + "x0.fID=x" + boost::lexical_cast<std::string>(distinguish) + ".fID";
@@ -136,7 +136,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
 
         // define Order
         std::string type = strToLower(bodyNode.nodeTest("xaxis").front().getAttribute("type"));
-        preSQLFrom += std::string(preSQLFrom == "" ? "" : ", ") + (type == "parameter" ? "parameter" : "mesurement") + " AS o";
+        preSQLFrom += std::string(preSQLFrom == "" ? "" : ", ") + (type == "parameter" ? "parameter" : "measurement") + " AS o";
         preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND ") + "x0.fID=o.fID AND o.name='" + SQLite::quote(bodyNode.nodeTest("xaxis").front().getAttribute("name")) + "'";
         preSQLOrder = "o." + (type == "parameter" ? "value" : (type == "index" ? "indexvalue" : type));
 
@@ -278,8 +278,8 @@ void Plot::exec(Node inNode, std::string inInFile) {
                                                 ? "indexvalue" : bodyNode.nodeTest("yaxis").front().getAttribute("type"))) + " AS y "
                                         + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? ", v.error AS ey " : "")
                                 + "FROM "
-                                        + (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "parameter" ? "parameter" : "mesurement") + " AS u, "
-                                        + (bodyNode.nodeTest("yaxis").front().getAttribute("type") == "parameter" ? "parameter" : "mesurement") + " AS v "
+                                        + (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "parameter" ? "parameter" : "measurement") + " AS u, "
+                                        + (bodyNode.nodeTest("yaxis").front().getAttribute("type") == "parameter" ? "parameter" : "measurement") + " AS v "
                                 + "WHERE u.fID='" + (*it) + "' AND v.FID='" + (*it) + "'"
                                         + " AND u.name='" + SQLite::quote(bodyNode.nodeTest("xaxis").front().getAttribute("name")) + "'"
                                         + " AND v.name='" + SQLite::quote(bodyNode.nodeTest("yaxis").front().getAttribute("name")) + "'"

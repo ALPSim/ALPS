@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2005-2007 by Lukas Gamper <mistral@student.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -60,7 +61,7 @@ class Index {
                 void setDB(SQLite &inDB) { mDB = inDB; }
                                 
                 /**
-                 * Lists all the parameters and mesurements indexed in the database
+                 * Lists all the parameters and measurements indexed in the database
                  * 
                  * @param inFullList Should the whole list be displaied
                  */
