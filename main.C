@@ -163,9 +163,10 @@ int main(int argc, char** argv)
 	else{
 	  //throw exception or commit suicide or even better: 
 	  //create an external solver that takes its arguments in frequency space.
-	  //solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
-	  std::cout<<parms["SOLVER"]<<std::endl;
-	  boost::throw_exception(std::logic_error("there is no such solver!"));	
+          std::cout<<"starting external solver"<<std::endl;
+	  solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+          FSSemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+          selfconsistency_loop_omega(parms, *solver_ptr, transform, *fourier_ptr, G0_omega, G_omega);
 	}
 #endif
 	FrequencySpaceHilbertTransformer *transform_ptr;

@@ -118,7 +118,7 @@ alps::ImpuritySolver::solve_omega(
   alps::oxstream G0_omega_xml(G0_omega_text);
   
   write_freq(G0_omega_xml,G0_omega);
-  parms["G0(omega)"] = G0_omega_text.str();
+  parms["G0"] = G0_omega_text.str();
   int res=solve_it(parms);
   if (res)
     boost::throw_exception(
