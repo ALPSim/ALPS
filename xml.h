@@ -31,9 +31,10 @@
 #ifndef ALPS_DMFT_XML_H
 #define ALPS_DMFT_XML_H
 
-#include "types.h"
 #include <alps/xml.h>
 #include <alps/vectorio.h>
+#include "types.h"
+#include "green_function.h"
 
 template <class T>
 void write_freq(alps::oxstream& xml, std::vector<T> const& v, int flavor)
