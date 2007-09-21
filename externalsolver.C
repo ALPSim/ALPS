@@ -101,7 +101,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
 {
   std::string infile = std::tmpnam(0); // the input file name
   std::string outfile = std::tmpnam(0); // the output file name
-  std::cout<<" hi there... in external solver solve omega"<<std::endl;
+//  std::cout<<" hi there... in external solver solve omega"<<std::endl;
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
  
@@ -119,9 +119,9 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     // scope to force closing of file
   }
   
-  std::cout<<" calling solver"<<std::endl;
+//  std::cout<<" calling solver"<<std::endl;
   call(infile,outfile);
-  std::cout<<" back from solver"<<std::endl;
+//  std::cout<<" back from solver"<<std::endl;
 
   // read the output
   

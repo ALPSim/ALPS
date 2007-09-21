@@ -118,17 +118,18 @@ alps::ImpuritySolver::solve_omega(
   alps::oxstream G0_omega_xml(G0_omega_text);
   
   write_freq(G0_omega_xml,G0_omega);
-  parms["G0"] = G0_omega_text.str();
+  parms["G0(omega)"] = G0_omega_text.str();
   int res=solve_it(parms);
   if (res)
     boost::throw_exception(
       std::runtime_error(" solver finished with nonzero exit code"));
     
+  std::cout<<"solve_omega: getting result."<<std::endl;
   // now extract the results
   std::pair<matsubara_green_function_t, itime_green_function_t> G = 
       dynamic_cast<MatsubaraImpurityTask*>(get_task())
         ->get_result();
-
+  std::cout<<"solve_omega: done getting result."<<std::endl;
   clear(); // destroy the simulation
   return G;
 
