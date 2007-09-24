@@ -134,7 +134,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
   uint N_large_t=(G_tau.ntime()-1)*n_oversampling_t+1;
   uint N_large_w=(G_tau.ntime()-1)*n_oversampling_w+1;
   double dt=beta_/(N_large_t-1);
-  assert(G_omega.nfreq()==N); 
+//  assert(G_omega.nfreq()==N); 
   //we implicitely assume that we have as many imag time slices as matsubara frequencies. 
   //If this is not the case: interpolate,
   double G_tau_vector[N_large_t];
@@ -166,8 +166,9 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
 	  }
 	  //std::cerr<<n<<" "<<G_omega_vector[n].real()<<" "<<G_omega_vector[n].imag()<<std::endl;
 	}
+        std::cout<<"doing forward ft for nfreq= "<<G_omega.nfreq()<<std::endl;
 	for(uint n=0;n<G_omega.nfreq();++n){
-	  G_omega(n,s1,s2,flavor)=G_omega_vector[n];
+	  G_omega(n,s1,s2,flavor)=n<N_large_w?G_omega_vector[n]:0.;
 	  if (s1==s2) {
 	    std::complex<double> iw(0,(2*n+1)*M_PI/beta_);
 	    G_omega(n,s1,s2,flavor) += f_omega(iw, c1_,c2_, c3_);
@@ -179,13 +180,13 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
 }
 
  
-void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr){
+void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift){
   if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
     std::cout<<"using General Fourier transform"<<std::endl;
-    fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"]));
+    fourier_ptr.reset(new FourierTransformer(parms["BETA"], (double)(parms["MU"])+mu_shift));
   } else{
     std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
-    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], parms["MU"], parms["t"]));
+    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], (double)(parms["MU"])+mu_shift, parms["t"]));
   }
 }
 

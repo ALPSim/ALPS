@@ -58,6 +58,7 @@ void write_freq(alps::oxstream& xml, std::pair<T,T> const& p)
 template <class T>
 void write_freq(alps::oxstream& xml, green_function<T> const& g)
 {
+//  std::cout<<"writing freq for gf with size: "<<g.nsite()<<" "<<g.nflavor()<<" "<<g.nfreq()<<std::endl;
     for(uint s1=0;s1<g.nsite();++s1){
       for(uint s2=0;s2<g.nsite();++s2){
 	for(uint f=0;f<g.nflavor();++f){
@@ -147,6 +148,8 @@ void read_freq(std::istream& in, std::vector<T>& v)
   alps::XMLTag tag = alps::parse_tag(in);
   if (tag.attributes["index"] !="Matsubara frequency")
     boost::throw_exception(std::runtime_error("Vector not in Matsubara frequency"));
+  v.resize(atoi(tag.attributes["size"].c_str()));
+//  std::cout<<"reading std::vector with size: "<<v.size()<<std::endl;
   alps::read_vector(alps::parse_content(in),v);
   tag = alps::parse_tag(in);
   if (tag.type !=alps::XMLTag::CLOSING)
@@ -157,12 +160,14 @@ void read_freq(std::istream& in, std::vector<T>& v)
 template <class T>
 void read_freq(std::istream& in, std::pair<T,T>& p)
 {
+//  std::cout<<"reading freq: std::pair" <<std::endl;
   read_freq(in,p.first);
   read_freq(in,p.second);
 }
 template <class T>
 void read_freq(std::istream& in, green_function<T>& g)
 {
+//std::cout<<"reading freq for gf with size: "<<g.nsite()<<" "<<g.nflavor()<<" "<<g.nfreq()<<std::endl;
     for(uint s1=0;s1<g.nsite();++s1){
       for(uint s2=0;s2<g.nsite();++s2){
 	for(uint f=0;f<g.nflavor();++f){
