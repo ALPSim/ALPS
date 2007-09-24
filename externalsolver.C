@@ -119,9 +119,9 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     // scope to force closing of file
   }
   
-//  std::cout<<" calling solver"<<std::endl;
+  std::cout<<" calling solver"<<std::endl;
   call(infile,outfile);
-//  std::cout<<" back from solver"<<std::endl;
+  std::cout<<" back from solver"<<std::endl;
 
   // read the output
   
@@ -130,25 +130,42 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   uint n_site     =(uint)parms.value_or_default("SITES", 1);
   uint n_orbital  =(uint)parms.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
-  itime_green_function_t G_tau(n_tau, n_site, n_orbital);
+  itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
+  {
+    std::ifstream output(outfile.c_str());
+    alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
+    // search for up and down spin Green's function
+    tag=alps::parse_tag(output);
+    while (tag.name != "GREENFUNCTION_OMEGA") {
+      if (tag.name=="/SIMULATION")
+        boost::throw_exception(std::runtime_error("Element <GREENFUNCTION_OMEGA> missing in output file"));
+      else
+        alps::skip_element(output,tag);
+      tag=alps::parse_tag(output);
+    }
+    std::cout<<"reading in freq"<<std::endl;
+    read_freq(output,G_omega);	
+  } // scope to force closing of file
   {
     std::ifstream output(outfile.c_str());
     alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
 	
-	// search for up and down spin Green's function
-	tag=alps::parse_tag(output);
-	while (tag.name != "GREENFUNCTION") {
-	  if (tag.name=="/SIMULATION")
-	    boost::throw_exception(std::runtime_error("Element <GREENFUNCTION> missing in output file"));
-	  else
-	    alps::skip_element(output,tag);
-	  tag=alps::parse_tag(output);
-	}
-
-    read_freq(output,G_omega);	
+    // search for up and down spin Green's function
+    tag=alps::parse_tag(output);
+    while (tag.name != "GREENFUNCTION_ITIME") {
+      if (tag.name=="/SIMULATION")
+        boost::throw_exception(std::runtime_error("Element <GREENFUNCTION_ITIME> missing in output file"));
+      else
+        alps::skip_element(output,tag);
+      tag=alps::parse_tag(output);
+    }
+    std::cout<<"reading in itime"<<std::endl;
     read_itime(output,G_tau);	
-    
+    std::cout<<"read in itime: "<<G_tau<<std::endl;
+    exit(0);
+    std::cout<<"done reading."<<std::endl;
   } // scope to force closing of file
+  
   
   boost::filesystem::remove(outpath);
   
@@ -165,6 +182,7 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   // call the external solver program
   std::string command = exe_.native_file_string() + " " + infile + " " + outfile;
   std::cerr << "Calling external solver " << exe_.native_file_string() << "\n\n";
+  std::cerr <<" command is: "<<command<<std::endl;
   int result = std::system(command.c_str());
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
