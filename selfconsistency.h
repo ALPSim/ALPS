@@ -35,7 +35,7 @@
 
 #include "solver.h"
 #include "hilberttransformer.h"
-#include "clustertransformer.h"
+#include "cluster.h"
 #include "fouriertransform.h"
 #include "green_function.h"
 
@@ -89,7 +89,7 @@ void selfconsistency_loop_DCA
 (
  const alps::Parameters& parms, 
  MatsubaraImpuritySolver& solver, 
- ClusterTransformer& clustertrans,
+ DCATransformer& clustertrans,
  FourierTransformer &fourier, 
  matsubara_green_function_t& G0_omega, 
  matsubara_green_function_t& G_omega
