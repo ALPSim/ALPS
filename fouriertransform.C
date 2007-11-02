@@ -85,6 +85,48 @@ void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &
 }
 
 
+void FourierTransformer::backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
+				     const green_function<alps::RealObsevaluator> &G_omega_real,
+				     const green_function<alps::RealObsevaluator> &G_omega_imag) const
+{
+  assert(G_tau.nflavor()==G_omega_real.nflavor() && G_tau.nsite()==G_omega_real.nsite());
+  assert(G_tau.nflavor()==G_omega_imag.nflavor() && G_tau.nsite()==G_omega_imag.nsite());
+  uint N_tau = G_tau.ntime()-1;
+  uint N_omega = G_omega_real.nfreq();
+  uint N_site = G_omega_real.nsite();
+  uint N_flavor = G_omega_real.nflavor();
+  green_function<alps::RealObsevaluator> G_omega_no_model_real(G_omega_real);
+  green_function<alps::RealObsevaluator> G_omega_no_model_imag(G_omega_imag);
+  double dt = beta_/N_tau;
+  for(uint f=0;f<N_flavor;++f){
+    for (uint s1=0; s1<N_site; ++s1){
+      for (uint s2=0; s2<N_site; ++s2) {
+	if (s1==s2) {
+	  for (uint k=0; k<N_omega; k++) {
+	    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+	    G_omega_no_model_real(k,s1,s2,f) -= f_omega(iw, c1_,c2_, c3_).real();
+	    G_omega_no_model_imag(k,s1,s2,f) -= f_omega(iw, c1_,c2_, c3_).imag();
+	  } 
+	}
+	for (uint i=0; i<N_tau; i++) {
+	  double wt = i*M_PI/N_tau;
+	  G_tau(i,s1,s2,f) = 2/beta_*(cos(wt)*G_omega_no_model_real(0,s1,s2,f)+
+				       sin(wt)*G_omega_no_model_imag(0,s1,s2,f));
+	  for (uint k=1; k<N_omega; k++) {
+	    wt = (2*k+1)*i*M_PI/N_tau;
+	    G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model_real(k,s1,s2,f)+
+					 sin(wt)*G_omega_no_model_imag(k,s1,s2,f));
+	  }
+	  G_tau(i,s1,s2,f) += s1==s2 ? f_tau(i*dt, beta_, c1_, c2_, c3_) : 0.; 
+	}
+	G_tau(N_tau,s1,s2,f)= -G_tau(0,s1,s2,f);
+	G_tau(N_tau,s1,s2,f)-= s1==s2 ? -1. : 0.;
+      }
+    }
+  }
+}
+
+
 ///same as the template function in fouriertransform.h, but not for the
 //multiple vectors. Use green_function_t instead.
 void FourierTransformer::backward_ft(itime_green_function_t &G_tau, 
