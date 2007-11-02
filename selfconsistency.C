@@ -51,7 +51,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   double mu = static_cast<double>(parms["MU"]);
   double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
  
   itime_green_function_t G0_tau_old(G0_tau);
@@ -86,7 +86,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
   double mu = static_cast<double>(parms["MU"]);
   double h = parms.value_or_default("H", 0);;
   double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
 
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
@@ -143,7 +143,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   double mu = static_cast<double>(parms["MU"]);
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
@@ -208,7 +208,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
 	  }
 	}
       }
-      std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "
+      std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
 	       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
     print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
@@ -218,7 +218,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
 
 
 void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
-			      ClusterTransformer& clustertrans, FourierTransformer &fourier,
+			      DCATransformer& clustertrans, FourierTransformer &fourier,
 			      matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
 {
   uint n_tau=boost::lexical_cast<uint>(parms["N"]);
@@ -230,7 +230,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   double mu = static_cast<double>(parms["MU"]);
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
@@ -262,11 +262,11 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     fourier.backward_ft(G0_tau, G0_omega);
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
-    //G_omega = clustertrans.transform_into_k_space(G_omega);
-    //G_tau = clustertrans.transform_into_k_space(G_tau);
+    std::cout<<"applying point group symmetries"<<std::endl<<std::flush;    
+    G_omega = clustertrans.symmetrize_k_space(G_omega);
+    G_tau = clustertrans.symmetrize_k_space(G_tau);
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta, paramagnet);
-    
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
@@ -295,14 +295,17 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
 	  }
 	}
       }
-      std::cerr<<"convergence loop: max diff in dressed Green (Matsubara freq): "
+      std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
 	       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
-    print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
     matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
     itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
     itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
+    if (parms.defined("ANTIFERROMAGNET")) 
+      print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, false);
+    else
+      print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, true);
     print_all_green_functions(iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, false, "_realspace");
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
   
