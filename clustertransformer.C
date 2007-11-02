@@ -61,10 +61,6 @@ matsubara_green_function_t SimpleDCATransformer::operator()(matsubara_green_func
 							    const double mu, const double h, const double beta, 
 							    const bool paramagnet)
 {
-  //
-  std::ofstream self("self");
-  std::ofstream gbar("gbar");
-  //
   assert(h==0);
   uint nflavor=G0_omega.nflavor();
   uint nfreq=G0_omega.nfreq();
@@ -88,9 +84,6 @@ matsubara_green_function_t SimpleDCATransformer::operator()(matsubara_green_func
       for (frequency_t freq=0; freq<nfreq; ++freq) {
 	selfenergy(freq, kc, kc, flavor)  = 1./G0_omega(freq, kc, kc, flavor);
 	selfenergy(freq, kc, kc, flavor) -= 1./G_omega(freq, kc, kc, flavor);
-	//
-	self << freq << " " << kc << " " << flavor << " " << selfenergy(freq, kc, kc, flavor) << "\n";
-	//
 	std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
 	G0_omega_new(freq, kc, kc, flavor) = 0.;
 	for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
@@ -101,9 +94,6 @@ matsubara_green_function_t SimpleDCATransformer::operator()(matsubara_green_func
 	    += 1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor));
 	}
 	G0_omega_new(freq, kc, kc, flavor) /= n_cluster_cells();
-	//
-	gbar << freq << " " << kc << " " << flavor << " " << G0_omega_new(freq, kc, kc, flavor) << "\n";
-	//
 	G0_omega_new(freq, kc, kc, flavor) = 
 	  1. / ( 1./G0_omega_new(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
       }
@@ -162,10 +152,6 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(matsubara_green_f
 							       const double mu, const double h, const double beta, 
 							       const bool paramagnet)
 {
-  //
-  std::ofstream self("selfaf");
-  std::ofstream gbar("gbaraf");
-  //
   assert(paramagnet==false);
   uint nflavor=G0_omega.nflavor();
   uint nfreq=G0_omega.nfreq();
@@ -182,12 +168,6 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(matsubara_green_f
   matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
   matsubara_green_function_t G_omega_inv = green_function_inverse(G_omega);
   matsubara_green_function_t selfenergy = green_function_subtract(G0_omega_inv, G_omega_inv);
-  //
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) 
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) 
-      for (frequency_t freq=0; freq<nfreq; ++freq) 
-	self << freq << " " << kc << " " << flavor << " " << selfenergy(freq, kc, kc, flavor) << "\n";
-  //
   for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
     matsubara_green_function_t G_kl(G0_omega);
     for (frequency_t freq=0; freq<nfreq; ++freq) {
@@ -211,18 +191,11 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(matsubara_green_f
 	}
       }
     }
-    G_kl = green_function_inverse(G_kl);
     G_kl = green_function_subtract(G_kl, selfenergy);
     G_kl = green_function_inverse(G_kl);
     G0_omega_new = green_function_add(G0_omega_new, G_kl);
   }
   G0_omega_new = green_function_divide(G0_omega_new, std::complex<double>(n_cluster_cells()));
-  //
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) 
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) 
-      for (frequency_t freq=0; freq<nfreq; ++freq) 
-	gbar << freq << " " << kc << " " << flavor << " " << G0_omega_new(freq, kc, kc, flavor) << "\n";
-  //
   G0_omega_new = green_function_inverse(G0_omega_new);
   G0_omega_new = green_function_add(G0_omega_new, selfenergy);
   G0_omega_new = green_function_inverse(G0_omega_new);
