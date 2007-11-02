@@ -3,9 +3,9 @@
 * ALPS DMFT Project
 *
 * Copyright (C) 2005-2007 by Philipp Werner <werner@comp-phys.org>,
-*                         Matthias Troyer <troyer@comp-phys.org>
-*                         Emanuel Gull <gullc@comp-phys.org>
-*                         Sebastian Fuchs <sfuchs@gwdg.de>
+*                         Matthias Troyer <troyer@comp-phys.org>,
+*                         Emanuel Gull <gullc@comp-phys.org>,
+*                         Sebastian Fuchs <fuchs@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -59,6 +59,16 @@ public:
   /// @return the result of the Hilbert transform (G0_tau)
   virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier_ignored, 
 					    double mu, double h, double beta, bool paramagnet)=0; 
+
+  virtual itime_green_function_t initial_G0(const alps::Parameters& parms) {
+    std::cout<<"reading initial G0_tau"<<std::endl;
+    int n_tau=boost::lexical_cast<int>(parms["N"]);
+    int n_orbital=parms.value_or_default("FLAVORS", 2);
+    itime_green_function_t G0_tau(n_tau+1, 1, n_orbital);
+    G0_tau.read(parms["G0TAU_INPUT"].c_str());
+    return G0_tau;
+  }
+      
   virtual ~HilbertTransformer() {}
 };
 
@@ -72,7 +82,7 @@ public:
   SemicircleHilbertTransformer(double t) : t_(t) {}
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
-  virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier, 
+  itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier, 
 				    double mu, double h, double beta, bool paramagnet)
   {
     if(h!=0) std::cerr<<"ignoring magnetic field!"<<std::endl;
@@ -103,6 +113,38 @@ public:
     fourier.backward_ft(G0_tau, G0_omega);
     return G0_tau;
   }
+
+  itime_green_function_t initial_G0(const alps::Parameters& parms) 
+  {
+    if (parms.defined("G0TAU_INPUT"))
+      return HilbertTransformer::initial_G0(parms);
+    else {
+      std::cout<<"reading initial G0_tau"<<std::endl;
+      boost::shared_ptr<FourierTransformer> fourier_ptr;
+      FourierTransformer::generate_transformer(parms, fourier_ptr);
+      int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+      int n_time=boost::lexical_cast<int>(parms["N"]);
+      int n_flavor=parms.value_or_default("FLAVORS", 2);
+      double beta = static_cast<double>(parms["BETA"]);
+      double mu = static_cast<double>(parms["MU"]);
+      double h = static_cast<double>(parms["H"]);
+      double h_init = parms.value_or_default("H_INIT", 0.);
+      double tsq=t_*t_;
+      matsubara_green_function_t G0_omega(n_matsubara,n_flavor);  
+      itime_green_function_t G0_tau(n_time, n_flavor);
+      for(uint i=0; i<G0_omega.nfreq(); i++) {
+	std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+	for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
+	  std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init : h_init);
+	  G0_omega(i, flavor) = (zeta - sqrt(zeta*zeta-4*tsq))/(2*tsq);
+	}
+      }
+      G0_tau.write("G0_tau_input");
+      G0_omega.write("G0_omega_input");
+      return G0_tau;
+    }
+  }
+
 private:
   double t_; 
 };
@@ -170,6 +212,15 @@ public:
 						matsubara_green_function_t &G0_omega, 
 						const double mu, const double h, 
 						const double beta,const bool paramagnet)=0; 
+  virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms) {
+    std::cout<<"reading initial G0_omega"<<std::endl;
+    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+    int n_orbital=parms.value_or_default("FLAVORS", 2);
+    matsubara_green_function_t G0_omega(n_matsubara, n_orbital);
+    G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+    return G0_omega;
+  }
+
   virtual ~FrequencySpaceHilbertTransformer() {}
 };
 
@@ -218,6 +269,42 @@ public:
     }
     return G0_omega;
   }
+
+  matsubara_green_function_t initial_G0(const alps::Parameters& parms)
+  {
+    if (parms.defined("G0OMEGA_INPUT"))
+      return FrequencySpaceHilbertTransformer::initial_G0(parms);
+    else {
+      std::cout<<"calculating initial G0_omega"<<std::endl;
+      int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+      int n_time=boost::lexical_cast<int>(parms["N"]);
+      int n_flavor=parms.value_or_default("FLAVORS", 2);
+      double beta = static_cast<double>(parms["BETA"]);
+      double mu = static_cast<double>(parms["MU"]);
+      double h = static_cast<double>(parms["H"]);
+      double h_init = parms.value_or_default("H_INIT", 0.);
+      double tsq=t_*t_;
+      matsubara_green_function_t G0_omega(n_matsubara,n_flavor);
+      for(uint i=0; i<G0_omega.nfreq(); i++) {
+	std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+	for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
+	  std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init-h : h_init-h);
+	  std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
+	  tmp *= tmp.imag()<0 ? -1 : 1;
+	  G0_omega(i, flavor) = (zeta - tmp)/(2*tsq);
+	  //std::cout << zeta << " " << sqrt(zeta*zeta) << std::endl;
+	}
+      }
+      G0_omega.write("G0_omega_input");
+      boost::shared_ptr<FourierTransformer> fourier_ptr;
+      FourierTransformer::generate_transformer(parms, fourier_ptr);
+      itime_green_function_t G0_tau(n_time,n_flavor);
+      fourier_ptr->backward_ft(G0_tau, G0_omega);
+      G0_tau.write("G0_tau_input");
+      return G0_omega;
+    }
+  }
+
 private:
   double t_; 
 };
@@ -306,6 +393,7 @@ public:
     }
     return G0_omega_new;
   }
+
 private:
   std::vector<double> epsilon;
   std::vector<double> dos;
