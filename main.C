@@ -35,7 +35,7 @@
 #include "selfconsistency.h"
 #include "externalsolver.h"
 #include "hilberttransformer.h"
-#include "clustertransformer.h"
+#include "cluster.h"
 #ifdef RUBTSOV
 #include "../DMFT-solvers/Rubtsov/rubtsov.h"
 #endif
@@ -94,19 +94,15 @@ int main(int argc, char** argv)
     if(!parms.defined("CLUSTER_LOOP")) {
       if(!parms.defined("OMEGA_LOOP")){
 	//...imaginary time tau
-	int n_tau=boost::lexical_cast<int>(parms["N"]);
-	int n_orbital=parms.value_or_default("FLAVORS", 2);
-	itime_green_function_t G0_tau(n_tau+1, 1, n_orbital), G_tau(n_tau+1, 1, n_orbital);
-	// read initial guess
-	G0_tau.read(parms.value_or_default("G0TAU_INPUT", "G0tau_input").c_str());
-	std::cout<<"starting value for G is: "<<G0_tau<<std::endl;
+	SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+	itime_green_function_t G0_tau = transform.initial_G0(parms);
+	itime_green_function_t G_tau = G0_tau;
 	boost::shared_ptr<ImpuritySolver> solver_ptr;
 	if (parms["SOLVER"]=="Hirsch-Fye"){
 	  std::cout<<"solving Hirsch Fye"<<std::endl;
 	  // we need a factory to create Hirsch-Fye simulations
 	  alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;	
 	  solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-	  SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 	  selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
 	}
 #ifdef WERNER
@@ -115,13 +111,12 @@ int main(int argc, char** argv)
 	  alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
 	  solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
 	  std::cout<<"interpreting input value as G_tau, not G0"<<std::endl;
-	  G_tau=G0_tau;
+	  //G_tau=G0_tau;
 	  F_selfconsistency_loop(parms, *solver_ptr, G_tau);
 	}
 #endif
 	else {
 	  solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
-	  SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
 	  selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
 	}
 	// write G0 (to be read in as an input for a new simulation)
@@ -137,16 +132,20 @@ int main(int argc, char** argv)
 	alps::scheduler::BasicFactory<WernerSimFrequency,WernerRun> werner_factory;
 #endif
 	//perform self consistency loop in Matsubara frequency omega
-	int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-	int n_orbital=parms.value_or_default("FLAVORS", 2);
-	matsubara_green_function_t G0_omega(n_matsubara,1,n_orbital), G_omega(n_matsubara,1,n_orbital);
-	
-	// read initial guess
-	G0_omega.read(parms.value_or_default("G0OMEGA_INPUT", "G0omega_input").c_str());
-	//construct a solver that takes the GF in both imaginary time and Matsubara freq
+	FrequencySpaceHilbertTransformer *transform_ptr;
+	if(!parms.defined("DOSFILE")){
+	  transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
+	  std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
+	}
+	else{
+	  std::cout<<"using DOS Hilbert transform"<<std::endl;
+	  transform_ptr= new FSDOSHilbertTransformer(parms);
+	}
+	matsubara_green_function_t G0_omega = transform_ptr->initial_G0(parms);
+	matsubara_green_function_t G_omega = G0_omega;
 	boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
-	if ((parms["SOLVER"]=="Rubtsov") && n_orbital==1){
+	if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("FLAVORS", "2")=="1")){
 	  std::cout<<"using single site Hubbard solver"<<std::endl;
 	  solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
 	}
@@ -163,21 +162,11 @@ int main(int argc, char** argv)
 	else{
 	  //throw exception or commit suicide or even better: 
 	  //create an external solver that takes its arguments in frequency space.
-          std::cout<<"starting external solver"<<std::endl;
-	  solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
-          FSSemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-          selfconsistency_loop_omega(parms, *solver_ptr, transform, *fourier_ptr, G0_omega, G_omega);
+	  //solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+	  std::cout<<parms["SOLVER"]<<std::endl;
+	  boost::throw_exception(std::logic_error("there is no such solver!"));	
 	}
 #endif
-	FrequencySpaceHilbertTransformer *transform_ptr;
-	if(!parms.defined("DOSFILE")){
-	  transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
-	  std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
-	}
-	else{
-	  std::cout<<"using DOS Hilbert transform"<<std::endl;
-	  transform_ptr= new FSDOSHilbertTransformer(parms);
-	}
 	selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr, *fourier_ptr, G0_omega, G_omega);
       
 	// write G0 (to be read as an input Green function)
@@ -192,44 +181,21 @@ int main(int argc, char** argv)
 #endif
 	//perform self consistency loop in Matsubara frequency omega
 	// all gfs are formulated in k-space and are diagonal in k! 
-	ClusterTransformer *transform_ptr;
-	std::cout<<"using DCA transformer"<<std::endl;
-	transform_ptr = new DCATransformer(parms);
-	int n_tau=boost::lexical_cast<int>(parms["N"]);
-	int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-	int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
-	int n_site=boost::lexical_cast<int>(parms["SITES"]);
-	matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital);
-	if (parms.defined("G0OMEGA_INPUT")) {
-	  std::cout<<"reading initial G0_omega"<<std::endl;
-	  G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
-	}
-	else {
-	  std::cout<<"calculating initial G0_omega"<<std::endl;
-	  G0_omega = transform_ptr->calculate_initial_G0(parms);	
-	  std::ofstream omfile ("G0_omega_input");
-	  omfile << G0_omega;
-	  omfile.close();
-	  std::ofstream realomfile ("G0_omega_input_realspace");
-	  realomfile << transform_ptr->transform_into_real_space(G0_omega);
-	  realomfile.close();
-	  itime_green_function_t G0_tau(n_tau, n_site, n_orbital);
-	  fourier_ptr->backward_ft(G0_tau, G0_omega);
-	  std::ofstream taufile ("G0_tau_input");
-	  taufile << G0_tau;
-	  taufile.close();
-	  std::ofstream realtaufile ("G0_tau_input_realspace");
-	  realtaufile << transform_ptr->transform_into_real_space(G0_tau);
-	  realtaufile.close();
-	}
-	matsubara_green_function_t G_omega(G0_omega);
+	DCATransformer *transform_ptr;
+	std::cout<<"using simple DCA transformer"<<std::endl;
+	if (parms.defined("ANTIFERROMAGNET"))
+	  transform_ptr = new AntiFerroDCATransformer(parms);
+	else
+	  transform_ptr = new SimpleDCATransformer(parms);
+	matsubara_green_function_t G0_omega=transform_ptr->initial_G0(parms);
+	matsubara_green_function_t G_omega=G0_omega;
 	boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
-	if (parms["SOLVER"]=="Rubtsov" && n_orbital==1){
+	if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="1")){
 	  std::cout<<"using Rubtsov Solver for half filling"<<std::endl;
 	  solver_ptr.reset(new alps::ImpuritySolver(half_fill_rubtsov_factory,argc,argv));
 	}
-	else if (parms["SOLVER"]=="Rubtsov" && n_orbital==2){
+	else if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="2")){
 	  std::cout<<"using Rubtsov Solver"<<std::endl;
 	  solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory,argc,argv));
 	}
