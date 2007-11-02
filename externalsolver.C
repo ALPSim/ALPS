@@ -162,7 +162,6 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     std::cout<<"reading in itime"<<std::endl;
     read_itime(output,G_tau);	
     std::cout<<"read in itime: "<<G_tau<<std::endl;
-    exit(0);
     std::cout<<"done reading."<<std::endl;
   } // scope to force closing of file
   
