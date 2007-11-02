@@ -1,9 +1,9 @@
-include $(HOME)/code/cvs/alpslib/share/alps/include.mk
-CXXFLAGS += -g -DWERNER -DRUBTSOV
-SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C clustertransformer.C
+include $(HOME)/code/alpslib/share/alps/include.mk
+CXXFLAGS += -DWERNER -DRUBTSOV
+SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C clustertransformer.C clusterhelper.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
 
-OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o auxiliaryfunctions.o alps_solver.o clustertransformer.o
+OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o auxiliaryfunctions.o alps_solver.o clustertransformer.o clusterhelper.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
 RUBTSOV_DIR=../DMFT-solvers/Rubtsov
@@ -40,7 +40,7 @@ docs:
 test: dmft
 	cd test && make all	
 clean:
-	$(RM) $(RMFLAGS) *.o dmft hirschfye $(RUBTSOV_DIR)/*.o $(WERNER_DIR)/*.o
+	$(RM) $(RMFLAGS) *.o dmft dmft_mpi hirschfye $(RUBTSOV_DIR)/*.o $(WERNER_DIR)/*.o
 fileclean:
 	rm G_omega_[1-9]* G0_omega_[1-9]* G_tau_[1-9]* G0_tau_[1-9]*
 %.o: %.cpp
