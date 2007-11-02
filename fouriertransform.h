@@ -32,6 +32,11 @@
 #include "green_function.h" // for the multiple_vector_type
 #include <alps/parameter.h>
 
+#include <alps/alea.h>
+#include <alps/alea/simpleobseval.h>
+#include <alps/osiris/dump.h>
+#include <alps/osiris/std/vector.h>
+
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
 void generate_spline_matrix(dense_matrix & spline_matrix);
@@ -109,6 +114,9 @@ public:
   virtual ~FourierTransformer(){}
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
+  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
+			   const green_function<alps::RealObsevaluator> &G_omega_real,
+			   const green_function<alps::RealObsevaluator> &G_omega_imag) const;
   static void generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift=0);
   static void generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr);
 protected:
