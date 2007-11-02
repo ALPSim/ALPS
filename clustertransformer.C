@@ -2,7 +2,7 @@
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2007 by Sebastian Fuchs <sfuchs@gwdg.de>
+* Copyright (C) 2007 by Sebastian Fuchs <fuchs@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -24,432 +24,249 @@
 *****************************************************************************/
 
 
-#include "clustertransformer.h"
+#include "cluster.h"
 
 
-ClusterHelper::ClusterHelper(const alps::Parameters& params) :
-  alps::graph_helper<alps::graph_helper<>::graph_type>(params)
-{
-  if (boost::lexical_cast<int>(params["SITES"]) != num_sites() / volume())
-    boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
-  std::ofstream momstream("LatticeMomenta.dat");
-  momentum_iterator itm, itm_end;
-  for (boost::tie(itm, itm_end) = momenta(); itm!=itm_end; ++itm) {
-    vector_type m=momentum(*itm);
-    for (int d=0; d<dimension(); ++d)
-      momstream << m[d] << "\t";
-    momstream << std::endl;
-  } 
-  momstream.close();
-  std::ofstream clustercoordstream("ClusterCoordinates.dat");
-  std::ofstream clustermomstream("ClusterMomenta.dat");
-  vertex_iterator itv, itv_end;
-  for (boost::tie(itv, itv_end) = cluster_sites(); itv!=itv_end; ++itv) {
-    vector_type v(cluster_coordinate(*itv));
-    vector_type m = cluster_momentum(*itv);
-    for (int d=0; d<dimension(); ++d) {
-      clustercoordstream << v[d] << "\t";
-      clustermomstream << m[d] << "\t";
-    }
-    clustermomstream << std::endl;
-    clustercoordstream << std::endl;
-  }
+matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters& parms) {
+  std::cout<<"reading initial G0_omega"<<std::endl;
+  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
+  int n_site=boost::lexical_cast<int>(parms["SITES"]);
+  matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital);
+  G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+  return G0_omega;
 }
 
 
-/*template<typename T>
-green_function<T> ClusterHelper::transform_into_k_space(const green_function<T>& G) const 
-{
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
-  assert(nsite==n_cluster_sites());
-  green_function<T> G_new(nfreq, nsite, nflavor);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  G_new(freq, i, j, flavor) = 0.;
-	}
-      }
-    }
-  }
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
-      vertex_iterator itv_j, itv_j_end;
-      for (boost::tie(itv_j, itv_j_end) = cluster_sites(); itv_j!=itv_j_end; ++itv_j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(*itv_k)[d]*(cluster_coordinate(*itv_i)[d]-cluster_coordinate(*itv_j)[d]);
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    G_new(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor) 
-	      += cos(phase) * G(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor) / double(nsite);
-	  }
-	}
-      }
-    }
-  }
-  return G_new;
-}
 
-
-template<typename T>
-green_function<T> ClusterHelper::transform_into_real_space(const green_function<T>& G)  const
-{
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
-  assert(nsite==n_cluster_sites());
-  green_function<T> G_new(nfreq, nsite, nflavor);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  G_new(freq, i, j, flavor) = 0.;
-	}
-      }
-    }
-  }
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
-      vertex_iterator itv_j, itv_j_end;
-      for (boost::tie(itv_j, itv_j_end) = cluster_sites(); itv_j!=itv_j_end; ++itv_j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(*itv_k)[d]*(cluster_coordinate(*itv_i)[d]-cluster_coordinate(*itv_j)[d]);
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    G_new(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor) 
-	      += cos(phase) * G(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor) / double(nsite);
-	  }
-	}
-      }
-    }
-  }
-  return G_new;
-  }*/
-
-
-/*matsubara_green_function_t ClusterHelper::transform_into_real_space(const matsubara_green_function_t& G) const 
-{
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
-  assert(nsite==n_cluster_sites());
-  matsubara_green_function_t G_new(nfreq, nsite, nflavor);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  G_new(freq, i, j, flavor) = 0.;
-	}
-      }
-    }
-  }
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
-      vertex_iterator itv_j, itv_j_end;
-      for (boost::tie(itv_j, itv_j_end) = cluster_sites(); itv_j!=itv_j_end; ++itv_j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(*itv_k)[d]*(cluster_coordinate(*itv_i)[d]-cluster_coordinate(*itv_j)[d]);
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    G_new(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor).real() 
-	      += cos(phase) * G(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor).real() / double(nsite);
-	    G_new(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor).real() 
-	      -= sin(phase) * G(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor).imag() / double(nsite);
-	    G_new(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor).imag() 
-	      += sin(phase) * G(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor).real() / double(nsite);
-	    G_new(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor).imag() 
-	      += cos(phase) * G(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor).imag() / double(nsite);
-	  }
-	}
-      }
-    }
-  }
-  return G_new;
-}*/
-
-
-itime_green_function_t ClusterHelper::transform_into_real_space(const itime_green_function_t& G) const 
-{
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
-  assert(nsite==n_cluster_sites());
-  itime_green_function_t G_new(nfreq, nsite, nflavor);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  G_new(freq, i, j, flavor) = 0.;
-	}
-      }
-    }
-  }
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
-      vertex_iterator itv_j, itv_j_end;
-      for (boost::tie(itv_j, itv_j_end) = cluster_sites(); itv_j!=itv_j_end; ++itv_j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(*itv_k)[d]*(cluster_coordinate(*itv_i)[d]-cluster_coordinate(*itv_j)[d]);
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    G_new(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor) 
-	      += cos(phase) * G(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor) / double(nsite);
-	  }
-	}
-      }
-    }
-  }
-  return G_new;
-}
-
-matsubara_green_function_t ClusterHelper::transform_into_real_space(const matsubara_green_function_t& G) const 
-{
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
-  assert(nsite==n_cluster_sites());
-  matsubara_green_function_t G_new(nfreq, nsite, nflavor);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  G_new(freq, i, j, flavor) = 0.;
-	}
-      }
-    }
-  }
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
-      vertex_iterator itv_j, itv_j_end;
-      for (boost::tie(itv_j, itv_j_end) = cluster_sites(); itv_j!=itv_j_end; ++itv_j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(*itv_k)[d]*(cluster_coordinate(*itv_i)[d]-cluster_coordinate(*itv_j)[d]);
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    G_new(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor) 
-	      += cos(phase) * G(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor) / double(nsite);
-	  }
-	}
-      }
-    }
-  }
-  return G_new;
-}
-
-/*matsubara_green_function_t ClusterHelper::transform_into_k_space(const matsubara_green_function_t& G) const 
-{
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
-  assert(nsite==n_cluster_sites());
-  matsubara_green_function_t G_new(nfreq, nsite, nflavor);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  G_new(freq, i, j, flavor) = 0.;
-	}
-      }
-    }
-  }
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
-      vertex_iterator itv_j, itv_j_end;
-      for (boost::tie(itv_j, itv_j_end) = cluster_sites(); itv_j!=itv_j_end; ++itv_j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(*itv_k)[d]*(cluster_coordinate(*itv_i)[d]-cluster_coordinate(*itv_j)[d]);
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    G_new(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor).real() 
-	      += cos(phase) * G(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor).real() / double(nsite);
-	    G_new(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor).real() 
-	      += sin(phase) * G(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor).imag() / double(nsite);
-	    G_new(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor).imag() 
-	      -= sin(phase) * G(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor).real() / double(nsite);
-	    G_new(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor).imag() 
-	      += cos(phase) * G(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor).imag() / double(nsite);
-	  }
-	}
-      }
-    }
-  }
-  return G_new;
-}*/
-
-
-itime_green_function_t ClusterHelper::transform_into_k_space(const itime_green_function_t& G) const 
-{
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
-  assert(nsite==n_cluster_sites());
-  itime_green_function_t G_new(nfreq, nsite, nflavor);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  G_new(freq, i, j, flavor) = 0.;
-	}
-      }
-    }
-  }
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
-      vertex_iterator itv_j, itv_j_end;
-      for (boost::tie(itv_j, itv_j_end) = cluster_sites(); itv_j!=itv_j_end; ++itv_j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(*itv_k)[d]*(cluster_coordinate(*itv_i)[d]-cluster_coordinate(*itv_j)[d]);
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    G_new(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor) 
-	      += cos(phase) * G(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor) / double(nsite);
-	  }
-	}
-      }
-    }
-  }
-  return G_new;
-}
-
-
-matsubara_green_function_t ClusterHelper::transform_into_k_space(const matsubara_green_function_t& G) const 
-{
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
-  assert(nsite==n_cluster_sites());
-  matsubara_green_function_t G_new(nfreq, nsite, nflavor);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  G_new(freq, i, j, flavor) = 0.;
-	}
-      }
-    }
-  }
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
-      vertex_iterator itv_j, itv_j_end;
-      for (boost::tie(itv_j, itv_j_end) = cluster_sites(); itv_j!=itv_j_end; ++itv_j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(*itv_k)[d]*(cluster_coordinate(*itv_i)[d]-cluster_coordinate(*itv_j)[d]);
-	for (frequency_t freq=0; freq<nfreq; ++freq) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    G_new(freq, vertex_index(*itv_k), vertex_index(*itv_k), flavor) 
-	      += cos(phase) * G(freq, vertex_index(*itv_i), vertex_index(*itv_j), flavor) / double(nsite);
-	  }
-	}
-      }
-    }
-  }
-  return G_new;
-}
-
-
-std::complex<double> *ClusterHelper::exp_iksite(const int sign) const
+std::complex<double>* DCATransformer::exp_iksite(const int sign) const
 {
   std::complex<double> *m = new std::complex<double>[n_cluster_sites()*n_cluster_sites()];
-  vertex_iterator itv_k, itv_k_end;
-  for (boost::tie(itv_k, itv_k_end) = cluster_sites(); itv_k!=itv_k_end; ++itv_k) {
-    vertex_iterator itv_i, itv_i_end;
-    for (boost::tie(itv_i, itv_i_end) = cluster_sites(); itv_i!=itv_i_end; ++itv_i) {
+  for (site_t k=0; k<n_cluster_sites(); ++k) {
+    for (site_t i=0; i<n_cluster_sites(); ++i) {
       double phase = 0.;
       for (int d=0; d<dimension(); ++d) 
-	phase += cluster_momentum(*itv_k)[d]*cluster_coordinate(*itv_i)[d];
+	phase += cluster_momentum(k,d)*cluster_coordinate(i,d);
       phase *= sign;
-      m[vertex_index(*itv_k)+n_cluster_sites()*vertex_index(*itv_i)]=std::complex<double>(cos(phase), sin(phase));
+      m[k+n_cluster_sites()*i]=std::complex<double>(cos(phase), sin(phase));
     }
   }
   return m;
 }
 
-matsubara_green_function_t ClusterTransformer::calculate_initial_G0(const alps::Parameters& parms)
-{
-  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-  int n_flavor=parms.value_or_default("FLAVORS", 2);
-  double beta = static_cast<double>(parms["BETA"]);
-  double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms["H"]);
-  bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
-  matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
-  matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
-  for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
-    for (site_t i=0; i<n_cluster_sites(); ++i) {
-      for (site_t j=0; j<n_cluster_sites(); ++j) {
-	for (frequency_t freq=0; freq<n_matsubara; ++freq) {
-	  G0_omega(freq, i, j, flavor) = (i==j); // zero except for diagonal elements
-	}
-      }
-    }
-  }
-  G_omega = G0_omega; 
-  //evoke transformation with G_omega==G0_omega (selfenergy=0)
-  return this->operator()(G_omega, G0_omega, mu, h, beta, paramagnet);
-}
 
 
-matsubara_green_function_t DCATransformer::operator()(matsubara_green_function_t &G_omega, 
-						     matsubara_green_function_t &G0_omega, 
-						     const double mu, const double h, const double beta, 
-						     const bool paramagnet)
+matsubara_green_function_t SimpleDCATransformer::operator()(matsubara_green_function_t &G_omega, 
+							    matsubara_green_function_t &G0_omega, 
+							    const double mu, const double h, const double beta, 
+							    const bool paramagnet)
 {
+  //
+  std::ofstream self("self");
+  std::ofstream gbar("gbar");
+  //
   assert(h==0);
   uint nflavor=G0_omega.nflavor();
   uint nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
+  if (paramagnet) {
+    if(nflavor>1 && nflavor%2==0) {
+      for(spin_t flavor=0; flavor<nflavor; flavor+=2) {
+	for (site_t k=0; k<n_cluster_sites(); ++k) {
+	  for(frequency_t freq=0; freq<nfreq; ++freq) {
+	    G_omega(freq, k, k, flavor)= 0.5*(G_omega(freq, k, k, flavor)+G_omega(freq, k, k, flavor+1));
+	    G_omega(freq, k, k, flavor+1)=G_omega(freq, k, k, flavor);
+	  }
+	}
+      }
+    }
+  }
   matsubara_green_function_t selfenergy(G0_omega);
   matsubara_green_function_t G0_omega_new(G0_omega);
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    vertex_iterator itv_kc, itv_kc_end;
-    for (boost::tie(itv_kc, itv_kc_end) = cluster_sites(); itv_kc!=itv_kc_end; ++itv_kc) {
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
-	selfenergy(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor) 
-	  = 1./G0_omega(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor);
-	selfenergy(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor) 
-	  -= 1./G_omega(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor);
+	selfenergy(freq, kc, kc, flavor)  = 1./G0_omega(freq, kc, kc, flavor);
+	selfenergy(freq, kc, kc, flavor) -= 1./G_omega(freq, kc, kc, flavor);
+	//
+	self << freq << " " << kc << " " << flavor << " " << selfenergy(freq, kc, kc, flavor) << "\n";
+	//
 	std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-	G0_omega_new(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor) = 0.;
-	momentum_iterator itm_kl, itm_kl_end;
-	for (boost::tie(itm_kl, itm_kl_end)=momenta(); itm_kl!=itm_kl_end; ++itm_kl) {
-	  vector_type k=momentum(*itm_kl);
-	  for (int d=0; d<dimension(); ++d)
-	    k[d] += cluster_momentum(*itv_kc)[d];
-	  G0_omega_new(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor) 
-	    += 1./(iomega_n+mu-epsilon(k)-selfenergy(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor));
+	G0_omega_new(freq, kc, kc, flavor) = 0.;
+	for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
+	  vector_type k(dimension());
+	  for (uint d=0; d<dimension(); ++d) 
+	    k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	  G0_omega_new(freq, kc, kc, flavor) 
+	    += 1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor));
 	}
-	G0_omega_new(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor) /= volume();
-	G0_omega_new(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor) = 
-	  1. / ( 1./G0_omega_new(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor) 
-		 + selfenergy(freq, vertex_index(*itv_kc), vertex_index(*itv_kc), flavor) );
+	G0_omega_new(freq, kc, kc, flavor) /= n_cluster_cells();
+	//
+	gbar << freq << " " << kc << " " << flavor << " " << G0_omega_new(freq, kc, kc, flavor) << "\n";
+	//
+	G0_omega_new(freq, kc, kc, flavor) = 
+	  1. / ( 1./G0_omega_new(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
       }
     }
   }
   return G0_omega_new;
 }
+
+
+
+matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Parameters& parms)
+{
+  if (parms.defined("G0OMEGA_INPUT")) 
+    return ClusterTransformer::initial_G0(parms);
+  else {
+    std::cout<<"calculating initial G0_omega"<<std::endl;
+    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+    int n_tau=boost::lexical_cast<int>(parms["N"]);
+    int n_flavor=parms.value_or_default("FLAVORS", 2);
+    double beta = static_cast<double>(parms["BETA"]);
+    double mu = static_cast<double>(parms["MU"]);
+    double h = static_cast<double>(parms["H"]);
+    bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
+    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
+    for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
+      for (site_t i=0; i<n_cluster_sites(); ++i) {
+	for (site_t j=0; j<n_cluster_sites(); ++j) {
+	  for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+	    G0_omega(freq, i, j, flavor) = (i==j); // zero except for diagonal elements
+	  }
+	}
+      }
+    }
+    G_omega = G0_omega; 
+    //evoke transformation with G_omega==G0_omega (selfenergy=0)
+    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta, paramagnet);
+    boost::shared_ptr<FourierTransformer> fourier_ptr;
+    FourierTransformer::generate_transformer(parms, fourier_ptr);
+    G0_omega_new.write("G0_omega_input");
+    matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
+    G0_omega_real.write("G0_omega_input_realspace");
+    itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor);
+    fourier_ptr->backward_ft(G0_tau, G0_omega_new);
+    G0_tau.write("G0_tau_input");
+    itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
+    G0_tau_real.write("G0_tau_input_realspace");
+    return G0_omega_new;
+  }
+}
+
+
+
+matsubara_green_function_t AntiFerroDCATransformer::operator()(matsubara_green_function_t &G_omega, 
+							       matsubara_green_function_t &G0_omega, 
+							       const double mu, const double h, const double beta, 
+							       const bool paramagnet)
+{
+  //
+  std::ofstream self("selfaf");
+  std::ofstream gbar("gbaraf");
+  //
+  assert(paramagnet==false);
+  uint nflavor=G0_omega.nflavor();
+  uint nfreq=G0_omega.nfreq();
+  assert(G0_omega.nsite()==n_cluster_sites());
+  assert(nflavor>1 && nflavor%2 == 0);
+  //symmetrize spins
+  //insert symmetrization here
+  matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor);
+  for (frequency_t freq=0; freq<G0_omega_new.nfreq(); ++freq) 
+    for (int i=0; i<G0_omega_new.nsite(); ++i) 
+      for (int j=0; j<G0_omega_new.nsite(); ++j) 
+	for (spin_t flavor=0; flavor<G0_omega_new.nflavor(); ++flavor) 
+	  G0_omega_new(freq,i,j,flavor) = 0.;
+  matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
+  matsubara_green_function_t G_omega_inv = green_function_inverse(G_omega);
+  matsubara_green_function_t selfenergy = green_function_subtract(G0_omega_inv, G_omega_inv);
+  //
+  for (spin_t flavor=0; flavor<nflavor; ++flavor) 
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) 
+      for (frequency_t freq=0; freq<nfreq; ++freq) 
+	self << freq << " " << kc << " " << flavor << " " << selfenergy(freq, kc, kc, flavor) << "\n";
+  //
+  for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
+    matsubara_green_function_t G_kl(G0_omega);
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+      for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
+	vector_type k0(dimension());
+	for (uint d=0; d<dimension(); ++d) 
+	  k0[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	vector_type k1(dimension());
+	for (uint d=0; d<dimension(); ++d) 
+	  k1[d] = lattice_momentum(kl,d) + cluster_momentum(kc+1,d);
+	for (spin_t flavor=0; flavor<nflavor; flavor+=2) { 
+	  G_kl(freq,kc,kc,flavor) = iomega_n+mu-epsilon(k0);
+	  G_kl(freq,kc,kc,flavor+1) = iomega_n+mu-epsilon(k0);
+	  G_kl(freq,kc+1,kc+1,flavor) = iomega_n+mu-epsilon(k1);
+	  G_kl(freq,kc+1,kc+1,flavor+1) = iomega_n+mu-epsilon(k1);
+	  G_kl(freq,kc+1,kc,flavor) = h/2;
+	  G_kl(freq,kc+1,kc,flavor+1) = -h/2;
+	  G_kl(freq,kc,kc+1,flavor) = h/2;
+	  G_kl(freq,kc,kc+1,flavor+1) = -h/2;
+	}
+      }
+    }
+    G_kl = green_function_inverse(G_kl);
+    G_kl = green_function_subtract(G_kl, selfenergy);
+    G_kl = green_function_inverse(G_kl);
+    G0_omega_new = green_function_add(G0_omega_new, G_kl);
+  }
+  G0_omega_new = green_function_divide(G0_omega_new, std::complex<double>(n_cluster_cells()));
+  //
+  for (spin_t flavor=0; flavor<nflavor; ++flavor) 
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) 
+      for (frequency_t freq=0; freq<nfreq; ++freq) 
+	gbar << freq << " " << kc << " " << flavor << " " << G0_omega_new(freq, kc, kc, flavor) << "\n";
+  //
+  G0_omega_new = green_function_inverse(G0_omega_new);
+  G0_omega_new = green_function_add(G0_omega_new, selfenergy);
+  G0_omega_new = green_function_inverse(G0_omega_new);
+  return G0_omega_new;
+}
+
+
+
+matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Parameters& parms)
+{
+  if (parms.defined("G0OMEGA_INPUT")) 
+    return ClusterTransformer::initial_G0(parms);
+  else {
+    std::cout<<"calculating initial G0_omega"<<std::endl;
+    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+    int n_tau=boost::lexical_cast<int>(parms["N"]);
+    int n_flavor=parms.value_or_default("FLAVORS", 2);
+    double beta = static_cast<double>(parms["BETA"]);
+    double mu = static_cast<double>(parms["MU"]);
+    double h = static_cast<double>(parms["H"]);
+    double h_init = parms.value_or_default("H_INIT", 0.);
+    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
+    matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
+    for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
+      for (site_t i=0; i<n_cluster_sites(); ++i) {
+	for (site_t j=0; j<n_cluster_sites(); ++j) {
+	  for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+	    G0_omega(freq, i, j, flavor) = (i==j); // zero except for diagonal elements
+	  }
+	}
+      }
+    }
+    G_omega = G0_omega; 
+    //evoke transformation with G_omega==G0_omega (selfenergy=0)
+    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h_init, beta, false);
+    boost::shared_ptr<FourierTransformer> fourier_ptr;
+    FourierTransformer::generate_transformer(parms, fourier_ptr);
+    G0_omega_new.write("G0_omega_input");
+    transform_into_real_space(G0_omega_new).write("G0_omega_input_realspace");
+    itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor);
+    fourier_ptr->backward_ft(G0_tau, G0_omega_new);
+    G0_tau.write("G0_tau_input");
+    transform_into_real_space(G0_tau).write("G0_tau_input_realspace");
+    return G0_omega_new;
+  }
+}
+  
