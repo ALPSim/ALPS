@@ -201,8 +201,10 @@ int main(int argc, char** argv)
 	}
 	else{
 #endif
-	  std::cout<<parms["SOLVER"]<<std::endl;
-	  boost::throw_exception(std::logic_error("there is no such cluster solver!"));	
+          std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
+	  solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+	  //std::cout<<parms["SOLVER"]<<std::endl;
+	  //boost::throw_exception(std::logic_error("there is no such cluster solver!"));	
 #ifdef RUBTSOV
 	}
 #endif
