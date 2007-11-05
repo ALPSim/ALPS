@@ -46,7 +46,10 @@ ImpuritySolver::result_type ExternalSolver::solve(
 {
   std::string infile = std::tmpnam(0); // the input file name
   std::string outfile = std::tmpnam(0); // the output file name
- 
+  if(parms.defined("TMPNAME")){
+    infile=parms["TMPNAME"]+std::string(".in.xml");
+    outfile=parms["TMPNAME"]+std::string(".out.xml");
+  }
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
  
@@ -101,6 +104,11 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
 {
   std::string infile = std::tmpnam(0); // the input file name
   std::string outfile = std::tmpnam(0); // the output file name
+  if(parms.defined("TMPNAME")){
+    infile=parms["TMPNAME"]+std::string(".in.xml");
+    outfile=parms["TMPNAME"]+std::string(".out.xml");
+  }
+
 //  std::cout<<" hi there... in external solver solve omega"<<std::endl;
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
@@ -159,10 +167,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
         alps::skip_element(output,tag);
       tag=alps::parse_tag(output);
     }
-    std::cout<<"reading in itime"<<std::endl;
     read_itime(output,G_tau);	
-    std::cout<<"read in itime: "<<G_tau<<std::endl;
-    std::cout<<"done reading."<<std::endl;
   } // scope to force closing of file
   
   
