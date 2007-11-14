@@ -4,7 +4,9 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2005-2007 by Lukas Gamper <mistral@student.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>,
+*                            Niall Moran <nmoran@thphys.nuim.ie>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -207,7 +209,7 @@ struct PlotDTD : public sp::grammar<PlotDTD>
       ForEach
         = *Comment
           >> sp::as_lower_d[sp::str_p("<for-each")] >> AtName >> '>'
-          >> XAxis >> YAxis >> *Constraint >> *Comment
+          >> (( XAxis >> YAxis >> *Constraint >> *Comment ) | ForEach )
           >> sp::as_lower_d[sp::str_p("</for-each")] >> '>';
       XAxis
         = *Comment

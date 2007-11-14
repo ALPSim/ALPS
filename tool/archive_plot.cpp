@@ -5,7 +5,8 @@
 * ALPS Libraries
 *
 * Copyright (C) 2005-2007 by Lukas Gamper <mistral@student.ethz.ch>,
-*                            Synge Todo <wistaria@comp-phys.org>
+*                            Synge Todo <wistaria@comp-phys.org>,
+*                            Niall Moran <nmoran@thphys.nuim.ie>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -74,6 +75,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
         std::string preSQLOrder;
         std::string buffer = "";
         std::string bufferBody = "";
+        int plot_num = 0 ;
 
         // find Node with axis tags and Check if all Attributes are there
         while (bodyNode.nodeTest("for-each").size() > 0)
@@ -166,7 +168,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
         }
         
         // find file ID's
-        if (forData.size() > 0) {
+        if (forData.size() > 0) { //while there is at lease one for loop
                 unsigned int table = 0;
                 while(forCount[0] < forData[0].size()) {
                         
@@ -178,7 +180,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
                                         + forNames[forVector[pos]] + ".value='" + forData[pos][forCount[pos]] + "'";
                                 forMeta[pos].push_back(forVector[pos] + "=" + forData[pos][forCount[pos]]);
                         }
-                        forCount[forCount.size() - 1]++;
+                        forCount[forCount.size() - 1]++; //increment the last element in the list by one
                         for (unsigned int pos = forCount.size() - 1; pos > 0 && forCount[pos] == forData[pos].size(); pos--) {
                                 forCount[pos] = 0;
                                 forCount[pos - 1]++;
@@ -196,6 +198,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
                         for (std::list<std::map<std::string, std::string> >::iterator it = rs.begin(); it != rs.end(); it++) 
                                 fIDs[table].push_back((*it)["id"]);
                         table++;
+                        plot_num = table; 
                 }
         } else {
                 fIDs.push_back(std::list<std::string>());
@@ -203,6 +206,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
                         + preSQLWhere + " ORDER BY " + preSQLOrder, true);
                 for (std::list<std::map<std::string, std::string> >::iterator it = rs.begin(); it != rs.end(); it++)
                         fIDs[0].push_back((*it)["id"]);
+                plot_num = 1 ; 
         }
 
         // Parameters cannot habe indeces or errors
@@ -232,7 +236,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
         // Loop over For-Loops
         unsigned int table = 0;
         bool firstLoop = true;
-        while((forCount[0] < forMeta[0].size()) || (forMeta.size() == 0 && firstLoop)) {
+        while( ((forCount[0] < forMeta[0].size()) || (forMeta.size() == 0 && firstLoop) ) && table < plot_num ) {
 
                 if (inNode.nodeTest("plot").front().getAttribute("output") == "text") {                        
                         buffer += std::string("\n#");
@@ -256,20 +260,27 @@ void Plot::exec(Node inNode, std::string inInFile) {
                                 + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "dx" : "")
                                 + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? "dy" : "")
                                 + "\n@    s" + boost::lexical_cast<std::string>(table) + " legend \"";
-      for (unsigned int pos = 0; pos < forMeta.size(); pos++)
-                          buffer += std::string(" ") + forMeta[pos][forCount[pos]];                                
-            buffer += std::string("\"");                                
-                        bufferBody += std::string("\n@target G0.S") + boost::lexical_cast<std::string>(table) + "\n@type xy"
-                                + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "dx" : "")
+                                                   for (unsigned int pos = 0; pos < forMeta.size(); pos++)
+                        buffer += std::string(" ") + forMeta[pos][forCount[pos]];                                
+                                              buffer += std::string("\"");                                
+                                         bufferBody += std::string("\n@target G0.S") + boost::lexical_cast<std::string>(table) + "\n@type xy"
+                                        + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "dx" : "")
                                 + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? "dy" : "") + "\n";
-                }
-                forCount[forCount.size() - 1]++;
-                for (unsigned int pos = forCount.size() - 1; pos > 0 && forCount[pos] == forMeta[pos].size(); pos--) {
+                } //end if 
+                /*forCount[forCount.size() - 1]++;
+                for (unsigned int pos = forCount.size() - 1; pos > 0 && forCount[pos] >= forMeta[pos].size() ; pos--) {
                         forCount[pos] = 0;
                         forCount[pos - 1]++;
-                }
+                }*/
+                
+                for ( unsigned int pos = 0 ; pos < forCount.size() ; pos++ ){
+                        forCount[pos]++; 
+                } 
+                
+                                         //forCount[forCount.size() - 1]++;                
+                
                 for (std::list<std::string>::iterator it = fIDs[table].begin(); it != fIDs[table].end(); it++) {
-                        rs = mDB(std::string("SELECT u.") + (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "parameter"
+                        std::string req = std::string("SELECT u.") + (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "parameter"
                                                 ? "value" : (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "index" 
                                                 ? "indexvalue" : bodyNode.nodeTest("xaxis").front().getAttribute("type"))) + " AS x, "
                                         + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "u.error AS ex, " : "")
@@ -286,8 +297,11 @@ void Plot::exec(Node inNode, std::string inInFile) {
                                         + (bodyNode.nodeTest("xaxis").front().getAttribute("index") != "" ? " AND u.indexvalue='" 
                                                 + bodyNode.nodeTest("xaxis").front().getAttribute("index") + "'" : "")
                                         + (bodyNode.nodeTest("yaxis").front().getAttribute("index") != "" ? " AND v.indexvalue='" 
-                                                + bodyNode.nodeTest("yaxis").front().getAttribute("index") + "'" : "")
-                                );
+                                           + bodyNode.nodeTest("yaxis").front().getAttribute("index") + "'" : "");
+// #ifndef NDEBUG
+                        std::cout << "Execute Query: " << req << std::endl;
+// #endif
+                        rs = mDB(req);
                         if (rs.size() > 0) {
                                 if (rs.size() != 1)
                                         throw std::runtime_error("The Result ob the Query is not unique!"); 

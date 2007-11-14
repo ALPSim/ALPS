@@ -1,3 +1,8 @@
+2007-11-14  Synge Todo <wistaria@comp-phys.org>
+
+	* [tool/archive] Supported nested for-each tags (contributed by
+	Niall Moran <nmoran@thphys.nuim.ie>).
+	
 2006-12-19  Matthias Troyer <troyer@comp-phys.org>
 
 	* Release 1.3b3

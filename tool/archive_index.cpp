@@ -172,6 +172,7 @@ void Index::exec(fs::path xmlPath) {
                             std::string fID = mDB(std::string("SELECT fID FROM uri WHERE path='") + pathname + "';", true).front()["fID"];
                             std::list<Node> scalarAverage = av->nodeTest("scalar_average");
                             std::list<Node> vectorAverage = av->nodeTest("vector_average");
+                            std::list<Node> histogram = av->nodeTest("histogram");
                             mDB(std::string("INSERT INTO parameter (fID, name, value) VALUES ('") + fID + "', '" + mDB.quote("average index") +
                                 "', '" + mDB.quote(boost::lexical_cast<std::string>(aidx)) + "');", true);
                             for (std::list<Node>::iterator it = parameters.begin(); it != parameters.end(); ++it)
@@ -181,17 +182,43 @@ void Index::exec(fs::path xmlPath) {
                             for (std::list<Node>::iterator it = scalarAverage.begin(); it != scalarAverage.end(); it++)
                               if (patternFilter("measurement", it->getAttribute("name")))
                                 mDB(std::string("INSERT INTO measurement (fID, indexvalue, name, count, mean, error, variance, autocorr) ")
-                                    + "VALUES ('" + fID + "', '', '" + mDB.quote(it->getAttribute("name")) + "', '" + mDB.quote(it->getElement("count").string()) + "', " 
-                                    + "'" + mDB.quote(it->getElement("mean").string()) + "', '" + mDB.quote(it->getElement("error").string()) + "', "
-                                    + "'" + mDB.quote(it->getElement("variance").string()) + "', '" + mDB.quote(it->getElement("autocorr").string()) + "')", true);
+                                    + "VALUES ('" + fID + "', '', '"
+                                    + mDB.quote(it->getAttribute("name")) + "', '"
+                                    + mDB.quote(it->getElement("count").string()) + "', '" 
+                                    + mDB.quote(it->getElement("mean").string()) + "', '"
+                                    + mDB.quote(it->getElement("error").string()) + "', '"
+                                    + mDB.quote(it->getElement("variance").string()) + "', '"
+                                    + mDB.quote(it->getElement("autocorr").string()) + "')", true);
                             for (std::list<Node>::iterator vIt = vectorAverage.begin(); vIt != vectorAverage.end(); vIt++)
                               if (patternFilter("measurement", vIt->getAttribute("name"))) {
                                 std::list<Node> scalarAvg = vIt->nodeTest("scalar_average");
                                 for (std::list<Node>::iterator it = scalarAvg.begin(); it != scalarAvg.end(); it++)
                                   mDB(std::string("INSERT INTO measurement (fID, indexvalue, name, count, mean, error, variance, autocorr) ")
-                                      + "VALUES ('" + fID + "', '" + it->getAttribute("indexvalue") + "', '" + mDB.quote(vIt->getAttribute("name")) + "', '" + mDB.quote(it->getElement("count").string()) + "', " 
-                                      + "'" + mDB.quote(it->getElement("mean").string()) + "', '" + mDB.quote(it->getElement("error").string()) + "', "
-                                      + "'" + mDB.quote(it->getElement("variance").string()) + "', '" + mDB.quote(it->getElement("autocorr").string()) + "')", true);
+                                      + "VALUES ('" + fID + "', '"
+                                      + it->getAttribute("indexvalue") + "', '"
+                                      + mDB.quote(vIt->getAttribute("name")) + "', '"
+                                      + mDB.quote(it->getElement("count").string()) + "', '"
+                                      + mDB.quote(it->getElement("mean").string()) + "', '"
+                                      + mDB.quote(it->getElement("error").string()) + "', '"
+                                      + mDB.quote(it->getElement("variance").string()) + "', '"
+                                      + mDB.quote(it->getElement("autocorr").string()) + "')", true);
+                              }
+                            for (std::list<Node>::iterator vIt = histogram.begin(); vIt != histogram.end(); vIt++)
+                              if (patternFilter("measurement", vIt->getAttribute("name"))) {
+                                std::list<Node> entry = vIt->nodeTest("entry");
+                                for (std::list<Node>::iterator it = entry.begin(); it != entry.end(); it++) {
+                                  int count = boost::lexical_cast<int>(it->getElement("count").string());
+                                  double value = boost::lexical_cast<double>(it->getElement("value").string());
+                                  double mean = value / count;
+                                  double error = std::sqrt(value) / count;
+                                  mDB(std::string("INSERT INTO measurement (fID, indexvalue, name, count, mean, error, variance, autocorr) ")
+                                      + "VALUES ('" + fID + "', '"
+                                      + it->getAttribute("indexvalue") + "', '"
+                                      + mDB.quote(vIt->getAttribute("name")) + "', '"
+                                      + mDB.quote(boost::lexical_cast<std::string>(count)) + "', '"
+                                      + mDB.quote(boost::lexical_cast<std::string>(mean)) + "', '"
+                                      + mDB.quote(boost::lexical_cast<std::string>(error)) + "', '', '')", true);
+                                }
                               }
                           }
                           fileCnt++;
