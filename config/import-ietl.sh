@@ -1,5 +1,13 @@
 #!/bin/sh
 
+# for echo without trailing newline character
+case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
+  *c*,-n*) ECHO_N= ECHO_C='
+' ;;
+  *c*,*  ) ECHO_N=-n ECHO_C= ;;
+  *)       ECHO_N= ECHO_C='\c' ;;
+esac
+
 branch=ietl
 taghead=IETL
 checkfile=ietl/lanczos.h
@@ -32,7 +40,7 @@ echo "CVS root = $ROOT"
 echo "CVS repository = $REPOSITORY"
 
 OLD_TAG=`(cd ../$dir && cvs status -v $checkfile | awk 'NF==3' | grep $taghead | head -1 | awk '{print $1}')`
-echo -n "Tag for previously imported source files [$OLD_TAG] ? : "
+echo $ECHO_N "Tag for previously imported source files [$OLD_TAG] ? : $ECHO_C"
 read answer &> /dev/null
 if test -n "$answer"; then
   OLD_TAG="$answer"
@@ -42,7 +50,7 @@ if test -z "$OLD_TAG"; then
 fi
 
 NEW_TAG=${taghead}_`date +'%Y%m%d'`
-echo -n "Tag for newly imported source files [$NEW_TAG] ? : "
+echo $ECHO_N "Tag for newly imported source files [$NEW_TAG] ? : $ECHO_C"
 read answer &> /dev/null
 if test -n "$answer"; then
   NEW_TAG="$answer"

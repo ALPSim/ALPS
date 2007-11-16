@@ -1,5 +1,13 @@
 #! /bin/sh
 
+# for echo without trailing newline character
+case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in
+  *c*,-n*) ECHO_N= ECHO_C='
+' ;;
+  *c*,*  ) ECHO_N=-n ECHO_C= ;;
+  *)       ECHO_N= ECHO_C='\c' ;;
+esac
+
 if test -z "$2"; then
   echo usage: $0 srcdir program
   exit -1
@@ -20,7 +28,7 @@ if test -n "$dir"; then
     exit -1
   fi
   if test "$dir" != "."; then
-    echo -n "[$dir] "
+    echo $ECHO_N "[$dir] $ECHO_C"
   fi
   cd $dir
   srcdir=`echo $srcdir | sed 's/^\./..\/./g'` # add '../' in case of relative path
