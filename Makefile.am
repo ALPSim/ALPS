@@ -11,7 +11,7 @@ distdir_light = alps-light-$(VERSION)
 dist_noinst_SCRIPTS = config/make_snapshot config/run-test config/update_preamble
 dist_noinst_DATA = ChangeLog ChangeLog.0 INSTALL TODO
 if ALPS_FULL
-dist_noinst_DATA += CITATIONS.txt LICENSE.txt README config/preamble.in
+dist_noinst_DATA += CITATIONS.txt LICENSE.txt README config/ac_alps.m4 config/preamble.in
 endif
 if ALPS_LIGHT
 dist_noinst_DATA += LICENSE-light.txt README-light config/preamble-light.in

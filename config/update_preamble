@@ -40,8 +40,9 @@ foreach $file (@ARGV) {
 	open(ORIG, "< $file") || die "Couldn't open $file";
 	open(NEW, "> $file_new") || die "Couldn't open $file_new";
 	foreach $line (<ORIG>) {
-	    $line =~ s/\t/        /g;
 	    chomp($line);
+	    $line =~ s/\t/        /g;
+	    $line =~ s/\s+$//g;
 	    if ($finish_preamble == 0) {
 		if ($line =~ /^\s*\*\s+Copyright.+([0-9]{4})-([0-9]{4})\s+by\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
 		    $year0 = $1;

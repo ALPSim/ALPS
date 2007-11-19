@@ -38,7 +38,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @ALPS_FULL_TRUE@am__append_1 = tool example
-@ALPS_FULL_TRUE@am__append_2 = CITATIONS.txt LICENSE.txt README config/preamble.in
+@ALPS_FULL_TRUE@am__append_2 = CITATIONS.txt LICENSE.txt README config/ac_alps.m4 config/preamble.in
 @ALPS_LIGHT_TRUE@am__append_3 = LICENSE-light.txt README-light config/preamble-light.in
 DIST_COMMON = README $(am__configure_deps) \
 	$(am__dist_noinst_DATA_DIST) $(dist_noinst_SCRIPTS) \
@@ -86,8 +86,9 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	pdf-recursive ps-recursive uninstall-info-recursive \
 	uninstall-recursive
 am__dist_noinst_DATA_DIST = ChangeLog ChangeLog.0 INSTALL TODO \
-	CITATIONS.txt LICENSE.txt README config/preamble.in \
-	LICENSE-light.txt README-light config/preamble-light.in
+	CITATIONS.txt LICENSE.txt README config/ac_alps.m4 \
+	config/preamble.in LICENSE-light.txt README-light \
+	config/preamble-light.in
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
     $(srcdir)/*) f=`echo "$$p" | sed "s|^$$srcdirstrip/||"`;; \
