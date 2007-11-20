@@ -298,9 +298,9 @@ void Plot::exec(Node inNode, std::string inInFile) {
                                                 + bodyNode.nodeTest("xaxis").front().getAttribute("index") + "'" : "")
                                         + (bodyNode.nodeTest("yaxis").front().getAttribute("index") != "" ? " AND v.indexvalue='" 
                                            + bodyNode.nodeTest("yaxis").front().getAttribute("index") + "'" : "");
-// #ifndef NDEBUG
+#ifndef NDEBUG
                         std::cout << "Execute Query: " << req << std::endl;
-// #endif
+#endif
                         rs = mDB(req);
                         if (rs.size() > 0) {
                                 if (rs.size() != 1)
