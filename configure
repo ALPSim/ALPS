@@ -21135,7 +21135,7 @@ fi;
 boost_dir_s=
 
 for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
-  for b in boost boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
+  for b in boost boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
     if test -f "$d/$b/boost/config.hpp"; then
       if test -f "$d/$b/libs/filesystem/src/exception.cpp"; then
         boost_dir_s="$d/$b"
@@ -22793,7 +22793,6 @@ _ACEOF
 # check for HDF5
 #
 
-if test "$ac_cv_alps_type" = "full"; then
 
 
 
@@ -23194,12 +23193,11 @@ echo "$as_me: disabling HDF5 support" >&6;}
   fi
 
 
-  test "$ac_cv_have_hdf5" = yes &&
+test "$ac_cv_have_hdf5" = yes &&
 cat >>confdefs.h <<\_ACEOF
 #define ALPS_HAVE_HDF5
 _ACEOF
 
-fi
 
 
 
@@ -29426,14 +29424,12 @@ fi
                                                   ac_config_files="$ac_config_files lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mpi/Makefile lib/heap/Makefile"
 
 
-                                                                      ac_config_files="$ac_config_files test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile"
+                                                                                ac_config_files="$ac_config_files test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile test/alea/Makefile"
 
           ac_config_files="$ac_config_files doc/Makefile"
 
 
 if test "$ac_cv_alps_type" = "full"; then
-            ac_config_files="$ac_config_files test/alea/Makefile"
-
                                 ac_config_files="$ac_config_files test/lattice/Makefile test/lattice/parameters test/lattice/parameters_complex"
 
             ac_config_files="$ac_config_files test/model/Makefile"
@@ -30170,8 +30166,8 @@ do
   "test/osiris/boostdump2.input" ) CONFIG_FILES="$CONFIG_FILES test/osiris/boostdump2.input" ;;
   "test/parameter/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/parameter/Makefile" ;;
   "test/parser/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/parser/Makefile" ;;
-  "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
   "test/alea/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/alea/Makefile" ;;
+  "doc/Makefile" ) CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
   "test/lattice/Makefile" ) CONFIG_FILES="$CONFIG_FILES test/lattice/Makefile" ;;
   "test/lattice/parameters" ) CONFIG_FILES="$CONFIG_FILES test/lattice/parameters" ;;
   "test/lattice/parameters_complex" ) CONFIG_FILES="$CONFIG_FILES test/lattice/parameters_complex" ;;

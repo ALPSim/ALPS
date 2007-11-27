@@ -65,7 +65,7 @@ host_triplet = @host@
 @BUILD_BOOST_WCHAR_TRUE@  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
 @BUILD_BOOST_WCHAR_TRUE@  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
 
-@ALPS_FULL_TRUE@am__append_4 = $(src_ALEA) $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
+@ALPS_FULL_TRUE@am__append_4 = $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
 @BUILD_BOOST_TRUE@am__append_5 = $(top_srcdir)/src/boost/throw_exception.C
 @BUILD_BOOST_TRUE@am__append_6 = $(src_boost_DATE_TIME) $(src_boost_PROGRAM_OPTIONS)
 @BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__append_7 = $(src_boost_FILESYSTEM_1_32) $(src_boost_REGEX_1_32) $(src_boost_SERIALIZATION_1_32)
@@ -169,12 +169,13 @@ am__objects_10 = abstract_task.lo factory.lo info.lo \
 	mpp_scheduler.lo options.lo remote_task.lo remote_worker.lo \
 	scheduler.lo signal.lo single_scheduler.lo serial_scheduler.lo \
 	slave_task.lo task.lo worker.lo workertask.lo
-@ALPS_FULL_TRUE@am__objects_11 = $(am__objects_7) $(am__objects_8) \
-@ALPS_FULL_TRUE@	$(am__objects_9) $(am__objects_10)
+@ALPS_FULL_TRUE@am__objects_11 = $(am__objects_8) $(am__objects_9) \
+@ALPS_FULL_TRUE@	$(am__objects_10)
 @BUILD_BOOST_TRUE@am__objects_12 = throw_exception.lo
 am_libalps_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6) $(am__objects_11) $(am__objects_12)
+	$(am__objects_6) $(am__objects_7) $(am__objects_11) \
+	$(am__objects_12)
 am__objects_13 = date_generators.lo greg_month.lo greg_weekday.lo \
 	gregorian_types.lo posix_time_types.lo
 am__objects_14 = cmdline.lo config_file.lo convert.lo \
@@ -709,8 +710,8 @@ src_boost_THREAD = \
 
 lib_LTLIBRARIES = libalps.la 
 libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) \
-	$(src_PARAMETER) $(src_PARSER) $(src_RANDOM) $(am__append_4) \
-	$(am__append_5)
+	$(src_PARAMETER) $(src_PARSER) $(src_RANDOM) $(src_ALEA) \
+	$(am__append_4) $(am__append_5)
 nodist_libalps_la_SOURCES = $(am__append_6) $(am__append_7) \
 	$(am__append_8) $(am__append_9) $(am__append_10) \
 	$(am__append_11) $(am__append_12)

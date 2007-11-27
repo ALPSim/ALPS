@@ -270,11 +270,11 @@ src_boost_THREAD = \
 
 lib_LTLIBRARIES = libalps.la 
 
-libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARAMETER) $(src_PARSER) $(src_RANDOM)
+libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARAMETER) $(src_PARSER) $(src_RANDOM) $(src_ALEA)
 nodist_libalps_la_SOURCES =
 
 if ALPS_FULL
-libalps_la_SOURCES += $(src_ALEA) $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
+libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
 endif
 
 if BUILD_BOOST

@@ -36,7 +36,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@ALPS_FULL_TRUE@am__append_1 = $(headers_ALEA) $(headers_LATTICE) $(headers_MODEL) $(headers_PLOT) $(headers_SCHEDULER)
+@ALPS_FULL_TRUE@am__append_1 = $(headers_LATTICE) $(headers_MODEL) $(headers_PLOT) $(headers_SCHEDULER)
 @BOOST_1_33_TRUE@am__append_2 = $(headers_BOOST_PRE134)
 @BOOST_1_32_TRUE@am__append_3 = $(headers_BOOST_PRE134)
 subdir = src
@@ -483,8 +483,8 @@ headers_HEAP = heap/heapwrapper.h
 headers = $(headers_BOOST) $(headers_ALPS) $(headers_PARAMETER) \
 	$(headers_EXPRESSION) $(headers_FIXEDCAP) $(headers_OSIRIS) \
 	$(headers_PARSER) $(headers_RANDOM) $(headers_IETL) \
-	$(headers_HEAP) $(am__append_1) $(am__append_2) \
-	$(am__append_3)
+	$(headers_HEAP) $(headers_ALEA) $(am__append_1) \
+	$(am__append_2) $(am__append_3)
 noinst_HEADERS = $(headers)
 all: all-am
 

@@ -16,9 +16,9 @@ headers_SCHEDULER = alps/scheduler.h alps/scheduler/factory.h alps/scheduler/inf
 headers_IETL = ietl/bandlanczos.h ietl/complex.h ietl/config.h.in ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h ietl/interface/blas.h ietl/interface/blitz.h ietl/interface/mtl.h ietl/interface/ublas.h ietl/interface/valarray.h ietl/inverse.h ietl/iteration.h ietl/jacobi.h ietl/krylov_wrapper.h ietl/lanczos.h ietl/matrix.h ietl/power.h ietl/rayleigh.h ietl/tmatrix.h ietl/traits.h ietl/vectorspace.h
 headers_HEAP = heap/heapwrapper.h
 
-headers = $(headers_BOOST) $(headers_ALPS) $(headers_PARAMETER) $(headers_EXPRESSION) $(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) $(headers_RANDOM) $(headers_IETL) $(headers_HEAP)
+headers = $(headers_BOOST) $(headers_ALPS) $(headers_PARAMETER) $(headers_EXPRESSION) $(headers_FIXEDCAP) $(headers_OSIRIS) $(headers_PARSER) $(headers_RANDOM) $(headers_IETL) $(headers_HEAP) $(headers_ALEA) 
 if ALPS_FULL
-headers += $(headers_ALEA) $(headers_LATTICE) $(headers_MODEL) $(headers_PLOT) $(headers_SCHEDULER)
+headers += $(headers_LATTICE) $(headers_MODEL) $(headers_PLOT) $(headers_SCHEDULER)
 endif
 if BOOST_1_33
 headers += $(headers_BOOST_PRE134)

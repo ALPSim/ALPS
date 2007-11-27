@@ -309,7 +309,7 @@ AC_ARG_WITH(boost-wchar,
 boost_dir_s=
 
 for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
-  for b in boost boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
+  for b in boost boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
     if test -f "$d/$b/boost/config.hpp"; then
       if test -f "$d/$b/libs/filesystem/src/exception.cpp"; then
         boost_dir_s="$d/$b"
@@ -611,10 +611,8 @@ test "$ac_cv_have_pthread" = yes && AC_DEFINE(ALPS_HAVE_PTHREAD, [], [pthread])
 # check for HDF5
 #
 
-if test "$ac_cv_alps_type" = "full"; then
-  AC_HDF5
-  test "$ac_cv_have_hdf5" = yes && AC_DEFINE(ALPS_HAVE_HDF5, [], [hdf5])
-fi
+AC_HDF5
+test "$ac_cv_have_hdf5" = yes && AC_DEFINE(ALPS_HAVE_HDF5, [], [hdf5])
 
 dnl
 dnl check for LAPACK
@@ -894,11 +892,10 @@ AC_CONFIG_FILES(Makefile config/config.site config/include.mk)
 AC_CONFIG_FILES(src/Makefile)
 AC_CONFIG_FILES(lib/Makefile lib/alps/Makefile lib/comm-sgl/Makefile lib/comm-mpi/Makefile lib/heap/Makefile)
 
-AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile)
+AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile test/alea/Makefile)
 AC_CONFIG_FILES(doc/Makefile)
 
 if test "$ac_cv_alps_type" = "full"; then
-  AC_CONFIG_FILES(test/alea/Makefile)
   AC_CONFIG_FILES(test/lattice/Makefile test/lattice/parameters  test/lattice/parameters_complex)
   AC_CONFIG_FILES(test/model/Makefile)
   AC_CONFIG_FILES(example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric)

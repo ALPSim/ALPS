@@ -52,7 +52,7 @@ release snapshot :
 	mv $(distdir) $(distdir_light)
 	cd $(distdir_light); \
 	  rm -f CITATIONS.txt LICENSE.txt README config/preamble.in; \
-	  rm -rf src/alps/alea* src/alps/lattice* src/alps/model* src/alps/plot* src/alps/scheduler* lib/xml tool example test/alea test/lattice test/model test/plot doc/alea doc/index.html doc/lattice doc/model doc/scheduler doc/tool; \
+	  rm -rf src/alps/lattice* src/alps/model* src/alps/plot* src/alps/scheduler* lib/xml tool example test/lattice test/model test/plot doc/index.html doc/lattice doc/model doc/scheduler doc/tool; \
 	  find . -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./config/update_preamble -l > /dev/null; \
 	  find . -name '*\.txt' -or -name '*\.html' | xargs chmod 644
 	if test "$@" = "snapshot"; then \

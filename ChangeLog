@@ -1,3 +1,7 @@
+2007-11-26  Synge Todo <wistaria@comp-phys.org>
+
+	* [light] Added alea library to ALPS light.
+	
 2007-11-14  Synge Todo <wistaria@comp-phys.org>
 
 	* [tool/archive] Supported nested for-each tags (contributed by
