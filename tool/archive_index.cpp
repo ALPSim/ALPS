@@ -40,11 +40,11 @@
 
 #include "archive_node.hpp"
 #include "archive_xml.hpp"
-        
+
 #ifdef USEPATTERN
         #include <stdexcept>
         #include <stack>
-        
+
         void Index::install(fs::path inPatternFile) {
                 mDB("COMMIT;", true);
                 mDB("CREATE TABLE pattern (name TEXT PRIMARY KEY, type TEXT, value TEXT);", true);
@@ -67,7 +67,7 @@
                 }
                 std::cout << "Patterns read" << std::endl;
         }
-        
+
         bool Index::patternFilter(std::string type, std::string name) {
                 return (mDB(std::string("SELECT * FROM pattern WHERE type='") + type + "' AND value='" + mDB.quote(name) +"';", true).empty() == false);
         }
@@ -76,13 +76,13 @@
         #include <stdexcept>
         #include <stack>
         #include <ctime>
-        
+
         void Index::install() {
                 mDB("COMMIT;", true);
                 cretateTables();
                 mDB("BEGIN;", true);
         }
-        
+
         bool Index::patternFilter(std::string, std::string) {
                 return true;
         }
@@ -105,7 +105,7 @@ void Index::list(bool inFullList) {
                 std::cout << std::setw(7) << "Total" << " Parameters {Values(Occurrence)*}" << std::endl;
                 for (std::list<std::map<std::string, std::string> >::iterator it = rs.begin(); it != rs.end(); it++) {
                         std::cout << std::setw(7) << (*it)["count"] << " " << mDB.unQuote((*it)["name"]) << " {";
-                        std::list<std::map<std::string, std::string> > subRS = mDB("SELECT value, count(value) AS count FROM parameter WHERE name='" 
+                        std::list<std::map<std::string, std::string> > subRS = mDB("SELECT value, count(value) AS count FROM parameter WHERE name='"
                                 + (*it)["name"] + "' GROUP BY value ORDER BY value", true);
                         unsigned int count = 0;
                         for (std::list<std::map<std::string, std::string> >::iterator subIT = subRS.begin(); subIT != subRS.end(); subIT++, count ++) {
@@ -126,7 +126,7 @@ void Index::list(bool inFullList) {
         else {
                 std::cout << std::endl << "Measurements" << std::endl;
                 for (std::list<std::map<std::string, std::string> >::iterator it = rs.begin(); it != rs.end(); it++)
-                        std::cout << std::setw(6) << (*it)["count"] << " " << mDB.unQuote((*it)["name"]) << std::endl; 
+                        std::cout << std::setw(6) << (*it)["count"] << " " << mDB.unQuote((*it)["name"]) << std::endl;
         }
 }
 
@@ -145,7 +145,7 @@ void Index::exec(fs::path xmlPath) {
                 dirs.pop();
                 if (fs::is_directory(path)) {
                         #ifdef DEBUG
-                                if (mVerbose) 
+                                if (mVerbose)
                                         std::cout << "Directory scannd : " << path.string() << std::endl;
                         #endif
                         fs::directory_iterator endIt;
@@ -184,7 +184,7 @@ void Index::exec(fs::path xmlPath) {
                                 mDB(std::string("INSERT INTO measurement (fID, indexvalue, name, count, mean, error, variance, autocorr) ")
                                     + "VALUES ('" + fID + "', '', '"
                                     + mDB.quote(it->getAttribute("name")) + "', '"
-                                    + mDB.quote(it->getElement("count").string()) + "', '" 
+                                    + mDB.quote(it->getElement("count").string()) + "', '"
                                     + mDB.quote(it->getElement("mean").string()) + "', '"
                                     + mDB.quote(it->getElement("error").string()) + "', '"
                                     + mDB.quote(it->getElement("variance").string()) + "', '"
@@ -207,7 +207,7 @@ void Index::exec(fs::path xmlPath) {
                               if (patternFilter("measurement", vIt->getAttribute("name"))) {
                                 std::list<Node> entry = vIt->nodeTest("entry");
                                 for (std::list<Node>::iterator it = entry.begin(); it != entry.end(); it++) {
-                                  int count = boost::lexical_cast<int>(it->getElement("count").string());
+                                  uint64_t count = boost::lexical_cast<uint64_t>(it->getElement("count").string());
                                   double value = boost::lexical_cast<double>(it->getElement("value").string());
                                   double mean = value / count;
                                   double error = std::sqrt(value) / count;
@@ -232,6 +232,6 @@ void Index::exec(fs::path xmlPath) {
                 } else if (mVerbose)
                         std::cout << "File " << path.string() << " already indexed" << std::endl;
         }
-        if (mVerbose) 
+        if (mVerbose)
                 std::cout << fileCnt << " files scanned in " << std::setiosflags(std::ios_base::fixed) << std::setprecision (2) << std::difftime(std::clock(), fulltime) / 1000000 << "s" << std::endl;
 }
