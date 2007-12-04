@@ -153,7 +153,7 @@ class SimpleDCATransformer : public DCATransformer
 {
 public:
   SimpleDCATransformer(const alps::Parameters& params) :
-    DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])) {}
+    DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])), tprime_(params.defined("t'")?boost::lexical_cast<double>(params["t'"]):0) {}
   
   matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
 					matsubara_green_function_t &G0_omega, 
@@ -174,14 +174,18 @@ private:
   green_function<T> transform_coordinates(const green_function<T>& G) const;
   
   double epsilon(const vector_type k) const
-  {
+  {  //cosine dispersion (nearest nbr hopping) for all dimensions. t' only valid/reasonable in two dimensions for nn hopping.
     double eps = 0;
     for (uint i=0; i<dimension(); ++i) 
       eps -= 2*t_*cos (k[i]);
+    if(tprime_!=0){
+      assert(dimension()==2);
+      eps -= 4*tprime_*cos(k[0])*cos(k[1]);
+    }
     return eps; 
   }
   
-  const double t_;
+  const double t_, tprime_;
   struct Forward;
   struct Backward;
   

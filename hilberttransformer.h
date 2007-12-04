@@ -128,6 +128,7 @@ public:
       double beta = static_cast<double>(parms["BETA"]);
       double mu = static_cast<double>(parms["MU"]);
       double h = static_cast<double>(parms["H"]);
+      if(h!=0) {std::cerr<<"we don't yet handle magnetic fields!"<<std::endl; abort(); }
       double h_init = parms.value_or_default("H_INIT", 0.);
       double tsq=t_*t_;
       matsubara_green_function_t G0_omega(n_matsubara,n_flavor);  
@@ -354,7 +355,7 @@ public:
 					const double mu, const double h, const double beta, const bool paramagnet)
   {
     assert(G_omega.nsite()==1);
-    assert(h==0);
+    if(h!=0){std::cerr<<" we don't yet handle magnetic fields!"<<std::endl; abort(); }
     if(paramagnet && G_omega.nflavor()==1){ 
       for(uint i=0;i<G_omega.nfreq();++i) {
 	G_omega(i,0)=std::complex<double>(0, G_omega(i,0).imag());

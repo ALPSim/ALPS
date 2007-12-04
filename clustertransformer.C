@@ -106,9 +106,15 @@ matsubara_green_function_t SimpleDCATransformer::operator()(matsubara_green_func
 
 matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Parameters& parms)
 {
-  if (parms.defined("G0OMEGA_INPUT")) 
-    return ClusterTransformer::initial_G0(parms);
-  else {
+  if (parms.defined("G0OMEGA_INPUT")){
+    std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
+    if(in_file.good()){
+      return ClusterTransformer::initial_G0(parms);
+    }
+    else
+      std::cerr<<"WARNING: Input file could not be found, proceeding with free solution."<<std::endl;
+  }
+  { //proceed with computation of new G0 if we can't find input G0
     std::cout<<"calculating initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_tau=boost::lexical_cast<int>(parms["N"]);
