@@ -58,8 +58,8 @@ public:
   /// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
   /// @return the result of the Hilbert transform (G0_tau)
   virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier_ignored, 
-					    double mu, double h, double beta, bool paramagnet)=0; 
-
+                                            double mu, double h, double beta, bool paramagnet)=0; 
+  
   virtual itime_green_function_t initial_G0(const alps::Parameters& parms) {
     std::cout<<"reading initial G0_tau"<<std::endl;
     int n_tau=boost::lexical_cast<int>(parms["N"]);
@@ -68,7 +68,7 @@ public:
     G0_tau.read(parms["G0TAU_INPUT"].c_str());
     return G0_tau;
   }
-      
+  
   virtual ~HilbertTransformer() {}
 };
 
@@ -83,7 +83,7 @@ public:
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
   itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier, 
-				    double mu, double h, double beta, bool paramagnet)
+                                    double mu, double h, double beta, bool paramagnet)
   {
     if(h!=0) std::cerr<<"ignoring magnetic field!"<<std::endl;
     double tsq=t_*t_;
@@ -93,10 +93,10 @@ public:
     if (paramagnet) {
       assert(G_tau.nflavor()%2==0);
       for(spin_t flavor=0;flavor<G_tau.nflavor(); flavor+=2){
-	for(itime_index_t tau=0;tau<G_tau.ntime();++tau){
-	  G_tau(tau, flavor  )=0.5*(G_tau(tau, flavor)+G_tau(tau, flavor+1));
-	  G_tau(tau, flavor+1)=G_tau(tau, flavor);
-	}
+        for(itime_index_t tau=0;tau<G_tau.ntime();++tau){
+          G_tau(tau, flavor  )=0.5*(G_tau(tau, flavor)+G_tau(tau, flavor+1));
+          G_tau(tau, flavor+1)=G_tau(tau, flavor);
+        }
       }
     }
     fourier.forward_ft(G_tau, G_omega);
@@ -105,7 +105,7 @@ public:
     for(uint i=0; i<G_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
       for(spin_t flavor=0;flavor<G_omega.nflavor(); flavor++){
-	G0_omega(i, flavor) = 1./(iw + mu - tsq*G_omega(i, flavor%2==0?flavor+1:flavor-1));
+        G0_omega(i, flavor) = 1./(iw + mu - tsq*G_omega(i, flavor%2==0?flavor+1:flavor-1));
       }
     }
     std::cout<<"symmetrized G0 omega real: "<<std::endl;
@@ -113,7 +113,7 @@ public:
     fourier.backward_ft(G0_tau, G0_omega);
     return G0_tau;
   }
-
+  
   itime_green_function_t initial_G0(const alps::Parameters& parms) 
   {
     if (parms.defined("G0TAU_INPUT"))
@@ -134,18 +134,18 @@ public:
       matsubara_green_function_t G0_omega(n_matsubara,n_flavor);  
       itime_green_function_t G0_tau(n_time, n_flavor);
       for(uint i=0; i<G0_omega.nfreq(); i++) {
-	std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-	for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
-	  std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init : h_init);
-	  G0_omega(i, flavor) = (zeta - sqrt(zeta*zeta-4*tsq))/(2*tsq);
-	}
+        std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+        for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
+          std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init : h_init);
+          G0_omega(i, flavor) = (zeta - sqrt(zeta*zeta-4*tsq))/(2*tsq);
+        }
       }
       G0_tau.write("G0_tau_input");
       G0_omega.write("G0_omega_input");
       return G0_tau;
     }
   }
-
+  
 private:
   double t_; 
 };
@@ -210,9 +210,9 @@ public:
   /// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
   /// @return the result of the Hilbert transform: the bare Green's function G0 in Matsubara frequencies
   virtual matsubara_green_function_t operator()(matsubara_green_function_t & G_omega, 
-						matsubara_green_function_t &G0_omega, 
-						const double mu, const double h, 
-						const double beta,const bool paramagnet)=0; 
+                                                matsubara_green_function_t &G0_omega, 
+                                                const double mu, const double h, 
+                                                const double beta,const bool paramagnet)=0; 
   virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms) {
     std::cout<<"reading initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
@@ -221,7 +221,7 @@ public:
     G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
     return G0_omega;
   }
-
+  
   virtual ~FrequencySpaceHilbertTransformer() {}
 };
 
@@ -235,8 +235,8 @@ public:
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
   virtual matsubara_green_function_t operator()(matsubara_green_function_t& G_omega, 
-					matsubara_green_function_t &G0_omega_ignored, 
-					const double mu, const double h, const double beta, const bool paramagnet)
+                                                matsubara_green_function_t &G0_omega_ignored, 
+                                                const double mu, const double h, const double beta, const bool paramagnet)
   {
     std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" paramagnet: "<<paramagnet<<std::endl;
     double tsq=t_*t_;
@@ -244,33 +244,33 @@ public:
     //formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
     if (paramagnet) {
       if(G_omega.nflavor()>1 && G_omega.nflavor()%2==0){
-	for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
-	  for(uint i=0;i<G_omega.nfreq();++i){
-	    G_omega(i,flavor  )= 0.5*(G_omega(i,flavor)+G_omega(i,flavor+1));
-	    G_omega(i,flavor+1)=G_omega(i,flavor);
-	  }
-	}
+        for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
+          for(uint i=0;i<G_omega.nfreq();++i){
+            G_omega(i,flavor  )= 0.5*(G_omega(i,flavor)+G_omega(i,flavor+1));
+            G_omega(i,flavor+1)=G_omega(i,flavor);
+          }
+        }
       }
     }
     if(G_omega.nflavor()==1){ //special case. Paramagnet built in.
       for(uint i=0; i<G_omega.ntime(); i++) {
-	std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-	G0_omega(i,0) =1./(iw + mu - tsq*G_omega(i,0));
+        std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+        G0_omega(i,0) =1./(iw + mu - tsq*G_omega(i,0));
       }
     }
     else{
       assert(G_omega.nflavor()%2==0);
       for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
-	for(uint i=0; i<G_omega.nfreq(); i++) {
-	  std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-	  G0_omega(i,flavor  ) =1./(iw + mu - tsq*G_omega(i,flavor+1)); 
-	  G0_omega(i,flavor+1) =1./(iw + mu - tsq*G_omega(i,flavor  )); 
-	}
+        for(uint i=0; i<G_omega.nfreq(); i++) {
+          std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+          G0_omega(i,flavor  ) =1./(iw + mu - tsq*G_omega(i,flavor+1)); 
+          G0_omega(i,flavor+1) =1./(iw + mu - tsq*G_omega(i,flavor  )); 
+        }
       }
     }
     return G0_omega;
   }
-
+  
   matsubara_green_function_t initial_G0(const alps::Parameters& parms)
   {
     if (parms.defined("G0OMEGA_INPUT"))
@@ -287,14 +287,14 @@ public:
       double tsq=t_*t_;
       matsubara_green_function_t G0_omega(n_matsubara,n_flavor);
       for(uint i=0; i<G0_omega.nfreq(); i++) {
-	std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-	for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
-	  std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init-h : h_init-h);
-	  std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
-	  tmp *= tmp.imag()<0 ? -1 : 1;
-	  G0_omega(i, flavor) = (zeta - tmp)/(2*tsq);
-	  //std::cout << zeta << " " << sqrt(zeta*zeta) << std::endl;
-	}
+        std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+        for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
+          std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init-h : h_init-h);
+          std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
+          tmp *= tmp.imag()<0 ? -1 : 1;
+          G0_omega(i, flavor) = (zeta - tmp)/(2*tsq);
+          //std::cout << zeta << " " << sqrt(zeta*zeta) << std::endl;
+        }
       }
       G0_omega.write("G0_omega_input");
       boost::shared_ptr<FourierTransformer> fourier_ptr;
@@ -305,7 +305,7 @@ public:
       return G0_omega;
     }
   }
-
+  
 private:
   double t_; 
 };
@@ -318,8 +318,8 @@ public:
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// via summation in k-space. The k-points are defined in the Hamiltonian.
   virtual matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
-					matsubara_green_function_t &G0_omega, 
-					const double mu, const double h, const double beta, const bool paramagnet);
+                                                matsubara_green_function_t &G0_omega, 
+                                                const double mu, const double h, const double beta, const bool paramagnet);
 };
 
 
@@ -351,20 +351,20 @@ public:
   /// using integration over D(epsilon).
   /// We perform the HT G <- \int \frac{D(e)}{A - e} de
   virtual matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
-					matsubara_green_function_t &G0_omega, 
-					const double mu, const double h, const double beta, const bool paramagnet)
+                                                matsubara_green_function_t &G0_omega, 
+                                                const double mu, const double h, const double beta, const bool paramagnet)
   {
     assert(G_omega.nsite()==1);
     if(h!=0){std::cerr<<" we don't yet handle magnetic fields!"<<std::endl; abort(); }
     if(paramagnet && G_omega.nflavor()==1){ 
       for(uint i=0;i<G_omega.nfreq();++i) {
-	G_omega(i,0)=std::complex<double>(0, G_omega(i,0).imag());
+        G_omega(i,0)=std::complex<double>(0, G_omega(i,0).imag());
       }
     }
     if(paramagnet && G_omega.nflavor()==2){ 
       for(uint i=0;i<G_omega.nfreq();++i){ 
-	G_omega(i,0)=0.5*(G_omega(i,0)+G_omega(i,1)); 
-	G_omega(i,1)=G_omega(i,0);
+        G_omega(i,0)=0.5*(G_omega(i,0)+G_omega(i,1)); 
+        G_omega(i,1)=G_omega(i,0);
       }
     }
     //matsubara_green_function_t G0_omega(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
@@ -373,28 +373,28 @@ public:
     matsubara_green_function_t sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
     for(spin_t f=0;f<G_omega.nflavor();++f){
       for(frequency_t w=0;w<G_omega.nfreq();++w){
-	std::complex<double> g=0;
-	sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); //self energy
-	std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu -sigma(w, f);
-	for(uint n=0;n<dos.size()-1;++n){
-	  double delta_epsilon = epsilon[n]-epsilon[n+1];
-	  double delta_dos     = dos[n]    -dos    [n+1];
-	  //perform analytic integration of D(e)/(A-e) for D known at points
-	  //e0, e1 at the end of the interval.
-	  g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])
-				 *(log(A-epsilon[n]) - log(A-epsilon[n+1])));
-	}
-	G_omega_new(w, f)=g;
+        std::complex<double> g=0;
+        sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); //self energy
+        std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu -sigma(w, f);
+        for(uint n=0;n<dos.size()-1;++n){
+          double delta_epsilon = epsilon[n]-epsilon[n+1];
+          double delta_dos     = dos[n]    -dos    [n+1];
+          //perform analytic integration of D(e)/(A-e) for D known at points
+          //e0, e1 at the end of the interval.
+          g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])
+                                 *(log(A-epsilon[n]) - log(A-epsilon[n+1])));
+        }
+        G_omega_new(w, f)=g;
       }
     }
     for(spin_t f=0;f<G_omega.nflavor();++f){
       for(frequency_t w=0;w<G_omega.nfreq();++w){
-	G0_omega_new(w,f)=1./(sigma(w,f)+1./G_omega_new(w,f));
+        G0_omega_new(w,f)=1./(sigma(w,f)+1./G_omega_new(w,f));
       }
     }
     return G0_omega_new;
   }
-
+  
 private:
   std::vector<double> epsilon;
   std::vector<double> dos;
