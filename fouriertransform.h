@@ -119,6 +119,7 @@ public:
 			   const green_function<alps::RealObsevaluator> &G_omega_imag) const;
   static void generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift=0);
   static void generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr);
+  void setmu(double mu){ mu_=mu;}
 protected:
   double beta_;
   double mu_;
