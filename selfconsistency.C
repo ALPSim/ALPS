@@ -36,13 +36,13 @@
 #include "fouriertransform.h"
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
-/// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
-///
-/// @param parms contains the ALPS parameters needed for the simulation.
-/// @param solver is the impurity solver (e.g. Hirsch Fye) that creates G out of G0.
-/// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates G0 out of G
-/// @param G0 is the bare Green's function in imaginary time. It has to be provided as an initial guess
-/// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
+                                 /// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
+                                 ///
+                                 /// @param parms contains the ALPS parameters needed for the simulation.
+                                 /// @param solver is the impurity solver (e.g. Hirsch Fye) that creates G out of G0.
+                                 /// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates G0 out of G
+                                 /// @param G0 is the bare Green's function in imaginary time. It has to be provided as an initial guess
+                                 /// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, FourierTransformer &fourier, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
 {
   int N = static_cast<int>(parms["N"]);
@@ -53,7 +53,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
- 
+  
   itime_green_function_t G0_tau_old(G0_tau);
   int iteration_ctr=0;
   double max_diff;	
@@ -68,12 +68,12 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     max_diff=0;
     for(int f=0; f<flavors;++f){
       for(int i=0; i<N; i++) {
-	  if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
-	    max_diff = fabs(G0_tau(i,f)-G0_tau_old(i,f));
-	}
+        if (fabs(G0_tau(i,f)-G0_tau_old(i,f)) > max_diff)
+          max_diff = fabs(G0_tau(i,f)-G0_tau_old(i,f));
+      }
     }	
-  std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
-  print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
+    std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
+    print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged  && iteration_ctr < max_it);
   std::cout<<"converged!"<<std::endl;
 }
@@ -87,7 +87,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
   double h = parms.value_or_default("H", 0);;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-
+  
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
   int iteration_ctr=0;
@@ -96,7 +96,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
     std::cout<<"running solver"<<std::endl;
     G_tau_old=G_tau;
     G_tau= solver.solve(G_tau, parms); //the Werner solver WANTS a G_tau as an input. It then makes an F function out of it.
-    //symmetrize
+                                       //symmetrize
     if(paramagnet){
       for(uint f=0;f<G_tau.nflavor();f+=2){
         for(uint i=0;i<G_tau.ntime();++i){
@@ -109,9 +109,9 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
     max_diff=0;
     for(int f=0; f<flavors;++f){
       for(int i=0; i<N; i++) {
-          if (fabs(G_tau(i,f)-G_tau_old(i,f)) > max_diff)
-            max_diff = fabs(G_tau(i,f)-G_tau_old(i,f));
-        }
+        if (fabs(G_tau(i,f)-G_tau_old(i,f)) > max_diff)
+          max_diff = fabs(G_tau(i,f)-G_tau_old(i,f));
+      }
     }
     std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
     print_dressed_tau_green_functions(iteration_ctr++, G_tau, beta);
@@ -120,7 +120,57 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
   std::cout<<"converged!"<<std::endl;
 }
 
+double adjust_filling(const alps::Parameters &parms, double current_filling){
+  
+  //static double filling_lower=-std::numeric_limits<double>::infinity(), filling_upper=std::numeric_limits<double>::infinity();
+  static double mu_lower=parms.value_or_default("MU_LOWER_BOUND",-std::numeric_limits<double>::infinity());
+  static double mu_upper=parms.value_or_default("MU_UPPER_BOUND",std::numeric_limits<double>::infinity());
+  static double target_filling=static_cast<double>(parms["FILLING"]);
+  static double filling_tolerance=parms.value_or_default("FILLING_TOLERANCE", 0.002);
+  static double filling_step=parms.value_or_default("FILLING_STEP", static_cast<double>(parms["t"]));
+  static double mu_old=std::numeric_limits<double>::infinity();
+  static double filling_old=std::numeric_limits<double>::infinity();
+  static bool keep_adjusting=true;
+  double mu = static_cast<double>(parms["MU"]);
+  double mu_target;
 
+  if(keep_adjusting==false){
+    std::cout<<"chem. potential fixed at "<<mu<<" current filling is: "<<current_filling<<"no longer adjusting."<<std::endl;
+    return mu;
+  }
+  std::cout<<"current filling is: "<<current_filling<<" current mu: "<<mu<<std::endl;
+  std::cout<<"old filling is: "<<filling_old<<" old mu: "<<mu_old<<std::endl;
+  std::cout<<"lower: "<<mu_lower<<std::endl;
+  std::cout<<"upper: "<<mu_upper<<std::endl;
+  
+  if (std::abs(current_filling-target_filling) > filling_tolerance){
+    std::cout<<"need to adjust filling. difference is "<<std::abs(current_filling-target_filling)<<std::endl;
+    if(filling_old==std::numeric_limits<double>::infinity()){ //first time we run this
+      filling_old=current_filling;
+      if(current_filling>target_filling){
+        mu_target=(mu==mu_upper?mu_upper+0.001:mu_upper);
+      }else{
+        mu_target=(mu==mu_lower?mu_lower+0.001:mu_lower);
+      }
+      mu_old=mu;
+    }else{ //we have a valid mu_old, mu, filling_old and current filling
+      mu_target=(mu_old-mu)*(target_filling-current_filling)/(filling_old-current_filling)+mu;
+      if(mu_target<mu_lower){
+        mu_target=(mu==mu_lower?mu_lower+0.001:mu_lower);
+      }else if(mu_target>mu_upper){
+        mu_target=(mu==mu_upper?mu_upper+0.001:mu_upper);
+      }
+      filling_old=current_filling;
+      mu_old=mu;
+    }
+    mu=mu_target;
+    std::cout<<"using new mu: "<<mu<<std::endl;
+    std::stringstream mustring; mustring<<mu;
+    (const_cast<alps::Parameters*>(&parms))->operator[]("MU")=mustring.str();
+  }else
+    keep_adjusting=false;
+  return mu;
+}
 
 /// @brief Run the self consistency loop for G and G0 mainly in Matsubara frequency space. Perform Fourier transformations where needed.
 ///
@@ -131,8 +181,8 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
 /// @param G_omega is the dressed Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 
 void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
-				FrequencySpaceHilbertTransformer& hilbert, FourierTransformer &fourier,
-				matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
+                                FrequencySpaceHilbertTransformer& hilbert, FourierTransformer &fourier,
+                                matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
 {
   uint n_tau=boost::lexical_cast<uint>(parms["N"]);
   uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
@@ -158,6 +208,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   }
   //define multiple vectors
   matsubara_green_function_t G_old_omega(G0_omega);
+  matsubara_green_function_t G_omega_shifted(G0_omega);
   matsubara_green_function_t G0_old_omega(G0_omega);
   itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
   itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
@@ -174,24 +225,45 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     G0_old_tau = G0_tau;
     
     fourier.backward_ft(G0_tau, G0_omega);
+    fourier.setmu(mu);
     
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
+    G_omega_shifted=G_omega;
+    if(parms.defined("FILLING")){ //adjust chemical potential
+      double current_filling=0;
+      for(int i=0;i<n_site;++i){
+        for(int j=0;j<n_orbital;++j){
+          current_filling-=G_tau(n_tau,i,i,j)/(n_site); //G is negative...
+        }
+      }
+      double mu_old=mu;
+      mu=adjust_filling(parms, current_filling);
+      for(uint i=0;i<n_site;++i){
+        for(uint j=0;j<n_site;++j){
+          for(uint orbital=0;orbital<n_orbital;++orbital){
+            for(uint k=0;k<n_matsubara;++k){
+              G_omega_shifted(k,i,j,orbital)=1./(1./G_omega(k,i,j,orbital)-mu_old+mu); //shift the GF to get filling right.
+            }
+          }
+        }
+      }
+    }
     std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
-    G0_omega = hilbert(G_omega, G0_omega, mu, h, beta, paramagnet);
+    G0_omega = hilbert(G_omega_shifted, G0_omega, mu, h, beta, paramagnet);
     
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
       for(uint orbital=0;orbital<n_orbital;++orbital){
-	for(uint site1=0;site1<n_site;++site1){
-	  for(uint site2=0;site2<n_site;++site2){
-	    for(uint i=0;i<n_matsubara;++i){
-	      G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
-		(1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
-	    }
-	  }
-	}
+        for(uint site1=0;site1<n_site;++site1){
+          for(uint site2=0;site2<n_site;++site2){
+            for(uint i=0;i<n_matsubara;++i){
+              G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
+              (1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
+            }
+          }
+        }
       }
     }
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
@@ -199,17 +271,17 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     if(iteration_ctr>1){
       //comparison for the dressed Green's function in Matsubara freq.
       for(uint w=0; w<n_matsubara; w++) {
-	for(uint i1=0; i1<n_site; i1++) {
-	  for(uint i2=0; i2<n_site; i2++) {
-	    for(uint o=0; o<n_orbital; o++) {
-	      if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
-		max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
-	    }
-	  }
-	}
+        for(uint i1=0; i1<n_site; i1++) {
+          for(uint i2=0; i2<n_site; i2++) {
+            for(uint o=0; o<n_orbital; o++) {
+              if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
+                max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
+            }
+          }
+        }
       }
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
-	       <<max_diff<<"\tconverged: "<<converged<<std::endl;
+      <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
     print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
@@ -218,8 +290,8 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
 
 
 void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
-			      DCATransformer& clustertrans, FourierTransformer &fourier,
-			      matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
+                              DCATransformer& clustertrans, FourierTransformer &fourier,
+                              matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
 {
   uint n_tau=boost::lexical_cast<uint>(parms["N"]);
   uint n_matsubara=boost::lexical_cast<uint>(parms["NMATSUBARA"]);
@@ -244,6 +316,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     result_in_omega=false;
   }
   matsubara_green_function_t G_old_omega(G0_omega);
+  matsubara_green_function_t G_omega_shifted(G0_omega);
   matsubara_green_function_t G0_old_omega(G0_omega);
   itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
   itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
@@ -265,20 +338,43 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     std::cout<<"applying point group symmetries"<<std::endl<<std::flush;    
     G_omega = clustertrans.symmetrize_k_space(G_omega);
     G_tau = clustertrans.symmetrize_k_space(G_tau);
+
+    G_omega_shifted=G_omega;
+    if(parms.defined("FILLING")){ //adjust chemical potential
+      double current_filling=0;
+      for(int i=0;i<n_site;++i){
+        for(int j=0;j<n_orbital;++j){
+          current_filling-=G_tau(n_tau,i,i,j)/(n_site); //G is negative...
+        }
+      }
+      double mu_old=mu;
+      mu=adjust_filling(parms, current_filling);
+      for(uint i=0;i<n_site;++i){
+        for(uint j=0;j<n_site;++j){
+          for(uint orbital=0;orbital<n_orbital;++orbital){
+            for(uint k=0;k<n_matsubara;++k){
+              G_omega_shifted(k,i,j,orbital)=1./(1./G_omega(k,i,j,orbital)-mu_old+mu); //shift the GF to get filling right.
+            }
+          }
+        }
+      }
+    }
+
+
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
-    G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta, paramagnet);
+    G0_omega = clustertrans(G_omega_shifted, G0_omega, mu, h, beta, paramagnet);
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
       for(uint orbital=0;orbital<n_orbital;++orbital){
-	for(uint site1=0;site1<n_site;++site1){
-	  for(uint site2=0;site2<n_site;++site2){
-	    for(uint i=0;i<n_matsubara;++i){
-	      G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
-		(1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
-	    }
-	  }
-	}
+        for(uint site1=0;site1<n_site;++site1){
+          for(uint site2=0;site2<n_site;++site2){
+            for(uint i=0;i<n_matsubara;++i){
+              G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
+              (1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
+            }
+          }
+        }
       }
     }
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
@@ -286,17 +382,17 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     if(iteration_ctr>1){
       //comparison for the dressed Green's function in Matsubara freq.
       for(uint w=0; w<n_matsubara; w++) {
-	for(uint i1=0; i1<n_site; i1++) {
-	  for(uint i2=0; i2<n_site; i2++) {
-	    for(uint o=0; o<n_orbital; o++) {
-	      if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
-		max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
-	    }
-	  }
-	}
+        for(uint i1=0; i1<n_site; i1++) {
+          for(uint i2=0; i2<n_site; i2++) {
+            for(uint o=0; o<n_orbital; o++) {
+              if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
+                max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
+            }
+          }
+        }
       }
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
-	       <<max_diff<<"\tconverged: "<<converged<<std::endl;
+      <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
     matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
     matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
