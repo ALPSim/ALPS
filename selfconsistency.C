@@ -130,15 +130,21 @@ double adjust_filling(const alps::Parameters &parms, double current_filling){
   static double filling_step=parms.value_or_default("FILLING_STEP", static_cast<double>(parms["t"]));
   static double mu_old=std::numeric_limits<double>::infinity();
   static double filling_old=std::numeric_limits<double>::infinity();
-  static bool keep_adjusting=true;
+  if(parms.defined("OLD_MU")){
+    mu_old=parms["OLD_MU"];
+    filling_old=parms["OLD_FILLING"];
+  }
+  static bool keep_adjusting=parms.value_or_default("KEEP_ADJUSTING_MU",true);
   double mu = static_cast<double>(parms["MU"]);
   double mu_target;
 
   if(keep_adjusting==false){
-    std::cout<<"chem. potential fixed at "<<mu<<" current filling is: "<<current_filling<<"no longer adjusting."<<std::endl;
+    std::cout<<"chem. potential fixed at "<<mu<<" current filling is: "<<current_filling<<" no longer adjusting. "<<std::endl;
+    std::cout<<"using new mu: "<<mu_old<<std::endl;
     return mu;
   }
-  std::cout<<"current filling is: "<<current_filling<<" current mu: "<<mu<<std::endl;
+  std::cout<<"current filling is: "<<current_filling<<std::endl;
+  std::cout<<"current mu is: "<<mu<<std::endl;
   std::cout<<"old filling is: "<<filling_old<<" old mu: "<<mu_old<<std::endl;
   std::cout<<"lower: "<<mu_lower<<std::endl;
   std::cout<<"upper: "<<mu_upper<<std::endl;
@@ -377,6 +383,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
         }
       }
     }
+    G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
     if(iteration_ctr>1){
