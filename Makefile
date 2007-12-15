@@ -1,8 +1,11 @@
-include $(HOME)/code/alpslib/share/alps/include.mk
-CXXFLAGS += -DWERNER -DRUBTSOV
+include $(HOME)/ALPS/share/alps/include.mk
+CXXFLAGS += -g -DWERNER -DRUBTSOV
 SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C clustertransformer.C clusterhelper.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
-
+LDFLAGS+=-L/opt/intel/cc/10.1.006/lib
+LDFLAGS_MPI+=-L/opt/intel/cc/10.1.006/lib
+LIBS+=-lirc -limf -lguide
+LIBS_MPI+=-lirc -limf -lguide
 OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o auxiliaryfunctions.o alps_solver.o clustertransformer.o clusterhelper.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
@@ -10,7 +13,10 @@ RUBTSOV_DIR=../DMFT-solvers/Rubtsov
 WERNER_DIR=../DMFT-solvers/Werner
 OBJECTS_WERNER=$(WERNER_DIR)/impurity.o  $(WERNER_DIR)/fourpoint.o
 
-OBJECTS_RUBTSOV=$(RUBTSOV_DIR)/rubtsov.o $(RUBTSOV_DIR)/rubtsov_io.o $(RUBTSOV_DIR)/rubtsov_solver.o $(RUBTSOV_DIR)/rubtsov_auxiliary.o $(RUBTSOV_DIR)/rubtsov_splines.o $(RUBTSOV_DIR)/rubtsov_measurements.o $(RUBTSOV_DIR)/rubtsov_wang_landau.o $(RUBTSOV_DIR)/rubtsov_fastupdate.o $(RUBTSOV_DIR)/rubtsov_model.o $(RUBTSOV_DIR)/rubtsov_worm.o $(RUBTSOV_DIR)/rubtsov_fourpoint.o
+OBJECTS_RUBTSOV=$(RUBTSOV_DIR)/rubtsov.o $(RUBTSOV_DIR)/rubtsov_io.o $(RUBTSOV_DIR)/rubtsov_solver.o $(RUBTSOV_DIR)/rubtsov_auxiliary.o \
+$(RUBTSOV_DIR)/rubtsov_splines.o $(RUBTSOV_DIR)/rubtsov_measurements.o $(RUBTSOV_DIR)/rubtsov_wang_landau.o $(RUBTSOV_DIR)/rubtsov_fastupdate.o \
+$(RUBTSOV_DIR)/rubtsov_model.o $(RUBTSOV_DIR)/rubtsov_worm.o $(RUBTSOV_DIR)/rubtsov_fourpoint.o $(RUBTSOV_DIR)/rubtsov_observables.o\
+$(RUBTSOV_DIR)/rubtsov_selfenergy.o
 OBJECTS_SOLVERS=$(OBJECTS_RUBTSOV) $(OBJECTS_WERNER)
 
 all: dmft dmft_mpi hirschfye
