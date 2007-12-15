@@ -175,6 +175,10 @@ public:
         G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);*/
     }
   }
+  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
+			   const green_function<alps::RealObsevaluator> &G_omega_real,
+			   const green_function<alps::RealObsevaluator> &G_omega_imag) const{abort();} //not implemented.
+
   virtual ~FFunctionFourierTransformer(){}
 private:
   double t_;
