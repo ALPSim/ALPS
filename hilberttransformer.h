@@ -157,11 +157,14 @@ class SquarelatticeHilbertTransformer : public HilbertTransformer {
 public:
   /// the constructor accepts the bandwidth
   SquarelatticeHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-  virtual itime_green_function_t operator()(itime_green_function_t Sigma, double mu)
+  virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier_ignored,
+                                                    double mu, double h, double beta, bool paramagnet)
   {
     //to implement
-    std::cout<<Sigma;
     std::cout<<mu;
+    std::cout<<beta;
+    std::cout<<h;
+    std::cout<<paramagnet;
     return itime_green_function_t(0,0,0);
   }
 private:
@@ -180,11 +183,15 @@ public:
   ///          Note that issues such as units are still undecided and might require further 
   ///          additions to the interface
   GeneralHilbertTransformer(const vector_type& D) : D_(D) {}
-  virtual itime_green_function_t operator()(itime_green_function_t Sigma, double mu)
+  virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier_ignored,
+                                                  double mu, double h, double beta, bool paramagnet)
   {
     //to implement
-    std::cout<<Sigma;
+    //std::cout<<Sigma;
     std::cout<<mu;
+    std::cout<<beta;
+    std::cout<<h;
+    std::cout<<paramagnet;
     return itime_green_function_t(0,0,0);
   }
 private:
