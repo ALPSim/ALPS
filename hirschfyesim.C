@@ -159,8 +159,8 @@ sign(1)
   
   // create measurement objects
   measurements << RealObservable("Sign");
-  measurements << SignedObservable<vec_obs_t>("G_meas_up");
-  measurements << SignedObservable<vec_obs_t>("G_meas_down");  
+  measurements << SignedObservable<alps::SimpleRealVectorObservable>("G_meas_up");
+  measurements << SignedObservable<alps::SimpleRealVectorObservable>("G_meas_down");  
   measurements << SimpleRealVectorObservable("G_fourpoint_uu");  
   measurements << SimpleRealVectorObservable("G_fourpoint_dd");  
   measurements << SimpleRealVectorObservable("G_fourpoint_ud");  
@@ -239,9 +239,9 @@ void HirschFyeRun::dostep()
     }
   }
   if(is_thermalized()){
-    std::cout<<"thermalized!"<<std::endl;
-  	measurements.get<SignedObservable<vec_obs_t> >("G_meas_up") << (G_up*(double)sign);
-  	measurements.get<SignedObservable<vec_obs_t> >("G_meas_down") << (G_down*(double)sign);
+//    std::cout<<"thermalized!"<<std::endl;
+  	measurements.get<SignedObservable<alps::SimpleRealVectorObservable> >("G_meas_up") << (G_up*(double)sign);
+  	measurements.get<SignedObservable<alps::SimpleRealVectorObservable> >("G_meas_down") << (G_down*(double)sign);
     measurements.get<RealObservable>("Sign")<<sign;
     
   }
@@ -313,11 +313,11 @@ void HirschFyeRun::dostep()
   }
 #endif
   //only for equilibration measurement
-  if(is_thermalized() && sweeps % 10000 ==0){
-    static std::ofstream equ_file("equilibration.dat");
-    equ_file<<sweeps<<"\t"<<measurements.get<RealVectorObservable>("G_meas_up").mean()[0]<<"\t"<<measurements.get<RealVectorObservable>("G_meas_up").error()[0]<<std::endl;
+  //if(is_thermalized() && sweeps % 10000 ==0){
+    //static std::ofstream equ_file("equilibration.dat");
+    //equ_file<<sweeps<<"\t"<<measurements.get<RealVectorObservable>("G_meas_up").mean()[0]<<"\t"<<measurements.get<RealVectorObservable>("G_meas_up").error()[0]<<std::endl;
     //std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
-  }
+ // }
 	
   // check if precision has deteriorated
   //std::cout<<"N check: "<<N_check<<std::endl;
