@@ -32,6 +32,8 @@
 
 #include "hirschfyesim.h"
 #include "xml.h"
+#include "cluster.h"
+#include "fouriertransform.h"
 #include <alps/alea.h>
 #include <cmath>
 #ifdef FOURPOINT
@@ -42,19 +44,19 @@ using namespace alps;
 
 /// compute largest element of a matrix
 double norm_max(dense_matrix & m) {
-
+  
   double max(0);
   for (dense_matrix::const_iterator1 it = m.begin1(); it != m.end1(); ++it)
     if (std::fabs((*it)) > max)
-	  max = std::fabs((*it));
-	  
+      max = std::fabs((*it));
+  
   return max;
-
+  
 }
 
 /// compute Green's function for given spin configuration from Green0
 void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l) {
-
+  
   int N(spins.size());
   std::vector<double> e_ls(N);
   for(int i=0;i<N;++i){
@@ -64,9 +66,9 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
   dense_matrix a(N, N);
   for (int i=0; i<N; i++) {
     for (int j=0; j<N; j++) {
-	  a(i,j) = -Green0(i,j)*(e_ls[j]-1);
-	}
-	a(i,i) += e_ls[i]; 
+      a(i,j) = -Green0(i,j)*(e_ls[j]-1);
+    }
+    a(i,i) += e_ls[i]; 
   }
   // solve a*Green=Green0
   // gesv solves A*X=B, input for B is Green0, output (=solution X) is Green   
@@ -78,100 +80,119 @@ void update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<i
 
 
 HirschFyeRun::HirschFyeRun(const alps::ProcessList& where,const alps::Parameters& p,int node)
-  : alps::scheduler::MCRun(where,p,node),  
-    sweeps(0),
-    thermalization_sweeps(static_cast<int>(parms["THERMALIZATION"])),
-    total_sweeps(static_cast<int>(parms["SWEEPS"])),
-    beta(static_cast<double>(parms["BETA"])),
-    N(static_cast<int>(parms["N"])),	
-    u(static_cast<double>(parms["U"])),
-	N_check(1000), // value is automatically adjusted during the simulation
-	check_counter(0),
-	tolerance(static_cast<double>(parms["TOLERANCE"])),	
-	G_up(static_cast<int>(parms["N"])),
-	Green0_up(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),
-	Green_up(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),
-	G_down(static_cast<int>(parms["N"])),
-	Green0_down(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),
-	Green_down(static_cast<int>(parms["N"]), static_cast<int>(parms["N"])),			
-    spins(static_cast<int>(parms["N"])),
-    start_time(time(NULL)),
-    max_time(static_cast<int>(parms.value_or_default("MAX_TIME", 86400))),
-    measure_fourpoint(static_cast<bool>(parms.value_or_default("MEASURE_FOURPOINT_FUNCTION", false))),
-    fp_interval(static_cast<int>(parms.value_or_default("FOURPOINT_INTERVAL", 1000)))
-
+: alps::scheduler::MCRun(where,p,node),  
+sweeps(0),
+thermalization_sweeps(static_cast<int>(parms["THERMALIZATION"])),
+total_sweeps(static_cast<int>(parms["SWEEPS"])),
+beta(static_cast<double>(parms["BETA"])),
+N(static_cast<int>(parms["N"])),	
+n_site(static_cast<int>(parms["SITES"])),	
+u(static_cast<double>(parms["U"])),
+N_check(1000), // value is automatically adjusted during the simulation
+check_counter(0),
+tolerance(static_cast<double>(parms["TOLERANCE"])),	
+Green0_up(N*n_site, N*n_site),
+Green_up(N*n_site, N*n_site),
+Green0_down(N*n_site, N*n_site),
+Green_down(N*n_site, N*n_site),			
+spins(static_cast<int>(N*n_site)),
+start_time(time(NULL)),
+max_time(static_cast<int>(parms.value_or_default("MAX_TIME", 86400))),
+measure_fourpoint(static_cast<bool>(parms.value_or_default("MEASURE_FOURPOINT_FUNCTION", false))),
+fp_interval(static_cast<int>(parms.value_or_default("FOURPOINT_INTERVAL", 1000))),
+bare_green_tau(N+1, n_site, 2),
+green_tau(N+1, n_site, 2),
+sign(1)
 {
-  // initialize G0
-  itime_green_function_t multiple_G0(N+1, 1, 2);
-  multiple_vector_type G0;
-  //outside HF solver we use sizeof(G0)=N+1, inside we only compute with N imag
-  //time positions.
-  G0.first.resize(N);
-  G0.second.resize(N);
-  std::istringstream in(parms["G0"]);
-  read_itime(in,multiple_G0);
-  G0=multiple_G0.to_multiple_vector();
+  std::cout<<"starting constructor."<<std::endl;
+  uint n_matsubara=parms["NMATSUBARA"];
+  matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, 2);
+  itime_green_function_t bgf_sc_convention_k(N+1,n_site, 2); //bare green function in k_space
+  boost::shared_ptr<FourierTransformer> fourier_ptr;
+  FourierTransformer::generate_transformer(parms, fourier_ptr, 0);
   
-  std::valarray<double> G0_up(G0.first.size());
-  std::valarray<double> G0_down(G0.first.size());
-  for (uint i=0; i<G0.first.size(); i++) {
-    G0_up[i] = -G0.first[G0.first.size()-1-i];
-    G0_down[i] = -G0.second[G0.second.size()-1-i];
-    std::cout<<i<<"\t"<<G0_up[i]<<" "<<G0_down[i]<<std::endl;
+  std::istringstream in_omega(parms["G0(omega)"]);
+  read_freq(in_omega, bare_green_matsubara);
+  
+  if (n_site > 1) {
+    matsubara_green_function_t bare_green_matsubara_k_space(bare_green_matsubara);
+    SimpleDCATransformer clusterhandler(parms);
+    bare_green_matsubara = clusterhandler.transform_into_real_space(bare_green_matsubara_k_space);
+    fourier_ptr->backward_ft(bgf_sc_convention_k, bare_green_matsubara_k_space);
+    std::ofstream bgfsccks("/tmp/bgfsccks");
+    std::ofstream bgmks("/tmp/bgmks");
+    bgfsccks<<bgf_sc_convention_k<<std::endl;
+    bgmks<<bare_green_matsubara_k_space<<std::endl;
+  } 
+  fourier_ptr->backward_ft(bare_green_tau, bare_green_matsubara);
+  //std::cout<<"bgf sc convention: "<<bgf_sc_convention<<std::endl;
+  std::ofstream bgfsccrs("/tmp/bgfsccrs");
+  bgfsccrs<<bare_green_tau<<std::endl;
+  
+  for(int i=0;i<2;++i){  //change convention to positive GF
+    for(int s1=0;s1<n_site;++s1){
+      for(int s2=0;s2<n_site;++s2){
+        for(int t=0;t<=N;++t){
+          bare_green_tau(t,s1, s2, i)*=-1;
+        }
+      }
+    }
   }
+  
   // initialize lambda
   double tmp = exp(beta/N*u/2);
   lambda = log(tmp + sqrt(tmp*tmp-1));
-
+  
   // initialize bath Green's function matrices
-  green_matrix_from_vector(G0_up, Green0_up);
-  green_matrix_from_vector(G0_down, Green0_down);
+  green_matrix_from_vector(bare_green_tau, Green0_up, Green0_down);
   //std::cout<<"Green0 down: "<<Green0_down<<std::endl;
   //std::cout<<"Green0 up: "<<Green0_up<<std::endl;
   // choose random spin configuration
   for (uint i=0; i<spins.size(); i++)
     spins[i] = (random_01()<0.5 ? 1 : -1);
-
- 
+  
+  
   // initialize Green's function matrices
   update_from_zero(Green_up, Green0_up, spins, lambda);
   update_from_zero(Green_down, Green0_down, spins, -lambda);
-
- 
+  
+  
   // create measurement objects
-  measurements << RealVectorObservable("G_meas_up");
-  measurements << RealVectorObservable("G_meas_down");  
+  measurements << RealObservable("Sign");
+  measurements << SignedObservable<vec_obs_t>("G_meas_up");
+  measurements << SignedObservable<vec_obs_t>("G_meas_down");  
   measurements << SimpleRealVectorObservable("G_fourpoint_uu");  
   measurements << SimpleRealVectorObservable("G_fourpoint_dd");  
   measurements << SimpleRealVectorObservable("G_fourpoint_ud");  
   measurements << SimpleRealVectorObservable("G_fourpoint_du");  
   
   //reset the measurment objects
-
-  measurements.get<RealVectorObservable>("G_meas_up").reset(true);
-  measurements.get<RealVectorObservable>("G_meas_down").reset(true);
-  measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").reset(true);
-  measurements.get<SimpleRealVectorObservable>("G_fourpoint_dd").reset(true);
-  measurements.get<SimpleRealVectorObservable>("G_fourpoint_ud").reset(true);
-  measurements.get<SimpleRealVectorObservable>("G_fourpoint_du").reset(true);
+  
+  measurements.reset(true);
   
 }
 
 
 // in principle, need only save spins (and do update_from_zero after loading)
 void HirschFyeRun::load(alps::IDump& dump) {
-  dump >> sweeps;
+std::cerr<<"implement load first!"<<std::endl;
+  abort();
+  
+  /*dump >> sweeps;
   if(!where.empty()) {// skip reading the spins if we are just evaluating
     dump >> Green_up >> Green_down >> spins; 	 
   }
   else
-    measurements.compact(); // and throw away time series
+    measurements.compact(); // and throw away time series*/
 }
 
 
 void HirschFyeRun::save(alps::ODump& dump) const
 {
-  dump << Green_up << Green_down << spins;
+  //std::cerr<<"implement save first!"<<std::endl;
+  //abort();
+
+  //dump << Green_up << Green_down << spins;
 }
 
 
@@ -186,31 +207,43 @@ double HirschFyeRun::work_done() const
     std::cout<<"we ran out of time!"<<std::endl<<"sweeps: "<<sweeps-thermalization_sweeps<<std::endl;
     return 1;
   }
-
+  
   return (is_thermalized() ? (sweeps-thermalization_sweeps)/double(total_sweeps) : 0.);
 }
 
 
 void HirschFyeRun::dostep()
 {
-
+  
   // increment sweep count
   sweeps++;
   check_counter++;
   // do local update
   for (int i=0; i<N; i++){
-    update_single_spin(random_01, Green_up, Green_down, spins, lambda);
-	  }
+    update_single_spin(random_01, Green_up, Green_down, spins, lambda, sign);
+  }
   // calculate Greens function	
   //std::valarray<double> G_tmp_up(N), G_tmp_down(N);		
-  green_vector_from_matrix(G_up, Green_up);
-  green_vector_from_matrix(G_down,Green_down);	
-
+  green_vector_from_matrix(green_tau, Green_up, Green_down);
+  
   //std::cout<<"in dostep"<<std::endl;
   // measure Greens function
+  std::valarray<double> G_up(N*n_site*n_site);
+  std::valarray<double> G_down(N*n_site*n_site);
+  for(int s1=0;s1<n_site;++s1){
+    for(int s2=0;s2<n_site;++s2){
+      for(int t=0;t<N;++t){
+        G_up  [t+N*s1+N*n_site*s2]=green_tau(t,s1,s2,0);
+        G_down[t+N*s1+N*n_site*s2]=green_tau(t,s1,s2,1);
+      }
+    }
+  }
   if(is_thermalized()){
-  	measurements.get<RealVectorObservable>("G_meas_up") << G_up;
-  	measurements.get<RealVectorObservable>("G_meas_down") << G_down;
+    std::cout<<"thermalized!"<<std::endl;
+  	measurements.get<SignedObservable<vec_obs_t> >("G_meas_up") << (G_up*(double)sign);
+  	measurements.get<SignedObservable<vec_obs_t> >("G_meas_down") << (G_down*(double)sign);
+    measurements.get<RealObservable>("Sign")<<sign;
+    
   }
 #ifdef FOURPOINT
   if(is_thermalized() && measure_fourpoint && (sweeps %fp_interval==0)){
@@ -227,29 +260,29 @@ void HirschFyeRun::dostep()
       for(int j=0;j<N;++j){
         G_ij_up[N*i+j]=Green_up  (i,j); //G_up(tau_i - tau_j)
         G_ij_dn[N*i+j]=Green_down(i,j); //G_down(tau_i - tau_j)
-       //std::cout<<i<<" "<<j<<"\t"<<G_ij_up[N*i+j]<<" "<<G_ij_dn[N*i+j]<<std::endl;
+                                        //std::cout<<i<<" "<<j<<"\t"<<G_ij_up[N*i+j]<<" "<<G_ij_dn[N*i+j]<<std::endl;
       }
     }*/
     //std::cout<<"size s is: "<<s<<std::endl;
-      for(int j=0;j<s;++j){
-        double guji=Green_up(j, 0);
-        double gdji=Green_down(j, 0);
-        for(int k=0;k<s;++k){
-          double gujk=Green_up(j, k);
-          double gdjk=Green_down(j, k);
-          for(int l=0;l<s;++l){
+    for(int j=0;j<s;++j){
+      double guji=Green_up(j, 0);
+      double gdji=Green_down(j, 0);
+      for(int k=0;k<s;++k){
+        double gujk=Green_up(j, k);
+        double gdjk=Green_down(j, k);
+        for(int l=0;l<s;++l){
           double gulk=Green_up(l, k);
           double gdlk=Green_down(l, k);
           double guli=Green_up(l, 0);
           double gdli=Green_down(l, 0);
-            //std::cout<<i<<" "<<j<<" "<<k<<" "<<l<<std::endl;
-            G_ijkl_uu(j*s2+k*s+l)+=guji*gulk-gujk*guli; //check review formula 154
-            G_ijkl_dd(j*s2+k*s+l)+=gdji*gdlk-gdjk*gdli;
-            G_ijkl_ud(j*s2+k*s+l)+=guji*gdlk;;
-            G_ijkl_du(j*s2+k*s+l)+=gdji*gulk;
-          }
+          //std::cout<<i<<" "<<j<<" "<<k<<" "<<l<<std::endl;
+          G_ijkl_uu(j*s2+k*s+l)+=guji*gulk-gujk*guli; //check review formula 154
+          G_ijkl_dd(j*s2+k*s+l)+=gdji*gdlk-gdjk*gdli;
+          G_ijkl_ud(j*s2+k*s+l)+=guji*gdlk;;
+          G_ijkl_du(j*s2+k*s+l)+=gdji*gulk;
         }
       }
+    }
     int meas_int=100;
     if(fpsteps% meas_int == 0){
       //std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
@@ -264,12 +297,12 @@ void HirschFyeRun::dostep()
         G_ijkl_du_va[i]=G_ijkl_du(i)/meas_int;
         G_ijkl_dd_va[i]=G_ijkl_dd(i)/meas_int;
       }
-
+      
       measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu")<<G_ijkl_uu_va;
       measurements.get<SimpleRealVectorObservable>("G_fourpoint_dd")<<G_ijkl_dd_va;
       measurements.get<SimpleRealVectorObservable>("G_fourpoint_ud")<<G_ijkl_ud_va;
       measurements.get<SimpleRealVectorObservable>("G_fourpoint_du")<<G_ijkl_du_va;
-     
+      
       G_ijkl_uu=0;
       G_ijkl_du=0;
       G_ijkl_ud=0;
@@ -287,30 +320,98 @@ void HirschFyeRun::dostep()
   }
 	
   // check if precision has deteriorated
+  //std::cout<<"N check: "<<N_check<<std::endl;
   if (check_counter%N_check == 0) {
-  
+    
     dense_matrix Green_diff_up(Green_up), Green_diff_down(Green_down);
-
+    
     update_from_zero(Green_up, Green0_up, spins, lambda);
     update_from_zero(Green_down, Green0_down, spins, -lambda);
-
+    
     Green_diff_up -= Green_up;
-	Green_diff_down -= Green_down;
-
+    Green_diff_down -= Green_down;
+    
     if (norm_max(Green_diff_up) > tolerance || norm_max(Green_diff_down) > tolerance)
-	  N_check /= 2;
-	else 
-	  N_check *= 2;
+      N_check /= 2;
+    else 
+      N_check *= 2;
 	  
-	check_counter = 0;
-
+    check_counter = 0;
+    
   }
-
+  
 }
 
 
-itime_green_function_t HirschFyeRun::get_result() const {
+std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_result() const {
+  std::cout<<"getting results."<<std::endl;
+  int N=parms["N"];
+  int n_matsubara=parms["NMATSUBARA"];
+  int n_site=parms["SITES"];
+  std::cout<<"calling get result for both itima and matsubara"  <<std::endl;
+  itime_green_function_t green_result(N+1, n_site, 2); //one site, two spins, n+1 time points including first and last
+  matsubara_green_function_t green_result_matsubara(n_matsubara, n_site, 2); //n matsubara frequencies
+  
+  alps::RealVectorObsevaluator G_meas_up=get_measurements()["G_meas_up"];
+  alps::RealVectorObsevaluator G_meas_down=get_measurements()["G_meas_down"];  
+  
+  std::valarray<double> g_up_mean_vector(G_meas_up.mean());
+  std::valarray<double> g_down_mean_vector(G_meas_down.mean());
+  
+  if(parms.defined("CHECKPOINT")){
+    alps::Parameters *p=const_cast<alps::Parameters*>(&parms);
+    p->erase(std::string("G0(omega)"));
+    alps::Parameters::iterator it=p->begin();
+    //measurements.compact();
+    while(it!=p->end()){
+      //std::cout<<it->key()<<" "<<it->value()<<std::endl;
+      if(strncmp(it->key().c_str(),"G0(omega)",9)==0){
+        it->value()="...ignored, nested...";
+      }
+      it++;
+    }
+    //std::cout<<parms<<std::endl;
+    std::cout<<"end of sim, checkpointing"<<std::endl;
+    std::string fns=parms["CHECKPOINT"];
+    fns+=".xml";
+    boost::filesystem::path fn(fns);
+    checkpoint(fn);
+  }
+  for(int i=0;i<n_site;++i){
+    for(int j=0;j<n_site;++j){
+      for(int t=0;t<N;++t){
+        green_result(t,i,j,0)=g_up_mean_vector[t+N*i+N*n_site*j];
+        green_result(t,i,j,1)=g_down_mean_vector[t+N*i+N*n_site*j];
+      }
+      green_result(N,i,j,0)=(i==j?1-green_result(0,i,j,0):-green_result(0,i,j,0));
+      green_result(N,i,j,1)=(i==j?1-green_result(0,i,j,1):-green_result(0,i,j,1));
+    }
+  }
+  std::cout<<"green result is: "<<green_result<<std::endl;
+  for(int i=0;i<n_site;++i){ //change to SC condition convention
+    for(int j=0;j<n_site;++j){
+      for(int t=0;t<=N;++t){
+        green_result(t,i,j,0)*=-1;
+        green_result(t,i,j,1)*=-1;
+      }
+    }
+  }
 
+  boost::shared_ptr<FourierTransformer> fourier_ptr;
+  FourierTransformer::generate_transformer_U(parms, fourier_ptr);
+  fourier_ptr->forward_ft(green_result, green_result_matsubara);
+  //once we have this we still need to transform the result to k-space for the
+  //self consistency
+  if(parms.defined("CLUSTER_LOOP")){
+    SimpleDCATransformer clusterhandler(parms);
+    green_result_matsubara= clusterhandler.transform_into_k_space(green_result_matsubara);
+    green_result = clusterhandler.transform_into_k_space(green_result); 
+  }
+  return std::make_pair(green_result_matsubara, green_result);
+}
+
+/*itime_green_function_t HirschFyeRun::get_result() const {
+  
   multiple_vector_type g;
   alps::RealVectorObsevaluator G_meas_up=get_measurements()["G_meas_up"];
   alps::RealVectorObsevaluator G_meas_down=get_measurements()["G_meas_down"];  
@@ -327,45 +428,60 @@ itime_green_function_t HirschFyeRun::get_result() const {
   g.second.push_back(-1.-g_down_mean_vector[0]);
   itime_green_function_t multiple_G(N+1,1,2);
   multiple_G.from_multiple_vector(g);
-   return multiple_G;
-
+  return multiple_G;
+  
 }
-
+*/
 
 ///take a Green's function in vector form G(\tau-\tau') and create a matrix G(\tau, \tau') out of it
-void HirschFyeRun::green_matrix_from_vector(const std::valarray<double> &green_vector, dense_matrix & green_matrix)const{
-  green_matrix.clear();
-	for (int i=0; i<N; i++) {
-    for (int j=i; j<N; j++) {	  
-      green_matrix(j,i) = green_vector[j-i];
+void HirschFyeRun::green_matrix_from_vector(const itime_green_function_t & bare_green_function,\
+ dense_matrix & green_matrix_up, dense_matrix & green_matrix_down)const{
+ 
+  green_matrix_up  .clear();
+  green_matrix_down.clear();
+ for (int s1=0; s1<n_site; s1++) {
+    for (int s2=0; s2<n_site; s2++) {	  
+      for (int i=0; i<N; i++) {
+        for (int j=i; j<N; j++) {	  
+          green_matrix_up  (s1*N+j,s2*N+i) = bare_green_function(j-i, s1, s2, 0); //green_vector[j-i];
+          green_matrix_down(s1*N+j,s2*N+i) = bare_green_function(j-i, s1, s2, 1); //green_vector[j-i];
+        }
+        for (int j=i+1; j<N; j++) {//consider antisymmetry (Fermions)
+          green_matrix_up  (s1*N+i,s2*N+j) = -bare_green_function(N-(j-i), s1, s2, 0); //-green_vector[N-(j-i)];
+          green_matrix_down(s1*N+i,s2*N+j) = -bare_green_function(N-(j-i), s1, s2, 1); //-green_vector[N-(j-i)];
+        }
+      }
     }
-  }
-  for (int i=0; i<N; i++) {
-    for (int j=i+1; j<N; j++) {//consider antisymmetry (Fermions)
-      green_matrix(i,j) -= green_vector[N-(j-i)];
- 	}
   }
 }
 ///take a Green's function in matrix form and transform it back into vector form.
-void HirschFyeRun::green_vector_from_matrix(std::valarray<double> &green_vector, const dense_matrix & green_matrix)const{
-  green_vector = 0.;
- 
-  for (int i=0; i<N; i++) {
-    for (int j=i; j<N; j++) {
-      green_vector[j-i] += green_matrix(j,i);
-	  
-	  if (j>i) {//consider antisymmetry (Fermions)
-        green_vector[N-(j-i)] -= green_matrix(i,j);
-	  }
-	  
+void HirschFyeRun::green_vector_from_matrix(itime_green_function_t &green_tau, const dense_matrix & green_matrix_up,\
+const dense_matrix & green_matrix_down)const{
+  green_tau.clear();
+  
+  for (int s1=0;s1<n_site;++s1){
+    for(int s2=0;s2<n_site;++s2){
+      for (int i=0; i<N; i++) {
+        for (int j=i; j<N; j++) {
+          green_tau(j-i,s1,s2,0) += green_matrix_up  (j+s1*N,i+s2*N);
+          green_tau(j-i,s1,s2,1) += green_matrix_down(j+s1*N,i+s2*N);
+          if (j>i) {//consider antisymmetry (Fermions)
+            green_tau(N-(j-i),s1,s2,0) -= green_matrix_up  (i+s1*N,j+s2*N);
+            green_tau(N-(j-i),s1,s2,1) -= green_matrix_down(i+s1*N,j+s2*N);
+          }
+        }
+      }
+      for(int i=0;i<N;++i){
+        green_tau(i, s1, s2, 0)/=N;
+        green_tau(i, s1, s2, 1)/=N;
+      }
     }
   }
-  green_vector /= N;
 }
 
 
-itime_green_function_t HirschFyeSim::get_result() const {
-
+/*itime_green_function_t HirschFyeSim::get_result() const {
+  
   multiple_vector_type g;
   int N(static_cast<int>(parms["N"]));
   alps::ObservableSet meas = get_measurements();
@@ -416,11 +532,11 @@ itime_green_function_t HirschFyeSim::get_result() const {
   for(uint i=0;i<g_up_mean_vector.size();++i){
   	g.first.push_back(-g_up_mean_vector[g_up_mean_vector.size()-1-i]);
   	g.second.push_back(-g_down_mean_vector[g_up_mean_vector.size()-1-i]);
-        //std::cout<<i<<"\t"<<-g_up_mean_vector[g_up_mean_vector.size()-1-i]<<"\t"<<G_meas_up.error()[g_up_mean_vector.size()-1-i]<<std::endl;
+    //std::cout<<i<<"\t"<<-g_up_mean_vector[g_up_mean_vector.size()-1-i]<<"\t"<<G_meas_up.error()[g_up_mean_vector.size()-1-i]<<std::endl;
   }
-      
+  
   itime_green_function_t multiple_G(N+1, 1, 2);
   multiple_G.from_multiple_vector(g);
   return multiple_G;
-}
+}*/
 

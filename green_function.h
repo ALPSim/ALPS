@@ -37,6 +37,7 @@ template <typename T> class green_function{
 		memcpy(err_, g.error(), sizeof(T)*nt_*ns_*ns_*nf_);
                 return *this;
         }
+  void clear(){ memset(val_, 0, ns_*ns_*nt_*nf_*sizeof(T)); }
 	//access of vectors and elements
 	///specialization for only one site: access element with given time and flavor
 	inline T &operator()(uint t, uint flavor){return val_[t+nt_*flavor];}

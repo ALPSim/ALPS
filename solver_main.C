@@ -45,7 +45,7 @@
 /// @param G0 contains on return the Weiss field read from the input file, in Matsubara frequencies
 /// @param parms contains on return the simulation parameter read from the input file
 
-itime_green_function_t read_input(const std::string& inputfile,  alps::Parameters& parms)
+matsubara_green_function_t read_input(const std::string& inputfile,  alps::Parameters& parms)
 {
 	std::ifstream input(inputfile.c_str());
 	alps::XMLTag tag=alps::parse_tag(input); // skip outermost element <SIMULATION>
@@ -61,11 +61,11 @@ itime_green_function_t read_input(const std::string& inputfile,  alps::Parameter
 			alps::skip_element(input,tag);
 		tag=alps::parse_tag(input);
 	}
-        int N=(int)parms["N"];
+        int N=(int)parms["NMATSUBARA"];
         int flavors=parms.value_or_default("FLAVORS", 2);
         int sites=parms.value_or_default("SITES", 1);
-        itime_green_function_t G0(N+1, sites, flavors);
-        read_itime(input,G0);
+        matsubara_green_function_t G0(N, sites, flavors);
+        read_freq(input,G0);
         return G0;
 }
 
@@ -76,19 +76,22 @@ itime_green_function_t read_input(const std::string& inputfile,  alps::Parameter
 /// @param G0 the Weiss field used in the solver
 /// @param G the Green's function calculated by the impurity solver
 /// @param parms the simulation parameter used in the solver
-void write_output(const std::string& outputfile, const itime_green_function_t& G0, const itime_green_function_t& G, const alps::Parameters& parms)
+void write_output(const std::string& outputfile, const matsubara_green_function_t& G0, const matsubara_green_function_t& G_omega, const itime_green_function_t &G_tau, const alps::Parameters& parms)
 {
 	alps::oxstream output(outputfile);
 	
 	output << alps::start_tag("SIMULATION") << parms;
     
     output << alps::start_tag("G0");
-    write_itime(output,G0);
+    write_freq(output,G0);
     output << alps::end_tag("G0");
-	
-    output << alps::start_tag("GREENFUNCTION") ;
-    write_itime(output,G);
-    output << alps::end_tag("GREENFUNCTION");
+    std::cout<<"writing output. sizes are: "<<G_omega.nfreq()<<" "<<G_tau.ntime()<<std::endl;
+    output << alps::start_tag("GREENFUNCTION_OMEGA") ;
+    write_freq(output,G_omega);
+    output << alps::end_tag("GREENFUNCTION_OMEGA");
+    output << alps::start_tag("GREENFUNCTION_ITIME") ;
+    write_itime(output,G_tau);
+    output << alps::end_tag("GREENFUNCTION_ITIME");
 	output << alps::end_tag("SIMULATION");
 }
 
@@ -153,13 +156,13 @@ int main(int argc, char** argv)
 		// read parameters and G0
 		
 		alps::Parameters parms;
-		itime_green_function_t G0=read_input(infile,parms);
+		matsubara_green_function_t G0=read_input(infile,parms);
                 alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
-		alps::ImpuritySolver solver(factory,argc,argv);
+                alps::ImpuritySolver solver(factory,argc,argv);
 		
 		// write g into output file
-		itime_green_function_t G = solver.solve(G0,parms);
-		write_output(outfile,G0,G,parms);
+                std::pair<matsubara_green_function_t, itime_green_function_t> G = solver.solve_omega(G0,parms);
+		write_output(outfile,G0,G.first,G.second, parms);
 #ifndef BOOST_NO_EXCEPTIONS
 	}
 	catch (std::exception& exc) {

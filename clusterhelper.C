@@ -564,7 +564,7 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_brillouin_zone(vector_ty
 }
 
 
-ClusterHelper::vector_type ClusterHelper::map_back_into_cluster(vector_type v, 
+ClusterHelper::vector_type &ClusterHelper::map_back_into_cluster(vector_type &v, 
 								const Matrix<double>::Type& B_inv, 
 								const Matrix<double>::Type& B) const
 {

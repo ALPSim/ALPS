@@ -83,7 +83,7 @@ private:
   bool append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v) const;
   bool append_column_no_duplicates(Matrix<site_t>::Type& m, std::map<site_t, site_t>& smap) const;
   vector_type map_back_into_brillouin_zone(vector_type v) const;
-  vector_type map_back_into_cluster(vector_type v, 
+  vector_type &map_back_into_cluster(vector_type &v, 
 				    const Matrix<double>::Type& B_inv, const Matrix<double>::Type& B) const;
   uint identify_vertex(const vector_type& v, const Matrix<double>::Type& coordinate_matrix) const;
   uint identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const uint i) const;

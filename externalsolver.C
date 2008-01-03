@@ -109,7 +109,6 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     outfile=parms["TMPNAME"]+std::string(".out.xml");
   }
 
-//  std::cout<<" hi there... in external solver solve omega"<<std::endl;
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
  
@@ -119,7 +118,6 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   
     input << alps::start_tag("SIMULATION") << parms;
 	input << alps::start_tag("G0");
-        std::cout<<"writing freq"<<std::endl;
     write_freq(input,G0_omega);
     input << alps::end_tag("G0");
     input << alps::end_tag("SIMULATION");
@@ -127,9 +125,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     // scope to force closing of file
   }
   
-  std::cout<<" calling solver"<<std::endl;
   call(infile,outfile);
-  std::cout<<" back from solver"<<std::endl;
 
   // read the output
   
