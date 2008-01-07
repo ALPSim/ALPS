@@ -1,15 +1,15 @@
 #! /bin/sh
 
 # find the transformer
-if test "x$ALPS_XSLT_TRANSFORMER" != x; then
+if test "x$ALPS_XSLT_TRANSFORMER" -ne  x; then
   transformer=$ALPS_XSLT_TRANSFORMER
 else 
   tryxsltproc=`which xsltproc`
-  if test "x$tryxsltproc" != x; then
+  if test "x$tryxsltproc" -ne  x; then
     transformer=$tryxsltproc
   else
     tryxalan=`which Xalan`
-    if test "x$tryxalan" != x; then
+    if test "x$tryxalan" -ne  x; then
       transformer=$tryxalan
     else
       echo Could not find XSLT transformer. Please set the ALPS_XSLT_TRANSFORMER environment variable
@@ -19,7 +19,7 @@ else
 fi
 
 #is it Gnome xsltproc?
-if test `$transformer | grep xsltproc | wc -l` == 1; then
+if test `$transformer | grep xsltproc | wc -l` -eq 1; then
 #is xsltproc
   $transformer $2 $1
 else
