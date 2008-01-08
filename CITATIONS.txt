@@ -3,20 +3,20 @@ acknowledge the use of the ALPS libraries, and the papers listed below:
 
 When alps/model.h or any header in alps/model was used:
 reference the web page http://alps.comp-phys.org/ and cite the publication:
-F. Alet et al., J. Phys. Soc. Jpn. Suppl., Vol. 74, 30 (2005).
+A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007)
 
 When alps/lattice.h or any header in alps/lattice was used:
 reference the web page http://alps.comp-phys.org/ and cite the publication:
-F. Alet et al., J. Phys. Soc. Jpn. Suppl., Vol. 74, 30 (2005).
+A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007)
 
 When alps/alea.h or any header in alps/alea was used:
 reference the web page http://alps.comp-phys.org/ and cite the publications:
-F. Alet et al., J. Phys. Soc. Jpn. Suppl., Vol. 74, 30 (2005).
+A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007)
 M. Troyer et al., Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
 
 When alps/scheduler.h or any header in alps/scheduler was used:
 reference the web page http://alps.comp-phys.org/ and cite the publications:
-F. Alet et al., J. Phys. Soc. Jpn. Suppl., Vol. 74, 30 (2005).
+A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007)
 M. Troyer et al., Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
 
 The use of any other library, in particular those with headers in the
