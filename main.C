@@ -84,10 +84,10 @@ int main(int argc, char** argv)
     alps::Parameters parms;
     {
       std::ifstream is(argv[1]);
-      assert(is.is_open());
+      if(!is.is_open()){std::cerr<<"parameter file argv[1] "<<argv[1]<<"is not open! exiting!"<<std::endl; abort(); }
       is>>parms;
+      is.close();
     }
-    //std::cout<<parms<<std::endl;
     boost::shared_ptr<FourierTransformer> fourier_ptr;
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     //perform selfconsistency loop in...
