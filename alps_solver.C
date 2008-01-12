@@ -71,7 +71,7 @@ int alps::ImpuritySolver::solve_it(Parameters const& p)
   }
   else{
 	std::cerr<<"a slave should never reach this section."<<std::endl;
-	exit(1);
+	abort();
   }
   /*std::cout<<"creating task"<<std::endl;
   the_scheduler->create_task(p);
@@ -124,12 +124,12 @@ alps::ImpuritySolver::solve_omega(
     boost::throw_exception(
       std::runtime_error(" solver finished with nonzero exit code"));
     
-  std::cout<<"solve_omega: getting result."<<std::endl;
+  //std::cout<<"solve_omega: getting result."<<std::endl;
   // now extract the results
   std::pair<matsubara_green_function_t, itime_green_function_t> G = 
       dynamic_cast<MatsubaraImpurityTask*>(get_task())
         ->get_result();
-  std::cout<<"solve_omega: done getting result."<<std::endl;
+  //std::cout<<"solve_omega: done getting result."<<std::endl;
   clear(); // destroy the simulation
   return G;
 
