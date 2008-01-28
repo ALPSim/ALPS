@@ -35,12 +35,14 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
   setup_tables();
   std::ofstream clustercoordstream("ClusterCoordinates");
   for (int m=0; m<cluster_coordinates_.size1(); ++m) {
+    clustercoordstream << m << " ";
     for (int d=0; d<cluster_coordinates_.size2(); ++d) 
       clustercoordstream << cluster_coordinates_(m,d) << " ";
     clustercoordstream << std::endl;
   }
   std::ofstream clustermomstream("ClusterMomenta");
   for (int m=0; m<cluster_momenta_.size1(); ++m) {
+    clustermomstream << m << " ";
     for (int d=0; d<cluster_momenta_.size2(); ++d) 
       clustermomstream << cluster_momenta_(m,d) << " ";
     clustermomstream << std::endl;
@@ -175,10 +177,10 @@ void ClusterHelper::setup_tables()
       b_red(1,0) *= -1;
       break;
     case 3 :
+      b_red(1,1) *= -1;
+      b_red(2,1) *= -1;
+      b_red(0,2) *= -1;      
       b_red(2,2) *= -1;
-      b_red(3,2) *= -1;
-      b_red(1,3) *= -1;      
-      b_red(3,3) *= -1;
       break;
     }
     Matrix<double>::Type b_red_inv = matrix_inverse<double>(b_red);
@@ -351,13 +353,14 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
       append_column_no_duplicates(symmetry_table_real_space, vertexmap);
     }
   }
-  std::cerr << "\nsymmetry table in real space:\n";
+  std::cerr << "\n";
+  /*std::cerr << "symmetry table in real space:\n";
   for (uint i=0; i<symmetry_table_real_space.size1(); ++i) {
     for (uint j=0; j<symmetry_table_real_space.size2(); ++j) {
       std::cerr << symmetry_table_real_space(i,j) << " ";
     }
     std::cerr << std::endl;
-  }
+    }*/
   //setup equivalence classes of sites and site pairs
   boost::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space);
   //setup symmetry table in k space
@@ -405,13 +408,14 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
       append_column_no_duplicates(symmetry_table_k_space, vertexmap);
     }
   }
-  std::cerr << "\nsymmetry table k space:\n";
+  std::cerr << "\n";
+  /*std::cerr << "symmetry table k space:\n";
   for (uint i=0; i<symmetry_table_k_space.size1(); ++i) {
     for (uint j=0; j<symmetry_table_k_space.size2(); ++j) {
       std::cerr << symmetry_table_k_space(i,j) << " ";
     }
     std::cerr << std::endl;
-  }
+    }*/
   //setup equivalence classes of sites and site pairs
   boost::tie(site_class_set_k_space_, pair_class_set_k_space_) = setup_classes(symmetry_table_k_space);
 }

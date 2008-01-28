@@ -2,7 +2,7 @@
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2005-2007 by Philipp Werner <werner@comp-phys.org>,
+* Copyright (C) 2005-2008 by Philipp Werner <werner@comp-phys.org>,
 *                            Emanuel Gull <gullc@comp-phys.org>
 *                            Sebastian Fuchs <fuchs@comp-phys.org>
 *                            Matthias Troyer <troyer@comp-phys.org>
@@ -52,6 +52,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
+  bool degenerate = parms.value_or_default("DEGENERATE", false);
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   
   itime_green_function_t G0_tau_old(G0_tau);
@@ -63,7 +64,8 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     G_tau = solver.solve(G0_tau, parms);
     //std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
-    G0_tau= hilbert(G_tau, fourier, mu, h, beta, paramagnet);
+    G_tau = hilbert.symmetrize(G_tau, paramagnet);
+    G0_tau= hilbert(G_tau, fourier, mu, h, beta);
     std::cout<<"comparing old and new results"<<std::endl;
     max_diff=0;
     for(int f=0; f<flavors;++f){
@@ -87,7 +89,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
   double h = parms.value_or_default("H", 0);;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  
+  bool degenerate = parms.value_or_default("DEGENERATE", false);  
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
   int iteration_ctr=0;
@@ -200,7 +202,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  
+  bool degenerate = parms.value_or_default("DEGENERATE", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   
@@ -235,6 +237,8 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
+    G_tau = hilbert.symmetrize(G_tau, paramagnet);
+    G_omega = hilbert.symmetrize(G_omega, paramagnet);
     G_omega_shifted=G_omega;
     if(parms.defined("FILLING")){ //adjust chemical potential
       double current_filling=0;
@@ -256,7 +260,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
       }
     }
     std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
-    G0_omega = hilbert(G_omega_shifted, G0_omega, mu, h, beta, paramagnet);
+    G0_omega = hilbert(G_omega_shifted, G0_omega, mu, h, beta);
     
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
@@ -309,7 +313,6 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   
@@ -342,9 +345,10 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
     std::cout<<"applying point group symmetries"<<std::endl<<std::flush;    
+    G_tau = clustertrans.symmetrize(G_tau, paramagnet);
+    G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     G_omega = clustertrans.symmetrize_k_space(G_omega);
     G_tau = clustertrans.symmetrize_k_space(G_tau);
-
     G_omega_shifted=G_omega;
     if(parms.defined("FILLING")){ //adjust chemical potential
       double current_filling=0;
@@ -368,7 +372,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
 
 
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
-    G0_omega = clustertrans(G_omega_shifted, G0_omega, mu, h, beta, paramagnet);
+    G0_omega = clustertrans(G_omega_shifted, G0_omega, mu, h, beta);
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;

@@ -56,27 +56,14 @@ std::complex<double>* DCATransformer::exp_iksite(const int sign) const
 
 
 
-matsubara_green_function_t SimpleDCATransformer::operator()(matsubara_green_function_t &G_omega, 
-							    matsubara_green_function_t &G0_omega, 
-							    const double mu, const double h, const double beta, 
-							    const bool paramagnet)
+matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
+							    const matsubara_green_function_t &G0_omega, 
+							    const double mu, const double h, const double beta)
 {
   assert(h==0);
   uint nflavor=G0_omega.nflavor();
   uint nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
-  if (paramagnet) {
-    if(nflavor>1 && nflavor%2==0) {
-      for(spin_t flavor=0; flavor<nflavor; flavor+=2) {
-	for (site_t k=0; k<n_cluster_sites(); ++k) {
-	  for(frequency_t freq=0; freq<nfreq; ++freq) {
-	    G_omega(freq, k, k, flavor)= 0.5*(G_omega(freq, k, k, flavor)+G_omega(freq, k, k, flavor+1));
-	    G_omega(freq, k, k, flavor+1)=G_omega(freq, k, k, flavor);
-	  }
-	}
-      }
-    }
-  }
   matsubara_green_function_t selfenergy(G0_omega);
   matsubara_green_function_t G0_omega_new(G0_omega);
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
@@ -136,7 +123,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     }
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
-    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta, paramagnet);
+    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     G0_omega_new.write("G0_omega_input");
@@ -153,18 +140,14 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
 
 
 
-matsubara_green_function_t AntiFerroDCATransformer::operator()(matsubara_green_function_t &G_omega, 
-							       matsubara_green_function_t &G0_omega, 
-							       const double mu, const double h, const double beta, 
-							       const bool paramagnet)
+matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
+							       const matsubara_green_function_t &G0_omega, 
+							       const double mu, const double h, const double beta)
 {
-  assert(paramagnet==false);
   uint nflavor=G0_omega.nflavor();
   uint nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
   assert(nflavor>1 && nflavor%2 == 0);
-  //symmetrize spins
-  //insert symmetrization here
   matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor);
   for (frequency_t freq=0; freq<G0_omega_new.nfreq(); ++freq) 
     for (int i=0; i<G0_omega_new.nsite(); ++i) 
@@ -236,7 +219,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     }
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
-    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h_init, beta, false);
+    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h_init+h, beta);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     G0_omega_new.write("G0_omega_input");

@@ -113,12 +113,14 @@ public:
   ClusterTransformer(const alps::Parameters& params) :
     ClusterHelper(params) {}
   
-  virtual matsubara_green_function_t operator()(matsubara_green_function_t & G_omega, 
-						matsubara_green_function_t &G0_omega, 
+  virtual matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
+						const matsubara_green_function_t &G0_omega, 
 						const double mu, const double h, 
-						const double beta,const bool paramagnet)=0; 
+						const double beta)=0; 
+  virtual itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const=0;
+  virtual matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const=0;
   virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms); 
-
+  
 };
 
 
@@ -130,9 +132,9 @@ public:
     ClusterTransformer(params) {}
   
   template<typename T> green_function<T> symmetrize_real_space(const green_function<T>& G) const 
-  { return symmetrize(G, pair_classes_real_space()); }
+  { return symmetrize_helper(G, pair_classes_real_space()); }
   template<typename T> green_function<T> symmetrize_k_space(const green_function<T>& G) const 
-  { return symmetrize(G, pair_classes_k_space()); }
+  { return symmetrize_helper(G, pair_classes_k_space()); }
   
   virtual matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const=0; 
   virtual matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const=0;
@@ -142,7 +144,7 @@ public:
 
 private:
   template<typename T>
-  green_function<T> symmetrize(const green_function<T>& G, 
+  green_function<T> symmetrize_helper(const green_function<T>& G, 
 			       const std::pair<std::set<pair_class_type>::const_iterator, 
 			       std::set<pair_class_type>::const_iterator> pair_classes) const;
 };
@@ -155,10 +157,13 @@ public:
   SimpleDCATransformer(const alps::Parameters& params) :
     DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])), tprime_(params.defined("t'")?boost::lexical_cast<double>(params["t'"]):0) {}
   
-  matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
-					matsubara_green_function_t &G0_omega, 
-					const double mu, const double h, const double beta, const bool paramagnet);
-
+  matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
+					const matsubara_green_function_t &G0_omega, 
+					const double mu, const double h, const double beta);
+  itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
+  { return spin_symmetrizer(G, paramagnet); }
+  matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
+  { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const 
   { return transform_coordinates<std::complex<double>, Backward>(G); }
   matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const 
@@ -167,17 +172,38 @@ public:
   { return transform_coordinates<double, Backward>(G); }
   itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const 
   { return transform_coordinates<double, Forward>(G); }
-
+  
   matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
-private:
+ private:
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;
-  
+  template <class T>
+  green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
+
   double epsilon(const vector_type k) const
   {  //cosine dispersion (nearest nbr hopping) for all dimensions. t' only valid/reasonable in two dimensions for nn hopping.
     double eps = 0;
     for (uint i=0; i<dimension(); ++i) 
-      eps -= 2*t_*cos (k[i]);
+      eps -= 2*t_*cos(k[i]);
+    /*if (tprime_!=0.) {
+      switch(dimension()) {
+      case 1 :
+	eps -= 2*tprime_*cos(k[0]*2.);
+	break;
+      case 2 :
+	eps -= 2*tprime_*cos(k[0]+k[1]);
+	eps -= 2*tprime_*cos(k[0]-k[1]);
+	break;
+      case 3 :
+	eps -= 2*tprime_*cos(k[0]+k[1]);
+	eps -= 2*tprime_*cos(k[0]-k[1]);
+	eps -= 2*tprime_*cos(k[1]+k[2]);
+	eps -= 2*tprime_*cos(k[1]-k[2]);
+	eps -= 2*tprime_*cos(k[0]+k[2]);
+	eps -= 2*tprime_*cos(k[0]-k[2]);
+	break;
+      }
+      }*/
     if(tprime_!=0){
       assert(dimension()==2);
       eps -= 4*tprime_*cos(k[0])*cos(k[1]);
@@ -199,10 +225,13 @@ public:
   AntiFerroDCATransformer(const alps::Parameters& params) :
     DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])) {}
   
-  matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
-					matsubara_green_function_t &G0_omega, 
-					const double mu, const double h, const double beta, const bool paramagnet);
-  
+  matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
+					const matsubara_green_function_t &G0_omega, 
+					const double mu, const double h, const double beta);
+  itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
+  { return spin_symmetrizer(G, paramagnet); }
+  matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
+  { return spin_symmetrizer(G, paramagnet); }    
   matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const 
   { return transform_coordinates<std::complex<double>, Backward>(G); }
   matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const 
@@ -215,6 +244,8 @@ public:
   matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
   
 private:
+  template <class T>
+  green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;
   template<typename T>
@@ -300,7 +331,7 @@ inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::matrix_inverse(typ
 
 
 template<typename T>
-green_function<T> DCATransformer::symmetrize(const green_function<T>& G, 
+green_function<T> DCATransformer::symmetrize_helper(const green_function<T>& G, 
 					     const std::pair<std::set<pair_class_type>::const_iterator, 
 					     std::set<pair_class_type>::const_iterator> pair_classes) const
 {
@@ -383,6 +414,25 @@ green_function<T> SimpleDCATransformer::transform_coordinates(const green_functi
 }
 
 
+template<class T>
+green_function<T> SimpleDCATransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
+{
+  green_function<T> G_new(G);
+  if (paramagnet) {
+    if(G_new.nflavor()>1 && G_new.nflavor()%2==0) {
+      for(spin_t flavor=0; flavor<G_new.nflavor(); flavor+=2) {
+	for (site_t k=0; k<n_cluster_sites(); ++k) {
+	  for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+	    G_new(freq, k, k, flavor)= 0.5*(G_new(freq, k, k, flavor)+G_new(freq, k, k, flavor+1));
+	    G_new(freq, k, k, flavor+1)=G_new(freq, k, k, flavor);
+	  }
+	}
+      }
+    }
+  }
+  return G_new;
+}
+
 
 template<typename T, class D>
 green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_function<T>& G) const 
@@ -401,15 +451,19 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
       }
     }
   }
-  for (site_t k=0; k<nsite; ++k) {
-    for (site_t i=0; i<nsite; ++i) {
-      for (site_t j=0; j<nsite; ++j) {
-	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
-	  phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
-	for (time_t t=0; t<nt; ++t) {
-	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-	    D::add(G_new, G, t, i, j, k, flavor, cos(phase)/double(nsite));
+  for (site_t k=0; k<nsite; k+=2) {
+    for (site_t q1=0; q1<=1; ++q1) {
+      for (site_t q2=0; q2<=1; ++q2) {
+	for (site_t i=0; i<nsite; ++i) {
+	  for (site_t j=0; j<nsite; ++j) {
+	    double phase = 0.;
+	    for (int d=0; d<dimension(); ++d) 
+	      phase += cluster_momentum(k+q1,d)*cluster_coordinate(i,d)-cluster_momentum(k+q2,d)*cluster_coordinate(j,d);
+	    for (time_t t=0; t<nt; ++t) {
+	      for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+		D::add(G_new, G, t, i, j, k+q1, k+q2, flavor, cos(phase)/double(nsite));
+	      }
+	    }
 	  }
 	}
       }
@@ -422,9 +476,9 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
 struct AntiFerroDCATransformer::Forward {
   template<typename T>
   static void add(green_function<T>& G_new, const green_function<T>& G, 
-		  const time_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor,
+		  const time_t t, const site_t i, const site_t j, const site_t k1, const site_t k2, const spin_t flavor,
 		  double factor) {
-    G_new(t, k, k, flavor) += factor * G(t, i, j, flavor);
+    G_new(t, k1, k2, flavor) += factor * G(t, i, j, flavor);
   }
 };
 
@@ -433,12 +487,35 @@ struct AntiFerroDCATransformer::Forward {
 struct AntiFerroDCATransformer::Backward {
   template<typename T>
   static void add(green_function<T>& G_new, const green_function<T>& G, 
-		  const time_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor,
+		  const time_t t, const site_t i, const site_t j, const site_t k1, const site_t k2, const spin_t flavor,
 		  double factor) {
-    G_new(t, i, j, flavor) += factor * G(t, k, k, flavor);
+    G_new(t, i, j, flavor) += factor * G(t, k1, k2, flavor);
   }
 };
   
+
+
+template<class T>
+green_function<T> AntiFerroDCATransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
+{
+  green_function<T> G_new(G);
+  if(G_new.nflavor()>1 && G_new.nflavor()%2==0) {
+    for(spin_t flavor=0; flavor<G_new.nflavor(); flavor+=2) {
+      for (site_t k=0; k<n_cluster_sites(); k+=2) {
+	for (site_t q1=0; q1<=1; ++q1) {
+	  for (site_t q2=0; q2<=1; ++q2) {
+	    double sign = (q1==q2) ? 1. : -1.;
+	    for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+	      G_new(freq, k+q1, k+q2, flavor) = 0.5 * (G_new(freq, k+q1, k+q2, flavor) + sign * G_new(freq, k+q1, k+q2, flavor+1));
+	      G_new(freq, k+q1, k+q2, flavor+1) = sign * G_new(freq, k+q1, k+q2, flavor);
+	    }
+	  }
+	}
+      }
+    }
+  }
+  return G_new;
+}
 
 
 template<typename T>
@@ -451,8 +528,8 @@ green_function<T> AntiFerroDCATransformer::green_function_inverse(const green_fu
 	T detG = G(t, k, k, f)*G(t, k+1, k+1, f) - G(t, k+1, k, f)*G(t, k, k+1, f);
 	G_inv(t, k, k, f) = G(t, k+1, k+1, f)/detG;
 	G_inv(t, k+1, k+1, f) = G(t, k, k, f)/detG;
-	G_inv(t, k+1, k, f) = -G(t, k, k+1, f)/detG;
-	G_inv(t, k, k+1, f) = -G(t, k+1, k, f)/detG;
+	G_inv(t, k+1, k, f) = -G(t, k+1, k, f)/detG;
+	G_inv(t, k, k+1, f) = -G(t, k, k+1, f)/detG;
       }
     }
   }
@@ -470,8 +547,8 @@ green_function<T> AntiFerroDCATransformer::green_function_add(const green_functi
       for (int k=0; k<G.nsite(); k+=2) {
 	G(t, k, k, f) += G2(t, k, k, f);
 	G(t, k+1, k+1, f) += G2(t, k+1, k+1, f);
-	G(t, k+1, k, f) += -G2(t, k+1, k, f);
-	G(t, k, k+1, f) += -G2(t, k, k+1, f);
+	G(t, k+1, k, f) += G2(t, k+1, k, f);
+	G(t, k, k+1, f) += G2(t, k, k+1, f);
       }
     }
   }
@@ -490,8 +567,8 @@ green_function<T> AntiFerroDCATransformer::green_function_subtract(const green_f
       for (int k=0; k<G.nsite(); k+=2) {
 	G(t, k, k, f) -= G2(t, k, k, f);
 	G(t, k+1, k+1, f) -= G2(t, k+1, k+1, f);
-	G(t, k+1, k, f) -= -G2(t, k+1, k, f);
-	G(t, k, k+1, f) -= -G2(t, k, k+1, f);
+	G(t, k+1, k, f) -= G2(t, k+1, k, f);
+	G(t, k, k+1, f) -= G2(t, k, k+1, f);
       }
     }
   }
