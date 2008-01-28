@@ -182,11 +182,14 @@ int main(int argc, char** argv)
 	//perform self consistency loop in Matsubara frequency omega
 	// all gfs are formulated in k-space and are diagonal in k! 
 	DCATransformer *transform_ptr;
-	std::cout<<"using simple DCA transformer"<<std::endl;
-	if (parms.defined("ANTIFERROMAGNET"))
-	  transform_ptr = new AntiFerroDCATransformer(parms);
-	else
+	if (parms.defined("ANTIFERROMAGNET")) {
+	  std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
+	  transform_ptr = new AntiFerroDCATransformer(parms); 
+	} 
+	else {
+	  std::cout<<"using simple DCA transformer"<<std::endl;
 	  transform_ptr = new SimpleDCATransformer(parms);
+	}
 	matsubara_green_function_t G0_omega=transform_ptr->initial_G0(parms);
 	matsubara_green_function_t G_omega=G0_omega;
 	boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
