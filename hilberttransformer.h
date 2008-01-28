@@ -57,9 +57,24 @@ public:
   /// @param G_tau the Greens function as a function of imaginary time tau 
   /// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
   /// @return the result of the Hilbert transform (G0_tau)
-  virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier_ignored, 
-                                            double mu, double h, double beta, bool paramagnet)=0; 
+  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier_ignored, 
+                                            double mu, double h, double beta)=0; 
   
+
+  itime_green_function_t symmetrize(const itime_green_function_t& G_tau, const bool paramagnet) const {
+    itime_green_function_t G(G_tau);
+    if (paramagnet) {
+      assert(G.nflavor()%2==0);
+      for(spin_t flavor=0;flavor<G.nflavor(); flavor+=2){
+        for(itime_index_t tau=0;tau<G.ntime();++tau){
+          G(tau, flavor  )=0.5*(G(tau, flavor)+G(tau, flavor+1));
+          G(tau, flavor+1)=G(tau, flavor);
+        }
+      }
+    }
+    return G;
+  }
+
   virtual itime_green_function_t initial_G0(const alps::Parameters& parms) {
     std::cout<<"reading initial G0_tau"<<std::endl;
     int n_tau=boost::lexical_cast<int>(parms["N"]);
@@ -82,23 +97,14 @@ public:
   SemicircleHilbertTransformer(double t) : t_(t) {}
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
-  itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier, 
-                                    double mu, double h, double beta, bool paramagnet)
+  itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier, 
+                                    double mu, double h, double beta)
   {
     if(h!=0) std::cerr<<"ignoring magnetic field!"<<std::endl;
     double tsq=t_*t_;
     matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
     matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
     itime_green_function_t G0_tau(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
-    if (paramagnet) {
-      assert(G_tau.nflavor()%2==0);
-      for(spin_t flavor=0;flavor<G_tau.nflavor(); flavor+=2){
-        for(itime_index_t tau=0;tau<G_tau.ntime();++tau){
-          G_tau(tau, flavor  )=0.5*(G_tau(tau, flavor)+G_tau(tau, flavor+1));
-          G_tau(tau, flavor+1)=G_tau(tau, flavor);
-        }
-      }
-    }
     fourier.forward_ft(G_tau, G_omega);
     std::cout<<"G omega real: "<<std::endl;
     print_real_green_matsubara(std::cout, G_omega, beta);
@@ -157,14 +163,13 @@ class SquarelatticeHilbertTransformer : public HilbertTransformer {
 public:
   /// the constructor accepts the bandwidth
   SquarelatticeHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-  virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier_ignored,
-                                                    double mu, double h, double beta, bool paramagnet)
+  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier_ignored,
+                                                    double mu, double h, double beta)
   {
     //to implement
     std::cout<<mu;
     std::cout<<beta;
     std::cout<<h;
-    std::cout<<paramagnet;
     return itime_green_function_t(0,0,0);
   }
 private:
@@ -183,15 +188,14 @@ public:
   ///          Note that issues such as units are still undecided and might require further 
   ///          additions to the interface
   GeneralHilbertTransformer(const vector_type& D) : D_(D) {}
-  virtual itime_green_function_t operator()(itime_green_function_t& G_tau, FourierTransformer &fourier_ignored,
-                                                  double mu, double h, double beta, bool paramagnet)
+  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier_ignored,
+                                                  double mu, double h, double beta)
   {
     //to implement
     //std::cout<<Sigma;
     std::cout<<mu;
     std::cout<<beta;
     std::cout<<h;
-    std::cout<<paramagnet;
     return itime_green_function_t(0,0,0);
   }
 private:
@@ -216,10 +220,10 @@ public:
   /// @param G_omega the Greens function as a function of Matsubara Frequency omega 
   /// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
   /// @return the result of the Hilbert transform: the bare Green's function G0 in Matsubara frequencies
-  virtual matsubara_green_function_t operator()(matsubara_green_function_t & G_omega, 
+  virtual matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
                                                 matsubara_green_function_t &G0_omega, 
                                                 const double mu, const double h, 
-                                                const double beta,const bool paramagnet)=0; 
+                                                const double beta)=0;
   virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms) {
     std::cout<<"reading initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
@@ -230,6 +234,21 @@ public:
   }
   
   virtual ~FrequencySpaceHilbertTransformer() {}
+  template <class T>
+  green_function<T> symmetrize(const green_function<T>& G, const bool paramagnet) const
+  {
+    green_function<T> G_new(G);
+    if (paramagnet) {
+      assert(G_new.nflavor()%2==0);
+      for(spin_t flavor=0;flavor<G_new.nflavor(); flavor+=2){
+        for(itime_index_t tau=0;tau<G_new.ntime();++tau){
+          G_new(tau, flavor  )=0.5*(G_new(tau, flavor)+G_new(tau, flavor+1));
+          G_new(tau, flavor+1)=G_new(tau, flavor);
+        }
+      }
+    }
+    return G_new;
+  }
 };
 
 
@@ -241,25 +260,15 @@ public:
   FSSemicircleHilbertTransformer(double t) : t_(t) {}
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
-  virtual matsubara_green_function_t operator()(matsubara_green_function_t& G_omega, 
+  virtual matsubara_green_function_t operator()(const matsubara_green_function_t& G_omega, 
                                                 matsubara_green_function_t &G0_omega_ignored, 
-                                                const double mu, const double h, const double beta, const bool paramagnet)
+                                                const double mu, const double h, const double beta)
   {
-    std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" paramagnet: "<<paramagnet<<std::endl;
+    std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<std::endl;
     double tsq=t_*t_;
     matsubara_green_function_t G0_omega(G_omega);
-    //formula according to review, p. 61, formula 221. Enforce symmetry up = down; 
-    if (paramagnet) {
-      if(G_omega.nflavor()>1 && G_omega.nflavor()%2==0){
-        for(uint flavor=0;flavor<G_omega.nflavor();flavor+=2){
-          for(uint i=0;i<G_omega.nfreq();++i){
-            G_omega(i,flavor  )= 0.5*(G_omega(i,flavor)+G_omega(i,flavor+1));
-            G_omega(i,flavor+1)=G_omega(i,flavor);
-          }
-        }
-      }
-    }
-    if(G_omega.nflavor()==1){ //special case. Paramagnet built in.
+    //formula according to review, p. 61, formula 221. 
+    if(G_omega.nflavor()==1){ //special case. 
       for(uint i=0; i<G_omega.ntime(); i++) {
         std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
         G0_omega(i,0) =1./(iw + mu - tsq*G_omega(i,0));
@@ -324,9 +333,9 @@ public:
   FSHamiltonianHilbertTransformer(const alps::Parameters& params);
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// via summation in k-space. The k-points are defined in the Hamiltonian.
-  virtual matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
+  virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
                                                 matsubara_green_function_t &G0_omega, 
-                                                const double mu, const double h, const double beta, const bool paramagnet);
+                                                const double mu, const double h, const double beta);
 };
 
 
@@ -357,23 +366,12 @@ public:
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// using integration over D(epsilon).
   /// We perform the HT G <- \int \frac{D(e)}{A - e} de
-  virtual matsubara_green_function_t operator()(matsubara_green_function_t &G_omega, 
+  virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
                                                 matsubara_green_function_t &G0_omega, 
-                                                const double mu, const double h, const double beta, const bool paramagnet)
+                                                const double mu, const double h, const double beta)
   {
     assert(G_omega.nsite()==1);
     if(h!=0){std::cerr<<" we don't yet handle magnetic fields!"<<std::endl; abort(); }
-    if(paramagnet && G_omega.nflavor()==1){ 
-      for(uint i=0;i<G_omega.nfreq();++i) {
-        G_omega(i,0)=std::complex<double>(0, G_omega(i,0).imag());
-      }
-    }
-    if(paramagnet && G_omega.nflavor()==2){ 
-      for(uint i=0;i<G_omega.nfreq();++i){ 
-        G_omega(i,0)=0.5*(G_omega(i,0)+G_omega(i,1)); 
-        G_omega(i,1)=G_omega(i,0);
-      }
-    }
     //matsubara_green_function_t G0_omega(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
     matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
     matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
