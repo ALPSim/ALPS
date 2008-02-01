@@ -33,26 +33,6 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
   n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9)
 {
   setup_tables();
-  std::ofstream clustercoordstream("ClusterCoordinates");
-  for (int m=0; m<cluster_coordinates_.size1(); ++m) {
-    clustercoordstream << m << " ";
-    for (int d=0; d<cluster_coordinates_.size2(); ++d) 
-      clustercoordstream << cluster_coordinates_(m,d) << " ";
-    clustercoordstream << std::endl;
-  }
-  std::ofstream clustermomstream("ClusterMomenta");
-  for (int m=0; m<cluster_momenta_.size1(); ++m) {
-    clustermomstream << m << " ";
-    for (int d=0; d<cluster_momenta_.size2(); ++d) 
-      clustermomstream << cluster_momenta_(m,d) << " ";
-    clustermomstream << std::endl;
-  }
-  std::ofstream latticemomstream("LatticeMomenta");
-  for (int m=0; m<lattice_momenta_.size1(); ++m) {
-    for (int d=0; d<lattice_momenta_.size2(); ++d) 
-      latticemomstream << lattice_momenta_(m,d) << " ";
-    latticemomstream << std::endl;
-  }
   std::ofstream siterealstr("SiteClassesRealSpace");
   for (std::set<site_class_type>::const_iterator it_i=site_class_set_real_space_.begin(); 
        it_i!=site_class_set_real_space_.end(); ++it_i) {
@@ -105,6 +85,7 @@ void ClusterHelper::setup_tables()
     sum += sum_i>=0 ? sum_i%2 : (-sum_i)%2;
   }
   bipartite_ = (sum==0);
+  std::cerr << "cluster is bipartite\n";
   Matrix<double>::Type basis_inv = matrix_inverse<double>(basis);
   //setup cluster coordinates
   int maxc=n_cluster_sites_;
@@ -140,8 +121,6 @@ void ClusterHelper::setup_tables()
     }
     break;
   }
-  if (cluster_coordinates_.size1() != n_cluster_sites())
-    boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   //arrange vertices for bipartite lattices
   if (bipartite()) {
     for (int i=0; i<cluster_coordinates_.size1(); ++i) {
@@ -156,6 +135,13 @@ void ClusterHelper::setup_tables()
       }
     }
   }
+  std::ofstream clustercoordstream("ClusterCoordinates");
+  for (int m=0; m<cluster_coordinates_.size1(); ++m) {
+    clustercoordstream << m << " ";
+    for (int d=0; d<cluster_coordinates_.size2(); ++d) 
+      clustercoordstream << cluster_coordinates_(m,d) << " ";
+    clustercoordstream << std::endl;
+  }
   //setup reciprocal basis
   Matrix<double>::Type reciprocal_basis(dimension(), dimension());
   basis_vector_iterator itbr, itbr_end;
@@ -166,24 +152,26 @@ void ClusterHelper::setup_tables()
   Matrix<double>::Type reciprocal_basis_inv = matrix_inverse<double>(reciprocal_basis);
   //setup cluster momenta
   if (bipartite()) {
-    Matrix<double>::Type b_red(dimension(),dimension());
-    for (uint i=0; i<b_red.size1(); ++i) 
-      for (uint j=0; j<b_red.size2(); ++j)
-	b_red(i,j) = M_PI;
+    Matrix<double>::Type b_red;
     switch (dimension()) {
     case 1 :
+      b_red.resize(1,1);
+      b_red(0,0) = M_PI/2;
       break;
     case 2 :
-      b_red(1,0) *= -1;
+      b_red.resize(2,2);
+      b_red(0,0)= M_PI/2; b_red(0,1)=M_PI/2;
+      b_red(1,0)=-M_PI/2; b_red(1,1)=M_PI/2;
       break;
     case 3 :
-      b_red(1,1) *= -1;
-      b_red(2,1) *= -1;
-      b_red(0,2) *= -1;      
-      b_red(2,2) *= -1;
+      //reduced Brillouin zone is the Wigner-Seitz cell of an fcc lattice with a=2
+      b_red.resize(4,3);
+      b_red(0,0) =  M_PI/2; b_red(0,1) =  M_PI/2; b_red(0,2) =  M_PI/2;
+      b_red(1,0) = -M_PI/2; b_red(1,1) =  M_PI/2; b_red(1,2) =  M_PI/2;
+      b_red(2,0) =  M_PI/2; b_red(2,1) = -M_PI/2; b_red(2,2) =  M_PI/2;
+      b_red(3,0) =  M_PI/2; b_red(3,1) =  M_PI/2; b_red(3,2) = -M_PI/2;
       break;
     }
-    Matrix<double>::Type b_red_inv = matrix_inverse<double>(b_red);
     cell_iterator itc, itc_end;
     for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
       vector_type o = origin(*itc);
@@ -193,7 +181,7 @@ void ClusterHelper::setup_tables()
 	  c[d] += cluster_coordinate(i,d);
 	c = matrix_vector_mult(reciprocal_basis, c);
 	c = map_back_into_brillouin_zone(c);
-	if (inside_reduced_brillouin_zone(c, b_red_inv)) {
+	if (inside_reduced_brillouin_zone(c, b_red)) {
 	  append_column_no_duplicates(cluster_momenta_, c);
 	  for (int d=0; d<dimension(); ++d) 
 	    c[d] += M_PI;
@@ -217,8 +205,13 @@ void ClusterHelper::setup_tables()
       }
     }
   }
-  if (cluster_momenta_.size1() != n_cluster_sites())
-    boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
+  std::ofstream clustermomstream("ClusterMomenta");
+  for (int m=0; m<cluster_momenta_.size1(); ++m) {
+    clustermomstream << m << " ";
+    for (int d=0; d<cluster_momenta_.size2(); ++d) 
+      clustermomstream << cluster_momenta_(m,d) << " ";
+    clustermomstream << std::endl;
+  }
   //setup lattice momenta
   lattice_momenta_.resize(n_cluster_cells(), dimension());
   momentum_iterator itm, itm_end;
@@ -229,6 +222,16 @@ void ClusterHelper::setup_tables()
       lattice_momenta_(m,d) = mom[d];
     }
   } 
+  std::ofstream latticemomstream("LatticeMomenta");
+  for (int m=0; m<lattice_momenta_.size1(); ++m) {
+    for (int d=0; d<lattice_momenta_.size2(); ++d) 
+      latticemomstream << lattice_momenta_(m,d) << " ";
+    latticemomstream << std::endl;
+  }
+  if (cluster_coordinates_.size1() != n_cluster_sites())
+    boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
+  if (cluster_momenta_.size1() != n_cluster_sites())
+    boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
   symmetry_analysis(basis, basis_inv, reciprocal_basis, reciprocal_basis_inv);
 }
 
@@ -504,14 +507,32 @@ bool ClusterHelper::inside_cluster(vector_type v, const Matrix<double>::Type& B)
 
 bool ClusterHelper::inside_reduced_brillouin_zone(vector_type v, const Matrix<double>::Type& B_red) const 
 {
-  v = matrix_vector_mult(B_red, v);
+  for (int i=0; i<B_red.size1(); ++i) {
+    double norm = 0.;
+    for (int d=0; d<B_red.size2(); ++d) 
+      norm += B_red(i,d)*B_red(i,d);
+    //norm = sqrt(norm);
+    double projection = 0.;
+    for (int d=0; d<B_red.size2(); ++d) 
+      projection +=  v[d] * B_red(i,d);
+    projection /= norm;
+    projection = round(projection);
+    if (projection > 1 || projection <= -1) {
+      /*std::cerr << v[0] << " " << v[1] << " " << v[2] << ";";
+      std::cerr << "proj: " << projection << ";";
+      std::cerr << i << " no\n";*/
+      return false;
+    }
+  }
+  return true;
+  /*v = matrix_vector_mult(B_red, v);
   for (uint d=0; d<v.size(); ++d) 
     v[d] *= 2;
   v = round(v);
   bool inside = true;
   for (uint d=0; d<v.size(); ++d) 
-    inside &= (v[d]<=1 && v[d]>-1);
-  return inside;
+  inside &= (v[d]<=1 && v[d]>-1);
+  return inside;*/
 }
 
 
