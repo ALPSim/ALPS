@@ -26,7 +26,6 @@
 *****************************************************************************/
 #ifndef FOURIER_TRANSFORM_H
 #define FOURIER_TRANSFORM_H
-//#include "hirschfyesim.h"
 #include <complex>
 #include "types.h" // for the multiple_vector_type
 #include "green_function.h" // for the multiple_vector_type
@@ -44,7 +43,7 @@ void generate_spline_matrix(dense_matrix & spline_matrix);
 void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs);
 
 //example:  V = vector_type
-template <class V> 
+/*template <class V> 
 void evaluate_second_derivatives(double dt, double c2, double c3, 
 				 dense_matrix & spline_matrix, 
 				 const V & g, V & second_derivatives) {
@@ -75,20 +74,11 @@ void evaluate_second_derivatives(double dt, double c2, double c3,
     rhs[i] = g[i-1]-2*g[i]+g[i+1];
   }
   rhs[Np1-1] = c2*dtsq + g[0] - g[1] + g[Np1-2] - g[Np1-1];
-  //std::cout<<"rhs: "<<rhs<<std::endl;
   solve_second_derivatives(spline_matrix, rhs);
-  //std::cout<<"rhs: "<<rhs<<std::endl;
   for(uint i=0;i<Np1;++i){
     second_derivatives[i]=rhs[i]*6./dtsq;
   }
-  /*
-  for (int i=0; i<Np1; i++) {
-    for (int j=0; j<Np1; j++) {
-      second_derivatives[i] += spline_matrix(i,j)*rhs[j];
-	}
-	second_derivatives[i] *= 6./dtsq;
-  }*/
-}
+}*/
 
 
 inline std::complex<double> f_omega(std::complex<double> iw, double c1, double c2, double c3) {
@@ -104,47 +94,79 @@ inline double f_tau(double tau, double beta, double c1, double c2, double c3) {
 
 class FourierTransformer{
 public:
-  FourierTransformer(double beta, double mu){
+  FourierTransformer(double beta, double mu, int n_flavor, int n_site){
     beta_=beta;
     mu_=mu;
-    c1_=1.;
-    c2_=mu/*/beta*/;
-    c3_=0.;
+    c2_.resize(n_flavor);
+    c3_.resize(n_flavor);
+    c1_.resize(n_flavor);
+    for(int f=0;f<n_flavor;++f){
+      c2_[f].resize(n_site);
+      c3_[f].resize(n_site);
+      c1_[f].resize(n_site);
+      for(int i=0;i<n_site;++i){
+        c2_[f][i].resize(n_site);
+        c3_[f][i].resize(n_site);
+        c1_[f][i].resize(n_site);
+        for(int j=0;j<n_site;++j){
+          c2_[f][i][j]=-mu;
+          c3_[f][i][j]=0;
+          c1_[f][i][j]=i==j?1:0;
+        }
+      }
+    }
   }
-  virtual ~FourierTransformer(){}
+  virtual ~FourierTransformer(){
+  }
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
   virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
-			   const green_function<alps::RealObsevaluator> &G_omega_real,
-			   const green_function<alps::RealObsevaluator> &G_omega_imag) const;
+  const green_function<alps::RealObsevaluator> &G_omega_real,
+  const green_function<alps::RealObsevaluator> &G_omega_imag) const;
   static void generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift=0);
-  static void generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr);
+  static void generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr,
+  const std::vector<std::vector<std::vector<double> > > &densities);
   void setmu(double mu){ mu_=mu;}
 protected:
   double beta_;
   double mu_;
-  double c1_;
-  double c2_;
-  double c3_;
+  std::vector<std::vector<std::vector<double> > > c1_;
+  std::vector<std::vector<std::vector<double> > > c2_;
+  std::vector<std::vector<std::vector<double> > > c3_;
 };
 
 
 class BetheFourierTransformer:public FourierTransformer{
 public:
-  BetheFourierTransformer(double beta, double mu, double t):FourierTransformer(beta, mu){
+  BetheFourierTransformer(double beta, double mu, double t, int n_flavor, int n_site):FourierTransformer(beta, mu, n_flavor, n_site){
     t_=t;
-    c3_=(mu_*mu_+t_*t_)/*/(beta*beta)*/;
+    for(int f=0;f<n_flavor;++f){
+      for(int i=0;i<n_site;++i){
+        for(int j=0;j<n_site;++j){
+          c2_[f][i][j]=mu_;
+          c3_[f][i][j]=(mu_*mu_+t_*t_);
+        }
+      }
+    }
     U_=0;
   }
-  BetheFourierTransformer(double beta, double mu, double t, double U):FourierTransformer(beta, mu){
+  BetheFourierTransformer(double beta, double mu, double t, double U, std::vector<std::vector<std::vector<double> > > densities, int n_flavor, int n_site):FourierTransformer(beta, mu, n_flavor, n_site){
     t_=t;
     U_=U;
-    c3_=(mu_*mu_+t_*t_+ U_*U_/4.)/*/(beta*beta)*/; //the U-trick: for the GF (not bgf)
+    //the density enters for GF away from 1/2 filling. implement this...
+    //the density here corresponds to the unshifted density, i.e. for single site, half filling ad an U/2 to mu.
+    for(int f=0;f<n_flavor;++f){
+      for(int i=0;i<n_site;++i){
+        for(int j=0;j<n_site;++j){
+          c3_[f][i][j]=(mu_*mu_+t_*t_+U*mu*(densities[f][i][j]+densities[(f+1)%2][i][j])+U*U*densities[(f+1)%2][i][j]*densities[(f+1)%2][i][j]);
+          c2_[f][i][j]=mu_-U*densities[(f+1)%2][i][j];
+        }
+      }
+    }
     std::cerr<<"using Bethe Fourier Transformer! "<<std::endl;
     std::cerr<<"mu=: "<<mu_<<std::endl;
     std::cerr<<"beta=: "<<beta_<<std::endl;
     std::cerr<<"U=: "<<U_<<std::endl;
-    std::cerr<<"c3=: "<<c3_<<std::endl;
   }
   virtual ~BetheFourierTransformer(){}
 private:
@@ -155,12 +177,18 @@ private:
 
 class FFunctionFourierTransformer:public FourierTransformer{
 public:
-  FFunctionFourierTransformer(double beta, double mu, double t):FourierTransformer(beta,mu){
+  FFunctionFourierTransformer(double beta, double mu, double t, int n_flavor, int n_site):FourierTransformer(beta,mu, n_flavor, n_site){
     std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"t: "<<t<<std::endl;
     t_=t;
-    c1_=t*t;
-    c2_=-(2*t*t*mu+mu*mu*mu);
-    c3_=0;//t*t*t*t-t*t*mu*mu-mu*mu*mu*mu; //recheck this term!
+    for(int f=0;f<n_flavor;++f){
+      for(int i=0;i<n_site;++i){
+        for(int j=0;j<n_site;++j){
+          c1_[f][i][j]*=t*t;
+          c2_[f][i][j]=-(2*t*t*mu+mu*mu*mu);
+          c3_[f][i][j]=0;
+        }
+      }
+    }
   }
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const{
     std::cerr<<"implement 2nd derivatives for F function before using this!"<<std::endl;
@@ -171,8 +199,6 @@ public:
     std::cout<<"correcting for F function"<<std::endl;
     for(uint j=0;j<G_tau.nflavor();++j){
       G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);
-      /*G_tau(0,j)=-t_*t_*(0.5+0.25*mu_);
-        G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);*/
     }
   }
   virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
@@ -182,6 +208,50 @@ public:
   virtual ~FFunctionFourierTransformer(){}
 private:
   double t_;
+};
+
+class PlaquetteMomentumFourierTransformer:public FourierTransformer{
+public:
+  PlaquetteMomentumFourierTransformer(double beta, //inverse temp
+  double t, //hopping
+  double tprime,  //frustrated hopping along diagonal
+  double mu, //chemical potential
+  double U, //onsite interaction
+  std::vector<std::vector<std::vector<double> > > densities,
+  int n_flavor,
+  int n_site
+  ):FourierTransformer(beta, mu, n_flavor, n_site){
+    if(n_site!=4){ std::cerr<<"this Fourier transformer can only be used for the plaquette!"; abort();}
+    if(n_flavor!=2){ std::cerr<<"this Fourier transformer can only be used for the plaquette!"; abort();}
+    double es_av=-8*(M_PI*t+2*tprime)/(M_PI*M_PI);
+    double ep_av= 16*tprime/(M_PI*M_PI);
+    double ed_av= 8*(M_PI*t-2*tprime)/(M_PI*M_PI);
+
+    double essq_av= 4*((8+M_PI*M_PI)*t*t+8*M_PI*t*tprime+M_PI*M_PI*tprime*tprime)/(M_PI*M_PI);
+    double epsq_av= 4*((1-8/M_PI/M_PI)*t*t+tprime);
+    double edsq_av= 4*((8+M_PI*M_PI)*t*t-8*M_PI*t*tprime+M_PI*M_PI*tprime*tprime)/(M_PI*M_PI);
+    
+    //take into account shift for symmetrical half filling: here that's exactly U/2
+    mu_=mu_+U/2; mu=mu+U/2;
+    
+    for(int f=0;f<n_flavor;++f){
+      c2_[f][0][0]=mu_+es_av;
+      c2_[f][1][1]=mu_+ed_av;
+      c2_[f][2][2]=mu_+ep_av;
+      c2_[f][3][3]=mu_+ep_av;
+      
+      c3_[f][0][0]=essq_av+2*mu_*es_av+mu_*mu_ - U*(2*densities[(f+1)%2][0][0])*(es_av-mu_)+U*U*densities[(f+1)%2][0][0]*densities[(f+1)%2][0][0];
+      c3_[f][1][1]=edsq_av+2*mu_*ed_av+mu_*mu_ - U*(2*densities[(f+1)%2][1][1])*(es_av-mu_)+U*U*densities[(f+1)%2][1][1]*densities[(f+1)%2][1][1];
+      c3_[f][2][2]=epsq_av+2*mu_*ep_av+mu_*mu_ - U*(2*densities[(f+1)%2][2][2])*(es_av-mu_)+U*U*densities[(f+1)%2][2][2]*densities[(f+1)%2][2][2];
+      c3_[f][3][3]=epsq_av+2*mu_*ep_av+mu_*mu_ - U*(2*densities[(f+1)%2][3][3])*(es_av-mu_)+U*U*densities[(f+1)%2][3][3]*densities[(f+1)%2][3][3];
+    }
+    U_=U;
+    t_=t;
+  }
+  virtual ~PlaquetteMomentumFourierTransformer(){}
+private:
+  double t_;
+  double U_;
 };
 
 #endif

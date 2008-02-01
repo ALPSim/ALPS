@@ -32,11 +32,11 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/parameter.h>
 
-void generate_spline_matrix(dense_matrix & spline_matrix) {
-
+/*void generate_spline_matrix(dense_matrix & spline_matrix) {
+  
   // spline_matrix has dimension (N+1)x(N+1)
   int Np1 = spline_matrix.size1();
-
+  
   // A is the matrix whose inverse defines spline_matrix
   //   
   //      6                   6
@@ -59,26 +59,17 @@ void generate_spline_matrix(dense_matrix & spline_matrix) {
   A(Np1-1, 1) = -1;
   A(Np1-1, Np1-2) = 1;
   A(Np1-1, Np1-1) = 2;
-  //std::cout<<A<<std::endl;  
-  // solve A*spline_matrix=I
-  // gesv solves A*X=B, input for B is I, output (=solution X) is spline_matrix
-  /*spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);   
-  boost::numeric::bindings::lapack::gesv(A, spline_matrix);
-  std::cout<<prec_prod(A, spline_matrix)<<std::endl;
-*/
   //Emanuel avoid inversion of matrix
   spline_matrix=A;
-}
+}*/
 void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs){
   //avoid matrix inversion and instead solve the system of equations: S *v2 =
   //rhs for v2. The result will be found in rhs as we use the LAPACK call dgesv
   dense_matrix v(rhs.size(), 1);
-  //std::cout<<v<<std::endl;
   for(uint i=0;i<rhs.size();++i){
     v(i,0)=rhs[i];
   }
   boost::numeric::bindings::lapack::gesv(spline_matrix, v);
-  //std::cout<<rhs<<std::endl;
   for(uint i=0;i<rhs.size();++i){
     rhs[i]=v(i,0);
   }
@@ -86,8 +77,8 @@ void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &
 
 
 void FourierTransformer::backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
-				     const green_function<alps::RealObsevaluator> &G_omega_real,
-				     const green_function<alps::RealObsevaluator> &G_omega_imag) const
+                                     const green_function<alps::RealObsevaluator> &G_omega_real,
+                                     const green_function<alps::RealObsevaluator> &G_omega_imag) const
 {
   assert(G_tau.nflavor()==G_omega_real.nflavor() && G_tau.nsite()==G_omega_real.nsite());
   assert(G_tau.nflavor()==G_omega_imag.nflavor() && G_tau.nsite()==G_omega_imag.nsite());
@@ -101,26 +92,26 @@ void FourierTransformer::backward_ft(green_function<alps::RealObsevaluator> &G_t
   for(uint f=0;f<N_flavor;++f){
     for (uint s1=0; s1<N_site; ++s1){
       for (uint s2=0; s2<N_site; ++s2) {
-	if (s1==s2) {
-	  for (uint k=0; k<N_omega; k++) {
-	    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-	    G_omega_no_model_real(k,s1,s2,f) -= f_omega(iw, c1_,c2_, c3_).real();
-	    G_omega_no_model_imag(k,s1,s2,f) -= f_omega(iw, c1_,c2_, c3_).imag();
-	  } 
-	}
-	for (uint i=0; i<N_tau; i++) {
-	  double wt = i*M_PI/N_tau;
-	  G_tau(i,s1,s2,f) = 2/beta_*(cos(wt)*G_omega_no_model_real(0,s1,s2,f)+
-				       sin(wt)*G_omega_no_model_imag(0,s1,s2,f));
-	  for (uint k=1; k<N_omega; k++) {
-	    wt = (2*k+1)*i*M_PI/N_tau;
-	    G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model_real(k,s1,s2,f)+
-					 sin(wt)*G_omega_no_model_imag(k,s1,s2,f));
-	  }
-	  G_tau(i,s1,s2,f) += s1==s2 ? f_tau(i*dt, beta_, c1_, c2_, c3_) : 0.; 
-	}
-	G_tau(N_tau,s1,s2,f)= -G_tau(0,s1,s2,f);
-	G_tau(N_tau,s1,s2,f)-= s1==s2 ? -1. : 0.;
+        if (s1==s2) {
+          for (uint k=0; k<N_omega; k++) {
+            std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+            G_omega_no_model_real(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]).real();
+            G_omega_no_model_imag(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]).imag();
+          } 
+        }
+        for (uint i=0; i<N_tau; i++) {
+          double wt = i*M_PI/N_tau;
+          G_tau(i,s1,s2,f) = 2/beta_*(cos(wt)*G_omega_no_model_real(0,s1,s2,f)+
+                                      sin(wt)*G_omega_no_model_imag(0,s1,s2,f));
+          for (uint k=1; k<N_omega; k++) {
+            wt = (2*k+1)*i*M_PI/N_tau;
+            G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model_real(k,s1,s2,f)+
+                                         sin(wt)*G_omega_no_model_imag(k,s1,s2,f));
+          }
+          G_tau(i,s1,s2,f) += f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
+        }
+        G_tau(N_tau,s1,s2,f)= -G_tau(0,s1,s2,f);
+        G_tau(N_tau,s1,s2,f)-= s1==s2 ? -1. : 0.;
       }
     }
   }
@@ -130,7 +121,7 @@ void FourierTransformer::backward_ft(green_function<alps::RealObsevaluator> &G_t
 ///same as the template function in fouriertransform.h, but not for the
 //multiple vectors. Use green_function_t instead.
 void FourierTransformer::backward_ft(itime_green_function_t &G_tau, 
-				     const matsubara_green_function_t &G_omega) const {
+                                     const matsubara_green_function_t &G_omega) const {
   assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite());
   uint N_tau = G_tau.ntime()-1;
   uint N_omega = G_omega.nfreq();
@@ -140,105 +131,290 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
   for(uint f=0;f<G_omega.nflavor();++f){
     for (uint s1=0; s1<N_site; ++s1){
       for (uint s2=0; s2<N_site; ++s2) {
-	if (s1==s2) {
-	  for (uint k=0; k<N_omega; k++) {
-	    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-	    //std::cout<<G_omega_no_model(k,f)<<std::endl;
-	    G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_,c2_, c3_);
-	    //std::cout<<k<<" "<<G_omega_no_model(k,f)<<std::endl;
-	  } 
-	}
-	//std::cout<<c1_<<" "<<c2_<<" "<<c3_<<std::endl;
-	for (uint i=0; i<N_tau; i++) {
-	  G_tau(i,s1,s2,f) = s1==s2 ? f_tau(i*dt, beta_, c1_, c2_, c3_) : 0.; 
-	  //std::cout<<i<<" "<<G_tau(i,f)<<std::endl;
-	  for (uint k=0; k<N_omega; k++) {
-	    double wt((2*k+1)*i*M_PI/N_tau);
-	    G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
-					 sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
-	  }
-	}
-	G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
-	G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
+        if (s1==s2) {
+          for (uint k=0; k<N_omega; k++) {
+            std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+            G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
+          } 
+        }
+        for (uint i=0; i<N_tau; i++) {
+          G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
+          for (uint k=0; k<N_omega; k++) {
+            double wt((2*k+1)*i*M_PI/N_tau);
+            G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
+                                         sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
+          }
+        }
+        G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
+        G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
       }
     }
   }
-}
+                                     }
 
 
-void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
+/*void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
   assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite());
   uint N=G_tau.ntime()-1;
+  uint n_omega=G_omega.nfreq();
   uint N_site=G_tau.nsite();
-  //double dt = beta_/N;
-  uint n_oversampling_t=10; //not sure that helps... check again!
-  uint n_oversampling_w=1; //not sure that helps... check again!
-  uint N_large_t=(G_tau.ntime()-1)*n_oversampling_t+1;
-  uint N_large_w=(G_tau.ntime()-1)*n_oversampling_w+1;
-  double dt=beta_/(N_large_t-1);
-//  assert(G_omega.nfreq()==N); 
+  double dt=beta_/N;
   //we implicitely assume that we have as many imag time slices as matsubara frequencies. 
   //If this is not the case: interpolate,
-  double G_tau_vector[N_large_t];
-  std::valarray<std::complex<double> > G_omega_vector(N_large_w);
-  //std::vector<double> G_tau_derivatives(G_tau.ntime());
-  assert(c1_==1); //otherwise change evaluate_second_derivatives!
+  double G_tau_vector[N];
+  std::valarray<std::complex<double> > G_omega_vector(n_omega);
+  std::valarray<std::complex<double> > G_omega_vector_nosub(n_omega);
+  //assert(c1_==1); //otherwise change evaluate_second_derivatives!
   for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
     for (uint s1=0; s1<N_site; ++s1){
       for (uint s2=0; s2<N_site; ++s2) {
-	for(uint i=0;i<N;++i){
-	  for(uint j=0;j<n_oversampling_t;++j){
-	    G_tau_vector[i*n_oversampling_t+j]=
-	      (1./n_oversampling_t*(G_tau(i,s1,s2,flavor)*(n_oversampling_t-j)+G_tau(i+1,s1,s2,flavor)*j));
-	  }
-	  G_tau_vector[N_large_t-1]=G_tau(N,s1,s2,flavor);
-	}
-	for (uint n=0; n<N_large_w; n++) {
-	  double w_n=(2*n+1)*M_PI/beta_;
-	  G_omega_vector[n]=0;
-	  for(uint i=0;i<N_large_t-1;++i){
-	    //if(n==0)
-	    //std::cout<<i<<" "<<dt<<" "<<i*dt<<std::endl;
+        for(uint i=0;i<N;++i){
+          G_tau_vector[i]=G_tau(i,s1,s2,flavor);
+        }
+        for (uint n=0; n<n_omega; n++) {
+          double w_n=(2*n+1)*M_PI/beta_;
+          G_omega_vector[n]=0;
+          G_omega_vector_nosub[n]=0;
+          for(uint i=0;i<N;++i){
             double phi=w_n*i*dt;
-	    if (s1==s2) 
-	      G_omega_vector[n] += std::complex<double>(cos(phi), sin(phi))*
-		((G_tau_vector[i]-f_tau(dt*i,beta_, c1_, c2_, c3_))*dt);
-	    else
-	      G_omega_vector[n] += dt*std::exp((std::complex<double>(0,1))*(w_n*i*dt))*G_tau_vector[i];
-	  }
-	  //std::cerr<<n<<" "<<G_omega_vector[n].real()<<" "<<G_omega_vector[n].imag()<<std::endl;
-	}
+            //if (s1==s2) 
+              G_omega_vector[n] += std::complex<double>(cos(phi), sin(phi))*
+                ((G_tau_vector[i]-f_tau(dt*i,beta_, c1_[flavor][s1][s2], c2_[flavor][s1][s2], c3_[flavor][s1][s2]))*dt);
+              G_omega_vector_nosub[n] += std::complex<double>(cos(phi), sin(phi))*G_tau_vector[i];
+            //else
+            //  G_omega_vector[n] += dt*std::exp((std::complex<double>(0,1))*(w_n*i*dt))*G_tau_vector[i];
+          }
+          if(n>n_omega/2)
+            G_omega_vector[n]=0; //no more information for these frequencies.
+        }
         std::cout<<"doing forward ft for nfreq= "<<G_omega.nfreq()<<std::endl;
-	for(uint n=0;n<G_omega.nfreq();++n){
-	  G_omega(n,s1,s2,flavor)=n<N_large_w?G_omega_vector[n]:0.;
-	  if (s1==s2) {
-	    std::complex<double> iw(0,(2*n+1)*M_PI/beta_);
-	    G_omega(n,s1,s2,flavor) += f_omega(iw, c1_,c2_, c3_);
-	  }
-	}
+        std::cout<<"c1: "<<c1_[flavor][s1][s2]<<" c2: "<<c2_[flavor][s1][s2]<<" c3: "<<c3_[flavor][s1][s2]<<std::endl;
+        for(uint n=0;n<G_omega.nfreq();++n){
+          G_omega(n,s1,s2,flavor)=G_omega_vector[n];
+          //if (s1==s2) {
+            std::complex<double> iw(0,(2*n+1)*M_PI/beta_);
+            std::cout<<n<<" "<<s1<<" "<<s2<<" "<<flavor<<" "<<
+              G_omega(n,s1,s2,flavor).real()<<" "<<G_omega(n,s1,s2,flavor).imag()<<" "<<
+              f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]).real()<<" "<<
+              f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]).imag()<<" "<<
+              G_omega_vector_nosub[n].real()<<" "<<G_omega_vector_nosub[n].imag()<<std::endl;
+            G_omega(n,s1,s2,flavor) += f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]);
+          //}
+        }
       }
     }
   }
+}*/
+
+void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
+
+  // spline_matrix has dimension (N+1)x(N+1)
+  int Np1 = spline_matrix.size1();
+  std::cout<<"spline matrix size is: "<<Np1<<std::endl;
+  // A is the matrix whose inverse defines spline_matrix
+  //   
+  //      6                   6
+  //      1  4  1
+  //         1  4  1
+  // A =        ...
+  //
+  //                    1  4  1
+  //    -2  0              0  2    
+  spline_matrix.clear(); 
+  dense_matrix A = 4*dt/6.*boost::numeric::ublas::identity_matrix<double>(Np1);
+        
+  for (int i=1; i<Np1-1; i++) {
+    A(i,i-1) = dt/6.;
+    A(i,i+1) = dt/6.;
+  }
+  A(0,0) = 1.;
+  A(0, Np1-1) = 1.;
+  A(Np1-1, 0) = -2.*dt/6.;
+  A(Np1-1, 1) = -1.*dt/6.;
+  A(Np1-1, Np1-2) = 1*dt/6.;
+  A(Np1-1, Np1-1) = 2*dt/6.;
+  
+  // solve A*spline_matrix=I
+  // gesv solves A*X=B, input for B is I, output (=solution X) is spline_matrix
+  spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);   
+  boost::numeric::bindings::lapack::gesv(A, spline_matrix);
 }
 
- 
+
+void evaluate_second_derivatives(double dt, double BETA, dense_matrix & spline_matrix, std::vector<double> & g, std::vector<double> & second_derivatives, const double c1g, const double c2g, const double c3g) {
+
+  // g, rhs and second_derivatives have dimension N+1
+  int Np1 = spline_matrix.size1();
+  //assert(c1g==1); 
+  // rhs is the vector containing the data of the curve y = g(tau), which allows to 
+  // compute the vector of second derivatives y'' at times tau_n by evaluating
+  // y'' = spline_matrix * rhs(y)
+  //
+  //                         0                                
+  //                         y0 - 2*y1 + y2
+  //                         y1 - 2*y2 + y3
+  // rhs = 6/(delta_tau)^2 * ...
+  //
+  //                         yNp1-3 - 2*yNp1-2 + yNp1-1
+  //                         y0 - y1 + yNp1-2 - yNp1-1     
+
+  std::vector<double> rhs(Np1, 0);
+  std::cout<<"constants: "<<c1g<<" "<<c2g<<" "<<c3g<<std::endl;
+  /*for(int i=0;i<Np1;++i){
+    g[i]-=f_tau(dt*i, BETA, c1g, c2g, c3g);
+  }*/
+  //rhs[0] = 10000*pow(1./100,2)*10000; // const2*dtau^2*const2 for G^-1=-const2*G; this is the condition if we do not remove the parabolic part !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  //std::cout<<g[0]<<" "<<g[1]<<" "<<g[Np1-1]<<" "<<g[Np1-2]<<std::endl;
+  rhs[0] = -c3g; //G''(0)+G''(beta)=-c3
+  for (int i=1; i<Np1-1; i++) {
+    rhs[i] = (g[i-1]-2*g[i]+g[i+1])/dt;
+  }
+  //rhs[Np1-1] = g[0] - g[1] + g[Np1-2] - g[Np1-1];
+  rhs[Np1-1] = c2g -1./dt*(-g[0] + g[1] -g[Np1-2] + g[Np1-1]);
+
+  
+  //rhs[Np1-1] = 0; // natural splines
+              
+  for (int i=0; i<Np1; i++) {
+    second_derivatives[i]=0;
+    for (int j=0; j<Np1; j++) {
+      second_derivatives[i] += spline_matrix(i,j)*rhs[j];
+    }
+  //  std::cout << "2der " << i << " " << second_derivatives[i] << "  rhs " << rhs[i] << " g "<<g[i]<<" f "<<f_tau(dt*i,BETA,c1g,c2g,c3g)<<"\n";
+  }
+}
+
+void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsubara_green_function_t & gomega) const {
+  //double BETA, const itime_green_function_t &gtau, matsubara_green_function_t &gomega, double *c1g, double *c2g, double *c3g) {
+  std::vector<double> v(gtau.ntime());
+  std::vector<std::complex<double> > v_omega(gomega.nfreq());
+  int Np1 = v.size();
+  int N = Np1-1;
+  int N_omega = v_omega.size();
+  double dt = beta_/N;
+  
+  
+  for(int f=0;f<gtau.nflavor();++f){
+    for(int p=0;p<gtau.nsite();++p){
+      for(int q=0;q<gtau.nsite();++q){
+        for(int tau=0;tau<Np1;++tau){
+          v[tau]=gtau(tau,p,q,f);
+        }
+        std::cout<<"c1 is: "<<c1_[f][p][q]<<" computed: "<<-v[0]-v[N]<<std::endl;
+        std::cout<<"c2 is: "<<c2_[f][p][q]<<" computed: "<<(v[1]-v[0]+v[N]-v[N-1])/dt<<std::endl;
+        std::cout<<"c3 is: "<<c3_[f][p][q]<<" computed: "<<-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt)<<std::endl;
+
+        //  *(const_cast<double*> (&(c1_[f][p][q])))=1;
+          *(const_cast<double*> (&(c2_[f][p][q])))*=-1; //convention is all wrong...
+        //  *(const_cast<double*> (&(c3_[f][p][q])))=0;
+
+        std::cout<<"c1 new is: "<<c1_[f][p][q]<<" computed: "<<-v[0]-v[N]<<std::endl;
+        std::cout<<"c2 new is: "<<c2_[f][p][q]<<" computed: "<<(v[1]-v[0]+v[N]-v[N-1])/dt<<std::endl;
+        std::cout<<"c3 new is: "<<c3_[f][p][q]<<" computed: "<<-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt)<<std::endl;
+       
+        /*bool use_computed=true;
+        if(use_computed){
+          std::cout<<"using computed, not analytic values for c1g, c2g, c3g"<<std::endl;
+          *(const_cast<double*> (&(c1_[f][p][q])))=-v[0]-v[N];
+          *(const_cast<double*> (&(c2_[f][p][q])))=(v[1]-v[0]+v[N]-v[N-1])/dt;
+          *(const_cast<double*> (&(c3_[f][p][q])))=-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt);
+       }*/
+        
+        dense_matrix spline_matrix(Np1, Np1);
+        generate_spline_matrix(spline_matrix, dt);
+        // matrix containing the second derivatives y'' of interpolated y=v[tau] at points tau_n 
+        std::vector<double> v2(Np1, 0); 
+        evaluate_second_derivatives(dt,beta_, spline_matrix, v, v2, c1_[f][p][q], c2_[f][p][q], c3_[f][p][q]);
+        v_omega.assign(N_omega, 0);
+        std::vector<std::complex<double> > v_omega_naive(N_omega);
+        //std::vector<std::complex<double> > v_omega_third(N_omega);
+        v_omega_naive.assign(N_omega, 0);
+        //v_omega_third.assign(N_omega, 0);
+        
+        std::cout << "beta " << beta_ << "\n";
+        
+        for (int k=0; k<N_omega; k++) {
+          std::complex<double> iw(0, M_PI*(2*k+1)/beta_);
+          for (int n=1; n<N; n++) {
+            v_omega[k] += exp(iw*(n*dt))*(v2[n+1]-2*v2[n]+v2[n-1]); //partial integration, four times. Then approximate the fourth derivative by finite differences
+            v_omega_naive[k]+=std::exp(iw*(n*dt))*v[n];
+                                                                    // v_omega_third[k]+=std::exp(iw*(n*dt))*(-v2[n]+v2[n+1])/(iw*iw*iw);
+          }
+          v_omega[k] += (v2[1] - v2[0] + v2[N] - v2[N-1]); //that's the third derivative, on the boundary
+          v_omega[k] *= 1./(dt*iw*iw*iw*iw);
+          v_omega_naive[k]+=v[0]-v[N];
+          //v_omega_third[k]+=(-v2[0]+v2[1]); //first slice
+          //v_omega_third[k]=-v_omega_third[k]+f_omega(iw, c1g[f], c2g[f], c3g[f]);
+          //std::cout<<k<<" "<<v_omega_naive[k]<<" "<<v_omega[k]/*<<" "<<v_omega_third[k]*/<<" "<<f_omega(iw, c1_[f][p][q],c2_[f][p][q],c3_[f][p][q])<<std::endl;
+          v_omega[k] += f_omega(iw, c1_[f][p][q], c2_[f][p][q], c3_[f][p][q]); //that's the boundary terms of the first, second, and third partial integration.
+                                                                               //std::cout<<"derivative at boundary: "<<-v2[1] + v2[0] + v2[N] - v2[N-1]<<" divisor: "<< 1./(dt*iw*iw*iw*iw)<<std::endl;
+          //gomega(k,f)=std::conj(v_omega[k]); //that's the proper convention for the self consistency loop in my DCA program.
+          gomega(k,f)=v_omega[k]; //that's the proper convention for the self consistency loop here.
+        }
+        
+        /*for (int k=0; k<N_omega; k++) {
+          std::complex<double> fw=f_omega(std::complex<double>(0, (2.*k+1)*M_PI/beta_),c1_[f][p][q],c2_[f][p][q],c3_[f][p][q]);
+        std::cout << "v_omega " << k << " " << M_PI*(2*k+1) << " " << std::real(v_omega[k]) << "  " << std::imag(v_omega[k]) << " "<<fw.real()<<" "<<fw.imag()<<" "<<(v_omega[k]-fw).real()<<" "<<(v_omega[k]-fw).imag()<<" naive: "<<v_omega_naive[k].real()<<" "<<v_omega_naive[k].imag()<<std::endl;
+        }*/
+        
+        static std::ofstream g_interpol("/tmp/g_interpol.dat");                      
+        for (int j=0; j<Np1-1; j++) {
+          // define parameters of spline fit y(tau) = a + b*(tau-tau_j) + c*(tau-tau_j)^2 + d*(tau-tau_j)^3
+          double a = v[j];
+          double b = (v[j+1]-v[j])/dt - dt/6.*(v2[j+1]+2.*v2[j]);
+          double c = v2[j]/2.;
+          double d = (v2[j+1]-v2[j])/(6.*dt);
+          // plot interpolated function
+          for (int n=0; n<10; n++) {
+            double x = n/10.*dt;
+            g_interpol<<j+n/10.<< " "<<a + b*x + c*pow(x,2) + d*pow(x,3)<<" "<<f_tau(x, beta_, c1_[f][p][q], c2_[f][p][q], c3_[f][p][q])<<std::endl;
+          }
+        }
+        g_interpol<<std::endl;
+        static std::ofstream second_der("/tmp/2nd_der.dat");
+        for (int j=0; j<Np1; j++) {
+          second_der<<j*dt<<" "<<v[j]<<" "<<v2[j]<<std::endl;
+        }
+        second_der<<std::endl;
+      }
+    }
+  }
+  } 
+
 void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift){
   if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
     std::cout<<"using General Fourier transform"<<std::endl;
-    fourier_ptr.reset(new FourierTransformer(parms["BETA"], (double)(parms["MU"])+mu_shift));
+    int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
+    int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
+    fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], (double)(parms["MU"])+mu_shift, n_flavor, n_sites));
   } else{
+    int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
+    int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
     std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
-    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], (double)(parms["MU"])+mu_shift, parms["t"]));
+    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], (double)(parms["MU"])+mu_shift, parms["t"], n_flavor, n_sites));
   }
 }
 
 
-void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr){
+void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr,
+ const std::vector<std::vector<std::vector<double> > > &densities){
   if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
+    int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
+    int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
     std::cout<<"using General Fourier transform"<<std::endl;
-    fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"]));
+    fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"], n_flavor, n_sites));
   } else{
+    int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
+    int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
     std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
-    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], parms["MU"], parms["t"], parms["U"]));
+    for(int f=0;f<n_flavor;++f){
+      for(int i=0;i<n_sites;++i){
+        for(int j=0;j<n_sites;++j){
+          std::cout<<f<<" "<<i<<" "<<j<<" "<<densities[f][i][j]<<std::endl;
+        }
+      }
+    }
+    std::cout<<"mu+U/2: "<<(double)parms["MU"]+(double)((double)parms["U"]/2.)<<std::endl;
+    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], (double)parms["MU"]+(double)((double)parms["U"]/2.), (double)parms["t"], (double)parms["U"], densities, n_flavor, n_sites));
   }
 }

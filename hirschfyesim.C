@@ -406,8 +406,20 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
     }
   }
 
+  std::vector<std::vector<std::vector<double> > > densities;
+  densities.resize(2);
+  densities[0].resize(n_site);
+  densities[1].resize(n_site);
+  for(int i=0;i<n_site;++i){
+    densities[0][i].resize(n_site);
+    densities[1][i].resize(n_site);
+    for(int j=0;j<n_site;++j){
+      densities[0][i][j]=-green_result(N,i,j,0);
+      densities[1][i][j]=-green_result(N,i,j,1);
+    }
+  }
   boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_transformer_U(parms, fourier_ptr);
+  FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
   //once we have this we still need to transform the result to k-space for the
   //self consistency
