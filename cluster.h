@@ -83,8 +83,11 @@ private:
   bool append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v) const;
   bool append_column_no_duplicates(Matrix<site_t>::Type& m, std::map<site_t, site_t>& smap) const;
   vector_type map_back_into_brillouin_zone(vector_type v) const;
-  vector_type &map_back_into_cluster(vector_type &v, 
+  vector_type map_back_into_cluster(vector_type v, 
 				    const Matrix<double>::Type& B_inv, const Matrix<double>::Type& B) const;
+  uint cluster_momentum_approximation(vector_type v, 
+				      const Matrix<double>::Type& mom,
+				      const Matrix<double>::Type& B) const;
   uint identify_vertex(const vector_type& v, const Matrix<double>::Type& coordinate_matrix) const;
   uint identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const uint i) const;
   double round(const double d) const;
@@ -120,7 +123,6 @@ public:
   virtual itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const=0;
   virtual matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const=0;
   virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms); 
-  
 };
 
 
@@ -140,6 +142,11 @@ public:
   virtual matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const=0;
   virtual itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const=0; 
   virtual itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const=0;
+  virtual matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
+							 const matsubara_green_function_t& G_omega, 
+							 const matsubara_green_function_t& G0_omega, 
+							 const double mu, const double h, 
+							 const double beta) const =0; 
   std::complex<double>* exp_iksite(const int sign) const;
 
 private:
@@ -174,6 +181,11 @@ public:
   { return transform_coordinates<double, Forward>(G); }
   
   matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
+  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
+						 const matsubara_green_function_t &G_omega, 
+						 const matsubara_green_function_t &G0_omega, 
+						 const double mu, const double h, 
+						 const double beta) const; 
  private:
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;
@@ -242,7 +254,16 @@ public:
   { return transform_coordinates<double, Forward>(G); }
   
   matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
-  
+  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
+						 const matsubara_green_function_t &G_omega, 
+						 const matsubara_green_function_t &G0_omega, 
+						 const double mu, const double h, 
+						 const double beta) const
+  {
+    boost::throw_exception(std::logic_error("transform fourpoint function for antiferromagnetic phases not yet implemented"));
+    return G_omega;
+  } 
+
 private:
   template <class T>
   green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;

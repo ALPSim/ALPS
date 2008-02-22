@@ -85,7 +85,6 @@ void ClusterHelper::setup_tables()
     sum += sum_i>=0 ? sum_i%2 : (-sum_i)%2;
   }
   bipartite_ = (sum==0);
-  std::cerr << "cluster is bipartite\n";
   Matrix<double>::Type basis_inv = matrix_inverse<double>(basis);
   //setup cluster coordinates
   int maxc=n_cluster_sites_;
@@ -123,6 +122,7 @@ void ClusterHelper::setup_tables()
   }
   //arrange vertices for bipartite lattices
   if (bipartite()) {
+    std::cerr << "cluster is bipartite\n";
     for (int i=0; i<cluster_coordinates_.size1(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
 	int j = i;
@@ -160,8 +160,8 @@ void ClusterHelper::setup_tables()
       break;
     case 2 :
       b_red.resize(2,2);
-      b_red(0,0)= M_PI/2; b_red(0,1)=M_PI/2;
-      b_red(1,0)=-M_PI/2; b_red(1,1)=M_PI/2;
+      b_red(0,0) = M_PI/2; b_red(0,1) = M_PI/2;
+      b_red(1,0) = -M_PI/2; b_red(1,1) = M_PI/2;
       break;
     case 3 :
       //reduced Brillouin zone is the Wigner-Seitz cell of an fcc lattice with a=2
@@ -204,6 +204,22 @@ void ClusterHelper::setup_tables()
 	append_column_no_duplicates(cluster_momenta_, c);
       }
     }
+    if ((n_cluster_sites()%2)==0) {
+      Matrix<double>::Type sorted_momenta;
+      vector_type v(dimension());
+      uint ind = 0;
+      for(uint i=0; i<n_cluster_sites(); ++i) {
+	//std::cerr << ind << "\n";
+	for (uint d=0; d<dimension(); ++d) 
+	  v[d] = cluster_momenta_(ind,d);
+	append_column_no_duplicates(sorted_momenta, v);
+	for (uint d=0; d<dimension(); ++d) 
+	  v[d] += M_PI;
+	v = map_back_into_brillouin_zone(v);
+	ind = cluster_momentum_approximation(v, cluster_momenta_, reciprocal_basis_inv);
+      }
+      cluster_momenta_ = sorted_momenta;
+    }
   }
   std::ofstream clustermomstream("ClusterMomenta");
   for (int m=0; m<cluster_momenta_.size1(); ++m) {
@@ -212,6 +228,7 @@ void ClusterHelper::setup_tables()
       clustermomstream << cluster_momenta_(m,d) << " ";
     clustermomstream << std::endl;
   }
+  
   //setup lattice momenta
   lattice_momenta_.resize(n_cluster_cells(), dimension());
   momentum_iterator itm, itm_end;
@@ -553,6 +570,7 @@ bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const v
 }
 
 
+
 bool ClusterHelper::append_column_no_duplicates(Matrix<site_t>::Type& m, 
 						std::map<site_t, site_t>& smap) const
 {
@@ -589,7 +607,8 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_brillouin_zone(vector_ty
 }
 
 
-ClusterHelper::vector_type &ClusterHelper::map_back_into_cluster(vector_type &v, 
+
+ClusterHelper::vector_type ClusterHelper::map_back_into_cluster(vector_type v, 
 								const Matrix<double>::Type& B_inv, 
 								const Matrix<double>::Type& B) const
 {
@@ -605,6 +624,66 @@ ClusterHelper::vector_type &ClusterHelper::map_back_into_cluster(vector_type &v,
   }
   v = matrix_vector_mult(B, v);
   return v;
+}
+
+
+
+uint ClusterHelper::cluster_momentum_approximation(vector_type v, 
+						   const Matrix<double>::Type& momenta, 
+						   const Matrix<double>::Type& B) const 
+{
+  //std::cerr << "jepp ";
+  Matrix<double>::Type T;
+  switch (dimension()) {
+  case 1 : 
+    T.resize(1,1);
+    T(0,0) = 2*M_PI;
+    break;
+  case 2 :
+    T.resize(4,2);
+    T(0,0) = 2*M_PI; T(0,1) = 0;
+    T(1,0) = 0 ; T(1,1) = 2*M_PI;
+    T(2,0) = 2*M_PI; T(2,1) = 2*M_PI;
+    T(3,0) = 2*M_PI; T(3,1) = -2*M_PI;
+    break;
+  case 3 :
+    T.resize(13,3);
+    T(0,0)  =  2*M_PI; T(0,1)  =       0; T(0,2)  =       0;
+    T(1,0)  =       0; T(1,1)  =  2*M_PI; T(1,2)  =       0;
+    T(2,0)  =       0; T(2,1)  =       0; T(2,2)  =  2*M_PI;
+    T(3,0)  =  2*M_PI; T(3,1)  =  2*M_PI; T(3,2)  =       0;
+    T(4,0)  =  2*M_PI; T(4,1)  =       0; T(4,2)  =  2*M_PI;
+    T(5,0)  =       0; T(5,1)  =  2*M_PI; T(5,2)  =  2*M_PI;
+    T(6,0)  =  2*M_PI; T(6,1)  = -2*M_PI; T(6,2)  =       0;
+    T(7,0)  =  2*M_PI; T(7,1)  =       0; T(7,2)  = -2*M_PI;
+    T(8,0)  =       0; T(8,1)  =  2*M_PI; T(8,2)  = -2*M_PI;
+    T(9,0)  =  2*M_PI; T(9,1)  =  2*M_PI; T(9,2)  =  2*M_PI;
+    T(10,0) = -2*M_PI; T(10,1) =  2*M_PI; T(10,2) =  2*M_PI;
+    T(11,0) =  2*M_PI; T(11,1) = -2*M_PI; T(11,2) =  2*M_PI;
+    T(12,0) =  2*M_PI; T(12,1) =  2*M_PI; T(12,2) = -2*M_PI;
+  }
+  for (int i=0; i<momenta.size1(); ++i) {
+    for (int t=0; t<T.size1(); ++t) {
+      for (int s=-1; s<=1; ++s) {
+	vector_type diff(dimension());
+	for (uint d=0; d<dimension(); ++d) 
+	  diff[d] = v[d] - momenta(i,d) - s*T(t,d);
+	diff = matrix_vector_mult(B, diff);
+	for (uint d=0; d<dimension(); ++d) 
+	  diff[d] *= 2;
+	diff = round(diff);
+	bool inside = true;
+	for (uint d=0; d<diff.size(); ++d) 
+	  inside &= diff[d]<=1 && diff[d]>-1;
+	if (inside) {
+	  //std::cerr << i << "\n";
+	  return i;
+	}
+      }
+    }
+  }
+  boost::throw_exception(std::logic_error("no cluster momentum approximation found")); 
+  return n_cluster_sites();
 }
 
 
@@ -629,6 +708,8 @@ uint ClusterHelper::identify_sublattice(const Matrix<double>::Type& coordinate_m
   double sum=0;
   for (int d=0; d<coordinate_matrix.size2(); ++d) 
     sum += coordinate_matrix(i,d);
+  sum = round(sum);
+  sum *= sum<0 ? -1 : 1;
   return (int(round(sum)))%2;
 }
 

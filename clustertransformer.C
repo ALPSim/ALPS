@@ -28,7 +28,7 @@
 
 
 matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters& parms) {
-  std::cout<<"reading initial G0_omega"<<std::endl;
+  std::cerr<<"reading initial G0_omega"<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
@@ -102,7 +102,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
       std::cerr<<"WARNING: Input file could not be found, proceeding with free solution."<<std::endl;
   }
   { //proceed with computation of new G0 if we can't find input G0
-    std::cout<<"calculating initial G0_omega"<<std::endl;
+    std::cerr<<"calculating initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_tau=boost::lexical_cast<int>(parms["N"]);
     int n_flavor=parms.value_or_default("FLAVORS", 2);
@@ -139,6 +139,71 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
 }
 
 
+matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
+								     const matsubara_green_function_t& G_omega,
+								     const matsubara_green_function_t& G0_omega, 
+								     const double mu, const double h, 
+								     const double beta) const
+{
+  assert(h==0);
+  uint nflavor=G0_omega.nflavor();
+  uint nfreq=G0_omega.nfreq();
+  assert(G0_omega.nsite()==n_cluster_sites());
+  matsubara_green_function_t G0_omega_fourpoint(G_omega_fourpoint);
+  for(int z=0; z<nflavor; ++z) {
+    int zbar = (z+1)%nflavor;
+    for(int k=0;k<n_cluster_sites();k+=2) {
+      for (int om=0; om<nfreq; ++om) {
+	G0_omega_fourpoint(om,k,k,z) =
+	  -G_omega(om,k+1,k+1,z)*G_omega(om,k,k,zbar);
+	G0_omega_fourpoint(om,k+1,k+1,z) =
+	  -G_omega(om,k,k,z)*G_omega(om,k+1,k+1,zbar);
+
+      }
+    }
+  }
+  matsubara_green_function_t two_particle_vertex(G_omega_fourpoint);
+  matsubara_green_function_t G_omega_fourpoint_new(G_omega_fourpoint);
+  matsubara_green_function_t selfenergy(G_omega);
+  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+    for (site_t k=0; k<n_cluster_sites(); ++k) {
+      for (frequency_t freq=0; freq<nfreq; ++freq) {
+	two_particle_vertex(freq, k, k, flavor) = 1./G0_omega_fourpoint(freq, k, k, flavor);
+	two_particle_vertex(freq, k, k, flavor) -= 1./G_omega_fourpoint(freq, k, k, flavor);
+	selfenergy(freq, k, k, flavor) = 1./G0_omega(freq, k, k, flavor);
+	selfenergy(freq, k, k, flavor) -= 1./G_omega(freq, k, k, flavor);
+      }
+    }
+  }
+  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+    spin_t flavorbar = (flavor+1)%nflavor;
+    for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
+      //site_t kc_plus_q = (kc+1)%n_cluster_sites();
+      for (frequency_t freq=0; freq<nfreq; ++freq) {
+	std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);	
+	G_omega_fourpoint_new(freq, kc, kc, flavor) = 0.;
+	for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
+	  vector_type k(dimension());
+	  vector_type k_plus_q(dimension());
+	  for (uint d=0; d<dimension(); ++d) { 
+	    k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	    k_plus_q[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d) + M_PI;
+	  }
+	  G_omega_fourpoint_new(freq, kc, kc, flavor) 
+	    -= (1./(iomega_n+mu-epsilon(k_plus_q)-selfenergy(freq, kc+1, kc+1, flavor)))
+	    * (1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavorbar)));
+	  G_omega_fourpoint_new(freq, kc+1, kc+1, flavor) 
+	    -= (1./(iomega_n+mu-epsilon(k_plus_q)-selfenergy(freq, kc+1, kc+1, flavorbar)))
+	    * (1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor)));
+	}
+	G_omega_fourpoint_new(freq, kc, kc, flavor) /= n_cluster_cells();
+	G_omega_fourpoint_new(freq, kc, kc, flavor) = 
+	  1. / ( 1./G_omega_fourpoint_new(freq, kc, kc, flavor) - two_particle_vertex(freq, kc, kc, flavor) );
+      }
+    }
+  }
+  return G_omega_fourpoint_new;
+}
 
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
 							       const matsubara_green_function_t &G0_omega, 
@@ -198,7 +263,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   if (parms.defined("G0OMEGA_INPUT")) 
     return ClusterTransformer::initial_G0(parms);
   else {
-    std::cout<<"calculating initial G0_omega"<<std::endl;
+    std::cerr<<"calculating initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_tau=boost::lexical_cast<int>(parms["N"]);
     int n_flavor=parms.value_or_default("FLAVORS", 2);
