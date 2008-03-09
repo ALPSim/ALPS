@@ -4,8 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
-*                            Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 2008 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -26,26 +25,12 @@
 *
 *****************************************************************************/
 
-/* $Id$ */
+#include <alps/osiris/os.h>
+#include <iostream>
 
-#ifndef ALPS_OS_H
-#define ALPS_OS_H
-
-//=======================================================================
-// This file includes low level functions which depend on the OS used
-//=======================================================================
-
-#include <alps/config.h>
-#include <string>
-
-namespace alps {
-
-/// returns the hostname
-std::string hostname();
-
-/// returns the username
-std::string username();
-
-} // end namespace
-
-#endif // ALPS_OS_H
+int main() {
+  std::cerr << "cofig hostname = " << ALPS_CONFIG_HOST << std::endl
+            << "config username = " << ALPS_CONFIG_USER << std::endl
+            << "exec hostname = " << alps::hostname() << std::endl
+            << "exec username = " << alps::username() << std::endl;
+}
