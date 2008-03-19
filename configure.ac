@@ -112,8 +112,12 @@ AC_DEFINE_UNQUOTED([ALPS_XML_DIR], ["$ac_cv_alps_xmldir"])
 ALPS_XML_DIR=$ac_cv_alps_xmldir
 AC_SUBST(ALPS_XML_DIR)
 
-test -z "$ac_hostname" && ac_hostname="unknown"
-AC_DEFINE_UNQUOTED([ALPS_CONFIG_HOST], ["$ac_hostname"])
+if test -n "$HOST"; then
+  AC_DEFINE_UNQUOTED([ALPS_CONFIG_HOST], ["$HOST"])
+else
+  test -z "$ac_hostname" && ac_hostname="unknown"
+  AC_DEFINE_UNQUOTED([ALPS_CONFIG_HOST], ["$ac_hostname"])
+fi
 ac_username=$USER
 test -z "$ac_username" && ac_username="unknown"
 AC_DEFINE_UNQUOTED([ALPS_CONFIG_USER], ["$ac_username"])
