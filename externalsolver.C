@@ -65,7 +65,6 @@ ImpuritySolver::result_type ExternalSolver::solve(
 	
     // scope to force closing of file
   }
-  
   call(infile,outfile);
 
   // read the output
@@ -125,6 +124,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     // scope to force closing of file
   }
   
+  std::cout<<"finished writing input xml file"<<std::endl;
+  std::cout<<"input file name was: "<<infile<<std::endl;
   call(infile,outfile);
 
   // read the output
