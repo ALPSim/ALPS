@@ -40,12 +40,20 @@
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
 // : the_scheduler(scheduler::start_single(f,argc,argv))
 {
+  std::cerr<<"constructing solver with arguments"<<std::endl;
+  for(int i=1;i<argc;++i){
+    std::cout<<argv[i]<<std::endl;
+  }
 	comm_init(argc,argv);
 	if(is_master()){
           alps::scheduler::NoJobfileOptions opt(1,argv);
+          opt.max_check_time=60;
+          //alps::scheduler::NoJobfileOptions opt(argc,argv);
           master_scheduler = new alps::scheduler::SingleScheduler(opt,factory);
+          //master_scheduler.set_max_check_time(300);
 	} else{ //a slave lives for many iterations...
             alps::scheduler::NoJobfileOptions opt(1,argv);
+            //alps::scheduler::NoJobfileOptions opt(argc,argv);
 	    int res=0;
 	    alps::scheduler::Scheduler *slave_scheduler = new alps::scheduler::Scheduler(opt,factory);
 	    res = slave_scheduler->run();
