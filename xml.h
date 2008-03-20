@@ -39,7 +39,7 @@
 template <class T>
 void write_freq(alps::oxstream& xml, std::vector<T> const& v, int flavor)
 {
-  
+  //std::cerr<<"writing freq oxstream of vector with size: "<<v.size()<<" flavor "<<flavor<<std::endl;
   xml << alps::start_tag("VECTOR") 
       << alps::attribute("index","Matsubara frequency")
       << alps::attribute("flavor",flavor)
