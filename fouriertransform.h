@@ -177,14 +177,14 @@ private:
 
 class FFunctionFourierTransformer:public FourierTransformer{
 public:
-  FFunctionFourierTransformer(double beta, double mu, double t, int n_flavor, int n_site):FourierTransformer(beta,mu, n_flavor, n_site){
-    std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"t: "<<t<<std::endl;
-    t_=t;
+  FFunctionFourierTransformer(double beta, double mu, double epsilonsq_av, int n_flavor, int n_site):FourierTransformer(beta,mu, n_flavor, n_site){
+    std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"epsilonsq_av: "<<epsilonsq_av<<std::endl;
+    epsilonsq_av_=epsilonsq_av; //this is the integral of the second moment of the dos: \int_-\infty^\infty e^2 rho(e) de. It is t^2 for semicircle...
     for(int f=0;f<n_flavor;++f){
       for(int i=0;i<n_site;++i){
         for(int j=0;j<n_site;++j){
-          c1_[f][i][j]*=t*t;
-          c2_[f][i][j]=-(2*t*t*mu+mu*mu*mu);
+          c1_[f][i][j]=epsilonsq_av;
+          c2_[f][i][j]=0;//-(2*epsilonsq_av*mu+mu*mu*mu);
           c3_[f][i][j]=0;
         }
       }
@@ -198,7 +198,7 @@ public:
     FourierTransformer::backward_ft(G_tau, G_omega);
     std::cout<<"correcting for F function"<<std::endl;
     for(uint j=0;j<G_tau.nflavor();++j){
-      G_tau(G_tau.ntime()-1,j)=-t_*t_-G_tau(0,j);
+      G_tau(G_tau.ntime()-1,j)=-epsilonsq_av_-G_tau(0,j);
     }
   }
   virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
@@ -207,7 +207,7 @@ public:
 
   virtual ~FFunctionFourierTransformer(){}
 private:
-  double t_;
+  double epsilonsq_av_;
 };
 
 class PlaquetteMomentumFourierTransformer:public FourierTransformer{

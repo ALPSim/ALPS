@@ -386,8 +386,9 @@ public:
           double delta_dos     = dos[n]    -dos    [n+1];
           //perform analytic integration of D(e)/(A-e) for D known at points
           //e0, e1 at the end of the interval.
-          g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])
-                                 *(log(A-epsilon[n]) - log(A-epsilon[n+1])));
+          //g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])
+          //                       *(log(A-epsilon[n]) - log(A-epsilon[n+1])));
+          g+=delta_dos/(2*delta_epsilon)*(dos[n+1]-dos[n])*(log(A-epsilon[n]) + log(A-epsilon[n+1]));
         }
         G_omega_new(w, f)=g;
       }
