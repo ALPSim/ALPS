@@ -45,13 +45,21 @@ bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@am__append_4 = \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@am__append_4 = \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
+
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@am__append_5 = \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 
 subdir = tool
 DIST_COMMON = $(dist_bin_SCRIPTS) $(srcdir)/Makefile.am \
@@ -124,14 +132,21 @@ parameter2xml_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@am__objects_1 = actions.$(OBJEXT) \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@	post_process.$(OBJEXT) \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@	utils.$(OBJEXT)
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@am__objects_2 = actions.$(OBJEXT) \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@	actions_class.$(OBJEXT) \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@	collector.$(OBJEXT) \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@	post_process.$(OBJEXT) \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@	template_stack.$(OBJEXT) \
-@BOOST_CVS_TRUE@@BUILD_DOC_TRUE@	utils.$(OBJEXT)
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@am__objects_2 = actions.$(OBJEXT) \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@	actions_class.$(OBJEXT) \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@	collector.$(OBJEXT) \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@	post_process.$(OBJEXT) \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@	template_stack.$(OBJEXT) \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@	utils.$(OBJEXT)
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@am__objects_3 = actions.$(OBJEXT) \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	actions_class.$(OBJEXT) \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	collector.$(OBJEXT) \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	post_process.$(OBJEXT) \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	template_stack.$(OBJEXT) \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	utils.$(OBJEXT)
 @BUILD_DOC_TRUE@nodist_quickbook_OBJECTS = quickbook.$(OBJEXT) \
-@BUILD_DOC_TRUE@	$(am__objects_1) $(am__objects_2)
+@BUILD_DOC_TRUE@	$(am__objects_1) $(am__objects_2) \
+@BUILD_DOC_TRUE@	$(am__objects_3)
 quickbook_OBJECTS = $(nodist_quickbook_OBJECTS)
 quickbook_LDADD = $(LDADD)
 quickbook_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
@@ -191,14 +206,16 @@ BOOST_1_33_FALSE = @BOOST_1_33_FALSE@
 BOOST_1_33_TRUE = @BOOST_1_33_TRUE@
 BOOST_1_34_FALSE = @BOOST_1_34_FALSE@
 BOOST_1_34_TRUE = @BOOST_1_34_TRUE@
+BOOST_1_35_FALSE = @BOOST_1_35_FALSE@
+BOOST_1_35_TRUE = @BOOST_1_35_TRUE@
 BOOST_CPPFLAGS = @BOOST_CPPFLAGS@
-BOOST_CVS_FALSE = @BOOST_CVS_FALSE@
-BOOST_CVS_TRUE = @BOOST_CVS_TRUE@
 BOOST_DIR = @BOOST_DIR@
 BOOST_INCDIR = @BOOST_INCDIR@
 BOOST_LDFLAGS = @BOOST_LDFLAGS@
 BOOST_LIBS = @BOOST_LIBS@
 BOOST_SRCDIR = @BOOST_SRCDIR@
+BOOST_SVN_FALSE = @BOOST_SVN_FALSE@
+BOOST_SVN_TRUE = @BOOST_SVN_TRUE@
 BOOST_USER_CONFIG_H = @BOOST_USER_CONFIG_H@
 BUILD_ARCHIVE_FALSE = @BUILD_ARCHIVE_FALSE@
 BUILD_ARCHIVE_TRUE = @BUILD_ARCHIVE_TRUE@
@@ -357,7 +374,8 @@ convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
 archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.cpp archive_node.hpp archive_plot.cpp archive_plot.hpp archive_sqlite.cpp archive_sqlite.hpp archive_xml.cpp archive_xml.hpp
 @BUILD_DOC_TRUE@nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp \
-@BUILD_DOC_TRUE@	$(am__append_3) $(am__append_4)
+@BUILD_DOC_TRUE@	$(am__append_3) $(am__append_4) \
+@BUILD_DOC_TRUE@	$(am__append_5)
 all: all-am
 
 .SUFFIXES:

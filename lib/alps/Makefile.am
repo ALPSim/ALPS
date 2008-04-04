@@ -78,11 +78,12 @@ src_boost_FILESYSTEM_1_34 = \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-src_boost_FILESYSTEM_CVS = \
+src_boost_FILESYSTEM_1_35 = \
   $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
+src_boost_FILESYSTEM_SVN = $(src_boost_FILESYSTEM_1_35)
 
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -132,7 +133,8 @@ src_boost_REGEX_1_33 += \
   $(BOOST_SRCDIR)/regex/src/winstances.cpp
 endif
 src_boost_REGEX_1_34 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_CVS = $(src_boost_REGEX_1_33)
+src_boost_REGEX_1_35 = $(src_boost_REGEX_1_33)
+src_boost_REGEX_SVN = $(src_boost_REGEX_1_33)
 
 src_boost_SERIALIZATION_1_32 = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
@@ -206,7 +208,7 @@ src_boost_SERIALIZATION_1_33 += \
   $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
 endif
 src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
-src_boost_SERIALIZATION_CVS = \
+src_boost_SERIALIZATION_1_35 = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
@@ -234,7 +236,7 @@ src_boost_SERIALIZATION_CVS = \
   $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp
 if BUILD_BOOST_WCHAR
-src_boost_SERIALIZATION_CVS += \
+src_boost_SERIALIZATION_1_35 += \
   $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
   $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
@@ -246,6 +248,7 @@ src_boost_SERIALIZATION_CVS += \
   $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
   $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
 endif
+src_boost_SERIALIZATION_SVN = $(src_boost_SERIALIZATION_1_35)
 
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
@@ -254,8 +257,9 @@ src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/slot.cpp \
   $(BOOST_SRCDIR)/signals/src/trackable.cpp
 
-src_BOOST_SYSTEM_CVS = \
+src_BOOST_SYSTEM_1_35 = \
   $(BOOST_SRCDIR)/system/src/error_code.cpp
+src_BOOST_SYSTEM_SVN = $(src_BOOST_SYSTEM_1_35)
 
 src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp \
@@ -294,8 +298,12 @@ if BOOST_1_34
 nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_34) $(src_boost_REGEX_1_34) $(src_boost_SERIALIZATION_1_34)
 endif
 
-if BOOST_CVS
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_CVS) $(src_boost_REGEX_CVS) $(src_boost_SERIALIZATION_CVS) $(src_BOOST_SYSTEM_CVS)
+if BOOST_1_35
+nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_35) $(src_boost_REGEX_1_35) $(src_boost_SERIALIZATION_1_35) $(src_BOOST_SYSTEM_1_35)
+endif
+
+if BOOST_SVN
+nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_SVN) $(src_boost_REGEX_SVN) $(src_boost_SERIALIZATION_SVN) $(src_BOOST_SYSTEM_SVN)
 endif
 
 if BUILD_BOOST_SIGNALS

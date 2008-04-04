@@ -330,7 +330,7 @@ AC_ARG_WITH(boost-wchar,
 boost_dir_s=
 
 for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
-  for b in boost boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
+  for b in boost boost_1_35_0 boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
     if test -f "$d/$b/boost/config.hpp"; then
       if test -f "$d/$b/libs/filesystem/src/exception.cpp"; then
         boost_dir_s="$d/$b"
@@ -391,9 +391,15 @@ dnl Boost version
 
 AC_MSG_CHECKING([for Boost version])
   AC_TRY_COMPILE([#include <boost/version.hpp>
+#if BOOST_VERSION < 103600
+#error
+#endif],,ac_cv_boost_version=svn)
+if test -z "$ac_cv_boost_version"; then
+  AC_TRY_COMPILE([#include <boost/version.hpp>
 #if BOOST_VERSION < 103500
 #error
-#endif],,ac_cv_boost_version=cvs)
+#endif],,ac_cv_boost_version=1_35)
+fi
 if test -z "$ac_cv_boost_version"; then
   AC_TRY_COMPILE([#include <boost/version.hpp>
 #if BOOST_VERSION < 103400 
@@ -413,8 +419,11 @@ if test -z "$ac_cv_boost_version"; then
 #endif],,ac_cv_boost_version=1_32)
 fi
 case "x$ac_cv_boost_version" in
-  xcvs )
-    AC_MSG_RESULT([CVS])
+  xsvn )
+    AC_MSG_RESULT([SVN])
+    ;;
+  x1_35 )
+    AC_MSG_RESULT([1.35])
     ;;
   x1_34 )
     AC_MSG_RESULT([1.34])
@@ -890,7 +899,8 @@ AM_CONDITIONAL(ALPS_LIGHT, test "$ac_cv_alps_type" = "light")
 AM_CONDITIONAL(BOOST_1_32, test "$ac_cv_boost_version" = 1_32)
 AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
 AM_CONDITIONAL(BOOST_1_34, test "$ac_cv_boost_version" = 1_34)
-AM_CONDITIONAL(BOOST_CVS, test "$ac_cv_boost_version" = cvs)
+AM_CONDITIONAL(BOOST_1_35, test "$ac_cv_boost_version" = 1_35)
+AM_CONDITIONAL(BOOST_SVN, test "$ac_cv_boost_version" = svn)
 AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
 AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_boost_signals" = yes)
 AM_CONDITIONAL(BUILD_BOOST_THREAD, test "$ac_cv_boost_thread" = yes)
@@ -929,7 +939,7 @@ if test "$ac_cv_use_precompiled_boost" != yes; then
   AC_CONFIG_HEADERS(src/boost/po_utf8_codecvt_facet.cpp)
   AC_DEFINE_UNQUOTED(SR_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/serialization/src/utf8_codecvt_facet.cpp")
   AC_CONFIG_HEADERS(src/boost/sr_utf8_codecvt_facet.cpp)
-  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = cvs; then
+  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = svn; then
     AC_DEFINE_UNQUOTED(FS_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/filesystem/src/utf8_codecvt_facet.cpp")
     AC_CONFIG_HEADERS(src/boost/fs_utf8_codecvt_facet.cpp)
   fi

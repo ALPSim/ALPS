@@ -28,7 +28,16 @@ nodist_quickbook_SOURCES += \
  $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
  $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 endif
-if BOOST_CVS
+if BOOST_1_35
+nodist_quickbook_SOURCES += \
+ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
+ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
+endif
+if BOOST_SVN
 nodist_quickbook_SOURCES += \
  $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
  $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
