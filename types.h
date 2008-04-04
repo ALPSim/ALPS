@@ -25,11 +25,12 @@
 *
 *****************************************************************************/
 
+//#define uint unsigned int 
+#include<sys/types.h>
 /// @file types.h
 /// @brief definition for basic types like vectors that are used throughout the solvers.
 #ifndef TYPES_H_
 #define TYPES_H_
-
 //includes
 #include <vector>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
@@ -83,4 +84,5 @@ void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta);
 void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &bare_green_matsubara, const multiple_complex_vector_type &dressed_green_matsubara, const multiple_vector_type &bare_green_itime, const multiple_vector_type &dressed_green_itime, const double beta);
 void print_tau_green_functions(const int iteration_ctr, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta);
+
 #endif /*TYPES_H_*/
