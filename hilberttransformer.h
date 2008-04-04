@@ -100,7 +100,7 @@ public:
   itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier, 
                                     double mu, double h, double beta)
   {
-    if(h!=0) std::cerr<<"ignoring magnetic field!"<<std::endl;
+    if(h!=0){ std::cerr<<"ignoring magnetic field!"<<std::endl; abort(); }
     double tsq=t_*t_;
     matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
     matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
@@ -388,16 +388,19 @@ public:
           //e0, e1 at the end of the interval.
           //g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])
           //                       *(log(A-epsilon[n]) - log(A-epsilon[n+1])));
-          g+=delta_dos/(2*delta_epsilon)*(dos[n+1]-dos[n])*(log(A-epsilon[n]) + log(A-epsilon[n+1]));
+          g+=0.5*(dos[n+1]-dos[n])*(log(A-epsilon[n]) + log(A-epsilon[n+1]));
+          //g-=delta_epsilon*dos[n]/(A-epsilon[n]);
         }
         G_omega_new(w, f)=g;
       }
     }
+    std::cout<<"G omega new is: "<<G_omega_new<<std::endl;
     for(spin_t f=0;f<G_omega.nflavor();++f){
       for(frequency_t w=0;w<G_omega.nfreq();++w){
         G0_omega_new(w,f)=1./(sigma(w,f)+1./G_omega_new(w,f));
       }
     }
+    std::cout<<"G0_omega_new"<<G0_omega_new<<std::endl;
     return G0_omega_new;
   }
   
