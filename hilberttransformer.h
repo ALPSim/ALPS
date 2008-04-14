@@ -167,9 +167,12 @@ public:
                                                     double mu, double h, double beta)
   {
     //to implement
+    std::cerr<<"Square Lattice Hilbert transformer"<<G_tau<<std::endl;
+    std::cout<<&fourier_ignored<<std::endl;
     std::cout<<mu;
     std::cout<<beta;
     std::cout<<h;
+    abort();
     return itime_green_function_t(0,0,0);
   }
 private:
@@ -193,9 +196,12 @@ public:
   {
     //to implement
     //std::cout<<Sigma;
-    std::cout<<mu;
-    std::cout<<beta;
-    std::cout<<h;
+    std::cerr<<G_tau<<std::endl;
+    std::cerr<<&fourier_ignored<<std::endl;
+    std::cerr<<mu;
+    std::cerr<<beta;
+    std::cerr<<h;
+    abort();
     return itime_green_function_t(0,0,0);
   }
 private:
@@ -264,7 +270,7 @@ public:
                                                 matsubara_green_function_t &G0_omega_ignored, 
                                                 const double mu, const double h, const double beta)
   {
-    std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<std::endl;
+    std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" "<<G0_omega_ignored.nfreq()<<std::endl;
     double tsq=t_*t_;
     matsubara_green_function_t G0_omega(G_omega);
     //formula according to review, p. 61, formula 221. 
@@ -382,8 +388,8 @@ public:
         sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); //self energy
         std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu -sigma(w, f);
         for(uint n=0;n<dos.size()-1;++n){
-          double delta_epsilon = epsilon[n]-epsilon[n+1];
-          double delta_dos     = dos[n]    -dos    [n+1];
+          //double delta_epsilon = epsilon[n]-epsilon[n+1];
+          //double delta_dos     = dos[n]    -dos    [n+1];
           //perform analytic integration of D(e)/(A-e) for D known at points
           //e0, e1 at the end of the interval.
           //g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])
