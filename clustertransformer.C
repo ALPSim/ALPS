@@ -60,7 +60,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 							    const matsubara_green_function_t &G0_omega, 
 							    const double mu, const double h, const double beta)
 {
-  assert(h==0);
+  if(h!=0){std::cerr<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
   uint nflavor=G0_omega.nflavor();
   uint nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
@@ -109,7 +109,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+    //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
@@ -145,7 +145,7 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
 								     const double mu, const double h, 
 								     const double beta) const
 {
-  assert(h==0);
+  if(h!=0){std::cerr<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
   uint nflavor=G0_omega.nflavor();
   uint nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
