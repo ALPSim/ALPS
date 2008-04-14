@@ -40,10 +40,10 @@
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
 // : the_scheduler(scheduler::start_single(f,argc,argv))
 {
-  std::cerr<<"constructing solver with arguments"<<std::endl;
-  for(int i=1;i<argc;++i){
-    std::cout<<argv[i]<<std::endl;
-  }
+  //std::cerr<<"constructing solver with arguments"<<std::endl;
+  //for(int i=1;i<argc;++i){
+  //  std::cout<<argv[i]<<std::endl;
+  //}
 	comm_init(argc,argv);
 	if(is_master()){
           alps::scheduler::NoJobfileOptions opt(1,argv);
