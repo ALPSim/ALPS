@@ -115,6 +115,7 @@ class ClusterTransformer : protected ClusterHelper
 public:
   ClusterTransformer(const alps::Parameters& params) :
     ClusterHelper(params) {}
+    virtual ~ClusterTransformer() {} //pro forma virtual destructor.
   
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
 						const matsubara_green_function_t &G0_omega, 
@@ -132,6 +133,7 @@ class DCATransformer : public ClusterTransformer
 public:
   DCATransformer(const alps::Parameters& params) :
     ClusterTransformer(params) {}
+  virtual ~DCATransformer(){} //pro forma virtual destructor
   
   template<typename T> green_function<T> symmetrize_real_space(const green_function<T>& G) const 
   { return symmetrize_helper(G, pair_classes_real_space()); }
@@ -261,6 +263,12 @@ public:
 						 const double beta) const
   {
     boost::throw_exception(std::logic_error("transform fourpoint function for antiferromagnetic phases not yet implemented"));
+    std::cout<<G_omega_fourpoint<<std::endl;
+    std::cout<<G_omega<<std::endl;
+    std::cout<<G0_omega<<std::endl;
+    std::cout<<mu<<std::endl;
+    std::cout<<h<<std::endl;
+    std::cout<<beta<<std::endl;
     return G_omega;
   } 
 
@@ -519,6 +527,7 @@ struct AntiFerroDCATransformer::Backward {
 template<class T>
 green_function<T> AntiFerroDCATransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
 {
+  if(paramagnet==1){ std::cerr<<"Sebastian: paramagnet is true, should we really be using the AFM transformer?"<<std::endl; }
   green_function<T> G_new(G);
   if(G_new.nflavor()>1 && G_new.nflavor()%2==0) {
     for(spin_t flavor=0; flavor<G_new.nflavor(); flavor+=2) {
