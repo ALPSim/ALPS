@@ -117,6 +117,7 @@ private:
 	int N_check;					// number of sweeps with single-spin updates
 	int check_counter;				// counts the number of single-spin updates
 	int fp_interval;				// counts the interval between measurements of the fourpoint function
+        bool measure_fourpoint;
 	double tolerance;				// tolerance for deterioration of precision
 									// (maximum deviation of Green's function matrix elements)
 	//std::valarray<double> G_up;		// Green's function for up spins
@@ -128,7 +129,6 @@ private:
 	std::vector<int> spins;		    // auxiliary Ising spins
 	double max_time;
 	double start_time;
-  bool measure_fourpoint;
   int sign;
 
   itime_green_function_t bare_green_tau;
