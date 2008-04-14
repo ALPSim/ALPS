@@ -203,7 +203,14 @@ public:
   }
   virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
 			   const green_function<alps::RealObsevaluator> &G_omega_real,
-			   const green_function<alps::RealObsevaluator> &G_omega_imag) const{abort();} //not implemented.
+			   const green_function<alps::RealObsevaluator> &G_omega_imag) const{
+
+    std::cerr<<"backward ft: "<<&G_tau<<std::endl;
+    std::cerr<<"backward ft: "<<&G_omega_real<<std::endl;
+    std::cerr<<"backward ft: "<<&G_omega_imag<<std::endl;
+    std::cerr<<"not implemented for obsevaluators. exiting."<<std::endl;
+    abort();
+  } //not implemented.
 
   virtual ~FFunctionFourierTransformer(){}
 private:
