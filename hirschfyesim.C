@@ -60,7 +60,7 @@ double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector
   
   blas::matrix M(Green.size1()); //for sign problem cases: figure out determinant...
   M.convert_from(Green); 
-  double det=M.determinant();
+  //double det=M.determinant();
   int N(spins.size());
   std::vector<double> e_ls(N);
   for(int i=0;i<N;++i){
@@ -98,19 +98,19 @@ n_site(static_cast<int>(parms["SITES"])),
 u(static_cast<double>(parms["U"])),
 N_check(1000), // value is automatically adjusted during the simulation
 check_counter(0),
+fp_interval(static_cast<int>(parms.value_or_default("FOURPOINT_INTERVAL", 1000))),
+measure_fourpoint(static_cast<bool>(parms.value_or_default("MEASURE_FOURPOINT_FUNCTION", false))),
 tolerance(static_cast<double>(parms["TOLERANCE"])),	
 Green0_up(N*n_site, N*n_site),
 Green_up(N*n_site, N*n_site),
 Green0_down(N*n_site, N*n_site),
 Green_down(N*n_site, N*n_site),			
 spins(static_cast<int>(N*n_site)),
-start_time(time(NULL)),
 max_time(static_cast<int>(parms.value_or_default("MAX_TIME", 86400))),
-measure_fourpoint(static_cast<bool>(parms.value_or_default("MEASURE_FOURPOINT_FUNCTION", false))),
-fp_interval(static_cast<int>(parms.value_or_default("FOURPOINT_INTERVAL", 1000))),
+start_time(time(NULL)),
+sign(1),
 bare_green_tau(N+1, n_site, 2),
-green_tau(N+1, n_site, 2),
-sign(1)
+green_tau(N+1, n_site, 2)
 {
   std::cout<<"starting constructor."<<std::endl;
   uint n_matsubara=parms["NMATSUBARA"];
@@ -161,8 +161,8 @@ sign(1)
   
   
   // initialize Green's function matrices
-  double s1=update_from_zero(Green_up, Green0_up, spins, lambda);
-  double s2=update_from_zero(Green_down, Green0_down, spins, -lambda);
+  /*double s1=*/update_from_zero(Green_up, Green0_up, spins, lambda);
+  /*double s2=*/update_from_zero(Green_down, Green0_down, spins, -lambda);
   
   
   // create measurement objects
@@ -183,7 +183,7 @@ sign(1)
 
 // in principle, need only save spins (and do update_from_zero after loading)
 void HirschFyeRun::load(alps::IDump& dump) {
-std::cerr<<"implement load first!"<<std::endl;
+std::cerr<<"implement load first!"<<&dump<<std::endl;
   abort();
   
   /*dump >> sweeps;
@@ -333,8 +333,8 @@ void HirschFyeRun::dostep()
     
     dense_matrix Green_diff_up(Green_up), Green_diff_down(Green_down);
     
-    double s1=update_from_zero(Green_up, Green0_up, spins, lambda);
-    double s2=update_from_zero(Green_down, Green0_down, spins, -lambda);
+    /*double s1=*/update_from_zero(Green_up, Green0_up, spins, lambda);
+    /*double s2=*/update_from_zero(Green_down, Green0_down, spins, -lambda);
     //std::cout<<"sign is: "<<sign<<" should be: "<<s1*s2<<std::endl;
     
     Green_diff_up -= Green_up;
