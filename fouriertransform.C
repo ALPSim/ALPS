@@ -131,12 +131,13 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
   for(uint f=0;f<G_omega.nflavor();++f){
     for (uint s1=0; s1<N_site; ++s1){
       for (uint s2=0; s2<N_site; ++s2) {
-        if (s1==s2) {
+        //std::cout<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
+        //if (s1==s2) {
           for (uint k=0; k<N_omega; k++) {
             std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
             G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
           } 
-        }
+        //}
         for (uint i=0; i<N_tau; i++) {
           G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
           for (uint k=0; k<N_omega; k++) {
@@ -241,7 +242,7 @@ void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
 }
 
 
-void evaluate_second_derivatives(double dt, double BETA, dense_matrix & spline_matrix, std::vector<double> & g, std::vector<double> & second_derivatives, const double c1g, const double c2g, const double c3g) {
+void evaluate_second_derivatives(double dt/*, double BETA*/, dense_matrix & spline_matrix, std::vector<double> & g, std::vector<double> & second_derivatives, const double c1g, const double c2g, const double c3g) {
 
   // g, rhs and second_derivatives have dimension N+1
   int Np1 = spline_matrix.size1();
@@ -324,7 +325,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
         generate_spline_matrix(spline_matrix, dt);
         // matrix containing the second derivatives y'' of interpolated y=v[tau] at points tau_n 
         std::vector<double> v2(Np1, 0); 
-        evaluate_second_derivatives(dt,beta_, spline_matrix, v, v2, c1_[f][p][q], c2_[f][p][q], c3_[f][p][q]);
+        evaluate_second_derivatives(dt/*,beta_*/, spline_matrix, v, v2, c1_[f][p][q], c2_[f][p][q], c3_[f][p][q]);
         v_omega.assign(N_omega, 0);
         std::vector<std::complex<double> > v_omega_naive(N_omega);
         //std::vector<std::complex<double> > v_omega_third(N_omega);
@@ -383,14 +384,14 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
 
 void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift){
   if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
-    std::cout<<"using General Fourier transform"<<std::endl;
+    //std::cout<<"using General Fourier transform"<<std::endl;
     int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
     int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
     fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], (double)(parms["MU"])+mu_shift, n_flavor, n_sites));
   } else{
     int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
     int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
+    //std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
     fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], (double)(parms["MU"])+mu_shift, parms["t"], n_flavor, n_sites));
   }
 }
@@ -401,12 +402,12 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,bo
   if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
     int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
     int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    std::cout<<"using General Fourier transform"<<std::endl;
+    //std::cout<<"using General Fourier transform"<<std::endl;
     fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"], n_flavor, n_sites));
   } else{
     int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
     int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
+    //std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
     for(int f=0;f<n_flavor;++f){
       for(int i=0;i<n_sites;++i){
         for(int j=0;j<n_sites;++j){
