@@ -52,7 +52,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  bool degenerate = parms.value_or_default("DEGENERATE", false);
+  //bool degenerate = parms.value_or_default("DEGENERATE", false);
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   
   itime_green_function_t G0_tau_old(G0_tau);
@@ -85,11 +85,11 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
   int N = static_cast<int>(parms["N"]);
   int flavors = parms.value_or_default("FLAVORS", 2);;
   double beta = static_cast<double>(parms["BETA"]);
-  double mu = static_cast<double>(parms["MU"]);
-  double h = parms.value_or_default("H", 0);;
+  //double mu = static_cast<double>(parms["MU"]);
+  //double h = parms.value_or_default("H", 0);;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  bool degenerate = parms.value_or_default("DEGENERATE", false);  
+  //bool degenerate = parms.value_or_default("DEGENERATE", false);  
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
   int iteration_ctr=0;
@@ -129,7 +129,7 @@ double adjust_filling(const alps::Parameters &parms, double current_filling){
   static double mu_upper=parms.value_or_default("MU_UPPER_BOUND",std::numeric_limits<double>::infinity());
   static double target_filling=static_cast<double>(parms["FILLING"]);
   static double filling_tolerance=parms.value_or_default("FILLING_TOLERANCE", 0.002);
-  static double filling_step=parms.value_or_default("FILLING_STEP", static_cast<double>(parms["t"]));
+  //static double filling_step=parms.value_or_default("FILLING_STEP", static_cast<double>(parms["t"]));
   static double mu_old=std::numeric_limits<double>::infinity();
   static double filling_old=std::numeric_limits<double>::infinity();
   if(parms.defined("OLD_MU")){
@@ -202,7 +202,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   double h = static_cast<double>(parms["H"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  bool degenerate = parms.value_or_default("DEGENERATE", false);
+  //bool degenerate = parms.value_or_default("DEGENERATE", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   
