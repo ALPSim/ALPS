@@ -33,7 +33,8 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
   n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9)
 {
   setup_tables();
-  std::ofstream siterealstr("SiteClassesRealSpace");
+{
+  std::ofstream siterealstr("/tmp/SiteClassesRealSpace");
   for (std::set<site_class_type>::const_iterator it_i=site_class_set_real_space_.begin(); 
        it_i!=site_class_set_real_space_.end(); ++it_i) {
     for (site_class_type::const_iterator it_j=it_i->begin(); it_j!=it_i->end(); ++it_j) {
@@ -41,7 +42,9 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
     }
     siterealstr << std::endl;
   }
-  std::ofstream pairrealstr("PairClassesRealSpace");
+}
+{
+  std::ofstream pairrealstr("/tmp/PairClassesRealSpace");
   for (std::set<pair_class_type >::const_iterator it_i=pair_class_set_real_space_.begin(); 
        it_i!=pair_class_set_real_space_.end(); ++it_i) {
     for (pair_class_type::const_iterator it_j=it_i->begin(); it_j!=it_i->end(); ++it_j) {
@@ -49,7 +52,9 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
     }
     pairrealstr << std::endl;
   }
-  std::ofstream sitekstr("SiteClassesKSpace");
+}
+{
+  std::ofstream sitekstr("/tmp/SiteClassesKSpace");
   for (std::set<site_class_type>::const_iterator it_i=site_class_set_k_space_.begin(); 
        it_i!=site_class_set_k_space_.end(); ++it_i) {
     for (site_class_type::const_iterator it_j=it_i->begin(); it_j!=it_i->end(); ++it_j) {
@@ -57,7 +62,9 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
     }
     sitekstr << std::endl;
   }
-  std::ofstream pairkstr("PairClassesKSpace");
+}
+{
+  std::ofstream pairkstr("/tmp/PairClassesKSpace");
   for (std::set<pair_class_type >::const_iterator it_i=pair_class_set_k_space_.begin(); 
        it_i!=pair_class_set_k_space_.end(); ++it_i) {
     for (pair_class_type::const_iterator it_j=it_i->begin(); it_j!=it_i->end(); ++it_j) {
@@ -65,6 +72,7 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
     }
     pairkstr << std::endl;
   }
+}
 }
 
 
@@ -122,7 +130,7 @@ void ClusterHelper::setup_tables()
   }
   //arrange vertices for bipartite lattices
   if (bipartite()) {
-    std::cerr << "cluster is bipartite\n";
+    //std::cerr << "cluster is bipartite\n";
     for (int i=0; i<cluster_coordinates_.size1(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
 	int j = i;
@@ -135,12 +143,14 @@ void ClusterHelper::setup_tables()
       }
     }
   }
-  std::ofstream clustercoordstream("ClusterCoordinates");
-  for (int m=0; m<cluster_coordinates_.size1(); ++m) {
-    clustercoordstream << m << " ";
-    for (int d=0; d<cluster_coordinates_.size2(); ++d) 
-      clustercoordstream << cluster_coordinates_(m,d) << " ";
-    clustercoordstream << std::endl;
+  {
+    std::ofstream clustercoordstream("/tmp/ClusterCoordinates");
+    for (int m=0; m<cluster_coordinates_.size1(); ++m) {
+      clustercoordstream << m << " ";
+      for (int d=0; d<cluster_coordinates_.size2(); ++d) 
+        clustercoordstream << cluster_coordinates_(m,d) << " ";
+      clustercoordstream << std::endl;
+    }
   }
   //setup reciprocal basis
   Matrix<double>::Type reciprocal_basis(dimension(), dimension());
