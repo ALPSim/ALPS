@@ -23850,7 +23850,11 @@ echo "$as_me: checking for Math Kernel Library" >&6;}
       echo "$as_me:$LINENO: checking MKL directory" >&5
 echo $ECHO_N "checking MKL directory... $ECHO_C" >&6
       if test -z "$mkl_dir"; then
-        for d in mkl/8.1.1 mkl/8.1 mkl/8.0.2 mkl/8.0 mkl721 mkl72 mkl70 mkl61 mkl; do
+        mkl_ver=no
+        if test -d "/opt/intel/mkl"; then
+          mkl_ver=`ls /opt/intel/mkl | sort -nr | head -1`
+        fi
+        for d in mkl/$mkl_ver mkl/8.1.1 mkl/8.1 mkl/8.0.2 mkl/8.0 mkl721 mkl72 mkl70 mkl61 mkl; do
           if test -d "/opt/intel/$d"; then
             mkl_dir="/opt/intel/$d"
             echo "$as_me:$LINENO: result: $mkl_dir" >&5
@@ -23953,6 +23957,218 @@ echo "${ECHO_T}unknown processor type" >&6
         found=no
 
         if test "$mkl_proc" != "itp"; then
+          # for MKL 10.x
+          echo "$as_me:$LINENO: checking for omp_in_parallel_ in -liomp5" >&5
+echo $ECHO_N "checking for omp_in_parallel_ in -liomp5... $ECHO_C" >&6
+if test "${ac_cv_lib_iomp5_omp_in_parallel_+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-liomp5  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char omp_in_parallel_ ();
+int
+main ()
+{
+omp_in_parallel_ ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_iomp5_omp_in_parallel_=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_iomp5_omp_in_parallel_=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_iomp5_omp_in_parallel_" >&5
+echo "${ECHO_T}$ac_cv_lib_iomp5_omp_in_parallel_" >&6
+if test $ac_cv_lib_iomp5_omp_in_parallel_ = yes; then
+  mkl_libs="-liomp5 $mkl_libs"
+             LIBS="$mkl_libs $ac_save_LIBS"
+             echo "$as_me:$LINENO: checking for dgemm_ in -lmkl" >&5
+echo $ECHO_N "checking for dgemm_ in -lmkl... $ECHO_C" >&6
+if test "${ac_cv_lib_mkl_dgemm_+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmkl  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char dgemm_ ();
+int
+main ()
+{
+dgemm_ ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_mkl_dgemm_=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_mkl_dgemm_=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_mkl_dgemm_" >&5
+echo "${ECHO_T}$ac_cv_lib_mkl_dgemm_" >&6
+if test $ac_cv_lib_mkl_dgemm_ = yes; then
+  mkl_libs="-lmkl $mkl_libs"
+               LIBS="$mkl_libs $ac_save_LIBS"
+               echo "$as_me:$LINENO: checking for dsyev_ in -lmkl_lapack" >&5
+echo $ECHO_N "checking for dsyev_ in -lmkl_lapack... $ECHO_C" >&6
+if test "${ac_cv_lib_mkl_lapack_dsyev_+set}" = set; then
+  echo $ECHO_N "(cached) $ECHO_C" >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lmkl_lapack  $LIBS"
+cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+
+/* Override any gcc2 internal prototype to avoid an error.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+/* We use char because int might match the return type of a gcc2
+   builtin and then its argument prototype would still apply.  */
+char dsyev_ ();
+int
+main ()
+{
+dsyev_ ();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (eval echo "$as_me:$LINENO: \"$ac_link\"") >&5
+  (eval $ac_link) 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } &&
+	 { ac_try='test -z "$ac_cxx_werror_flag"
+			 || test ! -s conftest.err'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; } &&
+	 { ac_try='test -s conftest$ac_exeext'
+  { (eval echo "$as_me:$LINENO: \"$ac_try\"") >&5
+  (eval $ac_try) 2>&5
+  ac_status=$?
+  echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); }; }; then
+  ac_cv_lib_mkl_lapack_dsyev_=yes
+else
+  echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+ac_cv_lib_mkl_lapack_dsyev_=no
+fi
+rm -f conftest.err conftest.$ac_objext \
+      conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+echo "$as_me:$LINENO: result: $ac_cv_lib_mkl_lapack_dsyev_" >&5
+echo "${ECHO_T}$ac_cv_lib_mkl_lapack_dsyev_" >&6
+if test $ac_cv_lib_mkl_lapack_dsyev_ = yes; then
+  mkl_libs="-lmkl_lapack $mkl_libs"; found=yes
+fi
+
+
+fi
+
+
+
+fi
+
+          if test "$found" = "yes"; then :;
+          else
           echo "$as_me:$LINENO: checking for d_abs" >&5
 echo $ECHO_N "checking for d_abs... $ECHO_C" >&6
 if test "${ac_cv_func_d_abs+set}" = set; then
@@ -24398,6 +24614,7 @@ fi
 
 fi
 
+          fi
         else
           echo "$as_me:$LINENO: checking for d_abs" >&5
 echo $ECHO_N "checking for d_abs... $ECHO_C" >&6

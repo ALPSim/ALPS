@@ -305,7 +305,11 @@ AC_DEFUN([AC_LAPACK],
       AC_MSG_NOTICE([checking for Math Kernel Library])
       AC_MSG_CHECKING([MKL directory])
       if test -z "$mkl_dir"; then
-        for d in mkl/8.1.1 mkl/8.1 mkl/8.0.2 mkl/8.0 mkl721 mkl72 mkl70 mkl61 mkl; do
+        mkl_ver=no
+        if test -d "/opt/intel/mkl"; then
+          mkl_ver=`ls /opt/intel/mkl | sort -nr | head -1`
+        fi
+        for d in mkl/$mkl_ver mkl/8.1.1 mkl/8.1 mkl/8.0.2 mkl/8.0 mkl721 mkl72 mkl70 mkl61 mkl; do
           if test -d "/opt/intel/$d"; then
             mkl_dir="/opt/intel/$d"
             AC_MSG_RESULT([$mkl_dir])
@@ -396,6 +400,20 @@ AC_DEFUN([AC_LAPACK],
         found=no
 
         if test "$mkl_proc" != "itp"; then
+          # for MKL 10.x
+          AC_CHECK_LIB(iomp5, omp_in_parallel_,
+            [mkl_libs="-liomp5 $mkl_libs"
+             LIBS="$mkl_libs $ac_save_LIBS"
+             AC_CHECK_LIB(mkl, dgemm_,
+              [mkl_libs="-lmkl $mkl_libs"
+               LIBS="$mkl_libs $ac_save_LIBS"
+               AC_CHECK_LIB(mkl_lapack, dsyev_,
+                [mkl_libs="-lmkl_lapack $mkl_libs"; found=yes])
+              ])
+            ]
+          )
+          if test "$found" = "yes"; then :;
+          else
           AC_CHECK_FUNC(d_abs,,
             [AC_CHECK_LIB(g2c, d_abs, 
               [mkl_libs="-lg2c"; LIBS="$mkl_libs $ac_save_LIBS"],
@@ -415,6 +433,7 @@ AC_DEFUN([AC_LAPACK],
               ])
             ]
           )
+          fi
         else
           AC_CHECK_FUNC(d_abs,,
             [AC_CHECK_LIB(g2c, d_abs, 
