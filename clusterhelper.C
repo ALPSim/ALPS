@@ -231,7 +231,7 @@ void ClusterHelper::setup_tables()
       cluster_momenta_ = sorted_momenta;
     }
   }
-  std::ofstream clustermomstream("ClusterMomenta");
+  std::ofstream clustermomstream("/tmp/ClusterMomenta");
   for (int m=0; m<cluster_momenta_.size1(); ++m) {
     clustermomstream << m << " ";
     for (int d=0; d<cluster_momenta_.size2(); ++d) 
@@ -249,7 +249,7 @@ void ClusterHelper::setup_tables()
       lattice_momenta_(m,d) = mom[d];
     }
   } 
-  std::ofstream latticemomstream("LatticeMomenta");
+  std::ofstream latticemomstream("/tmp/LatticeMomenta");
   for (int m=0; m<lattice_momenta_.size1(); ++m) {
     for (int d=0; d<lattice_momenta_.size2(); ++d) 
       latticemomstream << lattice_momenta_(m,d) << " ";
