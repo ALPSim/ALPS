@@ -32,6 +32,7 @@
 #define IETL_TMATRIX_H
 #include <ietl/vectorspace.h>
 #include <stdexcept>
+#include <limits>
 
 namespace ietl {
   template <class VS>
