@@ -1,11 +1,13 @@
-include $(HOME)/ALPS/share/alps/include.mk
-CXXFLAGS += -g -DWERNER -DRUBTSOV
+include $(HOME)/ALPS_OPENMPI_MKL/share/alps/include.mk
+CXXFLAGS += -g -DWERNER -DRUBTSOV -I../
 SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C clustertransformer.C clusterhelper.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
-LDFLAGS+=-L/opt/intel/cc/10.1.006/lib
-LDFLAGS_MPI+=-L/opt/intel/cc/10.1.006/lib
-LIBS+=-lirc -limf -lguide
-LIBS_MPI+=-lirc -limf -lguide
+#LDFLAGS+=-L/opt/intel/cc/10.1.006/lib
+#LDFLAGS_MPI+=-L/opt/intel/cc/10.1.006/lib
+#LIBS+=-lirc -limf -lguide
+#LIBS_MPI+=-lirc -limf -lguide
+#LDFLAGS+= -L/cluster/home/beta/gullc/intel/mkl/10.0.1.014/lib/em64t/
+#LIBS+= -lmkl_lapack  -lmkl -lguide -lpthread 
 OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o auxiliaryfunctions.o alps_solver.o clustertransformer.o clusterhelper.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
