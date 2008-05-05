@@ -139,7 +139,13 @@ int main(int argc, char** argv)
 	}
 	else{
 	  std::cout<<"using DOS Hilbert transform"<<std::endl;
-	  transform_ptr= new FSDOSHilbertTransformer(parms);
+          if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
+            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();}
+	    transform_ptr= new FSDOSHilbertTransformer(parms);
+          }else{
+            if((bool)(parms["PARAMAGNET"])==true){ std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); }
+	    transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
+          }
 	}
 	matsubara_green_function_t G0_omega = transform_ptr->initial_G0(parms);
 	matsubara_green_function_t G_omega = G0_omega;

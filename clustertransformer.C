@@ -60,7 +60,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 							    const matsubara_green_function_t &G0_omega, 
 							    const double mu, const double h, const double beta)
 {
-  if(h!=0){std::cerr<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
+  //if(h!=0){std::cerr<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
   uint nflavor=G0_omega.nflavor();
   uint nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
@@ -78,7 +78,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 	  for (uint d=0; d<dimension(); ++d) 
 	    k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
 	  G0_omega_new(freq, kc, kc, flavor) 
-	    += 1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor));
+	    += 1./(iomega_n+mu+(flavor%2==0?h:-h)-epsilon(k)-selfenergy(freq, kc, kc, flavor));
 	}
 	G0_omega_new(freq, kc, kc, flavor) /= n_cluster_cells();
 	G0_omega_new(freq, kc, kc, flavor) = 
@@ -109,6 +109,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
+    double h_init = parms.value_or_default("H_INIT", 0.);
     //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
@@ -123,7 +124,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     }
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
-    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
+    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h+h_init, beta);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     G0_omega_new.write("G0_omega_input");

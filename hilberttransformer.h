@@ -106,7 +106,7 @@ public:
     matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
     itime_green_function_t G0_tau(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
     fourier.forward_ft(G_tau, G_omega);
-    std::cout<<"G omega real: "<<std::endl;
+    //std::cout<<"G omega real: "<<std::endl;
     print_real_green_matsubara(std::cout, G_omega, beta);
     for(uint i=0; i<G_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
@@ -114,7 +114,7 @@ public:
         G0_omega(i, flavor) = 1./(iw + mu - tsq*G_omega(i, flavor%2==0?flavor+1:flavor-1));
       }
     }
-    std::cout<<"symmetrized G0 omega real: "<<std::endl;
+    //std::cout<<"symmetrized G0 omega real: "<<std::endl;
     print_real_green_matsubara(std::cout, G0_omega, beta);
     fourier.backward_ft(G0_tau, G0_omega);
     return G0_tau;
@@ -383,9 +383,10 @@ public:
     matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
     matsubara_green_function_t sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
     for(spin_t f=0;f<G_omega.nflavor();++f){
+      //std::cout<<"check of G0omega: "<<f<<" "<<G0_omega(0,f)<<" "<<G_omega(0,f);
       for(frequency_t w=0;w<G_omega.nfreq();++w){
         std::complex<double> g=0;
-        sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); //self energy
+        sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); 
         std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu -sigma(w, f);
         for(uint n=0;n<dos.size()-1;++n){
           //double delta_epsilon = epsilon[n]-epsilon[n+1];
@@ -399,21 +400,66 @@ public:
         }
         G_omega_new(w, f)=g;
       }
+      //std::cout<<"G omega new is: "<<G_omega_new(0,f)<<std::endl;
     }
-    std::cout<<"G omega new is: "<<G_omega_new<<std::endl;
+    if(G_omega.nflavor() !=2){std::cerr<<"don't know how to handle != 2 flavors."<<std::endl; abort();}
     for(spin_t f=0;f<G_omega.nflavor();++f){
       for(frequency_t w=0;w<G_omega.nfreq();++w){
         G0_omega_new(w,f)=1./(sigma(w,f)+1./G_omega_new(w,f));
       }
     }
-    std::cout<<"G0_omega_new"<<G0_omega_new<<std::endl;
+    //std::cout<<"G0_omega_new"<<" 0 "<<G0_omega_new(0,0)<<std::endl;
+    //std::cout<<"G0_omega_new"<<" 1 "<<G0_omega_new(0,1)<<std::endl;
     return G0_omega_new;
   }
   
-private:
+protected:
   std::vector<double> epsilon;
   std::vector<double> dos;
 };
+inline std::complex<double> integrand(int n, const std::vector<double> &dos, const std::vector<double> &epsilon, const std::complex<double> &zeta_A,
+    const std::complex<double> &zeta_B){ return dos[n]/(zeta_A*zeta_B - epsilon[n]*epsilon[n]); }
+//this can do Antiferromagnetism according to Georges et. al.
+class AFM_FSDOSHilbertTransformer: public FSDOSHilbertTransformer{
+  public:
+  AFM_FSDOSHilbertTransformer(const alps::Parameters &parms)
+  :FSDOSHilbertTransformer(parms){}
+  virtual ~AFM_FSDOSHilbertTransformer(){}
+  virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,matsubara_green_function_t &G0_omega, 
+      const double mu, const double h, const double beta)
+  {
+    if(G_omega.nsite()!=1){ std::cerr<<"don't know how to handle n_site >1. Use Sebastian's cluster loop for that. aborting."<<std::endl; abort();}
+    if(G_omega.nflavor()!=2){ std::cerr<<"don't know how to handle n_flavor!=2. aborting."<<std::endl; abort();}
+    matsubara_green_function_t Sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+    matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+    //compute self energy
+    for(frequency_t w=0;w<G_omega.nfreq();++w){
+      double wn=(2.*w+1)*M_PI/beta;
+      for(spin_t f=0;f<G_omega.nflavor();++f){
+        Sigma(w,f)=1./G0_omega(w,f)-1./G_omega(w,f);
+      }
+      //std::cout<<"sigma: "<<Sigma(w,0)<<" "<<Sigma(w,1)<<std::endl;
+      std::complex<double>zeta_A=std::complex<double>(mu-h,wn)-Sigma(w,0);
+      std::complex<double>zeta_B=std::complex<double>(mu+h,wn)-Sigma(w,1);
 
+      //Simpson: integrate dos(e)/(zeta_A zeta_B-e^2)
+      if(dos.size()%2 !=0){std::cerr<<"for Simpson precision: use a DOS with even number of integration points. "<<std::endl; abort(); }
+      std::complex<double> I=0;
+      for(int i=1;i<dos.size()-2;i+=2){
+        I+=4.*integrand(i,dos,epsilon,zeta_A,zeta_B)+2.*integrand(i+1,dos,epsilon,zeta_A,zeta_B);
+      }
+      I+=integrand(0,dos,epsilon,zeta_A,zeta_B)+integrand(dos.size()-1,dos,epsilon,zeta_A,zeta_B)+4.*integrand(dos.size()-2,dos,epsilon,zeta_A,zeta_B);
+      I*=(epsilon[epsilon.size()-1]-epsilon[0])/(3.*epsilon.size());
 
+      //compute the new G's:
+      G0_omega_new(w,0)=zeta_B*I; //formula 97 in review
+      G0_omega_new(w,1)=zeta_A*I;
+      //std::cout<<"G0: "<<G0_omega_new(w,0)<<" "<<G0_omega_new(w,1)<<std::endl;
+    }
+    //std::cout<<std::endl<<std::endl;
+    //std::cout<<Sigma<<std::endl;
+    //std::cout<<G0_omega_new<<std::endl;
+    return G0_omega_new;
+  }
+};
 #endif /*ALPS_DMFT_HILBERTTRANSFORMER_H*/
