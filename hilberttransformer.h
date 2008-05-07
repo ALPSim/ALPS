@@ -235,7 +235,27 @@ public:
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_orbital=parms.value_or_default("FLAVORS", 2);
     matsubara_green_function_t G0_omega(n_matsubara, n_orbital);
-    G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+    {
+      std::ifstream check(parms["G0OMEGA_INPUT"].c_str());
+      if(!check.is_open()){
+        std::cerr<<"could not open inital G0 file "<<parms["G0OMEGA_INPUT"]<<" proceeding with free solution. "<<std::endl;
+        matsubara_green_function_t G_omega(n_matsubara, n_orbital);
+        for(int i=0;i<n_matsubara;++i){
+          for(int f=0;f<n_orbital;++f){
+            G_omega(i,f)=1;
+            G0_omega(i,f)=1;
+          }
+        }
+        double h_init=parms.value_or_default("H_INIT",0.);
+        double h     =parms.value_or_default("H",0.);
+        double mu    =parms.value_or_default("MU",0.);
+        double beta  =parms.value_or_default("BETA",0.);
+        G0_omega=this->operator()(G_omega, G0_omega, mu, h_init+h, beta);
+        G0_omega.write("G0_omega_input");
+      }
+      else
+        G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+    }
     return G0_omega;
   }
   
