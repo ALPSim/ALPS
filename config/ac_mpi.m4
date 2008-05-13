@@ -92,6 +92,14 @@ AC_DEFUN([AC_MPI],
           break
         fi
       done
+      # for Intel MPI Library (3.1 or higher)
+      if test -z "$mpi_dir" -a -z "$mpi_incdir" -a -z "$mpi_libdir"; then
+        if test -d "/opt/intel/impi"; then
+          impi_root="/opt/intel/impi"
+          impi_ver=`ls /opt/intel/impi | sort -nr | head -1`
+          mpi_dir="$impi_root/$impi_ver"
+        fi
+      fi
       if test -n "$mpi_dir"; then
         AC_MSG_RESULT([$mpi_dir])
       else
@@ -115,7 +123,11 @@ AC_DEFUN([AC_MPI],
       fi
     else
       if test -n "$mpi_dir"; then
-        mpi_incdir="$mpi_dir/include"
+        if test `uname -m` = "x86_64" -a -d "$mpi_dir/include64"; then
+          mpi_incdir="$mpi_dir/include64"
+        else
+          mpi_incdir="$mpi_dir/include"
+        fi
         AC_MSG_CHECKING([for MPI header directory])
         AC_MSG_RESULT([$mpi_incdir])
       fi
@@ -129,14 +141,54 @@ AC_DEFUN([AC_MPI],
       fi
     else
       if test -n "$mpi_dir"; then
-        mpi_libdir="$mpi_dir/lib"
+        if test `uname -m` = "x86_64" -a -d "$mpi_dir/lib64"; then
+          mpi_libdir="$mpi_dir/lib64"
+        else
+          mpi_libdir="$mpi_dir/lib"
+        fi
         AC_MSG_CHECKING([for MPI library directory])
         AC_MSG_RESULT([$mpi_libdir])
       fi
     fi
 
     if test -n "$mpi_incdir"; then
-      if test -d "$mpi_incdir/mpi2c++"; then
+      # for Intel MPI library
+      if test `uname -m` = "x86_64" -a -d "$mpi_dir/bin64"; then
+        if test $COMPILER = intel; then
+          mpi_flags_compile=`LANG=C $mpi_dir/bin64/mpiicpc -show | cut -d ' ' -f 2-`
+          if test $? -eq 0; then
+            MPI_CPPFLAGS=$mpi_flags_compile
+            MPI_LDFLAGS=$mpi_flags_compile
+          fi
+        else
+          mpi_flags_compile=`LANG=C $mpi_dir/bin64/mpigxx -show | cut -d ' ' -f 2-`
+          if test $? -eq 0; then
+            MPI_CPPFLAGS=$mpi_flags_compile
+            MPI_LDFLAGS=$mpi_flags_compile
+          fi
+        fi
+      elif test -d "$mpi_dir/bin"; then
+        if test $COMPILER = intel; then
+          mpi_flags_compile=`LANG=C $mpi_dir/bin/mpiicpc -show | cut -d ' ' -f 2-`
+          if test $? -eq 0; then
+            MPI_CPPFLAGS=$mpi_flags_compile
+            MPI_LDFLAGS=$mpi_flags_compile
+          fi
+        else
+          mpi_flags_compile=`LANG=C $mpi_dir/bin/mpigxx -show | cut -d ' ' -f 2-`
+          if test $? -eq 0; then
+            MPI_CPPFLAGS=$mpi_flags_compile
+            MPI_LDFLAGS=$mpi_flags_compile
+          fi
+        fi        
+      else
+        mpi_cppflags_compile=`mpic++ -showme:compile`
+        if test $? -eq 0; then
+          MPI_CPPFLAGS=$mpi_cppflags_compile # for openmpi and recent LAM
+        fi
+      fi
+      if test -n "$MPI_CPPFLAGS"; then :;
+      elif test -d "$mpi_incdir/mpi2c++"; then
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/mpi2c++" # for LAM MPI
       elif test -d "$mpi_incdir/64"; then
         MPI_CPPFLAGS="-I$mpi_incdir -I$mpi_incdir/64"
@@ -145,13 +197,8 @@ AC_DEFUN([AC_MPI],
       else
         MPI_CPPFLAGS="-I$mpi_incdir"
       fi
-    else
-      mpi_cppflags_compile=`mpic++ -showme:compile`
-      if test $? -eq 0; then
-        MPI_CPPFLAGS=$mpi_cppflags_compile # for openmpi and recent LAM
-      fi
     fi
-    if test -n "$mpi_libdir"; then
+    if test -n "$mpi_libdir" -a -z "$MPI_LDFLAGS"; then
       MPI_LDFLAGS="-L$mpi_libdir"
     fi
     
@@ -163,13 +210,14 @@ AC_DEFUN([AC_MPI],
     CPPFLAGS="$MPI_CPPFLAGS $CPPFLAGS"
     LDFLAGS="$MPI_LDFLAGS $LDFLAGS"
 
-    AC_CHECK_HEADER([mpi.h],,
+    AC_CHECK_HEADERS([mpi.h],,
                     [
                     if test "$mpi" = yes; then
                       AC_MSG_ERROR([check for MPI library failed])
                     else
                       mpi=no
                     fi
+                    ],[
                     ])
 
     if test "$mpi" != no; then
