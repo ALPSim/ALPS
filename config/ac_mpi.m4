@@ -54,7 +54,7 @@ AC_DEFUN([AC_MPI],
       ll_root="$MP_PREFIX/ppe.poe"
     fi
     if test -z "$mpi_dir"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local /usr/local/src /usr/lib /usr $ll_root; do
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src /usr/lib /usr $ll_root; do
         if test -f "$d/include/mpi.h" && test -d "$d/lib"; then
           mpi_dir="$d"
           break
@@ -73,6 +73,11 @@ AC_DEFUN([AC_MPI],
         fi
         if test -f "$d/lam/include/mpi.h" && test -d "$d/lam/lib"; then
           mpi_dir="$d/lam"
+          break
+        fi
+        # for OpenMPI on Debian
+        if test -f "$d/openmpi/include/mpi.h" -a -d "$d/openmpi/lib"; then
+          mpi_dir="$d/openmpi"
           break
         fi
         # for lam 7.1 on CentOS 5
