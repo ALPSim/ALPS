@@ -424,8 +424,8 @@ public:
           //e0, e1 at the end of the interval.
           //g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])
           //                       *(log(A-epsilon[n]) - log(A-epsilon[n+1])));
-          g+=0.5*(dos[n+1]-dos[n])*(log(A-epsilon[n]) + log(A-epsilon[n+1]));
-          //g-=delta_epsilon*dos[n]/(A-epsilon[n]);
+          //g+=0.5*(dos[n+1]-dos[n])*(log(A-epsilon[n]) + log(A-epsilon[n+1]));
+          g+=dos[n]/(A-epsilon[n]);
         }
         G_omega_new(w, f)=g;
       }
