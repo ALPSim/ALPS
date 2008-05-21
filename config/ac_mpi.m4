@@ -155,13 +155,13 @@ AC_DEFUN([AC_MPI],
       # for Intel MPI library
       if test `uname -m` = "x86_64" -a -d "$mpi_dir/bin64"; then
         if test $COMPILER = intel; then
-          mpi_flags_compile=`LANG=C $mpi_dir/bin64/mpiicpc -show | cut -d ' ' -f 2-`
+          mpi_flags_compile=`LANG=C $mpi_dir/bin64/mpiicpc -show 2> /dev/null | cut -d ' ' -f 2-`
           if test $? -eq 0; then
             MPI_CPPFLAGS=$mpi_flags_compile
             MPI_LDFLAGS=$mpi_flags_compile
           fi
         else
-          mpi_flags_compile=`LANG=C $mpi_dir/bin64/mpigxx -show | cut -d ' ' -f 2-`
+          mpi_flags_compile=`LANG=C $mpi_dir/bin64/mpigxx -show 2> /dev/null | cut -d ' ' -f 2-`
           if test $? -eq 0; then
             MPI_CPPFLAGS=$mpi_flags_compile
             MPI_LDFLAGS=$mpi_flags_compile
@@ -169,20 +169,20 @@ AC_DEFUN([AC_MPI],
         fi
       elif test -d "$mpi_dir/bin"; then
         if test $COMPILER = intel; then
-          mpi_flags_compile=`LANG=C $mpi_dir/bin/mpiicpc -show | cut -d ' ' -f 2-`
+          mpi_flags_compile=`LANG=C $mpi_dir/bin/mpiicpc -show 2> /dev/null | cut -d ' ' -f 2-`
           if test $? -eq 0; then
             MPI_CPPFLAGS=$mpi_flags_compile
             MPI_LDFLAGS=$mpi_flags_compile
           fi
         else
-          mpi_flags_compile=`LANG=C $mpi_dir/bin/mpigxx -show | cut -d ' ' -f 2-`
+          mpi_flags_compile=`LANG=C $mpi_dir/bin/mpigxx -show 2> /dev/null | cut -d ' ' -f 2-`
           if test $? -eq 0; then
             MPI_CPPFLAGS=$mpi_flags_compile
             MPI_LDFLAGS=$mpi_flags_compile
           fi
         fi        
       else
-        mpi_cppflags_compile=`mpic++ -showme:compile`
+        mpi_cppflags_compile=`mpic++ -showme:compile 2> /dev/null`
         if test $? -eq 0; then
           MPI_CPPFLAGS=$mpi_cppflags_compile # for openmpi and recent LAM
         fi

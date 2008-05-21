@@ -1,7 +1,0 @@
-build
-Makefile
-.DS_Store
-alps-*.tar.gz
-config.log
-config.status
-libtool
