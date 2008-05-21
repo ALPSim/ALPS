@@ -3,8 +3,8 @@
 test "$prefix" = NONE && prefix='@prefix@'
 test "$exec_prefix" = NONE && exec_prefix='@exec_prefix@'
 test "$bindir" = '${exec_prefix}/bin' && bindir='@bindir@'
-test "$datarootdir" = '${prefix}/share' && datarootdir='@prefix@/share'
-test "$datadir" = '${prefix}/share' && datadir='@prefix@/share'
+datarootdir='@prefix@/share'
+datadir='@prefix@/share'
 test "$libdir" = '${exec_prefix}/lib' && libdir='@libdir@'
 test "$includedir" = '${prefix}/include' && includedir='@includedir@'
 
