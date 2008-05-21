@@ -82,6 +82,11 @@ dnl
 dnl Directories ------------------------------------------------------------
 dnl
 
+echo "Test: " 
+echo $prefix
+echo $datadir
+echo $includedir
+
 test "$prefix" = NONE && prefix=$ac_default_prefix
 test "$exec_prefix" = NONE && exec_prefix=$prefix
 test "$bindir" = '${exec_prefix}/bin' && bindir="$exec_prefix/bin"
@@ -92,6 +97,11 @@ AC_SUBST(docdir)
 docdir="$prefix/doc"
 AC_SUBST(SRC_DIR)
 SRC_DIR="$srcdir"
+
+echo "Test: " 
+echo $prefix
+echo $datadir
+echo $includedir
 
 ac_cv_alps_prefix="$prefix"
 ac_cv_alps_exec_prefix="$exec_prefix"

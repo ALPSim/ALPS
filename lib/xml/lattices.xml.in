@@ -115,7 +115,7 @@
 </LATTICE>
 
 
-<LATTICE name="hexagonal lattice" dimension="2">
+<LATTICE name="hexagonal lattice" dimension="3">
   <PARAMETER name="a" default="1"/>
   <PARAMETER name="c" default="1"/>
   <BASIS>
