@@ -55,7 +55,7 @@ if test -d config; then
   aclocal_flags='-I config'
 fi
 
-scripts="configu.guess consig.sub depcomp mkinstalldirs install-sh missing"
+scripts="configu.guess consig.sub depcomp install-sh ltmain.sh mkinstalldirs missing"
 if test -d config; then
   for s in $scripts; do
     test -f "config/$s" && rm -f "config/$s"
