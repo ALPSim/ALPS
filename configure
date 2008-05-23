@@ -25201,6 +25201,11 @@ $as_echo "$as_me: checking for Math Kernel Library" >&6;}
       { $as_echo "$as_me:$LINENO: checking MKL directory" >&5
 $as_echo_n "checking MKL directory... " >&6; }
       if test -z "$mkl_dir"; then
+        if test -n "$MKLROOT" && test -d "$MKLROOT"; then
+          mkl_dir="$MKLROOT"
+        fi
+      fi
+      if test -z "$mkl_dir"; then
         mkl_ver=no
         if test -d "/opt/intel/mkl"; then
           mkl_ver=`ls /opt/intel/mkl | sort -nr | head -1`

@@ -305,6 +305,11 @@ AC_DEFUN([AC_LAPACK],
       AC_MSG_NOTICE([checking for Math Kernel Library])
       AC_MSG_CHECKING([MKL directory])
       if test -z "$mkl_dir"; then
+        if test -n "$MKLROOT" && test -d "$MKLROOT"; then
+          mkl_dir="$MKLROOT"
+        fi
+      fi
+      if test -z "$mkl_dir"; then
         mkl_ver=no
         if test -d "/opt/intel/mkl"; then
           mkl_ver=`ls /opt/intel/mkl | sort -nr | head -1`
