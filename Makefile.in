@@ -43,7 +43,9 @@ DIST_COMMON = README $(am__configure_deps) \
 	$(top_srcdir)/config/config.site.in \
 	$(top_srcdir)/config/include.mk.in $(top_srcdir)/configure \
 	$(top_srcdir)/src/alps/config.h.in \
+	$(top_srcdir)/src/boost/fs_exception.cpp.in \
 	$(top_srcdir)/src/boost/fs_utf8_codecvt_facet.cpp.in \
+	$(top_srcdir)/src/boost/mp_exception.cpp.in \
 	$(top_srcdir)/src/boost/po_utf8_codecvt_facet.cpp.in \
 	$(top_srcdir)/src/boost/sr_utf8_codecvt_facet.cpp.in ChangeLog \
 	INSTALL TODO config/config.guess config/config.sub \
@@ -70,7 +72,9 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
-	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
+	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp \
+	$(top_builddir)/src/boost/fs_exception.cpp \
+	$(top_builddir)/src/boost/mp_exception.cpp
 CONFIG_CLEAN_FILES = config/config.site config/include.mk
 SCRIPTS = $(dist_noinst_SCRIPTS)
 SOURCES =
@@ -357,8 +361,28 @@ src/boost/stamp-h4: $(top_srcdir)/src/boost/fs_utf8_codecvt_facet.cpp.in $(top_b
 	@rm -f src/boost/stamp-h4
 	cd $(top_builddir) && $(SHELL) ./config.status src/boost/fs_utf8_codecvt_facet.cpp
 
+src/boost/fs_exception.cpp: src/boost/stamp-h5
+	@if test ! -f $@; then \
+	  rm -f src/boost/stamp-h5; \
+	  $(MAKE) $(AM_MAKEFLAGS) src/boost/stamp-h5; \
+	else :; fi
+
+src/boost/stamp-h5: $(top_srcdir)/src/boost/fs_exception.cpp.in $(top_builddir)/config.status
+	@rm -f src/boost/stamp-h5
+	cd $(top_builddir) && $(SHELL) ./config.status src/boost/fs_exception.cpp
+
+src/boost/mp_exception.cpp: src/boost/stamp-h6
+	@if test ! -f $@; then \
+	  rm -f src/boost/stamp-h6; \
+	  $(MAKE) $(AM_MAKEFLAGS) src/boost/stamp-h6; \
+	else :; fi
+
+src/boost/stamp-h6: $(top_srcdir)/src/boost/mp_exception.cpp.in $(top_builddir)/config.status
+	@rm -f src/boost/stamp-h6
+	cd $(top_builddir) && $(SHELL) ./config.status src/boost/mp_exception.cpp
+
 distclean-hdr:
-	-rm -f src/alps/config.h src/alps/stamp-h1 src/boost/po_utf8_codecvt_facet.cpp src/boost/stamp-h2 src/boost/sr_utf8_codecvt_facet.cpp src/boost/stamp-h3 src/boost/fs_utf8_codecvt_facet.cpp src/boost/stamp-h4
+	-rm -f src/alps/config.h src/alps/stamp-h1 src/boost/po_utf8_codecvt_facet.cpp src/boost/stamp-h2 src/boost/sr_utf8_codecvt_facet.cpp src/boost/stamp-h3 src/boost/fs_utf8_codecvt_facet.cpp src/boost/stamp-h4 src/boost/fs_exception.cpp src/boost/stamp-h5 src/boost/mp_exception.cpp src/boost/stamp-h6
 config/config.site: $(top_builddir)/config.status $(top_srcdir)/config/config.site.in
 	cd $(top_builddir) && $(SHELL) ./config.status $@
 config/include.mk: $(top_builddir)/config.status $(top_srcdir)/config/include.mk.in

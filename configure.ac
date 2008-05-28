@@ -299,8 +299,17 @@ AC_ARG_WITH(boost-all,
     fi
   ]
 )
+AC_ARG_WITH(boost-mpi,
+  AC_HELP_STRING([--with-boost-mpi],[compile Boost.MPI library]), [
+    if test "x$withval" = "xno"; then
+      ac_cv_boost_mpi=no
+    else
+      ac_cv_boost_mpi=yes
+    fi
+  ]
+)
 AC_ARG_WITH(boost-signals,
-  AC_HELP_STRING([--with-boost-signals],[compile Boost::signals library]), [
+  AC_HELP_STRING([--with-boost-signals],[compile Boost.Signals library]), [
     if test "x$withval" = "xno"; then
       ac_cv_boost_signals=no
     else
@@ -309,7 +318,7 @@ AC_ARG_WITH(boost-signals,
   ]
 )
 AC_ARG_WITH(boost-thread,
-  AC_HELP_STRING([--with-boost-thread],[compile boost::thread library]), [
+  AC_HELP_STRING([--with-boost-thread],[compile Boost.Thread library]), [
     if test "x$withval" = "xno"; then
       ac_cv_boost_thread=no
     else
@@ -318,7 +327,7 @@ AC_ARG_WITH(boost-thread,
   ]
 )
 AC_ARG_WITH(boost-wchar,
-  AC_HELP_STRING([--with-boost-wchar],[compile with wchar support in boost::regex and boost::serialization libraries]), [
+  AC_HELP_STRING([--with-boost-wchar],[compile with wchar support in Boost.Regex and Boost.Serialization libraries]), [
     if test "x$withval" = "xno"; then
       ac_cv_boost_wchar=no
     else
@@ -506,10 +515,10 @@ if test "$ac_cv_use_precompiled_boost" = no; then :; else
 
   if test "$ac_cv_use_precompiled_boost" = yes; then
     #
-    # TODO: check for Boost::program_options and Boost::serialization libraries
+    # TODO: check for Boost.Program_options and Boost.Serialization libraries
     #
 
-    AC_MSG_CHECKING([for Boost::signals library])
+    AC_MSG_CHECKING([for Boost.Signals library])
     ac_cv_boost_signals=no
     if test -n "$boost_libs"; then
       BOOST_SIGNALS_LIBS=
@@ -537,7 +546,7 @@ if test "$ac_cv_use_precompiled_boost" = no; then :; else
       AC_MSG_RESULT([no])
     fi
 
-    AC_MSG_CHECKING([for Boost::thread library])
+    AC_MSG_CHECKING([for Boost.Thread library])
     ac_cv_boost_thread=no
     if test -n "$boost_libs"; then
       BOOST_THREAD_LIBS=
@@ -681,9 +690,22 @@ fi
 # boost object libraries
 # 
 
-# check whether Boost::signals is compiled
+# check whether Boost.MPI is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  AC_MSG_CHECKING([whether to build boost::signals])
+  AC_MSG_CHECKING([whether to build Boost.MPI])
+  test -z "$ac_cv_boost_mpi" && ac_cv_boost_mpi=no
+  test "$ac_cv_have_mpi" = yes || ac_cv_boost_mpi=no
+  if test "$ac_cv_boost_version" = svn || test "$ac_cv_boost_version" = 1_35; then
+    :;
+  else
+    ac_cv_boost_mpi=no
+  fi
+fi
+AC_MSG_RESULT([$ac_cv_boost_mpi])
+
+# check whether Boost.Signals is compiled
+if test "$ac_cv_use_precompiled_boost" = yes; then :; else
+  AC_MSG_CHECKING([whether to build Boost.Signals])
   test -z "$ac_cv_boost_signals" && ac_cv_boost_signals=no
   if test "$ac_cv_boost_signals" = yes; then
     AC_MSG_RESULT([yes])
@@ -692,9 +714,9 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   fi
 fi
 
-# check whether boost::thread is compiled
+# check whether Boost.Thread is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  AC_MSG_CHECKING([whether to build boost::thread])
+  AC_MSG_CHECKING([whether to build Boost.Thread])
   test -z "$ac_cv_boost_thread" && ac_cv_boost_thread=no
   if test "$ac_cv_have_pthread" = yes; then
     if test "$ac_cv_boost_thread" = yes; then
@@ -707,14 +729,14 @@ if test "$ac_cv_use_precompiled_boost" = yes; then :; else
   fi
 fi
 
-# check whether boost::thread is compiled
+# check whether Boost.Regex is compiled
 if test "$ac_cv_use_precompiled_boost" = yes; then :; else
-  AC_MSG_CHECKING([whether to enable wchar support in boost::regex and boost::serialization])
+  AC_MSG_CHECKING([whether to enable wchar support in Boost.Regex and Boost.Serialization])
   test -z "$ac_cv_boost_wchar" && ac_cv_boost_wchar=no
   AC_MSG_RESULT([$ac_cv_boost_wchar])
 fi
 
-# check whether Boost::configure is used or not
+# check whether Boost.Configure is used or not
 AC_ARG_ENABLE(boost-config,
   AC_HELP_STRING([--enable-boost-config],
     [setup Boost configuration header file]),
@@ -902,6 +924,7 @@ AM_CONDITIONAL(BOOST_1_34, test "$ac_cv_boost_version" = 1_34)
 AM_CONDITIONAL(BOOST_1_35, test "$ac_cv_boost_version" = 1_35)
 AM_CONDITIONAL(BOOST_SVN, test "$ac_cv_boost_version" = svn)
 AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
+AM_CONDITIONAL(BUILD_BOOST_MPI, test "$ac_cv_boost_mpi" = yes)
 AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_boost_signals" = yes)
 AM_CONDITIONAL(BUILD_BOOST_THREAD, test "$ac_cv_boost_thread" = yes)
 AM_CONDITIONAL(BUILD_BOOST_WCHAR, test "$ac_cv_boost_wchar" = yes)
@@ -942,6 +965,14 @@ if test "$ac_cv_use_precompiled_boost" != yes; then
   if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = svn; then
     AC_DEFINE_UNQUOTED(FS_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/filesystem/src/utf8_codecvt_facet.cpp")
     AC_CONFIG_HEADERS(src/boost/fs_utf8_codecvt_facet.cpp)
+  fi
+  if test "$ac_cv_boost_version" = 1_32 || test "$ac_cv_boost_version" = 1_33 || test "$ac_cv_boost_version" = 1_34; then
+    AC_DEFINE_UNQUOTED(FS_EXCEPTION_CPP, "$BOOST_SRCDIR/filesystem/src/exception.cpp")
+    AC_CONFIG_HEADERS(src/boost/fs_exception.cpp)
+  fi
+  if test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = svn; then
+    AC_DEFINE_UNQUOTED(MP_EXCEPTION_CPP, "$BOOST_SRCDIR/mpi/src/exception.cpp")
+    AC_CONFIG_HEADERS(src/boost/mp_exception.cpp)
   fi
 fi
 

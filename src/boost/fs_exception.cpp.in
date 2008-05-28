@@ -1,0 +1,7 @@
+#undef FS_EXCEPTION_CPP
+
+#ifdef FS_EXCEPTION_CPP
+# include FS_EXCEPTION_CPP
+#else
+# error "FS_EXCEPTION_CPP not defined"
+#endif

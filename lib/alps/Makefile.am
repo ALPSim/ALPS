@@ -68,22 +68,45 @@ src_boost_DATE_TIME = \
 
 src_boost_FILESYSTEM_1_32 = \
   $(BOOST_SRCDIR)/filesystem/src/convenience.cpp \
-  $(BOOST_SRCDIR)/filesystem/src/exception.cpp \
   $(BOOST_SRCDIR)/filesystem/src/operations_posix_windows.cpp \
-  $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
+  $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp \
+  $(top_builddir)/src/boost/fs_exception.cpp
 src_boost_FILESYSTEM_1_33 = $(src_boost_FILESYSTEM_1_32)
 src_boost_FILESYSTEM_1_34 = \
-  $(BOOST_SRCDIR)/filesystem/src/exception.cpp \
   $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
-  $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
+  $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp \
+  $(top_builddir)/src/boost/fs_exception.cpp
 src_boost_FILESYSTEM_1_35 = \
   $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 src_boost_FILESYSTEM_SVN = $(src_boost_FILESYSTEM_1_35)
+
+src_boost_MPI_1_35 = \
+  $(BOOST_SRCDIR)/mpi/src/broadcast.cpp \
+  $(BOOST_SRCDIR)/mpi/src/communicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/computation_tree.cpp \
+  $(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/environment.cpp \
+  $(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/group.cpp \
+  $(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp \
+  $(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/point_to_point.cpp \
+  $(BOOST_SRCDIR)/mpi/src/request.cpp \
+  $(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/timer.cpp \
+  $(top_builddir)/src/boost/mp_exception.cpp
+# $(BOOST_SRCDIR)/mpi/src/text_skeleton_iarchive.cpp
+src_boost_MPI_SVN = $(src_boost_MPI_1_35)
 
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -300,10 +323,16 @@ endif
 
 if BOOST_1_35
 nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_35) $(src_boost_REGEX_1_35) $(src_boost_SERIALIZATION_1_35) $(src_BOOST_SYSTEM_1_35)
+if BUILD_BOOST_MPI
+nodist_libalps_la_SOURCES += $(src_boost_MPI_1_35)
+endif
 endif
 
 if BOOST_SVN
 nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_SVN) $(src_boost_REGEX_SVN) $(src_boost_SERIALIZATION_SVN) $(src_BOOST_SYSTEM_SVN)
+if BUILD_BOOST_MPI
+nodist_libalps_la_SOURCES += $(src_boost_MPI_SVN)
+endif
 endif
 
 if BUILD_BOOST_SIGNALS
