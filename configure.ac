@@ -966,14 +966,6 @@ if test "$ac_cv_use_precompiled_boost" != yes; then
     AC_DEFINE_UNQUOTED(FS_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/filesystem/src/utf8_codecvt_facet.cpp")
     AC_CONFIG_HEADERS(src/boost/fs_utf8_codecvt_facet.cpp)
   fi
-  if test "$ac_cv_boost_version" = 1_32 || test "$ac_cv_boost_version" = 1_33 || test "$ac_cv_boost_version" = 1_34; then
-    AC_DEFINE_UNQUOTED(FS_EXCEPTION_CPP, "$BOOST_SRCDIR/filesystem/src/exception.cpp")
-    AC_CONFIG_HEADERS(src/boost/fs_exception.cpp)
-  fi
-  if test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = svn; then
-    AC_DEFINE_UNQUOTED(MP_EXCEPTION_CPP, "$BOOST_SRCDIR/mpi/src/exception.cpp")
-    AC_CONFIG_HEADERS(src/boost/mp_exception.cpp)
-  fi
 fi
 
 dnl doc generation

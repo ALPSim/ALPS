@@ -1,7 +1,0 @@
-#undef MP_EXCEPTION_CPP
-
-#ifdef MP_EXCEPTION_CPP
-# include MP_EXCEPTION_CPP
-#else
-# error "MP_EXCEPTION_CPP not defined"
-#endif

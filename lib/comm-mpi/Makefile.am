@@ -10,4 +10,36 @@ endif
 
 SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
 
+src_boost_MPI_1_35 = \
+  $(BOOST_SRCDIR)/mpi/src/broadcast.cpp \
+  $(BOOST_SRCDIR)/mpi/src/communicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/computation_tree.cpp \
+  $(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/environment.cpp \
+  $(BOOST_SRCDIR)/mpi/src/exception.cpp \
+  $(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/group.cpp \
+  $(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp \
+  $(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/point_to_point.cpp \
+  $(BOOST_SRCDIR)/mpi/src/request.cpp \
+  $(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/timer.cpp
+# $(BOOST_SRCDIR)/mpi/src/text_skeleton_iarchive.cpp
+src_boost_MPI_SVN = $(src_boost_MPI_1_35)
+
 libcomm_mpi_la_SOURCES = $(SRC)
+nodist_libcomm_mpi_la_SOURCES =
+if BUILD_BOOST_MPI
+if BOOST_1_35
+nodist_libcomm_mpi_la_SOURCES += $(src_boost_MPI_1_35)
+endif
+if BOOST_SVN
+nodist_libcomm_mpi_la_SOURCES += $(src_boost_MPI_SVN)
+endif
+endif

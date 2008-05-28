@@ -33,6 +33,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @HAVE_MPI_TRUE@am__append_1 = libcomm-mpi.la
+@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_2 = $(src_boost_MPI_1_35)
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_3 = $(src_boost_MPI_SVN)
 subdir = lib/comm-mpi
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -54,9 +56,7 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
-	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp \
-	$(top_builddir)/src/boost/fs_exception.cpp \
-	$(top_builddir)/src/boost/mp_exception.cpp
+	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES =
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -70,7 +70,22 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libcomm_mpi_la_LIBADD =
 am__objects_1 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo
 am_libcomm_mpi_la_OBJECTS = $(am__objects_1)
-libcomm_mpi_la_OBJECTS = $(am_libcomm_mpi_la_OBJECTS)
+am__objects_2 = broadcast.lo communicator.lo computation_tree.lo \
+	content_oarchive.lo environment.lo exception.lo \
+	graph_communicator.lo group.lo intercommunicator.lo \
+	mpi_datatype_cache.lo mpi_datatype_oarchive.lo \
+	packed_iarchive.lo packed_oarchive.lo \
+	packed_skeleton_iarchive.lo packed_skeleton_oarchive.lo \
+	point_to_point.lo request.lo text_skeleton_oarchive.lo \
+	timer.lo
+@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_3 =  \
+@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_2)
+am__objects_4 = $(am__objects_2)
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_5 =  \
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_4)
+nodist_libcomm_mpi_la_OBJECTS = $(am__objects_3) $(am__objects_5)
+libcomm_mpi_la_OBJECTS = $(am_libcomm_mpi_la_OBJECTS) \
+	$(nodist_libcomm_mpi_la_OBJECTS)
 @HAVE_MPI_TRUE@am_libcomm_mpi_la_rpath = -rpath $(libdir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
@@ -83,7 +98,7 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(libcomm_mpi_la_SOURCES)
+SOURCES = $(libcomm_mpi_la_SOURCES) $(nodist_libcomm_mpi_la_SOURCES)
 DIST_SOURCES = $(libcomm_mpi_la_SOURCES)
 ETAGS = etags
 CTAGS = ctags
@@ -251,11 +266,35 @@ AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 lib_LTLIBRARIES = $(am__append_1)
 SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
+src_boost_MPI_1_35 = \
+  $(BOOST_SRCDIR)/mpi/src/broadcast.cpp \
+  $(BOOST_SRCDIR)/mpi/src/communicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/computation_tree.cpp \
+  $(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/environment.cpp \
+  $(BOOST_SRCDIR)/mpi/src/exception.cpp \
+  $(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/group.cpp \
+  $(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp \
+  $(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp \
+  $(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/point_to_point.cpp \
+  $(BOOST_SRCDIR)/mpi/src/request.cpp \
+  $(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp \
+  $(BOOST_SRCDIR)/mpi/src/timer.cpp
+
+# $(BOOST_SRCDIR)/mpi/src/text_skeleton_iarchive.cpp
+src_boost_MPI_SVN = $(src_boost_MPI_1_35)
 libcomm_mpi_la_SOURCES = $(SRC)
+nodist_libcomm_mpi_la_SOURCES = $(am__append_2) $(am__append_3)
 all: all-am
 
 .SUFFIXES:
-.SUFFIXES: .C .lo .o .obj
+.SUFFIXES: .C .cpp .lo .o .obj
 $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__configure_deps)
 	@for dep in $?; do \
 	  case '$(am__configure_deps)' in \
@@ -321,12 +360,31 @@ mostlyclean-compile:
 distclean-compile:
 	-rm -f *.tab.c
 
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/broadcast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communicator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/computation_tree.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/content_oarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dump.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/environment.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/exception.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/graph_communicator.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/group.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/intercommunicator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpdump.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpi_datatype_cache.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpi_datatype_oarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/os.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packed_iarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packed_oarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packed_skeleton_iarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packed_skeleton_oarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point_to_point.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/request.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_skeleton_oarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Plo@am__quote@
 
 .C.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -390,6 +448,160 @@ mpdump.lo: $(top_srcdir)/src/alps/osiris/mpdump.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/mpdump.C' object='mpdump.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpdump.lo `test -f '$(top_srcdir)/src/alps/osiris/mpdump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/mpdump.C
+
+broadcast.lo: $(BOOST_SRCDIR)/mpi/src/broadcast.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT broadcast.lo -MD -MP -MF $(DEPDIR)/broadcast.Tpo -c -o broadcast.lo `test -f '$(BOOST_SRCDIR)/mpi/src/broadcast.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/broadcast.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/broadcast.Tpo $(DEPDIR)/broadcast.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/broadcast.cpp' object='broadcast.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o broadcast.lo `test -f '$(BOOST_SRCDIR)/mpi/src/broadcast.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/broadcast.cpp
+
+communicator.lo: $(BOOST_SRCDIR)/mpi/src/communicator.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT communicator.lo -MD -MP -MF $(DEPDIR)/communicator.Tpo -c -o communicator.lo `test -f '$(BOOST_SRCDIR)/mpi/src/communicator.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/communicator.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/communicator.Tpo $(DEPDIR)/communicator.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/communicator.cpp' object='communicator.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o communicator.lo `test -f '$(BOOST_SRCDIR)/mpi/src/communicator.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/communicator.cpp
+
+computation_tree.lo: $(BOOST_SRCDIR)/mpi/src/computation_tree.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT computation_tree.lo -MD -MP -MF $(DEPDIR)/computation_tree.Tpo -c -o computation_tree.lo `test -f '$(BOOST_SRCDIR)/mpi/src/computation_tree.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/computation_tree.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/computation_tree.Tpo $(DEPDIR)/computation_tree.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/computation_tree.cpp' object='computation_tree.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o computation_tree.lo `test -f '$(BOOST_SRCDIR)/mpi/src/computation_tree.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/computation_tree.cpp
+
+content_oarchive.lo: $(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT content_oarchive.lo -MD -MP -MF $(DEPDIR)/content_oarchive.Tpo -c -o content_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/content_oarchive.Tpo $(DEPDIR)/content_oarchive.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp' object='content_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o content_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/content_oarchive.cpp
+
+environment.lo: $(BOOST_SRCDIR)/mpi/src/environment.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT environment.lo -MD -MP -MF $(DEPDIR)/environment.Tpo -c -o environment.lo `test -f '$(BOOST_SRCDIR)/mpi/src/environment.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/environment.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/environment.Tpo $(DEPDIR)/environment.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/environment.cpp' object='environment.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o environment.lo `test -f '$(BOOST_SRCDIR)/mpi/src/environment.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/environment.cpp
+
+exception.lo: $(BOOST_SRCDIR)/mpi/src/exception.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT exception.lo -MD -MP -MF $(DEPDIR)/exception.Tpo -c -o exception.lo `test -f '$(BOOST_SRCDIR)/mpi/src/exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/exception.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/exception.Tpo $(DEPDIR)/exception.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/exception.cpp' object='exception.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o exception.lo `test -f '$(BOOST_SRCDIR)/mpi/src/exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/exception.cpp
+
+graph_communicator.lo: $(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT graph_communicator.lo -MD -MP -MF $(DEPDIR)/graph_communicator.Tpo -c -o graph_communicator.lo `test -f '$(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/graph_communicator.Tpo $(DEPDIR)/graph_communicator.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp' object='graph_communicator.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o graph_communicator.lo `test -f '$(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/graph_communicator.cpp
+
+group.lo: $(BOOST_SRCDIR)/mpi/src/group.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT group.lo -MD -MP -MF $(DEPDIR)/group.Tpo -c -o group.lo `test -f '$(BOOST_SRCDIR)/mpi/src/group.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/group.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/group.Tpo $(DEPDIR)/group.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/group.cpp' object='group.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o group.lo `test -f '$(BOOST_SRCDIR)/mpi/src/group.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/group.cpp
+
+intercommunicator.lo: $(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT intercommunicator.lo -MD -MP -MF $(DEPDIR)/intercommunicator.Tpo -c -o intercommunicator.lo `test -f '$(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/intercommunicator.Tpo $(DEPDIR)/intercommunicator.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp' object='intercommunicator.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o intercommunicator.lo `test -f '$(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/intercommunicator.cpp
+
+mpi_datatype_cache.lo: $(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mpi_datatype_cache.lo -MD -MP -MF $(DEPDIR)/mpi_datatype_cache.Tpo -c -o mpi_datatype_cache.lo `test -f '$(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/mpi_datatype_cache.Tpo $(DEPDIR)/mpi_datatype_cache.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp' object='mpi_datatype_cache.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpi_datatype_cache.lo `test -f '$(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/mpi_datatype_cache.cpp
+
+mpi_datatype_oarchive.lo: $(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT mpi_datatype_oarchive.lo -MD -MP -MF $(DEPDIR)/mpi_datatype_oarchive.Tpo -c -o mpi_datatype_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/mpi_datatype_oarchive.Tpo $(DEPDIR)/mpi_datatype_oarchive.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp' object='mpi_datatype_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpi_datatype_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/mpi_datatype_oarchive.cpp
+
+packed_iarchive.lo: $(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT packed_iarchive.lo -MD -MP -MF $(DEPDIR)/packed_iarchive.Tpo -c -o packed_iarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/packed_iarchive.Tpo $(DEPDIR)/packed_iarchive.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp' object='packed_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o packed_iarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/packed_iarchive.cpp
+
+packed_oarchive.lo: $(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT packed_oarchive.lo -MD -MP -MF $(DEPDIR)/packed_oarchive.Tpo -c -o packed_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/packed_oarchive.Tpo $(DEPDIR)/packed_oarchive.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp' object='packed_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o packed_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/packed_oarchive.cpp
+
+packed_skeleton_iarchive.lo: $(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT packed_skeleton_iarchive.lo -MD -MP -MF $(DEPDIR)/packed_skeleton_iarchive.Tpo -c -o packed_skeleton_iarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/packed_skeleton_iarchive.Tpo $(DEPDIR)/packed_skeleton_iarchive.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp' object='packed_skeleton_iarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o packed_skeleton_iarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/packed_skeleton_iarchive.cpp
+
+packed_skeleton_oarchive.lo: $(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT packed_skeleton_oarchive.lo -MD -MP -MF $(DEPDIR)/packed_skeleton_oarchive.Tpo -c -o packed_skeleton_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/packed_skeleton_oarchive.Tpo $(DEPDIR)/packed_skeleton_oarchive.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp' object='packed_skeleton_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o packed_skeleton_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp
+
+point_to_point.lo: $(BOOST_SRCDIR)/mpi/src/point_to_point.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT point_to_point.lo -MD -MP -MF $(DEPDIR)/point_to_point.Tpo -c -o point_to_point.lo `test -f '$(BOOST_SRCDIR)/mpi/src/point_to_point.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/point_to_point.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/point_to_point.Tpo $(DEPDIR)/point_to_point.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/point_to_point.cpp' object='point_to_point.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o point_to_point.lo `test -f '$(BOOST_SRCDIR)/mpi/src/point_to_point.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/point_to_point.cpp
+
+request.lo: $(BOOST_SRCDIR)/mpi/src/request.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT request.lo -MD -MP -MF $(DEPDIR)/request.Tpo -c -o request.lo `test -f '$(BOOST_SRCDIR)/mpi/src/request.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/request.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/request.Tpo $(DEPDIR)/request.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/request.cpp' object='request.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o request.lo `test -f '$(BOOST_SRCDIR)/mpi/src/request.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/request.cpp
+
+text_skeleton_oarchive.lo: $(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT text_skeleton_oarchive.lo -MD -MP -MF $(DEPDIR)/text_skeleton_oarchive.Tpo -c -o text_skeleton_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/text_skeleton_oarchive.Tpo $(DEPDIR)/text_skeleton_oarchive.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp' object='text_skeleton_oarchive.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o text_skeleton_oarchive.lo `test -f '$(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp
+
+timer.lo: $(BOOST_SRCDIR)/mpi/src/timer.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT timer.lo -MD -MP -MF $(DEPDIR)/timer.Tpo -c -o timer.lo `test -f '$(BOOST_SRCDIR)/mpi/src/timer.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/timer.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/timer.Tpo $(DEPDIR)/timer.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/mpi/src/timer.cpp' object='timer.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o timer.lo `test -f '$(BOOST_SRCDIR)/mpi/src/timer.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/timer.cpp
+
+.cpp.o:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ $<
+
+.cpp.obj:
+@am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ `$(CYGPATH_W) '$<'`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXXCOMPILE) -c -o $@ `$(CYGPATH_W) '$<'`
+
+.cpp.lo:
+@am__fastdepCXX_TRUE@	$(LTCXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/$*.Tpo $(DEPDIR)/$*.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$<' object='$@' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
 mostlyclean-libtool:
 	-rm -f *.lo

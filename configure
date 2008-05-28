@@ -31278,22 +31278,6 @@ _ACEOF
     ac_config_headers="$ac_config_headers src/boost/fs_utf8_codecvt_facet.cpp"
 
   fi
-  if test "$ac_cv_boost_version" = 1_32 || test "$ac_cv_boost_version" = 1_33 || test "$ac_cv_boost_version" = 1_34; then
-    cat >>confdefs.h <<_ACEOF
-#define FS_EXCEPTION_CPP "$BOOST_SRCDIR/filesystem/src/exception.cpp"
-_ACEOF
-
-    ac_config_headers="$ac_config_headers src/boost/fs_exception.cpp"
-
-  fi
-  if test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = svn; then
-    cat >>confdefs.h <<_ACEOF
-#define MP_EXCEPTION_CPP "$BOOST_SRCDIR/mpi/src/exception.cpp"
-_ACEOF
-
-    ac_config_headers="$ac_config_headers src/boost/mp_exception.cpp"
-
-  fi
 fi
 
 ac_config_files="$ac_config_files doc/doxygen.conf"
@@ -32104,8 +32088,6 @@ do
     "src/boost/po_utf8_codecvt_facet.cpp") CONFIG_HEADERS="$CONFIG_HEADERS src/boost/po_utf8_codecvt_facet.cpp" ;;
     "src/boost/sr_utf8_codecvt_facet.cpp") CONFIG_HEADERS="$CONFIG_HEADERS src/boost/sr_utf8_codecvt_facet.cpp" ;;
     "src/boost/fs_utf8_codecvt_facet.cpp") CONFIG_HEADERS="$CONFIG_HEADERS src/boost/fs_utf8_codecvt_facet.cpp" ;;
-    "src/boost/fs_exception.cpp") CONFIG_HEADERS="$CONFIG_HEADERS src/boost/fs_exception.cpp" ;;
-    "src/boost/mp_exception.cpp") CONFIG_HEADERS="$CONFIG_HEADERS src/boost/mp_exception.cpp" ;;
     "doc/doxygen.conf") CONFIG_FILES="$CONFIG_FILES doc/doxygen.conf" ;;
     "doc/autodoc") CONFIG_FILES="$CONFIG_FILES doc/autodoc" ;;
     "doc/catalog.xml") CONFIG_FILES="$CONFIG_FILES doc/catalog.xml" ;;
