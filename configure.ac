@@ -231,7 +231,7 @@ AC_ARG_WITH(boost,
     if test -f "$boost_dir/boost/config.hpp"; then :; else
       AC_MSG_ERROR([Boost main tree not found])
     fi
-    if test -f "$boost_dir/libs/filesystem/src/exception.cpp"; then :; else
+    if test -f "$boost_dir/libs/program_options/src/cmdline.cpp"; then :; else
       AC_MSG_ERROR([Boost main tree not found])
     fi
     boost_incdir="$boost_dir"
