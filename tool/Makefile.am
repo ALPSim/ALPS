@@ -7,7 +7,7 @@ BOOST_DIR = @BOOST_DIR@
 pkgdatadir = $(libdir)/xml
 
 bin_PROGRAMS = compactrun convert2xml parameter2xml
-dist_bin_SCRIPTS = archivecat xslttransform transformall 
+dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet 
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
 
 compactrun_SOURCES = compactrun.C
