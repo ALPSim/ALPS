@@ -1,0 +1,9 @@
+#!/bin/bash
+
+TMPFILE=`mktemp -p /tmp -t`
+
+XSL_FILE=`grep href $@ | sed 's/.*file\:\/\///g' | sed 's/\"?>//g'`
+cp ${XSL_FILE} .
+
+sed 's/href=\".*\"/href=\"ALPS.xsl\"/g' $@ > ${TMPFILE}
+mv ${TMPFILE} $@
