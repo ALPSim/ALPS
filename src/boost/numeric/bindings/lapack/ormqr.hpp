@@ -2,12 +2,9 @@
  * 
  * Copyright (c) Toon Knapen, Karl Meerbergen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -100,31 +97,31 @@ namespace boost { namespace numeric { namespace bindings {
 
       inline 
       void ormqr (char const side, char const trans, int const m, int const n,
-		 int const k, const std::complex<float>* a, int const lda,
-		 const std::complex<float>* tau, std::complex<float>* c,
-		 int const ldc, std::complex<float>* work, int const lwork,
+		 int const k, const traits::complex_f* a, int const lda,
+		 const traits::complex_f* tau, traits::complex_f* c,
+		 int const ldc, traits::complex_f* work, int const lwork,
                  int& info) 
       {
         LAPACK_CUNMQR (&side, &trans, &m, &n, &k,
-		      reinterpret_cast<const fcomplex_t*>(a), &lda,
-		      reinterpret_cast<const fcomplex_t*>(tau),
-		      reinterpret_cast<fcomplex_t*>(c), &ldc,
-		      reinterpret_cast<fcomplex_t*>(work), &lwork,
+		      traits::complex_ptr(a), &lda,
+		      traits::complex_ptr(tau),
+		      traits::complex_ptr(c), &ldc,
+		      traits::complex_ptr(work), &lwork,
 		      &info);
       }
 
       inline 
       void ormqr (char const side, char const trans, int const m, int const n,
-		 int const k, const std::complex<double>* a, int const lda,
-		 const std::complex<double>* tau, std::complex<double>* c,
-		 int const ldc, std::complex<double>* work, int const lwork,
+		 int const k, const traits::complex_d* a, int const lda,
+		 const traits::complex_d* tau, traits::complex_d* c,
+		 int const ldc, traits::complex_d* work, int const lwork,
                  int& info) 
       {
         LAPACK_ZUNMQR (&side, &trans, &m, &n, &k,
-		      reinterpret_cast<const dcomplex_t*>(a), &lda,
-		      reinterpret_cast<const dcomplex_t*>(tau),
-		      reinterpret_cast<dcomplex_t*>(c), &ldc,
-		      reinterpret_cast<dcomplex_t*>(work), &lwork,
+		      traits::complex_ptr(a), &lda,
+		      traits::complex_ptr(tau),
+		      traits::complex_ptr(c), &ldc,
+		      traits::complex_ptr(work), &lwork,
 		      &info);
       }
 

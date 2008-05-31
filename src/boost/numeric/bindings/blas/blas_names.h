@@ -1,8 +1,10 @@
-//  Permission to copy, use, modify, sell and
-//  distribute this software is granted provided this copyright notice appears
-//  in all copies. This software is provided "as is" without express or implied
-//  warranty, and with no claim as to its suitability for any purpose.
+//
 //  Copyright (C) 2002, 2003 Si-Lab b.v.b.a and Toon Knapen 
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_BLAS_NAMES_H
 #define BOOST_NUMERIC_BINDINGS_BLAS_BLAS_NAMES_H
@@ -41,6 +43,11 @@
 #define BLAS_SCASUM FORTRAN_ID( scasum )
 #define BLAS_DZASUM FORTRAN_ID( dzasum )
 
+#define BLAS_SCOPY FORTRAN_ID( scopy )
+#define BLAS_DCOPY FORTRAN_ID( dcopy )
+#define BLAS_CCOPY FORTRAN_ID( ccopy )
+#define BLAS_ZCOPY FORTRAN_ID( zcopy )
+
 //
 // level 2
 //
@@ -72,5 +79,10 @@
 #define BLAS_ZSYRK FORTRAN_ID( zsyrk )
 #define BLAS_CHERK FORTRAN_ID( cherk )
 #define BLAS_ZHERK FORTRAN_ID( zherk )
+
+#define BLAS_STRSM FORTRAN_ID( strsm )
+#define BLAS_DTRSM FORTRAN_ID( dtrsm )
+#define BLAS_CTRSM FORTRAN_ID( ctrsm )
+#define BLAS_ZTRSM FORTRAN_ID( ztrsm )
 
 #endif // BOOST_NUMERIC_BINDINGS_BLAS_BLAS_NAMES_H

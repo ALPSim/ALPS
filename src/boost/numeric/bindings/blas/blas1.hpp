@@ -1,9 +1,10 @@
-
-//  Permission to copy, use, modify, sell and
-//  distribute this software is granted provided this copyright notice appears
-//  in all copies. This software is provided "as is" without express or implied
-//  warranty, and with no claim as to its suitability for any purpose.
+//
 //  Copyright Toon Knapen and Kresimir Fresl
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_BLAS1_HPP
 #define BOOST_NUMERIC_BINDINGS_BLAS_BLAS1_HPP
@@ -15,6 +16,27 @@
 #include <cassert> 
 
 namespace boost { namespace numeric { namespace bindings { namespace blas {
+
+  // x <- y
+  template < typename vector_x_type, typename vector_y_type >
+  void copy(const vector_x_type &x, vector_y_type &y )
+  {
+#ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
+    BOOST_STATIC_ASSERT( ( boost::is_same< typename traits::vector_traits<vector_x_type>::value_type, typename traits::vector_traits<vector_y_type>::value_type >::value ) ) ;
+#else
+    BOOST_STATIC_ASSERT( ( boost::is_same< typename vector_x_type::value_type, typename vector_y_type::value_type >::value ) ) ;
+#endif
+
+    const int n =  traits::vector_size( x ) ;
+    assert( n==traits::vector_size( y ) ) ;
+    const int stride_x = traits::vector_stride( x ) ;
+    const int stride_y = traits::vector_stride( y ) ;
+    typename traits::vector_traits<vector_x_type>::value_type const *x_ptr = traits::vector_storage( x ) ;
+    typename traits::vector_traits<vector_y_type>::value_type *y_ptr = traits::vector_storage( y ) ;
+
+    detail::copy( n, x_ptr, stride_x, y_ptr, stride_y ) ;
+  }
+
 
   // x <- alpha * x
   template < typename value_type, typename vector_type >
@@ -74,7 +96,13 @@ namespace boost { namespace numeric { namespace bindings { namespace blas {
 
     assert( traits::vector_size( x ) == traits::vector_size( y ) ) ;
 
-    typedef typename vector_type_x::value_type value_type ;
+    typedef
+#ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
+    typename traits::vector_traits< vector_type_x >::value_type 
+#else
+    typename vector_type_x::value_type
+#endif
+    value_type ;
 
     const int n = traits::vector_size( x ) ;
     const int stride_x = traits::vector_stride( x ) ;

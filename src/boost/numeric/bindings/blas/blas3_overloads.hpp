@@ -1,9 +1,10 @@
+//
 //  Copyright (C) Toon Knapen 2003
 //
-//  Permission to copy, use, modify, sell and
-//  distribute this software is granted provided this copyright notice appears
-//  in all copies. This software is provided "as is" without express or implied
-//  warranty, and with no claim as to its suitability for any purpose.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_BLAS3_OVERLOADS_HPP
 #define BOOST_NUMERIC_BINDINGS_BLAS_BLAS3_OVERLOADS_HPP
@@ -98,6 +99,41 @@ namespace boost { namespace numeric { namespace bindings { namespace blas { name
   {
      BLAS_ZHERK( &uplo, &trans, &n, &k, &alpha, complex_ptr( a_ptr ),
                  &lda, &beta, complex_ptr( c_ptr ), &ldc);
+  }
+
+  //
+  // trsm
+  //
+  inline
+  void trsm( char side, char uplo, char transa, char diag, int m, int n,
+             float const& alpha, float const* a_ptr, int lda,
+             float* b_ptr, int ldb )
+  {
+     BLAS_STRSM( &side, &uplo, &transa, &diag, &m, &n, &alpha, a_ptr, &lda, b_ptr, &ldb ) ;
+  }
+
+  inline
+  void trsm( char side, char uplo, char transa, char diag, int m, int n,
+             double const& alpha, double const* a_ptr, int lda,
+             double* b_ptr, int ldb )
+  {
+     BLAS_DTRSM( &side, &uplo, &transa, &diag, &m, &n, &alpha, a_ptr, &lda, b_ptr, &ldb ) ;
+  }
+
+  inline
+  void trsm( char side, char uplo, char transa, char diag, int m, int n,
+             complex_f const& alpha, complex_f const* a_ptr, int lda,
+             complex_f* b_ptr, int ldb )
+  {
+     BLAS_CTRSM( &side, &uplo, &transa, &diag, &m, &n, complex_ptr( &alpha ), complex_ptr( a_ptr ), &lda, complex_ptr( b_ptr ), &ldb ) ;
+  }
+
+  inline
+  void trsm( char side, char uplo, char transa, char diag, int m, int n,
+             complex_d const& alpha, complex_d const* a_ptr, int lda,
+             complex_d* b_ptr, int ldb )
+  {
+     BLAS_ZTRSM( &side, &uplo, &transa, &diag, &m, &n, complex_ptr( &alpha ), complex_ptr( a_ptr ), &lda, complex_ptr( b_ptr ), &ldb ) ;
   }
 
 }}}}}

@@ -2,12 +2,9 @@
  * 
  * Copyright (c) Toon Knapen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -20,11 +17,7 @@
 #ifndef BOOST_NUMERIC_BINDINGS_USE_CLAPACK
 #  include <boost/numeric/bindings/traits/fortran.h>
 #else
-#ifdef __IBMCPP__
-#  define FORTRAN_ID( id ) id
-#else
 #  define FORTRAN_ID( id ) id##_
-#endif 
 #endif 
 
 /* linear systems */
@@ -164,6 +157,16 @@
 #define LAPACK_CHEEV FORTRAN_ID( cheev )
 #define LAPACK_ZHEEV FORTRAN_ID( zheev )
 
+#define LAPACK_SSYEVD FORTRAN_ID( ssyevd )
+#define LAPACK_DSYEVD FORTRAN_ID( dsyevd )
+#define LAPACK_CHEEVD FORTRAN_ID( cheevd )
+#define LAPACK_ZHEEVD FORTRAN_ID( zheevd )
+
+#define LAPACK_SSYEVX FORTRAN_ID( ssyevx )
+#define LAPACK_DSYEVX FORTRAN_ID( dsyevx )
+#define LAPACK_CHEEVX FORTRAN_ID( cheevx )
+#define LAPACK_ZHEEVX FORTRAN_ID( zheevx )
+
 
 #define LAPACK_STREVC FORTRAN_ID( strevc )
 #define LAPACK_DTREVC FORTRAN_ID( dtrevc )
@@ -184,6 +187,17 @@
 #define LAPACK_CHBEV FORTRAN_ID( chbev )
 #define LAPACK_ZHBEV FORTRAN_ID( zhbev )
 
+#define LAPACK_SSBEVX FORTRAN_ID( ssbevx )
+#define LAPACK_DSBEVX FORTRAN_ID( dsbevx )
+#define LAPACK_CHBEVX FORTRAN_ID( chbevx )
+#define LAPACK_ZHBEVX FORTRAN_ID( zhbevx )
+
+
+/********************************************/
+/* eigenproblems for tridiagonal matrices */ 
+
+#define LAPACK_SSTEQR FORTRAN_ID( ssteqr )
+#define LAPACK_DSTEQR FORTRAN_ID( dsteqr )
 
 
 /********************************************/
@@ -200,6 +214,9 @@
 #define LAPACK_DORMQR FORTRAN_ID( dormqr )
 #define LAPACK_CUNMQR FORTRAN_ID( cunmqr )
 #define LAPACK_ZUNMQR FORTRAN_ID( zunmqr )
+
+#define LAPACK_SSYTRD FORTRAN_ID( ssytrd )
+#define LAPACK_DSYTRD FORTRAN_ID( dsytrd )
 
 
 /********************************************/

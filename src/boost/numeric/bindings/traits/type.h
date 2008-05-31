@@ -1,10 +1,9 @@
 /*
  * Copyright (C) 2000,2001,2002,2003 Si-Lab b.v.b.a. and Toon Knapen
  * 
- * License is hereby granted to use and modify this software 
- * as long as this copyright notice is retained and modifications
- * are clearly marked.
- * This License does not permit you to redistribute this software.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  * 
  */
 
@@ -30,7 +29,7 @@ union {
 } fcomplex_t ;
 
 typedef 
-struct
+struct {
   double cmplx[2] ;
 } dcomplex_t ;
 

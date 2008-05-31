@@ -2,12 +2,9 @@
  * 
  * Copyright (c) Toon Knapen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -68,8 +65,8 @@ namespace boost { namespace numeric { namespace bindings {
 
       inline 
       void trevc (char const side, char const howmny, const logical_t* select, int const n,
-                 std::complex<float>* t, int const ldt, std::complex<float>* vl, int const ldvl, std::complex<float>* vr, int const ldvr,
-                 int const mm, int& m, std::complex<float>* work, int& info) 
+                 traits::complex_f* t, int const ldt, traits::complex_f* vl, int const ldvl, traits::complex_f* vr, int const ldvr,
+                 int const mm, int& m, traits::complex_f* work, int& info) 
       {
         LAPACK_CTREVC (&side, &howmny, select, &n, traits::complex_ptr(t), &ldt, traits::complex_ptr(vl), &ldvl,
 			traits::complex_ptr(vr), &ldvr, &mm, &m, traits::complex_ptr(work+n), traits::complex_ptr(work), &info);
@@ -77,8 +74,8 @@ namespace boost { namespace numeric { namespace bindings {
 
       inline 
       void trevc (char const side, char const howmny, const logical_t* select, int const n,
-                  std::complex<double>* t, int const ldt, std::complex<double>* vl, int const ldvl, std::complex<double>* vr, int const ldvr,
-		  int const mm, int& m, std::complex<double>* work, int& info) 
+                  traits::complex_d* t, int const ldt, traits::complex_d* vl, int const ldvl, traits::complex_d* vr, int const ldvr,
+		  int const mm, int& m, traits::complex_d* work, int& info) 
       {
         LAPACK_ZTREVC (&side, &howmny, select, &n, traits::complex_ptr(t), &ldt,
       	               traits::complex_ptr(vl), &ldvl, traits::complex_ptr(vr), &ldvr,

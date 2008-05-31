@@ -2,12 +2,9 @@
  * 
  * Copyright (c) Toon Knapen, Karl Meerbergen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -66,8 +63,8 @@ namespace boost { namespace numeric { namespace bindings {
                  float* rwork, int& info) 
       {
         LAPACK_CHEEV (&jobz, &uplo, &n,
-		      reinterpret_cast<fcomplex_t*>(a), &lda, w,
-		      reinterpret_cast<fcomplex_t*>(work), &lwork,
+		      traits::complex_ptr(a), &lda, w,
+		      traits::complex_ptr(work), &lwork,
 		      rwork, &info);
       }
 
@@ -78,8 +75,8 @@ namespace boost { namespace numeric { namespace bindings {
                  double* rwork, int& info) 
       {
         LAPACK_ZHEEV (&jobz, &uplo, &n,
-		      reinterpret_cast<dcomplex_t*>(a), &lda, w,
-		      reinterpret_cast<dcomplex_t*>(work), &lwork,
+		      traits::complex_ptr(a), &lda, w,
+		      traits::complex_ptr(work), &lwork,
 		      rwork, &info);
       }
 

@@ -2,21 +2,16 @@
 //  Copyright (c) 2002,2003,2004
 //  Toon Knapen, Kresimir Fresl, Joerg Walter, Karl Meerbergen
 //
-//  Permission to use, copy, modify, distribute and sell this software
-//  and its documentation for any purpose is hereby granted without fee,
-//  provided that the above copyright notice appear in all copies and
-//  that both that copyright notice and this permission notice appear
-//  in supporting documentation.  The authors make no representations
-//  about the suitability of this software for any purpose.
-//  It is provided "as is" without express or implied warranty.
-//
+// Distributed under the Boost Software License, Version 1.0. 
+// (See accompanying file LICENSE_1_0.txt or copy at 
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef BOOST_NUMERIC_BINDINGS_TRAITS_VECTOR_RAW_HPP
 #define BOOST_NUMERIC_BINDINGS_TRAITS_VECTOR_RAW_HPP
 
 #include <cstddef> 
-// #include <boost/numeric/ublas/config.hpp> 
+#include <boost/numeric/ublas/config.hpp> 
 #ifndef BOOST_UBLAS_HAVE_BINDINGS
 #  include <boost/numeric/ublas/vector.hpp> 
 #endif 

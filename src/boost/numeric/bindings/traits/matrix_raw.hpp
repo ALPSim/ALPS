@@ -2,30 +2,23 @@
 //  Copyright (c) 2002-2003
 //  Toon Knapen, Kresimir Fresl, Joerg Walter
 //
-//  Permission to use, copy, modify, distribute and sell this software
-//  and its documentation for any purpose is hereby granted without fee,
-//  provided that the above copyright notice appear in all copies and
-//  that both that copyright notice and this permission notice appear
-//  in supporting documentation.  The authors make no representations
-//  about the suitability of this software for any purpose.
-//  It is provided "as is" without express or implied warranty.
-//
+// Distributed under the Boost Software License, Version 1.0. 
+// (See accompanying file LICENSE_1_0.txt or copy at 
+// http://www.boost.org/LICENSE_1_0.txt)
 //
 
 #ifndef BOOST_NUMERIC_BINDINGS_TRAITS_MATRIX_RAW_HPP
 #define BOOST_NUMERIC_BINDINGS_TRAITS_MATRIX_RAW_HPP
 
 #include <cstddef> 
-// #include <boost/numeric/ublas/config.hpp> 
+#include <boost/numeric/ublas/config.hpp> 
 #ifndef BOOST_UBLAS_HAVE_BINDINGS
 #  include <boost/numeric/ublas/matrix.hpp> 
 #endif 
 
 namespace boost { namespace numeric { namespace bindings { namespace traits {
 
-#ifndef BOOST_NUMERIC_BINDINGS_TRAITS_VECTOR_RAW_HPP
   namespace ublas = boost::numeric::ublas; 
-#endif
 
   // size: 
 
@@ -82,7 +75,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   int leading_dimension (const ublas::matrix<T,F,A> &m) {
     typedef ublas::matrix<T,F,A> matrix_t; 
     return bindings::traits::leading_dimension
-      (m, typename matrix_t::orientation_category());
+      (m, BOOST_UBLAS_TYPENAME matrix_t::orientation_category());
   }
   template <typename M>
   BOOST_UBLAS_INLINE
@@ -182,7 +175,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename T, typename F, typename A>
   BOOST_UBLAS_INLINE
-  const typename ublas::matrix<T,F,A>::value_type *
+  typename ublas::matrix<T,F,A>::const_pointer 
   matrix_storage (const ublas::matrix<T,F,A> &m) {
     return &m.data().begin()[0];
   }
@@ -191,13 +184,13 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   // But how shall we write portable code otherwise?
   template <typename T, typename F, typename A>
   BOOST_UBLAS_INLINE
-  const typename ublas::matrix<T,F,A>::value_type *
+  typename ublas::matrix<T,F,A>::const_pointer 
   matrix_storage_const (const ublas::matrix<T,F,A> &m) {
     return &m.data().begin()[0];
   }
   template <typename T, typename F, typename A>
   BOOST_UBLAS_INLINE
-  typename ublas::matrix<T,F,A>::value_type *
+  typename ublas::matrix<T,F,A>::pointer 
   matrix_storage (ublas::matrix<T,F,A> &m) {
     return &m.data().begin()[0];
   }
@@ -228,7 +221,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
 #ifndef BOOST_NO_FUNCTION_TEMPLATE_ORDERING
   template <typename M>
   BOOST_UBLAS_INLINE
-  const typename M::value_type *
+  typename M::const_pointer 
   matrix_storage (const ublas::matrix_reference<M> &m) {
     return matrix_storage (m.expression ());
   }
@@ -237,13 +230,13 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   // But how shall we write portable code otherwise?
   template <typename M>
   BOOST_UBLAS_INLINE
-  const typename M::value_type *
+  typename M::const_pointer 
   matrix_storage_const (const ublas::matrix_reference<M> &m) {
     return matrix_storage_const (m.expression ());
   }
   template <typename M>
   BOOST_UBLAS_INLINE
-  typename M::value_type * matrix_storage (ublas::matrix_reference<M> &m) {
+  typename M::pointer matrix_storage (ublas::matrix_reference<M> &m) {
     return matrix_storage (m.expression ());
   }
 

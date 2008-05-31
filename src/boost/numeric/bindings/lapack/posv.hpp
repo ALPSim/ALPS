@@ -2,12 +2,9 @@
  * 
  * Copyright (c) Toon Knapen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -27,6 +24,7 @@
 #  include <boost/type_traits/is_same.hpp>
 #endif 
 
+#include <cassert>
 
 namespace boost { namespace numeric { namespace bindings { 
 
@@ -142,10 +140,7 @@ namespace boost { namespace numeric { namespace bindings {
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK
       typedef traits::matrix_traits<SymmMatrA> matraits;
       typedef typename matraits::value_type val_t;
-      BOOST_STATIC_ASSERT((boost::is_same<
-        typename matraits::matrix_structure,
-        typename traits::detail::symm_herm_t<val_t>::type
-      >::value));
+      BOOST_STATIC_ASSERT( (traits::detail::symm_herm_compatible< val_t, typename matraits::matrix_structure >::value ) ) ;
       BOOST_STATIC_ASSERT((boost::is_same<
         typename traits::matrix_traits<MatrB>::matrix_structure, 
         traits::general_t

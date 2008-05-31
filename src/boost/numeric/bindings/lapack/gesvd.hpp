@@ -2,12 +2,9 @@
  * 
  * Copyright (c) Toon Knapen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -27,6 +24,8 @@
 #  include <boost/static_assert.hpp>
 #  include <boost/type_traits/is_same.hpp>
 #endif 
+
+#include <cassert>
 
 namespace boost { namespace numeric { namespace bindings { 
 
@@ -276,9 +275,8 @@ namespace boost { namespace numeric { namespace bindings {
 
       int const m = traits::matrix_size1 (a);
       int const n = traits::matrix_size2 (a);
-
-#ifndef NDEBUG
       int const minmn = m < n ? m : n; 
+
       assert (minmn == traits::vector_size (s)); 
       assert (!(jobu == 'O' && jobvt == 'O')); 
       assert ((jobu == 'N')
@@ -294,8 +292,6 @@ namespace boost { namespace numeric { namespace bindings {
               || (jobvt == 'O' && traits::leading_dimension (vt) >= 1)
               || (jobvt == 'A' && traits::leading_dimension (vt) >= n)
               || (jobvt == 'S' && traits::leading_dimension (vt) >= minmn));
-#endif
-
 #ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
       typedef typename traits::matrix_traits<MatrA>::value_type val_t; 
 #else 
@@ -344,9 +340,8 @@ namespace boost { namespace numeric { namespace bindings {
 
       int const m = traits::matrix_size1 (a);
       int const n = traits::matrix_size2 (a);
-
-#ifndef NDEBUG
       int const minmn = m < n ? m : n; 
+
       assert (minmn == traits::vector_size (s)); 
       assert (!(jobu == 'O' && jobvt == 'O')); 
       assert ((jobu == 'N')
@@ -362,8 +357,6 @@ namespace boost { namespace numeric { namespace bindings {
               || (jobvt == 'O' && traits::leading_dimension (vt) >= 1)
               || (jobvt == 'A' && traits::leading_dimension (vt) >= n)
               || (jobvt == 'S' && traits::leading_dimension (vt) >= minmn));
-#endif
-
 #ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
       typedef typename traits::matrix_traits<MatrA>::value_type val_t; 
 #else 
@@ -412,9 +405,8 @@ namespace boost { namespace numeric { namespace bindings {
 
       int const m = traits::matrix_size1 (a);
       int const n = traits::matrix_size2 (a);
-
-#ifndef NDEBUG
       int const minmn = m < n ? m : n; 
+
       assert (minmn == traits::vector_size (s)); 
       assert (!(jobu == 'O' && jobvt == 'O')); 
       assert ((jobu == 'N')
@@ -430,7 +422,6 @@ namespace boost { namespace numeric { namespace bindings {
               || (jobvt == 'O' && traits::leading_dimension (vt) >= 1)
               || (jobvt == 'A' && traits::leading_dimension (vt) >= n)
               || (jobvt == 'S' && traits::leading_dimension (vt) >= minmn));
-#endif
 
 #ifdef BOOST_NUMERIC_BINDINGS_LAPACK_2
       assert (opt == 'M'); 
@@ -499,11 +490,9 @@ namespace boost { namespace numeric { namespace bindings {
 
       int const m = traits::matrix_size1 (a);
       int const n = traits::matrix_size2 (a);
-
-#ifndef NDEBUG
       int const minmn = m < n ? m : n; 
+
       assert (minmn == traits::vector_size (s)); 
-#endif
 
 #ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS
       typedef typename traits::matrix_traits<MatrA>::value_type val_t; 

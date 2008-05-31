@@ -1,9 +1,10 @@
+//
 //  Copyright (C) Toon Knapen 2003
 //
-//  Permission to copy, use, modify, sell and
-//  distribute this software is granted provided this copyright notice appears
-//  in all copies. This software is provided "as is" without express or implied
-//  warranty, and with no claim as to its suitability for any purpose.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_BLAS1_OVERLOADS_HPP
 #define BOOST_NUMERIC_BINDINGS_BLAS_BLAS1_OVERLOADS_HPP
@@ -52,6 +53,11 @@ namespace boost { namespace numeric { namespace bindings { namespace blas { name
   inline float  asum(const int& n, const complex_f*   x, const int& incx) { return BLAS_SCASUM( &n, complex_ptr(x), &incx ) ; }
   inline double asum(const int& n, const complex_d*  x, const int& incx) { return BLAS_DZASUM( &n, complex_ptr(x), &incx ) ; }
   
+  // copy
+  inline void copy(const int& n, const float*     x, const int& incx, float*     y, const int& incy) { BLAS_SCOPY( &n, x, &incx, y, &incy ) ; }
+  inline void copy(const int& n, const double*    x, const int& incx, double*    y, const int& incy) { BLAS_DCOPY( &n, x, &incx, y, &incy ) ; }
+  inline void copy(const int& n, const complex_f* x, const int& incx, complex_f* y, const int& incy) { BLAS_CCOPY( &n, complex_ptr(x), &incx, complex_ptr(y), &incy ) ; }
+  inline void copy(const int& n, const complex_d* x, const int& incx, complex_d* y, const int& incy) { BLAS_ZCOPY( &n, complex_ptr(x), &incx, complex_ptr(y), &incy ) ; }
 }}}}}
 
 #endif // BOOST_NUMERIC_BINDINGS_BLAS_BLAS1_OVERLOADS_HPP

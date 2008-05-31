@@ -1,8 +1,10 @@
-//  Permission to copy, use, modify, sell and
-//  distribute this software is granted provided this copyright notice appears
-//  in all copies. This software is provided "as is" without express or implied
-//  warranty, and with no claim as to its suitability for any purpose.
+//
 //  Copyright (C) 2002, 2003 Si-Lab b.v.b.a and Toon Knapen 
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_BLAS_H
 #define BOOST_NUMERIC_BINDINGS_BLAS_BLAS_H
@@ -49,6 +51,11 @@ extern "C"
   float   BLAS_SCASUM(const int *n, const fcomplex_t  *x, const int *incx);
   double  BLAS_DZASUM(const int *n, const dcomplex_t *x, const int *incx);
 
+  void BLAS_SCOPY( const int *n, const float  *x, const int *incx, float  *y, const int *incy);
+  void BLAS_DCOPY( const int *n, const double  *x, const int *incx, double  *y, const int *incy);
+  void BLAS_CCOPY( const int *n, const fcomplex_t  *x, const int *incx, fcomplex_t  *y, const int *incy);
+  void BLAS_ZCOPY( const int *n, const dcomplex_t  *x, const int *incx, dcomplex_t  *y, const int *incy);
+
 
   //
   // Level 2
@@ -88,6 +95,15 @@ extern "C"
                       const fcomplex_t* a, const int* lda, const float* beta, fcomplex_t* c, const int* ldc );
   void   BLAS_ZHERK ( const char* uplo, const char* trans, const int* n, const int* k, const double* alpha,
                       const dcomplex_t* a, const int* lda, const double* beta, dcomplex_t* c, const int* ldc );
+
+  void BLAS_STRSM( const char* side, const char* uplo, const char* transa, const char* diag, const int* m,
+                   const int* n, float const* alpha, float const* a, int const* lda, float* b, int const* ldb );
+  void BLAS_DTRSM( const char* side, const char* uplo, const char* transa, const char* diag, const int* m,
+                   const int* n, double const* alpha, double const* a, int const* lda, double* b, int const* ldb );
+  void BLAS_CTRSM( const char* side, const char* uplo, const char* transa, const char* diag, const int* m,
+                   const int* n, fcomplex_t const* alpha, fcomplex_t const* a, int const* lda, fcomplex_t* b, int const* ldb );
+  void BLAS_ZTRSM( const char* side, const char* uplo, const char* transa, const char* diag, const int* m,
+                   const int* n, dcomplex_t const* alpha, dcomplex_t const* a, int const* lda, dcomplex_t* b, int const* ldb );
 
 }
 

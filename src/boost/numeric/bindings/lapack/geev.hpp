@@ -3,12 +3,9 @@
  * Copyright (c) Andreas Kloeckner 2004
  *               Toon Knapen, Karl Meerbergen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -102,11 +99,11 @@ namespace boost { namespace numeric { namespace bindings {
       {
 	int info;
 	LAPACK_CGEEV(jobvl, jobvr, n, 
-		     reinterpret_cast<fcomplex_t *>(a), lda, 
-		     reinterpret_cast<fcomplex_t *>(w), 
-		     reinterpret_cast<fcomplex_t *>(vl), ldvl, 
-		     reinterpret_cast<fcomplex_t *>(vr), ldvr, 
-		     reinterpret_cast<fcomplex_t *>(work), lwork, 
+		     traits::complex_ptr(a), lda, 
+		     traits::complex_ptr(w), 
+		     traits::complex_ptr(vl), ldvl, 
+		     traits::complex_ptr(vr), ldvr, 
+		     traits::complex_ptr(work), lwork, 
 		     rwork, &info);
 	return info;
       }
@@ -119,11 +116,11 @@ namespace boost { namespace numeric { namespace bindings {
       {
 	int info;
 	LAPACK_ZGEEV(jobvl, jobvr, n, 
-		     reinterpret_cast<dcomplex_t *>(a), lda, 
-		     reinterpret_cast<dcomplex_t *>(w), 
-		     reinterpret_cast<dcomplex_t *>(vl), ldvl, 
-		     reinterpret_cast<dcomplex_t *>(vr), ldvr, 
-		     reinterpret_cast<dcomplex_t *>(work), lwork, 
+		     traits::complex_ptr(a), lda, 
+		     traits::complex_ptr(w), 
+		     traits::complex_ptr(vl), ldvl, 
+		     traits::complex_ptr(vr), ldvr, 
+		     traits::complex_ptr(work), lwork, 
 		     rwork, &info);
 	return info;
       }
@@ -329,7 +326,7 @@ namespace boost { namespace numeric { namespace bindings {
 
       assert(traits::matrix_size2(a)==n); 
       assert(traits::vector_size(w)==n); 
-      assert(vecttraits::vector_size(w)==n); 
+      assert(traits::vector_size(w)==n); 
       assert(!vr || traits::matrix_size1(*vr)==n); 
       assert(!vl || traits::matrix_size1(*vl)==n); 
 

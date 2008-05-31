@@ -2,12 +2,9 @@
  * 
  * Copyright (c) 2002, 2003 Kresimir Fresl, Toon Knapen and Karl Meerbergen
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -17,7 +14,6 @@
 #ifndef BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_MATRIX_H
 #define BOOST_NUMERIC_BINDINGS_TRAITS_UBLAS_MATRIX_H
 
-#include <boost/version.hpp>
 #include <boost/numeric/bindings/traits/traits.hpp>
 
 #ifndef BOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS 
@@ -76,20 +72,19 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     static int leading_dimension (matrix_type& m) {
       // g++ 2.95.4 and 3.0.4 (with -pedantic) dislike 
       //   identifier_type::functor_type::size2()
-#if BOOST_VERSION >= 103500
-      return functor_t::size_m (m.size1(), m.size2());
-#else
-      return functor_t::size2 (m.size1(), m.size2());
-#endif
+      //return functor_t::size_m (m.size1(), m.size2());
+      return detail::ublas_ordering<orientation_category>::leading_dimension( m ) ;
     }
 
     // stride1 == distance (m (i, j), m (i+1, j)) 
     static int stride1 (matrix_type& m) { 
-      return functor_t::one1 (m.size1(), m.size2());
+      //return functor_t::one1 (m.size1(), m.size2());
+      return detail::ublas_ordering<orientation_category>::stride1( m ) ;
     } 
     // stride2 == distance (m (i, j), m (i, j+1)) 
     static int stride2 (matrix_type& m) { 
-      return functor_t::one2 (m.size1(), m.size2());
+      //return functor_t::one2 (m.size1(), m.size2());
+      return detail::ublas_ordering<orientation_category>::stride2( m ) ;
     }
   }; 
 
@@ -153,11 +148,12 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     typedef typename matrix_traits<M>::matrix_structure matrix_structure;
     typedef typename matrix_traits<M>::ordering_type    ordering_type; 
 
-    typedef typename M::value_type                                value_type;
-    typedef typename detail::generate_const<MR,value_type>::type* pointer; 
-
   private:
     typedef typename detail::generate_const<MR, typename MR::matrix_closure_type>::type m_type; 
+
+  public:
+    typedef typename matrix_traits<m_type>::value_type            value_type;
+    typedef typename matrix_traits<m_type>::pointer               pointer ;
 
   public:
     static pointer storage (matrix_type& mr) {

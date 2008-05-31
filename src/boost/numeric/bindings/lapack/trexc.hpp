@@ -2,12 +2,9 @@
  * 
  * Copyright (c) Toon Knapen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -54,10 +51,10 @@ namespace boost { namespace numeric { namespace bindings {
       int trexc_work_size( int const n, double ) {return n;}
 
       inline 
-      int trexc_work_size( int const n, std::complex<float> ) {return 0;}
+      int trexc_work_size( int const n, traits::complex_f ) {return 0;}
 
       inline 
-      int trexc_work_size( int const n, std::complex<double> ) {return 0;}
+      int trexc_work_size( int const n, traits::complex_d ) {return 0;}
     }
 
     // Get the minimum size of the work array.
@@ -85,7 +82,7 @@ namespace boost { namespace numeric { namespace bindings {
 
       inline 
       void trexc (char const compq, int const n,
-                 std::complex<float>* t, int const ldt, std::complex<float>* q, int const ldq, int& ifst, int& ilst,
+                 traits::complex_f* t, int const ldt, traits::complex_f* q, int const ldq, int& ifst, int& ilst,
 		 float* work, int& info) 
       {
         LAPACK_CTREXC (&compq, &n, traits::complex_ptr(t), &ldt, traits::complex_ptr(q), &ldq, &ifst, &ilst, &info);
@@ -93,7 +90,7 @@ namespace boost { namespace numeric { namespace bindings {
 
       inline 
       void trexc (char const compq, int const n,
-                 std::complex<double>* t, int const ldt, std::complex<double>* q, int const ldq, int& ifst, int& ilst,
+                 traits::complex_d* t, int const ldt, traits::complex_d* q, int const ldq, int& ifst, int& ilst,
 		 double* work, int& info) 
       {
         LAPACK_ZTREXC (&compq, &n, traits::complex_ptr(t), &ldt, traits::complex_ptr(q), &ldq, &ifst, &ilst, &info);

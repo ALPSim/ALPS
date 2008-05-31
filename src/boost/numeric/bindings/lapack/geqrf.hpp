@@ -2,12 +2,9 @@
  * 
  * Copyright (c) Toon Knapen, Karl Meerbergen & Kresimir Fresl 2003
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -73,27 +70,27 @@ namespace boost { namespace numeric { namespace bindings {
 
       inline 
       void geqrf (int const m, int const n,
-                  std::complex<float>* a, int const lda,
-                  std::complex<float>* tau, std::complex<float>* work,
+                  traits::complex_f* a, int const lda,
+                  traits::complex_f* tau, traits::complex_f* work,
 		  int const lwork, int& info) 
       {
         LAPACK_CGEQRF (&m, &n,
-                      reinterpret_cast<fcomplex_t*> (a), &lda,
-                      reinterpret_cast<fcomplex_t*> (tau),
-                      reinterpret_cast<fcomplex_t*> (work), &lwork, &info );
+                      traits::complex_ptr (a), &lda,
+                      traits::complex_ptr (tau),
+                      traits::complex_ptr (work), &lwork, &info );
       }
       
 
       inline 
       void geqrf (int const m, int const n,
-                  std::complex<double>* a, int const lda,
-                  std::complex<double>* tau, std::complex<double>* work,
+                  traits::complex_d* a, int const lda,
+                  traits::complex_d* tau, traits::complex_d* work,
 		  int const lwork, int& info) 
       {
         LAPACK_ZGEQRF (&m, &n,
-                      reinterpret_cast<dcomplex_t*> (a), &lda,
-                      reinterpret_cast<dcomplex_t*> (tau),
-                      reinterpret_cast<dcomplex_t*> (work), &lwork, &info );
+                      traits::complex_ptr (a), &lda,
+                      traits::complex_ptr (tau),
+                      traits::complex_ptr (work), &lwork, &info );
       }
       
     } 

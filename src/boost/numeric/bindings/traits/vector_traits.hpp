@@ -2,12 +2,9 @@
  * 
  * Copyright (c) 2002, 2003 Kresimir Fresl, Toon Knapen and Karl Meerbergen
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -39,11 +36,9 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     typedef T                                                    value_type; 
     typedef typename detail::generate_const<V,value_type>::type* pointer;      // if V is const, pointer will be a const value_type*
 
-    // assumption: iterator==pointer
-    // .. e.g. ublas::(un)bounded_array 
-    static pointer storage (V& v) { return v.begin(); }
-    static int size (V& v) { return v.size(); } 
-    static int stride (V& v) { return 1; } 
+    static pointer storage (V& v) { return &v[0]; }
+    static int size (V& v) { return static_cast<int>(v.size()); } 
+    static int stride (V&) { return 1; } 
   }; 
 
   // vector_detail_traits is used to implement specializations of vector_traits.

@@ -1,9 +1,10 @@
+//
 //  Copyright (C) Toon Knapen 2003
 //
-//  Permission to copy, use, modify, sell and
-//  distribute this software is granted provided this copyright notice appears
-//  in all copies. This software is provided "as is" without express or implied
-//  warranty, and with no claim as to its suitability for any purpose.
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
 
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_BLAS2_OVERLOADS_HPP
 #define BOOST_NUMERIC_BINDINGS_BLAS_BLAS2_OVERLOADS_HPP

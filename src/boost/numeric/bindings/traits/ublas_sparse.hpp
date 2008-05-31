@@ -2,12 +2,9 @@
  * 
  * Copyright (c) 2003 Kresimir Fresl, Toon Knapen and Karl Meerbergen
  *
- * Permission to copy, modify, use and distribute this software 
- * for any non-commercial or commercial purpose is granted provided 
- * that this license appear on all copies of the software source code.
- *
- * Authors assume no responsibility whatsoever for its use and makes 
- * no guarantees about its quality, correctness or reliability.
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
  *
  * KF acknowledges the support of the Faculty of Civil Engineering, 
  * University of Zagreb, Croatia.
@@ -23,6 +20,7 @@
 #endif 
 #include <boost/numeric/bindings/traits/sparse_traits.hpp>
 #include <boost/numeric/bindings/traits/detail/ublas_ordering.hpp>
+#include <algorithm>
 
 
 namespace boost { namespace numeric { namespace bindings { namespace traits {
@@ -54,6 +52,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     typedef typename detail::ublas_ordering<
       typename F::orientation_category
     >::type ordering_type; 
+    typedef F layout_type;
 
     typedef T value_type; 
 
@@ -68,6 +67,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     BOOST_STATIC_CONSTANT (std::size_t, index_base = IB);
 
     static index_pointer index1_storage (matrix_type& cm) {
+      assert (cm.filled1() == layout_type::size1 (cm.size1(), cm.size2()) + 1);
       return vector_traits<idx_array_t>::storage (cm.index1_data()); 
     }
     static index_pointer index2_storage (matrix_type& cm) {
@@ -80,7 +80,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     static int size1 (matrix_type& cm) { return cm.size1(); } 
     static int size2 (matrix_type& cm) { return cm.size2(); }
     static int num_nonzeros (matrix_type& cm) { 
-      return cm.filled(); 
+      return cm.nnz(); 
       // Joerg, this isn't very intuitive :o(
       // return cm.non_zeros(); 
     } 
@@ -140,7 +140,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     static int size1 (matrix_type& cm) { return cm.size1(); } 
     static int size2 (matrix_type& cm) { return cm.size2(); }
     static int num_nonzeros (matrix_type& cm) { 
-      return cm.filled(); 
+      return cm.nnz(); 
       // Joerg, this isn't very intuitive :o(
       // return cm.non_zeros(); 
     } 
