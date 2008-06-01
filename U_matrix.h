@@ -7,13 +7,13 @@
 typedef class U_matrix{
   public:
     U_matrix(const alps::Parameters &parms){
-      uint n_site=parms.value_or_default("SITES", 1);
-      uint n_flavor=parms.value_or_default("FLAVORS", 2);
+      unsigned int n_site=parms.value_or_default("SITES", 1);
+      unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
       //assert(n_site==1); //we do NOT know how to build U if nsite != 0.
       ns_=n_site;
       nf_=n_flavor;
       val_=new double[nf_*nf_];
-      for(uint i=0;i<nf_*nf_;++i){val_[i]=0;} //default: non-interacting.
+      for(unsigned int i=0;i<nf_*nf_;++i){val_[i]=0;} //default: non-interacting.
       if(parms.defined("U_MATRIX")){
         std::string ufilename(parms["U_MATRIX"]);
         std::ifstream u_file(ufilename.c_str());
@@ -40,7 +40,7 @@ typedef class U_matrix{
         assemble(n_site, n_flavor, U, J);
       }
       n_nonzero_=0;
-      for(uint i=0;i<nf_*nf_;++i){
+      for(unsigned int i=0;i<nf_*nf_;++i){
         if(val_[i]!=0) n_nonzero_++;
       }
     }

@@ -68,9 +68,9 @@ ImpuritySolver::result_type ExternalSolver::solve(
   call(infile,outfile);
 
   // read the output
-  uint N=(uint)parms["N"];
-  uint sites     =(uint)parms.value_or_default("SITES", 1);
-  uint flavors   =(uint)parms.value_or_default("FLAVORS", 2);
+  unsigned int N=(unsigned int)parms["N"];
+  unsigned int sites     =(unsigned int)parms.value_or_default("SITES", 1);
+  unsigned int flavors   =(unsigned int)parms.value_or_default("FLAVORS", 2);
  
   itime_green_function_t g(N+1, sites, flavors);
   
@@ -130,10 +130,10 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
 
   // read the output
   
-  uint n_matsubara=(uint)parms["NMATSUBARA"];
-  uint n_tau=(uint)parms["N"];
-  uint n_site     =(uint)parms.value_or_default("SITES", 1);
-  uint n_orbital  =(uint)parms.value_or_default("FLAVORS", 2);
+  unsigned int n_matsubara=(unsigned int)parms["NMATSUBARA"];
+  unsigned int n_tau=(unsigned int)parms["N"];
+  unsigned int n_site     =(unsigned int)parms.value_or_default("SITES", 1);
+  unsigned int n_orbital  =(unsigned int)parms.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
   {

@@ -9,13 +9,13 @@ template <typename T> class green_function{
 	public:
 	//construction and destruction, assignement and copy constructor
 	///constructor: how many time slices, how many sites, how many flavors
-	green_function(uint ntime, uint nsite, uint nflavor):nt_(ntime), ns_(nsite), nf_(nflavor),
+	green_function(unsigned int ntime, unsigned int nsite, unsigned int nflavor):nt_(ntime), ns_(nsite), nf_(nflavor),
 		 ntnsns_(ntime*nsite*nsite), ntns_(ntime*nsite){
 		val_=new T[nt_*ns_*ns_*nf_];
 		err_=new T[nt_*ns_*ns_*nf_];
 	}
 	///specialization: constructor for problems with only one site
-	green_function(uint ntime, uint nflavor):nt_(ntime), ns_(1), nf_(nflavor),
+	green_function(unsigned int ntime, unsigned int nflavor):nt_(ntime), ns_(1), nf_(nflavor),
 		ntnsns_(ntime), ntns_(ntime){
 		val_=new T[nt_*nf_];
 		err_=new T[nt_*nf_];
@@ -40,27 +40,27 @@ template <typename T> class green_function{
   void clear(){ memset(val_, 0, ns_*ns_*nt_*nf_*sizeof(T)); }
 	//access of vectors and elements
 	///specialization for only one site: access element with given time and flavor
-	inline T &operator()(uint t, uint flavor){return val_[t+nt_*flavor];}
+	inline T &operator()(unsigned int t, unsigned int flavor){return val_[t+nt_*flavor];}
 	///specialization for only one site: return const reference to element with given time and flavor
-	inline const T &operator()(uint t, uint flavor)const{return val_[t+nt_*flavor];}
+	inline const T &operator()(unsigned int t, unsigned int flavor)const{return val_[t+nt_*flavor];}
 
 	///return an entire vector of times for a given flavor
-	inline T *operator()(uint flavor){return val_+ntnsns_*flavor;}
+	inline T *operator()(unsigned int flavor){return val_+ntnsns_*flavor;}
 	
 	//error access
-	inline T &error(uint t, uint flavor){return err_[t+nt_*flavor];}
-	inline const T &error(uint t, uint flavor)const{return err_[t+nt_*flavor];}
-	inline T *errors(uint flavor){return err_+nt_*flavor;}
+	inline T &error(unsigned int t, unsigned int flavor){return err_[t+nt_*flavor];}
+	inline const T &error(unsigned int t, unsigned int flavor)const{return err_[t+nt_*flavor];}
+	inline T *errors(unsigned int flavor){return err_+nt_*flavor;}
 	///access element with given time, site 1, site 2, and flavor
-        inline T &operator()(uint t, uint site1, uint site2, uint flavor){return val_[t+nt_*site1+ntns_*site2+ntnsns_*flavor];}
+        inline T &operator()(unsigned int t, unsigned int site1, unsigned int site2, unsigned int flavor){return val_[t+nt_*site1+ntns_*site2+ntnsns_*flavor];}
 	///access element with given time, site 1, site 2, and flavor (const reference)
-        inline const T &operator()(uint t, uint site1, uint site2, uint flavor)const{return val_[t+nt_*site1+ntns_*site2+ntnsns_*flavor];}
+        inline const T &operator()(unsigned int t, unsigned int site1, unsigned int site2, unsigned int flavor)const{return val_[t+nt_*site1+ntns_*site2+ntnsns_*flavor];}
 	///return an entire vector of imaginary time values for a given site 1, site2, flavor
-        inline T *operator()(uint site1, uint site2, uint flavor){return val_+nt_*site1+ntns_*site2+ntnsns_*flavor;}
+        inline T *operator()(unsigned int site1, unsigned int site2, unsigned int flavor){return val_+nt_*site1+ntns_*site2+ntnsns_*flavor;}
 
-        inline T &error(uint t, uint site1, uint site2, uint flavor){return err_[t+nt_*site1+ntns_*site2+ntnsns_*flavor];}
-        inline const T &error(uint t, uint site1, uint site2, uint flavor)const{return err_[t+nt_*site1+ntns_*site2+ntnsns_*flavor];}
-        inline T *errors(uint site1, uint site2, uint flavor){return err_+nt_*site1+ntns_*site2+ntnsns_*flavor;}
+        inline T &error(unsigned int t, unsigned int site1, unsigned int site2, unsigned int flavor){return err_[t+nt_*site1+ntns_*site2+ntnsns_*flavor];}
+        inline const T &error(unsigned int t, unsigned int site1, unsigned int site2, unsigned int flavor)const{return err_[t+nt_*site1+ntns_*site2+ntnsns_*flavor];}
+        inline T *errors(unsigned int site1, unsigned int site2, unsigned int flavor){return err_+nt_*site1+ntns_*site2+ntnsns_*flavor;}
 
 	///get all values at once
 	inline const T *operator()() const {return val_;}
@@ -69,14 +69,14 @@ template <typename T> class green_function{
 
 	//size information
 	///how many flavors do we have? (flavors are usually spins, GF of different flavors are zero)
-	inline const uint &nflavor()const{return nf_;}
+	inline const unsigned int &nflavor()const{return nf_;}
 	///return # of sites
-	inline const uint &nsite()const{return ns_;}
+	inline const unsigned int &nsite()const{return ns_;}
 	///return # of imaginary time values
-	inline const uint &ntime()const{return nt_;}
+	inline const unsigned int &ntime()const{return nt_;}
 	///return # of matsubara frequencies. Exactly equivalent to ntime().
 	///In the case of a Matsubara GF 'ntime' sounds odd -> define 'nfreq' instead.
-	inline const uint &nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
+	inline const unsigned int &nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
 
         void read(const char *filename);
         void write(const char *filename);
@@ -84,12 +84,12 @@ template <typename T> class green_function{
         void from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> > &mv);
         ///mirror a GF at zero.
         /*void mirror_real(){
-            for(uint i=0;i<ntnsns_*nf_;++i){
+            for(unsigned int i=0;i<ntnsns_*nf_;++i){
               val_[i].real()*=-1;
             }
         }
         void mirror_imag(){
-            for(uint i=0;i<ntnsns_*nf_;++i){
+            for(unsigned int i=0;i<ntnsns_*nf_;++i){
               val_[i].imag()*=-1;
             }
         }*/
@@ -100,7 +100,7 @@ template <typename T> class green_function{
         /*class iterator{
           public:
             iterator(){}
-            iterator(uint i){pos_=i;}
+            iterator(unsigned int i){pos_=i;}
             static iterator begin() {return iterator(0);}
             static iterator end()   {return iterator(nf_*ns_*nt_);}
             void operator++(){pos_++;}
@@ -108,15 +108,15 @@ template <typename T> class green_function{
             const T &operator&()const {return val_[pos_];
             iterator &operator=(const iterator &it){pos_=it.pos_;}
           private:
-            uint pos_;
+            unsigned int pos_;
         };*/
 	private:
 	//const values
-	const uint nt_; ///imag time points
-	const uint ns_; ///number of sites
-	const uint nf_; ///number of flavors
-	const uint ntnsns_; ///nt*ns*ns
-	const uint ntns_; ///nt*ns
+	const unsigned int nt_; ///imag time points
+	const unsigned int ns_; ///number of sites
+	const unsigned int nf_; ///number of flavors
+	const unsigned int ntnsns_; ///nt*ns*ns
+	const unsigned int ntns_; ///nt*ns
 	// the actual values and errors.
         T *val_;
         T *err_;
@@ -141,11 +141,11 @@ template<typename T> void green_function<T>::read(const char *filename){
   assert(in_file.is_open()); //this is not good enough when people use -DNDEBUG.
   if(!in_file.is_open()){ std::cerr<<"input file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
   double ignored;
-  for(uint i=0;i<nt_;++i){
+  for(unsigned int i=0;i<nt_;++i){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
-    for(uint s0=0; s0<ns_; ++s0) {
-      for(uint s1=0; s1<ns_; ++s1){
-	for(uint f=0; f<nf_; ++f) {
+    for(unsigned int s0=0; s0<ns_; ++s0) {
+      for(unsigned int s1=0; s1<ns_; ++s1){
+	for(unsigned int f=0; f<nf_; ++f) {
 	  in_file>>operator()(i, s0, s1, f); //read the actual value
 	}
       }
@@ -157,11 +157,11 @@ template<typename T> void green_function<T>::write(const char *filename){
   std::ofstream out_file(filename);
   assert(out_file.is_open()); //this is not good enough when people use -DNDEBUG.
   if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
-  for(uint i=0;i<nt_;++i){
+  for(unsigned int i=0;i<nt_;++i){
     out_file << i << " ";
-    for(uint s0=0; s0<ns_; ++s0) {
-      for(uint s1=0; s1<ns_; ++s1){
-	for(uint f=0; f<nf_; ++f) {
+    for(unsigned int s0=0; s0<ns_; ++s0) {
+      for(unsigned int s1=0; s1<ns_; ++s1){
+	for(unsigned int f=0; f<nf_; ++f) {
 	  out_file<<operator()(i, s0, s1, f) << " "; 
 	}
       }
@@ -176,7 +176,7 @@ template<typename T> std::pair<std::vector<T>,std::vector<T> > green_function<T>
   std::pair<std::vector<T>,std::vector<T> > mv;
   mv.first.resize(nt_);
   mv.second.resize(nt_);
-  for(uint i=0;i<nt_;++i){
+  for(unsigned int i=0;i<nt_;++i){
     mv.first[i]=operator()(i,0,0,0);
     mv.second[i]=nf_==1?operator()(i,0,0,0):operator()(i,0,0,1);
   }
@@ -184,7 +184,7 @@ template<typename T> std::pair<std::vector<T>,std::vector<T> > green_function<T>
 }
 template<typename T> void green_function<T>::from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> >&mv){
   assert(ns_==1 && nf_<=2);
-  for(uint i=0;i<nt_;++i){
+  for(unsigned int i=0;i<nt_;++i){
     operator()(i,0,0,0)=mv.first[i];
     if(nf_==2)
       operator()(i,0,0,1)=mv.second[i];

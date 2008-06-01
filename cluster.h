@@ -54,13 +54,13 @@ public:
 
   ClusterHelper(const alps::Parameters& params);
 
-  double cluster_coordinate(const uint i, const uint j) const { return cluster_coordinates_(i,j); }
-  double cluster_momentum(const uint i, const uint j) const { return cluster_momenta_(i,j); }
-  double lattice_momentum(const uint i, const uint j) const { return lattice_momenta_(i,j); }
+  double cluster_coordinate(const unsigned int i, const unsigned int j) const { return cluster_coordinates_(i,j); }
+  double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }
+  double lattice_momentum(const unsigned int i, const unsigned int j) const { return lattice_momenta_(i,j); }
   bool bipartite() const { return bipartite_; }
-  uint n_cluster_sites() const { return n_cluster_sites_; }
-  uint n_cluster_cells() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::volume(); }
-  uint dimension() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::dimension(); }
+  unsigned int n_cluster_sites() const { return n_cluster_sites_; }
+  unsigned int n_cluster_cells() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::volume(); }
+  unsigned int dimension() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::dimension(); }
   site_class_set_itpair_type site_classes_real_space() const 
   { return site_class_set_itpair_type (site_class_set_real_space_.begin(), site_class_set_real_space_.end()); }
   pair_class_set_itpair_type pair_classes_real_space() const 
@@ -85,11 +85,11 @@ private:
   vector_type map_back_into_brillouin_zone(vector_type v) const;
   vector_type map_back_into_cluster(vector_type v, 
 				    const Matrix<double>::Type& B_inv, const Matrix<double>::Type& B) const;
-  uint cluster_momentum_approximation(vector_type v, 
+  unsigned int cluster_momentum_approximation(vector_type v, 
 				      const Matrix<double>::Type& mom,
 				      const Matrix<double>::Type& B) const;
-  uint identify_vertex(const vector_type& v, const Matrix<double>::Type& coordinate_matrix) const;
-  uint identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const uint i) const;
+  unsigned int identify_vertex(const vector_type& v, const Matrix<double>::Type& coordinate_matrix) const;
+  unsigned int identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const unsigned int i) const;
   double round(const double d) const;
   vector_type round(vector_type v) const;
   bool almost_equal(const double d1, const double d2) const { return fabs(d1-d2)<epsilon_; }
@@ -103,7 +103,7 @@ private:
   pair_class_set_type pair_class_set_real_space_;
   site_class_set_type site_class_set_k_space_;
   pair_class_set_type pair_class_set_k_space_;
-  uint n_cluster_sites_;
+  unsigned int n_cluster_sites_;
   bool bipartite_;
   const double epsilon_;
 };
@@ -197,7 +197,7 @@ public:
   double epsilon(const vector_type k) const
   {  //cosine dispersion (nearest nbr hopping) for all dimensions. t' only valid/reasonable in two dimensions for nn hopping.
     double eps = 0;
-    for (uint i=0; i<dimension(); ++i) 
+    for (unsigned int i=0; i<dimension(); ++i) 
       eps -= 2*t_*cos(k[i]);
     /*if (tprime_!=0.) {
       switch(dimension()) {
@@ -290,7 +290,7 @@ private:
   double epsilon(const vector_type k) const
   {
     double eps = 0;
-    for (uint i=0; i<dimension(); ++i) 
+    for (unsigned int i=0; i<dimension(); ++i) 
       eps -= 2*t_*cos (k[i]);
     return eps; 
   }
@@ -325,7 +325,7 @@ inline double ClusterHelper::round(const double d) const
 
 inline ClusterHelper::vector_type ClusterHelper::round(vector_type v) const
 {
-  for (uint d=0; d<v.size(); ++d) 
+  for (unsigned int d=0; d<v.size(); ++d) 
     v[d] = round(v[d]);
   return v;
 }
@@ -335,9 +335,9 @@ inline ClusterHelper::vector_type ClusterHelper::round(vector_type v) const
 inline ClusterHelper::vector_type ClusterHelper::matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v) const
 {
   vector_type vn(v.size());
-  for (uint i=0; i<v.size(); ++i) {
+  for (unsigned int i=0; i<v.size(); ++i) {
     vn[i] = 0.;
-    for (uint j=0; j<v.size(); ++j) {
+    for (unsigned int j=0; j<v.size(); ++j) {
       vn[i] += M(j,i)*v[j];
     }
   }
@@ -349,8 +349,8 @@ template<typename T>
 inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::matrix_inverse(typename Matrix<T>::Type M) const 
 {
   Matrix<double>::Type M_inv(M.size1(), M.size2());
-  for (uint i=0; i<M.size1(); ++i) 
-    for (uint j=0; j<M.size2(); ++j) 
+  for (unsigned int i=0; i<M.size1(); ++i) 
+    for (unsigned int j=0; j<M.size2(); ++j) 
       M_inv(i,j) = i==j;
   boost::numeric::bindings::lapack::gesv(M, M_inv);
   return M_inv;
@@ -364,9 +364,9 @@ green_function<T> DCATransformer::symmetrize_helper(const green_function<T>& G,
 					     const std::pair<std::set<pair_class_type>::const_iterator, 
 					     std::set<pair_class_type>::const_iterator> pair_classes) const
 {
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nfreq=G.nfreq();
+  unsigned int nflavor=G.nflavor();
+  unsigned int nsite=G.nsite();
+  unsigned int nfreq=G.nfreq();
   green_function<T> G_new(nfreq, nsite, nflavor);
   std::set<pair_class_type>::const_iterator itc, itc_end;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
@@ -411,9 +411,9 @@ struct SimpleDCATransformer::Backward {
 template<typename T, class D>
 green_function<T> SimpleDCATransformer::transform_coordinates(const green_function<T>& G) const 
 {
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nt=G.ntime();
+  unsigned int nflavor=G.nflavor();
+  unsigned int nsite=G.nsite();
+  unsigned int nt=G.ntime();
   assert(nsite==n_cluster_sites());
   green_function<T> G_new(nt, nsite, nflavor);
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
@@ -466,9 +466,9 @@ green_function<T> SimpleDCATransformer::spin_symmetrizer(const green_function<T>
 template<typename T, class D>
 green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_function<T>& G) const 
 {
-  uint nflavor=G.nflavor();
-  uint nsite=G.nsite();
-  uint nt=G.ntime();
+  unsigned int nflavor=G.nflavor();
+  unsigned int nsite=G.nsite();
+  unsigned int nt=G.ntime();
   assert(nsite==n_cluster_sites());
   green_function<T> G_new(nt, nsite, nflavor);
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {

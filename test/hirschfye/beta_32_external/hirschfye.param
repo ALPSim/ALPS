@@ -10,5 +10,5 @@ H=0.;
 TOLERANCE=0.0001;
 CONVERGED=0.0003;
 PARAMAGNET=1;
-SOLVER="/Users/gullc/alps_cvs/DMFT/hirschfye";
+SOLVER="/Users/emanuel/alps_svn/DMFT/hirschfye";
 FLAVORS=2;

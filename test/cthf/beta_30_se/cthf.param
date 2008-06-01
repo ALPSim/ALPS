@@ -12,7 +12,7 @@ PARAMAGNET=1;
 G0OMEGA_INPUT="G0omega_input"
 
 //Solver Parameters
-SOLVER="/Users/gullc/alps_svn/DMFT-solvers/CTHF/cthf"
+SOLVER="/Users/emanuel/alps_svn/DMFT-solvers/CTHF/cthf"
 N=500;
 NMATSUBARA=500;
 NSELF=1500;

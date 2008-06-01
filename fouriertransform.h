@@ -49,7 +49,7 @@ void evaluate_second_derivatives(double dt, double c2, double c3,
 				 const V & g, V & second_derivatives) {
   
   // g, rhs and second_derivatives have dimension N+1
-  uint Np1 = spline_matrix.size1();
+  unsigned int Np1 = spline_matrix.size1();
   double dtsq=dt*dt;
   
   // rhs is the vector containing the data of the curve y = g(tau), which allows to 
@@ -66,16 +66,16 @@ void evaluate_second_derivatives(double dt, double c2, double c3,
 
   V rhs;
   rhs.resize(Np1);
-  for(uint i=0;i<Np1;++i){
+  for(unsigned int i=0;i<Np1;++i){
     second_derivatives[i]=0;
   }
   rhs[0] = -c3*dtsq;  //think more about this!
-  for (uint i=1; i<Np1-1; i++) {
+  for (unsigned int i=1; i<Np1-1; i++) {
     rhs[i] = g[i-1]-2*g[i]+g[i+1];
   }
   rhs[Np1-1] = c2*dtsq + g[0] - g[1] + g[Np1-2] - g[Np1-1];
   solve_second_derivatives(spline_matrix, rhs);
-  for(uint i=0;i<Np1;++i){
+  for(unsigned int i=0;i<Np1;++i){
     second_derivatives[i]=rhs[i]*6./dtsq;
   }
 }*/
@@ -197,7 +197,7 @@ public:
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
     FourierTransformer::backward_ft(G_tau, G_omega);
     std::cout<<"correcting for F function"<<std::endl;
-    for(uint j=0;j<G_tau.nflavor();++j){
+    for(unsigned int j=0;j<G_tau.nflavor();++j){
       G_tau(G_tau.ntime()-1,j)=-epsilonsq_av_-G_tau(0,j);
     }
   }

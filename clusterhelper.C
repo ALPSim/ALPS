@@ -84,9 +84,9 @@ void ClusterHelper::setup_tables()
   basis_vector_iterator itb, itb_end;
   boost::tie(itb, itb_end) = basis_vectors();
   int sum = 0;
-  for (uint i=0; itb!=itb_end; ++itb, ++i) {
+  for (unsigned int i=0; itb!=itb_end; ++itb, ++i) {
     int sum_i = 0;
-    for (uint d=0; d<dimension(); ++d) {
+    for (unsigned int d=0; d<dimension(); ++d) {
       basis(i,d) = (*itb)[d];
       sum_i += int(round(basis(i,d)));
     }
@@ -97,7 +97,7 @@ void ClusterHelper::setup_tables()
   //setup cluster coordinates
   int maxc=n_cluster_sites_;
   vector_type c(dimension());
-  uint n_added = 0;
+  unsigned int n_added = 0;
   switch(dimension()) {
   case 1 :
     for (int i=-maxc; i<=maxc; ++i) {
@@ -156,8 +156,8 @@ void ClusterHelper::setup_tables()
   Matrix<double>::Type reciprocal_basis(dimension(), dimension());
   basis_vector_iterator itbr, itbr_end;
   boost::tie(itbr, itbr_end) = reciprocal_basis_vectors();
-  for (uint i=0; itbr!=itbr_end; ++itbr, ++i) 
-    for (uint d=0; d<dimension(); ++d)
+  for (unsigned int i=0; itbr!=itbr_end; ++itbr, ++i) 
+    for (unsigned int d=0; d<dimension(); ++d)
       reciprocal_basis(i,d) = (*itbr)[d];
   Matrix<double>::Type reciprocal_basis_inv = matrix_inverse<double>(reciprocal_basis);
   //setup cluster momenta
@@ -185,9 +185,9 @@ void ClusterHelper::setup_tables()
     cell_iterator itc, itc_end;
     for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
       vector_type o = origin(*itc);
-      for (uint i=0; i<n_cluster_sites(); ++i) {
+      for (unsigned int i=0; i<n_cluster_sites(); ++i) {
 	vector_type c = o;
-	for (uint d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  c[d] += cluster_coordinate(i,d);
 	c = matrix_vector_mult(reciprocal_basis, c);
 	c = map_back_into_brillouin_zone(c);
@@ -205,9 +205,9 @@ void ClusterHelper::setup_tables()
     cell_iterator itc, itc_end;
     for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
       vector_type o = origin(*itc);
-      for (uint i=0; i<n_cluster_sites(); ++i) {
+      for (unsigned int i=0; i<n_cluster_sites(); ++i) {
 	vector_type c = o;
-	for (uint d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  c[d] += cluster_coordinate(i,d);
 	c = matrix_vector_mult(reciprocal_basis, c);
 	c = map_back_into_brillouin_zone(c);
@@ -217,13 +217,13 @@ void ClusterHelper::setup_tables()
     if ((n_cluster_sites()%2)==0) {
       Matrix<double>::Type sorted_momenta;
       vector_type v(dimension());
-      uint ind = 0;
-      for(uint i=0; i<n_cluster_sites(); ++i) {
+      unsigned int ind = 0;
+      for(unsigned int i=0; i<n_cluster_sites(); ++i) {
 	//std::cerr << ind << "\n";
-	for (uint d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  v[d] = cluster_momenta_(ind,d);
 	append_column_no_duplicates(sorted_momenta, v);
-	for (uint d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  v[d] += M_PI;
 	v = map_back_into_brillouin_zone(v);
 	ind = cluster_momentum_approximation(v, cluster_momenta_, reciprocal_basis_inv);
@@ -243,7 +243,7 @@ void ClusterHelper::setup_tables()
   lattice_momenta_.resize(n_cluster_cells(), dimension());
   momentum_iterator itm, itm_end;
   boost::tie(itm, itm_end) = momenta();
-  for (uint m=0; itm!=itm_end; ++itm, ++m) {
+  for (unsigned int m=0; itm!=itm_end; ++itm, ++m) {
     vector_type mom=momentum(*itm);
     for (int d=0; d<dimension(); ++d) {
       lattice_momenta_(m,d) = mom[d];
@@ -330,7 +330,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 		 0, 1, 0,  1, 0, 0,  0, 0, 1,
 		 0, -1, 0,  -1, 0, 0,  0, 0, 1 };
   int* gr;
-  uint grsize;
+  unsigned int grsize;
   switch(dimension()) {
   case 1:
     gr = gr1D;
@@ -346,26 +346,26 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
     break;
   }
   std::vector<Matrix<double>::Type > group(grsize, Matrix<double>::Type(dimension(), dimension()));
-  for (uint g=0; g<grsize; ++g) 
-    for (uint i=0; i<dimension(); ++i)
-      for (uint j=0; j<dimension(); ++j)
+  for (unsigned int g=0; g<grsize; ++g) 
+    for (unsigned int i=0; i<dimension(); ++i)
+      for (unsigned int j=0; j<dimension(); ++j)
 	group[g](j,i) = gr[i+j*dimension()+g*dimension()*dimension()];
   //setup symmetry table in real space
   Matrix<site_t>::Type symmetry_table_real_space;
   std::cerr << "good symmetries: ";
-  for (uint g=0; g<group.size(); ++g) {
+  for (unsigned int g=0; g<group.size(); ++g) {
     std::map<site_t, site_t> vertexmap;
     std::set<site_t> vertexset;
-    for (uint i=0; i<n_cluster_sites(); ++i) {
+    for (unsigned int i=0; i<n_cluster_sites(); ++i) {
       bool bad = false;
       cell_iterator itc, itc_end;
       for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
 	vector_type c = origin(*itc);
-	for (uint d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  c[d] += cluster_coordinate(i,d);
 	c = matrix_vector_mult(group[g], c);
 	c = map_back_into_cluster(c, basis_inv, basis);
-	uint i_mapped = identify_vertex(c, cluster_coordinates_);
+	unsigned int i_mapped = identify_vertex(c, cluster_coordinates_);
 	if (!vertexmap.insert(std::pair<site_t,site_t>(i, i_mapped)).second) {
 	  if (vertexmap[i]!=i_mapped) {
 	    bad = true;
@@ -385,8 +385,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
   }
   std::cerr << "\n";
   /*std::cerr << "symmetry table in real space:\n";
-  for (uint i=0; i<symmetry_table_real_space.size1(); ++i) {
-    for (uint j=0; j<symmetry_table_real_space.size2(); ++j) {
+  for (unsigned int i=0; i<symmetry_table_real_space.size1(); ++i) {
+    for (unsigned int j=0; j<symmetry_table_real_space.size2(); ++j) {
       std::cerr << symmetry_table_real_space(i,j) << " ";
     }
     std::cerr << std::endl;
@@ -396,10 +396,10 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
   //setup symmetry table in k space
   Matrix<site_t>::Type symmetry_table_k_space;
   std::cerr << "good symmetries: ";
-  for (uint g=0; g<group.size(); ++g) {
+  for (unsigned int g=0; g<group.size(); ++g) {
     std::map<site_t, site_t> vertexmap;
     std::set<site_t> vertexset;
-    for (uint i=0; i<n_cluster_sites(); ++i) {
+    for (unsigned int i=0; i<n_cluster_sites(); ++i) {
       bool bad = false;
       cell_iterator itc, itc_end;
       for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
@@ -408,14 +408,14 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 	//c = matrix_vector_mult(reciprocal_basis, c);
 	//std::cerr << o[0] << " "<< o[1] << " cm ";
 	vector_type c(dimension());
-	for (uint d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  c[d] = 2*M_PI*o[d]+cluster_momentum(i,d);
 	//std::cerr << c[0] << " "<< c[1] << " g ";
 	c = matrix_vector_mult(group[g], c);
 	//std::cerr << c[0] << " " << c[1] << " ma ";
 	c = map_back_into_brillouin_zone(c);
 	//std::cerr << c[0] << " " << c[1] << " : ";
-	uint i_mapped = identify_vertex(c, cluster_momenta_);
+	unsigned int i_mapped = identify_vertex(c, cluster_momenta_);
 	//std::cerr << i << ":" << i_mapped << "\n";
 	if (i_mapped == n_cluster_sites()) {
 	  bad = true;
@@ -440,8 +440,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
   }
   std::cerr << "\n";
   /*std::cerr << "symmetry table k space:\n";
-  for (uint i=0; i<symmetry_table_k_space.size1(); ++i) {
-    for (uint j=0; j<symmetry_table_k_space.size2(); ++j) {
+  for (unsigned int i=0; i<symmetry_table_k_space.size1(); ++i) {
+    for (unsigned int j=0; j<symmetry_table_k_space.size2(); ++j) {
       std::cerr << symmetry_table_k_space(i,j) << " ";
     }
     std::cerr << std::endl;
@@ -457,19 +457,19 @@ ClusterHelper::setup_classes(const Matrix<site_t>::Type& symmetry_table) const
 {
   //setup site equivalence classes
   site_class_set_type site_class_set;
-  for (uint j=0; j<symmetry_table.size2(); ++j) {
+  for (unsigned int j=0; j<symmetry_table.size2(); ++j) {
     site_class_type s_class;
-    for (uint i=0; i<symmetry_table.size1(); ++i) {
+    for (unsigned int i=0; i<symmetry_table.size1(); ++i) {
       s_class.insert(symmetry_table(i,j));
     }
     site_class_set.insert(s_class);
   }
   //setup site pair equivalence classes
   pair_class_set_type pair_class_set;
-  for (uint j1=0; j1<symmetry_table.size2(); ++j1) {
-    for (uint j2=0; j2<symmetry_table.size2(); ++j2) {
+  for (unsigned int j1=0; j1<symmetry_table.size2(); ++j1) {
+    for (unsigned int j2=0; j2<symmetry_table.size2(); ++j2) {
       pair_class_type p_class;
-      for (uint i=0; i<symmetry_table.size1(); ++i) {
+      for (unsigned int i=0; i<symmetry_table.size1(); ++i) {
 	p_class.insert(pair_type(symmetry_table(i,j1), symmetry_table(i,j2)));
       }
       pair_class_set.insert(p_class);
@@ -525,7 +525,7 @@ bool ClusterHelper::inside_cluster(vector_type v, const Matrix<double>::Type& B)
   v = matrix_vector_mult(B, v);
   v = round(v);
   bool inside = true;
-  for (uint d=0; d<v.size(); ++d) 
+  for (unsigned int d=0; d<v.size(); ++d) 
     inside &= v[d]<1 && v[d]>=0;
   return inside;
 }
@@ -553,11 +553,11 @@ bool ClusterHelper::inside_reduced_brillouin_zone(vector_type v, const Matrix<do
   }
   return true;
   /*v = matrix_vector_mult(B_red, v);
-  for (uint d=0; d<v.size(); ++d) 
+  for (unsigned int d=0; d<v.size(); ++d) 
     v[d] *= 2;
   v = round(v);
   bool inside = true;
-  for (uint d=0; d<v.size(); ++d) 
+  for (unsigned int d=0; d<v.size(); ++d) 
   inside &= (v[d]<=1 && v[d]>-1);
   return inside;*/
 }
@@ -566,15 +566,15 @@ bool ClusterHelper::inside_reduced_brillouin_zone(vector_type v, const Matrix<do
 
 bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v) const
 {
-  for (uint i=0; i<m.size1(); ++i) {
+  for (unsigned int i=0; i<m.size1(); ++i) {
     bool equal = true;
-    for (uint d=0; d<m.size2(); ++d) 
+    for (unsigned int d=0; d<m.size2(); ++d) 
       equal &= almost_equal(m(i,d), v[d]);
     if (equal)
       return false;
   }
   m.resize(m.size1()+1, v.size(), true);
-  for (uint d=0; d<m.size2(); ++d)
+  for (unsigned int d=0; d<m.size2(); ++d)
     m(m.size1()-1,d) = v[d];
   return true;
 }
@@ -584,15 +584,15 @@ bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const v
 bool ClusterHelper::append_column_no_duplicates(Matrix<site_t>::Type& m, 
 						std::map<site_t, site_t>& smap) const
 {
-  for (uint i=0; i<m.size1(); ++i) {
+  for (unsigned int i=0; i<m.size1(); ++i) {
     bool equal = true;
-    for (uint d=0; d<m.size2(); ++d) 
+    for (unsigned int d=0; d<m.size2(); ++d) 
       equal &= m(i,d)==smap[d];
     if (equal)
       return false;
   }
   m.resize(m.size1()+1, smap.size(), true);
-  for (uint d=0; d<m.size2(); ++d)
+  for (unsigned int d=0; d<m.size2(); ++d)
     m(m.size1()-1,d) = smap[d];
   return true;
 }
@@ -601,7 +601,7 @@ bool ClusterHelper::append_column_no_duplicates(Matrix<site_t>::Type& m,
 
 ClusterHelper::vector_type ClusterHelper::map_back_into_brillouin_zone(vector_type v) const
 {
-  for (uint d=0; d<v.size(); ++d) {
+  for (unsigned int d=0; d<v.size(); ++d) {
     v[d] /= M_PI;
     v[d] = round(v[d]);
     while (v[d]>1) { 
@@ -623,7 +623,7 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_cluster(vector_type v,
 								const Matrix<double>::Type& B) const
 {
   v = matrix_vector_mult(B_inv, v);
-  for (uint d=0; d<v.size(); ++d) {
+  for (unsigned int d=0; d<v.size(); ++d) {
     v[d] = round(v[d]);
     while (v[d]>=1) { 
       v[d] -= 1;
@@ -638,7 +638,7 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_cluster(vector_type v,
 
 
 
-uint ClusterHelper::cluster_momentum_approximation(vector_type v, 
+unsigned int ClusterHelper::cluster_momentum_approximation(vector_type v, 
 						   const Matrix<double>::Type& momenta, 
 						   const Matrix<double>::Type& B) const 
 {
@@ -676,14 +676,14 @@ uint ClusterHelper::cluster_momentum_approximation(vector_type v,
     for (int t=0; t<T.size1(); ++t) {
       for (int s=-1; s<=1; ++s) {
 	vector_type diff(dimension());
-	for (uint d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  diff[d] = v[d] - momenta(i,d) - s*T(t,d);
 	diff = matrix_vector_mult(B, diff);
-	for (uint d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  diff[d] *= 2;
 	diff = round(diff);
 	bool inside = true;
-	for (uint d=0; d<diff.size(); ++d) 
+	for (unsigned int d=0; d<diff.size(); ++d) 
 	  inside &= diff[d]<=1 && diff[d]>-1;
 	if (inside) {
 	  //std::cerr << i << "\n";
@@ -698,11 +698,11 @@ uint ClusterHelper::cluster_momentum_approximation(vector_type v,
 
 
 
-uint ClusterHelper::identify_vertex(const vector_type& v, const Matrix<double>::Type& coordinate_matrix) const
+unsigned int ClusterHelper::identify_vertex(const vector_type& v, const Matrix<double>::Type& coordinate_matrix) const
 {
-  for (uint i=0; i<coordinate_matrix.size1(); ++i) {
+  for (unsigned int i=0; i<coordinate_matrix.size1(); ++i) {
     bool equal = true;
-    for (uint d=0; d<coordinate_matrix.size2(); ++d) 
+    for (unsigned int d=0; d<coordinate_matrix.size2(); ++d) 
       equal &= almost_equal(v[d], coordinate_matrix(i,d));
     if (equal)
       return i;
@@ -713,7 +713,7 @@ uint ClusterHelper::identify_vertex(const vector_type& v, const Matrix<double>::
 
 
 
-uint ClusterHelper::identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const uint i) const
+unsigned int ClusterHelper::identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const unsigned int i) const
 {
   double sum=0;
   for (int d=0; d<coordinate_matrix.size2(); ++d) 

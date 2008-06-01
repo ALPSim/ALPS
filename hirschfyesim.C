@@ -113,7 +113,7 @@ bare_green_tau(N+1, n_site, 2),
 green_tau(N+1, n_site, 2)
 {
   std::cout<<"starting constructor."<<std::endl;
-  uint n_matsubara=parms["NMATSUBARA"];
+  unsigned int n_matsubara=parms["NMATSUBARA"];
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, 2);
   itime_green_function_t bgf_sc_convention_k(N+1,n_site, 2); //bare green function in k_space
   boost::shared_ptr<FourierTransformer> fourier_ptr;
@@ -156,7 +156,7 @@ green_tau(N+1, n_site, 2)
   //std::cout<<"Green0 down: "<<Green0_down<<std::endl;
   //std::cout<<"Green0 up: "<<Green0_up<<std::endl;
   // choose random spin configuration
-  for (uint i=0; i<spins.size(); i++)
+  for (unsigned int i=0; i<spins.size(); i++)
     spins[i] = (random_01()<0.5 ? 1 : -1);
   
   
@@ -165,16 +165,13 @@ green_tau(N+1, n_site, 2)
   /*double s2=*/update_from_zero(Green_down, Green0_down, spins, -lambda);
   
   
-  // create measurement objects
-  measurements << RealObservable("Sign");
-  measurements << SignedObservable<alps::SimpleRealVectorObservable>("G_meas_up");
-  measurements << SignedObservable<alps::SimpleRealVectorObservable>("G_meas_down");  
-  measurements << SimpleRealVectorObservable("G_fourpoint_uu");  
-  measurements << SimpleRealVectorObservable("G_fourpoint_dd");  
-  measurements << SimpleRealVectorObservable("G_fourpoint_ud");  
-  measurements << SimpleRealVectorObservable("G_fourpoint_du");  
   
-  //reset the measurment objects
+  measurements.get<RealVectorObservable>("G_meas_up").reset(true);
+  measurements.get<RealVectorObservable>("G_meas_down").reset(true);
+  measurements.get<SimpleRealVectorObservable>("G_fourpoint_uu").reset(true);
+  measurements.get<SimpleRealVectorObservable>("G_fourpoint_dd").reset(true);
+  measurements.get<SimpleRealVectorObservable>("G_fourpoint_ud").reset(true);
+  measurements.get<SimpleRealVectorObservable>("G_fourpoint_du").reset(true);
   
   measurements.reset(true);
   
@@ -230,8 +227,6 @@ void HirschFyeRun::dostep()
   for (int i=0; i<N; i++){
     update_single_spin(random_01, Green_up, Green_down, spins, lambda, sign);
   }
-  // calculate Greens function	
-  //std::valarray<double> G_tmp_up(N), G_tmp_down(N);		
   green_vector_from_matrix(green_tau, Green_up, Green_down);
   
   //std::cout<<"in dostep"<<std::endl;
@@ -440,7 +435,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   std::valarray<double> g_up_mean_vector(G_meas_up.mean());
   std::valarray<double> g_down_mean_vector(G_meas_down.mean());
   
-  for(uint i=0;i<g_up_mean_vector.size();++i){
+  for(unsigned int i=0;i<g_up_mean_vector.size();++i){
   	g.first.push_back(g_up_mean_vector[i]);
   	g.second.push_back(g_down_mean_vector[i]);
   }
@@ -550,7 +545,7 @@ const dense_matrix & green_matrix_down)const{
   //also take into account G(beta)
   g.first.push_back(-1.+g_up_mean_vector[0]);
   g.second.push_back(-1.+g_down_mean_vector[0]);
-  for(uint i=0;i<g_up_mean_vector.size();++i){
+  for(unsigned int i=0;i<g_up_mean_vector.size();++i){
   	g.first.push_back(-g_up_mean_vector[g_up_mean_vector.size()-1-i]);
   	g.second.push_back(-g_down_mean_vector[g_up_mean_vector.size()-1-i]);
     //std::cout<<i<<"\t"<<-g_up_mean_vector[g_up_mean_vector.size()-1-i]<<"\t"<<G_meas_up.error()[g_up_mean_vector.size()-1-i]<<std::endl;

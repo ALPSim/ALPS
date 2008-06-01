@@ -55,8 +55,8 @@ typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major
 ///@parm m The dense matrix to be stored
 inline alps::ODump& operator << (alps::ODump& odump, const dense_matrix& m) {
   odump << m.size1() << m.size2();
-  for (uint i=0; i<m.size1(); i++) {
-  	for (uint j=0; j<m.size2(); j++) {
+  for (unsigned int i=0; i<m.size1(); i++) {
+  	for (unsigned int j=0; j<m.size2(); j++) {
   		odump << m(i,j);
   	}
   }
@@ -71,8 +71,8 @@ inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
   idump >> size1;
   idump >> size2;
   m.resize(size1, size2);
-  for (uint i=0; i<m.size1(); i++) {
-  	for (uint j=0; j<m.size2(); j++) {
+  for (unsigned int i=0; i<m.size1(); i++) {
+  	for (unsigned int j=0; j<m.size2(); j++) {
   		idump >> m(i,j);
   	}
   }  
@@ -112,8 +112,8 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
   	double tmp1 = exp(-2*lambda*spins[site])-1;
   	double tmp2 = exp(+2*lambda*spins[site])-1;
     
-    /*  	for (uint i=0; i<N; i++) {
-  		for (uint j=0; j<N; j++) {	
+    /*  	for (unsigned int i=0; i<N; i++) {
+  		for (unsigned int j=0; j<N; j++) {	
   			Green_new_up(i,j)   += (Green_up(i,site)-(i==site))*tmp1/(1+(1-Green_up(site,site))*tmp1)*Green_up(site,j);
   			Green_new_down(i,j) += (Green_down(i,site)-(i==site))*tmp2/(1+(1-Green_down(site,site))*tmp2)*Green_down(site,j);			
   		}	

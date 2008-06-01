@@ -1,5 +1,6 @@
-include $(HOME)/ALPS_OPENMPI_MKL/share/alps/include.mk
-CXXFLAGS += -g -DWERNER -DRUBTSOV -I../
+include $(HOME)/ALPS//share/alps/include.mk
+CXXFLAGS += -g -DWERNER -DRUBTSOV -I$(HOME)/alps_svn/
+
 SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C clustertransformer.C clusterhelper.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
 #LDFLAGS+=-L/opt/intel/cc/10.1.006/lib
@@ -21,7 +22,7 @@ $(RUBTSOV_DIR)/rubtsov_model.o $(RUBTSOV_DIR)/rubtsov_worm.o $(RUBTSOV_DIR)/rubt
 $(RUBTSOV_DIR)/rubtsov_selfenergy.o
 OBJECTS_SOLVERS=$(OBJECTS_RUBTSOV) $(OBJECTS_WERNER)
 
-all: dmft dmft_mpi hirschfye
+all: dmft hirschfye
 
 dmft : $(OBJECTS_DMFT) werner rubtsov
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CT_ALGOS) -o dmft $(OBJECTS_DMFT) $(OBJECTS_SOLVERS) $(LDFLAGS) $(LIBS)

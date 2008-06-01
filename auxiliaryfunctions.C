@@ -5,14 +5,14 @@
 #include <sstream>
 std::ostream &operator<<(std::ostream &os, const multiple_vector_type &v){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.first.size();++i)
+  for(unsigned int i=0;i<v.first.size();++i)
     os<<i<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
   return os;
 }
 
 std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type &v){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.first.size();++i)
+  for(unsigned int i=0;i<v.first.size();++i)
     //os<<i<<"\t"<<v.first[i].real()<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].real()<<"\t"<<v.second[i].imag()<<std::endl;
     os<<i<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
   return os;
@@ -20,7 +20,7 @@ std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type &v
 
 std::ostream &operator<<(std::ostream &os, const double_vector &v){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.size();++i)
+  for(unsigned int i=0;i<v.size();++i)
     //os<<i<<"\t"<<v.first[i].real()<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].real()<<"\t"<<v.second[i].imag()<<std::endl;
     os<<i<<"\t"<<v[i]<<std::endl;
   return os;
@@ -28,31 +28,31 @@ std::ostream &operator<<(std::ostream &os, const double_vector &v){
 
 std::ostream &operator<<(std::ostream &os, const complex_vector &v){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.size();++i)
+  for(unsigned int i=0;i<v.size();++i)
     os<<i<<"\t"<<v[i].real()<<"\t"<<v[i].imag()<<std::endl;
   return os;
 }
 
 void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.first.size();++i)
+  for(unsigned int i=0;i<v.first.size();++i)
     os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].imag()<<"\t"<<v.second[i].imag()<<std::endl;
 }
 
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const bool diagonal)
 {
   os<<std::setprecision(20);
-  for(uint i=0;i<v.nfreq();++i){
+  for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
     if (diagonal) {
-      for (uint k=0; k<v.nsite(); ++k) 
-	for(uint f=0;f<v.nflavor();++f)
+      for (unsigned int k=0; k<v.nsite(); ++k) 
+	for(unsigned int f=0;f<v.nflavor();++f)
 	  os<<v(i,k,k,f).imag()<<"\t";
     }
     else {
-      for (uint s1=0; s1<v.nsite(); ++s1)
-	for (uint s2=0; s2<v.nsite(); ++s2) 
-	  for(uint f=0;f<v.nflavor();++f)
+      for (unsigned int s1=0; s1<v.nsite(); ++s1)
+	for (unsigned int s2=0; s2<v.nsite(); ++s2) 
+	  for(unsigned int f=0;f<v.nflavor();++f)
 	    os<<v(i,s1,s2,f).imag()<<"\t";
     }
     os<<std::endl;
@@ -61,7 +61,7 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
 
 void print_selfenergy_matsubara(std::ostream &os, const multiple_complex_vector_type &g_bare, const multiple_complex_vector_type &g_dressed, const double beta){
   os<<std::setprecision(20);
-  for(uint i=0;i<g_bare.first.size();++i)
+  for(unsigned int i=0;i<g_bare.first.size();++i)
     os<<(2*i+1)*M_PI/beta<<"\t"<<(1./g_bare.first[i].imag() - 1./g_dressed.first[i].imag())<<std::endl;
 }
 
@@ -69,17 +69,17 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
 				const matsubara_green_function_t g_dressed, const double beta, const bool diagonal)
 {
   os<<std::setprecision(20);
-  for(uint i=0;i<g_bare.nfreq();++i){
+  for(unsigned int i=0;i<g_bare.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
     if (diagonal) {
-      for (uint k=0; k<g_bare.nsite(); ++k) 
-	for(uint f=0;f<g_bare.nflavor();++f)
+      for (unsigned int k=0; k<g_bare.nsite(); ++k) 
+	for(unsigned int f=0;f<g_bare.nflavor();++f)
 	  os<<(1./g_bare(i,k,k,f).imag() - 1./g_dressed(i,k,k,f).imag())<<"\t";
     }
     else {
-      for (uint s1=0; s1<g_bare.nsite(); ++s1) 
-	for (uint s2=0; s2<g_bare.nsite(); ++s2) 
-	  for(uint f=0;f<g_bare.nflavor();++f)
+      for (unsigned int s1=0; s1<g_bare.nsite(); ++s1) 
+	for (unsigned int s2=0; s2<g_bare.nsite(); ++s2) 
+	  for(unsigned int f=0;f<g_bare.nflavor();++f)
 	    os<<(1./g_bare(i,s1,s2,f).imag() - 1./g_dressed(i,s1,s2,f).imag())<<"\t";
     }
     os<<std::endl;
@@ -97,8 +97,8 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
 				  const matsubara_green_function_t &g_dressed, const double beta)
 {
   os<<"Quasiparticle weight estimate Zeta for Z, using sigma(pi T) and sigma(3 Pi T):"<<std::endl;
-  for(uint k=0; k<g_bare.nsite(); ++k) {
-    for(uint f=0;f<g_bare.nflavor();++f){
+  for(unsigned int k=0; k<g_bare.nsite(); ++k) {
+    for(unsigned int f=0;f<g_bare.nflavor();++f){
       double sigma_1=1./g_bare(0,k,k,f).imag() - 1./g_dressed(0,k,k,f).imag();
       double sigma_2=1./g_bare(1,k,k,f).imag() - 1./g_dressed(1,k,k,f).imag();
       os<<k<<":"<<"\t"<<1./(1.-sigma_1*beta/M_PI)<<"\t"<<1./(1.-(sigma_2)*beta/M_PI/3.)<<std::endl;
@@ -108,24 +108,24 @@ void print_quasiparticle_estimate(std::ostream &os, const matsubara_green_functi
 
 void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.first.size();++i){
+  for(unsigned int i=0;i<v.first.size();++i){
     os<<(2*i+1)*M_PI/beta<<"\t"<<v.first[i].real()<<"\t"<<v.second[i].real()<<std::endl;
   }
 }
 
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const bool diagonal){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.nfreq();++i){
+  for(unsigned int i=0;i<v.nfreq();++i){
     os<<(2*i+1)*M_PI/beta<<"\t";
     if (diagonal) {
-      for (uint k=0; k<v.nsite(); ++k) 
-	for(uint f=0;f<v.nflavor();++f)
+      for (unsigned int k=0; k<v.nsite(); ++k) 
+	for(unsigned int f=0;f<v.nflavor();++f)
 	  os<<v(i,k,k,f).real()<<"\t";
     }
     else {
-      for (uint s1=0; s1<v.nsite(); ++s1) 
-	for (uint s2=0; s2<v.nsite(); ++s2) 
-	  for(uint f=0;f<v.nflavor();++f)
+      for (unsigned int s1=0; s1<v.nsite(); ++s1) 
+	for (unsigned int s2=0; s2<v.nsite(); ++s2) 
+	  for(unsigned int f=0;f<v.nflavor();++f)
 	    os<<v(i,s1,s2,f).real()<<"\t";
     }
     os<<std::endl;
@@ -134,24 +134,24 @@ void print_real_green_matsubara(std::ostream &os, const matsubara_green_function
 
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.first.size();++i){
+  for(unsigned int i=0;i<v.first.size();++i){
     os<<i*beta/(v.first.size()-1)<<"\t"<<v.first[i]<<"\t"<<v.second[i]<<std::endl;
   }
 }
 
 void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const bool diagonal){
   os<<std::setprecision(20);
-  for(uint i=0;i<v.ntime();++i){
+  for(unsigned int i=0;i<v.ntime();++i){
     os<<beta*i/(v.ntime()-1)<<"\t";
     if (diagonal) {
-      for (uint k=0; k<v.nsite();++k) 
-	for(uint f=0;f<v.nflavor();++f)
+      for (unsigned int k=0; k<v.nsite();++k) 
+	for(unsigned int f=0;f<v.nflavor();++f)
 	  os<<v(i,k,k,f)<<"\t";
     }
     else {
-      for (uint s1=0; s1<v.nsite();++s1) 
-	for (uint s2=0; s2<v.nsite();++s2) 
-	  for(uint f=0;f<v.nflavor();++f)
+      for (unsigned int s1=0; s1<v.nsite();++s1) 
+	for (unsigned int s2=0; s2<v.nsite();++s2) 
+	  for(unsigned int f=0;f<v.nflavor();++f)
 	    os<<v(i,s1,s2,f)<<"\t";  
     }
     os<<std::endl;
@@ -223,11 +223,11 @@ void print_dressed_tau_green_functions(const int iteration_ctr, const itime_gree
 
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
   os<<std::setprecision(20);
-  for(uint o=0;o<v.nfreq();++o){
+  for(unsigned int o=0;o<v.nfreq();++o){
     os<<o<<"\t";
-    for(uint i=0;i<v.nsite();++i)
-      for(uint j=0;j<v.nsite();++j)
-	for(uint z=0;z<v.nflavor();++z)
+    for(unsigned int i=0;i<v.nsite();++i)
+      for(unsigned int j=0;j<v.nsite();++j)
+	for(unsigned int z=0;z<v.nflavor();++z)
 	  os<<v(o,i,j,z)<<"\t";
     os<<std::endl;
     
@@ -237,11 +237,11 @@ std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
 
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v){
   os<<std::setprecision(20);
-  for(uint o=0;o<v.nfreq();++o){
+  for(unsigned int o=0;o<v.nfreq();++o){
     os<<o<<"\t";
-      for(uint i=0;i<v.nsite();++i)
-	for(uint j=0;j<v.nsite();++j)
-	  for(uint z=0;z<v.nflavor();++z)
+      for(unsigned int i=0;i<v.nsite();++i)
+	for(unsigned int j=0;j<v.nsite();++j)
+	  for(unsigned int z=0;z<v.nflavor();++z)
 	  os<<v(o,i,j,z).real()<<"\t"<<v(o,i,j,z).imag()<<"\t";
     os<<std::endl;    
   }
@@ -257,9 +257,9 @@ inline double G_times_minusG(const int i, const int N, const multiple_vector_typ
 //do this using a simpson integrator and G(-tau)=1-G(beta-tau)
 double e_kin=0;
 int sgn=-1;
-uint N=G_tau.first.size()-1;
+unsigned int N=G_tau.first.size()-1;
 double dtau=beta/G_tau.first.size();
-for(uint i=1;i<N;++i){
+for(unsigned int i=1;i<N;++i){
 e_kin+=(3 - sgn)*G_times_minusG(i, N, G_tau);
 sgn *=-1;
 }

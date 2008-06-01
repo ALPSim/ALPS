@@ -66,11 +66,11 @@ void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &
   //avoid matrix inversion and instead solve the system of equations: S *v2 =
   //rhs for v2. The result will be found in rhs as we use the LAPACK call dgesv
   dense_matrix v(rhs.size(), 1);
-  for(uint i=0;i<rhs.size();++i){
+  for(unsigned int i=0;i<rhs.size();++i){
     v(i,0)=rhs[i];
   }
   boost::numeric::bindings::lapack::gesv(spline_matrix, v);
-  for(uint i=0;i<rhs.size();++i){
+  for(unsigned int i=0;i<rhs.size();++i){
     rhs[i]=v(i,0);
   }
 }
@@ -82,28 +82,28 @@ void FourierTransformer::backward_ft(green_function<alps::RealObsevaluator> &G_t
 {
   assert(G_tau.nflavor()==G_omega_real.nflavor() && G_tau.nsite()==G_omega_real.nsite());
   assert(G_tau.nflavor()==G_omega_imag.nflavor() && G_tau.nsite()==G_omega_imag.nsite());
-  uint N_tau = G_tau.ntime()-1;
-  uint N_omega = G_omega_real.nfreq();
-  uint N_site = G_omega_real.nsite();
-  uint N_flavor = G_omega_real.nflavor();
+  unsigned int N_tau = G_tau.ntime()-1;
+  unsigned int N_omega = G_omega_real.nfreq();
+  unsigned int N_site = G_omega_real.nsite();
+  unsigned int N_flavor = G_omega_real.nflavor();
   green_function<alps::RealObsevaluator> G_omega_no_model_real(G_omega_real);
   green_function<alps::RealObsevaluator> G_omega_no_model_imag(G_omega_imag);
   double dt = beta_/N_tau;
-  for(uint f=0;f<N_flavor;++f){
-    for (uint s1=0; s1<N_site; ++s1){
-      for (uint s2=0; s2<N_site; ++s2) {
+  for(unsigned int f=0;f<N_flavor;++f){
+    for (unsigned int s1=0; s1<N_site; ++s1){
+      for (unsigned int s2=0; s2<N_site; ++s2) {
         if (s1==s2) {
-          for (uint k=0; k<N_omega; k++) {
+          for (unsigned int k=0; k<N_omega; k++) {
             std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
             G_omega_no_model_real(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]).real();
             G_omega_no_model_imag(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]).imag();
           } 
         }
-        for (uint i=0; i<N_tau; i++) {
+        for (unsigned int i=0; i<N_tau; i++) {
           double wt = i*M_PI/N_tau;
           G_tau(i,s1,s2,f) = 2/beta_*(cos(wt)*G_omega_no_model_real(0,s1,s2,f)+
                                       sin(wt)*G_omega_no_model_imag(0,s1,s2,f));
-          for (uint k=1; k<N_omega; k++) {
+          for (unsigned int k=1; k<N_omega; k++) {
             wt = (2*k+1)*i*M_PI/N_tau;
             G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model_real(k,s1,s2,f)+
                                          sin(wt)*G_omega_no_model_imag(k,s1,s2,f));
@@ -123,24 +123,24 @@ void FourierTransformer::backward_ft(green_function<alps::RealObsevaluator> &G_t
 void FourierTransformer::backward_ft(itime_green_function_t &G_tau, 
                                      const matsubara_green_function_t &G_omega) const {
   assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite());
-  uint N_tau = G_tau.ntime()-1;
-  uint N_omega = G_omega.nfreq();
-  uint N_site = G_omega.nsite();
+  unsigned int N_tau = G_tau.ntime()-1;
+  unsigned int N_omega = G_omega.nfreq();
+  unsigned int N_site = G_omega.nsite();
   matsubara_green_function_t G_omega_no_model(G_omega);
   double dt = beta_/N_tau;
-  for(uint f=0;f<G_omega.nflavor();++f){
-    for (uint s1=0; s1<N_site; ++s1){
-      for (uint s2=0; s2<N_site; ++s2) {
+  for(unsigned int f=0;f<G_omega.nflavor();++f){
+    for (unsigned int s1=0; s1<N_site; ++s1){
+      for (unsigned int s2=0; s2<N_site; ++s2) {
         //std::cout<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
         //if (s1==s2) {
-          for (uint k=0; k<N_omega; k++) {
+          for (unsigned int k=0; k<N_omega; k++) {
             std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
             G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
           } 
         //}
-        for (uint i=0; i<N_tau; i++) {
+        for (unsigned int i=0; i<N_tau; i++) {
           G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
-          for (uint k=0; k<N_omega; k++) {
+          for (unsigned int k=0; k<N_omega; k++) {
             double wt((2*k+1)*i*M_PI/N_tau);
             G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
                                          sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
@@ -156,9 +156,9 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
 
 /*void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
   assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite());
-  uint N=G_tau.ntime()-1;
-  uint n_omega=G_omega.nfreq();
-  uint N_site=G_tau.nsite();
+  unsigned int N=G_tau.ntime()-1;
+  unsigned int n_omega=G_omega.nfreq();
+  unsigned int N_site=G_tau.nsite();
   double dt=beta_/N;
   //we implicitely assume that we have as many imag time slices as matsubara frequencies. 
   //If this is not the case: interpolate,
@@ -166,17 +166,17 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
   std::valarray<std::complex<double> > G_omega_vector(n_omega);
   std::valarray<std::complex<double> > G_omega_vector_nosub(n_omega);
   //assert(c1_==1); //otherwise change evaluate_second_derivatives!
-  for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
-    for (uint s1=0; s1<N_site; ++s1){
-      for (uint s2=0; s2<N_site; ++s2) {
-        for(uint i=0;i<N;++i){
+  for(unsigned int flavor=0;flavor<G_tau.nflavor();++flavor){
+    for (unsigned int s1=0; s1<N_site; ++s1){
+      for (unsigned int s2=0; s2<N_site; ++s2) {
+        for(unsigned int i=0;i<N;++i){
           G_tau_vector[i]=G_tau(i,s1,s2,flavor);
         }
-        for (uint n=0; n<n_omega; n++) {
+        for (unsigned int n=0; n<n_omega; n++) {
           double w_n=(2*n+1)*M_PI/beta_;
           G_omega_vector[n]=0;
           G_omega_vector_nosub[n]=0;
-          for(uint i=0;i<N;++i){
+          for(unsigned int i=0;i<N;++i){
             double phi=w_n*i*dt;
             //if (s1==s2) 
               G_omega_vector[n] += std::complex<double>(cos(phi), sin(phi))*
@@ -190,7 +190,7 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
         }
         std::cout<<"doing forward ft for nfreq= "<<G_omega.nfreq()<<std::endl;
         std::cout<<"c1: "<<c1_[flavor][s1][s2]<<" c2: "<<c2_[flavor][s1][s2]<<" c3: "<<c3_[flavor][s1][s2]<<std::endl;
-        for(uint n=0;n<G_omega.nfreq();++n){
+        for(unsigned int n=0;n<G_omega.nfreq();++n){
           G_omega(n,s1,s2,flavor)=G_omega_vector[n];
           //if (s1==s2) {
             std::complex<double> iw(0,(2*n+1)*M_PI/beta_);

@@ -63,14 +63,14 @@ class HirschFyeSim : public alps::scheduler::MCSimulation, public alps::Matsubar
 {
 public:
   HirschFyeSim(const alps::ProcessList& w, const boost::filesystem::path& p) 
-      : alps::scheduler::MCSimulation(w,p)
-  { 
-  }
+  : alps::scheduler::MCSimulation(w,p)
+{ 
+}
 
-  HirschFyeSim(const alps::ProcessList& w, const alps::Parameters& p) 
-      : alps::scheduler::MCSimulation(w,p) 
-  {
-  }
+HirschFyeSim(const alps::ProcessList& w, const alps::Parameters& p) 
+: alps::scheduler::MCSimulation(w,p) 
+{
+}
 
 	///return the Green's function G
 	//itime_green_function_t get_result() const;
@@ -95,7 +95,7 @@ public:
 	bool is_thermalized() const;
 	///return a value between zero and one, one meaning that the simulation is about to end.
 	double work_done() const;
-
+  
 	///return the Green's function G
 	itime_green_function_t get_result() const;
 	
@@ -106,7 +106,7 @@ public:
 	
 	
 private:
-	int sweeps;					// sweeps done
+    int sweeps;					// sweeps done
 	int thermalization_sweeps;		// sweeps to be done for equilibration
 	int total_sweeps;				// sweeps to be done after equilibration
 	double beta;					// inverse temperature
@@ -119,7 +119,7 @@ private:
 	int fp_interval;				// counts the interval between measurements of the fourpoint function
         bool measure_fourpoint;
 	double tolerance;				// tolerance for deterioration of precision
-									// (maximum deviation of Green's function matrix elements)
+                          // (maximum deviation of Green's function matrix elements)
 	//std::valarray<double> G_up;		// Green's function for up spins
 	dense_matrix Green0_up;       	// bath Green's function matrix for up spins
 	dense_matrix Green_up;        	// Green's function matrix for up spins  
