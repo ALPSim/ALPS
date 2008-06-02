@@ -11,7 +11,7 @@
 #define BOOST_NUMERIC_BINDINGS_TRAITS_MATRIX_RAW_HPP
 
 #include <cstddef> 
-#include <boost/numeric/ublas/config.hpp> 
+// #include <boost/numeric/ublas/config.hpp> 
 #ifndef BOOST_UBLAS_HAVE_BINDINGS
 #  include <boost/numeric/ublas/matrix.hpp> 
 #endif 
@@ -75,7 +75,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   int leading_dimension (const ublas::matrix<T,F,A> &m) {
     typedef ublas::matrix<T,F,A> matrix_t; 
     return bindings::traits::leading_dimension
-      (m, BOOST_UBLAS_TYPENAME matrix_t::orientation_category());
+      (m, typename matrix_t::orientation_category());
   }
   template <typename M>
   BOOST_UBLAS_INLINE
@@ -190,7 +190,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   }
   template <typename T, typename F, typename A>
   BOOST_UBLAS_INLINE
-  typename ublas::matrix<T,F,A>::pointer 
+  typename ublas::matrix<T,F,A>::value_type *
   matrix_storage (ublas::matrix<T,F,A> &m) {
     return &m.data().begin()[0];
   }
