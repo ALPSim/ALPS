@@ -201,6 +201,15 @@
   <EDGE><SOURCE vertex="1"/><TARGET vertex="3" offset="0 -1"/></EDGE>
 </UNITCELL>
 
+<UNITCELL name="coupled ladders" dimension="1">
+  <VERTEX type="0"/>
+  <VERTEX type="0"/>
+  <EDGE type="0"><SOURCE vertex="1"/><TARGET vertex="1" offset="1 0"/></EDGE>
+  <EDGE type="0"><SOURCE vertex="2"/><TARGET vertex="2" offset="1 0"/></EDGE>
+  <EDGE type="1"><SOURCE vertex="1"/><TARGET vertex="2"/></EDGE>
+  <EDGE type="2"><SOURCE vertex="1"/><TARGET vertex="2" offset="0 1"/></EDGE>
+</UNITCELL>
+
 
 <LATTICEGRAPH name = "square lattice 3x3">
   <FINITELATTICE>
@@ -263,6 +272,17 @@
     <BOUNDARY type="periodic"/>
   </FINITELATTICE>
   <UNITCELL ref="simple2d"/>
+</LATTICEGRAPH>
+
+<LATTICEGRAPH name = "coupled ladders">
+  <FINITELATTICE>
+    <LATTICE ref="square lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <BOUNDARY type="periodic"/>
+  </FINITELATTICE>
+  <UNITCELL ref="coupled ladders"/>
 </LATTICEGRAPH>
 
 <LATTICEGRAPH name = "triangular lattice">
