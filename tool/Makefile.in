@@ -33,7 +33,8 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
-	parameter2xml$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
+	parameter2xml$(EXEEXT) printgraph$(EXEEXT) $(am__EXEEXT_1) \
+	$(am__EXEEXT_2)
 @BUILD_ARCHIVE_TRUE@am__append_1 = archive
 @BUILD_DOC_TRUE@am__append_2 = quickbook
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@am__append_3 = \
@@ -125,6 +126,13 @@ parameter2xml_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
 	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
+am_printgraph_OBJECTS = printgraph.$(OBJEXT)
+printgraph_OBJECTS = $(am_printgraph_OBJECTS)
+printgraph_LDADD = $(LDADD)
+printgraph_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
+	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@am__objects_1 = actions.$(OBJEXT) \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@	post_process.$(OBJEXT) \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@	utils.$(OBJEXT)
@@ -174,9 +182,10 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(archive_SOURCES) $(compactrun_SOURCES) \
 	$(convert2xml_SOURCES) $(parameter2xml_SOURCES) \
-	$(nodist_quickbook_SOURCES)
+	$(printgraph_SOURCES) $(nodist_quickbook_SOURCES)
 DIST_SOURCES = $(archive_SOURCES) $(compactrun_SOURCES) \
-	$(convert2xml_SOURCES) $(parameter2xml_SOURCES)
+	$(convert2xml_SOURCES) $(parameter2xml_SOURCES) \
+	$(printgraph_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -347,6 +356,7 @@ bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extrac
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
+printgraph_SOURCES = printgraph.C
 archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.cpp archive_node.hpp archive_plot.cpp archive_plot.hpp archive_sqlite.cpp archive_sqlite.hpp archive_xml.cpp archive_xml.hpp
 @BUILD_DOC_TRUE@nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp \
 @BUILD_DOC_TRUE@	$(am__append_3) $(am__append_4) \
@@ -446,6 +456,9 @@ convert2xml$(EXEEXT): $(convert2xml_OBJECTS) $(convert2xml_DEPENDENCIES)
 parameter2xml$(EXEEXT): $(parameter2xml_OBJECTS) $(parameter2xml_DEPENDENCIES) 
 	@rm -f parameter2xml$(EXEEXT)
 	$(CXXLINK) $(parameter2xml_OBJECTS) $(parameter2xml_LDADD) $(LIBS)
+printgraph$(EXEEXT): $(printgraph_OBJECTS) $(printgraph_DEPENDENCIES) 
+	@rm -f printgraph$(EXEEXT)
+	$(CXXLINK) $(printgraph_OBJECTS) $(printgraph_LDADD) $(LIBS)
 quickbook$(EXEEXT): $(quickbook_OBJECTS) $(quickbook_DEPENDENCIES) 
 	@rm -f quickbook$(EXEEXT)
 	$(CXXLINK) $(quickbook_OBJECTS) $(quickbook_LDADD) $(LIBS)
@@ -507,6 +520,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert2xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameter2xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/post_process.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/printgraph.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/quickbook.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/template_stack.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/utils.Po@am__quote@
