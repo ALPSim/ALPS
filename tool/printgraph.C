@@ -47,9 +47,11 @@ int main(int argc, char ** argv)
        case 1:
          std::cin >> parameters;
          break;
-       case 2: 
-         std::ifstream parmfile(argv[1]);
-         parmfile >> parameters;
+       case 2:
+         {
+           std::ifstream parmfile(argv[1]);
+           parmfile >> parameters;
+         }
          break;
        default:
          std::cerr << "Usage: " << argv[0] << " [parameterfile]\n";
