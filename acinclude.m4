@@ -1,3 +1,4 @@
+sinclude(config/ac_boost.m4)
 sinclude(config/ac_compiler.m4)
 sinclude(config/ac_cxx_have_valarray.m4)
 sinclude(config/ac_cxx_namespaces.m4)
