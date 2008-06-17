@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2002-2006 by Matthias Troyer <troyer@comp-phys.org>,
+* Copyright (C) 2002-2008 by Matthias Troyer <troyer@comp-phys.org>,
 *                            Simon Trebst <trebst@comp-phys.org>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
@@ -61,9 +61,15 @@ void convert_params(const std::string& inname, const std::string& basename)
     baseseed = boost::lexical_cast<uint32_t>(list[0]["BASESEED"]);
   } else {
     baseseed =
-      boost::posix_time::microsec_clock::local_time().time_of_day().
-      total_microseconds();
+      boost::posix_time::microsec_clock::local_time().time_of_day().total_microseconds();
     baseseed = ((baseseed << 10) | (baseseed >> 22));
+  }
+
+  std::string sim_name = list[0].value_or_default("SIMULATION_NAME", "");
+  BOOST_FOREACH(alps::Parameters& p, list) {
+    if (p.value_or_default("SIMULATION_NAME", "") != sim_name)
+      boost::throw_exception(std::invalid_argument("inconsistent SIMULATION_NAME parameter"));
+    if (p.defined("SIMULATION_NAME")) p.erase("SIMULATION_NAME");
   }
 
   alps::oxstream
@@ -73,8 +79,9 @@ void convert_params(const std::string& inname, const std::string& basename)
       << alps::start_tag("JOB")
       << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
       << alps::attribute("xsi:noNamespaceSchemaLocation",
-                         "http://xml.comp-phys.org/2003/8/job.xsd")
-      << alps::start_tag("OUTPUT")
+                         "http://xml.comp-phys.org/2003/8/job.xsd");
+  if (sim_name != "") out << alps::attribute("name", sim_name);
+  out << alps::start_tag("OUTPUT")
       << alps::attribute("file", basename+".out.xml")
       << alps::end_tag("OUTPUT");
 
