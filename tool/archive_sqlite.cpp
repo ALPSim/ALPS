@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005-2007 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2005-2008 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -56,14 +56,14 @@ void SQLite::open(fs::path filename) {
                 throw std::runtime_error(std::string("Can't open database: ") + sqlite3_errmsg(mDB));
         operator()("BEGIN;");
  }
- 
-void SQLite::close(bool commit) { 
+
+void SQLite::close(bool commit) {
         #ifdef DEBUG
                 if(mCnt && mVerbose)
                         std::cout << "Number of executed queries: " << mCnt << " (" << std::setiosflags(std::ios_base::fixed) << std::setprecision(2) << timer / 1000 << "s)" << std::endl;
         #endif
          if(mDB) {
-                if (commit) 
+                if (commit)
                         operator()("COMMIT;");
                 else
                         operator()("ROLLBACK;");
@@ -99,8 +99,8 @@ std::string SQLite::unQuote(std::string str) {
         return str;
 }
 
-std::list<std::map<std::string, std::string> > SQLite::operator()(std::string query) { 
-        return operator()(query, false); 
+std::list<std::map<std::string, std::string> > SQLite::operator()(std::string query) {
+        return operator()(query, false);
 }
 
 std::list<std::map<std::string, std::string> > SQLite::operator()(std::string query, bool throwError) {
@@ -110,5 +110,6 @@ std::list<std::map<std::string, std::string> > SQLite::operator()(std::string qu
         if (sqlite3_exec(mDB, query.c_str(), SQLiteCallback, this, &mErrMsg) != SQLITE_OK && throwError)
                 throw std::runtime_error(std::string("Error in Query '") + query + "': " + sqlite3_errmsg(mDB));
         timer += std::difftime(std::clock(), tmp);
+        if (mVerbose) std::clog << "Exectured query " << query << "\nGot " << mRS.size() << " results\n";
         return mRS;
 }

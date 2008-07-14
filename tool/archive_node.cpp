@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2005-2008 by Lukas Gamper <mistral@student.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -31,27 +32,28 @@
 
 #include "archive_node.hpp"
 
-void Node::addElement(Node inChild) { 
+void Node::addElement(Node inChild) {
         inChild.mParent = this;
         mElem.push_back(inChild);
 }
 
-void Node::addElement(std::string inName) { 
+void Node::addElement(std::string inName) {
         std::transform (inName.begin(), inName.end(), inName.begin(), tolower);
-        addElement(Node(inName, this)); 
+        addElement(Node(inName, this));
 }
-                
+
 void Node::addAttribute(std::string inName, std::string inValue) {
         std::transform (inName.begin(), inName.end(), inName.begin(), tolower);
-        mAttr[inName] = inValue; 
+        mAttr[inName] = inValue;
 }
-                
-std::string Node::getAttribute(std::string inName) { 
-        std::transform (inName.begin(), inName.end(), inName.begin(), tolower);
-    if (mAttr.find(inName) == mAttr.end())
-            return "";
-    else
-                return mAttr[inName]; 
+
+std::string Node::getAttribute(std::string inName) const {
+  std::transform (inName.begin(), inName.end(), inName.begin(), tolower);
+  std::map<std::string, std::string>::const_iterator itr = mAttr.find(inName);
+  if (itr == mAttr.end())
+    return "";
+  else
+    return itr->second;
 }
 
 std::string Node::string() {
@@ -60,7 +62,7 @@ std::string Node::string() {
                 value += *it;
         return value;
 }
-                
+
 std::list<Node> Node::nodeTest(std::string nodeName) {
         std::transform (nodeName.begin(), nodeName.end(), nodeName.begin(), tolower);
         std::list<Node> context;

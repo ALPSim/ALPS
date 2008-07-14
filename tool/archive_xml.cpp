@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005-2007 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2005-2008 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>,
 *                            Niall Moran <nmoran@thphys.nuim.ie>
 *
@@ -49,8 +49,8 @@ std::string mCurAttrName;
 Node getRoot() { return mRoot; }
 
 void newDoc(char const*, char const*)
-{ 
-  mRoot = Node(); 
+{
+  mRoot = Node();
   mContext = &mRoot;
 }
 
@@ -66,7 +66,7 @@ void endElem(char const*, char const*) { mContext = mContext->getParent();  }
 
 void newText(char const* str, char const* end)
 { mContext->addText(std::string(str, end)); }
- 
+
 void storeAttrName(char const* str, char const* end)
 { mCurAttrName = std::string(str, end); }
 
@@ -89,7 +89,7 @@ struct XMLEbnf : public sp::grammar<XMLEbnf>
     {
       Constructor
         = sp::eps_p[&XMLActions::newDoc]
-          >> *(Header | DocType) 
+          >> *(Header | DocType)
           >> *DirCommentConstructor
           >> DirElemConstructor;
       Header
@@ -111,7 +111,7 @@ struct XMLEbnf : public sp::grammar<XMLEbnf>
                  >> *( DirElemContent[&XMLActions::newText]
                      | DirElemConstructor
                      | DirCommentConstructor
-                     ) 
+                     )
                  >> "</"
                  >> QName
                  >> !sp::space_p
@@ -167,7 +167,7 @@ struct XMLEbnf : public sp::grammar<XMLEbnf>
                 )
           ];
     }
-    
+
     sp::rule<ScannerT> const& start() const { return Constructor; }
   };
 };
@@ -181,10 +181,10 @@ struct PlotDTD : public sp::grammar<PlotDTD>
     sp::rule<ScannerT> Plot, ForEach, XAxis, YAxis, Constraint, Comment;
     sp::rule<ScannerT> AtName, AtOutput, AtType, AtLabel, AtError, AtIndex,
       AtOperator, AtValue;
-    
+
     definition(PlotDTD const&)
     {
-      Constructor 
+      Constructor
         = *(Header | DocType) >> Plot;
       Header
         = sp::as_lower_d[sp::str_p("<?xml")]
@@ -209,7 +209,8 @@ struct PlotDTD : public sp::grammar<PlotDTD>
       ForEach
         = *Comment
           >> sp::as_lower_d[sp::str_p("<for-each")] >> AtName >> '>'
-          >> (( XAxis >> YAxis >> *Constraint >> *Comment ) | ForEach )
+          >> (( *Comment >> *Constraint >> *Comment >> XAxis >> *Comment >> YAxis
+                >> *Constraint >> *Comment ) | ForEach )
           >> sp::as_lower_d[sp::str_p("</for-each")] >> '>';
       XAxis
         = *Comment
@@ -321,7 +322,7 @@ struct PlotDTD : public sp::grammar<PlotDTD>
             >> '\''
          );
     }
-    
+
     sp::rule<ScannerT> const& start() const { return Constructor; }
   };
 };
@@ -343,7 +344,7 @@ std::string XML::readFile(fs::path filename)
 Node XML::operator()(fs::path inFileName, bool usePlotDTD)
 {
   std::clock_t timer = std::clock();
-        
+
   std::string fileContent = readFile(inFileName);
   if (usePlotDTD) {
     sp::parse_info<> plotInfo =
@@ -353,7 +354,7 @@ Node XML::operator()(fs::path inFileName, bool usePlotDTD)
         "The Plotfile does not match the DTD! Fails parsing at: ") +
         plotInfo.stop));
   }
-        
+
   sp::parse_info<> info =
     sp::parse(fileContent.c_str(), XMLEbnf(), sp::space_p);
   if (mVerbose) {

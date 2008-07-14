@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2005-2008 by Lukas Gamper <mistral@student.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -42,27 +43,27 @@ class Node {
         std::map<std::string, std::string> mAttr;
         std::list<std::string> mText;
         std::list<Node> mElem;
-        
+
         public:
                 Node(): mName(""), mParent(NULL) {}
                 Node(std::string inName, Node *inParent): mName(inName), mParent(inParent) {}
 
                 void setParent(Node *inParent) { mParent = inParent; }
                 Node *getParent() { return mParent; }
-                
+
                 void setName(std::string inName) { mName = inName; }
                 std::string getName() { return mName; }
-                
+
                 void addElement(Node inChild);
                 void addElement(std::string inName);
                 std::list<Node> getElements() { return mElem; }
                 Node *getLastElement() { return &mElem.back(); }
 
                 void addText(std::string inName) { mText.push_back(inName); }
-                std::list<std::string> getText() { return mText; }
+                std::list<std::string> getText() const { return mText; }
 
                 void addAttribute(std::string inName, std::string inValue);
-                std::string getAttribute(std::string inName);
+                std::string getAttribute(std::string inName) const;
 
                 std::string string();
                 Node getElement(std::string nodeName);
