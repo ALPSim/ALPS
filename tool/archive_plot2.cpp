@@ -77,37 +77,138 @@ std::string operatorToString(std::string const& in) {
 }
 
 void append_where(std::string& where, std::string const& w) {
-  if (where.size()) where += " AND ";
-  where += w;
+  if (w.size()) {
+    if (where.size()) where += " AND ";
+    where += w;
+  }
 }
 
 void append_from(std::string& from, std::string const& f) {
-  if (from.size()) from += ", ";
-  from += f;
+  if (f.size()) {
+    if (from.size()) from += ", ";
+    from += f;
+  }
 }
 
+void check_duplicate(std::list<std::map<std::string, std::string> >& rs) {
+  std::string old = "";
+  for (std::list<std::map<std::string, std::string> >::iterator itr = rs.begin();
+       itr != rs.end(); ++itr) {
+    if (old != "" && (*itr)["x"] == old)
+      boost::throw_exception(std::runtime_error("duplicated entries"));
+    old = (*itr)["x"];
+  }
+}
 
+void create_header(std::string& buffer, std::string const& output_type,
+                   std::string const& plot_name, std::string const& xlabel,
+                   std::string const& ylabel) {
+  if (output_type == "text")
+    buffer += "# " + plot_name + "\n";
+  else if (output_type == "html")
+    buffer += "<h1>" + plot_name + "</h1>\n";
+  else if (output_type == "xmgr") {
+    buffer += "@g0 on\n@with g0\n@    legend on\n@    title \"" + plot_name + "\""
+      "\n@    xaxis  label \"" + xlabel + "\""
+      "\n@    yaxis  label \"" + ylabel + "\"";
+  } else if (output_type == "xml") {
+    buffer += "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
+      "<!DOCTYPE plot SYSTEM \"conf/plotdata.dtd\">\n"
+      "<plotdata";
+    if (plot_name.size()) buffer += " name=\"" + plot_name + "\"";
+    buffer += ">\n"
+      "  <xaxis label=\"" + xlabel + "\"/>\n"
+      "  <yaxis label=\"" + ylabel + "\"/>\n";
+  }
+}
+
+void create_trailer(std::string& buffer, std::string const& output_type) {
+  if (output_type == "xml") {
+    buffer += "</plotdata>\n";
+  }
+}
+
+void write_result(std::string& buffer, std::string& bufferBody,
+                  std::list<std::map<std::string, std::string> >& rs,
+                  std::string const& output_type, int table,
+                  std::string const& xlabel, std::string const& ylabel, bool xerror, bool yerror,
+                  std::vector<std::string> const& foreachName,
+                  std::vector<std::vector<std::string> > const& foreachData,
+                  std::vector<unsigned int> const& foreachOffset) {
+  std::string label;
+  for (int v = 0; v < foreachData.size(); ++v, table %= foreachOffset[v-1]) {
+    if (label.size()) label += " ";
+    label += foreachName[v] + "=" + foreachData[v][table / foreachOffset[v]];
+  }
+  if (output_type == "text") {
+    buffer += "\n# " + label;
+    buffer += "\n# " + xlabel + (xerror ? "\terror(" + xlabel + ")" : "")
+      + "\t" + ylabel + (yerror ? "\terror(" + ylabel + ")" : "") + "\n";
+    for (std::list<std::map<std::string, std::string> >::iterator itr = rs.begin();
+         itr != rs.end(); ++itr) {
+      buffer += std::string((*itr)["x"]) + (xerror ? "\t" + (*itr)["ex"] + "\t" : "\t")
+        + (*itr)["y"] + (yerror ? "\t" + (*itr)["ey"] : "") + "\n";
+    }
+  } else if (output_type == "html") {
+    buffer += "\n<h2>" + label + "</h2>\n";
+    buffer += "<table><tr><td>" + xlabel + "</td>"
+      + (xerror ? "<td>error(" + xlabel + ")</td>" : "")
+      + "<td>" + ylabel + "</td>"
+      + (yerror ? "<td>error(" + ylabel + ")</td>" : "")
+      + "</tr>\n";
+    for (std::list<std::map<std::string, std::string> >::iterator itr = rs.begin();
+         itr != rs.end(); ++itr) {
+      buffer += "<tr><td allign=\"right\">" + (*itr)["x"] + "</td>"
+        + (xerror ? "<td allign=\"right\">" + (*itr)["ex"] + "</td>" : "")
+        + "<tr><td allign=\"right\">" + (*itr)["y"] + "</td>"
+        + (yerror ? "<td allign=\"right\">" + (*itr)["ey"] + "</td>" : "")
+        + "</tr>\n";
+    }
+    buffer += "</table>\n";
+  } else if (output_type == "xmgr") {
+    buffer += "\n@    s" + boost::lexical_cast<std::string>(table)
+      + " type xy" + (xerror ? "dx" : "") + (yerror ? "dy" : "")
+      + "\n@    s" + boost::lexical_cast<std::string>(table) + " legend \"" + label + "\"";
+    bufferBody += std::string("\n@target G0.S") + boost::lexical_cast<std::string>(table)
+      + "\n@type xy" +  (xerror ? "dx" : "") + (yerror ? "dy" : "") + "\n";
+    for (std::list<std::map<std::string, std::string> >::iterator itr = rs.begin();
+         itr != rs.end(); ++itr) {
+      bufferBody += (*itr)["x"] + " " + (xerror ? (*itr)["ex"] + " " : "")
+        + (*itr)["y"] + " " + (xerror ? (*itr)["ey"] + " " : "") + "\n";
+      bufferBody += "&";
+    }
+  } else if (output_type == "xml") {
+    buffer += "  <set label=\"" + label + "\">\n";
+    for (std::list<std::map<std::string, std::string> >::iterator itr = rs.begin();
+         itr != rs.end(); ++itr) {
+      buffer += "    <point>"
+        "<x>" + (*itr)["x"] + "</x>"
+        + (xerror ? "<dx>" + (*itr)["ex"] + "</dx>" : "")
+        + "<y>" + (*itr)["y"] + "</y>"
+        + (yerror ? "<dy>" + (*itr)["ey"] + "</dy>" : "")
+        + "</point>\n";
+    }
+    buffer += "  </set>\n";
+  }
+}
 
 void Plot::exec(Node inNode, std::string inInFile) {
 
   typedef std::list<std::map<std::string, std::string> > result_type;
 
-  // initialize variables
-  Node bodyNode = inNode.nodeTest("plot").front();
+  std::string plot_name = inNode.nodeTest("plot").front().getAttribute("name");
+  std::string output_type = inNode.nodeTest("plot").front().getAttribute("output");
 
   int alias_number = 0;
   std::map<std::string, std::string> parameter_aliases;
   std::map<std::string, std::string> measurement_aliases;
 
-  std::map<std::string, std::list<std::map<std::string, std::string> > > constraints;
-  std::vector<std::string> constraintNames;
-  std::list<Node> constrainNodes;
+  // std::map<std::string, std::list<std::map<std::string, std::string> > > constraints;
+  // std::vector<std::string> constraintNames;
+  // std::list<Node> constrainNodes;
 
-  std::string buffer = "";
-  std::string bufferBody = "";
-  int plot_num = 0 ;
-
-  // find Node with axis tags and Check if all Attributes are there
+  std::string buffer;
+  std::string bufferBody;
 
   // parse <constraint> tags
   std::string constraintSQLFrom;
@@ -148,30 +249,21 @@ void Plot::exec(Node inNode, std::string inInFile) {
                    + ".value" + operatorToString(constraint.getAttribute("operator")) + value);
     }
   }
-
-  std::cout << "constraintSQLFrom: " << constraintSQLFrom << std::endl
-            << "constraintSQLWhere: " << constraintSQLWhere << std::endl;
+  // std::cout << "constraintSQLFrom: " << constraintSQLFrom << std::endl
+  //           << "constraintSQLWhere: " << constraintSQLWhere << std::endl;
 
   // parse <for-each> tags
+  std::string from = constraintSQLFrom;
+  std::string where = constraintSQLWhere;
   std::string foreachSQLFrom;
   std::string foreachSQLWhere;
   std::vector<std::string> foreachName;
   std::vector<std::vector<std::string> > foreachData;
-//   std::vector<std::vector<std::string> > forData;
-//   std::vector<std::string> forVector;
-//   std::vector<std::vector<std::string> > forMeta;
-//   std::vector<unsigned int> forCount;
   context = inNode.nodeTest("plot").front();
   for (unsigned int pos = 0; context.nodeTest("for-each").size() > 0; ++pos) {
     context = context.nodeTest("for-each").front();
     std::string name = context.getAttribute("name");
-    std::string from = constraintSQLFrom;
-    std::string where = constraintSQLWhere;
     std::string alias;
-    // forData.push_back(std::vector<std::string>());
-    // forCount.push_back(0);
-    // forMeta.push_back(std::vector<std::string>());
-    // forVector.push_back(context.getAttribute("name"));
     if (parameter_aliases.find(name) == parameter_aliases.end()) {
       // assign a new alias name for parameter
       alias = std::string("x") + boost::lexical_cast<std::string>(alias_number++);
@@ -194,223 +286,162 @@ void Plot::exec(Node inNode, std::string inInFile) {
       foreachData[pos].push_back((*it)["value"]);
   }
 
-  std::cout << "foreachSQLFrom: " << foreachSQLFrom << std::endl
-            << "foreachSQLWhere: " << foreachSQLWhere << std::endl;
+  int num_plots = 1;
+  std::vector<unsigned int> foreachOffset(foreachData.size());
+  for (int v = foreachData.size() - 1; v >= 0; --v) {
+    foreachOffset[v] = num_plots;
+    num_plots *= foreachData[v].size();
+  }
 
-  // define Order
-  std::string orderSQLFrom;
-  std::string orderSQLWhere;
-  std::string orderSQLOrder;
-  context = bodyNode.nodeTest("xaxis").front();
-  std::string xname = context.getAttribute("type");
+  // std::cout << "foreachSQLFrom: " << foreachSQLFrom << std::endl
+  //           << "foreachSQLWhere: " << foreachSQLWhere << std::endl;
+
+  // xaxis and yaxis
+  std::string axisSQLFrom;
+  std::string axisSQLWhere;
+  std::string axisSQLOrder;
+  context = inNode.nodeTest("plot").front();
+  while (context.nodeTest("for-each").size() > 0) context = context.nodeTest("for-each").front();
+  context = context.nodeTest("xaxis").front();
+  std::string xname = context.getAttribute("name");
   std::string xtype = strToLower(context.getAttribute("type"));
+  std::string xlabel = xname;
+  if (xtype != "parameter" && xtype != "mean") xlabel = xtype + "(" + xlabel + ")";
+  if (xtype == "index") xtype = "indexvalue";
+  std::string xalias;
+  bool xerror = (context.getAttribute("error") != "");
   if (xtype == "parameter") {
-    std::string alias;
     if (parameter_aliases.find(xname) == parameter_aliases.end()) {
       // assign a new alias name for parameter
-      alias = std::string("x") + boost::lexical_cast<std::string>(alias_number++);
-      append_from(orderSQLFrom, "parameter AS " + alias);
-      if (alias != "x0") append_where(orderSQLWhere, "x0.fID=" + alias + ".fID");
-      parameter_aliases[xname] = alias;
+      xalias = std::string("x") + boost::lexical_cast<std::string>(alias_number++);
+      append_from(axisSQLFrom, "parameter AS " + xalias);
+      if (xalias != "x0") append_where(axisSQLWhere, "x0.fID=" + xalias + ".fID");
+      parameter_aliases[xname] = xalias;
     } else {
-      alias = parameter_aliases[xname];
+      xalias = parameter_aliases[xname];
     }
-    orderSQLOrder = alias + ".value";
+    axisSQLOrder = xalias + ".value";
   } else {
-    std::string alias;
     if (measurement_aliases.find(xname) == measurement_aliases.end()) {
       // assign a new alias name for measurement
-      alias = std::string("x") + boost::lexical_cast<std::string>(alias_number++);
-      append_from(orderSQLFrom, "measurement AS " + alias);
-      if (alias != "x0") append_where(orderSQLWhere, "x0.fID=" + alias + ".fID");
-      measurement_aliases[xname] = alias;
+      xalias = std::string("x") + boost::lexical_cast<std::string>(alias_number++);
+      append_from(axisSQLFrom, "measurement AS " + xalias);
+      if (xalias != "x0") append_where(axisSQLWhere, "x0.fID=" + xalias + ".fID");
+      measurement_aliases[xname] = xalias;
     } else {
-      alias = measurement_aliases[xname];
+      xalias = measurement_aliases[xname];
     }
-    if (xtype == "index") {
-      orderSQLOrder = alias + ".indexvalue";
+    if (context.getAttribute("index") != "") {
+      append_where(axisSQLWhere, xalias + ".indexvalue=\""
+                   + SQLite::quote(context.getAttribute("index")) + "\"");
+      xlabel += " " + context.getAttribute("index");
+    }
+    axisSQLOrder = xalias + "." + xtype;
+  }
+  append_where(axisSQLWhere, xalias + ".name='" + SQLite::quote(xname) + "'");
+  if (xtype == "parameter") xtype = "value";
+
+  context = inNode.nodeTest("plot").front();
+  while (context.nodeTest("for-each").size() > 0) context = context.nodeTest("for-each").front();
+  context = context.nodeTest("yaxis").front();
+  std::string yname = context.getAttribute("name");
+  std::string ytype = strToLower(context.getAttribute("type"));
+  std::string ylabel = yname;
+  if (ytype != "parameter" && ytype != "mean") ylabel = ytype + "(" + ylabel + ")";
+  if (ytype == "index") ytype = "indexvalue";
+  std::string yalias;
+  bool yerror = (context.getAttribute("error") != "");
+  if (ytype == "parameter") {
+    if (parameter_aliases.find(yname) == parameter_aliases.end()) {
+      // assign a new alias name for parameter
+      yalias = std::string("x") + boost::lexical_cast<std::string>(alias_number++);
+      append_from(axisSQLFrom, "parameter AS " + yalias);
+      if (yalias != "x0") append_where(axisSQLWhere, "x0.fID=" + yalias + ".fID");
+      parameter_aliases[yname] = yalias;
     } else {
-      orderSQLOrder = alias + "." + xtype;
+      yalias = parameter_aliases[yname];
+    }
+    axisSQLOrder = yalias + ".value";
+  } else {
+    if (measurement_aliases.find(yname) == measurement_aliases.end()) {
+      // assign a new alias name for measurement
+      yalias = std::string("x") + boost::lexical_cast<std::string>(alias_number++);
+      append_from(axisSQLFrom, "measurement AS " + yalias);
+      if (yalias != "x0") append_where(axisSQLWhere, "x0.fID=" + yalias + ".fID");
+      measurement_aliases[yname] = yalias;
+    } else {
+      yalias = measurement_aliases[yname];
+    }
+    if (context.getAttribute("index") != "") {
+      append_where(axisSQLWhere, yalias + ".indexvalue=\""
+                   + SQLite::quote(context.getAttribute("index")) + "\"");
+      ylabel += " " + context.getAttribute("index");
+    }
+}
+  append_where(axisSQLWhere, yalias + ".name='" + SQLite::quote(yname) + "'");
+  if (ytype == "parameter") ytype = "value";
+
+  // Parameters cannot have indeces or errors
+  if (((xtype == "value" || xtype == "indexvalue") && xerror) ||
+      ((ytype == "value" || ytype == "indexvalue") && yerror))
+    throw std::runtime_error("Only measurements can have errorbars and indeces");
+
+  // std::cout << "axisSQLFrom: " << axisSQLFrom << std::endl
+  //           << "axisSQLWhere: " << axisSQLWhere << std::endl
+  //           << "axisSQLOrder: " << axisSQLOrder << std::endl;
+
+  std::string SQLFrom = constraintSQLFrom;
+  append_from(SQLFrom, foreachSQLFrom);
+  append_from(SQLFrom, axisSQLFrom);
+
+  std::string SQLWhere = constraintSQLWhere;
+  append_where(SQLWhere, foreachSQLWhere);
+  append_where(SQLWhere, axisSQLWhere);
+
+  std::string SQLOrder = axisSQLOrder;
+
+  std::string SQLSelect("SELECT " + xalias + "." + xtype + " AS x");
+  if (xerror) SQLSelect += ", " + xalias + ".error AS ex";
+  SQLSelect += ", " + yalias + "." + ytype + " AS y";
+  if (yerror) SQLSelect += ", " + yalias + ".error AS ey";
+
+  //
+  // Loop over <for-each> and output results
+  //
+
+  create_header(buffer, output_type, plot_name, xlabel, ylabel);
+
+  if (foreachName.size() == 0) {
+    if (SQLFrom.size()) SQLFrom = " FROM " + SQLFrom;
+    if (SQLWhere.size()) SQLWhere = " WHERE " + SQLWhere;
+    if (SQLOrder.size()) SQLOrder = " ORDER BY " + SQLOrder;
+    result_type rs = mDB(SQLSelect + SQLFrom + SQLWhere + SQLOrder +";", true);
+    check_duplicate(rs);
+    write_result(buffer, bufferBody, rs, output_type, 0, xlabel, ylabel, xerror, yerror,
+                 foreachName, foreachData, foreachOffset);
+  } else {
+    if (SQLFrom.size()) SQLFrom = " FROM " + SQLFrom;
+    if (SQLOrder.size()) SQLOrder = " ORDER BY " + SQLOrder;
+    for (int p = 0; p < num_plots; ++p) {
+      std::string where = SQLWhere;
+      int q = p;
+      for (int v = 0; v < foreachData.size(); ++v, q = q % foreachOffset[v-1]) {
+        std::string name = foreachName[v];
+        append_where(where, parameter_aliases[name] + ".name='" + SQLite::quote(name) + "'");
+        append_where(where, parameter_aliases[name] + ".value='"
+                     + foreachData[v][q / foreachOffset[v]] + "'");
+      }
+      if (where.size()) where = " WHERE " + where;
+      result_type rs = mDB(SQLSelect + SQLFrom + where + SQLOrder +";", true);
+      check_duplicate(rs);
+      write_result(buffer, bufferBody, rs, output_type, p, xlabel, ylabel, xerror, yerror,
+                   foreachName, foreachData, foreachOffset);
     }
   }
 
-  std::cout << "orderSQLFrom: " << orderSQLFrom << std::endl
-            << "orderSQLWhere: " << orderSQLWhere << std::endl
-            << "orderSQLOrder: " << orderSQLOrder << std::endl;
+  buffer += bufferBody;
+  create_trailer(buffer, output_type);
 
-//         preSQLFrom += std::string(preSQLFrom == "" ? "" : ", ") + (type == "parameter" ? "parameter" : "measurement") + " AS o";
-//         preSQLWhere += std::string(preSQLWhere == "" ? "" : " AND ") + "x0.fID=o.fID AND o.name='" + SQLite::quote(bodyNode.nodeTest("xaxis").front().getAttribute("name")) + "'";
-//         preSQLOrder = "o." + (type == "parameter" ? "value" : (type == "index" ? "indexvalue" : type));
-
-//         std::cout << "preSQLFrom: " << preSQLFrom << std::endl
-//                   << "preSQLWhere: " << preSQLWhere << std::endl
-//                   << "preSQLOrder " << preSQLOrder << std::endl;
-
-//         // find file ID's
-//         if (forData.size() > 0) { //while there is at lease one for loop
-//                 unsigned int table = 0;
-//                 while(forCount[0] < forData[0].size()) {
-
-//                         std::string where = preSQLWhere;
-//                         std::string from = preSQLFrom;
-//                         for (unsigned int pos = 0; pos < forData.size(); pos++) {
-//                                 where += std::string(preSQLWhere == "" ? "" : " AND ") + "x0.fID=" + forNames[forVector[pos]] + ".fID AND "
-//                                         + forNames[forVector[pos]] + ".name='" + SQLite::quote(forVector[pos]) + "' AND "
-//                                         + forNames[forVector[pos]] + ".value='" + forData[pos][forCount[pos]] + "'";
-//                                 forMeta[pos].push_back(forVector[pos] + "=" + forData[pos][forCount[pos]]);
-//                         }
-//                         forCount[forCount.size() - 1]++; //increment the last element in the list by one
-//                         for (unsigned int pos = forCount.size() - 1; pos > 0 && forCount[pos] == forData[pos].size(); pos--) {
-//                                 forCount[pos] = 0;
-//                                 forCount[pos - 1]++;
-//                         }
-//                         std::string req = std::string("SELECT DISTINCT x0.fID AS id FROM ") + from + " "
-//                           + "WHERE " + where + " ORDER BY " + preSQLOrder;
-//                         result_type rs = mDB(req, true);
-// #if 0
-//                         if (mVerbose) std::clog << "Executed Query: " << req << std::endl
-//                                                 << rs.size() << " files selected" << std::endl;
-// #endif
-//                         fIDs.push_back(std::list<std::string>());
-//                         for (result_type::iterator it = rs.begin(); it != rs.end(); it++)
-//                                 fIDs[table].push_back((*it)["id"]);
-//                         table++;
-//                         plot_num = table;
-//                 }
-//         } else {
-//                 fIDs.push_back(std::list<std::string>());
-//                 std::string req = std::string("SELECT x0.fID AS id FROM ") + preSQLFrom + " WHERE "
-//                   + preSQLWhere + " ORDER BY " + preSQLOrder;
-//                 result_type rs = mDB(req, true);
-// #if 0
-//                 if (mVerbose) std::clog << "Executed Query: " << req << std::endl
-//                                         << rs.size() << " entries selected" << std::endl;
-// #endif
-//                 for (result_type::iterator it = rs.begin(); it != rs.end(); it++)
-//                         fIDs[0].push_back((*it)["id"]);
-//                 plot_num = 1 ;
-//         }
-
-//         // Parameters cannot habe indeces or errors
-//         if ((bodyNode.nodeTest("xaxis").front().getAttribute("type") == "parameter" && (bodyNode.nodeTest("xaxis").front().getAttribute("error") != ""
-//                         || bodyNode.nodeTest("xaxis").front().getAttribute("error") != ""))
-//                         || (bodyNode.nodeTest("yaxis").front().getAttribute("type") == "parameter" && (bodyNode.nodeTest("yaxis").front().getAttribute("error") != ""
-//                         || bodyNode.nodeTest("yaxis").front().getAttribute("error") != "")))
-//                 throw std::runtime_error("Only measurements can habe errorbars and indeces");
-
-//         // initialize variables
-//         forCount.clear();
-//         for        (std::vector<std::vector<std::string> >::iterator it = forMeta.begin(); it != forMeta.end(); it++)
-//                 forCount.push_back(0);
-
-//         // Create Header
-//         if (inNode.nodeTest("plot").front().getAttribute("output") == "text")
-//                 buffer += std::string("# ") + inNode.nodeTest("plot").front().getAttribute("name") + "\n";
-//         else if (inNode.nodeTest("plot").front().getAttribute("output") == "html")
-//                 buffer += std::string("<h1>") + inNode.nodeTest("plot").front().getAttribute("name") + "</h1>\n";
-//         else if (inNode.nodeTest("plot").front().getAttribute("output") == "xmgr") {
-//                 buffer += std::string("@g0 on\n@with g0\n@    legend on\n@    title \"" + inNode.nodeTest("plot").front().getAttribute("name") + "\""
-//                         + "\n@    xaxis  label \"") + bodyNode.nodeTest("xaxis").front().getAttribute("name") + "\""
-//                         + "\n@    yaxis  label \"" + bodyNode.nodeTest("yaxis").front().getAttribute("name") + "\"";
-//         }
-
-//         // Loop over For-Loops
-//         unsigned int table = 0;
-//         bool firstLoop = true;
-//         while( ((forCount[0] < forMeta[0].size()) || (forMeta.size() == 0 && firstLoop) ) && table < plot_num ) {
-
-//                 if (inNode.nodeTest("plot").front().getAttribute("output") == "text") {
-//                         buffer += std::string("\n#");
-//                         for (unsigned int pos = 0; pos < forMeta.size(); pos++)
-//                                 buffer += std::string(" ") + forMeta[pos][forCount[pos]];
-//                         buffer += std::string("\n# ") + bodyNode.nodeTest("xaxis").front().getAttribute("name") + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != ""
-//                                         ? "\terror(" + bodyNode.nodeTest("xaxis").front().getAttribute("name") + ")\t" : "\t")
-//                                 + bodyNode.nodeTest("yaxis").front().getAttribute("name") + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != ""
-//                                         ? "\terror(" + bodyNode.nodeTest("yaxis").front().getAttribute("name") + ")" : "") + std::string("\n");
-//                 } else if (inNode.nodeTest("plot").front().getAttribute("output") == "html") {
-//                         buffer += std::string("\n<h2>");
-//                         for (unsigned int pos = 0; pos < forMeta.size(); pos++)
-//                                 buffer += std::string(" ") + forMeta[pos][forCount[pos]];
-//                         buffer += std::string("</h2>\n<table><tr><td>") + bodyNode.nodeTest("xaxis").front().getAttribute("name")
-//                                 + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != ""
-//                                         ? "</td><td>error(" + bodyNode.nodeTest("xaxis").front().getAttribute("name") + ")</td><td>" : "</td><td>")
-//                                 + bodyNode.nodeTest("yaxis").front().getAttribute("name") + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != ""
-//                                         ? "</td><td>error(" + bodyNode.nodeTest("yaxis").front().getAttribute("name") + ")</td></tr>" : "</td></tr>");
-//                 } else if (inNode.nodeTest("plot").front().getAttribute("output") == "xmgr") {
-//                         buffer += std::string("\n@    s") + boost::lexical_cast<std::string>(table) + " type xy"
-//                                 + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "dx" : "")
-//                                 + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? "dy" : "")
-//                                 + "\n@    s" + boost::lexical_cast<std::string>(table) + " legend \"";
-//                                                    for (unsigned int pos = 0; pos < forMeta.size(); pos++)
-//                         buffer += std::string(" ") + forMeta[pos][forCount[pos]];
-//                                               buffer += std::string("\"");
-//                                          bufferBody += std::string("\n@target G0.S") + boost::lexical_cast<std::string>(table) + "\n@type xy"
-//                                         + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "dx" : "")
-//                                 + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? "dy" : "") + "\n";
-//                 } //end if
-//                 /*forCount[forCount.size() - 1]++;
-//                 for (unsigned int pos = forCount.size() - 1; pos > 0 && forCount[pos] >= forMeta[pos].size() ; pos--) {
-//                         forCount[pos] = 0;
-//                         forCount[pos - 1]++;
-//                 }*/
-
-//                 for ( unsigned int pos = 0 ; pos < forCount.size() ; pos++ ){
-//                         forCount[pos]++;
-//                 }
-
-//                                          //forCount[forCount.size() - 1]++;
-
-//                 for (std::list<std::string>::iterator it = fIDs[table].begin(); it != fIDs[table].end(); it++) {
-//                         std::string req = std::string("SELECT u.") + (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "parameter"
-//                                                 ? "value" : (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "index"
-//                                                 ? "indexvalue" : bodyNode.nodeTest("xaxis").front().getAttribute("type"))) + " AS x, "
-//                                         + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "u.error AS ex, " : "")
-//                                         + "v." + (bodyNode.nodeTest("yaxis").front().getAttribute("type") == "parameter"
-//                                                 ? "value" : (bodyNode.nodeTest("yaxis").front().getAttribute("type") == "index"
-//                                                 ? "indexvalue" : bodyNode.nodeTest("yaxis").front().getAttribute("type"))) + " AS y "
-//                                         + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? ", v.error AS ey " : "")
-//                                 + "FROM "
-//                                         + (bodyNode.nodeTest("xaxis").front().getAttribute("type") == "parameter" ? "parameter" : "measurement") + " AS u, "
-//                                         + (bodyNode.nodeTest("yaxis").front().getAttribute("type") == "parameter" ? "parameter" : "measurement") + " AS v "
-//                                 + "WHERE u.fID='" + (*it) + "' AND v.FID='" + (*it) + "'"
-//                                         + " AND u.name='" + SQLite::quote(bodyNode.nodeTest("xaxis").front().getAttribute("name")) + "'"
-//                                         + " AND v.name='" + SQLite::quote(bodyNode.nodeTest("yaxis").front().getAttribute("name")) + "'"
-//                                         + (bodyNode.nodeTest("xaxis").front().getAttribute("index") != "" ? " AND u.indexvalue='"
-//                                                 + bodyNode.nodeTest("xaxis").front().getAttribute("index") + "'" : "")
-//                                         + (bodyNode.nodeTest("yaxis").front().getAttribute("index") != "" ? " AND v.indexvalue='"
-//                                            + bodyNode.nodeTest("yaxis").front().getAttribute("index") + "'" : "");
-//                         result_type rs = mDB(req);
-// #if 0
-//                         if (mVerbose) std::clog << "Executed Query: " << req << std::endl
-//                                                 << rs.size() << " entries selected\n";
-// #endif
-//                         if (rs.size() > 0) {
-//                                 if (rs.size() != 1)
-//                                         throw std::runtime_error("The Result ob the Query is not unique!");
-//                                 if (inNode.nodeTest("plot").front().getAttribute("output") == "text")
-//                                         buffer += std::string(rs.front()["x"]) + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "\t" + rs.front()["ex"] + "\t" : "\t")
-//                                                 + rs.front()["y"] + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? "\t" + rs.front()["ey"] : "") + "\n";
-//                                 else if (inNode.nodeTest("plot").front().getAttribute("output") == "html")
-//                                         buffer += std::string("<tr><td allign=\"right\">") + rs.front()["x"] + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? "</td><td>" + rs.front()["ex"] + "</td><td allign=\"right\">" : "</td><td allign=\"right\">")
-//                                                 + rs.front()["y"] + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? "</td><td allign=\"right\">" + rs.front()["ey"] : "") + "</td></tr>\n";
-//                                 else if (inNode.nodeTest("plot").front().getAttribute("output") == "xmgr") {
-//                                         bufferBody += std::string(rs.front()["x"])
-//                                                 + (bodyNode.nodeTest("xaxis").front().getAttribute("error") != "" ? " " + rs.front()["ex"] + " " : " ")
-//                                                 + rs.front()["y"]
-//                                                 + (bodyNode.nodeTest("yaxis").front().getAttribute("error") != "" ? " " + rs.front()["ey"] : "") + " \n";
-//                                 }
-//                         }
-//                 }
-//                 if (inNode.nodeTest("plot").front().getAttribute("output") == "html")
-//                         buffer += "</table>\n";
-//                 else if (inNode.nodeTest("plot").front().getAttribute("output") == "xmgr")
-//                         bufferBody += "&";
-//                 table++;
-//                 firstLoop = false;
-//         }
-//         if (inNode.nodeTest("plot").front().getAttribute("output") == "xmgr")
-//                 buffer += bufferBody;
-
-//         // Datei schreiben
-//         writeFile(mOutPath / (inInFile + "." + inNode.nodeTest("plot").front().getAttribute("output")), buffer);
+  // Datei schreiben
+  writeFile(mOutPath / (inInFile + "." + output_type), buffer);
 }
