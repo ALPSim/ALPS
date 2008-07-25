@@ -93,39 +93,44 @@
 </SITEBASIS>
 
 <SITEBASIS name="alternative fermion">
-  <QUANTUMNUMBER name="N" min="0" max="2" type="fermionic"/>
-  <QUANTUMNUMBER name="S" min="N*(2-N)/2" max="N*(2-N)/2"/>
-  <QUANTUMNUMBER name="Sz" min="-S" max="S"/>
-  <OPERATOR name="Splus" matrixelement="1">
+  <QUANTUMNUMBER name="Nup" min="0" max="1" type="fermionic"/>
+  <QUANTUMNUMBER name="Ndown" min="0" max="1" type="fermionic"/>
+  <QUANTUMNUMBER name="N" min="Nup+Ndown" max="Nup+Ndown"/>
+  <QUANTUMNUMBER name="Sz" min="(Nup-Ndown)/2" max = "(Nup-Ndown)/2"/>
+  <OPERATOR name="Splus" matrixelement="1/2">
+    <CHANGE quantumnumber="Nup" change="1"/>
+    <CHANGE quantumnumber="Ndown" change="-1"/>
     <CHANGE quantumnumber="Sz" change="1"/>
   </OPERATOR>
-  <OPERATOR name="Sminus" matrixelement="1">
+  <OPERATOR name="Sminus" matrixelement="1/2">
+    <CHANGE quantumnumber="Nup" change="-1"/>
+    <CHANGE quantumnumber="Ndown" change="+1"/>
     <CHANGE quantumnumber="Sz" change="-1"/>
   </OPERATOR>
-  <OPERATOR name="Sz" matrixelement="Sz"/>
+  <OPERATOR name="Sz" matrixelement="(Nup-Ndown)/2"/>
   <OPERATOR name="c_down" matrixelement="1">
+    <CHANGE quantumnumber="Ndown" change="-1"/>
     <CHANGE quantumnumber="N" change="-1"/>
-    <CHANGE quantumnumber="Sz" change="+1/2"/>
-    <CHANGE quantumnumber="S" change="-1/2"/>
+    <CHANGE quantumnumber="Sz" change="1/2"/>
   </OPERATOR>
   <OPERATOR name="cdag_down" matrixelement="1">
+    <CHANGE quantumnumber="Ndown" change="1"/>
     <CHANGE quantumnumber="N" change="1"/>
     <CHANGE quantumnumber="Sz" change="-1/2"/>
-    <CHANGE quantumnumber="S" change="1/2"/>
   </OPERATOR>
   <OPERATOR name="c_up" matrixelement="1">
+    <CHANGE quantumnumber="Nup" change="-1"/>
     <CHANGE quantumnumber="N" change="-1"/>
     <CHANGE quantumnumber="Sz" change="-1/2"/>
-    <CHANGE quantumnumber="S" change="-1/2"/>
   </OPERATOR>
   <OPERATOR name="cdag_up" matrixelement="1">
+    <CHANGE quantumnumber="Nup" change="1"/>
     <CHANGE quantumnumber="N" change="1"/>
-    <CHANGE quantumnumber="Sz" change="1/2"/>
-    <CHANGE quantumnumber="S" change="1/2"/>
+    <CHANGE quantumnumber="Sz" change="+1/2"/>
   </OPERATOR>
-  <OPERATOR name="n" matrixelement="N"/>
-  <OPERATOR name="n_up" matrixelement="N*(Sz+1/2)"/>
-  <OPERATOR name="n_down" matrixelement="N*(1/2-Sz)"/>
+  <OPERATOR name="n" matrixelement="Nup+Ndown"/>
+  <OPERATOR name="n_up" matrixelement="Nup"/>
+  <OPERATOR name="n_down" matrixelement="Ndown"/>
 </SITEBASIS>
 
 <SITEBASIS name="t-J">
@@ -221,6 +226,14 @@
   <SITEBASIS ref="fermion"/>
   <CONSTRAINT quantumnumber="Nup" value="Nup_total"/>
   <CONSTRAINT quantumnumber="Ndown" value="Ndown_total"/>
+</BASIS>
+
+<BASIS name="alternative fermion">
+  <SITEBASIS ref="alternative fermion"/>
+  <CONSTRAINT quantumnumber="Nup" value="Nup_total"/>
+  <CONSTRAINT quantumnumber="Ndown" value="Ndown_total"/>
+  <CONSTRAINT quantumnumber="N" value="N_total"/>
+  <CONSTRAINT quantumnumber="Sz" value="Sz_total"/>
 </BASIS>
 
 <BASIS name="t-J">
@@ -382,7 +395,7 @@
   <PARAMETER name="t1" default="t'"/>
   <PARAMETER name="V0" default="V"/>
   <PARAMETER name="V1" default="V'"/>
-  <BASIS ref="fermion"/>
+  <BASIS ref="alternative fermion"/>
   <SITETERM site="i">
     <PARAMETER name="mu#" default="mu"/>
     <PARAMETER name="U#" default="U"/>
@@ -394,6 +407,31 @@
     -t#*fermion_hop(i,j) + V#*n(i)*n(j)
   </BONDTERM>
 </HAMILTONIAN>
+
+<HAMILTONIAN name="alternative fermion Hubbard">
+  <PARAMETER name="mu" default="0"/>
+  <PARAMETER name="t" default="1"/>
+  <PARAMETER name="V" default="0"/>
+  <PARAMETER name="t'" default="0"/>
+  <PARAMETER name="V'" default="0"/>
+  <PARAMETER name="U" default="0"/>
+  <PARAMETER name="t0" default="t"/>
+  <PARAMETER name="t1" default="t'"/>
+  <PARAMETER name="V0" default="V"/>
+  <PARAMETER name="V1" default="V'"/>
+  <BASIS ref="alternative fermion"/>
+  <SITETERM site="i">
+    <PARAMETER name="mu#" default="mu"/>
+    <PARAMETER name="U#" default="U"/>
+    -mu#*n(i)+U#*n_up(i)*n_down(i)
+  </SITETERM>
+  <BONDTERM source="i" target="j">
+    <PARAMETER name="t#" default="0"/>
+    <PARAMETER name="V#" default="0"/>
+    -t#*fermion_hop(i,j) + V#*n(i)*n(j)
+  </BONDTERM>
+</HAMILTONIAN>
+
 
 <HAMILTONIAN name="Ian's fermion Hubbard">
   <PARAMETER name="mu" default="0"/>
