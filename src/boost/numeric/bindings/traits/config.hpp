@@ -31,6 +31,10 @@
 
 #elif defined(__sgi)
 
+// 2008-07-29 Synge Todo <wistaria@comp-phys.org>
+// Added support for Fujitsu C++ Compiler
+#elif defined(__FCC_VERSION)
+
 #else
 #error bindings do not recognise compiler
 #endif
