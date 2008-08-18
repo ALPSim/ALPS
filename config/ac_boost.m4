@@ -131,9 +131,9 @@ AC_DEFUN([AC_BOOST],
   boost_dir_s=
 
   for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
-    for b in boost boost_1_35_0 boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
+    for b in boost boost_1_36_0 boost_1_35_0 boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
       if test -f "$d/$b/boost/config.hpp"; then
-        if test -f "$d/$b/libs/filesystem/src/exception.cpp"; then
+        if test -f "$d/$b/libs/filesystem/src/exception.cpp" || test -f "$d/$b/libs/filesystem/src/operations.cpp"; then
           boost_dir_s="$d/$b"
           boost_incdir_s="$boost_dir_s"
           boost_srcdir_s="$boost_dir_s/libs"
@@ -190,9 +190,15 @@ dnl Boost version
 
   AC_MSG_CHECKING([for Boost version])
   AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103600
+#if BOOST_VERSION < 103700
 #error
 #endif],,ac_cv_boost_version=svn)
+  if test -z "$ac_cv_boost_version"; then
+    AC_TRY_COMPILE([#include <boost/version.hpp>
+#if BOOST_VERSION < 103600
+#error
+#endif],,ac_cv_boost_version=1_36)
+  fi
   if test -z "$ac_cv_boost_version"; then
     AC_TRY_COMPILE([#include <boost/version.hpp>
 #if BOOST_VERSION < 103500
@@ -221,6 +227,9 @@ dnl Boost version
     xsvn )
       AC_MSG_RESULT([SVN])
       ;;
+    x1_36 )
+      AC_MSG_RESULT([1.36])
+      ;;
     x1_35 )
       AC_MSG_RESULT([1.35])
       ;;
@@ -239,6 +248,7 @@ dnl Boost version
       ;;
   esac
   AM_CONDITIONAL(BOOST_SVN, test "$ac_cv_boost_version" = svn)
+  AM_CONDITIONAL(BOOST_1_36, test "$ac_cv_boost_version" = 1_36)
   AM_CONDITIONAL(BOOST_1_35, test "$ac_cv_boost_version" = 1_35)
   AM_CONDITIONAL(BOOST_1_34, test "$ac_cv_boost_version" = 1_34)
   AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
@@ -408,7 +418,7 @@ AC_DEFUN([AC_BOOST_LIBS],
     AC_MSG_CHECKING([whether to build Boost.MPI])
     test -z "$ac_cv_boost_mpi" && ac_cv_boost_mpi=no
     test "$ac_cv_have_mpi" = yes || ac_cv_boost_mpi=no
-    if test "$ac_cv_boost_version" = svn || test "$ac_cv_boost_version" = 1_35; then
+    if test "$ac_cv_boost_version" = svn || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_35; then
       :;
     else
       ac_cv_boost_mpi=no
