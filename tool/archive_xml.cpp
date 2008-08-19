@@ -259,7 +259,7 @@ struct PlotDTD : public sp::grammar<PlotDTD>
         = sp::as_lower_d[sp::str_p("output")]
           >> '='
           >> (sp::ch_p('"') | '\'')
-          >> sp::as_lower_d[(sp::str_p("text") | "html" | "xmgr" | "xml")]
+          >> sp::as_lower_d[(sp::str_p("text") | "html" | "gnuplot" | "xmgr" | "xml")]
           >> (sp::ch_p('"') | '\'');
       AtType
         = sp::as_lower_d[sp::str_p("type")]

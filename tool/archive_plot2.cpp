@@ -107,6 +107,11 @@ void create_header(std::string& buffer, std::string const& output_type,
     buffer += "# " + plot_name + "\n";
   else if (output_type == "html")
     buffer += "<h1>" + plot_name + "</h1>\n";
+  else if (output_type == "gnuplot")
+    buffer += "set title \"" + plot_name + "\"\n"
+      + "set xlabel \"" + xlabel + "\"\n"
+      + "set ylabel \"" + ylabel + "\"\n"
+      + "plot ";
   else if (output_type == "xmgr") {
     buffer += "@g0 on\n@with g0\n@    legend on\n@    title \"" + plot_name + "\""
       "\n@    xaxis  label \"" + xlabel + "\""
@@ -136,9 +141,10 @@ void write_result(std::string& buffer, std::string& bufferBody,
                   std::vector<std::vector<std::string> > const& foreachData,
                   std::vector<unsigned int> const& foreachOffset) {
   std::string label;
-  for (int v = 0; v < foreachData.size(); ++v, table %= foreachOffset[v-1]) {
+  int p = table;
+  for (int v = 0; v < foreachData.size(); ++v, p %= foreachOffset[v-1]) {
     if (label.size()) label += " ";
-    label += foreachName[v] + "=" + foreachData[v][table / foreachOffset[v]];
+    label += foreachName[v] + "=" + foreachData[v][p / foreachOffset[v]];
   }
   if (output_type == "text") {
     buffer += "\n# " + label;
@@ -165,6 +171,24 @@ void write_result(std::string& buffer, std::string& bufferBody,
         + "</tr>\n";
     }
     buffer += "</table>\n";
+  } else if (output_type == "gnuplot") {
+    if (table != 0) buffer += ", ";
+    if (xerror)
+      if (yerror)
+        buffer += "'-'  using 1:2:3:4 title \"" + label + "\" with xyerrorlines";
+      else
+        buffer += "'-'  using 1:2:3 title \"" + label + "\" with xerrorlines";
+    else
+      if (yerror)
+        buffer += "'-'  using 1:2:3 title \"" + label + "\" with yerrorlines";
+      else
+        buffer += "'-'  using 1:2 title \"" + label + "\" with lines";
+    if (table == 0) bufferBody += "\n";
+    for (std::list<std::map<std::string, std::string> >::iterator itr = rs.begin();
+         itr != rs.end(); ++itr)
+      bufferBody += (*itr)["x"] + " " + (xerror ? (*itr)["ex"] + " " : "")
+        + (*itr)["y"] + " " + (yerror ? (*itr)["ey"] + " " : "") + "\n";
+    bufferBody += "e\n";
   } else if (output_type == "xmgr") {
     buffer += "\n@    s" + boost::lexical_cast<std::string>(table)
       + " type xy" + (xerror ? "dx" : "") + (yerror ? "dy" : "")
@@ -174,7 +198,7 @@ void write_result(std::string& buffer, std::string& bufferBody,
     for (std::list<std::map<std::string, std::string> >::iterator itr = rs.begin();
          itr != rs.end(); ++itr) {
       bufferBody += (*itr)["x"] + " " + (xerror ? (*itr)["ex"] + " " : "")
-        + (*itr)["y"] + " " + (xerror ? (*itr)["ey"] + " " : "") + "\n";
+        + (*itr)["y"] + " " + (yerror ? (*itr)["ey"] + " " : "") + "\n";
       bufferBody += "&";
     }
   } else if (output_type == "xml") {
