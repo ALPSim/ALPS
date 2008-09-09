@@ -74,13 +74,13 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
     if (diagonal) {
       for (unsigned int k=0; k<g_bare.nsite(); ++k) 
 	for(unsigned int f=0;f<g_bare.nflavor();++f)
-	  os<<(1./g_bare(i,k,k,f).imag() - 1./g_dressed(i,k,k,f).imag())<<"\t";
+	  os<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).real()<<"\t"<<(1./g_bare(i,k,k,f) - 1./g_dressed(i,k,k,f)).imag()<<"\t";
     }
     else {
       for (unsigned int s1=0; s1<g_bare.nsite(); ++s1) 
 	for (unsigned int s2=0; s2<g_bare.nsite(); ++s2) 
 	  for(unsigned int f=0;f<g_bare.nflavor();++f)
-	    os<<(1./g_bare(i,s1,s2,f).imag() - 1./g_dressed(i,s1,s2,f).imag())<<"\t";
+	    os<<(1./g_bare(i,s1,s2,f) - 1./g_dressed(i,s1,s2,f)).real()<<"\t"<<(1./g_bare(i,s1,s2,f) - 1./g_dressed(i,s1,s2,f)).imag();
     }
     os<<std::endl;
   }

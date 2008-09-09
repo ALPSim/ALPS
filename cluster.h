@@ -389,7 +389,7 @@ green_function<T> DCATransformer::symmetrize_helper(const green_function<T>& G,
 struct SimpleDCATransformer::Forward {
   template<typename T>
   static void add(green_function<T>& G_new, const green_function<T>& G, 
-		  const time_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor,
+		  const itime_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor,
 		  double factor) {
     G_new(t, k, k, flavor) += factor * G(t, i, j, flavor);
   }
@@ -400,7 +400,7 @@ struct SimpleDCATransformer::Forward {
 struct SimpleDCATransformer::Backward {
   template<typename T>
   static void add(green_function<T>& G_new, const green_function<T>& G, 
-		  const time_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor,
+		  const itime_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor,
 		  double factor) {
     G_new(t, i, j, flavor) += factor * G(t, k, k, flavor);
   }
@@ -413,13 +413,13 @@ green_function<T> SimpleDCATransformer::transform_coordinates(const green_functi
 {
   unsigned int nflavor=G.nflavor();
   unsigned int nsite=G.nsite();
-  unsigned int nt=G.ntime();
+  itime_t nt=G.ntime();
   assert(nsite==n_cluster_sites());
   green_function<T> G_new(nt, nsite, nflavor);
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t i=0; i<nsite; ++i) {
       for (site_t j=0; j<nsite; ++j) {
-	for (time_t t=0; t<nt; ++t) {
+	for (itime_t t=0; t<nt; ++t) {
 	  G_new(t, i, j, flavor) = 0.;
 	}
       }
@@ -429,9 +429,9 @@ green_function<T> SimpleDCATransformer::transform_coordinates(const green_functi
     for (site_t i=0; i<nsite; ++i) {
       for (site_t j=0; j<nsite; ++j) {
 	double phase = 0.;
-	for (int d=0; d<dimension(); ++d) 
+	for (unsigned int d=0; d<dimension(); ++d) 
 	  phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
-	for (time_t t=0; t<nt; ++t) {
+	for (itime_t t=0; t<nt; ++t) {
 	  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
 	    D::add(G_new, G, t, i, j, k, flavor, cos(phase)/double(nsite));
 	  }
@@ -474,7 +474,7 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t i=0; i<nsite; ++i) {
       for (site_t j=0; j<nsite; ++j) {
-	for (time_t t=0; t<nt; ++t) {
+	for (itime_t t=0; t<nt; ++t) {
 	  G_new(t, i, j, flavor) = 0.;
 	}
       }
@@ -486,9 +486,9 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
 	for (site_t i=0; i<nsite; ++i) {
 	  for (site_t j=0; j<nsite; ++j) {
 	    double phase = 0.;
-	    for (int d=0; d<dimension(); ++d) 
+	    for (unsigned int d=0; d<dimension(); ++d) 
 	      phase += cluster_momentum(k+q1,d)*cluster_coordinate(i,d)-cluster_momentum(k+q2,d)*cluster_coordinate(j,d);
-	    for (time_t t=0; t<nt; ++t) {
+	    for (itime_t t=0; t<nt; ++t) {
 	      for (spin_t flavor=0; flavor<nflavor; ++flavor) {
 		D::add(G_new, G, t, i, j, k+q1, k+q2, flavor, cos(phase)/double(nsite));
 	      }
@@ -505,7 +505,7 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
 struct AntiFerroDCATransformer::Forward {
   template<typename T>
   static void add(green_function<T>& G_new, const green_function<T>& G, 
-		  const time_t t, const site_t i, const site_t j, const site_t k1, const site_t k2, const spin_t flavor,
+		  const itime_t t, const site_t i, const site_t j, const site_t k1, const site_t k2, const spin_t flavor,
 		  double factor) {
     G_new(t, k1, k2, flavor) += factor * G(t, i, j, flavor);
   }
@@ -516,7 +516,7 @@ struct AntiFerroDCATransformer::Forward {
 struct AntiFerroDCATransformer::Backward {
   template<typename T>
   static void add(green_function<T>& G_new, const green_function<T>& G, 
-		  const time_t t, const site_t i, const site_t j, const site_t k1, const site_t k2, const spin_t flavor,
+		  const itime_t t, const site_t i, const site_t j, const site_t k1, const site_t k2, const spin_t flavor,
 		  double factor) {
     G_new(t, i, j, flavor) += factor * G(t, k1, k2, flavor);
   }
@@ -552,7 +552,7 @@ template<typename T>
 green_function<T> AntiFerroDCATransformer::green_function_inverse(const green_function<T>& G) const
 {
   green_function<T> G_inv(G);
-  for (time_t t=0; t<G.ntime(); ++t) {
+  for (itime_t t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
       for (int k=0; k<G.nsite(); k+=2) {
 	T detG = G(t, k, k, f)*G(t, k+1, k+1, f) - G(t, k+1, k, f)*G(t, k, k+1, f);
@@ -572,7 +572,7 @@ green_function<T> AntiFerroDCATransformer::green_function_add(const green_functi
 							      const green_function<T>& G2) const
 {
   green_function<T> G(G1);
-  for (time_t t=0; t<G.ntime(); ++t) {
+  for (itime_t t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
       for (int k=0; k<G.nsite(); k+=2) {
 	G(t, k, k, f) += G2(t, k, k, f);
@@ -592,7 +592,7 @@ green_function<T> AntiFerroDCATransformer::green_function_subtract(const green_f
 								   const green_function<T>& G2) const
 {
   green_function<T> G(G1);
-  for (time_t t=0; t<G.ntime(); ++t) {
+  for (itime_t t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
       for (int k=0; k<G.nsite(); k+=2) {
 	G(t, k, k, f) -= G2(t, k, k, f);
@@ -612,7 +612,7 @@ green_function<T> AntiFerroDCATransformer::green_function_divide(const green_fun
 								 const T d) const
 {
   green_function<T> G(G1);
-  for (time_t t=0; t<G.ntime(); ++t) {
+  for (itime_t t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
       for (int k=0; k<G.nsite(); k+=2) {
 	G(t, k, k, f) /= d;

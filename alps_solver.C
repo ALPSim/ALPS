@@ -120,7 +120,7 @@ alps::ImpuritySolver::solve_omega(
                , const Parameters& p)
 {
   BOOST_ASSERT(is_master());
-  
+  std::cout<<"solve_omega: building p"<<std::endl;
   alps::Parameters parms(p);
   std::ostringstream G0_omega_text;
   alps::oxstream G0_omega_xml(G0_omega_text);

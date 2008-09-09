@@ -133,10 +133,19 @@ int main(int argc, char** argv)
 #endif
 	//perform self consistency loop in Matsubara frequency omega
 	FrequencySpaceHilbertTransformer *transform_ptr;
-	if(!parms.defined("DOSFILE")){
+	if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
 	  transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
 	  std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
-	}
+	}else if(parms.defined("TWODBS")){
+          if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
+            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();}
+            std::cerr<<"implement PM DOS integration!!"<<std::endl;
+            abort();
+          }else{
+            if((bool)(parms["PARAMAGNET"])==true){ std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); }
+	    transform_ptr=new TwoDAFMHilbertTransformer(parms);
+          }
+        }
 	else{
 	  std::cout<<"using DOS Hilbert transform"<<std::endl;
           if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
@@ -147,6 +156,7 @@ int main(int argc, char** argv)
 	    transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
           }
 	}
+        //std::cerr<<"getting initial G0"<<std::endl;
 	matsubara_green_function_t G0_omega = transform_ptr->initial_G0(parms);
 	matsubara_green_function_t G_omega = G0_omega;
 	boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	

@@ -131,7 +131,8 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
   for(unsigned int f=0;f<G_omega.nflavor();++f){
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
-        //std::cout<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
+        std::cout<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
+        std::cout<<"running backward fourier with beta: "<<beta_<<std::endl;
         //if (s1==s2) {
           for (unsigned int k=0; k<N_omega; k++) {
             std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
@@ -151,7 +152,12 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
       }
     }
   }
-                                     }
+/*  std::cout<<"no model, G, and f: "<<std::endl;
+  for(uint k=0; k<N_omega; k++){
+    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+    std::cout<<G_omega_no_model(k,0,0,0)<<" "<<G_omega(k,0,0,0)<<" "<<f_omega(iw, c1_[0][0][0],c2_[0][0][0], c3_[0][0][0])<<std::endl;
+  }*/
+}
 
 
 /*void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
@@ -295,9 +301,9 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
   double dt = beta_/N;
   
   
-  for(int f=0;f<gtau.nflavor();++f){
-    for(int p=0;p<gtau.nsite();++p){
-      for(int q=0;q<gtau.nsite();++q){
+  for(uint f=0;f<gtau.nflavor();++f){
+    for(uint p=0;p<gtau.nsite();++p){
+      for(uint q=0;q<gtau.nsite();++q){
         for(int tau=0;tau<Np1;++tau){
           v[tau]=gtau(tau,p,q,f);
         }
@@ -387,7 +393,8 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,boos
     //std::cout<<"using General Fourier transform"<<std::endl;
     int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
     int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], (double)(parms["MU"])+mu_shift, n_flavor, n_sites));
+    if(!parms.defined("EPSSQAV")){ throw(std::invalid_argument("second moment of band structure EPSSQAV needs to be defined! aborting."));}
+    fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], (double)(parms["MU"])+mu_shift, n_flavor, n_sites, parms["EPSSQAV"]));
   } else{
     int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
     int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
@@ -402,12 +409,13 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,bo
   if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
     int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
     int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    //std::cout<<"using General Fourier transform"<<std::endl;
-    fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"], n_flavor, n_sites));
+    std::cout<<"using General Fourier transform"<<std::endl;
+    if(!parms.defined("EPSSQAV")){ throw(std::invalid_argument("second moment of band structure EPSSQAV needs to be defined! aborting."));}
+    fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"], parms["U"], n_flavor, n_sites, densities, parms["EPSSQAV"]));
   } else{
     int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
     int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    //std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
+    std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
     for(int f=0;f<n_flavor;++f){
       for(int i=0;i<n_sites;++i){
         for(int j=0;j<n_sites;++j){

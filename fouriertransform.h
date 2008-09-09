@@ -94,7 +94,7 @@ inline double f_tau(double tau, double beta, double c1, double c2, double c3) {
 
 class FourierTransformer{
 public:
-  FourierTransformer(double beta, double mu, int n_flavor, int n_site){
+  FourierTransformer(double beta, double mu, int n_flavor, int n_site, double epssq){
     beta_=beta;
     mu_=mu;
     c2_.resize(n_flavor);
@@ -109,9 +109,34 @@ public:
         c3_[f][i].resize(n_site);
         c1_[f][i].resize(n_site);
         for(int j=0;j<n_site;++j){
-          c2_[f][i][j]=-mu;
-          c3_[f][i][j]=0;
           c1_[f][i][j]=i==j?1:0;
+          //we need to rederive c2 and c3 for the most general case!
+          c2_[f][i][j]=-mu;
+          c3_[f][i][j]=epssq+mu*mu;
+        }
+      }
+    }
+  }
+  FourierTransformer(double beta, double mu, double U, int n_flavor, int n_site, const std::vector<std::vector<std::vector<double> > > &densities, double epssq){
+    beta_=beta;
+    mu_=mu;
+    c2_.resize(n_flavor);
+    c3_.resize(n_flavor);
+    c1_.resize(n_flavor);
+    for(int f=0;f<n_flavor;++f){
+      c2_[f].resize(n_site);
+      c3_[f].resize(n_site);
+      c1_[f].resize(n_site);
+      for(int i=0;i<n_site;++i){
+        c2_[f][i].resize(n_site);
+        c3_[f][i].resize(n_site);
+        c1_[f][i].resize(n_site);
+        for(int j=0;j<n_site;++j){
+          c1_[f][i][j]=i==j?1:0;
+          //we need to rederive c2 and c3 for the most general case!
+          c2_[f][i][j]=-mu+U*densities[f==1?0:1][i][j]; //formula 13
+          double s = U*U*densities[f==1?0:1][i][j]*(1.-densities[f==1?0:1][i][j]);
+          c3_[f][i][j]=epssq+c2_[f][i][j]*c2_[f][i][j] +s;
         }
       }
     }
@@ -138,31 +163,10 @@ protected:
 
 class BetheFourierTransformer:public FourierTransformer{
 public:
-  BetheFourierTransformer(double beta, double mu, double t, int n_flavor, int n_site):FourierTransformer(beta, mu, n_flavor, n_site){
-    t_=t;
-    for(int f=0;f<n_flavor;++f){
-      for(int i=0;i<n_site;++i){
-        for(int j=0;j<n_site;++j){
-          c2_[f][i][j]=mu_;
-          c3_[f][i][j]=(mu_*mu_+t_*t_);
-        }
-      }
-    }
-    U_=0;
-  }
-  BetheFourierTransformer(double beta, double mu, double t, double U, std::vector<std::vector<std::vector<double> > > densities, int n_flavor, int n_site):FourierTransformer(beta, mu, n_flavor, n_site){
-    t_=t;
-    U_=U;
-    //the density enters for GF away from 1/2 filling. implement this...
-    //the density here corresponds to the unshifted density, i.e. for single site, half filling ad an U/2 to mu.
-    for(int f=0;f<n_flavor;++f){
-      for(int i=0;i<n_site;++i){
-        for(int j=0;j<n_site;++j){
-          c3_[f][i][j]=(mu_*mu_+t_*t_+U*mu*(densities[f][i][j]+densities[(f+1)%2][i][j])+U*U*densities[(f+1)%2][i][j]*densities[(f+1)%2][i][j]);
-          c2_[f][i][j]=mu_-U*densities[(f+1)%2][i][j];
-        }
-      }
-    }
+  BetheFourierTransformer(double beta, double mu, double t, int n_flavor, int n_site)
+    :FourierTransformer(beta, mu, n_flavor, n_site, t*t){}
+  BetheFourierTransformer(double beta, double mu, double t, double U, const std::vector<std::vector<std::vector<double> > > &densities, int n_flavor, int n_site)
+    :FourierTransformer(beta, mu, U, n_flavor, n_site, densities, t*t){
     std::cerr<<"using Bethe Fourier Transformer! "<<std::endl;
     std::cerr<<"mu=: "<<mu_<<std::endl;
     std::cerr<<"beta=: "<<beta_<<std::endl;
@@ -177,7 +181,8 @@ private:
 
 class FFunctionFourierTransformer:public FourierTransformer{
 public:
-  FFunctionFourierTransformer(double beta, double mu, double epsilonsq_av, int n_flavor, int n_site):FourierTransformer(beta,mu, n_flavor, n_site){
+  FFunctionFourierTransformer(double beta, double mu, double epsilonsq_av, int n_flavor, int n_site)
+    :FourierTransformer(beta,mu, n_flavor, n_site, 0){
     std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"epsilonsq_av: "<<epsilonsq_av<<std::endl;
     epsilonsq_av_=epsilonsq_av; //this is the integral of the second moment of the dos: \int_-\infty^\infty e^2 rho(e) de. It is t^2 for semicircle...
     for(int f=0;f<n_flavor;++f){
@@ -217,7 +222,7 @@ private:
   double epsilonsq_av_;
 };
 
-class PlaquetteMomentumFourierTransformer:public FourierTransformer{
+/*class PlaquetteMomentumFourierTransformer:public FourierTransformer{
 public:
   PlaquetteMomentumFourierTransformer(double beta, //inverse temp
   double t, //hopping
@@ -259,6 +264,6 @@ public:
 private:
   double t_;
   double U_;
-};
+};*/
 
 #endif

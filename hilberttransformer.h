@@ -43,6 +43,7 @@
 #include "types.h"
 #include <functional>
 #include "fouriertransform.h"
+#include "2dsimpson.h"
 
 /// @brief performs a Hilbert transformation
 ///
@@ -242,8 +243,8 @@ public:
         matsubara_green_function_t G_omega(n_matsubara, n_orbital);
         for(int i=0;i<n_matsubara;++i){
           for(int f=0;f<n_orbital;++f){
-            G_omega(i,f)=1;
-            G0_omega(i,f)=1;
+            G_omega(i,f)=f+1;
+            G0_omega(i,f)=f+1;
           }
         }
         double h_init=parms.value_or_default("H_INIT",0.);
@@ -397,6 +398,14 @@ public:
       S+=dos[i];
     }
     std::cout<<"check: total sum is: "<<S<<std::endl;
+    //find second moment of band structure:
+    double epssqav=0;
+    for(uint i=1;i<epsilon.size()-2;i+=2){
+      epssqav+=4.*(epsilon[i]*epsilon[i]*dos[i])+2*(dos[i+1]*epsilon[i+1]*epsilon[i+1]);
+    } 
+    epssqav+=dos[0]*epsilon[0]*epsilon[0]+dos[epsilon.size()-1]*epsilon[epsilon.size()-1]*epsilon[epsilon.size()-1]+4.*dos[epsilon.size()-2]*epsilon[epsilon.size()-2]*epsilon[epsilon.size()-2];
+    epssqav/=(3.);
+    std::cout<<"second moment of band structure: "<<epssqav<<std::endl;
   }
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// using integration over D(epsilon).
@@ -425,7 +434,7 @@ public:
           //g+=1./(delta_epsilon)*(delta_dos*delta_epsilon+(A*delta_dos +dos[n+1]*epsilon[n]-dos[n]*epsilon[n+1])
           //                       *(log(A-epsilon[n]) - log(A-epsilon[n+1])));
           //g+=0.5*(dos[n+1]-dos[n])*(log(A-epsilon[n]) + log(A-epsilon[n+1]));
-          g+=dos[n]/(A-epsilon[n]);
+          g+=dos[n]/(A-epsilon[n]); //go back to higher order integrator!!
         }
         G_omega_new(w, f)=g;
       }
@@ -475,7 +484,7 @@ class AFM_FSDOSHilbertTransformer: public FSDOSHilbertTransformer{
       //Simpson: integrate dos(e)/(zeta_A zeta_B-e^2)
       if(dos.size()%2 !=0){std::cerr<<"for Simpson precision: use a DOS with even number of integration points. "<<std::endl; abort(); }
       std::complex<double> I=0;
-      for(int i=1;i<dos.size()-2;i+=2){
+      for(uint i=1;i<dos.size()-2;i+=2){
         I+=4.*integrand(i,dos,epsilon,zeta_A,zeta_B)+2.*integrand(i+1,dos,epsilon,zeta_A,zeta_B);
       }
       I+=integrand(0,dos,epsilon,zeta_A,zeta_B)+integrand(dos.size()-1,dos,epsilon,zeta_A,zeta_B)+4.*integrand(dos.size()-2,dos,epsilon,zeta_A,zeta_B);
@@ -491,15 +500,58 @@ class AFM_FSDOSHilbertTransformer: public FSDOSHilbertTransformer{
       //std::cout<<"G0: "<<G0_omega_new(w,0)<<" "<<G0_omega_new(w,1)<<std::endl;
     }
     //std::cout<<std::endl<<std::endl;
-    std::cout<<"sigma: "<<std::endl;
+    /*std::cout<<"sigma: "<<std::endl;
     for(int i=0;i<Sigma.nfreq();++i){
       std::cout<<(2.*i+1)*M_PI/beta<<" "<<Sigma(i,0).real()<<" "<<Sigma(i,0).imag()<<" "<<Sigma(i,1).real()<<" "<<Sigma(i,1).imag()<<std::endl;
     }
     std::cout<<"g0 omega new: "<<std::endl;
     for(int i=0;i<G0_omega_new.nfreq();++i){
       std::cout<<(2.*i+1)*M_PI/beta<<" "<<G0_omega_new(i,0).real()<<" "<<G0_omega_new(i,0).imag()<<" "<<G0_omega_new(i,1).real()<<" "<<G0_omega_new(i,1).imag()<<std::endl;
-    }
+    }*/
     return G0_omega_new;
   }
+};
+inline double disp_2d(double kx, double ky, double t, double tprime){ return -2.*t*(cos(kx)+cos(ky)) - 4*tprime*cos(kx)*cos(ky);}
+class TwoDAFMHilbertTransformer: public FrequencySpaceHilbertTransformer{
+  public:
+    TwoDAFMHilbertTransformer(const alps::Parameters& params){
+      t_=params["t"];
+      tprime_=params.value_or_default("tprime",0);
+      L_=params.value_or_default("L",200);
+    }
+    matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
+     matsubara_green_function_t &G0_omega, const double mu, const double h, const double beta){
+
+      //compute sigma 
+     matsubara_green_function_t sigma(G_omega);
+     matsubara_green_function_t G(G_omega);
+     for(uint i=0;i<G_omega.nfreq();++i){
+       sigma(i,0)=1./G0_omega(i,0)-1./G_omega(i,0);
+       sigma(i,1)=1./G0_omega(i,1)-1./G_omega(i,1);
+     }
+      //perform integration over bz
+     for(uint i=0;i<G_omega.nfreq();++i){
+       G(i,0)=0.;
+       G(i,1)=0.;
+       std::complex<double> iomegan(0,(2*i+1)*M_PI/beta);
+       std::complex<double> zeta_A=iomegan + mu -h -sigma(i,0);
+       std::complex<double> zeta_B=iomegan + mu +h -sigma(i,1);
+       afm_integrand integrand(t_,tprime_,zeta_A, zeta_B);
+       //std::cout<<i<<" "<<zeta_A<<" "<<zeta_B<<" "<<L_<<std::endl;
+       std::complex<double> I=twodsimpson(integrand, -M_PI, -M_PI, M_PI, M_PI, L_);
+       G(i,0)=1./(4*M_PI*M_PI)*zeta_B*I;
+       G(i,1)=1./(4*M_PI*M_PI)*zeta_A*I;
+     }
+      //compute the new G0 
+     for(uint i=0;i<G_omega.nfreq();++i){
+       G0_omega(i,0)=1./(sigma(i,0)+1./G(i,0));
+       G0_omega(i,1)=1./(sigma(i,1)+1./G(i,1));
+     }
+     return G0_omega;
+  }
+  private:
+    double t_;
+    double tprime_;
+    int L_;
 };
 #endif /*ALPS_DMFT_HILBERTTRANSFORMER_H*/

@@ -242,8 +242,8 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     G_omega_shifted=G_omega;
     if(parms.defined("FILLING")){ //adjust chemical potential
       double current_filling=0;
-      for(int i=0;i<n_site;++i){
-        for(int j=0;j<n_orbital;++j){
+      for(uint i=0;i<n_site;++i){
+        for(uint j=0;j<n_orbital;++j){
           current_filling-=G_tau(n_tau,i,i,j)/(n_site); //G is negative...
         }
       }
@@ -342,7 +342,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G0_old_tau = G0_tau;
     
     fourier.backward_ft(G0_tau, G0_omega);
-    std::cout<<"running solver."<<std::endl<<std::flush;
+    std::cout<<"running solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
     std::cout<<"applying point group symmetries"<<std::endl<<std::flush;    
     G_tau = clustertrans.symmetrize(G_tau, paramagnet);
@@ -352,8 +352,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G_omega_shifted=G_omega;
     if(parms.defined("FILLING")){ //adjust chemical potential
       double current_filling=0;
-      for(int i=0;i<n_site;++i){
-        for(int j=0;j<n_orbital;++j){
+      for(uint i=0;i<n_site;++i){
+        for(uint j=0;j<n_orbital;++j){
           current_filling-=G_tau(n_tau,i,i,j)/(n_site); //G is negative...
         }
       }

@@ -27,6 +27,7 @@
 
 //#define uint unsigned int 
 #include<sys/types.h>
+#include<complex>
 /// @file types.h
 /// @brief definition for basic types like vectors that are used throughout the solvers.
 #ifndef TYPES_H_
