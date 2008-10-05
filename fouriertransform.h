@@ -222,48 +222,4 @@ private:
   double epsilonsq_av_;
 };
 
-/*class PlaquetteMomentumFourierTransformer:public FourierTransformer{
-public:
-  PlaquetteMomentumFourierTransformer(double beta, //inverse temp
-  double t, //hopping
-  double tprime,  //frustrated hopping along diagonal
-  double mu, //chemical potential
-  double U, //onsite interaction
-  std::vector<std::vector<std::vector<double> > > densities,
-  int n_flavor,
-  int n_site
-  ):FourierTransformer(beta, mu, n_flavor, n_site){
-    if(n_site!=4){ std::cerr<<"this Fourier transformer can only be used for the plaquette!"; abort();}
-    if(n_flavor!=2){ std::cerr<<"this Fourier transformer can only be used for the plaquette!"; abort();}
-    double es_av=-8*(M_PI*t+2*tprime)/(M_PI*M_PI);
-    double ep_av= 16*tprime/(M_PI*M_PI);
-    double ed_av= 8*(M_PI*t-2*tprime)/(M_PI*M_PI);
-
-    double essq_av= 4*((8+M_PI*M_PI)*t*t+8*M_PI*t*tprime+M_PI*M_PI*tprime*tprime)/(M_PI*M_PI);
-    double epsq_av= 4*((1-8/M_PI/M_PI)*t*t+tprime);
-    double edsq_av= 4*((8+M_PI*M_PI)*t*t-8*M_PI*t*tprime+M_PI*M_PI*tprime*tprime)/(M_PI*M_PI);
-    
-    //take into account shift for symmetrical half filling: here that's exactly U/2
-    mu_=mu_+U/2; mu=mu+U/2;
-    
-    for(int f=0;f<n_flavor;++f){
-      c2_[f][0][0]=mu_+es_av;
-      c2_[f][1][1]=mu_+ed_av;
-      c2_[f][2][2]=mu_+ep_av;
-      c2_[f][3][3]=mu_+ep_av;
-      
-      c3_[f][0][0]=essq_av+2*mu_*es_av+mu_*mu_ - U*(2*densities[(f+1)%2][0][0])*(es_av-mu_)+U*U*densities[(f+1)%2][0][0]*densities[(f+1)%2][0][0];
-      c3_[f][1][1]=edsq_av+2*mu_*ed_av+mu_*mu_ - U*(2*densities[(f+1)%2][1][1])*(es_av-mu_)+U*U*densities[(f+1)%2][1][1]*densities[(f+1)%2][1][1];
-      c3_[f][2][2]=epsq_av+2*mu_*ep_av+mu_*mu_ - U*(2*densities[(f+1)%2][2][2])*(es_av-mu_)+U*U*densities[(f+1)%2][2][2]*densities[(f+1)%2][2][2];
-      c3_[f][3][3]=epsq_av+2*mu_*ep_av+mu_*mu_ - U*(2*densities[(f+1)%2][3][3])*(es_av-mu_)+U*U*densities[(f+1)%2][3][3]*densities[(f+1)%2][3][3];
-    }
-    U_=U;
-    t_=t;
-  }
-  virtual ~PlaquetteMomentumFourierTransformer(){}
-private:
-  double t_;
-  double U_;
-};*/
-
 #endif
