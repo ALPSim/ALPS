@@ -257,7 +257,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
       // generate SQL string for constraint
       append_where(constraintSQLWhere, alias +".name='" + SQLite::quote(name) + "' AND " + alias
                    + ".value" + operatorToString(strToLower(constraint.getAttribute("operator")))
-                   + value);
+                   + "'" + value + "'");
     } else {
       if (measurement_aliases.find(name) == measurement_aliases.end()) {
         // assign a new alias name for measurement
