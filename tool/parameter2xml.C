@@ -40,13 +40,15 @@
 #include <iostream>
 #include <stdexcept>
 
-void convert_params(const std::string& inname, const std::string& basename)
+void convert_params(const std::string& inname, const std::string& basename,
+                    const alps::Parameters& params_overwrite)
 {
   alps::ParameterList list;
   {
     std::ifstream in(inname.c_str());
     in >> list;
   }
+  BOOST_FOREACH(alps::Parameters& p, list) { p << params_overwrite; }
 
   if (list.size() == 0) return;
 
@@ -126,17 +128,38 @@ int main(int argc, char** argv)
 try {
 #endif
 
-  if (argc<2 || argc>3) {
-    std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename]\n";
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename] [[NAME=value]...]\n";
     std::exit(-1);
   }
 
-  std::string inname = argv[1];
-  std::string outbase = argv[argc-1];
+  bool find_in = false;
+  bool find_out = false;
+  std::string inname;
+  std::string outbase;
+  alps::Parameters params_overwrite;
+
+  for (int p = 1; p < argc; ++p) {
+    std::string arg = argv[p];
+    if (arg.find('=') < arg.size()) {
+      std::istringstream iss(arg);
+      params_overwrite.parse(iss);
+    } else if (!find_in) {
+      inname = arg;
+      outbase = arg;
+      find_in = true;
+    } else if (!find_out) {
+      outbase = arg;
+    } else {
+      std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename] [[NAME=value]...]\n";
+      std::exit(-1);
+    }
+  }
+
   if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
   if (outbase.size() >= 2 && outbase.substr(0, 2) == "./") outbase.erase(0, 2);
 
-  convert_params(inname, outbase);
+  convert_params(inname, outbase, params_overwrite);
 
 #ifndef BOOST_NO_EXCEPTIONS
 }
