@@ -28,6 +28,9 @@ AC_DEFUN([AC_ALPS],
   AC_MSG_CHECKING([for MPI library])
   AC_MSG_RESULT([$ac_cv_alps_have_mpi])
   AM_CONDITIONAL(HAVE_MPI, test "$ac_cv_alps_have_mpi" = yes)
+  AC_MSG_CHECKING([for Boost.MPI library])
+  AC_MSG_RESULT([$ac_cv_boost_mpi])
+  AM_CONDITIONAL(HAVE_BOOST_MPI, test "$ac_cv_boost_mpi" = yes)
 
   dnl check for LAPACK
   AC_MSG_CHECKING([for LAPACK library])
@@ -62,6 +65,9 @@ AC_DEFUN([AC_ALPS_LIGHT],
   AC_MSG_CHECKING([for MPI library])
   AC_MSG_RESULT([$ac_cv_alps_have_mpi])
   AM_CONDITIONAL(HAVE_MPI, test "$ac_cv_alps_have_mpi" = yes)
+  AC_MSG_CHECKING([for Boost.MPI library])
+  AC_MSG_RESULT([$ac_cv_boost_mpi])
+  AM_CONDITIONAL(HAVE_BOOST_MPI, test "$ac_cv_boost_mpi" = yes)
 
   dnl check for LAPACK
   AC_MSG_CHECKING([for LAPACK library])

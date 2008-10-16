@@ -389,12 +389,6 @@ dnl Boost version
     fi
   fi
 
-  AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
-  AM_CONDITIONAL(BUILD_BOOST_MPI, test "$ac_cv_boost_mpi" = yes)
-  AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_boost_signals" = yes)
-  AM_CONDITIONAL(BUILD_BOOST_THREAD, test "$ac_cv_boost_thread" = yes)
-  AM_CONDITIONAL(BUILD_BOOST_WCHAR, test "$ac_cv_boost_wchar" = yes)
-
   ac_cv_boost_cppflags="$BOOST_CPPFLAGS"
   ac_cv_boost_ldflags="$BOOST_LDFLAGS"
   ac_cv_boost_libs="$BOOST_LIBS"
@@ -413,6 +407,8 @@ AC_DEFUN([AC_BOOST_LIBS],
   # boost object libraries
   # 
 
+  AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
+
   if test "$ac_cv_use_precompiled_boost" = yes; then :; else
     # check whether Boost.MPI is compiled
     AC_MSG_CHECKING([whether to build Boost.MPI])
@@ -424,6 +420,7 @@ AC_DEFUN([AC_BOOST_LIBS],
       ac_cv_boost_mpi=no
     fi
     AC_MSG_RESULT([$ac_cv_boost_mpi])
+    AM_CONDITIONAL(BUILD_BOOST_MPI, test "$ac_cv_boost_mpi" = yes)
 
     # check whether Boost.Signals is compiled
     AC_MSG_CHECKING([whether to build Boost.Signals])
@@ -433,6 +430,7 @@ AC_DEFUN([AC_BOOST_LIBS],
     else
       AC_MSG_RESULT([no])
     fi
+    AM_CONDITIONAL(BUILD_BOOST_SIGNALS, test "$ac_cv_boost_signals" = yes)
 
     # check whether Boost.Thread is compiled
     AC_MSG_CHECKING([whether to build Boost.Thread])
@@ -446,12 +444,23 @@ AC_DEFUN([AC_BOOST_LIBS],
     else
       AC_MSG_RESULT([no])
     fi
+    AM_CONDITIONAL(BUILD_BOOST_THREAD, test "$ac_cv_boost_thread" = yes)
 
     # check whether enable wchar support in Boost.Regex is compiled
     AC_MSG_CHECKING([whether to enable wchar support in Boost.Regex and Boost.Serialization])
     test -z "$ac_cv_boost_wchar" && ac_cv_boost_wchar=no
     AC_MSG_RESULT([$ac_cv_boost_wchar])
+    AM_CONDITIONAL(BUILD_BOOST_WCHAR, test "$ac_cv_boost_wchar" = yes)
   fi
+
+  AM_CONDITIONAL(HAVE_BOOST_MPI, test "$ac_cv_boost_mpi" = yes)
+  test "$ac_cv_boost_mpi" = yes && AC_DEFINE(ALPS_HAVE_BOOST_MPI)
+  AM_CONDITIONAL(HAVE_BOOST_SIGNALS, test "$ac_cv_boost_signals" = yes)
+  test "$ac_cv_boost_signals" = yes && AC_DEFINE(ALPS_HAVE_BOOST_SIGNALS)
+  AM_CONDITIONAL(HAVE_BOOST_THREAD, test "$ac_cv_boost_thread" = yes)
+  test "$ac_cv_boost_thread" = yes && AC_DEFINE(ALPS_HAVE_BOOST_THREAD)
+  AM_CONDITIONAL(HAVE_BOOST_WCHAR, test "$ac_cv_boost_wchar" = yes)
+  test "$ac_cv_boost_wchar" = yes && AC_DEFINE(ALPS_HAVE_BOOST_WCHAR)
   ]
 )
 
