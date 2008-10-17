@@ -34,49 +34,92 @@ if test -n "$dir"; then
   srcdir=`echo $srcdir | sed 's/^\./..\/./g'` # add '../' in case of relative path
 fi
 
+MPI=
+
 INPUT=
 if test -f "${prog}.input"; then
   INPUT="${prog}.input"
-elif test -f "${prog}.ip"; then
-  INPUT="${prog}.ip"
 elif test -f "${srcdir}/${prog}.input"; then
   INPUT="${srcdir}/${prog}.input"
+elif test -f "${prog}.ip"; then
+  INPUT="${prog}.ip"
 elif test -f "${srcdir}/${prog}.ip"; then
   INPUT="${srcdir}/${prog}.ip"
+elif test -f "${prog}.ip-2"; then
+  INPUT="${prog}.ip-2"
+  MPI=2
+elif test -f "${srcdir}/${prog}.ip-2"; then
+  INPUT="${srcdir}/${prog}.ip-2"
+  MPI=2
+elif test -f "${prog}.ip-4"; then
+  INPUT="${prog}.ip-4"
+  MPI=4
+elif test -f "${srcdir}/${prog}.ip-4"; then
+  INPUT="${srcdir}/${prog}.ip-4"
+  MPI=4
+elif test -f "${prog}.ip-8"; then
+  INPUT="${prog}.ip-8"
+  MPI=8
+elif test -f "${srcdir}/${prog}.ip-8"; then
+  INPUT="${srcdir}/${prog}.ip-8"
+  MPI=8
 fi
 
 OUTPUT=
 if test -f "${prog}.output"; then
   OUTPUT="${prog}.output"
-elif test -f "${prog}.op"; then
-  OUTPUT="${prog}.op"
 elif test -f "${srcdir}/${prog}.output"; then
   OUTPUT="${srcdir}/${prog}.output"
+elif test -f "${prog}.op"; then
+  OUTPUT="${prog}.op"
 elif test -f "${srcdir}/${prog}.op"; then
   OUTPUT="${srcdir}/${prog}.op"
+elif test -f "${prog}.op-2"; then
+  OUTPUT="${prog}.op-2"
+  MPI=2
+elif test -f "${srcdir}/${prog}.op-2"; then
+  OUTPUT="${srcdir}/${prog}.op-2"
+  MPI=2
+elif test -f "${prog}.op-4"; then
+  OUTPUT="${prog}.op-4"
+  MPI=4
+elif test -f "${srcdir}/${prog}.op-4"; then
+  OUTPUT="${srcdir}/${prog}.op-4"
+  MPI=4
+elif test -f "${prog}.op-8"; then
+  OUTPUT="${prog}.op-8"
+  MPI=8
+elif test -f "${srcdir}/${prog}.op-8"; then
+  OUTPUT="${srcdir}/${prog}.op-8"
+  MPI=8
+fi
+
+MPIRUN=
+if test -n "$MPI"; then
+  MPIRUN="mpirun -np $MPI"
 fi
 
 exec 3>&1
 if test -n "$INPUT"; then
   if test -n "$OUTPUT"; then
-    echo "./${prog} < ${INPUT} | diff ${OUTPUT} -"
-    res=`((./${prog} < ${INPUT} 3>&- 4>&-; echo $? 1>&4 3>&- 4>&-) | diff ${OUTPUT} - 1>&3 3>&- 4>&-) 4>&1`
+    echo "${MPIRUN} ./${prog} < ${INPUT} | diff ${OUTPUT} -"
+    res=`((${MPIRUN} ./${prog} < ${INPUT} 3>&- 4>&-; echo $? 1>&4 3>&- 4>&-) | diff ${OUTPUT} - 1>&3 3>&- 4>&-) 4>&1`
     res2=$?
     test $res = 0 && res=$res2
   else
-    echo "./${prog} < ${INPUT}"
-    ./${prog} < ${INPUT}
+    echo "${MPIRUN} ./${prog} < ${INPUT}"
+    ${MPIRUN} ./${prog} < ${INPUT}
     res=$?
   fi
 else
   if test -n "$OUTPUT"; then
-    echo "./${prog} | diff ${OUTPUT} -"
-    res=`((./${prog} 3>&- 4>&-; echo $? 1>&4 3>&- 4>&-) | diff ${OUTPUT} - 1>&3 3>&- 4>&-) 4>&1`
+    echo "${MPIRUN} ./${prog} | diff ${OUTPUT} -"
+    res=`((${MPIRUN} ./${prog} 3>&- 4>&-; echo $? 1>&4 3>&- 4>&-) | diff ${OUTPUT} - 1>&3 3>&- 4>&-) 4>&1`
     res2=$?
     test $res = 0 && res=$res2
   else
-    echo "./${prog}"
-    ./${prog}
+    echo "${MPIRUN} ./${prog}"
+    ${MPIRUN} ./${prog}
     res=$?
   fi
 fi
