@@ -69,9 +69,10 @@ host_triplet = @host@
 @BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__append_9 = $(src_boost_FILESYSTEM_1_34) $(src_boost_REGEX_1_34) $(src_boost_SERIALIZATION_1_34)
 @BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@am__append_10 = $(src_boost_FILESYSTEM_1_35) $(src_boost_REGEX_1_35) $(src_boost_SERIALIZATION_1_35) $(src_BOOST_SYSTEM_1_35)
 @BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@am__append_11 = $(src_boost_FILESYSTEM_1_36) $(src_boost_REGEX_1_36) $(src_boost_SERIALIZATION_1_36) $(src_BOOST_SYSTEM_1_36)
-@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__append_12 = $(src_boost_FILESYSTEM_SVN) $(src_boost_REGEX_SVN) $(src_boost_SERIALIZATION_SVN) $(src_BOOST_SYSTEM_SVN)
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__append_13 = $(src_boost_SIGNALS)
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__append_14 = $(src_boost_THREAD)
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@am__append_12 = $(src_boost_FILESYSTEM_1_37) $(src_boost_REGEX_1_37) $(src_boost_SERIALIZATION_1_37) $(src_BOOST_SYSTEM_1_37)
+@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__append_13 = $(src_boost_FILESYSTEM_SVN) $(src_boost_REGEX_SVN) $(src_boost_SERIALIZATION_SVN) $(src_BOOST_SYSTEM_SVN)
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__append_14 = $(src_boost_SIGNALS)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__append_15 = $(src_boost_THREAD)
 subdir = lib/alps
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -260,22 +261,26 @@ am__objects_36 = $(am__objects_32)
 @BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_27) \
 @BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_35) \
 @BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_36)
-@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__objects_38 = $(am__objects_34) \
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@am__objects_38 = $(am__objects_34) \
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_27) \
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_35) \
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_36)
+@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__objects_39 = $(am__objects_34) \
 @BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_27) \
 @BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_35) \
 @BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_36)
-am__objects_39 = connection.lo named_slot_map.lo signal_base.lo \
+am__objects_40 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_40 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_39)
-am__objects_41 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_41 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_40)
+am__objects_42 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_42 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_41)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_43 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_42)
 nodist_libalps_la_OBJECTS = $(am__objects_15) $(am__objects_19) \
 	$(am__objects_25) $(am__objects_29) $(am__objects_33) \
-	$(am__objects_37) $(am__objects_38) $(am__objects_40) \
-	$(am__objects_42)
+	$(am__objects_37) $(am__objects_38) $(am__objects_39) \
+	$(am__objects_41) $(am__objects_43)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -547,6 +552,7 @@ src_boost_FILESYSTEM_1_35 = \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 
 src_boost_FILESYSTEM_1_36 = $(src_boost_FILESYSTEM_1_35)
+src_boost_FILESYSTEM_1_37 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_SVN = $(src_boost_FILESYSTEM_1_35)
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -592,6 +598,7 @@ src_boost_REGEX_1_33 = $(BOOST_SRCDIR)/regex/src/c_regex_traits.cpp \
 src_boost_REGEX_1_34 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_1_35 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_1_36 = $(src_boost_REGEX_1_33)
+src_boost_REGEX_1_37 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_SVN = $(src_boost_REGEX_1_33)
 src_boost_SERIALIZATION_1_32 = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
@@ -683,6 +690,7 @@ src_boost_SERIALIZATION_1_35 =  \
 	$(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
 	$(am__append_3)
 src_boost_SERIALIZATION_1_36 = $(src_boost_SERIALIZATION_1_35)
+src_boost_SERIALIZATION_1_37 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_SVN = $(src_boost_SERIALIZATION_1_35)
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
@@ -695,6 +703,7 @@ src_BOOST_SYSTEM_1_35 = \
   $(BOOST_SRCDIR)/system/src/error_code.cpp
 
 src_BOOST_SYSTEM_1_36 = $(src_BOOST_SYSTEM_1_35)
+src_BOOST_SYSTEM_1_37 = $(src_BOOST_SYSTEM_1_35)
 src_BOOST_SYSTEM_SVN = $(src_BOOST_SYSTEM_1_35)
 src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp \
@@ -714,7 +723,7 @@ libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) \
 nodist_libalps_la_SOURCES = $(am__append_6) $(am__append_7) \
 	$(am__append_8) $(am__append_9) $(am__append_10) \
 	$(am__append_11) $(am__append_12) $(am__append_13) \
-	$(am__append_14)
+	$(am__append_14) $(am__append_15)
 all: all-am
 
 .SUFFIXES:

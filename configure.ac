@@ -475,7 +475,7 @@ if test "$ac_cv_use_precompiled_boost" != yes; then
   AC_CONFIG_HEADERS(src/boost/po_utf8_codecvt_facet.cpp)
   AC_DEFINE_UNQUOTED(SR_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/serialization/src/utf8_codecvt_facet.cpp")
   AC_CONFIG_HEADERS(src/boost/sr_utf8_codecvt_facet.cpp)
-  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = svn; then
+  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_37 || test "$ac_cv_boost_version" = svn; then
     AC_DEFINE_UNQUOTED(FS_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/filesystem/src/utf8_codecvt_facet.cpp")
     AC_CONFIG_HEADERS(src/boost/fs_utf8_codecvt_facet.cpp)
   fi
@@ -510,6 +510,7 @@ echo "  compiler type       $ac_cv_alps_compiler @<:@$ac_cv_alps_cxx@:>@"
 echo "  optimization        $ac_cv_alps_compiler_optimization"
 echo "  exceptions          $ac_cv_alps_compiler_exceptions"
 echo "  warnings            $ac_cv_alps_compiler_warnings"
+echo "  Boost version       $ac_cv_boost_version"
 echo "  MPI support         $ac_cv_alps_have_mpi"
 echo "  HDF5 support        $ac_cv_have_hdf5"
 echo "  LAPACK support      $ac_cv_have_lapack"

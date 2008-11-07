@@ -84,6 +84,7 @@ src_boost_FILESYSTEM_1_35 = \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 src_boost_FILESYSTEM_1_36 = $(src_boost_FILESYSTEM_1_35)
+src_boost_FILESYSTEM_1_37 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_SVN = $(src_boost_FILESYSTEM_1_35)
 
 src_boost_PROGRAM_OPTIONS = \
@@ -136,6 +137,7 @@ endif
 src_boost_REGEX_1_34 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_1_35 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_1_36 = $(src_boost_REGEX_1_33)
+src_boost_REGEX_1_37 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_SVN = $(src_boost_REGEX_1_33)
 
 src_boost_SERIALIZATION_1_32 = \
@@ -251,6 +253,7 @@ src_boost_SERIALIZATION_1_35 += \
   $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
 endif
 src_boost_SERIALIZATION_1_36 = $(src_boost_SERIALIZATION_1_35)
+src_boost_SERIALIZATION_1_37 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_SVN = $(src_boost_SERIALIZATION_1_35)
 
 src_boost_SIGNALS = \
@@ -263,6 +266,7 @@ src_boost_SIGNALS = \
 src_BOOST_SYSTEM_1_35 = \
   $(BOOST_SRCDIR)/system/src/error_code.cpp
 src_BOOST_SYSTEM_1_36 = $(src_BOOST_SYSTEM_1_35)
+src_BOOST_SYSTEM_1_37 = $(src_BOOST_SYSTEM_1_35)
 src_BOOST_SYSTEM_SVN = $(src_BOOST_SYSTEM_1_35)
 
 src_boost_THREAD = \
@@ -308,6 +312,10 @@ endif
 
 if BOOST_1_36
 nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_36) $(src_boost_REGEX_1_36) $(src_boost_SERIALIZATION_1_36) $(src_BOOST_SYSTEM_1_36)
+endif
+
+if BOOST_1_37
+nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_37) $(src_boost_REGEX_1_37) $(src_boost_SERIALIZATION_1_37) $(src_BOOST_SYSTEM_1_37)
 endif
 
 if BOOST_SVN

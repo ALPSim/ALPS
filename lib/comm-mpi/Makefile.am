@@ -32,6 +32,7 @@ src_boost_MPI_1_35 = \
   $(BOOST_SRCDIR)/mpi/src/timer.cpp
 # $(BOOST_SRCDIR)/mpi/src/text_skeleton_iarchive.cpp
 src_boost_MPI_1_36 = $(src_boost_MPI_1_35)
+src_boost_MPI_1_37 = $(src_boost_MPI_1_35)
 src_boost_MPI_SVN = $(src_boost_MPI_1_35)
 
 libcomm_mpi_la_SOURCES = $(SRC)
@@ -42,6 +43,9 @@ nodist_libcomm_mpi_la_SOURCES += $(src_boost_MPI_1_35)
 endif
 if BOOST_1_36
 nodist_libcomm_mpi_la_SOURCES += $(src_boost_MPI_1_36)
+endif
+if BOOST_1_37
+nodist_libcomm_mpi_la_SOURCES += $(src_boost_MPI_1_37)
 endif
 if BOOST_SVN
 nodist_libcomm_mpi_la_SOURCES += $(src_boost_MPI_SVN)

@@ -909,6 +909,8 @@ BOOST_DIR
 BOOST_SRCDIR
 BOOST_SVN_TRUE
 BOOST_SVN_FALSE
+BOOST_1_37_TRUE
+BOOST_1_37_FALSE
 BOOST_1_36_TRUE
 BOOST_1_36_FALSE
 BOOST_1_35_TRUE
@@ -1733,7 +1735,7 @@ Optional Packages:
                           multi-threading etc (default none) (only for
                           precompiled Boost library)
   --with-boost-all        compile all optional Boost libraries
-  --with-boost-mpi        compile Boost.MPI library
+  --without-boost-mpi     not compile Boost.MPI library
   --with-boost-signals    compile Boost.Signals library
   --with-boost-thread     compile Boost.Thread library
   --with-boost-wchar      compile with wchar support in Boost.Regex and
@@ -8033,7 +8035,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8036 "configure"' > conftest.$ac_ext
+  echo '#line 8038 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10166,11 +10168,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10169: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10171: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10173: \$? = $ac_status" >&5
+   echo "$as_me:10175: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10456,11 +10458,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10459: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10461: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10463: \$? = $ac_status" >&5
+   echo "$as_me:10465: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10560,11 +10562,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10563: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10565: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10567: \$? = $ac_status" >&5
+   echo "$as_me:10569: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12960,7 +12962,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12963 "configure"
+#line 12965 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13060,7 +13062,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13063 "configure"
+#line 13065 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15469,11 +15471,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15472: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15474: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15476: \$? = $ac_status" >&5
+   echo "$as_me:15478: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15573,11 +15575,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15576: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15578: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15580: \$? = $ac_status" >&5
+   echo "$as_me:15582: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17156,11 +17158,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17159: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17161: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17163: \$? = $ac_status" >&5
+   echo "$as_me:17165: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17260,11 +17262,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17263: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17265: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17267: \$? = $ac_status" >&5
+   echo "$as_me:17269: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19475,11 +19477,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19478: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19480: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19482: \$? = $ac_status" >&5
+   echo "$as_me:19484: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19765,11 +19767,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19768: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19770: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19772: \$? = $ac_status" >&5
+   echo "$as_me:19774: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19869,11 +19871,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19872: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19874: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19876: \$? = $ac_status" >&5
+   echo "$as_me:19878: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -22739,7 +22741,7 @@ fi
   boost_dir_s=
 
   for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
-    for b in boost boost_1_36_0 boost_1_35_0 boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
+    for b in boost boost_1_37_0 boost_1_36_0 boost_1_35_0 boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
       if test -f "$d/$b/boost/config.hpp"; then
         if test -f "$d/$b/libs/filesystem/src/exception.cpp" || test -f "$d/$b/libs/filesystem/src/operations.cpp"; then
           boost_dir_s="$d/$b"
@@ -22896,7 +22898,7 @@ cat confdefs.h >>conftest.$ac_ext
 cat >>conftest.$ac_ext <<_ACEOF
 /* end confdefs.h.  */
 #include <boost/version.hpp>
-#if BOOST_VERSION < 103700
+#if BOOST_VERSION < 103800
 #error
 #endif
 int
@@ -22934,6 +22936,53 @@ sed 's/^/| /' conftest.$ac_ext >&5
 fi
 
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  if test -z "$ac_cv_boost_version"; then
+    cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <boost/version.hpp>
+#if BOOST_VERSION < 103700
+#error
+#endif
+int
+main ()
+{
+
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext
+if { (ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_compile") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then
+  ac_cv_boost_version=1_37
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+
+fi
+
+rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
+  fi
   if test -z "$ac_cv_boost_version"; then
     cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
@@ -23174,6 +23223,10 @@ rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
       { $as_echo "$as_me:$LINENO: result: SVN" >&5
 $as_echo "SVN" >&6; }
       ;;
+    x1_37 )
+      { $as_echo "$as_me:$LINENO: result: 1.37" >&5
+$as_echo "1.37" >&6; }
+      ;;
     x1_36 )
       { $as_echo "$as_me:$LINENO: result: 1.36" >&5
 $as_echo "1.36" >&6; }
@@ -23208,6 +23261,14 @@ $as_echo "$as_me: error: Boost library is too old" >&2;}
 else
   BOOST_SVN_TRUE='#'
   BOOST_SVN_FALSE=
+fi
+
+   if test "$ac_cv_boost_version" = 1_37; then
+  BOOST_1_37_TRUE=
+  BOOST_1_37_FALSE='#'
+else
+  BOOST_1_37_TRUE='#'
+  BOOST_1_37_FALSE=
 fi
 
    if test "$ac_cv_boost_version" = 1_36; then
@@ -30567,9 +30628,9 @@ fi
     # check whether Boost.MPI is compiled
     { $as_echo "$as_me:$LINENO: checking whether to build Boost.MPI" >&5
 $as_echo_n "checking whether to build Boost.MPI... " >&6; }
-    test -z "$ac_cv_boost_mpi" && ac_cv_boost_mpi=no
+    test -z "$ac_cv_boost_mpi" && ac_cv_boost_mpi=yes
     test "$ac_cv_have_mpi" = yes || ac_cv_boost_mpi=no
-    if test "$ac_cv_boost_version" = svn || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_35; then
+    if test "$ac_cv_boost_version" = svn || test "$ac_cv_boost_version" = 1_37 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_35; then
       :;
     else
       ac_cv_boost_mpi=no
@@ -31381,7 +31442,7 @@ _ACEOF
 
   ac_config_headers="$ac_config_headers src/boost/sr_utf8_codecvt_facet.cpp"
 
-  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = svn; then
+  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_37 || test "$ac_cv_boost_version" = svn; then
     cat >>confdefs.h <<_ACEOF
 #define FS_UTF8_CODECVT_FACET_CPP "$BOOST_SRCDIR/filesystem/src/utf8_codecvt_facet.cpp"
 _ACEOF
@@ -31537,6 +31598,13 @@ if test -z "${BOOST_SVN_TRUE}" && test -z "${BOOST_SVN_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"BOOST_SVN\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"BOOST_SVN\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${BOOST_1_37_TRUE}" && test -z "${BOOST_1_37_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"BOOST_1_37\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"BOOST_1_37\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -33073,6 +33141,7 @@ echo "  compiler type       $ac_cv_alps_compiler [$ac_cv_alps_cxx]"
 echo "  optimization        $ac_cv_alps_compiler_optimization"
 echo "  exceptions          $ac_cv_alps_compiler_exceptions"
 echo "  warnings            $ac_cv_alps_compiler_warnings"
+echo "  Boost version       $ac_cv_boost_version"
 echo "  MPI support         $ac_cv_alps_have_mpi"
 echo "  HDF5 support        $ac_cv_have_hdf5"
 echo "  LAPACK support      $ac_cv_have_lapack"

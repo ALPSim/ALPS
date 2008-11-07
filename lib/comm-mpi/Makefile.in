@@ -35,7 +35,8 @@ host_triplet = @host@
 @HAVE_MPI_TRUE@am__append_1 = libcomm-mpi.la
 @BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_2 = $(src_boost_MPI_1_35)
 @BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_3 = $(src_boost_MPI_1_36)
-@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_4 = $(src_boost_MPI_SVN)
+@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_4 = $(src_boost_MPI_1_37)
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_5 = $(src_boost_MPI_SVN)
 subdir = lib/comm-mpi
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -85,10 +86,12 @@ am__objects_2 = broadcast.lo communicator.lo computation_tree.lo \
 am__objects_4 = $(am__objects_2)
 @BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_5 =  \
 @BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_4)
-@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_6 =  \
+@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_6 =  \
+@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_4)
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_7 =  \
 @BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_4)
 nodist_libcomm_mpi_la_OBJECTS = $(am__objects_3) $(am__objects_5) \
-	$(am__objects_6)
+	$(am__objects_6) $(am__objects_7)
 libcomm_mpi_la_OBJECTS = $(am_libcomm_mpi_la_OBJECTS) \
 	$(nodist_libcomm_mpi_la_OBJECTS)
 @HAVE_MPI_TRUE@am_libcomm_mpi_la_rpath = -rpath $(libdir)
@@ -294,10 +297,11 @@ src_boost_MPI_1_35 = \
 
 # $(BOOST_SRCDIR)/mpi/src/text_skeleton_iarchive.cpp
 src_boost_MPI_1_36 = $(src_boost_MPI_1_35)
+src_boost_MPI_1_37 = $(src_boost_MPI_1_35)
 src_boost_MPI_SVN = $(src_boost_MPI_1_35)
 libcomm_mpi_la_SOURCES = $(SRC)
 nodist_libcomm_mpi_la_SOURCES = $(am__append_2) $(am__append_3) \
-	$(am__append_4)
+	$(am__append_4) $(am__append_5)
 all: all-am
 
 .SUFFIXES:
