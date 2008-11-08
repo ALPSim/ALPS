@@ -29,6 +29,9 @@
 	    evaluation of observables (i.e. collecting results of measurement)
 	    is NOT performed automatically.  Please use pevaluate tool or
 	    rerun application with --evaluate command line option.
+
+          - Note: Since Boost.MPI library is used in ALPS/parapack, Boost 1.35.0
+            or higher is required for building ALPS/parapack with MPI support.
 	
 2008-11-07  Synge Todo <wistaria@comp-phys.org>
 
