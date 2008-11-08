@@ -1,0 +1,15 @@
+SIMULATION_NAME = "example/multiple run-1";
+
+WORKER = "ising"
+
+LATTICE = "chain lattice";
+L = 16;
+SWEEPS = 108192;
+THERMALIZATION = SWEEPS/8;
+
+{ NUM_CLONES = 10; T = 2; }
+{ NUM_CLONES = 20; T = 1.9; }
+{ T = 1.8; }
+{ T = 1.7; }
+{ T = 1.6; }
+{ T = 1.5; }

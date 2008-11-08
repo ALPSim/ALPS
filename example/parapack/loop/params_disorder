@@ -1,0 +1,8 @@
+LATTICE = "depleted square lattice"
+L = 4
+SWEEPS=128
+DEPLETION = 0.2
+DEPLETION_SEED = DISORDER_SEED
+
+NUM_CLONES = 100
+{ T = 1.0 }

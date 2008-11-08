@@ -1,0 +1,13 @@
+LATTICE = "square lattice";
+L = 8;
+
+COUPLING = 1;
+
+ENERGY_RANGE = "[-2*L*L:0]";
+WEIGHT_DUMP_FILE = "params_learn.task1.weight";
+OBSERVABLE_DUMP_FILE = "params_measure.task1.observable";
+
+{
+  WORKER = "wanglandau measure";
+  NUM_CLONES = 16;
+}

@@ -1,0 +1,13 @@
+SIMULATION_NAME = "example/loop run-1";
+
+WORKER = "loop"
+
+LATTICE = "chain lattice"
+L = 8
+SWEEPS=65536
+
+{ T = 0.1 }
+{ T = 0.2 }
+{ T = 0.3 }
+{ T = 0.4 }
+{ T = 0.5 }

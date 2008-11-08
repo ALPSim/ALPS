@@ -71,7 +71,9 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libcomm_mpi_la_LIBADD =
-am__objects_1 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo
+am__objects_1 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo \
+	clone_info_mpi.lo clone_mpi.lo parallel_factory.lo \
+	process_mpi.lo scheduler_mpi.lo
 am_libcomm_mpi_la_OBJECTS = $(am__objects_1)
 am__objects_2 = broadcast.lo communicator.lo computation_tree.lo \
 	content_oarchive.lo environment.lo exception.lo \
@@ -273,7 +275,13 @@ AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS
 AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS) $(MPI_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 lib_LTLIBRARIES = $(am__append_1)
-SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
+SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C \
+  $(top_srcdir)/src/alps/parapack/clone_info_mpi.C \
+  $(top_srcdir)/src/alps/parapack/clone_mpi.C \
+  $(top_srcdir)/src/alps/parapack/parallel_factory.C \
+  $(top_srcdir)/src/alps/parapack/process_mpi.C \
+  $(top_srcdir)/src/alps/parapack/scheduler_mpi.C
+
 src_boost_MPI_1_35 = \
   $(BOOST_SRCDIR)/mpi/src/broadcast.cpp \
   $(BOOST_SRCDIR)/mpi/src/communicator.cpp \
@@ -373,6 +381,8 @@ distclean-compile:
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/broadcast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/buffer.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clone_info_mpi.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/clone_mpi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/comm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/communicator.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/computation_tree.Plo@am__quote@
@@ -391,9 +401,12 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packed_oarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packed_skeleton_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/packed_skeleton_oarchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parallel_factory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/point_to_point.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process_mpi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/request.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scheduler_mpi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/text_skeleton_oarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/timer.Plo@am__quote@
 
@@ -459,6 +472,41 @@ mpdump.lo: $(top_srcdir)/src/alps/osiris/mpdump.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/mpdump.C' object='mpdump.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpdump.lo `test -f '$(top_srcdir)/src/alps/osiris/mpdump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/mpdump.C
+
+clone_info_mpi.lo: $(top_srcdir)/src/alps/parapack/clone_info_mpi.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT clone_info_mpi.lo -MD -MP -MF $(DEPDIR)/clone_info_mpi.Tpo -c -o clone_info_mpi.lo `test -f '$(top_srcdir)/src/alps/parapack/clone_info_mpi.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/clone_info_mpi.C
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/clone_info_mpi.Tpo $(DEPDIR)/clone_info_mpi.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/clone_info_mpi.C' object='clone_info_mpi.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o clone_info_mpi.lo `test -f '$(top_srcdir)/src/alps/parapack/clone_info_mpi.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/clone_info_mpi.C
+
+clone_mpi.lo: $(top_srcdir)/src/alps/parapack/clone_mpi.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT clone_mpi.lo -MD -MP -MF $(DEPDIR)/clone_mpi.Tpo -c -o clone_mpi.lo `test -f '$(top_srcdir)/src/alps/parapack/clone_mpi.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/clone_mpi.C
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/clone_mpi.Tpo $(DEPDIR)/clone_mpi.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/clone_mpi.C' object='clone_mpi.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o clone_mpi.lo `test -f '$(top_srcdir)/src/alps/parapack/clone_mpi.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/clone_mpi.C
+
+parallel_factory.lo: $(top_srcdir)/src/alps/parapack/parallel_factory.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT parallel_factory.lo -MD -MP -MF $(DEPDIR)/parallel_factory.Tpo -c -o parallel_factory.lo `test -f '$(top_srcdir)/src/alps/parapack/parallel_factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/parallel_factory.C
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/parallel_factory.Tpo $(DEPDIR)/parallel_factory.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/parallel_factory.C' object='parallel_factory.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o parallel_factory.lo `test -f '$(top_srcdir)/src/alps/parapack/parallel_factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/parallel_factory.C
+
+process_mpi.lo: $(top_srcdir)/src/alps/parapack/process_mpi.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT process_mpi.lo -MD -MP -MF $(DEPDIR)/process_mpi.Tpo -c -o process_mpi.lo `test -f '$(top_srcdir)/src/alps/parapack/process_mpi.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/process_mpi.C
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/process_mpi.Tpo $(DEPDIR)/process_mpi.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/process_mpi.C' object='process_mpi.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o process_mpi.lo `test -f '$(top_srcdir)/src/alps/parapack/process_mpi.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/process_mpi.C
+
+scheduler_mpi.lo: $(top_srcdir)/src/alps/parapack/scheduler_mpi.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT scheduler_mpi.lo -MD -MP -MF $(DEPDIR)/scheduler_mpi.Tpo -c -o scheduler_mpi.lo `test -f '$(top_srcdir)/src/alps/parapack/scheduler_mpi.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/scheduler_mpi.C
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/scheduler_mpi.Tpo $(DEPDIR)/scheduler_mpi.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/scheduler_mpi.C' object='scheduler_mpi.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scheduler_mpi.lo `test -f '$(top_srcdir)/src/alps/parapack/scheduler_mpi.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/scheduler_mpi.C
 
 broadcast.lo: $(BOOST_SRCDIR)/mpi/src/broadcast.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT broadcast.lo -MD -MP -MF $(DEPDIR)/broadcast.Tpo -c -o broadcast.lo `test -f '$(BOOST_SRCDIR)/mpi/src/broadcast.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/mpi/src/broadcast.cpp

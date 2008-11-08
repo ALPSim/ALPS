@@ -1,3 +1,35 @@
+2008-11-08  Synge Todo <wistaria@comp-phys.org>
+
+	* [parapack] ALPS/parapack scheduler (version 1.1 2008/11/08) has
+	  been merged into ALPS Library.  The ALPS/parapack scheduler supports:
+
+	  - Arbitrary number of clones (or 'runs') can be simulated by
+	    specifying NUM_CLONES parameter.  (See e.g.
+	    examples/parapack/single/params)
+
+	  - Multiple level parallelization (parallel worker).  (See e.g.
+	    examples/parapack/multiple)  The number of processors per clone
+            can be specified by --procs-per-clone=X command line option.
+
+	  - Exchange Monte Carlo (or parallel tempering).  (See e.g.
+	    examples/parapack/exchange)
+
+	  - Better support for disordered system: parameters WORKER_SEED
+	    and DISORDER_SEED will be set automatically from the master
+	    seed for each task (SEED).  For parallel workers,
+	    WORKER_SEED's are different for each worker (or 'MPI node')
+	    but DISORDER_SEED is identical in a clone.
+	
+	  - Note: The inteface of workers has been changed slightly.
+	    Please see sample implementations: examples/parapack/single/ising.h
+	    and examples/parapack/multiple/ising.h for serial and parallel
+	    workers, respectively.
+
+	  - Note: Since clones in a task will be simulated asynchronously,
+	    evaluation of observables (i.e. collecting results of measurement)
+	    is NOT performed automatically.  Please use pevaluate tool or
+	    rerun application with --evaluate command line option.
+	
 2008-11-07  Synge Todo <wistaria@comp-phys.org>
 
 	* [config] Update configure script for Boost verion 1.37.0

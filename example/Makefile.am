@@ -1,4 +1,4 @@
-SUBDIRS = model scheduler .
+SUBDIRS = model scheduler parapack .
 
 .PHONY : test tests example examples
 test tests :

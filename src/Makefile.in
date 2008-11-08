@@ -32,7 +32,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@ALPS_FULL_TRUE@am__append_1 = $(headers_LATTICE) $(headers_MODEL) $(headers_PLOT) $(headers_SCHEDULER)
+@ALPS_FULL_TRUE@am__append_1 = $(headers_LATTICE) $(headers_MODEL) $(headers_PLOT) $(headers_SCHEDULER) $(headers_PARAPACK)
 @BOOST_1_33_TRUE@am__append_2 = $(headers_BOOST_PRE134)
 @BOOST_1_32_TRUE@am__append_3 = $(headers_BOOST_PRE134)
 subdir = src
@@ -212,7 +212,23 @@ am__noinst_HEADERS_DIST = boost/function_objects.hpp \
 	alps/scheduler/options.h alps/scheduler/scheduler.h \
 	alps/scheduler/signal.hpp alps/scheduler/task.h \
 	alps/scheduler/types.h alps/scheduler/worker.h \
-	alps/scheduler/measurement_operators.h boost/foreach.hpp
+	alps/scheduler/measurement_operators.h alps/parapack/clone.h \
+	alps/parapack/clone_info.h alps/parapack/clone_info_mpi.h \
+	alps/parapack/clone_info_p.h alps/parapack/clone_mpi.h \
+	alps/parapack/clone_proxy.h alps/parapack/clone_proxy_mpi.h \
+	alps/parapack/exchange.h alps/parapack/exchange_mpi.h \
+	alps/parapack/exp_number.h alps/parapack/worker_factory.h \
+	alps/parapack/filelock.h alps/parapack/integer_range.h \
+	alps/parapack/job_p.h alps/parapack/measurement.h \
+	alps/parapack/montecarlo.h alps/parapack/option.h \
+	alps/parapack/parallel.h alps/parapack/parallel_factory.h \
+	alps/parapack/permutation.h alps/parapack/process.h \
+	alps/parapack/process_mpi.h alps/parapack/queue.h \
+	alps/parapack/rng_helper.h alps/parapack/scheduler.h \
+	alps/parapack/serial.h alps/parapack/simulation_p.h \
+	alps/parapack/job.h alps/parapack/types.h alps/parapack/util.h \
+	alps/parapack/version.h alps/parapack/wanglandau.h \
+	alps/parapack/mc_worker.h boost/foreach.hpp
 HEADERS = $(noinst_HEADERS)
 ETAGS = etags
 CTAGS = ctags
@@ -456,6 +472,7 @@ headers_RANDOM = alps/random.h alps/random/buffered_rng.h alps/random/pseudo_des
 headers_SCHEDULER = alps/scheduler.h alps/scheduler/factory.h alps/scheduler/info.h alps/scheduler/montecarlo.h alps/scheduler/options.h alps/scheduler/scheduler.h alps/scheduler/signal.hpp alps/scheduler/task.h alps/scheduler/types.h alps/scheduler/worker.h alps/scheduler/measurement_operators.h
 headers_IETL = ietl/bandlanczos.h ietl/complex.h ietl/config.h.in ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h ietl/interface/blas.h ietl/interface/blitz.h ietl/interface/mtl.h ietl/interface/ublas.h ietl/interface/valarray.h ietl/inverse.h ietl/iteration.h ietl/jacobi.h ietl/krylov_wrapper.h ietl/lanczos.h ietl/matrix.h ietl/power.h ietl/rayleigh.h ietl/tmatrix.h ietl/traits.h ietl/vectorspace.h
 headers_HEAP = heap/heapwrapper.h
+headers_PARAPACK = alps/parapack/clone.h alps/parapack/clone_info.h alps/parapack/clone_info_mpi.h alps/parapack/clone_info_p.h alps/parapack/clone_mpi.h alps/parapack/clone_proxy.h alps/parapack/clone_proxy_mpi.h alps/parapack/exchange.h alps/parapack/exchange_mpi.h alps/parapack/exp_number.h alps/parapack/worker_factory.h alps/parapack/filelock.h alps/parapack/integer_range.h alps/parapack/job_p.h alps/parapack/measurement.h alps/parapack/montecarlo.h alps/parapack/option.h alps/parapack/parallel.h alps/parapack/parallel_factory.h alps/parapack/permutation.h alps/parapack/process.h alps/parapack/process_mpi.h alps/parapack/queue.h alps/parapack/rng_helper.h alps/parapack/scheduler.h alps/parapack/serial.h alps/parapack/simulation_p.h alps/parapack/job.h alps/parapack/types.h alps/parapack/util.h alps/parapack/version.h alps/parapack/wanglandau.h alps/parapack/mc_worker.h
 headers = $(headers_BOOST) $(headers_ALPS) $(headers_PARAMETER) \
 	$(headers_EXPRESSION) $(headers_FIXEDCAP) $(headers_OSIRIS) \
 	$(headers_PARSER) $(headers_RANDOM) $(headers_IETL) \

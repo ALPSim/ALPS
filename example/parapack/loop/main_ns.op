@@ -1,0 +1,225 @@
+[input parameters]
+WORKER = loop;
+LATTICE = "chain lattice";
+L = 8;
+SEED = 23123;
+SWEEPS = 2048;
+T = 0.1;
+DIR_NAME = .;
+BASE_NAME = task1;
+WORKER_SEED = 23123;
+DISORDER_SEED = 23123;
+[results]
+Energy: -3.65327 +/- 0.0247; tau = 0.605 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.01663
+    bin #2   : 1024     entries: error = 0.0199661
+    bin #3   : 512      entries: error = 0.0228943
+    bin #4   : 256      entries: error = 0.0233182
+    bin #5   : 128      entries: error = 0.0247209
+Energy Density: -0.456659 +/- 0.00309; tau = 0.605 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00207876
+    bin #2   : 1024     entries: error = 0.00249576
+    bin #3   : 512      entries: error = 0.00286179
+    bin #4   : 256      entries: error = 0.00291478
+    bin #5   : 128      entries: error = 0.00309011
+Inverse Temperature: 10 +/- 0
+Staggered Magnetization^2: 7.00464 +/- 0.0914; tau = 0.386
+    bin #1   : 2048     entries: error = 0.0686239
+    bin #2   : 1024     entries: error = 0.080781
+    bin #3   : 512      entries: error = 0.0873692
+    bin #4   : 256      entries: error = 0.0943913
+    bin #5   : 128      entries: error = 0.0913549
+Staggered Susceptibility: 3.00882 +/- 0.0482; tau = 0.56 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.0331183
+    bin #2   : 1024     entries: error = 0.0377966
+    bin #3   : 512      entries: error = 0.0433965
+    bin #4   : 256      entries: error = 0.0463757
+    bin #5   : 128      entries: error = 0.0482286
+Susceptibility: 0.0143433 +/- 0.00354; tau = 0.967 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00206904
+    bin #2   : 1024     entries: error = 0.00257049
+    bin #3   : 512      entries: error = 0.00303534
+    bin #4   : 256      entries: error = 0.00335558
+    bin #5   : 128      entries: error = 0.003544
+Temperature: 0.1 +/- 6.68285e-10 Warning: potential error underflow. Errors might be smaller
+Volume: 8 +/- 0
+[input parameters]
+WORKER = loop;
+LATTICE = "chain lattice";
+L = 8;
+SEED = 23123;
+SWEEPS = 2048;
+T = 0.2;
+DIR_NAME = .;
+BASE_NAME = task2;
+WORKER_SEED = 23123;
+DISORDER_SEED = 23123;
+[results]
+Energy: -3.50215 +/- 0.0377; tau = 0.817 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.0232362
+    bin #2   : 1024     entries: error = 0.0279982
+    bin #3   : 512      entries: error = 0.0323614
+    bin #4   : 256      entries: error = 0.0368018
+    bin #5   : 128      entries: error = 0.0377102
+Energy Density: -0.437769 +/- 0.00471; tau = 0.817 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00290453
+    bin #2   : 1024     entries: error = 0.00349978
+    bin #3   : 512      entries: error = 0.00404517
+    bin #4   : 256      entries: error = 0.00460022
+    bin #5   : 128      entries: error = 0.00471377
+Inverse Temperature: 5 +/- 0
+Staggered Magnetization^2: 6.41846 +/- 0.0834; tau = 0.451 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.0604648
+    bin #2   : 1024     entries: error = 0.0683611
+    bin #3   : 512      entries: error = 0.0736229
+    bin #4   : 256      entries: error = 0.075171
+    bin #5   : 128      entries: error = 0.0833776
+Staggered Susceptibility: 2.37166 +/- 0.0343; tau = 0.465 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.0247191
+    bin #2   : 1024     entries: error = 0.0274494
+    bin #3   : 512      entries: error = 0.0296087
+    bin #4   : 256      entries: error = 0.0318117
+    bin #5   : 128      entries: error = 0.0343452
+Susceptibility: 0.083313 +/- 0.0056; tau = 1.15 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00307771
+    bin #2   : 1024     entries: error = 0.0038232
+    bin #3   : 512      entries: error = 0.00458258
+    bin #4   : 256      entries: error = 0.00522071
+    bin #5   : 128      entries: error = 0.00559841
+Temperature: 0.2 +/- 1.33657e-09 Warning: potential error underflow. Errors might be smaller
+Volume: 8 +/- 0
+[input parameters]
+WORKER = loop;
+LATTICE = "chain lattice";
+L = 8;
+SEED = 23123;
+SWEEPS = 2048;
+T = 0.3;
+DIR_NAME = .;
+BASE_NAME = task3;
+WORKER_SEED = 23123;
+DISORDER_SEED = 23123;
+[results]
+Energy: -3.32866 +/- 0.0502; tau = 0.971 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.0292816
+    bin #2   : 1024     entries: error = 0.0359432
+    bin #3   : 512      entries: error = 0.0416002
+    bin #4   : 256      entries: error = 0.0479232
+    bin #5   : 128      entries: error = 0.0502263
+Energy Density: -0.416083 +/- 0.00628; tau = 0.971 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.0036602
+    bin #2   : 1024     entries: error = 0.0044929
+    bin #3   : 512      entries: error = 0.00520002
+    bin #4   : 256      entries: error = 0.0059904
+    bin #5   : 128      entries: error = 0.00627829
+Inverse Temperature: 3.33333 +/- 1.08236e-08 Warning: potential error underflow. Errors might be smaller
+Staggered Magnetization^2: 6.14771 +/- 0.08; tau = 0.324
+    bin #1   : 2048     entries: error = 0.0623376
+    bin #2   : 1024     entries: error = 0.0725195
+    bin #3   : 512      entries: error = 0.0791545
+    bin #4   : 256      entries: error = 0.0815853
+    bin #5   : 128      entries: error = 0.0800331
+Staggered Susceptibility: 1.72639 +/- 0.0209; tau = 0.174
+    bin #1   : 2048     entries: error = 0.0179722
+    bin #2   : 1024     entries: error = 0.0206829
+    bin #3   : 512      entries: error = 0.0221841
+    bin #4   : 256      entries: error = 0.0222064
+    bin #5   : 128      entries: error = 0.0208613
+Susceptibility: 0.113627 +/- 0.00408; tau = 0.781 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00254595
+    bin #2   : 1024     entries: error = 0.00309202
+    bin #3   : 512      entries: error = 0.00344804
+    bin #4   : 256      entries: error = 0.00387034
+    bin #5   : 128      entries: error = 0.00407504
+Temperature: 0.3 +/- 1.27558e-09 Warning: potential error underflow. Errors might be smaller
+Volume: 8 +/- 0
+[input parameters]
+WORKER = loop;
+LATTICE = "chain lattice";
+L = 8;
+SEED = 23123;
+SWEEPS = 2048;
+T = 0.4;
+DIR_NAME = .;
+BASE_NAME = task4;
+WORKER_SEED = 23123;
+DISORDER_SEED = 23123;
+[results]
+Energy: -3.05625 +/- 0.06; tau = 1.04 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.0341933
+    bin #2   : 1024     entries: error = 0.0420475
+    bin #3   : 512      entries: error = 0.0496662
+    bin #4   : 256      entries: error = 0.0566546
+    bin #5   : 128      entries: error = 0.0599952
+Energy Density: -0.382031 +/- 0.0075; tau = 1.04 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00427416
+    bin #2   : 1024     entries: error = 0.00525594
+    bin #3   : 512      entries: error = 0.00620827
+    bin #4   : 256      entries: error = 0.00708183
+    bin #5   : 128      entries: error = 0.00749941
+Inverse Temperature: 2.5 +/- 0
+Staggered Magnetization^2: 5.4126 +/- 0.0687; tau = 0.376 WARNING: check error convergence
+    bin #1   : 2048     entries: error = 0.051876
+    bin #2   : 1024     entries: error = 0.0583504
+    bin #3   : 512      entries: error = 0.0633591
+    bin #4   : 256      entries: error = 0.0681891
+    bin #5   : 128      entries: error = 0.0686661
+Staggered Susceptibility: 1.27162 +/- 0.0168; tau = 0.357 WARNING: check error convergence
+    bin #1   : 2048     entries: error = 0.0128454
+    bin #2   : 1024     entries: error = 0.0141734
+    bin #3   : 512      entries: error = 0.01513
+    bin #4   : 256      entries: error = 0.0160337
+    bin #5   : 128      entries: error = 0.016818
+Susceptibility: 0.135498 +/- 0.00314; tau = 0.631 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00208745
+    bin #2   : 1024     entries: error = 0.00236037
+    bin #3   : 512      entries: error = 0.00263231
+    bin #4   : 256      entries: error = 0.00297613
+    bin #5   : 128      entries: error = 0.00314018
+Temperature: 0.4 +/- 2.67314e-09 Warning: potential error underflow. Errors might be smaller
+Volume: 8 +/- 0
+[input parameters]
+WORKER = loop;
+LATTICE = "chain lattice";
+L = 8;
+SEED = 23123;
+SWEEPS = 2048;
+T = 0.5;
+DIR_NAME = .;
+BASE_NAME = task5;
+WORKER_SEED = 23123;
+DISORDER_SEED = 23123;
+[results]
+Energy: -2.73022 +/- 0.0651; tau = 0.986 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.0377734
+    bin #2   : 1024     entries: error = 0.0465328
+    bin #3   : 512      entries: error = 0.0550331
+    bin #4   : 256      entries: error = 0.0614018
+    bin #5   : 128      entries: error = 0.0651248
+Energy Density: -0.341278 +/- 0.00814; tau = 0.986 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00472167
+    bin #2   : 1024     entries: error = 0.0058166
+    bin #3   : 512      entries: error = 0.00687914
+    bin #4   : 256      entries: error = 0.00767523
+    bin #5   : 128      entries: error = 0.0081406
+Inverse Temperature: 2 +/- 0
+Staggered Magnetization^2: 4.9436 +/- 0.0585; tau = 0.337 WARNING: check error convergence
+    bin #1   : 2048     entries: error = 0.0451894
+    bin #2   : 1024     entries: error = 0.0504323
+    bin #3   : 512      entries: error = 0.0542119
+    bin #4   : 256      entries: error = 0.0576646
+    bin #5   : 128      entries: error = 0.0584675
+Staggered Susceptibility: 0.971718 +/- 0.0131; tau = 0.466 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00945147
+    bin #2   : 1024     entries: error = 0.0107386
+    bin #3   : 512      entries: error = 0.0115054
+    bin #4   : 256      entries: error = 0.0124603
+    bin #5   : 128      entries: error = 0.013139
+Susceptibility: 0.138733 +/- 0.00295; tau = 0.701 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 2048     entries: error = 0.00190213
+    bin #2   : 1024     entries: error = 0.00221877
+    bin #3   : 512      entries: error = 0.00249888
+    bin #4   : 256      entries: error = 0.00274191
+    bin #5   : 128      entries: error = 0.00294797
+Temperature: 0.5 +/- 0
+Volume: 8 +/- 0

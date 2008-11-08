@@ -66,7 +66,8 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libcomm_sgl_la_LIBADD =
-am__objects_1 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo
+am__objects_1 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo \
+	scheduler_sgl.lo
 am_libcomm_sgl_la_OBJECTS = $(am__objects_1)
 libcomm_sgl_la_OBJECTS = $(am_libcomm_sgl_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -247,7 +248,9 @@ AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS
 AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 lib_LTLIBRARIES = libcomm-sgl.la
-SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
+SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C \
+  $(top_srcdir)/src/alps/parapack/scheduler_sgl.C
+
 libcomm_sgl_la_SOURCES = $(SRC)
 all: all-am
 
@@ -324,6 +327,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mpdump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/os.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/process.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scheduler_sgl.Plo@am__quote@
 
 .C.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<
@@ -387,6 +391,13 @@ mpdump.lo: $(top_srcdir)/src/alps/osiris/mpdump.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/mpdump.C' object='mpdump.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o mpdump.lo `test -f '$(top_srcdir)/src/alps/osiris/mpdump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/mpdump.C
+
+scheduler_sgl.lo: $(top_srcdir)/src/alps/parapack/scheduler_sgl.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT scheduler_sgl.lo -MD -MP -MF $(DEPDIR)/scheduler_sgl.Tpo -c -o scheduler_sgl.lo `test -f '$(top_srcdir)/src/alps/parapack/scheduler_sgl.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/scheduler_sgl.C
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/scheduler_sgl.Tpo $(DEPDIR)/scheduler_sgl.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/scheduler_sgl.C' object='scheduler_sgl.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o scheduler_sgl.lo `test -f '$(top_srcdir)/src/alps/parapack/scheduler_sgl.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/scheduler_sgl.C
 
 mostlyclean-libtool:
 	-rm -f *.lo

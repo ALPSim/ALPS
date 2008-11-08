@@ -1,0 +1,10 @@
+LATTICE = "square lattice";
+L = 8;
+COUPLING = 1;
+
+ENERGY_RANGE = "[-2*L*L:0]";
+WEIGHT_DUMP_FILE = "params_learn.task1.weight";
+
+{
+  WORKER = "wanglandau learn";
+}

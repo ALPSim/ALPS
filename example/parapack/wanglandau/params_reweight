@@ -1,0 +1,15 @@
+LATTICE = "square lattice";
+L = 8;
+
+COUPLING = 1;
+
+ENERGY_RANGE = "[-2*L*L:0]";
+WEIGHT_DUMP_FILE = "params_learn.task1.weight";
+OBSERVABLE_DUMP_FILE = "params_measure.task1.observable";
+
+{
+  WORKER = "wanglandau reweight";
+  T_MIN = 0.5;
+  T_MAX = 4.0;
+  T_STEP = 0.1;
+}

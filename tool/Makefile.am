@@ -6,7 +6,7 @@ BOOST_DIR = @BOOST_DIR@
 
 pkgdatadir = $(libdir)/xml
 
-bin_PROGRAMS = compactrun convert2xml parameter2xml printgraph
+bin_PROGRAMS = compactrun convert2xml parameter2xml printgraph pconfig pevaluate poutput txt2archive xml2archive
 dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet 
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
 
@@ -14,6 +14,11 @@ compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
 printgraph_SOURCES = printgraph.C
+pconfig_SOURCES = pconfig.C
+pevaluate_SOURCES = pevaluate.C
+poutput_SOURCES = poutput.C
+txt2archive_SOURCES = txt2archive.C
+xml2archive_SOURCES = xml2archive.C
 
 if BUILD_ARCHIVE
 bin_PROGRAMS += archive archive2
@@ -49,4 +54,3 @@ nodist_quickbook_SOURCES += \
  $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 endif
 endif
-

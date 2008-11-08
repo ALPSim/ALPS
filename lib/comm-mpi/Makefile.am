@@ -8,7 +8,12 @@ if HAVE_MPI
 lib_LTLIBRARIES += libcomm-mpi.la
 endif
 
-SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
+SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C \
+  $(top_srcdir)/src/alps/parapack/clone_info_mpi.C \
+  $(top_srcdir)/src/alps/parapack/clone_mpi.C \
+  $(top_srcdir)/src/alps/parapack/parallel_factory.C \
+  $(top_srcdir)/src/alps/parapack/process_mpi.C \
+  $(top_srcdir)/src/alps/parapack/scheduler_mpi.C
 
 src_boost_MPI_1_35 = \
   $(BOOST_SRCDIR)/mpi/src/broadcast.cpp \

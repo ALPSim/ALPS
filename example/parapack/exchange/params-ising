@@ -1,0 +1,15 @@
+SIMULATION_NAME = "example/exchange ising-1";
+
+WORKER = "ising exchange"
+
+LATTICE = "square lattice"
+L = 8
+
+NUM_REPLICAS = 16
+T_MIN = 0.2
+T_MAX = 10
+
+{
+TEMPERATURE_DISTRIBUTION_TYPE = 2
+OPTIMIZE_TEMPERATURE = 1
+}

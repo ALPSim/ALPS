@@ -31421,7 +31421,9 @@ if test "$ac_cv_alps_type" = "full"; then
 
   ac_config_files="$ac_config_files test/model/Makefile"
 
-  ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric"
+  ac_config_files="$ac_config_files test/parapack/Makefile"
+
+  ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric example/parapack/Makefile example/parapack/single/Makefile example/parapack/multiple/Makefile example/parapack/loop/Makefile example/parapack/exchange/Makefile example/parapack/wanglandau/Makefile"
 
   ac_config_files="$ac_config_files lib/xml/Makefile lib/xml/changestylesheet.xsl lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl"
 
@@ -32277,11 +32279,18 @@ do
     "test/lattice/parameters") CONFIG_FILES="$CONFIG_FILES test/lattice/parameters" ;;
     "test/lattice/parameters_complex") CONFIG_FILES="$CONFIG_FILES test/lattice/parameters_complex" ;;
     "test/model/Makefile") CONFIG_FILES="$CONFIG_FILES test/model/Makefile" ;;
+    "test/parapack/Makefile") CONFIG_FILES="$CONFIG_FILES test/parapack/Makefile" ;;
     "example/Makefile") CONFIG_FILES="$CONFIG_FILES example/Makefile" ;;
     "example/model/Makefile") CONFIG_FILES="$CONFIG_FILES example/model/Makefile" ;;
     "example/scheduler/Makefile") CONFIG_FILES="$CONFIG_FILES example/scheduler/Makefile" ;;
     "example/model/parm_symbolic") CONFIG_FILES="$CONFIG_FILES example/model/parm_symbolic" ;;
     "example/model/parm_numeric") CONFIG_FILES="$CONFIG_FILES example/model/parm_numeric" ;;
+    "example/parapack/Makefile") CONFIG_FILES="$CONFIG_FILES example/parapack/Makefile" ;;
+    "example/parapack/single/Makefile") CONFIG_FILES="$CONFIG_FILES example/parapack/single/Makefile" ;;
+    "example/parapack/multiple/Makefile") CONFIG_FILES="$CONFIG_FILES example/parapack/multiple/Makefile" ;;
+    "example/parapack/loop/Makefile") CONFIG_FILES="$CONFIG_FILES example/parapack/loop/Makefile" ;;
+    "example/parapack/exchange/Makefile") CONFIG_FILES="$CONFIG_FILES example/parapack/exchange/Makefile" ;;
+    "example/parapack/wanglandau/Makefile") CONFIG_FILES="$CONFIG_FILES example/parapack/wanglandau/Makefile" ;;
     "lib/xml/Makefile") CONFIG_FILES="$CONFIG_FILES lib/xml/Makefile" ;;
     "lib/xml/changestylesheet.xsl") CONFIG_FILES="$CONFIG_FILES lib/xml/changestylesheet.xsl" ;;
     "lib/xml/lattices.xml") CONFIG_FILES="$CONFIG_FILES lib/xml/lattices.xml" ;;

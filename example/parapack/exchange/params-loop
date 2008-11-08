@@ -1,0 +1,15 @@
+SIMULATION_NAME = "example/exchange loop-1";
+
+WORKER = "loop exchange"
+
+LATTICE = "chain lattice"
+L = 32
+
+NUM_REPLICAS = 16
+BETA_MIN = 0.1
+BETA_MAX = 5
+
+{
+TEMPERATURE_DISTRIBUTION_TYPE = 3
+OPTIMIZE_TEMPERATURE = 1
+}

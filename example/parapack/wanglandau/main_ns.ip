@@ -1,0 +1,30 @@
+SEED = 3;
+
+LATTICE = "square lattice";
+L = 6;
+COUPLING = 1;
+
+ENERGY_RANGE = "[-72:-16]";
+WEIGHT_DUMP_FILE = "weight.dump"
+
+{
+  WORKER = "wanglandau learn";
+  FINAL_UPDATE_FACTOR = 1.01
+  CHECK_INTERVAL = 1024
+}
+
+OBSERVABLE_DUMP_FILE = "observable.dump"
+
+{
+  WORKER = "wanglandau measure";
+  SWEEPS = 8192
+}
+
+{
+  WORKER = "wanglandau reweight";
+  REFERENCE_BIN = -72
+  REFERENCE_LOGG = log(2)
+  T_MIN = 0.5;
+  T_MAX = 4.0;
+  T_STEP = 0.1;
+}

@@ -58,6 +58,19 @@ src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/task.C \
   $(top_srcdir)/src/alps/scheduler/worker.C \
   $(top_srcdir)/src/alps/scheduler/workertask.C
+src_PARAPACK = \
+  $(top_srcdir)/src/alps/parapack/clone.C \
+  $(top_srcdir)/src/alps/parapack/clone_info.C \
+  $(top_srcdir)/src/alps/parapack/worker_factory.C \
+  $(top_srcdir)/src/alps/parapack/filelock.C \
+  $(top_srcdir)/src/alps/parapack/measurement.C \
+  $(top_srcdir)/src/alps/parapack/option.C \
+  $(top_srcdir)/src/alps/parapack/queue.C \
+  $(top_srcdir)/src/alps/parapack/scheduler_comm.C \
+  $(top_srcdir)/src/alps/parapack/job.C \
+  $(top_srcdir)/src/alps/parapack/types.C \
+  $(top_srcdir)/src/alps/parapack/util.C \
+  $(top_srcdir)/src/alps/parapack/mc_worker.C
 
 src_boost_DATE_TIME = \
   $(BOOST_SRCDIR)/date_time/src/gregorian/date_generators.cpp \
@@ -286,7 +299,7 @@ libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARAMETER
 nodist_libalps_la_SOURCES =
 
 if ALPS_FULL
-libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
+libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER) $(src_PARAPACK)
 endif
 
 if BUILD_BOOST
