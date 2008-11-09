@@ -1,5 +1,6 @@
 WORKER = "ising exchange"
 
+LATTICE_LIBRARY = "../../../lib/xml/lattices.xml";
 LATTICE = "chain lattice"
 L = 16
 
@@ -26,6 +27,7 @@ RANDOM_EXCHANGE = 0
 
 WORKER = "loop exchange"
 
+LATTICE_LIBRARY = "../../../lib/xml/lattices.xml";
 LATTICE = "chain lattice"
 L = 8
 

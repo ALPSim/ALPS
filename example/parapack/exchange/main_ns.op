@@ -1,5 +1,6 @@
 [input parameters]
 WORKER = "ising exchange";
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -161,6 +162,7 @@ Specific Heat: 0.197536 +/- 0.00911
 Temperature: 2 +/- 0
 [input parameters]
 WORKER = "ising exchange";
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
@@ -322,6 +324,7 @@ Specific Heat: 0.201805 +/- 0.00918
 Temperature: 2 +/- 0
 [input parameters]
 WORKER = "loop exchange";
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
 SEED = 1234;
@@ -475,6 +478,7 @@ Temperature: 0.2 +/- 7.17983e-10 Warning: potential error underflow. Errors migh
 Volume: 8 +/- 0
 [input parameters]
 WORKER = "loop exchange";
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
 SEED = 1234;

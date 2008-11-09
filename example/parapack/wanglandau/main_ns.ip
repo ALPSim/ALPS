@@ -1,5 +1,6 @@
 SEED = 3;
 
+LATTICE_LIBRARY = "../../../lib/xml/lattices.xml";
 LATTICE = "square lattice";
 L = 6;
 COUPLING = 1;

@@ -1,5 +1,6 @@
 WORKER = "ising"
 
+LATTICE_LIBRARY = "../../../lib/xml/lattices.xml";
 LATTICE = "chain lattice";
 L = 16;
 

@@ -1,5 +1,6 @@
 [input parameters]
 SEED = 3;
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "square lattice";
 L = 6;
 COUPLING = 1;
@@ -311,6 +312,7 @@ Upper Bound of Measurement: -16 +/- inf
 Upper Bound of Random Walk: -16 +/- inf
 [input parameters]
 SEED = 3;
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "square lattice";
 L = 6;
 COUPLING = 1;
@@ -622,6 +624,7 @@ Upper Bound of Measurement: -16 +/- inf
 Upper Bound of Random Walk: -16 +/- inf
 [input parameters]
 SEED = 3;
+LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "square lattice";
 L = 6;
 COUPLING = 1;
