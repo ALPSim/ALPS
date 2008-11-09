@@ -33,10 +33,16 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 @HAVE_MPI_TRUE@am__append_1 = libcomm-mpi.la
-@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_2 = $(src_boost_MPI_1_35)
-@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_3 = $(src_boost_MPI_1_36)
-@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_4 = $(src_boost_MPI_1_37)
-@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_5 = $(src_boost_MPI_SVN)
+@HAVE_BOOST_MPI_TRUE@am__append_2 = $(top_srcdir)/src/alps/parapack/clone_info_mpi.C \
+@HAVE_BOOST_MPI_TRUE@  $(top_srcdir)/src/alps/parapack/clone_mpi.C \
+@HAVE_BOOST_MPI_TRUE@  $(top_srcdir)/src/alps/parapack/parallel_factory.C \
+@HAVE_BOOST_MPI_TRUE@  $(top_srcdir)/src/alps/parapack/process_mpi.C \
+@HAVE_BOOST_MPI_TRUE@  $(top_srcdir)/src/alps/parapack/scheduler_mpi.C
+
+@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_3 = $(src_boost_MPI_1_35)
+@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_4 = $(src_boost_MPI_1_36)
+@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_5 = $(src_boost_MPI_1_37)
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__append_6 = $(src_boost_MPI_SVN)
 subdir = lib/comm-mpi
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -71,11 +77,25 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 libLTLIBRARIES_INSTALL = $(INSTALL)
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libcomm_mpi_la_LIBADD =
-am__objects_1 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo \
-	clone_info_mpi.lo clone_mpi.lo parallel_factory.lo \
-	process_mpi.lo scheduler_mpi.lo
-am_libcomm_mpi_la_OBJECTS = $(am__objects_1)
-am__objects_2 = broadcast.lo communicator.lo computation_tree.lo \
+am__libcomm_mpi_la_SOURCES_DIST =  \
+	$(top_srcdir)/src/alps/osiris/buffer.C \
+	$(top_srcdir)/src/alps/osiris/dump.C \
+	$(top_srcdir)/src/alps/osiris/os.C \
+	$(top_srcdir)/src/alps/osiris/process.C \
+	$(top_srcdir)/src/alps/osiris/comm.C \
+	$(top_srcdir)/src/alps/osiris/mpdump.C \
+	$(top_srcdir)/src/alps/parapack/clone_info_mpi.C \
+	$(top_srcdir)/src/alps/parapack/clone_mpi.C \
+	$(top_srcdir)/src/alps/parapack/parallel_factory.C \
+	$(top_srcdir)/src/alps/parapack/process_mpi.C \
+	$(top_srcdir)/src/alps/parapack/scheduler_mpi.C
+@HAVE_BOOST_MPI_TRUE@am__objects_1 = clone_info_mpi.lo clone_mpi.lo \
+@HAVE_BOOST_MPI_TRUE@	parallel_factory.lo process_mpi.lo \
+@HAVE_BOOST_MPI_TRUE@	scheduler_mpi.lo
+am__objects_2 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo \
+	$(am__objects_1)
+am_libcomm_mpi_la_OBJECTS = $(am__objects_2)
+am__objects_3 = broadcast.lo communicator.lo computation_tree.lo \
 	content_oarchive.lo environment.lo exception.lo \
 	graph_communicator.lo group.lo intercommunicator.lo \
 	mpi_datatype_cache.lo mpi_datatype_oarchive.lo \
@@ -83,17 +103,17 @@ am__objects_2 = broadcast.lo communicator.lo computation_tree.lo \
 	packed_skeleton_iarchive.lo packed_skeleton_oarchive.lo \
 	point_to_point.lo request.lo text_skeleton_oarchive.lo \
 	timer.lo
-@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_3 =  \
-@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_2)
-am__objects_4 = $(am__objects_2)
-@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_5 =  \
-@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_4)
-@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_6 =  \
-@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_4)
-@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_7 =  \
-@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_4)
-nodist_libcomm_mpi_la_OBJECTS = $(am__objects_3) $(am__objects_5) \
-	$(am__objects_6) $(am__objects_7)
+@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_4 =  \
+@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_3)
+am__objects_5 = $(am__objects_3)
+@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_6 =  \
+@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_5)
+@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_7 =  \
+@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_5)
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@am__objects_8 =  \
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@	$(am__objects_5)
+nodist_libcomm_mpi_la_OBJECTS = $(am__objects_4) $(am__objects_6) \
+	$(am__objects_7) $(am__objects_8)
 libcomm_mpi_la_OBJECTS = $(am_libcomm_mpi_la_OBJECTS) \
 	$(nodist_libcomm_mpi_la_OBJECTS)
 @HAVE_MPI_TRUE@am_libcomm_mpi_la_rpath = -rpath $(libdir)
@@ -109,7 +129,7 @@ CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(libcomm_mpi_la_SOURCES) $(nodist_libcomm_mpi_la_SOURCES)
-DIST_SOURCES = $(libcomm_mpi_la_SOURCES)
+DIST_SOURCES = $(am__libcomm_mpi_la_SOURCES_DIST)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -275,13 +295,12 @@ AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS
 AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS) $(MPI_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 lib_LTLIBRARIES = $(am__append_1)
-SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C \
-  $(top_srcdir)/src/alps/parapack/clone_info_mpi.C \
-  $(top_srcdir)/src/alps/parapack/clone_mpi.C \
-  $(top_srcdir)/src/alps/parapack/parallel_factory.C \
-  $(top_srcdir)/src/alps/parapack/process_mpi.C \
-  $(top_srcdir)/src/alps/parapack/scheduler_mpi.C
-
+SRC = $(top_srcdir)/src/alps/osiris/buffer.C \
+	$(top_srcdir)/src/alps/osiris/dump.C \
+	$(top_srcdir)/src/alps/osiris/os.C \
+	$(top_srcdir)/src/alps/osiris/process.C \
+	$(top_srcdir)/src/alps/osiris/comm.C \
+	$(top_srcdir)/src/alps/osiris/mpdump.C $(am__append_2)
 src_boost_MPI_1_35 = \
   $(BOOST_SRCDIR)/mpi/src/broadcast.cpp \
   $(BOOST_SRCDIR)/mpi/src/communicator.cpp \
@@ -308,8 +327,8 @@ src_boost_MPI_1_36 = $(src_boost_MPI_1_35)
 src_boost_MPI_1_37 = $(src_boost_MPI_1_35)
 src_boost_MPI_SVN = $(src_boost_MPI_1_35)
 libcomm_mpi_la_SOURCES = $(SRC)
-nodist_libcomm_mpi_la_SOURCES = $(am__append_2) $(am__append_3) \
-	$(am__append_4) $(am__append_5)
+nodist_libcomm_mpi_la_SOURCES = $(am__append_3) $(am__append_4) \
+	$(am__append_5) $(am__append_6)
 all: all-am
 
 .SUFFIXES:
