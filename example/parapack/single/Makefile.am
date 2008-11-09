@@ -31,9 +31,9 @@ TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 .PHONY : test tests
 test tests : check
 
-.PHONY : params
+.PHONY : params params.in.xml
 params : params.in.xml
 params.in.xml: $(srcdir)/params
-	$(bindir)/parameter2xml $(srcdir)/params params
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params params
 clean-local :
 	rm -f params.*

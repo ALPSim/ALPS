@@ -630,10 +630,10 @@ uninstall-am:
 .PHONY : test tests
 test tests : check
 
-.PHONY : params
+.PHONY : params params.in.xml
 params : params.in.xml
 params.in.xml: $(srcdir)/params
-	$(bindir)/parameter2xml $(srcdir)/params params
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params params
 clean-local :
 	rm -f params.*
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

@@ -633,9 +633,9 @@ test tests : check
 .PHONY : params
 params : params.in.xml params_disorder.in.xml
 params.in.xml: params
-	$(bindir)/parameter2xml $(srcdir)/params params
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params params
 params_disorder.in.xml: params_disorder
-	$(bindir)/parameter2xml $(srcdir)/params_disorder params_disorder
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params_disorder params_disorder
 clean-local :
 	rm -f params.* params_disorder.*
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

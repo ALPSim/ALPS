@@ -34,10 +34,10 @@ test tests : check
 .PHONY : params_learn params_measure params_reweight
 params : params_learn.in.xml params_measure.in.xml params_reweight.in.xml
 params_learn.in.xml: params_learn
-	$(bindir)/parameter2xml $(srcdir)/params_learn params_learn
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params_learn params_learn
 params_measure.in.xml: params_measure
-	$(bindir)/parameter2xml $(srcdir)/params_measure params_measure
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params_measure params_measure
 params_reweight.in.xml: params_reweight
-	$(bindir)/parameter2xml $(srcdir)/params_reweight params_reweight
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params_reweight params_reweight
 clean-local :
 	rm -f params_learn.* params_measure.* params_reweight.* weight.dump observable.dump

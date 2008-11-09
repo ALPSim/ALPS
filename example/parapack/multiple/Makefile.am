@@ -26,6 +26,6 @@ test tests : check
 .PHONY : params
 params : params.in.xml
 params.in.xml: $(srcdir)/params
-	$(bindir)/parameter2xml $(srcdir)/params params
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params params
 clean-local :
 	rm -f params.*

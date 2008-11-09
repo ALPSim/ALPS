@@ -38,8 +38,8 @@ test tests : check
 .PHONY : params
 params : params-ising.in.xml params-loop.in.xml
 params-ising.in.xml:
-	$(bindir)/parameter2xml $(srcdir)/params-ising params-ising
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params-ising params-ising
 params-loop.in.xml:
-	$(bindir)/parameter2xml $(srcdir)/params-loop params-loop
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params-loop params-loop
 clean-local :
 	rm -f params-ising.* params-loop.*

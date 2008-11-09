@@ -34,8 +34,8 @@ test tests : check
 .PHONY : params
 params : params.in.xml params_disorder.in.xml
 params.in.xml: params
-	$(bindir)/parameter2xml $(srcdir)/params params
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params params
 params_disorder.in.xml: params_disorder
-	$(bindir)/parameter2xml $(srcdir)/params_disorder params_disorder
+	$(top_builddir)/tool/parameter2xml $(srcdir)/params_disorder params_disorder
 clean-local :
 	rm -f params.* params_disorder.*
