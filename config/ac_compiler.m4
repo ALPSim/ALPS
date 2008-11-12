@@ -226,10 +226,10 @@ AC_DEFUN([AC_COMPILER],
     gnu)
       try_CFLAGS="-pthread"
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
-      try_CFLAGS_NOWARN="-w"
+      try_CFLAGS_NOWARN=""
       try_CXXFLAGS="-pthread -ftemplate-depth-150"
       try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare"
-      try_CXXFLAGS_NOWARN="-w"
+      try_CXXFLAGS_NOWARN=""
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;

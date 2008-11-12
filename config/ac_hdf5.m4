@@ -30,11 +30,11 @@ AC_DEFUN([AC_HDF5],
     AC_MSG_CHECKING([for HDF5 root directory])
     if test "x$hdf5_dir" = "x"; then
       for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
-        if test -f "$d/include/H5Cpp.h"; then
+        if test -f "$d/include/hdf5.h"; then
           hdf5_dir="$d"
           break
         fi
-        if test -f "$d/hdf5/include/H5Cpp.h"; then
+        if test -f "$d/hdf5/include/hdf5.h"; then
           hdf5_dir="$d/hdf5"
           break
         fi
@@ -46,8 +46,8 @@ AC_DEFUN([AC_HDF5],
       fi
     else
       AC_MSG_RESULT([$hdf5_dir])
-      if test -f "$hdf5_dir/include/H5Cpp.h"; then :; else
-        AC_MSG_ERROR([$hdf5_dir/include/H5Cpp.h not found])
+      if test -f "$hdf5_dir/include/hdf5.h"; then :; else
+        AC_MSG_ERROR([$hdf5_dir/include/hdf5.h not found])
       fi
     fi
 
@@ -64,7 +64,7 @@ AC_DEFUN([AC_HDF5],
     CPPFLAGS="$HDF5_CPPFLAGS $CPPFLAGS"
     LDFLAGS="$HDF5_LDFLAGS $LDFLAGS"
 
-    AC_CHECK_HEADER([H5Cpp.h],,
+    AC_CHECK_HEADER([hdf5.h],,
                     [
                     if test "$hdf5" = yes; then
                       AC_MSG_ERROR([check for HDF5 library failed])
@@ -78,27 +78,25 @@ AC_DEFUN([AC_HDF5],
       found=no
 
       if test "$found" = no; then
-        HDF5_LIBS="-lhdf5_cpp -lhdf5"
+        HDF5_LIBS="-lhdf5"
         LIBS="$HDF5_LIBS $ac_save_LIBS"
-        AC_MSG_CHECKING([for H5File() in $HDF5_LIBS])
-        AC_TRY_LINK([#include <H5Cpp.h>],
-                    [#ifndef H5_NO_NAMESPACE
-                     using namespace H5;
-                     #endif
-                     H5File file("tmp.h5",H5F_ACC_TRUNC);],
+        AC_MSG_CHECKING([for H5Fopen() in $HDF5_LIBS])
+        AC_TRY_LINK([#include <hdf5.h>],
+                    [
+                     H5Fopen("tmp.h5",H5F_ACC_RDWR,H5P_DEFAULT);
+                     ],
                     [AC_MSG_RESULT(yes); found=yes],
                     AC_MSG_RESULT(no))
       fi
 
       if test "$found" = no; then
-        HDF5_LIBS="-lhdf5_cpp -lhdf5 -lz"
+        HDF5_LIBS="-lhdf5 -lz"
         LIBS="$HDF5_LIBS $ac_save_LIBS"
         AC_MSG_CHECKING([for H5File() in $HDF5_LIBS])
-        AC_TRY_LINK([#include <H5Cpp.h>],
-                    [#ifndef H5_NO_NAMESPACE
-                     using namespace H5;
-                     #endif
-                     H5File file("tmp.h5",H5F_ACC_TRUNC);],
+        AC_TRY_LINK([#include <hdf5.h>],
+                    [
+                     H5Fopen("tmp.h5",H5F_ACC_RDWR,H5P_DEFAULT);
+                     ],
                     [AC_MSG_RESULT(yes); found=yes],
                     AC_MSG_RESULT(no))
       fi
