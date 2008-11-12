@@ -156,7 +156,7 @@ namespace boost { namespace numeric { namespace bindings {
       template <typename HermA, typename IVec, typename Work>
       inline
       int hptrf (char const ul, HermA& a, IVec& i, Work& w, int const lw) {
-
+        return 0;
       }
 
     }
