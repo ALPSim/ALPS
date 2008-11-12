@@ -127,11 +127,11 @@ typedef green_function<double> itime_green_function_t;
 ///write out imag time Green function
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v);
 ///read in imag time Green function
-std::istream &operator>>(std::istream &is, const green_function<double> &v);
+std::istream &operator>>(std::istream &is, green_function<double> &v);
 ///write out Matsubara Green function
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v);
 ///read in Matsubara Green function
-std::istream &operator>>(std::istream &is, const green_function<std::complex<double> > &v);
+std::istream &operator>>(std::istream &is, green_function<std::complex<double> > &v);
 
 ///compute kinetic energy
 double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, const double &t);
@@ -140,13 +140,13 @@ template<typename T> void green_function<T>::read(const char *filename){
   std::ifstream in_file(filename);
   assert(in_file.is_open()); //this is not good enough when people use -DNDEBUG.
   if(!in_file.is_open()){ std::cerr<<"input file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
-  double ignored;
+  double ignored=0;
   for(unsigned int i=0;i<nt_;++i){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
     for(unsigned int s0=0; s0<ns_; ++s0) {
       for(unsigned int s1=0; s1<ns_; ++s1){
 	for(unsigned int f=0; f<nf_; ++f) {
-	  in_file>>operator()(i, s0, s1, f); //read the actual value
+	  in_file>>operator()(i, s0, s1, f)>>std::ws; //read the actual value
 	}
       }
     }
