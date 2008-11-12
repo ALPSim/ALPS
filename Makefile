@@ -1,5 +1,4 @@
 #General ALPS include directory
-include $(HOME)/ALPS//share/alps/include.mk
 include ./Makefile.inc
 
 SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C clustertransformer.C clusterhelper.C 2dsimpson.C
