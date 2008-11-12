@@ -259,6 +259,10 @@ test "$ac_cv_have_pthread" = yes && AC_DEFINE(ALPS_HAVE_PTHREAD, [], [pthread])
 AC_HDF5
 test "$ac_cv_have_hdf5" = yes && AC_DEFINE(ALPS_HAVE_HDF5, [], [hdf5])
 
+# we could use this to check for the HDF5 C++ interface
+#AC_HDF5_CPP
+#test "$ac_cv_have_hdf5_cpp" = yes && AC_DEFINE(ALPS_HAVE_HDF5_CPP, [], [hdf5_cpp])
+
 dnl
 dnl check for LAPACK
 dnl
