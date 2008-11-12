@@ -419,7 +419,13 @@ AC_DEFUN([AC_BOOST_LIBS],
 
   AM_CONDITIONAL(BUILD_BOOST, test "$ac_cv_use_precompiled_boost" != yes)
 
-  if test "$ac_cv_use_precompiled_boost" = yes; then :; else
+  if test "$ac_cv_use_precompiled_boost" = yes; then
+    AM_CONDITIONAL(BUILD_BOOST_MPI, false)
+    AM_CONDITIONAL(BUILD_BOOST_SIGNALS, false)
+    AM_CONDITIONAL(BUILD_BOOST_SIGNALS, false)
+    AM_CONDITIONAL(BUILD_BOOST_THREAD, test "$ac_cv_boost_thread" = yes)
+    AM_CONDITIONAL(BUILD_BOOST_WCHAR, test "$ac_cv_boost_wchar" = yes)
+  else
     # check whether Boost.MPI is compiled
     AC_MSG_CHECKING([whether to build Boost.MPI])
     test -z "$ac_cv_boost_mpi" && ac_cv_boost_mpi=yes

@@ -246,7 +246,7 @@ AC_DEFUN([AC_MPI],
       fi
       if test "$found" = no; then
         # for openmpi and recent LAM
-        mpi_libs_link=`mpic++ -showme:link`
+        mpi_libs_link=`mpic++ -showme:link 2> /dev/null`
         if test $? -eq 0; then
           MPI_LIBS=$mpi_libs_link
           LIBS="$MPI_LIBS $ac_save_LIBS"
