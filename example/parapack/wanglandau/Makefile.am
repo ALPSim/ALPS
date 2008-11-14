@@ -28,11 +28,10 @@ TESTS = main_ns
 check_PROGRAMS += $(TESTS)
 dist_noinst_DATA += main_ns.ip main_ns.op
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
-.PHONY : test tests
-test tests : check
 
-.PHONY : params_learn params_measure params_reweight
-params : params_learn.in.xml params_measure.in.xml params_reweight.in.xml
+.PHONY : test tests example examples
+test tests :
+example examples : check
 params_learn.in.xml: params_learn
 	$(top_builddir)/tool/parameter2xml $(srcdir)/params_learn params_learn
 params_measure.in.xml: params_measure

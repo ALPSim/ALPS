@@ -28,14 +28,11 @@ TESTS = main_ns
 check_PROGRAMS += main_ns
 dist_noinst_DATA += main_ns.ip main_ns.op
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
-.PHONY : test tests
-test tests : check
 
-.PHONY : params
-params : params.in.xml params_disorder.in.xml
-params.in.xml: params
+.PHONY : test tests example examples
+test tests :
+example examples : check
+params.in.xml: $(srcdir)/params
 	$(top_builddir)/tool/parameter2xml $(srcdir)/params params
-params_disorder.in.xml: params_disorder
-	$(top_builddir)/tool/parameter2xml $(srcdir)/params_disorder params_disorder
 clean-local :
-	rm -f params.* params_disorder.*
+	rm -f params.*

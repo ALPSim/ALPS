@@ -20,11 +20,10 @@ TESTS =
 check_PROGRAMS +=
 dist_noinst_DATA +=
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
-.PHONY : test tests
-test tests : check
 
-.PHONY : params
-params : params.in.xml
+.PHONY : test tests example examples
+test tests :
+example examples : check
 params.in.xml: $(srcdir)/params
 	$(top_builddir)/tool/parameter2xml $(srcdir)/params params
 clean-local :

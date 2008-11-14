@@ -632,11 +632,10 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am
 
-.PHONY : test tests
-test tests : check
 
-.PHONY : params_learn params_measure params_reweight
-params : params_learn.in.xml params_measure.in.xml params_reweight.in.xml
+.PHONY : test tests example examples
+test tests :
+example examples : check
 params_learn.in.xml: params_learn
 	$(top_builddir)/tool/parameter2xml $(srcdir)/params_learn params_learn
 params_measure.in.xml: params_measure

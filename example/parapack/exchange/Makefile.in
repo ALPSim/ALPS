@@ -639,11 +639,10 @@ uninstall-am:
 	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
 	tags uninstall uninstall-am
 
-.PHONY : test tests
-test tests : check
 
-.PHONY : params
-params : params-ising.in.xml params-loop.in.xml
+.PHONY : test tests example examples
+test tests :
+example examples : check
 params-ising.in.xml:
 	$(top_builddir)/tool/parameter2xml $(srcdir)/params-ising params-ising
 params-loop.in.xml:

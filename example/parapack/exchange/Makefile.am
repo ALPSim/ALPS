@@ -32,11 +32,10 @@ TESTS = main_ns
 check_PROGRAMS += $(TESTS)
 dist_noinst_DATA += main_ns.ip main_ns.op
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
-.PHONY : test tests
-test tests : check
 
-.PHONY : params
-params : params-ising.in.xml params-loop.in.xml
+.PHONY : test tests example examples
+test tests :
+example examples : check
 params-ising.in.xml:
 	$(top_builddir)/tool/parameter2xml $(srcdir)/params-ising params-ising
 params-loop.in.xml:
