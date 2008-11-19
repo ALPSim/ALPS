@@ -273,7 +273,7 @@ SUBDIRS = lib src $(am__append_1) test doc .
 DIST_SUBDIRS = $(SUBDIRS)
 distdir = alps-$(VERSION)
 distdir_light = alps-light-$(VERSION)
-dist_noinst_SCRIPTS = config/make_snapshot config/run-test config/update_preamble
+dist_noinst_SCRIPTS = bootstrap config/make_snapshot config/run-test config/update_preamble
 dist_noinst_DATA = ChangeLog ChangeLog.0 INSTALL TODO $(am__append_2) \
 	$(am__append_3)
 nodist_data_DATA = config/config.site
