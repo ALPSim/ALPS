@@ -56,7 +56,7 @@ void convert_params(const std::string& inname, const std::string& basename,
             <<  basename+".in.xml" << std::endl;
 
   int bits = 31;
-  for (int n = 1; n < list.size(); n<<=1, --bits);
+  for (int n = 1; n < list.size(); n<<=1, --bits) {}
 
   uint32_t baseseed;
   if (list[0].defined("BASESEED")) {

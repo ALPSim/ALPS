@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005-2007 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2005-2008 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -31,7 +31,15 @@
 #ifndef _INDEX_H_
 #define _INDEX_H_
 
-#include <boost/spirit/core.hpp>
+#include <boost/version.hpp>
+#if BOOST_VERSION >= 103600
+# if !defined(BOOST_SPIRIT_USE_OLD_NAMESPACE)
+#  define BOOST_SPIRIT_USE_OLD_NAMESPACE
+# endif
+# include <boost/spirit/include/classic_core.hpp>
+#else
+# include <boost/spirit/core.hpp>
+#endif
 #include <boost/filesystem/operations.hpp>
 
 namespace fs = boost::filesystem;
@@ -43,33 +51,33 @@ class Index {
         bool mVerbose;
         void cretateTables();
         bool patternFilter(std::string, std::string);
-        
-        public:                
+
+        public:
                 Index(SQLite &inDB, bool verbose = true): mDB(inDB), mVerbose(verbose) {}
 
                 #ifdef USEPATTERN
-                        void install(fs::path inPatternFile);        
+                        void install(fs::path inPatternFile);
                 #else
                         void install();
                 #endif
-                
+
                 /**
                  * Sets a reference to the database
-                 * 
+                 *
                  * @param &inDB Reference of the database
                  */
                 void setDB(SQLite &inDB) { mDB = inDB; }
-                                
+
                 /**
                  * Lists all the parameters and measurements indexed in the database
-                 * 
+                 *
                  * @param inFullList Should the whole list be displaied
                  */
                 void list(bool inFullList);
 
                 /**
                  * Adds all files in the directory and subdirectories to the index it they do not already exit.
-                 * 
+                 *
                  * @param xmlPath Path to scan
                  */
                 void exec(fs::path xmlPath);
