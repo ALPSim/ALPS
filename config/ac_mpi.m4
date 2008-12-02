@@ -339,7 +339,18 @@ AC_DEFUN([AC_MPI],
                     [AC_MSG_RESULT(yes); found=yes],
                     AC_MSG_RESULT(no))
       fi
-
+      if test "$found" = no; then
+        # for Fujitsu mpiFCC in SunOS 5.10
+        mpi_libs_link=`mpiFCC -show | sed -e 's/FCC//g'`
+        if test $? -eq 0; then
+          MPI_LIBS=$mpi_libs_link
+          LIBS="$MPI_LIBS $ac_save_LIBS"
+          AC_MSG_CHECKING([for MPI_Finalize()])
+          AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                      [AC_MSG_RESULT(yes); found=yes],
+                      AC_MSG_RESULT(no))
+        fi
+      fi
       if test "$found" = no; then
         if test "$mpi" = yes; then
           AC_MSG_ERROR([check for MPI library failed])

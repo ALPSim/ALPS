@@ -178,6 +178,31 @@ AC_DEFUN([AC_LAPACK],
     ]
   )
 
+  AC_ARG_WITH(ssl2,
+    AC_HELP_STRING([--with-ssl2],[use SSL2 Library with Fujitsu compiler]),
+    [
+    if test "x$withval" = xno; then
+      ssl2=no
+    else
+      ssl2=yes
+      if test "x$withval" != xyes; then
+        ssl2_flags='-SSL2'
+      fi
+    fi
+    ]
+  )
+  AC_ARG_WITH(ssl2-dir,
+    AC_HELP_STRING([--with-ssl2-dir=DIR],[SSL2 lib directory]),
+    [
+    ssl2_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $ssl2_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-ssl2-dir]);;
+    esac
+    ]
+  )
+
   AC_ARG_WITH(veclib,
     AC_HELP_STRING([--with-veclib], [use vecLib framework on Mac OS X]),
     [
@@ -233,6 +258,9 @@ AC_DEFUN([AC_LAPACK],
     if test "x$essl" = xyes; then
       AC_MSG_ERROR([more than one BLAS-like libraries specified.])
     fi
+    if test "x$ssl2" = xyes; then
+      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
+    fi
     if test "x$veclib" = xyes; then
       AC_MSG_ERROR([more than one BLAS-like libraries specified.])
     fi
@@ -264,6 +292,9 @@ AC_DEFUN([AC_LAPACK],
     if test "x$essl" = xyes; then
       AC_MSG_ERROR([more than one BLAS-like libraries specified.])
     fi
+    if test "x$ssl2" = xyes; then
+      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
+    fi
   fi
   if test "x$mkl" = xyes; then
     if test "x$scsl" = xyes; then
@@ -275,6 +306,9 @@ AC_DEFUN([AC_LAPACK],
     if test "x$essl" = xyes; then
       AC_MSG_ERROR([more than one BLAS-like libraries specified.])
     fi
+    if test "x$ssl2" = xyes; then
+      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
+    fi
   fi
   if test "x$scsl" = xyes; then
     if test "x$veclib" = xyes; then
@@ -283,12 +317,24 @@ AC_DEFUN([AC_LAPACK],
     if test "x$essl" = xyes; then
       AC_MSG_ERROR([more than one BLAS-like libraries specified.])
     fi
+    if test "x$ssl2" = xyes; then
+      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
+    fi
   fi
   if test "x$veclib" = xyes; then
     if test "x$essl" = xyes; then
       AC_MSG_ERROR([more than one BLAS-like libraries specified.])
     fi
+    if test "x$ssl2" = xyes; then
+      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
+    fi
   fi
+  if test "x$essl" = xyes; then
+    if test "x$ssl2" = xyes; then
+      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
+    fi
+  fi
+
     
   AC_LANG_SAVE
   AC_LANG_CPLUSPLUS
@@ -645,6 +691,37 @@ AC_DEFUN([AC_LAPACK],
       AC_DEFINE(ALPS_HAVE_ESSL, [], [Define if you have ESSL library.])
     fi
   fi 
+
+  # for SSL2 with Fujitsu FCC compiler
+  if test "$found_blas" = no; then
+    if test "x$ssl2" != xno; then
+      AC_MSG_NOTICE([checking for SSL2 Library])
+      ssl2_ldflags="-SSL2"
+      LDFLAGS="$ssl2_ldflags $ac_save_LDFLAGS"
+      LIBS="$ac_save_LIBS"
+      AC_MSG_CHECKING([for dgemm_ in $ssl2_ldflags])
+      AC_TRY_LINK([#define main MAIN__
+      extern "C" char dgemm_();],[dgemm_();],
+        [AC_MSG_RESULT(yes)
+         AC_MSG_CHECKING([for dsyev_ in $ssl2_ldflags])
+         AC_TRY_LINK([#define main MAIN__
+	 extern "C" char dsyev_();],[dsyev_();],
+                     [AC_MSG_RESULT(yes)
+                      LAPACK_LDFLAGS="$ssl2_ldflags"; LAPACK_LIBS=
+                      found_blas=yes; found_lapack=yes],
+                     [AC_MSG_RESULT(no)])],
+        [AC_MSG_RESULT(no)]
+      )
+    fi
+    if test "x$ssl2" = xyes; then
+      if test "$found_blas" = no; then
+        AC_MSG_ERROR([SSL2 Library not found.])
+      fi
+    fi
+    if test "$found_blas" = yes; then
+      AC_DEFINE(ALPS_HAVE_SSL2, [], [Define if you have SSL2 Library.])
+    fi
+  fi
 
   # for ATLAS
   if test "$found_blas" = no; then
