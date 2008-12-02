@@ -111,7 +111,7 @@ public:
 
     // initialize operator information
     std::swap(operators_, operators_p_);
-    operators_.clear();
+    operators_.resize(0);
 
     // initialize cluster information (setup s cluster fragments)
     fragments_.resize(nsites_);
