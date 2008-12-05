@@ -302,7 +302,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
     } else {
       alias = parameter_aliases[name];
     }
-    std::string req("SELECT DISTINCT " + alias + ".value FROM " + from + " WHERE " + where + ";");
+    std::string req("SELECT DISTINCT " + alias + ".value as value FROM " + from + " WHERE " + where + ";");
     result_type rs = mDB(req, true);
     foreachName.push_back(name);
     foreachData.push_back(std::vector<std::string>());
