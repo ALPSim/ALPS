@@ -46,7 +46,7 @@ AC_DEFUN([AC_COMPILER],
 
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
-      [set compiler mode (MODE = gnu, kai, intel, como, hp32, hp64, dec, sgi32, sgi64, cray, cray-gcc, ibm32, ibm64, macos, macos-gcc-3, macos-gcc-3.3, macos-gcc-4.0, cygwin, fcc, generic)]),
+      [set compiler mode (MODE = gnu, kai, intel, como, hp32, hp64, dec, sgi32, sgi64, cray, cray-gcc, ibm32, ibm64, macos, macos-gcc-3, macos-gcc-3.3, macos-gcc-4.0, cygwin, pgi, fcc, generic)]),
     [
     case "x$withval" in
       xgnu* | xGNU* | xgcc* | xg++* )
@@ -103,6 +103,9 @@ AC_DEFUN([AC_COMPILER],
       xmacos* | xmac* | xosx*)
         COMPILER="macos"
         ;;
+      xpgi)
+      	COMPILER="pgi"
+	;;
       xfcc)
       	COMPILER="fcc"
 	;;
@@ -180,6 +183,10 @@ AC_DEFUN([AC_COMPILER],
     macos-gcc-4.0)
       try_CC="gcc-4.0"
       try_CXX="g++-4.0"
+      ;;
+    pgi)
+      try_CC="pgcc"
+      try_CXX="pgCC"
       ;;
     fcc)
       try_CC="fcc"
@@ -388,7 +395,9 @@ AC_DEFUN([AC_COMPILER],
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
-    fcc)
+    pgi*)
+      ;;
+    fcc*)
       ;;
     generic)
       try_CFLAGS_OPT="$CFLAGS"
