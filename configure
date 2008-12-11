@@ -1035,7 +1035,6 @@ with_scsl
 with_essl
 with_essl_dir
 with_ssl2
-with_ssl2_dir
 with_veclib
 with_sqlite_incdir
 with_sqlite_libdir
@@ -1759,7 +1758,6 @@ Optional Packages:
                           used\)
   --with-essl-dir=DIR     ESSL lib directory
   --with-ssl2             use SSL2 Library with Fujitsu compiler
-  --with-ssl2-dir=DIR     SSL2 lib directory
   --with-veclib           use vecLib framework on Mac OS X
   --with-sqlite-incdir=DIR
                           SQLite include directory
@@ -4921,6 +4919,8 @@ $as_echo "$as_me: error: compiler mode is not set" >&2;}
     pgi*)
       ;;
     fcc*)
+      try_CXXFLAGS_OPT="-Kfast -DBOOST_DISABLE_ASSERTS"
+      try_CXXFLAGS_DEBUG="-g -O0"
       ;;
     generic)
       try_CFLAGS_OPT="$CFLAGS"
@@ -5610,6 +5610,12 @@ ac_cv_alps_cpp="$CPP"
 ac_cv_alps_cxxcpp="$CXXCPP"
 
 test -z "$F77" && F77=no
+
+if test "$ac_cv_alps_compiler" = fcc; then
+  LDFLAGS="$LDFLAGS -Wl,-z,muldefs"
+  AR="$ac_cv_compiler_cxx --ar"
+  AR_FLAGS="-o"
+fi
 
 
 ac_ext=cpp
@@ -8058,7 +8064,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8061 "configure"' > conftest.$ac_ext
+  echo '#line 8067 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10170,11 +10176,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10173: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10179: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10177: \$? = $ac_status" >&5
+   echo "$as_me:10183: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10460,11 +10466,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10463: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10469: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10467: \$? = $ac_status" >&5
+   echo "$as_me:10473: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -10564,11 +10570,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10567: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10573: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:10571: \$? = $ac_status" >&5
+   echo "$as_me:10577: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12964,7 +12970,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12967 "configure"
+#line 12973 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13064,7 +13070,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 13067 "configure"
+#line 13073 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15473,11 +15479,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15476: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15482: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15480: \$? = $ac_status" >&5
+   echo "$as_me:15486: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15577,11 +15583,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15580: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15586: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15584: \$? = $ac_status" >&5
+   echo "$as_me:15590: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17160,11 +17166,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17163: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17169: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:17167: \$? = $ac_status" >&5
+   echo "$as_me:17173: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -17264,11 +17270,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:17267: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:17273: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:17271: \$? = $ac_status" >&5
+   echo "$as_me:17277: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -19479,11 +19485,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19482: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19488: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19486: \$? = $ac_status" >&5
+   echo "$as_me:19492: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19769,11 +19775,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19772: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19778: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:19776: \$? = $ac_status" >&5
+   echo "$as_me:19782: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19873,11 +19879,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19876: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19882: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19880: \$? = $ac_status" >&5
+   echo "$as_me:19886: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -25208,26 +25214,7 @@ if test "${with_ssl2+set}" = set; then
       ssl2=no
     else
       ssl2=yes
-      if test "x$withval" != xyes; then
-        ssl2_flags='-SSL2'
-      fi
     fi
-
-
-fi
-
-
-# Check whether --with-ssl2-dir was given.
-if test "${with_ssl2_dir+set}" = set; then
-  withval=$with_ssl2_dir;
-    ssl2_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-    # Be sure to have absolute paths.
-    case $ssl2_dir in
-      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
-      *)  { { $as_echo "$as_me:$LINENO: error: expected an absolute directory name for --with-ssl2-dir" >&5
-$as_echo "$as_me: error: expected an absolute directory name for --with-ssl2-dir" >&2;}
-   { (exit 1); exit 1; }; };;
-    esac
 
 
 fi
@@ -27709,7 +27696,7 @@ _ACEOF
     if test "x$ssl2" != xno; then
       { $as_echo "$as_me:$LINENO: checking for SSL2 Library" >&5
 $as_echo "$as_me: checking for SSL2 Library" >&6;}
-      ssl2_ldflags="-SSL2"
+      ssl2_ldflags="-KSSL2"
       LDFLAGS="$ssl2_ldflags $ac_save_LDFLAGS"
       LIBS="$ac_save_LIBS"
       { $as_echo "$as_me:$LINENO: checking for dgemm_ in $ssl2_ldflags" >&5
@@ -29722,7 +29709,6 @@ if test "${with_mpi+set}" = set; then
 fi
 
 
-
 # Check whether --with-mpi-incdir was given.
 if test "${with_mpi_incdir+set}" = set; then
   withval=$with_mpi_incdir;
@@ -29758,82 +29744,90 @@ fi
 # Check whether --with-mpi-libs was given.
 if test "${with_mpi_libs+set}" = set; then
   withval=$with_mpi_libs; mpi_libs="$withval"
+
 fi
 
 
   if test "$mpi" != no; then
-    { $as_echo "$as_me:$LINENO: checking for MPI root directory" >&5
+    if test "${MPI_CPPFLAGS+set}" = set || test "${MPI_LDFLAGS+set}" = set || test "${MPI_LIBS+set}" = set; then
+      echo ${MPI_CPPFLAGS}
+      MPI_CPPFLAGS=${MPI_CPPFLAGS}
+      MPI_LDFLAGS=${MPI_LDFLAGS}
+      MPI_LIBS=${MPI_LIBS}
+    else
+      { $as_echo "$as_me:$LINENO: checking for MPI root directory" >&5
 $as_echo_n "checking for MPI root directory... " >&6; }
-    ll_root="/usr/lpp/ppe.poe"
-    if test "x$MP_PREFIX" != x; then
-      ll_root="$MP_PREFIX/ppe.poe"
-    fi
-    if test -z "$mpi_dir"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src /usr/lib /usr $ll_root; do
-        if test -f "$d/include/mpi.h" && test -d "$d/lib"; then
-          mpi_dir="$d"
-          break
-        fi
-        if test -f "$d/mpi/include/mpi.h" && test -d "$d/mpi/lib"; then
-          mpi_dir="$d/mpi"
-          break
-        fi
-        if test -f "$d/mpich/include/mpi.h" && test -d "$d/mpich/lib"; then
-          mpi_dir="$d/mpich"
-          break
-        fi
-        if test -f "$d/lammpi/include/mpi.h" && test -d "$d/lammpi/lib"; then
-          mpi_dir="$d/lammpi"
-          break
-        fi
-        if test -f "$d/lam/include/mpi.h" && test -d "$d/lam/lib"; then
-          mpi_dir="$d/lam"
-          break
-        fi
-        # for OpenMPI on Debian
-        if test -f "$d/openmpi/include/mpi.h" -a -d "$d/openmpi/lib"; then
-          mpi_dir="$d/openmpi"
-          break
-        fi
-        # for lam 7.1 on CentOS 5
-        if test -f "$d/include/lam/mpi.h" && test -d "$d/lib64/lam"; then
-          test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
-          test -z "$mpi_libdir" && mpi_libdir="$d/lib64/lam"
-          break
-        fi
-        if test -f "$d/include/lam/mpi.h" && test -d "$d/lib/lam"; then
-          test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
-          test -z "$mpi_libdir" && mpi_libdir="$d/lib/lam"
-          break
-        fi
-      done
-      # for Intel MPI Library (3.1 or higher)
-      if test -z "$mpi_dir" -a -z "$mpi_incdir" -a -z "$mpi_libdir"; then
-        if test -d "/opt/intel/impi"; then
-          impi_root="/opt/intel/impi"
-          impi_ver=`ls /opt/intel/impi | sort -nr | head -1`
-          mpi_dir="$impi_root/$impi_ver"
-        fi
+      ll_root="/usr/lpp/ppe.poe"
+      if test "x$MP_PREFIX" != x; then
+        ll_root="$MP_PREFIX/ppe.poe"
       fi
-      if test -n "$mpi_dir"; then
+      if test -z "$mpi_dir"; then
+        for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src /usr/lib /usr $ll_root; do
+          if test -f "$d/include/mpi.h" && test -d "$d/lib"; then
+            mpi_dir="$d"
+            break
+          fi
+          if test -f "$d/mpi/include/mpi.h" && test -d "$d/mpi/lib"; then
+            mpi_dir="$d/mpi"
+            break
+          fi
+          if test -f "$d/mpich/include/mpi.h" && test -d "$d/mpich/lib"; then
+            mpi_dir="$d/mpich"
+            break
+          fi
+          if test -f "$d/lammpi/include/mpi.h" && test -d "$d/lammpi/lib"; then
+            mpi_dir="$d/lammpi"
+            break
+          fi
+          if test -f "$d/lam/include/mpi.h" && test -d "$d/lam/lib"; then
+            mpi_dir="$d/lam"
+            break
+          fi
+          # for OpenMPI on Debian
+          if test -f "$d/openmpi/include/mpi.h" -a -d "$d/openmpi/lib"; then
+            mpi_dir="$d/openmpi"
+            break
+          fi
+          # for lam 7.1 on CentOS 5
+          if test -f "$d/include/lam/mpi.h" && test -d "$d/lib64/lam"; then
+            test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
+            test -z "$mpi_libdir" && mpi_libdir="$d/lib64/lam"
+            break
+          fi
+          if test -f "$d/include/lam/mpi.h" && test -d "$d/lib/lam"; then
+            test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
+            test -z "$mpi_libdir" && mpi_libdir="$d/lib/lam"
+            break
+          fi
+        done
+        # for Intel MPI Library (3.1 or higher)
+        if test -z "$mpi_dir" -a -z "$mpi_incdir" -a -z "$mpi_libdir"; then
+          if test -d "/opt/intel/impi"; then
+            impi_root="/opt/intel/impi"
+            impi_ver=`ls /opt/intel/impi | sort -nr | head -1`
+            mpi_dir="$impi_root/$impi_ver"
+          fi
+        fi
+        if test -n "$mpi_dir"; then
+          { $as_echo "$as_me:$LINENO: result: $mpi_dir" >&5
+$as_echo "$mpi_dir" >&6; }
+        else
+          { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+        fi
+      else
         { $as_echo "$as_me:$LINENO: result: $mpi_dir" >&5
 $as_echo "$mpi_dir" >&6; }
-      else
-        { $as_echo "$as_me:$LINENO: result: yes" >&5
-$as_echo "yes" >&6; }
-      fi
-    else
-      { $as_echo "$as_me:$LINENO: result: $mpi_dir" >&5
-$as_echo "$mpi_dir" >&6; }
-      if test -f "$mpi_dir/include/mpi.h"; then :; else
-        { { $as_echo "$as_me:$LINENO: error: $mpi_dir/include/mpi.h not found" >&5
+        if test -f "$mpi_dir/include/mpi.h"; then :; else
+          { { $as_echo "$as_me:$LINENO: error: $mpi_dir/include/mpi.h not found" >&5
 $as_echo "$as_me: error: $mpi_dir/include/mpi.h not found" >&2;}
    { (exit 1); exit 1; }; }
-      fi
-      if test -d "$mpi_dir/lib"; then :; else
-        { { $as_echo "$as_me:$LINENO: error: $mpi_dir/lib not found" >&5
+        fi
+        if test -d "$mpi_dir/lib"; then :; else
+          { { $as_echo "$as_me:$LINENO: error: $mpi_dir/lib not found" >&5
 $as_echo "$as_me: error: $mpi_dir/lib not found" >&2;}
    { (exit 1); exit 1; }; }
+        fi
       fi
     fi
 
@@ -30026,12 +30020,13 @@ done
     if test "$mpi" != no; then
       found=no
 
-      if test -n "$mpi_libs"; then
-        MPI_LIBS="$mpi_libs"
-        LIBS="$MPI_LIBS $ac_save_LIBS"
-        { $as_echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
+      if test "$found" = no; then
+        if test -n "$mpi_libs"; then
+          MPI_LIBS="$mpi_libs"
+          LIBS="$MPI_LIBS $ac_save_LIBS"
+          { $as_echo "$as_me:$LINENO: checking for MPI_Finalize() in $MPI_LIBS" >&5
 $as_echo_n "checking for MPI_Finalize() in $MPI_LIBS... " >&6; }
-        cat >conftest.$ac_ext <<_ACEOF
+          cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
 cat confdefs.h >>conftest.$ac_ext
@@ -30075,7 +30070,7 @@ sed 's/^/| /' conftest.$ac_ext >&5
 
 	{ $as_echo "$as_me:$LINENO: result: no" >&5
 $as_echo "no" >&6; };
-                     { { $as_echo "$as_me:$LINENO: error: check for MPI library failed" >&5
+                       { { $as_echo "$as_me:$LINENO: error: check for MPI library failed" >&5
 $as_echo "$as_me: error: check for MPI library failed" >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -30083,8 +30078,62 @@ fi
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
-      fi
+        else
+          LDFLAGS="$MPI_LDFLAGS $ac_save_LDFLAGS"
+          LIBS="$MPI_LIBS $ac_save_LIBS"
+          { $as_echo "$as_me:$LINENO: checking for MPI_Finalize()" >&5
+$as_echo_n "checking for MPI_Finalize()... " >&6; }
+          cat >conftest.$ac_ext <<_ACEOF
+/* confdefs.h.  */
+_ACEOF
+cat confdefs.h >>conftest.$ac_ext
+cat >>conftest.$ac_ext <<_ACEOF
+/* end confdefs.h.  */
+#include <mpi.h>
+int
+main ()
+{
+MPI_Finalize();
+  ;
+  return 0;
+}
+_ACEOF
+rm -f conftest.$ac_objext conftest$ac_exeext
+if { (ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
+$as_echo "$ac_try_echo") >&5
+  (eval "$ac_link") 2>conftest.er1
+  ac_status=$?
+  grep -v '^ *+' conftest.er1 >conftest.err
+  rm -f conftest.er1
+  cat conftest.err >&5
+  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
+  (exit $ac_status); } && {
+	 test -z "$ac_cxx_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 $as_test_x conftest$ac_exeext
+       }; then
+  { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }; found=yes
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
 
+	{ $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+rm -rf conftest.dSYM
+rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
+      conftest$ac_exeext conftest.$ac_ext
+        fi
+      fi
       if test "$found" = no; then
         if test "$ac_cv_compiler" = ibm32 || test "$ac_cv_compiler" = ibm64; then
 	  # for IBM LoadLeveler

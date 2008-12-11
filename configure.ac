@@ -148,6 +148,13 @@ ac_cv_alps_cxxcpp="$CXXCPP"
 dnl disable F77
 test -z "$F77" && F77=no
 
+dnl fix options for Fujitsu compiler
+if test "$ac_cv_alps_compiler" = fcc; then
+  LDFLAGS="$LDFLAGS -Wl,-z,muldefs"
+  AR="$ac_cv_compiler_cxx --ar"
+  AR_FLAGS="-o"
+fi
+
 dnl
 dnl System Headers ---------------------------------------------------------
 dnl

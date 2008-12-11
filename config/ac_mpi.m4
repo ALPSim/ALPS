@@ -20,7 +20,6 @@ AC_DEFUN([AC_MPI],
     fi
     ]
   )
-  
   AC_ARG_WITH(mpi-incdir,
     AC_HELP_STRING([--with-mpi-incdir=DIR],[MPI include directory]),
     [
@@ -45,73 +44,81 @@ AC_DEFUN([AC_MPI],
   )
   AC_ARG_WITH(mpi-libs,
     AC_HELP_STRING([--with-mpi-libs=LIBS],[MPI libraries]),
-    [mpi_libs="$withval"])
-  
+    [mpi_libs="$withval"]
+  )
+
   if test "$mpi" != no; then
-    AC_MSG_CHECKING([for MPI root directory])
-    ll_root="/usr/lpp/ppe.poe"
-    if test "x$MP_PREFIX" != x; then
-      ll_root="$MP_PREFIX/ppe.poe"
-    fi
-    if test -z "$mpi_dir"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src /usr/lib /usr $ll_root; do
-        if test -f "$d/include/mpi.h" && test -d "$d/lib"; then
-          mpi_dir="$d"
-          break
-        fi
-        if test -f "$d/mpi/include/mpi.h" && test -d "$d/mpi/lib"; then
-          mpi_dir="$d/mpi"
-          break
-        fi
-        if test -f "$d/mpich/include/mpi.h" && test -d "$d/mpich/lib"; then
-          mpi_dir="$d/mpich"
-          break
-        fi
-        if test -f "$d/lammpi/include/mpi.h" && test -d "$d/lammpi/lib"; then
-          mpi_dir="$d/lammpi"
-          break
-        fi
-        if test -f "$d/lam/include/mpi.h" && test -d "$d/lam/lib"; then
-          mpi_dir="$d/lam"
-          break
-        fi
-        # for OpenMPI on Debian
-        if test -f "$d/openmpi/include/mpi.h" -a -d "$d/openmpi/lib"; then
-          mpi_dir="$d/openmpi"
-          break
-        fi
-        # for lam 7.1 on CentOS 5
-        if test -f "$d/include/lam/mpi.h" && test -d "$d/lib64/lam"; then
-          test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
-          test -z "$mpi_libdir" && mpi_libdir="$d/lib64/lam"
-          break
-        fi
-        if test -f "$d/include/lam/mpi.h" && test -d "$d/lib/lam"; then
-          test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
-          test -z "$mpi_libdir" && mpi_libdir="$d/lib/lam"
-          break
-        fi
-      done
-      # for Intel MPI Library (3.1 or higher)
-      if test -z "$mpi_dir" -a -z "$mpi_incdir" -a -z "$mpi_libdir"; then
-        if test -d "/opt/intel/impi"; then
-          impi_root="/opt/intel/impi"
-          impi_ver=`ls /opt/intel/impi | sort -nr | head -1`
-          mpi_dir="$impi_root/$impi_ver"
-        fi
-      fi
-      if test -n "$mpi_dir"; then
-        AC_MSG_RESULT([$mpi_dir])
-      else
-        AC_MSG_RESULT([yes])
-      fi
+    if test "${MPI_CPPFLAGS+set}" = set || test "${MPI_LDFLAGS+set}" = set || test "${MPI_LIBS+set}" = set; then
+      echo ${MPI_CPPFLAGS}
+      MPI_CPPFLAGS=${MPI_CPPFLAGS}
+      MPI_LDFLAGS=${MPI_LDFLAGS}
+      MPI_LIBS=${MPI_LIBS}
     else
-      AC_MSG_RESULT([$mpi_dir])
-      if test -f "$mpi_dir/include/mpi.h"; then :; else
-        AC_MSG_ERROR([$mpi_dir/include/mpi.h not found])
+      AC_MSG_CHECKING([for MPI root directory])
+      ll_root="/usr/lpp/ppe.poe"
+      if test "x$MP_PREFIX" != x; then
+        ll_root="$MP_PREFIX/ppe.poe"
       fi
-      if test -d "$mpi_dir/lib"; then :; else
-        AC_MSG_ERROR([$mpi_dir/lib not found])
+      if test -z "$mpi_dir"; then
+        for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src /usr/lib /usr $ll_root; do
+          if test -f "$d/include/mpi.h" && test -d "$d/lib"; then
+            mpi_dir="$d"
+            break
+          fi
+          if test -f "$d/mpi/include/mpi.h" && test -d "$d/mpi/lib"; then
+            mpi_dir="$d/mpi"
+            break
+          fi
+          if test -f "$d/mpich/include/mpi.h" && test -d "$d/mpich/lib"; then
+            mpi_dir="$d/mpich"
+            break
+          fi
+          if test -f "$d/lammpi/include/mpi.h" && test -d "$d/lammpi/lib"; then
+            mpi_dir="$d/lammpi"
+            break
+          fi
+          if test -f "$d/lam/include/mpi.h" && test -d "$d/lam/lib"; then
+            mpi_dir="$d/lam"
+            break
+          fi
+          # for OpenMPI on Debian
+          if test -f "$d/openmpi/include/mpi.h" -a -d "$d/openmpi/lib"; then
+            mpi_dir="$d/openmpi"
+            break
+          fi
+          # for lam 7.1 on CentOS 5
+          if test -f "$d/include/lam/mpi.h" && test -d "$d/lib64/lam"; then
+            test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
+            test -z "$mpi_libdir" && mpi_libdir="$d/lib64/lam"
+            break
+          fi
+          if test -f "$d/include/lam/mpi.h" && test -d "$d/lib/lam"; then
+            test -z "$mpi_incdir" && mpi_incdir="$d/include/lam"
+            test -z "$mpi_libdir" && mpi_libdir="$d/lib/lam"
+            break
+          fi
+        done
+        # for Intel MPI Library (3.1 or higher)
+        if test -z "$mpi_dir" -a -z "$mpi_incdir" -a -z "$mpi_libdir"; then
+          if test -d "/opt/intel/impi"; then
+            impi_root="/opt/intel/impi"
+            impi_ver=`ls /opt/intel/impi | sort -nr | head -1`
+            mpi_dir="$impi_root/$impi_ver"
+          fi
+        fi
+        if test -n "$mpi_dir"; then
+          AC_MSG_RESULT([$mpi_dir])
+        else
+          AC_MSG_RESULT([yes])
+        fi
+      else
+        AC_MSG_RESULT([$mpi_dir])
+        if test -f "$mpi_dir/include/mpi.h"; then :; else
+          AC_MSG_ERROR([$mpi_dir/include/mpi.h not found])
+        fi
+        if test -d "$mpi_dir/lib"; then :; else
+          AC_MSG_ERROR([$mpi_dir/lib not found])
+        fi
       fi
     fi
 
@@ -223,16 +230,24 @@ AC_DEFUN([AC_MPI],
     if test "$mpi" != no; then
       found=no
 
-      if test -n "$mpi_libs"; then
-        MPI_LIBS="$mpi_libs"
-        LIBS="$MPI_LIBS $ac_save_LIBS"
-        AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
-        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
-                    [AC_MSG_RESULT(yes); found=yes],
-                    [AC_MSG_RESULT(no);
-                     AC_MSG_ERROR([check for MPI library failed])])
+      if test "$found" = no; then
+        if test -n "$mpi_libs"; then
+          MPI_LIBS="$mpi_libs"
+          LIBS="$MPI_LIBS $ac_save_LIBS"
+          AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
+          AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                      [AC_MSG_RESULT(yes); found=yes],
+                      [AC_MSG_RESULT(no);
+                       AC_MSG_ERROR([check for MPI library failed])])
+        else
+          LDFLAGS="$MPI_LDFLAGS $ac_save_LDFLAGS"
+          LIBS="$MPI_LIBS $ac_save_LIBS"
+          AC_MSG_CHECKING([for MPI_Finalize()])
+          AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                      [AC_MSG_RESULT(yes); found=yes],
+                      [AC_MSG_RESULT(no)])
+        fi
       fi
-
       if test "$found" = no; then
         if test "$ac_cv_compiler" = ibm32 || test "$ac_cv_compiler" = ibm64; then
 	  # for IBM LoadLeveler

@@ -185,21 +185,7 @@ AC_DEFUN([AC_LAPACK],
       ssl2=no
     else
       ssl2=yes
-      if test "x$withval" != xyes; then
-        ssl2_flags='-SSL2'
-      fi
     fi
-    ]
-  )
-  AC_ARG_WITH(ssl2-dir,
-    AC_HELP_STRING([--with-ssl2-dir=DIR],[SSL2 lib directory]),
-    [
-    ssl2_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-    # Be sure to have absolute paths.
-    case $ssl2_dir in
-      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
-      *)  AC_MSG_ERROR([expected an absolute directory name for --with-ssl2-dir]);;
-    esac
     ]
   )
 
@@ -696,7 +682,7 @@ AC_DEFUN([AC_LAPACK],
   if test "$found_blas" = no; then
     if test "x$ssl2" != xno; then
       AC_MSG_NOTICE([checking for SSL2 Library])
-      ssl2_ldflags="-SSL2"
+      ssl2_ldflags="-KSSL2"
       LDFLAGS="$ssl2_ldflags $ac_save_LDFLAGS"
       LIBS="$ac_save_LIBS"
       AC_MSG_CHECKING([for dgemm_ in $ssl2_ldflags])
