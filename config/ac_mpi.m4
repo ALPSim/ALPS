@@ -49,7 +49,6 @@ AC_DEFUN([AC_MPI],
 
   if test "$mpi" != no; then
     if test "${MPI_CPPFLAGS+set}" = set || test "${MPI_LDFLAGS+set}" = set || test "${MPI_LIBS+set}" = set; then
-      echo ${MPI_CPPFLAGS}
       MPI_CPPFLAGS=${MPI_CPPFLAGS}
       MPI_LDFLAGS=${MPI_LDFLAGS}
       MPI_LIBS=${MPI_LIBS}
