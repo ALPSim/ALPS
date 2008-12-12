@@ -12,6 +12,8 @@ AC_DEFUN([AC_LAPACK],
     if test "x$withval" = xno; then
       atlas=no
     else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
       atlas=yes
       if test "x$withval" != xyes; then
         atlas_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
@@ -37,6 +39,8 @@ AC_DEFUN([AC_LAPACK],
     if test "x$withval" = xno; then
       blas=no
     else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
       blas=yes
       if test "x$withval" != xyes; then
         blas_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
@@ -56,25 +60,62 @@ AC_DEFUN([AC_LAPACK],
     ]
   )
 
-  AC_ARG_WITH(dxml,
-    AC_HELP_STRING([--with-dxml], [use Digital Extended Math Library]),
-    [
-    if test "x$withval" = xno; then
-      dxml=no
-    else
-      dxml=yes
-    fi
-    ]
-  )
-
   AC_ARG_WITH(cray_sci,
     AC_HELP_STRING([--with-cray-sci], [use Cray SCI Math Library]),
     [
     if test "x$withval" = xno; then
       cray_sci=no
     else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && AC_MSG_ERROR([more than one LAPACK-like Libraries specified.])
+      exclusive_lapack=yes
       cray_sci=yes
     fi
+    ]
+  )
+
+  AC_ARG_WITH(dxml,
+    AC_HELP_STRING([--with-dxml], [use Digital Extended Math Library]),
+    [
+    if test "x$withval" = xno; then
+      dxml=no
+    else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && AC_MSG_ERROR([more than one LAPACK-like Libraries specified.])
+      exclusive_lapack=yes
+      dxml=yes
+    fi
+    ]
+  )
+
+  AC_ARG_WITH(essl,
+    AC_HELP_STRING([--with-essl=LIBS],[use ESSL Library on IBM AIX \(implies AIX symbols used\)]),
+    [
+    if test "x$withval" = xno; then
+      essl=no
+    else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && AC_MSG_ERROR([more than one LAPACK-like Libraries specified.])
+      exclusive_lapack=yes
+      essl=yes
+      if test "x$withval" != xyes; then
+        essl_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+      fi
+    fi
+    ]
+  )
+  AC_ARG_WITH(essl-dir,
+    AC_HELP_STRING([--with-essl-dir=DIR],[ESSL lib directory]),
+    [
+    essl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $essl_dir in
+      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
+      *)  AC_MSG_ERROR([expected an absolute directory name for --with-essl-dir : $atlas_dir]);;
+    esac
     ]
   )
 
@@ -84,6 +125,8 @@ AC_DEFUN([AC_LAPACK],
     if test "x$withval" = xno; then
       lapack=no
     else
+      test "$exclusive_lapack" = yes && AC_MSG_ERROR([more than one LAPACK-like Libraries specified.])
+      exclusive_lapack=yes
       lapack=yes
       if test "x$withval" != xyes; then
         lapack_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
@@ -110,21 +153,22 @@ AC_DEFUN([AC_LAPACK],
     if test "x$withval" = xno; then
       mkl=no
     else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && AC_MSG_ERROR([more than one LAPACK-like Libraries specified.])
+      exclusive_lapack=yes
+      mkl=yes
       case "x$withval" in
         xp3)
-          mkl=yes
           mkl_proc="p3"
           ;;
         xp4)
-          mkl=yes
           mkl_proc="p4"
           ;;
         xitp)
-          mkl=yes
           mkl_proc="itp"
           ;;
         *)
-          mkl=yes
           mkl_proc=
       esac
     fi
@@ -148,33 +192,12 @@ AC_DEFUN([AC_LAPACK],
     if test "x$withval" = xno; then
       scsl=no
     else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && AC_MSG_ERROR([more than one LAPACK-like Libraries specified.])
+      exclusive_lapack=yes
       scsl=yes
     fi
-    ]
-  )
-
-  AC_ARG_WITH(essl,
-    AC_HELP_STRING([--with-essl=LIBS],[use ESSL Library on IBM AIX \(implies AIX symbols used\)]),
-    [
-    if test "x$withval" = xno; then
-      essl=no
-    else
-      essl=yes
-      if test "x$withval" != xyes; then
-        essl_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-      fi
-    fi
-    ]
-  )
-  AC_ARG_WITH(essl-dir,
-    AC_HELP_STRING([--with-essl-dir=DIR],[ESSL lib directory]),
-    [
-    essl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-    # Be sure to have absolute paths.
-    case $essl_dir in
-      [[\\/$]]* | ?:[[\\/]]* | NONE | '' ) ;;
-      *)  AC_MSG_ERROR([expected an absolute directory name for --with-essl-dir : $atlas_dir]);;
-    esac
     ]
   )
 
@@ -184,6 +207,10 @@ AC_DEFUN([AC_LAPACK],
     if test "x$withval" = xno; then
       ssl2=no
     else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && AC_MSG_ERROR([more than one LAPACK-like Libraries specified.])
+      exclusive_lapack=yes
       ssl2=yes
     fi
     ]
@@ -195,133 +222,92 @@ AC_DEFUN([AC_LAPACK],
     if test "x$withval" = xno; then
       veclib=no
     else
+      test "$exclusive_blas" = yes && AC_MSG_ERROR([more than one BLAS-like Libraries specified.])
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && AC_MSG_ERROR([more than one LAPACK-like Libraries specified.])
+      exclusive_lapack=yes
       veclib=yes
     fi
     ]
   )
 
-  if test -n "$atlas_dir"; then
-    if test "x$atlas" = xno; then
-      AC_MSG_ERROR([inconsistent options for ATLAS library.])
-    fi
-    atlas=yes
-  fi
-
-  if test -n "$blas_dir"; then
-    if test "x$blas" = xno; then
-      AC_MSG_ERROR([inconsistent options for BLAS library.])
-    fi
-    blas=yes
-  fi
-
-  if test -n "$lapack_dir"; then
-    if test "x$lapack" = xno; then
-      AC_MSG_ERROR([inconsistent options for LAPACK library.])
-    fi
-    lapack=yes
-  fi
-
-  if test -n "$mkl_dir"; then
-    if test "x$mkl" = xno; then
-      AC_MSG_ERROR([inconsistent options for MKL library.])
-    fi
-    mkl=yes
-  fi
-
-  if test "x$atlas" = xyes; then
-    if test "x$blas" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$dxml" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$mkl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$scsl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$essl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$ssl2" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$veclib" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-  fi
-  if test "x$blas" = xyes; then
-    if test "x$dxml" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$mkl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$scsl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$veclib" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-  fi
-  if test "x$dxml" = xyes; then
-    if test "x$mkl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$scsl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$veclib" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$essl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$ssl2" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-  fi
-  if test "x$mkl" = xyes; then
-    if test "x$scsl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$veclib" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$essl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$ssl2" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-  fi
-  if test "x$scsl" = xyes; then
-    if test "x$veclib" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$essl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$ssl2" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-  fi
-  if test "x$veclib" = xyes; then
-    if test "x$essl" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-    if test "x$ssl2" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
-    fi
-  fi
-  if test "x$essl" = xyes; then
-    if test "x$ssl2" = xyes; then
-      AC_MSG_ERROR([more than one BLAS-like libraries specified.])
+  if test "x$atlas" = xno; then
+    test -n "$atlas_dir" && AC_MSG_ERROR([inconsistent options for ATLAS library.])
+  else
+    if test "x$exclusive_blas" = xyes && test "x$atlas" != xyes; then
+      atlas=no
     fi
   fi
 
-    
+  if test "x$blas" = xno; then
+    test -n "$blas_dir" && AC_MSG_ERROR([inconsistent options for BLAS library.])
+  else
+    if test "x$exclusive_blas" = xyes && test "x$blas" != xyes; then
+      blas=no
+    fi
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$cray_sci" != xyes; then
+    cray_sci=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$cray_sci" != xyes; then
+    cray_sci=no
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$dxml" != xyes; then
+    dxml=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$dxml" != xyes; then
+    dxml=no
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$essl" != xyes; then
+    essl=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$essl" != xyes; then
+    essl=no
+  fi
+
+  if test "x$lapack" = xno; then
+    test -n "$lapack_dir" && AC_MSG_ERROR([inconsistent options for LAPACK library.])
+  else
+    if test "x$exclusive_lapack" = xyes && test "x$lapack" != xyes; then
+      lapack=no
+    fi
+  fi
+
+  if test "x$mkl" = xno; then
+    test -n "$mkl_dir" && AC_MSG_ERROR([inconsistent options for MKL library.])
+  else
+    if test "x$exclusive_blas" = xyes && test "x$mkl" != xyes; then
+      mkl=no
+    fi
+    if test "x$exclusive_lapack" = xyes && test "x$mkl" != xyes; then
+      mkl=no
+    fi
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$scsl" != xyes; then
+    scsl=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$scsl" != xyes; then
+    scsl=no
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$ssl2" != xyes; then
+    ssl2=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$ssl2" != xyes; then
+    ssl2=no
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$veclib" != xyes; then
+    veclib=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$veclib" != xyes; then
+    veclib=no
+  fi
+
   AC_LANG_SAVE
   AC_LANG_CPLUSPLUS
   ac_save_LDFLAGS="$LDFLAGS"
@@ -693,7 +679,7 @@ AC_DEFUN([AC_LAPACK],
          AC_TRY_LINK([#define main MAIN__
 	 extern "C" char dsyev_();],[dsyev_();],
                      [AC_MSG_RESULT(yes)
-                      LAPACK_LDFLAGS="$ssl2_ldflags"; LAPACK_LIBS=
+                      LAPACK_CPPFLAGS="-Dmain=MAIN__"; LAPACK_LDFLAGS="$ssl2_ldflags"; LAPACK_LIBS=
                       found_blas=yes; found_lapack=yes],
                      [AC_MSG_RESULT(no)])],
         [AC_MSG_RESULT(no)]

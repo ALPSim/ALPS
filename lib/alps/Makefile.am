@@ -70,18 +70,19 @@ src_PARAPACK_COMMON = \
   $(top_srcdir)/src/alps/parapack/measurement.C \
   $(top_srcdir)/src/alps/parapack/option.C \
   $(top_srcdir)/src/alps/parapack/queue.C \
-  $(top_srcdir)/src/alps/parapack/scheduler_comm.C \
   $(top_srcdir)/src/alps/parapack/job.C \
   $(top_srcdir)/src/alps/parapack/types.C \
   $(top_srcdir)/src/alps/parapack/util.C \
   $(top_srcdir)/src/alps/parapack/mc_worker.C
 src_PARAPACK_SGL = \
+  $(top_srcdir)/src/alps/parapack/scheduler_comm.C \
   $(top_srcdir)/src/alps/parapack/scheduler_sgl.C
 src_PARAPACK_MPI = \
   $(top_srcdir)/src/alps/parapack/clone_info_mpi.C \
   $(top_srcdir)/src/alps/parapack/clone_mpi.C \
   $(top_srcdir)/src/alps/parapack/parallel_factory.C \
   $(top_srcdir)/src/alps/parapack/process_mpi.C \
+  $(top_srcdir)/src/alps/parapack/scheduler_comm.C \
   $(top_srcdir)/src/alps/parapack/scheduler_mpi.C
 
 src_boost_DATE_TIME = \
@@ -354,10 +355,10 @@ libparapack_mpi_la_LDFLAGS = $(LDFLAGS_MPI)
 libparapack_mpi_la_LIBADD = $(LIBS_MPI)
 
 if ALPS_FULL
-libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER)
-libparapack_sgl_la_SOURCES += $(src_PARAPACK_COMMON) $(src_PARAPACK_SGL)
+libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER) $(src_PARAPACK_COMMON)
+libparapack_sgl_la_SOURCES += $(src_PARAPACK_SGL)
 if HAVE_BOOST_MPI
-libparapack_mpi_la_SOURCES += $(src_PARAPACK_COMMON) $(src_PARAPACK_MPI)
+libparapack_mpi_la_SOURCES += $(src_PARAPACK_MPI)
 endif
 endif
 

@@ -1025,15 +1025,15 @@ with_atlas
 with_atlas_dir
 with_blas
 with_blas_dir
-with_dxml
 with_cray_sci
+with_dxml
+with_essl
+with_essl_dir
 with_lapack
 with_lapack_dir
 with_mkl
 with_mkl_dir
 with_scsl
-with_essl
-with_essl_dir
 with_ssl2
 with_veclib
 with_sqlite_incdir
@@ -1747,16 +1747,16 @@ Optional Packages:
   --with-atlas-dir=DIR    ATLAS lib directory
   --with-blas=LIBS        use BLAS Library
   --with-blas-dir=DIR     BLAS lib directory
-  --with-dxml             use Digital Extended Math Library
   --with-cray-sci         use Cray SCI Math Library
+  --with-dxml             use Digital Extended Math Library
+  --with-essl=LIBS        use ESSL Library on IBM AIX \(implies AIX symbols
+                          used\)
+  --with-essl-dir=DIR     ESSL lib directory
   --with-lapack=LIBS      use LAPACK Library
   --with-lapack-dir=DIR   LAPACK lib directory
   --with-mkl=PROC         use Intel Math Kernel Library (PROC=p3, p4, itp)
   --with-mkl-dir=DIR      MKL lib directory
   --with-scsl             use SGI SCSL Library
-  --with-essl=LIBS        use ESSL Library on IBM AIX \(implies AIX symbols
-                          used\)
-  --with-essl-dir=DIR     ESSL lib directory
   --with-ssl2             use SSL2 Library with Fujitsu compiler
   --with-veclib           use vecLib framework on Mac OS X
   --with-sqlite-incdir=DIR
@@ -24993,6 +24993,10 @@ if test "${with_atlas+set}" = set; then
     if test "x$withval" = xno; then
       atlas=no
     else
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
       atlas=yes
       if test "x$withval" != xyes; then
         atlas_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
@@ -25026,6 +25030,10 @@ if test "${with_blas+set}" = set; then
     if test "x$withval" = xno; then
       blas=no
     else
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
       blas=yes
       if test "x$withval" != xyes; then
         blas_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
@@ -25053,12 +25061,42 @@ fi
 
 
 
+# Check whether --with-cray_sci was given.
+if test "${with_cray_sci+set}" = set; then
+  withval=$with_cray_sci;
+    if test "x$withval" = xno; then
+      cray_sci=no
+    else
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && { { $as_echo "$as_me:$LINENO: error: more than one LAPACK-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one LAPACK-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_lapack=yes
+      cray_sci=yes
+    fi
+
+
+fi
+
+
+
 # Check whether --with-dxml was given.
 if test "${with_dxml+set}" = set; then
   withval=$with_dxml;
     if test "x$withval" = xno; then
       dxml=no
     else
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && { { $as_echo "$as_me:$LINENO: error: more than one LAPACK-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one LAPACK-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_lapack=yes
       dxml=yes
     fi
 
@@ -25067,14 +25105,41 @@ fi
 
 
 
-# Check whether --with-cray_sci was given.
-if test "${with_cray_sci+set}" = set; then
-  withval=$with_cray_sci;
+# Check whether --with-essl was given.
+if test "${with_essl+set}" = set; then
+  withval=$with_essl;
     if test "x$withval" = xno; then
-      cray_sci=no
+      essl=no
     else
-      cray_sci=yes
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && { { $as_echo "$as_me:$LINENO: error: more than one LAPACK-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one LAPACK-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_lapack=yes
+      essl=yes
+      if test "x$withval" != xyes; then
+        essl_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+      fi
     fi
+
+
+fi
+
+
+# Check whether --with-essl-dir was given.
+if test "${with_essl_dir+set}" = set; then
+  withval=$with_essl_dir;
+    essl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
+    # Be sure to have absolute paths.
+    case $essl_dir in
+      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
+      *)  { { $as_echo "$as_me:$LINENO: error: expected an absolute directory name for --with-essl-dir : $atlas_dir" >&5
+$as_echo "$as_me: error: expected an absolute directory name for --with-essl-dir : $atlas_dir" >&2;}
+   { (exit 1); exit 1; }; };;
+    esac
 
 
 fi
@@ -25087,6 +25152,10 @@ if test "${with_lapack+set}" = set; then
     if test "x$withval" = xno; then
       lapack=no
     else
+      test "$exclusive_lapack" = yes && { { $as_echo "$as_me:$LINENO: error: more than one LAPACK-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one LAPACK-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_lapack=yes
       lapack=yes
       if test "x$withval" != xyes; then
         lapack_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
@@ -25120,21 +25189,26 @@ if test "${with_mkl+set}" = set; then
     if test "x$withval" = xno; then
       mkl=no
     else
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && { { $as_echo "$as_me:$LINENO: error: more than one LAPACK-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one LAPACK-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_lapack=yes
+      mkl=yes
       case "x$withval" in
         xp3)
-          mkl=yes
           mkl_proc="p3"
           ;;
         xp4)
-          mkl=yes
           mkl_proc="p4"
           ;;
         xitp)
-          mkl=yes
           mkl_proc="itp"
           ;;
         *)
-          mkl=yes
           mkl_proc=
       esac
     fi
@@ -25166,41 +25240,16 @@ if test "${with_scsl+set}" = set; then
     if test "x$withval" = xno; then
       scsl=no
     else
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && { { $as_echo "$as_me:$LINENO: error: more than one LAPACK-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one LAPACK-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_lapack=yes
       scsl=yes
     fi
-
-
-fi
-
-
-
-# Check whether --with-essl was given.
-if test "${with_essl+set}" = set; then
-  withval=$with_essl;
-    if test "x$withval" = xno; then
-      essl=no
-    else
-      essl=yes
-      if test "x$withval" != xyes; then
-        essl_flags=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-      fi
-    fi
-
-
-fi
-
-
-# Check whether --with-essl-dir was given.
-if test "${with_essl_dir+set}" = set; then
-  withval=$with_essl_dir;
-    essl_dir=`echo "$withval" | sed 's,//*,/,g' | sed 's,/$,,'`
-    # Be sure to have absolute paths.
-    case $essl_dir in
-      [\\/$]* | ?:[\\/]* | NONE | '' ) ;;
-      *)  { { $as_echo "$as_me:$LINENO: error: expected an absolute directory name for --with-essl-dir : $atlas_dir" >&5
-$as_echo "$as_me: error: expected an absolute directory name for --with-essl-dir : $atlas_dir" >&2;}
-   { (exit 1); exit 1; }; };;
-    esac
 
 
 fi
@@ -25213,6 +25262,14 @@ if test "${with_ssl2+set}" = set; then
     if test "x$withval" = xno; then
       ssl2=no
     else
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && { { $as_echo "$as_me:$LINENO: error: more than one LAPACK-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one LAPACK-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_lapack=yes
       ssl2=yes
     fi
 
@@ -25227,6 +25284,14 @@ if test "${with_veclib+set}" = set; then
     if test "x$withval" = xno; then
       veclib=no
     else
+      test "$exclusive_blas" = yes && { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one BLAS-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_blas=yes
+      test "$exclusive_lapack" = yes && { { $as_echo "$as_me:$LINENO: error: more than one LAPACK-like Libraries specified." >&5
+$as_echo "$as_me: error: more than one LAPACK-like Libraries specified." >&2;}
+   { (exit 1); exit 1; }; }
+      exclusive_lapack=yes
       veclib=yes
     fi
 
@@ -25234,187 +25299,90 @@ if test "${with_veclib+set}" = set; then
 fi
 
 
-  if test -n "$atlas_dir"; then
-    if test "x$atlas" = xno; then
-      { { $as_echo "$as_me:$LINENO: error: inconsistent options for ATLAS library." >&5
+  if test "x$atlas" = xno; then
+    test -n "$atlas_dir" && { { $as_echo "$as_me:$LINENO: error: inconsistent options for ATLAS library." >&5
 $as_echo "$as_me: error: inconsistent options for ATLAS library." >&2;}
    { (exit 1); exit 1; }; }
+  else
+    if test "x$exclusive_blas" = xyes && test "x$atlas" != xyes; then
+      atlas=no
     fi
-    atlas=yes
   fi
 
-  if test -n "$blas_dir"; then
-    if test "x$blas" = xno; then
-      { { $as_echo "$as_me:$LINENO: error: inconsistent options for BLAS library." >&5
+  if test "x$blas" = xno; then
+    test -n "$blas_dir" && { { $as_echo "$as_me:$LINENO: error: inconsistent options for BLAS library." >&5
 $as_echo "$as_me: error: inconsistent options for BLAS library." >&2;}
    { (exit 1); exit 1; }; }
+  else
+    if test "x$exclusive_blas" = xyes && test "x$blas" != xyes; then
+      blas=no
     fi
-    blas=yes
   fi
 
-  if test -n "$lapack_dir"; then
-    if test "x$lapack" = xno; then
-      { { $as_echo "$as_me:$LINENO: error: inconsistent options for LAPACK library." >&5
+  if test "x$exclusive_blas" = xyes && test "x$cray_sci" != xyes; then
+    cray_sci=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$cray_sci" != xyes; then
+    cray_sci=no
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$dxml" != xyes; then
+    dxml=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$dxml" != xyes; then
+    dxml=no
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$essl" != xyes; then
+    essl=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$essl" != xyes; then
+    essl=no
+  fi
+
+  if test "x$lapack" = xno; then
+    test -n "$lapack_dir" && { { $as_echo "$as_me:$LINENO: error: inconsistent options for LAPACK library." >&5
 $as_echo "$as_me: error: inconsistent options for LAPACK library." >&2;}
    { (exit 1); exit 1; }; }
+  else
+    if test "x$exclusive_lapack" = xyes && test "x$lapack" != xyes; then
+      lapack=no
     fi
-    lapack=yes
   fi
 
-  if test -n "$mkl_dir"; then
-    if test "x$mkl" = xno; then
-      { { $as_echo "$as_me:$LINENO: error: inconsistent options for MKL library." >&5
+  if test "x$mkl" = xno; then
+    test -n "$mkl_dir" && { { $as_echo "$as_me:$LINENO: error: inconsistent options for MKL library." >&5
 $as_echo "$as_me: error: inconsistent options for MKL library." >&2;}
    { (exit 1); exit 1; }; }
+  else
+    if test "x$exclusive_blas" = xyes && test "x$mkl" != xyes; then
+      mkl=no
     fi
-    mkl=yes
-  fi
-
-  if test "x$atlas" = xyes; then
-    if test "x$blas" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$dxml" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$mkl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$scsl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$essl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$ssl2" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$veclib" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-  fi
-  if test "x$blas" = xyes; then
-    if test "x$dxml" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$mkl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$scsl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$veclib" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-  fi
-  if test "x$dxml" = xyes; then
-    if test "x$mkl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$scsl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$veclib" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$essl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$ssl2" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-  fi
-  if test "x$mkl" = xyes; then
-    if test "x$scsl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$veclib" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$essl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$ssl2" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-  fi
-  if test "x$scsl" = xyes; then
-    if test "x$veclib" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$essl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$ssl2" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-  fi
-  if test "x$veclib" = xyes; then
-    if test "x$essl" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-    if test "x$ssl2" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
-    fi
-  fi
-  if test "x$essl" = xyes; then
-    if test "x$ssl2" = xyes; then
-      { { $as_echo "$as_me:$LINENO: error: more than one BLAS-like libraries specified." >&5
-$as_echo "$as_me: error: more than one BLAS-like libraries specified." >&2;}
-   { (exit 1); exit 1; }; }
+    if test "x$exclusive_lapack" = xyes && test "x$mkl" != xyes; then
+      mkl=no
     fi
   fi
 
+  if test "x$exclusive_blas" = xyes && test "x$scsl" != xyes; then
+    scsl=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$scsl" != xyes; then
+    scsl=no
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$ssl2" != xyes; then
+    ssl2=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$ssl2" != xyes; then
+    ssl2=no
+  fi
+
+  if test "x$exclusive_blas" = xyes && test "x$veclib" != xyes; then
+    veclib=no
+  fi
+  if test "x$exclusive_lapack" = xyes && test "x$veclib" != xyes; then
+    veclib=no
+  fi
 
 
   ac_ext=cpp
@@ -27781,7 +27749,7 @@ $as_echo "$ac_try_echo") >&5
        }; then
   { $as_echo "$as_me:$LINENO: result: yes" >&5
 $as_echo "yes" >&6; }
-                      LAPACK_LDFLAGS="$ssl2_ldflags"; LAPACK_LIBS=
+                      LAPACK_CPPFLAGS="-Dmain=MAIN__"; LAPACK_LDFLAGS="$ssl2_ldflags"; LAPACK_LIBS=
                       found_blas=yes; found_lapack=yes
 else
   $as_echo "$as_me: failed program was:" >&5
