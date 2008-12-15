@@ -399,7 +399,8 @@ AC_DEFUN([AC_COMPILER],
       ;;
     fcc*)
       try_CXXFLAGS_OPT="-Kfast -DBOOST_DISABLE_ASSERTS"
-      try_CXXFLAGS_DEBUG="-g -O0"
+      try_CXXFLAGS_DEBUG="-O0"
+      try_CXXFLAGS_NOWARN="-w"
       ;;
     generic)
       try_CFLAGS_OPT="$CFLAGS"
