@@ -21,10 +21,9 @@ txt2archive_SOURCES = txt2archive.C
 xml2archive_SOURCES = xml2archive.C
 
 if BUILD_ARCHIVE
-bin_PROGRAMS += archive archive2
+bin_PROGRAMS += archive
 endif
 archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.cpp archive_node.hpp archive_plot.cpp archive_plot.hpp archive_sqlite.cpp archive_sqlite.hpp archive_xml.cpp archive_xml.hpp
-archive2_SOURCES = archive2.cpp archive_index2.cpp archive_index.hpp archive_node.cpp archive_node.hpp archive_plot2.cpp archive_plot.hpp archive_sqlite.cpp archive_sqlite.hpp archive_xml.cpp archive_xml.hpp
 
 if BUILD_DOC
 bin_PROGRAMS += quickbook

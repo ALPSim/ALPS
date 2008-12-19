@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005 by Lukas Gamper <mistral@student.ethz.ch>
+* Copyright (C) 2005-2008 by Lukas Gamper <mistral@student.ethz.ch>,
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -53,60 +54,60 @@ int main(int ac, char* av[]) {
                         ("version", "print version string")
                         ("verbose,v", "Prints what's done")
                         ("help,h", "produce help message");
-        
+
                 po::options_description config("Configuration");
                 config.add_options()
-                        ("db-file,d", po::value<std::string>(), "database file")
-                        ("xml-path,x", po::value<std::string>(), "sourcefile path")
-                        ("plot-file,p", po::value<std::string>(), "plotfile")
-                        ("output-path,o", po::value<std::string>(), "output path")
+                        ("db-file,d", po::value<std::string>()->default_value("archive.db"), "database file")
+                        ("xml-file,x", po::value<std::string>(), "simulation XML file")
+                        ("plot-file,p", po::value<std::string>(), "plot XML file")
+                        ("output-path,o", po::value<std::string>()->default_value("."), "output path")
                         ("pattern-file,i", po::value<std::string>(), "index file, only used by installation and if compiled with -DUSEPATTERN")
                         ("full-list,l", "plots the whole list");
-        
+
                 po::options_description command("Commands");
                 command.add_options()
-                        ("command,c", po::value<std::string>()->default_value("plot"), "possible commands: 'help(h)', 'install(i)', 'plot'(p), 'append'(a), 'rebuilt'(r), 'list'(l)");
-                              
+                        ("command,c", po::value<std::string>(), "possible commands: 'help(h)', 'install(i)', 'plot'(p), 'append'(a), 'rebuilt'(r), 'list'(l)");
+
                 po::options_description hidden("Hidden");
                 hidden.add_options()
                         ("positional-arg", po::value<std::string>(), "positional argument");
-                              
+
                 po::options_description cmdline_options;
                 cmdline_options.add(generic).add(config).add(command);
-        
+
                 po::options_description config_file_options;
                 config_file_options.add(config);
-        
+
                 po::options_description visible("Allowed options");
                 visible.add(generic).add(config).add(command);
-        
+
                 po::positional_options_description posOpt;
                 posOpt.add("positional-arg", 1);
-        
+
                 po::variables_map vm;
                 store(po::command_line_parser(ac, av).options(cmdline_options).positional(posOpt).run(), vm);
 
                 std::ifstream ifs("conf/config.cfg");
                 po::store(po::parse_config_file(ifs, config_file_options), vm);
                 po::notify(vm);
-        
-                if (vm.count("help") || (vm["command"].as<std::string>() == "help" || vm["command"].as<std::string>() == "h")) {
+
+                if (vm.count("help") || !vm.count("command") || vm["command"].as<std::string>() == "help" || vm["command"].as<std::string>() == "h") {
                         std::cout << visible << std::endl;
                         exit(0);
-        
+
                 } else if (vm.count("version")) {
                         std::cout << "ALPS Plot Generator, version 1.0" << std::endl;
                         exit(0);
 
                 } else if (!vm.count("db-file"))
                         throw std::runtime_error("no db-file specified!");
-                        
+
                 else {
                         db.setVerbose(vm.count("verbose"));
-                          db.open(complete(fs::path(vm["db-file"].as<std::string>())));
+                        db.open(complete(fs::path(vm["db-file"].as<std::string>())));
 
                         if (vm["command"].as<std::string>() == "install" || vm["command"].as<std::string>() == "i") {
-                                #ifdef USEPATTERN                        
+                                #ifdef USEPATTERN
                                         if (!vm.count("pattern-file"))
                                                 throw std::runtime_error("no index-file specified!");
                                         Index(db, vm.count("verbose")).install(complte(fs::path(vm["pattern-file"].as<std::string>())));
@@ -126,18 +127,17 @@ int main(int ac, char* av[]) {
                                 if (vm.count("positional-arg"))
                                         plotPath = fs::path(fs::initial_path() / vm["positional-arg"].as<std::string>());
                                 fs::path outputPath = complete(fs::path(vm["output-path"].as<std::string>()));
-                                std::cout << plotPath.string() << std::endl;
                                 Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.leaf());
 
                         } else {
-                                if (!vm.count("xml-path") && !vm.count("positional-arg"))
-                                        throw std::runtime_error("No xml-path specified!");
+                                if (!vm.count("xml-file") && !vm.count("positional-arg"))
+                                        throw std::runtime_error("No xml-file specified!");
                                 else if (vm["command"].as<std::string>() == "rebuild" || vm["command"].as<std::string>() == "r") {
                                         if(db.clear() == false)
                                                 throw std::runtime_error("Could not clear tables!");
                                 } else if (vm["command"].as<std::string>() != "append" && vm["command"].as<std::string>() != "a")
                                         throw std::runtime_error(std::string("Unknown command '") + vm["command"].as<std::string>() + std::string("'"));
-                                Index(db, vm.count("verbose")).exec(complete(fs::path(vm["xml-path"].as<std::string>())));
+                                Index(db, vm.count("verbose")).exec(complete(fs::path(vm["xml-file"].as<std::string>())));
                         }
                 }
         } catch(std::exception& e) {
@@ -145,6 +145,6 @@ int main(int ac, char* av[]) {
                 db.close(false);
                 return 1;
         }
-        db.close(true);        
+        db.close(true);
         return 0;
 }

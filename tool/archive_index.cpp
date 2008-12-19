@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2006-2007 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2006-2008 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -40,6 +40,8 @@
 
 #include "archive_node.hpp"
 #include "archive_xml.hpp"
+
+#include <alps/parapack/scheduler.h>
 
 #ifdef USEPATTERN
         #include <stdexcept>
@@ -133,25 +135,37 @@ void Index::list(bool inFullList) {
 void Index::exec(fs::path xmlPath) {
         if (!fs::exists(xmlPath))
                 throw std::runtime_error(std::string("Not found: ") + xmlPath.string());
+        fs::path basedir = xmlPath.branch_path();
+        std::string file_in_str;
+        std::string file_out_str;
+        std::vector<fs::path> files;
+        int t = alps::parapack::scheduler::load_filename(xmlPath, file_in_str, file_out_str);
+        if (t == 1) {
+          std::vector<alps::task> tasks;
+          fs::path file_in = complete(fs::path(file_in_str), basedir);
+          fs::path file_out = complete(fs::path(file_out_str), basedir);
+          std::string simname;
+          alps::parapack::scheduler::load_tasks(file_in, file_out, basedir,
+                                                /* check_parameter = */ false, simname, tasks);
+          BOOST_FOREACH(alps::task& t, tasks) {
+            fs::path f = complete(fs::path(t.file_out_str()), basedir);
+            if (fs::exists(f)) {
+              files.push_back(f);
+            } else {
+              std::cerr << "Warning: " << f.native_file_string() << " not found\n";
+            }
+          }
+        } else {
+          files.push_back(xmlPath);
+        }
+
         long fileCnt = 0;
         #ifdef DEBUG
                 std::clock_t timer;
         #endif
         std::clock_t fulltime = std::clock();
-        std::stack<fs::path> dirs;
-        dirs.push(xmlPath);
-        while (!dirs.empty()) {
-                fs::path path = dirs.top();
-                dirs.pop();
-                if (fs::is_directory(path)) {
-                        #ifdef DEBUG
-                                if (mVerbose)
-                                        std::cout << "Directory scannd : " << path.string() << std::endl;
-                        #endif
-                        fs::directory_iterator endIt;
-                        for (fs::directory_iterator it(path); it != endIt; it++)
-                                dirs.push(*it);
-                } else if (mDB(std::string("SELECT * FROM uri WHERE path='") + path.string() + "';").empty()) {
+        BOOST_FOREACH(fs::path const& path, files) {
+                if (mDB(std::string("SELECT * FROM uri WHERE path='") + path.string() + "';").empty()) {
                         #ifdef DEBUG
                                 timer = std::clock();
                         #endif
@@ -229,9 +243,10 @@ void Index::exec(fs::path xmlPath) {
                             std::cout << "Index created on " << path.string() << " (" << std::setiosflags(std::ios_base::fixed) << std::setprecision (2) << std::difftime(std::clock(), timer)/1000000 << "s)" << std::endl;
                           #endif
                         }
-                } else if (mVerbose)
-                        std::cout << "File " << path.string() << " already indexed" << std::endl;
+                } else {
+                  std::cout << "File " << path.string() << " already indexed" << std::endl;
+                }
         }
-        if (mVerbose)
+        // if (mVerbose)
                 std::cout << fileCnt << " files scanned in " << std::setiosflags(std::ios_base::fixed) << std::setprecision (2) << std::difftime(std::clock(), fulltime) / 1000000 << "s" << std::endl;
 }
