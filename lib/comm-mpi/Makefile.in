@@ -268,9 +268,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  lib/comm-mpi/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  lib/comm-mpi/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  lib/comm-mpi/Makefile
+	  $(AUTOMAKE) --gnu  lib/comm-mpi/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \

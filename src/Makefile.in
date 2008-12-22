@@ -183,8 +183,12 @@ am__noinst_HEADERS_DIST = boost/function_objects.hpp \
 	alps/alea/abstractsimpleobservable.h \
 	alps/alea/abstractbinning.h alps/alea/output_helper.h \
 	alps/alea/histogramdata.h alps/alea/histogrameval.h \
-	alps/lattice.h alps/lattice/boundary.h \
-	alps/lattice/cell_traits.h alps/lattice/coordinate_traits.h \
+	mocasito/io/cache.hpp mocasito/io/context.hpp \
+	mocasito/io/hdf5.hpp mocasito/io/traits.hpp \
+	mocasito/io/container.hpp mocasito/io/free_fun.hpp \
+	mocasito/io/iterator.hpp mocasito/io/util.hpp alps/lattice.h \
+	alps/lattice/boundary.h alps/lattice/cell_traits.h \
+	alps/lattice/coordinate_traits.h \
 	alps/lattice/coordinatelattice.h \
 	alps/lattice/dimensional_traits.h alps/lattice/disorder.h \
 	alps/lattice/graph.h alps/lattice/graph_helper.h \
@@ -459,6 +463,7 @@ headers_BOOST = boost/function_objects.hpp \
 	boost/numeric/bindings/traits/ublas_vector2.hpp \
 	boost/numeric/bindings/traits/vector_raw.hpp \
 	boost/numeric/bindings/traits/vector_traits.hpp
+headers_MOCASITO = mocasito/io/cache.hpp mocasito/io/context.hpp mocasito/io/hdf5.hpp mocasito/io/traits.hpp mocasito/io/container.hpp mocasito/io/free_fun.hpp mocasito/io/iterator.hpp mocasito/io/util.hpp
 headers_ALPS = alps/bitops.h alps/cctype.h alps/copyright.h alps/expression.h alps/factory.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h alps/matrix_as_vector.h
 headers_PARAMETER = alps/parameter.h alps/parameter/parameter.h alps/parameter/parameter_p.h alps/parameter/parameterlist.h alps/parameter/parameterlist_p.h alps/parameter/parameters.h alps/parameter/parameters_p.h 
 headers_EXPRESSION = alps/expression/block.h alps/expression/evaluatable.h alps/expression/evaluate.h alps/expression/evaluate_helper.h alps/expression/evaluator.h alps/expression/expression.h alps/expression/expression_fwd.h alps/expression/factor.h alps/expression/function.h alps/expression/number.h alps/expression/parameterevaluator.h alps/expression/symbol.h alps/expression/term.h alps/expression/traits.h
@@ -477,8 +482,8 @@ headers_PARAPACK = alps/parapack/clone.h alps/parapack/clone_info.h alps/parapac
 headers = $(headers_BOOST) $(headers_ALPS) $(headers_PARAMETER) \
 	$(headers_EXPRESSION) $(headers_FIXEDCAP) $(headers_OSIRIS) \
 	$(headers_PARSER) $(headers_RANDOM) $(headers_IETL) \
-	$(headers_HEAP) $(headers_ALEA) $(am__append_1) \
-	$(am__append_2) $(am__append_3)
+	$(headers_HEAP) $(headers_ALEA) $(headers_MOCASITO) \
+	$(am__append_1) $(am__append_2) $(am__append_3)
 noinst_HEADERS = $(headers)
 all: all-am
 
@@ -492,9 +497,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  src/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  src/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  src/Makefile
+	  $(AUTOMAKE) --gnu  src/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
