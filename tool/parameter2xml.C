@@ -40,6 +40,8 @@
 #include <iostream>
 #include <stdexcept>
 
+using alps::uint32_t;
+
 void convert_params(const std::string& inname, const std::string& basename,
                     const alps::Parameters& params_overwrite)
 {
