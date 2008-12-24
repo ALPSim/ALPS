@@ -40,8 +40,6 @@
 #include <iostream>
 #include <stdexcept>
 
-using alps::uint32_t;
-
 void convert_params(const std::string& inname, const std::string& basename,
                     const alps::Parameters& params_overwrite)
 {
@@ -60,9 +58,9 @@ void convert_params(const std::string& inname, const std::string& basename,
   int bits = 31;
   for (int n = 1; n < list.size(); n<<=1, --bits) {}
 
-  uint32_t baseseed;
+  alps::uint32_t baseseed;
   if (list[0].defined("BASESEED")) {
-    baseseed = boost::lexical_cast<uint32_t>(list[0]["BASESEED"]);
+    baseseed = boost::lexical_cast<alps::uint32_t>(list[0]["BASESEED"]);
   } else {
     baseseed =
       boost::posix_time::microsec_clock::local_time().time_of_day().total_microseconds();
@@ -94,7 +92,7 @@ void convert_params(const std::string& inname, const std::string& basename,
       basename+".task"+boost::lexical_cast<std::string,int>(i+1);
 
     if (!list[i].defined("SEED")) {
-      uint32_t seed = baseseed;
+      alps::uint32_t seed = baseseed;
       for (int j = 0; j <= (32/bits); ++j) seed ^= (i << (j * bits));
       seed &= ((1<<30) | ((1<<30)-1));
       list[i]["SEED"] = seed;

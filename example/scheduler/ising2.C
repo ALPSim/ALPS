@@ -62,8 +62,8 @@ IsingSimulation2::IsingSimulation2(const alps::ProcessList& where,const alps::Pa
   : alps::scheduler::LatticeMCRun<graph_type>(where,p,node),
     beta(1./static_cast<double>(p["T"])),
     sweeps(0),
-    thermalization_sweeps(static_cast<uint32_t>(p["THERMALIZATION"])),
-    total_sweeps(static_cast<uint32_t>(p["SWEEPS"]))
+    thermalization_sweeps(static_cast<alps::uint32_t>(p["THERMALIZATION"])),
+    total_sweeps(static_cast<alps::uint32_t>(p["SWEEPS"]))
 {
   if (inhomogeneous())
     boost::throw_exception(std::runtime_error("Disordered lattices not supported by the Ising example program.\n"));
@@ -93,9 +93,9 @@ void IsingSimulation2::save(alps::ODump& dump) const
 bool IsingSimulation2::change_parameter(const std::string& name, const alps::StringValue& value)
 {
   if(name=="SWEEPS")
-    total_sweeps=static_cast<uint32_t>(value);
+    total_sweeps=static_cast<alps::uint32_t>(value);
   else if (name=="THERMALIZATION" && !is_thermalized())
-    thermalization_sweeps=static_cast<uint32_t>(value);
+    thermalization_sweeps=static_cast<alps::uint32_t>(value);
   else
     return false; // cannot do it
   return true; // could do it
