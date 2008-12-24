@@ -42,6 +42,8 @@ AM_INIT_AUTOMAKE
 AC_PREFIX_DEFAULT([$HOME/ALPS])
 AM_MAINTAINER_MODE
 
+AC_DEFINE([ALPS_AUTOCONF_CONFIGURE])
+
 dnl Full or Light version
 if test -f "$srcdir/src/alps/lattice.h"; then
   ac_cv_alps_type="full"
@@ -161,38 +163,20 @@ dnl
 
 AC_LANG_CPLUSPLUS
 
-AC_CHECK_HEADER([inttypes.h])
-test "$ac_cv_header_inttypes_h" = yes && AC_DEFINE(ALPS_HAVE_INTTYPES_H, [], [inttypes.h])
-
-AC_CHECK_HEADER([pwd.h])
-test "$ac_cv_header_pwd_h" = yes && AC_DEFINE(ALPS_HAVE_PWD_H, [], [pwd.h])
+AC_CHECK_HEADER([rpc/rpc.h])
+test "$ac_cv_header_rpc_rpc_h" = yes && AC_DEFINE(ALPS_HAVE_RPC_XDR_H, [], [rpc/rpc.h])
 
 AC_CHECK_HEADER([stdarg.h])
 test "$ac_cv_header_stdarg_h" = yes && AC_DEFINE(ALPS_HAVE_STDARG_H, [], [stdarg.h])
 
-AC_CHECK_HEADER([stdint.h])
-test "$ac_cv_header_stdint_h" = yes && AC_DEFINE(ALPS_HAVE_STDINT_H, [], [stdint.h])
-
-AC_CHECK_HEADER([unistd.h])
-test "$ac_cv_header_unistd_h" = yes && AC_DEFINE(ALPS_HAVE_UNISTD_H, [], [unistd.h])
-
-AC_CHECK_HEADER([bind/bitypes.h])
-test "$ac_cv_header_bind_bitypes_h" = yes && AC_DEFINE(ALPS_HAVE_BIND_BITYPES_H, [], [bind/bitypes.h])
-
-AC_CHECK_HEADER([rpc/rpc.h])
-test "$ac_cv_header_rpc_rpc_h" = yes && AC_DEFINE(ALPS_HAVE_RPC_XDR_H, [], [rpc/rpc.h])
-
-AC_CHECK_HEADER([sys/int_types.h])
-test "$ac_cv_header_sys_int_types_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_INT_TYPES_H, [], [sys/int_types.h])
-
 AC_CHECK_HEADER([sys/systeminfo.h])
 test "$ac_cv_header_sys_systeminfo_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_SYSTEMINFO_H, [], [sys/systeminfo.h])
 
-AC_CHECK_HEADER([sys/time.h])
-test "$ac_cv_header_sys_time_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TIME_H, [], [sys/time.h])
-
 AC_CHECK_HEADER([sys/types.h])
 test "$ac_cv_header_sys_types_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_TYPES_H, [], [sys/types.h])
+
+AC_CHECK_HEADER([unistd.h])
+test "$ac_cv_header_unistd_h" = yes && AC_DEFINE(ALPS_HAVE_UNISTD_H, [], [unistd.h])
 
 dnl
 dnl Other tools --------------------------------------------------------
