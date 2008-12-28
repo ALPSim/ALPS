@@ -1,8 +1,11 @@
 SUBDIRS = lib src
 if ALPS_FULL
-SUBDIRS += tool example
+SUBDIRS += tool
 endif
-SUBDIRS += test doc .
+SUBDIRS += test doc
+if ALPS_FULL
+SUBDIRS += example
+endif
 DIST_SUBDIRS = $(SUBDIRS)
 
 distdir = alps-$(VERSION)

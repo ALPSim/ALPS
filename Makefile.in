@@ -33,9 +33,10 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@ALPS_FULL_TRUE@am__append_1 = tool example
-@ALPS_FULL_TRUE@am__append_2 = CITATIONS.txt LICENSE.txt README config/ac_alps.m4 config/preamble.in
-@ALPS_LIGHT_TRUE@am__append_3 = LICENSE-light.txt README-light config/preamble-light.in
+@ALPS_FULL_TRUE@am__append_1 = tool
+@ALPS_FULL_TRUE@am__append_2 = example
+@ALPS_FULL_TRUE@am__append_3 = CITATIONS.txt LICENSE.txt README config/ac_alps.m4 config/preamble.in
+@ALPS_LIGHT_TRUE@am__append_4 = LICENSE-light.txt README-light config/preamble-light.in
 subdir = .
 DIST_COMMON = README $(am__configure_deps) \
 	$(am__dist_noinst_DATA_DIST) $(dist_noinst_SCRIPTS) \
@@ -269,13 +270,13 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = lib src $(am__append_1) test doc .
+SUBDIRS = lib src $(am__append_1) test doc $(am__append_2)
 DIST_SUBDIRS = $(SUBDIRS)
 distdir = alps-$(VERSION)
 distdir_light = alps-light-$(VERSION)
 dist_noinst_SCRIPTS = bootstrap config/make_snapshot config/run-test config/update_preamble
-dist_noinst_DATA = ChangeLog ChangeLog.0 INSTALL TODO $(am__append_2) \
-	$(am__append_3)
+dist_noinst_DATA = ChangeLog ChangeLog.0 INSTALL TODO $(am__append_3) \
+	$(am__append_4)
 nodist_data_DATA = config/config.site
 nodist_pkgdata_DATA = config/include.mk
 all: all-recursive
