@@ -88,7 +88,7 @@ namespace mocasito {
 					return -1;
 				}
 				type_traits<>::type datatype(std::string const & p) const {
-					detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), NULL));
+					detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), 0));
 					detail::h5t_t type_id(H5Dget_type(data_id));
 					detail::h5t_t native_id(H5Tget_native_type(type_id, H5T_DIR_ASCEND));
 					if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<char>(0))))) > 0) return type_traits<char>::value;
