@@ -34,12 +34,12 @@ namespace mocasito {
 				{
 					create(); 
 				}
-				std::vector<std::size_t> extends() const {
+				std::vector<std::size_t> extent() const {
 					if (_type == detail::IO_UNKNOWN)
 						throw(std::runtime_error("unknown path type: " + _path));
 					else if (_type != detail::IO_DATA)
-						throw(std::runtime_error("only data nodes have extends: " + _path));
-					return _engine->extends(_path); 
+						throw(std::runtime_error("only data nodes have extent: " + _path));
+					return _engine->extent(_path); 
 				}
 				std::size_t dimensions() const {
 					if (_type == detail::IO_UNKNOWN)
@@ -108,6 +108,9 @@ namespace mocasito {
 					return detail::append_helper(*this, v);
 				}
 				context<E> operator+(std::string const & p) const { 
+					std::cerr<<"operator+: this is: "<<this<<std::endl;
+					std::cerr<<"operator+: &p is: "<<&p<<std::endl;
+					std::cerr<<"strings are: p: "<<p<<" path: "<<_path<<std::endl;
 					if (p[0] == '/')
 						return context<E>(_engine, p);
 					else if (p.substr(0, 2) != "..")

@@ -65,7 +65,7 @@ namespace mocasito {
 					hid_t id = H5Dopen(_file_id, p.c_str(), H5P_DEFAULT);
 					return id < 0 ? false : static_cast<bool>(detail::h5d_t(id));
 				}
-				std::vector<std::size_t> extends(std::string const & p) const {
+				std::vector<std::size_t> extent(std::string const & p) const {
 					if (is_null(p))
 						return std::vector<std::size_t>(1, 0);
 					std::vector<hsize_t> buffer(dimensions(p));
@@ -177,7 +177,7 @@ namespace mocasito {
 					if (id < 0)
 						return set_data(p, v, s);
 					detail::h5d_t data_id(id);
-					hsize_t start = extends(p)[0], count = start + s;
+					hsize_t start = extent(p)[0], count = start + s;
 					detail::h5e_t(H5Dset_extent(data_id, &count));
 					detail::h5s_t space_id(H5Dget_space(data_id));
 					detail::h5e_t(H5Sselect_hyperslab(space_id, H5S_SELECT_SET, &start, NULL, &s, NULL));

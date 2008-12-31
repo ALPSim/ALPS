@@ -43,7 +43,7 @@ namespace mocasito {
 						throw(std::runtime_error("the path does not exists: " + p));
 					return _index->find(p) == _index->end();
 				}
-				std::vector<std::size_t> extends(std::string const & p) const {
+				std::vector<std::size_t> extent(std::string const & p) const {
 					if (_index->find(p) == _index->end())
 						throw(std::runtime_error("no data path: " + p));
 					return _index->find(p)->third;
