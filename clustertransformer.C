@@ -124,14 +124,15 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
     matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h+h_init, beta);
+    
+    itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
     G0_omega_new.write("G0_omega_input");
-    matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
-    G0_omega_real.write("G0_omega_input_realspace");
-    itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor);
+    FourierTransformer::generate_transformer(parms, fourier_ptr, k_space_moments(parms["MU"]));
     fourier_ptr->backward_ft(G0_tau, G0_omega_new);
     G0_tau.write("G0_tau_input");
+    matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
+    G0_omega_real.write("G0_omega_input_realspace");
     itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
     G0_tau_real.write("G0_tau_input_realspace");
     return G0_omega_new;
