@@ -31,6 +31,7 @@
 #include "hilberttransformer.h"
 #include <alps/lattice/graph_helper.h>
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include <boost/numeric/bindings/lapack/gesv.hpp>
 
 extern "C" void dgtsv_(const int*, const int*, double*, double*, double*, double*, const int*, int*);
@@ -188,6 +189,8 @@ public:
 						 const matsubara_green_function_t &G0_omega, 
 						 const double mu, const double h, 
 						 const double beta) const; 
+  hifreq_moments k_space_moments(const double &mu) const;
+  void compute_epsav(std::vector<double> &epsav, std::vector<double> &epsavsq) const;
  private:
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;

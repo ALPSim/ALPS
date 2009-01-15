@@ -141,6 +141,13 @@ public:
       }
     }
   }
+  FourierTransformer(const hifreq_moments &moments, const double &beta, const double &mu){
+    c1_=moments.c1;
+    c2_=moments.c2;
+    c3_=moments.c3;
+    beta_=beta;
+    mu_=mu;
+  }
   virtual ~FourierTransformer(){
   }
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
@@ -149,6 +156,7 @@ public:
   const green_function<alps::RealObsevaluator> &G_omega_real,
   const green_function<alps::RealObsevaluator> &G_omega_imag) const;
   static void generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift=0);
+  static void generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, const hifreq_moments &moments);
   static void generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr,
   const std::vector<std::vector<std::vector<double> > > &densities);
   void setmu(double mu){ mu_=mu;}

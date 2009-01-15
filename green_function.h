@@ -2,6 +2,7 @@
 #define GREEN_FUNCTION_H
 #include "types.h"
 #include <fstream>
+#include <iostream>
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
 template <typename T> class green_function{

@@ -234,7 +234,6 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     
     fourier.backward_ft(G0_tau, G0_omega);
     fourier.setmu(mu);
-    
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
     G_tau = hilbert.symmetrize(G_tau, paramagnet);
@@ -406,6 +405,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
     matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
+    alps::oxstream g0_omega_realspace_debug("/tmp/g0_omega_realspace_debug");
+    write_freq(g0_omega_realspace_debug,real_G0_omega);
     matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
     itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
     itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);

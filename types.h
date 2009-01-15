@@ -34,7 +34,7 @@
 #define TYPES_H_
 //includes
 #include <vector>
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <complex>
 /// the array (vector) type to store frequence dependent Green's functions and Weiss fields
 typedef std::vector<double> vector_type;
 /// two arrays are needed for a single site problem: one for up and one for down spins
@@ -47,7 +47,7 @@ typedef std::pair<complex_vector_type,complex_vector_type> multiple_complex_vect
 ///dense matrix
 //typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 ///complex matrix
-typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_matrix;
+//typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_matrix;
 
 ///same as complex_vector_type
 typedef std::vector<std::complex<double> > complex_vector;
@@ -86,4 +86,10 @@ void print_green_itime(std::ostream &os, const multiple_vector_type &v, const do
 void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &bare_green_matsubara, const multiple_complex_vector_type &dressed_green_matsubara, const multiple_vector_type &bare_green_itime, const multiple_vector_type &dressed_green_itime, const double beta);
 void print_tau_green_functions(const int iteration_ctr, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta);
 
+struct hifreq_moments{
+  std::vector<std::vector<std::vector<double> > >c0;
+  std::vector<std::vector<std::vector<double> > >c1;
+  std::vector<std::vector<std::vector<double> > >c2;
+  std::vector<std::vector<std::vector<double> > >c3;
+};
 #endif /*TYPES_H_*/

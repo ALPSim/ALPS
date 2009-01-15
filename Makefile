@@ -22,6 +22,8 @@ all: dmft dmft_mpi hirschfye
 
 dmft : $(OBJECTS_DMFT) werner rubtsov
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CT_ALGOS) -o dmft $(OBJECTS_DMFT) $(OBJECTS_SOLVERS) $(LDFLAGS) $(LIBS)
+energy : energy.o auxiliaryfunctions.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o energy energy.o auxiliaryfunctions.o $(LDFLAGS) $(LIBS)
 dmft_mpi : $(OBJECTS_DMFT) werner rubtsov
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o dmft_mpi $(OBJECTS_DMFT) $(OBJECTS_SOLVERS) $(LDFLAGS_MPI) $(LIBS_MPI)
 hirschfye : $(OBJECTS_HIRSCHFYE)

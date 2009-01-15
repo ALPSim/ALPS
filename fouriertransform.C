@@ -388,6 +388,9 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
   }
   } 
 
+void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, const hifreq_moments &moments){
+    fourier_ptr.reset(new FourierTransformer(moments, (double)parms["BETA"], (double)parms["MU"]));
+}
 void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift){
   if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
     //std::cout<<"using General Fourier transform"<<std::endl;

@@ -69,20 +69,19 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
-	selfenergy(freq, kc, kc, flavor)  = 1./G0_omega(freq, kc, kc, flavor);
-	selfenergy(freq, kc, kc, flavor) -= 1./G_omega(freq, kc, kc, flavor);
-	std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-	G0_omega_new(freq, kc, kc, flavor) = 0.;
-	for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
-	  vector_type k(dimension());
-	  for (unsigned int d=0; d<dimension(); ++d) 
-	    k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-	  G0_omega_new(freq, kc, kc, flavor) 
-	    += 1./(iomega_n+mu+(flavor%2==0?h:-h)-epsilon(k)-selfenergy(freq, kc, kc, flavor));
-	}
-	G0_omega_new(freq, kc, kc, flavor) /= n_cluster_cells();
-	G0_omega_new(freq, kc, kc, flavor) = 
-	  1. / ( 1./G0_omega_new(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
+        selfenergy(freq, kc, kc, flavor)  = 1./G0_omega(freq, kc, kc, flavor);
+        selfenergy(freq, kc, kc, flavor) -= 1./G_omega(freq, kc, kc, flavor);
+        std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+        G0_omega_new(freq, kc, kc, flavor) = 0.;
+        for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
+          vector_type k(dimension());
+          for (unsigned int d=0; d<dimension(); ++d) 
+            k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+          G0_omega_new(freq, kc, kc, flavor) += 1./(iomega_n+mu+(flavor%2==0?h:-h)-epsilon(k)-selfenergy(freq, kc, kc, flavor));
+        }
+        G0_omega_new(freq, kc, kc, flavor) /= n_cluster_cells();
+        G0_omega_new(freq, kc, kc, flavor) = 
+          1. / ( 1./G0_omega_new(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
       }
     }
   }
@@ -115,11 +114,11 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
       for (site_t i=0; i<n_cluster_sites(); ++i) {
-	for (site_t j=0; j<n_cluster_sites(); ++j) {
-	  for (frequency_t freq=0; freq<n_matsubara; ++freq) {
-	    G0_omega(freq, i, j, flavor) = (i==j); // zero except for diagonal elements
-	  }
-	}
+        for (site_t j=0; j<n_cluster_sites(); ++j) {
+          for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+            G0_omega(freq, i, j, flavor) = (i==j); // zero except for diagonal elements
+          }
+        }
       }
     }
     G_omega = G0_omega; 
@@ -298,3 +297,51 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   }
 }
   
+hifreq_moments SimpleDCATransformer::k_space_moments(const double &mu) const{
+  std::cout<<"computing moments for k-space fourier transform"<<std::endl;
+  hifreq_moments moments;
+  moments.c0.resize(2);
+  moments.c1.resize(2);
+  moments.c2.resize(2);
+  moments.c3.resize(2);
+  for(int s=0;s<2;++s){
+    moments.c0[s].resize(n_cluster_sites());
+    moments.c1[s].resize(n_cluster_sites());
+    moments.c2[s].resize(n_cluster_sites());
+    moments.c3[s].resize(n_cluster_sites());
+    for(int i=0;i<n_cluster_sites();++i){
+      moments.c0[s][i].resize(n_cluster_sites(),0.);
+      moments.c1[s][i].resize(n_cluster_sites(),0.);
+      moments.c2[s][i].resize(n_cluster_sites(),0.);
+      moments.c3[s][i].resize(n_cluster_sites(),0.);
+    }
+  }
+
+  std::vector<double> epsav  (n_cluster_sites()); //average of the band structure on this patch
+  std::vector<double> epssqav(n_cluster_sites());
+  compute_epsav(epsav, epssqav);
+
+  for(int s=0;s<2;++s){ 
+  for(int i=0;i<n_cluster_sites();++i){ //simple DCA has just the diagonal occupied
+    moments.c1[s][i][i]=1.; //this is the commutator term
+    moments.c2[s][i][i]=mu-epsav[i]; //this is the second order term
+    moments.c3[s][i][i]=mu*mu-2*mu*epsav[i]+epssqav[i]; //this is the third order term
+  }
+  }
+  return moments;
+}
+void SimpleDCATransformer::compute_epsav(std::vector<double> &epsav, std::vector<double> &epssqav) const{
+  epsav  .resize(n_cluster_sites());
+  epssqav.resize(n_cluster_sites());
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
+      vector_type k(dimension());
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+      epsav  [kc]+= epsilon(k);
+      epssqav[kc]+= epsilon(k)*epsilon(k);
+    }
+    epsav  [kc] /= n_cluster_cells();
+    epssqav[kc] /= n_cluster_cells();
+  }
+}
