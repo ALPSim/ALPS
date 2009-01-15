@@ -152,7 +152,7 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
       }
     }
   }
-/*  std::cout<<"no model, G, and f: "<<std::endl;
+  /*std::cout<<"no model, G, and f: "<<std::endl;
   for(uint k=0; k<N_omega; k++){
     std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
     std::cout<<G_omega_no_model(k,0,0,0)<<" "<<G_omega(k,0,0,0)<<" "<<f_omega(iw, c1_[0][0][0],c2_[0][0][0], c3_[0][0][0])<<std::endl;

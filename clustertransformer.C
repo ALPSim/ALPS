@@ -325,7 +325,7 @@ hifreq_moments SimpleDCATransformer::k_space_moments(const double &mu) const{
   for(int s=0;s<2;++s){ 
   for(int i=0;i<n_cluster_sites();++i){ //simple DCA has just the diagonal occupied
     moments.c1[s][i][i]=1.; //this is the commutator term
-    moments.c2[s][i][i]=mu-epsav[i]; //this is the second order term
+    moments.c2[s][i][i]=-(mu-epsav[i]); //this is the second order term
     moments.c3[s][i][i]=mu*mu-2*mu*epsav[i]+epssqav[i]; //this is the third order term
   }
   }
