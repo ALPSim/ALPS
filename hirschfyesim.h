@@ -74,7 +74,7 @@ HirschFyeSim(const alps::ProcessList& w, const alps::Parameters& p)
 
 	///return the Green's function G
 	//itime_green_function_t get_result() const;
-        std::pair<matsubara_green_function_t, itime_green_function_t>get_result() const;
+        std::pair<matsubara_green_function_t, itime_green_function_t>get_result();
 
 };
 

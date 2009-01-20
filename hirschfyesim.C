@@ -38,7 +38,7 @@
 #include <cmath>
 #include <blas_classes/matrix.h>
 #ifdef FOURPOINT
-#include "../blas_classes/vector.h"
+#include <blas_classes/vector.h>
 #endif
 using namespace std;
 using namespace alps;
@@ -347,7 +347,7 @@ void HirschFyeRun::dostep()
 }
 
 
-std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_result() const {
+std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_result() {
   std::cout<<"getting results."<<std::endl;
   int N=parms["N"];
   int n_matsubara=parms["NMATSUBARA"];

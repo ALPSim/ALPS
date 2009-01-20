@@ -100,8 +100,8 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
     G_tau= solver.solve(G_tau, parms); //the Werner solver WANTS a G_tau as an input. It then makes an F function out of it.
                                        //symmetrize
     if(paramagnet){
-      for(unsigned int  f=0;f<G_tau.nflavor();f+=2){
-        for(unsigned int  i=0;i<G_tau.ntime();++i){
+      for(unsigned int f=0;f<G_tau.nflavor();f+=2){
+        for(unsigned int i=0;i<G_tau.ntime();++i){
           G_tau(i,f  )=0.5*(G_tau(i,f)+G_tau(i,f+1));
           G_tau(i,f+1)=G_tau(i,f);
         }
@@ -192,10 +192,10 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
                                 FrequencySpaceHilbertTransformer& hilbert, FourierTransformer &fourier,
                                 matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
 {
-  unsigned int  n_tau=boost::lexical_cast<unsigned int >(parms["N"]);
-  unsigned int  n_matsubara=boost::lexical_cast<unsigned int >(parms["NMATSUBARA"]);
-  unsigned int  n_orbital=parms.value_or_default("FLAVORS", 2);
-  unsigned int  n_site=parms.value_or_default("SITES", 1);
+  unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
+  unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
+  unsigned int n_orbital=parms.value_or_default("FLAVORS", 2);
+  unsigned int n_site=parms.value_or_default("SITES", 1);
   
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
@@ -248,10 +248,10 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
       }
       double mu_old=mu;
       mu=adjust_filling(parms, current_filling);
-      for(unsigned int  i=0;i<n_site;++i){
-        for(unsigned int  j=0;j<n_site;++j){
-          for(unsigned int  orbital=0;orbital<n_orbital;++orbital){
-            for(unsigned int  k=0;k<n_matsubara;++k){
+      for(unsigned int i=0;i<n_site;++i){
+        for(unsigned int j=0;j<n_site;++j){
+          for(unsigned int orbital=0;orbital<n_orbital;++orbital){
+            for(unsigned int k=0;k<n_matsubara;++k){
               G_omega_shifted(k,i,j,orbital)=1./(1./G_omega(k,i,j,orbital)-mu_old+mu); //shift the GF to get filling right.
             }
           }
@@ -264,10 +264,10 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
-      for(unsigned int  orbital=0;orbital<n_orbital;++orbital){
-        for(unsigned int  site1=0;site1<n_site;++site1){
-          for(unsigned int  site2=0;site2<n_site;++site2){
-            for(unsigned int  i=0;i<n_matsubara;++i){
+      for(unsigned int orbital=0;orbital<n_orbital;++orbital){
+        for(unsigned int site1=0;site1<n_site;++site1){
+          for(unsigned int site2=0;site2<n_site;++site2){
+            for(unsigned int i=0;i<n_matsubara;++i){
               G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
               (1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
             }
@@ -279,10 +279,10 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     max_diff=0;
     if(iteration_ctr>1){
       //comparison for the dressed Green's function in Matsubara freq.
-      for(unsigned int  w=0; w<n_matsubara; w++) {
-        for(unsigned int  i1=0; i1<n_site; i1++) {
-          for(unsigned int  i2=0; i2<n_site; i2++) {
-            for(unsigned int  o=0; o<n_orbital; o++) {
+      for(unsigned int w=0; w<n_matsubara; w++) {
+        for(unsigned int i1=0; i1<n_site; i1++) {
+          for(unsigned int i2=0; i2<n_site; i2++) {
+            for(unsigned int o=0; o<n_orbital; o++) {
               if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
                 max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
             }
@@ -302,10 +302,10 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
                               DCATransformer& clustertrans, FourierTransformer &fourier,
                               matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
 {
-  unsigned int  n_tau=boost::lexical_cast<unsigned int >(parms["N"]);
-  unsigned int  n_matsubara=boost::lexical_cast<unsigned int >(parms["NMATSUBARA"]);
-  unsigned int  n_orbital=parms.value_or_default("FLAVORS", 2);
-  unsigned int  n_site=parms.value_or_default("SITES", 1);
+  unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
+  unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
+  unsigned int n_orbital=parms.value_or_default("FLAVORS", 2);
+  unsigned int n_site=parms.value_or_default("SITES", 1);
   
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
@@ -358,10 +358,10 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
       }
       double mu_old=mu;
       mu=adjust_filling(parms, current_filling);
-      for(unsigned int  i=0;i<n_site;++i){
-        for(unsigned int  j=0;j<n_site;++j){
-          for(unsigned int  orbital=0;orbital<n_orbital;++orbital){
-            for(unsigned int  k=0;k<n_matsubara;++k){
+      for(unsigned int i=0;i<n_site;++i){
+        for(unsigned int j=0;j<n_site;++j){
+          for(unsigned int orbital=0;orbital<n_orbital;++orbital){
+            for(unsigned int k=0;k<n_matsubara;++k){
               G_omega_shifted(k,i,j,orbital)=1./(1./G_omega(k,i,j,orbital)-mu_old+mu); //shift the GF to get filling right.
             }
           }
@@ -375,10 +375,10 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
-      for(unsigned int  orbital=0;orbital<n_orbital;++orbital){
-        for(unsigned int  site1=0;site1<n_site;++site1){
-          for(unsigned int  site2=0;site2<n_site;++site2){
-            for(unsigned int  i=0;i<n_matsubara;++i){
+      for(unsigned int orbital=0;orbital<n_orbital;++orbital){
+        for(unsigned int site1=0;site1<n_site;++site1){
+          for(unsigned int site2=0;site2<n_site;++site2){
+            for(unsigned int i=0;i<n_matsubara;++i){
               G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
               (1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
             }
@@ -391,10 +391,10 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     max_diff=0;
     if(iteration_ctr>1){
       //comparison for the dressed Green's function in Matsubara freq.
-      for(unsigned int  w=0; w<n_matsubara; w++) {
-        for(unsigned int  i1=0; i1<n_site; i1++) {
-          for(unsigned int  i2=0; i2<n_site; i2++) {
-            for(unsigned int  o=0; o<n_orbital; o++) {
+      for(unsigned int w=0; w<n_matsubara; w++) {
+        for(unsigned int i1=0; i1<n_site; i1++) {
+          for(unsigned int i2=0; i2<n_site; i2++) {
+            for(unsigned int o=0; o<n_orbital; o++) {
               if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
                 max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
             }

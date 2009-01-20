@@ -230,4 +230,53 @@ private:
   double epsilonsq_av_;
 };
 
+
+
+class FittingFourierTransformer : public FourierTransformer
+{
+  //a simple Fourier Transformer which fits c1_/w to the tail of the matsubara green function
+public:
+  
+  FittingFourierTransformer(double beta, double mu, int n_flavor, int n_site)
+    : FourierTransformer(beta, mu, n_flavor, n_site, 0)
+  {
+    std::cout<<"Fitting FFourier Transformer" << std::endl;
+    for(int f=0;f<n_flavor;++f){
+      for(int i=0;i<n_site;++i){
+	for(int j=0;j<n_site;++j){
+	  c1_[f][i][j]=0;
+	  c2_[f][i][j]=0;
+	  c3_[f][i][j]=0;
+	}
+      }
+    }
+  }
+  
+  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const
+  {
+    std::cerr<<"implement 2nd derivatives for F function before using this!"<<std::endl;
+    FourierTransformer::forward_ft(G_tau, G_omega);
+  }
+  
+  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega);
+  
+  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
+			   const green_function<alps::RealObsevaluator> &G_omega_real,
+			   const green_function<alps::RealObsevaluator> &G_omega_imag) const
+  {
+    
+    std::cerr<<"backward ft: "<<&G_tau<<std::endl;
+    std::cerr<<"backward ft: "<<&G_omega_real<<std::endl;
+    std::cerr<<"backward ft: "<<&G_omega_imag<<std::endl;
+    std::cerr<<"not implemented for obsevaluators. exiting."<<std::endl;
+    abort();
+  } //not implemented.
+  
+  virtual ~FittingFourierTransformer(){}
+  
+};
+
+
+
+
 #endif

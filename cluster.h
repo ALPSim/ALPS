@@ -33,9 +33,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include <boost/numeric/bindings/lapack/gesv.hpp>
-
-extern "C" void dgtsv_(const int*, const int*, double*, double*, double*, double*, const int*, int*);
-extern "C" void zgtsv_(const int*, const int*, void*, void*, void*, void*, const int*, int*);
+#include <boost/numeric/bindings/traits/type.h>
 
 
 class ClusterHelper: private alps::graph_helper<alps::graph_helper<>::graph_type>
@@ -72,12 +70,17 @@ public:
   { return pair_class_set_itpair_type(pair_class_set_k_space_.begin(), pair_class_set_k_space_.end()); }
 
 
+protected:
+  template<typename T> 
+  typename Matrix<T>::Type matrix_inverse(typename Matrix<T>::Type M) const;
+
+
 private:
   void setup_tables();
   void symmetry_analysis(const Matrix<double>::Type& basis, 
-			 const Matrix<double>::Type& basis_inv, 
+			 const Matrix<double>::Type& basis_inv/*, 
 			 const Matrix<double>::Type& reciprocal_basis, 
-			 const Matrix<double>::Type& reciprocal_basis_inv );
+			 const Matrix<double>::Type& reciprocal_basis_inv*/ );
   std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<site_t>::Type& symmetry_table) const;
   bool inside_cluster(vector_type v, const Matrix<double>::Type& b) const;
   bool inside_reduced_brillouin_zone(vector_type v, const Matrix<double>::Type& B) const;
@@ -95,7 +98,6 @@ private:
   vector_type round(vector_type v) const;
   bool almost_equal(const double d1, const double d2) const { return fabs(d1-d2)<epsilon_; }
   vector_type matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v) const;
-  template<typename T> typename Matrix<T>::Type matrix_inverse(typename Matrix<T>::Type M) const;
     
   Matrix<double>::Type cluster_coordinates_;
   Matrix<double>::Type cluster_momenta_;
@@ -116,8 +118,8 @@ class ClusterTransformer : protected ClusterHelper
 public:
   ClusterTransformer(const alps::Parameters& params) :
     ClusterHelper(params) {}
-    virtual ~ClusterTransformer() {} //pro forma virtual destructor.
-  
+  virtual ~ClusterTransformer() {} //pro forma virtual destructor.
+
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
 						const matsubara_green_function_t &G0_omega, 
 						const double mu, const double h, 
@@ -165,7 +167,11 @@ class SimpleDCATransformer : public DCATransformer
 {
 public:
   SimpleDCATransformer(const alps::Parameters& params) :
-    DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])), tprime_(params.defined("t'")?boost::lexical_cast<double>(params["t'"]):0) {}
+    DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])), 
+    t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
+    t3_(params.value_or_default("t3", 0.)),
+    t4_(params.value_or_default("t4", 0.))
+    /*tprime_(params.defined("t'")?boost::lexical_cast<double>(params["t'"]):0)*/ {}
   
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
 					const matsubara_green_function_t &G0_omega, 
@@ -196,39 +202,70 @@ public:
   green_function<T> transform_coordinates(const green_function<T>& G) const;
   template <class T>
   green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
+  matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const unsigned int nt) const;
+  template<typename T>
+  green_function<T> fourpoint_green_function_add(const green_function<T>& G1, 
+						 const green_function<T>& G2) const;
+  template<typename T>
+  green_function<T> fourpoint_green_function_subtract(const green_function<T>& G1, 
+						      const green_function<T>& G2) const;
+  template<typename T>
+  green_function<T> fourpoint_green_function_divide(const green_function<T>& G1, 
+						    const T d) const;
 
   double epsilon(const vector_type k) const
   {  //cosine dispersion (nearest nbr hopping) for all dimensions. t' only valid/reasonable in two dimensions for nn hopping.
     double eps = 0;
     for (unsigned int i=0; i<dimension(); ++i) 
       eps -= 2*t_*cos(k[i]);
-    /*if (tprime_!=0.) {
+    if (t2_!=0.) {
       switch(dimension()) {
       case 1 :
-	eps -= 2*tprime_*cos(k[0]*2.);
+	eps -= 2*t2_*cos(k[0]*2.);
 	break;
       case 2 :
-	eps -= 2*tprime_*cos(k[0]+k[1]);
-	eps -= 2*tprime_*cos(k[0]-k[1]);
+	eps -= 4*t2_*cos(k[0])*cos(k[1]);
 	break;
       case 3 :
-	eps -= 2*tprime_*cos(k[0]+k[1]);
-	eps -= 2*tprime_*cos(k[0]-k[1]);
-	eps -= 2*tprime_*cos(k[1]+k[2]);
-	eps -= 2*tprime_*cos(k[1]-k[2]);
-	eps -= 2*tprime_*cos(k[0]+k[2]);
-	eps -= 2*tprime_*cos(k[0]-k[2]);
+	eps -= 4*t2_*cos(k[0])*cos(k[1]);
+	eps -= 4*t2_*cos(k[1])*cos(k[2]);
+	eps -= 4*t2_*cos(k[0])*cos(k[2]);
 	break;
       }
-      }*/
-    if(tprime_!=0){
-      assert(dimension()==2);
-      eps -= 4*tprime_*cos(k[0])*cos(k[1]);
+    }
+    if(t3_!=0.) {
+      switch(dimension()) {
+      case 1 :
+	eps -= 2*t3_*cos(k[0]*3.);
+	break;
+      case 2 :
+	break;
+      case 3 :
+	eps -= 2*t3_*cos(k[0]+k[1]+k[2]);
+	eps -= 2*t3_*cos(k[0]-k[1]+k[2]);
+	eps -= 2*t3_*cos(k[0]+k[1]-k[2]);
+	eps -= 2*t3_*cos(k[0]-k[1]-k[2]);
+	break;
+      }
+    }
+    if (t4_!=0.) {
+      switch(dimension()) {
+      case 1 :
+	eps -= 2*t4_*cos(k[0]*4.);
+	break;
+      case 2 :
+	break;
+      case 3 :
+	eps -= 2*t4_*cos(k[0]*2.);
+	eps -= 2*t4_*cos(k[1]*2.);
+	eps -= 2*t4_*cos(k[2]*2.);
+	break;     
+      }
     }
     return eps; 
   }
   
-  const double t_, tprime_;
+  const double t_, t2_, t3_, t4_;
   struct Forward;
   struct Backward;
   
@@ -259,19 +296,13 @@ public:
   { return transform_coordinates<double, Forward>(G); }
   
   matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
-  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
-						 const matsubara_green_function_t &G_omega, 
-						 const matsubara_green_function_t &G0_omega, 
-						 const double mu, const double h, 
-						 const double beta) const
+  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& /*G_omega_fourpoint*/,
+						 const matsubara_green_function_t& G_omega, 
+						 const matsubara_green_function_t& /*G0_omega*/, 
+						 const double /*mu*/, const double /*h*/, 
+						 const double /*beta*/) const
   {
     boost::throw_exception(std::logic_error("transform fourpoint function for antiferromagnetic phases not yet implemented"));
-    std::cout<<G_omega_fourpoint<<std::endl;
-    std::cout<<G_omega<<std::endl;
-    std::cout<<G0_omega<<std::endl;
-    std::cout<<mu<<std::endl;
-    std::cout<<h<<std::endl;
-    std::cout<<beta<<std::endl;
     return G_omega;
   } 
 
@@ -351,10 +382,11 @@ inline ClusterHelper::vector_type ClusterHelper::matrix_vector_mult(const Matrix
 template<typename T>
 inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::matrix_inverse(typename Matrix<T>::Type M) const 
 {
-  Matrix<double>::Type M_inv(M.size1(), M.size2());
+  typename Matrix<T>::Type M_inv(M.size1(), M.size2());
   for (unsigned int i=0; i<M.size1(); ++i) 
     for (unsigned int j=0; j<M.size2(); ++j) 
-      M_inv(i,j) = i==j;
+      M_inv(i,j) = (T)(i==j);
+  typename Matrix<T>::Type M_un=M_inv;
   boost::numeric::bindings::lapack::gesv(M, M_inv);
   return M_inv;
 }
@@ -453,10 +485,12 @@ green_function<T> SimpleDCATransformer::spin_symmetrizer(const green_function<T>
   if (paramagnet) {
     if(G_new.nflavor()>1 && G_new.nflavor()%2==0) {
       for(spin_t flavor=0; flavor<G_new.nflavor(); flavor+=2) {
-	for (site_t k=0; k<n_cluster_sites(); ++k) {
-	  for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
-	    G_new(freq, k, k, flavor)= 0.5*(G_new(freq, k, k, flavor)+G_new(freq, k, k, flavor+1));
-	    G_new(freq, k, k, flavor+1)=G_new(freq, k, k, flavor);
+	for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
+	  for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
+	    for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+	      G_new(freq, k1, k2, flavor)= 0.5*(G_new(freq, k1, k2, flavor)+G_new(freq, k1, k2, flavor+1));
+	      G_new(freq, k1, k2, flavor+1)=G_new(freq, k1, k2, flavor);
+	    }
 	  }
 	}
       }
@@ -464,6 +498,109 @@ green_function<T> SimpleDCATransformer::spin_symmetrizer(const green_function<T>
   }
   return G_new;
 }
+
+
+
+inline matsubara_green_function_t SimpleDCATransformer::fourpoint_green_function_inverse(const matsubara_green_function_t& G,
+											 const unsigned int nf) const
+{
+  matsubara_green_function_t G_inv(G);
+  for (spin_t f=0; f<G.nflavor(); ++f) {
+    Matrix<std::complex<double> >::Type M(nf*G.nsite(), nf*G.nsite());
+    for (int k1=0; k1<G.nsite(); k1++) {
+      for (int k2=0; k2<G.nsite(); k2++) {
+	for (int t1=0; t1<nf; t1++) {
+	  for (int t2=0; t2<nf; t2++) {
+	    M(k1*nf+t1, k2*nf+t2) = G(nf*t1+t2, k1, k2, f);
+	  }
+	}
+      }
+    }
+    /*Matrix<std::complex<double> >::Type M_inv(M.size1(), M.size2());
+    for (unsigned int i=0; i<M_inv.size1(); ++i)  
+      for (unsigned int j=0; j<M_inv.size2(); ++j) 
+	M_inv(i,j) = (i==j);
+    const int n = M.size1();
+    const int nrhs = M.size1();
+    const int lda = M.size1();
+    int ipiv[n];
+    const int ldb = M.size1();
+    int info;
+    zgesv_(&n, &nrhs, (double* )(&M(0,0)), &lda, ipiv, (double* )(&M_inv(0,0)), &ldb, &info);
+    std::cerr << "(INFO: " << info << ")\n";*/
+    Matrix<std::complex<double> >::Type M_inv = matrix_inverse<std::complex<double> >(M);
+    for (int k1=0; k1<G.nsite(); k1++) {
+      for (int k2=0; k2<G.nsite(); k2++) {
+	for (int t1=0; t1<nf; t1++) { 
+	  for (int t2=0; t2<nf; t2++) {
+	    G_inv(nf*t1+t2, k1, k2, f) = M_inv(k1*nf+t1, k2*nf+t2);
+	  }
+	}
+      }
+    }
+  }
+  return G_inv;
+}
+
+
+
+template <typename T>
+green_function<T> SimpleDCATransformer::fourpoint_green_function_add(const green_function<T>& G1,
+								     const green_function<T>& G2) const
+{
+  green_function<T> G(G1);
+  for (time_t t=0; t<G.ntime(); ++t) {
+    for (spin_t f=0; f<G.nflavor(); ++f) {
+      for (int k1=0; k1<G.nsite(); k1++) {
+	for (int k2=0; k2<G.nsite(); k2++) {
+	  G(t, k1, k2, f) += G2(t, k1, k2, f);
+	}
+      }
+    }
+  }
+  return G;
+}
+
+
+
+template <typename T>
+green_function<T> SimpleDCATransformer::fourpoint_green_function_subtract(const green_function<T>& G1,
+									  const green_function<T>& G2) const
+{
+  green_function<T> G(G1);
+  for (time_t t=0; t<G.ntime(); ++t) {
+    for (spin_t f=0; f<G.nflavor(); ++f) {
+      for (int k1=0; k1<G.nsite(); k1++) {
+	for (int k2=0; k2<G.nsite(); k2++) {
+	  G(t, k1, k2, f) -= G2(t, k1, k2, f);
+	}
+      }
+    }
+  }
+  return G;
+}
+
+
+
+template <typename T>
+green_function<T> SimpleDCATransformer::fourpoint_green_function_divide(const green_function<T>& G1,
+									const T d) const
+{
+  green_function<T> G(G1);
+  for (time_t t=0; t<G.ntime(); ++t) {
+    for (spin_t f=0; f<G.nflavor(); ++f) {
+      for (int k1=0; k1<G.nsite(); k1++) {
+	for (int k2=0; k2<G.nsite(); k2++) {
+	  G(t, k1, k2, f) /= d;
+	}
+      }
+    }
+  }
+  return G;
+}
+
+
+
 
 
 template<typename T, class D>
@@ -530,23 +667,9 @@ struct AntiFerroDCATransformer::Backward {
 template<class T>
 green_function<T> AntiFerroDCATransformer::spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const
 {
-  if(paramagnet==1){ std::cerr<<"Sebastian: paramagnet is true, should we really be using the AFM transformer?"<<std::endl; }
   green_function<T> G_new(G);
-  if(G_new.nflavor()>1 && G_new.nflavor()%2==0) {
-    for(spin_t flavor=0; flavor<G_new.nflavor(); flavor+=2) {
-      for (site_t k=0; k<n_cluster_sites(); k+=2) {
-	for (site_t q1=0; q1<=1; ++q1) {
-	  for (site_t q2=0; q2<=1; ++q2) {
-	    double sign = (q1==q2) ? 1. : -1.;
-	    for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
-	      G_new(freq, k+q1, k+q2, flavor) = 0.5 * (G_new(freq, k+q1, k+q2, flavor) + sign * G_new(freq, k+q1, k+q2, flavor+1));
-	      G_new(freq, k+q1, k+q2, flavor+1) = sign * G_new(freq, k+q1, k+q2, flavor);
-	    }
-	  }
-	}
-      }
-    }
-  }
+  if (paramagnet) 
+    boost::throw_exception(std::invalid_argument("AFM and PM? redundant parameters! set paramagnet to false.\n"));
   return G_new;
 }
 

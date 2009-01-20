@@ -133,6 +133,13 @@ int main(int argc, char** argv)
 #endif
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
+#ifdef IGOR
+	if(parms.defined("IGORS_TRANSFORMER")) {
+	  std::cout<<"using Igor's Hilbert transformer\n";
+	  transform_ptr = new IgorsHilbertTransformer();
+	}
+	else 
+#endif
         if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
           transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
           std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;

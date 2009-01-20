@@ -33,8 +33,7 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
   n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9)
 {
   setup_tables();
-{
-  std::ofstream siterealstr("/tmp/SiteClassesRealSpace");
+  /*std::ofstream siterealstr("SiteClassesRealSpace");
   for (std::set<site_class_type>::const_iterator it_i=site_class_set_real_space_.begin(); 
        it_i!=site_class_set_real_space_.end(); ++it_i) {
     for (site_class_type::const_iterator it_j=it_i->begin(); it_j!=it_i->end(); ++it_j) {
@@ -42,9 +41,7 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
     }
     siterealstr << std::endl;
   }
-}
-{
-  std::ofstream pairrealstr("/tmp/PairClassesRealSpace");
+  std::ofstream pairrealstr("PairClassesRealSpace");
   for (std::set<pair_class_type >::const_iterator it_i=pair_class_set_real_space_.begin(); 
        it_i!=pair_class_set_real_space_.end(); ++it_i) {
     for (pair_class_type::const_iterator it_j=it_i->begin(); it_j!=it_i->end(); ++it_j) {
@@ -52,9 +49,7 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
     }
     pairrealstr << std::endl;
   }
-}
-{
-  std::ofstream sitekstr("/tmp/SiteClassesKSpace");
+  std::ofstream sitekstr("SiteClassesKSpace");
   for (std::set<site_class_type>::const_iterator it_i=site_class_set_k_space_.begin(); 
        it_i!=site_class_set_k_space_.end(); ++it_i) {
     for (site_class_type::const_iterator it_j=it_i->begin(); it_j!=it_i->end(); ++it_j) {
@@ -62,17 +57,14 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
     }
     sitekstr << std::endl;
   }
-}
-{
-  std::ofstream pairkstr("/tmp/PairClassesKSpace");
+  std::ofstream pairkstr("PairClassesKSpace");
   for (std::set<pair_class_type >::const_iterator it_i=pair_class_set_k_space_.begin(); 
        it_i!=pair_class_set_k_space_.end(); ++it_i) {
     for (pair_class_type::const_iterator it_j=it_i->begin(); it_j!=it_i->end(); ++it_j) {
       pairkstr << "(" << it_j->first << "," << it_j->second << ") ";
     }
     pairkstr << std::endl;
-  }
-}
+  }*/
 }
 
 
@@ -97,7 +89,6 @@ void ClusterHelper::setup_tables()
   //setup cluster coordinates
   int maxc=n_cluster_sites_;
   vector_type c(dimension());
-  unsigned int n_added = 0;
   switch(dimension()) {
   case 1 :
     for (int i=-maxc; i<=maxc; ++i) {
@@ -130,7 +121,7 @@ void ClusterHelper::setup_tables()
   }
   //arrange vertices for bipartite lattices
   if (bipartite()) {
-    //std::cerr << "cluster is bipartite\n";
+    std::cerr << "cluster is bipartite\n";
     for (int i=0; i<cluster_coordinates_.size1(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
 	int j = i;
@@ -143,15 +134,13 @@ void ClusterHelper::setup_tables()
       }
     }
   }
-  {
-    std::ofstream clustercoordstream("/tmp/ClusterCoordinates");
-    for (int m=0; m<cluster_coordinates_.size1(); ++m) {
-      clustercoordstream << m << " ";
-      for (int d=0; d<cluster_coordinates_.size2(); ++d) 
-        clustercoordstream << cluster_coordinates_(m,d) << " ";
-      clustercoordstream << std::endl;
-    }
-  }
+  /*std::ofstream clustercoordstream("ClusterCoordinates");
+  for (int m=0; m<cluster_coordinates_.size1(); ++m) {
+    clustercoordstream << m << " ";
+    for (int d=0; d<cluster_coordinates_.size2(); ++d) 
+      clustercoordstream << cluster_coordinates_(m,d) << " ";
+    clustercoordstream << std::endl;
+    }*/
   //setup reciprocal basis
   Matrix<double>::Type reciprocal_basis(dimension(), dimension());
   basis_vector_iterator itbr, itbr_end;
@@ -231,13 +220,13 @@ void ClusterHelper::setup_tables()
       cluster_momenta_ = sorted_momenta;
     }
   }
-  std::ofstream clustermomstream("/tmp/ClusterMomenta");
+  /*std::ofstream clustermomstream("ClusterMomenta");
   for (int m=0; m<cluster_momenta_.size1(); ++m) {
     clustermomstream << m << " ";
     for (int d=0; d<cluster_momenta_.size2(); ++d) 
       clustermomstream << cluster_momenta_(m,d) << " ";
     clustermomstream << std::endl;
-  }
+    }*/
   
   //setup lattice momenta
   lattice_momenta_.resize(n_cluster_cells(), dimension());
@@ -249,17 +238,17 @@ void ClusterHelper::setup_tables()
       lattice_momenta_(m,d) = mom[d];
     }
   } 
-  std::ofstream latticemomstream("/tmp/LatticeMomenta");
+  /*std::ofstream latticemomstream("LatticeMomenta");
   for (int m=0; m<lattice_momenta_.size1(); ++m) {
     for (int d=0; d<lattice_momenta_.size2(); ++d) 
       latticemomstream << lattice_momenta_(m,d) << " ";
     latticemomstream << std::endl;
-  }
+    }*/
   if (cluster_coordinates_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   if (cluster_momenta_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
-  symmetry_analysis(basis, basis_inv, reciprocal_basis, reciprocal_basis_inv);
+  symmetry_analysis(basis, basis_inv/*, reciprocal_basis, reciprocal_basis_inv*/);
 }
 
 
@@ -267,9 +256,9 @@ void ClusterHelper::setup_tables()
 
 
 void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis, 
-				      const Matrix<double>::Type& basis_inv, 
+				      const Matrix<double>::Type& basis_inv/*, 
 				      const Matrix<double>::Type& reciprocal_basis, 
-				      const Matrix<double>::Type& reciprocal_basis_inv )
+				      const Matrix<double>::Type& reciprocal_basis_inv */)
 {
   //setup point group
   int gr1D[] = { 1, -1 };

@@ -2,7 +2,7 @@
 *
 * ALPS DMFT Project
 *
-* Copyright (C) 2007 by Sebastian Fuchs <fuchs@comp-phys.org>
+* Copyright (C) 2007-2008 by Sebastian Fuchs <fuchs@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -60,7 +60,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 							    const matsubara_green_function_t &G0_omega, 
 							    const double mu, const double h, const double beta)
 {
-  //if(h!=0){std::cerr<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
+  if(h!=0){std::cerr<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
@@ -69,19 +69,20 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
-        selfenergy(freq, kc, kc, flavor)  = 1./G0_omega(freq, kc, kc, flavor);
-        selfenergy(freq, kc, kc, flavor) -= 1./G_omega(freq, kc, kc, flavor);
-        std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-        G0_omega_new(freq, kc, kc, flavor) = 0.;
-        for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
-          vector_type k(dimension());
-          for (unsigned int d=0; d<dimension(); ++d) 
-            k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-          G0_omega_new(freq, kc, kc, flavor) += 1./(iomega_n+mu+(flavor%2==0?h:-h)-epsilon(k)-selfenergy(freq, kc, kc, flavor));
-        }
-        G0_omega_new(freq, kc, kc, flavor) /= n_cluster_cells();
-        G0_omega_new(freq, kc, kc, flavor) = 
-          1. / ( 1./G0_omega_new(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
+	selfenergy(freq, kc, kc, flavor)  = 1./G0_omega(freq, kc, kc, flavor);
+	selfenergy(freq, kc, kc, flavor) -= 1./G_omega(freq, kc, kc, flavor);
+	std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+	G0_omega_new(freq, kc, kc, flavor) = 0.;
+	for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
+	  vector_type k(dimension());
+	  for (unsigned int d=0; d<dimension(); ++d) 
+	    k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	  G0_omega_new(freq, kc, kc, flavor) 
+	    += 1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor));
+	}
+	G0_omega_new(freq, kc, kc, flavor) /= n_cluster_cells();
+	G0_omega_new(freq, kc, kc, flavor) = 
+	  1. / ( 1./G0_omega_new(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
       }
     }
   }
@@ -108,22 +109,20 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    double h_init = parms.value_or_default("H_INIT", 0.);
     //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
+    G0_omega.clear();
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
       for (site_t i=0; i<n_cluster_sites(); ++i) {
-        for (site_t j=0; j<n_cluster_sites(); ++j) {
-          for (frequency_t freq=0; freq<n_matsubara; ++freq) {
-            G0_omega(freq, i, j, flavor) = (i==j); // zero except for diagonal elements
-          }
-        }
+	for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+	  G0_omega(freq, i, i, flavor) = 1.;
+	}
       }
     }
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
-    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h+h_init, beta);
+    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
     
     itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
@@ -140,71 +139,110 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
 }
 
 
+
 matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
 								     const matsubara_green_function_t& G_omega,
 								     const matsubara_green_function_t& G0_omega, 
 								     const double mu, const double h, 
 								     const double beta) const
 {
-  if(h!=0){std::cerr<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
-  unsigned int nflavor=G0_omega.nflavor();
-  unsigned int nfreq=G0_omega.nfreq();
+  std::cerr << "transforming cluster green function\n";
+  assert(h==0); 
+  unsigned int nz = G0_omega.nflavor();
+  unsigned int n_matsubara = G0_omega.nfreq(); 
   assert(G0_omega.nsite()==n_cluster_sites());
-  matsubara_green_function_t G0_omega_fourpoint(G_omega_fourpoint);
-  for(int z=0; z<nflavor; ++z) {
-    int zbar = (z+1)%nflavor;
-    for(int k=0;k<n_cluster_sites();k+=2) {
-      for (int om=0; om<nfreq; ++om) {
-	G0_omega_fourpoint(om,k,k,z) =
-	  -G_omega(om,k+1,k+1,z)*G_omega(om,k,k,zbar);
-	G0_omega_fourpoint(om,k+1,k+1,z) =
-	  -G_omega(om,k,k,z)*G_omega(om,k+1,k+1,zbar);
-
-      }
+  matsubara_green_function_t G0_omega_fourpoint_inv(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  G0_omega_fourpoint_inv.clear();
+  //matsubara_green_function_t G0_omega_fourpoint(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  //G0_omega_fourpoint.clear();
+  for(spin_t z=0; z<nz; ++z) {
+    int zbar = z%nz==0 ? z+1 : z-1;
+    for(site_t k=0;k<n_cluster_sites();++k) {
+      int kpq = k%2==0 ? k+1 : k-1;
+      for (frequency_t om=0; om<n_matsubara; ++om) {
+	G0_omega_fourpoint_inv(om+n_matsubara*om,k,k,z) = 1. / (G_omega(om,kpq,kpq,z)*G_omega(om,k,k,zbar));
+	//G0_omega_fourpoint(om+n_matsubara*om,k,k,z) = G_omega(om,kpq,kpq,z)*G_omega(om,k,k,zbar);
+      } 
     }
   }
-  matsubara_green_function_t two_particle_vertex(G_omega_fourpoint);
-  matsubara_green_function_t G_omega_fourpoint_new(G_omega_fourpoint);
-  matsubara_green_function_t selfenergy(G_omega);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+  /*std::ofstream greenfourpstr("G0FourPoint");
+  for (int om1 =0; om1<n_matsubara; ++om1) {
+    for (int om2 =0; om2<n_matsubara; ++om2) {
+      greenfourpstr << om1 << " " << om2 << " ";
+      for (int k1=0; k1<n_cluster_sites(); ++k1) {
+	for (int k2=0; k2<n_cluster_sites(); ++k2) {
+	  for (int z=0; z<nz; ++z) {
+	    greenfourpstr << G0_omega_fourpoint(om2+n_matsubara*om1, k1, k2, z).real() << " " 
+			  << G0_omega_fourpoint(om2+n_matsubara*om1, k1, k2, z).imag() << " ";
+	  }
+	}
+      }
+      greenfourpstr << std::endl;
+    }
+    }*/
+  matsubara_green_function_t G_omega_fourpoint_inv = fourpoint_green_function_inverse(G_omega_fourpoint, n_matsubara);
+  matsubara_green_function_t two_particle_vertex(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  two_particle_vertex = fourpoint_green_function_subtract(G0_omega_fourpoint_inv, G_omega_fourpoint_inv);
+  matsubara_green_function_t selfenergy(n_matsubara, n_cluster_sites(), nz);
+  selfenergy.clear();
+  for (spin_t z=0; z<nz; ++z) {
     for (site_t k=0; k<n_cluster_sites(); ++k) {
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
-	two_particle_vertex(freq, k, k, flavor) = 1./G0_omega_fourpoint(freq, k, k, flavor);
-	two_particle_vertex(freq, k, k, flavor) -= 1./G_omega_fourpoint(freq, k, k, flavor);
-	selfenergy(freq, k, k, flavor) = 1./G0_omega(freq, k, k, flavor);
-	selfenergy(freq, k, k, flavor) -= 1./G_omega(freq, k, k, flavor);
+      for (frequency_t om=0; om<n_matsubara; ++om) {
+	selfenergy(om, k, k, z) = 1./G0_omega(om, k, k, z);
+	selfenergy(om, k, k, z) -= 1./G_omega(om, k, k, z);
       }
     }
   }
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    spin_t flavorbar = (flavor+1)%nflavor;
-    for (site_t kc=0; kc<n_cluster_sites(); kc+=2) {
-      //site_t kc_plus_q = (kc+1)%n_cluster_sites();
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
-	std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);	
-	G_omega_fourpoint_new(freq, kc, kc, flavor) = 0.;
+  matsubara_green_function_t G_omega_fourpoint_new(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  G_omega_fourpoint_new.clear();
+  //matsubara_green_function_t Gtest(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  //Gtest.clear();
+  for (spin_t z=0; z<nz; ++z) {
+    spin_t zbar = z%nz==0 ? z+1 : z-1;
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+      int kcpq = kc%2==0 ? kc+1 : kc-1;
+      for (frequency_t om=0; om<n_matsubara; ++om) {
+	std::complex<double> iomega_n(0, (2.*om+1.)*M_PI/beta);	
 	for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
 	  vector_type k(dimension());
 	  vector_type k_plus_q(dimension());
-	  for (unsigned int d=0; d<dimension(); ++d) { 
+  	  for (unsigned int d=0; d<dimension(); ++d) { 
 	    k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-	    k_plus_q[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d) + M_PI;
+	    k_plus_q[d] = lattice_momentum(kl,d) + cluster_momentum(kcpq,d);
 	  }
-	  G_omega_fourpoint_new(freq, kc, kc, flavor) 
-	    -= (1./(iomega_n+mu-epsilon(k_plus_q)-selfenergy(freq, kc+1, kc+1, flavor)))
-	    * (1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavorbar)));
-	  G_omega_fourpoint_new(freq, kc+1, kc+1, flavor) 
-	    -= (1./(iomega_n+mu-epsilon(k_plus_q)-selfenergy(freq, kc+1, kc+1, flavorbar)))
-	    * (1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor)));
+	  G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z) 
+	    += (1./(iomega_n+mu-epsilon(k_plus_q)-selfenergy(om, kcpq, kcpq, z)))
+	    * (1./(iomega_n+mu-epsilon(k)-selfenergy(om, kc, kc, zbar)));
 	}
-	G_omega_fourpoint_new(freq, kc, kc, flavor) /= n_cluster_cells();
-	G_omega_fourpoint_new(freq, kc, kc, flavor) = 
-	  1. / ( 1./G_omega_fourpoint_new(freq, kc, kc, flavor) - two_particle_vertex(freq, kc, kc, flavor) );
+	G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z) /= n_cluster_cells();
+	//Gtest(om+n_matsubara*om, kc, kc, z) = G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z);
+	G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z) = 1. / G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z);
       }
     }
   }
+  /*std::ofstream greenteststr("GtestFourPoint");
+  for (int om1 =0; om1<n_matsubara; ++om1) {
+    for (int om2 =0; om2<n_matsubara; ++om2) {
+      greenteststr << om1 << " " << om2 << " ";
+      for (int k1=0; k1<n_cluster_sites(); ++k1) {
+	for (int k2=0; k2<n_cluster_sites(); ++k2) {
+	  for (int z=0; z<nz; ++z) {
+	    greenteststr << Gtest(om2+n_matsubara*om1, k1, k2, z).real() << " " 
+			  << Gtest(om2+n_matsubara*om1, k1, k2, z).imag() << " ";
+	  }
+	}
+      }
+      greenteststr << std::endl;
+    }
+    }*/
+  G_omega_fourpoint_new = fourpoint_green_function_subtract(G_omega_fourpoint_new, two_particle_vertex);
+  G_omega_fourpoint_new = fourpoint_green_function_inverse(G_omega_fourpoint_new, n_matsubara);
+  std::cerr << "lattice green function calculated\n";
+  //exit(1);
   return G_omega_fourpoint_new;
 }
+
+
 
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
 							       const matsubara_green_function_t &G0_omega, 
@@ -215,11 +253,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
   assert(G0_omega.nsite()==n_cluster_sites());
   assert(nflavor>1 && nflavor%2 == 0);
   matsubara_green_function_t G0_omega_new(nfreq,n_cluster_sites(),nflavor);
-  for (frequency_t freq=0; freq<G0_omega_new.nfreq(); ++freq) 
-    for (int i=0; i<G0_omega_new.nsite(); ++i) 
-      for (int j=0; j<G0_omega_new.nsite(); ++j) 
-	for (spin_t flavor=0; flavor<G0_omega_new.nflavor(); ++flavor) 
-	  G0_omega_new(freq,i,j,flavor) = 0.;
+  G0_omega_new.clear();
   matsubara_green_function_t G0_omega_inv = green_function_inverse(G0_omega);
   matsubara_green_function_t G_omega_inv = green_function_inverse(G_omega);
   matsubara_green_function_t selfenergy = green_function_subtract(G0_omega_inv, G_omega_inv);
@@ -274,12 +308,11 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     double h_init = parms.value_or_default("H_INIT", 0.);
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
+    G0_omega.clear();
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
       for (site_t i=0; i<n_cluster_sites(); ++i) {
-	for (site_t j=0; j<n_cluster_sites(); ++j) {
-	  for (frequency_t freq=0; freq<n_matsubara; ++freq) {
-	    G0_omega(freq, i, j, flavor) = (i==j); // zero except for diagonal elements
-	  }
+	for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+	  G0_omega(freq, i, i, flavor) = 1.;
 	}
       }
     }
