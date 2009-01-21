@@ -131,13 +131,14 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
   for(unsigned int f=0;f<G_omega.nflavor();++f){
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
-        std::cout<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
-        std::cout<<"running backward fourier with beta: "<<beta_<<std::endl;
+        //std::cout<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
+        //std::cout<<"running backward fourier with beta: "<<beta_<<std::endl;
         //if (s1==s2) {
           for (unsigned int k=0; k<N_omega; k++) {
             std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
             G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
           } 
+          //std::cout<<"last: no model: "<<G_omega_no_model(N_omega-1,s1,s2,f)<<" "<<f_omega(std::complex<double>(0,(2*(N_omega-1)+1)*M_PI/beta_), c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2])<<" G(omega): "<<G_omega(N_omega-1,s1,s2,f)<<std::endl;
         //}
         for (unsigned int i=0; i<N_tau; i++) {
           G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 

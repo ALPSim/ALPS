@@ -122,7 +122,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
   std::cout<<"converged!"<<std::endl;
 }
 
-double adjust_filling(const alps::Parameters &parms, double current_filling){
+/*void adjust_chemical_potential(const alps::Parameters &parms, double current_filling, double &mu){
   
   //static double filling_lower=-std::numeric_limits<double>::infinity(), filling_upper=std::numeric_limits<double>::infinity();
   static double mu_lower=parms.value_or_default("MU_LOWER_BOUND",-std::numeric_limits<double>::infinity());
@@ -178,7 +178,7 @@ double adjust_filling(const alps::Parameters &parms, double current_filling){
   }else
     keep_adjusting=false;
   return mu;
-}
+}*/
 
 /// @brief Run the self consistency loop for G and G0 mainly in Matsubara frequency space. Perform Fourier transformations where needed.
 ///
@@ -238,29 +238,23 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
     G_tau = hilbert.symmetrize(G_tau, paramagnet);
     G_omega = hilbert.symmetrize(G_omega, paramagnet);
-    G_omega_shifted=G_omega;
-    if(parms.defined("FILLING")){ //adjust chemical potential
-      double current_filling=0;
-      for(uint i=0;i<n_site;++i){
-        for(uint j=0;j<n_orbital;++j){
-          current_filling-=G_tau(n_tau,i,i,j)/(n_site); //G is negative...
-        }
-      }
-      double mu_old=mu;
-      mu=adjust_filling(parms, current_filling);
-      for(unsigned int i=0;i<n_site;++i){
-        for(unsigned int j=0;j<n_site;++j){
-          for(unsigned int orbital=0;orbital<n_orbital;++orbital){
-            for(unsigned int k=0;k<n_matsubara;++k){
-              G_omega_shifted(k,i,j,orbital)=1./(1./G_omega(k,i,j,orbital)-mu_old+mu); //shift the GF to get filling right.
-            }
-          }
-        }
-      }
+    /*if(parms.defined("FILLING")){ //adjust chemical potential
+      bool converged=false;
+      matsubara_green_function_t G_lattice_omega(G_omega);
+      do{
+        //standard hilbert trafo
+        matsubara_green_function_t G0_omega_new= hilbert(G_omega, G0_omega, mu, h, beta);
+        //re-obtain lattice Green's function from it
+
+        //compute density
+        double total_density=compute_density(G_omega);
+        //adjust chemical potential
+        converged=adjust_chemical_potential(parms, total_density, mu);
+      }while(!converged);
     }
     std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
-    G0_omega = hilbert(G_omega_shifted, G0_omega, mu, h, beta);
-    
+    G0_omega = hilbert(G_omega, G0_omega, mu, h, beta);
+    */
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
@@ -299,7 +293,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
 
 
 void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
-                              DCATransformer& clustertrans, FourierTransformer &fourier,
+                              DCATransformer& clustertrans, boost::shared_ptr<FourierTransformer> &fourier_ptr,
                               matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
@@ -317,7 +311,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   
   int iteration_ctr = 0;
   bool result_in_omega=true;
-  
+
   if(parms.defined("DIRECT_ITIME_MEASUREMENT") || 
      parms.defined("FACTORIZED_ITIME_MEASUREMENT") || 
      parms.defined("WERNER_ITIME_MEASUREMENT")) {
@@ -339,8 +333,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
-    
-    fourier.backward_ft(G0_tau, G0_omega);
+
+    fourier_ptr->backward_ft(G0_tau, G0_omega);
     std::cout<<"running solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
     std::cout<<"applying point group symmetries"<<std::endl<<std::flush;    
@@ -348,30 +342,11 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     G_omega = clustertrans.symmetrize_k_space(G_omega);
     G_tau = clustertrans.symmetrize_k_space(G_tau);
-    G_omega_shifted=G_omega;
-    if(parms.defined("FILLING")){ //adjust chemical potential
-      double current_filling=0;
-      for(uint i=0;i<n_site;++i){
-        for(uint j=0;j<n_orbital;++j){
-          current_filling-=G_tau(n_tau,i,i,j)/(n_site); //G is negative...
-        }
-      }
-      double mu_old=mu;
-      mu=adjust_filling(parms, current_filling);
-      for(unsigned int i=0;i<n_site;++i){
-        for(unsigned int j=0;j<n_site;++j){
-          for(unsigned int orbital=0;orbital<n_orbital;++orbital){
-            for(unsigned int k=0;k<n_matsubara;++k){
-              G_omega_shifted(k,i,j,orbital)=1./(1./G_omega(k,i,j,orbital)-mu_old+mu); //shift the GF to get filling right.
-            }
-          }
-        }
-      }
-    }
-
 
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
-    G0_omega = clustertrans(G_omega_shifted, G0_omega, mu, h, beta);
+    G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
+    hifreq_moments moments=clustertrans.k_space_moments(mu);
+    FourierTransformer::generate_transformer(parms, fourier_ptr, moments);
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
@@ -416,5 +391,4 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
       print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, true);
     print_all_green_functions(iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, false, "_realspace");
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
-  
-}
+} 

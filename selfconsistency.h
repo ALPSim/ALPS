@@ -91,7 +91,7 @@ void selfconsistency_loop_DCA
  const alps::Parameters& parms, 
  MatsubaraImpuritySolver& solver, 
  DCATransformer& clustertrans,
- FourierTransformer &fourier, 
+ boost::shared_ptr<FourierTransformer> &fourier, 
  matsubara_green_function_t& G0_omega, 
  matsubara_green_function_t& G_omega
  );

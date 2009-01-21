@@ -212,7 +212,8 @@ int main(int argc, char** argv)
         else {
           std::cout<<"using simple DCA transformer"<<std::endl;
           transform_ptr = new SimpleDCATransformer(parms);
-          FourierTransformer::generate_transformer(parms, fourier_ptr, ((SimpleDCATransformer*)transform_ptr)->k_space_moments(parms["MU"]));
+          std::cout<<"done building simple DCA transformer"<<std::endl;
+          FourierTransformer::generate_transformer(parms, fourier_ptr, transform_ptr->k_space_moments(parms["MU"]));
         }
         matsubara_green_function_t G0_omega=transform_ptr->initial_G0(parms);
         matsubara_green_function_t G_omega=G0_omega;
@@ -235,7 +236,7 @@ int main(int argc, char** argv)
 #ifdef RUBTSOV
         }
 #endif
-        selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr, *fourier_ptr, G0_omega, G_omega);
+        selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr, fourier_ptr, G0_omega, G_omega);
         // write G0
         G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
       }
@@ -244,6 +245,11 @@ int main(int argc, char** argv)
         boost::throw_exception(std::logic_error("there is no such cluster method!"));
       }
     }		
+    {
+      std::ofstream os(argv[1]);
+      os<<parms;
+      os.close();
+    }
 #ifndef BOOST_NO_EXCEPTIONS
   }
   catch (std::exception& exc) {

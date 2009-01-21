@@ -54,9 +54,9 @@ fileclean:
 
 %.o: %.C
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $<
-
+depend:
+				makedepend $(SOURCES) $(SOURCES_DMFT)
 hirschfyesim.o: hirschfyeaux.h hirschfyesim.h
 selfconsistency.o: hilberttransformer.h fouriertransform.h 
 main.o: hilberttransformer.h fouriertransform.h
 2dsimpson.o: 2dsimpson.C 2dsimpson.h
-# DO NOT DELETE

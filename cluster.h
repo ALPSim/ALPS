@@ -122,7 +122,7 @@ public:
 
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
 						const matsubara_green_function_t &G0_omega, 
-						const double mu, const double h, 
+						double &mu, const double h, 
 						const double beta)=0; 
   virtual itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const=0;
   virtual matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const=0;
@@ -143,6 +143,7 @@ public:
   template<typename T> green_function<T> symmetrize_k_space(const green_function<T>& G) const 
   { return symmetrize_helper(G, pair_classes_k_space()); }
   
+  virtual hifreq_moments k_space_moments(const double &mu) const=0;
   virtual matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const=0; 
   virtual matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const=0;
   virtual itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const=0; 
@@ -153,6 +154,8 @@ public:
 							 const double mu, const double h, 
 							 const double beta) const =0; 
   std::complex<double>* exp_iksite(const int sign) const;
+  void compute_epsav(std::vector<double> &epsav, std::vector<double> &epsavsq) const;
+  virtual double epsilon(const vector_type k) const=0;
 
 private:
   template<typename T>
@@ -167,15 +170,20 @@ class SimpleDCATransformer : public DCATransformer
 {
 public:
   SimpleDCATransformer(const alps::Parameters& params) :
-    DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])), 
+    t_(boost::lexical_cast<double>(params["t"])), 
     t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
     t3_(params.value_or_default("t3", 0.)),
-    t4_(params.value_or_default("t4", 0.))
-    /*tprime_(params.defined("t'")?boost::lexical_cast<double>(params["t'"]):0)*/ {}
+    t4_(params.value_or_default("t4", 0.)),
+    compute_filling_(params.defined("FILLING")?true:false),
+    n_target_(compute_filling_?(double)(params["FILLING"]):-1),
+    DCATransformer(params)
+    {
+      params_ptr_=&params;
+    }
   
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
 					const matsubara_green_function_t &G0_omega, 
-					const double mu, const double h, const double beta);
+					double &mu, const double h, const double beta);
   itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
   { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
@@ -196,7 +204,6 @@ public:
 						 const double mu, const double h, 
 						 const double beta) const; 
   hifreq_moments k_space_moments(const double &mu) const;
-  void compute_epsav(std::vector<double> &epsav, std::vector<double> &epsavsq) const;
  private:
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;
@@ -269,6 +276,9 @@ public:
   struct Forward;
   struct Backward;
   
+  bool compute_filling_;
+  double n_target_;
+  const alps::Parameters *params_ptr_;
 };
 
 
@@ -281,7 +291,7 @@ public:
   
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
 					const matsubara_green_function_t &G0_omega, 
-					const double mu, const double h, const double beta);
+					double &mu, const double h, const double beta);
   itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
   { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
@@ -294,6 +304,7 @@ public:
   { return transform_coordinates<double, Backward>(G); }
   itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const 
   { return transform_coordinates<double, Forward>(G); }
+  hifreq_moments k_space_moments(const double &mu) const;
   
   matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& /*G_omega_fourpoint*/,
