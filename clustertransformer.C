@@ -34,7 +34,7 @@ bool adjust_chemical_potential(const double &density, double &mu, bool &damping_
 
 
 matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters& parms) {
-  std::cerr<<"reading initial G0_omega"<<std::endl;
+  std::cout<<"reading initial G0_omega"<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
@@ -83,7 +83,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
                                                             const matsubara_green_function_t &G0_omega, 
                                                             double &mu, const double h, const double beta)
 {
-  if(h!=0){std::cerr<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
+  if(h!=0){std::cout<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
@@ -163,10 +163,10 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
       return ClusterTransformer::initial_G0(parms);
     }
     else
-      std::cerr<<"WARNING: Input file could not be found, proceeding with free solution."<<std::endl;
+      std::cout<<"WARNING: Input file could not be found, proceeding with free solution."<<std::endl;
   }
   { //proceed with computation of new G0 if we can't find input G0
-    std::cerr<<"calculating initial G0_omega"<<std::endl;
+    std::cout<<"calculating initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_tau=boost::lexical_cast<int>(parms["N"]);
     int n_flavor=parms.value_or_default("FLAVORS", 2);
@@ -209,7 +209,7 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
                                                                      const double mu, const double h, 
                                                                      const double beta) const
 {
-  std::cerr << "transforming cluster green function\n";
+  std::cout << "transforming cluster green function\n";
   assert(h==0); 
   unsigned int nz = G0_omega.nflavor();
   unsigned int n_matsubara = G0_omega.nfreq(); 
@@ -300,7 +300,7 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
    }*/
   G_omega_fourpoint_new = fourpoint_green_function_subtract(G_omega_fourpoint_new, two_particle_vertex);
   G_omega_fourpoint_new = fourpoint_green_function_inverse(G_omega_fourpoint_new, n_matsubara);
-  std::cerr << "lattice green function calculated\n";
+  std::cout << "lattice green function calculated\n";
   //exit(1);
   return G_omega_fourpoint_new;
 }
@@ -361,7 +361,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   if (parms.defined("G0OMEGA_INPUT")) 
     return ClusterTransformer::initial_G0(parms);
   else {
-    std::cerr<<"calculating initial G0_omega"<<std::endl;
+    std::cout<<"calculating initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_tau=boost::lexical_cast<int>(parms["N"]);
     int n_flavor=parms.value_or_default("FLAVORS", 2);

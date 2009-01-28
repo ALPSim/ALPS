@@ -96,7 +96,7 @@ public:
 					    double mu, double h, double beta)
   {
     //to implement
-    std::cerr<<"Square Lattice Hilbert transformer"<<G_tau<<std::endl;
+    std::cout<<"Square Lattice Hilbert transformer"<<G_tau<<std::endl;
     std::cout<<&fourier_ignored<<std::endl;
     std::cout<<mu;
     std::cout<<beta;
@@ -124,11 +124,11 @@ public:
   {
     //to implement
     //std::cout<<Sigma;
-    std::cerr<<G_tau<<std::endl;
-    std::cerr<<&fourier_ignored<<std::endl;
-    std::cerr<<mu;
-    std::cerr<<beta;
-    std::cerr<<h;
+    std::cout<<G_tau<<std::endl;
+    std::cout<<&fourier_ignored<<std::endl;
+    std::cout<<mu;
+    std::cout<<beta;
+    std::cout<<h;
     abort();
     return itime_green_function_t(0,0,0);
   }

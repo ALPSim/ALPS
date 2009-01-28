@@ -40,7 +40,7 @@
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
 // : the_scheduler(scheduler::start_single(f,argc,argv))
 {
-  //std::cerr<<"constructing solver with arguments"<<std::endl;
+  //std::cout<<"constructing solver with arguments"<<std::endl;
   //for(int i=1;i<argc;++i){
   //  std::cout<<argv[i]<<std::endl;
   //}

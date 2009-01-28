@@ -226,13 +226,13 @@ public:
   }
   
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const{
-    std::cerr<<"implement 2nd derivatives for F function before using this!"<<std::endl;
+    std::cout<<"implement 2nd derivatives for F function before using this!"<<std::endl;
     FourierTransformer::forward_ft(G_tau, G_omega);
   }
   
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
     FourierTransformer::backward_ft(G_tau, G_omega);
-    std::cerr<<"correcting for F function"<<std::endl;
+    std::cout<<"correcting for F function"<<std::endl;
     for(unsigned int j=0;j<G_tau.nflavor();++j){
       G_tau(G_tau.ntime()-1,j)=-epsilonsq_av_-G_tau(0,j);
     }
@@ -242,10 +242,10 @@ public:
 			   const green_function<alps::RealObsevaluator> &G_omega_real,
 			   const green_function<alps::RealObsevaluator> &G_omega_imag) const{
     
-    std::cerr<<"backward ft: "<<&G_tau<<std::endl;
-    std::cerr<<"backward ft: "<<&G_omega_real<<std::endl;
-    std::cerr<<"backward ft: "<<&G_omega_imag<<std::endl;
-    std::cerr<<"not implemented for obsevaluators. exiting."<<std::endl;
+    std::cout<<"backward ft: "<<&G_tau<<std::endl;
+    std::cout<<"backward ft: "<<&G_omega_real<<std::endl;
+    std::cout<<"backward ft: "<<&G_omega_imag<<std::endl;
+    std::cout<<"not implemented for obsevaluators. exiting."<<std::endl;
     abort();
   } //not implemented.
   
@@ -265,7 +265,7 @@ public:
   FittingFourierTransformer(double beta, double mu, int n_flavor, int n_site)
     : FourierTransformer(beta, mu, n_flavor, n_site)
   {
-    std::cerr<<"Fitting FFourier Transformer" << std::endl;
+    std::cout<<"Fitting FFourier Transformer" << std::endl;
     for(int f=0;f<n_flavor;++f){
       for(int i=0;i<n_site;++i){
 	for(int j=0;j<n_site;++j){
@@ -279,7 +279,7 @@ public:
   
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const
   {
-    std::cerr<<"implement 2nd derivatives for F function before using this!"<<std::endl;
+    std::cout<<"implement 2nd derivatives for F function before using this!"<<std::endl;
     FourierTransformer::forward_ft(G_tau, G_omega);
   }
   
@@ -290,10 +290,10 @@ public:
 			   const green_function<alps::RealObsevaluator> &G_omega_imag) const
   {
     
-    std::cerr<<"backward ft: "<<&G_tau<<std::endl;
-    std::cerr<<"backward ft: "<<&G_omega_real<<std::endl;
-    std::cerr<<"backward ft: "<<&G_omega_imag<<std::endl;
-    std::cerr<<"not implemented for obsevaluators. exiting."<<std::endl;
+    std::cout<<"backward ft: "<<&G_tau<<std::endl;
+    std::cout<<"backward ft: "<<&G_omega_real<<std::endl;
+    std::cout<<"backward ft: "<<&G_omega_imag<<std::endl;
+    std::cout<<"not implemented for obsevaluators. exiting."<<std::endl;
     abort();
   } //not implemented.
   

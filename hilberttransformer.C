@@ -96,7 +96,7 @@ itime_green_function_t HilbertTransformer::initial_G0(const alps::Parameters& pa
 itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier, 
 								double mu, double h, double beta)
 {
-  //if(h!=0){ std::cerr<<"ignoring magnetic field!"<<std::endl; abort(); }
+  //if(h!=0){ std::cout<<"ignoring magnetic field!"<<std::endl; abort(); }
   double tsq=t_*t_;
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
@@ -134,7 +134,7 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    //if(h!=0) {std::cerr<<"we don't yet handle magnetic fields!"<<std::endl; abort(); }
+    //if(h!=0) {std::cout<<"we don't yet handle magnetic fields!"<<std::endl; abort(); }
     double h_init = parms.value_or_default("H_INIT", 0.);
     double tsq=t_*t_;
     matsubara_green_function_t G0_omega(n_matsubara,n_flavor);  
@@ -189,7 +189,7 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
   else {
     std::ifstream check(parms["G0OMEGA_INPUT"].c_str());
     if(!check.is_open()){
-      std::cerr<<"could not open inital G0 file "<<parms["G0OMEGA_INPUT"]<<" proceeding with free solution. "<<std::endl;
+      std::cout<<"could not open inital G0 file "<<parms["G0OMEGA_INPUT"]<<" proceeding with free solution. "<<std::endl;
       matsubara_green_function_t G_omega(n_matsubara, n_orbital);
       for(int i=0;i<n_matsubara;++i){
 	for(int f=0;f<n_orbital;++f){
@@ -293,7 +293,7 @@ FSDOSHilbertTransformer::FSDOSHilbertTransformer(const alps::Parameters& params)
     dos.push_back(d);
     std::cout<<eps<<" "<<d<<std::endl;
   }
-  if(dos.size()%2!=0){ std::cerr<<"please use even number of DOS points"<<std::endl; abort(); }
+  if(dos.size()%2!=0){ std::cout<<"please use even number of DOS points"<<std::endl; abort(); }
   //normalize DOS to one:
   double s=0;
   for(uint i=1;i<epsilon.size()-2;i+=2){
@@ -329,7 +329,7 @@ matsubara_green_function_t FSDOSHilbertTransformer::operator()(const matsubara_g
 							       const double mu, const double h, const double beta)
 {
   assert(G_omega.nsite()==1);
-  if(h!=0){std::cerr<<" we don't yet handle magnetic fields!"<<std::endl; abort(); }
+  if(h!=0){std::cout<<" we don't yet handle magnetic fields!"<<std::endl; abort(); }
   //matsubara_green_function_t G0_omega(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
   matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
   matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
@@ -354,7 +354,7 @@ matsubara_green_function_t FSDOSHilbertTransformer::operator()(const matsubara_g
     }
     //std::cout<<"G omega new is: "<<G_omega_new(0,f)<<std::endl;
   }
-  if(G_omega.nflavor() !=2){std::cerr<<"don't know how to handle != 2 flavors."<<std::endl; abort();}
+  if(G_omega.nflavor() !=2){std::cout<<"don't know how to handle != 2 flavors."<<std::endl; abort();}
   for(spin_t f=0;f<G_omega.nflavor();++f){
     for(frequency_t w=0;w<G_omega.nfreq();++w){
       G0_omega_new(w,f)=1./(sigma(w,f)+1./G_omega_new(w,f));
@@ -372,8 +372,8 @@ matsubara_green_function_t AFM_FSDOSHilbertTransformer::operator()(const matsuba
 								   matsubara_green_function_t &G0_omega, 
 								   const double mu, const double h, const double beta)
 {
-  if(G_omega.nsite()!=1){ std::cerr<<"don't know how to handle n_site >1. Use Sebastian's cluster loop for that. aborting."<<std::endl; abort();}
-  if(G_omega.nflavor()!=2){ std::cerr<<"don't know how to handle n_flavor!=2. aborting."<<std::endl; abort();}
+  if(G_omega.nsite()!=1){ std::cout<<"don't know how to handle n_site >1. Use Sebastian's cluster loop for that. aborting."<<std::endl; abort();}
+  if(G_omega.nflavor()!=2){ std::cout<<"don't know how to handle n_flavor!=2. aborting."<<std::endl; abort();}
   matsubara_green_function_t Sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
   matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
   matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
@@ -388,7 +388,7 @@ matsubara_green_function_t AFM_FSDOSHilbertTransformer::operator()(const matsuba
     std::complex<double>zeta_B=std::complex<double>(mu+h,wn)-Sigma(w,1);
     
     //Simpson: integrate dos(e)/(zeta_A zeta_B-e^2)
-    if(dos.size()%2 !=0){std::cerr<<"for Simpson precision: use a DOS with even number of integration points. "<<std::endl; abort(); }
+    if(dos.size()%2 !=0){std::cout<<"for Simpson precision: use a DOS with even number of integration points. "<<std::endl; abort(); }
     std::complex<double> I=0;
     for(uint i=1;i<dos.size()-2;i+=2){
       I+=4.*integrand(i,dos,epsilon,zeta_A,zeta_B)+2.*integrand(i+1,dos,epsilon,zeta_A,zeta_B);

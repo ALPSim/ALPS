@@ -542,7 +542,7 @@ inline matsubara_green_function_t SimpleDCATransformer::fourpoint_green_function
     const int ldb = M.size1();
     int info;
     zgesv_(&n, &nrhs, (double* )(&M(0,0)), &lda, ipiv, (double* )(&M_inv(0,0)), &ldb, &info);
-    std::cerr << "(INFO: " << info << ")\n";*/
+    std::cout << "(INFO: " << info << ")\n";*/
     Matrix<std::complex<double> >::Type M_inv = matrix_inverse<std::complex<double> >(M);
     for (int k1=0; k1<G.nsite(); k1++) {
       for (int k2=0; k2<G.nsite(); k2++) {

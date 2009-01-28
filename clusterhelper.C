@@ -121,7 +121,7 @@ void ClusterHelper::setup_tables()
   }
   //arrange vertices for bipartite lattices
   if (bipartite()) {
-    std::cerr << "cluster is bipartite\n";
+    std::cout << "cluster is bipartite\n";
     for (int i=0; i<cluster_coordinates_.size1(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
 	int j = i;
@@ -208,7 +208,7 @@ void ClusterHelper::setup_tables()
       vector_type v(dimension());
       unsigned int ind = 0;
       for(unsigned int i=0; i<n_cluster_sites(); ++i) {
-	//std::cerr << ind << "\n";
+	//std::cout << ind << "\n";
 	for (unsigned int d=0; d<dimension(); ++d) 
 	  v[d] = cluster_momenta_(ind,d);
 	append_column_no_duplicates(sorted_momenta, v);
@@ -341,7 +341,7 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 	group[g](j,i) = gr[i+j*dimension()+g*dimension()*dimension()];
   //setup symmetry table in real space
   Matrix<site_t>::Type symmetry_table_real_space;
-  std::cerr << "good symmetries: ";
+  std::cout << "good symmetries: ";
   for (unsigned int g=0; g<group.size(); ++g) {
     std::map<site_t, site_t> vertexmap;
     std::set<site_t> vertexset;
@@ -368,23 +368,23 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 	break;
     }
     if (vertexset.size()==n_cluster_sites() && vertexmap.size()==n_cluster_sites()) {
-      std::cerr  << g << " ";
+      std::cout  << g << " ";
       append_column_no_duplicates(symmetry_table_real_space, vertexmap);
     }
   }
-  std::cerr << "\n";
-  /*std::cerr << "symmetry table in real space:\n";
+  std::cout << "\n";
+  /*std::cout << "symmetry table in real space:\n";
   for (unsigned int i=0; i<symmetry_table_real_space.size1(); ++i) {
     for (unsigned int j=0; j<symmetry_table_real_space.size2(); ++j) {
-      std::cerr << symmetry_table_real_space(i,j) << " ";
+      std::cout << symmetry_table_real_space(i,j) << " ";
     }
-    std::cerr << std::endl;
+    std::cout << std::endl;
     }*/
   //setup equivalence classes of sites and site pairs
   boost::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space);
   //setup symmetry table in k space
   Matrix<site_t>::Type symmetry_table_k_space;
-  std::cerr << "good symmetries: ";
+  std::cout << "good symmetries: ";
   for (unsigned int g=0; g<group.size(); ++g) {
     std::map<site_t, site_t> vertexmap;
     std::set<site_t> vertexset;
@@ -393,19 +393,19 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
       cell_iterator itc, itc_end;
       for (boost::tie(itc, itc_end) = cells(); itc!=itc_end; ++itc) {
 	offset_type o = offset(*itc);
-	//std::cerr << c[0] << " "<< c[1] << " mu ";
+	//std::cout << c[0] << " "<< c[1] << " mu ";
 	//c = matrix_vector_mult(reciprocal_basis, c);
-	//std::cerr << o[0] << " "<< o[1] << " cm ";
+	//std::cout << o[0] << " "<< o[1] << " cm ";
 	vector_type c(dimension());
 	for (unsigned int d=0; d<dimension(); ++d) 
 	  c[d] = 2*M_PI*o[d]+cluster_momentum(i,d);
-	//std::cerr << c[0] << " "<< c[1] << " g ";
+	//std::cout << c[0] << " "<< c[1] << " g ";
 	c = matrix_vector_mult(group[g], c);
-	//std::cerr << c[0] << " " << c[1] << " ma ";
+	//std::cout << c[0] << " " << c[1] << " ma ";
 	c = map_back_into_brillouin_zone(c);
-	//std::cerr << c[0] << " " << c[1] << " : ";
+	//std::cout << c[0] << " " << c[1] << " : ";
 	unsigned int i_mapped = identify_vertex(c, cluster_momenta_);
-	//std::cerr << i << ":" << i_mapped << "\n";
+	//std::cout << i << ":" << i_mapped << "\n";
 	if (i_mapped == n_cluster_sites()) {
 	  bad = true;
 	  break;
@@ -423,17 +423,17 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 	break;
     }
     if (vertexset.size()==n_cluster_sites() && vertexmap.size()==n_cluster_sites()) {
-      std::cerr  << g << " ";
+      std::cout  << g << " ";
       append_column_no_duplicates(symmetry_table_k_space, vertexmap);
     }
   }
-  std::cerr << "\n";
-  /*std::cerr << "symmetry table k space:\n";
+  std::cout << "\n";
+  /*std::cout << "symmetry table k space:\n";
   for (unsigned int i=0; i<symmetry_table_k_space.size1(); ++i) {
     for (unsigned int j=0; j<symmetry_table_k_space.size2(); ++j) {
-      std::cerr << symmetry_table_k_space(i,j) << " ";
+      std::cout << symmetry_table_k_space(i,j) << " ";
     }
-    std::cerr << std::endl;
+    std::cout << std::endl;
     }*/
   //setup equivalence classes of sites and site pairs
   boost::tie(site_class_set_k_space_, pair_class_set_k_space_) = setup_classes(symmetry_table_k_space);
@@ -534,9 +534,9 @@ bool ClusterHelper::inside_reduced_brillouin_zone(vector_type v, const Matrix<do
     projection /= norm;
     projection = round(projection);
     if (projection > 1 || projection <= -1) {
-      /*std::cerr << v[0] << " " << v[1] << " " << v[2] << ";";
-      std::cerr << "proj: " << projection << ";";
-      std::cerr << i << " no\n";*/
+      /*std::cout << v[0] << " " << v[1] << " " << v[2] << ";";
+      std::cout << "proj: " << projection << ";";
+      std::cout << i << " no\n";*/
       return false;
     }
   }
@@ -601,7 +601,7 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_brillouin_zone(vector_ty
     }
     v[d] *= M_PI;
   }
-  //std::cerr << v[0] << " " << v[1] << "\n";
+  //std::cout << v[0] << " " << v[1] << "\n";
   return v;
 }
 
@@ -631,7 +631,7 @@ unsigned int ClusterHelper::cluster_momentum_approximation(vector_type v,
 						   const Matrix<double>::Type& momenta, 
 						   const Matrix<double>::Type& B) const 
 {
-  //std::cerr << "jepp ";
+  //std::cout << "jepp ";
   Matrix<double>::Type T;
   switch (dimension()) {
   case 1 : 
@@ -675,7 +675,7 @@ unsigned int ClusterHelper::cluster_momentum_approximation(vector_type v,
 	for (unsigned int d=0; d<diff.size(); ++d) 
 	  inside &= diff[d]<=1 && diff[d]>-1;
 	if (inside) {
-	  //std::cerr << i << "\n";
+	  //std::cout << i << "\n";
 	  return i;
 	}
       }
@@ -696,7 +696,7 @@ unsigned int ClusterHelper::identify_vertex(const vector_type& v, const Matrix<d
     if (equal)
       return i;
   }
-  //std::cerr << v[0] << " " << v[1] << "\n";
+  //std::cout << v[0] << " " << v[1] << "\n";
   return n_cluster_sites();
 }
 
