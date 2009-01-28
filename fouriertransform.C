@@ -138,7 +138,7 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
   for(unsigned int f=0;f<G_omega.nflavor();++f){
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
-	//std::cerr<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
+	std::cout<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
         //std::cout<<"running backward fourier with beta: "<<beta_<<std::endl;
 	for (unsigned int k=0; k<N_omega; k++) {
 	  std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
@@ -164,16 +164,11 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
 		      << f_omega(iw, c1_[0][s1][s1],c2_[0][s1][s1], c3_[0][s1][s1]).real() << "\t"
 		      << f_omega(iw, c1_[0][s1][s1],c2_[0][s1][s1], c3_[0][s1][s1]).imag()
 		      << std::endl;
-	  }
-	  }*/
+		      }
+		      }*/
       }
     }
   }
-  /*std::cout<<"no model, G, and f: "<<std::endl;
-  for(uint k=0; k<N_omega; k++){
-    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-    std::cout<<G_omega_no_model(k,0,0,0)<<" "<<G_omega(k,0,0,0)<<" "<<f_omega(iw, c1_[0][0][0],c2_[0][0][0], c3_[0][0][0])<<std::endl;
-  }*/
 }
 
 
@@ -193,6 +188,8 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
   for(unsigned int flavor=0;flavor<G_tau.nflavor();++flavor){
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
+	std::cout << "running forward fourier with coefficients: " 
+		  << c1_[flavor][s1][s2]<<" "<<c2_[flavor][s1][s2]<<" "<<c3_[flavor][s1][s2]<<std::endl;
         for(unsigned int i=0;i<N;++i){
           G_tau_vector[i]=G_tau(i,s1,s2,flavor);
         }
@@ -215,16 +212,16 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
         for(unsigned int n=0;n<G_omega.nfreq();++n){
           G_omega(n,s1,s2,flavor)=G_omega_vector[n];
 	  std::complex<double> iw(0,(2*n+1)*M_PI/beta_);
-	  /*std::cout<<n<<" "<<s1<<" "<<s2<<" "<<flavor<<" "<<
-	    G_omega(n,s1,s2,flavor).real()<<" "<<G_omega(n,s1,s2,flavor).imag()<<" "<<
-	    f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]).real()<<" "<<
-	    f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]).imag()<<" "<<
-	    G_omega_vector_nosub[n].real()<<" "<<G_omega_vector_nosub[n].imag()<<std::endl;*/
 	  G_omega(n,s1,s2,flavor) += f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]);
         }
       }
     }
   }
+  /*for(unsigned int i=0;i<N;++i){
+    std::cerr << i*dt << "\t" 
+	      << G_tau_vector[i] << "\t"
+	      << f_tau(dt*i,beta_, c1_[0][0][0], c2_[0][0][0], c3_[0][0][0]) << std::endl;
+	      }*/
 }
 
 
@@ -451,7 +448,7 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
   std::vector< std::vector<double> > eps(n_flavors);
   std::vector< std::vector<double> > epssq(n_flavors);
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
-    std::cerr << "using general fourier transformer" << "\n";
+    std::cout << "using general fourier transformer" << "\n";
     for (int f=0; f<n_flavors; ++f) {
       eps[f].resize(n_site);
       epssq[f].resize(n_site);
@@ -461,7 +458,7 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
       } 
     }
   } else {
-    std::cerr << "using Bethe lattice fourier transformer" << "\n";
+    std::cout << "using Bethe lattice fourier transformer" << "\n";
     double t = parms["t"];
     for (int f=0; f<n_flavors; ++f) {
       eps[f].resize(n_site);
@@ -488,7 +485,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   std::vector< std::vector<double> > eps(n_flavors);
   std::vector< std::vector<double> > epssq(n_flavors);
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
-    std::cerr << "using general fourier transformer" << "\n";
+    std::cout << "using general fourier transformer" << "\n";
     for (int f=0; f<n_flavors; ++f) {
       eps[f].resize(n_site);
       epssq[f].resize(n_site);
@@ -498,7 +495,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
       } 
     }
   } else {
-    std::cerr << "using Bethe lattice fourier transformer" << "\n";
+    std::cout << "using Bethe lattice fourier transformer" << "\n";
     double t = parms["t"];
     for (int f=0; f<n_flavors; ++f) {
       eps[f].resize(n_site);
@@ -509,9 +506,9 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
       }
     }
   }
+  double U = parms["U"];
   fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"], 
-					   (double)parms["U"], 
+					   (double)parms["MU"]-U/2., U, 
 					   n_flavors, n_site, densities, eps, epssq));
 }
 
@@ -521,7 +518,7 @@ void FittingFourierTransformer::backward_ft(itime_green_function_t &G_tau,
 						     const matsubara_green_function_t &G_omega) 
 {
   //fit c1_ to G_omega
-  std::cerr << "Fitting Fourier Transformer:" << std::endl;
+  std::cout << "Fitting Fourier Transformer:" << std::endl;
   for (unsigned int f=0; f<G_omega.nflavor(); ++f) {
     for (unsigned int s=0; s<G_omega.nsite(); ++s) {
       std::complex<double> t1 = 0;
