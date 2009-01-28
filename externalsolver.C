@@ -55,7 +55,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
  
   // write input XML file
   {
-    alps::oxstream input(inpath);
+    alps::oxstream input(boost::filesystem::complete(inpath));
   
     input << alps::start_tag("SIMULATION") << parms;
 	input << alps::start_tag("G0");
@@ -92,7 +92,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
     
   } // scope to force closing of file
   
-  boost::filesystem::remove(outpath);
+  boost::filesystem::remove(boost::filesystem::complete(outpath));
   
   return g;
 }
@@ -113,7 +113,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
  
   // write input XML file
   {
-    alps::oxstream input(inpath);
+    alps::oxstream input(boost::filesystem::complete(inpath));
   
     input << alps::start_tag("SIMULATION") << parms;
 	input << alps::start_tag("G0");
@@ -168,7 +168,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   } // scope to force closing of file
   
   
-  boost::filesystem::remove(outpath);
+  boost::filesystem::remove(boost::filesystem::complete(outpath));
   
   return std::make_pair(G_omega, G_tau);
 }
@@ -189,7 +189,7 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
   //std::cerr << "\nFinished call to external solver.\n";
 	                                           
-  boost::filesystem::remove(inpath);
+  boost::filesystem::remove(boost::filesystem::complete(inpath));
 
   if (!boost::filesystem::exists(outpath))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));

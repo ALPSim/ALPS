@@ -75,12 +75,12 @@ int main(int argc, char** argv)
   try {
 #endif
     if(argc <2){
-      std::cout<<"use: program_name parameter_file. Under MPI to pass argument to nodes use"<<std::endl;
-      std::cout<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
+      std::cerr<<"use: program_name parameter_file. Under MPI to pass argument to nodes use"<<std::endl;
+      std::cerr<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
       exit(1);
     }
-    std::cout << "ALPS DMFT solver for the single site impurity problem.\n\n";
-    alps::print_copyright(std::cout);
+    std::cerr << "ALPS DMFT solver for the single site impurity problem.\n\n";
+    alps::print_copyright(std::cerr);
     alps::Parameters parms;
     {
       std::ifstream is(argv[1]);
@@ -99,7 +99,7 @@ int main(int argc, char** argv)
         itime_green_function_t G_tau = G0_tau;
         boost::shared_ptr<ImpuritySolver> solver_ptr;
         if (parms["SOLVER"]=="Hirsch-Fye"){
-          std::cout<<"solving Hirsch Fye"<<std::endl;
+          std::cerr<<"solving Hirsch Fye"<<std::endl;
           // we need a factory to create Hirsch-Fye simulations
           alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;	
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
@@ -107,16 +107,17 @@ int main(int argc, char** argv)
         }
 #ifdef WERNER
         else if (parms["SOLVER"]=="Werner") {
-          std::cout<<"solving Werner"<<std::endl;
+          std::cerr<<"solving Werner"<<std::endl;
           alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-          std::cout<<"interpreting input value as G_tau, not G0"<<std::endl;
+          std::cerr<<"interpreting input value as G_tau, not G0"<<std::endl;
           //G_tau=G0_tau;
           F_selfconsistency_loop(parms, *solver_ptr, G_tau);
         }
 #endif
         else {
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+	  boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
           selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
         }
         // write G0 (to be read in as an input for a new simulation)
@@ -124,9 +125,9 @@ int main(int argc, char** argv)
       } 
       else {
 #ifdef RUBTSOV
-        alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> rubtsov_factory_ss; //for single site problems
+        alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> rubtsov_factory_sshf;
+        alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory_ss; 
         alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; 
-        //for multi orbital problems, but only density density
 #endif
 #ifdef WERNER
         alps::scheduler::BasicFactory<WernerSimFrequency,WernerRun> werner_factory;
@@ -135,14 +136,14 @@ int main(int argc, char** argv)
         FrequencySpaceHilbertTransformer *transform_ptr;
 #ifdef IGOR
 	if(parms.defined("IGORS_TRANSFORMER")) {
-	  std::cout<<"using Igor's Hilbert transformer\n";
+	  std::cerr<<"using Igor's Hilbert transformer\n";
 	  transform_ptr = new IgorsHilbertTransformer();
 	}
 	else 
 #endif
         if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
           transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
-          std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
+          std::cerr<<"using Bethe lattice Hilbert transform"<<std::endl;
         }else if(parms.defined("TWODBS")){
           if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
             if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();}
@@ -154,7 +155,7 @@ int main(int argc, char** argv)
           }
         }
         else{
-          std::cout<<"using DOS Hilbert transform"<<std::endl;
+          std::cerr<<"using DOS Hilbert transform"<<std::endl;
           if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
             if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();}
             transform_ptr= new FSDOSHilbertTransformer(parms);
@@ -169,23 +170,28 @@ int main(int argc, char** argv)
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
         if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("FLAVORS", "2")=="1")){
-          std::cout<<"using single site Hubbard solver"<<std::endl;
+          std::cerr<<"using single site Hubbard solver for half filling"<<std::endl;
+          solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_sshf,argc,argv));
+        }
+        if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("FLAVORS", "2")=="2")){
+          std::cerr<<"using single site Hubbard solver"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
         }
         else if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("SITES", "1") =="1")){
-          std::cout<<"using multiband Hubbard solver"<<std::endl;
+          std::cerr<<"using multiband Hubbard solver"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
         }
 #endif
 #ifdef WERNER
         else if (parms["SOLVER"]=="Werner") {
-          std::cout<<"solving Werner -- using omega loop"<<std::endl;
+          std::cerr<<"solving Werner -- using omega loop"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
         }
         else{
           //throw exception or commit suicide or even better: 
           //create an external solver that takes its arguments in frequency space.
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+	  boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
           //std::cout<<parms["SOLVER"]<<std::endl;
           //boost::throw_exception(std::logic_error("there is no such solver!"));	
         }
@@ -206,30 +212,29 @@ int main(int argc, char** argv)
         // all gfs are formulated in k-space and are diagonal in k! 
         DCATransformer *transform_ptr;
         if (parms.defined("ANTIFERROMAGNET")) {
-          std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
+          std::cerr<<"using antiferromagnetic DCA transformer"<<std::endl;
           transform_ptr = new AntiFerroDCATransformer(parms); 
         } 
         else {
-          std::cout<<"using simple DCA transformer"<<std::endl;
+          std::cerr<<"using simple DCA transformer"<<std::endl;
           transform_ptr = new SimpleDCATransformer(parms);
-          std::cout<<"done building simple DCA transformer"<<std::endl;
-          FourierTransformer::generate_transformer(parms, fourier_ptr, transform_ptr->k_space_moments(parms["MU"]));
         }
+	FourierTransformer::generate_transformer(parms, fourier_ptr, transform_ptr->epsav(), transform_ptr->epssqav());
         matsubara_green_function_t G0_omega=transform_ptr->initial_G0(parms);
         matsubara_green_function_t G_omega=G0_omega;
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
         if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="1")){
-          std::cout<<"using Rubtsov Solver for half filling"<<std::endl;
+          std::cerr<<"using Rubtsov Solver for half filling"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(half_fill_rubtsov_factory,argc,argv));
         }
         else if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="2")){
-          std::cout<<"using Rubtsov Solver"<<std::endl;
+          std::cerr<<"using Rubtsov Solver"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory,argc,argv));
         }
         else{
 #endif
-          std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
+          std::cerr<<"starting external solver "<<parms["SOLVER"]<<std::endl;
           solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
           //std::cout<<parms["SOLVER"]<<std::endl;
           //boost::throw_exception(std::logic_error("there is no such cluster solver!"));	
@@ -241,7 +246,7 @@ int main(int argc, char** argv)
         G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
       }
       else {
-        std::cout<<parms["CLUSTER_LOOP"]<<std::endl;
+        std::cerr<<parms["CLUSTER_LOOP"]<<std::endl;
         boost::throw_exception(std::logic_error("there is no such cluster method!"));
       }
     }		

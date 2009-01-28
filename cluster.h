@@ -134,8 +134,8 @@ public:
 class DCATransformer : public ClusterTransformer
 {
 public:
-  DCATransformer(const alps::Parameters& params) :
-    ClusterTransformer(params) {}
+  DCATransformer(const alps::Parameters& params) 
+    : ClusterTransformer(params), epsav_(n_cluster_sites()), epssqav_(n_cluster_sites()) {}
   virtual ~DCATransformer(){} //pro forma virtual destructor
   
   template<typename T> green_function<T> symmetrize_real_space(const green_function<T>& G) const 
@@ -143,7 +143,6 @@ public:
   template<typename T> green_function<T> symmetrize_k_space(const green_function<T>& G) const 
   { return symmetrize_helper(G, pair_classes_k_space()); }
   
-  virtual hifreq_moments k_space_moments(const double &mu) const=0;
   virtual matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const=0; 
   virtual matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const=0;
   virtual itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const=0; 
@@ -154,14 +153,18 @@ public:
 							 const double mu, const double h, 
 							 const double beta) const =0; 
   std::complex<double>* exp_iksite(const int sign) const;
-  void compute_epsav(std::vector<double> &epsav, std::vector<double> &epsavsq) const;
   virtual double epsilon(const vector_type k) const=0;
+  void calculate_disp_moments();
+  std::vector<double> epsav() const { return epsav_; };
+  std::vector<double> epssqav() const { return epssqav_; };
 
 private:
   template<typename T>
   green_function<T> symmetrize_helper(const green_function<T>& G, 
 			       const std::pair<std::set<pair_class_type>::const_iterator, 
 			       std::set<pair_class_type>::const_iterator> pair_classes) const;
+  std::vector<double> epsav_;
+  std::vector<double> epssqav_;
 };
 
 
@@ -170,16 +173,17 @@ class SimpleDCATransformer : public DCATransformer
 {
 public:
   SimpleDCATransformer(const alps::Parameters& params) :
+    DCATransformer(params),
     t_(boost::lexical_cast<double>(params["t"])), 
     t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
     t3_(params.value_or_default("t3", 0.)),
     t4_(params.value_or_default("t4", 0.)),
-    compute_filling_(params.defined("FILLING")?true:false),
-    n_target_(compute_filling_?(double)(params["FILLING"]):-1),
-    DCATransformer(params)
-    {
-      params_ptr_=&params;
-    }
+    compute_filling_(params.defined("FILLING")),
+    n_target_(compute_filling_?(double)(params["FILLING"]):-1)
+  {
+    params_ptr_=&params;
+    calculate_disp_moments();
+  }
   
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
 					const matsubara_green_function_t &G0_omega, 
@@ -203,8 +207,8 @@ public:
 						 const matsubara_green_function_t &G0_omega, 
 						 const double mu, const double h, 
 						 const double beta) const; 
-  hifreq_moments k_space_moments(const double &mu) const;
- private:
+
+private:
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;
   template <class T>
@@ -287,7 +291,10 @@ class AntiFerroDCATransformer : public DCATransformer
 {
 public:
   AntiFerroDCATransformer(const alps::Parameters& params) :
-    DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])) {}
+    DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])) 
+  {
+    calculate_disp_moments();
+  }
   
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
 					const matsubara_green_function_t &G0_omega, 
@@ -304,7 +311,6 @@ public:
   { return transform_coordinates<double, Backward>(G); }
   itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const 
   { return transform_coordinates<double, Forward>(G); }
-  hifreq_moments k_space_moments(const double &mu) const;
   
   matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& /*G_omega_fourpoint*/,
@@ -331,7 +337,7 @@ private:
   template<typename T>
   green_function<T> green_function_divide(const green_function<T>& G1, const T d) const;
   
-
+  
   double epsilon(const vector_type k) const
   {
     double eps = 0;
@@ -346,8 +352,6 @@ private:
   struct Backward;
   
 };
-
-
 
 
 

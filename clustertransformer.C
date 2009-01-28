@@ -27,7 +27,12 @@
 #include "cluster.h"
 
 
-bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu, bool &computing_mu, int &mu_it, double &n_old, double &n_target, double &mu_old, double &mu_new, double &mu_orig);
+bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu, 
+			       bool &computing_mu, int &mu_it, double &n_old, double &n_target, 
+			       double &mu_old, double &mu_new, double &mu_orig);
+
+
+
 matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters& parms) {
   std::cerr<<"reading initial G0_omega"<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
@@ -53,6 +58,23 @@ std::complex<double>* DCATransformer::exp_iksite(const int sign) const
     }
   }
   return m;
+}
+
+
+
+void DCATransformer::calculate_disp_moments()
+{
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
+      vector_type k(dimension());
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+      epsav_  [kc]+= epsilon(k);
+      epssqav_[kc]+= epsilon(k)*epsilon(k);
+    }
+    epsav_  [kc] /= n_cluster_cells();
+    epssqav_[kc] /= n_cluster_cells();
+  }
 }
 
 
@@ -112,17 +134,19 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
       }
     }
     density=(density/beta+0.5*nflavor*n_cluster_sites())/n_cluster_sites(); //density such that 'half filling' corresponds to 1
-    if(compute_filling_) std::cout<<"mu: "<<mu<<" filling "<<density<<" it: "<<mu_it<<" converged: "<<converged<<std::endl;
-    //compute new chemical potential
-    converged=adjust_chemical_potential(density, mu, damping_mu, computing_mu, mu_it, n_old, n_target_, mu_old, mu_new, mu_orig);
-    std::cout<<"converged now: "<<converged<<" true is: "<<true<<" compute filling is: "<<compute_filling_<<std::endl;
+    if (compute_filling_) {
+      std::cout<<"mu: "<<mu<<" filling "<<density<<" it: "<<mu_it<<" converged: "<<converged<<std::endl;
+      //compute new chemical potential
+      converged=adjust_chemical_potential(density, mu, damping_mu, computing_mu, mu_it, n_old, n_target_, mu_old, mu_new, mu_orig);
+      std::cout<<"converged now: "<<converged<<" true is: "<<true<<" compute filling is: "<<compute_filling_<<std::endl;
+    }
   } while(compute_filling_ && (!converged));
   (*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
   for (spin_t flavor=0; flavor<nflavor; ++flavor) {
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         G0_omega_new(freq, kc, kc, flavor) = 
-	        1. / ( 1./G_omega_lattice(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
+	  1. / ( 1./G_omega_lattice(freq, kc, kc, flavor) + selfenergy(freq, kc, kc, flavor) );
       }
     }
   }
@@ -163,11 +187,10 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
     matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
-    
     itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
     G0_omega_new.write("G0_omega_input");
-    FourierTransformer::generate_transformer(parms, fourier_ptr, k_space_moments(parms["MU"]));
+    FourierTransformer::generate_transformer(parms, fourier_ptr, epsav(), epssqav());
     fourier_ptr->backward_ft(G0_tau, G0_omega_new);
     G0_tau.write("G0_tau_input");
     matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
@@ -360,7 +383,7 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
     matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h_init+h, beta);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
+    FourierTransformer::generate_transformer(parms, fourier_ptr, epsav(), epssqav());
     G0_omega_new.write("G0_omega_input");
     transform_into_real_space(G0_omega_new).write("G0_omega_input_realspace");
     itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor);
@@ -371,88 +394,8 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
   }
 }
 
-hifreq_moments SimpleDCATransformer::k_space_moments(const double &mu) const{
-  std::cout<<"computing moments for k-space fourier transform"<<std::endl;
-  hifreq_moments moments;
-  moments.c0.resize(2);
-  moments.c1.resize(2);
-  moments.c2.resize(2);
-  moments.c3.resize(2);
-  for(int s=0;s<2;++s){
-    moments.c0[s].resize(n_cluster_sites());
-    moments.c1[s].resize(n_cluster_sites());
-    moments.c2[s].resize(n_cluster_sites());
-    moments.c3[s].resize(n_cluster_sites());
-    for(int i=0;i<n_cluster_sites();++i){
-      moments.c0[s][i].resize(n_cluster_sites(),0.);
-      moments.c1[s][i].resize(n_cluster_sites(),0.);
-      moments.c2[s][i].resize(n_cluster_sites(),0.);
-      moments.c3[s][i].resize(n_cluster_sites(),0.);
-    }
-  }
-  
-  std::vector<double> epsav  (n_cluster_sites()); //average of the band structure on this patch
-  std::vector<double> epssqav(n_cluster_sites());
-  compute_epsav(epsav, epssqav);
-  
-  for(int s=0;s<2;++s){ 
-    for(int i=0;i<n_cluster_sites();++i){ //simple DCA has just the diagonal occupied
-      moments.c1[s][i][i]=1.; //this is the commutator term
-      moments.c2[s][i][i]=-(mu-epsav[i]); //this is the second order term
-      moments.c3[s][i][i]=mu*mu-2*mu*epsav[i]+epssqav[i]; //this is the third order term
-    }
-  }
-  return moments;
-}
-hifreq_moments AntiFerroDCATransformer::k_space_moments(const double &mu) const{
-  std::cout<<"computing moments for k-space fourier transform"<<std::endl;
-  std::cout<<"AFM properties will have to be added later on!"<<std::endl;
-  hifreq_moments moments;
-  moments.c0.resize(2);
-  moments.c1.resize(2);
-  moments.c2.resize(2);
-  moments.c3.resize(2);
-  for(int s=0;s<2;++s){
-    moments.c0[s].resize(n_cluster_sites());
-    moments.c1[s].resize(n_cluster_sites());
-    moments.c2[s].resize(n_cluster_sites());
-    moments.c3[s].resize(n_cluster_sites());
-    for(int i=0;i<n_cluster_sites();++i){
-      moments.c0[s][i].resize(n_cluster_sites(),0.);
-      moments.c1[s][i].resize(n_cluster_sites(),0.);
-      moments.c2[s][i].resize(n_cluster_sites(),0.);
-      moments.c3[s][i].resize(n_cluster_sites(),0.);
-    }
-  }
-  
-  std::vector<double> epsav  (n_cluster_sites()); //average of the band structure on this patch
-  std::vector<double> epssqav(n_cluster_sites());
-  compute_epsav(epsav, epssqav);
-  
-  for(int s=0;s<2;++s){ 
-    for(int i=0;i<n_cluster_sites();++i){ //simple DCA has just the diagonal occupied
-      moments.c1[s][i][i]=1.; //this is the commutator term
-      moments.c2[s][i][i]=-(mu-epsav[i]); //this is the second order term
-      moments.c3[s][i][i]=mu*mu-2*mu*epsav[i]+epssqav[i]; //this is the third order term
-    }
-  }
-  return moments;
-}
-void DCATransformer::compute_epsav(std::vector<double> &epsav, std::vector<double> &epssqav) const{
-  epsav  .resize(n_cluster_sites());
-  epssqav.resize(n_cluster_sites());
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
-      vector_type k(dimension());
-      for (unsigned int d=0; d<dimension(); ++d)
-        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      epsav  [kc]+= epsilon(k);
-      epssqav[kc]+= epsilon(k)*epsilon(k);
-    }
-    epsav  [kc] /= n_cluster_cells();
-    epssqav[kc] /= n_cluster_cells();
-  }
-}
+
+
 bool adjust_chemical_potential(const double &n_tot,
     double &mu,          //chemical potential, will be adjusted
     bool &damping_mu,    //do we use dampening?
@@ -463,18 +406,21 @@ bool adjust_chemical_potential(const double &n_tot,
     double &mu_old,      //old chemical pot
     double &mu_new,      //new chemical pot
     double &mu_orig      //original chemical potential
-    ){
+    )
+{
   //static bool damping_mu=false;
   //static bool computing_mu=true;
   //static int mu_it=0;
   //double n_target=parms["N_TARGET"];
   //static double n_old, mu_old, mu_new, mu_orig=mu;
   //once we are converged.
-  std::cout<<"running switch for: mu: "<<mu<<" mu old: "<<mu_old<<" mu orig: "<<mu_orig<<" n_tot: "<<n_tot<<" n old: "<<n_old<<" n_target: "<<n_target<<std::endl;
+  std::cout<<"running switch for: mu: "<<mu<<" mu old: "<<mu_old<<" mu orig: "
+	   <<mu_orig<<" n_tot: "<<n_tot<<" n old: "<<n_old<<" n_target: "<<n_target<<std::endl;
   if(!damping_mu && (std::abs(n_tot-n_target)<1.e-5 || mu_it==10)){
     damping_mu=true;
     mu_new=0.7*mu_new +0.3*mu_orig; //that should damp oscillations a bit by weakening corrections
-    std::cout<<"converged n/mu loop with mu "<<mu<<" applying damping: orig mu: "<<mu_orig<<" new mu: "<<mu_new<<std::endl;
+    std::cout<<"converged n/mu loop with mu "<<mu<<" applying damping: orig mu: "
+	     <<mu_orig<<" new mu: "<<mu_new<<std::endl;
     n_old=n_tot;
     mu_old=mu;
     mu=mu_new;
@@ -499,7 +445,8 @@ bool adjust_chemical_potential(const double &n_tot,
       //oops.. that means that we shifted the chemical potential up by too much
       std::cout<<"oops, get negative number of interacting particles!"<<std::endl;
       mu_new = (mu + mu_orig)/2; //this should bring us out of the interval where we have a negative particle number
-    }else if((n_old< n_target && n_tot > n_target) || (n_old > n_target && n_tot < n_target)){ //target density is somewhere in the middle
+    }else if((n_old< n_target && n_tot > n_target) || 
+	     (n_old > n_target && n_tot < n_target)){ //target density is somewhere in the middle
       //bisection
       mu_new = (mu - mu_old)/(n_tot - n_old)*(n_target-n_old) + mu_old;
       std::cout<<"bisection: old mus were"<<mu_old<<" "<<mu<<" new mu is: "<<mu_new<<std::endl;

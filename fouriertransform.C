@@ -32,6 +32,8 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/parameter.h>
 
+
+
 /*void generate_spline_matrix(dense_matrix & spline_matrix) {
   
   // spline_matrix has dimension (N+1)x(N+1)
@@ -62,6 +64,9 @@
   //Emanuel avoid inversion of matrix
   spline_matrix=A;
 }*/
+
+
+
 void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs){
   //avoid matrix inversion and instead solve the system of equations: S *v2 =
   //rhs for v2. The result will be found in rhs as we use the LAPACK call dgesv
@@ -74,6 +79,7 @@ void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &
     rhs[i]=v(i,0);
   }
 }
+
 
 
 void FourierTransformer::backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
@@ -118,6 +124,7 @@ void FourierTransformer::backward_ft(green_function<alps::RealObsevaluator> &G_t
 }
 
 
+
 ///same as the template function in fouriertransform.h, but not for the
 //multiple vectors. Use green_function_t instead.
 void FourierTransformer::backward_ft(itime_green_function_t &G_tau, 
@@ -131,16 +138,14 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
   for(unsigned int f=0;f<G_omega.nflavor();++f){
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
-        //std::cout<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
+	//std::cerr<<"running backward fourier with coefficients: "<<c1_[f][s1][s2]<<" "<<c2_[f][s1][s2]<<" "<<c3_[f][s1][s2]<<std::endl;
         //std::cout<<"running backward fourier with beta: "<<beta_<<std::endl;
-        //if (s1==s2) {
-          for (unsigned int k=0; k<N_omega; k++) {
-            std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-            G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
-          } 
-          //std::cout<<"last: no model: "<<G_omega_no_model(N_omega-1,s1,s2,f)<<" "<<f_omega(std::complex<double>(0,(2*(N_omega-1)+1)*M_PI/beta_), c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2])<<" G(omega): "<<G_omega(N_omega-1,s1,s2,f)<<std::endl;
-        //}
-        for (unsigned int i=0; i<N_tau; i++) {
+	for (unsigned int k=0; k<N_omega; k++) {
+	  std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+	  G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
+	} 
+	//std::cout<<"last: no model: "<<G_omega_no_model(N_omega-1,s1,s2,f)<<" "<<f_omega(std::complex<double>(0,(2*(N_omega-1)+1)*M_PI/beta_), c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2])<<" G(omega): "<<G_omega(N_omega-1,s1,s2,f)<<std::endl;
+	for (unsigned int i=0; i<N_tau; i++) {
           G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
           for (unsigned int k=0; k<N_omega; k++) {
             double wt((2*k+1)*i*M_PI/N_tau);
@@ -150,6 +155,17 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
         }
         G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
         G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
+	/*if (s1==s2 && f==0) {
+	  for(uint k=0; k<N_omega; k++){
+	    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+	    std::cout << iw.imag() << "\t" << s1 << "\t" 
+		      << G_omega_no_model(k,s1,s1,0).real() << "\t" << G_omega_no_model(k,s1,s1,0).imag() << "\t" 
+		      << G_omega(k,s1,s1,0).real() << "\t" << G_omega(k,s1,s1,0).imag() << "\t" 
+		      << f_omega(iw, c1_[0][s1][s1],c2_[0][s1][s1], c3_[0][s1][s1]).real() << "\t"
+		      << f_omega(iw, c1_[0][s1][s1],c2_[0][s1][s1], c3_[0][s1][s1]).imag()
+		      << std::endl;
+	  }
+	  }*/
       }
     }
   }
@@ -161,7 +177,8 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
 }
 
 
-/*void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
+
+void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
   assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite());
   unsigned int N=G_tau.ntime()-1;
   unsigned int n_omega=G_omega.nfreq();
@@ -185,11 +202,9 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
           G_omega_vector_nosub[n]=0;
           for(unsigned int i=0;i<N;++i){
             double phi=w_n*i*dt;
-            //if (s1==s2) 
-              G_omega_vector[n] += std::complex<double>(cos(phi), sin(phi))*
-                ((G_tau_vector[i]-f_tau(dt*i,beta_, c1_[flavor][s1][s2], c2_[flavor][s1][s2], c3_[flavor][s1][s2]))*dt);
-              G_omega_vector_nosub[n] += std::complex<double>(cos(phi), sin(phi))*G_tau_vector[i];
-            //else
+	    G_omega_vector[n] += std::complex<double>(cos(phi), sin(phi))*
+	      ((G_tau_vector[i]-f_tau(dt*i,beta_, c1_[flavor][s1][s2], c2_[flavor][s1][s2], c3_[flavor][s1][s2]))*dt);
+	    G_omega_vector_nosub[n] += std::complex<double>(cos(phi), sin(phi))*G_tau_vector[i];
             //  G_omega_vector[n] += dt*std::exp((std::complex<double>(0,1))*(w_n*i*dt))*G_tau_vector[i];
           }
           if(n>n_omega/2)
@@ -199,20 +214,20 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
         std::cout<<"c1: "<<c1_[flavor][s1][s2]<<" c2: "<<c2_[flavor][s1][s2]<<" c3: "<<c3_[flavor][s1][s2]<<std::endl;
         for(unsigned int n=0;n<G_omega.nfreq();++n){
           G_omega(n,s1,s2,flavor)=G_omega_vector[n];
-          //if (s1==s2) {
-            std::complex<double> iw(0,(2*n+1)*M_PI/beta_);
-            std::cout<<n<<" "<<s1<<" "<<s2<<" "<<flavor<<" "<<
-              G_omega(n,s1,s2,flavor).real()<<" "<<G_omega(n,s1,s2,flavor).imag()<<" "<<
-              f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]).real()<<" "<<
-              f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]).imag()<<" "<<
-              G_omega_vector_nosub[n].real()<<" "<<G_omega_vector_nosub[n].imag()<<std::endl;
-            G_omega(n,s1,s2,flavor) += f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]);
-          //}
+	  std::complex<double> iw(0,(2*n+1)*M_PI/beta_);
+	  /*std::cout<<n<<" "<<s1<<" "<<s2<<" "<<flavor<<" "<<
+	    G_omega(n,s1,s2,flavor).real()<<" "<<G_omega(n,s1,s2,flavor).imag()<<" "<<
+	    f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]).real()<<" "<<
+	    f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]).imag()<<" "<<
+	    G_omega_vector_nosub[n].real()<<" "<<G_omega_vector_nosub[n].imag()<<std::endl;*/
+	  G_omega(n,s1,s2,flavor) += f_omega(iw, c1_[flavor][s1][s2],c2_[flavor][s1][s2], c3_[flavor][s1][s2]);
         }
       }
     }
   }
-}*/
+}
+
+
 
 void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
 
@@ -247,6 +262,7 @@ void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
   spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);   
   boost::numeric::bindings::lapack::gesv(A, spline_matrix);
 }
+
 
 
 void evaluate_second_derivatives(double dt/*, double BETA*/, dense_matrix & spline_matrix, std::vector<double> & g, std::vector<double> & second_derivatives, const double c1g, const double c2g, const double c3g) {
@@ -292,7 +308,9 @@ void evaluate_second_derivatives(double dt/*, double BETA*/, dense_matrix & spli
   }
 }
 
-void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsubara_green_function_t & gomega) const {
+
+
+void FourierTransformer::forward_ft_kaputt(const itime_green_function_t & gtau, matsubara_green_function_t & gomega) const {
   //double BETA, const itime_green_function_t &gtau, matsubara_green_function_t &gomega, double *c1g, double *c2g, double *c3g) {
   std::vector<double> v(gtau.ntime());
   std::vector<std::complex<double> > v_omega(gomega.nfreq());
@@ -313,12 +331,12 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
         std::cout<<"c3 is: "<<c3_[f][p][q]<<" computed: "<<-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt)<<std::endl;
 
         //  *(const_cast<double*> (&(c1_[f][p][q])))=1;
-          *(const_cast<double*> (&(c2_[f][p][q])))*=-1; //convention is all wrong...
+        //  *(const_cast<double*> (&(c2_[f][p][q])))*=-1; //convention is all wrong...
         //  *(const_cast<double*> (&(c3_[f][p][q])))=0;
 
-        std::cout<<"c1 new is: "<<c1_[f][p][q]<<" computed: "<<-v[0]-v[N]<<std::endl;
-        std::cout<<"c2 new is: "<<c2_[f][p][q]<<" computed: "<<(v[1]-v[0]+v[N]-v[N-1])/dt<<std::endl;
-        std::cout<<"c3 new is: "<<c3_[f][p][q]<<" computed: "<<-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt)<<std::endl;
+        //std::cout<<"c1 new is: "<<c1_[f][p][q]<<" computed: "<<-v[0]-v[N]<<std::endl;
+        //std::cout<<"c2 new is: "<<c2_[f][p][q]<<" computed: "<<(v[1]-v[0]+v[N]-v[N-1])/dt<<std::endl;
+        //std::cout<<"c3 new is: "<<c3_[f][p][q]<<" computed: "<<-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt)<<std::endl;
        
         /*bool use_computed=true;
         if(use_computed){
@@ -357,7 +375,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
           v_omega[k] += f_omega(iw, c1_[f][p][q], c2_[f][p][q], c3_[f][p][q]); //that's the boundary terms of the first, second, and third partial integration.
                                                                                //std::cout<<"derivative at boundary: "<<-v2[1] + v2[0] + v2[N] - v2[N-1]<<" divisor: "<< 1./(dt*iw*iw*iw*iw)<<std::endl;
           //gomega(k,f)=std::conj(v_omega[k]); //that's the proper convention for the self consistency loop in my DCA program.
-          gomega(k,f)=v_omega[k]; //that's the proper convention for the self consistency loop here.
+          gomega(k,p,q,f)=v_omega[k]; //that's the proper convention for the self consistency loop here.
         }
         
         /*for (int k=0; k<N_omega; k++) {
@@ -365,7 +383,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
         std::cout << "v_omega " << k << " " << M_PI*(2*k+1) << " " << std::real(v_omega[k]) << "  " << std::imag(v_omega[k]) << " "<<fw.real()<<" "<<fw.imag()<<" "<<(v_omega[k]-fw).real()<<" "<<(v_omega[k]-fw).imag()<<" naive: "<<v_omega_naive[k].real()<<" "<<v_omega_naive[k].imag()<<std::endl;
         }*/
         
-        static std::ofstream g_interpol("/tmp/g_interpol.dat");                      
+        /*static std::ofstream g_interpol("/tmp/g_interpol.dat");                      
         for (int j=0; j<Np1-1; j++) {
           // define parameters of spline fit y(tau) = a + b*(tau-tau_j) + c*(tau-tau_j)^2 + d*(tau-tau_j)^3
           double a = v[j];
@@ -383,55 +401,119 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
         for (int j=0; j<Np1; j++) {
           second_der<<j*dt<<" "<<v[j]<<" "<<v2[j]<<std::endl;
         }
-        second_der<<std::endl;
+        second_der<<std::endl;*/
       }
     }
   }
-  } 
+} 
 
-void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, const hifreq_moments &moments){
-    fourier_ptr.reset(new FourierTransformer(moments, (double)parms["BETA"], (double)parms["MU"]));
-}
-void FourierTransformer::generate_transformer(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr, double mu_shift){
-  if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
-    //std::cout<<"using General Fourier transform"<<std::endl;
-    int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
-    int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    if(!parms.defined("EPSSQAV")){ throw(std::invalid_argument("second moment of band structure EPSSQAV needs to be defined! aborting."));}
-    fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], (double)(parms["MU"])+mu_shift, n_flavor, n_sites, parms["EPSSQAV"]));
-  } else{
-    int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
-    int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    //std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
-    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], (double)(parms["MU"])+mu_shift, parms["t"], n_flavor, n_sites));
-  }
+
+
+void FourierTransformer::generate_transformer(const alps::Parameters &parms,
+					      boost::shared_ptr<FourierTransformer> &fourier_ptr, 
+					      std::vector<double> eps, std::vector<double> epssq)
+{
+  int n_flavors = parms.value_or_default("FLAVORS", 2); 
+  std::vector<std::vector<double> > eps_f(n_flavors, eps);
+  std::vector<std::vector<double> > epssq_f(n_flavors, epssq);
+  fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
+					   (double)parms["MU"], 
+					   parms.value_or_default("FLAVORS", 2),
+					   parms.value_or_default("SITES", 1), 
+					   eps_f, epssq_f));
 }
 
 
-void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,boost::shared_ptr<FourierTransformer> & fourier_ptr,
- const std::vector<std::vector<std::vector<double> > > &densities){
-  if(parms.defined("GENERAL_FOURIER") || parms.defined("CLUSTER_LOOP")){
-    int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
-    int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    std::cout<<"using General Fourier transform"<<std::endl;
-    if(!parms.defined("EPSSQAV")){ throw(std::invalid_argument("second moment of band structure EPSSQAV needs to be defined! aborting."));}
-    fourier_ptr.reset(new FourierTransformer(parms["BETA"], parms["MU"], parms["U"], n_flavor, n_sites, densities, parms["EPSSQAV"]));
+
+void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
+						boost::shared_ptr<FourierTransformer> &fourier_ptr,
+						const std::vector<double> &densities,
+						std::vector<double> eps, std::vector<double> epssq)
+{
+  int n_flavors = parms.value_or_default("FLAVORS", 2); 
+  std::vector<std::vector<double> > eps_f(n_flavors, eps);
+  std::vector<std::vector<double> > epssq_f(n_flavors, epssq);
+  fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
+					   (double)parms["MU"], 
+					   (double)parms["U"], 
+					   parms.value_or_default("FLAVORS", 2),
+					   parms.value_or_default("SITES", 1), 
+					   densities, eps_f, epssq_f));
+}
+
+
+
+void FourierTransformer::generate_transformer(const alps::Parameters &parms,
+					      boost::shared_ptr<FourierTransformer> &fourier_ptr)
+{
+  int n_flavors = parms.value_or_default("FLAVORS", 2); 
+  int n_site = parms.value_or_default("SITES", 1); 
+  std::vector< std::vector<double> > eps(n_flavors);
+  std::vector< std::vector<double> > epssq(n_flavors);
+  if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
+    std::cerr << "using general fourier transformer" << "\n";
+    for (int f=0; f<n_flavors; ++f) {
+      eps[f].resize(n_site);
+      epssq[f].resize(n_site);
+      for (int i=0; i<n_site; ++i) {
+	eps[f][i] = parms["EPS_"+boost::lexical_cast<std::string>(f)+"_"+boost::lexical_cast<std::string>(i)];
+	epssq[f][i] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)+"_"+boost::lexical_cast<std::string>(i)];
+      } 
+    }
   } else {
-    int n_sites=parms.defined("SITES")?(int)parms["SITES"]:1;
-    int n_flavor=parms.defined("FLAVORS")?(int)parms["FLAVORS"]:2;
-    std::cout<<"using Bethe lattice Fourier transform"<<std::endl;
-    for(int f=0;f<n_flavor;++f){
-      for(int i=0;i<n_sites;++i){
-        for(int j=0;j<n_sites;++j){
-          std::cout<<f<<" "<<i<<" "<<j<<" "<<densities[f][i][j]<<std::endl;
-        }
+    std::cerr << "using Bethe lattice fourier transformer" << "\n";
+    double t = parms["t"];
+    for (int f=0; f<n_flavors; ++f) {
+      eps[f].resize(n_site);
+      epssq[f].resize(n_site);
+      for (int i=0; i<n_site; ++i) {
+	eps[f][i] = 0.;
+	epssq[f][i] = t*t;
       }
     }
-    std::cout<<"mu+U/2: "<<(double)parms["MU"]+(double)((double)parms["U"]/2.)<<std::endl;
-    fourier_ptr.reset(new BetheFourierTransformer(parms["BETA"], (double)parms["MU"]+(double)((double)parms["U"]/2.), (double)parms["t"], (double)parms["U"], densities, n_flavor, n_sites));
   }
+  fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
+					   (double)parms["MU"], 
+					   n_flavors, n_site, eps, epssq));
 }
 
+
+
+void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
+						boost::shared_ptr<FourierTransformer> &fourier_ptr,
+						const std::vector<double> &densities)
+{
+  int n_flavors = parms.value_or_default("FLAVORS", 2); 
+  int n_site = parms.value_or_default("SITES", 1); 
+  std::vector< std::vector<double> > eps(n_flavors);
+  std::vector< std::vector<double> > epssq(n_flavors);
+  if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
+    std::cerr << "using general fourier transformer" << "\n";
+    for (int f=0; f<n_flavors; ++f) {
+      eps[f].resize(n_site);
+      epssq[f].resize(n_site);
+      for (int i=0; i<n_site; ++i) {
+	eps[f][i] = parms["EPS_"+boost::lexical_cast<std::string>(f)+"_"+boost::lexical_cast<std::string>(i)];
+	epssq[f][i] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)+"_"+boost::lexical_cast<std::string>(i)];
+      } 
+    }
+  } else {
+    std::cerr << "using Bethe lattice fourier transformer" << "\n";
+    double t = parms["t"];
+    for (int f=0; f<n_flavors; ++f) {
+      eps[f].resize(n_site);
+      epssq[f].resize(n_site);
+      for (int i=0; i<n_site; ++i) {
+	eps[f][i] = 0.;
+	epssq[f][i] = t*t;
+      }
+    }
+  }
+  fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
+					   (double)parms["MU"], 
+					   (double)parms["U"], 
+					   n_flavors, n_site, densities, eps, epssq));
+}
 
 
 
@@ -439,7 +521,7 @@ void FittingFourierTransformer::backward_ft(itime_green_function_t &G_tau,
 						     const matsubara_green_function_t &G_omega) 
 {
   //fit c1_ to G_omega
-  std::cout << "Fitting Fourier Transformer:" << std::endl;
+  std::cerr << "Fitting Fourier Transformer:" << std::endl;
   for (unsigned int f=0; f<G_omega.nflavor(); ++f) {
     for (unsigned int s=0; s<G_omega.nsite(); ++s) {
       std::complex<double> t1 = 0;

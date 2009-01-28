@@ -117,7 +117,7 @@ green_tau(N+1, n_site, 2)
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, 2);
   itime_green_function_t bgf_sc_convention_k(N+1,n_site, 2); //bare green function in k_space
   boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_transformer(parms, fourier_ptr, 0);
+  FourierTransformer::generate_transformer(parms, fourier_ptr);
   
   std::istringstream in_omega(parms["G0(omega)"]);
   read_freq(in_omega, bare_green_matsubara);
@@ -192,7 +192,7 @@ std::cerr<<"implement load first!"<<&dump<<std::endl;
 }
 
 
-void HirschFyeRun::save(alps::ODump& dump) const
+void HirschFyeRun::save(alps::ODump& /*dump*/) const
 {
   //std::cerr<<"implement save first!"<<std::endl;
   //abort();
@@ -379,7 +379,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
     std::string fns=parms["CHECKPOINT"];
     fns+=".xml";
     boost::filesystem::path fn(fns);
-    checkpoint(fn);
+    checkpoint(boost::filesystem::complete(fn));
   }
   for(int i=0;i<n_site;++i){
     for(int j=0;j<n_site;++j){
@@ -401,28 +401,21 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
     }
   }
 
-  std::vector<std::vector<std::vector<double> > > densities;
+  std::vector<double> densities;
   densities.resize(2);
-  densities[0].resize(n_site);
-  densities[1].resize(n_site);
   for(int i=0;i<n_site;++i){
-    densities[0][i].resize(n_site);
-    densities[1][i].resize(n_site);
-    for(int j=0;j<n_site;++j){
-      densities[0][i][j]=-green_result(N,i,j,0);
-      densities[1][i][j]=-green_result(N,i,j,1);
-    }
+    densities[0] -= green_result(N,i,i,0);
+    densities[1] -= green_result(N,i,i,1);
+  }
+  densities[0] /= n_site;
+  densities[1] /= n_site;
+  if(parms.defined("CLUSTER_LOOP")){
+    SimpleDCATransformer clusterhandler(parms);
+    green_result = clusterhandler.transform_into_k_space(green_result); 
   }
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
-  //once we have this we still need to transform the result to k-space for the
-  //self consistency
-  if(parms.defined("CLUSTER_LOOP")){
-    SimpleDCATransformer clusterhandler(parms);
-    green_result_matsubara= clusterhandler.transform_into_k_space(green_result_matsubara);
-    green_result = clusterhandler.transform_into_k_space(green_result); 
-  }
   return std::make_pair(green_result_matsubara, green_result);
 }
 

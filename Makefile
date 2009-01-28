@@ -2,10 +2,10 @@
 include ./Makefile.inc
 CXXFLAGS += -g -DWERNER -DRUBTSOV -I..
 
-SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C alps_solver.C clustertransformer.C clusterhelper.C 2dsimpson.C
+SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C hilberttransformer.C alps_solver.C clustertransformer.C clusterhelper.C 2dsimpson.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
 
-OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o auxiliaryfunctions.o alps_solver.o clustertransformer.o clusterhelper.o 2dsimpson.o
+OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o hilberttransformer.o auxiliaryfunctions.o alps_solver.o clustertransformer.o clusterhelper.o 2dsimpson.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
 RUBTSOV_DIR=../DMFT-solvers/Rubtsov
@@ -58,5 +58,6 @@ depend:
 				makedepend $(SOURCES) $(SOURCES_DMFT)
 hirschfyesim.o: hirschfyeaux.h hirschfyesim.h
 selfconsistency.o: hilberttransformer.h fouriertransform.h 
+fouriertransform.o: fouriertransform.h
 main.o: hilberttransformer.h fouriertransform.h
 2dsimpson.o: 2dsimpson.C 2dsimpson.h
