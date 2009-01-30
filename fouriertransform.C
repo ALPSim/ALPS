@@ -155,17 +155,17 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
         }
         G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
         G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
-	/*if (s1==s2 && f==0) {
+	if (s1==s2 && f==0) {
+	  std::ofstream backstr("back.dat");
 	  for(uint k=0; k<N_omega; k++){
 	    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-	    std::cout << iw.imag() << "\t" << s1 << "\t" 
-		      << G_omega_no_model(k,s1,s1,0).real() << "\t" << G_omega_no_model(k,s1,s1,0).imag() << "\t" 
-		      << G_omega(k,s1,s1,0).real() << "\t" << G_omega(k,s1,s1,0).imag() << "\t" 
-		      << f_omega(iw, c1_[0][s1][s1],c2_[0][s1][s1], c3_[0][s1][s1]).real() << "\t"
-		      << f_omega(iw, c1_[0][s1][s1],c2_[0][s1][s1], c3_[0][s1][s1]).imag()
-		      << std::endl;
-		      }
-		      }*/
+	    backstr << iw.imag() << "\t" << f << "\t" << s1 << "\t" 
+		    << G_omega(k,s1,s1,f).real() << "\t" << G_omega(k,s1,s1,f).imag() << "\t" 
+		    << f_omega(iw, c1_[f][s1][s1],c2_[f][s1][s1], c3_[f][s1][s1]).real() << "\t"
+		    << f_omega(iw, c1_[f][s1][s1],c2_[f][s1][s1], c3_[f][s1][s1]).imag()
+		    << std::endl;
+	  }
+	}
       }
     }
   }
@@ -188,8 +188,6 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
   for(unsigned int flavor=0;flavor<G_tau.nflavor();++flavor){
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
-	std::cout << "running forward fourier with coefficients: " 
-		  << c1_[flavor][s1][s2]<<" "<<c2_[flavor][s1][s2]<<" "<<c3_[flavor][s1][s2]<<std::endl;
         for(unsigned int i=0;i<N;++i){
           G_tau_vector[i]=G_tau(i,s1,s2,flavor);
         }
@@ -430,9 +428,9 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
   std::vector<std::vector<double> > eps_f(n_flavors, eps);
   std::vector<std::vector<double> > epssq_f(n_flavors, epssq);
+  double U = parms["U"];
   fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"], 
-					   (double)parms["U"], 
+					   (double)parms["MU"]+U/2, U, 
 					   parms.value_or_default("FLAVORS", 2),
 					   parms.value_or_default("SITES", 1), 
 					   densities, eps_f, epssq_f));
@@ -508,7 +506,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   }
   double U = parms["U"];
   fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"]-U/2., U, 
+					   (double)parms["MU"]+U/2., U, 
 					   n_flavors, n_site, densities, eps, epssq));
 }
 
