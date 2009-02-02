@@ -155,7 +155,7 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
         }
         G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
         G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
-	if (s1==s2 && f==0) {
+	/*if (s1==s2 && f==0) {
 	  std::ofstream backstr("back.dat");
 	  for(uint k=0; k<N_omega; k++){
 	    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
@@ -165,7 +165,7 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
 		    << f_omega(iw, c1_[f][s1][s1],c2_[f][s1][s1], c3_[f][s1][s1]).imag()
 		    << std::endl;
 	  }
-	}
+	  }*/
       }
     }
   }
@@ -173,6 +173,53 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
 
 
 
+/*void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const 
+{
+  assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite());
+  uint N=G_tau.ntime()-1;
+  uint N_site=G_tau.nsite();
+  uint n_oversampling_t=10; //not sure that helps... check again!
+  uint n_oversampling_w=1; //not sure that helps... check again!
+  uint N_large_t=(G_tau.ntime()-1)*n_oversampling_t+1;
+  uint N_large_w=(G_tau.ntime()-1)*n_oversampling_w+1;
+  double dt=beta_/(N_large_t-1);
+  double G_tau_vector[N_large_t];
+  std::valarray<std::complex<double> > G_omega_vector(N_large_w);
+  //std::vector<double> G_tau_derivatives(G_tau.ntime());
+  assert(c1_==1); //otherwise change evaluate_second_derivatives!
+  for(uint flavor=0;flavor<G_tau.nflavor();++flavor){
+    for (uint s1=0; s1<N_site; ++s1){
+      for (uint s2=0; s2<N_site; ++s2) {
+	for(uint i=0;i<N;++i){
+	  for(uint j=0;j<n_oversampling_t;++j){
+	    G_tau_vector[i*n_oversampling_t+j]=
+	      (1./n_oversampling_t*(G_tau(i,s1,s2,flavor)*(n_oversampling_t-j)+G_tau(i+1,s1,s2,flavor)*j));
+	  }
+	  G_tau_vector[N_large_t-1]=G_tau(N,s1,s2,flavor);
+	}
+	for (uint n=0; n<N_large_w; n++) {
+	  double w_n=(2*n+1)*M_PI/beta_;
+	  G_omega_vector[n]=0;
+	  for(uint i=0;i<N_large_t-1;++i){
+	    double phi=w_n*i*dt;
+	    G_omega_vector[n] += std::complex<double>(cos(phi), sin(phi))*
+	      ((G_tau_vector[i]-f_tau(dt*i,beta_, c1_[flavor][s1][s2], c2_[flavor][s1][s2], c3_[flavor][s1][s2]))*dt);
+	  }
+	}
+        std::cout<<"doing forward ft for nfreq= "<<G_omega.nfreq()<<std::endl;
+	std::cout<<"c1: "<<c1_[flavor][s1][s2]<<" c2: "<<c2_[flavor][s1][s2]<<" c3: "<<c3_[flavor][s1][s2]<<std::endl;
+	for(uint n=0;n<G_omega.nfreq();++n){
+	  G_omega(n,s1,s2,flavor)=n<N_large_w?G_omega_vector[n]:0.;
+	  std::complex<double> iw(0,(2*n+1)*M_PI/beta_);
+	  G_omega(n,s1,s2,flavor) += f_omega(iw, c1_[flavor][s1][s2], c2_[flavor][s1][s2], c3_[flavor][s1][s2]);
+	}
+      }
+    }
+  }
+}
+
+
+ 
 void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsubara_green_function_t & G_omega) const {
   assert(G_tau.nflavor()==G_omega.nflavor() && G_tau.nsite()==G_omega.nsite());
   unsigned int N=G_tau.ntime()-1;
@@ -195,7 +242,7 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
           double w_n=(2*n+1)*M_PI/beta_;
           G_omega_vector[n]=0;
           G_omega_vector_nosub[n]=0;
-          for(unsigned int i=0;i<N;++i){
+         for(unsigned int i=0;i<N;++i){
             double phi=w_n*i*dt;
 	    G_omega_vector[n] += std::complex<double>(cos(phi), sin(phi))*
 	      ((G_tau_vector[i]-f_tau(dt*i,beta_, c1_[flavor][s1][s2], c2_[flavor][s1][s2], c3_[flavor][s1][s2]))*dt);
@@ -215,12 +262,12 @@ void FourierTransformer::forward_ft(const itime_green_function_t & G_tau, matsub
       }
     }
   }
-  /*for(unsigned int i=0;i<N;++i){
-    std::cerr << i*dt << "\t" 
-	      << G_tau_vector[i] << "\t"
-	      << f_tau(dt*i,beta_, c1_[0][0][0], c2_[0][0][0], c3_[0][0][0]) << std::endl;
-	      }*/
-}
+  //for(unsigned int i=0;i<N;++i){
+    //std::cerr << i*dt << "\t" 
+	//      << G_tau_vector[i] << "\t"
+	  //    << f_tau(dt*i,beta_, c1_[0][0][0], c2_[0][0][0], c3_[0][0][0]) << std::endl;
+	    //  }
+}*/
 
 
 
@@ -305,8 +352,8 @@ void evaluate_second_derivatives(double dt/*, double BETA*/, dense_matrix & spli
 
 
 
-void FourierTransformer::forward_ft_kaputt(const itime_green_function_t & gtau, matsubara_green_function_t & gomega) const {
-  //double BETA, const itime_green_function_t &gtau, matsubara_green_function_t &gomega, double *c1g, double *c2g, double *c3g) {
+void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsubara_green_function_t & gomega) const 
+{
   std::vector<double> v(gtau.ntime());
   std::vector<std::complex<double> > v_omega(gomega.nfreq());
   int Np1 = v.size();
@@ -314,16 +361,17 @@ void FourierTransformer::forward_ft_kaputt(const itime_green_function_t & gtau, 
   int N_omega = v_omega.size();
   double dt = beta_/N;
   
-  
   for(uint f=0;f<gtau.nflavor();++f){
     for(uint p=0;p<gtau.nsite();++p){
       for(uint q=0;q<gtau.nsite();++q){
         for(int tau=0;tau<Np1;++tau){
           v[tau]=gtau(tau,p,q,f);
         }
-        std::cout<<"c1 is: "<<c1_[f][p][q]<<" computed: "<<-v[0]-v[N]<<std::endl;
-        std::cout<<"c2 is: "<<c2_[f][p][q]<<" computed: "<<(v[1]-v[0]+v[N]-v[N-1])/dt<<std::endl;
-        std::cout<<"c3 is: "<<c3_[f][p][q]<<" computed: "<<-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt)<<std::endl;
+        std::cout<<"doing forward ft for nfreq= "<<gomega.nfreq()<<std::endl;
+	std::cout<<"c1: "<<c1_[f][p][q]<<" c2: "<<c2_[f][p][q]<<" c3: "<<c3_[f][p][q]<<std::endl;
+        //std::cout<<"c1 is: "<<c1_[f][p][q]<<" computed: "<<-v[0]-v[N]<<std::endl;
+        //std::cout<<"c2 is: "<<c2_[f][p][q]<<" computed: "<<(v[1]-v[0]+v[N]-v[N-1])/dt<<std::endl;
+        //std::cout<<"c3 is: "<<c3_[f][p][q]<<" computed: "<<-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt)<<std::endl;
 
         //  *(const_cast<double*> (&(c1_[f][p][q])))=1;
         //  *(const_cast<double*> (&(c2_[f][p][q])))*=-1; //convention is all wrong...
@@ -339,7 +387,7 @@ void FourierTransformer::forward_ft_kaputt(const itime_green_function_t & gtau, 
           *(const_cast<double*> (&(c1_[f][p][q])))=-v[0]-v[N];
           *(const_cast<double*> (&(c2_[f][p][q])))=(v[1]-v[0]+v[N]-v[N-1])/dt;
           *(const_cast<double*> (&(c3_[f][p][q])))=-(v[2]-2*v[1]+v[0]+v[N-2]-2*v[N-1]+v[N])/(dt*dt);
-       }*/
+	  }*/
         
         dense_matrix spline_matrix(Np1, Np1);
         generate_spline_matrix(spline_matrix, dt);
@@ -347,23 +395,23 @@ void FourierTransformer::forward_ft_kaputt(const itime_green_function_t & gtau, 
         std::vector<double> v2(Np1, 0); 
         evaluate_second_derivatives(dt/*,beta_*/, spline_matrix, v, v2, c1_[f][p][q], c2_[f][p][q], c3_[f][p][q]);
         v_omega.assign(N_omega, 0);
-        std::vector<std::complex<double> > v_omega_naive(N_omega);
+        //std::vector<std::complex<double> > v_omega_naive(N_omega);
         //std::vector<std::complex<double> > v_omega_third(N_omega);
-        v_omega_naive.assign(N_omega, 0);
+        //v_omega_naive.assign(N_omega, 0);
         //v_omega_third.assign(N_omega, 0);
         
-        std::cout << "beta " << beta_ << "\n";
+        //std::cout << "beta " << beta_ << "\n";
         
         for (int k=0; k<N_omega; k++) {
           std::complex<double> iw(0, M_PI*(2*k+1)/beta_);
           for (int n=1; n<N; n++) {
             v_omega[k] += exp(iw*(n*dt))*(v2[n+1]-2*v2[n]+v2[n-1]); //partial integration, four times. Then approximate the fourth derivative by finite differences
-            v_omega_naive[k]+=std::exp(iw*(n*dt))*v[n];
+            //v_omega_naive[k]+=std::exp(iw*(n*dt))*v[n];
                                                                     // v_omega_third[k]+=std::exp(iw*(n*dt))*(-v2[n]+v2[n+1])/(iw*iw*iw);
           }
           v_omega[k] += (v2[1] - v2[0] + v2[N] - v2[N-1]); //that's the third derivative, on the boundary
           v_omega[k] *= 1./(dt*iw*iw*iw*iw);
-          v_omega_naive[k]+=v[0]-v[N];
+          //v_omega_naive[k]+=v[0]-v[N];
           //v_omega_third[k]+=(-v2[0]+v2[1]); //first slice
           //v_omega_third[k]=-v_omega_third[k]+f_omega(iw, c1g[f], c2g[f], c3g[f]);
           //std::cout<<k<<" "<<v_omega_naive[k]<<" "<<v_omega[k]/*<<" "<<v_omega_third[k]*/<<" "<<f_omega(iw, c1_[f][p][q],c2_[f][p][q],c3_[f][p][q])<<std::endl;
@@ -375,7 +423,7 @@ void FourierTransformer::forward_ft_kaputt(const itime_green_function_t & gtau, 
         
         /*for (int k=0; k<N_omega; k++) {
           std::complex<double> fw=f_omega(std::complex<double>(0, (2.*k+1)*M_PI/beta_),c1_[f][p][q],c2_[f][p][q],c3_[f][p][q]);
-        std::cout << "v_omega " << k << " " << M_PI*(2*k+1) << " " << std::real(v_omega[k]) << "  " << std::imag(v_omega[k]) << " "<<fw.real()<<" "<<fw.imag()<<" "<<(v_omega[k]-fw).real()<<" "<<(v_omega[k]-fw).imag()<<" naive: "<<v_omega_naive[k].real()<<" "<<v_omega_naive[k].imag()<<std::endl;
+	  std::cout << "v_omega " << k << " " << M_PI*(2*k+1) << " " << std::real(v_omega[k]) << "  " << std::imag(v_omega[k]) << " "<<fw.real()<<" "<<fw.imag()<<" "<<(v_omega[k]-fw).real()<<" "<<(v_omega[k]-fw).imag()<<" naive: "<<v_omega_naive[k].real()<<" "<<v_omega_naive[k].imag()<<std::endl;
         }*/
         
         /*static std::ofstream g_interpol("/tmp/g_interpol.dat");                      
@@ -390,10 +438,10 @@ void FourierTransformer::forward_ft_kaputt(const itime_green_function_t & gtau, 
             double x = n/10.*dt;
             g_interpol<<j+n/10.<< " "<<a + b*x + c*pow(x,2) + d*pow(x,3)<<" "<<f_tau(x, beta_, c1_[f][p][q], c2_[f][p][q], c3_[f][p][q])<<std::endl;
           }
-        }
-        g_interpol<<std::endl;
-        static std::ofstream second_der("/tmp/2nd_der.dat");
-        for (int j=0; j<Np1; j++) {
+	  }
+	  g_interpol<<std::endl;
+	  static std::ofstream second_der("/tmp/2nd_der.dat");
+	  for (int j=0; j<Np1; j++) {
           second_der<<j*dt<<" "<<v[j]<<" "<<v2[j]<<std::endl;
         }
         second_der<<std::endl;*/
@@ -430,7 +478,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   std::vector<std::vector<double> > epssq_f(n_flavors, epssq);
   double U = parms["U"];
   fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"]+U/2, U, 
+					   (double)parms["MU"]/*+U/2*/, U, 
 					   parms.value_or_default("FLAVORS", 2),
 					   parms.value_or_default("SITES", 1), 
 					   densities, eps_f, epssq_f));
@@ -506,14 +554,14 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   }
   double U = parms["U"];
   fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"]+U/2., U, 
+					   (double)parms["MU"]/*+U/2.*/, U, 
 					   n_flavors, n_site, densities, eps, epssq));
 }
 
 
 
 void FittingFourierTransformer::backward_ft(itime_green_function_t &G_tau, 
-						     const matsubara_green_function_t &G_omega) 
+					    const matsubara_green_function_t &G_omega) 
 {
   //fit c1_ to G_omega
   std::cout << "Fitting Fourier Transformer:" << std::endl;

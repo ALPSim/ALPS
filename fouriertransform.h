@@ -168,8 +168,8 @@ public:
         for(int j=0;j<n_site;++j){
           c1_[f][i][j] = (i==j) ? 1 : 0;
           c2_[f][i][j] = (i==j) ? eps[f][i] - mu + U * densities[fbar] : 0; //formula 13
-          c3_[f][i][j] = (i==j) ? epssq[f][i] - 2*mu*eps[f][i] + mu*mu 
-	    + 2*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar] : 0;
+          c3_[f][i][j] = (i==j) ? epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
+	    - 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar] : 0;
         }
       }
     }
@@ -190,7 +190,6 @@ public:
 
   virtual ~FourierTransformer() {}
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
-  virtual void forward_ft_kaputt(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
   virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
 			   const green_function<alps::RealObsevaluator> &G_omega_real,
