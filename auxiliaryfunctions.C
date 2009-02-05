@@ -192,7 +192,7 @@ void print_all_green_functions(const int iteration_ctr, const matsubara_green_fu
   print_green_itime(G_tau_file,G_tau,beta, diagonal);
   print_imag_green_matsubara(G_omega_file_2,G_omega,beta, diagonal);
   print_green_itime(G_tau_file_2,G_tau,beta, diagonal);
-  print_selfenergy_matsubara(selfenergy_file,G_omega, G0_omega, beta, diagonal);
+  print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta, diagonal);
   if (diagonal)
     print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
 }
