@@ -3,6 +3,7 @@
 #include "types.h"
 #include <fstream>
 #include <iostream>
+#include <cassert>
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
 template <typename T> class green_function{
