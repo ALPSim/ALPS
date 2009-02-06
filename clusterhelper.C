@@ -134,13 +134,13 @@ void ClusterHelper::setup_tables()
       }
     }
   }
-  /*std::ofstream clustercoordstream("ClusterCoordinates");
+  std::ofstream clustercoordstream("ClusterCoordinates");
   for (int m=0; m<cluster_coordinates_.size1(); ++m) {
     clustercoordstream << m << " ";
     for (int d=0; d<cluster_coordinates_.size2(); ++d) 
       clustercoordstream << cluster_coordinates_(m,d) << " ";
     clustercoordstream << std::endl;
-    }*/
+    }
   //setup reciprocal basis
   Matrix<double>::Type reciprocal_basis(dimension(), dimension());
   basis_vector_iterator itbr, itbr_end;
@@ -220,13 +220,13 @@ void ClusterHelper::setup_tables()
       cluster_momenta_ = sorted_momenta;
     }
   }
-  /*std::ofstream clustermomstream("ClusterMomenta");
+  std::ofstream clustermomstream("ClusterMomenta");
   for (int m=0; m<cluster_momenta_.size1(); ++m) {
     clustermomstream << m << " ";
     for (int d=0; d<cluster_momenta_.size2(); ++d) 
       clustermomstream << cluster_momenta_(m,d) << " ";
     clustermomstream << std::endl;
-    }*/
+    }
   
   //setup lattice momenta
   lattice_momenta_.resize(n_cluster_cells(), dimension());
