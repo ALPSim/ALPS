@@ -59,12 +59,6 @@ void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function
   }
 }
 
-void print_selfenergy_matsubara(std::ostream &os, const multiple_complex_vector_type &g_bare, const multiple_complex_vector_type &g_dressed, const double beta){
-  os<<std::setprecision(20);
-  for(unsigned int i=0;i<g_bare.first.size();++i)
-    os<<(2*i+1)*M_PI/beta<<"\t"<<(1./g_bare.first[i].imag() - 1./g_dressed.first[i].imag())<<std::endl;
-}
-
 void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function_t &g_bare, 
 				const matsubara_green_function_t g_dressed, const double beta, const bool diagonal)
 {
