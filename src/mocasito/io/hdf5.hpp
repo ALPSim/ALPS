@@ -16,7 +16,7 @@ namespace mocasito {
 			class h5_e {
 				public:
 					static herr_t noop(hid_t) { return 0; }
-					static herr_t callback(unsigned n, const H5E_error2_t *desc, void * buffer) {
+					static herr_t callback(unsigned n, H5E_error2_t const * desc, void * buffer) {
 						*reinterpret_cast<std::ostringstream *>(buffer) << std::endl << "#" << n << " " << desc->file_name << " line " << desc->line << " in " << desc->func_name << "(): " << desc->desc;
 						return 0;
 					}
@@ -36,33 +36,53 @@ namespace mocasito {
 				private:
 					hid_t _id;
 			};
-			typedef h5_t<H5Fclose> h5f_t;
 			typedef h5_t<H5Gclose> h5g_t;
 			typedef h5_t<H5Dclose> h5d_t;
 			typedef h5_t<H5Aclose> h5a_t;
 			typedef h5_t<H5Sclose> h5s_t;
 			typedef h5_t<H5Tclose> h5t_t;
+			typedef h5_t<H5Pclose> h5p_t;
 			typedef h5_t<h5_e::noop> h5e_t;
+			template<typename T> class h5_fptr {
+				public:
+					h5_fptr(std::string const & p) {
+						H5Eset_auto(H5E_DEFAULT, NULL, NULL);
+						if (_files.find(_name = p) == _files.end()) {
+							T id = H5Fopen(p.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
+							_files.insert(std::make_pair(p, std::make_pair(id < 0 ? H5Fcreate(p.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT) : id, 1)));
+						} else
+							_files[p].second++;
+					}
+					~h5_fptr() {
+						if (!--_files[_name].second) {
+							H5Fclose(_files[_name].first);
+							_files.erase(_name);
+						}
+					}
+					operator T() const {
+						return _files[_name].first;
+					}
+				private:
+					std::string _name;
+					static std::map<std::string, std::pair<T, std::size_t> > _files;
+			};
+			template<typename T> std::map<std::string, std::pair<T, std::size_t> > h5_fptr<T>::_files;
 		}
 		class hdf5 {
 			public:
-				hdf5(std::string const & p, std::string const & q) {
+				hdf5(std::string const & p, std::string const & q): _file(p) {
 					if (q != "" && p != q)
 						throw(std::runtime_error("input file needs to be the same as the output file"));
-// TODO: pooling
-					H5Eset_auto(H5E_DEFAULT, NULL, NULL);
-					hid_t id = H5Fopen(p.c_str(), H5F_ACC_RDWR, H5P_DEFAULT);
-					_file_id = id < 0 ? H5Fcreate(p.c_str(), H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT) : id;
 				}
 				void flush() const {
-					H5Fflush(_file_id, H5F_SCOPE_GLOBAL);
+					H5Fflush(_file, H5F_SCOPE_GLOBAL);
 				}
 				bool is_group(std::string const & p) const {
-					hid_t id = H5Gopen(_file_id, p.c_str(), H5P_DEFAULT);
+					hid_t id = H5Gopen(_file, p.c_str(), H5P_DEFAULT);
 					return id < 0 ? false : static_cast<bool>(detail::h5g_t(id));
 				}
 				bool is_data(std::string const & p) const {
-					hid_t id = H5Dopen(_file_id, p.c_str(), H5P_DEFAULT);
+					hid_t id = H5Dopen(_file, p.c_str(), H5P_DEFAULT);
 					return id < 0 ? false : static_cast<bool>(detail::h5d_t(id));
 				}
 				std::vector<std::size_t> extent(std::string const & p) const {
@@ -70,7 +90,7 @@ namespace mocasito {
 						return std::vector<std::size_t>(1, 0);
 					std::vector<hsize_t> buffer(dimensions(p));
 					{
-						detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT));
+						detail::h5d_t data_id(H5Dopen(_file, p.c_str(), H5P_DEFAULT));
 						detail::h5s_t space_id(H5Dget_space(data_id));
 						detail::h5e_t(H5Sget_simple_extent_dims(space_id, &buffer.front(), NULL));
 					}
@@ -79,37 +99,21 @@ namespace mocasito {
 					return extend;
 				}
 				std::size_t dimensions(std::string const & p) const {
-					detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT));
+					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), H5P_DEFAULT));
 					detail::h5s_t space_id(H5Dget_space(data_id));
 					return static_cast<hid_t>(detail::h5e_t(H5Sget_simple_extent_dims(space_id, NULL, NULL)));
 				}
 				type_traits<>::type attrtype(detail::node_t t, std::string const & p, std::string const & s) const {
-// TODO: impl
-					return -1;
+					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), 0));
+					detail::h5a_t attr_id(H5Aopen(data_id, s.c_str(), H5P_DEFAULT));
+					return get_type_id(H5Aget_type(attr_id), p + "/@" + s);
 				}
 				type_traits<>::type datatype(std::string const & p) const {
-					detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), 0));
-					detail::h5t_t type_id(H5Dget_type(data_id));
-					detail::h5t_t native_id(H5Tget_native_type(type_id, H5T_DIR_ASCEND));
-					if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<char>(0))))) > 0) return type_traits<char>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<signed char>(0))))) > 0) return type_traits<signed char>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned char>(0))))) > 0) return type_traits<unsigned char>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<short>(0))))) > 0) return type_traits<short>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned char>(0))))) > 0) return type_traits<unsigned char>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<int>(0))))) > 0) return type_traits<int>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned>(0))))) > 0) return type_traits<unsigned>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<long>(0))))) > 0) return type_traits<long>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned long>(0))))) > 0) return type_traits<unsigned long>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<long long>(0))))) > 0) return type_traits<long long>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned long long>(0))))) > 0) return type_traits<unsigned long long>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<float>(0))))) > 0) return type_traits<float>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<double>(0))))) > 0) return type_traits<double>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<long double>(0))))) > 0) return type_traits<long double>::value;
-					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<bool>(0))))) > 0) return type_traits<bool>::value;
-					else throw(std::runtime_error("error comparing types " + p));
+					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), 0));
+					return get_type_id(H5Dget_type(data_id), p);
 				}
 				bool is_scalar(std::string const & p) const {
-					detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT));
+					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), H5P_DEFAULT));
 					detail::h5s_t space_id(H5Dget_space(data_id));
 					H5S_class_t type = H5Sget_simple_extent_type(space_id);
 					if (type == H5S_NO_CLASS)
@@ -117,7 +121,7 @@ namespace mocasito {
 					return type == H5S_SCALAR;
 				}
 				bool is_null(std::string const & p) const {
-					detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT));
+					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), H5P_DEFAULT));
 					detail::h5s_t space_id(H5Dget_space(data_id));
 					H5S_class_t type = H5Sget_simple_extent_type(space_id);
 					if (type == H5S_NO_CLASS)
@@ -126,45 +130,35 @@ namespace mocasito {
 				}
 				std::vector<std::string> list_children(std::string const & p) const {
 					std::vector<std::string> list;
-					H5Giterate(_file_id, p.c_str(), NULL, group_visitor, reinterpret_cast<void *>(&list));
+					H5Giterate(_file, p.c_str(), NULL, group_visitor, reinterpret_cast<void *>(&list));
 					return list;
 				}
 				template<typename T> void get_data(std::string const & p, T * v) const {
-					detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT));
+					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), H5P_DEFAULT));
 					if (!is_null(p)) {
 						detail::h5t_t type_id(get_native_type(v));
 						detail::h5e_t(H5Dread(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, v));
 					}
 				}
 				template<typename T> void get_group_attr(std::string const & p, std::string const & s, T & v) const {
-					get_attr<detail::h5g_t, T>(H5Gopen(_file_id, p.c_str(), H5P_DEFAULT), s, &v);
+					get_attr<detail::h5g_t, T>(H5Gopen(_file, p.c_str(), H5P_DEFAULT), s, &v);
 				}
 				template<typename T> void get_data_attr(std::string const & p, std::string const & s, T & v) const {
-					get_attr<detail::h5d_t, T>(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT), s, &v);
+					get_attr<detail::h5d_t, T>(H5Dopen(_file, p.c_str(), H5P_DEFAULT), s, &v);
 				}
 				template<typename T> void set_data(std::string const & p, T const & v) {
 					detail::h5t_t type_id(get_native_type(v));
-					hid_t id = H5Dopen(_file_id, p.c_str(), H5P_DEFAULT);
-					if (id < 0) {
-						create_path(p);
-						detail::h5s_t space_id(H5Screate(H5S_SCALAR));
-						id = H5Dcreate(_file_id, p.c_str(), type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-					}
+					hid_t id = H5Dopen(_file, p.c_str(), H5P_DEFAULT);
+					if (id < 0)
+						id = create_path(p, type_id, H5Screate(H5S_SCALAR), 0);
 					detail::h5d_t data_id(id);
 					detail::h5e_t(H5Dwrite(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &v));
 				}
 				template<typename T> void set_data(std::string const & p, T const * v, hsize_t s) {
 					detail::h5t_t type_id(get_native_type(v));
-					hid_t id = H5Dopen(_file_id, p.c_str(), H5P_DEFAULT);
+					hid_t id = H5Dopen(_file, p.c_str(), H5P_DEFAULT);
 					if (id < 0) {
-						create_path(p);
-						if (s == 0) {
-							detail::h5s_t space_id(H5Screate(H5S_NULL));
-							id = H5Dcreate(_file_id, p.c_str(), type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-						} else {
-							detail::h5s_t space_id(H5Screate_simple(1, &s, NULL));
-							id = H5Dcreate(_file_id, p.c_str(), type_id, space_id, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-						}
+						id = create_path(p, type_id, s ? H5Screate_simple(1, &s, NULL) : H5Screate(H5S_NULL), s);
 					} else 
 						detail::h5e_t(H5Dset_extent(id, &s));
 					detail::h5d_t data_id(id);
@@ -173,7 +167,7 @@ namespace mocasito {
 				}
 				template<typename T> void append_data(std::string const & p, T const * v, hsize_t s) {
 					detail::h5t_t type_id(get_native_type(v));
-					hid_t id = H5Dopen(_file_id, p.c_str(), H5P_DEFAULT);
+					hid_t id = H5Dopen(_file, p.c_str(), H5P_DEFAULT);
 					if (id < 0)
 						return set_data(p, v, s);
 					detail::h5d_t data_id(id);
@@ -181,17 +175,18 @@ namespace mocasito {
 					detail::h5e_t(H5Dset_extent(data_id, &count));
 					detail::h5s_t space_id(H5Dget_space(data_id));
 					detail::h5e_t(H5Sselect_hyperslab(space_id, H5S_SELECT_SET, &start, NULL, &s, NULL));
-					detail::h5e_t(H5Dwrite(data_id, type_id, H5S_ALL, space_id, H5P_DEFAULT, v));
+					detail::h5s_t mem_id(H5Screate_simple(1, &s, NULL));
+					detail::h5e_t(H5Dwrite(data_id, type_id, mem_id, space_id, H5P_DEFAULT, v));
 				}
 				void delete_data(std::string const & p, std::string const & s) {
-					detail::h5g_t data_id(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT));
-					detail::h5e_t(H5Ldelete(_file_id, s.c_str(), data_id));
+					detail::h5g_t data_id(H5Dopen(_file, p.c_str(), H5P_DEFAULT));
+					detail::h5e_t(H5Ldelete(_file, s.c_str(), data_id));
 				}
 				template<typename T> void set_group_attr(std::string const & p, std::string const & s, T const & v) {
-					set_attr<detail::h5g_t, T>(H5Gopen(_file_id, p.c_str(), H5P_DEFAULT), s, v);
+					set_attr<detail::h5g_t, T>(H5Gopen(_file, p.c_str(), H5P_DEFAULT), s, v);
 				}
 				template<typename T> void set_data_attr(std::string const & p, std::string const & s, T const & v) {
-					set_attr<detail::h5d_t, T>(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT), s, v);
+					set_attr<detail::h5d_t, T>(H5Dopen(_file, p.c_str(), H5P_DEFAULT), s, v);
 				}
 			private:
 				template<typename T> hid_t get_native_type(T &) const { throw(std::runtime_error("unknown type")); }
@@ -215,6 +210,25 @@ namespace mocasito {
 					reinterpret_cast<std::vector<std::string> *>(d)->push_back(n);
 					return 0;
 				}
+				type_traits<>::type get_type_id(detail::h5t_t const & type_id, std::string const & p) const {
+					detail::h5t_t native_id(H5Tget_native_type(type_id, H5T_DIR_ASCEND));
+					if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<char>(0))))) > 0) return type_traits<char>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<signed char>(0))))) > 0) return type_traits<signed char>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned char>(0))))) > 0) return type_traits<unsigned char>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<short>(0))))) > 0) return type_traits<short>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned short>(0))))) > 0) return type_traits<unsigned short>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<int>(0))))) > 0) return type_traits<int>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned>(0))))) > 0) return type_traits<unsigned>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<long>(0))))) > 0) return type_traits<long>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned long>(0))))) > 0) return type_traits<unsigned long>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<long long>(0))))) > 0) return type_traits<long long>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<unsigned long long>(0))))) > 0) return type_traits<unsigned long long>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<float>(0))))) > 0) return type_traits<float>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<double>(0))))) > 0) return type_traits<double>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<long double>(0))))) > 0) return type_traits<long double>::value;
+					else if (detail::h5e_t(H5Tequal(detail::h5t_t(H5Tcopy(native_id)), detail::h5t_t(get_native_type(static_cast<bool>(0))))) > 0) return type_traits<bool>::value;
+					else throw(std::runtime_error("error comparing types " + p));
+				}
 				template<typename I, typename T> void get_attr(I const & data_id, std::string const & s, T * v) const {
 					detail::h5t_t type_id(get_native_type(v));
 					detail::h5a_t attr_id(H5Aopen(data_id, s.c_str(), H5P_DEFAULT));
@@ -230,23 +244,27 @@ namespace mocasito {
 					detail::h5a_t attr_id(id);
 					detail::h5e_t(H5Awrite(attr_id, type_id, &v));
 				}
-				void create_path(std::string const & p) {
+				hid_t create_path(std::string const & p, hid_t type_id, hid_t space_id, hsize_t s) {
 					std::size_t pos;
 					hid_t data_id = -1;
 					for (pos = p.find_last_of('/'); data_id < 0 && pos > 0 && pos < std::string::npos; pos = p.find_last_of('/', pos - 1))
-						data_id = H5Gopen(_file_id, p.substr(0, pos).c_str(), H5P_DEFAULT);
+						data_id = H5Gopen(_file, p.substr(0, pos).c_str(), H5P_DEFAULT);
 					if (data_id < 0) {
 						pos = p.find_first_of('/', 1);
-						detail::h5g_t(H5Gcreate(_file_id, p.substr(0, pos).c_str(), 0, H5P_DEFAULT, H5P_DEFAULT));
+						detail::h5g_t(H5Gcreate(_file, p.substr(0, pos).c_str(), 0, H5P_DEFAULT, H5P_DEFAULT));
 					} else {
 						pos = p.find_first_of('/', pos + 1);
 						detail::h5g_t(data_id);
 					}
-					while ((pos = p.find_first_of('/', pos + 1)) != std::string::npos)
-						detail::h5g_t(H5Gcreate(_file_id, p.substr(0, pos).c_str(), 0, H5P_DEFAULT, H5P_DEFAULT));
+					while ((pos = p.find_first_of('/', pos + 1)) != std::string::npos && pos > 0)
+						detail::h5g_t(H5Gcreate(_file, p.substr(0, pos).c_str(), 0, H5P_DEFAULT, H5P_DEFAULT));
+					detail::h5p_t prop_id(H5Pcreate(H5P_DATASET_CREATE)); 
+					detail::h5e_t(H5Pset_fill_time(prop_id, H5D_FILL_TIME_NEVER));
+					if (s > 0)
+						detail::h5e_t(H5Pset_chunk (prop_id, 1, &s));
+					return H5Dcreate(_file, p.c_str(), type_id, detail::h5s_t(space_id), H5P_DEFAULT, prop_id, H5P_DEFAULT);
 				}
-// TODO: needs to be a pool!
-				detail::h5f_t _file_id;
+				detail::h5_fptr<hid_t> _file;
 		};
 	}
 }

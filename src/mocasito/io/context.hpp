@@ -93,7 +93,7 @@ namespace mocasito {
 				detail::iterator<E, context<E> > end() { 
 					return detail::iterator<E, context<E> >(); 
 				}
-				template<typename T> operator T() {
+				template<typename T> operator T() const {
 					if (_type == detail::IO_UNKNOWN)
 						throw(std::runtime_error("unknown path type: " + _path));
 					else if (_type == detail::IO_GROUP)
@@ -104,13 +104,10 @@ namespace mocasito {
 				template<typename T> context<E> & operator=(T const & v) {
 					return assign(*this, v);
 				}
-				template<typename T> context<E> & operator<<(T const & v) { 
+				template<typename T> context<E> & operator<<(T const & v) {
 					return detail::append_helper(*this, v);
 				}
 				context<E> operator+(std::string const & p) const { 
-					std::cerr<<"operator+: this is: "<<this<<std::endl;
-					std::cerr<<"operator+: &p is: "<<&p<<std::endl;
-					std::cerr<<"strings are: p: "<<p<<" path: "<<_path<<std::endl;
 					if (p[0] == '/')
 						return context<E>(_engine, p);
 					else if (p.substr(0, 2) != "..")
@@ -180,7 +177,7 @@ namespace mocasito {
 			private:
 				void create() {
 					if (_path.find_last_of('@') != std::string::npos) {
-						_segment = _path.substr(_path.find_last_of('@'));
+						_segment = _path.substr(_path.find_last_of('@') + 1);
 						_path = _path.substr(0, _path.find_last_of('@'));
 						if (_engine->is_group(_path))
 							_type = detail::IO_GROUP_ATTR;
@@ -198,6 +195,11 @@ namespace mocasito {
 				std::string _path;
 				E * _engine;
 		};
+		template<typename T, typename E> bool operator==(context<E> const & c, T const & v) { T w; assign(w, c); return w == v; }
+		template<typename E> bool operator==(context<E> const & c, char const * v) { return c == std::string(v); }
+		template<typename T, typename E> bool operator==(T const & v, context<E> const & c) { return c == v; }
+		template<typename T, typename E> bool operator!=(context<E> const & c, T const & v) { return !(c == v); }
+		template<typename T, typename E> bool operator!=(T const & v, context<E> const & c) { return !(v == c); }
 	}
 }
 #endif
