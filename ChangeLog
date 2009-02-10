@@ -1,3 +1,7 @@
+2009-02-10  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Update configure script for Boost verion 1.38.0
+
 2008-11-08  Synge Todo <wistaria@comp-phys.org>
 
 	* [parapack] ALPS/parapack scheduler (version 1.1 2008/11/08) has

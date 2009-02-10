@@ -15,7 +15,7 @@ define([alps_version], [1.3.3])
 
 dnl Latest publication year of ALPS
 
-define([alps_year], [2008])
+define([alps_year], [2009])
 
 dnl Increment lib_revision if source code has changed at all.
 dnl
@@ -472,7 +472,7 @@ if test "$ac_cv_use_precompiled_boost" != yes; then
   AC_CONFIG_HEADERS(src/boost/po_utf8_codecvt_facet.cpp)
   AC_DEFINE_UNQUOTED(SR_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/serialization/src/utf8_codecvt_facet.cpp")
   AC_CONFIG_HEADERS(src/boost/sr_utf8_codecvt_facet.cpp)
-  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_37 || test "$ac_cv_boost_version" = svn; then
+  if test "$ac_cv_boost_version" = 1_34 || test "$ac_cv_boost_version" = 1_35 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_37 || test "$ac_cv_boost_version" = 1_38 || test "$ac_cv_boost_version" = svn; then
     AC_DEFINE_UNQUOTED(FS_UTF8_CODECVT_FACET_CPP, "$BOOST_SRCDIR/filesystem/src/utf8_codecvt_facet.cpp")
     AC_CONFIG_HEADERS(src/boost/fs_utf8_codecvt_facet.cpp)
   fi
