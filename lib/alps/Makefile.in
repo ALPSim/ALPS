@@ -291,7 +291,8 @@ am__objects_36 = $(am__objects_32)
 @BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_28) \
 @BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_35) \
 @BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_36)
-@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@am__objects_39 = $(am__objects_28) \
+@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@am__objects_39 = $(am__objects_34) \
+@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_28) \
 @BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_35) \
 @BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_36)
 @BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__objects_40 = $(am__objects_34) \
@@ -670,6 +671,7 @@ src_boost_FILESYSTEM_1_35 = \
 
 src_boost_FILESYSTEM_1_36 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_1_37 = $(src_boost_FILESYSTEM_1_35)
+src_boost_FILESYSTEM_1_38 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_SVN = $(src_boost_FILESYSTEM_1_35)
 src_boost_MPI_1_35 = \
   $(BOOST_SRCDIR)/mpi/src/broadcast.cpp \

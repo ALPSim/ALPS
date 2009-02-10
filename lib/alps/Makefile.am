@@ -111,6 +111,7 @@ src_boost_FILESYSTEM_1_35 = \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 src_boost_FILESYSTEM_1_36 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_1_37 = $(src_boost_FILESYSTEM_1_35)
+src_boost_FILESYSTEM_1_38 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_SVN = $(src_boost_FILESYSTEM_1_35)
 
 src_boost_MPI_1_35 = \
