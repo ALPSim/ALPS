@@ -134,8 +134,7 @@ public:
 class DCATransformer : public ClusterTransformer
 {
 public:
-  DCATransformer(const alps::Parameters& params) 
-    : ClusterTransformer(params), epsav_(n_cluster_sites()), epssqav_(n_cluster_sites()) {}
+  DCATransformer(const alps::Parameters& params);
   virtual ~DCATransformer(){} //pro forma virtual destructor
   
   template<typename T> green_function<T> symmetrize_real_space(const green_function<T>& G) const 
@@ -153,80 +152,13 @@ public:
 							 const double mu, const double h, 
 							 const double beta) const =0; 
   std::complex<double>* exp_iksite(const int sign) const;
-  virtual double epsilon(const vector_type k) const=0;
-  void calculate_disp_moments();
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
-
-private:
-  template<typename T>
-  green_function<T> symmetrize_helper(const green_function<T>& G, 
-			       const std::pair<std::set<pair_class_type>::const_iterator, 
-			       std::set<pair_class_type>::const_iterator> pair_classes) const;
-  std::vector<double> epsav_;
-  std::vector<double> epssqav_;
-};
-
-
-
-class SimpleDCATransformer : public DCATransformer
-{
-public:
-  SimpleDCATransformer(const alps::Parameters& params) :
-    DCATransformer(params),
-    t_(boost::lexical_cast<double>(params["t"])), 
-    t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
-    t3_(params.value_or_default("t3", 0.)),
-    t4_(params.value_or_default("t4", 0.)),
-    compute_filling_(params.defined("FILLING")),
-    n_target_(compute_filling_?(double)(params["FILLING"]):-1)
-  {
-    params_ptr_=&params;
-    calculate_disp_moments();
-  }
+  double bandwidth() const { return bandwidth_; };
   
-  matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
-					const matsubara_green_function_t &G0_omega, 
-					double &mu, const double h, const double beta);
-  itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
-  { return spin_symmetrizer(G, paramagnet); }
-  matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
-  { return spin_symmetrizer(G, paramagnet); }
-  matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const 
-  { return transform_coordinates<std::complex<double>, Backward>(G); }
-  matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const 
-  { return transform_coordinates<std::complex<double>, Forward>(G); }
-  itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const 
-  { return transform_coordinates<double, Backward>(G); }
-  itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const 
-  { return transform_coordinates<double, Forward>(G); }
-  
-  matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
-  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
-						 const matsubara_green_function_t &G_omega, 
-						 const matsubara_green_function_t &G0_omega, 
-						 const double mu, const double h, 
-						 const double beta) const; 
-
-private:
-  template<typename T, class D>
-  green_function<T> transform_coordinates(const green_function<T>& G) const;
-  template <class T>
-  green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
-  matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const unsigned int nt) const;
-  template<typename T>
-  green_function<T> fourpoint_green_function_add(const green_function<T>& G1, 
-						 const green_function<T>& G2) const;
-  template<typename T>
-  green_function<T> fourpoint_green_function_subtract(const green_function<T>& G1, 
-						      const green_function<T>& G2) const;
-  template<typename T>
-  green_function<T> fourpoint_green_function_divide(const green_function<T>& G1, 
-						    const T d) const;
-
   double epsilon(const vector_type k) const
-  {  //cosine dispersion (nearest nbr hopping) for all dimensions. t' only valid/reasonable in two dimensions for nn hopping.
-    double eps = 0;
+  {  
+    double eps = -half_filling_;
     for (unsigned int i=0; i<dimension(); ++i) 
       eps -= 2*t_*cos(k[i]);
     if (t2_!=0.) {
@@ -273,10 +205,73 @@ private:
 	break;     
       }
     }
-    return eps; 
+    return eps;
   }
   
+private:
+  template<typename T>
+  green_function<T> symmetrize_helper(const green_function<T>& G, 
+				      const std::pair<std::set<pair_class_type>::const_iterator, 
+				      std::set<pair_class_type>::const_iterator> pair_classes) const;
   const double t_, t2_, t3_, t4_;
+  std::vector<double> epsav_;
+  std::vector<double> epssqav_;
+  double bandwidth_;
+  double half_filling_;
+};
+
+
+
+class SimpleDCATransformer : public DCATransformer
+{
+public:
+  SimpleDCATransformer(const alps::Parameters& params) :
+    DCATransformer(params),
+    compute_filling_(params.defined("FILLING")),
+    n_target_(compute_filling_?(double)(params["FILLING"]):-1)
+  {
+    params_ptr_=&params;
+  }
+  
+  matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
+					const matsubara_green_function_t &G0_omega, 
+					double &mu, const double h, const double beta);
+  itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
+  { return spin_symmetrizer(G, paramagnet); }
+  matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
+  { return spin_symmetrizer(G, paramagnet); }
+  matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const 
+  { return transform_coordinates<std::complex<double>, Backward>(G); }
+  matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const 
+  { return transform_coordinates<std::complex<double>, Forward>(G); }
+  itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const 
+  { return transform_coordinates<double, Backward>(G); }
+  itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const 
+  { return transform_coordinates<double, Forward>(G); }
+  
+  matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
+  matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
+						 const matsubara_green_function_t &G_omega, 
+						 const matsubara_green_function_t &G0_omega, 
+						 const double mu, const double h, 
+						 const double beta) const; 
+
+private:
+  template<typename T, class D>
+  green_function<T> transform_coordinates(const green_function<T>& G) const;
+  template <class T>
+  green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
+  matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const unsigned int nt) const;
+  template<typename T>
+  green_function<T> fourpoint_green_function_add(const green_function<T>& G1, 
+						 const green_function<T>& G2) const;
+  template<typename T>
+  green_function<T> fourpoint_green_function_subtract(const green_function<T>& G1, 
+						      const green_function<T>& G2) const;
+  template<typename T>
+  green_function<T> fourpoint_green_function_divide(const green_function<T>& G1, 
+						    const T d) const;
+
   struct Forward;
   struct Backward;
   
@@ -290,11 +285,7 @@ private:
 class AntiFerroDCATransformer : public DCATransformer
 {
 public:
-  AntiFerroDCATransformer(const alps::Parameters& params) :
-    DCATransformer(params), t_(boost::lexical_cast<double>(params["t"])) 
-  {
-    calculate_disp_moments();
-  }
+  AntiFerroDCATransformer(const alps::Parameters& params) : DCATransformer(params) {}
   
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
 					const matsubara_green_function_t &G0_omega, 
@@ -336,18 +327,7 @@ private:
   green_function<T> green_function_subtract(const green_function<T>& G1, const green_function<T>& G2) const;
   template<typename T>
   green_function<T> green_function_divide(const green_function<T>& G1, const T d) const;
-  
-  
-  double epsilon(const vector_type k) const
-  {
-    double eps = 0;
-    for (unsigned int i=0; i<dimension(); ++i) 
-      eps -= 2*t_*cos (k[i]);
-    return eps; 
-  }
-  
-  const double t_;
-  
+    
   struct Forward;
   struct Backward;
   

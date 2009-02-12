@@ -44,6 +44,47 @@ matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters
 }
 
 
+DCATransformer::DCATransformer(const alps::Parameters& params) 
+  : ClusterTransformer(params), 
+    t_(boost::lexical_cast<double>(params["t"])), 
+    t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
+    t3_(params.value_or_default("t3", 0.)),
+    t4_(params.value_or_default("t4", 0.)),
+    epsav_(n_cluster_sites()), 
+    epssqav_(n_cluster_sites())
+{
+  //calculating dispersion moments, bandwidth and half filling
+  std::vector<double> energies;
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
+      vector_type k(dimension());
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+      double E = epsilon(k);
+      epsav_  [kc]+= E;
+      epssqav_[kc]+= E*E;
+      energies.push_back(E); 
+    }    
+    epsav_  [kc] /= n_cluster_cells();
+    epssqav_[kc] /= n_cluster_cells();
+  }
+  if (t2_==0. && t3_==0. && t4_==0.) {
+    bandwidth_ = dimension()*4*t_;
+    half_filling_ = 0;
+  }
+  else {
+    std::sort(energies.begin(), energies.end());
+    double min = energies.front();
+    double max = energies.back();
+    bandwidth_ = max - min;
+    if (energies.size()%2) 
+      half_filling_ = energies[energies.size()/2];
+    else 
+      half_filling_ = (energies[energies.size()/2-1] + energies[energies.size()/2])/2. ;
+  }
+  std::cout << "Bandwidth: " << bandwidth_ << ", half filling at: " << half_filling_ << "\n";
+}
+
 
 std::complex<double>* DCATransformer::exp_iksite(const int sign) const
 {
@@ -58,23 +99,6 @@ std::complex<double>* DCATransformer::exp_iksite(const int sign) const
     }
   }
   return m;
-}
-
-
-
-void DCATransformer::calculate_disp_moments()
-{
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (site_t kl=0; kl<n_cluster_cells(); ++kl) {
-      vector_type k(dimension());
-      for (unsigned int d=0; d<dimension(); ++d)
-        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-      epsav_  [kc]+= epsilon(k);
-      epssqav_[kc]+= epsilon(k)*epsilon(k);
-    }
-    epsav_  [kc] /= n_cluster_cells();
-    epssqav_[kc] /= n_cluster_cells();
-  }
 }
 
 
