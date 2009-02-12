@@ -51,7 +51,8 @@ DCATransformer::DCATransformer(const alps::Parameters& params)
     t3_(params.value_or_default("t3", 0.)),
     t4_(params.value_or_default("t4", 0.)),
     epsav_(n_cluster_sites()), 
-    epssqav_(n_cluster_sites())
+    epssqav_(n_cluster_sites()),
+    half_filling_(0.)
 {
   //calculating dispersion moments, bandwidth and half filling
   std::vector<double> energies;
@@ -70,17 +71,18 @@ DCATransformer::DCATransformer(const alps::Parameters& params)
   }
   if (t2_==0. && t3_==0. && t4_==0.) {
     bandwidth_ = dimension()*4*t_;
-    half_filling_ = 0;
   }
   else {
     std::sort(energies.begin(), energies.end());
     double min = energies.front();
     double max = energies.back();
     bandwidth_ = max - min;
-    if (energies.size()%2) 
-      half_filling_ = energies[energies.size()/2];
-    else 
-      half_filling_ = (energies[energies.size()/2-1] + energies[energies.size()/2])/2. ;
+    if (params.value_or_default("SHIFT_TO_HALF_FILLING", false)) {
+      if (energies.size()%2) 
+	half_filling_ = energies[energies.size()/2];
+      else 
+	half_filling_ = (energies[energies.size()/2-1] + energies[energies.size()/2])/2. ;
+    }
   }
   std::cout << "Bandwidth: " << bandwidth_ << ", half filling at: " << half_filling_ << "\n";
 }
