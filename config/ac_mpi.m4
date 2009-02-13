@@ -362,6 +362,14 @@ AC_DEFUN([AC_MPI],
                     AC_MSG_RESULT(no))
       fi
       if test "$found" = no; then
+        MPI_LIBS="-lpmpich++ -lmpich -lpthread -lrdmacm -libverbs -libumad -lrt"
+        LIBS="$MPI_LIBS $ac_save_LIBS"
+        AC_MSG_CHECKING([for MPI_Finalize() in $MPI_LIBS])
+        AC_TRY_LINK([#include <mpi.h>],[MPI_Finalize();],
+                    [AC_MSG_RESULT(yes); found=yes],
+                    AC_MSG_RESULT(no))
+      fi
+      if test "$found" = no; then
         # for Fujitsu mpiFCC in SunOS 5.10
         mpi_libs_link=`mpiFCC -show 2> /dev/null | sed -e 's/FCC//g'`
         if test $? -eq 0; then
