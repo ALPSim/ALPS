@@ -205,7 +205,7 @@ namespace mocasito {
 				hid_t get_native_type(double) const { return H5Tcopy(H5T_NATIVE_DOUBLE); }
 				hid_t get_native_type(long double) const { return H5Tcopy(H5T_NATIVE_LDOUBLE); }
 				hid_t get_native_type(bool) const { return H5Tcopy(H5T_NATIVE_HBOOL); }
-				template<typename T> hid_t get_native_type(T * v) const { return get_native_type(*v); }
+				template<typename T> hid_t get_native_type(T * ) const { return get_native_type(T()); }
 				static herr_t group_visitor(hid_t id, char const * n, void * d) {
 					reinterpret_cast<std::vector<std::string> *>(d)->push_back(n);
 					return 0;
