@@ -10,7 +10,7 @@
 namespace mocasito {
 	namespace io {
 		template<typename E, typename T> T & assign(T & v, context<E> const & c) {
-			if (!c.is_attribute())
+			if (!c.is_attribute() && c.dimensions() > 0)
 				set_size<T>::apply(v, c.extent()[0]);
 			c.get(get_data<T>::apply(v));
 			return v;
