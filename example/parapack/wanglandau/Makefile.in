@@ -307,9 +307,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign  example/parapack/wanglandau/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --gnu  example/parapack/wanglandau/Makefile'; \
 	cd $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign  example/parapack/wanglandau/Makefile
+	  $(AUTOMAKE) --gnu  example/parapack/wanglandau/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
