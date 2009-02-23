@@ -21,39 +21,39 @@ namespace mocasito {
 		template<typename E> class context {
 			public:
 				context() {}
-				context(context<E> const & c)
+				context(context<E> const & c, MOCASITO_TRACE)
 					: _type(c._type), _segment(c._segment), _path(c._path), _engine(c._engine) 
 				{}
-				context(E * e, std::string const & p)
+				context(E * e, std::string const & p, MOCASITO_TRACE)
 					: _type(detail::IO_UNKNOWN), _path(p), _engine(e) 
 				{
 					create(); 
 				}
-				context(context<E> const & c, std::string const & p)
+				context(context<E> const & c, std::string const & p, MOCASITO_TRACE)
 					: _type(detail::IO_UNKNOWN), _path(p), _engine(c._engine) 
 				{
 					create(); 
 				}
-				std::vector<std::size_t> extent() const {
+				std::vector<std::size_t> extent(MOCASITO_TRACE) const {
 					if (_type == detail::IO_UNKNOWN)
-						throw(std::runtime_error("unknown path type: " + _path));
+						MOCASITO_IO_THROW("unknown path type: " + _path)
 					else if (_type != detail::IO_DATA)
-						throw(std::runtime_error("only data nodes have extent: " + _path));
+						MOCASITO_IO_THROW("only data nodes have extent: " + _path)
 					return _engine->extent(_path); 
 				}
-				std::size_t dimensions() const {
+				std::size_t dimensions(MOCASITO_TRACE) const {
 					if (_type == detail::IO_UNKNOWN)
-						throw(std::runtime_error("unknown path type: " + _path));
+						MOCASITO_IO_THROW("unknown path type: " + _path)
 					else if (_type != detail::IO_DATA)
-						throw(std::runtime_error("only data nodes have dimensions: " + _path));
+						MOCASITO_IO_THROW("only data nodes have dimensions: " + _path)
 					return _engine->dimensions(_path);
 				}
-				type_traits<>::type datatype() const {
+				type_traits<>::type datatype(MOCASITO_TRACE) const {
 					switch (_type) {
 						case detail::IO_UNKNOWN:
-							throw(std::runtime_error("unknown path type: " + _path));
+							MOCASITO_IO_THROW("unknown path type: " + _path)
 						case detail::IO_GROUP:
-							throw(std::runtime_error("groups have no datatype: " + _path));
+							MOCASITO_IO_THROW("groups have no datatype: " + _path)
 						case detail::IO_GROUP_ATTR:
 						case detail::IO_DATA_ATTR:
 							return _engine->attrtype(_type, _path, _segment);
@@ -62,52 +62,60 @@ namespace mocasito {
 							return _engine->datatype(_path);
 					}
 				}
-				std::string path() const { 
+				std::string path(MOCASITO_TRACE) const { 
 					return _path + (_segment.size() ? "@" : "") + _segment; 
 				}
-				bool is_attribute() const {
+				bool is_attribute(MOCASITO_TRACE) const {
 					if (_type == detail::IO_UNKNOWN)
-						throw(std::runtime_error("unknown path type: " + _path));
+						MOCASITO_IO_THROW("unknown path type: " + _path)
 					return _type == detail::IO_GROUP_ATTR || _type == detail::IO_DATA_ATTR;
 				};
-				bool is_leaf() const {
+				bool is_leaf(MOCASITO_TRACE) const {
 					if (_type == detail::IO_UNKNOWN)
-						throw(std::runtime_error("unknown path type: " + _path));
+						MOCASITO_IO_THROW("unknown path type: " + _path)
 					return _type != detail::IO_GROUP;
 				};
-				bool is_scalar() const {
+				bool is_scalar(MOCASITO_TRACE) const {
 					if (_type == detail::IO_UNKNOWN)
-						throw(std::runtime_error("unknown path type: " + _path));
+						MOCASITO_IO_THROW("unknown path type: " + _path)
 					else if (_type != detail::IO_DATA)
-						throw(std::runtime_error("only data nodes can be check to be scalar: " + _path));
+						MOCASITO_IO_THROW("only data nodes can be check to be scalar: " + _path)
 					return _engine->is_scalar(_path);
 				};
-				bool exists() const  {
+				bool exists(MOCASITO_TRACE) const  {
 					return (_type != detail::IO_UNKNOWN);
 				};
-				detail::iterator<E, context<E> > begin() { 
+				detail::iterator<E, context<E> > begin(MOCASITO_TRACE) { 
 					if (_type != detail::IO_GROUP)
-						throw(std::runtime_error("iterators can only loop over groups: " + _path));
+						MOCASITO_IO_THROW("iterators can only loop over groups: " + _path)
 					return detail::iterator<E, context<E> >(_engine, _path, _engine->list_children(_path)); 
 				}
-				detail::iterator<E, context<E> > end() { 
+				detail::iterator<E, context<E> > end(MOCASITO_TRACE) { 
 					return detail::iterator<E, context<E> >(); 
 				}
 				template<typename T> operator T() const {
+					MOCASITO_TRACE;
 					if (_type == detail::IO_UNKNOWN)
-						throw(std::runtime_error("unknown path type: " + _path));
+						MOCASITO_IO_THROW("unknown path type: " + _path)
 					else if (_type == detail::IO_GROUP)
-						throw(std::runtime_error("groups have no data: " + _path));
+						MOCASITO_IO_THROW("groups have no data: " + _path)
 					T v;
 					return assign(v, *this);
 				}
 				template<typename T> context<E> & operator=(T const & v) {
+					MOCASITO_TRACE;
 					return assign(*this, v);
 				}
 				template<typename T> context<E> & operator<<(T const & v) {
+					MOCASITO_TRACE;
 					return detail::append_helper(*this, v);
 				}
-				context<E> operator+(std::string const & p) const { 
+				context<E> operator+(char const * p) const {
+					MOCASITO_TRACE;
+					this->operator+(std::string(p));
+				}
+				context<E> operator+(std::string const & p) const {
+					MOCASITO_TRACE;
 					if (p[0] == '/')
 						return context<E>(_engine, p);
 					else if (p.substr(0, 2) != "..")
@@ -119,10 +127,10 @@ namespace mocasito {
 						return context<E>(_engine, q + "/" + p);
 					}
 				}
-				template<typename T> void get(T * v) const { 
+				template<typename T> void get(T * v, MOCASITO_TRACE) const { 
 					switch (_type) {
 						case detail::IO_GROUP:
-							throw(std::runtime_error("groups have no data " + _path));
+							MOCASITO_IO_THROW("groups have no data " + _path)
 						case detail::IO_DATA:
 							_engine->get_data(_path, v); 
 							break;
@@ -134,13 +142,13 @@ namespace mocasito {
 							break;
 						case detail::IO_UNKNOWN:
 						default:
-							throw(std::runtime_error("unknown path type " + _path));
+							MOCASITO_IO_THROW("unknown path type " + _path)
 					}
 				}
-				template<typename T> void set(T const & v) {
+				template<typename T> void set(T const & v, MOCASITO_TRACE) {
 					switch (_type) {
 						case detail::IO_GROUP:
-							throw(std::runtime_error("groups have no data " + _path));
+							MOCASITO_IO_THROW("groups have no data " + _path)
 						case detail::IO_UNKNOWN:
 						case detail::IO_DATA:
 							_engine->set_data(_path, v); 
@@ -154,10 +162,10 @@ namespace mocasito {
 							break;
 					}
 				}
-				template<typename T> void set(T const * v, std::size_t s) {
+				template<typename T> void set(T const * v, std::size_t s, MOCASITO_TRACE) {
 					switch (_type) {
 						case detail::IO_GROUP:
-							throw(std::runtime_error("groups have no data " + _path));
+							MOCASITO_IO_THROW("groups have no data " + _path)
 						case detail::IO_DATA:
 						case detail::IO_UNKNOWN:
 							_engine->set_data(_path, v, s);
@@ -166,16 +174,16 @@ namespace mocasito {
 						case detail::IO_GROUP_ATTR:
 						case detail::IO_DATA_ATTR:
 						default:
-							throw(std::runtime_error("attrbuts are scalar data " + _path));
+							MOCASITO_IO_THROW("attrbuts are scalar data " + _path)
 					}
 				}
-				template<typename T> void append(T const * v, std::size_t s) { 
+				template<typename T> void append(T const * v, std::size_t s, MOCASITO_TRACE) { 
 					if (_type != detail::IO_DATA)
-						throw(std::runtime_error("append can only be used for data: " + _path));
+						MOCASITO_IO_THROW("append can only be used for data: " + _path)
 					_engine->append_data(_path, v, s);
 				}
 			private:
-				void create() {
+				void create(MOCASITO_TRACE) {
 					if (_path.find_last_of('@') != std::string::npos) {
 						_segment = _path.substr(_path.find_last_of('@') + 1);
 						_path = _path.substr(0, _path.find_last_of('@'));
@@ -184,7 +192,7 @@ namespace mocasito {
 						else if (_engine->is_data(_path))
 							_type = detail::IO_DATA_ATTR;
 						else
-							throw(std::runtime_error("attributes can only be set on existing pathes: " + _path));
+							MOCASITO_IO_THROW("attributes can only be set on existing pathes: " + _path)
 					} else if (_engine->is_group(_path))
 						_type = detail::IO_GROUP;
 					else if (_engine->is_data(_path))

@@ -2,13 +2,11 @@
 // Use, modification and distribution is subject to the Boost Software
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-
 #include <cstddef>
 #include <complex>
 #include <string>
 #include <cstring>
 #include <stdexcept>
-
 #ifndef IO_TRAITS
 #define IO_TRAITS
 namespace mocasito {
@@ -60,6 +58,7 @@ namespace mocasito {
 		// SCALAR
 		#define MOCASITO_IO_SET_SCALAR(T, N)												\
 			template<> struct type_traits<T> {												\
+				typedef int type;															\
 				static int const value = N;													\
 			};																				\
 			template<> struct pointer_traits<T> {											\
@@ -130,6 +129,7 @@ namespace mocasito {
 				static void apply(T, std::size_t) {}										\
 			};
 		MOCASITO_IO_CV_CALLBACK_1(MOCASITO_IO_SET_COMPLEX, std::complex<T>, ~)
+		#undef MOCASITO_IO_SET_COMPLEX
 		// ARRAY
 		template<typename T, std::size_t N> struct pointer_traits<T[N]> {
 			typedef typename pointer_traits<T>::type type;
@@ -161,6 +161,7 @@ namespace mocasito {
 		template<typename T, std::size_t N> struct set_size<T[N]> {
 			static void apply(T[N], std::size_t) {}
 		};
+		#undef MOCASITO_IO_CV_CALLBACK_1
 	}
 }
 #endif

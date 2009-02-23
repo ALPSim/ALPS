@@ -3,9 +3,11 @@
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 #include "util.hpp"
+#include "traits.hpp"
 #include <string>
-#include <sstream>
+#include <cstring>
 #include <vector>
+#include <deque>
 #include <stdexcept>
 #include <hdf5.h>
 #ifndef IO_CACHE
@@ -13,140 +15,179 @@
 namespace mocasito {
 	namespace io {
 		namespace detail {
-			template<typename T1, typename T2, typename T3> class triple {
-				public:
-					triple(T1 v1, T2 v2, T3 v3)
-						: first(v1), second(v2), third(v3)
-					{}
-					T1 first;
-					T2 second;
-					T3 third;
-			}
+			struct cache_index {
+				cache_index(bool is_g = false, bool is_s = false, bool is_n = false, bool is_a = false)
+					: is_group(is_g), is_scalar(is_s), is_null(is_n), is_attr(is_a), type(0), size(1), offset(0), children(0), attr(0) 
+				{}
+				bool is_group;
+				bool is_scalar;
+				bool is_null;
+				bool is_attr;
+				std::size_t type;
+				std::size_t size;
+				std::size_t offset;
+				std::vector<std::string> children;
+				std::vector<std::string> attr;
+			};
 		}
-		template<typename in_handler, typename out_handler> class cache {
+		template<typename InEngine, typename OutEngine> class cache {
 			public:
-				cache(std::string const & p, std::string const & q)
-					: _in(p), _out(q)
+				cache(std::string const & p, std::string const & q, MOCASITO_TRACE)
+					: _out(q), _mem(0) 
 				{
-					_in.get(*this);
-				}
-				void flush() const {
-					_out.write(*this);
-				}
-				bool is_group(std::string const & p) const {
-					if (_tree->find(p) == _tree->end() && _index->find(p) == _index->end())
-						throw(std::runtime_error("the path does not exists: " + p));
-					return _tree->find(p) == _tree->end();
-				}
-				bool is_data(std::string const & p) const {
-					if (_tree->find(p) == _tree->end() && _index->find(p) == _index->end())
-						throw(std::runtime_error("the path does not exists: " + p));
-					return _index->find(p) == _index->end();
-				}
-				std::vector<std::size_t> extent(std::string const & p) const {
-					if (_index->find(p) == _index->end())
-						throw(std::runtime_error("no data path: " + p));
-					return _index->find(p)->third;
-				}
-				std::size_t dimensions(std::string const & p) const {
-					if (_index->find(p) == _index->end())
-						throw(std::runtime_error("no data path: " + p));
-					return _index->find(p)->third.size();
-				}
-				type_traits<>::type attrtype(detail::node_t t, std::string const & p, std::string const & s) const {
-// TODO: impl
-throw(std::runtime_error("not Impl"));
-					return -1;
-				}
-				type_traits<>::type datatype(detail::node_t t, std::string const & p) const {
-					if (_index->find(p) == _index->end())
-						throw(std::runtime_error("no data path: " + p));
-					return _index->find(p)->first;
-				}
-				bool is_scalar(std::string const & p) const {
-					if (_index->find(p) == _index->end())
-						throw(std::runtime_error("no data path: " + p));
-					return _index->find(p)->third.size() == 0;
-				}
-				std::vector<std::string> list_children(std::string const & p) const {
-					if (_tree->find(p) == _tree->end())
-						throw(std::runtime_error("no group path: " + p));
-					return _tree->find(p)->second;
-				}
-				template<typename T> void get_data(std::string const & p, T * v) const {
-					if (_index->find(p) == _index->end())
-						throw(std::runtime_error("no data path: " + p));
-					switch (_index->find(p)->first) {
-						case type_traits<bool>::value:
-							std::memcoyp
-						
-							template<> struct type_traits<char> { enum { value = 2 }; };
-							template<> struct type_traits<signed char> { enum { value = 3 }; };
-							template<> struct type_traits<unsigned char> { enum { value = 4 }; };
-							template<> struct type_traits<short> { enum { value = 5 }; };
-							template<> struct type_traits<unsigned short> { enum { value = 6 }; };
-							template<> struct type_traits<int> { enum { value = 7 }; };
-							template<> struct type_traits<unsigned> { enum { value = 8 }; };
-							template<> struct type_traits<long> { enum { value = 9 }; };
-							template<> struct type_traits<long long> { enum { value = 10 }; };
-							template<> struct type_traits<unsigned long long> { enum { value = 11 }; };
-							template<> struct type_traits<float> { enum { value = 12 }; };
-							template<> struct type_traits<double> { enum { value = 13 }; };
-							template<> struct type_traits<long double> { enum { value = 14 }; };
-						default:
-							throw(std::runtime_error("unknown type: " + _index->find(p)->first));
+					InEngine input(p, "");
+					std::deque<std::string> stack(1, "/");
+					std::string path;
+					std::vector<std::string> list;
+					while (stack.size()) {
+						_index.insert(std::make_pair(path = stack.front(), detail::cache_index()));
+						stack.pop_front();
+						if (input.is_group(path)) {
+							list = input.list_children(path);
+							for	(std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
+								stack.push_back(path + (path == "/" ? "" : "/") + *it);
+						}
+/*						list = input.list_attr(path);
+						for	(std::vector<std::string>::iterator it = list.begin(); it != list.end(); ++it)
+							_index.insert(std::make_pair(path + (path == "/" ? "@" : "/@") + *it, detail::cache_index(false, false, false, true)));
+*/					}
+					for (std::map<std::string, detail::cache_index>::iterator it = _index.begin(); it != _index.end(); ++it) {
+						it->second.attr = input.list_attr(it->first);
+						if (input.is_group(it->first)) {
+							it->second.is_group = true;
+							it->second.children = input.list_children(it->first);
+						} else {
+							it->second.type = input.datatype(it->first);
+							std::size_t size_of;
+							switch (it->second.type) {
+								#define MOCASITO_IO_CACHE_GET_SIZE_OF(T)					\
+									case type_traits<T>::value: size_of = sizeof(T); break;
+								MOCASITO_IO_FOREACH_SCALAR(MOCASITO_IO_CACHE_GET_SIZE_OF)
+								#undef MOCASITO_IO_CACHE_GET_SIZE_OF
+								default: 
+									MOCASITO_IO_THROW("unknown type")
+							}
+							it->second.offset = _mem.size();
+							if (input.is_scalar(it->first)) {
+								it->second.is_scalar = true;
+								_mem.resize(_mem.size() + size_of);
+							} else {
+								it->second.is_null = input.is_null(it->first);
+								if(input.dimensions(it->first) > 1)
+									MOCASITO_IO_THROW("the path has more than one dimension: " + it->first)
+								it->second.size = input.extent(it->first)[0];
+								_mem.resize(_mem.size() + it->second.size * size_of);
+							}
+							switch (it->second.type) {
+								#define MOCASITO_IO_CACHE_READ_DATA(T)						\
+									case type_traits<T>::value: input.get_data(it->first, reinterpret_cast<T *>(&_mem[it->second.offset])); break;
+								MOCASITO_IO_FOREACH_SCALAR(MOCASITO_IO_CACHE_READ_DATA)
+								#undef MOCASITO_IO_CACHE_READ_DATA
+							}
+						}
 					}
-					
-					
-					
-					
-						
-						
-						
-					v = static_cast<T>(*reinterprete_cast<long long *>(&_data->front() + _index->find(_path)->second));
-						
-						
-						
-					return _index->find(p)->third.size() == 0;
-
-detail::h5d_t data_id(H5Dopen(_file_id, p.c_str(), H5P_DEFAULT));
-					detail::h5t_t type_id(get_native_type(v));
-					detail::h5e_t(H5Dread(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, v));
 				}
-				template<typename T> void get_group_attr(std::string const & p, std::string const & s, T & v) const {
-// TODO: impl
-throw(std::runtime_error("not Impl"));
+				void flush(MOCASITO_TRACE) const {
+					OutEngine input(_out, _out);
+					MOCASITO_IO_THROW("not implemented")
 				}
-				template<typename T> void get_data_attr(std::string const & p, std::string const & s, T & v) const {
-// TODO: impl
-throw(std::runtime_error("not Impl"));
+				bool is_group(std::string const & p, MOCASITO_TRACE) const {
+					if (_index.find(p) == _index.end())
+						MOCASITO_IO_THROW("the paht does not exists: " + p)
+					return _index.find(p)->second.is_group;
 				}
-				template<typename T> void set_data(std::string const & p, T const & v) {
-// TODO: impl
-throw(std::runtime_error("not Impl"));
+				bool is_data(std::string const & p, MOCASITO_TRACE) const {
+					if (_index.find(p) == _index.end())
+						MOCASITO_IO_THROW("the paht does not exists: " + p)
+					return !_index.find(p)->second.is_group;
 				}
-				template<typename T> void set_data(std::string const & p, T const * v, hsize_t s) {
-// TODO: impl
-throw(std::runtime_error("not Impl"));
+				std::vector<std::size_t> extent(std::string const & p, MOCASITO_TRACE) const {
+					if (_index.find(p) == _index.end())
+						MOCASITO_IO_THROW("the paht does not exists: " + p)
+					if (_index.find(p)->second.is_scalar)
+						return std::vector<std::size_t>(0);
+					else if (_index.find(p)->second.is_null)
+						return std::vector<std::size_t>(1, 0);
+					else
+						return std::vector<std::size_t>(1, _index.find(p)->second.size);
 				}
-				template<typename T> void append_data(std::string const & p, T const * v, hsize_t s) {
-// TODO: impl
-throw(std::runtime_error("not Impl"));
+				std::size_t dimensions(std::string const & p, MOCASITO_TRACE) const {
+					if (_index.find(p) == _index.end())
+						MOCASITO_IO_THROW("the paht does not exists: " + p)
+					if (_index.find(p)->second.is_scalar)
+						return 0;
+					else
+						return 1;
 				}
-				template<typename T> void set_group_attr(std::string const & p, std::string const & s, T const & v) {
-// TODO: impl
-throw(std::runtime_error("not Impl"));
+				type_traits<>::type attrtype(detail::node_t t, std::string const & p, std::string const & s, MOCASITO_TRACE) const {
+					MOCASITO_IO_THROW("not implemented")
+					return type_traits<>::value;
 				}
-				template<typename T> void set_data_attr(std::string const & p, std::string const & s, T const & v) {
-// TODO: impl
-throw(std::runtime_error("not Impl"));
+				type_traits<>::type datatype(std::string const & p, MOCASITO_TRACE) const {
+					if (_index.find(p) == _index.end())
+						MOCASITO_IO_THROW("the paht does not exists: " + p)
+					return _index.find(p)->second.type;
+				}
+				bool is_scalar(std::string const & p, MOCASITO_TRACE) const {
+					if (_index.find(p) == _index.end())
+						MOCASITO_IO_THROW("the paht does not exists: " + p)
+					return _index.find(p)->second.is_scalar;
+				}
+				bool is_null(std::string const & p, MOCASITO_TRACE) const {
+					if (_index.find(p) == _index.end())
+						MOCASITO_IO_THROW("the paht does not exists: " + p)
+					return _index.find(p)->second.is_null;
+				}
+				std::vector<std::string> list_children(std::string const & p, MOCASITO_TRACE) const {
+					if (!is_group(p))
+						MOCASITO_IO_THROW("the paht is not a group: " + p)
+					return _index.find(p)->second.children;
+				}
+				template<typename T> void get_data(std::string const & p, T * v, MOCASITO_TRACE) const {
+					if (!is_data(p))
+						MOCASITO_IO_THROW("the paht does not contains data: " + p)
+					switch (_index.find(p)->second.type) {
+						#define MOCASITO_IO_CACHE_GET_DATA(U)								\
+							case type_traits<U>::value:										\
+								{															\
+									std::deque<U> buffer(_index.find(p)->second.size);		\
+									std::memcpy(&buffer.front(), &_mem[_index.find(p)->second.offset], _index.find(p)->second.size * sizeof(U));\
+									std::copy(buffer.begin(), buffer.end(), v);				\
+								}															\
+							break;
+						MOCASITO_IO_FOREACH_SCALAR(MOCASITO_IO_CACHE_GET_DATA)
+						#undef MOCASITO_IO_CACHE_GET_DATA
+					}
+				}
+				template<typename T> void get_group_attr(std::string const & p, std::string const & s, T & v, MOCASITO_TRACE) const {
+					MOCASITO_IO_THROW("not implemented")
+				}
+				template<typename T> void get_data_attr(std::string const & p, std::string const & s, T & v, MOCASITO_TRACE) const {
+					MOCASITO_IO_THROW("not implemented")
+				}
+				template<typename T> void set_data(std::string const & p, T const & v, MOCASITO_TRACE) {
+					MOCASITO_IO_THROW("not implemented")
+				}
+				template<typename T> void set_data(std::string const & p, T const * v, hsize_t s, MOCASITO_TRACE) {
+					MOCASITO_IO_THROW("not implemented")
+				}
+				template<typename T> void append_data(std::string const & p, T const * v, hsize_t s, MOCASITO_TRACE) {
+					MOCASITO_IO_THROW("not implemented")
+				}
+				void delete_data(std::string const & p, std::string const & s, MOCASITO_TRACE) {
+					MOCASITO_IO_THROW("not implemented")
+				}
+				template<typename T> void set_group_attr(std::string const & p, std::string const & s, T const & v, MOCASITO_TRACE) {
+					MOCASITO_IO_THROW("not implemented")
+				}
+				template<typename T> void set_data_attr(std::string const & p, std::string const & s, T const & v, MOCASITO_TRACE) {
+					MOCASITO_IO_THROW("not implemented")
 				}
 			private:
-				in_handler _in;
-				out_handler _out;
-				std::map<std::string, std::vector<std::string> > _tree;
-				std::map<std::string, detail::triple<std::size_t, std::size_t, std::vector<std::size_t> > _index;
-				std::vector<char> _data;
+				std::string _out;
+				std::map<std::string, detail::cache_index> _index;
+				std::vector<char> _mem;
+		};
 	}
 }
 #endif
