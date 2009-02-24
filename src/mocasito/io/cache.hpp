@@ -32,9 +32,10 @@ namespace mocasito {
 		}
 		template<typename InEngine, typename OutEngine> class cache {
 			public:
-				cache(std::string const & p, std::string const & q, MOCASITO_TRACE)
+				cache(std::string const & p, std::string const & q)
 					: _out(q), _mem(0) 
 				{
+					MOCASITO_TRACE
 					InEngine input(p, "");
 					std::deque<std::string> stack(1, "/");
 					std::string path;
@@ -87,21 +88,24 @@ namespace mocasito {
 						}
 					}
 				}
-				void flush(MOCASITO_TRACE) const {
+				void flush() const {
+					MOCASITO_TRACE
 					OutEngine input(_out, _out);
 					MOCASITO_IO_THROW("not implemented")
 				}
-				bool is_group(std::string const & p, MOCASITO_TRACE) const {
+				bool is_group(std::string const & p) const {
+					MOCASITO_TRACE
 					if (_index.find(p) == _index.end())
 						MOCASITO_IO_THROW("the paht does not exists: " + p)
 					return _index.find(p)->second.is_group;
 				}
-				bool is_data(std::string const & p, MOCASITO_TRACE) const {
+				bool is_data(std::string const & p) const {
 					if (_index.find(p) == _index.end())
 						MOCASITO_IO_THROW("the paht does not exists: " + p)
 					return !_index.find(p)->second.is_group;
 				}
-				std::vector<std::size_t> extent(std::string const & p, MOCASITO_TRACE) const {
+				std::vector<std::size_t> extent(std::string const & p) const {
+					MOCASITO_TRACE
 					if (_index.find(p) == _index.end())
 						MOCASITO_IO_THROW("the paht does not exists: " + p)
 					if (_index.find(p)->second.is_scalar)
@@ -111,7 +115,8 @@ namespace mocasito {
 					else
 						return std::vector<std::size_t>(1, _index.find(p)->second.size);
 				}
-				std::size_t dimensions(std::string const & p, MOCASITO_TRACE) const {
+				std::size_t dimensions(std::string const & p) const {
+					MOCASITO_TRACE
 					if (_index.find(p) == _index.end())
 						MOCASITO_IO_THROW("the paht does not exists: " + p)
 					if (_index.find(p)->second.is_scalar)
@@ -119,31 +124,36 @@ namespace mocasito {
 					else
 						return 1;
 				}
-				type_traits<>::type attrtype(detail::node_t t, std::string const & p, std::string const & s, MOCASITO_TRACE) const {
+				type_traits<>::type attrtype(detail::node_t t, std::string const & p, std::string const & s) const {
 					MOCASITO_IO_THROW("not implemented")
 					return type_traits<>::value;
 				}
-				type_traits<>::type datatype(std::string const & p, MOCASITO_TRACE) const {
+				type_traits<>::type datatype(std::string const & p) const {
+					MOCASITO_TRACE
 					if (_index.find(p) == _index.end())
 						MOCASITO_IO_THROW("the paht does not exists: " + p)
 					return _index.find(p)->second.type;
 				}
-				bool is_scalar(std::string const & p, MOCASITO_TRACE) const {
+				bool is_scalar(std::string const & p) const {
+					MOCASITO_TRACE
 					if (_index.find(p) == _index.end())
 						MOCASITO_IO_THROW("the paht does not exists: " + p)
 					return _index.find(p)->second.is_scalar;
 				}
-				bool is_null(std::string const & p, MOCASITO_TRACE) const {
+				bool is_null(std::string const & p) const {
+					MOCASITO_TRACE
 					if (_index.find(p) == _index.end())
 						MOCASITO_IO_THROW("the paht does not exists: " + p)
 					return _index.find(p)->second.is_null;
 				}
-				std::vector<std::string> list_children(std::string const & p, MOCASITO_TRACE) const {
+				std::vector<std::string> list_children(std::string const & p) const {
+					MOCASITO_TRACE
 					if (!is_group(p))
 						MOCASITO_IO_THROW("the paht is not a group: " + p)
 					return _index.find(p)->second.children;
 				}
-				template<typename T> void get_data(std::string const & p, T * v, MOCASITO_TRACE) const {
+				template<typename T> void get_data(std::string const & p, T * v) const {
+					MOCASITO_TRACE
 					if (!is_data(p))
 						MOCASITO_IO_THROW("the paht does not contains data: " + p)
 					switch (_index.find(p)->second.type) {
@@ -159,28 +169,36 @@ namespace mocasito {
 						#undef MOCASITO_IO_CACHE_GET_DATA
 					}
 				}
-				template<typename T> void get_group_attr(std::string const & p, std::string const & s, T & v, MOCASITO_TRACE) const {
+				template<typename T> void get_group_attr(std::string const & p, std::string const & s, T & v) const {
+					MOCASITO_TRACE
 					MOCASITO_IO_THROW("not implemented")
 				}
-				template<typename T> void get_data_attr(std::string const & p, std::string const & s, T & v, MOCASITO_TRACE) const {
+				template<typename T> void get_data_attr(std::string const & p, std::string const & s, T & v) const {
+					MOCASITO_TRACE
 					MOCASITO_IO_THROW("not implemented")
 				}
-				template<typename T> void set_data(std::string const & p, T const & v, MOCASITO_TRACE) {
+				template<typename T> void set_data(std::string const & p, T const & v) {
+					MOCASITO_TRACE
 					MOCASITO_IO_THROW("not implemented")
 				}
-				template<typename T> void set_data(std::string const & p, T const * v, hsize_t s, MOCASITO_TRACE) {
+				template<typename T> void set_data(std::string const & p, T const * v, hsize_t s) {
+					MOCASITO_TRACE
 					MOCASITO_IO_THROW("not implemented")
 				}
-				template<typename T> void append_data(std::string const & p, T const * v, hsize_t s, MOCASITO_TRACE) {
+				template<typename T> void append_data(std::string const & p, T const * v, hsize_t s) {
+					MOCASITO_TRACE
 					MOCASITO_IO_THROW("not implemented")
 				}
-				void delete_data(std::string const & p, std::string const & s, MOCASITO_TRACE) {
+				void delete_data(std::string const & p, std::string const & s) {
+					MOCASITO_TRACE
 					MOCASITO_IO_THROW("not implemented")
 				}
-				template<typename T> void set_group_attr(std::string const & p, std::string const & s, T const & v, MOCASITO_TRACE) {
+				template<typename T> void set_group_attr(std::string const & p, std::string const & s, T const & v) {
+					MOCASITO_TRACE
 					MOCASITO_IO_THROW("not implemented")
 				}
-				template<typename T> void set_data_attr(std::string const & p, std::string const & s, T const & v, MOCASITO_TRACE) {
+				template<typename T> void set_data_attr(std::string const & p, std::string const & s, T const & v) {
+					MOCASITO_TRACE
 					MOCASITO_IO_THROW("not implemented")
 				}
 			private:

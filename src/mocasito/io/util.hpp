@@ -9,7 +9,7 @@
 #define IO_UTIL
 namespace mocasito {
 	namespace io {
-		#define MOCASITO_TRACE mocasito::io::trace<> __trace__ = mocasito::io::trace<>(__LINE__, __FILE__)
+		#define MOCASITO_TRACE mocasito::io::trace<> __trace__ = mocasito::io::trace<>(__LINE__, __FUNCTION__, __FILE__);
 		#define MOCASITO_IO_THROW(message)													\
 			{																				\
 				MOCASITO_TRACE;																\
@@ -17,29 +17,29 @@ namespace mocasito {
 			}
 		namespace detail {
 			struct trace_entry {
-				trace_entry (int line, std::string file)
-					: _line(line), _file(file)
+				trace_entry (std::size_t ln, std::string fn, std::string fl)
+					: line(ln), function(fn), file(fl)
 				{}
-				int _line;
-				std::string _file;
+				std::size_t line;
+				std::string function, file;
 			};
 		}
 		template<typename T = void> class trace {
 			public:
-				trace(int line, std::string file) {
-					_stack.push_back(detail::trace_entry(line, file));
+				trace(std::size_t line, std::string function, std::string file) {
+					_stack.push_back(detail::trace_entry(line, function, file));
 				}
 				~trace() {
 					_stack.pop_back();
 				}
-				static void push(int line, std::string file) {
-					_stack.push_back(detail::trace_entry(line, file));
+				static void push(std::size_t line, std::string function, std::string file) {
+					_stack.push_back(detail::trace_entry(line, function, file));
 				}
 				static std::string str() {
 					std::size_t cnt = 0;
 					std::ostringstream buffer;
 					for (std::vector<detail::trace_entry>::reverse_iterator it = _stack.rbegin(); it != _stack.rend(); ++it, ++cnt)
-						buffer << "#" << cnt << " " << it->_file << " line " << it->_line << std::endl;
+						buffer << "#" << cnt << " " << it->file << " line " << it->line << " in " << it->function << std::endl;
 					return buffer.str();
 				}
 			private:
