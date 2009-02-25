@@ -169,11 +169,11 @@ public:
           c1_[f][i][j] = (i==j) ? 1 : 0;
           c2_[f][i][j] = (i==j) ? eps[f][i] - mu + U * densities[fbar] : 0; //formula 13
           c3_[f][i][j] = (i==j) ? epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
-	    - 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar] : 0;
+	    + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar] : 0;
         }
       }
     }
-    std::ofstream forstr("for.dat");
+    /*std::ofstream forstr("for.dat");
     for(int f=0;f<n_flavor;++f){
       std::cout << "densities: " << densities[f] << std::endl; 
       for(int s1=0;s1<n_site;++s1){
@@ -185,7 +185,7 @@ public:
 		 << std::endl;
 	}
       }
-    }
+      }*/
   }
 
   virtual ~FourierTransformer() {}
