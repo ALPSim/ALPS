@@ -4,7 +4,8 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2002 by Matthias Troyer <troyer@itp.phys.ethz.ch>
+* Copyright (C) 1994-2009 by Matthias Troyer <troyer@itp.phys.ethz.ch>
+*                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -48,11 +49,11 @@ public:
   bool change_parameter(const std::string& name, const alps::StringValue& value);
   
 private:
-  uint32_t length;                  // the system size
+  alps::uint32_t length;                  // the system size
   double beta;                      // the inverse temperatre
-  uint32_t sweeps;                  // the number of sweeps done
-  uint32_t thermalization_sweeps;   // the number of sweeps to be done for equilibration
-  uint32_t total_sweeps;            // the total number of sweeps to be done after equilibration
+  alps::uint32_t sweeps;                  // the number of sweeps done
+  alps::uint32_t thermalization_sweeps;   // the number of sweeps to be done for equilibration
+  alps::uint32_t total_sweeps;            // the total number of sweeps to be done after equilibration
   std::vector<int> spins;           // the vector to store the spins
 };
 

@@ -114,7 +114,7 @@ namespace mocasito {
 					detail::h5s_t space_id(H5Dget_space(data_id));
 					return static_cast<hid_t>(detail::h5e_t(H5Sget_simple_extent_dims(space_id, NULL, NULL)));
 				}
-				type_traits<>::type attrtype(detail::node_t t, std::string const & p, std::string const & s) const {
+                                type_traits<>::type attrtype(detail::node_t /* t */, std::string const & p, std::string const & s) const {
 					MOCASITO_TRACE
 					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), 0));
 					detail::h5a_t attr_id(H5Aopen(data_id, s.c_str(), H5P_DEFAULT));
@@ -242,12 +242,12 @@ namespace mocasito {
 				hid_t get_native_type(long double) const { return H5Tcopy(H5T_NATIVE_LDOUBLE); }
 				hid_t get_native_type(bool) const { return H5Tcopy(H5T_NATIVE_HBOOL); }
 				template<typename T> hid_t get_native_type(T * ) const { return get_native_type(T()); }
-				static herr_t child_visitor(hid_t id, char const * n, void * d) {
+                                static herr_t child_visitor(hid_t /* id */, char const * n, void * d) {
 					MOCASITO_TRACE
 					reinterpret_cast<std::vector<std::string> *>(d)->push_back(n);
 					return 0;
 				}
-				static herr_t attr_visitor(hid_t id, char const * n, const H5A_info_t *, void * d) {
+                                static herr_t attr_visitor(hid_t /* id */, char const * n, const H5A_info_t *, void * d) {
 					MOCASITO_TRACE
 					reinterpret_cast<std::vector<std::string> *>(d)->push_back(n);
 					return 0;

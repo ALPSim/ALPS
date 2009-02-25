@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2005 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 1994-2009 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -25,8 +25,6 @@
 * DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
-
-/* $Id$ */
 
 //=======================================================================
 // This file implements the simulation specific classes for a simple

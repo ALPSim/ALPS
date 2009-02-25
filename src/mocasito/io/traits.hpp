@@ -76,7 +76,7 @@ namespace mocasito {
 				}																			\
 			};																				\
 			template<> struct get_size<T> {													\
-				static std::size_t apply(T & v) {											\
+				static std::size_t apply(T &) {											\
 					return fixed_size<base_type<T>::type>::value;							\
 				}																			\
 			};																				\

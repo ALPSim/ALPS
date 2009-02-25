@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2006 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 1994-2009 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -45,11 +45,11 @@ void IsingSimulation::print_copyright(std::ostream& out)
 
 IsingSimulation::IsingSimulation(const alps::ProcessList& where,const alps::Parameters& p,int node)
   : alps::scheduler::MCRun(where,p,node),
-    length(static_cast<uint32_t>(p["L"])),
+    length(static_cast<alps::uint32_t>(p["L"])),
     beta(1./static_cast<double>(p["T"])),
     sweeps(0),
-    thermalization_sweeps(static_cast<uint32_t>(p["THERMALIZATION"])),
-    total_sweeps(static_cast<uint32_t>(p["SWEEPS"])),
+    thermalization_sweeps(static_cast<alps::uint32_t>(p["THERMALIZATION"])),
+    total_sweeps(static_cast<alps::uint32_t>(p["SWEEPS"])),
     spins(length)
 {
   // initialize random spin configuration
@@ -79,9 +79,9 @@ void IsingSimulation::save(alps::ODump& dump) const
 bool IsingSimulation::change_parameter(const std::string& name, const alps::StringValue& value)
 {
   if(name=="SWEEPS")
-    total_sweeps=static_cast<uint32_t>(value);
+    total_sweeps=static_cast<alps::uint32_t>(value);
   else if (name=="THERMALIZATION" && !is_thermalized())
-    thermalization_sweeps=static_cast<uint32_t>(value);
+    thermalization_sweeps=static_cast<alps::uint32_t>(value);
   else
     return false; // cannot do it
   return true; // could do it
