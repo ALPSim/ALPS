@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -28,21 +28,11 @@
 #include <alps/parser/xmlstream.h>
 #include <alps/parser/xslt_path.h>
 #include <boost/program_options.hpp>
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 103600
-# if !defined(BOOST_SPIRIT_USE_OLD_NAMESPACE)
-#  define BOOST_SPIRIT_USE_OLD_NAMESPACE
-# endif
-# include <boost/spirit/include/classic_core.hpp>
-#else
-# include <boost/spirit/core.hpp>
-#endif
 #include <fstream>
 #include <sstream>
 #include <string>
 
 namespace po = boost::program_options;
-namespace bs = boost::spirit;
 using namespace alps;
 
 int main(int argc, char** argv) {

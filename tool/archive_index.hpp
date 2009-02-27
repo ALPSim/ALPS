@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005-2008 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2005-2009 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -31,20 +31,10 @@
 #ifndef _INDEX_H_
 #define _INDEX_H_
 
-#include <boost/version.hpp>
-#if BOOST_VERSION >= 103600
-# if !defined(BOOST_SPIRIT_USE_OLD_NAMESPACE)
-#  define BOOST_SPIRIT_USE_OLD_NAMESPACE
-# endif
-# include <boost/spirit/include/classic_core.hpp>
-#else
-# include <boost/spirit/core.hpp>
-#endif
+#include "archive_sqlite.hpp"
 #include <boost/filesystem/operations.hpp>
 
 namespace fs = boost::filesystem;
-
-#include "archive_sqlite.hpp"
 
 class Index {
         SQLite &mDB;

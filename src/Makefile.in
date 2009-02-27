@@ -63,8 +63,8 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 CONFIG_CLEAN_FILES =
 SOURCES =
 DIST_SOURCES =
-am__noinst_HEADERS_DIST = boost/function_objects.hpp \
-	boost/numeric/bindings/blas/blas.h \
+am__noinst_HEADERS_DIST = boost/classic_spirit.hpp \
+	boost/function_objects.hpp boost/numeric/bindings/blas/blas.h \
 	boost/numeric/bindings/blas/blas.hpp \
 	boost/numeric/bindings/blas/blas1.hpp \
 	boost/numeric/bindings/blas/blas1_overloads.hpp \
@@ -397,7 +397,7 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 headers_CONFIG = alps/config.h @BOOST_USER_CONFIG_H@
 headers_BOOST_PRE134 = boost/foreach.hpp 
-headers_BOOST = boost/function_objects.hpp \
+headers_BOOST = boost/classic_spirit.hpp boost/function_objects.hpp \
 	boost/numeric/bindings/blas/blas.h \
 	boost/numeric/bindings/blas/blas.hpp \
 	boost/numeric/bindings/blas/blas1.hpp \
