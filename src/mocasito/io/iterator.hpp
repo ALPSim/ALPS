@@ -6,6 +6,7 @@
 #include <vector>
 #include <stdexcept>
 #include "util.hpp"
+#include "../trace.hpp"
 #ifndef IO_DETAIL_ITERATOR
 #define IO_DETAIL_ITERATOR
 namespace mocasito {

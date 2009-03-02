@@ -4,6 +4,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 #include "util.hpp"
 #include "traits.hpp"
+#include "../trace.hpp"
 #include <string>
 #include <sstream>
 #include <vector>
@@ -114,11 +115,12 @@ namespace mocasito {
 					detail::h5s_t space_id(H5Dget_space(data_id));
 					return static_cast<hid_t>(detail::h5e_t(H5Sget_simple_extent_dims(space_id, NULL, NULL)));
 				}
-                                type_traits<>::type attrtype(detail::node_t /* t */, std::string const & p, std::string const & s) const {
+				type_traits<>::type attrtype(std::string const & p, std::string const & s) const {
 					MOCASITO_TRACE
-					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), 0));
-					detail::h5a_t attr_id(H5Aopen(data_id, s.c_str(), H5P_DEFAULT));
-					return get_type_id(H5Aget_type(attr_id), p + "/@" + s);
+					if (is_group(p))
+						return attrtype_helper<detail::h5g_t>(H5Gopen(_file, p.c_str(), H5P_DEFAULT), p, s);
+					else
+						return attrtype_helper<detail::h5g_t>(H5Dopen(_file, p.c_str(), H5P_DEFAULT), p, s);
 				}
 				type_traits<>::type datatype(std::string const & p) const {
 					detail::h5d_t data_id(H5Dopen(_file, p.c_str(), 0));
@@ -168,13 +170,12 @@ namespace mocasito {
 						detail::h5e_t(H5Dread(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, v));
 					}
 				}
-				template<typename T> void get_group_attr(std::string const & p, std::string const & s, T & v) const {
+				template<typename T> void get_attr(std::string const & p, std::string const & s, T & v) const {
 					MOCASITO_TRACE
-					get_attr<detail::h5g_t, T>(H5Gopen(_file, p.c_str(), H5P_DEFAULT), s, &v);
-				}
-				template<typename T> void get_data_attr(std::string const & p, std::string const & s, T & v) const {
-					MOCASITO_TRACE
-					get_attr<detail::h5d_t, T>(H5Dopen(_file, p.c_str(), H5P_DEFAULT), s, &v);
+					if (is_group(p))
+						get_attr_helper<detail::h5g_t, T>(H5Gopen(_file, p.c_str(), H5P_DEFAULT), s, &v);
+					else
+						get_attr_helper<detail::h5d_t, T>(H5Dopen(_file, p.c_str(), H5P_DEFAULT), s, &v);
 				}
 				template<typename T> void set_data(std::string const & p, T const & v) {
 					MOCASITO_TRACE
@@ -216,13 +217,12 @@ namespace mocasito {
 					detail::h5g_t data_id(H5Dopen(_file, p.c_str(), H5P_DEFAULT));
 					detail::h5e_t(H5Ldelete(_file, s.c_str(), data_id));
 				}
-				template<typename T> void set_group_attr(std::string const & p, std::string const & s, T const & v) {
+				template<typename T> void set_attr(std::string const & p, std::string const & s, T const & v) {
 					MOCASITO_TRACE
-					set_attr<detail::h5g_t, T>(H5Gopen(_file, p.c_str(), H5P_DEFAULT), s, v);
-				}
-				template<typename T> void set_data_attr(std::string const & p, std::string const & s, T const & v) {
-					MOCASITO_TRACE
-					set_attr<detail::h5d_t, T>(H5Dopen(_file, p.c_str(), H5P_DEFAULT), s, v);
+					if (is_group(p))
+						set_attr_helper<detail::h5g_t, T>(H5Gopen(_file, p.c_str(), H5P_DEFAULT), s, v);
+					else
+						set_attr_helper<detail::h5d_t, T>(H5Dopen(_file, p.c_str(), H5P_DEFAULT), s, v);
 				}
 			private:
 				template<typename T> hid_t get_native_type(T &) const { MOCASITO_IO_THROW("unknown type") }
@@ -263,13 +263,18 @@ namespace mocasito {
 					else MOCASITO_IO_THROW("error comparing types " + p)
 					return type_traits<>::value;
 				}
-				template<typename I, typename T> void get_attr(I const & data_id, std::string const & s, T * v) const {
+				template<typename I> type_traits<>::type attrtype_helper(I const & data_id, std::string const & p, std::string const & s) const {
+					MOCASITO_TRACE
+					detail::h5a_t attr_id(H5Aopen(data_id, s.c_str(), H5P_DEFAULT));
+					return get_type_id(H5Aget_type(attr_id), p + "/@" + s);
+				}
+				template<typename I, typename T> void get_attr_helper(I const & data_id, std::string const & s, T * v) const {
 					MOCASITO_TRACE
 					detail::h5t_t type_id(get_native_type(v));
 					detail::h5a_t attr_id(H5Aopen(data_id, s.c_str(), H5P_DEFAULT));
 					detail::h5e_t(H5Aread(attr_id, type_id, v));
 				}
-				template<typename I, typename T> void set_attr(I const & data_id, std::string const & s, T const & v) {
+				template<typename I, typename T> void set_attr_helper(I const & data_id, std::string const & s, T const & v) {
 					MOCASITO_TRACE
 					detail::h5t_t type_id(get_native_type(v));
 					hid_t id = H5Aopen(data_id, s.c_str(), H5P_DEFAULT);

@@ -5,6 +5,7 @@
 #include "context.hpp"
 #include "traits.hpp"
 #include "util.hpp"
+#include "../trace.hpp"
 #ifndef IO_FREE_FUN
 #define IO_FREE_FUN
 namespace mocasito {
