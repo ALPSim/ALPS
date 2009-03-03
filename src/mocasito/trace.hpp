@@ -11,7 +11,7 @@ namespace mocasito {
 	#define MOCASITO_TRACE																	\
 		static char const * __trace_file__ = __FILE__;										\
 		static std::string const __trace_function__(__FUNCTION__);							\
-		mocasito::trace<> __trace__ = mocasito::trace<>(__LINE__, __trace_file__, __trace_function__.c_str());
+		mocasito::trace<> __trace__ = mocasito::trace<>(__LINE__, __trace_file__, &__trace_function__);
 	#define MOCASITO_IO_THROW(message)														\
 		{																					\
 			MOCASITO_TRACE;																	\
@@ -19,7 +19,7 @@ namespace mocasito {
 		}
 	template<typename T = void> class trace {
 		public:
-			trace(std::size_t line, char const * file, char const * function)
+			trace(std::size_t line, char const * file, std::string const * function)
 				: _line(line), _file(file), _function(function)
 			{
 				_stack.push_back(this);
@@ -40,7 +40,7 @@ namespace mocasito {
 		private:
 			std::size_t const _line;
 			char const * _file;
-			char const * _function;
+			std::string const * _function;
 			static std::vector<trace<T> *> _stack;
 	};
 	template<typename T> std::vector<trace<T> *> trace<T>::_stack;
