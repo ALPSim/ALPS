@@ -1,3 +1,10 @@
+2009-03-18  Synge Todo <wistaria@comp-phys.org>
+
+	* [parapack] Now it becomes possible to terminate simulation by
+	  making (or touching) an empty file.  For example, if the master
+	  XML input filename is "mysim.in.xml", then the termination
+	  filename is "mysim.term".
+	
 2009-02-10  Synge Todo <wistaria@comp-phys.org>
 
 	* [config] Update configure script for Boost verion 1.38.0
