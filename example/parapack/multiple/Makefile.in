@@ -33,7 +33,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 check_PROGRAMS = $(am__EXEEXT_1)
-@HAVE_BOOST_MPI_TRUE@am__append_1 = main_pp
+@HAVE_BOOST_MPI_TRUE@am__append_1 = ising_mpi
 TESTS =
 subdir = example/parapack/multiple
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
@@ -61,9 +61,9 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES =
-@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = main_pp$(EXEEXT)
-am_main_pp_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
-main_pp_OBJECTS = $(am_main_pp_OBJECTS)
+@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = ising_mpi$(EXEEXT)
+am_ising_mpi_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
+ising_mpi_OBJECTS = $(am_ising_mpi_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libparapack-mpi.la \
 	$(top_builddir)/lib/alps/libalps.la \
@@ -71,10 +71,10 @@ am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libparapack-mpi.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-main_pp_DEPENDENCIES = $(am__DEPENDENCIES_2)
-main_pp_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main_pp_LDFLAGS) $(LDFLAGS) -o $@
+ising_mpi_DEPENDENCIES = $(am__DEPENDENCIES_2)
+ising_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(ising_mpi_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -95,8 +95,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(main_pp_SOURCES)
-DIST_SOURCES = $(main_pp_SOURCES)
+SOURCES = $(ising_mpi_SOURCES)
+DIST_SOURCES = $(ising_mpi_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -264,9 +264,9 @@ LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 dist_noinst_DATA = params
-main_pp_SOURCES = main.C ising.h ising.C
-main_pp_LDFLAGS = $(LDFLAGS_MPI)
-main_pp_LDADD = $(LIBS_MPI)
+ising_mpi_SOURCES = main.C ising.h ising.C
+ising_mpi_LDFLAGS = $(LDFLAGS_MPI)
+ising_mpi_LDADD = $(LIBS_MPI)
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 all: all-am
 
@@ -308,9 +308,9 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-main_pp$(EXEEXT): $(main_pp_OBJECTS) $(main_pp_DEPENDENCIES) 
-	@rm -f main_pp$(EXEEXT)
-	$(main_pp_LINK) $(main_pp_OBJECTS) $(main_pp_LDADD) $(LIBS)
+ising_mpi$(EXEEXT): $(ising_mpi_OBJECTS) $(ising_mpi_DEPENDENCIES) 
+	@rm -f ising_mpi$(EXEEXT)
+	$(ising_mpi_LINK) $(ising_mpi_OBJECTS) $(ising_mpi_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

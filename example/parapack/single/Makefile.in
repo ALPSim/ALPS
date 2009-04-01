@@ -32,9 +32,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = main_ps$(EXEEXT) $(am__EXEEXT_1) main_ns$(EXEEXT)
-@HAVE_BOOST_MPI_TRUE@am__append_1 = main_pp
-TESTS = main_ns$(EXEEXT)
+check_PROGRAMS = ising$(EXEEXT) $(am__EXEEXT_1) ising_ns$(EXEEXT)
+@HAVE_BOOST_MPI_TRUE@am__append_1 = ising_mpi
+TESTS = ising_ns$(EXEEXT)
 subdir = example/parapack/single
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -61,37 +61,37 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES =
-@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = main_pp$(EXEEXT)
-am_main_ns_OBJECTS = main_ns.$(OBJEXT) ising.$(OBJEXT)
-main_ns_OBJECTS = $(am_main_ns_OBJECTS)
+@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = ising_mpi$(EXEEXT)
+am_ising_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
+ising_OBJECTS = $(am_ising_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libparapack-sgl.la \
 	$(top_builddir)/lib/alps/libalps.la \
 	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-main_ns_DEPENDENCIES = $(am__DEPENDENCIES_2)
-main_ns_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
+ising_DEPENDENCIES = $(am__DEPENDENCIES_2)
+ising_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main_ns_LDFLAGS) $(LDFLAGS) -o $@
-am_main_pp_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
-main_pp_OBJECTS = $(am_main_pp_OBJECTS)
+	$(ising_LDFLAGS) $(LDFLAGS) -o $@
+am_ising_mpi_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
+ising_mpi_OBJECTS = $(am_ising_mpi_OBJECTS)
 am__DEPENDENCIES_3 = $(top_builddir)/lib/alps/libparapack-mpi.la \
 	$(top_builddir)/lib/alps/libalps.la \
 	$(top_builddir)/lib/comm-mpi/libcomm-mpi.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-main_pp_DEPENDENCIES = $(am__DEPENDENCIES_3)
-main_pp_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main_pp_LDFLAGS) $(LDFLAGS) -o $@
-am_main_ps_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
-main_ps_OBJECTS = $(am_main_ps_OBJECTS)
-main_ps_DEPENDENCIES = $(am__DEPENDENCIES_2)
-main_ps_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main_ps_LDFLAGS) $(LDFLAGS) -o $@
+ising_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
+ising_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(ising_mpi_LDFLAGS) $(LDFLAGS) -o $@
+am_ising_ns_OBJECTS = main_ns.$(OBJEXT) ising.$(OBJEXT)
+ising_ns_OBJECTS = $(am_ising_ns_OBJECTS)
+ising_ns_DEPENDENCIES = $(am__DEPENDENCIES_2)
+ising_ns_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(ising_ns_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -112,9 +112,9 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(main_ns_SOURCES) $(main_pp_SOURCES) $(main_ps_SOURCES)
-DIST_SOURCES = $(main_ns_SOURCES) $(main_pp_SOURCES) \
-	$(main_ps_SOURCES)
+SOURCES = $(ising_SOURCES) $(ising_mpi_SOURCES) $(ising_ns_SOURCES)
+DIST_SOURCES = $(ising_SOURCES) $(ising_mpi_SOURCES) \
+	$(ising_ns_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -281,16 +281,16 @@ LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
-dist_noinst_DATA = params main_ns.ip main_ns.op
-main_ps_SOURCES = main.C ising.h ising.C
-main_ps_LDFLAGS = $(LDFLAGS_SGL)
-main_ps_LDADD = $(LIBS_SGL)
-main_pp_SOURCES = main.C ising.h ising.C
-main_pp_LDFLAGS = $(LDFLAGS_MPI)
-main_pp_LDADD = $(LIBS_MPI)
-main_ns_SOURCES = main_ns.C ising.h ising.C
-main_ns_LDFLAGS = $(LDFLAGS_SGL)
-main_ns_LDADD = $(LIBS_SGL)
+dist_noinst_DATA = params ising_ns.ip ising_ns.op
+ising_SOURCES = main.C ising.h ising.C
+ising_LDFLAGS = $(LDFLAGS_SGL)
+ising_LDADD = $(LIBS_SGL)
+ising_mpi_SOURCES = main.C ising.h ising.C
+ising_mpi_LDFLAGS = $(LDFLAGS_MPI)
+ising_mpi_LDADD = $(LIBS_MPI)
+ising_ns_SOURCES = main_ns.C ising.h ising.C
+ising_ns_LDFLAGS = $(LDFLAGS_SGL)
+ising_ns_LDADD = $(LIBS_SGL)
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 all: all-am
 
@@ -332,15 +332,15 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-main_ns$(EXEEXT): $(main_ns_OBJECTS) $(main_ns_DEPENDENCIES) 
-	@rm -f main_ns$(EXEEXT)
-	$(main_ns_LINK) $(main_ns_OBJECTS) $(main_ns_LDADD) $(LIBS)
-main_pp$(EXEEXT): $(main_pp_OBJECTS) $(main_pp_DEPENDENCIES) 
-	@rm -f main_pp$(EXEEXT)
-	$(main_pp_LINK) $(main_pp_OBJECTS) $(main_pp_LDADD) $(LIBS)
-main_ps$(EXEEXT): $(main_ps_OBJECTS) $(main_ps_DEPENDENCIES) 
-	@rm -f main_ps$(EXEEXT)
-	$(main_ps_LINK) $(main_ps_OBJECTS) $(main_ps_LDADD) $(LIBS)
+ising$(EXEEXT): $(ising_OBJECTS) $(ising_DEPENDENCIES) 
+	@rm -f ising$(EXEEXT)
+	$(ising_LINK) $(ising_OBJECTS) $(ising_LDADD) $(LIBS)
+ising_mpi$(EXEEXT): $(ising_mpi_OBJECTS) $(ising_mpi_DEPENDENCIES) 
+	@rm -f ising_mpi$(EXEEXT)
+	$(ising_mpi_LINK) $(ising_mpi_OBJECTS) $(ising_mpi_LDADD) $(LIBS)
+ising_ns$(EXEEXT): $(ising_ns_OBJECTS) $(ising_ns_DEPENDENCIES) 
+	@rm -f ising_ns$(EXEEXT)
+	$(ising_ns_LINK) $(ising_ns_OBJECTS) $(ising_ns_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

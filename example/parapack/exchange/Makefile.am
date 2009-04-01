@@ -6,31 +6,27 @@ LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
-check_PROGRAMS = main_ps
+check_PROGRAMS = exchange
 if HAVE_BOOST_MPI
-check_PROGRAMS += main_pp main_pm
+check_PROGRAMS += exchange_mpi
 endif
 dist_noinst_DATA = params-ising params-loop
 
-main_ps_SOURCES = main.C ising.C loop.C
-main_ps_LDFLAGS = $(LDFLAGS_SGL)
-main_ps_LDADD = $(LIBS_SGL)
+exchange_SOURCES = main.C ising.C loop.C
+exchange_LDFLAGS = $(LDFLAGS_SGL)
+exchange_LDADD = $(LIBS_SGL)
 
-main_pp_SOURCES = main.C ising.C loop.C
-main_pp_LDFLAGS = $(LDFLAGS_MPI)
-main_pp_LDADD = $(LIBS_MPI)
+exchange_mpi_SOURCES = main.C ising.C loop.C ising_p.C loop_p.C
+exchange_mpi_LDFLAGS = $(LDFLAGS_MPI)
+exchange_mpi_LDADD = $(LIBS_MPI)
 
-main_pm_SOURCES = main.C ising.C loop.C ising_p.C loop_p.C
-main_pm_LDFLAGS = $(LDFLAGS_MPI)
-main_pm_LDADD = $(LIBS_MPI)
+exchange_ns_SOURCES = main_ns.C ising.C loop.C
+exchange_ns_LDFLAGS = $(LDFLAGS_SGL)
+exchange_ns_LDADD = $(LIBS_SGL)
 
-main_ns_SOURCES = main_ns.C ising.C loop.C
-main_ns_LDFLAGS = $(LDFLAGS_SGL)
-main_ns_LDADD = $(LIBS_SGL)
-
-TESTS = main_ns
+TESTS = exchange_ns
 check_PROGRAMS += $(TESTS)
-dist_noinst_DATA += main_ns.ip main_ns.op
+dist_noinst_DATA += exchange_ns.ip exchange_ns.op
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 
 .PHONY : test tests example examples

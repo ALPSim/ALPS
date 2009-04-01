@@ -8,13 +8,13 @@ LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/
 
 check_PROGRAMS =
 if HAVE_BOOST_MPI
-check_PROGRAMS += main_pp
+check_PROGRAMS += ising_mpi
 endif
 dist_noinst_DATA = params
 
-main_pp_SOURCES = main.C ising.h ising.C
-main_pp_LDFLAGS = $(LDFLAGS_MPI)
-main_pp_LDADD = $(LIBS_MPI)
+ising_mpi_SOURCES = main.C ising.h ising.C
+ising_mpi_LDFLAGS = $(LDFLAGS_MPI)
+ising_mpi_LDADD = $(LIBS_MPI)
 
 TESTS =
 check_PROGRAMS +=

@@ -1,7 +1,3 @@
-SIMULATION_NAME = "example/multiple run-1";
-
-WORKER = "ising"
-
 LATTICE = "chain lattice";
 L = 16;
 SWEEPS = 108192;

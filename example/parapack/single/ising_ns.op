@@ -1,5 +1,4 @@
 [input parameters]
-WORKER = ising;
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
@@ -53,7 +52,6 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.191992 +/- 0.00475
 Temperature: 2 +/- 0
 [input parameters]
-WORKER = ising;
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
@@ -107,7 +105,6 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.238557 +/- 0.00526
 Temperature: 1.8 +/- 0
 [input parameters]
-WORKER = ising;
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;

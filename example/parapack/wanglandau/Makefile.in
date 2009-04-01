@@ -32,9 +32,9 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = main_ps$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
-@HAVE_BOOST_MPI_TRUE@am__append_1 = main_pp
-TESTS = main_ns$(EXEEXT)
+check_PROGRAMS = wanglandau$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
+@HAVE_BOOST_MPI_TRUE@am__append_1 = wanglandau_mpi
+TESTS = wanglandau_ns$(EXEEXT)
 subdir = example/parapack/wanglandau
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -61,38 +61,38 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES =
-@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = main_pp$(EXEEXT)
-am__EXEEXT_2 = main_ns$(EXEEXT)
-am_main_ns_OBJECTS = main_ns.$(OBJEXT) wanglandau.$(OBJEXT)
-main_ns_OBJECTS = $(am_main_ns_OBJECTS)
+@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = wanglandau_mpi$(EXEEXT)
+am__EXEEXT_2 = wanglandau_ns$(EXEEXT)
+am_wanglandau_OBJECTS = main.$(OBJEXT) wanglandau.$(OBJEXT)
+wanglandau_OBJECTS = $(am_wanglandau_OBJECTS)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libparapack-sgl.la \
 	$(top_builddir)/lib/alps/libalps.la \
 	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-main_ns_DEPENDENCIES = $(am__DEPENDENCIES_2)
-main_ns_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main_ns_LDFLAGS) $(LDFLAGS) -o $@
-am_main_pp_OBJECTS = main.$(OBJEXT) wanglandau.$(OBJEXT)
-main_pp_OBJECTS = $(am_main_pp_OBJECTS)
+wanglandau_DEPENDENCIES = $(am__DEPENDENCIES_2)
+wanglandau_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(wanglandau_LDFLAGS) $(LDFLAGS) -o $@
+am_wanglandau_mpi_OBJECTS = main.$(OBJEXT) wanglandau.$(OBJEXT)
+wanglandau_mpi_OBJECTS = $(am_wanglandau_mpi_OBJECTS)
 am__DEPENDENCIES_3 = $(top_builddir)/lib/alps/libparapack-mpi.la \
 	$(top_builddir)/lib/alps/libalps.la \
 	$(top_builddir)/lib/comm-mpi/libcomm-mpi.la \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-main_pp_DEPENDENCIES = $(am__DEPENDENCIES_3)
-main_pp_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main_pp_LDFLAGS) $(LDFLAGS) -o $@
-am_main_ps_OBJECTS = main.$(OBJEXT) wanglandau.$(OBJEXT)
-main_ps_OBJECTS = $(am_main_ps_OBJECTS)
-main_ps_DEPENDENCIES = $(am__DEPENDENCIES_2)
-main_ps_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main_ps_LDFLAGS) $(LDFLAGS) -o $@
+wanglandau_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
+wanglandau_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(wanglandau_mpi_LDFLAGS) $(LDFLAGS) -o $@
+am_wanglandau_ns_OBJECTS = main_ns.$(OBJEXT) wanglandau.$(OBJEXT)
+wanglandau_ns_OBJECTS = $(am_wanglandau_ns_OBJECTS)
+wanglandau_ns_DEPENDENCIES = $(am__DEPENDENCIES_2)
+wanglandau_ns_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
+	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
+	$(CXXFLAGS) $(wanglandau_ns_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -113,9 +113,10 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(main_ns_SOURCES) $(main_pp_SOURCES) $(main_ps_SOURCES)
-DIST_SOURCES = $(main_ns_SOURCES) $(main_pp_SOURCES) \
-	$(main_ps_SOURCES)
+SOURCES = $(wanglandau_SOURCES) $(wanglandau_mpi_SOURCES) \
+	$(wanglandau_ns_SOURCES)
+DIST_SOURCES = $(wanglandau_SOURCES) $(wanglandau_mpi_SOURCES) \
+	$(wanglandau_ns_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -283,16 +284,16 @@ LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 dist_noinst_DATA = params_learn params_measure params_reweight \
-	main_ns.ip main_ns.op
-main_ps_SOURCES = main.C wanglandau.C wanglandau.h
-main_ps_LDFLAGS = $(LDFLAGS_SGL)
-main_ps_LDADD = $(LIBS_SGL)
-main_pp_SOURCES = main.C wanglandau.C wanglandau.h
-main_pp_LDFLAGS = $(LDFLAGS_MPI)
-main_pp_LDADD = $(LIBS_MPI)
-main_ns_SOURCES = main_ns.C wanglandau.C wanglandau.h
-main_ns_LDFLAGS = $(LDFLAGS_SGL)
-main_ns_LDADD = $(LIBS_SGL)
+	wanglandau_ns.ip wanglandau_ns.op
+wanglandau_SOURCES = main.C wanglandau.C wanglandau.h
+wanglandau_LDFLAGS = $(LDFLAGS_SGL)
+wanglandau_LDADD = $(LIBS_SGL)
+wanglandau_mpi_SOURCES = main.C wanglandau.C wanglandau.h
+wanglandau_mpi_LDFLAGS = $(LDFLAGS_MPI)
+wanglandau_mpi_LDADD = $(LIBS_MPI)
+wanglandau_ns_SOURCES = main_ns.C wanglandau.C wanglandau.h
+wanglandau_ns_LDFLAGS = $(LDFLAGS_SGL)
+wanglandau_ns_LDADD = $(LIBS_SGL)
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 all: all-am
 
@@ -334,15 +335,15 @@ clean-checkPROGRAMS:
 	  echo " rm -f $$p $$f"; \
 	  rm -f $$p $$f ; \
 	done
-main_ns$(EXEEXT): $(main_ns_OBJECTS) $(main_ns_DEPENDENCIES) 
-	@rm -f main_ns$(EXEEXT)
-	$(main_ns_LINK) $(main_ns_OBJECTS) $(main_ns_LDADD) $(LIBS)
-main_pp$(EXEEXT): $(main_pp_OBJECTS) $(main_pp_DEPENDENCIES) 
-	@rm -f main_pp$(EXEEXT)
-	$(main_pp_LINK) $(main_pp_OBJECTS) $(main_pp_LDADD) $(LIBS)
-main_ps$(EXEEXT): $(main_ps_OBJECTS) $(main_ps_DEPENDENCIES) 
-	@rm -f main_ps$(EXEEXT)
-	$(main_ps_LINK) $(main_ps_OBJECTS) $(main_ps_LDADD) $(LIBS)
+wanglandau$(EXEEXT): $(wanglandau_OBJECTS) $(wanglandau_DEPENDENCIES) 
+	@rm -f wanglandau$(EXEEXT)
+	$(wanglandau_LINK) $(wanglandau_OBJECTS) $(wanglandau_LDADD) $(LIBS)
+wanglandau_mpi$(EXEEXT): $(wanglandau_mpi_OBJECTS) $(wanglandau_mpi_DEPENDENCIES) 
+	@rm -f wanglandau_mpi$(EXEEXT)
+	$(wanglandau_mpi_LINK) $(wanglandau_mpi_OBJECTS) $(wanglandau_mpi_LDADD) $(LIBS)
+wanglandau_ns$(EXEEXT): $(wanglandau_ns_OBJECTS) $(wanglandau_ns_DEPENDENCIES) 
+	@rm -f wanglandau_ns$(EXEEXT)
+	$(wanglandau_ns_LINK) $(wanglandau_ns_OBJECTS) $(wanglandau_ns_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

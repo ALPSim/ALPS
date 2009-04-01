@@ -6,27 +6,27 @@ LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
-check_PROGRAMS = main_ps
+check_PROGRAMS = loop
 if HAVE_BOOST_MPI
-check_PROGRAMS += main_pp
+check_PROGRAMS += loop_mpi
 endif
 dist_noinst_DATA = params params_disorder
 
-main_ps_SOURCES = main.C loop.C loop.h union_find.h
-main_ps_LDFLAGS = $(LDFLAGS_SGL)
-main_ps_LDADD = $(LIBS_SGL)
+loop_SOURCES = main.C loop.C loop.h union_find.h
+loop_LDFLAGS = $(LDFLAGS_SGL)
+loop_LDADD = $(LIBS_SGL)
 
-main_pp_SOURCES = main.C loop.C loop.h union_find.h
-main_pp_LDFLAGS = $(LDFLAGS_MPI)
-main_pp_LDADD = $(LIBS_MPI)
+loop_mpi_SOURCES = main.C loop.C loop.h union_find.h
+loop_mpi_LDFLAGS = $(LDFLAGS_MPI)
+loop_mpi_LDADD = $(LIBS_MPI)
 
-main_ns_SOURCES = main_ns.C loop.C loop.h union_find.h
-main_ns_LDFLAGS = $(LDFLAGS_SGL)
-main_ns_LDADD = $(LIBS_SGL)
+loop_ns_SOURCES = main_ns.C loop.C loop.h union_find.h
+loop_ns_LDFLAGS = $(LDFLAGS_SGL)
+loop_ns_LDADD = $(LIBS_SGL)
 
-TESTS = main_ns
-check_PROGRAMS += main_ns
-dist_noinst_DATA += main_ns.ip main_ns.op
+TESTS = loop_ns
+check_PROGRAMS += loop_ns
+dist_noinst_DATA += loop_ns.ip loop_ns.op
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 
 .PHONY : test tests example examples

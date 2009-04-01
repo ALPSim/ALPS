@@ -6,27 +6,27 @@ LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
 LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
-check_PROGRAMS = main_ps
+check_PROGRAMS = wanglandau
 if HAVE_BOOST_MPI
-check_PROGRAMS += main_pp
+check_PROGRAMS += wanglandau_mpi
 endif
 dist_noinst_DATA = params_learn params_measure params_reweight
 
-main_ps_SOURCES = main.C wanglandau.C wanglandau.h
-main_ps_LDFLAGS = $(LDFLAGS_SGL)
-main_ps_LDADD = $(LIBS_SGL)
+wanglandau_SOURCES = main.C wanglandau.C wanglandau.h
+wanglandau_LDFLAGS = $(LDFLAGS_SGL)
+wanglandau_LDADD = $(LIBS_SGL)
 
-main_pp_SOURCES = main.C wanglandau.C wanglandau.h
-main_pp_LDFLAGS = $(LDFLAGS_MPI)
-main_pp_LDADD = $(LIBS_MPI)
+wanglandau_mpi_SOURCES = main.C wanglandau.C wanglandau.h
+wanglandau_mpi_LDFLAGS = $(LDFLAGS_MPI)
+wanglandau_mpi_LDADD = $(LIBS_MPI)
 
-main_ns_SOURCES = main_ns.C wanglandau.C wanglandau.h
-main_ns_LDFLAGS = $(LDFLAGS_SGL)
-main_ns_LDADD = $(LIBS_SGL)
+wanglandau_ns_SOURCES = main_ns.C wanglandau.C wanglandau.h
+wanglandau_ns_LDFLAGS = $(LDFLAGS_SGL)
+wanglandau_ns_LDADD = $(LIBS_SGL)
 
-TESTS = main_ns
+TESTS = wanglandau_ns
 check_PROGRAMS += $(TESTS)
-dist_noinst_DATA += main_ns.ip main_ns.op
+dist_noinst_DATA += wanglandau_ns.ip wanglandau_ns.op
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 
 .PHONY : test tests example examples
