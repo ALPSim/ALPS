@@ -455,6 +455,23 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
 
 
 
+void FourierTransformer::append_tail(matsubara_green_function_t& G_omega, 
+				     const matsubara_green_function_t& G0_omega,
+				     const int nfreq_measured) const
+{
+  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+    for (site_t k=0; k<G0_omega.nsite(); ++k) {
+      for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
+	std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
+	std::complex<double> selfenergy = Sc0_[flavor][k][k] + Sc1_[flavor][k][k]/iw;
+	G_omega(freq, k, k, flavor) = 1./(1./G0_omega(freq, k, k, flavor) - selfenergy);
+      }
+    }
+  }
+}
+
+
+
 void FourierTransformer::generate_transformer(const alps::Parameters &parms,
 					      boost::shared_ptr<FourierTransformer> &fourier_ptr, 
 					      std::vector<double> eps, std::vector<double> epssq)

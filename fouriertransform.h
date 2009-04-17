@@ -98,50 +98,19 @@ public:
   
   FourierTransformer(double beta, double mu, int n_flavor, int n_site)
   {
-    beta_=beta;
-    mu_=mu;
-    c1_.resize(n_flavor);
-    c2_.resize(n_flavor);
-    c3_.resize(n_flavor);
-    for(int f=0;f<n_flavor;++f){
-      c1_[f].resize(n_site);
-      c2_[f].resize(n_site);
-      c3_[f].resize(n_site);
-      for(int i=0;i<n_site;++i){
-        c1_[f][i].resize(n_site);
-        c2_[f][i].resize(n_site);
-        c3_[f][i].resize(n_site);
-        for(int j=0;j<n_site;++j){
-          c1_[f][i][j] = (i==j) ? 1. : 0.;
-          c2_[f][i][j]= 0.;
-          c3_[f][i][j]= 0.;
-        }
-      }
-    }
+    init(beta, mu, n_flavor, n_site);
   }
 
 
   FourierTransformer(double beta, double mu, int n_flavor, int n_site, 
 		     std::vector<std::vector<double> >& eps, std::vector<std::vector<double> >& epssq)
   {
-    beta_=beta;
-    mu_=mu;
-    c1_.resize(n_flavor);
-    c2_.resize(n_flavor);
-    c3_.resize(n_flavor);
+    init(beta, mu, n_flavor, n_site);
     for(int f=0;f<n_flavor;++f){
-      c1_[f].resize(n_site);
-      c2_[f].resize(n_site);
-      c3_[f].resize(n_site);
       for(int i=0;i<n_site;++i){
-        c1_[f][i].resize(n_site);
-        c2_[f][i].resize(n_site);
-        c3_[f][i].resize(n_site);
-        for(int j=0;j<n_site;++j){
-          c1_[f][i][j] = (i==j) ? 1 : 0;
-          c2_[f][i][j] = (i==j) ? eps[f][i] - mu : 0;
-          c3_[f][i][j] = (i==j) ? epssq[f][i] - 2*mu*eps[f][i] + mu*mu : 0;
-        }
+	c1_[f][i][i] = 1.;
+	c2_[f][i][i] = eps[f][i] - mu;
+	c3_[f][i][i] = epssq[f][i] - 2*mu*eps[f][i] + mu*mu;
       }
     }
   }
@@ -151,26 +120,16 @@ public:
 		     const std::vector<double>& densities, 
 		     std::vector<std::vector<double> >& eps, std::vector<std::vector<double> >& epssq)
   {
-    beta_=beta;
-    mu_=mu;
-    c1_.resize(n_flavor);
-    c2_.resize(n_flavor);
-    c3_.resize(n_flavor);
+    init(beta, mu, n_flavor, n_site);
     for(int f=0;f<n_flavor;++f){
       int fbar = f%2==0 ? f+1 : f-1;
-      c1_[f].resize(n_site);
-      c2_[f].resize(n_site);
-      c3_[f].resize(n_site);
       for(int i=0;i<n_site;++i){
-        c1_[f][i].resize(n_site);
-        c2_[f][i].resize(n_site);
-        c3_[f][i].resize(n_site);
-        for(int j=0;j<n_site;++j){
-          c1_[f][i][j] = (i==j) ? 1 : 0;
-          c2_[f][i][j] = (i==j) ? eps[f][i] - mu + U * densities[fbar] : 0; //formula 13
-          c3_[f][i][j] = (i==j) ? epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
-	    + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar] : 0;
-        }
+	c1_[f][i][i] = 1.;
+	c2_[f][i][i] = eps[f][i] - mu + U * densities[fbar]; //formula 13
+	c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
+	  + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
+	Sc0_[f][i][i] = U * (densities[fbar]-0.5);
+	Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
       }
     }
     /*std::ofstream forstr("for.dat");
@@ -194,6 +153,8 @@ public:
   virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
 			   const green_function<alps::RealObsevaluator> &G_omega_real,
 			   const green_function<alps::RealObsevaluator> &G_omega_imag) const;
+  virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
+			   const int nfreq_measured) const;
   
   static void generate_transformer(const alps::Parameters &parms,
 				   boost::shared_ptr<FourierTransformer> &fourier_ptr, 
@@ -210,11 +171,49 @@ public:
   //void setmu(double mu){ mu_=mu;}
   
 protected:
+
   double beta_;
   double mu_;
   std::vector<std::vector<std::vector<double> > > c1_;
   std::vector<std::vector<std::vector<double> > > c2_;
   std::vector<std::vector<std::vector<double> > > c3_;
+  std::vector<std::vector<std::vector<double> > > Sc0_; //coefficients for the self-energy
+  std::vector<std::vector<std::vector<double> > > Sc1_;  
+
+private:
+
+  void init(double beta, double mu, int n_flavor, int n_site)
+  {
+    beta_=beta;
+    mu_=mu;
+    c1_.resize(n_flavor);
+    c2_.resize(n_flavor);
+    c3_.resize(n_flavor);
+    Sc0_.resize(n_flavor);
+    Sc1_.resize(n_flavor);
+    for(int f=0;f<n_flavor;++f){
+      c1_[f].resize(n_site);
+      c2_[f].resize(n_site);
+      c3_[f].resize(n_site);
+      Sc0_[f].resize(n_site);
+      Sc1_[f].resize(n_site);
+      for(int i=0;i<n_site;++i){
+        c1_[f][i].resize(n_site);
+        c2_[f][i].resize(n_site);
+        c3_[f][i].resize(n_site);
+        Sc0_[f][i].resize(n_site);
+        Sc1_[f][i].resize(n_site);
+        for(int j=0;j<n_site;++j){
+          c1_[f][i][j] = (i==j) ? 1. : 0.;
+          c2_[f][i][j]= 0.;
+          c3_[f][i][j]= 0.;
+          Sc0_[f][i][j] = 0.;
+          Sc1_[f][i][j]= 0.;
+        }
+      }
+    } 
+  }
+
 };
 
 
