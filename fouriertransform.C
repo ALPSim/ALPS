@@ -461,6 +461,9 @@ void FourierTransformer::append_tail(matsubara_green_function_t& G_omega,
 {
   for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
     for (site_t k=0; k<G0_omega.nsite(); ++k) {
+      std::cout << "append tail to self-energy with coefficients: "
+		<< " " << Sc0_[flavor][k][k]
+		<< " " << Sc1_[flavor][k][k] << std::endl;
       for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
 	std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
 	std::complex<double> selfenergy = Sc0_[flavor][k][k] + Sc1_[flavor][k][k]/iw;
