@@ -233,45 +233,69 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
                                                                      const matsubara_green_function_t& G_omega,
                                                                      const matsubara_green_function_t& G0_omega, 
                                                                      const double mu, const double h, 
-                                                                     const double beta) const
+                                                                     const double beta, const int n_matsubara) const
 {
   std::cout << "transforming cluster green function\n";
   assert(h==0); 
   unsigned int nz = G0_omega.nflavor();
-  unsigned int n_matsubara = G0_omega.nfreq(); 
   assert(G0_omega.nsite()==n_cluster_sites());
-  matsubara_green_function_t G0_omega_fourpoint_inv(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  matsubara_green_function_t G0_omega_fourpoint_inv(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
   G0_omega_fourpoint_inv.clear();
-  //matsubara_green_function_t G0_omega_fourpoint(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  //matsubara_green_function_t G0_omega_fourpoint(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
   //G0_omega_fourpoint.clear();
   for(spin_t z=0; z<nz; ++z) {
     int zbar = z%nz==0 ? z+1 : z-1;
     for(site_t k=0;k<n_cluster_sites();++k) {
       int kpq = k%2==0 ? k+1 : k-1;
-      for (frequency_t om=0; om<n_matsubara; ++om) {
-        G0_omega_fourpoint_inv(om+n_matsubara*om,k,k,z) = 1. / (G_omega(om,kpq,kpq,z)*G_omega(om,k,k,zbar));
-        //G0_omega_fourpoint(om+n_matsubara*om,k,k,z) = G_omega(om,kpq,kpq,z)*G_omega(om,k,k,zbar);
+      for (int om=0; om<2*n_matsubara; ++om) {
+	std::complex<double> g_kpq_z;
+	std::complex<double> g_k_zbar;
+	if (om<n_matsubara) {
+	  g_kpq_z = G_omega(om,kpq,kpq,z);
+	  g_k_zbar = G_omega(om,k,k,zbar);
+	} 
+	else {
+	  g_kpq_z = std::conj(G_omega(om-n_matsubara,kpq,kpq,z));
+	  g_k_zbar = std::conj(G_omega(om-n_matsubara,k,k,zbar));
+	}   
+        G0_omega_fourpoint_inv(om+2*n_matsubara*om,k,k,z) = 1. / (g_kpq_z*g_k_zbar);
+        //G0_omega_fourpoint(om+2*n_matsubara*om,k,k,z) = g_kpq_z*g_k_zbar;
       } 
     }
   }
   /*std::ofstream greenfourpstr("G0FourPoint");
-   for (int om1 =0; om1<n_matsubara; ++om1) {
-   for (int om2 =0; om2<n_matsubara; ++om2) {
-   greenfourpstr << om1 << " " << om2 << " ";
-   for (int k1=0; k1<n_cluster_sites(); ++k1) {
-   for (int k2=0; k2<n_cluster_sites(); ++k2) {
-   for (int z=0; z<nz; ++z) {
-   greenfourpstr << G0_omega_fourpoint(om2+n_matsubara*om1, k1, k2, z).real() << " " 
-   << G0_omega_fourpoint(om2+n_matsubara*om1, k1, k2, z).imag() << " ";
-   }
-   }
-   }
-   greenfourpstr << std::endl;
-   }
-   }*/
-  matsubara_green_function_t G_omega_fourpoint_inv = fourpoint_green_function_inverse(G_omega_fourpoint, n_matsubara);
-  matsubara_green_function_t two_particle_vertex(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+    for (int om1 =0; om1<2*n_matsubara; ++om1) {
+    for (int om2 =0; om2<2*n_matsubara; ++om2) {
+    greenfourpstr << om1-n_matsubara << " " << om2-n_matsubara << " ";
+    for (int k1=0; k1<n_cluster_sites(); ++k1) {
+    for (int k2=0; k2<n_cluster_sites(); ++k2) {
+    for (int z=0; z<nz; ++z) {
+    greenfourpstr << G0_omega_fourpoint(om2+2*n_matsubara*om1, k1, k2, z).real() << " " 
+    << G0_omega_fourpoint(om2+2*n_matsubara*om1, k1, k2, z).imag() << " ";
+    }
+    }
+    }
+    greenfourpstr << std::endl;
+    }
+    }*/
+  matsubara_green_function_t G_omega_fourpoint_inv = fourpoint_green_function_inverse(G_omega_fourpoint, 2*n_matsubara);
+  matsubara_green_function_t two_particle_vertex(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
   two_particle_vertex = fourpoint_green_function_subtract(G0_omega_fourpoint_inv, G_omega_fourpoint_inv);
+  /*std::ofstream vertexstr("Vertex");
+    for (int om1 =0; om1<2*n_matsubara; ++om1) {
+    for (int om2 =0; om2<2*n_matsubara; ++om2) {
+    vertexstr << om1-n_matsubara << " " << om2-n_matsubara << " ";
+    for (int k1=0; k1<n_cluster_sites(); ++k1) {
+    for (int k2=0; k2<n_cluster_sites(); ++k2) {
+    for (int z=0; z<nz; ++z) {
+    vertexstr << two_particle_vertex(om2+2*n_matsubara*om1, k1, k2, z).real() << " " 
+    << two_particle_vertex(om2+2*n_matsubara*om1, k1, k2, z).imag() << " ";
+    }
+    }
+    }
+    vertexstr << std::endl;
+    }
+    }*/
   matsubara_green_function_t selfenergy(n_matsubara, n_cluster_sites(), nz);
   selfenergy.clear();
   for (spin_t z=0; z<nz; ++z) {
@@ -282,16 +306,20 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
       }
     }
   }
-  matsubara_green_function_t G_omega_fourpoint_new(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  matsubara_green_function_t G_omega_fourpoint_new(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
   G_omega_fourpoint_new.clear();
-  //matsubara_green_function_t Gtest(n_matsubara*n_matsubara, n_cluster_sites(), nz);
+  //matsubara_green_function_t Gtest(4*n_matsubara*n_matsubara, n_cluster_sites(), nz);
   //Gtest.clear();
   for (spin_t z=0; z<nz; ++z) {
     spin_t zbar = z%nz==0 ? z+1 : z-1;
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       int kcpq = kc%2==0 ? kc+1 : kc-1;
-      for (frequency_t om=0; om<n_matsubara; ++om) {
-        std::complex<double> iomega_n(0, (2.*om+1.)*M_PI/beta);	
+      for (int om=0; om<2*n_matsubara; ++om) {
+        std::complex<double> iomega_n;
+	if(om<n_matsubara) 
+	  iomega_n = std::complex<double>(0, (2.*om+1.)*M_PI/beta);
+	else
+	  iomega_n = std::complex<double>(0, -(2.*(om-n_matsubara)+1.)*M_PI/beta);
         for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
           vector_type k(dimension());
           vector_type k_plus_q(dimension());
@@ -299,35 +327,44 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
             k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
             k_plus_q[d] = lattice_momentum(kl,d) + cluster_momentum(kcpq,d);
           }
-          G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z) 
-          += (1./(iomega_n+mu-epsilon(k_plus_q)-selfenergy(om, kcpq, kcpq, z)))
-          * (1./(iomega_n+mu-epsilon(k)-selfenergy(om, kc, kc, zbar)));
+	  std::complex<double> s_kcpq_z;
+	  std::complex<double> s_kc_zbar;
+	  if(om<n_matsubara) {
+	    s_kcpq_z = selfenergy(om, kcpq, kcpq, z);
+	    s_kc_zbar = selfenergy(om, kc, kc, zbar);
+	  }
+	  else {
+	    s_kcpq_z = std::conj(selfenergy(om-n_matsubara, kcpq, kcpq, z));
+	    s_kc_zbar = std::conj(selfenergy(om-n_matsubara, kc, kc, zbar));
+	  }
+          G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z) 
+	    += (1./(iomega_n+mu-epsilon(k_plus_q)-s_kcpq_z))
+	    * (1./(iomega_n+mu-epsilon(k)-s_kc_zbar));
         }
-        G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z) /= n_cluster_cells();
-        //Gtest(om+n_matsubara*om, kc, kc, z) = G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z);
-        G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z) = 1. / G_omega_fourpoint_new(om+n_matsubara*om, kc, kc, z);
+        G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z) /= n_cluster_cells();
+        //Gtest(om+2*n_matsubara*om, kc, kc, z) = G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z);
+        G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z) = 1. / G_omega_fourpoint_new(om+2*n_matsubara*om, kc, kc, z);
       }
     }
   }
   /*std::ofstream greenteststr("GtestFourPoint");
-   for (int om1 =0; om1<n_matsubara; ++om1) {
-   for (int om2 =0; om2<n_matsubara; ++om2) {
-   greenteststr << om1 << " " << om2 << " ";
-   for (int k1=0; k1<n_cluster_sites(); ++k1) {
-   for (int k2=0; k2<n_cluster_sites(); ++k2) {
-   for (int z=0; z<nz; ++z) {
-   greenteststr << Gtest(om2+n_matsubara*om1, k1, k2, z).real() << " " 
-   << Gtest(om2+n_matsubara*om1, k1, k2, z).imag() << " ";
-   }
-   }
-   }
-   greenteststr << std::endl;
-   }
-   }*/
+    for (int om1 =0; om1<2*n_matsubara; ++om1) {
+    for (int om2 =0; om2<2*n_matsubara; ++om2) {
+    greenteststr << om1-n_matsubara << " " << om2-n_matsubara << " ";
+    for (int k1=0; k1<n_cluster_sites(); ++k1) {
+    for (int k2=0; k2<n_cluster_sites(); ++k2) {
+    for (int z=0; z<nz; ++z) {
+    greenteststr << Gtest(om2+2*n_matsubara*om1, k1, k2, z).real() << " " 
+    << Gtest(om2+2*n_matsubara*om1, k1, k2, z).imag() << " ";
+    }
+    }
+    }
+    greenteststr << std::endl;
+    }
+    }*/
   G_omega_fourpoint_new = fourpoint_green_function_subtract(G_omega_fourpoint_new, two_particle_vertex);
-  G_omega_fourpoint_new = fourpoint_green_function_inverse(G_omega_fourpoint_new, n_matsubara);
+  G_omega_fourpoint_new = fourpoint_green_function_inverse(G_omega_fourpoint_new, 2*n_matsubara);
   std::cout << "lattice green function calculated\n";
-  //exit(1);
   return G_omega_fourpoint_new;
 }
 

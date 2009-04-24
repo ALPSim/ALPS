@@ -149,8 +149,8 @@ public:
   virtual matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
 							 const matsubara_green_function_t& G_omega, 
 							 const matsubara_green_function_t& G0_omega, 
-							 const double mu, const double h, 
-							 const double beta) const =0; 
+							 const double mu, const double h, const double beta,
+							 const int n_matsubara) const =0; 
   std::complex<double>* exp_iksite(const int sign) const;
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
@@ -253,8 +253,8 @@ public:
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
 						 const matsubara_green_function_t &G_omega, 
 						 const matsubara_green_function_t &G0_omega, 
-						 const double mu, const double h, 
-						 const double beta) const; 
+						 const double mu, const double h, const double beta,
+						 const int n_matsubara) const; 
 
 private:
   template<typename T, class D>
@@ -307,8 +307,8 @@ public:
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& /*G_omega_fourpoint*/,
 						 const matsubara_green_function_t& G_omega, 
 						 const matsubara_green_function_t& /*G0_omega*/, 
-						 const double /*mu*/, const double /*h*/, 
-						 const double /*beta*/) const
+						 const double /*mu*/, const double /*h*/, const double /*beta*/,
+						 const int /*n_matsubara*/) const
   {
     boost::throw_exception(std::logic_error("transform fourpoint function for antiferromagnetic phases not yet implemented"));
     return G_omega;
