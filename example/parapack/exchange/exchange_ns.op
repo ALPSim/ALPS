@@ -19,7 +19,8 @@ DISORDER_SEED = 2873;
 [[replica 0]]
 Binder Ratio of Magnetization: 0.37081 +/- 0.0143
 EXMC: Acceptance Rate: 0.851562 +/- 0.0111158
-EXMC: Inverse Round-Trip Time: 0.109619 +/- 0.00387846
+EXMC: Average Inverse Round-Trip Time: 0.109619 +/- 0.00387846
+EXMC: Inverse Round-Trip Time: 0.114258 +/- 0.00994624
 EXMC: Inverse Temperature: 0.25 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 1 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 0 +/- 0
@@ -56,6 +57,7 @@ Temperature: 4 +/- 0
 [[replica 1]]
 Binder Ratio of Magnetization: 0.376545 +/- 0.0163
 EXMC: Acceptance Rate: 0.838867 +/- 0.0114948
+EXMC: Inverse Round-Trip Time: 0.108398 +/- 0.00971984
 EXMC: Inverse Temperature: 0.323601 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0.597656 +/- 0.0153316
 EXMC: Ratio of Upward-Moving Walker: 0.402344 +/- 0.0153316
@@ -92,6 +94,7 @@ Temperature: 3.09022 +/- 0
 [[replica 2]]
 Binder Ratio of Magnetization: 0.36698 +/- 0.0126
 EXMC: Acceptance Rate: 0.796875 +/- 0.0125788
+EXMC: Inverse Round-Trip Time: 0.108398 +/- 0.00971984
 EXMC: Inverse Temperature: 0.402391 +/- 1.88527e-09 Warning: potential error underflow. Errors might be smaller
 EXMC: Ratio of Downward-Moving Walker: 0.40332 +/- 0.0153376
 EXMC: Ratio of Upward-Moving Walker: 0.59668 +/- 0.0153376
@@ -127,6 +130,7 @@ Specific Heat: 0.140213 +/- 0.00548
 Temperature: 2.48515 +/- 0
 [[replica 3]]
 Binder Ratio of Magnetization: 0.382721 +/- 0.0107
+EXMC: Inverse Round-Trip Time: 0.107422 +/- 0.00968126
 EXMC: Inverse Temperature: 0.5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 1 +/- 0
@@ -181,7 +185,8 @@ DISORDER_SEED = 2873;
 [[replica 0]]
 Binder Ratio of Magnetization: 0.365109 +/- 0.0134
 EXMC: Acceptance Rate: 0.822266 +/- 0.0169115
-EXMC: Inverse Round-Trip Time: 0.0795898 +/- 0.00364115
+EXMC: Average Inverse Round-Trip Time: 0.0795898 +/- 0.00364115
+EXMC: Inverse Round-Trip Time: 0.0791016 +/- 0.00843841
 EXMC: Inverse Temperature: 0.25 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 1 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 0 +/- 0
@@ -218,6 +223,7 @@ Temperature: 4 +/- 0
 [[replica 1]]
 Binder Ratio of Magnetization: 0.382896 +/- 0.0126
 EXMC: Acceptance Rate: 0.851562 +/- 0.0157279
+EXMC: Inverse Round-Trip Time: 0.0791016 +/- 0.00843841
 EXMC: Inverse Temperature: 0.337763 +/- 5.93894e-10 Warning: potential error underflow. Errors might be smaller
 EXMC: Ratio of Downward-Moving Walker: 0.544922 +/- 0.0155694
 EXMC: Ratio of Upward-Moving Walker: 0.455078 +/- 0.0155694
@@ -254,6 +260,7 @@ Temperature: 2.96066 +/- 0
 [[replica 2]]
 Binder Ratio of Magnetization: 0.375721 +/- 0.0131
 EXMC: Acceptance Rate: 0.851562 +/- 0.0157279
+EXMC: Inverse Round-Trip Time: 0.0771484 +/- 0.00834241
 EXMC: Inverse Temperature: 0.411492 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0.421875 +/- 0.0154406
 EXMC: Ratio of Upward-Moving Walker: 0.578125 +/- 0.0154406
@@ -289,6 +296,7 @@ Specific Heat: 0.151802 +/- 0.00681
 Temperature: 2.43018 +/- 0
 [[replica 3]]
 Binder Ratio of Magnetization: 0.377062 +/- 0.0133 WARNING: check error convergence
+EXMC: Inverse Round-Trip Time: 0.0830078 +/- 0.0086259
 EXMC: Inverse Temperature: 0.5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 1 +/- 0
@@ -342,7 +350,8 @@ DISORDER_SEED = 1234;
 [results]
 [[replica 0]]
 EXMC: Acceptance Rate: 0.361328 +/- 0.0150194
-EXMC: Inverse Round-Trip Time: 0.0251465 +/- 0.00235099
+EXMC: Average Inverse Round-Trip Time: 0.0251465 +/- 0.00235099
+EXMC: Inverse Round-Trip Time: 0.0214844 +/- 0.00453323
 EXMC: Inverse Temperature: 2 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 1 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 0 +/- 0
@@ -377,6 +386,7 @@ Temperature: 0.5 +/- 1.64717e-10 Warning: potential error underflow. Errors migh
 Volume: 8 +/- 0
 [[replica 1]]
 EXMC: Acceptance Rate: 0.361328 +/- 0.0150194
+EXMC: Inverse Round-Trip Time: 0.0244141 +/- 0.0048252
 EXMC: Inverse Temperature: 2.84399 +/- 1.45548e-08 Warning: potential error underflow. Errors might be smaller
 EXMC: Ratio of Downward-Moving Walker: 0.673828 +/- 0.0146575
 EXMC: Ratio of Upward-Moving Walker: 0.326172 +/- 0.0146575
@@ -411,6 +421,7 @@ Temperature: 0.351619 +/- 2.09002e-09 Warning: potential error underflow. Errors
 Volume: 8 +/- 0
 [[replica 2]]
 EXMC: Acceptance Rate: 0.356445 +/- 0.0149745
+EXMC: Inverse Round-Trip Time: 0.03125 +/- 0.00543993
 EXMC: Inverse Temperature: 3.86307 +/- 2.15722e-08 Warning: potential error underflow. Errors might be smaller
 EXMC: Ratio of Downward-Moving Walker: 0.318359 +/- 0.0145646
 EXMC: Ratio of Upward-Moving Walker: 0.681641 +/- 0.0145646
@@ -444,6 +455,7 @@ Susceptibility: 0.112469 +/- 0.00485; tau = 0.252 WARNING: ERRORS NOT CONVERGED!
 Temperature: 0.258861 +/- 0
 Volume: 8 +/- 0
 [[replica 3]]
+EXMC: Inverse Round-Trip Time: 0.0234375 +/- 0.00473007
 EXMC: Inverse Temperature: 5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 1 +/- 0
@@ -496,7 +508,8 @@ DISORDER_SEED = 1234;
 [results]
 [[replica 0]]
 EXMC: Acceptance Rate: 0.328125 +/- 0.0207708
-EXMC: Inverse Round-Trip Time: 0.0131836 +/- 0.00174697
+EXMC: Average Inverse Round-Trip Time: 0.0131836 +/- 0.00174697
+EXMC: Inverse Round-Trip Time: 0.0117188 +/- 0.00336467
 EXMC: Inverse Temperature: 2 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 1 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 0 +/- 0
@@ -531,6 +544,7 @@ Temperature: 0.5 +/- 1.64717e-10 Warning: potential error underflow. Errors migh
 Volume: 8 +/- 0
 [[replica 1]]
 EXMC: Acceptance Rate: 0.324219 +/- 0.0207067
+EXMC: Inverse Round-Trip Time: 0.0107422 +/- 0.00322302
 EXMC: Inverse Temperature: 2.85011 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0.626953 +/- 0.0151203
 EXMC: Ratio of Upward-Moving Walker: 0.373047 +/- 0.0151203
@@ -565,6 +579,7 @@ Temperature: 0.350864 +/- 0
 Volume: 8 +/- 0
 [[replica 2]]
 EXMC: Acceptance Rate: 0.375 +/- 0.0214163
+EXMC: Inverse Round-Trip Time: 0.0136719 +/- 0.00363067
 EXMC: Inverse Temperature: 3.89225 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0.336914 +/- 0.0147777
 EXMC: Ratio of Upward-Moving Walker: 0.663086 +/- 0.0147777
@@ -598,6 +613,7 @@ Susceptibility: 0.117357 +/- 0.00515; tau = 0.332 WARNING: ERRORS NOT CONVERGED!
 Temperature: 0.256921 +/- 4.51095e-10 Warning: potential error underflow. Errors might be smaller
 Volume: 8 +/- 0
 [[replica 3]]
+EXMC: Inverse Round-Trip Time: 0.0166016 +/- 0.00399486
 EXMC: Inverse Temperature: 5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 1 +/- 0

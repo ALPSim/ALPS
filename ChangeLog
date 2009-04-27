@@ -1,3 +1,10 @@
+2009-04-27  Synge Todo <wistaria@comp-phys.org>
+
+	* [parapack] Introduced replica-wise inverse round-trip time
+	  measurement ("EXMC: Inverse Round-Trip Time") in exchange Monte
+	  Carlo adaptor.  The original (average) inverse round-trip time
+	  has been renamed as "EXMC: Average Inverse Round-Trip Time".
+	
 2009-03-18  Synge Todo <wistaria@comp-phys.org>
 
 	* [parapack] Now it becomes possible to terminate simulation by
