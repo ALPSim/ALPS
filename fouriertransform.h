@@ -126,11 +126,13 @@ public:
       std::cerr << "dens: " << densities[fbar] << std::endl;
       for(int i=0;i<n_site;++i){
 	c1_[f][i][i] = 1.;
-	c2_[f][i][i] = eps[f][i] - mu + U * densities[fbar]; //formula 13
+	c2_[f][i][i] = eps[f][i]-mu + U * densities[fbar]; //formula 13
 	c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
 	  + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
 	Sc0_[f][i][i] = U * (densities[fbar]-0.5);
 	Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
+	Sc2_[f][i][i] = 2*U*U * densities[fbar] * (1-densities[fbar])
+	  * ( U * (1-densities[fbar]) + (eps[f][i]-mu) );
       }
     }
     /*std::ofstream forstr("for.dat");
@@ -180,6 +182,7 @@ protected:
   std::vector<std::vector<std::vector<double> > > c3_;
   std::vector<std::vector<std::vector<double> > > Sc0_; //coefficients for the self-energy
   std::vector<std::vector<std::vector<double> > > Sc1_;  
+  std::vector<std::vector<std::vector<double> > > Sc2_;  
 
 private:
 
@@ -192,24 +195,28 @@ private:
     c3_.resize(n_flavor);
     Sc0_.resize(n_flavor);
     Sc1_.resize(n_flavor);
+    Sc2_.resize(n_flavor);
     for(int f=0;f<n_flavor;++f){
       c1_[f].resize(n_site);
       c2_[f].resize(n_site);
       c3_[f].resize(n_site);
       Sc0_[f].resize(n_site);
       Sc1_[f].resize(n_site);
+      Sc2_[f].resize(n_site);
       for(int i=0;i<n_site;++i){
         c1_[f][i].resize(n_site);
         c2_[f][i].resize(n_site);
         c3_[f][i].resize(n_site);
         Sc0_[f][i].resize(n_site);
         Sc1_[f][i].resize(n_site);
+	Sc2_[f][i].resize(n_site);
         for(int j=0;j<n_site;++j){
           c1_[f][i][j] = (i==j) ? 1. : 0.;
           c2_[f][i][j]= 0.;
           c3_[f][i][j]= 0.;
           Sc0_[f][i][j] = 0.;
           Sc1_[f][i][j]= 0.;
+	  Sc2_[f][i][j]= 0.;
         }
       }
     } 
