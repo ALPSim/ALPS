@@ -131,8 +131,9 @@ public:
 	  + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
 	Sc0_[f][i][i] = U * (densities[fbar]-0.5);
 	Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
-	Sc2_[f][i][i] = 2*U*U * densities[fbar] * (1-densities[fbar])
-	  * ( U * (1-densities[fbar]) + (eps[f][i]-mu) );
+	std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
+	Sc2_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar])
+	  * ( U * (1-densities[fbar]) + (-eps[f][i]-mu) );
       }
     }
     /*std::ofstream forstr("for.dat");
