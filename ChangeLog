@@ -1,3 +1,7 @@
+2009-05-12  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Update configure script for Boost verion 1.39.0
+
 2009-04-27  Synge Todo <wistaria@comp-phys.org>
 
 	* [parapack] Introduced replica-wise inverse round-trip time
