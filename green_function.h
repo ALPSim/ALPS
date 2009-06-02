@@ -3,7 +3,9 @@
 #include "types.h"
 #include <fstream>
 #include <iostream>
+#include <stdexcept>
 #include <cassert>
+#include <cstdlib>
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
 template <typename T> class green_function{
@@ -141,7 +143,7 @@ double kinetic_energy(const multiple_vector_type &G_tau, const double &beta, con
 template<typename T> void green_function<T>::read(const char *filename){
   std::ifstream in_file(filename);
   assert(in_file.is_open()); //this is not good enough when people use -DNDEBUG.
-  if(!in_file.is_open()){ std::cerr<<"input file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
+  if(!in_file.is_open()){ throw(std::invalid_argument("input file could not be opened!")); }
   double ignored=0;
   for(unsigned int i=0;i<nt_;++i){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
