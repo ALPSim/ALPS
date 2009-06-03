@@ -1,0 +1,10 @@
+L = 16;
+
+SEED = 2873
+
+SWEEPS = 4096;
+THERMALIZATION = SWEEPS/8;
+
+{ T = 2; }
+{ T = 1.8; }
+{ T = 1.6; }

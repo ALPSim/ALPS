@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -25,33 +25,6 @@
 *
 *****************************************************************************/
 
-#include <alps/parapack/process_mpi.h>
-#include <iostream>
+#include <alps/parapack/scheduler.h>
 
-namespace mpi = boost::mpi;
-
-int main(int argc, char **argv) {
-  mpi::environment env(argc, argv);
-  mpi::communicator world;
-  if (world.size() >= 4) {
-    alps::process_helper_mpi process(world, 4);
-    mpi::communicator cg = process.comm_ctrl();
-    mpi::communicator cl = process.comm_work();
-    if (cg)
-      if (cl)
-        std::cout << "rank: " << world.rank()
-                  << ", global rank = " << cg.rank()
-                  << ", local rank = " << cl.rank() << std::endl;
-      else
-        std::cout << "rank: " << world.rank()
-                  << ", global rank = " << cg.rank() << std::endl;
-    else
-      if (cl)
-        std::cout << "rank: " << world.rank()
-                  << ", local rank = " << cl.rank() << std::endl;
-      else
-        std::cout << "rank: " << world.rank() << std::endl;
-    process.halt();
-    while (!process.check_halted()) {}
-  }
-}
+int main(int argc, char** argv) { return alps::parapack::run_sequential(argc, argv); }

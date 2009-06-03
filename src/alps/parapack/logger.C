@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -25,33 +25,20 @@
 *
 *****************************************************************************/
 
-#include <alps/parapack/process_mpi.h>
-#include <iostream>
+#include "logger.h"
+#include <boost/lexical_cast.hpp>
 
-namespace mpi = boost::mpi;
+namespace alps {
 
-int main(int argc, char **argv) {
-  mpi::environment env(argc, argv);
-  mpi::communicator world;
-  if (world.size() >= 4) {
-    alps::process_helper_mpi process(world, 4);
-    mpi::communicator cg = process.comm_ctrl();
-    mpi::communicator cl = process.comm_work();
-    if (cg)
-      if (cl)
-        std::cout << "rank: " << world.rank()
-                  << ", global rank = " << cg.rank()
-                  << ", local rank = " << cl.rank() << std::endl;
-      else
-        std::cout << "rank: " << world.rank()
-                  << ", global rank = " << cg.rank() << std::endl;
-    else
-      if (cl)
-        std::cout << "rank: " << world.rank()
-                  << ", local rank = " << cl.rank() << std::endl;
-      else
-        std::cout << "rank: " << world.rank() << std::endl;
-    process.halt();
-    while (!process.check_halted()) {}
-  }
+std::string logger::header() {
+  return std::string("[") + to_simple_string(boost::posix_time::second_clock::local_time()) + "]: ";
 }
+std::string logger::clone(alps::tid_t tid, alps::cid_t cid) {
+  return std::string("clone[") + boost::lexical_cast<std::string>(tid+1) + ',' +
+    boost::lexical_cast<std::string>(cid+1) + ']';
+}
+std::string logger::group(alps::gid_t gid) {
+  return std::string("processgroup[") + boost::lexical_cast<std::string>(gid+1) + ']';
+}
+
+} // namespace alps

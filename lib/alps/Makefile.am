@@ -67,6 +67,7 @@ src_PARAPACK_COMMON = \
   $(top_srcdir)/src/alps/parapack/clone_info.C \
   $(top_srcdir)/src/alps/parapack/worker_factory.C \
   $(top_srcdir)/src/alps/parapack/filelock.C \
+  $(top_srcdir)/src/alps/parapack/logger.C \
   $(top_srcdir)/src/alps/parapack/measurement.C \
   $(top_srcdir)/src/alps/parapack/option.C \
   $(top_srcdir)/src/alps/parapack/queue.C \

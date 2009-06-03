@@ -171,6 +171,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parapack/clone_info.C \
 	$(top_srcdir)/src/alps/parapack/worker_factory.C \
 	$(top_srcdir)/src/alps/parapack/filelock.C \
+	$(top_srcdir)/src/alps/parapack/logger.C \
 	$(top_srcdir)/src/alps/parapack/measurement.C \
 	$(top_srcdir)/src/alps/parapack/option.C \
 	$(top_srcdir)/src/alps/parapack/queue.C \
@@ -197,8 +198,8 @@ am__objects_10 = abstract_task.lo factory.lo info.lo \
 	scheduler.lo signal.lo single_scheduler.lo serial_scheduler.lo \
 	slave_task.lo task.lo worker.lo workertask.lo
 am__objects_11 = clone.lo clone_info.lo worker_factory.lo filelock.lo \
-	measurement.lo option.lo queue.lo job.lo types.lo util.lo \
-	mc_worker.lo
+	logger.lo measurement.lo option.lo queue.lo job.lo types.lo \
+	util.lo mc_worker.lo
 @ALPS_FULL_TRUE@am__objects_12 = $(am__objects_8) $(am__objects_9) \
 @ALPS_FULL_TRUE@	$(am__objects_10) $(am__objects_11)
 @BUILD_BOOST_TRUE@am__objects_13 = throw_exception.lo
@@ -632,6 +633,7 @@ src_PARAPACK_COMMON = \
   $(top_srcdir)/src/alps/parapack/clone_info.C \
   $(top_srcdir)/src/alps/parapack/worker_factory.C \
   $(top_srcdir)/src/alps/parapack/filelock.C \
+  $(top_srcdir)/src/alps/parapack/logger.C \
   $(top_srcdir)/src/alps/parapack/measurement.C \
   $(top_srcdir)/src/alps/parapack/option.C \
   $(top_srcdir)/src/alps/parapack/queue.C \
@@ -1040,6 +1042,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/latticedescriptor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/latticegraphdescriptor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/latticelibrary.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/logger.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/master_scheduler.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/mc_worker.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/measurement.Plo@am__quote@
@@ -1503,6 +1506,13 @@ filelock.lo: $(top_srcdir)/src/alps/parapack/filelock.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/filelock.C' object='filelock.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o filelock.lo `test -f '$(top_srcdir)/src/alps/parapack/filelock.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/filelock.C
+
+logger.lo: $(top_srcdir)/src/alps/parapack/logger.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT logger.lo -MD -MP -MF $(DEPDIR)/logger.Tpo -c -o logger.lo `test -f '$(top_srcdir)/src/alps/parapack/logger.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/logger.C
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/logger.Tpo $(DEPDIR)/logger.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/logger.C' object='logger.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o logger.lo `test -f '$(top_srcdir)/src/alps/parapack/logger.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/logger.C
 
 measurement.lo: $(top_srcdir)/src/alps/parapack/measurement.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT measurement.lo -MD -MP -MF $(DEPDIR)/measurement.Tpo -c -o measurement.lo `test -f '$(top_srcdir)/src/alps/parapack/measurement.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/measurement.C
