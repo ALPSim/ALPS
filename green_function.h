@@ -6,6 +6,9 @@
 #include <stdexcept>
 #include <cassert>
 #include <cstdlib>
+#ifdef USE_MPI
+#include <mpi.h>
+#endif 
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
 template <typename T> class green_function{
@@ -86,6 +89,12 @@ template <typename T> class green_function{
         void write(const char *filename);
         std::pair<std::vector<T>,std::vector<T> > to_multiple_vector() const;
         void from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> > &mv);
+#ifdef USE_MPI
+        void broadcast(){
+         MPI_Bcast( val_, ntnsns_*nf_*sizeof(T)/sizeof(double), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+         MPI_Bcast( err_, ntnsns_*nf_*sizeof(T)/sizeof(double), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+        }
+#endif
         ///mirror a GF at zero.
         /*void mirror_real(){
             for(unsigned int i=0;i<ntnsns_*nf_;++i){
@@ -124,7 +133,6 @@ template <typename T> class green_function{
 	// the actual values and errors.
         T *val_;
         T *err_;
-
 };
 typedef green_function<std::complex<double> > matsubara_green_function_t;
 typedef green_function<double> itime_green_function_t;
