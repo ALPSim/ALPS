@@ -387,6 +387,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
       print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, false);
     else
       print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, true);
-    print_all_green_functions(iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, false, "_realspace");
+    if(!parms.defined("WRITE_SPARSE"))
+      print_all_green_functions(iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, false, "_realspace");
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
 } 
