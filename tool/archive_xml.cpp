@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2005-2008 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2005-2009 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>,
 *                            Niall Moran <nmoran@thphys.nuim.ie>
 *
@@ -34,7 +34,7 @@
 #include <iostream>
 #include <ctime>
 #include <iomanip>
-#include <boost/spirit/core.hpp>
+#include <boost/classic_spirit.hpp>
 #include <boost/throw_exception.hpp>
 
 namespace sp = boost::spirit;
