@@ -39,6 +39,8 @@ hirschfye : $(OBJECTS_HIRSCHFYE)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o hirschfye $(OBJECTS_HIRSCHFYE) $(LDFLAGS) $(LIBS)
 compute_sigma: compute_sigma.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o compute_sigma compute_sigma.cpp $(LDFLAGS) $(LIBS)
+hybridization : hybridization.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o hybridization hybridization.cpp fouriertransform.o clustertransformer.o clusterhelper.o auxiliaryfunctions.o $(LDFLAGS) $(LIBS)
 rubtsov:
 	cd $(RUBTSOV_DIR); $(MAKE)
 werner:
