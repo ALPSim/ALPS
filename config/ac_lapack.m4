@@ -458,6 +458,20 @@ AC_DEFUN([AC_LAPACK],
           )
           fi
         else
+          # for MKL 10.x
+          AC_CHECK_LIB(iomp5, omp_in_parallel_,
+            [mkl_libs="-liomp5 $mkl_libs"
+             LIBS="$mkl_libs $ac_save_LIBS"
+             AC_CHECK_LIB(mkl, dgemm_,
+              [mkl_libs="-lmkl $mkl_libs"
+               LIBS="$mkl_libs $ac_save_LIBS"
+               AC_CHECK_LIB(mkl_lapack, dsyev_,
+                [mkl_libs="-lmkl_lapack $mkl_libs"; found=yes])
+              ])
+            ]
+          )
+          if test "$found" = "yes"; then :;
+          else
           AC_CHECK_FUNC(d_abs,,
             [AC_CHECK_LIB(g2c, d_abs, 
               [mkl_libs="-lg2c $mkl_libs"; LIBS="$mkl_libs $ac_save_LIBS"],
@@ -482,6 +496,7 @@ AC_DEFUN([AC_LAPACK],
               ])
             ]
           )
+          fi
         fi
         if test "$found" = yes; then
           LAPACK_LDFLAGS="$mkl_ldflags"
