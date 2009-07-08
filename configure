@@ -24839,13 +24839,15 @@ $as_echo "unknown processor type" >&6; }
 
         if test "$mkl_proc" != "itp"; then
           # for MKL 10.x
-          { $as_echo "$as_me:$LINENO: checking for omp_in_parallel_ in -liomp5" >&5
-$as_echo_n "checking for omp_in_parallel_ in -liomp5... " >&6; }
-if test "${ac_cv_lib_iomp5_omp_in_parallel_+set}" = set; then
+          libs_beforemkl10x=$LIBS
+          LIBS=
+          rtlfound=no
+          { $as_echo "$as_me:$LINENO: checking for library containing omp_in_parallel_" >&5
+$as_echo_n "checking for library containing omp_in_parallel_... " >&6; }
+if test "${ac_cv_search_omp_in_parallel_+set}" = set; then
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-liomp5  $LIBS"
+  ac_func_search_save_LIBS=$LIBS
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -24868,7 +24870,14 @@ return omp_in_parallel_ ();
   return 0;
 }
 _ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
+for ac_lib in '' iomp5 guide; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $libs_beforemkl10x  $ac_func_search_save_LIBS"
+  fi
+  rm -f conftest.$ac_objext conftest$ac_exeext
 if { (ac_try="$ac_link"
 case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
@@ -24889,99 +24898,46 @@ $as_echo "$ac_try_echo") >&5
 	 test "$cross_compiling" = yes ||
 	 $as_test_x conftest$ac_exeext
        }; then
-  ac_cv_lib_iomp5_omp_in_parallel_=yes
+  ac_cv_search_omp_in_parallel_=$ac_res
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	ac_cv_lib_iomp5_omp_in_parallel_=no
+
 fi
 
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+      conftest$ac_exeext
+  if test "${ac_cv_search_omp_in_parallel_+set}" = set; then
+  break
 fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_lib_iomp5_omp_in_parallel_" >&5
-$as_echo "$ac_cv_lib_iomp5_omp_in_parallel_" >&6; }
-if test "x$ac_cv_lib_iomp5_omp_in_parallel_" = x""yes; then
-  mkl_libs="-liomp5 $mkl_libs"
-             LIBS="$mkl_libs $ac_save_LIBS"
-             { $as_echo "$as_me:$LINENO: checking for dgemm_ in -lmkl" >&5
-$as_echo_n "checking for dgemm_ in -lmkl... " >&6; }
-if test "${ac_cv_lib_mkl_dgemm_+set}" = set; then
+done
+if test "${ac_cv_search_omp_in_parallel_+set}" = set; then
+  :
+else
+  ac_cv_search_omp_in_parallel_=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_search_omp_in_parallel_" >&5
+$as_echo "$ac_cv_search_omp_in_parallel_" >&6; }
+ac_res=$ac_cv_search_omp_in_parallel_
+if test "$ac_res" != no; then
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+   rtlfound=yes
+fi
+
+          if test "$rtlfound" = "yes"; then
+            rtllibs=$LIBS
+            LIBS=
+            { $as_echo "$as_me:$LINENO: checking for library containing dsyev_" >&5
+$as_echo_n "checking for library containing dsyev_... " >&6; }
+if test "${ac_cv_search_dsyev_+set}" = set; then
   $as_echo_n "(cached) " >&6
 else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmkl  $LIBS"
-cat >conftest.$ac_ext <<_ACEOF
-/* confdefs.h.  */
-_ACEOF
-cat confdefs.h >>conftest.$ac_ext
-cat >>conftest.$ac_ext <<_ACEOF
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char dgemm_ ();
-int
-main ()
-{
-return dgemm_ ();
-  ;
-  return 0;
-}
-_ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
-if { (ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:$LINENO: $ac_try_echo\""
-$as_echo "$ac_try_echo") >&5
-  (eval "$ac_link") 2>conftest.er1
-  ac_status=$?
-  grep -v '^ *+' conftest.er1 >conftest.err
-  rm -f conftest.er1
-  cat conftest.err >&5
-  $as_echo "$as_me:$LINENO: \$? = $ac_status" >&5
-  (exit $ac_status); } && {
-	 test -z "$ac_cxx_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 $as_test_x conftest$ac_exeext
-       }; then
-  ac_cv_lib_mkl_dgemm_=yes
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_cv_lib_mkl_dgemm_=no
-fi
-
-rm -rf conftest.dSYM
-rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_lib_mkl_dgemm_" >&5
-$as_echo "$ac_cv_lib_mkl_dgemm_" >&6; }
-if test "x$ac_cv_lib_mkl_dgemm_" = x""yes; then
-  mkl_libs="-lmkl $mkl_libs"
-               LIBS="$mkl_libs $ac_save_LIBS"
-               { $as_echo "$as_me:$LINENO: checking for dsyev_ in -lmkl_lapack" >&5
-$as_echo_n "checking for dsyev_ in -lmkl_lapack... " >&6; }
-if test "${ac_cv_lib_mkl_lapack_dsyev_+set}" = set; then
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lmkl_lapack  $LIBS"
+  ac_func_search_save_LIBS=$LIBS
 cat >conftest.$ac_ext <<_ACEOF
 /* confdefs.h.  */
 _ACEOF
@@ -25004,7 +24960,14 @@ return dsyev_ ();
   return 0;
 }
 _ACEOF
-rm -f conftest.$ac_objext conftest$ac_exeext
+for ac_lib in '' mkl_intel mkl_intel_lp64; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  -lmkl_intel_thread -lmkl_core $rtllibs $libs_beforemkl10x  $ac_func_search_save_LIBS"
+  fi
+  rm -f conftest.$ac_objext conftest$ac_exeext
 if { (ac_try="$ac_link"
 case "(($ac_try" in
   *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
@@ -25025,32 +24988,39 @@ $as_echo "$ac_try_echo") >&5
 	 test "$cross_compiling" = yes ||
 	 $as_test_x conftest$ac_exeext
        }; then
-  ac_cv_lib_mkl_lapack_dsyev_=yes
+  ac_cv_search_dsyev_=$ac_res
 else
   $as_echo "$as_me: failed program was:" >&5
 sed 's/^/| /' conftest.$ac_ext >&5
 
-	ac_cv_lib_mkl_lapack_dsyev_=no
+
 fi
 
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
-      conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
+      conftest$ac_exeext
+  if test "${ac_cv_search_dsyev_+set}" = set; then
+  break
 fi
-{ $as_echo "$as_me:$LINENO: result: $ac_cv_lib_mkl_lapack_dsyev_" >&5
-$as_echo "$ac_cv_lib_mkl_lapack_dsyev_" >&6; }
-if test "x$ac_cv_lib_mkl_lapack_dsyev_" = x""yes; then
-  mkl_libs="-lmkl_lapack $mkl_libs"; found=yes
+done
+if test "${ac_cv_search_dsyev_+set}" = set; then
+  :
+else
+  ac_cv_search_dsyev_=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:$LINENO: result: $ac_cv_search_dsyev_" >&5
+$as_echo "$ac_cv_search_dsyev_" >&6; }
+ac_res=$ac_cv_search_dsyev_
+if test "$ac_res" != no; then
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+   mkl_libs="$LIBS -lmkl_intel_thread -lmkl_core $rtllibs"; found=yes
 fi
 
-
-fi
-
-
-
-fi
-
+          fi
+          LIBS=$libs_beforemkl10x
           if test "$found" = "yes"; then :;
           else
           { $as_echo "$as_me:$LINENO: checking for d_abs" >&5
