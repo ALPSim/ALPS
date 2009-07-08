@@ -461,17 +461,19 @@ AC_DEFUN([AC_LAPACK],
           fi
         else
           # for MKL 10.x
-          AC_CHECK_LIB(iomp5, omp_in_parallel_,
-            [mkl_libs="-liomp5 $mkl_libs"
-             LIBS="$mkl_libs $ac_save_LIBS"
-             AC_CHECK_LIB(mkl, dgemm_,
-              [mkl_libs="-lmkl $mkl_libs"
-               LIBS="$mkl_libs $ac_save_LIBS"
-               AC_CHECK_LIB(mkl_lapack, dsyev_,
-                [mkl_libs="-lmkl_lapack $mkl_libs"; found=yes])
-              ])
-            ]
-          )
+          libs_beforemkl10x=$LIBS
+          LIBS=
+          rtlfound=no
+          AC_SEARCH_LIBS([omp_in_parallel_], [iomp5 guide],
+            [ rtlfound=yes ], [], [ $libs_beforemkl10x ])
+          if test "$rtlfound" = "yes"; then
+            rtllibs=$LIBS
+            LIBS=
+            AC_SEARCH_LIBS([dsyev_], [mkl_intel mkl_intel_lp64],
+              [ mkl_libs="$LIBS -lmkl_intel_thread -lmkl_core $rtllibs"; found=yes ], [],
+              [ -lmkl_intel_thread -lmkl_core $rtllibs $libs_beforemkl10x ])
+          fi
+          LIBS=$libs_beforemkl10x
           if test "$found" = "yes"; then :;
           else
           AC_CHECK_FUNC(d_abs,,
