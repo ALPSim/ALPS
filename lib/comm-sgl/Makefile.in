@@ -70,6 +70,8 @@ libcomm_sgl_la_LIBADD =
 am__objects_1 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo
 am_libcomm_sgl_la_OBJECTS = $(am__objects_1)
 libcomm_sgl_la_OBJECTS = $(am_libcomm_sgl_la_OBJECTS)
+@BUILD_UNIFIED_LIB_FALSE@am_libcomm_sgl_la_rpath = -rpath $(libdir)
+@BUILD_UNIFIED_LIB_TRUE@am_libcomm_sgl_la_rpath = -rpath $(libdir)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 CXXCOMPILE = $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) \
@@ -247,7 +249,8 @@ DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
 AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
 AM_LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 LDADD = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
-lib_LTLIBRARIES = libcomm-sgl.la
+@BUILD_UNIFIED_LIB_FALSE@lib_LTLIBRARIES = libcomm-sgl.la
+@BUILD_UNIFIED_LIB_TRUE@lib_LTLIBRARIES = libcomm-sgl.la
 SRC = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
 libcomm_sgl_la_SOURCES = $(SRC)
 all: all-am
@@ -311,7 +314,7 @@ clean-libLTLIBRARIES:
 	  rm -f "$${dir}/so_locations"; \
 	done
 libcomm-sgl.la: $(libcomm_sgl_la_OBJECTS) $(libcomm_sgl_la_DEPENDENCIES) 
-	$(CXXLINK) -rpath $(libdir) $(libcomm_sgl_la_OBJECTS) $(libcomm_sgl_la_LIBADD) $(LIBS)
+	$(CXXLINK) $(am_libcomm_sgl_la_rpath) $(libcomm_sgl_la_OBJECTS) $(libcomm_sgl_la_LIBADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
