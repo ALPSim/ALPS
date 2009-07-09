@@ -122,7 +122,8 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 am__DEPENDENCIES_1 =
 am__DEPENDENCIES_2 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
-libalps_la_DEPENDENCIES = $(am__DEPENDENCIES_2)
+libalps_la_DEPENDENCIES = ../comm-sgl/libcomm-sgl.la \
+	$(am__DEPENDENCIES_2)
 am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/expression/evaluator.C \
 	$(top_srcdir)/src/alps/osiris/xdrdump.C \
@@ -327,7 +328,8 @@ libalps_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 am__DEPENDENCIES_3 = $(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
 	$(am__DEPENDENCIES_1)
-libparapack_mpi_la_DEPENDENCIES = $(am__DEPENDENCIES_3)
+libparapack_mpi_la_DEPENDENCIES = libalps.la \
+	../comm-mpi/libcomm-mpi.la $(am__DEPENDENCIES_3)
 am__libparapack_mpi_la_SOURCES_DIST =  \
 	$(top_srcdir)/src/alps/parapack/clone_info_mpi.C \
 	$(top_srcdir)/src/alps/parapack/clone_mpi.C \
@@ -365,7 +367,8 @@ libparapack_mpi_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
 	$(CXXFLAGS) $(libparapack_mpi_la_LDFLAGS) $(LDFLAGS) -o $@
 @ALPS_FULL_TRUE@@HAVE_BOOST_MPI_TRUE@am_libparapack_mpi_la_rpath =  \
 @ALPS_FULL_TRUE@@HAVE_BOOST_MPI_TRUE@	-rpath $(libdir)
-libparapack_sgl_la_DEPENDENCIES = $(am__DEPENDENCIES_2)
+libparapack_sgl_la_DEPENDENCIES = libalps.la \
+	../comm-sgl/libcomm-sgl.la $(am__DEPENDENCIES_2)
 am__libparapack_sgl_la_SOURCES_DIST =  \
 	$(top_srcdir)/src/alps/parapack/scheduler_comm.C \
 	$(top_srcdir)/src/alps/parapack/scheduler_sgl.C
@@ -889,17 +892,17 @@ nodist_libalps_la_SOURCES = $(am__append_10) $(am__append_11) \
 	$(am__append_18) $(am__append_19) $(am__append_26) \
 	$(am__append_27)
 libalps_la_LDFLAGS = $(LDFLAGS_SGL)
-libalps_la_LIBADD = $(LIBS_SGL)
+libalps_la_LIBADD = ../comm-sgl/libcomm-sgl.la $(LIBS_SGL)
 libparapack_sgl_la_SOURCES = $(am__append_7)
 nodist_libparapack_sgl_la_SOURCES = 
 libparapack_sgl_la_LDFLAGS = $(LDFLAGS_SGL)
-libparapack_sgl_la_LIBADD = $(LIBS_SGL)
+libparapack_sgl_la_LIBADD = libalps.la ../comm-sgl/libcomm-sgl.la $(LIBS_SGL)
 libparapack_mpi_la_SOURCES = $(am__append_8)
 nodist_libparapack_mpi_la_SOURCES = $(am__append_20) $(am__append_21) \
 	$(am__append_22) $(am__append_23) $(am__append_24) \
 	$(am__append_25)
 libparapack_mpi_la_LDFLAGS = $(LDFLAGS_MPI)
-libparapack_mpi_la_LIBADD = $(LIBS_MPI)
+libparapack_mpi_la_LIBADD = libalps.la ../comm-mpi/libcomm-mpi.la $(LIBS_MPI)
 all: all-am
 
 .SUFFIXES:

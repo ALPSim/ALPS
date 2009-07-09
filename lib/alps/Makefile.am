@@ -353,17 +353,17 @@ endif
 libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARAMETER) $(src_PARSER) $(src_RANDOM) $(src_ALEA)
 nodist_libalps_la_SOURCES =
 libalps_la_LDFLAGS = $(LDFLAGS_SGL)
-libalps_la_LIBADD = $(LIBS_SGL)
+libalps_la_LIBADD = ../comm-sgl/libcomm-sgl.la $(LIBS_SGL)
 
 libparapack_sgl_la_SOURCES =
 nodist_libparapack_sgl_la_SOURCES =
 libparapack_sgl_la_LDFLAGS = $(LDFLAGS_SGL)
-libparapack_sgl_la_LIBADD = $(LIBS_SGL)
+libparapack_sgl_la_LIBADD = libalps.la ../comm-sgl/libcomm-sgl.la $(LIBS_SGL)
 
 libparapack_mpi_la_SOURCES =
 nodist_libparapack_mpi_la_SOURCES =
 libparapack_mpi_la_LDFLAGS = $(LDFLAGS_MPI)
-libparapack_mpi_la_LIBADD = $(LIBS_MPI)
+libparapack_mpi_la_LIBADD = libalps.la ../comm-mpi/libcomm-mpi.la $(LIBS_MPI)
 
 if ALPS_FULL
 libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER) $(src_PARAPACK_COMMON)
