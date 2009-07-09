@@ -80,6 +80,16 @@ cache_file='config/config.cache'
 if test -d "config"; then :; else mkdir config; fi
 if test -f $cache_file; then :; else touch $cache_file; fi
 
+AC_ARG_ENABLE(unified-library,
+  AC_HELP_STRING([--enable-unified-library], [building only one library for single and mpi version]),
+  [
+  if test "x$enableval" = "xyes"; then
+    ac_cv_unifiedlib=yes
+  fi
+  ]
+)
+test -z "$ac_cv_unifiedlib" && ac_cv_unifiedlib=no
+
 dnl
 dnl Directories ------------------------------------------------------------
 dnl
@@ -404,10 +414,18 @@ LIBS=
 
 ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_hdf5_cppflags $ac_cv_lapack_cppflags $ac_cv_sqlite_cppflags $ac_cv_xml_cppflags -I$ac_cv_alps_includedir $ac_cv_boost_cppflags $ac_cv_mpi_cppflags"
 ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_hdf5_ldflags $ac_cv_lapack_ldflags $ac_cv_sqlite_ldflags $ac_cv_xml_ldflags -L$ac_cv_alps_libdir $ac_cv_boost_ldflags"
-ac_cv_alps_libs="-lparapack-sgl -lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+if test $ac_cv_unifiedlib = no; then
+  ac_cv_alps_libs="-lparapack-sgl -lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+else
+  ac_cv_alps_libs="-lalps-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+fi
 
 ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
-ac_cv_alps_libs_mpi="-lparapack-mpi -lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+if test $ac_cv_unifiedlib = no; then
+  ac_cv_alps_libs_mpi="-lparapack-mpi -lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+else
+  ac_cv_alps_libs_mpi="-lalps-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+fi
 
 dnl
 dnl Experimental Features
@@ -439,6 +457,7 @@ AM_CONDITIONAL(ALPS_LIGHT, test "$ac_cv_alps_type" = "light")
 AM_CONDITIONAL(BUILD_DOC, test "$build_doc" = yes)
 AM_CONDITIONAL(BUILD_PDF, test "$build_pdf" = yes)
 AM_CONDITIONAL(BUILD_LIBHEAP, test "$ac_cv_libheap" = yes)
+AM_CONDITIONAL(BUILD_UNIFIED_LIB, test "$ac_cv_unifiedlib" = yes)
 AM_CONDITIONAL(BUILD_ARCHIVE, test "$ac_cv_have_sqlite" = yes)
 AM_CONDITIONAL(HAVE_MPI, test "$ac_cv_have_mpi" = yes)
 AM_CONDITIONAL(HAVE_HDF5, test "$ac_cv_have_hdf5" = yes)

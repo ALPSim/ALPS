@@ -797,6 +797,8 @@ HAVE_MPI_FALSE
 HAVE_MPI_TRUE
 BUILD_ARCHIVE_FALSE
 BUILD_ARCHIVE_TRUE
+BUILD_UNIFIED_LIB_FALSE
+BUILD_UNIFIED_LIB_TRUE
 BUILD_LIBHEAP_FALSE
 BUILD_LIBHEAP_TRUE
 BUILD_PDF_FALSE
@@ -1003,6 +1005,7 @@ ac_subst_files=''
 ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
+enable_unified_library
 enable_optimization
 enable_exceptions
 enable_warnings
@@ -1705,6 +1708,8 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-maintainer-mode  enable make rules and dependencies not useful
 			  (and sometimes confusing) to the casual installer
+  --enable-unified-library
+                          building only one library for single and mpi version
   --enable-optimization   enable optimization [default=yes]
   --enable-exceptions     enable exception handling [default=yes]
   --enable-warnings       enable warning messages
@@ -2784,6 +2789,18 @@ LIB_VERSION_INFO="-version-info 1:5:1"
 cache_file='config/config.cache'
 if test -d "config"; then :; else mkdir config; fi
 if test -f $cache_file; then :; else touch $cache_file; fi
+
+# Check whether --enable-unified-library was given.
+if test "${enable_unified_library+set}" = set; then
+  enableval=$enable_unified_library;
+  if test "x$enableval" = "xyes"; then
+    ac_cv_unifiedlib=yes
+  fi
+
+
+fi
+
+test -z "$ac_cv_unifiedlib" && ac_cv_unifiedlib=no
 
 
 test "$prefix" = NONE && prefix=$ac_default_prefix
@@ -7265,7 +7282,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 7268 "configure"' > conftest.$ac_ext
+  echo '#line 7285 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -9377,11 +9394,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9380: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9397: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9384: \$? = $ac_status" >&5
+   echo "$as_me:9401: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9667,11 +9684,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9670: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9687: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:9674: \$? = $ac_status" >&5
+   echo "$as_me:9691: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -9771,11 +9788,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:9774: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:9791: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:9778: \$? = $ac_status" >&5
+   echo "$as_me:9795: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -12171,7 +12188,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12174 "configure"
+#line 12191 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -12271,7 +12288,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<EOF
-#line 12274 "configure"
+#line 12291 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14680,11 +14697,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14683: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14700: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:14687: \$? = $ac_status" >&5
+   echo "$as_me:14704: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -14784,11 +14801,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:14787: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:14804: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:14791: \$? = $ac_status" >&5
+   echo "$as_me:14808: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16367,11 +16384,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16370: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16387: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16374: \$? = $ac_status" >&5
+   echo "$as_me:16391: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16471,11 +16488,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16474: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16491: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16478: \$? = $ac_status" >&5
+   echo "$as_me:16495: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -18686,11 +18703,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18689: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18706: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18693: \$? = $ac_status" >&5
+   echo "$as_me:18710: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -18976,11 +18993,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:18979: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:18996: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:18983: \$? = $ac_status" >&5
+   echo "$as_me:19000: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -19080,11 +19097,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:19083: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:19100: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:19087: \$? = $ac_status" >&5
+   echo "$as_me:19104: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -31225,10 +31242,18 @@ LIBS=
 
 ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_hdf5_cppflags $ac_cv_lapack_cppflags $ac_cv_sqlite_cppflags $ac_cv_xml_cppflags -I$ac_cv_alps_includedir $ac_cv_boost_cppflags $ac_cv_mpi_cppflags"
 ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_hdf5_ldflags $ac_cv_lapack_ldflags $ac_cv_sqlite_ldflags $ac_cv_xml_ldflags -L$ac_cv_alps_libdir $ac_cv_boost_ldflags"
-ac_cv_alps_libs="-lparapack-sgl -lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+if test $ac_cv_unifiedlib = no; then
+  ac_cv_alps_libs="-lparapack-sgl -lalps -lcomm-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+else
+  ac_cv_alps_libs="-lalps-sgl $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+fi
 
 ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
-ac_cv_alps_libs_mpi="-lparapack-mpi -lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+if test $ac_cv_unifiedlib = no; then
+  ac_cv_alps_libs_mpi="-lparapack-mpi -lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+else
+  ac_cv_alps_libs_mpi="-lalps-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+fi
 
 
 # Check whether --enable-libheap was given.
@@ -31286,6 +31311,14 @@ fi
 else
   BUILD_LIBHEAP_TRUE='#'
   BUILD_LIBHEAP_FALSE=
+fi
+
+ if test "$ac_cv_unifiedlib" = yes; then
+  BUILD_UNIFIED_LIB_TRUE=
+  BUILD_UNIFIED_LIB_FALSE='#'
+else
+  BUILD_UNIFIED_LIB_TRUE='#'
+  BUILD_UNIFIED_LIB_FALSE=
 fi
 
  if test "$ac_cv_have_sqlite" = yes; then
@@ -31702,6 +31735,13 @@ if test -z "${BUILD_LIBHEAP_TRUE}" && test -z "${BUILD_LIBHEAP_FALSE}"; then
   { { $as_echo "$as_me:$LINENO: error: conditional \"BUILD_LIBHEAP\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"BUILD_LIBHEAP\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${BUILD_UNIFIED_LIB_TRUE}" && test -z "${BUILD_UNIFIED_LIB_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"BUILD_UNIFIED_LIB\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"BUILD_UNIFIED_LIB\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi

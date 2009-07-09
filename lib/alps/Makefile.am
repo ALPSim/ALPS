@@ -342,11 +342,21 @@ src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/tss.cpp \
   $(BOOST_SRCDIR)/thread/src/xtime.cpp
 
+if BUILD_UNIFIED_LIB
+lib_LTLIBRARIES = 
+if ALPS_FULL
+lib_LTLIBRARIES += libalps-sgl.la
+if HAVE_BOOST_MPI
+lib_LTLIBRARIES += libalps-mpi.la
+endif
+endif
+else
 lib_LTLIBRARIES = libalps.la
 if ALPS_FULL
 lib_LTLIBRARIES += libparapack-sgl.la
 if HAVE_BOOST_MPI
 lib_LTLIBRARIES += libparapack-mpi.la
+endif
 endif
 endif
 
@@ -443,3 +453,18 @@ nodist_libalps_la_SOURCES += $(src_boost_THREAD)
 endif
 
 endif
+
+# unified libraries
+
+SRC_OSIRIS = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
+
+libalps_sgl_la_SOURCES = $(libalps_la_SOURCES) $(libparapack_sgl_la_SOURCES) $(SRC_OSIRIS)
+nodist_libalps_sgl_la_SOURCES = $(nodist_libalps_la_SOURCES) $(nodist_libparapack_sgl_la_SOURCES)
+libalps_sgl_la_LDFLAGS = $(LDFLAGS_SGL)
+libalps_sgl_la_LIBADD = $(LIBS_SGL)
+
+libalps_mpi_la_SOURCES = $(libalps_la_SOURCES) $(libparapack_mpi_la_SOURCES) $(SRC_OSIRIS)
+nodist_libalps_mpi_la_SOURCES = $(nodist_libalps_la_SOURCES) $(nodist_libparapack_mpi_la_SOURCES)
+libalps_mpi_la_CPPFLAGS = $(AM_CPPFLAGS) -DALPS_MPI
+libalps_mpi_la_LDFLAGS = $(LDFLAGS_MPI)
+libalps_mpi_la_LIBADD = $(LIBS_MPI)
