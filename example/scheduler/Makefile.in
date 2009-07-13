@@ -111,8 +111,10 @@ main2_mpi_OBJECTS = $(am_main2_mpi_OBJECTS)
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
 @BUILD_UNIFIED_LIB_TRUE@am__DEPENDENCIES_3 = $(top_builddir)/lib/alps/libalps-mpi.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
@@ -332,8 +334,8 @@ LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
 @BUILD_UNIFIED_LIB_FALSE@LIBS_SGL = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 @BUILD_UNIFIED_LIB_TRUE@LIBS_SGL = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
-@BUILD_UNIFIED_LIB_FALSE@LIBS_MPI = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LIBS_MPI = $(top_builddir)/lib/alps/libalps-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+@BUILD_UNIFIED_LIB_FALSE@LIBS_MPI = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+@BUILD_UNIFIED_LIB_TRUE@LIBS_MPI = $(top_builddir)/lib/alps/libalps-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 evaluate_SOURCES = evaluate.C
 evaluate_LDFLAGS = $(LDFLAGS_SGL)
 evaluate_LDADD = $(LIBS_SGL)
