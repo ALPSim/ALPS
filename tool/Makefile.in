@@ -51,10 +51,22 @@ bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 
-@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@am__append_5 = \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@am__append_5 = \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/input_path.cpp \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/markups.cpp \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
+
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@am__append_6 = \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/input_path.cpp \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/markups.cpp \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
@@ -246,15 +258,25 @@ printgraph_LDADD = $(LDADD)
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@	post_process.$(OBJEXT) \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@	template_stack.$(OBJEXT) \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@	utils.$(OBJEXT)
-@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@am__objects_3 = actions.$(OBJEXT) \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@am__objects_3 = actions.$(OBJEXT) \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@	actions_class.$(OBJEXT) \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@	collector.$(OBJEXT) \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@	input_path.$(OBJEXT) \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@	markups.$(OBJEXT) \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@	post_process.$(OBJEXT) \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@	template_stack.$(OBJEXT) \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@	utils.$(OBJEXT)
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@am__objects_4 = actions.$(OBJEXT) \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	actions_class.$(OBJEXT) \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	collector.$(OBJEXT) \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	input_path.$(OBJEXT) \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	markups.$(OBJEXT) \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	post_process.$(OBJEXT) \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	template_stack.$(OBJEXT) \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@	utils.$(OBJEXT)
 @BUILD_DOC_TRUE@nodist_quickbook_OBJECTS = quickbook.$(OBJEXT) \
 @BUILD_DOC_TRUE@	$(am__objects_1) $(am__objects_2) \
-@BUILD_DOC_TRUE@	$(am__objects_3)
+@BUILD_DOC_TRUE@	$(am__objects_3) $(am__objects_4)
 quickbook_OBJECTS = $(nodist_quickbook_OBJECTS)
 quickbook_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@quickbook_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
@@ -518,7 +540,7 @@ xml2archive_SOURCES = xml2archive.C
 archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.cpp archive_node.hpp archive_plot.cpp archive_plot.hpp archive_sqlite.cpp archive_sqlite.hpp archive_xml.cpp archive_xml.hpp
 @BUILD_DOC_TRUE@nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp \
 @BUILD_DOC_TRUE@	$(am__append_3) $(am__append_4) \
-@BUILD_DOC_TRUE@	$(am__append_5)
+@BUILD_DOC_TRUE@	$(am__append_5) $(am__append_6)
 all: all-am
 
 .SUFFIXES:
@@ -691,6 +713,8 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/collector.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compactrun.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert2xml.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input_path.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/markups.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameter2xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pconfig.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pevaluate.Po@am__quote@
@@ -821,6 +845,34 @@ template_stack.obj: $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp' object='template_stack.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o template_stack.obj `if test -f '$(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp'; then $(CYGPATH_W) '$(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp'; fi`
+
+input_path.o: $(BOOST_DIR)/tools/quickbook/detail/input_path.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT input_path.o -MD -MP -MF $(DEPDIR)/input_path.Tpo -c -o input_path.o `test -f '$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp' || echo '$(srcdir)/'`$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/input_path.Tpo $(DEPDIR)/input_path.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp' object='input_path.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o input_path.o `test -f '$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp' || echo '$(srcdir)/'`$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp
+
+input_path.obj: $(BOOST_DIR)/tools/quickbook/detail/input_path.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT input_path.obj -MD -MP -MF $(DEPDIR)/input_path.Tpo -c -o input_path.obj `if test -f '$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp'; then $(CYGPATH_W) '$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/input_path.Tpo $(DEPDIR)/input_path.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp' object='input_path.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o input_path.obj `if test -f '$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp'; then $(CYGPATH_W) '$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_DIR)/tools/quickbook/detail/input_path.cpp'; fi`
+
+markups.o: $(BOOST_DIR)/tools/quickbook/detail/markups.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT markups.o -MD -MP -MF $(DEPDIR)/markups.Tpo -c -o markups.o `test -f '$(BOOST_DIR)/tools/quickbook/detail/markups.cpp' || echo '$(srcdir)/'`$(BOOST_DIR)/tools/quickbook/detail/markups.cpp
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/markups.Tpo $(DEPDIR)/markups.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_DIR)/tools/quickbook/detail/markups.cpp' object='markups.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o markups.o `test -f '$(BOOST_DIR)/tools/quickbook/detail/markups.cpp' || echo '$(srcdir)/'`$(BOOST_DIR)/tools/quickbook/detail/markups.cpp
+
+markups.obj: $(BOOST_DIR)/tools/quickbook/detail/markups.cpp
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT markups.obj -MD -MP -MF $(DEPDIR)/markups.Tpo -c -o markups.obj `if test -f '$(BOOST_DIR)/tools/quickbook/detail/markups.cpp'; then $(CYGPATH_W) '$(BOOST_DIR)/tools/quickbook/detail/markups.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_DIR)/tools/quickbook/detail/markups.cpp'; fi`
+@am__fastdepCXX_TRUE@	mv -f $(DEPDIR)/markups.Tpo $(DEPDIR)/markups.Po
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_DIR)/tools/quickbook/detail/markups.cpp' object='markups.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o markups.obj `if test -f '$(BOOST_DIR)/tools/quickbook/detail/markups.cpp'; then $(CYGPATH_W) '$(BOOST_DIR)/tools/quickbook/detail/markups.cpp'; else $(CYGPATH_W) '$(srcdir)/$(BOOST_DIR)/tools/quickbook/detail/markups.cpp'; fi`
 
 .cpp.o:
 @am__fastdepCXX_TRUE@	$(CXXCOMPILE) -MT $@ -MD -MP -MF $(DEPDIR)/$*.Tpo -c -o $@ $<

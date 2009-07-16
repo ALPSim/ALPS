@@ -25,6 +25,7 @@ int main()
   
   std::valarray<double> current_distribution(0.,N+1);
   alps::RealVectorObservable histogram;
+  alps::RealObservable number;
   
   // equilibration
   for (int i=0;i<M/5;++i) {
@@ -34,6 +35,7 @@ int main()
       ++n;
   }
   
+  number.reset(true);
   histogram.reset(true); 
   
   for (int i=0;i<M;++i) {
@@ -44,10 +46,12 @@ int main()
 
     current_distribution[n]=1;
     histogram << current_distribution;
+    number << double(n);
     current_distribution[n]=0;  
   }
   
-  std::cout << "Result: " << histogram << "\n";
+  std::cout << "Mean number on Anik: " << number << "\n";
+  std::cout << "Distribution: " << histogram << "\n";
 
   for (int i=0;i<=N;++i)
     std::cout << i << "\t" 
