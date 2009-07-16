@@ -687,22 +687,40 @@ AC_DEFUN([AC_LAPACK],
   if test "$found_blas" = no; then
     if test "x$ssl2" != xno; then
       AC_MSG_NOTICE([checking for SSL2 Library])
-      ssl2_ldflags="-KSSL2"
+      ssl2_ldflags="-SSL2"
       LDFLAGS="$ssl2_ldflags $ac_save_LDFLAGS"
       LIBS="$ac_save_LIBS"
       AC_MSG_CHECKING([for dgemm_ in $ssl2_ldflags])
       AC_TRY_LINK([#define main MAIN__
-      extern "C" char dgemm_();],[dgemm_();],
+                   extern "C" char dgemm_();],[dgemm_();],
         [AC_MSG_RESULT(yes)
          AC_MSG_CHECKING([for dsyev_ in $ssl2_ldflags])
          AC_TRY_LINK([#define main MAIN__
-	 extern "C" char dsyev_();],[dsyev_();],
+	              extern "C" char dsyev_();],[dsyev_();],
                      [AC_MSG_RESULT(yes)
                       LAPACK_CPPFLAGS="-Dmain=MAIN__"; LAPACK_LDFLAGS="$ssl2_ldflags"; LAPACK_LIBS=
                       found_blas=yes; found_lapack=yes],
                      [AC_MSG_RESULT(no)])],
         [AC_MSG_RESULT(no)]
       )
+      if test "$found_blas" = no; then
+        ssl2_ldflags="-KSSL2"
+        LDFLAGS="$ssl2_ldflags $ac_save_LDFLAGS"
+        LIBS="$ac_save_LIBS"
+        AC_MSG_CHECKING([for dgemm_ in $ssl2_ldflags])
+        AC_TRY_LINK([#define main MAIN__
+                     extern "C" char dgemm_();],[dgemm_();],
+          [AC_MSG_RESULT(yes)
+           AC_MSG_CHECKING([for dsyev_ in $ssl2_ldflags])
+           AC_TRY_LINK([#define main MAIN__
+                        extern "C" char dsyev_();],[dsyev_();],
+                       [AC_MSG_RESULT(yes)
+                        LAPACK_CPPFLAGS="-Dmain=MAIN__"; LAPACK_LDFLAGS="$ssl2_ldflags"; LAPACK_LIBS=
+                        found_blas=yes; found_lapack=yes],
+                       [AC_MSG_RESULT(no)])],
+          [AC_MSG_RESULT(no)]
+        )
+      fi
     fi
     if test "x$ssl2" = xyes; then
       if test "$found_blas" = no; then
