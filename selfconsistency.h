@@ -47,25 +47,10 @@
 ///                 retrieve additional information.
 /// @param hilbert  a Hilbert transformation object. It performs the Hilbert transformation
 ///                 for the density of states of the given model.
-/// @param G0_tau The bare Green's function in imaginary time
-/// @param G_tau  The Green's function G in imaginary time.
 
-extern void selfconsistency_loop
-(
- alps::Parameters& parms, 
- ImpuritySolver& solver, 
- HilbertTransformer& hilbert,
- FourierTransformer& fourier,
- itime_green_function_t& G0_tau, 
- itime_green_function_t& G_tau
- );
+extern void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert);
 
-extern void F_selfconsistency_loop
-(
- alps::Parameters& parms, 
- ImpuritySolver& solver, 
- itime_green_function_t& G_tau
- );
+extern void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, itime_green_function_t& G_tau);
 
 
 /// performs a DMFT self-conistency loop until convergence
@@ -73,28 +58,10 @@ extern void F_selfconsistency_loop
 /// @param parms The input parameters for the simulation.
 /// @param solver   An impurity solver that takes both the bare GF in imaginary time AND in Matsubara freqencies, but returns
 /// @param hilbert  a Hilbert transformation object. It performs the Hilbert transformation, taking its arguments in Frequency space.
-/// @param G0_omega The bare Green's function in Matsubara frequencies.
-/// @param G_omega  The dressed Green's function G in Matsubara frequencies.
-void selfconsistency_loop_omega
-(
- const alps::Parameters& parms, 
- MatsubaraImpuritySolver& solver, 
- FrequencySpaceHilbertTransformer& hilbert,
- FourierTransformer &fourier, 
- matsubara_green_function_t& G0_omega, 
- matsubara_green_function_t& G_omega
- );
+void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpuritySolver& solver,  FrequencySpaceHilbertTransformer& hilbert);
 
 
-void selfconsistency_loop_DCA
-(
- const alps::Parameters& parms, 
- MatsubaraImpuritySolver& solver, 
- DCATransformer& clustertrans,
- boost::shared_ptr<FourierTransformer> &fourier, 
- matsubara_green_function_t& G0_omega, 
- matsubara_green_function_t& G_omega
- );
+void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, DCATransformer& clustertrans);
 
 #endif
 

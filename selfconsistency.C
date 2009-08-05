@@ -34,6 +34,7 @@
 #include "selfconsistency.h"
 #include "green_function.h"
 #include "fouriertransform.h"
+#include "types.h"
 #include <sys/types.h> //will this fail on Windows?
 #include <boost/tuple/tuple.hpp> //will this fail on Windows?
                                  /// @brief Run the self consistency loop for G and G0 mainly in imaginary time. Perform Fourier transformations if needed.
@@ -43,29 +44,37 @@
                                  /// @param hilbert is the HilbertTransformer that solves the Dyson equation, i.e. generates G0 out of G
                                  /// @param G0 is the bare Green's function in imaginary time. It has to be provided as an initial guess
                                  /// @param G is the Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
-void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert, FourierTransformer &fourier, itime_green_function_t& G0_tau, itime_green_function_t& G_tau)
+
+
+void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, HilbertTransformer& hilbert)
 {
   int N = static_cast<int>(parms["N"]);
   int flavors = parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
-  double mu = static_cast<double>(parms["MU"]);
-  double h = parms.value_or_default("H", 0.);
+  double h_old = static_cast<double>(parms["H"]);
+  double h_init = parms.value_or_default("H_INIT", 0.);
+  double h = h_old + h_init;
+  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
-  
+
+  itime_green_function_t G0_tau = hilbert.initial_G0(parms);
+  itime_green_function_t G_tau = G0_tau;
   itime_green_function_t G0_tau_old(G0_tau);
+
   int iteration_ctr=0;
   double max_diff;	
   do {
+    double mu = static_cast<double>(parms["MU"]);
     G0_tau_old = G0_tau;
     std::cout<<"running solver"<<std::endl;
     G_tau = solver.solve(G0_tau, parms);
     //std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
     G_tau = hilbert.symmetrize(G_tau, paramagnet);
-    G0_tau= hilbert(G_tau, fourier, mu, h, beta);
+    G0_tau= hilbert(G_tau, mu, h, beta);
     std::cout<<"comparing old and new results"<<std::endl;
     max_diff=0;
     for(int f=0; f<flavors;++f){
@@ -75,12 +84,18 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
       }
     }	
     std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
+    if (iteration_ctr == 0) 
+      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
     print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged  && iteration_ctr < max_it);
   std::cout<<"converged!"<<std::endl;
+  // write G0 (to be read in as an input for a new simulation)
+  G0_tau.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
 }
 
-void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, itime_green_function_t& G_tau)
+
+
+void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  itime_green_function_t& G_tau)
 {
   int N = static_cast<int>(parms["N"]);
   int flavors = parms.value_or_default("FLAVORS", 2);;
@@ -89,7 +104,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
   //double h = parms.value_or_default("H", 0);;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
-  //bool degenerate = parms.value_or_default("DEGENERATE", false);  
+  //bool degenerate = parms.value_or_default("DEGENERATE", false);
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
   int iteration_ctr=0;
@@ -120,6 +135,9 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
     //print_tau_green_functions(iteration_ctr++, G_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged);
   std::cout<<"converged!"<<std::endl;
+  // write G (to be read in as an input for a new simulation)
+  G_tau.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+
 }
 
 /*void adjust_chemical_potential(const alps::Parameters &parms, double current_filling, double &mu){
@@ -189,8 +207,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, iti
 /// @param G_omega is the dressed Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 
 void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
-                                FrequencySpaceHilbertTransformer& hilbert, FourierTransformer &fourier,
-                                matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
+                                FrequencySpaceHilbertTransformer& hilbert) 
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
   unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
@@ -198,22 +215,20 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   unsigned int n_site=parms.value_or_default("SITES", 1);
   
   double beta = static_cast<double>(parms["BETA"]);
-  double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms["H"]);
+  double h_old = static_cast<double>(parms["H"]);
+  double h_init = parms.value_or_default("H_INIT", 0.);
+  double h = h_old + h_init;
+  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   
+  matsubara_green_function_t G0_omega = hilbert.initial_G0(parms);
+  matsubara_green_function_t G_omega = G0_omega;
+
   int iteration_ctr = 0;
-  bool result_in_omega=true;
-  
-  if(parms.defined("DIRECT_ITIME_MEASUREMENT") || 
-     parms.defined("FACTORIZED_ITIME_MEASUREMENT") || 
-     parms.defined("WERNER_ITIME_MEASUREMENT")) {
-    result_in_omega=false;
-  }
   //define multiple vectors
   matsubara_green_function_t G_old_omega(G0_omega);
   matsubara_green_function_t G_omega_shifted(G0_omega);
@@ -223,16 +238,18 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
   itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
   //initialize space for multiple vectors
+  boost::shared_ptr<FourierTransformer> fourier_ptr;
   double max_diff;	
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+    double mu = static_cast<double>(parms["MU"]);
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
-    
-    fourier.backward_ft(G0_tau, G0_omega);
+    FourierTransformer::generate_transformer(parms, fourier_ptr);
+    fourier_ptr->backward_ft(G0_tau, G0_omega);
     //fourier.setmu(mu);
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
@@ -286,14 +303,16 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
     print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
-  }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
-  
+    if (iteration_ctr == 1) 
+      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
+  }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           
+  // write G0 (to be read as an input Green function)
+  G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
 }
 
 
 void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
-                              DCATransformer& clustertrans, boost::shared_ptr<FourierTransformer> &fourier_ptr,
-                              matsubara_green_function_t& G0_omega, matsubara_green_function_t& G_omega) 
+                              DCATransformer& clustertrans) 
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
   unsigned int n_matsubara=boost::lexical_cast<unsigned int>(parms["NMATSUBARA"]);
@@ -301,21 +320,19 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   unsigned int n_site=parms.value_or_default("SITES", 1);
   
   double beta = static_cast<double>(parms["BETA"]);
-  double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms["H"]);
+  double h_old = static_cast<double>(parms["H"]);
+  double h_init = parms.value_or_default("H_INIT", 0.);
+  double h = h_old + h_init;
+  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   
-  int iteration_ctr = 0;
-  bool result_in_omega=true;
+  matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms);
+  matsubara_green_function_t G_omega=G0_omega;
 
-  if(parms.defined("DIRECT_ITIME_MEASUREMENT") || 
-     parms.defined("FACTORIZED_ITIME_MEASUREMENT") || 
-     parms.defined("WERNER_ITIME_MEASUREMENT")) {
-    result_in_omega=false;
-  }
+  int iteration_ctr = 0;
   matsubara_green_function_t G_old_omega(G0_omega);
   matsubara_green_function_t G_omega_shifted(G0_omega);
   matsubara_green_function_t G0_old_omega(G0_omega);
@@ -324,15 +341,17 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
   itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
   //initialize space for multiple vectors
+  boost::shared_ptr<FourierTransformer> fourier_ptr;
   double max_diff;	
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
+    double mu = static_cast<double>(parms["MU"]);
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
-
+    FourierTransformer::generate_transformer(parms, fourier_ptr);
     fourier_ptr->backward_ft(G0_tau, G0_omega);
     std::cout<<"running solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
@@ -344,7 +363,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
 
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
-    FourierTransformer::generate_transformer(parms, fourier_ptr, clustertrans.epsav(), clustertrans.epssqav());
+    FourierTransformer::generate_transformer(parms, fourier_ptr);
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
@@ -384,10 +403,14 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
     itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
     if (parms.defined("ANTIFERROMAGNET")) 
-      print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, false);
+      print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, blockdiagonal);
     else
-      print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, true);
-    if(!parms.defined("WRITE_SPARSE"))
-      print_all_green_functions(iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, false, "_realspace");
-  }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
+      print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, diagonal);
+    if(!parms.defined("WRITE_SPARSE"))  
+      print_all_green_functions(iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, nondiagonal, "_realspace");
+    if (iteration_ctr == 1) 
+      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
+  } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 
+  // write G0
+  G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
 } 
