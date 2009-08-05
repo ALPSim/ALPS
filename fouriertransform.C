@@ -26,6 +26,7 @@
 *****************************************************************************/
 /*fouriertransform.C*/
 #include "fouriertransform.h"
+#include "cluster.h"
 #include <valarray>
 #include <boost/numeric/bindings/lapack/lapack.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
@@ -134,8 +135,8 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
   unsigned int N_omega = G_omega.nfreq();
   unsigned int N_site = G_omega.nsite();
   matsubara_green_function_t G_omega_no_model(G_omega);
+  matsubara_green_function_t test(G_omega);
   double dt = beta_/N_tau;
-  //std::ofstream backstr("back.dat");
   for(unsigned int f=0;f<G_omega.nflavor();++f){
     for (unsigned int s1=0; s1<N_site; ++s1){
       for (unsigned int s2=0; s2<N_site; ++s2) {
@@ -143,26 +144,50 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
           for (unsigned int i=0; i<=N_tau; i++) {
             G_tau(i,s1,s2,f)=0.;
           }
-        }else{
-        for (unsigned int k=0; k<N_omega; k++) {
-          std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-          G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
         } 
-        for (unsigned int i=0; i<N_tau; i++) {
-          G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
-          for (unsigned int k=0; k<N_omega; k++) {
-            double wt((2*k+1)*i*M_PI/N_tau);
-            G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
-                                         sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
-          }
-        }
-        G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
-        G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
-        }
+	else {
+	  for (unsigned int k=0; k<N_omega; k++) {
+	    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+	    G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
+	  } 
+	  for (unsigned int i=0; i<N_tau; i++) {
+	    G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
+	    for (unsigned int k=0; k<N_omega; k++) {
+	      double wt((2*k+1)*i*M_PI/N_tau);
+	      G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
+					   sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
+	    }
+	  }
+	  G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
+	  G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
+	}
       }
     }
   }
+  /*std::ofstream backstr("back.dat");
+    G_omega.write("gtest");
+    test.write("ftest");
+    int sdel = 1;//N_site > 1 ? 2 : 1;
+    int pmax = 0;//N_site > 1 ? 1 : 0;
+    for(unsigned int f=0;f<G_omega.nflavor();++f){
+    for (unsigned int s=0; s<N_site; s+=sdel){
+    for (int p1=0; p1<=pmax; ++p1) {
+    for (int p2=0; p2<=pmax; ++p2) {
+    for(uint k=0; k<N_omega; k++){
+    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+    backstr << iw.imag() << "\t" << f << "\t" << s+p1 << "\t" << s+p2 << "\t"
+    << G_omega(k,s+p1,s+p2,f).real() << "\t" << G_omega(k,s+p1,s+p2,f).imag() << "\t" 
+    << f_omega(iw, c1_[f][s+p1][s+p2],c2_[f][s+p1][s+p2], c3_[f][s+p1][s+p2]).real() << "\t"
+    << f_omega(iw, c1_[f][s+p1][s+p2],c2_[f][s+p1][s+p2], c3_[f][s+p1][s+p2]).imag()
+    << std::endl;
+    }
+    }
+    }
+    }
+    }*/
 }
+  
+  
 
 
 
@@ -465,41 +490,107 @@ void FourierTransformer::append_tail(matsubara_green_function_t& G_omega,
       }
     }
   }
+  /*std::ofstream self("self.dat");
+  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+    for (site_t k=0; k<G0_omega.nsite(); ++k) {
+      for (frequency_t freq=0; freq<nfreq_measured; ++freq) {
+	std::complex<double> Sigma = 1./G0_omega(freq, k, k, flavor) - 1./G_omega(freq, k, k, flavor);
+	self << (2*freq+1)*M_PI/beta_ << " " << flavor << " " << k << " " 
+	     << Sigma.real() << " " << Sigma.imag() << "\n";
+      }
+      for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
+	std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
+	std::complex<double> Sigma = Sc0_[flavor][k][k] + Sc1_[flavor][k][k]/iw + Sc2_[flavor][k][k]/(iw*iw);
+	self << (2*freq+1)*M_PI/beta_ << " " << flavor << " " << k << " " 
+	     << Sigma.real() << " " << Sigma.imag() << "\n";
+      }
+    }
+  }*/
 }
 
 
 
-void FourierTransformer::generate_transformer(const alps::Parameters &parms,
-					      boost::shared_ptr<FourierTransformer> &fourier_ptr, 
-					      std::vector<double> eps, std::vector<double> epssq)
+void ClusterAntiFerroGFourierTransformer::append_tail(matsubara_green_function_t& G_omega, 
+						      const matsubara_green_function_t& G0_omega,
+						      const int nfreq_measured) const
 {
-  int n_flavors = parms.value_or_default("FLAVORS", 2); 
-  std::vector<std::vector<double> > eps_f(n_flavors, eps);
-  std::vector<std::vector<double> > epssq_f(n_flavors, epssq);
-  fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"], 
-					   parms.value_or_default("FLAVORS", 2),
-					   parms.value_or_default("SITES", 1), 
-					   eps_f, epssq_f));
+  matsubara_green_function_t selfenergy_tail(G0_omega.nfreq()-nfreq_measured, G0_omega.nsite(), G0_omega.nflavor());
+  selfenergy_tail.clear();
+  matsubara_green_function_t G_omega_tail(selfenergy_tail);
+  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+    for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
+      std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
+      for (site_t k=0; k<G0_omega.nsite(); k+=2) {
+	for (int p1=0; p1<=1; p1++) {
+	  for (int p2=0; p2<=1; p2++) {
+	    selfenergy_tail(freq-nfreq_measured, k+p1, k+p2, flavor) = 
+	      Sc0_[flavor][k+p1][k+p2] + Sc1_[flavor][k+p1][k+p2]/iw + Sc2_[flavor][k+p1][k+p2]/(iw*iw);
+	    G_omega_tail(freq-nfreq_measured, k+p1, k+p2, flavor) = G0_omega(freq, k+p1, k+p2, flavor);
+	  }
+	}
+      }
+    }
+  }
+  matsubara_green_function_t selfenergy_measured(nfreq_measured, G0_omega.nsite(), G0_omega.nflavor());
+  matsubara_green_function_t G_omega_measured(nfreq_measured, G0_omega.nsite(), G0_omega.nflavor());
+  selfenergy_measured.clear();
+  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+    for (frequency_t freq=0; freq<nfreq_measured; ++freq) {
+      for (site_t k=0; k<G0_omega.nsite(); k+=2) {
+	for (int p1=0; p1<=1; p1++) {
+	  for (int p2=0; p2<=1; p2++) {
+	    selfenergy_measured(freq, k+p1, k+p2, flavor) = G0_omega(freq, k+p1, k+p2, flavor);
+	    G_omega_measured(freq, k+p1, k+p2, flavor) = G_omega(freq, k+p1, k+p2, flavor);
+	  }
+	}
+      }
+    }
+  }
+  selfenergy_measured = AntiFerroDCATransformer::green_function_inverse(selfenergy_measured);
+  selfenergy_measured = 
+    AntiFerroDCATransformer::green_function_subtract(selfenergy_measured, 
+						     AntiFerroDCATransformer::green_function_inverse(G_omega_measured));
+  /*std::ofstream mappend("mappend.dat");
+  for (site_t k=0; k<G0_omega.nsite(); k+=2) {
+    for (int p1=0; p1<=1; p1++) {
+      for (int p2=0; p2<=1; p2++) {
+	for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+	  for (frequency_t freq=0; freq<nfreq_measured; ++freq) {
+	    std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
+	    mappend << iw.imag() << "\t" << flavor << "\t" << k+p1 << "\t" << k+p2 << "\t"
+		    << selfenergy_measured(freq, k+p1, k+p2, flavor).real() << "\t"
+		    << selfenergy_measured(freq, k+p1, k+p2, flavor).imag() << std::endl;
+	  }
+	}
+      }
+    }
+    }
+  std::ofstream tappend("tappend.dat");
+  for (site_t k=0; k<G0_omega.nsite(); k+=2) {
+    for (int p1=0; p1<=1; p1++) {
+      for (int p2=0; p2<=1; p2++) {
+	for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
+	  for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) {
+	    std::complex<double> iw(0,(2*freq+1)*M_PI/beta_);
+	    tappend << iw.imag() << "\t" << flavor << "\t" << k+p1 << "\t" << k+p2 << "\t"
+		    << selfenergy_tail(freq-nfreq_measured, k+p1, k+p2, flavor).real() << "\t"
+		    << selfenergy_tail(freq-nfreq_measured, k+p1, k+p2, flavor).imag() << std::endl;
+	  }
+	}
+      }
+    }
+    }*/
+  G_omega_tail = AntiFerroDCATransformer::green_function_inverse(G_omega_tail);
+  G_omega_tail = AntiFerroDCATransformer::green_function_subtract(G_omega_tail, selfenergy_tail);
+  G_omega_tail = AntiFerroDCATransformer::green_function_inverse(G_omega_tail);
+  for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) 
+    for (frequency_t freq=nfreq_measured; freq<G0_omega.nfreq(); ++freq) 
+      for (site_t k=0; k<G0_omega.nsite(); k+=2) 
+	for (int p1=0; p1<=1; p1++) 
+	  for (int p2=0; p2<=1; p2++) 
+	    G_omega(freq, k+p1, k+p2, flavor) = G_omega_tail(freq-nfreq_measured, k+p1, k+p2, flavor);
 }
 
-
-
-void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
-						boost::shared_ptr<FourierTransformer> &fourier_ptr,
-						const std::vector<double> &densities,
-						std::vector<double> eps, std::vector<double> epssq)
-{
-  int n_flavors = parms.value_or_default("FLAVORS", 2); 
-  std::vector<std::vector<double> > eps_f(n_flavors, eps);
-  std::vector<std::vector<double> > epssq_f(n_flavors, epssq);
-  double U = parms["U"];
-  fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"]+U/2, U, 
-					   parms.value_or_default("FLAVORS", 2),
-					   parms.value_or_default("SITES", 1), 
-					   densities, eps_f, epssq_f));
-}
 
 
 
@@ -508,34 +599,40 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
 {
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
   int n_site = parms.value_or_default("SITES", 1); 
-  std::vector< std::vector<double> > eps(n_flavors);
-  std::vector< std::vector<double> > epssq(n_flavors);
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
     std::cout << "using general fourier transformer" << "\n";
+    std::vector<double> eps(n_flavors);
+    std::vector<double> epssq(n_flavors);
     for (int f=0; f<n_flavors; ++f) {
-      eps[f].resize(n_site);
-      epssq[f].resize(n_site);
-      for (int i=0; i<n_site; ++i) {
-	eps[f][i] = parms["EPS_"+boost::lexical_cast<std::string>(f)+"_"+boost::lexical_cast<std::string>(i)];
-	epssq[f][i] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)+"_"+boost::lexical_cast<std::string>(i)];
-      } 
+      eps[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
+      epssq[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
     }
-  } else {
+    fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"], 
+						     n_flavors, eps, epssq));
+  } 
+  else if (n_site>1) {
+    std::cout << "using cluster fourier transformer" << "\n";
+    boost::shared_ptr<DCATransformer> clusterhandler;
+    DCATransformer::generate_transformer(parms, clusterhandler);
+    std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
+    std::vector<std::vector<double> > epssq_f(n_flavors, clusterhandler->epssqav());
+    fourier_ptr.reset(new ClusterG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"], 
+						      n_flavors, n_site, eps_f, epssq_f));    
+  } 
+  else {
     std::cout << "using Bethe lattice fourier transformer" << "\n";
+    std::vector<double> eps(n_flavors);
+    std::vector<double> epssq(n_flavors);
     double t = parms["t"];
     for (int f=0; f<n_flavors; ++f) {
-      eps[f].resize(n_site);
-      epssq[f].resize(n_site);
-      for (int i=0; i<n_site; ++i) {
-	eps[f][i] = 0.;
-	epssq[f][i] = t*t;
-      }
+      eps[f] = 0.;
+      epssq[f] = t*t;
     }
+    fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"],
+						     n_flavors, eps, epssq));
   }
-  fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"], 
-					   n_flavors, n_site, eps, epssq));
 }
+
 
 
 
@@ -545,35 +642,86 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
 {
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
   int n_site = parms.value_or_default("SITES", 1); 
-  std::vector< std::vector<double> > eps(n_flavors);
-  std::vector< std::vector<double> > epssq(n_flavors);
+  double U = parms["U"];
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
     std::cout << "using general fourier transformer" << "\n";
+    std::vector<std::vector<double> > eps(n_flavors);
+    std::vector<std::vector<double> >epssq(n_flavors);
     for (int f=0; f<n_flavors; ++f) {
-      eps[f].resize(n_site);
-      epssq[f].resize(n_site);
-      for (int i=0; i<n_site; ++i) {
-	eps[f][i] = parms["EPS_"+boost::lexical_cast<std::string>(f)+"_"+boost::lexical_cast<std::string>(i)];
-	epssq[f][i] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)+"_"+boost::lexical_cast<std::string>(i)];
-      } 
+      eps[f].resize(1);      
+      epssq[f].resize(1);
+      eps[f][0] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
+      epssq[f][0] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]; 
     }
-  } else {
+    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
+					      n_flavors, 1, densities, eps, epssq));
+  } 
+  else if (n_site>1) {
+    std::cout << "using cluster fourier transformer" << "\n";
+    boost::shared_ptr<DCATransformer> clusterhandler;
+    DCATransformer::generate_transformer(parms, clusterhandler);
+    std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
+    std::vector<std::vector<double> > epssq_f(n_flavors, clusterhandler->epssqav());
+    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
+					      n_flavors, n_site, densities, eps_f, epssq_f));    
+  }
+  else {
     std::cout << "using Bethe lattice fourier transformer" << "\n";
+    std::vector<std::vector<double> > eps(n_flavors);
+    std::vector<std::vector<double> >epssq(n_flavors);
     double t = parms["t"];
     for (int f=0; f<n_flavors; ++f) {
-      eps[f].resize(n_site);
-      epssq[f].resize(n_site);
-      for (int i=0; i<n_site; ++i) {
-	eps[f][i] = 0.;
-	epssq[f][i] = t*t;
-      }
+      eps[f].resize(1);      
+      epssq[f].resize(1);
+      eps[f][0] = 0.;
+      epssq[f][0] = t*t;
     }
+    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
+					      n_flavors, 1, densities, eps, epssq));
   }
-  double U = parms["U"];
-  fourier_ptr.reset(new FourierTransformer((double)parms["BETA"], 
-					   (double)parms["MU"]+U/2., U, 
-					   n_flavors, n_site, densities, eps, epssq));
 }
+
+
+
+void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
+						boost::shared_ptr<FourierTransformer> &fourier_ptr,
+						const std::vector<double> &densities, const std::vector<double> &magnetization)
+{
+  int n_flavors = parms.value_or_default("FLAVORS", 2); 
+  int n_site = parms.value_or_default("SITES", 1); 
+  double U = parms["U"];
+  if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
+    std::cout << "using general fourier transformer" << "\n";
+    std::vector<double> eps(n_flavors);
+    std::vector<double> epssq(n_flavors);
+    for (int f=0; f<n_flavors; ++f) {
+      eps[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
+      epssq[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]; 
+    }
+    fourier_ptr.reset(new SimpleAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U,
+							     n_flavors, densities, magnetization,  eps, epssq));
+  } else if (n_site>1) {
+    std::cout << "using cluster fourier transformer" << "\n";
+    boost::shared_ptr<DCATransformer> clusterhandler;
+    DCATransformer::generate_transformer(parms, clusterhandler);
+    std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
+    std::vector<std::vector<double> > epssq_f(n_flavors, clusterhandler->epssqav());
+    fourier_ptr.reset(new ClusterAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
+							      n_flavors, n_site, densities, magnetization, eps_f, epssq_f));
+  } else {
+    std::cout << "using Bethe lattice fourier transformer" << "\n";
+    std::vector<double> eps(n_flavors);
+    std::vector<double> epssq(n_flavors);
+    double t = parms["t"];
+    for (int f=0; f<n_flavors; ++f) {
+      eps[f] = 0.;
+      epssq[f] = t*t;
+    }
+    fourier_ptr.reset(new SimpleAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
+							     n_flavors, densities, magnetization, eps, epssq));
+  }
+}
+
 
 
 

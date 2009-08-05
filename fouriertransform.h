@@ -96,101 +96,10 @@ class FourierTransformer
 {
 public:
   
-  FourierTransformer(double beta, double mu, int n_flavor, int n_site)
-  {
-    init(beta, mu, n_flavor, n_site);
-  }
-
-
-  FourierTransformer(double beta, double mu, int n_flavor, int n_site, 
-		     std::vector<std::vector<double> >& eps, std::vector<std::vector<double> >& epssq)
-  {
-    init(beta, mu, n_flavor, n_site);
-    for(int f=0;f<n_flavor;++f){
-      for(int i=0;i<n_site;++i){
-	c1_[f][i][i] = 1.;
-	c2_[f][i][i] = eps[f][i] - mu;
-	c3_[f][i][i] = epssq[f][i] - 2*mu*eps[f][i] + mu*mu;
-      }
-    }
-  }
-
-  
-  FourierTransformer(double beta, double mu, double U, int n_flavor, int n_site, 
-		     const std::vector<double>& densities, 
-		     std::vector<std::vector<double> >& eps, std::vector<std::vector<double> >& epssq)
-  {
-    init(beta, mu, n_flavor, n_site);
-    for(int f=0;f<n_flavor;++f){
-      int fbar = f%2==0 ? f+1 : f-1;
-      std::cerr << "dens: " << densities[fbar] << std::endl;
-      for(int i=0;i<n_site;++i){
-	c1_[f][i][i] = 1.;
-	c2_[f][i][i] = eps[f][i]-mu + U * densities[fbar]; //formula 13
-	c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
-	  + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
-	Sc0_[f][i][i] = U * (densities[fbar]-0.5);
-	Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
-	std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
-	Sc2_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar])
-	  * ( U * (1-densities[fbar]) + (-eps[f][i]-mu) );
-      }
-    }
-    /*std::ofstream forstr("for.dat");
-    for(int f=0;f<n_flavor;++f){
-      std::cout << "densities: " << densities[f] << std::endl; 
-      for(int s1=0;s1<n_site;++s1){
-	for(uint k=0; k<100; k++){
-	  std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-	  forstr << iw.imag() << "\t" << f << "\t" << s1 << "\t" 
-		 << f_omega(iw, c1_[f][s1][s1],c2_[f][s1][s1], c3_[f][s1][s1]).real() << "\t"
-		 << f_omega(iw, c1_[f][s1][s1],c2_[f][s1][s1], c3_[f][s1][s1]).imag()
-		 << std::endl;
-	}
-      }
-      }*/
-  }
-
-  virtual ~FourierTransformer() {}
-  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
-  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
-  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
-			   const green_function<alps::RealObsevaluator> &G_omega_real,
-			   const green_function<alps::RealObsevaluator> &G_omega_imag) const;
-  virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
-			   const int nfreq_measured) const;
-  
-  static void generate_transformer(const alps::Parameters &parms,
-				   boost::shared_ptr<FourierTransformer> &fourier_ptr, 
-				   std::vector<double> eps, std::vector<double> epssq);
-  static void generate_transformer_U(const alps::Parameters &parms,
-				     boost::shared_ptr<FourierTransformer> &fourier_ptr,
-				     const std::vector<double> &densities,
-				     std::vector<double> eps, std::vector<double> epssq);
-  static void generate_transformer(const alps::Parameters &parms,
-				   boost::shared_ptr<FourierTransformer> &fourier_ptr);
-  static void generate_transformer_U(const alps::Parameters &parms,
-				     boost::shared_ptr<FourierTransformer> &fourier_ptr,
-				     const std::vector<double> &densities);
-  //void setmu(double mu){ mu_=mu;}
-  
-protected:
-
-  double beta_;
-  double mu_;
-  std::vector<std::vector<std::vector<double> > > c1_;
-  std::vector<std::vector<std::vector<double> > > c2_;
-  std::vector<std::vector<std::vector<double> > > c3_;
-  std::vector<std::vector<std::vector<double> > > Sc0_; //coefficients for the self-energy
-  std::vector<std::vector<std::vector<double> > > Sc1_;  
-  std::vector<std::vector<std::vector<double> > > Sc2_;  
-
-private:
-
-  void init(double beta, double mu, int n_flavor, int n_site)
+  FourierTransformer(const double beta, const int n_flavor, const int n_site)
   {
     beta_=beta;
-    mu_=mu;
+    //mu_=mu;
     c1_.resize(n_flavor);
     c2_.resize(n_flavor);
     c3_.resize(n_flavor);
@@ -223,7 +132,231 @@ private:
     } 
   }
 
+
+  virtual ~FourierTransformer() {}
+  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
+  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
+  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
+			   const green_function<alps::RealObsevaluator> &G_omega_real,
+			   const green_function<alps::RealObsevaluator> &G_omega_imag) const;
+  virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
+			   const int nfreq_measured) const;
+  
+  static void generate_transformer(const alps::Parameters &parms,
+				   boost::shared_ptr<FourierTransformer> &fourier_ptr);
+  static void generate_transformer_U(const alps::Parameters &parms,
+				     boost::shared_ptr<FourierTransformer> &fourier_ptr,
+				     const std::vector<double> &densities);
+  static void generate_transformer_U(const alps::Parameters &parms,
+				     boost::shared_ptr<FourierTransformer> &fourier_ptr,
+				     const std::vector<double> &densities,
+				     const std::vector<double> &magnetization);
+  //void setmu(double mu){ mu_=mu;}
+  
+protected:
+
+  double beta_;
+  //double mu_;
+  std::vector<std::vector<std::vector<double> > > c1_;
+  std::vector<std::vector<std::vector<double> > > c2_;
+  std::vector<std::vector<std::vector<double> > > c3_;
+  std::vector<std::vector<std::vector<double> > > Sc0_; //coefficients for the self-energy
+  std::vector<std::vector<std::vector<double> > > Sc1_;  
+  std::vector<std::vector<std::vector<double> > > Sc2_;  
+
+
 };
+
+
+
+class SimpleG0FourierTransformer : public FourierTransformer
+{
+public: 
+  SimpleG0FourierTransformer(const double beta, const double mu, const double h, const int n_flavor, 
+			     const std::vector<double>& eps, const std::vector<double>& epssq)
+    : FourierTransformer(beta, n_flavor, 1)
+  {
+    for(int f=0; f<n_flavor; f++) {
+      int s = f % 2 ? -1 : 1;
+      double mub = mu + s*h;
+      c1_[f][0][0] = 1.;
+      c2_[f][0][0] = eps[f] - mub;
+      c3_[f][0][0] = epssq[f] - 2*mub*eps[f] + mub*mub;	
+    }
+  }
+};
+  
+  
+
+class ClusterG0FourierTransformer : public FourierTransformer
+{
+public: 
+  ClusterG0FourierTransformer(const double beta, const double mu, const double h, const int n_flavor, const int n_site, 
+			      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
+    : FourierTransformer(beta, n_flavor, n_site)
+  { 
+    for(int f=0; f<n_flavor; f++) {
+      int s = f % 2 ? -1 : 1;
+      if (n_site%2 == 0) {
+	for(int i=0; i<n_site; i++) {
+	  c1_[f][i][i] = 1.;
+	  c2_[f][i][i] = eps[f][i] - mu;
+	  c3_[f][i][i] = epssq[f][i] - 2*mu*eps[f][i] + mu*mu +h*h/4.;
+	}
+	for(int i=0; i<n_site; i+=2) {
+	  c2_[f][i+1][i] = s*h/2;
+	  c2_[f][i][i+1] = c2_[f][i+1][i];
+	  c3_[f][i+1][i] = s*h/2*(eps[f][i] + eps[f][i+1] - 2*mu);
+	  c3_[f][i][i+1] = c3_[f][i+1][i];
+	}
+      }
+      else {
+	boost::throw_exception(std::logic_error("FourierTransformer: cannot handle antiferromagnetism with uneven cluster size\n"));
+      }
+    }
+  }
+};
+  
+  
+
+class GFourierTransformer : public FourierTransformer
+{
+public: 
+  GFourierTransformer(const double beta, const double mu, const double U, const int n_flavor, const int n_site, 
+		      const std::vector<double>& densities, 
+		      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
+  : FourierTransformer(beta, n_flavor, n_site)  
+  {
+    for(int f=0;f<n_flavor;++f){
+      int fbar = f%2==0 ? f+1 : f-1;
+      std::cerr << "dens: " << densities[fbar] << std::endl;
+      for(int i=0;i<n_site;++i){
+	c1_[f][i][i] = 1.;
+	c2_[f][i][i] = eps[f][i] - mu + U*densities[fbar]; 
+	c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
+	  + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
+	Sc0_[f][i][i] = U * (densities[fbar]-0.5);
+	Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
+	std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
+	Sc2_[f][i][i] = 0;/*U*U * densities[fbar] * (1-densities[fbar])
+			   * ( U * (1-densities[fbar]) + (eps[f][i]-mu) );*/
+      }
+    }
+    /*std::ofstream forstr("for.dat");
+    for(int f=0;f<n_flavor;++f){
+      std::cout << "densities: " << densities[f] << std::endl; 
+      for(int s1=0;s1<n_site;++s1){
+	for(uint k=0; k<100; k++){
+	  std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+	  forstr << iw.imag() << "\t" << f << "\t" << s1 << "\t" 
+		 << f_omega(iw, c1_[f][s1][s1],c2_[f][s1][s1], c3_[f][s1][s1]).real() << "\t"
+		 << f_omega(iw, c1_[f][s1][s1],c2_[f][s1][s1], c3_[f][s1][s1]).imag()
+		 << std::endl;
+	}
+      }
+    }*/
+  }
+};
+
+
+
+
+class SimpleAntiFerroGFourierTransformer : public FourierTransformer
+{
+public: 
+  SimpleAntiFerroGFourierTransformer(const double beta, const double /*mu*/, const double /*h*/, const double /*U*/, const int n_flavor, 
+				     const std::vector<double>& /*densities*/, const std::vector<double>& /*magnetization*/,  
+				     const std::vector<double>& /*eps*/, const std::vector<double>& /*epssq*/)
+    : FourierTransformer(beta, n_flavor, 1)
+  {
+    std::cerr << "to be implemented\n";
+    exit(1);
+    for(int f=0;f<n_flavor;++f){
+      //int fbar = f%2==0 ? f+1 : f-1;
+      //int s = f % 2 ? -1 : 1;
+      //double mub = mu + s*h;
+      c1_[f][0][0] = 1.;
+      c2_[f][0][0] = 0;
+      c3_[f][0][0] = 0;
+      Sc0_[f][0][0] = 0;
+      Sc1_[f][0][0] = 0;
+      Sc2_[f][0][0] = 0;
+    }
+  }
+};
+
+
+
+class ClusterAntiFerroGFourierTransformer : public FourierTransformer
+{
+public: 
+  ClusterAntiFerroGFourierTransformer(const double beta, const double mu, const double h, const double U, 
+				      const int n_flavor, const int n_site, 
+				      const std::vector<double>& density, const std::vector<double>& magnetization, 
+				      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
+    : FourierTransformer(beta, n_flavor, n_site)
+  { 
+    for(int f=0;f<n_flavor;++f){
+      int fbar = f%2==0 ? f+1 : f-1;
+      int s = f % 2 ? -1 : 1;
+      for(int i=0;i<n_site;++i){
+	c1_[f][i][i] = 1.;
+	c2_[f][i][i] = eps[f][i] - mu + U*density[fbar]; 
+	c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu + h*h/4 
+	  + 2.*U*density[fbar]*(eps[f][i]-mu) + U*U*density[fbar] + U*s*h*magnetization[fbar];
+	Sc0_[f][i][i] = U * (density[fbar]-0.5);
+	Sc1_[f][i][i] = U*U * (density[fbar]*(1-density[fbar]) - magnetization[fbar]*magnetization[fbar]);
+	/*double m = magnetization[fbar];
+	double n = density[fbar];
+	double e = eps[f][i];
+	double eq = i%2 ? eps[f][i-1] : eps[f][i+1];*/
+	Sc2_[f][i][i] = 0.;/*U*U*n*(1-n) * (U*(1-n) + (e-mu))
+	  + U*U*m * (2*U*(n-1)*m + U*m*n - (eq-mu)*n + eq)
+	  + U*s*h*m* ( U*(0.5-n) + (e-eq) );*/
+      }
+      for(int i=0; i<n_site; i+=2) {
+	c2_[f][i+1][i] = s*h/2 + U*magnetization[fbar];
+	c2_[f][i][i+1] = c2_[f][i+1][i];
+	c3_[f][i+1][i] = (U*magnetization[fbar]+s*h/2)*(eps[f][i] + eps[f][i+1] - 2*mu)
+	  + U*U*magnetization[fbar] + U*s*h*density[fbar];
+	c3_[f][i][i+1] = c3_[f][i+1][i];
+	Sc0_[f][i+1][i] = U*magnetization[fbar];
+	Sc0_[f][i][i+1] = Sc0_[f][i+1][i];
+	Sc1_[f][i+1][i] = U*U*magnetization[fbar]*(1-2*density[fbar]);
+	/*double m = magnetization[fbar];
+	double n = density[fbar];
+	double e = eps[f][i];
+	double eq = i%2 ? eps[f][i-1] : eps[f][i+1];*/
+	Sc2_[f][i][i+1] = 0;/*U*U*U * (m*m*m + m*(3*n*n-4*n+1)) 
+	  - 0.5*U*U*s*h* (n*(1-n) + m*m)
+	  +U*U*(((2*mu-eq-e)*n-mu)*m + 0*(e+eq));*/
+	Sc2_[f][i][i+1] = Sc2_[f][i+1][i];	
+      }
+    }
+    /*std::ofstream forstr("for.dat");
+    for(int f=0;f<n_flavor;++f){
+      std::cout << "density: " << density[f] << std::endl; 
+      for(int s=0;s<n_site;s+=1){
+	for (int p1=0; p1<=0; ++p1) {
+	  for (int p2=0; p2<=0; ++p2) {
+	    for(uint k=0; k<100; k++){
+	      std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+	      forstr << iw.imag() << "\t" << f << "\t" << s+p1 << "\t" << s+p2 << "\t"
+		     << f_omega(iw, c1_[f][s+p1][s+p2],c2_[f][s+p1][s+p2], c3_[f][s+p1][s+p2]).real() << "\t"
+		     << f_omega(iw, c1_[f][s+p1][s+p2],c2_[f][s+p1][s+p2], c3_[f][s+p1][s+p2]).imag()
+		     << std::endl;
+	    }
+	  }
+	}
+      }
+    }*/
+  }
+
+  virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
+			   const int nfreq_measured) const;
+
+};
+
 
 
 
@@ -231,7 +364,7 @@ class FFunctionFourierTransformer:public FourierTransformer
 {
 public:
   FFunctionFourierTransformer(double beta, double mu, double epsilonsq_av, int n_flavor, int n_site)
-    :FourierTransformer(beta,mu, n_flavor, n_site){
+    :FourierTransformer(beta, n_flavor, n_site){
     std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"epsilonsq_av: "<<epsilonsq_av<<std::endl;
     epsilonsq_av_=epsilonsq_av; //this is the integral of the second moment of the dos: \int_-\infty^\infty e^2 rho(e) de. It is t^2 for semicircle...
     for(int f=0;f<n_flavor;++f){
@@ -282,8 +415,8 @@ class FittingFourierTransformer : public FourierTransformer
   //a simple Fourier Transformer which fits c1_/w to the tail of the matsubara green function
 public:
   
-  FittingFourierTransformer(double beta, double mu, int n_flavor, int n_site)
-    : FourierTransformer(beta, mu, n_flavor, n_site)
+  FittingFourierTransformer(double beta, int n_flavor, int n_site)
+    : FourierTransformer(beta, n_flavor, n_site)
   {
     std::cout<<"Fitting FFourier Transformer" << std::endl;
     for(int f=0;f<n_flavor;++f){
