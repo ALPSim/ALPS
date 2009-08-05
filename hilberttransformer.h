@@ -31,6 +31,7 @@
 #ifndef ALPS_DMFT_HILBERTTRANSFORMER_H
 #define ALPS_DMFT_HILBERTTRANSFORMER_H
 
+
 /// @file hilberttransformer.h
 /// @brief Hilbert transformations
 ///
@@ -40,9 +41,9 @@
 ///
 /// @todo the transformations need to be implemented. responsible: Philipp Werner and Hartmut Monien
 
-#include "fouriertransform.h"
 #include "types.h"
 #include "2dsimpson.h"
+#include "fouriertransform.h"
 
 /// @brief performs a Hilbert transformation
 ///
@@ -57,7 +58,7 @@ public:
   /// @param G_tau the Greens function as a function of imaginary time tau 
   /// @param mu the chemical potential, h the magnetic field, beta the inverse temperature
   /// @return the result of the Hilbert transform (G0_tau)
-  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier_ignored, 
+  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
                                             double mu, double h, double beta)=0; 
     itime_green_function_t symmetrize(const itime_green_function_t& G_tau, const bool paramagnet) const;
   virtual itime_green_function_t initial_G0(const alps::Parameters& parms);
@@ -76,7 +77,7 @@ public:
 
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
-  itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier, 
+  itime_green_function_t operator()(const itime_green_function_t& G_tau, 
                                     double mu, double h, double beta);
   itime_green_function_t initial_G0(const alps::Parameters& parms);
   
@@ -92,12 +93,11 @@ class SquarelatticeHilbertTransformer : public HilbertTransformer {
 public:
   /// the constructor accepts the bandwidth
   SquarelatticeHilbertTransformer(double bandwidth) : bw_(bandwidth) {}
-  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier_ignored,
+  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
 					    double mu, double h, double beta)
   {
     //to implement
     std::cout<<"Square Lattice Hilbert transformer"<<G_tau<<std::endl;
-    std::cout<<&fourier_ignored<<std::endl;
     std::cout<<mu;
     std::cout<<beta;
     std::cout<<h;
@@ -119,13 +119,12 @@ public:
   ///          Note that issues such as units are still undecided and might require further 
   ///          additions to the interface
   GeneralHilbertTransformer(const vector_type& D) : D_(D) {}
-  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier_ignored,
+  virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
 					    double mu, double h, double beta)
   {
     //to implement
     //std::cout<<Sigma;
     std::cout<<G_tau<<std::endl;
-    std::cout<<&fourier_ignored<<std::endl;
     std::cout<<mu;
     std::cout<<beta;
     std::cout<<h;

@@ -44,6 +44,22 @@ matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters
 }
 
 
+
+void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::shared_ptr<DCATransformer> &trans_ptr)
+{
+  bool antiferromagnetic = parms.value_or_default("ANTIFERROMAGNET", false);
+  if (antiferromagnetic) {
+    std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
+    trans_ptr.reset(new AntiFerroDCATransformer(parms));
+  }
+  else {
+    std::cout<<"using simple DCA transformer"<<std::endl;
+    trans_ptr.reset(new SimpleDCATransformer(parms));
+  }
+}
+
+
+
 DCATransformer::DCATransformer(const alps::Parameters& params) 
   : ClusterTransformer(params), 
     t_(boost::lexical_cast<double>(params["t"])), 
@@ -137,13 +153,13 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
     for (spin_t flavor=0; flavor<nflavor; ++flavor) {
       for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
         for (frequency_t freq=0; freq<nfreq; ++freq) {
-	        G_omega_lattice(freq, kc, kc, flavor) = 0.;
+	  G_omega_lattice(freq, kc, kc, flavor) = 0.;
           std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-	        for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
-	          vector_type k(dimension());
-	          for (unsigned int d=0; d<dimension(); ++d) 
-	            k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-	          G_omega_lattice(freq, kc, kc, flavor) += 1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor));
+	  for (site_t kl=0; kl<n_cluster_cells(); ++kl) { 
+	    vector_type k(dimension());
+	    for (unsigned int d=0; d<dimension(); ++d) 
+	      k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	    G_omega_lattice(freq, kc, kc, flavor) += 1./(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor));
           }
           G_omega_lattice(freq, kc, kc, flavor) /= n_cluster_cells();
         }
@@ -198,7 +214,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     int n_flavor=parms.value_or_default("FLAVORS", 2);
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H"]);
+    //double h = static_cast<double>(parms["H"]);
     //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
@@ -212,11 +228,11 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     }
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
-    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
+    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
     itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
     G0_omega_new.write("G0_omega_input");
-    FourierTransformer::generate_transformer(parms, fourier_ptr, epsav(), epssqav());
+    FourierTransformer::generate_transformer(parms, fourier_ptr);
     fourier_ptr->backward_ft(G0_tau, G0_omega_new);
     G0_tau.write("G0_tau_input");
     matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
@@ -226,6 +242,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     return G0_omega_new;
   }
 }
+
 
 
 
@@ -348,10 +365,10 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
           G_kl(freq,kc,kc,flavor+1) = iomega_n+mu-epsilon(k0);
           G_kl(freq,kc+1,kc+1,flavor) = iomega_n+mu-epsilon(k1);
           G_kl(freq,kc+1,kc+1,flavor+1) = iomega_n+mu-epsilon(k1);
-          G_kl(freq,kc+1,kc,flavor) = h/2;
-          G_kl(freq,kc+1,kc,flavor+1) = -h/2;
-          G_kl(freq,kc,kc+1,flavor) = h/2;
-          G_kl(freq,kc,kc+1,flavor+1) = -h/2;
+          G_kl(freq,kc+1,kc,flavor) = -h/2;
+          G_kl(freq,kc+1,kc,flavor+1) = h/2;
+          G_kl(freq,kc,kc+1,flavor) = -h/2;
+          G_kl(freq,kc,kc+1,flavor+1) = h/2;
         }
       }
     }
@@ -368,6 +385,7 @@ matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_g
 
 
 
+
 matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Parameters& parms)
 {
   if (parms.defined("G0OMEGA_INPUT")) 
@@ -380,7 +398,6 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    double h_init = parms.value_or_default("H_INIT", 0.);
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
     G0_omega.clear();
@@ -393,9 +410,9 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     }
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
-    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h_init+h, beta);
+    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, h, beta);
     boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr, epsav(), epssqav());
+    FourierTransformer::generate_transformer(parms, fourier_ptr);
     G0_omega_new.write("G0_omega_input");
     transform_into_real_space(G0_omega_new).write("G0_omega_input_realspace");
     itime_green_function_t G0_tau(n_tau, n_cluster_sites(), n_flavor);

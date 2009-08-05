@@ -58,21 +58,18 @@ itime_green_function_t HilbertTransformer::initial_G0(const alps::Parameters& pa
 {
   if (parms.defined("ISOLATING")) {
     std::cout<<"calculating initial G0_tau"<<std::endl;
-    boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_time=boost::lexical_cast<int>(parms["N"]);
     int n_flavor=parms.value_or_default("FLAVORS", 2);
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    double h_init = parms.value_or_default("H_INIT", 0.);
     matsubara_green_function_t G0_omega(n_matsubara,n_flavor);  
     itime_green_function_t G0_tau(n_time, n_flavor);
     for(uint i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
       for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
-	std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init-h : h_init+h);
+	std::complex<double> zeta = iw+mu+(flavor%2 ? -h : h);
 	G0_omega(i, flavor) = 1./zeta;
       }
     }
@@ -93,7 +90,7 @@ itime_green_function_t HilbertTransformer::initial_G0(const alps::Parameters& pa
 
 
 
-itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_green_function_t& G_tau, FourierTransformer &fourier, 
+itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_green_function_t& G_tau, 
 								double mu, double h, double beta)
 {
   //if(h!=0){ std::cout<<"ignoring magnetic field!"<<std::endl; abort(); }
@@ -101,7 +98,11 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G0_tau(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
-  fourier.forward_ft(G_tau, G_omega);
+  std::cerr << "SemicircleHilbertTransformer::operator(): Fouriertransformation of G_tau at this point is requested. Densities needed!\n";
+  exit(1);
+  boost::shared_ptr<FourierTransformer> fourier_ptr;
+  //FourierTransformer::generate_transformer(parms, fourier_ptr); ????
+  fourier_ptr->forward_ft(G_tau, G_omega);
   //std::cout<<"G omega real: "<<std::endl;
   print_real_green_matsubara(std::cout, G_omega, beta);
   for(uint i=0; i<G_omega.nfreq(); i++) {
@@ -113,7 +114,7 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
   }
   //std::cout<<"symmetrized G0 omega real: "<<std::endl;
   print_real_green_matsubara(std::cout, G0_omega, beta);
-  fourier.backward_ft(G0_tau, G0_omega);
+  fourier_ptr->backward_ft(G0_tau, G0_omega);
   return G0_tau;
 }
 
@@ -126,8 +127,6 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
     return HilbertTransformer::initial_G0(parms);
   else {
     std::cout<<"calculating initial G0_tau"<<std::endl;
-    boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_time=boost::lexical_cast<int>(parms["N"]);
     int n_flavor=parms.value_or_default("FLAVORS", 2);
@@ -135,14 +134,13 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
     //if(h!=0) {std::cout<<"we don't yet handle magnetic fields!"<<std::endl; abort(); }
-    double h_init = parms.value_or_default("H_INIT", 0.);
     double tsq=t_*t_;
     matsubara_green_function_t G0_omega(n_matsubara,n_flavor);  
     itime_green_function_t G0_tau(n_time, n_flavor);
     for(uint i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
       for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
-	std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init-h : h_init+h);
+	std::complex<double> zeta = iw+mu+(flavor%2 ? -h : h);
 	G0_omega(i, flavor) = (zeta - sqrt(zeta*zeta-4*tsq))/(2*tsq);
       }
     }
@@ -169,12 +167,11 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    double h_init = parms.value_or_default("H_INIT", 0.);
     matsubara_green_function_t G0_omega(n_matsubara,n_flavor);
     for(uint i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
       for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
-	std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init-h : h_init+h);
+	std::complex<double> zeta = iw+mu+(flavor%2 ? -h : h);
 	G0_omega(i, flavor) = 1./zeta;
       }
     }
@@ -197,11 +194,10 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
 	  G0_omega(i,f)=1;
 	}
       }
-      double h_init=parms.value_or_default("H_INIT",0.);
       double h     =parms.value_or_default("H",0.);
       double mu    =parms.value_or_default("MU",0.);
       double beta  =parms.value_or_default("BETA",0.);
-      G0_omega=this->operator()(G_omega, G0_omega, mu, h_init+h, beta);
+      G0_omega=this->operator()(G_omega, G0_omega, mu, h, beta);
       G0_omega.write("G0_omega_input");
     }
     else
@@ -255,13 +251,12 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    double h_init = parms.value_or_default("H_INIT", 0.);
     double tsq=t_*t_;
     matsubara_green_function_t G0_omega(n_matsubara,n_flavor);
     for(uint i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
       for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
-	std::complex<double> zeta = iw+mu+(flavor%2 ? -h_init-h : h_init+h);
+	std::complex<double> zeta = iw+mu+(flavor%2 ? -h : h);
 	std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
 	tmp *= tmp.imag()<0 ? -1 : 1;
 	G0_omega(i, flavor) = (zeta - tmp)/(2*tsq);
@@ -518,7 +513,6 @@ matsubara_green_function_t IgorsHilbertTransformer::initial_G0(const alps::Param
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
-    //double h_init = parms.value_or_default("H_INIT", 0.);
     matsubara_green_function_t G0_omega(n_matsubara,n_flavor);
     for(uint i=0; i<G0_omega.nfreq(); i++) {
       for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
