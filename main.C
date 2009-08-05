@@ -88,22 +88,18 @@ int main(int argc, char** argv)
       is>>parms;
       is.close();
     }
-    boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
       if(!parms.defined("OMEGA_LOOP")){
         //...imaginary time tau
         SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
-        itime_green_function_t G0_tau = transform.initial_G0(parms);
-        itime_green_function_t G_tau = G0_tau;
         boost::shared_ptr<ImpuritySolver> solver_ptr;
         if (parms["SOLVER"]=="Hirsch-Fye"){
           std::cout<<"solving Hirsch Fye"<<std::endl;
           // we need a factory to create Hirsch-Fye simulations
           alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;	
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
-          selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
+          selfconsistency_loop(parms, *solver_ptr, transform);
         }
 #ifdef WERNER
         else if (parms["SOLVER"]=="Werner") {
@@ -111,17 +107,15 @@ int main(int argc, char** argv)
           alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
           std::cout<<"interpreting input value as G_tau, not G0"<<std::endl;
-          //G_tau=G0_tau;
+	  itime_green_function_t G_tau = transform.initial_G0(parms);
           F_selfconsistency_loop(parms, *solver_ptr, G_tau);
         }
 #endif
         else {
 	  boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
           solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
-          selfconsistency_loop(parms, *solver_ptr, transform, *fourier_ptr, G0_tau, G_tau);
+          selfconsistency_loop(parms, *solver_ptr, transform);
         }
-        // write G0 (to be read in as an input for a new simulation)
-        G0_tau.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
       } 
       else {
 #ifdef RUBTSOV
@@ -146,27 +140,32 @@ int main(int argc, char** argv)
           std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
         }else if(parms.defined("TWODBS")){
           if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();}
+            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
+	      std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
+	    }
             std::cerr<<"implement PM DOS integration!!"<<std::endl;
             abort();
           }else{
-            if((bool)(parms["PARAMAGNET"])==true){ std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); }
+            if((bool)(parms["PARAMAGNET"])==true){ 
+	      std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
+	    }
             transform_ptr=new TwoDAFMHilbertTransformer(parms);
           }
         }
         else{
           std::cout<<"using DOS Hilbert transform"<<std::endl;
           if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();}
+            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
+	      std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
+	    }
             transform_ptr= new FSDOSHilbertTransformer(parms);
           }else{
-            if((bool)(parms["PARAMAGNET"])==true){ std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); }
+            if((bool)(parms["PARAMAGNET"])==true){ 
+	      std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
+	    }
             transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
           }
         }
-        //std::cout<<"getting initial G0"<<std::endl;
-        matsubara_green_function_t G0_omega = transform_ptr->initial_G0(parms);
-        matsubara_green_function_t G_omega = G0_omega;
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
         if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("FLAVORS", "2")=="1")){
@@ -196,10 +195,7 @@ int main(int argc, char** argv)
           //boost::throw_exception(std::logic_error("there is no such solver!"));	
         }
 #endif
-        selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr, *fourier_ptr, G0_omega, G_omega);
-        
-        // write G0 (to be read as an input Green function)
-        G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+        selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
       }
     }
     else { //CLUSTER_LOOP
@@ -210,18 +206,8 @@ int main(int argc, char** argv)
 #endif
         //perform self consistency loop in Matsubara frequency omega
         // all gfs are formulated in k-space and are diagonal in k! 
-        DCATransformer *transform_ptr;
-        if (parms.defined("ANTIFERROMAGNET")) {
-          std::cout<<"using antiferromagnetic DCA transformer"<<std::endl;
-          transform_ptr = new AntiFerroDCATransformer(parms); 
-        } 
-        else {
-          std::cout<<"using simple DCA transformer"<<std::endl;
-          transform_ptr = new SimpleDCATransformer(parms);
-        }
-	FourierTransformer::generate_transformer(parms, fourier_ptr, transform_ptr->epsav(), transform_ptr->epssqav());
-        matsubara_green_function_t G0_omega=transform_ptr->initial_G0(parms);
-        matsubara_green_function_t G_omega=G0_omega;
+	boost::shared_ptr<DCATransformer> transform_ptr;
+	DCATransformer::generate_transformer(parms, transform_ptr);
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
         if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="1")){
@@ -241,9 +227,7 @@ int main(int argc, char** argv)
 #ifdef RUBTSOV
         }
 #endif
-        selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr, fourier_ptr, G0_omega, G_omega);
-        // write G0
-        G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+        selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);
       }
       else {
         std::cout<<parms["CLUSTER_LOOP"]<<std::endl;
