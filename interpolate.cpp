@@ -53,15 +53,25 @@ std::vector<std::map<double, std::vector<double> > > read_spectra(const alps::Pa
 
 
 
-std::map<double, double> interpolate(const std::map<double, std::vector<double> >& spectra, 
-				     const ClusterHelper::vector_type k,
-				     const ClusterHelper& helper)
+void interpolate(std::ofstream& out_str, const ClusterHelper& helper,
+		 const std::map<double, std::vector<double> >& spectra, 
+		 const std::vector<ClusterHelper::vector_type>& kvec,
+		 const double offset, const double sign, 
+		 const bool antiferromagnet)
 {
-  std::map<double, double> spectrum;
-  for (std::map<double, std::vector<double> >::const_iterator it=spectra.begin(); it!=spectra.end(); ++it) {
-    spectrum[it->first] = helper.interpolate(k, it->second);
+  for (std::vector<ClusterHelper::vector_type>::const_iterator itk=kvec.begin(); itk!=kvec.end(); ++itk) {
+    ClusterHelper::vector_type k = *itk;
+    std::map<double, double> spectrum;
+    for (std::map<double, std::vector<double> >::const_iterator it=spectra.begin(); it!=spectra.end(); ++it) {
+      spectrum[it->first] = helper.interpolate(k, it->second, antiferromagnet);
+    }
+    double l = sqrt(k[0]*k[0] + k[1]*k[1] + k[2]*k[2]);
+    for (std::map<double, double>::const_iterator it=spectrum.begin(); it!=spectrum.end(); ++it) {
+      out_str << k[0] << "\t" << k[1] << "\t"  << k[2] << "\t" << offset+sign*l << "\t" 
+	      << it->first << "\t" << it->second << "\n"; 
+    }
+    out_str << "\n";
   }
-  return spectrum;
 }
 
 
@@ -70,62 +80,57 @@ void interpolate_spectra(const alps::Parameters& parms)
 {
   std::vector<std::map<double, std::vector<double> > > spectra = read_spectra(parms);
   ClusterHelper helper(parms);
+  const bool antiferromagnet = parms["ANTIFERROMAGNET"];
   if (helper.dimension() != 3) 
     boost::throw_exception(std::invalid_argument("implement interpolation for d!=3!"));	
   for (int z=0; z<spectra.size(); ++z) {
     std::stringstream name1;
-    name1 << "Gamma_R" << "_" << z;
-    std::ofstream gamma_r_str(name1.str().c_str());
-    gamma_r_str << "# kx\tky\tkz\tomega\tspectrum\n";
-    for (int i=0; i<=100; ++i) {
-      ClusterHelper::vector_type k(3);
-      k[0] = double(i)/100.*M_PI;
-      k[1] = k[0];
-      k[2] = k[0];
-      std::map<double, double> spec = interpolate(spectra[z], k, helper);
-      for (std::map<double, double>::const_iterator it=spec.begin(); it!=spec.end(); ++it) {
-	gamma_r_str << k[0] << "\t" << k[1] << "\t"  << k[2] << "\t" 
-		    << it->first << "\t" << it->second << "\n"; 
+    name1 << "Dispersion" << "_" << z;
+    std::ofstream out_str(name1.str().c_str());
+    std::vector<ClusterHelper::vector_type> kvec(101);
+    if (antiferromagnet) {
+      for (int i=0; i<=100; ++i) {
+	kvec[i].resize(3);
+	kvec[i][0] = double(i)/100.*M_PI/2.;
+	kvec[i][1] = kvec[i][0];
+	kvec[i][2] = kvec[i][0];
       }
-      gamma_r_str << "\n";
-    }
-    gamma_r_str.close();
-    std::stringstream name2;
-    name2 << "R_X" << "_" << z;
-    std::ofstream r_x_str(name2.str().c_str());
-    r_x_str << "# kx\tky\nkz\tomega\tspectrum\n";
-    for (int i=100; i>=0; --i) {
-      ClusterHelper::vector_type k(3);
-      k[0] = M_PI;
-      k[1] = double(i)/100*M_PI;
-      k[2] = k[1];
-      std::map<double, double> spec = interpolate(spectra[z], k, helper);
-      for (std::map<double, double>::const_iterator it=spec.begin(); it!=spec.end(); ++it) {
-	r_x_str << k[0] << "\t" << k[1] << "\t"  << k[2] << "\t" 
-		<< it->first << "\t" << it->second << "\n"; 
+      interpolate(out_str, helper, spectra[z], kvec, 0, 1, antiferromagnet);
+      for (int i=0; i<=100; ++i) {
+	kvec[i].resize(3);
+	kvec[i][0] = double(i)/100.*M_PI/2.;
+	kvec[i][1] = 0;
+	kvec[i][2] = 0;
       }
-      r_x_str << "\n";
+      interpolate(out_str, helper, spectra[z], kvec, 0, -1, antiferromagnet);
     }
-    r_x_str.close();
-    std::stringstream name3;
-    name3 << "X_Gamma" << "_" << z;
-    std::ofstream x_gamma_str(name3.str().c_str());
-    x_gamma_str << "# kx\tky\nkz\tomega\tspectrum\n";
-    for (int i=100; i>=0; --i) {
-      ClusterHelper::vector_type k(3);
-      k[0] = double(i)/100*M_PI;
-      k[1] = 0;
-      k[2] = 0.;
-      std::map<double, double> spec = interpolate(spectra[z], k, helper);
-      for (std::map<double, double>::const_iterator it=spec.begin(); it!=spec.end(); ++it) {
-	x_gamma_str << k[0] << "\t" << k[1] << "\t"  << k[2] << "\t" 
-		    << it->first << "\t" << it->second << "\n"; 
+    else {
+      for (int i=0; i<=100; ++i) {
+	kvec[i].resize(3);
+	kvec[i][0] = double(i)/100.*M_PI;
+	kvec[i][1] = kvec[i][0];
+	kvec[i][2] = kvec[i][0];
       }
-      x_gamma_str << "\n";
+      interpolate(out_str, helper, spectra[z], kvec, 0, 1, antiferromagnet);
+      for (int i=0; i<=100; ++i) {
+	kvec[i].resize(3);
+	kvec[i][0] = double(i)/100.*M_PI;
+	kvec[i][1] = 0;
+	kvec[i][2] = 0; 
+      }
+      interpolate(out_str, helper, spectra[z], kvec, 0, -1, antiferromagnet);
+      for (int i=0; i<=100; ++i) {
+	kvec[i].resize(3);
+	kvec[i][0] = M_PI;
+	kvec[i][1] = double(i)/100.*M_PI;
+	kvec[i][2] = kvec[i][1];
+      }
+      interpolate(out_str, helper, spectra[z], kvec, M_PI, -1, antiferromagnet);
     }
-    x_gamma_str.close();
+    out_str.close();
   }
 }
+
 
       
 

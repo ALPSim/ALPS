@@ -153,24 +153,23 @@ void ClusterHelper::setup_tables()
   reciprocal_basis_inv_ = Matrix<double>::inverse(reciprocal_basis_);
   //setup cluster momenta
   if (bipartite()) {
-    Matrix<double>::Type b_red;
     switch (dimension()) {
     case 1 :
-      b_red.resize(1,1);
-      b_red(0,0) = M_PI/2;
+      rbzone_boundaries_.resize(1,1);
+      rbzone_boundaries_(0,0) = M_PI/2;
       break;
     case 2 :
-      b_red.resize(2,2);
-      b_red(0,0) = M_PI/2; b_red(0,1) = M_PI/2;
-      b_red(1,0) = -M_PI/2; b_red(1,1) = M_PI/2;
+      rbzone_boundaries_.resize(2,2);
+      rbzone_boundaries_(0,0) = M_PI/2; rbzone_boundaries_(0,1) = M_PI/2;
+      rbzone_boundaries_(1,0) = -M_PI/2; rbzone_boundaries_(1,1) = M_PI/2;
       break;
     case 3 :
-      //reduced Brillouin zone is the Wigner-Seitz cell of an fcc lattice with a=2
-      b_red.resize(4,3);
-      b_red(0,0) =  M_PI/2; b_red(0,1) =  M_PI/2; b_red(0,2) =  M_PI/2;
-      b_red(1,0) = -M_PI/2; b_red(1,1) =  M_PI/2; b_red(1,2) =  M_PI/2;
-      b_red(2,0) =  M_PI/2; b_red(2,1) = -M_PI/2; b_red(2,2) =  M_PI/2;
-      b_red(3,0) =  M_PI/2; b_red(3,1) =  M_PI/2; b_red(3,2) = -M_PI/2;
+      //reduced Brillouin zone is the one of an fcc lattice with a=2
+      rbzone_boundaries_.resize(4,3);
+      rbzone_boundaries_(0,0) =  M_PI/2; rbzone_boundaries_(0,1) =  M_PI/2; rbzone_boundaries_(0,2) =  M_PI/2;
+      rbzone_boundaries_(1,0) = -M_PI/2; rbzone_boundaries_(1,1) =  M_PI/2; rbzone_boundaries_(1,2) =  M_PI/2;
+      rbzone_boundaries_(2,0) =  M_PI/2; rbzone_boundaries_(2,1) = -M_PI/2; rbzone_boundaries_(2,2) =  M_PI/2;
+      rbzone_boundaries_(3,0) =  M_PI/2; rbzone_boundaries_(3,1) =  M_PI/2; rbzone_boundaries_(3,2) = -M_PI/2;
       break;
     }
     cell_iterator itc, itc_end;
@@ -182,7 +181,7 @@ void ClusterHelper::setup_tables()
 	  c[d] += cluster_coordinate(i,d);
 	c = matrix_vector_mult(reciprocal_basis_, c);
 	c = map_back_into_brillouin_zone(c);
-	if (inside_reduced_brillouin_zone(c, b_red)) {
+	if (inside_reduced_brillouin_zone(c)) {
 	  append_column_no_duplicates(cluster_momenta_, c);
 	  for (int d=0; d<dimension(); ++d) 
 	    c[d] += M_PI;
@@ -232,7 +231,7 @@ void ClusterHelper::setup_tables()
     }
   }
   //setup lattice momenta
-lattice_momenta_.resize(n_cluster_cells(), dimension());
+  lattice_momenta_.resize(n_cluster_cells(), dimension());
   momentum_iterator itm, itm_end;
   boost::tie(itm, itm_end) = momenta();
   for (unsigned int m=0; itm!=itm_end; ++itm, ++m) {
@@ -528,34 +527,22 @@ bool ClusterHelper::inside_cluster(vector_type v, const Matrix<double>::Type& B)
 
 
 
-bool ClusterHelper::inside_reduced_brillouin_zone(vector_type v, const Matrix<double>::Type& B_red) const 
+bool ClusterHelper::inside_reduced_brillouin_zone(vector_type v) const 
 {
-  for (int i=0; i<B_red.size1(); ++i) {
+  for (int i=0; i<rbzone_boundaries_.size1(); ++i) {
     double norm = 0.;
-    for (int d=0; d<B_red.size2(); ++d) 
-      norm += B_red(i,d)*B_red(i,d);
+    for (int d=0; d<rbzone_boundaries_.size2(); ++d) 
+      norm += rbzone_boundaries_(i,d)*rbzone_boundaries_(i,d);
     //norm = sqrt(norm);
     double projection = 0.;
-    for (int d=0; d<B_red.size2(); ++d) 
-      projection +=  v[d] * B_red(i,d);
+    for (int d=0; d<rbzone_boundaries_.size2(); ++d) 
+      projection +=  v[d] * rbzone_boundaries_(i,d);
     projection /= norm;
     projection = round(projection);
-    if (projection > 1 || projection <= -1) {
-      /*std::cout << v[0] << " " << v[1] << " " << v[2] << ";";
-      std::cout << "proj: " << projection << ";";
-      std::cout << i << " no\n";*/
+    if (projection > 1 || projection <= -1) 
       return false;
-    }
   }
   return true;
-  /*v = matrix_vector_mult(B_red, v);
-  for (unsigned int d=0; d<v.size(); ++d) 
-    v[d] *= 2;
-  v = round(v);
-  bool inside = true;
-  for (unsigned int d=0; d<v.size(); ++d) 
-  inside &= (v[d]<=1 && v[d]>-1);
-  return inside;*/
 }
 
 
@@ -690,7 +677,8 @@ unsigned int ClusterHelper::cluster_momentum_approximation(vector_type v) const
 
 
 
-double ClusterHelper::interpolate(vector_type k, const std::vector<double>& values) const 
+double ClusterHelper::interpolate(vector_type k, const std::vector<double>& values, 
+				  const bool antiferromagnet) const 
 {
   k = round(matrix_vector_mult(reciprocal_basis_inv_, k));
   std::vector<vector_type> neighbor;
@@ -740,6 +728,16 @@ double ClusterHelper::interpolate(vector_type k, const std::vector<double>& valu
   for (int i=0; i<neighbor.size(); ++i) {
     vector_type nv = matrix_vector_mult(reciprocal_basis_, neighbor[i]);
     nv = map_back_into_brillouin_zone(nv);
+    if (antiferromagnet) {
+      if (!inside_reduced_brillouin_zone(nv)) {
+	for (int d=0; d<dimension(); ++d) 
+	  nv[d] -= M_PI;
+	nv = map_back_into_brillouin_zone(nv);
+      }
+      if (!inside_reduced_brillouin_zone(nv)) {
+	boost::throw_exception(std::logic_error("something doesn't work in ClusterHelper::interpolate)"));
+      }
+    }
     neighbor_index[i] = identify_vertex(nv, cluster_momenta_);
   }
   std::vector<double> av(neighbor_index.size());

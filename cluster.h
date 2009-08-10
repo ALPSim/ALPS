@@ -70,7 +70,7 @@ public:
   unsigned int n_cluster_cells() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::volume(); }
   unsigned int dimension() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::dimension(); }
   unsigned int cluster_momentum_approximation(vector_type k) const;
-  double interpolate(vector_type k, const std::vector<double>& values) const;
+  double interpolate(vector_type k, const std::vector<double>& values, const bool antiferromagnet) const;
 
   site_class_set_itpair_type site_classes_real_space() const 
   { return site_class_set_itpair_type (site_class_set_real_space_.begin(), site_class_set_real_space_.end()); }
@@ -90,7 +90,7 @@ private:
 			 const Matrix<double>::Type& reciprocal_basis_inv*/ );
   std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<site_t>::Type& symmetry_table) const;
   bool inside_cluster(vector_type v, const Matrix<double>::Type& b) const;
-  bool inside_reduced_brillouin_zone(vector_type v, const Matrix<double>::Type& B) const;
+  bool inside_reduced_brillouin_zone(vector_type v) const;
   bool append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v) const;
   bool append_column_no_duplicates(Matrix<site_t>::Type& m, std::map<site_t, site_t>& smap) const;
   vector_type map_back_into_brillouin_zone(vector_type v) const;
@@ -108,6 +108,7 @@ private:
   Matrix<double>::Type lattice_momenta_;
   Matrix<double>::Type reciprocal_basis_;
   Matrix<double>::Type reciprocal_basis_inv_;
+  Matrix<double>::Type rbzone_boundaries_;
   site_class_set_type site_class_set_real_space_;
   pair_class_set_type pair_class_set_real_space_;
   site_class_set_type site_class_set_k_space_;
