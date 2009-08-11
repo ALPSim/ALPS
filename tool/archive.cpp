@@ -125,7 +125,7 @@ int main(int ac, char* av[]) {
                                         throw std::runtime_error("no output-path specified");
                                 fs::path plotPath = complete(fs::path(vm["plot-file"].as<std::string>()));
                                 if (vm.count("positional-arg"))
-                                        plotPath = fs::path(fs::initial_path() / vm["positional-arg"].as<std::string>());
+                                  plotPath = complete(fs::path(vm["positional-arg"].as<std::string>()));
                                 fs::path outputPath = complete(fs::path(vm["output-path"].as<std::string>()));
                                 Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.leaf());
 
