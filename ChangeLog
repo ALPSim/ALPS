@@ -1,3 +1,7 @@
+2009-08-28  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Update configure script for Boost verion 1.40.0
+
 2009-06-03  Synge Todo <wistaria@comp-phys.org>
 
 	* Merged parapack-200905 branch changes r3167:3179 into the trunk.

@@ -114,6 +114,7 @@ src_boost_FILESYSTEM_1_36 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_1_37 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_1_38 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_1_39 = $(src_boost_FILESYSTEM_1_35)
+src_boost_FILESYSTEM_1_40 = $(src_boost_FILESYSTEM_1_35)
 src_boost_FILESYSTEM_SVN = $(src_boost_FILESYSTEM_1_35)
 
 src_boost_MPI_1_35 = \
@@ -141,6 +142,7 @@ src_boost_MPI_1_36 = $(src_boost_MPI_1_35)
 src_boost_MPI_1_37 = $(src_boost_MPI_1_35)
 src_boost_MPI_1_38 = $(src_boost_MPI_1_35)
 src_boost_MPI_1_39 = $(src_boost_MPI_1_35)
+src_boost_MPI_1_40 = $(src_boost_MPI_1_35)
 src_boost_MPI_SVN = $(src_boost_MPI_1_35)
 
 src_boost_PROGRAM_OPTIONS = \
@@ -196,6 +198,7 @@ src_boost_REGEX_1_36 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_1_37 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_1_38 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_1_39 = $(src_boost_REGEX_1_33)
+src_boost_REGEX_1_40 = $(src_boost_REGEX_1_33)
 src_boost_REGEX_SVN = $(src_boost_REGEX_1_33)
 
 src_boost_SERIALIZATION_1_32 = \
@@ -314,6 +317,7 @@ src_boost_SERIALIZATION_1_36 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_37 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_38 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_39 = $(src_boost_SERIALIZATION_1_35)
+src_boost_SERIALIZATION_1_40 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_SVN = $(src_boost_SERIALIZATION_1_35)
 
 src_boost_SIGNALS = \
@@ -329,6 +333,7 @@ src_BOOST_SYSTEM_1_36 = $(src_BOOST_SYSTEM_1_35)
 src_BOOST_SYSTEM_1_37 = $(src_BOOST_SYSTEM_1_35)
 src_BOOST_SYSTEM_1_38 = $(src_BOOST_SYSTEM_1_35)
 src_BOOST_SYSTEM_1_39 = $(src_BOOST_SYSTEM_1_35)
+src_BOOST_SYSTEM_1_40 = $(src_BOOST_SYSTEM_1_35)
 src_BOOST_SYSTEM_SVN = $(src_BOOST_SYSTEM_1_35)
 
 src_boost_THREAD = \
@@ -420,6 +425,10 @@ if BOOST_1_39
 nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_39) $(src_boost_REGEX_1_39) $(src_boost_SERIALIZATION_1_39) $(src_BOOST_SYSTEM_1_39)
 endif
 
+if BOOST_1_40
+nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_40) $(src_boost_REGEX_1_40) $(src_boost_SERIALIZATION_1_40) $(src_BOOST_SYSTEM_1_40)
+endif
+
 if BOOST_SVN
 nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_SVN) $(src_boost_REGEX_SVN) $(src_boost_SERIALIZATION_SVN) $(src_BOOST_SYSTEM_SVN)
 endif
@@ -439,6 +448,9 @@ nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_38)
 endif
 if BOOST_1_39
 nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_39)
+endif
+if BOOST_1_40
+nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_40)
 endif
 if BOOST_SVN
 nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_SVN)

@@ -27,6 +27,7 @@
 
 #include <boost/version.hpp>
 #if BOOST_VERSION >= 103600
+# include <boost/detail/workaround.hpp>
 # if !defined(BOOST_SPIRIT_USE_OLD_NAMESPACE)
 #  define BOOST_SPIRIT_USE_OLD_NAMESPACE
 # endif
