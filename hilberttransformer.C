@@ -123,7 +123,7 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
 
 itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Parameters& parms) 
 {
-  if (parms.defined("G0TAU_INPUT"))
+  if (parms.defined("G0TAU_INPUT") || parms.defined("ISOLATING"))
     return HilbertTransformer::initial_G0(parms);
   else {
     std::cout<<"calculating initial G0_tau"<<std::endl;
@@ -241,7 +241,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
 
 matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps::Parameters& parms)
 {
-  if (parms.defined("G0OMEGA_INPUT"))
+  if (parms.defined("G0OMEGA_INPUT") || parms.defined("ISOLATING"))
     return FrequencySpaceHilbertTransformer::initial_G0(parms);
   else {
     std::cout<<"calculating initial G0_omega"<<std::endl;
