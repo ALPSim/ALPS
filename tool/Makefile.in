@@ -76,8 +76,9 @@ DIST_COMMON = $(dist_bin_SCRIPTS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/changestylesheet.in \
 	$(srcdir)/convert2html.in $(srcdir)/convert2text.in \
 	$(srcdir)/extractgp.in $(srcdir)/extracthtml.in \
-	$(srcdir)/extracttext.in $(srcdir)/extractxmgr.in \
-	$(srcdir)/plot2gp.in $(srcdir)/plot2html.in \
+	$(srcdir)/extractmpl.in $(srcdir)/extracttext.in \
+	$(srcdir)/extractxmgr.in $(srcdir)/plot2gp.in \
+	$(srcdir)/plot2html.in $(srcdir)/plot2mpl.in \
 	$(srcdir)/plot2text.in $(srcdir)/plot2xmgr.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
@@ -103,7 +104,7 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
-	changestylesheet
+	changestylesheet extractmpl plot2mpl
 @BUILD_ARCHIVE_TRUE@am__EXEEXT_1 = archive$(EXEEXT)
 @BUILD_DOC_TRUE@am__EXEEXT_2 = quickbook$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
@@ -527,7 +528,7 @@ AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $
 @BUILD_UNIFIED_LIB_FALSE@LDADD = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 @BUILD_UNIFIED_LIB_TRUE@LDADD = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet 
-bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
+bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet extractmpl plot2mpl
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
 parameter2xml_SOURCES = parameter2xml.C
@@ -595,6 +596,10 @@ plot2text: $(top_builddir)/config.status $(srcdir)/plot2text.in
 plot2xmgr: $(top_builddir)/config.status $(srcdir)/plot2xmgr.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 changestylesheet: $(top_builddir)/config.status $(srcdir)/changestylesheet.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+extractmpl: $(top_builddir)/config.status $(srcdir)/extractmpl.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+plot2mpl: $(top_builddir)/config.status $(srcdir)/plot2mpl.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)

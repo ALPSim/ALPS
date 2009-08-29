@@ -35,13 +35,12 @@ build_triplet = @build@
 host_triplet = @host@
 @ALPS_FULL_TRUE@am__append_1 = tool
 @ALPS_FULL_TRUE@am__append_2 = example
-@ALPS_FULL_TRUE@am__append_3 = CITATIONS.txt LICENSE.txt README config/ac_alps.m4 config/preamble.in
-@ALPS_LIGHT_TRUE@am__append_4 = LICENSE-light.txt README-light config/preamble-light.in
+@ALPS_FULL_TRUE@am__append_3 = CITATIONS.txt LICENSE.txt README.txt config/ac_alps.m4 config/preamble.in
+@ALPS_LIGHT_TRUE@am__append_4 = LICENSE-light.txt README-light.txt config/preamble-light.in
 subdir = .
-DIST_COMMON = README $(am__configure_deps) \
-	$(am__dist_noinst_DATA_DIST) $(dist_noinst_SCRIPTS) \
-	$(srcdir)/Makefile.am $(srcdir)/Makefile.in \
-	$(top_srcdir)/config/config.site.in \
+DIST_COMMON = $(am__configure_deps) $(am__dist_noinst_DATA_DIST) \
+	$(dist_noinst_SCRIPTS) $(srcdir)/Makefile.am \
+	$(srcdir)/Makefile.in $(top_srcdir)/config/config.site.in \
 	$(top_srcdir)/config/include.mk.in $(top_srcdir)/configure \
 	$(top_srcdir)/src/alps/config.h.in \
 	$(top_srcdir)/src/boost/fs_utf8_codecvt_facet.cpp.in \
@@ -86,8 +85,8 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
 am__dist_noinst_DATA_DIST = ChangeLog ChangeLog.0 INSTALL TODO \
-	CITATIONS.txt LICENSE.txt README config/ac_alps.m4 \
-	config/preamble.in LICENSE-light.txt README-light \
+	CITATIONS.txt LICENSE.txt README.txt config/ac_alps.m4 \
+	config/preamble.in LICENSE-light.txt README-light.txt \
 	config/preamble-light.in
 am__vpath_adj_setup = srcdirstrip=`echo "$(srcdir)" | sed 's|.|.|g'`;
 am__vpath_adj = case $$p in \
@@ -833,7 +832,7 @@ release snapshot :
 	tar zxf $(distdir).tar.gz
 	mv $(distdir) $(distdir_light)
 	cd $(distdir_light); \
-	  rm -f CITATIONS.txt LICENSE.txt README config/preamble.in; \
+	  rm -f CITATIONS.txt LICENSE.txt README.txt config/preamble.in; \
 	  rm -rf src/alps/lattice* src/alps/model* src/alps/plot* src/alps/scheduler* lib/xml tool example test/lattice test/model test/plot doc/index.html doc/lattice doc/model doc/scheduler doc/tool; \
 	  find . -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./config/update_preamble -l > /dev/null; \
 	  find . -name '*\.txt' -or -name '*\.html' | xargs chmod 644
@@ -848,7 +847,7 @@ release snapshot :
 	fi
 	tar zxf $(distdir).tar.gz
 	cd $(distdir); \
-	  rm -f LICENSE-light.txt README-light config/preamble-light.in doc/index-light.html; \
+	  rm -f LICENSE-light.txt README-light.txt config/preamble-light.in doc/index-light.html; \
 	  find . -name '*\.txt' -or -name '*\.html' | xargs chmod 644
 	rm -f $(distdir).tar.gz
 	if test "$@" = "snapshot"; then \

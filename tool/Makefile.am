@@ -12,7 +12,7 @@ pkgdatadir = $(libdir)/xml
 
 bin_PROGRAMS = compactrun convert2xml parameter2xml printgraph pconfig pevaluate poutput txt2archive xml2archive
 dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet 
-bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet
+bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet extractmpl plot2mpl
 
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C

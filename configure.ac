@@ -11,7 +11,7 @@ dnl
 
 dnl Version of ALPS Library
 
-define([alps_version], [1.3.3])
+define([alps_version], [1.4b1])
 
 dnl Latest publication year of ALPS
 
@@ -483,7 +483,7 @@ if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(test/parapack/Makefile)
   AC_CONFIG_FILES(example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric example/parapack/Makefile example/parapack/single/Makefile example/parapack/multiple/Makefile example/parapack/loop/Makefile example/parapack/exchange/Makefile example/parapack/wanglandau/Makefile example/sampling/Makefile)
   AC_CONFIG_FILES(lib/xml/Makefile lib/xml/changestylesheet.xsl lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl)
-  AC_CONFIG_FILES(tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet)
+  AC_CONFIG_FILES(tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet tool/extractmpl tool/plot2mpl)
 fi
 
 if test "$ac_cv_use_precompiled_boost" != yes; then

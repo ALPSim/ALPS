@@ -1,0 +1,27 @@
+#! /bin/bash
+
+# check correct usage
+if test $# -lt 2;
+then
+  echo Usage: $0 plot.xml archive.xml 
+  echo or     $0 plot.xml task1.xml task2.xml ...
+  exit
+fi 
+
+# define xsl-settings from xml-plot input  
+@bindir@/xslttransform $1 @libdir@/xml/plot2xsl.xsl > /tmp/archive2plot$$.xsl 
+
+# generate xml-plot output from archive or list of task files
+if test $# -gt 2;
+then
+  @bindir@/archivecat `echo ${*:1} | cut -d' ' -f2-` > /tmp/archive$$
+  @bindir@/xslttransform /tmp/archive$$ /tmp/archive2plot$$.xsl > /tmp/plot$$
+  rm /tmp/archive$$
+else
+  @bindir@/xslttransform $2 /tmp/archive2plot$$.xsl > /tmp/plot$$  
+fi
+rm /tmp/archive2plot$$.xsl
+
+# generate matplotlib source from previously generated xml-plot
+@bindir@/xslttransform /tmp/plot$$ @libdir@/xml/plot2mpl.xsl 
+rm /tmp/plot$$

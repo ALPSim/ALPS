@@ -14,10 +14,10 @@ distdir_light = alps-light-$(VERSION)
 dist_noinst_SCRIPTS = bootstrap config/make_snapshot config/run-test config/update_preamble
 dist_noinst_DATA = ChangeLog ChangeLog.0 INSTALL TODO
 if ALPS_FULL
-dist_noinst_DATA += CITATIONS.txt LICENSE.txt README config/ac_alps.m4 config/preamble.in
+dist_noinst_DATA += CITATIONS.txt LICENSE.txt README.txt config/ac_alps.m4 config/preamble.in
 endif
 if ALPS_LIGHT
-dist_noinst_DATA += LICENSE-light.txt README-light config/preamble-light.in
+dist_noinst_DATA += LICENSE-light.txt README-light.txt config/preamble-light.in
 endif
 
 nodist_data_DATA = config/config.site
@@ -54,7 +54,7 @@ release snapshot :
 	tar zxf $(distdir).tar.gz
 	mv $(distdir) $(distdir_light)
 	cd $(distdir_light); \
-	  rm -f CITATIONS.txt LICENSE.txt README config/preamble.in; \
+	  rm -f CITATIONS.txt LICENSE.txt README.txt config/preamble.in; \
 	  rm -rf src/alps/lattice* src/alps/model* src/alps/plot* src/alps/scheduler* lib/xml tool example test/lattice test/model test/plot doc/index.html doc/lattice doc/model doc/scheduler doc/tool; \
 	  find . -type f -name '*\.h' -or -name '*\.C' -or -name '*\.hpp' -or -name '*\.h\.in' | xargs ./config/update_preamble -l > /dev/null; \
 	  find . -name '*\.txt' -or -name '*\.html' | xargs chmod 644
@@ -69,7 +69,7 @@ release snapshot :
 	fi
 	tar zxf $(distdir).tar.gz
 	cd $(distdir); \
-	  rm -f LICENSE-light.txt README-light config/preamble-light.in doc/index-light.html; \
+	  rm -f LICENSE-light.txt README-light.txt config/preamble-light.in doc/index-light.html; \
 	  find . -name '*\.txt' -or -name '*\.html' | xargs chmod 644
 	rm -f $(distdir).tar.gz
 	if test "$@" = "snapshot"; then \
