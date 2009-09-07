@@ -1,3 +1,7 @@
+2009-09-07  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Added support for OpenMP
+
 2009-08-28  Synge Todo <wistaria@comp-phys.org>
 
 	* [config] Update configure script for Boost verion 1.40.0

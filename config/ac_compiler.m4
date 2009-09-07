@@ -488,7 +488,20 @@ AC_DEFUN([AC_COMPILER],
     ]
   )
   AC_LANG_RESTORE
-  ]
+
+  AC_LANG_SAVE
+  AC_LANG_C
+  AC_OPENMP
+  AC_LANG_CPLUSPLUS
+  AC_OPENMP
+  AC_LANG_RESTORE
+  if test "$ac_cv_prog_cxx_openmp" = unsupported; then
+    ac_cv_have_openmp=no
+  else
+    ac_cv_have_openmp=yes
+    CFLAGS="$CFLAGS $OPENMP_CFLAGS"
+    CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+  fi
 
   ac_cv_compiler="$COMPILER"
   ac_cv_compiler_cc="$CC"
@@ -498,4 +511,5 @@ AC_DEFUN([AC_COMPILER],
 
   ac_cv_prog_ac_ct_CC="$CC"
   ac_cv_prog_ac_ct_CXX="$CXX"
+  ]
 )
