@@ -420,28 +420,31 @@ am__objects_41 = $(am__objects_37)
 @BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_33) \
 @BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_40) \
 @BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_41)
-@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__objects_47 = $(am__objects_39) \
+am__objects_47 = $(am__objects_36) libalps_mpi_la-archive_exception.lo \
+	libalps_mpi_la-shared_ptr_helper.lo \
+	libalps_mpi_la-xml_archive_exception.lo
+@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__objects_48 = $(am__objects_39) \
 @BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_33) \
-@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_40) \
+@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_47) \
 @BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_41)
-am__objects_48 = libalps_mpi_la-connection.lo \
+am__objects_49 = libalps_mpi_la-connection.lo \
 	libalps_mpi_la-named_slot_map.lo libalps_mpi_la-signal_base.lo \
 	libalps_mpi_la-slot.lo libalps_mpi_la-trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_49 =  \
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_48)
-am__objects_50 = libalps_mpi_la-barrier.lo libalps_mpi_la-condition.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_50 =  \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_49)
+am__objects_51 = libalps_mpi_la-barrier.lo libalps_mpi_la-condition.lo \
 	libalps_mpi_la-exceptions.lo libalps_mpi_la-mutex.lo \
 	libalps_mpi_la-once.lo libalps_mpi_la-recursive_mutex.lo \
 	libalps_mpi_la-thread.lo libalps_mpi_la-tss.lo \
 	libalps_mpi_la-xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_51 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_50)
-am__objects_52 = $(am__objects_21) $(am__objects_25) $(am__objects_31) \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_52 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_51)
+am__objects_53 = $(am__objects_21) $(am__objects_25) $(am__objects_31) \
 	$(am__objects_35) $(am__objects_38) $(am__objects_42) \
 	$(am__objects_43) $(am__objects_44) $(am__objects_45) \
-	$(am__objects_46) $(am__objects_47) $(am__objects_49) \
-	$(am__objects_51)
-am__objects_53 = libalps_mpi_la-broadcast.lo \
+	$(am__objects_46) $(am__objects_48) $(am__objects_50) \
+	$(am__objects_52)
+am__objects_54 = libalps_mpi_la-broadcast.lo \
 	libalps_mpi_la-communicator.lo \
 	libalps_mpi_la-computation_tree.lo \
 	libalps_mpi_la-content_oarchive.lo \
@@ -457,18 +460,18 @@ am__objects_53 = libalps_mpi_la-broadcast.lo \
 	libalps_mpi_la-point_to_point.lo libalps_mpi_la-request.lo \
 	libalps_mpi_la-text_skeleton_oarchive.lo \
 	libalps_mpi_la-timer.lo
-@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_54 = $(am__objects_53)
-am__objects_55 = $(am__objects_53)
-@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_56 = $(am__objects_55)
-@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_57 = $(am__objects_55)
-@BOOST_1_38_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_58 = $(am__objects_55)
-@BOOST_1_39_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_59 = $(am__objects_55)
-@BOOST_1_40_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_60 = $(am__objects_55)
-@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_61 = $(am__objects_55)
-am__objects_62 = $(am__objects_54) $(am__objects_56) $(am__objects_57) \
-	$(am__objects_58) $(am__objects_59) $(am__objects_60) \
-	$(am__objects_61)
-nodist_libalps_mpi_la_OBJECTS = $(am__objects_52) $(am__objects_62)
+@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_55 = $(am__objects_54)
+am__objects_56 = $(am__objects_54)
+@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_57 = $(am__objects_56)
+@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_58 = $(am__objects_56)
+@BOOST_1_38_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_59 = $(am__objects_56)
+@BOOST_1_39_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_60 = $(am__objects_56)
+@BOOST_1_40_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_61 = $(am__objects_56)
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_62 = $(am__objects_56)
+am__objects_63 = $(am__objects_55) $(am__objects_57) $(am__objects_58) \
+	$(am__objects_59) $(am__objects_60) $(am__objects_61) \
+	$(am__objects_62)
+nodist_libalps_mpi_la_OBJECTS = $(am__objects_53) $(am__objects_63)
 libalps_mpi_la_OBJECTS = $(am_libalps_mpi_la_OBJECTS) \
 	$(nodist_libalps_mpi_la_OBJECTS)
 libalps_mpi_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -543,52 +546,52 @@ am__libalps_sgl_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/osiris/process.C \
 	$(top_srcdir)/src/alps/osiris/comm.C \
 	$(top_srcdir)/src/alps/osiris/mpdump.C
-am__objects_63 = copyright.lo
-am__objects_64 = evaluator.lo
-am__objects_65 = xdrdump.lo xdrcore.lo dumparchive.lo
-am__objects_66 = parameter.lo parameterlist.lo parameters.lo
-am__objects_67 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
+am__objects_64 = copyright.lo
+am__objects_65 = evaluator.lo
+am__objects_66 = xdrdump.lo xdrcore.lo dumparchive.lo
+am__objects_67 = parameter.lo parameterlist.lo parameters.lo
+am__objects_68 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
 	xmlstream.lo xslt_path.lo
-am__objects_68 = rngfactory.lo
-am__objects_69 = nan.lo observable.lo observableset.lo
-am__objects_70 = disorder.lo latticedescriptor.lo \
+am__objects_69 = rngfactory.lo
+am__objects_70 = nan.lo observable.lo observableset.lo
+am__objects_71 = disorder.lo latticedescriptor.lo \
 	latticegraphdescriptor.lo latticelibrary.lo unitcell.lo
-am__objects_71 = modellibrary.lo siteterm.lo bondterm.lo \
+am__objects_72 = modellibrary.lo siteterm.lo bondterm.lo \
 	globaloperator.lo
-am__objects_72 = abstract_task.lo factory.lo info.lo \
+am__objects_73 = abstract_task.lo factory.lo info.lo \
 	master_scheduler.lo measurement_operators.lo montecarlo.lo \
 	mpp_scheduler.lo options.lo remote_task.lo remote_worker.lo \
 	scheduler.lo signal.lo single_scheduler.lo serial_scheduler.lo \
 	slave_task.lo task.lo worker.lo workertask.lo
-am__objects_73 = clone.lo clone_info.lo worker_factory.lo filelock.lo \
+am__objects_74 = clone.lo clone_info.lo worker_factory.lo filelock.lo \
 	logger.lo measurement.lo option.lo queue.lo job.lo types.lo \
 	util.lo mc_worker.lo
-@ALPS_FULL_TRUE@am__objects_74 = $(am__objects_70) $(am__objects_71) \
-@ALPS_FULL_TRUE@	$(am__objects_72) $(am__objects_73)
-@BUILD_BOOST_TRUE@am__objects_75 = throw_exception.lo
-am__objects_76 = $(am__objects_63) $(am__objects_64) $(am__objects_65) \
-	$(am__objects_66) $(am__objects_67) $(am__objects_68) \
-	$(am__objects_69) $(am__objects_74) $(am__objects_75)
-am__objects_77 = scheduler_comm.lo scheduler_sgl.lo
-@ALPS_FULL_TRUE@am__objects_78 = $(am__objects_77)
-am__objects_79 = $(am__objects_78)
-am__objects_80 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo
-am_libalps_sgl_la_OBJECTS = $(am__objects_76) $(am__objects_79) \
-	$(am__objects_80)
-am__objects_81 = date_generators.lo greg_month.lo greg_weekday.lo \
+@ALPS_FULL_TRUE@am__objects_75 = $(am__objects_71) $(am__objects_72) \
+@ALPS_FULL_TRUE@	$(am__objects_73) $(am__objects_74)
+@BUILD_BOOST_TRUE@am__objects_76 = throw_exception.lo
+am__objects_77 = $(am__objects_64) $(am__objects_65) $(am__objects_66) \
+	$(am__objects_67) $(am__objects_68) $(am__objects_69) \
+	$(am__objects_70) $(am__objects_75) $(am__objects_76)
+am__objects_78 = scheduler_comm.lo scheduler_sgl.lo
+@ALPS_FULL_TRUE@am__objects_79 = $(am__objects_78)
+am__objects_80 = $(am__objects_79)
+am__objects_81 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo
+am_libalps_sgl_la_OBJECTS = $(am__objects_77) $(am__objects_80) \
+	$(am__objects_81)
+am__objects_82 = date_generators.lo greg_month.lo greg_weekday.lo \
 	gregorian_types.lo posix_time_types.lo
-am__objects_82 = cmdline.lo config_file.lo convert.lo \
+am__objects_83 = cmdline.lo config_file.lo convert.lo \
 	options_description.lo parsers.lo positional_options.lo \
 	value_semantic.lo variables_map.lo winmain.lo \
 	po_utf8_codecvt_facet.lo
-@BUILD_BOOST_TRUE@am__objects_83 = $(am__objects_81) $(am__objects_82)
-am__objects_84 = convenience.lo operations_posix_windows.lo \
+@BUILD_BOOST_TRUE@am__objects_84 = $(am__objects_82) $(am__objects_83)
+am__objects_85 = convenience.lo operations_posix_windows.lo \
 	path_posix_windows.lo
-am__objects_85 = c_regex_traits.lo c_regex_traits_common.lo \
+am__objects_86 = c_regex_traits.lo c_regex_traits_common.lo \
 	cpp_regex_traits.lo cregex.lo fileiter.lo instances.lo \
 	posix_api.lo regex.lo regex_debug.lo regex_synch.lo \
 	w32_regex_traits.lo wide_posix_api.lo winstances.lo
-am__objects_86 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
+am__objects_87 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
 	basic_serializer_map.lo basic_text_iprimitive.lo \
 	basic_text_oprimitive.lo binary_iarchive.lo binary_oarchive.lo \
 	codecvt_null.lo extended_type_info.lo \
@@ -596,25 +599,25 @@ am__objects_86 = basic_archive.lo basic_iarchive.lo basic_oarchive.lo \
 	polymorphic_iarchive.lo polymorphic_oarchive.lo \
 	text_iarchive.lo text_oarchive.lo void_cast.lo \
 	sr_utf8_codecvt_facet.lo
-@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__objects_87 = $(am__objects_84) \
-@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_85) \
-@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_86)
-am__objects_88 = $(am__objects_84)
-@BUILD_BOOST_WCHAR_TRUE@am__objects_89 = wc_regex_traits.lo \
+@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@am__objects_88 = $(am__objects_85) \
+@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_86) \
+@BOOST_1_32_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_87)
+am__objects_89 = $(am__objects_85)
+@BUILD_BOOST_WCHAR_TRUE@am__objects_90 = wc_regex_traits.lo \
 @BUILD_BOOST_WCHAR_TRUE@	wide_posix_api.lo winstances.lo
-am__objects_90 = c_regex_traits.lo cpp_regex_traits.lo cregex.lo \
+am__objects_91 = c_regex_traits.lo cpp_regex_traits.lo cregex.lo \
 	fileiter.lo icu.lo instances.lo posix_api.lo regex.lo \
 	regex_debug.lo regex_raw_buffer.lo regex_traits_defaults.lo \
 	static_mutex.lo usinstances.lo w32_regex_traits.lo \
-	$(am__objects_89)
-@BUILD_BOOST_WCHAR_TRUE@am__objects_91 = basic_text_wiprimitive.lo \
+	$(am__objects_90)
+@BUILD_BOOST_WCHAR_TRUE@am__objects_92 = basic_text_wiprimitive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	basic_text_woprimitive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	binary_wiarchive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	binary_woarchive.lo text_wiarchive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	text_woarchive.lo xml_wgrammar.lo \
 @BUILD_BOOST_WCHAR_TRUE@	xml_wiarchive.lo xml_woarchive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	sr_utf8_codecvt_facet.lo
-am__objects_92 = basic_archive.lo basic_archive_impl.lo \
+am__objects_93 = basic_archive.lo basic_archive_impl.lo \
 	basic_iarchive.lo basic_iserializer.lo basic_oarchive.lo \
 	basic_oserializer.lo basic_pointer_iserializer.lo \
 	basic_pointer_oserializer.lo basic_serializer_map.lo \
@@ -624,18 +627,18 @@ am__objects_92 = basic_archive.lo basic_archive_impl.lo \
 	extended_type_info_no_rtti.lo extended_type_info_typeid.lo \
 	polymorphic_iarchive.lo polymorphic_oarchive.lo stl_port.lo \
 	text_iarchive.lo text_oarchive.lo void_cast.lo xml_grammar.lo \
-	xml_iarchive.lo xml_oarchive.lo $(am__objects_91)
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__objects_93 = $(am__objects_88) \
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_90) \
-@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_92)
-am__objects_94 = operations.lo path.lo portability.lo \
+	xml_iarchive.lo xml_oarchive.lo $(am__objects_92)
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@am__objects_94 = $(am__objects_89) \
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_91) \
+@BOOST_1_33_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_93)
+am__objects_95 = operations.lo path.lo portability.lo \
 	fs_utf8_codecvt_facet.lo
-am__objects_95 = $(am__objects_90)
-am__objects_96 = $(am__objects_92)
-@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_97 = $(am__objects_94) \
-@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_95) \
-@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96)
-am__objects_98 = basic_archive.lo basic_iarchive.lo \
+am__objects_96 = $(am__objects_91)
+am__objects_97 = $(am__objects_93)
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@am__objects_98 = $(am__objects_95) \
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96) \
+@BOOST_1_34_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_97)
+am__objects_99 = basic_archive.lo basic_iarchive.lo \
 	basic_iserializer.lo basic_oarchive.lo basic_oserializer.lo \
 	basic_pointer_iserializer.lo basic_pointer_oserializer.lo \
 	basic_serializer_map.lo basic_text_iprimitive.lo \
@@ -645,60 +648,62 @@ am__objects_98 = basic_archive.lo basic_iarchive.lo \
 	extended_type_info_typeid.lo polymorphic_iarchive.lo \
 	polymorphic_oarchive.lo stl_port.lo text_iarchive.lo \
 	text_oarchive.lo void_cast.lo xml_grammar.lo xml_iarchive.lo \
-	xml_oarchive.lo $(am__objects_91)
-am__objects_99 = error_code.lo
-@BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@am__objects_100 =  \
-@BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_94) \
+	xml_oarchive.lo $(am__objects_92)
+am__objects_100 = error_code.lo
+@BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@am__objects_101 =  \
 @BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_95) \
-@BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_98) \
-@BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_99)
-am__objects_101 = $(am__objects_94)
-am__objects_102 = $(am__objects_98)
+@BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96) \
+@BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_99) \
+@BOOST_1_35_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_100)
+am__objects_102 = $(am__objects_95)
 am__objects_103 = $(am__objects_99)
-@BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@am__objects_104 =  \
-@BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_101) \
-@BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_95) \
+am__objects_104 = $(am__objects_100)
+@BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@am__objects_105 =  \
 @BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_102) \
-@BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103)
-@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@am__objects_105 =  \
-@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_101) \
-@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_95) \
+@BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96) \
+@BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103) \
+@BOOST_1_36_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_104)
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@am__objects_106 =  \
 @BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_102) \
-@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103)
-@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@am__objects_106 =  \
-@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_101) \
-@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_95) \
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96) \
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103) \
+@BOOST_1_37_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_104)
+@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@am__objects_107 =  \
 @BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_102) \
-@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103)
-@BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@am__objects_107 =  \
-@BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_101) \
-@BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_95) \
+@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96) \
+@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103) \
+@BOOST_1_38_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_104)
+@BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@am__objects_108 =  \
 @BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_102) \
-@BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103)
-@BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@am__objects_108 =  \
-@BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_101) \
-@BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_95) \
+@BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96) \
+@BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103) \
+@BOOST_1_39_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_104)
+@BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@am__objects_109 =  \
 @BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_102) \
-@BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103)
-@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__objects_109 =  \
-@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_101) \
-@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_95) \
+@BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96) \
+@BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103) \
+@BOOST_1_40_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_104)
+am__objects_110 = $(am__objects_99) archive_exception.lo \
+	shared_ptr_helper.lo xml_archive_exception.lo
+@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@am__objects_111 =  \
 @BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_102) \
-@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_103)
-am__objects_110 = connection.lo named_slot_map.lo signal_base.lo \
+@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_96) \
+@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_110) \
+@BOOST_SVN_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_104)
+am__objects_112 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_111 = $(am__objects_110)
-am__objects_112 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@@BUILD_BOOST_TRUE@am__objects_113 = $(am__objects_112)
+am__objects_114 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_113 =  \
-@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_112)
-am__objects_114 = $(am__objects_83) $(am__objects_87) \
-	$(am__objects_93) $(am__objects_97) $(am__objects_100) \
-	$(am__objects_104) $(am__objects_105) $(am__objects_106) \
-	$(am__objects_107) $(am__objects_108) $(am__objects_109) \
-	$(am__objects_111) $(am__objects_113)
-am__objects_115 =
-nodist_libalps_sgl_la_OBJECTS = $(am__objects_114) $(am__objects_115)
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@am__objects_115 =  \
+@BUILD_BOOST_THREAD_TRUE@@BUILD_BOOST_TRUE@	$(am__objects_114)
+am__objects_116 = $(am__objects_84) $(am__objects_88) \
+	$(am__objects_94) $(am__objects_98) $(am__objects_101) \
+	$(am__objects_105) $(am__objects_106) $(am__objects_107) \
+	$(am__objects_108) $(am__objects_109) $(am__objects_111) \
+	$(am__objects_113) $(am__objects_115)
+am__objects_117 =
+nodist_libalps_sgl_la_OBJECTS = $(am__objects_116) $(am__objects_117)
 libalps_sgl_la_OBJECTS = $(am_libalps_sgl_la_OBJECTS) \
 	$(nodist_libalps_sgl_la_OBJECTS)
 libalps_sgl_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -765,15 +770,15 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parapack/util.C \
 	$(top_srcdir)/src/alps/parapack/mc_worker.C \
 	$(top_srcdir)/src/boost/throw_exception.C
-am_libalps_la_OBJECTS = $(am__objects_63) $(am__objects_64) \
-	$(am__objects_65) $(am__objects_66) $(am__objects_67) \
-	$(am__objects_68) $(am__objects_69) $(am__objects_74) \
-	$(am__objects_75)
-nodist_libalps_la_OBJECTS = $(am__objects_83) $(am__objects_87) \
-	$(am__objects_93) $(am__objects_97) $(am__objects_100) \
-	$(am__objects_104) $(am__objects_105) $(am__objects_106) \
-	$(am__objects_107) $(am__objects_108) $(am__objects_109) \
-	$(am__objects_111) $(am__objects_113)
+am_libalps_la_OBJECTS = $(am__objects_64) $(am__objects_65) \
+	$(am__objects_66) $(am__objects_67) $(am__objects_68) \
+	$(am__objects_69) $(am__objects_70) $(am__objects_75) \
+	$(am__objects_76)
+nodist_libalps_la_OBJECTS = $(am__objects_84) $(am__objects_88) \
+	$(am__objects_94) $(am__objects_98) $(am__objects_101) \
+	$(am__objects_105) $(am__objects_106) $(am__objects_107) \
+	$(am__objects_108) $(am__objects_109) $(am__objects_111) \
+	$(am__objects_113) $(am__objects_115)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 libalps_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -788,12 +793,12 @@ am__libparapack_mpi_la_SOURCES_DIST =  \
 	$(top_srcdir)/src/alps/parapack/process_mpi.C \
 	$(top_srcdir)/src/alps/parapack/scheduler_comm.C \
 	$(top_srcdir)/src/alps/parapack/scheduler_mpi.C
-am__objects_116 = clone_info_mpi.lo clone_mpi.lo parallel_factory.lo \
+am__objects_118 = clone_info_mpi.lo clone_mpi.lo parallel_factory.lo \
 	process_mpi.lo scheduler_comm.lo scheduler_mpi.lo
-@ALPS_FULL_TRUE@@HAVE_BOOST_MPI_TRUE@am__objects_117 =  \
-@ALPS_FULL_TRUE@@HAVE_BOOST_MPI_TRUE@	$(am__objects_116)
-am_libparapack_mpi_la_OBJECTS = $(am__objects_117)
-am__objects_118 = broadcast.lo communicator.lo computation_tree.lo \
+@ALPS_FULL_TRUE@@HAVE_BOOST_MPI_TRUE@am__objects_119 =  \
+@ALPS_FULL_TRUE@@HAVE_BOOST_MPI_TRUE@	$(am__objects_118)
+am_libparapack_mpi_la_OBJECTS = $(am__objects_119)
+am__objects_120 = broadcast.lo communicator.lo computation_tree.lo \
 	content_oarchive.lo environment.lo exception.lo \
 	graph_communicator.lo group.lo intercommunicator.lo \
 	mpi_datatype_cache.lo mpi_datatype_oarchive.lo \
@@ -801,17 +806,17 @@ am__objects_118 = broadcast.lo communicator.lo computation_tree.lo \
 	packed_skeleton_iarchive.lo packed_skeleton_oarchive.lo \
 	point_to_point.lo request.lo text_skeleton_oarchive.lo \
 	timer.lo
-@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_119 = $(am__objects_118)
-am__objects_120 = $(am__objects_118)
-@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_121 = $(am__objects_120)
-@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_122 = $(am__objects_120)
-@BOOST_1_38_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_123 = $(am__objects_120)
-@BOOST_1_39_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_124 = $(am__objects_120)
-@BOOST_1_40_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_125 = $(am__objects_120)
-@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_126 = $(am__objects_120)
-nodist_libparapack_mpi_la_OBJECTS = $(am__objects_119) \
-	$(am__objects_121) $(am__objects_122) $(am__objects_123) \
-	$(am__objects_124) $(am__objects_125) $(am__objects_126)
+@BOOST_1_35_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_121 = $(am__objects_120)
+am__objects_122 = $(am__objects_120)
+@BOOST_1_36_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_123 = $(am__objects_122)
+@BOOST_1_37_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_124 = $(am__objects_122)
+@BOOST_1_38_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_125 = $(am__objects_122)
+@BOOST_1_39_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_126 = $(am__objects_122)
+@BOOST_1_40_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_127 = $(am__objects_122)
+@BOOST_SVN_TRUE@@BUILD_BOOST_MPI_TRUE@@BUILD_BOOST_TRUE@am__objects_128 = $(am__objects_122)
+nodist_libparapack_mpi_la_OBJECTS = $(am__objects_121) \
+	$(am__objects_123) $(am__objects_124) $(am__objects_125) \
+	$(am__objects_126) $(am__objects_127) $(am__objects_128)
 libparapack_mpi_la_OBJECTS = $(am_libparapack_mpi_la_OBJECTS) \
 	$(nodist_libparapack_mpi_la_OBJECTS)
 libparapack_mpi_la_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
@@ -823,7 +828,7 @@ libparapack_sgl_la_LIBADD =
 am__libparapack_sgl_la_SOURCES_DIST =  \
 	$(top_srcdir)/src/alps/parapack/scheduler_comm.C \
 	$(top_srcdir)/src/alps/parapack/scheduler_sgl.C
-am_libparapack_sgl_la_OBJECTS = $(am__objects_78)
+am_libparapack_sgl_la_OBJECTS = $(am__objects_79)
 nodist_libparapack_sgl_la_OBJECTS =
 libparapack_sgl_la_OBJECTS = $(am_libparapack_sgl_la_OBJECTS) \
 	$(nodist_libparapack_sgl_la_OBJECTS)
@@ -1323,7 +1328,12 @@ src_boost_SERIALIZATION_1_37 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_38 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_39 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_40 = $(src_boost_SERIALIZATION_1_35)
-src_boost_SERIALIZATION_SVN = $(src_boost_SERIALIZATION_1_35)
+src_boost_SERIALIZATION_SVN = \
+  $(src_boost_SERIALIZATION_1_35) \
+  $(BOOST_SRCDIR)/serialization/src/archive_exception.cpp \
+  $(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
+
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
   $(BOOST_SRCDIR)/signals/src/named_slot_map.cpp \
@@ -1469,6 +1479,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/abstract_task.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/archive_exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/barrier.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_archive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/basic_archive_impl.Plo@am__quote@
@@ -1542,6 +1553,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/latticegraphdescriptor.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/latticelibrary.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-abstract_task.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-archive_exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-barrier.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-basic_archive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-basic_archive_impl.Plo@am__quote@
@@ -1674,6 +1686,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-scheduler_comm.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-scheduler_mpi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-serial_scheduler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-shared_ptr_helper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-signal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-signal_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-single_scheduler.Plo@am__quote@
@@ -1711,6 +1724,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-workertask.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-xdrcore.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-xdrdump.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-xml_archive_exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-xml_grammar.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-xml_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-xml_oarchive.Plo@am__quote@
@@ -1784,6 +1798,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scheduler_mpi.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/scheduler_sgl.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/serial_scheduler.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/shared_ptr_helper.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signal.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/signal_base.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/single_scheduler.Plo@am__quote@
@@ -1821,6 +1836,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/workertask.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdrcore.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xdrdump.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_archive_exception.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_grammar.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_iarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/xml_oarchive.Plo@am__quote@
@@ -2897,6 +2913,27 @@ libalps_mpi_la-error_code.lo: $(BOOST_SRCDIR)/system/src/error_code.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/system/src/error_code.cpp' object='libalps_mpi_la-error_code.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_mpi_la-error_code.lo `test -f '$(BOOST_SRCDIR)/system/src/error_code.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/system/src/error_code.cpp
+
+libalps_mpi_la-archive_exception.lo: $(BOOST_SRCDIR)/serialization/src/archive_exception.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_mpi_la-archive_exception.lo -MD -MP -MF $(DEPDIR)/libalps_mpi_la-archive_exception.Tpo -c -o libalps_mpi_la-archive_exception.lo `test -f '$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libalps_mpi_la-archive_exception.Tpo $(DEPDIR)/libalps_mpi_la-archive_exception.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp' object='libalps_mpi_la-archive_exception.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_mpi_la-archive_exception.lo `test -f '$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp
+
+libalps_mpi_la-shared_ptr_helper.lo: $(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_mpi_la-shared_ptr_helper.lo -MD -MP -MF $(DEPDIR)/libalps_mpi_la-shared_ptr_helper.Tpo -c -o libalps_mpi_la-shared_ptr_helper.lo `test -f '$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libalps_mpi_la-shared_ptr_helper.Tpo $(DEPDIR)/libalps_mpi_la-shared_ptr_helper.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp' object='libalps_mpi_la-shared_ptr_helper.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_mpi_la-shared_ptr_helper.lo `test -f '$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp
+
+libalps_mpi_la-xml_archive_exception.lo: $(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_mpi_la-xml_archive_exception.lo -MD -MP -MF $(DEPDIR)/libalps_mpi_la-xml_archive_exception.Tpo -c -o libalps_mpi_la-xml_archive_exception.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libalps_mpi_la-xml_archive_exception.Tpo $(DEPDIR)/libalps_mpi_la-xml_archive_exception.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp' object='libalps_mpi_la-xml_archive_exception.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_mpi_la-xml_archive_exception.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
 
 libalps_mpi_la-connection.lo: $(BOOST_SRCDIR)/signals/src/connection.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_mpi_la-connection.lo -MD -MP -MF $(DEPDIR)/libalps_mpi_la-connection.Tpo -c -o libalps_mpi_la-connection.lo `test -f '$(BOOST_SRCDIR)/signals/src/connection.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/connection.cpp
@@ -4143,6 +4180,27 @@ error_code.lo: $(BOOST_SRCDIR)/system/src/error_code.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/system/src/error_code.cpp' object='error_code.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o error_code.lo `test -f '$(BOOST_SRCDIR)/system/src/error_code.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/system/src/error_code.cpp
+
+archive_exception.lo: $(BOOST_SRCDIR)/serialization/src/archive_exception.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT archive_exception.lo -MD -MP -MF $(DEPDIR)/archive_exception.Tpo -c -o archive_exception.lo `test -f '$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/archive_exception.Tpo $(DEPDIR)/archive_exception.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp' object='archive_exception.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o archive_exception.lo `test -f '$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/archive_exception.cpp
+
+shared_ptr_helper.lo: $(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT shared_ptr_helper.lo -MD -MP -MF $(DEPDIR)/shared_ptr_helper.Tpo -c -o shared_ptr_helper.lo `test -f '$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/shared_ptr_helper.Tpo $(DEPDIR)/shared_ptr_helper.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp' object='shared_ptr_helper.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o shared_ptr_helper.lo `test -f '$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp
+
+xml_archive_exception.lo: $(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT xml_archive_exception.lo -MD -MP -MF $(DEPDIR)/xml_archive_exception.Tpo -c -o xml_archive_exception.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/xml_archive_exception.Tpo $(DEPDIR)/xml_archive_exception.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp' object='xml_archive_exception.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o xml_archive_exception.lo `test -f '$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
 
 connection.lo: $(BOOST_SRCDIR)/signals/src/connection.cpp
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT connection.lo -MD -MP -MF $(DEPDIR)/connection.Tpo -c -o connection.lo `test -f '$(BOOST_SRCDIR)/signals/src/connection.cpp' || echo '$(srcdir)/'`$(BOOST_SRCDIR)/signals/src/connection.cpp

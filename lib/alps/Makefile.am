@@ -319,7 +319,11 @@ src_boost_SERIALIZATION_1_37 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_38 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_39 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_40 = $(src_boost_SERIALIZATION_1_35)
-src_boost_SERIALIZATION_SVN = $(src_boost_SERIALIZATION_1_35)
+src_boost_SERIALIZATION_SVN = \
+  $(src_boost_SERIALIZATION_1_35) \
+  $(BOOST_SRCDIR)/serialization/src/archive_exception.cpp \
+  $(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
 
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
