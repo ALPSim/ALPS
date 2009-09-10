@@ -495,7 +495,7 @@ AC_DEFUN([AC_COMPILER],
   AC_LANG_CPLUSPLUS
   AC_OPENMP
   AC_LANG_RESTORE
-  if test "$ac_cv_prog_cxx_openmp" = unsupported; then
+  if test -z "$ac_cv_prog_cxx_openmp" -o "$ac_cv_prog_cxx_openmp" = unsupported; then
     ac_cv_have_openmp=no
   else
     ac_cv_have_openmp=yes

@@ -1,3 +1,7 @@
+2009-09-09  Synge Todo <wistaria@comp-phys.org>
+
+	* [parapack] Supported OpenMP parallelization
+
 2009-09-07  Synge Todo <wistaria@comp-phys.org>
 
 	* [config] Added support for OpenMP

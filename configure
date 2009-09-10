@@ -5470,7 +5470,7 @@ ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
 ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
 ac_compiler_gnu=$ac_cv_c_compiler_gnu
 
-  if test "$ac_cv_prog_cxx_openmp" = unsupported; then
+  if test -z "$ac_cv_prog_cxx_openmp" -o "$ac_cv_prog_cxx_openmp" = unsupported; then
     ac_cv_have_openmp=no
   else
     ac_cv_have_openmp=yes
