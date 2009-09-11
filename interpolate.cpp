@@ -154,8 +154,8 @@ void interpolate_spectra(const alps::Parameters& parms)
       break;
     }
     case 3 :
-      /*if (antiferromagnet) {
-	for (int i=0; i<=100; ++i) {
+      if (antiferromagnet) {
+	/*for (int i=0; i<=100; ++i) {
 	  kvec[i].resize(3);
 	  kvec[i][0] = double(i)/100.*M_PI/2.;
 	  kvec[i][1] = kvec[i][0];
@@ -168,7 +168,7 @@ void interpolate_spectra(const alps::Parameters& parms)
 	  kvec[i][1] = 0;
 	  kvec[i][2] = 0;
 	}
-	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0, -1, mu, antiferromagnet);
+	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0, -1, mu, antiferromagnet);*/
       }
       else {
 	for (int i=0; i<=100; ++i) {
@@ -177,6 +177,8 @@ void interpolate_spectra(const alps::Parameters& parms)
 	  kvec[i][1] = kvec[i][0];
 	  kvec[i][2] = kvec[i][0];
 	}
+	std::stringstream name1;
+	name1 << name.str() << "_1";
 	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0, 1, mu, antiferromagnet);
 	for (int i=0; i<=100; ++i) {
 	  kvec[i].resize(3);
@@ -184,15 +186,28 @@ void interpolate_spectra(const alps::Parameters& parms)
 	  kvec[i][1] = 0;
 	  kvec[i][2] = 0; 
 	}
-	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0, -1, mu, antiferromagnet);
+	std::stringstream name2;
+	name2 << name.str() << "_2";
+	interpolate(name2.str(), transform_ptr, selfenergies[z], kvec, 0, -1, mu, antiferromagnet);
 	for (int i=0; i<=100; ++i) {
 	  kvec[i].resize(3);
 	  kvec[i][0] = M_PI;
 	  kvec[i][1] = double(i)/100.*M_PI;
-	  kvec[i][2] = kvec[i][1];
+	  kvec[i][2] = 0;
 	}
-	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, M_PI, -1, mu, antiferromagnet);
-	}*/
+	std::stringstream name3;
+	name3 << name.str() << "_3";
+	interpolate(name3.str(), transform_ptr, selfenergies[z], kvec, M_PI, -1, mu, antiferromagnet);
+	for (int i=0; i<=100; ++i) {
+	  kvec[i].resize(3);
+	  kvec[i][0] = M_PI;
+	  kvec[i][1] = M_PI;
+	  kvec[i][2] = double(i)/100.*M_PI;
+	}
+	std::stringstream name4;
+	name4 << name.str() << "_4";
+	interpolate(name4.str(), transform_ptr, selfenergies[z], kvec, 2*M_PI, -1, mu, antiferromagnet);
+      }
       break;
     default :
       boost::throw_exception(std::invalid_argument("QCD?"));	
