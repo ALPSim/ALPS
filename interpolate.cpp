@@ -30,104 +30,173 @@
 
 
 
-std::vector<std::map<double, std::vector<double> > > read_spectra(const alps::Parameters& parms) 
+std::vector<std::map<double, std::vector<std::complex<double> > > > read_selfenergies(const alps::Parameters& parms) 
 {
   int n_zone = parms["FLAVORS"];
   int n_sites = parms["SITES"];
-  std::vector<std::map<double, std::vector<double> > > spectra(n_zone);
-  std::ifstream data(parms["SPECTRA"].c_str());
+  std::vector<std::map<double, std::vector<std::complex<double> > > > selfenergies(n_zone);
+  std::ifstream data(parms["SELFENERGIES"].c_str());
   while (data) {
     int k;
     int z;
     double omega;
-    double A;
-    data >> k >> z >> omega >> A; 
-    if (spectra[z].find(omega)==spectra[z].end()) {
-      std::vector<double> kd(n_sites);
-      spectra[z][omega] = kd;
+    double Sigma_real;
+    double Sigma_imag;
+    data >> k >> z >> omega >> Sigma_real >> Sigma_imag; 
+    if (selfenergies[z].find(omega)==selfenergies[z].end()) {
+      std::vector<std::complex<double> > kd(n_sites);
+      selfenergies[z][omega] = kd;
     }
-    spectra[z][omega][k] = A;
+    selfenergies[z][omega][k] = std::complex<double>(Sigma_real, Sigma_imag);
   }
-  return spectra;
+  return selfenergies;
 }
 
 
 
-void interpolate(std::ofstream& out_str, const ClusterHelper& helper,
-		 const std::map<double, std::vector<double> >& spectra, 
+
+void interpolate(std::string name, const boost::shared_ptr<DCATransformer> transform_ptr,
+		 const std::map<double, std::vector<std::complex<double> > >& selfenergies, 
 		 const std::vector<ClusterHelper::vector_type>& kvec,
-		 const double offset, const double sign, 
+		 const double offset, const int sign, const double mu, 
 		 const bool antiferromagnet)
 {
+  std::ofstream out_str(name.c_str());
+  double l0 = 0;
+  for (int d=0; d<transform_ptr->dimension(); ++d) 
+    l0 += kvec[0][d]*kvec[0][d];
+  l0 =sqrt(l0);
   for (std::vector<ClusterHelper::vector_type>::const_iterator itk=kvec.begin(); itk!=kvec.end(); ++itk) {
     ClusterHelper::vector_type k = *itk;
-    std::map<double, double> spectrum;
-    for (std::map<double, std::vector<double> >::const_iterator it=spectra.begin(); it!=spectra.end(); ++it) {
-      spectrum[it->first] = helper.interpolate(k, it->second, antiferromagnet);
+    std::map<double, std::complex<double> > spectrum;
+    for (std::map<double, std::vector<std::complex<double> > >::const_iterator it=selfenergies.begin(); it!=selfenergies.end(); ++it) {
+      spectrum[it->first] = transform_ptr->interpolate(k, it->second, antiferromagnet);
     }
-    double l = sqrt(k[0]*k[0] + k[1]*k[1] + k[2]*k[2]);
-    for (std::map<double, double>::const_iterator it=spectrum.begin(); it!=spectrum.end(); ++it) {
-      out_str << k[0] << "\t" << k[1] << "\t"  << k[2] << "\t" << offset+sign*l << "\t" 
-	      << it->first << "\t" << it->second << "\n"; 
+    double l = 0;
+    for (int d=0; d<transform_ptr->dimension(); ++d) 
+      l += k[d]*k[d];
+    l =sqrt(l);
+    for (std::map<double, std::complex<double> >::iterator it=spectrum.begin(); it!=spectrum.end(); ++it) {
+      std::complex<double> G = 1./(it->first + mu - transform_ptr->epsilon(k) - it->second);
+      for (int d=0; d<transform_ptr->dimension(); ++d) 
+	out_str << k[d] << "\t" ;
+      out_str << (offset+sign*(l-l0))/M_PI << "\t" << it->first << "\t" 
+	      << G.real() << "\t" << G.imag() << "\n"; 
     }
     out_str << "\n";
   }
+  out_str.close();
 }
 
 
 
 void interpolate_spectra(const alps::Parameters& parms)
 {
-  std::vector<std::map<double, std::vector<double> > > spectra = read_spectra(parms);
-  ClusterHelper helper(parms);
-  const bool antiferromagnet = parms["ANTIFERROMAGNET"];
-  if (helper.dimension() != 3) 
-    boost::throw_exception(std::invalid_argument("implement interpolation for d!=3!"));	
-  for (int z=0; z<spectra.size(); ++z) {
-    std::stringstream name1;
-    name1 << "Dispersion" << "_" << z;
-    std::ofstream out_str(name1.str().c_str());
+  std::vector<std::map<double, std::vector<std::complex<double> > > > selfenergies = read_selfenergies(parms);
+  boost::shared_ptr<DCATransformer> transform_ptr;
+  DCATransformer::generate_transformer(parms, transform_ptr);
+  const double mu = parms["MU"];
+  const bool antiferromagnet = parms.value_or_default("ANTIFERROMAGNET", false);
+  for (int z=0; z<selfenergies.size(); ++z) {
+    std::stringstream name;
+    name << "Dispersion" << "_" << z;
     std::vector<ClusterHelper::vector_type> kvec(101);
-    if (antiferromagnet) {
+    switch (transform_ptr->dimension()) {
+    case 1 :
       for (int i=0; i<=100; ++i) {
-	kvec[i].resize(3);
-	kvec[i][0] = double(i)/100.*M_PI/2.;
-	kvec[i][1] = kvec[i][0];
-	kvec[i][2] = kvec[i][0];
+	kvec[i].resize(1);
+	kvec[i][0] = double(i)/100.*M_PI;
+	if (antiferromagnet) 
+	  kvec[i][0] /= 2.;
       }
-      interpolate(out_str, helper, spectra[z], kvec, 0, 1, antiferromagnet);
+      interpolate(name.str(), transform_ptr, selfenergies[z], kvec, 0., 1, mu, antiferromagnet);
+      break;
+    case 2 : {
       for (int i=0; i<=100; ++i) {
-	kvec[i].resize(3);
-	kvec[i][0] = double(i)/100.*M_PI/2.;
-	kvec[i][1] = 0;
-	kvec[i][2] = 0;
-      }
-      interpolate(out_str, helper, spectra[z], kvec, 0, -1, antiferromagnet);
-    }
-    else {
-      for (int i=0; i<=100; ++i) {
-	kvec[i].resize(3);
+	kvec[i].resize(2);
 	kvec[i][0] = double(i)/100.*M_PI;
 	kvec[i][1] = kvec[i][0];
-	kvec[i][2] = kvec[i][0];
+	if (antiferromagnet)
+	  kvec[i][0] /= 2.;
       }
-      interpolate(out_str, helper, spectra[z], kvec, 0, 1, antiferromagnet);
+      std::stringstream name1;
+      name1 << name.str() << "_1";
+      interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0., 1, mu, antiferromagnet);
       for (int i=0; i<=100; ++i) {
-	kvec[i].resize(3);
+	kvec[i].resize(2);
 	kvec[i][0] = double(i)/100.*M_PI;
 	kvec[i][1] = 0;
-	kvec[i][2] = 0; 
       }
-      interpolate(out_str, helper, spectra[z], kvec, 0, -1, antiferromagnet);
-      for (int i=0; i<=100; ++i) {
-	kvec[i].resize(3);
-	kvec[i][0] = M_PI;
-	kvec[i][1] = double(i)/100.*M_PI;
-	kvec[i][2] = kvec[i][1];
+      std::stringstream name2;
+      name2 << name.str() << "_2";
+      interpolate(name2.str(), transform_ptr, selfenergies[z], kvec, 0., -1, mu, antiferromagnet);
+      if (antiferromagnet) {
+	for (int i=0; i<=100; ++i) {
+	  kvec[i].resize(2);
+	  double del_k = double(i)/100.*M_PI/2.;
+	  kvec[i][0] = M_PI/2 + del_k;
+	  kvec[i][1] = M_PI/2 - del_k;
+	}
+	std::stringstream name3;
+	name3 << name.str() << "_3";
+	interpolate(name3.str(), transform_ptr, selfenergies[z], kvec, M_PI/sqrt(2), 1, mu, antiferromagnet);
       }
-      interpolate(out_str, helper, spectra[z], kvec, M_PI, -1, antiferromagnet);
+      else {
+	for (int i=0; i<=100; ++i) {
+	  kvec[i].resize(2);
+	  kvec[i][0] = M_PI;
+	  kvec[i][1] = double(i)/100.*M_PI;
+	}
+	std::stringstream name3;
+	name3 << name.str() << "_3";
+	interpolate(name3.str(), transform_ptr, selfenergies[z], kvec, -M_PI, -1, mu, antiferromagnet);
+      }
+      break;
     }
-    out_str.close();
+    case 3 :
+      /*if (antiferromagnet) {
+	for (int i=0; i<=100; ++i) {
+	  kvec[i].resize(3);
+	  kvec[i][0] = double(i)/100.*M_PI/2.;
+	  kvec[i][1] = kvec[i][0];
+	  kvec[i][2] = kvec[i][0];
+	}
+	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0, 1, mu, antiferromagnet);
+	for (int i=0; i<=100; ++i) {
+	  kvec[i].resize(3);
+	  kvec[i][0] = double(i)/100.*M_PI/2.;
+	  kvec[i][1] = 0;
+	  kvec[i][2] = 0;
+	}
+	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0, -1, mu, antiferromagnet);
+      }
+      else {
+	for (int i=0; i<=100; ++i) {
+	  kvec[i].resize(3);
+	  kvec[i][0] = double(i)/100.*M_PI;
+	  kvec[i][1] = kvec[i][0];
+	  kvec[i][2] = kvec[i][0];
+	}
+	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0, 1, mu, antiferromagnet);
+	for (int i=0; i<=100; ++i) {
+	  kvec[i].resize(3);
+	  kvec[i][0] = double(i)/100.*M_PI;
+	  kvec[i][1] = 0;
+	  kvec[i][2] = 0; 
+	}
+	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, 0, -1, mu, antiferromagnet);
+	for (int i=0; i<=100; ++i) {
+	  kvec[i].resize(3);
+	  kvec[i][0] = M_PI;
+	  kvec[i][1] = double(i)/100.*M_PI;
+	  kvec[i][2] = kvec[i][1];
+	}
+	interpolate(name1.str(), transform_ptr, selfenergies[z], kvec, M_PI, -1, mu, antiferromagnet);
+	}*/
+      break;
+    default :
+      boost::throw_exception(std::invalid_argument("QCD?"));	
+    }
   }
 }
 

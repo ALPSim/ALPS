@@ -70,7 +70,9 @@ public:
   unsigned int n_cluster_cells() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::volume(); }
   unsigned int dimension() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::dimension(); }
   unsigned int cluster_momentum_approximation(vector_type k) const;
-  double interpolate(vector_type k, const std::vector<double>& values, const bool antiferromagnet) const;
+  
+  template<typename T>
+  T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const;
 
   site_class_set_itpair_type site_classes_real_space() const 
   { return site_class_set_itpair_type (site_class_set_real_space_.begin(), site_class_set_real_space_.end()); }
@@ -134,6 +136,13 @@ public:
   virtual itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const=0;
   virtual matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const=0;
   virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms); 
+
+  template<typename T>
+  T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
+    return ClusterHelper::interpolate(k, values, antiferromagnet);
+  }
+  unsigned int dimension() const { return ClusterHelper::dimension(); }  
+
 };
 
 
@@ -264,7 +273,6 @@ public:
 						 const matsubara_green_function_t &G0_omega, 
 						 const double mu, const double h, const double beta,
 						 const int n_matsubara) const; 
-
 private:
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;
@@ -397,6 +405,86 @@ inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse
   return M_inv;
 }
 
+
+
+
+template<typename T>
+inline T ClusterHelper::interpolate(vector_type k, const std::vector<T>& values, 
+				    const bool antiferromagnet) const 
+{
+  k = round(matrix_vector_mult(reciprocal_basis_inv_, k));
+  std::vector<vector_type> neighbor;
+  std::vector<unsigned int> neighbor_index;
+  switch (dimension()) {
+  case 1:
+    neighbor.resize(2);
+    neighbor_index.resize(2);
+    for (int i=0; i<2; ++i) 
+      neighbor[i].resize(1);
+    neighbor[0][0] = floor(k[0]);
+    neighbor[1][0] = ceil(k[0]);
+    break;
+  case 2:
+    neighbor.resize(4);
+    neighbor_index.resize(4);
+    for (int i=0; i<4; ++i) 
+      neighbor[i].resize(2);
+    for (int x=0; x<=1; ++x) {
+      double xt = (x==0) ? floor(k[0]) : ceil(k[0]);
+      for (int y=0; y<=1; ++y) {
+	double yt = (y==0) ? floor(k[1]) : ceil(k[1]);
+	neighbor[y*2+x][0] = xt;
+	neighbor[y*2+x][1] = yt;
+      }
+    }
+    break;
+  case 3:
+    neighbor.resize(8);
+    neighbor_index.resize(8);
+    for (int i=0; i<8; ++i) 
+      neighbor[i].resize(3);
+    for (int x=0; x<=1; ++x) {
+      double xt = (x==0) ? floor(k[0]) : ceil(k[0]);
+      for (int y=0; y<=1; ++y) {
+	double yt = (y==0) ? floor(k[1]) : ceil(k[1]);
+	for (int z=0; z<=1; ++z) {
+	  double zt = (z==0) ? floor(k[2]) : ceil(k[2]);
+	  neighbor[z*2*2+y*2+x][0] = xt;
+	  neighbor[z*2*2+y*2+x][1] = yt;
+	  neighbor[z*2*2+y*2+x][2] = zt;
+	}
+      }
+    }
+    break;
+  }
+  for (int i=0; i<neighbor.size(); ++i) {
+    vector_type nv = matrix_vector_mult(reciprocal_basis_, neighbor[i]);
+    nv = map_back_into_brillouin_zone(nv);
+    if (antiferromagnet) {
+      if (!inside_reduced_brillouin_zone(nv)) {
+	for (int d=0; d<dimension(); ++d) 
+	  nv[d] -= M_PI;
+	nv = map_back_into_brillouin_zone(nv);
+      }
+      if (!inside_reduced_brillouin_zone(nv)) {
+	boost::throw_exception(std::logic_error("something doesn't work in ClusterHelper::interpolate)"));
+      }
+    }
+    neighbor_index[i] = identify_vertex(nv, cluster_momenta_);
+  }
+  std::vector<T> av(neighbor_index.size());
+  for (int i=0; i<neighbor_index.size(); ++i) 
+    av[i] = values[neighbor_index[i]];
+  for (int d=0; d<dimension(); ++d) {
+    double c = k[d] - floor(k[d]) ;
+    std::vector<T> t(av.size()/2);
+    for (int i=0; i<av.size(); i+=2) {
+      t[i/2] = (1-c)*av[i] + c*av[i+1];
+    }
+    av = t;
+  }
+  return av[0];
+}
 
 
 
