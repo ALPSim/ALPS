@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -82,7 +82,7 @@ public:
     nsites_(num_sites()), nbonds_(num_bonds()),
     mcs_(params), operators_(0), spins_(nsites_, 0),
     operators_p_(), fragments_(), current_(nsites_), clusters_(),
-    r_time_(*engine_ptr, boost::exponential_distribution<>(beta_ * nbonds_ / 2)) {
+    r_time_(engine(), boost::exponential_distribution<>(beta_ * nbonds_ / 2)) {
     if (!is_bipartite())
       boost::throw_exception(std::invalid_argument("non-bipartite lattice"));
   }

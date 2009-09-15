@@ -68,14 +68,15 @@ src_PARAPACK_COMMON = \
   $(top_srcdir)/src/alps/parapack/clone_info.C \
   $(top_srcdir)/src/alps/parapack/worker_factory.C \
   $(top_srcdir)/src/alps/parapack/filelock.C \
+  $(top_srcdir)/src/alps/parapack/job.C \
   $(top_srcdir)/src/alps/parapack/logger.C \
+  $(top_srcdir)/src/alps/parapack/mc_worker.C \
   $(top_srcdir)/src/alps/parapack/measurement.C \
   $(top_srcdir)/src/alps/parapack/option.C \
   $(top_srcdir)/src/alps/parapack/queue.C \
-  $(top_srcdir)/src/alps/parapack/job.C \
+  $(top_srcdir)/src/alps/parapack/rng_helper.C \
   $(top_srcdir)/src/alps/parapack/types.C \
-  $(top_srcdir)/src/alps/parapack/util.C \
-  $(top_srcdir)/src/alps/parapack/mc_worker.C
+  $(top_srcdir)/src/alps/parapack/util.C
 src_PARAPACK_SGL = \
   $(top_srcdir)/src/alps/parapack/scheduler_comm.C \
   $(top_srcdir)/src/alps/parapack/scheduler_sgl.C
