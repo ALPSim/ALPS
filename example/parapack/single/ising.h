@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -40,13 +40,34 @@ public:
     if (params.defined("T")) beta_ = 1 / evaluate("T", params);
     // coupling constant
     coupling_ = (params.defined("J")) ? evaluate("J", params) : 1.0;
+    // lattice
+    if (!is_bipartite())
+      std::cerr << "Warning: lattice should be bipartite.  "
+                << "OpenMP parallelization will be switched off.\n";
+    sublat_[0].clear();
+    sublat_[1].clear();
+    for (int s = 0; s < num_sites(); ++s) {
+      if (parity(s) < 0.5) {
+        sublat_[0].push_back(s);
+      } else {
+        sublat_[1].push_back(s);
+      }
+    }
     // configuration
     spins_.resize(num_sites());
-    BOOST_FOREACH(site_descriptor v, sites()) spins_[v] = (uniform_01() < 0.5 ? 1 : -1);
-    // energy
-    energy_ = 0;
-    BOOST_FOREACH(bond_descriptor b, bonds())
-      energy_ -= coupling_ * spins_[source(b)] * spins_[target(b)];
+    #pragma omp parallel
+    {
+      int r = alps::thread_id();
+      #pragma omp for
+      for (int s = 0; s < num_sites(); ++s) spins_[s] = (uniform_01(r) < 0.5 ? 1 : -1);
+    }
+    double ene = 0;
+    #pragma omp parallel for reduction(+: ene)
+    for (int b = 0; b < num_bonds(); ++b) {
+      bond_descriptor bd = bond(b);
+      ene -= coupling_ * spins_[source(bd)] * spins_[target(bd)];
+    }
+    energy_ = ene;
   }
   virtual ~single_ising_worker() {}
 
@@ -67,19 +88,47 @@ public:
   void run(alps::ObservableSet& obs) {
     ++mcs_;
 
-    BOOST_FOREACH(site_descriptor s, sites()) {
-      double diff = 0;
-      BOOST_FOREACH(site_descriptor v, neighbors(s))
-        diff += 2 * coupling_ * spins_[s] * spins_[v];
-      if (uniform_01() < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) {
-        spins_[s] = -spins_[s];
-        energy_ += diff;
+    if (is_bipartite()) {
+      for (int t = 0; t < 2; ++t) {
+        #pragma omp parallel
+        {
+          int r = alps::thread_id();
+          #pragma omp for
+          for (int k = 0; k < sublat_[t].size(); ++k) {
+            int s = sublat_[t][k];
+            double diff = 0;
+            neighbor_iterator itr, itr_end;
+            for (boost::tie(itr, itr_end) = neighbors(s); itr != itr_end; ++itr)
+              diff += 2 * coupling_ * spins_[s] * spins_[*itr];
+            if (uniform_01(r) < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) {
+              spins_[s] = -spins_[s];
+            }
+          } // end omp for
+        } // end omp parallel
+      }
+    } else {
+      for (int s = 0; s < num_sites(); ++s) {
+        double diff = 0;
+        neighbor_iterator itr, itr_end;
+        for (boost::tie(itr, itr_end) = neighbors(s); itr != itr_end; ++itr)
+          diff += 2 * coupling_ * spins_[s] * spins_[*itr];
+        if (uniform_01() < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) {
+          spins_[s] = -spins_[s];
+        }
       }
     }
 
     // measurements
     double mag = 0;
-    BOOST_FOREACH(site_descriptor v, sites()) mag += spins_[v];
+    #pragma omp parallel for reduction(+: mag)
+    for (int s = 0; s < num_sites(); ++s) mag += spins_[s];
+    double ene = 0;
+    #pragma omp parallel for reduction(+: ene)
+    for (int b = 0; b < num_bonds(); ++b) {
+      bond_descriptor bd = bond(b);
+      ene -= coupling_ * spins_[source(bd)] * spins_[target(bd)];
+    }
+    energy_ = ene;
     obs["Temperature"] << 1/beta_;
     obs["Inverse Temperature"] << beta_;
     obs["Number of Sites"] << (double)num_sites();
@@ -103,6 +152,8 @@ private:
   // parameteters
   double beta_;
   double coupling_;
+
+  std::vector<int> sublat_[2];
 
   // configuration (need checkpointing)
   alps::mc_steps mcs_;

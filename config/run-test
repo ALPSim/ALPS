@@ -13,6 +13,9 @@ if test -z "$2"; then
   exit -1
 fi
 
+# number of threads is fixed to 1
+export OMP_NUM_THREADS=1
+
 srcdir="$1"
 prog=`basename $2 .exe`
 dir=`echo $2 | sed 's/^\(\.\/\)*//g'` # remove preceding './'

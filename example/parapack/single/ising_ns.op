@@ -11,45 +11,45 @@ BASE_NAME = task1;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
 [results]
-Binder Ratio of Magnetization: 0.395042 +/- 0.00725
-Energy: -7.35156 +/- 0.0693; tau = 0.301
-    bin #1   : 4096     entries: error = 0.0547737
-    bin #2   : 2048     entries: error = 0.0604012
-    bin #3   : 1024     entries: error = 0.0635487
-    bin #4   : 512      entries: error = 0.0646785
-    bin #5   : 256      entries: error = 0.0650729
-    bin #6   : 128      entries: error = 0.0693159
-Energy^2: 66.3281 +/- 0.967; tau = 0.25
-    bin #1   : 4096     entries: error = 0.789461
-    bin #2   : 2048     entries: error = 0.867228
-    bin #3   : 1024     entries: error = 0.905059
-    bin #4   : 512      entries: error = 0.912493
-    bin #5   : 256      entries: error = 0.904217
-    bin #6   : 128      entries: error = 0.966638
+Binder Ratio of Magnetization: 0.400668 +/- 0.00668
+Energy: -7.3877 +/- 0.054; tau = -0.0234
+    bin #1   : 4096     entries: error = 0.055334
+    bin #2   : 2048     entries: error = 0.0573897
+    bin #3   : 1024     entries: error = 0.0589793
+    bin #4   : 512      entries: error = 0.0584065
+    bin #5   : 256      entries: error = 0.058645
+    bin #6   : 128      entries: error = 0.0540237
+Energy^2: 67.1133 +/- 0.803; tau = -0.00181
+    bin #1   : 4096     entries: error = 0.804864
+    bin #2   : 2048     entries: error = 0.840186
+    bin #3   : 1024     entries: error = 0.868374
+    bin #4   : 512      entries: error = 0.863942
+    bin #5   : 256      entries: error = 0.875367
+    bin #6   : 128      entries: error = 0.803408
 Inverse Temperature: 0.5 +/- 0
-Magnetization: 0.0957031 +/- 0.198; tau = 1.44 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 4096     entries: error = 0.100507
-    bin #2   : 2048     entries: error = 0.126523
-    bin #3   : 1024     entries: error = 0.152029
-    bin #4   : 512      entries: error = 0.172658
-    bin #5   : 256      entries: error = 0.190097
-    bin #6   : 128      entries: error = 0.19803
-Magnetization^2: 41.3652 +/- 1.03; tau = 0.323
-    bin #1   : 4096     entries: error = 0.799692
-    bin #2   : 2048     entries: error = 0.915808
-    bin #3   : 1024     entries: error = 0.984599
-    bin #4   : 512      entries: error = 1.03168
-    bin #5   : 256      entries: error = 1.01452
-    bin #6   : 128      entries: error = 1.02601
-Magnetization^4: 4329.23 +/- 188; tau = 0.266
-    bin #1   : 4096     entries: error = 152.043
-    bin #2   : 2048     entries: error = 171.747
-    bin #3   : 1024     entries: error = 181.937
-    bin #4   : 512      entries: error = 190.567
-    bin #5   : 256      entries: error = 189.986
-    bin #6   : 128      entries: error = 188.19
+Magnetization: 0.224121 +/- 0.204; tau = 1.47 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 4096     entries: error = 0.102898
+    bin #2   : 2048     entries: error = 0.133003
+    bin #3   : 1024     entries: error = 0.16186
+    bin #4   : 512      entries: error = 0.184989
+    bin #5   : 256      entries: error = 0.198097
+    bin #6   : 128      entries: error = 0.204444
+Magnetization^2: 43.3975 +/- 1.17; tau = 0.489
+    bin #1   : 4096     entries: error = 0.829149
+    bin #2   : 2048     entries: error = 0.978981
+    bin #3   : 1024     entries: error = 1.08561
+    bin #4   : 512      entries: error = 1.14052
+    bin #5   : 256      entries: error = 1.22981
+    bin #6   : 128      entries: error = 1.16611
+Magnetization^4: 4697.92 +/- 223; tau = 0.437
+    bin #1   : 4096     entries: error = 163.093
+    bin #2   : 2048     entries: error = 188.297
+    bin #3   : 1024     entries: error = 209.071
+    bin #4   : 512      entries: error = 221.506
+    bin #5   : 256      entries: error = 238.859
+    bin #6   : 128      entries: error = 223.283
 Number of Sites: 16 +/- 0
-Specific Heat: 0.191992 +/- 0.00475
+Specific Heat: 0.195909 +/- 0.00455
 Temperature: 2 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
@@ -64,45 +64,45 @@ BASE_NAME = task2;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
 [results]
-Binder Ratio of Magnetization: 0.418038 +/- 0.00659
-Energy: -8.04199 +/- 0.0728; tau = 0.378
-    bin #1   : 4096     entries: error = 0.0549493
-    bin #2   : 2048     entries: error = 0.0618946
-    bin #3   : 1024     entries: error = 0.0662395
-    bin #4   : 512      entries: error = 0.0682905
-    bin #5   : 256      entries: error = 0.0671873
-    bin #6   : 128      entries: error = 0.0728002
-Energy^2: 77.0352 +/- 1.12; tau = 0.355
-    bin #1   : 4096     entries: error = 0.859108
-    bin #2   : 2048     entries: error = 0.968866
-    bin #3   : 1024     entries: error = 1.04514
-    bin #4   : 512      entries: error = 1.07864
-    bin #5   : 256      entries: error = 1.06369
-    bin #6   : 128      entries: error = 1.12343
+Binder Ratio of Magnetization: 0.411696 +/- 0.00706 WARNING: check error convergence
+Energy: -7.93457 +/- 0.0618; tau = 0.16
+    bin #1   : 4096     entries: error = 0.0537853
+    bin #2   : 2048     entries: error = 0.0576367
+    bin #3   : 1024     entries: error = 0.0594593
+    bin #4   : 512      entries: error = 0.0623103
+    bin #5   : 256      entries: error = 0.0629159
+    bin #6   : 128      entries: error = 0.0618111
+Energy^2: 74.8008 +/- 1; tau = 0.209
+    bin #1   : 4096     entries: error = 0.840317
+    bin #2   : 2048     entries: error = 0.914113
+    bin #3   : 1024     entries: error = 0.954099
+    bin #4   : 512      entries: error = 0.997756
+    bin #5   : 256      entries: error = 1.0106
+    bin #6   : 128      entries: error = 1.00071
 Inverse Temperature: 0.555556 +/- 0
-Magnetization: 0.125 +/- 0.235; tau = 1.79 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 4096     entries: error = 0.10967
-    bin #2   : 2048     entries: error = 0.141931
-    bin #3   : 1024     entries: error = 0.177882
-    bin #4   : 512      entries: error = 0.212657
-    bin #5   : 256      entries: error = 0.223501
-    bin #6   : 128      entries: error = 0.234859
-Magnetization^2: 49.2559 +/- 1.29; tau = 0.502
-    bin #1   : 4096     entries: error = 0.907981
-    bin #2   : 2048     entries: error = 1.07375
-    bin #3   : 1024     entries: error = 1.21519
-    bin #4   : 512      entries: error = 1.33906
-    bin #5   : 256      entries: error = 1.35903
-    bin #6   : 128      entries: error = 1.28533
-Magnetization^4: 5801.35 +/- 253; tau = 0.401
-    bin #1   : 4096     entries: error = 188.183
-    bin #2   : 2048     entries: error = 219.51
-    bin #3   : 1024     entries: error = 244.692
-    bin #4   : 512      entries: error = 264.847
-    bin #5   : 256      entries: error = 266.877
-    bin #6   : 128      entries: error = 252.622
+Magnetization: 0.019043 +/- 0.245; tau = 2.11 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 4096     entries: error = 0.107278
+    bin #2   : 2048     entries: error = 0.140875
+    bin #3   : 1024     entries: error = 0.175566
+    bin #4   : 512      entries: error = 0.210225
+    bin #5   : 256      entries: error = 0.230241
+    bin #6   : 128      entries: error = 0.245264
+Magnetization^2: 47.1162 +/- 1.41; tau = 0.789 WARNING: check error convergence
+    bin #1   : 4096     entries: error = 0.879791
+    bin #2   : 2048     entries: error = 1.07309
+    bin #3   : 1024     entries: error = 1.21145
+    bin #4   : 512      entries: error = 1.29992
+    bin #5   : 256      entries: error = 1.38069
+    bin #6   : 128      entries: error = 1.41269
+Magnetization^4: 5388.82 +/- 282; tau = 0.727 WARNING: check error convergence
+    bin #1   : 4096     entries: error = 180.085
+    bin #2   : 2048     entries: error = 217.067
+    bin #3   : 1024     entries: error = 240.798
+    bin #4   : 512      entries: error = 262.182
+    bin #5   : 256      entries: error = 277.884
+    bin #6   : 128      entries: error = 282.117
 Number of Sites: 16 +/- 0
-Specific Heat: 0.238557 +/- 0.00526
+Specific Heat: 0.228534 +/- 0.00507
 Temperature: 1.8 +/- 0
 [input parameters]
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
@@ -117,43 +117,43 @@ BASE_NAME = task3;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
 [results]
-Binder Ratio of Magnetization: 0.426107 +/- 0.00758 WARNING: ERRORS NOT CONVERGED!!!
-Energy: -8.83203 +/- 0.0762; tau = 0.551 WARNING: check error convergence
-    bin #1   : 4096     entries: error = 0.052555
-    bin #2   : 2048     entries: error = 0.0598841
-    bin #3   : 1024     entries: error = 0.0658485
-    bin #4   : 512      entries: error = 0.0712819
-    bin #5   : 256      entries: error = 0.0705976
-    bin #6   : 128      entries: error = 0.0761964
-Energy^2: 89.3125 +/- 1.4; tau = 0.672 WARNING: check error convergence
-    bin #1   : 4096     entries: error = 0.914256
-    bin #2   : 2048     entries: error = 1.05183
-    bin #3   : 1024     entries: error = 1.16433
-    bin #4   : 512      entries: error = 1.26741
-    bin #5   : 256      entries: error = 1.27719
-    bin #6   : 128      entries: error = 1.39945
+Binder Ratio of Magnetization: 0.422606 +/- 0.00839 WARNING: check error convergence
+Energy: -8.83008 +/- 0.0588; tau = 0.128
+    bin #1   : 4096     entries: error = 0.0524171
+    bin #2   : 2048     entries: error = 0.0582986
+    bin #3   : 1024     entries: error = 0.062572
+    bin #4   : 512      entries: error = 0.0651055
+    bin #5   : 256      entries: error = 0.0633426
+    bin #6   : 128      entries: error = 0.0587614
+Energy^2: 89.2188 +/- 1.07; tau = 0.193
+    bin #1   : 4096     entries: error = 0.905934
+    bin #2   : 2048     entries: error = 1.02326
+    bin #3   : 1024     entries: error = 1.10941
+    bin #4   : 512      entries: error = 1.16537
+    bin #5   : 256      entries: error = 1.13355
+    bin #6   : 128      entries: error = 1.06669
 Inverse Temperature: 0.625 +/- 0
-Magnetization: -0.125488 +/- 0.297; tau = 2.65 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 4096     entries: error = 0.118609
-    bin #2   : 2048     entries: error = 0.156236
-    bin #3   : 1024     entries: error = 0.198969
-    bin #4   : 512      entries: error = 0.240695
-    bin #5   : 256      entries: error = 0.273921
-    bin #6   : 128      entries: error = 0.297475
-Magnetization^2: 57.6104 +/- 1.83; tau = 1.03 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 4096     entries: error = 1.04446
-    bin #2   : 2048     entries: error = 1.28625
-    bin #3   : 1024     entries: error = 1.49419
-    bin #4   : 512      entries: error = 1.67859
-    bin #5   : 256      entries: error = 1.71272
-    bin #6   : 128      entries: error = 1.82862
-Magnetization^4: 7785.05 +/- 405; tau = 1.01 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 4096     entries: error = 233.498
-    bin #2   : 2048     entries: error = 285.749
-    bin #3   : 1024     entries: error = 327.279
-    bin #4   : 512      entries: error = 366.132
-    bin #5   : 256      entries: error = 376.468
-    bin #6   : 128      entries: error = 405.277
+Magnetization: -0.380371 +/- 0.295; tau = 2.68 WARNING: ERRORS NOT CONVERGED!!!
+    bin #1   : 4096     entries: error = 0.117015
+    bin #2   : 2048     entries: error = 0.156402
+    bin #3   : 1024     entries: error = 0.200997
+    bin #4   : 512      entries: error = 0.246337
+    bin #5   : 256      entries: error = 0.272301
+    bin #6   : 128      entries: error = 0.295315
+Magnetization^2: 56.2021 +/- 1.8; tau = 1.04 WARNING: check error convergence
+    bin #1   : 4096     entries: error = 1.02624
+    bin #2   : 2048     entries: error = 1.28759
+    bin #3   : 1024     entries: error = 1.51324
+    bin #4   : 512      entries: error = 1.67917
+    bin #5   : 256      entries: error = 1.70192
+    bin #6   : 128      entries: error = 1.80186
+Magnetization^4: 7470.37 +/- 389; tau = 0.94 WARNING: check error convergence
+    bin #1   : 4096     entries: error = 229.007
+    bin #2   : 2048     entries: error = 284.053
+    bin #3   : 1024     entries: error = 330.239
+    bin #4   : 512      entries: error = 368.309
+    bin #5   : 256      entries: error = 368.519
+    bin #6   : 128      entries: error = 388.661
 Number of Sites: 16 +/- 0
-Specific Heat: 0.276209 +/- 0.00679 WARNING: check error convergence
+Specific Heat: 0.274705 +/- 0.0066
 Temperature: 1.6 +/- 0
