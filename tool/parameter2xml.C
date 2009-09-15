@@ -41,16 +41,28 @@
 #include <stdexcept>
 
 void convert_params(const std::string& inname, const std::string& basename,
-                    const alps::Parameters& params_overwrite)
+                    const alps::Parameters& params_add)
 {
   alps::ParameterList list;
   {
     std::ifstream in(inname.c_str());
     in >> list;
   }
-  BOOST_FOREACH(alps::Parameters& p, list) { p << params_overwrite; }
-
   if (list.size() == 0) return;
+
+  BOOST_FOREACH(alps::Parameters& params, list) {
+    BOOST_FOREACH(alps::Parameter const& padd, params_add) {
+      std::string key = padd.key();
+      if (params.defined(key)) {
+        if (params[key] != padd.value()) {
+          std::cerr << "Error: parameter " << key << " is already defined\n";
+          boost::throw_exception(std::invalid_argument("convert_params"));
+        }
+      } else {
+        params[key] = padd.value();
+      }
+    }
+  }
 
   std::cout << "Converting parameter file " << inname << " to "
             <<  basename+".in.xml" << std::endl;
@@ -137,13 +149,18 @@ try {
   bool find_out = false;
   std::string inname;
   std::string outbase;
-  alps::Parameters params_overwrite;
+  alps::Parameters params_add;
 
   for (int p = 1; p < argc; ++p) {
     std::string arg = argv[p];
-    if (arg.find('=') < arg.size()) {
-      std::istringstream iss(arg);
-      params_overwrite.parse(iss);
+    int eqpos = arg.find('=');
+    if (eqpos < arg.size()) {
+      if ((eqpos > 0) && (eqpos+1 < arg.size())) {
+        params_add[arg.substr(0, eqpos)] = arg.substr(eqpos+1);
+      } else {
+        std::cerr << "Error: invalid parameter \"" << arg << "\"\n";
+        std::exit(-1);
+      }
     } else if (!find_in) {
       inname = arg;
       outbase = arg;
@@ -159,7 +176,7 @@ try {
   if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
   if (outbase.size() >= 2 && outbase.substr(0, 2) == "./") outbase.erase(0, 2);
 
-  convert_params(inname, outbase, params_overwrite);
+  convert_params(inname, outbase, params_add);
 
 #ifndef BOOST_NO_EXCEPTIONS
 }
