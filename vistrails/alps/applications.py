@@ -9,22 +9,33 @@ import core.modules.basic_modules
 import core.modules.module_registry
 
 import alpscore
+import os
 
 basic = core.modules.basic_modules
 
 ##############################################################################
 
+
 class AlpsApplication(alpscore.SystemCommandLogged):
     """ Runs an ALPS application for a given parameter file """
+
+    def get_path(self,appname):
+        if self.hasInputFromPort('num_processes') and  self.getInputFromPort('num_processes') > 1:
+            return alpscore._get_path(appname+'_mpi')
+        else: 
+            return alpscore._get_path(appname)
+
     def get_app_name(self):
         if self.hasInputFromPort('application'):
           fn = self.getInputFromPort('application')
-          return alpscore._get_path(fn.name)
+          return self.get_path(fn.name)
         else:
           if self.appname != '':
-            return alpscore._get_path(self.appname)
+            return self.get_path(self.appname)
           else: 
              raise ModuleError(self, 'No application specified')
+
+             
     def getoptions(self):
         options = []
         if self.hasInputFromPort('tmin'):
@@ -37,8 +48,10 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         input_file = self.getInputFromPort('input_file')
         result = basic.File()
         result.name = input_file.name.replace('.in.xml', '.out.xml')
-        cmdline = [self.get_app_name()]
-        cmdline += self.getoptions()
+        an = self.get_app_name()
+        if not os.path.isfile(an):
+            raise ModuleError(self, "Application '%s' not existent" % an)
+        cmdline = [an] + self.getoptions()
         if self.hasInputFromPort('continue'):
             cmdline += [result.name]
         else:
@@ -46,12 +59,13 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         print cmdline
         self.execute(cmdline)
         self.setResult('output_file', result)
+        
     _input_ports = [('input_file', [basic.File]),
                     ('tmin', [basic.Integer]),
                     ('tmax', [basic.Integer]),
                     ('continue', [basic.Boolean]),
                     ('application', [basic.File]),
-                    ('log_file',[basic.File])
+                    ('num_processes',[basic.Integer])
                     ]
     _output_ports = [('output_file', [basic.File]),
                      ('log_file',[basic.File])]
@@ -97,7 +111,6 @@ class AppDMRG(AlpsApplication):
 class AppQWL(AlpsApplication):
     """Runs qwl for given parameter file """
     appname = 'qwl'
-
 
   
 def initialize(): pass

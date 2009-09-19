@@ -30,8 +30,8 @@ class LatticeModel(parameters.Parameters):
    def compute(self):
        self.parms = {}
        self.defaults = {}
-       self.update_parms_from_port('lattice')
-       self.update_parms_from_port('model')
+       self.update_from_port('lattice')
+       self.update_from_port('model')
        self.setOutput()
    _input_ports = [('lattice', [lattices.LatticeParameters]),
                     ('model', [models.ModelParameters])]
@@ -44,7 +44,7 @@ class DiagonalizationSimulation(parameters.Parameters):
        self.parms = {}
        self.defaults = {}
        for port_name in self.inputPorts:
-          self.update_parms_from_port(port_name)
+          self.update_from_port(port_name)
        self.setOutput()
    _input_ports = [('system', [parameters.SystemParameters]),
                     ('conserved', [parameters.ConservedQuantumnumbers]),
@@ -59,7 +59,7 @@ class MonteCarloSimulation(parameters.Parameters):
        self.parms = {}
        self.defaults = {}
        for port_name in self.inputPorts:
-          self.update_parms_from_port(port_name)
+          self.update_from_port(port_name)
        self.setOutput()
    _input_ports = [('system', [parameters.SystemParameters]),
                     ('mcparms', [parameters.MonteCarloParameters]),
@@ -136,6 +136,6 @@ def selfRegister():
   reg.add_module(MonteCarloSimulation,namespace="System")
   reg.add_module(DiagonalizationSimulation,namespace="System")
 
-  reg.add_module(TextEditCell,namespace="System")
+  reg.add_module(TextEditCell,namespace="System",abstract=True)
   reg.add_input_port(TextEditCell, "Location", packages.spreadsheet.basicWidgets.CellLocation)
   reg.add_input_port(TextEditCell, "File", basic.File)

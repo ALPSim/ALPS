@@ -27,33 +27,45 @@ class Parameters(Module):
          if self.defaults.has_key(k) and self.defaults[k]!=other.defaults[k]:
             raise ModuleError(self, "default for parameter " + k + " defined twice and the values differ")
          else: self.defaults[k] = other.defaults[k]
-   def update_parms_unchecked(self,other):
+         
+   def update_unchecked(self,other):
        self.parms.update(other.parms)
        self.defaults.update(other.defaults)
-   def update_parms_from_port(self,port_name):
+       
+   def update_from_port(self,port_name):
        if self.hasInputFromPort(port_name):
          input_values = self.forceGetInputListFromPort(port_name)
          for q in input_values:
            self.update_parms(q)
-   def set_checked(self,key_name,value):
+           
+   def set(self,key_name,value):
        if type(value) == basic.File:
-         self.set_checked(key_name,value.name)
+         self.set(key_name,value.name)
        else:
          if self.parms.has_key(key_name) and self.parms[key_name] != value:
             raise ModuleError(self, "parameter " + key_name + " defined twice and the values differ")
          else:
            self.parms[key_name] = value
+           
    def set_from_port(self,port_name):
        if self.hasInputFromPort(port_name):
-          self.set_checked(port_name,self.getInputFromPort(port_name))
+          self.set(port_name,self.getInputFromPort(port_name))
+          
    def set_missing_from_defaults(self):
        for k in self.defaults.keys():
          if not self.parms.has_key(k):
            self.parms[k] = self.defaults[k]
+           
    def readInputs(self):
        for port_name in self.inputPorts:
          if port_name != 'parms':
             self.set_from_port(port_name)
+
+   def setOutput(self):
+       self.update_from_port('parms')
+       self.setResult('value',self)
+       self.setResult('value_as_string',self.to_string())
+            
    def write(self,out):
      self.set_missing_from_defaults()
      out.write('{\n')
@@ -63,16 +75,14 @@ class Parameters(Module):
        out.write(self.parms[key])
        out.write('\"\n')
      out.write('}\n')
+     
    def to_string(self):
      res = str(self.parms)
      if len(self.defaults)>0:
        res += '; defaults='
        res += str(self.defaults)
      return res
-   def setOutput(self):
-       self.update_parms_from_port('parms')
-       self.setResult('value',self)
-       self.setResult('value_as_string',self.to_string())
+       
    def compute(self):
        self.parms = {}
        self.defaults = {}
@@ -98,14 +108,11 @@ class UpdateParameters(Parameters):
    def compute(self):
        self.parms = {}
        self.defaults = {}
-       if self.hasInputFromPort('parms'):
-         input_values = self.forceGetInputListFromPort('parms')
-         for p in input_values:
-           self.update_parms_unchecked(p)
+       self.updateFromPort('parms')
        if self.hasInputFromPort('updated_parms'):
          input_values = self.forceGetInputListFromPort('updated_parms')
          for p in input_values:
-           self.update_parms_unchecked(p)
+           self.update_unchecked(p)
        self.setResult('value',self)
        self.setResult('value_as_string',str(self.parms))
    _input_ports = [('parms',[Parameters]),
@@ -131,9 +138,9 @@ class MonteCarloMeasurements(Parameters):
        if self.hasInputFromPort(port_name):
           val  = self.getInputFromPort(port_name)
           if type(val) == basic.Boolean:
-            self.set_checked('MEASURE['+port_name+']',val)
+            self.set('MEASURE['+port_name+']',val)
           else:
-            self.set_checked(port_name,val)
+            self.set(port_name,val)
    _input_ports = [('Correlations',[(basic.Boolean, 'the spin or density correlations')]),
                    ('Structure Factor',[(basic.Boolean, 'the spin or density structure factor')]),
                    ('Green Function',[(basic.Boolean, 'the Green function')]),
@@ -239,7 +246,7 @@ class UpdateParameterList(ParameterList):
        if self.hasInputFromPort('parms'):
          input_values = self.forceGetInputListFromPort('parms')
          for p in input_values:
-           self.update_parms_unchecked(p)
+           self.update_unchecked(p)
        self.setOutput()
 
 class IterateParameter(ParameterList):

@@ -17,7 +17,7 @@ import evaluation
 import tools
 
 identifier = 'org.comp-phys.alps'
-version = '0.1.7'
+version = '0.1.9'
 name = 'ALPS'
 
 configuration = ConfigurationObject(path=(None, str))
@@ -41,6 +41,6 @@ def initialize():
   tools.selfRegister()
   
   if configuration.check('path'):
-    print "Have path", configuration.path
+    print "Have ALPS path", configuration.path
     alpscore.binpath = configuration.path
 

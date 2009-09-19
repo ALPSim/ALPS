@@ -175,7 +175,7 @@ def selfRegister():
   reg.add_module(MakeParameterFile,namespace="Tools")
   reg.add_module(Parameter2XML,namespace="Tools")
   
-  reg.add_module(ExpandWildcards,namespace="Tools")
+  reg.add_module(ExpandWildcards,namespace="Tools",abstract=True)
   reg.add_module(GetRunFiles,namespace="Tools")
   reg.add_module(GetResultFiles,namespace="Tools")
   
