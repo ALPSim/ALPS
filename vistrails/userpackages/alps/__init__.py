@@ -17,10 +17,10 @@ import evaluation
 import tools
 
 identifier = 'org.comp-phys.alps'
-version = '0.1.9'
+version = '0.2.0'
 name = 'ALPS'
 
-configuration = ConfigurationObject(path=(None, str))
+configuration = ConfigurationObject(path=(None, str),mpirun=(None, str))
 
 ##############################################################################
 

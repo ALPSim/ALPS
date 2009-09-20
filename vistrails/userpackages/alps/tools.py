@@ -72,9 +72,8 @@ class Parameter2XML(alpscore.SystemCommandLogged):
         input_file = self.getInputFromPort("parameter")
         base_name = os.path.basename(input_file.name)
         print "Running"
-        self.execute([alpscore._get_path('parameter2xml'),
-                            input_file.name,
-                            o.name + "/" + base_name])
+        self.execute(['cd',o.name,';', alpscore._get_path('parameter2xml'),
+                            input_file.name, base_name])
         # Things would be easier on our side if ALPS somehow
         # advertised all the files it creates. Right now, it will be
         # hard to make sure all temporary files that are created will
@@ -164,7 +163,32 @@ class XML2HTML(alpscore.SystemCommand):
     _output_ports = [('output_file', [basic.File])]
 
 
+class PackSimulationResults(alpscore.SystemCommandLogged):
+    def compute(self):
+        o = self.interpreter.filePool.create_file(suffix='.tar.gz')
+        input_file = self.getInputFromPort("file")
+        dirname = os.path.dirname(input_file.name)
+        self.execute(['cd', dirname,';', 'tar','czf', o.name, '*'])
+        self.setResult("archive", o)
+    _input_ports = [('file', [basic.File])]
+    _output_ports = [('archive', [basic.File]),
+                     ('log_file',[basic.File])]
 
+class UnpackSimulationResults(alpscore.SystemCommandLogged):
+    def compute(self):
+        o = self.interpreter.filePool.create_file()
+        os.unlink(o.name)
+        os.mkdir(o.name)
+        input_file = self.getInputFromPort("archive")
+        self.execute(['cd', o.name,';', 'tar','xzf', input_file.name])
+        print "Executed"
+        l = glob.glob(o.name+'/*.out.xml')
+        print "All out files: ",l
+        o.name = l[0]
+        self.setResult("output_file",o)
+    _input_ports = [('archive', [basic.File])]
+    _output_ports = [('output_file', [basic.File]),
+                     ('log_file',[basic.File])]
 
 def initialize(): pass
 
@@ -182,4 +206,7 @@ def selfRegister():
   reg.add_module(Convert2XML,namespace="Tools")
   reg.add_module(Convert2Text,namespace="Tools")
   reg.add_module(XML2HTML,namespace="Tools")
+
+  reg.add_module(PackSimulationResults,namespace="Tools")
+  reg.add_module(UnpackSimulationResults,namespace="Tools")
 

@@ -11,6 +11,8 @@ import core.modules.module_registry
 import alpscore
 import os
 
+from core.modules.vistrails_module import ModuleError
+
 basic = core.modules.basic_modules
 
 ##############################################################################
