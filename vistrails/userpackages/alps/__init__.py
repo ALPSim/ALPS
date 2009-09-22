@@ -20,7 +20,7 @@ identifier = 'org.comp-phys.alps'
 version = '0.2.0'
 name = 'ALPS'
 
-configuration = ConfigurationObject(path=(None, str),mpirun=(None, str))
+configuration = ConfigurationObject(path=(None, str),mpirun=("['mpirun','-np']", str))
 
 ##############################################################################
 
@@ -40,7 +40,5 @@ def initialize():
   evaluation.selfRegister()
   tools.selfRegister()
   
-  if configuration.check('path'):
-    print "Have ALPS path", configuration.path
-    alpscore.binpath = configuration.path
+  alpscore.config = configuration
 

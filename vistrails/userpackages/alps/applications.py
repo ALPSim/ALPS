@@ -54,6 +54,9 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         if not os.path.isfile(an):
             raise ModuleError(self, "Application '%s' not existent" % an)
         cmdline = [an] + self.getoptions()
+        if self.hasInputFromPort('num_processes') and  self.getInputFromPort('num_processes') > 1:
+            cmdline = alspcore.config.mpirun+[self.getInputFromPort('num_processes')]+cmdline
+            print "Using MPI", cmdline
         if self.hasInputFromPort('continue'):
             cmdline += [result.name]
         else:

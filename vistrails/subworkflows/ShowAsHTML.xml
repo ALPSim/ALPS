@@ -2,7 +2,7 @@
   <action date="2009-08-27 11:55:08" id="1" prevId="0" prune="" session="0" user="troyer">
     <annotation id="0" key="__description__" value="Copied from pipeline" />
     <add id="0" objectId="0" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="0" name="XML2HTML" namespace="Tools" package="org.comp-phys.alps" tag="" version="0.1.6" />
+      <module cache="1" id="0" name="XML2HTML" namespace="Tools" package="org.comp-phys.alps" tag="" version="0.1.10" />
     </add>
     <add id="1" objectId="0" parentObjId="0" parentObjType="module" what="location">
       <location id="0" x="-67.0431454255" y="-15.2672509384" />
