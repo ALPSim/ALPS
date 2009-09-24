@@ -62,10 +62,6 @@ void interpolate(std::string name, const boost::shared_ptr<DCATransformer> trans
 		 const bool antiferromagnet)
 {
   std::ofstream out_str(name.c_str());
-  double l0 = 0;
-  for (int d=0; d<transform_ptr->dimension(); ++d) 
-    l0 += kvec[0][d]*kvec[0][d];
-  l0 =sqrt(l0);
   for (std::vector<ClusterHelper::vector_type>::const_iterator itk=kvec.begin(); itk!=kvec.end(); ++itk) {
     ClusterHelper::vector_type k = *itk;
     std::map<double, std::complex<double> > spectrum;
@@ -74,13 +70,13 @@ void interpolate(std::string name, const boost::shared_ptr<DCATransformer> trans
     }
     double l = 0;
     for (int d=0; d<transform_ptr->dimension(); ++d) 
-      l += k[d]*k[d];
+      l += (k[d]-kvec[0][d])*(k[d]-kvec[0][d]);
     l =sqrt(l);
     for (std::map<double, std::complex<double> >::iterator it=spectrum.begin(); it!=spectrum.end(); ++it) {
       std::complex<double> G = 1./(it->first + mu - transform_ptr->epsilon(k) - it->second);
       for (int d=0; d<transform_ptr->dimension(); ++d) 
 	out_str << k[d] << "\t" ;
-      out_str << (offset+sign*(l-l0))/M_PI << "\t" << it->first << "\t" 
+      out_str << (offset+sign*l)/M_PI << "\t" << it->first << "\t" 
 	      << G.real() << "\t" << G.imag() << "\n"; 
     }
     out_str << "\n";
@@ -197,7 +193,7 @@ void interpolate_spectra(const alps::Parameters& parms)
 	}
 	std::stringstream name3;
 	name3 << name.str() << "_3";
-	interpolate(name3.str(), transform_ptr, selfenergies[z], kvec, M_PI, -1, mu, antiferromagnet);
+	interpolate(name3.str(), transform_ptr, selfenergies[z], kvec, -M_PI, -1, mu, antiferromagnet);
 	for (int i=0; i<=100; ++i) {
 	  kvec[i].resize(3);
 	  kvec[i][0] = M_PI;
@@ -206,7 +202,7 @@ void interpolate_spectra(const alps::Parameters& parms)
 	}
 	std::stringstream name4;
 	name4 << name.str() << "_4";
-	interpolate(name4.str(), transform_ptr, selfenergies[z], kvec, 2*M_PI, -1, mu, antiferromagnet);
+	interpolate(name4.str(), transform_ptr, selfenergies[z], kvec, -2*M_PI, -1, mu, antiferromagnet);
       }
       break;
     default :
