@@ -72,7 +72,7 @@ class Parameters(Module):
      for key in self.parms:
        out.write(key)
        out.write('=\"')
-       out.write(self.parms[key])
+       out.write(str(self.parms[key]))
        out.write('\"\n')
      out.write('}\n')
      
@@ -137,7 +137,8 @@ class MonteCarloMeasurements(Parameters):
    def set_from_port(self,port_name):
        if self.hasInputFromPort(port_name):
           val  = self.getInputFromPort(port_name)
-          if type(val) == basic.Boolean:
+          print port_name," ",type(val)
+          if type(val) == bool:
             self.set('MEASURE['+port_name+']',val)
           else:
             self.set(port_name,val)

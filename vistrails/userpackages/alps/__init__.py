@@ -17,7 +17,7 @@ import evaluation
 import tools
 
 identifier = 'org.comp-phys.alps'
-version = '0.2.0'
+version = '0.2.1'
 name = 'ALPS'
 
 configuration = ConfigurationObject(path=(None, str),mpirun=("['mpirun','-np']", str))
