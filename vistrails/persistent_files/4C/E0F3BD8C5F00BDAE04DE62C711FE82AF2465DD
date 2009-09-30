@@ -1,0 +1,103 @@
+Generic classical Monte Carlo program using local or cluster updates
+  available from http://alps.comp-phys.org/
+  copyright(c) 1999-2007 by Matthias Troyer <troyer@comp-phys.org>
+                            Mathias Koerner <mkoerner@comp-phys.org>
+ for details see the publication:
+ A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+using the ALPS parallelizing scheduler
+  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.
+  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
+
+based on the ALPS libraries version 1.4b1
+  available from http://alps.comp-phys.org/
+  copyright (c) 1994-2009 by the ALPS collaboration.
+  Consult the web page for license details.
+  For details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+parsing task files ... 
+Created run 1 locally
+Starting task 1.
+Checking if it is finished: not yet, next check in 2 seconds ( 80% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 1
+This task took 4 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Created run 1 locally
+Starting task 2.
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 2
+This task took 1 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Created run 1 locally
+Starting task 3.
+Checking if it is finished: not yet, next check in 2 seconds ( 77% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 3
+This task took 4 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Created run 1 locally
+Starting task 4.
+Checking if it is finished: not yet, next check in 2 seconds ( 14% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 4
+This task took 4 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Created run 1 locally
+Starting task 5.
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 16% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 40% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 65% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 89% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 5
+This task took 16 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Created run 1 locally
+Starting task 6.
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 9% done).
+Checking if it is finished: not yet, next check in 5 seconds ( 19% done).
+Checking if it is finished: not yet, next check in 4 seconds ( 41% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 59% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 70% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 81% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 92% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 6
+This task took 33 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Finished with everything.
