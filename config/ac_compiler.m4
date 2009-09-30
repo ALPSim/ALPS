@@ -501,6 +501,11 @@ AC_DEFUN([AC_COMPILER],
     ac_cv_have_openmp=yes
     CFLAGS="$CFLAGS $OPENMP_CFLAGS"
     CXXFLAGS="$CXXFLAGS $OPENMP_CXXFLAGS"
+    if test "$build_vendor" = "apple" -a "$ac_cv_prog_cxx_openmp" = "-fopenmp"; then
+      # workaround for g++ on Mac OS X Snow Leopard
+      CFLAGS="$CFLAGS -Xcompiler -fopenmp"
+      CXXFLAGS="$CXXFLAGS -Xcompiler -fopenmp"
+    fi
   fi
 
   ac_cv_compiler="$COMPILER"
