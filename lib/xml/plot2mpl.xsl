@@ -17,7 +17,7 @@
       </xsl:apply-templates>
     </xsl:if>
     <xsl:text>])</xsl:text><xsl:value-of select="$newline"/>
-    <xsl:text>errorbar(data[0],data[1]</xsl:text>
+    <xsl:text>if len(data):</xsl:text><xsl:value-of select="$newline"/><xsl:text>     errorbar(data[0],data[1]</xsl:text>
     <xsl:if test= "point/dy">
       <xsl:text>,yerr=data[3]</xsl:text>
     </xsl:if>

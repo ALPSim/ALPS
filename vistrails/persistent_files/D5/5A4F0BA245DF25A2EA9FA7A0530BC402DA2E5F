@@ -1,0 +1,64 @@
+ALPS/looper version 3.2b10-20090915 (2009/09/15)
+  multi-cluster quantum Monte Carlo algorithms for spin systems
+  available from http://wistaria.comp-phys.org/alps-looper/
+  copyright (c) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+
+using ALPS/parapack version 2009-01-22
+  a Monte Carlo scheduler for multiple-level parallelization
+  available from http://wistaria.comp-phys.org/alps-parapack/
+  copyright (c) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+
+based on the ALPS libraries version 1.4b1
+  available from http://alps.comp-phys.org/
+  copyright (c) 1994-2009 by the ALPS collaboration.
+  Consult the web page for license details.
+  For details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+[2009-Sep-24 14:26:50]: starting scheduler on ogdoad.ethz.ch
+  master input file  = /var/folders/WJ/WJD2UO6pG04hWvcIfT8kIk+++TI/-Tmp-/vt_tmpW-lkNf/vt_tmpwnLSSx/quantum1b.in.xml
+  master output file = /var/folders/WJ/WJD2UO6pG04hWvcIfT8kIk+++TI/-Tmp-/vt_tmpW-lkNf/vt_tmpwnLSSx/quantum1b.out.xml
+  termination file   = /var/folders/WJ/WJD2UO6pG04hWvcIfT8kIk+++TI/-Tmp-/vt_tmpW-lkNf/vt_tmpwnLSSx/quantum1b.term
+  number of thread(s)       = 1
+  thread(s) per clone       = 1
+  number of thread group(s) = 1
+  check parameter = no
+  auto evaluation = no
+  time limit = unlimited
+  interval between checkpointing  = 3600 seconds
+  interval between progress report = 600 seconds
+[2009-Sep-24 14:26:50]: task status: total number of tasks = 14
+  new = 14, running = 0, continuing = 0, suspended = 0, finished = 0, completed = 0
+[2009-Sep-24 14:26:50]: starting 1 threadgroup(s)
+[2009-Sep-24 14:26:51]: dispatching a new clone[1,1] on threadgroup[1]
+[2009-Sep-24 14:28:13]: clone[1,1] finished on threadgroup[1]
+[2009-Sep-24 14:28:14]: dispatching a new clone[2,1] on threadgroup[1]
+[2009-Sep-24 14:28:57]: clone[2,1] finished on threadgroup[1]
+[2009-Sep-24 14:28:58]: dispatching a new clone[3,1] on threadgroup[1]
+[2009-Sep-24 14:29:21]: clone[3,1] finished on threadgroup[1]
+[2009-Sep-24 14:29:22]: dispatching a new clone[4,1] on threadgroup[1]
+[2009-Sep-24 14:29:39]: clone[4,1] finished on threadgroup[1]
+[2009-Sep-24 14:29:39]: dispatching a new clone[5,1] on threadgroup[1]
+[2009-Sep-24 14:29:53]: clone[5,1] finished on threadgroup[1]
+[2009-Sep-24 14:29:53]: dispatching a new clone[6,1] on threadgroup[1]
+[2009-Sep-24 14:30:04]: clone[6,1] finished on threadgroup[1]
+[2009-Sep-24 14:30:05]: dispatching a new clone[7,1] on threadgroup[1]
+[2009-Sep-24 14:30:15]: clone[7,1] finished on threadgroup[1]
+[2009-Sep-24 14:30:15]: dispatching a new clone[8,1] on threadgroup[1]
+[2009-Sep-24 14:30:24]: clone[8,1] finished on threadgroup[1]
+[2009-Sep-24 14:30:25]: dispatching a new clone[9,1] on threadgroup[1]
+[2009-Sep-24 14:30:33]: clone[9,1] finished on threadgroup[1]
+[2009-Sep-24 14:30:34]: dispatching a new clone[10,1] on threadgroup[1]
+[2009-Sep-24 14:30:41]: clone[10,1] finished on threadgroup[1]
+[2009-Sep-24 14:30:42]: dispatching a new clone[11,1] on threadgroup[1]
+[2009-Sep-24 14:30:49]: clone[11,1] finished on threadgroup[1]
+[2009-Sep-24 14:30:50]: dispatching a new clone[12,1] on threadgroup[1]
+[2009-Sep-24 14:30:56]: clone[12,1] finished on threadgroup[1]
+[2009-Sep-24 14:30:57]: dispatching a new clone[13,1] on threadgroup[1]
+[2009-Sep-24 14:31:03]: clone[13,1] finished on threadgroup[1]
+[2009-Sep-24 14:31:03]: dispatching a new clone[14,1] on threadgroup[1]
+[2009-Sep-24 14:31:09]: clone[14,1] finished on threadgroup[1]
+[2009-Sep-24 14:31:09]: all tasks have been finished
+[2009-Sep-24 14:31:09]: threadgroup[1] halted
+[2009-Sep-24 14:31:09]: task status: total number of tasks = 14
+  new = 0, running = 0, continuing = 0, suspended = 0, finished = 0, completed = 14

@@ -57,6 +57,8 @@ class PlotScalarVersusParameter(PlotDescription):
           ylabel = self.getInputFromPort('observable')
         f.write('  <xaxis label="' + str(xlabel) + '" type="PARAMETER" name="' + str(self.getInputFromPort('parameter')) + '"/>\n')
         f.write('  <yaxis label="' + str(ylabel) + '" type="SCALAR_AVERAGE" name="' + str(self.getInputFromPort('observable')) + '"/>\n')
+        if (self.hasInputFromPort('for-each')):
+          f.write('  <for-each name="' + str(self.getInputFromPort('for-each')) + '"/>\n')
         f.write('</plot>\n')
         f.close()
         self.setResult('value',self)
@@ -64,7 +66,8 @@ class PlotScalarVersusParameter(PlotDescription):
                     ('observable', [basic.String]),
                     ('x-label', [basic.String]),
                     ('y-label', [basic.String]),
-                    ('title',[basic.String])]
+                    ('title',[basic.String]),
+                    ('for-each',[basic.String])]
     _output_ports = [('value',PlotDescription)]
 
 class PlotFile(basic.File):

@@ -1,0 +1,132 @@
+Generic classical Monte Carlo program using local or cluster updates
+  available from http://alps.comp-phys.org/
+  copyright(c) 1999-2007 by Matthias Troyer <troyer@comp-phys.org>
+                            Mathias Koerner <mkoerner@comp-phys.org>
+ for details see the publication:
+ A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+using the ALPS parallelizing scheduler
+  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.
+  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
+
+based on the ALPS libraries version 1.4b1
+  available from http://alps.comp-phys.org/
+  copyright (c) 1994-2009 by the ALPS collaboration.
+  Consult the web page for license details.
+  For details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+parsing task files ... 
+Using cluster updates
+Created run 1 locally
+Starting task 1.
+Checking if it is finished: not yet, next check in 2 seconds ( 5% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 75% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 1
+This task took 7 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Using cluster updates
+Created run 1 locally
+Starting task 2.
+Checking if it is finished: not yet, next check in 2 seconds ( 17% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 73% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 2
+This task took 7 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Using cluster updates
+Created run 1 locally
+Starting task 3.
+Checking if it is finished: not yet, next check in 2 seconds ( 8% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 42% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 3
+This task took 10 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Using cluster updates
+Created run 1 locally
+Starting task 4.
+Checking if it is finished: not yet, next check in 2 seconds ( 1% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 15% done).
+Checking if it is finished: not yet, next check in 3 seconds ( 29% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 47% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 61% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 75% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 89% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 4
+This task took 23 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Using cluster updates
+Created run 1 locally
+Starting task 5.
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 2% done).
+Checking if it is finished: not yet, next check in 15 seconds ( 6% done).
+Checking if it is finished: not yet, next check in 11 seconds ( 30% done).
+Checking if it is finished: not yet, next check in 8 seconds ( 48% done).
+Checking if it is finished: not yet, next check in 6 seconds ( 62% done).
+Checking if it is finished: not yet, next check in 4 seconds ( 73% done).
+Checking if it is finished: not yet, next check in 3 seconds ( 80% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 86% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 91% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 95% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 5
+This task took 69 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Using cluster updates
+Created run 1 locally
+Starting task 6.
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 32 seconds ( 3% done).
+Checking if it is finished: not yet, next check in 24 seconds ( 27% done).
+Checking if it is finished: not yet, next check in 18 seconds ( 46% done).
+Checking if it is finished: not yet, next check in 13 seconds ( 60% done).
+Checking if it is finished: not yet, next check in 9 seconds ( 70% done).
+Checking if it is finished: not yet, next check in 7 seconds ( 78% done).
+Checking if it is finished: not yet, next check in 5 seconds ( 84% done).
+Checking if it is finished: not yet, next check in 3 seconds ( 88% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 91% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 93% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 95% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 98% done).
+Checking if it is finished: not yet, next check in 2 seconds ( 0% done).
+Halted Simulation 6
+This task took 141 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Finished with everything.
