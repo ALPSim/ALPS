@@ -63,7 +63,10 @@ class AlpsApplication(alpscore.SystemCommandLogged):
             cmdline += [input_file.name]
         print cmdline
         self.execute(cmdline)
+        resultdir = basic.Directory
+        resultdir.name = os.path.dirname(result.name)
         self.setResult('output_file', result)
+        self.setResult('output_dir', resultdir)
         
     _input_ports = [('input_file', [basic.File]),
                     ('tmin', [basic.Integer]),
@@ -73,6 +76,7 @@ class AlpsApplication(alpscore.SystemCommandLogged):
                     ('num_processes',[basic.Integer])
                     ]
     _output_ports = [('output_file', [basic.File]),
+    				 ('output_dir', [basic.Directory]),
                      ('log_file',[basic.File])]
     appname=''
                          
