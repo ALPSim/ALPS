@@ -402,7 +402,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
     itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
     itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
-    if (parms.defined("ANTIFERROMAGNET")) 
+    if (parms.value_or_default("ANTIFERROMAGNET", false)) 
       print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, blockdiagonal);
     else
       print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, diagonal);
