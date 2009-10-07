@@ -195,23 +195,22 @@ public:
 			      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
     : FourierTransformer(beta, n_flavor, n_site)
   { 
+    if (n_site%2 != 0 && h!=0) 
+      boost::throw_exception(std::logic_error("FourierTransformer: cannot handle antiferromagnetism with uneven cluster size\n"));
     for(int f=0; f<n_flavor; f++) {
       int s = f % 2 ? -1 : 1;
-      if (n_site%2 == 0) {
-	for(int i=0; i<n_site; i++) {
-	  c1_[f][i][i] = 1.;
-	  c2_[f][i][i] = eps[f][i] - mu;
-	  c3_[f][i][i] = epssq[f][i] - 2*mu*eps[f][i] + mu*mu +h*h/4.;
-	}
+      for(int i=0; i<n_site; i++) {
+	c1_[f][i][i] = 1.;
+	c2_[f][i][i] = eps[f][i] - mu;
+	c3_[f][i][i] = epssq[f][i] - 2*mu*eps[f][i] + mu*mu +h*h/4.;
+      }
+      if (n_site%2==0) {
 	for(int i=0; i<n_site; i+=2) {
 	  c2_[f][i+1][i] = s*h/2;
 	  c2_[f][i][i+1] = c2_[f][i+1][i];
 	  c3_[f][i+1][i] = s*h/2*(eps[f][i] + eps[f][i+1] - 2*mu);
 	  c3_[f][i][i+1] = c3_[f][i+1][i];
 	}
-      }
-      else {
-	boost::throw_exception(std::logic_error("FourierTransformer: cannot handle antiferromagnetism with uneven cluster size\n"));
       }
     }
   }
