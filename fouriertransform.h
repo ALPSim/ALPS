@@ -195,7 +195,7 @@ public:
 			      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
     : FourierTransformer(beta, n_flavor, n_site)
   { 
-    if (n_site%2 != 0 && h!=0) 
+    if (n_site%2!=0 && h!=0) 
       boost::throw_exception(std::logic_error("FourierTransformer: cannot handle antiferromagnetism with uneven cluster size\n"));
     for(int f=0; f<n_flavor; f++) {
       int s = f % 2 ? -1 : 1;

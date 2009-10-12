@@ -1,6 +1,6 @@
 #General ALPS include directory
 include ./Makefile.inc
-CXXFLAGS += -g -DWERNER -DRUBTSOV -I..
+CXXFLAGS += -DWERNER -DRUBTSOV -I..
 
 SOURCES=externalsolver.C hirschfyesim.C fouriertransform.C hilberttransformer.C alps_solver.C clustertransformer.C clusterhelper.C 2dsimpson.C
 SOURCES_DMFT= main.C selfconsistency.C $(SOURCES) 
@@ -8,7 +8,7 @@ SOURCES_DMFT= main.C selfconsistency.C $(SOURCES)
 OBJECTS=externalsolver.o hirschfyesim.o fouriertransform.o hilberttransformer.o auxiliaryfunctions.o alps_solver.o clustertransformer.o clusterhelper.o 2dsimpson.o
 OBJECTS_DMFT=main.o selfconsistency.o $(OBJECTS)
 OBJECTS_HIRSCHFYE=solver_main.o $(OBJECTS)
-OBJECTS_INTERPOLATE=interpolate.o $(OBJECTS)
+OBJECTS_INTERPOLATE=interpolate.o interpolator.o $(OBJECTS)
 RUBTSOV_DIR=../DMFT-solvers/Rubtsov
 WERNER_DIR=../DMFT-solvers/Werner
 IGOR_DIR=../../Igor/k_int_mats
@@ -51,7 +51,7 @@ werner:
 igor:
 	cd $(IGOR_DIR); $(MAKE)
 clean:
-	$(RM) $(RMFLAGS) *.o dmft dmft_mpi hirschfye $(RUBTSOV_DIR)/*.o $(WERNER_DIR)/*.o
+	$(RM) $(RMFLAGS) *.o dmft dmft_mpi hirschfye interpolate $(RUBTSOV_DIR)/*.o $(WERNER_DIR)/*.o
 fileclean:
 	rm G_omega_[1-9]* G0_omega_[1-9]* G_tau_[1-9]* G0_tau_[1-9]*
 %.o: %.cpp
@@ -62,7 +62,11 @@ fileclean:
 depend:
 				makedepend $(SOURCES) $(SOURCES_DMFT)
 hirschfyesim.o: hirschfyeaux.h hirschfyesim.h
-selfconsistency.o: hilberttransformer.h fouriertransform.h 
-fouriertransform.o: fouriertransform.h
-main.o: hilberttransformer.h fouriertransform.h
+selfconsistency.o: hilberttransformer.h fouriertransform.h cluster.h 
+fouriertransform.o: fouriertransform.h cluster.h
+main.o: hilberttransformer.h fouriertransform.h cluster.h
 2dsimpson.o: 2dsimpson.C 2dsimpson.h
+interpolate.o: interpolator.h
+interpolator.o: interpolator.h
+clustertransformer.o: cluster.h
+clusterhelper.o: cluster.h
