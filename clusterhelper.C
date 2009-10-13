@@ -64,7 +64,7 @@ ClusterHelper::ClusterHelper(const alps::Parameters& params) :
       pairkstr << "(" << it_j->first << "," << it_j->second << ") ";
     }
     pairkstr << std::endl;
-  }*/
+    }*/
 }
 
 
@@ -242,6 +242,7 @@ void ClusterHelper::setup_tables()
   } 
   /*std::ofstream latticemomstream("LatticeMomenta");
   for (int m=0; m<lattice_momenta_.size1(); ++m) {
+    latticemomstream << m << " ";
     for (int d=0; d<lattice_momenta_.size2(); ++d) 
       latticemomstream << lattice_momenta_(m,d) << " ";
     latticemomstream << std::endl;
