@@ -25,12 +25,47 @@
 *
 *****************************************************************************/
 
-#include "ising.h"
 #include <alps/parapack/temperature_scan.h>
+#include <iomanip>
+#include <iostream>
 
-PARAPACK_SET_VERSION(PARAPACK_VERSION_STRING ": Metropolis algorithm");
-PARAPACK_REGISTER_WORKER(single_ising_worker, "ising");
-PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising");
-PARAPACK_REGISTER_WORKER(alps::parapack::temperature_scan_adaptor<single_ising_worker>,
-                         "ising temperature_scan");
-PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising temperature_scan");
+class my_worker {
+public:
+  my_worker(alps::Parameters const&) {}
+  void init_observables(alps::Parameters const&, alps::ObservableSet const&) {}
+  void run(alps::ObservableSet const&) {}
+  void set_beta(double beta) { std::cout << "T = " << 1/beta; }
+  void save(alps::ODump&) const {}
+  void load(alps::IDump&) {}
+};
+
+int main() {
+#ifndef BOOST_NO_EXCEPTIONS
+try {
+#endif
+  std::cout << std::setprecision(3);
+
+  alps::Parameters params(std::cin);
+  std::vector<alps::ObservableSet> obs;
+  alps::parapack::temperature_scan_adaptor<my_worker> worker(params);
+  worker.init_observables(params, obs);
+
+  int count = 0;
+  while (worker.progress() < 1) {
+    std::cout << count++ << ", ";
+    worker.run(obs);
+    std::cout << ", progress = " << worker.progress() << std::endl;
+  }
+
+#ifndef BOOST_NO_EXCEPTIONS
+}
+catch (std::exception& exc) {
+  std::cerr << exc.what() << "\n";
+  return -1;
+}
+catch (...) {
+  std::cerr << "Fatal Error: Unknown Exception!\n";
+  return -2;
+}
+#endif
+}
