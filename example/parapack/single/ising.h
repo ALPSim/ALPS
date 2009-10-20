@@ -29,6 +29,7 @@
 #define PARAPACK_EXAMPLE_SINGLE_ISING_H
 
 #include <alps/parapack/serial.h>
+#include <boost/graph/sequential_vertex_coloring.hpp>
 
 class single_ising_worker : public alps::parapack::lattice_mc_worker<> {
 private:
@@ -41,18 +42,14 @@ public:
     // coupling constant
     coupling_ = (params.defined("J")) ? evaluate("J", params) : 1.0;
     // lattice
-    if (!is_bipartite())
-      std::cerr << "Warning: lattice should be bipartite.  "
-                << "OpenMP parallelization will be switched off.\n";
-    sublat_[0].clear();
-    sublat_[1].clear();
-    for (int s = 0; s < num_sites(); ++s) {
-      if (parity(s) < 0.5) {
-        sublat_[0].push_back(s);
-      } else {
-        sublat_[1].push_back(s);
-      }
-    }
+    std::vector<std::size_t> color(num_sites());
+    typedef boost::property_map<graph_type, alps::site_index_t>::const_type vertex_index_map;
+    int nc = boost::sequential_vertex_coloring(graph(),
+      boost::iterator_property_map<std::size_t*, vertex_index_map>(&color.front(),
+          get(boost::vertex_index, graph())));
+    sublat_.clear();
+    sublat_.resize(nc);
+    for (int s = 0; s < num_sites(); ++s) sublat_[color[s]].push_back(s);
     // configuration
     spins_.resize(num_sites());
     #pragma omp parallel
@@ -88,34 +85,22 @@ public:
   void run(alps::ObservableSet& obs) {
     ++mcs_;
 
-    if (is_bipartite()) {
-      for (int t = 0; t < 2; ++t) {
-        #pragma omp parallel
-        {
-          int r = alps::thread_id();
-          #pragma omp for
-          for (int k = 0; k < sublat_[t].size(); ++k) {
-            int s = sublat_[t][k];
-            double diff = 0;
-            neighbor_iterator itr, itr_end;
-            for (boost::tie(itr, itr_end) = neighbors(s); itr != itr_end; ++itr)
-              diff += 2 * coupling_ * spins_[s] * spins_[*itr];
-            if (uniform_01(r) < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) {
-              spins_[s] = -spins_[s];
-            }
-          } // end omp for
-        } // end omp parallel
-      }
-    } else {
-      for (int s = 0; s < num_sites(); ++s) {
-        double diff = 0;
-        neighbor_iterator itr, itr_end;
-        for (boost::tie(itr, itr_end) = neighbors(s); itr != itr_end; ++itr)
-          diff += 2 * coupling_ * spins_[s] * spins_[*itr];
-        if (uniform_01() < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) {
-          spins_[s] = -spins_[s];
-        }
-      }
+    for (int t = 0; t < sublat_.size(); ++t) {
+      #pragma omp parallel
+      {
+        int r = alps::thread_id();
+        #pragma omp for
+        for (int k = 0; k < sublat_[t].size(); ++k) {
+          int s = sublat_[t][k];
+          double diff = 0;
+          neighbor_iterator itr, itr_end;
+          for (boost::tie(itr, itr_end) = neighbors(s); itr != itr_end; ++itr)
+            diff += 2 * coupling_ * spins_[s] * spins_[*itr];
+          if (uniform_01(r) < 0.5 * (1 + std::tanh(-0.5 * beta_ * diff))) {
+            spins_[s] = -spins_[s];
+          }
+        } // end omp for
+      } // end omp parallel
     }
 
     // measurements
@@ -152,8 +137,7 @@ private:
   // parameteters
   double beta_;
   double coupling_;
-
-  std::vector<int> sublat_[2];
+  std::vector<std::vector<int> > sublat_;
 
   // configuration (need checkpointing)
   alps::mc_steps mcs_;
