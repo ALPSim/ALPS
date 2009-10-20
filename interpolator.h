@@ -41,7 +41,10 @@ public:
   typedef ClusterHelper::vector_type vector_t;
 
   Interpolator(const alps::Parameters& parms) :
-    mu(parms["MU"]), name("Dispersion_"), n_zone(parms["FLAVORS"])
+    mu(parms["MU"]), 
+    delta(parms.value_or_default("DELTA", 0.)),
+    name("Dispersion_"), 
+    n_zone(parms["FLAVORS"])
   {
     DCATransformer::generate_transformer(parms, transform_ptr);
   }
@@ -55,6 +58,7 @@ protected:
 
   boost::shared_ptr<DCATransformer> transform_ptr;
   const double mu;
+  const double delta;
   const std::string name;
   const unsigned int n_zone;
   

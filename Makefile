@@ -66,7 +66,7 @@ selfconsistency.o: hilberttransformer.h fouriertransform.h cluster.h
 fouriertransform.o: fouriertransform.h cluster.h
 main.o: hilberttransformer.h fouriertransform.h cluster.h
 2dsimpson.o: 2dsimpson.C 2dsimpson.h
-interpolate.o: interpolator.h
-interpolator.o: interpolator.h
+interpolate.o: interpolator.h cluster.h
+interpolator.o: interpolator.h cluster.h
 clustertransformer.o: cluster.h
 clusterhelper.o: cluster.h

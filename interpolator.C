@@ -101,10 +101,17 @@ AntiferroInterpolator::AntiferroInterpolator(const alps::Parameters& parms) :
 	itm->resize(2,2);
       selfenergies[z][omega] = kd;
     }
-    const int k = k1 / 2;
+    const int k = (k1/2)*2;
     const int i = k1 % 2;
     const int j = k2 % 2;
-    selfenergies[z][omega][k](i,j) = std::complex<double>(Sigma_real, Sigma_imag);
+    //if (i==j) {
+      selfenergies[z][omega][k]  (i,j) = std::complex<double>(Sigma_real, Sigma_imag);
+      selfenergies[z][omega][k+1](i,j) = std::complex<double>(Sigma_real, Sigma_imag);
+      /*}
+    else {
+      selfenergies[z][omega][k]  (i,j) = std::complex<double>(0., 0.);
+      selfenergies[z][omega][k+1](i,j) = std::complex<double>(0., 0.);
+      }*/
   }
 }
 
@@ -122,7 +129,7 @@ void ParaInterpolator::interpolate_spectrum(const int counter, const int zone,
     vector_t k = *itk;
     std::map<double, std::complex<double> > interpolated_selfenergy;
     for (selfenergy_t::const_iterator it=selfenergies[zone].begin(); it!=selfenergies[zone].end(); ++it) {
-      interpolated_selfenergy[it->first] = transform_ptr->interpolate(k, it->second);
+      interpolated_selfenergy[it->first] = transform_ptr->interpolate(k, it->second, false);
     }
     double l = 0;
     for (int d=0; d<transform_ptr->dimension(); ++d) 
@@ -130,11 +137,15 @@ void ParaInterpolator::interpolate_spectrum(const int counter, const int zone,
     l = sqrt(l);
     for (std::map<double, std::complex<double> >::const_iterator it=interpolated_selfenergy.begin(); 
 	 it!=interpolated_selfenergy.end(); ++it) {
-      std::complex<double> G = 1./(it->first + mu - transform_ptr->epsilon(k) - it->second);
+      std::complex<double> idelta(0., delta);
+      std::complex<double> G = it->first + mu - transform_ptr->epsilon(k) - it->second + idelta;
+      G = 1./G;
       for (int d=0; d<transform_ptr->dimension(); ++d) 
 	out_str << k[d] << "\t" ;
-      out_str << (offset+sign*l)/M_PI << "\t" << it->first << "\t" 
-	      << G.real() << "\t" << G.imag() << "\n"; 
+      out_str << (offset+sign*l)/M_PI << "\t" 
+	      << it->first << "\t" 
+	      << G.real() << "\t" 
+	      << G.imag() << "\n";
     }
     out_str << "\n";
   }
@@ -158,7 +169,7 @@ void AntiferroInterpolator::interpolate_spectrum(const int counter, const int zo
       k2[d] += M_PI;
     std::map<double, matrix_t> interpolated_selfenergy;
     for (selfenergy_t::const_iterator it=selfenergies[zone].begin(); it!=selfenergies[zone].end(); ++it) {
-      interpolated_selfenergy[it->first] = transform_ptr->interpolate(k1, it->second);
+      interpolated_selfenergy[it->first] = transform_ptr->interpolate(k1, it->second, true);
     }
     double l = 0;
     for (int d=0; d<transform_ptr->dimension(); ++d) 
@@ -167,14 +178,15 @@ void AntiferroInterpolator::interpolate_spectrum(const int counter, const int zo
     for (std::map<double, matrix_t>::const_iterator it=interpolated_selfenergy.begin(); 
 	 it!=interpolated_selfenergy.end(); ++it) {
       matrix_t G = -it->second;
-      G(0,0) += it->first + mu - transform_ptr->epsilon(k1);
-      G(1,1) += it->first + mu - transform_ptr->epsilon(k2);
+      std::complex<double> idelta(0., delta);
+      G(0,0) += it->first + mu - transform_ptr->epsilon(k1) + idelta;
+      G(1,1) += it->first + mu - transform_ptr->epsilon(k2) + idelta; 
       G = ClusterHelper::Matrix<std::complex<double> >::inverse(G);
       std::complex<double> Gs = G(0,0) + G(1,1);
       for (int d=0; d<transform_ptr->dimension(); ++d) 
 	out_str << k1[d] << "\t" ;
       out_str << (offset+sign*l)/M_PI << "\t" << it->first << "\t" 
-	      << Gs.real() << "\t" << Gs.imag() << "\n"; 
+	      << Gs.real() << "\t" << Gs.imag() << "\n";
     }
     out_str << "\n";
   }
