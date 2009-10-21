@@ -14,7 +14,8 @@ if test -z "$2"; then
 fi
 
 # number of threads is fixed to 1
-export OMP_NUM_THREADS=1
+OMP_NUM_THREADS="1"
+export OMP_NUM_THREADS
 
 srcdir="$1"
 prog=`basename $2 .exe`
