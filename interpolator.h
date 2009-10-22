@@ -40,18 +40,8 @@ public:
 
   typedef ClusterHelper::vector_type vector_t;
 
-  Interpolator(const alps::Parameters& parms) :
-    mu(parms["MU"]), 
-    delta(parms.value_or_default("DELTA", 0.)),
-    name("Dispersion_"), 
-    n_zone(parms["FLAVORS"])
-  {
-    DCATransformer::generate_transformer(parms, transform_ptr);
-  }
-
+  Interpolator(const alps::Parameters& parms);
   virtual ~Interpolator() {}
-  
-
   void interpolate();
    
 protected:
@@ -61,13 +51,15 @@ protected:
   const double delta;
   const std::string name;
   const unsigned int n_zone;
+  const unsigned int n_k;
   
-  virtual void interpolate_spectrum(const int counter, const int zone, 
+  virtual void interpolate_spectrum(const unsigned int counter, const unsigned int, 
 				    const std::vector<vector_t>& kvec,
 				    const double offset, const int sign) = 0;
-  virtual void interpolate_1D(const int zone) = 0;
-  virtual void interpolate_2D(const int zone) = 0;
-  virtual void interpolate_3D(const int zone) = 0;
+
+  virtual void interpolate_1D(const unsigned int) = 0;
+  virtual void interpolate_2D(const unsigned int) = 0;
+  virtual void interpolate_3D(const unsigned int) = 0;
  
 };
 
@@ -84,12 +76,13 @@ public:
   
 private:
   
-  virtual void interpolate_spectrum(const int counter, const int zone, 
+  virtual void interpolate_spectrum(const unsigned int counter, const unsigned int, 
 				    const std::vector<vector_t>& kvec,
 				    const double offset, const int sign);  
-  virtual void interpolate_1D(const int zone);
-  virtual void interpolate_2D(const int zone);
-  virtual void interpolate_3D(const int zone);
+
+  virtual void interpolate_1D(const unsigned int);
+  virtual void interpolate_2D(const unsigned int);
+  virtual void interpolate_3D(const unsigned int);
   
   std::vector<selfenergy_t> selfenergies;
 };
@@ -108,12 +101,13 @@ public:
   
 private:
   
-  virtual void interpolate_spectrum(const int counter, const int zone, 
+  virtual void interpolate_spectrum(const unsigned int counter, const unsigned int, 
 				    const std::vector<vector_t>& kvec,
 				    const double offset, const int sign);  
-  virtual void interpolate_1D(const int zone);
-  virtual void interpolate_2D(const int zone);
-  virtual void interpolate_3D(const int zone);
+
+  virtual void interpolate_1D(const unsigned int);
+  virtual void interpolate_2D(const unsigned int);
+  virtual void interpolate_3D(const unsigned int);
   
   std::vector<selfenergy_t> selfenergies;
 };

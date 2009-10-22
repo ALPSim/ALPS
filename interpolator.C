@@ -31,9 +31,22 @@
 
 
 
+Interpolator::Interpolator(const alps::Parameters& parms) :
+  mu(parms["MU"]), 
+  delta(parms.value_or_default("DELTA", 0.)),
+  name("Dispersion_"), 
+  n_zone(parms["FLAVORS"]),
+  n_k(parms.value_or_default("NK", 30))
+{
+  DCATransformer::generate_transformer(parms, transform_ptr);
+}
+
+
+
+
 void Interpolator::interpolate() 
 {
-  for (int z=0; z<n_zone; ++z) {
+  for (unsigned int z=0; z<n_zone; ++z) {
     switch (transform_ptr->dimension()) {
     case 1 :
       interpolate_1D(z);
@@ -58,13 +71,13 @@ void Interpolator::interpolate()
 ParaInterpolator::ParaInterpolator(const alps::Parameters& parms)  : 
   Interpolator(parms), selfenergies(n_zone)
 {
-  const int n_sites = parms["SITES"];
+  const unsigned int n_sites = parms["SITES"];
   std::ifstream data(parms["SELFENERGIES"].c_str());
   if (!data.is_open()) 
     boost::throw_exception(std::invalid_argument("cannot read self-energies"));	
   while (data) {
-    int k;
-    int z;
+    unsigned int k;
+    unsigned int z;
     double omega;
     double Sigma_real;
     double Sigma_imag;
@@ -83,14 +96,14 @@ ParaInterpolator::ParaInterpolator(const alps::Parameters& parms)  :
 AntiferroInterpolator::AntiferroInterpolator(const alps::Parameters& parms) :
   Interpolator(parms), selfenergies(n_zone)  
 {
-  const int n_sites = parms["SITES"];
+  const unsigned int n_sites = parms["SITES"];
   std::ifstream data(parms["SELFENERGIES"].c_str());
   if (!data.is_open())
     boost::throw_exception(std::invalid_argument("cannot read self-energies"));	
   while (data) {
-    int k1;
-    int k2;
-    int z;
+    unsigned int k1;
+    unsigned int k2;
+    unsigned int z;
     double omega;
     double Sigma_real;
     double Sigma_imag;
@@ -101,9 +114,9 @@ AntiferroInterpolator::AntiferroInterpolator(const alps::Parameters& parms) :
 	itm->resize(2,2);
       selfenergies[z][omega] = kd;
     }
-    const int k = (k1/2)*2;
-    const int i = k1 % 2;
-    const int j = k2 % 2;
+    const unsigned int k = (k1/2)*2;
+    const unsigned int i = k1 % 2;
+    const unsigned int j = k2 % 2;
     //if (i==j) {
       selfenergies[z][omega][k]  (i,j) = std::complex<double>(Sigma_real, Sigma_imag);
       selfenergies[z][omega][k+1](i,j) = std::complex<double>(Sigma_real, Sigma_imag);
@@ -118,7 +131,7 @@ AntiferroInterpolator::AntiferroInterpolator(const alps::Parameters& parms) :
 
 
 
-void ParaInterpolator::interpolate_spectrum(const int counter, const int zone, 
+void ParaInterpolator::interpolate_spectrum(const unsigned int counter, const unsigned int zone, 
 					    const std::vector<vector_t>& kvec,
 					    const double offset, const int sign)
 {
@@ -132,7 +145,7 @@ void ParaInterpolator::interpolate_spectrum(const int counter, const int zone,
       interpolated_selfenergy[it->first] = transform_ptr->interpolate(k, it->second, false);
     }
     double l = 0;
-    for (int d=0; d<transform_ptr->dimension(); ++d) 
+    for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
       l += (k[d]-kvec[0][d])*(k[d]-kvec[0][d]);
     l = sqrt(l);
     for (std::map<double, std::complex<double> >::const_iterator it=interpolated_selfenergy.begin(); 
@@ -140,7 +153,7 @@ void ParaInterpolator::interpolate_spectrum(const int counter, const int zone,
       std::complex<double> idelta(0., delta);
       std::complex<double> G = it->first + mu - transform_ptr->epsilon(k) - it->second + idelta;
       G = 1./G;
-      for (int d=0; d<transform_ptr->dimension(); ++d) 
+      for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
 	out_str << k[d] << "\t" ;
       out_str << (offset+sign*l)/M_PI << "\t" 
 	      << it->first << "\t" 
@@ -155,7 +168,7 @@ void ParaInterpolator::interpolate_spectrum(const int counter, const int zone,
 
   
 
-void AntiferroInterpolator::interpolate_spectrum(const int counter, const int zone, 
+void AntiferroInterpolator::interpolate_spectrum(const unsigned int counter, const unsigned int zone, 
 						 const std::vector<vector_t>& kvec,
 						 const double offset, const int sign)
 {
@@ -165,14 +178,14 @@ void AntiferroInterpolator::interpolate_spectrum(const int counter, const int zo
   for (std::vector<vector_t>::const_iterator itk=kvec.begin(); itk!=kvec.end(); ++itk) {
     vector_t k1 = *itk;
     vector_t k2 = k1;
-    for (int d=0; d<transform_ptr->dimension(); ++d) 
+    for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
       k2[d] += M_PI;
     std::map<double, matrix_t> interpolated_selfenergy;
     for (selfenergy_t::const_iterator it=selfenergies[zone].begin(); it!=selfenergies[zone].end(); ++it) {
       interpolated_selfenergy[it->first] = transform_ptr->interpolate(k1, it->second, true);
     }
     double l = 0;
-    for (int d=0; d<transform_ptr->dimension(); ++d) 
+    for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
       l += (k1[d]-kvec[0][d])*(k1[d]-kvec[0][d]);
     l = sqrt(l);
     for (std::map<double, matrix_t>::const_iterator it=interpolated_selfenergy.begin(); 
@@ -183,7 +196,7 @@ void AntiferroInterpolator::interpolate_spectrum(const int counter, const int zo
       G(1,1) += it->first + mu - transform_ptr->epsilon(k2) + idelta; 
       G = ClusterHelper::Matrix<std::complex<double> >::inverse(G);
       std::complex<double> Gs = G(0,0) + G(1,1);
-      for (int d=0; d<transform_ptr->dimension(); ++d) 
+      for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
 	out_str << k1[d] << "\t" ;
       out_str << (offset+sign*l)/M_PI << "\t" << it->first << "\t" 
 	      << Gs.real() << "\t" << Gs.imag() << "\n";
@@ -196,12 +209,13 @@ void AntiferroInterpolator::interpolate_spectrum(const int counter, const int zo
 
   
 
-void ParaInterpolator::interpolate_1D(const int zone) 
+void ParaInterpolator::interpolate_1D(const unsigned int zone) 
 {
-  std::vector<ClusterHelper::vector_type> kvec(101);
-  for (int i=0; i<=100; ++i) {
+  const unsigned int n = n_k*M_PI;
+  std::vector<ClusterHelper::vector_type> kvec(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i].resize(1);
-    kvec[i][0] = double(i)/100.*M_PI;
+    kvec[i][0] = double(i)/n*M_PI;
   }
   interpolate_spectrum(0, zone, kvec, 0., 1);
 }
@@ -209,12 +223,13 @@ void ParaInterpolator::interpolate_1D(const int zone)
 
 
 
-void AntiferroInterpolator::interpolate_1D(const int zone) 
+void AntiferroInterpolator::interpolate_1D(const unsigned int zone) 
 {
-  std::vector<ClusterHelper::vector_type> kvec(101);
-  for (int i=0; i<=100; ++i) {
+  const unsigned int n = n_k*M_PI/2.;
+  std::vector<ClusterHelper::vector_type> kvec(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i].resize(1);
-    kvec[i][0] = double(i)/200.*M_PI;
+    kvec[i][0] = double(i)/(2*n)*M_PI;
   }
   interpolate_spectrum(0, zone, kvec, 0., 1);
 }
@@ -222,23 +237,27 @@ void AntiferroInterpolator::interpolate_1D(const int zone)
 
 
 
-void ParaInterpolator::interpolate_2D(const int zone) 
+void ParaInterpolator::interpolate_2D(const unsigned int zone) 
 {
-  std::vector<ClusterHelper::vector_type> kvec(101);
-  for (int i=0; i<=100; ++i) {
+  unsigned int n = n_k*M_PI*sqrt(2);
+  std::vector<ClusterHelper::vector_type> kvec(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i].resize(2);
-    kvec[i][0] = double(i)/100.*M_PI;
+    kvec[i][0] = double(i)/n*M_PI;
     kvec[i][1] = kvec[i][0]; 
   }
   interpolate_spectrum(0, zone, kvec, 0., 1);
-  for (int i=0; i<=100; ++i) {
-    kvec[i][0] = double(i)/100.*M_PI;
+  n = n_k*M_PI;
+  kvec.resize(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
+    kvec[i].resize(2);
+    kvec[i][0] = double(i)/n*M_PI;
     kvec[i][1] = 0.;
   }
   interpolate_spectrum(1, zone, kvec, 0., -1);
-  for (int i=0; i<=100; ++i) {
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i][0] = M_PI;
-    kvec[i][1] = double(i)/100.*M_PI;
+    kvec[i][1] = double(i)/n*M_PI;
   }
   interpolate_spectrum(2, zone, kvec, -M_PI, -1);
 }
@@ -246,22 +265,29 @@ void ParaInterpolator::interpolate_2D(const int zone)
 
 
 
-void AntiferroInterpolator::interpolate_2D(const int zone) 
+void AntiferroInterpolator::interpolate_2D(const unsigned int zone) 
 {
-  std::vector<ClusterHelper::vector_type> kvec(101);
-  for (int i=0; i<=100; ++i) {
+  unsigned int n = n_k*M_PI/sqrt(2.);
+  std::vector<ClusterHelper::vector_type> kvec(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i].resize(2);
-    kvec[i][0] = double(i)/200.*M_PI;
+    kvec[i][0] = double(i)/(2*n)*M_PI;
     kvec[i][1] = kvec[i][0]; 
   }
   interpolate_spectrum(0, zone, kvec, 0., 1);
-  for (int i=0; i<=100; ++i) {
-    kvec[i][0] = double(i)/100.*M_PI;
+  n = n_k*M_PI;
+  kvec.resize(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
+    kvec[i].resize(2);
+    kvec[i][0] = double(i)/n*M_PI;
     kvec[i][1] = 0.;
   }
   interpolate_spectrum(1, zone, kvec, 0., -1);
-  for (int i=0; i<=100; ++i) {
-    double del_k = double(i)/100.*M_PI/2.;
+  n = n_k*M_PI/sqrt(2.);
+  kvec.resize(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
+    kvec[i].resize(2);
+    double del_k = double(i)/n*M_PI/2.;
     kvec[i][0] = M_PI/2 + del_k;
     kvec[i][1] = M_PI/2 - del_k;
   }
@@ -271,32 +297,36 @@ void AntiferroInterpolator::interpolate_2D(const int zone)
 
 
 
-void ParaInterpolator::interpolate_3D(const int zone) 
+void ParaInterpolator::interpolate_3D(const unsigned int zone) 
 {
-  std::vector<ClusterHelper::vector_type> kvec(101);
-  for (int i=0; i<=100; ++i) {
+  unsigned int n = n_k*M_PI*sqrt(3);
+  std::vector<ClusterHelper::vector_type> kvec(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i].resize(3);
-    kvec[i][0] = double(i)/100.*M_PI;
+    kvec[i][0] = double(i)/n*M_PI;
     kvec[i][1] = kvec[i][0];
     kvec[i][2] = kvec[i][0];
   }
   interpolate_spectrum(0, zone, kvec, 0, 1);
-  for (int i=0; i<=100; ++i) {
-    kvec[i][0] = double(i)/100.*M_PI;
+  n = n_k*M_PI;
+  kvec.resize(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
+    kvec[i].resize(3);
+    kvec[i][0] = double(i)/n*M_PI;
     kvec[i][1] = 0.;
     kvec[i][2] = 0.; 
   }
   interpolate_spectrum(1, zone, kvec, 0, -1);
-  for (int i=0; i<=100; ++i) {
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i][0] = M_PI;
-    kvec[i][1] = double(i)/100.*M_PI;
+    kvec[i][1] = double(i)/n*M_PI;
     kvec[i][2] = 0.;
   }
   interpolate_spectrum(2, zone, kvec, -M_PI, -1);
-  for (int i=0; i<=100; ++i) {
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i][0] = M_PI;
     kvec[i][1] = M_PI;
-    kvec[i][2] = double(i)/100.*M_PI;
+    kvec[i][2] = double(i)/n*M_PI;
   }
   interpolate_spectrum(3, zone, kvec, -2*M_PI, -1);
 }
@@ -304,37 +334,50 @@ void ParaInterpolator::interpolate_3D(const int zone)
 
 
 
-void AntiferroInterpolator::interpolate_3D(const int zone) 
+void AntiferroInterpolator::interpolate_3D(const unsigned int zone) 
 {
-  std::vector<ClusterHelper::vector_type> kvec(101);
-  for (int i=0; i<=100; ++i) {
+  unsigned int n = n_k*M_PI*sqrt(3)/2.;
+  std::vector<ClusterHelper::vector_type> kvec(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
     kvec[i].resize(3);
-    kvec[i][0] = double(i)/200.*M_PI;
+    kvec[i][0] = double(i)/(2*n)*M_PI;
     kvec[i][1] = kvec[i][0];
     kvec[i][2] = kvec[i][0];
   }
   interpolate_spectrum(0, zone, kvec, 0, 1);
-  for (int i=0; i<=100; ++i) {
-    kvec[i][0] = double(i)/100.*M_PI;
+  n = n_k*M_PI;
+  kvec.resize(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
+    kvec[i].resize(3);
+    kvec[i][0] = double(i)/n*M_PI;
     kvec[i][1] = 0.;
     kvec[i][2] = 0.; 
   }
   interpolate_spectrum(1, zone, kvec, 0, -1);
-  for (int i=0; i<=100; ++i) {
+  n = n_k*M_PI/2.;
+  kvec.resize(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
+    kvec[i].resize(3);
     kvec[i][0] = M_PI;
-    kvec[i][1] = double(i)/200.*M_PI;
+    kvec[i][1] = double(i)/(2*n)*M_PI;
     kvec[i][2] = 0.;
   }
   interpolate_spectrum(2, zone, kvec, -M_PI, -1);
-  for (int i=0; i<=100; ++i) {
-    double del_k = double(i)/100.*M_PI/4.;
+  n = n_k*M_PI*sqrt(3./8.);
+  kvec.resize(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
+    kvec[i].resize(3);
+    double del_k = double(i)/n*M_PI/4.;
     kvec[i][0] = M_PI/2. + del_k;
     kvec[i][1] = M_PI/2. + del_k;
     kvec[i][2] = M_PI/2. - 2*del_k;
   }
   interpolate_spectrum(3, zone, kvec, sqrt(3)/2.*M_PI, 1);
-  for (int i=0; i<=100; ++i) {
-    double del_k = double(i)/100.*M_PI/4.;
+  n = n_k*M_PI/sqrt(8.);
+  kvec.resize(n+1);
+  for (unsigned int i=0; i<=n; ++i) {
+    kvec[i].resize(3);
+    double del_k = double(i)/n*M_PI/4.;
     kvec[i][0] = 3./4.*M_PI + del_k;
     kvec[i][1] = 3./4.*M_PI - del_k;
     kvec[i][2] = 0.;
