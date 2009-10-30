@@ -61,8 +61,7 @@ class EvaluateFullDiagT(AlpsEvaluate):
                     ('entropy',[PlotFile]),
                     ('specific_heat',[PlotFile]),
                     ('uniform_susceptibility',[PlotFile]),
-                    ('magnetization',[PlotFile]),
-                    ('application',[basic.File],True)]
+                    ('magnetization',[PlotFile])]
 
 
 class EvaluateFullDiagH(AlpsEvaluate):
@@ -76,8 +75,7 @@ class EvaluateFullDiagH(AlpsEvaluate):
                     ('entropy',[PlotFile]),
                     ('specific_heat',[PlotFile]),
                     ('uniform_susceptibility',[PlotFile]),
-                    ('magnetization',[PlotFile]),
-                    ('application',[basic.File],True)]
+                    ('magnetization',[PlotFile])]
 
 
 class EvaluateLoop(alpscore.SystemCommandLogged):

@@ -21,14 +21,11 @@ import packages.spreadsheet
 
 from packages.controlflow.list_module import ListOfElements
 
-configuration = ConfigurationObject(path=(None, str))
-
 basic = core.modules.basic_modules
 
 config = ConfigurationObject()
 
 ##############################################################################
-
 def _get_path(binary_file):
     if config.check('path'):
         print "Have ALPS path", config.path
@@ -122,17 +119,46 @@ class TextCellWidget(QCellWidget):
             self.browser.setText("No text file is specified!")
 
 
+
+def dict_conf(l):
+	if l[0] == '{' and l[-1] == '}':
+		cmd = 'temp = ' + l
+		exec cmd
+		return temp
+	else:
+		pairs = l.split(',')
+		temp = {}
+		for pair in pairs:
+			[k,v] = pair.split('=')
+			temp[eval(k)] = eval(v)
+		return temp
+
+def dict_compute(self):
+	if self.hasInputFromPort('value'):
+		inps = self.forceGetInputListFromPort('value')
+		result = {}
+		for inp in inps:
+			result.update(inp)
+		self.setResult('value',result)
+		self.setResult('value_as_string',str(result))
+
+
+Dictionary = basic.new_constant('Dictionary', staticmethod(dict_conf), {},\
+    staticmethod(lambda x: type(x) == dict))
+
 def initialize(): pass
 
 def selfRegister():
-  print "registering"
-  reg = core.modules.module_registry.get_module_registry()
-  
-  reg.add_module(SystemCommand,namespace="Tools",abstract=True)
-  reg.add_module(SystemCommandLogged,namespace="Tools",abstract=True)
-  
-  reg.add_module(OpenHTML,namespace="Tools")
+    reg = core.modules.module_registry.get_module_registry()
 
-  reg.add_module(TextCell,namespace="Tools")
-  reg.add_input_port(TextCell, "Location", packages.spreadsheet.basicWidgets.CellLocation)
-  reg.add_input_port(TextCell, "File", basic.File)
+    reg.add_module(SystemCommand,namespace="Tools",abstract=True)
+    reg.add_module(SystemCommandLogged,namespace="Tools",abstract=True)
+
+    reg.add_module(TextCell,namespace="Tools")
+    reg.add_input_port(TextCell, "Location", packages.spreadsheet.basicWidgets.CellLocation)
+    reg.add_input_port(TextCell, "File", basic.File)
+
+
+    Dictionary.compute = dict_compute
+    basic.init_constant(Dictionary)
+#    reg.add_module(Dictionary,namespace="Parameters")

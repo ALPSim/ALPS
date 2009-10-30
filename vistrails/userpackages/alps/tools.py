@@ -17,7 +17,7 @@ import glob
 import parameters
 import alpscore
 import system
-from parameters import Parameters, ParameterList
+from parameters import Parameters
 from packages.controlflow.list_module import ListOfElements
 
 basic = core.modules.basic_modules
@@ -40,10 +40,6 @@ class MakeParameterFile(Module):
             o = self.interpreter.filePool.create_file()
             o.name = os.path.join(os.path.dirname(o.name),self.getInputFromPort('simulationid'))
         f = file(o.name,'w')
-        if self.hasInputFromPort('parmlist'):
-          input_values = self.forceGetInputListFromPort('parmlist')
-          for p in input_values:
-            p.write(f);
         if self.hasInputFromPort('parms'):
           input_values = self.forceGetInputListFromPort('parms')
           for p in input_values:
@@ -52,8 +48,7 @@ class MakeParameterFile(Module):
         self.setResult('file', o)
         self.setResult('file_name', o.name)
         self.setResult('simulationid',os.path.basename(o.name))
-    _input_ports = [('parmlist',[ParameterList]),
-                    ('parms', [Parameters]),
+    _input_ports = [('parms', [Parameters]),
                     ('file', [basic.File]),
                     ('simulationid',[system.SimulationID])]
     _output_ports=[('file', [basic.File]),
@@ -201,7 +196,6 @@ class UnpackSimulationResults(alpscore.SystemCommandLogged,GetSimName):
         dir.name = o.name
         input_file = self.getInputFromPort("archive")
         self.execute(['cd', o.name,';', 'tar','xzf', input_file.name])
-        dir = self.getInputFromPort("dir")
         o.name = self.get_sim_name(dir.name)
         self.setResult("output_file",o)
         self.setResult("output_dir",dir)

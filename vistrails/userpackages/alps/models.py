@@ -17,16 +17,16 @@ basic = core.modules.basic_modules
 
 
 class ModelParameters(parameters.FixedAndDefaultParameters): 
-   """ A dictionary of parameters defining a model"""
-   _input_ports = [('MODEL',[basic.String]),
-                   ('MODEL_LIBRARY',[basic.File])]
+    """ A dictionary of parameters defining a model"""
+    _input_ports = [('MODEL',[basic.String]),
+                    ('MODEL_LIBRARY',[basic.File])]
 
 class ClassicalSpinModel(ModelParameters):
-   """ the classical spin models for ALPS spinmc """
+    """ the classical spin models for ALPS spinmc """
 
 class SpinModel(ModelParameters):
-   fixedparms = {'MODEL'   : 'spin'}
-   fixedefaults = {'J0'    : '0',
+   fixed = {'MODEL'   : 'spin'}
+   defaults =      {'J0'    : '0',
                     'J'     : 'J0',
                     'Jxy'   : 'J',
                     'Jz'    : 'J',
@@ -50,23 +50,22 @@ class SpinModel(ModelParameters):
                  }
 
 def register_model(type):
-  reg = core.modules.module_registry.get_module_registry()
-  reg.add_module(type,namespace="Models")
-  reg.add_input_port(type,'MODEL',[basic.String],True)
+   reg = core.modules.module_registry.get_module_registry()
+   reg.add_module(type,namespace="Models")
+   reg.add_input_port(type,'MODEL',[basic.String],True)
 
 def register_parameters(type, ns="Models"):
-  reg = core.modules.module_registry.get_module_registry()
-  reg.add_module(type,namespace=ns)
-  reg.add_output_port(type, "value", type)
-  reg.add_output_port(type, "value_as_string", basic.String)
+   reg = core.modules.module_registry.get_module_registry()
+   reg.add_module(type,namespace=ns)
+   reg.add_output_port(type, "value", type)
   
 def initialize(): pass
 
 def selfRegister():
 
-  reg = core.modules.module_registry.get_module_registry()
+   reg = core.modules.module_registry.get_module_registry()
   
-  register_parameters(ModelParameters)
-  reg.add_module(ClassicalSpinModel,namespace="Models")
-  register_model(SpinModel)
+   register_parameters(ModelParameters)
+   reg.add_module(ClassicalSpinModel,namespace="Models")
+   register_model(SpinModel)
   

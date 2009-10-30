@@ -8,6 +8,7 @@ from core.configuration import ConfigurationObject
 
 import alpscore
 import parameters
+import alpsparameters
 import lattices
 import models
 import system
@@ -17,7 +18,7 @@ import evaluation
 import tools
 
 identifier = 'org.comp-phys.alps'
-version = '0.2.2'
+version = '0.3.0'
 name = 'ALPS'
 
 configuration = ConfigurationObject(path=(None, str),mpirun="['mpirun','-np']")
@@ -28,10 +29,9 @@ def package_dependencies():
   return ['edu.utah.sci.vistrails.control_flow', 'edu.utah.sci.vistrails.matplotlib', 'edu.utah.sci.vistrails.spreadsheet']
 
 def initialize():
-  
-
   alpscore.selfRegister()  
   parameters.selfRegister()
+  alpsparameters.selfRegister()
   lattices.selfRegister()
   models.selfRegister()
   system.selfRegister()
@@ -41,4 +41,5 @@ def initialize():
   tools.selfRegister()
   
   alpscore.config = configuration
+
 

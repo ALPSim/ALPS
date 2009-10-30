@@ -10,6 +10,7 @@ import core.modules.basic_modules
 import core.modules.module_registry
 
 import parameters
+import alpsparameters
 import lattices 
 import models
 
@@ -18,104 +19,49 @@ from packages.spreadsheet.basic_widgets import SpreadsheetCell
 from packages.spreadsheet.spreadsheet_cell import QCellWidget
 import packages.spreadsheet
 
+from alpsparameters import SystemParameters
 basic = core.modules.basic_modules
 
 ##############################################################################
 
 class SimulationID(basic.String):
-   """ a simulation ID """
+    """ a simulation ID """
 
 class LatticeModel(parameters.Parameters): 
-   """ the simulation parameters, conistsing of model, lattice, and other parameters """
-   def compute(self):
-       self.parms = {}
-       self.defaults = {}
-       self.update_from_port('lattice')
-       self.update_from_port('model')
-       self.setOutput()
-   _input_ports = [('lattice', [lattices.LatticeParameters]),
-                    ('model', [models.ModelParameters])]
-   _output_ports=[('value', [parameters.SystemParameters]),
-                  ('value_as_string', [basic.String])]
+    """ the simulation parameters, conistsing of model, lattice, and other parameters """
+    def compute(self):
+        res=self.updateFromPort('lattice',ParametersData({}))
+        res=self.updateFromPort('model',res)
+        self.setOutput(res)
+    _input_ports = [('lattice', [lattices.LatticeParameters]),
+                     ('model', [models.ModelParameters])]
+    _output_ports=[('value', [SystemParameters])]
 
 class DiagonalizationSimulation(parameters.Parameters):
-   """ a module collecting the typical input parameters for exact diagonalization """
-   def compute(self):
-       self.parms = {}
-       self.defaults = {}
-       for port_name in self.inputPorts:
-          self.update_from_port(port_name)
-       self.setOutput()
-   _input_ports = [('system', [parameters.SystemParameters]),
-                    ('conserved', [parameters.ConservedQuantumnumbers]),
-                    ('measurements',[parameters.CustomMeasurements])]
-   _output_ports=[('value', [parameters.SystemParameters]),
-                  ('value_as_string', [basic.String])]
+    """ a module collecting the typical input parameters for exact diagonalization """
+    def compute(self):
+        res = ParametersData({})
+        for port_name in self.inputPorts:
+           res=self.updateFromPort(port_name,res)
+        self.setOutput(res)
+    _input_ports = [('system', [SystemParameters]),
+                     ('conserved', [alpsparameters.ConservedQuantumnumbers]),
+                     ('measurements',[alpsparameters.CustomMeasurements])]
+    _output_ports=[('value', [SystemParameters])]
 
 
 class MonteCarloSimulation(parameters.Parameters):
-   """ a module collecting the typical input parameters for a Monte Carlo simulation """
-   def compute(self):
-       self.parms = {}
-       self.defaults = {}
-       for port_name in self.inputPorts:
-          self.update_from_port(port_name)
-       self.setOutput()
-   _input_ports = [('system', [parameters.SystemParameters]),
-                    ('mcparms', [parameters.MonteCarloParameters]),
-                    ('temperature',[parameters.Temperature]),
-                    ('measurements',[parameters.MonteCarloMeasurements])]
-   _output_ports=[('value', [parameters.SystemParameters]),
-                  ('value_as_string', [basic.String])]
-
-class TextEditCell(SpreadsheetCell):
-    """
-    RichTextCell is a custom Module to view HTML files
-    
-    """
+    """ a module collecting the typical input parameters for a Monte Carlo simulation """
     def compute(self):
-        """ compute() -> None
-        Dispatch the HTML contents to the spreadsheet
-        """
-        if self.hasInputFromPort("File"):
-            fileValue = self.getInputFromPort("File")
-        else:
-            fileValue = None
-        self.display(TextEditCellWidget, (fileValue,))
-
-class TextEditCellWidget(QCellWidget):
-    """
-    RichTextCellWidget has a QTextBrowser to display HTML files
-    
-    """
-    def __init__(self, parent=None):
-        """ RichTextCellWidget(parent: QWidget) -> RichTextCellWidget
-        Create a rich text cell without a toolbar
-        
-        """
-        QCellWidget.__init__(self, parent)
-        self.setLayout(QtGui.QVBoxLayout(self))
-        self.browser = QtGui.QTextEdit()
-        self.layout().addWidget(self.browser)
-        self.browser.setReadOnly(True)
- #       self.browser.controlBarType = None
-
-    def updateContents(self, inputPorts):
-        """ updateContents(inputPorts: tuple) -> None
-        Updates the contents with a new changed in filename
-        
-        """
-        (fileValue,) = inputPorts
-        if fileValue:
-            try:
-                fi = open(fileValue.name, "r")
-            except IOError:
-                self.browser.setText("Cannot load the text file!")
-                return            
-            self.browser.setText(fi.read())
-            fi.close()
-        else:
-            self.browser.setText("No text file is specified!")
+        res = ParametersData({})
+        for port_name in self.inputPorts:
+           res=self.updateFromPort(port_name,res)
+        self.setOutput(res)
+    _input_ports = [('system', [SystemParameters]),
+                     ('mcparms', [alpsparameters.MonteCarloParameters]),
+                     ('temperature',[alpsparameters.Temperature]),
+                     ('measurements',[alpsparameters.MonteCarloMeasurements])]
+    _output_ports=[('value', [SystemParameters])]
 
 
 def initialize(): pass
@@ -124,7 +70,6 @@ def register_parameters(type, ns="System"):
   reg = core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace=ns)
   reg.add_output_port(type, "value", type)
-  reg.add_output_port(type, "value_as_string", basic.String)
 
 def selfRegister():
 
@@ -136,6 +81,3 @@ def selfRegister():
   reg.add_module(MonteCarloSimulation,namespace="System")
   reg.add_module(DiagonalizationSimulation,namespace="System")
 
-  reg.add_module(TextEditCell,namespace="System",abstract=True)
-  reg.add_input_port(TextEditCell, "Location", packages.spreadsheet.basicWidgets.CellLocation)
-  reg.add_input_port(TextEditCell, "File", basic.File)
