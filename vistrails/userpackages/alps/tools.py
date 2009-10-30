@@ -30,12 +30,7 @@ class MakeParameterFile(Module):
     """Creates a parameter file.
     """
     def compute(self):
-        if (self.hasInputFromPort('file')):
-          o = self.getInputFromPort('file')
-          if self.hasInputFromPort('simulationid'):
-            raise ModuleError(self, 'Cannot specify a full path and a simulationid')
-        else:
-          o = self.interpreter.filePool.create_file()
+        o = self.interpreter.filePool.create_file()
         if self.hasInputFromPort('simulationid'):
             o = self.interpreter.filePool.create_file()
             o.name = os.path.join(os.path.dirname(o.name),self.getInputFromPort('simulationid'))
@@ -43,16 +38,14 @@ class MakeParameterFile(Module):
         if self.hasInputFromPort('parms'):
           input_values = self.forceGetInputListFromPort('parms')
           for p in input_values:
-            p.write(f);
+            res = make_parameter_data(p)
+            res.write(f);
         f.close()
         self.setResult('file', o)
-        self.setResult('file_name', o.name)
         self.setResult('simulationid',os.path.basename(o.name))
     _input_ports = [('parms', [Parameters]),
-                    ('file', [basic.File]),
                     ('simulationid',[system.SimulationID])]
     _output_ports=[('file', [basic.File]),
-                   ('file_name',[basic.String]),
                    ('simulationid',[system.SimulationID])]
 
 
@@ -61,11 +54,10 @@ class Parameter2XML(alpscore.SystemCommandLogged):
         o = self.interpreter.filePool.create_file()
         os.unlink(o.name)
         os.mkdir(o.name)
-        input_file = self.getInputFromPort("parameter")
+        input_file = self.getInputFromPort("file")
         base_name = os.path.basename(input_file.name)
         dir = basic.Directory
         dir.name = o.name
-        print "Running"
         self.execute(['cd',o.name,';', alpscore._get_path('parameter2xml'),
                             input_file.name, base_name])
         # Things would be easier on our side if ALPS somehow
@@ -78,16 +70,15 @@ class Parameter2XML(alpscore.SystemCommandLogged):
         ofile.name = os.path.join(o.name,base_name + '.in.xml')
         self.setResult("output_dir", dir)
         self.setResult("output_file", ofile)
-    _input_ports = [('parameter', [basic.File]),
+    _input_ports = [('file', [basic.File]),
                     ('output_dir', [basic.File],True)]
     _output_ports = [('output_file', [basic.File]),
                      ('output_dir', [basic.Directory]),
                      ('log_file',[basic.File])]
 
-class ExpandWildcards(Module):
+class Glob(Module):
     def expand(self,name):
         l = glob.glob(name)
-        print "Found: ", l
         self.setResult('value',l)
         self.setResult('value_as_string',str(l))
     def compute(self):
@@ -96,7 +87,7 @@ class ExpandWildcards(Module):
     _output_ports = [('value',[ListOfElements]),
                      ('value_as_string',[basic.String])]
 
-class GetRunFiles(ExpandWildcards):
+class GetRunFiles(Glob):
     def compute(self):
         tasks = '*'
         runs = '*[0-9]'
@@ -109,7 +100,7 @@ class GetRunFiles(ExpandWildcards):
     _input_ports = [('tasks',[basic.String]),
                     ('runs',[basic.String])]
 
-class GetResultFiles(ExpandWildcards):
+class GetResultFiles(Glob):
     def compute(self):
         tasks = '*'
         if (self.hasInputFromPort('tasks')):
@@ -122,10 +113,9 @@ class Convert2XML(alpscore.SystemCommandLogged):
     def compute(self):
         input_file = self.getInputFromPort('input_file')
         self.execute([alpscore._get_path('convert2xml')] + input_file)
-        ilist = copy.copy(input_file)
         olist = []
-        for q in ilist:
-          olist +=  [q + '.xml']
+        for q in input_file:
+          olist.append(q + '.xml')
         self.setResult('value', olist)
         self.setResult('value_as_string', str(olist))
     _input_ports = [('input_file', [ListOfElements])]
@@ -160,25 +150,13 @@ class XML2HTML(alpscore.SystemCommand):
 class PackSimulationResults(alpscore.SystemCommandLogged):
     def compute(self):
         o = self.interpreter.filePool.create_file(suffix='.tar.gz')
-        if self.hasInputFromPort("file"):
-          dirname = os.path.dirname(self.getInputFromPort("file").name)
-          if self.hasInputFromPort("dir"):
-            raise ModuleError(self, 'Cannot specify both directory and (deprecated) file name')
         if self.hasInputFromPort("dir"):
           dirname = self.getInputFromPort("dir").name
         self.execute(['cd', dirname,';', 'tar','czf', o.name, '*'])
         self.setResult("archive", o)
-    _input_ports = [('file', [basic.File],True),('dir', [basic.Directory])]
+    _input_ports = [('dir', [basic.Directory])]
     _output_ports = [('archive', [basic.File]),
                      ('log_file',[basic.File])]
-
-class PackSimulationDir(alpscore.SystemCommandLogged):
-    def compute(self):
-        o = self.interpreter.filePool.create_file(suffix='.tar.gz')
-        input_file = self.getInputFromPort("file")
-        dirname = os.path.dirname(input_file.name)
-        self.execute(['cd', dirname,';', 'tar','czf', o.name, '*'])
-        self.setResult("archive", o)
 
 
 class GetSimName:
@@ -226,7 +204,7 @@ def selfRegister():
   reg.add_module(MakeParameterFile,namespace="Tools")
   reg.add_module(Parameter2XML,namespace="Tools")
   
-  reg.add_module(ExpandWildcards,namespace="Tools",abstract=True)
+  reg.add_module(Glob,namespace="Tools",abstract=True)
   reg.add_module(GetRunFiles,namespace="Tools")
   reg.add_module(GetResultFiles,namespace="Tools")
   
