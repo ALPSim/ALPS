@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="file:///Users/troyer/opt/lib/xml/ALPS.xsl"?>
+<SIMULATION xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2002/10/QMCXML.xsd">
+  <PARAMETERS>
+    <PARAMETER name="UPDATE">cluster</PARAMETER>
+    <PARAMETER name="THERMALIZATION">1000</PARAMETER>
+    <PARAMETER name="J">1</PARAMETER>
+    <PARAMETER name="SWEEPS">100000</PARAMETER>
+    <PARAMETER name="L">16</PARAMETER>
+    <PARAMETER name="LATTICE">square lattice</PARAMETER>
+    <PARAMETER name="T">2.269186</PARAMETER>
+    <PARAMETER name="W">L</PARAMETER>
+    <PARAMETER name="MODEL">Ising</PARAMETER>
+    <PARAMETER name="SEED">1125473244</PARAMETER>
+  </PARAMETERS>
+</SIMULATION>

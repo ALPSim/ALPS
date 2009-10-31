@@ -153,6 +153,7 @@ def selfRegister():
 
     reg.add_module(SystemCommand,namespace="Tools",abstract=True)
     reg.add_module(SystemCommandLogged,namespace="Tools",abstract=True)
+    reg.add_module(OpenHTML,namespace="Tools")
 
     reg.add_module(TextCell,namespace="Tools")
     reg.add_input_port(TextCell, "Location", packages.spreadsheet.basicWidgets.CellLocation)

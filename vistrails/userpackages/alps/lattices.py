@@ -21,20 +21,20 @@ class square_lattice(LatticeParameters):
    """ a square lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
-   fixedparms = {'LATTICE' : 'square lattice'}
-   fixeddefaults = {'W':'L'}
+   fixed = {'LATTICE' : 'square lattice'}
+   defaults = {'W':'L'}
 
 class ladder(LatticeParameters):
    """ a ladder lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
-   fixedparms = {'LATTICE' : 'ladder'}
-   fixeddefaults = {'W':'2'}
+   fixed = {'LATTICE' : 'ladder'}
+   defaults = {'W':'2'}
 
 class chain_lattice(LatticeParameters):
    """ a chain lattice """
    _input_ports = [('L',[(basic.String, 'the length')])]
-   fixedparms = {'LATTICE' : 'chain lattice'}
+   fixed = {'LATTICE' : 'chain lattice'}
 
   
 def register_lattice(type):
@@ -50,7 +50,6 @@ def selfRegister():
 
   reg.add_module(LatticeParameters,namespace="Lattices")
   reg.add_output_port(LatticeParameters, "value", LatticeParameters)
-  reg.add_output_port(LatticeParameters, "value_as_string", basic.String)
 
   register_lattice(square_lattice)
   register_lattice(chain_lattice)

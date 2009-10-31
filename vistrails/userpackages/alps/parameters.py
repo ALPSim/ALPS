@@ -23,7 +23,7 @@ class CommonParametersFunctions:
         if isinstance(value,basic.File):
           value = value.name
         if p.has_key(key) and p[key] != value:
-          raise ModuleError(self, "parameter " + key_name + " defined twice and the values differ")
+          raise ModuleError(self, "parameter " + key + " defined twice and the values differ")
         else:
           p[key] = value
 
@@ -35,7 +35,7 @@ class CommonParametersFunctions:
 class ParametersData(CommonParametersFunctions):
     """ A dictionary of parameters """
     def __init__(self, d):
-        self.parms = d.copy()
+        self.parms = copy.deepcopy(d)
         
     def merge_one(self,p):
         self.update_checked(self.parms,p.parms)
@@ -45,7 +45,7 @@ class ParametersData(CommonParametersFunctions):
         return p
         
     def set(self,key_name,value):
-        self.set_checked(parms,key_name,value)
+        self.set_checked(self.parms,key_name,value)
 
     def updateIfMissing(self,defaults):
         for k in defaults.keys():
@@ -72,7 +72,7 @@ class ParametersData(CommonParametersFunctions):
 class ParameterListData(CommonParametersFunctions):
     """ a list of Parameters """
     def __init__(self, l):
-        self.list = copy.copy(l)
+        self.list = copy.deepcopy(l)
 
     def copy(self):
         p = ParameterListData(self.list)
@@ -102,7 +102,8 @@ class ParameterListData(CommonParametersFunctions):
 
     def write(self,out):
         for p in self.list:
-          p.write(out)
+          pd = ParametersData(p)
+          pd.write(out)
        
     def toBasic(self):
         return self.list

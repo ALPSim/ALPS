@@ -30,7 +30,7 @@ class SimulationID(basic.String):
 class LatticeModel(parameters.Parameters): 
     """ the simulation parameters, conistsing of model, lattice, and other parameters """
     def compute(self):
-        res=self.updateFromPort('lattice',ParametersData({}))
+        res=self.updateFromPort('lattice',parameters.ParametersData({}))
         res=self.updateFromPort('model',res)
         self.setOutput(res)
     _input_ports = [('lattice', [lattices.LatticeParameters]),
@@ -40,7 +40,7 @@ class LatticeModel(parameters.Parameters):
 class DiagonalizationSimulation(parameters.Parameters):
     """ a module collecting the typical input parameters for exact diagonalization """
     def compute(self):
-        res = ParametersData({})
+        res = parameters.ParametersData({})
         for port_name in self.inputPorts:
            res=self.updateFromPort(port_name,res)
         self.setOutput(res)
@@ -53,7 +53,7 @@ class DiagonalizationSimulation(parameters.Parameters):
 class MonteCarloSimulation(parameters.Parameters):
     """ a module collecting the typical input parameters for a Monte Carlo simulation """
     def compute(self):
-        res = ParametersData({})
+        res = parameters.ParametersData({})
         for port_name in self.inputPorts:
            res=self.updateFromPort(port_name,res)
         self.setOutput(res)

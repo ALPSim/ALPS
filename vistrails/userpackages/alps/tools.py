@@ -27,26 +27,27 @@ basic = core.modules.basic_modules
 
 
 class MakeParameterFile(Module):
-    """Creates a parameter file.
-    """
-    def compute(self):
-        o = self.interpreter.filePool.create_file()
-        if self.hasInputFromPort('simulationid'):
-            o = self.interpreter.filePool.create_file()
-            o.name = os.path.join(os.path.dirname(o.name),self.getInputFromPort('simulationid'))
-        f = file(o.name,'w')
-        if self.hasInputFromPort('parms'):
-          input_values = self.forceGetInputListFromPort('parms')
-          for p in input_values:
-            res = make_parameter_data(p)
-            res.write(f);
-        f.close()
-        self.setResult('file', o)
-        self.setResult('simulationid',os.path.basename(o.name))
-    _input_ports = [('parms', [Parameters]),
+     """Creates a parameter file.
+     """
+     def compute(self):
+         o = self.interpreter.filePool.create_file()
+         if self.hasInputFromPort('simulationid'):
+             o = self.interpreter.filePool.create_file()
+             o.name = os.path.join(os.path.dirname(o.name),self.getInputFromPort('simulationid'))
+         f = file(o.name,'w')
+         if self.hasInputFromPort('parms'):
+           input_values = self.forceGetInputListFromPort('parms')
+           for p in input_values:
+             res = parameters.make_parameter_data(p)
+             print type(res), res
+             res.write(f);
+         f.close()
+         self.setResult('file', o)
+         self.setResult('simulationid',os.path.basename(o.name))
+     _input_ports = [('parms', [Parameters]),
+                     ('simulationid',[system.SimulationID])]
+     _output_ports=[('file', [basic.File]),
                     ('simulationid',[system.SimulationID])]
-    _output_ports=[('file', [basic.File]),
-                   ('simulationid',[system.SimulationID])]
 
 
 class Parameter2XML(alpscore.SystemCommandLogged):
@@ -80,34 +81,45 @@ class Glob(Module):
     def expand(self,name):
         l = glob.glob(name)
         self.setResult('value',l)
-        self.setResult('value_as_string',str(l))
     def compute(self):
       self.expand(self.getInputFromPort('input_file').name)
     _input_ports = [('input_file',[basic.File])]
-    _output_ports = [('value',[ListOfElements]),
-                     ('value_as_string',[basic.String])]
+    _output_ports = [('value',[ListOfElements])]
 
-class GetRunFiles(Glob):
-    def compute(self):
-        tasks = '*'
-        runs = '*[0-9]'
-        if (self.hasInputFromPort('tasks')):
-          tasks = str(self.getInputFromPort('tasks'))
-        if (self.hasInputFromPort('runs')):
-          tasks = str(self.getInputFromPort('runs'))
-        input_file = self.getInputFromPort('input_file')
-        self.expand(input_file.name.replace('.out.xml', '.task' + tasks + '.out.run' +runs))
-    _input_ports = [('tasks',[basic.String]),
-                    ('runs',[basic.String])]
+class GetRunFiles(Module):
+     def compute(self):
+         tasks = '*'
+         runs = '*[0-9]'
+         prefix = '*'
+         d = self.getInputFromPort('dir')
+         dirname = d.name
+         if (self.hasInputFromPort('tasks')):
+           tasks = str(self.getInputFromPort('tasks'))
+         if (self.hasInputFromPort('runs')):
+           tasks = str(self.getInputFromPort('runs'))
+         if (self.hasInputFromPort('prefix')):
+           tasks = str(self.getInputFromPort('prefix'))+'*'
+         self.setResult('value',glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.run' +runs)))
+     _input_ports = [('dir',[basic.Directory]), 
+                     ('prefix',[basic.String]), 
+                     ('tasks',[basic.String]),
+                     ('runs',[basic.String])]
+     _output_ports = [('value',[ListOfElements])]
 
-class GetResultFiles(Glob):
-    def compute(self):
-        tasks = '*'
-        if (self.hasInputFromPort('tasks')):
-          tasks = self.getInputFromPort('tasks')
-        input_file = self.getInputFromPort('input_file')
-        self.expand(input_file.name.replace('.out.xml', '.task' + tasks + '.out.xml'))
-    _input_ports = [('tasks',[basic.String])]
+class GetResultFiles(Module):
+     def compute(self):
+         prefix = '*'
+         tasks = '*'
+         d = self.getInputFromPort('dir')
+         dirname = d.name
+         if (self.hasInputFromPort('tasks')):
+           tasks = self.getInputFromPort('tasks')
+         input_file = self.getInputFromPort('input_file')
+         self.setResult('value',glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml')))
+     _input_ports = [('dir',[basic.Directory]), 
+                      ('prefix',[basic.String]), 
+                      ('tasks',[basic.String])]
+     _output_ports = [('value',[ListOfElements])]
 
 class Convert2XML(alpscore.SystemCommandLogged):
     def compute(self):
@@ -117,10 +129,8 @@ class Convert2XML(alpscore.SystemCommandLogged):
         for q in input_file:
           olist.append(q + '.xml')
         self.setResult('value', olist)
-        self.setResult('value_as_string', str(olist))
     _input_ports = [('input_file', [ListOfElements])]
     _output_ports = [('value', [ListOfElements]),
-                     ('value_as_string',[basic.String]),
                      ('log_file',[basic.File])]
  
 class Convert2Text(alpscore.SystemCommand):
