@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="file:///Users/troyer/opt/lib/xml/job.xsl"?>
+<JOB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/job.xsd">
+  <TASK status="finished">
+    <INPUT file="quantum3a.task1.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task2.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task3.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task4.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task5.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task6.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task7.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task8.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task9.out.xml"/>
+  </TASK>
+  <TASK status="finished">
+    <INPUT file="quantum3a.task10.out.xml"/>
+  </TASK>
+</JOB>

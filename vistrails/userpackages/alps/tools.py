@@ -197,11 +197,25 @@ class GetSimulationInDir(basic.Module,GetSimName):
         dir = self.getInputFromPort("dir")
         o = basic.File
         o.name = self.get_sim_name(dir.name)
+        self.setResult("file",o)
         self.setResult("output_file",o)
-        self.setResult("output_dir",dir)
     _input_ports = [('dir', [basic.Directory])]
-    _output_ports = [('output_file', [basic.File]),
-                     ('output_dir', [basic.Directory])]
+    _output_ports = [('file', [basic.File]),
+                     ('output_file', [basic.File],True)]
+                     
+class PickFileFromList(basic.Module):
+    def compute(self):
+        f=basic.File()
+        ind = 0
+        if self.hasInputFromPort('index'):
+          ind = self.getInputFromPort('index')
+        f.name = self.getInputFromPort('files')[ind]
+        self.setResult('file',f)
+    _input_ports = [('files', [ListOfElements]),
+                    ('index', [basic.Integer])]
+    _output_ports = [('file', [basic.File])]
+
+
 
 
 def initialize(): pass
@@ -226,3 +240,4 @@ def selfRegister():
 
   reg.add_module(GetSimulationInDir,namespace="Tools")
 
+  reg.add_module(PickFileFromList,namespace="Tools")

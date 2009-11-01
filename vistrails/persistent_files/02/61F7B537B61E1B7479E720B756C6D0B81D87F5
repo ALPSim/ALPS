@@ -1,0 +1,855 @@
+Worm algorithm quantum Monte Carlo simulation v2.0
+  copyright (c) 1997-2007 by Simon Trebst <trebst@comp-phys.org>
+                          and Matthias Troyer <troyer@comp-phys.org>
+ for details see the publication:
+ A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+using the ALPS parallelizing scheduler
+  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.
+  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
+
+based on the ALPS libraries version 1.4b1
+  available from http://alps.comp-phys.org/
+  copyright (c) 1994-2009 by the ALPS collaboration.
+  Consult the web page for license details.
+  For details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+parsing task files ... 
+Created run 1 locally
+Starting task 1.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 15% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 53% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 91% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 1
+This task took 45 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 2.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 2% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 29% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 55% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 80% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 2
+This task took 56 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 3.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 18% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 37% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 57% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 94% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 3
+This task took 78 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 4.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 7% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 27% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 46% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 65% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 85% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 4
+This task took 78 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 5.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 9% done).
+Checking if it is finished: not yet, next check in 12 seconds ( 25% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 45% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 63% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 80% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 97% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 5
+This task took 91 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 6.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 4% done).
+Checking if it is finished: not yet, next check in 13 seconds ( 20% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 40% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 55% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 71% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 87% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 6
+This task took 92 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 7.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 7% done).
+Checking if it is finished: not yet, next check in 28 seconds ( 15% done).
+Checking if it is finished: not yet, next check in 16 seconds ( 41% done).
+Checking if it is finished: not yet, next check in 11 seconds ( 57% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 68% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 79% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 89% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 7
+This task took 136 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 8.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 13% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 32% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 48% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 68% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 88% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 8
+This task took 78 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 9.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 1% done).
+Checking if it is finished: not yet, next check in 20 seconds ( 13% done).
+Checking if it is finished: not yet, next check in 14 seconds ( 37% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 54% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 66% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 77% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 90% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 9
+This task took 114 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 10.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 7% done).
+Checking if it is finished: not yet, next check in 22 seconds ( 17% done).
+Checking if it is finished: not yet, next check in 17 seconds ( 38% done).
+Checking if it is finished: not yet, next check in 12 seconds ( 54% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 65% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 83% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 93% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 10
+This task took 143 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 11.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 2% done).
+Checking if it is finished: not yet, next check in 24 seconds ( 12% done).
+Checking if it is finished: not yet, next check in 20 seconds ( 32% done).
+Checking if it is finished: not yet, next check in 16 seconds ( 48% done).
+Checking if it is finished: not yet, next check in 12 seconds ( 61% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 70% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 79% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 87% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 95% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 11
+This task took 165 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 12.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 1% done).
+Checking if it is finished: not yet, next check in 42 seconds ( 7% done).
+Checking if it is finished: not yet, next check in 28 seconds ( 33% done).
+Checking if it is finished: not yet, next check in 23 seconds ( 48% done).
+Checking if it is finished: not yet, next check in 18 seconds ( 60% done).
+Checking if it is finished: not yet, next check in 14 seconds ( 69% done).
+Checking if it is finished: not yet, next check in 11 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 82% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 88% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 94% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 12
+This task took 242 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 13.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 3% done).
+Checking if it is finished: not yet, next check in 83 seconds ( 6% done).
+Checking if it is finished: not yet, next check in 40 seconds ( 39% done).
+Checking if it is finished: not yet, next check in 25 seconds ( 58% done).
+Checking if it is finished: not yet, next check in 18 seconds ( 69% done).
+Checking if it is finished: not yet, next check in 14 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 82% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 87% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 91% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 96% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 13
+This task took 307 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 14.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 78 seconds ( 3% done).
+Checking if it is finished: not yet, next check in 52 seconds ( 30% done).
+Checking if it is finished: not yet, next check in 39 seconds ( 47% done).
+Checking if it is finished: not yet, next check in 32 seconds ( 58% done).
+Checking if it is finished: not yet, next check in 24 seconds ( 68% done).
+Checking if it is finished: not yet, next check in 18 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 13 seconds ( 82% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 87% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 90% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 94% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 98% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 14
+This task took 396 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 15.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 2% done).
+Checking if it is finished: not yet, next check in 24 seconds ( 12% done).
+Checking if it is finished: not yet, next check in 18 seconds ( 34% done).
+Checking if it is finished: not yet, next check in 16 seconds ( 47% done).
+Checking if it is finished: not yet, next check in 12 seconds ( 59% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 69% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 78% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 86% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 95% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 15
+This task took 163 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 16.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 3% done).
+Checking if it is finished: not yet, next check in 46 seconds ( 9% done).
+Checking if it is finished: not yet, next check in 38 seconds ( 30% done).
+Checking if it is finished: not yet, next check in 31 seconds ( 45% done).
+Checking if it is finished: not yet, next check in 21 seconds ( 61% done).
+Checking if it is finished: not yet, next check in 15 seconds ( 71% done).
+Checking if it is finished: not yet, next check in 11 seconds ( 78% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 85% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 90% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 95% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 98% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 16
+This task took 279 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 17.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 1% done).
+Checking if it is finished: not yet, next check in 65 seconds ( 5% done).
+Checking if it is finished: not yet, next check in 43 seconds ( 31% done).
+Checking if it is finished: not yet, next check in 32 seconds ( 48% done).
+Checking if it is finished: not yet, next check in 25 seconds ( 60% done).
+Checking if it is finished: not yet, next check in 19 seconds ( 69% done).
+Checking if it is finished: not yet, next check in 15 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 83% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 88% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 92% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 97% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 17
+This task took 327 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 18.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 66 seconds ( 4% done).
+Checking if it is finished: not yet, next check in 56 seconds ( 26% done).
+Checking if it is finished: not yet, next check in 39 seconds ( 46% done).
+Checking if it is finished: not yet, next check in 27 seconds ( 61% done).
+Checking if it is finished: not yet, next check in 21 seconds ( 70% done).
+Checking if it is finished: not yet, next check in 17 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 12 seconds ( 83% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 87% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 91% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 94% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 97% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 18
+This task took 378 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 19.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 1% done).
+Checking if it is finished: not yet, next check in 122 seconds ( 3% done).
+Checking if it is finished: not yet, next check in 91 seconds ( 27% done).
+Checking if it is finished: not yet, next check in 74 seconds ( 44% done).
+Checking if it is finished: not yet, next check in 51 seconds ( 59% done).
+Checking if it is finished: not yet, next check in 41 seconds ( 68% done).
+Checking if it is finished: not yet, next check in 32 seconds ( 75% done).
+Checking if it is finished: not yet, next check in 28 seconds ( 79% done).
+Checking if it is finished: not yet, next check in 21 seconds ( 84% done).
+Checking if it is finished: not yet, next check in 16 seconds ( 88% done).
+Checking if it is finished: not yet, next check in 12 seconds ( 90% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 92% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 94% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 96% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 98% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 99% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 19
+This task took 686 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 20.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 143 seconds ( 2% done).
+Checking if it is finished: not yet, next check in 108 seconds ( 27% done).
+Checking if it is finished: not yet, next check in 89 seconds ( 42% done).
+Checking if it is finished: not yet, next check in 72 seconds ( 55% done).
+Checking if it is finished: not yet, next check in 50 seconds ( 68% done).
+Checking if it is finished: not yet, next check in 38 seconds ( 76% done).
+Checking if it is finished: not yet, next check in 27 seconds ( 82% done).
+Checking if it is finished: not yet, next check in 22 seconds ( 86% done).
+Checking if it is finished: not yet, next check in 15 seconds ( 90% done).
+Checking if it is finished: not yet, next check in 11 seconds ( 92% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 94% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 96% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 99% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 20
+This task took 773 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Created run 1 locally
+Starting task 21.
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 1% done).
+Checking if it is finished: not yet, next check in 218 seconds ( 2% done).
+Checking if it is finished: not yet, next check in 140 seconds ( 29% done).
+Checking if it is finished: not yet, next check in 104 seconds ( 47% done).
+Checking if it is finished: not yet, next check in 78 seconds ( 60% done).
+Checking if it is finished: not yet, next check in 56 seconds ( 71% done).
+Checking if it is finished: not yet, next check in 36 seconds ( 80% done).
+Checking if it is finished: not yet, next check in 24 seconds ( 87% done).
+Checking if it is finished: not yet, next check in 16 seconds ( 91% done).
+Checking if it is finished: not yet, next check in 11 seconds ( 93% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 95% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 97% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 98% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 99% done).
+Checking if it is finished: not yet, next check in 10 seconds ( 0% done).
+Halted Simulation 21
+This task took 968 seconds.
+Checkpointing Simulation 1
+Checkpointing Simulation 2
+Checkpointing Simulation 3
+Checkpointing Simulation 4
+Checkpointing Simulation 5
+Checkpointing Simulation 6
+Checkpointing Simulation 7
+Checkpointing Simulation 8
+Checkpointing Simulation 9
+Checkpointing Simulation 10
+Checkpointing Simulation 11
+Checkpointing Simulation 12
+Checkpointing Simulation 13
+Checkpointing Simulation 14
+Checkpointing Simulation 15
+Checkpointing Simulation 16
+Checkpointing Simulation 17
+Checkpointing Simulation 18
+Checkpointing Simulation 19
+Checkpointing Simulation 20
+Checkpointing Simulation 21
+Finished with everything.

@@ -48,7 +48,29 @@ class MonteCarloParameters(Parameters):
 
 class LoopMonteCarloParameters(MonteCarloParameters): 
     """ A module to set the temperature """
-    _input_ports = [('REPRESENTATION',[(basic.String, 'the representation (SSE or PATHINTEGRAL)')])]
+    def compute(self):
+        res = self.readInputs(ParametersData({}))
+        res.updateIfMissing(self.defaults)
+        self.setResult('value',res.toBasic())
+    _input_ports = [('WORKER',[(basic.String, 'the WORKER to be used, default sse')])]
+    defaults = { 'WORKER':'sse' }
+
+class QWLMonteCarloParameters(MonteCarloParameters): 
+    """ A module to set the temperature """
+    _input_ports = [('T_MIN',[basic.String]),
+                    ('T_MAX',[basic.String]),
+                    ('DELTA_T',[basic.String]),
+                    ('CUTOFF',[basic.String]),
+                    ('MEASURE_MAGNETIC_PROPERTIES',[basic.String]),
+                    ('NUMBER_OF_WANG_LANDAU_STEPS',[basic.String],True),
+                    ('USE_ZHOU_BHATT_METHOD',[basic.String],True),
+                    ('FLATNESS_TRESHOLD',[basic.String],True),
+                    ('BLOCK_SWEEPS',[basic.String],True),
+                    ('INITIAL_MODIFICATION_FACTOR',[basic.String],True),
+                    ('EXPANSION_ORDER_MINIMUM',[basic.String],True),
+                    ('EXPANSION_ORDER_MAXIMUM',[basic.String],True),
+                    ('START_STORING',[basic.String],True)
+                    ]
 
 class ClassicalMonteCarloParameters(MonteCarloParameters): 
     """ A module to set the temperature """
@@ -118,6 +140,7 @@ def selfRegister():
   register_parameters(MonteCarloParameters)
   reg.add_module(LoopMonteCarloParameters,namespace="Parameters")
   reg.add_module(ClassicalMonteCarloParameters,namespace="Parameters")
+  reg.add_module(QWLMonteCarloParameters,namespace="Parameters")
   register_parameters(Temperature)
   
   register_parameters(ConservedQuantumnumbers)

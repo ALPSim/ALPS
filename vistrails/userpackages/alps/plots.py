@@ -77,12 +77,12 @@ class PlotFile(basic.File):
 #    _input_ports = [('datafiles',[basic.File]),
 #                    ('plotdescription',[PlotDescription])]
 
-class BasicExtract(alpscore.SystemCommand):
+class ExtractAnything(alpscore.SystemCommand):
     def compute(self):
         outputfile = self.interpreter.filePool.create_file(suffix=self.suffix)
         cmdlist = [alpscore._get_path(self.extractapp), 
                    self.getInputFromPort('plotdescription').name ]
-        cmdlist += self.getfiles()
+        cmdlist += self.getInputFromPort('data')
         cmdlist += [ '>', outputfile.name]
         print cmdlist
         self.execute(cmdlist)
@@ -94,37 +94,42 @@ class BasicExtract(alpscore.SystemCommand):
     _output_ports = [('file',[basic.File]),
                      ('source',[basic.String])]
 
-class GetSingleFile:
-   def getfiles(self):
-       return self.getInputFromPort('data').name
-
-class GetFileList:
-   def getfiles(self):
-       return self.getInputFromPort('data')
+class Plot2Anything(alpscore.SystemCommand):
+    def compute(self):
+        outputfile = self.interpreter.filePool.create_file(suffix=self.suffix)
+        cmdlist = [alpscore._get_path(self.extractapp), 
+                   self.getInputFromPort('plot').name, '>', outputfile.name]
+        print cmdlist
+        self.execute(cmdlist)
+        self.setResult('file',outputfile)
+        f = file(outputfile.name,'r')
+        self.setResult('source',f.read())
+    _input_ports = [('plot',[PlotFile])]
+    _output_ports = [('file',[basic.File]),
+                     ('source',[basic.String])]
        
        
-class ExtractXMGR(BasicExtract,GetFileList):
+class ExtractXMGR(ExtractAnything):
     suffix='xmgr'
     extractapp='extractxmgr'
 
-class ExtractText(BasicExtract,GetFileList):
+class ExtractText(ExtractAnything):
     suffix='txt'
     extractapp='extracttext'
 
-class ExtractMpl(BasicExtract,GetFileList):
+class ExtractMpl(ExtractAnything):
     suffix='py'
     extractapp='extractmpl'
     
-    
-class Plot2XMGR(BasicExtract,GetSingleFile):
+class Plot2XMGR(Plot2Anything):
     suffix='xmgr'
     extractapp='plot2xmgr'
 
-class Plot2Text(BasicExtract,GetSingleFile):
+class Plot2Text(Plot2Anything):
     suffix='txt'
     extractapp='plot2text'
 
-class Plot2Mpl(BasicExtract,GetSingleFile):
+class Plot2Mpl(Plot2Anything):
     suffix='py'
     extractapp='plot2mpl'
 
@@ -144,10 +149,11 @@ def selfRegister():
   reg.add_module(PlotScalarVersusParameter,namespace="Plots")
   reg.add_module(PlotFile,namespace="Plots")
 
-  reg.add_module(BasicExtract,namespace="Plots",abstract=True)
+  reg.add_module(ExtractAnything,namespace="Plots",abstract=True)
   reg.add_module(ExtractXMGR,namespace="Plots")
   reg.add_module(ExtractText,namespace="Plots")
   reg.add_module(ExtractMpl,namespace="Plots")
+  reg.add_module(Plot2Anything,namespace="Plots",abstract=True)
   reg.add_module(Plot2XMGR,namespace="Plots")
   reg.add_module(Plot2Text,namespace="Plots")
   reg.add_module(Plot2Mpl,namespace="Plots")

@@ -11,7 +11,8 @@ import core.modules.module_registry
 
 import alpscore
 import plots
-
+import tools
+import os
 
 from plots import PlotFile
 
@@ -31,7 +32,7 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
              raise ModuleError(self, 'No application specified')
           
     def compute(self):
-        an = self.get_app_name()
+        an = self.get_appname()
         if not os.path.isfile(an):
             raise ModuleError(self, "Application '%s' not existent" % an)
         cmdlist = [an]
@@ -43,9 +44,9 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
         self.execute(cmdlist)
         outfiles = {}
         for port_name in self.outputPorts:
-            outfiles[port_name] = PlotFile
-            outfiles[port_name].name = infile.replace('.out.xml', '.plot.' + str(port_name) + '.xml')
-            self.setResult(port_name,outfiles[port_name])
+            of = PlotFile()
+            of.name = infile.replace('.out.xml', '.plot.' + str(port_name) + '.xml')
+            self.setResult(port_name,of)
     _input_ports = [('file',[basic.File]),
                     ('application',[basic.File])]
     appname = ''
@@ -78,12 +79,27 @@ class EvaluateFullDiagH(AlpsEvaluate):
                     ('magnetization',[PlotFile])]
 
 
-class EvaluateLoop(alpscore.SystemCommandLogged):
+class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
     def compute(self):
-        self.execute([alpscore._get_path('loop'),'--evaluate',self.getInputFromPort('file').name])
-        self.setResult('output_file',self.getInputFromPort('file'))
-    _input_ports = [('file', [basic.File])]
-    _output_ports = [('output_file', [basic.File])]
+        name = self.get_sim_name(self.getInputFromPort('dir').name)
+        self.execute([alpscore._get_path('loop'),'--evaluate',name])
+        self.setResult('dir',self.getInputFromPort('dir'))
+    _input_ports = [('dir', [basic.Directory])]
+    _output_ports = [('dir', [basic.Directory])]
+
+class EvaluateQWL(AlpsEvaluate):
+    appname = 'qwl_evaluate'
+    _input_ports = [('T_MIN',[basic.Float]),
+                    ('T_MAX',[basic.Float]),
+                    ('DELTA_T',[basic.Float]),
+                    ('application',[basic.File],True)]
+    _output_ports = [('energy',[PlotFile]),
+                    ('free_energy',[PlotFile]),
+                    ('entropy',[PlotFile]),
+                    ('specific_heat',[PlotFile]),
+                    ('uniform_susceptibility',[PlotFile]),
+                    ('staggered_structure_factor',[PlotFile]),
+                    ('uniform_structure_factor',[PlotFile])]
 
 def initialize(): pass
 
@@ -95,4 +111,5 @@ def selfRegister():
   reg.add_module(EvaluateFullDiagT,namespace="Evaluation")
   reg.add_module(EvaluateFullDiagH,namespace="Evaluation")
   reg.add_module(EvaluateLoop,namespace="Evaluation")
+  reg.add_module(EvaluateQWL,namespace="Evaluation")
   

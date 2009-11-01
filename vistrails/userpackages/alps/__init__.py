@@ -14,8 +14,8 @@ import models
 import system
 import applications
 import plots
-import evaluation
 import tools
+import evaluation
 
 identifier = 'org.comp-phys.alps'
 version = '0.3.0'
@@ -37,8 +37,8 @@ def initialize():
   system.selfRegister()
   applications.selfRegister()
   plots.selfRegister()
-  evaluation.selfRegister()
   tools.selfRegister()
+  evaluation.selfRegister()
   
   alpscore.config = configuration
 

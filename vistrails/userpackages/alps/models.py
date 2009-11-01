@@ -49,6 +49,24 @@ class SpinModel(ModelParameters):
                     'Jxy#'  : 'J#'
                  }
 
+class BosonHubbardModel(ModelParameters):
+   fixed = {'MODEL'   : 'boson Hubbard'}
+   defaults =      {'mu'    : '0',
+                    't'     : '1',
+                    'V'     : '0',
+                    "t'"    : '0',
+                    "V''"   : '0',
+                    'U'     : '0',
+                    't0'    : 't',
+                    't1'    : "t'",
+                    'V0'    : '0',
+                    'V1'    : "V'",
+                    'mu#'   : 'mu',
+                    'U#'    : 'U',
+                    't#'    : '0',
+                    'V#'    : '0'
+                 }
+
 def register_model(type):
    reg = core.modules.module_registry.get_module_registry()
    reg.add_module(type,namespace="Models")
@@ -68,4 +86,5 @@ def selfRegister():
    register_parameters(ModelParameters)
    reg.add_module(ClassicalSpinModel,namespace="Models")
    register_model(SpinModel)
+   register_model(BosonHubbardModel)
   
