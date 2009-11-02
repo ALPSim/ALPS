@@ -71,7 +71,7 @@ class OpenHTML(NotCacheable, SystemCommand):
 
 class TextCell(SpreadsheetCell):
     """
-    RichTextCell is a custom Module to view HTML files
+    TextCell is a custom Module to view plain text files
     
     """
     def compute(self):
@@ -86,7 +86,7 @@ class TextCell(SpreadsheetCell):
 
 class TextCellWidget(QCellWidget):
     """
-  TextCellWidget has a QTextEdit to display HTML files
+  TextCellWidget has a QTextEdit to display plain text files
     
     """
     def __init__(self, parent=None):

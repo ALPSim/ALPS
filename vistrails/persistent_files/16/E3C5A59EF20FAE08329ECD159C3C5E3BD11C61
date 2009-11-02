@@ -1,0 +1,50 @@
+Quantum Wang-Landau stochastic series expansion program
+  copyright(c) 2004 Stefan Wessel <wessel@comp-phys.org>
+  for details see the publications:
+  M. Troyer, S. Wessel, and F. Alet, Phys. Rev. Lett. 90, 120201 (2003).
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+using the ALPS parallelizing scheduler
+  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.
+  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
+
+based on the ALPS libraries version 1.4b1
+  available from http://alps.comp-phys.org/
+  copyright (c) 1994-2009 by the ALPS collaboration.
+  Consult the web page for license details.
+  For details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+parsing task files ... 
+Created run 1 locally
+Starting task 1.
+[0-1000]  step 1, ln[f]=1 : flatness=1 ratio=0
+[0-1000]  step 1, ln[f]=1 : flatness=1 ratio=0
+Checking if it is finished: not yet, next check in 60 seconds ( 0% done).
+[0-1000]  step 1, ln[f]=1 : flatness=1 ratio=0
+[0-1000]  step 1, ln[f]=1 : flatness=1 ratio=0
+[0-1000]  step 1, ln[f]=1 : flatness=1 ratio=0
+[0-1000]  step 1, ln[f]=1 : flatness=0.6925 ratio=1845
+[0-1000]  step 2, ln[f]=0.5 : flatness=2.7103 ratio=366.5
+[0-1000]  step 3, ln[f]=0.25 : flatness=2.80722 ratio=321.75
+[0-1000]  step 4, ln[f]=0.125 : flatness=2.06048 ratio=246
+[0-1000]  step 5, ln[f]=0.0625 : flatness=1.22028 ratio=205.75
+[0-1000]  step 6, ln[f]=0.03125 : flatness=0.883633 ratio=145.969
+[0-1000]  step 7, ln[f]=0.015625 : flatness=0.644127 ratio=104.641
+[0-1000]  step 8, ln[f]=0.0078125 : flatness=0.545505 ratio=79.3594
+[0-1000]  step 9, ln[f]=0.00390625 : flatness=0.19333 ratio=56.5234
+[0-1000]  step 10, ln[f]=0.00195312 : flatness=0.180273 ratio=39.6172
+[0-1000]  step 11, ln[f]=0.000976562 : flatness=0.27131 ratio=28.5
+[0-1000]  step 12, ln[f]=0.000488281 : flatness=0.250753 ratio=16.001
+[0-1000]  step 13, ln[f]=0.000244141 : flatness=0.359687 ratio=13.9417
+[0-1000]  step 14, ln[f]=0.00012207 : flatness=0.146814 ratio=9.43103
+[0-1000]  step 15, ln[f]=6.10352e-05 : flatness=0.105025 ratio=6.6972
+Checking if it is finished: not yet, next check in 60 seconds ( 0% done).
+[0-1000]  step 16, ln[f]=3.05176e-05 : flatness=0.118516 ratio=4.88553
+[0-1000]  continuing using final weights...
+[0-1000]  all done.
+Checking if it is finished: not yet, next check in 60 seconds ( 0% done).
+Halted Simulation 1
+This task took 123 seconds.
+Checkpointing Simulation 1
+Finished with everything.

@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="file:///Users/troyer/opt/lib/xml/job.xsl"?>
+<JOB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/job.xsd">
+  <OUTPUT file="quantum2b.out.xml"/>
+  <TASK status="new">
+    <INPUT file="quantum2b.task1.in.xml"/>
+    <OUTPUT file="quantum2b.task1.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task2.in.xml"/>
+    <OUTPUT file="quantum2b.task2.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task3.in.xml"/>
+    <OUTPUT file="quantum2b.task3.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task4.in.xml"/>
+    <OUTPUT file="quantum2b.task4.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task5.in.xml"/>
+    <OUTPUT file="quantum2b.task5.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task6.in.xml"/>
+    <OUTPUT file="quantum2b.task6.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task7.in.xml"/>
+    <OUTPUT file="quantum2b.task7.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task8.in.xml"/>
+    <OUTPUT file="quantum2b.task8.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task9.in.xml"/>
+    <OUTPUT file="quantum2b.task9.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task10.in.xml"/>
+    <OUTPUT file="quantum2b.task10.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task11.in.xml"/>
+    <OUTPUT file="quantum2b.task11.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task12.in.xml"/>
+    <OUTPUT file="quantum2b.task12.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task13.in.xml"/>
+    <OUTPUT file="quantum2b.task13.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task14.in.xml"/>
+    <OUTPUT file="quantum2b.task14.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task15.in.xml"/>
+    <OUTPUT file="quantum2b.task15.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task16.in.xml"/>
+    <OUTPUT file="quantum2b.task16.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task17.in.xml"/>
+    <OUTPUT file="quantum2b.task17.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task18.in.xml"/>
+    <OUTPUT file="quantum2b.task18.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task19.in.xml"/>
+    <OUTPUT file="quantum2b.task19.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task20.in.xml"/>
+    <OUTPUT file="quantum2b.task20.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task21.in.xml"/>
+    <OUTPUT file="quantum2b.task21.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task22.in.xml"/>
+    <OUTPUT file="quantum2b.task22.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task23.in.xml"/>
+    <OUTPUT file="quantum2b.task23.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task24.in.xml"/>
+    <OUTPUT file="quantum2b.task24.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task25.in.xml"/>
+    <OUTPUT file="quantum2b.task25.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum2b.task26.in.xml"/>
+    <OUTPUT file="quantum2b.task26.out.xml"/>
+  </TASK>
+</JOB>

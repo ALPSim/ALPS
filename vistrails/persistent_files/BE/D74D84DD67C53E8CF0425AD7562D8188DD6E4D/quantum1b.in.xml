@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="file:///Users/troyer/opt/lib/xml/job.xsl"?>
+<JOB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/job.xsd">
+  <OUTPUT file="quantum1b.out.xml"/>
+  <TASK status="new">
+    <INPUT file="quantum1b.task1.in.xml"/>
+    <OUTPUT file="quantum1b.task1.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task2.in.xml"/>
+    <OUTPUT file="quantum1b.task2.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task3.in.xml"/>
+    <OUTPUT file="quantum1b.task3.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task4.in.xml"/>
+    <OUTPUT file="quantum1b.task4.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task5.in.xml"/>
+    <OUTPUT file="quantum1b.task5.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task6.in.xml"/>
+    <OUTPUT file="quantum1b.task6.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task7.in.xml"/>
+    <OUTPUT file="quantum1b.task7.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task8.in.xml"/>
+    <OUTPUT file="quantum1b.task8.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task9.in.xml"/>
+    <OUTPUT file="quantum1b.task9.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task10.in.xml"/>
+    <OUTPUT file="quantum1b.task10.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task11.in.xml"/>
+    <OUTPUT file="quantum1b.task11.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task12.in.xml"/>
+    <OUTPUT file="quantum1b.task12.out.xml"/>
+  </TASK>
+  <TASK status="new">
+    <INPUT file="quantum1b.task13.in.xml"/>
+    <OUTPUT file="quantum1b.task13.out.xml"/>
+  </TASK>
+</JOB>
