@@ -55,6 +55,7 @@ class PlotScalarVersusParameter(PlotDescription):
           ylabel = self.getInputFromPort('y-label')
         else:
           ylabel = self.getInputFromPort('observable')
+        f.write('  <legend show="true"/>\n')
         f.write('  <xaxis label="' + str(xlabel) + '" type="PARAMETER" name="' + str(self.getInputFromPort('parameter')) + '"/>\n')
         f.write('  <yaxis label="' + str(ylabel) + '" type="SCALAR_AVERAGE" name="' + str(self.getInputFromPort('observable')) + '"/>\n')
         if (self.hasInputFromPort('for-each')):
