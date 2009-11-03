@@ -17,6 +17,8 @@ import plots
 import tools
 import evaluation
 
+import dataset
+
 identifier = 'org.comp-phys.alps'
 version = '0.3.0'
 name = 'ALPS'
@@ -41,5 +43,7 @@ def initialize():
   evaluation.selfRegister()
   
   alpscore.config = configuration
+  
+  dataset.initialize()
 
 
