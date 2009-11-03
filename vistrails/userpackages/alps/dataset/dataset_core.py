@@ -93,3 +93,32 @@ class DataSets(Module):
 			else:
 				self.sets = [sets_]
 
+class ConcatenateDataSets(Module):
+	"""Takes the sets from several DataSets from the input port and puts them
+	into one DataSets object"""
+	my_input_ports = [
+		PortDescriptor('input',DataSets)
+	]
+
+	my_output_ports = [
+		PortDescriptor('value',DataSets)
+	]
+
+	def compute(self):
+		if self.hasInputFromPort('input'):
+			inps = self.forceGetInputListFromPort('input')
+			sets = []
+			for inp in inps:
+				sets = sets + inp.sets
+			self.setResult('value',DataSets(sets))
+
+class Descriptor:
+	my_input_ports = []
+	my_output_ports = []
+	data = {}
+	
+	def compute(self):
+		for ip in self.my_input_ports:
+			if self.hasInputFromPort(ip.name):
+				self.data[ip.name] = self.getInputFromPort(ip.name)
+		self.setResult('output',self)

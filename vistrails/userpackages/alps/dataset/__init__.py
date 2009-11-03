@@ -13,6 +13,8 @@ import numpy as np
 from dataset_core import *
 from dataset_evaluate import *
 from dataset_fit import *
+from dataset_load import *
+from dataset_plot import *
 
 def warn(m):
 	print m
@@ -46,6 +48,9 @@ def register(m,ns,abst=False):
 			reg.add_output_port(m, output_port.name, (output_port.porttype, output_port.description), True)
 		else:
 			reg.add_output_port(m, output_port.name, (output_port.porttype, output_port.description))
+	
+	if Descriptor in m.__bases__:
+		reg.add_output_port(m, 'output', (m,''))
 
 def initialize():
 	# We'll first create a local alias for the module registry so that
@@ -61,9 +66,14 @@ def initialize():
 	register(ConstantDataSet,'DataSet::Load')
 	register(LoadDataSet,'DataSet::Load')
 	register(LoadAlpsFromTxt,'DataSet::Load')
+	register(CustomLoader,'DataSet::Load')
 	
 	register(EvalExpression_1to1,'DataSet::Evaluate')
 	register(EvalExpression_2to1,'DataSet::Evaluate')
+	register(EvalExpression_Allto1,'DataSet::Evaluate')
+	
+	register(AxisDescriptor,'DataSet::Plot')
+	register(LegendDescriptor,'DataSet::Plot')
 	register(Plotter,'DataSet::Plot')
 	
 	register(FitPrototype,'DataSet::Fit',abst=True)
