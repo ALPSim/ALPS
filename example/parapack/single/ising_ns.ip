@@ -7,12 +7,12 @@ SEED = 2873
 SWEEPS = 4096;
 THERMALIZATION = SWEEPS/8;
 
-WORKER = "ising"
+ALGORITHM = "ising"
 
 { T = 2; }
 { T = 1.8; }
 { T = 1.6; }
 
-WORKER = "ising temperature_scan"
+ALGORITHM = "ising; temperature scan"
 
 { NUM_TEMPERATURES = 3; INITIAL_TEMPERATURE = 2; DIFF_TEMPERATURE = -0.2; }

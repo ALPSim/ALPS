@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -29,7 +29,7 @@
 #include <alps/parapack/exchange.h>
 
 PARAPACK_SET_VERSION(PARAPACK_VERSION_STRING ": exchange Monte Carlo");
-PARAPACK_REGISTER_WORKER(qmc_worker, "loop");
+PARAPACK_REGISTER_ALGORITHM(qmc_worker, "loop");
 PARAPACK_REGISTER_EVALUATOR(alps::parapack::simple_evaluator, "loop");
-PARAPACK_REGISTER_WORKER(alps::parapack::single_exchange_worker<qmc_worker>, "loop exchange");
-PARAPACK_REGISTER_EVALUATOR(alps::parapack::simple_evaluator, "loop exchange");
+PARAPACK_REGISTER_ALGORITHM(alps::parapack::single_exchange_worker<qmc_worker>, "loop; exchange");
+PARAPACK_REGISTER_EVALUATOR(alps::parapack::simple_evaluator, "loop; exchange");

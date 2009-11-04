@@ -1,5 +1,5 @@
 [input parameters]
-WORKER = loop;
+ALGORITHM = loop;
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
@@ -45,7 +45,7 @@ Susceptibility: 0.0143433 +/- 0.00354; tau = 0.967 WARNING: ERRORS NOT CONVERGED
 Temperature: 0.1 +/- 6.68285e-10 Warning: potential error underflow. Errors might be smaller
 Volume: 8 +/- 0
 [input parameters]
-WORKER = loop;
+ALGORITHM = loop;
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
@@ -91,7 +91,7 @@ Susceptibility: 0.083313 +/- 0.0056; tau = 1.15 WARNING: ERRORS NOT CONVERGED!!!
 Temperature: 0.2 +/- 1.33657e-09 Warning: potential error underflow. Errors might be smaller
 Volume: 8 +/- 0
 [input parameters]
-WORKER = loop;
+ALGORITHM = loop;
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
@@ -137,7 +137,7 @@ Susceptibility: 0.113627 +/- 0.00408; tau = 0.781 WARNING: ERRORS NOT CONVERGED!
 Temperature: 0.3 +/- 1.27558e-09 Warning: potential error underflow. Errors might be smaller
 Volume: 8 +/- 0
 [input parameters]
-WORKER = loop;
+ALGORITHM = loop;
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
@@ -183,7 +183,7 @@ Susceptibility: 0.135498 +/- 0.00314; tau = 0.631 WARNING: ERRORS NOT CONVERGED!
 Temperature: 0.4 +/- 2.67314e-09 Warning: potential error underflow. Errors might be smaller
 Volume: 8 +/- 0
 [input parameters]
-WORKER = loop;
+ALGORITHM = loop;
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;

@@ -1,4 +1,4 @@
-WORKER = "ising exchange"
+ALGORITHM = "ising; exchange"
 
 LATTICE_LIBRARY = "../../../lib/xml/lattices.xml";
 LATTICE = "chain lattice"
@@ -25,7 +25,7 @@ RANDOM_EXCHANGE = 0
 
 #clear
 
-WORKER = "loop exchange"
+ALGORITHM = "loop; exchange"
 
 LATTICE_LIBRARY = "../../../lib/xml/lattices.xml";
 LATTICE = "chain lattice"

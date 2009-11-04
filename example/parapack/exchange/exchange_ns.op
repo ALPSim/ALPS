@@ -1,5 +1,5 @@
 [input parameters]
-WORKER = "ising exchange";
+ALGORITHM = "ising; exchange";
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
@@ -165,7 +165,7 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.193985 +/- 0.00837
 Temperature: 2 +/- 0
 [input parameters]
-WORKER = "ising exchange";
+ALGORITHM = "ising; exchange";
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 16;
@@ -331,7 +331,7 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.201454 +/- 0.00936 WARNING: check error convergence
 Temperature: 2 +/- 0
 [input parameters]
-WORKER = "loop exchange";
+ALGORITHM = "loop; exchange";
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;
@@ -489,7 +489,7 @@ Susceptibility: 0.0848389 +/- 0.00615; tau = 0.49 WARNING: ERRORS NOT CONVERGED!
 Temperature: 0.2 +/- 7.17983e-10 Warning: potential error underflow. Errors might be smaller
 Volume: 8 +/- 0
 [input parameters]
-WORKER = "loop exchange";
+ALGORITHM = "loop; exchange";
 LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
 LATTICE = "chain lattice";
 L = 8;

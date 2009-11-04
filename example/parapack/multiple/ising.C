@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -29,6 +29,6 @@
 #include "ising.h"
 
 PARAPACK_SET_VERSION(PARAPACK_VERSION_STRING ": parallel Metropolis algorithm");
-PARAPACK_REGISTER_WORKER(single_ising_worker, "ising");
-PARAPACK_REGISTER_PARALLEL_WORKER(parallel_ising_worker, "ising");
+PARAPACK_REGISTER_ALGORITHM(single_ising_worker, "ising");
+PARAPACK_REGISTER_PARALLEL_ALGORITHM(parallel_ising_worker, "ising");
 PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising");

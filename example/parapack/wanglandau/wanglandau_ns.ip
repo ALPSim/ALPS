@@ -9,7 +9,7 @@ ENERGY_RANGE = "[-72:-16]";
 WEIGHT_DUMP_FILE = "weight.dump"
 
 {
-  WORKER = "wanglandau learn";
+  ALGORITHM = "wanglandau learn";
   FINAL_UPDATE_FACTOR = 1.01
   CHECK_INTERVAL = 1024
 }
@@ -17,12 +17,12 @@ WEIGHT_DUMP_FILE = "weight.dump"
 OBSERVABLE_DUMP_FILE = "observable.dump"
 
 {
-  WORKER = "wanglandau measure";
+  ALGORITHM = "wanglandau measure";
   SWEEPS = 8192
 }
 
 {
-  WORKER = "wanglandau reweight";
+  ALGORITHM = "wanglandau reweight";
   REFERENCE_BIN = -72
   REFERENCE_LOGG = log(2)
   T_MIN = 0.5;

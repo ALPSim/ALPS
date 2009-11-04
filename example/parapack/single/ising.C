@@ -29,8 +29,7 @@
 #include <alps/parapack/temperature_scan.h>
 
 PARAPACK_SET_VERSION(PARAPACK_VERSION_STRING ": Metropolis algorithm");
-PARAPACK_REGISTER_WORKER(single_ising_worker, "ising");
+PARAPACK_REGISTER_ALGORITHM(single_ising_worker, "ising");
+PARAPACK_REGISTER_ALGORITHM(alps::parapack::temperature_scan_adaptor<single_ising_worker>,
+                         "ising; temperature scan");
 PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising");
-PARAPACK_REGISTER_WORKER(alps::parapack::temperature_scan_adaptor<single_ising_worker>,
-                         "ising temperature_scan");
-PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising temperature_scan");
