@@ -1,3 +1,15 @@
+2009-11-05  Synge Todo <wistaria@comp-phys.org>
+
+	* [parapack] Default number of threads per process has been
+	  changed (OMP_NUM_THREADS for serial and 1 for parallel
+	  scheduler)
+
+	* [parapack] Introduced --total-threads and --threads-per-clone
+	  options.  In addition to an explicit integral number,
+	  --total-threads accepts "auto", which sets the total number of
+	  threads as OMP_NUM_THREADS times number of processes.  Merged
+	  --procs-per-clone option into --threads-per-clone.
+
 2009-09-09  Synge Todo <wistaria@comp-phys.org>
 
 	* [parapack] Supported OpenMP parallelization
