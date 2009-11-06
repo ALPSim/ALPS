@@ -138,3 +138,40 @@ class LoadAlpsFromTxt(Module):
 					data.append([idx,val])
 
 			self.setResult('data', DataSets(sets))
+		else:
+			# throw something
+			pass
+
+class LoadAlpsHdf5(Module):
+	my_input_ports = [
+		PortDescriptor('file',basic.File)
+		PortDescriptor('Measurements',ListOfElements)
+	]
+	
+	my_output_ports = [
+		PortDescriptor('data',DataSets)
+	]	
+	
+	# Pre: file is a h5py file descriptor
+	# Post: returns a list of all measurements saved in the file
+	def FindAllMeasurements(self,file):
+		return []
+	
+	# Pre: file is a h5py file descriptor
+	# Post: returns DataSet with all parameters set
+	def ReadMeasurementFromFile(self,file,measname):
+		pass
+	
+	def compute(self):
+		if self.hasInputFromPort('Measurements'):
+			warn("Not implemented")
+		else:
+			# open file
+			
+			sets = []
+			
+			LOM = FindAllMeasurements(fd)
+			for m in LOM:
+				sets.append(ReadVariableFromFile(fd,m))
+			
+			self.setResult('data',DataSets(sets))

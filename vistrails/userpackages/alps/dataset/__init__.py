@@ -67,6 +67,7 @@ def initialize():
 	register(LoadDataSet,'DataSet::Load')
 	register(LoadAlpsFromTxt,'DataSet::Load')
 	register(CustomLoader,'DataSet::Load')
+#	register(LoadAlpsHdf5,'DataSet::Load')
 	
 	register(EvalExpression_1to1,'DataSet::Evaluate')
 	register(EvalExpression_2to1,'DataSet::Evaluate')
