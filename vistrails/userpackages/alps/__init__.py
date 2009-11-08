@@ -20,7 +20,7 @@ import evaluation
 import dataset
 
 identifier = 'org.comp-phys.alps'
-version = '0.3.0'
+version = '0.4.0'
 name = 'ALPS'
 
 configuration = ConfigurationObject(path=(None, str),mpirun="['mpirun','-np']")

@@ -91,7 +91,7 @@ class ParameterListData(CommonParametersFunctions):
           self.list = newlist
         
     def set(self,key_name,value):
-        for p in list:
+        for p in self.list:
           self.set_checked(p,key_name,value)
           
     def updateIfMissing(self,defaults):
@@ -154,10 +154,10 @@ class Parameters(Module):
         if self.hasInputFromPort(port_name):
           val = self.getInputFromPort(port_name)
           if (isinstance(val,ParameterValueList)):
-            list = []
+            l = []
             for v in val:
-              list.append({port_name:v})
-            res = self.merge(res,ParameterListData(list))
+              l.append({port_name:v})
+            res = self.merge(res,ParameterListData(l))
           else:
             res.set(port_name,val)
           return res

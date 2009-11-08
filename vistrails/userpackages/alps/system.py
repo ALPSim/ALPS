@@ -30,7 +30,8 @@ class SimulationID(basic.String):
 class LatticeModel(parameters.Parameters): 
     """ the simulation parameters, conistsing of model, lattice, and other parameters """
     def compute(self):
-        res=self.updateFromPort('lattice',parameters.ParametersData({}))
+        res=self.updateFromPort('parms',parameters.ParametersData({}))
+        res=self.updateFromPort('lattice',res)
         res=self.updateFromPort('model',res)
         self.setOutput(res)
     _input_ports = [('lattice', [lattices.LatticeParameters]),

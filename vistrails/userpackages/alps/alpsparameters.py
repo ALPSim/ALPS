@@ -13,6 +13,7 @@ import copy
 from packages.controlflow.list_module import ListOfElements
 basic = core.modules.basic_modules
 
+import parameters
 from parameters import Parameters, ParametersData
 
 ##############################################################################
@@ -97,10 +98,12 @@ class CustomMeasurements(Parameters):
 
 class CustomMeasurement(basic.Module):
     def compute(self):
+        print 'key:', self.getInputFromPort('name')
+        print 'def:', self.getInputFromPort('definition')
         key = 'MEASURE_'+ self.prefix+'['+str(self.getInputFromPort('name'))+']'
         self.setResult('value',{key : self.getInputFromPort('definition')})
     _input_ports = [('name',[(basic.String, 'the name of the measurement')]),
-                    ('defintiion',[(basic.String, 'the operator to be measured')])]
+                    ('definition',[(basic.String, 'the operator to be measured')])]
     _output_ports=[('value', [CustomMeasurements])]
 
 

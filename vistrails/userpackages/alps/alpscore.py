@@ -28,7 +28,6 @@ config = ConfigurationObject()
 ##############################################################################
 def _get_path(binary_file):
     if config.check('path'):
-        print "Have ALPS path", config.path
         return os.path.join(config.path, binary_file)
     else:
         return binary_file

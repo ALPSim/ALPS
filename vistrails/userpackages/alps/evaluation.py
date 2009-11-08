@@ -51,33 +51,6 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
                     ('application',[basic.File])]
     appname = ''
 
-class EvaluateFullDiagT(AlpsEvaluate):
-    appname = 'fulldiag_evaluate'
-    _input_ports = [('T_MIN',[basic.Float]),
-                    ('T_MAX',[basic.Float]),
-                    ('DELTA_T',[basic.Float]),
-                    ('application',[basic.File],True)]
-    _output_ports = [('energy',[PlotFile]),
-                    ('free_energy',[PlotFile]),
-                    ('entropy',[PlotFile]),
-                    ('specific_heat',[PlotFile]),
-                    ('uniform_susceptibility',[PlotFile]),
-                    ('magnetization',[PlotFile])]
-
-
-class EvaluateFullDiagH(AlpsEvaluate):
-    appname = 'fulldiag_evaluate'
-    _input_ports = [('H_MIN',[basic.Float]),
-                    ('H_MAX',[basic.Float]),
-                    ('DELTA_H',[basic.Float]),
-                    ('application',[basic.File],True)]
-    _output_ports = [('energy',[PlotFile]),
-                    ('free_energy',[PlotFile]),
-                    ('entropy',[PlotFile]),
-                    ('specific_heat',[PlotFile]),
-                    ('uniform_susceptibility',[PlotFile]),
-                    ('magnetization',[PlotFile])]
-
 
 class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
     def compute(self):
@@ -108,8 +81,6 @@ def selfRegister():
   reg = core.modules.module_registry.get_module_registry()
 
   reg.add_module(AlpsEvaluate,namespace="Evaluation",abstract=True)
-  reg.add_module(EvaluateFullDiagT,namespace="Evaluation")
-  reg.add_module(EvaluateFullDiagH,namespace="Evaluation")
-  reg.add_module(EvaluateLoop,namespace="Evaluation")
-  reg.add_module(EvaluateQWL,namespace="Evaluation")
+  reg.add_module(EvaluateLoop,namespace="Evaluation",abstract=True)
+  reg.add_module(EvaluateQWL,namespace="Evaluation",abstract=True)
   
