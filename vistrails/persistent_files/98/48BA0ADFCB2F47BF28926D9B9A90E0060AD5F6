@@ -1,0 +1,265 @@
+ALPS sparse diagonalization application version 1.1
+  available from http://alps.comp-phys.org/
+  copyright (c) 2003-2007 by Matthias Troyer <troyer@comp-phys.org>
+ for details see the publication:
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+using the ALPS parallelizing scheduler
+  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.
+  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
+
+based on the ALPS libraries version 1.4b1
+  available from http://alps.comp-phys.org/
+  copyright (c) 1994-2009 by the ALPS collaboration.
+  Consult the web page for license details.
+  For details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+parsing task files ... 
+Starting task 1.
+Quantumnumber Sz going from -8 to 8 with increment 1
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Starting Lanczos 
+Finished Lanczos
+Checking if it is finished: not yet, next check in 60 seconds ( 0% done).
+Halted Simulation 1
+This task took 405 seconds.
+Checkpointing Simulation 1
+Finished with everything.

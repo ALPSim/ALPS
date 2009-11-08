@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="file:///Users/troyer/opt/lib/xml/job.xsl"?>
+<JOB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/job.xsd">
+  <VERSION type="alps" string="ALPS Libraries version 1.4b1; ALPS/parapack version 2009-01-22; configured on powerbook-troyer.local by troyer; compiled on Oct  1 2009 20:56:26"/>
+  <VERSION type="application" string="ALPS/looper version 3.2b10-20090915 (2009/09/15)"/>
+  <INPUT file="quantum1b.in.xml"/>
+  <OUTPUT file="quantum1b.out.xml"/>
+  <TASK id="1" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task1.in.xml"/>
+    <OUTPUT file="quantum1b.task1.out.xml"/>
+  </TASK>
+  <TASK id="2" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task2.in.xml"/>
+    <OUTPUT file="quantum1b.task2.out.xml"/>
+  </TASK>
+  <TASK id="3" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task3.in.xml"/>
+    <OUTPUT file="quantum1b.task3.out.xml"/>
+  </TASK>
+  <TASK id="4" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task4.in.xml"/>
+    <OUTPUT file="quantum1b.task4.out.xml"/>
+  </TASK>
+  <TASK id="5" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task5.in.xml"/>
+    <OUTPUT file="quantum1b.task5.out.xml"/>
+  </TASK>
+  <TASK id="6" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task6.in.xml"/>
+    <OUTPUT file="quantum1b.task6.out.xml"/>
+  </TASK>
+  <TASK id="7" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task7.in.xml"/>
+    <OUTPUT file="quantum1b.task7.out.xml"/>
+  </TASK>
+  <TASK id="8" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task8.in.xml"/>
+    <OUTPUT file="quantum1b.task8.out.xml"/>
+  </TASK>
+  <TASK id="9" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task9.in.xml"/>
+    <OUTPUT file="quantum1b.task9.out.xml"/>
+  </TASK>
+  <TASK id="10" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task10.in.xml"/>
+    <OUTPUT file="quantum1b.task10.out.xml"/>
+  </TASK>
+  <TASK id="11" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task11.in.xml"/>
+    <OUTPUT file="quantum1b.task11.out.xml"/>
+  </TASK>
+  <TASK id="12" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task12.in.xml"/>
+    <OUTPUT file="quantum1b.task12.out.xml"/>
+  </TASK>
+  <TASK id="13" status="completed" progress="100%" weight="0">
+    <INPUT file="quantum1b.task13.in.xml"/>
+    <OUTPUT file="quantum1b.task13.out.xml"/>
+  </TASK>
+</JOB>
