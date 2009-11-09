@@ -140,6 +140,7 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
         if not os.path.isfile(an):
             raise ModuleError(self, "Application '%s' not existent" % an)
         cmdlist = [an]
+        cmdlist += self.options
         for port_name in self.inputPorts:
            if port_name != 'file' and port_name != 'application' and self.hasInputFromPort(port_name):
              cmdlist += ['--'+str(port_name),str(self.getInputFromPort(port_name))]
@@ -154,6 +155,7 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
     _input_ports = [('file',[basic.File]),
                     ('application',[basic.File])]
     appname = ''
+    options = []
 
 class EvaluateFullDiagT(AlpsEvaluate):
     appname = 'fulldiag_evaluate'
@@ -171,6 +173,7 @@ class EvaluateFullDiagT(AlpsEvaluate):
 
 class EvaluateFullDiagH(AlpsEvaluate):
     appname = 'fulldiag_evaluate'
+    options = ['--versus', 'h']
     _input_ports = [('H_MIN',[basic.Float]),
                     ('H_MAX',[basic.Float]),
                     ('DELTA_H',[basic.Float]),

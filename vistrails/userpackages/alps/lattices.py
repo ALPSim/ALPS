@@ -44,7 +44,7 @@ class chain_lattice(LatticeParameters):
    _input_ports = [('L',[(basic.String, 'the length')])]
    fixed = {'LATTICE' : 'chain lattice'}
 
-  
+
 def register_lattice(type):
   reg = core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace="Lattices")

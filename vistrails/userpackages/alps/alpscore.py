@@ -68,6 +68,21 @@ class OpenHTML(NotCacheable, SystemCommand):
     _input_ports = [('file', [basic.File]),
                     ('files', [ListOfElements])]
 
+class TextFile(basic.Module):
+    def compute(self):
+        if self.hasInputFromPort('suffix'):
+          f = self.interpreter.filePool.create_file(suffix=self.getInputFromPort('suffix'))
+        else:
+          f = self.interpreter.filePool.create_file()
+        out = file(f.name,'w')
+        out.write(self.getInputFromPort('text'))
+        out.close()
+        self.setResult('file',f)
+    _input_ports = [('text', [basic.String]),
+                    ('suffix', [basic.String])]
+    _output_ports = [('file',[basic.File])]
+
+
 class TextCell(SpreadsheetCell):
     """
     TextCell is a custom Module to view plain text files
@@ -153,6 +168,7 @@ def selfRegister():
     reg.add_module(SystemCommand,namespace="Tools",abstract=True)
     reg.add_module(SystemCommandLogged,namespace="Tools",abstract=True)
     reg.add_module(OpenHTML,namespace="Tools")
+    reg.add_module(TextFile,namespace="Tools")
 
     reg.add_module(TextCell,namespace="Tools")
     reg.add_input_port(TextCell, "Location", packages.spreadsheet.basicWidgets.CellLocation)
