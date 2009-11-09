@@ -34,6 +34,7 @@
 Interpolator::Interpolator(const alps::Parameters& parms) :
   mu(parms["MU"]), 
   delta(parms.value_or_default("DELTA", 0.)),
+  delta_green(parms.value_or_default("DELTA_GREEN", delta)),
   name("Dispersion_"), 
   n_zone(parms["FLAVORS"]),
   n_k(parms.value_or_default("NK", 30))
@@ -117,18 +118,26 @@ AntiferroInterpolator::AntiferroInterpolator(const alps::Parameters& parms) :
     const unsigned int k = (k1/2)*2;
     const unsigned int i = k1 % 2;
     const unsigned int j = k2 % 2;
-    //if (i==j) {
       selfenergies[z][omega][k]  (i,j) = std::complex<double>(Sigma_real, Sigma_imag);
       selfenergies[z][omega][k+1](i,j) = std::complex<double>(Sigma_real, Sigma_imag);
-      /*}
-    else {
-      selfenergies[z][omega][k]  (i,j) = std::complex<double>(0., 0.);
-      selfenergies[z][omega][k+1](i,j) = std::complex<double>(0., 0.);
-      }*/
   }
 }
 
 
+
+void ParaInterpolator::local_green_function() 
+{
+  for (int z=0; z<n_zone; ++z) {
+    std::stringstream name;
+    name << "greenloc_" << z << ".dat"; 
+    std::ofstream green_str(name.str().c_str());
+    std::map<double, std::complex<double> > local_G = 
+      boost::dynamic_pointer_cast<SimpleDCATransformer>(transform_ptr)->local_green_function_from_selfenergies(selfenergies[z], mu, delta_green);
+    for (std::map<double, std::complex<double> >::const_iterator it=local_G.begin(); it!=local_G.end(); ++it) 
+      green_str << it->first << "\t" << it->second.real() << "\t" << it->second.imag() << "\n";
+    green_str.close();
+  }
+}
 
 
 void ParaInterpolator::interpolate_spectrum(const unsigned int counter, const unsigned int zone, 

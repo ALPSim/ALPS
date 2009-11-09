@@ -60,6 +60,9 @@ int main(int argc, char** argv)
       interptr.reset(new AntiferroInterpolator(parms));
     else
       interptr.reset(new ParaInterpolator(parms));
+    std::cerr << "intrepolating local Green function from self-energies" << std::endl;
+    interptr->local_green_function();
+    std::cerr << "interpolating self-energies and calculating dispersion" << std::endl;
     interptr->interpolate();
 #ifndef BOOST_NO_EXCEPTIONS
   }

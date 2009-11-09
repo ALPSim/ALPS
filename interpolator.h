@@ -42,13 +42,15 @@ public:
 
   Interpolator(const alps::Parameters& parms);
   virtual ~Interpolator() {}
+  virtual void local_green_function() = 0;
   void interpolate();
-   
+
 protected:
 
   boost::shared_ptr<DCATransformer> transform_ptr;
   const double mu;
   const double delta;
+  const double delta_green;
   const std::string name;
   const unsigned int n_zone;
   const unsigned int n_k;
@@ -73,6 +75,8 @@ public:
   typedef std::map<double, std::vector<std::complex<double> > > selfenergy_t;
 
   ParaInterpolator(const alps::Parameters& parms);
+
+  virtual void local_green_function();
   
 private:
   
@@ -99,6 +103,8 @@ public:
   
   AntiferroInterpolator(const alps::Parameters& parms);
   
+  virtual void local_green_function() { ; }
+
 private:
   
   virtual void interpolate_spectrum(const unsigned int counter, const unsigned int, 

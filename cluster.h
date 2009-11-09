@@ -143,7 +143,8 @@ public:
   }
   
   unsigned int dimension() const { return ClusterHelper::dimension(); }  
-
+  // double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
+  // double lattice_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::lattice_momentum(i,j); }
 };
 
 
@@ -274,6 +275,10 @@ public:
 						 const matsubara_green_function_t &G0_omega, 
 						 const double mu, const double h, const double beta,
 						 const int n_matsubara) const; 
+  std::map<double, std::complex<double> > local_green_function_from_selfenergies(const std::map<double, 
+										 std::vector<std::complex<double> > >& selfenergies, 
+										 const double mu, const double delta);
+  
 private:
   template<typename T, class D>
   green_function<T> transform_coordinates(const green_function<T>& G) const;
@@ -343,6 +348,11 @@ public:
   template<typename T>
   static green_function<T> green_function_divide(const green_function<T>& G1, const T d);
 
+  std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> 
+  local_green_function_from_selfenergies(const std::map<double, 
+					 std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& selfenergies,
+					 const double mu, const double delta);
+  
 private:
   template <class T>
   green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
@@ -872,7 +882,6 @@ green_function<T> AntiFerroDCATransformer::green_function_divide(const green_fun
   }
   return G;
 }
-
 
 
 #endif /*ALPS_CLUSTER_H*/

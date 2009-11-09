@@ -345,6 +345,34 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
 
 
 
+std::map<double, std::complex<double> > 
+SimpleDCATransformer::local_green_function_from_selfenergies(const std::map<double, std::vector<std::complex<double> > >& selfenergies,
+							     const double mu, const double delta)
+{
+  typedef std::map<double, std::vector<std::complex<double> > > selfenergy_t;
+  std::map<double, std::complex<double> > local_G;
+  for (selfenergy_t::const_iterator it=selfenergies.begin(); it!=selfenergies.end(); ++it) {
+    for (int kc=0; kc<n_cluster_sites(); ++kc) { 
+      for (int kl=0; kl<n_cluster_cells(); ++kl) { 
+	for (int sign=-1; sign<=1; sign+=2) {
+	  vector_type k(dimension());
+	  for (unsigned int d=0; d<dimension(); ++d) 
+	    k[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	  std::complex<double> idelta(0., delta);
+	  if (local_G.find(it->first)==local_G.end()) 
+	    local_G[it->first] = 1. / (it->first + mu - epsilon(k) - it->second[kc] + idelta);
+	  else
+	    local_G[it->first] += 1. / (it->first + mu - epsilon(k) - it->second[kc] + idelta);
+	}
+      }
+    }
+    local_G[it->first] /= 2*n_cluster_cells()*n_cluster_sites();
+  }
+  return local_G;
+}
+
+
+
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
                                                                const matsubara_green_function_t &G0_omega, 
                                                                double &mu, const double h, const double beta)
@@ -433,6 +461,20 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     return G0_omega_new;
   }
 }
+
+
+
+
+
+std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> 
+AntiFerroDCATransformer::local_green_function_from_selfenergies(const std::map<double, 
+								std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& selfenergies,
+								const double mu, const double delta)
+{
+  std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> dummy;
+  return dummy;
+}
+				       
 
 
 
