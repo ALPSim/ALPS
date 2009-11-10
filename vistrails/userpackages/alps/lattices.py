@@ -44,6 +44,18 @@ class chain_lattice(LatticeParameters):
    _input_ports = [('L',[(basic.String, 'the length')])]
    fixed = {'LATTICE' : 'chain lattice'}
 
+class open_chain_lattice:
+   """ an open chain lattice """
+   _input_ports = [('L',[(basic.String, 'the length')])]
+   fixed = {'LATTICE' : 'open chain lattice'}
+
+class open_ladder(LatticeParameters):
+   """ an open ladder lattice """
+   _input_ports = [('L',[(basic.String, 'the length')]),
+                   ('W',[(basic.String, 'the width')])]
+   fixed = {'LATTICE' : 'open ladder'}
+   defaults = {'W':'2'}
+
 
 def register_lattice(type):
   reg = core.modules.module_registry.get_module_registry()
@@ -60,7 +72,9 @@ def selfRegister():
   reg.add_output_port(LatticeParameters, "value", LatticeParameters)
 
   register_lattice(chain_lattice)
+  register_lattice(open_chain_lattice)
   register_lattice(ladder)
+  register_lattice(open_ladder)
   register_lattice(square_lattice)
   register_lattice(simple_cubic_lattice)
   
