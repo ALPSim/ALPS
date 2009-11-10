@@ -1,0 +1,23 @@
+ALPS full diagonalization application version 1.1
+  available from http://alps.comp-phys.org/
+  copyright (c) 2003-2007 by Matthias Troyer <troyer@comp-phys.org>
+                          and Andreas Honecker <ahoneck@uni-goettingen.de>
+ for details see the publication:
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+using the ALPS parallelizing scheduler
+  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.
+  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
+
+based on the ALPS libraries version 1.4b1
+  available from http://alps.comp-phys.org/
+  copyright (c) 1994-2009 by the ALPS collaboration.
+  Consult the web page for license details.
+  For details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+parsing task files ... 
+<LATTICES> tag needed at start of lattice library
+Cannot open simulation file /var/folders/3a/3a7Bh0q+2RWwOk+8ZRkQa++++TI/-Tmp-/vt_tmpAhzK7H/vt_tmpUtG_K1/diag2d.task1.in.xml.
+Task 1 does not exist.
+Finished with everything.
