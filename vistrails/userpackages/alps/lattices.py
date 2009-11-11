@@ -44,7 +44,7 @@ class chain_lattice(LatticeParameters):
    _input_ports = [('L',[(basic.String, 'the length')])]
    fixed = {'LATTICE' : 'chain lattice'}
 
-class open_chain_lattice:
+class open_chain_lattice(LatticeParameters):
    """ an open chain lattice """
    _input_ports = [('L',[(basic.String, 'the length')])]
    fixed = {'LATTICE' : 'open chain lattice'}

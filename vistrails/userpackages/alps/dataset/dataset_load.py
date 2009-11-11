@@ -144,7 +144,7 @@ class LoadAlpsFromTxt(Module):
 
 class LoadAlpsHdf5(Module):
 	my_input_ports = [
-		PortDescriptor('file',basic.File)
+		PortDescriptor('file',basic.File),
 		PortDescriptor('Measurements',ListOfElements)
 	]
 	

@@ -81,7 +81,7 @@ class ClassicalMonteCarloParameters(MonteCarloParameters):
 class DMRGParameters(Parameters): 
     """ A module to set the Monte Carlo parameters """
     _input_ports = [('SWEEPS',[(basic.String, 'the number of sweeps')]),
-                    ('STATES',[(basic.String, 'the number of states in each sweep')])
+                    ('STATES',[(basic.String, 'the number of states in each sweep')]),
                     ('MAXSTATES',[(basic.String, 'the maximum number of states')])
                     ]
 
