@@ -82,7 +82,8 @@ class DMRGParameters(Parameters):
     """ A module to set the Monte Carlo parameters """
     _input_ports = [('SWEEPS',[(basic.String, 'the number of sweeps')]),
                     ('STATES',[(basic.String, 'the number of states in each sweep')]),
-                    ('MAXSTATES',[(basic.String, 'the maximum number of states')])
+                    ('MAXSTATES',[(basic.String, 'the maximum number of states')]),
+                    ('NUMBER_EIGENVALUES',[(basic.String, 'the number of eigenvalues to compute')])
                     ]
 
 
@@ -150,9 +151,11 @@ def selfRegister():
 
   register_parameters(MonteCarloMeasurements)
   register_parameters(MonteCarloParameters)
+  register_parameters(DMRGParameters)
   reg.add_module(LoopMonteCarloParameters,namespace="Parameters")
   reg.add_module(ClassicalMonteCarloParameters,namespace="Parameters")
   reg.add_module(QWLMonteCarloParameters,namespace="Parameters")
+
   register_parameters(Temperature)
   
   register_parameters(ConservedQuantumnumbers)

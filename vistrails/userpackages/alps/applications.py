@@ -12,6 +12,7 @@ import alpscore
 import plots
 import tools
 import os
+import system
 
 from core.modules.vistrails_module import ModuleError
 from plots import PlotFile
@@ -213,10 +214,16 @@ class EvaluateQWL(AlpsEvaluate):
   
 def initialize(): pass
 
+def register_parameters(type, ns="Applications"):
+  reg = core.modules.module_registry.get_module_registry()
+  reg.add_module(type,namespace=ns)
+  reg.add_output_port(type, "value", type)
+  
 def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
   
+  register_parameters(system.SimulationID)
   reg.add_module(AlpsApplication,namespace="Applications")
   reg.add_module(AppSpinMC,namespace="Applications")
   reg.add_module(AppLoop,namespace="Applications")
@@ -231,3 +238,7 @@ def selfRegister():
   reg.add_module(EvaluateFullDiagH,namespace="Applications")
   reg.add_module(EvaluateLoop,namespace="Applications")
   reg.add_module(EvaluateQWL,namespace="Applications")
+  reg.add_module(system.LatticeModel,namespace="Applications")
+  reg.add_module(system.MonteCarloSimulation,namespace="Applications")
+  reg.add_module(system.DiagonalizationSimulation,namespace="Applications")
+  reg.add_module(system.DMRGSimulation,namespace="Applications")

@@ -64,12 +64,25 @@ class MonteCarloSimulation(parameters.Parameters):
                      ('measurements',[alpsparameters.MonteCarloMeasurements])]
     _output_ports=[('value', [SystemParameters])]
 
+class DMRGSimulation(parameters.Parameters):
+    """ a module collecting the typical input parameters for a DMRG simulation """
+    def compute(self):
+        res = parameters.ParametersData({})
+        for port_name in self.inputPorts:
+           res=self.updateFromPort(port_name,res)
+        self.setOutput(res)
+    _input_ports = [('system', [SystemParameters]),
+                     ('dmrgparms', [alpsparameters.DMRGParameters]),
+                     ('conserved', [alpsparameters.ConservedQuantumnumbers]),
+                     ('measurements',[alpsparameters.CustomMeasurements])]
+    _output_ports=[('value', [SystemParameters])]
+
 
 def initialize(): pass
 
 def register_parameters(type, ns="System"):
   reg = core.modules.module_registry.get_module_registry()
-  reg.add_module(type,namespace=ns)
+  reg.add_module(type,namespace=ns,abstract=True)
   reg.add_output_port(type, "value", type)
 
 def selfRegister():
@@ -78,7 +91,8 @@ def selfRegister():
   reg = core.modules.module_registry.get_module_registry()
 
   register_parameters(SimulationID)
-  reg.add_module(LatticeModel,namespace="System")
-  reg.add_module(MonteCarloSimulation,namespace="System")
-  reg.add_module(DiagonalizationSimulation,namespace="System")
+  reg.add_module(LatticeModel,namespace="System",abstract=True)
+  reg.add_module(MonteCarloSimulation,namespace="System",abstract=True)
+  reg.add_module(DiagonalizationSimulation,namespace="System",abstract=True)
+  reg.add_module(DMRGSimulation,namespace="System",abstract=True)
 
