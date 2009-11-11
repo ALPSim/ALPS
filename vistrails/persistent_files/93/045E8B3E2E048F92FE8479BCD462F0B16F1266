@@ -1,0 +1,673 @@
+ALPS/dmrg version 1.0.0 (2006/10/02)
+  Density Matrix Renormalization Group algorithm
+  for low-dimensional interacting systems.
+  available from http://alps.comp-phys.org/
+  copyright (c) 2006-2013 by Adrian E. Feiguin
+  for details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+using the ALPS parallelizing scheduler
+  copyright (c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>.
+  see Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
+
+based on the ALPS libraries version 1.4b1
+  available from http://alps.comp-phys.org/
+  copyright (c) 1994-2009 by the ALPS collaboration.
+  Consult the web page for license details.
+  For details see the publication: 
+  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+parsing task files ... 
+Starting task 1.
+LEFT-TO-RIGHT sweep to get B(1)B(2)...B(L/2-1)
+WARMUP LEFT-TO-RIGHT ITERATION 1
+NUMBER OF STATES: 2 2 2 2 4
+E0 = -1.6177181417
+ITER = 1 ENTROPY = 0.692658436413
+-------------------------------------------
+Truncation error = -1.11022302463e-16
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 2
+NUMBER OF STATES: 4 2 2 2 5
+E0 = -1.73144612658
+ITER = 2 ENTROPY = 0.639794812296
+-------------------------------------------
+Truncation error = 2.22044604925e-16
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 3
+NUMBER OF STATES: 8 2 2 2 6
+E0 = -1.78010894325
+ITER = 3 ENTROPY = 0.59142886697
+-------------------------------------------
+Truncation error = 0
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 4
+NUMBER OF STATES: 16 2 2 2 7
+E0 = -1.84557593063
+ITER = 4 ENTROPY = 0.414800663094
+-------------------------------------------
+Truncation error = 0
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 5
+NUMBER OF STATES: 20 2 2 2 10
+E0 = -3.16213522334
+ITER = 5 ENTROPY = 0.53671073492
+-------------------------------------------
+Truncation error = 5.55111512313e-17
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 6
+NUMBER OF STATES: 20 2 2 2 11
+E0 = -3.40062399799
+ITER = 6 ENTROPY = 0.692367585869
+-------------------------------------------
+Truncation error = 1.66533453694e-16
+-------------------------------------------
+RIGHT-TO-LEFT sweep to get B(1)B(2)...B(L/2-1)
+WARMUP RIGHT-TO-LEFT ITERATION 1
+NUMBER OF STATES: 20 2 2 2 11
+E0 = -3.54102094327
+ITER = 1 ENTROPY = 0.672554448303
+-------------------------------------------
+Truncation error = -6.67461962436e-17
+-------------------------------------------
+WARMUP RIGHT-TO-LEFT ITERATION 2
+NUMBER OF STATES: 20 2 2 4 16
+E0 = -3.54117292884
+ITER = 2 ENTROPY = 0.607006920881
+-------------------------------------------
+Truncation error = 2.44162329244e-16
+-------------------------------------------
+WARMUP RIGHT-TO-LEFT ITERATION 3
+NUMBER OF STATES: 20 2 2 8 21
+E0 = -3.54119307147
+ITER = 3 ENTROPY = 0.348523806343
+-------------------------------------------
+Truncation error = 3.22658566532e-16
+-------------------------------------------
+WARMUP RIGHT-TO-LEFT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149300975
+ITER = 4 ENTROPY = 0.513388456385
+-------------------------------------------
+Truncation error = -5.96744875736e-16
+-------------------------------------------
+WARMUP RIGHT-TO-LEFT ITERATION 5
+NUMBER OF STATES: 8 2 2 20 41
+E0 = -3.60149300723
+ITER = 5 ENTROPY = 0.598690160165
+-------------------------------------------
+Truncation error = 1.38777878078e-16
+-------------------------------------------
+WARMUP RIGHT-TO-LEFT ITERATION 6
+NUMBER OF STATES: 4 2 2 20 32
+E0 = -3.60149300672
+ITER = 6 ENTROPY = 0.705372155505
+-------------------------------------------
+Truncation error = -3.88578058619e-16
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 1
+NUMBER OF STATES: 2 2 2 20 25
+E0 = -3.60149300924
+ITER = 1 ENTROPY = 0.585794344175
+-------------------------------------------
+Truncation error = -1.99818460389e-16
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 2
+NUMBER OF STATES: 4 2 2 20 32
+E0 = -3.60149301032
+ITER = 2 ENTROPY = 0.705366229103
+-------------------------------------------
+Truncation error = -2.32236105346e-16
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 3
+NUMBER OF STATES: 8 2 2 20 41
+E0 = -3.6014930125
+ITER = 3 ENTROPY = 0.59867676641
+-------------------------------------------
+Truncation error = -1.78676518026e-16
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301287
+ITER = 4 ENTROPY = 0.513389167661
+-------------------------------------------
+Truncation error = -1.80411241502e-16
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 5
+NUMBER OF STATES: 20 2 2 8 41
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598678410441
+-------------------------------------------
+Truncation error = 1.94289029309e-16
+-------------------------------------------
+WARMUP LEFT-TO-RIGHT ITERATION 6
+NUMBER OF STATES: 20 2 2 4 33
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365769855
+-------------------------------------------
+Truncation error = 1.11022302463e-16
+-------------------------------------------
+NEW SWEEP 1 20 20
+===========================================
+NEW SWEEP
+===========================================
+RIGHT-TO-LEFT ITERATION 1
+NUMBER OF STATES: 20 2 2 2 21
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585798014204
+-------------------------------------------
+Truncation error = -1.88454666369e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 2
+NUMBER OF STATES: 20 2 2 4 33
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365924665
+-------------------------------------------
+Truncation error = 2.07299455379e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 3
+NUMBER OF STATES: 20 2 2 8 41
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680318592
+-------------------------------------------
+Truncation error = 5.20417042793e-18
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392537862
+-------------------------------------------
+Truncation error = 3.1918911958e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 5
+NUMBER OF STATES: 8 2 2 20 36
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680647442
+-------------------------------------------
+Truncation error = 8.32667268469e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 6
+NUMBER OF STATES: 4 2 2 20 28
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994555
+-------------------------------------------
+Truncation error = 3.33066907388e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 1
+NUMBER OF STATES: 2 2 2 20 24
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797393223
+-------------------------------------------
+Truncation error = -2.50308400309e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 2
+NUMBER OF STATES: 4 2 2 20 28
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365997885
+-------------------------------------------
+Truncation error = -3.12250225676e-17
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 3
+NUMBER OF STATES: 8 2 2 20 36
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680640163
+-------------------------------------------
+Truncation error = -6.93889390391e-17
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392631415
+-------------------------------------------
+Truncation error = 3.33066907388e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 5
+NUMBER OF STATES: 20 2 2 8 41
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680606352
+-------------------------------------------
+Truncation error = 5.55111512313e-17
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 6
+NUMBER OF STATES: 20 2 2 4 27
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365993331
+-------------------------------------------
+Truncation error = -5.55111512313e-17
+-------------------------------------------
+NEW SWEEP 2 40 40
+===========================================
+NEW SWEEP
+===========================================
+RIGHT-TO-LEFT ITERATION 1
+NUMBER OF STATES: 20 2 2 2 21
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797440072
+-------------------------------------------
+Truncation error = 1.43589025219e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 2
+NUMBER OF STATES: 20 2 2 4 27
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365993693
+-------------------------------------------
+Truncation error = -2.89265139619e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 3
+NUMBER OF STATES: 20 2 2 8 41
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680612366
+-------------------------------------------
+Truncation error = -3.20923843056e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392624682
+-------------------------------------------
+Truncation error = -1.52655665886e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 5
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680619109
+-------------------------------------------
+Truncation error = -2.22044604925e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 6
+NUMBER OF STATES: 4 2 2 40 33
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994806
+-------------------------------------------
+Truncation error = 0
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 1
+NUMBER OF STATES: 2 2 2 40 24
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797432698
+-------------------------------------------
+Truncation error = -1.41535817354e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 2
+NUMBER OF STATES: 4 2 2 40 33
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994805
+-------------------------------------------
+Truncation error = -2.84060969191e-17
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 3
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680618488
+-------------------------------------------
+Truncation error = 5.37764277553e-17
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626202
+-------------------------------------------
+Truncation error = 0
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 5
+NUMBER OF STATES: 32 2 2 8 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680617605
+-------------------------------------------
+Truncation error = -1.38777878078e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 6
+NUMBER OF STATES: 40 2 2 4 38
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994654
+-------------------------------------------
+Truncation error = -1.66533453694e-16
+-------------------------------------------
+NEW SWEEP 3 60 60
+===========================================
+NEW SWEEP
+===========================================
+RIGHT-TO-LEFT ITERATION 1
+NUMBER OF STATES: 40 2 2 2 29
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797433668
+-------------------------------------------
+Truncation error = -8.71359733499e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 2
+NUMBER OF STATES: 40 2 2 4 38
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994659
+-------------------------------------------
+Truncation error = 3.01408203951e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 3
+NUMBER OF STATES: 32 2 2 8 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680617727
+-------------------------------------------
+Truncation error = -1.89084858881e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626057
+-------------------------------------------
+Truncation error = -1.94289029309e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 5
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.59868061784
+-------------------------------------------
+Truncation error = 8.32667268469e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 6
+NUMBER OF STATES: 4 2 2 60 38
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994676
+-------------------------------------------
+Truncation error = -7.77156117238e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 1
+NUMBER OF STATES: 2 2 2 60 27
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797433523
+-------------------------------------------
+Truncation error = 2.02820345154e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 2
+NUMBER OF STATES: 4 2 2 60 38
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994675
+-------------------------------------------
+Truncation error = -1.49186218934e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 3
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680617824
+-------------------------------------------
+Truncation error = -1.43982048506e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626076
+-------------------------------------------
+Truncation error = -1.38777878078e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 5
+NUMBER OF STATES: 32 2 2 8 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680617812
+-------------------------------------------
+Truncation error = 1.11022302463e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 6
+NUMBER OF STATES: 60 2 2 4 41
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = 1.66533453694e-16
+-------------------------------------------
+NEW SWEEP 4 80 80
+===========================================
+NEW SWEEP
+===========================================
+RIGHT-TO-LEFT ITERATION 1
+NUMBER OF STATES: 60 2 2 2 27
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797433538
+-------------------------------------------
+Truncation error = -4.23990812078e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 2
+NUMBER OF STATES: 60 2 2 4 41
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = 1.55474591534e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 3
+NUMBER OF STATES: 32 2 2 8 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680617813
+-------------------------------------------
+Truncation error = -7.49400541622e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626074
+-------------------------------------------
+Truncation error = -3.60822483003e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 5
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = 8.32667268469e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 6
+NUMBER OF STATES: 4 2 2 64 45
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = -6.10622663544e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 1
+NUMBER OF STATES: 2 2 2 80 23
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797433535
+-------------------------------------------
+Truncation error = 1.05757145662e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 2
+NUMBER OF STATES: 4 2 2 64 45
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = 9.28077059648e-17
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 3
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = 1.83880688454e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626074
+-------------------------------------------
+Truncation error = -9.71445146547e-17
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 5
+NUMBER OF STATES: 32 2 2 8 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = -2.77555756156e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 6
+NUMBER OF STATES: 64 2 2 4 45
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = 0
+-------------------------------------------
+NEW SWEEP 5 100 100
+===========================================
+NEW SWEEP
+===========================================
+RIGHT-TO-LEFT ITERATION 1
+NUMBER OF STATES: 80 2 2 2 28
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797433536
+-------------------------------------------
+Truncation error = 5.83368531433e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 2
+NUMBER OF STATES: 64 2 2 4 45
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = -8.82540568403e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 3
+NUMBER OF STATES: 32 2 2 8 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = -8.32667268469e-17
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626074
+-------------------------------------------
+Truncation error = -1.38777878078e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 5
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = 2.77555756156e-16
+-------------------------------------------
+RIGHT-TO-LEFT ITERATION 6
+NUMBER OF STATES: 4 2 2 64 45
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = -5.55111512313e-17
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 1
+NUMBER OF STATES: 2 2 2 100 25
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797433536
+-------------------------------------------
+Truncation error = 1.75037664484e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 2
+NUMBER OF STATES: 4 2 2 64 45
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = -2.59774840528e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 3
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = -3.46944695195e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626074
+-------------------------------------------
+Truncation error = -2.08166817117e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 5
+NUMBER OF STATES: 32 2 2 8 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = -2.77555756156e-16
+-------------------------------------------
+LEFT-TO-RIGHT ITERATION 6
+NUMBER OF STATES: 64 2 2 4 45
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = 0
+-------------------------------------------
+FINAL SWEEP ITERATION 
+RIGHT-TO-LEFT ITERATION 1
+NUMBER OF STATES: 100 2 2 2 30
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797433536
+-------------------------------------------
+Truncation error = 6.93211764033e-18
+-------------------------------------------
+FINAL SWEEP ITERATION 
+RIGHT-TO-LEFT ITERATION 2
+NUMBER OF STATES: 64 2 2 4 45
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = -6.02816407902e-17
+-------------------------------------------
+FINAL SWEEP ITERATION 
+RIGHT-TO-LEFT ITERATION 3
+NUMBER OF STATES: 32 2 2 8 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = -1.11022302463e-16
+-------------------------------------------
+FINAL SWEEP ITERATION 
+RIGHT-TO-LEFT ITERATION 4
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626074
+-------------------------------------------
+Truncation error = -9.71445146547e-17
+-------------------------------------------
+FINAL SWEEP ITERATION 
+RIGHT-TO-LEFT ITERATION 5
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 5 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = -3.60822483003e-16
+-------------------------------------------
+FINAL SWEEP ITERATION 
+RIGHT-TO-LEFT ITERATION 6
+NUMBER OF STATES: 4 2 2 64 45
+E0 = -3.60149301289
+ITER = 6 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = -4.4408920985e-16
+-------------------------------------------
+FINAL SWEEP ITERATION 
+LEFT-TO-RIGHT ITERATION 1
+NUMBER OF STATES: 2 2 2 100 33
+E0 = -3.60149301289
+ITER = 1 ENTROPY = 0.585797433536
+-------------------------------------------
+Truncation error = 6.41644398204e-17
+-------------------------------------------
+FINAL SWEEP ITERATION 
+LEFT-TO-RIGHT ITERATION 2
+NUMBER OF STATES: 4 2 2 64 45
+E0 = -3.60149301289
+ITER = 2 ENTROPY = 0.705365994673
+-------------------------------------------
+Truncation error = 5.63785129692e-17
+-------------------------------------------
+FINAL SWEEP ITERATION 
+LEFT-TO-RIGHT ITERATION 3
+NUMBER OF STATES: 8 2 2 32 45
+E0 = -3.60149301289
+ITER = 3 ENTROPY = 0.598680617815
+-------------------------------------------
+Truncation error = -2.60208521397e-16
+-------------------------------------------
+FINAL SWEEP - LAST ITERATION 
+NUMBER OF STATES: 16 2 2 16 45
+E0 = -3.60149301289
+ITER = 4 ENTROPY = 0.513392626074
+-------------------------------------------
+Truncation error = -4.16333634234e-17
+-------------------------------------------
+Checking if it is finished: not yet, next check in 60 seconds ( 0% done).
+Halted Simulation 1
+This task took 2 seconds.
+Checkpointing Simulation 1
+Finished with everything.
