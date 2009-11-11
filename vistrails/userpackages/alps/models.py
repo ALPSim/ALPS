@@ -67,6 +67,22 @@ class BosonHubbardModel(ModelParameters):
                     'V#'    : '0'
                  }
 
+class HardcoreBosonModel(ModelParameters):
+   fixed = {'MODEL'   : 'hardcore boson'}
+   defaults =      {'mu'    : '0',
+                    't'     : '1',
+                    'V'     : '0',
+                    "t'"    : '0',
+                    "V''"   : '0',
+                    't0'    : 't',
+                    't1'    : "t'",
+                    'V0'    : '0',
+                    'V1'    : "V'",
+                    'mu#'   : 'mu',
+                    't#'    : '0',
+                    'V#'    : '0'
+                 }
+
 def register_model(type):
    reg = core.modules.module_registry.get_module_registry()
    reg.add_module(type,namespace="Models")
@@ -87,4 +103,5 @@ def selfRegister():
    reg.add_module(ClassicalSpinModel,namespace="Models")
    register_model(SpinModel)
    register_model(BosonHubbardModel)
+   register_model(HardcoreBosonModel)
   
