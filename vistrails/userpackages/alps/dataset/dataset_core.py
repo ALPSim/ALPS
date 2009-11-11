@@ -86,6 +86,7 @@ class DataSets(Module):
 	my_output_ports = []
 
 	def __init__(self,sets_ = None):
+		Module.__init__(self)
 		self.sets = []
 		if sets_ != None:
 			if type(sets_) == type(self.sets):
@@ -115,10 +116,13 @@ class ConcatenateDataSets(Module):
 class Descriptor:
 	my_input_ports = []
 	my_output_ports = []
-	data = {}
 	
 	def compute(self):
 		for ip in self.my_input_ports:
 			if self.hasInputFromPort(ip.name):
 				self.data[ip.name] = self.getInputFromPort(ip.name)
 		self.setResult('output',self)
+	
+	def __init__(self):
+		Module.__init__(self)
+		self.data = {}
