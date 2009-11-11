@@ -10,6 +10,7 @@ import numpy as np
 # name = "dataset"
 # identifier = "org.comp-phys.alps.dataset"
 
+from dataset_exceptions import *
 from dataset_core import *
 from dataset_evaluate import *
 from dataset_fit import *
@@ -63,19 +64,22 @@ def initialize():
 	register(ConcatenateDataSets,'DataSet')
 	register(Select,'DataSet')
 	
-	register(ConstantDataSet,'DataSet::Load')
-	register(LoadDataSet,'DataSet::Load')
-	register(LoadAlpsFromTxt,'DataSet::Load')
-	register(CustomLoader,'DataSet::Load')
-#	register(LoadAlpsHdf5,'DataSet::Load')
+	register(ConstantDataSet,'DataSet|Load')
+	register(LoadDataSet,'DataSet|Load')
+	register(LoadAlpsFromTxt,'DataSet|Load')
+	register(CustomLoader,'DataSet|Load')
+	register(CollectXY,'DataSet|Load')
+#	register(LoadAlpsHdf5,'DataSet|Load')
 	
-	register(EvalExpression_1to1,'DataSet::Evaluate')
-	register(EvalExpression_2to1,'DataSet::Evaluate')
-	register(EvalExpression_Allto1,'DataSet::Evaluate')
+	register(Transform,'DataSet|Evaluate')
+	AddDataSetsInputPorts(TransformN, 5)
+	register(TransformN,'DataSet|Evaluate')
+	register(Reduce,'DataSet|Evaluate')
+	register(GeneralTransform,'DataSet|Evaluate')
 	
-	register(AxisDescriptor,'DataSet::Plot')
-	register(LegendDescriptor,'DataSet::Plot')
-	register(Plotter,'DataSet::Plot')
+	register(AxisDescriptor,'DataSet|Plot')
+	register(LegendDescriptor,'DataSet|Plot')
+	register(Plotter,'DataSet|Plot')
 	
-	register(FitPrototype,'DataSet::Fit',abst=True)
-	register(PolyFit,'DataSet::Fit')
+	register(FitPrototype,'DataSet|Fit',abst=True)
+	register(PolyFit,'DataSet|Fit')

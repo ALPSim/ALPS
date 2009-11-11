@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
 
+from dataset_exceptions import *
 from dataset_core import *
 
 class AxisDescriptor(Descriptor, Module):
@@ -61,34 +62,28 @@ class Plotter(NotCacheable, Module):
 			
 			if self.hifp('xaxis'):
 				xaxis = self.gifp('xaxis')
-				try:
+				if 'label' in xaxis.data:
+					print 'xlabel = ' + xaxis.data['label']
 					plt.xlabel(xaxis.data['label'])
-				except KeyError:
-					pass
-				try:
+				
+				if 'min' in xaxis.data and 'max' in xaxis.data:
 					if xaxis.data['min'] != xaxis.data['max']:
-						plt.xlim(xaxis.data['min'],xaxis.data['max'])
-				except KeyError:
-					pass
+						plt.ylim(xaxis.data['min'],xaxis.data['max'])
 			
 			if self.hifp('yaxis'):
 				yaxis = self.gifp('yaxis')
-				try:
+				if 'label' in yaxis.data:
+					print 'ylabel = ' + yaxis.data['label']
 					plt.ylabel(yaxis.data['label'])
-				except KeyError:
-					pass
-				try:
+				
+				if 'min' in yaxis.data and 'max' in yaxis.data:
 					if yaxis.data['min'] != yaxis.data['max']:
-						plt.ylim(yaxis.data['min'],yaxis.data['may'])
-				except KeyError:
-					pass
+						plt.ylim(yaxis.data['min'],yaxis.data['max'])
 			
 			if self.hifp('legend'):
 				legend = self.gifp('legend')
-				try:
+				if 'location' in legend.data:
 					plt.legend(loc=legend.data['location'])
-				except KeyError:
-					plt.legend()
 			
 			if self.hifp('hide_buttons') and self.gifp('hide_buttons') == True:
 				plt.get_current_fig_manager().toolbar.hide()
@@ -98,3 +93,5 @@ class Plotter(NotCacheable, Module):
 				exec urllib.unquote(str(code))
 
 			self.setResult('source','foo')
+		else:
+			raise EmptyInputPort('data')

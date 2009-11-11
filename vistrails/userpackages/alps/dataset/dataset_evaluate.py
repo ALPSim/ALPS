@@ -10,6 +10,7 @@ import numpy as np
 from scipy import optimize
 
 from dataset_core import *
+from dataset_exceptions import *
 
 class ConstantDataSet(Module):
 	"""Create a constant dataset and store into DataSets"""
@@ -32,8 +33,10 @@ class ConstantDataSet(Module):
 			d.y = value + 0*d.x
 
 			self.setResult('value',DataSets(d))
+		else:
+			raise EmptyInputPort('value || source')
 
-class EvalExpression_1to1(NotCacheable, Module):
+class Transform(NotCacheable, Module):
 	my_input_ports = [
 		PortDescriptor("input",DataSets),
 		PortDescriptor("source",basic.String,use_python_source=True)
@@ -48,6 +51,7 @@ class EvalExpression_1to1(NotCacheable, Module):
 			for s in q:
 				x = s.x
 				y = s.y
+				props = s.props
 
 				code = self.getInputFromPort('source')
 				proc_code = urllib.unquote(str(code))
@@ -57,11 +61,15 @@ class EvalExpression_1to1(NotCacheable, Module):
 				s.y = y
 
 			self.setResult('output',DataSets(q))
+		else:
+			raise EmptyInputPort('input || source')
 
-class EvalExpression_2to1(NotCacheable, Module):
+def AddDataSetsInputPorts(m, Nmax):
+	for i in range(0,Nmax):
+		m.my_input_ports.append(PortDescriptor('input'+str(i),DataSets))
+
+class TransformN(NotCacheable, Module):
 	my_input_ports = [
-		PortDescriptor("input1",DataSets),
-		PortDescriptor("input2",DataSets),
 		PortDescriptor("source",basic.String,use_python_source=True)
 	]
 	my_output_ports = [
@@ -69,34 +77,42 @@ class EvalExpression_2to1(NotCacheable, Module):
 	]
 	
 	def compute(self):
-		if self.hasInputFromPort('input1') and self.hasInputFromPort('input2') and self.hasInputFromPort('source'):
-			q1 = copy.deepcopy(self.getInputFromPort('input1').sets)
-			q2 = copy.deepcopy(self.getInputFromPort('input2').sets)
+		if self.hasInputFromPort('source'):
+			Nports = len(self.my_input_ports)-1
+			print Nports
+			
+			inputs = []
+			for i in range(0,Nports):
+				port = 'input'+str(i)
+				if self.hasInputFromPort(port):
+					r = self.getInputFromPort(port).sets
+					inputs.append(copy.deepcopy(r))
+			Ninputs = len(inputs)
 			
 			results = []
 			
-			assert(len(q1) == len(q2))
+			for i in range(1,Ninputs):
+				if len(inputs[0]) != len(inputs[i]):
+					raise InvalidInput("Input lengths don't match")
 			
-			for iset in range(0,len(q1)):
-				x1 = q1[iset].x
-				y1 = q1[iset].y
+			for iset in range(0,len(inputs[0])):
+				for iport in range(0,Ninputs):
+					cmd = 'set' + str(iport) + ' = inputs[' + str(iport) + '][' + str(iset) + ']'
+					exec cmd
 				
-				x2 = q2[iset].x
-				y2 = q2[iset].y
+				result = DataSet()
 				
 				code = self.getInputFromPort('source')
 				proc_code = urllib.unquote(str(code))
 				exec proc_code
 				
-				result = DataSet()
-				result.x = x
-				result.y = y
-				
 				results.append(result)
 			
 			self.setResult('output',DataSets(results))
+		else:
+			raise EmptyInputPort('source')
 
-class EvalExpression_Allto1(NotCacheable, Module):
+class Reduce(NotCacheable, Module):
 	my_input_ports = [
 		PortDescriptor("input",DataSets),
 		PortDescriptor("source",basic.String,use_python_source=True)
@@ -107,17 +123,33 @@ class EvalExpression_Allto1(NotCacheable, Module):
 
 	def compute(self):
 		if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
-			x = np.array([])
-			y = np.array([])
-			
-			res = DataSet()
+			result = DataSet()
 			
 			for s in self.getInputFromPort('input').sets:
 				code = self.getInputFromPort('source')
 				proc_code = urllib.unquote(str(code))
 				exec proc_code
 			
-			self.setResult('output',DataSets(res))
+			self.setResult('output',DataSets(result))
+		else:
+			raise EmptyInputPort('input || source')
+
+class GeneralTransform(NotCacheable, Module):
+	my_input_ports = [
+		PortDescriptor("input",DataSets),
+		PortDescriptor("source",basic.String,use_python_source=True)
+	]
+	my_output_ports = [
+		PortDescriptor("output",DataSets)
+	]
+	
+	def compute(self):
+		if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
+			code = self.getInputFromPort('source')
+			proc_code = urllib.unquote(str(code))
+			exec proc_code
+		else:
+			raise EmptyInputPort('input || source')
 
 class Select(Module):
 	my_input_ports = [
@@ -125,25 +157,31 @@ class Select(Module):
 		PortDescriptor("source",basic.String,use_python_source=True)
 	]
 	my_output_ports = [
-		PortDescriptor("output",DataSets)
+		PortDescriptor("kept",DataSets),
+		PortDescriptor("discarded",DataSets)
 	]
 
 	def compute(self):
 		if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
 			q = copy.deepcopy(self.getInputFromPort('input').sets)
 			kept_sets = []
+			disc_sets = []
+			
+			code = self.getInputFromPort('source')
+			proc_code = urllib.unquote(str(code))
+			
+			cmd = 'def fn(x,y,props):\n'
+			for line in proc_code.split('\n'):
+				cmd = cmd + '\t' + line + '\n'
+			exec cmd
+			
 			for s in q:
-				keep = True
-				x = s.x
-				y = s.y
-				props = s.props
-
-				code = self.getInputFromPort('source')
-				proc_code = urllib.unquote(str(code))
-				exec proc_code
-
-				if keep:
+				if fn(s.x,s.y,s.props):
 					kept_sets.append(s)
+				else:
+					disc_sets.append(s)
 
-			self.setResult('output',DataSets(kept_sets))
-	
+			self.setResult('kept',DataSets(kept_sets))
+			self.setResult('discarded',DataSets(disc_sets))
+		else:
+			raise EmptyInputPort('input || source')

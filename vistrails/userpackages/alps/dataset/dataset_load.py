@@ -12,14 +12,14 @@ from scipy import optimize
 from dataset_core import *
 
 class Loader:
-	def __init__(self,filename,label,xcolumn,ycolumns,parms={}):
+	def __init__(self,filename,label,xcolumn,ycolumns,props={}):
 		self.sets = []
-		self.read_set(filename,label,xcolumn,ycolumns,parms)
+		self.read_set(filename,label,xcolumn,ycolumns,props)
 	
 	def __init__(self):
 		self.sets = []
 	
-	def read_set(self,filename,label,xcolumn,ycolumns,parms={}):
+	def read_set(self,filename,label,xcolumn,ycolumns,props={}):
 		raw = np.loadtxt(filename).transpose()
 		
 		for iyc in ycolumns:
@@ -31,15 +31,15 @@ class Loader:
 				res.y = raw[iyc]
 			else:
 				if len(raw.strides) == 1:
-					raw.x = np.arange(0,len(raw))
-					raw.y = raw
+					res.x = np.arange(0,len(raw))
+					res.y = raw
 				else:
 					res.y = raw[iyc]
 					res.x = np.arange(0,len(res.y))
 			
 			res.props['column'] = iyc
 			res.props['label'] = copy.deepcopy(label)
-			res.props.update(parms)
+			res.props.update(props)
 			
 			self.sets.append(res)
 
@@ -175,3 +175,56 @@ class LoadAlpsHdf5(Module):
 				sets.append(ReadVariableFromFile(fd,m))
 			
 			self.setResult('data',DataSets(sets))
+
+class CollectXY(Module):
+	my_input_ports = [
+		PortDescriptor('for-each',ListOfElements),
+		PortDescriptor('observable',basic.String),
+		PortDescriptor('input',DataSets)
+	]
+	my_output_ports = [
+		PortDescriptor('output',DataSets)
+	]
+	
+	def compute(self):
+		if self.hasInputFromPort('for-each') and self.hasInputFromPort('observable'):
+			# find all possible values for each for-each
+			sets = self.getInputFromPort('input')
+			for_each = self.getInputFromPort('for-each')
+			observable = self.getInputFromPort('observable')
+			
+			for_each_sets = {}
+			for iset in sets:
+				if iset.props['observable'] != observable:
+					continue
+				
+				fe_par_set = []
+				for m in for_each:
+					fe_par_set.append(iset.props[m])
+				
+				if fe_par_set in for_each_sets:
+					for_each_sets[fe_par_set].append(iset)
+				else:
+					for_each_sets[fe_par_set] = [iset]
+			
+			for k,v in for_each_sets.items():
+				res = DataSet()
+				res.props = v[0].props
+				for im in range(0,for_each):
+					m = for_each[im]
+					res.props[m] = k[im]
+				
+				for x in v:
+					res.x = np.concatenate(res.x, x.x)
+					res.y = np.concatenate(res.y, x.y)
+				
+				order = np.argsort(res.x)
+				res.x = res.x[order]
+				res.y = res.y[order]
+				
+				for_each_sets[k] = res
+			
+			self.setResult('output',DataSets(for_each_sets.values()))
+				
+		else:
+			raise EmptyInputPort('for-each || observable')
