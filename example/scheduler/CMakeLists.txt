@@ -1,0 +1,10 @@
+include_directories(${PROJECT_BINARY_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/src)
+include_directories(${PROJECT_SOURCE_DIR}/tool)
+include_directories(${Boost_ROOT_DIR})
+
+add_executable(ising2 main.C ising.C)
+add_dependencies(ising2 alps)
+target_link_libraries(ising2 alps)
+install(TARGETS ising2 RUNTIME DESTINATION bin)
+ADD_TEST(ising2 ising2 ./parm.in.xml)
