@@ -1,0 +1,63 @@
+#-----------------------------------------------------------------------------
+#
+# ALPSConfig.cmake - ALPS CMake configuration file for external projects.
+#
+# This file is configured by ALPS and used by the UseALPS.cmake module
+# to load ALPS's settings for an external project.
+
+# The ALPS include file directories.
+set(ALPS_INCLUDE_DIRS "@ALPS_INCLUDE_DIRS_CONFIG@")
+
+# The ALPS library directories.
+set(ALPS_LIBRARY_DIRS "@ALPS_LIBRARY_DIRS_CONFIG@")
+
+# The ALPS runtime library directories.  Note that if
+# ALPS_CONFIGURATION_TYPES is set (see below) then these directories
+# will be the parent directories under which there will be a directory
+# of runtime binaries for each configuration type.
+set(ALPS_RUNTIME_LIBRARY_DIRS "@ALPS_RUNTIME_LIBRARY_DIRS_CONFIG@")
+
+# The C and C++ flags added by ALPS to the cmake-configured flags.
+set(ALPS_REQUIRED_C_FLAGS "@ALPS_REQUIRED_C_FLAGS@")
+set(ALPS_REQUIRED_CXX_FLAGS "@ALPS_REQUIRED_CXX_FLAGS@")
+set(ALPS_REQUIRED_EXE_LINKER_FLAGS "@ALPS_REQUIRED_EXE_LINKER_FLAGS@")
+set(ALPS_REQUIRED_SHARED_LINKER_FLAGS "@ALPS_REQUIRED_SHARED_LINKER_FLAGS@")
+set(ALPS_REQUIRED_MODULE_LINKER_FLAGS "@ALPS_REQUIRED_MODULE_LINKER_FLAGS@")
+
+# The ALPS version number.
+SET(ALPS_VERSION_MAJOR "@ALPS_VERSION_MAJOR@")
+SET(ALPS_VERSION_MINOR "@ALPS_VERSION_MINOR@")
+SET(ALPS_VERSION_BUILD "@ALPS_VERSION_BUILD@")
+
+# The location of the UseALPS.cmake file.
+set(ALPS_USE_FILE "@ALPS_USE_FILE@")
+
+# ALPS Configuration options.
+set(ALPS_BUILD_SHARED_LIBS "@BUILD_SHARED_LIBS@")
+set(ALPS_BUILD_TYPE @CMAKE_BUILD_TYPE@)
+set(ALPS_CONFIGURATION_TYPES @CMAKE_CONFIGURATION_TYPES@)
+
+# MPI
+set(MPI_FOUND "@MPI_FOUND@")
+set(MPI_COMPILE_FLAGS "@MPI_COMPILE_FLAGS@")
+set(MPI_EXTRA_LIBRARY "@MPI_EXTRA_LIBRARY@")
+set(MPI_INCLUDE_PATH "@MPI_INCLUDE_PATH@")
+set(MPI_LINK_FLAGS "@MPI_LINK_FLAGS@")
+
+# LAPACK
+set(LAPACK_FOUND "@LAPACK_FOUND@")
+set(LAPACK_DEFINITIONS "@LAPACK_DEFINITIONS@")
+set(LAPACK_LINKER_FLAGS "@LAPACK_LINKER_FLAGS@")
+set(LAPACK_LIBRARIES "@LAPACK_LIBRARIES@")
+
+# SQLite
+set(SQLite_FOUND "@SQLite_FOUND@")
+set(SQLite_INCLUDE_DIR "@SQLite_INCLUDE_DIR@")
+set(SQLite_LIBRARIES "@SQLite_LIBRARIES@")
+set(SQLite_DLLS "@SQLite_DLLS@")
+
+# LPSolve
+set(LPSolve_FOUND "@LPSolve_FOUND@")
+set(LPSolve_INCLUDE_DIR "@LPSolve_INCLUDE_DIR@")
+set(LPSolve_LIBRARIES "@LPSolve_LIBRARIES@")
+set(LPSolve_DLLS "@LPSolve_DLLS@")
