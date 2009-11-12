@@ -22,6 +22,15 @@ class Loader:
 	def read_set(self,filename,label,xcolumn,ycolumns,props={}):
 		raw = np.loadtxt(filename).transpose()
 		
+		if len(raw.shape) == 0:
+			res = DataSet()
+			res.x = np.array([0])
+			res.y = np.array([raw])
+			res.props.update(props)
+			res.props.update({'column':0,'label':copy.deepcopy(label),'filename':filename})
+			self.sets.append(res)
+			return
+		
 		for iyc in ycolumns:
 			res = DataSet()
 			res.props['filename'] = filename

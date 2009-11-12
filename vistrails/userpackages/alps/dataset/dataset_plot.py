@@ -36,14 +36,14 @@ class Plotter(NotCacheable, Module):
 	]
 	my_output_ports = [PortDescriptor('unused',basic.String)]
 
-	colors = ['k','b','g','m','c','y']
-
 	def hifp(self,m):
 		return self.hasInputFromPort(m)
 	def gifp(self,m):
 		return self.getInputFromPort(m)
 
 	def compute(self):
+		self.colors = ['k','b','g','m','c','y']
+		
 		if self.hifp('data'):
 			s = self.gifp('data')
 			lines = []
@@ -63,7 +63,6 @@ class Plotter(NotCacheable, Module):
 			if self.hifp('xaxis'):
 				xaxis = self.gifp('xaxis')
 				if 'label' in xaxis.data:
-					print 'xlabel = ' + xaxis.data['label']
 					plt.xlabel(xaxis.data['label'])
 				
 				if 'min' in xaxis.data and 'max' in xaxis.data:
@@ -73,7 +72,6 @@ class Plotter(NotCacheable, Module):
 			if self.hifp('yaxis'):
 				yaxis = self.gifp('yaxis')
 				if 'label' in yaxis.data:
-					print 'ylabel = ' + yaxis.data['label']
 					plt.ylabel(yaxis.data['label'])
 				
 				if 'min' in yaxis.data and 'max' in yaxis.data:
@@ -84,6 +82,8 @@ class Plotter(NotCacheable, Module):
 				legend = self.gifp('legend')
 				if 'location' in legend.data:
 					plt.legend(loc=legend.data['location'])
+				else:
+					plt.legend()
 			
 			if self.hifp('hide_buttons') and self.gifp('hide_buttons') == True:
 				plt.get_current_fig_manager().toolbar.hide()
