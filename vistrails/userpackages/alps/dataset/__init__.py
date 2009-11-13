@@ -16,6 +16,7 @@ from dataset_evaluate import *
 from dataset_fit import *
 from dataset_load import *
 from dataset_plot import *
+from dataset_tools import *
 
 def warn(m):
 	print m
@@ -83,3 +84,6 @@ def initialize():
 	
 	register(FitPrototype,'DataSet|Fit',abst=True)
 	register(PolyFit,'DataSet|Fit')
+	
+	register(SortByX,'DataSet|Tools')
+	register(WriteTxt,'DataSet|Tools')

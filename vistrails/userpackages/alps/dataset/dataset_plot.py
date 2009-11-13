@@ -53,7 +53,9 @@ class Plotter(NotCacheable, Module):
 				icolor = (icolor+1)%len(self.colors)
 
 				if q.props.has_key('label'):
-					lines[-1][0].set_label(q.props['label'])
+					label = q.props['label']
+					if label != 'none':
+						lines[-1][0].set_label(q.props['label'])
 				elif q.props.has_key('filename'):
 					lines[-1][0].set_label(q.props['filename'])
 

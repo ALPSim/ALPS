@@ -46,4 +46,3 @@ class PolyFit(FitPrototype):
 			data.y = data.y + fit_parms[deg]*data.x**(degree-deg)
 		
 		return data
-	
