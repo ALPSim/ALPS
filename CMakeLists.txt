@@ -161,5 +161,6 @@ ENABLE_TESTING()
 # programs
 ######################################################################
 add_subdirectory(tool)
-add_subdirectory(example/parapack/single)
-add_subdirectory(example/scheduler)
+# add_subdirectory(example/parapack/single)
+# add_subdirectory(example/scheduler)
+add_subdirectory(test/alea)
