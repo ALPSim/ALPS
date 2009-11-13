@@ -51,9 +51,9 @@ set(LAPACK_LINKER_FLAGS "")
 set(LAPACK_LIBRARIES "")
 
 # SQLite
-set(SQLite_FOUND "1")
-set(SQLite_INCLUDE_DIR "/usr/include")
-set(SQLite_LIBRARIES "/usr/lib/libsqlite3.dylib")
+set(SQLite_FOUND "")
+set(SQLite_INCLUDE_DIR "")
+set(SQLite_LIBRARIES "")
 set(SQLite_DLLS "")
 
 # LPSolve

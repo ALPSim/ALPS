@@ -73,7 +73,7 @@ find_package(MPI)
 find_package(Lapack)
 
 # SQLite
-find_package(SQLite)
+# find_package(SQLite)
 
 # LPSolve
 find_package(LPSolve)
