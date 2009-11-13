@@ -10,16 +10,16 @@ execute_process(
 	TIMEOUT ${timeout}
 )
 
-file(WRITE ${cmd}_output ${out})
-
 if(not_successful)
 	message(SEND_ERROR "error runing test '${cmd}': ${err};shell output: ${not_successful}!")
 endif(not_successful)
 
+file(WRITE ${cmd}_output ${out})
+
 execute_process(
 	COMMAND ${CMAKE_COMMAND} -E compare_files ${output} ${cmd}_output
 	RESULT_VARIABLE not_successful
-	OUTPUT_QUIET
+	OUTPUT_VARIABLE out
 	ERROR_VARIABLE err
 	TIMEOUT ${timeout}
 )
@@ -27,5 +27,5 @@ execute_process(
 file(REMOVE ${cmd}_output)
 
 if(not_successful)
-	message(SEND_ERROR "output does not match for '${cmd}': ${err}; shell output: ${not_successful}!")
+	message(SEND_ERROR "output does not match for '${cmd}': ${err}; ${out}; shell output: ${not_successful}!")
 endif(not_successful)

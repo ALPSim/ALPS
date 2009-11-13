@@ -158,4 +158,9 @@ add_subdirectory(src/boost)
 add_subdirectory(tool)
 # add_subdirectory(example/parapack/single)
 # add_subdirectory(example/scheduler)
+
+######################################################################
+# tests
+######################################################################
+ENABLE_TESTING()
 add_subdirectory(test)
