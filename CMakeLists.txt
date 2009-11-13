@@ -153,14 +153,9 @@ add_subdirectory(src/alps)
 add_subdirectory(src/boost)
 
 ######################################################################
-# testing
-######################################################################
-ENABLE_TESTING()
-
-######################################################################
 # programs
 ######################################################################
 add_subdirectory(tool)
 # add_subdirectory(example/parapack/single)
 # add_subdirectory(example/scheduler)
-add_subdirectory(test/alea)
+add_subdirectory(test)
