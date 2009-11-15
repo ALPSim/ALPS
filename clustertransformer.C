@@ -373,6 +373,51 @@ SimpleDCATransformer::local_green_function_from_selfenergies(const std::map<doub
 
 
 
+double SimpleDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
+					    const double beta, const double mu)
+{
+  const unsigned int nzone = selfenergies.size();
+  const unsigned int nfreq = selfenergies[0][0].size()/2;
+  std::vector<alps::RealObsevaluator> energy_vec(2*nfreq);
+  for (frequency_t freq=0; freq<nfreq; ++freq) {
+    double om = (2.*freq+1.)*M_PI/beta;
+    for (int z=0; z<nzone; ++z) {
+      for (int kc=0; kc<n_cluster_sites(); ++kc) { 
+	alps::RealObsevaluator Sigma_re = selfenergies[z][kc][2*freq];
+	alps::RealObsevaluator Sigma_im = selfenergies[z][kc][2*freq+1];
+	for (int kl=0; kl<n_cluster_cells(); ++kl) { 
+	  for (int sign=-1; sign<=1; sign+=2) {
+	    vector_type k(dimension());
+	    for (unsigned int d=0; d<dimension(); ++d) 
+	      k[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	    double eps = epsilon(k);
+	    alps::RealObsevaluator obs = ((mu-eps-Sigma_re)*(mu-eps-Sigma_re) + (om-Sigma_im)*(om-Sigma_im));
+	    alps::RealObsevaluator obsr = (-Sigma_re+mu-eps)/obs;
+	    alps::RealObsevaluator obsi = (Sigma_im-om)/obs;
+	    if (z==0 && kc==0 && kl==0 && sign==-1) {
+	      energy_vec[2*freq] = obsr*eps;
+	      energy_vec[2*freq+1] = obsi*eps;
+	    }
+	    else {
+	      energy_vec[2*freq] += obsr*eps;
+	      energy_vec[2*freq+1] += obsi*eps;
+	    }
+	  }
+	}
+      }
+    }
+    energy_vec[2*freq] /= 2*n_cluster_cells()*n_cluster_sites();
+    energy_vec[2*freq+1] /= 2*n_cluster_cells()*n_cluster_sites();
+  }
+  std::ofstream teststr("test.dat");
+  for (frequency_t freq=0; freq<nfreq; ++freq) {
+    double om = (2.*freq+1.)*M_PI/beta;
+    teststr << om << "\t" << energy_vec[2*freq] << "\t" << energy_vec[2*freq+1] << "\n";
+  }
+  return 0.;
+}
+
+
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
                                                                const matsubara_green_function_t &G0_omega, 
                                                                double &mu, const double h, const double beta)
@@ -468,12 +513,22 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
 
 std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> 
 AntiFerroDCATransformer::local_green_function_from_selfenergies(const std::map<double, 
-								std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& selfenergies,
-								const double mu, const double delta)
+								std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& /*selfenergies*/,
+								const double /*mu*/, const double /*delta*/)
 {
+  boost::throw_exception(std::invalid_argument("to be implemented"));
   std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> dummy;
   return dummy;
 }
+
+
+double AntiFerroDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& /*selfenergies*/,
+					       const double /*beta*/, const double /*mu*/)
+{
+  boost::throw_exception(std::invalid_argument("to be implemented"));
+  return 0.;
+}
+
 				       
 
 
