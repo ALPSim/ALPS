@@ -59,9 +59,9 @@ if(BUILD_BOOST_SERIALIZATION)
       basic_xml_grammar.ipp binary_iarchive.cpp binary_oarchive.cpp binary_wiarchive.cpp
       binary_woarchive.cpp codecvt_null.cpp extended_type_info.cpp
       extended_type_info_no_rtti.cpp extended_type_info_typeid.cpp polymorphic_iarchive.cpp
-      stl_port.cpp text_iarchive.cpp text_oarchive.cpp text_wiarchive.cpp text_woarchive.cpp
-      utf8_codecvt_facet.cpp void_cast.cpp xml_grammar.cpp xml_iarchive.cpp xml_oarchive.cpp
-      xml_wgrammar.cpp xml_wiarchive.cpp xml_woarchive.cpp)
+      polymorphic_oarchive.cpp stl_port.cpp text_iarchive.cpp text_oarchive.cpp text_wiarchive.cpp
+      text_woarchive.cpp utf8_codecvt_facet.cpp void_cast.cpp xml_grammar.cpp xml_iarchive.cpp
+      xml_oarchive.cpp xml_wgrammar.cpp xml_wiarchive.cpp xml_woarchive.cpp)
   foreach(S ${SOURCES})
     set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
   endforeach(S)
