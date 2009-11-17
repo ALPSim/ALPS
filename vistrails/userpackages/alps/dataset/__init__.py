@@ -59,9 +59,7 @@ def initialize():
 	# we can refer to it in a shorter way.
 	reg = core.modules.module_registry.registry
 
-	basic.init_constant(Dictionary)
-	register(Parameter,'DataSet')
-	register(DataSets,'DataSet')
+	register(DataSets,'DataSet',abst=True)
 	register(ConcatenateDataSets,'DataSet')
 	register(Select,'DataSet')
 	

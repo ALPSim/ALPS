@@ -56,7 +56,7 @@ if(BUILD_BOOST_SERIALIZATION)
       basic_oserializer.cpp basic_pointer_iserializer.cpp basic_pointer_oserializer.cpp
       basic_serializer_map.cpp basic_text_iprimitive.cpp basic_text_oprimitive.cpp
       basic_text_wiprimitive.cpp basic_text_woprimitive.cpp basic_xml_archive.cpp
-      basic_xml_grammar.ipp binary_iarchive.cpp binary_oarchive.cpp binary_wiarchive.cpp
+      binary_iarchive.cpp binary_oarchive.cpp binary_wiarchive.cpp
       binary_woarchive.cpp codecvt_null.cpp extended_type_info.cpp
       extended_type_info_no_rtti.cpp extended_type_info_typeid.cpp polymorphic_iarchive.cpp
       polymorphic_oarchive.cpp stl_port.cpp text_iarchive.cpp text_oarchive.cpp text_wiarchive.cpp
