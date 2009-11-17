@@ -21,7 +21,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   if(WIN32 AND NOT UNIX)
     set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/My Documents/ALPS" CACHE PATH "ALPS install prefix" FORCE)
   else(WIN32 AND NOT UNIX)
-    set(CMAKE_INSTALL_PREFIX "$ENV{HOME}/ALPS" CACHE PATH "ALPS install prefix" FORCE)
+    set(CMAKE_INSTALL_PREFIX "/usr/local" CACHE PATH "ALPS install prefix" FORCE)
   endif(WIN32 AND NOT UNIX)
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
@@ -35,7 +35,7 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/CMake)
 ######################################################################
 set(ALPS_VERSION_MAJOR 1)
 set(ALPS_VERSION_MINOR 3)
-set(ALPS_VERSION_BUILD 3)
+set(ALPS_VERSION_BUILD 4)
 set(ALPS_YEAR 2009)
 
 set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_BUILD}")
@@ -158,6 +158,66 @@ add_subdirectory(src/boost)
 add_subdirectory(tool)
 # add_subdirectory(example/parapack/single)
 # add_subdirectory(example/scheduler)
+
+##########################################################################
+# Binary packages                                                        #
+##########################################################################
+set(CPACK_PACKAGE_NAME "ALPS")
+set(CPACK_PACKAGE_VENDOR "alps.comp-phys.org")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
+set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.txt")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.txt")
+set(CPACK_RESOURCE_FILE_WELCOME "${PROJECT_SOURCE_DIR}/Welcome.txt")
+set(CPACK_PACKAGE_VERSION "${ALPS2_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${ALPS2_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${ALPS2_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_SUBMINOR "${ALPS2_VERSION_SUBMINOR}")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY "/usr/local")
+
+if(WIN32 AND NOT UNIX)
+  # There is a bug in NSI that does not handle full unix paths properly. Make
+  # sure there is at least one set of four (4) backlasshes.
+  # NOTE: No ALPS icon yet
+#  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/tools/build/CMake\\\\InstallIcon.bmp")
+#  set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
+  set(CPACK_NSIS_DISPLAY_NAME "ALPS ${ALPS2_VERSION_MAJOR}.${ALPS2_VERSION_MINOR}.${ALPS2_VERSION_SUBMINOR}")
+  set(CPACK_NSIS_HELP_LINK "http:\\\\\\\\alps.comp-phys.org")
+  set(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\alps.comp-phys.org")
+  set(CPACK_NSIS_CONTACT "comp-phys-alps-users@lists.comp-phys.org")
+  set(CPACK_NSIS_MODIFY_PATH ON)
+  
+  # Encode the compiler name in the package 
+  if (MSVC60)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS2-${ALPS2_VERSION}-vc6")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual C++ 6")
+  elseif (MSVC70)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS2-${ALPS2_VERSION}-vc7")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2002")
+  elseif (MSVC71)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS2-${ALPS2_VERSION}-vc71")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2003")
+  elseif (MSVC80)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS2-${ALPS2_VERSION}-vc8")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2005")    
+  elseif (MSVC90)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS2-${ALPS2_VERSION}-vc9")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2008")
+  elseif (BORLAND)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS2-${ALPS2_VERSION}-borland")  
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Borland C++ Builder")    
+  endif (MSVC60)
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
+endif(WIN32 AND NOT UNIX)
+include(CPack)
+
+if(COMMAND cpack_configure_downloads)
+  cpack_configure_downloads(
+  "http://alps.comp-phys.org/software/releases/"
+    ALL ADD_REMOVE)
+endif()
+##########################################################################
+
 
 ######################################################################
 # tests
