@@ -78,6 +78,26 @@ find_package(Lapack)
 # LPSolve
 find_package(LPSolve)
 
+INCLUDE(config/CMake/FindHDF5.cmake)
+
+IF(FOUND_HDF5)
+  SET(HAVE_LIBHDF5 1)
+  INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
+  LINK_LIBRARIES(${HDF5_LIBRARY})
+  #zlib
+  INCLUDE(config/CMake/FindZLIB.cmake)
+  IF(ZLIB_FOUND)
+    LINK_LIBRARIES(${ZLIB_LIBRARY})
+  ENDIF(ZLIB_FOUND)
+  #szlib
+  INCLUDE(config/CMake/FindSZLIB.cmake)
+  IF(SZLIB_FOUND)
+    LINK_LIBRARIES(${SZLIB_LIBRARY})
+  ENDIF(SZLIB_FOUND)
+ELSE(FOUND_HDF5)
+  MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
+ENDIF(FOUND_HDF5)
+
 ######################################################################
 # configuration files
 ######################################################################

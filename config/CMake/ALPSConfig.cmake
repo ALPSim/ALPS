@@ -6,16 +6,16 @@
 # to load ALPS's settings for an external project.
 
 # The ALPS include file directories.
-set(ALPS_INCLUDE_DIRS "/Users/gamperl/ALPS/include;/Users/gamperl/boost_1_40_0")
+set(ALPS_INCLUDE_DIRS "/usr/local/include;/Users/gamperl/boost_1_40_0")
 
 # The ALPS library directories.
-set(ALPS_LIBRARY_DIRS "/Users/gamperl/ALPS/lib")
+set(ALPS_LIBRARY_DIRS "/usr/local/lib")
 
 # The ALPS runtime library directories.  Note that if
 # ALPS_CONFIGURATION_TYPES is set (see below) then these directories
 # will be the parent directories under which there will be a directory
 # of runtime binaries for each configuration type.
-set(ALPS_RUNTIME_LIBRARY_DIRS "/Users/gamperl/ALPS/bin")
+set(ALPS_RUNTIME_LIBRARY_DIRS "/usr/local/bin")
 
 # The C and C++ flags added by ALPS to the cmake-configured flags.
 set(ALPS_REQUIRED_C_FLAGS "")
@@ -27,10 +27,10 @@ set(ALPS_REQUIRED_MODULE_LINKER_FLAGS "")
 # The ALPS version number.
 SET(ALPS_VERSION_MAJOR "1")
 SET(ALPS_VERSION_MINOR "3")
-SET(ALPS_VERSION_BUILD "3")
+SET(ALPS_VERSION_BUILD "4")
 
 # The location of the UseALPS.cmake file.
-set(ALPS_USE_FILE "/Users/gamperl/ALPS/share/alps/UseALPS.cmake")
+set(ALPS_USE_FILE "/usr/local/share/alps/UseALPS.cmake")
 
 # ALPS Configuration options.
 set(ALPS_BUILD_SHARED_LIBS "ON")
