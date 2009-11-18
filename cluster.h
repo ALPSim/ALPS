@@ -177,6 +177,7 @@ public:
   std::complex<double>* exp_iksite(const int sign) const;
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
+  double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
   double bandwidth() const { return bandwidth_; };
   
   double epsilon(const vector_type k) const
@@ -239,6 +240,7 @@ private:
   const double t_, t2_, t3_, t4_;
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
+  std::vector<double> dispersion_moments_;
   double bandwidth_;
   double half_filling_;
 };
