@@ -8,12 +8,12 @@ if(BOOST_ROOT)
   find_path(Boost_ROOT_DIR "libs/filesystem/src/path.cpp" ${BOOST_ROOT})
 else(BOOST_ROOT)
   set(DIR0
-    $ENV{HOME} $ENV{HOME}/src $ENV{HOME}/ALPS/src
+    $ENV{HOME} $ENV{HOME}/src $ENV{HOME}/ALPS/src /usr/local /usr/local/src
     "$ENV{HOMEDRIVE}/Program Files"
     "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/My Documents"
     "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/My Documents/src"
     "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/My Documents/ALPS/src")
-  set(DIR1 boost boostsrc boost_1_40_0 boost_1_39_0 boost_1_38_0 boostsrc_1_38_0)
+  set(DIR1 boost boostsrc boost_1_41_0 boost_1_40_0 boost_1_39_0 boost_1_38_0 boostsrc_1_38_0)
   set(_boost_SEARCH_PATH "")
   foreach(D0 ${DIR0})
     foreach(D1 ${DIR1})

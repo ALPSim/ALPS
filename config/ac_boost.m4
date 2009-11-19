@@ -131,7 +131,7 @@ AC_DEFUN([AC_BOOST],
   boost_dir_s=
 
   for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
-    for b in boost boost_1_40_0 boost_1_39_0 boost_1_38_0 boost_1_37_0 boost_1_36_0 boost_1_35_0 boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
+    for b in boost boost_1_41_0 boost_1_40_0 boost_1_39_0 boost_1_38_0 boost_1_37_0 boost_1_36_0 boost_1_35_0 boost_1_34_1 boost_1_34_0 boost_1_33_1 boost_1_33_0 boost_1_32_0; do
       if test -f "$d/$b/boost/config.hpp"; then
         if test -f "$d/$b/libs/filesystem/src/exception.cpp" || test -f "$d/$b/libs/filesystem/src/operations.cpp"; then
           boost_dir_s="$d/$b"
@@ -190,9 +190,15 @@ dnl Boost version
 
   AC_MSG_CHECKING([for Boost version])
   AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 104100
+#if BOOST_VERSION < 104200
 #error
 #endif],,ac_cv_boost_version=svn)
+  if test -z "$ac_cv_boost_version"; then
+    AC_TRY_COMPILE([#include <boost/version.hpp>
+#if BOOST_VERSION < 104100
+#error
+#endif],,ac_cv_boost_version=1_41)
+  fi
   if test -z "$ac_cv_boost_version"; then
     AC_TRY_COMPILE([#include <boost/version.hpp>
 #if BOOST_VERSION < 104000
@@ -251,6 +257,9 @@ dnl Boost version
     xsvn )
       AC_MSG_RESULT([SVN])
       ;;
+    x1_41 )
+      AC_MSG_RESULT([1.41])
+      ;;
     x1_40 )
       AC_MSG_RESULT([1.40])
       ;;
@@ -284,6 +293,7 @@ dnl Boost version
       ;;
   esac
   AM_CONDITIONAL(BOOST_SVN, test "$ac_cv_boost_version" = svn)
+  AM_CONDITIONAL(BOOST_1_41, test "$ac_cv_boost_version" = 1_41)
   AM_CONDITIONAL(BOOST_1_40, test "$ac_cv_boost_version" = 1_40)
   AM_CONDITIONAL(BOOST_1_39, test "$ac_cv_boost_version" = 1_39)
   AM_CONDITIONAL(BOOST_1_38, test "$ac_cv_boost_version" = 1_38)
@@ -460,7 +470,7 @@ AC_DEFUN([AC_BOOST_LIBS],
     AC_MSG_CHECKING([whether to build Boost.MPI])
     test -z "$ac_cv_boost_mpi" && ac_cv_boost_mpi=yes
     test "$ac_cv_have_mpi" = yes || ac_cv_boost_mpi=no
-    if test "$ac_cv_boost_version" = svn || test "$ac_cv_boost_version" = 1_40 || test "$ac_cv_boost_version" = 1_39 || test "$ac_cv_boost_version" = 1_38 || test "$ac_cv_boost_version" = 1_37 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_35; then
+    if test "$ac_cv_boost_version" = svn || test "$ac_cv_boost_version" = 1_41 || test "$ac_cv_boost_version" = 1_40 || test "$ac_cv_boost_version" = 1_39 || test "$ac_cv_boost_version" = 1_38 || test "$ac_cv_boost_version" = 1_37 || test "$ac_cv_boost_version" = 1_36 || test "$ac_cv_boost_version" = 1_35; then
       :;
     else
       ac_cv_boost_mpi=no
