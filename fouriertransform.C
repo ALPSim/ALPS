@@ -610,7 +610,8 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
     fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"], 
 						     n_flavors, eps, epssq));
   } 
-  else if (n_site>1) {
+  else if (parms.defined("CLUSTER_LOOP")){
+    if(!(std::string(parms["CLUSTER_LOOP"])==std::string("DCA"))) throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA");
     std::cout << "using cluster fourier transformer" << "\n";
     boost::shared_ptr<DCATransformer> clusterhandler;
     DCATransformer::generate_transformer(parms, clusterhandler);
@@ -656,7 +657,8 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
     fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
 					      n_flavors, 1, densities, eps, epssq));
   } 
-  else if (n_site>1) {
+  else if (parms.defined("CLUSTER_LOOP")){
+    if(!(std::string(parms["CLUSTER_LOOP"])==std::string("DCA"))) throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA");
     std::cout << "using cluster fourier transformer" << "\n";
     boost::shared_ptr<DCATransformer> clusterhandler;
     DCATransformer::generate_transformer(parms, clusterhandler);
@@ -700,7 +702,9 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
     }
     fourier_ptr.reset(new SimpleAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U,
 							     n_flavors, densities, magnetization,  eps, epssq));
-  } else if (n_site>1) {
+  }
+  else if (parms.defined("CLUSTER_LOOP")){
+    if(!(std::string(parms["CLUSTER_LOOP"])==std::string("DCA"))) throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA");
     std::cout << "using cluster fourier transformer" << "\n";
     boost::shared_ptr<DCATransformer> clusterhandler;
     DCATransformer::generate_transformer(parms, clusterhandler);
