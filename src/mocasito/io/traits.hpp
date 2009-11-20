@@ -115,11 +115,11 @@ namespace mocasito {
 			template <typename T> struct fixed_size<C> {									\
 				static std::size_t const value = 2 * fixed_size<T>::value;					\
 			};																				\
-			template<typename T> struct get_data<C> {										\
-				static typename pointer_traits<C>::type apply(C & v) {						\
-					return &v.real();														\
-				}																			\
-			};																				\
+			template<typename T> struct get_data<C> { \
+				static typename pointer_traits<C>::type apply(C & v) { \
+					return reinterpret_cast<typename pointer_traits<C>::type>(&v); \
+				} \
+			}; \
 			template<typename T> struct get_size<C> {										\
 				static std::size_t apply(C) {												\
 					return fixed_size<C>::value;											\

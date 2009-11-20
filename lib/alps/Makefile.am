@@ -499,3 +499,6 @@ nodist_libalps_mpi_la_SOURCES = $(nodist_libalps_la_SOURCES) $(nodist_libparapac
 libalps_mpi_la_CPPFLAGS = $(AM_CPPFLAGS) -DALPS_MPI
 libalps_mpi_la_LDFLAGS = $(LDFLAGS_MPI)
 # libalps_mpi_la_LIBADD = $(LIBS_MPI)
+
+clean-local :
+	rm -f *.ii *.ti
