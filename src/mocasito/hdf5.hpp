@@ -2,6 +2,9 @@
 // Use, modification and distribution is subject to the Boost Software
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
+
+#ifdef ALPS_HAVE_HDF5
+
 #include <string>
 #include <sstream>
 #include <cstring>
@@ -147,7 +150,7 @@ namespace mocasito {
 				detail::h5e_t(H5Dwrite(data_id, type_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, &v));
 			}
 			template<typename T> typename boost::disable_if<boost::is_scalar<T> >::type set_data(std::string const & p, T const & v) {
-                                set_data(p, &const_cast<T&>(v)[0], v.size());
+				set_data(p, &const_cast<T&>(v)[0], v.size());
 			}
 			template<typename T> void set_data(std::string const & p, char const * const & v) {
 				set_data(p, v, std::strlen(v));
@@ -250,4 +253,6 @@ namespace mocasito {
 			detail::h5f_t _file;
 	};
 }
+#endif
+
 #endif

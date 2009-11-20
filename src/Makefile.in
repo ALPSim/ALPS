@@ -129,7 +129,7 @@ am__noinst_HEADERS_DIST = boost/classic_spirit.hpp \
 	boost/numeric/bindings/traits/ublas_vector.hpp \
 	boost/numeric/bindings/traits/ublas_vector2.hpp \
 	boost/numeric/bindings/traits/vector_raw.hpp \
-	boost/numeric/bindings/traits/vector_traits.hpp alps/hdf5.hpp alps/bitops.h \
+	boost/numeric/bindings/traits/vector_traits.hpp alps/bitops.h \
 	alps/cctype.h alps/copyright.h alps/expression.h \
 	alps/factory.h alps/functional.h alps/math.hpp \
 	alps/multi_array.hpp alps/stringvalue.h alps/typetraits.h \
@@ -188,7 +188,7 @@ am__noinst_HEADERS_DIST = boost/classic_spirit.hpp \
 	mocasito/io/hdf5.hpp mocasito/io/traits.hpp \
 	mocasito/io/container.hpp mocasito/io/free_fun.hpp \
 	mocasito/io/iterator.hpp mocasito/io/util.hpp \
-	mocasito/trace.hpp mocasito/hdf5.hpp alps/lattice.h \
+	mocasito/trace.hpp alps/h5archive.hpp alps/lattice.h \
 	alps/lattice/boundary.h alps/lattice/cell_traits.h \
 	alps/lattice/coordinate_traits.h \
 	alps/lattice/coordinatelattice.h \
@@ -473,8 +473,8 @@ headers_BOOST = boost/classic_spirit.hpp boost/function_objects.hpp \
 	boost/numeric/bindings/traits/ublas_vector2.hpp \
 	boost/numeric/bindings/traits/vector_raw.hpp \
 	boost/numeric/bindings/traits/vector_traits.hpp
-headers_MOCASITO = mocasito/io/cache.hpp mocasito/io/context.hpp mocasito/io/hdf5.hpp mocasito/io/traits.hpp mocasito/io/container.hpp mocasito/io/free_fun.hpp mocasito/io/iterator.hpp mocasito/io/util.hpp mocasito/trace.hpp mocasito/hdf5.hpp
-headers_ALPS = alps/hdf5.hpp alps/bitops.h alps/cctype.h alps/copyright.h alps/expression.h alps/factory.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h alps/matrix_as_vector.h
+headers_MOCASITO = mocasito/io/cache.hpp mocasito/io/context.hpp mocasito/io/hdf5.hpp mocasito/io/traits.hpp mocasito/io/container.hpp mocasito/io/free_fun.hpp mocasito/io/iterator.hpp mocasito/io/util.hpp mocasito/trace.hpp
+headers_ALPS = alps/h5archive.hpp alps/bitops.h alps/cctype.h alps/copyright.h alps/expression.h alps/factory.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/stringvalue.h alps/typetraits.h alps/vectorio.h alps/vectormath.h alps/vectortraits.h alps/matrix_as_vector.h
 headers_PARAMETER = alps/parameter.h alps/parameter/parameter.h alps/parameter/parameter_p.h alps/parameter/parameterlist.h alps/parameter/parameterlist_p.h alps/parameter/parameters.h alps/parameter/parameters_p.h 
 headers_EXPRESSION = alps/expression/block.h alps/expression/evaluatable.h alps/expression/evaluate.h alps/expression/evaluate_helper.h alps/expression/evaluator.h alps/expression/expression.h alps/expression/expression_fwd.h alps/expression/factor.h alps/expression/function.h alps/expression/number.h alps/expression/parameterevaluator.h alps/expression/symbol.h alps/expression/term.h alps/expression/traits.h
 headers_ALEA = alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nan.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/observableset_p.h alps/alea/obsvalue.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h alps/alea/signedobservable.h alps/alea/hdf5.h alps/alea/recordableobservable.h alps/alea/abstractsimpleobservable.h alps/alea/abstractbinning.h alps/alea/output_helper.h alps/alea/histogramdata.h alps/alea/histogrameval.h
