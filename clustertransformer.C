@@ -378,104 +378,109 @@ SimpleDCATransformer::local_green_function_from_selfenergies(const std::map<doub
 
 
 
-double SimpleDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
-					    const double beta, const double mu)
+alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
+							    const double beta, const double mu, const bool error_propagation)
 {
   const unsigned int nzone = selfenergies.size();
   const unsigned int nfreq = selfenergies[0][0].size()/2;
-  std::vector<alps::RealObsevaluator> energy_vec(nfreq);
-  for (frequency_t freq=0; freq<nfreq; ++freq) {
-    double om = (2.*freq+1.)*M_PI/beta;
-    for (int z=0; z<nzone; ++z) {
-      for (int kc=0; kc<n_cluster_sites(); ++kc) { 
-	alps::RealObsevaluator Sigma_re = selfenergies[z][kc][2*freq];
-	alps::RealObsevaluator obsi = selfenergies[z][kc][2*freq+1];
-	Sigma_re -= mu;
-	obsi -= om;
-	alps::RealObsevaluator obsi_sq = obsi * obsi;
-	for (int kl=0; kl<n_cluster_cells(); ++kl) { 
+  if (error_propagation) {
+    std::vector<alps::RealObsevaluator> energy_vec(nfreq);
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      double om = (2.*freq+1.)*M_PI/beta;
+      for (int z=0; z<nzone; ++z) {
+	for (int kc=0; kc<n_cluster_sites(); ++kc) { 
+	  alps::RealObsevaluator Sigma_re = selfenergies[z][kc][2*freq];
+	  alps::RealObsevaluator obsi = selfenergies[z][kc][2*freq+1];
+	  Sigma_re -= mu;
+	  obsi -= om;
+	  alps::RealObsevaluator obsi_sq = obsi * obsi;
+	  for (int kl=0; kl<n_cluster_cells(); ++kl) { 
 	    for (int sign=-1; sign<=1; sign+=2) {
-	    vector_type k(dimension());
-	    for (unsigned int d=0; d<dimension(); ++d) 
-	      k[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
-	    double eps = epsilon(k);
-	    alps::RealObsevaluator obsr = Sigma_re;
-	    obsr += eps;
-	    obsr *= -1;
-	    alps::RealObsevaluator obs = obsr;
-	    obs *= obsr;
-	    obs += obsi_sq;
-	    obsr /= obs;
-	    obsr *= eps;
-	    // obsi /= obs;
-	    // obsi *= eps;
-	    if (z==0 && kc==0 && kl==0 && sign==-1) {
-	      energy_vec[freq] = obsr;
-	      // energy_vec[2*freq+1] = obsi;
-	    }
-	    else {
-	      energy_vec[freq] += obsr;
-	      // energy_vec[2*freq+1] += obsi;
+	      vector_type k(dimension());
+	      for (unsigned int d=0; d<dimension(); ++d) 
+		k[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	      double eps = epsilon(k);
+	      alps::RealObsevaluator obsr = Sigma_re;
+	      obsr += eps;
+	      obsr *= -1;
+	      alps::RealObsevaluator obs = obsr;
+	      obs *= obsr;
+	      obs += obsi_sq;
+	      obsr /= obs;
+	      obsr *= eps;
+	      // obsi /= obs;
+	      // obsi *= eps;
+	      if (z==0 && kc==0 && kl==0 && sign==-1) {
+		energy_vec[freq] = obsr;
+		// energy_vec[2*freq+1] = obsi;
+	      }
+	      else {
+		energy_vec[freq] += obsr;
+		// energy_vec[2*freq+1] += obsi;
+	      }
 	    }
 	  }
 	}
       }
+      energy_vec[freq] /= 2*n_cluster_cells()*n_cluster_sites();
+      // energy_vec[2*freq+1] /= 2*n_cluster_cells()*n_cluster_sites();
     }
-    energy_vec[freq] /= 2*n_cluster_cells()*n_cluster_sites();
-    // energy_vec[2*freq+1] /= 2*n_cluster_cells()*n_cluster_sites();
-  }
-  std::cout << "dispmom: " << dispersion_moments(0) << "\t" << dispersion_moments(1) << "\n";
-  std::ofstream test1str("test1.dat");
-  for (frequency_t freq=0; freq<nfreq; ++freq) {
-    double om = (2.*freq+1.)*M_PI/beta;
-    test1str << om << "\t" << energy_vec[freq].mean() << "\t"  << "\n";
-  }
-  test1str.close();
-  alps::RealObsevaluator kin = energy_vec[0] + dispersion_moments(1)*nzone*beta*beta/M_PI/M_PI;
-  for (frequency_t freq=1; freq<nfreq; ++freq) {
+    std::cout << "dispmom: " << dispersion_moments(0) << "\t" << dispersion_moments(1) << "\n";
+    std::ofstream test1str("test1.dat");
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      double om = (2.*freq+1.)*M_PI/beta;
+      test1str << om << "\t" << energy_vec[freq].mean() << "\t"  << "\n";
+    }
+    test1str.close();
+    alps::RealObsevaluator kin = energy_vec[0] + dispersion_moments(1)*nzone*beta*beta/M_PI/M_PI;
+    for (frequency_t freq=1; freq<nfreq; ++freq) {
       double om = (2.*freq+1.)*M_PI/beta;
       kin += energy_vec[freq] + dispersion_moments(1)*nzone/om/om;
+    }
+    kin *= 2./beta;
+    kin -= 0.25*nzone*dispersion_moments(1)*beta;
+    return kin; 
   }
-  kin *= 2./beta;
-  kin -= 0.25*nzone*dispersion_moments(1)*beta;
-  std::cout << "kin: " << kin.mean() << "\t" << kin.error() << "\n";
-  return kin.mean(); 
-  //
-  /* std::vector<std::complex<double> > energy_test(nfreq, std::complex<double>(0., 0.));
-  for (frequency_t freq=0; freq<nfreq; ++freq) {
+  else {
+    std::vector<std::complex<double> > energy_test(nfreq, std::complex<double>(0., 0.));
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
       std::complex<double> iom(0., (2.*freq+1.)*M_PI/beta);
       for (int z=0; z<nzone; ++z) {
-	  for (int kc=0; kc<n_cluster_sites(); ++kc) { 
-	      std::complex<double> Sigma(selfenergies[z][kc][2*freq].mean(), selfenergies[z][kc][2*freq+1].mean());
-	      for (int kl=0; kl<n_cluster_cells(); ++kl) { 
-		  for (int sign=-1; sign<=1; sign+=2) {
-		      vector_type k(dimension());
-		      for (unsigned int d=0; d<dimension(); ++d) 
-			  k[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
-		      double eps = epsilon(k);
-		      energy_test[freq] += eps / ( iom+mu-eps-Sigma);
-		  }
-	      }
+	for (int kc=0; kc<n_cluster_sites(); ++kc) { 
+	  std::complex<double> Sigma(selfenergies[z][kc][2*freq].mean(), selfenergies[z][kc][2*freq+1].mean());
+	  for (int kl=0; kl<n_cluster_cells(); ++kl) { 
+	    for (int sign=-1; sign<=1; sign+=2) {
+	      vector_type k(dimension());
+	      for (unsigned int d=0; d<dimension(); ++d) 
+		k[d] = sign*lattice_momentum(kl,d) + cluster_momentum(kc,d);
+	      double eps = epsilon(k);
+	      energy_test[freq] += eps / ( iom+mu-eps-Sigma);
+	    }
 	  }
+	}
       }
       energy_test[freq] /= 2*n_cluster_cells()*n_cluster_sites();
-  }
-  std::ofstream test2str("test2.dat");
-  for (frequency_t freq=0; freq<nfreq; ++freq) {
+    }
+    std::ofstream test2str("test2.dat");
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
       double om = (2.*freq+1.)*M_PI/beta;
-      test2str << om << "\t" << energy_test[freq].real() << "\t"  << "\n";
-  }
-  test2str.close();
-  double kin2 = 0.;
-  for (frequency_t freq=0; freq<nfreq; ++freq) {
+      test2str << om << "\t" << energy_test[freq].real() << "\t"  << energy_test[freq].imag() << "\n";
+    }
+    test2str.close();
+    double kin = 0.;
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
       double om = (2.*freq+1.)*M_PI/beta;
-      kin2 += energy_test[freq].real() + dispersion_moments(1)*nzone/om/om;
+      kin += energy_test[freq].real() + dispersion_moments(1)*nzone/om/om;
+    }
+    kin *= 2./beta;
+    kin -= 0.25*nzone*dispersion_moments(1)*beta;
+    alps::SimpleRealObservable kin_obs("kinetic energy");
+    kin_obs.reset(true);
+    kin_obs << kin;
+    alps::RealObsevaluator kin_eval(kin_obs);
+    return kin_eval; 
   }
-  kin2 *= 2./beta;
-  kin2 -= 0.25*nzone*dispersion_moments(1)*beta;
-  return kin2; */
 }
-
 
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
                                                                const matsubara_green_function_t &G0_omega, 
@@ -581,11 +586,11 @@ AntiFerroDCATransformer::local_green_function_from_selfenergies(const std::map<d
 }
 
 
-double AntiFerroDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& /*selfenergies*/,
-					       const double /*beta*/, const double /*mu*/)
+alps::RealObsevaluator AntiFerroDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& /*selfenergies*/,
+							       const double /*beta*/, const double /*mu*/, const bool /*error_propagation*/)
 {
   boost::throw_exception(std::invalid_argument("to be implemented"));
-  return 0.;
+  return alps::RealObsevaluator();
 }
 
 				       

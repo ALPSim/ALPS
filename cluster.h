@@ -171,8 +171,8 @@ public:
 							 const matsubara_green_function_t& G0_omega, 
 							 const double mu, const double h, const double beta,
 							 const int n_matsubara) const =0; 
-  virtual double kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
-				const double beta, const double mu)=0;
+  virtual alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
+						const double beta, const double mu, const bool error_propagation)=0;
 
   std::complex<double>* exp_iksite(const int sign) const;
   std::vector<double> epsav() const { return epsav_; };
@@ -281,8 +281,8 @@ public:
 						 const matsubara_green_function_t &G0_omega, 
 						 const double mu, const double h, const double beta,
 						 const int n_matsubara) const; 
-  double kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
-			const double beta, const double mu);
+  alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
+					const double beta, const double mu, const bool error_propagation);
   std::map<double, std::complex<double> > local_green_function_from_selfenergies(const std::map<double, 
 										 std::vector<std::complex<double> > >& selfenergies, 
 										 const double mu, const double delta);
@@ -356,8 +356,8 @@ public:
   template<typename T>
   static green_function<T> green_function_divide(const green_function<T>& G1, const T d);
 
-  double kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
-			const double beta, const double mu);
+  alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
+					const double beta, const double mu, const bool error_propagation);
   std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> 
   local_green_function_from_selfenergies(const std::map<double, 
 					 std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& selfenergies,
