@@ -32,9 +32,30 @@ class ConstantDataSet(Module):
 			d.x = np.arange(0,length)
 			d.y = value + 0*d.x
 
-			self.setResult('value',DataSets(d))
+			self.setResult('value',[d])
 		else:
 			raise EmptyInputPort('value || source')
+
+class GenerateDataSet(Module):
+	my_input_ports = [PortDescriptor('source',basic.String,use_python_source=True)]
+	my_output_ports = [PortDescriptor('output',DataSets)]
+	
+	def compute(self):
+		if self.hasInputFromPort('source'):
+			code = self.getInputFromPort('source')
+			proc_code = urllib.unquote(str(code))
+			exec proc_code
+			
+			try:
+				if type(result) == list:
+					self.setResult('output',result)
+				else:
+					self.setResult('output',[result])
+			except NameError:
+				raise InvalidInput("Generate result!")
+				
+		else:
+			raise EmptyInputPort('source')
 
 class Transform(NotCacheable, Module):
 	my_input_ports = [
@@ -47,7 +68,7 @@ class Transform(NotCacheable, Module):
 
 	def compute(self):
 		if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
-			q = copy.deepcopy(self.getInputFromPort('input').sets)
+			q = copy.deepcopy(self.getInputFromPort('input'))
 			for s in q:
 				x = s.x
 				y = s.y
@@ -60,7 +81,7 @@ class Transform(NotCacheable, Module):
 				s.x = x
 				s.y = y
 
-			self.setResult('output',DataSets(q))
+			self.setResult('output',q)
 		else:
 			raise EmptyInputPort('input || source')
 
@@ -85,7 +106,7 @@ class TransformN(NotCacheable, Module):
 			for i in range(0,Nports):
 				port = 'input'+str(i)
 				if self.hasInputFromPort(port):
-					r = self.getInputFromPort(port).sets
+					r = self.getInputFromPort(port)
 					inputs.append(copy.deepcopy(r))
 			Ninputs = len(inputs)
 			
@@ -108,7 +129,7 @@ class TransformN(NotCacheable, Module):
 				
 				results.append(result)
 			
-			self.setResult('output',DataSets(results))
+			self.setResult('output',results)
 		else:
 			raise EmptyInputPort('source')
 
@@ -125,12 +146,12 @@ class Reduce(NotCacheable, Module):
 		if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
 			result = DataSet()
 			
-			for s in self.getInputFromPort('input').sets:
+			for s in self.getInputFromPort('input'):
 				code = self.getInputFromPort('source')
 				proc_code = urllib.unquote(str(code))
 				exec proc_code
 			
-			self.setResult('output',DataSets(result))
+			self.setResult('output',[result])
 		else:
 			raise EmptyInputPort('input || source')
 
@@ -148,40 +169,5 @@ class GeneralTransform(NotCacheable, Module):
 			code = self.getInputFromPort('source')
 			proc_code = urllib.unquote(str(code))
 			exec proc_code
-		else:
-			raise EmptyInputPort('input || source')
-
-class Select(Module):
-	my_input_ports = [
-		PortDescriptor("input",DataSets),
-		PortDescriptor("source",basic.String,use_python_source=True)
-	]
-	my_output_ports = [
-		PortDescriptor("kept",DataSets),
-		PortDescriptor("discarded",DataSets)
-	]
-
-	def compute(self):
-		if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
-			q = copy.deepcopy(self.getInputFromPort('input').sets)
-			kept_sets = []
-			disc_sets = []
-			
-			code = self.getInputFromPort('source')
-			proc_code = urllib.unquote(str(code))
-			
-			cmd = 'def fn(x,y,props):\n'
-			for line in proc_code.split('\n'):
-				cmd = cmd + '\t' + line + '\n'
-			exec cmd
-			
-			for s in q:
-				if fn(s.x,s.y,s.props):
-					kept_sets.append(s)
-				else:
-					disc_sets.append(s)
-
-			self.setResult('kept',DataSets(kept_sets))
-			self.setResult('discarded',DataSets(disc_sets))
 		else:
 			raise EmptyInputPort('input || source')

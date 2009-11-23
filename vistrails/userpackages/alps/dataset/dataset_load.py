@@ -94,7 +94,7 @@ class LoadDataSet(Module):
 				label = self.getInputFromPort('label')
 			
 			l = Loader(filename,label,xc,yc)
-			self.setResult('data', DataSets(l.sets))
+			self.setResult('data', l.sets)
 
 class CustomLoader(Module):
 	my_input_ports = [
@@ -146,7 +146,7 @@ class LoadAlpsFromTxt(Module):
 					val = float(spl[1])
 					data.append([idx,val])
 
-			self.setResult('data', DataSets(sets))
+			self.setResult('data', sets)
 		else:
 			# throw something
 			pass
@@ -183,7 +183,7 @@ class LoadAlpsHdf5(Module):
 			for m in LOM:
 				sets.append(ReadVariableFromFile(fd,m))
 			
-			self.setResult('data',DataSets(sets))
+			self.setResult('data', sets)
 
 class CollectXY(Module):
 	my_input_ports = [
@@ -233,7 +233,7 @@ class CollectXY(Module):
 				
 				for_each_sets[k] = res
 			
-			self.setResult('output',DataSets(for_each_sets.values()))
+			self.setResult('output',for_each_sets.values())
 				
 		else:
 			raise EmptyInputPort('for-each || observable')

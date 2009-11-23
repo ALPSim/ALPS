@@ -21,11 +21,11 @@ class FitPrototype(Module):
 
 	def compute(self):
 		if self.hasInputFromPort('input'):
-			q = copy.deepcopy(self.getInputFromPort('input').sets)
+			q = copy.deepcopy(self.getInputFromPort('input'))
 			for s in q:
 				s = self.transform(s)
 
-			self.setResult('output',DataSets(q))
+			self.setResult('output',q)
 
 class PolyFit(FitPrototype):
 	my_input_ports = FitPrototype.my_input_ports + [PortDescriptor("degree",basic.Integer)]

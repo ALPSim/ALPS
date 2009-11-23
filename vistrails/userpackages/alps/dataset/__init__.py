@@ -17,6 +17,7 @@ from dataset_fit import *
 from dataset_load import *
 from dataset_plot import *
 from dataset_tools import *
+from dataset_select import *
 
 def warn(m):
 	print m
@@ -51,7 +52,7 @@ def register(m,ns,abst=False):
 		else:
 			reg.add_output_port(m, output_port.name, (output_port.porttype, output_port.description))
 	
-	if Descriptor in m.__bases__:
+	if Descriptor in m.__bases__ or Selector in m.__bases__ or m == Selector:
 		reg.add_output_port(m, 'output', (m,''))
 
 def initialize():
@@ -61,9 +62,9 @@ def initialize():
 
 	register(DataSets,'DataSet',abst=True)
 	register(ConcatenateDataSets,'DataSet')
-	register(Select,'DataSet')
 	
 	register(ConstantDataSet,'DataSet|Load')
+	register(GenerateDataSet,'DataSet|Load')
 	register(LoadDataSet,'DataSet|Load')
 	register(LoadAlpsFromTxt,'DataSet|Load')
 	register(CustomLoader,'DataSet|Load')
@@ -78,10 +79,20 @@ def initialize():
 	
 	register(AxisDescriptor,'DataSet|Plot')
 	register(LegendDescriptor,'DataSet|Plot')
-	register(Plotter,'DataSet|Plot')
+	register(Plotter,'DataSet|Plot',abst=True)
+	register(PlotDescriptor,'DataSet|Plot')
+	register(MplXYPlot,'DataSet|Plot')
 	
 	register(FitPrototype,'DataSet|Fit',abst=True)
 	register(PolyFit,'DataSet|Fit')
 	
 	register(SortByX,'DataSet|Tools')
 	register(WriteTxt,'DataSet|Tools')
+	
+	register(Selector,'DataSet|Select',abst=True)
+	register(PropertySelector,'DataSet|Select')
+	register(PropertyRangeSelector,'DataSet|Select')
+	register(And,'DataSet|Select')
+	register(Or,'DataSet|Select')
+	register(Select,'DataSet',abst=True)
+	register(Select,'DataSet|Select')

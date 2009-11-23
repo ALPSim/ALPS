@@ -25,7 +25,7 @@ class WriteTxt(Module):
 	
 	def compute(self):
 		if self.hasInputFromPort('input'):
-			for s in self.getInputFromPort('input').sets:
+			for s in self.getInputFromPort('input'):
 				if 'filename' in s.props:
 					data = np.array([s.x,s.y]).transpose()
 					np.savetxt(s.props['filename'],data)

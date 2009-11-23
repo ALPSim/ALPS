@@ -67,19 +67,19 @@ class ConcatenateDataSets(Module):
 			inps = self.forceGetInputListFromPort('input')
 			sets = []
 			for inp in inps:
-				sets = sets + inp.sets
-			self.setResult('value',DataSets(sets))
+				sets = sets + inp
+			self.setResult('value',sets)
 
 class Descriptor:
 	my_input_ports = []
 	my_output_ports = []
 	
-	def compute(self):
-		for ip in self.my_input_ports:
-			if self.hasInputFromPort(ip.name):
-				self.data[ip.name] = self.getInputFromPort(ip.name)
-		self.setResult('output',self)
-	
 	def __init__(self):
 		Module.__init__(self)
-		self.data = {}
+	
+	def compute(self):
+		ret = {}
+		for ip in self.my_input_ports:
+			if self.hasInputFromPort(ip.name):
+				ret[ip.name] = self.getInputFromPort(ip.name)
+		self.setResult('output',ret)
