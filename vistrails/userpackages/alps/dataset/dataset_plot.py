@@ -11,6 +11,7 @@ from scipy import optimize
 
 from dataset_exceptions import *
 from dataset_core import *
+from plot_core import *
 
 class AxisDescriptor(Descriptor, Module):
 	my_input_ports = [
@@ -45,40 +46,12 @@ class MplXYPlot(Module):
 	def __init__(self):
 		Module.__init__(self)		
 		self.colors = ['k','b','g','m','c','y']
+		self.worker = MplXYPlot_core()
 	
 	def hifp(self,m):
 		return self.hasInputFromPort(m)
 	def gifp(self,m):
 		return self.getInputFromPort(m)
-	
-	def draw_lines(self):
-		self.lines = []
-		self.icolor = 0
-		
-		xlog = False
-		ylog = False
-		if 'xaxis' in self.plt and 'logarithmic' in self.plt['xaxis']:
-			xlog = self.plt['xaxis']['logarithmic']
-		if 'yaxis' in self.plt and 'logarithmic' in self.plt['yaxis']:
-			ylog = self.plt['yaxis']['logarithmic']
-		
-		print self.plt	
-		for q in self.plt['data']:
-			if xlog and ylog:
-				self.lines.append(plt.loglog(q.x,q.y,self.colors[self.icolor]))
-			elif xlog:
-				self.lines.append(plt.semilogx(q.x,q.y,self.colors[self.icolor]))
-			elif ylog:
-				self.lines.append(plt.semilogy(q.x,q.y,self.colors[self.icolor]))
-			else:
-				self.lines.append(plt.plot(q.x,q.y,self.colors[self.icolor]))
-			
-			if 'label' in q.props and q.props['label'] != 'none':
-				self.lines[-1][0].set_label(q.props['label'])
-			elif 'filename' in q.props:
-				self.lines[-1][0].set_label(q.props['filename'])
-			
-			self.icolor = (self.icolor+1)%len(self.colors)
 			
 	def compute(self):
 		if self.hifp('plot'):
@@ -86,30 +59,7 @@ class MplXYPlot(Module):
 		else:
 			raise EmptyInputPort('plot')
 		
-		print self.plt
-		
-		self.draw_lines()
-		
-		if 'xaxis' in self.plt:
-			if 'label' in self.plt['xaxis']:
-				plt.xlabel(self.plt['xaxis']['label'])
-			if 'min' in self.plt['xaxis'] and 'max' in self.plt['xaxis']:
-				plt.xlim(self.plt['xaxis']['min'],self.plt['xaxis']['max'])
-				
-		if 'yaxis' in self.plt:
-			if 'label' in self.plt['yaxis']:
-				plt.ylabel(self.plt['yaxis']['label'])
-			if 'min' in self.plt['yaxis'] and 'max' in self.plt['yaxis']:
-				plt.ylim(self.plt['yaxis']['min'],self.plt['yaxis']['max'])
-		
-		if 'legend' in self.plt:
-			if 'location' in self.plt['legend']:
-				plt.legend(loc=self.plt['legend']['location'])
-			else:
-				plt.legend()
-		
-		if 'title' in self.plt:
-			plt.title(self.plt['title'])
+		self.worker(self.plt)
 		
 		if self.hifp('hide_buttons') and self.gifp('hide_buttons') == True:
 			plt.get_current_fig_manager().toolbar.hide()
