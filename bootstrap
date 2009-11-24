@@ -13,7 +13,7 @@ fi
 # required version of autotools
 am_require=1.11
 ac_require=2.63
-lt_require=2.2.6
+lt_require=2.2.6b
 if `(grep AC_PROG_LIBTOOL configure.ac) > /dev/null 2>&1`; then
   if `(glibtoolize --version) > /dev/null 2>&1`; then
     LIBTOOLIZE=glibtoolize

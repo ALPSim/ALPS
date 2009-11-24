@@ -24,6 +24,7 @@ ELSE(Hdf5_INCLUDE_DIRS)
     /usr/apps/lib
     /usr/lib 
     /opt/lib
+    /opt/local/lib
     /usr/local/lib
     /usr/local/hdf5/lib
     /sw/lib
@@ -36,6 +37,7 @@ ELSE(Hdf5_INCLUDE_DIRS)
     /usr/apps/include
     /usr/include
     /opt/include
+    /opt/local/include
     /usr/local/include
     /usr/local/hdf5/include
     /sw/include

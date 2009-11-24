@@ -323,7 +323,6 @@ src_boost_SERIALIZATION_1_37 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_38 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_39 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_40 = $(src_boost_SERIALIZATION_1_35)
-src_boost_SERIALIZATION_1_41 = $(src_boost_SERIALIZATION_1_35)
 src_boost_SERIALIZATION_1_41 = \
   $(src_boost_SERIALIZATION_1_35) \
   $(BOOST_SRCDIR)/serialization/src/archive_exception.cpp \
