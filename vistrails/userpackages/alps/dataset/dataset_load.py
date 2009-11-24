@@ -7,9 +7,11 @@ from packages.controlflow.list_module import ListOfElements
 import urllib, copy
 import matplotlib.pyplot as plt
 import numpy as np
+import h5py
 from scipy import optimize
 
 from dataset_core import *
+from loadhdf5_core import *
 
 class Loader:
 	def __init__(self,filename,label,xcolumn,ycolumns,props={}):
@@ -161,29 +163,15 @@ class LoadAlpsHdf5(Module):
 		PortDescriptor('data',DataSets)
 	]	
 	
-	# Pre: file is a h5py file descriptor
-	# Post: returns a list of all measurements saved in the file
-	def FindAllMeasurements(self,file):
-		return []
-	
-	# Pre: file is a h5py file descriptor
-	# Post: returns DataSet with all parameters set
-	def ReadMeasurementFromFile(self,file,measname):
-		pass
-	
 	def compute(self):
+		if self.hasInputFromPort('file'):
+			self.f = self.getInputFromPort('file').name
 		if self.hasInputFromPort('Measurements'):
 			warn("Not implemented")
 		else:
-			# open file
-			
-			sets = []
-			
-			LOM = FindAllMeasurements(fd)
-			for m in LOM:
-				sets.append(ReadVariableFromFile(fd,m))
-			
-			self.setResult('data', sets)
+			loader = Hdf5Loader()
+			datasets = loader.ReadMeasurementFromFile(self.f)
+			self.setResult('data',datasets)
 
 class CollectXY(Module):
 	my_input_ports = [
