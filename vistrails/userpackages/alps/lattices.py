@@ -49,6 +49,11 @@ class open_chain_lattice(LatticeParameters):
    _input_ports = [('L',[(basic.String, 'the length')])]
    fixed = {'LATTICE' : 'open chain lattice'}
 
+class dimerized_chain_lattice(LatticeParameters):
+	""" a chain lattice with two different bonds """
+	_input_ports = [('L',[(basic.String, 'the length')])]
+	fixed = {'LATTICE' : 'dimerized chain lattice'}
+
 class open_ladder(LatticeParameters):
    """ an open ladder lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
@@ -73,6 +78,7 @@ def selfRegister():
 
   register_lattice(chain_lattice)
   register_lattice(open_chain_lattice)
+  register_lattice(dimerized_chain_lattice)
   register_lattice(ladder)
   register_lattice(open_ladder)
   register_lattice(square_lattice)

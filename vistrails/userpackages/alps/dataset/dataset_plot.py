@@ -108,6 +108,9 @@ class MplXYPlot(Module):
 			else:
 				plt.legend()
 		
+		if 'title' in self.plt:
+			plt.title(self.plt['title'])
+		
 		if self.hifp('hide_buttons') and self.gifp('hide_buttons') == True:
 			plt.get_current_fig_manager().toolbar.hide()
 		
@@ -158,10 +161,10 @@ class Plotter(NotCacheable, Module):
 				xaxis = self.gifp('xaxis')
 				if 'label' in xaxis:
 					plt.xlabel(xaxis['label'])
-				
+			
 				if 'min' in xaxis and 'max' in xaxis:
 					if xaxis['min'] != xaxis['max']:
-						plt.ylim(xaxis['min'],xaxis['max'])
+						plt.xlim(xaxis['min'],xaxis['max'])
 			
 			if self.hifp('yaxis'):
 				yaxis = self.gifp('yaxis')

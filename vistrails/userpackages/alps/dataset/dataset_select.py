@@ -30,8 +30,7 @@ class PropertySelector(Selector):
 		pn = self.getInputFromPort('property_name')
 		if pn in ds.props:
 			pv = type(ds.props[pn])(self.getInputFromPort('property_value'))
-			if ds.props[pn] == pv:
-				return True
+			return ds.props[pn] == pv
 		return False
 
 class PropertyRangeSelector(Selector):
