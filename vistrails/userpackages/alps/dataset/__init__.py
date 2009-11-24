@@ -69,7 +69,7 @@ def initialize():
 	register(LoadAlpsFromTxt,'DataSet|Load')
 	register(CustomLoader,'DataSet|Load')
 	register(CollectXY,'DataSet|Load')
-#	register(LoadAlpsHdf5,'DataSet|Load')
+	register(LoadAlpsHdf5,'DataSet|Load')
 
 	register(Transform,'DataSet|Evaluate')
 	AddDataSetsInputPorts(TransformN, 5)
