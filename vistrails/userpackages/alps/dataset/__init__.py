@@ -85,6 +85,7 @@ def initialize():
 	
 	register(FitPrototype,'DataSet|Fit',abst=True)
 	register(PolyFit,'DataSet|Fit')
+	register(NonlinearFit,'DataSet|Fit')
 	
 	register(SortByX,'DataSet|Tools')
 	register(WriteTxt,'DataSet|Tools')
