@@ -1722,7 +1722,7 @@ Optional Features:
   --enable-warnings       enable warning messages
   --disable-dependency-tracking  speeds up one-time build
   --enable-dependency-tracking   do not reject slow dependency extractors
-  --disable-openmp        do not use OpenMP
+  --enable-openmp         enable OpenMP parallelization
   --enable-shared[=PKGS]  build shared libraries [default=yes]
   --enable-static[=PKGS]  build static libraries [default=yes]
   --enable-fast-install[=PKGS]
@@ -5237,7 +5237,7 @@ if test "${enable_openmp+set}" = set; then
   enableval=$enable_openmp;
 fi
 
-  if test "$enable_openmp" != no; then
+  if test "$enable_openmp" = yes; then
     { $as_echo "$as_me:$LINENO: checking for $CC option to support OpenMP" >&5
 $as_echo_n "checking for $CC option to support OpenMP... " >&6; }
 if test "${ac_cv_prog_c_openmp+set}" = set; then
@@ -5279,10 +5279,10 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
 	ac_cv_prog_c_openmp='unsupported'
-	  	  	  	  	  	  	  	  	  	  	  	  	  for ac_option in -fopenmp -xopenmp -openmp -mp -omp -qsmp=omp; do
-	    ac_save_CFLAGS=$CFLAGS
-	    CFLAGS="$CFLAGS $ac_option"
-	    cat >conftest.$ac_ext <<_ACEOF
+                                                                                                                                  for ac_option in -fopenmp -xopenmp -openmp -mp -omp -qsmp=omp; do
+            ac_save_CFLAGS=$CFLAGS
+            CFLAGS="$CFLAGS $ac_option"
+            cat >conftest.$ac_ext <<_ACEOF
 
 #ifndef _OPENMP
  choke me
@@ -5323,11 +5323,11 @@ fi
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
-	    CFLAGS=$ac_save_CFLAGS
-	    if test "$ac_cv_prog_c_openmp" != unsupported; then
-	      break
-	    fi
-	  done
+            CFLAGS=$ac_save_CFLAGS
+            if test "$ac_cv_prog_c_openmp" != unsupported; then
+              break
+            fi
+          done
 fi
 
 rm -rf conftest.dSYM
@@ -5358,7 +5358,7 @@ if test "${enable_openmp+set}" = set; then
   enableval=$enable_openmp;
 fi
 
-  if test "$enable_openmp" != no; then
+  if test "$enable_openmp" = yes; then
     { $as_echo "$as_me:$LINENO: checking for $CC option to support OpenMP" >&5
 $as_echo_n "checking for $CC option to support OpenMP... " >&6; }
 if test "${ac_cv_prog_cxx_openmp+set}" = set; then
@@ -5400,10 +5400,10 @@ else
 sed 's/^/| /' conftest.$ac_ext >&5
 
 	ac_cv_prog_cxx_openmp='unsupported'
-	  	  	  	  	  	  	  	  	  	  	  	  	  for ac_option in -fopenmp -xopenmp -openmp -mp -omp -qsmp=omp; do
-	    ac_save_CXXFLAGS=$CXXFLAGS
-	    CXXFLAGS="$CXXFLAGS $ac_option"
-	    cat >conftest.$ac_ext <<_ACEOF
+                                                                                                                                  for ac_option in -fopenmp -xopenmp -openmp -mp -omp -qsmp=omp; do
+            ac_save_CXXFLAGS=$CXXFLAGS
+            CXXFLAGS="$CXXFLAGS $ac_option"
+            cat >conftest.$ac_ext <<_ACEOF
 
 #ifndef _OPENMP
  choke me
@@ -5444,11 +5444,11 @@ fi
 rm -rf conftest.dSYM
 rm -f core conftest.err conftest.$ac_objext conftest_ipa8_conftest.oo \
       conftest$ac_exeext conftest.$ac_ext
-	    CXXFLAGS=$ac_save_CXXFLAGS
-	    if test "$ac_cv_prog_cxx_openmp" != unsupported; then
-	      break
-	    fi
-	  done
+            CXXFLAGS=$ac_save_CXXFLAGS
+            if test "$ac_cv_prog_cxx_openmp" != unsupported; then
+              break
+            fi
+          done
 fi
 
 rm -rf conftest.dSYM

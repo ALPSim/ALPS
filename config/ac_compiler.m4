@@ -1,3 +1,50 @@
+# AC_ALPS_OPENMP
+# --------------
+# This macro is almost equivalent to autoconf/autoconf/c.m4 except
+# that the OpenMP support is disabled by default.
+AC_DEFUN([AC_ALPS_OPENMP],
+[
+  OPENMP_[]_AC_LANG_PREFIX[]FLAGS=
+  AC_ARG_ENABLE([openmp],
+    [AS_HELP_STRING([--enable-openmp], [enable OpenMP parallelization])])
+  if test "$enable_openmp" = yes; then
+    AC_CACHE_CHECK([for $CC option to support OpenMP],
+      [ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp],
+      [AC_LINK_IFELSE([_AC_LANG_OPENMP],
+         [ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp='none needed'],
+         [ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp='unsupported'
+          dnl Try these flags:
+          dnl   GCC >= 4.2           -fopenmp
+          dnl   SunPRO C             -xopenmp
+          dnl   Intel C              -openmp
+          dnl   SGI C, PGI C         -mp
+          dnl   Tru64 Compaq C       -omp
+          dnl   IBM C (AIX, Linux)   -qsmp=omp
+          dnl If in this loop a compiler is passed an option that it doesn't
+          dnl understand or that it misinterprets, the AC_LINK_IFELSE test
+          dnl will fail (since we know that it failed without the option),
+          dnl therefore the loop will continue searching for an option, and
+          dnl no output file called 'penmp' or 'mp' is created.
+          for ac_option in -fopenmp -xopenmp -openmp -mp -omp -qsmp=omp; do
+            ac_save_[]_AC_LANG_PREFIX[]FLAGS=$[]_AC_LANG_PREFIX[]FLAGS
+            _AC_LANG_PREFIX[]FLAGS="$[]_AC_LANG_PREFIX[]FLAGS $ac_option"
+            AC_LINK_IFELSE([_AC_LANG_OPENMP],
+              [ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp=$ac_option])
+            _AC_LANG_PREFIX[]FLAGS=$ac_save_[]_AC_LANG_PREFIX[]FLAGS
+            if test "$ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp" != unsupported; then
+              break
+            fi
+          done])])
+    case $ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp in #(
+      "none needed" | unsupported)
+        ;; #(
+      *)
+        OPENMP_[]_AC_LANG_PREFIX[]FLAGS=$ac_cv_prog_[]_AC_LANG_ABBREV[]_openmp ;;
+    esac
+  fi
+  AC_SUBST([OPENMP_]_AC_LANG_PREFIX[FLAGS])
+])
+
 AC_DEFUN([AC_COMPILER],
   [
   AC_SUBST(COMPILER)
@@ -491,9 +538,9 @@ AC_DEFUN([AC_COMPILER],
 
   AC_LANG_SAVE
   AC_LANG_C
-  AC_OPENMP
+  AC_ALPS_OPENMP
   AC_LANG_CPLUSPLUS
-  AC_OPENMP
+  AC_ALPS_OPENMP
   AC_LANG_RESTORE
   if test -z "$ac_cv_prog_cxx_openmp" -o "$ac_cv_prog_cxx_openmp" = unsupported; then
     ac_cv_have_openmp=no
