@@ -23,13 +23,13 @@ AC_DEFUN([AC_HDF5],
     ]
   )
 
-  # default is 'without HDF5'
-  test -z "$hdf5" && hdf5=no
+  # default is 'with HDF5'
+  test -z "$hdf5" && hdf5=yes
 
   if test "$hdf5" != "no"; then
     AC_MSG_CHECKING([for HDF5 root directory])
     if test "x$hdf5_dir" = "x"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src /sw; do
         if test -f "$d/include/hdf5.h"; then
           hdf5_dir="$d"
           break

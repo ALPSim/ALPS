@@ -29,7 +29,7 @@ AC_DEFUN([AC_HDF5_CPP],
   if test "$hdf5" != "no"; then
     AC_MSG_CHECKING([for HDF5 c++ interface])
     if test "x$hdf5_dir" = "x"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src /sw; do
         if test -f "$d/include/H5Cpp.h"; then
           hdf5_dir="$d"
           break

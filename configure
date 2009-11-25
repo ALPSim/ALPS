@@ -19685,14 +19685,14 @@ $as_echo "$as_me: error: expected an absolute directory name for --with-hdf5 : $
 fi
 
 
-  # default is 'without HDF5'
-  test -z "$hdf5" && hdf5=no
+  # default is 'with HDF5'
+  test -z "$hdf5" && hdf5=yes
 
   if test "$hdf5" != "no"; then
     { $as_echo "$as_me:$LINENO: checking for HDF5 root directory" >&5
 $as_echo_n "checking for HDF5 root directory... " >&6; }
     if test "x$hdf5_dir" = "x"; then
-      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src; do
+      for d in $HOME $HOME/src $prefix $prefix/src /usr/local /usr/local/src /sw; do
         if test -f "$d/include/hdf5.h"; then
           hdf5_dir="$d"
           break
