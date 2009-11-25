@@ -182,8 +182,6 @@ add_subdirectory(tool)
 ##########################################################################
 # Binary packages                                                        #
 ##########################################################################
-CMAKE_OSX_ARCHITECTURES=i386;x86_64
-
 set(CPACK_PACKAGE_NAME "ALPS")
 set(CPACK_PACKAGE_VENDOR "alps.comp-phys.org")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
