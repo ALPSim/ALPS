@@ -182,6 +182,8 @@ add_subdirectory(tool)
 ##########################################################################
 # Binary packages                                                        #
 ##########################################################################
+CMAKE_OSX_ARCHITECTURES=i386;x86_64
+
 set(CPACK_PACKAGE_NAME "ALPS")
 set(CPACK_PACKAGE_VENDOR "alps.comp-phys.org")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
@@ -232,6 +234,7 @@ if(WIN32 AND NOT UNIX)
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
 endif(WIN32 AND NOT UNIX)
 include(CPack)
+
 
 if(COMMAND cpack_configure_downloads)
   cpack_configure_downloads(
