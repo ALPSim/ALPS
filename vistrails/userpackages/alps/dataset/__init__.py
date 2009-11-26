@@ -13,7 +13,7 @@ import numpy as np
 import sys, os
 try:
 	sys.path.append(os.environ['HOME'] + '/.vistrails/userpackages/alps/pyalps')
-	sys.path.append(os.environ['HOME'] + '/.vistrails/userpackages/alps/util')
+	sys.path.append(os.environ['HOME'] + '/.vistrails/userpackages/alps/pyalps/util')
 except KeyError:
 	raise EnvironmentError('Cannot find $HOME - do we live on Windows?')
 
