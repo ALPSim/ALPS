@@ -36,12 +36,35 @@ else
   (cd "$BUILD_DIR" && "$CURL" "$URL" | tar zxf -) 2>&1 | tee -a "$LOG"
 fi
 
+echo "applying a patch..." | tee -a "$LOG"
+cat << EOF | (cd "$BUILD_DIR/lp_solve_$VERSION" && patch -p0)
+*** lpglob.h.orig
+--- lpglob.h
+***************
+*** 14,20 ****
+  extern short      Maximise;
+  extern short      *relat;
+  extern int        yylineno;
+! extern int        yyleng;
+  extern int        Lin_term_count;
+  extern int        Sign;
+  extern constraint_name *First_constraint_name;
+--- 14,20 ----
+  extern short      Maximise;
+  extern short      *relat;
+  extern int        yylineno;
+! /* extern int        yyleng; */
+  extern int        Lin_term_count;
+  extern int        Sign;
+  extern constraint_name *First_constraint_name;
+EOF
+
 ( \
 echo "building..." && \
 (cd "$BUILD_DIR/lp_solve_$VERSION" && make) && \
 echo "installing..." && \
-mkdir -p "$prefix/include" "$prefix/lib" && \
-(cd "$BUILD_DIR/lp_solve_$VERSION" && cp -fp lpkit.h hash.h fortify.h declare.h "$prefix/include" && cp -fp liblpk.a "$prefix/lib") && \
+mkdir -p "$PREFIX/include" "$PREFIX/lib" && \
+(cd "$BUILD_DIR/lp_solve_$VERSION" && cp -fp lpkit.h hash.h fortify.h declare.h "$PREFIX/include" && cp -fp liblpk.a "$PREFIX/lib") && \
 echo "cleaning up..." && \
 rm -rf "$BUILD_DIR/lp_solve_$VERSION" && \
 echo "done" \
