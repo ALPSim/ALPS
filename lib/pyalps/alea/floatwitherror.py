@@ -12,138 +12,142 @@ from sys  import stdin
 from math import *
 
 class FloatWithError:
-
-
-  def __init__(self,mean_=0,error_=0):
-    self.mean  = mean_
-    self.error = error_
+  def __init__(self,mean__=0,error__=0):
+    self.mean_  = mean__
+    self.error_ = error__
 
   def __str__(self):
-    return str(self.mean) + '\t' + str(self.error)
+    return str(self.mean_) + '\t' + str(self.error_)
+  def __repr__(self):
+	return self.__str__()
   def __expr__(self):
-    return expr(self.mean) + '\t' + expr(self.error)
+    return expr(self.mean_) + '\t' + expr(self.error_)
+  def mean(self):
+    return str(self.mean_)
+  def error(self):
+    return str(self.error_)
 
   
   def __add__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    return FloatWithError(x__.mean+y__.mean,sqrt(x__.error*x__.error+y__.error*y__.error))
+    return FloatWithError(x__.mean_+y__.mean_,sqrt(x__.error_*x__.error_+y__.error_*y__.error_))
 
   def __radd__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    return FloatWithError(y__.mean+x__.mean,sqrt(y__.error*y__.error+x__.error*x__.error))
+    return FloatWithError(y__.mean_+x__.mean_,sqrt(y__.error_*y__.error_+x__.error_*x__.error_))
 
   def __sub__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    return FloatWithError(x__.mean-y__.mean,sqrt(x__.error*x__.error+y__.error*y__.error))
+    return FloatWithError(x__.mean_-y__.mean_,sqrt(x__.error_*x__.error_+y__.error_*y__.error_))
 
   def __rsub__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    return FloatWithError(y__.mean-x__.mean,sqrt(y__.error*y__.error+x__.error*x__.error))
+    return FloatWithError(y__.mean_-x__.mean_,sqrt(y__.error_*y__.error_+x__.error_*x__.error_))
 
   def __iadd__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    return FloatWithError(x__.mean+y__.mean,sqrt(x__.error*x__.error+y__.error*y__.error))
+    return FloatWithError(x__.mean_+y__.mean_,sqrt(x__.error_*x__.error_+y__.error_*y__.error_))
   def __isub__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    return FloatWithError(x__.mean-y__.mean,sqrt(x__.error*x__.error+y__.error*y__.error))
+    return FloatWithError(x__.mean_-y__.mean_,sqrt(x__.error_*x__.error_+y__.error_*y__.error_))
 
 
   def __mul__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    z__mean_      = x__.mean * y__.mean
-    #x__rel_error_ = x__.error / x__.mean
-    #y__rel_error_ = y__.error / y__.mean
-    #return FloatWithError(z__mean_,z__mean_*sqrt(x__rel_error_*x__rel_error_ + y__rel_error_*y__rel_error_))
-    z__deri__x__   = y__.mean
-    z__deri__y__   = x__.mean
-    return FloatWithError(z__mean_,sqrt(z__deri__x__*z__deri__x__*x__.error*x__.error + z__deri__y__*z__deri__y__*y__.error*y__.error))
+    z__mean__      = x__.mean_ * y__.mean_
+    #x__rel_error__ = x__.error_ / x__.mean_
+    #y__rel_error__ = y__.error_ / y__.mean_
+    #return FloatWithError(z__mean__,z__mean__*sqrt(x__rel_error__*x__rel_error__ + y__rel_error__*y__rel_error__))
+    z__deri__x__   = y__.mean_
+    z__deri__y__   = x__.mean_
+    return FloatWithError(z__mean__,sqrt(z__deri__x__*z__deri__x__*x__.error_*x__.error_ + z__deri__y__*z__deri__y__*y__.error_*y__.error_))
 
   def __div__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    z__mean_      = x__.mean / y__.mean
-    #x__rel_error_ = x__.error / x__.mean
-    #y__rel_error_ = y__.error / y__.mean
-    #return FloatWithError(z__mean_,z__mean_*sqrt(x__rel_error_*x__rel_error_ + y__rel_error_*y__rel_error_))
-    z__deri__x__   = 1./y__.mean
-    z__deri__y__   = -x__.mean/(y__.mean*y__.mean)
-    return FloatWithError(z__mean_,sqrt(z__deri__x__*z__deri__x__*x__.error*x__.error + z__deri__y__*z__deri__y__*y__.error*y__.error))
+    z__mean__      = x__.mean_ / y__.mean_
+    #x__rel_error__ = x__.error_ / x__.mean_
+    #y__rel_error__ = y__.error_ / y__.mean_
+    #return FloatWithError(z__mean__,z__mean__*sqrt(x__rel_error__*x__rel_error__ + y__rel_error__*y__rel_error__))
+    z__deri__x__   = 1./y__.mean_
+    z__deri__y__   = -x__.mean_/(y__.mean_*y__.mean_)
+    return FloatWithError(z__mean__,sqrt(z__deri__x__*z__deri__x__*x__.error_*x__.error_ + z__deri__y__*z__deri__y__*y__.error_*y__.error_))
 
   def __rmul__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    z__mean_      = y__.mean * x__.mean
-    #x__rel_error_ = x__.error / x__.mean
-    #y__rel_error_ = y__.error / y__.mean
-    #return FloatWithError(z__mean_,z__mean_*sqrt(y__rel_error_*y__rel_error_ + x__rel_error_*x__rel_error_))
-    z__deri__x__   = y__.mean
-    z__deri__y__   = x__.mean
-    return FloatWithError(z__mean_,sqrt(z__deri__x__*z__deri__x__*x__.error*x__.error + z__deri__y__*z__deri__y__*y__.error*y__.error))
+    z__mean__      = y__.mean_ * x__.mean_
+    #x__rel_error__ = x__.error_ / x__.mean_
+    #y__rel_error__ = y__.error_ / y__.mean_
+    #return FloatWithError(z__mean__,z__mean__*sqrt(y__rel_error__*y__rel_error__ + x__rel_error__*x__rel_error__))
+    z__deri__x__   = y__.mean_
+    z__deri__y__   = x__.mean_
+    return FloatWithError(z__mean__,sqrt(z__deri__x__*z__deri__x__*x__.error_*x__.error_ + z__deri__y__*z__deri__y__*y__.error_*y__.error_))
 
   def __rdiv__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    z__mean_      = y__.mean / x__.mean
-    #x__rel_error_ = x__.error / x__.mean
-    #y__rel_error_ = y__.error / y__.mean
-    #return FloatWithError(z__mean_,z__mean_*sqrt(y__rel_error_*y__rel_error_ + x__rel_error_*x__rel_error_))
-    z__deri__y__   = 1./x__.mean
-    z__deri__x__   = -y__.mean/(x__.mean*x__.mean)
-    return FloatWithError(z__mean_,sqrt(z__deri__x__*z__deri__x__*x__.error*x__.error + z__deri__y__*z__deri__y__*y__.error*y__.error))
+    z__mean__      = y__.mean_ / x__.mean_
+    #x__rel_error__ = x__.error_ / x__.mean_
+    #y__rel_error__ = y__.error_ / y__.mean_
+    #return FloatWithError(z__mean__,z__mean__*sqrt(y__rel_error__*y__rel_error__ + x__rel_error__*x__rel_error__))
+    z__deri__y__   = 1./x__.mean_
+    z__deri__x__   = -y__.mean_/(x__.mean_*x__.mean_)
+    return FloatWithError(z__mean__,sqrt(z__deri__x__*z__deri__x__*x__.error_*x__.error_ + z__deri__y__*z__deri__y__*y__.error_*y__.error_))
 
   def __imul__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    z__mean_      = x__.mean * y__.mean
-    #x__rel_error_ = x__.error / x__.mean
-    #y__rel_error_ = y__.error / y__.mean
-    #return FloatWithError(z__mean_,z__mean_*sqrt(x__rel_error_*x__rel_error_ + y__rel_error_*y__rel_error_))
-    z__deri__x__   = y__.mean
-    z__deri__y__   = x__.mean
-    return FloatWithError(z__mean_,sqrt(z__deri__x__*z__deri__x__*x__.error*x__.error + z__deri__y__*z__deri__y__*y__.error*y__.error))
+    z__mean__      = x__.mean_ * y__.mean_
+    #x__rel_error__ = x__.error_ / x__.mean_
+    #y__rel_error__ = y__.error_ / y__.mean_
+    #return FloatWithError(z__mean__,z__mean__*sqrt(x__rel_error__*x__rel_error__ + y__rel_error__*y__rel_error__))
+    z__deri__x__   = y__.mean_
+    z__deri__y__   = x__.mean_
+    return FloatWithError(z__mean__,sqrt(z__deri__x__*z__deri__x__*x__.error_*x__.error_ + z__deri__y__*z__deri__y__*y__.error_*y__.error_))
 
   def __idiv__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
       y__ = FloatWithError(y__)
-    z__mean_      = x__.mean / y__.mean
-    #x__rel_error_ = x__.error / x__.mean
-    #y__rel_error_ = y__.error / y__.mean
-    #return FloatWithError(z__mean_,z__mean_*sqrt(x__rel_error_*x__rel_error_ + y__rel_error_*y__rel_error_))
-    z__deri__x__   = 1./y__.mean
-    z__deri__y__   = -x__.mean/(y__.mean*y__.mean)
-    return FloatWithError(z__mean_,sqrt(z__deri__x__*z__deri__x__*x__.error*x__.error + z__deri__y__*z__deri__y__*y__.error*y__.error))
+    z__mean__      = x__.mean_ / y__.mean_
+    #x__rel_error__ = x__.error_ / x__.mean_
+    #y__rel_error__ = y__.error_ / y__.mean_
+    #return FloatWithError(z__mean__,z__mean__*sqrt(x__rel_error__*x__rel_error__ + y__rel_error__*y__rel_error__))
+    z__deri__x__   = 1./y__.mean_
+    z__deri__y__   = -x__.mean_/(y__.mean_*y__.mean_)
+    return FloatWithError(z__mean__,sqrt(z__deri__x__*z__deri__x__*x__.error_*x__.error_ + z__deri__y__*z__deri__y__*y__.error_*y__.error_))
 
 
   def __neg__(self):
-    return FloatWithError(0-self.mean,self.error)
+    return FloatWithError(0-self.mean_,self.error_)
 
   def __pos__(self):
-    return FloatWithError(self.mean,self.error)
+    return FloatWithError(self.mean_,self.error_)
 
   def __abs__(self):
-    return FloatWithError(abs(self.mean),self.error)
+    return FloatWithError(abs(self.mean_),self.error_)
 
 
   def __pow__(x__,y__):
-    z__mean_      = pow(x__.mean,y__)
-    #x__rel_error_ = x__.error / x__.mean
-    #return FloatWithError(z__mean_,z__mean_*y__*x__rel_error_)
-    z__deri__      = y__*pow(x__.mean,y__-1.)
-    return FloatWithError(z__mean_,abs(z__deri__*x__.error))
+    z__mean__      = pow(x__.mean_,y__)
+    #x__rel_error__ = x__.error_ / x__.mean_
+    #return FloatWithError(z__mean__,z__mean__*y__*x__rel_error__)
+    z__deri__      = y__*pow(x__.mean_,y__-1.)
+    return FloatWithError(z__mean__,abs(z__deri__*x__.error_))
 
   def __ipow__(x__,y__):
-    z__mean_      = pow(x__.mean,y__)
-    #x__rel_error_ = x__.error / x__.mean
-    #return FloatWithError(z__mean_,z__mean_*y__*x__rel_error_)
-    z__deri__      = y__*pow(x__.mean,y__-1.)
-    return FloatWithError(z__mean_,abs(z__deri__*x__.error))
+    z__mean__      = pow(x__.mean_,y__)
+    #x__rel_error__ = x__.error_ / x__.mean_
+    #return FloatWithError(z__mean__,z__mean__*y__*x__rel_error__)
+    z__deri__      = y__*pow(x__.mean_,y__-1.)
+    return FloatWithError(z__mean__,abs(z__deri__*x__.error_))
 
 
   def sq(self):
@@ -157,73 +161,73 @@ class FloatWithError:
 
 
   def exp(self,a__=e):
-    y__mean_ = a__**self.mean
-    return FloatWithError(y__mean_,abs(y__mean_*log(a__)*self.error))
+    y__mean__ = a__**self.mean_
+    return FloatWithError(y__mean__,abs(y__mean__*log(a__)*self.error_))
 
   def log(self,a__=e):
-    y__mean_ = log(self.mean,a__)
-    y__deri__ = 1./(self.mean * log(a__))
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = log(self.mean_,a__)
+    y__deri__ = 1./(self.mean_ * log(a__))
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   
   def sin(self):
-    y__mean_ = sin(self.mean)
-    y__deri__ = cos(self.mean)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = sin(self.mean_)
+    y__deri__ = cos(self.mean_)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def cos(self):
-    y__mean_ = cos(self.mean)
-    y__deri__ = -sin(self.mean)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = cos(self.mean_)
+    y__deri__ = -sin(self.mean_)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def tan(self):
-    y__mean_ = tan(self.mean)
-    y__deri__ = 1./(cos(self.mean)*cos(self.mean))
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = tan(self.mean_)
+    y__deri__ = 1./(cos(self.mean_)*cos(self.mean_))
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def asin(self):
-    y__mean_ = asin(self.mean)
-    y__deri__ = 1./sqrt(1. - self.mean*self.mean)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = asin(self.mean_)
+    y__deri__ = 1./sqrt(1. - self.mean_*self.mean_)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def acos(self):
-    y__mean_ = acos(self.mean)
-    y__deri__ = -1./sqrt(1. - self.mean*self.mean)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = acos(self.mean_)
+    y__deri__ = -1./sqrt(1. - self.mean_*self.mean_)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def atan(self):
-    y__mean_ = atan(self.mean)
-    y__deri__ = 1./(1. + self.mean*self.mean)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = atan(self.mean_)
+    y__deri__ = 1./(1. + self.mean_*self.mean_)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   
   def sinh(self):
-    y__mean_ = sinh(self.mean)
-    y__deri__ = cosh(self.mean)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = sinh(self.mean_)
+    y__deri__ = cosh(self.mean_)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def cosh(self):
-    y__mean_ = cosh(self.mean)
-    y__deri__ = sinh(self.mean)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = cosh(self.mean_)
+    y__deri__ = sinh(self.mean_)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def tanh(self):
-    y__mean_ = tanh(self.mean)
-    y__deri__ = 1./(cosh(self.mean)*cosh(self.mean))
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = tanh(self.mean_)
+    y__deri__ = 1./(cosh(self.mean_)*cosh(self.mean_))
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def asinh(self):
-    y__mean_ = asinh(self.mean)
-    y__deri__ = 1./sqrt(self.mean*self.mean + 1.)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = asinh(self.mean_)
+    y__deri__ = 1./sqrt(self.mean_*self.mean_ + 1.)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def acosh(self):
-    y__mean_ = acosh(self.mean)
-    y__deri__ = 1./sqrt(self.mean*self.mean - 1.)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = acosh(self.mean_)
+    y__deri__ = 1./sqrt(self.mean_*self.mean_ - 1.)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
 
   def atanh(self):
-    y__mean_ = atanh(self.mean)
-    y__deri__ = 1./(1. - self.mean*self.mean)
-    return FloatWithError(y__mean_,abs(y__deri__ * self.error))
+    y__mean__ = atanh(self.mean_)
+    y__deri__ = 1./(1. - self.mean_*self.mean_)
+    return FloatWithError(y__mean__,abs(y__deri__ * self.error_))
  
