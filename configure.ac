@@ -405,7 +405,7 @@ AM_PATH_PYTHON(2.5, [ac_cv_have_python=yes], [ac_cv_have_python=no])
 AC_SUBST(PYTHON_EXECUTABLE, [$ac_cv_path_PYTHON])
 AC_SUBST(PYTHON_SCRIPTDIR, [$ac_cv_alps_libdir/python])
 
-if test -n "$ac_cv_have_PYTHON"; then
+if test -n "$ac_cv_have_python"; then
   dnl check for wxPython
   AC_MSG_CHECKING([checking for wxPython])
   ac_cv_wxpython_version=`$ac_cv_path_PYTHON -c 'import wx; print wx.__version__' < /dev/null 2> /dev/null`
@@ -524,7 +524,7 @@ if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric example/parapack/Makefile example/parapack/single/Makefile example/parapack/multiple/Makefile example/parapack/loop/Makefile example/parapack/exchange/Makefile example/parapack/wanglandau/Makefile example/sampling/Makefile)
   AC_CONFIG_FILES(lib/xml/Makefile lib/xml/changestylesheet.xsl lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl)
   AC_CONFIG_FILES(tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet tool/extractmpl tool/plot2mpl)
-  if test "$ac_cv_have_vtkpython" = yes; then
+  if test "$ac_cv_have_vtk_python" = yes; then
     AC_CONFIG_FILES(tool/config.py tool/lattice-preview)
   fi
 fi

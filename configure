@@ -27316,7 +27316,7 @@ PYTHON_EXECUTABLE=$ac_cv_path_PYTHON
 PYTHON_SCRIPTDIR=$ac_cv_alps_libdir/python
 
 
-if test -n "$ac_cv_have_PYTHON"; then
+if test -n "$ac_cv_have_python"; then
     { $as_echo "$as_me:$LINENO: checking checking for wxPython" >&5
 $as_echo_n "checking checking for wxPython... " >&6; }
   ac_cv_wxpython_version=`$ac_cv_path_PYTHON -c 'import wx; print wx.__version__' < /dev/null 2> /dev/null`
@@ -27515,7 +27515,7 @@ if test "$ac_cv_alps_type" = "full"; then
 
   ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet tool/extractmpl tool/plot2mpl"
 
-  if test "$ac_cv_have_vtkpython" = yes; then
+  if test "$ac_cv_have_vtk_python" = yes; then
     ac_config_files="$ac_config_files tool/config.py tool/lattice-preview"
 
   fi
