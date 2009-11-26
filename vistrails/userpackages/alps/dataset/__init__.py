@@ -89,6 +89,7 @@ def initialize():
 	register(Plotter,'DataSet|Plot',abst=True)
 	register(PlotDescriptor,'DataSet|Plot')
 	register(MplXYPlot,'DataSet|Plot')
+	reg.add_module(PlotAsText,namespace='DataSet|Plot')
 	
 	register(FitPrototype,'DataSet|Fit',abst=True)
 	register(PolyFit,'DataSet|Fit')
