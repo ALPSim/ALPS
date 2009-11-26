@@ -166,7 +166,7 @@ install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
 install(FILES config/CMake/UseALPS.cmake ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
         DESTINATION share/alps)
 
-install(DIRECTORY lib/python DESTINATION lib
+install(DIRECTORY lib/pyalps DESTINATION lib
         FILES_MATCHING PATTERN "*.py"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
