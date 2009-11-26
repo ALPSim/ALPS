@@ -396,6 +396,46 @@ else
 fi
 
 dnl
+dnl python
+dnl
+
+am_cv_python_pyexecdir="$ac_cv_alps_libdir/python"
+am_cv_python_pythondir="$ac_cv_alps_libdir/python"
+AM_PATH_PYTHON(2.5, [ac_cv_have_python=yes], [ac_cv_have_python=no])
+AC_SUBST(PYTHON_EXECUTABLE, [$ac_cv_path_PYTHON])
+AC_SUBST(PYTHON_SCRIPTDIR, [$ac_cv_alps_libdir/python])
+
+if test -n "$ac_cv_have_PYTHON"; then
+  dnl check for wxPython
+  AC_MSG_CHECKING([checking for wxPython])
+  ac_cv_wxpython_version=`$ac_cv_path_PYTHON -c 'import wx; print wx.__version__' < /dev/null 2> /dev/null`
+  if test $? = 0; then
+    ac_cv_have_wxpython=yes
+    AC_MSG_RESULT([yes])
+    AC_MSG_CHECKING([checking for wxPython version])
+    AC_MSG_RESULT([$ac_cv_wxpython_version])
+  else
+    ac_cv_have_wxpython=no
+    AC_MSG_RESULT([no])
+  fi
+fi
+AM_CONDITIONAL(HAVE_WXPYTHON, test "$ac_cv_have_wxpython" = yes)
+
+if test -n "$ac_cv_have_wxpython"; then
+  dnl check for VTK
+  AC_MSG_CHECKING([checking for VTK Python wrapper])
+  $ac_cv_path_PYTHON -c 'import vtk.wx.wxVTKRenderWindowInteractor' < /dev/null > /dev/null 2>&1
+  if test $? = 0; then
+    ac_cv_have_vtk_python=yes
+    AC_MSG_RESULT([yes])
+  else
+    ac_cv_have_vtk_python=no
+    AC_MSG_RESULT([no])
+  fi
+fi
+AM_CONDITIONAL(HAVE_VTKPYTHON, test "$ac_cv_have_vtk_python" = yes)
+
+dnl
 dnl # setup BASE_CPPFLAGS, BASE_LDFLAGS, BASE_LIBS
 dnl
 
@@ -484,6 +524,9 @@ if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric example/parapack/Makefile example/parapack/single/Makefile example/parapack/multiple/Makefile example/parapack/loop/Makefile example/parapack/exchange/Makefile example/parapack/wanglandau/Makefile example/sampling/Makefile)
   AC_CONFIG_FILES(lib/xml/Makefile lib/xml/changestylesheet.xsl lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl)
   AC_CONFIG_FILES(tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet tool/extractmpl tool/plot2mpl)
+  if test "$ac_cv_have_vtkpython" = yes; then
+    AC_CONFIG_FILES(tool/config.py tool/lattice-preview)
+  fi
 fi
 
 if test "$ac_cv_use_precompiled_boost" != yes; then

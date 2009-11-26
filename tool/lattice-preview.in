@@ -1,0 +1,18 @@
+#!/bin/sh
+
+DIR=`dirname $0`
+if test -f "$DIR/config.py"; then
+  SCRIPTDIR="@abs_srcdir@"
+  PYTHONPATH=$SCRIPTDIR:@abs_builddir@:$PHTHONPATH
+  export PYTHONPATH
+else
+  SCRIPTDIR="@PYTHON_SCRIPTDIR@/alps"
+  PYTHONPATH=$SCRIPTDIR:$PHTHONPATH
+  export PYTHONPATH
+fi
+
+# for Mac OS X Snow Leopard
+VERSIONER_PYTHON_PREFER_32_BIT=yes
+export VERSIONER_PYTHON_PREFER_32_BIT
+
+@PYTHON_EXECUTABLE@ "$SCRIPTDIR/preview.py" $@ < /dev/null &

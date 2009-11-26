@@ -810,6 +810,21 @@ abs_top_srcdir
 BASE_LIBS
 BASE_LDFLAGS
 BASE_CPPFLAGS
+HAVE_VTKPYTHON_FALSE
+HAVE_VTKPYTHON_TRUE
+HAVE_WXPYTHON_FALSE
+HAVE_WXPYTHON_TRUE
+PYTHON_SCRIPTDIR
+PYTHON_EXECUTABLE
+pkgpyexecdir
+pyexecdir
+pkgpythondir
+pythondir
+PYTHON_PLATFORM
+PYTHON_EXEC_PREFIX
+PYTHON_PREFIX
+PYTHON_VERSION
+PYTHON
 JAVA_OPTS
 FOP_OPTS
 FOP_BIN
@@ -7542,13 +7557,13 @@ if test "${lt_cv_nm_interface+set}" = set; then
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7545: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7560: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7548: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7563: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7551: output\"" >&5)
+  (eval echo "\"\$as_me:7566: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8753,7 +8768,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8756 "configure"' > conftest.$ac_ext
+  echo '#line 8771 "configure"' > conftest.$ac_ext
   if { (eval echo "$as_me:$LINENO: \"$ac_compile\"") >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10855,11 +10870,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10858: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10873: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10862: \$? = $ac_status" >&5
+   echo "$as_me:10877: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11194,11 +11209,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11197: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11212: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11201: \$? = $ac_status" >&5
+   echo "$as_me:11216: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11299,11 +11314,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11302: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11317: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11306: \$? = $ac_status" >&5
+   echo "$as_me:11321: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11354,11 +11369,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11357: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11372: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11361: \$? = $ac_status" >&5
+   echo "$as_me:11376: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -14154,7 +14169,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14157 "configure"
+#line 14172 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -14250,7 +14265,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 14253 "configure"
+#line 14268 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -16270,11 +16285,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16273: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16288: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:16277: \$? = $ac_status" >&5
+   echo "$as_me:16292: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -16369,11 +16384,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16372: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16387: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16376: \$? = $ac_status" >&5
+   echo "$as_me:16391: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -16421,11 +16436,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:16424: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:16439: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:16428: \$? = $ac_status" >&5
+   echo "$as_me:16443: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -27080,6 +27095,278 @@ $as_echo "$as_me: Documentation will not be built." >&6;}
 fi
 
 
+am_cv_python_pyexecdir="$ac_cv_alps_libdir/python"
+am_cv_python_pythondir="$ac_cv_alps_libdir/python"
+
+
+
+
+        if test -n "$PYTHON"; then
+      # If the user set $PYTHON, use it and don't search something else.
+      { $as_echo "$as_me:$LINENO: checking whether $PYTHON version >= 2.7" >&5
+$as_echo_n "checking whether $PYTHON version >= 2.7... " >&6; }
+      prog="import sys
+# split strings by '.' and convert to numeric.  Append some zeros
+# because we need at least 4 digits for the hex conversion.
+# map returns an iterator in Python 3.0 and a list in 2.x
+minver = list(map(int, '2.7'.split('.'))) + [0, 0, 0]
+minverhex = 0
+# xrange is not present in Python 3.0 and range returns an iterator
+for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[i]
+sys.exit(sys.hexversion < minverhex)"
+  if { echo "$as_me:$LINENO: $PYTHON -c "$prog"" >&5
+   ($PYTHON -c "$prog") >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); }; then
+  { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { { $as_echo "$as_me:$LINENO: error: too old" >&5
+$as_echo "$as_me: error: too old" >&2;}
+   { (exit 1); exit 1; }; }
+fi
+
+      am_display_PYTHON=$PYTHON
+    else
+      # Otherwise, try each interpreter until we find one that satisfies
+      # VERSION.
+      { $as_echo "$as_me:$LINENO: checking for a Python interpreter with version >= 2.7" >&5
+$as_echo_n "checking for a Python interpreter with version >= 2.7... " >&6; }
+if test "${am_cv_pathless_PYTHON+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+
+	for am_cv_pathless_PYTHON in python python2 python3 python3.0 python2.5 python2.4 python2.3 python2.2 python2.1 python2.0 none; do
+	  test "$am_cv_pathless_PYTHON" = none && break
+	  prog="import sys
+# split strings by '.' and convert to numeric.  Append some zeros
+# because we need at least 4 digits for the hex conversion.
+# map returns an iterator in Python 3.0 and a list in 2.x
+minver = list(map(int, '2.7'.split('.'))) + [0, 0, 0]
+minverhex = 0
+# xrange is not present in Python 3.0 and range returns an iterator
+for i in list(range(0, 4)): minverhex = (minverhex << 8) + minver[i]
+sys.exit(sys.hexversion < minverhex)"
+  if { echo "$as_me:$LINENO: $am_cv_pathless_PYTHON -c "$prog"" >&5
+   ($am_cv_pathless_PYTHON -c "$prog") >&5 2>&5
+   ac_status=$?
+   echo "$as_me:$LINENO: \$? = $ac_status" >&5
+   (exit $ac_status); }; then
+  break
+fi
+
+	done
+fi
+{ $as_echo "$as_me:$LINENO: result: $am_cv_pathless_PYTHON" >&5
+$as_echo "$am_cv_pathless_PYTHON" >&6; }
+      # Set $PYTHON to the absolute path of $am_cv_pathless_PYTHON.
+      if test "$am_cv_pathless_PYTHON" = none; then
+	PYTHON=:
+      else
+        # Extract the first word of "$am_cv_pathless_PYTHON", so it can be a program name with args.
+set dummy $am_cv_pathless_PYTHON; ac_word=$2
+{ $as_echo "$as_me:$LINENO: checking for $ac_word" >&5
+$as_echo_n "checking for $ac_word... " >&6; }
+if test "${ac_cv_path_PYTHON+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  case $PYTHON in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_PYTHON="$PYTHON" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  test -z "$as_dir" && as_dir=.
+  for ac_exec_ext in '' $ac_executable_extensions; do
+  if { test -f "$as_dir/$ac_word$ac_exec_ext" && $as_test_x "$as_dir/$ac_word$ac_exec_ext"; }; then
+    ac_cv_path_PYTHON="$as_dir/$ac_word$ac_exec_ext"
+    $as_echo "$as_me:$LINENO: found $as_dir/$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+PYTHON=$ac_cv_path_PYTHON
+if test -n "$PYTHON"; then
+  { $as_echo "$as_me:$LINENO: result: $PYTHON" >&5
+$as_echo "$PYTHON" >&6; }
+else
+  { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+      fi
+      am_display_PYTHON=$am_cv_pathless_PYTHON
+    fi
+
+
+  if test "$PYTHON" = :; then
+      ac_cv_have_python=no
+  else
+
+
+  { $as_echo "$as_me:$LINENO: checking for $am_display_PYTHON version" >&5
+$as_echo_n "checking for $am_display_PYTHON version... " >&6; }
+if test "${am_cv_python_version+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  am_cv_python_version=`$PYTHON -c "import sys; sys.stdout.write(sys.version[:3])"`
+fi
+{ $as_echo "$as_me:$LINENO: result: $am_cv_python_version" >&5
+$as_echo "$am_cv_python_version" >&6; }
+  PYTHON_VERSION=$am_cv_python_version
+
+
+
+  PYTHON_PREFIX='${prefix}'
+
+  PYTHON_EXEC_PREFIX='${exec_prefix}'
+
+
+
+  { $as_echo "$as_me:$LINENO: checking for $am_display_PYTHON platform" >&5
+$as_echo_n "checking for $am_display_PYTHON platform... " >&6; }
+if test "${am_cv_python_platform+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  am_cv_python_platform=`$PYTHON -c "import sys; sys.stdout.write(sys.platform)"`
+fi
+{ $as_echo "$as_me:$LINENO: result: $am_cv_python_platform" >&5
+$as_echo "$am_cv_python_platform" >&6; }
+  PYTHON_PLATFORM=$am_cv_python_platform
+
+
+
+
+                { $as_echo "$as_me:$LINENO: checking for $am_display_PYTHON script directory" >&5
+$as_echo_n "checking for $am_display_PYTHON script directory... " >&6; }
+if test "${am_cv_python_pythondir+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$prefix" = xNONE
+     then
+       am_py_prefix=$ac_default_prefix
+     else
+       am_py_prefix=$prefix
+     fi
+     am_cv_python_pythondir=`$PYTHON -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_python_lib(0,0,prefix='$am_py_prefix'))" 2>/dev/null ||
+     echo "$PYTHON_PREFIX/lib/python$PYTHON_VERSION/site-packages"`
+     case $am_cv_python_pythondir in
+     $am_py_prefix*)
+       am__strip_prefix=`echo "$am_py_prefix" | sed 's|.|.|g'`
+       am_cv_python_pythondir=`echo "$am_cv_python_pythondir" | sed "s,^$am__strip_prefix,$PYTHON_PREFIX,"`
+       ;;
+     esac
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $am_cv_python_pythondir" >&5
+$as_echo "$am_cv_python_pythondir" >&6; }
+  pythondir=$am_cv_python_pythondir
+
+
+
+  pkgpythondir=\${pythondir}/$PACKAGE
+
+
+            { $as_echo "$as_me:$LINENO: checking for $am_display_PYTHON extension module directory" >&5
+$as_echo_n "checking for $am_display_PYTHON extension module directory... " >&6; }
+if test "${am_cv_python_pyexecdir+set}" = set; then
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$exec_prefix" = xNONE
+     then
+       am_py_exec_prefix=$am_py_prefix
+     else
+       am_py_exec_prefix=$exec_prefix
+     fi
+     am_cv_python_pyexecdir=`$PYTHON -c "import sys; from distutils import sysconfig; sys.stdout.write(sysconfig.get_python_lib(1,0,prefix='$am_py_exec_prefix'))" 2>/dev/null ||
+     echo "$PYTHON_EXEC_PREFIX/lib/python$PYTHON_VERSION/site-packages"`
+     case $am_cv_python_pyexecdir in
+     $am_py_exec_prefix*)
+       am__strip_prefix=`echo "$am_py_exec_prefix" | sed 's|.|.|g'`
+       am_cv_python_pyexecdir=`echo "$am_cv_python_pyexecdir" | sed "s,^$am__strip_prefix,$PYTHON_EXEC_PREFIX,"`
+       ;;
+     esac
+
+fi
+{ $as_echo "$as_me:$LINENO: result: $am_cv_python_pyexecdir" >&5
+$as_echo "$am_cv_python_pyexecdir" >&6; }
+  pyexecdir=$am_cv_python_pyexecdir
+
+
+
+  pkgpyexecdir=\${pyexecdir}/$PACKAGE
+
+
+    ac_cv_have_python=yes
+  fi
+
+
+PYTHON_EXECUTABLE=$ac_cv_path_PYTHON
+
+PYTHON_SCRIPTDIR=$ac_cv_alps_libdir/python
+
+
+if test -n "$ac_cv_have_PYTHON"; then
+    { $as_echo "$as_me:$LINENO: checking checking for wxPython" >&5
+$as_echo_n "checking checking for wxPython... " >&6; }
+  ac_cv_wxpython_version=`$ac_cv_path_PYTHON -c 'import wx; print wx.__version__' < /dev/null 2> /dev/null`
+  if test $? = 0; then
+    ac_cv_have_wxpython=yes
+    { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+    { $as_echo "$as_me:$LINENO: checking checking for wxPython version" >&5
+$as_echo_n "checking checking for wxPython version... " >&6; }
+    { $as_echo "$as_me:$LINENO: result: $ac_cv_wxpython_version" >&5
+$as_echo "$ac_cv_wxpython_version" >&6; }
+  else
+    ac_cv_have_wxpython=no
+    { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+fi
+ if test "$ac_cv_have_wxpython" = yes; then
+  HAVE_WXPYTHON_TRUE=
+  HAVE_WXPYTHON_FALSE='#'
+else
+  HAVE_WXPYTHON_TRUE='#'
+  HAVE_WXPYTHON_FALSE=
+fi
+
+
+if test -n "$ac_cv_have_wxpython"; then
+    { $as_echo "$as_me:$LINENO: checking checking for VTK Python wrapper" >&5
+$as_echo_n "checking checking for VTK Python wrapper... " >&6; }
+  $ac_cv_path_PYTHON -c 'import vtk.wx.wxVTKRenderWindowInteractor' < /dev/null > /dev/null 2>&1
+  if test $? = 0; then
+    ac_cv_have_vtk_python=yes
+    { $as_echo "$as_me:$LINENO: result: yes" >&5
+$as_echo "yes" >&6; }
+  else
+    ac_cv_have_vtk_python=no
+    { $as_echo "$as_me:$LINENO: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+fi
+ if test "$ac_cv_have_vtk_python" = yes; then
+  HAVE_VTKPYTHON_TRUE=
+  HAVE_VTKPYTHON_FALSE='#'
+else
+  HAVE_VTKPYTHON_TRUE='#'
+  HAVE_VTKPYTHON_FALSE=
+fi
+
+
+
 
 BASE_CPPFLAGS="$CPPFLAGS"
 ac_cv_base_cppflags="$CPPFLAGS"
@@ -27228,6 +27515,10 @@ if test "$ac_cv_alps_type" = "full"; then
 
   ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet tool/extractmpl tool/plot2mpl"
 
+  if test "$ac_cv_have_vtkpython" = yes; then
+    ac_config_files="$ac_config_files tool/config.py tool/lattice-preview"
+
+  fi
 fi
 
 if test "$ac_cv_use_precompiled_boost" != yes; then
@@ -27582,6 +27873,20 @@ if test -z "${HAVE_BOOST_WCHAR_TRUE}" && test -z "${HAVE_BOOST_WCHAR_FALSE}"; th
   { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_BOOST_WCHAR\" was never defined.
 Usually this means the macro was only invoked conditionally." >&5
 $as_echo "$as_me: error: conditional \"HAVE_BOOST_WCHAR\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_WXPYTHON_TRUE}" && test -z "${HAVE_WXPYTHON_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_WXPYTHON\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_WXPYTHON\" was never defined.
+Usually this means the macro was only invoked conditionally." >&2;}
+   { (exit 1); exit 1; }; }
+fi
+if test -z "${HAVE_VTKPYTHON_TRUE}" && test -z "${HAVE_VTKPYTHON_FALSE}"; then
+  { { $as_echo "$as_me:$LINENO: error: conditional \"HAVE_VTKPYTHON\" was never defined.
+Usually this means the macro was only invoked conditionally." >&5
+$as_echo "$as_me: error: conditional \"HAVE_VTKPYTHON\" was never defined.
 Usually this means the macro was only invoked conditionally." >&2;}
    { (exit 1); exit 1; }; }
 fi
@@ -28565,6 +28870,8 @@ do
     "tool/changestylesheet") CONFIG_FILES="$CONFIG_FILES tool/changestylesheet" ;;
     "tool/extractmpl") CONFIG_FILES="$CONFIG_FILES tool/extractmpl" ;;
     "tool/plot2mpl") CONFIG_FILES="$CONFIG_FILES tool/plot2mpl" ;;
+    "tool/config.py") CONFIG_FILES="$CONFIG_FILES tool/config.py" ;;
+    "tool/lattice-preview") CONFIG_FILES="$CONFIG_FILES tool/lattice-preview" ;;
     "src/boost/po_utf8_codecvt_facet.cpp") CONFIG_HEADERS="$CONFIG_HEADERS src/boost/po_utf8_codecvt_facet.cpp" ;;
     "src/boost/sr_utf8_codecvt_facet.cpp") CONFIG_HEADERS="$CONFIG_HEADERS src/boost/sr_utf8_codecvt_facet.cpp" ;;
     "src/boost/fs_utf8_codecvt_facet.cpp") CONFIG_HEADERS="$CONFIG_HEADERS src/boost/fs_utf8_codecvt_facet.cpp" ;;

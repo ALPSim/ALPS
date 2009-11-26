@@ -1,0 +1,136 @@
+#!/usr/bin/perl
+
+# Script for updating preamble of *.h and *.C
+#
+# Usage: 
+#   update_preamble.pl [-l] [files]
+# Options:
+#   -l : use preamble for light version instead of full version
+
+# written by Synge Todo <wistaria@comp-phys.org>
+
+$basedir = $0;
+$basedir =~ s/[a-zA-Z\_\.]+$//;
+
+if (@ARGV[0] ne '-l') {
+    # ALPS full version
+    $skel = join('', $basedir, "preamble_py.in");
+} else {
+    # ALPS-light
+    shift @ARGV;
+    $skel = join('', $basedir, "preamble-light.in");
+}
+if (!-f $skel) {
+    die "Couldn't find $skel.";
+}
+
+foreach $file (@ARGV) {
+    if (-f $file) {
+	$file_new = "$file.$$.tmp";
+
+	# scan
+	$year0 = "";
+	$year1 = "";
+	$id = "";
+	@authors = ();
+	@emails = ();
+	$finish_preamble = 0;
+	$skip = 0;
+	$print_id = 0;
+	open(ORIG, "< $file") || die "Couldn't open $file";
+	open(NEW, "> $file_new") || die "Couldn't open $file_new";
+	foreach $line (<ORIG>) {
+	    chomp($line);
+	    $line =~ s/\t/        /g;
+	    $line =~ s/\s+$//g;
+	    if ($finish_preamble == 0) {
+		if ($line =~ /^\s*\#\s+Copyright.+([0-9]{4})-([0-9]{4})\s+by\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
+		    $year0 = $1;
+		    $year1 = $2;
+		    @authors[$#authors+1] = $3;
+		    @emails[$#emails+1] = $4;
+		} elsif ($line =~ /^\s*\#\s+Copyright.+([0-9]{4})\s+by\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
+		    $year0 = $1;
+		    @authors[$#authors+1] = $2;
+		    @emails[$#emails+1] = $3;
+		} elsif ($line =~ /^\s*\#\s+(\S\C+)\s+\<([a-zA-Z0-9\.\-_]+@[a-zA-Z0-9\.\-_]+)\>/) {
+		    @authors[$#authors + 1] = $1;
+		    @emails[$#emails + 1] = $2;
+		} elsif ($line =~ /(\$Id\:\C+\$)/) {
+		    $id = $1;
+		} elsif ($line =~ /(^\s*$)|(^$)|(^\#)|(^ \#)|(^\/\#)/) {
+		    ## nothing to do
+		} else {
+		    $finish_preamble = 1;
+		}
+
+		if ($finish_preamble == 1) {
+		    if ($year0 eq "" || @authors[0] eq "") {
+			## Year and authors not found.  Skip this file.
+			$skip = 1;
+		    } else {
+			if ($year1 eq $year0) { $year1 = ""; }
+			# if ($id eq "") { $id = join("", "\$I", "d: \$"); }
+			
+			## print out preamble
+			open(SKEL, "< $skel") || die "Couldn't open $skel";
+			foreach $sk (<SKEL>) {
+			    chomp($sk);
+			    if ($sk =~ /\@COPYRIGHT\@/) {
+				if ($year1) {
+				    print NEW "# Copyright (C) $year0-$year1 by @authors[0] <@emails[0]>";
+				} else {
+				    print NEW "# Copyright (C) $year0 by @authors[0] <@emails[0]>";
+				}
+				if ($#authors > 0) { print NEW ","; }
+				print NEW "\n";
+				for ($i = 1; $i <= $#authors; $i++) {
+				    if ($year1) {
+					print NEW "#                            @authors[$i] <@emails[$i]>";
+				    } else {
+					print NEW "#                       @authors[$i] <@emails[$i]>";
+				    }
+				    if ($i < $#authors) { print NEW ","; }
+				    print NEW "\n";
+				}
+			    } elsif ($sk =~ /\@ID\@/) {
+				if ($id ne "") {
+				    $sk =~ s/\@ID\@/$id/;
+				    print NEW "$sk\n";
+				    $print_id=1;
+				}
+			    } else {
+				print NEW "$sk\n";
+			    }
+			}
+			if ($print_id == 1) {
+			    print NEW "\n";
+			}
+		    }
+		}
+	    }
+
+	    if ($skip == 0 && $finish_preamble == 1) {
+		print NEW "$line\n";
+	    }
+	}
+	close(ORIG);
+	close(NEW);
+
+	if ($skip ==0) {
+	    system("diff $file $file_new > /dev/null");
+	    if ($? == 256) {
+		unlink $file;
+		rename $file_new, $file;
+		print "$file is updated.\n";
+	    } else {
+		unlink $file_new;
+	    }
+	} else {
+	    print "$file does not obey ALPS standard.  Skipped.\n";
+	    unlink $file_new;
+	}
+    } else {
+	print "Couldn't open $file.  Skipped.\n";
+    }
+}

@@ -16,6 +16,7 @@
 @SET_MAKE@
 
 
+
 VPATH = @srcdir@
 pkgincludedir = $(includedir)/@PACKAGE@
 pkglibdir = $(libdir)/@PACKAGE@
@@ -37,15 +38,19 @@ host_triplet = @host@
 bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 	parameter2xml$(EXEEXT) printgraph$(EXEEXT) pconfig$(EXEEXT) \
 	pevaluate$(EXEEXT) poutput$(EXEEXT) txt2archive$(EXEEXT) \
-	xml2archive$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
-@BUILD_ARCHIVE_TRUE@am__append_1 = archive
-@BUILD_DOC_TRUE@am__append_2 = quickbook
-@BOOST_1_34_TRUE@@BUILD_DOC_TRUE@am__append_3 = \
+	xml2archive$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2) \
+	$(am__EXEEXT_3)
+@HAVE_VTKPYTHON_TRUE@am__append_1 = lattice2xml
+@HAVE_VTKPYTHON_TRUE@am__append_2 = lattice-preview
+@HAVE_VTKPYTHON_TRUE@am__append_3 = config.py license.py preview.py
+@BUILD_ARCHIVE_TRUE@am__append_4 = archive
+@BUILD_DOC_TRUE@am__append_5 = quickbook
+@BOOST_1_34_TRUE@@BUILD_DOC_TRUE@am__append_6 = \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
 @BOOST_1_34_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 
-@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@am__append_4 = \
+@BOOST_1_35_TRUE@@BUILD_DOC_TRUE@am__append_7 = \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
@@ -53,7 +58,7 @@ bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
 @BOOST_1_35_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 
-@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@am__append_5 = \
+@BOOST_1_39_TRUE@@BUILD_DOC_TRUE@am__append_8 = \
 @BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
 @BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
 @BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
@@ -63,7 +68,7 @@ bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 @BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
 @BOOST_1_39_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 
-@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@am__append_6 = \
+@BOOST_SVN_TRUE@@BUILD_DOC_TRUE@am__append_9 = \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
@@ -73,13 +78,17 @@ bin_PROGRAMS = compactrun$(EXEEXT) convert2xml$(EXEEXT) \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
 @BOOST_SVN_TRUE@@BUILD_DOC_TRUE@ $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 
+TESTS = $(am__EXEEXT_1)
+@HAVE_VTKPYTHON_TRUE@am__append_10 = lattice2xml
 subdir = tool
-DIST_COMMON = $(dist_bin_SCRIPTS) $(srcdir)/Makefile.am \
+DIST_COMMON = $(am__nobase_pkgpython_PYTHON_DIST) $(dist_bin_SCRIPTS) \
+	$(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/changestylesheet.in \
-	$(srcdir)/convert2html.in $(srcdir)/convert2text.in \
-	$(srcdir)/extractgp.in $(srcdir)/extracthtml.in \
-	$(srcdir)/extractmpl.in $(srcdir)/extracttext.in \
-	$(srcdir)/extractxmgr.in $(srcdir)/plot2gp.in \
+	$(srcdir)/config.py.in $(srcdir)/convert2html.in \
+	$(srcdir)/convert2text.in $(srcdir)/extractgp.in \
+	$(srcdir)/extracthtml.in $(srcdir)/extractmpl.in \
+	$(srcdir)/extracttext.in $(srcdir)/extractxmgr.in \
+	$(srcdir)/lattice-preview.in $(srcdir)/plot2gp.in \
 	$(srcdir)/plot2html.in $(srcdir)/plot2mpl.in \
 	$(srcdir)/plot2text.in $(srcdir)/plot2xmgr.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -106,12 +115,13 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
-	changestylesheet extractmpl plot2mpl
+	changestylesheet extractmpl plot2mpl config.py lattice-preview
 CONFIG_CLEAN_VPATH_FILES =
-@BUILD_ARCHIVE_TRUE@am__EXEEXT_1 = archive$(EXEEXT)
-@BUILD_DOC_TRUE@am__EXEEXT_2 = quickbook$(EXEEXT)
+@HAVE_VTKPYTHON_TRUE@am__EXEEXT_1 = lattice2xml$(EXEEXT)
+@BUILD_ARCHIVE_TRUE@am__EXEEXT_2 = archive$(EXEEXT)
+@BUILD_DOC_TRUE@am__EXEEXT_3 = quickbook$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" \
-	"$(DESTDIR)$(bindir)"
+	"$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgpythondir)"
 PROGRAMS = $(bin_PROGRAMS)
 am_archive_OBJECTS = archive.$(OBJEXT) archive_index.$(OBJEXT) \
 	archive_node.$(OBJEXT) archive_plot.$(OBJEXT) \
@@ -162,6 +172,23 @@ convert2xml_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
 @BUILD_UNIFIED_LIB_TRUE@convert2xml_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
+am_lattice2xml_OBJECTS = lattice2xml.$(OBJEXT)
+lattice2xml_OBJECTS = $(am_lattice2xml_OBJECTS)
+lattice2xml_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@lattice2xml_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
+@BUILD_UNIFIED_LIB_TRUE@lattice2xml_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
@@ -374,17 +401,23 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(archive_SOURCES) $(compactrun_SOURCES) \
-	$(convert2xml_SOURCES) $(parameter2xml_SOURCES) \
-	$(pconfig_SOURCES) $(pevaluate_SOURCES) $(poutput_SOURCES) \
-	$(printgraph_SOURCES) $(nodist_quickbook_SOURCES) \
-	$(txt2archive_SOURCES) $(xml2archive_SOURCES)
-DIST_SOURCES = $(archive_SOURCES) $(compactrun_SOURCES) \
-	$(convert2xml_SOURCES) $(parameter2xml_SOURCES) \
-	$(pconfig_SOURCES) $(pevaluate_SOURCES) $(poutput_SOURCES) \
-	$(printgraph_SOURCES) $(txt2archive_SOURCES) \
+	$(convert2xml_SOURCES) $(lattice2xml_SOURCES) \
+	$(parameter2xml_SOURCES) $(pconfig_SOURCES) \
+	$(pevaluate_SOURCES) $(poutput_SOURCES) $(printgraph_SOURCES) \
+	$(nodist_quickbook_SOURCES) $(txt2archive_SOURCES) \
 	$(xml2archive_SOURCES)
+DIST_SOURCES = $(archive_SOURCES) $(compactrun_SOURCES) \
+	$(convert2xml_SOURCES) $(lattice2xml_SOURCES) \
+	$(parameter2xml_SOURCES) $(pconfig_SOURCES) \
+	$(pevaluate_SOURCES) $(poutput_SOURCES) $(printgraph_SOURCES) \
+	$(txt2archive_SOURCES) $(xml2archive_SOURCES)
+am__nobase_pkgpython_PYTHON_DIST = config.py license.py preview.py
+py_compile = $(top_srcdir)/config/py-compile
+DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
+am__tty_colors = \
+red=; grn=; lgn=; blu=; std=
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 pkgdatadir = $(libdir)/xml
 ACLOCAL = @ACLOCAL@
@@ -482,6 +515,13 @@ PACKAGE_STRING = @PACKAGE_STRING@
 PACKAGE_TARNAME = @PACKAGE_TARNAME@
 PACKAGE_VERSION = @PACKAGE_VERSION@
 PATH_SEPARATOR = @PATH_SEPARATOR@
+PYTHON = @PYTHON@
+PYTHON_EXECUTABLE = @PYTHON_EXECUTABLE@
+PYTHON_EXEC_PREFIX = @PYTHON_EXEC_PREFIX@
+PYTHON_PLATFORM = @PYTHON_PLATFORM@
+PYTHON_PREFIX = @PYTHON_PREFIX@
+PYTHON_SCRIPTDIR = @PYTHON_SCRIPTDIR@
+PYTHON_VERSION = @PYTHON_VERSION@
 RANLIB = @RANLIB@
 SED = @SED@
 SET_MAKE = @SET_MAKE@
@@ -541,9 +581,13 @@ mandir = @mandir@
 mkdir_p = @mkdir_p@
 oldincludedir = @oldincludedir@
 pdfdir = @pdfdir@
+pkgpyexecdir = @pkgpyexecdir@
+pkgpythondir = @pkgpythondir@
 prefix = @prefix@
 program_transform_name = @program_transform_name@
 psdir = @psdir@
+pyexecdir = @pyexecdir@
+pythondir = @pythondir@
 sbindir = @sbindir@
 sharedstatedir = @sharedstatedir@
 srcdir = @srcdir@
@@ -557,10 +601,15 @@ AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLA
 AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS)
 @BUILD_UNIFIED_LIB_FALSE@LDADD = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 @BUILD_UNIFIED_LIB_TRUE@LDADD = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet 
-bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet extractmpl plot2mpl
+dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet
+bin_SCRIPTS = convert2text convert2html extractgp extracthtml \
+	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
+	changestylesheet extractmpl plot2mpl $(am__append_2)
+nobase_pkgpython_PYTHON = $(am__append_3)
+dist_noinst_DATA = lattice2xml.ip lattice2xml.op
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
+lattice2xml_SOURCES = lattice2xml.C
 parameter2xml_SOURCES = parameter2xml.C
 printgraph_SOURCES = printgraph.C
 pconfig_SOURCES = pconfig.C
@@ -570,8 +619,9 @@ txt2archive_SOURCES = txt2archive.C
 xml2archive_SOURCES = xml2archive.C
 archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.cpp archive_node.hpp archive_plot.cpp archive_plot.hpp archive_sqlite.cpp archive_sqlite.hpp archive_xml.cpp archive_xml.hpp
 @BUILD_DOC_TRUE@nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp \
-@BUILD_DOC_TRUE@	$(am__append_3) $(am__append_4) \
-@BUILD_DOC_TRUE@	$(am__append_5) $(am__append_6)
+@BUILD_DOC_TRUE@	$(am__append_6) $(am__append_7) \
+@BUILD_DOC_TRUE@	$(am__append_8) $(am__append_9)
+TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 all: all-am
 
 .SUFFIXES:
@@ -632,6 +682,10 @@ extractmpl: $(top_builddir)/config.status $(srcdir)/extractmpl.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 plot2mpl: $(top_builddir)/config.status $(srcdir)/plot2mpl.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+config.py: $(top_builddir)/config.status $(srcdir)/config.py.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
+lattice-preview: $(top_builddir)/config.status $(srcdir)/lattice-preview.in
+	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 install-binPROGRAMS: $(bin_PROGRAMS)
 	@$(NORMAL_INSTALL)
 	test -z "$(bindir)" || $(MKDIR_P) "$(DESTDIR)$(bindir)"
@@ -684,6 +738,9 @@ compactrun$(EXEEXT): $(compactrun_OBJECTS) $(compactrun_DEPENDENCIES)
 convert2xml$(EXEEXT): $(convert2xml_OBJECTS) $(convert2xml_DEPENDENCIES) 
 	@rm -f convert2xml$(EXEEXT)
 	$(CXXLINK) $(convert2xml_OBJECTS) $(convert2xml_LDADD) $(LIBS)
+lattice2xml$(EXEEXT): $(lattice2xml_OBJECTS) $(lattice2xml_DEPENDENCIES) 
+	@rm -f lattice2xml$(EXEEXT)
+	$(CXXLINK) $(lattice2xml_OBJECTS) $(lattice2xml_LDADD) $(LIBS)
 parameter2xml$(EXEEXT): $(parameter2xml_OBJECTS) $(parameter2xml_DEPENDENCIES) 
 	@rm -f parameter2xml$(EXEEXT)
 	$(CXXLINK) $(parameter2xml_OBJECTS) $(parameter2xml_LDADD) $(LIBS)
@@ -795,6 +852,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/compactrun.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert2xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/input_path.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/lattice2xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/markups.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/parameter2xml.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pconfig.Po@am__quote@
@@ -981,6 +1039,43 @@ mostlyclean-libtool:
 
 clean-libtool:
 	-rm -rf .libs _libs
+install-nobase_pkgpythonPYTHON: $(nobase_pkgpython_PYTHON)
+	@$(NORMAL_INSTALL)
+	test -z "$(pkgpythondir)" || $(MKDIR_P) "$(DESTDIR)$(pkgpythondir)"
+	@list='$(nobase_pkgpython_PYTHON)'; test -n "$(pkgpythondir)" || list=; \
+	$(am__nobase_list) | while read dir files; do \
+	  xfiles=; for p in $$files; do \
+	    if test -f "$$p"; then b=; else b="$(srcdir)/"; fi; \
+	    if test -f "$$b$$p"; then xfiles="$$xfiles $$b$$p"; dlist="$$dlist $$p"; \
+	    else :; fi; done; \
+	  test -z "$$xfiles" || { \
+	    test "x$$dir" = x. || { \
+	      echo "$(MKDIR_P) '$(DESTDIR)$(pkgpythondir)/$$dir'"; \
+	      $(MKDIR_P) "$(DESTDIR)$(pkgpythondir)/$$dir"; }; \
+	    echo " $(INSTALL_DATA) $$xfiles '$(DESTDIR)$(pkgpythondir)/$$dir'"; \
+	    $(INSTALL_DATA) $$xfiles "$(DESTDIR)$(pkgpythondir)/$$dir" || exit $$?; }; \
+	  if test -n "$$dlist"; then \
+	    if test -z "$(DESTDIR)"; then \
+	      PYTHON=$(PYTHON) $(py_compile) --basedir "$(pkgpythondir)" $$dlist; \
+	    else \
+	      PYTHON=$(PYTHON) $(py_compile) --destdir "$(DESTDIR)" --basedir "$(pkgpythondir)" $$dlist; \
+	    fi; \
+	  else :; fi \
+	done
+
+uninstall-nobase_pkgpythonPYTHON:
+	@$(NORMAL_UNINSTALL)
+	@list='$(nobase_pkgpython_PYTHON)'; test -n "$(pkgpythondir)" || list=; \
+	$(am__nobase_strip_setup); files=`$(am__nobase_strip)`; \
+	test -n "$$files" || exit 0; \
+	filesc=`echo "$$files" | sed 's|$$|c|'`; \
+	fileso=`echo "$$files" | sed 's|$$|o|'`; \
+	echo " ( cd '$(DESTDIR)$(pkgpythondir)' && rm -f" $$files ")"; \
+	cd "$(DESTDIR)$(pkgpythondir)" && rm -f $$files || exit $$?; \
+	echo " ( cd '$(DESTDIR)$(pkgpythondir)' && rm -f" $$filesc ")"; \
+	cd "$(DESTDIR)$(pkgpythondir)" && rm -f $$filesc || exit $$?; \
+	echo " ( cd '$(DESTDIR)$(pkgpythondir)' && rm -f" $$fileso ")"; \
+	cd "$(DESTDIR)$(pkgpythondir)" && rm -f $$fileso
 
 ID: $(HEADERS) $(SOURCES) $(LISP) $(TAGS_FILES)
 	list='$(SOURCES) $(HEADERS) $(LISP) $(TAGS_FILES)'; \
@@ -1034,6 +1129,98 @@ GTAGS:
 distclean-tags:
 	-rm -f TAGS ID GTAGS GRTAGS GSYMS GPATH tags
 
+check-TESTS: $(TESTS)
+	@failed=0; all=0; xfail=0; xpass=0; skip=0; \
+	srcdir=$(srcdir); export srcdir; \
+	list=' $(TESTS) '; \
+	$(am__tty_colors); \
+	if test -n "$$list"; then \
+	  for tst in $$list; do \
+	    if test -f ./$$tst; then dir=./; \
+	    elif test -f $$tst; then dir=; \
+	    else dir="$(srcdir)/"; fi; \
+	    if $(TESTS_ENVIRONMENT) $${dir}$$tst; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *[\ \	]$$tst[\ \	]*) \
+		xpass=`expr $$xpass + 1`; \
+		failed=`expr $$failed + 1`; \
+		col=$$red; res=XPASS; \
+	      ;; \
+	      *) \
+		col=$$grn; res=PASS; \
+	      ;; \
+	      esac; \
+	    elif test $$? -ne 77; then \
+	      all=`expr $$all + 1`; \
+	      case " $(XFAIL_TESTS) " in \
+	      *[\ \	]$$tst[\ \	]*) \
+		xfail=`expr $$xfail + 1`; \
+		col=$$lgn; res=XFAIL; \
+	      ;; \
+	      *) \
+		failed=`expr $$failed + 1`; \
+		col=$$red; res=FAIL; \
+	      ;; \
+	      esac; \
+	    else \
+	      skip=`expr $$skip + 1`; \
+	      col=$$blu; res=SKIP; \
+	    fi; \
+	    echo "$${col}$$res$${std}: $$tst"; \
+	  done; \
+	  if test "$$all" -eq 1; then \
+	    tests="test"; \
+	    All=""; \
+	  else \
+	    tests="tests"; \
+	    All="All "; \
+	  fi; \
+	  if test "$$failed" -eq 0; then \
+	    if test "$$xfail" -eq 0; then \
+	      banner="$$All$$all $$tests passed"; \
+	    else \
+	      if test "$$xfail" -eq 1; then failures=failure; else failures=failures; fi; \
+	      banner="$$All$$all $$tests behaved as expected ($$xfail expected $$failures)"; \
+	    fi; \
+	  else \
+	    if test "$$xpass" -eq 0; then \
+	      banner="$$failed of $$all $$tests failed"; \
+	    else \
+	      if test "$$xpass" -eq 1; then passes=pass; else passes=passes; fi; \
+	      banner="$$failed of $$all $$tests did not behave as expected ($$xpass unexpected $$passes)"; \
+	    fi; \
+	  fi; \
+	  dashes="$$banner"; \
+	  skipped=""; \
+	  if test "$$skip" -ne 0; then \
+	    if test "$$skip" -eq 1; then \
+	      skipped="($$skip test was not run)"; \
+	    else \
+	      skipped="($$skip tests were not run)"; \
+	    fi; \
+	    test `echo "$$skipped" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$skipped"; \
+	  fi; \
+	  report=""; \
+	  if test "$$failed" -ne 0 && test -n "$(PACKAGE_BUGREPORT)"; then \
+	    report="Please report to $(PACKAGE_BUGREPORT)"; \
+	    test `echo "$$report" | wc -c` -le `echo "$$banner" | wc -c` || \
+	      dashes="$$report"; \
+	  fi; \
+	  dashes=`echo "$$dashes" | sed s/./=/g`; \
+	  if test "$$failed" -eq 0; then \
+	    echo "$$grn$$dashes"; \
+	  else \
+	    echo "$$red$$dashes"; \
+	  fi; \
+	  echo "$$banner"; \
+	  test -z "$$skipped" || echo "$$skipped"; \
+	  test -z "$$report" || echo "$$report"; \
+	  echo "$$dashes$$std"; \
+	  test "$$failed" -eq 0; \
+	else :; fi
+
 distdir: $(DISTFILES)
 	@srcdirstrip=`echo "$(srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
 	topsrcdirstrip=`echo "$(top_srcdir)" | sed 's/[].[^$$\\*]/\\\\&/g'`; \
@@ -1065,10 +1252,11 @@ distdir: $(DISTFILES)
 	  fi; \
 	done
 check-am: all-am
+	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) $(SCRIPTS)
+all-am: Makefile $(PROGRAMS) $(SCRIPTS) $(DATA)
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)"; do \
+	for dir in "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(bindir)" "$(DESTDIR)$(pkgpythondir)"; do \
 	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
 	done
 install: install-am
@@ -1118,7 +1306,7 @@ info: info-am
 
 info-am:
 
-install-data-am:
+install-data-am: install-nobase_pkgpythonPYTHON
 
 install-dvi: install-dvi-am
 
@@ -1166,25 +1354,26 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-dist_binSCRIPTS
+	uninstall-dist_binSCRIPTS uninstall-nobase_pkgpythonPYTHON
 
-.MAKE: install-am install-strip
+.MAKE: check-am install-am install-strip
 
-.PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
-	clean-generic clean-libtool ctags distclean distclean-compile \
-	distclean-generic distclean-libtool distclean-tags distdir dvi \
-	dvi-am html html-am info info-am install install-am \
-	install-binPROGRAMS install-binSCRIPTS install-data \
-	install-data-am install-dist_binSCRIPTS install-dvi \
-	install-dvi-am install-exec install-exec-am install-html \
-	install-html-am install-info install-info-am install-man \
-	install-pdf install-pdf-am install-ps install-ps-am \
-	install-strip installcheck installcheck-am installdirs \
-	maintainer-clean maintainer-clean-generic mostlyclean \
-	mostlyclean-compile mostlyclean-generic mostlyclean-libtool \
-	pdf pdf-am ps ps-am tags uninstall uninstall-am \
-	uninstall-binPROGRAMS uninstall-binSCRIPTS \
-	uninstall-dist_binSCRIPTS
+.PHONY: CTAGS GTAGS all all-am check check-TESTS check-am clean \
+	clean-binPROGRAMS clean-generic clean-libtool ctags distclean \
+	distclean-compile distclean-generic distclean-libtool \
+	distclean-tags distdir dvi dvi-am html html-am info info-am \
+	install install-am install-binPROGRAMS install-binSCRIPTS \
+	install-data install-data-am install-dist_binSCRIPTS \
+	install-dvi install-dvi-am install-exec install-exec-am \
+	install-html install-html-am install-info install-info-am \
+	install-man install-nobase_pkgpythonPYTHON install-pdf \
+	install-pdf-am install-ps install-ps-am install-strip \
+	installcheck installcheck-am installdirs maintainer-clean \
+	maintainer-clean-generic mostlyclean mostlyclean-compile \
+	mostlyclean-generic mostlyclean-libtool pdf pdf-am ps ps-am \
+	tags uninstall uninstall-am uninstall-binPROGRAMS \
+	uninstall-binSCRIPTS uninstall-dist_binSCRIPTS \
+	uninstall-nobase_pkgpythonPYTHON
 
 
 # Tell versions [3.59,3.63) of GNU make to not export all variables.

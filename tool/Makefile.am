@@ -11,11 +11,19 @@ BOOST_DIR = @BOOST_DIR@
 pkgdatadir = $(libdir)/xml
 
 bin_PROGRAMS = compactrun convert2xml parameter2xml printgraph pconfig pevaluate poutput txt2archive xml2archive
-dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet 
+dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet extractmpl plot2mpl
+nobase_pkgpython_PYTHON =
+dist_noinst_DATA = lattice2xml.ip lattice2xml.op
+if HAVE_VTKPYTHON
+  bin_PROGRAMS += lattice2xml
+  bin_SCRIPTS += lattice-preview
+  nobase_pkgpython_PYTHON += config.py license.py preview.py
+endif
 
 compactrun_SOURCES = compactrun.C
 convert2xml_SOURCES = convert2xml.C
+lattice2xml_SOURCES = lattice2xml.C
 parameter2xml_SOURCES = parameter2xml.C
 printgraph_SOURCES = printgraph.C
 pconfig_SOURCES = pconfig.C
@@ -70,3 +78,9 @@ nodist_quickbook_SOURCES += \
  $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
 endif
 endif
+
+TESTS =
+if HAVE_VTKPYTHON
+  TESTS += lattice2xml
+endif
+TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
