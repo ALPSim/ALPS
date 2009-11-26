@@ -98,6 +98,15 @@ ELSE(FOUND_HDF5)
   MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
 ENDIF(FOUND_HDF5)
 
+# python
+if(WIN32 AND NOT UNIX)
+  find_package(PyInstaller)
+  include(UsePyInstaller)
+else(WIN32 AND NOT UNIX)
+  find_package(PythonInterp)
+  set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
+endif(WIN32 AND NOT UNIX)
+
 ######################################################################
 # configuration files
 ######################################################################

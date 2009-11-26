@@ -38,7 +38,10 @@ def prog():
     return "ALPS Lattice Preview"
 
 def systemLibraryPath():
-    return config.prefix() + '/lib/xml/lattices.xml'
+    if os.path.exists(config.prefix() + '/lib/xml/lattices.xml'):
+        return config.prefix() + '/lib/xml/lattices.xml'
+    else:
+        return config.builddir() + '/../lib/xml/lattices.xml'
 
 def lattice2xml():
     if os.path.exists(config.builddir() + '/lattice2xml'):
@@ -367,7 +370,9 @@ class LatticeParameterWindow(wx.Frame):
 
     def OnPreview(self, evt):
         params = ""
-        if not self.useSystem:
+        if self.useSystem:
+            params += "LATTICE_LIBRARY = \"" + systemLibraryPath() + "\"; "
+        else:
             params += "LATTICE_LIBRARY = \"" + self.libraryPath + "\"; "
         params += "LATTICE = \"" + self.graphName + "\"; "
         params += "UNROLL_BOUNDARY = 1; "

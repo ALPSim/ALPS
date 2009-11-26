@@ -25,23 +25,32 @@
 #
 ##############################################################################
 
-def version():
-    return "@PACKAGE_VERSION@"
+import os
+
+def select(a, b):
+    if len(a):
+        return a
+    else:
+        return b
 
 def copyright():
-    return "Copyright (C) 2006-2009 Synge Todo"
+    return "Copyright (C) 2006-2009 Synge Todo <wistaria@comp-phys.org>"
+
+def version():
+    return select("@PACKAGE_VERSION@", "@ALPS_VERSION@")
 
 def prefix():
-    return "@prefix@"
+    return select("@prefix@", "@CMAKE_INSTALL_PREFIX@")
 
 def srcdir():
-    return "@abs_srcdir@"
+    return select("@abs_srcdir@", "@CMAKE_CURRENT_SOURCE_DIR@")
 
 def builddir():
-    return "@abs_builddir@"
+    return select("@abs_builddir@", "@CMAKE_CURRENT_BINARY_DIR@")
 
-## main routine
+## test routine
 if __name__ == "__main__":
    print version()
    print copyright()
    print prefix()
+   print 'isInstalled() = ', isInstalled()

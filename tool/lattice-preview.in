@@ -1,9 +1,18 @@
 #!/bin/sh
 
 DIR=`dirname $0`
+SRCDIR="@abs_srcdir@"
+if test -z "$SRCDIR"; then
+  SRCDIR="@CMAKE_CURRENT_SOURCE_DIR@"
+fi
+BUILDIDR="@abs_builddir@"
+if test -z "$BUILDDIR"; then
+  BUILDIDR="@CMAKE_CURRENT_BINARY_DIR@"
+fi
+  
 if test -f "$DIR/config.py"; then
-  SCRIPTDIR="@abs_srcdir@"
-  PYTHONPATH=$SCRIPTDIR:@abs_builddir@:$PHTHONPATH
+  SCRIPTDIR="$SRCDIR"
+  PYTHONPATH=$SCRIPTDIR:$BUILDDIR:$PHTHONPATH
   export PYTHONPATH
 else
   SCRIPTDIR="@PYTHON_SCRIPTDIR@/alps"
@@ -11,8 +20,11 @@ else
   export PYTHONPATH
 fi
 
-# for Mac OS X Snow Leopard
-VERSIONER_PYTHON_PREFER_32_BIT=yes
-export VERSIONER_PYTHON_PREFER_32_BIT
-
-@PYTHON_EXECUTABLE@ "$SCRIPTDIR/preview.py" $@ < /dev/null &
+if test `uname -s 2> /dev/null` = Darwin && test `(uname -r | cut -s -d. -f1) 2> /dev/null` = 10; then
+  # for Mac OS X Snow Leopard
+  VERSIONER_PYTHON_PREFER_32_BIT=yes
+  export VERSIONER_PYTHON_PREFER_32_BIT
+  arch -i386 @PYTHON_EXECUTABLE@ "$SCRIPTDIR/preview.py" $@ < /dev/null &
+else
+  @PYTHON_EXECUTABLE@ "$SCRIPTDIR/preview.py" $@ < /dev/null &
+fi
