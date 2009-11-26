@@ -10,6 +10,13 @@ import numpy as np
 # name = "dataset"
 # identifier = "org.comp-phys.alps.dataset"
 
+import sys, os
+try:
+	sys.path.append(os.environ['HOME'] + '/.vistrails/userpackages/alps/pyalps')
+	sys.path.append(os.environ['HOME'] + '/.vistrails/userpackages/alps/util')
+except KeyError:
+	raise EnvironmentError('Cannot find $HOME - do we live on Windows?')
+
 from dataset_exceptions import *
 from dataset_core import *
 from dataset_evaluate import *
