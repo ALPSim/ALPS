@@ -12,14 +12,14 @@ from sys  import stdin
 from math import *
 
 class FloatWithError:
-
-
   def __init__(self,mean__=0,error__=0):
     self.mean_  = mean__
     self.error_ = error__
 
   def __str__(self):
     return str(self.mean_) + '\t' + str(self.error_)
+  def __repr__(self):
+	return self.__str__()
   def __expr__(self):
     return expr(self.mean_) + '\t' + expr(self.error_)
   def mean(self):
