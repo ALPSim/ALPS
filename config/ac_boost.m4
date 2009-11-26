@@ -327,9 +327,9 @@ dnl Boost version
       LIBS="$BOOST_LIBS $ac_save_LIBS"
     else
       if test -z "$boost_toolset"; then
-        BOOST_LIBS="-lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization"
+        BOOST_LIBS="-lboost_date_time -lboost_filesystem -lboost_program_options -lboost_regex -lboost_serialization -lboost_system"
       else
-        BOOST_LIBS="-lboost_date_time-$boost_toolset -lboost_filesystem-$boost_toolset -lboost_program_options-$boost_toolset -lboost_regex-$boost_toolset -lboost_serialization-$boost_toolset"
+        BOOST_LIBS="-lboost_date_time-$boost_toolset -lboost_filesystem-$boost_toolset -lboost_program_options-$boost_toolset -lboost_regex-$boost_toolset -lboost_serialization-$boost_toolset -lboost_system-$boost_toolset"
       fi
       LIBS="$BOOST_LIBS $ac_save_LIBS"
     fi
