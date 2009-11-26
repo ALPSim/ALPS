@@ -93,3 +93,38 @@ class MplXYPlot_core:
 		
 		if 'title' in self.plt:
 			plt.title(self.plt['title'])
+            
+ 
+def convert_to_text(desc):
+		output = ''
+
+		if 'title' in desc:
+			output += desc['title'] + '/n'           
+
+		if 'xaxis' in desc:
+            output += 'X'
+			if 'label' in desc['xaxis']:
+				output += ': ' + plt['xaxis']['label'])
+			if 'min' in desc['xaxis'] and 'max' in desc['xaxis']:
+				output += ': ' str(desc['xaxis']['min']) + ' to ' + str(data['xaxis']['max'])
+            output+='\n'
+
+		if 'yaxis' in desc:
+            output += 'Y'
+			if 'label' in desc['yaxis']:
+				output += ': ' + plt['yaxis']['label'])
+			if 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
+				output += ': ' str(desc['yaxis']['min']) + ' to ' + str(data['yaxis']['max'])
+            output+='\n\n'
+				
+		
+		for q in desc['data']:
+			if 'label' in q.props and q.props['label'] != 'none':
+				output += q.props['label'])
+			elif 'filename' in q.props:
+				output += q.props['filename'])
+            output += '\n'
+
+            for i in range(len(q.x)):
+                output += str(q.x[i]) + '\t' + str(q.y[i])
+            
