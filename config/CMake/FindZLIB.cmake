@@ -7,15 +7,21 @@
 
 FIND_PATH(ZLIB_INCLUDE_DIR zlib.h
     $ENV{ZLIB_HOME}/include
-  /usr/local/include
-  /usr/include
+    /usr/local/include
+    /usr/include
+    $ENV{HOMEDRIVE}/Zlib/include
 )
 
 FIND_LIBRARY(ZLIB_LIBRARY z
     $ENV{ZLIB_HOME}/lib
-  /usr/lib
-  /usr/local/lib
+    /usr/lib
+    /usr/local/lib
 )
+IF(NOT ZLIB_LIBRARY)
+  FIND_LIBRARY(ZLIB_LIBRARY zlib
+    $ENV{HOMEDRIVE}/Zlib/lib
+)
+ENDIF(NOT ZLIB_LIBRARY)
 
 IF(ZLIB_INCLUDE_DIR)
   IF(ZLIB_LIBRARY)

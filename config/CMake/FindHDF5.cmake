@@ -28,6 +28,7 @@ ELSE(Hdf5_INCLUDE_DIRS)
     /usr/local/lib
     /usr/local/hdf5/lib
     /sw/lib
+    $ENV{HOMEDRIVE}/HDF5/lib
     )
 
   SET(TRIAL_INCLUDE_PATHS
@@ -41,6 +42,7 @@ ELSE(Hdf5_INCLUDE_DIRS)
     /usr/local/include
     /usr/local/hdf5/include
     /sw/include
+    $ENV{HOMEDRIVE}/HDF5/include
     )
 
   IF($ENV{HDF5_DIR} MATCHES "hdf")

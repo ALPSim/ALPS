@@ -19,7 +19,7 @@ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 ######################################################################
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   if(WIN32 AND NOT UNIX)
-    set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/My Documents/ALPS" CACHE PATH "ALPS install prefix" FORCE)
+    set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/ALPS" CACHE PATH "ALPS install prefix" FORCE)
   else(WIN32 AND NOT UNIX)
     set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
   endif(WIN32 AND NOT UNIX)
