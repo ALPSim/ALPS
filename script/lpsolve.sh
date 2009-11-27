@@ -8,7 +8,7 @@ SRC_DIR="$3"
 
 if test -z "$BUILD_DIR"; then
   echo "$0 prefix build_dir [src_dir]"
-  exit 255
+  exit 127
 fi
 
 LOG="$0.log.$$"
@@ -31,7 +31,7 @@ else
   CURL=`which curl`
   if test -z "$CURL"; then
     echo "curl utility not found" | tee -a "$LOG"
-    exit 255
+    exit 127
   fi
   (cd "$BUILD_DIR" && "$CURL" "$URL" | tar zxf -) 2>&1 | tee -a "$LOG"
 fi
