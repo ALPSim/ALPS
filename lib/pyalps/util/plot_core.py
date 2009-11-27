@@ -99,12 +99,12 @@ def convert_to_text(desc):
         output = ''
 
         if 'title' in desc:
-            output += desc['title'] + '/n'           
+            output += desc['title'] + '\n'           
 
         if 'xaxis' in desc:
             output += 'X'
             if 'label' in desc['xaxis']:
-                output += ': ' + plt['xaxis']['label']
+                output += ': ' + desc['xaxis']['label']
             if 'min' in desc['xaxis'] and 'max' in desc['xaxis']:
                 output += ': ' + str(desc['xaxis']['min']) + ' to ' + str(data['xaxis']['max'])
             output+='\n'
@@ -112,7 +112,7 @@ def convert_to_text(desc):
         if 'yaxis' in desc:
             output += 'Y'
             if 'label' in desc['yaxis']:
-                output += ': ' + plt['yaxis']['label']
+                output += ': ' + desc['yaxis']['label']
             if 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
                 output += ': ' + str(desc['yaxis']['min']) + ' to ' + str(data['yaxis']['max'])
             output+='\n\n'
@@ -126,6 +126,7 @@ def convert_to_text(desc):
             output += '\n'
 
             for i in range(len(q.x)):
-                output += str(q.x[i]) + '\t' + str(q.y[i])
+                output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
+            output+='\n\n'                
         return output
             

@@ -78,7 +78,7 @@ class PlotAsText(Module):
         res = convert_to_text(desc)
         o = self.interpreter.filePool.create_file()
         f = file(o.name,'w')
-        f,write(res)
+        f.write(res)
         f.close()
         self.setResult('value_as_string',res)
         self.setResult('file',0)
