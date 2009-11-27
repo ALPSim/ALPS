@@ -884,7 +884,6 @@ CXXCPP
 CPP
 OPENMP_CXXFLAGS
 OPENMP_CFLAGS
-COMPILER
 am__fastdepCXX_FALSE
 am__fastdepCXX_TRUE
 CXXDEPMODE
@@ -907,6 +906,7 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
+COMPILER
 host_os
 host_vendor
 host_cpu
@@ -987,11 +987,11 @@ ac_user_opts='
 enable_option_checking
 enable_maintainer_mode
 enable_unified_library
+with_compiler
 enable_dependency_tracking
 enable_optimization
 enable_exceptions
 enable_warnings
-with_compiler
 enable_openmp
 enable_shared
 enable_static
@@ -3460,6 +3460,178 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
+
+
+
+# Check whether --with-compiler was given.
+if test "${with_compiler+set}" = set; then :
+  withval=$with_compiler;
+    case "x$withval" in
+      xgnu* | xGNU* | xgcc* | xg++* )
+        COMPILER="gnu"
+        ;;
+      xcygwin* )
+        COMPILER="cygwin"
+        ;;
+      xkai* | xKAI*)
+        COMPILER="kai"
+        ;;
+      xintel* | xicc* )
+        COMPILER="intel"
+        ;;
+      xcomo*)
+        COMPILER="como"
+        ;;
+      xhp32* | xaCC32* | xhp | xaCC)
+        COMPILER="hp32"
+        ;;
+      xhp64* | xaCC64*)
+        COMPILER="hp64"
+        ;;
+      xdec* | xcxx*)
+        COMPILER="dec"
+        ;;
+      xsgi32* | xsgi | xirix32* | xirix*)
+        COMPILER="sgi32"
+        ;;
+      xsgi64* | xirix64*)
+        COMPILER="sgi64"
+        ;;
+      xcray-gcc* | xCRAY-gcc*)
+        COMPILER="cray-gcc"
+        ;;
+      xcray* | xCRAY*)
+        COMPILER="cray"
+        ;;
+      xibm32* | xIBM32*)
+        COMPILER="ibm32"
+        ;;
+      xibm64* | xIBM64* | xibm* | xIBM* | xvacpp* | xxlC*)
+        COMPILER="ibm64"
+        ;;
+      xmacos-gcc-3 | xmacos-gnu-3 | xmacos-g++-3)
+        COMPILER="macos-gcc-3"
+        ;;
+      xmacos-gcc-3.3 | xmacos-gnu-3.3 | xmacos-g++-3.3)
+        COMPILER="macos-gcc-3.3"
+        ;;
+      xmacos-gcc-4.0 | xmacos-gnu-4.0 | xmacos-g++-4.0)
+        COMPILER="macos-gcc-4.0"
+        ;;
+      xmacos* | xmac* | xosx*)
+        COMPILER="macos"
+        ;;
+      xpgi)
+      	COMPILER="pgi"
+	;;
+      xfcc)
+      	COMPILER="fcc"
+	;;
+      xgeneric*)
+        COMPILER="generic"
+        ;;
+      *)
+        as_fn_error "unknown mode $withval" "$LINENO" 5
+        ;;
+    esac
+
+
+fi
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for compiler mode" >&5
+$as_echo_n "checking for compiler mode... " >&6; }
+  test -z "$COMPILER" && COMPILER="generic"
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $COMPILER" >&5
+$as_echo "$COMPILER" >&6; }
+
+  case "$COMPILER" in
+    gnu)
+      try_CC="gcc"
+      try_CXX="g++"
+      ;;
+    cygwin)
+      try_CC="gcc"
+      try_CXX="g++"
+      ;;
+    kai)
+      try_CC="cc"
+      try_CXX="KCC"
+      ;;
+    intel*)
+      try_CC="icc"
+      try_CXX="icpc"
+      ;;
+    como)
+      try_CC="como"
+      try_CXX="como"
+      ;;
+    hp*)
+      try_CC="cc"
+      try_CXX="aCC"
+      ;;
+    dec)
+      try_CC="cc"
+      try_CXX="cxx"
+      ;;
+    sgi*)
+      try_CC="cc"
+      try_CXX="CC"
+      ;;
+    cray)
+      try_CC="cc"
+      try_CXX="CC"
+      ;;
+    cray-gcc)
+      try_CC="cc"
+      try_CXX="CC"
+      ;;
+    ibm*)
+      try_CC="xlc_r"
+      try_CXX="xlC_r"
+      ;;
+    macos)
+      try_CC="gcc"
+      try_CXX="g++"
+      ;;
+    macos-gcc-3)
+      try_CC="gcc3"
+      try_CXX="g++3"
+      ;;
+    macos-gcc-3.3)
+      try_CC="gcc-3.3"
+      try_CXX="g++-3.3"
+      ;;
+    macos-gcc-4.0)
+      try_CC="gcc-4.0"
+      try_CXX="g++-4.0"
+      ;;
+    pgi)
+      try_CC="pgcc"
+      try_CXX="pgCC"
+      ;;
+    fcc)
+      try_CC="fcc"
+      try_CXX="FCC"
+      ;;
+    generic)
+      # nothing to do
+      ;;
+    *)
+      as_fn_error "unknown mode $COMPILER" "$LINENO" 5
+      ;;
+  esac
+
+  if test "$COMPILER" != "generic"; then
+    if test -z "$CC"; then
+      CC=$try_CC
+    fi
+    if test -z "$CXX"; then
+      CXX=$try_CXX
+    fi
+  fi
+  ac_cv_compiler="$COMPILER"
+
 DEPDIR="${am__leading_dot}deps"
 
 ac_config_commands="$ac_config_commands depfiles"
@@ -4882,175 +5054,6 @@ fi
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_compiler_warnings" >&5
 $as_echo "$ac_cv_compiler_warnings" >&6; }
 
-
-# Check whether --with-compiler was given.
-if test "${with_compiler+set}" = set; then :
-  withval=$with_compiler;
-    case "x$withval" in
-      xgnu* | xGNU* | xgcc* | xg++* )
-        COMPILER="gnu"
-        ;;
-      xcygwin* )
-        COMPILER="cygwin"
-        ;;
-      xkai* | xKAI*)
-        COMPILER="kai"
-        ;;
-      xintel* | xicc* )
-        COMPILER="intel"
-        ;;
-      xcomo*)
-        COMPILER="como"
-        ;;
-      xhp32* | xaCC32* | xhp | xaCC)
-        COMPILER="hp32"
-        ;;
-      xhp64* | xaCC64*)
-        COMPILER="hp64"
-        ;;
-      xdec* | xcxx*)
-        COMPILER="dec"
-        ;;
-      xsgi32* | xsgi | xirix32* | xirix*)
-        COMPILER="sgi32"
-        ;;
-      xsgi64* | xirix64*)
-        COMPILER="sgi64"
-        ;;
-      xcray-gcc* | xCRAY-gcc*)
-        COMPILER="cray-gcc"
-        ;;
-      xcray* | xCRAY*)
-        COMPILER="cray"
-        ;;
-      xibm32* | xIBM32*)
-        COMPILER="ibm32"
-        ;;
-      xibm64* | xIBM64* | xibm* | xIBM* | xvacpp* | xxlC*)
-        COMPILER="ibm64"
-        ;;
-      xmacos-gcc-3 | xmacos-gnu-3 | xmacos-g++-3)
-        COMPILER="macos-gcc-3"
-        ;;
-      xmacos-gcc-3.3 | xmacos-gnu-3.3 | xmacos-g++-3.3)
-        COMPILER="macos-gcc-3.3"
-        ;;
-      xmacos-gcc-4.0 | xmacos-gnu-4.0 | xmacos-g++-4.0)
-        COMPILER="macos-gcc-4.0"
-        ;;
-      xmacos* | xmac* | xosx*)
-        COMPILER="macos"
-        ;;
-      xpgi)
-      	COMPILER="pgi"
-	;;
-      xfcc)
-      	COMPILER="fcc"
-	;;
-      xgeneric*)
-        COMPILER="generic"
-        ;;
-      *)
-        as_fn_error "unknown mode $withval" "$LINENO" 5
-        ;;
-    esac
-
-
-fi
-
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for compiler mode" >&5
-$as_echo_n "checking for compiler mode... " >&6; }
-  test -z "$COMPILER" && COMPILER="generic"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $COMPILER" >&5
-$as_echo "$COMPILER" >&6; }
-
-  case "$COMPILER" in
-    gnu)
-      try_CC="gcc"
-      try_CXX="g++"
-      ;;
-    cygwin)
-      try_CC="gcc"
-      try_CXX="g++"
-      ;;
-    kai)
-      try_CC="cc"
-      try_CXX="KCC"
-      ;;
-    intel*)
-      try_CC="icc"
-      try_CXX="icpc"
-      ;;
-    como)
-      try_CC="como"
-      try_CXX="como"
-      ;;
-    hp*)
-      try_CC="cc"
-      try_CXX="aCC"
-      ;;
-    dec)
-      try_CC="cc"
-      try_CXX="cxx"
-      ;;
-    sgi*)
-      try_CC="cc"
-      try_CXX="CC"
-      ;;
-    cray)
-      try_CC="cc"
-      try_CXX="CC"
-      ;;
-    cray-gcc)
-      try_CC="cc"
-      try_CXX="CC"
-      ;;
-    ibm*)
-      try_CC="xlc_r"
-      try_CXX="xlC_r"
-      ;;
-    macos)
-      try_CC="gcc"
-      try_CXX="g++"
-      ;;
-    macos-gcc-3)
-      try_CC="gcc3"
-      try_CXX="g++3"
-      ;;
-    macos-gcc-3.3)
-      try_CC="gcc-3.3"
-      try_CXX="g++-3.3"
-      ;;
-    macos-gcc-4.0)
-      try_CC="gcc-4.0"
-      try_CXX="g++-4.0"
-      ;;
-    pgi)
-      try_CC="pgcc"
-      try_CXX="pgCC"
-      ;;
-    fcc)
-      try_CC="fcc"
-      try_CXX="FCC"
-      ;;
-    generic)
-      # nothing to do
-      ;;
-    *)
-      as_fn_error "unknown mode $COMPILER" "$LINENO" 5
-      ;;
-  esac
-
-  if test "$COMPILER" != "generic"; then
-    if test -z "$CC"; then
-      CC=$try_CC
-    fi
-    if test -z "$CXX"; then
-      CXX=$try_CXX
-    fi
-  fi
-
   save_CFLAGS="$CFLAGS"
   save_CPPFLAGS="$CPPFLAGS"
   save_CXXFLAGS="$CXXFLAGS"
@@ -6107,13 +6110,13 @@ fi
 
 
 
-  if test "$COMPILER" = generic && test "$ac_cv_cxx_compiler_gnu" = yes; then
-    COMPILER=gnu
-    { $as_echo "$as_me:${as_lineno-$LINENO}: compiler mode is reset to $COMPILER" >&5
-$as_echo "$as_me: compiler mode is reset to $COMPILER" >&6;}
+  if test "$ac_cv_compiler" = generic && test "$ac_cv_cxx_compiler_gnu" = yes; then
+    ac_cv_compiler=gnu
+    { $as_echo "$as_me:${as_lineno-$LINENO}: compiler mode is reset to $ac_cv_compiler" >&5
+$as_echo "$as_me: compiler mode is reset to $ac_cv_compiler" >&6;}
   fi
 
-  test -z "$COMPILER" && as_fn_error "compiler mode is not set" "$LINENO" 5
+  test -z "$ac_cv_compiler" && as_fn_error "compiler mode is not set" "$LINENO" 5
 
   # default options
   try_CFLAGS=
@@ -6128,7 +6131,7 @@ $as_echo "$as_me: compiler mode is reset to $COMPILER" >&6;}
   try_CXXFLAGS_NOWARN=
   try_CXXFLAGS_EH=
   try_CXXFLAGS_NOEH=
-  case "$COMPILER" in
+  case "$ac_cv_compiler" in
     gnu)
       try_CFLAGS="-pthread"
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers"
@@ -6309,7 +6312,7 @@ $as_echo "$as_me: compiler mode is reset to $COMPILER" >&6;}
       fi
       ;;
     *)
-      as_fn_error "unknown mode $COMPILER" "$LINENO" 5
+      as_fn_error "unknown mode $ac_cv_compiler" "$LINENO" 5
       ;;
   esac
 
@@ -6597,7 +6600,6 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
     fi
   fi
 
-  ac_cv_compiler="$COMPILER"
   ac_cv_compiler_cc="$CC"
   ac_cv_compiler_cflags="$CFLAGS"
   ac_cv_compiler_cxx="$CXX"
@@ -7700,13 +7702,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7703: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7705: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7706: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7708: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7709: output\"" >&5)
+  (eval echo "\"\$as_me:7711: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8911,7 +8913,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8914 "configure"' > conftest.$ac_ext
+  echo '#line 8916 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10695,11 +10697,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10698: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10700: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10702: \$? = $ac_status" >&5
+   echo "$as_me:10704: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11034,11 +11036,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11037: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11039: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11041: \$? = $ac_status" >&5
+   echo "$as_me:11043: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11139,11 +11141,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11142: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11144: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11146: \$? = $ac_status" >&5
+   echo "$as_me:11148: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11194,11 +11196,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11197: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11199: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11201: \$? = $ac_status" >&5
+   echo "$as_me:11203: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13561,7 +13563,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13564 "configure"
+#line 13566 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13657,7 +13659,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13660 "configure"
+#line 13662 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15613,11 +15615,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15616: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15618: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15620: \$? = $ac_status" >&5
+   echo "$as_me:15622: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15712,11 +15714,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15715: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15717: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15719: \$? = $ac_status" >&5
+   echo "$as_me:15721: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15764,11 +15766,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15767: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15769: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15771: \$? = $ac_status" >&5
+   echo "$as_me:15773: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized

@@ -142,7 +142,8 @@ dnl
 AC_CANONICAL_HOST
 
 dnl C/C++ compiler
-AC_COMPILER
+AC_SELECT_COMPILER
+AC_COMPILER_OPTIONS
 ac_cv_alps_compiler="$ac_cv_compiler"
 ac_cv_alps_compiler_optimization="$ac_cv_compiler_optimization"
 ac_cv_alps_compiler_exceptions="$ac_cv_compiler_exceptions"

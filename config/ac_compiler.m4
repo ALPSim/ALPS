@@ -45,54 +45,10 @@ AC_DEFUN([AC_ALPS_OPENMP],
   AC_SUBST([OPENMP_]_AC_LANG_PREFIX[FLAGS])
 ])
 
-AC_DEFUN([AC_COMPILER],
-  [
-  AC_REQUIRE([AC_PROG_CC])
-  AC_REQUIRE([AC_PROG_CXX])
+# AC_SELECT_COMPILER
+AC_DEFUN([AC_SELECT_COMPILER],
+[
   AC_SUBST(COMPILER)
-  AC_SUBST(CPPFLAGS)
-  AC_SUBST(CFLAGS)
-  AC_SUBST(CXXFLAGS)
-
-  AC_MSG_CHECKING([for optimization])
-  AC_ARG_ENABLE(optimization,
-    AC_HELP_STRING([--enable-optimization],
-      [enable optimization @<:@default=yes@:>@]),
-    [
-    if test "x$enableval" = "xno"; then
-      ac_cv_compiler_optimization=no
-    fi
-    ]
-  )
-  test -z "$ac_cv_compiler_optimization" && ac_cv_compiler_optimization=yes
-  AC_MSG_RESULT($ac_cv_compiler_optimization)
-
-  AC_MSG_CHECKING([for exception handling])
-  AC_ARG_ENABLE(exceptions,
-    AC_HELP_STRING([--enable-exceptions],
-      [enable exception handling @<:@default=yes@:>@]),
-    [
-    if test "x$enableval" = "xno"; then
-      ac_cv_compiler_exceptions=no
-    fi
-    ]
-  )
-  test -z "$ac_cv_compiler_exceptions" && ac_cv_compiler_exceptions=yes
-  AC_MSG_RESULT($ac_cv_compiler_exceptions)
-
-  AC_MSG_CHECKING([for warning messages])
-  AC_ARG_ENABLE(warnings,
-    AC_HELP_STRING([--enable-warnings],
-      [enable warning messages]),
-    [
-    if test "x$enableval" = "xyes"; then
-      ac_cv_compiler_warnings=yes
-    fi
-    ]
-  )
-  test -z "$ac_cv_compiler_warnings" && ac_cv_compiler_warnings=no
-  AC_MSG_RESULT($ac_cv_compiler_warnings)
-
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
       [set compiler mode (MODE = gnu, kai, intel, como, hp32, hp64, dec, sgi32, sgi64, cray, cray-gcc, ibm32, ibm64, macos, macos-gcc-3, macos-gcc-3.3, macos-gcc-4.0, cygwin, pgi, fcc, generic)]),
@@ -257,6 +213,57 @@ AC_DEFUN([AC_COMPILER],
       CXX=$try_CXX
     fi
   fi
+  ac_cv_compiler="$COMPILER"
+])
+
+
+AC_DEFUN([AC_COMPILER_OPTIONS],
+  [
+  AC_REQUIRE([AC_PROG_CC])
+  AC_REQUIRE([AC_PROG_CXX])
+
+  AC_SUBST(CPPFLAGS)
+  AC_SUBST(CFLAGS)
+  AC_SUBST(CXXFLAGS)
+
+  AC_MSG_CHECKING([for optimization])
+  AC_ARG_ENABLE(optimization,
+    AC_HELP_STRING([--enable-optimization],
+      [enable optimization @<:@default=yes@:>@]),
+    [
+    if test "x$enableval" = "xno"; then
+      ac_cv_compiler_optimization=no
+    fi
+    ]
+  )
+  test -z "$ac_cv_compiler_optimization" && ac_cv_compiler_optimization=yes
+  AC_MSG_RESULT($ac_cv_compiler_optimization)
+
+  AC_MSG_CHECKING([for exception handling])
+  AC_ARG_ENABLE(exceptions,
+    AC_HELP_STRING([--enable-exceptions],
+      [enable exception handling @<:@default=yes@:>@]),
+    [
+    if test "x$enableval" = "xno"; then
+      ac_cv_compiler_exceptions=no
+    fi
+    ]
+  )
+  test -z "$ac_cv_compiler_exceptions" && ac_cv_compiler_exceptions=yes
+  AC_MSG_RESULT($ac_cv_compiler_exceptions)
+
+  AC_MSG_CHECKING([for warning messages])
+  AC_ARG_ENABLE(warnings,
+    AC_HELP_STRING([--enable-warnings],
+      [enable warning messages]),
+    [
+    if test "x$enableval" = "xyes"; then
+      ac_cv_compiler_warnings=yes
+    fi
+    ]
+  )
+  test -z "$ac_cv_compiler_warnings" && ac_cv_compiler_warnings=no
+  AC_MSG_RESULT($ac_cv_compiler_warnings)
 
   save_CFLAGS="$CFLAGS"
   save_CPPFLAGS="$CPPFLAGS"
@@ -265,12 +272,12 @@ AC_DEFUN([AC_COMPILER],
   AC_PROG_CC
   AC_PROG_CXX
 
-  if test "$COMPILER" = generic && test "$ac_cv_cxx_compiler_gnu" = yes; then
-    COMPILER=gnu
-    AC_MSG_NOTICE([compiler mode is reset to $COMPILER])
+  if test "$ac_cv_compiler" = generic && test "$ac_cv_cxx_compiler_gnu" = yes; then
+    ac_cv_compiler=gnu
+    AC_MSG_NOTICE([compiler mode is reset to $ac_cv_compiler])
   fi
 
-  test -z "$COMPILER" && AC_MSG_ERROR([compiler mode is not set])
+  test -z "$ac_cv_compiler" && AC_MSG_ERROR([compiler mode is not set])
 
   # default options
   try_CFLAGS=
@@ -285,7 +292,7 @@ AC_DEFUN([AC_COMPILER],
   try_CXXFLAGS_NOWARN=
   try_CXXFLAGS_EH=
   try_CXXFLAGS_NOEH=
-  case "$COMPILER" in
+  case "$ac_cv_compiler" in
     gnu)
       try_CFLAGS="-pthread"
       try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers"
@@ -466,7 +473,7 @@ AC_DEFUN([AC_COMPILER],
       fi
       ;;
     *)
-      AC_MSG_ERROR([unknown mode $COMPILER])
+      AC_MSG_ERROR([unknown mode $ac_cv_compiler])
       ;;
   esac
 
@@ -557,7 +564,6 @@ AC_DEFUN([AC_COMPILER],
     fi
   fi
 
-  ac_cv_compiler="$COMPILER"
   ac_cv_compiler_cc="$CC"
   ac_cv_compiler_cflags="$CFLAGS"
   ac_cv_compiler_cxx="$CXX"
