@@ -6,6 +6,8 @@ from core.modules.python_source_configure import PythonSourceConfigurationWidget
 import urllib, copy
 import numpy as np
 
+from util.dataset import DataSet
+
 class PortDescriptor:
 	def __init__(self, name, porttype, description='', use_python_source=False, hidden=False):
 		self.name = name
@@ -19,24 +21,6 @@ class PortDescriptor:
 	description = ''
 	use_python_source = False
 	hidden = False
-
-class DataSet:
-	def __deepcopy__(self,memo):
-		ret = DataSet()
-		ret.props = copy.deepcopy(self.props,memo)
-		ret.x = copy.deepcopy(self.x,memo)
-		ret.y = copy.deepcopy(self.y,memo)
-		ret.dx = copy.deepcopy(self.dx,memo)
-		ret.dy = copy.deepcopy(self.dy,memo)
-		return ret
-
-	def __init__(self):
-		self.props = {}
-		self.x = np.array([])
-		self.y = np.array([])
-
-		self.dx = np.array([])
-		self.dy = np.array([])
 
 class DataSets(Module):
 	my_input_ports = []

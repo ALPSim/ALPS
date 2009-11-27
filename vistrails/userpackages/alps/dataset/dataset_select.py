@@ -10,6 +10,8 @@ import numpy as np
 from dataset_core import *
 from dataset_exceptions import *
 
+import alea
+
 class Selector(Module):
 	my_input_ports = []
 	my_output_ports = []

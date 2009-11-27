@@ -51,15 +51,23 @@ class MplXYPlot_core:
             line_props = self.colors[self.icolor]
             if 'line' in q.props:
                 line_props += q.props['line']
-            if xlog and ylog:
-                self.acc('self.lines.append(plt.loglog())')
-                self.lines.append(plt.loglog(q.x,q.y,line_props))
-            elif xlog:
-                self.lines.append(plt.semilogx(q.x,q.y,line_props))
-            elif ylog:
-                self.lines.append(plt.semilogy(q.x,q.y,line_props))
-            else:
+            
+            try:
+                means = np.array([xx.mean for xx in q.y])
+                errors = np.array([xx.error for xx in q.y])
+                
+                print means
+                print errors
+                
+                self.lines.append(plt.errorbar(q.x,means,errors,fmt=line_props))
+                
+            except AttributeError:
                 self.lines.append(plt.plot(q.x,q.y,line_props))
+            
+            if xlog:
+                plt.xscale('log')
+            if ylog:
+                plt.yscale('log')
             
             if 'label' in q.props and q.props['label'] != 'none':
                 self.lines[-1][0].set_label(q.props['label'])

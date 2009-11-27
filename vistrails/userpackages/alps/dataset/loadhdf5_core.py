@@ -4,10 +4,9 @@ import numpy as np
 from scipy import optimize
 
 from dataset_core import *
-import pyalps.alea.floatwitherror as fwe
+import alea.floatwitherror as fwe
 
 class Hdf5Loader:
-
 	def GetFileNames(self, flist):
 		self.files = [f.replace('xml','run1.h5') for f in flist] #will be updated once we have aggregated hdf5-files
 		return self.files

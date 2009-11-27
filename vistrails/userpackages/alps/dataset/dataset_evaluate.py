@@ -12,6 +12,8 @@ from scipy import optimize
 from dataset_core import *
 from dataset_exceptions import *
 
+import alea
+
 class ConstantDataSet(Module):
 	"""Create a constant dataset and store into DataSets"""
 	my_input_ports = [

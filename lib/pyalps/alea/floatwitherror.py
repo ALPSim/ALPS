@@ -22,7 +22,8 @@ class FloatWithError:
     return str(self.mean) + '\t' + str(self.error)
   def __expr__(self):
     return expr(self.mean) + '\t' + expr(self.error)
-
+  def __repr__(self):
+	return self.__str__()
   
   def __add__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
