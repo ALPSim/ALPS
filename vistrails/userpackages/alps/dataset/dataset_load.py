@@ -153,9 +153,30 @@ class LoadAlpsFromTxt(Module):
 			# throw something
 			pass
 
+class LoadProperties(Module):
+	my_input_ports = [
+		PortDescriptor('ResultFiles', ListOfElements)
+	]
+	
+	my_output_ports = [
+		PortDescriptor('dictionary', ListOfElements) 
+	]	
+	
+	def compute(self):
+		if self.hasInputFromPort('ResultFiles'):
+			flist = [n.name for n in self.getInputFromPort('ResultFiles')]
+		loader = Hdf5Loader()
+		h5flist = loader.GetFileNames(flist)
+		dictlist = []
+		for f in h5flist:
+			paramdict = loader.ReadParameters(f)
+			paramdict.update({"ObservableList": loader.GetObservableList(f)})
+			dictlist.append(paramdict)
+		self.setResult('dictionary', dict)
+	
 class LoadAlpsHdf5(Module):
 	my_input_ports = [
-		PortDescriptor('file',basic.File),
+		PortDescriptor('ResultFiles',ListOfElements),
 		PortDescriptor('Measurements',ListOfElements)
 	]
 	
@@ -164,14 +185,13 @@ class LoadAlpsHdf5(Module):
 	]	
 	
 	def compute(self):
-		if self.hasInputFromPort('file'):
-			self.f = self.getInputFromPort('file').name
+		if self.hasInputFromPort('ResultFiles'):
+			files = [n.name for n in self.getInputFromPort('ResultFiles')]
 		if self.hasInputFromPort('Measurements'):
 			warn("Not implemented")
-		else:
-			loader = Hdf5Loader()
-			datasets = loader.ReadMeasurementFromFile(self.f)
-			self.setResult('data',datasets)
+		loader = Hdf5Loader()
+		datasets = loader.ReadMeasurementFromFile(files)
+		self.setResult('data',datasets)
 
 class CollectXY(Module):
 	my_input_ports = [

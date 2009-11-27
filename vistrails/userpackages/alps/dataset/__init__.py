@@ -76,6 +76,8 @@ def initialize():
 	register(LoadAlpsFromTxt,'DataSet|Load')
 	register(CustomLoader,'DataSet|Load')
 	register(CollectXY,'DataSet|Load')
+	register(LoadProperties,'DataSet|Load')
+	register(LoadProperties,'DataSet|Load')
 	register(LoadAlpsHdf5,'DataSet|Load')
 
 	register(Transform,'DataSet|Evaluate')
