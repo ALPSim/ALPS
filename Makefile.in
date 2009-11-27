@@ -333,6 +333,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
+ACLOCAL_AMFLAGS = '-I m4'
 SUBDIRS = lib src $(am__append_1) test doc $(am__append_2)
 DIST_SUBDIRS = $(SUBDIRS)
 distdir = alps-$(VERSION)

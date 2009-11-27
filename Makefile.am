@@ -1,3 +1,5 @@
+ACLOCAL_AMFLAGS = '-I m4'
+
 SUBDIRS = lib src
 if ALPS_FULL
 SUBDIRS += tool
