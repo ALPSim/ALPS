@@ -81,7 +81,7 @@ namespace mocasito {
 				}																			\
 			};																				\
 			template<> struct set_size<T> {													\
-				static void apply(T, std::size_t) {}										\
+				static void apply(T &, std::size_t) {}										\
 			};
 		MOCASITO_IO_CV_CALLBACK_1(MOCASITO_IO_SET_SCALAR, bool, 1)
 		MOCASITO_IO_CV_CALLBACK_1(MOCASITO_IO_SET_SCALAR, char, 2)
@@ -115,18 +115,18 @@ namespace mocasito {
 			template <typename T> struct fixed_size<C> {									\
 				static std::size_t const value = 2 * fixed_size<T>::value;					\
 			};																				\
-			template<typename T> struct get_data<C> { \
-				static typename pointer_traits<C>::type apply(C & v) { \
-					return reinterpret_cast<typename pointer_traits<C>::type>(&v); \
-				} \
-			}; \
+			template<typename T> struct get_data<C> { 										\
+				static typename pointer_traits<C>::type apply(C & v) { 						\
+					return reinterpret_cast<typename pointer_traits<C>::type>(&v); 			\
+				} 																			\
+			}; 																				\
 			template<typename T> struct get_size<C> {										\
 				static std::size_t apply(C) {												\
 					return fixed_size<C>::value;											\
 				}																			\
 			};																				\
 			template<typename T> struct set_size<C> {										\
-				static void apply(T, std::size_t) {}										\
+				static void apply(C &, std::size_t) {}										\
 			};
 		MOCASITO_IO_CV_CALLBACK_1(MOCASITO_IO_SET_COMPLEX, std::complex<T>, ~)
 		#undef MOCASITO_IO_SET_COMPLEX
