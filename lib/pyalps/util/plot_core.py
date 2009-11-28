@@ -53,16 +53,21 @@ class MplXYPlot_core:
                 line_props += q.props['line']
             
             try:
-                means = np.array([xx.mean for xx in q.y])
-                errors = np.array([xx.error for xx in q.y])
-                
-                print means
-                print errors
-                
-                self.lines.append(plt.errorbar(q.x,means,errors,fmt=line_props))
-                
+                xmeans = np.array([xx.mean for xx in q.x])
+                xerrors = np.array([xx.error for xx in q.x])
             except AttributeError:
-                self.lines.append(plt.plot(q.x,q.y,line_props))
+                xmeans = q.x
+                xerrors = None
+            
+            try:
+                ymeans = np.array([xx.mean for xx in q.y])
+                yerrors = np.array([xx.error for xx in q.y])
+            except AttributeError:
+                ymeans = q.y
+                yerrors = None
+            
+            print xmeans, ymeans, xerrors, yerrors
+            self.lines.append(plt.errorbar(xmeans,ymeans,yerr=xerrors,xerr=yerrors,fmt=line_props))
             
             if xlog:
                 plt.xscale('log')
