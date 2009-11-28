@@ -4,7 +4,7 @@ import numpy as np
 from scipy import optimize
 
 from dataset_core import *
-import alea.floatwitherror as fwe
+import pyalps.alea.floatwitherror as fwe
 
 class Hdf5Loader:
 	def GetFileNames(self, flist):

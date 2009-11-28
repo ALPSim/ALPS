@@ -13,7 +13,7 @@ from scipy import optimize
 from dataset_core import *
 from loadhdf5_core import *
 
-import alea
+import pyalps.alea
 
 class Loader:
 	def __init__(self,filename,label,xcolumn,ycolumns,props={}):

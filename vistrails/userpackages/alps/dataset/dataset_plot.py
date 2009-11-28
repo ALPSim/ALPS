@@ -11,7 +11,7 @@ from scipy import optimize
 
 from dataset_exceptions import *
 from dataset_core import *
-from util.plot_core import *
+from pyalps.util.plot_core import *
 
 class AxisDescriptor(Descriptor, Module):
     my_input_ports = [
@@ -76,6 +76,36 @@ class PlotAsText(Module):
     def compute(self):
         desc = self.getInputFromPort('plot')
         res = convert_to_text(desc)
+        o = self.interpreter.filePool.create_file()
+        f = file(o.name,'w')
+        f.write(res)
+        f.close()
+        self.setResult('value_as_string',res)
+        self.setResult('file',0)
+
+class GraceXYPlot(Module): 
+    _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
+    _output_ports = [('file',[(basic.File, 'the plot file')]),
+                     ('value_as_string',[(basic.String, 'the plot as string')])]
+    
+    def compute(self):
+        desc = self.getInputFromPort('plot')
+        res = convert_to_grace(desc)
+        o = self.interpreter.filePool.create_file()
+        f = file(o.name,'w')
+        f.write(res)
+        f.close()
+        self.setResult('value_as_string',res)
+        self.setResult('file',0)
+
+class GnuplotXYPlot(Module): 
+    _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
+    _output_ports = [('file',[(basic.File, 'the plot file')]),
+                     ('value_as_string',[(basic.String, 'the plot as string')])]
+    
+    def compute(self):
+        desc = self.getInputFromPort('plot')
+        res = convert_to_gnuplot(desc)
         o = self.interpreter.filePool.create_file()
         f = file(o.name,'w')
         f.write(res)

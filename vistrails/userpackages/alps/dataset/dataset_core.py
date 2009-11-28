@@ -6,7 +6,7 @@ from core.modules.python_source_configure import PythonSourceConfigurationWidget
 import urllib, copy
 import numpy as np
 
-from util.dataset import DataSet
+from pyalps.util.dataset import DataSet
 
 class PortDescriptor:
 	def __init__(self, name, porttype, description='', use_python_source=False, hidden=False):
