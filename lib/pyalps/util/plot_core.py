@@ -143,3 +143,82 @@ def convert_to_text(desc):
             output+='\n\n'                
         return output
             
+def convert_to_grace(desc):
+        output =  '# Grace project file\n'
+        output += '#\n@g0 on\n@with g0\n'
+        output += '@ frame linewidth 2.0'
+        output += '@page background fill off'
+
+        xrange = [0,1]
+        yrange = [0,1]
+        if 'xaxis' in desc and 'min' in desc['xaxis'] and 'max' in desc['xaxis']: 
+            xrange = [ desc['xaxis']['min'],data['xaxis']['max']]
+        if 'yaxis' in desc and 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
+            yrange = [ desc['yaxis']['min'],data['yaxis']['max']]
+
+        output += '@    world ' + str(xrange[0])+', ' + str (yrange[0]) + ','
+        output +=                 str(xrange[1])+', ' + str (yrange[1]) + '\n'
+
+        if 'title' in desc:
+            output += '@    title "'+ desc['title'] + '"\n'           
+            output += '@    title size 1.500000\n'
+
+        xlog = False
+        ylog = False
+        if 'xaxis' in self.plt and 'logarithmic' in self.plt['xaxis']:
+            xlog = self.plt['xaxis']['logarithmic']
+        if 'yaxis' in self.plt and 'logarithmic' in self.plt['yaxis']:
+            ylog = self.plt['yaxis']['logarithmic']
+            
+        if xlog:
+            output += '@    xaxes scale Logarithmic\n'
+        else:
+            output += '@    xaxes scale Normal\n'
+
+        if ylog:
+            output += '@    xaxes scale Logarithmic\n'
+        else:
+            output += '@    xaxes scale Normal\n'
+
+        if 'xaxis' in desc:
+            if 'label' in desc['xaxis']:
+                output += '@    xaxis  label "' + desc['xaxis']['label'] +'"\n'
+                output += '@    xaxis  label char size 1.500000\n'
+            if 'min' in desc['xaxis'] and 'max' in desc['xaxis']:
+                output += ': ' + str(desc['xaxis']['min']) + ' to ' + str(data['xaxis']['max'])
+        output += '@    xaxis  ticklabel char size 1.250000\n'
+        output += '@    xaxis  tick minor ticks 4\n'
+
+        if 'yaxis' in desc:
+            if 'label' in desc['yaxis']:
+                output += '@    xaxis  label "' + desc['yaxis']['label'] +'"\n'
+                output += '@    xaxis  label char size 1.500000\n'
+            if 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
+                output += ': ' + str(desc['yaxis']['min']) + ' to ' + str(data['yaxis']['max'])
+        output += '@    yaxis  ticklabel char size 1.250000\n'
+        output += '@    yaxis  tick minor ticks 4\n'
+        
+        if 'legend' in desc:
+            output += '@    legend on\n'
+            output += '@    legend loctype view\n'
+            output += '@    legend 0.85, 0.8\n'
+        
+        num = 0
+        for q in desc['data']:
+            output += '@    s'+str(num)+' symbol 1\n'
+            output += '@    s'+str(num)+'symbol size 0.500000\n'
+            output += '@    s'+str(num)+' line type 1\n'
+            output += '@target G0.S'+str(num)+'\n'
+            if 'label' in q.props and q.props['label'] != 'none':
+                output += q.props['label']
+            elif 'filename' in q.props:
+                output += q.props['filename']
+            output += '\n'
+
+            if len(q.y):
+                # test for dx, dy, ...
+                for i in range(len(q.x)):
+                    output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
+            num+=1
+                     
+        return output
