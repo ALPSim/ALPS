@@ -165,10 +165,10 @@ def convert_to_grace(desc):
 
         xlog = False
         ylog = False
-        if 'xaxis' in self.plt and 'logarithmic' in self.plt['xaxis']:
-            xlog = self.plt['xaxis']['logarithmic']
-        if 'yaxis' in self.plt and 'logarithmic' in self.plt['yaxis']:
-            ylog = self.plt['yaxis']['logarithmic']
+        if 'xaxis' in desc and 'logarithmic' in desc['xaxis']:
+            xlog = desc['xaxis']['logarithmic']
+        if 'yaxis' in desc and 'logarithmic' in desc['yaxis']:
+            ylog = desc['yaxis']['logarithmic']
             
         if xlog:
             output += '@    xaxes scale Logarithmic\n'
@@ -184,17 +184,13 @@ def convert_to_grace(desc):
             if 'label' in desc['xaxis']:
                 output += '@    xaxis  label "' + desc['xaxis']['label'] +'"\n'
                 output += '@    xaxis  label char size 1.500000\n'
-            if 'min' in desc['xaxis'] and 'max' in desc['xaxis']:
-                output += ': ' + str(desc['xaxis']['min']) + ' to ' + str(data['xaxis']['max'])
         output += '@    xaxis  ticklabel char size 1.250000\n'
         output += '@    xaxis  tick minor ticks 4\n'
 
         if 'yaxis' in desc:
             if 'label' in desc['yaxis']:
-                output += '@    xaxis  label "' + desc['yaxis']['label'] +'"\n'
-                output += '@    xaxis  label char size 1.500000\n'
-            if 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
-                output += ': ' + str(desc['yaxis']['min']) + ' to ' + str(data['yaxis']['max'])
+                output += '@    yaxis  label "' + desc['yaxis']['label'] +'"\n'
+                output += '@    yaxis  label char size 1.500000\n'
         output += '@    yaxis  ticklabel char size 1.250000\n'
         output += '@    yaxis  tick minor ticks 4\n'
         
@@ -205,20 +201,44 @@ def convert_to_grace(desc):
         
         num = 0
         for q in desc['data']:
-            output += '@    s'+str(num)+' symbol 1\n'
-            output += '@    s'+str(num)+'symbol size 0.500000\n'
-            output += '@    s'+str(num)+' line type 1\n'
             output += '@target G0.S'+str(num)+'\n'
+            output += '@    s'+str(num)+' symbol ' + str(num+1) +'\n'
+            output += '@    s'+str(num)+' symbol size 0.500000\n'
+            output += '@    s'+str(num)+' line type 1\n'
             if 'label' in q.props and q.props['label'] != 'none':
-                output += q.props['label']
+                output += '@    s'+str(num)+' legend "' + q.props['label'] + '"\n'
             elif 'filename' in q.props:
-                output += q.props['filename']
+                output += '@    s'+str(num)+' legend "' + q.props['label'] + '"\n'
             output += '\n'
 
             if len(q.y):
-                # test for dx, dy, ...
-                for i in range(len(q.x)):
-                    output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
-            num+=1
+                try:
+                    xerrors = np.array([xx.error for xx in q.x])
+                except AttributeError:
+                    xerrors = None
+                
+                try:
+                    yerrors = np.array([xx.error for xx in q.y])
+                except AttributeError:
+                    yerrors = None
+                    
+                if xerrors == None and yerrors == None:
+                    output += '@type xy\n'
+                    for i in range(len(q.x)):
+                        output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
+                if xerrors == None and yerrors != None:
+                    output += '@type xydy\n'
+                    for i in range(len(q.x)):
+                        output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.y[i].error) + '\n'
+                if xerrors != None and yerrors == None:
+                    output += '@type xydx\n'
+                    for i in range(len(q.x)):
+                        output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\n'
+                if xerrors != None and yerrors != None:
+                    output += '@type xydxdy\n'
+                    for i in range(len(q.x)):
+                        output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\t' + str(q.x[i].error) + '\n'
+                output += '&\n'
+                num+=1
                      
         return output

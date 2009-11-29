@@ -22,7 +22,8 @@ basic = core.modules.basic_modules
 class DisplayXMGRPlot(NotCacheable, alpscore.SystemCommand):
      """ open the file using  xmgr command """
      def compute(self):
-         self.execute(['nohup','/sw/bin/xmgrace', self.getInputFromPort('file').name,'&'])
+         print alpscore._get_tool_path('xmgrace')
+         self.execute(['nohup',alpscore._get_tool_path('xmgrace'), self.getInputFromPort('file').name,'&'])
      _input_ports = [('file', [basic.File])]
 
 class PlotDescription(basic.File):

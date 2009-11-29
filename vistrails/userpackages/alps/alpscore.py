@@ -27,8 +27,14 @@ config = ConfigurationObject()
 
 ##############################################################################
 def _get_path(binary_file):
-    if config.check('path'):
-        return os.path.join(config.path, binary_file)
+    if config.check('alpspath'):
+        return os.path.join(config.alpspath, binary_file)
+    else:
+        return binary_file
+
+def _get_tool_path(binary_file):
+    if config.check('toolpath'):
+        return os.path.join(config.toolpath, binary_file)
     else:
         return binary_file
 

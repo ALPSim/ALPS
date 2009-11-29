@@ -96,7 +96,7 @@ class GraceXYPlot(Module):
         f.write(res)
         f.close()
         self.setResult('value_as_string',res)
-        self.setResult('file',0)
+        self.setResult('file',o)
 
 class GnuplotXYPlot(Module): 
     _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
@@ -111,7 +111,7 @@ class GnuplotXYPlot(Module):
         f.write(res)
         f.close()
         self.setResult('value_as_string',res)
-        self.setResult('file',0)
+        self.setResult('file',o)
         
 
 class Plotter(NotCacheable, Module):
