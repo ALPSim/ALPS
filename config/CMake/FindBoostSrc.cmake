@@ -54,7 +54,7 @@ set(BUILD_BOOST_REGEX TRUE)
 set(BUILD_BOOST_SERIALIZATION TRUE)
 set(BUILD_BOOST_SYSTEM TRUE)
 
-# Boost ライブラリの auto link を防ぐ
+# Avoid auto link of Boost library
 add_definitions(-DBOOST_ALL_NO_LIB=1)
 
 mark_as_advanced(Boost_INCLUDE_DIR)
