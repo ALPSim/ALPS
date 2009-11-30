@@ -27,6 +27,7 @@ def Plot(data,xaxis=None,yaxis=None,legend=None):
         d['yaxis'] = yaxis
     if legend != None:
         d['legend'] = legend
+		
 
 class MplXYPlot_core:
     colors = ['k','b','g','m','c','y']
@@ -242,3 +243,108 @@ def convert_to_grace(desc):
                 num+=1
                      
         return output
+		
+def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
+	output =  '# Gnuplot project file\n'
+	output += 'set terminal postscript color eps enhanced '+str(fontsize)+'\n'
+	output += 'set output "' + outfile + '"\n'
+
+	if 'xaxis' in desc and 'min' in desc['xaxis'] and 'max' in desc['xaxis']: 
+		xrange = [ desc['xaxis']['min'],desc['xaxis']['max']]
+		output += 'set xrange [' + str(xrange[0])+': ' + str (xrange[1]) + ']\n'
+	if 'yaxis' in desc and 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
+		yrange = [ desc['yaxis']['min'],desc['yaxis']['max']]
+		output += 'set yrange [' + str(yrange[0])+': ' + str (yrange[1]) + ']\n'
+	
+	if 'title' in desc:
+		output += 'set title "'+ desc['title'] + '"\n'           
+
+	xlog = False
+	ylog = False
+	if 'xaxis' in desc and 'logarithmic' in desc['xaxis']:
+		xlog = desc['xaxis']['logarithmic']
+	if 'yaxis' in desc and 'logarithmic' in desc['yaxis']:
+		ylog = desc['yaxis']['logarithmic']
+		
+	if xlog:
+		output += 'set xlogscale \n'
+	else:
+		output += '# no xlogscale \n'
+
+	if ylog:
+		output += 'set ylogscale\n'
+	else:
+		output += '# no ylogscale\n'
+
+	if 'xaxis' in desc:
+		if 'label' in desc['xaxis']:
+			output += 'set xlabel "' + desc['xaxis']['label'] +'"\n'
+	
+	if 'yaxis' in desc:
+		if 'label' in desc['yaxis']:
+			output += 'set ylabel "' + desc['yaxis']['label'] +'"\n'
+			        
+	if 'legend' in desc:
+		output += 'set key top right\n'
+        
+	num = 0
+	output += 'plot '
+	for q in desc['data']:
+		if len(q.y):
+			try:
+				xerrors = np.array([xx.error for xx in q.x])
+			except AttributeError:
+				xerrors = None
+                
+			try:
+				yerrors = np.array([xx.error for xx in q.y])
+			except AttributeError:
+				yerrors = None
+		if 'label' in q.props:
+			if xerrors == None and yerrors == None:
+				output += ' "-" using 1:2 title "' + q.props['label'] + '",'
+			if xerrors == None and yerrors != None:
+				output += ' "-" using 1:2:3 w yerrorbars  title "' + q.props['label'] + '",'
+			if xerrors != None and yerrors == None:
+				output += ' "-" using 1:2:3 w xerrorbars  title "' + q.props['label'] + '",'
+			if xerrors != None and yerrors != None:
+				output += ' "-" using 1:2:3:4 w xyerrorbars  title "' + q.props['label'] + '",'
+		else:
+			if xerrors == None and yerrors == None:
+				output += ' "-" using 1:2 notitle ,"' 
+			if xerrors == None and yerrors != None:
+				output += ' "-" using 1:2:3 w yerrorbars  notitle ,' 
+			if xerrors != None and yerrors == None:
+				output += ' "-" using 1:2:3 w xerrorbars  notitle ,' 
+			if xerrors != None and yerrors != None:
+				output += ' "-" using 1:2:3:4 w xyerrorbars  notitle ,'
+				
+		output=output[:-1]
+		output+='\n'
+	for q in desc['data']:	
+			if xerrors == None and yerrors == None:
+				output += '# X Y \n'
+				for i in range(len(q.x)):
+					output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
+				output += 'end \n'
+			if xerrors == None and yerrors != None:
+				output += '# X Y DY \n'
+				for i in range(len(q.x)):
+					output += str(q.x[i]) + '\t' + str(q.y[i].mean) + '\t' + str(q.y[i].error) + '\n'
+				output += 'end \n'
+			if xerrors != None and yerrors == None:
+				output += '# X Y DX \n'
+				for i in range(len(q.x)):
+					output += str(q.x[i].mean) + '\t' + str(q.y[i]) + '\t' + str(q.x[i].error) + '\n'
+				output += 'end \n'
+			if xerrors != None and yerrors != None:
+				output += '# X Y DXY \n'
+				for i in range(len(q.x)):
+					output += str(q.x[i].mean) + '\t' + str(q.y[i].mean) + '\t' + str(q.x[i].error) + '\t' + str(q.y[i].error) + '\n'
+				output += 'end \n'
+			output += '\n'
+			num+=1
+                     
+	return output
+
+
