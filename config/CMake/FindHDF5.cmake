@@ -121,7 +121,7 @@ ENDIF(Hdf5_INCLUDE_DIRS)
 IF(HDF5_INCLUDE_DIR AND HDF5_LIBRARIES)
   SET(HDF5_FOUND 1 CACHE BOOL "Found hdf5 library")
 ELSE(HDF5_INCLUDE_DIR AND HDF5_LIBRARIES)
-  SET(HDF5_FOUND 0 CACHE BOOL "Not fount hdf5 library")
+  SET(HDF5_FOUND 0 CACHE BOOL "Not found hdf5 library")
 ENDIF(HDF5_INCLUDE_DIR AND HDF5_LIBRARIES)
 
 ##############################################################################
