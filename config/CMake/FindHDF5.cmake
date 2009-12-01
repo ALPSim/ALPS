@@ -387,7 +387,7 @@ else()
     # HDF5 was compiled with parallel IO support
     set( HDF5_IS_PARALLEL FALSE )
     if( HDF5_INCLUDE_DIR )
-        if( EXISTS "${HDF5_INCLUDE_DIR}/h5pubconf.h" )
+        if( EXISTS "${HDF5_INCLUDE_DIR}/H5pubconf.h" )
             file( STRINGS "${HDF5_INCLUDE_DIR}/H5pubconf.h" 
                 HDF5_HAVE_PARALLEL_DEFINE
                 REGEX "HAVE_PARALLEL 1" )
