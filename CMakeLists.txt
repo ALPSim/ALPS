@@ -89,7 +89,12 @@ ELSE(HDF5_FOUND)
   MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
 ENDIF(HDF5_FOUND)
 IF(HDF5_IS_PARALLEL)
-  MESSAGE(WARNING "parallel(MPI) hdf5 is detected. ALPS do not use these feature.")
+  SET(ALPS_HAVE_HDF5_PARALLEL 1)
+  MESSAGE(WARNING "parallel(MPI) hdf5 is detected. We try to compile but ALPS do not use these feature.")
+  IF(NOT MPI_FOUND)
+    MESSAGE(FATAL_ERROR "parallel(MPI) hdf5 needs MPI. Enable MPI or install seriall hdf5.")
+  ENDIF(NOT MPI_FOUND)
+  INCLUDE_DIRECTORIES(${MPI_INCLUDE_PATH})
 ENDIF(HDF5_IS_PARALLEL)
 
 # python
