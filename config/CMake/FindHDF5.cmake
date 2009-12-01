@@ -61,11 +61,6 @@
 #
 # this module look for HDF5 (http://hdf.ncsa.uiuc.edu) support
 # it will define the following values
-#
-# HDF5_INCLUDE_DIR  = where hdf5.h can be found
-# HDF5_LIBRARIES      = the library to link against (hdf5 etc)
-# HDF5_FOUND        = set to true after finding the library
-#
 
 # If Hdf5Config.cmake provied by HDF5 source, use them
 IF(EXISTS ${PROJECT_CMAKE}/Hdf5Config.cmake)
