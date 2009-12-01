@@ -74,43 +74,10 @@ IF(Hdf5_INCLUDE_DIRS)
 
 ELSE(Hdf5_INCLUDE_DIRS)
 
-  SET(TRIAL_LIBRARY_PATHS
-    $ENV{PHDF5_HOME}/lib
-    $ENV{HDF5_HOME}/lib
-    $ENV{HDF_HOME}/lib
-    /usr/apps/lib
-    /usr/lib 
-    /opt/lib
-    /opt/local/lib
-    /usr/local/lib
-    /usr/local/hdf5/lib
-    /sw/lib
-    $ENV{HOMEDRIVE}/HDF5/lib
-    )
-
-  SET(TRIAL_INCLUDE_PATHS
-    $ENV{PHDF5_HOME}/include
-    $ENV{HDF5_HOME}/include
-    $ENV{HDF_HOME}/include
-    /usr/apps/include
-    /usr/include
-    /opt/include
-    /opt/local/include
-    /usr/local/include
-    /usr/local/hdf5/include
-    /sw/include
-    $ENV{HOMEDRIVE}/HDF5/include
-    )
-
   IF($ENV{HDF5_DIR} MATCHES "hdf")
     MESSAGE(STATUS "Using environment variable HDF5_DIR.")
-    SET(TRIAL_LIBRARY_PATHS $ENV{HDF5_DIR}/lib ${TRIAL_LIBRARY_PATHS} )
-    SET(TRIAL_INCLUDE_PATHS $ENV{HDF5_DIR}/include ${TRIAL_INCLUDE_PATHS} )
   ENDIF($ENV{HDF5_DIR} MATCHES "hdf")
   
-  FIND_LIBRARY(HDF5_LIBRARIES hdf5 ${TRIAL_LIBRARY_PATHS})
-  FIND_PATH(HDF5_INCLUDE_DIR hdf5.h ${TRIAL_INCLUDE_PATHS} )
-
 ENDIF(Hdf5_INCLUDE_DIRS)
 
 ##############################################################################
@@ -264,8 +231,33 @@ else()
                 ${HDF5_${LANGUAGE}_INCLUDE_FLAGS}
                 ENV
                     HDF5_ROOT
+##############################################################################
+# ALPS addition
+##############################################################################
+                    HDF5_DIR
+                    PHDF5_HOME
+                    HDF5_HOME
+                    HDF_HOME
+##############################################################################
+# ALPS addition end
+##############################################################################
             PATHS 
-                $ENV{HOME}/.local/include
+                $ENV{HOME}/.local
+##############################################################################
+# ALPS addition
+##############################################################################
+                $ENV{HOMEDRIVE}/HDF5
+                /opt/local/hdf5
+                /opt/local
+                /usr/local/hdf5
+                /usr/local
+                /usr/apps
+                /usr
+                /opt
+                /sw
+##############################################################################
+# ALPS addition end
+##############################################################################
             PATH_SUFFIXES
                 include
                 Include
@@ -295,11 +287,51 @@ else()
                 NAMES ${THIS_LIBRARY_SEARCH_DEBUG} 
                 HINTS ${HDF5_${LANGUAGE}_LIBRARY_DIRS} 
                 ENV HDF5_ROOT 
+##############################################################################
+# ALPS addition
+##############################################################################
+                    HDF5_DIR
+                    PHDF5_HOME
+                    HDF5_HOME
+                    HDF_HOME
+                PATHS
+                $ENV{HOMEDRIVE}/HDF5
+                /opt/local/hdf5
+                /opt/local
+                /usr/local/hdf5
+                /usr/local
+                /usr/apps
+                /usr
+                /opt
+                /sw
+##############################################################################
+# ALPS addition end
+##############################################################################
                 PATH_SUFFIXES lib Lib )
             find_library( HDF5_${LIB}_LIBRARY_RELEASE
                 NAMES ${THIS_LIBRARY_SEARCH_RELEASE} 
                 HINTS ${HDF5_${LANGUAGE}_LIBRARY_DIRS} 
                 ENV HDF5_ROOT 
+##############################################################################
+# ALPS addition
+##############################################################################
+                    HDF5_DIR
+                    PHDF5_HOME
+                    HDF5_HOME
+                    HDF_HOME
+                PATHS
+                $ENV{HOMEDRIVE}/HDF5
+                /opt/local/hdf5
+                /opt/local
+                /usr/local/hdf5
+                /usr/local
+                /usr/apps
+                /usr
+                /opt
+                /sw
+##############################################################################
+# ALPS addition end
+##############################################################################
                 PATH_SUFFIXES lib Lib )
             select_library_configurations( HDF5_${LIB} )
             # even though we adjusted the individual library names in
