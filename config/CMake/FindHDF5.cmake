@@ -124,11 +124,6 @@ ELSE(HDF5_INCLUDE_DIR AND HDF5_LIBRARIES)
   SET(HDF5_FOUND 0 CACHE BOOL "Not fount hdf5 library")
 ENDIF(HDF5_INCLUDE_DIR AND HDF5_LIBRARIES)
 
-MARK_AS_ADVANCED(
-  HDF5_INCLUDE_DIR 
-  HDF5_LIBRARY 
-  HDF5_FOUND
-)
 ##############################################################################
 # ALPS addition end
 ##############################################################################
