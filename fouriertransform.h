@@ -152,7 +152,29 @@ public:
 				     const std::vector<double> &densities,
 				     const std::vector<double> &magnetization);
   //void setmu(double mu){ mu_=mu;}
-  
+
+  double moments(const unsigned int z, const unsigned int i, const unsigned int j, 
+		 const unsigned int mom) const 
+  {
+    switch (mom) {
+    case 0 :
+      return c1_[z][i][j];
+      break;
+    case 1 :
+      return c2_[z][i][j];
+      break;
+    case 2 :
+      return c3_[z][i][j];
+      break;
+    default :
+      boost::throw_exception(std::invalid_argument("no such coefficient stored in FourierTransformer"));
+      return 0.;
+      break;
+    }
+  }
+    
+
+
 protected:
 
   double beta_;
