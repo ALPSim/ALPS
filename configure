@@ -21705,6 +21705,17 @@ fi
 
 
 
+
+  ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
+
+  ac_save_CPPFLAGS=$CPPFLAGS
+  ac_save_LDFLAGS=$LDFLAGS
+  ac_save_LIBS=$LIBS
+
   #
   # boost object libraries
   #
@@ -21734,7 +21745,7 @@ $as_echo_n "checking for Boost.MPI library... " >&6; }
     fi
     CPPFLAGS="$ac_save_CPPFLAGS $BOOST_CPPFLAGS $MPI_CPPFLAGS"
     LDFLAGS="$ac_save_LDFLAGS $BOOST_LDFLAGS $MPI_LDFLAGS"
-    LIBS="$BOOST_MPI_LIBS $BOOST_LIBS $ac_save_LIBS"
+    LIBS="$BOOST_MPI_LIBS $BOOST_LIBS $MPI_LIBS $ac_save_LIBS"
     cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 #include <boost/mpi/communicator.hpp>
@@ -22005,6 +22016,16 @@ else
 fi
 
   test "$ac_cv_boost_wchar" = yes && $as_echo "#define ALPS_HAVE_BOOST_WCHAR 1" >>confdefs.h
+
+
+  CPPFLAGS="$ac_save_CPPFLAGS"
+  LDFLAGS="$ac_save_LDFLAGS"
+  LIBS="$ac_save_LIBS"
+  ac_ext=cpp
+ac_cpp='$CXXCPP $CPPFLAGS'
+ac_compile='$CXX -c $CXXFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CXX -o conftest$ac_exeext $CXXFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_cxx_compiler_gnu
 
 
 

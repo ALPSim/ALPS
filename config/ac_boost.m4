@@ -146,7 +146,7 @@ AC_DEFUN([AC_BOOST],
     fi 
   done
 
-dnl check for Boost include files
+  dnl check for Boost include files
 
   AC_LANG_SAVE
   AC_LANG_CPLUSPLUS
@@ -398,6 +398,12 @@ dnl Boost version
 
 AC_DEFUN([AC_BOOST_LIBS],
   [
+  AC_LANG_SAVE
+  AC_LANG_CPLUSPLUS
+  ac_save_CPPFLAGS=$CPPFLAGS
+  ac_save_LDFLAGS=$LDFLAGS
+  ac_save_LIBS=$LIBS
+
   #
   # boost object libraries
   # 
@@ -419,7 +425,7 @@ AC_DEFUN([AC_BOOST_LIBS],
     fi
     CPPFLAGS="$ac_save_CPPFLAGS $BOOST_CPPFLAGS $MPI_CPPFLAGS"
     LDFLAGS="$ac_save_LDFLAGS $BOOST_LDFLAGS $MPI_LDFLAGS"
-    LIBS="$BOOST_MPI_LIBS $BOOST_LIBS $ac_save_LIBS"
+    LIBS="$BOOST_MPI_LIBS $BOOST_LIBS $MPI_LIBS $ac_save_LIBS"
     AC_TRY_LINK([#include <boost/mpi/communicator.hpp>],[boost::mpi::communicator comm;],ac_cv_boost_mpi=yes)
     if test "$ac_cv_boost_mpi" = yes; then
       if test -n "$BOOST_MPI_LIBS"; then
@@ -536,6 +542,11 @@ AC_DEFUN([AC_BOOST_LIBS],
   test "$ac_cv_boost_thread" = yes && AC_DEFINE(ALPS_HAVE_BOOST_THREAD)
   AM_CONDITIONAL(HAVE_BOOST_WCHAR, test "$ac_cv_boost_wchar" = yes)
   test "$ac_cv_boost_wchar" = yes && AC_DEFINE(ALPS_HAVE_BOOST_WCHAR)
+
+  CPPFLAGS="$ac_save_CPPFLAGS"
+  LDFLAGS="$ac_save_LDFLAGS"
+  LIBS="$ac_save_LIBS"
+  AC_LANG_RESTORE
   ]
 )
 
