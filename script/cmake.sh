@@ -14,7 +14,7 @@ fi
 LOG="$0.log.$$"
 echo "executing $0 $*" | tee "$LOG"
 
-URL="http://www.cmake.org/files/v2.6/cmake-$VERSION.tar.gz"
+URL="http://www.cmake.org/files/v2.8/cmake-$VERSION.tar.gz"
 SRC="$SRC_DIR/cmake-$VERSION.tar.gz"
 
 echo "cleaning up..." | tee -a "$LOG"
