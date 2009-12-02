@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.6.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 project(alps)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)

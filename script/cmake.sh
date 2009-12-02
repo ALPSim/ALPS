@@ -1,6 +1,6 @@
 #!/bin/sh
 
-VERSION=2.6.4
+VERSION=2.8.0
 
 PREFIX="$1"
 BUILD_DIR="$2"
