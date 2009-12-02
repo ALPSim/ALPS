@@ -308,9 +308,6 @@ AC_BOOST_LIBS
 dnl check whether Boost.Configure is used or not
 AC_BOOST_CONFIGURE
 
-# If MPI found but BOOST_MPI not found, stop with error.
-test "$ac_cv_alps_have_mpi" = "yes" -a "$ac_cv_boost_mpi" = "no" && AC_MSG_ERROR([MPI found but Boost.MPI not found. Please check your Boost Library configuration.])
-
 dnl
 dnl Doxygen
 dnl
@@ -467,7 +464,11 @@ fi
 
 ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
 if test $ac_cv_unifiedlib = no; then
-  ac_cv_alps_libs_mpi="-lparapack-mpi -lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+  if test $ac_cv_boost_mpi = yes; then
+    ac_cv_alps_libs_mpi="-lparapack-mpi -lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+  else
+    ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+  fi
 else
   ac_cv_alps_libs_mpi="-lalps-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
 fi

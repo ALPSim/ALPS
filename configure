@@ -17448,99 +17448,6 @@ $as_echo "no" >&6; }
       fi
     fi
 
-    if test "$ac_cv_use_precompiled_boost" = yes; then
-
-      #
-      # TODO: check for Boost.Program_options and Boost.Serialization libraries
-      #
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Boost.Signals library" >&5
-$as_echo_n "checking for Boost.Signals library... " >&6; }
-      ac_cv_boost_signals=no
-      if test -n "$boost_libs"; then
-        BOOST_SIGNALS_LIBS=
-      else
-        if test -z "$boost_toolset"; then
-          BOOST_SIGNALS_LIBS="-lboost_signals"
-        else
-          BOOST_SIGNALS_LIBS="-lboost_signals-$boost_toolset"
-        fi
-      fi
-      LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS $ac_save_LIBS"
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/signals/signal2.hpp>
-#include <string>
-int
-main ()
-{
-boost::signal2<void, int, int, boost::last_value<void>, std::string> sig;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_boost_signals=yes
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-      if test "$ac_cv_boost_signals" = yes; then
-        if test -n "$BOOST_SIGNALS_LIBS"; then
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BOOST_SIGNALS_LIBS" >&5
-$as_echo "$BOOST_SIGNALS_LIBS" >&6; }
-          BOOST_LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS"
-        else
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-        fi
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      fi
-
-      { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Boost.Thread library" >&5
-$as_echo_n "checking for Boost.Thread library... " >&6; }
-      ac_cv_boost_thread=no
-      if test -n "$boost_libs"; then
-        BOOST_THREAD_LIBS=
-      else
-        if test -z "$boost_toolset"; then
-          BOOST_THREAD_LIBS="-lboost_thread"
-        else
-          BOOST_THREAD_LIBS="-lboost_thread-$boost_toolset"
-        fi
-      fi
-      LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS $ac_save_LIBS"
-      cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/thread/xtime.hpp>
-int
-main ()
-{
-int x = boost::xtime_get(0, 0);
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_link "$LINENO"; then :
-  ac_cv_boost_thread=yes
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-      if test "$ac_cv_boost_thread" = yes; then
-        if test -n "$BOOST_THREAD_LIBS"; then
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BOOST_THREAD_LIBS" >&5
-$as_echo "$BOOST_THREAD_LIBS" >&6; }
-          BOOST_LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS"
-        else
-          { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-        fi
-      else
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-      fi
-    fi
   fi
 
 
@@ -21812,20 +21719,144 @@ fi
 
 
   if test "$ac_cv_use_precompiled_boost" = yes; then
-     if false; then
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Boost.MPI library" >&5
+$as_echo_n "checking for Boost.MPI library... " >&6; }
+    ac_cv_boost_mpi=no
+    if test -n "$boost_libs"; then
+      BOOST_MPI_LIBS=
+    else
+      if test -z "$boost_toolset"; then
+        BOOST_MPI_LIBS="-lboost_mpi"
+      else
+        BOOST_MPI_LIBS="-lboost_mpi-$boost_toolset"
+      fi
+    fi
+    CPPFLAGS="$ac_save_CPPFLAGS $BOOST_CPPFLAGS $MPI_CPPFLAGS"
+    LDFLAGS="$ac_save_LDFLAGS $BOOST_LDFLAGS $MPI_LDFLAGS"
+    LIBS="$BOOST_MPI_LIBS $BOOST_LIBS $ac_save_LIBS"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <boost/mpi/communicator.hpp>
+int
+main ()
+{
+boost::mpi::communicator comm;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_boost_mpi=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+    if test "$ac_cv_boost_mpi" = yes; then
+      if test -n "$BOOST_MPI_LIBS"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BOOST_MPI_LIBS" >&5
+$as_echo "$BOOST_MPI_LIBS" >&6; }
+        BOOST_LIBS="$BOOST_MPI_LIBS $BOOST_LIBS"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      fi
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Boost.Signals library" >&5
+$as_echo_n "checking for Boost.Signals library... " >&6; }
+    ac_cv_boost_signals=no
+    if test -n "$boost_libs"; then
+      BOOST_SIGNALS_LIBS=
+    else
+      if test -z "$boost_toolset"; then
+        BOOST_SIGNALS_LIBS="-lboost_signals"
+      else
+        BOOST_SIGNALS_LIBS="-lboost_signals-$boost_toolset"
+      fi
+    fi
+    LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS $ac_save_LIBS"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <boost/signals/signal2.hpp>
+#include <string>
+int
+main ()
+{
+boost::signal2<void, int, int, boost::last_value<void>, std::string> sig;
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_boost_signals=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+    if test "$ac_cv_boost_signals" = yes; then
+      if test -n "$BOOST_SIGNALS_LIBS"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BOOST_SIGNALS_LIBS" >&5
+$as_echo "$BOOST_SIGNALS_LIBS" >&6; }
+        BOOST_LIBS="$BOOST_LIBS $BOOST_SIGNALS_LIBS"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      fi
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    fi
+
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for Boost.Thread library" >&5
+$as_echo_n "checking for Boost.Thread library... " >&6; }
+    ac_cv_boost_thread=no
+    if test -n "$boost_libs"; then
+      BOOST_THREAD_LIBS=
+    else
+      if test -z "$boost_toolset"; then
+        BOOST_THREAD_LIBS="-lboost_thread"
+      else
+        BOOST_THREAD_LIBS="-lboost_thread-$boost_toolset"
+      fi
+    fi
+    LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS $ac_save_LIBS"
+    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+#include <boost/thread/xtime.hpp>
+int
+main ()
+{
+int x = boost::xtime_get(0, 0);
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_cxx_try_link "$LINENO"; then :
+  ac_cv_boost_thread=yes
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+    if test "$ac_cv_boost_thread" = yes; then
+      if test -n "$BOOST_THREAD_LIBS"; then
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: $BOOST_THREAD_LIBS" >&5
+$as_echo "$BOOST_THREAD_LIBS" >&6; }
+        BOOST_LIBS="$BOOST_LIBS $BOOST_THREAD_LIBS"
+      else
+        { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+      fi
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    fi
+     if test "$ac_cv_boost_mpi" = yes; then
   BUILD_BOOST_MPI_TRUE=
   BUILD_BOOST_MPI_FALSE='#'
 else
   BUILD_BOOST_MPI_TRUE='#'
   BUILD_BOOST_MPI_FALSE=
-fi
-
-     if false; then
-  BUILD_BOOST_SIGNALS_TRUE=
-  BUILD_BOOST_SIGNALS_FALSE='#'
-else
-  BUILD_BOOST_SIGNALS_TRUE='#'
-  BUILD_BOOST_SIGNALS_FALSE=
 fi
 
      if false; then
@@ -22025,9 +22056,6 @@ $as_echo "$as_me: running Boost configuration script" >&6;}
   fi
 
 
-
-# If MPI found but BOOST_MPI not found, stop with error.
-test "$ac_cv_alps_have_mpi" = "yes" -a "$ac_cv_boost_mpi" = "no" && as_fn_error "MPI found but Boost.MPI not found. Please check your Boost Library configuration." "$LINENO" 5
 
 
 # Extract the first word of "doxygen", so it can be a program name with args.
@@ -22809,7 +22837,11 @@ fi
 
 ac_cv_alps_ldflags_mpi="$ac_cv_alps_ldflags $ac_cv_mpi_ldflags"
 if test $ac_cv_unifiedlib = no; then
-  ac_cv_alps_libs_mpi="-lparapack-mpi -lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+  if test $ac_cv_boost_mpi = yes; then
+    ac_cv_alps_libs_mpi="-lparapack-mpi -lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+  else
+    ac_cv_alps_libs_mpi="-lalps -lcomm-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
+  fi
 else
   ac_cv_alps_libs_mpi="-lalps-mpi $ac_cv_mpi_libs $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_base_libs"
 fi
@@ -23163,10 +23195,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_BOOST_MPI_TRUE}" && test -z "${BUILD_BOOST_MPI_FALSE}"; then
   as_fn_error "conditional \"BUILD_BOOST_MPI\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BUILD_BOOST_SIGNALS_TRUE}" && test -z "${BUILD_BOOST_SIGNALS_FALSE}"; then
-  as_fn_error "conditional \"BUILD_BOOST_SIGNALS\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_BOOST_SIGNALS_TRUE}" && test -z "${BUILD_BOOST_SIGNALS_FALSE}"; then
