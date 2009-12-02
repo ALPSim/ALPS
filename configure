@@ -22026,6 +22026,9 @@ $as_echo "$as_me: running Boost configuration script" >&6;}
 
 
 
+# If MPI found but BOOST_MPI not found, stop with error.
+test "$ac_cv_alps_have_mpi" = "yes" -a "$ac_cv_boost_mpi" = "no" && as_fn_error "MPI found but Boost.MPI not found. Please check your Boost Library configuration." "$LINENO" 5
+
 
 # Extract the first word of "doxygen", so it can be a program name with args.
 set dummy doxygen; ac_word=$2

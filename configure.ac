@@ -308,6 +308,9 @@ AC_BOOST_LIBS
 dnl check whether Boost.Configure is used or not
 AC_BOOST_CONFIGURE
 
+# If MPI found but BOOST_MPI not found, stop with error.
+test "$ac_cv_alps_have_mpi" = "yes" -a "$ac_cv_boost_mpi" = "no" && AC_MSG_ERROR([MPI found but Boost.MPI not found. Please check your Boost Library configuration.])
+
 dnl
 dnl Doxygen
 dnl
