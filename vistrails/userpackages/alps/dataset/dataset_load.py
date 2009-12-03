@@ -197,8 +197,8 @@ class LoadAlpsHdf5(Module):
 class CollectXY(Module):
     my_input_ports = [
         PortDescriptor('for-each',ListOfElements),
-        PortDescriptor('observable',basic.String),
-        PortDescriptor('versus',basic.String),
+        PortDescriptor('y',basic.String),
+        PortDescriptor('x',basic.String),
         PortDescriptor('input',DataSets)
     ]
     my_output_ports = [
@@ -206,15 +206,17 @@ class CollectXY(Module):
     ]
     
     def compute(self):
-        if self.hasInputFromPort('for-each') \
-        and self.hasInputFromPort('observable') \
-        and self.hasInputFromPort('versus') \
+        if self.hasInputFromPort('y') \
+        and self.hasInputFromPort('x') \
         and self.hasInputFromPort('input'):
             # find all possible values for each for-each
             sets = self.getInputFromPort('input')
-            for_each = self.getInputFromPort('for-each')
-            observable = self.getInputFromPort('observable')
-            versus = self.getInputFromPort('versus')
+            observable = self.getInputFromPort('y')
+            versus = self.getInputFromPort('x')
+            
+            for_each = []
+            if self.hasInputFromPort('for-each'):
+                for_each = self.getInputFromPort('for-each')
             
             for_each_sets = {}
             for iset in sets:

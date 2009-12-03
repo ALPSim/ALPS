@@ -68,7 +68,7 @@ class MplXYPlot_core:
                 yerrors = None
             
             print xmeans, ymeans, xerrors, yerrors
-            self.lines.append(plt.errorbar(xmeans,ymeans,yerr=xerrors,xerr=yerrors,fmt=line_props))
+            self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props))
             
             if xlog:
                 plt.xscale('log')
