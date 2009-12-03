@@ -4,6 +4,7 @@ import numpy as np
 from scipy import optimize
 
 from dataset_core import *
+from pyalps.util.dataset import ResultFile
 import pyalps.alea.floatwitherror as fwe
 
 class Hdf5Loader:
@@ -26,6 +27,16 @@ class Hdf5Loader:
 				pass
 		return dict 
 		
+	def GetProperties(self, flist):
+		fs = self.GetFileNames(flist)
+		resultfiles = []
+		for f in fs:
+			rfile = ResultFile()
+			rfile.props = self.ReadParameters(f)
+			rfile.props["ObservableList"] = self.GetObservableList(f)
+			resultfiles.append(rfile)
+		return resultfiles
+		
 	def GetResultsPath(self, file):
 		path = "/simulation/realizations/0/clones/"
 		self.h5f = h5py.File(file)
@@ -40,16 +51,21 @@ class Hdf5Loader:
 		
 	# Pre: file is a h5py file descriptor
 	# Post: returns DataSet with all parameters set
-	def ReadMeasurementFromFile(self,flist):
+	def ReadMeasurementFromFile(self,flist,measurements=None):
 		fs = self.GetFileNames(flist)
 		sets = []
 		for f in fs:
 			path = self.GetResultsPath(f)
 			grp = self.h5f.require_group(path)
 			params = self.ReadParameters(f)
-			obs_list = self.GetObservableList(f)
+			list = self.GetObservableList(f)
+			obslist = []
+			if measurements == None:
+				obslist = list
+			else:
+				obslist = [obs for obs in measurements if obs in list]
 			kwd = "mean"
-			for m in obs_list:
+			for m in obslist:
 				if kwd in grp[m].keys():
 					p_mean = m + "/mean"
 					p_error = m + "/error"
@@ -67,7 +83,8 @@ class Hdf5Loader:
 							subset.append(fwe.FloatWithError(all_m[i],all_e[i]))
 						d.y = np.array(subset)
 						d.x =	 np.arange(0,len(d.y))
-						d.props['hdf5_path'] = m
+						d.props['hdf5_path'] = path + m
+						d.props['observable'] = m
 						d.props.update(params)
 						sets.append(d)
 					except AttributeError:

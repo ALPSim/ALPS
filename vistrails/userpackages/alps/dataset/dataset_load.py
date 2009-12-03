@@ -156,44 +156,43 @@ class LoadAlpsFromTxt(Module):
             pass
 
 class LoadProperties(Module):
-    my_input_ports = [
-        PortDescriptor('ResultFiles', ListOfElements)
-    ]
-    
-    my_output_ports = [
-        PortDescriptor('dictionary', ListOfElements) 
-    ]    
-    
-    def compute(self):
-        if self.hasInputFromPort('ResultFiles'):
-            flist = [n.name for n in self.getInputFromPort('ResultFiles')]
-        loader = Hdf5Loader()
-        h5flist = loader.GetFileNames(flist)
-        dictlist = []
-        for f in h5flist:
-            paramdict = loader.ReadParameters(f)
-            paramdict.update({"ObservableList": loader.GetObservableList(f)})
-            dictlist.append(paramdict)
-        self.setResult('dictionary', dict)
+	my_input_ports = [
+		PortDescriptor('ResultFiles', ListOfElements)
+	]
+	
+	my_output_ports = [
+		PortDescriptor('Props', ResultFiles) 
+	]	
+	
+	def compute(self):
+		print "in Module Load Properties"
+		if self.hasInputFromPort('ResultFiles'):
+			flist = self.getInputFromPort('ResultFiles')
+		loader = Hdf5Loader()
+		dictlist = loader.GetProperties(flist)
+		self.setResult('Props', dictlist)
     
 class LoadAlpsHdf5(Module):
-    my_input_ports = [
-        PortDescriptor('ResultFiles',ListOfElements),
-        PortDescriptor('Measurements',ListOfElements)
-    ]
-    
-    my_output_ports = [
-        PortDescriptor('data',DataSets)
-    ]    
-    
-    def compute(self):
-        if self.hasInputFromPort('ResultFiles'):
-            files = [n.name for n in self.getInputFromPort('ResultFiles')]
-        if self.hasInputFromPort('Measurements'):
-            warn("Not implemented")
-        loader = Hdf5Loader()
-        datasets = loader.ReadMeasurementFromFile(files)
-        self.setResult('data',datasets)
+	my_input_ports = [
+		PortDescriptor('ResultFiles',ListOfElements),
+		PortDescriptor('Measurements',ListOfElements)
+	]
+	
+	my_output_ports = [
+		PortDescriptor('data',DataSets)
+	]	
+	
+	def compute(self):
+		loader = Hdf5Loader()
+		if self.hasInputFromPort('ResultFiles'):
+			files = self.getInputFromPort('ResultFiles')
+		datasets = []
+		if self.hasInputFromPort('Measurements'):
+			datasets = loader.ReadMeasurementFromFile(files,self.getInputFromPort('Measurements'))
+		else:
+			datasets = loader.ReadMeasurementFromFile(files)
+		self.setResult('data',datasets)
+
 
 class CollectXY(Module):
     my_input_ports = [
