@@ -236,6 +236,8 @@ class CollectXY(Module):
                 for im in range(0,len(for_each)):
                     m = for_each[im]
                     res.props[m] = k[im]
+                res.props['xlabel'] = versus
+                res.props['ylabel'] = observable
                 
                 for x in v:
                     if len(res.x) > 0 and len(res.y) > 0:

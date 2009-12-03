@@ -87,6 +87,12 @@ class MplXYPlot_core:
         
         self.draw_lines()
         
+        for ds in self.plt['data']:
+            if 'xlabel' in ds.props:
+                plt.xlabel(ds.props['xlabel'])
+            if 'ylabel' in ds.props:
+                plt.ylabel(ds.props['ylabel'])
+        
         if 'xaxis' in self.plt:
             if 'label' in self.plt['xaxis']:
                 plt.xlabel(self.plt['xaxis']['label'])
