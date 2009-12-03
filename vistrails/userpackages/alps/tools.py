@@ -99,7 +99,13 @@ class GetRunFiles(Module):
            tasks = str(self.getInputFromPort('runs'))
          if (self.hasInputFromPort('prefix')):
            tasks = str(self.getInputFromPort('prefix'))+'*'
-         self.setResult('value',glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.run' +runs)))
+         files = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.run' +runs))
+# remove HDF5 files from the list
+         res = []
+         for f in files:
+           if f[-3:]!='.h5':
+             res.append(f)
+         self.setResult('value',res)
      _input_ports = [('dir',[basic.Directory]), 
                      ('prefix',[basic.String]), 
                      ('tasks',[basic.String]),

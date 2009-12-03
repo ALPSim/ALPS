@@ -1,7 +1,0 @@
-length of the chain, number of iterations? number of states kept for the warmup sweep?use reflection symmetry? (1=yes) length = 0, nsweeps = 0
-#length = 0, nsweeps = 0
-nearest neighbour hopping t, nearest neighbour interaction V? t = 0, V = 6.95322e-310
-#t = 0, V = 6.95322e-310
-starting finite system sweeps 
-
-*************** The End ***************
