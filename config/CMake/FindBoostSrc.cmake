@@ -45,6 +45,8 @@ endif(Boost_INCLUDE_DIR)
 
 if(Boost_ROOT_DIR)
   message(STATUS "Found Boost Source: ${Boost_ROOT_DIR}")
+else(Boost_ROOT_DIR)
+  message(FATAL_ERROR "Boost Source not Found")
 endif(Boost_ROOT_DIR)
 
 set(BUILD_BOOST_DATE_TIME TRUE)
