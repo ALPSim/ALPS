@@ -68,6 +68,9 @@ find_package(BoostSrc REQUIRED)
 
 # MPI
 find_package(MPI)
+IF(MPI_FOUND)
+  LINK_LIBRARIES(${MPI_LIBRARIES})
+ENDIF(MPI_FOUND)
 
 # Lapack
 find_package(Lapack)
