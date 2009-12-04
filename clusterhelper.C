@@ -229,8 +229,62 @@ void ClusterHelper::setup_tables()
 	clustermomstream << cluster_momenta_(m,d) << " ";
 	clustermomstream << std::endl;
     }
-    }
+  }
   //setup lattice momenta
+  std::vector<double> weights;
+  momentum_iterator itm, itm_end;
+  boost::tie(itm, itm_end) = momenta();
+  for (; itm!=itm_end; ++itm) {
+    vector_type mom=momentum(*itm);
+    vector_type mom_trans = matrix_vector_mult(reciprocal_basis_inv_, mom);
+    std::vector<vector_type> moms;
+    switch (dimension()) {
+    case 1 :
+      for (int s1=-1; s1<=1; s1+=2) {
+	vector_type tmom = mom_trans;
+	tmom[0] = s1*mom_trans[0];
+	moms.push_back(tmom);
+      }
+      break;
+    case 2 :
+      for (int s1=-1; s1<=1; s1+=2) {
+	for (int s2=-1; s2<=1; s2+=2) {
+	  vector_type tmom = mom_trans;
+	  tmom[0] = s1*mom_trans[0];
+	  tmom[1] = s2*mom_trans[1];
+	  moms.push_back(tmom);
+	}
+      }
+      break;
+    case 3 :
+      for (int s1=-1; s1<=1; s1+=2) {
+	for (int s2=-1; s2<=1; s2+=2) {
+	  for (int s3=-1; s3<=1; s3+=2) {
+	    vector_type tmom = mom_trans;
+	    tmom[0] = s1*mom_trans[0];
+	    tmom[1] = s2*mom_trans[1];
+	    tmom[2] = s3*mom_trans[2];
+	    moms.push_back(tmom);
+	  }
+	}
+      }
+      break;
+    }
+    for (int g=0; g<moms.size(); ++g) {
+      double weight = 1.;
+      for (int d=0; d<dimension(); ++d) {
+	if (almost_equal(moms[g][d], 0.5) || almost_equal(moms[g][d], -0.5))
+	  weight *= 0.5;
+      }
+      vector_type momw(dimension()+1);
+      vector_type momt = matrix_vector_mult(reciprocal_basis_, moms[g]);
+      for (int d=0; d<dimension(); ++d) 
+	momw[d] = momt[d];
+      momw[dimension()] = weight;
+      append_column_no_duplicates(lattice_momenta_, momw);
+    }
+  }
+  /*
   lattice_momenta_.resize(n_cluster_cells(), dimension());
   momentum_iterator itm, itm_end;
   boost::tie(itm, itm_end) = momenta();
@@ -239,14 +293,16 @@ void ClusterHelper::setup_tables()
     for (int d=0; d<dimension(); ++d) {
       lattice_momenta_(m,d) = mom[d];
     }
-  } 
-  /*std::ofstream latticemomstream("LatticeMomenta");
-  for (int m=0; m<lattice_momenta_.size1(); ++m) {
-    latticemomstream << m << " ";
-    for (int d=0; d<lattice_momenta_.size2(); ++d) 
-      latticemomstream << lattice_momenta_(m,d) << " ";
-    latticemomstream << std::endl;
-    }*/
+    } */
+  if (alps::is_master()) {
+    std::ofstream latticemomstream("LatticeMomenta");
+    for (int m=0; m<lattice_momenta_.size1(); ++m) {
+      latticemomstream << m << " ";
+      for (int d=0; d<lattice_momenta_.size2(); ++d) 
+	latticemomstream << lattice_momenta_(m,d) << " ";
+      latticemomstream << std::endl;
+    }
+  }
   if (cluster_coordinates_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   if (cluster_momenta_.size1() != n_cluster_sites())

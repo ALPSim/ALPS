@@ -69,6 +69,7 @@ public:
   bool bipartite() const { return bipartite_; }
   unsigned int n_cluster_sites() const { return n_cluster_sites_; }
   unsigned int n_cluster_cells() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::volume(); }
+  unsigned int n_lattice_momenta() const { return lattice_momenta_.size1(); }
   unsigned int dimension() const { return alps::graph_helper<alps::graph_helper<>::graph_type>::dimension(); }
   unsigned int cluster_momentum_approximation(vector_type k) const;
 
