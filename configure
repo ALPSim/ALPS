@@ -833,24 +833,6 @@ HDF5_CPPFLAGS
 EXAMPLE_PTHREAD
 LIB_PTHREAD
 OBJ_PTHREAD
-BOOST_1_32_FALSE
-BOOST_1_32_TRUE
-BOOST_1_33_FALSE
-BOOST_1_33_TRUE
-BOOST_1_34_FALSE
-BOOST_1_34_TRUE
-BOOST_1_35_FALSE
-BOOST_1_35_TRUE
-BOOST_1_36_FALSE
-BOOST_1_36_TRUE
-BOOST_1_37_FALSE
-BOOST_1_37_TRUE
-BOOST_1_38_FALSE
-BOOST_1_38_TRUE
-BOOST_1_39_FALSE
-BOOST_1_39_TRUE
-BOOST_1_40_FALSE
-BOOST_1_40_TRUE
 BOOST_1_41_FALSE
 BOOST_1_41_TRUE
 BOOST_SVN_FALSE
@@ -7702,13 +7684,13 @@ if test "${lt_cv_nm_interface+set}" = set; then :
 else
   lt_cv_nm_interface="BSD nm"
   echo "int some_variable = 0;" > conftest.$ac_ext
-  (eval echo "\"\$as_me:7705: $ac_compile\"" >&5)
+  (eval echo "\"\$as_me:7687: $ac_compile\"" >&5)
   (eval "$ac_compile" 2>conftest.err)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7708: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
+  (eval echo "\"\$as_me:7690: $NM \\\"conftest.$ac_objext\\\"\"" >&5)
   (eval "$NM \"conftest.$ac_objext\"" 2>conftest.err > conftest.out)
   cat conftest.err >&5
-  (eval echo "\"\$as_me:7711: output\"" >&5)
+  (eval echo "\"\$as_me:7693: output\"" >&5)
   cat conftest.out >&5
   if $GREP 'External.*some_variable' conftest.out > /dev/null; then
     lt_cv_nm_interface="MS dumpbin"
@@ -8913,7 +8895,7 @@ ia64-*-hpux*)
   ;;
 *-*-irix6*)
   # Find out which ABI we are using.
-  echo '#line 8916 "configure"' > conftest.$ac_ext
+  echo '#line 8898 "configure"' > conftest.$ac_ext
   if { { eval echo "\"\$as_me\":${as_lineno-$LINENO}: \"$ac_compile\""; } >&5
   (eval $ac_compile) 2>&5
   ac_status=$?
@@ -10697,11 +10679,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:10700: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:10682: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:10704: \$? = $ac_status" >&5
+   echo "$as_me:10686: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11036,11 +11018,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11039: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11021: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:11043: \$? = $ac_status" >&5
+   echo "$as_me:11025: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -11141,11 +11123,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11144: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11126: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11148: \$? = $ac_status" >&5
+   echo "$as_me:11130: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -11196,11 +11178,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:11199: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:11181: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:11203: \$? = $ac_status" >&5
+   echo "$as_me:11185: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -13563,7 +13545,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13566 "configure"
+#line 13548 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -13659,7 +13641,7 @@ else
   lt_dlunknown=0; lt_dlno_uscore=1; lt_dlneed_uscore=2
   lt_status=$lt_dlunknown
   cat > conftest.$ac_ext <<_LT_EOF
-#line 13662 "configure"
+#line 13644 "configure"
 #include "confdefs.h"
 
 #if HAVE_DLFCN_H
@@ -15615,11 +15597,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15618: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15600: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>conftest.err)
    ac_status=$?
    cat conftest.err >&5
-   echo "$as_me:15622: \$? = $ac_status" >&5
+   echo "$as_me:15604: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s "$ac_outfile"; then
      # The compiler can only warn and ignore the option if not recognized
      # So say no if there are warnings other than the usual output.
@@ -15714,11 +15696,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15717: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15699: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15721: \$? = $ac_status" >&5
+   echo "$as_me:15703: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -15766,11 +15748,11 @@ else
    -e 's:.*FLAGS}\{0,1\} :&$lt_compiler_flag :; t' \
    -e 's: [^ ]*conftest\.: $lt_compiler_flag&:; t' \
    -e 's:$: $lt_compiler_flag:'`
-   (eval echo "\"\$as_me:15769: $lt_compile\"" >&5)
+   (eval echo "\"\$as_me:15751: $lt_compile\"" >&5)
    (eval "$lt_compile" 2>out/conftest.err)
    ac_status=$?
    cat out/conftest.err >&5
-   echo "$as_me:15773: \$? = $ac_status" >&5
+   echo "$as_me:15755: \$? = $ac_status" >&5
    if (exit $ac_status) && test -s out/conftest2.$ac_objext
    then
      # The compiler can only warn and ignore the option if not recognized
@@ -17043,166 +17025,6 @@ if ac_fn_cxx_try_compile "$LINENO"; then :
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
   fi
-  if test -z "$ac_cv_boost_version"; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103900
-#error
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ac_cv_boost_version=1_39
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103800
-#error
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ac_cv_boost_version=1_38
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103700
-#error
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ac_cv_boost_version=1_37
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103600
-#error
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ac_cv_boost_version=1_36
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103500
-#error
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ac_cv_boost_version=1_35
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103400
-#error
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ac_cv_boost_version=1_34
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103300
-#error
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ac_cv_boost_version=1_33
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-#include <boost/version.hpp>
-#if BOOST_VERSION < 103200
-#error
-#endif
-int
-main ()
-{
-
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_cxx_try_compile "$LINENO"; then :
-  ac_cv_boost_version=1_32
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-  fi
   case "x$ac_cv_boost_version" in
     xsvn )
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: SVN" >&5
@@ -17211,42 +17033,6 @@ $as_echo "SVN" >&6; }
     x1_41 )
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.41" >&5
 $as_echo "1.41" >&6; }
-      ;;
-    x1_40 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.40" >&5
-$as_echo "1.40" >&6; }
-      ;;
-    x1_39 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.39" >&5
-$as_echo "1.39" >&6; }
-      ;;
-    x1_38 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.38" >&5
-$as_echo "1.38" >&6; }
-      ;;
-    x1_37 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.37" >&5
-$as_echo "1.37" >&6; }
-      ;;
-    x1_36 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.36" >&5
-$as_echo "1.36" >&6; }
-      ;;
-    x1_35 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.35" >&5
-$as_echo "1.35" >&6; }
-      ;;
-    x1_34 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.34" >&5
-$as_echo "1.34" >&6; }
-      ;;
-    x1_33 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.33" >&5
-$as_echo "1.33" >&6; }
-      ;;
-    x1_32 )
-      { $as_echo "$as_me:${as_lineno-$LINENO}: result: 1.32" >&5
-$as_echo "1.32" >&6; }
       ;;
     * )
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: unknown" >&5
@@ -17268,78 +17054,6 @@ fi
 else
   BOOST_1_41_TRUE='#'
   BOOST_1_41_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_40; then
-  BOOST_1_40_TRUE=
-  BOOST_1_40_FALSE='#'
-else
-  BOOST_1_40_TRUE='#'
-  BOOST_1_40_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_39; then
-  BOOST_1_39_TRUE=
-  BOOST_1_39_FALSE='#'
-else
-  BOOST_1_39_TRUE='#'
-  BOOST_1_39_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_38; then
-  BOOST_1_38_TRUE=
-  BOOST_1_38_FALSE='#'
-else
-  BOOST_1_38_TRUE='#'
-  BOOST_1_38_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_37; then
-  BOOST_1_37_TRUE=
-  BOOST_1_37_FALSE='#'
-else
-  BOOST_1_37_TRUE='#'
-  BOOST_1_37_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_36; then
-  BOOST_1_36_TRUE=
-  BOOST_1_36_FALSE='#'
-else
-  BOOST_1_36_TRUE='#'
-  BOOST_1_36_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_35; then
-  BOOST_1_35_TRUE=
-  BOOST_1_35_FALSE='#'
-else
-  BOOST_1_35_TRUE='#'
-  BOOST_1_35_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_34; then
-  BOOST_1_34_TRUE=
-  BOOST_1_34_FALSE='#'
-else
-  BOOST_1_34_TRUE='#'
-  BOOST_1_34_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_33; then
-  BOOST_1_33_TRUE=
-  BOOST_1_33_FALSE='#'
-else
-  BOOST_1_33_TRUE='#'
-  BOOST_1_33_FALSE=
-fi
-
-   if test "$ac_cv_boost_version" = 1_32; then
-  BOOST_1_32_TRUE=
-  BOOST_1_32_FALSE='#'
-else
-  BOOST_1_32_TRUE='#'
-  BOOST_1_32_FALSE=
 fi
 
 
@@ -23172,42 +22886,6 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BOOST_1_41_TRUE}" && test -z "${BOOST_1_41_FALSE}"; then
   as_fn_error "conditional \"BOOST_1_41\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_40_TRUE}" && test -z "${BOOST_1_40_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_40\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_39_TRUE}" && test -z "${BOOST_1_39_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_39\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_38_TRUE}" && test -z "${BOOST_1_38_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_38\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_37_TRUE}" && test -z "${BOOST_1_37_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_37\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_36_TRUE}" && test -z "${BOOST_1_36_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_36\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_35_TRUE}" && test -z "${BOOST_1_35_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_35\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_34_TRUE}" && test -z "${BOOST_1_34_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_34\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_33_TRUE}" && test -z "${BOOST_1_33_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_33\" was never defined.
-Usually this means the macro was only invoked conditionally." "$LINENO" 5
-fi
-if test -z "${BOOST_1_32_TRUE}" && test -z "${BOOST_1_32_FALSE}"; then
-  as_fn_error "conditional \"BOOST_1_32\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_BOOST_TRUE}" && test -z "${BUILD_BOOST_FALSE}"; then

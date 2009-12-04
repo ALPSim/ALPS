@@ -95,32 +95,13 @@ src_boost_DATE_TIME = \
   $(BOOST_SRCDIR)/date_time/src/gregorian/gregorian_types.cpp \
   $(BOOST_SRCDIR)/date_time/src/posix_time/posix_time_types.cpp
 
-src_boost_FILESYSTEM_1_32 = \
-  $(BOOST_SRCDIR)/filesystem/src/convenience.cpp \
-  $(BOOST_SRCDIR)/filesystem/src/operations_posix_windows.cpp \
-  $(BOOST_SRCDIR)/filesystem/src/path_posix_windows.cpp
-  # $(BOOST_SRCDIR)/filesystem/src/exception.cpp
-src_boost_FILESYSTEM_1_33 = $(src_boost_FILESYSTEM_1_32)
-src_boost_FILESYSTEM_1_34 = \
+src_boost_FILESYSTEM = \
   $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
   $(BOOST_SRCDIR)/filesystem/src/path.cpp \
   $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
   $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-  # $(BOOST_SRCDIR)/filesystem/src/exception.cpp
-src_boost_FILESYSTEM_1_35 = \
-  $(BOOST_SRCDIR)/filesystem/src/operations.cpp \
-  $(BOOST_SRCDIR)/filesystem/src/path.cpp \
-  $(BOOST_SRCDIR)/filesystem/src/portability.cpp \
-  $(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-src_boost_FILESYSTEM_1_36 = $(src_boost_FILESYSTEM_1_35)
-src_boost_FILESYSTEM_1_37 = $(src_boost_FILESYSTEM_1_35)
-src_boost_FILESYSTEM_1_38 = $(src_boost_FILESYSTEM_1_35)
-src_boost_FILESYSTEM_1_39 = $(src_boost_FILESYSTEM_1_35)
-src_boost_FILESYSTEM_1_40 = $(src_boost_FILESYSTEM_1_35)
-src_boost_FILESYSTEM_1_41 = $(src_boost_FILESYSTEM_1_35)
-src_boost_FILESYSTEM_SVN = $(src_boost_FILESYSTEM_1_35)
 
-src_boost_MPI_1_35 = \
+src_boost_MPI = \
   $(BOOST_SRCDIR)/mpi/src/broadcast.cpp \
   $(BOOST_SRCDIR)/mpi/src/communicator.cpp \
   $(BOOST_SRCDIR)/mpi/src/computation_tree.cpp \
@@ -140,14 +121,6 @@ src_boost_MPI_1_35 = \
   $(BOOST_SRCDIR)/mpi/src/request.cpp \
   $(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp \
   $(BOOST_SRCDIR)/mpi/src/timer.cpp
-# $(BOOST_SRCDIR)/mpi/src/text_skeleton_iarchive.cpp
-src_boost_MPI_1_36 = $(src_boost_MPI_1_35)
-src_boost_MPI_1_37 = $(src_boost_MPI_1_35)
-src_boost_MPI_1_38 = $(src_boost_MPI_1_35)
-src_boost_MPI_1_39 = $(src_boost_MPI_1_35)
-src_boost_MPI_1_40 = $(src_boost_MPI_1_35)
-src_boost_MPI_1_41 = $(src_boost_MPI_1_35)
-src_boost_MPI_SVN = $(src_boost_MPI_1_35)
 
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -161,21 +134,7 @@ src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/winmain.cpp \
   $(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp
 
-src_boost_REGEX_1_32 = \
-  $(BOOST_SRCDIR)/regex/src/c_regex_traits.cpp \
-  $(BOOST_SRCDIR)/regex/src/c_regex_traits_common.cpp \
-  $(BOOST_SRCDIR)/regex/src/cpp_regex_traits.cpp \
-  $(BOOST_SRCDIR)/regex/src/cregex.cpp \
-  $(BOOST_SRCDIR)/regex/src/fileiter.cpp \
-  $(BOOST_SRCDIR)/regex/src/instances.cpp \
-  $(BOOST_SRCDIR)/regex/src/posix_api.cpp \
-  $(BOOST_SRCDIR)/regex/src/regex.cpp \
-  $(BOOST_SRCDIR)/regex/src/regex_debug.cpp \
-  $(BOOST_SRCDIR)/regex/src/regex_synch.cpp \
-  $(BOOST_SRCDIR)/regex/src/w32_regex_traits.cpp \
-  $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp \
-  $(BOOST_SRCDIR)/regex/src/winstances.cpp
-src_boost_REGEX_1_33 = \
+src_boost_REGEX = \
   $(BOOST_SRCDIR)/regex/src/c_regex_traits.cpp \
   $(BOOST_SRCDIR)/regex/src/cpp_regex_traits.cpp \
   $(BOOST_SRCDIR)/regex/src/cregex.cpp \
@@ -191,94 +150,13 @@ src_boost_REGEX_1_33 = \
   $(BOOST_SRCDIR)/regex/src/usinstances.cpp \
   $(BOOST_SRCDIR)/regex/src/w32_regex_traits.cpp
 if BUILD_BOOST_WCHAR
-src_boost_REGEX_1_33 += \
+src_boost_REGEX += \
   $(BOOST_SRCDIR)/regex/src/wc_regex_traits.cpp \
   $(BOOST_SRCDIR)/regex/src/wide_posix_api.cpp \
   $(BOOST_SRCDIR)/regex/src/winstances.cpp
 endif
-src_boost_REGEX_1_34 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_1_35 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_1_36 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_1_37 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_1_38 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_1_39 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_1_40 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_1_41 = $(src_boost_REGEX_1_33)
-src_boost_REGEX_SVN = $(src_boost_REGEX_1_33)
 
-src_boost_SERIALIZATION_1_32 = \
-  $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp \
-  $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
-  $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
-  $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp \
-  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
-  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
-#  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp
-#  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp
-#  $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp
-#  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp
-#  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp
-#  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp
-#  $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp
-#  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp
-#  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp
-#  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp
-#  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp
-src_boost_SERIALIZATION_1_33 = \
-  $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_archive_impl.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_pointer_iserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_pointer_oserializer.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_serializer_map.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_iprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_oprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_xml_archive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/codecvt_null.cpp \
-  $(BOOST_SRCDIR)/serialization/src/extended_type_info.cpp \
-  $(BOOST_SRCDIR)/serialization/src/extended_type_info_no_rtti.cpp \
-  $(BOOST_SRCDIR)/serialization/src/extended_type_info_typeid.cpp \
-  $(BOOST_SRCDIR)/serialization/src/polymorphic_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/polymorphic_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/stl_port.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_oarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp
-if BUILD_BOOST_WCHAR
-src_boost_SERIALIZATION_1_33 += \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
-  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
-endif
-src_boost_SERIALIZATION_1_34 = $(src_boost_SERIALIZATION_1_33)
-src_boost_SERIALIZATION_1_35 = \
+src_boost_SERIALIZATION = \
   $(BOOST_SRCDIR)/serialization/src/basic_archive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/basic_iserializer.cpp \
@@ -304,31 +182,23 @@ src_boost_SERIALIZATION_1_35 = \
   $(BOOST_SRCDIR)/serialization/src/void_cast.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_grammar.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_iarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp
-if BUILD_BOOST_WCHAR
-src_boost_SERIALIZATION_1_35 += \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
-  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
-  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
-endif
-src_boost_SERIALIZATION_1_36 = $(src_boost_SERIALIZATION_1_35)
-src_boost_SERIALIZATION_1_37 = $(src_boost_SERIALIZATION_1_35)
-src_boost_SERIALIZATION_1_38 = $(src_boost_SERIALIZATION_1_35)
-src_boost_SERIALIZATION_1_39 = $(src_boost_SERIALIZATION_1_35)
-src_boost_SERIALIZATION_1_40 = $(src_boost_SERIALIZATION_1_35)
-src_boost_SERIALIZATION_1_41 = \
-  $(src_boost_SERIALIZATION_1_35) \
+  $(BOOST_SRCDIR)/serialization/src/xml_oarchive.cpp \
   $(BOOST_SRCDIR)/serialization/src/archive_exception.cpp \
   $(BOOST_SRCDIR)/serialization/src/shared_ptr_helper.cpp \
   $(BOOST_SRCDIR)/serialization/src/xml_archive_exception.cpp
-src_boost_SERIALIZATION_SVN = $(src_boost_SERIALIZATION_1_41)
+if BUILD_BOOST_WCHAR
+src_boost_SERIALIZATION += \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_wiprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/basic_text_woprimitive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/binary_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/text_woarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_wgrammar.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_wiarchive.cpp \
+  $(BOOST_SRCDIR)/serialization/src/xml_woarchive.cpp \
+  $(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp
+endif
 
 src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/connection.cpp \
@@ -337,15 +207,8 @@ src_boost_SIGNALS = \
   $(BOOST_SRCDIR)/signals/src/slot.cpp \
   $(BOOST_SRCDIR)/signals/src/trackable.cpp
 
-src_BOOST_SYSTEM_1_35 = \
+src_BOOST_SYSTEM = \
   $(BOOST_SRCDIR)/system/src/error_code.cpp
-src_BOOST_SYSTEM_1_36 = $(src_BOOST_SYSTEM_1_35)
-src_BOOST_SYSTEM_1_37 = $(src_BOOST_SYSTEM_1_35)
-src_BOOST_SYSTEM_1_38 = $(src_BOOST_SYSTEM_1_35)
-src_BOOST_SYSTEM_1_39 = $(src_BOOST_SYSTEM_1_35)
-src_BOOST_SYSTEM_1_40 = $(src_BOOST_SYSTEM_1_35)
-src_BOOST_SYSTEM_1_41 = $(src_BOOST_SYSTEM_1_35)
-src_BOOST_SYSTEM_SVN = $(src_BOOST_SYSTEM_1_35)
 
 src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/barrier.cpp \
@@ -402,77 +265,11 @@ endif
 if BUILD_BOOST
 
 libalps_la_SOURCES += $(top_srcdir)/src/boost/throw_exception.C
-nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_PROGRAM_OPTIONS)
-
-if BOOST_1_32
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_32) $(src_boost_REGEX_1_32) $(src_boost_SERIALIZATION_1_32)
-endif
-
-if BOOST_1_33
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_33) $(src_boost_REGEX_1_33) $(src_boost_SERIALIZATION_1_33)
-endif
-
-if BOOST_1_34
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_34) $(src_boost_REGEX_1_34) $(src_boost_SERIALIZATION_1_34)
-endif
-
-if BOOST_1_35
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_35) $(src_boost_REGEX_1_35) $(src_boost_SERIALIZATION_1_35) $(src_BOOST_SYSTEM_1_35)
-endif
-
-if BOOST_1_36
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_36) $(src_boost_REGEX_1_36) $(src_boost_SERIALIZATION_1_36) $(src_BOOST_SYSTEM_1_36)
-endif
-
-if BOOST_1_37
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_37) $(src_boost_REGEX_1_37) $(src_boost_SERIALIZATION_1_37) $(src_BOOST_SYSTEM_1_37)
-endif
-
-if BOOST_1_38
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_38) $(src_boost_REGEX_1_38) $(src_boost_SERIALIZATION_1_38) $(src_BOOST_SYSTEM_1_38)
-endif
-
-if BOOST_1_39
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_39) $(src_boost_REGEX_1_39) $(src_boost_SERIALIZATION_1_39) $(src_BOOST_SYSTEM_1_39)
-endif
-
-if BOOST_1_40
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_40) $(src_boost_REGEX_1_40) $(src_boost_SERIALIZATION_1_40) $(src_BOOST_SYSTEM_1_40)
-endif
-
-if BOOST_1_41
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_1_41) $(src_boost_REGEX_1_41) $(src_boost_SERIALIZATION_1_41) $(src_BOOST_SYSTEM_1_41)
-endif
-
-if BOOST_SVN
-nodist_libalps_la_SOURCES += $(src_boost_FILESYSTEM_SVN) $(src_boost_REGEX_SVN) $(src_boost_SERIALIZATION_SVN) $(src_BOOST_SYSTEM_SVN)
+nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_PROGRAM_OPTIONS)$(src_boost_FILESYSTEM) $(src_boost_REGEX) $(src_boost_SERIALIZATION) $(src_BOOST_SYSTEM)
 endif
 
 if BUILD_BOOST_MPI
-if BOOST_1_35
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_35)
-endif
-if BOOST_1_36
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_36)
-endif
-if BOOST_1_37
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_37)
-endif
-if BOOST_1_38
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_38)
-endif
-if BOOST_1_39
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_39)
-endif
-if BOOST_1_40
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_40)
-endif
-if BOOST_1_41
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_1_41)
-endif
-if BOOST_SVN
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI_SVN)
-endif
+nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI)
 endif
 
 if BUILD_BOOST_SIGNALS
@@ -480,8 +277,6 @@ nodist_libalps_la_SOURCES += $(src_boost_SIGNALS)
 endif
 if BUILD_BOOST_THREAD
 nodist_libalps_la_SOURCES += $(src_boost_THREAD)
-endif
-
 endif
 
 # unified libraries

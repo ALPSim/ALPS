@@ -205,87 +205,12 @@ dnl Boost version
 #error
 #endif],,ac_cv_boost_version=1_40)
   fi
-  if test -z "$ac_cv_boost_version"; then
-    AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103900
-#error
-#endif],,ac_cv_boost_version=1_39)
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103800
-#error
-#endif],,ac_cv_boost_version=1_38)
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103700
-#error
-#endif],,ac_cv_boost_version=1_37)
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103600
-#error
-#endif],,ac_cv_boost_version=1_36)
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103500
-#error
-#endif],,ac_cv_boost_version=1_35)
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103400 
-#error
-#endif],,ac_cv_boost_version=1_34)
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103300
-#error
-#endif],,ac_cv_boost_version=1_33)
-  fi
-  if test -z "$ac_cv_boost_version"; then
-    AC_TRY_COMPILE([#include <boost/version.hpp>
-#if BOOST_VERSION < 103200
-#error
-#endif],,ac_cv_boost_version=1_32)
-  fi
   case "x$ac_cv_boost_version" in
     xsvn )
       AC_MSG_RESULT([SVN])
       ;;
     x1_41 )
       AC_MSG_RESULT([1.41])
-      ;;
-    x1_40 )
-      AC_MSG_RESULT([1.40])
-      ;;
-    x1_39 )
-      AC_MSG_RESULT([1.39])
-      ;;
-    x1_38 )
-      AC_MSG_RESULT([1.38])
-      ;;
-    x1_37 )
-      AC_MSG_RESULT([1.37])
-      ;;
-    x1_36 )
-      AC_MSG_RESULT([1.36])
-      ;;
-    x1_35 )
-      AC_MSG_RESULT([1.35])
-      ;;
-    x1_34 )
-      AC_MSG_RESULT([1.34])
-      ;;
-    x1_33 )
-      AC_MSG_RESULT([1.33])
-      ;;
-    x1_32 )
-      AC_MSG_RESULT([1.32])
       ;;
     * )
       AC_MSG_RESULT([unknown])
@@ -294,15 +219,6 @@ dnl Boost version
   esac
   AM_CONDITIONAL(BOOST_SVN, test "$ac_cv_boost_version" = svn)
   AM_CONDITIONAL(BOOST_1_41, test "$ac_cv_boost_version" = 1_41)
-  AM_CONDITIONAL(BOOST_1_40, test "$ac_cv_boost_version" = 1_40)
-  AM_CONDITIONAL(BOOST_1_39, test "$ac_cv_boost_version" = 1_39)
-  AM_CONDITIONAL(BOOST_1_38, test "$ac_cv_boost_version" = 1_38)
-  AM_CONDITIONAL(BOOST_1_37, test "$ac_cv_boost_version" = 1_37)
-  AM_CONDITIONAL(BOOST_1_36, test "$ac_cv_boost_version" = 1_36)
-  AM_CONDITIONAL(BOOST_1_35, test "$ac_cv_boost_version" = 1_35)
-  AM_CONDITIONAL(BOOST_1_34, test "$ac_cv_boost_version" = 1_34)
-  AM_CONDITIONAL(BOOST_1_33, test "$ac_cv_boost_version" = 1_33)
-  AM_CONDITIONAL(BOOST_1_32, test "$ac_cv_boost_version" = 1_32)
 
   dnl pre-compiled boost library
 

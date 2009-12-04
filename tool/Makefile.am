@@ -39,24 +39,7 @@ archive_SOURCES = archive.cpp archive_index.cpp archive_index.hpp archive_node.c
 
 if BUILD_DOC
 bin_PROGRAMS += quickbook
-nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp 
-if BOOST_1_34
-nodist_quickbook_SOURCES += \
- $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
-endif
-if BOOST_1_35
-nodist_quickbook_SOURCES += \
- $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
-endif
-if BOOST_1_39
-nodist_quickbook_SOURCES += \
+nodist_quickbook_SOURCES = $(BOOST_DIR)/tools/quickbook/detail/quickbook.cpp \
  $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
  $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
  $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
@@ -65,18 +48,6 @@ nodist_quickbook_SOURCES += \
  $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
  $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
  $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
-endif
-if BOOST_SVN 
-nodist_quickbook_SOURCES += \
- $(BOOST_DIR)/tools/quickbook/detail/actions.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/actions_class.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/collector.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/input_path.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/markups.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/post_process.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/template_stack.cpp \
- $(BOOST_DIR)/tools/quickbook/detail/utils.cpp
-endif
 endif
 
 TESTS =
