@@ -250,6 +250,7 @@ class CollectXY(Module):
                 order = np.argsort(res.x)
                 res.x = res.x[order]
                 res.y = res.y[order]
+                res
                 
                 for_each_sets[k] = res
             

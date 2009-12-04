@@ -159,9 +159,9 @@ def convert_to_grace(desc):
         xrange = [0,1]
         yrange = [0,1]
         if 'xaxis' in desc and 'min' in desc['xaxis'] and 'max' in desc['xaxis']: 
-            xrange = [ desc['xaxis']['min'],data['xaxis']['max']]
+            xrange = [ desc['xaxis']['min'],desc['xaxis']['max']]
         if 'yaxis' in desc and 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
-            yrange = [ desc['yaxis']['min'],data['yaxis']['max']]
+            yrange = [ desc['yaxis']['min'],desc['yaxis']['max']]
 
         output += '@    world ' + str(xrange[0])+', ' + str (yrange[0]) + ','
         output +=                 str(xrange[1])+', ' + str (yrange[1]) + '\n'
