@@ -263,9 +263,8 @@ endif
 endif
 
 if BUILD_BOOST
-
 libalps_la_SOURCES += $(top_srcdir)/src/boost/throw_exception.C
-nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_PROGRAM_OPTIONS)$(src_boost_FILESYSTEM) $(src_boost_REGEX) $(src_boost_SERIALIZATION) $(src_BOOST_SYSTEM)
+nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_PROGRAM_OPTIONS) $(src_boost_FILESYSTEM) $(src_boost_REGEX) $(src_boost_SERIALIZATION) $(src_BOOST_SYSTEM)
 endif
 
 if BUILD_BOOST_MPI
