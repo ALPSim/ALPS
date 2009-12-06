@@ -125,7 +125,35 @@ std::complex<double>* DCATransformer::exp_iksite(const int sign) const
   return m;
 }
 
-
+int* DCATransformer::momentum_translation() const
+{
+	int *m = new int[n_cluster_sites()*n_cluster_sites()*n_cluster_sites()];
+	std::valarray<double> phase(dimension());
+	int res;
+	for(site_t i=0; i<n_cluster_sites();++i){
+		for(site_t j=0;j<n_cluster_sites();++j){
+			for(site_t k=0;k<n_cluster_sites();++k){
+				for(int d=0;d<dimension();++d){
+					phase[d]=cluster_momentum(i,d)-cluster_momentum(j,d)+cluster_momentum(k,d);
+				}
+				for(site_t p=0;p<n_cluster_sites();++p){
+					for(int d=0;d<dimension();++d){
+						double tmp=(phase[d]-cluster_momentum(p,d))/(2.*M_PI);
+						if(tmp==(int)tmp)
+							res=1;
+						else{
+							res=0;
+							break;
+						}
+					}
+					if(res)
+						m[i*n_cluster_sites()*n_cluster_sites()+j*n_cluster_sites()+k]=p;
+				}
+			}
+		}
+	}
+	return m;
+}
 
 matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
                                                             const matsubara_green_function_t &G0_omega, 

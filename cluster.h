@@ -176,6 +176,7 @@ public:
 						const double beta, const double mu, const bool error_propagation)=0;
 
   std::complex<double>* exp_iksite(const int sign) const;
+  int* momentum_translation() const;
   std::vector<double> epsav() const { return epsav_; };
   std::vector<double> epssqav() const { return epssqav_; };
   double dispersion_moments(const unsigned int i) const { return dispersion_moments_[i]; }
