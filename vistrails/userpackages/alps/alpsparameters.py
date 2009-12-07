@@ -53,8 +53,8 @@ class LoopMonteCarloParameters(MonteCarloParameters):
         res = self.readInputs(ParametersData({}))
         res.updateIfMissing(self.defaults)
         self.setResult('value',res.toBasic())
-    _input_ports = [('WORKER',[(basic.String, 'the WORKER to be used, default sse')])]
-    defaults = { 'WORKER':'sse' }
+    _input_ports = [('ALGORITHM',[(basic.String, 'the algorithm to be used, default sse')])]
+    defaults = { 'ALGORITHM':'sse' }
 
 class QWLMonteCarloParameters(MonteCarloParameters): 
     """ A module to set the temperature """

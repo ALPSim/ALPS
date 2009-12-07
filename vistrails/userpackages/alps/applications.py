@@ -54,6 +54,13 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         input_file = self.getInputFromPort('input_file')
         result = basic.File()
         result.name = input_file.name.replace('.in.xml', '.out.xml')
+        resultdir = basic.Directory
+        resultdir.name = os.path.dirname(result.name)
+        if self.hasInputFromPort('vtl'):
+            filename = os.path.join(resultdir.name,'workflow.vtl')
+            file_ = open(filename,'w')
+            file_.write(self.getInputFromPort('vtl'))
+            file_.close()
         an = self.get_app_name()
         if not os.path.isfile(an):
             raise ModuleError(self, "Application '%s' not existent" % an)
@@ -67,8 +74,6 @@ class AlpsApplication(alpscore.SystemCommandLogged):
             cmdline += [input_file.name]
         print cmdline
         self.execute(cmdline)
-        resultdir = basic.Directory
-        resultdir.name = os.path.dirname(result.name)
         self.setResult('output_file', result)
         self.setResult('output_dir', resultdir)
         
@@ -77,6 +82,7 @@ class AlpsApplication(alpscore.SystemCommandLogged):
                     ('tmax', [basic.Integer]),
                     ('continue', [basic.Boolean]),
                     ('application', [basic.File]),
+                    ('vtl', [basic.String]),
                     ('num_processes',[basic.Integer])
                     ]
     _output_ports = [('output_file', [basic.File]),
@@ -218,26 +224,37 @@ def register_parameters(type, ns="Applications"):
   reg = core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace=ns)
   reg.add_output_port(type, "value", type)
+
+
+def register_application(type):
+  reg = core.modules.module_registry.get_module_registry()
+  reg.add_module(type,namespace="Applications")
+  reg.add_input_port(type,'application',[basic.File],False)
   
 def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
   
   register_parameters(system.SimulationID)
+  
   reg.add_module(AlpsApplication,namespace="Applications")
-  reg.add_module(AppSpinMC,namespace="Applications")
-  reg.add_module(AppLoop,namespace="Applications")
-  reg.add_module(AppWorm,namespace="Applications")
-  reg.add_module(AppDirLoopSSE,namespace="Applications")
-  reg.add_module(AppFullDiag,namespace="Applications")
-  reg.add_module(AppSparseDiag,namespace="Applications")
-  reg.add_module(AppDMRG,namespace="Applications")
-  reg.add_module(AppQWL,namespace="Applications")
+  
+  register_application(AppSpinMC)
+  register_application(AppLoop)
+  register_application(AppWorm)
+  register_application(AppDirLoopSSE)
+  register_application(AppFullDiag)
+  register_application(AppSparseDiag)
+  register_application(AppDMRG)
+  register_application(AppQWL)
+  
   reg.add_module(AlpsEvaluate,namespace="Applications",abstract=True)
-  reg.add_module(EvaluateFullDiagT,namespace="Applications")
-  reg.add_module(EvaluateFullDiagH,namespace="Applications")
-  reg.add_module(EvaluateLoop,namespace="Applications")
-  reg.add_module(EvaluateQWL,namespace="Applications")
+  
+  register_application(EvaluateFullDiagT)
+  register_application(EvaluateFullDiagH)
+  register_application(EvaluateLoop)
+  register_application(EvaluateQWL)
+  
   reg.add_module(system.LatticeModel,namespace="Applications")
   reg.add_module(system.MonteCarloSimulation,namespace="Applications")
   reg.add_module(system.DiagonalizationSimulation,namespace="Applications")
