@@ -19,6 +19,20 @@ class SortByX(FitPrototype):
 		data.x = data.x[order]
 		data.y = data.y[order]
 
+class SelectXRange(FitPrototype):
+    my_input_ports = [
+        PortDescriptor('min',basic.Float),
+        PortDescriptor('max',basic.Float)
+    ]
+    
+    def transform(self,data):
+        min = self.getInputFromPort('min')
+        max = self.getInputFromPort('max')
+        
+        selection = (data.x >= min) & (data.x <= max)
+        data.x = data.x[selection]
+        data.y = data.y[selection]
+
 class WriteTxt(Module):
 	my_input_ports = [PortDescriptor('input',DataSets)]
 	my_output_ports = []
