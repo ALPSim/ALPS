@@ -270,11 +270,18 @@ void ClusterHelper::setup_tables()
       }
       break;
     }
+    double L = pow(n_cluster_cells(), 1./double(dimension()));
     for (int g=0; g<moms.size(); ++g) {
       double weight = 1.;
       for (int d=0; d<dimension(); ++d) {
-	if (almost_equal(moms[g][d], 0.5) || almost_equal(moms[g][d], -0.5))
-	  weight *= 0.5;
+	double m = (moms[g][d]+0.5)*L;
+	if (almost_equal(m, 0) || almost_equal(m, L))
+	  weight *= 1./3.;
+	else if ( (((int)abs(round(m)))%2==0 && ((int)abs(round(L)))%2==0) || 
+		  (((int)abs(round(m)))%2==1 && ((int)abs(round(L)))%2==1) )
+	  weight *= 2./3.;
+	else
+	  weight *= 4./3.;
       }
       vector_type momw(dimension()+1);
       vector_type momt = matrix_vector_mult(reciprocal_basis_, moms[g]);
