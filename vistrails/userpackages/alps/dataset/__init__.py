@@ -42,6 +42,9 @@ def register(m,ns,abst=False):
         reg.add_module(m, namespace=ns, abstract=abst)
     
     for input_port in m.my_input_ports:
+        if input_port.porttype == SelftypePlaceholder:
+            input_port.porttype = m
+        
         if ups and input_port.hidden:
             warn("use_python_source and hidden ports is currently not possible")
             if input_port.use_python_source:
@@ -54,6 +57,9 @@ def register(m,ns,abst=False):
             reg.add_input_port(m, input_port.name, (input_port.porttype, input_port.description))
     
     for output_port in m.my_output_ports:
+        if output_port.porttype == SelftypePlaceholder:
+            output_port.porttype = m
+        
         if output_port.hidden:
             reg.add_output_port(m, output_port.name, (output_port.porttype, output_port.description), True)
         else:
@@ -69,7 +75,7 @@ def initialize():
 
     register(DataSets,'DataSet',abst=True)
     register(ConcatenateDataSets,'DataSet')
-    register(ResultFiles,'DataSet',abst=True)
+    register(ResultFiles,'DataSet')
     
     register(ConstantDataSet,'DataSet|Load')
     register(GenerateDataSet,'DataSet|Load')

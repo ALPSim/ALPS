@@ -30,7 +30,9 @@ class ResultFile(ResultProperties):
         ret.props = copy.deepcopy(self.props,memo)
         return ret
     
-    def __init__(self):
+    def __init__(self,fn=None):
         ResultProperties.__init__(self)
+        if fn != None:
+            self.props['filename'] = fn
         
         
