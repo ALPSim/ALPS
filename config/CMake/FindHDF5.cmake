@@ -246,7 +246,7 @@ else()
 ##############################################################################
 # ALPS addition
 ##############################################################################
-                $ENV{HOMEDRIVE}/HDF5
+                $ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt
                 /opt/local/hdf5
                 /opt/local
                 /usr/local/hdf5
@@ -295,7 +295,7 @@ else()
                     HDF5_HOME
                     HDF_HOME
                 PATHS
-                $ENV{HOMEDRIVE}/HDF5
+                $ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt
                 /opt/local/hdf5
                 /opt/local
                 /usr/local/hdf5
@@ -320,7 +320,7 @@ else()
                     HDF5_HOME
                     HDF_HOME
                 PATHS
-                $ENV{HOMEDRIVE}/HDF5
+                $ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt
                 /opt/local/hdf5
                 /opt/local
                 /usr/local/hdf5

@@ -76,11 +76,25 @@ ENDIF(MPI_FOUND)
 find_package(Lapack)
 
 # SQLite
-# find_package(SQLite)
+find_package(SQLite)
 
 # LPSolve
 find_package(LPSolve)
 
+# Zlib
+find_package(ZLIB)
+if(ZLIB_FOUND)
+  include_directories(${ZLIB_INCLUDE_DIR})
+  link_libraries(${ZLIB_LIBRARIES})
+endif(ZLIB_FOUND)
+  
+# SZip
+find_package(SZIP)
+if(SZIP_FOUND)
+  include_directories(${SZIP_INCLUDE_DIR})
+  link_libraries(${SZIP_LIBRARIES})
+endif(SZIP_FOUND)
+  
 # HDF5
 find_package(HDF5)
 IF(HDF5_FOUND)

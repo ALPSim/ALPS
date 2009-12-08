@@ -9,12 +9,12 @@
 if(NOT LPSolve_INCLUDE_DIR)
   set(__TRIAL_PATHS "$ENV{LPSOLVE_ROOT}/include" "${LPSOLVE_ROOT}" "${LPSOLVE_ROOT}/include"
       /usr/include /usr/local/include /opt/include /usr/local/lpsolve /sw/include
-      "$ENV{HOMEDRIVE}/Program Files/lpsolve/include"
+      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/include"
      )
   find_path(LPSolve_INCLUDE_DIR lpkit.h ${__TRIAL_PATHS})
   set(__TRIAL_PATHS "$ENV{LPSOLVE_ROOT}/lib" "${LPSOLVE_ROOT}" "${LPSOLVE_ROOT}/lib"
       /usr/lib /usr/local/lib /opt/lib /usr/local/lpsolve /sw/lib
-      "$ENV{HOMEDRIVE}/Program Files/lpsolve/lib"
+      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/lib"
      )
   find_library(LPSolve_LIBRARIES lpsolve ${__TRIAL_PATHS})
   if(NOT LPSolve_LIBRARIES)
@@ -24,7 +24,7 @@ if(NOT LPSolve_INCLUDE_DIR)
     find_library(LPSolve_LIBRARIES lpk ${__TRIAL_PATHS})
   endif(NOT LPSolve_LIBRARIES)
   set(__TRIAL_PATHS "$ENV{LPSOLVE_ROOT}/bin" "${LPSOLVE_ROOT}" "${LPSOLVE_ROOT}/bin"
-      "$ENV{HOMEDRIVE}/Program Files/lpsolve/bin"
+      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/bin"
      )
   find_path(LPSolve_DLL_DIR lpsolve.dll ${__TRIAL_PATHS})
   if(LPSolve_DLL_DIR)
