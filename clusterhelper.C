@@ -301,7 +301,7 @@ void ClusterHelper::setup_tables()
       lattice_momenta_(m,d) = mom[d];
     }
     } */
-  if (alps::is_master()) {
+  /*if (alps::is_master()) {
     std::ofstream latticemomstream("LatticeMomenta");
     for (int m=0; m<lattice_momenta_.size1(); ++m) {
       latticemomstream << m << " ";
@@ -309,7 +309,7 @@ void ClusterHelper::setup_tables()
 	latticemomstream << lattice_momenta_(m,d) << " ";
       latticemomstream << std::endl;
     }
-  }
+    }*/
   if (cluster_coordinates_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
   if (cluster_momenta_.size1() != n_cluster_sites())
