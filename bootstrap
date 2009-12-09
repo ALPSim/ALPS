@@ -11,7 +11,7 @@ if test -f configure.ac; then :; else
 fi
 
 # required version of autotools
-am_require=1.11
+am_require=1.11.1
 ac_require=2.65
 lt_require=2.2.6b
 if `(grep AC_PROG_LIBTOOL configure.ac) > /dev/null 2>&1`; then
