@@ -25,7 +25,7 @@
 
   <xsl:template match="JOB">
    <xsl:text disable-output-escaping = "yes">
-&lt;?xml-stylesheet type="text/xsl" href="file://@libdir@/xml/job.xsl"?>
+&lt;?xml-stylesheet type="text/xsl" href="file://@libdir@/xml/ALPS.xsl"?>
 </xsl:text>   
     <xsl:copy-of select="."/>
   </xsl:template>

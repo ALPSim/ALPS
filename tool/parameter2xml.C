@@ -30,6 +30,7 @@
 /* $Id$ */
 
 #include <alps/xml.h>
+#include <alps/parser/xslt_path.h>
 #include <alps/parameter.h>
 #include <boost/date_time/posix_time/posix_time.hpp>
 #include <boost/filesystem/operations.hpp>
@@ -86,10 +87,16 @@ void convert_params(const std::string& inname, const std::string& basename,
     if (p.defined("SIMULATION_NAME")) p.erase("SIMULATION_NAME");
   }
 
-  alps::oxstream
-    out(boost::filesystem::path((basename+".in.xml").c_str(), boost::filesystem::native));
+  boost::filesystem::path infile((basename+".in.xml").c_str(), boost::filesystem::native);
+  alps::oxstream out(infile);
+
+  // make sure ths stylesheet is there
+  alps::copy_stylesheet(infile.remove_filename());
+  
+  
+  
   out << alps::header("UTF-8")
-      << alps::stylesheet(alps::xslt_path("job.xsl"))
+      << alps::stylesheet(alps::xslt_path("ALPS.xsl"))
       << alps::start_tag("JOB")
       << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
       << alps::attribute("xsi:noNamespaceSchemaLocation",

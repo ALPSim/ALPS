@@ -31,6 +31,7 @@
 
 #include <boost/filesystem/operations.hpp>
 #include <alps/osiris/xdrdump.h>
+#include <alps/parser/xslt_path.h>
 #include <alps/scheduler/montecarlo.h>
 #include <boost/filesystem/path.hpp>
 #include <boost/lexical_cast.hpp>
@@ -53,7 +54,7 @@ void convert_params(const std::string& inname, const std::string& outfilename)
 
   alps::oxstream out(boost::filesystem::path((basename+".in.xml").c_str(),boost::filesystem::native));
   out << alps::header("UTF-8")
-      << alps::stylesheet(alps::xslt_path("job.xsl"))
+      << alps::stylesheet(alps::xslt_path("ALPS.xsl"))
       << alps::start_tag("JOB")
       << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
       << alps::attribute("xsi:noNamespaceSchemaLocation",
@@ -157,7 +158,7 @@ void convert_scheduler(const std::string& inname, const std::string& outname)
   std::string jobname=outname+".xml";
   std::cout << "Converting scheduler file " << inname << " to " <<  jobname << std::endl;
   alps::oxstream out(boost::filesystem::path(jobname,boost::filesystem::native));
-  out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("job.xsl"))
+  out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("ALPS.xsl"))
     << alps::start_tag("JOB") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
     << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2003/8/job.xsd");
   int dummy_i;
@@ -213,6 +214,9 @@ try {
     default:
       convert_params(inname,inname);
     }
+    // make sure ths stylesheet is there
+    alps::copy_stylesheet(boost::filesystem::path(inname,
+                              boost::filesystem::native).remove_filename());
   }
 
 #ifndef BOOST_NO_EXCEPTIONS
