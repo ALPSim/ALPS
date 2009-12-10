@@ -132,7 +132,7 @@ class GetResultFiles(Module):
                 tasks = self.getInputFromPort('tasks')
             if self.hasInputFromPort('prefix'):
                 prefix = self.getInputFromPort('prefix')
-                result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
+            result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
             self.setResult('value', result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
 

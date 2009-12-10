@@ -215,7 +215,7 @@ def convert_to_grace(desc):
             if 'label' in q.props and q.props['label'] != 'none':
                 output += '@    s'+str(num)+' legend "' + q.props['label'] + '"\n'
             elif 'filename' in q.props:
-                output += '@    s'+str(num)+' legend "' + q.props['label'] + '"\n'
+                output += '@    s'+str(num)+' legend "' + q.props['filename'] + '"\n'
             output += '\n'
 
             if len(q.y):
