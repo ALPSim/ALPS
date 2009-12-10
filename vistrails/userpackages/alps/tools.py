@@ -128,9 +128,11 @@ class GetResultFiles(Module):
             tasks = '*'
             d = self.getInputFromPort('dir')
             dirname = d.name
-            if (self.hasInputFromPort('tasks')):
+            if self.hasInputFromPort('tasks'):
                 tasks = self.getInputFromPort('tasks')
-            result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
+            if self.hasInputFromPort('prefix'):
+                prefix = self.getInputFromPort('prefix')
+                result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
             self.setResult('value', result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
 

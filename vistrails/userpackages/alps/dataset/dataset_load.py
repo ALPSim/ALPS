@@ -157,7 +157,7 @@ class LoadAlpsFromTxt(Module):
 
 class LoadProperties(Module):
 	my_input_ports = [
-		PortDescriptor('ResultFiles', ListOfElements)
+		PortDescriptor('ResultFiles', ResultFiles)
 	]
 	
 	my_output_ports = [
@@ -167,14 +167,14 @@ class LoadProperties(Module):
 	def compute(self):
 		print "in Module Load Properties"
 		if self.hasInputFromPort('ResultFiles'):
-			flist = self.getInputFromPort('ResultFiles')
+			flist = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
 		loader = Hdf5Loader()
 		dictlist = loader.GetProperties(flist)
 		self.setResult('Props', dictlist)
     
 class LoadAlpsHdf5(Module):
 	my_input_ports = [
-		PortDescriptor('ResultFiles',ListOfElements),
+		PortDescriptor('ResultFiles',ResultFiles),
 		PortDescriptor('Measurements',ListOfElements)
 	]
 	
@@ -185,7 +185,7 @@ class LoadAlpsHdf5(Module):
 	def compute(self):
 		loader = Hdf5Loader()
 		if self.hasInputFromPort('ResultFiles'):
-			files = self.getInputFromPort('ResultFiles')
+			files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
 		datasets = []
 		if self.hasInputFromPort('Measurements'):
 			datasets = loader.ReadMeasurementFromFile(files,self.getInputFromPort('Measurements'))

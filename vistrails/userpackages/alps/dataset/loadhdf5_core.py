@@ -19,7 +19,7 @@ class Hdf5Loader:
 		self.h5param = h5py.File(file)
 		pgrp = self.h5param.require_group("/parameters")
 		pgrp.visit(LOP.append)
-		dict = {'hdf5_file' : file}
+		dict = {'filename' : file}
 		for m in LOP:
 			try:
 				dict[m] = pgrp[m].value
