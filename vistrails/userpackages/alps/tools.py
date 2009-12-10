@@ -24,7 +24,8 @@ basic = core.modules.basic_modules
 
 ##############################################################################
 
-
+from pyalps.util.dataset import ResultFile
+from dataset import ResultFiles
 
 class MakeParameterFile(Module):
      """Creates a parameter file.
@@ -113,18 +114,32 @@ class GetRunFiles(Module):
      _output_ports = [('value',[ListOfElements])]
 
 class GetResultFiles(Module):
-     def compute(self):
-         prefix = '*'
-         tasks = '*'
-         d = self.getInputFromPort('dir')
-         dirname = d.name
-         if (self.hasInputFromPort('tasks')):
-           tasks = self.getInputFromPort('tasks')
-         self.setResult('value',glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml')))
-     _input_ports = [('dir',[basic.Directory]), 
-                      ('prefix',[basic.String]), 
-                      ('tasks',[basic.String])]
-     _output_ports = [('value',[ListOfElements])]
+    def compute(self):
+        if self.hasInputFromPort('pattern'):
+            # try several ways to match the pattern
+            pattern = self.getInputFromPort('pattern')
+            pattern = os.path.expanduser(pattern)
+            pattern = os.path.expandvars(pattern)
+            result = glob.glob(pattern)
+            self.setResult('value',result)
+            self.setResult('resultfiles', [ResultFile(x) for x in result])
+        else:
+            prefix = '*'
+            tasks = '*'
+            d = self.getInputFromPort('dir')
+            dirname = d.name
+            if (self.hasInputFromPort('tasks')):
+                tasks = self.getInputFromPort('tasks')
+            result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
+            self.setResult('value', result)
+            self.setResult('resultfiles', [ResultFile(x) for x in result])
+
+    _input_ports = [('dir',[basic.Directory]), 
+        ('prefix',[basic.String]), 
+        ('tasks',[basic.String]),
+        ('pattern',[basic.String])]
+    _output_ports = [('value',[ListOfElements]),
+        ('resultfiles',[ResultFiles])]
 
 class Convert2XML(alpscore.SystemCommandLogged):
     def compute(self):
