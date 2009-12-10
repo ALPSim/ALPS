@@ -156,42 +156,46 @@ class LoadAlpsFromTxt(Module):
             pass
 
 class LoadProperties(Module):
-	my_input_ports = [
-		PortDescriptor('ResultFiles', ResultFiles)
-	]
-	
-	my_output_ports = [
-		PortDescriptor('Props', ResultFiles) 
-	]	
-	
-	def compute(self):
-		print "in Module Load Properties"
-		if self.hasInputFromPort('ResultFiles'):
-			flist = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
-		loader = Hdf5Loader()
-		dictlist = loader.GetProperties(flist)
-		self.setResult('Props', dictlist)
+    my_input_ports = [
+        PortDescriptor('ResultFiles', ResultFiles)
+    ]
+    
+    my_output_ports = [
+        PortDescriptor('Props', ResultFiles) 
+    ]    
+    
+    def compute(self):
+        print "in Module Load Properties"
+        if self.hasInputFromPort('ResultFiles'):
+            flist = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+        loader = Hdf5Loader()
+        dictlist = loader.GetProperties(flist)
+        self.setResult('Props', dictlist)
     
 class LoadAlpsHdf5(Module):
-	my_input_ports = [
-		PortDescriptor('ResultFiles',ResultFiles),
-		PortDescriptor('Measurements',ListOfElements)
-	]
-	
-	my_output_ports = [
-		PortDescriptor('data',DataSets)
-	]	
-	
-	def compute(self):
-		loader = Hdf5Loader()
-		if self.hasInputFromPort('ResultFiles'):
-			files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
-		datasets = []
-		if self.hasInputFromPort('Measurements'):
-			datasets = loader.ReadMeasurementFromFile(files,self.getInputFromPort('Measurements'))
-		else:
-			datasets = loader.ReadMeasurementFromFile(files)
-		self.setResult('data',datasets)
+    my_input_ports = [
+        PortDescriptor('ResultFiles',ResultFiles),
+        PortDescriptor('Measurements',ListOfElements),
+        PortDescriptor('StatisticalVariables',ListOfElements)
+    ]
+    
+    my_output_ports = [
+        PortDescriptor('data',DataSets)
+    ]    
+    
+    def compute(self):
+        loader = Hdf5Loader()
+        if self.hasInputFromPort('ResultFiles'):
+            files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+        datasets = []
+        statisticalvariables = []
+        if self.hasInputFromPort('StatisticalVariables'):
+            statisticalvariables = self.getInputFromPort('StatisticalVariables')    
+        if self.hasInputFromPort('Measurements'):
+            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,self.getInputFromPort('Measurements'))
+        else:
+            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables)
+        self.setResult('data',datasets)
 
 
 class CollectXY(Module):
