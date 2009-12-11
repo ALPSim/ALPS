@@ -756,7 +756,7 @@ AC_DEFUN([AC_LAPACK],
                     [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
       fi
       if test "$found" = no; then
-        for atlas_libs in '-latlas' '-lf77blas -latlas' '-lf77blas -latlas -lg2c' '-lf77blas -latlas -lI77 -lF77'; do
+        for atlas_libs in '-lptf77blas -lptcblas -latlas -lgfortran' '-latlas' '-lf77blas -latlas' '-lf77blas -latlas -lg2c' '-lf77blas -latlas -lI77 -lF77' '-lf77blas -lcblas -latlas -lgfortran'; do
           LDFLAGS="$atlas_ldflags $ac_save_LDFLAGS"
           LIBS="$atlas_libs $ac_save_LIBS"
           AC_MSG_CHECKING([for dgemm_ in $atlas_ldflags $atlas_libs])
@@ -764,19 +764,21 @@ AC_DEFUN([AC_LAPACK],
                       [AC_MSG_RESULT(yes); found=yes],[AC_MSG_RESULT(no)])
           if test "$found" = no; then
             if test -z "$atlas_dir"; then
-              for d in $HOME $HOME/src $prefix /usr/local /usr/local/src; do
-                if test -d "$d/lib"; then
-                  atlas_ldflags="-L$d/lib"
-                  LDFLAGS="$atlas_ldflags $ac_save_LDFLAGS"
-                  AC_MSG_CHECKING([for dgemm_ in $atlas_ldflags $atlas_libs])
-                  AC_TRY_LINK([extern "C" char dgemm_();],[dgemm_();],
-                              [AC_MSG_RESULT(yes); found=yes],
-                              [AC_MSG_RESULT(no)])
-                  if test "$found" = yes; then
-                    break
+              for d in $HOME $HOME/src $prefix /usr/local /usr/local/src /usr; do
+                for dtwo in lib lib/atlas lib/atlas-corei7sse3 lib/atlas-core2sse3 lib/atlas-amd64sse3 lib/atlas-base; do
+                  if test -d "$d/$dtwo"; then
+                    atlas_ldflags="-L$d/$dtwo"
+                    LDFLAGS="$atlas_ldflags $ac_save_LDFLAGS"
+                    AC_MSG_CHECKING([for dgemm_ in $atlas_ldflags $atlas_libs])
+                    AC_TRY_LINK([extern "C" char dgemm_();],[dgemm_();],
+                                [AC_MSG_RESULT(yes); found=yes],
+                                [AC_MSG_RESULT(no)])
+                    if test "$found" = yes; then
+                      break
+                    fi
+                    atlas_ldflags=
                   fi
-                  atlas_ldflags=
-                fi
+                done
               done
             fi
           fi
