@@ -72,8 +72,7 @@ int main(int argc, char** argv) {
   std::string yaxis = vm["xaxis"].as<std::string>();
 
   oxstream os(std::cout);
-  os << header("UTF-8")
-     << stylesheet(xslt_path("archive.xsl"));
+  os << header("UTF-8");
 
   os << start_tag("ARCHIVE")
      << xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")

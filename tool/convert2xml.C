@@ -107,7 +107,7 @@ void convert_simulation(const std::string& inname, const std::string& outname)
   std::string jobname=outname+".xml";
   std::cout << "Converting simulation file " << inname << " to " <<  jobname << std::endl;
   alps::oxstream out(boost::filesystem::path(jobname,boost::filesystem::native));
-  out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("QMCXML.xsl"))
+  out << alps::header("UTF-8") << alps::stylesheet(alps::xslt_path("ALPS.xsl"))
       << alps::start_tag("SIMULATION") << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
       << alps::attribute("xsi:noNamespaceSchemaLocation","http://xml.comp-phys.org/2002/10/QMCXML.xsd");
   int dummy_i;

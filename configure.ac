@@ -528,8 +528,8 @@ if test "$ac_cv_alps_type" = "full"; then
   AC_CONFIG_FILES(test/model/Makefile)
   AC_CONFIG_FILES(test/parapack/Makefile)
   AC_CONFIG_FILES(example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric example/parapack/Makefile example/parapack/single/Makefile example/parapack/multiple/Makefile example/parapack/loop/Makefile example/parapack/exchange/Makefile example/parapack/wanglandau/Makefile example/sampling/Makefile)
-  AC_CONFIG_FILES(lib/xml/Makefile lib/xml/changestylesheet.xsl lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl)
-  AC_CONFIG_FILES(tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet tool/extractmpl tool/plot2mpl)
+  AC_CONFIG_FILES(lib/xml/Makefile lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl)
+  AC_CONFIG_FILES(tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/use_local_stylesheet tool/extractmpl tool/plot2mpl)
   if test "$ac_cv_have_vtk_python" = yes; then
     AC_CONFIG_FILES(tool/config.py tool/lattice-preview)
   fi

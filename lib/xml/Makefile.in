@@ -35,9 +35,8 @@ build_triplet = @build@
 host_triplet = @host@
 subdir = lib/xml
 DIST_COMMON = $(dist_pkgdata_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/changestylesheet.xsl.in \
-	$(srcdir)/lattices.xml.in $(srcdir)/models.xml.in \
-	$(srcdir)/plot2xsl.xsl.in
+	$(srcdir)/Makefile.in $(srcdir)/lattices.xml.in \
+	$(srcdir)/models.xml.in $(srcdir)/plot2xsl.xsl.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_boost.m4 \
@@ -60,8 +59,7 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-CONFIG_CLEAN_FILES = changestylesheet.xsl lattices.xml models.xml \
-	plot2xsl.xsl
+CONFIG_CLEAN_FILES = lattices.xml models.xml plot2xsl.xsl
 CONFIG_CLEAN_VPATH_FILES =
 SOURCES =
 DIST_SOURCES =
@@ -267,8 +265,8 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-dist_pkgdata_DATA = archive2plot.xsl helpers.xsl plot2gp.xsl plot2html.xsl plot2text.xsl plot2xmgr.xsl QMCXML2text.xsl ALPS.xsl plot2mpl.xsl parms2py.xsl job.xsl
-pkgdata_DATA = plot2xsl.xsl changestylesheet.xsl lattices.xml models.xml
+dist_pkgdata_DATA = archive2plot.xsl helpers.xsl plot2gp.xsl plot2text.xsl plot2xmgr.xsl QMCXML2text.xsl ALPS.xsl plot2mpl.xsl changestylesheet.xsl
+pkgdata_DATA = plot2xsl.xsl lattices.xml models.xml
 all: all-am
 
 .SUFFIXES:
@@ -302,8 +300,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-changestylesheet.xsl: $(top_builddir)/config.status $(srcdir)/changestylesheet.xsl.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 lattices.xml: $(top_builddir)/config.status $(srcdir)/lattices.xml.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 models.xml: $(top_builddir)/config.status $(srcdir)/models.xml.in

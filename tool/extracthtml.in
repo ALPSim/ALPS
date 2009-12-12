@@ -23,5 +23,5 @@ fi
 rm /tmp/archive2plot$$.xsl
 
 # generate html output from previously generated xml-plot
-@bindir@/xslttransform /tmp/plot$$ @libdir@/xml/plot2html.xsl 
+@bindir@/xslttransform /tmp/plot$$ @libdir@/xml/ALPS.xsl 
 rm /tmp/plot$$

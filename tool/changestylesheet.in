@@ -1,7 +1,0 @@
-#! /bin/sh
-for f in $*; do
-  if test -f $f; then
-    @bindir@/xslttransform $f @libdir@/xml/changestylesheet.xsl > /tmp/tmp$$
-    mv /tmp/tmp$$ $f
-  fi
-done

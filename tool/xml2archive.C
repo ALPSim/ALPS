@@ -35,8 +35,7 @@ int main(int argc, char** argv) {
   }
 
   alps::oxstream os(std::cout);
-  os << alps::header("UTF-8")
-     << alps::stylesheet(alps::xslt_path("archive.xsl"));
+  os << alps::header("UTF-8");
 
   boost::filesystem::path file(argv[1]);
   boost::filesystem::path basedir = file.branch_path();

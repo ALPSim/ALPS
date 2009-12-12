@@ -22715,9 +22715,9 @@ if test "$ac_cv_alps_type" = "full"; then
 
   ac_config_files="$ac_config_files example/Makefile example/model/Makefile example/scheduler/Makefile example/model/parm_symbolic example/model/parm_numeric example/parapack/Makefile example/parapack/single/Makefile example/parapack/multiple/Makefile example/parapack/loop/Makefile example/parapack/exchange/Makefile example/parapack/wanglandau/Makefile example/sampling/Makefile"
 
-  ac_config_files="$ac_config_files lib/xml/Makefile lib/xml/changestylesheet.xsl lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl"
+  ac_config_files="$ac_config_files lib/xml/Makefile lib/xml/lattices.xml lib/xml/models.xml lib/xml/plot2xsl.xsl"
 
-  ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/changestylesheet tool/extractmpl tool/plot2mpl"
+  ac_config_files="$ac_config_files tool/Makefile tool/convert2text tool/convert2html tool/extractgp tool/extracthtml tool/extracttext tool/extractxmgr tool/plot2gp tool/plot2html tool/plot2text tool/plot2xmgr tool/use_local_stylesheet tool/extractmpl tool/plot2mpl"
 
   if test "$ac_cv_have_vtk_python" = yes; then
     ac_config_files="$ac_config_files tool/config.py tool/lattice-preview"
@@ -23990,7 +23990,6 @@ do
     "example/parapack/wanglandau/Makefile") CONFIG_FILES="$CONFIG_FILES example/parapack/wanglandau/Makefile" ;;
     "example/sampling/Makefile") CONFIG_FILES="$CONFIG_FILES example/sampling/Makefile" ;;
     "lib/xml/Makefile") CONFIG_FILES="$CONFIG_FILES lib/xml/Makefile" ;;
-    "lib/xml/changestylesheet.xsl") CONFIG_FILES="$CONFIG_FILES lib/xml/changestylesheet.xsl" ;;
     "lib/xml/lattices.xml") CONFIG_FILES="$CONFIG_FILES lib/xml/lattices.xml" ;;
     "lib/xml/models.xml") CONFIG_FILES="$CONFIG_FILES lib/xml/models.xml" ;;
     "lib/xml/plot2xsl.xsl") CONFIG_FILES="$CONFIG_FILES lib/xml/plot2xsl.xsl" ;;
@@ -24005,7 +24004,7 @@ do
     "tool/plot2html") CONFIG_FILES="$CONFIG_FILES tool/plot2html" ;;
     "tool/plot2text") CONFIG_FILES="$CONFIG_FILES tool/plot2text" ;;
     "tool/plot2xmgr") CONFIG_FILES="$CONFIG_FILES tool/plot2xmgr" ;;
-    "tool/changestylesheet") CONFIG_FILES="$CONFIG_FILES tool/changestylesheet" ;;
+    "tool/use_local_stylesheet") CONFIG_FILES="$CONFIG_FILES tool/use_local_stylesheet" ;;
     "tool/extractmpl") CONFIG_FILES="$CONFIG_FILES tool/extractmpl" ;;
     "tool/plot2mpl") CONFIG_FILES="$CONFIG_FILES tool/plot2mpl" ;;
     "tool/config.py") CONFIG_FILES="$CONFIG_FILES tool/config.py" ;;

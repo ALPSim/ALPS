@@ -8,7 +8,7 @@
 
 <xsl:template name="PrintXMLHeader">
    <xsl:text disable-output-escaping = "yes">
-&lt;?xml-stylesheet type="text/xsl" href="http://xml.comp-phys.org/2003/4/plot2html.xsl"?>
+&lt;?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>
    </xsl:text>   
 </xsl:template>
 

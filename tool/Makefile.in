@@ -50,14 +50,14 @@ TESTS = $(am__EXEEXT_1)
 subdir = tool
 DIST_COMMON = $(am__nobase_pkgpython_PYTHON_DIST) $(dist_bin_SCRIPTS) \
 	$(dist_noinst_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in $(srcdir)/changestylesheet.in \
-	$(srcdir)/config.py.in $(srcdir)/convert2html.in \
-	$(srcdir)/convert2text.in $(srcdir)/extractgp.in \
-	$(srcdir)/extracthtml.in $(srcdir)/extractmpl.in \
-	$(srcdir)/extracttext.in $(srcdir)/extractxmgr.in \
-	$(srcdir)/lattice-preview.in $(srcdir)/plot2gp.in \
-	$(srcdir)/plot2html.in $(srcdir)/plot2mpl.in \
-	$(srcdir)/plot2text.in $(srcdir)/plot2xmgr.in TODO
+	$(srcdir)/Makefile.in $(srcdir)/config.py.in \
+	$(srcdir)/convert2html.in $(srcdir)/convert2text.in \
+	$(srcdir)/extractgp.in $(srcdir)/extracthtml.in \
+	$(srcdir)/extractmpl.in $(srcdir)/extracttext.in \
+	$(srcdir)/extractxmgr.in $(srcdir)/lattice-preview.in \
+	$(srcdir)/plot2gp.in $(srcdir)/plot2html.in \
+	$(srcdir)/plot2mpl.in $(srcdir)/plot2text.in \
+	$(srcdir)/plot2xmgr.in $(srcdir)/use_local_stylesheet.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_boost.m4 \
@@ -82,7 +82,8 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
-	changestylesheet extractmpl plot2mpl config.py lattice-preview
+	use_local_stylesheet extractmpl plot2mpl config.py \
+	lattice-preview
 CONFIG_CLEAN_VPATH_FILES =
 @HAVE_VTKPYTHON_TRUE@am__EXEEXT_1 = lattice2xml$(EXEEXT)
 @BUILD_ARCHIVE_TRUE@am__EXEEXT_2 = archive$(EXEEXT)
@@ -546,10 +547,10 @@ AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLA
 AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS)
 @BUILD_UNIFIED_LIB_FALSE@LDADD = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 @BUILD_UNIFIED_LIB_TRUE@LDADD = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet
+dist_bin_SCRIPTS = archivecat xslttransform transformall changestylesheet
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
-	changestylesheet extractmpl plot2mpl $(am__append_2)
+	extractmpl plot2mpl use_local_stylesheet $(am__append_2)
 nobase_pkgpython_PYTHON = $(am__append_3)
 dist_noinst_DATA = lattice2xml.ip lattice2xml.op
 compactrun_SOURCES = compactrun.C
@@ -628,7 +629,7 @@ plot2text: $(top_builddir)/config.status $(srcdir)/plot2text.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 plot2xmgr: $(top_builddir)/config.status $(srcdir)/plot2xmgr.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-changestylesheet: $(top_builddir)/config.status $(srcdir)/changestylesheet.in
+use_local_stylesheet: $(top_builddir)/config.status $(srcdir)/use_local_stylesheet.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 extractmpl: $(top_builddir)/config.status $(srcdir)/extractmpl.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@

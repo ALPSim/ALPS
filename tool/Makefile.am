@@ -11,8 +11,8 @@ BOOST_DIR = @BOOST_DIR@
 pkgdatadir = $(libdir)/xml
 
 bin_PROGRAMS = compactrun convert2xml parameter2xml printgraph pconfig pevaluate poutput txt2archive xml2archive
-dist_bin_SCRIPTS = archivecat xslttransform transformall use_local_stylesheet
-bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr changestylesheet extractmpl plot2mpl
+dist_bin_SCRIPTS = archivecat xslttransform transformall changestylesheet
+bin_SCRIPTS = convert2text convert2html extractgp extracthtml extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr extractmpl plot2mpl use_local_stylesheet
 nobase_pkgpython_PYTHON =
 dist_noinst_DATA = lattice2xml.ip lattice2xml.op
 if HAVE_VTKPYTHON
