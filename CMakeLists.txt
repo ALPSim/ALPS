@@ -34,8 +34,8 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/CMake)
 # Version information
 ######################################################################
 set(ALPS_VERSION_MAJOR 1)
-set(ALPS_VERSION_MINOR 3)
-set(ALPS_VERSION_BUILD 5)
+set(ALPS_VERSION_MINOR 4)
+set(ALPS_VERSION_BUILD 0d)
 set(ALPS_YEAR 2009)
 
 set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_BUILD}")
@@ -44,6 +44,10 @@ set(ALPS_VERSION_STRING "ALPS Libraries version ${ALPS_VERSION}")
 set(ALPS_CONFIG_HOST unknown)
 set(ALPS_CONFIG_USER unknown)
 set(ALPS_XML_DIR "${CMAKE_INSTALL_PREFIX}/lib/xml")
+set(ALPS_PREFIX "${CMAKE_INSTALL_PREFIX}")
+set(ALPS_SRCDIR "${CMAKE_SOURCE_DIR}")
+set(libdir "${CMAKE_INSTALL_PREFIX}/lib")
+set(bindir "${CMAKE_INSTALL_PREFIX}/bin")
 
 ######################################################################
 # C & C++ Headers

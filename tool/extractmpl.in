@@ -14,7 +14,7 @@ fi
 # generate xml-plot output from archive or list of task files
 if test $# -gt 2;
 then
-  @bindir@/archivecat `echo ${*:1} | cut -d' ' -f2-` > /tmp/archive$$
+  @bindir@/archivecat `echo $* | cut -d' ' -f2-` > /tmp/archive$$
   @bindir@/xslttransform /tmp/archive$$ /tmp/archive2plot$$.xsl > /tmp/plot$$
   rm /tmp/archive$$
 else

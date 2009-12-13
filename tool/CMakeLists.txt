@@ -1,16 +1,15 @@
 include_directories(${SQLite_INCLUDE_DIR})
 
 #
-# parameter2xml
+# basic C++ tools
 # 
 
-add_executable(parameter2xml parameter2xml.C)
-target_link_libraries(parameter2xml alps)
-install(TARGETS parameter2xml RUNTIME DESTINATION bin)
-
-#
-# archive
-#
+set (TOOLS parameter2xml convert2xml compactrun lattice2xml pevaluate pconfig poutput printgraph txt2archive xml2archive)
+foreach(program ${TOOLS})
+  add_executable(${program} ${program}.C)
+  target_link_libraries(${program} alps)
+  install(TARGETS ${program} RUNTIME DESTINATION bin)
+endforeach(program)
 
 if(SQLite_FOUND)
   add_executable(archive archive.cpp archive_index.cpp archive_node.cpp archive_plot.cpp
@@ -20,8 +19,22 @@ if(SQLite_FOUND)
 endif(SQLite_FOUND)
 
 #
+# legacy shell scripts that stay around for backwards compatibility until the new solutions are there
+#
+
+if(UNIX AND NOT WIN32)
+  set (SCRIPTS_TO_CONFIGURE convert2html convert2text extractgp extracthtml extractmpl extracttext extractxmgr plot2gp plot2html plot2mpl plot2text plot2xmgr)
+  foreach(script ${SCRIPTS_TO_CONFIGURE})
+    configure_file(${script}.in ${CMAKE_CURRENT_BINARY_DIR}/${script})
+    install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${script} DESTINATION bin)
+  endforeach(script)
+  install(PROGRAMS archivecat DESTINATION bin)
+endif(UNIX AND NOT WIN32)
+
+#
 # lattice-preview and helper program
 #
+
 
 configure_file(config.py.in ${CMAKE_CURRENT_BINARY_DIR}/config.py)
 if(WIN32 AND NOT UNIX)
@@ -34,6 +47,4 @@ else(WIN32 AND NOT UNIX)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/config.py preview.py license.py
     DESTINATION lib/python/alps)
 endif(WIN32 AND NOT UNIX)
-add_executable(lattice2xml lattice2xml.C)
-target_link_libraries(lattice2xml alps)
-install(TARGETS lattice2xml RUNTIME DESTINATION bin)
+
