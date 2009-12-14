@@ -75,6 +75,8 @@
     <CHANGE quantumnumber="Ndown" change="+1"/>
   </OPERATOR>
   <OPERATOR name="Sz" matrixelement="(Nup-Ndown)/2"/>
+  <OPERATOR name="Nup" matrixelement="Nup"/>
+  <OPERATOR name="Ndown" matrixelement="Ndown"/>
   <OPERATOR name="c_down" matrixelement="1">
     <CHANGE quantumnumber="Ndown" change="-1"/>
   </OPERATOR>
