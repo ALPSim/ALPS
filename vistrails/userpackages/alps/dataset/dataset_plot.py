@@ -35,7 +35,7 @@ class PlotDescriptor(Descriptor, Module):
         PortDescriptor('title',basic.String)
     ]
 
-class MplXYPlot(Module):
+class MplXYPlot(NotCacheable,Module):
     my_input_ports = [
         PortDescriptor('plot',PlotDescriptor),
         PortDescriptor('hide_buttons',basic.Boolean),

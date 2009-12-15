@@ -108,6 +108,7 @@ def initialize():
     register(SortByX,'DataSet|Tools')
     register(SelectXRange,'DataSet|Tools')
     register(WriteTxt,'DataSet|Tools')
+    register(CacheErasure,'DataSet|Tools')
     
     register(Selector,'DataSet|Select',abst=True)
     register(PropertySelector,'DataSet|Select')

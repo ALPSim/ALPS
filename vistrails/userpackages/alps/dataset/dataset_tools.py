@@ -43,3 +43,11 @@ class WriteTxt(Module):
 				if 'filename' in s.props:
 					data = np.array([s.x,s.y]).transpose()
 					np.savetxt(s.props['filename'],data)
+
+class CacheErasure(NotCacheable,Module):
+    my_input_ports = [PortDescriptor('input',DataSets)]
+    my_output_ports = [PortDescriptor('output',DataSets)]
+    
+    def compute(self):
+        self.setResult('output', self.getInputFromPort('input'))
+    
