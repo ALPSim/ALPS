@@ -4,6 +4,8 @@ THERMALIZATION = SWEEPS/8;
 LATTICE = "chain lattice";
 L = 16;
 
+ALGORITHM = "ising"
+
 { NUM_CLONES = 10; T = 2; }
 { NUM_CLONES = 20; T = 1.9; }
 { T = 1.8; }
