@@ -97,9 +97,10 @@ def initialize():
     register(Plotter,'DataSet|Plot',abst=True)
     register(PlotDescriptor,'DataSet|Plot')
     register(MplXYPlot,'DataSet|Plot')
-    reg.add_module(PlotAsText,namespace='DataSet|Plot')
-    reg.add_module(GraceXYPlot,namespace='DataSet|Plot')
-    reg.add_module(GnuplotXYPlot,namespace='DataSet|Plot')
+    reg.add_module(Convert2Text,namespace='DataSet|Plot')
+    reg.add_module(GraceXYPlot,namespace='DataSet|Plot',abstract=True)
+    reg.add_module(GraceXYPlot,name="Convert2Grace",namespace='DataSet|Plot')
+    reg.add_module(Convert2Gnuplot,namespace='DataSet|Plot')
     
     register(FitPrototype,'DataSet|Fit',abst=True)
     register(PolyFit,'DataSet|Fit')

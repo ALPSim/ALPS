@@ -29,15 +29,15 @@ class DisplayXMGRPlot(NotCacheable, alpscore.SystemCommand):
 class PlotDescription(basic.File):
     """ a plot desription file """
 
-class PlotDescriptionXML(Module):
-    def compute(self):
-        self = self.interpreter.filePool.create_file(suffix='.txt')
-        f = file(self.name,'w')
-        f.write(str(self.getInputFromPort('xml')))
-        f.close()
-        self.setResult('value',self)
-    _input_ports = [('xml', [basic.String])]
-    _output_ports = [('value',PlotDescription)]
+#class PlotDescriptionXML(Module):
+#    def compute(self):
+#        self = self.interpreter.filePool.create_file(suffix='.txt')
+#        f = file(self.name,'w')
+#        f.write(str(self.getInputFromPort('xml')))
+#        f.close()
+#        self.setResult('value',self)
+#    _input_ports = [('xml', [basic.String])]
+#    _output_ports = [('value',PlotDescription)]
 
 class PlotScalarVersusParameter(PlotDescription):
     def compute(self):
@@ -144,23 +144,24 @@ def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
 
-  reg.add_module(PlotDescription,namespace="Plots")
+  reg.add_module(PlotDescription,namespace="Plots",abstract=True)
   reg.add_output_port(PlotDescription, "value", PlotDescription)
   reg.add_output_port(PlotDescription, "self", PlotDescription, True)
-  reg.add_module(PlotDescriptionXML,namespace="Plots")
-  reg.add_module(PlotScalarVersusParameter,namespace="Plots")
-  reg.add_module(PlotFile,namespace="Plots")
+#  reg.add_module(PlotDescriptionXML,namespace="Plots")
+  reg.add_module(PlotScalarVersusParameter,namespace="Plots",abstract=True)
+  reg.add_module(PlotFile,namespace="Plots",abstract=True)
 
   reg.add_module(ExtractAnything,namespace="Plots",abstract=True)
-  reg.add_module(ExtractXMGR,namespace="Plots")
-  reg.add_module(ExtractText,namespace="Plots")
-  reg.add_module(ExtractMpl,namespace="Plots")
+  reg.add_module(ExtractXMGR,namespace="Plots",abstract=True)
+  reg.add_module(ExtractText,namespace="Plots",abstract=True)
+  reg.add_module(ExtractMpl,namespace="Plots",abstract=True)
   reg.add_module(Plot2Anything,namespace="Plots",abstract=True)
-  reg.add_module(Plot2XMGR,namespace="Plots")
-  reg.add_module(Plot2Text,namespace="Plots")
-  reg.add_module(Plot2Mpl,namespace="Plots")
+  reg.add_module(Plot2XMGR,namespace="Plots",abstract=True)
+  reg.add_module(Plot2Text,namespace="Plots",abstract=True)
+  reg.add_module(Plot2Mpl,namespace="Plots",abstract=True)
   
-  reg.add_module(DisplayXMGRPlot,namespace="Plots")
-  reg.add_module(AlpsMplPlot,namespace="Plots")
+  reg.add_module(DisplayXMGRPlot,namespace="Plots",abstract=True)
+  reg.add_module(DisplayXMGRPlot,name="DisplayGracePlot",namespace="DataSet|Plot")
+  reg.add_module(AlpsMplPlot,namespace="Plots",abstract=True)
   
  # reg.add_module(MakePlot)

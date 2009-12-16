@@ -70,7 +70,7 @@ class MplXYPlot(NotCacheable,Module):
             code = self.getInputFromPort('source')
             exec urllib.unquote(str(code))
         
-class PlotAsText(Module): 
+class Convert2Text(Module): 
     _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
     _output_ports = [('file',[(basic.File, 'the plot file')]),
                      ('value_as_string',[(basic.String, 'the plot as string')])]
@@ -100,7 +100,7 @@ class GraceXYPlot(Module):
         self.setResult('value_as_string',res)
         self.setResult('file',o)
 
-class GnuplotXYPlot(Module): 
+class Convert2Gnuplot(Module): 
     _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
     _output_ports = [('file',[(basic.File, 'the plot file')]),
                      ('value_as_string',[(basic.String, 'the plot as string')])]
