@@ -95,21 +95,30 @@ class MplXYPlot_core:
         
         if 'xaxis' in self.plt:
             if 'label' in self.plt['xaxis']:
-                plt.xlabel(self.plt['xaxis']['label'])
+                if 'fontsize' in self.plt['xaxis']:
+                    plt.xlabel(self.plt['xaxis']['label'],fontsize=self.plt['xaxis']['fontsize'])
+                else:
+                    plt.xlabel(self.plt['xaxis']['label'])
             if 'min' in self.plt['xaxis'] and 'max' in self.plt['xaxis']:
                 plt.xlim(self.plt['xaxis']['min'],self.plt['xaxis']['max'])
                 
         if 'yaxis' in self.plt:
             if 'label' in self.plt['yaxis']:
-                plt.ylabel(self.plt['yaxis']['label'])
+                if 'fontsize' in self.plt['yaxis']:
+                    plt.ylabel(self.plt['yaxis']['label'],fontsize=self.plt['yaxis']['fontsize'])
+                else:
+                    plt.ylabel(self.plt['yaxis']['label'])
             if 'min' in self.plt['yaxis'] and 'max' in self.plt['yaxis']:
                 plt.ylim(self.plt['yaxis']['min'],self.plt['yaxis']['max'])
         
         if 'legend' in self.plt:
+            prop = {}
+            if 'fontsize' in self.plt['legend']:
+                prop['size'] = self.plt['legend']['fontsize']
             if 'location' in self.plt['legend']:
-                plt.legend(loc=self.plt['legend']['location'])
+                plt.legend(loc=self.plt['legend']['location'],prop=prop)
             else:
-                plt.legend()
+                plt.legend(prop=prop)
         
         if 'title' in self.plt:
             plt.title(self.plt['title'])

@@ -18,12 +18,14 @@ class AxisDescriptor(Descriptor, Module):
         PortDescriptor('label',basic.String),
         PortDescriptor('min',basic.Float),
         PortDescriptor('max',basic.Float),
-        PortDescriptor('logarithmic',basic.Boolean)
+        PortDescriptor('logarithmic',basic.Boolean),
+        PortDescriptor('fontsize',basic.Integer)
     ]
 
 class LegendDescriptor(Descriptor, Module):
     my_input_ports = [
-        PortDescriptor('location',basic.Integer)
+        PortDescriptor('location',basic.Integer),
+        PortDescriptor('fontsize',basic.Integer)
     ]
 
 class PlotDescriptor(Descriptor, Module):
