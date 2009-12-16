@@ -13,6 +13,7 @@ import os.path
 import tempfile
 import copy
 import glob
+import zipfile
 
 import parameters
 import alpscore
@@ -26,6 +27,32 @@ basic = core.modules.basic_modules
 
 from pyalps.util.dataset import ResultFile
 from dataset import ResultFiles
+
+class UnzipDirectory(Module):
+    _input_ports = [('zipfile',[basic.File])]
+    _output_ports = [('output_dir', [basic.Directory])]
+    
+    def compute(self):
+        o = self.interpreter.filePool.create_file()
+        os.unlink(o.name)
+        os.mkdir(o.name)
+        dir = basic.Directory
+        dir.name = o.name
+        os.chdir(dir.name)
+        
+        input_file = self.getInputFromPort('zipfile').name
+        zf = zipfile.ZipFile(input_file,'r')
+        # ugly, but necessary in Python 2.5
+        filelist = zf.namelist()
+        for f in filelist:
+            if f[-1] == '/':
+                os.mkdir(f)
+            else:
+                open(f,'w').write(zf.read(f))
+        # This will work when Vistrails moves to Python 2.6
+        # zf.extractall()
+        
+        self.setResult('output_dir',dir)
 
 class MakeParameterFile(Module):
      """Creates a parameter file.
@@ -260,6 +287,7 @@ def selfRegister():
 
   reg.add_module(PackSimulationResults,namespace="Tools")
   reg.add_module(UnpackSimulationResults,namespace="Tools")
+  reg.add_module(UnzipDirectory,namespace="Tools")
 
   reg.add_module(GetSimulationInDir,namespace="Tools")
 
