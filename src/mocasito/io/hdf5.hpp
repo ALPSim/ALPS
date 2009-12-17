@@ -2,6 +2,10 @@
 // Use, modification and distribution is subject to the Boost Software
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
+
+#ifndef IO_HDF5
+#define IO_HDF5
+
 #include "util.hpp"
 #include "traits.hpp"
 #include "../trace.hpp"
@@ -10,9 +14,15 @@
 #include <vector>
 #include <map>
 #include <stdexcept>
+
+#ifndef _HDF5USEDLL_
+# define _HDF5USEDLL_
+#endif
+#ifndef _HDF5USEHLDLL_
+# define _HDF5USEHLDLL_
+#endif
 #include <hdf5.h>
-#ifndef IO_HDF5
-#define IO_HDF5
+
 namespace mocasito {
 	namespace io {
 		namespace detail {

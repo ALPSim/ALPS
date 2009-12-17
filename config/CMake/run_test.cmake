@@ -1,4 +1,4 @@
-find_program(cmd_path ${cmd})
+find_program(cmd_path ${cmd} ${binarydir} ${binarydir}/Release ${binarydir}/Debug)
 find_file(input_path ${input} ${binarydir} ${sourcedir})
 find_file(output_path ${output} ${binarydir} ${sourcedir})
 

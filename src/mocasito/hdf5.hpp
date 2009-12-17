@@ -3,6 +3,9 @@
 // License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#ifndef MOCASITO_HDF5
+#define MOCASITO_HDF5
+
 #ifdef ALPS_HAVE_HDF5
 
 #include <string>
@@ -16,6 +19,12 @@
 #include <boost/type_traits.hpp>
 #include <boost/utility/enable_if.hpp>
 
+#ifndef _HDF5USEDLL_
+# define _HDF5USEDLL_
+#endif
+#ifndef _HDF5USEHLDLL_
+# define _HDF5USEHLDLL_
+#endif
 #include <hdf5.h>
 
 #include <alps/config.h>
@@ -23,8 +32,6 @@
 # include <valarray>
 #endif
 
-#ifndef MOCASITO_HDF5
-#define MOCASITO_HDF5
 namespace mocasito {
 	namespace detail {
 		class h5_e {

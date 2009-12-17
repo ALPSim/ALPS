@@ -3,8 +3,6 @@
 #
 
 set(BOOST_SOURCES "")
-set(BOOST_SHARED_CPPFLAGS ${BOOST_SHARED_CPPFLAGS} BOOST_ALL_DYN_LINK=1)
-set(BOOST_STATIC_CPPFLAGS ${BOOST_STATIC_CPPFLAGS} BOOST_ALL_STATIC_LINK=1)
 
 # Boost.Date_Time
 if(BUILD_BOOST_DATE_TIME)
@@ -95,11 +93,6 @@ if(BUILD_BOOST_SYSTEM)
 endif(BUILD_BOOST_SYSTEM)
 
 add_library(boost ${BOOST_SOURCES})
-if(BUILD_SHARED_LIBS)
-  set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS "${BOOST_SHARED_CPPFLAGS}")
-else(BUILD_SHARED_LIBS)
-  set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS "${BOOST_STATIC_CPPFLAGS}")
-endif(BUILD_SHARED_LIBS)
 
 #######################################################################
 # install

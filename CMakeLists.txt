@@ -7,6 +7,7 @@ option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 if(MSVC)
   SET(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /Zm1000 /EHsc /GR /openmp" CACHE STRING
     "Flags used by the compiler." FORCE)
+  add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
 if(NOT CMAKE_BUILD_TYPE)

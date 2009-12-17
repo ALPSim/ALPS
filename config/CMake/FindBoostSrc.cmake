@@ -58,5 +58,10 @@ set(BUILD_BOOST_SYSTEM TRUE)
 
 # Avoid auto link of Boost library
 add_definitions(-DBOOST_ALL_NO_LIB=1)
+if(BUILD_SHARED_LIBS)
+  add_definitions(-DBOOST_ALL_DYN_LINK=1)
+else(BUILD_SHARED_LIBS)
+  add_definitions(-DBOOST_ALL_STATIC_LINK=1)
+endif(BUILD_SHARED_LIBS)
 
 mark_as_advanced(Boost_INCLUDE_DIR)
