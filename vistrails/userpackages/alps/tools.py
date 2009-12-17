@@ -206,42 +206,12 @@ class XML2HTML(alpscore.SystemCommand):
     _output_ports = [('output_file', [basic.File])]
 
 
-class PackSimulationResults(alpscore.SystemCommandLogged):
-    def compute(self):
-        o = self.interpreter.filePool.create_file(suffix='.tar.gz')
-        if self.hasInputFromPort("dir"):
-          dirname = self.getInputFromPort("dir").name
-        self.execute(['cd', dirname,';', 'tar','czf', o.name, '*'])
-        self.setResult("archive", o)
-    _input_ports = [('dir', [basic.Directory])]
-    _output_ports = [('archive', [basic.File]),
-                     ('log_file',[basic.File])]
-
-
 class GetSimName:
     def get_sim_name(self,dirname):
         l = glob.glob(os.path.join(dirname,'*.out.xml'))
         return l[0]
 
 
-class UnpackSimulationResults(alpscore.SystemCommandLogged,GetSimName):
-    def compute(self):
-        o = self.interpreter.filePool.create_file()
-        os.unlink(o.name)
-        os.mkdir(o.name)
-        dir = basic.Directory
-        dir.name = o.name
-        input_file = self.getInputFromPort("archive")
-        self.execute(['cd', o.name,';', 'tar','xzf', input_file.name])
-        o.name = self.get_sim_name(dir.name)
-        self.setResult("output_file",o)
-        self.setResult("output_dir",dir)
-    _input_ports = [('archive', [basic.File])]
-    _output_ports = [('output_file', [basic.File]),
-                     ('output_dir', [basic.Directory]),
-                     ('log_file',[basic.File])]        
-        
-        
 class GetSimulationInDir(basic.Module,GetSimName):
     def compute(self):
         dir = self.getInputFromPort("dir")
@@ -285,8 +255,6 @@ def selfRegister():
   reg.add_module(Convert2Text,namespace="Tools")
   reg.add_module(XML2HTML,namespace="Tools")
 
-  reg.add_module(PackSimulationResults,namespace="Tools")
-  reg.add_module(UnpackSimulationResults,namespace="Tools")
   reg.add_module(UnzipDirectory,namespace="Tools")
 
   reg.add_module(GetSimulationInDir,namespace="Tools")
