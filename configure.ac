@@ -181,6 +181,9 @@ test "$ac_cv_header_rpc_rpc_h" = yes && AC_DEFINE(ALPS_HAVE_RPC_XDR_H, [], [rpc/
 AC_CHECK_HEADER([stdarg.h])
 test "$ac_cv_header_stdarg_h" = yes && AC_DEFINE(ALPS_HAVE_STDARG_H, [], [stdarg.h])
 
+AC_CHECK_HEADER([sys/stat.h])
+test "$ac_cv_header_sys_stat_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_STAT_H, [], [sys/stat.h])
+
 AC_CHECK_HEADER([sys/systeminfo.h])
 test "$ac_cv_header_sys_systeminfo_h" = yes && AC_DEFINE(ALPS_HAVE_SYS_SYSTEMINFO_H, [], [sys/systeminfo.h])
 
