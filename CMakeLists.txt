@@ -127,6 +127,11 @@ if(WIN32 AND NOT UNIX)
 else(WIN32 AND NOT UNIX)
   find_package(PythonInterp)
   set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
+  find_package(PythonLibs)
+  IF (PYTHONLIBS_FOUND)
+    SET(ALPS_HAVE_PYTHON 1)
+    INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS})
+  ENDIF (PYTHONLIBS_FOUND)
 endif(WIN32 AND NOT UNIX)
 
 ######################################################################

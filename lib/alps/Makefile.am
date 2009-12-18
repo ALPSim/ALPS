@@ -13,8 +13,7 @@ src_ALPS = \
 src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
   $(top_srcdir)/src/alps/alea/observable.C \
-  $(top_srcdir)/src/alps/alea/observableset.C \
-  $(top_srcdir)/src/alps/alea/value_with_error.C
+  $(top_srcdir)/src/alps/alea/observableset.C
 src_EXPRESSION = \
   $(top_srcdir)/src/alps/expression/evaluator.C 
 src_OSIRIS = \
