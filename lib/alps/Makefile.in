@@ -132,6 +132,7 @@ am__libalps_mpi_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/alea/nan.C \
 	$(top_srcdir)/src/alps/alea/observable.C \
 	$(top_srcdir)/src/alps/alea/observableset.C \
+	$(top_srcdir)/src/alps/alea/value_with_error.C \
 	$(top_srcdir)/src/alps/lattice/disorder.C \
 	$(top_srcdir)/src/alps/lattice/latticedescriptor.C \
 	$(top_srcdir)/src/alps/lattice/latticegraphdescriptor.C \
@@ -197,7 +198,8 @@ am__objects_5 = libalps_mpi_la-parser.lo \
 	libalps_mpi_la-xslt_path.lo
 am__objects_6 = libalps_mpi_la-rngfactory.lo
 am__objects_7 = libalps_mpi_la-nan.lo libalps_mpi_la-observable.lo \
-	libalps_mpi_la-observableset.lo
+	libalps_mpi_la-observableset.lo \
+	libalps_mpi_la-value_with_error.lo
 am__objects_8 = libalps_mpi_la-disorder.lo \
 	libalps_mpi_la-latticedescriptor.lo \
 	libalps_mpi_la-latticegraphdescriptor.lo \
@@ -364,6 +366,7 @@ am__libalps_sgl_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/alea/nan.C \
 	$(top_srcdir)/src/alps/alea/observable.C \
 	$(top_srcdir)/src/alps/alea/observableset.C \
+	$(top_srcdir)/src/alps/alea/value_with_error.C \
 	$(top_srcdir)/src/alps/lattice/disorder.C \
 	$(top_srcdir)/src/alps/lattice/latticedescriptor.C \
 	$(top_srcdir)/src/alps/lattice/latticegraphdescriptor.C \
@@ -420,7 +423,8 @@ am__objects_39 = parameter.lo parameterlist.lo parameters.lo
 am__objects_40 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
 	xmlstream.lo xslt_path.lo
 am__objects_41 = rngfactory.lo
-am__objects_42 = nan.lo observable.lo observableset.lo
+am__objects_42 = nan.lo observable.lo observableset.lo \
+	value_with_error.lo
 am__objects_43 = disorder.lo latticedescriptor.lo \
 	latticegraphdescriptor.lo latticelibrary.lo unitcell.lo
 am__objects_44 = modellibrary.lo siteterm.lo bondterm.lo \
@@ -518,6 +522,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/alea/nan.C \
 	$(top_srcdir)/src/alps/alea/observable.C \
 	$(top_srcdir)/src/alps/alea/observableset.C \
+	$(top_srcdir)/src/alps/alea/value_with_error.C \
 	$(top_srcdir)/src/alps/lattice/disorder.C \
 	$(top_srcdir)/src/alps/lattice/latticedescriptor.C \
 	$(top_srcdir)/src/alps/lattice/latticegraphdescriptor.C \
@@ -830,7 +835,8 @@ src_ALPS = \
 src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
   $(top_srcdir)/src/alps/alea/observable.C \
-  $(top_srcdir)/src/alps/alea/observableset.C
+  $(top_srcdir)/src/alps/alea/observableset.C \
+  $(top_srcdir)/src/alps/alea/value_with_error.C
 
 src_EXPRESSION = \
   $(top_srcdir)/src/alps/expression/evaluator.C 
@@ -1366,6 +1372,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-usinstances.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-value_semantic.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-value_with_error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-variables_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-void_cast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-w32_regex_traits.Plo@am__quote@
@@ -1476,6 +1483,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/usinstances.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/value_semantic.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/value_with_error.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/variables_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/void_cast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/w32_regex_traits.Plo@am__quote@
@@ -1648,6 +1656,13 @@ libalps_mpi_la-observableset.lo: $(top_srcdir)/src/alps/alea/observableset.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/alea/observableset.C' object='libalps_mpi_la-observableset.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_mpi_la-observableset.lo `test -f '$(top_srcdir)/src/alps/alea/observableset.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/observableset.C
+
+libalps_mpi_la-value_with_error.lo: $(top_srcdir)/src/alps/alea/value_with_error.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_mpi_la-value_with_error.lo -MD -MP -MF $(DEPDIR)/libalps_mpi_la-value_with_error.Tpo -c -o libalps_mpi_la-value_with_error.lo `test -f '$(top_srcdir)/src/alps/alea/value_with_error.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/value_with_error.C
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libalps_mpi_la-value_with_error.Tpo $(DEPDIR)/libalps_mpi_la-value_with_error.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/alea/value_with_error.C' object='libalps_mpi_la-value_with_error.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_mpi_la-value_with_error.lo `test -f '$(top_srcdir)/src/alps/alea/value_with_error.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/value_with_error.C
 
 libalps_mpi_la-disorder.lo: $(top_srcdir)/src/alps/lattice/disorder.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_mpi_la-disorder.lo -MD -MP -MF $(DEPDIR)/libalps_mpi_la-disorder.Tpo -c -o libalps_mpi_la-disorder.lo `test -f '$(top_srcdir)/src/alps/lattice/disorder.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/lattice/disorder.C
@@ -2908,6 +2923,13 @@ observableset.lo: $(top_srcdir)/src/alps/alea/observableset.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/alea/observableset.C' object='observableset.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o observableset.lo `test -f '$(top_srcdir)/src/alps/alea/observableset.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/observableset.C
+
+value_with_error.lo: $(top_srcdir)/src/alps/alea/value_with_error.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT value_with_error.lo -MD -MP -MF $(DEPDIR)/value_with_error.Tpo -c -o value_with_error.lo `test -f '$(top_srcdir)/src/alps/alea/value_with_error.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/value_with_error.C
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/value_with_error.Tpo $(DEPDIR)/value_with_error.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/alea/value_with_error.C' object='value_with_error.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o value_with_error.lo `test -f '$(top_srcdir)/src/alps/alea/value_with_error.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/value_with_error.C
 
 disorder.lo: $(top_srcdir)/src/alps/lattice/disorder.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT disorder.lo -MD -MP -MF $(DEPDIR)/disorder.Tpo -c -o disorder.lo `test -f '$(top_srcdir)/src/alps/lattice/disorder.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/lattice/disorder.C
