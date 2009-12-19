@@ -253,7 +253,9 @@ class CollectXY(Module):
                 order = np.argsort(res.x)
                 res.x = res.x[order]
                 res.y = res.y[order]
-                res
+                res.props['label'] = ''
+                for im in range(0,len(for_each)):
+                    res.props['label'] += '%s = %s ' % (for_each[im], k[im])
                 
                 for_each_sets[k] = res
             
