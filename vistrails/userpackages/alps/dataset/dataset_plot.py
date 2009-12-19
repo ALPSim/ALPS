@@ -100,6 +100,13 @@ class GraceXYPlot(Module):
         self.setResult('value_as_string',res)
         self.setResult('file',o)
 
+class LoadXMLPlot(Module): 
+    _input_ports = [('file',[(basic.File, 'the plot file')])]
+    _output_ports = [('plot',[(PlotDescriptor,'the plot')])]
+    
+    def compute(self):
+        self.setResult('plot',read_xml(self.getInputFromPort('file').name))
+        
 class Convert2Gnuplot(Module): 
     _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
     _output_ports = [('file',[(basic.File, 'the plot file')]),

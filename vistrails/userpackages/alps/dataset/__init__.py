@@ -85,6 +85,8 @@ def initialize():
     register(CollectXY,'DataSet|Load')
     register(LoadProperties,'DataSet|Load')
     register(LoadAlpsHdf5,'DataSet|Load')
+    
+
 
     register(Transform,'DataSet|Evaluate')
     AddDataSetsInputPorts(TransformN, 5)
@@ -101,6 +103,7 @@ def initialize():
     reg.add_module(GraceXYPlot,namespace='DataSet|Plot',abstract=True)
     reg.add_module(GraceXYPlot,name="Convert2Grace",namespace='DataSet|Plot')
     reg.add_module(Convert2Gnuplot,namespace='DataSet|Plot')
+    reg.add_module(LoadXMLPlot,namespace='DataSet|Plot')
     
     register(FitPrototype,'DataSet|Fit',abst=True)
     register(PolyFit,'DataSet|Fit')
