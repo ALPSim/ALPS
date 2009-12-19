@@ -1,0 +1,11 @@
+LATTICE="double dimer"
+MODEL="dimerized spin"
+LATTICE_LIBRARY="dd-graph.xml"
+MODEL_LIBRARY="model-dspin.xml"
+local_S0=1
+local_S1=1/2
+J0      = 1
+J1	= 0.4
+h	= 0
+CONSERVED_QUANTUMNUMBERS="Sz"
+{T = 0.02}

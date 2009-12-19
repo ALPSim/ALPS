@@ -1,0 +1,69 @@
+How to run a SSE optimized ensemble simulation
+==============================================
+
+
+The workflow consists of the following basic steps:
+
+1. Run a Wang-Landau simulation to estimate g(n) (or, the density of states, respectively) and measure the histogram up/down walkers.
+
+2. Take these measurements and derive new weights. Since a derivative needs to be calculated, this is best done by first interpolating the data by a smooth function. A sample Mathematica (calc_oe_weights.nb) is provided for this purpose.
+
+3. Restart the simulation with the new weights given in a separate parameter file. Again, the histogram up/down walkers are measured.
+
+4. Repeat step 2. and 3. until the fraction H+(n)/H(n) is linear.
+
+
+The steps are described in more detail below.
+
+
+STEP 1
+======
+
+Prepare your parameter file as usual (see below for a complete list of parameters). Make sure you set the parameter SIMULATION_PHASE=1. This tells the program that you want to do a Wang-Landau simulation.
+Other relevant Wang-Landau parameters are:
+
+- CUTOFF: The cutoff length of the expansion
+
+- MEASUREMENT_STEPS: How many measurements to take of the histograms after g(n) was estimated.
+
+- NUMBER_OF_WANG_LANDAU_STEPS (default 12): The number of Wang-Landau steps that should be performed.
+
+- USE_ZHOU_BHATT (default true): Whether or not to use the Zhou-Bhatt method for determining the histogram flatness.
+
+- WL_BLOCK_SWEEPS: Only required if Zhou-Bhatt is NOT used. It specifies the number of sweeps to wait until histogram flatness is checked. For Zhou-Bhatt this is determined automatically.
+
+- FLATNESS_TRESHOLD (default 0.2): Only required if Zhou-Bhatt is NOT used. Specifies how flat "flatness" should be.
+
+
+STEP 2
+======
+
+After step 1 is finished, you should have measurements of logg(n), histo(n) (the histogram), histoup(n) (the upwalker histogram) and the roundtrip times in the job XML output file.
+If you are using the sample Mathematica code for the evaluation, use the following command to extract these measurements from the XML file into separate files:
+
+xsltproc extract_logg.xsl <job-xml-output-file>  > logg.dat
+xsltproc extract_histo.xsl <job-xml-output-file>  > histo.dat
+xsltproc extract_histoup.xsl <job-xml-output-file>  > histoup.dat
+
+Now, start Mathematica and open the file calc_oe_weights.nb and execute all the commands in the file.
+If everything goes fine, you should now have a file oe_logg.dat. This file contains the new logg(n) (the actual optimized weights are given by w(n)=1/g(n)).
+
+
+STEP 3
+======
+
+Prepare the job file for the OE run. The following parameters are relevant:
+
+- CUTOFF: The cutoff length of the expansion (clearly, you should not change it at this point)
+
+- LOGG_FILENAME: The path to the file were the optimized logg is stored. In our example, this is oe_logg.dat (see step 2).
+
+- SIMULATION_PHASE=2: This is REQUIRED in order to tell the program to run the optimized ensemble phase of the program.
+
+- OE_BLOCK_SWEEPS: Sepcifies how many OE sweeps you want to perform.
+
+- OE_NB_THERMALIZATION (default OE_BLOCK_SWEEPS/10): The number of steps to wait until histograms are measured. Please note that during this thermalization phase an average number of worms is determined, so don't leave out the thermalization.
+
+
+After you have run the simulation, the job XML output file should now contain measurements of the histograms and the roundtrip times. By the same procedure as described in step 2 you can again extract the histograms and let Mathematica calculate new weights. The only difference is that this time the logg-data is already in the external file oe_log.dat and thus needs not be extracted from the job XML output file.
+

@@ -1,0 +1,11 @@
+MODEL   = "spin"
+LATTICE = "chain lattice"
+J       = 1
+L       = 10
+T_MIN   = 0.1
+T_MAX   = 10.0
+DELTA_T = 0.1
+CUTOFF  = 50
+{J      =  1}
+{J      = -1}
+

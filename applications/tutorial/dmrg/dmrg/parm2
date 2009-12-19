@@ -1,0 +1,17 @@
+LATTICE="open chain lattice"
+SWEEPS=4
+MAXSTATES=100
+CONSERVED_QUANTUMNUMBERS="Sz"
+MODEL="spin", L=10
+J=1
+MEASURE_AVERAGE[Magnetization]=Sz
+{ h=0.0 }
+{ h=0.5 }
+{ h=1.0 }
+{ h=1.5 }
+{ h=2.0 }
+{ h=2.5 }
+{ h=3.0 }
+{ h=3.5 }
+{ h=4.0 }
+{ h=4.5 }

@@ -1,0 +1,59 @@
+Conventions for parameters, observables for MC simulations :
+
+* For specific parameters of the Monte Carlo :
+Everything upper-case
+For expressions with more than one term, use underscore.
+
+Ex : 
+EPSILON =1;
+NUMBER_OF_WORMS=3;
+
+* Observables :
+First letter of each word in uppercase, rest of the word in lowercase
+For expressions with more than one term, use a space
+For powers of observables, put "^n" where n is the power on the last word
+
+Ex : 
+Magnetization
+Staggered Structure Factor
+Magnetization^2
+Staggered Structure Factor^4
+
+* Measurements :
+To enable or disable specific measurements, use the keywords 
+MEASURE[Observable Name]=1;
+TIMESERIES[Observable Name]=1;
+
+Where brackets "[ ]" will be recognized by the parser, and the observable name
+uses exactly the convention described before.
+
+Ex : 
+MEASURE[Magnetization]=1;
+TIMESERIES[Staggered Structure Factor]=0;
+MEASURE[Staggered Structure Factor^4]=0;
+TIMESERIES[Magnetization^2]=1;
+
+
+Magnetization (per spin)
+
+Energy Density
+Magnetization Density
+Susceptibility Density
+
+Local Magnetization
+
+
+Spin Correlation[(0,0), (-2,4)]
+Local Kinetic Energy[Bond((0,0),(0,1))]
+Local Energy[Site(1)]
+Local Energy[(1,1)]
+Bond Correlation[Bond((0,0), (0,1)),Bond((1,1), (1,2))] 
+Green's Function
+
+Total Energy
+Energy Density (per volume)
+Energy per Site
+Energy per Unit Cell
+
+
+

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+set -eu
+
+@bindir@/parameter2xml $1
+@top_builddir@/mc/spins/spinmc --Tmin 2 $1.in.xml
+@bindir@/extracttext @top_srcdir@/test/mc/spins/$2 $1.task*.out.xml > result.$1.txt
+diff -u result.$1.txt @top_srcdir@/test/mc/spins/result.$1.txt.output
+
+exit $?

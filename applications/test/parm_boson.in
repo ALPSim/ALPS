@@ -1,0 +1,40 @@
+t=1.;
+T=0.3;
+THERMALIZATION=10000;
+SWEEPS=100000;
+LATTICE="chain lattice";
+MODEL="hardcore boson";
+CONSERVED_QUANTUMNUMBERS="N";
+MEASURE_AVERAGE[Double occupancy]=double_occupancy
+MEASURE_AVERAGE[Hybridization]=boson_hop
+MEASURE_AVERAGE[Density]=n
+MEASURE_LOCAL[Local double occupancy]=double_occupancy
+MEASURE_LOCAL[Local density]=n
+MEASURE_CORRELATIONS[Density correlations]=n
+MEASURE_CORRELATIONS[Green function]="bdag:b"
+L=2;
+{N_total=1; V=0.; EPSILON=0.5;}
+{N_total=2; V=0.; EPSILON=0.5;}
+{N_total=2; V=0.5;}
+L=4;
+{N_total=2; V=0.; EPSILON=0.5;}
+{N_total=2; V=0.5;}
+{N_total=3; V=0; EPSILON=0.5;}
+{N_total=3; V=0.5;}
+MODEL="boson Hubbard";
+Nmax=2;
+L=2;
+{N_total=1; U=0.; EPSILON=0.5;}
+{N_total=2; U=0.; EPSILON=0.5;}
+{N_total=2; U=4.;}
+{N_total=3; U=0.; EPSILON=0.5;}
+{N_total=3; U=4.;}
+L=4;
+{N_total=1; U=0.; EPSILON=0.5;}
+{N_total=1; U=4.;}
+{N_total=2; U=0.; EPSILON=0.5;}
+{N_total=2; U=4.;}
+{N_total=3; U=0.; EPSILON=0.5;}
+{N_total=3; U=4.;}
+{N_total=4; U=0.; EPSILON=0.5;}
+{N_total=4; U=4.;}

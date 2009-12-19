@@ -1,0 +1,143 @@
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C) 1997-2006 by Synge Todo <wistaria@comp-phys.org>
+*
+* This software is part of the ALPS Applications, published under the ALPS
+* Application License; you can use, redistribute it and/or modify it under
+* the terms of the license, either version 1 or (at your option) any later
+* version.
+* 
+* You should have received a copy of the ALPS Application License along with
+* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+* available from http://alps.comp-phys.org/.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+* DEALINGS IN THE SOFTWARE.
+*
+*****************************************************************************/
+
+#ifndef LOOPER_LAPACK_H
+#define LOOPER_LAPACK_H
+
+#include <cassert>
+#include <cmath>
+#include <complex>
+#include <stdexcept>
+
+#include <boost/numeric/bindings/lapack/gesvd.hpp>
+#include <boost/numeric/bindings/lapack/syev.hpp>
+#include <boost/numeric/bindings/lapack/heev.hpp>
+#include <boost/numeric/bindings/traits/matrix_traits.hpp>
+#include <boost/numeric/bindings/traits/traits.hpp>
+#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <boost/numeric/bindings/traits/ublas_vector.hpp>
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/vector.hpp>
+
+namespace looper {
+
+//
+// diagonalize matrix
+//
+
+template <class T, class R, class A, class Vector>
+inline void diagonalize(
+  boost::numeric::ublas::matrix<T,R,A>& a,
+  Vector& w, bool need_eigenvectors = true)
+{
+  using namespace boost::numeric;
+
+  BOOST_STATIC_ASSERT((boost::is_same<typename R::orientation_category,
+    ublas::column_major_tag>::value));
+
+  const char jobz = (need_eigenvectors ? 'V' : 'N');
+  const char uplo = 'L';
+
+  // call dispatcher
+  int info = bindings::lapack::syev(jobz, uplo, a, w,
+    bindings::lapack::optimal_workspace());
+  if (info != 0) throw std::runtime_error("failed in heev");
+}
+
+template <class T, class R, class A, class Vector>
+inline void diagonalize(
+  boost::numeric::ublas::matrix<std::complex<T>,R,A>& a,
+  Vector& w, bool need_eigenvectors = true)
+{
+  using namespace boost::numeric;
+
+  BOOST_STATIC_ASSERT((boost::is_same<typename R::orientation_category,
+    ublas::column_major_tag>::value));
+
+  const char jobz = (need_eigenvectors ? 'V' : 'N');
+  const char uplo = 'L';
+
+  // call dispatcher
+  int info = bindings::lapack::heev(jobz, uplo, a, w,
+    bindings::lapack::optimal_workspace());
+  if (info != 0) throw std::runtime_error("failed in heev");
+}
+
+
+//
+// solve_llsp: solving linear least-squares problem
+//
+
+template <typename T, typename R, typename A>
+inline double solve_llsp(
+  const boost::numeric::ublas::matrix<T, R, A>& a,
+  const boost::numeric::ublas::vector<T>& b,
+  boost::numeric::ublas::vector<T>& x,
+  double tol = 1.0e-10)
+{
+  using namespace boost::numeric;
+#ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
+  using ublas::norm_inf; using ublas::norm_2; using ublas::prod;
+#endif
+
+  BOOST_STATIC_ASSERT((boost::is_same<typename R::orientation_category,
+    ublas::column_major_tag>::value));
+
+  typedef T value_type;
+  typedef ublas::matrix<value_type, R, A> matrix_type;
+  typedef ublas::vector<value_type> vector_type;
+
+  int const m = bindings::traits::matrix_size1(a);
+  int const n = bindings::traits::matrix_size2(a);
+  int const min_mn = std::min(m, n);
+
+  // temporary storage
+  matrix_type at; at = a;
+  matrix_type u(m, min_mn);
+  matrix_type vt(min_mn, n);
+  vector_type s(min_mn);
+
+  // call SVD
+  int info = bindings::lapack::gesvd(at, s, u, vt);
+  if (info != 0) throw std::runtime_error("failed in gesvd");
+
+  // inverse S
+  double smax_inv = 1.0 / norm_inf(s);
+  for (int i = 0; i < min_mn; ++i)
+    s(i) = (smax_inv * s(i) > tol) ? (1.0 / s(i)) : 0.0;
+
+  for (int i = 0; i < n; ++i) {
+    x(i) = 0.0;
+    for (int j = 0; j < min_mn; ++j)
+      for (int k = 0; k < m; ++k) x(i) += vt(j,i) * s(j) * u(k,j) * b(k);
+  }
+
+  // return residual
+  return norm_2(prod(a,x) - b);
+}
+
+} // end namespace looper
+
+#endif // ! LOOPER_LAPACK_H

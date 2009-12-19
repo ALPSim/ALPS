@@ -1,0 +1,18 @@
+LATTICE="chain lattice";
+MODEL="Ian's fermion Hubbard";
+CONSERVED_QUANTUMNUMBERS="N,Sz";
+L=8;
+Sz_total=0;
+N_total=2;
+t=1;
+{U=0;}
+{U=1;}
+{U=2;}
+{U=4;}
+{U=8;}
+L=9;
+N_total=4;
+{t=1;U=0;}
+{t=1;U=1;}
+{t=-1;U=0;}
+{t=-1;U=1;}

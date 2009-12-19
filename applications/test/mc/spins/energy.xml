@@ -1,0 +1,9 @@
+﻿<?xml version="1.0" encoding="UTF-8"?> 
+<?xml-stylesheet type="text/xsl" href="http://xml.comp-phys.org/2003/4/plot2html.xsl"?>
+<plot name="Energy versus temperature">
+
+ <legend show="true" />
+ <xaxis label="Temperature" type="PARAMETER" name="T" />
+ <yaxis label="Energy" type="SCALAR_AVERAGE" />
+   
+</plot>

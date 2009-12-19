@@ -1,0 +1,12 @@
+MODEL="spin";
+LATTICE="chain lattice";
+LATTICE_LIBRARY="../lattices.xml"
+MODEL_LIBRARY="../models.xml"
+CONSERVED_QUANTUMNUMBERS="Sz";
+MEASURE_LOCAL[Local magnetization]=Sz
+MEASURE_STRUCTURE_FACTOR[Structure Factor S]=Sz
+MEASURE_CORRELATIONS[Diagonal spin correlations]=Sz
+MEASURE_CORRELATIONS[Offdiagonal spin correlations]="Splus:Sminus"
+local_S=1;
+J=1;
+{L=4;}

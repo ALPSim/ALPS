@@ -1,0 +1,768 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="generator" content="Docutils 0.5: http://docutils.sourceforge.net/" />
+<title></title>
+<style type="text/css">
+
+/*
+:Author: David Goodger
+:Contact: goodger@python.org
+:Date: $Date$
+:Revision: $Revision$
+:Copyright: This stylesheet has been placed in the public domain.
+
+Default cascading style sheet for the HTML output of Docutils.
+
+See http://docutils.sf.net/docs/howto/html-stylesheets.html for how to
+customize this style sheet.
+*/
+
+/* used to remove borders from tables and images */
+.borderless, table.borderless td, table.borderless th {
+  border: 0 }
+
+table.borderless td, table.borderless th {
+  /* Override padding for "table.docutils td" with "! important".
+     The right padding separates the table cells. */
+  padding: 0 0.5em 0 0 ! important }
+
+.first {
+  /* Override more specific margin styles with "! important". */
+  margin-top: 0 ! important }
+
+.last, .with-subtitle {
+  margin-bottom: 0 ! important }
+
+.hidden {
+  display: none }
+
+a.toc-backref {
+  text-decoration: none ;
+  color: black }
+
+blockquote.epigraph {
+  margin: 2em 5em ; }
+
+dl.docutils dd {
+  margin-bottom: 0.5em }
+
+/* Uncomment (and remove this text!) to get bold-faced definition list terms
+dl.docutils dt {
+  font-weight: bold }
+*/
+
+div.abstract {
+  margin: 2em 5em }
+
+div.abstract p.topic-title {
+  font-weight: bold ;
+  text-align: center }
+
+div.admonition, div.attention, div.caution, div.danger, div.error,
+div.hint, div.important, div.note, div.tip, div.warning {
+  margin: 2em ;
+  border: medium outset ;
+  padding: 1em }
+
+div.admonition p.admonition-title, div.hint p.admonition-title,
+div.important p.admonition-title, div.note p.admonition-title,
+div.tip p.admonition-title {
+  font-weight: bold ;
+  font-family: sans-serif }
+
+div.attention p.admonition-title, div.caution p.admonition-title,
+div.danger p.admonition-title, div.error p.admonition-title,
+div.warning p.admonition-title {
+  color: red ;
+  font-weight: bold ;
+  font-family: sans-serif }
+
+/* Uncomment (and remove this text!) to get reduced vertical space in
+   compound paragraphs.
+div.compound .compound-first, div.compound .compound-middle {
+  margin-bottom: 0.5em }
+
+div.compound .compound-last, div.compound .compound-middle {
+  margin-top: 0.5em }
+*/
+
+div.dedication {
+  margin: 2em 5em ;
+  text-align: center ;
+  font-style: italic }
+
+div.dedication p.topic-title {
+  font-weight: bold ;
+  font-style: normal }
+
+div.figure {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+div.footer, div.header {
+  clear: both;
+  font-size: smaller }
+
+div.line-block {
+  display: block ;
+  margin-top: 1em ;
+  margin-bottom: 1em }
+
+div.line-block div.line-block {
+  margin-top: 0 ;
+  margin-bottom: 0 ;
+  margin-left: 1.5em }
+
+div.sidebar {
+  margin-left: 1em ;
+  border: medium outset ;
+  padding: 1em ;
+  background-color: #ffffee ;
+  width: 40% ;
+  float: right ;
+  clear: right }
+
+div.sidebar p.rubric {
+  font-family: sans-serif ;
+  font-size: medium }
+
+div.system-messages {
+  margin: 5em }
+
+div.system-messages h1 {
+  color: red }
+
+div.system-message {
+  border: medium outset ;
+  padding: 1em }
+
+div.system-message p.system-message-title {
+  color: red ;
+  font-weight: bold }
+
+div.topic {
+  margin: 2em }
+
+h1.section-subtitle, h2.section-subtitle, h3.section-subtitle,
+h4.section-subtitle, h5.section-subtitle, h6.section-subtitle {
+  margin-top: 0.4em }
+
+h1.title {
+  text-align: center }
+
+h2.subtitle {
+  text-align: center }
+
+hr.docutils {
+  width: 75% }
+
+img.align-left {
+  clear: left }
+
+img.align-right {
+  clear: right }
+
+ol.simple, ul.simple {
+  margin-bottom: 1em }
+
+ol.arabic {
+  list-style: decimal }
+
+ol.loweralpha {
+  list-style: lower-alpha }
+
+ol.upperalpha {
+  list-style: upper-alpha }
+
+ol.lowerroman {
+  list-style: lower-roman }
+
+ol.upperroman {
+  list-style: upper-roman }
+
+p.attribution {
+  text-align: right ;
+  margin-left: 50% }
+
+p.caption {
+  font-style: italic }
+
+p.credits {
+  font-style: italic ;
+  font-size: smaller }
+
+p.label {
+  white-space: nowrap }
+
+p.rubric {
+  font-weight: bold ;
+  font-size: larger ;
+  color: maroon ;
+  text-align: center }
+
+p.sidebar-title {
+  font-family: sans-serif ;
+  font-weight: bold ;
+  font-size: larger }
+
+p.sidebar-subtitle {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+p.topic-title {
+  font-weight: bold }
+
+pre.address {
+  margin-bottom: 0 ;
+  margin-top: 0 ;
+  font-family: serif ;
+  font-size: 100% }
+
+pre.literal-block, pre.doctest-block {
+  margin-left: 2em ;
+  margin-right: 2em }
+
+span.classifier {
+  font-family: sans-serif ;
+  font-style: oblique }
+
+span.classifier-delimiter {
+  font-family: sans-serif ;
+  font-weight: bold }
+
+span.interpreted {
+  font-family: sans-serif }
+
+span.option {
+  white-space: nowrap }
+
+span.pre {
+  white-space: pre }
+
+span.problematic {
+  color: red }
+
+span.section-subtitle {
+  /* font-size relative to parent (h1..h6 element) */
+  font-size: 80% }
+
+table.citation {
+  border-left: solid 1px gray;
+  margin-left: 1px }
+
+table.docinfo {
+  margin: 2em 4em }
+
+table.docutils {
+  margin-top: 0.5em ;
+  margin-bottom: 0.5em }
+
+table.footnote {
+  border-left: solid 1px black;
+  margin-left: 1px }
+
+table.docutils td, table.docutils th,
+table.docinfo td, table.docinfo th {
+  padding-left: 0.5em ;
+  padding-right: 0.5em ;
+  vertical-align: top }
+
+table.docutils th.field-name, table.docinfo th.docinfo-name {
+  font-weight: bold ;
+  text-align: left ;
+  white-space: nowrap ;
+  padding-left: 0 }
+
+h1 tt.docutils, h2 tt.docutils, h3 tt.docutils,
+h4 tt.docutils, h5 tt.docutils, h6 tt.docutils {
+  font-size: 100% }
+
+ul.auto-toc {
+  list-style-type: none }
+
+</style>
+</head>
+<body>
+<div class="document">
+
+
+<!-- -*- mode: rst -*- -->
+<div class="section">
+<h1><a id="alps-looper" name="alps-looper">ALPS/looper</a></h1>
+<p>The <a class="reference" href="http://wistaria.comp-phys.org/alps-looper/">ALPS/looper</a> package is one of the applications of the <a class="reference" href="http://alps.comp-phys.org/">ALPS
+Project</a>.  The <a class="reference" href="http://wistaria.comp-phys.org/alps-looper/">ALPS/looper</a> is the successor of the <a class="reference" href="http://wistaria.comp-phys.org/looper/">Looper Library
+version 2</a>, which is the Fortran 90 library for quantum Monte Carlo
+method.  It provides multi-cluster quantum Monte Carlo algorithms for
+generic spin systems in the path-integral or SSE representations.</p>
+<p>The application supports generic spin models with arbitrary spin size
+<em>S</em> on arbitrary lattices.  The supported interactions are</p>
+<ul class="simple">
+<li>XXZ two-spin interaction (Ising, Heisenberg, XY)</li>
+<li>single-ion anisotropy (D-term) for <em>S</em> &gt; 1/2</li>
+<li>longitudinal magnetic field</li>
+<li>transverse matnetic field</li>
+</ul>
+<p>Since it supports so-called <em>freezing graphs</em>, models with easy-axis
+(Ising-like) anisotropy can also be simulated very efficiently.</p>
+<p>A stripped version of the <a class="reference" href="http://wistaria.comp-phys.org/alps-looper/">ALPS/looper</a> is distributed as a part of
+<a class="reference" href="http://alps.comp-phys.org/software/applications/doc/">ALPS Applications</a> Package.  The full version of <a class="reference" href="http://wistaria.comp-phys.org/alps-looper/">ALPS/looper</a>
+library (including test suites, etc) is available from
+<a class="reference" href="http://wistaria.comp-phys.org/alps-looper/">http://wistaria.comp-phys.org/alps-looper/</a>.</p>
+</div>
+<div class="section">
+<h1><a id="latest-news" name="latest-news">Latest News</a></h1>
+<ul class="simple">
+<li>February 24, 2007: Release of 3.2b3</li>
+<li>January 20, 2006: Release of 3.2b1</li>
+<li>October 8, 2004: Release of 3.1.2</li>
+<li>October 6, 2004: Release of 3.1.1</li>
+<li>September 23, 2004: Release of 3.1</li>
+<li>July 22, 2004: Release of 3.0.1</li>
+<li>June 11, 2004: Release of 3.0</li>
+</ul>
+</div>
+<div class="section">
+<h1><a id="compiling-programs" name="compiling-programs">Compiling programs</a></h1>
+<p>Note: This section applies only for the full version of <a class="reference" href="http://wistaria.comp-phys.org/alps-looper/">ALPS/looper</a>.</p>
+<div class="section">
+<h2><a id="prerequisites" name="prerequisites">Prerequisites</a></h2>
+<ul class="simple">
+<li><a class="reference" href="http://www.boost.org/">Boost C++ Library</a> -- version 1.33.1 or higher</li>
+<li><a class="reference" href="http://alps.comp-phys.org/software/ALPS/doc/">ALPS Library</a> -- version 1.3b3 or higher</li>
+<li><a class="reference" href="http://www.netlib.org/lapack/">LAPACK Library</a></li>
+</ul>
+</div>
+<div class="section">
+<h2><a id="download" name="download">Download</a></h2>
+<p><a class="reference" href="http://wistaria.comp-phys.org/alps-looper/download">http://wistaria.comp-phys.org/alps-looper/download</a></p>
+</div>
+<div class="section">
+<h2><a id="compilation" name="compilation">Compilation</a></h2>
+<pre class="literal-block">
+./configure
+make
+</pre>
+<p>In case that the <cite>ALPS Library</cite> is installed under a directory other
+than the default one (i.e. <tt class="docutils literal"><span class="pre">$HOME/ALPS</span></tt>), please specify its
+location to the configure script by <tt class="docutils literal"><span class="pre">--prefix</span></tt> option.</p>
+</div>
+</div>
+<div class="section">
+<h1><a id="running-a-simulation" name="running-a-simulation">Running a simulation</a></h1>
+<div class="section">
+<h2><a id="input-parameters" name="input-parameters">Input parameters</a></h2>
+<p>In addition to the general input parameters of the <a class="reference" href="http://alps.comp-phys.org/software/alps/doc/scheduler/running.html">ALPS scheduler
+library</a>,
+the <tt class="docutils literal"><span class="pre">loop</span></tt> and <tt class="docutils literal"><span class="pre">loop_mpi</span></tt> applications take the following input parameters:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="13%" />
+<col width="13%" />
+<col width="74%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><strong>Name</strong></td>
+<td><strong>Default Value</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">LATTICE_LIBRARY</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">$PREFIX/lib/xml/lattices.xml</span></tt></td>
+<td>path to a file containing lattice descriptions</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">LATTICE</span></tt></td>
+<td><em>none</em></td>
+<td>name of the lattice</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">MODEL_LIBRARY</span></tt></td>
+<td><tt class="docutils literal"><span class="pre">$PREFIX/lib/xml/models.xml</span></tt></td>
+<td>path to a file containing model descriptions</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">MODEL</span></tt></td>
+<td><em>none</em></td>
+<td>name of the model</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">REPRESENTATION</span></tt></td>
+<td>path integral</td>
+<td>type of representation, either <tt class="docutils literal"><span class="pre">&quot;path</span> <span class="pre">integral&quot;</span></tt> or <tt class="docutils literal"><span class="pre">&quot;SSE&quot;</span></tt></td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">T</span></tt></td>
+<td><em>none</em></td>
+<td>temperature</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">T_START_#</span></tt></td>
+<td><em>undefined</em></td>
+<td>[optional] see <a class="reference" href="#temperature-annealing">Temperature Annealing</a>.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">T_DURATION_#</span></tt></td>
+<td><em>undefined</em></td>
+<td>[optional] see <a class="reference" href="#temperature-annealing">Temperature Annealing</a>.</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">SWEEPS</span></tt></td>
+<td>65536</td>
+<td>Monte Carlo steps after thermalization</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">THERMALIZATION</span></tt></td>
+<td>8192</td>
+<td>Monte Carlo steps for thermalization</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">USE_SITE_INDICES_AS_TYPES</span></tt></td>
+<td>false</td>
+<td>if true, all sites will have distinct site types, which are identical to site indices (starting from 0).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">USE_BOND_INDICES_AS_TYPES</span></tt></td>
+<td>false</td>
+<td>if true, all bonds will have distinct bond types, which are identical to bond indices (starting from 0).</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">MEASURE[Correlations]</span></tt></td>
+<td>false</td>
+<td>if true, correlation function will be calculated</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">MEASURE[Green</span> <span class="pre">Function]</span></tt></td>
+<td>false</td>
+<td>if true, Green's function will be calculated</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">INITIAL_SITE</span></tt></td>
+<td><em>undefined</em></td>
+<td>initical site from which correlation function and Green's function are measured.  If not defined, correlation between all possible site pairs will be calculated</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">MEASURE[Local</span> <span class="pre">Susceptibility]</span></tt></td>
+<td>false</td>
+<td>if true, local suscepbility and local magnetization will be calculated</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">MEASURE[Structure</span> <span class="pre">Factor]</span></tt></td>
+<td>false</td>
+<td>if true, structure factor for all possible k-values will be calculated</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">DISABLE_IMPROVED_ESTIMATOR</span></tt></td>
+<td>false</td>
+<td>[optional] use normal (i.e. unimproved) estimator for measurements (will be set to true automatically in the presence of longitudinal magnetic field)</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">FORCE_SCATTER</span></tt></td>
+<td>0</td>
+<td>[optional] minimum probability for forward scattering graph (will be set to 0.1 automatically for classically frustrated models in order to ensure the ergodicity</td>
+</tr>
+<tr><td><tt class="docutils literal"><span class="pre">LOOPER_DEBUG[MODEL</span> <span class="pre">OUTPUT]</span></tt></td>
+<td><em>undefined</em></td>
+<td>if defined, all the coupling constants will be printed out to <em>standard output</em> (<tt class="docutils literal"><span class="pre">cout</span></tt>) before calculation.  If the value is <tt class="docutils literal"><span class="pre">cerr</span></tt>, the output will be made for <em>standard error</em> (<tt class="docutils literal"><span class="pre">cerr</span></tt>).</td>
+</tr>
+</tbody>
+</table>
+<p>In addition, the lattice/model descriptions can require further
+parameters (e.g. <tt class="docutils literal"><span class="pre">L</span></tt> or <tt class="docutils literal"><span class="pre">W</span></tt>) as specified in the lattice (model)
+description file.</p>
+</div>
+<div class="section">
+<h2><a id="temperature-annealing" name="temperature-annealing">Temperature Annealing</a></h2>
+<p>Some models (typically models with competing interactions) have very
+long equilibration time.  In such cases, one might want to lower the
+temperature slowly during the thermalization steps.  Such temperature
+annealing process can be specified by using the parameters
+<tt class="docutils literal"><span class="pre">T_START_#</span></tt> and <tt class="docutils literal"><span class="pre">T_DURATION_#</span></tt> (<tt class="docutils literal"><span class="pre">#</span> <span class="pre">=</span> <span class="pre">0,</span> <span class="pre">1,</span> <span class="pre">2,...</span></tt>), where
+<tt class="docutils literal"><span class="pre">T_START_#</span></tt> and <tt class="docutils literal"><span class="pre">T_DURATION_#</span></tt> specify the starting temperature
+and the duration of the <tt class="docutils literal"><span class="pre">#</span></tt> th block, respectively.</p>
+<img alt="anneal.jpg" src="anneal.jpg" />
+<p>For example the protocol shown in the above figure can be realized by specifing the following parameter set.</p>
+<pre class="literal-block">
+T_START_0 = 2.0;
+T_DURATION_0 = 100;
+T_START_1 = 1.5;
+T_DURATION_1 = 400;
+THERMALIZATION = 1000;
+T = 1.2;
+</pre>
+<p>Note that the sum of <tt class="docutils literal"><span class="pre">T_DURATION_#</span></tt>'s must be less than or
+equal to <tt class="docutils literal"><span class="pre">THERMALIZATION</span></tt>.</p>
+</div>
+<div class="section">
+<h2><a id="measurements" name="measurements">Measurements</a></h2>
+<p>The following observables are measured by the <tt class="docutils literal"><span class="pre">loop</span></tt> application:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="22%" />
+<col width="78%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><strong>Name</strong></td>
+<td><strong>Description</strong></td>
+</tr>
+<tr><td>Energy</td>
+<td>total energy</td>
+</tr>
+<tr><td>Energy Density</td>
+<td>energy per spin</td>
+</tr>
+<tr><td>Energy^2</td>
+<td>square of total energy</td>
+</tr>
+<tr><td>Specific Heat</td>
+<td>specific heat</td>
+</tr>
+<tr><td>Stiffness</td>
+<td>stiffness constant</td>
+</tr>
+<tr><td>Magnetization</td>
+<td>total uniform magnetization</td>
+</tr>
+<tr><td>Magnetization^2</td>
+<td>square of total uniform magnetization</td>
+</tr>
+<tr><td>Magnetization^4</td>
+<td>4th power of total uniform magnetization</td>
+</tr>
+<tr><td>Binder Ratio of Magnetization</td>
+<td>Binder ratio of uniform magnetization</td>
+</tr>
+<tr><td>Magnetization Density</td>
+<td>uniform magnetization per spin</td>
+</tr>
+<tr><td>Magnetization Density^2</td>
+<td>square of uniform magnetization per spin</td>
+</tr>
+<tr><td>Magnetization Density^4</td>
+<td>4th power of uniform magnetization per spin</td>
+</tr>
+<tr><td>Susceptibility</td>
+<td>uniform susceptibility</td>
+</tr>
+<tr><td>Staggered Magnetization</td>
+<td>total staggered magnetization <a class="footnote-reference" href="#id46" id="id1" name="id1">[1]</a></td>
+</tr>
+<tr><td>Staggered Magnetization^2</td>
+<td>square of total staggered magnetization <a class="footnote-reference" href="#id46" id="id2" name="id2">[1]</a></td>
+</tr>
+<tr><td>Staggered Magnetization^4</td>
+<td>4th power of total staggered magnetization <a class="footnote-reference" href="#id46" id="id3" name="id3">[1]</a></td>
+</tr>
+<tr><td>Staggered Magnetization Density</td>
+<td>staggered magnetization per spin <a class="footnote-reference" href="#id46" id="id4" name="id4">[1]</a></td>
+</tr>
+<tr><td>Staggered Magnetization Density^2</td>
+<td>square of staggered magnetization per spin <a class="footnote-reference" href="#id46" id="id5" name="id5">[1]</a></td>
+</tr>
+<tr><td>Staggered Magnetization Density^4</td>
+<td>4th power of staggered magnetization per spin <a class="footnote-reference" href="#id46" id="id6" name="id6">[1]</a></td>
+</tr>
+<tr><td>Staggered Susceptibility</td>
+<td>staggered susceptibility <a class="footnote-reference" href="#id46" id="id7" name="id7">[1]</a></td>
+</tr>
+<tr><td>Generalized Magnetization</td>
+<td>total generalized magnetization <a class="footnote-reference" href="#id47" id="id8" name="id8">[2]</a></td>
+</tr>
+<tr><td>Generalized Magnetization^2</td>
+<td>square of total generalized magnetization <a class="footnote-reference" href="#id47" id="id9" name="id9">[2]</a></td>
+</tr>
+<tr><td>Generalized Magnetization^4</td>
+<td>4th power of total generalized magnetization <a class="footnote-reference" href="#id47" id="id10" name="id10">[2]</a></td>
+</tr>
+<tr><td>Generalized Binder Ratio of Magnetization</td>
+<td>Binder ratio of generalized magnetization <a class="footnote-reference" href="#id47" id="id11" name="id11">[2]</a></td>
+</tr>
+<tr><td>Generalized Magnetization Density</td>
+<td>generalized magnetization per spin <a class="footnote-reference" href="#id47" id="id12" name="id12">[2]</a></td>
+</tr>
+<tr><td>Generalized Magnetization Density^2</td>
+<td>square of generalized magnetization per spin <a class="footnote-reference" href="#id47" id="id13" name="id13">[2]</a></td>
+</tr>
+<tr><td>Generalized Magnetization Density^4</td>
+<td>4th power of generalized magnetization per spin <a class="footnote-reference" href="#id47" id="id14" name="id14">[2]</a></td>
+</tr>
+<tr><td>Generalized Susceptibility</td>
+<td>generalized susceptibility <a class="footnote-reference" href="#id47" id="id15" name="id15">[2]</a></td>
+</tr>
+<tr><td>Generalized Staggered Magnetization</td>
+<td>total generalized staggered magnetization <a class="footnote-reference" href="#id46" id="id16" name="id16">[1]</a> <a class="footnote-reference" href="#id47" id="id17" name="id17">[2]</a></td>
+</tr>
+<tr><td>Generalized Staggered Magnetization^2</td>
+<td>square of total generalized staggered magnetization <a class="footnote-reference" href="#id46" id="id18" name="id18">[1]</a> <a class="footnote-reference" href="#id47" id="id19" name="id19">[2]</a></td>
+</tr>
+<tr><td>Generalized Staggered Magnetization^4</td>
+<td>4th power of total generalized staggered magnetization <a class="footnote-reference" href="#id46" id="id20" name="id20">[1]</a> <a class="footnote-reference" href="#id47" id="id21" name="id21">[2]</a></td>
+</tr>
+<tr><td>Generalized Staggered Magnetization Density</td>
+<td>generalized staggered magnetization per spin <a class="footnote-reference" href="#id46" id="id22" name="id22">[1]</a> <a class="footnote-reference" href="#id47" id="id23" name="id23">[2]</a></td>
+</tr>
+<tr><td>Generalized Staggered Magnetization Density^2</td>
+<td>square of generalized staggered magnetization per spin <a class="footnote-reference" href="#id46" id="id24" name="id24">[1]</a> <a class="footnote-reference" href="#id47" id="id25" name="id25">[2]</a></td>
+</tr>
+<tr><td>Generalized Staggered Magnetization Density^4</td>
+<td>4th power of generalized staggered magnetization per spin <a class="footnote-reference" href="#id46" id="id26" name="id26">[1]</a> <a class="footnote-reference" href="#id47" id="id27" name="id27">[2]</a></td>
+</tr>
+<tr><td>Generalized Staggered Susceptibility</td>
+<td>generalized staggered susceptibility <a class="footnote-reference" href="#id46" id="id28" name="id28">[1]</a> <a class="footnote-reference" href="#id47" id="id29" name="id29">[2]</a></td>
+</tr>
+<tr><td>Spin Correlations</td>
+<td>correlation functions <a class="footnote-reference" href="#id48" id="id30" name="id30">[3]</a></td>
+</tr>
+<tr><td>Staggered Spin Correlations</td>
+<td>staggered correlation functions <a class="footnote-reference" href="#id46" id="id31" name="id31">[1]</a> <a class="footnote-reference" href="#id48" id="id32" name="id32">[3]</a></td>
+</tr>
+<tr><td>Generalized Spin Correlations</td>
+<td>generalized correlation functions <a class="footnote-reference" href="#id47" id="id33" name="id33">[2]</a> <a class="footnote-reference" href="#id48" id="id34" name="id34">[3]</a></td>
+</tr>
+<tr><td>Generalized Staggered Spin Correlations</td>
+<td>generalized staggered correlation function <a class="footnote-reference" href="#id46" id="id35" name="id35">[1]</a> <a class="footnote-reference" href="#id47" id="id36" name="id36">[2]</a> <a class="footnote-reference" href="#id48" id="id37" name="id37">[3]</a></td>
+</tr>
+<tr><td>Green's Function</td>
+<td>Green's function <a class="footnote-reference" href="#id47" id="id38" name="id38">[2]</a> <a class="footnote-reference" href="#id49" id="id39" name="id39">[4]</a></td>
+</tr>
+<tr><td>Structure Factor</td>
+<td>static structure factor <a class="footnote-reference" href="#id50" id="id40" name="id40">[5]</a></td>
+</tr>
+<tr><td>Local Magnetization</td>
+<td>local magnetization <a class="footnote-reference" href="#id51" id="id41" name="id41">[6]</a></td>
+</tr>
+<tr><td>Local Susceptibility</td>
+<td>local susceptibility (i.e., response of uniform magnetization against local magnetic field or that of local magnetization against uniform magnetic field) <a class="footnote-reference" href="#id51" id="id42" name="id42">[6]</a></td>
+</tr>
+<tr><td>Staggered Local Susceptibility</td>
+<td>statggered local susceptibility (i.e., response of staggered magnetization against local magnetic field or that of local magnetization against staggered magnetic field) <a class="footnote-reference" href="#id46" id="id43" name="id43">[1]</a> <a class="footnote-reference" href="#id51" id="id44" name="id44">[6]</a></td>
+</tr>
+<tr><td>Local Field Susceptibility</td>
+<td>local-field susceptibility (i.e., response of local magnetization against local magnetic field) <a class="footnote-reference" href="#id51" id="id45" name="id45">[6]</a></td>
+</tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id46" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a name="id46">[1]</a></td><td><em>(<a class="fn-backref" href="#id1">1</a>, <a class="fn-backref" href="#id2">2</a>, <a class="fn-backref" href="#id3">3</a>, <a class="fn-backref" href="#id4">4</a>, <a class="fn-backref" href="#id5">5</a>, <a class="fn-backref" href="#id6">6</a>, <a class="fn-backref" href="#id7">7</a>, <a class="fn-backref" href="#id16">8</a>, <a class="fn-backref" href="#id18">9</a>, <a class="fn-backref" href="#id20">10</a>, <a class="fn-backref" href="#id22">11</a>, <a class="fn-backref" href="#id24">12</a>, <a class="fn-backref" href="#id26">13</a>, <a class="fn-backref" href="#id28">14</a>, <a class="fn-backref" href="#id31">15</a>, <a class="fn-backref" href="#id35">16</a>, <a class="fn-backref" href="#id43">17</a>)</em> measured only for bipartite lattices</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id47" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a name="id47">[2]</a></td><td><em>(<a class="fn-backref" href="#id8">1</a>, <a class="fn-backref" href="#id9">2</a>, <a class="fn-backref" href="#id10">3</a>, <a class="fn-backref" href="#id11">4</a>, <a class="fn-backref" href="#id12">5</a>, <a class="fn-backref" href="#id13">6</a>, <a class="fn-backref" href="#id14">7</a>, <a class="fn-backref" href="#id15">8</a>, <a class="fn-backref" href="#id17">9</a>, <a class="fn-backref" href="#id19">10</a>, <a class="fn-backref" href="#id21">11</a>, <a class="fn-backref" href="#id23">12</a>, <a class="fn-backref" href="#id25">13</a>, <a class="fn-backref" href="#id27">14</a>, <a class="fn-backref" href="#id29">15</a>, <a class="fn-backref" href="#id33">16</a>, <a class="fn-backref" href="#id36">17</a>, <a class="fn-backref" href="#id38">18</a>)</em> measured only by improved estimator</td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id48" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a name="id48">[3]</a></td><td><em>(<a class="fn-backref" href="#id30">1</a>, <a class="fn-backref" href="#id32">2</a>, <a class="fn-backref" href="#id34">3</a>, <a class="fn-backref" href="#id37">4</a>)</em> set <tt class="docutils literal"><span class="pre">MEASURE[Correlations]</span></tt> to <tt class="docutils literal"><span class="pre">true</span></tt></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id49" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id39" name="id49">[4]</a></td><td>set <tt class="docutils literal"><span class="pre">MEASURE[Green</span> <span class="pre">Function]</span></tt> to <tt class="docutils literal"><span class="pre">true</span></tt></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id50" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a class="fn-backref" href="#id40" name="id50">[5]</a></td><td>set <tt class="docutils literal"><span class="pre">MEASURE[Structure</span> <span class="pre">Factor]</span></tt> to <tt class="docutils literal"><span class="pre">true</span></tt></td></tr>
+</tbody>
+</table>
+<table class="docutils footnote" frame="void" id="id51" rules="none">
+<colgroup><col class="label" /><col /></colgroup>
+<tbody valign="top">
+<tr><td class="label"><a name="id51">[6]</a></td><td><em>(<a class="fn-backref" href="#id41">1</a>, <a class="fn-backref" href="#id42">2</a>, <a class="fn-backref" href="#id44">3</a>, <a class="fn-backref" href="#id45">4</a>)</em> set <tt class="docutils literal"><span class="pre">MEASURE[Local</span> <span class="pre">Susceptiblity]</span></tt> to <tt class="docutils literal"><span class="pre">true</span></tt></td></tr>
+</tbody>
+</table>
+<p>A few remarks concerning the generalized susceptibilities: The general
+idea is that the uniform generalized susceptibility is the
+susceptibility for the magnetic order supposed to be stronger.  The
+staggered generalized susceptibility is the staggered susceptibility
+of this specific order.  To be more precise, we have the following
+correspondance:</p>
+<table border="1" class="docutils">
+<colgroup>
+<col width="39%" />
+<col width="25%" />
+<col width="35%" />
+</colgroup>
+<tbody valign="top">
+<tr><td><strong>Model</strong></td>
+<td><strong>Generalized Susceptibility</strong></td>
+<td><strong>Generalized Staggered Susceptibility</strong></td>
+</tr>
+<tr><td>Ferromagnetic model with Ising anisotropy (in the <em>Z</em> axis)</td>
+<td>uniform <em>Z-Z</em> susceptibility</td>
+<td>staggered <em>Z-Z</em> susceptibility&lt;br&gt;</td>
+</tr>
+<tr><td>Ferromagnetic model (Heisenberg point)</td>
+<td>uniform <em>Z-Z</em> (or <em>X-X</em>) susceptibility</td>
+<td>staggered <em>Z-Z</em> (or <em>X-X</em>) susceptibility</td>
+</tr>
+<tr><td>Ferromagnetic model with XY anisotropy (in the <em>XY</em> plane)</td>
+<td>uniform <em>X-X</em> susceptibility</td>
+<td>staggered <em>X-X</em> susceptibility</td>
+</tr>
+<tr><td>Antiferromagnetic model with XY anisotropy (in the <em>XY</em> plane)</td>
+<td>staggered <em>X-X</em> susceptibility</td>
+<td>uniform <em>X-X</em> susceptibility</td>
+</tr>
+<tr><td>Antiferromagnetic model (Heisenberg point)</td>
+<td>staggered <em>Z-Z</em> (or <em>X-X</em>) susceptibility</td>
+<td>uniform <em>Z-Z</em> (or <em>X-X</em>) susceptibility</td>
+</tr>
+<tr><td>Antiferromagnetic model with Ising anisotropy (in the <em>Z</em> axis)</td>
+<td>staggered <em>Z-Z</em> susceptibility</td>
+<td>uniform <em>Z-Z</em> susceptibility</td>
+</tr>
+</tbody>
+</table>
+<p>Same considerations apply for the uniform and staggered magnetization to the square.</p>
+</div>
+</div>
+<div class="section">
+<h1><a id="license" name="license">License</a></h1>
+<p>The <a class="reference" href="http://alps.comp-phys.org/software/applications/LICENSE.txt">license</a>
+allows the use of the applications for non-commercial scientific use
+provided that the use of the <a class="reference" href="http://wistaria.comp-phys.org/alps-looper/">ALPS/looper</a> Library and the ALPS
+Libraries is acknowledged, and the papers listed below are referenced
+in any scientific publication.  For detail please see the <a class="reference" href="http://alps.comp-phys.org/software/applications/LICENSE.txt">ALPS
+Applications Licence</a>.</p>
+<ul class="simple">
+<li>reference<ul>
+<li><a class="reference" href="http://alps.comp-phys.org/">http://alps.comp-phys.org/</a></li>
+<li><a class="reference" href="http://wistaria.comp-phys.org/alps-looper/">http://wistaria.comp-phys.org/alps-looper/</a></li>
+</ul>
+</li>
+<li>publications<ul>
+<li>S. Todo and K. Kato, <em>Cluster Algorithms for General-S Quantum
+Spin Systems</em>, Phys. Rev. Lett., <strong>87</strong>, 047203 (2001).</li>
+<li>F. Alet, P. Dayal, A. Grzesik, A. Honecker, M. Kner, A. L舫chli,
+S.R. Manmana, I.P. McCulloch, F. Michel, R.M. Noack, G. Schmid,
+U. Schollwk, F. Stkli, S. Todo, S. Trebst, M. Troyer, P. Werner,
+S. Wessel (ALPS collaboration), <em>The ALPS project: open source
+software for strongly correlated systems</em>,
+<a class="reference" href="http://jpsj.ipap.jp/journal/supplement/74/pdf/030.pdf">J. Phys. Soc. Jpn. Suppl. 74, 30 (2005)</a>.</li>
+</ul>
+</li>
+</ul>
+</div>
+<div class="section">
+<h1><a id="acknowledgement" name="acknowledgement">Acknowledgement</a></h1>
+<p>I wish to thank M. Troyer and F. Alet for many useful comments and suggestions.</p>
+</div>
+<div class="section">
+<h1><a id="questions-and-request-for-support" name="questions-and-request-for-support">Questions and request for support</a></h1>
+<p>can be addressed to Synge Todo &lt;<a class="reference" href="mailto:wistaria&#64;comp-phys.org">wistaria&#64;comp-phys.org</a>&gt;.</p>
+</div>
+<div class="section">
+<h1><a id="references" name="references">References</a></h1>
+<ul class="simple">
+<li>H.G. Evertz, <em>The loop algorithm</em>, Adv. in Physics, <strong>52</strong>, 1 (2003).</li>
+<li>S. Todo and K. Kato, <em>Cluster Algorithms for General-S Quantum
+Spin Systems</em>, Phys. Rev. Lett., <strong>87</strong>, 047203 (2001).</li>
+<li>S. Todo, <em>Parallel Quantum Monte Carlo Simulation of S=3
+Antiferromagnetic Heisenberg Chain</em>, Computer Simulation Studies
+in Condensed-Matter Physics XV, ed D.P. Landau, S.P. Lewis, and
+H.-B. Schuettler (Springer-Verlag, Berlin, 2003) pp. 89-94.</li>
+<li>F. Alet, P. Dayal, A. Grzesik, A. Honecker, M. Kner, A. L舫chli,
+S.R. Manmana, I.P. McCulloch, F. Michel, R.M. Noack, G. Schmid,
+U. Schollwk, F. Stkli, S. Todo, S. Trebst, M. Troyer, P. Werner,
+S. Wessel (ALPS collaboration), <em>The ALPS project: open source
+software for strongly correlated systems</em>,
+<a class="reference" href="http://jpsj.ipap.jp/journal/supplement/74/pdf/030.pdf">J. Phys. Soc. Jpn. Suppl. 74, 30 (2005)</a>
+(preprint: <a class="reference" href="http://www.arXiv.org/abs/cond-mat/0410407">cond-mat/0410407</a>).</li>
+</ul>
+<hr class="docutils" />
+<p>Copyright (c) 1997-2007 by Synge Todo &lt;<a class="reference" href="mailto:wistaria&#64;comp-phys.org">wistaria&#64;comp-phys.org</a>&gt;</p>
+</div>
+</div>
+</body>
+</html>

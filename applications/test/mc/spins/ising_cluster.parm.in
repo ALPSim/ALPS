@@ -1,0 +1,12 @@
+LATTICE="square lattice"
+LATTICE_LIBRARY="@top_srcdir@/test/mc/spins/lattices.xml"
+T=2.269186
+J=1
+THERMALIZATION=10000
+SWEEPS=50000
+UPDATE="cluster"
+MODEL="Ising"
+SEED=10
+{L=2;}
+{L=4;}
+{L=8;}

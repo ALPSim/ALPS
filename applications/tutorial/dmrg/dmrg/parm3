@@ -1,0 +1,18 @@
+LATTICE="open chain lattice"
+SWEEPS=4
+MAXSTATES=100
+CONSERVED_QUANTUMNUMBERS="Sz"
+MODEL="spin", L=10
+MEASURE_AVERAGE[Magnetization]=Sz
+
+{
+ MODEL="spin", L=10, Sz_total=0
+ J=1, h=0.0
+ local_S=1
+ NUMBER_EIGENVALUES=2
+ MEASURE_AVERAGE[Magnetization]=Sz
+ MEASURE_AVERAGE[Exchange]=exchange
+ MEASURE_LOCAL[Local magnetization]=Sz
+ MEASURE_CORRELATIONS[Diagonal spin correlations]=Sz
+ MEASURE_CORRELATIONS[Offdiagonal spin correlations]="Splus:Sminus"
+}

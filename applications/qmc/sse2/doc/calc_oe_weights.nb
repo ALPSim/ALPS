@@ -1,0 +1,313 @@
+(************** Content-type: application/mathematica **************
+                     CreatedBy='Mathematica 5.2'
+
+                    Mathematica-Compatible Notebook
+
+This notebook can be used with any Mathematica-compatible
+application, such as Mathematica, MathReader or Publicon. The data
+for the notebook starts with the line containing stars above.
+
+To get the notebook into a Mathematica-compatible application, do
+one of the following:
+
+* Save the data starting with the line of stars above into a file
+  with a name ending in .nb, then open the file inside the
+  application;
+
+* Copy the data starting with the line of stars above to the
+  clipboard, then use the Paste menu command inside the application.
+
+Data for notebooks contains only printable 7-bit ASCII and can be
+sent directly in email or through ftp in text mode.  Newlines can be
+CR, LF or CRLF (Unix, Macintosh or MS-DOS style).
+
+NOTE: If you modify the data for this notebook not in a Mathematica-
+compatible application, you must delete the line below containing
+the word CacheID, otherwise Mathematica-compatible applications may
+try to use invalid cache data.
+
+For more information on notebooks and Mathematica-compatible 
+applications, contact Wolfram Research:
+  web: http://www.wolfram.com
+  email: info@wolfram.com
+  phone: +1-217-398-0700 (U.S.)
+
+Notebook reader applications are available free of charge from 
+Wolfram Research.
+*******************************************************************)
+
+(*CacheID: 232*)
+
+
+(*NotebookFileLineBreakTest
+NotebookFileLineBreakTest*)
+(*NotebookOptionsPosition[      9426,        256]*)
+(*NotebookOutlinePosition[     10056,        278]*)
+(*  CellTagsIndexPosition[     10012,        274]*)
+(*WindowFrame->Normal*)
+
+
+
+Notebook[{
+Cell[BoxData[
+    StyleBox[\(Off[General::spell]\),
+      "MR"]], "Input"],
+
+Cell[BoxData[
+    RowBox[{
+      StyleBox[\(SetDirectory["\</PATH/TO/YOUR/DATA/FILES\>"]\),
+        "MR"], " "}]], "Input"],
+
+Cell[BoxData[
+    \(<< Statistics`DataSmoothing`\)], "Input"],
+
+Cell[BoxData[
+    \(<< NumericalMath`SplineFit`\)], "Input"],
+
+Cell[BoxData[
+    \(<< Graphics`MultipleListPlot`\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ 
+      This\ imports\ the\ extracted\ logg\ values\ *) \)\(\[IndentingNewLine]\
+\)\(Logg = Flatten[Import["\<logg.dat\>"]];\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\(\[IndentingNewLine]\)\( (*\ 
+      If\ you\ want\ to\ import\ logg\ from\ different\ runs, \ 
+      use\ the\ following\ routine\ instead . \ 
+          It\ assumes\ filenames\ in\ the\ format\ "\<logg<RUNNUMBER>.dat\>" \
+. \ Logg\ will\ then\ contain\ the\ \(\(average\)\(.\)\)\ *) \)\(\
+\[IndentingNewLine]\)\(\(LoggC = {};\)\n
+    \(For[i = 1, 
+        i \[LessEqual] 20, \(i++\), \[IndentingNewLine]tt = 
+          StringJoin["\<logg\>", 
+            ToString[i], "\<.dat\>"]; \[IndentingNewLine]temp = 
+          Flatten[\(Import[tt]\)[\([\)\(All, 
+              2\)\(]\)]]; \[IndentingNewLine]AppendTo[LoggC, 
+          temp];\[IndentingNewLine]];\)\[IndentingNewLine]
+    \(Logg = 
+        Table[Mean[Part[LoggC, \ All, i]], {i, 1, 
+            Length[LoggC[\([1]\)]]}];\)\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\(\[IndentingNewLine]\)\( (*\ Now, \ 
+      import\ the\ histograms\ *) \)\(\[IndentingNewLine]\)\(\(Histo = 
+        Flatten[\(Import["\<histo.dat\>"]\)[\([All, 
+              2]\)]];\)\[IndentingNewLine]
+    \(HistoUp = 
+        Flatten[\(Import["\<histoup.dat\>"]\)[\([\)\(All, 
+            2\)\(]\)]];\)\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ Similarly, \ for\ multiple\ runs, \ 
+      we\ collect\ all\ measurements\ into\ one\ \(\(vector\)\(:\)\)\ *) \)\(\
+\[IndentingNewLine]\)\(\(HC = {};\)\n
+    \(For[i = 1, 
+        i \[LessEqual] 20, \(i++\), \[IndentingNewLine]tt = 
+          StringJoin["\<histo\>", 
+            ToString[i], "\<.dat\>"]; \[IndentingNewLine]hctemp = 
+          Flatten[\(Import[tt]\)[\([\)\(All, 
+              2\)\(]\)]]; \[IndentingNewLine]AppendTo[HC, 
+          hctemp];\[IndentingNewLine]];\)\[IndentingNewLine]
+    \(Histo = 
+        Table[Total[Part[HC, \ All, i]], {i, 1, 
+            Length[HC[\([\)\(1\)\(]\)]]}];\)\[IndentingNewLine]
+    \(HuC = {};\)\n
+    \(For[i = 1, 
+        i \[LessEqual] 20, \(i++\), \[IndentingNewLine]tt = 
+          StringJoin["\<histoup\>", 
+            ToString[i], "\<.dat\>"]; \[IndentingNewLine]hctemp = 
+          Flatten[\(Import[tt]\)[\([\)\(All, 
+              2\)\(]\)]]; \[IndentingNewLine]AppendTo[HuC, 
+          hctemp];\[IndentingNewLine]];\)\n
+    \(HistoUp = 
+        Table[Total[Part[HuC, \ All, i]], {i, 1, 
+            Length[HuC[\([\)\(1\)\(]\)]]}];\)\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\(\[IndentingNewLine]\)\( (*Just\ to\ test ... \ *) \)\(\
+\[IndentingNewLine]\)\(ListPlot[Histo]\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\(\[IndentingNewLine]\)\( (*Just\ to\ test ... \ *) \)\(\
+\[IndentingNewLine]\)\(ListPlot[HistoUp]\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\(\[IndentingNewLine]\)\( (*Just\ to\ test ... \ *) \)\(\
+\[IndentingNewLine]\)\(ListPlot[Logg]\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ Now, \ 
+      calculate\ the\ fraction\ of\ Upwalker\ and\ Histogram\ *) \)\(\
+\[IndentingNewLine]\)\(fract = 
+        Table[{i, 1 - HistoUp[\([i + 1]\)]/Histo[\([i + 1]\)]}, {i, 0, 
+            Length[Histo] - 1}];\)\)\)], "Input"],
+
+Cell[BoxData[
+    RowBox[{
+    "\[IndentingNewLine]", \( (*\ 
+        Why\ not\ create\ a\ nice\ plot\ of\ \(\(it\)\(?\)\)\ *) \), 
+      "\[IndentingNewLine]", 
+      RowBox[{"ListPlot", "[", 
+        RowBox[{
+        "fract", ",", " ", \(Frame \[Rule] True\), 
+          ",", \(FrameLabel \[Rule] {"\<n\>", 
+              TraditionalForm[\(\(H\_+\) \((n)\)\)\/\(H \((n)\)\)]}\), 
+          ",", \(TextStyle \[Rule] {FontFamily \[Rule] "\<Times\>", 
+              FontSize \[Rule] 10}\), ",", 
+          RowBox[{
+            StyleBox["RotateLabel",
+              "MR"], " ", "\[Rule]", " ", 
+            StyleBox["False",
+              "MR"]}], 
+          StyleBox[",",
+            "MR"], 
+          StyleBox[" ",
+            "MR"], 
+          StyleBox[\(PlotJoined -> True\),
+            "MR"], 
+          StyleBox[",",
+            "MR"], 
+          StyleBox[" ",
+            "MR"], 
+          StyleBox[\(Axes -> False\),
+            "MR"], 
+          StyleBox[",",
+            "MR"], 
+          StyleBox[" ",
+            "MR"], 
+          StyleBox[\(PlotRange -> All\),
+            "MR"]}], "]"}]}]], "Input"],
+
+Cell[BoxData[
+    \(\(\(\[IndentingNewLine]\)\( (*\ For\ the\ spline, \ 
+      take\ only\ every\ 20  th\ point\ *) \)\(\[IndentingNewLine]\)\(\(ss = 
+        20;\)\[IndentingNewLine]
+    \(fractpts = 
+        Table[fract[\([i]\)], \ {i, 1, \ Length[fract], 
+            ss}];\)\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(splinec = SplineFit[fractpts, Bezier]\)], "Input"],
+
+Cell[BoxData[
+    \(\(\(\[IndentingNewLine]\)\( (*\ 
+      Check\ if\ the\ result\ looks\ nice\ \
+*) \)\(\[IndentingNewLine]\)\(ParametricPlot[
+      splinec[t], {t, 0, Length[fractpts] - 1}, 
+      Compiled\  \[Rule] \ False]\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ 
+      We\ need\ a\ function\ for\ the\ x - \ and\ y - 
+        axis\ *) \)\(\[IndentingNewLine]\)\(\(pts\  = \ 
+        Transpose[
+          Table[splinec[t], {t, 0, 
+              Length[fractpts] - 1}]];\)\[IndentingNewLine]
+    \(f1\  = \ Interpolation[pts[\([\)\(1\)\(]\)]];\)\[IndentingNewLine]
+    \(f2\  = \ Interpolation[pts[\([\)\(2\)\(]\)]];\)\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ 
+      We\ can\ now\ calculate\ the\ derivative\ of\ it\ *) \)\(\
+\[IndentingNewLine]\)\(fprime[t_] = \ D[f2[t], t]/D[f1[t], t]\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ 
+      And\ this\ is\ how\ it\ looks\ like\ *) \)\(\[IndentingNewLine]\)\(Plot[
+      fprime[t], {t, 1, Length[fractpts]}, 
+      PlotRange \[Rule] All]\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ Finally, \ we\ are\ able\ to\ calculate\ the\ new, \ 
+      optimized\ weights\ *) \)\(\[IndentingNewLine]\)\(newweights = 
+        Table[{i - 
+              1, \(-Log[\([i]\)]\) + \((Log[fprime[\((i - 1)\)/ss + 1]] - 
+                    Log[Histo[\([i]\)]])\)/2}, \ {i, 1, 
+            Length[fract]}];\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ 
+      The\ new\ weights\ are\ saved\ as\ logarithms . \ 
+          Therefore, \ \(-newweights\)\ corresponds\ to\ the\ new\ "\<logg\>" \
+. \ Thus, \ \(\(this\ plot\ shows\ the\ difference\ of\ the\ new\ logg\ to\ \
+the\ old\ one\ \((and\ not\ their\ \(sum!\))\)\)\(:\)\)\ *) \)\(\
+\[IndentingNewLine]\)\(ListPlot[
+      newweights[\([All, 2]\)] + Logg]\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\( (*\ 
+      Export\ the\ new\ weights\ formated\ as\ new\ logg' \(\(s\)\(:\)\)\ \
+*) \)\(\[IndentingNewLine]\)\(Export["\<oe_logg.dat\>", \(-newweights[\([All, 
+            2]\)]\)\ ]\)\)\)], "Input"],
+
+Cell[BoxData[
+    \(\(\(\[IndentingNewLine]\)\(\[IndentingNewLine]\)\(\[IndentingNewLine]\)\
+\( (*\ In\ order\ to\ repeat\ this\ for\ multiple\ optimization\ steps, \ 
+      simply\ take\ the\ output\ of\ the\ OE\ simulation\ and\ re - 
+        import\ the\ weights\ and\ the\ histograms . \ Of\ course, \ 
+      Logg\ above\ is\ now\ replaced\ by\ the\ previously\ derived\ \
+newweights, \ which\ we\ stored\ as\ oe_logg . dat . \ So, \ 
+      for\ the\ next\ run, \ 
+      we\ import\ as\ \(\(follows\)\(:\)\)\ \
+*) \)\(\[IndentingNewLine]\)\(Logg = 
+        Flatten[Import["\<oe_logg.dat\>"]];\)\)\)], "Input"]
+},
+FrontEndVersion->"5.2 for X",
+ScreenRectangle->{{0, 1400}, {0, 1050}},
+WindowSize->{677, 871},
+WindowMargins->{{Automatic, 85}, {Automatic, 25}}
+]
+
+(*******************************************************************
+Cached data follows.  If you edit this Notebook file directly, not
+using Mathematica, you must remove the line containing CacheID at
+the top of  the file.  The cache data will then be recreated when
+you save this file from within Mathematica.
+*******************************************************************)
+
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+
+(*NotebookFileOutline
+Notebook[{
+Cell[1754, 51, 74, 2, 27, "Input"],
+Cell[1831, 55, 123, 3, 27, "Input"],
+Cell[1957, 60, 61, 1, 27, "Input"],
+Cell[2021, 63, 60, 1, 27, "Input"],
+Cell[2084, 66, 62, 1, 27, "Input"],
+Cell[2149, 69, 169, 3, 43, "Input"],
+Cell[2321, 74, 820, 16, 187, "Input"],
+Cell[3144, 92, 346, 7, 75, "Input"],
+Cell[3493, 101, 1140, 24, 267, "Input"],
+Cell[4636, 127, 135, 2, 59, "Input"],
+Cell[4774, 131, 137, 2, 59, "Input"],
+Cell[4914, 135, 134, 2, 59, "Input"],
+Cell[5051, 139, 261, 5, 43, "Input"],
+Cell[5315, 146, 1112, 34, 117, "Input"],
+Cell[6430, 182, 295, 6, 75, "Input"],
+Cell[6728, 190, 70, 1, 27, "Input"],
+Cell[6801, 193, 243, 5, 59, "Input"],
+Cell[7047, 200, 400, 8, 75, "Input"],
+Cell[7450, 210, 173, 3, 43, "Input"],
+Cell[7626, 215, 198, 4, 43, "Input"],
+Cell[7827, 221, 350, 6, 75, "Input"],
+Cell[8180, 229, 399, 7, 91, "Input"],
+Cell[8582, 238, 224, 4, 43, "Input"],
+Cell[8809, 244, 613, 10, 155, "Input"]
+}
+]
+*)
+
+
+
+(*******************************************************************
+End of Mathematica Notebook file.
+*******************************************************************)
+

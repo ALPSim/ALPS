@@ -1,0 +1,191 @@
+2009-03-30  Synge Todo <wistaria@comp-phys.org>
+
+	* [qmc/looper] Updated to version 3.2b9
+
+2009-03-24  Synge Todo <wistaria@comp-phys.org>
+
+	* [qmc/looper] Updated to version 3.2b7
+
+2006-09-06 Release 1.3b2 for the PSI tutorials
+
+2004-12-10  Synge Todo <wistaria@comp-phys.org>
+
+        * Added support for MKL 7.2
+        
+2004-12-02  Matthias Troyer <troyer@comp-phys.org>
+
+        * Added local compressibility to qmc/sse
+
+2004-10-31  Matthias Troyer <troyer@comp-phys.org>
+
+        * Release 1.2.1
+
+2004-10-30  Matthias Troyer <troyer@comp-phys.org>
+
+        * [tutorial] Fixed fulldiag tutorial release
+        * [mc/spins] Added support for different local spin values
+
+2004-10-17  Matthias Troyer <troyer@comp-phys.org>
+
+        * Release 1.2
+
+2004-10-12  Matthias Troyer <troyer@comp-phys.org>
+
+        * [tutorial] Updated tutorials to ensure converged errors
+
+2004-10-12  Fabien Alet <alet@comp-phys.org>
+
+        * [qmc/sse] Correctly treating bond terms with 0 matrices.
+
+2004-10-10  Matthias Troyer <troyer@comp-phys.org>
+
+        * Release 1.2b5
+
+2004-10-10  Matthias Troyer <troyer@comp-phys.org>
+
+        * [qmc/looper] fixed problem with looper and new model library
+
+2004-10-08  Matthias Troyer <troyer@comp-phys.org>
+
+        * Release 1.2b4
+
+2004-10-08  Synge Todo  <wistaria@comp-phys.org>
+
+	* [qmc/looper] Imported ALPS/looper version 3.1.2 (LOOPER_3_1_2).
+
+2004-09-24  Matthias Troyer <troyer@comp-phys.org>
+
+        * Release 1.2b2
+
+2004-09-24  Matthias Troyer <troyer@comp-phys.org>
+
+        * [diag] fixed a problem with recent uBlas change
+        * [tutorial] updated classical MC tutorial
+
+2004-09-23  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.2b1
+
+2004-09-21  Andreas Honecker
+
+	* [diag/fulldiag] Finished fulldiag evaluation program and tutorial
+
+2004-09-20  Fabien Alet <alet@comp-phys.org>
+
+	* [qmc/sse] Added sign problem support to SSE code
+
+2004-09-20  Simon Trebst <trebst@comp-phys.org>
+
+	* [qmc/worm] Added sign problem support to worm code
+
+2004-09-14  Synge Todo  <wistaria@comp-phys.org>
+
+	* [qmc/looper] Imported ALPS/looper version 3.1b2 (LOOPER_3_1b2).
+
+2004-08-30  Matthias Troyer <troyer@comp-phys.org>
+
+        * [qmc/sse] Fixed out-of-bounds bug
+
+2004-08-24  Stefan Wessel <wessel@comp-phys.org>
+
+        * Added quantum Wang-Landau code qmc/qwl
+        * Added qwl tutorial, test and documentation
+  
+2004-08-20  Synge Todo  <wistaria@comp-phys.org>
+
+	* [qmc/looper] Added a script for importing alps-looper source
+	  code (config/import-looper.hpp).
+	  Imported latest snapshot (LOOPER_20040820).
+
+2004-08-19  Matthias Troyer <troyer@comp-phys.org>
+
+	* [diag/fulldiag] Added first version of fulldiag_evaluator program
+	
+2004-08-19  Synge Todo <wistaria@comp-phys.org>
+
+	* [config] Added support for MKL 7.0
+	
+2004-08-18  Matthias Troyer <troyer@comp-phys.org>
+
+	* [diag] Factored out common code of sparsediag and fulldiag
+                 Added fermion support
+	* [diag/sparsediag] Based on scheduler
+	
+2004-08-11  Matthias Troyer <troyer@comp-phys.org>
+
+	* [qmc/sse-loop] added sign problem support and generalized stiffness 
+          calculation
+	* [test] added a simple test suite for 2,3 and 4-site spin problems
+
+2004-07-18  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.1
+
+2004-07-16  Matthias Troyer <troyer@comp-phys.org>
+
+	* Added preliminary sign problem support to sse-loop
+
+2004-07-14  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.1b2
+
+2004-07-12  Matthias Troyer <troyer@comp-phys.org>
+
+	* Added ALPS-installed ublas bindings to search path in configure
+
+2004-07-10  Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.1b1
+
+2004-07-03  Matthias Troyer <troyer@comp-phys.org>
+
+	* Fixed compiler problems with DMRG and -DNDEBUG
+
+2004-07-02  Matthias Troyer <troyer@comp-phys.org>
+
+	* Added site and bond disorder to worm code
+
+2004-06-18  Matthias Troyer <troyer@comp-phys.org>
+
+	* Ported worm code to IBM
+
+2004-06-17  Matthias Troyer <troyer@comp-phys.org>
+
+	* Addded worm code
+
+2004-06-17  Simon Trebst <trebst@comp-phys.org>
+
+	* Addded worm code tutorial and documentation
+
+2004-06-11  Synge Todo  <wistaria@comp-phys.org>
+
+	* Updated tutorials.
+
+	* Updated qmc/looper to ALPS/looper 3.0 (2004/06/11).
+	
+2004-06-08  Synge Todo  <wistaria@comp-phys.org>
+	
+	* Turned off maintainer mode for GNU autotools.
+
+2004-06-02 Synge Todo <wistaria@comp-phys.org>
+
+        * ss_20040519_am branch (tag ss_20040602_am) merged into the
+        trunk.
+        
+2004-05-20 Synge Todo <wistaria@comp-phys.org>
+
+        * [config] New configuration scripts with Automake and Libtool.
+
+	* Added looper QMC code (qmc/looper).
+	
+2004-05-17 Synge Todo <wistaria@comp-phys.org>
+
+	* Added support for MKL, DXML, SCSL.
+	
+2004-04-05 Matthias Troyer <troyer@comp-phys.org>
+
+	* Added disordered lattice support (e.g. traps) to diag and sse
+
+2004-03-21 Matthias Troyer <troyer@comp-phys.org>
+
+	* Release 1.0

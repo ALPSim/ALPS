@@ -1,0 +1,11 @@
+LATTICE = "next-nearest chain lattice"
+LATTICE_LIBRARY = "lattices_dmrg.xml"
+L = 20
+t = 1
+t1 = 0.01
+K = 2*3.1415927*2/L
+V = cos(K*x)+cos(3*K*x)/9+cos(5*K*x)/25+cos(7*K*x)/36-2
+SWEEPS = 100
+WAVEFUNCTION_FILE = "psi.dat"
+OUTPUT_LEVEL = 1
+

@@ -1,0 +1,6 @@
+SUBDIRS =
+if EXIST_MC_SPINS
+SUBDIRS += spins
+endif
+SUBDIRS += .
+DIST_SUBDIRS = $(SUBDIRS)

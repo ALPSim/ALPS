@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="file:///home/norbert/Code/ALPS-CVS/lib/xml/ALPS.xsl"?>
+<SIMULATION xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2002/10/QMCXML.xsd">
+  <PARAMETERS>
+    <PARAMETER name="LATTICE">chain lattice</PARAMETER>
+    <PARAMETER name="MODEL">spin</PARAMETER>
+    <PARAMETER name="LATTICE_LIBRARY">lattices.xml</PARAMETER>
+    <PARAMETER name="MODEL_LIBRARY">models.xml</PARAMETER>
+    <PARAMETER name="local_S">1/2</PARAMETER>
+    <PARAMETER name="J">1</PARAMETER>
+    <PARAMETER name="OE_BLOCK_SWEEPS">300000</PARAMETER>
+    <PARAMETER name="SIMULATION_PHASE">1</PARAMETER>
+    <PARAMETER name="MEASUREMENT_STEPS">150000</PARAMETER>
+    <PARAMETER name="TEMPERATURE">1</PARAMETER>
+    <PARAMETER name="NUMBER_OF_WANG_LANDAU_STEPS">10</PARAMETER>
+    <PARAMETER name="CUTOFF">500</PARAMETER>
+    <PARAMETER name="LOGG_FILENAME">LOGG.dat</PARAMETER>
+    <PARAMETER name="L">10</PARAMETER>
+    <PARAMETER name="SEED">1627389952</PARAMETER>
+    <PARAMETER name="VARIABLE_LENGTH">true</PARAMETER>
+  </PARAMETERS>
+</SIMULATION>

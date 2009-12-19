@@ -1,0 +1,14 @@
+* save the origin bond type somewhere (use a map betwen edge_type and number) (Matthias ?? Fabien ??)
+* improve for 2 states model (Fabien)
+* improve measurements (Fabien)
+* improve manual in particular for flags (Fabien)
+
+LATER :
+
+* Green's functions measurements (when the lattice library will provide k-space concepts) (Stefan ??)
+* More measurements, a general strategy for adding measurements (???)
+
+EVEN LATER :
+
+* T=0 variant of SSE (Synge ??)
+* Wang Landau variant of SSE  (Stefan ?? Fabien ??)

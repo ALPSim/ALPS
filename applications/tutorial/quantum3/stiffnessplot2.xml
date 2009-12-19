@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="http://xml.comp-phys.org/2003/4/plot2html.xsl"?>
+
+<plot name="MI-SF transition for the 2D BHM">
+ 
+  <!-- general plot description -->
+  <legend show="false"/>
+  <xaxis label="hopping t/U"      type="PARAMETER" name="t"/>
+  <yaxis label="Stiffness \xr\0\ss"      type="SCALAR_AVERAGE" name="Stiffness"/>
+
+  <for-each name="L"/>
+    <set/>
+
+</plot>
+
