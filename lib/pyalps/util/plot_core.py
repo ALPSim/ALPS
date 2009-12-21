@@ -24,7 +24,7 @@ def read_xml(filename):
     plotd = {}
     plotd['xaxis'] = xaxis
     plotd['yaxis'] = yaxis
-    plotd['data'] = data
+    plotd['data'] = [data]
     if show_legend:
         plotd['legend'] = {}
     
