@@ -80,28 +80,28 @@ void evaluate(const boost::filesystem::path& p, const alps::Parameters new_parms
 
   ss.erase(ss.rfind(".out.xml"),8);
   if (1) {
-    alps::plot::Plot<double> my_plot("Energy Density versus Temperature");
+    alps::plot::Plot<double> my_plot("Energy Density versus Temperature",parms);
     my_plot.set_labels("Temperature","Energy Density");
     my_plot << energy_set;
     alps::oxstream my_ox(ss+".plot.energy.xml");
     my_ox << my_plot;
   }
   if (1) {
-    alps::plot::Plot<double> my_plot("Free Energy Density versus Temperature");
+    alps::plot::Plot<double> my_plot("Free Energy Density versus Temperature",parms);
     my_plot.set_labels("Temperature","Free Energy Density");
     my_plot << free_energy_set;
     alps::oxstream my_ox(ss+".plot.free_energy.xml");
     my_ox << my_plot;
   }
   if (1) {
-    alps::plot::Plot<double> my_plot("Entropy Density versus Temperature");
+    alps::plot::Plot<double> my_plot("Entropy Density versus Temperature",parms);
     my_plot.set_labels("Temperature","Entropy Density");
     my_plot << entropy_set;
     alps::oxstream my_ox(ss+".plot.entropy.xml");
     my_ox << my_plot;
   }
   if (1) {
-    alps::plot::Plot<double> my_plot("Specific Heat per Site versus Temperature");
+    alps::plot::Plot<double> my_plot("Specific Heat per Site versus Temperature",parms);
     my_plot.set_labels("Temperature","Specific Heat per Site");
     my_plot << specific_heat_set;
     alps::oxstream my_ox(ss+".plot.specific_heat.xml");
@@ -151,21 +151,21 @@ void evaluate(const boost::filesystem::path& p, const alps::Parameters new_parms
       }
     }
     if (1) {
-      alps::plot::Plot<double> my_plot("Uniform Structure Factor per Site versus Temperature");
+      alps::plot::Plot<double> my_plot("Uniform Structure Factor per Site versus Temperature",parms);
       my_plot.set_labels("Temperature","Uniform Structure Factor per Site");
       my_plot << uniform_structure_factor_set;
       alps::oxstream my_ox(ss+".plot.uniform_structure_factor.xml");
       my_ox << my_plot;
     }
     if (1) {
-      alps::plot::Plot<double> my_plot("Uniform Susceptibility per Site versus Temperature");
+      alps::plot::Plot<double> my_plot("Uniform Susceptibility per Site versus Temperature",parms);
       my_plot.set_labels("Temperature","Uniform Susceptibility per Site");
       my_plot << uniform_susceptibility_set;
       alps::oxstream my_ox(ss+".plot.uniform_susceptibility.xml");
       my_ox << my_plot;
     }   
     if (lattice.is_bipartite()) {
-      alps::plot::Plot<double> my_plot("Staggered Structure Factor per Site versus Temperature");
+      alps::plot::Plot<double> my_plot("Staggered Structure Factor per Site versus Temperature",parms);
       my_plot.set_labels("Temperature","Staggered Structure Factor per Site");
       my_plot << staggered_structure_factor_set;
       alps::oxstream my_ox(ss+".plot.staggered_structure_factor.xml");
@@ -187,17 +187,23 @@ try {
   alps::Parameters parms;
 
   while (i<argc-1 && argv[i][0]=='-' && argv[i][1]=='-') {
-    parms[argv[i]+2]=argv[i+1];
-    i+=2;
+    std::string name = argv[i]+2;
+    if (name=="help") {
+      std::cerr << "Usage: \n" << argv[0] << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] inputfile1 [inputfile2 [.....]] \n";
+      ++i;
+    }
+    else {
+      parms[name]=argv[i+1];
+      i+=2;
+    }
+  }
+  
+  while (i < argc) {
+    boost::filesystem::path p(argv[i],boost::filesystem::native);
+    evaluate(boost::filesystem::complete(p),parms);
+    ++i;
   }
 
-  if (argc-i!=1) {
-    std::cerr << "Usage: \n" << argv[0] << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] inputfile \n";
-    exit(1);
-  }
-
-  boost::filesystem::path p(argv[i],boost::filesystem::native);
-  evaluate(boost::filesystem::complete(p),parms);
  
 #ifndef BOOST_NO_EXCEPTIONS
 }
@@ -207,4 +213,5 @@ catch (std::exception& e)
   std::exit(-5);
 }
 #endif
+  return 0;
 }

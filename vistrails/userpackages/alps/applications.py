@@ -16,6 +16,8 @@ import system
 
 from core.modules.vistrails_module import ModuleError
 from plots import PlotFile
+from pyalps.util.plot_core import *
+from dataset import PlotDescriptor
 
 basic = core.modules.basic_modules
 
@@ -156,9 +158,10 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
         self.execute(cmdlist)
         outfiles = {}
         for port_name in self.outputPorts:
-            of = PlotFile()
-            of.name = infile.replace('.out.xml', '.plot.' + str(port_name) + '.xml')
-            self.setResult(port_name,of)
+            if port_name != 'self' and port_name != 'log_file':
+              of = PlotFile()
+              of.name = infile.replace('.out.xml', '.plot.' + str(port_name) + '.xml')
+              self.setResult(port_name,read_xml(of.name))
     _input_ports = [('file',[basic.File]),
                     ('application',[basic.File])]
     appname = ''
@@ -170,12 +173,12 @@ class EvaluateFullDiagT(AlpsEvaluate):
                     ('T_MAX',[basic.Float]),
                     ('DELTA_T',[basic.Float]),
                     ('application',[basic.File],True)]
-    _output_ports = [('energy',[PlotFile]),
-                    ('free_energy',[PlotFile]),
-                    ('entropy',[PlotFile]),
-                    ('specific_heat',[PlotFile]),
-                    ('uniform_susceptibility',[PlotFile]),
-                    ('magnetization',[PlotFile])]
+    _output_ports = [('energy',[PlotDescriptor]),
+                    ('free_energy',[PlotDescriptor]),
+                    ('entropy',[PlotDescriptor]),
+                    ('specific_heat',[PlotDescriptor]),
+                    ('uniform_susceptibility',[PlotDescriptor]),
+                    ('magnetization',[PlotDescriptor])]
 
 
 class EvaluateFullDiagH(AlpsEvaluate):
@@ -185,12 +188,12 @@ class EvaluateFullDiagH(AlpsEvaluate):
                     ('H_MAX',[basic.Float]),
                     ('DELTA_H',[basic.Float]),
                     ('application',[basic.File],True)]
-    _output_ports = [('energy',[PlotFile]),
-                    ('free_energy',[PlotFile]),
-                    ('entropy',[PlotFile]),
-                    ('specific_heat',[PlotFile]),
-                    ('uniform_susceptibility',[PlotFile]),
-                    ('magnetization',[PlotFile])]
+    _output_ports = [('energy',[PlotDescriptor]),
+                    ('free_energy',[PlotDescriptor]),
+                    ('entropy',[PlotDescriptor]),
+                    ('specific_heat',[PlotDescriptor]),
+                    ('uniform_susceptibility',[PlotDescriptor]),
+                    ('magnetization',[PlotDescriptor])]
 
 
 class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
@@ -207,13 +210,13 @@ class EvaluateQWL(AlpsEvaluate):
                     ('T_MAX',[basic.Float]),
                     ('DELTA_T',[basic.Float]),
                     ('application',[basic.File],True)]
-    _output_ports = [('energy',[PlotFile]),
-                    ('free_energy',[PlotFile]),
-                    ('entropy',[PlotFile]),
-                    ('specific_heat',[PlotFile]),
-                    ('uniform_susceptibility',[PlotFile]),
-                    ('staggered_structure_factor',[PlotFile]),
-                    ('uniform_structure_factor',[PlotFile])]
+    _output_ports = [('energy',[PlotDescriptor]),
+                    ('free_energy',[PlotDescriptor]),
+                    ('entropy',[PlotDescriptor]),
+                    ('specific_heat',[PlotDescriptor]),
+                    ('uniform_susceptibility',[PlotDescriptor]),
+                    ('staggered_structure_factor',[PlotDescriptor]),
+                    ('uniform_structure_factor',[PlotDescriptor])]
 
 
 
