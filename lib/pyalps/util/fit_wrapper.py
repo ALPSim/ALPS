@@ -17,13 +17,13 @@ class Parameter:
 	def __call__(self):
 		return self.value
 
-def fit(function, parameters, y, x = None):
+def fit(self,function, parameters, y, x = None):
 	def f(params):
 		i = 0
 		for p in parameters:
 			p.set(params[i])
 			i += 1
-		return y - function(x)
+		return y - function(self,x)
 
 	if x == None: x = np.arange(y.shape[0])
 	p = [param() for param in parameters]

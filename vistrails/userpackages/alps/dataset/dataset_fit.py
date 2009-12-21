@@ -73,7 +73,7 @@ class NonlinearFit(FitPrototype):
         
         code = self.getInputFromPort('source')
         proc_code = urllib.unquote(str(code))
-        cmd = 'def f(x):\n'
+        cmd = 'def f(self,x):\n'
         for line in proc_code.split('\n'):
             cmd += '\t' + line + '\n'
         exec cmd
@@ -82,9 +82,9 @@ class NonlinearFit(FitPrototype):
             xmin = self.getInputFromPort('xrange_min')
             xmax = self.getInputFromPort('xrange_max')
             selection = (data.x >= xmin) & (data.x <= xmax)
-            fw.fit(f, pars, data.y[selection], data.x[selection])
+            fw.fit(self,f, pars, data.y[selection], data.x[selection])
         else:
-            fw.fit(f, pars, data.y, data.x)
+            fw.fit(self,f, pars, data.y, data.x)
         
         data.props['label'] = ''
         for i in range(0,len(pars)):
@@ -93,4 +93,4 @@ class NonlinearFit(FitPrototype):
             data.props[p] = pars[i].get()
         
         data.x = np.linspace(min(data.x), max(data.x), 1000)
-        data.y = f(data.x)
+        data.y = f(self,data.x)
