@@ -41,7 +41,7 @@ class MplXYPlot(NotCacheable,Module):
     my_input_ports = [
         PortDescriptor('plot',PlotDescriptor),
         PortDescriptor('hide_buttons',basic.Boolean),
-        PortDescriptor('source',basic.String)
+        PortDescriptor('source',basic.String,use_python_source=True)
     ]
     my_output_ports = [PortDescriptor('unused',basic.String)]
     
