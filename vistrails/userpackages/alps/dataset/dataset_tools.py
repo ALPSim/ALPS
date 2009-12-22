@@ -51,3 +51,17 @@ class CacheErasure(NotCacheable,Module):
     def compute(self):
         self.setResult('output', self.getInputFromPort('input'))
     
+class SetLabels(FitPrototype):
+    my_input_ports = [
+        PortDescriptor('label_props',ListOfElements)
+    ]
+    
+    def transform(self,data):
+        labelstr = ''
+        labels = self.getInputFromPort('label_props')
+        for label in labels:
+            if label != labels[0]:
+                labelstr += ', '
+            labelstr += '%s = %.4s' % (label,data.props[label])
+        data.props['label'] = labelstr
+

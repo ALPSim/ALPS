@@ -113,10 +113,12 @@ def initialize():
     register(SelectXRange,'DataSet|Tools')
     register(WriteTxt,'DataSet|Tools')
     register(CacheErasure,'DataSet|Tools')
+    register(SetLabels,'DataSet|Tools')
     
     register(Selector,'DataSet|Select',abst=True)
     register(PropertySelector,'DataSet|Select')
     register(PropertyRangeSelector,'DataSet|Select')
+    register(ObservableSelector,'DataSet|Select')
     register(And,'DataSet|Select')
     register(Or,'DataSet|Select')
     register(Select,'DataSet',abst=True)

@@ -5,11 +5,10 @@ from dataset import DataSet
 
 def read_xml(filename):
     root = ElementTree.parse(filename).getroot()
+    data = DataSet()
 
-    show_legend = (root.find('legend').attrib['show'] == 'true')
-
-    xaxis = {'label': root.find('xaxis').attrib['label']}
-    yaxis = {'label': root.find('yaxis').attrib['label']}
+    data.props['xlabel'] = root.find('xaxis').attrib['label']
+    data.props['ylabel'] = root.find('yaxis').attrib['label']
 
     x = []
     y = []
@@ -17,20 +16,14 @@ def read_xml(filename):
         x.append(point.find('x').text)
         y.append(point.find('y').text)
 
-    data = DataSet()
     data.x = np.array(x)
     data.y = np.array(y)
     
-    plotd = {}
-    plotd['xaxis'] = xaxis
-    plotd['yaxis'] = yaxis
-    plotd['data'] = [data]
-    if show_legend:
-        plotd['legend'] = {}
+    parameters = root.find('PARAMETERS')
+    for par in parameters.getchildren():
+        data.props[par.attrib['name']] = par.text
     
-    return plotd
-
-
+    return data
 
 def Axis(label=None,mmin=None,mmax=None,log=False):
     d = {}

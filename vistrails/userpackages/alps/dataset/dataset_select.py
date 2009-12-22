@@ -45,10 +45,27 @@ class PropertyRangeSelector(Selector):
     def decide(self,ds):
         pn = self.getInputFromPort('property_name')
         if pn in ds.props:
-            pmin = type(ds.props[pn])(self.getInputFromPort('min'))
-            pmax = type(ds.props[pn])(self.getInputFromPort('max'))
-            if ds.props[pn] >= pmin and ds.props[pn] <= pmax:
-                return True
+            if self.hasInputFromPort('min') and self.hasInputFromPort('max'):
+                pmin = type(ds.props[pn])(self.getInputFromPort('min'))
+                pmax = type(ds.props[pn])(self.getInputFromPort('max'))
+                if ds.props[pn] >= pmin and ds.props[pn] <= pmax:
+                    return True
+            elif self.hasInputFromPort('min'):
+                pmin = type(ds.props[pn])(self.getInputFromPort('min'))
+                if ds.props[pn] >= pmin:
+                    return True
+            elif self.hasInputFromPort('max'):
+                pmax = type(ds.props[pn])(self.getInputFromPort('max'))
+        return False
+
+class ObservableSelector(Selector):
+    my_input_ports = [
+        PortDescriptor('observable',basic.String)
+    ]
+    
+    def decide(self,ds):
+        if ds.props['observable'] == self.getInputFromPort('observable'):
+            return True
         return False
 
 class Select(Module):
