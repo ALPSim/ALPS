@@ -266,7 +266,7 @@ protected:
 
     char title[50];
     sprintf(title, "Fitting after %i steps", step);
-    alps::plot::Plot<double> myPlot(title, true);
+    alps::plot::Plot<double> myPlot(title);
     myPlot << exp_results_set;
     myPlot << sim_results_set;
     
@@ -289,7 +289,7 @@ protected:
 
     char title[50];
     sprintf(title, "Residui after %i Steps and Measurement Error", step);
-    alps::plot::Plot<double> myPlot(title, true);
+    alps::plot::Plot<double> myPlot(title);
     myPlot << exp_error_set;
     myPlot << residui_set;
 
@@ -311,7 +311,7 @@ protected:
     
     char title[64];
     sprintf(title, "Residuum Size and Measurement Error after %i steps", step);
-    alps::plot::Plot<double> myPlot(title,true);
+    alps::plot::Plot<double> myPlot(title);
     myPlot << exp_percent_set;
     myPlot << sim_percent;
     

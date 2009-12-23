@@ -22,8 +22,14 @@ endif(ALPS_FOR_VISTRAILS)
 #######################################################################
 # install
 #######################################################################
-install(TARGETS pyalea
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib/pyalps
-        LIBRARY DESTINATION lib/pyalps)
+if(ALPS_FOR_VISTRAILS)
+  install(TARGETS pyalea
+          ARCHIVE DESTINATION ../Resources/lib/python2.5/pyalps
+          LIBRARY DESTINATION ../Resources/lib/python2.5/pyalps)
+else(ALPS_FOR_VISTRAILS)
+  install(TARGETS pyalea
+          RUNTIME DESTINATION bin
+          ARCHIVE DESTINATION lib/pyalps
+          LIBRARY DESTINATION lib/pyalps)
+endif(ALPS_FOR_VISTRAILS)
 

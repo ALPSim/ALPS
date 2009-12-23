@@ -126,7 +126,14 @@ endif (ALPS_FOR_VISTRAILS)
 #######################################################################
 # install
 #######################################################################
+if (ALPS_FOR_VISTRAILS)
 install(TARGETS boost
-        RUNTIME DESTINATION bin
-        ARCHIVE DESTINATION lib
-        LIBRARY DESTINATION lib)
+          RUNTIME DESTINATION .
+          ARCHIVE DESTINATION .
+          LIBRARY DESTINATION .)
+else (ALPS_FOR_VISTRAILS)
+  install(TARGETS boost
+          RUNTIME DESTINATION bin
+          ARCHIVE DESTINATION lib
+          LIBRARY DESTINATION lib)
+endif (ALPS_FOR_VISTRAILS)

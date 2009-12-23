@@ -24,7 +24,11 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   if(WIN32 AND NOT UNIX)
     set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/ALPS" CACHE PATH "ALPS install prefix" FORCE)
   else(WIN32 AND NOT UNIX)
-    set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
+    if (ALPS_FOR_VISTRAILS)
+      set(CMAKE_INSTALL_PREFIX "/Applications/Vistrails/Vistrails.app/Contents/Frameworks" CACHE PATH "ALPS install prefix" FORCE)
+    else (ALPS_FOR_VISTRAILS)
+      set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
+    endif (ALPS_FOR_VISTRAILS)
   endif(WIN32 AND NOT UNIX)
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
@@ -132,9 +136,14 @@ else(WIN32 AND NOT UNIX)
   find_package(PythonInterp)
   set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
   find_package(PythonLibs)
+  if (ALPS_FOR_VISTRAILS)
+    SET(PYTHON_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/Python.framework/Headers)
+    SET(PYTHON_LIBRARY "-F${CMAKE_INSTALL_PREFIX} -framework Python")
+    MESSAGE(WARNING "Changing Python libraries to those of Vistrails")
+  endif(ALPS_FOR_VISTRAILS)
   IF (PYTHONLIBS_FOUND)
     SET(ALPS_HAVE_PYTHON 1)
-    INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS})
+    INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS}) 
     link_libraries(${PYTHON_LIBRARY})
   ELSE (PYTHONLIBS_FOUND)
     set(BUILD_BOOST_PYTHON FALSE)
@@ -189,28 +198,36 @@ configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMa
 ######################################################################
 include(InstallRequiredSystemLibraries)
 
-set(ALPS_HEADER_DIR "include")
-install(DIRECTORY src/alps src/boost DESTINATION ${ALPS_HEADER_DIR}
-        FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h DESTINATION ${ALPS_HEADER_DIR}/alps)
+if (NOT ALPS_FOR_VISTRAILS)
+  set(ALPS_HEADER_DIR "include")
+  install(DIRECTORY src/alps src/boost DESTINATION ${ALPS_HEADER_DIR}
+          FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+  install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h DESTINATION ${ALPS_HEADER_DIR}/alps)
+endif(NOT ALPS_FOR_VISTRAILS)
 # if(INSTALL_BOOST_HEADERS)
 #   install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR}
 #           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
 #           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 # endif(INSTALL_BOOST_HEADERS)
 
-install(DIRECTORY lib/xml DESTINATION lib
-        FILES_MATCHING PATTERN "*.xsl"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
-
-install(FILES config/CMake/UseALPS.cmake ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
-        DESTINATION share/alps)
-
-install(DIRECTORY lib/pyalps DESTINATION lib
+if (ALPS_FOR_VISTRAILS)
+  install(DIRECTORY lib/pyalps DESTINATION ../Resources/lib/python2.5
         FILES_MATCHING PATTERN "*.py"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+else (ALPS_FOR_VISTRAILS)
+  install(DIRECTORY lib/xml DESTINATION lib
+        FILES_MATCHING PATTERN "*.xsl"
+        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
+
+  install(FILES config/CMake/UseALPS.cmake ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
+        DESTINATION share/alps)
+
+  install(DIRECTORY lib/pyalps DESTINATION lib
+        FILES_MATCHING PATTERN "*.py"
+        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+endif (ALPS_FOR_VISTRAILS)
 
 ######################################################################
 # libraries
@@ -227,6 +244,7 @@ add_subdirectory(lib/pyalps)
 if (NOT ALPS_FOR_VISTRAILS)
   add_subdirectory(tool)
 endif (NOT ALPS_FOR_VISTRAILS)
+
 # add_subdirectory(example/parapack/single)
 # add_subdirectory(example/scheduler)
 
