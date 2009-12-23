@@ -2,6 +2,7 @@ include (CMakeDetermineSystem)
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 project(alps)
 
+option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 # option(INSTALL_BOOST_HEADERS "Install all the Boost header files" OFF)
 
@@ -75,9 +76,9 @@ find_package(BoostSrc REQUIRED)
 
 # MPI
 find_package(MPI)
-IF(MPI_FOUND)
+IF(MPI_FOUND AND NOT ALPS_FOR_VISTRAILS)
   LINK_LIBRARIES(${MPI_LIBRARIES})
-ENDIF(MPI_FOUND)
+ENDIF(MPI_FOUND AND NOT ALPS_FOR_VISTRAILS)
 
 # Lapack
 find_package(Lapack)
@@ -90,28 +91,30 @@ find_package(LPSolve)
 
 # Zlib
 find_package(ZLIB)
-if(ZLIB_FOUND)
+if(ZLIB_FOUND AND NOT ALPS_FOR_VISTRAILS)
   include_directories(${ZLIB_INCLUDE_DIR})
   link_libraries(${ZLIB_LIBRARIES})
-endif(ZLIB_FOUND)
+endif(ZLIB_FOUND AND NOT ALPS_FOR_VISTRAILS)
   
 # SZip
 find_package(SZIP)
-if(SZIP_FOUND)
+if(SZIP_FOUND AND NOT ALPS_FOR_VISTRAILS)
   include_directories(${SZIP_INCLUDE_DIR})
   link_libraries(${SZIP_LIBRARIES})
-endif(SZIP_FOUND)
+endif(SZIP_FOUND AND NOT ALPS_FOR_VISTRAILS)
   
 # HDF5
 find_package(HDF5)
-IF(HDF5_FOUND)
-  SET(HAVE_LIBHDF5 1)
-  INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
-  LINK_LIBRARIES(${HDF5_LIBRARIES})
-  SET(ALPS_HAVE_HDF5 1)
-ELSE(HDF5_FOUND)
-  MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
-ENDIF(HDF5_FOUND)
+IF (NOT ALPS_FOR_VISTRAILS)
+  IF(HDF5_FOUND)
+    SET(HAVE_LIBHDF5 1)
+    INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
+    LINK_LIBRARIES(${HDF5_LIBRARIES})
+    SET(ALPS_HAVE_HDF5 1)
+  ELSE(HDF5_FOUND)
+    MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
+  ENDIF(HDF5_FOUND)
+ENDIF(NOT ALPS_FOR_VISTRAILS)
 IF(HDF5_IS_PARALLEL)
   SET(ALPS_HAVE_HDF5_PARALLEL 1)
   MESSAGE(WARNING "parallel(MPI) hdf5 is detected. We try to compile but ALPS do not use these feature.")
@@ -212,14 +215,18 @@ install(DIRECTORY lib/pyalps DESTINATION lib
 ######################################################################
 # libraries
 ######################################################################
-add_subdirectory(src/alps)
+if (NOT ALPS_FOR_VISTRAILS)
+  add_subdirectory(src/alps)
+endif (NOT ALPS_FOR_VISTRAILS)
 add_subdirectory(src/boost)
 add_subdirectory(lib/pyalps)
 
 ######################################################################
 # programs
 ######################################################################
-add_subdirectory(tool)
+if (NOT ALPS_FOR_VISTRAILS)
+  add_subdirectory(tool)
+endif (NOT ALPS_FOR_VISTRAILS)
 # add_subdirectory(example/parapack/single)
 # add_subdirectory(example/scheduler)
 
@@ -289,5 +296,8 @@ endif()
 ######################################################################
 # tests
 ######################################################################
-ENABLE_TESTING()
-add_subdirectory(test)
+
+if (NOT ALPS_FOR_VISTRAILS)
+  ENABLE_TESTING()
+  add_subdirectory(test)
+endif (NOT ALPS_FOR_VISTRAILS)

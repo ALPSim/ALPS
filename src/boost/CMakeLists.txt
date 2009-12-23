@@ -111,7 +111,17 @@ if(BUILD_BOOST_SYSTEM)
   endforeach(S)
 endif(BUILD_BOOST_SYSTEM)
 
+
 add_library(boost ${BOOST_SOURCES})
+
+if (ALPS_FOR_VISTRAILS)
+  SET_TARGET_PROPERTIES(boost
+    PROPERTIES BUILD_WITH_INSTALL_RPATH ON
+    INSTALL_NAME_DIR "@executable_path/../Frameworks"
+  )
+endif (ALPS_FOR_VISTRAILS)
+
+
 
 #######################################################################
 # install
