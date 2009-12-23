@@ -215,6 +215,9 @@ if (ALPS_FOR_VISTRAILS)
   install(DIRECTORY lib/pyalps DESTINATION ../Resources/lib/python2.5
         FILES_MATCHING PATTERN "*.py"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+  install(DIRECTORY vistrails/userpackages/alps DESTINATION ../Resources/lib/python2.5/packages
+        FILES_MATCHING PATTERN "*.py"
+        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 else (ALPS_FOR_VISTRAILS)
   install(DIRECTORY lib/xml DESTINATION lib
         FILES_MATCHING PATTERN "*.xsl"
