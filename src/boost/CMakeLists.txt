@@ -81,6 +81,25 @@ if(BUILD_BOOST_SERIALIZATION)
   endforeach(S)
 endif(BUILD_BOOST_SERIALIZATION)
 
+# Boost.Python
+if(BUILD_BOOST_PYTHON)
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/python/src")
+  set(SOURCES dict.cpp errors.cpp exec.cpp import.cpp list.cpp long.cpp
+      module.cpp numeric.cpp object_operators.cpp object_protocol.cpp slice.cpp
+      str.cpp tuple.cpp wrapper.cpp converter/arg_to_python_base.cpp
+      converter/builtin_converters.cpp converter/from_python.cpp
+      converter/registry.cpp converter/type_id.cpp object/class.cpp
+      object/enum.cpp object/function.cpp object/function_doc_signature.cpp
+      object/inheritance.cpp object/iterator.cpp object/life_support.cpp
+      object/pickle_support.cpp object/stl_iterator.cpp
+  )
+  foreach(S ${SOURCES})
+    if(EXISTS ${DIRECTORY}/${S})
+      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
+    endif(EXISTS ${DIRECTORY}/${S})
+  endforeach(S)
+endif(BUILD_BOOST_PYTHON)
+
 # Boost.System
 if(BUILD_BOOST_SYSTEM)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/system/src")
