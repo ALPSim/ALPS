@@ -31,12 +31,12 @@
 
 
 #include <boost/python.hpp>
-#include "value_with_error.h"
+#include <alps/alea/value_with_error.h>
 
 using namespace boost::python;
 using namespace alps::alea;
 
-BOOST_PYTHON_MODULE(value_with_error)
+BOOST_PYTHON_MODULE(pyalea)
 {
   class_<value_with_error<double> >("value_with_error",init<optional<value_with_error<double>::value_type,value_with_error<double>::value_type> >())
     .add_property("mean", &value_with_error<double>::mean)

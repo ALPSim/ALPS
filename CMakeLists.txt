@@ -214,6 +214,7 @@ install(DIRECTORY lib/pyalps DESTINATION lib
 ######################################################################
 add_subdirectory(src/alps)
 add_subdirectory(src/boost)
+add_subdirectory(lib/pyalps)
 
 ######################################################################
 # programs
