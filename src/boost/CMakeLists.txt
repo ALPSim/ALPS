@@ -98,6 +98,7 @@ if(BUILD_BOOST_PYTHON)
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
     endif(EXISTS ${DIRECTORY}/${S})
   endforeach(S)
+  add_definitions(-DBOOST_PYTHON_SOURCE)
 endif(BUILD_BOOST_PYTHON)
 
 # Boost.System
@@ -111,8 +112,13 @@ if(BUILD_BOOST_SYSTEM)
   endforeach(S)
 endif(BUILD_BOOST_SYSTEM)
 
-
 add_library(boost ${BOOST_SOURCES})
+
+if(MSVC)
+  get_target_property(LIB_NAME boost LOCATION)
+  add_custom_command(TARGET boost POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
+endif(MSVC)
 
 if (ALPS_FOR_VISTRAILS)
   SET_TARGET_PROPERTIES(boost
@@ -120,8 +126,6 @@ if (ALPS_FOR_VISTRAILS)
     INSTALL_NAME_DIR "@executable_path/../Frameworks"
   )
 endif (ALPS_FOR_VISTRAILS)
-
-
 
 #######################################################################
 # install
