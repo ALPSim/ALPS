@@ -3,6 +3,7 @@
 #
 #  ZLIB_INCLUDE_DIRS - where to find zlib.h, etc.
 #  ZLIB_LIBRARIES    - List of libraries when using zlib.
+#  ZLIB_DLLS         - List of DLLs when using zlib.
 #  ZLIB_FOUND        - True if zlib found.
 
 #=============================================================================
@@ -25,16 +26,19 @@ ENDIF (ZLIB_INCLUDE_DIR)
 
 FIND_PATH(ZLIB_INCLUDE_DIR zlib.h PATHS "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/include")
 
-SET(ZLIB_NAMES z zlib zdll)
+SET(ZLIB_NAMES z zlib)
 FIND_LIBRARY(ZLIB_LIBRARY NAMES ${ZLIB_NAMES} PATHS "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/lib")
-MARK_AS_ADVANCED( ZLIB_LIBRARY ZLIB_INCLUDE_DIR )
+
+FIND_FILE(ZLIB_DLL zlib.dll "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/bin")
+
+MARK_AS_ADVANCED( ZLIB_LIBRARY ZLIB_INCLUDE_DIR ZLIB_DLL )
 
 # Per-recommendation
 SET(ZLIB_INCLUDE_DIRS "${ZLIB_INCLUDE_DIR}")
 SET(ZLIB_LIBRARIES    "${ZLIB_LIBRARY}")
+SET(ZLIB_DLLS         "${ZLIB_DLL}")
 
 # handle the QUIETLY and REQUIRED arguments and set ZLIB_FOUND to TRUE if 
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB DEFAULT_MSG ZLIB_LIBRARIES ZLIB_INCLUDE_DIRS)
-

@@ -33,6 +33,7 @@
 #  HDF5_C_LIBRARIES - Required libraries for the HDF5 C bindings.
 #  HDF5_CXX_LIBRARIES - Required libraries for the HDF5 C++ bindings
 #  HDF5_LIBRARIES - Required libraries for all requested bindings
+#  HDF5_DLLS - Required DLLs for all requested bindings
 #  HDF5_FOUND - true if HDF5 was found on the system
 #  HDF5_LIBRARY_DIRS - the full set of library directories
 #  HDF5_IS_PARALLEL - Whether or not HDF5 was found with parallel IO support
@@ -402,6 +403,12 @@ else()
 
 endif()
 
+FIND_FILE(HDF5_DLL hdf5.dll "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/bin")
+FIND_FILE(HDF5_HL_DLL hdf5_hl.dll "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/bin")
+LIST(APPEND HDF5_DLLS ${HDF5_DLL})
+LIST(APPEND HDF5_DLLS ${HDF5_HL_DLL})
+mark_as_advanced( HDF5_DLL HDF5_HL_DLL )
+
 find_package_handle_standard_args( HDF5 DEFAULT_MSG 
     HDF5_LIBRARIES 
     HDF5_INCLUDE_DIR
@@ -410,8 +417,8 @@ find_package_handle_standard_args( HDF5 DEFAULT_MSG
 mark_as_advanced( 
     HDF5_INCLUDE_DIR 
     HDF5_LIBRARIES 
+    HDF5_DLLS
     HDF5_DEFINTIONS
     HDF5_LIBRARY_DIRS
     HDF5_C_COMPILER_EXECUTABLE
     HDF5_CXX_COMPILER_EXECUTABLE )
-
