@@ -68,7 +68,10 @@ def register(m,ns,abst=False):
     if Descriptor in m.__bases__ or Selector in m.__bases__ or m == Selector:
         reg.add_output_port(m, 'output', (m,''))
 
-def initialize():
+def initialize(): pass
+
+def selfRegister():
+
     # We'll first create a local alias for the module registry so that
     # we can refer to it in a shorter way.
     reg = core.modules.module_registry.registry

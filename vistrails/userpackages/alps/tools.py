@@ -67,7 +67,6 @@ class MakeParameterFile(Module):
            input_values = self.forceGetInputListFromPort('parms')
            for p in input_values:
              res = parameters.make_parameter_data(p)
-             print type(res), res
              res.write(f);
          f.close()
          self.setResult('file', o)

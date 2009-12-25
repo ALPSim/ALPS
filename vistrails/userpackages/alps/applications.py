@@ -13,11 +13,12 @@ import plots
 import tools
 import os
 import system
+import glob
 
 from core.modules.vistrails_module import ModuleError
 from plots import PlotFile
 from pyalps.util.plot_core import *
-from dataset import PlotDescriptor
+from dataset import DataSets, ResultFiles
 
 basic = core.modules.basic_modules
 
@@ -151,19 +152,43 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
         cmdlist = [an]
         cmdlist += self.options
         for port_name in self.inputPorts:
-           if port_name != 'file' and port_name != 'application' and self.hasInputFromPort(port_name):
+           if port_name != 'files' and port_name != 'file' and port_name != 'application' and self.hasInputFromPort(port_name):
              cmdlist += ['--'+str(port_name),str(self.getInputFromPort(port_name))]
-        infile = self.getInputFromPort('file').name
-        cmdlist += [infile]
+        rf = self.getInputFromPort('files')
+        infiles = [x.props['filename'] for x in rf]
+        print "Files", infiles
+        cmdlist += infiles
+        print cmdlist
         self.execute(cmdlist)
-        outfiles = {}
-        for port_name in self.outputPorts:
-            if port_name != 'self' and port_name != 'log_file':
-              of = PlotFile()
-              of.name = infile.replace('.out.xml', '.plot.' + str(port_name) + '.xml')
-              self.setResult(port_name,read_xml(of.name))
-    _input_ports = [('file',[basic.File]),
+        datasetmap = {}
+        datasets = []
+        for infile in infiles:
+          print "Looking at file", infile
+          ofname = infile.replace('.out.xml', '.plot.*.xml')
+          l = glob.glob(ofname)
+          print "Have plots", l
+          for fn in l:
+            dataset = read_xml(fn)
+            datasets.append(dataset)
+            ylabel = dataset.props['ylabel']
+            print ylabel
+            if datasetmap.has_key(ylabel):
+              datasetmap[ylabel].append(dataset)
+            else:
+              datasetmap[ylabel] = [dataset]
+              
+        for (port_name,ylabel) in self.plots:
+          if datasetmap.has_key(ylabel):
+            self.setResult(port_name,datasetmap[ylabel])
+            print "For ",port_name,len(datasetmap[ylabel])
+          else:
+            self.setResult(port_name,[])
+            print "Nothing for",port_name
+          
+    _input_ports = [('file',[basic.File],True),
+                    ('files',[ResultFiles]),
                     ('application',[basic.File])]
+    _output_ports = [('all',[DataSets])]
     appname = ''
     options = []
 
@@ -173,12 +198,14 @@ class EvaluateFullDiagT(AlpsEvaluate):
                     ('T_MAX',[basic.Float]),
                     ('DELTA_T',[basic.Float]),
                     ('application',[basic.File],True)]
-    _output_ports = [('energy',[PlotDescriptor]),
-                    ('free_energy',[PlotDescriptor]),
-                    ('entropy',[PlotDescriptor]),
-                    ('specific_heat',[PlotDescriptor]),
-                    ('uniform_susceptibility',[PlotDescriptor]),
-                    ('magnetization',[PlotDescriptor])]
+    plots = [('energy','Energy Density'), 
+             ('free_energy','Free Energy Density'),
+             ('entropy','Entropy Density'),
+             ('specific_heat','Specific Heat per Site'),
+             ('uniform_susceptibility','Uniform Susceptibility per Site'),
+             ('magnetization','Magnetization per Site'),
+             ('compressibility','Compressibility per Site'),
+             ('particle_number','Particle number per Site')]
 
 
 class EvaluateFullDiagH(AlpsEvaluate):
@@ -188,12 +215,14 @@ class EvaluateFullDiagH(AlpsEvaluate):
                     ('H_MAX',[basic.Float]),
                     ('DELTA_H',[basic.Float]),
                     ('application',[basic.File],True)]
-    _output_ports = [('energy',[PlotDescriptor]),
-                    ('free_energy',[PlotDescriptor]),
-                    ('entropy',[PlotDescriptor]),
-                    ('specific_heat',[PlotDescriptor]),
-                    ('uniform_susceptibility',[PlotDescriptor]),
-                    ('magnetization',[PlotDescriptor])]
+    plots = [('energy','Energy Density'), 
+             ('free_energy','Free Energy Density'),
+             ('entropy','Entropy Density'),
+             ('specific_heat','Specific Heat per Site'),
+             ('uniform_susceptibility','Uniform Susceptibility per Site'),
+             ('magnetization','Magnetization per Site'),
+             ('compressibility','Compressibility per Site'),
+             ('particle_number','Particle number per Site')]
 
 
 class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
@@ -210,13 +239,13 @@ class EvaluateQWL(AlpsEvaluate):
                     ('T_MAX',[basic.Float]),
                     ('DELTA_T',[basic.Float]),
                     ('application',[basic.File],True)]
-    _output_ports = [('energy',[PlotDescriptor]),
-                    ('free_energy',[PlotDescriptor]),
-                    ('entropy',[PlotDescriptor]),
-                    ('specific_heat',[PlotDescriptor]),
-                    ('uniform_susceptibility',[PlotDescriptor]),
-                    ('staggered_structure_factor',[PlotDescriptor]),
-                    ('uniform_structure_factor',[PlotDescriptor])]
+    plots = [('energy','Energy Density'), 
+             ('free_energy','Free Energy Density'),
+             ('entropy','Entropy Density'),
+             ('specific_heat','Specific Heat per Site'),
+             ('uniform_susceptibility','Uniform Susceptibility per Site'),
+             ('staggered_structure_factor','Staggered Structure Factor per Site'),
+             ('uniform_structure_factor','Uniform Structure Factor per Site')]
 
 
 
@@ -233,6 +262,15 @@ def register_application(type):
   reg = core.modules.module_registry.get_module_registry()
   reg.add_module(type,namespace="Applications")
   reg.add_input_port(type,'application',[basic.File],False)
+
+def register_evaluation(type):
+  reg = core.modules.module_registry.get_module_registry()
+  reg.add_module(type,namespace="Applications")
+  reg.add_output_port(type,'all',[DataSets])
+  for (port_name,ylabel) in type.plots:
+    reg.add_output_port(type,port_name,[DataSets])
+  reg.add_output_port(type,'log_file',[basic.File])
+  
   
 def selfRegister():
 
@@ -253,10 +291,10 @@ def selfRegister():
   
   reg.add_module(AlpsEvaluate,namespace="Applications",abstract=True)
   
-  register_application(EvaluateFullDiagT)
-  register_application(EvaluateFullDiagH)
+  register_evaluation(EvaluateFullDiagT)
+  register_evaluation(EvaluateFullDiagH)
   register_application(EvaluateLoop)
-  register_application(EvaluateQWL)
+  register_evaluation(EvaluateQWL)
   
   reg.add_module(system.LatticeModel,namespace="Applications")
   reg.add_module(system.MonteCarloSimulation,namespace="Applications")

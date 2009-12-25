@@ -88,8 +88,6 @@ class LoadDataSet(Module):
                     yc = [0]
             if self.hasInputFromPort('y-columns'):
                 yc = self.getInputFromPort('y-columns')
-                print type(yc)
-                print yc
                 yc = [int(x) for x in yc]
             
             label = ''

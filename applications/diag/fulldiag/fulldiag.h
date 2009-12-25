@@ -207,27 +207,6 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
 
   MeasurementsPlot<magnitude_type> plots (this->measurements_[0],vstr);
 
-  std::cerr << "Seeing what we have:\n";
-  std::cerr << "Average: \n"; 
-  for (int i=0;i<this->measurements_.size();++i) {
-    std::cerr << i << ": " << this->measurements_[i].average_values.size() << "\n";
-    for (typename   std::map<std::string,std::vector<T> >::const_iterator it = 
-          this->measurements_[i].average_values.begin(); it != this->measurements_[i].average_values.end(); ++it)
-          std::cerr << it->first << "\t" << it->second.size() << "\n";
-  }
-    
-  
-  std::cerr << "Local: \n"; 
-  for (int i=0;i<this->measurements_.size();++i)
-    std::cerr << i << ": " << this->measurements_[i].local_values.size() << "\n";
-  std::cerr << "Correlations: \n"; 
-  for (int i=0;i<this->measurements_.size();++i)
-    std::cerr << i << ": " << this->measurements_[i].correlation_values.size() << "\n";
-  std::cerr << "Structure factor: \n"; 
-  for (int i=0;i<this->measurements_.size();++i)
-    std::cerr << i << ": " << this->measurements_[i].structurefactor_values.size() << "\n";
-
-
   alps::plot::Plot<magnitude_type> energy_plot("Energy"+dstr+" versus "+vstr);
   alps::plot::Plot<magnitude_type> free_energy_plot("Free Energy"+dstr+" versus "+vstr);
   alps::plot::Plot<magnitude_type> entropy_plot("Entropy"+dstr+" versus "+vstr);

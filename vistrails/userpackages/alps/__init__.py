@@ -31,6 +31,7 @@ def package_dependencies():
   return ['edu.utah.sci.vistrails.control_flow', 'edu.utah.sci.vistrails.matplotlib', 'edu.utah.sci.vistrails.spreadsheet']
 
 def initialize():
+  dataset.selfRegister()
   alpscore.selfRegister()  
   parameters.selfRegister()
   alpsparameters.selfRegister()

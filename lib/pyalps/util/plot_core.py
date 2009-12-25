@@ -12,9 +12,13 @@ def read_xml(filename):
 
     x = []
     y = []
+    dx = []
+    dy = []
     for point in root.find('set').getchildren():
-        x.append(point.find('x').text)
-        y.append(point.find('y').text)
+        x.append(float(point.find('x').text))
+        y.append(float(point.find('y').text))
+#        dx.append(float(point.find('dx').text))
+#        dy.append(float(point.find('dy').text))
 
     data.x = np.array(x)
     data.y = np.array(y)
@@ -71,7 +75,6 @@ class MplXYPlot_core:
         if 'yaxis' in self.plt and 'logarithmic' in self.plt['yaxis']:
             ylog = self.plt['yaxis']['logarithmic']
         
-        print self.plt    
         for q in self.plt['data']:
             line_props = self.colors[self.icolor]
             if 'line' in q.props:
@@ -91,7 +94,6 @@ class MplXYPlot_core:
                 ymeans = q.y
                 yerrors = None
             
-            print xmeans, ymeans, xerrors, yerrors
             self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props))
             
             if xlog:

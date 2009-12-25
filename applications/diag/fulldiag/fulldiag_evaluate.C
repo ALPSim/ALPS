@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 2002-2006 by Matthias Troyer <troyer@comp-phys.org>,
+* Copyright (C) 2002-2009 by Matthias Troyer <troyer@comp-phys.org>,
 *                            Andreas Honecker <ahoneck@uni-goettingen.de>
 *
 * This software is part of the ALPS Applications, published under the ALPS
@@ -33,8 +33,8 @@
 
 void error_exit(char *pname)
  {
-    std::cerr << "Usage:\n" << pname << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--H_MIN ...] [--H_MAX ... ] [--DELTA_H ... ] [--versus h] [--DENSITIES ...] inputfile [outputfileprefix]\n";
-    std::cerr << "or:\n" << pname << " --couple mu [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--MU_MIN ...] [--MU_MAX ... ] [--DELTA_MU ...] [--versus mu] [--DENSITIES ...] inputfile [outputfileprefix]\n";
+    std::cerr << "Usage:\n" << pname << " [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--H_MIN ...] [--H_MAX ... ] [--DELTA_H ... ] [--versus h] [--DENSITIES ...] filenames\n";
+    std::cerr << "or:\n" << pname << " --couple mu [--T_MIN ...] [--T_MAX ...] [--DELTA_T ...] [--MU_MIN ...] [--MU_MAX ... ] [--DELTA_MU ...] [--versus mu] [--DENSITIES ...] filenames\n";
     exit(1);
  }
 
@@ -58,19 +58,15 @@ try {
   if(i >= argc)
     error_exit(argv[0]);
 
-  boost::filesystem::path p(argv[i],boost::filesystem::native);
-  std::string name=argv[i];
-  if (argc-i==1) {
+  while (i<argc) {
+    boost::filesystem::path p(argv[i],boost::filesystem::native);
+    std::string name=argv[i];
     name.erase(name.rfind(".out.xml"),8);
+    alps::ProcessList nowhere;
+    FullDiagMatrix<double> matrix (nowhere,p);
+    matrix.evaluate(parms,name); 
+    ++i; 
   }
-  else if (argc-i==2)
-    name=argv[argc-1]; 
-  else {
-    error_exit(argv[0]);
-  }
-  alps::ProcessList nowhere;
-  FullDiagMatrix<double> matrix (nowhere,p);
-  matrix.evaluate(parms,name);  
 #ifndef BOOST_NO_EXCEPTIONS
 }
 catch (std::exception& e)
