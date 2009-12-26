@@ -2,9 +2,10 @@
 # applications
 ######################################################################
 
-add_subdirectory(mc/spins)
-add_subdirectory(qmc/looper)
-add_subdirectory(qmc/sse)
+add_subdirectory(mc)
+add_subdirectory(qmc)
+add_subdirectory(diag)
+add_subdirectory(dmrg)
   
 
 ######################################################################

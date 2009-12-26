@@ -1,0 +1,5 @@
+add_subdirectory(looper)
+add_subdirectory(sse)
+add_subdirectory(checksign)
+add_subdirectory(worms)
+add_subdirectory(qwl)

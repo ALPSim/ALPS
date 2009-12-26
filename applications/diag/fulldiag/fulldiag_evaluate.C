@@ -26,7 +26,7 @@
 
 /* $Id$ */
 
-#include <fulldiag.h>
+#include "fulldiag.h"
 #include <fstream>
 
 // Print usage and exit

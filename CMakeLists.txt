@@ -5,7 +5,11 @@ project(alps)
 option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
+option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
 # option(INSTALL_BOOST_HEADERS "Install all the Boost header files" OFF)
+
+# is this correct???
+set(VERSION_BUILD "unknown")
 
 if(MSVC)
   SET(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /Zm1000 /EHsc /GR /openmp" CACHE STRING
@@ -227,6 +231,73 @@ set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
 configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
 
 ######################################################################
+# install dependent libraries under Windows, from applications
+# we'll need something similar for MacOS X
+######################################################################
+
+if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
+  # Lapack
+  if(LAPACK_LIBRARIES)
+    foreach(file ${LAPACK_LIBRARIES})
+      get_filename_component(LAPACK_PATH ${file} PATH)
+    endforeach(file ${LAPACK_LIBRARIES})
+    add_custom_target(liblapack ALL
+      COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
+      COMMAND cmake -E copy_if_different ${LAPACK_PATH}/lapack.lib ${PROJECT_BINARY_DIR}/lib
+      COMMAND cmake -E copy_if_different ${LAPACK_PATH}/blas.lib ${PROJECT_BINARY_DIR}/lib
+      COMMAND cmake -E copy_if_different ${LAPACK_PATH}/f2c.lib ${PROJECT_BINARY_DIR}/lib
+    )
+    install(FILES ${PROJECT_BINARY_DIR}/lib/lapack.lib ${PROJECT_BINARY_DIR}/lib/blas.lib
+            ${PROJECT_BINARY_DIR}/lib/f2c.lib
+            DESTINATION lib
+    )
+  endif(LAPACK_LIBRARIES)
+  # SQLite
+  if(SQLite_LIBRARIES)
+    get_filename_component(SQLite_PATH ${SQLite_LIBRARIES} PATH)
+    get_filename_component(SQLite_BASE ${SQLite_PATH} PATH)
+    get_filename_component(SQLite_NAME ${SQLite_LIBRARIES} NAME_WE)
+    add_custom_target(libsqlite ALL
+      COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
+      COMMAND cmake -E copy_if_different ${SQLite_LIBRARIES} ${PROJECT_BINARY_DIR}/lib
+      COMMAND cmake -E copy_if_different ${SQLite_BASE}/bin/${SQLite_NAME}.dll ${PROJECT_BINARY_DIR}/bin
+    )
+    install(FILES ${PROJECT_BINARY_DIR}/lib/${SQLite_NAME}.lib DESTINATION lib)
+    install(FILES ${PROJECT_BINARY_DIR}/bin/${SQLite_NAME}.dll DESTINATION bin)
+  endif(SQLite_LIBRARIES)
+  # LPSolve
+  if(LPSolve_LIBRARIES)
+    get_filename_component(LPSolve_PATH ${LPSolve_LIBRARIES} PATH)
+    get_filename_component(LPSolve_BASE ${LPSolve_PATH} PATH)
+    get_filename_component(LPSolve_NAME ${LPSolve_LIBRARIES} NAME_WE)
+    add_custom_target(liblpsolve ALL
+      COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
+      COMMAND cmake -E copy_if_different ${LPSolve_LIBRARIES} ${PROJECT_BINARY_DIR}/lib
+      COMMAND cmake -E copy_if_different ${LPSolve_BASE}/bin/${LPSolve_NAME}.dll ${PROJECT_BINARY_DIR}/bin
+    )
+    install(FILES ${PROJECT_BINARY_DIR}/lib/${LPSolve_NAME}.lib DESTINATION lib)
+    install(FILES ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}.dll DESTINATION bin)
+  endif(LPSolve_LIBRARIES)
+  # alps & boost
+  add_custom_target(libalps ALL
+    COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/bin
+    COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
+    COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib/xml
+    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/archive.exe ${PROJECT_BINARY_DIR}/bin
+    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/parameter2xml.exe ${PROJECT_BINARY_DIR}/bin
+    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/ising.exe ${PROJECT_BINARY_DIR}/bin
+    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/alps.dll ${PROJECT_BINARY_DIR}/lib
+    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/boost.dll ${PROJECT_BINARY_DIR}/lib
+    COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml
+  )
+  install(FILES ${PROJECT_BINARY_DIR}/bin/archive.exe ${PROJECT_BINARY_DIR}/bin/parameter2xml.exe ${PROJECT_BINARY_DIR}/bin/ising.exe DESTINATION bin)
+  install(FILES ${PROJECT_BINARY_DIR}/lib/alps.dll ${PROJECT_BINARY_DIR}/lib/boost.dll DESTINATION bin)
+  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
+endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
+
+
+
+######################################################################
 # installation
 ######################################################################
 include(InstallRequiredSystemLibraries)
@@ -268,6 +339,7 @@ endif (ALPS_FOR_VISTRAILS)
 ######################################################################
 # libraries
 ######################################################################
+
 if (NOT ALPS_FOR_VISTRAILS)
   add_subdirectory(src/alps)
 endif (NOT ALPS_FOR_VISTRAILS)
@@ -277,72 +349,86 @@ add_subdirectory(lib/pyalps)
 ######################################################################
 # programs
 ######################################################################
+
 if (NOT ALPS_FOR_VISTRAILS)
   add_subdirectory(tool)
   add_subdirectory(example)
 endif (NOT ALPS_FOR_VISTRAILS)
 
+######################################################################
+# applications
+######################################################################
 
+if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
+  add_subdirectory(applications)
+endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
+  
 ##########################################################################
 # Binary packages                                                        #
 ##########################################################################
-set(CPACK_PACKAGE_NAME "ALPS")
-set(CPACK_PACKAGE_VENDOR "alps.comp-phys.org")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
-set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
-set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.txt")
-set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.txt")
-set(CPACK_RESOURCE_FILE_WELCOME "${PROJECT_SOURCE_DIR}/Welcome.txt")
-set(CPACK_PACKAGE_VERSION "${ALPS_VERSION}")
-set(CPACK_PACKAGE_VERSION_MAJOR "${ALPS_VERSION_MAJOR}")
-set(CPACK_PACKAGE_VERSION_MINOR "${ALPS_VERSION_MINOR}")
-set(CPACK_PACKAGE_VERSION_SUBMINOR "${ALPS_VERSION_SUBMINOR}")
-set(CPACK_PACKAGING_INSTALL_PREFIX "/")
-set(CPACK_PACKAGE_INSTALL_DIRECTORY "/opt/alps")
-set(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/alps")
 
-if(WIN32 AND NOT UNIX)
-  # There is a bug in NSI that does not handle full unix paths properly. Make
-  # sure there is at least one set of four (4) backlasshes.
-  # NOTE: No ALPS icon yet
-#  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/tools/build/CMake\\\\InstallIcon.bmp")
-#  set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
-  set(CPACK_NSIS_DISPLAY_NAME "ALPS ${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_SUBMINOR}")
-  set(CPACK_NSIS_HELP_LINK "http:\\\\\\\\alps.comp-phys.org")
-  set(CPACK_NSIS_URL_INFO_ABOUT "http:\\\\\\\\alps.comp-phys.org")
-  set(CPACK_NSIS_CONTACT "comp-phys-alps-users@lists.comp-phys.org")
-  set(CPACK_NSIS_MODIFY_PATH ON)
-  
-  # Encode the compiler name in the package 
-  if (MSVC60)
-    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc6")
-    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual C++ 6")
-  elseif (MSVC70)
-    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc7")
-    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2002")
-  elseif (MSVC71)
-    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc71")
-    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2003")
-  elseif (MSVC80)
-    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc8")
-    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2005")    
-  elseif (MSVC90)
-    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc9")
-    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2008")
-  elseif (BORLAND)
-    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-borland")  
-    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Borland C++ Builder")    
-  endif (MSVC60)
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
-endif(WIN32 AND NOT UNIX)
-include(CPack)
+if (NOT ALPS_FOR_VISTRAILS)
+  set(CPACK_PACKAGE_NAME "ALPS")
+  set(CPACK_PACKAGE_VENDOR "ALPS Collaboration")
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
+  set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
+  set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.txt")
+  set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.txt")
+  set(CPACK_RESOURCE_FILE_WELCOME "${PROJECT_SOURCE_DIR}/Welcome.txt")
+  set(CPACK_PACKAGE_VERSION "${ALPS_VERSION}")
+  set(CPACK_PACKAGE_VERSION_MAJOR "${ALPS_VERSION_MAJOR}")
+  set(CPACK_PACKAGE_VERSION_MINOR "${ALPS_VERSION_MINOR}")
+  set(CPACK_PACKAGE_VERSION_SUBMINOR "${ALPS_VERSION_SUBMINOR}")
+  set(CPACK_PACKAGING_INSTALL_PREFIX "/")
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY "/opt/alps")
+  set(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/alps")
+  set(CPACK_PACKAGE_VERSION_PATCH "${ALPS_VERSION_BUILD}-${VERSION_BUILD}")
+
+  if(WIN32 AND NOT UNIX)
+    # There is a bug in NSI that does not handle full unix paths properly. Make
+    # sure there is at least one set of four (4) backlasshes.
+    # NOTE: No ALPS icon yet
+  #  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/tools/build/CMake\\\\InstallIcon.bmp")
+  #  set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
+    set(CPACK_NSIS_DISPLAY_NAME "ALPS ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+    set(CPACK_NSIS_CONTACT "wistaria@comp-phys.org")
+    set(CPACK_NSIS_HELP_LINK "http://alps.comp-phys.org")
+    set(CPACK_NSIS_URL_INFO_ABOUT "http://alps.comp-phys.org")
+    set(CPACK_NSIS_MODIFY_PATH ON)
+    
+    # Encode the compiler name in the package 
+    if (MSVC60)
+      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc6")
+      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual C++ 6")
+    elseif (MSVC70)
+      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc7")
+      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2002")
+    elseif (MSVC71)
+      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc71")
+      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2003")
+    elseif (MSVC80)
+      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc8")
+      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2005")    
+    elseif (MSVC90)
+      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc9")
+      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2008")
+    elseif (BORLAND)
+      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-borland")  
+      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Borland C++ Builder")    
+    endif (MSVC60)
+    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
+    set(CPACK_PACKAGE_INSTALL_DIRECTORY "C:\alps")
+  endif(WIN32 AND NOT UNIX)
+  include(CPack)
 
 
-if(COMMAND cpack_configure_downloads)
-  cpack_configure_downloads(
-  "http://alps.comp-phys.org/static/software/releases/"
-    ALL ADD_REMOVE)
-endif()
+  if(COMMAND cpack_configure_downloads)
+    cpack_configure_downloads(
+    "http://alps.comp-phys.org/static/software/releases/"
+      ALL ADD_REMOVE)
+  endif()
+endif (NOT ALPS_FOR_VISTRAILS)
+
 ##########################################################################
 
 
