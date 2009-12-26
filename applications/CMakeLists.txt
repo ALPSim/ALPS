@@ -11,5 +11,5 @@ add_subdirectory(qmc/sse)
 # GUI's
 ######################################################################
 
-add_subdirectory(gui/simulator)
+# add_subdirectory(gui/simulator)
 
