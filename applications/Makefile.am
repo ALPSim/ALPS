@@ -5,6 +5,9 @@ endif
 if EXIST_DMRG
 SUBDIRS += dmrg
 endif
+if EXIST_DMFT
+SUBDIRS += dmft
+endif
 if EXIST_MC
 SUBDIRS += mc
 endif
@@ -17,7 +20,7 @@ endif
 SUBDIRS += .
 DIST_SUBDIRS = $(SUBDIRS)
 
-REMOVE_FOR_RELEASE = dmrg/interacting qmc/sse-loop test/sse-loop
+REMOVE_FOR_RELEASE = dmrg/interacting qmc/sse-loop test/sse-loop  dmft
 
 distdir = alps-applications-$(VERSION)
 

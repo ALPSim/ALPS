@@ -37,16 +37,19 @@ build_triplet = @build@
 host_triplet = @host@
 @EXIST_DIAG_TRUE@am__append_1 = diag
 @EXIST_DMRG_TRUE@am__append_2 = dmrg
-@EXIST_MC_TRUE@am__append_3 = mc
-@EXIST_QMC_TRUE@am__append_4 = qmc
-@EXIST_TEST_TRUE@am__append_5 = test
+@EXIST_DMFT_TRUE@am__append_3 = dmft
+@EXIST_MC_TRUE@am__append_4 = mc
+@EXIST_QMC_TRUE@am__append_5 = qmc
+@EXIST_TEST_TRUE@am__append_6 = test
 subdir = .
 DIST_COMMON = $(am__configure_deps) $(dist_noinst_DATA) \
 	$(dist_noinst_SCRIPTS) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(top_srcdir)/config/config.h.in \
-	$(top_srcdir)/configure ChangeLog config/config.guess \
-	config/config.sub config/depcomp config/install-sh \
-	config/ltmain.sh config/missing
+	$(top_srcdir)/configure \
+	$(top_srcdir)/dmft/DMFT-Solvers/Makefile.in \
+	$(top_srcdir)/dmft/DMFT-Solvers/Werner/Makefile.in ChangeLog \
+	config/config.guess config/config.sub config/depcomp \
+	config/install-sh config/ltmain.sh config/missing
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_alps.m4 \
@@ -58,7 +61,8 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config/config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = dmft/DMFT-Solvers/Makefile \
+	dmft/DMFT-Solvers/Werner/Makefile
 CONFIG_CLEAN_VPATH_FILES =
 SCRIPTS = $(dist_noinst_SCRIPTS)
 SOURCES =
@@ -239,9 +243,9 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SUBDIRS = $(am__append_1) $(am__append_2) $(am__append_3) \
-	$(am__append_4) $(am__append_5) .
+	$(am__append_4) $(am__append_5) $(am__append_6) .
 DIST_SUBDIRS = $(SUBDIRS)
-REMOVE_FOR_RELEASE = dmrg/interacting qmc/sse-loop test/sse-loop
+REMOVE_FOR_RELEASE = dmrg/interacting qmc/sse-loop test/sse-loop  dmft
 distdir = alps-applications-$(VERSION)
 dist_noinst_SCRIPTS = config/update_preamble
 dist_noinst_DATA = CITATIONS.txt ChangeLog LICENSE.txt \
@@ -322,6 +326,10 @@ $(top_srcdir)/config/config.h.in: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 
 distclean-hdr:
 	-rm -f config/config.h config/stamp-h1
+dmft/DMFT-Solvers/Makefile: $(top_builddir)/config.status $(top_srcdir)/dmft/DMFT-Solvers/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
+dmft/DMFT-Solvers/Werner/Makefile: $(top_builddir)/config.status $(top_srcdir)/dmft/DMFT-Solvers/Werner/Makefile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
