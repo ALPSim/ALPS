@@ -1,0 +1,10 @@
+SUBDIRS =
+if EXIST_DMFT
+SUBDIRS += DMFT
+endif
+#SUBDIRS += blas_classes
+if EXIST_DMFT_SOLVERS
+SUBDIRS += DMFT-solvers
+endif
+SUBDIRS += .
+DIST_SUBDIRS = $(SUBDIRS)
