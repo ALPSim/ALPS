@@ -4,6 +4,7 @@ project(alps)
 
 option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
+option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
 # option(INSTALL_BOOST_HEADERS "Install all the Boost header files" OFF)
 
 if(MSVC)
@@ -278,10 +279,9 @@ add_subdirectory(lib/pyalps)
 ######################################################################
 if (NOT ALPS_FOR_VISTRAILS)
   add_subdirectory(tool)
+  add_subdirectory(example)
 endif (NOT ALPS_FOR_VISTRAILS)
 
-# add_subdirectory(example/parapack/single)
-# add_subdirectory(example/scheduler)
 
 ##########################################################################
 # Binary packages                                                        #
