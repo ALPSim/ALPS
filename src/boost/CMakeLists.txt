@@ -112,6 +112,24 @@ if(BUILD_BOOST_SYSTEM)
   endforeach(S)
 endif(BUILD_BOOST_SYSTEM)
 
+# Boost.MPI
+if(BUILD_BOOST_MPI)
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src")
+  set(SOURCES broadcast.cpp communicator.cpp computation_tree.cpp 
+      content_oarchive.cpp environment.cpp exception.cpp graph_communicator.cpp
+      group.cpp intercommunicator.cpp mpi_datatype_cache.cpp 
+      mpi_datatype_oarchive.cpp packed_iarchive.cpp packed_oarchive.cpp
+      packed_skeleton_iarchive.cpp packed_skeleton_oarchive.cpp
+      point_to_point.cpp request.cpp timer.cpp
+  )
+  foreach(S ${SOURCES})
+    if(EXISTS ${DIRECTORY}/${S})
+      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
+    endif(EXISTS ${DIRECTORY}/${S})
+  endforeach(S)
+endif(BUILD_BOOST_MPI)
+
+
 add_library(boost ${BOOST_SOURCES})
 
 if(MSVC)

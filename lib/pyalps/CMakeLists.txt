@@ -8,9 +8,10 @@ endif (ALPS_HAVE_PYTHON)
 
 
 if(BUILD_SHARED_LIBS)
-  add_library(pyalea ${PYALEA_SOURCES})
+  python_add_module(pyalea ${PYALEA_SOURCES})
   set_target_properties(pyalea PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-  set_target_properties(pyalea PROPERTIES  PREFIX "" SUFFIX ".so")
+  set_target_properties(pyalea PROPERTIES PREFIX "")
+#  set_target_properties(pyalea PROPERTIES SUFFIX ".pyd")
 endif(BUILD_SHARED_LIBS)
 
 if(ALPS_FOR_VISTRAILS)
