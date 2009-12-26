@@ -5,7 +5,10 @@ from scipy import optimize
 
 from util.dataset import ResultFile
 from util.dataset import DataSet
-import alea.floatwitherror as fwe
+#import alea.floatwitherror 
+#fwe = alea.floatwitherror.FloatWithError
+import pyalps.pyalea
+fwe = pyalps.pyalea.value_with_error
 
 class Hdf5Loader:
     def GetFileNames(self, flist):
@@ -78,9 +81,9 @@ class Hdf5Loader:
                             size = len(all_m)
                         except:
                             size=0
-                            subset.append(fwe.FloatWithError(all_m,all_e))
+                            subset.append(fwe(all_m,all_e))
                         for i in range(0,size):
-                            subset.append(fwe.FloatWithError(all_m[i],all_e[i]))
+                            subset.append(fwe(all_m[i],all_e[i]))
                         d.y = np.array(subset)
                         d.x =     np.arange(0,len(d.y))
                         d.props['hdf5_path'] = path + m

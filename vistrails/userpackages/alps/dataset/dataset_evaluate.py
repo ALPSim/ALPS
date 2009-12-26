@@ -59,7 +59,7 @@ class GenerateDataSet(Module):
 		else:
 			raise EmptyInputPort('source')
 
-class Transform(NotCacheable, Module):
+class Transform(Module):
 	my_input_ports = [
 		PortDescriptor("input",DataSets),
 		PortDescriptor("source",basic.String,use_python_source=True)
@@ -91,7 +91,7 @@ def AddDataSetsInputPorts(m, Nmax):
 	for i in range(0,Nmax):
 		m.my_input_ports.append(PortDescriptor('input'+str(i),DataSets))
 
-class TransformN(NotCacheable, Module):
+class TransformN(Module):
 	my_input_ports = [
 		PortDescriptor("source",basic.String,use_python_source=True)
 	]
@@ -135,7 +135,7 @@ class TransformN(NotCacheable, Module):
 		else:
 			raise EmptyInputPort('source')
 
-class Reduce(NotCacheable, Module):
+class Reduce(Module):
 	my_input_ports = [
 		PortDescriptor("input",DataSets),
 		PortDescriptor("source",basic.String,use_python_source=True)
@@ -157,7 +157,7 @@ class Reduce(NotCacheable, Module):
 		else:
 			raise EmptyInputPort('input || source')
 
-class GeneralTransform(NotCacheable, Module):
+class GeneralTransform(Module):
 	my_input_ports = [
 		PortDescriptor("input",DataSets),
 		PortDescriptor("source",basic.String,use_python_source=True)
