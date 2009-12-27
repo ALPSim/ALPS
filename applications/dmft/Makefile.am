@@ -2,8 +2,9 @@ SUBDIRS =
 if EXIST_DMFT
 SUBDIRS += DMFT
 endif
-if EXIST_DMFT_SOLVERS
-SUBDIRS += DMFT-solvers
-endif
 SUBDIRS += .
 DIST_SUBDIRS = $(SUBDIRS)
+if EXIST_DMFT_SOLVERS
+SUBDIRS += DMFT-solvers
+SUBDIRS += DMFT-solvers/Werner
+endif

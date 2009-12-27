@@ -106,6 +106,7 @@ LIBS=
 
 AC_SUBST([DEFAULT_INCLUDES], '-I. -I$(srcdir) -I$(top_builddir)')
 AC_SUBST([LDADD], "$LPSOLVE_LIBS $ac_cv_alps_libs")
+AC_SUBST([LDFLAGS], "$ac_cv_alps_ldflags_mpi $LPSOLVE_LDFLAGS")
 
 AC_SUBST([LDFLAGS_MPI], "$ac_cv_alps_ldflags_mpi $LPSOLVE_LDFLAGS")
 AC_SUBST([LIBS_MPI], "$LPSOLVE_LIBS $ac_cv_alps_libs_mpi")
@@ -192,7 +193,7 @@ exist_dmft_solvers_hybridization=no
 build_dmft_solvers_hybridization=no
 
 #the following line will switch on the DMFT code
-#if test -f "$srcdir/dmft/Makefile.in"; then
+if test -f "$srcdir/dmft/Makefile.in"; then
 if false; then
   exist_dmft=yes
   dnl dmft/DMFT
@@ -202,14 +203,14 @@ if false; then
       build_dmft_dmft=yes
     fi
   fi
-  if test -f "$srcdir/dmft/DMFT-solvers/Makefile.in"; then
+  if test -f "$srcdir/dmft/DMFT-solvers/Werner"; then
     exist_dmft_solvers=yes
     if test "$ac_cv_have_lapack" = yes; then
       build_dmft_solvers=yes
     fi
   fi
   dnl dmft/DMFT-solvers/Werner
-  if test -f "$srcdir/dmft/DMFT-solvers/Werner/Makefile.in"; then
+  if test -f "$srcdir/dmft/DMFT-solvers/Werner/impurity.h"; then
     exist_dmft_solvers_hybridization=yes
     if test "$ac_cv_have_lapack" = yes; then
       build_dmft_solvers_hybridization=yes
@@ -382,8 +383,6 @@ test "$exist_dmrg_interacting" = yes && AC_CONFIG_FILES(dmrg/interacting/Makefil
 test "$exist_dmrg_particle_in_box" = yes && AC_CONFIG_FILES(dmrg/particle_in_box/Makefile)
 test "$exist_dmft" = yes && AC_CONFIG_FILES(dmft/Makefile)
 test "$exist_dmft_dmft" = yes && AC_CONFIG_FILES(dmft/DMFT/Makefile)
-test "$exist_dmft_solver" = yes && AC_CONFIG_FILES(dmft/DMFT-Solvers/Makefile)
-test "$exist_dmft_solver_hybridization" = yes && AC_CONFIG_FILES(dmft/DMFT-Solvers/Werner/Makefile)
 test "$exist_mc" = yes && AC_CONFIG_FILES(mc/Makefile)
 test "$exist_mc_spins" = yes && AC_CONFIG_FILES(mc/spins/Makefile)
 test "$exist_qmc" = yes && AC_CONFIG_FILES(qmc/Makefile)
@@ -448,11 +447,8 @@ if test "x$exist_dmft" = xyes; then
   if test "x$exist_dmft_dmft" = xyes; then
     echo "    DMFT                 $build_dmft_dmft"
   fi
-  if test "x$exist_dmft_solvers" = xyes; then
-    echo "    Solvers              $build_dmft_solvers"
-  fi
-  if test "x$exist_dmft_solvers" = xyes; then
-    echo "     Hirsch Fye          $build_dmft_solvers"
+  if test "x$exist_dmft_dmft" = xyes; then
+    echo "     Hirsch Fye          $exist_dmft_dmft"
   fi
   if test "x$exist_dmft_solvers_hybridization" = xyes; then
     echo "     Hybridization       $build_dmft_solvers_hybridization"
