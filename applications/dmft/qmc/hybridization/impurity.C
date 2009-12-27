@@ -10,13 +10,13 @@
  * THIS SOFTWARE NEEDS AN APPROPRIATE LICENSE BLOCK HERE
  *****************************************************************************/
 
-#include <DMFT/types.h>
+#include "types.h"
 #include <alps/model.h>
 #include <alps/lattice.h>
 #include "impurity.h"
 #include "moves.h"
-#include <DMFT/fouriertransform.h>
-#include <DMFT/xml.h>
+#include "fouriertransform.h"
+#include "xml.h"
 #include <alps/alea.h>
 //#include "matrix_builder.h"
 using namespace std;

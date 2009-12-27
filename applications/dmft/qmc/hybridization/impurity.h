@@ -23,12 +23,12 @@
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 #include <cmath>
-#include <blas_classes/matrix.h>
-#include <blas_classes/vector.h>
 #include <alps/osiris/std/list.h>
-#include <DMFT/green_function.h>
-#include <DMFT/U_matrix.h>
-#include <DMFT/alps_solver.h>
+#include "blas_classes/matrix.h"
+#include "blas_classes/vector.h"
+#include "green_function.h"
+#include "U_matrix.h"
+#include "alps_solver.h"
 
 //typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> blas_matrix;
 typedef blas::matrix blas_matrix;
