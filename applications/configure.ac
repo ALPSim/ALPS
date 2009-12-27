@@ -194,7 +194,6 @@ build_dmft_solvers_hybridization=no
 
 #the following line will switch on the DMFT code
 if test -f "$srcdir/dmft/Makefile.in"; then
-if false; then
   exist_dmft=yes
   dnl dmft/DMFT
   if test -f "$srcdir/dmft/DMFT/Makefile.in"; then
