@@ -35,8 +35,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 check_PROGRAMS = evaluate$(EXEEXT) evaluate2$(EXEEXT) main$(EXEEXT) \
-	main2$(EXEEXT) main3$(EXEEXT) $(am__EXEEXT_1)
-@HAVE_MPI_TRUE@am__append_1 = main_mpi main2_mpi main3_mpi
+	main2$(EXEEXT) main3$(EXEEXT)
 subdir = example/scheduler
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -64,87 +63,97 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@HAVE_MPI_TRUE@am__EXEEXT_1 = main_mpi$(EXEEXT) main2_mpi$(EXEEXT) \
-@HAVE_MPI_TRUE@	main3_mpi$(EXEEXT)
 am_evaluate_OBJECTS = evaluate.$(OBJEXT)
 evaluate_OBJECTS = $(am_evaluate_OBJECTS)
+evaluate_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-@BUILD_UNIFIED_LIB_FALSE@am__DEPENDENCIES_2 =  \
+@BUILD_UNIFIED_LIB_FALSE@evaluate_DEPENDENCIES =  \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
-@BUILD_UNIFIED_LIB_TRUE@am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@evaluate_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
-evaluate_DEPENDENCIES = $(am__DEPENDENCIES_2)
-evaluate_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(evaluate_LDFLAGS) $(LDFLAGS) -o $@
 am_evaluate2_OBJECTS = evaluate2.$(OBJEXT)
 evaluate2_OBJECTS = $(am_evaluate2_OBJECTS)
-evaluate2_DEPENDENCIES = $(am__DEPENDENCIES_2)
-evaluate2_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(evaluate2_LDFLAGS) $(LDFLAGS) -o $@
-am_main_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
-main_OBJECTS = $(am_main_OBJECTS)
-main_DEPENDENCIES = $(am__DEPENDENCIES_2)
-main_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main_LDFLAGS) $(LDFLAGS) -o $@
-am_main2_OBJECTS = main2.$(OBJEXT) ising2.$(OBJEXT)
-main2_OBJECTS = $(am_main2_OBJECTS)
-main2_DEPENDENCIES = $(am__DEPENDENCIES_2)
-main2_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main2_LDFLAGS) $(LDFLAGS) -o $@
-am_main2_mpi_OBJECTS = main2.$(OBJEXT) ising2.$(OBJEXT)
-main2_mpi_OBJECTS = $(am_main2_mpi_OBJECTS)
-@BUILD_UNIFIED_LIB_FALSE@am__DEPENDENCIES_3 =  \
+evaluate2_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@evaluate2_DEPENDENCIES =  \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-mpi/libcomm-mpi.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
-@BUILD_UNIFIED_LIB_TRUE@am__DEPENDENCIES_3 = $(top_builddir)/lib/alps/libalps-mpi.la \
+@BUILD_UNIFIED_LIB_TRUE@evaluate2_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
-main2_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
-main2_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(main2_mpi_LDFLAGS) $(LDFLAGS) -o $@
+am_main_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
+main_OBJECTS = $(am_main_OBJECTS)
+main_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@main_DEPENDENCIES =  \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
+@BUILD_UNIFIED_LIB_TRUE@main_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
+am_main2_OBJECTS = main2.$(OBJEXT) ising2.$(OBJEXT)
+main2_OBJECTS = $(am_main2_OBJECTS)
+main2_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@main2_DEPENDENCIES =  \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
+@BUILD_UNIFIED_LIB_TRUE@main2_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_main3_OBJECTS = main3.$(OBJEXT) ising.$(OBJEXT)
 main3_OBJECTS = $(am_main3_OBJECTS)
-main3_DEPENDENCIES = $(am__DEPENDENCIES_2)
-main3_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(main3_LDFLAGS) $(LDFLAGS) -o $@
-am_main3_mpi_OBJECTS = main3.$(OBJEXT) ising.$(OBJEXT)
-main3_mpi_OBJECTS = $(am_main3_mpi_OBJECTS)
-main3_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
-main3_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(main3_mpi_LDFLAGS) $(LDFLAGS) -o $@
-am_main_mpi_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
-main_mpi_OBJECTS = $(am_main_mpi_OBJECTS)
-main_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
-main_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(main_mpi_LDFLAGS) $(LDFLAGS) -o $@
+main3_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@main3_DEPENDENCIES =  \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
+@BUILD_UNIFIED_LIB_TRUE@main3_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -167,11 +176,9 @@ LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
 SOURCES = $(evaluate_SOURCES) $(evaluate2_SOURCES) $(main_SOURCES) \
-	$(main2_SOURCES) $(main2_mpi_SOURCES) $(main3_SOURCES) \
-	$(main3_mpi_SOURCES) $(main_mpi_SOURCES)
+	$(main2_SOURCES) $(main3_SOURCES)
 DIST_SOURCES = $(evaluate_SOURCES) $(evaluate2_SOURCES) \
-	$(main_SOURCES) $(main2_SOURCES) $(main2_mpi_SOURCES) \
-	$(main3_SOURCES) $(main3_mpi_SOURCES) $(main_mpi_SOURCES)
+	$(main_SOURCES) $(main2_SOURCES) $(main3_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -353,37 +360,16 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(SQLITE_CPPFLAGS) $(HDF5_CPPFLAGS)
-LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS)
-@BUILD_UNIFIED_LIB_FALSE@LIBS_SGL = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LIBS_SGL = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
-@BUILD_UNIFIED_LIB_FALSE@LIBS_MPI = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LIBS_MPI = $(top_builddir)/lib/alps/libalps-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(SQLITE_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
+AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
+AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS) $(MPI_LDFLAGS)
+@BUILD_UNIFIED_LIB_FALSE@LDADD = $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
+@BUILD_UNIFIED_LIB_TRUE@LDADD = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 evaluate_SOURCES = evaluate.C
-evaluate_LDFLAGS = $(LDFLAGS_SGL)
-evaluate_LDADD = $(LIBS_SGL)
 evaluate2_SOURCES = evaluate2.C
-evaluate2_LDFLAGS = $(LDFLAGS_SGL)
-evaluate2_LDADD = $(LIBS_SGL)
 main_SOURCES = main.C ising.h ising.C
-main_LDFLAGS = $(LDFLAGS_SGL)
-main_LDADD = $(LIBS_SGL)
 main2_SOURCES = main2.C ising2.h ising2.C
-main2_LDFLAGS = $(LDFLAGS_SGL)
-main2_LDADD = $(LIBS_SGL)
 main3_SOURCES = main3.C ising.h ising.C
-main3_LDFLAGS = $(LDFLAGS_SGL)
-main3_LDADD = $(LIBS_SGL)
-main_mpi_SOURCES = main.C ising.h ising.C
-main_mpi_LDFLAGS = $(LDFLAGS_MPI)
-main_mpi_LDADD = $(LIBS_MPI)
-main2_mpi_SOURCES = main2.C ising2.h ising2.C
-main2_mpi_LDFLAGS = $(LDFLAGS_MPI)
-main2_mpi_LDADD = $(LIBS_MPI)
-main3_mpi_SOURCES = main3.C ising.h ising.C
-main3_mpi_LDFLAGS = $(LDFLAGS_MPI)
-main3_mpi_LDADD = $(LIBS_MPI)
 dist_noinst_DATA = parm parm2 parm3
 all: all-am
 
@@ -430,28 +416,19 @@ clean-checkPROGRAMS:
 	rm -f $$list
 evaluate$(EXEEXT): $(evaluate_OBJECTS) $(evaluate_DEPENDENCIES) 
 	@rm -f evaluate$(EXEEXT)
-	$(evaluate_LINK) $(evaluate_OBJECTS) $(evaluate_LDADD) $(LIBS)
+	$(CXXLINK) $(evaluate_OBJECTS) $(evaluate_LDADD) $(LIBS)
 evaluate2$(EXEEXT): $(evaluate2_OBJECTS) $(evaluate2_DEPENDENCIES) 
 	@rm -f evaluate2$(EXEEXT)
-	$(evaluate2_LINK) $(evaluate2_OBJECTS) $(evaluate2_LDADD) $(LIBS)
+	$(CXXLINK) $(evaluate2_OBJECTS) $(evaluate2_LDADD) $(LIBS)
 main$(EXEEXT): $(main_OBJECTS) $(main_DEPENDENCIES) 
 	@rm -f main$(EXEEXT)
-	$(main_LINK) $(main_OBJECTS) $(main_LDADD) $(LIBS)
+	$(CXXLINK) $(main_OBJECTS) $(main_LDADD) $(LIBS)
 main2$(EXEEXT): $(main2_OBJECTS) $(main2_DEPENDENCIES) 
 	@rm -f main2$(EXEEXT)
-	$(main2_LINK) $(main2_OBJECTS) $(main2_LDADD) $(LIBS)
-main2_mpi$(EXEEXT): $(main2_mpi_OBJECTS) $(main2_mpi_DEPENDENCIES) 
-	@rm -f main2_mpi$(EXEEXT)
-	$(main2_mpi_LINK) $(main2_mpi_OBJECTS) $(main2_mpi_LDADD) $(LIBS)
+	$(CXXLINK) $(main2_OBJECTS) $(main2_LDADD) $(LIBS)
 main3$(EXEEXT): $(main3_OBJECTS) $(main3_DEPENDENCIES) 
 	@rm -f main3$(EXEEXT)
-	$(main3_LINK) $(main3_OBJECTS) $(main3_LDADD) $(LIBS)
-main3_mpi$(EXEEXT): $(main3_mpi_OBJECTS) $(main3_mpi_DEPENDENCIES) 
-	@rm -f main3_mpi$(EXEEXT)
-	$(main3_mpi_LINK) $(main3_mpi_OBJECTS) $(main3_mpi_LDADD) $(LIBS)
-main_mpi$(EXEEXT): $(main_mpi_OBJECTS) $(main_mpi_DEPENDENCIES) 
-	@rm -f main_mpi$(EXEEXT)
-	$(main_mpi_LINK) $(main_mpi_OBJECTS) $(main_mpi_LDADD) $(LIBS)
+	$(CXXLINK) $(main3_OBJECTS) $(main3_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

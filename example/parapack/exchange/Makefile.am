@@ -1,17 +1,17 @@
 DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(SQLITE_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
 
-LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS)
+LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(MPI_LDFLAGS) $(HDF5_LDFLAGS)
 if BUILD_UNIFIED_LIB
-  LIBS_SGL = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+  LIBS_SGL = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
 else
-  LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+  LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la  $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS)  $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 endif
 
-LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
+LDFLAGS_MPI = $(LDFLAGS_SGL) 
 if BUILD_UNIFIED_LIB
-  LIBS_MPI = $(top_builddir)/lib/alps/libalps-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+  LIBS_MPI = $(top_builddir)/lib/alps/libalps-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS)$(HDF5_LIBS)  $(MPI_LIBS) $(BASE_LIBS) 
 else
-  LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-mpi/libcomm-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+  LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
 endif
 
 check_PROGRAMS = exchange

@@ -1,4 +1,4 @@
-SUBDIRS = comm-sgl comm-mpi alps heap
+SUBDIRS = alps heap
 if ALPS_FULL
 SUBDIRS += xml
 endif

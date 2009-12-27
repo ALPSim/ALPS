@@ -14897,7 +14897,7 @@ LIBS=
 
 DEFAULT_INCLUDES='-I. -I$(srcdir) -I$(top_builddir)'
 
-LDADD="$LPSOLVE_LIBS $ac_cv_alps_libs"
+LDADD="$LPSOLVE_LIBS $ac_cv_alps_libs_mpi"
 
 LDFLAGS="$ac_cv_alps_ldflags_mpi $LPSOLVE_LDFLAGS"
 

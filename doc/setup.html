@@ -271,10 +271,9 @@ href="#options">Configure Options</a>).  ALPS libraries are installed
 under <t>PREFIX/lib</t>.  For example, you can compile and link your
 program as
 <blockquote>
-  <pre>CC -I/home/ALPS/include -L/home/ALPS/lib -o myprog myprog.C -lalps -lcomm-sgl -lm<br></pre>
+  <pre>CC -I/home/ALPS/include -L/home/ALPS/lib -o myprog myprog.C -lalps -lm<br></pre>
 </blockquote>
-For parallel applications using MPI -lcomm-sgl should be
-replaced by <t>-lcomm-mpi</t>, and appropriate
+For parallel applications ppropriate
 linker flags for MPI should be appended (e.g. -lmpi).  You
 should link the ALPS libraries exactly in this order.  Otherwise you
 will have an error message from the linker.</p>
@@ -290,8 +289,6 @@ simple makefile for your application, e.g.</t></t>
 include $(HOME)/ALPS/share/alps/include.mk
 myprog : myprog.C
         $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)
-myprog_mpi : myprog.C
-        $(CXX) $(CPPFLAGS_MPI) $(CXXFLAGS) -o myprog_mpi myprog.C $(LDFLAGS_MPI) $(LIBS_MPI)
   </pre>
 </blockquote>
 </p>

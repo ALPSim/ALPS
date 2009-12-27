@@ -160,11 +160,10 @@ Options]).  ALPS libraries are installed under /PREFIX/=/lib=.  For
 example, you can compile and link your program as
 
 [pre
-CC -I${HOME}/ALPS/include -L${HOME}/ALPS/lib -o myprog myprog.C -lalps -lcomm-sgl -lm
+CC -I${HOME}/ALPS/include -L${HOME}/ALPS/lib -o myprog myprog.C -lalps -lm
 ]
 
-For parallel applications using MPI, =-lcomm-sgl= should be
-replaced  =-lcomm-mpi=,  and appropriate linker flags
+For parallel applications appropriate linker flags
 for MPI should be appended (e.g. =-lmpi=).  You should link the
 ALPS libraries exactly in this order.  Otherwise you will have an
 error message from the linker.
@@ -180,8 +179,6 @@ your application, e.g.
 include $(HOME)/ALPS/share/alps/include.mk
 myprog : myprog.C
         $(CXX) $(CPPFLAGS) $(CXXFLAGS) -o myprog myprog.C $(LDFLAGS) $(LIBS)
-myprog_mpi : myprog.C
-        $(CXX) $(CPPFLAGS_MPI) $(CXXFLAGS) -o myprog_mpi myprog.C $(LDFLAGS_MPI) $(LIBS_MPI)
 ]
 
 [endsect]

@@ -5,10 +5,10 @@ from scipy import optimize
 
 from util.dataset import ResultFile
 from util.dataset import DataSet
-#import alea.floatwitherror 
-#fwe = alea.floatwitherror.FloatWithError
-import pyalps.pyalea
-fwe = pyalps.pyalea.value_with_error
+import alea.floatwitherror 
+fwe = alea.floatwitherror.FloatWithError
+#import pyalps.pyalea
+#fwe = pyalps.pyalea.value_with_error
 
 class Hdf5Loader:
     def GetFileNames(self, flist):

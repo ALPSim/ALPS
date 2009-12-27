@@ -16,10 +16,6 @@ src_ALEA = \
   $(top_srcdir)/src/alps/alea/observableset.C
 src_EXPRESSION = \
   $(top_srcdir)/src/alps/expression/evaluator.C 
-src_OSIRIS = \
-  $(top_srcdir)/src/alps/osiris/xdrdump.C \
-  $(top_srcdir)/src/alps/osiris/xdrcore.C \
-  $(top_srcdir)/src/alps/osiris/dumparchive.C
 src_LATTICE = \
   $(top_srcdir)/src/alps/lattice/disorder.C \
   $(top_srcdir)/src/alps/lattice/latticedescriptor.C \
@@ -63,6 +59,17 @@ src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/task.C \
   $(top_srcdir)/src/alps/scheduler/worker.C \
   $(top_srcdir)/src/alps/scheduler/workertask.C
+src_OSIRIS = \
+  $(top_srcdir)/src/alps/osiris/buffer.C \
+  $(top_srcdir)/src/alps/osiris/dump.C \
+  $(top_srcdir)/src/alps/osiris/os.C \
+  $(top_srcdir)/src/alps/osiris/process.C \
+  $(top_srcdir)/src/alps/osiris/comm.C \
+  $(top_srcdir)/src/alps/osiris/mpdump.C \
+  $(top_srcdir)/src/alps/osiris/xdrdump.C \
+  $(top_srcdir)/src/alps/osiris/xdrcore.C \
+  $(top_srcdir)/src/alps/osiris/dumparchive.C
+
 src_PARAPACK_COMMON = \
   $(top_srcdir)/src/alps/parapack/clone.C \
   $(top_srcdir)/src/alps/parapack/clone_info.C \
@@ -241,18 +248,21 @@ endif
 
 libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARAMETER) $(src_PARSER) $(src_RANDOM) $(src_ALEA)
 nodist_libalps_la_SOURCES =
-libalps_la_LDFLAGS = $(LDFLAGS_SGL)
-# libalps_la_LIBADD = ../comm-sgl/libcomm-sgl.la $(LIBS_SGL)
+if HAVE_MPI
+  libalps_la_LDFLAGS = $(LDFLAGS_MPI)
+  libalps_la_CPPFLAGS = $(AM_CPPFLAGS) -DALPS_MPI
+else
+  libalps_la_CPPFLAGS = $(AM_CPPFLAGS)
+  libalps_la_LDFLAGS = $(LDFLAGS_SGL)
+endif
 
 libparapack_sgl_la_SOURCES =
 nodist_libparapack_sgl_la_SOURCES =
 libparapack_sgl_la_LDFLAGS = $(LDFLAGS_SGL)
-# libparapack_sgl_la_LIBADD = libalps.la ../comm-sgl/libcomm-sgl.la $(LIBS_SGL)
 
 libparapack_mpi_la_SOURCES =
 nodist_libparapack_mpi_la_SOURCES =
 libparapack_mpi_la_LDFLAGS = $(LDFLAGS_MPI)
-# libparapack_mpi_la_LIBADD = libalps.la ../comm-mpi/libcomm-mpi.la $(LIBS_MPI)
 
 if ALPS_FULL
 libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER) $(src_PARAPACK_COMMON)
@@ -280,14 +290,12 @@ endif
 
 # unified libraries
 
-SRC_OSIRIS = $(top_srcdir)/src/alps/osiris/buffer.C $(top_srcdir)/src/alps/osiris/dump.C $(top_srcdir)/src/alps/osiris/os.C $(top_srcdir)/src/alps/osiris/process.C $(top_srcdir)/src/alps/osiris/comm.C $(top_srcdir)/src/alps/osiris/mpdump.C
-
-libalps_sgl_la_SOURCES = $(libalps_la_SOURCES) $(libparapack_sgl_la_SOURCES) $(SRC_OSIRIS)
+libalps_sgl_la_SOURCES = $(libalps_la_SOURCES) $(libparapack_sgl_la_SOURCES)
 nodist_libalps_sgl_la_SOURCES = $(nodist_libalps_la_SOURCES) $(nodist_libparapack_sgl_la_SOURCES)
 libalps_sgl_la_LDFLAGS = $(LDFLAGS_SGL)
 # libalps_sgl_la_LIBADD = $(LIBS_SGL)
 
-libalps_mpi_la_SOURCES = $(libalps_la_SOURCES) $(libparapack_mpi_la_SOURCES) $(SRC_OSIRIS)
+libalps_mpi_la_SOURCES = $(libalps_la_SOURCES) $(libparapack_mpi_la_SOURCES)
 nodist_libalps_mpi_la_SOURCES = $(nodist_libalps_la_SOURCES) $(nodist_libparapack_mpi_la_SOURCES)
 libalps_mpi_la_CPPFLAGS = $(AM_CPPFLAGS) -DALPS_MPI
 libalps_mpi_la_LDFLAGS = $(LDFLAGS_MPI)

@@ -64,49 +64,95 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 am_fleas_correlated_OBJECTS = fleas_correlated.$(OBJEXT)
 fleas_correlated_OBJECTS = $(am_fleas_correlated_OBJECTS)
+fleas_correlated_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-@BUILD_UNIFIED_LIB_FALSE@am__DEPENDENCIES_2 =  \
+@BUILD_UNIFIED_LIB_FALSE@fleas_correlated_DEPENDENCIES =  \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
-@BUILD_UNIFIED_LIB_TRUE@am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@fleas_correlated_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
-fleas_correlated_DEPENDENCIES = $(am__DEPENDENCIES_2)
-fleas_correlated_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(fleas_correlated_LDFLAGS) $(LDFLAGS) -o $@
 am_fleas_direct_OBJECTS = fleas_direct.$(OBJEXT)
 fleas_direct_OBJECTS = $(am_fleas_direct_OBJECTS)
-fleas_direct_DEPENDENCIES = $(am__DEPENDENCIES_2)
-fleas_direct_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(fleas_direct_LDFLAGS) $(LDFLAGS) -o $@
+fleas_direct_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@fleas_direct_DEPENDENCIES =  \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
+@BUILD_UNIFIED_LIB_TRUE@fleas_direct_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_fleas_independent_OBJECTS = fleas_independent.$(OBJEXT)
 fleas_independent_OBJECTS = $(am_fleas_independent_OBJECTS)
-fleas_independent_DEPENDENCIES = $(am__DEPENDENCIES_2)
-fleas_independent_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(fleas_independent_LDFLAGS) $(LDFLAGS) -o $@
+fleas_independent_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@fleas_independent_DEPENDENCIES =  \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
+@BUILD_UNIFIED_LIB_TRUE@fleas_independent_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_fleas_simpleminded_OBJECTS = fleas_simpleminded.$(OBJEXT)
 fleas_simpleminded_OBJECTS = $(am_fleas_simpleminded_OBJECTS)
-fleas_simpleminded_DEPENDENCIES = $(am__DEPENDENCIES_2)
-fleas_simpleminded_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(fleas_simpleminded_LDFLAGS) $(LDFLAGS) -o $@
+fleas_simpleminded_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@fleas_simpleminded_DEPENDENCIES =  \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
+@BUILD_UNIFIED_LIB_TRUE@fleas_simpleminded_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_fleas_uncorrelated_OBJECTS = fleas_uncorrelated.$(OBJEXT)
 fleas_uncorrelated_OBJECTS = $(am_fleas_uncorrelated_OBJECTS)
-fleas_uncorrelated_DEPENDENCIES = $(am__DEPENDENCIES_2)
-fleas_uncorrelated_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(fleas_uncorrelated_LDFLAGS) $(LDFLAGS) -o $@
+fleas_uncorrelated_LDADD = $(LDADD)
+@BUILD_UNIFIED_LIB_FALSE@fleas_uncorrelated_DEPENDENCIES =  \
+@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
+@BUILD_UNIFIED_LIB_TRUE@fleas_uncorrelated_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -314,25 +360,15 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(SQLITE_CPPFLAGS) $(HDF5_CPPFLAGS)
-LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS)
-@BUILD_UNIFIED_LIB_FALSE@LIBS_SGL = $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LIBS_SGL = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(SQLITE_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
+AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS) $(MPI_LDFLAGS)
+@BUILD_UNIFIED_LIB_FALSE@LDADD = $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
+@BUILD_UNIFIED_LIB_TRUE@LDADD = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 fleas_correlated_SOURCES = fleas_correlated.C fleas.h
-fleas_correlated_LDFLAGS = $(LDFLAGS_SGL)
-fleas_correlated_LDADD = $(LIBS_SGL)
 fleas_independent_SOURCES = fleas_independent.C fleas.h
-fleas_independent_LDFLAGS = $(LDFLAGS_SGL)
-fleas_independent_LDADD = $(LIBS_SGL)
 fleas_uncorrelated_SOURCES = fleas_uncorrelated.C fleas.h
-fleas_uncorrelated_LDFLAGS = $(LDFLAGS_SGL)
-fleas_uncorrelated_LDADD = $(LIBS_SGL)
 fleas_direct_SOURCES = fleas_direct.C fleas.h
-fleas_direct_LDFLAGS = $(LDFLAGS_SGL)
-fleas_direct_LDADD = $(LIBS_SGL)
 fleas_simpleminded_SOURCES = fleas_simpleminded.C fleas.h
-fleas_simpleminded_LDFLAGS = $(LDFLAGS_SGL)
-fleas_simpleminded_LDADD = $(LIBS_SGL)
 all: all-am
 
 .SUFFIXES:
@@ -378,19 +414,19 @@ clean-checkPROGRAMS:
 	rm -f $$list
 fleas_correlated$(EXEEXT): $(fleas_correlated_OBJECTS) $(fleas_correlated_DEPENDENCIES) 
 	@rm -f fleas_correlated$(EXEEXT)
-	$(fleas_correlated_LINK) $(fleas_correlated_OBJECTS) $(fleas_correlated_LDADD) $(LIBS)
+	$(CXXLINK) $(fleas_correlated_OBJECTS) $(fleas_correlated_LDADD) $(LIBS)
 fleas_direct$(EXEEXT): $(fleas_direct_OBJECTS) $(fleas_direct_DEPENDENCIES) 
 	@rm -f fleas_direct$(EXEEXT)
-	$(fleas_direct_LINK) $(fleas_direct_OBJECTS) $(fleas_direct_LDADD) $(LIBS)
+	$(CXXLINK) $(fleas_direct_OBJECTS) $(fleas_direct_LDADD) $(LIBS)
 fleas_independent$(EXEEXT): $(fleas_independent_OBJECTS) $(fleas_independent_DEPENDENCIES) 
 	@rm -f fleas_independent$(EXEEXT)
-	$(fleas_independent_LINK) $(fleas_independent_OBJECTS) $(fleas_independent_LDADD) $(LIBS)
+	$(CXXLINK) $(fleas_independent_OBJECTS) $(fleas_independent_LDADD) $(LIBS)
 fleas_simpleminded$(EXEEXT): $(fleas_simpleminded_OBJECTS) $(fleas_simpleminded_DEPENDENCIES) 
 	@rm -f fleas_simpleminded$(EXEEXT)
-	$(fleas_simpleminded_LINK) $(fleas_simpleminded_OBJECTS) $(fleas_simpleminded_LDADD) $(LIBS)
+	$(CXXLINK) $(fleas_simpleminded_OBJECTS) $(fleas_simpleminded_LDADD) $(LIBS)
 fleas_uncorrelated$(EXEEXT): $(fleas_uncorrelated_OBJECTS) $(fleas_uncorrelated_DEPENDENCIES) 
 	@rm -f fleas_uncorrelated$(EXEEXT)
-	$(fleas_uncorrelated_LINK) $(fleas_uncorrelated_OBJECTS) $(fleas_uncorrelated_LDADD) $(LIBS)
+	$(CXXLINK) $(fleas_uncorrelated_OBJECTS) $(fleas_uncorrelated_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

@@ -99,7 +99,7 @@ archive_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
 @BUILD_UNIFIED_LIB_FALSE@archive_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -110,13 +110,14 @@ am__DEPENDENCIES_1 =
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_compactrun_OBJECTS = compactrun.$(OBJEXT)
 compactrun_OBJECTS = $(am_compactrun_OBJECTS)
 compactrun_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@compactrun_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -127,13 +128,14 @@ compactrun_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_convert2xml_OBJECTS = convert2xml.$(OBJEXT)
 convert2xml_OBJECTS = $(am_convert2xml_OBJECTS)
 convert2xml_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@convert2xml_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -144,13 +146,14 @@ convert2xml_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_lattice2xml_OBJECTS = lattice2xml.$(OBJEXT)
 lattice2xml_OBJECTS = $(am_lattice2xml_OBJECTS)
 lattice2xml_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@lattice2xml_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -161,13 +164,14 @@ lattice2xml_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_parameter2xml_OBJECTS = parameter2xml.$(OBJEXT)
 parameter2xml_OBJECTS = $(am_parameter2xml_OBJECTS)
 parameter2xml_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@parameter2xml_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -178,13 +182,14 @@ parameter2xml_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_pconfig_OBJECTS = pconfig.$(OBJEXT)
 pconfig_OBJECTS = $(am_pconfig_OBJECTS)
 pconfig_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@pconfig_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -195,13 +200,14 @@ pconfig_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_pevaluate_OBJECTS = pevaluate.$(OBJEXT)
 pevaluate_OBJECTS = $(am_pevaluate_OBJECTS)
 pevaluate_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@pevaluate_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -212,13 +218,14 @@ pevaluate_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_poutput_OBJECTS = poutput.$(OBJEXT)
 poutput_OBJECTS = $(am_poutput_OBJECTS)
 poutput_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@poutput_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -229,19 +236,21 @@ poutput_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_printgraph_OBJECTS = printgraph.$(OBJEXT)
 printgraph_OBJECTS = $(am_printgraph_OBJECTS)
 printgraph_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@printgraph_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
 @BUILD_UNIFIED_LIB_TRUE@printgraph_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
@@ -256,7 +265,7 @@ quickbook_OBJECTS = $(nodist_quickbook_OBJECTS)
 quickbook_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@quickbook_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -267,13 +276,14 @@ quickbook_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_txt2archive_OBJECTS = txt2archive.$(OBJEXT)
 txt2archive_OBJECTS = $(am_txt2archive_OBJECTS)
 txt2archive_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@txt2archive_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
@@ -284,19 +294,21 @@ txt2archive_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
 am_xml2archive_OBJECTS = xml2archive.$(OBJEXT)
 xml2archive_OBJECTS = $(am_xml2archive_OBJECTS)
 xml2archive_LDADD = $(LDADD)
 @BUILD_UNIFIED_LIB_FALSE@xml2archive_DEPENDENCIES = $(top_builddir)/lib/alps/libparapack-sgl.la \
 @BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/comm-sgl/libcomm-sgl.la \
+@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
 @BUILD_UNIFIED_LIB_TRUE@xml2archive_DEPENDENCIES = $(top_builddir)/lib/alps/libalps-sgl.la \
+@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
 @BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
@@ -543,10 +555,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
-AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS)
-AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS)
-@BUILD_UNIFIED_LIB_FALSE@LDADD = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la $(top_builddir)/lib/comm-sgl/libcomm-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LDADD = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
+AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
+AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS) $(MPI_LDFLAGS)
+@BUILD_UNIFIED_LIB_FALSE@LDADD = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
+@BUILD_UNIFIED_LIB_TRUE@LDADD = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 dist_bin_SCRIPTS = archivecat xslttransform transformall changestylesheet
 bin_SCRIPTS = convert2text convert2html extractgp extracthtml \
 	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
