@@ -34,9 +34,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+bin_PROGRAMS = $(am__EXEEXT_1)
 @BUILD_MC_SPINS_TRUE@am__append_1 = spinmc spinmc_evaluate fit
-@BUILD_MC_SPINS_TRUE@@HAVE_MPI_TRUE@am__append_2 = spinmc_mpi fit_mpi
 subdir = mc/spins
 DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -52,9 +51,6 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_MC_SPINS_TRUE@am__EXEEXT_1 = spinmc$(EXEEXT) \
 @BUILD_MC_SPINS_TRUE@	spinmc_evaluate$(EXEEXT) fit$(EXEEXT)
-@BUILD_MC_SPINS_TRUE@@HAVE_MPI_TRUE@am__EXEEXT_2 =  \
-@BUILD_MC_SPINS_TRUE@@HAVE_MPI_TRUE@	spinmc_mpi$(EXEEXT) \
-@BUILD_MC_SPINS_TRUE@@HAVE_MPI_TRUE@	fit_mpi$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = abstract_fitter.$(OBJEXT) base_incr_fitter.$(OBJEXT) \
@@ -64,12 +60,6 @@ am_fit_OBJECTS = fit.$(OBJEXT) $(am__objects_1)
 fit_OBJECTS = $(am_fit_OBJECTS)
 fit_LDADD = $(LDADD)
 fit_DEPENDENCIES =
-am_fit_mpi_OBJECTS = fit.$(OBJEXT) $(am__objects_1)
-fit_mpi_OBJECTS = $(am_fit_mpi_OBJECTS)
-fit_mpi_DEPENDENCIES =
-fit_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(fit_mpi_LDFLAGS) $(LDFLAGS) -o $@
 am_spinmc_OBJECTS = spinmc.$(OBJEXT) $(am__objects_1)
 spinmc_OBJECTS = $(am_spinmc_OBJECTS)
 spinmc_LDADD = $(LDADD)
@@ -79,12 +69,6 @@ am_spinmc_evaluate_OBJECTS = spinmc_evaluate.$(OBJEXT) \
 spinmc_evaluate_OBJECTS = $(am_spinmc_evaluate_OBJECTS)
 spinmc_evaluate_LDADD = $(LDADD)
 spinmc_evaluate_DEPENDENCIES =
-am_spinmc_mpi_OBJECTS = spinmc.$(OBJEXT) $(am__objects_1)
-spinmc_mpi_OBJECTS = $(am_spinmc_mpi_OBJECTS)
-spinmc_mpi_DEPENDENCIES =
-spinmc_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(spinmc_mpi_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -106,8 +90,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-DIST_SOURCES = $(fit_SOURCES) $(fit_mpi_SOURCES) $(spinmc_SOURCES) \
-	$(spinmc_evaluate_SOURCES) $(spinmc_mpi_SOURCES)
+DIST_SOURCES = $(fit_SOURCES) $(spinmc_SOURCES) \
+	$(spinmc_evaluate_SOURCES)
 ETAGS = etags
 CTAGS = ctags
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
@@ -240,12 +224,6 @@ SOURCES = abstract_fitter.C base_incr_fitter.C dummy_fitter.C est_grad_fitter.C 
 spinmc_SOURCES = spinmc.C $(SOURCES)
 spinmc_evaluate_SOURCES = spinmc_evaluate.C $(SOURCES)
 fit_SOURCES = fit.C $(SOURCES)
-spinmc_mpi_SOURCES = spinmc.C $(SOURCES)
-spinmc_mpi_LDFLAGS = @LDFLAGS_MPI@
-spinmc_mpi_LDADD = @LIBS_MPI@
-fit_mpi_SOURCES = fit.C $(SOURCES)
-fit_mpi_LDFLAGS = @LDFLAGS_MPI@
-fit_mpi_LDADD = @LIBS_MPI@
 all: all-am
 
 .SUFFIXES:
@@ -326,18 +304,12 @@ clean-binPROGRAMS:
 fit$(EXEEXT): $(fit_OBJECTS) $(fit_DEPENDENCIES) 
 	@rm -f fit$(EXEEXT)
 	$(CXXLINK) $(fit_OBJECTS) $(fit_LDADD) $(LIBS)
-fit_mpi$(EXEEXT): $(fit_mpi_OBJECTS) $(fit_mpi_DEPENDENCIES) 
-	@rm -f fit_mpi$(EXEEXT)
-	$(fit_mpi_LINK) $(fit_mpi_OBJECTS) $(fit_mpi_LDADD) $(LIBS)
 spinmc$(EXEEXT): $(spinmc_OBJECTS) $(spinmc_DEPENDENCIES) 
 	@rm -f spinmc$(EXEEXT)
 	$(CXXLINK) $(spinmc_OBJECTS) $(spinmc_LDADD) $(LIBS)
 spinmc_evaluate$(EXEEXT): $(spinmc_evaluate_OBJECTS) $(spinmc_evaluate_DEPENDENCIES) 
 	@rm -f spinmc_evaluate$(EXEEXT)
 	$(CXXLINK) $(spinmc_evaluate_OBJECTS) $(spinmc_evaluate_LDADD) $(LIBS)
-spinmc_mpi$(EXEEXT): $(spinmc_mpi_OBJECTS) $(spinmc_mpi_DEPENDENCIES) 
-	@rm -f spinmc_mpi$(EXEEXT)
-	$(spinmc_mpi_LINK) $(spinmc_mpi_OBJECTS) $(spinmc_mpi_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

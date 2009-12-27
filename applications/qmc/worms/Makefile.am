@@ -5,15 +5,8 @@ dist_noinst_DATA =
 bin_PROGRAMS =
 if BUILD_QMC_WORMS
 bin_PROGRAMS += worm worm_evaluate
-if HAVE_MPI
-bin_PROGRAMS += worm_mpi
-endif
 endif
 
 worm_SOURCES = $(SOURCES)
-
 worm_evaluate_SOURCES = evaluate.C
 
-worm_mpi_SOURCES = $(SOURCES)
-worm_mpi_LDFLAGS = @LDFLAGS_MPI@
-worm_mpi_LDADD = @LIBS_MPI@

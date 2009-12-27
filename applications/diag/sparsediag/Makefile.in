@@ -35,9 +35,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+bin_PROGRAMS = $(am__EXEEXT_1)
 @BUILD_DIAG_SPARSEDIAG_TRUE@am__append_1 = sparsediag
-@BUILD_DIAG_SPARSEDIAG_TRUE@@HAVE_MPI_TRUE@am__append_2 = sparsediag_mpi
 subdir = diag/sparsediag
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -53,7 +52,6 @@ CONFIG_HEADER = $(top_builddir)/config/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_DIAG_SPARSEDIAG_TRUE@am__EXEEXT_1 = sparsediag$(EXEEXT)
-@BUILD_DIAG_SPARSEDIAG_TRUE@@HAVE_MPI_TRUE@am__EXEEXT_2 = sparsediag_mpi$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = sparsediag.$(OBJEXT) factory.$(OBJEXT)
@@ -61,12 +59,6 @@ am_sparsediag_OBJECTS = $(am__objects_1)
 sparsediag_OBJECTS = $(am_sparsediag_OBJECTS)
 sparsediag_LDADD = $(LDADD)
 sparsediag_DEPENDENCIES =
-am_sparsediag_mpi_OBJECTS = $(am__objects_1)
-sparsediag_mpi_OBJECTS = $(am_sparsediag_mpi_OBJECTS)
-sparsediag_mpi_DEPENDENCIES =
-sparsediag_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(sparsediag_mpi_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -88,7 +80,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-DIST_SOURCES = $(sparsediag_SOURCES) $(sparsediag_mpi_SOURCES)
+DIST_SOURCES = $(sparsediag_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -221,9 +213,6 @@ top_srcdir = @top_srcdir@
 SOURCES = sparsediag.C sparsediag.h factory.C factory.h ../matrix.h
 dist_noinst_DATA = 
 sparsediag_SOURCES = $(SOURCES)
-sparsediag_mpi_SOURCES = $(SOURCES)
-sparsediag_mpi_LDFLAGS = @LDFLAGS_MPI@
-sparsediag_mpi_LDADD = @LIBS_MPI@
 all: all-am
 
 .SUFFIXES:
@@ -304,9 +293,6 @@ clean-binPROGRAMS:
 sparsediag$(EXEEXT): $(sparsediag_OBJECTS) $(sparsediag_DEPENDENCIES) 
 	@rm -f sparsediag$(EXEEXT)
 	$(CXXLINK) $(sparsediag_OBJECTS) $(sparsediag_LDADD) $(LIBS)
-sparsediag_mpi$(EXEEXT): $(sparsediag_mpi_OBJECTS) $(sparsediag_mpi_DEPENDENCIES) 
-	@rm -f sparsediag_mpi$(EXEEXT)
-	$(sparsediag_mpi_LINK) $(sparsediag_mpi_OBJECTS) $(sparsediag_mpi_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

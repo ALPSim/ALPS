@@ -35,9 +35,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-noinst_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+noinst_PROGRAMS = $(am__EXEEXT_1)
 @BUILD_QMC_SSE_LOOP_TRUE@am__append_1 = loop
-@BUILD_QMC_SSE_LOOP_TRUE@@HAVE_MPI_TRUE@am__append_2 = loop_mpi
 subdir = qmc/sse-loop
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in TODO
@@ -53,20 +52,12 @@ CONFIG_HEADER = $(top_builddir)/config/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_QMC_SSE_LOOP_TRUE@am__EXEEXT_1 = loop$(EXEEXT)
-@BUILD_QMC_SSE_LOOP_TRUE@@HAVE_MPI_TRUE@am__EXEEXT_2 =  \
-@BUILD_QMC_SSE_LOOP_TRUE@@HAVE_MPI_TRUE@	loop_mpi$(EXEEXT)
 PROGRAMS = $(noinst_PROGRAMS)
 am__objects_1 = loop.$(OBJEXT) sse.$(OBJEXT) vertex.$(OBJEXT)
 am_loop_OBJECTS = $(am__objects_1)
 loop_OBJECTS = $(am_loop_OBJECTS)
 loop_LDADD = $(LDADD)
 loop_DEPENDENCIES =
-am_loop_mpi_OBJECTS = $(am__objects_1)
-loop_mpi_OBJECTS = $(am_loop_mpi_OBJECTS)
-loop_mpi_DEPENDENCIES =
-loop_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(loop_mpi_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -88,7 +79,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-DIST_SOURCES = $(loop_SOURCES) $(loop_mpi_SOURCES)
+DIST_SOURCES = $(loop_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -221,9 +212,6 @@ top_srcdir = @top_srcdir@
 SOURCES = loop.C sse.C sse.h vertex.C vertex.h
 dist_noinst_DATA = 
 loop_SOURCES = $(SOURCES)
-loop_mpi_SOURCES = $(SOURCES)
-loop_mpi_LDFLAGS = @LDFLAGS_MPI@
-loop_mpi_LDADD = @LIBS_MPI@
 all: all-am
 
 .SUFFIXES:
@@ -270,9 +258,6 @@ clean-noinstPROGRAMS:
 loop$(EXEEXT): $(loop_OBJECTS) $(loop_DEPENDENCIES) 
 	@rm -f loop$(EXEEXT)
 	$(CXXLINK) $(loop_OBJECTS) $(loop_LDADD) $(LIBS)
-loop_mpi$(EXEEXT): $(loop_mpi_OBJECTS) $(loop_mpi_DEPENDENCIES) 
-	@rm -f loop_mpi$(EXEEXT)
-	$(loop_mpi_LINK) $(loop_mpi_OBJECTS) $(loop_mpi_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

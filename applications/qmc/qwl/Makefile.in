@@ -35,9 +35,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+bin_PROGRAMS = $(am__EXEEXT_1)
 @BUILD_QMC_QWL_TRUE@am__append_1 = qwl qwl_evaluate
-@BUILD_QMC_QWL_TRUE@@HAVE_MPI_TRUE@am__append_2 = qwl_mpi
 subdir = qmc/qwl
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -53,7 +52,6 @@ CONFIG_HEADER = $(top_builddir)/config/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_QMC_QWL_TRUE@am__EXEEXT_1 = qwl$(EXEEXT) qwl_evaluate$(EXEEXT)
-@BUILD_QMC_QWL_TRUE@@HAVE_MPI_TRUE@am__EXEEXT_2 = qwl_mpi$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = qwl.$(OBJEXT)
@@ -66,12 +64,6 @@ am_qwl_evaluate_OBJECTS = $(am__objects_2)
 qwl_evaluate_OBJECTS = $(am_qwl_evaluate_OBJECTS)
 qwl_evaluate_LDADD = $(LDADD)
 qwl_evaluate_DEPENDENCIES =
-am_qwl_mpi_OBJECTS = $(am__objects_1)
-qwl_mpi_OBJECTS = $(am_qwl_mpi_OBJECTS)
-qwl_mpi_DEPENDENCIES =
-qwl_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
-	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) \
-	$(qwl_mpi_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -93,8 +85,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-DIST_SOURCES = $(qwl_SOURCES) $(qwl_evaluate_SOURCES) \
-	$(qwl_mpi_SOURCES)
+DIST_SOURCES = $(qwl_SOURCES) $(qwl_evaluate_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -229,9 +220,6 @@ SOURCES_EVAL = qwl_evaluate.C
 dist_noinst_DATA = 
 qwl_SOURCES = $(SOURCES)
 qwl_evaluate_SOURCES = $(SOURCES_EVAL)
-qwl_mpi_SOURCES = $(SOURCES)
-qwl_mpi_LDFLAGS = @LDFLAGS_MPI@
-qwl_mpi_LDADD = @LIBS_MPI@
 all: all-am
 
 .SUFFIXES:
@@ -315,9 +303,6 @@ qwl$(EXEEXT): $(qwl_OBJECTS) $(qwl_DEPENDENCIES)
 qwl_evaluate$(EXEEXT): $(qwl_evaluate_OBJECTS) $(qwl_evaluate_DEPENDENCIES) 
 	@rm -f qwl_evaluate$(EXEEXT)
 	$(CXXLINK) $(qwl_evaluate_OBJECTS) $(qwl_evaluate_LDADD) $(LIBS)
-qwl_mpi$(EXEEXT): $(qwl_mpi_OBJECTS) $(qwl_mpi_DEPENDENCIES) 
-	@rm -f qwl_mpi$(EXEEXT)
-	$(qwl_mpi_LINK) $(qwl_mpi_OBJECTS) $(qwl_mpi_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

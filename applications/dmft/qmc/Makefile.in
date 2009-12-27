@@ -35,14 +35,12 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = dmft$(EXEEXT) hirschfye$(EXEEXT) $(am__EXEEXT_1)
-@HAVE_MPI_TRUE@am__append_1 = dmft_mpi
-@BUILD_DMFT_SOLVERS_HYBRIDIZATION_TRUE@am__append_2 = -DBUILD_DMFT_SOLVERS_HYBRIDIZATION
-@BUILD_DMFT_SOLVERS_HYBRIDIZATION_TRUE@am__append_3 = ../DMFT-solvers/Werner/impurity.C \
-@BUILD_DMFT_SOLVERS_HYBRIDIZATION_TRUE@	../DMFT-solvers/Werner/fourpoint.C
-@BUILD_DMFT_SOLVERS_HYBRIDIZATION_TRUE@am__append_4 = ../DMFT-solvers/Werner/impurity.C \
-@BUILD_DMFT_SOLVERS_HYBRIDIZATION_TRUE@	../DMFT-solvers/Werner/fourpoint.C
-subdir = dmft/DMFT
+bin_PROGRAMS = dmft$(EXEEXT) hirschfye$(EXEEXT)
+@BUILD_DMFT_QMC_HYBRIDIZATION_TRUE@am__append_1 = -DBUILD_DMFT_QMC_HYBRIDIZATION
+@BUILD_DMFT_QMC_HYBRIDIZATION_TRUE@am__append_2 =  \
+@BUILD_DMFT_QMC_HYBRIDIZATION_TRUE@	hybridization/impurity.C \
+@BUILD_DMFT_QMC_HYBRIDIZATION_TRUE@	hybridization/fourpoint.C
+subdir = dmft/qmc
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -56,36 +54,22 @@ mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/config/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@HAVE_MPI_TRUE@am__EXEEXT_1 = dmft_mpi$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__dmft_SOURCES_DIST = externalsolver.C hirschfyesim.C \
 	fouriertransform.C hilberttransformer.C alps_solver.C \
 	2dsimpson.C selfconsistency.C auxiliaryfunctions.C main.C \
-	../DMFT-solvers/Werner/impurity.C \
-	../DMFT-solvers/Werner/fourpoint.C
+	hybridization/impurity.C hybridization/fourpoint.C
 am__objects_1 = externalsolver.$(OBJEXT) hirschfyesim.$(OBJEXT) \
 	fouriertransform.$(OBJEXT) hilberttransformer.$(OBJEXT) \
 	alps_solver.$(OBJEXT) 2dsimpson.$(OBJEXT) \
 	selfconsistency.$(OBJEXT) auxiliaryfunctions.$(OBJEXT)
-@BUILD_DMFT_SOLVERS_HYBRIDIZATION_TRUE@am__objects_2 =  \
-@BUILD_DMFT_SOLVERS_HYBRIDIZATION_TRUE@	impurity.$(OBJEXT) \
-@BUILD_DMFT_SOLVERS_HYBRIDIZATION_TRUE@	fourpoint.$(OBJEXT)
+@BUILD_DMFT_QMC_HYBRIDIZATION_TRUE@am__objects_2 = impurity.$(OBJEXT) \
+@BUILD_DMFT_QMC_HYBRIDIZATION_TRUE@	fourpoint.$(OBJEXT)
 am_dmft_OBJECTS = $(am__objects_1) main.$(OBJEXT) $(am__objects_2)
 dmft_OBJECTS = $(am_dmft_OBJECTS)
 dmft_LDADD = $(LDADD)
 dmft_DEPENDENCIES =
-am__dmft_mpi_SOURCES_DIST = externalsolver.C hirschfyesim.C \
-	fouriertransform.C hilberttransformer.C alps_solver.C \
-	2dsimpson.C selfconsistency.C auxiliaryfunctions.C main.C \
-	../DMFT-solvers/Werner/impurity.C \
-	../DMFT-solvers/Werner/fourpoint.C
-am_dmft_mpi_OBJECTS = $(am__objects_1) main.$(OBJEXT) $(am__objects_2)
-dmft_mpi_OBJECTS = $(am_dmft_mpi_OBJECTS)
-dmft_mpi_DEPENDENCIES =
-dmft_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(dmft_mpi_LDFLAGS) $(LDFLAGS) -o $@
 am__objects_3 = solver_main.$(OBJEXT)
 am_hirschfye_OBJECTS = $(am__objects_3) $(am__objects_1)
 hirschfye_OBJECTS = $(am_hirschfye_OBJECTS)
@@ -103,8 +87,7 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-DIST_SOURCES = $(am__dmft_SOURCES_DIST) $(am__dmft_mpi_SOURCES_DIST) \
-	$(hirschfye_SOURCES)
+DIST_SOURCES = $(am__dmft_SOURCES_DIST) $(hirschfye_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -235,13 +218,10 @@ top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 SOURCES = externalsolver.C hirschfyesim.C fouriertransform.C hilberttransformer.C alps_solver.C 2dsimpson.C selfconsistency.C auxiliaryfunctions.C 
-INCLUDES = -I@top_srcdir@/dmft/ $(am__append_2)
+INCLUDES = -I. $(am__append_1)
 SOURCES_HF = solver_main.C
 dist_noinst_DATA = 
-dmft_SOURCES = $(SOURCES) main.C $(am__append_3)
-dmft_mpi_SOURCES = $(SOURCES) main.C $(am__append_4)
-dmft_mpi_LDFLAGS = @LDFLAGS_MPI@
-dmft_mpi_LDADD = @LIBS_MPI@
+dmft_SOURCES = $(SOURCES) main.C $(am__append_2)
 hirschfye_SOURCES = $(SOURCES_HF) $(SOURCES)
 all: all-am
 
@@ -256,9 +236,9 @@ $(srcdir)/Makefile.in: @MAINTAINER_MODE_TRUE@ $(srcdir)/Makefile.am  $(am__confi
 	      exit 1;; \
 	  esac; \
 	done; \
-	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign dmft/DMFT/Makefile'; \
+	echo ' cd $(top_srcdir) && $(AUTOMAKE) --foreign dmft/qmc/Makefile'; \
 	$(am__cd) $(top_srcdir) && \
-	  $(AUTOMAKE) --foreign dmft/DMFT/Makefile
+	  $(AUTOMAKE) --foreign dmft/qmc/Makefile
 .PRECIOUS: Makefile
 Makefile: $(srcdir)/Makefile.in $(top_builddir)/config.status
 	@case '$?' in \
@@ -323,9 +303,6 @@ clean-binPROGRAMS:
 dmft$(EXEEXT): $(dmft_OBJECTS) $(dmft_DEPENDENCIES) 
 	@rm -f dmft$(EXEEXT)
 	$(CXXLINK) $(dmft_OBJECTS) $(dmft_LDADD) $(LIBS)
-dmft_mpi$(EXEEXT): $(dmft_mpi_OBJECTS) $(dmft_mpi_DEPENDENCIES) 
-	@rm -f dmft_mpi$(EXEEXT)
-	$(dmft_mpi_LINK) $(dmft_mpi_OBJECTS) $(dmft_mpi_LDADD) $(LIBS)
 hirschfye$(EXEEXT): $(hirschfye_OBJECTS) $(hirschfye_DEPENDENCIES) 
 	@rm -f hirschfye$(EXEEXT)
 	$(CXXLINK) $(hirschfye_OBJECTS) $(hirschfye_LDADD) $(LIBS)
@@ -370,33 +347,33 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-impurity.o: ../DMFT-solvers/Werner/impurity.C
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT impurity.o -MD -MP -MF $(DEPDIR)/impurity.Tpo -c -o impurity.o `test -f '../DMFT-solvers/Werner/impurity.C' || echo '$(srcdir)/'`../DMFT-solvers/Werner/impurity.C
+impurity.o: hybridization/impurity.C
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT impurity.o -MD -MP -MF $(DEPDIR)/impurity.Tpo -c -o impurity.o `test -f 'hybridization/impurity.C' || echo '$(srcdir)/'`hybridization/impurity.C
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/impurity.Tpo $(DEPDIR)/impurity.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../DMFT-solvers/Werner/impurity.C' object='impurity.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='hybridization/impurity.C' object='impurity.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o impurity.o `test -f '../DMFT-solvers/Werner/impurity.C' || echo '$(srcdir)/'`../DMFT-solvers/Werner/impurity.C
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o impurity.o `test -f 'hybridization/impurity.C' || echo '$(srcdir)/'`hybridization/impurity.C
 
-impurity.obj: ../DMFT-solvers/Werner/impurity.C
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT impurity.obj -MD -MP -MF $(DEPDIR)/impurity.Tpo -c -o impurity.obj `if test -f '../DMFT-solvers/Werner/impurity.C'; then $(CYGPATH_W) '../DMFT-solvers/Werner/impurity.C'; else $(CYGPATH_W) '$(srcdir)/../DMFT-solvers/Werner/impurity.C'; fi`
+impurity.obj: hybridization/impurity.C
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT impurity.obj -MD -MP -MF $(DEPDIR)/impurity.Tpo -c -o impurity.obj `if test -f 'hybridization/impurity.C'; then $(CYGPATH_W) 'hybridization/impurity.C'; else $(CYGPATH_W) '$(srcdir)/hybridization/impurity.C'; fi`
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/impurity.Tpo $(DEPDIR)/impurity.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../DMFT-solvers/Werner/impurity.C' object='impurity.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='hybridization/impurity.C' object='impurity.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o impurity.obj `if test -f '../DMFT-solvers/Werner/impurity.C'; then $(CYGPATH_W) '../DMFT-solvers/Werner/impurity.C'; else $(CYGPATH_W) '$(srcdir)/../DMFT-solvers/Werner/impurity.C'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o impurity.obj `if test -f 'hybridization/impurity.C'; then $(CYGPATH_W) 'hybridization/impurity.C'; else $(CYGPATH_W) '$(srcdir)/hybridization/impurity.C'; fi`
 
-fourpoint.o: ../DMFT-solvers/Werner/fourpoint.C
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fourpoint.o -MD -MP -MF $(DEPDIR)/fourpoint.Tpo -c -o fourpoint.o `test -f '../DMFT-solvers/Werner/fourpoint.C' || echo '$(srcdir)/'`../DMFT-solvers/Werner/fourpoint.C
+fourpoint.o: hybridization/fourpoint.C
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fourpoint.o -MD -MP -MF $(DEPDIR)/fourpoint.Tpo -c -o fourpoint.o `test -f 'hybridization/fourpoint.C' || echo '$(srcdir)/'`hybridization/fourpoint.C
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/fourpoint.Tpo $(DEPDIR)/fourpoint.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../DMFT-solvers/Werner/fourpoint.C' object='fourpoint.o' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='hybridization/fourpoint.C' object='fourpoint.o' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fourpoint.o `test -f '../DMFT-solvers/Werner/fourpoint.C' || echo '$(srcdir)/'`../DMFT-solvers/Werner/fourpoint.C
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fourpoint.o `test -f 'hybridization/fourpoint.C' || echo '$(srcdir)/'`hybridization/fourpoint.C
 
-fourpoint.obj: ../DMFT-solvers/Werner/fourpoint.C
-@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fourpoint.obj -MD -MP -MF $(DEPDIR)/fourpoint.Tpo -c -o fourpoint.obj `if test -f '../DMFT-solvers/Werner/fourpoint.C'; then $(CYGPATH_W) '../DMFT-solvers/Werner/fourpoint.C'; else $(CYGPATH_W) '$(srcdir)/../DMFT-solvers/Werner/fourpoint.C'; fi`
+fourpoint.obj: hybridization/fourpoint.C
+@am__fastdepCXX_TRUE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT fourpoint.obj -MD -MP -MF $(DEPDIR)/fourpoint.Tpo -c -o fourpoint.obj `if test -f 'hybridization/fourpoint.C'; then $(CYGPATH_W) 'hybridization/fourpoint.C'; else $(CYGPATH_W) '$(srcdir)/hybridization/fourpoint.C'; fi`
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/fourpoint.Tpo $(DEPDIR)/fourpoint.Po
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='../DMFT-solvers/Werner/fourpoint.C' object='fourpoint.obj' libtool=no @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='hybridization/fourpoint.C' object='fourpoint.obj' libtool=no @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fourpoint.obj `if test -f '../DMFT-solvers/Werner/fourpoint.C'; then $(CYGPATH_W) '../DMFT-solvers/Werner/fourpoint.C'; else $(CYGPATH_W) '$(srcdir)/../DMFT-solvers/Werner/fourpoint.C'; fi`
+@am__fastdepCXX_FALSE@	$(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o fourpoint.obj `if test -f 'hybridization/fourpoint.C'; then $(CYGPATH_W) 'hybridization/fourpoint.C'; else $(CYGPATH_W) '$(srcdir)/hybridization/fourpoint.C'; fi`
 
 mostlyclean-libtool:
 	-rm -f *.lo

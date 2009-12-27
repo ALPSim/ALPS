@@ -35,9 +35,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+bin_PROGRAMS = $(am__EXEEXT_1)
 @BUILD_QMC_WORMS_TRUE@am__append_1 = worm worm_evaluate
-@BUILD_QMC_WORMS_TRUE@@HAVE_MPI_TRUE@am__append_2 = worm_mpi
 subdir = qmc/worms
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in
@@ -54,7 +53,6 @@ CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_QMC_WORMS_TRUE@am__EXEEXT_1 = worm$(EXEEXT) \
 @BUILD_QMC_WORMS_TRUE@	worm_evaluate$(EXEEXT)
-@BUILD_QMC_WORMS_TRUE@@HAVE_MPI_TRUE@am__EXEEXT_2 = worm_mpi$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 = WModel.$(OBJEXT) Wcheck.$(OBJEXT) Winit.$(OBJEXT) \
@@ -68,12 +66,6 @@ am_worm_evaluate_OBJECTS = evaluate.$(OBJEXT)
 worm_evaluate_OBJECTS = $(am_worm_evaluate_OBJECTS)
 worm_evaluate_LDADD = $(LDADD)
 worm_evaluate_DEPENDENCIES =
-am_worm_mpi_OBJECTS = $(am__objects_1)
-worm_mpi_OBJECTS = $(am_worm_mpi_OBJECTS)
-worm_mpi_DEPENDENCIES =
-worm_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(worm_mpi_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -95,8 +87,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-DIST_SOURCES = $(worm_SOURCES) $(worm_evaluate_SOURCES) \
-	$(worm_mpi_SOURCES)
+DIST_SOURCES = $(worm_SOURCES) $(worm_evaluate_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -230,9 +221,6 @@ SOURCES = WModel.C Wcheck.C Winit.C WRun.C Wmeas.C Wdostep.C main.C WKink.h WRun
 dist_noinst_DATA = 
 worm_SOURCES = $(SOURCES)
 worm_evaluate_SOURCES = evaluate.C
-worm_mpi_SOURCES = $(SOURCES)
-worm_mpi_LDFLAGS = @LDFLAGS_MPI@
-worm_mpi_LDADD = @LIBS_MPI@
 all: all-am
 
 .SUFFIXES:
@@ -316,9 +304,6 @@ worm$(EXEEXT): $(worm_OBJECTS) $(worm_DEPENDENCIES)
 worm_evaluate$(EXEEXT): $(worm_evaluate_OBJECTS) $(worm_evaluate_DEPENDENCIES) 
 	@rm -f worm_evaluate$(EXEEXT)
 	$(CXXLINK) $(worm_evaluate_OBJECTS) $(worm_evaluate_LDADD) $(LIBS)
-worm_mpi$(EXEEXT): $(worm_mpi_OBJECTS) $(worm_mpi_DEPENDENCIES) 
-	@rm -f worm_mpi$(EXEEXT)
-	$(worm_mpi_LINK) $(worm_mpi_OBJECTS) $(worm_mpi_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
