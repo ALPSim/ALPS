@@ -1,10 +1,4 @@
 SUBDIRS =
-if EXIST_DMFT
-SUBDIRS += DMFT
-endif
-SUBDIRS += .
-DIST_SUBDIRS = $(SUBDIRS)
-if EXIST_DMFT_SOLVERS
-SUBDIRS += DMFT-solvers
-SUBDIRS += DMFT-solvers/Werner
+if EXIST_DMFT_QMC
+SUBDIRS += qmc
 endif

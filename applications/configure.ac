@@ -42,7 +42,7 @@ if test "$ac_cv_have_lapack" != yes; then
   AC_MSG_NOTICE([LAPACK library not found. dmrg/dmrg will not be built.])
   AC_MSG_NOTICE([LAPACK library not found. dmrg/interacting will not be built.])
   AC_MSG_NOTICE([LAPACK library not found. dmrg/particle_in_box will not be built.])
-  AC_MSG_NOTICE([LAPACK library not found. dmft/DMFT will not be built.])
+  AC_MSG_NOTICE([LAPACK library not found. dmft/qmc will not be built.])
   AC_MSG_NOTICE([LAPACK library not found. mc/spins will not be built.])
   AC_MSG_NOTICE([LAPACK library not found. qmc/looper will not be built.])
 fi
@@ -185,44 +185,33 @@ AM_CONDITIONAL(BUILD_DMRG_PARTICLE_IN_BOX, test "$build_dmrg_particle_in_box" = 
 
 dnl dmft
 exist_dmft=no
-exist_dmft_dmft=no
-build_dmft_dmft=no
-exist_dmft_solvers=no
-build_dmft_solvers=no
-exist_dmft_solvers_hybridization=no
-build_dmft_solvers_hybridization=no
+exist_dmft_qmc=no
+build_dmft_qmc=no
+exist_dmft_qmc_hybridization=no
+build_dmft_qmc_hybridization=no
 
 #the following line will switch on the DMFT code
 if test -f "$srcdir/dmft/Makefile.in"; then
   exist_dmft=yes
-  dnl dmft/DMFT
-  if test -f "$srcdir/dmft/DMFT/Makefile.in"; then
-    exist_dmft_dmft=yes
+  dnl dmft/qmc
+  if test -f "$srcdir/dmft/qmc/Makefile.in"; then
+    exist_dmft_qmc=yes
     if test "$ac_cv_have_lapack" = yes; then
-      build_dmft_dmft=yes
+      build_dmft_qmc=yes
     fi
   fi
-  if test -f "$srcdir/dmft/DMFT-solvers/Werner"; then
-    exist_dmft_solvers=yes
+  if test -f "$srcdir/dmft/qmc/hybridization/impurity.C"; then
+    exist_dmft_qmc_hybridization=yes
     if test "$ac_cv_have_lapack" = yes; then
-      build_dmft_solvers=yes
-    fi
-  fi
-  dnl dmft/DMFT-solvers/Werner
-  if test -f "$srcdir/dmft/DMFT-solvers/Werner/impurity.h"; then
-    exist_dmft_solvers_hybridization=yes
-    if test "$ac_cv_have_lapack" = yes; then
-      build_dmft_solvers_hybridization=yes
+      build_dmft_qmc_hybridization=yes
     fi
   fi
 fi
 AM_CONDITIONAL(EXIST_DMFT, test "$exist_dmft" = yes)
-AM_CONDITIONAL(EXIST_DMFT_DMFT, test "$exist_dmft_dmft" = yes)
-AM_CONDITIONAL(BUILD_DMFT_DMFT, test "$build_dmft_dmft" = yes)
-AM_CONDITIONAL(EXIST_DMFT_SOLVERS, test "$exist_dmft_solver" = yes)
-AM_CONDITIONAL(BUILD_DMFT_SOLVERS, test "$build_dmft_solver" = yes)
-AM_CONDITIONAL(EXIST_DMFT_SOLVERS_HYBRIDIZATION, test "$exist_dmft_solvers_hybridization" = yes)
-AM_CONDITIONAL(BUILD_DMFT_SOLVERS_HYBRIDIZATION, test "$build_dmft_solvers_hybridization" = yes)
+AM_CONDITIONAL(EXIST_DMFT_QMC, test "$exist_dmft_qmc" = yes)
+AM_CONDITIONAL(BUILD_DMFT_QMC, test "$build_dmft_qmc" = yes)
+AM_CONDITIONAL(EXIST_DMFT_QMC_HYBRIDIZATION, test "$exist_dmft_qmc_hybridization" = yes)
+AM_CONDITIONAL(BUILD_DMFT_QMC_HYBRIDIZATION, test "$build_dmft_qmc_hybridization" = yes)
 
 dnl mc
 exist_mc=no
@@ -381,7 +370,7 @@ test "$exist_dmrg_dmrg" = yes && AC_CONFIG_FILES(dmrg/dmrg/Makefile)
 test "$exist_dmrg_interacting" = yes && AC_CONFIG_FILES(dmrg/interacting/Makefile)
 test "$exist_dmrg_particle_in_box" = yes && AC_CONFIG_FILES(dmrg/particle_in_box/Makefile)
 test "$exist_dmft" = yes && AC_CONFIG_FILES(dmft/Makefile)
-test "$exist_dmft_dmft" = yes && AC_CONFIG_FILES(dmft/DMFT/Makefile)
+test "$exist_dmft_qmc" = yes && AC_CONFIG_FILES(dmft/qmc/Makefile)
 test "$exist_mc" = yes && AC_CONFIG_FILES(mc/Makefile)
 test "$exist_mc_spins" = yes && AC_CONFIG_FILES(mc/spins/Makefile)
 test "$exist_qmc" = yes && AC_CONFIG_FILES(qmc/Makefile)
@@ -443,14 +432,14 @@ if test "x$exist_dmrg" = xyes; then
 fi
 if test "x$exist_dmft" = xyes; then
   echo "  DMFT"
-  if test "x$exist_dmft_dmft" = xyes; then
-    echo "    DMFT                 $build_dmft_dmft"
+  if test "x$exist_dmft_qmc" = xyes; then
+    echo "    DMFT                 $build_dmft_qmc"
   fi
-  if test "x$exist_dmft_dmft" = xyes; then
-    echo "     Hirsch Fye          $exist_dmft_dmft"
+  if test "x$exist_dmft_qmc" = xyes; then
+    echo "     Hirsch Fye          $exist_dmft_qmc"
   fi
-  if test "x$exist_dmft_solvers_hybridization" = xyes; then
-    echo "     Hybridization       $build_dmft_solvers_hybridization"
+  if test "x$exist_dmft_qmc_hybridization" = xyes; then
+    echo "     Hybridization       $build_dmft_qmc_hybridization"
   fi
 fi
 if test "x$exist_mc" = xyes; then

@@ -28,8 +28,8 @@
 #include <cassert>
 #include <stdio.h>
 
-#ifdef BUILD_DMFT_SOLVERS_HYBRIDIZATION
-#include "../DMFT-solvers/Werner/impurity.h"
+#ifdef BUILD_DMFT_QMC_HYBRIDIZATION
+#include "hybridization/impurity.h"
 #endif
 
 
@@ -82,7 +82,7 @@ int main(int argc, char** argv)
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
-#ifdef BUILD_DMFT_SOLVERS_HYBRIDIZATION
+#ifdef BUILD_DMFT_QMC_HYBRIDIZATION
         else if (parms["SOLVER"]=="Werner") {
           std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
           alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
@@ -104,7 +104,7 @@ int main(int argc, char** argv)
         alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory_ss; 
         alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; 
 #endif
-#ifdef BUILD_DMFT_SOLVERS_HYBRIDIZATION
+#ifdef BUILD_DMFT_QMC_HYBRIDIZATION
         alps::scheduler::BasicFactory<WernerSimFrequency,WernerRun> werner_factory;
 #endif
         //perform self consistency loop in Matsubara frequency omega
@@ -162,7 +162,7 @@ int main(int argc, char** argv)
           solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
         }
 #endif
-#ifdef BUILD_DMFT_SOLVERS_HYBRIDIZATION
+#ifdef BUILD_DMFT_QMC_HYBRIDIZATION
         if (parms["SOLVER"]=="Werner") {
           std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
