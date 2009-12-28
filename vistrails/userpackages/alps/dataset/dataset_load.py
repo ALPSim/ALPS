@@ -93,7 +93,8 @@ class LoadDataSet(Module):
             if self.hasInputFromPort('label'):
                 label = self.getInputFromPort('label')
             
-            l = Loader(filename,label,xc,yc)
+            l = Loader()
+            l.read_set(filename,label,xc,yc)
             self.setResult('data', l.sets)
 
 class CustomLoader(Module):
