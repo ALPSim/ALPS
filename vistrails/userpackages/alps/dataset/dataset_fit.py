@@ -8,7 +8,7 @@ import urllib, copy
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize, polyfit
-import pyalps.util.fit_wrapper as fw
+import pyalps.fit_wrapper as fw
 
 from dataset_core import *
 from dataset_exceptions import *

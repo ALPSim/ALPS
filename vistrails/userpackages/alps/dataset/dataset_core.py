@@ -8,7 +8,7 @@ from packages.controlflow.list_module import ListOfElements
 import urllib, copy
 import numpy as np
 
-from pyalps.util.dataset import DataSet,ResultFile
+from pyalps import DataSet,ResultFile
 
 class PortDescriptor:
     def __init__(self, name, porttype, description='', use_python_source=False, hidden=False):

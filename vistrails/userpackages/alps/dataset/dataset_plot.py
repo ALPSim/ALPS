@@ -11,7 +11,7 @@ from scipy import optimize
 
 from dataset_exceptions import *
 from dataset_core import *
-from pyalps.util.plot_core import *
+from pyalps.plot_core import *
 
 class AxisDescriptor(Descriptor, Module):
     my_input_ports = [

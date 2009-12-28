@@ -17,7 +17,7 @@ import glob
 
 from core.modules.vistrails_module import ModuleError
 from plots import PlotFile
-from pyalps.util.plot_core import *
+from pyalps.plot_core import *
 from dataset import DataSets, ResultFiles
 
 basic = core.modules.basic_modules

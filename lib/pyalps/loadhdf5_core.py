@@ -3,12 +3,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
 
-from util.dataset import ResultFile
-from util.dataset import DataSet
-import alea.floatwitherror 
-fwe = alea.floatwitherror.FloatWithError
-#import pyalps.pyalea
-#fwe = pyalps.pyalea.value_with_error
+from dataset import ResultFile
+from dataset import DataSet
+from floatwitherror import FloatWithError as fwe
 
 class Hdf5Loader:
     def GetFileNames(self, flist):

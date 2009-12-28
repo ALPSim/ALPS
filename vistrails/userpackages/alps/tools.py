@@ -25,7 +25,7 @@ basic = core.modules.basic_modules
 
 ##############################################################################
 
-from pyalps.util.dataset import ResultFile
+from pyalps import ResultFile
 from dataset import ResultFiles
 
 class UnzipDirectory(Module):

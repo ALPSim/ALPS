@@ -11,8 +11,7 @@ import h5py
 from scipy import optimize
 
 from dataset_core import *
-from pyalps.loadhdf5_core import Hdf5Loader
-import pyalps.alea
+from pyalps import Hdf5Loader
 
 class Loader:
     def __init__(self,filename,label,xcolumn,ycolumns,props={}):
