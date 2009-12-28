@@ -63,6 +63,7 @@
 # this module look for HDF5 (http://hdf.ncsa.uiuc.edu) support
 # it will define the following values
 
+    MESSAGE(STATUS EXISTS ${HDF5_INCLUDE_DIR})
 # If Hdf5Config.cmake provied by HDF5 source, use them
 IF(EXISTS ${PROJECT_CMAKE}/Hdf5Config.cmake)
   INCLUDE(${PROJECT_CMAKE}/Hdf5Config.cmake)
@@ -70,7 +71,7 @@ ENDIF(EXISTS ${PROJECT_CMAKE}/Hdf5Config.cmake)
 
 IF(Hdf5_INCLUDE_DIRS)
 
-  FIND_PATH(HDF5_INCLUDE_DIR hdf5.h ${Hdf5_INCLUDE_DIRS})
+  FIND_PATH(HDF5_INCLUDE_DIR NAMES hdf5.h PATHS ${Hdf5_INCLUDE_DIRS})
   FIND_LIBRARY(HDF5_LIBRARIES hdf5 ${Hdf5_LIBRARY_DIRS})
 
 ELSE(Hdf5_INCLUDE_DIRS)
@@ -80,6 +81,13 @@ ELSE(Hdf5_INCLUDE_DIRS)
   ENDIF($ENV{HDF5_DIR} MATCHES "hdf")
   
 ENDIF(Hdf5_INCLUDE_DIRS)
+
+IF(ALPS_FOR_VISTRAILS)
+  MESSAGE(STATUS "Using Vistrails HDF5")
+  FIND_PATH(HDF5_INCLUDE_DIR hdf5.h ${CMAKE_INSTALL_PREFIX}/../Resources/hdf5/include NO_DEFAULT_PATH)
+  FIND_LIBRARY(HDF5_LIBRARIES hdf5 ${CMAKE_INSTALL_PREFIX}/../Resources/hdf5/lib NO_DEFAULT_PATH)
+  SET(HDF5_FOUND TRUE)
+ENDIF(ALPS_FOR_VISTRAILS)
 
 ##############################################################################
 # ALPS addition end
