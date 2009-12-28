@@ -17,8 +17,6 @@ def read_xml(filename):
     for point in root.find('set').getchildren():
         x.append(float(point.find('x').text))
         y.append(float(point.find('y').text))
-#        dx.append(float(point.find('dx').text))
-#        dy.append(float(point.find('dy').text))
 
     data.x = np.array(x)
     data.y = np.array(y)
