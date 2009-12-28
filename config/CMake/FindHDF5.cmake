@@ -63,7 +63,6 @@
 # this module look for HDF5 (http://hdf.ncsa.uiuc.edu) support
 # it will define the following values
 
-    MESSAGE(STATUS EXISTS ${HDF5_INCLUDE_DIR})
 # If Hdf5Config.cmake provied by HDF5 source, use them
 IF(EXISTS ${PROJECT_CMAKE}/Hdf5Config.cmake)
   INCLUDE(${PROJECT_CMAKE}/Hdf5Config.cmake)
