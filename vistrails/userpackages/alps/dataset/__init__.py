@@ -85,6 +85,7 @@ def selfRegister():
 
 
     register(Transform,'DataSet|Evaluate')
+    register(TransformProperties,'DataSet|Evaluate')
     AddDataSetsInputPorts(TransformN, 5)
     register(TransformN,'DataSet|Evaluate')
     register(Reduce,'DataSet|Evaluate')

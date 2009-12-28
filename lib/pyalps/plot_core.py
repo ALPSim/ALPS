@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from xml.etree import ElementTree
 from dataset import DataSet
+from floatwitherror import FloatWithError as fwe
 
 def read_xml(filename):
     root = ElementTree.parse(filename).getroot()
@@ -17,6 +18,10 @@ def read_xml(filename):
     for point in root.find('set').getchildren():
         x.append(float(point.find('x').text))
         y.append(float(point.find('y').text))
+        if point.find('dx') != None:
+            x[-1] = fwe(x[-1],float(point.find('dx').text))
+        if point.find('dy') != None:
+            y[-1] = fwe(y[-1],float(point.find('dy').text))
 
     data.x = np.array(x)
     data.y = np.array(y)
