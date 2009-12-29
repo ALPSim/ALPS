@@ -5,8 +5,8 @@
 #ifndef __DMTK_CTIMER_H__
 #define __DMTK_CTIMER_H__
 
-#include <sys/time.h>
-#include <sys/resource.h>
+#include <boost/date_time/posix_time/posix_time.hpp>
+//#include <sys/resource.h>
 #include <stdio.h>
 #include <string>
 #include <sstream>
@@ -23,7 +23,10 @@ enum
 typedef double cpu_time;
 
 void mytime(cpu_time *my_timer) 
-{ *my_timer = clock() * (1.0 / CLOCKS_PER_SEC); }
+{ 
+  static boost::posix_time::ptime start = boost::posix_time::second_clock::local_time();
+	*my_timer = (boost::posix_time::second_clock::local_time()-start).seconds(); 
+}
 
 class CTimer
 {
@@ -74,22 +77,22 @@ public:
 		    dd = int((t - hh*3600 - mm*60 - ss)*100);
                     
                     if(ss < 10) 
-                      snprintf(cs,3,"0%i",ss);
+                      sprintf(cs,"0%i",ss);
                     else
-                      snprintf(cs,3,"%i",ss);
+                      sprintf(cs,"%i",ss);
                     if(mm < 10) 
-                      snprintf(cm,3,"0%i",mm);
+                      sprintf(cm,"0%i",mm);
                     else
-                      snprintf(cm,3,"%i",mm);
+                      sprintf(cm,"%i",mm);
                     if(dd < 10) 
-                      snprintf(cd,3,"0%i",dd);
+                      sprintf(cd,"0%i",dd);
                     else
-                      snprintf(cd,3,"%i",dd);
-                    snprintf(s,200,"%i:%s:%s.%s",hh,cm,cs,cd);
+                      sprintf(cd,"%i",dd);
+                    sprintf(s,"%i:%s:%s.%s",hh,cm,cs,cd);
                     break;
                   case CTIMER_SECONDS:
                   default:
-                    snprintf(s,200,"%f sec.",t);
+                    sprintf(s,"%f sec.",t);
                     break;
                 }
 

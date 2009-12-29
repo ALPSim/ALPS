@@ -98,12 +98,12 @@ namespace mocasito {
 				bool is_group(std::string const & p) const {
 					MOCASITO_TRACE
 					hid_t id = H5Gopen2(_file, p.c_str(), H5P_DEFAULT);
-					return id < 0 ? false : static_cast<bool>(detail::h5g_t(id));
+					return id < 0 ? false : detail::h5g_t(id)!=0;
 				}
 				bool is_data(std::string const & p) const {
 					MOCASITO_TRACE
 					hid_t id = H5Dopen2(_file, p.c_str(), H5P_DEFAULT);
-					return id < 0 ? false : static_cast<bool>(detail::h5d_t(id));
+					return id < 0 ? false : detail::h5d_t(id)!=0;
 				}
 				std::vector<std::size_t> extent(std::string const & p) const {
 					MOCASITO_TRACE

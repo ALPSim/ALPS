@@ -55,8 +55,8 @@ class QWL_SSE_Simulation : public scheduler::LatticeModelMCRun<> {
   
  private:
 
-  typedef uint32_t statetype;
-  typedef uint32_t bond_state_type;
+  typedef boost::uint32_t statetype;
+  typedef boost::uint32_t bond_state_type;
     
   unsigned int L;      // Size of the Operator String
   unsigned int non0;   // Number of non-unity operators
@@ -76,40 +76,40 @@ class QWL_SSE_Simulation : public scheduler::LatticeModelMCRun<> {
   unsigned int norder;
   unsigned int norder_min;
   unsigned int norder_max;
-  uint32_t includeLfactor;
+  boost::uint32_t includeLfactor;
   double logf;
   unsigned int logf_steps_total;
   unsigned int logf_step;
   double minimum_histogram;
   double flatness_treshold;
-  uint32_t use_zhou_bhatt;
+  boost::uint32_t use_zhou_bhatt;
   unsigned int block_sweeps_total;
   unsigned int block_sweeps;
-  uint32_t doing_multicanonical;
-  uint32_t upwalker;
+  boost::uint32_t doing_multicanonical;
+  boost::uint32_t upwalker;
   unsigned int thistime;
-  uint32_t all_done;
-  uint32_t measure_magnetics;
+  boost::uint32_t all_done;
+  boost::uint32_t measure_magnetics;
 
   struct vertextype {
     vertextype()
       : op(0) {
     };
-    uint32_t op;
-    uint32_t bond;
+	boost::uint32_t op;
+    boost::uint32_t bond;
     bond_state_type vs;
     int         vv[4];
-    uint32_t  vn[4];
-    uint32_t vvisited[4];
+    boost::uint32_t  vn[4];
+    boost::uint32_t vvisited[4];
   };
   
   vector<vertextype> operator_string;
   
   vector <statetype>  state;   
   vector <int>   statev;  //pointing to previous vertex
-  vector <uint32_t> staten;  //pointing to previous node number
+  vector <boost::uint32_t> staten;  //pointing to previous node number
 
-  vector <uint32_t> is_ferromagnetic;
+  vector <boost::uint32_t> is_ferromagnetic;
   vector <double> matrix_factor;
   
   void init_measurements();
@@ -120,7 +120,7 @@ class QWL_SSE_Simulation : public scheduler::LatticeModelMCRun<> {
   void loopupdate();
   void measure();
   void store_histograms(string);
-  uint32_t exit_leg(vertextype& , uint32_t);  
+  boost::uint32_t exit_leg(vertextype& , boost::uint32_t);  
   double matrix_element(const int, const int, const int);
 
   statetype get_state(bond_state_type vs, int n) const {
@@ -515,9 +515,9 @@ void QWL_SSE_Simulation::vertexbuild() {
 void QWL_SSE_Simulation::loopupdate() {
   static unsigned int i0;
   static unsigned int ir;
-  static uint32_t n0;
-  static uint32_t nr;
-  static uint32_t nex;
+  static boost::uint32_t n0;
+  static boost::uint32_t nr;
+  static boost::uint32_t nex;
   i0=0;
   n0=0;
   int flipflag;
@@ -565,7 +565,7 @@ void QWL_SSE_Simulation::loopupdate() {
 }
 
 
-inline uint32_t QWL_SSE_Simulation::exit_leg(vertextype&  opn, uint32_t nr) {
+inline boost::uint32_t QWL_SSE_Simulation::exit_leg(vertextype&  opn, boost::uint32_t nr) {
   if (is_ferromagnetic[inhomogeneous_bond_type(bond(opn.bond))])
     return 3-nr;
   if (!nr)
