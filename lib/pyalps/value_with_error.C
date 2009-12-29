@@ -36,6 +36,23 @@
 using namespace boost::python;
 using namespace alps::alea;
 
+
+namespace alps { namespace alea {
+
+template<class T>
+struct value_with_error_pickle_suite : boost::python::pickle_suite
+{
+  static boost::python::tuple getinitargs(const value_with_error<T>& this_element)
+  {   
+    return boost::python::make_tuple(this_element.mean(),this_element.error());
+  }   
+}
+
+}
+}
+
+
+
 BOOST_PYTHON_MODULE(pyalea)
 {
   class_<value_with_error<double> >("value_with_error",init<optional<value_with_error<double>::value_type,value_with_error<double>::value_type> >())
@@ -91,6 +108,8 @@ BOOST_PYTHON_MODULE(pyalea)
     .def("asinh",&value_with_error<double>::asinh)
     .def("acosh",&value_with_error<double>::acosh)
     .def("atanh",&value_with_error<double>::atanh)
+
+    .def_pickle(value_with_error_pickle_suite<double>())
     ;
 }
 
