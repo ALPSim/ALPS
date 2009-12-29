@@ -6,6 +6,8 @@ from scipy import optimize
 from dataset import ResultFile
 from dataset import DataSet
 from floatwitherror import FloatWithError as fwe
+# or the C++ class as alternative
+#from pyalps.pyalea import value_with_error as fwe
 
 class Hdf5Loader:
     def GetFileNames(self, flist):
