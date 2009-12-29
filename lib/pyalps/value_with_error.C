@@ -42,11 +42,11 @@ namespace alps { namespace alea {
 template<class T>
 struct value_with_error_pickle_suite : boost::python::pickle_suite
 {
-  static boost::python::tuple getinitargs(const value_with_error<T>& this_element)
+  static boost::python::tuple getinitargs(const value_with_error<T>& v)
   {   
-    return boost::python::make_tuple(this_element.mean(),this_element.error());
+    return boost::python::make_tuple(v.mean(),v.error());
   }   
-}
+};
 
 }
 }
