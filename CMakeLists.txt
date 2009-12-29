@@ -6,7 +6,16 @@ option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
 option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
+option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" ON)
+option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
+
+set(VISTRAILS_APP_NAME "Vistrails.app" CACHE STRING "Name of the Vistrails application" FORCE)
+
 # option(INSTALL_BOOST_HEADERS "Install all the Boost header files" OFF)
+
+if (ALPS_FOR_VISTRAILS)
+  set(ALPS_INSTALL_HEADERS OFF)
+endif (ALPS_FOR_VISTRAILS)
 
 # is this correct???
 set(VERSION_BUILD "unknown")
@@ -30,7 +39,7 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/ALPS" CACHE PATH "ALPS install prefix" FORCE)
   else(WIN32 AND NOT UNIX)
     if (ALPS_FOR_VISTRAILS)
-      set(CMAKE_INSTALL_PREFIX "/Applications/Vistrails/Vistrails.app/Contents/Frameworks" CACHE PATH "ALPS install prefix" FORCE)
+      set(CMAKE_INSTALL_PREFIX "/Applications/Vistrails/" CACHE PATH "ALPS install prefix" FORCE)
     else (ALPS_FOR_VISTRAILS)
       set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
     endif (ALPS_FOR_VISTRAILS)
@@ -175,8 +184,8 @@ find_package(PythonInterp)
 set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
 find_package(PythonLibs)
 if (ALPS_FOR_VISTRAILS)
-  SET(PYTHON_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/Python.framework/Headers)
-  SET(PYTHON_LIBRARY "-F${CMAKE_INSTALL_PREFIX} -framework Python")
+  SET(PYTHON_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Contents/Frameworks/Python.framework/Headers)
+  SET(PYTHON_LIBRARY "-F${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Contents/Frameworks -framework Python")
   MESSAGE(WARNING "Changing Python libraries to those of Vistrails")
 endif(ALPS_FOR_VISTRAILS)
 IF (PYTHONLIBS_FOUND)
@@ -302,13 +311,14 @@ endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
 ######################################################################
 include(InstallRequiredSystemLibraries)
 
-if (NOT ALPS_FOR_VISTRAILS)
+if (ALPS_INSTALL_HEADERS)
   set(ALPS_HEADER_DIR "include")
   install(DIRECTORY src/alps src/boost DESTINATION ${ALPS_HEADER_DIR}
           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h DESTINATION ${ALPS_HEADER_DIR}/alps)
-endif(NOT ALPS_FOR_VISTRAILS)
+endif(ALPS_INSTALL_HEADERS)
+
 # if(INSTALL_BOOST_HEADERS)
 #   install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR}
 #           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
@@ -316,10 +326,10 @@ endif(NOT ALPS_FOR_VISTRAILS)
 # endif(INSTALL_BOOST_HEADERS)
 
 if (ALPS_FOR_VISTRAILS)
-  install(DIRECTORY lib/pyalps DESTINATION ../Resources/lib/python2.5
+  install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5
         FILES_MATCHING PATTERN "*.py" PATTERN "*.xml"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-  install(DIRECTORY vistrails/userpackages/alps DESTINATION ../Resources/lib/python2.5/packages
+  install(DIRECTORY vistrails/userpackages/alps DESTINATION ${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5/packages
         FILES_MATCHING PATTERN "*.py" PATTERN "*.xml"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 else (ALPS_FOR_VISTRAILS)
@@ -365,67 +375,69 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
 # Binary packages                                                        #
 ##########################################################################
 
-if (NOT ALPS_FOR_VISTRAILS)
+if (ALPS_FOR_VISTRAILS)
+  set(CPACK_PACKAGE_NAME "ALPS Vistrails Patch")
+else(ALPS_FOR_VISTRAILS)
   set(CPACK_PACKAGE_NAME "ALPS")
-  set(CPACK_PACKAGE_VENDOR "ALPS Collaboration")
-  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
-  set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
-  set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.txt")
-  set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.txt")
-  set(CPACK_RESOURCE_FILE_WELCOME "${PROJECT_SOURCE_DIR}/Welcome.txt")
-  set(CPACK_PACKAGE_VERSION "${ALPS_VERSION}")
-  set(CPACK_PACKAGE_VERSION_MAJOR "${ALPS_VERSION_MAJOR}")
-  set(CPACK_PACKAGE_VERSION_MINOR "${ALPS_VERSION_MINOR}")
-  set(CPACK_PACKAGE_VERSION_SUBMINOR "${ALPS_VERSION_SUBMINOR}")
-  set(CPACK_PACKAGING_INSTALL_PREFIX "/")
-  set(CPACK_PACKAGE_INSTALL_DIRECTORY "/opt/alps")
-  set(CPACK_PACKAGE_DEFAULT_LOCATION "/opt/alps")
-  set(CPACK_PACKAGE_VERSION_PATCH "${ALPS_VERSION_BUILD}-${VERSION_BUILD}")
+endif(ALPS_FOR_VISTRAILS)
+set(CPACK_PACKAGE_VENDOR "ALPS Collaboration")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
+set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
+set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.txt")
+set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.txt")
+set(CPACK_RESOURCE_FILE_WELCOME "${PROJECT_SOURCE_DIR}/Welcome.txt")
+set(CPACK_PACKAGE_VERSION "${ALPS_VERSION}")
+set(CPACK_PACKAGE_VERSION_MAJOR "${ALPS_VERSION_MAJOR}")
+set(CPACK_PACKAGE_VERSION_MINOR "${ALPS_VERSION_MINOR}")
+set(CPACK_PACKAGE_VERSION_SUBMINOR "${ALPS_VERSION_SUBMINOR}")
+set(CPACK_PACKAGING_INSTALL_PREFIX "/")
+set(CPACK_PACKAGE_INSTALL_DIRECTORY ${CMAKE_INSTALL_PREFIX})
+set(CPACK_PACKAGE_DEFAULT_LOCATION ${CMAKE_INSTALL_PREFIX})
+set(CPACK_PACKAGE_VERSION_PATCH "${ALPS_VERSION_BUILD}-${VERSION_BUILD}")
 
-  if(WIN32 AND NOT UNIX)
-    # There is a bug in NSI that does not handle full unix paths properly. Make
-    # sure there is at least one set of four (4) backlasshes.
-    # NOTE: No ALPS icon yet
-  #  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/tools/build/CMake\\\\InstallIcon.bmp")
-  #  set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
-    set(CPACK_NSIS_DISPLAY_NAME "ALPS ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
-    set(CPACK_NSIS_CONTACT "wistaria@comp-phys.org")
-    set(CPACK_NSIS_HELP_LINK "http://alps.comp-phys.org")
-    set(CPACK_NSIS_URL_INFO_ABOUT "http://alps.comp-phys.org")
-    set(CPACK_NSIS_MODIFY_PATH ON)
-    
-    # Encode the compiler name in the package 
-    if (MSVC60)
-      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc6")
-      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual C++ 6")
-    elseif (MSVC70)
-      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc7")
-      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2002")
-    elseif (MSVC71)
-      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc71")
-      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2003")
-    elseif (MSVC80)
-      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc8")
-      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2005")    
-    elseif (MSVC90)
-      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc9")
-      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2008")
-    elseif (BORLAND)
-      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-borland")  
-      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Borland C++ Builder")    
-    endif (MSVC60)
-    set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
-    set(CPACK_PACKAGE_INSTALL_DIRECTORY "C:\\alps")
-  endif(WIN32 AND NOT UNIX)
-  include(CPack)
+if(WIN32 AND NOT UNIX)
+  # There is a bug in NSI that does not handle full unix paths properly. Make
+  # sure there is at least one set of four (4) backlasshes.
+  # NOTE: No ALPS icon yet
+#  set(CPACK_PACKAGE_ICON "${PROJECT_SOURCE_DIR}/tools/build/CMake\\\\InstallIcon.bmp")
+#  set(CPACK_NSIS_INSTALLED_ICON_NAME "bin\\\\MyExecutable.exe")
+  set(CPACK_NSIS_DISPLAY_NAME "ALPS ${CPACK_PACKAGE_VERSION_MAJOR}.${CPACK_PACKAGE_VERSION_MINOR}.${CPACK_PACKAGE_VERSION_PATCH}")
+  set(CPACK_NSIS_CONTACT "wistaria@comp-phys.org")
+  set(CPACK_NSIS_HELP_LINK "http://alps.comp-phys.org")
+  set(CPACK_NSIS_URL_INFO_ABOUT "http://alps.comp-phys.org")
+  set(CPACK_NSIS_MODIFY_PATH ON)
+  
+  # Encode the compiler name in the package 
+  if (MSVC60)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc6")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual C++ 6")
+  elseif (MSVC70)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc7")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2002")
+  elseif (MSVC71)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc71")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2003")
+  elseif (MSVC80)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc8")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2005")    
+  elseif (MSVC90)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc9")
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Microsoft Visual Studio 2008")
+  elseif (BORLAND)
+    set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-borland")  
+    set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for Borland C++ Builder")    
+  endif (MSVC60)
+  set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
+  set(CPACK_PACKAGE_INSTALL_DIRECTORY "C:\\alps")
+endif(WIN32 AND NOT UNIX)
+include(CPack)
 
 
-  if(COMMAND cpack_configure_downloads)
-    cpack_configure_downloads(
-    "http://alps.comp-phys.org/static/software/releases/"
-      ALL ADD_REMOVE)
-  endif()
-endif (NOT ALPS_FOR_VISTRAILS)
+if(COMMAND cpack_configure_downloads)
+  cpack_configure_downloads(
+  "http://alps.comp-phys.org/static/software/releases/"
+    ALL ADD_REMOVE)
+endif()
 
 ##########################################################################
 

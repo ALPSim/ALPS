@@ -150,9 +150,9 @@ endif (ALPS_FOR_VISTRAILS)
 #######################################################################
 if (ALPS_FOR_VISTRAILS)
 install(TARGETS boost
-          RUNTIME DESTINATION .
-          ARCHIVE DESTINATION .
-          LIBRARY DESTINATION .)
+          RUNTIME DESTINATION ${VISTRAILS_APP_NAME}/Contents/Frameworks
+          ARCHIVE DESTINATION ${VISTRAILS_APP_NAME}/Contents/Frameworks
+          LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/Contents/Frameworks)
 else (ALPS_FOR_VISTRAILS)
   install(TARGETS boost
           RUNTIME DESTINATION bin
