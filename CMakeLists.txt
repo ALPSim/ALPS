@@ -38,9 +38,9 @@ if(WIN32 AND NOT UNIX)
     if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Vistrails" CACHE PATH "ALPS install prefix" FORCE)
     endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(VISTRAILS_APP_NAME "vistrails" CACHE STRING "Name of the Vistrails application" FORCE)
+    set(VISTRAILS_APP_NAME "vistrails" CACHE STRING "Name of the Vistrails application")
     set(VISTRAILS_PACKAGE_DIR packages)
-    set(VISTRAILS_PYTHON_EXTENSION_DIR Python25/Lib/site-packages/)
+    set(VISTRAILS_PYTHON_EXTENSION_DIR Python25/Lib/site-packages )
 #    set(VISTRAILS_PYTHON_EXTENSION_DIR Python25/DLLs)
     set(VISTRAILS_DYLIB_DIR "")
   else (ALPS_FOR_VISTRAILS)
@@ -54,7 +54,7 @@ else(WIN32 AND NOT UNIX)
     if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       set(CMAKE_INSTALL_PREFIX "/Applications/Vistrails/" CACHE PATH "ALPS install prefix" FORCE)
     endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-    set(VISTRAILS_APP_NAME "Vistrails.app/" CACHE STRING "Name of the Vistrails application" FORCE)
+    set(VISTRAILS_APP_NAME "Vistrails.app" CACHE STRING "Name of the Vistrails application")
     set(VISTRAILS_PACKAGE_DIR Contents/Resources/lib/python2.5/packages)
     set(VISTRAILS_PYTHON_EXTENSION_DIR Contents/Resources/lib/python2.5)
     set(VISTRAILS_DYLIB_DIR Contents/Frameworks)
@@ -353,15 +353,15 @@ endif(ALPS_INSTALL_HEADERS)
 
 if (ALPS_FOR_VISTRAILS)
   install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
-        FILES_MATCHING PATTERN "*.py" PATTERN "*.xml"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" exclude)
+        FILES_MATCHING PATTERN "*.py"
+        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
   install(DIRECTORY vistrails/userpackages/alps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PACKAGE_DIR}
-        FILES_MATCHING PATTERN "*.py" PATTERN "*.xml"
+        FILES_MATCHING PATTERN "*.py"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 else (ALPS_FOR_VISTRAILS)
   install(DIRECTORY lib/xml DESTINATION lib
         FILES_MATCHING PATTERN "*.xsl"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" exclude)
+        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
   install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
 
   install(FILES config/CMake/UseALPS.cmake ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
