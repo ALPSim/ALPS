@@ -16,19 +16,15 @@ if(WIN32 AND NOT UNIX)
 endif(WIN32 AND NOT UNIX)
 endif(BUILD_SHARED_LIBS)
 
-if(ALPS_FOR_VISTRAILS)
-  target_link_libraries(pyalea boost ${LINK_LIBRARIES})
-else(ALPS_FOR_VISTRAILS)
-  target_link_libraries(pyalea alps boost ${LINK_LIBRARIES})
-endif(ALPS_FOR_VISTRAILS)
+target_link_libraries(pyalea boost ${LINK_LIBRARIES})
 
 #######################################################################
 # install
 #######################################################################
 if(ALPS_FOR_VISTRAILS)
   install(TARGETS pyalea
-          ARCHIVE DESTINATION ${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5/pyalps
-          LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5/pyalps)
+          ARCHIVE DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
+          LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps)
 else(ALPS_FOR_VISTRAILS)
   install(TARGETS pyalea
           RUNTIME DESTINATION bin

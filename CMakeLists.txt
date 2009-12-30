@@ -8,9 +8,6 @@ option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
 option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" ON)
 option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
-
-set(VISTRAILS_APP_NAME "Vistrails.app" CACHE STRING "Name of the Vistrails application" FORCE)
-
 # option(INSTALL_BOOST_HEADERS "Install all the Boost header files" OFF)
 
 if (ALPS_FOR_VISTRAILS)
@@ -34,17 +31,38 @@ message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 ######################################################################
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
-if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  if(WIN32 AND NOT UNIX)
-    set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/ALPS" CACHE PATH "ALPS install prefix" FORCE)
-  else(WIN32 AND NOT UNIX)
-    if (ALPS_FOR_VISTRAILS)
+
+if(WIN32 AND NOT UNIX)
+  if (ALPS_FOR_VISTRAILS)
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+      set(CMAKE_INSTALL_PREFIX "C:/Program Files (x86)/Vistrails" CACHE PATH "ALPS install prefix" FORCE)
+    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(VISTRAILS_APP_NAME "vistrails" CACHE STRING "Name of the Vistrails application" FORCE)
+    set(VISTRAILS_PACKAGE_DIR packages)
+    set(VISTRAILS_PYTHON_EXTENSION_DIR Python25/Lib/site-packages/)
+#    set(VISTRAILS_PYTHON_EXTENSION_DIR Python25/DLLs)
+    set(VISTRAILS_DYLIB_DIR "")
+  else (ALPS_FOR_VISTRAILS)
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+      set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/ALPS" CACHE PATH "ALPS install prefix" FORCE)
+    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  endif (ALPS_FOR_VISTRAILS)
+else(WIN32 AND NOT UNIX)
+  if (ALPS_FOR_VISTRAILS)
+    message (status setting)
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       set(CMAKE_INSTALL_PREFIX "/Applications/Vistrails/" CACHE PATH "ALPS install prefix" FORCE)
-    else (ALPS_FOR_VISTRAILS)
+    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set(VISTRAILS_APP_NAME "Vistrails.app" CACHE STRING "Name of the Vistrails application" FORCE)
+    set(VISTRAILS_PACKAGE_DIR Contents/Resources/lib/python2.5/packages)
+    set(VISTRAILS_PYTHON_EXTENSION_DIR Contents/Resources/lib/python2.5)
+    set(VISTRAILS_DYLIB_DIR Contents/Frameworks)
+  else (ALPS_FOR_VISTRAILS)
+    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
-    endif (ALPS_FOR_VISTRAILS)
-  endif(WIN32 AND NOT UNIX)
-endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+  endif (ALPS_FOR_VISTRAILS)
+endif(WIN32 AND NOT UNIX)
 
 ######################################################################
 # CMAKE_MODULE_PATH
@@ -184,10 +202,17 @@ find_package(PythonInterp)
 set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
 find_package(PythonLibs)
 if (ALPS_FOR_VISTRAILS)
-  SET(PYTHON_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Contents/Frameworks/Python.framework/Headers)
-  SET(PYTHON_LIBRARY "-F${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Contents/Frameworks -framework Python")
   MESSAGE(WARNING "Changing Python libraries to those of Vistrails")
+  if(WIN32 AND NOT UNIX)
+    SET(PYTHON_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Python25/include)
+    SET(PYTHON_LIBRARY "${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Python25/libs/python25.lib")
+  elseif(WIN32 AND NOT UNIX)
+    SET(PYTHON_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Contents/Frameworks/Python.framework/Headers)
+    SET(PYTHON_LIBRARY "-F${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Contents/Frameworks -framework Python")
+  endif(WIN32 AND NOT UNIX)
+  set(PYTHONLIBS_FOUND TRUE)
 endif(ALPS_FOR_VISTRAILS)
+
 IF (PYTHONLIBS_FOUND)
   SET(ALPS_HAVE_PYTHON 1)
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS}) 
@@ -326,16 +351,16 @@ endif(ALPS_INSTALL_HEADERS)
 # endif(INSTALL_BOOST_HEADERS)
 
 if (ALPS_FOR_VISTRAILS)
-  install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5
+  install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
         FILES_MATCHING PATTERN "*.py" PATTERN "*.xml"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-  install(DIRECTORY vistrails/userpackages/alps DESTINATION ${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5/packages
+        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" exclude)
+  install(DIRECTORY vistrails/userpackages/alps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PACKAGE_DIR}
         FILES_MATCHING PATTERN "*.py" PATTERN "*.xml"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 else (ALPS_FOR_VISTRAILS)
   install(DIRECTORY lib/xml DESTINATION lib
         FILES_MATCHING PATTERN "*.xsl"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" exclude)
   install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
 
   install(FILES config/CMake/UseALPS.cmake ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
