@@ -28,7 +28,7 @@ if(UNIX AND NOT WIN32)
     configure_file(${script}.in ${CMAKE_CURRENT_BINARY_DIR}/${script})
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${script} DESTINATION bin)
   endforeach(script)
-  install(PROGRAMS archivecat DESTINATION bin)
+  install(PROGRAMS archivecat xslttransform DESTINATION bin)
 endif(UNIX AND NOT WIN32)
 
 #
