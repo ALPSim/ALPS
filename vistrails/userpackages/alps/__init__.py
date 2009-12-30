@@ -23,7 +23,7 @@ identifier = 'org.comp-phys.alps'
 version = '0.4.1'
 name = 'ALPS'
 
-configuration = ConfigurationObject(alpspath=(None, str),toolpath="/opt/local/bin",mpirun="['mpirun','-np']")
+configuration = ConfigurationObject(alpspath="/opt/alps/bin",toolpath="/opt/local/bin",mpirun="['mpirun','-np']",mpiprocs=0)
 
 ##############################################################################
 

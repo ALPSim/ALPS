@@ -38,6 +38,20 @@ def _get_tool_path(binary_file):
     else:
         return binary_file
 
+def _get_default_mpi_procs():
+    if config.check('mpiprocs'):
+      return config.mpirocs
+    else:
+      return 0
+
+def _get_mpi_run():
+    if config.check('mpirun'):
+      cmd = "res =" + config.mpirun
+      exec cmd
+      return res
+    else:
+      return ['mpirun','-np']
+
 class SystemCommand(Module):
     def execute(self,cmdline):
         cmd = list2cmdline(cmdline)

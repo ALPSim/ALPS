@@ -29,10 +29,7 @@ class AlpsApplication(alpscore.SystemCommandLogged):
     """ Runs an ALPS application for a given parameter file """
 
     def get_path(self,appname):
-        if self.hasInputFromPort('num_processes') and  self.getInputFromPort('num_processes') > 1:
-            return alpscore._get_path(appname+'_mpi')
-        else: 
-            return alpscore._get_path(appname)
+        return alpscore._get_path(appname)
 
     def get_app_name(self):
         if self.hasInputFromPort('application'):
@@ -44,7 +41,13 @@ class AlpsApplication(alpscore.SystemCommandLogged):
           else: 
              raise ModuleError(self, 'No application specified')
 
-             
+    def num_procs(self):
+        if self.hasInputFromPort('num_processes'):
+          np = self.getInputFromPort('num_processes')
+        else:
+          np = alpscore._get_default_mpi_procs()
+        return np
+
     def getoptions(self):
         options = []
         if self.hasInputFromPort('tmin'):
@@ -59,23 +62,18 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         result.name = input_file.name.replace('.in.xml', '.out.xml')
         resultdir = basic.Directory
         resultdir.name = os.path.dirname(result.name)
-        if self.hasInputFromPort('vtl'):
-            filename = os.path.join(resultdir.name,'workflow.vtl')
-            file_ = open(filename,'w')
-            file_.write(self.getInputFromPort('vtl'))
-            file_.close()
         an = self.get_app_name()
         if not os.path.isfile(an):
             raise ModuleError(self, "Application '%s' not existent" % an)
-        cmdline = [an] + self.getoptions()
-        if self.hasInputFromPort('num_processes') and  self.getInputFromPort('num_processes') > 1:
-            cmdline = alspcore.config.mpirun+[self.getInputFromPort('num_processes')]+cmdline
-            print "Using MPI", cmdline
+        if self.num_procs()>1:
+            cmdline = alpscore._get_mpi_run()+[str(self.num_procs()),an,"--mpi"]
+        else:
+          cmdline = [an]
+        cmdline += self.getoptions()
         if self.hasInputFromPort('continue'):
             cmdline += [result.name]
         else:
             cmdline += [input_file.name]
-        print cmdline
         self.execute(cmdline)
         self.setResult('output_file', result)
         self.setResult('output_dir', resultdir)
@@ -85,7 +83,6 @@ class AlpsApplication(alpscore.SystemCommandLogged):
                     ('tmax', [basic.Integer]),
                     ('continue', [basic.Boolean]),
                     ('application', [basic.File]),
-                    ('vtl', [basic.String]),
                     ('num_processes',[basic.Integer])
                     ]
     _output_ports = [('output_file', [basic.File]),
