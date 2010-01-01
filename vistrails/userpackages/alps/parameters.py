@@ -61,6 +61,18 @@ class ParametersData(CommonParametersFunctions):
           out.write('\"\n')
         out.write('}\n')
         
+    def write_xml_file(self,filename):
+         f = file(filename,'w')
+         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+         f.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')
+         f.write('<SIMULATION xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/QMCXML.xsd">\n')
+         f.write('  <PARAMETERS>\n')
+         for key in self.parms:
+           print key
+           f.write('<PARAMETER name="'+str(key)+'">'+str(self.parms[key])+'</PARAMETER>\n')
+         f.write('  </PARAMETERS>\n')
+         f.write('</SIMULATION>\n')
+         f.close()
     def update_unchecked(self,other):
         self.parms.update(other)
 

@@ -97,8 +97,7 @@ def selfRegister():
     register(PlotDescriptor,'DataSet|Plot')
     register(MplXYPlot,'DataSet|Plot')
     reg.add_module(Convert2Text,namespace='DataSet|Plot')
-    reg.add_module(GraceXYPlot,namespace='DataSet|Plot',abstract=True)
-    reg.add_module(GraceXYPlot,name="Convert2Grace",namespace='DataSet|Plot')
+    reg.add_module(GraceXYPlot,name='Convert2Grace',namespace='DataSet|Plot')
     reg.add_module(Convert2Gnuplot,namespace='DataSet|Plot')
     reg.add_module(LoadXMLPlot,namespace='DataSet|Plot')
     

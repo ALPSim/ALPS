@@ -12,6 +12,8 @@ import core.modules.basic_modules
 import core.modules.module_registry
 import os
 import os.path
+import platform
+import shutil
 
 from PyQt4 import QtCore, QtGui
 from packages.spreadsheet.basic_widgets import SpreadsheetCell
@@ -51,6 +53,14 @@ def _get_mpi_run():
       return res
     else:
       return ['mpirun','-np']
+      
+def copy_stylesheet(dir):
+    if platform.system()=='Darwin':
+      shutil.copyfile('../Resources/lib/xml/ALPS.xsl', os.path.join(dir,'ALPS.xsl'))
+    if platform.system()=='Windows':
+      shutil.copyfile(os.path.join(os.path.join('lib','xml'),'ALPS.xsl'), os.path.join(dir,'ALPS.xsl'))
+     
+
 
 class SystemCommand(Module):
     def execute(self,cmdline):
@@ -63,7 +73,10 @@ class SystemCommand(Module):
 class SystemCommandLogged(Module):
     def execute(self,cmdline):
         logfile = self.interpreter.filePool.create_file(suffix='.log')
-        cmdline += ['>&',logfile.name]
+        if platform.system() == 'Windows':
+          cmdline += ['>',logfile.name]
+        else:
+          cmdline += ['>&',logfile.name]
         cmd = list2cmdline(cmdline)
         print cmd
         result = os.system(cmd)

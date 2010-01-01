@@ -42,6 +42,7 @@ src_PARSER = \
   $(top_srcdir)/src/alps/parser/xslt_path.C
 src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/abstract_task.C \
+  $(top_srcdir)/src/alps/scheduler/convertxdr.C \
   $(top_srcdir)/src/alps/scheduler/factory.C \
   $(top_srcdir)/src/alps/scheduler/info.C \
   $(top_srcdir)/src/alps/scheduler/master_scheduler.C \

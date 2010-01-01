@@ -147,6 +147,7 @@ am__libalps_mpi_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/model/bondterm.C \
 	$(top_srcdir)/src/alps/model/globaloperator.C \
 	$(top_srcdir)/src/alps/scheduler/abstract_task.C \
+	$(top_srcdir)/src/alps/scheduler/convertxdr.C \
 	$(top_srcdir)/src/alps/scheduler/factory.C \
 	$(top_srcdir)/src/alps/scheduler/info.C \
 	$(top_srcdir)/src/alps/scheduler/master_scheduler.C \
@@ -208,8 +209,8 @@ am__objects_9 = libalps_mpi_la-modellibrary.lo \
 	libalps_mpi_la-siteterm.lo libalps_mpi_la-bondterm.lo \
 	libalps_mpi_la-globaloperator.lo
 am__objects_10 = libalps_mpi_la-abstract_task.lo \
-	libalps_mpi_la-factory.lo libalps_mpi_la-info.lo \
-	libalps_mpi_la-master_scheduler.lo \
+	libalps_mpi_la-convertxdr.lo libalps_mpi_la-factory.lo \
+	libalps_mpi_la-info.lo libalps_mpi_la-master_scheduler.lo \
 	libalps_mpi_la-measurement_operators.lo \
 	libalps_mpi_la-montecarlo.lo libalps_mpi_la-mpp_scheduler.lo \
 	libalps_mpi_la-options.lo libalps_mpi_la-remote_task.lo \
@@ -378,6 +379,7 @@ am__libalps_sgl_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/model/bondterm.C \
 	$(top_srcdir)/src/alps/model/globaloperator.C \
 	$(top_srcdir)/src/alps/scheduler/abstract_task.C \
+	$(top_srcdir)/src/alps/scheduler/convertxdr.C \
 	$(top_srcdir)/src/alps/scheduler/factory.C \
 	$(top_srcdir)/src/alps/scheduler/info.C \
 	$(top_srcdir)/src/alps/scheduler/master_scheduler.C \
@@ -424,7 +426,7 @@ am__objects_42 = disorder.lo latticedescriptor.lo \
 	latticegraphdescriptor.lo latticelibrary.lo unitcell.lo
 am__objects_43 = modellibrary.lo siteterm.lo bondterm.lo \
 	globaloperator.lo
-am__objects_44 = abstract_task.lo factory.lo info.lo \
+am__objects_44 = abstract_task.lo convertxdr.lo factory.lo info.lo \
 	master_scheduler.lo measurement_operators.lo montecarlo.lo \
 	mpp_scheduler.lo options.lo remote_task.lo remote_worker.lo \
 	scheduler.lo signal.lo single_scheduler.lo serial_scheduler.lo \
@@ -531,6 +533,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/model/bondterm.C \
 	$(top_srcdir)/src/alps/model/globaloperator.C \
 	$(top_srcdir)/src/alps/scheduler/abstract_task.C \
+	$(top_srcdir)/src/alps/scheduler/convertxdr.C \
 	$(top_srcdir)/src/alps/scheduler/factory.C \
 	$(top_srcdir)/src/alps/scheduler/info.C \
 	$(top_srcdir)/src/alps/scheduler/master_scheduler.C \
@@ -582,8 +585,9 @@ am__objects_74 = libalps_la-disorder.lo \
 	libalps_la-latticelibrary.lo libalps_la-unitcell.lo
 am__objects_75 = libalps_la-modellibrary.lo libalps_la-siteterm.lo \
 	libalps_la-bondterm.lo libalps_la-globaloperator.lo
-am__objects_76 = libalps_la-abstract_task.lo libalps_la-factory.lo \
-	libalps_la-info.lo libalps_la-master_scheduler.lo \
+am__objects_76 = libalps_la-abstract_task.lo libalps_la-convertxdr.lo \
+	libalps_la-factory.lo libalps_la-info.lo \
+	libalps_la-master_scheduler.lo \
 	libalps_la-measurement_operators.lo libalps_la-montecarlo.lo \
 	libalps_la-mpp_scheduler.lo libalps_la-options.lo \
 	libalps_la-remote_task.lo libalps_la-remote_worker.lo \
@@ -975,6 +979,7 @@ src_PARSER = \
 
 src_SCHEDULER = \
   $(top_srcdir)/src/alps/scheduler/abstract_task.C \
+  $(top_srcdir)/src/alps/scheduler/convertxdr.C \
   $(top_srcdir)/src/alps/scheduler/factory.C \
   $(top_srcdir)/src/alps/scheduler/info.C \
   $(top_srcdir)/src/alps/scheduler/master_scheduler.C \
@@ -1293,6 +1298,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/content_oarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convert.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/convertxdr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/copyright.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cpp_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cregex.Plo@am__quote@
@@ -1358,6 +1364,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_la-config_file.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_la-connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_la-convert.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_la-convertxdr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_la-copyright.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_la-cpp_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_la-cregex.Plo@am__quote@
@@ -1519,6 +1526,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-connection.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-content_oarchive.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-convert.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-convertxdr.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-copyright.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-cpp_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/libalps_mpi_la-cregex.Plo@am__quote@
@@ -2030,6 +2038,13 @@ libalps_mpi_la-abstract_task.lo: $(top_srcdir)/src/alps/scheduler/abstract_task.
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/abstract_task.C' object='libalps_mpi_la-abstract_task.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_mpi_la-abstract_task.lo `test -f '$(top_srcdir)/src/alps/scheduler/abstract_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/abstract_task.C
+
+libalps_mpi_la-convertxdr.lo: $(top_srcdir)/src/alps/scheduler/convertxdr.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_mpi_la-convertxdr.lo -MD -MP -MF $(DEPDIR)/libalps_mpi_la-convertxdr.Tpo -c -o libalps_mpi_la-convertxdr.lo `test -f '$(top_srcdir)/src/alps/scheduler/convertxdr.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/convertxdr.C
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libalps_mpi_la-convertxdr.Tpo $(DEPDIR)/libalps_mpi_la-convertxdr.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/convertxdr.C' object='libalps_mpi_la-convertxdr.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_mpi_la-convertxdr.lo `test -f '$(top_srcdir)/src/alps/scheduler/convertxdr.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/convertxdr.C
 
 libalps_mpi_la-factory.lo: $(top_srcdir)/src/alps/scheduler/factory.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_mpi_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_mpi_la-factory.lo -MD -MP -MF $(DEPDIR)/libalps_mpi_la-factory.Tpo -c -o libalps_mpi_la-factory.lo `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C
@@ -3291,6 +3306,13 @@ abstract_task.lo: $(top_srcdir)/src/alps/scheduler/abstract_task.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o abstract_task.lo `test -f '$(top_srcdir)/src/alps/scheduler/abstract_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/abstract_task.C
 
+convertxdr.lo: $(top_srcdir)/src/alps/scheduler/convertxdr.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT convertxdr.lo -MD -MP -MF $(DEPDIR)/convertxdr.Tpo -c -o convertxdr.lo `test -f '$(top_srcdir)/src/alps/scheduler/convertxdr.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/convertxdr.C
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/convertxdr.Tpo $(DEPDIR)/convertxdr.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/convertxdr.C' object='convertxdr.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o convertxdr.lo `test -f '$(top_srcdir)/src/alps/scheduler/convertxdr.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/convertxdr.C
+
 factory.lo: $(top_srcdir)/src/alps/scheduler/factory.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT factory.lo -MD -MP -MF $(DEPDIR)/factory.Tpo -c -o factory.lo `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/factory.Tpo $(DEPDIR)/factory.Plo
@@ -4389,6 +4411,13 @@ libalps_la-abstract_task.lo: $(top_srcdir)/src/alps/scheduler/abstract_task.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/abstract_task.C' object='libalps_la-abstract_task.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_la-abstract_task.lo `test -f '$(top_srcdir)/src/alps/scheduler/abstract_task.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/abstract_task.C
+
+libalps_la-convertxdr.lo: $(top_srcdir)/src/alps/scheduler/convertxdr.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_la-convertxdr.lo -MD -MP -MF $(DEPDIR)/libalps_la-convertxdr.Tpo -c -o libalps_la-convertxdr.lo `test -f '$(top_srcdir)/src/alps/scheduler/convertxdr.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/convertxdr.C
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/libalps_la-convertxdr.Tpo $(DEPDIR)/libalps_la-convertxdr.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/scheduler/convertxdr.C' object='libalps_la-convertxdr.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o libalps_la-convertxdr.lo `test -f '$(top_srcdir)/src/alps/scheduler/convertxdr.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/convertxdr.C
 
 libalps_la-factory.lo: $(top_srcdir)/src/alps/scheduler/factory.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(libalps_la_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT libalps_la-factory.lo -MD -MP -MF $(DEPDIR)/libalps_la-factory.Tpo -c -o libalps_la-factory.lo `test -f '$(top_srcdir)/src/alps/scheduler/factory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/scheduler/factory.C

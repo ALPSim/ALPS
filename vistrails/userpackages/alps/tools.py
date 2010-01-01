@@ -14,12 +14,15 @@ import tempfile
 import copy
 import glob
 import zipfile
+import datetime
 
 import parameters
 import alpscore
 import system
 from parameters import Parameters
 from packages.controlflow.list_module import ListOfElements
+
+import pyalps.pytools # the C++ conversion functions
 
 basic = core.modules.basic_modules
 
@@ -76,6 +79,86 @@ class MakeParameterFile(Module):
      _output_ports=[('file', [basic.File]),
                     ('simulationid',[system.SimulationID])]
 
+
+class WriteInputFiles(Module):
+     """Creates a parameter file.
+     """
+     def create_xml_file(self, f, dir, fname, p):
+         f.write('  <TASK status="new">\n')
+         f.write('    <INPUT file="'+fname+'.in.xml"/>\n')
+         f.write('    <OUTPUT file="'+fname+'.out.xml"/>\n')
+         f.write('  </TASK>\n')
+         print 'creating data'
+         res = parameters.ParametersData(p)             
+         print 'writing file'
+         res.write_xml_file(os.path.join(dir.name,fname+'.in.xml'))
+         
+     def compute(self):
+         of = self.interpreter.filePool.create_file()
+         os.unlink(of.name)
+         os.mkdir(of.name)
+         dir = basic.Directory
+         dir.name = of.name
+         o = self.interpreter.filePool.create_file()
+         if self.hasInputFromPort('simulationid'):
+           base_name = self.getInputFromPort('simulationid')
+         else:
+           base_name = os.path.basename(o.name)
+
+         ofile = basic.File()
+         ofile.name = os.path.join(dir.name,base_name + '.in.xml')
+         f = file(ofile.name,'w')
+         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+         f.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')
+         f.write('<JOB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/job.xsd">\n')
+         f.write('  <OUTPUT file="'+base_name+'.out.xml"/>\n')
+         
+         if self.hasInputFromPort('parms'):
+           input_values = self.forceGetInputListFromPort('parms')
+           print 'all: ',input_values
+           l = []
+           for p in input_values:
+             if isinstance(p,list):
+               l += p
+             else:
+               l += [p]
+
+           bits = 31;
+           n = len(l)
+           while n>0:
+             n /= 2
+             bits -= 1
+
+           if self.hasInputFromPort('baseseed'):
+             baseseed = self.getInputFromPort('baseseed')
+           else:
+             now = datetime.datetime.now()
+             baseseed = now.microsecond+1000000*now.second+60000000*now.minute
+             baseseed = ((baseseed << 10) | (baseseed >> 22));
+             
+             
+           count = 0
+           for p in l:
+               count += 1
+               if not p.has_key('SEED'):
+                 seed = baseseed
+                 for j in range(0,32/bits+1):
+                   seed ^= ((count-1) << (j * bits))
+                 seed &= ((1<<30) | ((1<<30)-1))
+                 p['SEED'] = seed
+               self.create_xml_file(f,dir,base_name+'.task'+str(count),p)
+
+         f.write('</JOB>\n')
+         f.close()
+         
+         alpscore.copy_stylesheet(dir.name)
+         self.setResult("output_dir", dir)
+         self.setResult("output_file", ofile)
+     _input_ports = [('parms', [Parameters]),
+                     ('baseseed',[basic.Integer],True),
+                     ('simulationid',[system.SimulationID])]
+     _output_ports = [('output_file', [basic.File]),
+                     ('output_dir', [basic.Directory])]
 
 class Parameter2XML(alpscore.SystemCommandLogged):
     def compute(self):
@@ -169,23 +252,23 @@ class GetResultFiles(Module):
     _output_ports = [('value',[ListOfElements]),
         ('resultfiles',[ResultFiles])]
 
-class Convert2XML(alpscore.SystemCommandLogged):
+class Convert2XML(Module):
     def compute(self):
-        input_file = self.getInputFromPort('input_file')
-        self.execute([alpscore._get_path('convert2xml')] + input_file)
+        input_files = self.getInputFromPort('input_file')
         olist = []
-        for q in input_file:
-          olist.append(q + '.xml')
+        for f in input_files:
+          print f
+          olist.append(pyalps.pytools.convert2xml(str(f)))
+          alpscore.copy_stylesheet(os.path.dirname(f))
         self.setResult('value', olist)
     _input_ports = [('input_file', [ListOfElements])]
-    _output_ports = [('value', [ListOfElements]),
-                     ('log_file',[basic.File])]
+    _output_ports = [('value', [ListOfElements])]
  
 class Convert2Text(alpscore.SystemCommand):
     def compute(self):
         input_file = self.getInputFromPort('input_file')
         output_file = self.interpreter.filePool.create_file(suffix='.txt')
-        self.execute([alpscore._get_path('convert2xml'), input_file.name, '>' , output_file.name])
+        self.execute([alpscore._get_path('convert2text'), input_file.name, '>' , output_file.name])
         self.setResult('output_file', output_file)
     _input_ports = [('input_file', [basic.File])]
     _output_ports = [('output_file', [basic.File])]
@@ -245,6 +328,8 @@ def selfRegister():
   
   reg.add_module(MakeParameterFile,namespace="Tools")
   reg.add_module(Parameter2XML,namespace="Tools")
+  reg.add_module(WriteInputFiles,name='MakeParameterXMLFiles',namespace="Tools")
+  reg.add_module(WriteInputFiles,namespace="Tools")
   
   reg.add_module(Glob,namespace="Tools",abstract=True)
   reg.add_module(GetRunFiles,namespace="Tools")

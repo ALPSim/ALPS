@@ -27,47 +27,13 @@
 *
 *****************************************************************************/
 
-/* $Id$ */
-
-#include <alps/scheduler/convert.h>
-#include <alps/parser/xslt_path.h>
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
-#include <stdexcept>
-#include <iostream>
+/* $Id: convert2xml.C 3523 2009-12-12 05:52:24Z troyer $ */
+#include <string>
 
 
-int main(int argc, char** argv)
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
+namespace alps {
 
-  if (argc<2) {
-    std::cerr << "Usage: " << argv[0] << " inputfile [inputfile ...]]\n";
-    std::exit(-1);
-  }
-
-  for (int i=1;i<argc;++i) {
-    std::string inname=argv[i];
-    if (inname.size() >= 2 && inname.substr(0, 2) == "./") 
-      inname.erase(0, 2);
-    alps::convert2xml(inname);
-    if (i==1)
-    
-      alps::copy_stylesheet(boost::filesystem::path(inname,
-                              boost::filesystem::native).remove_filename());
-  }
-
-  // make sure ths stylesheet is there
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& e)
-{
-  std::cerr << "Caught exception: " << e.what() << "\n";
-  std::exit(-5);
-}
-#endif
-
-}
+  /// convert a file from XDR format to XML
+  
+  std::string convert2xml(std::string const& name);
+} // end namespace
