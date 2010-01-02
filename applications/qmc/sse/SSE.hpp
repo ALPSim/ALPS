@@ -84,13 +84,13 @@ private :
 
   double epsilon;
   double total_shift;
-  uint32_t cutoff_L; 
-  uint32_t number_of_worms_per_sweep;
+  alps::uint32_t cutoff_L; 
+  alps::uint32_t number_of_worms_per_sweep;
   alps::uint64_t nb_steps; 
-  uint32_t nb_thermalisation_steps; 
-  uint32_t each_measurement;
+  alps::uint32_t nb_thermalisation_steps; 
+  alps::uint32_t each_measurement;
   alps::uint64_t steps_done_total; 
-  uint32_t measurements_done;
+  alps::uint32_t measurements_done;
   double worm_size;
   std::string WHICH_LOOP_TYPE;
   bool NO_WORMWEIGHT;
@@ -102,7 +102,7 @@ private :
   vector<state_type> site_state_copy; 
 
   vector<std::pair<state_type,state_type> > site_type_for_bond_type_;
-  vector<uint32_t> number_of_bonds_for_bond_type;
+  vector<alps::uint32_t> number_of_bonds_for_bond_type;
 
   std::vector<std::vector<double> > matrix_element_raise_;
   std::vector<std::vector<double> > matrix_element_lower_;
@@ -114,7 +114,7 @@ private :
   vector<double> energy_offset;
   vector<vertex_type> operator_string;
   vector<vertex_type> operator_string_copy;
-  uint32_t current_number_of_non_identity;
+  alps::uint32_t current_number_of_non_identity;
   std::valarray<double> green;
   double worm_weight;
   double matelsum;
@@ -147,10 +147,10 @@ private :
   void print_operator_string();
   void diagonal_update();
   void link_legs();
-  std::pair<uint32_t,state_type> initial_vertex();
+  std::pair<alps::uint32_t,state_type> initial_vertex();
   void worm_update();
-  inline state_type return_exit_leg(uint32_t,state_type);
-  void increase_cutoff_L(uint32_t);
+  inline state_type return_exit_leg(alps::uint32_t,state_type);
+  void increase_cutoff_L(alps::uint32_t);
   void do_update();
 
   /******** SSE.Directed.cpp ********/
@@ -159,17 +159,17 @@ private :
   //bool find_sol(double[4],double[4],double[4],double[4]);
   bool find_minbounce(double[4],double[4],double[4],double[4]);
   bool find_locopt(double[4],double[4]);
-  double return_weight_after_flip(uint32_t, state_type[4],state_type,bool);
-  double return_weight_before_flip(uint32_t, state_type[4],state_type,bool);
-  double return_worm_weight_before(uint32_t,state_type[4],state_type,bool);
-  double return_worm_weight_after(uint32_t,state_type[4],state_type,bool);
-  //bool calculate_scattering_matrix(uint32_t,state_type[4],bool);
-  bool calculate_minbounce(uint32_t,state_type[4],bool);
-  bool calculate_locopt(uint32_t,state_type[4],bool);
-  bool calculate_all_scattering_matrices(uint32_t,bool);            
-  void put_in(uint32_t,state_type[4],state_type);
+  double return_weight_after_flip(alps::uint32_t, state_type[4],state_type,bool);
+  double return_weight_before_flip(alps::uint32_t, state_type[4],state_type,bool);
+  double return_worm_weight_before(alps::uint32_t,state_type[4],state_type,bool);
+  double return_worm_weight_after(alps::uint32_t,state_type[4],state_type,bool);
+  //bool calculate_scattering_matrix(alps::uint32_t,state_type[4],bool);
+  bool calculate_minbounce(alps::uint32_t,state_type[4],bool);
+  bool calculate_locopt(alps::uint32_t,state_type[4],bool);
+  bool calculate_all_scattering_matrices(alps::uint32_t,bool);            
+  void put_in(alps::uint32_t,state_type[4],state_type);
   void calculate_proba_worm();
-  void calculate_heat_bath_matrix(uint32_t,state_type[4],bool);
+  void calculate_heat_bath_matrix(alps::uint32_t,state_type[4],bool);
 
   /******** SSE.Measurements.cpp ********/
   void create_observables();

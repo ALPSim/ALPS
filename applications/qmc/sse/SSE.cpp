@@ -48,8 +48,8 @@ SSE::SSE(const alps::ProcessList& w, const alps::Parameters& myparms,int n)
   number_of_worms_per_sweep(parms.value_or_default("NUMBER_OF_WORMS_PER_SWEEP",1)),
   nb_steps(parms.defined("SWEEPS") ? alps::uint64_t(parms["SWEEPS"]) 
     :  (parms.defined("MCS") ? alps::uint64_t(parms["MCS"]) : alps::uint64_t(parms["Steps"]))),
-  nb_thermalisation_steps(parms.defined("THERMALIZATION") ? uint32_t(parms["THERMALIZATION"]) 
-    :  (parms.defined("thermalization") ? uint32_t(parms["thermalization"]) : nb_steps/10)),
+  nb_thermalisation_steps(parms.defined("THERMALIZATION") ? alps::uint32_t(parms["THERMALIZATION"]) 
+    :  (parms.defined("thermalization") ? alps::uint32_t(parms["thermalization"]) : nb_steps/10)),
   each_measurement(parms.value_or_default("SKIP",1)),
   steps_done_total(0),
   measurements_done(0),
@@ -126,7 +126,7 @@ void SSE::load(alps::IDump& dump)
     dump >>  steps_done_total;
   else {
     // data type have changed from 32 to 64 Bit between version 301 and 302
-    uint32_t steps_done_total_tmp;
+    alps::uint32_t steps_done_total_tmp;
     dump >>  steps_done_total_tmp;
     // perform the conversion which may be necessary
     steps_done_total = steps_done_total_tmp;

@@ -526,9 +526,9 @@ class System
     {
       char file[255];
       if(position == LEFT)
-        snprintf(file,255,"gs_%s_%i_l.dat",_name,n);
+        sprintf(file,"gs_%s_%i_l.dat",_name,n);
       else
-        snprintf(file,255,"gs_%s_%i_r.dat",_name,n);
+        sprintf(file,"gs_%s_%i_r.dat",_name,n);
 
       ofstream outputfile(file,std::ios::out|std::ios::binary);
       if(!outputfile) 
@@ -560,9 +560,9 @@ class System
     {
       char file[255];
       if(position == LEFT)
-        snprintf(file,255,"gs_%s_%i_l.dat",_name,n);
+        sprintf(file,"gs_%s_%i_l.dat",_name,n);
       else
-        snprintf(file,255,"gs_%s_%i_r.dat",_name,n);
+        sprintf(file,"gs_%s_%i_r.dat",_name,n);
 
       ifstream inputfile(file,std::ios::in|std::ios::binary);
       if(!inputfile) 
@@ -596,9 +596,9 @@ class System
     {
       char file[255];
       if(position == LEFT)
-        snprintf(file,255,"rho_%s_%i_l.dat",_name,n);
+        sprintf(file,"rho_%s_%i_l.dat",_name,n);
       else
-        snprintf(file,255,"rho_%s_%i_r.dat",_name,n);
+        sprintf(file,"rho_%s_%i_r.dat",_name,n);
 
 #ifdef DMTK_DEBUG
       cout << "SAVING RHO " << file << endl;
@@ -617,9 +617,9 @@ class System
     {
       char file[255];
       if(position == LEFT)
-        snprintf(file,255,"rho_%s_%i_l.dat",_name,n);
+        sprintf(file,"rho_%s_%i_l.dat",_name,n);
       else
-        snprintf(file,255,"rho_%s_%i_r.dat",_name,n);
+        sprintf(file,"rho_%s_%i_r.dat",_name,n);
 
 #ifdef DMTK_DEBUG
       cout << "READING RHO " << file << endl;
@@ -638,9 +638,9 @@ class System
     {
       char file[255];
       if(position == LEFT)
-        snprintf(file,255,"block_%s_%i_l.dat",_name,n);
+        sprintf(file,"block_%s_%i_l.dat",_name,n);
       else
-        snprintf(file,255,"block_%s_%i_r.dat",_name,n);
+        sprintf(file,"block_%s_%i_r.dat",_name,n);
 
 #ifdef DMTK_DEBUG
       cout << "SAVING BLOCK " << file << endl;
@@ -666,9 +666,9 @@ class System
 
       char file[255];
       if(position == LEFT)
-        snprintf(file,255,"block_%s_%i_l.dat",_name,n);
+        sprintf(file,"block_%s_%i_l.dat",_name,n);
       else
-        snprintf(file,255,"block_%s_%i_r.dat",_name,n);
+        sprintf(file,"block_%s_%i_r.dat",_name,n);
 
 #ifdef DMTK_DEBUG
       cout << "READING BLOCK " << file << endl;
@@ -732,7 +732,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
   _use_seed = false;
 
   char file[255];
-  snprintf(file,255,"iter_%s.dat",_name);
+  sprintf(file,"iter_%s.dat",_name);
   ofstream outputfile(file,std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
@@ -962,7 +962,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
   qn = qnt;
 
   char file[255];
-  snprintf(file,255,"iter_%s.dat",_name);
+  sprintf(file,"iter_%s.dat",_name);
   ofstream outputfile(file,std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
@@ -1091,7 +1091,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
   _in_warmup = false;
 
   char file[255];
-  snprintf(file,255,"iter_%s.dat",_name);
+  sprintf(file,"iter_%s.dat",_name);
   ofstream outputfile(file,std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
   outputfile << "Last iteration to get a symmetric block B(L/2-1)..B(L/2-1)\n";
@@ -1293,7 +1293,7 @@ System<T>::init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool u
          if(_grand_canonical & (1 << i)) cout << QN::qn_name(i) << " = " << qnt[i] << endl;
     }
   char file[255];
-  snprintf(file,255,"iter_%s.dat",_name);
+  sprintf(file,"iter_%s.dat",_name);
   ofstream outputfile(file,std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
   outputfile << "TOTAL SIZE : " << size() << " " << lnow << endl;
@@ -1486,7 +1486,7 @@ System<T>::diagonalize(bool use_seed)
   if(_target_subspaces && _in_warmup && lattice().size() != size()) n = 0;
 
   char file[255];
-  snprintf(file,255,"vectors_%s.dat",_name);
+  sprintf(file,"vectors_%s.dat",_name);
 
   if(verbose() > 0) cout << ">>>>>>> LANCZOS <<<<<<<" << endl;
 
@@ -1514,7 +1514,7 @@ System<T>::diagonalize(bool use_seed)
     cout << "OVERLAP " << product(seed,gs) << endl;
   } 
 
-  snprintf(file,255,"iter_%s.dat",_name);
+  sprintf(file,"iter_%s.dat",_name);
   ofstream outputfile(file,std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
@@ -1616,7 +1616,7 @@ System<T>::build_target_states(int /*pos*/)
     Vector<double> b(100);
     Vector<double> e(1);
     char file[255];
-    snprintf(file,255,"vectors_%s.dat",_name);
+    sprintf(file,"vectors_%s.dat",_name);
     int n = _lanczos_maxiter;
 
     _project_states.resize(i+1);
@@ -1918,7 +1918,7 @@ System<T>::truncate(int position, int new_size)
   cout << "-------------------------------------------\n";
 
   char file[255];
-  snprintf(file,255,"iter_%s.dat",_name);
+  sprintf(file,"iter_%s.dat",_name);
   ofstream outputfile(file,std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
@@ -2034,7 +2034,7 @@ System<T>::rotate(int position, Block<T>& b)
     cout << "-------------------------------------------\n";
   }
   char file[255];
-  snprintf(file,255,"iter_%s.dat",_name);
+  sprintf(file,"iter_%s.dat",_name);
   ofstream outputfile(file,std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 

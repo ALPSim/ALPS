@@ -57,7 +57,7 @@ void SSE::diagonal_update()
       if (it->identity()) { // Identity operator
         double proba=0.;
         // Get a random bond
-        uint32_t random_bond=random_int(0,num_bonds()-1);
+        alps::uint32_t random_bond=random_int(0,num_bonds()-1);
         bond_descriptor this_bond=bond(random_bond);
 
         // Get the insertion probability at this bond
@@ -115,13 +115,13 @@ void SSE::link_legs()
 {
   // for each site, the current vertex sitting there
   // A value of cutoff_L indicates no vertex at this site (for the moment)
-  vector<uint32_t> current_vertex(num_sites(),cutoff_L);
+  vector<alps::uint32_t> current_vertex(num_sites(),cutoff_L);
   // for each site, the first vertex sitting there
   // A value of cutoff_L indicates no vertex at this site (for the moment)
-  vector<uint32_t> first_vertex(num_sites(),cutoff_L);
+  vector<alps::uint32_t> first_vertex(num_sites(),cutoff_L);
   
   std::vector<vertex_type>::iterator it; 
-  uint32_t i=0;
+  alps::uint32_t i=0;
   // Loop over all vertices
   for (it=operator_string.begin();it!=operator_string.end();++it,++i) { 
     if (!(it->identity())) { // Non-Identity vertices
@@ -134,7 +134,7 @@ void SSE::link_legs()
           { first_vertex[site]=i; }
         else {// There was already a vertex on this site
           // Get the previous vertex on this site
-          uint32_t previous_vertex=current_vertex[site];         
+          alps::uint32_t previous_vertex=current_vertex[site];         
           // This boolean indicates if it was previous vertex' left (0) or 
           // right (leg) at this site
           bool previous_vertex_first_leg=(source(bond(operator_string[previous_vertex].bond_number))!=site);
@@ -152,10 +152,10 @@ void SSE::link_legs()
   
   // Boundary conditions in imaginary time
   // Link last and first vertices on all sites
-  for (uint32_t ii=0;ii<num_sites();++ii) { 
+  for (alps::uint32_t ii=0;ii<num_sites();++ii) { 
     if (current_vertex[ii]!=cutoff_L) { 
-      uint32_t last = current_vertex[ii];
-      uint32_t first = first_vertex[ii];
+      alps::uint32_t last = current_vertex[ii];
+      alps::uint32_t first = first_vertex[ii];
       bool last_legs  = (source(bond(operator_string[last].bond_number))!=ii);
       bool first_legs = (source(bond(operator_string[first].bond_number))!=ii);
       operator_string[last].linked_vertices[2+last_legs]=make_pair(first,first_legs);
@@ -169,7 +169,7 @@ void SSE::link_legs()
 // Helper function to print the Operator string
 void SSE::print_operator_string()
 {
-  std::vector<vertex_type>::iterator it; uint32_t i=0;
+  std::vector<vertex_type>::iterator it; alps::uint32_t i=0;
   for (it=operator_string.begin();it!=operator_string.end();++it,++i) { 
     if (!(it->identity())) {
       cout << "vertex_type " << i << " between [" << source(bond(it->bond_number)) 
@@ -188,9 +188,9 @@ void SSE::print_operator_string()
  **************************** Worm Start ********************************
  ************************************************************************/
 
-std::pair<uint32_t,SSE::state_type> SSE::initial_vertex() 
+std::pair<alps::uint32_t,SSE::state_type> SSE::initial_vertex() 
 {
-  uint32_t current_vertex;
+  alps::uint32_t current_vertex;
   state_type current_leg_number;
   if (!measure_green_function_) {
     current_vertex=random_int(0,cutoff_L-1); 
@@ -254,7 +254,7 @@ std::pair<uint32_t,SSE::state_type> SSE::initial_vertex()
 void SSE::worm_update()
 { 
   // pick a random slot and leg
-  uint32_t current_vertex; 
+  alps::uint32_t current_vertex; 
   state_type current_leg_number;
 
   boost::tie(current_vertex,current_leg_number) = initial_vertex();
@@ -298,9 +298,9 @@ void SSE::worm_update()
   //**********************************************************************
  
   // Initial definitions - useful to check for the end of the worm
-  uint32_t initial_vertex=current_vertex;
+  alps::uint32_t initial_vertex=current_vertex;
   bool initial_leg=current_leg;
-  uint32_t next_vertex=current_vertex;
+  alps::uint32_t next_vertex=current_vertex;
   bool next_leg=current_leg;
   bool initial_is_upper_leg=is_upper_leg;
     
@@ -464,7 +464,7 @@ void SSE::worm_update()
 
 // Given the current vertex, and the incoming leg, looks into the 
 // worm scattering probability array to return an exit leg
-SSE::state_type SSE::return_exit_leg(uint32_t vertex,state_type incomingleg)
+SSE::state_type SSE::return_exit_leg(alps::uint32_t vertex,state_type incomingleg)
 {
   state_type* MP= operator_string[vertex].leg;
   boost::multi_array<double, 2>  prob = proba_worm[bond_type[bond(operator_string[vertex].bond_number)]][MP[0]][MP[1]][MP[2]][MP[3]];
@@ -482,12 +482,12 @@ SSE::state_type SSE::return_exit_leg(uint32_t vertex,state_type incomingleg)
 
 
 // Increase the cutoff by adding randomly dL Identity operators
-void SSE::increase_cutoff_L(uint32_t dL)
+void SSE::increase_cutoff_L(alps::uint32_t dL)
 {
   vector<vertex_type> new_OS(cutoff_L+dL);
   double proba=double(dL)/(cutoff_L+dL);
  
-  uint32_t left_to_do = dL;
+  alps::uint32_t left_to_do = dL;
   vector<vertex_type>::iterator it_old=operator_string.begin();
   vector<vertex_type>::iterator it_new=new_OS.begin();
   while ( left_to_do && it_old!=operator_string.end() ) {
@@ -511,14 +511,14 @@ void SSE::do_update()
 
   // Eventually increase the cutoff
   if (current_number_of_non_identity>0.8*cutoff_L)
-    increase_cutoff_L(uint32_t(1+0.1*cutoff_L));
+    increase_cutoff_L(alps::uint32_t(1+0.1*cutoff_L));
 
   diagonal_update();
   link_legs();
   
   if (current_number_of_non_identity || measure_green_function_) { // do worm update
     if (parms.defined("NUMBER_OF_WORMS_PER_SWEEP")) { 
-      for (uint32_t kk=0;kk<number_of_worms_per_sweep;++kk)
+      for (alps::uint32_t kk=0;kk<number_of_worms_per_sweep;++kk)
         worm_update();
       worm_size/=number_of_worms_per_sweep;
     }
@@ -554,7 +554,7 @@ void SSE::do_update()
         }
         
         // Do number_of_worms_per_sweep worm updates
-        for (uint32_t kk=0;kk<number_of_worms_per_sweep;++kk)
+        for (alps::uint32_t kk=0;kk<number_of_worms_per_sweep;++kk)
           worm_update();
         worm_size/=number_of_worms_per_sweep;
       }

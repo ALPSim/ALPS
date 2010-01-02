@@ -198,7 +198,7 @@ void SSE::determine_bonds_offset()
   energy_offset.resize(number_of_bond_types);
   matrix_sign.resize(boost::extents[number_of_bond_types][maximum_number_of_states][maximum_number_of_states][maximum_number_of_states][maximum_number_of_states]);
 
-  for (uint32_t i=0;i<number_of_bond_types;++i) {
+  for (alps::uint32_t i=0;i<number_of_bond_types;++i) {
     /********* Old part. Please keep it like this at the moment **************
 
     double max=-std::numeric_limits<double>::max();
@@ -300,7 +300,7 @@ void SSE::initialize_diagonal_update_probabilities()
   // resize the diagonal probability array
   proba_diagonal.resize(boost::extents[number_of_bond_types][maximum_number_of_states][maximum_number_of_states]);
 
-  for (uint32_t i=0;i<number_of_bond_types;++i)
+  for (alps::uint32_t i=0;i<number_of_bond_types;++i)
     for (state_type l1=0;l1<number_states_for_site_type_[site_type_for_bond_type_[i].first];l1++)
       for (state_type l2=0;l2<number_states_for_site_type_[site_type_for_bond_type_[i].second];l2++)
         proba_diagonal[i][l1][l2]=std::fabs(matrix_element[i][l1][l2][l1][l2])*num_bonds()*beta;
@@ -318,7 +318,7 @@ void SSE::initialize_simulation()
   
   print_arrays();
   total_shift=0.;
-  for (uint32_t r=0;r<number_of_bond_types;++r)
+  for (alps::uint32_t r=0;r<number_of_bond_types;++r)
     total_shift+=energy_offset[r]*number_of_bonds_for_bond_type[r];
 }
 
@@ -329,12 +329,12 @@ void SSE::print_arrays()
 if (parms.defined("PRINT_MATRIX")) { 
   cout << "----------- Matrix elements ----------\n";
 
-  for (uint32_t i1=0;i1<number_of_bond_types;++i1) { 
+  for (alps::uint32_t i1=0;i1<number_of_bond_types;++i1) { 
     cout << "**** Bond type " << i1 << endl;
-    for (uint32_t i2=0;i2<number_states_for_site_type_[site_type_for_bond_type_[i1].first];++i2) 
-      for (uint32_t i3=0;i3<number_states_for_site_type_[site_type_for_bond_type_[i1].second];++i3)
-        for (uint32_t i4=0;i4<number_states_for_site_type_[site_type_for_bond_type_[i1].first];++i4)
-          for (uint32_t i5=0;i5<number_states_for_site_type_[site_type_for_bond_type_[i1].second];++i5) { 
+    for (alps::uint32_t i2=0;i2<number_states_for_site_type_[site_type_for_bond_type_[i1].first];++i2) 
+      for (alps::uint32_t i3=0;i3<number_states_for_site_type_[site_type_for_bond_type_[i1].second];++i3)
+        for (alps::uint32_t i4=0;i4<number_states_for_site_type_[site_type_for_bond_type_[i1].first];++i4)
+          for (alps::uint32_t i5=0;i5<number_states_for_site_type_[site_type_for_bond_type_[i1].second];++i5) { 
             cout << "-----" << i2 << " " << i3 << " " << i4 << " " << i5 << endl;
             if (matrix_element[i1][i2][i3][i4][i5]!=0.) {
               cout << i2 << " " << i3 << " " << i4 << " " << i5 << " : " << matrix_element[i1][i2][i3][i4][i5]; 
@@ -349,16 +349,16 @@ if (parms.defined("PRINT_MATRIX")) {
   if (parms.defined("PRINT_PROBA"))  {
     cout << "----------- Worm Proba ----------\n";
 
-  for (uint32_t i1=0;i1<number_of_bond_types;++i1) { 
+  for (alps::uint32_t i1=0;i1<number_of_bond_types;++i1) { 
     cout << "**** Bond type " << i1 << endl;
-    for (uint32_t i2=0;i2<number_states_for_site_type_[site_type_for_bond_type_[i1].first];++i2) 
-      for (uint32_t i3=0;i3<number_states_for_site_type_[site_type_for_bond_type_[i1].second];++i3)
-        for (uint32_t i4=0;i4<number_states_for_site_type_[site_type_for_bond_type_[i1].first];++i4)
-          for (uint32_t i5=0;i5<number_states_for_site_type_[site_type_for_bond_type_[i1].second];++i5) { 
+    for (alps::uint32_t i2=0;i2<number_states_for_site_type_[site_type_for_bond_type_[i1].first];++i2) 
+      for (alps::uint32_t i3=0;i3<number_states_for_site_type_[site_type_for_bond_type_[i1].second];++i3)
+        for (alps::uint32_t i4=0;i4<number_states_for_site_type_[site_type_for_bond_type_[i1].first];++i4)
+          for (alps::uint32_t i5=0;i5<number_states_for_site_type_[site_type_for_bond_type_[i1].second];++i5) { 
             cout << "-----" << i2 << " " << i3 << " " << i4 << " " << i5 << endl;
             
-            for (uint32_t r1=0;r1<4;++r1) { 
-              for (uint32_t r2=0;r2<4;++r2)
+            for (alps::uint32_t r1=0;r1<4;++r1) { 
+              for (alps::uint32_t r2=0;r2<4;++r2)
                 cout << proba_worm[i1][i2][i3][i4][i5][r1][r2] << " ";
                 cout << endl;
             }

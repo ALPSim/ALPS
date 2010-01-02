@@ -206,8 +206,8 @@ bool SSE::find_minbounce(double weight_before[4],double weight_after[4],double w
 
   // Print the solution
  /*   
-     for (uint32_t r1=0;r1<4;++r1) {
-        for (uint32_t r2=0;r2<4;++r2) 
+     for (alps::uint32_t r1=0;r1<4;++r1) {
+        for (alps::uint32_t r2=0;r2<4;++r2) 
           cout << the_sol[r1][r2] << " ";
         cout << endl;
       }
@@ -298,7 +298,7 @@ bool SSE::find_locopt(double weight_after[4],double worm_weight_after[4])
 }
 
 
-double SSE::return_weight_after_flip(uint32_t bond_type, state_type VS[4],state_type leg_to_flip,bool convention)
+double SSE::return_weight_after_flip(alps::uint32_t bond_type, state_type VS[4],state_type leg_to_flip,bool convention)
 // Return the matrix element of the vertex if the leg "leg_to_flip"
 // is modified
 // VS means Vertex State : the status of the legs of the current vertex
@@ -360,7 +360,7 @@ double SSE::return_weight_after_flip(uint32_t bond_type, state_type VS[4],state_
 }
 
 
-double SSE::return_weight_before_flip(uint32_t bond_type,state_type VS[4],state_type leg_that_was_flipped,bool convention)
+double SSE::return_weight_before_flip(alps::uint32_t bond_type,state_type VS[4],state_type leg_that_was_flipped,bool convention)
 // Return the matrix element of the vertex before the leg "leg_that_was_flipped" was modified
 // VS means Vertex State : the status of the legs of the current vertex
 {
@@ -421,7 +421,7 @@ else
 return ans;
 }
 
-double SSE::return_worm_weight_before(uint32_t bond_type,state_type VS[4],state_type leg_that_was_flipped, bool convention)
+double SSE::return_worm_weight_before(alps::uint32_t bond_type,state_type VS[4],state_type leg_that_was_flipped, bool convention)
 // Return the matrix element of the worm before the leg "leg_that_was_flipped" was modified
 // VS means Vertex State : the status of the legs of the current vertex
 {
@@ -474,7 +474,7 @@ if (ans!=0. && NO_WORMWEIGHT)
 return ans;    
 }
 
-double SSE::return_worm_weight_after(uint32_t bond_type,state_type VS[4],state_type leg_to_flip, bool convention)
+double SSE::return_worm_weight_after(alps::uint32_t bond_type,state_type VS[4],state_type leg_to_flip, bool convention)
 // Return the matrix element of the worm if the leg "leg_to_flip"
 // is modified
 // VS means Vertex State : the status of the legs of the current vertex
@@ -526,7 +526,7 @@ if (ans!=0. && NO_WORMWEIGHT)
 return ans;
 }
 
-bool SSE::calculate_minbounce(uint32_t bond_type,state_type VS[4],bool convention)
+bool SSE::calculate_minbounce(alps::uint32_t bond_type,state_type VS[4],bool convention)
   // Given a current vertex (VS is the Vertex state), calculates the different worm and vertex weights, feed them in the solver, and return true if there is a bounce 
 {
   double weigA[4]; // matrix weight after
@@ -550,7 +550,7 @@ bool SSE::calculate_minbounce(uint32_t bond_type,state_type VS[4],bool conventio
   return (possible ? find_minbounce(weigB,weigA,WWB,WWA) : false);
 }
 
-bool SSE::calculate_locopt(uint32_t bond_type, state_type VS[4], bool convention)
+bool SSE::calculate_locopt(alps::uint32_t bond_type, state_type VS[4], bool convention)
 // Given a current vertex (VS is the Vertex state), calculates the different worm and vertex weights, feed them in the solver, and return true if there is a bounce . This is for the lcoally optimal case.
 {
   double weigA[4]; // matrix weight after
@@ -574,7 +574,7 @@ bool SSE::calculate_locopt(uint32_t bond_type, state_type VS[4], bool convention
   return (possible ? find_locopt(weigA,WWA) : false);
 }
 
-void SSE::calculate_heat_bath_matrix(uint32_t bond_type,state_type VS[4],bool convention)
+void SSE::calculate_heat_bath_matrix(alps::uint32_t bond_type,state_type VS[4],bool convention)
   // Calculate the scattering matrix with the conventional heat bath choice
   // Scattering matrix is put in the_sol array
 {
@@ -600,7 +600,7 @@ void SSE::calculate_heat_bath_matrix(uint32_t bond_type,state_type VS[4],bool co
 }
 
 
-bool SSE::calculate_all_scattering_matrices(uint32_t bond_type,bool convention)
+bool SSE::calculate_all_scattering_matrices(alps::uint32_t bond_type,bool convention)
   // Loops over all the vertices, calculates their scattering matrix 
   // Checks if it has not been calculated before by symmetry 
   // Currently only the symmetry right-left is implemented
@@ -689,7 +689,7 @@ bool SSE::calculate_all_scattering_matrices(uint32_t bond_type,bool convention)
 }
 
 
-void SSE::put_in(uint32_t bond_type,state_type VS[4],state_type symmetry)
+void SSE::put_in(alps::uint32_t bond_type,state_type VS[4],state_type symmetry)
   // Puts the solution at the correct place
   // If the calculation has already been done by symmetry, looks for the corresponding solution, unrolls it and put it at the correct place
 {
@@ -758,6 +758,6 @@ void SSE::calculate_proba_worm()
    proba_worm.resize( boost::extents[number_of_bond_types][maximum_number_of_states][maximum_number_of_states][maximum_number_of_states][maximum_number_of_states][4][4]);
 
    bool convention=true;
-   for (uint32_t i=0;i<number_of_bond_types;++i)
+   for (alps::uint32_t i=0;i<number_of_bond_types;++i)
      calculate_all_scattering_matrices(i,convention); 
 }
