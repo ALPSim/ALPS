@@ -271,7 +271,7 @@ class System
     bool in_warmup() const { return _in_warmup; }
 
     void set_name(const char *the_name) 
-      { snprintf(_name, 255, "%s", the_name); }
+      { sprintf(_name, "%s", the_name); }
     const char* name() const { return _name; }
 
     virtual void diagonalize(bool use_seed = true);

@@ -27,6 +27,13 @@ basic = core.modules.basic_modules
 
 config = ConfigurationObject()
 
+alpsxslfile = ''
+if platform.system()=='Darwin':
+  alpsxslfile='../Resources/lib/xml/ALPS.xsl'
+if platform.system()=='Windows':
+  alpsxslfile=os.path.join(os.path.join('lib','xml'),'ALPS.xsl')
+
+
 ##############################################################################
 def _get_path(binary_file):
     if config.check('alpspath'):
@@ -55,12 +62,8 @@ def _get_mpi_run():
       return ['mpirun','-np']
       
 def copy_stylesheet(dir):
-    if platform.system()=='Darwin':
-      shutil.copyfile('../Resources/lib/xml/ALPS.xsl', os.path.join(dir,'ALPS.xsl'))
-    if platform.system()=='Windows':
-      shutil.copyfile(os.path.join(os.path.join('lib','xml'),'ALPS.xsl'), os.path.join(dir,'ALPS.xsl'))
-     
-
+    print "xsl: ",alpsxslfile
+    shutil.copyfile(alpsxslfile, os.path.join(dir,'ALPS.xsl'))
 
 class SystemCommand(Module):
     def execute(self,cmdline):
@@ -92,12 +95,18 @@ class SystemCommandLogged(Module):
 class OpenHTML(NotCacheable, SystemCommand):
     """ open the file using the system open command """
     def compute(self):
-        cmdlist = ['open', '-a', 'Safari']
+        cmdlist = 'false'
+        if platform.system() == 'Windows':
+          cmdlist = ['C:\Program Files\Internet Explorer\iexplore.exe']
+        if platform.system()=='Darwin':
+          cmdlist = ['open', '-a', 'Safari']
         if self.hasInputFromPort('file'):
            cmdlist += [self.getInputFromPort('file').name]
         if self.hasInputFromPort('files'):
            cmdlist += self.getInputFromPort('files')
         self.execute(cmdlist)
+    _input_ports = [('file', [basic.File]),
+                    ('files', [ListOfElements])]
     _input_ports = [('file', [basic.File]),
                     ('files', [ListOfElements])]
 
@@ -195,7 +204,13 @@ Dictionary = basic.new_constant('Dictionary', staticmethod(dict_conf), {},\
 
 def initialize(): pass
 
+
 def selfRegister():
+    if platform.system()=='Darwin':
+      alpsxslfile='../Resources/lib/xml/ALPS.xsl'
+    if platform.system()=='Windows':
+      alpsxslfile=os.path.join(os.path.join('lib','xml'),'ALPS.xsl')
+
     reg = core.modules.module_registry.get_module_registry()
 
     reg.add_module(SystemCommand,namespace="Tools",abstract=True)

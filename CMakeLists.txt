@@ -176,6 +176,7 @@ find_package(HDF5)
 
 IF(HDF5_FOUND)
   SET(HAVE_LIBHDF5 1)  
+
   INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
   LINK_LIBRARIES(${HDF5_LIBRARIES})
   SET(ALPS_HAVE_HDF5 1)
@@ -391,8 +392,8 @@ add_subdirectory(lib/pyalps)
 # programs
 ######################################################################
 
+ add_subdirectory(tool)
 if (NOT ALPS_FOR_VISTRAILS)
-  add_subdirectory(tool)
   add_subdirectory(example)
 endif (NOT ALPS_FOR_VISTRAILS)
 

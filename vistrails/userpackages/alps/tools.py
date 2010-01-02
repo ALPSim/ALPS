@@ -16,6 +16,9 @@ import glob
 import zipfile
 import datetime
 
+import platform
+import codecs
+
 import parameters
 import alpscore
 import system
@@ -277,11 +280,26 @@ class XML2HTML(alpscore.SystemCommand):
     def compute(self):
         input_file = self.getInputFromPort('input_file')
         output_file = self.interpreter.filePool.create_file(suffix='.html')
-        cmdlist = [alpscore._get_path('xslttransform')]
-        if self.hasInputFromPort('stylesheet'):
-          cmdlist += [self.getInputFromPort('stylesheet').name]
-        cmdlist += [input_file.name, '>' , output_file.name]
+        if platform.system() == 'Windows':
+          cmdlist = ['msxsl.exe',input_file.name]
+          if self.hasInputFromPort('stylesheet'):
+            cmdlist += [self.getInputFromPort('stylesheet').name]
+          else:
+            cmdlist += [alpscore.alpsxslfile]
+          cmdlist += ['-o', output_file.name]
+        if platform.system() != 'Windows':
+          cmdlist = [alpscore._get_path('xslttransform')]
+          if self.hasInputFromPort('stylesheet'):
+            cmdlist += [self.getInputFromPort('stylesheet').name]
+          cmdlist += [input_file.name, '>' , output_file.name]
         self.execute(cmdlist)
+        if platform.system() == 'Windows': # need to convert to UTF-8
+          fin = codecs.open(output_file.name,"r","utf-16")
+          u = fin.read()
+          fin.close()
+          fout = file(output_file.name,"w")
+          fout.write(u.encode("utf-8"))
+          fout.close()
         self.setResult('output_file', output_file)
     _input_ports = [('input_file', [basic.File]),
                     ('stylesheet',[basic.File])]
@@ -326,8 +344,8 @@ def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
   
-  reg.add_module(MakeParameterFile,namespace="Tools")
-  reg.add_module(Parameter2XML,namespace="Tools")
+  reg.add_module(MakeParameterFile,namespace="Tools",abstract=True)
+  reg.add_module(Parameter2XML,namespace="Tools",abstract=True)
   reg.add_module(WriteInputFiles,name='MakeParameterXMLFiles',namespace="Tools")
   reg.add_module(WriteInputFiles,namespace="Tools")
   
