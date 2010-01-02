@@ -35,7 +35,7 @@ else(ALPS_FOR_VISTRAILS)
     endforeach(script)
     install(PROGRAMS archivecat xslttransform DESTINATION bin)
   else(UNIX AND NOT WIN32)
-    install(PROGRAMS msxsl DESTINATION bin)
+    install(PROGRAMS msxsl.exe DESTINATION bin)
   endif(UNIX AND NOT WIN32)
 
 #

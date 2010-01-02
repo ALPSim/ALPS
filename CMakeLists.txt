@@ -326,13 +326,8 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
     COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/archive.exe ${PROJECT_BINARY_DIR}/bin
     COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/parameter2xml.exe ${PROJECT_BINARY_DIR}/bin
     COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/ising.exe ${PROJECT_BINARY_DIR}/bin
-    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/alps.dll ${PROJECT_BINARY_DIR}/lib
-    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/boost.dll ${PROJECT_BINARY_DIR}/lib
     COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml
   )
-  install(FILES ${PROJECT_BINARY_DIR}/bin/archive.exe ${PROJECT_BINARY_DIR}/bin/parameter2xml.exe ${PROJECT_BINARY_DIR}/bin/ising.exe DESTINATION bin)
-#  install(FILES ${PROJECT_BINARY_DIR}/lib/alps.dll ${PROJECT_BINARY_DIR}/lib/boost.dll DESTINATION bin)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
 endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
 
 
@@ -355,6 +350,8 @@ endif(ALPS_INSTALL_HEADERS)
 #           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
 #           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 # endif(INSTALL_BOOST_HEADERS)
+
+install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
 
 if (ALPS_FOR_VISTRAILS)
   install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
