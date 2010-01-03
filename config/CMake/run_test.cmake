@@ -40,4 +40,4 @@ if(EXISTS ${output_path})
   endif(not_successful)
 endif(EXISTS ${output_path})
 
-file(REMOVE ${cmd}_output)
+#file(REMOVE ${cmd}_output)
