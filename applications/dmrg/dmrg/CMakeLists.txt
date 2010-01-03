@@ -1,5 +1,5 @@
 if(LAPACK_FOUND)
-  add_definitions(${LAPACK_DEFINITIONS} BIND_FORTRAN_LOWERCASE_UNDERSCORE)
+  add_definitions(${LAPACK_DEFINITIONS} -DBIND_FORTRAN_LOWERCASE_UNDERSCORE)
   include_directories(${PROJECT_SOURCE_DIR}/applications/dmrg/dmrg)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
   add_executable(dmrg dmrg.C)

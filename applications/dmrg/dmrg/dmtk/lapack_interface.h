@@ -2,7 +2,6 @@
 #define __DMTK_LAPACK_INTERFACE_H__
 
 #include <complex>
-#define BIND_FORTRAN_LOWERCASE_UNDERSCORE
 #include <boost/numeric/bindings/traits/fortran.h>
 
 extern "C" {
