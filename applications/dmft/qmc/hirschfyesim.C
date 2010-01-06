@@ -22,9 +22,9 @@
 #include "fouriertransform.h"
 #include <alps/alea.h>
 #include <cmath>
-#include <blas_classes/matrix.h>
+#include "blas_classes/matrix.h"
 #ifdef FOURPOINT
-#include <blas_classes/vector.h>
+#include "blas_classes/vector.h"
 #endif
 using namespace std;
 using namespace alps;

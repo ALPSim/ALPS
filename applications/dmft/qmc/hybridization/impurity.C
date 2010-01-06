@@ -299,6 +299,7 @@ std::pair < matsubara_green_function_t, itime_green_function_t > WernerSimFreque
     std::string fns=parms["CHECKPOINT"];
     fns+=".xml";
     boost::filesystem::path fn(fns);
+    std::cerr << parms;
     checkpoint(fn);
   }
   {

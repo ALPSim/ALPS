@@ -12,6 +12,6 @@ H = 0;
 TOLERANCE = 0.0001;
 CONVERGED = 0.0003;
 PARAMAGNET = 0;
-SOLVER = /Users/emanuel/alps_svn/applications/dmft/DMFT/hirschfye;
+SOLVER = /opt/alps/bin/hirschfye;
 FLAVORS = 2;
 OMEGA_LOOP = 1;
