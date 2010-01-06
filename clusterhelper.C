@@ -204,12 +204,13 @@ void ClusterHelper::setup_tables()
 	append_column_no_duplicates(cluster_momenta_, c);
       }
     }
+    // beware: bugs ahead
+    /*
     if ((n_cluster_sites()%2)==0) {
       Matrix<double>::Type sorted_momenta;
       vector_type v(dimension());
       unsigned int ind = 0;
       for(unsigned int i=0; i<n_cluster_sites(); ++i) {
-	//std::cout << ind << "\n";
 	for (unsigned int d=0; d<dimension(); ++d) 
 	  v[d] = cluster_momenta_(ind,d);
 	append_column_no_duplicates(sorted_momenta, v);
@@ -220,6 +221,7 @@ void ClusterHelper::setup_tables()
       }
       cluster_momenta_ = sorted_momenta;
     }
+    */
   }
   if(alps::is_master()){
     std::ofstream clustermomstream("ClusterMomenta");
@@ -301,13 +303,28 @@ void ClusterHelper::setup_tables()
       lattice_momenta_(m,d) = mom[d];
     }
     } */
-  /*if (alps::is_master()) {
+  /* if (alps::is_master()) {
     std::ofstream latticemomstream("LatticeMomenta");
     for (int m=0; m<lattice_momenta_.size1(); ++m) {
       latticemomstream << m << " ";
       for (int d=0; d<lattice_momenta_.size2(); ++d) 
 	latticemomstream << lattice_momenta_(m,d) << " ";
       latticemomstream << std::endl;
+    }
+  }
+  if(alps::is_master()){
+    std::ofstream allmomstream("AllMomenta");
+    for (int mc=0; mc<cluster_momenta_.size1(); ++mc) {
+      for (int ml=0; ml<lattice_momenta_.size1(); ++ml) {
+	vector_type mom(dimension());
+	for (int d=0; d<dimension(); ++d) 
+	  mom[d] = cluster_momenta_(mc,d)+lattice_momenta_(ml,d);
+	mom = map_back_into_brillouin_zone(mom);
+	allmomstream << mc << " ";
+	for (int d=0; d<cluster_momenta_.size2(); ++d) 
+	  allmomstream << mom[d] << " ";
+	allmomstream << std::endl;
+      }
     }
     }*/
   if (cluster_coordinates_.size1() != n_cluster_sites())
