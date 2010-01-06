@@ -458,7 +458,7 @@ ac_cv_base_libs="$LIBS"
 LIBS=
 
 ac_cv_alps_cppflags="$ac_cv_base_cppflags $ac_cv_hdf5_cppflags $ac_cv_lapack_cppflags $ac_cv_sqlite_cppflags $ac_cv_xml_cppflags -I$ac_cv_alps_includedir $ac_cv_boost_cppflags $ac_cv_mpi_cppflags"
-ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_hdf5_ldflags $ac_cv_lapack_ldflags $ac_cv_sqlite_ldflags $ac_cv_xml_ldflags -L$ac_cv_alps_libdir $ac_cv_boost_ldflags  $ac_cv_mpi_ldflags"
+ac_cv_alps_ldflags="$ac_cv_base_ldflags $ac_cv_hdf5_ldflags $ac_cv_lapack_ldflags $ac_cv_sqlite_ldflags $ac_cv_xml_ldflags -L$ac_cv_alps_libdir $ac_cv_boost_ldflags $ac_cv_mpi_ldflags"
 if test $ac_cv_unifiedlib = no; then
   ac_cv_alps_libs="-lparapack-sgl -lalps $ac_cv_boost_libs $ac_cv_hdf5_libs $ac_cv_lapack_libs $ac_cv_sqlite_libs $ac_cv_xml_libs $ac_cv_mpi_libs $ac_cv_base_libs"
 else
@@ -517,6 +517,7 @@ dnl
 
 dnl alps/config.h
 AC_CONFIG_HEADERS([src/alps/config.h])
+AC_CONFIG_HEADERS([src/alps/version.h])
 
 dnl Makefiles
 AC_CONFIG_FILES(Makefile config/config.site config/include.mk)

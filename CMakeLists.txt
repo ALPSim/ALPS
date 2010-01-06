@@ -249,6 +249,7 @@ ENDIF (PYTHONLIBS_FOUND)
 # configuration files
 ######################################################################
 configure_file(src/alps/config.h.in ${PROJECT_BINARY_DIR}/src/alps/config.h)
+configure_file(src/alps/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
 
 configure_file(lib/xml/lattices.xml.in ${PROJECT_BINARY_DIR}/lib/xml/lattices.xml)
 configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
@@ -360,7 +361,7 @@ if (ALPS_INSTALL_HEADERS)
   install(DIRECTORY src/alps src/boost DESTINATION ${ALPS_HEADER_DIR}
           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-  install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h DESTINATION ${ALPS_HEADER_DIR}/alps)
+  install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps)
 
   if(ALPS_PACKAGE_LIBRARIES)
      install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR}

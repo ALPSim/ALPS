@@ -27,6 +27,7 @@
 
 #include <alps/parapack/scheduler.h>
 #include <alps/parapack/version.h>
+#include <alps/version.h>
 #include <alps/osiris/os.h>
 #include <boost/version.hpp>
 #include <iostream>
