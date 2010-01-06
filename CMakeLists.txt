@@ -6,7 +6,7 @@ option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
 option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
-option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" ON)
+option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
 option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
 
 # option(INSTALL_BOOST_HEADERS "Install all the Boost header files" OFF)
@@ -345,15 +345,22 @@ if (ALPS_INSTALL_HEADERS)
           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h DESTINATION ${ALPS_HEADER_DIR}/alps)
+
+  if(ALPS_PACKAGE_LIBRARIES)
+     install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR}
+             FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
+             PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+     install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include DESTINATION .)
+  endif(ALPS_PACKAGE_LIBRARIES)
+
 endif(ALPS_INSTALL_HEADERS)
 
-# if(INSTALL_BOOST_HEADERS)
-#   install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR}
-#           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-#           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-# endif(INSTALL_BOOST_HEADERS)
+
 
 install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
+if(ALPS_PACKAGE_LIBRARIES)
+  install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION .)
+endif(ALPS_PACKAGE_LIBRARIES)
 
 if (ALPS_FOR_VISTRAILS)
   install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}

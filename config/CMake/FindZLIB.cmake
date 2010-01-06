@@ -19,6 +19,14 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+IF(ALPS_PACKAGE_LIBRARIES)
+  IF (UNIX AND NOT WIN32)
+    MESSAGE(STATUS "Using ALPS-installed ZLIB")
+    FIND_PATH(ZLIB_INCLUDE_DIR zlib.h.h /usr/include ${CMAKE_INSTALL_PREFIX}/include NO_DEFAULT_PATH)
+    FIND_LIBRARY(ZLIB_LIBRARY z /usr/lib ${CMAKE_INSTALL_PREFIX}/lib NO_DEFAULT_PATH)
+  ENDIF (UNIX AND NOT WIN32)
+ENDIF(ALPS_PACKAGE_LIBRARIES)
+
 IF (ZLIB_INCLUDE_DIR)
   # Already in cache, be silent
   SET(ZLIB_FIND_QUIETLY TRUE)
