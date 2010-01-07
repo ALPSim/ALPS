@@ -19,10 +19,6 @@ AC_DEFUN([AC_ALPS],
   LDFLAGS="$ac_cv_alps_ldflags"
   LIBS=
   AC_SUBST([LDADD], "$ac_cv_alps_libs")
-  if test "$ac_cv_alps_have_mpi" = yes; then
-    AC_SUBST([LDFLAGS_MPI], "$ac_cv_alps_ldflags_mpi")
-    AC_SUBST([LIBS_MPI], "$ac_cv_alps_libs_mpi")
-  fi
 
   dnl check for MPI library
   AC_MSG_CHECKING([for MPI library])
@@ -56,10 +52,6 @@ AC_DEFUN([AC_ALPS_LIGHT],
   LDFLAGS="$ac_cv_alps_ldflags"
   LIBS=
   AC_SUBST([LDADD], "$ac_cv_alps_libs")
-  if test "$ac_cv_alps_have_mpi" = yes; then
-    AC_SUBST([LDFLAGS_MPI], "$ac_cv_alps_ldflags_mpi")
-    AC_SUBST([LIBS_MPI], "$ac_cv_alps_libs_mpi")
-  fi
 
   dnl check for MPI library
   AC_MSG_CHECKING([for MPI library])

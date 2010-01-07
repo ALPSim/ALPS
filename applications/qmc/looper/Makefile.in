@@ -35,9 +35,8 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-bin_PROGRAMS = $(am__EXEEXT_1) $(am__EXEEXT_2)
+bin_PROGRAMS = $(am__EXEEXT_1)
 @BUILD_QMC_LOOPER_TRUE@am__append_1 = loop
-@BUILD_QMC_LOOPER_TRUE@@HAVE_BOOST_MPI_TRUE@@HAVE_MPI_TRUE@am__append_2 = loop_mpi
 subdir = qmc/looper
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in ChangeLog
@@ -53,7 +52,6 @@ CONFIG_HEADER = $(top_builddir)/config/config.h
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
 @BUILD_QMC_LOOPER_TRUE@am__EXEEXT_1 = loop$(EXEEXT)
-@BUILD_QMC_LOOPER_TRUE@@HAVE_BOOST_MPI_TRUE@@HAVE_MPI_TRUE@am__EXEEXT_2 = loop_mpi$(EXEEXT)
 am__installdirs = "$(DESTDIR)$(bindir)"
 PROGRAMS = $(bin_PROGRAMS)
 am__objects_1 =
@@ -63,14 +61,6 @@ am_loop_OBJECTS = loop.$(OBJEXT) loop_custom.$(OBJEXT) \
 loop_OBJECTS = $(am_loop_OBJECTS)
 loop_LDADD = $(LDADD)
 loop_DEPENDENCIES =
-am_loop_mpi_OBJECTS = loop.$(OBJEXT) loop_custom.$(OBJEXT) \
-	loop_model.$(OBJEXT) path_integral.$(OBJEXT) sse.$(OBJEXT) \
-	$(am__objects_1)
-loop_mpi_OBJECTS = $(am_loop_mpi_OBJECTS)
-loop_mpi_DEPENDENCIES =
-loop_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(loop_mpi_LDFLAGS) $(LDFLAGS) -o $@
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -92,7 +82,7 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-DIST_SOURCES = $(loop_SOURCES) $(loop_mpi_SOURCES)
+DIST_SOURCES = $(loop_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -135,10 +125,8 @@ INSTALL_STRIP_PROGRAM = @INSTALL_STRIP_PROGRAM@
 LD = @LD@
 LDADD = @LDADD@
 LDFLAGS = @LDFLAGS@
-LDFLAGS_MPI = @LDFLAGS_MPI@
 LIBOBJS = @LIBOBJS@
 LIBS = @LIBS@
-LIBS_MPI = @LIBS_MPI@
 LIBTOOL = @LIBTOOL@
 LIPO = @LIPO@
 LN_S = @LN_S@
@@ -261,9 +249,6 @@ SOURCES = \
 
 dist_noinst_DATA = doc/index.html
 loop_SOURCES = loop.C loop_config.h loop_custom.C loop_model.C path_integral.C sse.C $(SOURCES)
-loop_mpi_SOURCES = loop.C loop_config.h loop_custom.C loop_model.C path_integral.C sse.C $(SOURCES)
-loop_mpi_LDFLAGS = @LDFLAGS_MPI@
-loop_mpi_LDADD = @LIBS_MPI@
 all: all-am
 
 .SUFFIXES:
@@ -344,9 +329,6 @@ clean-binPROGRAMS:
 loop$(EXEEXT): $(loop_OBJECTS) $(loop_DEPENDENCIES) 
 	@rm -f loop$(EXEEXT)
 	$(CXXLINK) $(loop_OBJECTS) $(loop_LDADD) $(LIBS)
-loop_mpi$(EXEEXT): $(loop_mpi_OBJECTS) $(loop_mpi_DEPENDENCIES) 
-	@rm -f loop_mpi$(EXEEXT)
-	$(loop_mpi_LINK) $(loop_mpi_OBJECTS) $(loop_mpi_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

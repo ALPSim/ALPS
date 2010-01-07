@@ -40,15 +40,6 @@ dist_noinst_DATA = doc/index.html
 bin_PROGRAMS =
 if BUILD_QMC_LOOPER
 bin_PROGRAMS += loop
-if HAVE_MPI
-if HAVE_BOOST_MPI
-bin_PROGRAMS += loop_mpi
-endif
-endif
 endif
 
 loop_SOURCES = loop.C loop_config.h loop_custom.C loop_model.C path_integral.C sse.C $(SOURCES)
-
-loop_mpi_SOURCES = loop.C loop_config.h loop_custom.C loop_model.C path_integral.C sse.C $(SOURCES)
-loop_mpi_LDFLAGS = @LDFLAGS_MPI@
-loop_mpi_LDADD = @LIBS_MPI@

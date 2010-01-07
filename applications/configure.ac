@@ -106,10 +106,7 @@ LIBS=
 
 AC_SUBST([DEFAULT_INCLUDES], '-I. -I$(srcdir) -I$(top_builddir)')
 AC_SUBST([LDADD], "$LPSOLVE_LIBS $ac_cv_alps_libs")
-AC_SUBST([LDFLAGS], "$ac_cv_alps_ldflags_mpi $LPSOLVE_LDFLAGS")
-
-AC_SUBST([LDFLAGS_MPI], "$ac_cv_alps_ldflags_mpi $LPSOLVE_LDFLAGS")
-AC_SUBST([LIBS_MPI], "$LPSOLVE_LIBS $ac_cv_alps_libs_mpi")
+AC_SUBST([LDFLAGS], "$ac_cv_alps_ldflags $LPSOLVE_LDFLAGS")
 
 dnl
 dnl Applications
