@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -196,20 +196,19 @@ template<typename ESTIMATOR>
 struct collector {
   template<typename BASE_ESTIMATOR>
   class basic_collector : public  BASE_ESTIMATOR::collector {
-    typedef typename BASE_ESTIMATOR::collector collector;
-    typedef typename BASE_ESTIMATOR::estimate estimate;
   public:
-    basic_collector() : collector(), nop_(0), nc_(0), range_(std::make_pair(1, 0)), noc_(0) {}
+    basic_collector()
+      : BASE_ESTIMATOR::collector(), nop_(0), nc_(0), range_(std::make_pair(1, 0)), noc_(0) {}
     basic_collector& operator+=(basic_collector const& coll) {
-      collector::operator+=(coll);
+      BASE_ESTIMATOR::collector::operator+=(coll);
       nop_ += coll.nop_;
       nc_ += coll.nc_;
       range_ = std::make_pair(std::min(range_.first, coll.range_.first),
                               std::max(range_.second, coll.range_.second));
       return *this;
     }
-    basic_collector& operator+=(estimate const& est) {
-      collector::operator+=(est);
+    basic_collector& operator+=(typename BASE_ESTIMATOR::estimate const& est) {
+      BASE_ESTIMATOR::collector::operator+=(est);
       return *this;
     }
     void set_num_clusters(unsigned int n) { nc_ = n; }
