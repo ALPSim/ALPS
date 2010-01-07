@@ -540,10 +540,11 @@ namespace blas{
   template<> inline general_matrix<std::complex<double> >& general_matrix<std::complex<double> >::invert()
   {
     general_matrix<std::complex<double> > B(size1_, size1_);
-    int ipiv[size1_];
+    int *ipiv=new int[size1_];
     int info;
     B.set_to_identity();
     lapack::zgesv_(&size1_, &size1_, values_, &size1_, ipiv, &(B(0,0)), &size1_, &info);
+    delete[] ipiv;
     if(info){ throw(std::logic_error("in dgesv: info was not zero.")); }
     swap(B);
     return *this;
@@ -551,10 +552,11 @@ namespace blas{
   template<> inline general_matrix<double >& general_matrix<double >::invert()
   {
     general_matrix<double> B(size1_, size1_);
-    int ipiv[size1_];
+    int *ipiv=new int[size1_];
     int info;
     B.set_to_identity();
     lapack::dgesv_(&size1_, &size1_, values_, &size1_, ipiv, &(B(0,0)), &size1_, &info);
+    delete[] ipiv;
     if(info){ throw(std::logic_error("in dgesv: info was not zero.")); }
     swap(B);
     //std::cout<<"B: "<<B<<" this: "<<*this<<std::endl;
