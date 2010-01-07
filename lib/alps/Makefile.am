@@ -82,7 +82,8 @@ src_PARAPACK = \
   $(top_srcdir)/src/alps/parapack/queue.C \
   $(top_srcdir)/src/alps/parapack/rng_helper.C \
   $(top_srcdir)/src/alps/parapack/types.C \
-  $(top_srcdir)/src/alps/parapack/util.C
+  $(top_srcdir)/src/alps/parapack/util.C \
+  $(top_srcdir)/src/alps/parapack/version.C
 
 src_boost_DATE_TIME = \
   $(BOOST_SRCDIR)/date_time/src/gregorian/date_generators.cpp \

@@ -175,6 +175,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parapack/rng_helper.C \
 	$(top_srcdir)/src/alps/parapack/types.C \
 	$(top_srcdir)/src/alps/parapack/util.C \
+	$(top_srcdir)/src/alps/parapack/version.C \
 	$(top_srcdir)/src/boost/throw_exception.C
 am__objects_1 = copyright.lo
 am__objects_2 = evaluator.lo
@@ -197,7 +198,7 @@ am__objects_10 = abstract_task.lo convertxdr.lo factory.lo info.lo \
 am__objects_11 = clone.lo clone_info.lo worker_factory.lo filelock.lo \
 	job.lo logger.lo mc_worker.lo measurement.lo option.lo \
 	parapack.lo process_impl.lo queue.lo rng_helper.lo types.lo \
-	util.lo
+	util.lo version.lo
 @ALPS_FULL_TRUE@am__objects_12 = $(am__objects_8) $(am__objects_9) \
 @ALPS_FULL_TRUE@	$(am__objects_10) $(am__objects_11)
 @BUILD_BOOST_TRUE@am__objects_13 = throw_exception.lo
@@ -543,7 +544,8 @@ src_PARAPACK = \
   $(top_srcdir)/src/alps/parapack/queue.C \
   $(top_srcdir)/src/alps/parapack/rng_helper.C \
   $(top_srcdir)/src/alps/parapack/types.C \
-  $(top_srcdir)/src/alps/parapack/util.C
+  $(top_srcdir)/src/alps/parapack/util.C \
+  $(top_srcdir)/src/alps/parapack/version.C
 
 src_boost_DATE_TIME = \
   $(BOOST_SRCDIR)/date_time/src/gregorian/date_generators.cpp \
@@ -888,6 +890,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/util.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/value_semantic.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/variables_map.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/version.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/void_cast.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/w32_regex_traits.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/wc_regex_traits.Plo@am__quote@
@@ -1402,6 +1405,13 @@ util.lo: $(top_srcdir)/src/alps/parapack/util.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/util.C' object='util.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o util.lo `test -f '$(top_srcdir)/src/alps/parapack/util.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/util.C
+
+version.lo: $(top_srcdir)/src/alps/parapack/version.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT version.lo -MD -MP -MF $(DEPDIR)/version.Tpo -c -o version.lo `test -f '$(top_srcdir)/src/alps/parapack/version.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/version.C
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/version.Tpo $(DEPDIR)/version.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/parapack/version.C' object='version.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o version.lo `test -f '$(top_srcdir)/src/alps/parapack/version.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/parapack/version.C
 
 throw_exception.lo: $(top_srcdir)/src/boost/throw_exception.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT throw_exception.lo -MD -MP -MF $(DEPDIR)/throw_exception.Tpo -c -o throw_exception.lo `test -f '$(top_srcdir)/src/boost/throw_exception.C' || echo '$(srcdir)/'`$(top_srcdir)/src/boost/throw_exception.C

@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2002-2010 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -25,20 +25,12 @@
 *
 *****************************************************************************/
 
+#include "version.h"
 #include <alps/copyright.h>
-#include <alps/version.h>
-#include <alps/osiris/os.h>
-#include <boost/version.hpp>
-#include <iostream>
 
-int main() {
-  std::cout << "ALPS version:          " << alps::version() << std::endl
-            << "Boost version:         " << BOOST_LIB_VERSION << std::endl
-            << "source directory:      " << ALPS_SRCDIR << std::endl
-            << "installed at:          " << ALPS_PREFIX << std::endl
-            << "configured on:         " << alps::config_host() << std::endl
-            << "configured by:         " << alps::config_user() << std::endl
-            << "compiled on:           " << alps::compile_date() << std::endl
-            << "current hostname:      " << alps::hostname() << std::endl
-            << "current user:          " << alps::username() << std::endl;
+std::string alps::parapack_copyright() {
+  return "ALPS/parapack scheduler\n" \
+    "  a Monte Carlo scheduler for multiple-level parallelization\n"    \
+    "  available from http://wistaria.comp-phys.org/alps-parapack/\n"   \
+    "  copyright (c) 1997-" + alps::year() + " by Synge Todo <wistaria@comp-phys.org>\n";
 }

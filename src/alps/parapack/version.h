@@ -28,12 +28,12 @@
 #ifndef PARAPACK_VERSION_H
 #define PARAPACK_VERSION_H
 
-#include <alps/version.h>
+#include <string>
 
-#define PARAPACK_COPYRIGHT \
-  "ALPS/parapack scheduler\n" \
-  "  a Monte Carlo scheduler for multiple-level parallelization\n" \
-  "  available from http://wistaria.comp-phys.org/alps-parapack/\n" \
-  "  copyright (c) 1997-" ALPS_YEAR " by Synge Todo <wistaria@comp-phys.org>\n"
+namespace alps {
+
+std::string parapack_copyright();
+
+}
 
 #endif // PARAPACK_VERSION_H

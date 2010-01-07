@@ -147,14 +147,6 @@ private:
 
 class ising_evaluator : public alps::parapack::simple_evaluator {
 public:
-  static std::string version() {
-    return "ALPS/parapack test program: Metropolis algorithm ";
-  }
-  static void print_copyright(std::ostream& out) {
-    out << version()
-        << "\n  Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>\n";
-  }
-
   ising_evaluator(alps::Parameters const&) {}
   virtual ~ising_evaluator() {}
 
