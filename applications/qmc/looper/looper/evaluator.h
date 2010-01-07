@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 2003-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 2003-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -26,9 +26,8 @@
 #ifndef LOOPER_EVALUATOR_H
 #define LOOPER_EVALUATOR_H
 
-#include "version.h"
 #include <alps/scheduler.h>
-#include <alps/parapack/serial.h>
+#include <alps/parapack/worker.h>
 
 namespace looper {
 

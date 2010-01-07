@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -37,40 +37,76 @@ inline std::complex<double> ctime(double t) {
   return std::exp(std::complex<double>(0, 2*M_PI*t));
 }
 
-template<bool STORE_CTIME = true>
-class imaginary_time;
+inline std::complex<double> ctime2(double t) {
+  return std::exp(std::complex<double>(0, 4*M_PI*t));
+}
 
-// default version
-// store complex time inside the object
-template<bool STORE_CTIME>
-class imaginary_time {
+template<int STORE_CTIME = 1> class imaginary_time;
+
+// STORE_CTIME = 0
+// calculate complex time when needed
+template<>
+class imaginary_time<0> {
+public:
+  explicit imaginary_time(double t) : time_(t) {}
+  operator double() const { return time_; }
+  std::complex<double> ctime() const { return ::looper::ctime(time_); }
+  std::complex<double> ctime2() const { return ::looper::ctime2(time_); }
+private:
+  double time_;
+};
+
+// STORE_CTIME = 1
+// store (complex time) inside the object (default version)
+template<>
+class imaginary_time<1> {
 public:
   explicit imaginary_time(double t) : time_(t), ctime_(::looper::ctime(t)) {}
   operator double() const { return time_; }
   std::complex<double> const& ctime() const { return ctime_; }
+  std::complex<double> ctime2() const { return ctime_ * ctime_; }
 private:
   double time_;
   std::complex<double> ctime_;
 };
 
-// another version
-// calculate complex time when needed
+// STORE_CTIME = 2
+// store both of (complex time) and (complex time)^2 inside the object
 template<>
-class imaginary_time<false> {
+class imaginary_time<2> {
 public:
-  explicit imaginary_time(double t) : time_(t) {}
+  explicit imaginary_time(double t)
+    : time_(t), ctime_(::looper::ctime(t)), ctime2_(ctime_ * ctime_) {}
   operator double() const { return time_; }
-  std::complex<double> ctime() const { return ::looper::ctime(time_); }
+  std::complex<double> const& ctime() const { return ctime_; }
+  std::complex<double> const& ctime2() const { return ctime2_; }
 private:
   double time_;
+  std::complex<double> ctime_, ctime2_;
 };
 
-inline std::complex<double> const& ctime(imaginary_time<true> const& t) {
+inline std::complex<double> ctime(imaginary_time<0> const& t) {
   return t.ctime();
 }
 
-inline std::complex<double> ctime(imaginary_time<false> const& t) {
+inline std::complex<double> ctime2(imaginary_time<0> const& t) {
+  return t.ctime2();
+}
+
+inline std::complex<double> const& ctime(imaginary_time<1> const& t) {
   return t.ctime();
+}
+
+inline std::complex<double> ctime2(imaginary_time<1> const& t) {
+  return t.ctime2();
+}
+
+inline std::complex<double> const& ctime(imaginary_time<2> const& t) {
+  return t.ctime();
+}
+
+inline std::complex<double> const& ctime2(imaginary_time<2> const& t) {
+  return t.ctime2();
 }
 
 } // end namespace looper
@@ -79,16 +115,16 @@ inline std::complex<double> ctime(imaginary_time<false> const& t) {
 namespace looper {
 #endif
 
-template<bool F>
-alps::ODump& operator<<(alps::ODump& dp, looper::imaginary_time<F> const& t) {
+template<int STORE_CTIME>
+alps::ODump& operator<<(alps::ODump& dp, looper::imaginary_time<STORE_CTIME> const& t) {
   dp << static_cast<double>(t); return dp;
 }
 
-template<bool F>
-alps::IDump& operator>>(alps::IDump& dp, looper::imaginary_time<F>& t) {
+template<int STORE_CTIME>
+alps::IDump& operator>>(alps::IDump& dp, looper::imaginary_time<STORE_CTIME>& t) {
   double t_in;
   dp >> t_in;
-  t = looper::imaginary_time<F>(t_in);
+  t = looper::imaginary_time<STORE_CTIME>(t_in);
   return dp;
 }
 

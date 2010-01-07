@@ -1,5 +1,5 @@
 2009-06-23  Synge Todo <wistaria@comp-phys.org>
-
+	
 	* Fixed improved estimators for |Magnetization|, |Magnetization Density|,
 	  |Staggered Magnetization|, |Staggered Magnetization Density| in
 	  looper/susceptibility.h

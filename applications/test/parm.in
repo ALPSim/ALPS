@@ -1,5 +1,4 @@
 MODEL="spin";
-REPRESENTATION="SSE"
 CONSERVED_QUANTUMNUMBERS="Sz";
 MEASURE_AVERAGE[Magnetization]=Sz
 MEASURE_AVERAGE[Exchange]=exchange
@@ -8,7 +7,7 @@ MEASURE_CORRELATIONS[Diagonal spin correlations]=Sz
 MEASURE_CORRELATIONS[Offdiagonal spin correlations]="Splus:Sminus"
 THERMALIZATION=10000;
 SWEEPS=1000000;
-ALGORITHM="path integral";
+ALGORITHM="loop; path integral";
 J=1;
 T=0.3;
 {LATTICE="dimer";}

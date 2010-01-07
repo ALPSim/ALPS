@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -32,7 +32,7 @@
 #include <looper/temperature.h>
 #include <looper/type.h>
 #include <looper/union_find.h>
-#include <alps/parapack/serial.h>
+#include <alps/parapack/worker.h>
 #include <alps/parapack/exchange.h>
 
 namespace {
@@ -378,9 +378,10 @@ typedef looper::evaluator<loop_config::measurement_set> loop_evaluator;
 // dynamic registration to the factories
 //
 
-PARAPACK_REGISTER_WORKER(loop_worker, "path integral");
-PARAPACK_REGISTER_WORKER(alps::parapack::single_exchange_worker<loop_worker>, "path integral exchange");
-PARAPACK_REGISTER_EVALUATOR(loop_evaluator, "path integral");
-PARAPACK_REGISTER_EVALUATOR(loop_evaluator, "path integral exchange");
+PARAPACK_REGISTER_ALGORITHM(loop_worker, "loop");
+PARAPACK_REGISTER_ALGORITHM(loop_worker, "loop; path integral");
+PARAPACK_REGISTER_ALGORITHM(alps::parapack::single_exchange_worker<loop_worker>, "loop; exchange");
+PARAPACK_REGISTER_ALGORITHM(alps::parapack::single_exchange_worker<loop_worker>, "loop; path integral; exchange");
+PARAPACK_REGISTER_EVALUATOR(loop_evaluator, "loop");
 
 } // end namespace
