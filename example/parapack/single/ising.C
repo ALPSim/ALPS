@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -28,7 +28,7 @@
 #include "ising.h"
 #include <alps/parapack/temperature_scan.h>
 
-PARAPACK_SET_VERSION(PARAPACK_VERSION_STRING ": Metropolis algorithm");
+PARAPACK_SET_VERSION("ALPS/parapack example program: Metropolis algorithm");
 PARAPACK_REGISTER_ALGORITHM(single_ising_worker, "ising");
 PARAPACK_REGISTER_ALGORITHM(alps::parapack::temperature_scan_adaptor<single_ising_worker>,
                          "ising; temperature scan");

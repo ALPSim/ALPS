@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -28,7 +28,7 @@
 #ifndef PARAPACK_EXAMPLE_MULTIPLE_ISING_H
 #define PARAPACK_EXAMPLE_MULTIPLE_ISING_H
 
-#include <alps/parapack/parallel.h>
+#include <alps/parapack/worker.h>
 #include <functional>
 
 namespace mpi = boost::mpi;

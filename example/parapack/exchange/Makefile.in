@@ -34,8 +34,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-check_PROGRAMS = exchange$(EXEEXT) $(am__EXEEXT_1) $(am__EXEEXT_2)
-@HAVE_BOOST_MPI_TRUE@am__append_1 = exchange_mpi
+check_PROGRAMS = exchange$(EXEEXT) $(am__EXEEXT_1)
 TESTS = exchange_ns$(EXEEXT)
 subdir = example/parapack/exchange
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
@@ -59,63 +58,29 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
+	$(top_builddir)/src/alps/version.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = exchange_mpi$(EXEEXT)
-am__EXEEXT_2 = exchange_ns$(EXEEXT)
+am__EXEEXT_1 = exchange_ns$(EXEEXT)
 am_exchange_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT) loop.$(OBJEXT)
 exchange_OBJECTS = $(am_exchange_OBJECTS)
+exchange_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-@BUILD_UNIFIED_LIB_FALSE@am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libparapack-sgl.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
-@BUILD_UNIFIED_LIB_TRUE@am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libalps-sgl.la \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
-exchange_DEPENDENCIES = $(am__DEPENDENCIES_2)
-exchange_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(exchange_LDFLAGS) $(LDFLAGS) -o $@
-am_exchange_mpi_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT) \
-	loop.$(OBJEXT) ising_p.$(OBJEXT) loop_p.$(OBJEXT)
-exchange_mpi_OBJECTS = $(am_exchange_mpi_OBJECTS)
-@BUILD_UNIFIED_LIB_FALSE@am__DEPENDENCIES_3 = $(top_builddir)/lib/alps/libparapack-mpi.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
-@BUILD_UNIFIED_LIB_TRUE@am__DEPENDENCIES_3 = $(top_builddir)/lib/alps/libalps-mpi.la \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(XML_LIBS)$(HDF5_LIBS) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
-exchange_mpi_DEPENDENCIES = $(am__DEPENDENCIES_3)
-exchange_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(exchange_mpi_LDFLAGS) $(LDFLAGS) -o $@
+exchange_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_exchange_ns_OBJECTS = main_ns.$(OBJEXT) ising.$(OBJEXT) \
 	loop.$(OBJEXT)
 exchange_ns_OBJECTS = $(am_exchange_ns_OBJECTS)
-exchange_ns_DEPENDENCIES = $(am__DEPENDENCIES_2)
-exchange_ns_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(exchange_ns_LDFLAGS) $(LDFLAGS) -o $@
+exchange_ns_LDADD = $(LDADD)
+exchange_ns_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -128,10 +93,8 @@ CXXLD = $(CXX)
 CXXLINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CXXLD) $(AM_CXXFLAGS) $(CXXFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(exchange_SOURCES) $(exchange_mpi_SOURCES) \
-	$(exchange_ns_SOURCES)
-DIST_SOURCES = $(exchange_SOURCES) $(exchange_mpi_SOURCES) \
-	$(exchange_ns_SOURCES)
+SOURCES = $(exchange_SOURCES) $(exchange_ns_SOURCES)
+DIST_SOURCES = $(exchange_SOURCES) $(exchange_ns_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -315,24 +278,14 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(SQLITE_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
-LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(MPI_LDFLAGS) $(HDF5_LDFLAGS)
-@BUILD_UNIFIED_LIB_FALSE@LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la  $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS)  $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LIBS_SGL = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
-LDFLAGS_MPI = $(LDFLAGS_SGL) 
-@BUILD_UNIFIED_LIB_FALSE@LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LIBS_MPI = $(top_builddir)/lib/alps/libalps-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS)$(HDF5_LIBS)  $(MPI_LIBS) $(BASE_LIBS) 
+DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
+AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
+AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS) $(MPI_LDFLAGS)
+LDADD = $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
 dist_noinst_DATA = params-ising params-loop exchange_ns.ip \
 	exchange_ns.op
 exchange_SOURCES = main.C ising.C loop.C
-exchange_LDFLAGS = $(LDFLAGS_SGL)
-exchange_LDADD = $(LIBS_SGL)
-exchange_mpi_SOURCES = main.C ising.C loop.C ising_p.C loop_p.C
-exchange_mpi_LDFLAGS = $(LDFLAGS_MPI)
-exchange_mpi_LDADD = $(LIBS_MPI)
 exchange_ns_SOURCES = main_ns.C ising.C loop.C
-exchange_ns_LDFLAGS = $(LDFLAGS_SGL)
-exchange_ns_LDADD = $(LIBS_SGL)
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 all: all-am
 
@@ -379,13 +332,10 @@ clean-checkPROGRAMS:
 	rm -f $$list
 exchange$(EXEEXT): $(exchange_OBJECTS) $(exchange_DEPENDENCIES) 
 	@rm -f exchange$(EXEEXT)
-	$(exchange_LINK) $(exchange_OBJECTS) $(exchange_LDADD) $(LIBS)
-exchange_mpi$(EXEEXT): $(exchange_mpi_OBJECTS) $(exchange_mpi_DEPENDENCIES) 
-	@rm -f exchange_mpi$(EXEEXT)
-	$(exchange_mpi_LINK) $(exchange_mpi_OBJECTS) $(exchange_mpi_LDADD) $(LIBS)
+	$(CXXLINK) $(exchange_OBJECTS) $(exchange_LDADD) $(LIBS)
 exchange_ns$(EXEEXT): $(exchange_ns_OBJECTS) $(exchange_ns_DEPENDENCIES) 
 	@rm -f exchange_ns$(EXEEXT)
-	$(exchange_ns_LINK) $(exchange_ns_OBJECTS) $(exchange_ns_LDADD) $(LIBS)
+	$(CXXLINK) $(exchange_ns_OBJECTS) $(exchange_ns_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)
@@ -394,9 +344,7 @@ distclean-compile:
 	-rm -f *.tab.c
 
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ising.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ising_p.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/loop.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/loop_p.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/main_ns.Po@am__quote@
 

@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -29,7 +29,7 @@
 #define PARAPACK_EXAMPLE_LOOP_LOOP_H
 
 #include "union_find.h"
-#include <alps/parapack/serial.h>
+#include <alps/parapack/worker.h>
 #include <algorithm> // for std::swap
 #include <vector>
 

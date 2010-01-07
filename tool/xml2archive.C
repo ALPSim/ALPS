@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -25,7 +25,7 @@
 *
 *****************************************************************************/
 
-#include <alps/parapack/scheduler.h>
+#include <alps/parapack/parapack.h>
 #include <boost/filesystem/operations.hpp>
 
 int main(int argc, char** argv) {
@@ -41,18 +41,18 @@ int main(int argc, char** argv) {
   boost::filesystem::path basedir = file.branch_path();
   std::string file_in_str, file_out_str;
 
-  alps::parapack::scheduler::load_filename(file, file_in_str, file_out_str);
+  alps::parapack::load_filename(file, file_in_str, file_out_str);
 
   typedef std::pair<std::string, std::string> version_t;
   std::vector<version_t> versions;
-  alps::parapack::scheduler::load_version(file, versions);
+  alps::parapack::load_version(file, versions);
 
   boost::filesystem::path file_in = complete(boost::filesystem::path(file_in_str), basedir);
   boost::filesystem::path file_out = complete(boost::filesystem::path(file_out_str), basedir);
   std::string simname;
   std::vector<alps::task> tasks;
 
-  alps::parapack::scheduler::load_tasks(file_in, file_out, basedir, false, simname, tasks);
+  alps::parapack::load_tasks(file_in, file_out, basedir, false, simname, tasks);
 
   os << alps::start_tag("ARCHIVE")
      << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")

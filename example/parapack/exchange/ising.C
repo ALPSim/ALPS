@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -28,9 +28,13 @@
 #include "../single/ising.h"
 #include <alps/parapack/exchange.h>
 
-PARAPACK_SET_VERSION(PARAPACK_VERSION_STRING ": exchange Monte Carlo");
+PARAPACK_SET_VERSION("ALPS/parapack example program: exchange Monte Carlo");
 PARAPACK_REGISTER_ALGORITHM(single_ising_worker, "ising");
 PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising");
 PARAPACK_REGISTER_ALGORITHM(alps::parapack::single_exchange_worker<single_ising_worker>,
                          "ising; exchange");
+#ifdef ALPS_HAVE_MPI
+PARAPACK_REGISTER_PARALLEL_WORKER(alps::parapack::parallel_exchange_worker<single_ising_worker>,
+                                  "ising exchange");
+#endif
 PARAPACK_REGISTER_EVALUATOR(ising_evaluator, "ising; exchange");

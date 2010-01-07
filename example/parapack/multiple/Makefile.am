@@ -1,32 +1,16 @@
-DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(SQLITE_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
-
-LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(MPI_LDFLAGS) $(HDF5_LDFLAGS)
-if BUILD_UNIFIED_LIB
-  LIBS_SGL = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
-else
-  LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la  $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS)  $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-endif
-
-LDFLAGS_MPI = $(LDFLAGS_SGL) 
-if BUILD_UNIFIED_LIB
-  LIBS_MPI = $(top_builddir)/lib/alps/libalps-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS)$(HDF5_LIBS)  $(MPI_LIBS) $(BASE_LIBS) 
-else
-  LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-endif
+DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
+AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
+AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS) $(MPI_LDFLAGS)
+LDADD = $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
 
 check_PROGRAMS =
 if HAVE_BOOST_MPI
-check_PROGRAMS += ising_mpi ising_ns
+check_PROGRAMS += ising ising_ns
 endif
 dist_noinst_DATA = params
 
-ising_mpi_SOURCES = main.C ising.h ising.C
-ising_mpi_LDFLAGS = $(LDFLAGS_MPI)
-ising_mpi_LDADD = $(LIBS_MPI)
-
+ising_SOURCES = main.C ising.h ising.C
 ising_ns_SOURCES = main_ns.C ising.h ising.C
-ising_ns_LDFLAGS = $(LDFLAGS_MPI)
-ising_ns_LDADD = $(LIBS_MPI)
 
 TESTS =
 check_PROGRAMS +=

@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -27,7 +27,7 @@
 
 #include "wanglandau.h"
 
-PARAPACK_SET_VERSION(PARAPACK_VERSION_STRING ": Wang-Landau algorithm");
+PARAPACK_SET_VERSION("ALPS/parapack example program: Wang-Landau algorithm");
 
 PARAPACK_REGISTER_WORKER(wanglandau_worker<alps::wanglandau::learn>, "wanglandau learn");
 PARAPACK_REGISTER_EVALUATOR(alps::wanglandau_evaluator<alps::wanglandau::learn>, "wanglandau learn");

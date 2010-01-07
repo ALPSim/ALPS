@@ -1,12 +1,8 @@
 BOOST_SRCDIR=@BOOST_SRCDIR@
 DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
-AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
-
-LDFLAGS_SGL = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS)
-LIBS_SGL = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(BASE_LIBS)
-
-LDFLAGS_MPI = $(LDFLAGS_SGL) $(MPI_LDFLAGS)
-LIBS_MPI = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
+CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
+LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(XML_LDFLAGS) $(MPI_LDFLAGS)
+LIBS = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
 src_ALPS = \
   $(top_srcdir)/src/alps/copyright.C
@@ -71,7 +67,7 @@ src_OSIRIS = \
   $(top_srcdir)/src/alps/osiris/xdrcore.C \
   $(top_srcdir)/src/alps/osiris/dumparchive.C
 
-src_PARAPACK_COMMON = \
+src_PARAPACK = \
   $(top_srcdir)/src/alps/parapack/clone.C \
   $(top_srcdir)/src/alps/parapack/clone_info.C \
   $(top_srcdir)/src/alps/parapack/worker_factory.C \
@@ -81,20 +77,12 @@ src_PARAPACK_COMMON = \
   $(top_srcdir)/src/alps/parapack/mc_worker.C \
   $(top_srcdir)/src/alps/parapack/measurement.C \
   $(top_srcdir)/src/alps/parapack/option.C \
+  $(top_srcdir)/src/alps/parapack/parapack.C \
+  $(top_srcdir)/src/alps/parapack/process_impl.C \
   $(top_srcdir)/src/alps/parapack/queue.C \
   $(top_srcdir)/src/alps/parapack/rng_helper.C \
   $(top_srcdir)/src/alps/parapack/types.C \
   $(top_srcdir)/src/alps/parapack/util.C
-src_PARAPACK_SGL = \
-  $(top_srcdir)/src/alps/parapack/scheduler_comm.C \
-  $(top_srcdir)/src/alps/parapack/scheduler_sgl.C
-src_PARAPACK_MPI = \
-  $(top_srcdir)/src/alps/parapack/clone_info_mpi.C \
-  $(top_srcdir)/src/alps/parapack/clone_mpi.C \
-  $(top_srcdir)/src/alps/parapack/parallel_factory.C \
-  $(top_srcdir)/src/alps/parapack/process_mpi.C \
-  $(top_srcdir)/src/alps/parapack/scheduler_comm.C \
-  $(top_srcdir)/src/alps/parapack/scheduler_mpi.C
 
 src_boost_DATE_TIME = \
   $(BOOST_SRCDIR)/date_time/src/gregorian/date_generators.cpp \
@@ -127,8 +115,8 @@ src_boost_MPI = \
   $(BOOST_SRCDIR)/mpi/src/packed_skeleton_oarchive.cpp \
   $(BOOST_SRCDIR)/mpi/src/point_to_point.cpp \
   $(BOOST_SRCDIR)/mpi/src/request.cpp \
-  $(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp \
   $(BOOST_SRCDIR)/mpi/src/timer.cpp
+  # $(BOOST_SRCDIR)/mpi/src/text_skeleton_oarchive.cpp
 
 src_boost_PROGRAM_OPTIONS = \
   $(BOOST_SRCDIR)/program_options/src/cmdline.cpp \
@@ -229,48 +217,13 @@ src_boost_THREAD = \
   $(BOOST_SRCDIR)/thread/src/tss.cpp \
   $(BOOST_SRCDIR)/thread/src/xtime.cpp
 
-if BUILD_UNIFIED_LIB
-lib_LTLIBRARIES = 
-if ALPS_FULL
-lib_LTLIBRARIES += libalps-sgl.la
-if HAVE_BOOST_MPI
-lib_LTLIBRARIES += libalps-mpi.la
-endif
-endif
-else
 lib_LTLIBRARIES = libalps.la
-if ALPS_FULL
-lib_LTLIBRARIES += libparapack-sgl.la
-if HAVE_BOOST_MPI
-lib_LTLIBRARIES += libparapack-mpi.la
-endif
-endif
-endif
 
 libalps_la_SOURCES = $(src_ALPS) $(src_EXPRESSION) $(src_OSIRIS) $(src_PARAMETER) $(src_PARSER) $(src_RANDOM) $(src_ALEA)
 nodist_libalps_la_SOURCES =
-if HAVE_MPI
-  libalps_la_LDFLAGS = $(LDFLAGS_MPI)
-  libalps_la_CPPFLAGS = $(AM_CPPFLAGS) -DALPS_MPI
-else
-  libalps_la_CPPFLAGS = $(AM_CPPFLAGS)
-  libalps_la_LDFLAGS = $(LDFLAGS_SGL)
-endif
-
-libparapack_sgl_la_SOURCES =
-nodist_libparapack_sgl_la_SOURCES =
-libparapack_sgl_la_LDFLAGS = $(LDFLAGS_SGL)
-
-libparapack_mpi_la_SOURCES =
-nodist_libparapack_mpi_la_SOURCES =
-libparapack_mpi_la_LDFLAGS = $(LDFLAGS_MPI)
 
 if ALPS_FULL
-libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER) $(src_PARAPACK_COMMON)
-libparapack_sgl_la_SOURCES += $(src_PARAPACK_SGL)
-if HAVE_BOOST_MPI
-libparapack_mpi_la_SOURCES += $(src_PARAPACK_MPI)
-endif
+libalps_la_SOURCES += $(src_LATTICE) $(src_MODEL) $(src_SCHEDULER) $(src_PARAPACK)
 endif
 
 if BUILD_BOOST
@@ -279,28 +232,14 @@ nodist_libalps_la_SOURCES += $(src_boost_DATE_TIME) $(src_boost_PROGRAM_OPTIONS)
 endif
 
 if BUILD_BOOST_MPI
-nodist_libparapack_mpi_la_SOURCES += $(src_boost_MPI)
+nodist_libalps_la_SOURCES += $(src_boost_MPI)
 endif
-
 if BUILD_BOOST_SIGNALS
 nodist_libalps_la_SOURCES += $(src_boost_SIGNALS)
 endif
 if BUILD_BOOST_THREAD
 nodist_libalps_la_SOURCES += $(src_boost_THREAD)
 endif
-
-# unified libraries
-
-libalps_sgl_la_SOURCES = $(libalps_la_SOURCES) $(libparapack_sgl_la_SOURCES)
-nodist_libalps_sgl_la_SOURCES = $(nodist_libalps_la_SOURCES) $(nodist_libparapack_sgl_la_SOURCES)
-libalps_sgl_la_LDFLAGS = $(LDFLAGS_SGL)
-# libalps_sgl_la_LIBADD = $(LIBS_SGL)
-
-libalps_mpi_la_SOURCES = $(libalps_la_SOURCES) $(libparapack_mpi_la_SOURCES)
-nodist_libalps_mpi_la_SOURCES = $(nodist_libalps_la_SOURCES) $(nodist_libparapack_mpi_la_SOURCES)
-libalps_mpi_la_CPPFLAGS = $(AM_CPPFLAGS) -DALPS_MPI
-libalps_mpi_la_LDFLAGS = $(LDFLAGS_MPI)
-# libalps_mpi_la_LIBADD = $(LIBS_MPI)
 
 clean-local :
 	rm -f *.ii *.ti

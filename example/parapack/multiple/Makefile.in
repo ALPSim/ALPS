@@ -35,7 +35,7 @@ POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
 check_PROGRAMS = $(am__EXEEXT_1)
-@HAVE_BOOST_MPI_TRUE@am__append_1 = ising_mpi ising_ns
+@HAVE_BOOST_MPI_TRUE@am__append_1 = ising ising_ns
 TESTS =
 subdir = example/parapack/multiple
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
@@ -59,40 +59,28 @@ am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 mkinstalldirs = $(install_sh) -d
 CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
+	$(top_builddir)/src/alps/version.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = ising_mpi$(EXEEXT) \
-@HAVE_BOOST_MPI_TRUE@	ising_ns$(EXEEXT)
-am_ising_mpi_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
-ising_mpi_OBJECTS = $(am_ising_mpi_OBJECTS)
+@HAVE_BOOST_MPI_TRUE@am__EXEEXT_1 = ising$(EXEEXT) ising_ns$(EXEEXT)
+am_ising_OBJECTS = main.$(OBJEXT) ising.$(OBJEXT)
+ising_OBJECTS = $(am_ising_OBJECTS)
+ising_LDADD = $(LDADD)
 am__DEPENDENCIES_1 =
-@BUILD_UNIFIED_LIB_FALSE@am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libparapack-mpi.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(top_builddir)/lib/alps/libalps.la \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_FALSE@	$(am__DEPENDENCIES_1)
-@BUILD_UNIFIED_LIB_TRUE@am__DEPENDENCIES_2 = $(top_builddir)/lib/alps/libalps-mpi.la \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(XML_LIBS)$(HDF5_LIBS) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1) \
-@BUILD_UNIFIED_LIB_TRUE@	$(am__DEPENDENCIES_1)
-ising_mpi_DEPENDENCIES = $(am__DEPENDENCIES_2)
-ising_mpi_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(ising_mpi_LDFLAGS) $(LDFLAGS) -o $@
+ising_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 am_ising_ns_OBJECTS = main_ns.$(OBJEXT) ising.$(OBJEXT)
 ising_ns_OBJECTS = $(am_ising_ns_OBJECTS)
-ising_ns_DEPENDENCIES = $(am__DEPENDENCIES_2)
-ising_ns_LINK = $(LIBTOOL) --tag=CXX $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CXXLD) $(AM_CXXFLAGS) \
-	$(CXXFLAGS) $(ising_ns_LDFLAGS) $(LDFLAGS) -o $@
+ising_ns_LDADD = $(LDADD)
+ising_ns_DEPENDENCIES = $(top_builddir)/lib/alps/libalps.la \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1) \
+	$(am__DEPENDENCIES_1) $(am__DEPENDENCIES_1)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
 am__depfiles_maybe = depfiles
 am__mv = mv -f
@@ -114,8 +102,8 @@ CCLD = $(CC)
 LINK = $(LIBTOOL) --tag=CC $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) \
 	--mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) $(AM_LDFLAGS) \
 	$(LDFLAGS) -o $@
-SOURCES = $(ising_mpi_SOURCES) $(ising_ns_SOURCES)
-DIST_SOURCES = $(ising_mpi_SOURCES) $(ising_ns_SOURCES)
+SOURCES = $(ising_SOURCES) $(ising_ns_SOURCES)
+DIST_SOURCES = $(ising_SOURCES) $(ising_ns_SOURCES)
 DATA = $(dist_noinst_DATA)
 ETAGS = etags
 CTAGS = ctags
@@ -299,20 +287,13 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(XML_CPPFLAGS) $(SQLITE_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
-LDFLAGS_SGL = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(MPI_LDFLAGS) $(HDF5_LDFLAGS)
-@BUILD_UNIFIED_LIB_FALSE@LIBS_SGL = $(top_builddir)/lib/alps/libparapack-sgl.la $(top_builddir)/lib/alps/libalps.la  $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS)  $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LIBS_SGL = $(top_builddir)/lib/alps/libalps-sgl.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
-LDFLAGS_MPI = $(LDFLAGS_SGL) 
-@BUILD_UNIFIED_LIB_FALSE@LIBS_MPI = $(top_builddir)/lib/alps/libparapack-mpi.la $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS) $(HDF5_LIBS)
-@BUILD_UNIFIED_LIB_TRUE@LIBS_MPI = $(top_builddir)/lib/alps/libalps-mpi.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS)$(HDF5_LIBS)  $(MPI_LIBS) $(BASE_LIBS) 
+DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
+AM_CPPFLAGS = $(BASE_CPPFLAGS) $(BOOST_CPPFLAGS) $(SQLITE_CPPFLAGS) $(XML_CPPFLAGS) $(HDF5_CPPFLAGS) $(MPI_CPPFLAGS)
+AM_LDFLAGS = $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(SQLITE_LDFLAGS) $(XML_LDFLAGS) $(HDF5_LDFLAGS) $(MPI_LDFLAGS)
+LDADD = $(top_builddir)/lib/alps/libalps.la $(BOOST_LIBS) $(SQLITE_LIBS) $(XML_LIBS) $(HDF5_LIBS) $(MPI_LIBS) $(BASE_LIBS) 
 dist_noinst_DATA = params ising_ns.ip ising_ns.op-2 ising_ns.op-4
-ising_mpi_SOURCES = main.C ising.h ising.C
-ising_mpi_LDFLAGS = $(LDFLAGS_MPI)
-ising_mpi_LDADD = $(LIBS_MPI)
+ising_SOURCES = main.C ising.h ising.C
 ising_ns_SOURCES = main_ns.C ising.h ising.C
-ising_ns_LDFLAGS = $(LDFLAGS_MPI)
-ising_ns_LDADD = $(LIBS_MPI)
 TESTS_ENVIRONMENT = $(top_srcdir)/config/run-test $(srcdir)
 all: all-am
 
@@ -357,12 +338,12 @@ clean-checkPROGRAMS:
 	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
 	echo " rm -f" $$list; \
 	rm -f $$list
-ising_mpi$(EXEEXT): $(ising_mpi_OBJECTS) $(ising_mpi_DEPENDENCIES) 
-	@rm -f ising_mpi$(EXEEXT)
-	$(ising_mpi_LINK) $(ising_mpi_OBJECTS) $(ising_mpi_LDADD) $(LIBS)
+ising$(EXEEXT): $(ising_OBJECTS) $(ising_DEPENDENCIES) 
+	@rm -f ising$(EXEEXT)
+	$(CXXLINK) $(ising_OBJECTS) $(ising_LDADD) $(LIBS)
 ising_ns$(EXEEXT): $(ising_ns_OBJECTS) $(ising_ns_DEPENDENCIES) 
 	@rm -f ising_ns$(EXEEXT)
-	$(ising_ns_LINK) $(ising_ns_OBJECTS) $(ising_ns_LDADD) $(LIBS)
+	$(CXXLINK) $(ising_ns_OBJECTS) $(ising_ns_LDADD) $(LIBS)
 
 mostlyclean-compile:
 	-rm -f *.$(OBJEXT)

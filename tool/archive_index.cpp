@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2006-2008 by Lukas Gamper <mistral@student.ethz.ch>,
+* Copyright (C) 2006-2010 by Lukas Gamper <mistral@student.ethz.ch>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -41,7 +41,7 @@
 #include "archive_node.hpp"
 #include "archive_xml.hpp"
 
-#include <alps/parapack/scheduler.h>
+#include <alps/parapack/parapack.h>
 
 #ifdef USEPATTERN
         #include <stdexcept>
@@ -139,14 +139,14 @@ void Index::exec(fs::path xmlPath) {
         std::string file_in_str;
         std::string file_out_str;
         std::vector<fs::path> files;
-        int t = alps::parapack::scheduler::load_filename(xmlPath, file_in_str, file_out_str);
+        int t = alps::parapack::load_filename(xmlPath, file_in_str, file_out_str);
         if (t == 1) {
           std::vector<alps::task> tasks;
           fs::path file_in = complete(fs::path(file_in_str), basedir);
           fs::path file_out = complete(fs::path(file_out_str), basedir);
           std::string simname;
-          alps::parapack::scheduler::load_tasks(file_in, file_out, basedir,
-                                                /* check_parameter = */ false, simname, tasks);
+          alps::parapack::load_tasks(file_in, file_out, basedir,
+                                     /* check_parameter = */ false, simname, tasks);
           BOOST_FOREACH(alps::task& t, tasks) {
             fs::path f = complete(fs::path(t.file_out_str()), basedir);
             if (fs::exists(f)) {
