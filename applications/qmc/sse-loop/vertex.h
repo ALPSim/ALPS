@@ -32,6 +32,7 @@
 
 #include <alps/lattice/graphproperties.h>
 #include <alps/osiris/dump.h>
+#include <alps/osiris/std/vector.h>
 #include <iostream>
 #include <stdexcept>
 
@@ -53,12 +54,18 @@ public:
   typedef super_type::size_type size_type;
   StateVector(size_type s=0) : std::vector<uint8_t>(s) {}
   void flip(site_number_type i) { (*this)[i]=1-(*this)[i];}
+  
+  void save(alps::ODump& od) const { od << static_cast<const super_type&>(*this); }
+  void load(alps::IDump& id) { id >> static_cast<super_type&>(*this); }
 };
 
 
 std::ostream& operator<< (std::ostream& ost, const StateVector& stv);
+
+namespace alps {
 inline alps::ODump& operator<<(alps::ODump&, const Vertex&);
 inline alps::IDump& operator>>(alps::IDump&, Vertex&);
+}
 
 class Vertex {
 public:
@@ -118,8 +125,8 @@ public:
   }
 
   // dumping
-  friend alps::ODump& operator<<(alps::ODump&, const Vertex&);
-  friend alps::IDump& operator>>(alps::IDump&, Vertex&);
+  friend alps::ODump& alps::operator<<(alps::ODump&, const Vertex&);
+  friend alps::IDump& alps::operator>>(alps::IDump&, Vertex&);
   static vertex_number_type n_; // TODO: not needed
   
 private:
@@ -147,8 +154,13 @@ public:
   void init(); 
 
   template <class RNG> void grow(size_type s, RNG& rnd); // TODO: not needed
+
+  void save(alps::ODump& od) const { od << static_cast<const super_type&>(*this); }
+  void load(alps::IDump& id) { id >> static_cast<super_type&>(*this); }
 };
 
+
+namespace alps {
 
 inline alps::ODump& operator<<(alps::ODump& dump, const Vertex& v) 
 {
@@ -158,6 +170,8 @@ inline alps::ODump& operator<<(alps::ODump& dump, const Vertex& v)
 inline alps::IDump& operator>>(alps::IDump& dump, Vertex& v)
 {
   return dump >> v.sites_[0] >> v.sites_[1] >> v.type_ >> v.bond_number_;
+}
+
 }
 
 
