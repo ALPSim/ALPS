@@ -148,7 +148,7 @@ private:
 class ising_evaluator : public alps::parapack::simple_evaluator {
 public:
   static std::string version() {
-    return "ALPS/parapack test program: Metropolis algorithm " PARAPACK_VERSION;
+    return "ALPS/parapack test program: Metropolis algorithm ";
   }
   static void print_copyright(std::ostream& out) {
     out << version()

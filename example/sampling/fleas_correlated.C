@@ -35,9 +35,6 @@ int main()
       ++n;
   }
   
-  number.reset(true);
-  histogram.reset(true); 
-  
   for (int i=0;i<M;++i) {
     if (rng() <= n )
      --n;
