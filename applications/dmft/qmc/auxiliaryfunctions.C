@@ -313,7 +313,7 @@ std::istream &operator>>(std::istream &is, green_function<double> &v){
   return is;
 }
 
-std::istream &operator>>(std::istream &is, green_function<std::complex<double> > &v){
+/*std::istream &operator>>(std::istream &is, green_function<std::complex<double> > &v){
   double index;
   for(unsigned int o=0;o<v.nfreq();++o){
     is>>index;
@@ -326,7 +326,7 @@ std::istream &operator>>(std::istream &is, green_function<std::complex<double> >
 		  }
   }
   return is;
-}
+}*/
 
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v){
   os<<std::setprecision(20);
