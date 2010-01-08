@@ -93,8 +93,10 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
   	double tmp1 = exp(-2*lambda*spins[site])-1;
   	double tmp2 = exp(+2*lambda*spins[site])-1;
     
-    double vi_up[N], uj_up[N];
-    double vi_dn[N], uj_dn[N];
+    double *vi_up=new double[N];
+    double *uj_up=new double[N];
+    double *vi_dn=new double[N];
+    double *uj_dn=new double[N];
     double alpha_up=tmp1/(1+(1-Green_up(site,site))*tmp1);
     double alpha_dn=tmp2/(1+(1-Green_down(site,site))*tmp2);
     for(uint i=0;i<N;++i){
@@ -108,7 +110,10 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
     dger_(&N,&N,&alpha_dn,vi_dn,&one,uj_dn,&one,&(Green_down(0,0)),&N);
   	// update spin
   	spins[site] = -spins[site];
-    
+    delete[] vi_up;
+    delete[] vi_dn;
+    delete[] uj_up;
+    delete[] uj_dn;
   }
 }
 

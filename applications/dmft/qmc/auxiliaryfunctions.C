@@ -319,7 +319,7 @@ std::istream &operator>>(std::istream &is, green_function<std::complex<double> >
     for(unsigned int i=0;i<v.nsite();++i)
       for(unsigned int j=0;j<v.nsite();++j)
         for(unsigned int z=0;z<v.nflavor();++z)
-          is>>v(o,i,j,z).real()>>v(o,i,j,z).imag();
+          is>>(v(o,i,j,z).real())>>(v(o,i,j,z).imag());
   }
   return is;
 }
@@ -331,7 +331,7 @@ std::ostream &operator<<(std::ostream &os, const green_function<std::complex<dou
     for(unsigned int i=0;i<v.nsite();++i)
       for(unsigned int j=0;j<v.nsite();++j)
         for(unsigned int z=0;z<v.nflavor();++z)
-          os<<v(o,i,j,z).real()<<"\t"<<v(o,i,j,z).imag()<<"\t";
+          os<<(v(o,i,j,z).real())<<"\t"<<(v(o,i,j,z).imag())<<"\t";
     os<<std::endl;    
   }
   return os;

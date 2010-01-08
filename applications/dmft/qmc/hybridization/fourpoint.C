@@ -75,8 +75,8 @@ void WernerRun::measure_fourpoint()
       if (segments[j].size()>0) {
         //double N_div_beta=N/BETA;
         double N4_div_beta=N4point/BETA;
-        double start_times[segments[j].size()];
-        double end_times[segments[j].size()];
+        double *start_times=new double[segments[j].size()];
+        double *end_times=new double[segments[j].size()];
         int i=0;
         for(it1=segments[j].begin();it1!=segments[j].end();++it1){
           start_times[i]=it1->t_start();
@@ -95,8 +95,8 @@ void WernerRun::measure_fourpoint()
               
               //Fourpoint, up and down sector:
               if(j==0){
-                double start_times_1[segments[1].size()];
-                double end_times_1[segments[1].size()];
+                double *start_times_1=new double[segments[1].size()];
+                double *end_times_1=new double[segments[1].size()];
                 int z=0;
                 for(it1=segments[1].begin();it1!=segments[1].end();++it1){
                   start_times_1[z]=it1->t_start();
@@ -134,10 +134,14 @@ void WernerRun::measure_fourpoint()
                     }
                   }
                 }
+                delete[] start_times_1;
+                delete[] end_times_1;
               }
             } //if M != 0
           } //for k
         } //for i
+        delete [] start_times;
+        delete [] end_times;
       }// if there are segments.
       
     }
