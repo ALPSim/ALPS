@@ -169,8 +169,8 @@ namespace blas{
     }
     T* values() { return values_; }
     const T* values() const { return values_; }
-    inline T&operator()(const uint i, const uint j){return *(values_+(i*size2_+j));}
-    inline const T&operator()(const uint i, const uint j) const {return *(values_+(i*size2_+j));}
+    inline T&operator()(const unsigned i, const unsigned j){return *(values_+(i*size2_+j));}
+    inline const T&operator()(const unsigned i, const unsigned j) const {return *(values_+(i*size2_+j));}
     //matrix size 
     inline const int &size1()const{return size1_;}
     //matrix size 

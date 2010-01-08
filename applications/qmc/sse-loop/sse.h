@@ -61,7 +61,7 @@ private:
   typedef VertexString::iterator vertex_iterator;
 
   void setup_model();
-  double diagonal_matrix_element(uint8_t l, uint8_t r, int) const { return diag_me[l][r]; }
+  double diagonal_matrix_element(alps::uint8_t l, alps::uint8_t r, int) const { return diag_me[l][r]; }
   double offset() const { return offset_; }
   SSEPath breakup(int ,const LocalConfig c, double r) const {return r < probabilities_[c] ? path_[c][0] : path_[c][1];}
   friend class ::Vertex;

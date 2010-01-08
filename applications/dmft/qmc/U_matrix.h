@@ -26,7 +26,7 @@ public:
       n_nonzero_(0), mu_shift_(0)
   {
     val_ = new double[nf_*nf_];
-    for(uint i=0; i<nf_*nf_; ++i) 
+    for(unsigned i=0; i<nf_*nf_; ++i) 
       val_[i]=0; //default: non-interacting.
     if(parms.defined("U_MATRIX")){
       std::string ufilename(parms["U_MATRIX"]);
@@ -54,10 +54,10 @@ public:
       double Uprime = parms.value_or_default("Uprime", U-2*J);
       assemble(U, Uprime, J);
     }
-    for (uint i=0; i<nf_*nf_; ++i)
+    for (unsigned i=0; i<nf_*nf_; ++i)
       if (val_[i]!=0) 
 	n_nonzero_++;
-    for (uint i=0; i<nf_; ++i) 
+    for (unsigned i=0; i<nf_; ++i) 
       mu_shift_ += operator()(i,0);
     mu_shift_ /= 2;
   }

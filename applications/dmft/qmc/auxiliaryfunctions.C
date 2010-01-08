@@ -16,6 +16,7 @@
 #include "U_matrix.h"
 #include <fstream>
 #include <sstream>
+#include <math.h>
 
 
 
@@ -318,8 +319,11 @@ std::istream &operator>>(std::istream &is, green_function<std::complex<double> >
     is>>index;
     for(unsigned int i=0;i<v.nsite();++i)
       for(unsigned int j=0;j<v.nsite();++j)
-        for(unsigned int z=0;z<v.nflavor();++z)
-          is>>(v(o,i,j,z).real())>>(v(o,i,j,z).imag());
+		  for(unsigned int z=0;z<v.nflavor();++z) {
+            double re,im;
+			is >>re >> im;
+            v(o,i,j,z)=std::complex<double>(re,im);
+		  }
   }
   return is;
 }

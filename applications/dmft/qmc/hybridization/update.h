@@ -439,26 +439,26 @@ template <class G, class S> double det_rat_shift(times & new_segment, int k, bla
 }
 
 
-template <class G, class S> void compute_M_shift(times & new_segment, uint k, blas_matrix & M, const S& segments_old, G& F, double BETA, double det_rat) {
+template <class G, class S> void compute_M_shift(times & new_segment, unsigned k, blas_matrix & M, const S& segments_old, G& F, double BETA, double det_rat) {
   std::vector<double> R(M.size1(),0), M_k(M.size1(),0), Fe(M.size1(),0);
   
   typename S::const_iterator it=segments_old.begin();
-  for (uint i=0; i<M_k.size(); i++) {
+  for (unsigned i=0; i<M_k.size(); i++) {
     M_k[i] = M(i,k);
     Fe[i] = interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);
     it++;
   }
   
-  for (uint i=0; i<R.size(); i++) {
+  for (unsigned i=0; i<R.size(); i++) {
     if (i!=k) {
-      for (uint j=0; j<R.size(); j++)
+      for (unsigned j=0; j<R.size(); j++)
         R[i] += Fe[j]*M(j,i);  
     } 
   }   
   
-  for (uint m=0; m<(uint)M.size1(); m++) {
+  for (unsigned m=0; m<(unsigned)M.size1(); m++) {
     if (m!=k) {
-      for (uint n=0; n<(uint)M.size1(); n++) {
+      for (unsigned n=0; n<(unsigned)M.size1(); n++) {
         M(n,m) -= M_k[n]*R[m]/det_rat;
       }
     }

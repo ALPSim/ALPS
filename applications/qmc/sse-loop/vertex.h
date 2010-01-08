@@ -47,12 +47,12 @@ typedef unsigned int bondtype_type;
 typedef unsigned int site_number_type;
 typedef std::vector<Vertex>::size_type vertex_number_type;
 
-class StateVector : public std::vector<uint8_t>
+class StateVector : public std::vector<alps::uint8_t>
 {
 public:
-  typedef std::vector<uint8_t> super_type;
+  typedef std::vector<alps::uint8_t> super_type;
   typedef super_type::size_type size_type;
-  StateVector(size_type s=0) : std::vector<uint8_t>(s) {}
+  StateVector(size_type s=0) : std::vector<alps::uint8_t>(s) {}
   void flip(site_number_type i) { (*this)[i]=1-(*this)[i];}
   
   void save(alps::ODump& od) const { od << static_cast<const super_type&>(*this); }
@@ -130,11 +130,11 @@ public:
   static vertex_number_type n_; // TODO: not needed
   
 private:
-  uint8_t type_; // 0 = identity, 1= diagonal 2=offdiagonal TODO: change, we obly need 0=diagonbal 1=offdiagonal
+  alps::uint8_t type_; // 0 = identity, 1= diagonal 2=offdiagonal TODO: change, we obly need 0=diagonbal 1=offdiagonal
   site_number_type sites_[2]; 
   SSEPath breakup_;
   unsigned int bond_number_;
-  bool visited_[4];            // flags for loop building. TODO: can combine all 4 into 4 bits of a single uint8_t
+  bool visited_[4];            // flags for loop building. TODO: can combine all 4 into 4 bits of a single alps::uint8_t
   vertex_number_type down_[2]; // links for the web
   vertex_number_type up_[2];  // TODO: can combine down_ and 1 bit for down_leg_ into one integer, saves memory!
   int down_leg_[2];

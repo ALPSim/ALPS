@@ -19,6 +19,8 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/parameter.h>
 
+#include <math.h>
+
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 
 
@@ -141,9 +143,9 @@ void FourierTransformer::forward_ft(const itime_green_function_t & gtau, matsuba
   int N_omega = v_omega.size();
   double dt = beta_/N;
   
-  for(uint f=0;f<gtau.nflavor();++f){
-    for(uint p=0;p<gtau.nsite();++p){
-      for(uint q=0;q<gtau.nsite();++q){
+  for(unsigned f=0;f<gtau.nflavor();++f){
+    for(unsigned p=0;p<gtau.nsite();++p){
+      for(unsigned q=0;q<gtau.nsite();++q){
         for(int tau=0;tau<Np1;++tau){
           v[tau]=gtau(tau,p,q,f);
         }

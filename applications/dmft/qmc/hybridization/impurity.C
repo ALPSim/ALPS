@@ -129,9 +129,9 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
 bool WernerRun::change_parameter(const std::string & name, const alps::StringValue & value)
 {
   if (name == "SWEEPS")
-    total_sweeps = static_cast < uint32_t > (value);
+    total_sweeps = static_cast < alps::uint32_t > (value);
   else if (name == "THERMALIZATION" && !is_thermalized())
-    thermalization_sweeps = static_cast < uint32_t > (value);
+    thermalization_sweeps = static_cast < alps::uint32_t > (value);
   else
     return false;               // cannot do it
   return true;                  // could do it
@@ -310,7 +310,7 @@ std::pair < matsubara_green_function_t, itime_green_function_t > WernerSimFreque
     matrix_size << RealObsevaluator(get_measurements()["MatrixSize"]).mean() << std::endl;
     RealVectorObsevaluator overlap = get_measurements()["overlap"];
     std::ofstream overlap_file("overlap", std::ios::app);
-    for (uint i = 0; i < overlap.mean().size(); ++i) {
+    for (unsigned i = 0; i < overlap.mean().size(); ++i) {
       overlap_file << overlap.mean()[i] << "\t";
     }
     overlap_file << std::endl;
@@ -374,7 +374,7 @@ itime_green_function_t WernerSimItime::get_result() const
     RealVectorObsevaluator overlap = get_measurements()["overlap"];
     std::ofstream overlap_file("overlap", std::ios::app);
     overlap_file << setprecision(20);
-    for (uint i = 0; i < overlap.mean().size(); ++i) {
+    for (unsigned i = 0; i < overlap.mean().size(); ++i) {
       overlap_file << overlap.mean()[i] << "\t";
     }
     overlap_file << std::endl;

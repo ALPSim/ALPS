@@ -229,14 +229,14 @@ void SSERun::do_diagonal()
   // build vertex web
 void SSERun::do_web() // TODO: nothing, unchanged, build the links
 {  
-  vector<uint32_t> current_vertex(num_sites(),vertex_string.size());
-  vector<uint32_t> first_vertex(num_sites(),vertex_string.size());
+  vector<alps::uint32_t> current_vertex(num_sites(),vertex_string.size());
+  vector<alps::uint32_t> first_vertex(num_sites(),vertex_string.size());
   vertex_iterator it;
-  uint32_t i=0;
+  alps::uint32_t i=0;
   for (it=vertex_string.begin(); it !=vertex_string.end() ; ++it, ++i)  {
     if(!it->is_identity())  {
       for (int leg=0; leg<2;++leg)  {
-        uint32_t site=it->site(leg);
+        alps::uint32_t site=it->site(leg);
         if (current_vertex[site]==vertex_string.size())
           first_vertex[site]=i; // I'm the first vertex on this site
         else  {
@@ -257,7 +257,7 @@ void SSERun::do_web() // TODO: nothing, unchanged, build the links
   }
  
   // fix ends around time-boundary
-  for (uint32_t site = 0 ; site < num_sites() ; ++ site)
+  for (alps::uint32_t site = 0 ; site < num_sites() ; ++ site)
     if (current_vertex[site]!=vertex_string.size())  {
       // was there at least one vertex connected to this site?
       // connect it around boundary
@@ -285,7 +285,7 @@ void SSERun::do_loops()
   for_each(vertex_string.begin(),vertex_string.end(),mem_fun_ref(&Vertex::reset));
   int loops=0;
   vertex_iterator start = vertex_string.begin();
-  uint32_t loop_length(0);
+  alps::uint32_t loop_length(0);
   
   do {
     if (!start->is_identity() ) { 

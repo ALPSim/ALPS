@@ -61,8 +61,8 @@ void WernerRun::measure_fourpoint()
   
   fourpoint_array.resize(FLAVORS*N44);
   fourpoint_ud_array.resize(N44);
-  for(uint i=0;i<fourpoint_array.size();++i) fourpoint_array[i]=0;
-  for(uint i=0;i<fourpoint_ud_array.size();++i) fourpoint_ud_array[i]=0;
+  for(unsigned i=0;i<fourpoint_array.size();++i) fourpoint_array[i]=0;
+  for(unsigned i=0;i<fourpoint_ud_array.size();++i) fourpoint_ud_array[i]=0;
   
   //double sign_meas=0, s=1;
   G_meas = 0;

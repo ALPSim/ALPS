@@ -47,7 +47,7 @@ std::ostream& operator<<(std::ostream& out, const Vertex& v)
 
 std::ostream& operator<< (std::ostream& ost, const StateVector& stv)
 {
-  int i;
+  unsigned int i;
   for (i=0;i<stv.size();i++)
     {
     if (stv[i])
