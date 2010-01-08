@@ -402,13 +402,14 @@ namespace blas{
       }
     }
     double max() const{
-      double rowmax[size_];
+      double *rowmax=new double[size_];
       int rowmax_index, max_index, inc=1;
       for(int i=0;i<size_;++i){
         rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
         rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
       }
       max_index=idamax_(&size_, rowmax ,&inc);
+      delete[] rowmax;
       return std::abs(rowmax[max_index-1]);
     }
     void swap(matrix &M2){
@@ -428,8 +429,9 @@ namespace blas{
       //get optimal size for work
       lapack::dsyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &(eigenvalues(0)),&work_size, &lwork, &info); 
       lwork=(int)work_size;
-      double work[lwork];
+      double *work=new double[lwork];
       lapack::dsyev_(&jobs, &uplo, &size_, eigenvectors.values_, &size_, &eigenvalues(0),work, &lwork, &info); 
+      delete[] work;
       /*matrix eigenvectors_trans(eigenvectors);
        eigenvectors_trans.transpose();
        std::cout<<*this<<std::endl;
