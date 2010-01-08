@@ -3428,6 +3428,10 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
+  save_CFLAGS="$CFLAGS"
+  save_CPPFLAGS="$CPPFLAGS"
+  save_CXXFLAGS="$CXXFLAGS"
+
 
 
 # Check whether --with-compiler was given.
@@ -5020,10 +5024,6 @@ fi
   test -z "$ac_cv_compiler_warnings" && ac_cv_compiler_warnings=no
   { $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_compiler_warnings" >&5
 $as_echo "$ac_cv_compiler_warnings" >&6; }
-
-  save_CFLAGS="$CFLAGS"
-  save_CPPFLAGS="$CPPFLAGS"
-  save_CXXFLAGS="$CXXFLAGS"
 
   ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'

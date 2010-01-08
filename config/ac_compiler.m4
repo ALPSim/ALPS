@@ -48,6 +48,10 @@ AC_DEFUN([AC_ALPS_OPENMP],
 # AC_SELECT_COMPILER
 AC_DEFUN([AC_SELECT_COMPILER],
 [
+  save_CFLAGS="$CFLAGS"
+  save_CPPFLAGS="$CPPFLAGS"
+  save_CXXFLAGS="$CXXFLAGS"
+
   AC_SUBST(COMPILER)
   AC_ARG_WITH(compiler,
     AC_HELP_STRING([--with-compiler=MODE],
@@ -264,10 +268,6 @@ AC_DEFUN([AC_COMPILER_OPTIONS],
   )
   test -z "$ac_cv_compiler_warnings" && ac_cv_compiler_warnings=no
   AC_MSG_RESULT($ac_cv_compiler_warnings)
-
-  save_CFLAGS="$CFLAGS"
-  save_CPPFLAGS="$CPPFLAGS"
-  save_CXXFLAGS="$CXXFLAGS"
 
   AC_PROG_CC
   AC_PROG_CXX
