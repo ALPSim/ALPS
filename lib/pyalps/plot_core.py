@@ -111,6 +111,11 @@ class MplXYPlot_core:
             
             self.icolor = (self.icolor+1)%len(self.colors)
             
+            if 'legend' in self.plt:
+                if 'scatter_labels' in self.plt['legend']:
+                    if self.plt['legend']['scatter_labels'] == True:
+                        plt.annotate(q.props['label'], (q.x[0], q.y[0]))
+            
     def __call__(self, desc):
         self.plt = desc
         
@@ -141,13 +146,18 @@ class MplXYPlot_core:
                 plt.ylim(self.plt['yaxis']['min'],self.plt['yaxis']['max'])
         
         if 'legend' in self.plt:
-            prop = {}
-            if 'fontsize' in self.plt['legend']:
-                prop['size'] = self.plt['legend']['fontsize']
-            if 'location' in self.plt['legend']:
-                plt.legend(loc=self.plt['legend']['location'],prop=prop)
-            else:
-                plt.legend(prop=prop)
+            showlegend = True
+            if 'scatter_labels' in self.plt['legend']:
+                if self.plt['legend']['scatter_labels'] == True:
+                    showlegend = False
+            if showlegend:
+                prop = {}
+                if 'fontsize' in self.plt['legend']:
+                    prop['size'] = self.plt['legend']['fontsize']
+                if 'location' in self.plt['legend']:
+                    plt.legend(loc=self.plt['legend']['location'],prop=prop)
+                else:
+                    plt.legend(prop=prop)
         
         if 'title' in self.plt:
             plt.title(self.plt['title'])

@@ -25,7 +25,8 @@ class AxisDescriptor(Descriptor, Module):
 class LegendDescriptor(Descriptor, Module):
     my_input_ports = [
         PortDescriptor('location',basic.Integer),
-        PortDescriptor('fontsize',basic.Integer)
+        PortDescriptor('fontsize',basic.Integer),
+        PortDescriptor('scatter_labels',basic.Boolean)
     ]
 
 class PlotDescriptor(Descriptor, Module):
