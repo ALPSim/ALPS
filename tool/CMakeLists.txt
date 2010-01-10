@@ -55,3 +55,10 @@ else(ALPS_FOR_VISTRAILS)
       DESTINATION lib/python/alps)
   endif(WIN32 AND NOT UNIX)
 endif(ALPS_FOR_VISTRAILS)
+
+#
+# Analytical continuation with MaxEnt
+#
+add_executable(maxent maxent.cpp MaxEntHelper.cpp MaxEntSimulation.cpp ContiParameters.cpp)
+  target_link_libraries(maxent alps boost)
+  install(TARGETS maxent RUNTIME DESTINATION bin)
