@@ -59,6 +59,8 @@ endif(ALPS_FOR_VISTRAILS)
 #
 # Analytical continuation with MaxEnt
 #
+if(NOT ALPS_FOR_VISTRAILS)
 add_executable(maxent maxent.cpp MaxEntHelper.cpp MaxEntSimulation.cpp ContiParameters.cpp)
   target_link_libraries(maxent alps boost)
   install(TARGETS maxent RUNTIME DESTINATION bin)
+endif(NOT ALPS_FOR_VISTRAILS)
