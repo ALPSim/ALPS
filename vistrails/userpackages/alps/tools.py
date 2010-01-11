@@ -139,7 +139,8 @@ class WriteInputFiles(Module):
              baseseed = now.microsecond+1000000*now.second+60000000*now.minute
              baseseed = ((baseseed << 10) | (baseseed >> 22));
              
-             
+           Module.annotate(self,{'baseseed':baseseed})
+           
            count = 0
            for p in l:
                count += 1
