@@ -34,42 +34,32 @@
 
 
 
-MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::filesystem::path& fn) :
-  alps::scheduler::Task(w,fn), MaxEntHelper(parms), 
-  alpha(parms["N_ALPHA"]), norm(parms.value_or_default("NORM", 1.)), hartree(parms.value_or_default("HARTREE", 0.))
+MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::filesystem::path& fn) 
+ : alps::scheduler::Task(w,fn)
+ , MaxEntHelper(parms)
+ , alpha(parms["N_ALPHA"])
+ , norm(parms.value_or_default("NORM", 1.))
+ , hartree(parms.value_or_default("HARTREE", 0.))
+ , name(fn.leaf(),0,fn.leaf().size()-6)
+ , dir(fn.branch_path())
+ , spex_str(boost::filesystem::complete(name+"spex.dat", dir).string().c_str())
+ , chisq_str(boost::filesystem::complete(name+"chi2.dat", dir).string().c_str())
+ , avspec_str(boost::filesystem::complete(name+"avspec.dat", dir).string().c_str())
+ , maxspec_str(boost::filesystem::complete(name+"maxspec.dat", dir).string().c_str())
+ , chispec_str(boost::filesystem::complete(name+"chispec.dat", dir).string().c_str())
+ , prob_str(boost::filesystem::complete(name+"prob.dat", dir).string().c_str())
+ , complete_str(boost::filesystem::complete(name+"complete.dat", dir).string().c_str())
 {
   const double alpha_min = parms["ALPHA_MIN"];
   const double alpha_max = parms["ALPHA_MAX"];
   alpha[0] = alpha_max;
   for (int a=1; a<alpha.size(); ++a) 
     alpha[a] =  alpha[a-1] * std::pow(alpha_min/alpha_max, 1./double(alpha.size()-1));
-  boost::filesystem::path dir = fn.branch_path();
-  std::string name = fn.leaf();
-  name.erase(name.size()-6, 6);
-  spex_str = new std::ofstream(boost::filesystem::complete(name+"spex.dat", dir).string().c_str());
-  chisq_str = new std::ofstream(boost::filesystem::complete(name+"chi2.dat", dir).string().c_str());
-  avspec_str = new std::ofstream(boost::filesystem::complete(name+"avspec.dat", dir).string().c_str());
-  maxspec_str = new std::ofstream(boost::filesystem::complete(name+"maxspec.dat", dir).string().c_str());
-  chispec_str = new std::ofstream(boost::filesystem::complete(name+"chispec.dat", dir).string().c_str());
-  prob_str = new std::ofstream(boost::filesystem::complete(name+"prob.dat", dir).string().c_str());
-  complete_str = new std::ofstream(boost::filesystem::complete(name+"complete.dat", dir).string().c_str());
 }
 
 
 MaxEntSimulation::~MaxEntSimulation() 
 {
-  spex_str->close();
-  delete spex_str;
-  avspec_str->close();
-  delete avspec_str;
-  maxspec_str->close();
-  delete maxspec_str;
-  chispec_str->close();
-  delete chispec_str;
-  prob_str->close();
-  delete prob_str;
-  complete_str->close();
-  delete complete_str;
 }
 
 
@@ -89,17 +79,17 @@ void MaxEntSimulation::dostep()
     vector_type A = get_spectrum(u);
     std::cerr << "norm: " << boost::numeric::ublas::sum(transform_into_real_space(u)) << "\t";
     for (int i=0; i<A.size(); ++i) 
-      *spex_str << alpha[a] << " " << omega_coord(i) << " " << A[i] << "\n";
-    *spex_str << "\n";
+      spex_str << alpha[a] << " " << omega_coord(i) << " " << A[i] << "\n";
+    spex_str << "\n";
     lprob[a] = log_prob(u, alpha[a]);
     spectra[a] = A;
     double chi_squared = chi2(transform_into_real_space(u));
     chi_sq[a] = chi_squared;
     std::cerr << "chi2  : " << chi_squared << std::endl;
   }
-  *spex_str << "\n";
+  spex_str << "\n";
   for (int a=0; a<chi_sq.size(); ++a) 
-    *chisq_str << alpha[a] << " " << chi_sq[a] << std::endl;
+    chisq_str << alpha[a] << " " << chi_sq[a] << std::endl;
   double a_chi = 0;
   double diff = std::abs(chi_sq[0]-1);
   for (int a=1; a<chi_sq.size(); ++a) {
@@ -111,13 +101,13 @@ void MaxEntSimulation::dostep()
   }
   vector_type def = get_spectrum(transform_into_singular_space(Default()));
   for (int i=0; i<spectra[0].size(); ++i) 
-    *chispec_str << omega_coord(i) << " " << spectra[a_chi][i]*norm << " " << def[i]*norm << std::endl;
+    chispec_str << omega_coord(i) << " " << spectra[a_chi][i]*norm << " " << def[i]*norm << std::endl;
   boost::numeric::ublas::vector<double>::const_iterator max_lprob = std::max_element(lprob.begin(), lprob.end());  
   const int max_a = max_lprob-lprob.begin();
   const double factor = chi_scale_factor(spectra[max_a], chi_sq[max_a], alpha[max_a]);
   std::cerr << "chi scale factor: " << factor << std::endl;
   for (int i=0; i<spectra[0].size(); ++i) 
-    *maxspec_str << omega_coord(i) << " " << spectra[max_a][i]*norm << " " << def[i]*norm << std::endl;
+    maxspec_str << omega_coord(i) << " " << spectra[max_a][i]*norm << " " << def[i]*norm << std::endl;
   vector_type prob(lprob.size());
   for (int a=0; a<prob.size(); ++a) 
     prob[a] = exp(lprob[a]-*max_lprob);
@@ -126,7 +116,7 @@ void MaxEntSimulation::dostep()
     probnorm += 0.5*(prob[a]+prob[a+1])*(alpha[a]-alpha[a+1]);
   prob /= probnorm;
   for (int a=0; a<prob.size(); ++a) {
-    *prob_str << alpha[a] << "\t" << prob[a] << "\n";
+    prob_str << alpha[a] << "\t" << prob[a] << "\n";
   }
   double postprobdef = 0;
   for (int a=0; a<lprob.size()-1; ++a) 
@@ -139,10 +129,10 @@ void MaxEntSimulation::dostep()
       avspec[i] += 0.5*(prob[a]*spectra[a][i] +prob[a+1]*spectra[a+1][i])*(alpha[a]-alpha[a+1]);
   }
   for (int i=0; i<avspec.size(); ++i) 
-    *avspec_str << omega_coord(i) << " " << avspec[i]*norm << " " << def[i]*norm << std::endl;
+    avspec_str << omega_coord(i) << " " << avspec[i]*norm << " " << def[i]*norm << std::endl;
   omega_complex_type complete_spec = real_and_imaginary_part(avspec, norm, hartree);
   for (int i=0; i<complete_spec.first.size(); ++i) 
-    *complete_str << complete_spec.first[i] << " " 
+    complete_str << complete_spec.first[i] << " " 
 		  << complete_spec.second[i].real() << " " << complete_spec.second[i].imag() << std::endl;
   finish();
 }

@@ -33,7 +33,7 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/osiris.h>
 #include <alps/alea.h>
-#include "DefaultModel.hpp"
+#include "default_model.hpp"
 
 
 class ContiParameters {
@@ -61,7 +61,7 @@ public:
 
 private:
   
-  DefaultModel* Default_;
+  boost::shared_ptr<DefaultModel> Default_;
   const double T_;
   const int ndat_;
 

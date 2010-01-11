@@ -31,6 +31,7 @@
 
 #include <math.h>
 #include <alps/parameter.h>
+#include <boost/shared_ptr.hpp>
 
 
 
@@ -144,7 +145,7 @@ private:
 class TabFunction : public Model
 {
 public:
-  TabFunction(const alps::Parameters& p, char* name) //: index(0)
+  TabFunction(const alps::Parameters& p, std::string const& name) //: index(0)
   {
     std::ifstream defstream(static_cast<std::string>(p[name]).c_str());
     if (!defstream)
@@ -193,8 +194,12 @@ class GeneralDefaultModel : public DefaultModel
 {
 public:
   
-  GeneralDefaultModel(const alps::Parameters& p, Model* mod) : DefaultModel(p) , Mod(mod), ntab(5001), 
-							       xtab(ntab)//, omega_index(0)
+  GeneralDefaultModel(const alps::Parameters& p, boost::shared_ptr<Model> mod) 
+   : DefaultModel(p) 
+   , Mod(mod)
+   , ntab(5001)
+   , xtab(ntab) 
+ //, omega_index(0)
   {
     double sum = 0;
     xtab[0] = 0.;
@@ -249,7 +254,7 @@ public:
   }
   
 private:
-  Model* Mod;
+  boost::shared_ptr<Model> Mod;
   const int ntab;
   std::vector<double> xtab;
   //int omega_index;
@@ -257,37 +262,37 @@ private:
 
 
 
-inline DefaultModel* make_default_model(const alps::Parameters& parms, char *name) 
+inline boost::shared_ptr<DefaultModel> make_default_model(const alps::Parameters& parms, std::string const& name) 
 {
   if (!parms.defined(name) || parms[name] == "flat") {
     if (alps::is_master())
       std::cerr << "Using flat default model" << std::endl;
-    return new FlatDefaultModel(parms);
+    return boost::shared_ptr<DefaultModel>(new FlatDefaultModel(parms));
   }
   else if (parms[name] == "gaussian") {
     if (alps::is_master())
       std::cerr << "Using Gaussian default model" << std::endl;
-    Model* Mod = new Gaussian(parms);
-    return new GeneralDefaultModel(parms, Mod);
+    boost::shared_ptr<Model> Mod(new Gaussian(parms));
+    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
   }
   else if (parms[name] == "double gaussian") {
     if (alps::is_master())
       std::cerr << "Using double Gaussian default model" << std::endl;
-    Model* Mod = new DoubleGaussian(parms);
-    return new GeneralDefaultModel(parms, Mod);
+    boost::shared_ptr<Model> Mod(new DoubleGaussian(parms));
+    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
   }
   else if (parms[name] == "general double gaussian") {
     if (alps::is_master())
       std::cerr << "Using general double Gaussian default model" << std::endl;
-    Model* Mod = new GeneralDoubleGaussian(parms);
-    return new GeneralDefaultModel(parms, Mod);
+    boost::shared_ptr<Model> Mod(new GeneralDoubleGaussian(parms));
+    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
 
   }
   else { 
     if (alps::is_master())
       std::cerr << "Using tabulated default model" << std::endl;
-    Model* Mod = new TabFunction(parms, name);
-    return new GeneralDefaultModel(parms, Mod);
+    boost::shared_ptr<Model> Mod(new TabFunction(parms, name));
+    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
   }
 }
 

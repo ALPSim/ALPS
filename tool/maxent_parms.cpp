@@ -25,7 +25,7 @@
 *
 *****************************************************************************/
 
-#include "ContiParameters.hpp"
+#include "maxent_parms.hpp"
 #include <boost/numeric/bindings/traits/ublas_symmetric.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_expression.hpp>

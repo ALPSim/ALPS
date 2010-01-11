@@ -31,7 +31,7 @@
 #define ALPS_APPLICATIONS_MAXENT_MAXENT_HPP
 
 #include <alps/scheduler.h>
-#include "ContiParameters.hpp"
+#include "maxent_parms.hpp"
 
 
 
@@ -111,13 +111,15 @@ private:
   vector_type alpha;
   const double norm;
   const double hartree;
-  std::ofstream* spex_str;
-  std::ofstream* chisq_str;
-  std::ofstream* avspec_str;
-  std::ofstream* maxspec_str;
-  std::ofstream* chispec_str;
-  std::ofstream* prob_str;
-  std::ofstream* complete_str;
+  std::string name;
+  boost::filesystem::path dir;
+  std::ofstream spex_str;
+  std::ofstream chisq_str;
+  std::ofstream avspec_str;
+  std::ofstream maxspec_str;
+  std::ofstream chispec_str;
+  std::ofstream prob_str;
+  std::ofstream complete_str;
 }; 
 
 
