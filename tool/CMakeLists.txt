@@ -59,8 +59,6 @@ endif(ALPS_FOR_VISTRAILS)
 #
 # Analytical continuation with MaxEnt
 #
-add_executable(maxent maxent.cpp MaxEntHelper.cpp MaxEntSimulation.cpp ContiParameters.cpp)
-  target_link_libraries(maxent alps boost)
 
 if(LAPACK_FOUND)
   add_definitions(${LAPACK_DEFINITIONS} -DBIND_FORTRAN_LOWERCASE_UNDERSCORE)
