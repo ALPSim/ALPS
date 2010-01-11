@@ -10,6 +10,18 @@
 
 from sys  import stdin
 from math import *
+		
+def get_mean(f):
+    try:
+        return f.mean
+    except AttributeError:
+        return f
+
+def get_error(f):
+    try:
+        return f.error
+    except AttributeError:
+        return 0
 
 class FloatWithError:
 

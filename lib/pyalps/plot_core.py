@@ -3,6 +3,7 @@ import numpy as np
 from xml.etree import ElementTree
 from dataset import DataSet
 from floatwitherror import FloatWithError as fwe
+from floatwitherror import get_mean
 
 def read_xml(filename):
     root = ElementTree.parse(filename).getroot()
@@ -58,7 +59,6 @@ def Plot(data,xaxis=None,yaxis=None,legend=None):
         d['yaxis'] = yaxis
     if legend != None:
         d['legend'] = legend
-		
 
 class MplXYPlot_core:
     colors = ['k','b','g','m','c','y']
@@ -114,7 +114,7 @@ class MplXYPlot_core:
             if 'legend' in self.plt:
                 if 'scatter_labels' in self.plt['legend']:
                     if self.plt['legend']['scatter_labels'] == True:
-                        plt.annotate(q.props['label'], (q.x[0], q.y[0]))
+                        plt.annotate(q.props['label'], (xmeans[0],ymeans[0]))
             
     def __call__(self, desc):
         self.plt = desc
