@@ -47,7 +47,7 @@ MaxEntHelper::MaxEntHelper(const alps::Parameters& p) :
 
 MaxEntHelper::vector_type MaxEntHelper::transform_into_singular_space(vector_type A) const
 {
-  for (int i=0; i<A.size(); ++i) {
+  for (unsigned int i=0; i<A.size(); ++i) {
     A[i] /= Default(i);
     A[i] = A[i]==0. ? 0. : log(A[i]);
   }
@@ -61,7 +61,7 @@ MaxEntHelper::vector_type MaxEntHelper::transform_into_real_space(vector_type u)
 {
   using namespace boost::numeric::ublas;
   u = prec_prod(trans(Vt()), u);
-  for (int i=0; i<u.size(); ++i) {
+  for (unsigned int i=0; i<u.size(); ++i) {
     u[i] = exp(u[i]);
     u[i] *= Default(i);
   }
@@ -74,7 +74,7 @@ MaxEntHelper::vector_type MaxEntHelper::transform_into_real_space(vector_type u)
 MaxEntHelper::vector_type MaxEntHelper::get_spectrum(const vector_type& u) const
 {
   vector_type A = transform_into_real_space(u);
-  for (int i=0; i<A.size(); ++i) 
+  for (unsigned int i=0; i<A.size(); ++i) 
     A[i] /= delta_omega(i);
   return A;
 }
@@ -87,8 +87,8 @@ MaxEntHelper::matrix_type MaxEntHelper::left_side(const vector_type& u) const
   using namespace boost::numeric::ublas;
   vector_type A = transform_into_real_space(u);
   matrix_type M = trans(Vt());
-  for (int i=0; i<M.size1(); ++i) 
-    for (int j=0; j<M.size2(); ++j) 
+  for (unsigned int i=0; i<M.size1(); ++i) 
+    for (unsigned int j=0; j<M.size2(); ++j) 
       M(i,j) *= A[i];
   M = prec_prod(Vt(), M);
   M = prec_prod(Sigma() ,M);
@@ -117,8 +117,8 @@ double MaxEntHelper::step_length(const vector_type& delta, const vector_type& u)
   using namespace boost::numeric::ublas;
   vector_type A = transform_into_real_space(u);
   matrix_type L = trans(Vt());
-  for (int i=0; i<L.size1(); ++i) 
-    for (int j=0; j<L.size2(); ++j) 
+  for (unsigned int i=0; i<L.size1(); ++i) 
+    for (unsigned int j=0; j<L.size2(); ++j) 
       L(i,j) *= A[i];
   L = prec_prod(Vt(), L);
   return inner_prod(delta, prec_prod(L, delta));
@@ -132,8 +132,8 @@ double MaxEntHelper::convergence(const vector_type& u, const double alpha) const
   using namespace boost::numeric::ublas;
   vector_type A = transform_into_real_space(u);
   matrix_type L = trans(Vt());
-  for (int i=0; i<L.size1(); ++i) 
-    for (int j=0; j<L.size2(); ++j) 
+  for (unsigned int i=0; i<L.size1(); ++i) 
+    for (unsigned int j=0; j<L.size2(); ++j) 
       L(i,j) *= A[i];
   L = prec_prod(Vt(), L);
   vector_type alpha_dSdu = -alpha*prec_prod(L, u);
@@ -151,14 +151,14 @@ double MaxEntHelper::log_prob(const vector_type& u, const double alpha) const
   using namespace boost::numeric;
   matrix_type L = ublas::prec_prod(ublas::trans(K()), K());
   const vector_type A = transform_into_real_space(u);
-  for (int i=0; i<L.size1(); ++i)
-    for (int j=0; j<L.size2(); ++j)
+  for (unsigned int i=0; i<L.size1(); ++i)
+    for (unsigned int j=0; j<L.size2(); ++j)
       L(i,j) *= 2./ndat()*sqrt(A[i])*sqrt(A[j]);
-  for (int i=0; i<L.size1(); ++i)
+  for (unsigned int i=0; i<L.size1(); ++i)
     L(i,i) += alpha;
   bindings::lapack::potrf('L', L);
   double log_det = 0.;
-  for (int i=0; i<L.size1(); ++i) 
+  for (unsigned int i=0; i<L.size1(); ++i) 
     log_det  += log(L(i,i)*L(i,i));
   double lprob = 0.5*( (nfreq())*log(alpha) - log_det ) - Q(u, alpha);
   /*double gamma = 100;
@@ -174,17 +174,17 @@ double MaxEntHelper::log_prob(const vector_type& u, const double alpha) const
 
 double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const double alpha) const
 {
-  for (int i=0; i<A.size(); ++i) 
+  for (unsigned int i=0; i<A.size(); ++i) 
     A[i] *= delta_omega(i);
   using namespace boost::numeric;
   matrix_type L = ublas::prec_prod(ublas::trans(K()), K());
-  for (int i=0; i<L.size1(); ++i)
-    for (int j=0; j<L.size2(); ++j)
+  for (unsigned int i=0; i<L.size1(); ++i)
+    for (unsigned int j=0; j<L.size2(); ++j)
     L(i,j) *= 2./ndat()*sqrt(A[i])*sqrt(A[j]);
   vector_type lambda(L.size1());
   bindings::lapack::syev('N', 'U', L , lambda, bindings::lapack::optimal_workspace());
   double Ng = 0.;
-  for (int i=0; i<lambda.size(); ++i) {
+  for (unsigned int i=0; i<lambda.size(); ++i) {
     if (lambda[i]>=0) 
       Ng += lambda[i]/(lambda[i]+alpha);
   }
@@ -200,7 +200,7 @@ double MaxEntHelper::chi2(const vector_type& A) const
 {
   vector_type del_G = prec_prod(K(), A) - y();
   double c = 0;
-  for (int i=0; i<del_G.size(); ++i) 
+  for (unsigned int i=0; i<del_G.size(); ++i) 
     c += del_G[i]*del_G[i];
   c /= ndat();
   return c;
@@ -211,7 +211,7 @@ double MaxEntHelper::chi2(const vector_type& A) const
 double MaxEntHelper::entropy(const vector_type& A) const 
 {
   double S = 0;
-  for (int i=0; i<A.size(); ++i) {
+  for (unsigned int i=0; i<A.size(); ++i) {
     double lg = A[i]==0. ? 0. : log(A[i]/Default(i));
     S += A[i] - Default(i) - A[i]*lg;
   }

@@ -59,8 +59,16 @@ endif(ALPS_FOR_VISTRAILS)
 #
 # Analytical continuation with MaxEnt
 #
-if(NOT ALPS_FOR_VISTRAILS)
 add_executable(maxent maxent.cpp MaxEntHelper.cpp MaxEntSimulation.cpp ContiParameters.cpp)
   target_link_libraries(maxent alps boost)
+
+if(LAPACK_FOUND)
+  add_definitions(${LAPACK_DEFINITIONS} -DBIND_FORTRAN_LOWERCASE_UNDERSCORE)
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
+  add_executable(maxent maxent.cpp MaxEntHelper.cpp MaxEntSimulation.cpp ContiParameters.cpp)
+  target_link_libraries(maxent alps boost ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   install(TARGETS maxent RUNTIME DESTINATION bin)
-endif(NOT ALPS_FOR_VISTRAILS)
+
+else(LAPACK_FOUND)
+  message(STATUS "maxent will not be built since the lapack library has not been found")
+endif(LAPACK_FOUND)

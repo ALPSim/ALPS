@@ -29,7 +29,7 @@
 #ifndef ALPS_MAXENT_DEFAULT_MODEL_HPP
 #define ALPS_MAXENT_DEFAULT_MODEL_HPP
 
-
+#include <math.h>
 #include <alps/parameter.h>
 
 
