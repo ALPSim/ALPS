@@ -159,35 +159,35 @@ IF(NOT LAPACK_LIBRARY_INIT)
   endif(WIN32 AND NOT UNIX)
 ENDIF(NOT LAPACK_LIBRARY_INIT)
 
-IF(NOT LAPACK_LIBRARY_INIT)
-  FIND_LIBRARY(LAPACK_LIBRARY NAMES lapack lapack_gnu
-    PATHS /usr/apps/math/lapack
-    /usr/lib
-    /opt/lib
-    /usr/local/lib
-    /sw/lib
-    )
-  IF(LAPACK_LIBRARY)
-    MESSAGE(STATUS "Found netlib lapack library")
-    SET(LAPACK_LIBRARY_INIT 1)
-  ENDIF(LAPACK_LIBRARY)
-ENDIF(NOT LAPACK_LIBRARY_INIT)
+#IF(NOT LAPACK_LIBRARY_INIT)
+#  FIND_LIBRARY(LAPACK_LIBRARY NAMES lapack lapack_gnu
+#    PATHS /usr/apps/math/lapack
+#    /usr/lib
+#    /opt/lib
+#    /usr/local/lib
+#    /sw/lib
+#    )
+#  IF(LAPACK_LIBRARY)
+#    MESSAGE(STATUS "Found netlib lapack library")
+#    SET(LAPACK_LIBRARY_INIT 1)
+#  ENDIF(LAPACK_LIBRARY)
+#ENDIF(NOT LAPACK_LIBRARY_INIT)
 
-IF(NOT BLAS_LIBRARY_INIT)
-  FIND_LIBRARY(BLAS_LIBRARY NAMES goto blas blas_gnu
-    PATHS 
-    $ENV{GOTOBLAS_HOME}
-    /usr/apps/math/lapack
-    /usr/lib
-    /opt/lib
-    /usr/local/lib
-    /sw/lib
-    )
-  IF(BLAS_LIBRARY)
-    MESSAGE(STATUS "Found netlib blas is found")
-    SET(BLAS_LIBRARY_INIT 1)
-  ENDIF(BLAS_LIBRARY)
-ENDIF(NOT BLAS_LIBRARY_INIT)
+#IF(NOT BLAS_LIBRARY_INIT)
+#  FIND_LIBRARY(BLAS_LIBRARY NAMES goto blas blas_gnu
+#    PATHS 
+#    $ENV{GOTOBLAS_HOME}
+#    /usr/apps/math/lapack
+#    /usr/lib
+#    /opt/lib
+#    /usr/local/lib
+#    /sw/lib
+#    )
+#  IF(BLAS_LIBRARY)
+#    MESSAGE(STATUS "Found netlib blas is found")
+#    SET(BLAS_LIBRARY_INIT 1)
+#  ENDIF(BLAS_LIBRARY)
+#ENDIF(NOT BLAS_LIBRARY_INIT)
 
 # Use CMake provided LAPACK/BLAS detection code
 # Fortran compiler is needed
