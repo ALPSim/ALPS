@@ -265,7 +265,7 @@ public:
     t_=params["t"];
     tprime_=params.value_or_default("tprime",0);
     L_=params.value_or_default("L",200);
-    if(L%2 !=0) throw std::runtime_error("please choose L to be even for Simpson integration for fast convergence!!");
+    if(L_%2 !=0) throw std::runtime_error("please choose L to be even for Simpson integration for fast convergence!!");
   }
 
   
