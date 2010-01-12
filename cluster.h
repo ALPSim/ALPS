@@ -231,7 +231,7 @@ public:
 	break;     
       }
     }
-    return eps;
+    return eps*bandwidth_scale_factor_;
   }
   
 private:
@@ -240,11 +240,12 @@ private:
 				      const std::pair<std::set<pair_class_type>::const_iterator, 
 				      std::set<pair_class_type>::const_iterator> pair_classes) const;
   const double t_, t2_, t3_, t4_;
+  double bandwidth_;
+  double bandwidth_scale_factor_;
+  double half_filling_;
   std::vector<double> epsav_;
   std::vector<double> epssqav_;
   std::vector<double> dispersion_moments_;
-  double bandwidth_;
-  double half_filling_;
 };
 
 

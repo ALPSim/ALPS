@@ -62,15 +62,19 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
 
 DCATransformer::DCATransformer(const alps::Parameters& params) 
   : ClusterTransformer(params), 
-    t_(boost::lexical_cast<double>(params["t"])), 
+    t_(params.defined("W") ? 1. : static_cast<double>(params["t"])), 
     t2_(params.value_or_default("t'", params.value_or_default("t2", 0.))),
     t3_(params.value_or_default("t3", 0.)),
     t4_(params.value_or_default("t4", 0.)),
+    bandwidth_(params.value_or_default("W", 0.)),
+    bandwidth_scale_factor_(1.),
+    half_filling_(0.),
     epsav_(n_cluster_sites()), 
     epssqav_(n_cluster_sites()),
-    dispersion_moments_(2, 0.),
-    half_filling_(0.)
+    dispersion_moments_(2, 0.)
 {
+  if (params.defined("t") && params.defined("W"))
+    boost::throw_exception(std::invalid_argument("both t and W are defined"));
   //calculating dispersion moments, bandwidth and half filling
   std::vector<double> energies;
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
@@ -92,14 +96,15 @@ DCATransformer::DCATransformer(const alps::Parameters& params)
   dispersion_moments_[0] /= n_cluster_sites();
   dispersion_moments_[1] /= n_cluster_sites();
   double hf = 0.;
+  double bw = 0.;
   if (t2_==0. && t3_==0. && t4_==0.) {
-    bandwidth_ = dimension()*4*t_;
+    bw = dimension()*4*t_;
   }
   else {
     std::sort(energies.begin(), energies.end());
     double min = energies.front();
     double max = energies.back();
-    bandwidth_ = max - min;
+    bw = max - min;
     if (energies.size()%2) 
       hf = energies[energies.size()/2];
     else 
@@ -111,6 +116,14 @@ DCATransformer::DCATransformer(const alps::Parameters& params)
   }
   else 
     std::cout << "half-filling: " << hf << "\n"; 
+  if (params.defined("W")) {
+    bandwidth_scale_factor_ = bandwidth_/bw;
+    std::cout << "bandwidth scale factor: " << bandwidth_scale_factor_ << "\n";
+  }
+  else {
+    bandwidth_ = bw;
+  }
+  
   std::cout << "bandwidth: " << bandwidth_ << "\n";
 }
 
