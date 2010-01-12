@@ -44,7 +44,7 @@ alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc
   //for(int i=1;i<argc;++i){
   //  std::cout<<argv[i]<<std::endl;
   //}
-	comm_init(argc,argv);
+	comm_init(argc,argv, true);
 	if(is_master()){
           alps::scheduler::NoJobfileOptions opt(1,argv);
           opt.max_check_time=60;
