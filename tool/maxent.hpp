@@ -27,8 +27,8 @@
 
 /* $Id: factory.h 1101 2004-08-18 18:11:43Z troyer $ */
 
-#ifndef ALPS_APPLICATIONS_MAXENT_MAXENT_HPP
-#define ALPS_APPLICATIONS_MAXENT_MAXENT_HPP
+#ifndef ALPS_TOOL_MAXENT_HPP
+#define ALPS_TOOL_MAXENT_HPP
 
 #include <alps/scheduler.h>
 #include "maxent_parms.hpp"
@@ -60,16 +60,13 @@ public :
   double Default(const int i) const { return def_[i]; }  
   const vector_type& Default() const { return def_; }
 
-  double Q(const vector_type& u, const double alpha, const double gamma=1) const {
+  double Q(const vector_type& u, const double alpha) const {
     using namespace boost::numeric::ublas;
     vector_type A = transform_into_real_space(u);
-    return gamma*(chi2(A)-alpha*entropy(A));
+    return 0.5*chi2(A)-alpha*entropy(A);
   }
     
-  omega_complex_type real_and_imaginary_part(const vector_type& spectrum, const double norm, const double hartree) const 
-  {
-    return ContiParameters::real_and_imaginary_part(spectrum, MaxEntParameters::omega_coord(), norm, hartree);
-  }
+  int ndat() const { return MaxEntParameters::ndat(); }
 
   vector_type transform_into_singular_space(vector_type A) const;
   vector_type transform_into_real_space(vector_type u) const;
@@ -85,9 +82,6 @@ public :
   
   private:
 
-  //matrix_type Kd;
-  //vector_type Gd;
-  //int nx;
   vector_type def_;
 };
   
@@ -119,7 +113,6 @@ private:
   std::ofstream maxspec_str;
   std::ofstream chispec_str;
   std::ofstream prob_str;
-  std::ofstream complete_str;
 }; 
 
 

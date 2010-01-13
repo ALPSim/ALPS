@@ -153,21 +153,14 @@ double MaxEntHelper::log_prob(const vector_type& u, const double alpha) const
   const vector_type A = transform_into_real_space(u);
   for (unsigned int i=0; i<L.size1(); ++i)
     for (unsigned int j=0; j<L.size2(); ++j)
-      L(i,j) *= 2./ndat()*sqrt(A[i])*sqrt(A[j]);
+      L(i,j) *= sqrt(A[i])*sqrt(A[j]);
   for (unsigned int i=0; i<L.size1(); ++i)
     L(i,i) += alpha;
   bindings::lapack::potrf('L', L);
   double log_det = 0.;
   for (unsigned int i=0; i<L.size1(); ++i) 
     log_det  += log(L(i,i)*L(i,i));
-  double lprob = 0.5*( (nfreq())*log(alpha) - log_det ) - Q(u, alpha);
-  /*double gamma = 100;
-  for (int g=0; g<50; ++g) {
-    gamma *= std::pow(0.01/100, 1./double(50-1));
-    double lp = 0.5*nfreq()*log(gamma) + 0.5*( (nfreq())*log(alpha) - log_det ) - Q(u, alpha, gamma);
-    std::cout << alpha << "\t" << gamma << "\t" << lp << "\n";
-    }*/
-  return lprob;
+  return 0.5*( (nfreq())*log(alpha) - log_det ) - Q(u, alpha);
 }
 
 
@@ -180,7 +173,7 @@ double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const 
   matrix_type L = ublas::prec_prod(ublas::trans(K()), K());
   for (unsigned int i=0; i<L.size1(); ++i)
     for (unsigned int j=0; j<L.size2(); ++j)
-    L(i,j) *= 2./ndat()*sqrt(A[i])*sqrt(A[j]);
+    L(i,j) *= sqrt(A[i])*sqrt(A[j]);
   vector_type lambda(L.size1());
   bindings::lapack::syev('N', 'U', L , lambda, bindings::lapack::optimal_workspace());
   double Ng = 0.;
@@ -188,10 +181,9 @@ double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const 
     if (lambda[i]>=0) 
       Ng += lambda[i]/(lambda[i]+alpha);
   }
-  Ng /= ndat();
   std::cerr << "Ng: " << Ng << std::endl;
   std::cerr << "chi2 max: " << chi_sq << std::endl;
-  return sqrt(chi_sq/(1-Ng));
+  return sqrt(chi_sq/(ndat()-Ng));
 }
 
 
@@ -202,7 +194,6 @@ double MaxEntHelper::chi2(const vector_type& A) const
   double c = 0;
   for (unsigned int i=0; i<del_G.size(); ++i) 
     c += del_G[i]*del_G[i];
-  c /= ndat();
   return c;
 }
 

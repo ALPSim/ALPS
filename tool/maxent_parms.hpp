@@ -25,8 +25,8 @@
 *
 *****************************************************************************/
 
-#ifndef ALPS_APPLICATIONS_MAXENT_CONTI_PARAMETERS_HPP
-#define ALPS_APPLICATIONS_MAXENT_CONTI_PARAMETERS_HPP
+#ifndef ALPS_TOOL_MAXENT_PARMS_HPP
+#define ALPS_TOOL_MAXENT_PARMS_HPP
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/bindings/traits/ublas_vector.hpp>
@@ -51,10 +51,6 @@ public:
   double y(const int i) const { return y_[i]; }
   double T() const { return T_; }
   int ndat() const { return ndat_; }
-  omega_complex_type real_and_imaginary_part(const vector_type& spectrum, 
-					     const vector_type& omega,
-					     const double norm, const double hartree) const;
-  
   double K(const int i, const int j) const {
     return K_(i,j);
   }

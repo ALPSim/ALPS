@@ -26,8 +26,8 @@
 *****************************************************************************/
 
 
-#ifndef ALPS_MAXENT_DEFAULT_MODEL_HPP
-#define ALPS_MAXENT_DEFAULT_MODEL_HPP
+#ifndef ALPS_TOOL_DEFAULT_MODEL_HPP
+#define ALPS_TOOL_DEFAULT_MODEL_HPP
 
 #include <math.h>
 #include <alps/parameter.h>
@@ -163,13 +163,6 @@ public:
   }
   
   double operator()(const double omega) {
-    /*if (index>0 && Omega[index-1]>=omega) 
-      index=0;
-    while (Omega[index]<omega) 
-      index++;
-    if (index==0)
-      return Def[0];
-      else {*/
     std::vector<double>::const_iterator ub = std::upper_bound(Omega.begin(), Omega.end(), omega);
     int index = ub - Omega.begin();
     if (ub==Omega.end())
@@ -179,13 +172,11 @@ public:
     double D1 = Def[index-1];
     double D2 = Def[index];
     return -(D2-D1)/(om2-om1)*(om2-omega)+D2;      
-    //}
   }
    
 private:
   std::vector<double> Omega;
   std::vector<double> Def;
-  //int index;
 };
 
 
@@ -199,7 +190,6 @@ public:
    , Mod(mod)
    , ntab(5001)
    , xtab(ntab) 
- //, omega_index(0)
   {
     double sum = 0;
     xtab[0] = 0.;
@@ -213,17 +203,10 @@ public:
     for (int o=0; o<ntab; ++o) {
       xtab[o] *= blow_up()/sum;
     }
-    //std::cerr << "dev:" << sum-1 << "\n";
-    //for (int o=0; o<ntab; ++o) 
-    //std::cout << o << "\t" << xtab[o] << "\n";
   }
   
   double omega(const double x) const {
     assert(x<=blow_up() && x>=0.);
-    /*if (omega_index>0 && xtab[omega_index-1]>=x) 
-      omega_index=0;
-      while (xtab[omega_index]<x) 
-      omega_index++; */
     std::vector<double>::const_iterator ub = std::upper_bound(xtab.begin(), xtab.end(), x);
     int omega_index = ub - xtab.begin();
     if (ub==xtab.end())
@@ -240,16 +223,12 @@ public:
   }
   
   double x(const double t) const {
-    //std::cout << 1-t << "\n";
     assert(t<=1. && t>=0.);
     int od = (int)(t*(ntab-1));
     if (od==(ntab-1)) 
       return blow_up();
-    //double o1 = od;
-    //double o2 = od+1;
     double x1 = xtab[od];
     double x2 = xtab[od+1];
-    //std::cerr << o1 << "\t" << o2 << "\t" << x1 << "\t" << x2 << "\n";
     return -(x2-x1)*(od+1-t*ntab)+x2;      
   }
   
@@ -257,7 +236,6 @@ private:
   boost::shared_ptr<Model> Mod;
   const int ntab;
   std::vector<double> xtab;
-  //int omega_index;
 };
 
 

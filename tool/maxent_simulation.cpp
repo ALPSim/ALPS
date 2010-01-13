@@ -48,7 +48,6 @@ MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::file
  , maxspec_str(boost::filesystem::complete(name+"maxspec.dat", dir).string().c_str())
  , chispec_str(boost::filesystem::complete(name+"chispec.dat", dir).string().c_str())
  , prob_str(boost::filesystem::complete(name+"prob.dat", dir).string().c_str())
- , complete_str(boost::filesystem::complete(name+"complete.dat", dir).string().c_str())
 {
   const double alpha_min = parms["ALPHA_MIN"];
   const double alpha_max = parms["ALPHA_MAX"];
@@ -91,9 +90,9 @@ void MaxEntSimulation::dostep()
   for (int a=0; a<chi_sq.size(); ++a) 
     chisq_str << alpha[a] << " " << chi_sq[a] << std::endl;
   double a_chi = 0;
-  double diff = std::abs(chi_sq[0]-1);
+  double diff = std::abs(chi_sq[0]-ndat());
   for (int a=1; a<chi_sq.size(); ++a) {
-    double diff_new = std::abs(chi_sq[a]-1);
+    double diff_new = std::abs(chi_sq[a]-ndat());
     if (diff_new < diff) {
       diff = diff_new;
       a_chi = a;
@@ -130,10 +129,6 @@ void MaxEntSimulation::dostep()
   }
   for (int i=0; i<avspec.size(); ++i) 
     avspec_str << omega_coord(i) << " " << avspec[i]*norm << " " << def[i]*norm << std::endl;
-  omega_complex_type complete_spec = real_and_imaginary_part(avspec, norm, hartree);
-  for (int i=0; i<complete_spec.first.size(); ++i) 
-    complete_str << complete_spec.first[i] << " " 
-		  << complete_spec.second[i].real() << " " << complete_spec.second[i].imag() << std::endl;
   finish();
 }
 
@@ -146,17 +141,13 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
   double mu = 1e-18;
   const double nu = 1.3;
   const int max_it = 1000;
-  //double Q_new;
   double Q1;
   int it = 0;
   for (; it<max_it; it++) {
     vector_type delta;
-    // double Q_old = Q(u, alpha);
-    //std::cerr << "Q: " << Q_old << std::endl;
     int it2 = 0;
     for (; it2<max_it; ++it2) {
       delta = iteration(u, alpha, mu);
-      // const double Q_new = Q(u+delta, alpha);
       Q1 = Q(u+delta, alpha);
       if (step_length(delta, u)<=0.02) {
 	break;
@@ -164,35 +155,8 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
       else if (mu<1e20) {
 	mu *= nu;
       }
-      /*vector_type delta_mu = iteration(u, alpha, mu);
-      vector_type delta_mu_nu = iteration(u, alpha, mu/nu);
-      const double Q_mu = Q(u+delta_mu, alpha);
-      const double Q_mu_nu = Q(u+delta_mu_nu, alpha);
-      //std::cout << "mu: " << mu << std::endl;
-      if (Q_mu<Q_old) {
-	if (Q_mu_nu<Q_mu) { 
-	  delta = delta_mu_nu;
-	  Q_new = Q_mu_nu;
-	  if (mu > 1e-20)
-	    mu /= nu;
-	}
-	else {
-	  delta = delta_mu;
-	  Q_new = Q_mu;
-	}
-	break;
-      }
-      else if (mu<1e20) 
-	mu *= nu;
-      else {
-	delta = delta_mu;
-	Q_new = Q_mu;
-	break;
-	}*/
     } 
     u += delta;
-    //std::cerr << mu << " " << convergence(u, alpha) << "\n";
-    //if (ublas::norm_2(delta)<1e-6 || fabs(Q_new-Q_old)<1e-6)
     if (convergence(u, alpha)<=1e-4)
       break;
   }
@@ -208,15 +172,8 @@ MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const d
 {
   using namespace boost::numeric;
   matrix_type M = left_side(u);
-  /*for (int i=0; i<M.size1(); ++i) {
-    for (int j=0; j<M.size1(); ++j) {
-      std::cout << i << " " << j << " " << M(i,j) << std::endl;
-    }
-    std::cout << std::endl;
-  }
-  exit(1);*/
   for (int i=0; i<M.size1(); ++i) 
-    M(i,i) += alpha + mu;//*M(i,i);
+    M(i,i) += alpha + mu;
   vector_type b = right_side(u) + alpha*u;
   matrix_type B(b.size(),1);
   for (int i=0; i<M.size1(); ++i) 

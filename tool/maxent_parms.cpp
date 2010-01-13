@@ -37,7 +37,7 @@ ContiParameters::ContiParameters(const alps::Parameters& p) :
   Default_(make_default_model(p, "DEFAULT_MODEL")), 
   T_(p.value_or_default("T", 1./static_cast<double>(p["BETA"]))),
   ndat_(p["NDAT"]), nfreq_(p["NFREQ"]),
-  y_(ndat_), K_(/*ndat_, ntab_*/),   t_array_(nfreq_+1)
+  y_(ndat_), K_(),   t_array_(nfreq_+1)
 {
   if (ndat_<4) 
     boost::throw_exception(std::invalid_argument("NDAT too small"));
@@ -81,10 +81,6 @@ ContiParameters::ContiParameters(const alps::Parameters& p) :
   }
   else 
     boost::throw_exception(std::invalid_argument("No valid frequency grid specified"));
-  /*DefaultModel* RealDefault = make_default_model(p, "REAL_DEFAULT_MODEL");
-    for (int i=0; i<nfreq_; ++i) {
-    real_default_[i] = RealDefault->D(Default().omega((histo_coord_[i] + histo_coord_[i+1])/2.));
-    }*/
   for (int i=0; i<ndat(); ++i) 
     y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)]);
 }
@@ -104,16 +100,13 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     if (p["KERNEL"] == "fermionic") {
       if (alps::is_master())
 	std::cerr << "Using fermionic kernel" << std::endl;
-      // std::ofstream aus("aus.out");
       for (int i=0; i<ndat(); ++i) {
 	double tau = i / ((ndat()) * T_);
 	for (int j=0; j<ntab; ++j) {
 	  double omega = freq[j]; //Default().omega_of_t(double(j)/(ntab-1));
 	  K_(i,j) =  -1. / (std::exp(omega*tau) + std::exp(-omega*(1./T_-tau)));
-	  // aus << tau << " " << omega << " " << K_(i,j) << "\n"; 
 	}
       }
-      // aus.close();
     }
     else if (p["KERNEL"] == "bosonic") {
       if (alps::is_master())
@@ -122,7 +115,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
 	double tau = i / (ndat() * T_);
 	K_(i,0) = T_;
 	for (int j=1; j<ntab; ++j) {
-	  double omega = freq[j]; //Default().omega_of_t(double(j)/(ntab-1));
+	  double omega = freq[j];
 	  K_(i,j) = 0.5*omega * (std::exp(-omega*tau) + std::exp(-omega*(1./T_-tau))) / (1 - std::exp(-omega/T_));
 	}
       }    
@@ -169,64 +162,11 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     }
     else 
       boost::throw_exception(std::invalid_argument("unknown integration kernel"));    
-    //std::ofstream aus("aus.out");
     for (int i=0; i<ndat(); i+=2) {
       for (int j=1; j<ntab; ++j) {
 	K_(i,j) = Kc(i/2,j).real();
 	K_(i+1,j) = Kc(i/2,j).imag();
-	//aus << (i+1)*M_PI*T_ << " " << freq[j] << " " << K_(i,j) << " " << K_(i+1,j) << "\n"; 
       }
-    }
-    //aus.close();
-  }
-  else if (p["DATASPACE"] == "temperature") {
-    if (alps::is_master())
-      std::cerr << "assume temperature data" << std::endl;
-    const double mu = p.value_or_default("MU", 0.);
-    std::vector<double> T(ndat());
-    for (int i=0; i < ndat(); ++i) 
-      T[i] = static_cast<double>(p["T_"+boost::lexical_cast<std::string>(i)]); 
-    if (p.value_or_default("PARTICLE_HOLE_SYMMETRY", false)) {
-      if (alps::is_master())
-	std::cerr << "assume temperature data and particle hole symmetry" << std::endl;
-      if (p["KERNEL"] == "fermionic energy") {
-	if (alps::is_master())
-	  std::cerr << "Using fermionic energy kernel" << std::endl;
-	for(int i=0; i<ndat(); ++i) {
-	  for (int j=0; j<ntab; ++j) {
-	    K_(i,j) = 0.5*freq[j]*(1./(1.+exp((freq[j]-mu)/T[i])) - 1./(1.+exp((-freq[j]-mu)/T[i])));
-	  }
-	} 
-      }
-      else if (p["KERNEL"] == "energy") {
-	if (alps::is_master())
-	  std::cerr << "Using general energy kernel" << std::endl;
-	for(int i=0; i<ndat(); ++i) {
-	  for (int j=0; j<ntab; ++j) {
-	    if (freq[j] == 0) 
-	      boost::throw_exception(std::logic_error("kaputt"));    
-	    else if (freq[j] > 0) 
-	      K_(i,j) = 0.5*freq[j]*(1./(1.+exp((freq[j]-mu)/T[i])) - 1./(1.+exp((-freq[j]-mu)/T[i])));
-	    else if (freq[j] < 0) 
-	      	K_(i,j) = freq[j]*freq[j]/(exp((-freq[j]-mu)/T[i])-1.);
-	  }
-	} 
-      }
-      else 
-	boost::throw_exception(std::invalid_argument("unknown integration kernel"));    
-    }
-    else {
-      if (p["KERNEL"] == "fermionic energy") {
-	if (alps::is_master())
-	  std::cerr << "Using fremionic energy kernel" << std::endl;
-	for(int i=0; i<ndat(); ++i) {
-	  for (int j=0; j<ntab; ++j) {
-	    K_(i,j) = freq[j]/(1.+exp((freq[j]-mu)/T[i]));
-	  }
-	} 
-      }
-      else 
-	boost::throw_exception(std::invalid_argument("unknown integration kernel"));    
     }
   }
   else
@@ -270,65 +210,6 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     for (int j=0; j<ntab; ++j) 
       K_(i,j) /= sigma[i];
   }
-}
-
-
-
-
-ContiParameters::omega_complex_type ContiParameters::real_and_imaginary_part(const vector_type& spectrum, 
-									     const vector_type& omega,
-									     const double norm, 
-									     const double hartree) const
-{
-  const int nom = 1000;
-  const double omega_max = omega[omega.size()-1]*2.;
-  const double omega_min = omega[0]<0 ? omega[0]*2. : omega[0]/2.;
-  const double eps = (omega_max-omega_min)/nom/100;
-  vector_type omega_new(nom);
-  for (int i=0; i<nom; ++i) 
-    omega_new[i] = (double(i)/(nom-1)) * (omega_max-omega_min) + omega_min;
-  vector_type imag_part(nom);
-  for (int i=0; i<nom; ++i) {
-    vector_type::const_iterator ub = std::upper_bound(omega.begin(), omega.end(), omega_new[i]);
-    int index = ub - omega.begin();
-    //double v1, v2, om1, om2;
-    if (ub == omega.begin() || ub == omega.end()) 
-      imag_part[i] = 0.;
-    else {
-      double A1 = spectrum[index-1]*norm;
-      double A2 = spectrum[index]*norm;
-      double om1 = omega[index-1];
-      double om2 = omega[index];
-      imag_part[i] =  -(A2-A1)/(om2-om1)*(om2-omega_new[i])+A2;       
-    }
-  }
-  vector_type real_part(nom);
-  //std::ofstream teststr("test.dat");
-  for (int i=0; i<real_part.size(); ++i) {
-    real_part[i] = 0;
-    double p = omega_new[i];
-    for (int j=0; j<imag_part.size()-1; ++j) {
-      double v1 = imag_part[j];
-      double v2 = imag_part[j+1];
-      double om1 = omega_new[j];
-      double om2 = omega_new[j+1];
-      if (i==j) { 
-	v1 = -(v2-v1)/(om2-om1)*(om2-om1-eps)+v2; 
-	om1 += eps;
-      }
-      else if (i==j+1) {
-	v2 = -(v1-v2)/(om2-om1)*(om2-om1-eps)+v1; 
-	om2 -= eps;
-      }
-      real_part[i] += 0.5 * (v1/(p-om1) + v2/(p-om2)) * (om2-om1); 
-      //teststr << omega_new[i] << "\t" << real_part[i] << std::endl; 
-    }
-  }
-  complex_vector_type real_imag_part(real_part.size());
-  for (int i=0; i<real_imag_part.size(); ++i) {
-    real_imag_part[i] = std::complex<double>(real_part[i]+hartree, -M_PI*imag_part[i]); 
-  }
-  return omega_complex_type(omega_new, real_imag_part);
 }
 
 
