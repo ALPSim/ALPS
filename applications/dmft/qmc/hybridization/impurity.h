@@ -57,6 +57,11 @@ inline bool operator<(const times& t1, const double t2) {
   return t1.t_start() < t2;
 }
 
+
+inline bool operator<(const double t1, const times& t2) {
+  return t1 < t2.t_start();
+}
+
 inline bool operator>(times t1, times t2) {
   return t1.t_start() > t2.t_start();
 }

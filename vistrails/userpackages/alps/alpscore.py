@@ -36,16 +36,25 @@ if platform.system()=='Windows':
 
 ##############################################################################
 def _get_path(binary_file):
+   
     if config.check('alpspath'):
-        return os.path.join(config.alpspath, binary_file)
+        exename = os.path.join(config.alpspath, binary_file)
     else:
-        return binary_file
+        exename = binary_file
+    if platform.system()=='Windows':
+        return exename +'.exe'
+    else:
+        return exename
 
 def _get_tool_path(binary_file):
     if config.check('toolpath'):
-        return os.path.join(config.toolpath, binary_file)
+        exename = os.path.join(config.toolpath, binary_file)
     else:
-        return binary_file
+        exename = binary_file
+    if platform.system()=='Windows':
+        return exename +'.exe'
+    else:
+        return exename
 
 def _get_default_mpi_procs():
     if config.check('mpiprocs'):
