@@ -1,4 +1,5 @@
 mkdir -p deplibs/lib
+mkdir -p deplibs/bin
 cp /opt/local/lib/libhdf5*dylib deplibs/lib
 cp /opt/local/lib/libsz*dylib deplibs/lib
 cp /opt/local/lib/libz*dylib deplibs/lib
@@ -21,9 +22,7 @@ install_name_tool -change /opt/local/lib/libz.1.dylib /opt/alps/lib/libz.1.dylib
 install_name_tool -change /opt/local/lib/libz.1.dylib /opt/alps/lib/libz.1.dylib deplibs/lib/libhdf5_hl.dylib
 install_name_tool -change /opt/local/lib/libz.1.dylib /opt/alps/lib/libz.1.dylib deplibs/lib/libhdf5_hl.6.dylib
 
-cp ~/src/lp_solve_4.0/liblpk.a deplibs/lib
-
-mkdir -p deplibs/include/lpsolve
+mkdir -p deplibs/include
 cp /opt/local/include/H5* deplibs/include
 cp /opt/local/include/hdf* deplibs/include
 cp /opt/local/include/zconf.h deplibs/include
@@ -31,7 +30,6 @@ cp /opt/local/include/zlib.h deplibs/include
 cp /opt/local/include/szlib.h deplibs/include
 cp /opt/local/include/szip_adpt.h deplibs/include
 cp /opt/local/include/ricehdf.h deplibs/include
-cp ~/src/lp_solve_4.0/*.h deplibs/include/lpsolve
 
 sudo cp deplibs/lib/* /opt/alps/lib
 sudo cp -r deplibs/include/* /opt/alps/include
