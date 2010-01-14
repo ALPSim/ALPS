@@ -95,7 +95,7 @@ public:
   
   MaxEntSimulation(const alps::ProcessList&, const boost::filesystem::path&);
   ~MaxEntSimulation();
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&, alps::hdf5::oarchive&) const;
+  void write_xml_body(alps::oxstream&, const boost::filesystem::path&) const;
   void dostep();
   vector_type levenberg_marquardt(vector_type u, const double alpha) const;
   vector_type iteration(vector_type u, const double alpha, const double mu) const;
