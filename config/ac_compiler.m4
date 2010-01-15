@@ -295,10 +295,10 @@ AC_DEFUN([AC_COMPILER_OPTIONS],
   case "$ac_cv_compiler" in
     gnu)
       try_CFLAGS="-pthread"
-      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers"
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers -Wno-unknown-pragmas"
       try_CFLAGS_NOWARN=""
       try_CXXFLAGS="-pthread -ftemplate-depth-150"
-      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers -Wno-unknown-pragmas"
       try_CXXFLAGS_NOWARN=""
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
@@ -443,10 +443,10 @@ AC_DEFUN([AC_COMPILER_OPTIONS],
       try_CXXFLAGS_NOEH="-fno-exceptions"
       ;;
     macos*)
-      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers"
+      try_CFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers -Wno-unknown-pragmas"
       try_CFLAGS_NOWARN="-w"
       try_CXXFLAGS="-ftemplate-depth-150"
-      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers"
+      try_CXXFLAGS_WARN="-W -Wall -Wno-comment -Wno-sign-compare -Wno-deprecated -Wno-missing-field-initializers -Wno-unknown-pragmas"
       try_CXXFLAGS_NOWARN="-w"
       try_CXXFLAGS_EH="-fexceptions"
       try_CXXFLAGS_NOEH="-fno-exceptions"
