@@ -22683,7 +22683,7 @@ ac_config_files="$ac_config_files src/Makefile"
 ac_config_files="$ac_config_files lib/Makefile lib/alps/Makefile lib/heap/Makefile"
 
 
-ac_config_files="$ac_config_files test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile test/alea/Makefile test/mocasito/Makefile"
+ac_config_files="$ac_config_files test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile test/alea/Makefile test/hdf5/Makefile"
 
 ac_config_files="$ac_config_files doc/Makefile"
 
@@ -23951,7 +23951,7 @@ do
     "test/parameter/Makefile") CONFIG_FILES="$CONFIG_FILES test/parameter/Makefile" ;;
     "test/parser/Makefile") CONFIG_FILES="$CONFIG_FILES test/parser/Makefile" ;;
     "test/alea/Makefile") CONFIG_FILES="$CONFIG_FILES test/alea/Makefile" ;;
-    "test/mocasito/Makefile") CONFIG_FILES="$CONFIG_FILES test/mocasito/Makefile" ;;
+    "test/hdf5/Makefile") CONFIG_FILES="$CONFIG_FILES test/hdf5/Makefile" ;;
     "doc/Makefile") CONFIG_FILES="$CONFIG_FILES doc/Makefile" ;;
     "test/lattice/Makefile") CONFIG_FILES="$CONFIG_FILES test/lattice/Makefile" ;;
     "test/lattice/parameters") CONFIG_FILES="$CONFIG_FILES test/lattice/parameters" ;;

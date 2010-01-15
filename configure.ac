@@ -499,7 +499,7 @@ AC_CONFIG_FILES(Makefile config/config.site config/include.mk)
 AC_CONFIG_FILES(src/Makefile)
 AC_CONFIG_FILES(lib/Makefile lib/alps/Makefile lib/heap/Makefile)
 
-AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile test/alea/Makefile test/mocasito/Makefile)
+AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile test/alea/Makefile test/hdf5/Makefile)
 AC_CONFIG_FILES(doc/Makefile)
 
 if test "$ac_cv_alps_type" = "full"; then
