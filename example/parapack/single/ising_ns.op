@@ -256,7 +256,7 @@ Magnetization^4: 5649.97 +/- 336; tau = 1.1 WARNING: ERRORS NOT CONVERGED!!!
     bin #5   : 256      entries: error = 310.255
     bin #6   : 128      entries: error = 335.719
 Number of Sites: 16 +/- 0
-Specific Heat: 0.222374 +/- 0.00492
+Specific Heat: 0.222374 +/- 0.00492 WARNING: check error convergence
 Temperature: 1.8 +/- 0
 [[replica 2]]
 Binder Ratio of Magnetization: 0.437238 +/- 0.00822 WARNING: check error convergence
