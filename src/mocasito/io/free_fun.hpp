@@ -22,7 +22,8 @@ namespace mocasito {
 			if (fixed_size<T const>::value == 1)
 				c.set(*get_data<T const>::apply(v));
 			else
-				c.set(get_data<T const>::apply(v), get_size<T const>::apply(v));
+				if (get_size<T const>::apply(v)>0)
+				  c.set(get_data<T const>::apply(v), get_size<T const>::apply(v));
 			return c;
 		}
 		template<typename E> context<E> & assign(context<E> & c, char const * v) {
