@@ -11,7 +11,7 @@ from floatwitherror import FloatWithError as fwe
 
 class Hdf5Loader:
     def GetFileNames(self, flist):
-        self.files = [f.replace('xml','run1.h5') for f in flist] #will be updated once we have aggregated hdf5-files
+        self.files = [f.replace('.out.xml','.clone1.h5') for f in flist] #will be updated once we have aggregated hdf5-files
         return self.files
         
     # Pre: file is a h5py file descriptor
@@ -40,11 +40,13 @@ class Hdf5Loader:
         return resultfiles
         
     def GetResultsPath(self, file):
-        path = "/simulation/realizations/0/clones/"
+        path = "/simulation/realizations/0/clones/0/results/0/worker/0/"
         self.h5f = h5py.File(file)
         sgrp = self.h5f.require_group(path)
+        # catch some exceptions and write more reasonable error
+        # right now, the error is quite useless
         newpath =  path + sgrp.keys()[0] + "/results"
-        return newpath
+        return path #newpath
         
     def GetObservableList(self,file):
         p = self.GetResultsPath(file)
@@ -60,12 +62,12 @@ class Hdf5Loader:
             path = self.GetResultsPath(f)
             grp = self.h5f.require_group(path)
             params = self.ReadParameters(f)
-            list = self.GetObservableList(f)
+            list_ = self.GetObservableList(f)
             obslist = []
             if measurements == None:
-                obslist = list
+                obslist = list_
             else:
-                obslist = [obs for obs in measurements if obs in list]
+                obslist = [obs for obs in measurements if obs in list_]
             kwd = "mean"
             for m in obslist:
                 if kwd in grp[m].keys():
