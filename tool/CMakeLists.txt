@@ -9,7 +9,8 @@ if (ALPS_FOR_VISTRAILS)
     install(PROGRAMS msxsl.exe DESTINATION ${VISTRAILS_APP_NAME})
   endif(WIN32 AND NOT UNIX)
 else(ALPS_FOR_VISTRAILS)
-  set (TOOLS parameter2xml convert2xml compactrun lattice2xml pevaluate pconfig poutput printgraph txt2archive xml2archive)
+  set (TOOLS parameter2xml convert2xml compactrun lattice2xml pevaluate pconfig 
+             poutput printgraph txt2archive xml2archive)
   foreach(program ${TOOLS})
     add_executable(${program} ${program}.C)
     target_link_libraries(${program} alps)
@@ -28,12 +29,10 @@ else(ALPS_FOR_VISTRAILS)
 #
 
   if(UNIX AND NOT WIN32)
-    set (SCRIPTS_TO_CONFIGURE convert2html convert2text extractgp extracthtml extractmpl extracttext extractxmgr plot2gp plot2html plot2mpl plot2text plot2xmgr)
-    foreach(script ${SCRIPTS_TO_CONFIGURE})
-      configure_file(${script}.in ${CMAKE_CURRENT_BINARY_DIR}/${script})
-      install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/${script} DESTINATION bin)
-    endforeach(script)
-    install(PROGRAMS archivecat xslttransform DESTINATION bin)
+    install(PROGRAMS archivecat convert2html convert2text extractgp extracthtml 
+            extractmpl  extracttext extractxmgr plot2gp plot2html plot2mpl 
+            plot2text plot2xmgr use_local_stylesheet xslttransform 
+            DESTINATION bin)
   else(UNIX AND NOT WIN32)
     install(PROGRAMS msxsl.exe DESTINATION bin)
   endif(UNIX AND NOT WIN32)

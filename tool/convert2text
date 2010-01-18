@@ -1,0 +1,8 @@
+#! /bin/sh
+
+f=$1
+dir=`dirname $0`
+echo '<?xml version="1.0" encoding="UTF-8"?>' > /tmp/input$$
+tail -n +3 $f >> /tmp/input$$
+$dir/xslttransform /tmp/input$$ $dir/../lib/xml/QMCXML2text.xsl
+rm /tmp/input$$

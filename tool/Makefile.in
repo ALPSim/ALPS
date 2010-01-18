@@ -51,13 +51,7 @@ subdir = tool
 DIST_COMMON = $(am__nobase_pkgpython_PYTHON_DIST) $(dist_bin_SCRIPTS) \
 	$(dist_noinst_DATA) $(srcdir)/Makefile.am \
 	$(srcdir)/Makefile.in $(srcdir)/config.py.in \
-	$(srcdir)/convert2html.in $(srcdir)/convert2text.in \
-	$(srcdir)/extractgp.in $(srcdir)/extracthtml.in \
-	$(srcdir)/extractmpl.in $(srcdir)/extracttext.in \
-	$(srcdir)/extractxmgr.in $(srcdir)/lattice-preview.in \
-	$(srcdir)/plot2gp.in $(srcdir)/plot2html.in \
-	$(srcdir)/plot2mpl.in $(srcdir)/plot2text.in \
-	$(srcdir)/plot2xmgr.in $(srcdir)/use_local_stylesheet.in TODO
+	$(srcdir)/lattice-preview.in TODO
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_boost.m4 \
@@ -81,10 +75,7 @@ CONFIG_HEADER = $(top_builddir)/src/alps/config.h \
 	$(top_builddir)/src/boost/po_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/sr_utf8_codecvt_facet.cpp \
 	$(top_builddir)/src/boost/fs_utf8_codecvt_facet.cpp
-CONFIG_CLEAN_FILES = convert2text convert2html extractgp extracthtml \
-	extracttext extractxmgr plot2gp plot2html plot2text plot2xmgr \
-	use_local_stylesheet extractmpl plot2mpl config.py \
-	lattice-preview
+CONFIG_CLEAN_FILES = config.py lattice-preview
 CONFIG_CLEAN_VPATH_FILES =
 @HAVE_VTKPYTHON_TRUE@am__EXEEXT_1 = lattice2xml$(EXEEXT)
 @BUILD_ARCHIVE_TRUE@am__EXEEXT_2 = archive$(EXEEXT)
@@ -489,32 +480,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-convert2text: $(top_builddir)/config.status $(srcdir)/convert2text.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-convert2html: $(top_builddir)/config.status $(srcdir)/convert2html.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-extractgp: $(top_builddir)/config.status $(srcdir)/extractgp.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-extracthtml: $(top_builddir)/config.status $(srcdir)/extracthtml.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-extracttext: $(top_builddir)/config.status $(srcdir)/extracttext.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-extractxmgr: $(top_builddir)/config.status $(srcdir)/extractxmgr.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-plot2gp: $(top_builddir)/config.status $(srcdir)/plot2gp.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-plot2html: $(top_builddir)/config.status $(srcdir)/plot2html.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-plot2text: $(top_builddir)/config.status $(srcdir)/plot2text.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-plot2xmgr: $(top_builddir)/config.status $(srcdir)/plot2xmgr.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-use_local_stylesheet: $(top_builddir)/config.status $(srcdir)/use_local_stylesheet.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-extractmpl: $(top_builddir)/config.status $(srcdir)/extractmpl.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
-plot2mpl: $(top_builddir)/config.status $(srcdir)/plot2mpl.in
-	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 config.py: $(top_builddir)/config.status $(srcdir)/config.py.in
 	cd $(top_builddir) && $(SHELL) ./config.status $(subdir)/$@
 lattice-preview: $(top_builddir)/config.status $(srcdir)/lattice-preview.in

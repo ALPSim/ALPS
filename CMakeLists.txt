@@ -268,7 +268,6 @@ configure_file(src/alps/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
 
 configure_file(lib/xml/lattices.xml.in ${PROJECT_BINARY_DIR}/lib/xml/lattices.xml)
 configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
-configure_file(lib/xml/plot2xsl.xsl.in ${PROJECT_BINARY_DIR}/lib/xml/plot2xsl.xsl)
 
 ######################################################################
 # include directories

@@ -1,0 +1,13 @@
+#!/bin/bash
+
+l=$*
+dir=`dirname $0`
+
+for f in $l; do
+  if test -f $f; then
+    $dir/xslttransform $f $dir/../lib/xml/changestylesheet.xsl > /tmp/tmp$$
+    mv /tmp/tmp$$ $f
+  fi
+done
+
+cp  $dir/../lib/xml/ALPS.xsl .

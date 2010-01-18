@@ -106,7 +106,7 @@ class OpenHTML(NotCacheable, SystemCommand):
     def compute(self):
         cmdlist = 'false'
         if platform.system() == 'Windows':
-          cmdlist = ['C:\Program Files\Internet Explorer\iexplore.exe']
+          cmdlist = ['start','C:\Program Files\Internet Explorer\iexplore.exe']
         if platform.system()=='Darwin':
           cmdlist = ['open', '-a', 'Safari']
         if self.hasInputFromPort('file'):

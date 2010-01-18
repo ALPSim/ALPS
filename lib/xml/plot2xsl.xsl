@@ -11,7 +11,7 @@
     <xsl:value-of select="$newline"/>
     <xsl:value-of select="$newline"/>
   
-    <xslout:include href="file://localhost/@libdir@/xml/archive2plot.xsl"/>
+    <xslout:include href="archive2plot.xsl"/>
     <xsl:value-of select="$newline"/>
 
     <!-- general plot description -->

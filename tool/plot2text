@@ -7,4 +7,7 @@ then
   exit
 fi 
 
-@bindir@/xslttransform $1 @libdir@/xml/ALPS.xsl
+f=$1
+dir=`dirname $0`
+
+$dir/xslttransform $f $dir/../lib/xml/plot2text.xsl 
