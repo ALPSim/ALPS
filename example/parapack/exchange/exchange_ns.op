@@ -129,7 +129,7 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.168846 +/- 0.00797
 Temperature: 2.37948 +/- 0
 [[replica 3]]
-Binder Ratio of Magnetization: 0.408778 +/- 0.0125
+Binder Ratio of Magnetization: 0.408778 +/- 0.0125 WARNING: check error convergence
 EXMC: Inverse Round-Trip Time: 0.114258 +/- 0.00994624
 EXMC: Inverse Temperature: 0.5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
@@ -162,7 +162,7 @@ Magnetization^4: 5582.59 +/- 427; tau = 0.177
     bin #3   : 256      entries: error = 435.908
     bin #4   : 128      entries: error = 427.051
 Number of Sites: 16 +/- 0
-Specific Heat: 0.193985 +/- 0.00837
+Specific Heat: 0.193985 +/- 0.00837 WARNING: check error convergence
 Temperature: 2 +/- 0
 [input parameters]
 ALGORITHM = "ising; exchange";
@@ -295,7 +295,7 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.147365 +/- 0.00695
 Temperature: 2.4268 +/- 0
 [[replica 3]]
-Binder Ratio of Magnetization: 0.398979 +/- 0.0125
+Binder Ratio of Magnetization: 0.398979 +/- 0.0125 WARNING: ERRORS NOT CONVERGED!!!
 EXMC: Inverse Round-Trip Time: 0.0771484 +/- 0.00834241
 EXMC: Inverse Temperature: 0.5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
