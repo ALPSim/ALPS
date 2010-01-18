@@ -58,7 +58,7 @@ def _get_tool_path(binary_file):
 
 def _get_default_mpi_procs():
     if config.check('mpiprocs'):
-      return config.mpirocs
+      return config.mpiprocs
     else:
       return 0
 
