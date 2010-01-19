@@ -8,4 +8,5 @@ install(DIRECTORY alps boost ietl mocasito ${CMAKE_BINARY_DIR}/src/alps
 	PATTERN ".DS_Store" EXCLUDE
 	PATTERN "*.in" EXCLUDE
 	PATTERN "Makefile*" EXCLUDE
+    COMPONENT headers
 	)

@@ -4,7 +4,7 @@ if(LPSolve_FOUND)
                  SSE.Directed.cpp SSE.Initialization.cpp SSE.Measurements.cpp
 		 SSE.Update.cpp SSE.cpp)
   target_link_libraries(dirloop_sse alps boost ${LPSolve_LIBRARIES})
-  install(TARGETS dirloop_sse RUNTIME DESTINATION bin)
+  install(TARGETS dirloop_sse RUNTIME DESTINATION bin COMPONENT applications)
 else(LPSolve_FOUND)
   message(STATUS "sse will not be built since lp_sovle library is not found")
 endif(LPSolve_FOUND)

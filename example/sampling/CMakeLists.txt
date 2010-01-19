@@ -9,6 +9,7 @@ if (ALPS_BUILD_EXAMPLES)
   foreach(program ${EXAMPLES})
     add_executable(${program} ${program}.C)
     target_link_libraries(${program} alps)
+    install(TARGETS ${program} COMPONENT examples RUNTIME DESTINATION bin )
   endforeach(program)
 endif (ALPS_BUILD_EXAMPLES)
 

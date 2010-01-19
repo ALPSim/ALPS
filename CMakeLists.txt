@@ -37,7 +37,6 @@ if(WIN32 AND NOT UNIX)
   endif (ALPS_FOR_VISTRAILS)
 else(WIN32 AND NOT UNIX)
   if (ALPS_FOR_VISTRAILS)
-    message (status setting)
     if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       set(CMAKE_INSTALL_PREFIX "/Applications/Vistrails/" CACHE PATH "ALPS install prefix" FORCE)
     endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -321,7 +320,7 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
     )
     install(FILES ${PROJECT_BINARY_DIR}/lib/lapack.lib ${PROJECT_BINARY_DIR}/lib/blas.lib
             ${PROJECT_BINARY_DIR}/lib/f2c.lib
-            DESTINATION lib
+            DESTINATION lib COMPONENT dependentlibraries
     )
   endif(LAPACK_LIBRARIES)
   # SQLite
@@ -334,8 +333,8 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
       COMMAND cmake -E copy_if_different ${SQLite_LIBRARIES} ${PROJECT_BINARY_DIR}/lib
       COMMAND cmake -E copy_if_different ${SQLite_BASE}/bin/${SQLite_NAME}.dll ${PROJECT_BINARY_DIR}/bin
     )
-    install(FILES ${PROJECT_BINARY_DIR}/lib/${SQLite_NAME}.lib DESTINATION lib)
-    install(FILES ${PROJECT_BINARY_DIR}/bin/${SQLite_NAME}.dll DESTINATION bin)
+    install(FILES ${PROJECT_BINARY_DIR}/lib/${SQLite_NAME}.lib DESTINATION lib COMPONENT dependentlibraries)
+    install(FILES ${PROJECT_BINARY_DIR}/bin/${SQLite_NAME}.dll DESTINATION bin COMPONENT dependentlibraries)
   endif(SQLite_LIBRARIES)
   # LPSolve
   if(LPSolve_LIBRARIES)
@@ -347,8 +346,8 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
       COMMAND cmake -E copy_if_different ${LPSolve_LIBRARIES} ${PROJECT_BINARY_DIR}/lib
       COMMAND cmake -E copy_if_different ${LPSolve_BASE}/bin/${LPSolve_NAME}.dll ${PROJECT_BINARY_DIR}/bin
     )
-    install(FILES ${PROJECT_BINARY_DIR}/lib/${LPSolve_NAME}.lib DESTINATION lib)
-    install(FILES ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}.dll DESTINATION bin)
+    install(FILES ${PROJECT_BINARY_DIR}/lib/${LPSolve_NAME}.lib DESTINATION lib COMPONENT dependentlibraries)
+    install(FILES ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}.dll DESTINATION bin COMPONENT dependentlibraries)
   endif(LPSolve_LIBRARIES)
   # alps & boost
   add_custom_target(libalps ALL
@@ -369,28 +368,33 @@ endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
 ######################################################################
 include(InstallRequiredSystemLibraries)
 
-if (ALPS_INSTALL_HEADERS)
+if (ALPS_INSTALL_HEADERS AND NOT ALPS_FOR_VISTRAILS)
   set(ALPS_HEADER_DIR "include")
-  install(DIRECTORY src/alps src/boost src/ietl src/mocasito DESTINATION ${ALPS_HEADER_DIR}
+  install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-  install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps)
+  install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
 
   if(ALPS_PACKAGE_LIBRARIES)
-     install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR}
+     install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR} COMPONENT dependentheaders
              FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
              PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-     install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include DESTINATION .)
+     install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include DESTINATION . COMPONENT dependentheaders)
   endif(ALPS_PACKAGE_LIBRARIES)
 
-endif(ALPS_INSTALL_HEADERS)
+endif(ALPS_INSTALL_HEADERS AND NOT ALPS_FOR_VISTRAILS)
 
 
 
-install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
+if (ALPS_FOR_VISTRAILS)
+  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
+else (ALPS_FOR_VISTRAILS)
+  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib COMPONENT xml)
+endif (ALPS_FOR_VISTRAILS)
+
 if(ALPS_PACKAGE_LIBRARIES)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION .)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/bin DESTINATION .)
+  install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION . COMPONENT dependentlibraries)
+  install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/bin DESTINATION . COMPONENT dependentlibraries)
 endif(ALPS_PACKAGE_LIBRARIES)
 
 if (ALPS_FOR_VISTRAILS)
@@ -404,15 +408,15 @@ if (ALPS_FOR_VISTRAILS)
         FILES_MATCHING PATTERN "*.xsl"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 else (ALPS_FOR_VISTRAILS)
-  install(DIRECTORY lib/xml DESTINATION lib
+  install(DIRECTORY lib/xml DESTINATION lib COMPONENT xml
         FILES_MATCHING PATTERN "*.xsl"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib)
+  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib COMPONENT xml)
 
   install(FILES config/CMake/UseALPS.cmake ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
-        DESTINATION share/alps)
+        DESTINATION share/alps COMPONENT build)
 
-  install(DIRECTORY lib/pyalps DESTINATION lib
+  install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
         FILES_MATCHING PATTERN "*.py"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 endif (ALPS_FOR_VISTRAILS)
@@ -446,6 +450,52 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
 # Binary packages                                                        #
 ##########################################################################
 
+ set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "ALPS and Boost libraries")
+ set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "ALPS headers")
+ set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "ALPS applications")
+ set(CPACK_COMPONENT_XML_DISPLAY_NAME "XML files")
+ set(CPACK_COMPONENT_PYTHON_DISPLAY_NAME "ALPS Python packages")
+ set(CPACK_COMPONENT_TOOLS_DISPLAY_NAME "ALPS tools")
+ set(CPACK_COMPONENT_DEPENDENTLIBRARIES_DISPLAY_NAME "Dependent libraries")
+ set(CPACK_COMPONENT_DEPENDENTHEADERS_DISPLAY_NAME "Headers of dependent libraries")
+ set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME "ALPS examples")
+ set(CPACK_COMPONENT_BUILD_DISPLAY_NAME "Build system support")
+ 
+ set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "The libraries needed by the ALPS applications")
+ set(CPACK_COMPONENT_HEADERS_DESCRIPTION "The ALPS header files")
+ set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION "The ALPS application programs")
+ set(CPACK_COMPONENT_XML_DESCRIPTION "The XML files and XSL stylefiles for ALPS input and evaluation")
+ set(CPACK_COMPONENT_PYTHON_DESCRIPTION "The ALPS Python packages for data evaluation")
+ set(CPACK_COMPONENT_TOOLS_DESCRIPTION "The ALPS tools")
+ set(CPACK_COMPONENT_DEPENDENTLIBRARIES_DESCRIPTION "External libraries that ALPS depends on. They do not need to be installed if they already exist on the system and can be found by the ALPS applications")
+ set(CPACK_COMPONENT_DEPENDENTHEADERS_DESCRIPTION "Headers of libraries that ALPS depends on")
+ set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "ALPS examples")
+ set(CPACK_COMPONENT_BUILD_DESCRIPTION "Include files for CMake and make to simplify the building of ALPS applications")
+
+ set(CPACK_COMPONENT_LIBRARIES_GROUP "Runtime")
+ set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
+ set(CPACK_COMPONENT_XML_GROUP "Runtime")
+ set(CPACK_COMPONENT_PYTHON_GROUP "Runtime")
+ set(CPACK_COMPONENT_TOOLS_GROUP "Runtime")
+ set(CPACK_COMPONENT_DEPENDENTLIBRARIES_GROUP "Runtime")
+ set(CPACK_COMPONENT_HEADERS_GROUP "Development")
+ set(CPACK_COMPONENT_DEPENDENTHEADERS_GROUP "Development")
+ set(CPACK_COMPONENT_BUILD_GROUP "Development")
+ set(CPACK_COMPONENT_EXAMPLES_GROUP "Examples")
+
+ set(CPACK_COMPONENT_HEADERS_DISABLED ON)
+ set(CPACK_COMPONENT_DEPENDENTHEADERS_DISABLED ON)
+ set(CPACK_COMPONENT_BUILD_DISABLED ON)
+
+ set(CPACK_COMPONENT_GROUP_DEVELOPMENT_DESCRIPTION "Components needed only to build applications based on the ALPS libraries")
+ set(CPACK_COMPONENT_GROUP_RUNTIME_DESCRIPTION "Components needed to run the ALPS applications")
+ set(CPACK_COMPONENT_GROUP_EXAMPLES_DESCRIPTION "Installs some example programs")
+ set(CPACK_COMPONENT_APPLICATIONS_DEPENDS libraries)
+ set(CPACK_COMPONENT_PYTHON_DEPENDS libraries)
+ set(CPACK_COMPONENT_TOOLS_DEPENDS libraries)
+ set(CPACK_COMPONENT_EXAMPLES_DEPENDS libraries)
+ 
+ 
 if (ALPS_FOR_VISTRAILS)
   set(CPACK_PACKAGE_NAME "ALPS Vistrails Patch")
   set(CPACK_NSIS_MODIFY_PATH OFF)
@@ -507,7 +557,7 @@ if(WIN32 AND NOT UNIX)
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
 endif(WIN32 AND NOT UNIX)
 
-set(CPACK_STRIP_FILES ON)
+#set(CPACK_STRIP_FILES ON)
 include(CPack)
 
 

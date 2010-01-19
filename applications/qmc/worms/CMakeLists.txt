@@ -7,5 +7,5 @@ add_executable(worm_evaluate evaluate.C)
 target_link_libraries(worm worm_impl alps boost)
 target_link_libraries(worm_evaluate worm_impl alps boost)
 
-install(TARGETS worm RUNTIME DESTINATION bin)
-install(TARGETS worm_evaluate RUNTIME DESTINATION bin)
+install(TARGETS worm RUNTIME DESTINATION bin COMPONENT applications)
+install(TARGETS worm_evaluate RUNTIME DESTINATION bin COMPONENT applications)
