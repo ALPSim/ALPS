@@ -32,7 +32,7 @@ if (ALPS_HAVE_PYTHON)
             ARCHIVE DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
             LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps)
   else(ALPS_FOR_VISTRAILS)
-    install(TARGETS pyalea pytools
+    install(TARGETS pyalea pytools COMPONENT python
             RUNTIME DESTINATION bin
             ARCHIVE DESTINATION lib/pyalps
             LIBRARY DESTINATION lib/pyalps)

@@ -10,6 +10,7 @@ option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent librarie
 #maintenance building options
 option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
+option(ALPS_DOWNLOAD_PACKAGES "MPrepare an installer that downloads instead of containing the installation packages" OFF)
 
 if (ALPS_FOR_VISTRAILS)
   set(ALPS_INSTALL_HEADERS OFF)
@@ -95,7 +96,7 @@ endif(NOT CMAKE_BUILD_TYPE)
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
 
 
-set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_BUILD}(r${VERSION_BUILD})")
+set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_BUILD}-r${VERSION_BUILD}")
 set(ALPS_VERSION_STRING "ALPS Libraries version ${ALPS_VERSION}")
 
 set(ALPS_CONFIG_HOST unknown)
@@ -494,11 +495,15 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
  
  
 if (ALPS_FOR_VISTRAILS)
-  set(CPACK_PACKAGE_NAME "ALPS Vistrails Patch")
+  set(CPACK_PACKAGE_NAME "alps-vistrails-patch")
   set(CPACK_NSIS_MODIFY_PATH OFF)
 else(ALPS_FOR_VISTRAILS)
-  set(CPACK_PACKAGE_NAME "ALPS")
   set(CPACK_NSIS_MODIFY_PATH ON)
+  if(ALPS_DOWNLOAD_PACKAGES)
+    set(CPACK_PACKAGE_NAME "alps-download")
+  else(ALPS_DOWNLOAD_PACKAGES)
+    set(CPACK_PACKAGE_NAME "alps")
+  endif(ALPS_DOWNLOAD_PACKAGES)
 endif(ALPS_FOR_VISTRAILS)
 set(CPACK_PACKAGE_VENDOR "ALPS Collaboration")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
@@ -570,12 +575,13 @@ endif(WIN32 AND NOT UNIX)
 #set(CPACK_STRIP_FILES ON)
 include(CPack)
 
-
-if(COMMAND cpack_configure_downloads)
-  cpack_configure_downloads(
-  "http://alps.comp-phys.org/static/software/releases/"
-    ALL ADD_REMOVE)
-endif()
+if (ALPS_DOWNLOAD_PACKAGES)
+  if(COMMAND cpack_configure_downloads)
+    cpack_configure_downloads(
+    "http://alps.comp-phys.org/static/software/releases/packages/"
+      ALL ADD_REMOVE)
+  endif()
+endif(ALPS_DOWNLOAD_PACKAGES)
 
 ##########################################################################
 
