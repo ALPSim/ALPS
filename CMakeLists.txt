@@ -296,6 +296,14 @@ set(ALPS_INCLUDE_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/include)
 set(ALPS_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/lib)
 set(ALPS_RUNTIME_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/bin)
 
+# If ALPS is built as a shared libraly, application developers may need these settings.
+list(APPEND ALPS_EXTRA_INCLUDE_DIRS
+	    ${MPI_INCLUDE_PATH} ${SQLite_INCLUDE_DIR} ${LPSolve_INCLUDE_DIR}
+             ${HDF5_INCLUDE_DIR})
+list(APPEND ALPS_EXTRA_LIBRARIES
+            ${MPI_EXTRA_LIBRARY} ${LAPACK_LIBRARIES} ${SQLite_LIBRARIES}
+  	    ${LPSolve_LIBRARIES} ${HDF5_LIBRARIES})
+
 set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
 
 configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
