@@ -5,7 +5,8 @@ LDFLAGS = @LIB_VERSION_INFO@ $(BASE_LDFLAGS) $(BOOST_LDFLAGS) $(HDF5_LDFLAGS) $(
 LIBS = $(BOOST_LIBS) $(HDF5_LIBS) $(XML_LIBS) $(MPI_LIBS) $(BASE_LIBS)
 
 src_ALPS = \
-  $(top_srcdir)/src/alps/copyright.C
+  $(top_srcdir)/src/alps/copyright.C \
+  $(top_srcdir)/src/alps/encode.cpp
 src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
   $(top_srcdir)/src/alps/alea/observable.C \

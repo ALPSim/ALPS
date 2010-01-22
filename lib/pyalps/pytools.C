@@ -32,11 +32,14 @@
 
 #include <boost/python.hpp>
 #include <alps/scheduler/convert.h>
+#include <alps/encode.hpp>
 
 
 BOOST_PYTHON_MODULE(pytools)
 {
   using namespace boost::python;
   def("convert2xml", alps::convert2xml);
+  def("hdf5_name_encode", alps::hdf5_name_encode);
+  def("hdf5_name_decode", alps::hdf5_name_decode);
 }
 

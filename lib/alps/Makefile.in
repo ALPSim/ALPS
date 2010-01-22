@@ -109,6 +109,7 @@ am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libalps_la_LIBADD =
 am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
+	$(top_srcdir)/src/alps/encode.cpp \
 	$(top_srcdir)/src/alps/expression/evaluator.C \
 	$(top_srcdir)/src/alps/osiris/buffer.C \
 	$(top_srcdir)/src/alps/osiris/dump.C \
@@ -177,7 +178,7 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parapack/util.C \
 	$(top_srcdir)/src/alps/parapack/version.C \
 	$(top_srcdir)/src/boost/throw_exception.C
-am__objects_1 = copyright.lo
+am__objects_1 = copyright.lo encode.lo
 am__objects_2 = evaluator.lo
 am__objects_3 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo \
 	xdrdump.lo xdrcore.lo dumparchive.lo
@@ -458,7 +459,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
 src_ALPS = \
-  $(top_srcdir)/src/alps/copyright.C
+  $(top_srcdir)/src/alps/copyright.C \
+  $(top_srcdir)/src/alps/encode.cpp
 
 src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
@@ -782,6 +784,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/disorder.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dump.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dumparchive.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/encode.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/environment.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/error_code.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/evaluator.Plo@am__quote@
@@ -943,6 +946,13 @@ copyright.lo: $(top_srcdir)/src/alps/copyright.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/copyright.C' object='copyright.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
+
+encode.lo: $(top_srcdir)/src/alps/encode.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode.lo -MD -MP -MF $(DEPDIR)/encode.Tpo -c -o encode.lo `test -f '$(top_srcdir)/src/alps/encode.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/encode.cpp
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/encode.Tpo $(DEPDIR)/encode.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/encode.cpp' object='encode.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode.lo `test -f '$(top_srcdir)/src/alps/encode.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/encode.cpp
 
 evaluator.lo: $(top_srcdir)/src/alps/expression/evaluator.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluator.lo -MD -MP -MF $(DEPDIR)/evaluator.Tpo -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/expression/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression/evaluator.C
