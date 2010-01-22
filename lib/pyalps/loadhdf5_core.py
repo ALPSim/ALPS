@@ -1,17 +1,21 @@
 import urllib, copy, h5py
 import matplotlib.pyplot as plt
 import numpy as np
+import os
 from scipy import optimize
 
 from dataset import ResultFile
 from dataset import DataSet
 from floatwitherror import FloatWithError as fwe
+
+import pyalps.pytools as pt # the C++ conversion functions
+
 # or the C++ class as alternative
 #from pyalps.pyalea import value_with_error as fwe
 
 class Hdf5Loader:
     def GetFileNames(self, flist):
-        self.files = [f.replace('.out.xml','.clone1.h5') for f in flist] #will be updated once we have aggregated hdf5-files
+        self.files = [f.replace('xml','h5') for f in flist] 
         return self.files
         
     # Pre: file is a h5py file descriptor
@@ -40,13 +44,9 @@ class Hdf5Loader:
         return resultfiles
         
     def GetResultsPath(self, file):
-        path = "/simulation/realizations/0/clones/0/results/0/worker/0/"
         self.h5f = h5py.File(file)
-        sgrp = self.h5f.require_group(path)
-        # catch some exceptions and write more reasonable error
-        # right now, the error is quite useless
-        newpath =  path + sgrp.keys()[0] + "/results"
-        return path #newpath
+        path = "/simulation/results/"
+        return path
         
     def GetObservableList(self,file):
         p = self.GetResultsPath(file)
@@ -62,38 +62,56 @@ class Hdf5Loader:
             path = self.GetResultsPath(f)
             grp = self.h5f.require_group(path)
             params = self.ReadParameters(f)
-            list_ = self.GetObservableList(f)
+            list = self.GetObservableList(f)
             obslist = []
             if measurements == None:
-                obslist = list_
+                obslist = list
             else:
-                obslist = [obs for obs in measurements if obs in list_]
-            kwd = "mean"
-            for m in obslist:
-                if kwd in grp[m].keys():
-                    p_mean = m + "/mean/value"
-                    p_error = m + "/mean/error"
-                    try:
-                        d = DataSet()
-                        subset = []
-                        all_m = grp[p_mean].value
-                        all_e = grp[p_error].value
+                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if obs in list]
+            try:
+                d = DataSet()
+                subset=[]
+                for m in obslist:
+                    if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
+                        mean = grp[m+"/mean/value"].value
+                        error = grp[m+"/mean/error"].value
+                        print "reading count"
+                        d.props['count'] = grp[m+"/count"].value
+                        print "value of count", grp[m+"/count"].value 
                         try:
-                            size = len(all_m)
+                            size = len(mean)
+                            subset = [fwe(mean[i],error[i]) for i in range(0,size)]
                         except:
                             size=0
-                            subset.append(fwe(all_m,all_e))
-                        for i in range(0,size):
-                            subset.append(fwe(all_m[i],all_e[i]))
-                        d.y = np.array(subset)
-                        d.x =     np.arange(0,len(d.y))
-                        d.props['hdf5_path'] = path + m
-                        d.props['observable'] = m
-                        d.props.update(params)
-                        for s in statvar:
-                            if s in grp[m].keys():
+                            subset = [fwe(mean,error)]
+                    elif "mean" in grp[m].keys():
+                        value = grp[m+"/mean/value"].value
+                        try:
+                            size=len(value)
+                            subset = [float(value[i]) for i in range(0,size)]
+                        except:
+                            size=0
+                            subset = [float(value)]
+                    d.y = np.array(subset)
+                    if "labels" in grp[m].keys():
+                        d.x = np.array(grp[m+"/labels"].value)
+                    else:
+                        d.x = np.arange(0,len(d.y))
+                    d.props['hdf5_path'] = path + m
+                    d.props['observable'] = pt.hdf5_name_decode(m)
+                    d.props.update(params)
+                    if "timeseries" in statvar:
+                        tslist = grp[m+"/timeseries"].keys()
+                        for l in tslist:
+                            d.props[l] = grp[m+"/timeseries/"+l].value
+                    for s in statvar:
+                        if s in grp[m].keys():
+                            try:
                                 d.props[s] = grp[m+"/"+s+"/value"].value
-                        sets.append(d)
-                    except AttributeError:
-                        pass
+                            except:
+                                pass
+                    sets.append(d)
+            except AttributeError:
+                print "could not create DataSet"
+                pass
         return sets
