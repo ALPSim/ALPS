@@ -68,7 +68,7 @@ class Hdf5Loader:
             if measurements == None:
                 obslist = list
             else:
-                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if obs in list]
+                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list]
             try:
                 d = DataSet()
                 subset=[]
