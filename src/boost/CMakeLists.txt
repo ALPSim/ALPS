@@ -155,9 +155,8 @@ install(TARGETS boost
           LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_DYLIB_DIR}
           )
 else (ALPS_FOR_VISTRAILS)
-  install(TARGETS boost
+  install(TARGETS boost COMPONENT libraries
           RUNTIME DESTINATION bin
           ARCHIVE DESTINATION lib
-          LIBRARY DESTINATION lib
-          COMPONENT libraries)
+          LIBRARY DESTINATION lib)
 endif (ALPS_FOR_VISTRAILS)
