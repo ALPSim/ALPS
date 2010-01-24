@@ -51,8 +51,7 @@ class Hdf5Loader:
     def GetObservableList(self,file):
         p = self.GetResultsPath(file)
         obsgrp = self.h5f.require_group(p)
-        olist = [pt.hdf5_name_encode(obs) for obs in obsgrp.keys()]
-        return olist
+        return obsgrp.keys()
         
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set

@@ -146,6 +146,7 @@ BOOST_PYTHON_MODULE(pyalea)
     .def_pickle(value_with_error_pickle_suite<double>())
     ;
 
+/*
   class_<value_with_error_container<double> >("value_with_error_vector",init<optional<std::vector<double>,std::vector<double> > >())
     .def("__getitem__",&value_with_error_container<double>::getitem)
     .def("__getslice__",&value_with_error_container<double>::getslice)
@@ -214,5 +215,6 @@ BOOST_PYTHON_MODULE(pyalea)
 
     .def("__repr__", &print_vector_list<double>) 
     ;
+    */
 }
 

@@ -118,7 +118,6 @@ class WriteInputFiles(Module):
          
          if self.hasInputFromPort('parms'):
            input_values = self.forceGetInputListFromPort('parms')
-           print 'all: ',input_values
            l = []
            for p in input_values:
              if isinstance(p,list):
