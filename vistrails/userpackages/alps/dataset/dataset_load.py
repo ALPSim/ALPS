@@ -154,15 +154,16 @@ class LoadAlpsFromTxt(Module):
 
 class LoadProperties(Module):
     my_input_ports = [
-        PortDescriptor('ResultFiles', ResultFiles)
+        PortDescriptor('ResultFiles', ResultFiles),
+        PortDescriptor('PropertyPath',basic.String) 
     ]
     
     my_output_ports = [
-        PortDescriptor('Props', ResultFiles) 
+        PortDescriptor('Props', ResultFiles)
     ]    
     
     def compute(self):
-        print "in Module Load Properties"
+        propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
         if self.hasInputFromPort('ResultFiles'):
             flist = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
         loader = Hdf5Loader()
@@ -173,7 +174,9 @@ class LoadAlpsHdf5(Module):
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('Measurements',ListOfElements),
-        PortDescriptor('StatisticalVariables',ListOfElements)
+        PortDescriptor('StatisticalVariables',ListOfElements),
+        PortDescriptor('PropertyPath',basic.String),
+        PortDescriptor('ResultPath',basic.String)
     ]
     
     my_output_ports = [
@@ -181,6 +184,8 @@ class LoadAlpsHdf5(Module):
     ]    
     
     def compute(self):
+        propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
+        resPath= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/simulation/results"
         loader = Hdf5Loader()
         if self.hasInputFromPort('ResultFiles'):
             files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
@@ -189,9 +194,9 @@ class LoadAlpsHdf5(Module):
         if self.hasInputFromPort('StatisticalVariables'):
             statisticalvariables = self.getInputFromPort('StatisticalVariables')    
         if self.hasInputFromPort('Measurements'):
-            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,self.getInputFromPort('Measurements'))
+            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,propPath,resPath,self.getInputFromPort('Measurements'))
         else:
-            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables)
+            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,propPath,resPath)
         self.setResult('data',datasets)
 
 

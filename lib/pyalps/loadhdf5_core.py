@@ -20,10 +20,10 @@ class Hdf5Loader:
         
     # Pre: file is a h5py file descriptor
     # Post: returns a dictionary of all parameters saved in the file
-    def ReadParameters(self,file):
+    def ReadParameters(self,file, proppath):
         LOP = []
         self.h5param = h5py.File(file)
-        pgrp = self.h5param.require_group("/parameters")
+        pgrp = self.h5param.require_group(proppath)
         pgrp.visit(LOP.append)
         dict = {'filename' : file}
         for m in LOP:
@@ -33,51 +33,44 @@ class Hdf5Loader:
                 pass
         return dict 
         
-    def GetProperties(self, flist):
+    def GetProperties(self, flist,proppath):
         fs = self.GetFileNames(flist)
         resultfiles = []
         for f in fs:
             rfile = ResultFile()
-            rfile.props = self.ReadParameters(f)
+            rfile.props = self.ReadParameters(f,proppath)
             rfile.props["ObservableList"] = self.GetObservableList(f)
             resultfiles.append(rfile)
         return resultfiles
         
-    def GetResultsPath(self, file):
+    def GetObservableList(self,file,respath):
         self.h5f = h5py.File(file)
-        path = "/simulation/results/"
-        return path
-        
-    def GetObservableList(self,file):
-        p = self.GetResultsPath(file)
-        obsgrp = self.h5f.require_group(p)
-        return obsgrp.keys()
+        obsgrp = self.h5f.require_group(respath)
+        olist = [pt.hdf5_name_encode(obs) for obs in obsgrp.keys()]
+        return olist
         
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
-    def ReadMeasurementFromFile(self,flist,statvar,measurements=None):
+    def ReadMeasurementFromFile(self,flist,statvar,proppath,respath,measurements=None):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
-            path = self.GetResultsPath(f)
-            grp = self.h5f.require_group(path)
-            params = self.ReadParameters(f)
-            list = self.GetObservableList(f)
+            list = self.GetObservableList(f,respath)
+            grp = self.h5f.require_group(respath)
+            params = self.ReadParameters(f,proppath)
             obslist = []
             if measurements == None:
                 obslist = list
             else:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list]
-            try:
-                d = DataSet()
-                subset=[]
-                for m in obslist:
+            subset=[]
+            for m in obslist:
+                try:
+                    d = DataSet()
                     if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
                         mean = grp[m+"/mean/value"].value
                         error = grp[m+"/mean/error"].value
-                        print "reading count"
                         d.props['count'] = grp[m+"/count"].value
-                        print "value of count", grp[m+"/count"].value 
                         try:
                             size = len(mean)
                             subset = [fwe(mean[i],error[i]) for i in range(0,size)]
@@ -97,7 +90,7 @@ class Hdf5Loader:
                         d.x = np.array(grp[m+"/labels"].value)
                     else:
                         d.x = np.arange(0,len(d.y))
-                    d.props['hdf5_path'] = path + m
+                    d.props['hdf5_path'] = respath + m
                     d.props['observable'] = pt.hdf5_name_decode(m)
                     d.props.update(params)
                     if "timeseries" in statvar:
@@ -111,7 +104,7 @@ class Hdf5Loader:
                             except:
                                 pass
                     sets.append(d)
-            except AttributeError:
-                print "could not create DataSet"
-                pass
+                except AttributeError:
+                    print "could not create DataSet"
+                    ass
         return sets
