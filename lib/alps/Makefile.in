@@ -110,7 +110,6 @@ LTLIBRARIES = $(lib_LTLIBRARIES)
 libalps_la_LIBADD =
 am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/encode.cpp \
-	$(top_srcdir)/src/alps/expression/evaluator.C \
 	$(top_srcdir)/src/alps/osiris/buffer.C \
 	$(top_srcdir)/src/alps/osiris/dump.C \
 	$(top_srcdir)/src/alps/osiris/os.C \
@@ -132,7 +131,9 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/random/rngfactory.C \
 	$(top_srcdir)/src/alps/alea/nan.C \
 	$(top_srcdir)/src/alps/alea/observable.C \
-	$(top_srcdir)/src/alps/alea/observableset.C \
+	$(top_srcdir)/src/alps/alea/observablefactory.C \
+	$(top_srcdir)/src/alps/alea/observableset.C src_EXPRESSION = \
+	$(top_srcdir)/src/alps/expression/evaluator.C \
 	$(top_srcdir)/src/alps/lattice/disorder.C \
 	$(top_srcdir)/src/alps/lattice/latticedescriptor.C \
 	$(top_srcdir)/src/alps/lattice/latticegraphdescriptor.C \
@@ -179,57 +180,56 @@ am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
 	$(top_srcdir)/src/alps/parapack/version.C \
 	$(top_srcdir)/src/boost/throw_exception.C
 am__objects_1 = copyright.lo encode.lo
-am__objects_2 = evaluator.lo
-am__objects_3 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo \
+am__objects_2 = buffer.lo dump.lo os.lo process.lo comm.lo mpdump.lo \
 	xdrdump.lo xdrcore.lo dumparchive.lo
-am__objects_4 = parameter.lo parameterlist.lo parameters.lo
-am__objects_5 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
+am__objects_3 = parameter.lo parameterlist.lo parameters.lo
+am__objects_4 = parser.lo xmlattributes.lo xmlhandler.lo xmlparser.lo \
 	xmlstream.lo xslt_path.lo
-am__objects_6 = rngfactory.lo
-am__objects_7 = nan.lo observable.lo observableset.lo
-am__objects_8 = disorder.lo latticedescriptor.lo \
+am__objects_5 = rngfactory.lo
+am__objects_6 = nan.lo observable.lo observablefactory.lo \
+	observableset.lo evaluator.lo
+am__objects_7 = disorder.lo latticedescriptor.lo \
 	latticegraphdescriptor.lo latticelibrary.lo unitcell.lo
-am__objects_9 = modellibrary.lo siteterm.lo bondterm.lo \
+am__objects_8 = modellibrary.lo siteterm.lo bondterm.lo \
 	globaloperator.lo
-am__objects_10 = abstract_task.lo convertxdr.lo factory.lo info.lo \
+am__objects_9 = abstract_task.lo convertxdr.lo factory.lo info.lo \
 	master_scheduler.lo measurement_operators.lo montecarlo.lo \
 	mpp_scheduler.lo options.lo remote_task.lo remote_worker.lo \
 	scheduler.lo signal.lo single_scheduler.lo serial_scheduler.lo \
 	slave_task.lo task.lo worker.lo workertask.lo
-am__objects_11 = clone.lo clone_info.lo worker_factory.lo filelock.lo \
+am__objects_10 = clone.lo clone_info.lo worker_factory.lo filelock.lo \
 	job.lo logger.lo mc_worker.lo measurement.lo option.lo \
 	parapack.lo process_impl.lo queue.lo rng_helper.lo types.lo \
 	util.lo version.lo
-@ALPS_FULL_TRUE@am__objects_12 = $(am__objects_8) $(am__objects_9) \
-@ALPS_FULL_TRUE@	$(am__objects_10) $(am__objects_11)
-@BUILD_BOOST_TRUE@am__objects_13 = throw_exception.lo
+@ALPS_FULL_TRUE@am__objects_11 = $(am__objects_7) $(am__objects_8) \
+@ALPS_FULL_TRUE@	$(am__objects_9) $(am__objects_10)
+@BUILD_BOOST_TRUE@am__objects_12 = throw_exception.lo
 am_libalps_la_OBJECTS = $(am__objects_1) $(am__objects_2) \
 	$(am__objects_3) $(am__objects_4) $(am__objects_5) \
-	$(am__objects_6) $(am__objects_7) $(am__objects_12) \
-	$(am__objects_13)
-am__objects_14 = date_generators.lo greg_month.lo greg_weekday.lo \
+	$(am__objects_6) $(am__objects_11) $(am__objects_12)
+am__objects_13 = date_generators.lo greg_month.lo greg_weekday.lo \
 	gregorian_types.lo posix_time_types.lo
-am__objects_15 = cmdline.lo config_file.lo convert.lo \
+am__objects_14 = cmdline.lo config_file.lo convert.lo \
 	options_description.lo parsers.lo positional_options.lo \
 	value_semantic.lo variables_map.lo winmain.lo \
 	po_utf8_codecvt_facet.lo
-am__objects_16 = operations.lo path.lo portability.lo \
+am__objects_15 = operations.lo path.lo portability.lo \
 	fs_utf8_codecvt_facet.lo
-@BUILD_BOOST_WCHAR_TRUE@am__objects_17 = wc_regex_traits.lo \
+@BUILD_BOOST_WCHAR_TRUE@am__objects_16 = wc_regex_traits.lo \
 @BUILD_BOOST_WCHAR_TRUE@	wide_posix_api.lo winstances.lo
-am__objects_18 = c_regex_traits.lo cpp_regex_traits.lo cregex.lo \
+am__objects_17 = c_regex_traits.lo cpp_regex_traits.lo cregex.lo \
 	fileiter.lo icu.lo instances.lo posix_api.lo regex.lo \
 	regex_debug.lo regex_raw_buffer.lo regex_traits_defaults.lo \
 	static_mutex.lo usinstances.lo w32_regex_traits.lo \
-	$(am__objects_17)
-@BUILD_BOOST_WCHAR_TRUE@am__objects_19 = basic_text_wiprimitive.lo \
+	$(am__objects_16)
+@BUILD_BOOST_WCHAR_TRUE@am__objects_18 = basic_text_wiprimitive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	basic_text_woprimitive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	binary_wiarchive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	binary_woarchive.lo text_wiarchive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	text_woarchive.lo xml_wgrammar.lo \
 @BUILD_BOOST_WCHAR_TRUE@	xml_wiarchive.lo xml_woarchive.lo \
 @BUILD_BOOST_WCHAR_TRUE@	sr_utf8_codecvt_facet.lo
-am__objects_20 = basic_archive.lo basic_iarchive.lo \
+am__objects_19 = basic_archive.lo basic_iarchive.lo \
 	basic_iserializer.lo basic_oarchive.lo basic_oserializer.lo \
 	basic_pointer_iserializer.lo basic_pointer_oserializer.lo \
 	basic_serializer_map.lo basic_text_iprimitive.lo \
@@ -240,27 +240,27 @@ am__objects_20 = basic_archive.lo basic_iarchive.lo \
 	polymorphic_oarchive.lo stl_port.lo text_iarchive.lo \
 	text_oarchive.lo void_cast.lo xml_grammar.lo xml_iarchive.lo \
 	xml_oarchive.lo archive_exception.lo shared_ptr_helper.lo \
-	xml_archive_exception.lo $(am__objects_19)
-am__objects_21 = error_code.lo
-@BUILD_BOOST_TRUE@am__objects_22 = $(am__objects_14) $(am__objects_15) \
-@BUILD_BOOST_TRUE@	$(am__objects_16) $(am__objects_18) \
-@BUILD_BOOST_TRUE@	$(am__objects_20) $(am__objects_21)
-am__objects_23 = broadcast.lo communicator.lo computation_tree.lo \
+	xml_archive_exception.lo $(am__objects_18)
+am__objects_20 = error_code.lo
+@BUILD_BOOST_TRUE@am__objects_21 = $(am__objects_13) $(am__objects_14) \
+@BUILD_BOOST_TRUE@	$(am__objects_15) $(am__objects_17) \
+@BUILD_BOOST_TRUE@	$(am__objects_19) $(am__objects_20)
+am__objects_22 = broadcast.lo communicator.lo computation_tree.lo \
 	content_oarchive.lo environment.lo exception.lo \
 	graph_communicator.lo group.lo intercommunicator.lo \
 	mpi_datatype_cache.lo mpi_datatype_oarchive.lo \
 	packed_iarchive.lo packed_oarchive.lo \
 	packed_skeleton_iarchive.lo packed_skeleton_oarchive.lo \
 	point_to_point.lo request.lo timer.lo
-@BUILD_BOOST_MPI_TRUE@am__objects_24 = $(am__objects_23)
-am__objects_25 = connection.lo named_slot_map.lo signal_base.lo \
+@BUILD_BOOST_MPI_TRUE@am__objects_23 = $(am__objects_22)
+am__objects_24 = connection.lo named_slot_map.lo signal_base.lo \
 	slot.lo trackable.lo
-@BUILD_BOOST_SIGNALS_TRUE@am__objects_26 = $(am__objects_25)
-am__objects_27 = barrier.lo condition.lo exceptions.lo mutex.lo \
+@BUILD_BOOST_SIGNALS_TRUE@am__objects_25 = $(am__objects_24)
+am__objects_26 = barrier.lo condition.lo exceptions.lo mutex.lo \
 	once.lo recursive_mutex.lo thread.lo tss.lo xtime.lo
-@BUILD_BOOST_THREAD_TRUE@am__objects_28 = $(am__objects_27)
-nodist_libalps_la_OBJECTS = $(am__objects_22) $(am__objects_24) \
-	$(am__objects_26) $(am__objects_28)
+@BUILD_BOOST_THREAD_TRUE@am__objects_27 = $(am__objects_26)
+nodist_libalps_la_OBJECTS = $(am__objects_21) $(am__objects_23) \
+	$(am__objects_25) $(am__objects_27)
 libalps_la_OBJECTS = $(am_libalps_la_OBJECTS) \
 	$(nodist_libalps_la_OBJECTS)
 depcomp = $(SHELL) $(top_srcdir)/config/depcomp
@@ -465,8 +465,8 @@ src_ALPS = \
 src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
   $(top_srcdir)/src/alps/alea/observable.C \
-  $(top_srcdir)/src/alps/alea/observableset.C
-
+  $(top_srcdir)/src/alps/alea/observablefactory.C \
+  $(top_srcdir)/src/alps/alea/observableset.C \
 src_EXPRESSION = \
   $(top_srcdir)/src/alps/expression/evaluator.C 
 
@@ -826,6 +826,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/named_slot_map.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/nan.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/observable.Plo@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/observablefactory.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/observableset.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/once.Plo@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/operations.Plo@am__quote@
@@ -953,13 +954,6 @@ encode.lo: $(top_srcdir)/src/alps/encode.cpp
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/encode.cpp' object='encode.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode.lo `test -f '$(top_srcdir)/src/alps/encode.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/encode.cpp
-
-evaluator.lo: $(top_srcdir)/src/alps/expression/evaluator.C
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluator.lo -MD -MP -MF $(DEPDIR)/evaluator.Tpo -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/expression/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression/evaluator.C
-@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/evaluator.Tpo $(DEPDIR)/evaluator.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/expression/evaluator.C' object='evaluator.lo' libtool=yes @AMDEPBACKSLASH@
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/expression/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression/evaluator.C
 
 buffer.lo: $(top_srcdir)/src/alps/osiris/buffer.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT buffer.lo -MD -MP -MF $(DEPDIR)/buffer.Tpo -c -o buffer.lo `test -f '$(top_srcdir)/src/alps/osiris/buffer.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/buffer.C
@@ -1108,12 +1102,26 @@ observable.lo: $(top_srcdir)/src/alps/alea/observable.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o observable.lo `test -f '$(top_srcdir)/src/alps/alea/observable.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/observable.C
 
+observablefactory.lo: $(top_srcdir)/src/alps/alea/observablefactory.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT observablefactory.lo -MD -MP -MF $(DEPDIR)/observablefactory.Tpo -c -o observablefactory.lo `test -f '$(top_srcdir)/src/alps/alea/observablefactory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/observablefactory.C
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/observablefactory.Tpo $(DEPDIR)/observablefactory.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/alea/observablefactory.C' object='observablefactory.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o observablefactory.lo `test -f '$(top_srcdir)/src/alps/alea/observablefactory.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/observablefactory.C
+
 observableset.lo: $(top_srcdir)/src/alps/alea/observableset.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT observableset.lo -MD -MP -MF $(DEPDIR)/observableset.Tpo -c -o observableset.lo `test -f '$(top_srcdir)/src/alps/alea/observableset.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/observableset.C
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/observableset.Tpo $(DEPDIR)/observableset.Plo
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/alea/observableset.C' object='observableset.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o observableset.lo `test -f '$(top_srcdir)/src/alps/alea/observableset.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/alea/observableset.C
+
+evaluator.lo: $(top_srcdir)/src/alps/expression/evaluator.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT evaluator.lo -MD -MP -MF $(DEPDIR)/evaluator.Tpo -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/expression/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression/evaluator.C
+@am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/evaluator.Tpo $(DEPDIR)/evaluator.Plo
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/expression/evaluator.C' object='evaluator.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o evaluator.lo `test -f '$(top_srcdir)/src/alps/expression/evaluator.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/expression/evaluator.C
 
 disorder.lo: $(top_srcdir)/src/alps/lattice/disorder.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT disorder.lo -MD -MP -MF $(DEPDIR)/disorder.Tpo -c -o disorder.lo `test -f '$(top_srcdir)/src/alps/lattice/disorder.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/lattice/disorder.C
