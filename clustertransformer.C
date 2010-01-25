@@ -95,6 +95,8 @@ DCATransformer::DCATransformer(const alps::Parameters& params)
   }
   dispersion_moments_[0] /= n_cluster_sites();
   dispersion_moments_[1] /= n_cluster_sites();
+  std::cerr << "dispersion moments: " << dispersion_moments(0) << " " 
+	    << dispersion_moments(1) << std::endl;
   double hf = 0.;
   double bw = 0.;
   if (t2_==0. && t3_==0. && t4_==0.) {
@@ -464,13 +466,6 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
       energy_vec[freq] /= n_cluster_cells()*n_cluster_sites();
       // energy_vec[2*freq+1] /= n_cluster_cells()*n_cluster_sites();
     }
-    std::cout << "dispmom: " << dispersion_moments(0) << "\t" << dispersion_moments(1) << "\n";
-    std::ofstream test1str("test1.dat");
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
-      double om = (2.*freq+1.)*M_PI/beta;
-      test1str << om << "\t" << energy_vec[freq].mean() << "\t"  << "\n";
-    }
-    test1str.close();
     alps::RealObsevaluator kin = energy_vec[0] + dispersion_moments(1)*nzone*beta*beta/M_PI/M_PI;
     for (frequency_t freq=1; freq<nfreq; ++freq) {
       double om = (2.*freq+1.)*M_PI/beta;
@@ -481,34 +476,28 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
     return kin; 
   }
   else {
-    std::vector<std::complex<double> > energy_test(nfreq, std::complex<double>(0., 0.));
+    std::vector<std::complex<double> > energy_vec(nfreq, std::complex<double>(0., 0.));
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       std::complex<double> iom(0., (2.*freq+1.)*M_PI/beta);
       for (int z=0; z<nzone; ++z) {
-	for (int kc=0; kc<n_cluster_sites(); ++kc) { 
+	for (int kc=0; kc<n_cluster_sites(); ++kc) {
 	  std::complex<double> Sigma(selfenergies[z][kc][2*freq].mean(), selfenergies[z][kc][2*freq+1].mean());
-	  for (int kl=0; kl<n_cluster_cells(); ++kl) { 
+	  for (int kl=0; kl<n_lattice_momenta(); ++kl) { 
 	    vector_type k(dimension());
 	    for (unsigned int d=0; d<dimension(); ++d) 
 	      k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
 	    double weight = lattice_momentum(kl, dimension());
 	    double eps = epsilon(k);
-	    energy_test[freq] += weight*eps / ( iom+mu-eps-Sigma);
+	    energy_vec[freq] += weight*eps / ( iom + mu -eps -Sigma );
 	  }
 	}
       }
-      energy_test[freq] /= n_cluster_cells()*n_cluster_sites();
+      energy_vec[freq] /= n_cluster_cells()*n_cluster_sites();
     }
-    std::ofstream test2str("test2.dat");
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
-      double om = (2.*freq+1.)*M_PI/beta;
-      test2str << om << "\t" << energy_test[freq].real() << "\t"  << energy_test[freq].imag() << "\n";
-    }
-    test2str.close();
     double kin = 0.;
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       double om = (2.*freq+1.)*M_PI/beta;
-      kin += energy_test[freq].real() + dispersion_moments(1)*nzone/om/om;
+      kin += energy_vec[freq].real() + dispersion_moments(1)*nzone/om/om;
     }
     kin *= 2./beta;
     kin -= 0.25*nzone*dispersion_moments(1)*beta;
