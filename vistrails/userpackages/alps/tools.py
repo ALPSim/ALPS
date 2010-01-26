@@ -190,9 +190,25 @@ class Parameter2XML(alpscore.SystemCommandLogged):
                      ('output_dir', [basic.Directory]),
                      ('log_file',[basic.File])]
 
+
+def recursive_glob(pattern):
+    ret = glob.glob(pattern)
+    dirs = os.listdir('.')
+    for d in dirs:
+        try:
+            curdir = os.getcwd()
+            os.chdir(d)
+            files_there = recursive_glob(pattern)
+            files_there = [os.path.join(d,x) for x in files_there]
+            ret += files_there
+            os.chdir(curdir)
+        except OSError:
+            pass
+    return ret
+
 class Glob(Module):
     def expand(self,name):
-        l = glob.glob(name)
+        l = recursive_glob(name)
         self.setResult('value',l)
     def compute(self):
       self.expand(self.getInputFromPort('input_file').name)
@@ -232,7 +248,8 @@ class GetResultFiles(Module):
             pattern = self.getInputFromPort('pattern')
             pattern = os.path.expanduser(pattern)
             pattern = os.path.expandvars(pattern)
-            result = glob.glob(pattern)
+            # result = glob.glob(pattern)
+            result = recursive_glob(pattern)
             self.setResult('value',result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
         else:
@@ -244,7 +261,9 @@ class GetResultFiles(Module):
                 tasks = self.getInputFromPort('tasks')
             if self.hasInputFromPort('prefix'):
                 prefix = self.getInputFromPort('prefix')
-            result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
+            # result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
+            result = recursive_glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
+            # result = recursive_glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.h5'))
             self.setResult('value', result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
 

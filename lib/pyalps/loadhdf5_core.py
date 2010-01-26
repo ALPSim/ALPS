@@ -1,7 +1,6 @@
-import urllib, copy, h5py
+import urllib, copy, h5py, os
 import matplotlib.pyplot as plt
 import numpy as np
-import os
 from scipy import optimize
 
 from dataset import ResultFile
@@ -13,6 +12,13 @@ import pyalps.pytools as pt # the C++ conversion functions
 # or the C++ class as alternative
 #from pyalps.pyalea import value_with_error as fwe
 
+class Hdf5Missing(Exception):
+    def __init__(self,what):
+        self.what = what
+    
+    def __str__(self):
+        return 'Failed to find ' + self.what
+
 class Hdf5Loader:
     def GetFileNames(self, flist):
         self.files = [f.replace('xml','h5') for f in flist] 
@@ -20,20 +26,24 @@ class Hdf5Loader:
         
     # Pre: file is a h5py file descriptor
     # Post: returns a dictionary of all parameters saved in the file
-    def ReadParameters(self,file, proppath):
+    def ReadParameters(self,proppath):
         LOP = []
-        self.h5param = h5py.File(file)
-        pgrp = self.h5param.require_group(proppath)
-        pgrp.visit(LOP.append)
         dict = {'filename' : file}
-        for m in LOP:
-            try:
-                dict[m] = pgrp[m].value
-            except AttributeError:
-                pass
+        try:
+            pgrp = self.h5f.require_group(proppath)
+            pgrp.visit(LOP.append)
+            for m in LOP:
+                try:
+                    dict[m] = pgrp[m].value
+                except AttributeError:
+                    pass
+                except KeyError:
+                    pass
+        except KeyError:
+            raise Hdf5Missing(proppath + ' in ReadParameters()')
         return dict 
         
-    def GetProperties(self, flist,proppath):
+    def GetProperties(self,flist,proppath):
         fs = self.GetFileNames(flist)
         resultfiles = []
         for f in fs:
@@ -43,9 +53,11 @@ class Hdf5Loader:
             resultfiles.append(rfile)
         return resultfiles
         
-    def GetObservableList(self,file,respath):
-        self.h5f = h5py.File(file)
-        obsgrp = self.h5f.require_group(respath)
+    def GetObservableList(self,respath):
+        try:
+            obsgrp = self.h5f.require_group(respath)
+        except KeyError:
+            raise Hdf5Missing(respath + ' in GetObservableList()')
         olist = [pt.hdf5_name_encode(obs) for obs in obsgrp.keys()]
         return olist
         
@@ -55,14 +67,18 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
-            list = self.GetObservableList(f,respath)
+            self.h5f = h5py.File(f)
+            self.h5fname = f
+            
+            list_ = self.GetObservableList(respath)
+            # this is exception-safe in the sense that it's also required in the line above
             grp = self.h5f.require_group(respath)
-            params = self.ReadParameters(f,proppath)
+            params = self.ReadParameters(proppath)
             obslist = []
             if measurements == None:
-                obslist = list
+                obslist = list_
             else:
-                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list]
+                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
             subset=[]
             for m in obslist:
                 try:
@@ -105,6 +121,6 @@ class Hdf5Loader:
                                 pass
                     sets.append(d)
                 except AttributeError:
-                    print "could not create DataSet"
-                    ass
+                    print "Could not create DataSet"
+                    pass
         return sets
