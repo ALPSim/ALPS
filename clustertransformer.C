@@ -95,7 +95,7 @@ DCATransformer::DCATransformer(const alps::Parameters& params)
   }
   dispersion_moments_[0] /= n_cluster_sites();
   dispersion_moments_[1] /= n_cluster_sites();
-  std::cerr << "dispersion moments: " << dispersion_moments(0) << " " 
+  std::cout << "dispersion moments: " << dispersion_moments(0) << " " 
 	    << dispersion_moments(1) << std::endl;
   double hf = 0.;
   double bw = 0.;
@@ -478,16 +478,16 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
   else {
     std::vector<std::complex<double> > energy_vec(nfreq, std::complex<double>(0., 0.));
     for (frequency_t freq=0; freq<nfreq; ++freq) {
-      std::complex<double> iom(0., (2.*freq+1.)*M_PI/beta);
+      const std::complex<double> iom(0., (2.*freq+1.)*M_PI/beta);
       for (int z=0; z<nzone; ++z) {
 	for (int kc=0; kc<n_cluster_sites(); ++kc) {
-	  std::complex<double> Sigma(selfenergies[z][kc][2*freq].mean(), selfenergies[z][kc][2*freq+1].mean());
+	  const std::complex<double> Sigma(selfenergies[z][kc][2*freq].mean(), selfenergies[z][kc][2*freq+1].mean());
 	  for (int kl=0; kl<n_lattice_momenta(); ++kl) { 
 	    vector_type k(dimension());
 	    for (unsigned int d=0; d<dimension(); ++d) 
 	      k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-	    double weight = lattice_momentum(kl, dimension());
-	    double eps = epsilon(k);
+	    const double weight = lattice_momentum(kl, dimension());
+	    const double eps = epsilon(k);
 	    energy_vec[freq] += weight*eps / ( iom + mu -eps -Sigma );
 	  }
 	}
@@ -508,6 +508,8 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
     return kin_eval; 
   }
 }
+
+
 
 matsubara_green_function_t AntiFerroDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
                                                                const matsubara_green_function_t &G0_omega, 
