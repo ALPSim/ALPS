@@ -4,6 +4,7 @@ project(alps)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
+option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
 option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
 option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
 
@@ -249,13 +250,13 @@ if (ALPS_FOR_VISTRAILS)
   set(PYTHONLIBS_FOUND TRUE)
 endif(ALPS_FOR_VISTRAILS)
 
-IF (PYTHONLIBS_FOUND)
+IF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
   SET(ALPS_HAVE_PYTHON 1)
   INCLUDE_DIRECTORIES(${PYTHON_INCLUDE_DIRS}) 
   link_libraries(${PYTHON_LIBRARY})
-ELSE (PYTHONLIBS_FOUND)
+ELSE (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
   set(BUILD_BOOST_PYTHON FALSE)
-ENDIF (PYTHONLIBS_FOUND)
+ENDIF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
 
 ######################################################################
 # configuration files
