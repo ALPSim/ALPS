@@ -421,51 +421,72 @@ SimpleDCATransformer::local_green_function_from_selfenergies(const std::map<doub
 
 
 alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
-							    const double beta, const double mu, const bool error_propagation)
+							    const double beta, const double mu, 
+							    const bool error_propagation, const bool paramagnet)
 {
   const unsigned int nzone = selfenergies.size();
   const unsigned int nfreq = selfenergies[0][0].size()/2;
   if (error_propagation) {
+    std::cerr << "calculating the kinetic energy using error propagation\n"
+	      << "CAUTION: this may take a while\n";
+    int del_z = paramagnet ? 2 : 1;
     std::vector<alps::RealObsevaluator> energy_vec(nfreq);
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
-      double om = (2.*freq+1.)*M_PI/beta;
-      for (int z=0; z<nzone; ++z) {
-	for (int kc=0; kc<n_cluster_sites(); ++kc) { 
-	  alps::RealObsevaluator Sigma_re = selfenergies[z][kc][2*freq];
+    for (int z=0; z<nzone; z+=del_z) {
+      for (site_class_set_type::const_iterator it_kc=site_classes_k_space().first; 
+	   it_kc!=site_classes_k_space().second; ++it_kc) {
+	std::vector<alps::RealObsevaluator> energy_kc(nfreq);
+	const int multiplier = it_kc->size();
+	const site_t kc = *((*it_kc).begin());
+	vector_type kc_vec(dimension());
+	for (unsigned int d=0; d<dimension(); ++d) 
+	  kc_vec[d] = cluster_momentum(kc,d);
+	for (frequency_t freq=0; freq<nfreq; ++freq) {
+	  const double om = (2.*freq+1.)*M_PI/beta;
 	  alps::RealObsevaluator obsi = selfenergies[z][kc][2*freq+1];
-	  Sigma_re -= mu;
 	  obsi -= om;
 	  alps::RealObsevaluator obsi_sq = obsi * obsi;
-	  for (int kl=0; kl<n_lattice_momenta(); ++kl) { 
-	    vector_type k(dimension());
+	  alps::RealObsevaluator mSigma_re = -selfenergies[z][kc][2*freq];
+	  mSigma_re += mu;	    
+	  // kl == 0
+	  alps::RealObsevaluator obsr0 = mSigma_re;
+	  vector_type k0 = kc_vec;
+	  for (unsigned int d=0; d<dimension(); ++d) 
+	    k0[d] += lattice_momentum(0,d);
+	  const double weight0 = lattice_momentum(0, dimension());
+	  const double eps0 = epsilon(k0);
+	  obsr0 -= eps0;
+	  alps::RealObsevaluator obs0 = obsr0;
+	  obs0 *= obsr0;
+	  obs0 += obsi_sq;
+	  obsr0 /= obs0;
+	  obsr0 *= eps0;
+	  energy_kc[freq] = weight0*obsr0;
+	  for (site_t kl=1; kl<n_lattice_momenta(); ++kl) { 
+	    alps::RealObsevaluator obsr = mSigma_re;
+	    vector_type k = kc_vec;
 	    for (unsigned int d=0; d<dimension(); ++d) 
-	      k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-	    double weight = lattice_momentum(kl, dimension());
-	    double eps = epsilon(k);
-	    alps::RealObsevaluator obsr = Sigma_re;
-	    obsr += eps;
-	    obsr *= -1;
+	      k[d] += lattice_momentum(kl,d);
+	    const double weight = lattice_momentum(kl, dimension());
+	    const double eps = epsilon(k);
+	    obsr -= eps;
 	    alps::RealObsevaluator obs = obsr;
 	    obs *= obsr;
 	    obs += obsi_sq;
 	    obsr /= obs;
 	    obsr *= eps;
-	    // obsi /= obs;
-	    // obsi *= eps;
-	    if (z==0 && kc==0 && kl==0) {
-	      energy_vec[freq] = weight*obsr;
-	      // energy_vec[2*freq+1] = weight*obsi;
-	    }
-	    else {
-	      energy_vec[freq] += weight*obsr;
-	      // energy_vec[2*freq+1] += weight*obsi;
-	    }
+	    energy_kc[freq] += weight*obsr;
 	  }
+	  energy_kc[freq] *= multiplier;
+	  if (it_kc==site_classes_k_space().first && z==0)
+	    energy_vec[freq] = energy_kc[freq];
+	  else
+	    energy_vec[freq] += energy_kc[freq];
 	}
       }
-      energy_vec[freq] /= n_cluster_cells()*n_cluster_sites();
-      // energy_vec[2*freq+1] /= n_cluster_cells()*n_cluster_sites();
     }
+    for (frequency_t freq=0; freq<nfreq; ++freq) 
+      energy_vec[freq] *= del_z/n_cluster_sites()/n_cluster_cells();
+    // frequency sum
     alps::RealObsevaluator kin = energy_vec[0] + dispersion_moments(1)*nzone*beta*beta/M_PI/M_PI;
     for (frequency_t freq=1; freq<nfreq; ++freq) {
       double om = (2.*freq+1.)*M_PI/beta;
@@ -616,7 +637,8 @@ AntiFerroDCATransformer::local_green_function_from_selfenergies(const std::map<d
 
 
 alps::RealObsevaluator AntiFerroDCATransformer::kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& /*selfenergies*/,
-							       const double /*beta*/, const double /*mu*/, const bool /*error_propagation*/)
+							       const double /*beta*/, const double /*mu*/, 
+							       const bool /*error_propagation*/, const bool /*paramagnet*/)
 {
   boost::throw_exception(std::invalid_argument("to be implemented"));
   return alps::RealObsevaluator();

@@ -173,7 +173,8 @@ public:
 							 const double mu, const double h, const double beta,
 							 const int n_matsubara) const =0; 
   virtual alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
-						const double beta, const double mu, const bool error_propagation)=0;
+						const double beta, const double mu, 
+						const bool error_propagation, const bool paramagnet)=0;
 
   std::complex<double>* exp_iksite(const int sign) const;
   int* momentum_translation() const;
@@ -285,7 +286,8 @@ public:
 						 const double mu, const double h, const double beta,
 						 const int n_matsubara) const; 
   alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
-					const double beta, const double mu, const bool error_propagation);
+					const double beta, const double mu, 
+					const bool error_propagation, const bool paramagnet);
   std::map<double, std::complex<double> > local_green_function_from_selfenergies(const std::map<double, 
 										 std::vector<std::complex<double> > >& selfenergies, 
 										 const double mu, const double delta);
@@ -360,7 +362,8 @@ public:
   static green_function<T> green_function_divide(const green_function<T>& G1, const T d);
 
   alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
-					const double beta, const double mu, const bool error_propagation);
+					const double beta, const double mu, 
+					const bool error_propagation, const bool paramagnet);
   std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> 
   local_green_function_from_selfenergies(const std::map<double, 
 					 std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& selfenergies,
