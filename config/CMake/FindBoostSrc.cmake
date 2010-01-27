@@ -14,7 +14,7 @@ else(BOOST_ROOT)
     "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/src"
     "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/ALPS/src")
   # set(DIR1 boost boostsrc boost_1_41_0 boost_1_40_0 boost_1_39_0 boost_1_38_0 boostsrc_1_38_0)
-  set(DIR1 boost boostsrc boost_1_41_0)
+  set(DIR1 boost boostsrc boost_1_42_0 boost_1_41_0)
   set(_boost_SEARCH_PATH "")
   foreach(D0 ${DIR0})
     foreach(D1 ${DIR1})

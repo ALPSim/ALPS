@@ -135,16 +135,16 @@ find_package(BoostSrc REQUIRED)
 
 # MPI
 find_package(MPI)
-IF(MPI_FOUND AND NOT ALPS_FOR_VISTRAILS)
+IF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
   LINK_LIBRARIES(${MPI_LIBRARIES})
   include_directories(${MPI_INCLUDE_PATH})
   set(BUILD_BOOST_MPI TRUE)
   SET(ALPS_HAVE_MPI 1)
   SET(ALPS_HAVE_BOOST_MPI 1)
   set(BUILD_BOOST_MPI TRUE)
-ELSE(MPI_FOUND AND NOT ALPS_FOR_VISTRAILS)
+ELSE(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
   set(BUILD_BOOST_MPI FALSE)
-ENDIF(MPI_FOUND AND NOT ALPS_FOR_VISTRAILS)
+ENDIF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
 #add_definitions( -DBOOST_MPI_HOMOGENEOUS )
 
 # Lapack
@@ -286,28 +286,6 @@ else(APPLE)
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif(APPLE)
 
-######################################################################
-# setting up ALPSConfig.cmake
-######################################################################
-set(ALPS_INCLUDE_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/include)
-# if(NOT INSTALL_BOOST_HEADERS)
-  list(APPEND ALPS_INCLUDE_DIRS_CONFIG ${Boost_ROOT_DIR})
-# endif(NOT INSTALL_BOOST_HEADERS)
-
-set(ALPS_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/lib)
-set(ALPS_RUNTIME_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/bin)
-
-# If ALPS is built as a shared libraly, application developers may need these settings.
-list(APPEND ALPS_EXTRA_INCLUDE_DIRS
-	    ${MPI_INCLUDE_PATH} ${SQLite_INCLUDE_DIR} ${LPSolve_INCLUDE_DIR}
-             ${HDF5_INCLUDE_DIR})
-list(APPEND ALPS_EXTRA_LIBRARIES
-            ${MPI_EXTRA_LIBRARY} ${LAPACK_LIBRARIES} ${SQLite_LIBRARIES}
-  	    ${LPSolve_LIBRARIES} ${HDF5_LIBRARIES})
-
-set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
-
-configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
 
 ######################################################################
 # install dependent libraries under Windows, from applications
@@ -368,6 +346,41 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
   )
 endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
 
+######################################################################
+# setting up ALPSConfig.cmake and include.mk
+######################################################################
+set(ALPS_INCLUDE_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/include)
+# if(NOT INSTALL_BOOST_HEADERS)
+  list(APPEND ALPS_INCLUDE_DIRS_CONFIG ${Boost_ROOT_DIR})
+# endif(NOT INSTALL_BOOST_HEADERS)
+
+set(ALPS_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/lib)
+set(ALPS_RUNTIME_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/bin)
+
+# If ALPS is built as a shared libraly, application developers may need these settings.
+list(APPEND ALPS_EXTRA_INCLUDE_DIRS
+	    ${MPI_INCLUDE_PATH} ${SQLite_INCLUDE_DIR} ${LPSolve_INCLUDE_DIR}
+             ${HDF5_INCLUDE_DIR})
+list(APPEND ALPS_EXTRA_LIBRARIES
+            ${MPI_EXTRA_LIBRARY} ${LAPACK_LIBRARIES} ${SQLite_LIBRARIES}
+  	    ${LPSolve_LIBRARIES} ${HDF5_LIBRARIES})
+
+set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
+
+foreach(arg ${MPI_LIBRARIES})
+   set(MPI_LIBS "${MPI_LIBS} ${arg}")
+ endforeach(arg ${MPI_LIBRARIES})
+
+foreach(arg ${LAPACK_LIBRARY})
+   set(LAPACK_LIBS "${LAPACK_LIBS} ${arg}")
+ endforeach(arg ${LAPACK_LIBRARY})
+
+if(MAC_VECLIB)
+  set(LAPACK_LDFLAGS "-faltivec -framework vecLib")
+endif(MAC_VECLIB) 
+configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
+configure_file(config/CMake/include.mk.in ${PROJECT_BINARY_DIR}/config/CMake/include.mk)
+
 
 
 ######################################################################
@@ -420,8 +433,10 @@ else (ALPS_FOR_VISTRAILS)
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
   install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib COMPONENT xml)
 
-  install(FILES config/CMake/UseALPS.cmake ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
-        DESTINATION share/alps COMPONENT build)
+  install(FILES config/CMake/UseALPS.cmake 
+          ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
+          ${PROJECT_BINARY_DIR}/config/CMake/include.mk
+          DESTINATION share/alps COMPONENT build)
 
   install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
         FILES_MATCHING PATTERN "*.py"
@@ -452,7 +467,8 @@ endif (NOT ALPS_FOR_VISTRAILS)
 if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
   add_subdirectory(applications)
 endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
-  
+    
+
 ##########################################################################
 # Binary packages                                                        #
 ##########################################################################
@@ -603,3 +619,10 @@ if (NOT ALPS_FOR_VISTRAILS)
   ENABLE_TESTING()
   add_subdirectory(test)
 endif (NOT ALPS_FOR_VISTRAILS)
+
+
+
+get_cmake_property( P VARIABLES ) 
+foreach( VAR in ${P} )
+#  message( STATUS " ${VAR}=${${VAR}}" )
+endforeach()

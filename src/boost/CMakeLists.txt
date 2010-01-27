@@ -3,6 +3,7 @@
 #
 
 set(BOOST_SOURCES "")
+set(BOOST_MPI_PYTHON_SOURCES "")
 
 # Boost.Date_Time
 if(BUILD_BOOST_DATE_TIME)
@@ -129,6 +130,44 @@ if(BUILD_BOOST_MPI)
   endforeach(S)
 endif(BUILD_BOOST_MPI)
 
+# Boost.MPI Python bindings
+if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src/python")
+  set(SOURCES collectives.cpp py_communicator.cpp datatypes.cpp 
+      documentation.cpp py_environment.cpp py_nonblocking.cpp py_exception.cpp
+      module.cpp py_request.cpp skeleton_and_content.cpp status.cpp py_timer.cpp 
+      serialize.cpp
+  )
+  foreach(S ${SOURCES})
+    if(EXISTS ${DIRECTORY}/${S})
+      set(BOOST_MPI_PYTHON_SOURCES ${BOOST_MPI_PYTHON_SOURCES} ${DIRECTORY}/${S})
+    endif(EXISTS ${DIRECTORY}/${S})
+  endforeach(S)
+
+  if(BUILD_SHARED_LIBS)
+    python_add_module(mpi ${BOOST_MPI_PYTHON_SOURCES})
+    set_target_properties(mpi PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
+    set_target_properties(mpi PROPERTIES PREFIX "")
+  if(WIN32 AND NOT UNIX)
+    set_target_properties(mpi PROPERTIES SUFFIX ".pyd")
+  endif(WIN32 AND NOT UNIX)
+  endif(BUILD_SHARED_LIBS)
+
+  target_link_libraries(mpi boost ${LINK_LIBRARIES})
+
+  if(ALPS_FOR_VISTRAILS)
+    install(TARGETS mpi
+            RUNTIME DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
+            ARCHIVE DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
+            LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR})
+  else(ALPS_FOR_VISTRAILS)
+    install(TARGETS mpi COMPONENT python
+            RUNTIME DESTINATION bin
+            ARCHIVE DESTINATION lib/pyalps
+            LIBRARY DESTINATION lib/pyalps)
+  endif(ALPS_FOR_VISTRAILS)
+endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
+
 
 add_library(boost ${BOOST_SOURCES})
 
@@ -144,6 +183,10 @@ if (ALPS_FOR_VISTRAILS)
     INSTALL_NAME_DIR "@executable_path/../Frameworks"
   )
 endif (ALPS_FOR_VISTRAILS)
+
+
+
+
 
 #######################################################################
 # install
