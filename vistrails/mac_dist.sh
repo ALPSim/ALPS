@@ -1,4 +1,11 @@
 #!/bin/bash
+
+#  Copyright Matthier Troyer 2009 - 2010.
+#  Distributed under the Boost Software License, Version 1.0.
+#      (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
+
 SRC_PATH="vistrails"
 BIN_PATH="Contents/Resources/lib/python2.5"
 DIRS="api core db gui packages tests"

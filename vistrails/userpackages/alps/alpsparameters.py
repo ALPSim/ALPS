@@ -1,6 +1,11 @@
 # VisTrails package for ALPS, Algorithms and Libraries for Physics Simulations
 #
-# Get ALPS at http://alps.comp-phys.org/
+# Copyright (C) 2009 - 2010 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+#                              Synge Todo <wistaria@comp-phys.org>
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompany-
+# ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
 #
 ##############################################################################
 

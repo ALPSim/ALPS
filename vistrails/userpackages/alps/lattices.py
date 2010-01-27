@@ -1,6 +1,11 @@
-# VisTrails package for ALPS, Algorithms and Libraries for Physics Simulations
+    # VisTrails package for ALPS, Algorithms and Libraries for Physics Simulations
 #
-# Get ALPS at http://alps.comp-phys.org/
+# Copyright (C) 2009 - 2010 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+#                              Synge Todo <wistaria@comp-phys.org>
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompany-
+# ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
 #
 ##############################################################################
 
@@ -50,9 +55,9 @@ class open_chain_lattice(LatticeParameters):
    fixed = {'LATTICE' : 'open chain lattice'}
 
 class dimerized_chain_lattice(LatticeParameters):
-	""" a chain lattice with two different bonds """
-	_input_ports = [('L',[(basic.String, 'the length')])]
-	fixed = {'LATTICE' : 'dimerized chain lattice'}
+    """ a chain lattice with two different bonds """
+    _input_ports = [('L',[(basic.String, 'the length')])]
+    fixed = {'LATTICE' : 'dimerized chain lattice'}
 
 class open_ladder(LatticeParameters):
    """ an open ladder lattice """

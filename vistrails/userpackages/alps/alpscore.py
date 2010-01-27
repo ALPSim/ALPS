@@ -1,6 +1,11 @@
 # VisTrails package for ALPS, Algorithms and Libraries for Physics Simulations
 #
-# Get ALPS at http://alps.comp-phys.org/
+# Copyright (C) 2009 - 2010 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+#                              Synge Todo <wistaria@comp-phys.org>
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompany-
+# ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
 #
 ##############################################################################
 
@@ -186,26 +191,26 @@ class TextCellWidget(QCellWidget):
 
 
 def dict_conf(l):
-	if l[0] == '{' and l[-1] == '}':
-		cmd = 'temp = ' + l
-		exec cmd
-		return temp
-	else:
-		pairs = l.split(',')
-		temp = {}
-		for pair in pairs:
-			[k,v] = pair.split('=')
-			temp[eval(k)] = eval(v)
-		return temp
+    if l[0] == '{' and l[-1] == '}':
+        cmd = 'temp = ' + l
+        exec cmd
+        return temp
+    else:
+        pairs = l.split(',')
+        temp = {}
+        for pair in pairs:
+            [k,v] = pair.split('=')
+            temp[eval(k)] = eval(v)
+        return temp
 
 def dict_compute(self):
-	if self.hasInputFromPort('value'):
-		inps = self.forceGetInputListFromPort('value')
-		result = {}
-		for inp in inps:
-			result.update(inp)
-		self.setResult('value',result)
-		self.setResult('value_as_string',str(result))
+    if self.hasInputFromPort('value'):
+        inps = self.forceGetInputListFromPort('value')
+        result = {}
+        for inp in inps:
+            result.update(inp)
+        self.setResult('value',result)
+        self.setResult('value_as_string',str(result))
 
 
 Dictionary = basic.new_constant('Dictionary', staticmethod(dict_conf), {},\

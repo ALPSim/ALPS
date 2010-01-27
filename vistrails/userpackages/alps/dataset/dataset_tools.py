@@ -41,10 +41,10 @@ from dataset_exceptions import *
 from dataset_fit import *
 
 class SortByX(FitPrototype):
-	def transform(self,data):
-		order = np.argsort(data.x)
-		data.x = data.x[order]
-		data.y = data.y[order]
+    def transform(self,data):
+        order = np.argsort(data.x)
+        data.x = data.x[order]
+        data.y = data.y[order]
 
 class SelectXRange(FitPrototype):
     my_input_ports = [
@@ -61,15 +61,15 @@ class SelectXRange(FitPrototype):
         data.y = data.y[selection]
 
 class WriteTxt(Module):
-	my_input_ports = [PortDescriptor('input',DataSets)]
-	my_output_ports = []
-	
-	def compute(self):
-		if self.hasInputFromPort('input'):
-			for s in self.getInputFromPort('input'):
-				if 'filename' in s.props:
-					data = np.array([s.x,s.y]).transpose()
-					np.savetxt(s.props['filename'],data)
+    my_input_ports = [PortDescriptor('input',DataSets)]
+    my_output_ports = []
+    
+    def compute(self):
+        if self.hasInputFromPort('input'):
+            for s in self.getInputFromPort('input'):
+                if 'filename' in s.props:
+                    data = np.array([s.x,s.y]).transpose()
+                    np.savetxt(s.props['filename'],data)
 
 class CacheErasure(NotCacheable,Module):
     my_input_ports = [PortDescriptor('input',DataSets)]
