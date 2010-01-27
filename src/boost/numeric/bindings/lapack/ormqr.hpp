@@ -67,62 +67,62 @@ namespace boost { namespace numeric { namespace bindings {
 
       inline 
       void ormqr (char const side, char const trans, int const m, int const n,
-		 int const k, const float* a, int const lda,
-		 const float* tau, float* c,
-		 int const ldc, float* work, int const lwork,
+         int const k, const float* a, int const lda,
+         const float* tau, float* c,
+         int const ldc, float* work, int const lwork,
                  int& info) 
       {
         LAPACK_SORMQR (&side, &trans, &m, &n, &k,
-		      a, &lda,
-		      tau,
-		      c, &ldc,
-		      work, &lwork,
-		      &info);
+              a, &lda,
+              tau,
+              c, &ldc,
+              work, &lwork,
+              &info);
       }
 
       inline 
       void ormqr (char const side, char const trans, int const m, int const n,
-		 int const k, const double* a, int const lda,
-		 const double* tau, double* c,
-		 int const ldc, double* work, int const lwork,
+         int const k, const double* a, int const lda,
+         const double* tau, double* c,
+         int const ldc, double* work, int const lwork,
                  int& info) 
       {
         LAPACK_DORMQR (&side, &trans, &m, &n, &k,
-		      a, &lda,
-		      tau,
-		      c, &ldc,
-		      work, &lwork,
-		      &info);
+              a, &lda,
+              tau,
+              c, &ldc,
+              work, &lwork,
+              &info);
       }
 
       inline 
       void ormqr (char const side, char const trans, int const m, int const n,
-		 int const k, const traits::complex_f* a, int const lda,
-		 const traits::complex_f* tau, traits::complex_f* c,
-		 int const ldc, traits::complex_f* work, int const lwork,
+         int const k, const traits::complex_f* a, int const lda,
+         const traits::complex_f* tau, traits::complex_f* c,
+         int const ldc, traits::complex_f* work, int const lwork,
                  int& info) 
       {
         LAPACK_CUNMQR (&side, &trans, &m, &n, &k,
-		      traits::complex_ptr(a), &lda,
-		      traits::complex_ptr(tau),
-		      traits::complex_ptr(c), &ldc,
-		      traits::complex_ptr(work), &lwork,
-		      &info);
+              traits::complex_ptr(a), &lda,
+              traits::complex_ptr(tau),
+              traits::complex_ptr(c), &ldc,
+              traits::complex_ptr(work), &lwork,
+              &info);
       }
 
       inline 
       void ormqr (char const side, char const trans, int const m, int const n,
-		 int const k, const traits::complex_d* a, int const lda,
-		 const traits::complex_d* tau, traits::complex_d* c,
-		 int const ldc, traits::complex_d* work, int const lwork,
+         int const k, const traits::complex_d* a, int const lda,
+         const traits::complex_d* tau, traits::complex_d* c,
+         int const ldc, traits::complex_d* work, int const lwork,
                  int& info) 
       {
         LAPACK_ZUNMQR (&side, &trans, &m, &n, &k,
-		      traits::complex_ptr(a), &lda,
-		      traits::complex_ptr(tau),
-		      traits::complex_ptr(c), &ldc,
-		      traits::complex_ptr(work), &lwork,
-		      &info);
+              traits::complex_ptr(a), &lda,
+              traits::complex_ptr(tau),
+              traits::complex_ptr(c), &ldc,
+              traits::complex_ptr(work), &lwork,
+              &info);
       }
 
 

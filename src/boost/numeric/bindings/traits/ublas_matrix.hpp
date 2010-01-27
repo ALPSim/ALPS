@@ -228,7 +228,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     static int leading_dimension (matrix_type& ms) {
       typedef typename identifier_type::orientation_category oc_t; 
       return ld (ms.stride1(), ms.stride2(), oc_t())
-	* matrix_traits<m_type>::leading_dimension (ms.data()); 
+                 * matrix_traits<m_type>::leading_dimension (ms.data()); 
     }
 
     static int stride1 (matrix_type& ms) { 

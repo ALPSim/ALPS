@@ -2,7 +2,8 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1994-2006 by Matthias Troyer <troyer@itp.phys.ethz.ch>
+* Copyright (C) 2006 -2010 by Adrian Feiguin <afeiguin@uwyo.edu>
+*                             Matthias Troyer <troyer@itp.phys.ethz.ch>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under

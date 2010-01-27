@@ -117,9 +117,13 @@ by calling <tt>make_graph_from_lattice</tt>.
   <pre>template &lt;class L, class G&gt;<br>struct lattice_traits&lt;lattice_graph&lt;L,G&gt; &gt;<br>{<br>  typedef typename lattice_graph&lt;L,G&gt;::unit_cell_type unit_cell_type;<br>  typedef typename lattice_graph&lt;L,G&gt;::cell_descriptor cell_descriptor;<br>  typedef typename lattice_graph&lt;L,G&gt;::offset_type offset_type;<br>  typedef typename lattice_graph&lt;L,G&gt;::basis_vector_iterator basis_vector_iterator;<br>  typedef typename lattice_graph&lt;L,G&gt;::cell_iterator cell_iterator;<br>  typedef typename lattice_graph&lt;L,G&gt;::size_type size_type;<br>  typedef typename lattice_graph&lt;L,G&gt;::vector_type vector_type;<br>  typedef typename lattice_graph&lt;L,G&gt;::boundary_crossing_type boundary_crossing_type;<br>};<br></pre>
 </blockquote>
  is the traits class for the lattice. 
-<hr> 
-<address>copyright (c) 2000-2003 by  <a
- href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
- <br>
+<HR>
+<ADDRESS>
+    <p>copyright (c) 1994-2010 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></p>
+    <p>Distributed under the Boost Software License, Version 1.0. 
+    (See http://www.boost.org/LICENSE_1_0.txt)</p>
+</ADDRESS>
+
 </body>
 </html>
+

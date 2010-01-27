@@ -249,7 +249,7 @@ void HamiltonianMatrix<T,M>::dostep()
       momenta.push_back(alps::write_vector(*it));
   }
   int ik=0;
-  bool loop_momenta = ! parms.defined("TOTAL_MOMENTUM");	// Loop over momenta ?
+  bool loop_momenta = ! parms.defined("TOTAL_MOMENTUM");    // Loop over momenta ?
   bool done;
   do { 
     // set QN

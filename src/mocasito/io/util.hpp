@@ -8,26 +8,26 @@
 #ifndef IO_UTIL
 #define IO_UTIL
 namespace mocasito {
-	namespace io {
-		#define MOCASITO_IO_FOREACH_SCALAR(callback)										\
-			callback(char)																	\
-			callback(signed char)															\
-			callback(unsigned char)															\
-			callback(short)																	\
-			callback(unsigned short)														\
-			callback(long)																	\
-			callback(int)																	\
-			callback(unsigned)																\
-			callback(unsigned long)															\
-			callback(long long)																\
-			callback(unsigned long long)													\
-			callback(float)																	\
-			callback(double)																\
-			callback(long double)															\
-			callback(bool)
-		namespace detail {
-			typedef enum node_t { IO_UNKNOWN = -1, IO_GROUP, IO_DATA, IO_ATTR } node_t;
-		}
-	}
+    namespace io {
+        #define MOCASITO_IO_FOREACH_SCALAR(callback)                                        \
+            callback(char)                                                                    \
+            callback(signed char)                                                            \
+            callback(unsigned char)                                                            \
+            callback(short)                                                                    \
+            callback(unsigned short)                                                        \
+            callback(long)                                                                    \
+            callback(int)                                                                    \
+            callback(unsigned)                                                                \
+            callback(unsigned long)                                                            \
+            callback(long long)                                                                \
+            callback(unsigned long long)                                                    \
+            callback(float)                                                                    \
+            callback(double)                                                                \
+            callback(long double)                                                            \
+            callback(bool)
+        namespace detail {
+            typedef enum node_t { IO_UNKNOWN = -1, IO_GROUP, IO_DATA, IO_ATTR } node_t;
+        }
+    }
 }
 #endif

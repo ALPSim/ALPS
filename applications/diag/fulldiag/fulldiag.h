@@ -120,12 +120,12 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
   p << parmsin;
   
   bool have_t_range=false;
-  bool muN = false;		// coupling -mu N ?
+  bool muN = false;        // coupling -mu N ?
   magnitude_type tmin;
   magnitude_type tmax;
   magnitude_type deltaT;
   
-  conserved_name = "Sz";	// Default: Coupling -h Sz
+  conserved_name = "Sz";    // Default: Coupling -h Sz
   std::string field_name = "h";
   std::string field_label = "Magnetic Field";
   std::string conserved_label = "Magnetization";
@@ -135,7 +135,7 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
   muN = (p["couple"] == "mu");
   if(p["couple"] == "MU")
      muN = true;
-  if(muN)			// Switch to coupling -mu N
+  if(muN)            // Switch to coupling -mu N
    {
     conserved_name = "N";
     field_name = "mu";
@@ -446,7 +446,7 @@ void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesys
     beta = (this->parms.defined("T") ? 1./double(this->parms["T"]) 
                            : double(this->parms["beta"]));
     field0 = field = this->parms.value_or_default("H",this->parms.value_or_default("h",0.));
-    conserved_name = "Sz";	// Here we support only a coupling -h Sz
+    conserved_name = "Sz";    // Here we support only a coupling -h Sz
 
     min_val = groundstate_energy();
 

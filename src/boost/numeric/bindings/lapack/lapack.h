@@ -372,40 +372,40 @@ extern "C" {
 
   void LAPACK_CTREVC( const char* side, const char* howmny, const logical_t* select, const int *n,
                      fcomplex_t* t, const int * ldt, fcomplex_t* vl, const int* ldvl,
-		     fcomplex_t* vr, const int * ldvr, const int * nm, int* m, fcomplex_t* work,
+             fcomplex_t* vr, const int * ldvr, const int * nm, int* m, fcomplex_t* work,
                      float* rwork, int* info );
 
   void LAPACK_ZTREVC( const char* side, const char* howmny, const logical_t* select, const int *n,
                      dcomplex_t* t, const int * ldt, dcomplex_t* vl, const int* ldvl,
-		     dcomplex_t* vr, const int * ldvr, const int * nm, int* m, dcomplex_t* work,
+             dcomplex_t* vr, const int * ldvr, const int * nm, int* m, dcomplex_t* work,
                      double* rwork, int* info );
 
   void LAPACK_STREVC( const char* side, const char* howmny, const logical_t* select, const int *n,
                      float* t, const int * ldt, float* vl, const int* ldvl,
-		     float* vr, const int * ldvr, const int * nm, int* m, float* work,
+             float* vr, const int * ldvr, const int * nm, int* m, float* work,
                      int* info );
 
   void LAPACK_DTREVC( const char* side, const char* howmny, const logical_t* select, const int *n,
                      double* t, const int * ldt, double* vl, const int* ldvl,
-		     double* vr, const int * ldvr, const int * nm, int* m, double* work,
+             double* vr, const int * ldvr, const int * nm, int* m, double* work,
                      int* info );
 
 
   void LAPACK_STREXC( const char* compq, const int *n,
                      float* t, const int * ldt, float* q, const int* ldq,
-		     int* ifst, const int * ilst, float* work, int* info );
+             int* ifst, const int * ilst, float* work, int* info );
 
   void LAPACK_DTREXC( const char* compq, const int *n,
                      double* t, const int * ldt, double* q, const int* ldq,
-		     int* ifst, const int * ilst, double* work, int* info );
+             int* ifst, const int * ilst, double* work, int* info );
 
   void LAPACK_CTREXC( const char* compq, const int *n,
                      fcomplex_t* t, const int * ldt, fcomplex_t* q, const int* ldq,
-		     int* ifst, const int * ilst, int* info );
+             int* ifst, const int * ilst, int* info );
 
   void LAPACK_ZTREXC( const char* compq, const int *n,
                      dcomplex_t* t, const int * ldt, dcomplex_t* q, const int* ldq,
-		     int* ifst, const int * ilst, int* info );
+             int* ifst, const int * ilst, int* info );
 
 
   /* Hermitian tridiagonal matrices */

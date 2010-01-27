@@ -455,16 +455,6 @@ dnl
 dnl Experimental Features
 dnl
 
-AC_ARG_ENABLE(libheap,
-  AC_HELP_STRING([--enable-libheap], [building libheap wrapper @<:@default=yes@:>@]),
-  [
-  if test "x$enableval" = "xno"; then
-    ac_cv_libheap=no
-  fi
-  ]
-)
-test -z "$ac_cv_libheap" && ac_cv_libheap=yes
-
 dnl
 dnl Absolute paths
 dnl
@@ -480,7 +470,6 @@ AM_CONDITIONAL(ALPS_FULL, test "$ac_cv_alps_type" = "full")
 AM_CONDITIONAL(ALPS_LIGHT, test "$ac_cv_alps_type" = "light")
 AM_CONDITIONAL(BUILD_DOC, test "$build_doc" = yes)
 AM_CONDITIONAL(BUILD_PDF, test "$build_pdf" = yes)
-AM_CONDITIONAL(BUILD_LIBHEAP, test "$ac_cv_libheap" = yes)
 AM_CONDITIONAL(BUILD_UNIFIED_LIB, test "$ac_cv_unifiedlib" = yes)
 AM_CONDITIONAL(BUILD_ARCHIVE, test "$ac_cv_have_sqlite" = yes)
 AM_CONDITIONAL(HAVE_MPI, test "$ac_cv_have_mpi" = yes)
@@ -497,7 +486,6 @@ AC_CONFIG_HEADERS([src/alps/version.h])
 dnl Makefiles
 AC_CONFIG_FILES(Makefile config/config.site config/include.mk)
 AC_CONFIG_FILES(src/Makefile)
-AC_CONFIG_FILES(lib/Makefile lib/alps/Makefile lib/heap/Makefile)
 
 AC_CONFIG_FILES(test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile test/alea/Makefile test/hdf5/Makefile)
 AC_CONFIG_FILES(doc/Makefile)

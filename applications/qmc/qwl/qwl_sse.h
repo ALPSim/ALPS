@@ -95,7 +95,7 @@ class QWL_SSE_Simulation : public scheduler::LatticeModelMCRun<> {
     vertextype()
       : op(0) {
     };
-	boost::uint32_t op;
+    boost::uint32_t op;
     boost::uint32_t bond;
     bond_state_type vs;
     int         vv[4];

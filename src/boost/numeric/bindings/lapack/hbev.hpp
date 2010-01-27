@@ -80,8 +80,8 @@ namespace boost { namespace numeric { namespace bindings {
                  float* ab, int const ldab, float* w, float* z, int const ldz,
                  float* work, int& info) 
       {
-	      //for (int i=0; i<n*kd; ++i) std::cout << *(ab+i) << " " ;
-	      //std::cout << "\n" ;
+          //for (int i=0; i<n*kd; ++i) std::cout << *(ab+i) << " " ;
+          //std::cout << "\n" ;
         LAPACK_SSBEV (&jobz, &uplo, &n, &kd, ab, &ldab, w, z, &ldz,
                       work, &info);
       }
@@ -248,7 +248,7 @@ namespace boost { namespace numeric { namespace bindings {
                        traits::matrix_storage (z),
                        traits::leading_dimension (z),
                        work, info);
-	 return info ;
+     return info ;
        } // hbev()
        
        } // namespace detail

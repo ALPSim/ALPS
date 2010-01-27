@@ -105,7 +105,7 @@ QMCRun<G,StateType>::QMCRun(const alps::ProcessList& w, const alps::Parameters& 
     measure_structure_factor_(p.value_or_default("MEASURE[Structure Factor]",false)),
     measure_green_function_(p.value_or_default("MEASURE[Green Function]",false)),
     measure_bond_type_stiffness_(p.value_or_default("MEASURE[Bond Type Stiffness]",false)),
-	measure_CBS_order_(p.value_or_default("MEASURE[CBS Order]",false)),
+    measure_CBS_order_(p.value_or_default("MEASURE[CBS Order]",false)),
     num_site_types_(alps::maximum_vertex_type(this->graph())+1),
     num_bond_types_(alps::maximum_edge_type(this->graph())+1)
 {
@@ -612,16 +612,16 @@ void QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
   }
   if (measure_CBS_order_)
   {
-		std::complex<double> val;
-		for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit)
-		{
-			double phase = M_PI * (coordinate(*sit)[0] + coordinate(*sit)[1]);
-			val += local[*sit] * (std::complex<double> ( std::cos(phase), std::sin(phase) ));			
-		}
-		double CBS_order = (std::abs(val) * std::abs(val) * sign) / this->num_sites();
-		this->measurements["CBS Order"] << CBS_order;
-		this->measurements["CBS Order^2"] << CBS_order * CBS_order;
-		this->measurements["CBS Order^4"] << CBS_order * CBS_order * CBS_order * CBS_order;
+        std::complex<double> val;
+        for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit)
+        {
+            double phase = M_PI * (coordinate(*sit)[0] + coordinate(*sit)[1]);
+            val += local[*sit] * (std::complex<double> ( std::cos(phase), std::sin(phase) ));            
+        }
+        double CBS_order = (std::abs(val) * std::abs(val) * sign) / this->num_sites();
+        this->measurements["CBS Order"] << CBS_order;
+        this->measurements["CBS Order^2"] << CBS_order * CBS_order;
+        this->measurements["CBS Order^4"] << CBS_order * CBS_order * CBS_order * CBS_order;
   }
 }
 

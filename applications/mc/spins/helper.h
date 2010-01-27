@@ -1,3 +1,28 @@
+/*****************************************************************************
+*
+* ALPS Project Applications
+*
+* Copyright (C)  by Andreas Streich 
+*
+* This software is part of the ALPS Applications, published under the ALPS
+* Application License; you can use, redistribute it and/or modify it under
+* the terms of the license, either version 1 or (at your option) any later
+* version.
+* 
+* You should have received a copy of the ALPS Application License along with
+* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+* available from http://alps.comp-phys.org/.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+* DEALINGS IN THE SOFTWARE.
+*
+*****************************************************************************/
+
 #ifndef ALPS_APPLICATIONS_MC_SPIN_HELPER_H_
 #define ALPS_APPLICATIONS_MC_SPIN_HELPER_H_
 
@@ -60,12 +85,12 @@ public:
       tmp.append(1,myString[myPos]);
       myPos++;
     }
-	if (tmp.length()==0) {
+    if (tmp.length()==0) {
       std::cerr << "no more arguments left\n";
       boost::throw_exception(std::runtime_error("too few input values"));
     }
-	if (paramsSet) return alps::evaluate<T>(tmp, myParams);
-	else return alps::evaluate<T>(tmp);
+    if (paramsSet) return alps::evaluate<T>(tmp, myParams);
+    else return alps::evaluate<T>(tmp);
   }
 
   std::string getNextString() {

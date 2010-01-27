@@ -1,4 +1,4 @@
-SUBDIRS = alps heap
+SUBDIRS = alps
 if ALPS_FULL
 SUBDIRS += xml
 endif

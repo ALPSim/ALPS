@@ -28,7 +28,7 @@ template <class G> void construct_matrix(blas_matrix & M, segment_container_t & 
       double argument = it1->t_end()-it2->t_start();
       double sign = 1;
       if (argument<0) {
-        argument += BETA;	  
+        argument += BETA;      
         sign = -1;
       }
       M(row,column) = interpolate_F(argument, BETA, F)*sign;
@@ -106,18 +106,18 @@ template <class S> inline double segment_overlap(times segment, const S& other_s
   double length = (segment.t_start()<segment.t_end() ? segment.t_end()-segment.t_start() : segment.t_end()-segment.t_start()+BETA);
   double t_final = segment.t_start()+length;
   double t = segment.t_start();
-  double t_final_segment;		
+  double t_final_segment;        
   double other_length=0;
   if (other_full_line==1)
     other_length=length;
   else if (other_segments.size()>0){
     typename S::const_iterator it; //this function does NOT change the segments.
-    //it =lower_bound(other_segments.begin(), other_segments.end(), t);	
+    //it =lower_bound(other_segments.begin(), other_segments.end(), t);    
     //find first segment that has starting time AFTER t.
     it=other_segments.begin();
     while(it != other_segments.end() && it->t_start()<t){
-	    it++;
-    } 		
+        it++;
+    }         
     if (it!=other_segments.begin()) {
       it--;
       //find end point of this segment
@@ -143,7 +143,7 @@ template <class S> inline double segment_overlap(times segment, const S& other_s
     if (it->t_end()<it->t_start() && t<it->t_end()) {
       other_length += (t_final<it->t_end() ? t_final-t : it->t_end()-t);
     }
-  } 	
+  }     
   return other_length;   
 }
 
@@ -183,13 +183,13 @@ template <class G, class S, class V> double det_rat_up(const times & new_segment
   
   // take care of sign changes produced by segments which "wind around"
   if (new_segment.t_end() < new_segment.t_start()) {
-    det_rat *= -1;	  
-    overlap = -1;	
+    det_rat *= -1;      
+    overlap = -1;    
   }
   else {
     overlap = 1;
   }
-	
+    
   if (det_rat < 0) {
     det_rat_sign = -1;
     det_rat *= -1;
@@ -219,7 +219,7 @@ template <class V> void compute_M_up(int k, blas_matrix & M, V& Fs, V& Fe, doubl
     
     for (int n=0; n<(int)M.size1(); n++) {
       M_new(i_new,k) -= M(i,n)*Fs(n);
-      M_new(k,i_new) -= M(n,i)*Fe(n);	
+      M_new(k,i_new) -= M(n,i)*Fe(n);    
     } 
     M_new(i_new,k) *= det_rat_inv;
     M_new(k,i_new) *= det_rat_inv;
@@ -269,9 +269,9 @@ template <class S> double det_rat_down(int k, blas_matrix & M, const S& segments
   if (k==(int)segments_old.size()-1) {
     typename S::const_iterator it=segments_old.end(); it--;
     if (it->t_end() < it->t_start())
-      det_rat *= -1;	  
+      det_rat *= -1;      
   }
-	
+    
   if (det_rat < 0) {
     det_rat_sign = -1;
     det_rat *= -1;
@@ -348,10 +348,10 @@ template <class G, class S> double det_rat_move(times & new_segment, int k, blas
     // check if last segment has been shifted across beta
     if ((new_segment.t_end()-new_segment.t_start())*(it1->t_end()-it1->t_start())<0) {
       det_rat *= -1;
-      overlap = -1;	  
+      overlap = -1;      
     }
   }
-	
+    
   if (det_rat < 0) {
     det_rat_sign = -1;
     det_rat *= -1;
@@ -380,7 +380,7 @@ template <class G, class S> void compute_M_move(times & new_segment, int k, blas
       for (int n=0; n<M.size1(); n++) {
         if (n!=k) {
           M_new(i,k) -= det_rat_inv*(M(k,k)*M(i,n)-M(i,k)*M(k,n))*interpolate_F(it->t_end()-new_segment.t_start(), BETA, F);
-          M_new(k,i) -= det_rat_inv*(M(k,k)*M(n,i)-M(n,k)*M(k,i))*interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);	  
+          M_new(k,i) -= det_rat_inv*(M(k,k)*M(n,i)-M(n,k)*M(k,i))*interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);      
         }
         it++;
       } 
@@ -423,10 +423,10 @@ template <class G, class S> double det_rat_shift(times & new_segment, int k, bla
     // check if last segment has been shifted across beta
     if ((new_segment.t_end()-new_segment.t_start())*(it->t_end()-it->t_start())<0) {
       det_rat *= -1;
-      overlap = -1;	  
+      overlap = -1;      
     }
   }
-	
+    
   if (det_rat < 0) {
     det_rat_sign = -1;
     det_rat *= -1;
@@ -474,7 +474,7 @@ template <class G, class S> void compute_M_shift(times & new_segment, unsigned k
    typename S::const_iterator it=segments_old.begin();
    for (int i=0; i<(int)M_k.size(); i++) {
    M_k(i) = M(i,k);
-   Fe(i) = interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);	
+   Fe(i) = interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);    
    it++;
    }
    
@@ -513,9 +513,9 @@ template <class G, class S, class V> double det_rat_insert_anti(times & anti_seg
   // check if anti-segment winds around
   if (anti_segment.t_end()<anti_segment.t_start()) {
     det_rat *= -1;
-    overlap = -1;	  
+    overlap = -1;      
   }
-	
+    
   if (det_rat < 0) {
     det_rat_sign = -1;
     det_rat *= -1;
@@ -628,7 +628,7 @@ template <class G, class S> double det_rat_remove_anti(times anti_segment, int r
   if (anti_segment.t_end() < anti_segment.t_start()) {
     inv_det_rat *= -1;
   }
-	
+    
   if (inv_det_rat < 0) {
     det_rat_sign = -1;
     inv_det_rat *= -1;

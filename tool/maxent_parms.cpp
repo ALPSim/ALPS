@@ -99,38 +99,38 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       std::cerr << "assume time space data" << std::endl;
     if (p["KERNEL"] == "fermionic") {
       if (alps::is_master())
-	std::cerr << "Using fermionic kernel" << std::endl;
+        std::cerr << "Using fermionic kernel" << std::endl;
       for (int i=0; i<ndat(); ++i) {
-	double tau = i / ((ndat()) * T_);
-	for (int j=0; j<ntab; ++j) {
-	  double omega = freq[j]; //Default().omega_of_t(double(j)/(ntab-1));
-	  K_(i,j) =  -1. / (std::exp(omega*tau) + std::exp(-omega*(1./T_-tau)));
-	}
+        double tau = i / ((ndat()) * T_);
+        for (int j=0; j<ntab; ++j) {
+          double omega = freq[j]; //Default().omega_of_t(double(j)/(ntab-1));
+          K_(i,j) =  -1. / (std::exp(omega*tau) + std::exp(-omega*(1./T_-tau)));
+        }
       }
     }
     else if (p["KERNEL"] == "bosonic") {
       if (alps::is_master())
-	std::cerr << "Using bosonic kernel" << std::endl;
+        std::cerr << "Using bosonic kernel" << std::endl;
       for (int i=0; i<ndat(); ++i) {
-	double tau = i / (ndat() * T_);
-	K_(i,0) = T_;
-	for (int j=1; j<ntab; ++j) {
-	  double omega = freq[j];
-	  K_(i,j) = 0.5*omega * (std::exp(-omega*tau) + std::exp(-omega*(1./T_-tau))) / (1 - std::exp(-omega/T_));
-	}
+        double tau = i / (ndat() * T_);
+        K_(i,0) = T_;
+        for (int j=1; j<ntab; ++j) {
+          double omega = freq[j];
+          K_(i,j) = 0.5*omega * (std::exp(-omega*tau) + std::exp(-omega*(1./T_-tau))) / (1 - std::exp(-omega/T_));
+        }
       }    
     }
     else 
       boost::throw_exception(std::invalid_argument("unknown integration kernel"));
   } 
   else if (p["DATASPACE"]=="frequency" && p["KERNEL"] == "fermionic" &&
-	   p.value_or_default("PARTICLE_HOLE_SYMMETRY", false)) {
+           p.value_or_default("PARTICLE_HOLE_SYMMETRY", false)) {
     std::cerr << "using particle hole symmetric fermionic frequency space kernel" << std::endl;
     for (int i=0; i<ndat(); ++i) {
       double omegan = (2*i+1)*M_PI*T_;
       for (int j=0; j<ntab; ++j) {
-	double omega = freq[j]; 
-	K_(i,j) =  -omegan / (omegan*omegan + omega*omega);
+        double omega = freq[j]; 
+        K_(i,j) =  -omegan / (omegan*omegan + omega*omega);
       }
     }
   } 
@@ -140,32 +140,32 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     ublas::matrix<std::complex<double>, ublas::column_major> Kc(ndat_/2, ntab);
     if (p["KERNEL"] == "fermionic") {
       if (alps::is_master())
-	std::cerr << "Using fermionic kernel" << std::endl;
+        std::cerr << "Using fermionic kernel" << std::endl;
       for (int i=0; i<ndat()/2; ++i) {
-	std::complex<double> iomegan(0, (2*i+1)*M_PI*T_);
-	for (int j=0; j<ntab; ++j) {
-	  double omega = freq[j]; 
-	  Kc(i,j) =  1. / (iomegan - omega);
-	}
+        std::complex<double> iomegan(0, (2*i+1)*M_PI*T_);
+        for (int j=0; j<ntab; ++j) {
+          double omega = freq[j]; 
+          Kc(i,j) =  1. / (iomegan - omega);
+        }
       }
     }
     else if (p["KERNEL"] == "bosonic") {
       if (alps::is_master())
-	std::cerr << "Using bosonic kernel" << std::endl;
+        std::cerr << "Using bosonic kernel" << std::endl;
       for (int i=0; i<ndat()/2; ++i) {
-	std::complex<double> iomegan(0, 2*i*M_PI*T_);
-	for (int j=1; j<ntab; ++j) {
-	  double omega = freq[j]; 
-	  Kc(i,j) =  -1. / (iomegan - omega);
-	}
+        std::complex<double> iomegan(0, 2*i*M_PI*T_);
+        for (int j=1; j<ntab; ++j) {
+          double omega = freq[j]; 
+          Kc(i,j) =  -1. / (iomegan - omega);
+        }
       }    
     }
     else 
       boost::throw_exception(std::invalid_argument("unknown integration kernel"));    
     for (int i=0; i<ndat(); i+=2) {
       for (int j=1; j<ntab; ++j) {
-	K_(i,j) = Kc(i/2,j).real();
-	K_(i+1,j) = Kc(i/2,j).imag();
+        K_(i,j) = Kc(i/2,j).real();
+        K_(i+1,j) = Kc(i/2,j).imag();
       }
     }
   }
@@ -184,7 +184,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     while (covstream) {
       covstream >> i >> j >> covariance;
       if (i<ndat() && j<ndat())
-	cov(i,j) = covariance;
+        cov(i,j) = covariance;
     }
     if (p.defined("ERROR_MULTIPLICATOR"))
       cov *= (double)p["ERROR_MULTIPLICATOR"];
@@ -198,7 +198,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     for (int i=0; i<ndat(); ++i) { 
       sigma[i] = std::sqrt(var(i));
       if (alps::is_master())
-	std::cout << "# " << var(i) << "\n";
+        std::cout << "# " << var(i) << "\n";
     }
   } 
   else {

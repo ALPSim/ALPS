@@ -100,7 +100,7 @@ does one simulation step. This needs to be <A href="implementing.html">implement
 <blockquote><pre>
 virtual double work_done() const =0;
 </pre></blockquote>
-returns the fraction of work that is already done for the simulation. A value of one means that the simulation is finished. This also needs to be <A href="implement.html">implemented</A> by the user of the library.
+returns the fraction of work that is already done for the simulation. A value of one means that the simulation is finished. This also needs to be <A href="implementing.html">implemented</A> by the user of the library.
 <blockquote><pre>
 virtual void start();
 </pre></blockquote>
@@ -174,14 +174,14 @@ The constructor creates the graph from the following input parameters:
 <table border="1">
 <thead><tr><td><b>Parameter</b></td><td><b>Description</b></td></tr></thead>
 <tbody>
-<tr><td>LATTICE_LIBRARY</td><td>The path to an XML file containg lattice descriptions. It will be used to initialize a <a href="../lattice/library.html">lattice library</a>. The default is a file called "lattices.xml" in the current working directory.</td></tr>
+<tr><td>LATTICE_LIBRARY</td><td>The path to an XML file containg lattice descriptions. It will be used to initialize a <a href="../lattice/latticelibrary.html">lattice library</a>. The default is a file called "lattices.xml" in the current working directory.</td></tr>
 <tr><td>LATTICE</td><td>The name of the lattice or graph in the lattice library that will be constructed.</td></tr>
 <tr><td>GRAPH</td><td>A synonym for LATTICE.</td></tr>
 </tbody>
 </table>
 
 <h3>The <tt> LatticeModelMCRun</tt> class</h3>
-is derived from <tt>LatticeMCRun</tt> and <a href="../model/model_helper.html"><tt>model_helper</tt></A>, thus constructing a model and providing access to it.
+is derived from <tt>LatticeMCRun</tt> and <tt>model_helper</tt>, thus constructing a model and providing access to it.
 <blockquote><pre>   
 LatticeModelMCRun(const osiris::ProcessList&amp; w,const alps::Parameters&amp; p,int n);
 </pre></blockquote>
@@ -198,9 +198,12 @@ bool has_sign_problem() const;
 </pre></blockquote>
 returns true if the model might suffer from a sign problem.
 <HR>
-<ADDRESS>copyright (c) 1994-2004 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></ADDRESS>
-</body>
-</html>
+<ADDRESS>
+    <p>copyright (c) 1994-2010 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></p>
+    <p>Distributed under the Boost Software License, Version 1.0. 
+    (See http://www.boost.org/LICENSE_1_0.txt)</p>
+</ADDRESS>
 
 </body>
 </html>
+

@@ -58,26 +58,26 @@ namespace boost { namespace numeric { namespace bindings {
 
       inline 
       void heev (char const jobz, char const uplo, int const n,
-		 traits::complex_f* a, int const lda,
+         traits::complex_f* a, int const lda,
                  float* w, traits::complex_f* work, int const lwork,
                  float* rwork, int& info) 
       {
         LAPACK_CHEEV (&jobz, &uplo, &n,
-		      traits::complex_ptr(a), &lda, w,
-		      traits::complex_ptr(work), &lwork,
-		      rwork, &info);
+              traits::complex_ptr(a), &lda, w,
+              traits::complex_ptr(work), &lwork,
+              rwork, &info);
       }
 
       inline 
       void heev (char const jobz, char const uplo, int const n,
-		 traits::complex_d* a, int const lda,
+         traits::complex_d* a, int const lda,
                  double* w, traits::complex_d* work, int const lwork,
                  double* rwork, int& info) 
       {
         LAPACK_ZHEEV (&jobz, &uplo, &n,
-		      traits::complex_ptr(a), &lda, w,
-		      traits::complex_ptr(work), &lwork,
-		      rwork, &info);
+              traits::complex_ptr(a), &lda, w,
+              traits::complex_ptr(work), &lwork,
+              rwork, &info);
       }
 
 

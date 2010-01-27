@@ -60,67 +60,67 @@ void SSE::diagonal_update()
                         proba=0.;
                         
                         if (i%2==0)  {//"Gap" between succeeding operators    
-			  if (current_number_of_non_identity<norder_max) {  
-			    uint32_t random_bond=random_int(0,num_bonds()-1);
-			    bond_descriptor this_bond=bond(random_bond);
-			    proba=ensemble_weight_fraction(current_number_of_non_identity);
-			    proba*=proba_diagonal[bond_type[this_bond]][states[source(this_bond)]][states[target(this_bond)]]
-			      /(current_number_of_non_identity+1);
-			    if (proba!=0. && (proba>=1. || random_real()<proba)) {
-        			bit->vertex_type=1;
-				bit->bond_number=random_bond;
-				bit->leg[0]=bit->leg[2]=states[source(this_bond)];                              
-				bit->leg[1]=bit->leg[3]=states[target(this_bond)];
-				++bit;
-				++current_number_of_non_identity;
-				++i;			    	
-		            } 
-			  }
+              if (current_number_of_non_identity<norder_max) {  
+                uint32_t random_bond=random_int(0,num_bonds()-1);
+                bond_descriptor this_bond=bond(random_bond);
+                proba=ensemble_weight_fraction(current_number_of_non_identity);
+                proba*=proba_diagonal[bond_type[this_bond]][states[source(this_bond)]][states[target(this_bond)]]
+                  /(current_number_of_non_identity+1);
+                if (proba!=0. && (proba>=1. || random_real()<proba)) {
+                    bit->vertex_type=1;
+                bit->bond_number=random_bond;
+                bit->leg[0]=bit->leg[2]=states[source(this_bond)];                              
+                bit->leg[1]=bit->leg[3]=states[target(this_bond)];
+                ++bit;
+                ++current_number_of_non_identity;
+                ++i;                    
+                    } 
+              }
                         } else { //Operator
-			  deletion_occured=false;
-			  if (oit->diagonal()) {
-			    if (current_number_of_non_identity>norder_min) {
-			      proba=1./ensemble_weight_fraction(current_number_of_non_identity-1);
-			      proba*=current_number_of_non_identity
-				/proba_diagonal[bond_type[bond(oit->bond_number)]][oit->leg[0]][oit->leg[1]];
-			      
-			      if ( proba>=1 || random_real()<proba ) {
-				--current_number_of_non_identity;
-			      	--i;
-				++oit;  //Proceed to next operator in original string
-			        deletion_occured=true;
-			      }	 
-			    }
-			  } else { // Non-Diagonal
+              deletion_occured=false;
+              if (oit->diagonal()) {
+                if (current_number_of_non_identity>norder_min) {
+                  proba=1./ensemble_weight_fraction(current_number_of_non_identity-1);
+                  proba*=current_number_of_non_identity
+                /proba_diagonal[bond_type[bond(oit->bond_number)]][oit->leg[0]][oit->leg[1]];
+                  
+                  if ( proba>=1 || random_real()<proba ) {
+                --current_number_of_non_identity;
+                      --i;
+                ++oit;  //Proceed to next operator in original string
+                    deletion_occured=true;
+                  }     
+                }
+              } else { // Non-Diagonal
 
-			    int s=source(bond(oit->bond_number));
-			    int t=target(bond(oit->bond_number));
-			    
-			    /*    if (measure_site_compressibility_) {
-				  if (last_level[s]!=std::numeric_limits<unsigned int>::max()) {
-				  localint[s]+=(level-last_level[s])*(matrix_element_n_[site_type(s)][states[s]]-initm[s]);
-				  localint2[s]+=(level-last_level[s])*(matrix_element_n_[site_type(s)][states[s]]*matrix_element_n_[site_type(s)][states[s]]-initm[s]*initm[s]);
-				  }
-				  if (last_level[t]!=std::numeric_limits<unsigned int>::max()) {
-				  localint[t]+=(level-last_level[t])*(matrix_element_n_[site_type(t)][states[t]]-initm[t]);
-				  localint2[t]+=(level-last_level[t])*(matrix_element_n_[site_type(t)][states[t]]*matrix_element_n_[site_type(t)][states[t]]-initm[t]*initm[t]);
-				  }
-				  last_level[s]=last_level[t]=level;
-				  }*/
-			    states[s]=oit->leg[2];
-			    states[t]=oit->leg[3];
-			  }
-			  if (!deletion_occured) {   //If nothing was deleted (offdiagonal or by probability, we copy the op.
-			    *bit=*oit;
-			    ++oit;
-			    ++bit;
-			  }
-			}
+                int s=source(bond(oit->bond_number));
+                int t=target(bond(oit->bond_number));
+                
+                /*    if (measure_site_compressibility_) {
+                  if (last_level[s]!=std::numeric_limits<unsigned int>::max()) {
+                  localint[s]+=(level-last_level[s])*(matrix_element_n_[site_type(s)][states[s]]-initm[s]);
+                  localint2[s]+=(level-last_level[s])*(matrix_element_n_[site_type(s)][states[s]]*matrix_element_n_[site_type(s)][states[s]]-initm[s]*initm[s]);
+                  }
+                  if (last_level[t]!=std::numeric_limits<unsigned int>::max()) {
+                  localint[t]+=(level-last_level[t])*(matrix_element_n_[site_type(t)][states[t]]-initm[t]);
+                  localint2[t]+=(level-last_level[t])*(matrix_element_n_[site_type(t)][states[t]]*matrix_element_n_[site_type(t)][states[t]]-initm[t]*initm[t]);
+                  }
+                  last_level[s]=last_level[t]=level;
+                  }*/
+                states[s]=oit->leg[2];
+                states[t]=oit->leg[3];
+              }
+              if (!deletion_occured) {   //If nothing was deleted (offdiagonal or by probability, we copy the op.
+                *bit=*oit;
+                ++oit;
+                ++bit;
+              }
+            }
                         diagonal_update_iteration_end(i);   //Used to update histograms, weights (WL) etc.
                 }
                 operator_string=buffer_string;
                 buffer_string=identity_string;             
-		diagonal_update_sweep_end();
+        diagonal_update_sweep_end();
                 
         } else {
                 
@@ -189,7 +189,7 @@ void SSE::diagonal_update()
                         diagonal_update_iteration_end(0);
                 }
         diagonal_update_sweep_end();
-	}
+    }
 }
 
 /****************************************************************************
@@ -606,7 +606,7 @@ void SSE::do_update()
     }
     else {
       if (!(is_thermalized())) {
-	         //  std::cout<<"Worms not_thermalized\n";
+             //  std::cout<<"Worms not_thermalized\n";
 
       // If in the thermalization part, do enough worms such that
       // the total worm size is larger than 2n 
@@ -614,7 +614,7 @@ void SSE::do_update()
       
         int yy=0;
         while (worm_size<2*current_number_of_non_identity) { 
-	              
+                  
           worm_update(); 
           yy++;
         }
@@ -643,6 +643,6 @@ void SSE::do_update()
           worm_update();
         worm_size/=number_of_worms_per_sweep;
       }
-    }
+        }
   }
 }

@@ -30,7 +30,7 @@
 
 
 alps::scheduler::Task* MaxEntFactory::make_task(const alps::ProcessList& w, 
-						const boost::filesystem::path& fn) const
+                 const boost::filesystem::path& fn) const
 {
   return static_cast<alps::scheduler::Task*>(new MaxEntSimulation(w,fn));
 }

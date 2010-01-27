@@ -1,3 +1,16 @@
+/*
+ * 
+ * Copyright (c) 2002, 2003 Kresimir Fresl, Toon Knapen and Karl Meerbergen
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * KF acknowledges the support of the Faculty of Civil Engineering, 
+ * University of Zagreb, Croatia.
+ *
+ */
+
 #ifndef boost_numeric_bindings_traits_algorithm_hpp
 #define boost_numeric_bindings_traits_algorithm_hpp
 

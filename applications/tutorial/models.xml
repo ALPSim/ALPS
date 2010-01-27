@@ -1,4 +1,12 @@
-<MODELS>
+<!--
+   Copyright (c) 2003-2010 Matthias Troyer (troyer@ethz.ch)
+    
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+  
+  <MODELS>
 <SITEBASIS name="spin">
   <PARAMETER name="local_spin" default="local_S"/>
   <PARAMETER name="local_S" default="1/2"/>

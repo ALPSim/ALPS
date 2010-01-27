@@ -41,7 +41,7 @@ public:
   DefaultModel(const alps::Parameters& p) : 
     omega_max(p["OMEGA_MAX"]), 
     omega_min((p["KERNEL"] == "bosonic") ? 0. : 
-	      static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max))),
+          static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max))),
     blow_up_(p.value_or_default("BLOW_UP", 1.))
   {}
 
@@ -157,7 +157,7 @@ public:
     }
     double omega_max = p["OMEGA_MAX"]; 
     double omega_min = (p["KERNEL"] == "bosonic") ? 0. : 
-			static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max));
+         static_cast<double>(p.value_or_default("OMEGA_MIN", -omega_max));
     if (Omega[0]!=omega_min || Omega[Omega.size()-1]!=omega_max)
       boost::throw_exception(std::invalid_argument("invalid omega range for default model"));
   }

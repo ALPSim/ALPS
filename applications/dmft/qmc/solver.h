@@ -59,20 +59,20 @@ public:
   MatsubaraImpuritySolver() {}
     
   typedef std::pair<matsubara_green_function_t,itime_green_function_t> result_type;
-	
-	///  @brief solves the impurity problem taking both G0_tau and G0_omega
-	///
-	///  @param G0_omega the bare Green's function in Matsubara frequency
-	///  @param G0_tau the bare Green's function in imaginary time
-	///  @param parms the simulation parameters
-	///  
-	///  Note that  mu, U and h are passed as simulation parameters inside parms.
-	/// 
-	///  @return the Green's functions for up and down spins as function of 
+    
+    ///  @brief solves the impurity problem taking both G0_tau and G0_omega
+    ///
+    ///  @param G0_omega the bare Green's function in Matsubara frequency
+    ///  @param G0_tau the bare Green's function in imaginary time
+    ///  @param parms the simulation parameters
+    ///  
+    ///  Note that  mu, U and h are passed as simulation parameters inside parms.
+    /// 
+    ///  @return the Green's functions for up and down spins as function of 
     ///          Matsubara frequency
     
   virtual result_type solve_omega(const matsubara_green_function_t& G0_omega,
-				  const alps::Parameters& parms =alps::Parameters())=0;
+                  const alps::Parameters& parms =alps::Parameters())=0;
             
   virtual ~MatsubaraImpuritySolver() {}
 };

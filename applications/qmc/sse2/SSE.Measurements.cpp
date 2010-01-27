@@ -61,7 +61,7 @@ void SSE::create_observables()
 }
    
 void SSE::finish_measurements() {
-	// In case you need to clean something up...
+    // In case you need to clean something up...
 }
 
 void SSE::do_measurements()

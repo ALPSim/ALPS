@@ -20,12 +20,12 @@ namespace boost { namespace numeric { namespace bindings { namespace blas {
   template < typename value_type, typename matrix_type_a, typename matrix_type_b, typename matrix_type_c >
   // ! CAUTION this function assumes that all matrices involved are column-major matrices
   void gemm(const char TRANSA, const char TRANSB, 
-	    const value_type& alpha,
-	    const matrix_type_a &a,
-	    const matrix_type_b &b,
-	    const value_type &beta,
-	    matrix_type_c &c
-	    )
+        const value_type& alpha,
+        const matrix_type_a &a,
+        const matrix_type_b &b,
+        const value_type &beta,
+        matrix_type_c &c
+        )
   {
     const int m = TRANSA == traits::NO_TRANSPOSE ? traits::matrix_size1( a ) : traits::matrix_size2( a ) ;
     const int n = TRANSB == traits::NO_TRANSPOSE ? traits::matrix_size2( b ) : traits::matrix_size1( b );
@@ -48,11 +48,11 @@ namespace boost { namespace numeric { namespace bindings { namespace blas {
   // C <- alpha * A * B + beta * C 
   template < typename value_type, typename matrix_type_a, typename matrix_type_b, typename matrix_type_c >
   void gemm(const value_type& alpha,
-	    const matrix_type_a &a,
-	    const matrix_type_b &b,
-	    const value_type &beta,
-	    matrix_type_c &c
-	    )
+        const matrix_type_a &a,
+        const matrix_type_b &b,
+        const value_type &beta,
+        matrix_type_c &c
+        )
   {
     gemm( traits::NO_TRANSPOSE, traits::NO_TRANSPOSE, alpha, a, b, beta, c ) ;
   }

@@ -102,21 +102,21 @@ public:
   bool change_parameter(const std::string& name, const alps::StringValue& value);
   
 private:
-  int sweeps;						// sweeps done
-  int thermalization_sweeps;		// sweeps to be done for equilibration
-  int total_sweeps;					// sweeps to be done after equilibration
-  int start_time;			//time when solver started
-  int max_time;				//maximum time for solver
-  double mu;						// chemical potential
-  double BETA;					// BETA
-  //double u00;						// on-site interaction
-  U_matrix u;					
-  double t;							// bandwidth=4t (for semi-circle)
-  std::vector<std::vector<double> > F;			// F_up(\tau) = -G_{0,down}^{-1}(-\tau) + (iw + mu) hybridization function
-  std::vector<segment_container_t >	segments;		// stores configurations with 0,1,... segments (but not full line)
-  std::vector<int>					full_line;					// if 1 means that particle occupies full time-line
-  std::vector<double>				sign;					// sign of Z_n_up
-  std::vector<blas_matrix>			M;				// inverse matrix for up-spins
+  int sweeps;                        // sweeps done
+  int thermalization_sweeps;        // sweeps to be done for equilibration
+  int total_sweeps;                    // sweeps to be done after equilibration
+  int start_time;            //time when solver started
+  int max_time;                //maximum time for solver
+  double mu;                        // chemical potential
+  double BETA;                    // BETA
+  //double u00;                        // on-site interaction
+  U_matrix u;                    
+  double t;                            // bandwidth=4t (for semi-circle)
+  std::vector<std::vector<double> > F;            // F_up(\tau) = -G_{0,down}^{-1}(-\tau) + (iw + mu) hybridization function
+  std::vector<segment_container_t >    segments;        // stores configurations with 0,1,... segments (but not full line)
+  std::vector<int>                    full_line;                    // if 1 means that particle occupies full time-line
+  std::vector<double>                sign;                    // sign of Z_n_up
+  std::vector<blas_matrix>            M;                // inverse matrix for up-spins
   std::valarray<double> G_meas;
 };
 
@@ -135,7 +135,7 @@ public:
     p_=p;
   }
   
-	///return the Green's function G
+    ///return the Green's function G
   std::pair<matsubara_green_function_t, itime_green_function_t> get_result();
 private:
   alps::Parameters p_;
@@ -156,7 +156,7 @@ public:
     p_=p;
   }
   
-	///return the Green's function G
+    ///return the Green's function G
   itime_green_function_t get_result() const;
 private:
   alps::Parameters p_;

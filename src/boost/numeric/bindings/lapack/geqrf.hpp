@@ -72,7 +72,7 @@ namespace boost { namespace numeric { namespace bindings {
       void geqrf (int const m, int const n,
                   traits::complex_f* a, int const lda,
                   traits::complex_f* tau, traits::complex_f* work,
-		  int const lwork, int& info) 
+          int const lwork, int& info) 
       {
         LAPACK_CGEQRF (&m, &n,
                       traits::complex_ptr (a), &lda,
@@ -85,7 +85,7 @@ namespace boost { namespace numeric { namespace bindings {
       void geqrf (int const m, int const n,
                   traits::complex_d* a, int const lda,
                   traits::complex_d* tau, traits::complex_d* work,
-		  int const lwork, int& info) 
+          int const lwork, int& info) 
       {
         LAPACK_ZGEQRF (&m, &n,
                       traits::complex_ptr (a), &lda,

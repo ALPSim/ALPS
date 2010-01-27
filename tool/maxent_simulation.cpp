@@ -150,10 +150,10 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
       delta = iteration(u, alpha, mu);
       Q1 = Q(u+delta, alpha);
       if (step_length(delta, u)<=0.02) {
-	break;
+        break;
       }
       else if (mu<1e20) {
-	mu *= nu;
+        mu *= nu;
       }
     } 
     u += delta;
@@ -161,7 +161,7 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
       break;
   }
   std::cerr <<"Iterations: " << it+1 << "\t"
-	    << "Q: " << Q1 << "\t";
+            << "Q: " << Q1 << "\t";
   return u;
 }
 

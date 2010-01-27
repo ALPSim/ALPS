@@ -41,7 +41,7 @@ a nontrivial copy constructor, destructor and assignment operatir is needed.
   <pre>void save(osiris::ODump&amp; dump) const;<br>void load(osiris::IDump&amp; dump);<br></pre>
 </blockquote>
  are the (de)serialization functions using the <a
- href="../../osiris/doc/index.html">osiris</a> library. 
+ href="../osiris/index.html">osiris</a> library. 
 <blockquote>
   <pre>ObservableSet&amp; operator&lt;&lt;(const ObservableSet&amp; obs);<br></pre>
 </blockquote>
@@ -152,9 +152,13 @@ the output operator for each of them.
   <pre>ODump&amp; operator&lt;&lt;(ODump&amp; od, const ObservableSet&amp;);<br>IDump&amp; operator&gt;&gt;(IDump&amp; id, ObservableSet&amp;);<br></pre>
 </blockquote>
  serialize and deserialize the <tt>ObservableSet</tt> 
-<hr> 
-<address>copyright (c) 1994-2003 by <a
- href="mailto:troyer@comp-phys.org">Matthias Troyer</a></address>
- <br>
+<HR>
+<ADDRESS>
+    <p>copyright (c) 1994-2010 by <A HREF="mailto:troyer@comp-phys.org">Matthias Troyer</A></p>
+    <p>Distributed under the Boost Software License, Version 1.0. 
+    (See http://www.boost.org/LICENSE_1_0.txt)</p>
+</ADDRESS>
+
 </body>
 </html>
+

@@ -1,16 +1,32 @@
-#
-# --> This is a float with error data type, written in python language.
-#    -> It is basically an extension of the float data type, that takes care of uncorrelated error propagation.
-#    -> There is currently no documentation on it at the moment.
-#
-# --> Written by Ping Nang (Tama) Ma, (pingnang@itp.phys.ethz.ch), ETH Zurich (Nov 2009)
-#    
+# ****************************************************************************
 # 
-#!/usr/bin/python
-
+# ALPS Project: Algorithms and Libraries for Physics Simulations
+# 
+# ALPS Libraries
+# 
+# Copyright (C) 2009 by Ping Nang (Tama) Ma <pingnang@phys.ethz.ch>
+# 
+# This software is part of the ALPS libraries, published under the ALPS
+# Library License; you can use, redistribute it and/or modify it under
+# the terms of the license, either version 1 or (at your option) any later
+# version.
+#  
+# You should have received a copy of the ALPS Library License along with
+# the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
+# available from http://alps.comp-phys.org/.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+# FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+# SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+# FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+# ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+# DEALINGS IN THE SOFTWARE.
+# 
+# ****************************************************************************
 from sys  import stdin
 from math import *
-		
+        
 def get_mean(f):
     try:
         return f.mean
@@ -35,7 +51,7 @@ class FloatWithError:
   def __expr__(self):
     return expr(self.mean) + '\t' + expr(self.error)
   def __repr__(self):
-	return self.__str__()
+    return self.__str__()
   
   def __add__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):

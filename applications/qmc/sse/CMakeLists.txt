@@ -1,3 +1,8 @@
+#  Copyright Matthias Troyer 2009 - 2010.
+#  Distributed under the Boost Software License, Version 1.0.
+#      (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
 if(LPSolve_FOUND)
   include_directories(${LPSolve_INCLUDE_DIR})
   add_executable(dirloop_sse

@@ -1,4 +1,8 @@
 #!/bin/sh
+#  Copyright Synge Todo 2009 - 2010.
+#  Distributed under the Boost Software License, Version 1.0.
+#      (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
 
 # for echo without trailing newline character
 case `echo "testing\c"; echo 1,2,3`,`echo -n testing; echo 1,2,3` in

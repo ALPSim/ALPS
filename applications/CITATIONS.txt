@@ -41,3 +41,10 @@ to check the ALPS web page http://alps.comp-phys.org/ for updates.
   - and cite the publications: 
     M. Troyer, S. Wessel, and F. Alet, Phys. Rev. Lett. 90, 120201 (2003).
     A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+
+  Copyright ALPS collaboration 2002 - 2010
+  Distributed under the Boost Software License, Version 1.0.
+      (See accompanying file LICENSE_1_0.txt or copy at
+          http://www.boost.org/LICENSE_1_0.txt)
+

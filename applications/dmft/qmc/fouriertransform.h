@@ -63,14 +63,14 @@ public:
         c3_[f][i].resize(n_site);
         Sc0_[f][i].resize(n_site);
         Sc1_[f][i].resize(n_site);
-	Sc2_[f][i].resize(n_site);
+        Sc2_[f][i].resize(n_site);
         for(int j=0;j<n_site;++j){
           c1_[f][i][j] = (i==j) ? 1. : 0.;
           c2_[f][i][j]= 0.;
           c3_[f][i][j]= 0.;
           Sc0_[f][i][j] = 0.;
           Sc1_[f][i][j]= 0.;
-	  Sc2_[f][i][j]= 0.;
+          Sc2_[f][i][j]= 0.;
         }
       }
     } 
@@ -81,20 +81,20 @@ public:
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
   /*virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
-			   const green_function<alps::RealObsevaluator> &G_omega_real,
-			   const green_function<alps::RealObsevaluator> &G_omega_imag) const;*/
+                           const green_function<alps::RealObsevaluator> &G_omega_real,
+                           const green_function<alps::RealObsevaluator> &G_omega_imag) const;*/
   virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
-			   const int nfreq_measured) const;
+                           const int nfreq_measured) const;
   
   static void generate_transformer(const alps::Parameters &parms,
-				   boost::shared_ptr<FourierTransformer> &fourier_ptr);
+                                   boost::shared_ptr<FourierTransformer> &fourier_ptr);
   static void generate_transformer_U(const alps::Parameters &parms,
-				     boost::shared_ptr<FourierTransformer> &fourier_ptr,
-				     const std::vector<double> &densities);
+                                     boost::shared_ptr<FourierTransformer> &fourier_ptr,
+                                     const std::vector<double> &densities);
   static void generate_transformer_U(const alps::Parameters &parms,
-				     boost::shared_ptr<FourierTransformer> &fourier_ptr,
-				     const std::vector<double> &densities,
-				     const std::vector<double> &magnetization);
+                                     boost::shared_ptr<FourierTransformer> &fourier_ptr,
+                                     const std::vector<double> &densities,
+                                     const std::vector<double> &magnetization);
   //void setmu(double mu){ mu_=mu;}
   
 protected:
@@ -117,7 +117,7 @@ class SimpleG0FourierTransformer : public FourierTransformer
 {
 public: 
   SimpleG0FourierTransformer(const double beta, const double mu, const double h, const int n_flavor, 
-			     const std::vector<double>& eps, const std::vector<double>& epssq)
+                             const std::vector<double>& eps, const std::vector<double>& epssq)
     : FourierTransformer(beta, n_flavor, 1)
   {
     for(int f=0; f<n_flavor; f++) {
@@ -125,7 +125,7 @@ public:
       double mub = mu + s*h;
       c1_[f][0][0] = 1.;
       c2_[f][0][0] = eps[f] - mub;
-      c3_[f][0][0] = epssq[f] - 2*mub*eps[f] + mub*mub;	
+      c3_[f][0][0] = epssq[f] - 2*mub*eps[f] + mub*mub;        
     }
   }
 };
@@ -135,22 +135,22 @@ class GFourierTransformer : public FourierTransformer
 {
 public: 
   GFourierTransformer(const double beta, const double mu, const double U, const int n_flavor, const int n_site, 
-		      const std::vector<double>& densities, 
-		      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
+                      const std::vector<double>& densities, 
+                      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
   : FourierTransformer(beta, n_flavor, n_site)  
   {
     for(int f=0;f<n_flavor;++f){
       int fbar = f%2==0 ? f+1 : f-1;
       std::cerr << "dens: " << densities[fbar] << std::endl;
       for(int i=0;i<n_site;++i){
-	c1_[f][i][i] = 1.;
-	c2_[f][i][i] = eps[f][i] - mu + U*densities[fbar]; 
-	c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
-	  + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
-	Sc0_[f][i][i] = U * (densities[fbar]-0.5);
-	Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
-	std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
-	Sc2_[f][i][i] = 0;
+        c1_[f][i][i] = 1.;
+        c2_[f][i][i] = eps[f][i] - mu + U*densities[fbar]; 
+        c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
+          + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
+        Sc0_[f][i][i] = U * (densities[fbar]-0.5);
+        Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
+        std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
+        Sc2_[f][i][i] = 0;
       }
     }
   }
@@ -190,8 +190,8 @@ public:
   }
   
   /*virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
-			   const green_function<alps::RealObsevaluator> &G_omega_real,
-			   const green_function<alps::RealObsevaluator> &G_omega_imag) const{
+                           const green_function<alps::RealObsevaluator> &G_omega_real,
+                           const green_function<alps::RealObsevaluator> &G_omega_imag) const{
     
     std::cout<<"backward ft: "<<&G_tau<<std::endl;
     std::cout<<"backward ft: "<<&G_omega_real<<std::endl;

@@ -110,7 +110,7 @@ void SSE::initialize_hamiltonian()
    // TODO : Save here the original bond type if needed
   // original_bond_type[*it] = bond_type[*it];
 
-    std::map<bond_tuple_type,unsigned int>::const_iterator found = sse_bond_type.find(this_bond);	      
+    std::map<bond_tuple_type,unsigned int>::const_iterator found = sse_bond_type.find(this_bond);          
     if (found!=sse_bond_type.end()) {
       bond_type[*it]=found->second;
       number_of_bonds_for_bond_type[found->second]++;
@@ -212,7 +212,7 @@ boost::multi_array<double,4> SSE::bond_hamiltonian(const bond_descriptor& b)
   unsigned int num_neighbor1 = num_neighbors(source(b));
   unsigned int num_neighbor2 = num_neighbors(source(b));
   unsigned int dim1          = model().basis().site_basis(site1_t).num_states();
-  unsigned int dim2			 = model().basis().site_basis(site2_t).num_states();
+  unsigned int dim2             = model().basis().site_basis(site2_t).num_states();
   
   // get site and bond terms
   alps::Parameters p(parms);
@@ -277,17 +277,17 @@ void SSE::determine_bonds_offset()
     for (uint8_t l1=0;l1<number_states_for_site_type_[site_type_for_bond_type_[i].first];l1++) 
       for (uint8_t l2=0;l2<number_states_for_site_type_[site_type_for_bond_type_[i].second];l2++) { 
         double me=std::fabs(matrix_element[i][l1][l2][l1][l2]);
-	if (me!=0) { diag=1;}
+    if (me!=0) { diag=1;}
         if (me>max)
           max=me; 
       } 
     // Offset is the maximum diagonal matrix element + epsilon
        if ((!(diag)) && (epsilon==0))
-	 {  boost::throw_exception(std::runtime_error("Hamiltonian looks purely off-diagonal. Please put the parameter EPSILON non zero for sse to work."));
-	   //cout << "Hello\n"; 
-	 }
+     {  boost::throw_exception(std::runtime_error("Hamiltonian looks purely off-diagonal. Please put the parameter EPSILON non zero for sse to work."));
+       //cout << "Hello\n"; 
+     }
        else {
-	 energy_offset[i]=max+epsilon;
+     energy_offset[i]=max+epsilon;
        }
    
    ***************************************************/
@@ -315,8 +315,8 @@ void SSE::determine_bonds_offset()
      for (uint8_t l2=0;l2<number_states_for_site_type_[site_type_for_bond_type_[i].second];l2++) 
        for (uint8_t l3=0;l3<number_states_for_site_type_[site_type_for_bond_type_[i].first];l3++)
          for (uint8_t l4=0;l4<number_states_for_site_type_[site_type_for_bond_type_[i].second];l4++) {
-	   if ((matrix_element[i][l1][l2][l3][l4])!=0) { found_non_zero=1; break;}
-	 }
+       if ((matrix_element[i][l1][l2][l3][l4])!=0) { found_non_zero=1; break;}
+     }
 
     }
     else {found_non_zero=1;}
@@ -332,13 +332,13 @@ void SSE::determine_bonds_offset()
 
     // Offset is the maximum diagonal matrix element + epsilon
     if (is_signed_)
-	    { cerr << "WARNING : Hamiltonian has a sign problem...";
-	      if (epsilon!=0)
-		cerr << " Please make sure that the value of EPSILON that you use makes the algorithm ergodic\n";
-	  else
-	    // random value of epsilon, just to make sure we scan all sign sectors ...
-	    epsilon=0.0314159;
-	    }    
+        { cerr << "WARNING : Hamiltonian has a sign problem...";
+          if (epsilon!=0)
+        cerr << " Please make sure that the value of EPSILON that you use makes the algorithm ergodic\n";
+      else
+        // random value of epsilon, just to make sure we scan all sign sectors ...
+        epsilon=0.0314159;
+        }    
     energy_offset[i]=std::fabs(min)+epsilon;
  
    /**************************************************************/
@@ -393,8 +393,8 @@ void SSE::initialize_simulation()
         cutoff_L = norder_max;
         
         operator_string.resize(cutoff_L);
-	buffer_string.resize(cutoff_L);
-	identity_string.resize(cutoff_L);
+    buffer_string.resize(cutoff_L);
+    identity_string.resize(cutoff_L);
         initialize_site_states();
         initialize_hamiltonian();
         determine_bonds_offset();

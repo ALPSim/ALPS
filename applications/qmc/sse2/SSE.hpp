@@ -50,7 +50,7 @@ using namespace alps;
 
 class SSE : public QMCRun<> {
 public : 
-	typedef Vertex<state_type> vertex_type;
+    typedef Vertex<state_type> vertex_type;
         static void print_copyright(std::ostream&);
         SSE(const ProcessList&,const Parameters&,int);
         void save(ODump&) const;
@@ -60,47 +60,47 @@ public :
         double work_done() const;
         bool change_parameter(const std::string&, const StringValue&);
         void store_histograms(string);
-	
+    
 protected :
-	// Common parameters
-	histogram<double> final_weight_fract;
+    // Common parameters
+    histogram<double> final_weight_fract;
         histogram<double> histo;  //Histogram for current_number_of_non_identity
-       	histogram<double> histoup; //Histogram for upwalker
-	vector<double> timeup;  // Time up (measured as proposed by Stefan Wessel)
-	vector<double> timedown;// Time down (measured as proposed by Stefan Wessel)
-	vector<double> realtimeup;
-	vector<double> realtimedown;
-	double thistime;
-	double realtime;
-	bool variable_length_representation;
+           histogram<double> histoup; //Histogram for upwalker
+    vector<double> timeup;  // Time up (measured as proposed by Stefan Wessel)
+    vector<double> timedown;// Time down (measured as proposed by Stefan Wessel)
+    vector<double> realtimeup;
+    vector<double> realtimedown;
+    double thistime;
+    double realtime;
+    bool variable_length_representation;
         uint32_t upwalker;
-	uint32_t number_of_worms_per_sweep; 
-	int simulation_phase;  //1: WL-RUN, 2: OE-RUN (one step)
+    uint32_t number_of_worms_per_sweep; 
+    int simulation_phase;  //1: WL-RUN, 2: OE-RUN (one step)
 
-	// WL parameters
-	double logf;
+    // WL parameters
+    double logf;
         unsigned int logf_steps_total;
         unsigned int logf_step;
         double minimum_histogram;
         double flatness_treshold;
         uint32_t use_zhou_bhatt;
-	histogram<double> g; // Density of states for current_number_of_non_identity	
-	
-	// OE parameters
+    histogram<double> g; // Density of states for current_number_of_non_identity    
+    
+    // OE parameters
         unsigned int OE_nb_thermalization;     
        
 
-	void finish_measurements();
-	void store_histo_vars();
+    void finish_measurements();
+    void store_histo_vars();
         void do_WL_step();
         void do_OE_step();
         void update_final_weights();
        // virtual bool almost_thermalized();
-	void create_observables();
+    void create_observables();
 
-	void initialize_current_simulation();
+    void initialize_current_simulation();
         double ensemble_weight_fraction(int norder);
-	void load_external_data();
+    void load_external_data();
 
         typedef QMCRun<> super_type;
         /************* Worm weights ******************/

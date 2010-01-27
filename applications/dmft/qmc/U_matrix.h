@@ -36,7 +36,7 @@ public:
       int j;
       double U_ij;
       while(u_file>>i>>j>>U_ij){
-	operator()(i,j)=U_ij;
+        operator()(i,j)=U_ij;
       }
     } else if (nf_==1) {
       //special case: only 1 orbital
@@ -56,7 +56,7 @@ public:
     }
     for (unsigned i=0; i<nf_*nf_; ++i)
       if (val_[i]!=0) 
-	n_nonzero_++;
+        n_nonzero_++;
     for (unsigned i=0; i<nf_; ++i) 
       mu_shift_ += operator()(i,0);
     mu_shift_ /= 2;
@@ -73,12 +73,12 @@ public:
       operator()(i  , i+1) =U; //Hubbard repulsion same band
       operator()(i+1, i  ) =U; //Hubbard repulsion same band
       for(spin_t j=0; j<nf_; j+=2){
-	if(j==i) 
-	  continue;
-	operator()(i  ,j  ) = Uprime; //Hubbard repulsion interband same spin 
-	operator()(i+1,j+1) = Uprime; //Hubbard repulsion interband same spin
-	operator()(i  ,j+1) = Uprime+J; //Hubbard repulsion interband opposite spin
-	operator()(i+1,j  ) = Uprime+J; //Hubbard repulsion interband opposite spin
+        if(j==i) 
+          continue;
+        operator()(i  ,j  ) = Uprime; //Hubbard repulsion interband same spin 
+        operator()(i+1,j+1) = Uprime; //Hubbard repulsion interband same spin
+        operator()(i  ,j+1) = Uprime+J; //Hubbard repulsion interband opposite spin
+        operator()(i+1,j  ) = Uprime+J; //Hubbard repulsion interband opposite spin
       }
     }
   } 

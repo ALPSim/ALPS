@@ -74,8 +74,8 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
      template <typename M>
      int matrix_bandwidth( M const& m, lower_t ) {
         // When the lower triangular band matrix is stored the
-	// upper bandwidth must be zero
-	assert( 0 == matrix_traits<M const>::upper_bandwidth( m ) ) ;
+    // upper bandwidth must be zero
+    assert( 0 == matrix_traits<M const>::upper_bandwidth( m ) ) ;
         return matrix_traits<M const>::lower_bandwidth( m ) ;
      }
   } // namespace detail

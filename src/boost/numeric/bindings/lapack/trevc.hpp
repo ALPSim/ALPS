@@ -50,7 +50,7 @@ namespace boost { namespace numeric { namespace bindings {
       inline 
       void trevc (char const side, char const howmny, const logical_t* select, int const n,
                  float* t, int const ldt, float* vl, int const ldvl, float* vr, int const ldvr,
-		 int const mm, int& m, float* work, int& info) 
+         int const mm, int& m, float* work, int& info) 
       {
         LAPACK_STREVC (&side, &howmny, select, &n, t, &ldt, vl, &ldvl, vr, &ldvr, &mm, &m, work, &info);
       }
@@ -58,7 +58,7 @@ namespace boost { namespace numeric { namespace bindings {
       inline 
       void trevc (char const side, char const howmny, const logical_t* select, int const n,
                  double* t, int const ldt, double* vl, int const ldvl, double* vr, int const ldvr,
-		 int const mm, int& m, double* work, int& info) 
+         int const mm, int& m, double* work, int& info) 
       {
         LAPACK_DTREVC (&side, &howmny, select, &n, t, &ldt, vl, &ldvl, vr, &ldvr, &mm, &m, work, &info);
       }
@@ -69,17 +69,17 @@ namespace boost { namespace numeric { namespace bindings {
                  int const mm, int& m, traits::complex_f* work, int& info) 
       {
         LAPACK_CTREVC (&side, &howmny, select, &n, traits::complex_ptr(t), &ldt, traits::complex_ptr(vl), &ldvl,
-			traits::complex_ptr(vr), &ldvr, &mm, &m, traits::complex_ptr(work+n), traits::complex_ptr(work), &info);
+            traits::complex_ptr(vr), &ldvr, &mm, &m, traits::complex_ptr(work+n), traits::complex_ptr(work), &info);
       }
 
       inline 
       void trevc (char const side, char const howmny, const logical_t* select, int const n,
                   traits::complex_d* t, int const ldt, traits::complex_d* vl, int const ldvl, traits::complex_d* vr, int const ldvr,
-		  int const mm, int& m, traits::complex_d* work, int& info) 
+          int const mm, int& m, traits::complex_d* work, int& info) 
       {
         LAPACK_ZTREVC (&side, &howmny, select, &n, traits::complex_ptr(t), &ldt,
-      	               traits::complex_ptr(vl), &ldvl, traits::complex_ptr(vr), &ldvr,
-		       &mm, &m, traits::complex_ptr(work+n), traits::complex_ptr(work), &info);
+                         traits::complex_ptr(vl), &ldvl, traits::complex_ptr(vr), &ldvr,
+               &mm, &m, traits::complex_ptr(work+n), traits::complex_ptr(work), &info);
       }
 
     } 
@@ -124,8 +124,8 @@ namespace boost { namespace numeric { namespace bindings {
                     traits::leading_dimension (vl),
                     traits::matrix_storage (vr),
                     traits::leading_dimension (vr),
-		    mm,
-		    m,
+            mm,
+            m,
                     traits::vector_storage (work),
                     info);
       return info; 

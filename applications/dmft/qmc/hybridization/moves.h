@@ -391,7 +391,7 @@ template < class RNG, class S, class G > void insert_remove_antisegment(RNG & rn
  new_t_start=rng()*BETA;
  length_segment = s->t_end()-s->t_start();
  if (length_segment<0)
- length_segment += BETA;	  
+ length_segment += BETA;      
  }
  else {
  
@@ -439,15 +439,15 @@ template < class RNG, class S, class G > void insert_remove_antisegment(RNG & rn
  
  double det_rat, det_rat_sign, overlap;
  
- det_rat = det_rat_move(segment_insert, n, M, segments, F, BETA, det_rat_sign, overlap);	
+ det_rat = det_rat_move(segment_insert, n, M, segments, F, BETA, det_rat_sign, overlap);    
  
  if (log(rng()) < log(det_rat)-delta*u) {
  
- compute_M_move(segment_insert, n, M, segments, F, BETA, det_rat*overlap);	
+ compute_M_move(segment_insert, n, M, segments, F, BETA, det_rat*overlap);    
  
  sign *= det_rat_sign;
- s->set_t_start(new_t_start);	
- s->set_t_end(new_t_end);	
+ s->set_t_start(new_t_start);    
+ s->set_t_end(new_t_end);    
  }
  
  }
@@ -574,9 +574,9 @@ template < class RNG, class S, class G, class MAT > void swap_segments(RNG & rng
  
  double det_rat_remove, det_rat_remove_sign, det_rat_insert, det_rat_insert_sign, overlap;
  
- det_rat_remove = det_rat_down(position, M, segments, det_rat_remove_sign);	  
+ det_rat_remove = det_rat_down(position, M, segments, det_rat_remove_sign);      
  
- std::vector<double> other_Fs(other_segments.size()), other_Fe(other_segments.size());	
+ std::vector<double> other_Fs(other_segments.size()), other_Fe(other_segments.size());    
  det_rat_insert = det_rat_up(*s, other_M, other_segments, other_F, other_Fs, other_Fe, BETA, det_rat_insert_sign, overlap);
  
  if (rng() < det_rat_remove*det_rat_insert*segments.size()/(other_segments.size()+1)) {
@@ -589,15 +589,15 @@ template < class RNG, class S, class G, class MAT > void swap_segments(RNG & rng
  for (typename S::iterator it=other_segments.begin(); it!=s_up; it++)
  n++;
  compute_M_up(*s, n, other_M, other_segments, other_F, other_Fs, other_Fe, BETA, det_rat_insert*overlap);
- other_segments.insert(s_up, *s);	
+ other_segments.insert(s_up, *s);    
  
- compute_M_down(position, M);	
- segments.erase(s);	
+ compute_M_down(position, M);    
+ segments.erase(s);    
  
  sign *= det_rat_remove_sign;
- other_sign *= det_rat_insert_sign;	
+ other_sign *= det_rat_insert_sign;    
  
- }	
+ }    
  
  }
  */

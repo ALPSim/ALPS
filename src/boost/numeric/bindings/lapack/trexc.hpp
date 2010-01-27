@@ -67,7 +67,7 @@ namespace boost { namespace numeric { namespace bindings {
       inline 
       void trexc (char const compq, int const n,
                  float* t, int const ldt, float* q, int const ldq, int& ifst, int& ilst,
-		 float* work, int& info) 
+         float* work, int& info) 
       {
         LAPACK_STREXC (&compq, &n, t, &ldt, q, &ldq, &ifst, &ilst, work, &info);
       }
@@ -75,7 +75,7 @@ namespace boost { namespace numeric { namespace bindings {
       inline 
       void trexc (char const compq, int const n,
                  double* t, int const ldt, double* q, int const ldq, int& ifst, int& ilst,
-		 double* work, int& info) 
+         double* work, int& info) 
       {
         LAPACK_DTREXC (&compq, &n, t, &ldt, q, &ldq, &ifst, &ilst, work, &info);
       }
@@ -83,7 +83,7 @@ namespace boost { namespace numeric { namespace bindings {
       inline 
       void trexc (char const compq, int const n,
                  traits::complex_f* t, int const ldt, traits::complex_f* q, int const ldq, int& ifst, int& ilst,
-		 float* work, int& info) 
+         float* work, int& info) 
       {
         LAPACK_CTREXC (&compq, &n, traits::complex_ptr(t), &ldt, traits::complex_ptr(q), &ldq, &ifst, &ilst, &info);
       }
@@ -91,7 +91,7 @@ namespace boost { namespace numeric { namespace bindings {
       inline 
       void trexc (char const compq, int const n,
                  traits::complex_d* t, int const ldt, traits::complex_d* q, int const ldq, int& ifst, int& ilst,
-		 double* work, int& info) 
+         double* work, int& info) 
       {
         LAPACK_ZTREXC (&compq, &n, traits::complex_ptr(t), &ldt, traits::complex_ptr(q), &ldq, &ifst, &ilst, &info);
       }
@@ -126,7 +126,7 @@ namespace boost { namespace numeric { namespace bindings {
                     traits::leading_dimension (t),
                     traits::matrix_storage (q),
                     traits::leading_dimension (q),
-		    ifst, ilst,
+            ifst, ilst,
                     traits::vector_storage (work),
                     info);
       return info; 

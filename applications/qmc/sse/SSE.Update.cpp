@@ -388,7 +388,7 @@ void SSE::worm_update()
       operator_string.swap(operator_string_copy);
       site_state.swap(site_state_copy);
       link_legs();
-	  break;
+      break;
     }
     // Modify entrance leg
     // This has to be modified for different convention

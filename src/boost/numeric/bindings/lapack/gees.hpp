@@ -160,10 +160,10 @@ namespace boost { namespace numeric { namespace bindings {
                        traits::vector_storage (w),
                        traits::matrix_storage (vs),
                        traits::leading_dimension (vs),
-		       traits::vector_storage( work ),
-		       traits::vector_size( work ),
+               traits::vector_storage( work ),
+               traits::vector_size( work ),
                        bwork, info);
-	 return info ;
+     return info ;
        } // gees()
 
 
@@ -172,7 +172,7 @@ namespace boost { namespace numeric { namespace bindings {
                  typename Work, typename RWork>
        inline
        int gees (char jobvs, MatrA& a, EigVal& w, SchVec& vs,
-		 Work& work, RWork& rwork) {
+         Work& work, RWork& rwork) {
 
 #ifndef BOOST_NUMERIC_BINDINGS_NO_STRUCTURE_CHECK 
          BOOST_STATIC_ASSERT((boost::is_same<
@@ -206,11 +206,11 @@ namespace boost { namespace numeric { namespace bindings {
                        traits::vector_storage (w),
                        traits::matrix_storage (vs),
                        traits::leading_dimension (vs),
-		       traits::vector_storage( work ),
-		       traits::vector_size( work ),
-		       traits::vector_storage( rwork ),
+               traits::vector_storage( work ),
+               traits::vector_size( work ),
+               traits::vector_storage( rwork ),
                        bwork, info);
-	 return info ;
+     return info ;
        } // gees()
 
 

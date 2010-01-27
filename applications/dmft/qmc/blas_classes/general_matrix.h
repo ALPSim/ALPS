@@ -81,7 +81,7 @@ namespace blas{
   //contains size 1 and size 2 that do not have to be the same.
   //std::ostream &operator<<(std::ostream &os, const general_matrix &M); //forward declaration
   template<typename T>class general_matrix{
-	public:
+        public:
     typedef T value_type;
     general_matrix(int size1, int size2){
       //std::cout<<"new general matrix, sizes : "<<size1<<" "<<size2<<std::endl;
@@ -397,7 +397,7 @@ namespace blas{
     general_matrix &invert(){
       throw(std::logic_error(std::string("you linked the general case for invert. Please use the specializations.")));
     }
-	private:
+        private:
     int size1_; //current size of matrix
     int size2_; //current size of matrix
     int total_memory_size_; //total memory allocated for this matrix

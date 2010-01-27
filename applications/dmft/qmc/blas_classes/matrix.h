@@ -33,7 +33,7 @@ namespace blas{
   //simple BLAS matrix that uses BLAS calls for rank one and matrix vector.
   std::ostream &operator<<(std::ostream &os, const matrix &M); //forward declaration
   class matrix{
-	public:
+        public:
     matrix(int size){
       if(size>0)
         values_=new double[size*size];
@@ -194,14 +194,14 @@ namespace blas{
     inline void right_multiply(const vector &v1, vector &v2) const{ //perform v2[i]=M[ij]v1[j]
       //call the BLAS routine for matrix vector multiplication:
       char trans='T';
-      double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
+      double alpha=1., beta=0.;        //no need to multiply a constant or add a vector
       int inc=1;
       dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
     }
     inline void right_multiply(const rsvector &v1, rsvector &v2) const{ //perform v2[i]=M[ij]v1[j]
       //call the BLAS routine for matrix vector multiplication:
       char trans='T';
-      double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
+      double alpha=1., beta=0.;        //no need to multiply a constant or add a vector
       int inc=1;
       dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1.values_, &inc, &beta, v2.values_, &inc);
     }
@@ -459,7 +459,7 @@ namespace blas{
         dscal_(&size_, &diagonal_matrix(i), values_+i, &memory_size_);
       }
     }
-	private:
+        private:
     int size_; //current size of matrix
     int memory_size_; //current size of matrix
     double *values_; //where the actual values are stored
@@ -602,21 +602,21 @@ inline complex_dense_matrix mult(const complex_dense_matrix &A, const complex_de
 #endif //UBLAS
   /*class block_diagonal_matrix: public std::vector<matrix>{
 public:
-	double trace(){
-	  double tr=0;
-	  for(int i=0;i<size();++i){
-	    tr+=operator[](i).trace();
-	  }
-	  return tr;
+        double trace(){
+          double tr=0;
+          for(int i=0;i<size();++i){
+            tr+=operator[](i).trace();
+          }
+          return tr;
  */ /*class block_diagonal_matrix: public std::vector<matrix>{
 public:
-	double trace(){
-	  double tr=0;
-	  for(int i=0;i<size();++i){
-	    tr+=operator[](i).trace();
-	  }
-	  return tr;
-	}
+        double trace(){
+          double tr=0;
+          for(int i=0;i<size();++i){
+            tr+=operator[](i).trace();
+          }
+          return tr;
+        }
 } ;
 */
 

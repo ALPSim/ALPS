@@ -51,18 +51,18 @@ SSE::SSE(const alps::ProcessList& w, const alps::Parameters& myparms,int n)
           operator_string(0),
           current_number_of_non_identity(0),
           boundary_crossing(alps::get_or_default(alps::boundary_crossing_t(),graph(),alps::boundary_crossing())),
-	  all_done(0),
+      all_done(0),
           block_sweeps(0),
           thermalized(false),
-	  logf_step(1),
-    	  thistime(0.),realtime(0.),
-    	  upwalker(1)
+      logf_step(1),
+          thistime(0.),realtime(0.),
+          upwalker(1)
 
 {
-	initialize_simulation();
+    initialize_simulation();
         create_observables();
         initialize_current_simulation();  
-	std::cout<<"Simulation initialized\n";
+    std::cout<<"Simulation initialized\n";
 }
 
 // Check if simulation is finished
@@ -100,72 +100,72 @@ void SSE::dostep()
         steps_done_total++;
         block_sweeps++;
         
-	if (simulation_phase==1)
-		do_WL_step();
-	else 	
-		do_OE_step();
+    if (simulation_phase==1)
+        do_WL_step();
+    else     
+        do_OE_step();
 }
 
 
 void SSE::do_WL_step() {
-	if (is_thermalized()) {
-		do_measurements();  // Physical measurements. We can only measure after g has been fixed.
-                measurements_done++;			
+    if (is_thermalized()) {
+        do_measurements();  // Physical measurements. We can only measure after g has been fixed.
+                measurements_done++;            
                 if (measurements_done>=nb_measurement_steps && all_done!=1.) {
-	                finish_measurements();
-			store_histo_vars();
+                    finish_measurements();
+            store_histo_vars();
                         cerr << "[" << norder_min << "-" << norder_max << "]  all done." << endl;
                         all_done=1.;
                 }
-	} else {
-		if (block_sweeps >= block_sweeps_total) {
-			cerr << "Successfully done one sweep with "<<block_sweeps_total<<" sweeps\n";		 
-			block_sweeps=0;
-			g.subtract(); 
-  			double histomin=histo.min();
-  			double histoflatness=histo.flatness();
-  			cerr << "operator_string length: " << operator_string.size() << "non-ids: " << current_number_of_non_identity << "\n";
-  			cerr << "[" << norder_min << "-" << norder_max << "]  step "  << logf_step << ", ln[f]="<< logf 
-       				<< " : flatness="<< histoflatness << " ratio=" << histomin/minimum_histogram <<endl;
-  			if (histoflatness<flatness_treshold && histomin>=minimum_histogram) {
-    				histo.fill(0.0); 
-				cerr<<"current_logf_step: "<<logf_step<<"\n"; 
-    				if (logf_step==logf_steps_total) {  
-      					thermalized=true;
-					measurements_done=0;
-					// Update the final WL weights:
-					for (unsigned int i=norder_min;i<=norder_max;++i) {
-						final_weight_fract[i]=exp(g[i]-g[i+1]);  // = w(n+1)/w(n)
-  					}
-      					cerr << "WL: [" << norder_min << "-" << norder_max << "]  continuing using final weights..." << endl;   
-    				} else {
-					++logf_step; 
-					logf/=2.0;
-					if (use_zhou_bhatt) {
-						block_sweeps_total=static_cast<unsigned int>(block_sweeps_total*1.41);
-						minimum_histogram*=2;
-      					}
-    				}
-  			}   	
+    } else {
+        if (block_sweeps >= block_sweeps_total) {
+            cerr << "Successfully done one sweep with "<<block_sweeps_total<<" sweeps\n";         
+            block_sweeps=0;
+            g.subtract(); 
+              double histomin=histo.min();
+              double histoflatness=histo.flatness();
+              cerr << "operator_string length: " << operator_string.size() << "non-ids: " << current_number_of_non_identity << "\n";
+              cerr << "[" << norder_min << "-" << norder_max << "]  step "  << logf_step << ", ln[f]="<< logf 
+                       << " : flatness="<< histoflatness << " ratio=" << histomin/minimum_histogram <<endl;
+              if (histoflatness<flatness_treshold && histomin>=minimum_histogram) {
+                    histo.fill(0.0); 
+                cerr<<"current_logf_step: "<<logf_step<<"\n"; 
+                    if (logf_step==logf_steps_total) {  
+                          thermalized=true;
+                    measurements_done=0;
+                    // Update the final WL weights:
+                    for (unsigned int i=norder_min;i<=norder_max;++i) {
+                        final_weight_fract[i]=exp(g[i]-g[i+1]);  // = w(n+1)/w(n)
+                      }
+                          cerr << "WL: [" << norder_min << "-" << norder_max << "]  continuing using final weights..." << endl;   
+                    } else {
+                    ++logf_step; 
+                    logf/=2.0;
+                    if (use_zhou_bhatt) {
+                        block_sweeps_total=static_cast<unsigned int>(block_sweeps_total*1.41);
+                        minimum_histogram*=2;
+                          }
+                    }
+              }       
                 }
-	}
+    }
 }
 
 
 void SSE::do_OE_step() {
-	if (all_done==1.) 
-		return;
-	if (is_thermalized()) {
-		do_measurements();  // Physical measurements - we can always measure (as soon as it is thermalized), since det. bal. is fulfilled.
-		measurements_done++;
-	} else if (block_sweeps>=OE_nb_thermalization)  // Wait some time before starting measurements	
-		thermalized=true;	
-	
-	if (block_sweeps >= block_sweeps_total) { // In this implementation, only 1 optimization step is performed per OE run. I.e., we stop now:
-		finish_measurements();
-		store_histo_vars();
-		all_done=1.;			
-	}
+    if (all_done==1.) 
+        return;
+    if (is_thermalized()) {
+        do_measurements();  // Physical measurements - we can always measure (as soon as it is thermalized), since det. bal. is fulfilled.
+        measurements_done++;
+    } else if (block_sweeps>=OE_nb_thermalization)  // Wait some time before starting measurements    
+        thermalized=true;    
+    
+    if (block_sweeps >= block_sweeps_total) { // In this implementation, only 1 optimization step is performed per OE run. I.e., we stop now:
+        finish_measurements();
+        store_histo_vars();
+        all_done=1.;            
+    }
 }
 
 
@@ -173,16 +173,16 @@ void SSE::do_OE_step() {
 
 void SSE::store_histo_vars() {
   if (simulation_phase==1) {  // Only in this case we store g. For OE sims, we already started with an \
-			      //  external g from the LOGG_FILE input parameter
-  	valarray<double> gval=g.getvalarray(norder_min,norder_max);
-  	measurements["logg"] << gval;
+                  //  external g from the LOGG_FILE input parameter
+      valarray<double> gval=g.getvalarray(norder_min,norder_max);
+      measurements["logg"] << gval;
   }
   measurements["Histogram"] << histo.getvalarray(norder_min,norder_max);
   measurements["HistoUp"] << histoup.getvalarray(norder_min,norder_max);
   for (int i=0; i<timeup.size();++i) {
-       	measurements["Time Up"]<<timeup[i];
-	measurements["RealTime Up"]<<realtimeup[i];
-  }	 
+           measurements["Time Up"]<<timeup[i];
+    measurements["RealTime Up"]<<realtimeup[i];
+  }     
   for (int i=0; i<timedown.size();++i) {
         measurements["Time Down"]<<timedown[i];
         measurements["RealTime Down"]<<realtimedown[i];
@@ -202,56 +202,56 @@ void SSE::initialize_current_simulation() {
   realtimeup.resize(0);
   realtimedown.resize(0);
   if (parms.defined("NUMBER_OF_WORMS_PER_SWEEP")) 
-  	number_of_worms_per_sweep=parms.value_or_default("NUMBER_OF_WORMS_PER_SWEEP",1);
+      number_of_worms_per_sweep=parms.value_or_default("NUMBER_OF_WORMS_PER_SWEEP",1);
   
 
   simulation_phase=parms.value_or_default("SIMULATION_PHASE",1);
  
   if (simulation_phase==1) { // WL sim
-	g.resize(norder_max-norder_min+1,norder_min);
-  	logf_steps_total=parms.value_or_default("NUMBER_OF_WANG_LANDAU_STEPS",12); 	
-  	use_zhou_bhatt=parms.value_or_default("USE_ZHOU_BHATT_METHOD",1.);
-	if (use_zhou_bhatt) {
-		block_sweeps_total=g.size();
-    		logf=log(double(parms.value_or_default("INITIAL_MODIFICATION_FACTOR",exp(1.))));
-    		minimum_histogram=1./logf;
-    		flatness_treshold=parms.value_or_default("FLATNESS_TRESHOLD",1E10);
-  	} else {
-    		block_sweeps_total=parms.value_or_default("WL_BLOCK_SWEEPS",10000);
-    		logf=log(double(parms.value_or_default("INITIAL_INCREASE_FACTOR",exp(cutoff_L*log((double)num_sites())/block_sweeps_total))));
-    		minimum_histogram=0.;
-    		flatness_treshold=parms.value_or_default("FLATNESS_TRESHOLD",0.2);
-  	}
-  	
+    g.resize(norder_max-norder_min+1,norder_min);
+      logf_steps_total=parms.value_or_default("NUMBER_OF_WANG_LANDAU_STEPS",12);     
+      use_zhou_bhatt=parms.value_or_default("USE_ZHOU_BHATT_METHOD",1.);
+    if (use_zhou_bhatt) {
+        block_sweeps_total=g.size();
+            logf=log(double(parms.value_or_default("INITIAL_MODIFICATION_FACTOR",exp(1.))));
+            minimum_histogram=1./logf;
+            flatness_treshold=parms.value_or_default("FLATNESS_TRESHOLD",1E10);
+      } else {
+            block_sweeps_total=parms.value_or_default("WL_BLOCK_SWEEPS",10000);
+            logf=log(double(parms.value_or_default("INITIAL_INCREASE_FACTOR",exp(cutoff_L*log((double)num_sites())/block_sweeps_total))));
+            minimum_histogram=0.;
+            flatness_treshold=parms.value_or_default("FLATNESS_TRESHOLD",0.2);
+      }
+      
   } else { // OE sim
-	std::string logg_filename((std::string)parms.value_or_default("LOGG_FILENAME","logg.dat"));
+    std::string logg_filename((std::string)parms.value_or_default("LOGG_FILENAME","logg.dat"));
         block_sweeps_total = parms.value_or_default("OE_BLOCK_SWEEPS", 20000);
-	OE_nb_thermalization=parms.value_or_default("OE_NB_THERMALIZATION", block_sweeps_total/10);
-  	g.resize(norder_max-norder_min+1,norder_min);
-  	cerr << "Loading logg from file "<<logg_filename<<"\n";
-  	ifstream myfile (logg_filename.c_str());
-  	if (myfile.is_open()) {
-    		int i=norder_min;
-    		double tmplogg=0.;
-    		while ( myfile>>tmplogg) {
-      			if (i<=norder_max)
-        			g[i] = tmplogg;
-      			else {
-				cerr << "WARNING: Logg file larger than norder_max! Disregarding further input\n";
-				break;
-      			}
-      			++i;
-    		}
-    		myfile.close();
-  	} else {
-	    cout << "Unable to open logg file!\n";
-	    exit(0);
-  	}
-	//Convert logg to weight fractions:
-	//final_weight_fract[i] gives the *ratio* of w(n+1)/w(n) !!!!!
-  	for (int i = norder_min; i<norder_max;++i) {
-          	final_weight_fract[i]= exp(-g[i+1]+g[i]); //g(n) is in Log!!          
-  	}
+    OE_nb_thermalization=parms.value_or_default("OE_NB_THERMALIZATION", block_sweeps_total/10);
+      g.resize(norder_max-norder_min+1,norder_min);
+      cerr << "Loading logg from file "<<logg_filename<<"\n";
+      ifstream myfile (logg_filename.c_str());
+      if (myfile.is_open()) {
+            int i=norder_min;
+            double tmplogg=0.;
+            while ( myfile>>tmplogg) {
+                  if (i<=norder_max)
+                    g[i] = tmplogg;
+                  else {
+                cerr << "WARNING: Logg file larger than norder_max! Disregarding further input\n";
+                break;
+                  }
+                  ++i;
+            }
+            myfile.close();
+      } else {
+        cout << "Unable to open logg file!\n";
+        exit(0);
+      }
+    //Convert logg to weight fractions:
+    //final_weight_fract[i] gives the *ratio* of w(n+1)/w(n) !!!!!
+      for (int i = norder_min; i<norder_max;++i) {
+              final_weight_fract[i]= exp(-g[i+1]+g[i]); //g(n) is in Log!!          
+      }
   }
 }
 
@@ -269,21 +269,21 @@ void SSE::diagonal_update_sweep_end() {
   // IMPORTANT: Independently of the op string representation, increment the time at the end of complete traversals,
   // since this determines how long the rest of the (off-diagonal) updates will take. And this performance is independent of the representation.
   if (is_thermalized()) { // WL or OE sim are thermalized
-	thistime++;
-	realtime+=(double)current_number_of_non_identity/cutoff_L;  // Time rescaled by the current op string length
-	 
-	// IMPORTANT: It turns out that even the histos of a WL sim in variable length should continuously be updated, and not after sweep end.
-	// Uncomment all the following lines if you still want to try the non-optimal case of updating after complete sweeps only.
-	// If so, remember to *comment* in diagonal_update_iteration_end, as indicated.
-	
-	// histo[current_number_of_non_identity]++;
-	// if (upwalker) histoup[current_number_of_non_identity]++;	
+    thistime++;
+    realtime+=(double)current_number_of_non_identity/cutoff_L;  // Time rescaled by the current op string length
+     
+    // IMPORTANT: It turns out that even the histos of a WL sim in variable length should continuously be updated, and not after sweep end.
+    // Uncomment all the following lines if you still want to try the non-optimal case of updating after complete sweeps only.
+    // If so, remember to *comment* in diagonal_update_iteration_end, as indicated.
+    
+    // histo[current_number_of_non_identity]++;
+    // if (upwalker) histoup[current_number_of_non_identity]++;    
    }
-   // else if (simulation_phase==1) {	
-	//if (variable_length_representation) {
-	//	g[current_number_of_non_identity]+=logf;
-	//	histo[current_number_of_non_identity]++;
-	//}
+   // else if (simulation_phase==1) {    
+    //if (variable_length_representation) {
+    //    g[current_number_of_non_identity]+=logf;
+    //    histo[current_number_of_non_identity]++;
+    //}
 // }
 
 }
@@ -293,20 +293,20 @@ void SSE::diagonal_update_iteration_end(int i) {
   // Test for upper/lower boundary after continuously, independent of the representation. If this is done differently, variable length gives a fraction 
   // with a large, discontinuous "jump" from f(n)>0 to 0 at n=norder_max
   if (upwalker && current_number_of_non_identity==norder_max) {
-	upwalker=0;
+    upwalker=0;
         if (is_thermalized()) { 
           timeup.push_back((double)thistime);
-	  realtimeup.push_back(realtime);
-	  thistime=0;
+      realtimeup.push_back(realtime);
+      thistime=0;
           realtime=0.;
         }
   } else if (!upwalker && current_number_of_non_identity==norder_min) {
-	upwalker=1; 
+    upwalker=1; 
         if (is_thermalized()) {
-	  timedown.push_back((double)thistime);
+      timedown.push_back((double)thistime);
           realtimedown.push_back(realtime);
           thistime=0;
-	  realtime=0.;
+      realtime=0.;
         }
   }
   // IMPORTANT: If you have uncommented as indicated in diagonal_update_sweep_end, you alsa HAVE to comment the following lines until the end of this 
@@ -314,10 +314,10 @@ void SSE::diagonal_update_iteration_end(int i) {
   // current (if you leave the code) or you optimize the "global" current (ie. measured after complete string traversals) (if you change the code).
   // Norbert Stoop, Dec. 2006
   if (is_thermalized()) {  // WL or OE sim are thermalized, so measure those thingies...
-    	histo[current_number_of_non_identity]++;
-	if (upwalker) histoup[current_number_of_non_identity]++;
+        histo[current_number_of_non_identity]++;
+    if (upwalker) histoup[current_number_of_non_identity]++;
   } else if (simulation_phase==1) { // In the WL phase, we always "measure" the histo and g
-	g[current_number_of_non_identity]+=logf;
+    g[current_number_of_non_identity]+=logf;
         histo[current_number_of_non_identity]++;
   } 
 }
@@ -333,7 +333,7 @@ void SSE::save(alps::ODump& dump) const
   histoup.save(dump);
  
   if (simulation_phase==1) { // WL simulation
-  	dump << minimum_histogram << flatness_treshold<<logf;
+      dump << minimum_histogram << flatness_treshold<<logf;
   }
   
 }
@@ -347,7 +347,7 @@ void SSE::load(alps::IDump& dump)
   histoup.load(dump);
  
   if (simulation_phase==1) { // WL simulation
-  	dump>> minimum_histogram >> flatness_treshold >> logf;
+      dump>> minimum_histogram >> flatness_treshold >> logf;
   }
 }
 

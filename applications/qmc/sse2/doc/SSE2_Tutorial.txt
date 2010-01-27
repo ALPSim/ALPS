@@ -67,3 +67,11 @@ Prepare the job file for the OE run. The following parameters are relevant:
 
 After you have run the simulation, the job XML output file should now contain measurements of the histograms and the roundtrip times. By the same procedure as described in step 2 you can again extract the histograms and let Mathematica calculate new weights. The only difference is that this time the logg-data is already in the external file oe_log.dat and thus needs not be extracted from the job XML output file.
 
+
+
+#  Copyright Norbert Stoop
+#  Distributed under the Boost Software License, Version 1.0.
+#      (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
+

@@ -1,3 +1,8 @@
+#  Copyright Synge Todo and Matthias Troyer 2009 - 2010.
+#  Distributed under the Boost Software License, Version 1.0.
+#      (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
 include (CMakeDetermineSystem)
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
 project(alps)
@@ -7,7 +12,7 @@ option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
 option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
 option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
 option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
-
+option(ALPS_BUILD_DEVELOPER_TOOLS "Build toold used by developers to maintain ALPS" OFF)
 #maintenance building options
 option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
@@ -467,6 +472,14 @@ endif (NOT ALPS_FOR_VISTRAILS)
 if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
   add_subdirectory(applications)
 endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
+
+######################################################################
+# developer tools
+######################################################################
+
+if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
+  add_subdirectory(script)
+endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
     
 
 ##########################################################################

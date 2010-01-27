@@ -1,4 +1,5 @@
 # Generated from ltmain.m4sh.
+# boostinspect:nolicense
 
 # ltmain.sh (GNU libtool) 2.2.6b
 # Written by Gordon Matzigkeit <gord@gnu.ai.mit.edu>, 1996

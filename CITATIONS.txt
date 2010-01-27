@@ -22,3 +22,9 @@ M. Troyer et al., Lecture Notes in Computer Science, Vol. 1505, p. 191 (1998).
 The use of any other library, in particular those with headers in the
 subdirectories alps/parser, alps/osiris, alps/random do not carry any
 citation requirement but acknowledgment of the ALPS project is encouraged.
+
+
+  Copyright ALPS collaboration 2002 - 2010
+  Distributed under the Boost Software License, Version 1.0.
+      (See accompanying file LICENSE_1_0.txt or copy at
+          http://www.boost.org/LICENSE_1_0.txt)

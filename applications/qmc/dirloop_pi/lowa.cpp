@@ -1,3 +1,30 @@
+/*****************************************************************************
+*
+* ALPS Project: Algorithms and Libraries for Physics Simulations
+*
+* ALPS Libraries
+*
+* Copyright (C) 2003-2010 by Lode Pollet <pollet@itp.phys.ethz.ch>
+*
+* This software is part of the ALPS libraries, published under the ALPS
+* Library License; you can use, redistribute it and/or modify it under
+* the terms of the license, either version 1 or (at your option) any later
+* version.
+* 
+* You should have received a copy of the ALPS Library License along with
+* the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
+* available from http://alps.comp-phys.org/.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+* DEALINGS IN THE SOFTWARE.
+*
+*****************************************************************************/
+
 #include "lowa.hpp"
 #include "BH_parm.hpp"
 #include <alps/alea.h>
@@ -789,21 +816,21 @@ void lowa::worm_cycle(TimeType& p)
 #endif
       if ((t_between(worm_tail.time(), worm_head.time(), worm_it->time())) && (worm_tail.time()!=(worm_it->time() ))) {
 #ifdef DEBUGMODE
-	cout << "\nMoving upwards, measuring density matrix " << worm_tail.time() << "\t" << worm_head.time() << "\t" << worm_it->time();
+    cout << "\nMoving upwards, measuring density matrix " << worm_tail.time() << "\t" << worm_head.time() << "\t" << worm_it->time();
 #endif
 
-	// measure density matrix
-	worm_head.time(worm_tail.time());
-	//dns[dist(worm_head.to(), worm_tail.to())] += start_bos;
-	if (worm_head.to() != worm_tail.to()) {
+    // measure density matrix
+    worm_head.time(worm_tail.time());
+    //dns[dist(worm_head.to(), worm_tail.to())] += start_bos;
+    if (worm_head.to() != worm_tail.to()) {
           double cosphi=1.; for (int k=0; k < dim; k++) cosphi *= cos(phase[k]* (cdist(worm_head.to(),k) - cdist(worm_tail.to(),k)));
 #ifdef HARDCORE
 #ifdef TRAPPEDSYSTEM
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos;
 #else
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
 #endif
 #else
 #ifdef TRAPPEDSYSTEM       
@@ -811,12 +838,12 @@ void lowa::worm_cycle(TimeType& p)
           av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
 #else
           av_dns[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos;
 #endif 
 #endif
         }
-	p = 0.;
-	return;
+    p = 0.;
+    return;
       }
 
       worm_head.time(worm_it->time());  //worm jumps to next element
@@ -828,32 +855,32 @@ void lowa::worm_cycle(TimeType& p)
 #endif
         if (worm_head.time() == worm_tail.time()) { // worm bites in tail (same sites)
 #ifdef DEBUGMODE
-	  cout << "\n ...removing worm";
+      cout << "\n ...removing worm";
 #endif
-	  //dns[0] = worm_it->after();  
+      //dns[0] = worm_it->after();  
 #ifdef HARDCORE
 #ifdef TRAPPEDSYSTEM
           av_dns[0] += worm_it->after();
-	  av_dns_inf[0] += worm_it->after();
+      av_dns_inf[0] += worm_it->after();
 #else
           av_dns[0] += worm_it->after();
-	  av_dns_inf[0] += worm_it->after();
+      av_dns_inf[0] += worm_it->after();
 #endif
 #else
 #ifdef TRAPPEDSYSTEM           
           av_dns[0] += worm_it->after();
-	  av_dns_inf[0] += worm_it->after();
+      av_dns_inf[0] += worm_it->after();
 #else
           av_dns[0] += worm_it->after();
-	  av_dns_inf[0] += worm_it->after();
+      av_dns_inf[0] += worm_it->after();
 #endif 
 #endif
 
 
-	  find_assoc_delete(worm_head.to(), site_it[worm_head.to()]);
+      find_assoc_delete(worm_head.to(), site_it[worm_head.to()]);
           site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
           if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
-	  worm_it = site_it[worm_head.to()];
+      worm_it = site_it[worm_head.to()];
           worm_diag = 1;
 
           p = 0.;
@@ -861,24 +888,24 @@ void lowa::worm_cycle(TimeType& p)
         }
         else {  // worm head passes dummy
 #ifdef DEBUGMODE
-	  cout << "\n ...passing dummy" << worm_head.to() << "\t" << worm_tail.to() << "\trising : "<< worm_rising;
+      cout << "\n ...passing dummy" << worm_head.to() << "\t" << worm_tail.to() << "\trising : "<< worm_rising;
 #endif
 
-	  if (worm_rising) {
-	    site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()-1);
-	    site_it[worm_head.to()]->after( site_it[worm_head.to()]->after() -1);
-	  }
-	  else {
-	    site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()+1);
-	    site_it[worm_head.to()]->after( site_it[worm_head.to()]->after() +1);
-	  }
+      if (worm_rising) {
+        site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()-1);
+        site_it[worm_head.to()]->after( site_it[worm_head.to()]->after() -1);
+      }
+      else {
+        site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()+1);
+        site_it[worm_head.to()]->after( site_it[worm_head.to()]->after() +1);
+      }
 #ifdef DEBUGMODE
-	  cout << "\n ...passed dummy" << *worm_it << "\t" << *site_it[worm_head.to()];
+      cout << "\n ...passed dummy" << *worm_it << "\t" << *site_it[worm_head.to()];
 #endif
-	  site_right(worm_head.to());
-	  worm_it = site_it[worm_head.to()];
+      site_right(worm_head.to());
+      worm_it = site_it[worm_head.to()];
 #ifdef DEBUGMODE
-	  cout << "\n ...passed dummy" << *worm_it;
+      cout << "\n ...passed dummy" << *worm_it;
 #endif
           p -= segm_tau * dE;
           return;
@@ -890,46 +917,46 @@ void lowa::worm_cycle(TimeType& p)
         cout << "\nMoving upwards, next.from = head.to";
 #endif
         if (!worm_rising) {  //pass the interaction with probability 1
-	  // no iterators change, worm remains on same site
-	  site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()+1);
-	  site_it[worm_head.to()]->after( site_it[worm_head.to()]->after() +1);
-	  site_right(worm_head.to());
-	  worm_it = site_it[worm_head.to()];
+      // no iterators change, worm remains on same site
+      site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()+1);
+      site_it[worm_head.to()]->after( site_it[worm_head.to()]->after() +1);
+      site_right(worm_head.to());
+      worm_it = site_it[worm_head.to()];
           p -= segm_tau*dE;
           return;
         }
         else // try to delete/relink interaction
         {
-	  for (SiteType j = 0; j < zcoord; j++) {
-	    list<element_type>::iterator it = site_it[worm_it->from()]->get_assoc(j);
-	    if (worm_it->time() == it->time()) {
-	      site_it[worm_it->to()] = it;
-	      break;
-	    }
-	  }
-	  //cout << "\n calc_del_weight iterator for to" << site_it[worm_it->to()]->time() << "\t" << &*site_it[worm_it->to()];
+      for (SiteType j = 0; j < zcoord; j++) {
+        list<element_type>::iterator it = site_it[worm_it->from()]->get_assoc(j);
+        if (worm_it->time() == it->time()) {
+          site_it[worm_it->to()] = it;
+          break;
+        }
+      }
+      //cout << "\n calc_del_weight iterator for to" << site_it[worm_it->to()]->time() << "\t" << &*site_it[worm_it->to()];
           calc_del_weight(worm_it->to()); // this should also set the iterators right
           SiteType i3 = heatbath_search(trans);
           if (i3 == zcoord) { //annihilate interaction
 #ifdef DEBUGMODE
             cout << "\n  annihilate " << i3;
 #endif
-	    SiteType ib = worm_it->to();
+        SiteType ib = worm_it->to();
 
-	    // delete interaction on the from site
-	    find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
-	    find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
-	    site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+        // delete interaction on the from site
+        find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
+        find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
+        site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
 
-	    // delete interaction on the to site
+        // delete interaction on the to site
             worm_head.to(ib);
             site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
-	    worm_it = site_it[worm_head.to()]; // worm jumps
+        worm_it = site_it[worm_head.to()]; // worm jumps
             p -= segm_tau * dE;
-	    nrvertex--;
-	    //print_conf(cout);
+        nrvertex--;
+        //print_conf(cout);
             return;
           }
           else //relink
@@ -937,30 +964,30 @@ void lowa::worm_cycle(TimeType& p)
 #ifdef DEBUGMODE
             cout << "\n relink or bounce " << i3 << "\t" << nb(worm_it->to(),i3);
 #endif
-	    // define the new element
-	    SiteType ito = worm_it->to();
+        // define the new element
+        SiteType ito = worm_it->to();
             SiteType ib = nb(ito,i3);
 
 
-	    site_it[ito]->from(ib);
+        site_it[ito]->from(ib);
 
-	    // delete the old element on the from site
-	    find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
-	    site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+        // delete the old element on the from site
+        find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
+        site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
 
-	    // insert new element
-	    int n0 = site_it[ib]->before();
-	    element_type new_elem(n0+1,n0, ib, ito, worm_head.time() );
-	    site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
-	    //cout << "\nafter insert, before find_assoc!!! " << site_it[ib]->time() << "\t" << site_it[ito]->time();
-	    find_assoc_insert(ib, site_it[ib]);
+        // insert new element
+        int n0 = site_it[ib]->before();
+        element_type new_elem(n0+1,n0, ib, ito, worm_head.time() );
+        site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
+        //cout << "\nafter insert, before find_assoc!!! " << site_it[ib]->time() << "\t" << site_it[ito]->time();
+        find_assoc_insert(ib, site_it[ib]);
 
-	    worm_head.to(ib); // worm jumps
-	    site_left(ib);
-	    worm_it = site_it[ib];
-	    worm_dir = -worm_dir;
-	    worm_rising = !worm_rising;
+        worm_head.to(ib); // worm jumps
+        site_left(ib);
+        worm_it = site_it[ib];
+        worm_dir = -worm_dir;
+        worm_rising = !worm_rising;
             p -= segm_tau * dE;
             return;
           }
@@ -968,26 +995,26 @@ void lowa::worm_cycle(TimeType& p)
       }
       else if (worm_it->to() == worm_head.to()) {
 #ifdef DEBUGMODE
-	cout << "\nMoving upwards next.to = head.to";
+    cout << "\nMoving upwards next.to = head.to";
 #endif
         if (worm_rising) { // pass interaction with probability 1
-	  // no iterators change, worm remains on same site
-	  site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()-1);
-	  site_it[worm_head.to()]->after( site_it[worm_head.to()]->after() -1);
-	  site_right(worm_head.to());
-	  worm_it = site_it[worm_head.to()];
+      // no iterators change, worm remains on same site
+      site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()-1);
+      site_it[worm_head.to()]->after( site_it[worm_head.to()]->after() -1);
+      site_right(worm_head.to());
+      worm_it = site_it[worm_head.to()];
           p -= segm_tau * dE;
           return;
         }
         else { // try to delete/relink interaction
-	  for (SiteType j = 0; j < zcoord; j++) {
-	    list<element_type>::iterator it = site_it[worm_it->to()]->get_assoc(j);
-	    if (worm_it->time() == it->time()) {
-	      site_it[worm_it->from()] = it;
-	      break;
-	    }
-	  }
-	  calc_del_weight(worm_it->from());
+      for (SiteType j = 0; j < zcoord; j++) {
+        list<element_type>::iterator it = site_it[worm_it->to()]->get_assoc(j);
+        if (worm_it->time() == it->time()) {
+          site_it[worm_it->from()] = it;
+          break;
+        }
+      }
+      calc_del_weight(worm_it->from());
           SiteType i3 = heatbath_search(trans);
 
           if (i3 == zcoord) { //annihilate interaction
@@ -995,53 +1022,53 @@ void lowa::worm_cycle(TimeType& p)
             SiteType ib = worm_it->from();
 
 #ifdef DEBUGMODE
-	    cout << "\n Annihilate " << i3 << endl;
+        cout << "\n Annihilate " << i3 << endl;
 #endif
 
-	    // delete element on the to site
-	    find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
-	    find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
-	    site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+        // delete element on the to site
+        find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
+        find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
+        site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
 
-	    // delete element on the from site
+        // delete element on the from site
             worm_head.to(ib);
             site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
-	    worm_it = site_it[worm_head.to()]; // worm jumps
+        worm_it = site_it[worm_head.to()]; // worm jumps
 
             p -= segm_tau * dE;
-	    nrvertex--;
+        nrvertex--;
             return;
           }
           else {// relink the interaction
 #ifdef DEBUGMODE
-	    cout << "\n Relink : " << i3 << endl;
+        cout << "\n Relink : " << i3 << endl;
 #endif
-	    // define the new element
-	    SiteType ifrom = worm_it->from();
+        // define the new element
+        SiteType ifrom = worm_it->from();
             SiteType ib = nb(ifrom,i3);
 
-	    site_it[ifrom]->to(ib);
+        site_it[ifrom]->to(ib);
 
-	    // delete the old element on the to site
-	    find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
-	    site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+        // delete the old element on the to site
+        find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
+        site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
 
-	    // insert new element
-	    int n0 = site_it[ib]->before();
-	    element_type new_elem(n0-1,n0, ifrom, ib, worm_head.time() );
-	    site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
-	    find_assoc_insert(ib, site_it[ib]);
+        // insert new element
+        int n0 = site_it[ib]->before();
+        element_type new_elem(n0-1,n0, ifrom, ib, worm_head.time() );
+        site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
+        find_assoc_insert(ib, site_it[ib]);
 
-	    worm_head.to(ib); // worm jumps
-	    site_left(ib);
-	    worm_it = site_it[ib];
-	    worm_dir = -worm_dir;
-	    worm_rising = !worm_rising;
+        worm_head.to(ib); // worm jumps
+        site_left(ib);
+        worm_it = site_it[ib];
+        worm_dir = -worm_dir;
+        worm_rising = !worm_rising;
             p -= segm_tau*dE;
-	    return;
+        return;
           }
         }  //....try to delete/relink interaction
       }
@@ -1049,8 +1076,8 @@ void lowa::worm_cycle(TimeType& p)
       {
 #ifdef DEBUGMODE
         cout << "\nMoving upwards, worm passes remote interaction. This should not occur at all!!";
-	//print_conf(cout);
-	char ch; cin >> ch;
+    //print_conf(cout);
+    char ch; cin >> ch;
 #endif
       }
     } // shift_right_kink
@@ -1068,36 +1095,36 @@ void lowa::worm_cycle(TimeType& p)
 
       if (  t_between(worm_tail.time(), worm_head.time(), newtime) ) { 
 #ifdef DEBUGMODE
-	cout << "\nMoving to the right, not inserting interaction, but measuring the density matrix ";
+    cout << "\nMoving to the right, not inserting interaction, but measuring the density matrix ";
 #endif
 
-	// measure density matrix
+    // measure density matrix
 
-	worm_head.time(worm_tail.time());
-	//dns[dist(worm_head.to(), worm_tail.to())] += start_bos;
-	if (worm_head.to() != worm_tail.to()) {
+    worm_head.time(worm_tail.time());
+    //dns[dist(worm_head.to(), worm_tail.to())] += start_bos;
+    if (worm_head.to() != worm_tail.to()) {
           double cosphi=1.; for (int k=0; k < dim; k++) cosphi *= cos(phase[k]* (cdist(worm_head.to(),k) - cdist(worm_tail.to(),k)));
 #ifdef HARDCORE
 #ifdef TRAPPEDSYSTEM
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos;
 #else
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
 #endif
 #else
 #ifdef TRAPPEDSYSTEM           
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
 #else
           av_dns[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos;
 #endif 
 #endif
-	}
-	p = 0.;
-	//print_conf(cout);
-	return;
+    }
+    p = 0.;
+    //print_conf(cout);
+    return;
       }
 
       calc_ins_weight(dE, worm_head.to(), newtime); // this should also set the iterators right...
@@ -1114,35 +1141,35 @@ void lowa::worm_cycle(TimeType& p)
         element_type new_elem;
         new_elem.time(worm_head.time());
         if (worm_rising) {
-	  new_elem.to(worm_head.to());
-	  new_elem.from(ib);
-	  new_elem.after(site_it[worm_head.to()]->before());
-	  new_elem.before(site_it[worm_head.to()]->before()-1);
-	  site_it[worm_head.to()] = operator_string[worm_head.to()].insert(site_it[worm_head.to()], new_elem);
-	  new_elem.after(site_it[ib]->before()-1);
-	  new_elem.before(site_it[ib]->before());
-	  site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
+      new_elem.to(worm_head.to());
+      new_elem.from(ib);
+      new_elem.after(site_it[worm_head.to()]->before());
+      new_elem.before(site_it[worm_head.to()]->before()-1);
+      site_it[worm_head.to()] = operator_string[worm_head.to()].insert(site_it[worm_head.to()], new_elem);
+      new_elem.after(site_it[ib]->before()-1);
+      new_elem.before(site_it[ib]->before());
+      site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
         }
-	else {
+    else {
           new_elem.to(ib);
           new_elem.from(worm_head.to());
-	  new_elem.after(site_it[worm_head.to()]->before());
-	  new_elem.before(site_it[worm_head.to()]->before()+1);
-	  site_it[worm_head.to()] = operator_string[worm_head.to()].insert(site_it[worm_head.to()], new_elem);
-	  new_elem.after(site_it[ib]->before()+1);
-	  new_elem.before(site_it[ib]->before());
-	  site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
-	}
-	find_assoc_insert(worm_head.to(), site_it[worm_head.to()]);
-	find_assoc_insert(ib, site_it[ib]);
-	site_right(worm_head.to());
-	site_right(ib);
+      new_elem.after(site_it[worm_head.to()]->before());
+      new_elem.before(site_it[worm_head.to()]->before()+1);
+      site_it[worm_head.to()] = operator_string[worm_head.to()].insert(site_it[worm_head.to()], new_elem);
+      new_elem.after(site_it[ib]->before()+1);
+      new_elem.before(site_it[ib]->before());
+      site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
+    }
+    find_assoc_insert(worm_head.to(), site_it[worm_head.to()]);
+    find_assoc_insert(ib, site_it[ib]);
+    site_right(worm_head.to());
+    site_right(ib);
 
-	// worm jumps
+    // worm jumps
         worm_head.to(ib);
-	worm_it = site_it[ib];
+    worm_it = site_it[ib];
         p = 0.;
-	nrvertex++;
+    nrvertex++;
         return;
       }
       else // bounce back
@@ -1151,10 +1178,10 @@ void lowa::worm_cycle(TimeType& p)
         cout << "\nInserting interaction failed, bouncing back, moving upwards";
 #endif
 
-	site_left(worm_head.to());
-	worm_it = site_it[worm_head.to()];
-	worm_dir = -worm_dir;
-	worm_rising = !worm_rising;
+    site_left(worm_head.to());
+    worm_it = site_it[worm_head.to()];
+    worm_dir = -worm_dir;
+    worm_rising = !worm_rising;
         p = 0.;
         return;
       }
@@ -1181,35 +1208,35 @@ void lowa::worm_cycle(TimeType& p)
     if (shift_left_kink(p, dE, segm_tau)) {
 
       if ( ( t_between(worm_tail.time(), worm_it->time(), worm_head.time() )) && ( worm_tail.time()  !=  worm_it->time() ) && (worm_tail.time() != worm_head.time()) ) { 
-	// measure density matrix
+    // measure density matrix
 #ifdef DEBUGMODE
-	cout << "\n measuring density matrix";
+    cout << "\n measuring density matrix";
 #endif
 
-	worm_head.time(worm_tail.time());
-	//dns[dist(worm_head.to(), worm_tail.to())] += start_bos;
-	if (worm_head.to() != worm_tail.to()) {
+    worm_head.time(worm_tail.time());
+    //dns[dist(worm_head.to(), worm_tail.to())] += start_bos;
+    if (worm_head.to() != worm_tail.to()) {
           double cosphi=1.; for (int k=0; k < dim; k++) cosphi *= cos(phase[k]* (cdist(worm_head.to(),k) - cdist(worm_tail.to(),k)));
 #ifdef HARDCORE
 #ifdef TRAPPEDSYSTEM
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos;
 #else
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
 #endif
 #else
 #ifdef TRAPPEDSYSTEM           
-	  av_dns[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
+      av_dns[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos * cosphi;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
 #else
           av_dns[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos;
 #endif 
 #endif
-	}
-	p = 0.;
-	return;
+    }
+    p = 0.;
+    return;
       }
 
       worm_head.time(worm_it->time());  //worm jumps to next element
@@ -1226,128 +1253,128 @@ void lowa::worm_cycle(TimeType& p)
 #ifdef HARDCORE
 #ifdef TRAPPEDSYSTEM
           av_dns[0] += worm_it->before();
-	  av_dns_inf[0] += worm_it->before();
+      av_dns_inf[0] += worm_it->before();
 #else
           av_dns[0] += worm_it->before();
-	  av_dns_inf[0] += worm_it->before();
+      av_dns_inf[0] += worm_it->before();
 #endif
 #else
 #ifdef TRAPPEDSYSTEM           
           av_dns[0] += worm_it->before();
-	  av_dns_inf[0] += worm_it->before();
+      av_dns_inf[0] += worm_it->before();
 #else
           av_dns[0] += worm_it->before();
-	  av_dns_inf[0] += worm_it->before();
+      av_dns_inf[0] += worm_it->before();
 #endif 
 #endif
 
-	  find_assoc_delete(worm_head.to(), site_it[worm_head.to()]);
+      find_assoc_delete(worm_head.to(), site_it[worm_head.to()]);
 
-	  site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
-	  if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
-	  worm_it = site_it[worm_head.to()];
+      site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+      if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
+      worm_it = site_it[worm_head.to()];
           worm_dir = 1;
           worm_diag = 1;
           p = 0.;
           return;
         }
-	else {  // worm head passes tail on other site, update green function (different sites)
+    else {  // worm head passes tail on other site, update green function (different sites)
 #ifdef DEBUGMODE
-	  cout << "\n  passing dummy in moving downwards";
+      cout << "\n  passing dummy in moving downwards";
 #endif
 
-	  if (worm_rising) {
-	    site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()-1);
-	    site_it[worm_head.to()]->after(site_it[worm_head.to()]->after() -1);
-	  }
-	  else {
-	    site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()+1);
-	    site_it[worm_head.to()]->after(site_it[worm_head.to()]->after() +1);
-	  }
-	  site_left(worm_head.to());
-	  worm_it = site_it[worm_head.to()];
-	  p -= segm_tau * dE;
+      if (worm_rising) {
+        site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()-1);
+        site_it[worm_head.to()]->after(site_it[worm_head.to()]->after() -1);
+      }
+      else {
+        site_it[worm_head.to()]->before(site_it[worm_head.to()]->before()+1);
+        site_it[worm_head.to()]->after(site_it[worm_head.to()]->after() +1);
+      }
+      site_left(worm_head.to());
+      worm_it = site_it[worm_head.to()];
+      p -= segm_tau * dE;
           //print_conf(cout);
-	  return;
-	} // else ... worm passes tail
+      return;
+    } // else ... worm passes tail
       } // time of worm head equals time of worm tail
       else if (worm_it->from() == worm_head.to()) {
 #ifdef DEBUGMODE
-	cout << "\nMoving downwards, prev.from = head.to " << worm_rising;
+    cout << "\nMoving downwards, prev.from = head.to " << worm_rising;
 #endif
         if (worm_rising) { // pass interaction with probability 1
-	  site_it[worm_head.to()]->after( site_it[worm_head.to()]->after()  - 1);
-	  site_it[worm_head.to()]->before(site_it[worm_head.to()]->before() - 1);
-	  site_left(worm_head.to());
-	  worm_it = site_it[worm_head.to()];
+      site_it[worm_head.to()]->after( site_it[worm_head.to()]->after()  - 1);
+      site_it[worm_head.to()]->before(site_it[worm_head.to()]->before() - 1);
+      site_left(worm_head.to());
+      worm_it = site_it[worm_head.to()];
           p -= segm_tau * dE;
           return;
         }
         else { // try to delete/relink interaction
-	  for (SiteType j = 0; j < zcoord; j++) {  
-	    list<element_type>::iterator it = site_it[worm_it->from()]->get_assoc(j);
-	    if (worm_it->time() == it->time()) {
-	      site_it[worm_it->to()] = it;
-	      break;
-	    }
-	  }
-	  calc_del_weight(worm_it->to());        // This should also put the iterators right
+      for (SiteType j = 0; j < zcoord; j++) {  
+        list<element_type>::iterator it = site_it[worm_it->from()]->get_assoc(j);
+        if (worm_it->time() == it->time()) {
+          site_it[worm_it->to()] = it;
+          break;
+        }
+      }
+      calc_del_weight(worm_it->to());        // This should also put the iterators right
           SiteType i3 = heatbath_search(trans);
 
           if (i3 == zcoord) {  
-	    //annihilate interaction
+        //annihilate interaction
 #ifdef DEBUGMODE
             cout << "\n  annihilate " << i3;
 #endif
 
-	    SiteType ib = worm_it->to();
+        SiteType ib = worm_it->to();
 
 
-	    // delete interaction on the from site
-	    find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
-	    find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
-	    site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+        // delete interaction on the from site
+        find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
+        find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
+        site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
-	    site_left(worm_head.to());
+        site_left(worm_head.to());
 
-	    // delete interaction on the to site
+        // delete interaction on the to site
             worm_head.to(ib);
             site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
-	    site_left(worm_head.to());
+        site_left(worm_head.to());
 
-	    worm_it = site_it[worm_head.to()]; // worm jumps
+        worm_it = site_it[worm_head.to()]; // worm jumps
             p -= segm_tau * dE;
-	    nrvertex--;
-	    //print_conf(cout);
+        nrvertex--;
+        //print_conf(cout);
             return;
           }
           else { //relink
 #ifdef DEBUGMODE
-	    cout << "\n relink or bounce " << i3 << "\t" << nb(worm_it->to(),i3);
+        cout << "\n relink or bounce " << i3 << "\t" << nb(worm_it->to(),i3);
 #endif
-	    // define the new element
-	    SiteType ito = worm_it->to();
+        // define the new element
+        SiteType ito = worm_it->to();
             SiteType ib  = nb(ito,i3);
 
-	    site_it[ito]->from(ib);
+        site_it[ito]->from(ib);
 
-	    // delete the old element on the from site
-	    find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
-	    site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+        // delete the old element on the from site
+        find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
+        site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
 
-	    // insert new element
-	    int n0 = site_it[ib]->before(); 
-	    element_type new_elem(n0,n0-1, ib, ito, worm_head.time() );
-	    site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
-	    find_assoc_insert(ib, site_it[ib]);
+        // insert new element
+        int n0 = site_it[ib]->before(); 
+        element_type new_elem(n0,n0-1, ib, ito, worm_head.time() );
+        site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
+        find_assoc_insert(ib, site_it[ib]);
 
-	    worm_head.to(ib); // worm jumps
-	    site_right(ib);
-	    worm_it = site_it[ib];
-	    worm_dir = -worm_dir;
-	    worm_rising = !worm_rising;
+        worm_head.to(ib); // worm jumps
+        site_right(ib);
+        worm_it = site_it[ib];
+        worm_dir = -worm_dir;
+        worm_rising = !worm_rising;
             p -= segm_tau * dE;
             return;
           }
@@ -1358,73 +1385,73 @@ void lowa::worm_cycle(TimeType& p)
         cout << "\nMoving downwards, prev.to = head.to";
 #endif
         if (!worm_rising) {  //pass the interaction with probability 1
-	  site_it[worm_head.to()]->after( site_it[worm_head.to()]->after()  + 1);
-	  site_it[worm_head.to()]->before(site_it[worm_head.to()]->before() + 1);
-	  site_left(worm_head.to());
-	  worm_it = site_it[worm_head.to()];
+      site_it[worm_head.to()]->after( site_it[worm_head.to()]->after()  + 1);
+      site_it[worm_head.to()]->before(site_it[worm_head.to()]->before() + 1);
+      site_left(worm_head.to());
+      worm_it = site_it[worm_head.to()];
           p -= segm_tau * dE;
           return;
         }
         else { // try to delete/relink interaction
-	  for (SiteType j = 0; j < zcoord; j++) {  
-	    list<element_type>::iterator it = site_it[worm_it->to()]->get_assoc(j);
-	    if (worm_it->time() == it->time()) {
-	      site_it[worm_it->from()] = it;
-	      break;
-	    }
-	  }
-	  //cout << "\n calc_del_weight iterator for from" << site_it[worm_it->from()]->time() << "\t" << &*site_it[worm_it->from()];
-	  calc_del_weight(worm_it->from());
+      for (SiteType j = 0; j < zcoord; j++) {  
+        list<element_type>::iterator it = site_it[worm_it->to()]->get_assoc(j);
+        if (worm_it->time() == it->time()) {
+          site_it[worm_it->from()] = it;
+          break;
+        }
+      }
+      //cout << "\n calc_del_weight iterator for from" << site_it[worm_it->from()]->time() << "\t" << &*site_it[worm_it->from()];
+      calc_del_weight(worm_it->from());
           SiteType i3 = heatbath_search(trans);
           if (i3 == zcoord) { //annihilate interaction
 #ifdef DEBUGMODE
             cout << "\n  annihilate " << i3;
 #endif
-	    SiteType ib = worm_it->from();
+        SiteType ib = worm_it->from();
 
-	    // delete interaction on the from site
-	    find_assoc_delete(worm_it->to(),   site_it[worm_it->to()]  );
-	    find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
-	    site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+        // delete interaction on the from site
+        find_assoc_delete(worm_it->to(),   site_it[worm_it->to()]  );
+        find_assoc_delete(worm_it->from(), site_it[worm_it->from()]);
+        site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
-	    site_left(worm_head.to());
+        site_left(worm_head.to());
 
-	    // delete interaction on the to site
+        // delete interaction on the to site
             worm_head.to(ib);
             site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
-	    site_left(worm_head.to());
-	    worm_it = site_it[worm_head.to()];
+        site_left(worm_head.to());
+        worm_it = site_it[worm_head.to()];
             p -= segm_tau * dE;
-	    nrvertex--;
+        nrvertex--;
             return;
           }
           else { // relink the interaction
 #ifdef DEBUGMODE
-	    cout << "\n relink or bounce " << i3 << "\t" << nb(worm_it->from(),i3);
+        cout << "\n relink or bounce " << i3 << "\t" << nb(worm_it->from(),i3);
 #endif
-	    // define the new element
-	    SiteType ifrom = worm_it->from();
+        // define the new element
+        SiteType ifrom = worm_it->from();
             SiteType ib  = nb(ifrom,i3);
 
-	    site_it[ifrom]->to(ib);
+        site_it[ifrom]->to(ib);
 
-	    // delete the old element on the to site
-	    find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
-	    site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
+        // delete the old element on the to site
+        find_assoc_delete(worm_it->to(), site_it[worm_it->to()]);
+        site_it[worm_head.to()] = operator_string[worm_head.to()].erase(site_it[worm_head.to()]);
             if (site_it[worm_head.to()] == operator_string[worm_head.to()].end()) site_it[worm_head.to()] = operator_string[worm_head.to()].begin();
 
-	    // insert new element
-	    int n0 = site_it[ib]->before();
-	    element_type new_elem(n0,n0+1, ifrom, ib, worm_head.time() );
-	    site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
-	    find_assoc_insert(ib, site_it[ib]);
+        // insert new element
+        int n0 = site_it[ib]->before();
+        element_type new_elem(n0,n0+1, ifrom, ib, worm_head.time() );
+        site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
+        find_assoc_insert(ib, site_it[ib]);
 
-	    worm_head.to(ib); // worm jumps
-	    site_right(ib);
-	    worm_it = site_it[ib];
-	    worm_dir = -worm_dir;
-	    worm_rising = !worm_rising;
+        worm_head.to(ib); // worm jumps
+        site_right(ib);
+        worm_it = site_it[ib];
+        worm_dir = -worm_dir;
+        worm_rising = !worm_rising;
             p -= segm_tau * dE;
             return;
           }
@@ -1433,7 +1460,7 @@ void lowa::worm_cycle(TimeType& p)
       else {// worm passes the interaction (no sites in common), but diagonal energy might change
 #ifdef DEBUGMODE
         cout << "\nMoving downwards, worm passes remote interaction. This should not occur at all!!";
-	char ch; cin >> ch;
+    char ch; cin >> ch;
 #endif
       }
     } // shift_left_kink
@@ -1446,36 +1473,36 @@ void lowa::worm_cycle(TimeType& p)
       cout << "\nMoving to the left, inserting interaction " << worm_head.to() << "\t" << worm_rising << "\t " << newtime;
 #endif
       if (  (worm_tail.time() != worm_head.time() ) && (t_between(worm_tail.time(), newtime, worm_head.time() )) ) { 
-	// measure density matrix
+    // measure density matrix
 #ifdef DEBUGMODE
-	cout << "\nMoving to the left, measuring density matrix ";
+    cout << "\nMoving to the left, measuring density matrix ";
 #endif
 
-	worm_head.time(worm_tail.time());
-	//dns[dist(worm_head.to(), worm_tail.to())] += start_bos;
-	if (worm_head.to() != worm_tail.to()) {
+    worm_head.time(worm_tail.time());
+    //dns[dist(worm_head.to(), worm_tail.to())] += start_bos;
+    if (worm_head.to() != worm_tail.to()) {
           double cosphi=1.; for (int k=0; k < dim; k++) cosphi *= cos(phase[k]* (cdist(worm_head.to(),k) - cdist(worm_tail.to(),k)));
 #ifdef HARDCORE
 #ifdef TRAPPEDSYSTEM
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.25*start_bos;
 #else
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
 #endif
 #else
 #ifdef TRAPPEDSYSTEM           
           av_dns[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 0.5*start_bos;
 #else
           av_dns[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos * cosphi;
-	  av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos;
+      av_dns_inf[dist(worm_head.to(), worm_tail.to())] += 1.*start_bos;
 #endif 
 #endif
-	}
+    }
 
-	p = 0.;
-	return;
+    p = 0.;
+    return;
       }
 
       site_right(worm_head.to());   // then the iterator is the same as for right_insert
@@ -1488,43 +1515,43 @@ void lowa::worm_cycle(TimeType& p)
       {
         SiteType ib = nb(worm_head.to(),i3);
 #ifdef DEBUGMODE
-	cout << "\n ..." << i3 << "\t" << ib << "\t" << worm_head.to();
+    cout << "\n ..." << i3 << "\t" << ib << "\t" << worm_head.to();
 #endif
         element_type new_elem;
         new_elem.time(worm_head.time());
         if (worm_rising) {
-	  new_elem.to(ib);
+      new_elem.to(ib);
           new_elem.from(worm_head.to());
-	  new_elem.after(site_it[worm_head.to()]->before() );
-	  new_elem.before(site_it[worm_head.to()]->before() + 1  );
-	  site_it[worm_head.to()] = operator_string[worm_head.to()].insert(site_it[worm_head.to()], new_elem);
+      new_elem.after(site_it[worm_head.to()]->before() );
+      new_elem.before(site_it[worm_head.to()]->before() + 1  );
+      site_it[worm_head.to()] = operator_string[worm_head.to()].insert(site_it[worm_head.to()], new_elem);
 
-	  new_elem.after(site_it[ib]->before());
-	  new_elem.before(site_it[ib]->before()-1);
-	  site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
+      new_elem.after(site_it[ib]->before());
+      new_elem.before(site_it[ib]->before()-1);
+      site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
         }
         else {
           new_elem.to(worm_head.to());
-	  new_elem.from(ib);
-	  new_elem.after(  site_it[worm_head.to()]->before()  );
-	  new_elem.before( site_it[worm_head.to()]->before() - 1    );
-	  site_it[worm_head.to()] = operator_string[worm_head.to()].insert(site_it[worm_head.to()], new_elem);
-	  
-	  new_elem.after( site_it[ib]->before()  );
-	  new_elem.before(site_it[ib]->before()+1);
-	  site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
-	}
+      new_elem.from(ib);
+      new_elem.after(  site_it[worm_head.to()]->before()  );
+      new_elem.before( site_it[worm_head.to()]->before() - 1    );
+      site_it[worm_head.to()] = operator_string[worm_head.to()].insert(site_it[worm_head.to()], new_elem);
+      
+      new_elem.after( site_it[ib]->before()  );
+      new_elem.before(site_it[ib]->before()+1);
+      site_it[ib] = operator_string[ib].insert(site_it[ib], new_elem);
+    }
         find_assoc_insert(worm_head.to(), site_it[worm_head.to()]);
-	find_assoc_insert(ib, site_it[ib]);
-	site_left(worm_head.to());  //restore
-	site_left(ib);
-	
-	// worm jumps
+    find_assoc_insert(ib, site_it[ib]);
+    site_left(worm_head.to());  //restore
+    site_left(ib);
+    
+    // worm jumps
         worm_head.to(ib);
-	worm_it = site_it[ib];
+    worm_it = site_it[ib];
         p = 0.;
-	nrvertex++;
-	//print_conf(cout);
+    nrvertex++;
+    //print_conf(cout);
         return;
       }
       else // bounce back
@@ -1532,10 +1559,10 @@ void lowa::worm_cycle(TimeType& p)
 #ifdef DEBUGMODE
         cout << "\nInserting interaction failed, bouncing back, moving upwards";
 #endif
-	// site_right(worm_head.to()); is already done
-	worm_it = site_it[worm_head.to()];
-	worm_dir = -worm_dir;
-	worm_rising = !worm_rising;
+    // site_right(worm_head.to()); is already done
+    worm_it = site_it[worm_head.to()];
+    worm_dir = -worm_dir;
+    worm_rising = !worm_rising;
         p = 0.;
         return;
       }
@@ -1617,12 +1644,12 @@ bool lowa::test_conf()
     int ii = 0;
     for (list<element_type>::iterator it = operator_string[i].begin(); it != operator_string[i].end(); ++it, ++ii) {
       if (it->before() < 0 || it->before() > nmax) {
-	cout << "\n Error with density  << " << i << "\t "<< &*it << "\t" << it->time();
-	return (0);
+    cout << "\n Error with density  << " << i << "\t "<< &*it << "\t" << it->time();
+    return (0);
       }
       if (it->after() < 0 || it->after() > nmax) {
-	cout << "\n Error with density  << " << i << "\t "<< &*it << "\t" << it->time();
-	return (0);
+    cout << "\n Error with density  << " << i << "\t "<< &*it << "\t" << it->time();
+    return (0);
       }
     }
   }
@@ -1637,11 +1664,11 @@ void lowa::calc_winding() {
     if (operator_string[s].size() > 1) {
       int i;
       for (; it !=operator_string[s].end(); ++it) {
-	if (it->from() != it->to()) {
-	  for (int k = 0; k < dim; k++) {
-	    mWinding[k] += winding_element(bond(it->from(), it->to()), k);
-	  }
-	} //if
+    if (it->from() != it->to()) {
+      for (int k = 0; k < dim; k++) {
+        mWinding[k] += winding_element(bond(it->from(), it->to()), k);
+      }
+    } //if
       } // ...iterator over operator_string[site]
     } // if
   } // ...over all sites
@@ -1766,9 +1793,9 @@ void lowa::load_internal(istream& is, vector<int32_t >& counter)
     ++it; if (it == operator_string[i].end()) it = operator_string[i].begin();
     while (it != dummy_it[i]) {
       for (int j = 0; j < zcoord; j++) {
-	SiteType s = nb(i,j);
-	is >> ass;
-	it->set_assoc(j, v[s][ass] );
+    SiteType s = nb(i,j);
+    is >> ass;
+    it->set_assoc(j, v[s][ass] );
       }
       ++it; if (it == operator_string[i].end()) it = operator_string[i].begin();
     }
@@ -1870,9 +1897,9 @@ void lowa::find_assoc_delete(SiteType cursite, list<element_type>::iterator it)
      for (SiteType j = 0; j < zcoord; j++) {
       SiteType oppdir = (j + dim) % zcoord;
       SiteType s = nb(cursite, j);
-	  for (list<element_type>::iterator itt=operator_string[s].begin(); itt != operator_string[s].end(); ++itt) 
-	    itt->set_assoc(oppdir, operator_string[cursite].begin());
-	  }
+      for (list<element_type>::iterator itt=operator_string[s].begin(); itt != operator_string[s].end(); ++itt) 
+        itt->set_assoc(oppdir, operator_string[cursite].begin());
+      }
   }
   else {
     list<element_type>::iterator newpoint=it;
@@ -1889,21 +1916,21 @@ void lowa::find_assoc_delete(SiteType cursite, list<element_type>::iterator it)
       list<element_type>::iterator it_begin=itp->get_assoc(j);
       list<element_type>::iterator itt=it_begin;
       if ((itt == it_end) && (itt == dummy_it[s])) {
-	for (list<element_type>::iterator itt=operator_string[s].begin(); itt != operator_string[s].end(); ++itt) {
-	  if (itt->get_assoc(oppdir) == it) itt->set_assoc(oppdir, newpoint);
-	}
+    for (list<element_type>::iterator itt=operator_string[s].begin(); itt != operator_string[s].end(); ++itt) {
+      if (itt->get_assoc(oppdir) == it) itt->set_assoc(oppdir, newpoint);
+    }
       }
       else {
-	while (itt != it_end) {
-	  if (itt->get_assoc(oppdir) == it) {
-	    itt->set_assoc(oppdir, newpoint);
-	  }
-	  ++itt;
-	  if (itt==operator_string[s].end()) itt=operator_string[s].begin();
-	}
-	if (it_end->get_assoc(oppdir) == it) {
-	  it_end->set_assoc(oppdir, newpoint);
-	}
+    while (itt != it_end) {
+      if (itt->get_assoc(oppdir) == it) {
+        itt->set_assoc(oppdir, newpoint);
+      }
+      ++itt;
+      if (itt==operator_string[s].end()) itt=operator_string[s].begin();
+    }
+    if (it_end->get_assoc(oppdir) == it) {
+      it_end->set_assoc(oppdir, newpoint);
+    }
       } //else
     }
   }
@@ -1919,8 +1946,8 @@ void lowa::print_conf(ostream& out)
     for (list<element_type>::iterator it = operator_string[i].begin(); it != operator_string[i].end(); ++it, ++ii) {
       it->print();
       if (ii > n) {
-	cout << "\n Error with list!\n";
-	char ch; cin >> ch;
+    cout << "\n Error with list!\n";
+    char ch; cin >> ch;
       }
     }
     out << "\n--------------------\n\n\n";
@@ -1983,26 +2010,26 @@ void lowa::dostep() {
 /*
       if (times_tot + 1.5*dtimes > times_runtime ) {
          cout << "\nApproaching run time limit. Saving and Quitting....\n\n";
-	 update_av();      
-	 ofstream outDens(filename2.c_str());
-	 outDens << setprecision(20);
-	 print_av(outDens);
-	 outDens.close();
-	 ofstream outDensChem(filename0.c_str());
-	 outDensChem << setprecision(20);
-	 print_av_chem(outDensChem);
-	 outDens.close();
-	 cout << "# Worm insert ratio (run)     : " << get_worm_insert_ratio() << endl;
-	 cout << "# MCsteps (overall)           : " << MCstep_total << endl;
-	 cout << "# MCsteps (run)               : " << MCstep_run << endl;
-	 cout << "# Nr MCstep per s (run)       : " << MCstep_run / times_run << endl;
-	 double d = MCmeas / MCstep_run;
-	 cout << "# ratio meas/ non-diag        : " << d << endl;
-	 if ( ( d < 0.005) || (d > 0.1) ) {
-	    cout << "# CHANGE FREQUENCY OF MEASURING to Nmeasure " << 0.01/d/Nmeasure << "\t" << endl;
-	 }
+     update_av();      
+     ofstream outDens(filename2.c_str());
+     outDens << setprecision(20);
+     print_av(outDens);
+     outDens.close();
+     ofstream outDensChem(filename0.c_str());
+     outDensChem << setprecision(20);
+     print_av_chem(outDensChem);
+     outDens.close();
+     cout << "# Worm insert ratio (run)     : " << get_worm_insert_ratio() << endl;
+     cout << "# MCsteps (overall)           : " << MCstep_total << endl;
+     cout << "# MCsteps (run)               : " << MCstep_run << endl;
+     cout << "# Nr MCstep per s (run)       : " << MCstep_run / times_run << endl;
+     double d = MCmeas / MCstep_run;
+     cout << "# ratio meas/ non-diag        : " << d << endl;
+     if ( ( d < 0.005) || (d > 0.1) ) {
+        cout << "# CHANGE FREQUENCY OF MEASURING to Nmeasure " << 0.01/d/Nmeasure << "\t" << endl;
+     }
          cout << "# CHEMICAL POTENTIAL = " << mu << " ; <N> = " << dummy_av_Npart << endl;
-	 return(0);
+     return(0);
       }
 */
    }
