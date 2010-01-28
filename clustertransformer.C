@@ -441,6 +441,7 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
 	for (unsigned int d=0; d<dimension(); ++d) 
 	  kc_vec[d] = cluster_momentum(kc,d);
 	for (frequency_t freq=0; freq<nfreq; ++freq) {
+	    std::cerr << ".";
 	  const double om = (2.*freq+1.)*M_PI/beta;
 	  alps::RealObsevaluator obsi = selfenergies[z][kc][2*freq+1];
 	  obsi -= om;
@@ -477,20 +478,22 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
 	    energy_kc[freq] += weight*obsr;
 	  }
 	  energy_kc[freq] *= multiplier;
-	  if (it_kc==site_classes_k_space().first && z==0)
-	    energy_vec[freq] = energy_kc[freq];
-	  else
+	  if (it_kc==site_classes_k_space().first && z==0) 
+	      energy_vec[freq] = energy_kc[freq];
+	  else 
 	    energy_vec[freq] += energy_kc[freq];
 	}
+	std::cerr << "\n";
       }
     }
     for (frequency_t freq=0; freq<nfreq; ++freq) 
-      energy_vec[freq] *= del_z/n_cluster_sites()/n_cluster_cells();
+      energy_vec[freq] *= (double)del_z/(double)n_cluster_sites()/(double)n_cluster_cells();
     // frequency sum
-    alps::RealObsevaluator kin = energy_vec[0] + dispersion_moments(1)*nzone*beta*beta/M_PI/M_PI;
+    alps::RealObsevaluator kin = energy_vec[0] 
+	+ dispersion_moments(1)*nzone*beta*beta/M_PI/M_PI;
     for (frequency_t freq=1; freq<nfreq; ++freq) {
       double om = (2.*freq+1.)*M_PI/beta;
-      kin += energy_vec[freq] + dispersion_moments(1)*nzone/om/om;
+      kin += energy_vec[freq]  + dispersion_moments(1)*nzone/om/om;
     }
     kin *= 2./beta;
     kin -= 0.25*nzone*dispersion_moments(1)*beta;
