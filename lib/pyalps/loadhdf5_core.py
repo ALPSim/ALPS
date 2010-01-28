@@ -30,6 +30,7 @@ import urllib, copy, h5py, os
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
+import datetime
 
 from dataset import ResultFile
 from dataset import DataSet
@@ -92,12 +93,12 @@ class Hdf5Loader:
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
     def ReadMeasurementFromFile(self,flist,statvar,proppath,respath,measurements=None):
+        print "I'm here", len(flist)
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
             self.h5f = h5py.File(f)
             self.h5fname = f
-            
             list_ = self.GetObservableList(respath)
             # this is exception-safe in the sense that it's also required in the line above
             grp = self.h5f.require_group(respath)
