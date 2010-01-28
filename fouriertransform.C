@@ -145,46 +145,49 @@ void FourierTransformer::backward_ft(itime_green_function_t &G_tau,
             G_tau(i,s1,s2,f)=0.;
           }
         } 
-	else {
-	  for (unsigned int k=0; k<N_omega; k++) {
-	    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-	    G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
-	  } 
-	  for (unsigned int i=0; i<N_tau; i++) {
-	    G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
-	    for (unsigned int k=0; k<N_omega; k++) {
-	      double wt((2*k+1)*i*M_PI/N_tau);
-	      G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
-					   sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
-	    }
-	  }
-	  G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
-	  G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
-	}
+        else {
+          for (unsigned int k=0; k<N_omega; k++) {
+            std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+            G_omega_no_model(k,s1,s2,f) -= f_omega(iw, c1_[f][s1][s2],c2_[f][s1][s2], c3_[f][s1][s2]);
+          } 
+          for (unsigned int i=0; i<N_tau; i++) {
+            G_tau(i,s1,s2,f) = f_tau(i*dt, beta_, c1_[f][s1][s2], c2_[f][s1][s2], c3_[f][s1][s2]); 
+            for (unsigned int k=0; k<N_omega; k++) {
+              double wt((2*k+1)*i*M_PI/N_tau);
+              G_tau(i,s1,s2,f) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,f).real()+
+                                           sin(wt)*G_omega_no_model(k,s1,s2,f).imag());
+            }
+          }
+          G_tau(N_tau,s1,s2,f)= s1==s2 ? -1. : 0.;
+          G_tau(N_tau,s1,s2,f)-=G_tau(0,s1,s2,f);
+        }
       }
     }
   }
+  //std::cout<<"Fourier: G omega nomodel: "<<G_omega_no_model<<std::endl;
+  //std::cout<<"this was generated for c1: "<<c1_[0][0][0]<<"c2: "<<c2_[0][0][0]<<std::endl;
+
   /*std::ofstream backstr("back.dat");
-    G_omega.write("gtest");
-    test.write("ftest");
-    int sdel = 1;//N_site > 1 ? 2 : 1;
-    int pmax = 0;//N_site > 1 ? 1 : 0;
-    for(unsigned int f=0;f<G_omega.nflavor();++f){
+  G_omega.write("gtest");
+  test.write("ftest");
+  int sdel = 1;//N_site > 1 ? 2 : 1;
+  int pmax = 0;//N_site > 1 ? 1 : 0;
+  for(unsigned int f=0;f<G_omega.nflavor();++f){
     for (unsigned int s=0; s<N_site; s+=sdel){
-    for (int p1=0; p1<=pmax; ++p1) {
-    for (int p2=0; p2<=pmax; ++p2) {
-    for(uint k=0; k<N_omega; k++){
-    std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
-    backstr << iw.imag() << "\t" << f << "\t" << s+p1 << "\t" << s+p2 << "\t"
-    << G_omega(k,s+p1,s+p2,f).real() << "\t" << G_omega(k,s+p1,s+p2,f).imag() << "\t" 
-    << f_omega(iw, c1_[f][s+p1][s+p2],c2_[f][s+p1][s+p2], c3_[f][s+p1][s+p2]).real() << "\t"
-    << f_omega(iw, c1_[f][s+p1][s+p2],c2_[f][s+p1][s+p2], c3_[f][s+p1][s+p2]).imag()
-    << std::endl;
+      for (int p1=0; p1<=pmax; ++p1) {
+        for (int p2=0; p2<=pmax; ++p2) {
+          for(uint k=0; k<N_omega; k++){
+            std::complex<double> iw(0,(2*k+1)*M_PI/beta_);
+            backstr << iw.imag() << "\t" << f << "\t" << s+p1 << "\t" << s+p2 << "\t"
+            << G_omega(k,s+p1,s+p2,f).real() << "\t" << G_omega(k,s+p1,s+p2,f).imag() << "\t" 
+            << f_omega(iw, c1_[f][s+p1][s+p2],c2_[f][s+p1][s+p2], c3_[f][s+p1][s+p2]).real() << "\t"
+            << f_omega(iw, c1_[f][s+p1][s+p2],c2_[f][s+p1][s+p2], c3_[f][s+p1][s+p2]).imag()
+            << std::endl;
+          }
+        }
+      }
     }
-    }
-    }
-    }
-    }*/
+  }*/
 }
   
   
