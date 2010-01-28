@@ -23,6 +23,8 @@
 *
 *****************************************************************************/
 
+// boostinspect:nounnamed
+
 #ifndef LOOPER_MEASUREMENT_H
 #define LOOPER_MEASUREMENT_H
 
