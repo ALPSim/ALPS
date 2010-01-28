@@ -266,7 +266,7 @@ doc-distclean :
 
 pkgdocdir = @docdir@/alps
 
-doc_ALPS = bitops.html config.html expression.html fixed_capacity.html functional.html index_general.html math.html parameterlist.html parameters.html random.html setup.html stringvalue.html typetraits.html valuetype.html vectormath.html vectortraits.html
+doc_ALPS = bitops.html config.html expression.html fixed_capacity.html functional.html index_general.html math.html parameterlist.html parameters.html random.html setup.html stringvalue.html typetraits.html vectormath.html vectortraits.html
 doc_ALEA = \
 	alea/abstractsimpleobservable.html \
 	alea/binning.html \
@@ -302,7 +302,7 @@ doc_LATTICE = \
 	lattice/simplelattice.html \
 	lattice/unitcell.html
 doc_MODEL = model/index.html
-doc_OSIRIS = osiris/comm.html osiris/dump.html osiris/index.html osiris/mpdump.html osiris/os.html osiris/parameterlist.html osiris/parameters.html osiris/process.html osiris/stdmap.html osiris/stdpair.html osiris/stdstring.html osiris/stdvalarray.html osiris/stdvector.html osiris/valuetype.html osiris/xdrdump.html
+doc_OSIRIS = osiris/comm.html osiris/dump.html osiris/index.html osiris/mpdump.html osiris/os.html osiris/process.html osiris/stdmap.html osiris/stdpair.html osiris/stdstring.html osiris/stdvalarray.html osiris/stdvector.html osiris/xdrdump.html
 doc_PARSER = parser/index.html parser/parser.html parser/xmlattributes.html parser/xmlstream.html
 doc_SCHEDULER = scheduler/implementing.html scheduler/index.html scheduler/montecarlo.html scheduler/running.html scheduler/scheduler.html scheduler/signal.html
 doc_TOOL = tool/index.html
