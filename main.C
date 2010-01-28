@@ -107,7 +107,7 @@ int main(int argc, char** argv)
           alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
           std::cout<<"interpreting input value as G_tau, not G0"<<std::endl;
-	  itime_green_function_t G_tau = transform.initial_G0(parms);
+	        itime_green_function_t G_tau = transform.initial_G0(parms);
           F_selfconsistency_loop(parms, *solver_ptr, G_tau);
         }
 #endif
