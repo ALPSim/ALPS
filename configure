@@ -22656,6 +22656,8 @@ ac_config_files="$ac_config_files Makefile config/config.site config/include.mk"
 
 ac_config_files="$ac_config_files src/Makefile"
 
+ac_config_files="$ac_config_files lib/Makefile lib/alps/Makefile"
+
 
 ac_config_files="$ac_config_files test/Makefile test/fixed_capacity/Makefile test/osiris/Makefile test/osiris/xdrdump2.input test/osiris/boostdump2.input test/parameter/Makefile test/parser/Makefile test/alea/Makefile test/hdf5/Makefile"
 
@@ -23910,6 +23912,8 @@ do
     "config/config.site") CONFIG_FILES="$CONFIG_FILES config/config.site" ;;
     "config/include.mk") CONFIG_FILES="$CONFIG_FILES config/include.mk" ;;
     "src/Makefile") CONFIG_FILES="$CONFIG_FILES src/Makefile" ;;
+    "lib/Makefile") CONFIG_FILES="$CONFIG_FILES lib/Makefile" ;;
+    "lib/alps/Makefile") CONFIG_FILES="$CONFIG_FILES lib/alps/Makefile" ;;
     "test/Makefile") CONFIG_FILES="$CONFIG_FILES test/Makefile" ;;
     "test/fixed_capacity/Makefile") CONFIG_FILES="$CONFIG_FILES test/fixed_capacity/Makefile" ;;
     "test/osiris/Makefile") CONFIG_FILES="$CONFIG_FILES test/osiris/Makefile" ;;

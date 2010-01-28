@@ -280,7 +280,7 @@ target_alias = @target_alias@
 top_build_prefix = @top_build_prefix@
 top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
-SUBDIRS = alps heap $(am__append_1) .
+SUBDIRS = alps $(am__append_1) .
 DIST_SUBDIRS = $(SUBDIRS)
 all: all-recursive
 
