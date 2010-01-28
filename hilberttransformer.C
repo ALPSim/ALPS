@@ -155,6 +155,7 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
 
 matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const alps::Parameters& parms) 
 {
+  //std::cout<<"General Hilbert: G0"<<std::endl;
   std::cout<<"reading initial G0_omega"<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=parms.value_or_default("FLAVORS", 2);
@@ -196,9 +197,17 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
       }
       double h     =parms.value_or_default("H",0.);
       double mu    =parms.value_or_default("MU",0.);
+    int n_time=boost::lexical_cast<int>(parms["N"]);
+    int n_flavor=parms.value_or_default("FLAVORS", 2);
       double beta  =parms.value_or_default("BETA",0.);
       G0_omega=this->operator()(G_omega, G0_omega, mu, h, beta);
       G0_omega.write("G0_omega_input");
+      boost::shared_ptr<FourierTransformer> fourier_ptr;
+      FourierTransformer::generate_transformer(parms, fourier_ptr);
+      itime_green_function_t G0_tau(n_time,n_flavor);
+      fourier_ptr->backward_ft(G0_tau, G0_omega);
+      G0_tau.write("G0_tau_input");
+
     }
     else
       G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
@@ -241,9 +250,17 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
 
 matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps::Parameters& parms)
 {
-  if (parms.defined("G0OMEGA_INPUT") || parms.defined("ISOLATING"))
+  //std::cout<<"Semicirc Hilbert: initial G0"<<std::endl;
+  if ( parms.defined("ISOLATING"))
     return FrequencySpaceHilbertTransformer::initial_G0(parms);
-  else {
+  if (parms.defined("G0OMEGA_INPUT")){
+    std::ifstream g0_file("G0OMEGA_INPUT");
+    if(g0_file.good())
+      return FrequencySpaceHilbertTransformer::initial_G0(parms); //only open that file if it is good.
+    else
+      std::cout<<"failed to open initial G0 file"<<std::endl;
+  }
+  {
     std::cout<<"calculating initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_time=boost::lexical_cast<int>(parms["N"]);
@@ -269,6 +286,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps
     itime_green_function_t G0_tau(n_time,n_flavor);
     fourier_ptr->backward_ft(G0_tau, G0_omega);
     G0_tau.write("G0_tau_input");
+    //std::cout<<"written G0 in omega and tau, returning."<<std::endl;
     return G0_omega;
   }
 }
