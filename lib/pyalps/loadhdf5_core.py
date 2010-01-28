@@ -109,7 +109,6 @@ class Hdf5Loader:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
             subset=[]
             for m in obslist:
-                print m
                 try:
                     d = DataSet()
                     if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
@@ -123,7 +122,6 @@ class Hdf5Loader:
                             size=0
                             subset = [fwe(mean,error)]
                     elif "mean" in grp[m].keys():
-                        print "mean only"
                         value = grp[m+"/mean/value"].value
                         try:
                             size=len(value)
@@ -132,7 +130,6 @@ class Hdf5Loader:
                             size=0
                             subset = [float(value)]
                     d.y = np.array(subset)
-                    print m, d.y
                     if "labels" in grp[m].keys():
                         d.x = np.array(grp[m+"/labels"].value)
                     else:
