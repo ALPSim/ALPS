@@ -4,8 +4,9 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 1994-2009 by Bela Bauer <bauerb@phys.ethz.ch>
-# 
+# Copyright (C) 1994-2010 by Bela Bauer <bauerb@phys.ethz.ch>
+#                            Brigitte Surer <surerb@phys.ethz.ch> 
+#
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
 # the terms of the license, either version 1 or (at your option) any later
