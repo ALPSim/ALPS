@@ -13,10 +13,12 @@ option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
 option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
 option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build toold used by developers to maintain ALPS" OFF)
+option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
+
 #maintenance building options
 option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
-option(ALPS_DOWNLOAD_PACKAGES "MPrepare an installer that downloads instead of containing the installation packages" OFF)
+option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
 
 if (ALPS_FOR_VISTRAILS)
   set(ALPS_INSTALL_HEADERS OFF)
@@ -91,8 +93,6 @@ ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.svn)
 set(VERSION_BUILD ${ALPS_WC_REVISION})
 
 if(MSVC)
-  SET(CMAKE_CXX_FLAGS "/DWIN32 /D_WINDOWS /W3 /Zm1000 /EHsc /GR /openmp" CACHE STRING
-    "Flags used by the compiler." FORCE)
   add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
 endif(MSVC)
 
@@ -100,7 +100,6 @@ if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
 endif(NOT CMAKE_BUILD_TYPE)
 message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
-
 
 set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_BUILD}-r${VERSION_BUILD}")
 set(ALPS_VERSION_STRING "ALPS Libraries version ${ALPS_VERSION}")
@@ -151,6 +150,15 @@ ELSE(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
   set(BUILD_BOOST_MPI FALSE)
 ENDIF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
 #add_definitions( -DBOOST_MPI_HOMOGENEOUS )
+
+# OpenMP
+if(ALPS_ENABLE_OPENMP)
+  find_package(OpenMP)
+  if(OPENMP_FOUND)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+  endif(OPENMP_FOUND)
+endif(ALPS_ENABLE_OPENMP)
 
 # Lapack
 if (NOT ALPS_FOR_VISTRAILS)
