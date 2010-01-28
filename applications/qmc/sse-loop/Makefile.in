@@ -39,7 +39,7 @@ noinst_PROGRAMS = $(am__EXEEXT_1)
 @BUILD_QMC_SSE_LOOP_TRUE@am__append_1 = loop
 subdir = qmc/sse-loop
 DIST_COMMON = $(dist_noinst_DATA) $(srcdir)/Makefile.am \
-	$(srcdir)/Makefile.in TODO
+	$(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_alps.m4 \

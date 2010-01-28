@@ -240,19 +240,19 @@ top_srcdir = @top_srcdir@
 SUBDIRS = $(am__append_1) $(am__append_2) $(am__append_3) \
 	$(am__append_4) $(am__append_5) $(am__append_6) .
 DIST_SUBDIRS = $(SUBDIRS)
-REMOVE_FOR_RELEASE = dmrg/interacting qmc/sse-loop test/sse-loop  dmft
+REMOVE_FOR_RELEASE = dmrg/interacting qmc/sse-loop test/sse-loop dmft
 distdir = alps-applications-$(VERSION)
 dist_noinst_SCRIPTS = config/update_preamble
 dist_noinst_DATA = CITATIONS.txt ChangeLog LICENSE.txt \
-	config/preamble.in doc/index.html tutorial/lattices.xml \
-	tutorial/models.xml tutorial/classical1/parm1a \
-	tutorial/classical1/parm1b tutorial/classical2/parm2a \
-	tutorial/classical2/parm2b tutorial/classical2/plot.xml \
-	tutorial/quantum1/parm3a tutorial/quantum1/parm3b \
-	tutorial/quantum1/plot.xml tutorial/quantum2/parm4a \
-	tutorial/quantum2/parm4b tutorial/quantum2/parm4c \
-	tutorial/quantum2/plot2.xml tutorial/quantum3/parm5a \
-	tutorial/quantum3/parm5b tutorial/quantum3/stiffnessplot.xml \
+	config/preamble.in tutorial/lattices.xml tutorial/models.xml \
+	tutorial/classical1/parm1a tutorial/classical1/parm1b \
+	tutorial/classical2/parm2a tutorial/classical2/parm2b \
+	tutorial/classical2/plot.xml tutorial/quantum1/parm3a \
+	tutorial/quantum1/parm3b tutorial/quantum1/plot.xml \
+	tutorial/quantum2/parm4a tutorial/quantum2/parm4b \
+	tutorial/quantum2/parm4c tutorial/quantum2/plot2.xml \
+	tutorial/quantum3/parm5a tutorial/quantum3/parm5b \
+	tutorial/quantum3/stiffnessplot.xml \
 	tutorial/quantum3/stiffnessplot2.xml tutorial/qwl/parm1 \
 	tutorial/qwl/parm2 tutorial/qwl/parm3 tutorial/qwl/parm4 \
 	tutorial/dmrg/particle_in_box/parm1 \

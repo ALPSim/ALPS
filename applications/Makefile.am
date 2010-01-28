@@ -20,12 +20,12 @@ endif
 SUBDIRS += .
 DIST_SUBDIRS = $(SUBDIRS)
 
-REMOVE_FOR_RELEASE = dmrg/interacting qmc/sse-loop test/sse-loop  dmft
+REMOVE_FOR_RELEASE = dmrg/interacting qmc/sse-loop test/sse-loop dmft
 
 distdir = alps-applications-$(VERSION)
 
 dist_noinst_SCRIPTS = config/update_preamble
-dist_noinst_DATA = CITATIONS.txt ChangeLog LICENSE.txt config/preamble.in doc/index.html
+dist_noinst_DATA = CITATIONS.txt ChangeLog LICENSE.txt config/preamble.in
 
 
 dist_noinst_DATA += \

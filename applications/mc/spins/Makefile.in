@@ -37,7 +37,7 @@ host_triplet = @host@
 bin_PROGRAMS = $(am__EXEEXT_1)
 @BUILD_MC_SPINS_TRUE@am__append_1 = spinmc spinmc_evaluate fit
 subdir = mc/spins
-DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in TODO
+DIST_COMMON = $(srcdir)/Makefile.am $(srcdir)/Makefile.in
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/acinclude.m4 \
 	$(top_srcdir)/config/ac_alps.m4 \
