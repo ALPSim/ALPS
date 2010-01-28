@@ -89,7 +89,7 @@ RECURSIVE_TARGETS = all-recursive check-recursive dvi-recursive \
 	install-pdf-recursive install-ps-recursive install-recursive \
 	installcheck-recursive installdirs-recursive pdf-recursive \
 	ps-recursive uninstall-recursive
-am__dist_noinst_DATA_DIST = ChangeLog ChangeLog.0 INSTALL TODO \
+am__dist_noinst_DATA_DIST = ChangeLog ChangeLog.0 INSTALL \
 	CITATIONS.txt LICENSE.txt README.txt config/ac_alps.m4 \
 	config/preamble.in LICENSE-light.txt README-light.txt \
 	config/preamble-light.in
@@ -341,7 +341,7 @@ DIST_SUBDIRS = $(SUBDIRS)
 distdir = alps-$(VERSION)
 distdir_light = alps-light-$(VERSION)
 dist_noinst_SCRIPTS = bootstrap config/make_snapshot config/run-test config/update_preamble
-dist_noinst_DATA = ChangeLog ChangeLog.0 INSTALL TODO $(am__append_3) \
+dist_noinst_DATA = ChangeLog ChangeLog.0 INSTALL $(am__append_3) \
 	$(am__append_4)
 nodist_data_DATA = config/config.site
 nodist_pkgdata_DATA = config/include.mk
