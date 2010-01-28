@@ -27,7 +27,11 @@
 #define LOOPER_EVALUATOR_H
 
 #include <alps/scheduler.h>
-#include <alps/parapack/worker.h>
+#ifdef HAVE_PARAPACK_13
+# include <alps/parapack/serial.h>
+#else
+# include <alps/parapack/worker.h>
+#endif
 
 namespace looper {
 

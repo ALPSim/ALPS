@@ -62,8 +62,6 @@ void add_vector_obs(alps::ObservableSet& m, std::string const& name,
   if (!m.has(name)) m << make_observable(alps::RealVectorObservable(name, label), is_signed);
 }
 
-namespace {
-
 // for path integral
 template<typename OP>
 inline void proceed(boost::mpl::true_, double& t, OP const& op) { t = op.time(); }
@@ -73,8 +71,6 @@ inline void proceed(boost::mpl::false_, double, OP const&) {}
 // for sse
 inline void proceed(boost::mpl::true_, double& t) { t += 1; }
 inline void proceed(boost::mpl::false_, double) {}
-
-}
 
 
 //

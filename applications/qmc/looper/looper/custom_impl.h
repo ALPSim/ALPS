@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1997-2007 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -34,8 +34,6 @@
 
 namespace looper {
 
-namespace {
-
 template<class I>
 bool build_diagonal_matrix(std::string const& op, alps::Parameters const& p,
   alps::model_helper<I> const& mh, unsigned int t, std::vector<double>& mat) {
@@ -60,8 +58,6 @@ bool build_diagonal_matrix(std::string const& op, alps::Parameters const& p,
   }
   return valid;
 }
-
-} // end namespace
 
 template<typename LAT>
 custom_measurement_initializer<LAT>::

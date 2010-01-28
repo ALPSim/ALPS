@@ -32,7 +32,11 @@
 #include <looper/temperature.h>
 #include <looper/type.h>
 #include <looper/union_find.h>
-#include <alps/parapack/worker.h>
+#ifdef HAVE_PARAPACK_13
+# include <alps/parapack/serial.h>
+#else
+# include <alps/parapack/worker.h>
+#endif
 #include <alps/parapack/exchange.h>
 
 namespace {
