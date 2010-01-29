@@ -272,6 +272,8 @@ private:
   double Sign;
   bool nonlocal;
   
+  bool use_1D_stiffness ; //@#$br
+
   unsigned last_id_;
 
   //- kinks and related data structures ----------------------
