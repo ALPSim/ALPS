@@ -1,3 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
+                              xmlns:xslout="http://xml.comp-phys.org/schema/plot">
+
 <!--
    Copyright (c) 2003-2010 Matthias Troyer <troyer@ethz.ch>
   
@@ -6,10 +10,6 @@
    http://www.boost.org/LICENSE_1_0.txt)
   -->
   
-<?xml version="1.0" encoding="UTF-8"?> 
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform"
-                              xmlns:xslout="http://xml.comp-phys.org/schema/plot">
-
 <xsl:namespace-alias stylesheet-prefix="xslout" result-prefix="xsl"/>
 <xsl:output method="xml" indent="yes"/>
 <xsl:include href="helpers.xsl"/>

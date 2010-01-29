@@ -1,3 +1,7 @@
+<?xml version="1.0"?>
+
+<?xml-stylesheet type="text/xsl" href="http://xml.comp-phys.org/2003/4/plot2html.xsl"?>
+   <plot name=""><legend show=""/><xaxis label="T"/><yaxis label="U"/>
 <!--
    Copyright (c) 2003-2010 Matthias Troyer (troyer@ethz.ch)
     
@@ -6,11 +10,7 @@
    http://www.boost.org/LICENSE_1_0.txt)
   -->
 
-<?xml version="1.0"?>
 
-<?xml-stylesheet type="text/xsl" href="http://xml.comp-phys.org/2003/4/plot2html.xsl"?>
-   <plot name=""><legend show=""/><xaxis label="T"/><yaxis label="U"/><set>
-</set>
 <set label="L=4">
 <point><x>0.4</x><y>1.0006657</y><dy>1.39e-05</dy></point>
 <point><x>1.3</x><y>1.051633</y><dy>0.000246</dy></point>

@@ -1,3 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?> 
+<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
+
 <!--
    Copyright (c) 2003-2010 Matthias Troyer <troyer@ethz.ch>
   
@@ -6,8 +9,6 @@
    http://www.boost.org/LICENSE_1_0.txt)
   -->
   
-<?xml version="1.0" encoding="UTF-8"?> 
-<xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
 
 <xsl:include href="helpers.xsl"/>
 <xsl:output method="text"/>

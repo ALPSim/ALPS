@@ -1,3 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="http://xml.comp-phys.org/2003/4/plot2html.xsl"?>
+
+<plot name="Susceptibility versus temperature for one-dimensional Heisenberg models">
+ 
 <!--
    Copyright (c) 2003-2010 Matthias Troyer (troyer@ethz.ch)
     
@@ -6,11 +11,6 @@
    http://www.boost.org/LICENSE_1_0.txt)
   -->
 
-<?xml version="1.0" encoding="UTF-8"?>
-<?xml-stylesheet type="text/xsl" href="http://xml.comp-phys.org/2003/4/plot2html.xsl"?>
-
-<plot name="Susceptibility versus temperature for one-dimensional Heisenberg models">
- 
   <!-- general plot description -->
   <legend show="true"/>
   <xaxis label="Temperature"    type="PARAMETER" name="T"/>
