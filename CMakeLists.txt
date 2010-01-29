@@ -141,16 +141,20 @@ find_package(BoostSrc REQUIRED)
 IF(NOT MPI_FOUND)
   find_package(MPI)
 ENDIF(NOT MPI_FOUND)
+set(MPI_DEFINITIONS ${MPI_COMPILE_FLAGS})
+set(MPI_INCLUDE_DIR ${MPI_INCLUDE_PATH})
 IF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
   LINK_LIBRARIES(${MPI_LIBRARIES})
-  include_directories(${MPI_INCLUDE_PATH})
-  set(BUILD_BOOST_MPI TRUE)
+  include_directories(${MPI_INCLUDE_DIR})
   SET(ALPS_HAVE_MPI 1)
   SET(ALPS_HAVE_BOOST_MPI 1)
   set(BUILD_BOOST_MPI TRUE)
 ELSE(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
   set(BUILD_BOOST_MPI FALSE)
 ENDIF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
+foreach(arg ${MPI_LIBRARIES})
+  set(MPI_LIBS "${MPI_LIBS} ${arg}")
+endforeach(arg ${MPI_LIBRARIES})
 #add_definitions( -DBOOST_MPI_HOMOGENEOUS )
 
 # OpenMP
@@ -180,6 +184,14 @@ if (NOT ALPS_FOR_VISTRAILS)
     ENDIF (REQUIRE_PTHREAD)
   ENDIF(NOT WIN32)
 endif (NOT ALPS_FOR_VISTRAILS)
+if(MAC_VECLIB)
+  set(LAPACK_LDFLAGS "-faltivec -framework vecLib")
+endif(MAC_VECLIB) 
+set(LAPACK_DEFINITIONS "${LAPACK_DEFINITIONS} -DBOOST_NUMERIC_BINDINGS_POOR_MANS_TRAITS=1")
+foreach(arg ${LAPACK_LIBRARY})
+  set(LAPACK_LIBS "${LAPACK_LIBS} ${arg}")
+endforeach(arg ${LAPACK_LIBRARY})
+set(LAPACK_LINKER_FLAGS ${LAPACK_LDFLAGS})
 
 # SQLite
 if (NOT ALPS_FOR_VISTRAILS)
@@ -303,7 +315,6 @@ else(APPLE)
   set(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 endif(APPLE)
 
-
 ######################################################################
 # install dependent libraries under Windows, from applications
 ######################################################################
@@ -366,39 +377,61 @@ endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
 ######################################################################
 # setting up ALPSConfig.cmake and include.mk
 ######################################################################
+
+set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
+
 set(ALPS_INCLUDE_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/include)
 # if(NOT INSTALL_BOOST_HEADERS)
   list(APPEND ALPS_INCLUDE_DIRS_CONFIG ${Boost_ROOT_DIR})
 # endif(NOT INSTALL_BOOST_HEADERS)
-
 set(ALPS_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/lib)
 set(ALPS_RUNTIME_LIBRARY_DIRS_CONFIG ${CMAKE_INSTALL_PREFIX}/bin)
 
-# If ALPS is built as a shared libraly, application developers may need these settings.
-list(APPEND ALPS_EXTRA_INCLUDE_DIRS
-	    ${MPI_INCLUDE_PATH} ${SQLite_INCLUDE_DIR} ${LPSolve_INCLUDE_DIR}
-             ${HDF5_INCLUDE_DIR})
-list(APPEND ALPS_EXTRA_LIBRARIES
-            ${MPI_EXTRA_LIBRARY} ${LAPACK_LIBRARIES} ${SQLite_LIBRARIES}
-  	    ${LPSolve_LIBRARIES} ${HDF5_LIBRARIES})
+if(MPI_DEFINITIONS)
+  set(ALPS_EXTRA_DEFINITIONS "${ALPS_EXTRA_DEFINITIONS} ${MPI_DEFINITIONS}")
+endif(MPI_DEFINITIONS)
+if(LAPACK_DEFINITIONS)
+  set(ALPS_EXTRA_DEFINITIONS "${ALPS_EXTRA_DEFINITIONS} ${LAPACK_DEFINITIONS}")
+endif(LAPACK_DEFINITIONS)
 
-set(ALPS_USE_FILE ${CMAKE_INSTALL_PREFIX}/share/alps/UseALPS.cmake)
+if(MPI_INCLUDE_DIR)
+  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${MPI_INCLUDE_DIR})
+endif(MPI_INCLUDE_DIR)
+if(SQLite_INCLUDE_DIR)
+  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${SQLite_INCLUDE_DIR})
+endif(SQLite_INCLUDE_DIR)
+if(LPSolve_INCLUDE_DIR)
+  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${LPSolve_INCLUDE_DIR})
+endif(LPSolve_INCLUDE_DIR)
+if(HDF5_INCLUDE_DIR)
+  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
+endif(HDF5_INCLUDE_DIR)
 
-foreach(arg ${MPI_LIBRARIES})
-   set(MPI_LIBS "${MPI_LIBS} ${arg}")
- endforeach(arg ${MPI_LIBRARIES})
+if(MPI_LINKER_FLAGS)
+  set(ALPS_EXTRA_LINKER_FLAGS "${ALPS_EXTRA_LINKER_FLAGS} ${MPI_LINKER_FLAGS}")
+endif(MPI_LINKER_FLAGS)
+if(LAPACK_LINKER_FLAGS)
+  set(ALPS_EXTRA_LINKER_FLAGS "${ALPS_EXTRA_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
+endif(LAPACK_LINKER_FLAGS)
 
-foreach(arg ${LAPACK_LIBRARY})
-   set(LAPACK_LIBS "${LAPACK_LIBS} ${arg}")
- endforeach(arg ${LAPACK_LIBRARY})
+if(MPI_LIBRARIES)
+  list(APPEND ALPS_EXTRA_LIBRARIES ${MPI_LIBRARIES})
+endif(MPI_LIBRARIES)
+if(LAPACK_LIBRARIES)
+  list(APPEND ALPS_EXTRA_LIBRARIES ${LAPACK_LIBRARIES})
+endif(LAPACK_LIBRARIES)
+if(SQLite_LIBRARIES)
+  list(APPEND ALPS_EXTRA_LIBRARIES ${SQLite_LIBRARIES})
+endif(SQLite_LIBRARIES)
+if(LPSolve_LIBRARIES)
+  list(APPEND ALPS_EXTRA_LIBRARIES ${LPSolve_LIBRARIES})
+endif(LPSolve_LIBRARIES)
+if(HDF5_LIBRARIES)
+  list(APPEND ALPS_EXTRA_LIBRARIES ${HDF5_LIBRARIES})
+endif(HDF5_LIBRARIES)
 
-if(MAC_VECLIB)
-  set(LAPACK_LDFLAGS "-faltivec -framework vecLib")
-endif(MAC_VECLIB) 
 configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
 configure_file(config/CMake/include.mk.in ${PROJECT_BINARY_DIR}/config/CMake/include.mk)
-
-
 
 ######################################################################
 # installation

@@ -4,13 +4,26 @@
 # settings to use ALPS.
 #
 
-IF(NOT ALPS_USE_FILE_INCLUDED)
-  SET(ALPS_USE_FILE_INCLUDED 1)
+if(NOT ALPS_USE_FILE_INCLUDED)
+  set(ALPS_USE_FILE_INCLUDED 1)
 
-  # Add include directories needed to use ALPS.
-  INCLUDE_DIRECTORIES(${ALPS_INCLUDE_DIRS})
+  set(CMAKE_BUILD_TYPE ${ALPS_BUILD_TYPE} CACHE STRING "Type of build" FORCE)
+  set(BUILD_SHARED_LIBS ${ALPS_BUILD_SHARED_LIBS})
 
-  # Add link directories needed to use ALPS.
-  LINK_DIRECTORIES(${ALPS_LIBRARY_DIRS})
+  # Add macro definitions needed to use ALPS and dependent libraries
+  add_definitions(${ALPS_EXTRA_DEFINITIONS})
 
-ENDIF(NOT ALPS_USE_FILE_INCLUDED)
+  # Add include directories needed to use ALPS and dependent libraries
+  include_directories(${ALPS_INCLUDE_DIRS} ${ALPS_EXTRA_INCLUDE_DIRS})
+
+  # Add link directories needed to use ALPS and dependent libraries
+  link_directories(${ALPS_LIBRARY_DIRS})
+
+  # Add linker flags needed to use ALPS and dependent libraries
+  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${ALPS_EXTRA_LINKER_FLAGS}")
+  set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} ${ALPS_EXTRA_LINKER_FLAGS}")
+
+  # list of ALPS and dependent libraries
+  set(ALPS_LIBRARIES alps boost ${ALPS_EXTRA_LIBRARIES})
+
+endif(NOT ALPS_USE_FILE_INCLUDED)
