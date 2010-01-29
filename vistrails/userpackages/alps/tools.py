@@ -1,7 +1,8 @@
 # VisTrails package for ALPS, Algorithms and Libraries for Physics Simulations
 #
 # Copyright (C) 2009 - 2010 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
-#                              Synge Todo <wistaria@comp-phys.org>
+#                              Synge Todo <wistaria@comp-phys.org>,
+#                              Bela Bauer <bauerb@phys.ethz.ch>
 #
 # Distributed under the Boost Software License, Version 1.0. (See accompany-
 # ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -196,27 +197,18 @@ class Parameter2XML(alpscore.SystemCommandLogged):
                      ('log_file',[basic.File])]
 
 
-def recursive_glob(pattern):
-    ret = glob.glob(pattern)
-    print 'pattern ', pattern
-    print 'ret ', ret
-    dirs = os.listdir('.')
-    print 'dirs ', dirs
+def recursive_glob(dirname,pattern):
+    ret = [os.path.join(dirname,x) for x in glob.glob(os.path.join(dirname, pattern))]
+#    print 'pattern ', pattern
+#    print 'here ', ret
+    dirs = [os.path.join(dirname,x) for x in os.listdir(dirname)]
+#    print 'dirs ', dirs
     for d in dirs:
-        try:
-            print dir
-            curdir = os.getcwd()
-            os.chdir(d)
-            print pattern
-            files_there = recursive_glob(pattern)
-            print "1 ", files_there
-            files_there = [os.path.join(d,x) for x in files_there]
-            print "2 ", files_there
+        if os.path.isdir(d):
+            files_there = recursive_glob(os.path.join(dirname, d), pattern)
+#            files_there = [os.path.join(dirname,d,x) for x in files_there]
             ret += files_there
-            print "ret ", ret
-            os.chdir(curdir)
-        except OSError:
-            pass
+#    print 'final ret', ret
     return ret
 
 class Glob(Module):
@@ -256,13 +248,14 @@ class GetRunFiles(Module):
 
 class GetResultFiles(Module):
     def compute(self):
-        if self.hasInputFromPort('pattern'):
+        if self.hasInputFromPort('pattern') and self.hasInputFromPort('dir'):
+            dir = self.getInputFromPort('dir').name
             # try several ways to match the pattern
             pattern = self.getInputFromPort('pattern')
             pattern = os.path.expanduser(pattern)
             pattern = os.path.expandvars(pattern)
-            result = glob.glob(pattern)
-            #result = recursive_glob(pattern)
+            # result = glob.glob(pattern)
+            result = recursive_glob(dir,pattern)
             self.setResult('value',result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
         else:
@@ -274,9 +267,9 @@ class GetResultFiles(Module):
                 tasks = self.getInputFromPort('tasks')
             if self.hasInputFromPort('prefix'):
                 prefix = self.getInputFromPort('prefix')
-            result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
+            # result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
             # result = recursive_glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
-            # result = recursive_glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.h5'))
+            result = recursive_glob(dirname, prefix+ '.task' + tasks + '.out.h5')
             self.setResult('value', result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
 
