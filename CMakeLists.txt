@@ -138,7 +138,9 @@ CHECK_INCLUDE_FILE_CXX(valarray ALPS_HAVE_VALARRAY)
 find_package(BoostSrc REQUIRED)
 
 # MPI
-find_package(MPI)
+IF(NOT MPI_FOUND)
+  find_package(MPI)
+ENDIF(NOT MPI_FOUND)
 IF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
   LINK_LIBRARIES(${MPI_LIBRARIES})
   include_directories(${MPI_INCLUDE_PATH})
@@ -162,7 +164,9 @@ endif(ALPS_ENABLE_OPENMP)
 
 # Lapack
 if (NOT ALPS_FOR_VISTRAILS)
-  find_package(Lapack)
+  if (NOT LAPACK_FOUND)
+    find_package(Lapack)
+  endif (NOT LAPACK_FOUND)
   if (LAPACK_FOUND)
     set(ALPS_HAVE_LAPACK 1)
     set(ALPS_HAVE_BLAS 1)
