@@ -34,6 +34,17 @@ void WRun::create_observables()
   
   measurements << alps::RealVectorObservable("Statistics");
   measurements << alps::make_observable(alps::RealVectorObservable("Winding number^2"), is_signed_);
+
+  if(use_1D_stiffness){   //@#$br: take care of D=1 ---> need a histogram of the winding numbers
+     measurements << alps::make_observable(alps::RealVectorObservable("Winding number histogram"), is_signed_); 
+  }
+  
+  // warn a user if using the D>1 stiffness estimator in 1D  
+  //if(1==dimension() && !use_1D_stiffness){
+  //  std::cout<<" *** Warning: using the <W^2> estimator for the stiffness \n *** Consider switching USE_1D_STIFFNESS=true \n" ;
+  //}
+
+
  
   if (nonlocal) {
     measurements << alps::RealObservable("Ratio time intervals");
@@ -184,21 +195,33 @@ void WRun::make_meas()
   std::valarray<double> winding_number2(0., dimension());
   winding_number2 = winding_number*winding_number;
 
-  // determine stiffness
-  double stiffness=0.;
-  for(int d=0; d<dimension(); ++d) {
-    stiffness += winding_number[d]*winding_number[d];
+  if(use_1D_stiffness){
+     // @#$br : record the winding numbers = -1, 0, 1
+     //         the vector entries are 0,1,2, respectively            
+     std::valarray<double> winding_numberz(3);
+     for(int i=0; i<3;++i){  winding_numberz[i]=0. ;}
+     if( fabs( winding_number[0] ) <=1 ) {
+          winding_numberz[(int)winding_number[0]+1]+=Sign ; 
+          measurements["Winding number histogram"]  << winding_numberz ; //*Sign; 
+     }
+  }
+  else{
+     // determine stiffness
+     double stiffness=0.;
+     for(int d=0; d<dimension(); ++d) {
+        stiffness += winding_number[d]*winding_number[d];
+     }
+     measurements["Stiffness"] << stiffness*Sign/(dimension()*beta);
   }
 
   double vol = num_sites();
-
 
   measurements["Statistics"]  << stat; 
   winding_number2 *= Sign;
   measurements["Winding number^2"] << winding_number2;
   measurements["Energy"] << energy*Sign;
   measurements["Energy Density"] << energy/vol*Sign;
-  measurements["Stiffness"] << stiffness*Sign/(dimension()*beta);
+  //measurements["Stiffness"] << stiffness*Sign/(dimension()*beta);
 
   if (measure_green_function_) {
     green /= 2.*double(skip_measurements);
