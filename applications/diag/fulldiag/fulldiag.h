@@ -449,8 +449,7 @@ void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesys
     conserved_name = "Sz";    // Here we support only a coupling -h Sz
 
     min_val = groundstate_energy();
-
-    MeasurementsPlot<magnitude_type> noplots (this->measurements_[0],"");
+    MeasurementsPlot<magnitude_type> noplots (alps::MeasurementLabels(*this,0),"");
 
     calculate_averages(noplots);
     // TODO: evaluate the quantities just for one value
