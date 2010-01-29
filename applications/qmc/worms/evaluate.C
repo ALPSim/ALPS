@@ -38,6 +38,8 @@ void evaluate(const boost::filesystem::path& p, std::ostream& out) {
   alps::Parameters parms=sim.get_parameters();
   double beta=parms.defined("beta") ? alps::evaluate<double>("beta",parms) : 
          1./alps::evaluate<double>("T",parms);     
+
+  int L=alps::evaluate<double>("L",parms) ;
          
   alps::graph_helper<> graph(parms);
   double numsites = graph.num_sites();
@@ -48,6 +50,26 @@ void evaluate(const boost::filesystem::path& p, std::ostream& out) {
 
   alps::RealObsevaluator kappa= beta*(n2 - numsites*n*n);  // add factor of beta
   kappa.rename("Compressibility");
+
+  bool use_1D_stiffness = parms.defined("USE_1D_STIFFNESS") ? static_cast<bool>(parms["USE_1D_STIFFNESS"]) : false ; 
+  //bool use_1D_stiffness = parms.defined("USE_1D_STIFFNESS") ? true : false ; 
+
+  if (use_1D_stiffness){
+    // winding number statistics
+    alps::RealVectorObsevaluator wz = sim.get_measurements()["Winding number histogram"] ;
+    alps::RealObsevaluator wz_m1(wz.slice(0)) ;
+    alps::RealObsevaluator wz_0(wz.slice(1)) ;
+    alps::RealObsevaluator wz_p1(wz.slice(2)) ;
+
+    alps::RealObsevaluator rho_s_01=log(2.*wz_0/( wz_m1+wz_p1 )) ;
+    rho_s_01 *= 2.*beta/L ;
+    rho_s_01 = 1./rho_s_01 ; 
+    rho_s_01.rename("Superfluid stiffness (1D estimator)") ;
+    out<<rho_s_01<<"\n" ; 
+    sim << rho_s_01 ; 
+  }
+
+
 
 /*
   alps::RealVectorObsevaluator IntervalStatistics 
