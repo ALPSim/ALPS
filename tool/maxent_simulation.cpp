@@ -185,11 +185,13 @@ MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const d
 
 
 
-void MaxEntSimulation::write_xml_body(alps::oxstream& out, const boost::filesystem::path&) const
+void MaxEntSimulation::write_xml_body(alps::oxstream& out, const boost::filesystem::path&, bool write_all_xml) const
 {
-  out << alps::start_tag("AVERAGES");
-  out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Zeug") << alps::no_linebreak
-      << alps::start_tag("MEAN") << 42 << alps::end_tag("MEAN")
-      << alps::end_tag("SCALAR_AVERAGE");
-  out << alps::end_tag("AVERAGES");
+  if (write_all_xml) {
+    out << alps::start_tag("AVERAGES");
+    out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Zeug") << alps::no_linebreak
+        << alps::start_tag("MEAN") << 42 << alps::end_tag("MEAN")
+        << alps::end_tag("SCALAR_AVERAGE");
+    out << alps::end_tag("AVERAGES");
+  }
 }

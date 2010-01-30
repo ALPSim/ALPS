@@ -376,15 +376,17 @@ DMRGTask::save_results()
 }
     
 
-void DMRGTask::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p) const
+void DMRGTask::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p,bool writeallxml) const
 {
-  out << alps::start_tag("EIGENSTATES") << alps::attribute("number",num_eigenvalues);
-  for (int j=0;j<num_eigenvalues;++j) {
-    out << alps::start_tag("EIGENSTATE") << alps::attribute("number",j);
-    this->write_xml_one_vector(out,p,j);
-    out << alps::end_tag("EIGENSTATE");   
+  if (writeallxml) {
+    out << alps::start_tag("EIGENSTATES") << alps::attribute("number",num_eigenvalues);
+    for (int j=0;j<num_eigenvalues;++j) {
+      out << alps::start_tag("EIGENSTATE") << alps::attribute("number",j);
+      this->write_xml_one_vector(out,p,j);
+      out << alps::end_tag("EIGENSTATE");   
+    }
+    out << alps::end_tag("EIGENSTATES");
   }
-  out << alps::end_tag("EIGENSTATES");
 }
 
 

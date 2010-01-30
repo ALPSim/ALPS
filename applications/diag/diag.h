@@ -29,6 +29,11 @@
 #include <alps/scheduler/measurement_operators.h>
 #include <boost/regex.hpp> 
 
+#ifdef ALPS_HAVE_HDF5
+#include <alps/hdf5.hpp>
+#endif
+
+
 template <class T, class M>
 class DiagMatrix : public HamiltonianMatrix<T,M>, public alps::MeasurementOperators
 {
@@ -46,8 +51,14 @@ public:
   typedef boost::numeric::ublas::mapped_vector_of_mapped_vector<T, boost::numeric::ublas::row_major>  operator_matrix_type;
   
   DiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
+
+#ifdef ALPS_HAVE_HDF5
+  void serialize(alps::hdf5::oarchive &) const;
+  void serialize(alps::hdf5::iarchive &);
+#endif
+
 protected:
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&) const;
+  void write_xml_body(alps::oxstream&, const boost::filesystem::path&,bool) const;
   void handle_tag(std::istream& infile, const alps::XMLTag& tag); 
 
   std::vector<mag_vector_type> eigenvalues_;
@@ -77,35 +88,59 @@ DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesy
 }
 
 
+#ifdef ALPS_HAVE_HDF5
 template <class T, class M>
-void DiagMatrix<T,M>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p) const
-{
-  for (int i=0;i<eigenvalues_.size();++i) {
-    int num_eigenvalues = std::min(int(this->parms.value_or_default("NUMBER_EIGENVALUES",
-                eigenvalues_[i].size())),int(eigenvalues_[i].size()));
-    out << alps::start_tag("EIGENVALUES") << alps::attribute("number",num_eigenvalues);
-    for (int j=0;j<this->quantumnumbervalues_[i].size();++j)
-      out << alps::start_tag("QUANTUMNUMBER") << alps::attribute("name",this->quantumnumbervalues_[i][j].first)
-          << alps::attribute("value",this->quantumnumbervalues_[i][j].second) << alps::end_tag("QUANTUMNUMBER");
-    for (int j=0;j<num_eigenvalues;++j)
-      out << eigenvalues_[i][j] << "\n";
-    out << alps::end_tag("EIGENVALUES");
-  }
+void DiagMatrix<T,M>::serialize(alps::hdf5::iarchive & ar) {
+    alps::scheduler::Task::serialize(ar);
+}
 
-  if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true)) {
+template <class T, class M>
+void DiagMatrix<T,M>::serialize(alps::hdf5::oarchive & ar) const {
+  alps::scheduler::Task::serialize(ar);
+  for (int i=0;i<eigenvalues_.size();++i) {
+    std::string sectorpath = "/sector/" + boost::lexical_cast<std::string>(i);
+    for (int j=0;j<this->quantumnumbervalues_[i].size();++j)
+      ar << alps::make_pvp(sectorpath + "/quantumnumbers/" + this->quantumnumbervalues_[i][j].first,
+                     this->quantumnumbervalues_[i][j].second);
+      ar << alps::make_pvp(sectorpath + "/energies",eigenvalues_[i]);
+    if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true))
+        measurements_[i].write_hdf5(ar,sectorpath);
+  }
+}
+#endif
+
+
+template <class T, class M>
+void DiagMatrix<T,M>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& name,bool writeallxml) const
+{
+  if (writeallxml) {
     for (int i=0;i<eigenvalues_.size();++i) {
-       int num_eigenvalues = std::min(int(this->parms.value_or_default("NUMBER_EIGENVALUES",
-                eigenvalues_[i].size())),int(eigenvalues_[i].size()));
-      out << alps::start_tag("EIGENSTATES") << alps::attribute("number",num_eigenvalues);
+      int num_eigenvalues = std::min(int(this->parms.value_or_default("NUMBER_EIGENVALUES",
+                  eigenvalues_[i].size())),int(eigenvalues_[i].size()));
+      out << alps::start_tag("EIGENVALUES") << alps::attribute("number",num_eigenvalues);
       for (int j=0;j<this->quantumnumbervalues_[i].size();++j)
         out << alps::start_tag("QUANTUMNUMBER") << alps::attribute("name",this->quantumnumbervalues_[i][j].first)
             << alps::attribute("value",this->quantumnumbervalues_[i][j].second) << alps::end_tag("QUANTUMNUMBER");
-      for (int j=0;j<num_eigenvalues;++j) {
-        out << alps::start_tag("EIGENSTATE") << alps::attribute("number",j);
-        measurements_[i].write_xml_one_vector(out,p,j);
-        out << alps::end_tag("EIGENSTATE");   
+      for (int j=0;j<num_eigenvalues;++j)
+        out << eigenvalues_[i][j] << "\n";
+      out << alps::end_tag("EIGENVALUES");
+    }
+
+    if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true)) {
+      for (int i=0;i<eigenvalues_.size();++i) {
+         int num_eigenvalues = std::min(int(this->parms.value_or_default("NUMBER_EIGENVALUES",
+                  eigenvalues_[i].size())),int(eigenvalues_[i].size()));
+        out << alps::start_tag("EIGENSTATES") << alps::attribute("number",num_eigenvalues);
+        for (int j=0;j<this->quantumnumbervalues_[i].size();++j)
+          out << alps::start_tag("QUANTUMNUMBER") << alps::attribute("name",this->quantumnumbervalues_[i][j].first)
+              << alps::attribute("value",this->quantumnumbervalues_[i][j].second) << alps::end_tag("QUANTUMNUMBER");
+        for (int j=0;j<num_eigenvalues;++j) {
+          out << alps::start_tag("EIGENSTATE") << alps::attribute("number",j);
+          measurements_[i].write_xml_one_vector(out,name,j);
+          out << alps::end_tag("EIGENSTATE");   
+        }
+        out << alps::end_tag("EIGENSTATES");
       }
-      out << alps::end_tag("EIGENSTATES");
     }
   }
 }

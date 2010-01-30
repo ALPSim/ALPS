@@ -45,7 +45,7 @@ public:
   DMRGTask(const alps::ProcessList& , const boost::filesystem::path& );
   DMRGTask(const alps::ProcessList& w, const alps::Parameters& p);
   void dostep();
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&) const;
+  void write_xml_body(alps::oxstream&, const boost::filesystem::path&,bool) const;
 
   static void print_copyright(std::ostream& os = std::cout) 
   {
