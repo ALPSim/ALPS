@@ -50,7 +50,7 @@ class Hdf5Missing(Exception):
 
 class Hdf5Loader:
     def GetFileNames(self, flist):
-        self.files = [f.replace('xml','h5') for f in flist] 
+        self.files = [f[:-3]+"h5" for f in flist if f[-3:]=='xml']
         return self.files
         
     # Pre: file is a h5py file descriptor
@@ -141,7 +141,11 @@ class Hdf5Loader:
                     if "timeseries" in statvar:
                         tslist = grp[m+"/timeseries"].keys()
                         for l in tslist:
-                            d.props[l] = grp[m+"/timeseries/"+l].value
+                            d.props["timeseries_"+l] = np.array(grp[m+"/timeseries/"+l].value)
+                    if "jacknife" in statvar:
+                        jklist = grp[m+"/jacknife"].keys()
+                        for l in jklist:
+                            d.props["jacknife_"+l] = np.array(grp[m+"/jacknife/"+l].value)
                     for s in statvar:
                         if s in grp[m].keys():
                             try:
