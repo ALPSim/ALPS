@@ -69,7 +69,7 @@ class Hdf5Loader:
                 except KeyError:
                     pass
         except KeyError:
-            raise Hdf5Missing(proppath + ' in ReadParameters()')
+            pass
         return dict 
         
     def GetProperties(self,flist,proppath):
@@ -110,7 +110,7 @@ class Hdf5Loader:
                 for secnum in sectors_grp.keys():
                     try:
                         d = DataSet()
-                        secpath = respath+'sectors/'+secnum
+                        secpath = respath+'/sectors/'+secnum
                         d.props['hdf5_path'] = secpath 
                         d.y = np.array(sectors_grp[secnum+'/energies'].value )
                         d.props.update(params)
