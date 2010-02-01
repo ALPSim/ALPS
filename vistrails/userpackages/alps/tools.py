@@ -268,8 +268,8 @@ class GetResultFiles(Module):
             if self.hasInputFromPort('prefix'):
                 prefix = self.getInputFromPort('prefix')
             # result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
-            # result = recursive_glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
-            result = recursive_glob(dirname, prefix+ '.task' + tasks + '.out.h5')
+            result = recursive_glob(dirname, prefix+ '.task' + tasks + '.out.xml')
+            # result = recursive_glob(dirname, prefix+ '.task' + tasks + '.out.h5')
             self.setResult('value', result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
 
