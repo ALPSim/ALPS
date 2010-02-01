@@ -89,6 +89,37 @@ class Hdf5Loader:
             raise Hdf5Missing(respath + ' in GetObservableList()')
         olist = [pt.hdf5_name_encode(obs) for obs in obsgrp.keys()]
         return olist
+
+  # Pre: file is a h5py file descriptor
+    # Post: returns DataSet with all parameters set
+    def ReadSpectrumFromFile(self,flist,proppath,respath):
+        print "I'm here spectrum", flist
+        fs = self.GetFileNames(flist)
+        sets = []
+        for f in fs:
+            print "Reading ", f
+            self.h5f = h5py.File(f)
+            self.h5fname = f
+            params = self.ReadParameters(proppath)
+            print params
+            grp = self.h5f.require_group(respath)
+            print 'path ', respath, ' has keys ',grp.keys()
+            if 'sectors' in grp.keys():
+                print "Has sectors"
+                sectors_grp = self.h5f.require_group(respath+'/sectors')
+                for secnum in sectors_grp.keys():
+                    try:
+                        d = DataSet()
+                        secpath = respath+'sectors/'+secnum
+                        d.props['hdf5_path'] = secpath 
+                        d.y = np.array(sectors_grp[secnum+'/energies'].value )
+                        d.props.update(params)
+                        d.props.update(self.ReadParameters(secpath+'/quantumnumbers' ))
+                        sets.append(d)
+                    except AttributeError:
+                        print "Could not create DataSet"
+                        pass
+        return sets
         
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
@@ -157,3 +188,5 @@ class Hdf5Loader:
                     print "Could not create DataSet"
                     pass
         return sets
+
+ 

@@ -98,7 +98,7 @@ template <class T, class M>
 void DiagMatrix<T,M>::serialize(alps::hdf5::oarchive & ar) const {
   alps::scheduler::Task::serialize(ar);
   for (int i=0;i<eigenvalues_.size();++i) {
-    std::string sectorpath = "/sector/" + boost::lexical_cast<std::string>(i);
+    std::string sectorpath = "/spectrum/sectors/" + boost::lexical_cast<std::string>(i);
     for (int j=0;j<this->quantumnumbervalues_[i].size();++j)
       ar << alps::make_pvp(sectorpath + "/quantumnumbers/" + this->quantumnumbervalues_[i][j].first,
                      this->quantumnumbervalues_[i][j].second);

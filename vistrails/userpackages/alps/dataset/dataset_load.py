@@ -227,6 +227,27 @@ class LoadAlpsHdf5(Module):
             datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,propPath,resPath)
         self.setResult('data',datasets)
 
+class LoadSpectrumHdf5(Module):
+    my_input_ports = [
+        PortDescriptor('ResultFiles',ResultFiles),
+        PortDescriptor('PropertyPath',basic.String),
+        PortDescriptor('SpectrumPath',basic.String)
+    ]
+    
+    my_output_ports = [
+        PortDescriptor('data',DataSets)
+    ]    
+    
+    def compute(self):
+        propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
+        resPath= self.getInputFromPort('SpectrumPath') if self.hasInputFromPort('SpectrumPath') else "/spectrum"
+        loader = Hdf5Loader()
+        if self.hasInputFromPort('ResultFiles'):
+            files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+        datasets = []
+        datasets = loader.ReadSpectrumFromFile(files,propPath,resPath)
+        self.setResult('data',datasets)
+
 
 class CollectXY(Module):
     my_input_ports = [

@@ -108,6 +108,7 @@ def selfRegister():
     register(CollectXY,'DataSet|Load')
     register(LoadProperties,'DataSet|Load')
     register(LoadAlpsHdf5,'DataSet|Load')
+    register(LoadSpectrumHdf5,'DataSet|Load')
     
 
 
