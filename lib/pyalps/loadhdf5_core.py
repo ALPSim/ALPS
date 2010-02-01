@@ -112,7 +112,9 @@ class Hdf5Loader:
                         d = DataSet()
                         secpath = respath+'/sectors/'+secnum
                         d.props['hdf5_path'] = secpath 
+                        d.props['observable'] = 'spectrum'
                         d.y = np.array(sectors_grp[secnum+'/energies'].value )
+                        d.x = range(len(d.y))
                         d.props.update(params)
                         d.props.update(self.ReadParameters(secpath+'/quantumnumbers' ))
                         sets.append(d)
