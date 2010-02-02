@@ -33,6 +33,11 @@
 #define DMRG_VERSION "1.0.0"
 #define DMRG_DATE "2006/10/02"
 
+#ifdef ALPS_HAVE_HDF5
+#include <alps/hdf5.hpp>
+#endif
+
+
 class DMRGTask 
  : public alps::scheduler::Task
  , public alps::graph_helper<>
@@ -57,6 +62,10 @@ public:
        << "  for details see the publication: \n"
        << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
   }
+
+#ifdef ALPS_HAVE_HDF5
+  void serialize(alps::hdf5::oarchive &) const;
+#endif
 
 private:
 

@@ -76,12 +76,15 @@ private:
   
   template <class Op, class D> 
   std::vector<value_type> calculate(Op const& op, std::pair<D,D>  const&) const;
+  
+  bool read_hdf5_;
 };
 
 template <class T, class M>
 DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p) 
     : super_type(where,p)
     , alps::MeasurementOperators(this->parms)
+    , read_hdf5_(false)
 { 
   if (this->calc_averages())
     multiplicities_ = this->distance_multiplicities();
@@ -91,7 +94,40 @@ DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesy
 #ifdef ALPS_HAVE_HDF5
 template <class T, class M>
 void DiagMatrix<T,M>::serialize(alps::hdf5::iarchive & ar) {
-    alps::scheduler::Task::serialize(ar);
+  alps::scheduler::Task::serialize(ar);
+  std::vector<std::string> list = ar.list_children("/spectrum/sectors");
+  measurements_.resize(list.size(),alps::EigenvectorMeasurements<value_type>(*this));
+  for (unsigned i=0; i<list.size();++i) {
+    std::string sectorpath = "/spectrum/sectors/"+list[i];
+    std::cerr << "Reading " << sectorpath << "\n";
+    
+    // read quantum numbers
+    std::vector<std::pair<std::string,std::string> > qnvals;
+    if (ar.is_group(sectorpath+"/quantumnumbers")) {
+    std::cerr << "Reading qnums\n";
+      std::vector<std::string> qnlist = ar.list_children(sectorpath+"/quantumnumbers");
+      for (std::vector<std::string>::const_iterator it = qnlist.begin(); it != qnlist.end(); ++it) {
+          std::cerr << "Reading " << *it << "\n";
+          std::string v;
+          ar >> alps::make_pvp(sectorpath+"/quantumnumbers/"+*it, v);
+          qnvals.push_back(std::make_pair(*it,v));
+      }
+    }
+    this->quantumnumbervalues_.push_back(qnvals);
+
+    // read energies
+    if (ar.is_data(sectorpath+"/energies")) {
+      std::cerr << "Reading energies\n";
+      mag_vector_type evals_vector;
+      ar >> alps::make_pvp(sectorpath+"/energies", evals_vector);
+      eigenvalues_.push_back(evals_vector);
+    }
+    
+    // read measurements
+      std::cerr << "Reading meas\n";
+      ar >> alps::make_pvp(sectorpath,measurements_[i]);
+  }
+  this->read_hdf5_ = true; // skip XML, once all is being read
 }
 
 template <class T, class M>
@@ -104,7 +140,7 @@ void DiagMatrix<T,M>::serialize(alps::hdf5::oarchive & ar) const {
                      this->quantumnumbervalues_[i][j].second);
       ar << alps::make_pvp(sectorpath + "/energies",eigenvalues_[i]);
     if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true))
-        measurements_[i].write_hdf5(ar,sectorpath);
+      ar << alps::make_pvp(sectorpath,measurements_[i]);
   }
 }
 #endif
@@ -148,14 +184,27 @@ void DiagMatrix<T,M>::write_xml_body(alps::oxstream& out, const boost::filesyste
 template <class T, class M>
 void DiagMatrix<T,M>::handle_tag(std::istream& infile, const alps::XMLTag& intag) 
 {
+  alps::XMLTag tag(intag);
+  
+  // we don't need to read the XML file if the HDF-5 file has already been read
+//  if (this->read_hdf5_) {
+//     skip_element(infile,tag);
+//    return;
+//  }
+  
   if (intag.type==alps::XMLTag::SINGLE)
     return;
   if (intag.name=="EIGENVALUES") {
+    // we don't need to read the XML file if the HDF-5 file has already been read
+    if (this->read_hdf5_) {
+       skip_element(infile,tag);
+      return;
+    }
+
     std::vector<std::pair<std::string,std::string> > qnvals;
     std::vector<magnitude_type> evals;
     char c;
     infile >> c;
-    alps::XMLTag tag;
     while (c=='<' && infile) {
       infile.putback(c);
       tag=alps::parse_tag(infile);

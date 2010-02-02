@@ -375,6 +375,12 @@ DMRGTask::save_results()
     std::cerr << "Did not get right number of measurements\n";
 }
     
+#ifdef ALPS_HAVE_HDF5
+void DMRGTask::serialize(alps::hdf5::oarchive & ar) const
+{
+  alps::scheduler::Task::serialize(ar);
+}
+#endif
 
 void DMRGTask::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
 {

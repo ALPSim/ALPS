@@ -376,6 +376,13 @@ DMRGTask::save_results()
 }
     
 
+#ifdef ALPS_HAVE_HDF5
+void DMRGTask::serialize(alps::hdf5::oarchive & ar) const
+{
+  alps::scheduler::Task::serialize(ar);
+}
+#endif
+
 void DMRGTask::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p,bool writeallxml) const
 {
   if (writeallxml) {
