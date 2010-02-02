@@ -289,11 +289,18 @@ def convert_to_grace(desc):
             output += '@    legend 0.85, 0.8\n'
         
         num = 0
+        symnum = 0
         for q in desc['data']:
             output += '@target G0.S'+str(num)+'\n'
             output += '@    s'+str(num)+' symbol ' + str(num+1) +'\n'
             output += '@    s'+str(num)+' symbol size 0.500000\n'
-            output += '@    s'+str(num)+' line type 1\n'
+            if q.props['line'] == 'scatter':
+              symnum += 1
+              output += '@    s'+str(num)+' line type 0\n'
+              output += '@    s'+str(num)+' symbol ' + str(symnum) + '\n'
+              output += '@    s'+str(num)+' symbol size 1.000000\n'
+            else:
+              output += '@    s'+str(num)+' line type 1\n'
             if 'label' in q.props and q.props['label'] != 'none':
                 output += '@    s'+str(num)+' legend "' + q.props['label'] + '"\n'
             elif 'filename' in q.props:
