@@ -90,6 +90,7 @@ def Plot(data,xaxis=None,yaxis=None,legend=None):
 
 class MplXYPlot_core:
     colors = ['k','b','g','m','c','y']
+    markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
     
     def __init__(self):
         self.icolor = 0
@@ -98,6 +99,7 @@ class MplXYPlot_core:
     def draw_lines(self):
         self.lines = []
         self.icolor = 0
+        self.imarker = 0
         
         xlog = False
         ylog = False
@@ -107,10 +109,6 @@ class MplXYPlot_core:
             ylog = self.plt['yaxis']['logarithmic']
         
         for q in self.plt['data']:
-            line_props = self.colors[self.icolor]
-            if 'line' in q.props:
-                line_props += q.props['line']
-            
             try:
                 xmeans = np.array([xx.mean for xx in q.x])
                 xerrors = np.array([xx.error for xx in q.x])
@@ -124,9 +122,17 @@ class MplXYPlot_core:
             except AttributeError:
                 ymeans = q.y
                 yerrors = None
-            
-            self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props))
-            
+                
+            if 'line' in q.props and q.props['line'] == 'scatter':
+                self.lines.append([plt.scatter(xmeans, ymeans, c=self.colors[self.icolor], marker=self.markers[self.imarker])])
+                self.imarker = (self.imarker+1)%len(self.markers)
+            else:
+                line_props = self.colors[self.icolor]
+                if 'line' in q.props:
+                    line_props += q.props['line']
+                
+                self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props))
+                
             if xlog:
                 plt.xscale('log')
             if ylog:

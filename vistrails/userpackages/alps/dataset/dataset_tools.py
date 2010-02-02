@@ -92,3 +92,6 @@ class SetLabels(FitPrototype):
             labelstr += '%s = %.4s' % (label,data.props[label])
         data.props['label'] = labelstr
 
+class MakeScatter(FitPrototype):
+    def transform(self,data):
+        data.props['line'] = 'scatter'

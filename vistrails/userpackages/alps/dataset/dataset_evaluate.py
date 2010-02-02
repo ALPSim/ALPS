@@ -213,8 +213,12 @@ class GeneralTransform(Module):
     
     def compute(self):
         if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
+            data = copy.deepcopy( self.getInputFromPort('input') )
+            
             code = self.getInputFromPort('source')
             proc_code = urllib.unquote(str(code))
             exec proc_code
+            
+            self.setResult('output', data)
         else:
             raise EmptyInputPort('input || source')
