@@ -93,11 +93,9 @@ class Hdf5Loader:
   # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
     def ReadSpectrumFromFile(self,flist,proppath,respath):
-        print "I'm here spectrum", flist
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
-            print "Reading ", f
             self.h5f = h5py.File(f)
             self.h5fname = f
             params = self.ReadParameters(proppath)
@@ -105,7 +103,6 @@ class Hdf5Loader:
             grp = self.h5f.require_group(respath)
             print 'path ', respath, ' has keys ',grp.keys()
             if 'sectors' in grp.keys():
-                print "Has sectors"
                 sectors_grp = self.h5f.require_group(respath+'/sectors')
                 for secnum in sectors_grp.keys():
                     try:
@@ -126,7 +123,6 @@ class Hdf5Loader:
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
     def ReadMeasurementFromFile(self,flist,statvar,proppath,respath,measurements=None):
-        print "I'm here", len(flist)
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:

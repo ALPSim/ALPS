@@ -259,9 +259,9 @@ def convert_to_grace(desc):
             output += '@    xaxes scale Normal\n'
 
         if ylog:
-            output += '@    xaxes scale Logarithmic\n'
+            output += '@    yaxes scale Logarithmic\n'
         else:
-            output += '@    xaxes scale Normal\n'
+            output += '@    yaxes scale Normal\n'
 
         if 'xaxis' in desc:
             if 'label' in desc['xaxis']:

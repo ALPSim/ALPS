@@ -295,14 +295,20 @@ class CollectXY(Module):
                 res.props['ylabel'] = observable
                 
                 for x in v:
+                    if len(x.y)>1:
+                        res.props['line'] = '.'
+                    print 'trying ones'
+                    xvalue = np.array([x.props[versus] for i in range(len(x.y))])
+                    print xvalue
                     if len(res.x) > 0 and len(res.y) > 0:
-                        res.x = np.concatenate((res.x, np.array([x.props[versus]])))
+                        res.x = np.concatenate((res.x, xvalue ))
                         res.y = np.concatenate((res.y, x.y))
                     else:
-                        res.x = np.array([x.props[versus]])
+                        res.x = xvalue
                         res.y = x.y
                 
-                order = np.argsort(res.x)
+                order = np.argsort(res.x) #, kind = 'mergesort')
+                print order
                 res.x = res.x[order]
                 res.y = res.y[order]
                 res.props['label'] = ''
