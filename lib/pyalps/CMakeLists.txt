@@ -8,7 +8,7 @@
 #
 
 if (ALPS_HAVE_PYTHON)
-  set(PYALEA_SOURCES value_with_error.C)
+  set(PYALEA_SOURCES value_with_error_boostpy_wrapper.C)
   set(PYTOOLS_SOURCES pytools.C)
 
 
