@@ -59,13 +59,27 @@ namespace alps {
       return boost::python::str(boost::python::str(self.mean()) + " +/- " + boost::python::str(self.error()));
     }
 
-    static boost::python::str print_value_with_error_vector(value_with_error<std::vector<double> > self)
+    static boost::python::str print_vector_with_error(value_with_error<std::vector<double> > self)
     {
       boost::python::str s;
       for (std::size_t index=0; index < self.size(); ++index)
       {
-        s += boost::python::str(self[index]);
+        s += boost::python::str(self.at(index));
         s += boost::python::str("\n");
+      }
+      return s;
+    }
+
+    template<class T>
+    inline static boost::python::str print_vector_of_value_with_error(std::vector<value_with_error<T> > const & self)
+    {
+      typename std::vector<value_with_error<T> >::const_iterator it;
+
+      boost::python::str s;
+      for (it = self.begin(); it != self.end(); ++it)
+      {
+        s += print_value_with_error(*it);
+        if (it != (self.end()-1))  {  s += '\n';  }
       }
       return s;
     }
@@ -147,39 +161,43 @@ BOOST_PYTHON_MODULE(pyalea)
     .def_pickle(value_with_error_pickle_suite<double>())
     ;
 
-  class_<value_with_error<std::vector<double> > >("value_with_error_vector",init<optional<std::vector<double>,std::vector<double> > >())
-    //.def(vector_indexing_suite<value_with_error<std::vector<double> > >())   // what is left is just the proxy thing
-
+  class_<value_with_error<std::vector<double> > >("vector_with_error",init<optional<std::vector<double>,std::vector<double> > >())
     .add_property("mean",&value_with_error<std::vector<double> >::mean)
     .add_property("error",&value_with_error<std::vector<double> >::error)
 
-    .def("__repr__", &print_value_with_error_vector)
+    .def("__repr__", &print_vector_with_error)
 
+    .def("__len__",&value_with_error<std::vector<double> >::size)         
+    .def("append",&value_with_error<std::vector<double> >::push_back)     
+    .def("push_back",&value_with_error<std::vector<double> >::push_back)  
+    .def("insert",&value_with_error<std::vector<double> >::insert)    
+    .def("pop_back",&value_with_error<std::vector<double> >::pop_back)   
+    .def("erase",&value_with_error<std::vector<double> >::erase)        
+    .def("clear",&value_with_error<std::vector<double> >::clear)         
+    .def("at",&value_with_error<std::vector<double> >::at)
 
-    .def("__len__",&value_with_error<std::vector<double> >::size)          // will be depreciated after vector indexing suite is okay
-    .def("append",&value_with_error<std::vector<double> >::push_back)      // will be depreciated after vector indexing suite is okay
-    //.def("extend",&value_with_error<std::vector<double> >::extend)       // will be depreciated after vector indexing suite is okay
-    .def("push_back",&value_with_error<std::vector<double> >::push_back)   // will be depreciated after vector indexing suite is okay
-    //.def("fill", &value_with_error<std::vector<double> >::fill)          // will be depreciated after vector indexing suite is okay
-    //.def("insert",&value_with_error<std::vector<double> >::insert)       // will be depreciated after vector indexing suite is okay
-    //.def("pop_back",&value_with_error<std::vector<double> >::pop_back)   // will be depreciated after vector indexing suite is okay
-    //.def("erase",&value_with_error<std::vector<double> >::erase)         // will be depreciated after vector indexing suite is okay
-    //.def("unfill",&value_with_error<std::vector<double> >::unfill)       // will be depreciated after vector indexing suite is okay
-    //.def("clear",&value_with_error<std::vector<double> >::clear)         // will be depreciated after vector indexing suite is okay
-
+    .def("obtained_from",&obtain_vector_with_error_from_vector_of_value_with_error<double>)
 
     .def(self + value_with_error<std::vector<double> >())
     .def(self + double())
     .def(double() + self)
+    .def(self + std::vector<double>())
+    .def(std::vector<double>() + self)
     .def(self - value_with_error<std::vector<double> >())
     .def(self - double())
     .def(double() - self)
+    .def(self - std::vector<double>())
+    .def(std::vector<double>() - self)
     .def(self * value_with_error<std::vector<double> >())
     .def(self * double())
     .def(double() * self)
+    .def(self * std::vector<double>())
+    .def(std::vector<double>() * self)
     .def(self / value_with_error<std::vector<double> >())
     .def(self / double())
     .def(double() / self)
+    .def(self / std::vector<double>())
+    .def(std::vector<double>() / self)
 
     .def(+self)
     .def(-self)
@@ -208,7 +226,62 @@ BOOST_PYTHON_MODULE(pyalea)
     ;
 
 
-  class_<std::vector<double> >("float_vector")
+  class_<std::vector<value_with_error<double> > >("vector_of_value_with_error")
+    .def(vector_indexing_suite<std::vector<value_with_error<double> > >())
+
+    .def("__repr__", &print_vector_of_value_with_error<double>)
+
+    .def("obtained_from",&obtain_vector_of_value_with_error_from_vector_with_error<double>)
+
+    .def(self + std::vector<value_with_error<double> >())
+    .def(self + double())
+    .def(double() + self)
+    .def(self + std::vector<double>())
+    .def(std::vector<double>() + self)
+    .def(self - std::vector<value_with_error<double> >())
+    .def(self - double())
+    .def(double() - self)
+    .def(self - std::vector<double>())
+    .def(std::vector<double>() - self)
+    .def(self * std::vector<value_with_error<double> >())
+    .def(self * double())
+    .def(double() * self)
+    .def(self * std::vector<double>())
+    .def(std::vector<double>() * self)
+    .def(self / std::vector<value_with_error<double> >())
+    .def(self / double())
+    .def(double() / self)
+    .def(self / std::vector<double>())
+    .def(std::vector<double>() / self)
+
+    .def(-self)
+
+    .def("__abs__",&vec_abs<double>)
+
+    .def("__pow__",&vec_pow<double>)
+    .def("sq",&vec_sq<double>)
+    .def("cb",&vec_cb<double>)
+    .def("sqrt",&vec_sqrt<double>)
+    .def("cbrt",&vec_cbrt<double>)
+    .def("exp",&vec_exp<double>)
+    .def("log",&vec_log<double>)
+
+    .def("sin",&vec_sin<double>)
+    .def("cos",&vec_cos<double>)
+    .def("tan",&vec_tan<double>)
+    .def("asin",&vec_asin<double>)
+    .def("acos",&vec_acos<double>)
+    .def("atan",&vec_atan<double>)
+    .def("sinh",&vec_sinh<double>)
+    .def("cosh",&vec_cosh<double>)
+    .def("tanh",&vec_tanh<double>)
+    .def("asinh",&vec_asinh<double>)
+    .def("acosh",&vec_acosh<double>)
+    .def("atanh",&vec_atanh<double>)
+    ;
+
+
+  class_<std::vector<double> >("vector")
     .def(vector_indexing_suite<std::vector<double> >())
 
     .def("__repr__", &print_vector_list<double>) 
