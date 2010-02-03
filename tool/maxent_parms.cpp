@@ -101,7 +101,11 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       if (alps::is_master())
         std::cerr << "Using fermionic kernel" << std::endl;
       for (int i=0; i<ndat(); ++i) {
-        double tau = i / ((ndat()) * T_);
+	double tau;
+	if (p.defined("TAU_"+boost::lexical_cast<std::string>(i)))
+	  tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
+	else 
+	  tau = i / (ndat() * T_);
         for (int j=0; j<ntab; ++j) {
           double omega = freq[j]; //Default().omega_of_t(double(j)/(ntab-1));
           K_(i,j) =  -1. / (std::exp(omega*tau) + std::exp(-omega*(1./T_-tau)));
@@ -112,7 +116,11 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       if (alps::is_master())
         std::cerr << "Using bosonic kernel" << std::endl;
       for (int i=0; i<ndat(); ++i) {
-        double tau = i / (ndat() * T_);
+	double tau;
+	if (p.defined("TAU_"+boost::lexical_cast<std::string>(i)))
+	  tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
+	else 
+	  tau = i / (ndat() * T_);
         K_(i,0) = T_;
         for (int j=1; j<ntab; ++j) {
           double omega = freq[j];
