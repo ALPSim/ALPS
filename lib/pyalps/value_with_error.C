@@ -176,7 +176,7 @@ BOOST_PYTHON_MODULE(pyalea)
     .def("clear",&value_with_error<std::vector<double> >::clear)         
     .def("at",&value_with_error<std::vector<double> >::at)
 
-    .def("obtained_from",&obtain_vector_with_error_from_vector_of_value_with_error<double>)
+    //.def("obtained_from",&obtain_vector_with_error_from_vector_of_value_with_error<double>)
 
     .def(self + value_with_error<std::vector<double> >())
     .def(self + double())
@@ -231,7 +231,7 @@ BOOST_PYTHON_MODULE(pyalea)
 
     .def("__repr__", &print_vector_of_value_with_error<double>)
 
-    .def("obtained_from",&obtain_vector_of_value_with_error_from_vector_with_error<double>)
+    //.def("obtained_from",&obtain_vector_of_value_with_error_from_vector_with_error<double>)
 
     .def(self + std::vector<value_with_error<double> >())
     .def(self + double())
@@ -280,11 +280,14 @@ BOOST_PYTHON_MODULE(pyalea)
     .def("atanh",&vec_atanh<double>)
     ;
 
+  boost::python::def("convert2_vector_with_error",&obtain_vector_with_error_from_vector_of_value_with_error<double>);
+  boost::python::def("convert2_vector_of_value_with_error",&obtain_vector_of_value_with_error_from_vector_with_error<double>);
 
   class_<std::vector<double> >("vector")
     .def(vector_indexing_suite<std::vector<double> >())
 
     .def("__repr__", &print_vector_list<double>) 
     ;
+
 
 }
