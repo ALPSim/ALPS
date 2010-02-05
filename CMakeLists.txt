@@ -25,11 +25,6 @@ if (ALPS_FOR_VISTRAILS)
   set(ALPS_INSTALL_HEADERS OFF)
 endif (ALPS_FOR_VISTRAILS)
 
-if (ALPS_BUILD_ON_CRAY)
-  set(CMAKE_CXX_COMPILER "/opt/cray/xt-asyncpe/3.5/bin/CC")
-  set(CMAKE_C_COMPILER "/opt/cray/xt-asyncpe/3.5/bin/cc")
-endif (ALPS_BUILD_ON_CRAY)
-
 ######################################################################
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
