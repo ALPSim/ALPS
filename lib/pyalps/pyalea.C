@@ -6,7 +6,6 @@
 *
 * Copyright (C) 1994-2010 by Ping Nang Ma <pingnang@itp.phys.ethz.ch>,
 *                            Matthias Troyer <troyer@itp.phys.ethz.ch>,
-*                            Bela Bauer <bauerb@itp.phys.ethz.ch>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -29,14 +28,15 @@
 
 /* $Id: nobinning.h 3520 2009-12-11 16:49:53Z gamperl $ */
 
+#define PY_ARRAY_UNIQUE_SYMBOL pyalea_PyArrayHandle
 
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
+#include <numpy/arrayobject.h>
 #include <alps/alea/value_with_error.h>
 
 
 using namespace boost::python;
-using namespace alps::alea;
 
 
 namespace alps { 
@@ -54,12 +54,14 @@ namespace alps {
 
 
     // for printing support
-    inline static boost::python::str print_value_with_error(value_with_error<double> const & self)
+    template <class T>
+    inline static boost::python::str print_value_with_error(value_with_error<T> const & self)
     {
       return boost::python::str(boost::python::str(self.mean()) + " +/- " + boost::python::str(self.error()));
     }
 
-    static boost::python::str print_vector_with_error(value_with_error<std::vector<double> > self)
+    template <class T>
+    static boost::python::str print_vector_with_error(value_with_error<std::vector<T> > self)
     {
       boost::python::str s;
       for (std::size_t index=0; index < self.size(); ++index)
@@ -96,9 +98,56 @@ namespace alps {
       return s;
     }
 
+
+    // for interchanging purpose between numpy array and std::vector
+    template <class T>  PyArray_TYPES getEnum();
+
+    template <>   PyArray_TYPES getEnum<double>()       {  return PyArray_DOUBLE;      }
+    template <>   PyArray_TYPES getEnum<long double>()  {  return PyArray_LONGDOUBLE;  }
+    template <>   PyArray_TYPES getEnum<int>()          {  return PyArray_INT;         }
+    template <>   PyArray_TYPES getEnum<long>()         {  return PyArray_LONG;        }
+
+    void import_numpy_array()               
+    {  
+      static bool inited = false;
+      if (!inited) {
+        import_array();  
+        boost::python::numeric::array::set_module_and_type("numpy", "ndarray");  
+        inited = true;
+      }
+    }
+
+    template <class T>
+    boost::python::numeric::array convert2numpy_array(std::vector<T> const& vec)
+    {
+      import_numpy_array();                 // ### WARNING: forgetting this will end up in segmentation fault!
+
+      npy_intp arr_size= vec.size();   // ### NOTE: npy_intp is nothing but just signed size_t
+      boost::python::object obj(boost::python::handle<>(PyArray_SimpleNew(1, &arr_size, getEnum<T>())));  // ### NOTE: PyArray_SimpleNew is the new version of PyArray_FromDims
+      void *arr_data= PyArray_DATA((PyArrayObject*) obj.ptr());
+      memcpy(arr_data, &vec.front(), PyArray_ITEMSIZE((PyArrayObject*) obj.ptr()) * arr_size);
+
+      return boost::python::extract<boost::python::numeric::array>(obj);
+    }
+
+    template <class T>
+    std::vector<T> convert2vector(boost::python::object const& arr)
+    {
+      import_numpy_array();                 // ### WARNING: forgetting this will end up in segmentation fault!
+
+      std::size_t vec_size = PyArray_Size(arr.ptr());
+      T * data = (T *) PyArray_DATA(arr.ptr());
+
+      std::vector<T> vec(vec_size);
+      memcpy(&vec.front(),data, PyArray_ITEMSIZE((PyArrayObject*) arr.ptr()) * vec_size);
+      return vec;
+    }
+    
   }
 }
 
+
+using namespace alps::alea;
 
 
 BOOST_PYTHON_MODULE(pyalea)
@@ -107,7 +156,7 @@ BOOST_PYTHON_MODULE(pyalea)
     .add_property("mean", &value_with_error<double>::mean)
     .add_property("error",&value_with_error<double>::error)  
 
-    .def("__repr__", &print_value_with_error)
+    .def("__repr__", &print_value_with_error<double>)
 
     .def(+self)
     .def(-self)
@@ -165,7 +214,7 @@ BOOST_PYTHON_MODULE(pyalea)
     .add_property("mean",&value_with_error<std::vector<double> >::mean)
     .add_property("error",&value_with_error<std::vector<double> >::error)
 
-    .def("__repr__", &print_vector_with_error)
+    .def("__repr__", &print_vector_with_error<double>)
 
     .def("__len__",&value_with_error<std::vector<double> >::size)         
     .def("append",&value_with_error<std::vector<double> >::push_back)     
@@ -280,14 +329,19 @@ BOOST_PYTHON_MODULE(pyalea)
     .def("atanh",&vec_atanh<double>)
     ;
 
-  boost::python::def("convert2_vector_with_error",&obtain_vector_with_error_from_vector_of_value_with_error<double>);
-  boost::python::def("convert2_vector_of_value_with_error",&obtain_vector_of_value_with_error_from_vector_with_error<double>);
+  boost::python::def("convert2vector_with_error",&obtain_vector_with_error_from_vector_of_value_with_error<double>);
+  boost::python::def("convert2vector_of_value_with_error",&obtain_vector_of_value_with_error_from_vector_with_error<double>);
 
   class_<std::vector<double> >("vector")
     .def(vector_indexing_suite<std::vector<double> >())
 
-    .def("__repr__", &print_vector_list<double>) 
+    .def("__repr__", &print_vector_list<double>)
     ;
 
+  boost::python::def("convert2numpy_array_float",&convert2numpy_array<double>);
+  boost::python::def("convert2numpy_array_int",&convert2numpy_array<int>);
+
+  boost::python::def("convert2vector_double",&convert2vector<double>);
+  boost::python::def("convert2vector_int",&convert2vector<int>);
 
 }

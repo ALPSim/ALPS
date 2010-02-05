@@ -8,9 +8,8 @@
 #
 
 if (ALPS_HAVE_PYTHON)
-  set(PYALEA_SOURCES value_with_error.C)
+  set(PYALEA_SOURCES pyalea.C)
   set(PYTOOLS_SOURCES pytools.C)
-
 
   if(BUILD_SHARED_LIBS)
     python_add_module(pyalea ${PYALEA_SOURCES})
