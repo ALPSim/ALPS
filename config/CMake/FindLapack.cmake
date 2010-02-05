@@ -7,7 +7,8 @@
 # 2) search MKL in usual paths
 # 3) search ENV ATLAS
 # 4) search lapack/blas
-# 5) give up
+# 5) if build is on cray use hardcoded path
+# 6) give up
 
 SET(MKL_PATHS "/usr/local/lib /usr/lib")
 
@@ -252,3 +253,11 @@ ENDIF(USE_SCALAPACK)
 IF(LAPACK_LIBRARY_INIT)
   SET(LAPACK_FOUND TRUE)
 ENDIF(LAPACK_LIBRARY_INIT)
+
+IF(ALPS_BUILD_ON_CRAY)
+  SET(LAPACK_FOUND TRUE)
+  SET(BLAS_FOUND TRUE)
+  SET(LAPACK_LIBRARY "/opt/xt-libsci/default/gnu/lib/43/libsci.a")
+  SET(LAPACK_LIBRARY "/opt/xt-libsci/default/gnu/lib/43/libsci.a")
+ENDIF(ALPS_BUILD_ON_CRAY)
+

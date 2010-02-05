@@ -14,6 +14,7 @@ option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
 option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build toold used by developers to maintain ALPS" OFF)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
+option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
 
 #maintenance building options
 option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
@@ -23,6 +24,11 @@ option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of co
 if (ALPS_FOR_VISTRAILS)
   set(ALPS_INSTALL_HEADERS OFF)
 endif (ALPS_FOR_VISTRAILS)
+
+if (ALPS_BUILD_ON_CRAY)
+  set(CMAKE_CXX_COMPILER "/opt/cray/xt-asyncpe/3.5/bin/CC")
+  set(CMAKE_C_COMPILER "/opt/cray/xt-asyncpe/3.5/bin/cc")
+endif (ALPS_BUILD_ON_CRAY)
 
 ######################################################################
 # set default CMAKE_INSTALL_PREFIX
