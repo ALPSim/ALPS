@@ -118,7 +118,7 @@ namespace alps {
     }
 
     template <class T>
-    boost::python::numeric::array convert2numpy_array(std::vector<T> const& vec)
+    boost::python::numeric::array convert2numpy_array(std::vector<T> vec)
     {
       import_numpy_array();                 // ### WARNING: forgetting this will end up in segmentation fault!
 
@@ -131,7 +131,7 @@ namespace alps {
     }
 
     template <class T>
-    std::vector<T> convert2vector(boost::python::object const& arr)
+    std::vector<T> convert2vector(boost::python::object arr)
     {
       import_numpy_array();                 // ### WARNING: forgetting this will end up in segmentation fault!
 
@@ -141,6 +141,32 @@ namespace alps {
       std::vector<T> vec(vec_size);
       memcpy(&vec.front(),data, PyArray_ITEMSIZE((PyArrayObject*) arr.ptr()) * vec_size);
       return vec;
+    }
+
+
+    // loading and extracting numpy arrays into vector_with_error
+    #define IMPLEMENT_VECTOR_WITH_ERROR_CONSTRUCTION(TYPE) \
+    template<> \
+    value_with_error<std::vector<TYPE> >::value_with_error(boost::python::object const & mean_nparray, boost::python::object const & error_nparray) \
+      : _mean(convert2vector<TYPE>(mean_nparray)) \
+      , _error(convert2vector<TYPE>(error_nparray)) \
+    {}
+
+    IMPLEMENT_VECTOR_WITH_ERROR_CONSTRUCTION(int)
+    IMPLEMENT_VECTOR_WITH_ERROR_CONSTRUCTION(long int)
+    IMPLEMENT_VECTOR_WITH_ERROR_CONSTRUCTION(double)
+    IMPLEMENT_VECTOR_WITH_ERROR_CONSTRUCTION(long double)
+
+    template<class T>
+    static boost::python::numeric::array mean_numpyarray(value_with_error<std::vector<T> > rhs) 
+    {
+      return convert2numpy_array(rhs.mean());
+    }
+
+    template<class T>
+    static boost::python::numeric::array error_numpyarray(value_with_error<std::vector<T> > rhs) 
+    {
+      return convert2numpy_array(rhs.error());
     }
     
   }
@@ -210,9 +236,11 @@ BOOST_PYTHON_MODULE(pyalea)
     .def_pickle(value_with_error_pickle_suite<double>())
     ;
 
-  class_<value_with_error<std::vector<double> > >("vector_with_error",init<optional<std::vector<double>,std::vector<double> > >())
-    .add_property("mean",&value_with_error<std::vector<double> >::mean)
-    .add_property("error",&value_with_error<std::vector<double> >::error)
+  class_<value_with_error<std::vector<double> > >("vector_with_error",init<boost::python::object,boost::python::object>())
+    .def(init<optional<std::vector<double>,std::vector<double> > >())
+
+    .add_property("mean",&mean_numpyarray<double>)
+    .add_property("error",&error_numpyarray<double>)
 
     .def("__repr__", &print_vector_with_error<double>)
 
@@ -224,8 +252,6 @@ BOOST_PYTHON_MODULE(pyalea)
     .def("erase",&value_with_error<std::vector<double> >::erase)        
     .def("clear",&value_with_error<std::vector<double> >::clear)         
     .def("at",&value_with_error<std::vector<double> >::at)
-
-    //.def("obtained_from",&obtain_vector_with_error_from_vector_of_value_with_error<double>)
 
     .def(self + value_with_error<std::vector<double> >())
     .def(self + double())
@@ -279,8 +305,6 @@ BOOST_PYTHON_MODULE(pyalea)
     .def(vector_indexing_suite<std::vector<value_with_error<double> > >())
 
     .def("__repr__", &print_vector_of_value_with_error<double>)
-
-    //.def("obtained_from",&obtain_vector_of_value_with_error_from_vector_with_error<double>)
 
     .def(self + std::vector<value_with_error<double> >())
     .def(self + double())
