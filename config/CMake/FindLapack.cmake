@@ -257,7 +257,7 @@ ENDIF(LAPACK_LIBRARY_INIT)
 IF(ALPS_BUILD_ON_CRAY)
   SET(BLAS_FOUND TRUE)
   SET(LAPACK_FOUND TRUE)
-  SET(BLAS_FOUND "/opt/xt-libsci/default/gnu/lib/43/libsci.a")
+  SET(BLAS_LIBRARY "/opt/xt-libsci/default/gnu/lib/43/libsci.a")
   SET(LAPACK_LIBRARY "/opt/xt-libsci/default/gnu/lib/43/libsci.a")
 ENDIF(ALPS_BUILD_ON_CRAY)
 
