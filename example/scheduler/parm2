@@ -1,7 +1,7 @@
 L=100;
 THERMALIZATION=100;
 SWEEPS=10000;
-WORK_FACTOR=[SWEEPS*L];
+WORK_FACTOR=SWEEPS*L;
 LATTICE_LIBRARY="../../lib/xml/lattices.xml";
 LATTICE="chain lattice";
 {T=0.5;}

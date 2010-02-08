@@ -27,20 +27,52 @@
 # ****************************************************************************
 
 import urllib, copy, h5py, os
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
 import numpy as np
-from scipy import optimize
-import datetime
+#from scipy import optimize
+#import datetime
 
 from dataset import ResultFile
 from dataset import DataSet
-from floatwitherror import FloatWithError as fwe
+#from floatwitherror import FloatWithError as fwe
 
 import pyalps.pytools as pt # the C++ conversion functions
 
 # or the C++ class as alternative
-#from pyalps.pyalea import value_with_error as fwe
+from pyalps.pyalea import value_with_error as fwe
+from pyalps.pyalea import vector_with_error as vwe
+from pyalps.pyalea import vector_of_value_with_error as vfwe
+from pyalps.pyalea import convert2vector_of_value_with_error as convert2vfwe
 
+def parse_label(label):
+    if '--' in label:
+      vals = label.rsplit('--')
+      return (eval(vals[0]),eval(vals[1]))
+    else:
+      return eval(label)
+ 
+ 
+def parse_labels(labels):
+    if type(labels)==int: 
+      return np.array([labels])
+    larr=[]
+    allsame = True
+    first = None
+    for x in labels:
+      v = parse_label(x)
+      larr.append(v)
+      if '--' in x:      
+        if first==None:
+          first = v[0]
+        else:
+          if first != v[0]:
+            allsame = False
+      else:
+        allsame = False
+    if allsame:
+      larr = [x[1] for x in larr]
+    return np.array(larr)
+       
 class Hdf5Missing(Exception):
     def __init__(self,what):
         self.what = what
@@ -99,9 +131,7 @@ class Hdf5Loader:
             self.h5f = h5py.File(f)
             self.h5fname = f
             params = self.ReadParameters(proppath)
-            print params
             grp = self.h5f.require_group(respath)
-            print 'path ', respath, ' has keys ',grp.keys()
             if 'sectors' in grp.keys():
                 sectors_grp = self.h5f.require_group(respath+'/sectors')
                 for secnum in sectors_grp.keys():
@@ -137,7 +167,6 @@ class Hdf5Loader:
                 obslist = list_
             else:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
-            subset=[]
             for m in obslist:
                 try:
                     d = DataSet()
@@ -147,21 +176,23 @@ class Hdf5Loader:
                         d.props['count'] = grp[m+"/count"].value
                         try:
                             size = len(mean)
-                            subset = [fwe(mean[i],error[i]) for i in range(0,size)]
+                            if size == 1:
+                                d.y = np.array([fwe(mean,error)])
+                            else:
+                                d.y = convert2vfwe(vwe(mean,error))
                         except:
-                            size=0
-                            subset = [fwe(mean,error)]
+                            size=1
+                            d.y = np.array([fwe(mean,error)])
                     elif "mean" in grp[m].keys():
                         value = grp[m+"/mean/value"].value
                         try:
                             size=len(value)
-                            subset = [float(value[i]) for i in range(0,size)]
+                            d.y = np.array([float(x) for x in value])
                         except:
-                            size=0
-                            subset = [float(value)]
-                    d.y = np.array(subset)
+                            size=1
+                            d.y = np.array([value])
                     if "labels" in grp[m].keys():
-                        d.x = np.array(grp[m+"/labels"].value)
+                        d.x = parse_labels(grp[m+"/labels"].value)
                     else:
                         d.x = np.arange(0,len(d.y))
                     d.props['hdf5_path'] = respath + m
