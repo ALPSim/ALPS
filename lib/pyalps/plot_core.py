@@ -113,14 +113,14 @@ class MplXYPlot_core:
                 xmeans = np.array([xx.mean for xx in q.x])
                 xerrors = np.array([xx.error for xx in q.x])
             except AttributeError:
-                xmeans = q.x
+                xmeans = [float(vvv) for vvv in q.x]
                 xerrors = None
             
             try:
                 ymeans = np.array([xx.mean for xx in q.y])
                 yerrors = np.array([xx.error for xx in q.y])
             except AttributeError:
-                ymeans = q.y
+                ymeans = [float(vvv) for vvv in q.y]
                 yerrors = None
                 
             if 'line' in q.props and q.props['line'] == 'scatter':

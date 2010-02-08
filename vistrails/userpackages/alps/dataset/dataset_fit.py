@@ -55,6 +55,18 @@ class FitPrototype(Module):
                 s = self.transform(s)
 
             self.setResult('output',q)
+    
+    def property_compute(self):
+        if self.hasInputFromPort('input'):
+            newsets = []
+            for s in q:
+                newset = DataSet()
+                newset.x = s.x
+                newset.y = s.y
+                newset.props = copy.deepcopy(s.props)
+                newset = self.transform(newset)
+                newsets.append(newset)
+            self.setResult('output',newsets)
 
 class PolyFit(FitPrototype):
     my_input_ports = FitPrototype.my_input_ports + [PortDescriptor("degree",basic.Integer)]

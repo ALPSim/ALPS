@@ -83,6 +83,10 @@ class SetLabels(FitPrototype):
         PortDescriptor('label_props',ListOfElements)
     ]
     
+    # overwrite default behaviour to deepcopy everything
+    def compute(self):
+        FitPrototype.property_compute(self)
+    
     def transform(self,data):
         labelstr = ''
         labels = self.getInputFromPort('label_props')
