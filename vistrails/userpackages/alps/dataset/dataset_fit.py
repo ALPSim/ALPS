@@ -60,12 +60,11 @@ class FitPrototype(Module):
         if self.hasInputFromPort('input'):
             newsets = []
             for s in self.getInputFromPort('input'):
-                newset = DataSet()
-                newset.x = s.x
-                newset.y = s.y
-                newset.props = copy.deepcopy(s.props)
-                newset = self.transform(newset)
-                newsets.append(newset)
+                newsets.append(DataSet())
+                newsets[-1].x = s.x
+                newsets[-1].y = s.y
+                newsets[-1].props = copy.deepcopy(s.props)
+                self.transform(newsets[-1])
             self.setResult('output',newsets)
 
 class PolyFit(FitPrototype):
