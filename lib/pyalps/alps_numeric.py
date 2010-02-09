@@ -1,4 +1,4 @@
-import numpy
+import numpy as np
 import math
 from pyalea import *
 
@@ -21,8 +21,8 @@ global_function = "def OPERATION(obj): \n\
     return vector_of_value_with_error.OPERATION(obj) \n\
 \n\
   # numpy array \n\
-  if (isinstance(obj,numpy.ndarray)) : \n\
-    return numpy.OPERATION(obj)\n\
+  if (isinstance(obj,np.ndarray)) : \n\
+    return np.OPERATION(obj)\n\
 "
 
 
