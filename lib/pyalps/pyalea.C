@@ -42,17 +42,6 @@ using namespace boost::python;
 namespace alps { 
   namespace alea {
 
-    // for pickling support
-    template<class T>
-    struct value_with_error_pickle_suite : boost::python::pickle_suite
-    {
-      static boost::python::tuple getinitargs(const value_with_error<T>& v)
-      {   
-        return boost::python::make_tuple(v.mean(),v.error());
-      }   
-    };
-
-
     // for printing support
     template <class T>
     inline static boost::python::str print_value_with_error(value_with_error<T> const & self)
@@ -157,18 +146,60 @@ namespace alps {
     IMPLEMENT_VECTOR_WITH_ERROR_CONSTRUCTION(double)
     IMPLEMENT_VECTOR_WITH_ERROR_CONSTRUCTION(long double)
 
+    #define IMPLEMENT_VECTOR_WITH_ERROR_GET(TYPE) \
+    template<> \
+    boost::python::object value_with_error<std::vector<TYPE> >::mean_nparray() const \
+    { \
+       return convert2numpy_array(_mean); \
+    } \
+    \
+    template<> \
+    boost::python::object value_with_error<std::vector<TYPE> >::error_nparray() const \
+    { \
+       return convert2numpy_array(_error); \
+    } \
+
+    IMPLEMENT_VECTOR_WITH_ERROR_GET(int)
+    IMPLEMENT_VECTOR_WITH_ERROR_GET(long int)
+    IMPLEMENT_VECTOR_WITH_ERROR_GET(double)
+    IMPLEMENT_VECTOR_WITH_ERROR_GET(long double)
+ 
+
+    // for pickling support
     template<class T>
-    static boost::python::numeric::array mean_numpyarray(value_with_error<std::vector<T> > rhs) 
+    struct value_with_error_pickle_suite : boost::python::pickle_suite
     {
-      return convert2numpy_array(rhs.mean());
-    }
+      static boost::python::tuple getinitargs(const value_with_error<T>& v)
+      {   
+        return boost::python::make_tuple(v.mean(),v.error());
+      }   
+    };
 
     template<class T>
-    static boost::python::numeric::array error_numpyarray(value_with_error<std::vector<T> > rhs) 
+    struct vector_with_error_pickle_suite : boost::python::pickle_suite
     {
-      return convert2numpy_array(rhs.error());
-    }
-    
+      static boost::python::tuple getinitargs(const value_with_error<std::vector<T> >& v)
+      {
+        return boost::python::make_tuple(v.mean_nparray(),v.error_nparray());
+      }
+    };
+
+    template<class T>
+    struct vector_of_value_with_error_pickle_suite : boost::python::pickle_suite
+    {
+      static boost::python::tuple getstate(const std::vector<value_with_error<T> > vec_of) 
+      {
+        value_with_error<std::vector<T> > vec_with = obtain_vector_with_error_from_vector_of_value_with_error<T>(vec_of);
+        return boost::python::make_tuple(vec_with.mean_nparray(),vec_with.error_nparray());
+      }
+
+      static void setstate(std::vector<value_with_error<T> > & vec_of, boost::python::tuple state)
+      {
+        value_with_error<std::vector<T> > vec_with(state[0],state[1]);
+        vec_of = obtain_vector_of_value_with_error_from_vector_with_error<T>(vec_with); 
+      }
+    };
+
   }
 }
 
@@ -239,8 +270,13 @@ BOOST_PYTHON_MODULE(pyalea)
   class_<value_with_error<std::vector<double> > >("vector_with_error",init<boost::python::object,boost::python::object>())
     .def(init<optional<std::vector<double>,std::vector<double> > >())
 
-    .add_property("mean",&mean_numpyarray<double>)
-    .add_property("error",&error_numpyarray<double>)
+    .add_property("mean",&value_with_error<std::vector<double> >::mean_nparray)
+    .add_property("error",&value_with_error<std::vector<double> >::error_nparray)
+
+
+
+//    .add_property("mean",&mean_numpyarray<double>)
+//    .add_property("error",&error_numpyarray<double>)
 
     .def("__repr__", &print_vector_with_error<double>)
 
@@ -298,6 +334,9 @@ BOOST_PYTHON_MODULE(pyalea)
     .def("asinh",&asinh<std::vector<double> >)
     .def("acosh",&acosh<std::vector<double> >)
     .def("atanh",&atanh<std::vector<double> >)
+
+    .def_pickle(vector_with_error_pickle_suite<double>())
+
     ;
 
 
@@ -351,6 +390,9 @@ BOOST_PYTHON_MODULE(pyalea)
     .def("asinh",&vec_asinh<double>)
     .def("acosh",&vec_acosh<double>)
     .def("atanh",&vec_atanh<double>)
+
+    .def_pickle(vector_of_value_with_error_pickle_suite<double>())
+
     ;
 
   boost::python::def("convert2vector_with_error",&obtain_vector_with_error_from_vector_of_value_with_error<double>);
