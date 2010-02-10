@@ -9,6 +9,7 @@ project(alps)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
+option(ALPS_BUILD_TESTS "Build ALPS tests" ON)
 option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
 option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
 option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
@@ -703,10 +704,10 @@ endif(ALPS_DOWNLOAD_PACKAGES)
 # tests
 ######################################################################
 
-if (NOT ALPS_FOR_VISTRAILS)
+if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_TESTS)
   ENABLE_TESTING()
   add_subdirectory(test)
-endif (NOT ALPS_FOR_VISTRAILS)
+endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_TESTS)
 
 
 
