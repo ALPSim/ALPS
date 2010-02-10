@@ -8,9 +8,10 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/tool)
 include_directories(${Boost_ROOT_DIR})
 
+if(ALPS_BUILD_EXAMPLES)
 add_executable(ising main.C ising.C)
 add_dependencies(ising alps)
 target_link_libraries(ising alps)
 install(TARGETS ising COMPONENT examples
         RUNTIME DESTINATION bin )
-
+endif(ALPS_BUILD_EXAMPLES)
