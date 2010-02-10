@@ -168,54 +168,68 @@ class Hdf5Loader:
             else:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
             for m in obslist:
-                try:
-                    d = DataSet()
-                    if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
-                        mean = grp[m+"/mean/value"].value
-                        error = grp[m+"/mean/error"].value
-                        d.props['count'] = grp[m+"/count"].value
-                        try:
-                            size = len(mean)
-                            if size == 1:
-                                d.y = np.array([fwe(mean,error)])
-                            else:
-                                d.y = convert2vfwe(vwe(mean,error))
-                        except:
-                            size=1
-                            d.y = np.array([fwe(mean,error)])
-                    elif "mean" in grp[m].keys():
-                        value = grp[m+"/mean/value"].value
-                        try:
-                            size=len(value)
-                            d.y = np.array([float(x) for x in value])
-                        except:
-                            size=1
-                            d.y = np.array([value])
-                    if "labels" in grp[m].keys():
-                        d.x = parse_labels(grp[m+"/labels"].value)
-                    else:
-                        d.x = np.arange(0,len(d.y))
-                    d.props['hdf5_path'] = respath + m
-                    d.props['observable'] = pt.hdf5_name_decode(m)
-                    d.props.update(params)
-                    if "timeseries" in statvar:
-                        tslist = grp[m+"/timeseries"].keys()
-                        for l in tslist:
-                            d.props["timeseries_"+l] = np.array(grp[m+"/timeseries/"+l].value)
-                    if "jacknife" in statvar:
-                        jklist = grp[m+"/jacknife"].keys()
-                        for l in jklist:
-                            d.props["jacknife_"+l] = np.array(grp[m+"/jacknife/"+l].value)
-                    for s in statvar:
-                        if s in grp[m].keys():
+                if not statvar: #if not a specific statistical variable is specified then use the default mean & error or mean
+                    try:
+                        d = DataSet()
+                        if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
+                            mean = grp[m+"/mean/value"].value
+                            error = grp[m+"/mean/error"].value
+                            d.props['count'] = grp[m+"/count"].value
                             try:
-                                d.props[s] = grp[m+"/"+s+"/value"].value
+                                size = len(mean)
+                                if size == 1:
+                                    d.y = np.array([fwe(mean,error)])
+                                else:
+                                    d.y = convert2vfwe(vwe(mean,error))
                             except:
+                                size=1
+                                d.y = np.array([fwe(mean,error)])
+                        elif "mean" in grp[m].keys():
+                            value = grp[m+"/mean/value"].value
+                            try:
+                                size=len(value)
+                                d.y = np.array([float(x) for x in value])
+                            except:
+                                size=1
+                                d.y = np.array([value])
+                        if "labels" in grp[m].keys():
+                            d.x = parse_labels(grp[m+"/labels"].value)
+                        else:
+                            d.x = np.arange(0,len(d.y))
+                        d.props['hdf5_path'] = respath + m
+                        d.props['observable'] = pt.hdf5_name_decode(m)
+                        d.props.update(params)
+                        sets.append(d)
+                    except AttributeError:
+                        print "Could not create DataSet"
+                        pass
+                else:
+                    for s in statvar:
+                        for k in grp[m+"/"+s]:
+                            try:
+                                d=DataSet()
+                                value = np.array(grp[m+"/"+s+"/"+k].value)
+                                try:
+                                    size = len(value)
+                                    if size == 1:
+                                        d.y = np.array([value])
+                                    else:
+                                        d.y = np.array(value)
+                                except:
+                                    size=1
+                                    d.y = np.array([value])
+                                
+                                if "labels" in grp[m].keys():
+                                    d.x = parse_labels(grp[m+"/labels"].value)
+                                else:
+                                    d.x = np.arange(0,len(d.y))
+                                d.props['hdf5_path'] = respath + m
+                                d.props['observable'] = pt.hdf5_name_decode(m+"/"+s+"/"+k)
+                                d.props.update(params)
+                                sets.append(d)
+                            except AttributeError:
+                                print "Could not create DataSet"
                                 pass
-                    sets.append(d)
-                except AttributeError:
-                    print "Could not create DataSet"
-                    pass
         return sets
 
  
