@@ -95,37 +95,34 @@ DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesy
 template <class T, class M>
 void DiagMatrix<T,M>::serialize(alps::hdf5::iarchive & ar) {
   alps::scheduler::Task::serialize(ar);
-  std::vector<std::string> list = ar.list_children("/spectrum/sectors");
-  measurements_.resize(list.size(),alps::EigenvectorMeasurements<value_type>(*this));
-  for (unsigned i=0; i<list.size();++i) {
-    std::string sectorpath = "/spectrum/sectors/"+list[i];
-    std::cerr << "Reading " << sectorpath << "\n";
-    
-    // read quantum numbers
-    std::vector<std::pair<std::string,std::string> > qnvals;
-    if (ar.is_group(sectorpath+"/quantumnumbers")) {
-    std::cerr << "Reading qnums\n";
-      std::vector<std::string> qnlist = ar.list_children(sectorpath+"/quantumnumbers");
-      for (std::vector<std::string>::const_iterator it = qnlist.begin(); it != qnlist.end(); ++it) {
-          std::cerr << "Reading " << *it << "\n";
-          std::string v;
-          ar >> alps::make_pvp(sectorpath+"/quantumnumbers/"+*it, v);
-          qnvals.push_back(std::make_pair(*it,v));
-      }
-    }
-    this->quantumnumbervalues_.push_back(qnvals);
+  if (ar.is_group("/spectrum/sectors")) {
+      std::vector<std::string> list = ar.list_children("/spectrum/sectors");
+      measurements_.resize(list.size(),alps::EigenvectorMeasurements<value_type>(*this));
+      for (unsigned i=0; i<list.size();++i) {
+        std::string sectorpath = "/spectrum/sectors/"+list[i];
+        
+        // read quantum numbers
+        std::vector<std::pair<std::string,std::string> > qnvals;
+        if (ar.is_group(sectorpath+"/quantumnumbers")) {
+          std::vector<std::string> qnlist = ar.list_children(sectorpath+"/quantumnumbers");
+          for (std::vector<std::string>::const_iterator it = qnlist.begin(); it != qnlist.end(); ++it) {
+              std::string v;
+              ar >> alps::make_pvp(sectorpath+"/quantumnumbers/"+*it, v);
+              qnvals.push_back(std::make_pair(*it,v));
+          }
+        }
+        this->quantumnumbervalues_.push_back(qnvals);
 
-    // read energies
-    if (ar.is_data(sectorpath+"/energies")) {
-      std::cerr << "Reading energies\n";
-      mag_vector_type evals_vector;
-      ar >> alps::make_pvp(sectorpath+"/energies", evals_vector);
-      eigenvalues_.push_back(evals_vector);
-    }
-    
-    // read measurements
-      std::cerr << "Reading meas\n";
-      ar >> alps::make_pvp(sectorpath,measurements_[i]);
+        // read energies
+        if (ar.is_data(sectorpath+"/energies")) {
+          mag_vector_type evals_vector;
+          ar >> alps::make_pvp(sectorpath+"/energies", evals_vector);
+          eigenvalues_.push_back(evals_vector);
+        }
+        
+        // read measurements
+          ar >> alps::make_pvp(sectorpath,measurements_[i]);
+      }
   }
   this->read_hdf5_ = true; // skip XML, once all is being read
 }
