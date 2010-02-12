@@ -5,7 +5,10 @@
 find_package(PythonLibs REQUIRED)
 
 if (PYTHONLIBS_FOUND AND NOT PYTHON_NUMPY_INCLUDE_DIR)
-    set(SEARCH_DIRS ${PYTHON_INCLUDE_DIR}/../Versions/Current/Extras/lib/python/numpy/core/include)
+    message (STATUS "incld dir ${PYTHON_INCLUDE_DIR}")
+    set(SEARCH_DIRS 
+        ${PYTHON_INCLUDE_DIR}/../Versions/Current/Extras/lib/python/numpy/core/include
+        ${PYTHON_INCLUDE_DIR}/../Lib/site-packages/numpy/core/include)
     if(VISTRAILS_APP_NAME)
         set(SEARCH_DIRS ${SEARCH_DIRS} 
            ${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/numpy/core/include
