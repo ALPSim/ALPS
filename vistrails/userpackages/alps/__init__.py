@@ -26,11 +26,11 @@ import platform
 import dataset
 
 identifier = 'org.comp-phys.alps'
-version = '0.4.1'
+version = '0.4.2'
 name = 'ALPS'
 
 if platform.system()=='Windows':
-  configuration = ConfigurationObject(alpspath="C:\\ALPS/\\bin",toolpath="C:\\ALPS\\bin",mpirun="",mpiprocs=0)
+  configuration = ConfigurationObject(alpspath="C:\\Program Files\\ALPS\\bin",toolpath="C:\\Program Files\\ALPS\\bin",mpirun="",mpiprocs=0)
 else:
   configuration = ConfigurationObject(alpspath="/opt/alps/bin",toolpath="/opt/local/bin",mpirun="['mpirun','-np']",mpiprocs=0)
 
