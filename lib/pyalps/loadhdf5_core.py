@@ -124,6 +124,9 @@ class Hdf5Loader:
 
   # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
+    
+    def read_one_spectrum(self,path):
+      
     def ReadSpectrumFromFile(self,flist,proppath,respath):
         fs = self.GetFileNames(flist)
         sets = []
@@ -132,6 +135,19 @@ class Hdf5Loader:
             self.h5fname = f
             params = self.ReadParameters(proppath)
             grp = self.h5f.require_group(respath)
+            if 'energies' in grp.keys():
+                    try:
+                        d = DataSet()
+                        d.props['hdf5_path'] = respath 
+                        d.props['observable'] = 'spectrum'
+                        d.y = np.array(grp['energies'].value )
+                        d.x = range(len(d.y))
+                        d.props.update(params)
+                        d.props.update(self.ReadParameters('quantumnumbers' ))
+                        sets.append(d)
+                    except AttributeError:
+                        print "Could not create DataSet"
+                        pass
             if 'sectors' in grp.keys():
                 sectors_grp = self.h5f.require_group(respath+'/sectors')
                 for secnum in sectors_grp.keys():
