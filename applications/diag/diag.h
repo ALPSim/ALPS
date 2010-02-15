@@ -184,19 +184,15 @@ void DiagMatrix<T,M>::handle_tag(std::istream& infile, const alps::XMLTag& intag
   alps::XMLTag tag(intag);
   
   // we don't need to read the XML file if the HDF-5 file has already been read
-//  if (this->read_hdf5_) {
-//     skip_element(infile,tag);
-//    return;
-//  }
+  if (this->read_hdf5_) {
+     skip_element(infile,tag);
+    return;
+  }
   
   if (intag.type==alps::XMLTag::SINGLE)
     return;
   if (intag.name=="EIGENVALUES") {
     // we don't need to read the XML file if the HDF-5 file has already been read
-    if (this->read_hdf5_) {
-       skip_element(infile,tag);
-      return;
-    }
 
     std::vector<std::pair<std::string,std::string> > qnvals;
     std::vector<magnitude_type> evals;
