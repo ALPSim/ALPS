@@ -39,6 +39,7 @@ import h5py
 from scipy import optimize
 
 from dataset_core import *
+from pyalps.dict_intersect import dict_intersect
 from pyalps import Hdf5Loader
 
 class Loader:
@@ -286,8 +287,9 @@ class CollectXY(Module):
                     for_each_sets[fe_par_set] = [iset]
             
             for k,v in for_each_sets.items():
+                common_props = dict_intersect([q.props for q in v])
                 res = DataSet()
-                res.props = v[0].props
+                res.props = common_props
                 for im in range(0,len(for_each)):
                     m = for_each[im]
                     res.props[m] = k[im]

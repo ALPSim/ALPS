@@ -30,8 +30,13 @@ def dict_intersect(dicts):
     intersection = sets[0]
     for iset in sets:
         intersection &= iset
-    print intersection
     ret = {}
     for key in intersection:
-        ret[key] = dicts[0][key]
+        take = True
+        val0 = dicts[0][key]
+        for idict in dicts:
+            if val0 != idict[key]:
+                take = False
+        if take:
+            ret[key] = dicts[0][key]
     return ret

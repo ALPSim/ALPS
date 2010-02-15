@@ -126,7 +126,8 @@ class Hdf5Loader:
     # Post: returns DataSet with all parameters set
     
     def read_one_spectrum(self,path):
-      
+        pass
+        
     def ReadSpectrumFromFile(self,flist,proppath,respath):
         fs = self.GetFileNames(flist)
         sets = []
