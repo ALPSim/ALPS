@@ -59,6 +59,8 @@ class AlpsApplication(alpscore.SystemCommandLogged):
             options += ['--Tmin', str(self.getInputFromPort('tmin'))]
         if self.hasInputFromPort('tmax'):
             options += ['--Tmax', str(self.getInputFromPort('tmax'))]
+        if self.hasInputFromPort('write_xml'):
+            options += ['--write-xml']
         return options
     
     def compute(self):
@@ -88,7 +90,8 @@ class AlpsApplication(alpscore.SystemCommandLogged):
                     ('tmax', [basic.Integer]),
                     ('continue', [basic.Boolean]),
                     ('application', [basic.File]),
-                    ('num_processes',[basic.Integer])
+                    ('num_processes',[basic.Integer]),
+                    ('write_xml',[basic.Boolean])
                     ]
     _output_ports = [('output_file', [basic.File]),
                      ('output_dir', [basic.Directory]),
