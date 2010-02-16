@@ -60,6 +60,7 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         if self.hasInputFromPort('tmax'):
             options += ['--Tmax', str(self.getInputFromPort('tmax'))]
         if self.hasInputFromPort('write_xml'):
+          if self.getInputFromPort('write_xml'):
             options += ['--write-xml']
         return options
     

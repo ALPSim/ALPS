@@ -119,7 +119,7 @@ class Hdf5Loader:
             obsgrp = self.h5f.require_group(respath)
         except KeyError:
             raise Hdf5Missing(respath + ' in GetObservableList()')
-        olist = [pt.hdf5_name_encode(obs) for obs in obsgrp.keys()]
+        olist = obsgrp.keys()
         return olist
 
   # Pre: file is a h5py file descriptor
@@ -173,6 +173,7 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
+            print "Reading from ", f
             self.h5f = h5py.File(f)
             self.h5fname = f
             list_ = self.GetObservableList(respath)
@@ -185,7 +186,9 @@ class Hdf5Loader:
             else:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
             for m in obslist:
+                print "Trying to read ", m
                 if not statvar: #if not a specific statistical variable is specified then use the default mean & error or mean
+                    print "read ", m
                     try:
                         d = DataSet()
                         if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
@@ -195,11 +198,11 @@ class Hdf5Loader:
                             try:
                                 size = len(mean)
                                 if size == 1:
-                                    d.y = np.array([fwe(mean,error)])
+                                    d.y = np.array([fwe(mean[0],error[0])])
                                 else:
                                     d.y = convert2vfwe(vwe(mean,error))
                             except:
-                                size=1
+                                size=0
                                 d.y = np.array([fwe(mean,error)])
                         elif "mean" in grp[m].keys():
                             value = grp[m+"/mean/value"].value

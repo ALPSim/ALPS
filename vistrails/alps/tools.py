@@ -285,7 +285,7 @@ class Convert2XML(Module):
         input_files = self.getInputFromPort('input_file')
         olist = []
         for f in input_files:
-          print f
+          print "Converting", f
           olist.append(pyalps.pytools.convert2xml(str(f)))
           alpscore.copy_stylesheet(os.path.dirname(f))
         self.setResult('value', olist)
