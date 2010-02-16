@@ -67,9 +67,11 @@ public:
 
 private:
 
-  alps::SiteOperator make_site_term(std::string const& x)
+  alps::SiteOperator make_site_term(std::string x)
   {
-    alps::SiteOperator op(x+"(i)","i");
+    if (x[x.size()-1]!=')')
+      x += "(i)";
+    alps::SiteOperator op(x,"i");
     substitute_operators(op,parms);
     return op;
   }
