@@ -119,7 +119,6 @@ void DiagMatrix<T,M>::serialize(alps::hdf5::iarchive & ar) {
           ar >> alps::make_pvp(sectorpath+"/energies", evals_vector);
           eigenvalues_.push_back(evals_vector);
         }
-        
         // read measurements
           ar >> alps::make_pvp(sectorpath,measurements_[i]);
       }
