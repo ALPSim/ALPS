@@ -10,4 +10,5 @@ mkdir deplibs\lib
 mkdir deplibs\include
 copy ..\..\opt\lib deplibs\lib
 copy ..\..\opt\bin deplibs\bin
+copy deplibs\bin\lpsolve.dll deplibs\bin\lpsolve51.dll
 copy ..\..\opt\include deplibs\include

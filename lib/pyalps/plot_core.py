@@ -234,9 +234,9 @@ def convert_to_text(desc):
             
 def convert_to_grace(desc):
         output =  '# Grace project file\n'
-        output += '#\n@g0 on\n@with g0\n'
-        output += '@ frame linewidth 2.0'
-        output += '@page background fill off'
+        output += '#\n@    g0 on\n@    with g0\n'
+        output += '@     frame linewidth 2.0\n'
+        output += '@    page background fill off\n'
 
         xrange = [0,1]
         yrange = [0,1]
@@ -294,7 +294,7 @@ def convert_to_grace(desc):
             output += '@target G0.S'+str(num)+'\n'
             output += '@    s'+str(num)+' symbol ' + str(num+1) +'\n'
             output += '@    s'+str(num)+' symbol size 0.500000\n'
-            if q.props['line'] == 'scatter':
+            if 'line' in q.props and q.props['line'] == 'scatter':
               symnum += 1
               output += '@    s'+str(num)+' line type 0\n'
               output += '@    s'+str(num)+' symbol ' + str(symnum) + '\n'
