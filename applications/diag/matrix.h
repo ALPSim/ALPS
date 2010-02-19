@@ -133,7 +133,7 @@ public:
   {
     MM m(dimension(),dimension());
     m.clear();
-    for (int i=0;i<dimension();++i) {
+    for (unsigned i=0;i<dimension();++i) {
       m(i,i) +=1.;
       m(i,i) -=1.;
     } // Boost bug workaround
@@ -155,7 +155,7 @@ public:
   {
     MM m(dimension(),dimension());
     m.clear();
-    for (int i=0;i<dimension();++i) {
+    for (unsigned i=0;i<dimension();++i) {
       m(i,i) +=1.;
       m(i,i) -=1.;
     } // Boost bug workaround
@@ -175,7 +175,7 @@ public:
   {
     MM m(dimension(),dimension());
     m.clear();
-    for (int i=0;i<dimension();++i) {
+    for (unsigned i=0;i<dimension();++i) {
       m(i,i) +=1.;
       m(i,i) -=1.;
     } // Boost bug workaround
@@ -248,13 +248,13 @@ void HamiltonianMatrix<T,M>::dostep()
     for (typename std::vector<vector_type>::const_iterator it=k.begin();it!=k.end();++it)
       momenta.push_back(alps::write_vector(*it));
   }
-  int ik=0;
+  unsigned ik=0;
   bool loop_momenta = ! parms.defined("TOTAL_MOMENTUM");    // Loop over momenta ?
   bool done;
   do { 
     // set QN
     std::vector<std::pair<std::string,std::string> > qns;
-    for (int i=0;i<indices.size();++i) {
+    for (unsigned i=0;i<indices.size();++i) {
       parms[ranges_[i].first.second]=ranges_[i].second.get<0>()+indices[i];
       qns.push_back(std::make_pair(
         ranges_[i].first.first,
@@ -271,7 +271,7 @@ void HamiltonianMatrix<T,M>::dostep()
       alps::read_vector_resize(parms["TOTAL_MOMENTUM"],k);
       alps::ParameterEvaluator eval(parms);
       total_momentum.clear();
-      for (int i=0;i<k.size();++i)
+      for (unsigned i=0;i<k.size();++i)
         total_momentum.push_back(std::real(k[i].value(eval)));
     }
     use_bloch_=alps::dimension(total_momentum)!=0;
@@ -541,16 +541,16 @@ void HamiltonianMatrix<T,M>::build() const
   built_matrix_ = true;
   add_operator_matrix(matrix_,model());
   // counter ublas bug
-  for (int i=0;i<dimension();++i)
+  for (unsigned i=0;i<dimension();++i)
     matrix_(i,i) += 1.;
-  for (int i=0;i<dimension();++i)
+  for (unsigned i=0;i<dimension();++i)
     matrix_(i,i) -= 1.;
     
   //std::cerr << "Time to build matrix: " << t.elapsed() << "\n";
   if (this->parms.value_or_default("CHECK_SYMMETRY",false)) {
     std::cerr << "Checking symmetry\n";
-    for (int i=0;i<dimension();++i)
-      for (int j=0;j<i;++j)
+    for (unsigned i=0;i<dimension();++i)
+      for (unsigned j=0;j<i;++j)
         if (std::abs(static_cast<value_type>(matrix_(i,j))-::conj(static_cast<value_type>(matrix_(j,i)))) > 1e-10) {
           std::cerr << "Symmetry problem: " << i << " " << j << " " << static_cast<value_type>(matrix_(i,j)) << " " << ::conj(static_cast<value_type>(matrix_(j,i))) << "\n";
           std::cout << basis() << "\n";

@@ -129,9 +129,9 @@ void DiagMatrix<T,M>::serialize(alps::hdf5::iarchive & ar) {
 template <class T, class M>
 void DiagMatrix<T,M>::serialize(alps::hdf5::oarchive & ar) const {
   alps::scheduler::Task::serialize(ar);
-  for (int i=0;i<eigenvalues_.size();++i) {
+  for (unsigned  i=0;i<eigenvalues_.size();++i) {
     std::string sectorpath = "/spectrum/sectors/" + boost::lexical_cast<std::string>(i);
-    for (int j=0;j<this->quantumnumbervalues_[i].size();++j)
+    for (unsigned j=0;j<this->quantumnumbervalues_[i].size();++j)
       ar << alps::make_pvp(sectorpath + "/quantumnumbers/" + this->quantumnumbervalues_[i][j].first,
                      this->quantumnumbervalues_[i][j].second);
       ar << alps::make_pvp(sectorpath + "/energies",eigenvalues_[i]);
@@ -146,27 +146,27 @@ template <class T, class M>
 void DiagMatrix<T,M>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& name,bool writeallxml) const
 {
   if (writeallxml) {
-    for (int i=0;i<eigenvalues_.size();++i) {
-      int num_eigenvalues = std::min(int(this->parms.value_or_default("NUMBER_EIGENVALUES",
-                  eigenvalues_[i].size())),int(eigenvalues_[i].size()));
+    for (unsigned i=0;i<eigenvalues_.size();++i) {
+      unsigned num_eigenvalues = std::min(unsigned(this->parms.value_or_default("NUMBER_EIGENVALUES",
+                  eigenvalues_[i].size())),unsigned(eigenvalues_[i].size()));
       out << alps::start_tag("EIGENVALUES") << alps::attribute("number",num_eigenvalues);
-      for (int j=0;j<this->quantumnumbervalues_[i].size();++j)
+      for (unsigned j=0;j<this->quantumnumbervalues_[i].size();++j)
         out << alps::start_tag("QUANTUMNUMBER") << alps::attribute("name",this->quantumnumbervalues_[i][j].first)
             << alps::attribute("value",this->quantumnumbervalues_[i][j].second) << alps::end_tag("QUANTUMNUMBER");
-      for (int j=0;j<num_eigenvalues;++j)
+      for (unsigned j=0;j<num_eigenvalues;++j)
         out << eigenvalues_[i][j] << "\n";
       out << alps::end_tag("EIGENVALUES");
     }
 
     if (calc_averages() || this->parms.value_or_default("MEASURE_ENERGY",true)) {
-      for (int i=0;i<eigenvalues_.size();++i) {
-         int num_eigenvalues = std::min(int(this->parms.value_or_default("NUMBER_EIGENVALUES",
-                  eigenvalues_[i].size())),int(eigenvalues_[i].size()));
+      for (unsigned i=0;i<eigenvalues_.size();++i) {
+         unsigned num_eigenvalues = std::min(unsigned(this->parms.value_or_default("NUMBER_EIGENVALUES",
+                  eigenvalues_[i].size())),unsigned(eigenvalues_[i].size()));
         out << alps::start_tag("EIGENSTATES") << alps::attribute("number",num_eigenvalues);
-        for (int j=0;j<this->quantumnumbervalues_[i].size();++j)
+        for (unsigned j=0;j<this->quantumnumbervalues_[i].size();++j)
           out << alps::start_tag("QUANTUMNUMBER") << alps::attribute("name",this->quantumnumbervalues_[i][j].first)
               << alps::attribute("value",this->quantumnumbervalues_[i][j].second) << alps::end_tag("QUANTUMNUMBER");
-        for (int j=0;j<num_eigenvalues;++j) {
+        for (unsigned j=0;j<num_eigenvalues;++j) {
           out << alps::start_tag("EIGENSTATE") << alps::attribute("number",j);
           measurements_[i].write_xml_one_vector(out,name,j);
           out << alps::end_tag("EIGENSTATE");   
@@ -271,7 +271,7 @@ void DiagMatrix<T,M>::perform_measurements()
           for (bond_iterator bit=this->bonds().first; bit!=this->bonds().second;++bit) {
             std::vector<value_type> av = calculate(ex.second,*bit);
             meas.local_values[ex.first].resize(av.size());
-            for (int i=0;i<av.size();++i)
+            for (unsigned i=0;i<av.size();++i)
               meas.local_values[ex.first][i].push_back(av[i]);
           }
         }
@@ -279,7 +279,7 @@ void DiagMatrix<T,M>::perform_measurements()
           for (site_iterator sit=this->sites().first; sit!=this->sites().second;++sit) {
             std::vector<value_type> av = calculate(ex.second,*sit);
             meas.local_values[ex.first].resize(av.size());
-            for (int i=0;i<av.size();++i)
+            for (unsigned i=0;i<av.size();++i)
               meas.local_values[ex.first][i].push_back(av[i]);
           }
         }
@@ -307,7 +307,7 @@ void DiagMatrix<T,M>::perform_measurements()
               av = calculate(op,std::make_pair(*sit1,*sit2));
             }
             meas.correlation_values[ex.first].resize(av.size());
-            for (int i=0;i<av.size();++i) {
+            for (unsigned i=0;i<av.size();++i) {
               if (meas.correlation_values[ex.first][i].size()<=d)
                 meas.correlation_values[ex.first][i].resize(d+1);
               meas.correlation_values[ex.first][i][d] += (av[i] / 
@@ -346,14 +346,14 @@ void DiagMatrix<T,M>::perform_measurements()
           for (site_iterator sit2=this->sites().first; sit2!=this->sites().second ; ++sit2) {
           if (av.size() < corrs[*sit1][*sit2].size())
             av.resize(corrs[*sit1][*sit2].size());
-          for (int i=0;i<corrs[*sit1][*sit2].size();++i)
+          for (unsigned i=0;i<corrs[*sit1][*sit2].size();++i)
             av[i] += std::real(corrs[*sit1][*sit2][i]
                       *std::conj(mit.phase(coordinate(*sit1)))
                       *mit.phase(coordinate(*sit2)))/static_cast<double>(this->num_sites());
         }
         if (meas.structurefactor_values[ex.first].size() < av.size())
           meas.structurefactor_values[ex.first].resize(av.size());
-        for (int i=0;i<av.size();++i)
+        for (unsigned i=0;i<av.size();++i)
           meas.structurefactor_values[ex.first][i].push_back(av[i]); 
       }
     }

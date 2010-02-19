@@ -486,7 +486,7 @@ std::vector<T> FullDiagMatrix<T>::calculate(operator_matrix_type const& m) const
 {
   using namespace boost::numeric::ublas;
   std::vector<value_type> av;
-  for (int i=0;i<this->matrix().size1();++i) {
+  for (unsigned i=0;i<this->matrix().size1();++i) {
     const matrix_column<matrix_type const> v(this->matrix(),i);
     av.push_back(inner_prod(boost::numeric::ublas::conj(v),prod(m,v)));
   }

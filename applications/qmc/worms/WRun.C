@@ -707,10 +707,12 @@ bool WRun::create_worm()
     subinterval_valid = false;
   }
   else {
-    double statistical_weight =
-      onsite_energy(state2,s)-onsite_energy(state1,s);
-    double wcp  = integrated_weight(statistical_weight, beta*time);
-    pacc = creation_matrix_element(state1,do_create,s)/eta * wcp;
+    pacc = creation_matrix_element(state1,do_create,s)/eta;
+	if (pacc==0.)
+		  return false;
+	double statistical_weight =
+        onsite_energy(state2,s)-onsite_energy(state1,s);
+    pacc *= integrated_weight(statistical_weight, beta*time);
   }
 
   // accept/reject 

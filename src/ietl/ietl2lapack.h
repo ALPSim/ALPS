@@ -43,7 +43,10 @@
 namespace ietl {
   template <class T>
     T* get_data(const std::vector<T>& v) {
-    return const_cast<T*>(&v[0]);
+	if (v.empty())
+	  return 0;
+	else
+      return const_cast<T*>(&v[0]);
   }
 }
  
