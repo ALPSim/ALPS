@@ -128,6 +128,17 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
         }
       }    
     }
+    else if (p["KERNEL"] == "Boris") {
+      if (alps::is_master())
+        std::cerr << "Using Boris' kernel" << std::endl;
+      for (int i=0; i<ndat(); ++i) {
+	double tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
+        for (int j=0; j<ntab; ++j) {
+          double omega = freq[j];
+          K_(i,j) = std::exp(-omega*tau);
+        }
+      }    
+    }
     else 
       boost::throw_exception(std::invalid_argument("unknown integration kernel"));
   } 
@@ -194,8 +205,6 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       if (i<ndat() && j<ndat())
         cov(i,j) = covariance;
     }
-    if (p.defined("ERROR_MULTIPLICATOR"))
-      cov *= (double)p["ERROR_MULTIPLICATOR"];
     vector_type var(ndat());
     bindings::lapack::syev('V', 'U', cov , var, bindings::lapack::optimal_workspace());
     matrix_type cov_trans = ublas::trans(cov);

@@ -106,28 +106,39 @@ private:
 };
 
 
-
-class DoubleGaussian : public Gaussian
+class ShiftedGaussian : public Gaussian
 {
 public:
-  DoubleGaussian(const alps::Parameters& p) : 
+  ShiftedGaussian(const alps::Parameters& p) :
     Gaussian(p), shift(static_cast<double>(p["SHIFT"])){}
 
   double operator()(const double omega) {
-    return 0.5*(Gaussian::operator()(omega-shift) + Gaussian::operator()(omega+shift));
+    return Gaussian::operator()(omega-shift);
   }
-
-private:
+  
+protected:
   const double shift;
 };
 
 
+class DoubleGaussian : public ShiftedGaussian
+{
+public:
+  DoubleGaussian(const alps::Parameters& p) : 
+    ShiftedGaussian(p){}
 
-class GeneralDoubleGaussian : public Gaussian
+  double operator()(const double omega) {
+    return 0.5*(Gaussian::operator()(omega-shift) + Gaussian::operator()(omega+shift));
+  }
+};
+
+
+
+class GeneralDoubleGaussian : public ShiftedGaussian
 {
 public:
   GeneralDoubleGaussian(const alps::Parameters& p) : 
-    Gaussian(p), bnorm(static_cast<double>(p["BOSE NORM"])), shift(p.value_or_default("SHIFT", 0.)) {}
+    ShiftedGaussian(p), bnorm(static_cast<double>(p["BOSE_NORM"])) {}
   
   double operator()(const double omega) {
     if (omega > 0)
@@ -138,7 +149,6 @@ public:
   
 private:
   const double bnorm; 
-  const double shift;
 };
 
 
@@ -251,6 +261,12 @@ inline boost::shared_ptr<DefaultModel> make_default_model(const alps::Parameters
     if (alps::is_master())
       std::cerr << "Using Gaussian default model" << std::endl;
     boost::shared_ptr<Model> Mod(new Gaussian(parms));
+    return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
+  }
+  else if (parms[name] == "shifted gaussian") {
+    if (alps::is_master())
+      std::cerr << "Using shifted Gaussian default model" << std::endl;
+    boost::shared_ptr<Model> Mod(new ShiftedGaussian(parms));
     return boost::shared_ptr<DefaultModel>(new GeneralDefaultModel(parms, Mod));
   }
   else if (parms[name] == "double gaussian") {
