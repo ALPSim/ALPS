@@ -47,7 +47,7 @@ class QN:public dmtk::Vector<alps::half_integer<short> >
     typedef alps::half_integer<short> half_integer_type;
     typedef dmtk::Vector<alps::half_integer<short> > _V;
   public:
-    QN() { _V::resize(QN_MAX_SIZE); }
+    QN() { this->resize(QN_MAX_SIZE); }
     QN(half_integer_type val) { _V::resize(QN_MAX_SIZE); _V::operator=(val); }
     QN(const dmtk::Vector<half_integer_type> &v) : dmtk::Vector<alps::half_integer<short> >(v) {}
 
@@ -257,14 +257,14 @@ QN
 operator+(const QN &a, const QN &b)
 {
   QN c;
-  meta_op<QN_MAX_SIZE,DMApAdd0<alps::half_integer<short> > >::op(c, a, b);
+  meta_op<QN_MAX_SIZE-1,DMApAdd0<alps::half_integer<short> > >::op(c, a, b);
   return c;
 }
 
 QN&
 QN::operator+=(const QN &v)
 { 
-  meta_op<QN_MAX_SIZE,DMApAdd0<alps::half_integer<short> > >::op(*this,*this,v); 
+  meta_op<QN_MAX_SIZE-1,DMApAdd0<alps::half_integer<short> > >::op(*this,*this,v); 
   return *this; 
 }
 
@@ -272,14 +272,14 @@ QN
 operator-(const QN &a, const QN &b)
 {
   QN c;
-  meta_op<QN_MAX_SIZE,DMApSubs0<alps::half_integer<short> > >::op(c, a, b);
+  meta_op<QN_MAX_SIZE-1,DMApSubs0<alps::half_integer<short> > >::op(c, a, b);
   return c;
 }
 
 QN&
 QN::operator-=(const QN &v)
 { 
-  meta_op<QN_MAX_SIZE,DMApSubs0<alps::half_integer<short> > >::op(*this,*this,v); 
+  meta_op<QN_MAX_SIZE-1,DMApSubs0<alps::half_integer<short> > >::op(*this,*this,v); 
   return *this; 
 }
 
