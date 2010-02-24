@@ -1,4 +1,4 @@
-scp alps-vistrails*Darwin.* root@alps.ethz.ch:/var/www/vistrails
-scp alps-download*Darwin.* root@alps.ethz.ch:/var/software/releases
-scp alps-[12]*Darwin.* root@alps.ethz.ch:/var/www/software/releases
-scp CPackUploads/*pkg root@alps.ethz.ch:/var/www/software/releases/packages
+scp alps-vistrails*.* root@alps.ethz.ch:/var/www/vistrails
+scp alps-download*.* root@alps.ethz.ch:/var/software/releases
+scp alps-[12]*.* root@alps.ethz.ch:/var/www/software/releases
+scp CPackUploads/*pkg CPackUploads/*zip root@alps.ethz.ch:/var/www/software/releases/packages

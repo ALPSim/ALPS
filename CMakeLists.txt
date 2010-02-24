@@ -136,6 +136,13 @@ CHECK_INCLUDE_FILE_CXX(valarray ALPS_HAVE_VALARRAY)
 ######################################################################
 # Packages
 ######################################################################
+#set(PARCOLLET_INTERPRETER "python" CACHE PATH "Python interpreter")
+
+
+#find_package(Parcollet)
+#include_directories(${PARCOLLET_INCLUDE_DIR})
+#link_libraries(${PARCOLLET_LIBRARIES})
+
 
 # Boost Source File
 find_package(BoostSrc REQUIRED)
