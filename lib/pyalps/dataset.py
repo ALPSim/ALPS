@@ -62,4 +62,3 @@ class ResultFile(ResultProperties):
         if fn != None:
             self.props['filename'] = fn
         
-        
