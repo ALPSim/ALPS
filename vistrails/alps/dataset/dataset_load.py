@@ -39,8 +39,10 @@ import h5py
 from scipy import optimize
 
 from dataset_core import *
+from dataset_exceptions import *
 from pyalps.dict_intersect import dict_intersect
 from pyalps import Hdf5Loader
+from pyalps.hlist import HList
 
 class Loader:
     def __init__(self,filename,label,xcolumn,ycolumns,props={}):
@@ -249,6 +251,37 @@ class LoadSpectrumHdf5(Module):
         datasets = loader.ReadSpectrumFromFile(files,propPath,resPath)
         self.setResult('data',datasets)
 
+class GroupBy(Module):
+    my_input_ports = [
+        PortDescriptor('for-each',ListOfElements),
+        PortDescriptor('input',DataSets)
+    ]
+    my_output_ports = [
+        PortDescriptor('output',DataSets)
+    ]
+    
+    def compute(self):
+        if self.hasInputFromPort('input'):
+            # find all possible values for each for-each
+            sets = self.getInputFromPort('input')
+            
+            for_each = []
+            if self.hasInputFromPort('for-each'):
+                for_each = self.getInputFromPort('for-each')
+            
+            for_each_sets = {}
+            for iset in sets:
+                fe_par_set = tuple((iset.props[m] for m in for_each))
+                
+                if fe_par_set in for_each_sets:
+                    for_each_sets[fe_par_set].append(iset)
+                else:
+                    for_each_sets[fe_par_set] = [iset]
+            
+            self.setResult('output',HList(for_each_sets.values()))
+                
+        else:
+            raise EmptyInputPort('for-each || observable')
 
 class CollectXY(Module):
     my_input_ports = [

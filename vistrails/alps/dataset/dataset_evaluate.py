@@ -129,6 +129,36 @@ class Transform(Module):
         else:
             raise EmptyInputPort('input || source')
 
+class GroupedTransform(Module):
+    my_input_ports = [
+        PortDescriptor("input",DataSets),
+        PortDescriptor("source",basic.String,use_python_source=True)
+    ]
+    my_output_ports = [
+        PortDescriptor("output",DataSets)
+    ]
+
+    def compute(self):
+        if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
+            q = copy.deepcopy(self.getInputFromPort('input'))
+            
+            code = self.getInputFromPort('source')
+            proc_code = urllib.unquote(str(code))
+            
+            index = 0
+            while True:
+                try:
+                    s = q[(index,)]
+                    exec proc_code
+                    q[(index,)] = s
+                    index += 1
+                except IndexError:
+                    break
+
+            self.setResult('output',q)
+        else:
+            raise EmptyInputPort('input || source')
+
 class TransformProperties(Transform):
     deepcopy_all = False
 

@@ -150,3 +150,6 @@ def selfRegister():
     register(Select,'DataSet',abst=True)
     register(Select,'DataSet|Select')
     register(SelectFiles,'DataSet|Select')
+    
+    register(GroupBy,'DataSet|Hierarchy')
+    register(GroupedTransform,'DataSet|Hierarchy')
