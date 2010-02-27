@@ -30,6 +30,7 @@
 #include <alps/lattice.h>
 #include <alps/scheduler.h>
 #include <alps/matrix_as_vector.h>
+#include <alps/type_traits/norm_type.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/numeric/ublas/vector.hpp>
@@ -71,7 +72,7 @@ class HamiltonianMatrix : public alps::scheduler::Task, public alps::graph_helpe
 {
 public:
   typedef T value_type;
-  typedef typename alps::type_traits<value_type>::norm_t magnitude_type;
+  typedef typename alps::norm_type<value_type>::type magnitude_type;
   typedef M matrix_type;
   typedef alps::model_helper<>::half_integer_type half_integer_type;
   typedef typename alps::graph_helper<>::graph_type graph_type;

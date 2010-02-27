@@ -4,8 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2010 by Ping Nang Ma <pingnang@itp.phys.ethz.ch>,
-*                            Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 2010 by Matthias Troyer <troyer@comp-phys.org>,
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -16,7 +15,7 @@
 * the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
 * available from http://alps.comp-phys.org/.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
 * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
 * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
@@ -26,26 +25,30 @@
 *
 *****************************************************************************/
 
-/* $Id: nobinning.h 3520 2009-12-11 16:49:53Z gamperl $ */
+/* $Id: obsvalue.h 3435 2009-11-28 14:45:38Z troyer $ */
 
-#include <alps/alea/obsbinneddata.h>
+#ifndef ALPS_TYPE_TRAITS_IS_SEQUENCE_H
+#define ALPS_TYPE_TRAITS_IS_SEQUENCE_H
 
-#include <iostream>
-#include <iomanip>
-#include <cmath>
+#include <alps/config.h>
+#include <boost/mpl/bool.hpp>
 #include <valarray>
 #include <vector>
-#include <algorithm>
 
+// maybe we can automate this by checking for the existence of a value_type member
 
-int main(int argc, char** argv)
-{
+namespace alps {
 
-  // empty constructor
-  alps::alea::binned_data<double> data;
-  std::cout << data << std::endl;
+template <class T>
+struct is_sequence : public boost::mpl::false_ {};
 
+template <class T>
+struct is_sequence<std::vector<T> > : public boost::mpl::true_ {};
 
+template <class T>
+struct is_sequence<std::valarray<T> > : public boost::mpl::true_ {};
+ 
 
-  return 0;
-}
+} // end namespace alps
+
+#endif // ALPS_TYPE_TRAITS_ELEMENT_TYPE_H

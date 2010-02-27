@@ -4,8 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2010 by Ping Nang Ma <pingnang@itp.phys.ethz.ch>,
-*                            Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 2010 by Matthias Troyer <troyer@comp-phys.org>,
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -16,7 +15,7 @@
 * the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
 * available from http://alps.comp-phys.org/.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
 * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
 * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
@@ -26,26 +25,47 @@
 *
 *****************************************************************************/
 
-/* $Id: nobinning.h 3520 2009-12-11 16:49:53Z gamperl $ */
+/* $Id: obsvalue.h 3435 2009-11-28 14:45:38Z troyer $ */
 
-#include <alps/alea/obsbinneddata.h>
+#ifndef ALPS_TYPE_TRAITS_CHANGE_VALUE_TYPE_H
+#define ALPS_TYPE_TRAITS_CHANGE_VALUE_TYPE_H
 
-#include <iostream>
-#include <iomanip>
-#include <cmath>
+#include <alps/config.h>
+#include <boost/mpl/bool.hpp>
 #include <valarray>
 #include <vector>
-#include <algorithm>
 
+// maybe we can automate this by checking for the existence of a value_type member
 
-int main(int argc, char** argv)
+namespace alps {
+
+template <class T, class V>
+struct change_value_type 
 {
+  typedef V type;
+};
 
-  // empty constructor
-  alps::alea::binned_data<double> data;
-  std::cout << data << std::endl;
+template <class T, class A, class V>
+struct change_value_type<std::vector<T,A>,V> 
+{
+  typedef std::vector<V> type;
+};
 
+template <class T, class V>
+struct change_value_type<std::valarray<T>,V> 
+{
+  typedef std::valarray<V> type;
+};
 
+template <class T, class V>
+struct change_value_type_replace_valarray : change_value_type<T,V> {};
 
-  return 0;
-}
+template <class T, class V>
+struct change_value_type_replace_valarray<std::valarray<T>,V> 
+{
+  typedef std::vector<V> type;
+};
+
+} // end namespace alps
+
+#endif // ALPS_TYPE_TRAITS_CHANGE_VALUE_TYPE_H
