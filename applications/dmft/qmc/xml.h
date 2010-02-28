@@ -20,7 +20,7 @@
 #define ALPS_DMFT_XML_H
 
 #include <alps/xml.h>
-#include <alps/vectorio.h>
+#include <alps/utility/vectorio.hpp>
 #include "types.h"
 #include "green_function.h"
 

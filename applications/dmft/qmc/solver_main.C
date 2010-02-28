@@ -17,7 +17,7 @@
 #include "xml.h"
 #include <alps/parameter.h>
 #include <alps/copyright.h>
-#include <alps/vectorio.h>
+#include <alps/utility/vectorio.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>
 

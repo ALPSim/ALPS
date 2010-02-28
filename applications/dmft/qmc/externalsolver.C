@@ -21,7 +21,7 @@
 #include "xml.h"
 #include <alps/xml.h>
 #include <alps/parser/parser.h>
-#include <alps/vectorio.h>
+#include <alps/utility/vectorio.hpp>
 #include <cstdlib>
 #include <fstream>
 #include <boost/tuple/tuple.hpp>
