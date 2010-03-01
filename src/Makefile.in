@@ -185,12 +185,12 @@ am__noinst_HEADERS_DIST = boost/classic_spirit.hpp \
 	alps/alea/abstractsimpleobservable.h \
 	alps/alea/abstractbinning.h alps/alea/output_helper.h \
 	alps/alea/histogramdata.h alps/alea/histogrameval.h \
-	alps/alea/value_with_error.h mocasito/io/cache.hpp \
-	mocasito/io/context.hpp mocasito/io/hdf5.hpp \
-	mocasito/io/traits.hpp mocasito/io/container.hpp \
-	mocasito/io/free_fun.hpp mocasito/io/iterator.hpp \
-	mocasito/io/util.hpp mocasito/trace.hpp \
-	alps/type_traits/average_type.hpp \
+	alps/alea/value_with_error.h alps/alea/type_tag.hpp \
+	mocasito/io/cache.hpp mocasito/io/context.hpp \
+	mocasito/io/hdf5.hpp mocasito/io/traits.hpp \
+	mocasito/io/container.hpp mocasito/io/free_fun.hpp \
+	mocasito/io/iterator.hpp mocasito/io/util.hpp \
+	mocasito/trace.hpp alps/type_traits/average_type.hpp \
 	alps/type_traits/change_value_type.hpp \
 	alps/type_traits/element_type.hpp \
 	alps/type_traits/is_complex.hpp \
@@ -505,7 +505,7 @@ headers_MOCASITO = mocasito/io/cache.hpp mocasito/io/context.hpp mocasito/io/hdf
 headers_ALPS = alps/lambda.hpp alps/hdf5.hpp alps/bitops.h alps/cctype.h alps/copyright.h alps/expression.h alps/factory.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/stringvalue.h alps/vectormath.h alps/vectortraits.h alps/matrix_as_vector.h alps/encode.hpp
 headers_PARAMETER = alps/parameter.h alps/parameter/parameter.h alps/parameter/parameter_p.h alps/parameter/parameterlist.h alps/parameter/parameterlist_p.h alps/parameter/parameters.h alps/parameter/parameters_p.h 
 headers_EXPRESSION = alps/expression/block.h alps/expression/evaluatable.h alps/expression/evaluate.h alps/expression/evaluate_helper.h alps/expression/evaluator.h alps/expression/expression.h alps/expression/expression_fwd.h alps/expression/factor.h alps/expression/function.h alps/expression/number.h alps/expression/parameterevaluator.h alps/expression/symbol.h alps/expression/term.h alps/expression/traits.h
-headers_ALEA = alps/alea/convergence.hpp alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nan.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/observablefactory.h alps/alea/observableset_p.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h alps/alea/signedobservable.h alps/alea/hdf5.h alps/alea/recordableobservable.h alps/alea/abstractsimpleobservable.h alps/alea/abstractbinning.h alps/alea/output_helper.h alps/alea/histogramdata.h alps/alea/histogrameval.h alps/alea/value_with_error.h
+headers_ALEA = alps/alea/convergence.hpp alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nan.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/observablefactory.h alps/alea/observableset_p.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h alps/alea/signedobservable.h alps/alea/hdf5.h alps/alea/recordableobservable.h alps/alea/abstractsimpleobservable.h alps/alea/abstractbinning.h alps/alea/output_helper.h alps/alea/histogramdata.h alps/alea/histogrameval.h alps/alea/value_with_error.h alps/alea/type_tag.hpp
 headers_FIXEDCAP = alps/fixed_capacity_deque.h alps/fixed_capacity_traits.h alps/fixed_capacity_fwd.h alps/fixed_capacity_vector.h alps/fixed_capacity/checking.h alps/fixed_capacity/deque_detail.h alps/fixed_capacity/uninitialized_array.h
 headers_OSIRIS = alps/osiris.h alps/osiris/buffer.h alps/osiris/comm.h alps/osiris/dump.h alps/osiris/mpdump.h alps/osiris/os.h alps/osiris/process.h alps/osiris/xdrcore.h alps/osiris/xdrdump.h alps/osiris/std/impl.h alps/osiris/std/list.h alps/osiris/std/map.h alps/osiris/std/pair.h alps/osiris/std/set.h alps/osiris/std/string.h alps/osiris/std/valarray.h alps/osiris/std/vector.h alps/osiris/archivedump.h alps/osiris/dumparchive.h alps/osiris/std/deque.h alps/osiris/std/stack.h alps/osiris/boost/array.h
 headers_LATTICE = alps/lattice.h alps/lattice/boundary.h alps/lattice/cell_traits.h alps/lattice/coordinate_traits.h alps/lattice/coordinatelattice.h alps/lattice/dimensional_traits.h alps/lattice/disorder.h alps/lattice/graph.h alps/lattice/graph_helper.h alps/lattice/graph_traits.h alps/lattice/graphproperties.h alps/lattice/hypercubic.h alps/lattice/lattice.h alps/lattice/latticedescriptor.h alps/lattice/latticegraph.h alps/lattice/latticegraphdescriptor.h alps/lattice/latticelibrary.h alps/lattice/parity.h alps/lattice/point_traits.h alps/lattice/propertymap.h alps/lattice/simplecell.h alps/lattice/simplelattice.h alps/lattice/unitcell.h alps/lattice/bond_compare.h
