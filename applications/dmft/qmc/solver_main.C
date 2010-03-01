@@ -2,7 +2,7 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005 - 2009 by Emanuel Gull <gull@phys.columbia.edu>
+ * Copyright (C) 2005 - 2010 by Emanuel Gull <gull@phys.columbia.edu>
  *                              Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
