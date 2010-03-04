@@ -279,6 +279,10 @@
   1/2*(Splus(x)*Sminus(y)+Sminus(x)*Splus(y))
 </BONDOPERATOR>
 
+<BONDOPERATOR name="biquadratic" source="x" target="y">
+  (exchange_xy(i,j)+Sz(i)*Sz(j))*(exchange_xy(i,j)+Sz(i)*Sz(j))
+</BONDOPERATOR>
+
 <BONDOPERATOR name="fermion_hop" source="x" target="y">
   cdag_up(x)*c_up(y)+cdag_up(y)*c_up(x)+cdag_down(x)*c_down(y)+cdag_down(y)*c_down(x)
 </BONDOPERATOR>
@@ -334,6 +338,7 @@
   <PARAMETER name="h" default="0"/>
   <PARAMETER name="Gamma" default="0"/>
   <PARAMETER name="D" default="0"/>
+  <PARAMETER name="Jbq" default="0"/>
   <BASIS ref="spin"/>
   <SITETERM site="i">
   <PARAMETER name="h#" default="h"/>
@@ -345,7 +350,7 @@
     <PARAMETER name="J#" default="0"/>
     <PARAMETER name="Jz#" default="J#"/>
     <PARAMETER name="Jxy#" default="J#"/>
-    Jz#*Sz(i)*Sz(j)+Jxy#*exchange_xy(i,j)
+    Jz#*Sz(i)*Sz(j)+Jxy#*exchange_xy(i,j)+Jbq*biquadratic(i,j)
   </BONDTERM>
 </HAMILTONIAN>
 
