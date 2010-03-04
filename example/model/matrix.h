@@ -47,6 +47,7 @@ struct symbolic_traits {
 template<class T>
 const bool symbolic_traits<T>::is_symbolic;
 
+// Having this in a header causes problems -> header can only be included in *one* cpp file
 template<>
 struct symbolic_traits<alps::Expression> {
  BOOST_STATIC_CONSTANT(bool, is_symbolic=true);
@@ -67,6 +68,12 @@ public:
     if (!built_) build(); 
     o << matrix_;
   }
+
+  int rows() { return matrix_.size1(); }
+  int cols() { return matrix_.size2(); }
+  const T& operator()(int i, int j) const { return matrix_(i,j); }
+
+
   void build() const;
 
 private:
