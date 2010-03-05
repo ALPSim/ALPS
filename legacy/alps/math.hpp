@@ -31,6 +31,12 @@
 #ifndef ALPS_MATH_HPP
 #define ALPS_MATH_HPP
 
+#if defined(_MSC_VER) || defined(__BORLANDC__) || defined(__DMC__)
+#  pragma message ("This header is deprecated. Please use the new headers in alps/numeric")
+#elif defined(__GNUC__) || defined(__HP_aCC) || defined(__SUNPRO_CC) || defined(__IBMCPP__)
+#  warning "This header is deprecated. Please use the new headers in alps/numeric"
+#endif
+
 #include <alps/numeric/real.hpp>
 #include <alps/numeric/abs2.hpp>
 #include <alps/numeric/binomial.hpp>
