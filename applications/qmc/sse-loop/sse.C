@@ -28,7 +28,7 @@
 
 #include "sse.h"
 #include "vertex.h"
-#include <alps/osiris/os.h>
+#include <alps/utility/os.hpp>
 #include <alps/alea.h>
 #include <algorithm>
 #include <alps/osiris/comm.h>

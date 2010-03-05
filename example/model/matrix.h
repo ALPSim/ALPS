@@ -30,7 +30,7 @@
 #include <alps/expression.h>
 #include <alps/model/model_helper.h>
 #include <alps/lattice/graph_helper.h>
-#include <alps/osiris/os.h>
+#include <alps/numeric/is_nonzero.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/multi_array.hpp>
@@ -177,7 +177,7 @@ void HamiltonianMatrix<T,M>::build() const
       int is=state[s];                         // get site basis index
       for (int js=0;js<basis[s].size();++js) { // loop over target site states
         T val=mat[is][js];                     // get matrix element
-        if (alps::is_nonzero(val)) {           // if matrix element is nonzero
+        if (alps::numeric::is_nonzero(val)) {           // if matrix element is nonzero
           state_type newstate=state;
           newstate[s]=js;                      // build target state
           int j = states.index(newstate);      // lookup target state
@@ -202,7 +202,7 @@ void HamiltonianMatrix<T,M>::build() const
       for (int js1=0;js1<basis[s1].size();++js1) { // loop over target site states
         for (int js2=0;js2<basis[s2].size();++js2) {
           T val=mat[is1][is2][js1][js2].first;     // get matrix element
-          if (alps::is_nonzero(val)) {             // if nonzero matrix element
+          if (alps::numeric::is_nonzero(val)) {             // if nonzero matrix element
             state_type newstate=state;             // prepare target state
             newstate[s1]=js1;                      // build target state
             newstate[s2]=js2;

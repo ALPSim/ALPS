@@ -108,11 +108,12 @@ am__base_list = \
 am__installdirs = "$(DESTDIR)$(libdir)"
 LTLIBRARIES = $(lib_LTLIBRARIES)
 libalps_la_LIBADD =
-am__libalps_la_SOURCES_DIST = $(top_srcdir)/src/alps/copyright.C \
-	$(top_srcdir)/src/alps/encode.cpp \
+am__libalps_la_SOURCES_DIST =  \
+	$(top_srcdir)/src/alps/utility/copyright.cpp \
+	$(top_srcdir)/src/alps/utility/encode.cpp \
 	$(top_srcdir)/src/alps/osiris/buffer.C \
 	$(top_srcdir)/src/alps/osiris/dump.C \
-	$(top_srcdir)/src/alps/osiris/os.C \
+	$(top_srcdir)/src/alps/utility/os.C \
 	$(top_srcdir)/src/alps/osiris/process.C \
 	$(top_srcdir)/src/alps/osiris/comm.C \
 	$(top_srcdir)/src/alps/osiris/mpdump.C \
@@ -459,8 +460,8 @@ top_builddir = @top_builddir@
 top_srcdir = @top_srcdir@
 DEFAULT_INCLUDES = -I$(top_builddir)/src -I$(top_srcdir)/src
 src_ALPS = \
-  $(top_srcdir)/src/alps/copyright.C \
-  $(top_srcdir)/src/alps/encode.cpp
+  $(top_srcdir)/src/alps/utility/copyright.cpp \
+  $(top_srcdir)/src/alps/utility/encode.cpp
 
 src_ALEA = \
   $(top_srcdir)/src/alps/alea/nan.C \
@@ -523,7 +524,7 @@ src_SCHEDULER = \
 src_OSIRIS = \
   $(top_srcdir)/src/alps/osiris/buffer.C \
   $(top_srcdir)/src/alps/osiris/dump.C \
-  $(top_srcdir)/src/alps/osiris/os.C \
+  $(top_srcdir)/src/alps/utility/os.C \
   $(top_srcdir)/src/alps/osiris/process.C \
   $(top_srcdir)/src/alps/osiris/comm.C \
   $(top_srcdir)/src/alps/osiris/mpdump.C \
@@ -941,19 +942,19 @@ distclean-compile:
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LTCXXCOMPILE) -c -o $@ $<
 
-copyright.lo: $(top_srcdir)/src/alps/copyright.C
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT copyright.lo -MD -MP -MF $(DEPDIR)/copyright.Tpo -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
+copyright.lo: $(top_srcdir)/src/alps/utility/copyright.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT copyright.lo -MD -MP -MF $(DEPDIR)/copyright.Tpo -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/utility/copyright.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/utility/copyright.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/copyright.Tpo $(DEPDIR)/copyright.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/copyright.C' object='copyright.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/utility/copyright.cpp' object='copyright.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/copyright.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/copyright.C
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o copyright.lo `test -f '$(top_srcdir)/src/alps/utility/copyright.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/utility/copyright.cpp
 
-encode.lo: $(top_srcdir)/src/alps/encode.cpp
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode.lo -MD -MP -MF $(DEPDIR)/encode.Tpo -c -o encode.lo `test -f '$(top_srcdir)/src/alps/encode.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/encode.cpp
+encode.lo: $(top_srcdir)/src/alps/utility/encode.cpp
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT encode.lo -MD -MP -MF $(DEPDIR)/encode.Tpo -c -o encode.lo `test -f '$(top_srcdir)/src/alps/utility/encode.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/utility/encode.cpp
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/encode.Tpo $(DEPDIR)/encode.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/encode.cpp' object='encode.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/utility/encode.cpp' object='encode.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode.lo `test -f '$(top_srcdir)/src/alps/encode.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/encode.cpp
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o encode.lo `test -f '$(top_srcdir)/src/alps/utility/encode.cpp' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/utility/encode.cpp
 
 buffer.lo: $(top_srcdir)/src/alps/osiris/buffer.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT buffer.lo -MD -MP -MF $(DEPDIR)/buffer.Tpo -c -o buffer.lo `test -f '$(top_srcdir)/src/alps/osiris/buffer.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/buffer.C
@@ -969,12 +970,12 @@ dump.lo: $(top_srcdir)/src/alps/osiris/dump.C
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
 @am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o dump.lo `test -f '$(top_srcdir)/src/alps/osiris/dump.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/dump.C
 
-os.lo: $(top_srcdir)/src/alps/osiris/os.C
-@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT os.lo -MD -MP -MF $(DEPDIR)/os.Tpo -c -o os.lo `test -f '$(top_srcdir)/src/alps/osiris/os.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/os.C
+os.lo: $(top_srcdir)/src/alps/utility/os.C
+@am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT os.lo -MD -MP -MF $(DEPDIR)/os.Tpo -c -o os.lo `test -f '$(top_srcdir)/src/alps/utility/os.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/utility/os.C
 @am__fastdepCXX_TRUE@	$(am__mv) $(DEPDIR)/os.Tpo $(DEPDIR)/os.Plo
-@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/osiris/os.C' object='os.lo' libtool=yes @AMDEPBACKSLASH@
+@AMDEP_TRUE@@am__fastdepCXX_FALSE@	source='$(top_srcdir)/src/alps/utility/os.C' object='os.lo' libtool=yes @AMDEPBACKSLASH@
 @AMDEP_TRUE@@am__fastdepCXX_FALSE@	DEPDIR=$(DEPDIR) $(CXXDEPMODE) $(depcomp) @AMDEPBACKSLASH@
-@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o os.lo `test -f '$(top_srcdir)/src/alps/osiris/os.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/os.C
+@am__fastdepCXX_FALSE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -c -o os.lo `test -f '$(top_srcdir)/src/alps/utility/os.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/utility/os.C
 
 process.lo: $(top_srcdir)/src/alps/osiris/process.C
 @am__fastdepCXX_TRUE@	$(LIBTOOL)  --tag=CXX $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=compile $(CXX) $(DEFS) $(DEFAULT_INCLUDES) $(INCLUDES) $(AM_CPPFLAGS) $(CPPFLAGS) $(AM_CXXFLAGS) $(CXXFLAGS) -MT process.lo -MD -MP -MF $(DEPDIR)/process.Tpo -c -o process.lo `test -f '$(top_srcdir)/src/alps/osiris/process.C' || echo '$(srcdir)/'`$(top_srcdir)/src/alps/osiris/process.C

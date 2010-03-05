@@ -30,7 +30,7 @@
 #include "location_impl.h"
 #include "random_choice.h"
 
-#include <alps/math.hpp>
+#include <alps/numeric/is_nonzero.hpp>
 #include <boost/array.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/tuple/tuple.hpp>
@@ -216,8 +216,8 @@ struct xxz_bond_graph_type {
     diagonal_choice_helper() {}
     template<std::size_t N>
     diagonal_choice_helper(boost::array<double, N> const& v) {
-      p[0] = alps::is_nonzero<1>(v[0] + v[2]) ? v[0] / (v[0] + v[2]) : 1; // for antiparallel
-      p[1] = alps::is_nonzero<1>(v[1] + v[3]) ? v[1] / (v[1] + v[3]) : 1; // for parallel
+      p[0] = alps::numeric::is_nonzero<1>(v[0] + v[2]) ? v[0] / (v[0] + v[2]) : 1; // for antiparallel
+      p[1] = alps::numeric::is_nonzero<1>(v[1] + v[3]) ? v[1] / (v[1] + v[3]) : 1; // for parallel
     }
     boost::array<double, 2> p;
   };
@@ -233,7 +233,7 @@ struct xxz_bond_graph_type {
     offdiagonal_choice_helper() {}
     template<std::size_t N>
     offdiagonal_choice_helper(boost::array<double, N> const& v) {
-      p = alps::is_nonzero<1>(v[0] + v[1]) ? v[0] / (v[0] + v[1]) : 1;
+      p = alps::numeric::is_nonzero<1>(v[0] + v[1]) ? v[0] / (v[0] + v[1]) : 1;
     }
     double p;
   };
@@ -273,11 +273,11 @@ struct xyz_bond_graph_type {
     template<std::size_t N>
     diagonal_choice_helper(boost::array<double, N> const& v) {
       // for antiparallel
-      p[0] = alps::is_nonzero<1>(v[0] + v[2] + v[4]) ? v[0] / (v[0] + v[2] + v[4]) : 1;
-      p[2] = alps::is_nonzero<1>(v[0] + v[2] + v[4]) ? (v[0] + v[2])/ (v[0] + v[2] + v[4]) : 1;
+      p[0] = alps::numeric::is_nonzero<1>(v[0] + v[2] + v[4]) ? v[0] / (v[0] + v[2] + v[4]) : 1;
+      p[2] = alps::numeric::is_nonzero<1>(v[0] + v[2] + v[4]) ? (v[0] + v[2])/ (v[0] + v[2] + v[4]) : 1;
       // for parallel
-      p[1] = alps::is_nonzero<1>(v[1] + v[3] + v[5]) ? v[1] / (v[1] + v[3] + v[5]) : 1;
-      p[3] = alps::is_nonzero<1>(v[1] + v[3] + v[5]) ? (v[1] + v[3]) / (v[1] + v[3] + v[5]) : 1;
+      p[1] = alps::numeric::is_nonzero<1>(v[1] + v[3] + v[5]) ? v[1] / (v[1] + v[3] + v[5]) : 1;
+      p[3] = alps::numeric::is_nonzero<1>(v[1] + v[3] + v[5]) ? (v[1] + v[3]) / (v[1] + v[3] + v[5]) : 1;
     }
     boost::array<double, 4> p;
   };
@@ -307,8 +307,8 @@ struct xyz_bond_graph_type {
     offdiagonal_choice_helper() {}
     template<std::size_t N>
     offdiagonal_choice_helper(boost::array<double, N> const& v) {
-      p[0] = alps::is_nonzero<1>(v[0] + v[1]) ? v[0] / (v[0] + v[1]) : 1;
-      p[1] = alps::is_nonzero<1>(v[4] + v[5]) ? v[4] / (v[4] + v[5]) : 1;
+      p[0] = alps::numeric::is_nonzero<1>(v[0] + v[1]) ? v[0] / (v[0] + v[1]) : 1;
+      p[1] = alps::numeric::is_nonzero<1>(v[4] + v[5]) ? v[4] / (v[4] + v[5]) : 1;
     }
     boost::array<double, 2> p;
   };
@@ -448,7 +448,7 @@ public:
     weight_ = 0;
     BOOST_FOREACH(typename WEIGHT_TABLE::site_weight_t const& sw, wt.site_weights()) {
       for (int g = 0; g < WEIGHT_TABLE::num_site_graphs; ++g) {
-        if (alps::is_nonzero<1>(sw.second.v[g])) {
+        if (alps::numeric::is_nonzero<1>(sw.second.v[g])) {
           if (site_graph_t::is_valid_gid(g)) {
             graph_.push_back(local_graph_t(g, location_t::site_location(sw.first)));
             w.push_back(sw.second.v[g]);
@@ -461,7 +461,7 @@ public:
     }
     BOOST_FOREACH(typename WEIGHT_TABLE::bond_weight_t const& bw, wt.bond_weights()) {
       for (int g = 0; g < WEIGHT_TABLE::num_bond_graphs; ++g) {
-        if (alps::is_nonzero<1>(bw.second.v[g])) {
+        if (alps::numeric::is_nonzero<1>(bw.second.v[g])) {
           if (bond_graph_t::is_valid_gid(g)) {
             graph_.push_back(local_graph_t(g, location_t::bond_location(bw.first)));
             w.push_back(bw.second.v[g]);
@@ -477,7 +477,7 @@ public:
         offdiag_.push_back(typename bond_graph_t::offdiagonal_choice_helper(bw.second.v));
     }
     if (w.size()) dist_graph_.init(w);
-    if (alps::is_zero<2>(weight_)) weight_ = 1.0e-20;
+    if (alps::numeric::is_zero<2>(weight_)) weight_ = 1.0e-20;
   }
 
   template<typename RNG>

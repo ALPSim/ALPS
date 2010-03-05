@@ -27,7 +27,7 @@
 
 #include <alps/model.h>
 #include <alps/lattice.h>
-#include <alps/copyright.h>
+#include <alps/utility/copyright.hpp>
 #include <alps/xml.h>
 #include <cstring>
 #include <iostream>

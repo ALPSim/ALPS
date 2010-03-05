@@ -25,9 +25,9 @@
 *
 *****************************************************************************/
 
-#include <alps/copyright.h>
+#include <alps/utility/copyright.hpp>
 #include <alps/version.h>
-#include <alps/osiris/os.h>
+#include <alps/utility/os.hpp>
 #include <boost/version.hpp>
 #include <iostream>
 

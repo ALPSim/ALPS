@@ -41,7 +41,7 @@
   "  available from http://wistaria.comp-phys.org/alps-looper/\n" \
   "  copyright (c) 1997-2010 by Synge Todo <wistaria@comp-phys.org>\n" \
 
-#include <alps/copyright.h>
+#include <alps/utility/copyright.hpp>
 #include <iostream>
 
 namespace looper {

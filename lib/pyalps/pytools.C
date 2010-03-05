@@ -32,7 +32,7 @@
 
 #include <boost/python.hpp>
 #include <alps/scheduler/convert.h>
-#include <alps/encode.hpp>
+#include <alps/utility/encode.hpp>
 
 
 BOOST_PYTHON_MODULE(pytools)

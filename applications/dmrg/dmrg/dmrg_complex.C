@@ -33,6 +33,7 @@
 #include "dmrg_complex.h"
 #include <boost/tokenizer.hpp>
 #include <boost/algorithm/string/replace.hpp>
+#include <alps/numeric/real.hpp>
 #include <alps/scheduler.h>
 #include <boost/foreach.hpp>
 
@@ -381,7 +382,7 @@ void DMRGTask::serialize(alps::hdf5::oarchive & ar) const
   alps::scheduler::Task::serialize(ar);
   std::map<std::string,std::vector<value_type> >::const_iterator it = average_values.find("Energy");
   if (it != average_values.end()) {
-    std::vector<double> energies = alps::real(it->second);
+    std::vector<double> energies = alps::numeric::real(it->second);
     ar << alps::make_pvp("spectrum/energies",energies);
   }
   ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<std::complex<double> >&>(*this));

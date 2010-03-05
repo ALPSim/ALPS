@@ -90,14 +90,14 @@ void MeasurementsPlot<T>::add (T w, alps::EigenvectorMeasurements<ValueType> con
   typedef std::pair<std::string,std::vector<std::vector<ValueType> >  > vector_element_type;
 
   BOOST_FOREACH(element_type const& s, meas.average_values)
-    average_sum[s.first] += w * alps::real(s.second[j]);
+    average_sum[s.first] += w * alps::numeric::real(s.second[j]);
 
   BOOST_FOREACH(vector_element_type const& s, meas.local_values) 
   {
     if (local_sum[s.first].size() < s.second[j].size())
       local_sum[s.first].resize(s.second[j].size());
     for (int i=0; i < s.second[j].size(); ++i)
-      local_sum[s.first][i] += w * alps::real(s.second[j][i]);
+      local_sum[s.first][i] += w * alps::numeric::real(s.second[j][i]);
   }
 
   BOOST_FOREACH(vector_element_type const& s, meas.correlation_values)
@@ -105,7 +105,7 @@ void MeasurementsPlot<T>::add (T w, alps::EigenvectorMeasurements<ValueType> con
     if (correlation_sum[s.first].size() < s.second[j].size())
      correlation_sum[s.first].resize(s.second[j].size());
     for (int i=0; i < s.second[j].size(); ++i)
-      correlation_sum[s.first][i] += w * alps::real(s.second[j][i]);
+      correlation_sum[s.first][i] += w * alps::numeric::real(s.second[j][i]);
   }
 
   BOOST_FOREACH(vector_element_type const& s, meas.structurefactor_values)
@@ -113,7 +113,7 @@ void MeasurementsPlot<T>::add (T w, alps::EigenvectorMeasurements<ValueType> con
     if (structurefactor_sum[s.first].size() < s.second[j].size())
       structurefactor_sum[s.first].resize(s.second[j].size());
     for (int i=0; i < s.second[j].size(); ++i)
-      structurefactor_sum[s.first][i] += w * alps::real(s.second[j][i]);
+      structurefactor_sum[s.first][i] += w * alps::numeric::real(s.second[j][i]);
   }
 }
 

@@ -29,6 +29,7 @@
 #include "custom.h"
 #include <alps/model.h>
 #include <alps/scheduler/measurement_operators.h>
+#include <alps/numeric/is_nonzero.hpp>
 #include <boost/foreach.hpp>
 #include <boost/next_prior.hpp>
 
@@ -49,7 +50,7 @@ bool build_diagonal_matrix(std::string const& op, alps::Parameters const& p,
         if (i == j) {
           mat[i] = alps::evaluate<double>(m[i][j]);
         } else {
-          if (alps::is_nonzero(alps::evaluate<double>(m[i][j]))) valid = false;
+          if (alps::numeric::is_nonzero(alps::evaluate<double>(m[i][j]))) valid = false;
         }
       } else {
         valid = false;

@@ -28,7 +28,6 @@
 
 #include "alternating_tensor.h"
 #include <alps/lattice.h>
-#include <alps/math.hpp>
 #include <alps/parapack/integer_range.h>
 #include <boost/throw_exception.hpp>
 #include <stdexcept>

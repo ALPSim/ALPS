@@ -28,24 +28,4 @@
 
 /* $Id$ */
 
-#ifndef ALPS_OS_H
-#define ALPS_OS_H
-
-//=======================================================================
-// This file includes low level functions which depend on the OS used
-//=======================================================================
-
-#include <alps/config.h>
-#include <string>
-
-namespace alps {
-
-/// returns the hostname
-ALPS_DECL std::string hostname();
-
-/// returns the username
-ALPS_DECL std::string username();
-
-} // end namespace
-
-#endif // ALPS_OS_H
+#include <alps/utility/os.hpp>

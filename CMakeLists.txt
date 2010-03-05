@@ -13,6 +13,7 @@ option(ALPS_BUILD_TESTS "Build ALPS tests" ON)
 option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
 option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
 option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
+option(ALPS_INSTALL_DEPRECATED "Install deprecated headers for ALPS" OFF)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build toold used by developers to maintain ALPS" OFF)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
@@ -24,6 +25,7 @@ option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of co
 
 if (ALPS_FOR_VISTRAILS)
   set(ALPS_INSTALL_HEADERS OFF)
+  set(ALPS_INSTALL_DEPRECATED OFF)
 endif (ALPS_FOR_VISTRAILS)
 
 ######################################################################
@@ -458,12 +460,17 @@ configure_file(config/CMake/include.mk.in ${PROJECT_BINARY_DIR}/config/CMake/inc
 ######################################################################
 include(InstallRequiredSystemLibraries)
 
-if (ALPS_INSTALL_HEADERS AND NOT ALPS_FOR_VISTRAILS)
+if (ALPS_INSTALL_HEADERS)
   set(ALPS_HEADER_DIR "include")
   install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
           FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
+  if (ALPS_INSTALL_DEPRECATED)
+    install(DIRECTORY legacy/alps COMPONENT deprecated DESTINATION ${ALPS_HEADER_DIR}
+            FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+            PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+  endif (ALPS_INSTALL_DEPRECATED)
 
   if(ALPS_PACKAGE_LIBRARIES)
      install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR} COMPONENT dependentheaders
@@ -472,7 +479,7 @@ if (ALPS_INSTALL_HEADERS AND NOT ALPS_FOR_VISTRAILS)
      install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include DESTINATION . COMPONENT dependentheaders)
   endif(ALPS_PACKAGE_LIBRARIES)
 
-endif(ALPS_INSTALL_HEADERS AND NOT ALPS_FOR_VISTRAILS)
+endif(ALPS_INSTALL_HEADERS)
 
 
 
@@ -553,6 +560,7 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
 
  set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "ALPS and Boost libraries")
  set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "ALPS headers")
+ set(CPACK_COMPONENT_DEPRECATED_DISPLAY_NAME "Deprecated ALPS headers")
  set(CPACK_COMPONENT_APPLICATIONS_DISPLAY_NAME "ALPS applications")
  set(CPACK_COMPONENT_XML_DISPLAY_NAME "XML files")
  set(CPACK_COMPONENT_PYTHON_DISPLAY_NAME "ALPS Python packages")
@@ -564,6 +572,7 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
  
  set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "The libraries needed by the ALPS applications")
  set(CPACK_COMPONENT_HEADERS_DESCRIPTION "The ALPS header files")
+ set(CPACK_COMPONENT_DEPRECATED_DESCRIPTION "Deprecated ALPS header files")
  set(CPACK_COMPONENT_APPLICATIONS_DESCRIPTION "The ALPS application programs")
  set(CPACK_COMPONENT_XML_DESCRIPTION "The XML files and XSL stylefiles for ALPS input and evaluation")
  set(CPACK_COMPONENT_PYTHON_DESCRIPTION "The ALPS Python packages for data evaluation")
@@ -580,11 +589,13 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
  set(CPACK_COMPONENT_TOOLS_GROUP "Runtime")
  set(CPACK_COMPONENT_DEPENDENTLIBRARIES_GROUP "Runtime")
  set(CPACK_COMPONENT_HEADERS_GROUP "Development")
+ set(CPACK_COMPONENT_DEPRECATED_GROUP "Development")
  set(CPACK_COMPONENT_DEPENDENTHEADERS_GROUP "Development")
  set(CPACK_COMPONENT_BUILD_GROUP "Development")
  set(CPACK_COMPONENT_EXAMPLES_GROUP "Examplecodes")
 
  set(CPACK_COMPONENT_HEADERS_DISABLED ON)
+ set(CPACK_COMPONENT_DEPRECATED_DISABLED ON)
  set(CPACK_COMPONENT_DEPENDENTHEADERS_DISABLED ON)
  set(CPACK_COMPONENT_BUILD_DISABLED ON)
 

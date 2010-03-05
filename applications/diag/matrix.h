@@ -29,7 +29,8 @@
 #include <alps/model.h>
 #include <alps/lattice.h>
 #include <alps/scheduler.h>
-#include <alps/matrix_as_vector.h>
+#include <alps/numeric/matrix_as_vector.hpp>
+#include <alps/numeric/is_nonzero.hpp>
 #include <alps/type_traits/norm_type.hpp>
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
@@ -146,7 +147,7 @@ public:
   template <class MM, class OP> 
   void add_operator_matrix(MM& m, const OP& op) const 
   {
-    alps::matrix_as_vector<MM> v(m);
+    alps::numeric::matrix_as_vector<MM> v(m);
     apply_operator(op,v,v);
   }
 
@@ -167,7 +168,7 @@ public:
   template <class MM, class OP, class D> 
   void add_operator_matrix(MM& m, const OP& op, D d) const 
   {
-    alps::matrix_as_vector<MM> v(m);
+    alps::numeric::matrix_as_vector<MM> v(m);
     apply_operator(op,d,v,v);
   }
 
@@ -187,7 +188,7 @@ public:
   template <class MM, class OP> 
   void add_operator_matrix(MM& m, const OP& op, site_descriptor s1, site_descriptor s2) const 
   {
-    alps::matrix_as_vector<MM> v(m);
+    alps::numeric::matrix_as_vector<MM> v(m);
     apply_operator(op,s1,s2,v,v);
   }
 
@@ -391,7 +392,7 @@ void HamiltonianMatrix<T,M>::apply_operator(const STATES& states, const alps::Si
     int is=state[s];                          // get site basis index
     for (int js=0;js<basis_[s].size();++js) { // loop over target site states
       T val=mat[is][js];                      // get matrix element
-      if (alps::is_nonzero(val)) {            // if matrix element is nonzero
+      if (alps::numeric::is_nonzero(val)) {            // if matrix element is nonzero
         state_type newstate=state;            // prepare target state
         newstate[s]=js;                       // build target state
         std::complex<double> phase;
@@ -430,7 +431,7 @@ void HamiltonianMatrix<T,M>::apply_operator(const STATES& states, const boost::m
     for (int js1=0;js1<basis_[s1].size();++js1) { // loop over target site states
       for (int js2=0;js2<basis_[s2].size();++js2) {
         T val=mat[is1][is2][js1][js2].first;      // get matrix element
-        if (alps::is_nonzero(val)) {              // if nonzero matrix element
+        if (alps::numeric::is_nonzero(val)) {              // if nonzero matrix element
           state_type newstate=state;              // prepare target state
           newstate[s1]=js1;                       // build target state
           newstate[s2]=js2;

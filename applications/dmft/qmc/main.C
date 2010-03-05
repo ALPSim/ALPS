@@ -21,7 +21,7 @@
 #include "hilberttransformer.h"
 
 #include <alps/parameter.h>
-#include <alps/copyright.h>
+#include <alps/utility/copyright.hpp>
 
 #include <iostream>
 #include <fstream>

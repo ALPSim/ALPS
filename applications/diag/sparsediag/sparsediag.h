@@ -26,6 +26,7 @@
 /* $Id$ */
 
 #include "../diag.h"
+#include <alps/numeric/real.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <ietl/interface/ublas.h>
@@ -129,7 +130,7 @@ void SparseDiagMatrix<T>::do_subspace()
   else
   {
     ev.resize(1);
-    ev[0]=alps::real(value_type(this->matrix()(0,0)));
+    ev[0]=alps::numeric::real(value_type(this->matrix()(0,0)));
   }
   if (this->calc_averages()) {
     if  (this->dimension()>1) {

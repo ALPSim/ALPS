@@ -353,7 +353,7 @@ void loop_worker::flip(alps::ObservableSet& obs) {
   if (SIGN()) {
     if (IMPROVE()) {
       obs["Sign"] << improved_sign;
-      if (alps::is_zero(improved_sign)) {
+      if (alps::numeric::is_zero(improved_sign)) {
         obs["Weight of Zero-Meron Sector"] << 0.;
       } else {
         obs["Weight of Zero-Meron Sector"] << 1.;
