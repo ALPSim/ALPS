@@ -18,6 +18,10 @@ option(ALPS_BUILD_DEVELOPER_TOOLS "Build toold used by developers to maintain AL
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
 
+# a workaround for Mac OS X's LLVM compiler
+option(ALPS_LLVM_WORKAROUND "Exclude some parts of ALPS from the build with LLVM" OFF)
+mark_as_advanced(ALPS_LLVM_WORKAROUND)
+
 #maintenance building options
 option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
