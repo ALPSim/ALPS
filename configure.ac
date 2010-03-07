@@ -352,11 +352,13 @@ if test "$ac_cv_boostbook" = yes; then
   AC_FOP
   AC_SUBST(FOP_DIR)
   AC_SUBST(FOP_BIN)
+  AC_SUBST(FOP)
   AC_SUBST(FOP_OPTS)
   AC_SUBST(JAVA_OPTS)
   if test "$ac_cv_have_fop" = yes; then
     FOP_DIR="$ac_cv_fop_dir"
     FOP_BIN="$ac_cv_fop_bin"
+    FOP="$ac_cv_fop"
     case "x$build_os" in
       xdarwin*)
         FOP_OPTS="-Xmx128000000"

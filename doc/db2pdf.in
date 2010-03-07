@@ -29,7 +29,7 @@ echo @XSLTPROC@ $PARAMS --load-trace --path @top_srcdir@/doc/xsl:@BOOST_DIR@/too
 
 [ "$?" -ne 0 ] && exit $?
 
-echo @FOP_DIR@/@FOP_BIN@ $FO $PDF
-@FOP_DIR@/@FOP_BIN@ $FO $PDF
+echo @FOP@ $FO $PDF
+@FOP@ $FO $PDF
 
 exit $?
