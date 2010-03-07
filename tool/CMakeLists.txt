@@ -22,6 +22,21 @@ else(ALPS_FOR_VISTRAILS)
     install(TARGETS ${program} RUNTIME DESTINATION bin COMPONENT tools) 
   endforeach(program)
 
+#
+# quickbook
+# 
+  set (QUICKBOOK_SOURCES "")
+  set (DIRECTORY "${Boost_ROOT_DIR}/tools/quickbook/detail")
+  set (FILES quickbook.cpp actions.cpp actions_class.cpp utils.cpp 
+       input_path.cpp post_process.cpp collector.cpp template_stack.cpp
+       markups.cpp)
+  foreach(S ${FILES})
+    set(QUICKBOOK_SOURCES ${QUICKBOOK_SOURCES} ${DIRECTORY}/${S})
+  endforeach(S)
+  add_executable(quickbook ${QUICKBOOK_SOURCES})
+  target_link_libraries(quickbook boost)
+  install(TARGETS quickbook RUNTIME DESTINATION bin COMPONENT tools)
+ 
   if(SQLite_FOUND)
     add_executable(archive archive.cpp archive_index.cpp archive_node.cpp archive_plot.cpp
       archive_sqlite.cpp archive_xml.cpp)

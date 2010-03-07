@@ -17,6 +17,7 @@ option(ALPS_INSTALL_DEPRECATED "Install deprecated headers for ALPS" OFF)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build toold used by developers to maintain ALPS" OFF)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
+option(ALPS_BUILD_DOC "Build ALPS documentation" OFF)
 
 # a workaround for Mac OS X's LLVM compiler
 option(ALPS_LLVM_WORKAROUND "Exclude some parts of ALPS from the build with LLVM" OFF)
@@ -456,10 +457,23 @@ if(HDF5_LIBRARIES)
   list(APPEND ALPS_EXTRA_LIBRARIES ${HDF5_LIBRARIES})
 endif(HDF5_LIBRARIES)
 
+set (HDF5_LIBS "")
+foreach (l ${HDF5_LIBRARIES})
+  set (HDF5_LIBS "${HDF5_LIBS} ${l}")
+  if (${l} STREQUAL "debug")
+    set (HDF5_LIBS "")
+  endif()
+  if (${l} STREQUAL "optimized")
+    set (HDF5_LIBS "")
+  endif()
+endforeach(l)
+
 configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
 configure_file(config/CMake/include.mk.in ${PROJECT_BINARY_DIR}/config/CMake/include.mk)
 
-######################################################################
+set (HDF5_LIBRARIES ${HDF5_LIBRARIES_SAVE})
+
+
 # installation
 ######################################################################
 include(InstallRequiredSystemLibraries)
@@ -525,6 +539,14 @@ else (ALPS_FOR_VISTRAILS)
 endif (ALPS_FOR_VISTRAILS)
 
 ######################################################################
+# documentation
+######################################################################
+
+if (ALPS_BUILD_DOC AND NOT ALPS_FOR_VISTRAILS)
+add_subdirectory(doc)
+endif (ALPS_BUILD_DOC AND NOT ALPS_FOR_VISTRAILS)
+
+######################################################################
 # libraries
 ######################################################################
 
@@ -536,7 +558,7 @@ add_subdirectory(lib/pyalps)
 # programs
 ######################################################################
 
- add_subdirectory(tool)
+add_subdirectory(tool)
 if (NOT ALPS_FOR_VISTRAILS)
   add_subdirectory(example)
 endif (NOT ALPS_FOR_VISTRAILS)
