@@ -4,25 +4,28 @@
 #
 #
 
-if(BOOST_ROOT)
-  find_path(Boost_ROOT_DIR "libs/filesystem/src/path.cpp" ${BOOST_ROOT})
-else(BOOST_ROOT)
-  set(DIR0
-    $ENV{HOME} $ENV{HOME}/src $ENV{HOME}/ALPS/src /usr/local /usr/local/src
-    "$ENV{HOMEDRIVE}/Program Files"
-    "$ENV{HOMEDRIVE}$ENV{HOMEPATH}"
-    "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/src"
-    "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/ALPS/src")
-  # set(DIR1 boost boostsrc boost_1_41_0 boost_1_40_0 boost_1_39_0 boost_1_38_0 boostsrc_1_38_0)
-  set(DIR1 boost boostsrc boost_1_42_0 boost_1_41_0)
-  set(_boost_SEARCH_PATH "")
-  foreach(D0 ${DIR0})
-    foreach(D1 ${DIR1})
-      set(_boost_SEARCH_PATH ${_boost_SEARCH_PATH} ${D0}/${D1})
-    endforeach(D1)
-  endforeach(D0)
-  find_path(Boost_ROOT_DIR "libs/filesystem/src/path.cpp" ${_boost_SEARCH_PATH})
-endif(BOOST_ROOT)
+
+if (NOT Boost_ROOT_DIR)
+  if(BOOST_ROOT)
+    find_path(Boost_ROOT_DIR "libs/filesystem/src/path.cpp" ${BOOST_ROOT})
+  else(BOOST_ROOT)
+    set(DIR0
+      $ENV{HOME} $ENV{HOME}/src $ENV{HOME}/ALPS/src /usr/local /usr/local/src
+      "$ENV{HOMEDRIVE}/Program Files"
+      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}"
+      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/src"
+      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/ALPS/src")
+    # set(DIR1 boost boostsrc boost_1_41_0 boost_1_40_0 boost_1_39_0 boost_1_38_0 boostsrc_1_38_0)
+    set(DIR1 boost boostsrc boost_1_42_0 boost_1_41_0)
+    set(_boost_SEARCH_PATH "")
+    foreach(D0 ${DIR0})
+      foreach(D1 ${DIR1})
+        set(_boost_SEARCH_PATH ${_boost_SEARCH_PATH} ${D0}/${D1})
+      endforeach(D1)
+    endforeach(D0)
+    find_path(Boost_ROOT_DIR "libs/filesystem/src/path.cpp" ${_boost_SEARCH_PATH})
+  endif(BOOST_ROOT)
+endif (NOT Boost_ROOT_DIR)
 
 if(Boost_ROOT_DIR)
   set(Boost_INCLUDE_DIR ${Boost_ROOT_DIR} CACHE PATH "Boost Include Directory")
