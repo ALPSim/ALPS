@@ -461,6 +461,7 @@ if(HDF5_LIBRARIES)
 endif(HDF5_LIBRARIES)
 
 set (HDF5_LIBS "")
+message (STATUS "Rewriting ${HDF5_LIBRARIES} into a nice list")
 foreach (l ${HDF5_LIBRARIES})
   set (HDF5_LIBS "${HDF5_LIBS} ${l}")
   if (${l} STREQUAL "debug")
@@ -470,6 +471,8 @@ foreach (l ${HDF5_LIBRARIES})
     set (HDF5_LIBS "")
   endif()
 endforeach(l)
+
+message (STATUS "The list is ${HDF5_LIBS}")
 
 # From debug output, it seems that everything appears only once
 # message("${LAPACK_LIBRARY}")
