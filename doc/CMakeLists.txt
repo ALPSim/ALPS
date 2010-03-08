@@ -8,10 +8,13 @@ find_package(Doxygen REQUIRED)
 find_package(Java REQUIRED)
 find_package(DocbookDtd REQUIRED)
 find_package(DocbookXsl REQUIRED) 
-find_package(Fop)
+find_package(Fop REQUIRED)
 
-set (JAVA_OPTS "-Xmx128000000" CACHE STRING "Runtime options for Java")
-set (FOP_OPTS "-Xmx128000000" CACHE STRING "Runtime options for FOP")
+set (JAVA_OPTS "-Xmx256000000" CACHE STRING "Runtime options for Java")
+set (FOP_OPTS "-Xmx256000000" CACHE STRING "Runtime options for FOP")
+mark_as_advanced(JAVA_OPTS)
+mark_as_advanced(FOP_OPTS)
+
 set(BOOST_DIR ${Boost_ROOT_DIR})
 set(top_srcdir ${PROJECT_SOURCE_DIR})
 set(docdir ${PROJECT_BINARY_DIR}/doc)
@@ -49,7 +52,7 @@ endforeach (S)
 file(GLOB HEADERS ${PROJECT_SOURCE_DIR}/src/alps/*.hpp ${PROJECT_SOURCE_DIR}/src/alps/*.h)
 add_custom_command(OUTPUT src/general.autodoc 
                    COMMAND ./autodoc src/general.autodoc ${HEADERS}
-                   DEPENDS ${HEADERS})
+                   DEPENDS ${HEADERS} autodoc.in)
 set(ALPS_QBK_DEPENDS ${ALPS_QBK_DEPENDS} src/general.autodoc)
 
 
@@ -57,7 +60,7 @@ foreach (S ${ALPS_AUTODOC_SOURCES})
   file(GLOB_RECURSE HEADERS ${PROJECT_SOURCE_DIR}/src/alps/${S}/*.hpp ${PROJECT_SOURCE_DIR}/src/alps/${S}/*.h)
   add_custom_command(OUTPUT src/${S}.autodoc 
                      COMMAND ./autodoc src/${S}.autodoc ${HEADERS}
-                     DEPENDS ${HEADERS})
+                     DEPENDS ${HEADERS} autodoc.in)
   set(ALPS_QBK_DEPENDS ${ALPS_QBK_DEPENDS} src/${S}.autodoc)
 endforeach (S)
 
@@ -68,7 +71,7 @@ add_custom_command(OUTPUT src/alps.xml
 
 add_custom_command(OUTPUT src/alps.docbook 
                    COMMAND ./bb2db src/alps.xml src/alps.docbook
-                   DEPENDS src/alps.xml ${ALPS_QBK_DEPENDS})
+                   DEPENDS src/alps.xml ${ALPS_QBK_DEPENDS} bb2db.in)
 
 file(COPY src/images DESTINATION html)
 add_custom_command(OUTPUT html/index.html 
@@ -79,14 +82,33 @@ add_custom_command(OUTPUT html/index.html
                    src/alps.docbook 
                    ${Boost_ROOT_DIR}/doc/html/boostbook.css
                    ${PROJECT_SOURCE_DIR}/doc/src/alps_logo.gif
+                   db2html.in
                    )
 
-add_custom_target(docs ALL DEPENDS html/index.html)
+add_custom_command(OUTPUT alps.pdf 
+	               COMMAND ./db2pdf src/alps.docbook alps.pdf
+                   DEPENDS 
+                   src/alps.docbook 
+                   db2pdf.in
+                   )
+
+add_custom_target(docs ALL DEPENDS html/index.html alps.pdf)
 
 install(DIRECTORY doc COMPONENT documentation DESTINATION doc
-        FILES_MATCHING PATTERN "*.html" PATTERN "*.png"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+        FILES_MATCHING 
+        PATTERN "*.html" 
+        PATTERN "*.png"
+        PATTERN ".svn" EXCLUDE 
+        PATTERN "CVS" EXCLUDE
+        )
 
 install(DIRECTORY ${PROJECT_BINARY_DIR}/doc COMPONENT documentation DESTINATION doc
-        FILES_MATCHING PATTERN "*.html" PATTERN "*.png" PATTERN "*.gif" PATTERN "*.xsl" PATTERN "*.css")
+        FILES_MATCHING 
+        PATTERN "*.pdf" 
+        PATTERN "*.html" 
+        PATTERN "*.png" 
+        PATTERN "*.gif" 
+        PATTERN "*.xsl" 
+        PATTERN "*.css"
+        )
 
