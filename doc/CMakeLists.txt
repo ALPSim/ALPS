@@ -8,7 +8,7 @@ find_package(Doxygen REQUIRED)
 find_package(Java REQUIRED)
 find_package(DocbookDtd REQUIRED)
 find_package(DocbookXsl REQUIRED) 
-find_package(Fop REQUIRED)
+find_package(Fop)
 
 set (JAVA_OPTS "-Xmx256000000" CACHE STRING "Runtime options for Java")
 set (FOP_OPTS "-Xmx256000000" CACHE STRING "Runtime options for FOP")
@@ -91,6 +91,12 @@ add_custom_command(OUTPUT alps.pdf
                    src/alps.docbook 
                    db2pdf.in
                    )
+
+if(FOP_FOUND)
+  add_custom_target(docs ALL DEPENDS html/index.html alps.pdf)
+else(FOP_FOUND)
+  add_custom_target(docs ALL DEPENDS html/index.html)
+endif(FOP_FOUND)
 
 add_custom_target(docs ALL DEPENDS html/index.html alps.pdf)
 

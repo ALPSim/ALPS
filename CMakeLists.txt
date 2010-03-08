@@ -542,9 +542,9 @@ endif (ALPS_FOR_VISTRAILS)
 # documentation
 ######################################################################
 
-if (ALPS_BUILD_DOC AND NOT ALPS_FOR_VISTRAILS)
+if (ALPS_BUILD_DOC AND NOT ALPS_FOR_VISTRAILS AND NOT WIN32)
 add_subdirectory(doc)
-endif (ALPS_BUILD_DOC AND NOT ALPS_FOR_VISTRAILS)
+endif (ALPS_BUILD_DOC AND NOT ALPS_FOR_VISTRAILS AND NOT WIN32)
 
 ######################################################################
 # libraries
@@ -709,7 +709,7 @@ set(CPACK_RPM_PACKAGE_GROUP "${CPACK_PACKAGE_VENDOR}")
 # set(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "")
 # set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "")
 
-if(WIN32 AND NOT UNIX)
+if(F AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
   # NOTE: No ALPS icon yet
