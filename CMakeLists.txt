@@ -709,7 +709,7 @@ set(CPACK_RPM_PACKAGE_GROUP "${CPACK_PACKAGE_VENDOR}")
 # set(CPACK_RPM_PRE_UNINSTALL_SCRIPT_FILE "")
 # set(CPACK_RPM_POST_UNINSTALL_SCRIPT_FILE "")
 
-if(F AND NOT UNIX)
+if(WIN32 AND NOT UNIX)
   # There is a bug in NSI that does not handle full unix paths properly. Make
   # sure there is at least one set of four (4) backlasshes.
   # NOTE: No ALPS icon yet

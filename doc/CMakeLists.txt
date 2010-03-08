@@ -98,8 +98,6 @@ else(FOP_FOUND)
   add_custom_target(docs ALL DEPENDS html/index.html)
 endif(FOP_FOUND)
 
-add_custom_target(docs ALL DEPENDS html/index.html alps.pdf)
-
 install(DIRECTORY doc COMPONENT documentation DESTINATION doc
         FILES_MATCHING 
         PATTERN "*.html" 
