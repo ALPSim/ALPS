@@ -194,6 +194,7 @@ ENDIF(NOT LAPACK_LIBRARY_INIT)
 # Fortran compiler is needed
 IF(NOT BLAS_LIBRARY_INIT AND NOT LAPACK_LIBRARY_INIT)
   enable_language(Fortran)
+  message("Falling back to CMake provied LAPACK/BLAS detection.")
   find_package(BLAS)
   if(BLAS_FOUND)
     SET(BLAS_LIBRARY_INIT 1)

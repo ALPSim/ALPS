@@ -173,9 +173,11 @@ IF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
 ELSE(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
   set(BUILD_BOOST_MPI FALSE)
 ENDIF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
-foreach(arg ${MPI_LIBRARIES})
-  set(MPI_LIBS "${MPI_LIBS} ${arg}")
+IF(MPI_FOUND)
+  foreach(arg ${MPI_LIBRARIES})
+    set(MPI_LIBS "${MPI_LIBS} ${arg}")
 endforeach(arg ${MPI_LIBRARIES})
+ENDIF(MPI_FOUND)
 #add_definitions( -DBOOST_MPI_HOMOGENEOUS )
 
 # OpenMP
@@ -208,9 +210,10 @@ endif (NOT ALPS_FOR_VISTRAILS)
 if(MAC_VECLIB)
   set(LAPACK_LDFLAGS "-faltivec -framework vecLib")
 endif(MAC_VECLIB) 
-foreach(arg ${LAPACK_LIBRARY})
-  set(LAPACK_LIBS "${LAPACK_LIBS} ${arg}")
-endforeach(arg ${LAPACK_LIBRARY})
+# see below - this will be done again
+#foreach(arg ${LAPACK_LIBRARY})
+#  set(LAPACK_LIBS "${LAPACK_LIBS} ${arg}")
+#endforeach(arg ${LAPACK_LIBRARY})
 set(LAPACK_LINKER_FLAGS ${LAPACK_LDFLAGS})
 
 # SQLite
@@ -467,6 +470,15 @@ foreach (l ${HDF5_LIBRARIES})
     set (HDF5_LIBS "")
   endif()
 endforeach(l)
+
+# From debug output, it seems that everything appears only once
+# message("${LAPACK_LIBRARY}")
+set (LAPACK_LIBS "")
+foreach (l ${LAPACK_LIBRARY})
+#  message("${l}")
+  set (LAPACK_LIBS "${LAPACK_LIBS} ${l}")
+endforeach(l)
+# message("${LAPACK_LIBS}")
 
 configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
 configure_file(config/CMake/include.mk.in ${PROJECT_BINARY_DIR}/config/CMake/include.mk)
