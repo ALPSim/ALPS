@@ -74,6 +74,8 @@ class HList:
         
         if fdepth == None:
             fdepth = depth(self.data_)
+        if fdepth < 0:
+            fdepth = depth(self.data_) + fdepth
         
         index__(self.data_, self.indices_, [0 for q in range(depth(self.data_))], 0, fdepth)
         self.indices_ = [idx[0:fdepth] for idx in self.indices_]
@@ -98,4 +100,10 @@ class HList:
             raise TypeError("Assigning to slices is not supported")
         else:
             self[self.indices_[key]] = value
+    
+    def indices(self):
+        return self.indices_
+    
+    def data(self):
+        return self.data_
     

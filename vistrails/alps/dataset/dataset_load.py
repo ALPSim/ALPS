@@ -42,7 +42,7 @@ from dataset_core import *
 from dataset_exceptions import *
 from pyalps.dict_intersect import dict_intersect
 from pyalps import Hdf5Loader
-from pyalps.hlist import flatten
+from pyalps.hlist import flatten, depth
 
 class Loader:
     def __init__(self,filename,label,xcolumn,ycolumns,props={}):
@@ -108,7 +108,6 @@ class LoadDataSet(Module):
         if self.hasInputFromPort('file'):
             f = self.getInputFromPort('file')
             filename = f.name
-            print filename
             
             xc = 0
             yc = [1]
@@ -262,23 +261,38 @@ class GroupBy(Module):
     
     def compute(self):
         if self.hasInputFromPort('input'):
-            # find all possible values for each for-each
-            sets = self.getInputFromPort('input')
+            groups = self.getInputFromPort('input')
+            dd = depth(groups)
             
-            for_each = []
-            if self.hasInputFromPort('for-each'):
-                for_each = self.getInputFromPort('for-each')
+            if dd > 1:
+                hgroups = flatten(groups, -1)
+                hgroups_idcs = hgroups.indices()
+            else:
+                hgroups = [groups]
+                hgroups_idcs = [0]
             
-            for_each_sets = {}
-            for iset in sets:
-                fe_par_set = tuple((iset.props[m] for m in for_each))
+            for idx in hgroups_idcs:
+                sets = hgroups[idx]
                 
-                if fe_par_set in for_each_sets:
-                    for_each_sets[fe_par_set].append(iset)
-                else:
-                    for_each_sets[fe_par_set] = [iset]
+                for_each = []
+                if self.hasInputFromPort('for-each'):
+                    for_each = self.getInputFromPort('for-each')
+                
+                for_each_sets = {}
+                for iset in sets:
+                    fe_par_set = tuple((iset.props[m] for m in for_each))
+                    
+                    if fe_par_set in for_each_sets:
+                        for_each_sets[fe_par_set].append(iset)
+                    else:
+                        for_each_sets[fe_par_set] = [iset]
+                
+                hgroups[idx] = for_each_sets.values()
             
-            self.setResult('output',for_each_sets.values())
+            if dd > 1:
+                self.setResult('output', groups)
+            else:
+                self.setResult('output', hgroups[0])
                 
         else:
             raise EmptyInputPort('for-each || observable')
@@ -333,7 +347,6 @@ class CollectXY(Module):
                     if len(x.y)>1:
                         res.props['line'] = '.'
                     xvalue = np.array([x.props[versus] for i in range(len(x.y))])
-                    print xvalue
                     if len(res.x) > 0 and len(res.y) > 0:
                         res.x = np.concatenate((res.x, xvalue ))
                         res.y = np.concatenate((res.y, x.y))
@@ -342,7 +355,6 @@ class CollectXY(Module):
                         res.y = x.y
                 
                 order = np.argsort(res.x) #, kind = 'mergesort')
-                print order
                 res.x = res.x[order]
                 res.y = res.y[order]
                 res.props['label'] = ''
