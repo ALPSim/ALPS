@@ -1,0 +1,382 @@
+[library ALPS.Random
+    [authors [Surer, Brigitte], [Troyer, Matthias] ]
+    [copyright 2006 2007 2008 Brigitte Surer, Matthias Troyer]
+    [purpose
+        Parallel random number generators and extenstions to the Boost
+        Random library
+    ]
+    [id random]
+    [dirname random]
+    [license
+        Distributed under the Boost Software License, Version 1.0.
+        (See accompanying file LICENSE_1_0.txt or copy at
+        <ulink url="http://www.boost.org/LICENSE_1_0.txt">
+            http://www.boost.org/LICENSE_1_0.txt
+        </ulink>)
+    ]
+]
+
+[section:rand The Random Library]
+
+The `Random` library provides extensions to the Boost Random library, 
+in particular a multivariate normal distribution and parallel random number generators.
+
+
+[section:multivariate Multivariate normal distribution]
+
+The [classref alps::multivariate_normal_distribution multivariate_normal_distribution] class template implements a
+multi-variate normal distribution of correlated normally distributed random numbers.
+
+Multivariate normally distributed random numbers are sequences of n random numbers, distributed with given mean values M(i), 
+and covariance matrix Cov(i,j). 
+
+Instead of using a sequence type a`result_type`> the design decision was to keep the underlying real 
+number type as the `result_type`. Hence, n succesive calls are required to obtain all n multivariate
+normal numbers. This removes the need to choose a specific container type as`result_type`,
+while still allowing any container to be filled using, for example, `std::generate`.
+
+The constructor of the distribution takes the Cholesky decomposition C of the covariance matrix Cov = C[sup T]C, and the vector of
+mean values M. The algoritm used first creates a vector v of n normally distributed random numbers with 0 mean and unit 
+variance and then calculates the multivariate randim numbers using the equation m + C * v.
+
+
+
+[endsect]
+
+
+[section:buffered Runtime-polymorphic buffered generator classes]
+
+[section:buffered_intro Introduction]
+
+Boost.Random and the TR1 random number library provide a number of efficient pseudo 
+random number generators. These pseudo random number generators follow an algorithmic
+prescription to generate numbers that look "sufficiently" random to be used in place of
+true random numbers. Since, however these "random numbers" are not truly random, one
+has to be careful when using them for high-precision Monte Carlo simulations. Experience
+has shown that the only reliable test for the quality of a random number generator for
+a given application is to redo the calculation with more than one type of random number
+generator.
+
+In order to facilitate the switching of random number engines at runtime, we here provide
+polymorphic generator classes. Since the cost os a virtual `operator()`, requiring a virtual function 
+call for every single number is prohibitive in high performance applications, the [classref alps::buffered_generator buffered_generator]
+uses a virtual function [memfunref alps::buffered_generator::fill_buffer fill_buffer] to generate not just one but a sequence of numbers, and then return
+values from that buffer using an inlines <code>operator()</code> until the buffer is exhausted.
+
+We provide an abstract class template  [classref alps::buffered_generator buffered_generator<ResultType>] and a concrete 
+derived class template [classref alps::basic_buffered_generator basic_buffered_generator<GeneratorType,ResultType>] which uses a given generator
+to fill the buffer. 
+
+Since generators can have different ranges, 
+we additionally provide, for convenience, a [classref alps::buffered_uniform_01 buffered_uniform_01<GeneratorType,ResultType>]
+random number generator class template. This template models a uniform random number generator by providing `min()` and `max()` functions
+and can thus be used with any of the distributions of Boost.Random.
+[endsect]
+
+[section:buffer_example1 Example 1: a buffered generator]
+The first example shows how a buffered generator can be created and used in
+a simulation.
+
+ #include <boost/random/buffered_generator.hpp>
+ #include <boost/random.hpp>
+ #include <iostream>
+
+ // A simple example simulation - usually it will be much more complex
+ double simulate(boost::buffered_generator<double>& gen)
+ {
+   double sum=0;
+   for (int i=0;i<100000;i++)
+     sum += gen();
+   return sum;
+ }
+
+ // create a buffered_generator
+ template <class RNG>
+ void simulate_it()
+ {
+   typedef boost::variate_generator<RNG&,boost::normal_distribution<> > gen_type;
+   RNG engine;
+   boost::basic_buffered_generator<gen_type,double> 
+     gen(gen_type(engine,boost::normal_distribution<>()));
+    
+   std::cout << simulate(gen) << std::endl;
+ }
+
+ // call the simulation with two different generators
+ int main()
+ {
+   simulate_it<boost::mt11213b>();
+   simulate_it<boost::mt19937>();
+ }
+
+
+[endsect]
+
+[section:buffer_example2 Example 2: a buffered engine]
+The next example uses a polymorphic <code>buffered_uniform_01</code> generator 
+as a uniform random number generation engine to create variates with different
+distributions: uniform and normally distributed. Note that the 
+<code>buffered_generator</code> is a model of Generator but not of
+UniformRandomNumberGenerator and can thus not be used as an engine in a
+<code>variate_generator</code>.
+
+ #include <boost/random/buffered_uniform_01.hpp>
+ #include <boost/random.hpp>
+ #include <iostream>
+
+ // A simple example simulation - usually it will be much more complex
+ double simulate(boost::buffered_uniform_01<double>& gen)
+ {
+   double sum=0;
+   for (int i=0;i<100000;i++)
+     sum += gen();
+    
+   typedef boost::variate_generator<boost::buffered_uniform_01<double>&,boost::normal_distribution<> > gen_type;
+   gen_type gauss(gen,boost::normal_distribution<>());
+   for (int i=0;i<100000;i++)
+     sum += gauss();
+   return sum;
+ }
+
+ // create a buffered_generator
+ template <class RNG>
+ void simulate_it()
+ {
+   boost::basic_buffered_uniform_01<RNG> gen;
+   std::cout << simulate(gen) << std::endl;
+ }
+
+ // call the simulation with two different generators
+ int main()
+ {
+   simulate_it<boost::mt11213b>();
+   simulate_it<boost::mt19937>();
+ }
+
+[endsect]
+[endsect]
+
+
+[section:parallel Parallel random number generators]
+[section:parallel_intro Introduction]
+Stochastic simulations on parallel machines face an additional problem over
+simulations on a single CPU: we not only need one random number stream but
+uncorrelated random number streams for each CPU. Since massively parallel
+machines with 65536 CPUs exist, this can be a formidable challenge.
+
+The [@http://sprng.cs.fsu.edu/ Scalable Parallel Pseuo Random Number Generators Library (SPRNG)] is a 
+C-library that was designed to solve this challenge. As explained in 
+detail in the [@http://sprng.cs.fsu.edu/Version1.0/paper/node7.html
+SPRNG paper], there are several methods of creating independent parallel
+random number streams, using parametrization of the generator, or cycle
+division techniques.
+
+Since the method to create independent streams depends on the choice of
+generator, no generic seeding can be implemented, but the
+seeding mechanism is specific to the generator. However, a common interface
+is possible, and we follow the design of the SPRNG library
+by requiring the following two parameters next to a global seed
+
+* `stream_number`: the number of the current stream
+* `total_streams`: the total number of streams required
+
+Any parallel random number generator has to guarantee that generators created 
+with the same values of `total_streams`, `global_seed`
+but different values for `stream_number` produce independent
+non-overlapping sequences of random numbers. In a parallel application, typically
+the node number is chosen as `stream_number` and the total number
+of nodes as `total_streams`.
+
+[endsect]
+
+
+[section:parallel_uniform_rng Parallel Uniform Random Number Generator concept]
+
+A parallel uniform random number generator is a refinement of the `UniformRandomNumberGenerator`
+that provides not one but many independent streams (sequences) of uniform random
+numbers. 
+
+In the following table, 
+
+* `X` denotes a model of the concept `ParallelUniformRandomNumberGenerator`.
+* `v` is an object of type`X`.
+* `s` is an integral value.
+* `num` and `total` are unsigned integral values saitsfying `num < total`.
+* `first` and `last`  are input iterators with a value type convertible to `unsigned int`. `first` is required to be non-const.
+
+Parallel uniform random number generators seeded 
+with the same values of`num` and `total` must produce independent
+non-overlapping sequences of random numbers, if all other arguments besides 
+`v` are equivalent, including where
+applicable, the values of the range [`first`, `last`).
+
+[table ParallelUniformRandomNumberGenerator requirements
+[[Expression]  [Return type]  [Note]]
+[[`seed(v,num,total)`]  [`void`]  [default parallel seeding of `v`]]
+[[`seed(v,num,total,s)`]  [`void`]  [parallel seeding of `v` from a seed `s`]]
+[[`seed(v,num,total,first,last)`] [`void`] [parallel seeding of `v` from two iterators. The semantics is
+identical to that of the seeding of a `UniformRandomNumberGenerator` from
+a pair of iterators, with the only distinction that for identical elements in the range
+[`first`, `last`) and identical values of `total`
+but different values of `num`, independent
+non-overlapping sequences of random numbers will be produced by the generator.]]]
+
+[endsect]
+
+
+[section:parallel_named Named parameters interface]
+To simplify seeding of parallel random number generators, the generators
+provided in this library implement a named parameter interface:
+
+[table ParallelUniformRandomNumberGenerator named parameters interface
+[[Expression]  [Return type]  [Note]]
+[[`X::max_streams`] [`int`] [the maximum number of independent streams provided by `X`]]
+[[`X(...)`] [`X`] [creates an object of type `X` with the named parameter arguments given in the table below]]
+[[`v.seed(...)`] [`void`] [seeds `v` with the named parameter arguments given in the table below]]
+[[`v.seed(first,last,...)`] [`void`] [seeds `v` with the range of values given by [`first`, `last`), and the named parameter arguments given in 
+the table below]]]
+
+using the following parameters:
+
+[table Named parameters for seeding of a ParallelUniformRandomNumberGenerator
+[[Parameter name] [Default] [Legal values]]
+[[`total_streams`] [1] [0 <= `total_streams` < `X::max_streams`]]
+[[`stream_number`] [0] [0 <= `stream_number` < `total_streams`]]
+[[`global_seed`] [0] []]
+]
+
+Parallel uniform random number generators created 
+with the same values of `total_streams`, `global_seed`
+but different values for `stream_number` will produce independent
+non-overlapping sequences of random numbers.
+
+
+[endsect]
+
+
+[section:parallel_seed Parallel seeding functions]
+The headers [headerref alps/random/parallel/seed.hpp]  and 
+[headerref alps/random/parallel/mpi.hpp] provide default implementations
+ of the parallel seeding functions required by the `ParallelUniformRandomNumberGenerator` concept, and additional
+convencience functions.
+
+[endsect]
+
+
+
+[section:parallel_generators Parallel random number generators]
+The ALPS Random library includes a 64-bit linear congruential generator and the WELL generators in the headers [headerref alps/random/parallel/lcg64.hpp] and [headerref alps/random/parallel/well.hpp].
+
+
+The 64-bit linear congruential generator template [classref alps::random::parallel::lcg64] comes with three predfined instantiations [classref alps::lcg64a lcg64a], [classref alps::lcg64b lcg64b], and [classref alps::lcg64c lcg64c],  
+using three well-tested choices of multipliers. As for other linear
+congruential generators, the recursion relation x(n+1) := (a * x(n) + c) mod m
+is used. In this implementation, m=2^64 and the multiplier `a`,
+which is given as template parameter is different for the three generators . The prime additive constant `c` is chosen depending
+on the stream number, thus giving independent sequences for each stream.
+
+The WELL generators provided by two instantiations [classref alps::random::parallel::well512a well512a] and [classref alps::random::parallel::well1024a well1024a] of the class template[classref alps::random::parallel::well] 
+model a parallel uniform pseude random number generator, whose algorithm is described in [@http://www.iro.umontreal.ca/~panneton/WELLRNG.html 
+Improved Long-Period Generators Based on Linear Recurrences Modulo 2, F. Panneton, P. L'Ecuyer and M. Matsumoto, submitted to ACM TOMS]. 
+The parallel seeding is based on stochastic  cycle division:
+* The single seed method calls a pseudo-random number generator (default: `boost::mt19937`), which provides the random seeds for `total_streams` WELL generators.
+* In the iterator method the state vector of all `total_streams` WELL generators is filled from a buffer.
+
+[endsect]
+
+
+[endsect]
+
+
+[section:parallel_sprng Wrappers to the SPRNG parallel random number library]
+[section:parallel_sprng_intro Introduction]
+
+
+The [@http://sprng.cs.fsu.edu/ 
+Scalable Parallel Pseuo Random Number Generators Library (SPRNG)] is the
+most widely used and portable C-library for parallel random number generators.
+This header provides Boost.Random and TR1-conforming wrappers to the generators
+in the SPRNG library.
+
+[endsect]
+
+[section:parallel_sprng_wrappers SPRNG wrappers]
+
+
+In addition to the members required for a parallel 
+random number generator
+the SPNRG wrappers provide the follwing, where `X` is the type of a SPRNG 
+generators and `v` and object of that type:
+
+[table 
+[[Expression] [Notes]]
+[[`X::sprng_type`] [the integer SPRNG random number generator type]]
+[[`X::max_param`] [the number of different parameter values allowed for the generator]]
+]
+
+The named parameters follow the convention for parallel 
+random number generators, with the addition of one extra named parameter.
+
+[table
+[[Parameter name] [Default] [Legal values]]
+[[`parameter`] [0] [0 <= `parameter` < `X::max_param`]]
+]
+
+This parameter parametrizes the generators, e.g. by choosing different multipliers
+in a linear congruential generator. Generators with identical seeds, but
+different parameters are guaranteed to provide independent sequences
+of random numbers. Since the value of `max_param` is
+typically small, the use of this extra parameter is limited, and it is in general
+better to obtain independent sequences by using different values for the
+`stream_number` parameter.
+
+The following table lists the specific values of the constants for the various
+SPRNG Generators:
+
+[table
+[[SPRNG generator] [`sprng_type`] [`max_streams`] [`max_param`]]
+[[`boost::random::spring::lfg`] [0] [2^31-1] [11]]
+[[`boost::random::spring::lcg`] [1] [2^19] [7]]
+[[`boost::random::spring::lcg64`] [2] [146138719] [3]]
+[[`boost::random::spring::cmrg`] [3] [146138719] [3]]
+[[`boost::random::spring::mlfg`] [4] [2^31-1] [11]]
+[[`boost::random::spring::pmlcg`] [5] [2^30] [1]]
+]
+
+The class members and their semantics are the same as those defined
+in the parallel random number generator concepts.
+
+[endsect]
+
+
+[section:parallel_sprng_building Building SPRNG]
+
+The SPRNG wrappers are a header-only library but executables will need
+to be linked with the SPRNG library, which can be downloaded in source form
+from the [@http://sprng.cs.fsu.edu/ SPRNG web page].
+
+The path to the SPRNG library needs to be specified by either a statement
+
+ using sprng : path-to-sprng-library ;
+
+in the user-config.jam file or by setting the environment variable 
+`SPRNG_ROOT`. The path can point either to a compiled library or 
+alternatively to the source distribution. In the latter case the SPRNG library
+is built from source when needed.
+
+The PMLCG generator additionally needs the 
+[@http://www.gnu.org/software/gmp/ GMP] library. To use this generator
+the GMP library needs to be installed, and its path specified as the optional second argument to
+
+ using sprng : path-to-sprng-library : path-to-gmp-library ;
+
+[endsect]
+
+[endsect]
+
+
+
+[endsect]
+
+
+[xinclude random.autodoc]
