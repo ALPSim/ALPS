@@ -210,10 +210,6 @@ endif (NOT ALPS_FOR_VISTRAILS)
 if(MAC_VECLIB)
   set(LAPACK_LDFLAGS "-faltivec -framework vecLib")
 endif(MAC_VECLIB) 
-# see below - this will be done again
-#foreach(arg ${LAPACK_LIBRARY})
-#  set(LAPACK_LIBS "${LAPACK_LIBS} ${arg}")
-#endforeach(arg ${LAPACK_LIBRARY})
 set(LAPACK_LINKER_FLAGS ${LAPACK_LDFLAGS})
 
 # SQLite
@@ -471,17 +467,12 @@ foreach (l ${HDF5_LIBRARIES})
     set (HDF5_LIBS "")
   endif()
 endforeach(l)
-
 message (STATUS "The list is ${HDF5_LIBS}")
 
-# From debug output, it seems that everything appears only once
-# message("${LAPACK_LIBRARY}")
 set (LAPACK_LIBS "")
 foreach (l ${LAPACK_LIBRARY})
-#  message("${l}")
   set (LAPACK_LIBS "${LAPACK_LIBS} ${l}")
 endforeach(l)
-# message("${LAPACK_LIBS}")
 
 configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
 configure_file(config/CMake/include.mk.in ${PROJECT_BINARY_DIR}/config/CMake/include.mk)
