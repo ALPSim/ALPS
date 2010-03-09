@@ -35,6 +35,7 @@
 #include <boost/filesystem/operations.hpp>
 #include <stdexcept>
 #include <iostream>
+#include <set>
 
 
 int main(int argc, char** argv)
@@ -48,15 +49,19 @@ try {
     std::exit(-1);
   }
 
+  std::set<boost::filesystem::path> paths;
+  
   for (int i=1;i<argc;++i) {
     std::string inname=argv[i];
     if (inname.size() >= 2 && inname.substr(0, 2) == "./") 
       inname.erase(0, 2);
     alps::convert2xml(inname);
-    if (i==1)
-    
-      alps::copy_stylesheet(boost::filesystem::path(inname,
-                              boost::filesystem::native).remove_filename());
+    boost::filesystem::path dir = boost::filesystem::path(inname,
+                              boost::filesystem::native).remove_filename();
+    if (paths.find(dir)==paths.end()) {
+      alps::copy_stylesheet(dir);
+      paths.insert(dir);
+    }
   }
 
   // make sure ths stylesheet is there

@@ -223,7 +223,8 @@ private:
   typedef std::vector<std::pair<string_pair,half_integer_tuple> > QNRangeType;
 
   void build_subspaces(const std::string&);
-  virtual void do_subspace()=0;
+  virtual void do_subspace() 
+  { boost::throw_exception(std::logic_error("Cannot call do_subspace on a dummy diag simulation"));}
   void invalidate() { built_matrix_=built_basis_=false;}
   
   QNRangeType ranges_;

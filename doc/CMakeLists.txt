@@ -32,12 +32,13 @@ configure_file(singledoc.in ${PROJECT_BINARY_DIR}/doc/singledoc)
 
 make_directory(${PROJECT_BINARY_DIR}/doc/src)
 make_directory(${PROJECT_BINARY_DIR}/doc/html)
+make_directory(${PROJECT_BINARY_DIR}/doc/html/search)
 make_directory( ${PROJECT_BINARY_DIR}/doc/alps/doxygen)
 
-set(ALPS_AUTODOC_SOURCES alea lattice model osiris parser scheduler)
+set(ALPS_AUTODOC_SOURCES alea lattice model osiris parser scheduler random)
 
 set(ALPS_QBK_SOURCES alea general getting_started lattice
-    model osiris overview parser scheduler tools)
+    model osiris overview parser scheduler tools random)
     
 set(ALPS_QBK_DEPENDS src/alps.qbk )
 
@@ -98,7 +99,7 @@ else(FOP_FOUND)
   add_custom_target(docs ALL DEPENDS html/index.html)
 endif(FOP_FOUND)
 
-install(DIRECTORY doc COMPONENT documentation DESTINATION doc
+install(DIRECTORY doc COMPONENT documentation DESTINATION .
         FILES_MATCHING 
         PATTERN "*.html" 
         PATTERN "*.png"
@@ -106,7 +107,7 @@ install(DIRECTORY doc COMPONENT documentation DESTINATION doc
         PATTERN "CVS" EXCLUDE
         )
 
-install(DIRECTORY ${PROJECT_BINARY_DIR}/doc COMPONENT documentation DESTINATION doc
+install(DIRECTORY ${PROJECT_BINARY_DIR}/doc COMPONENT documentation DESTINATION .
         FILES_MATCHING 
         PATTERN "*.pdf" 
         PATTERN "*.html" 
@@ -114,5 +115,7 @@ install(DIRECTORY ${PROJECT_BINARY_DIR}/doc COMPONENT documentation DESTINATION 
         PATTERN "*.gif" 
         PATTERN "*.xsl" 
         PATTERN "*.css"
+        PATTERN "CMakeFiles" EXCLUDE
+        PATTERN "src" EXCLUDE
         )
 

@@ -66,7 +66,8 @@ protected:
   std::vector<alps::EigenvectorMeasurements<value_type> > measurements_;
   void perform_measurements();
 private:
-  virtual std::vector<value_type> calculate(operator_matrix_type const&) const=0;
+  virtual std::vector<value_type> calculate(operator_matrix_type const&) const 
+  { boost::throw_exception(std::logic_error("Cannot call do_subspace on a dummy diag simulation"));}
   
   template <class Op> 
   std::vector<value_type> calculate(Op const& op) const;
