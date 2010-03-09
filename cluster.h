@@ -75,6 +75,7 @@ public:
 
   template<typename T>
   T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const;
+  double site_distance(const unsigned int i, const unsigned int j) const;
 
   site_class_set_itpair_type site_classes_real_space() const 
   { return site_class_set_itpair_type (site_class_set_real_space_.begin(), site_class_set_real_space_.end()); }
@@ -145,6 +146,7 @@ public:
   }
   
   unsigned int dimension() const { return ClusterHelper::dimension(); }  
+  double site_distance(const unsigned int i, const unsigned int j) const { return ClusterHelper::site_distance(i, j); }
   // double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
   // double lattice_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::lattice_momentum(i,j); }
 };

@@ -595,6 +595,18 @@ ClusterHelper::setup_classes(const Matrix<site_t>::Type& symmetry_table) const
 }
 
 
+double ClusterHelper::site_distance(const unsigned int i, const unsigned int j) const
+{
+  double dist = 0;
+  for (int d=0; d<dimension(); ++d) {
+    double del = cluster_coordinate(i, d);
+    del -= cluster_coordinate(j, d);
+    dist += del*del;
+  }
+  return round(sqrt(dist));
+}
+
+
 
 bool ClusterHelper::inside_cluster(vector_type v, const Matrix<double>::Type& B) const 
 {
