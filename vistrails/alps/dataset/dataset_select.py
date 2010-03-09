@@ -37,6 +37,8 @@ import numpy as np
 from dataset_core import *
 from dataset_exceptions import *
 
+from pyalps.hlist import flatten
+
 class Selector(Module):
     my_input_ports = []
     my_output_ports = []
@@ -118,7 +120,7 @@ class Select(Module):
                 cmd = cmd + '\t' + line + '\n'
             exec cmd
                 
-            for s in q:
+            for s in flatten(q):
                 if fn(s.x,s.y,s.props):
                     kept_sets.append(s)
                 else:
@@ -132,7 +134,7 @@ class Select(Module):
             kept_sets = []
             disc_sets = []
             
-            for iq in q:
+            for iq in flatten(q):
                 if s.decide(iq):
                     kept_sets.append(iq)
                 else:

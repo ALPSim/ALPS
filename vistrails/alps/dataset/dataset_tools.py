@@ -40,6 +40,8 @@ from dataset_core import *
 from dataset_exceptions import *
 from dataset_fit import *
 
+from pyalps.hlist import deep_flatten, flatten
+
 class SortByX(FitPrototype):
     def transform(self,data):
         order = np.argsort(data.x)
@@ -99,3 +101,10 @@ class SetLabels(FitPrototype):
 class MakeScatter(FitPrototype):
     def transform(self,data):
         data.props['line'] = 'scatter'
+
+class Flatten(Module):
+    my_input_ports = [PortDescriptor('input',DataSets)]
+    my_output_ports = [PortDescriptor('output',DataSets)]
+    
+    def compute(self):
+        self.setResult('output', deep_flatten(self.getInputFromPort('input')))

@@ -55,18 +55,31 @@ def hget__(hl,idx,level):
     else:
         return hget__(hl[idx[level]],idx,level+1)
 
+def flatten(sl, fdepth = None):
+    if fdepth == None:
+        fdepth = depth(sl)
+    return HList(sl, fdepth)
+
+def deep_flatten(sl, fdepth = None):
+    return [x for x in flatten(sl, fdepth)]
+
 class HList:
     def __init__(self):
         self.data_ = []
         self.indices_ = []
     
-    def __init__(self,init):
+    def __init__(self,init,fdepth = None):
         self.data_ = init
         self.indices_ = []
         
-        index__(self.data_, self.indices_, [0 for q in range(depth(self.data_))], 0, depth(self.data_))
+        if fdepth == None:
+            fdepth = depth(self.data_)
+        
+        index__(self.data_, self.indices_, [0 for q in range(depth(self.data_))], 0, fdepth)
+        self.indices_ = [idx[0:fdepth] for idx in self.indices_]
     
     def __getitem__(self, key):
+#        print 'Get key',key
         if type(key) == tuple:
             return hget__(self.data_,key,0)
         elif type(key) == list:
@@ -75,18 +88,14 @@ class HList:
             return self[self.indices_[key]]
     
     def __repr__(self):
-        return str(self.data_)
+        return str([self[k] for k in self.indices_])
     
     def __setitem__(self, key, value):
+#        print 'Set key',key
         if type(key) == tuple:
             hset__(self.data_,key,0,value)
         elif type(key) == list:
             raise TypeError("Assigning to slices is not supported")
         else:
             self[self.indices_[key]] = value
-    
-    def flat(self):
-        return [self[k] for k in self.indices_]
-    
-    
     

@@ -42,7 +42,7 @@ from dataset_core import *
 from dataset_exceptions import *
 from pyalps.dict_intersect import dict_intersect
 from pyalps import Hdf5Loader
-from pyalps.hlist import HList
+from pyalps.hlist import flatten
 
 class Loader:
     def __init__(self,filename,label,xcolumn,ycolumns,props={}):
@@ -278,7 +278,7 @@ class GroupBy(Module):
                 else:
                     for_each_sets[fe_par_set] = [iset]
             
-            self.setResult('output',HList(for_each_sets.values()))
+            self.setResult('output',for_each_sets.values())
                 
         else:
             raise EmptyInputPort('for-each || observable')
@@ -308,7 +308,7 @@ class CollectXY(Module):
                 for_each = self.getInputFromPort('for-each')
             
             for_each_sets = {}
-            for iset in sets:
+            for iset in flatten(sets):
                 if iset.props['observable'] != observable:
                     continue
                 

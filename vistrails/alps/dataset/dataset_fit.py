@@ -40,6 +40,8 @@ import pyalps.fit_wrapper as fw
 from dataset_core import *
 from dataset_exceptions import *
 
+from pyalps.hlist import flatten
+
 class FitPrototype(Module):
     my_input_ports = [
         PortDescriptor("input",DataSets)
@@ -51,7 +53,7 @@ class FitPrototype(Module):
     def compute(self):
         if self.hasInputFromPort('input'):
             q = copy.deepcopy(self.getInputFromPort('input'))
-            for s in q:
+            for s in flatten(q):
                 s = self.transform(s)
 
             self.setResult('output',q)

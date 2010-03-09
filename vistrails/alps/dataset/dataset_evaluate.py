@@ -39,6 +39,8 @@ from scipy import optimize
 from dataset_core import *
 from dataset_exceptions import *
 
+from pyalps.hlist import flatten
+
 class ConstantDataSet(Module):
     """Create a constant dataset and store into DataSets"""
     my_input_ports = [
@@ -101,7 +103,7 @@ class Transform(Module):
             else:
                 q = self.getInputFromPort('input')
                 newsets = []
-            for s in q:
+            for s in flatten(q):
                 x = s.x
                 y = s.y
                 if self.deepcopy_all:
@@ -132,28 +134,29 @@ class Transform(Module):
 class GroupedTransform(Module):
     my_input_ports = [
         PortDescriptor("input",DataSets),
-        PortDescriptor("source",basic.String,use_python_source=True)
+        PortDescriptor("source",basic.String,use_python_source=True),
+        PortDescriptor("level",basic.Integer)
     ]
     my_output_ports = [
         PortDescriptor("output",DataSets)
     ]
 
     def compute(self):
+        level = 1
+        if self.hasInputFromPort('level'):
+            level = self.getInputFromPort('level')
+        
         if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
             q = copy.deepcopy(self.getInputFromPort('input'))
             
             code = self.getInputFromPort('source')
             proc_code = urllib.unquote(str(code))
+            cmd = 'def f(data):\n'
+            for line in proc_code.split('\n'):
+                cmd += '\t' + line + '\n'
+            exec cmd
             
-            index = 0
-            while True:
-                try:
-                    s = q[(index,)]
-                    exec proc_code
-                    q[(index,)] = s
-                    index += 1
-                except IndexError:
-                    break
+            q = [f(s) for s in flatten(q,level)]
 
             self.setResult('output',q)
         else:
@@ -184,7 +187,7 @@ class TransformN(Module):
                 port = 'input'+str(i)
                 if self.hasInputFromPort(port):
                     r = self.getInputFromPort(port)
-                    inputs.append(copy.deepcopy(r))
+                    inputs.append(flatten(copy.deepcopy(r)))
             Ninputs = len(inputs)
             
             results = []
@@ -223,7 +226,7 @@ class Reduce(Module):
         if self.hasInputFromPort('input') and self.hasInputFromPort('source'):
             result = DataSet()
             
-            for s in self.getInputFromPort('input'):
+            for s in flatten(self.getInputFromPort('input')):
                 code = self.getInputFromPort('source')
                 proc_code = urllib.unquote(str(code))
                 exec proc_code
