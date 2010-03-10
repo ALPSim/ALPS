@@ -50,7 +50,7 @@ public:
   typedef typename super_type::half_integer_type half_integer_type;
   typedef boost::numeric::ublas::mapped_vector_of_mapped_vector<T, boost::numeric::ublas::row_major>  operator_matrix_type;
   
-  DiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
+  DiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p,bool delay_construct=false);
 
 #ifdef ALPS_HAVE_HDF5
   void serialize(alps::hdf5::oarchive &) const;
@@ -82,13 +82,15 @@ private:
 };
 
 template <class T, class M>
-DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p) 
+DiagMatrix<T,M>::DiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p, bool delay_construct) 
     : super_type(where,p)
     , alps::MeasurementOperators(this->parms)
     , read_hdf5_(false)
 { 
   if (this->calc_averages())
     multiplicities_ = this->distance_multiplicities();
+  if (!delay_construct)
+    this->construct();
 }
 
 
@@ -124,6 +126,7 @@ void DiagMatrix<T,M>::serialize(alps::hdf5::iarchive & ar) {
           ar >> alps::make_pvp(sectorpath,measurements_[i]);
       }
   }
+  std::cerr << eigenvalues_.size() << " sectors\n";
   this->read_hdf5_ = true; // skip XML, once all is being read
 }
 

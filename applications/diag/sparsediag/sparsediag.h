@@ -62,7 +62,7 @@ private:
 
 template <class T>
 SparseDiagMatrix<T>::SparseDiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p) 
-    : super_type(where,p) 
+    : super_type(where,p,true) 
 { 
   this->construct();
 }

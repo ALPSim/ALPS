@@ -103,7 +103,7 @@ private:
 
 template <class T>
 FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p) 
- : super_type(where,p), 
+ : super_type(where,p,true), 
    field(0.), 
    field0(0.), 
    have_Conserved(false) 
