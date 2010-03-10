@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: lanczos.h,v 1.34 2004/06/29 08:31:02 troyer Exp $
+ * $Id: simple_arnoldi.h,v 1.34 2004/06/29 08:31:02 troyer Exp $
  *
  * Copyright (C) 2001-2003 by Bela Bauer <bauerb@phys.ethz.ch>
  *
@@ -32,6 +32,7 @@
 #include <stdexcept>
 #include <climits>
 #include <vector>
+#include <iostream>
 
 namespace ietl {
 	namespace detail {
@@ -71,7 +72,7 @@ namespace ietl {
         { }
         
         template<class Iter>
-        void calculate_eigenvalues(Iter &iter)
+        void calculate_eigenvalues(Iter &iter, bool verbose = false)
         {
             std::vector<vector_type> vectors;
             
@@ -97,7 +98,7 @@ namespace ietl {
                 normw = ietl::two_norm(w);
                 
                 // check convergence
-                if (j > iter.desired_eigenvalues() && j < vec_dimension(vs)) {
+                if (j > iter.desired_eigenvalues()) {
                     evals.resize(H.size1());
 					h_matrix_type evecs(H.size1(), H.size2()), H2 = H; // keep a backup because geev destroys the matrix
                     boost::numeric::bindings::lapack::geev(H2, evals, static_cast<h_matrix_type*>(NULL), &evecs,
@@ -105,8 +106,9 @@ namespace ietl {
 					double resid = 0;
 					for (int k = 0; k < iter.desired_eigenvalues(); ++k)
 						resid += std::abs(evecs(evecs.size2()-1, k))*normw;
-                    // std::cout << "m = " << j << " -> resid = " << resid << std::endl;
-                    if (iter.converged(resid, abs(evals[iter.desired_eigenvalues()-1]))) {
+                    if (verbose)
+						std::cout << "Arnoldi iteration " << j << ": residual = " << resid << std::endl;
+                    if (iter.finished(resid, abs(evals[iter.desired_eigenvalues()-1]))) {
 						std::sort(evals.begin(), evals.end(), detail::cmp);
                         break;
 					}
@@ -122,6 +124,7 @@ namespace ietl {
                 w /= normw;
                 vectors.push_back(w);
                 ++j;
+				++iter;
             } while (true);
         }
         

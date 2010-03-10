@@ -1,5 +1,5 @@
 /***************************************************************************
- * $Id: lanczos1.cpp,v 1.9 2004/06/29 08:31:02 troyer Exp $
+ * $Id: arnoldi1.cpp,v 1.9 2004/06/29 08:31:02 troyer Exp $
  *
  * An example of the Arnoldi iteration for non-Hermitian matrices
  *
@@ -56,7 +56,7 @@ int main () {
    ietl::arnoldi_iteration<double> iter(50, nvals, 1e-8, 1e-8);
    
    ietl::simple_arnoldi<Matrix, ietl::vectorspace<Vector>, boost::lagged_fibonacci607> arni(mat, vs, gen);
-   arni.calculate_eigenvalues(iter);
+   arni.calculate_eigenvalues(iter, true);
    
    for (int i = 0; i < nvals; ++i)
        std::cout << "Eigenvalue " << i << ": " << arni.get_eigenvalue(i) << std::endl;
