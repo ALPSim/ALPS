@@ -8,8 +8,8 @@
 
 FIND_PATH(DOCBOOK_DTD_DIR
   NAMES docbookx.dtd
-  PATHS ${Boost_ROOT_DIR}/tools/boostbook
-  PATH_SUFFIXES docbook-dtd-4.2
+  PATHS /opt/local/share/xml/docbook/ ${Boost_ROOT_DIR}/tools/boostbook
+  PATH_SUFFIXES 4.2 docbook-dtd-4.2
 )
 
 INCLUDE(FindPackageHandleStandardArgs)

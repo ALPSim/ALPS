@@ -6,13 +6,20 @@
 # This module looks for fop and will define 
 # DOCBOOK_XSL_FOUND and DOCBOOK_XSL_DIR
 
-file(GLOB subdirs RELATIVE ${Boost_ROOT_DIR}/tools/boostbook ${Boost_ROOT_DIR}/tools/boostbook/docbook-xsl-*[0-9])
-message (STATUS ${subdirs})
 FIND_PATH(DOCBOOK_XSL_DIR
   NAMES fo/docbook.xsl
-  PATHS ${Boost_ROOT_DIR}/tools/boostbook
+  PATHS /opt/local/share/xsl/docbook-xsl/
   PATH_SUFFIXES ${subdirs}
 )
+
+if (NOT DOCBOOK_XSL_DIR)
+    file(GLOB subdirs RELATIVE ${Boost_ROOT_DIR}/tools/boostbook ${Boost_ROOT_DIR}/tools/boostbook/docbook-xs*)
+    FIND_PATH(DOCBOOK_XSL_DIR
+      NAMES fo/docbook.xsl
+      PATHS ${Boost_ROOT_DIR}/tools/boostbook
+      PATH_SUFFIXES ${subdirs}
+    )
+endif (NOT DOCBOOK_XSL_DIR)
 
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(DocbookXsl DEFAULT_MSG DOCBOOK_XSL_DIR)
