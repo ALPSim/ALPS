@@ -132,6 +132,7 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
+            fileset=[]
             self.h5f = h5py.File(f)
             self.h5fname = f
             params = self.ReadParameters(proppath)
@@ -145,7 +146,7 @@ class Hdf5Loader:
                         d.x = range(len(d.y))
                         d.props.update(params)
                         d.props.update(self.ReadParameters('quantumnumbers' ))
-                        sets.append(d)
+                        fileset.append(d)
                     except AttributeError:
                         print "Could not create DataSet"
                         pass
@@ -161,10 +162,57 @@ class Hdf5Loader:
                         d.x = range(len(d.y))
                         d.props.update(params)
                         d.props.update(self.ReadParameters(secpath+'/quantumnumbers' ))
-                        sets.append(d)
+                        fileset.append(d)
                     except AttributeError:
                         print "Could not create DataSet"
                         pass
+            sets.append(fileset)
+        return sets
+        
+    def ReadDiagDataFromFile(self,flist,proppath,respath, measurements=None, array_index=None):
+        fs = self.GetFileNames(flist)
+        sets = []
+        for f in fs:
+            fileset=[]
+            self.h5f = h5py.File(f)
+            self.h5fname = f
+            list_ = self.GetObservableList(respath+'/sectors/0/results')
+            params = self.ReadParameters(proppath)
+            grp = self.h5f.require_group(respath)
+            if measurements == None:
+                obslist = list_
+            else:
+                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+            if 'sectors' in grp.keys():
+                sectors_grp = self.h5f.require_group(respath+'/sectors')
+                sector_sets=[]
+                for secnum in sectors_grp.keys():
+                    for m in obslist:
+                        if "mean" in sectors_grp[secnum+'/results/'+m].keys():
+                            try:
+                                d = DataSet()
+                                secpath = respath+'/sectors/'+secnum
+                                secresultspath = respath+'/sectors/'+secnum+'/results/'+m
+                                d.props['hdf5_path'] = secresultspath 
+                                d.props['observable'] = pt.hdf5_name_decode(m)
+                                if array_index == None:
+                                    d.y = np.array(sectors_grp[secnum+'/results/'+m+'/mean/value'].value )
+                                    d.x = range(len(d.y))
+                                else:
+                                    try:
+                                        d.y = np.array(sectors_grp[secnum+'/results/'+m+'/mean/value'].value[array_index] )
+                                        d.x = array_index
+                                        d.props['index'] = array_index
+                                    except:
+                                        pass
+                                d.props.update(params)
+                                d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                                sector_sets.append(d)
+                            except AttributeError:
+                                print "Could not create DataSet"
+                                pass
+                        fileset.append(sector_sets)
+            sets.append(fileset)
         return sets
         
     # Pre: file is a h5py file descriptor
@@ -173,7 +221,7 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
-            print "Reading from ", f
+            fileset = []
             self.h5f = h5py.File(f)
             self.h5fname = f
             list_ = self.GetObservableList(respath)
@@ -186,9 +234,7 @@ class Hdf5Loader:
             else:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
             for m in obslist:
-                print "Trying to read ", m
                 if not statvar: #if not a specific statistical variable is specified then use the default mean & error or mean
-                    print "read ", m
                     try:
                         d = DataSet()
                         if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
@@ -219,7 +265,7 @@ class Hdf5Loader:
                         d.props['hdf5_path'] = respath + m
                         d.props['observable'] = pt.hdf5_name_decode(m)
                         d.props.update(params)
-                        sets.append(d)
+                        fileset.append(d)
                     except AttributeError:
                         print "Could not create DataSet"
                         pass
@@ -246,10 +292,11 @@ class Hdf5Loader:
                                 d.props['hdf5_path'] = respath + m
                                 d.props['observable'] = pt.hdf5_name_decode(m+"/"+s+"/"+k)
                                 d.props.update(params)
-                                sets.append(d)
+                                fileset.append(d)
                             except AttributeError:
                                 print "Could not create DataSet"
                                 pass
+            sets.append(fileset)
         return sets
 
  

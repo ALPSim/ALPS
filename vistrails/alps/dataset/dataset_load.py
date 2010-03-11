@@ -249,6 +249,37 @@ class LoadSpectrumHdf5(Module):
         datasets = []
         datasets = loader.ReadSpectrumFromFile(files,propPath,resPath)
         self.setResult('data',datasets)
+        
+class LoadDiagDataHdf5(Module):
+    my_input_ports = [
+        PortDescriptor('ResultFiles',ResultFiles),
+        PortDescriptor('PropertyPath',basic.String),
+        PortDescriptor('SpectrumPath',basic.String),
+        PortDescriptor('Measurements',ListOfElements),
+        PortDescriptor('index',basic.Integer)        
+    ]
+    
+    my_output_ports = [
+        PortDescriptor('data',DataSets)
+    ]    
+    
+    def compute(self):
+        propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
+        resPath= self.getInputFromPort('SpectrumPath') if self.hasInputFromPort('SpectrumPath') else "/spectrum"
+        loader = Hdf5Loader()
+        if self.hasInputFromPort('ResultFiles'):
+            files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+        datasets = []
+        if self.hasInputFromPort('Measurements') and self.hasInputFromPort('index'):
+            datasets = loader.ReadDiagDataFromFile(files,propPath,resPath, self.getInputFromPort('Measurements'),self.getInputFromPort('index'))
+        elif self.hasInputFromPort('Measurements'):
+            datasets = loader.ReadDiagDataFromFile(files,propPath,resPath, self.getInputFromPort('Measurements'))
+        elif self.hasInputFromPort('index'):
+            datasets = loader.ReadDiagDataFromFile(files,propPath,resPath,None,self.getInputFromPort('index'))
+        else:
+            datasets = loader.ReadDiagDataFromFile(files,propPath,resPath)
+            
+        self.setResult('data',datasets)
 
 class GroupBy(Module):
     my_input_ports = [
