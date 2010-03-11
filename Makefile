@@ -31,11 +31,11 @@ dmft : $(OBJECTS_DMFT) werner rubtsov
 energy : energy.o auxiliaryfunctions.o
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o energy energy.o auxiliaryfunctions.o $(LDFLAGS) $(LIBS)
 dmft_mpi : $(OBJECTS_DMFT) werner rubtsov
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o dmft_mpi $(OBJECTS_DMFT) $(OBJECTS_SOLVERS) $(LDFLAGS_MPI) $(LIBS_MPI)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o dmft_mpi $(OBJECTS_DMFT) $(OBJECTS_SOLVERS) $(LDFLAGS) $(LIBS)
 dmft_igor : $(OBJECTS_DMFT) werner rubtsov igor
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CT_ALGOS) -o dmft_igor $(OBJECTS_DMFT) $(OBJECTS_IGOR) $(OBJECTS_SOLVERS) $(LDFLAGS) $(LIBS) -L//sw/lib/gcc4.3/lib/ -lgfortran 
 dmft_igor_mpi : $(OBJECTS_DMFT) werner rubtsov igor
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CT_ALGOS) -o dmft_igor_mpi $(OBJECTS_DMFT) $(OBJECTS_IGOR) $(OBJECTS_SOLVERS) $(LDFLAGS_MPI) $(LIBS_MPI) -L//sw/lib/gcc4.3/lib/ -lgfortran 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CT_ALGOS) -o dmft_igor_mpi $(OBJECTS_DMFT) $(OBJECTS_IGOR) $(OBJECTS_SOLVERS) $(LDFLAGS) $(LIBS) -L//sw/lib/gcc4.3/lib/ -lgfortran 
 hirschfye : $(OBJECTS_HIRSCHFYE)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o hirschfye $(OBJECTS_HIRSCHFYE) $(LDFLAGS) $(LIBS)
 interpolate : $(OBJECTS_INTERPOLATE)
