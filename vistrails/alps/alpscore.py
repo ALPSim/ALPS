@@ -21,7 +21,7 @@ import platform
 import shutil
 
 from PyQt4 import QtCore, QtGui
-from packages.spreadsheet.basic_widgets import SpreadsheetCell
+from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget
 import packages.spreadsheet
 
@@ -233,7 +233,7 @@ def selfRegister():
     reg.add_module(TextFile,namespace="Tools")
 
     reg.add_module(TextCell,namespace="Tools")
-    reg.add_input_port(TextCell, "Location", packages.spreadsheet.basicWidgets.CellLocation)
+    reg.add_input_port(TextCell, "Location", CellLocation)
     reg.add_input_port(TextCell, "File", basic.File)
 
 

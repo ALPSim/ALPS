@@ -165,7 +165,7 @@ def selfRegister():
   reg.add_module(Plot2Text,namespace="Plots",abstract=True)
   reg.add_module(Plot2Mpl,namespace="Plots",abstract=True)
   
-  reg.add_module(DisplayXMGRPlot,namespace="Plots",abstract=True)
+#  reg.add_module(DisplayXMGRPlot,namespace="Plots",abstract=True)
   reg.add_module(DisplayXMGRPlot,name="DisplayGracePlot",namespace="DataSet|Plot")
   reg.add_module(AlpsMplPlot,namespace="Plots",abstract=True)
   

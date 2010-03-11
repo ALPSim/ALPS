@@ -169,6 +169,8 @@ class WriteInputFiles(Module):
      _output_ports = [('output_file', [basic.File]),
                      ('output_dir', [basic.Directory])]
 
+class MakeParameterXMLFiles(WriteInputFiles): pass
+
 class Parameter2XML(alpscore.SystemCommandLogged):
     def compute(self):
         o = self.interpreter.filePool.create_file()
@@ -371,8 +373,8 @@ def selfRegister():
   
   reg.add_module(MakeParameterFile,namespace="Tools",abstract=True)
   reg.add_module(Parameter2XML,namespace="Tools",abstract=True)
-  reg.add_module(WriteInputFiles,name='MakeParameterXMLFiles',namespace="Tools")
   reg.add_module(WriteInputFiles,namespace="Tools")
+  reg.add_module(MakeParameterXMLFiles,namespace="Tools",abstract=True)
   
   reg.add_module(Glob,namespace="Tools",abstract=True)
   reg.add_module(GetRunFiles,namespace="Tools")

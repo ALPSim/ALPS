@@ -19,6 +19,7 @@ option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
 option(ALPS_BUILD_DOC "Build ALPS documentation" OFF)
 
+
 # a workaround for Mac OS X's LLVM compiler
 option(ALPS_LLVM_WORKAROUND "Exclude some parts of ALPS from the build with LLVM" OFF)
 mark_as_advanced(ALPS_LLVM_WORKAROUND)
@@ -27,10 +28,16 @@ mark_as_advanced(ALPS_LLVM_WORKAROUND)
 option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
 option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
+option(ALPS_PATCH_VISTRAILS "Patch Vistrails from Vistrails SVN" OFF)
+
+mark_as_advanced(ALPS_PATCH_VISTRAILS)
 
 if (ALPS_FOR_VISTRAILS)
   set(ALPS_INSTALL_HEADERS OFF)
   set(ALPS_INSTALL_DEPRECATED OFF)
+  set(ALPS_BUILD_DOC OFF)
+else (ALPS_FOR_VISTRAILS)
+  set(ALPS_PATCH_VISTRAILS OFF)
 endif (ALPS_FOR_VISTRAILS)
 
 ######################################################################
@@ -541,6 +548,26 @@ else (ALPS_FOR_VISTRAILS)
         FILES_MATCHING PATTERN "*.py"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 endif (ALPS_FOR_VISTRAILS)
+
+######################################################################
+# patch Vistrails
+######################################################################
+
+if(ALPS_PATCH_VISTRAILS)
+  find_package(VistrailsSVN)
+  if (APPLE)
+    foreach (DIR api core db gui packages tests)
+      install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails/${DIR} 
+              DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
+              PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
+    endforeach(DIR)
+    install(FILES ${VISTRAILS_SVN_DIR}/vistrails/vistrails.py 
+            DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR/../..})
+  else(APPLE)
+    messate(ERROR "Cannot patch VisTrails on your systems yet. Please add the needed code.")
+  endif(APPLE)
+endif(ALPS_PATCH_VISTRAILS)
+
 
 ######################################################################
 # documentation

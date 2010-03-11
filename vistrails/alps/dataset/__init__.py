@@ -109,9 +109,8 @@ def selfRegister():
     register(LoadProperties,'DataSet|Load')
     register(LoadAlpsHdf5,'DataSet|Load')
     register(LoadSpectrumHdf5,'DataSet|Load')
-    register(LoadDiagDataHdf5,'DataSet|Load')
-    
-
+    register(LoadBinningAnalysis,'DataSet|Load')
+    register(LoadAlpsDiagData,'DataSet|Load')
 
     register(Transform,'DataSet|Evaluate')
     register(TransformProperties,'DataSet|Evaluate')
@@ -127,7 +126,7 @@ def selfRegister():
     register(MplXYPlot,'DataSet|Plot')
     reg.add_module(Convert2Text,namespace='DataSet|Plot')
     reg.add_module(GraceXYPlot,name='Convert2Grace',namespace='DataSet|Plot')
-    reg.add_module(GraceXYPlot,namespace='DataSet|Plot',abstract=True)
+#    reg.add_module(GraceXYPlot,namespace='DataSet|Plot',abstract=True)
     reg.add_module(Convert2Gnuplot,namespace='DataSet|Plot')
     reg.add_module(LoadXMLPlot,namespace='DataSet|Plot')
     
@@ -148,7 +147,7 @@ def selfRegister():
     register(ObservableSelector,'DataSet|Select')
     register(And,'DataSet|Select')
     register(Or,'DataSet|Select')
-    register(Select,'DataSet',abst=True)
+#    register(Select,'DataSet',abst=True)
     register(Select,'DataSet|Select')
     register(SelectFiles,'DataSet|Select')
     

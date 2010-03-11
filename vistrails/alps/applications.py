@@ -282,7 +282,7 @@ def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
   
-  register_parameters(system.SimulationID)
+#  register_parameters(system.SimulationID)
   
   reg.add_module(AlpsApplication,namespace="Applications")
   

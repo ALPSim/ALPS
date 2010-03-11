@@ -82,8 +82,15 @@ class Hdf5Missing(Exception):
 
 class Hdf5Loader:
     def GetFileNames(self, flist):
-        self.files = [f[:-3]+"h5" for f in flist if f[-3:]=='xml']
-        return self.files
+        files = []
+        for f in flist:
+          if f[-4:]=='.xml':
+            f = f[:-3]+'h5'
+          else:
+            if f[-3:]!='.h5':
+              f += '.h5'
+          files.append(f)
+        return files
         
     # Pre: file is a h5py file descriptor
     # Post: returns a dictionary of all parameters saved in the file
@@ -168,7 +175,7 @@ class Hdf5Loader:
                         pass
             sets.append(fileset)
         return sets
-        
+
     def ReadDiagDataFromFile(self,flist,proppath,respath, measurements=None, array_index=None):
         fs = self.GetFileNames(flist)
         sets = []
@@ -215,6 +222,61 @@ class Hdf5Loader:
             sets.append(fileset)
         return sets
         
+    # Pre: file is a h5py file descriptor
+    # Post: returns DataSet with the evaluated binning analysis set
+    def ReadBinningAnalysis(self,flist,proppath,respath,measurements=None):
+        print 'getting file list'
+        fs = self.GetFileNames(flist)
+        sets = []
+        for f in fs:
+            fileset = []
+            print 'loading ', f
+            self.h5f = h5py.File(f)
+            self.h5fname = f
+            if respath == None:
+              respath="/simulation/results"
+            print 'obs: ',respath
+            list_ = self.GetObservableList(respath)
+            print list_
+            # this is exception-safe in the sense that it's also required in the line above
+            print 'reading properties'
+            grp = self.h5f.require_group(respath)
+            params = self.ReadParameters(proppath)
+            obslist = []
+            if measurements == None:
+                obslist = list_
+            else:
+                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+            for m in obslist:
+                print "Trying to read ", m
+                try:
+                    d = DataSet()
+                    if "timeseries" in grp[m].keys():
+                        k = grp[m+'/timeseries'].keys()
+                        if "logbinning" in k and "logbinning2" in k and "logbinning_counts" in k:
+                            bins = np.array(grp[m+"/timeseries/logbinning"].value[0:-4])
+                            bins2 = np.array(grp[m+"/timeseries/logbinning2"].value[0:-4])
+                            counts = np.array(grp[m+"/timeseries/logbinning_counts"].value[0:-4])
+                            ncounts = []
+                            ncounts = np.array(ncounts)
+                            scale = 1
+                            for i in range(len(counts)):
+                                mean = bins[i]/(counts[i]*scale)
+                                mean2 = bins2[i]/counts[i]
+                                bins2[i] = np.sqrt((mean2-mean*mean)/counts[i])
+                                scale *=2
+                            d.y = bins2
+                            d.x = np.arange(0,len(d.y))
+                            d.props['hdf5_path'] = respath + m
+                            d.props['observable'] = 'binning analysis of ' + pt.hdf5_name_decode(m)
+                            d.props.update(params)
+                            fileset.append(d)
+                except AttributeError:
+                    print "Could not create DataSet"
+                    pass
+            sets.append(fileset)
+        return sets
+                                                                            
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
     def ReadMeasurementFromFile(self,flist,statvar,proppath,respath,measurements=None):

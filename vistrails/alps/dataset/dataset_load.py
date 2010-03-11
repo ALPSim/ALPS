@@ -229,6 +229,32 @@ class LoadAlpsHdf5(Module):
             datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,propPath,resPath)
         self.setResult('data',datasets)
 
+class LoadBinningAnalysis(Module):
+    my_input_ports = [
+        PortDescriptor('ResultFiles',ResultFiles),
+        PortDescriptor('Measurements',ListOfElements),
+        PortDescriptor('PropertyPath',basic.String),
+        PortDescriptor('ResultPath',basic.String)
+    ]
+    
+    my_output_ports = [
+        PortDescriptor('data',DataSets)
+    ]    
+    
+    def compute(self):
+        propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
+        resPath= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else None
+        loader = Hdf5Loader()
+        if self.hasInputFromPort('ResultFiles'):
+            files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+        datasets = []
+        if self.hasInputFromPort('Measurements'):
+            datasets = loader.ReadBinningAnalysis(files,propPath,resPath,self.getInputFromPort('Measurements'))
+        else:
+            datasets = loader.ReadMeasurementFromFile(files,propPath,resPath)
+        self.setResult('data',datasets)
+
+
 class LoadSpectrumHdf5(Module):
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
@@ -250,7 +276,7 @@ class LoadSpectrumHdf5(Module):
         datasets = loader.ReadSpectrumFromFile(files,propPath,resPath)
         self.setResult('data',datasets)
         
-class LoadDiagDataHdf5(Module):
+class LoadAlpsDiagData(Module):
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('PropertyPath',basic.String),

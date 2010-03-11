@@ -33,6 +33,7 @@ configure_file(singledoc.in ${PROJECT_BINARY_DIR}/doc/singledoc)
 make_directory(${PROJECT_BINARY_DIR}/doc/src)
 make_directory(${PROJECT_BINARY_DIR}/doc/html)
 make_directory(${PROJECT_BINARY_DIR}/doc/html/search)
+make_directory(${PROJECT_BINARY_DIR}/doc/html/images)
 make_directory( ${PROJECT_BINARY_DIR}/doc/alps/doxygen)
 
 set(ALPS_AUTODOC_SOURCES alea lattice model osiris parser scheduler random)
@@ -93,11 +94,11 @@ add_custom_command(OUTPUT alps.pdf
                    db2pdf.in
                    )
 
-if(FOP_FOUND)
-  add_custom_target(docs ALL DEPENDS html/index.html alps.pdf)
-else(FOP_FOUND)
+#if(FOP_FOUND)
+#  add_custom_target(docs ALL DEPENDS html/index.html alps.pdf)
+#else(FOP_FOUND)
   add_custom_target(docs ALL DEPENDS html/index.html)
-endif(FOP_FOUND)
+#endif(FOP_FOUND)
 
 install(DIRECTORY doc COMPONENT documentation DESTINATION .
         FILES_MATCHING 

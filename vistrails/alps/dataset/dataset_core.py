@@ -51,7 +51,7 @@ class PortDescriptor:
     use_python_source = False
     hidden = False
 
-class DataSets(Module):
+class DataSets(ListOfElements):
     my_input_ports = []
     my_output_ports = []
 
