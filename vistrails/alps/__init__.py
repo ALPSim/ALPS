@@ -13,7 +13,7 @@ from core.configuration import ConfigurationObject
 import platform
 
 identifier = 'org.comp-phys.alps'
-version = '0.4.2'
+version = '0.5.0'
 name = 'ALPS'
 
 

@@ -20,6 +20,7 @@ import os
 import system
 import glob
 
+from packages.vtlcreator.init import VtlFileCreator
 from core.modules.vistrails_module import ModuleError
 from plots import PlotFile
 from pyalps.plot_core import *
@@ -82,6 +83,9 @@ class AlpsApplication(alpscore.SystemCommandLogged):
             cmdline += [result.name]
         else:
             cmdline += [input_file.name]
+        f = file(os.path.join(resultdir.name,'workflow.vtl'),'w')
+        f.write(VtlFileCreator.generate_vtl(self.moduleInfo['locator'],self.moduleInfo['version'],self.moduleInfo['pipeline']))
+        f.close()
         self.execute(cmdline)
         self.setResult('output_file', result)
         self.setResult('output_dir', resultdir)
