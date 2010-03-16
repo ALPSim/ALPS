@@ -68,7 +68,7 @@ AC_DEFUN([AC_FOP],
     ac_cv_have_fop=yes
     ac_cv_fop_dir="$fop_dir"
     ac_cv_fop_bin="$fop_bin"
-    ac_cv_fop=$fop_dir/$fop_bin"
+    ac_cv_fop="$fop_dir/$fop_bin"
   else
     ac_cv_have_fop=no
     ac_cv_fop_dir=

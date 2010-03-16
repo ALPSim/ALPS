@@ -132,9 +132,8 @@ am__noinst_HEADERS_DIST = boost/classic_spirit.hpp \
 	boost/numeric/bindings/traits/vector_raw.hpp \
 	boost/numeric/bindings/traits/vector_traits.hpp \
 	alps/lambda.hpp alps/hdf5.hpp alps/cctype.h alps/expression.h \
-	alps/factory.h alps/functional.h alps/math.hpp \
-	alps/multi_array.hpp alps/stringvalue.h alps/vectormath.h \
-	alps/parameter.h alps/parameter/parameter.h \
+	alps/factory.h alps/functional.h alps/multi_array.hpp \
+	alps/stringvalue.h alps/parameter.h alps/parameter/parameter.h \
 	alps/parameter/parameter_p.h alps/parameter/parameterlist.h \
 	alps/parameter/parameterlist_p.h alps/parameter/parameters.h \
 	alps/parameter/parameters_p.h alps/expression/block.h \
@@ -198,11 +197,16 @@ am__noinst_HEADERS_DIST = boost/classic_spirit.hpp \
 	alps/type_traits/is_scalar.hpp \
 	alps/type_traits/covariance_type.hpp \
 	alps/type_traits/iterator_type.hpp \
+	alps/numeric/is_positive.hpp alps/numeric/is_negative.hpp \
+	alps/numeric/round.hpp alps/numeric/is_equal.hpp \
+	alps/numeric/is_nonzero.hpp alps/numeric/is_zero.hpp \
+	alps/numeric/abs2.hpp alps/numeric/double2int.hpp \
+	alps/numeric/binomial.hpp alps/numeric/real.hpp \
 	alps/numeric/matrix_as_vector.hpp \
 	alps/numeric/special_functions.hpp \
 	alps/numeric/update_minmax.hpp \
 	alps/numeric/vector_functions.hpp \
-	alps/numeric/vector_valarray_conversion.h \
+	alps/numeric/vector_valarray_conversion.hpp \
 	alps/numeric/checked_divide.hpp \
 	alps/numeric/set_negative_0.hpp alps/numeric/outer_product.hpp \
 	alps/numeric/scalar_product.hpp alps/utility/os.hpp \
@@ -303,6 +307,7 @@ EXAMPLE_MPI = @EXAMPLE_MPI@
 EXAMPLE_PTHREAD = @EXAMPLE_PTHREAD@
 EXEEXT = @EXEEXT@
 FGREP = @FGREP@
+FOP = @FOP@
 FOP_BIN = @FOP_BIN@
 FOP_DIR = @FOP_DIR@
 FOP_OPTS = @FOP_OPTS@
@@ -504,7 +509,7 @@ headers_BOOST = boost/classic_spirit.hpp boost/function_objects.hpp \
 	boost/numeric/bindings/traits/vector_raw.hpp \
 	boost/numeric/bindings/traits/vector_traits.hpp
 headers_MOCASITO = mocasito/io/cache.hpp mocasito/io/context.hpp mocasito/io/hdf5.hpp mocasito/io/traits.hpp mocasito/io/container.hpp mocasito/io/free_fun.hpp mocasito/io/iterator.hpp mocasito/io/util.hpp mocasito/trace.hpp
-headers_ALPS = alps/lambda.hpp alps/hdf5.hpp alps/cctype.h alps/expression.h alps/factory.h alps/functional.h alps/math.hpp alps/multi_array.hpp alps/stringvalue.h alps/vectormath.h 
+headers_ALPS = alps/lambda.hpp alps/hdf5.hpp alps/cctype.h alps/expression.h alps/factory.h alps/functional.h alps/multi_array.hpp alps/stringvalue.h
 headers_PARAMETER = alps/parameter.h alps/parameter/parameter.h alps/parameter/parameter_p.h alps/parameter/parameterlist.h alps/parameter/parameterlist_p.h alps/parameter/parameters.h alps/parameter/parameters_p.h 
 headers_EXPRESSION = alps/expression/block.h alps/expression/evaluatable.h alps/expression/evaluate.h alps/expression/evaluate_helper.h alps/expression/evaluator.h alps/expression/expression.h alps/expression/expression_fwd.h alps/expression/factor.h alps/expression/function.h alps/expression/number.h alps/expression/parameterevaluator.h alps/expression/symbol.h alps/expression/term.h alps/expression/traits.h
 headers_ALEA = alps/alea/convergence.hpp alps/alea.h alps/alea/detailedbinning.h alps/alea/histogram.h alps/alea/nan.h alps/alea/nobinning.h alps/alea/observable.h alps/alea/observableset.h alps/alea/observablefactory.h alps/alea/observableset_p.h alps/alea/simplebinning.h alps/alea/simpleobsdata.h alps/alea/simpleobservable.h alps/alea/simpleobseval.h alps/alea/signedobservable.h alps/alea/hdf5.h alps/alea/recordableobservable.h alps/alea/abstractsimpleobservable.h alps/alea/abstractbinning.h alps/alea/output_helper.h alps/alea/histogramdata.h alps/alea/histogrameval.h alps/alea/value_with_error.h alps/alea/type_tag.hpp
@@ -519,7 +524,7 @@ headers_SCHEDULER = alps/scheduler.h alps/scheduler/factory.h alps/scheduler/inf
 headers_IETL = ietl/bandlanczos.h ietl/complex.h ietl/config.h.in ietl/fmatrix.h ietl/ietl2lapack.h ietl/ietl2lapack_interface.h ietl/interface/blas.h ietl/interface/blitz.h ietl/interface/mtl.h ietl/interface/ublas.h ietl/interface/valarray.h ietl/inverse.h ietl/iteration.h ietl/jacobi.h ietl/krylov_wrapper.h ietl/lanczos.h ietl/matrix.h ietl/power.h ietl/rayleigh.h ietl/tmatrix.h ietl/traits.h ietl/vectorspace.h
 headers_PARAPACK = alps/parapack/clone.h alps/parapack/clone_info.h alps/parapack/clone_info_p.h alps/parapack/clone_proxy.h alps/parapack/clone_timer.h alps/parapack/exchange.h alps/parapack/exp_number.h alps/parapack/worker_factory.h alps/parapack/filelock.h alps/parapack/integer_range.h alps/parapack/job_p.h alps/parapack/logger.h alps/parapack/measurement.h alps/parapack/montecarlo.h alps/parapack/option.h alps/parapack/parapack.h alps/parapack/permutation.h alps/parapack/process.h alps/parapack/queue.h alps/parapack/rng_helper.h alps/parapack/simulation_p.h alps/parapack/job.h alps/parapack/types.h alps/parapack/util.h alps/parapack/version.h alps/parapack/wanglandau.h alps/parapack/mc_worker.h alps/parapack/temperature_scan.h alps/parapack/worker.h
 headers_TYPETRAITS = alps/type_traits/average_type.hpp alps/type_traits/change_value_type.hpp alps/type_traits/element_type.hpp alps/type_traits/is_complex.hpp alps/type_traits/is_sequence.hpp alps/type_traits/norm_type.hpp alps/type_traits/real_type.hpp alps/type_traits/slice.hpp alps/type_traits/type_tag.hpp alps/type_traits/is_scalar.hpp alps/type_traits/covariance_type.hpp alps/type_traits/iterator_type.hpp
-headers_NUMERIC = alps/numeric/matrix_as_vector.hpp alps/numeric/special_functions.hpp alps/numeric/update_minmax.hpp alps/numeric/vector_functions.hpp alps/numeric/vector_valarray_conversion.h alps/numeric/checked_divide.hpp alps/numeric/set_negative_0.hpp alps/numeric/outer_product.hpp alps/numeric/scalar_product.hpp
+headers_NUMERIC = alps/numeric/is_positive.hpp alps/numeric/is_negative.hpp alps/numeric/round.hpp alps/numeric/is_equal.hpp alps/numeric/is_nonzero.hpp alps/numeric/is_zero.hpp alps/numeric/abs2.hpp alps/numeric/double2int.hpp alps/numeric/binomial.hpp alps/numeric/real.hpp alps/numeric/matrix_as_vector.hpp alps/numeric/special_functions.hpp alps/numeric/update_minmax.hpp alps/numeric/vector_functions.hpp alps/numeric/vector_valarray_conversion.hpp alps/numeric/checked_divide.hpp alps/numeric/set_negative_0.hpp alps/numeric/outer_product.hpp alps/numeric/scalar_product.hpp
 headers_UTILITY = alps/utility/os.hpp alps/utility/copyright.hpp alps/utility/bitops.hpp alps/utility/encode.hpp alps/utility/numeric_cast.hpp alps/utility/assign.hpp alps/utility/resize.hpp alps/utility/size.hpp alps/utility/vectorio.hpp alps/utility/data.hpp
 headers = $(headers_BOOST) $(headers_ALPS) $(headers_PARAMETER) \
 	$(headers_EXPRESSION) $(headers_FIXEDCAP) $(headers_OSIRIS) \

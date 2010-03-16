@@ -61,7 +61,7 @@ src_SCHEDULER = \
 src_OSIRIS = \
   $(top_srcdir)/src/alps/osiris/buffer.C \
   $(top_srcdir)/src/alps/osiris/dump.C \
-  $(top_srcdir)/src/alps/utility/os.C \
+  $(top_srcdir)/src/alps/utility/os.cpp \
   $(top_srcdir)/src/alps/osiris/process.C \
   $(top_srcdir)/src/alps/osiris/comm.C \
   $(top_srcdir)/src/alps/osiris/mpdump.C \
