@@ -37,7 +37,7 @@ private:
 public:
   wanglandau_worker(alps::Parameters const& params)
     : super_type(params),
-      coupling(alps::double2int(evaluate("COUPLING", params))), // integer value!
+      coupling(alps::numeric::double2int(evaluate("COUPLING", params))), // integer value!
       mcs(params),
       weight(range_t(params.defined("ENERGY_WALK_RANGE")
                      ? params["ENERGY_WALK_RANGE"] : params["ENERGY_RANGE"], params),
@@ -131,12 +131,12 @@ public:
       weight(range_t(params.defined("ENERGY_MEASURE_RANGE")
                      ? params["ENERGY_MEASURE_RANGE"] : params["ENERGY_RANGE"], params)),
       t_min(evaluate("T_MIN", params)), t_max(evaluate("T_MAX", params)),
-      t_step(evaluate("T_STEP", params)), nsteps(alps::double2int((t_max - t_min) / t_step)),
+      t_step(evaluate("T_STEP", params)), nsteps(alps::numeric::double2int((t_max - t_min) / t_step)),
       has_reference(false), step(0) {
     weight.load_weight(params);
     if (params.defined("REFERENCE_BIN") && params.defined("REFERENCE_LOGG")) {
       has_reference = true;
-      ref_bin = alps::double2int(evaluate("REFERENCE_BIN", params));
+      ref_bin = alps::numeric::double2int(evaluate("REFERENCE_BIN", params));
       ref_val = evaluate("REFERENCE_LOGG", params);
     }
   }
@@ -199,7 +199,7 @@ public:
       }
       for (int i = 0; i < hist_m.size(); ++i) {
         if (hist_m[i] > 0) {
-          int bin = alps::double2int(ene_m[i]);
+          int bin = alps::numeric::double2int(ene_m[i]);
           alps::exp_double w
             = alps::exp_double(hist_m[i]) * factor * weight[bin]
             * alps::exp_value(- beta * ene_m[i]);
