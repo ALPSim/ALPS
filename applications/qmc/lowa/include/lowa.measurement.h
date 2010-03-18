@@ -114,11 +114,15 @@ void Lowa::take_diagonal_measurements()
   outFile.close();
 
 #ifdef MEASURE_DENSITY
-  // *** replace this by hdf5 measurements here!
+  alps::hdf5::oarchive oa_mdns(filename_mdns.c_str());
+  oa_mdns << alps::make_pvp("TimeSeries/Density",_state,_N);
+
+/*
   outFile.open(filename_mdns.c_str(),std::ios::app);
   for (site_type index=0; index < _N; ++index)  {  outFile << static_cast<int>(get_measdensity(index)) << "\t";  }
   outFile << "\n";
   outFile.close();
+*/
 #endif
             
   //measurements["Total Particle Number (Actual)"]     << get_Npart();

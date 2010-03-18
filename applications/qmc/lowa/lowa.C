@@ -175,7 +175,7 @@ void Lowa::init()
   filename_proj_cymdns = obtain_filename("proj_cymdns");
   filename_cs_cymdns   = obtain_filename("cs_cymdns");
 
-  filename_mdns        = obtain_filename("mdns");
+  filename_mdns        = obtain_filename_hdf5("mdns");
   filename_mdnsmat     = obtain_filename("mdnsmat");
   filename_mdnsmatinf  = obtain_filename("mdnsmatinf");
 
@@ -335,20 +335,6 @@ bool Lowa::test_conf()
   }
   return (1);
 }
-
-
-/*
-
-alps::hdf5::iarchive ia("filename...");
-ia << make_pvp("/Sim0",myLowa);
-
-void Lowa::serialize(alps::hdf5::iarchive &ia)
-{
-  ia << make_pvp("TimeSeries/ObservableFoo",obsfoo,lengthofobsfoo);
-}
-void Lowa::serialize(alps::hdf5::oarchive &oa) { ... }
-
-*/
 
 
 bool Lowa::change_parameter(const std::string& name,const alps::StringValue& value)

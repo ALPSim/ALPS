@@ -46,6 +46,7 @@
 #include "./include/cdefine.h"
 
 #include <alps/scheduler/montecarlo.h>
+#include <alps/hdf5.hpp>
 #include <iostream>
 #include <iomanip>
 #include <time.h>
@@ -159,7 +160,8 @@ private:
 // ### PRINT and I/O (ASCII/hdf5)   // *** Tama : to include them in <lowa.io.h>
 
   // member functions
-  std::string obtain_filename(std::string original_filename)  {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str());  }
+  std::string obtain_filename(std::string original_filename)       {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str());  }
+  std::string obtain_filename_hdf5(std::string original_filename)  {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str() + ".h5");  }
   void export_lowa_simulation(std::ostream&);
   void import_lowa_simulation(std::istream&);
   void save(alps::ODump& odump)  {}
