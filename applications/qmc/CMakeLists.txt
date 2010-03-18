@@ -8,6 +8,7 @@ add_subdirectory(sse)
 add_subdirectory(checksign)
 add_subdirectory(worms)
 add_subdirectory(qwl)
+add_subdirectory(lowa)
 
 IF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse-loop)
   add_subdirectory(sse-loop)
