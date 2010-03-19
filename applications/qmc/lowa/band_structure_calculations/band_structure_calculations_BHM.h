@@ -104,11 +104,11 @@ public:
 
 private:
   // physical constants
-  static const double pi   = 3.141592654;
-  static const double hbar = 1.05457148;
-  static const double amu  = 1.66053886;
-  static const double kB   = 1.3806503;
-  static const double a0   = 0.052917720859;
+  static const double pi;
+  static const double hbar;
+  static const double amu;
+  static const double kB;
+  static const double a0;
 
   double pi_sq, twice_pi;
   double _xEr2nK, _yEr2nK, _zEr2nK;  
@@ -796,6 +796,21 @@ void band_structure_calculations_BHM<S,T>::perform_calculations() {
   }
 #endif
 }
+
+template<class S,class T>
+const double band_structure_calculations_BHM<S,T>::pi   = 3.141592654;
+
+template<class S,class T>
+const double band_structure_calculations_BHM<S,T>::hbar = 1.05457148;
+
+template<class S,class T>
+const double band_structure_calculations_BHM<S,T>::amu  = 1.66053886;
+
+template<class S,class T>
+const double band_structure_calculations_BHM<S,T>::kB   = 1.3806503;
+
+template<class S,class T>
+const double band_structure_calculations_BHM<S,T>::a0   = 0.052917720859;
 
 
 } // ending namespace applications

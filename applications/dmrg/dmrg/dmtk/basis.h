@@ -163,7 +163,7 @@ class State
     bool operator!=(const State& s) const { QN qaux = _qn1+_qn2; return (qaux != s.qn()); }
     bool operator>(const State& s) const { QN qaux = _qn1+_qn2; return (qaux > s.qn()); }
     bool operator>=(const State& s) const { QN qaux = _qn1+_qn2; return (qaux >= s.qn()); }
-    bool operator<(const State& s) const { QN qaux = _qn1+_qn2; return (qaux < s.qn()); }
+    bool operator<(const State& s) const {  return (qn() < s.qn()); }
     bool operator<=(const State& s) const { QN qaux = _qn1+_qn2; return (qaux <= s.qn()); }
 
     // Streams

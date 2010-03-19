@@ -191,7 +191,6 @@ void indexx(size_t n, const A& arr, Vector<size_t>& indx, bool ascending = true)
   std::vector<AuxIndex<T> > aux(n);
   AuxIndex<T> *ra = &aux[0];
   for(int i = 0; i < n; i++) { ra->v = arr[i]; ra->index = i; ra++; } 
-
   std::sort(aux.begin(), aux.end());
 
   ra = &aux[0];

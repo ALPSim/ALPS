@@ -34,7 +34,7 @@
 #define ALPS_APPLICATIONS_LOWA_TYPEDEF_H
 
 #include <iostream>
-
+#include <alps/config.h>
 
 namespace alps {
 namespace applications {
