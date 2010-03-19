@@ -97,6 +97,11 @@ Lowa::Lowa(const alps::ProcessList& where,const alps::Parameters& p,int node)
   , _binsize(static_cast<time_type>(p["BIN_SIZE"]))
 {
   // Further initialization
+  pi   = 3.141592654;
+  tol  = 1e-10;
+  hbar = 1.05457148;
+  amu  = 1.66053886;
+
   zcoord = 2*dim;
 
   Ls     = new site_type [dim];

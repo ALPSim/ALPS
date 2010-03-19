@@ -134,10 +134,10 @@ private:
 
 // ### PHYSICAL CONSTANTS
 
-  static const double pi   = 3.141592654;
-  static const double tol  = 1e-10;
-  static const double hbar = 1.05457148;
-  static const double amu  = 1.66053886;
+  double pi;
+  double tol;
+  double hbar;
+  double amu;
 
 
 // ### INTRINSIC SIMULATION VARIABLES

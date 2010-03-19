@@ -104,11 +104,11 @@ public:
 
 private:
   // physical constants
-  static const double pi;
-  static const double hbar;
-  static const double amu;
-  static const double kB;
-  static const double a0;
+  double pi;
+  double hbar;
+  double amu;
+  double kB;
+  double a0;
 
   double pi_sq, twice_pi;
   double _xEr2nK, _yEr2nK, _zEr2nK;  
@@ -174,6 +174,12 @@ public:
   // constructors
   band_structure_calculations_BHM() 
   {
+    pi   = 3.141592654;
+    hbar = 1.05457148;
+    amu  = 1.66053886;
+    kB   = 1.3806503;
+    a0   = 0.052917720859;
+
     // hardcore lapack initialization
     vect = 'I'; 
     n    = MATRIX_SIZE; 
