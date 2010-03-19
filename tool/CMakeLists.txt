@@ -61,12 +61,16 @@ else(ALPS_FOR_VISTRAILS)
 # lattice-preview and helper program
 #
 
-
   configure_file(config.py.in ${CMAKE_CURRENT_BINARY_DIR}/config.py)
   if(WIN32 AND NOT UNIX)
-    add_pi_executable(lattice-preview preview.py ${CMAKE_CURRENT_BINARY_DIR}/config.py license.py)
-    file(GLOB pi_generated_files ${CMAKE_CURRENT_BINARY_DIR}/lattice-preview/*)
-    install(FILES ${pi_generated_files} DESTINATION bin COMPONENT tools)
+    # in the function add_pi_executable is not present ...
+    option(ALPS_HAS_CMAKE_PI_MACROS "Ignore the PI macros if they are not present" ON)
+    mark_as_advanced(ALPS_HAS_CMAKE_PI_MACROS)
+    if (ALPS_HAS_CMAKE_PI_MACROS)
+      add_pi_executable(lattice-preview preview.py ${CMAKE_CURRENT_BINARY_DIR}/config.py license.py)
+      file(GLOB pi_generated_files ${CMAKE_CURRENT_BINARY_DIR}/lattice-preview/*)
+      install(FILES ${pi_generated_files} DESTINATION bin COMPONENT tools)
+    endif (ALPS_HAS_CMAKE_PI_MACROS)
   else(WIN32 AND NOT UNIX)
     configure_file(lattice-preview.in ${CMAKE_CURRENT_BINARY_DIR}/lattice-preview)
     install(PROGRAMS ${CMAKE_CURRENT_BINARY_DIR}/lattice-preview DESTINATION bin COMPONENT tools)

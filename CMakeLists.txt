@@ -294,10 +294,10 @@ IF(HDF5_IS_PARALLEL)
 ENDIF(HDF5_IS_PARALLEL)
 
 # python
-if(WIN32 AND NOT UNIX)
+if(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON)
   find_package(PyInstaller)
   include(UsePyInstaller)
-endif(WIN32 AND NOT UNIX)
+endif(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON)
 find_package(PythonInterp)
 set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
 find_package(PythonLibs)
