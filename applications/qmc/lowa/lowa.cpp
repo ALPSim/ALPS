@@ -38,12 +38,13 @@
  */
 
 
-#include "./lowa.h"
-#include "./include/lowa.insertion_deletion.h"
-#include "./include/lowa.propagation.h"
-#include "./include/lowa.measurement.h"
-#include "./include/lowa.dostep.h"
-#include "./include/lowa.io.h"
+#include "lowa.hpp"
+#include "include/lowa.insertion_deletion.h"
+#include "include/lowa.propagation.h"
+#include "include/lowa.measurement.h"
+#include "include/lowa.dostep.h"
+#include "include/lowa.io.h"
+
 #include <alps/alea/detailedbinning.h>
 
 
@@ -98,32 +99,30 @@ Lowa::Lowa(const alps::ProcessList& where,const alps::Parameters& p,int node)
   // Further initialization
   zcoord = 2*dim;
 
-  if (dim == 1) {
-    Ls     = new site_type;
-    v0     = new parm_type;
-    vc     = new parm_type;
-    lambda = new parm_type;
-    waist  = new parm_type;
-    phase  = new parm_type;
-  }
-  else {
-    Ls     = new site_type [dim];
-    v0     = new parm_type [dim];
-    vc     = new parm_type [dim];
-    lambda = new parm_type [dim];
-    waist  = new parm_type [dim];
-    phase  = new parm_type [dim];
-  }
+  Ls     = new site_type [dim];
+  v0     = new parm_type [dim];
+  vc     = new parm_type [dim];
+  lambda = new parm_type [dim];
+  waist  = new parm_type [dim];
+  phase  = new parm_type [dim];
 
   for (int k = 0; k < dim; ++k)    {  Ls[k] = static_cast<site_type>(p["LENGTH"]); }
   _N = 1;    for (int k=0; k < dim; ++k)      {  _N   *= Ls[k];  }
   _Nxy = 1;  for (int k=0; k < (dim-1); ++k)  {  _Nxy *= Ls[k];  }
 
   if (dim == 3) {
-    v0[0] = static_cast<parm_type>(p["V0_x"]);   v0[1] = static_cast<parm_type>(p["V0_y"]);   v0[2] = static_cast<parm_type>(p["V0_z"]);
-    vc[0] = static_cast<parm_type>(p["VC_x"]);   vc[1] = static_cast<parm_type>(p["VC_y"]);   vc[2] = static_cast<parm_type>(p["VC_z"]);
-    lambda[0] = static_cast<parm_type>(p["WAVELENGTH_x"]);   lambda[1] = static_cast<parm_type>(p["WAVELENGTH_y"]);   lambda[2] = static_cast<parm_type>(p["WAVELENGTH_z"]);
-    waist[0]  = static_cast<parm_type>(p["WAIST_x"]);        waist[1]  = static_cast<parm_type>(p["WAIST_y"]);        waist[2] = static_cast<parm_type>(p["WAIST_z"]);
+    v0[0] = static_cast<parm_type>(p["V0_x"]);   
+    v0[1] = static_cast<parm_type>(p["V0_y"]);   
+    v0[2] = static_cast<parm_type>(p["V0_z"]);
+    vc[0] = static_cast<parm_type>(p["VC_x"]);   
+    vc[1] = static_cast<parm_type>(p["VC_y"]);   
+    vc[2] = static_cast<parm_type>(p["VC_z"]);
+    lambda[0] = static_cast<parm_type>(p["WAVELENGTH_x"]);   
+    lambda[1] = static_cast<parm_type>(p["WAVELENGTH_y"]);   
+    lambda[2] = static_cast<parm_type>(p["WAVELENGTH_z"]);
+    waist[0]  = static_cast<parm_type>(p["WAIST_x"]);       
+    waist[1]  = static_cast<parm_type>(p["WAIST_y"]);        
+    waist[2] = static_cast<parm_type>(p["WAIST_z"]);
     phase[0] = static_cast<parm_type>(p["MASS"]) * amu * lambda[0] * lambda[0] / (8*_tof*hbar) * 1e-8;
     phase[1] = static_cast<parm_type>(p["MASS"]) * amu * lambda[1] * lambda[1] / (8*_tof*hbar) * 1e-8;
     phase[2] = static_cast<parm_type>(p["MASS"]) * amu * lambda[2] * lambda[2] / (8*_tof*hbar) * 1e-8;

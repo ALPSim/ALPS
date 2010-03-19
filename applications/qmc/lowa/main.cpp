@@ -27,7 +27,7 @@
 
 /* $Id: main.C,v 1.5 2005/07/24 06:49:25 troyer Exp $ */
 
-#include "lowa.h"
+#include "lowa.hpp"
 #include <alps/osiris/comm.h>
 
 int main(int argc, char** argv)

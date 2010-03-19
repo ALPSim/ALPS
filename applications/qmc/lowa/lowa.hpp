@@ -33,7 +33,7 @@
 /*
  *
  * 1) Code modification      -- partly done
- * 2) Replacing raw pointers -- not done yet
+ * 2) Replacing raw pointers -- not done yet  -- use std::vector whenever you allocate something
  *
  */
 
@@ -43,7 +43,12 @@
 #define LOWA_H
 
 
-#include "./include/cdefine.h"
+#include "include/cdefine.h"
+#include "include/typedef.h"
+#include "include/bipartite_lattice.h"     
+#include "include/kink.h"
+#include "band_structure_calculations/band_structure_calculations_BHM.h"
+
 
 #include <alps/scheduler/montecarlo.h>
 #include <alps/hdf5.hpp>
@@ -58,10 +63,6 @@
 #include <algorithm>
 #include <numeric>
 
-#include "./include/typedef.h"
-#include "./include/bipartite_lattice.h"     
-#include "./include/kink.h"
-#include "../../band_structure_calculations/band_structure_calculations_BHM.h"
 
 
 
