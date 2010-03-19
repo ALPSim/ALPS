@@ -61,7 +61,8 @@ class FitPrototype(Module):
     def property_compute(self):
         if self.hasInputFromPort('input'):
             newsets = []
-            for s in self.getInputFromPort('input'):
+			q = self.getInputFromPort('input')
+            for s in flatten(q):
                 newsets.append(DataSet())
                 newsets[-1].x = s.x
                 newsets[-1].y = s.y
