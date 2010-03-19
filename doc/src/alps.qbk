@@ -20,3 +20,4 @@
 [xinclude model.xml]
 [xinclude scheduler.xml]
 [xinclude tools.xml]
+[xinclude hdf5.xml]

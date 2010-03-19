@@ -36,9 +36,9 @@ make_directory(${PROJECT_BINARY_DIR}/doc/html/search)
 make_directory(${PROJECT_BINARY_DIR}/doc/html/images)
 make_directory( ${PROJECT_BINARY_DIR}/doc/alps/doxygen)
 
-set(ALPS_AUTODOC_SOURCES alea lattice model osiris parser scheduler random)
+set(ALPS_AUTODOC_SOURCES hdf5 alea lattice model osiris parser scheduler random)
 
-set(ALPS_QBK_SOURCES alea general getting_started lattice
+set(ALPS_QBK_SOURCES alea general getting_started hdf5 lattice
     model osiris overview parser scheduler tools random)
     
 set(ALPS_QBK_DEPENDS src/alps.qbk )
