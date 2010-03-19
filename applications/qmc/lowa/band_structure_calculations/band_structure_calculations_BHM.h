@@ -803,6 +803,7 @@ void band_structure_calculations_BHM<S,T>::perform_calculations() {
 #endif
 }
 
+/*
 template<class S,class T>
 const double band_structure_calculations_BHM<S,T>::pi   = 3.141592654;
 
@@ -817,7 +818,7 @@ const double band_structure_calculations_BHM<S,T>::kB   = 1.3806503;
 
 template<class S,class T>
 const double band_structure_calculations_BHM<S,T>::a0   = 0.052917720859;
-
+*/
 
 } // ending namespace applications
 } // ending namespace alps
