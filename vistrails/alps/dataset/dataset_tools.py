@@ -108,3 +108,26 @@ class Flatten(Module):
     
     def compute(self):
         self.setResult('output', deep_flatten(self.getInputFromPort('input')))
+
+class PrepareDictionary(Module):
+    my_input_ports = [PortDescriptor('source',basic.String,use_python_source=True)]
+    my_output_ports = [PortDescriptor('output',basic.Dictionary)]
+    
+    def compute(self):
+        lines = self.getInputFromPort('source')
+        lines = urllib.unquote(str(lines)).split('\n')
+        lines1 = []
+        for line in lines:
+            if line.startswith('#'):
+                continue
+            else:
+                lines1.append(line.strip())
+        
+        d = {}
+        print lines1
+        for line in lines1:
+            pair = line.split('=')
+            if len(pair) == 2:
+                d[pair[0]] = pair[1]
+        
+        self.setResult('output', d)

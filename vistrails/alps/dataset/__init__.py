@@ -103,7 +103,6 @@ def selfRegister():
     register(ConstantDataSet,'DataSet|Load')
     register(GenerateDataSet,'DataSet|Load')
     register(LoadDataSet,'DataSet|Load')
-    register(LoadAlpsFromTxt,'DataSet|Load')
     register(CustomLoader,'DataSet|Load')
     register(CollectXY,'DataSet|Load')
     register(LoadProperties,'DataSet|Load')
@@ -139,6 +138,7 @@ def selfRegister():
     register(WriteTxt,'DataSet|Tools')
     register(CacheErasure,'DataSet|Tools')
     register(SetLabels,'DataSet|Tools')
+    register(PrepareDictionary,'DataSet|Tools')
     register(MakeScatter,'DataSet|Plot')
     
     register(Selector,'DataSet|Select',abst=True)

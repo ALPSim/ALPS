@@ -142,46 +142,6 @@ class CustomLoader(Module):
             proc_code = urllib.unquote(str(code))
             exec proc_code
 
-class LoadAlpsFromTxt(Module):
-    my_input_ports = [
-        PortDescriptor('file',basic.File),
-        PortDescriptor('parameter_name',basic.String)
-    ]
-    my_output_ports = [
-        PortDescriptor('data',DataSets)
-    ]
-
-    def compute(self):
-        if self.hasInputFromPort('file') and self.hasInputFromPort('parameter_name'):
-            parname = self.getInputFromPort('parameter_name')
-            filename = self.getInputFromPort('file').name
-            lines = open(filename).readlines()
-            par = 0
-            sets = []
-
-            data = []
-            lines.append(parname+'=123') # evil hack
-            for line in lines:
-                if line.count(parname+'=') > 0:
-                    if len(data) > 0:
-                        res = DataSet()
-                        [res.x, res.y] = np.array(data).transpose()
-                        res.props[parname] = par
-                        res.props['label'] = parname + ' = ' + str(par)
-                        sets.append(copy.deepcopy(res))
-                    par = float(line.split('=')[1])
-                    data = []
-                else:
-                    spl = line.split()
-                    idx = float(spl[0])
-                    val = float(spl[1])
-                    data.append([idx,val])
-
-            self.setResult('data', sets)
-        else:
-            # throw something
-            pass
-
 class LoadProperties(Module):
     my_input_ports = [
         PortDescriptor('ResultFiles', ResultFiles),
