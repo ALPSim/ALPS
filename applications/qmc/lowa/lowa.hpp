@@ -49,14 +49,14 @@
 #include "include/kink.h"
 #include "band_structure_calculations/band_structure_calculations_BHM.h"
 
-
 #include <alps/scheduler/montecarlo.h>
-#include <alps/hdf5.hpp>
+#include <boost/filesystem.hpp>
 #include <iostream>
 #include <iomanip>
 #include <time.h>
 #include <sstream>
 #include <fstream>
+#include <alps/hdf5.hpp>
 #include <vector>
 #include <valarray>
 #include <list>
@@ -162,7 +162,6 @@ private:
 
   // member functions
   std::string obtain_filename(std::string original_filename)       {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str());  }
-  std::string obtain_filename_hdf5(std::string original_filename)  {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str() + ".h5");  }
   void export_lowa_simulation(std::ostream&);
   void import_lowa_simulation(std::istream&);
   void save(alps::ODump& odump)  {}

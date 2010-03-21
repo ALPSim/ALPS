@@ -113,8 +113,11 @@ void Lowa::take_diagonal_measurements()
   outFile << "\n";
   outFile.close();
 
-#ifdef MEASURE_DENSITY
-  alps::hdf5::oarchive oa_mdns(filename_mdns.c_str());
+#ifdef MEASURE_TIME_SERIES_DENSITY
+  std::ostringstream ss;  ss << sweeps;  
+  std::string cur_filename_mdns = "./timeseries_density_measurements/" + filename_mdns + "_" + ss.str() + ".h5";
+
+  alps::hdf5::oarchive oa_mdns(cur_filename_mdns.c_str());
   oa_mdns << alps::make_pvp("TimeSeries/Density",_state,_N);
 
 /*
@@ -140,7 +143,7 @@ void Lowa::take_diagonal_measurements()
 
 void Lowa::take_offdiagonal_measurements()
 {
-#ifdef MEASURE_DENSITY_MATRIX
+#ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
   // *** replace this by hdf5 measurements here
   outFile.open(filename_mdnsmat.c_str(),std::ios::app);
   for (site_type index=0; index < _N; ++index)  {  outFile << (static_cast<obs_type>(av_dnsmat[index])/_Z_dnsmat) << "\t";  }

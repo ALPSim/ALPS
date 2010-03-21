@@ -96,7 +96,6 @@ Lowa::Lowa(const alps::ProcessList& where,const alps::Parameters& p,int node)
   , is_doublon_treated_as_hole(static_cast<bool>(p["IS_DOUBLON_OR_HIGHER_TREATED_AS_HOLE"]))
   , _binsize(static_cast<time_type>(p["BIN_SIZE"]))
 {
-  // Further initialization
   pi   = 3.141592654;
   tol  = 1e-10;
   hbar = 1.05457148;
@@ -151,6 +150,14 @@ Lowa::Lowa(const alps::ProcessList& where,const alps::Parameters& p,int node)
   //initialise parameters 
   init();
   print_params(std::cout);
+
+
+  std::cout << V(505050) << "\t" << _mu_eff[505050] << "\n";
+  std::cout << V(505051) << "\t" << _mu_eff[505051] << "\n";
+  std::cout << V(505052) << "\t" << _mu_eff[505052] << "\n";
+
+
+
 }
 
 
@@ -168,6 +175,14 @@ void Lowa::init()
 
 
 // ### PRINT and I/O (ASCII/hdf5)
+  // create directory if possible
+#ifdef MEASURE_TIME_SERIES_DENSITY
+  boost::filesystem::create_directory("./timeseries_density_measurements");
+#endif
+#ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
+  boost::filesystem::create_directory("./timeseries_density_matrix_measurements");
+#endif
+
   // definitions of filenames
   filename1       = obtain_filename("qmc_saveconf");
   filename1_trial = obtain_filename("tqmc_saveconf");
@@ -179,7 +194,7 @@ void Lowa::init()
   filename_proj_cymdns = obtain_filename("proj_cymdns");
   filename_cs_cymdns   = obtain_filename("cs_cymdns");
 
-  filename_mdns        = obtain_filename_hdf5("mdns");
+  filename_mdns        = obtain_filename("mdns");
   filename_mdnsmat     = obtain_filename("mdnsmat");
   filename_mdnsmatinf  = obtain_filename("mdnsmatinf");
 

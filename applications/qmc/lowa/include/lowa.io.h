@@ -224,9 +224,7 @@ void Lowa::import_lowa_simulation(std::istream& is)
 #endif
   is >> _Ekin >> _Epot >> new_measurement;
   is >> no_of_accepted_worm_insertions >> no_of_proposed_worm_insertions;
-
-  uint32_t dummy_sweeps;
-  is >> dummy_sweeps;
+  is >> sweeps;
 
   calc_N_and_E();
   for (int i = 0; i < _N; i++) {
