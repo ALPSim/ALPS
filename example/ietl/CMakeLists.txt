@@ -4,15 +4,17 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 #
-# examples of using the IETL
+# examples using the IETL
 # 
 
 if (ALPS_BUILD_EXAMPLES)
-  set (EXAMPLES arnoldi1)
-     
-  foreach(program ${EXAMPLES})
-    add_executable(${program} ${program}.C)
-    target_link_libraries(${program} alps)
-  endforeach(program)
+  if(LAPACK_FOUND)
+    add_definitions(${LAPACK_DEFINITIONS})
+    set (EXAMPLES arnoldi1)
+    foreach(program ${EXAMPLES})
+      add_executable(${program} ${program}.C)
+      target_link_libraries(${program} alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
+    endforeach(program)
+  endif(LAPACK_FOUND)
 endif (ALPS_BUILD_EXAMPLES)
 
