@@ -150,14 +150,6 @@ Lowa::Lowa(const alps::ProcessList& where,const alps::Parameters& p,int node)
   //initialise parameters 
   init();
   print_params(std::cout);
-
-
-  std::cout << V(505050) << "\t" << _mu_eff[505050] << "\n";
-  std::cout << V(505051) << "\t" << _mu_eff[505051] << "\n";
-  std::cout << V(505052) << "\t" << _mu_eff[505052] << "\n";
-
-
-
 }
 
 

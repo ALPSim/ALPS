@@ -121,7 +121,8 @@ void Lowa::take_diagonal_measurements()
   oa_mdns << alps::make_pvp("TimeSeries/Density",_state,_N);
 
 /*
-  outFile.open(filename_mdns.c_str(),std::ios::app);
+  std::string cur_filename_mdns_ASCII = "./timeseries_density_measurements/" + filename_mdns + "_" + ss.str() + ".o";
+  outFile.open(cur_filename_mdns_ASCII.c_str(),std::ios::app);
   for (site_type index=0; index < _N; ++index)  {  outFile << static_cast<int>(get_measdensity(index)) << "\t";  }
   outFile << "\n";
   outFile.close();
