@@ -32,6 +32,7 @@ from xml.etree import ElementTree
 from dataset import DataSet
 from floatwitherror import FloatWithError as fwe
 from floatwitherror import get_mean
+from hlist import flatten
 
 def read_xml(filename):
     root = ElementTree.parse(filename).getroot()
@@ -108,7 +109,7 @@ class MplXYPlot_core:
         if 'yaxis' in self.plt and 'logarithmic' in self.plt['yaxis']:
             ylog = self.plt['yaxis']['logarithmic']
         
-        for q in self.plt['data']:
+        for q in flatten(self.plt['data']):
             try:
                 xmeans = np.array([xx.mean for xx in q.x])
                 xerrors = np.array([xx.error for xx in q.x])
@@ -155,7 +156,7 @@ class MplXYPlot_core:
         
         self.draw_lines()
         
-        for ds in self.plt['data']:
+        for ds in flatten(self.plt['data']):
             if 'xlabel' in ds.props:
                 plt.xlabel(ds.props['xlabel'])
             if 'ylabel' in ds.props:
