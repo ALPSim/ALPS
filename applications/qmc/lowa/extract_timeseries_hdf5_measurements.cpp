@@ -117,7 +117,6 @@ int main(int argc, char** argv)
 
   std::vector<std::valarray<double> > raw_data;
 
-  int counter;
   double dummy;  
 
   for (int label=label_lb; label <= label_ub; ++label)
@@ -153,7 +152,7 @@ int main(int argc, char** argv)
         ia >> alps::make_pvp(description_str,raw_data_elem_vec);
 
         std::valarray<double> raw_data_elem = alps::numeric::vector2valarray<double>(raw_data_elem_vec);
-        if ((counter > thermal) && ((counter % skip) == 0))  
+        if ((sweeps > thermal) && ((sweeps % skip) == 0))  
         {  
           raw_data.push_back(raw_data_elem);  
           std::cout << "Dataset (Label " << label << " , Sweep " << sweeps << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_elem_vec.begin(),raw_data_elem_vec.end(),0.) << std::endl;

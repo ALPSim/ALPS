@@ -74,17 +74,14 @@ void Lowa::dostep() {
 #endif
     ++counter_TEST;
 
-    MCstep_total += MCstep;
-    MCstep        = 0;
-
 
     if (counter_MEASURE >= Nmeasure) {
 
       if ((Ncan < 0) || (get_Npart() == Ncan)) {
         ++sweeps;
         time (&times2);
-        std::cout << "Measuring..." << get_Nmeaspart() << " ( " << get_Npart() << " ),\t Total elapsed MCstep : " << MCstep_total << "\t worm insert ratio : " << worm_insertion_acceptance_ratio() << "\t Average nr MCstep per second  : " << (MCstep_total - MCold) / ( times2 - times1) << " Sweeps : " << sweeps << "\n";
-        MCold = MCstep_total;
+        std::cout << "Measuring..." << get_Nmeaspart() << " ( " << get_Npart() << " ),\t Total elapsed MCstep : " << MCstep_total+MCstep << "\t worm insert ratio : " << worm_insertion_acceptance_ratio() << "\t Average nr MCstep per second  : " << (MCstep_total+MCstep - MCold) / ( times2 - times1) << " Sweeps : " << sweeps << "\n";
+        MCold = MCstep_total + MCstep;
         times1 = times2;
 
         update_obs();
