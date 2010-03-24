@@ -43,8 +43,6 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
-  alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
-  alps::scheduler::init(factory);
 
   int i=1;  
   alps::Parameters parms;

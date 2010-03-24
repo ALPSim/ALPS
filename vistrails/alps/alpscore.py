@@ -19,6 +19,7 @@ import os
 import os.path
 import platform
 import shutil
+import sys
 
 from PyQt4 import QtCore, QtGui
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
@@ -37,6 +38,7 @@ if platform.system()=='Darwin':
   alpsxslfile='../Resources/lib/xml/ALPS.xsl'
 if platform.system()=='Windows':
   alpsxslfile=os.path.join(os.path.join('lib','xml'),'ALPS.xsl')
+alpsxslfile = os.path.join(sys.exec_prefix,alpsxslfile)
 
 
 ##############################################################################

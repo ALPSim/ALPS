@@ -28,6 +28,8 @@ import dataset
 
 ##############################################################################
 
+_subworkflows = ['MplXYPlotCell.xml']
+
 
 def initialize():
   dataset.selfRegister()

@@ -1,18 +1,24 @@
 /***************************************************************************
  * $Id: simple_arnoldi.h,v 1.34 2004/06/29 08:31:02 troyer Exp $
  *
- * Copyright (C) 2001-2003 by Bela Bauer <bauerb@phys.ethz.ch>
+ * Copyright (C) 2010 by Bela Bauer <bauerb@phys.ethz.ch>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
- *
+* This software is part of the ALPS libraries, published under the ALPS
+* Library License; you can use, redistribute it and/or modify it under
+* the terms of the license, either version 1 or (at your option) any later
+* version.
+* 
+* You should have received a copy of the ALPS Library License along with
+* the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
+* available from http://alps.comp-phys.org/.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+* DEALINGS IN THE SOFTWARE.
  *
  **************************************************************************/
 
@@ -35,20 +41,20 @@
 #include <iostream>
 
 namespace ietl {
-	namespace detail {
-		bool cmp(std::complex<double> a, std::complex<double> b)
-		{
-			return ietl::real(a) > ietl::real(b);
-		}
-	}
-	
+    namespace detail {
+        bool cmp(std::complex<double> a, std::complex<double> b)
+        {
+            return ietl::real(a) > ietl::real(b);
+        }
+    }
+    
     template<class T>
     class arnoldi_iteration : public basic_iteration<T>
     {
     public:
         arnoldi_iteration(unsigned int max_iter_, unsigned int desired_eigenvalues__, T reltol_, T abstol_)
-    	    : basic_iteration<T>(max_iter_, reltol_, abstol_)
-	        , desired_eigenvalues_(desired_eigenvalues__)
+            : basic_iteration<T>(max_iter_, reltol_, abstol_)
+            , desired_eigenvalues_(desired_eigenvalues__)
         { }
         
         unsigned int desired_eigenvalues() { return desired_eigenvalues_; }
@@ -66,9 +72,9 @@ namespace ietl {
         typedef typename vectorspace_traits<VS>::magnitude_type magnitude_type;
         
         simple_arnoldi(Matrix &mat_, VS &vs_, Gen &rng_)
-	        : mat(mat_)
-    	    , vs(vs_)
-        	, rng(rng_)
+            : mat(mat_)
+            , vs(vs_)
+            , rng(rng_)
         { }
         
         template<class Iter>
@@ -79,7 +85,7 @@ namespace ietl {
             vector_type w = new_vector(vs);
             generate(w, rng);
             project(w, vs);
-			w /= two_norm(w);
+            w /= two_norm(w);
             
             h_matrix_type H(1,1);
             
@@ -100,18 +106,18 @@ namespace ietl {
                 // check convergence
                 if (j > iter.desired_eigenvalues()) {
                     evals.resize(H.size1());
-					h_matrix_type evecs(H.size1(), H.size2()), H2 = H; // keep a backup because geev destroys the matrix
+                    h_matrix_type evecs(H.size1(), H.size2()), H2 = H; // keep a backup because geev destroys the matrix
                     boost::numeric::bindings::lapack::geev(H2, evals, static_cast<h_matrix_type*>(NULL), &evecs,
-						boost::numeric::bindings::lapack::optimal_workspace());
-					double resid = 0;
-					for (int k = 0; k < iter.desired_eigenvalues(); ++k)
-						resid += std::abs(evecs(evecs.size2()-1, k))*normw;
+                        boost::numeric::bindings::lapack::optimal_workspace());
+                    double resid = 0;
+                    for (int k = 0; k < iter.desired_eigenvalues(); ++k)
+                        resid += std::abs(evecs(evecs.size2()-1, k))*normw;
                     if (verbose)
-						std::cout << "Arnoldi iteration " << j << ": residual = " << resid << std::endl;
+                        std::cout << "Arnoldi iteration " << j << ": residual = " << resid << std::endl;
                     if (iter.finished(resid, abs(evals[iter.desired_eigenvalues()-1]))) {
-						std::sort(evals.begin(), evals.end(), detail::cmp);
+                        std::sort(evals.begin(), evals.end(), detail::cmp);
                         break;
-					}
+                    }
                 }
                 
                 H.resize(j+2, j+2, true);
@@ -124,7 +130,7 @@ namespace ietl {
                 w /= normw;
                 vectors.push_back(w);
                 ++j;
-				++iter;
+                ++iter;
             } while (true);
         }
         
@@ -133,9 +139,9 @@ namespace ietl {
             return evals[i];
         }
         
-    protected:	
+    protected:    
         typedef boost::numeric::ublas::matrix<scalar_type, boost::numeric::ublas::column_major> h_matrix_type;
-		
+        
         Matrix& mat;
         VS &vs;
         Gen &rng;

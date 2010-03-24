@@ -30,7 +30,10 @@
 #include <alps/expression.h>
 #include <alps/model/model_helper.h>
 #include <alps/lattice/graph_helper.h>
+
 #include <alps/numeric/is_nonzero.hpp>
+#include <alps/type_traits/is_symbolic.hpp>
+
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
 #include <boost/multi_array.hpp>
@@ -39,21 +42,6 @@
 #include <boost/numeric/ublas/io.hpp>
 #include <cmath>
 
-template<class T>
-struct symbolic_traits {
- BOOST_STATIC_CONSTANT(bool, is_symbolic=false);
-};
-
-template<class T>
-const bool symbolic_traits<T>::is_symbolic;
-
-// Having this in a header causes problems -> header can only be included in *one* cpp file
-template<>
-struct symbolic_traits<alps::Expression> {
- BOOST_STATIC_CONSTANT(bool, is_symbolic=true);
-};
-
-const bool symbolic_traits<alps::Expression>::is_symbolic;
 
 template <class T, class M = boost::numeric::ublas::matrix<T> >
 class HamiltonianMatrix : public alps::graph_helper<>
@@ -108,7 +96,7 @@ void HamiltonianMatrix<T,M>::build() const
 #endif
 
   // get Hamilton operator
-  alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(*this,parms_,symbolic_traits<T>::is_symbolic));
+  alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(*this,parms_,alps::is_symbolic<T>::type::value));
     
   // get all site matrices
   std::map<unsigned int,boost::multi_array<T,2> > site_matrix;

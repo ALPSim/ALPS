@@ -13,7 +13,7 @@ from core.configuration import ConfigurationObject
 import platform
 
 identifier = 'org.comp-phys.alps'
-version = '0.5.0'
+version = '0.5.1'
 name = 'ALPS'
 
 
@@ -22,7 +22,7 @@ name = 'ALPS'
 def package_dependencies():
   return ['edu.utah.sci.vistrails.control_flow', 'edu.utah.sci.vistrails.matplotlib', 'edu.utah.sci.vistrails.spreadsheet']
 
-
+_subworkflows = ['MplXYPlotCell.xml']
 
 if platform.system()=='Windows':
   configuration = ConfigurationObject(alpspath="C:\\Program Files\\ALPS\\bin",toolpath="C:\\Program Files\\ALPS\\bin",mpirun="",mpiprocs=0)

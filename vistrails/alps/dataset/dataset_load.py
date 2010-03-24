@@ -41,7 +41,7 @@ from scipy import optimize
 from dataset_core import *
 from dataset_exceptions import *
 from pyalps.dict_intersect import dict_intersect
-from pyalps import Hdf5Loader
+from pyalps.loadhdf5_core import Hdf5Loader
 from pyalps.hlist import flatten, depth
 
 class Loader:
