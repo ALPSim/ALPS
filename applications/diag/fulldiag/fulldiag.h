@@ -103,10 +103,10 @@ private:
 
 template <class T>
 FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p) 
- : super_type(where,p,true), 
-   field(0.), 
-   field0(0.), 
-   have_Conserved(false) 
+ : super_type(where,p,true)
+ , field(0.)
+ , field0(0.) 
+ , have_Conserved(false) 
 { 
   this->construct(); 
 }
@@ -115,8 +115,8 @@ FullDiagMatrix<T>::FullDiagMatrix (const alps::ProcessList& where , const boost:
 template <class T>
 void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::string& basename) const
 {
-  alps::Parameters p(this->parms);
-  alps::graph_helper<> lattice(this->parms);
+  alps::Parameters p(this->get_parameters());
+  alps::graph_helper<> lattice(this->get_parameters());
   p << parmsin;
   
   bool have_t_range=false;

@@ -8,7 +8,7 @@
 # 
 
 if (ALPS_BUILD_EXAMPLES)
-  set (EXAMPLES print_numeric print_symbolic)
+  set (EXAMPLES print_numeric print_symbolic print_numeric2 print_symbolic2)
   set (INPUT parm_numeric parm_symbolic)
   
   foreach(file ${INPUT})
@@ -16,7 +16,7 @@ if (ALPS_BUILD_EXAMPLES)
   endforeach(file)
      
   foreach(program ${EXAMPLES})
-    add_executable(${program} ${program}.C)
+    add_executable(${program} ${program}.cpp)
     target_link_libraries(${program} alps)
   endforeach(program)
 endif (ALPS_BUILD_EXAMPLES)

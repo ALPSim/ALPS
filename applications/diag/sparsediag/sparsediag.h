@@ -46,7 +46,7 @@ public:
   typedef typename super_type::matrix_type matrix_type;
   typedef typename super_type::site_iterator site_iterator;
   typedef typename super_type::site_descriptor site_descriptor;
-  typedef typename super_type::vector_type vector_type;
+  typedef typename boost::numeric::ublas::vector<value_type> vector_type;
   typedef typename super_type::size_type size_type;
   typedef typename super_type::mag_vector_type mag_vector_type;
   typedef typename super_type::half_integer_type half_integer_type;
@@ -62,7 +62,7 @@ private:
 
 template <class T>
 SparseDiagMatrix<T>::SparseDiagMatrix(const alps::ProcessList& where , const boost::filesystem::path& p) 
-    : super_type(where,p,true) 
+ : super_type(where,p,true) 
 { 
   this->construct();
 }
@@ -116,8 +116,8 @@ void SparseDiagMatrix<T>::do_subspace()
   int n;
   
   if (this->dimension()>1) {
-    int max_iter = this->parms.value_or_default("MAX_ITERATIONS",std::min(int(10*this->dimension()),1000));  
-    int num_eigenvalues = this->parms.value_or_default("NUMBER_EIGENVALUES",1);
+    int max_iter = this->get_parameters().value_or_default("MAX_ITERATIONS",std::min(int(10*this->dimension()),1000));  
+    int num_eigenvalues = this->get_parameters().value_or_default("NUMBER_EIGENVALUES",1);
     ietl::lanczos_iteration_nlowest<double> iter(max_iter,num_eigenvalues);
     std::cerr << "Starting Lanczos \n";
     lanczos.calculate_eigenvalues(iter,generator);

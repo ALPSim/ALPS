@@ -4,8 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1994-2010 by Ping Nang Ma <pingnang@itp.phys.ethz.ch>,
-*                            Matthias Troyer <troyer@itp.phys.ethz.ch>,
+* Copyright (C) 1994-2003 by Matthias Troyer <troyer@itp.phys.ethz.ch>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -16,7 +15,7 @@
 * the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
 * available from http://alps.comp-phys.org/.
 *
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR  
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
 * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
 * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
@@ -26,38 +25,39 @@
 *
 *****************************************************************************/
 
+/* $Id$ */
 
-/* $Id: nobinning.h 3520 2009-12-11 16:49:53Z gamperl $ */
+#include <alps/model/hamiltonian_matrix.hpp>
 
-#ifndef ALPS_VECTOR_VALARRAY_CONVERSION
-#define ALPS_VECTOR_VALARRAY_CONVERSION
+#include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/ublas/matrix_sparse.hpp>
+#include <boost/numeric/ublas/io.hpp>
 
-#include <vector>
-#include <valarray>
-#include <algorithm>
-
-
-namespace alps {
-  namespace numeric {
-
-    template<class T>
-    std::vector<T> valarray2vector(std::valarray<T> const & from)
-    {
-      std::vector<T> to;
-      to.reserve(from.size());
-	  std::copy(&const_cast<std::valarray<T>&>(from)[0],&const_cast<std::valarray<T>&>(from)[0]+from.size(),std::back_inserter(to));
-      return to;
-    }
-
-    template<class T>
-    std::valarray<T> vector2valarray(std::vector<T> const & from)
-    {
-      std::valarray<T> to(from.size());
-      std::copy(from.begin(),from.end(),&to[0]);
-      return to;
-    }
-
-  }
-}
-
+#ifdef BOOST_NO_ARGUMENT_DEPENDENT_LOOKUP
+using namespace alps;
 #endif
+
+int main()
+{
+#ifndef BOOST_NO_EXCEPTIONS
+try {
+#endif
+
+  using namespace boost::numeric::ublas ;
+  alps::Parameters parms;
+  std::cin >> parms;
+  alps::hamiltonian_matrix<compressed_matrix<double,row_major> > ham(parms);
+  std::cout << ham.matrix() << std::endl;
+
+#ifndef BOOST_NO_EXCEPTIONS
+}
+catch (std::exception& exc) {
+  std::cerr << exc.what() << "\n";
+  return -1;
+}
+catch (...) {
+  std::cerr << "Fatal Error: Unknown Exception!\n";
+  return -2;
+}
+#endif
+}
