@@ -66,7 +66,7 @@ public:
   inline size_type dim2() const {return _column;}
 
   inline value_type& operator() (index_type const row, index_type const column) const 
-  { return _values[row*_column + column];}    //CHAsizeGED TO FORTRAsize STYLE!!!
+  { return _values[row*_column + column];}    //CHANGED TO FORTRAN STYLE!!!
 
 
 private:
@@ -110,7 +110,7 @@ public:
 
     , _values(new value_type [mymatrix._size])
   {
-    std::copy(&mymatrix._values[0], &mymatrix._values[mymatrix._size], &_values[0]);
+    std::copy(&mymatrix._values[0], &mymatrix._values[0]+_size, &_values[0]);
   }
 
 
@@ -125,14 +125,14 @@ public:
       _size  = mymatrix._size;
 
       _values = new value_type [_size];
-      std::copy(&mymatrix._values[0], &mymatrix._values[_size], &_values[0]);
+      std::copy(&mymatrix._values[0], &mymatrix._values[0]+_size, &_values[0]);
 
       return *this;
     }
     else
     {
       assert(_size == mymatrix._size);
-      std::copy(&mymatrix._values[0], &mymatrix._values[_size], &_values[0]);
+      std::copy(&mymatrix._values[0], &mymatrix._values[0]+_size, &_values[0]);
 
       return *this;
     }

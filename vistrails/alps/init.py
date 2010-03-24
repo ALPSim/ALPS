@@ -28,7 +28,8 @@ import dataset
 
 ##############################################################################
 
-_subworkflows = ['MplXYPlotCell.xml']
+_subworkflows = [('MplXYPlotCell.xml', {'namespace': 'Tools'}) ]
+#_subworkflows = ['MplXYPlotCell.xml']
 
 
 def initialize():
