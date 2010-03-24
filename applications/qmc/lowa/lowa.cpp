@@ -167,14 +167,6 @@ void Lowa::init()
 
 
 // ### PRINT and I/O (ASCII/hdf5)
-  // create directory if possible
-#ifdef MEASURE_TIME_SERIES_DENSITY
-  boost::filesystem::create_directory("./timeseries_density_measurements");
-#endif
-#ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
-  boost::filesystem::create_directory("./timeseries_density_matrix_measurements");
-#endif
-
   // definitions of filenames
   filename1       = obtain_filename("qmc_saveconf");
   filename1_trial = obtain_filename("tqmc_saveconf");
@@ -186,9 +178,13 @@ void Lowa::init()
   filename_proj_cymdns = obtain_filename("proj_cymdns");
   filename_cs_cymdns   = obtain_filename("cs_cymdns");
 
-  filename_mdns        = obtain_filename("mdns");
-  filename_mdnsmat     = obtain_filename("mdnsmat");
-  filename_mdnsmatinf  = obtain_filename("mdnsmatinf");
+#ifdef MEASURE_TIME_SERIES_DENSITY
+  filename_mdns        = obtain_filename_h5("timeseries.mdns");
+#endif
+#ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
+  filename_mdnsmat     = obtain_filename_h5("timeseries.mdnsmat");
+  filename_mdnsmatinf  = obtain_filename_h5("timeseries.mdnsmatinf");
+#endif
 
 
 // ### WOLDLINE DESCRIPTION

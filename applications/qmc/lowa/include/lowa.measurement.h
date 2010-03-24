@@ -114,11 +114,13 @@ void Lowa::take_diagonal_measurements()
   outFile.close();
 
 #ifdef MEASURE_TIME_SERIES_DENSITY
-  std::ostringstream ss;  ss << sweeps;  
-  std::string cur_filename_mdns = "./timeseries_density_measurements/" + filename_mdns + "_" + ss.str() + ".h5";
+  alps::hdf5::oarchive oa_mdns(filename_mdns.c_str());
 
-  alps::hdf5::oarchive oa_mdns(cur_filename_mdns.c_str());
-  oa_mdns << alps::make_pvp("TimeSeries/Density",_state,_N);
+  std::ostringstream ss;  ss << sweeps;  
+  std::string cur_desc_mdns = "TimeSeries/Density/Set" + ss.str();
+
+  oa_mdns << alps::make_pvp("No_of_datasets",sweeps);
+  oa_mdns << alps::make_pvp(cur_desc_mdns,_state,_N);
 
 /*
   std::string cur_filename_mdns_ASCII = "./timeseries_density_measurements/" + filename_mdns + "_" + ss.str() + ".o";

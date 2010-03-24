@@ -124,40 +124,27 @@ int main(int argc, char** argv)
     std::ostringstream ss_out;
     ss_out << label;
     std::string cur_filename = fileIN;
+    if (label != 0)  {  cur_filename += ss_out.str();  }
+    cur_filename += ".h5";
+    alps::hdf5::iarchive ia(cur_filename.c_str());
 
-    if (label != 0)
-    {
-      cur_filename += ss_out.str();
-    }
-
-    bool is_input_finished = false;
     uint32_t sweeps = 0;
+    ia >> alps::make_pvp("No_of_datasets",sweeps);
 
-    while (!is_input_finished)
+    for (uint32_t counter=1; counter <= sweeps; ++counter)
     {
-      ++sweeps;
       std::ostringstream ss2_out;
-      ss2_out << sweeps;
-      std::string cur_filename_now = cur_filename + "_" + ss2_out.str() + ".h5";
+      ss2_out << counter;
+      std::string cur_description_str = description_str + ss2_out.str();
 
-      std::ifstream inTest;
-      inFile.open(cur_filename_now.c_str(),std::ios::in);
-      if (!inFile.good())  {  is_input_finished = true; }
-      inFile.close();
-
-      if (!is_input_finished)
-      {
-        std::vector<double> raw_data_elem_vec;
-        alps::hdf5::iarchive ia(cur_filename_now.c_str());
-        ia >> alps::make_pvp(description_str,raw_data_elem_vec);
-
-        std::valarray<double> raw_data_elem = alps::numeric::vector2valarray<double>(raw_data_elem_vec);
-        if ((sweeps > thermal) && ((sweeps % skip) == 0))  
-        {  
-          raw_data.push_back(raw_data_elem);  
-          std::cout << "Dataset (Label " << label << " , Sweep " << sweeps << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_elem_vec.begin(),raw_data_elem_vec.end(),0.) << std::endl;
-        }
-      }  
+      std::vector<double> raw_data_elem_vec;
+      ia >> alps::make_pvp(cur_description_str,raw_data_elem_vec);
+      std::valarray<double> raw_data_elem = alps::numeric::vector2valarray<double>(raw_data_elem_vec);
+      if ((counter > thermal) && ((counter % skip) == 0))  
+      {  
+        raw_data.push_back(raw_data_elem);  
+        std::cout << "Dataset (Label " << label << " , Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_elem_vec.begin(),raw_data_elem_vec.end(),0.) << std::endl;
+      }
     }
   }
 

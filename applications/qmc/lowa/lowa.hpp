@@ -50,7 +50,6 @@
 #include "band_structure_calculations/band_structure_calculations_BHM.h"
 
 #include <alps/scheduler/montecarlo.h>
-#include <boost/filesystem.hpp>
 #include <iostream>
 #include <iomanip>
 #include <time.h>
@@ -161,7 +160,8 @@ private:
 // ### PRINT and I/O (ASCII/hdf5)   // *** Tama : to include them in <lowa.io.h>
 
   // member functions
-  std::string obtain_filename(std::string original_filename)       {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str());  }
+  std::string obtain_filename(std::string original_filename)     {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str());  }
+  std::string obtain_filename_h5(std::string original_filename)  {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str() + ".h5");  }
   void export_lowa_simulation(std::ostream&);
   void import_lowa_simulation(std::istream&);
   void save(alps::ODump& odump)  {}
@@ -177,8 +177,12 @@ private:
 
   std::string filename1, filename1_trial;
   std::string filename_N, filename_mN, filename_dns0, filename_mdns0, filename_proj_cymdns, filename_cs_cymdns;
+#ifdef MEASURE_TIME_SERIES_DENSITY
   std::string filename_mdns;
+#endif
+#ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
   std::string filename_mdnsmat, filename_mdnsmatinf;
+#endif
 
 
 // WORLDLINE DESCRIPTION (ie. LATTICE (space), BAND PARAMETERS (space), LIST OF INTERACTIONS (space-time), DENSITY at a "plane")   
