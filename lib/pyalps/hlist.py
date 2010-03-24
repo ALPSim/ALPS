@@ -65,6 +65,13 @@ def flatten(sl, fdepth = None):
 def deep_flatten(sl, fdepth = None):
     return [x for x in flatten(sl, fdepth)]
 
+def copy_structure(sl):
+    try:
+        ll = len(sl)
+        return [copy_structure(isl) for isl in sl]
+    except Exception:
+        return 1
+
 def happly(functor, sl, fdepth = None):
     if fdepth == None:
         fdepth = depth(sl)
@@ -72,9 +79,10 @@ def happly(functor, sl, fdepth = None):
     hl.apply(functor)
 
 def hmap(functor, sl, fdepth = None):
-    cpy = copy.deepcopy(sl)
-    happly(functor, cpy, fdepth)
-    return cpy
+    if fdepth == None:
+        fdepth = depth(sl)
+    hl = HList(sl, fdepth)
+    return hl.map(functor)
 
 class HList:
     def __init__(self):
@@ -126,4 +134,11 @@ class HList:
     def apply(self, functor):
         for idx in self.indices_:
             self[idx] = functor(self[idx])
+    
+    def map(self, functor):
+        ret = copy_structure(self.data_)
+        rethl = HList(ret)
+        for idx in self.indices_:
+            rethl[idx] = functor(self[idx])
+        return ret
     

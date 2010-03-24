@@ -35,6 +35,7 @@ import urllib, copy
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
+import copy
 
 from dataset_core import *
 from dataset_exceptions import *
@@ -81,23 +82,35 @@ class CacheErasure(NotCacheable,Module):
     def compute(self):
         self.setResult('output', self.getInputFromPort('input'))
     
-class SetLabels(FitPrototype):
+class SetLabels(Module):
     my_input_ports = [
+        PortDescriptor('input',DataSets),
         PortDescriptor('label_props',ListOfElements)
+    ]
+    my_output_ports = [
+        PortDescriptor('output',DataSets)
     ]
     
     # overwrite default behaviour to deepcopy everything
     def compute(self):
-        FitPrototype.property_compute(self)
-    
-    def transform(self,data):
-        labelstr = ''
+        q = self.getInputFromPort('input')
         labels = self.getInputFromPort('label_props')
-        for label in labels:
-            if label != labels[0]:
-                labelstr += ', '
-            labelstr += '%s = %.4s' % (label,data.props[label])
-        data.props['label'] = labelstr
+        
+        def f(x):
+            ret = DataSet()
+            ret.x = x.x
+            ret.y = x.y
+            ret.props = copy.deepcopy(x.props)
+            labelstr = ''
+            for label in labels:
+                if label != labels[0]:
+                    labelstr += ', '
+                labelstr += '%s = %.4s' % (label,x.props[label])
+            ret.props['label'] = labelstr
+            return ret
+        
+        q2 = hmap(f, q)
+        self.setResult('output', q2)
 
 class MakeScatter(FitPrototype):
     def transform(self,data):
