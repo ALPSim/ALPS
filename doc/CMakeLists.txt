@@ -36,7 +36,7 @@ make_directory(${PROJECT_BINARY_DIR}/doc/html/search)
 make_directory(${PROJECT_BINARY_DIR}/doc/html/images)
 make_directory( ${PROJECT_BINARY_DIR}/doc/alps/doxygen)
 
-set(ALPS_AUTODOC_SOURCES hdf5 alea lattice model osiris parser scheduler random)
+set(ALPS_AUTODOC_SOURCES alea lattice model osiris parser scheduler random)
 
 set(ALPS_QBK_SOURCES alea general getting_started hdf5 lattice
     model osiris overview parser scheduler tools random)
@@ -56,6 +56,12 @@ add_custom_command(OUTPUT src/general.autodoc
                    COMMAND ./autodoc src/general.autodoc ${HEADERS}
                    DEPENDS ${HEADERS} autodoc.in)
 set(ALPS_QBK_DEPENDS ${ALPS_QBK_DEPENDS} src/general.autodoc)
+
+set(HEADERS ${PROJECT_SOURCE_DIR}/src/alps/hdf5.hpp)
+add_custom_command(OUTPUT src/hdf5.autodoc 
+                   COMMAND ./autodoc src/hdf5.autodoc ${HEADERS}
+                   DEPENDS ${HEADERS} autodoc.in)
+set(ALPS_QBK_DEPENDS ${ALPS_QBK_DEPENDS} src/hdf5.autodoc)
 
 
 foreach (S ${ALPS_AUTODOC_SOURCES})
