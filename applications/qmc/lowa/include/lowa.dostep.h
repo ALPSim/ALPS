@@ -85,7 +85,7 @@ void Lowa::dostep() {
         times1 = times2;
 
         update_obs();
-        take_diagonal_measurements();
+        if (is_thermalized())  {  take_diagonal_measurements();  }
       }
       counter_MEASURE = 0;
 
@@ -94,7 +94,7 @@ void Lowa::dostep() {
 
 #ifdef MEASURE_DENSITY_MATRIX
     if (counter_MEASURE_GREEN >= Nmeasure_green) {
-      take_offdiagonal_measurements();
+      if (is_thermalized())  {  take_offdiagonal_measurements();  }
       reset_av_dnsmat();
       counter_MEASURE_GREEN = 0;
     }
