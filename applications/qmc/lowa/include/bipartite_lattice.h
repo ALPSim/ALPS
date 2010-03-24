@@ -45,7 +45,6 @@
 #include <iostream>
 #include <cmath>
 
-
 namespace alps {
 namespace applications {
 namespace lowa {
@@ -374,9 +373,9 @@ public:
       site_type s0 = i0 + j0*_Nx + k0*_Nxy;
       return s0;
 #else
-      site_type i0 = std::abs(_xintcoord[s2] - _xintcoord[s1]);
-      site_type j0 = std::abs(_yintcoord[s2] - _yintcoord[s1]);
-      site_type k0 = std::abs(_zintcoord[s2] - _zintcoord[s1]);
+      site_type i0 = (_xintcoord[s2] - _xintcoord[s1] > 0 ? _xintcoord[s2] - _xintcoord[s1] : -(_xintcoord[s2] - _xintcoord[s1]));
+      site_type j0 = (_yintcoord[s2] - _yintcoord[s1] > 0 ? _yintcoord[s2] - _yintcoord[s1] : -(_yintcoord[s2] - _yintcoord[s1]));
+      site_type k0 = (_zintcoord[s2] - _zintcoord[s1] > 0 ? _zintcoord[s2] - _zintcoord[s1] : -(_zintcoord[s2] - _zintcoord[s1]));
 
       site_type s0 = i0 + j0*_Nx + k0*_Nxy;
       return s0;
