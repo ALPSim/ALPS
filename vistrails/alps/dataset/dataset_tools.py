@@ -40,7 +40,8 @@ from dataset_core import *
 from dataset_exceptions import *
 from dataset_fit import *
 
-from pyalps.hlist import deep_flatten, flatten
+from pyalps.hlist import deep_flatten, flatten, happly, hmap, depth
+from pyalps.dict_intersect import dict_difference, dict_intersect
 
 class SortByX(FitPrototype):
     def transform(self,data):
@@ -131,3 +132,22 @@ class PrepareDictionary(Module):
                 d[pair[0]] = pair[1]
         
         self.setResult('output', d)
+
+class PrintHierarchyStructure(Module):
+    my_input_ports = [PortDescriptor('input',DataSets)]
+    my_output_ports = []
+    
+    def compute(self):
+        q = self.getInputFromPort('input')
+        
+        all_props = [v.props for v in flatten(q)]
+        diff_props = dict_difference(all_props)
+        
+        def f(x):
+            d = {}
+            for k in diff_props:
+                d[k] = x.props[k]
+            return d
+        
+        q2 = hmap(f, q)
+        print q2

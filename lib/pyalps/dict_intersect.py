@@ -40,3 +40,19 @@ def dict_intersect(dicts):
         if take:
             ret[key] = dicts[0][key]
     return ret
+
+def dict_difference(dicts):
+    sets = [set(q.keys()) for q in dicts]
+    intersection = sets[0]
+    for iset in sets:
+        intersection &= iset
+    ret = []
+    for key in intersection:
+        take = True
+        val0 = dicts[0][key]
+        for idict in dicts:
+            if val0 != idict[key]:
+                take = False
+        if not take:
+            ret.append(key)
+    return ret

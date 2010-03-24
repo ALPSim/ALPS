@@ -25,6 +25,8 @@
 # 
 # ****************************************************************************
 
+import copy
+
 def depth(hl):
     ret = 0
     if len(hl) == 0:
@@ -63,6 +65,17 @@ def flatten(sl, fdepth = None):
 def deep_flatten(sl, fdepth = None):
     return [x for x in flatten(sl, fdepth)]
 
+def happly(functor, sl, fdepth = None):
+    if fdepth == None:
+        fdepth = depth(sl)
+    hl = HList(sl, fdepth)
+    hl.apply(functor)
+
+def hmap(functor, sl, fdepth = None):
+    cpy = copy.deepcopy(sl)
+    happly(functor, cpy, fdepth)
+    return cpy
+
 class HList:
     def __init__(self):
         self.data_ = []
@@ -79,6 +92,9 @@ class HList:
         
         index__(self.data_, self.indices_, [0 for q in range(depth(self.data_))], 0, fdepth)
         self.indices_ = [idx[0:fdepth] for idx in self.indices_]
+    
+    def __len__(self):
+        return len(self.indices_)
     
     def __getitem__(self, key):
 #        print 'Get key',key
@@ -106,4 +122,8 @@ class HList:
     
     def data(self):
         return self.data_
+    
+    def apply(self, functor):
+        for idx in self.indices_:
+            self[idx] = functor(self[idx])
     

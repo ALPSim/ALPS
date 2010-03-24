@@ -154,3 +154,4 @@ def selfRegister():
     register(GroupBy,'DataSet|Hierarchy')
     register(GroupedTransform,'DataSet|Hierarchy')
     register(Flatten,'DataSet|Hierarchy')
+    register(PrintHierarchyStructure,'DataSet|Hierarchy')

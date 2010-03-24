@@ -39,7 +39,7 @@ from scipy import optimize
 from dataset_core import *
 from dataset_exceptions import *
 
-from pyalps.hlist import flatten
+from pyalps.hlist import flatten, happly, hmap
 
 class ConstantDataSet(Module):
     """Create a constant dataset and store into DataSets"""
@@ -156,7 +156,7 @@ class GroupedTransform(Module):
                 cmd += '\t' + line + '\n'
             exec cmd
             
-            q = [f(s) for s in flatten(q,level)]
+            happly(f, q, level)
 
             self.setResult('output',q)
         else:
