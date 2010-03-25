@@ -94,8 +94,8 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/CMake)
 ######################################################################
 # Version information
 ######################################################################
-set(ALPS_VERSION_MAJOR 1)
-set(ALPS_VERSION_MINOR 4)
+set(ALPS_VERSION_MAJOR 2)
+set(ALPS_VERSION_MINOR 0)
 set(ALPS_VERSION_BUILD 0d)
 set(ALPS_YEAR 2010)
 set(ALPS_RELEASE_PATCH "")
@@ -542,7 +542,7 @@ if (ALPS_FOR_VISTRAILS)
             PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
   endif (NOT WIN32 AND NOT APPLE)
   install(DIRECTORY vistrails/alps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PACKAGE_DIR}
-        FILES_MATCHING PATTERN "*.py"
+        FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   install(DIRECTORY lib/xml DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR}
         FILES_MATCHING PATTERN "*.xsl"
