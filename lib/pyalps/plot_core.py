@@ -385,7 +385,8 @@ def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
         
     num = 0
     output += 'plot '
-    for q in desc['data']:
+    
+    for q in flatten(desc['data']):
         if len(q.y):
             try:
                 xerrors = np.array([xx.error for xx in q.x])
@@ -396,28 +397,48 @@ def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
                 yerrors = np.array([xx.error for xx in q.y])
             except AttributeError:
                 yerrors = None
-        if 'label' in q.props:
-            if xerrors == None and yerrors == None:
-                output += ' "-" using 1:2 title "' + q.props['label'] + '",'
-            if xerrors == None and yerrors != None:
-                output += ' "-" using 1:2:3 w yerrorbars  title "' + q.props['label'] + '",'
-            if xerrors != None and yerrors == None:
-                output += ' "-" using 1:2:3 w xerrorbars  title "' + q.props['label'] + '",'
-            if xerrors != None and yerrors != None:
-                output += ' "-" using 1:2:3:4 w xyerrorbars  title "' + q.props['label'] + '",'
+        if 'line' in q.props and q.props['line'] == 'scatter':
+            if 'label' in q.props:
+                if xerrors == None and yerrors == None:
+                    output += ' "-" using 1:2 title "' + q.props['label'] + '",'
+                if xerrors == None and yerrors != None:
+                    output += ' "-" using 1:2:3 w yerrorbars  title "' + q.props['label'] + '",'
+                if xerrors != None and yerrors == None:
+                    output += ' "-" using 1:2:3 w xerrorbars  title "' + q.props['label'] + '",'
+                if xerrors != None and yerrors != None:
+                    output += ' "-" using 1:2:3:4 w xyerrorbars  title "' + q.props['label'] + '",'
+            else:
+                if xerrors == None and yerrors == None:
+                    output += ' "-" using 1:2 notitle ,"' 
+                if xerrors == None and yerrors != None:
+                    output += ' "-" using 1:2:3 w yerrorbars  notitle ,' 
+                if xerrors != None and yerrors == None:
+                    output += ' "-" using 1:2:3 w xerrorbars  notitle ,' 
+                if xerrors != None and yerrors != None:
+                    output += ' "-" using 1:2:3:4 w xyerrorbars  notitle ,'
         else:
-            if xerrors == None and yerrors == None:
-                output += ' "-" using 1:2 notitle ,"' 
-            if xerrors == None and yerrors != None:
-                output += ' "-" using 1:2:3 w yerrorbars  notitle ,' 
-            if xerrors != None and yerrors == None:
-                output += ' "-" using 1:2:3 w xerrorbars  notitle ,' 
-            if xerrors != None and yerrors != None:
-                output += ' "-" using 1:2:3:4 w xyerrorbars  notitle ,'
-                
+            if 'label' in q.props:
+                if xerrors == None and yerrors == None:
+                    output += ' "-" using 1:2 title "' + q.props['label'] + '",'
+                if xerrors == None and yerrors != None:
+                    output += ' "-" using 1:2:3 w yerrorline  title "' + q.props['label'] + '",'
+                if xerrors != None and yerrors == None:
+                    output += ' "-" using 1:2:3 w xerrorline  title "' + q.props['label'] + '",'
+                if xerrors != None and yerrors != None:
+                    output += ' "-" using 1:2:3:4 w xyerrorline  title "' + q.props['label'] + '",'
+            else:
+                if xerrors == None and yerrors == None:
+                    output += ' "-" using 1:2 notitle ,"' 
+                if xerrors == None and yerrors != None:
+                    output += ' "-" using 1:2:3 w yerrorline  notitle ,' 
+                if xerrors != None and yerrors == None:
+                    output += ' "-" using 1:2:3 w xerrorline  notitle ,' 
+                if xerrors != None and yerrors != None:
+                    output += ' "-" using 1:2:3:4 w xyerrorline  notitle ,'
         output=output[:-1]
         output+='\n'
-    for q in desc['data']:    
+    
+    for q in flatten(desc['data']):    
             if xerrors == None and yerrors == None:
                 output += '# X Y \n'
                 for i in range(len(q.x)):

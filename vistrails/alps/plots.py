@@ -31,6 +31,20 @@ class DisplayXMGRPlot(NotCacheable, alpscore.SystemCommand):
          self.execute(['nohup',alpscore._get_tool_path('xmgrace'), self.getInputFromPort('file').name,'&'])
      _input_ports = [('file', [basic.File])]
 
+class DisplayGnuplot(NotCacheable, alpscore.SystemCommand):
+    def compute(self):
+        lines = [x.strip() for x in open(self.getInputFromPort('file').name).readlines()]
+        lines2 = ['set terminal x11 enhanced']
+        for line in lines:
+            if not line.startswith('set terminal'):
+                lines2.append(line)
+        outf = open(self.getInputFromPort('file').name, 'w')
+        for line in lines2:
+            outf.write(line + '\n')
+        outf.close()
+        self.execute(['nohup',alpscore._get_tool_path('gnuplot'), '-persist' , self.getInputFromPort('file').name,'&'])
+    _input_ports = [('file', [basic.File])]
+    
 class PlotDescription(basic.File):
     """ a plot desription file """
 
@@ -167,6 +181,7 @@ def selfRegister():
   
 #  reg.add_module(DisplayXMGRPlot,namespace="Plots",abstract=True)
   reg.add_module(DisplayXMGRPlot,name="DisplayGracePlot",namespace="DataSet|Plot")
+  reg.add_module(DisplayGnuplot,name="DisplayGnuplotPlot",namespace="DataSet|Plot")
   reg.add_module(AlpsMplPlot,namespace="Plots",abstract=True)
   
  # reg.add_module(MakePlot)
