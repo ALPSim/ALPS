@@ -2,8 +2,6 @@
 //  Use, modification, and distribution are subject to the Boost Software 
 //  License, Version 1.0. (See at <http://www.boost.org/LICENSE_1_0.txt>.)
 
-/* $Id: abstract_task.C 3822 2010-01-30 22:02:39Z troyer $ */
-
 #include "ngs.hpp"
 
 #include <boost/random/variate_generator.hpp>
@@ -12,13 +10,13 @@
 
 class ising_impl : public alps::mcbase {
 	public:
-		ising_impl(parameters_type const & parms)
-			: mcbase(parms)
-			, length(int(parms["L"]))
-			, beta(1. / double(parms["T"]))
+		ising_impl(parameters_type const & params)
+			: alps::mcbase(params)
+			, length(params["L"])
+			, beta(1. / double(params["T"]))
 			, sweeps(0)
-			, thermalization_sweeps(int(parms["THERMALIZATION"]))
-			, total_sweeps(int(parms["SWEEPS"]))
+			, thermalization_sweeps(int(params["THERMALIZATION"]))
+			, total_sweeps(int(params["SWEEPS"]))
 			, spins(length)
 			, random(boost::mt19937(), boost::uniform_real<>())
 		{
@@ -75,4 +73,5 @@ class ising_impl : public alps::mcbase {
 		std::valarray<double> corr;
 		boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
 };
-typedef alps::mcrun<ising_impl> ising_sim;
+typedef alps::mcmpirun<ising_impl> parallel_sim;
+typedef alps::mcrun<ising_impl> simple_sim;

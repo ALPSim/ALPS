@@ -2,19 +2,21 @@
 //  Use, modification, and distribution are subject to the Boost Software 
 //  License, Version 1.0. (See at <http://www.boost.org/LICENSE_1_0.txt>.)
 
-/* $Id: abstract_task.C 3822 2010-01-30 22:02:39Z troyer $ */
-
 #include "isingng.hpp"
 
-#include <iostream>
-
-bool callback() {
-	return false;
+template<typename S> void run_sim(alps::mcoptions const & options, int argc, char *argv[]) {
+	typename S::parameters_type params(options);
+	S s(params, argc, argv);
+	s.run(boost::bind(&S::stop, s));
+	while (!s.stop())
+		usleep(500000);
 }
-int main(int argc, char **argv) {
-	alps::Parameters parms;
-	std::cin >> parms;
-	ising_sim s(parms);
-	s.run(&callback);
-	s.save("sim.h5");
+int main(int argc, char *argv[]) {
+	if (argc < 2)
+		throw std::invalid_argument("parameter file missing " + std::string(argv[0]) + " param.h5");
+	alps::mcoptions options(argc, argv);
+	if (options.is_valid() && options.use_mpi())
+		run_sim<parallel_sim>(options, argc, argv);
+	else if (options.is_valid())
+		run_sim<simple_sim>(options, argc, argv);
 }
