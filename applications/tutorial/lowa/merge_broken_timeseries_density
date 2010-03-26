@@ -1,0 +1,62 @@
+###/*****************************************************************************
+###*
+###* ALPS Project: Algorithms and Libraries for Physics Si_mulations
+###*
+###* ALPS Applications
+###*
+###* Copyright (C) 2010-2010 by Ping Nang Ma <pingnang@itp.phys.ethz.ch>,
+###*                            Matthias Troyer <troyer@itp.phys.ethz.ch>
+###*
+###* This software is part of the ALPS libraries, published under the ALPS
+###* Library License; you can use, redistribute it and/or modify it under
+###* the terms of the license, either version 1 or (at your option) any later
+###* version.
+###*
+###* You should have received a copy of the ALPS Library License along with
+###* the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
+###* available from http://alps.comp-phys.org/.
+###*
+###* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+###* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+###* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT
+###* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE
+###* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE,
+###* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+###* DEALINGS IN THE SOFTWARE.
+###*
+###*****************************************************************************/
+###
+### $Id: merge_broken_timeseries_hdf5_measurements 3520 2010-03-19 22:00:00Z tamama $ 
+###
+###
+### Legends
+### -------
+###
+### 1)  -a : input filename1 (backbone)
+### 2)  -b : input filename2 (backbone)
+### 3)  -d : description label in hdf5 file
+### 4)  -t : no. of thermalization steps desired  (important for fast convergence)
+### 5)  -s : no of skip steps desired    (important to keep autocorrelation low)
+### 6)  -o : output filename
+###
+
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns1 -b ./2/timeseries.mdns1 -o ./timeseries.mdns1 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns2 -b ./2/timeseries.mdns2 -o ./timeseries.mdns2 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns3 -b ./2/timeseries.mdns3 -o ./timeseries.mdns3 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns4 -b ./2/timeseries.mdns4 -o ./timeseries.mdns4 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns5 -b ./2/timeseries.mdns5 -o ./timeseries.mdns5 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns6 -b ./2/timeseries.mdns6 -o ./timeseries.mdns6 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns7 -b ./2/timeseries.mdns7 -o ./timeseries.mdns7 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns8 -b ./2/timeseries.mdns8 -o ./timeseries.mdns8 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns9 -b ./2/timeseries.mdns9 -o ./timeseries.mdns9 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns10 -b ./2/timeseries.mdns10 -o ./timeseries.mdns10 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns11 -b ./2/timeseries.mdns11 -o ./timeseries.mdns11 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns12 -b ./2/timeseries.mdns12 -o ./timeseries.mdns12 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns13 -b ./2/timeseries.mdns13 -o ./timeseries.mdns13 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns14 -b ./2/timeseries.mdns14 -o ./timeseries.mdns14 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns15 -b ./2/timeseries.mdns15 -o ./timeseries.mdns15 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns16 -b ./2/timeseries.mdns16 -o ./timeseries.mdns16 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns17 -b ./2/timeseries.mdns17 -o ./timeseries.mdns17 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns18 -b ./2/timeseries.mdns18 -o ./timeseries.mdns18 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns19 -b ./2/timeseries.mdns19 -o ./timeseries.mdns19 -d TimeSeries/Density/Set -t 10 -s 1
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/merge_broken_timeseries_hdf5_measurements -a ./1/timeseries.mdns20 -b ./2/timeseries.mdns20 -o ./timeseries.mdns20 -d TimeSeries/Density/Set -t 10 -s 1 

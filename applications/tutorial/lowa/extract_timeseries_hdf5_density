@@ -41,4 +41,4 @@
 ### 7)  -o : output filename
 ###
 
-/Users/tamama/Programs/ALPS2/applications/qmc/lowa/extract_timeseries_hdf5_measurements -i timeseries.mdns -o mdns -d TimeSeries/Density/Set -l 1 -u 1 -t 10 -s 1 
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/extract_timeseries_hdf5_measurements -i timeseries.mdns -o mdns -d TimeSeries/Density/Set -l 1 -u 5 -t 10 -s 1 

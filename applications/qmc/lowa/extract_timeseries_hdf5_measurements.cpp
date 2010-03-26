@@ -115,6 +115,9 @@ int main(int argc, char** argv)
   }
 
 
+  bool is_data_inputed = false;
+
+
   std::vector<std::valarray<double> > raw_data;
 
   double dummy;  
@@ -126,75 +129,65 @@ int main(int argc, char** argv)
     std::string cur_filename = fileIN;
     if (label != 0)  {  cur_filename += ss_out.str();  }
     cur_filename += ".h5";
-    alps::hdf5::iarchive ia(cur_filename.c_str());
 
-    uint32_t sweeps = 0;
-    ia >> alps::make_pvp("No_of_datasets",sweeps);
-
-    for (uint32_t counter=1; counter <= sweeps; ++counter)
+    bool is_hdf5_file_found = false;
+    inFile.open(cur_filename.c_str(),std::ios::in);
+    if (inFile.good())  {  is_hdf5_file_found = true;  }
+    inFile.close();
+ 
+    if (is_hdf5_file_found)
     {
-      std::ostringstream ss2_out;
-      ss2_out << counter;
-      std::string cur_description_str = description_str + ss2_out.str();
-
-      std::vector<double> raw_data_elem_vec;
-      ia >> alps::make_pvp(cur_description_str,raw_data_elem_vec);
-      std::valarray<double> raw_data_elem = alps::numeric::vector2valarray<double>(raw_data_elem_vec);
-      if ((counter > thermal) && ((counter % skip) == 0))  
-      {  
-        raw_data.push_back(raw_data_elem);  
-        std::cout << "Dataset (Label " << label << " , Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_elem_vec.begin(),raw_data_elem_vec.end(),0.) << std::endl;
+      alps::hdf5::iarchive ia(cur_filename.c_str());
+  
+      uint32_t sweeps = 0;
+      ia >> alps::make_pvp("No_of_datasets",sweeps);
+  
+      for (uint32_t counter=1; counter <= sweeps; ++counter)
+      {
+        std::ostringstream ss2_out;
+        ss2_out << counter;
+        std::string cur_description_str = description_str + ss2_out.str();
+  
+        std::vector<double> raw_data_elem_vec;
+        if (ia.is_data(cur_description_str))
+        {
+          ia >> alps::make_pvp(cur_description_str,raw_data_elem_vec);
+          std::valarray<double> raw_data_elem = alps::numeric::vector2valarray<double>(raw_data_elem_vec);
+          if ((counter > thermal) && ((counter % skip) == 0))  
+          {  
+            raw_data.push_back(raw_data_elem); 
+            is_data_inputed = true; 
+            std::cout << "Dataset (Label " << label << " , Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_elem_vec.begin(),raw_data_elem_vec.end(),0.) << std::endl;
+          }
+        }
       }
     }
   }
 
 
-  /*
-   * METHOD A
-   * --------
-   * Arrays of alps::RealObservable -- very fast
-   *
-   */  
-
-  uint32_t Nsites = raw_data[0].size();
-  uint32_t count  = raw_data.size();
-  alps::RealObservable* data = new alps::RealObservable [Nsites];
-  for (uint32_t index=0; index < Nsites; ++index)
+  if (is_data_inputed)
   {
-    for (uint32_t count_index=0; count_index < count; ++count_index)
+    uint32_t Nsites = raw_data[0].size();
+    uint32_t count  = raw_data.size();
+    alps::RealObservable* data = new alps::RealObservable [Nsites];
+    for (uint32_t index=0; index < Nsites; ++index)
     {
-      data[index] << raw_data[count_index][index];
+      for (uint32_t count_index=0; count_index < count; ++count_index)
+      {
+        data[index] << raw_data[count_index][index];
+      }
     }
+    outFile.open(fileOUT.c_str(),std::ios::out);
+    for (std::size_t index=0; index < Nsites; ++index)
+    {
+      std::cout << data[index];
+      outFile << index << "\t" << data[index].mean() << "\t" << data[index].error() << "\n";
+    }
+    outFile.close();
+
+
+    delete [] data;
   }
-  outFile.open(fileOUT.c_str(),std::ios::out);
-  for (std::size_t index=0; index < Nsites; ++index)
-  {
-    outFile << index << "\t" << data[index].mean() << "\t" << data[index].error() << "\n";
-  }
-  outFile.close();
-
-  delete[] data;
-
-
-  /* 
-   * METHOD B
-   * --------
-   * alps::RealVectorObservable -- very very slow
-   *
-   */
-
-/*
-  alps::RealVectorObservable data(fileIN);          
-  data.reset(true);   
-  for (std::vector<std::valarray<double> >::iterator it=raw_data.begin(); it != raw_data.end(); ++it)  {  data << *it;  }
-
-  outFile.open(fileOUT.c_str(),std::ios::out);
-  for (std::size_t index=0; index < raw_data[0].size(); ++index)
-  {
-    outFile << index << "\t" << data[index].mean() << "\t" << data[index].error() << "\n";
-  } 
-  outFile.close();
-*/
 
   return 0;
 }
