@@ -10,6 +10,7 @@
 if (ALPS_BUILD_EXAMPLES)
   if(LAPACK_FOUND)
     add_definitions(${LAPACK_DEFINITIONS})
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
     set (EXAMPLES arnoldi1)
     foreach(program ${EXAMPLES})
       add_executable(${program} ${program}.C)

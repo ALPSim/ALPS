@@ -23,10 +23,11 @@
 #include <boost/random.hpp>
 #include <boost/limits.hpp>
 
+#include <boost/numeric/bindings/lapack/geev.hpp>
 #include <boost/numeric/ublas/matrix_expression.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include <boost/numeric/bindings/lapack/geev.hpp>
+
 
 #include <ietl/interface/ublas.h>
 #include <ietl/simple_arnoldi.h>

@@ -18,9 +18,8 @@
 #include <boost/program_options.hpp>
 
 #include <vector>
-#include <unistd.h>
+//#include <unistd.h>
 #include <signal.h>
-
 #include <mpi.h>
 
 namespace alps {
