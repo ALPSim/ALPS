@@ -469,7 +469,8 @@ namespace alps {
 							MPI_Isend(&(obuf.front()), count, MPI_BYTE, source, status.MPI_TAG, MPI_COMM_WORLD, request);
 							if (tag == MC_finalize)
 								MPI_Wait(request, &status);
-							MPI_Request_free(request);
+							else
+								MPI_Request_free(request);
 							pending[index] = std::make_pair(0, boost::any());
 						}
 					}
