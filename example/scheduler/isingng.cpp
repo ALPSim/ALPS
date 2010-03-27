@@ -7,7 +7,7 @@
 template<typename S> void run_sim(alps::mcoptions const & options, int argc, char *argv[]) {
 	typename S::parameters_type params(options);
 	S s(params, argc, argv);
-	s.run(boost::bind(&S::stop, s));
+	s.run(boost::bind(&S::stop, boost::ref(s)));
 	while (!s.stop())
 		usleep(500000);
 }
