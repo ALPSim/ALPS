@@ -19,8 +19,9 @@
 
 #include <iomanip>
 #include <vector>
-//#include <unistd.h>
+#include <cmath>
 #include <signal.h>
+
 #include <mpi.h>
 
 namespace alps {
@@ -50,6 +51,10 @@ namespace alps {
 	}
 	class mcidump : public IDump {
 		public:
+			void reset(std::vector<char> const & buf) { 
+				buffer = buf;
+				pos = 0;
+			}
 			#define ALPS_MCIDUMP_DO_TYPE(T)																		\
 				void read_simple(T & x) { read_buffer(&x, sizeof(T)); }											\
 				void read_array(std::size_t n, T * p) { read_buffer(p, n * sizeof(T)); }
@@ -72,8 +77,6 @@ namespace alps {
 			ALPS_MCIDUMP_DO_TYPE(long double)
 			# undef ALPS_MCIDUMP_DO_TYPE
 			void read_string(std::size_t n, char * x) { read_buffer(x, n); }
-			std::size_t size() { return buffer.size(); }
-			char * data() { return &buffer.front(); }
 		private:
 			void read_buffer(void * p, std::size_t n) {
 				if(pos + n > buffer.size())
@@ -86,6 +89,8 @@ namespace alps {
 	};
 	class mcodump : public ODump {
 		public:
+			std::size_t size() const { return buffer.size(); }
+			char & front() { return buffer.front(); }
 			#define ALPS_MCODUMP_DO_TYPE(T)																		\
 				void write_simple(T x) { write_buffer(&x, sizeof(T)); }											\
 				void write_array(std::size_t n, T const * p) { write_buffer(p, n * sizeof(T)); }
@@ -108,8 +113,6 @@ namespace alps {
 			ALPS_MCODUMP_DO_TYPE(long double)
 			# undef ALPS_MCODUMP_DO_TYPE
 			void write_string(std::size_t n, const char * x) { write_buffer(x, n); }
-			std::size_t size() { return buffer.size(); }
-			char * data() { return &buffer.front(); }
 		private:
 			void write_buffer(void const * p, std::size_t n) {
 				std::size_t write_pos = buffer.size();
@@ -319,6 +322,7 @@ namespace alps {
 			boost::posix_time::ptime end_time;
 	};
 	template<typename Impl> bool mcrun<Impl>::signal = false;
+#ifdef ALPS_HAVE_MPI
 	enum mctags {
 		MC_send_params		= 0x01,
 		MC_get_fraction		= 0x02,
@@ -328,7 +332,6 @@ namespace alps {
 		public:
 			mcmpirun(typename mcrun<Impl>::parameters_type const & params, int argc, char *argv[])
 				: mcrun<Impl>(params)
-				, source(0)
 				, next_check(3)
 				, check_time(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check))
 			{
@@ -364,14 +367,50 @@ namespace alps {
 				}
 			}
 			bool stop() {
-				if (!rank && boost::posix_time::second_clock::local_time() > check_time && !mcrun<Impl>::finalized) {
-					check_time = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check);
-					
-					
-					
-					if (mcrun<Impl>::verbose)
-						std::cerr << "checkin progress" << std::endl;
+				if (!rank) {
 			
+					if (boost::posix_time::second_clock::local_time() > check_time && !mcrun<Impl>::finalized) {
+						check_time = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check);
+						
+						if (mcrun<Impl>::verbose)
+							std::cerr << "checkin progress" << std::endl;
+						
+						mcodump dump;
+						master_send(MC_get_fraction, dump);
+						
+						
+				
+					}
+				}
+				if (MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status) != MPI_SUCCESS)
+					throw std::runtime_error("Error when receiving message: " + boost::lexical_cast<std::string>(status.MPI_ERROR));
+				if (flag) {
+					int count;
+					int tag = status.MPI_TAG & 0xFF;
+					int index = status.MPI_TAG >> 16;
+					MPI_Get_count(&status, MPI_BYTE, &count);
+					std::vector<char> buf(count);
+					MPI_Recv(&(buf.front()), count, MPI_BYTE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+					if (status.MPI_SOURCE == source) {
+//						pending.resize(pending.size() > index ? pending.size() : index);
+//						pending[index].clear();
+						for (std::vector<int>::const_iterator it = targets.begin(); it != targets.end(); ++it) {
+							
+							
+							
+	std::cerr << "send " << count << " bytes form " << rank << " to " << *it << ", tag: " << tag << ", index:" << index << std::endl;
+							
+							
+						
+							MPI_Request * request = new MPI_Request;
+							MPI_Isend(&(buf[0]), count, MPI_BYTE, *it, status.MPI_TAG, MPI_COMM_WORLD, request);
+							MPI_Request_free(request);
+						}
+					} else {
+					
+					
+					
+					}
 				}
 				return mcrun<Impl>::stop();
 			}
@@ -381,6 +420,7 @@ namespace alps {
 					mcodump dump;
 					dump << collect_results(*this);
 					
+					
 //					std::cout << dump.size() << std::endl;
 					
 				}
@@ -388,47 +428,35 @@ namespace alps {
 				mcrun<Impl>::finalized = true;
 			}
 		private:
-/*			void broadcast(int tag, mcodump const & obuf, std::vector<mcidump> & ibufs) {
-				MPI_Status status;
-				int flag = true;
-				if (rank != 0){
-					MPI_Iprobe(source, tag, MPI_COMM_WORLD, &flag, &status);
-					if (flag) {
-						int count;
-						MPI_Get_count(&status, MPI_BYTE, &count);
-						ibuf.resize(count);
-						MPI_Recv(&(buf[0]), count, MPI_BYTE, source, status.MPI_TAG, MPI_COMM_WORLD, &status);
-						for (int k = 0; k < targets.size(); ++k) {
-							MPI_Request * request = new MPI_Request; 
-							MPI_Isend(&(buf[0]), count, MPI_BYTE, targets[k], status.MPI_TAG, MPI_COMM_WORLD, request);
-							
-							
-							MPI_Request_free(request);
-							
-							
-						}
-					}
-				} else {
-					for(int k = 0; k < targets.size(); ++k) {
-						MPI_Request * request = new MPI_Request; 
-						int count = buf.size();
-						MPI_Isend(&(buf[0]), count, MPI_BYTE, targets[k], tag, MPI_COMM_WORLD, request);
+			void master_send(int tag, mcodump & buf) {
+				tag += pending.size() << 16;
+				pending.push_back(std::vector<std::vector<char> >());
+				
+				
+				std::cerr << "= = = = >" << std::endl;
+			
+				for (std::vector<int>::const_iterator it = targets.begin(); it != targets.end(); ++it) {
+					MPI_Request * request = new MPI_Request; 
+					int count = buf.size();
 						
 						
-						MPI_Request_free(request);
+std::cerr << "master send " << count << " bytes to " << *it << ", tag: " << tag << std::endl;
 						
 						
-					}
+					MPI_Isend(&(buf.front()), count, MPI_BYTE, *it, tag, MPI_COMM_WORLD, request);
+					MPI_Request_free(request);
 				}
-				return "";
 			}
-*/			int rank;
+			int flag;
+			int rank;
 			int size;
 			int source;
 			int next_check;
+			MPI_Status status;
 			std::vector<int> targets;
 			boost::posix_time::ptime check_time;
-			
+			std::vector<std::vector<std::vector<char> > > pending;
 	};
+#endif
 }
 #endif

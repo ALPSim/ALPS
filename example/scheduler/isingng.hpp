@@ -39,23 +39,25 @@ class ising_impl : public alps::mcbase {
 			}
 		};
 		void do_measurements() {
-			tmag = 0;
-			ten = 0;
-			corr.resize(length, 0.);
-			for (int i = 0; i < length; ++i) {
-				tmag += spins[i];
-				ten += -spins[i] * spins[ i + 1 < length ? i + 1 : 0 ];
-				for (int d = 0; d < length; ++d)
-					corr[d] += spins[i] * spins[( i + d ) % length ];
+			if (sweeps > thermalization_sweeps) {
+				tmag = 0;
+				ten = 0;
+				corr.resize(length, 0.);
+				for (int i = 0; i < length; ++i) {
+					tmag += spins[i];
+					ten += -spins[i] * spins[ i + 1 < length ? i + 1 : 0 ];
+					for (int d = 0; d < length; ++d)
+						corr[d] += spins[i] * spins[( i + d ) % length ];
+				}
+				corr /= double(length);
+				ten /= length;
+				tmag /= length;
+				results["Energy"] << ten;
+				results["Magnetization"] << tmag;
+				results["Magnetization^2"] << tmag * tmag;
+				results["Magnetization^4"] << tmag * tmag * tmag * tmag;
+				results["Correlations"] << corr;
 			}
-			corr /= double(length);
-			ten /= length;
-			tmag /= length;
-			results["Energy"] << ten;
-			results["Magnetization"] << tmag;
-			results["Magnetization^2"] << tmag * tmag;
-			results["Magnetization^4"] << tmag * tmag * tmag * tmag;
-			results["Correlations"] << corr;
 			sweeps++;
 		};
 		double fraction_completed() const {
@@ -73,5 +75,7 @@ class ising_impl : public alps::mcbase {
 		std::valarray<double> corr;
 		boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
 };
-typedef alps::mcmpirun<ising_impl> parallel_sim;
 typedef alps::mcrun<ising_impl> simple_sim;
+#ifdef ALPS_HAVE_MPI
+	typedef alps::mcmpirun<ising_impl> parallel_sim;
+#endif

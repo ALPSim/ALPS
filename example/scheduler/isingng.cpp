@@ -15,8 +15,11 @@ int main(int argc, char *argv[]) {
 	if (argc < 2)
 		throw std::invalid_argument("parameter file missing " + std::string(argv[0]) + " param.h5");
 	alps::mcoptions options(argc, argv);
+#ifdef ALPS_HAVE_MPI
 	if (options.is_valid() && options.use_mpi())
 		run_sim<parallel_sim>(options, argc, argv);
-	else if (options.is_valid())
+	else 
+#endif
+	if (options.is_valid())
 		run_sim<simple_sim>(options, argc, argv);
 }
