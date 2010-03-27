@@ -134,7 +134,7 @@ namespace alps {
 					("help", "produce help message")
 					("mpi", "run in parallel using MPI") 
 					("time-limit,T", boost::program_options::value<std::size_t>(&limit)->default_value(0), "time limit for the simulation")
-					("tree-log,b", boost::program_options::value<std::size_t>(&log)->default_value(4), "binary log of the number of children per node in the mpi communicationtree")
+					("tree-base,b", boost::program_options::value<std::size_t>(&base)->default_value(16), "number of children per node in the mpi communicationtree")
 					("verbose,v", "verbose mode")
 					("input-file", boost::program_options::value<std::string>(&file), "input file in hdf5 format");
 				boost::program_options::positional_options_description p;
@@ -154,7 +154,7 @@ namespace alps {
 			}
 			bool is_valid() const { return valid; }
 			std::size_t time_limit() const { return limit; }
-			std::size_t tree_log() const { return log; }
+			std::size_t tree_base() const { return base; }
 			bool use_mpi() const { return mpi; }
 			bool is_verbose() const { return verbose; }
 			std::string input_file() const { return file; }
@@ -164,7 +164,7 @@ namespace alps {
 			bool verbose;
 			std::string file;
 			std::size_t limit;
-			std::size_t log;
+			std::size_t base;
 	};
 	class mcparamvalue : public std::string {
 		public:
@@ -194,7 +194,7 @@ namespace alps {
 				ar >> make_pvp("/parameters", this);
 				operator[]("time_limit") = o.time_limit();
 				operator[]("verbose") = o.is_verbose();
-				operator[]("tree_log") = o.tree_log();
+				operator[]("tree_base") = o.tree_base();
 				operator[]("input_file") = o.input_file();
 			}
 			mcparamvalue & operator[](std::string const & k) {
@@ -345,16 +345,18 @@ namespace alps {
 				MPI_Init (&argc, &argv);
 				MPI_Comm_rank (MPI_COMM_WORLD, &rank);
 				MPI_Comm_size (MPI_COMM_WORLD, &size);
-				int mask = params["tree_log"];
+				int base = params["tree_base"];
 				if(size > 1) {
-					int layer = -1;
-					while (rank >= (0x1 << (mask * (++layer + 1))) - 1);
-					source = (rank - (0x1 << (layer * mask)) + 1) / (0x1 << mask) + ((0x1 << ((layer ? layer - 1 : layer) * mask)) - 1);
-					for (std::size_t i = 1; !rank && i < std::min((0x1 << mask) - 1, size); ++i)
+					int layer = base;
+					while (rank >= layer - 1)
+						layer *= base;
+					layer /= base;
+					source = std::max(0, (rank - layer + 1) / base + layer / base - 1);
+					for (std::size_t i = 1; !rank && i < std::min(base - 1, size); ++i)
 						targets.push_back(i);
-					for (std::size_t i = 0; i < (0x1 << mask); ++i)
-						if ((rank - (0x1 << (layer * mask)) + 1) * (0x1 << mask) + (0x1 << ((layer + 1) * mask)) - 1 + i < size)
-							targets.push_back((rank - (0x1 << (layer * mask)) + 1) * (0x1 << mask) + (0x1 << ((layer + 1) * mask)) - 1 + i);
+					for (std::size_t i = 0; i < base; ++i)
+						if ((rank - layer + 1) * base + layer * base - 1 + i < size)
+							targets.push_back((rank - layer + 1) * base + layer * base - 1 + i);
 				}
 				if (mcrun<Impl>::verbose) {
 					std::cerr << "start on rank: " << std::setw(3) << rank << ", source: " << std::setw(3) << source;
