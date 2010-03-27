@@ -108,7 +108,7 @@ IF (EXISTS ${PROJECT_SOURCE_DIR}/.svn)
     MESSAGE("Current revision is ${ALPS_WC_REVISION}") 
   ELSE(Subversion_FOUND) 
     IF (NOT ALPS_RELEASE_PATCH)
-      SET(ALPS_WC_REVISION "4043")
+      SET(ALPS_WC_REVISION "4050")
     ELSE (NOT ALPS_RELEASE_PATCH)
       SET(ALPS_WC_REVISION ${ALPS_RELEASE_PATCH})
     ENDIF (NOT ALPS_RELEASE_PATCH)
@@ -569,6 +569,7 @@ endif (ALPS_FOR_VISTRAILS)
 
 if(ALPS_PATCH_VISTRAILS)
   find_package(VistrailsSVN)
+  MESSAGE (STATUS "patching Vistrails from ${VISTRAILS_SVN_DIR}")
   if (APPLE)
     foreach (DIR api core db gui packages tests)
       install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails/${DIR} 
@@ -578,7 +579,13 @@ if(ALPS_PATCH_VISTRAILS)
     install(FILES ${VISTRAILS_SVN_DIR}/vistrails/vistrails.py 
             DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR/../..})
   else(APPLE)
-    message(ERROR "Cannot patch VisTrails on your systems yet. Please add the needed code.")
+    if (WIN32) 
+        install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails
+                DESTINATION .
+                PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
+    else (WIN32)
+      message(ERROR "Cannot patch VisTrails on your systems yet. Please add the needed code.")
+    endif (WIN32)
   endif(APPLE)
 endif(ALPS_PATCH_VISTRAILS)
 
