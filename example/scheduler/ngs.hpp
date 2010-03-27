@@ -17,9 +17,10 @@
 #include <boost/filesystem/path.hpp>
 #include <boost/program_options.hpp>
 
-#include <iomanip>
-#include <vector>
 #include <cmath>
+#include <vector>
+#include <iomanip>
+#include <algorithm>
 #include <signal.h>
 
 #include <mpi.h>
@@ -133,6 +134,7 @@ namespace alps {
 					("help", "produce help message")
 					("mpi", "run in parallel using MPI") 
 					("time-limit,T", boost::program_options::value<std::size_t>(&limit)->default_value(0), "time limit for the simulation")
+					("tree-log,b", boost::program_options::value<std::size_t>(&log)->default_value(4), "binary log of the number of children per node in the mpi communicationtree")
 					("verbose,v", "verbose mode")
 					("input-file", boost::program_options::value<std::string>(&file), "input file in hdf5 format");
 				boost::program_options::positional_options_description p;
@@ -151,7 +153,8 @@ namespace alps {
 					boost::throw_exception(std::runtime_error("No job file specified"));
 			}
 			bool is_valid() const { return valid; }
-			int time_limit() const { return limit; }
+			std::size_t time_limit() const { return limit; }
+			std::size_t tree_log() const { return log; }
 			bool use_mpi() const { return mpi; }
 			bool is_verbose() const { return verbose; }
 			std::string input_file() const { return file; }
@@ -161,6 +164,7 @@ namespace alps {
 			bool verbose;
 			std::string file;
 			std::size_t limit;
+			std::size_t log;
 	};
 	class mcparamvalue : public std::string {
 		public:
@@ -190,6 +194,7 @@ namespace alps {
 				ar >> make_pvp("/parameters", this);
 				operator[]("time_limit") = o.time_limit();
 				operator[]("verbose") = o.is_verbose();
+				operator[]("tree_log") = o.tree_log();
 				operator[]("input_file") = o.input_file();
 			}
 			mcparamvalue & operator[](std::string const & k) {
@@ -197,7 +202,7 @@ namespace alps {
 			}
 			mcparamvalue const & operator[](std::string const & k) const {
 				if (find(k) == end())
-					throw std::invalid_argument("unknown argument" + k);
+					throw std::invalid_argument("unknown argument: "  + k);
 				return find(k)->second;
 			}
 			void serialize(hdf5::oarchive & ar) const {
@@ -332,29 +337,24 @@ namespace alps {
 		public:
 			mcmpirun(typename mcrun<Impl>::parameters_type const & params, int argc, char *argv[])
 				: mcrun<Impl>(params)
-				, next_check(3)
+				, next_check(8)
+				, start_time(boost::posix_time::second_clock::local_time())
 				, check_time(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check))
+				, checkpointing(false)
 			{
 				MPI_Init (&argc, &argv);
 				MPI_Comm_rank (MPI_COMM_WORLD, &rank);
 				MPI_Comm_size (MPI_COMM_WORLD, &size);
-				int nmesg = 2; // size > 16 ? 16 : size < 4 ? 2 : size / 2;
+				int mask = params["tree_log"];
 				if(size > 1) {
-					int nstep = nmesg;
-					if (rank > 0)
-						while((rank % nstep) == 0)
-							nstep *= nstep;
-						source = (rank / nstep) * nstep;
-					nstep = 1;
-					while (nstep < size)
-						nstep *= nmesg;
-					do {
-						if (rank % nstep == 0)
-							for (int i = 1; i < nmesg; ++i)
-								if (rank + i * (nstep / nmesg) < size)
-									targets.push_back(rank + i * (nstep / nmesg));
-						nstep /= nmesg;
-					} while (nstep != 1);
+					int layer = -1;
+					while (rank >= (0x1 << (mask * (++layer + 1))) - 1);
+					source = (rank - (0x1 << (layer * mask)) + 1) / (0x1 << mask) + ((0x1 << ((layer ? layer - 1 : layer) * mask)) - 1);
+					for (std::size_t i = 1; !rank && i < std::min((0x1 << mask) - 1, size); ++i)
+						targets.push_back(i);
+					for (std::size_t i = 0; i < (0x1 << mask); ++i)
+						if ((rank - (0x1 << (layer * mask)) + 1) * (0x1 << mask) + (0x1 << ((layer + 1) * mask)) - 1 + i < size)
+							targets.push_back((rank - (0x1 << (layer * mask)) + 1) * (0x1 << mask) + (0x1 << ((layer + 1) * mask)) - 1 + i);
 				}
 				if (mcrun<Impl>::verbose) {
 					std::cerr << "start on rank: " << std::setw(3) << rank << ", source: " << std::setw(3) << source;
@@ -367,82 +367,138 @@ namespace alps {
 				}
 			}
 			bool stop() {
-				if (!rank) {
-			
-					if (boost::posix_time::second_clock::local_time() > check_time && !mcrun<Impl>::finalized) {
-						check_time = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check);
-						
-						if (mcrun<Impl>::verbose)
-							std::cerr << "checkin progress" << std::endl;
-						
-						mcodump dump;
-						master_send(MC_get_fraction, dump);
-						
-						
-				
-					}
+				if (!rank && next_check > 0 && boost::posix_time::second_clock::local_time() > check_time && !mcrun<Impl>::finalized) {
+					next_check *= -1;
+					mcodump dump;
+					master_send(MC_get_fraction, dump);
 				}
 				if (MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status) != MPI_SUCCESS)
-					throw std::runtime_error("Error when receiving message: " + boost::lexical_cast<std::string>(status.MPI_ERROR));
+					throw std::runtime_error("Error when receiving MPI message: " + boost::lexical_cast<std::string>(status.MPI_ERROR));
 				if (flag) {
 					int count;
 					int tag = status.MPI_TAG & 0xFF;
-					int index = status.MPI_TAG >> 16;
+					std::size_t index = status.MPI_TAG >> 16;
 					MPI_Get_count(&status, MPI_BYTE, &count);
 					std::vector<char> buf(count);
 					MPI_Recv(&(buf.front()), count, MPI_BYTE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
 					if (status.MPI_SOURCE == source) {
-//						pending.resize(pending.size() > index ? pending.size() : index);
-//						pending[index].clear();
+						pending.resize(std::max(pending.size(), index + 1));
+						switch (tag) {
+							case MC_get_fraction:
+								pending[index].second = mcrun<Impl>::fraction_completed();
+								break;
+							case MC_finalize:
+								pending[index].second = std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> >(1, make_pair(1, collect_results(*this)));
+								mcrun<Impl>::save("sim-" + boost::lexical_cast<std::string>(rank) + ".out.h5");
+								finalize();
+								break;
+						}
 						for (std::vector<int>::const_iterator it = targets.begin(); it != targets.end(); ++it) {
-							
-							
-							
-	std::cerr << "send " << count << " bytes form " << rank << " to " << *it << ", tag: " << tag << ", index:" << index << std::endl;
-							
-							
-						
 							MPI_Request * request = new MPI_Request;
 							MPI_Isend(&(buf[0]), count, MPI_BYTE, *it, status.MPI_TAG, MPI_COMM_WORLD, request);
 							MPI_Request_free(request);
 						}
 					} else {
-					
-					
-					
+						if (std::find(targets.begin(), targets.end(), status.MPI_SOURCE) == targets.end())
+							throw std::runtime_error("Invalid MPI source: " + boost::lexical_cast<std::string>(status.MPI_SOURCE));
+						mcidump ibuf;
+						ibuf.reset(buf);
+						switch (tag) {
+							case MC_get_fraction:
+								double fraction;
+								ibuf >> fraction;
+								pending[index].second = fraction + boost::any_cast<double>(pending[index].second);
+								break;
+							case MC_finalize:
+								typename mcrun<Impl>::results_type result;
+								ibuf >> result;
+								std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> > results = boost::any_cast<std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> > >(pending[index].second);
+								results.push_back(make_pair(1, result));
+								while (results.size() > 1 && results.back().first == (results.rbegin() + 1)->first) {
+									(results.rbegin() + 1)->first *= 2;
+									(results.rbegin() + 1)->second << results.back().second;
+									results.pop_back();
+								}
+								pending[index].second = results;
+								break;
+						}
+						pending[index].first++;
+					}
+					if (pending[index].first == targets.size()) {
+						mcodump obuf;
+						switch (tag) {
+							case MC_get_fraction:
+								if (!rank) {
+									next_check = 8 + 0.5 * (boost::posix_time::second_clock::local_time() - start_time).total_seconds() / boost::any_cast<double>(pending[index].second) * (1 - boost::any_cast<double>(pending[index].second));
+									std::cerr << std::fixed << std::setprecision(1) << boost::any_cast<double>(pending[index].second) * 100 << "% done next check in " << next_check << "s" << std::endl;
+									check_time = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check);
+									if (boost::any_cast<double>(pending[index].second) >= 1)
+										finalize();
+								} else
+									obuf << boost::any_cast<double>(pending[index].second);
+								break;
+							case MC_finalize:
+								std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> > results = boost::any_cast<std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> > >(pending[index].second);
+								for (std::size_t i = results.size() - 1; i > 0; --i)
+									results[i - 1].second << results[i].second;
+								if (!rank) {
+									boost::filesystem::path path = "sim.out.h5";
+									if (mcrun<Impl>::verbose)
+										std::cerr << "write file: " << path.file_string() << std::endl;
+									boost::filesystem::path backup = boost::filesystem::exists(path) ? path.parent_path() / ( path.filename() + ".bak" ) : path;
+									if (boost::filesystem::exists(backup))
+										boost::filesystem::remove(backup);
+									{
+										hdf5::oarchive ar(backup.file_string());
+										ar << make_pvp("/simulation/results", results[0].second);
+									}
+									if (backup != path) {
+										boost::filesystem::remove(path);
+										boost::filesystem::rename(backup, path);
+									}
+								} else
+									obuf << results[0].second;
+								checkpointing = false;
+								break;
+						}
+						if (rank) {
+							count = obuf.size();
+							MPI_Request * request = new MPI_Request;
+							MPI_Isend(&(obuf.front()), count, MPI_BYTE, source, status.MPI_TAG, MPI_COMM_WORLD, request);
+							if (tag == MC_finalize)
+								MPI_Wait(request, &status);
+							MPI_Request_free(request);
+							pending[index] = std::make_pair(0, boost::any());
+						}
 					}
 				}
-				return mcrun<Impl>::stop();
+				return !checkpointing && mcrun<Impl>::stop();
 			}
 		protected:
 			void finalize() {
 				if (!rank) {
 					mcodump dump;
-					dump << collect_results(*this);
-					
-					
-//					std::cout << dump.size() << std::endl;
-					
+					master_send(MC_finalize, dump);
 				}
-				mcrun<Impl>::save("sim-" + boost::lexical_cast<std::string>(rank) + ".out.h5");
 				mcrun<Impl>::finalized = true;
+				checkpointing = true;
 			}
 		private:
 			void master_send(int tag, mcodump & buf) {
-				tag += pending.size() << 16;
-				pending.push_back(std::vector<std::vector<char> >());
-				
-				
-				std::cerr << "= = = = >" << std::endl;
-			
+				pending.resize(pending.size() + 1);
+				switch (tag) {
+					case MC_get_fraction:
+						pending.back().second = mcrun<Impl>::fraction_completed();
+						break;
+					case MC_finalize:
+						pending.back().second = std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> >(1, make_pair(1, collect_results(*this)));
+						mcrun<Impl>::save("sim-" + boost::lexical_cast<std::string>(rank) + ".out.h5");
+						break;
+				}
+				tag += (pending.size() - 1) << 16;
 				for (std::vector<int>::const_iterator it = targets.begin(); it != targets.end(); ++it) {
 					MPI_Request * request = new MPI_Request; 
 					int count = buf.size();
-						
-						
-std::cerr << "master send " << count << " bytes to " << *it << ", tag: " << tag << std::endl;
-						
-						
 					MPI_Isend(&(buf.front()), count, MPI_BYTE, *it, tag, MPI_COMM_WORLD, request);
 					MPI_Request_free(request);
 				}
@@ -453,9 +509,11 @@ std::cerr << "master send " << count << " bytes to " << *it << ", tag: " << tag 
 			int source;
 			int next_check;
 			MPI_Status status;
+			bool checkpointing;
 			std::vector<int> targets;
+			boost::posix_time::ptime start_time;
 			boost::posix_time::ptime check_time;
-			std::vector<std::vector<std::vector<char> > > pending;
+			std::vector<std::pair<std::size_t, boost::any> > pending;
 	};
 #endif
 }
