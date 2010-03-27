@@ -271,6 +271,7 @@ std::ostream& Lowa::print_params(std::ostream& out) const
   out << "\n Ntest    : " << Ntest;
   out << "\n Nsave    : " << Nsave;
   out << std::endl << std::endl << std::endl;
+  return out;
 }
 
 
