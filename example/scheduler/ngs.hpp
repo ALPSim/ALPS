@@ -333,6 +333,98 @@ namespace alps {
 		MC_get_fraction		= 0x02,
 		MC_finalize			= 0x03
 	};
+	template<typename Visitor> class Communicator {
+		public:
+			Communicator(Visitor v, int argc, char *argv[], int base = 16)
+				: visitor(v)
+			{
+				MPI_Init (&argc, &argv);
+				MPI_Comm_rank (MPI_COMM_WORLD, &rank);
+				MPI_Comm_size (MPI_COMM_WORLD, &size);
+				if(size > 1) {
+					int layer = base;
+					while (rank >= layer - 1)
+						layer *= base;
+					layer /= base;
+					source = std::max(0, (rank - layer + 1) / base + layer / base - 1);
+					for (int i = 1; !rank && i < std::min(base - 1, size); ++i)
+						targets.push_back(i);
+					for (int i = 0; i < base; ++i)
+						if ((rank - layer + 1) * base + layer * base - 1 + i < size)
+							targets.push_back((rank - layer + 1) * base + layer * base - 1 + i);
+				}
+				std::cerr << "start on rank: " << std::setw(3) << rank << ", source: " << std::setw(3) << source;
+				if (targets.size()) {
+					std::cerr << ", targets:";
+					for (std::vector<int>::const_iterator it = targets.begin(); it != targets.end(); ++it)
+						std::cerr << " " << std::setw(3) << *it;
+				}
+				std::cerr << std::endl;
+			}
+			void broadcast(mcodump const & buf, int tag) {
+				tasks.resize(tasks.size() + 1);
+				visitor.initialize(tasks.back().second, tag);
+				tag += (tasks.size() - 1) << 16;
+				MPI_Status status;
+				for (std::vector<int>::const_iterator it = targets.begin(); it != targets.end(); ++it) {
+					MPI_Request * request = new MPI_Request; 
+					int count = buf.size();
+					MPI_Isend(&(buf.front()), count, MPI_BYTE, *it, tag, MPI_COMM_WORLD, request);
+					MPI_Request_free(request);
+				}
+			}
+			void probe() {
+				int flag;
+				MPI_Status status;
+				if (MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status) != MPI_SUCCESS)
+					throw std::runtime_error("Error when receiving MPI message: " + boost::lexical_cast<std::string>(status.MPI_ERROR));
+				if (flag) {
+					int count;
+					int tag = status.MPI_TAG & 0xFF;
+					int index = status.MPI_TAG >> 16;
+					MPI_Get_count(&status, MPI_BYTE, &count);
+					std::vector<char> buf(count);
+					MPI_Recv(&(buf.front()), count, MPI_BYTE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
+					if (status.MPI_SOURCE == source) {
+						tasks.resize(std::max(tasks.size(), std::size_t(index + 1)));
+						visitor.initialize(tasks[index].second, tag);
+						for (std::vector<int>::const_iterator it = targets.begin(); it != targets.end(); ++it) {
+							MPI_Request * request = new MPI_Request;
+							MPI_Isend(&(buf[0]), count, MPI_BYTE, *it, status.MPI_TAG, MPI_COMM_WORLD, request);
+							MPI_Request_free(request);
+						}
+					} else {
+						if (std::find(targets.begin(), targets.end(), status.MPI_SOURCE) == targets.end())
+							throw std::runtime_error("Invalid MPI source: " + boost::lexical_cast<std::string>(status.MPI_SOURCE));
+						mcidump ibuf;
+						ibuf.reset(buf);
+						visitor.accumulate(tasks[index].second, ibuf, tag);
+						tasks[index].first++;
+					}
+					if (tasks[index].first == targets.size()) {
+						mcodump obuf;
+						visitor.finalize(tasks[index].second, obuf, tag);
+						if (rank) {
+							count = obuf.size();
+							MPI_Request * request = new MPI_Request;
+							MPI_Isend(&(obuf.front()), count, MPI_BYTE, source, status.MPI_TAG, MPI_COMM_WORLD, request);
+							if (visitor.do_wait(tag))
+								MPI_Wait(request, &status);
+							else
+								MPI_Request_free(request);
+							tasks[index] = std::make_pair(0, boost::any());
+						}
+					}
+				}
+			}
+		private:
+			int rank;
+			int size;
+			int source;
+			Visitor visitor;
+			std::vector<int> targets;
+			std::vector<std::pair<int, boost::any> > tasks;
+	};
 	template <typename Impl> class mcmpirun : public mcrun<Impl> {
 		public:
 			mcmpirun(typename mcrun<Impl>::parameters_type const & params, int argc, char *argv[])
