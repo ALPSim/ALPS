@@ -30,10 +30,12 @@
 
 #define PY_ARRAY_UNIQUE_SYMBOL pyalea_PyArrayHandle
 
+#include <alps/alea/value_with_error.h>
+#include <alps/utility/make_copy.hpp>
 #include <boost/python.hpp>
 #include <boost/python/suite/indexing/vector_indexing_suite.hpp>
 #include <numpy/arrayobject.h>
-#include <alps/alea/value_with_error.h>
+
 
 
 using namespace boost::python;
@@ -215,6 +217,8 @@ BOOST_PYTHON_MODULE(pyalea)
 
     .def("__repr__", &print_value_with_error<double>)
 
+    .def("__deepcopy__", &alps::make_copy<value_with_error<double> >)
+
     .def(+self)
     .def(-self)
     .def("__abs__",&abs<double>)
@@ -279,6 +283,9 @@ BOOST_PYTHON_MODULE(pyalea)
 //    .add_property("error",&error_numpyarray<double>)
 
     .def("__repr__", &print_vector_with_error<double>)
+    
+    .def("__deepcopy__", &alps::make_copy<value_with_error<std::vector<double> > >)
+
 
     .def("__len__",&value_with_error<std::vector<double> >::size)         
     .def("append",&value_with_error<std::vector<double> >::push_back)     
