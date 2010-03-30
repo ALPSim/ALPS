@@ -127,7 +127,6 @@ namespace alps {
 			mcoptions(int argc, char* argv[])
 				: valid(false)
 				, mpi(false)
-				, verbose(false)
 			{
 				boost::program_options::options_description desc("Allowed options");
 				desc.add_options()
@@ -135,7 +134,6 @@ namespace alps {
 					("mpi", "run in parallel using MPI") 
 					("time-limit,T", boost::program_options::value<std::size_t>(&limit)->default_value(0), "time limit for the simulation")
 					("tree-base,b", boost::program_options::value<std::size_t>(&base)->default_value(16), "number of children per node in the mpi communicationtree")
-					("verbose,v", "verbose mode")
 					("input-file", boost::program_options::value<std::string>(&file), "input file in hdf5 format");
 				boost::program_options::positional_options_description p;
 				p.add("input-file", 1);
@@ -145,8 +143,6 @@ namespace alps {
 				valid = !vm.count("help");
 				if (vm.count("mpi"))
 					mpi = true;
-				if (vm.count("verbose"))
-					verbose = true;
 				if (vm.count("help"))
 					std::cout << desc << std::endl;
 				else if (file.empty())
@@ -156,12 +152,10 @@ namespace alps {
 			std::size_t time_limit() const { return limit; }
 			std::size_t tree_base() const { return base; }
 			bool use_mpi() const { return mpi; }
-			bool is_verbose() const { return verbose; }
 			std::string input_file() const { return file; }
 		private:
 			bool valid;
 			bool mpi;
-			bool verbose;
 			std::string file;
 			std::size_t limit;
 			std::size_t base;
@@ -193,7 +187,6 @@ namespace alps {
 				hdf5::iarchive ar(o.input_file());
 				ar >> make_pvp("/parameters", this);
 				operator[]("time_limit") = o.time_limit();
-				operator[]("verbose") = o.is_verbose();
 				operator[]("tree_base") = o.tree_base();
 				operator[]("input_file") = o.input_file();
 			}
@@ -225,8 +218,11 @@ namespace alps {
 			typedef std::vector<std::string> result_names_type;
 			mcbase(parameters_type const & params): params(params) {}
 			void save(boost::filesystem::path const & path) const {
-				if (bool(params["verbose"]))
-					std::cerr << "write file: " << path.file_string() << std::endl;
+				{
+					std::stringstream out;
+					out << "write file: " << path.file_string() << std::endl;
+					std::cerr << out.str();
+				}
 				boost::filesystem::path backup = boost::filesystem::exists(path) ? path.parent_path() / ( path.filename() + ".bak" ) : path;
 				if (boost::filesystem::exists(backup))
 					boost::filesystem::remove(backup);
@@ -239,6 +235,11 @@ namespace alps {
 				if (backup != path) {
 					boost::filesystem::remove(path);
 					boost::filesystem::rename(backup, path);
+				}
+				{
+					std::stringstream out;
+					out << "file written: " << path.file_string() << std::endl;
+					std::cerr << out.str();
 				}
 			}
 			void load(boost::filesystem::path const & path) { 
@@ -273,7 +274,6 @@ namespace alps {
 			mcrun(parameters_type const & params, int argc = 0, char *argv[] = NULL)
 				: impl(params)
 				, finalized(false)
-				, verbose(params["verbose"])
 				, input_file(params["input_file"])
 				, end_time(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(std::size_t(params["time_limit"])))
 			{
@@ -309,13 +309,11 @@ namespace alps {
 			double fraction_completed() const { return impl.fraction_completed(); }
 		protected:
 			virtual void finalize() {
-				if (mcrun<Impl>::verbose)
-					std::cerr << "checkpoint after: " << std::fixed << std::setprecision(1) << fraction_completed() * 100 << "%" << std::endl;
+				std::cerr << "checkpoint after: " << std::fixed << std::setprecision(1) << fraction_completed() * 100 << "%" << std::endl;
 				save(input_file + ".out.h5");
 				finalized = true;
 			}
 			bool finalized;
-			bool verbose;
 		private:
 			static void signal_hanler(int code) {
 				std::cerr << "caught signal: " << code << std::endl;
@@ -423,9 +421,17 @@ namespace alps {
 					}
 					if (tasks[index].get<0>() == children.size()) {
 						if (!rank) {
-							std::cerr << "broadcast: " << std::setw(2) << tag << ", took: " << std::setprecision(4) << (clock() - tasks[index].get<2>()) / (double)CLOCKS_PER_SEC << "s" << std::endl;
+							std::stringstream out;
+							out << "broadcast: " << std::setw(2) << tag << ", took: " << std::setprecision(4) << (clock() - tasks[index].get<2>()) / (double)CLOCKS_PER_SEC << "s" << std::endl;
+							std::cerr << out.str();
+//							std::cerr << (std::stringstream() << "broadcast: " << std::setw(2) << tag << ", took: " << std::setprecision(4) << (clock() - tasks[index].get<2>()) / (double)CLOCKS_PER_SEC << "s" << std::endl).str();
 							finish(tag, tasks[index].get<1>());
 						} else if (tasks[index].get<0>() == children.size()) {
+							{
+								std::stringstream out;
+								out << "return: " << std::setw(2) << tag << " from: " << std::setw(3) << rank << " to " << std::setw(3) << status.MPI_TAG << "|" << std::setw(3) << parent << std::endl;
+								std::cerr << out.str();
+							}
 							mcodump obuf;
 							pack(tag, tasks[index].get<1>(), obuf);
 							count = obuf.size();
@@ -535,8 +541,11 @@ namespace alps {
 						for (std::size_t i = results.size() - 1; i > 0; --i)
 							results[i - 1].second << results[i].second;
 						boost::filesystem::path path = "sim.out.h5";
-						if (mcrun<Impl>::verbose)
-							std::cerr << "write file: " << path.file_string() << std::endl;
+						{
+							std::stringstream out;
+							out << "write file: " << path.file_string() << std::endl;
+							std::cerr << out.str();
+						}
 						boost::filesystem::path backup = boost::filesystem::exists(path) ? path.parent_path() / ( path.filename() + ".bak" ) : path;
 						if (boost::filesystem::exists(backup))
 							boost::filesystem::remove(backup);
@@ -549,6 +558,11 @@ namespace alps {
 							boost::filesystem::rename(backup, path);
 						}
 						checkpointing = false;
+						{
+							std::stringstream out;
+							out << "file written: " << path.file_string() << std::endl;
+							std::cerr << out.str();
+						}
 						break;
 				}
 			}
