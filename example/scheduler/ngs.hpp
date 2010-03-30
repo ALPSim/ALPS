@@ -424,12 +424,11 @@ namespace alps {
 							std::stringstream out;
 							out << "broadcast: " << std::setw(2) << tag << ", took: " << std::setprecision(4) << (clock() - tasks[index].get<2>()) / (double)CLOCKS_PER_SEC << "s" << std::endl;
 							std::cerr << out.str();
-//							std::cerr << (std::stringstream() << "broadcast: " << std::setw(2) << tag << ", took: " << std::setprecision(4) << (clock() - tasks[index].get<2>()) / (double)CLOCKS_PER_SEC << "s" << std::endl).str();
 							finish(tag, tasks[index].get<1>());
 						} else if (tasks[index].get<0>() == children.size()) {
 							{
 								std::stringstream out;
-								out << "return: " << std::setw(2) << tag << " from: " << std::setw(3) << rank << " to " << std::setw(3) << status.MPI_TAG << "|" << std::setw(3) << parent << std::endl;
+								out << "return: " << std::setw(2) << tag << " from: " << std::setw(3) << rank << " to " << std::setw(3) << parent << std::endl;
 								std::cerr << out.str();
 							}
 							mcodump obuf;
@@ -500,6 +499,11 @@ namespace alps {
 						data = fraction + boost::any_cast<double>(data);
 						break;
 					case MC_finalize:
+						{
+							std::stringstream out;
+							out << "merge: " << communicator.get_rank() << std::endl;
+							std::cerr << out.str();
+						}
 						typename mcrun<Impl>::results_type result;
 						buf >> result;
 						std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> > results = boost::any_cast<std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> > >(data);
@@ -510,6 +514,11 @@ namespace alps {
 							results.pop_back();
 						}
 						data = results;
+						{
+							std::stringstream out;
+							out << "merged: " << communicator.get_rank() << std::endl;
+							std::cerr << out.str();
+						}
 						break;
 				}
 			}
