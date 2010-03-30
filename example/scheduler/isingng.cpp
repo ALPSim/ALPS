@@ -4,6 +4,8 @@
 
 #include "isingng.hpp"
 
+#include <boost/bind.hpp>
+
 template<typename S> void run_sim(alps::mcoptions const & options, int argc, char *argv[]) {
 	typename S::parameters_type params(options);
 	S s(params, argc, argv);
