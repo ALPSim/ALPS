@@ -138,7 +138,7 @@ def selfRegister():
     register(WriteTxt,'DataSet|Tools')
     register(CacheErasure,'DataSet|Tools')
     register(SetLabels,'DataSet|Tools')
-    register(PrepareDictionary,'DataSet|Tools')
+    register(PrepareDictionary,'Tools')
     register(MakeScatter,'DataSet|Plot')
     
     register(Selector,'DataSet|Select',abst=True)

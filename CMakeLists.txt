@@ -496,7 +496,7 @@ if(APPLE AND NOT ALPS_FOR_VISTRAILS)
   set(PYTHONHOME "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources")
   set(PYTHONPATH "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources:$PYTHONPATH")
   set(PYTHONBIN "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/MacOS/python")
-  set(PYSTARTUP "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}//Contents/Resources/lib/python2.5/pyalps/mpl_setup_qt.py")
+  set(PYSTARTUP "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5/pyalps/mpl_setup_qt.py")
 
   configure_file(config/CMake/vispython.in ${PROJECT_BINARY_DIR}/config/CMake/vispython)
 
@@ -574,7 +574,7 @@ else (ALPS_FOR_VISTRAILS)
           ${PROJECT_BINARY_DIR}/config/CMake/include.mk
           DESTINATION share/alps COMPONENT build)
 
-  install(FILES ${PROJECT_BINARY_DIR}/config/CMake/vispython ${PROJECT_BINARY_DIR}/config/CMake/alpspython
+  install(PROGRAMS ${PROJECT_BINARY_DIR}/config/CMake/vispython ${PROJECT_BINARY_DIR}/config/CMake/alpspython
 		DESTINATION bin COMPONENT build)
 
   install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
