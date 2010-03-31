@@ -180,7 +180,6 @@ int main(int argc, char** argv)
     outFile.open(fileOUT.c_str(),std::ios::out);
     for (std::size_t index=0; index < Nsites; ++index)
     {
-      std::cout << data[index];
       outFile << index << "\t" << data[index].mean() << "\t" << data[index].error() << "\n";
     }
     outFile.close();
