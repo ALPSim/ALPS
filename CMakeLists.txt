@@ -41,6 +41,11 @@ else (ALPS_FOR_VISTRAILS)
 endif (ALPS_FOR_VISTRAILS)
 
 ######################################################################
+# CMAKE_MODULE_PATH
+######################################################################
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/CMake)
+
+######################################################################
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
 
@@ -48,12 +53,6 @@ if(WIN32 AND NOT UNIX)
   if (ALPS_FOR_VISTRAILS)
     set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/Vistrails" CACHE PATH "ALPS install prefix")
     set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/Vistrails" CACHE PATH "ALPS install prefix")
-    set(VISTRAILS_APP_NAME "vistrails" CACHE STRING "Name of the Vistrails application")
-    set(VISTRAILS_PACKAGE_DIR packages)
-    set(VISTRAILS_PYTHON_EXTENSION_DIR Python25/Lib/site-packages )
-    set(VISTRAILS_LIB_DIR lib)
-#    set(VISTRAILS_PYTHON_EXTENSION_DIR Python25/DLLs)
-    set(VISTRAILS_DYLIB_DIR "")
   else (ALPS_FOR_VISTRAILS)
     if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/ALPS" CACHE PATH "ALPS install prefix" FORCE)
@@ -61,37 +60,23 @@ if(WIN32 AND NOT UNIX)
     endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
   endif (ALPS_FOR_VISTRAILS)
 else(WIN32 AND NOT UNIX)
-#  if (ALPS_FOR_VISTRAILS)
+  if (ALPS_FOR_VISTRAILS)
     if (APPLE)
       if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
         set(CMAKE_INSTALL_PREFIX "/Applications/Vistrails/" CACHE PATH "ALPS install prefix" FORCE)
       endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-      set(VISTRAILS_APP_DIR "/Applications/Vistrails/" CACHE PATH "Vistrails application path")
-      set(VISTRAILS_APP_NAME "Vistrails.app" CACHE STRING "Name of the Vistrails application")
-      set(VISTRAILS_PACKAGE_DIR Contents/Resources/lib/python2.5/packages)
-      set(VISTRAILS_PYTHON_EXTENSION_DIR Contents/Resources/lib/python2.5)
-      set(VISTRAILS_LIB_DIR Contents/Resources/lib)
-      set(VISTRAILS_DYLIB_DIR Contents/Frameworks)
       set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5")
     else (APPLE)
-      set(VISTRAILS_APP_DIR "NOTFOUND" CACHE PATH "Vistrails application path")
-      set(VISTRAILS_APP_NAME "vistrails" CACHE STRING "Name of the Vistrails application")
-      set(VISTRAILS_PACKAGE_DIR vistrails/packages)
-      set(VISTRAILS_PYTHON_EXTENSION_DIR /usr/lib/python2.5/site-packages)
-      set(VISTRAILS_LIB_DIR vistrails/lib)
-      set(VISTRAILS_DYLIB_DIR lib)
+      # what happens to the above variables in this case?
     endif (APPLE)
-#  else (ALPS_FOR_VISTRAILS)
+  else (ALPS_FOR_VISTRAILS)
     if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
     endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-#  endif (ALPS_FOR_VISTRAILS)
+  endif (ALPS_FOR_VISTRAILS)
 endif(WIN32 AND NOT UNIX)
 
-######################################################################
-# CMAKE_MODULE_PATH
-######################################################################
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/CMake)
+find_package(Vistrails)
 
 ######################################################################
 # Version information
@@ -492,20 +477,6 @@ endforeach(l)
 configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
 configure_file(config/CMake/include.mk.in ${PROJECT_BINARY_DIR}/config/CMake/include.mk)
 
-if(APPLE AND NOT ALPS_FOR_VISTRAILS)
-  set(PYTHONHOME "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources")
-  set(PYTHONPATH "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources:$PYTHONPATH")
-  set(PYTHONBIN "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/MacOS/python")
-  set(PYSTARTUP "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5/pyalps/mpl_setup_qt.py")
-
-  configure_file(config/CMake/vispython.in ${PROJECT_BINARY_DIR}/config/CMake/vispython)
-
-  set(PYTHONPATH "${CMAKE_INSTALL_PREFIX}/lib")
-  set(PYTHONBIN "${PYTHON_EXECUTABLE}")
-
-  configure_file(config/CMake/alpspython.in ${PROJECT_BINARY_DIR}/config/CMake/alpspython)
-endif(APPLE AND NOT ALPS_FOR_VISTRAILS)
-
 set (HDF5_LIBRARIES ${HDF5_LIBRARIES_SAVE})
 
 
@@ -573,9 +544,6 @@ else (ALPS_FOR_VISTRAILS)
           ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
           ${PROJECT_BINARY_DIR}/config/CMake/include.mk
           DESTINATION share/alps COMPONENT build)
-
-  install(PROGRAMS ${PROJECT_BINARY_DIR}/config/CMake/vispython ${PROJECT_BINARY_DIR}/config/CMake/alpspython
-		DESTINATION bin COMPONENT build)
 
   install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
         FILES_MATCHING PATTERN "*.py"

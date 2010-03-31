@@ -90,3 +90,28 @@ if(LAPACK_FOUND AND NOT ALPS_FOR_VISTRAILS)
   target_link_libraries(maxent alps boost ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   install(TARGETS maxent RUNTIME DESTINATION bin COMPONENT tools)
 endif(LAPACK_FOUND AND NOT ALPS_FOR_VISTRAILS)
+
+#
+# alpspython and vispython scripts
+# 
+
+if(APPLE AND NOT ALPS_FOR_VISTRAILS)
+  if (VISTRAILS_FOUND)
+    set(PYTHONHOME "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources")
+    set(PYTHONPATH "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources:$PYTHONPATH")
+    set(PYTHONBIN "${VISTRAILS_APP_DIR}/${VISTRAILS_PYTHON_INTERPRETER}/Contents/MacOS/python")
+    set(PYSTARTUP "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Resources/lib/python2.5/pyalps/mpl_setup_qt.py")
+  
+    configure_file(vispython.in ${PROJECT_BINARY_DIR}/tool/vispython)
+    
+    install(PROGRAMS vispython DESTINATION bin COMPONENT tools)
+  endif(VISTRAILS_FOUND)
+
+  set(PYTHONPATH "${CMAKE_INSTALL_PREFIX}/lib")
+  set(PYTHONBIN "${PYTHON_EXECUTABLE}")
+
+  configure_file(alpspython.in ${PROJECT_BINARY_DIR}/tool/alpspython)
+
+  install(PROGRAMS alpspython DESTINATION bin COMPONENT tools)
+endif(APPLE AND NOT ALPS_FOR_VISTRAILS)
+
