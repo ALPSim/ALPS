@@ -49,6 +49,8 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/CMake)
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
 
+find_package(Vistrails)
+
 if(WIN32 AND NOT UNIX)
   if (ALPS_FOR_VISTRAILS)
     set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/Vistrails" CACHE PATH "ALPS install prefix")
@@ -63,7 +65,7 @@ else(WIN32 AND NOT UNIX)
   if (ALPS_FOR_VISTRAILS)
     if (APPLE)
       if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        set(CMAKE_INSTALL_PREFIX "/Applications/Vistrails/" CACHE PATH "ALPS install prefix" FORCE)
+        set(CMAKE_INSTALL_PREFIX ${VISTRAILS_APP_DIR} CACHE PATH "ALPS install prefix" FORCE)
       endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
       set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5")
     else (APPLE)
@@ -76,7 +78,6 @@ else(WIN32 AND NOT UNIX)
   endif (ALPS_FOR_VISTRAILS)
 endif(WIN32 AND NOT UNIX)
 
-find_package(Vistrails)
 
 ######################################################################
 # Version information
