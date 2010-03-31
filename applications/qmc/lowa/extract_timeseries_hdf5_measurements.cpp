@@ -55,11 +55,12 @@ int main(int argc, char** argv)
   std::string thermal_str;   int thermal  = 0;
   std::string skip_str;      int skip     = 1;
   std::string description_str;
+  bool is_print = false;
  
 
   int optchar;
 
-  while ((optchar = getopt (argc, argv, "i:o:l:u:t:s:d:")) != -1)
+  while ((optchar = getopt (argc, argv, "i:o:l:u:t:s:d:p")) != -1)
   {
     switch (optchar)
     {
@@ -86,6 +87,10 @@ int main(int argc, char** argv)
 
       case 'd':
         description_str = (std::string) strdup (optarg);
+        break;
+
+      case 'p':
+        is_print = true;
         break;
     }
   }
@@ -180,6 +185,7 @@ int main(int argc, char** argv)
     outFile.open(fileOUT.c_str(),std::ios::out);
     for (std::size_t index=0; index < Nsites; ++index)
     {
+      if (is_print)  {  std::cout << index << " " << data[index];  }
       outFile << index << "\t" << data[index].mean() << "\t" << data[index].error() << "\n";
     }
     outFile.close();
