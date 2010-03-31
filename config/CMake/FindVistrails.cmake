@@ -1,3 +1,8 @@
+#  Copyright Bela Bauer and Matthias Troyer 2010.
+#  Distributed under the Boost Software License, Version 1.0.
+#      (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
 # look for Vistrails and set the following variables:
 
 # Vistrails_FOUND
@@ -11,15 +16,24 @@
 
 if(WIN32 AND NOT UNIX)
   set(VISTRAILS_APP_NAME "vistrails" CACHE STRING "Name of the Vistrails application")
+  find_path(VISTRAILS_APP_DIR ${VISTRAILS_APP_NAME} "$ENV{HOMEDRIVE}/Program Files (x86)/VisTrails" "$ENV{HOMEDRIVE}/Program Files/VisTrails" CACHE STRING "Path to the VisTrails directory")
+  if(VISTRAILS_APP_DIR)
+    set(VISTRAILS_FOUND "TRUE")
+  else(VISTRAILS_APP_DIR)
+    set(VISTRAILS_FOUND "FALSE")
+  endif(VISTRAILS_APP_DIR)
   set(VISTRAILS_PACKAGE_DIR "packages")
   set(VISTRAILS_PYTHON_EXTENSION_DIR Python25/Lib/site-packages )
   set(VISTRAILS_LIB_DIR "lib")
+  set(VISTRAILS_PYTHONPATH_DIR "")
   set(VISTRAILS_PYTHON_EXTENSION_DIR "Python25/DLLs")
   set(VISTRAILS_DYLIB_DIR "")
+  set(VISTRAILS_ALTERNATE_APP_DIR "$ENV{HOMEDRIVE}/Program Files (x86)/VisTrails")
+  set(VISTRAILS_PYTHON_INTERPRETER "${VISTRAILS_APP_NAME}/Python25/python.exe")
 else(WIN32 AND NOT UNIX)
   if(APPLE)	
     set(VISTRAILS_APP_NAME "Vistrails.app" CACHE STRING "Name of the Vistrails application")
-    find_path(VISTRAILS_APP_DIR ${VISTRAILS_APP_NAME} "/Applications/Vistrails/")
+    find_path(VISTRAILS_APP_DIR ${VISTRAILS_APP_NAME} "/Applications/Vistrails/" CACHE STRING "Path to the VisTrails directory")
     if(VISTRAILS_APP_DIR)
       set(VISTRAILS_FOUND "TRUE")
     else(VISTRAILS_APP_DIR)
@@ -28,6 +42,7 @@ else(WIN32 AND NOT UNIX)
     set(VISTRAILS_PACKAGE_DIR "Contents/Resources/lib/python2.5/packages")
     set(VISTRAILS_PYTHON_EXTENSION_DIR "Contents/Resources/lib/python2.5")
     set(VISTRAILS_LIB_DIR "Contents/Resources/lib")
+    set(VISTRAILS_PYTHONPATH_DIR "Contents/Resources")
     set(VISTRAILS_DYLIB_DIR "Contents/Frameworks")
     set(VISTRAILS_PYTHON_INTERPRETER "Contents/MacOS/python")
   else(APPLE)	
@@ -44,3 +59,12 @@ else(WIN32 AND NOT UNIX)
     set(VISTRAILS_DYLIB_DIR "lib")
   endif(APPLE)
 endif(WIN32 AND NOT UNIX)
+
+MARK_AS_ADVANCED( VISTRAILS_APP_NAME )
+MARK_AS_ADVANCED( VISTRAILS_PACKAGE_DIR )
+MARK_AS_ADVANCED( VISTRAILS_PYTHON_EXTENSION_DIR )
+MARK_AS_ADVANCED( VISTRAILS_LIB_DIR )
+MARK_AS_ADVANCED( VISTRAILS_DYLIB_DIR )
+MARK_AS_ADVANCED( VISTRAILS_PYTHON_INTERPRETER )
+MARK_AS_ADVANCED( VISTRAILS_PYTHONPATH_DIR )
+
