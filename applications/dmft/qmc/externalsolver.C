@@ -30,11 +30,14 @@ ImpuritySolver::result_type ExternalSolver::solve(
       const itime_green_function_t& G0
     , const alps::Parameters& parms) 
 {
-  std::string infile = std::tmpnam(0); // the input file name
-  std::string outfile = std::tmpnam(0); // the output file name
+  char basename_in[]="alps_external_solver_XXXXXX";
+  char basename_out[]="alps_external_solver_out_XXXXXX";
+  mkstemp(basename_in); // the input file name
+  mkstemp(basename_out); // the output file name
+  std::string infile(basename_in), outfile(basename_out);
   if(parms.defined("TMPNAME")){
-    infile=parms["TMPNAME"]+std::string(".in.xml");
-    outfile=parms["TMPNAME"]+std::string(".out.xml");
+    infile=basename_in+std::string(".in.xml");
+    outfile=basename_out+std::string(".out.xml");
   }
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
@@ -87,13 +90,15 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
               const matsubara_green_function_t& G0_omega
             , const alps::Parameters& parms)
 {
-  std::string infile = std::tmpnam(0); // the input file name
-  std::string outfile = std::tmpnam(0); // the output file name
+  char basename_in[]="alps_external_solver_XXXXXX";
+  char basename_out[]="alps_external_solver_out_XXXXXX";
+  mkstemp(basename_in); // the input file name
+  mkstemp(basename_out); // the output file name
+  std::string infile(basename_in), outfile(basename_out);
   if(parms.defined("TMPNAME")){
-    infile=parms["TMPNAME"]+std::string(".in.xml");
-    outfile=parms["TMPNAME"]+std::string(".out.xml");
+    infile=basename_in+std::string(".in.xml");
+    outfile=basename_out+std::string(".out.xml");
   }
-
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
  
