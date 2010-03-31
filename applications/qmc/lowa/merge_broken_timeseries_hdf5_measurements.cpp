@@ -97,8 +97,6 @@ int main(int argc, char** argv)
   }
 
 
-  std::vector<std::valarray<uint8_t> > raw_data;
-
   uint8_t dummy;  
 
   std::string cur_filename1 = fileIN1;
@@ -144,7 +142,6 @@ int main(int argc, char** argv)
         std::valarray<uint8_t> raw_data_elem = alps::numeric::vector2valarray<uint8_t>(raw_data_elem_vec);
         if ((counter > thermal) && ((counter % skip) == 0))  
         {  
-          raw_data.push_back(raw_data_elem); 
           oa << alps::make_pvp(cur_description_str, &raw_data_elem[0], raw_data_elem_vec.size());
           oa << alps::make_pvp("No_of_datasets",counter);
           std::cout << "Dataset (Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << std::endl;
@@ -171,7 +168,6 @@ int main(int argc, char** argv)
         ia2 >> alps::make_pvp(cur_description_str,raw_data_elem_vec);
         std::valarray<uint8_t> raw_data_elem = alps::numeric::vector2valarray<uint8_t>(raw_data_elem_vec);        if ((counter > thermal) && ((counter % skip) == 0))  
         {   
-          raw_data.push_back(raw_data_elem); 
           oa << alps::make_pvp(cur_description_str, &raw_data_elem[0], raw_data_elem_vec.size());
           oa << alps::make_pvp("No_of_datasets",counter);
           std::cout << "Dataset (Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << std::endl;

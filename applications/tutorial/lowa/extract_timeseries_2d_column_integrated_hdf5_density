@@ -26,7 +26,7 @@
 ###*
 ###*****************************************************************************/
 ###
-### $Id: extract_hdf5_timeseries_density 3520 2010-03-19 22:00:00Z tamama $ 
+### $Id: extract_timeseries_2d_column_integrated_hdf5_density 3520 2010-03-19 22:00:00Z tamama $ 
 ###
 ###
 ### Legends
@@ -41,4 +41,15 @@
 ### 7)  -o : output filename
 ###
 
-/Users/tamama/Programs/ALPS2/applications/qmc/lowa/extract_timeseries_hdf5_measurements -i ./1/timeseries.mdns -o mdns -d TimeSeries/Density/Set -l 1 -u 1 -t 10 -s 1 
+
+#!/bin/bash
+
+
+if [ $# -ne 2 ] ; then
+  echo Error!
+  echo Usage: extract_timeseries_2d_column_integrated_hdf5_density  [thermalization steps]  [skip steps]
+  exit 1;
+fi
+
+
+/Users/tamama/Programs/ALPS2/applications/qmc/lowa/extract_timeseries_hdf5_measurements -i ./1.2d/timeseries.mdns.2d.column_integrated -o mdns.2d.column_integrated -d TimeSeries/Density/Set -l 1 -u 1 -t $1 -s $2 

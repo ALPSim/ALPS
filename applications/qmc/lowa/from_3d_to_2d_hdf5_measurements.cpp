@@ -44,10 +44,29 @@
 #include <alps/alea.h>
 
 
+
+template <class T1,class T2>
+void from_3dvec_to_2dvec(std::vector<T1>& from, std::vector<T2>& to1, std::vector<T1>& to2, uint32_t const L, uint32_t const L_sq, uint32_t const L_cube)
+{
+  to1.clear();   to1.resize(L_sq,0);
+  to2.clear();   to2.resize(L_sq,0);
+
+  for(uint32_t index=0; index < L_sq; ++index)
+  {
+    for (uint32_t k=0; k < L; ++k)
+    {
+      to1[index] += from[index + k*L_sq];
+    }
+    to2[index] = from[index + (L/2)*L_sq];
+  }
+}
+
+
+
 int main(int argc, char** argv)
 {
   std::ifstream inFile;     std::string fileIN;
-  std::ofstream outFile;    std::string fileOUT;
+  std::ofstream outFile;    std::string fileOUT1, fileOUT2;
 
   std::string len_str;       int length;
   std::string thermal_str;   int thermal  = 0;
@@ -57,7 +76,7 @@ int main(int argc, char** argv)
 
   int optchar;
 
-  while ((optchar = getopt (argc, argv, "i:o:t:s:d:")) != -1)
+  while ((optchar = getopt (argc, argv, "i:a:b:t:s:d:")) != -1)
   {
     switch (optchar)
     {
@@ -65,8 +84,12 @@ int main(int argc, char** argv)
         fileIN  = (std::string) strdup (optarg);
         break;
 
-      case 'o':
-        fileOUT  = (std::string) strdup (optarg);
+      case 'a':
+        fileOUT1  = (std::string) strdup (optarg);
+        break;
+
+      case 'b':
+        fileOUT2  = (std::string) strdup (optarg);
         break;
 
       case 't':
@@ -94,9 +117,6 @@ int main(int argc, char** argv)
     ss >> skip;
   }
 
-
-  std::vector<std::valarray<uint8_t> > raw_data;
-
   uint8_t dummy;  
 
   std::string cur_filename = fileIN;
@@ -110,8 +130,11 @@ int main(int argc, char** argv)
 
   uint32_t sweeps =0;
 
-  fileOUT += ".h5";
-  alps::hdf5::oarchive oa(fileOUT.c_str());
+  fileOUT1 += ".h5";
+  alps::hdf5::oarchive oa1(fileOUT1.c_str());
+
+  fileOUT2 += ".h5";
+  alps::hdf5::oarchive oa2(fileOUT2.c_str());
 
  
   if (is_hdf5_file_found)
@@ -131,21 +154,31 @@ int main(int argc, char** argv)
       {
         ia >> alps::make_pvp(cur_description_str,raw_data_elem_vec);
 
-        uint32_t L    = alps::numeric::cbrt(raw_data_elem_vec.size());
+        uint32_t L_cube = raw_data_elem_vec.size();
+        uint32_t L    = alps::numeric::cbrt(L_cube);
+        if (alps::numeric::cb(L) != L_cube)  { ++L; }   // by default, alps::numeric::cbrt is just pow(double,1./3), so there exists truncation error here...
         uint32_t L_sq = alps::numeric::sq(L);
+
+        std::vector<uint32_t> raw_data_elem_2d_column_integrated_vec;
+        std::vector<uint8_t> raw_data_elem_2d_cross_section_vec;
+
+        from_3dvec_to_2dvec<uint8_t,uint32_t>(raw_data_elem_vec,raw_data_elem_2d_column_integrated_vec,raw_data_elem_2d_cross_section_vec,L,L_sq,L_cube);
      
-        std::valarray<uint8_t> raw_data_elem = alps::numeric::vector2valarray<uint8_t>(raw_data_elem_vec);
+        std::valarray<uint32_t> raw_data_elem_2d_column_integrated = alps::numeric::vector2valarray<uint32_t>(raw_data_elem_2d_column_integrated_vec);
+        std::valarray<uint8_t> raw_data_elem_2d_cross_section     = alps::numeric::vector2valarray<uint8_t>(raw_data_elem_2d_cross_section_vec);
         if ((counter > thermal) && ((counter % skip) == 0))  
         {  
-          raw_data.push_back(raw_data_elem); 
-          oa << alps::make_pvp(cur_description_str, &raw_data_elem[0], raw_data_elem_vec.size());
-          oa << alps::make_pvp("No_of_datasets",counter);
-          std::cout << "Dataset (Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << " ; Nsites (projected) = " << L_sq << std::endl;
+          oa1 << alps::make_pvp(cur_description_str, &raw_data_elem_2d_column_integrated[0], L_sq);
+          oa1 << alps::make_pvp("No_of_datasets",counter);
+
+          oa2 << alps::make_pvp(cur_description_str, &raw_data_elem_2d_cross_section[0], L_sq);
+          oa2 << alps::make_pvp("No_of_datasets",counter);
+
+          std::cout << "Dataset (Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << L_cube << " ; Nsites (projected) = " << L_sq << std::endl;
         }
       }
     }
   }
-
 
   return 0;
 }
