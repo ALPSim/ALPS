@@ -8,6 +8,7 @@
 #include <alps/alea.h>
 #include <alps/hdf5.hpp>
 
+#include <boost/mpi.hpp>
 #include <boost/utility.hpp>
 #include <boost/function.hpp>
 #include <boost/lambda/bind.hpp>
@@ -22,8 +23,6 @@
 #include <sstream>
 #include <algorithm>
 #include <signal.h>
-
-#include <mpi.h>
 
 namespace alps {
 	template<typename S> struct result_names_type {
@@ -52,10 +51,7 @@ namespace alps {
 	}
 	class mcidump : public IDump {
 		public:
-			void reset(std::vector<char> const & buf) { 
-				buffer = buf;
-				pos = 0;
-			}
+			mcidump(std::vector<char> const & buf) : buffer(buf), pos(0) {}
 			#define ALPS_MCIDUMP_DO_TYPE(T)																		\
 				void read_simple(T & x) { read_buffer(&x, sizeof(T)); }											\
 				void read_array(std::size_t n, T * p) { read_buffer(p, n * sizeof(T)); }
@@ -90,8 +86,7 @@ namespace alps {
 	};
 	class mcodump : public ODump {
 		public:
-			std::size_t size() const { return buffer.size(); }
-			char & front() { return buffer.front(); }
+			std::vector<char> const & data() { return buffer; }
 			#define ALPS_MCODUMP_DO_TYPE(T)																		\
 				void write_simple(T x) { write_buffer(&x, sizeof(T)); }											\
 				void write_array(std::size_t n, T const * p) { write_buffer(p, n * sizeof(T)); }
@@ -218,11 +213,7 @@ namespace alps {
 			typedef std::vector<std::string> result_names_type;
 			mcbase(parameters_type const & params): params(params) {}
 			void save(boost::filesystem::path const & path) const {
-				{
-					std::stringstream out;
-					out << "write file: " << path.file_string() << std::endl;
-					std::cerr << out.str();
-				}
+				std::cerr << "write file: " << path.file_string() << std::endl;
 				boost::filesystem::path backup = boost::filesystem::exists(path) ? path.parent_path() / ( path.filename() + ".bak" ) : path;
 				if (boost::filesystem::exists(backup))
 					boost::filesystem::remove(backup);
@@ -235,11 +226,6 @@ namespace alps {
 				if (backup != path) {
 					boost::filesystem::remove(path);
 					boost::filesystem::rename(backup, path);
-				}
-				{
-					std::stringstream out;
-					out << "file written: " << path.file_string() << std::endl;
-					std::cerr << out.str();
 				}
 			}
 			void load(boost::filesystem::path const & path) { 
@@ -342,25 +328,22 @@ namespace alps {
 				, char *argv[]
 				, int base = 16
 			)
-				: begin(begin_), merge(merge_), pack(pack_), finish(finish_)
+				: env(argc, argv), world(), begin(begin_), merge(merge_), pack(pack_), finish(finish_)
 			{
-				MPI_Init (&argc, &argv);
-				MPI_Comm_rank (MPI_COMM_WORLD, &rank);
-				MPI_Comm_size (MPI_COMM_WORLD, &size);
-				if(size > 1) {
+				if(world.size() > 1) {
 					int layer = base;
-					while (rank >= layer - 1)
+					while (world.rank() >= layer - 1)
 						layer *= base;
 					layer /= base;
-					parent = std::max(0, (rank - layer + 1) / base + layer / base - 1);
-					for (int i = 1; !rank && i < std::min(base - 1, size); ++i)
+					parent = std::max(0, (world.rank() - layer + 1) / base + layer / base - 1);
+					for (int i = 1; !world.rank() && i < std::min(base - 1, world.size()); ++i)
 						children.push_back(i);
 					for (int i = 0; i < base; ++i)
-						if ((rank - layer + 1) * base + layer * base - 1 + i < size)
-							children.push_back((rank - layer + 1) * base + layer * base - 1 + i);
+						if ((world.rank() - layer + 1) * base + layer * base - 1 + i < world.size())
+							children.push_back((world.rank() - layer + 1) * base + layer * base - 1 + i);
 				}
 				std::stringstream out;
-				out << "node: " << std::setw(4) << rank << ", parent: " << std::setw(4) << parent;
+				out << "node: " << std::setw(4) << world.rank() << ", parent: " << std::setw(4) << parent;
 				if (children.size()) {
 					out << ", children:";
 					for (std::vector<int>::const_iterator it = children.begin(); it != children.end(); ++it)
@@ -370,88 +353,67 @@ namespace alps {
 				std::cerr << out.str();
 			}
 			bool is_master() {
-				return !rank;
+				return !world.rank();
 			}
 			int get_rank() {
-				return rank;
+				return world.rank();
 			}
 			void broadcast(int tag, mcodump & buf) {
-				if (rank)
+				if (world.rank())
 					throw std::runtime_error("Only rank 0 can send a broadcast");
 				tasks.resize(tasks.size() + 1);
 				tasks.back().get<2>() = clock();
 				begin(tag, tasks.back().get<1>());
 				tag += (tasks.size() - 1) << 16;
-				if (children.size()) {
-					std::vector<MPI_Status> states(children.size()); 
-					std::vector<MPI_Request> requests(children.size());
-					int count = buf.size();
-					for (std::size_t i = 0; i < children.size(); ++i)
-						MPI_Isend(&(buf.front()), count, MPI_BYTE, children[i], tag, MPI_COMM_WORLD, &(requests[i]));
-					MPI_Waitall(requests.size(), &(requests.front()), &(states.front()));
-				}
+				for (std::vector<int>::const_iterator it = children.begin(); it != children.end(); ++it)
+// use isend?
+					world.send(*it, tag, buf.data());
 			}
 			void probe() {
-				int flag;
-				MPI_Status status;
-				if (MPI_Iprobe(MPI_ANY_SOURCE, MPI_ANY_TAG, MPI_COMM_WORLD, &flag, &status) != MPI_SUCCESS)
-					throw std::runtime_error("Error when receiving MPI message: " + boost::lexical_cast<std::string>(status.MPI_ERROR));
-				if (flag) {
-					int count;
-					int tag = status.MPI_TAG & 0xFF;
-					int index = status.MPI_TAG >> 16;
-					MPI_Get_count(&status, MPI_BYTE, &count);
-					std::vector<char> buf(count);
-					MPI_Recv(&(buf.front()), count, MPI_BYTE, status.MPI_SOURCE, status.MPI_TAG, MPI_COMM_WORLD, &status);
-					if (status.MPI_SOURCE == parent) {
+			return;				boost::mpi::status status; // = world.iprobe();
+				// ??
+				if (false) {
+					int tag = status.tag() & 0xFF;
+					int index = status.tag() >> 16;
+					std::vector<char> buf;
+					world.recv(status.source(), status.tag(), buf);
+					if (status.source() == parent) {
 						tasks.resize(std::max(tasks.size(), std::size_t(index + 1)));
 						begin(tag, tasks[index].get<1>());
-						std::vector<MPI_Status> states(children.size()); 
-						std::vector<MPI_Request> requests(children.size());
-						for (std::size_t i = 0; i < children.size(); ++i)
-							MPI_Isend(&(buf.front()), count, MPI_BYTE, children[i], status.MPI_TAG, MPI_COMM_WORLD, &(requests[i]));
-						MPI_Waitall(requests.size(), &(requests.front()), &(states.front()));
+						for (std::vector<int>::const_iterator it = children.begin(); it != children.end(); ++it)
+// use isend?
+							world.send(*it, status.tag(), buf);
 					} else {
-						if (std::find(children.begin(), children.end(), status.MPI_SOURCE) == children.end())
-							throw std::runtime_error("Invalid MPI source: " + boost::lexical_cast<std::string>(status.MPI_SOURCE));
-						mcidump ibuf;
-						ibuf.reset(buf);
+						if (std::find(children.begin(), children.end(), status.source()) == children.end())
+							throw std::runtime_error("Invalid MPI source: " + boost::lexical_cast<std::string>(status.source()));
+						mcidump ibuf(buf);
 						merge(tag, tasks[index].get<1>(), ibuf);
 						tasks[index].get<0>()++;
 					}
 					if (tasks[index].get<0>() == children.size()) {
-						if (!rank) {
-							std::stringstream out;
-							out << "broadcast: " << std::setw(2) << tag << ", took: " << std::setprecision(4) << (clock() - tasks[index].get<2>()) / (double)CLOCKS_PER_SEC << "s" << std::endl;
-							std::cerr << out.str();
+						if (!world.rank()) {
+							std::cerr << "broadcast: " << std::setw(2) << tag << ", took: " << std::setprecision(4) << (clock() - tasks[index].get<2>()) / (double)CLOCKS_PER_SEC << "s" << std::endl;
 							finish(tag, tasks[index].get<1>());
 						} else if (tasks[index].get<0>() == children.size()) {
-							{
-								std::stringstream out;
-								out << "return: " << std::setw(2) << tag << " from: " << std::setw(3) << rank << " to " << std::setw(3) << parent << std::endl;
-								std::cerr << out.str();
-							}
 							mcodump obuf;
 							pack(tag, tasks[index].get<1>(), obuf);
-							count = obuf.size();
-							MPI_Request request;
-							MPI_Isend(&(obuf.front()), count, MPI_BYTE, parent, status.MPI_TAG, MPI_COMM_WORLD, &request);
-							MPI_Wait(&request, &status);
+// use isend?
+							world.send(parent, status.tag(), obuf.data());
 						}
 						tasks[index] = boost::make_tuple(0, boost::any(), 0);
 					}
 				}
 			}
 		private:
-			int rank;
-			int size;
 			int parent;
 			std::vector<int> children;
-			std::vector<boost::tuple<int, boost::any, clock_t> > tasks;
+			boost::mpi::environment env;
+			boost::mpi::communicator world;
 			boost::function<void(int, boost::any &)> begin;
 			boost::function<void(int, boost::any &)> finish;
-			boost::function<void(int, boost::any &, mcidump &)> merge;
 			boost::function<void(int, boost::any &, mcodump &)> pack;
+			boost::function<void(int, boost::any &, mcidump &)> merge;
+			std::vector<boost::tuple<int, boost::any, clock_t> > tasks;
 	};
 	template <typename Impl> class mcmpirun : public mcrun<Impl> {
 		public:
@@ -499,11 +461,6 @@ namespace alps {
 						data = fraction + boost::any_cast<double>(data);
 						break;
 					case MC_finalize:
-						{
-							std::stringstream out;
-							out << "merge: " << communicator.get_rank() << std::endl;
-							std::cerr << out.str();
-						}
 						typename mcrun<Impl>::results_type result;
 						buf >> result;
 						std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> > results = boost::any_cast<std::vector<std::pair<std::size_t, typename mcrun<Impl>::results_type> > >(data);
@@ -514,11 +471,6 @@ namespace alps {
 							results.pop_back();
 						}
 						data = results;
-						{
-							std::stringstream out;
-							out << "merged: " << communicator.get_rank() << std::endl;
-							std::cerr << out.str();
-						}
 						break;
 				}
 			}
@@ -550,11 +502,7 @@ namespace alps {
 						for (std::size_t i = results.size() - 1; i > 0; --i)
 							results[i - 1].second << results[i].second;
 						boost::filesystem::path path = "sim.out.h5";
-						{
-							std::stringstream out;
-							out << "write file: " << path.file_string() << std::endl;
-							std::cerr << out.str();
-						}
+						std::cerr << "write file: " << path.file_string() << std::endl;
 						boost::filesystem::path backup = boost::filesystem::exists(path) ? path.parent_path() / ( path.filename() + ".bak" ) : path;
 						if (boost::filesystem::exists(backup))
 							boost::filesystem::remove(backup);
@@ -567,11 +515,6 @@ namespace alps {
 							boost::filesystem::rename(backup, path);
 						}
 						checkpointing = false;
-						{
-							std::stringstream out;
-							out << "file written: " << path.file_string() << std::endl;
-							std::cerr << out.str();
-						}
 						break;
 				}
 			}
