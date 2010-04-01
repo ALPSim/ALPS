@@ -4,13 +4,9 @@
 
 #include "ngs.hpp"
 
-#include <boost/random/variate_generator.hpp>
-#include <boost/random/mersenne_twister.hpp>
-#include <boost/random/uniform_real.hpp>
-
-class ising_impl : public alps::mcbase {
+class ising_sim : public alps::mcbase {
 	public:
-		ising_impl(parameters_type const & params)
+		ising_sim(parameters_type const & params)
 			: alps::mcbase(params)
 			, length(params["L"])
 			, beta(1. / double(params["T"]))
@@ -18,7 +14,6 @@ class ising_impl : public alps::mcbase {
 			, thermalization_sweeps(int(params["THERMALIZATION"]))
 			, total_sweeps(int(params["SWEEPS"]))
 			, spins(length)
-			, random(boost::mt19937(), boost::uniform_real<>())
 		{
 			for(int i = 0; i < length; ++i)
 				spins[i] = (random() < 0.5 ? 1 : -1);
@@ -73,9 +68,4 @@ class ising_impl : public alps::mcbase {
 		double ten;
 		std::vector<int> spins;
 		std::valarray<double> corr;
-		boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
 };
-typedef alps::mcrun<ising_impl> simple_sim;
-#ifdef ALPS_HAVE_MPI
-	typedef alps::mcmpirun<ising_impl> parallel_sim;
-#endif

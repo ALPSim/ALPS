@@ -1,27 +1,44 @@
-//  (C) Copyright 2010 Lukas Gamper <gamperl -at- gmail.com>
-//  Use, modification, and distribution are subject to the Boost Software 
-//  License, Version 1.0. (See at <http://www.boost.org/LICENSE_1_0.txt>.)
+# include "isingng.hpp"
 
-#include "isingng.hpp"
+//#define SINGLE_RUN
+//#define THREAD_RUN
+#define MPI_RUN
 
-#include <boost/bind.hpp>
-
-template<typename S> void run_sim(alps::mcoptions const & options, int argc, char *argv[]) {
-	typename S::parameters_type params(options);
-	S s(params, argc, argv);
-	s.run(boost::bind(&S::stop, boost::ref(s)));
-	while (!s.stop())
-		usleep(100000);
+#ifdef SINGLE_RUN
+	typedef ising_sim sim_type;
+#endif
+#ifdef THREAD_RUN
+	typedef alps::mcthreadsim<ising_sim> sim_type;
+#endif
+#ifdef MPI_RUN
+	typedef alps::mcmpisim<ising_sim> sim_type;
+#endif
+bool stop_callback(boost::posix_time::ptime const & end_time) {
+	return alps::mcsignal() || boost::posix_time::second_clock::local_time() > end_time;
 }
 int main(int argc, char *argv[]) {
-	if (argc < 2)
-		throw std::invalid_argument("parameter file missing " + std::string(argv[0]) + " param.h5");
 	alps::mcoptions options(argc, argv);
-#ifdef ALPS_HAVE_MPI
-	if (options.is_valid() && options.use_mpi())
-		run_sim<parallel_sim>(options, argc, argv);
-	else 
+	if (options.valid) {
+		sim_type::parameters_type params(options.input_file);
+#ifdef MPI_RUN
+		boost::mpi::environment env(argc, argv);
+		boost::mpi::communicator c;
+		sim_type s(params, c);
+#else
+		sim_type s(params);
 #endif
-	if (options.is_valid())
-		run_sim<simple_sim>(options, argc, argv);
+		s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
+#ifdef MPI_RUN
+		s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
+		if (s.is_master()) {
+			alps::hdf5::oarchive ar("sim.h5");
+			ar << make_pvp("/parameters", params) << make_pvp("/simulation/results", collect_results(s, "Magnetization"));
+			s.terminate();
+		} else
+			s.process_requests();
+#else
+		s.save("sim");
+		std::cout << collect_results(s, "Magnetization");
+#endif
+	}
 }
