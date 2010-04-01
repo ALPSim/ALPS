@@ -199,6 +199,14 @@ endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
 
 add_library(boost ${BOOST_SOURCES})
 
+if(WIN32)
+  if(BUILD_SHARED_LIBS)
+    set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS BOOST_THREAD_BUILD_DLL=1)
+  else(BUILD_SHARED_LIBS)
+    set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS BOOST_THREAD_BUILD_LIB=1)
+  endif(BUILD_SHARED_LIBS)
+endif(WIN32)
+
 if(MSVC)
   get_target_property(LIB_NAME boost LOCATION)
   add_custom_command(TARGET boost POST_BUILD
