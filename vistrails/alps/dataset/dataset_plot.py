@@ -84,7 +84,7 @@ class MplXYPlot(NotCacheable,Module):
         return self.getInputFromPort(m)
             
     def compute(self):
-        try:
+#        try:
             if self.hifp('plot'):
                 self.plt = self.gifp('plot')
             else:
@@ -98,10 +98,10 @@ class MplXYPlot(NotCacheable,Module):
             if self.hasInputFromPort('source'):
                 code = self.getInputFromPort('source')
                 exec urllib.unquote(str(code))
-        except Exception as exc:
-            from traceback import print_exc()
-            print_exc()
-            raise exc
+#        except Exception as exc:
+#            from traceback import print_exc()
+#            print_exc()
+#            raise exc
         
 class Convert2Text(Module): 
     _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
