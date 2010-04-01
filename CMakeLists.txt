@@ -211,7 +211,7 @@ if (NOT ALPS_FOR_VISTRAILS)
   ENDIF(NOT WIN32)
 endif (NOT ALPS_FOR_VISTRAILS)
 if(MAC_VECLIB)
-  set(LAPACK_LDFLAGS "-faltivec -framework vecLib")
+  set(LAPACK_LDFLAGS "-framework vecLib")
 endif(MAC_VECLIB) 
 set(LAPACK_LINKER_FLAGS ${LAPACK_LDFLAGS})
 
