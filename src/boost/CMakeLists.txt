@@ -135,6 +135,22 @@ if(BUILD_BOOST_MPI)
   endforeach(S)
 endif(BUILD_BOOST_MPI)
 
+# Boost.Thread
+if(BUILD_BOOST_THREAD)
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/thread/src")
+  if (WIN32)
+    set(SOURCES win32/thread.cpp win32/tss_dll.cpp win32/tss_pe.cpp)
+  else (WIN32)
+    set(SOURCES pthread/once.cpp pthread/thread.cpp)
+  endif(WIN32)
+  foreach(S ${SOURCES})
+    if(EXISTS ${DIRECTORY}/${S})
+      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
+    endif(EXISTS ${DIRECTORY}/${S})
+  endforeach(S)
+endif(BUILD_BOOST_THREAD)
+
+
 # Boost.MPI Python bindings
 if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src/python")
