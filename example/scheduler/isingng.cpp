@@ -32,11 +32,6 @@ int main(int argc, char *argv[]) {
 		s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
 		if (s.is_master()) {
 			sim_type::results_type results = collect_results(s);
-			
-			
-			std::cerr << "saving sim\n";
-			
-			
 			{
 				alps::hdf5::oarchive ar("sim.h5");
 				ar << make_pvp("/parameters", params) << make_pvp("/simulation/results", results);

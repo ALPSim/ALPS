@@ -370,23 +370,8 @@ namespace alps {
 					std::vector<char> buf;
 					mcodump odump;
 					odump << mcthreadsim<Impl>::collect_results();
-			
-			
-			std::cerr << "> send bcast\n";
-			
-			
 					boost::mpi::broadcast(communicator, action, 0);
-			
-			
-			std::cerr << "> send reduce\n";
-			
-			
 					boost::mpi::reduce(communicator, odump.data(), buf, mcmpimerge<typename mcthreadsim<Impl>::results_type>(), 0);
-			
-			
-			std::cerr << "> get reduce\n";
-			
-			
 					mcidump idump(buf);
 					typename mcthreadsim<Impl>::results_type results;
 					idump >> results;
@@ -415,7 +400,7 @@ namespace alps {
 						if (!flag && boost::posix_time::second_clock::local_time() > check_time) {
 							double fraction = fraction_completed();
 							flag = (fraction >= 1);
-							next_check = 8 + 0.5 * (boost::posix_time::second_clock::local_time() - start_time).total_seconds() / fraction * (1 - fraction);
+							next_check = std::min(2. * next_check, std::max(double(next_check), 0.8 * (boost::posix_time::second_clock::local_time() - start_time).total_seconds() / fraction * (1 - fraction)));
 							check_time = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check);
 							std::cerr << std::fixed << std::setprecision(1) << fraction * 100 << "% done next check in " << next_check << "s" << std::endl;
 						}
@@ -433,12 +418,6 @@ namespace alps {
 				while (!is_master()) {
 					int action;
 					boost::mpi::broadcast(communicator, action, 0);
-			
-			
-			std::cerr << "< " + boost::lexical_cast<std::string>(action) + " " + boost::lexical_cast<std::string>(communicator.rank()) + "\n";
-			
-			
-					
 					switch (action) {
 						case MPI_get_fraction:
 							boost::mpi::reduce(communicator, mcthreadsim<Impl>::fraction_completed(), std::plus<double>(), 0);
