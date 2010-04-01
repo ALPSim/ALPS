@@ -33,6 +33,8 @@ from packages.controlflow.list_module import ListOfElements
 
 import pyalps.pytools # the C++ conversion functions
 
+import pyalps
+
 basic = core.modules.basic_modules
 
 ##############################################################################
@@ -90,17 +92,8 @@ class MakeParameterFile(Module):
 
 
 class WriteInputFiles(Module):
-     """Creates a parameter file.
+     """ This module writes the XML input files for ALPS
      """
-     def create_xml_file(self, f, dir, fname, p):
-         f.write('  <TASK status="new">\n')
-         f.write('    <INPUT file="'+fname+'.in.xml"/>\n')
-         f.write('    <OUTPUT file="'+fname+'.out.xml"/>\n')
-         f.write('  </TASK>\n')
-         print 'creating data'
-         res = parameters.ParametersData(p)             
-         print 'writing file'
-         res.write_xml_file(os.path.join(dir.name,fname+'.in.xml'))
          
      def compute(self):
          of = self.interpreter.filePool.create_file()
@@ -116,12 +109,7 @@ class WriteInputFiles(Module):
 
          ofile = basic.File()
          ofile.name = os.path.join(dir.name,base_name + '.in.xml')
-         f = file(ofile.name,'w')
-         f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
-         f.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')
-         f.write('<JOB xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2003/8/job.xsd">\n')
-         f.write('  <OUTPUT file="'+base_name+'.out.xml"/>\n')
-         
+
          if self.hasInputFromPort('parms'):
            input_values = self.forceGetInputListFromPort('parms')
            l = []
@@ -131,36 +119,16 @@ class WriteInputFiles(Module):
              else:
                l += [p]
 
-           bits = 31;
-           n = len(l)
-           while n>0:
-             n /= 2
-             bits -= 1
-
            if self.hasInputFromPort('baseseed'):
              baseseed = self.getInputFromPort('baseseed')
            else:
-             now = datetime.datetime.now()
-             baseseed = now.microsecond+1000000*now.second+60000000*now.minute
-             baseseed = ((baseseed << 10) | (baseseed >> 22));
+             baseseed = pyalps.generateSeed()
              
            Module.annotate(self,{'baseseed':baseseed})
            
-           count = 0
-           for p in l:
-               count += 1
-               if not p.has_key('SEED'):
-                 seed = baseseed
-                 for j in range(0,32/bits+1):
-                   seed ^= ((count-1) << (j * bits))
-                 seed &= ((1<<30) | ((1<<30)-1))
-                 p['SEED'] = seed
-               self.create_xml_file(f,dir,base_name+'.task'+str(count),p)
-
-         f.write('</JOB>\n')
-         f.close()
-         
-         alpscore.copy_stylesheet(dir.name)
+           pyalps.writeInputFiles(os.path.join(dir.name,base_name),l,baseseed)
+           alpscore.copy_stylesheet(dir.name)
+           
          self.setResult("output_dir", dir)
          self.setResult("output_file", ofile)
      _input_ports = [('parms', [Parameters]),
@@ -201,16 +169,11 @@ class Parameter2XML(alpscore.SystemCommandLogged):
 
 def recursive_glob(dirname,pattern):
     ret = [os.path.join(dirname,x) for x in glob.glob(os.path.join(dirname, pattern))]
-#    print 'pattern ', pattern
-#    print 'here ', ret
     dirs = [os.path.join(dirname,x) for x in os.listdir(dirname)]
-#    print 'dirs ', dirs
     for d in dirs:
         if os.path.isdir(d):
             files_there = recursive_glob(os.path.join(dirname, d), pattern)
-#            files_there = [os.path.join(dirname,d,x) for x in files_there]
             ret += files_there
-#    print 'final ret', ret
     return ret
 
 class Glob(Module):

@@ -20,9 +20,8 @@ name = 'ALPS'
 ##############################################################################
 
 def package_dependencies():
-  return ['edu.utah.sci.vistrails.control_flow', 'edu.utah.sci.vistrails.matplotlib', 'edu.utah.sci.vistrails.spreadsheet']
+  return ['edu.utah.sci.vistrails.control_flow', 'edu.utah.sci.vistrails.matplotlib', 'edu.utah.sci.vistrails.spreadsheet', 'edu.utah.sci.vistrails.vtlcreator']
 
-_subworkflows = ['MplXYPlotCell.xml']
 
 if platform.system()=='Windows':
   configuration = ConfigurationObject(alpspath="C:\\Program Files\\ALPS\\bin",toolpath="C:\\Program Files\\ALPS\\bin",mpirun="",mpiprocs=0)
