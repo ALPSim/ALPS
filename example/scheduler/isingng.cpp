@@ -31,8 +31,16 @@ int main(int argc, char *argv[]) {
 #ifdef MPI_RUN
 		s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
 		if (s.is_master()) {
-			alps::hdf5::oarchive ar("sim.h5");
-			ar << make_pvp("/parameters", params) << make_pvp("/simulation/results", collect_results(s, "Magnetization"));
+			sim_type::results_type results = collect_results(s);
+			
+			
+			std::cerr << "saving sim\n";
+			
+			
+			{
+				alps::hdf5::oarchive ar("sim.h5");
+				ar << make_pvp("/parameters", params) << make_pvp("/simulation/results", results);
+			}
 			s.terminate();
 		} else
 			s.process_requests();

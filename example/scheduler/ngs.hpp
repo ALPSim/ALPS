@@ -370,8 +370,23 @@ namespace alps {
 					std::vector<char> buf;
 					mcodump odump;
 					odump << mcthreadsim<Impl>::collect_results();
+			
+			
+			std::cerr << "> send bcast\n";
+			
+			
 					boost::mpi::broadcast(communicator, action, 0);
+			
+			
+			std::cerr << "> send reduce\n";
+			
+			
 					boost::mpi::reduce(communicator, odump.data(), buf, mcmpimerge<typename mcthreadsim<Impl>::results_type>(), 0);
+			
+			
+			std::cerr << "> get reduce\n";
+			
+			
 					mcidump idump(buf);
 					typename mcthreadsim<Impl>::results_type results;
 					idump >> results;
@@ -418,6 +433,12 @@ namespace alps {
 				while (!is_master()) {
 					int action;
 					boost::mpi::broadcast(communicator, action, 0);
+			
+			
+			std::cerr << "< " + boost::lexical_cast<std::string>(action) + " " + boost::lexical_cast<std::string>(communicator.rank()) + "\n";
+			
+			
+					
 					switch (action) {
 						case MPI_get_fraction:
 							boost::mpi::reduce(communicator, mcthreadsim<Impl>::fraction_completed(), std::plus<double>(), 0);
