@@ -84,19 +84,24 @@ class MplXYPlot(NotCacheable,Module):
         return self.getInputFromPort(m)
             
     def compute(self):
-        if self.hifp('plot'):
-            self.plt = self.gifp('plot')
-        else:
-            raise EmptyInputPort('plot')
-        
-        self.worker(self.plt)
-        
-        if self.hifp('hide_buttons') and self.gifp('hide_buttons') == True:
-            plt.get_current_fig_manager().toolbar.hide()
-        
-        if self.hasInputFromPort('source'):
-            code = self.getInputFromPort('source')
-            exec urllib.unquote(str(code))
+        try:
+            if self.hifp('plot'):
+                self.plt = self.gifp('plot')
+            else:
+                raise EmptyInputPort('plot')
+            
+            self.worker(self.plt)
+            
+            if self.hifp('hide_buttons') and self.gifp('hide_buttons') == True:
+                plt.get_current_fig_manager().toolbar.hide()
+            
+            if self.hasInputFromPort('source'):
+                code = self.getInputFromPort('source')
+                exec urllib.unquote(str(code))
+        except Exception as exc:
+            from traceback import print_exc()
+            print_exc()
+            raise exc
         
 class Convert2Text(Module): 
     _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
