@@ -19,7 +19,7 @@
 #  - PYTHON_EXTRA_LIBS :  libraries which must be linked in when embedding
 #  - PYTHON_LINK_FOR_SHARED :  linking flags needed when building a shared lib for external modules
 
-if (NOT PYTHON_INTERPRETER)
+if (NOT PYTHON_INTERPRETER AND NOT ALPS_FOR_VISTRAILS)
   find_program(PYTHON_INTERPRETER python)
   if (NOT PYTHON_INTERPRETER)
     set (PYTHON_FOUND FALSE)
@@ -28,13 +28,15 @@ if (NOT PYTHON_INTERPRETER)
   endif(NOT PYTHON_INTERPRETER)
 else (NOT PYTHON_INTERPRETER)
   set(PYTHON_FOUND TRUE)
-endif (NOT PYTHON_INTERPRETER)
+endif (NOT PYTHON_INTERPRETER AND NOT ALPS_FOR_VISTRAILS)
 
 set(PYTHON_MINIMAL_VERSION 2.5)
 
-find_package(PythonLibs)
+if (WIN32 AND NOT ALPS_FOR_VISTRAILS)
+  find_package(PythonLibs)
+endif (WIN32 AND NOT ALPS_FOR_VISTRAILS)
 
-IF (PYTHON_FOUND)
+IF (PYTHON_FOUND AND NOT ALPS_FOR_VISTRAILS)
 
   MESSAGE (STATUS "Python interpreter ${PYTHON_INTERPRETER}")
   #
@@ -59,9 +61,9 @@ IF (PYTHON_FOUND)
     MESSAGE(WARNING "Python intepreter version is ${PYTHON_VERSION} will it should be >= ${PYTHON_MINIMAL_VERSION}")
     SET(PYTHON_FOUND FALSE)
   ENDIF (PYTHON_VERSION_NOT_OK)
-ENDIF (PYTHON_FOUND)
+ENDIF (PYTHON_FOUND AND NOT ALPS_FOR_VISTRAILS)
 
-IF (PYTHON_FOUND)
+IF (PYTHON_FOUND AND NOT ALPS_FOR_VISTRAILS)
   EXEC_PYTHON_SCRIPT ("import distutils " nulle) # check that distutils is there...
   EXEC_PYTHON_SCRIPT ("import numpy" nulle) # check that numpy is there...
   #EXEC_PYTHON_SCRIPT ("import tables" nulle) # check that tables is there...
@@ -120,12 +122,12 @@ IF (PYTHON_FOUND)
   IF(APPLE)
       SET (PYTHON_LINK_FOR_SHARED -u _PyMac_Error -framework Python)
       SET (PYTHON_LINK_MODULE -bundle -undefined dynamic_lookup)
-      ELSE(${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
+  ELSE(APPLE)
       SET (PYTHON_LINK_MODULE -shared)
   ENDIF(APPLE)
-ENDIF (PYTHON_FOUND)
+ENDIF (PYTHON_FOUND AND NOT ALPS_FOR_VISTRAILS)
 
-  set (PYTHONLIBS_FOUND ${PYTHON_FOUND})
+set (PYTHONLIBS_FOUND ${PYTHON_FOUND})
 
 #
 # This function writes down a script to compile f2py modules
