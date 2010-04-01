@@ -8,9 +8,11 @@
 
 FIND_PATH(DOCBOOK_XSL_DIR
   NAMES fo/docbook.xsl
-  PATHS /opt/local/share/xsl/docbook-xsl/
+  PATHS /opt/local/share/xsl/docbook-xsl/ /usr/share/xml/docbook/stylesheet/docbook-xsl/
   PATH_SUFFIXES ${subdirs}
 )
+
+#MESSAGE("BOST ROOT DIR ${Boost_ROOT_DIR}")
 
 if (NOT DOCBOOK_XSL_DIR)
     file(GLOB subdirs RELATIVE ${Boost_ROOT_DIR}/tools/boostbook ${Boost_ROOT_DIR}/tools/boostbook/docbook-xs*)

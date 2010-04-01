@@ -8,7 +8,7 @@
 
 FIND_PATH(DOCBOOK_DTD_DIR
   NAMES docbookx.dtd
-  PATHS /opt/local/share/xml/docbook/ ${Boost_ROOT_DIR}/tools/boostbook
+  PATHS /opt/local/share/xml/docbook/ ${Boost_ROOT_DIR}/tools/boostbook /usr/share/xml/docbook/schema/dtd/4.2/
   PATH_SUFFIXES 4.2 docbook-dtd-4.2
 )
 
