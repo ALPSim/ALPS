@@ -26,14 +26,18 @@
 #include <fstream>
 #include <boost/tuple/tuple.hpp>
 
+#ifdef BOOST_MSVC
+#include <io.h>
+#endif
+
 ImpuritySolver::result_type ExternalSolver::solve(
       const itime_green_function_t& G0
     , const alps::Parameters& parms) 
 {
   char basename_in[]="alps_external_solver_XXXXXX";
   char basename_out[]="alps_external_solver_out_XXXXXX";
-  mkstemp(basename_in); // the input file name
-  mkstemp(basename_out); // the output file name
+  mktemp(basename_in); // the input file name
+  mktemp(basename_out); // the output file name
   std::string infile(basename_in), outfile(basename_out);
   if(parms.defined("TMPNAME")){
     infile=basename_in+std::string(".in.xml");
@@ -92,8 +96,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
 {
   char basename_in[]="alps_external_solver_XXXXXX";
   char basename_out[]="alps_external_solver_out_XXXXXX";
-  mkstemp(basename_in); // the input file name
-  mkstemp(basename_out); // the output file name
+  mktemp(basename_in); // the input file name
+  mktemp(basename_out); // the output file name
   std::string infile(basename_in), outfile(basename_out);
   if(parms.defined("TMPNAME")){
     infile=basename_in+std::string(".in.xml");
