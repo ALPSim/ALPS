@@ -559,9 +559,10 @@ else (ALPS_FOR_VISTRAILS)
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
   install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib COMPONENT xml)
 
-  install(FILES config/CMake/UseALPS.cmake 
+  install(FILES config/CMake/UseALPS.cmake
           ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
           ${PROJECT_BINARY_DIR}/config/CMake/include.mk
+          config/CMake/run_test.cmake
           DESTINATION share/alps COMPONENT build)
 
   install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
