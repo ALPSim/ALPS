@@ -55,15 +55,13 @@ void generate_timeseries_coupling_obs(std::vector<T1>& o,std::vector<T1>& O, std
 
       for (T2 delta_j=-xi; delta_j <= xi; ++delta_j) {
         for (T2 delta_i=-xi; delta_i <= xi; ++delta_i) {
-
           if (std::sqrt(delta_i*delta_i + delta_j*delta_j) <= xi) {
             T2 cur_i = i + delta_i;
             T2 cur_j = j + delta_j;
             T2 cur_p = cur_j*L + cur_i;
 
-            if ((cur_i >= 0) && (cur_i < L) && (cur_j >=0) && (cur_j < L))   {  O[p] += o[cur_p];  }
+            if ((cur_i >= 0) && (cur_i < L) && (cur_j >=0) && (cur_j < L))   {  O[p] += o[cur_p];  } 
           }
-
         }
       }
 
@@ -72,10 +70,18 @@ void generate_timeseries_coupling_obs(std::vector<T1>& o,std::vector<T1>& O, std
 
   using namespace alps::numeric;
   oO = o * O;
+
+/*
+  // for debugging purpose, not needed now since totally debugged...
+  using std::operator<<;  
+  std::cout << "\n\nChecking the validity of this function...\n\n";
+  for (T2 i=0; i < L; ++i) {
+    T2 p = (L/2)*L + i;
+    std::cout << i << "\t" << o[p] << "\t" << o[p-1] << "\t" << o[p+1] << "\t" << o[p-L] << "\t" << o[p+L] << "\t" << O[p] << "\t" << oO[p] << "\n";
+  }
+  std::cin.get();
+*/
 }
-
-
-
 
 
 
@@ -87,7 +93,7 @@ int main(int argc, char** argv)
   std::string thermal_str;   int thermal  = 0;
   std::string skip_str;      int skip     = 1;
   std::string description_str;
-  std::string xi_str;        int32_t xi    = 0.;
+  std::string xi_str;        int32_t xi= 0;
 
 
   int optchar;
@@ -142,7 +148,7 @@ int main(int argc, char** argv)
     std::istringstream ss(xi_str);
     ss >> xi;
   }
-
+  
 
   uint32_t dummy;  
 
@@ -200,16 +206,12 @@ int main(int argc, char** argv)
           oa2 << alps::make_pvp(cur_description_str, &raw_data_elem_oO[0], L_sq);
           oa2 << alps::make_pvp("No_of_datasets",counter);
 
-          std::cout << "Dataset (Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_o_vec.size() << std::endl;
+          //std::cout << "Dataset (Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_o_vec.size() << std::endl;
         }
 
       }
     }
   }
-
-
-
-
 
   return 0;
 }

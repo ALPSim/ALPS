@@ -207,7 +207,7 @@ int main(int argc, char** argv)
           oa << alps::make_pvp(cur_description_str, &raw_data_elem_1d[0], nrbin);
           oa << alps::make_pvp("No_of_datasets",counter);
 
-          std::cout << "Dataset (Sweep " << counter << " ) read from hdf5 file... ;  Nsites (projected) = " << raw_data_elem_vec.size() << " ; L^2 = " << L_sq << std::endl;
+          //std::cout << "Dataset (Sweep " << counter << " ) read from hdf5 file... ;  Nsites (projected) = " << raw_data_elem_vec.size() << " ; L^2 = " << L_sq << std::endl;
         }
       }
     }

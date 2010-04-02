@@ -162,7 +162,7 @@ int main(int argc, char** argv)
           {  
             raw_data.push_back(raw_data_elem); 
             is_data_inputed = true; 
-            std::cout << "Dataset (Label " << label << " , Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_elem_vec.begin(),raw_data_elem_vec.end(),0.) << std::endl;
+            //std::cout << "Dataset (Label " << label << " , Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_elem_vec.begin(),raw_data_elem_vec.end(),0.) << std::endl;
           }
         }
       }
