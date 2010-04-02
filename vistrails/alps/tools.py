@@ -31,9 +31,9 @@ import system
 from parameters import Parameters
 from packages.controlflow.list_module import ListOfElements
 
+import pyalps
 import pyalps.pytools # the C++ conversion functions
 
-import pyalps
 
 basic = core.modules.basic_modules
 
@@ -127,7 +127,7 @@ class WriteInputFiles(Module):
            Module.annotate(self,{'baseseed':baseseed})
            
            pyalps.writeInputFiles(os.path.join(dir.name,base_name),l,baseseed)
-           alpscore.copy_stylesheet(dir.name)
+           pyalps.copyStylesheet(dir.name)
            
          self.setResult("output_dir", dir)
          self.setResult("output_file", ofile)
@@ -166,15 +166,6 @@ class Parameter2XML(alpscore.SystemCommandLogged):
                      ('output_dir', [basic.Directory]),
                      ('log_file',[basic.File])]
 
-
-def recursive_glob(dirname,pattern):
-    ret = [os.path.join(dirname,x) for x in glob.glob(os.path.join(dirname, pattern))]
-    dirs = [os.path.join(dirname,x) for x in os.listdir(dirname)]
-    for d in dirs:
-        if os.path.isdir(d):
-            files_there = recursive_glob(os.path.join(dirname, d), pattern)
-            ret += files_there
-    return ret
 
 class Glob(Module):
     def expand(self,name):
@@ -220,7 +211,7 @@ class GetResultFiles(Module):
             pattern = os.path.expanduser(pattern)
             pattern = os.path.expandvars(pattern)
             # result = glob.glob(pattern)
-            result = recursive_glob(dir,pattern)
+            result = pyalps.recursiveGlob(dir,pattern)
             self.setResult('value',result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
         else:
@@ -232,9 +223,7 @@ class GetResultFiles(Module):
                 tasks = self.getInputFromPort('tasks')
             if self.hasInputFromPort('prefix'):
                 prefix = self.getInputFromPort('prefix')
-            # result = glob.glob(os.path.join(dirname,prefix+ '.task' + tasks + '.out.xml'))
-            result = recursive_glob(dirname, prefix+ '.task' + tasks + '.out.xml')
-            # result = recursive_glob(dirname, prefix+ '.task' + tasks + '.out.h5')
+            result = pyalps.recursiveGlob(dirname, prefix+ '.task' + tasks + '.out.xml')
             self.setResult('value', result)
             self.setResult('resultfiles', [ResultFile(x) for x in result])
 
@@ -252,7 +241,7 @@ class Convert2XML(Module):
         for f in input_files:
           print "Converting", f
           olist.append(pyalps.pytools.convert2xml(str(f)))
-          alpscore.copy_stylesheet(os.path.dirname(f))
+          pyalps.copyStylesheet(os.path.dirname(f))
         self.setResult('value', olist)
     _input_ports = [('input_file', [ListOfElements])]
     _output_ports = [('value', [ListOfElements])]
@@ -275,7 +264,7 @@ class XML2HTML(alpscore.SystemCommand):
           if self.hasInputFromPort('stylesheet'):
             cmdlist += [self.getInputFromPort('stylesheet').name]
           else:
-            cmdlist += [alpscore.alpsxslfile]
+            cmdlist += [pyalps.xslPath()]
           cmdlist += ['-o', output_file.name]
         if platform.system() != 'Windows':
           cmdlist = [alpscore._get_path('xslttransform')]

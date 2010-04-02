@@ -41,7 +41,7 @@ from scipy import optimize
 from dataset_core import *
 from dataset_exceptions import *
 from pyalps.dict_intersect import dict_intersect
-from pyalps.loadhdf5_core import Hdf5Loader
+from pyalps.load import Hdf5Loader
 from pyalps.hlist import flatten, depth
 
 class Loader:
@@ -184,9 +184,9 @@ class LoadAlpsHdf5(Module):
         if self.hasInputFromPort('StatisticalVariables'):
             statisticalvariables = self.getInputFromPort('StatisticalVariables')    
         if self.hasInputFromPort('Measurements'):
-            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,propPath,resPath,self.getInputFromPort('Measurements'))
+            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
         else:
-            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,propPath,resPath)
+            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=None,proppath=propPath,respath=resPath)
         self.setResult('data',datasets)
 
 class LoadBinningAnalysis(Module):

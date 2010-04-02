@@ -27,10 +27,7 @@
 # ****************************************************************************
 
 import urllib, copy, h5py, os
-#import matplotlib.pyplot as plt
 import numpy as np
-#from scipy import optimize
-#import datetime
 
 from dataset import ResultFile
 from dataset import DataSet
@@ -224,22 +221,17 @@ class Hdf5Loader:
         
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with the evaluated binning analysis set
-    def ReadBinningAnalysis(self,flist,proppath,respath,measurements=None):
-        print 'getting file list'
+    def ReadBinningAnalysis(self,flist,measurements=None,proppath='/parameters',respath=None):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
             fileset = []
-            print 'loading ', f
             self.h5f = h5py.File(f)
             self.h5fname = f
             if respath == None:
               respath="/simulation/results"
-            print 'obs: ',respath
             list_ = self.GetObservableList(respath)
-            print list_
             # this is exception-safe in the sense that it's also required in the line above
-            print 'reading properties'
             grp = self.h5f.require_group(respath)
             params = self.ReadParameters(proppath)
             obslist = []
@@ -248,7 +240,6 @@ class Hdf5Loader:
             else:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
             for m in obslist:
-                print "Trying to read ", m
                 try:
                     d = DataSet()
                     if "timeseries" in grp[m].keys():
@@ -361,4 +352,9 @@ class Hdf5Loader:
             sets.append(fileset)
         return sets
 
- 
+def loadBinningAnalysis(files,what=None):
+    ll = Hdf5Loader()
+    if isinstance(what,str):
+      what = [what]
+    return ll.ReadBinningAnalysis(files,measurements=what)
+

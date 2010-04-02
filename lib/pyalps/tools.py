@@ -27,6 +27,74 @@
 
 import os.path
 import datetime
+import shutil
+import tempfile
+import subprocess
+import platform
+import sys
+import glob
+
+import pyalps.pytools # the C++ conversion functions
+from load import loadBinningAnalysis
+from hlist import deep_flatten, flatten
+
+def list2cmdline(lst):
+    """ convert a list of arguments to a valid commandline """
+    if platform.system() == 'Windows':
+      return '"%s"' % subprocess.list2cmdline(lst)
+    else:
+      return subprocess.list2cmdline(lst)
+
+def executeCommand(cmdline):
+    """ execute the command given as list of arguments """
+    cmd = list2cmdline(cmdline)
+    print cmd
+    return os.system(cmd)
+
+def executeCommandLogged(cmdline,logfile):
+    """ execute the command given as list of arguments and store the result into the log file """
+    if platform.system() == 'Windows':
+      cmdline += ['>',logfile]
+    else:
+      cmdline += ['>&',logfile]
+    return executeCommand(cmdline)
+
+def execute(appname, parmfile, Tmin=None, Tmax=None, write_xml=False):
+    """ run an ALPS application """
+    cmdline = [appname,parmfile]
+    if Tmin!=None:
+      cmdline += ['--Tmin',str(Tmin)]
+    if Tmax!=None:
+      cmdline += ['--TMax',str(TMax)]
+    if write_xml:
+      cmdline += ['--write_xml']
+    return executeCommand(cmdline)
+    
+       
+def inVistrails():
+    """ returns True if called from within VisTrails """
+    in_vistrails=True
+    try:
+      import core.modules.basic_modules
+    except:
+      in_vistrails=False
+    return in_vistrails
+    
+def xslPath():
+    """ return the path to the ALPS.xsl stylesheet """
+    if inVistrails():
+      if platform.system()=='Darwin':
+        return os.path.join(sys.exec_prefix,'../Resources/lib/xml/ALPS.xsl')
+      if platform.system()=='Windows':
+        return os.path.join(sys.exec_prefix,'lib','xml','ALPS.xsl')
+    return pyalps.pytools.search_xml_library_path("ALPS.xsl")
+    
+    
+def copyStylesheet(dir):
+    """ copy the ALPS.xsl stylesheet to the specified directory """
+    target = os.path.join(dir,'ALPS.xsl')
+    if not os.path.exists(target):
+      shutil.copyfile(xslPath(), target)
 
 def writeTaskXMLFile(filename,parms):
     f = file(filename,'w')
@@ -41,7 +109,7 @@ def writeTaskXMLFile(filename,parms):
     f.close()
 
 def generateSeed():
-    """ This function generates a random seed based on the current time
+    """ generate a random seed based on the current time
     """
     now = datetime.datetime.now()
     baseseed = now.microsecond+1000000*now.second+60000000*now.minute
@@ -86,6 +154,23 @@ def writeInputFiles(fname,parms, baseseed=None):
 
     f.write('</JOB>\n')
     f.close()
-    
+
+    copyStylesheet('.')
     return fname+'.in.xml'
-    #alpscore.copy_stylesheet(dir.name)
+
+def recursiveGlob(dirname,pattern):
+    ret = glob.glob(os.path.join(dirname, pattern))
+    for d in os.listdir(dirname):
+        if os.path.isdir(d):
+            ret += recursiveGlob(os.path.join(dirname, d), pattern)
+    return ret
+    
+def getResultFiles(dirname='.',pattern=None,prefix=None):
+    """ get all result files matching the given pattern or prefix """
+    if prefix!= None and pattern != None:
+      raise "Cannot define both prefix and pattern"
+    if prefix == None: prefix = '*'
+    if pattern == None:
+      pattern = prefix+'.task*.out.xml'
+    return recursiveGlob(dirname, pattern)
+    

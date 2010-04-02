@@ -26,20 +26,13 @@ from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget
 import packages.spreadsheet
 
-
 from packages.controlflow.list_module import ListOfElements
+
+import pyalps
 
 basic = core.modules.basic_modules
 
 config = ConfigurationObject()
-
-alpsxslfile = ''
-if platform.system()=='Darwin':
-  alpsxslfile='../Resources/lib/xml/ALPS.xsl'
-if platform.system()=='Windows':
-  alpsxslfile=os.path.join(os.path.join('lib','xml'),'ALPS.xsl')
-alpsxslfile = os.path.join(sys.exec_prefix,alpsxslfile)
-
 
 ##############################################################################
 def _get_path(binary_file):
@@ -77,34 +70,20 @@ def _get_mpi_run():
     else:
       return ['mpirun','-np']
       
-def copy_stylesheet(dir):
-    print "xsl: ",alpsxslfile
-    shutil.copyfile(alpsxslfile, os.path.join(dir,'ALPS.xsl'))
-
 class SystemCommand(Module):
     def execute(self,cmdline):
-        cmd = list2cmdline(cmdline)
-        print cmd
-        result = os.system(cmd)
-        if result <> 0:
+        if pyalps.executeCommand(cmdline) <> 0:
            raise ModuleError(self, 'Execution failed')
 
 class SystemCommandLogged(Module):
     def execute(self,cmdline):
         logfile = self.interpreter.filePool.create_file(suffix='.log')
-        if platform.system() == 'Windows':
-          cmdline += ['>',logfile.name]
-        else:
-          cmdline += ['>&',logfile.name]
-        cmd = list2cmdline(cmdline)
-        print cmd
-        result = os.system(cmd)
+        result = pyalps.executeCommandLogged(cmdline,logfile.name)
         self.setResult('log_file', logfile)  
         if result <> 0:
-           cmdline = ['open',logfile.name]
-           cmd = list2cmdline(cmdline)
-           os.system(cmd)
-           raise ModuleError(self, 'Execution failed')
+          if platform.system()=='Darwin':
+            pyalps.executeCommand(['open',logfile.name])
+)         raise ModuleError(self, 'Execution failed')
     _output_ports = [('log_file',[basic.File])]
 
 
@@ -222,10 +201,6 @@ def initialize(): pass
 
 
 def selfRegister():
-    if platform.system()=='Darwin':
-      alpsxslfile='../Resources/lib/xml/ALPS.xsl'
-    if platform.system()=='Windows':
-      alpsxslfile=os.path.join(os.path.join('lib','xml'),'ALPS.xsl')
 
     reg = core.modules.module_registry.get_module_registry()
 
