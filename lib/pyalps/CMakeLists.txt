@@ -11,21 +11,21 @@ if (ALPS_HAVE_PYTHON)
   set(PYALEA_SOURCES ../../src/alps/python/pyalea.cpp)
   set(PYTOOLS_SOURCES ../../src/alps/python/pytools.cpp)
 
-  if(BUILD_SHARED_LIBS)
     python_add_module(pyalea ${PYALEA_SOURCES})
     python_add_module(pytools ${PYTOOLS_SOURCES})
+  if(BUILD_SHARED_LIBS)
     set_target_properties(pyalea PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
     set_target_properties(pytools PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
     set_target_properties(pyalea PROPERTIES PREFIX "")
     set_target_properties(pytools PROPERTIES PREFIX "")
-  if(WIN32 AND NOT UNIX)
-    set_target_properties(pyalea PROPERTIES SUFFIX ".pyd")
-    set_target_properties(pytools PROPERTIES SUFFIX ".pyd")
-  endif(WIN32 AND NOT UNIX)
+    if(WIN32 AND NOT UNIX)
+      set_target_properties(pyalea PROPERTIES SUFFIX ".pyd")
+      set_target_properties(pytools PROPERTIES SUFFIX ".pyd")
+    endif(WIN32 AND NOT UNIX)
   endif(BUILD_SHARED_LIBS)
-
   target_link_libraries(pyalea boost ${LINK_LIBRARIES})
   target_link_libraries(pytools alps boost ${LINK_LIBRARIES})
+
 
   #######################################################################
   # install
