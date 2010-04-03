@@ -10,20 +10,20 @@ for l in [2,4,8,16,32,48]:
           'LATTICE'        : "square lattice", 
           'T'              : 2.269186,
           'J'              : 1 ,
-          'THERMALIZATION' : 10000,
-          'SWEEPS'         : 50000,
-          'UPDATE'         : "local",
+          'THERMALIZATION' : 1000,
+          'SWEEPS'         : 100000,
+          'UPDATE'         : "cluster",
           'MODEL'          : "Ising",
           'L'              : l
         }
     )
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm1a',parms)
+input_file = pyalps.writeInputFiles('parm1b',parms)
 pyalps.execute('spinmc',input_file,Tmin=5)
 
 #load the binning analysis for the absolute value of the magnetization
-binning = pyalps.loadBinningAnalysis(pyalps.getResultFiles(),'|Magnetization|')
+binning = pyalps.loadBinningAnalysis(pyalps.getResultFiles(prefix='parm1b'),'|Magnetization|')
 binning = pyalps.flatten(binning)
 
 #make one plot with all data
@@ -31,6 +31,7 @@ for dataset in binning:
     dataset.props['label'] = 'L='+str(dataset.props['L'])
 
 plt.figure()
+plt.title('Binning analysis for cluster updates')
 plt.xlabel('binning level')
 plt.ylabel('Error of |Magnetization|')
 pyalps.pyplot.plot(binning)
@@ -44,8 +45,6 @@ for dataset in binning:
     plt.xlabel('binning level')
     plt.ylabel('Error of |Magnetization|')
     pyalps.pyplot.plot(dataset)
-
-# pyalps.writeGraceFile(binning,'parm1a.xmgr')
 
 
 
