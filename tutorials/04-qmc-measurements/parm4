@@ -3,7 +3,6 @@ LATTICE="square lattice";
 LATTICE_LIBRARY="../lattices.xml"
 MODEL_LIBRARY="../models.xml"
 REPRESENTATION="SSE";
-CONSERVED_QUANTUMNUMBERS="Sz";
 MEASURE[Correlations]=true;
 MEASURE[Structure Factor]=true;
 MEASURE[Green Function]=true;

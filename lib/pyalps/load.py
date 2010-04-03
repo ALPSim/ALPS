@@ -46,7 +46,7 @@ def parse_label(label):
       vals = label.rsplit('--')
       return (eval(vals[0]),eval(vals[1]))
     else:
-      return eval(label)
+      return eval(str(label))
  
  
 def parse_labels(labels):
