@@ -33,10 +33,13 @@ import subprocess
 import platform
 import sys
 import glob
+import numpy as np
 
 import pyalps.pytools # the C++ conversion functions
-from load import loadBinningAnalysis
+from load import loadBinningAnalysis, loadMeasurements
 from hlist import deep_flatten, flatten
+from dict_intersect import dict_intersect
+from dataset import DataSet
 
 def list2cmdline(lst):
     """ convert a list of arguments to a valid commandline """
@@ -174,3 +177,46 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
       pattern = prefix+'.task*.out.xml'
     return recursiveGlob(dirname, pattern)
     
+def collectXY(sets,x,y,foreach=[]):
+      foreach_sets = {}
+      for iset in flatten(sets):
+          if iset.props['observable'] != y:
+              continue
+          
+          fe_par_set = tuple((iset.props[m] for m in foreach))
+          
+          if fe_par_set in foreach_sets:
+              foreach_sets[fe_par_set].append(iset)
+          else:
+              foreach_sets[fe_par_set] = [iset]
+      
+      for k,v in foreach_sets.items():
+          common_props = dict_intersect([q.props for q in v])
+          res = DataSet()
+          res.props = common_props
+          for im in range(0,len(foreach)):
+              m = foreach[im]
+              res.props[m] = k[im]
+          res.props['xlabel'] = x
+          res.props['ylabel'] = y
+          
+          for data in v:
+              if len(data.y)>1:
+                  res.props['line'] = '.'
+              xvalue = np.array([data.props[x] for i in range(len(data.y))])
+              if len(res.x) > 0 and len(res.y) > 0:
+                  res.x = np.concatenate((res.x, xvalue ))
+                  res.y = np.concatenate((res.y, data.y))
+              else:
+                  res.x = xvalue
+                  res.y = data.y
+          
+          order = np.argsort(res.x) #, kind = 'mergesort')
+          res.x = res.x[order]
+          res.y = res.y[order]
+          res.props['label'] = ''
+          for im in range(0,len(foreach)):
+              res.props['label'] += '%s = %s ' % (foreach[im], k[im])
+          
+          foreach_sets[k] = res
+      return foreach_sets.values()

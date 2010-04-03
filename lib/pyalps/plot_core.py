@@ -26,7 +26,6 @@
 # 
 # ****************************************************************************
 
-import matplotlib.pyplot as plt
 import numpy as np
 from xml.etree import ElementTree
 from dataset import DataSet
@@ -89,151 +88,47 @@ def Plot(data,xaxis=None,yaxis=None,legend=None):
     if legend != None:
         d['legend'] = legend
 
-class MplXYPlot_core:
-    colors = ['k','b','g','m','c','y']
-    markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
+def convertToText(data,title=None,xaxis=None,yaxis=None)
+    if  title!=None:
+        output += title + '\n'           
+
+    if xaxis != None:
+        output += 'X'
+        if 'label' in xaxis:
+            output += ': ' + xaxis['label']
+        if 'min' in xaxis and 'max' in xaxis:
+            output += ': ' + str(xaxis['min']) + ' to ' + str(xaxis['max'])
+        output+='\n'
+
+    if yaxis != None:
+        output += 'Y'
+        if 'label' in yaxis:
+            output += ': ' + yaxis['label']
+        if 'min' in yaxis and 'max' in yaxis:
+            output += ': ' + str(yaxis['min']) + ' to ' + str(yaxis['max'])
+        output+='\n\n'
+            
     
-    def __init__(self):
-        self.icolor = 0
-        self.output = ''
-    
-    def draw_lines(self):
-        self.lines = []
-        self.icolor = 0
-        self.imarker = 0
+    for q in flatten(data):
+        if 'label' in q.props and q.props['label'] != 'none':
+            output += q.props['label']
+        elif 'filename' in q.props:
+            output += q.props['filename']
+        output += '\n'
+
+        for i in range(len(q.x)):
+            output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
+        output+='\n\n'                
+    return output
         
-        xlog = False
-        ylog = False
-        if 'xaxis' in self.plt and 'logarithmic' in self.plt['xaxis']:
-            xlog = self.plt['xaxis']['logarithmic']
-        if 'yaxis' in self.plt and 'logarithmic' in self.plt['yaxis']:
-            ylog = self.plt['yaxis']['logarithmic']
-        
-        for q in flatten(self.plt['data']):
-            try:
-                xmeans = np.array([xx.mean for xx in q.x])
-                xerrors = np.array([xx.error for xx in q.x])
-            except AttributeError:
-                xmeans = [float(vvv) for vvv in q.x]
-                xerrors = None
-            
-            try:
-                ymeans = np.array([xx.mean for xx in q.y])
-                yerrors = np.array([xx.error for xx in q.y])
-            except AttributeError:
-                ymeans = [float(vvv) for vvv in q.y]
-                yerrors = None
-                
-            if 'line' in q.props and q.props['line'] == 'scatter':
-                self.lines.append([plt.scatter(xmeans, ymeans, c=self.colors[self.icolor], marker=self.markers[self.imarker])])
-                self.imarker = (self.imarker+1)%len(self.markers)
-            else:
-                line_props = self.colors[self.icolor]
-                if 'line' in q.props:
-                    line_props += q.props['line']
-                
-                self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props))
-                
-            if xlog:
-                plt.xscale('log')
-            if ylog:
-                plt.yscale('log')
-            
-            if 'label' in q.props and q.props['label'] != 'none':
-                self.lines[-1][0].set_label(q.props['label'])
-            elif 'filename' in q.props:
-                self.lines[-1][0].set_label(q.props['filename'])
-            
-            self.icolor = (self.icolor+1)%len(self.colors)
-            
-            if 'legend' in self.plt:
-                if 'scatter_labels' in self.plt['legend']:
-                    if self.plt['legend']['scatter_labels'] == True:
-                        plt.annotate(q.props['label'], (xmeans[0],ymeans[0]))
-            
-    def __call__(self, desc):
-        self.plt = desc
-        
-        self.draw_lines()
-        
-        for ds in flatten(self.plt['data']):
-            if 'xlabel' in ds.props:
-                plt.xlabel(ds.props['xlabel'])
-            if 'ylabel' in ds.props:
-                plt.ylabel(ds.props['ylabel'])
-        
-        if 'xaxis' in self.plt:
-            if 'label' in self.plt['xaxis']:
-                if 'fontsize' in self.plt['xaxis']:
-                    plt.xlabel(self.plt['xaxis']['label'],fontsize=self.plt['xaxis']['fontsize'])
-                else:
-                    plt.xlabel(self.plt['xaxis']['label'])
-            if 'min' in self.plt['xaxis'] and 'max' in self.plt['xaxis']:
-                plt.xlim(self.plt['xaxis']['min'],self.plt['xaxis']['max'])
-                
-        if 'yaxis' in self.plt:
-            if 'label' in self.plt['yaxis']:
-                if 'fontsize' in self.plt['yaxis']:
-                    plt.ylabel(self.plt['yaxis']['label'],fontsize=self.plt['yaxis']['fontsize'])
-                else:
-                    plt.ylabel(self.plt['yaxis']['label'])
-            if 'min' in self.plt['yaxis'] and 'max' in self.plt['yaxis']:
-                plt.ylim(self.plt['yaxis']['min'],self.plt['yaxis']['max'])
-        
-        if 'legend' in self.plt:
-            showlegend = True
-            if 'scatter_labels' in self.plt['legend']:
-                if self.plt['legend']['scatter_labels'] == True:
-                    showlegend = False
-            if showlegend:
-                prop = {}
-                if 'fontsize' in self.plt['legend']:
-                    prop['size'] = self.plt['legend']['fontsize']
-                if 'location' in self.plt['legend']:
-                    plt.legend(loc=self.plt['legend']['location'],prop=prop)
-                else:
-                    plt.legend(prop=prop)
-        
-        if 'title' in self.plt:
-            plt.title(self.plt['title'])
-            
- 
 def convert_to_text(desc):
-        output = ''
+    if 'title' in desc: t = desc['title'] else: t = None
+    if 'xaxis' in desc: x = desc['xaxis'] else: x = None
+    if 'yaxis' in desc: y = desc['yaxis'] else: y = None
+    return convertToText(desc['data'],title=t,xaxis=x,yaxis=y)    
 
-        if 'title' in desc:
-            output += desc['title'] + '\n'           
-
-        if 'xaxis' in desc:
-            output += 'X'
-            if 'label' in desc['xaxis']:
-                output += ': ' + desc['xaxis']['label']
-            if 'min' in desc['xaxis'] and 'max' in desc['xaxis']:
-                output += ': ' + str(desc['xaxis']['min']) + ' to ' + str(data['xaxis']['max'])
-            output+='\n'
-
-        if 'yaxis' in desc:
-            output += 'Y'
-            if 'label' in desc['yaxis']:
-                output += ': ' + desc['yaxis']['label']
-            if 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
-                output += ': ' + str(desc['yaxis']['min']) + ' to ' + str(data['yaxis']['max'])
-            output+='\n\n'
-                
-        
-        for q in desc['data']:
-            if 'label' in q.props and q.props['label'] != 'none':
-                output += q.props['label']
-            elif 'filename' in q.props:
-                output += q.props['filename']
-            output += '\n'
-
-            for i in range(len(q.x)):
-                output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
-            output+='\n\n'                
-        return output
             
-def convert_to_grace(desc):
+def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         output =  '# Grace project file\n'
         output += '#\n@    g0 on\n@    with g0\n'
         output += '@     frame linewidth 2.0\n'
@@ -241,24 +136,24 @@ def convert_to_grace(desc):
 
         xrange = [0,1]
         yrange = [0,1]
-        if 'xaxis' in desc and 'min' in desc['xaxis'] and 'max' in desc['xaxis']: 
-            xrange = [ desc['xaxis']['min'],desc['xaxis']['max']]
-        if 'yaxis' in desc and 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
-            yrange = [ desc['yaxis']['min'],desc['yaxis']['max']]
+        if 'min' in xaxis and 'max' in xaxis: 
+            xrange = [ xaxis['min'],xaxis['max']]
+        if 'min' in yaxis and 'max' in yaxis:
+            yrange = [ yaxis['min'],yaxis['max']]
 
         output += '@    world ' + str(xrange[0])+', ' + str (yrange[0]) + ','
         output +=                 str(xrange[1])+', ' + str (yrange[1]) + '\n'
 
-        if 'title' in desc:
-            output += '@    title "'+ desc['title'] + '"\n'           
+        if title != None:
+            output += '@    title "'+ title + '"\n'           
             output += '@    title size 1.500000\n'
 
         xlog = False
         ylog = False
-        if 'xaxis' in desc and 'logarithmic' in desc['xaxis']:
-            xlog = desc['xaxis']['logarithmic']
-        if 'yaxis' in desc and 'logarithmic' in desc['yaxis']:
-            ylog = desc['yaxis']['logarithmic']
+        if  'logarithmic' in xaxis:
+            xlog = xaxis['logarithmic']
+        if 'logarithmic' in yaxis:
+            ylog = yaxis['logarithmic']
             
         if xlog:
             output += '@    xaxes scale Logarithmic\n'
@@ -270,28 +165,26 @@ def convert_to_grace(desc):
         else:
             output += '@    yaxes scale Normal\n'
 
-        if 'xaxis' in desc:
-            if 'label' in desc['xaxis']:
-                output += '@    xaxis  label "' + desc['xaxis']['label'] +'"\n'
-                output += '@    xaxis  label char size 1.500000\n'
+        if 'label' in xaxis:
+            output += '@    xaxis  label "' + xaxis['label'] +'"\n'
+            output += '@    xaxis  label char size 1.500000\n'
         output += '@    xaxis  ticklabel char size 1.250000\n'
         output += '@    xaxis  tick minor ticks 4\n'
 
-        if 'yaxis' in desc:
-            if 'label' in desc['yaxis']:
-                output += '@    yaxis  label "' + desc['yaxis']['label'] +'"\n'
-                output += '@    yaxis  label char size 1.500000\n'
+        if 'label' in yaxis:
+            output += '@    yaxis  label "' + yaxis['label'] +'"\n'
+            output += '@    yaxis  label char size 1.500000\n'
         output += '@    yaxis  ticklabel char size 1.250000\n'
         output += '@    yaxis  tick minor ticks 4\n'
         
-        if 'legend' in desc:
+        if legend != None and legend != False:
             output += '@    legend on\n'
             output += '@    legend loctype view\n'
             output += '@    legend 0.85, 0.8\n'
         
         num = 0
         symnum = 0
-        for q in desc['data']:
+        for q in flatten(data):
             output += '@target G0.S'+str(num)+'\n'
             output += '@    s'+str(num)+' symbol ' + str(num+1) +'\n'
             output += '@    s'+str(num)+' symbol size 0.500000\n'
@@ -339,54 +232,58 @@ def convert_to_grace(desc):
                 num+=1
                      
         return output
-        
-def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
+
+def convert_to_grace(desc):
+    if 'title' in desc: t = desc['title'] else: t = None
+    if 'xaxis' in desc: x = desc['xaxis'] else: x = None
+    if 'yaxis' in desc: y = desc['yaxis'] else: y = None
+    if 'legend' in desc: l = desc['legend'] else: l = None
+    return makeGracePlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l)    
+
+  
+def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="output.eps", fontsize=24):
     output =  '# Gnuplot project file\n'
     output += 'set terminal postscript color eps enhanced '+str(fontsize)+'\n'
     output += 'set output "' + outfile + '"\n'
 
-    if 'xaxis' in desc and 'min' in desc['xaxis'] and 'max' in desc['xaxis']: 
-        xrange = [ desc['xaxis']['min'],desc['xaxis']['max']]
+    if 'min' in xaxis and 'max' in xaxis: 
+        xrange = [ xaxis['min'],xaxis['max']]
         output += 'set xrange [' + str(xrange[0])+': ' + str (xrange[1]) + ']\n'
-    if 'yaxis' in desc and 'min' in desc['yaxis'] and 'max' in desc['yaxis']:
-        yrange = [ desc['yaxis']['min'],desc['yaxis']['max']]
+    if 'min' in yaxis and 'max' in yaxis:
+        yrange = [ yaxis['min'],yaxis['max']]
         output += 'set yrange [' + str(yrange[0])+': ' + str (yrange[1]) + ']\n'
     
-    if 'title' in desc:
+    if title != None:
         output += 'set title "'+ desc['title'] + '"\n'           
 
     xlog = False
     ylog = False
-    if 'xaxis' in desc and 'logarithmic' in desc['xaxis']:
-        xlog = desc['xaxis']['logarithmic']
-    if 'yaxis' in desc and 'logarithmic' in desc['yaxis']:
-        ylog = desc['yaxis']['logarithmic']
-        
-    if xlog:
+    if 'logarithmic' in xaxis:
+        xlog = xaxis['logarithmic']
         output += 'set xlogscale \n'
     else:
         output += '# no xlogscale \n'
 
-    if ylog:
+    if 'logarithmic' in yaxis:
+        ylog = yaxis['logarithmic']
         output += 'set ylogscale\n'
     else:
         output += '# no ylogscale\n'
+        
 
-    if 'xaxis' in desc:
-        if 'label' in desc['xaxis']:
-            output += 'set xlabel "' + desc['xaxis']['label'] +'"\n'
-    
-    if 'yaxis' in desc:
-        if 'label' in desc['yaxis']:
-            output += 'set ylabel "' + desc['yaxis']['label'] +'"\n'
+    if 'label' in xaxis:
+        output += 'set xlabel "' + xaxis['label'] +'"\n'
+
+    if 'label' in yaxis:
+        output += 'set ylabel "' + yaxis['label'] +'"\n'
                     
-    if 'legend' in desc:
+    if legend != None and legend != False:
         output += 'set key top right\n'
         
     num = 0
     output += 'plot '
     
-    for q in flatten(desc['data']):
+    for q in flatten(data):
         if len(q.y):
             try:
                 xerrors = np.array([xx.error for xx in q.x])
@@ -438,7 +335,7 @@ def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
         output=output[:-1]
         output+='\n'
     
-    for q in flatten(desc['data']):    
+    for q in flatten(data):    
             if xerrors == None and yerrors == None:
                 output += '# X Y \n'
                 for i in range(len(q.x)):
@@ -463,5 +360,12 @@ def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
             num+=1
                      
     return output
+
+def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
+    if 'title' in desc: t = desc['title'] else: t = None
+    if 'xaxis' in desc: x = desc['xaxis'] else: x = None
+    if 'yaxis' in desc: y = desc['yaxis'] else: y = None
+    if 'legend' in desc: l = desc['legend'] else: l = None
+    makeGnuplotPlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l,outfile=outfile,fontsize=fontsize)    
 
 

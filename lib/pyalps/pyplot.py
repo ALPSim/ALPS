@@ -87,3 +87,115 @@ def plot(data):
         icolor = (icolor+1)%len(colors)
 
 
+
+class MplXYPlot_core:
+    colors = ['k','b','g','m','c','y']
+    markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
+    
+    def __init__(self):
+        self.icolor = 0
+        self.output = ''
+    
+    def draw_lines(self):
+        self.lines = []
+        self.icolor = 0
+        self.imarker = 0
+        
+        xlog = False
+        ylog = False
+        if 'xaxis' in self.plt and 'logarithmic' in self.plt['xaxis']:
+            xlog = self.plt['xaxis']['logarithmic']
+        if 'yaxis' in self.plt and 'logarithmic' in self.plt['yaxis']:
+            ylog = self.plt['yaxis']['logarithmic']
+        
+        for q in flatten(self.plt['data']):
+            try:
+                xmeans = np.array([xx.mean for xx in q.x])
+                xerrors = np.array([xx.error for xx in q.x])
+            except AttributeError:
+                xmeans = [float(vvv) for vvv in q.x]
+                xerrors = None
+            
+            try:
+                ymeans = np.array([xx.mean for xx in q.y])
+                yerrors = np.array([xx.error for xx in q.y])
+            except AttributeError:
+                ymeans = [float(vvv) for vvv in q.y]
+                yerrors = None
+                
+            if 'line' in q.props and q.props['line'] == 'scatter':
+                self.lines.append([plt.scatter(xmeans, ymeans, c=self.colors[self.icolor], marker=self.markers[self.imarker])])
+                self.imarker = (self.imarker+1)%len(self.markers)
+            else:
+                line_props = self.colors[self.icolor]
+                if 'line' in q.props:
+                    line_props += q.props['line']
+                
+                self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props))
+                
+            if xlog:
+                plt.xscale('log')
+            if ylog:
+                plt.yscale('log')
+            
+            if 'label' in q.props and q.props['label'] != 'none':
+                self.lines[-1][0].set_label(q.props['label'])
+            elif 'filename' in q.props:
+                self.lines[-1][0].set_label(q.props['filename'])
+            
+            self.icolor = (self.icolor+1)%len(self.colors)
+            
+            if 'legend' in self.plt:
+                if 'scatter_labels' in self.plt['legend']:
+                    if self.plt['legend']['scatter_labels'] == True:
+                        plt.annotate(q.props['label'], (xmeans[0],ymeans[0]))
+            
+    def __call__(self, desc):
+        self.plt = desc
+        
+        self.draw_lines()
+        
+        for ds in flatten(self.plt['data']):
+            if 'xlabel' in ds.props:
+                plt.xlabel(ds.props['xlabel'])
+            if 'ylabel' in ds.props:
+                plt.ylabel(ds.props['ylabel'])
+        
+        if 'xaxis' in self.plt:
+            if 'label' in self.plt['xaxis']:
+                if 'fontsize' in self.plt['xaxis']:
+                    plt.xlabel(self.plt['xaxis']['label'],fontsize=self.plt['xaxis']['fontsize'])
+                else:
+                    plt.xlabel(self.plt['xaxis']['label'])
+            if 'min' in self.plt['xaxis'] and 'max' in self.plt['xaxis']:
+                plt.xlim(self.plt['xaxis']['min'],self.plt['xaxis']['max'])
+                
+        if 'yaxis' in self.plt:
+            if 'label' in self.plt['yaxis']:
+                if 'fontsize' in self.plt['yaxis']:
+                    plt.ylabel(self.plt['yaxis']['label'],fontsize=self.plt['yaxis']['fontsize'])
+                else:
+                    plt.ylabel(self.plt['yaxis']['label'])
+            if 'min' in self.plt['yaxis'] and 'max' in self.plt['yaxis']:
+                plt.ylim(self.plt['yaxis']['min'],self.plt['yaxis']['max'])
+        
+        if 'legend' in self.plt:
+            showlegend = True
+            if 'scatter_labels' in self.plt['legend']:
+                if self.plt['legend']['scatter_labels'] == True:
+                    showlegend = False
+            if showlegend:
+                prop = {}
+                if 'fontsize' in self.plt['legend']:
+                    prop['size'] = self.plt['legend']['fontsize']
+                if 'location' in self.plt['legend']:
+                    plt.legend(loc=self.plt['legend']['location'],prop=prop)
+                else:
+                    plt.legend(prop=prop)
+        
+        if 'title' in self.plt:
+            plt.title(self.plt['title'])
+            
+ 
+ 
+ 

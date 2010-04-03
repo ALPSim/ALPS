@@ -270,7 +270,7 @@ class Hdf5Loader:
                                                                             
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
-    def ReadMeasurementFromFile(self,flist,statvar,proppath,respath,measurements=None):
+    def ReadMeasurementFromFile(self,flist,statvar=None,proppath='/parameters',respath='/simulation/results',measurements=None):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
@@ -357,4 +357,10 @@ def loadBinningAnalysis(files,what=None):
     if isinstance(what,str):
       what = [what]
     return ll.ReadBinningAnalysis(files,measurements=what)
+
+def loadMeasurements(files,what=None):
+    ll = Hdf5Loader()
+    if isinstance(what,str):
+      what = [what]
+    return ll.ReadMeasurementFromFile(files,measurements=what)
 

@@ -40,9 +40,9 @@ from scipy import optimize
 
 from dataset_core import *
 from dataset_exceptions import *
-from pyalps.dict_intersect import dict_intersect
 from pyalps.load import Hdf5Loader
 from pyalps.hlist import flatten, depth
+import pyalps
 
 class Loader:
     def __init__(self,filename,label,xcolumn,ycolumns,props={}):
@@ -338,49 +338,7 @@ class CollectXY(Module):
             if self.hasInputFromPort('for-each'):
                 for_each = self.getInputFromPort('for-each')
             
-            for_each_sets = {}
-            for iset in flatten(sets):
-                if iset.props['observable'] != observable:
-                    continue
-                
-                fe_par_set = tuple((iset.props[m] for m in for_each))
-                
-                if fe_par_set in for_each_sets:
-                    for_each_sets[fe_par_set].append(iset)
-                else:
-                    for_each_sets[fe_par_set] = [iset]
-            
-            for k,v in for_each_sets.items():
-                common_props = dict_intersect([q.props for q in v])
-                res = DataSet()
-                res.props = common_props
-                for im in range(0,len(for_each)):
-                    m = for_each[im]
-                    res.props[m] = k[im]
-                res.props['xlabel'] = versus
-                res.props['ylabel'] = observable
-                
-                for x in v:
-                    if len(x.y)>1:
-                        res.props['line'] = '.'
-                    xvalue = np.array([x.props[versus] for i in range(len(x.y))])
-                    if len(res.x) > 0 and len(res.y) > 0:
-                        res.x = np.concatenate((res.x, xvalue ))
-                        res.y = np.concatenate((res.y, x.y))
-                    else:
-                        res.x = xvalue
-                        res.y = x.y
-                
-                order = np.argsort(res.x) #, kind = 'mergesort')
-                res.x = res.x[order]
-                res.y = res.y[order]
-                res.props['label'] = ''
-                for im in range(0,len(for_each)):
-                    res.props['label'] += '%s = %s ' % (for_each[im], k[im])
-                
-                for_each_sets[k] = res
-            
-            self.setResult('output',for_each_sets.values())
+            self.setResult('output',pyalps.collectXY(sets,observable,input,for_each))
                 
         else:
             raise EmptyInputPort('for-each || observable')
