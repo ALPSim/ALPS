@@ -20,7 +20,7 @@ for l in [2,4,8,16,32,48]:
 
 #write the input file and run the simulation
 input_file = pyalps.writeInputFiles('parm1b',parms)
-pyalps.execute('spinmc',input_file,Tmin=5)
+pyalps.runApplication('spinmc',input_file,Tmin=5)
 
 #load the binning analysis for the absolute value of the magnetization
 binning = pyalps.loadBinningAnalysis(pyalps.getResultFiles(prefix='parm1b'),'|Magnetization|')

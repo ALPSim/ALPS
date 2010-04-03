@@ -62,7 +62,7 @@ def executeCommandLogged(cmdline,logfile):
       cmdline += ['>&',logfile]
     return executeCommand(cmdline)
 
-def execute(appname, parmfile, Tmin=None, Tmax=None, write_xml=False):
+def runApplication(appname, parmfile, Tmin=None, Tmax=None, write_xml=False):
     """ run an ALPS application """
     cmdline = [appname,parmfile]
     if Tmin!=None:
@@ -71,8 +71,14 @@ def execute(appname, parmfile, Tmin=None, Tmax=None, write_xml=False):
       cmdline += ['--TMax',str(TMax)]
     if write_xml:
       cmdline += ['--write_xml']
+    return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
+
+def evaluateLoop(parmfile, appname='loop', write_xml=False):
+    """ run an ALPS application """
+    cmdline = [appname,parmfile,'--evaluate']
+    if write_xml:
+      cmdline += ['--write_xml']
     return executeCommand(cmdline)
-    
        
 def inVistrails():
     """ returns True if called from within VisTrails """
@@ -110,6 +116,8 @@ def writeTaskXMLFile(filename,parms):
     f.write('  </PARAMETERS>\n')
     f.write('</SIMULATION>\n')
     f.close()
+    for fn in  glob.glob(filename.replace('.in.xml','.out.*')) + glob.glob(filename.replace('.in.xml','.clone*')):
+      os.remove(fn)
 
 def generateSeed():
     """ generate a random seed based on the current time
@@ -124,6 +132,8 @@ def writeInputFiles(fname,parms, baseseed=None):
     """
     dirname = os.path.dirname(fname)
     base_name = os.path.basename(fname)
+    if os.path.exists(fname+'.out.xml'):
+      os.remove(fname+'.out.xml')
     f = file(fname+'.in.xml','w')
     f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
     f.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')

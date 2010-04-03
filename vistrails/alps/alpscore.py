@@ -83,7 +83,7 @@ class SystemCommandLogged(Module):
         if result <> 0:
           if platform.system()=='Darwin':
             pyalps.executeCommand(['open',logfile.name])
-)         raise ModuleError(self, 'Execution failed')
+          raise ModuleError(self, 'Execution failed')
     _output_ports = [('log_file',[basic.File])]
 
 

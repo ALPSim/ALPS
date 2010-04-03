@@ -88,7 +88,7 @@ def Plot(data,xaxis=None,yaxis=None,legend=None):
     if legend != None:
         d['legend'] = legend
 
-def convertToText(data,title=None,xaxis=None,yaxis=None)
+def convertToText(data,title=None,xaxis=None,yaxis=None):
     if  title!=None:
         output += title + '\n'           
 
@@ -122,9 +122,12 @@ def convertToText(data,title=None,xaxis=None,yaxis=None)
     return output
         
 def convert_to_text(desc):
-    if 'title' in desc: t = desc['title'] else: t = None
-    if 'xaxis' in desc: x = desc['xaxis'] else: x = None
-    if 'yaxis' in desc: y = desc['yaxis'] else: y = None
+    if 'title' in desc: t = desc['title'] 
+    else: t = None
+    if 'xaxis' in desc: x = desc['xaxis'] 
+    else: x = None
+    if 'yaxis' in desc: y = desc['yaxis'] 
+    else: y = None
     return convertToText(desc['data'],title=t,xaxis=x,yaxis=y)    
 
             
@@ -234,10 +237,14 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         return output
 
 def convert_to_grace(desc):
-    if 'title' in desc: t = desc['title'] else: t = None
-    if 'xaxis' in desc: x = desc['xaxis'] else: x = None
-    if 'yaxis' in desc: y = desc['yaxis'] else: y = None
-    if 'legend' in desc: l = desc['legend'] else: l = None
+    if 'title' in desc: t = desc['title'] 
+    else: t = None
+    if 'xaxis' in desc: x = desc['xaxis'] 
+    else: x = None
+    if 'yaxis' in desc: y = desc['yaxis'] 
+    else: y = None
+    if 'legend' in desc: l = desc['legend'] 
+    else: l = None
     return makeGracePlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l)    
 
   
@@ -362,10 +369,14 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="
     return output
 
 def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
-    if 'title' in desc: t = desc['title'] else: t = None
-    if 'xaxis' in desc: x = desc['xaxis'] else: x = None
-    if 'yaxis' in desc: y = desc['yaxis'] else: y = None
-    if 'legend' in desc: l = desc['legend'] else: l = None
+    if 'title' in desc: t = desc['title'] 
+    else: t = None
+    if 'xaxis' in desc: x = desc['xaxis'] 
+    else: x = None
+    if 'yaxis' in desc: y = desc['yaxis'] 
+    else: y = None
+    if 'legend' in desc: l = desc['legend'] 
+    else: l = None
     makeGnuplotPlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l,outfile=outfile,fontsize=fontsize)    
 
 
