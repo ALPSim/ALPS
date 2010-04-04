@@ -251,8 +251,6 @@ class Hdf5Loader:
                             bins = np.array(grp[m+"/timeseries/logbinning"].value[0:-4])
                             bins2 = np.array(grp[m+"/timeseries/logbinning2"].value[0:-4])
                             counts = np.array(grp[m+"/timeseries/logbinning_counts"].value[0:-4])
-                            ncounts = []
-                            ncounts = np.array(ncounts)
                             scale = 1
                             for i in range(len(counts)):
                                 mean = bins[i]/(counts[i]*scale)

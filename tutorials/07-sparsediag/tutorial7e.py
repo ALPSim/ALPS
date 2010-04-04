@@ -4,15 +4,21 @@ import matplotlib.pyplot as plt
 import pyalps.pyplot
 
 #prepare the input parameters
-parms = [{ 
+
+parms=[]
+for sz in [0, 1]:
+      parms.append(
+        {
           'LATTICE'                   : "ladder", 
           'MODEL'                     : "spin",
           'local_S'                   : 0.5,
           'J0'                        : 1,
           'J1'                        : 1,
-          'L'                         : 8,
-          'CONSERVED_QUANTUMNUMBERS'  : 'Sz'
-        }]
+          'L'                         : 12,
+          'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
+          'Sz_total'                  : sz
+        }
+      )
 
 #write the input file and run the simulation
 input_file = pyalps.writeInputFiles('parm7e',parms)
@@ -21,12 +27,31 @@ res = pyalps.runApplication('sparsediag',input_file)
 #load all measurements for all states
 data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm7e'))
 
+energies=[]
+# get ground state energy
+for set in data:
+  for s in set:
+    energies += list(s.y)
+
+groundstate_energy = np.min(energies)
+
+#plot spectra
+spectrumplot = []
+for set in data:
+  plot = pyalps.DataSet()
+  plot.props['label']='Sz='+str(set[0].props['Sz_total'])
+  plot.props['line'] = 'scatter'
+  for s in set:
+    plot.x = np.concatenate((plot.x,np.array([s.props['TOTAL_MOMENTUM'] for i in range(0,len(s.y))])))
+    plot.y = np.concatenate((plot.y,s.y - groundstate_energy))
+  spectrumplot.append(plot)
 
 plt.figure()
-pyalps.pyplot.plot(gapplot)
+pyalps.pyplot.plot(spectrumplot)
 plt.legend()
-plt.xlim(0,0.25)
-plt.ylim(0,1.0)
+plt.xlim(0,2*3.1416)
+plt.ylabel('Energy')
+plt.ylim(0,3)
 
 
 

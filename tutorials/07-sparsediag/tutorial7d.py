@@ -43,7 +43,7 @@ for sim in data:
   
 
 # make a plot of the triplet gap as function of system size 
-plots=[]  
+plt.figure()
 for s in [0.5,1]:
   gapplot = pyalps.DataSet()
   gapplot.x = 1./np.sort(lengths)
@@ -51,10 +51,8 @@ for s in [0.5,1]:
   gapplot.props['xlabel']='$1/L$'
   gapplot.props['ylabel']='Triplet gap $\Delta/J$'
   gapplot.props['label']='S='+str(s)
-  plots.append(gapplot)
+  pyalps.pyplot.plot(gapplot)
 
-plt.figure()
-pyalps.pyplot.plot(plots)
 plt.legend()
 plt.xlim(0,0.25)
 plt.ylim(0,1.0)
