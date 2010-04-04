@@ -40,6 +40,7 @@ from load import loadBinningAnalysis, loadMeasurements
 from hlist import deep_flatten, flatten
 from dict_intersect import dict_intersect
 from dataset import DataSet
+from plot_core import read_xml as readAlpsXMLPlot
 
 def list2cmdline(lst):
     """ convert a list of arguments to a valid commandline """
@@ -65,20 +66,45 @@ def executeCommandLogged(cmdline,logfile):
 def runApplication(appname, parmfile, Tmin=None, Tmax=None, write_xml=False):
     """ run an ALPS application """
     cmdline = [appname,parmfile]
-    if Tmin!=None:
+    if Tmin:
       cmdline += ['--Tmin',str(Tmin)]
-    if Tmax!=None:
+    if Tmax:
       cmdline += ['--TMax',str(TMax)]
     if write_xml:
       cmdline += ['--write_xml']
     return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
 
-def evaluateLoop(parmfile, appname='loop', write_xml=False):
-    """ run an ALPS application """
-    cmdline = [appname,parmfile,'--evaluate']
+def evaluateLoop(parmfiles, appname='loop', write_xml=False):
+    """ evaluate results of the looper QMC application """
+    cmdline = [appname,'--evaluate']
     if write_xml:
       cmdline += ['--write_xml']
+    cmdline += parmfiles
     return executeCommand(cmdline)
+
+def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX=None):
+    """ evaluate results of the quantum Wang-Landau application """
+    cmdline = [appname]
+    if DELTA_T:
+      cmdline += ['--DELTA_T',str(DELTA_T)]
+    if T_MIN:
+      cmdline += ['--T_MIN',str(T_MIN)]
+    if T_MAX:
+      cmdline += ['--T_MAX',str(T_MAX)]
+    cmdline += infiles
+    res = executeCommand(cmdline)
+    if res != 0:
+      raise "Execution error in evaluateQWL: " + str(res)
+    datasets = []
+    for infile in infiles:
+      datasets.append([])
+      ofname = infile.replace('.out.xml', '.plot.*.xml')
+      for fn in glob.glob(ofname):
+        dataset = readAlpsXMLPlot(fn)
+        datasets[-1].append(dataset)
+        ylabel = dataset.props['ylabel']
+    return datasets
+
        
 def inVistrails():
     """ returns True if called from within VisTrails """
