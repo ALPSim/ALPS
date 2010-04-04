@@ -132,7 +132,7 @@ class Hdf5Loader:
     def read_one_spectrum(self,path):
         pass
         
-    def ReadSpectrumFromFile(self,flist,proppath,respath):
+    def ReadSpectrumFromFile(self,flist,proppath='/parameters',respath='/spectrum'):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
@@ -173,7 +173,7 @@ class Hdf5Loader:
             sets.append(fileset)
         return sets
 
-    def ReadDiagDataFromFile(self,flist,proppath,respath, measurements=None, array_index=None):
+    def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, array_index=None):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
@@ -189,8 +189,8 @@ class Hdf5Loader:
                 obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
             if 'sectors' in grp.keys():
                 sectors_grp = self.h5f.require_group(respath+'/sectors')
-                sector_sets=[]
                 for secnum in sectors_grp.keys():
+                    sector_sets=[]
                     for m in obslist:
                         if "mean" in sectors_grp[secnum+'/results/'+m].keys():
                             try:
@@ -205,17 +205,20 @@ class Hdf5Loader:
                                 else:
                                     try:
                                         d.y = np.array(sectors_grp[secnum+'/results/'+m+'/mean/value'].value[array_index] )
-                                        d.x = array_index
-                                        d.props['index'] = array_index
                                     except:
                                         pass
+                                if "labels" in sectors_grp[secnum+'/results/'+m].keys():
+                                    d.x = parse_labels(sectors_grp[secnum+'/results/'+m+'/labels'].value)
+                                else:
+                                    d.x = np.arange(0,len(d.y))
                                 d.props.update(params)
                                 d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
                                 sector_sets.append(d)
+
                             except AttributeError:
                                 print "Could not create DataSet"
                                 pass
-                        fileset.append(sector_sets)
+                    fileset.append(sector_sets)
             sets.append(fileset)
         return sets
         
@@ -363,4 +366,14 @@ def loadMeasurements(files,what=None):
     if isinstance(what,str):
       what = [what]
     return ll.ReadMeasurementFromFile(files,measurements=what)
+    
+    
+def loadEigenstateMeasurements(files,what=None):
+    ll = Hdf5Loader()
+    if isinstance(what,str):
+      what = [what]
+    return ll.ReadDiagDataFromFile(files,measurements=what)
 
+def loadSpectra(files):
+    ll = Hdf5Loader()
+    return ll.ReadSpectrumFromFile(files)

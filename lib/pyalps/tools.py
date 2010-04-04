@@ -36,7 +36,7 @@ import glob
 import numpy as np
 
 import pyalps.pytools # the C++ conversion functions
-from load import loadBinningAnalysis, loadMeasurements
+from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra
 from hlist import deep_flatten, flatten
 from dict_intersect import dict_intersect
 from dataset import DataSet
