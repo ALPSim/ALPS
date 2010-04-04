@@ -105,6 +105,52 @@ def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX
         ylabel = dataset.props['ylabel']
     return datasets
 
+def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, T_MIN=None, T_MAX=None):
+    """ evaluate results of the fulldiag application """
+    cmdline = [appname]
+    if DELTA_T:
+      cmdline += ['--DELTA_T',str(DELTA_T)]
+    if T_MIN:
+      cmdline += ['--T_MIN',str(T_MIN)]
+    if T_MAX:
+      cmdline += ['--T_MAX',str(T_MAX)]
+    cmdline += infiles
+    res = executeCommand(cmdline)
+    if res != 0:
+      raise "Execution error in evaluateFulldiagVersusT: " + str(res)
+    datasets = []
+    for infile in infiles:
+      datasets.append([])
+      ofname = infile.replace('.out.xml', '.plot.*.xml')
+      for fn in glob.glob(ofname):
+        dataset = readAlpsXMLPlot(fn)
+        datasets[-1].append(dataset)
+        ylabel = dataset.props['ylabel']
+    return datasets
+
+def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, H_MIN=None, H_MAX=None):
+    """ evaluate results of the fulldiag application """
+    cmdline = [appname,'--versus', 'h']
+    if DELTA_T:
+      cmdline += ['--DELTA_H',str(DELTA_H)]
+    if T_MIN:
+      cmdline += ['--H_MIN',str(H_MIN)]
+    if T_MAX:
+      cmdline += ['--H_MAX',str(H_MAX)]
+    cmdline += infiles
+    res = executeCommand(cmdline)
+    if res != 0:
+      raise "Execution error in evaluateFulldiagVersusH: " + str(res)
+    datasets = []
+    for infile in infiles:
+      datasets.append([])
+      ofname = infile.replace('.out.xml', '.plot.*.xml')
+      for fn in glob.glob(ofname):
+        dataset = readAlpsXMLPlot(fn)
+        datasets[-1].append(dataset)
+        ylabel = dataset.props['ylabel']
+    return datasets
+
        
 def inVistrails():
     """ returns True if called from within VisTrails """
