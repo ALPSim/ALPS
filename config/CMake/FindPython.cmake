@@ -89,7 +89,7 @@ IF (PYTHON_FOUND AND NOT ALPS_FOR_VISTRAILS)
   #
   EXEC_PYTHON_SCRIPT ("from distutils.sysconfig import * ;print get_python_lib(0,0)"
               PYTHON_SITE_PKG)
-  MESSAGE(STATUS "Python site packages found it in: ${PYTHON_SITE_PKG}" )
+  MESSAGE(STATUS "PYTHON_SITE_PKG = ${PYTHON_SITE_PKG}" )
   mark_as_advanced(PYTHON_SITE_PKG)
 
     if (NOT WIN32)

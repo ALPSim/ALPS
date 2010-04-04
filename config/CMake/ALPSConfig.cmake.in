@@ -25,6 +25,9 @@ SET(ALPS_VERSION_BUILD "@ALPS_VERSION_BUILD@")
 # The location of the UseALPS.cmake file.
 set(ALPS_USE_FILE "@ALPS_USE_FILE@")
 
+# The Boost Root Dir used by ALPS
+set(Boost_ROOT_DIR "@Boost_ROOT_DIR@")
+
 # ALPS Configuration options.
 set(ALPS_BUILD_SHARED_LIBS "@BUILD_SHARED_LIBS@")
 set(ALPS_BUILD_TYPE @CMAKE_BUILD_TYPE@)
