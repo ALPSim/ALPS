@@ -564,6 +564,8 @@ else (ALPS_FOR_VISTRAILS)
           ${PROJECT_BINARY_DIR}/config/CMake/include.mk
           config/CMake/run_test.cmake
           DESTINATION share/alps COMPONENT build)
+          
+  add_subdirectory(config/CMake)
 
   install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
         FILES_MATCHING PATTERN "*.py"
@@ -637,6 +639,14 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
 if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
   add_subdirectory(script)
 endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
+
+######################################################################
+# developer tools
+######################################################################
+
+if (NOT ALPS_FOR_VISTRAILS)
+  add_subdirectory(tutorials)
+endif (NOT ALPS_FOR_VISTRAILS)
     
 
 ##########################################################################
@@ -655,6 +665,7 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
  set(CPACK_COMPONENT_EXAMPLES_DISPLAY_NAME "ALPS examples")
  set(CPACK_COMPONENT_BUILD_DISPLAY_NAME "Build system support")
  set(CPACK_COMPONENT_DOCUMENTATION_DISPLAY_NAME "Documentation")
+ set(CPACK_COMPONENT_TUTORIALS_DISPLAY_NAME "Tutorials")
  
  set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "The libraries needed by the ALPS applications")
  set(CPACK_COMPONENT_HEADERS_DESCRIPTION "The ALPS header files")
@@ -668,6 +679,7 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
  set(CPACK_COMPONENT_EXAMPLES_DESCRIPTION "ALPS examples")
  set(CPACK_COMPONENT_BUILD_DESCRIPTION "Include files for CMake and make to simplify the building of ALPS applications")
  set(CPACK_COMPONENT_DOCUMENTATION_DESCRIPTION "Documentation for the ALPS libraries")
+ set(CPACK_COMPONENT_TUTORIALS_DESCRIPTION "Tutorials for the ALPS libraries and applications")
 
  set(CPACK_COMPONENT_LIBRARIES_GROUP "Runtime")
  set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
@@ -693,6 +705,7 @@ endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
  set(CPACK_COMPONENT_PYTHON_DEPENDS libraries)
  set(CPACK_COMPONENT_TOOLS_DEPENDS libraries)
  set(CPACK_COMPONENT_EXAMPLES_DEPENDS libraries)
+ set(CPACK_COMPONENT_TUTORIALS_DEPENDS python applications libraries tools)
  
  
 if (ALPS_FOR_VISTRAILS)
