@@ -1,9 +1,0 @@
-LATTICE = "chain lattice"
-LATTICE_LIBRARY = "lattices_dmrg.xml"
-L = 20
-t = 1
-V = 0.5*(x/L-0.5)*(x/L-0.5)
-SWEEPS = 100
-WAVEFUNCTION_FILE = "psi_harmonic_potential.dat"
-OUTPUT_LEVEL = 1
-

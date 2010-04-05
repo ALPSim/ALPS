@@ -26,6 +26,7 @@
 *****************************************************************************/
 
 #include "dmrg3.h"
+#include <fstream>
 
 // Single-particle DMRG main function
 
@@ -37,7 +38,7 @@
 // level 3 : show wavefunction at end of each sweep
 // level 4 : show detailed debug information
 
-int main() 
+int main(int argc, char** argv) 
 {
   try
   {
@@ -56,7 +57,13 @@ int main()
       << "  diagonalization instead.\n";
 
     alps::Parameters parameters;
-    std::cin >> parameters;
+      
+    if (argc==1)
+      std::cin >> parameters;
+    else {
+      std::ifstream in(argv[1]);
+      in >> parameters;
+    }
 
     System DMRGSystem(parameters);
 

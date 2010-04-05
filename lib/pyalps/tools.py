@@ -63,15 +63,15 @@ def executeCommandLogged(cmdline,logfile):
       cmdline += ['>&',logfile]
     return executeCommand(cmdline)
 
-def runApplication(appname, parmfile, Tmin=None, Tmax=None, write_xml=False):
+def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False):
     """ run an ALPS application """
     cmdline = [appname,parmfile]
     if Tmin:
       cmdline += ['--Tmin',str(Tmin)]
     if Tmax:
       cmdline += ['--TMax',str(TMax)]
-    if write_xml:
-      cmdline += ['--write_xml']
+    if writexml:
+      cmdline += ['--write-xml']
     return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
 
 def evaluateLoop(parmfiles, appname='loop', write_xml=False):
@@ -105,15 +105,17 @@ def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX
         ylabel = dataset.props['ylabel']
     return datasets
 
-def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, T_MIN=None, T_MAX=None):
+def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, T_MIN=None, T_MAX=None, H=None):
     """ evaluate results of the fulldiag application """
     cmdline = [appname]
-    if DELTA_T:
+    if DELTA_T != None:
       cmdline += ['--DELTA_T',str(DELTA_T)]
-    if T_MIN:
+    if T_MIN != None:
       cmdline += ['--T_MIN',str(T_MIN)]
-    if T_MAX:
+    if T_MAX != None:
       cmdline += ['--T_MAX',str(T_MAX)]
+    if H != None:
+      cmdline += ['--H',str(H)]
     cmdline += infiles
     res = executeCommand(cmdline)
     if res != 0:
@@ -128,15 +130,17 @@ def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, 
         ylabel = dataset.props['ylabel']
     return datasets
 
-def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, H_MIN=None, H_MAX=None):
+def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, H_MIN=None, H_MAX=None, T=None):
     """ evaluate results of the fulldiag application """
     cmdline = [appname,'--versus', 'h']
-    if DELTA_T:
+    if DELTA_H != None:
       cmdline += ['--DELTA_H',str(DELTA_H)]
-    if T_MIN:
+    if H_MIN != None:
       cmdline += ['--H_MIN',str(H_MIN)]
-    if T_MAX:
+    if H_MAX != None:
       cmdline += ['--H_MAX',str(H_MAX)]
+    if T != None:
+      cmdline += ['--T',str(T)]
     cmdline += infiles
     res = executeCommand(cmdline)
     if res != 0:
@@ -242,6 +246,20 @@ def writeInputFiles(fname,parms, baseseed=None):
 
     copyStylesheet('.')
     return fname+'.in.xml'
+
+def writeParameterFile(fname,parms):
+    """ This function writes a text input file for simple ALPS applications
+    """
+    f = file(fname,'w')
+    for key in parms:
+      value = parms[key]
+      if type(value) == str:
+        f.write(str(key)+' = "' + value + '"\n')
+      else:
+        f.write(str(key)+' = ' + str(value) + '\n')
+    f.close()
+    return fname
+
 
 def recursiveGlob(dirname,pattern):
     ret = glob.glob(os.path.join(dirname, pattern))

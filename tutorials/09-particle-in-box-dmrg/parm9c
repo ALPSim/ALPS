@@ -1,0 +1,11 @@
+LATTICE_LIBRARY = "lattices_dmrg.xml"
+SWEEPS = 100
+K = "2*3.1415927*2/L"
+L = 20
+t1 = 0.01
+OUTPUT_LEVEL = 1
+LATTICE = "next-nearest chain lattice"
+t = 1
+V = "cos(K*x)+cos(3*K*x)/9+cos(5*K*x)/25+cos(7*K*x)/36-2"
+WAVEFUNCTION_FILE = "psi2.dat"
+MODEL = "spin"
