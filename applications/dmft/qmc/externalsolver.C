@@ -36,8 +36,8 @@ ImpuritySolver::result_type ExternalSolver::solve(
 {
   char basename_in[]="alps_external_solver_XXXXXX";
   char basename_out[]="alps_external_solver_out_XXXXXX";
-  mktemp(basename_in); // the input file name
-  mktemp(basename_out); // the output file name
+  mkstemp(basename_in); // the input file name
+  mkstemp(basename_out); // the output file name
   std::string infile(basename_in), outfile(basename_out);
   if(parms.defined("TMPNAME")){
     infile=basename_in+std::string(".in.xml");
@@ -96,8 +96,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
 {
   char basename_in[]="alps_external_solver_XXXXXX";
   char basename_out[]="alps_external_solver_out_XXXXXX";
-  mktemp(basename_in); // the input file name
-  mktemp(basename_out); // the output file name
+  mkstemp(basename_in); // the input file name
+  mkstemp(basename_out); // the output file name
   std::string infile(basename_in), outfile(basename_out);
   if(parms.defined("TMPNAME")){
     infile=basename_in+std::string(".in.xml");
