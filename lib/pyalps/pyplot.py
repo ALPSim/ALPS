@@ -29,6 +29,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from hlist import flatten
 from dataset import DataSet
+from matplotlib.font_manager import FontProperties
 
 colors = ['k','b','g','m','c','y']
 markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
@@ -185,13 +186,18 @@ class MplXYPlot_core:
                 if self.plt['legend']['scatter_labels'] == True:
                     showlegend = False
             if showlegend:
-                prop = {}
+                legend_prop = {}
                 if 'fontsize' in self.plt['legend']:
-                    prop['size'] = self.plt['legend']['fontsize']
+                    legend_prop['size'] = self.plt['legend']['fontsize']
                 if 'location' in self.plt['legend']:
-                    plt.legend(loc=self.plt['legend']['location'],prop=prop)
+                    legend_loc = self.plt['legend']['location']
                 else:
-                    plt.legend(prop=prop)
+                    legend_loc = 0
+
+                if len(legend_prop) > 0:
+                    plt.legend(loc=legend_loc,prop=FontProperties(legend_prop))
+                else:
+                    plt.legend(loc=legend_loc)
         
         if 'title' in self.plt:
             plt.title(self.plt['title'])
