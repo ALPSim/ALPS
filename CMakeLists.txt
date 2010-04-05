@@ -146,13 +146,6 @@ CHECK_INCLUDE_FILE_CXX(valarray ALPS_HAVE_VALARRAY)
 ######################################################################
 # Packages
 ######################################################################
-#set(PARCOLLET_INTERPRETER "python" CACHE PATH "Python interpreter")
-
-
-#find_package(Parcollet)
-#include_directories(${PARCOLLET_INCLUDE_DIR})
-#link_libraries(${PARCOLLET_LIBRARIES})
-
 
 # Boost Source File
 find_package(BoostSrc REQUIRED)
@@ -223,6 +216,9 @@ if (NOT ALPS_FOR_VISTRAILS)
     file(COPY ${SQLite_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
 endif (NOT ALPS_FOR_VISTRAILS)
+
+# FFTW
+find_package(FFTW)
 
 # LPSolve
 if (NOT ALPS_FOR_VISTRAILS)
