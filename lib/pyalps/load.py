@@ -4,7 +4,7 @@
 # 
 # ALPS Libraries
 # 
-# Copyright (C) 1994-2010 by Bela Bauer <bauerb@phys.ethz.ch>
+# Copyright (C) 2009-2010 by Bela Bauer <bauerb@phys.ethz.ch>
 #                            Brigitte Surer <surerb@phys.ethz.ch> 
 # 
 # This software is part of the ALPS libraries, published under the ALPS
@@ -173,22 +173,53 @@ class Hdf5Loader:
             sets.append(fileset)
         return sets
 
-    def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, array_index=None):
+    def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, index=None):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
             fileset=[]
             self.h5f = h5py.File(f)
             self.h5fname = f
-            list_ = self.GetObservableList(respath+'/sectors/0/results')
             params = self.ReadParameters(proppath)
             grp = self.h5f.require_group(respath)
-            if measurements == None:
-                obslist = list_
-            else:
-                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+            if 'results' in grp.keys():
+                list_ = self.GetObservableList(respath+'/results')
+                if measurements == None:
+                    obslist = list_
+                else:
+                    obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+                for m in obslist:
+                    if "mean" in grp['results/'+m].keys():
+                        try:
+                            d = DataSet()
+                            secresultspath = respath+'/results/'+m
+                            d.props['hdf5_path'] = secresultspath 
+                            d.props['observable'] = pt.hdf5_name_decode(m)
+                            if index == None:
+                                d.y = np.array(grp['results/'+m+'/mean/value'].value )
+                                d.x = range(len(d.y))
+                            else:
+                                try:
+                                    d.y = np.array(grp['results/'+m+'/mean/value'].value[index] )
+                                except:
+                                    pass
+                            if "labels" in grp['results/'+m].keys():
+                                d.x = parse_labels(grp['results/'+m+'/labels'].value)
+                            else:
+                                d.x = np.arange(0,len(d.y))
+                            d.props.update(params)
+
+                        except AttributeError:
+                            print "Could not create DataSet"
+                            pass
+                    fileset.append(d)
             if 'sectors' in grp.keys():
                 sectors_grp = self.h5f.require_group(respath+'/sectors')
+                list_ = self.GetObservableList(respath+'/sectors/0/results')
+                if measurements == None:
+                    obslist = list_
+                else:
+                    obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
                 for secnum in sectors_grp.keys():
                     sector_sets=[]
                     for m in obslist:
@@ -199,12 +230,12 @@ class Hdf5Loader:
                                 secresultspath = respath+'/sectors/'+secnum+'/results/'+m
                                 d.props['hdf5_path'] = secresultspath 
                                 d.props['observable'] = pt.hdf5_name_decode(m)
-                                if array_index == None:
+                                if index == None:
                                     d.y = np.array(sectors_grp[secnum+'/results/'+m+'/mean/value'].value )
                                     d.x = range(len(d.y))
                                 else:
                                     try:
-                                        d.y = np.array(sectors_grp[secnum+'/results/'+m+'/mean/value'].value[array_index] )
+                                        d.y = np.array(sectors_grp[secnum+'/results/'+m+'/mean/value'].value[index] )
                                     except:
                                         pass
                                 if "labels" in sectors_grp[secnum+'/results/'+m].keys():

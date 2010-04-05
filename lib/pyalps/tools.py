@@ -42,6 +42,12 @@ from dict_intersect import dict_intersect
 from dataset import DataSet
 from plot_core import read_xml as readAlpsXMLPlot
 
+def size(lst):
+    try:
+      return len(lst)
+    except:
+      return 1
+
 def list2cmdline(lst):
     """ convert a list of arguments to a valid commandline """
     if platform.system() == 'Windows':

@@ -26,8 +26,9 @@ for sector in data[0]:
   print '\nSector with Sz =', sector[0].props['Sz'], 
   print 'and k =', sector[0].props['TOTAL_MOMENTUM']
   for s in sector:
-    if len(s.x)==1:
+    if pyalps.size(s.y[0])==1:
       print s.props['observable'], ' : ', s.y[0]
     else:
       for (x,y) in zip(s.x,s.y[0]):
         print  s.props['observable'], '(', x, ') : ', y
+
