@@ -174,20 +174,25 @@ class LoadAlpsHdf5(Module):
     ]    
     
     def compute(self):
-        propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
-        resPath= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/simulation/results"
-        loader = Hdf5Loader()
-        if self.hasInputFromPort('ResultFiles'):
-            files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
-        datasets = []
-        statisticalvariables = []
-        if self.hasInputFromPort('StatisticalVariables'):
-            statisticalvariables = self.getInputFromPort('StatisticalVariables')    
-        if self.hasInputFromPort('Measurements'):
-            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
-        else:
-            datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=None,proppath=propPath,respath=resPath)
-        self.setResult('data',datasets)
+        try:
+            propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
+            resPath= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/simulation/results"
+            loader = Hdf5Loader()
+            if self.hasInputFromPort('ResultFiles'):
+                files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+            datasets = []
+            statisticalvariables = []
+            if self.hasInputFromPort('StatisticalVariables'):
+                statisticalvariables = self.getInputFromPort('StatisticalVariables')    
+            if self.hasInputFromPort('Measurements'):
+                datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
+            else:
+                datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=None,proppath=propPath,respath=resPath)
+            self.setResult('data',datasets)
+        except Exception, (exc):
+            from traceback import print_exc
+            print_exc()
+            raise exc
 
 class LoadBinningAnalysis(Module):
     my_input_ports = [

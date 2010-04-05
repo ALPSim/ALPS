@@ -93,7 +93,7 @@ class Hdf5Loader:
     # Post: returns a dictionary of all parameters saved in the file
     def ReadParameters(self,proppath):
         LOP = []
-        dict = {'filename' : file}
+        dict = {'filename' : self.h5fname}
         try:
             pgrp = self.h5f.require_group(proppath)
             pgrp.visit(LOP.append)
