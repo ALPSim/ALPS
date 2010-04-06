@@ -30,6 +30,7 @@ import numpy as np
 from hlist import flatten
 from dataset import DataSet
 from matplotlib.font_manager import FontProperties
+import platform
 
 colors = ['k','b','g','m','c','y']
 markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
@@ -187,7 +188,7 @@ class MplXYPlot_core:
                     showlegend = False
             if showlegend:
                 legend_prop = {}
-                if 'fontsize' in self.plt['legend']:
+                if platform.system() != 'Linux' and 'fontsize' in self.plt['legend']:
                     legend_prop['size'] = self.plt['legend']['fontsize']
                 if 'location' in self.plt['legend']:
                     legend_loc = self.plt['legend']['location']
