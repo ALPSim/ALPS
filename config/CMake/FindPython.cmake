@@ -97,7 +97,8 @@ IF (PYTHON_FOUND AND NOT ALPS_FOR_VISTRAILS)
       # Check for Python library path
       #
       #EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print string.join(get_config_vars('VERSION'))"  PYTHON_VERSION_MAJOR_MINOR)         
-      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print '-L%s/config -lpython%s'%(get_python_lib(0,1),string.join(get_config_vars('VERSION')))" PYTHON_LIBRARY)
+#      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print '-L%s/config -lpython%s'%(get_python_lib(0,1),string.join(get_config_vars('VERSION')))" PYTHON_LIBRARY)
+      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print '%s/config/libpython%s.a' % (get_python_lib(0,1),string.join(get_config_vars('VERSION')))" PYTHON_LIBRARY)
       MESSAGE(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY}" )
       mark_as_advanced(PYTHON_LIBRARY)
 
@@ -150,7 +151,7 @@ ENDFUNCTION(WriteScriptToBuildF2pyModule)
 
 FUNCTION(PYTHON_ADD_MODULE _NAME )
   OPTION(PYTHON_ENABLE_MODULE_${_NAME} "Add module ${_NAME}" TRUE)
-  OPTION(PYTHON_MODULE_${_NAME}_BUILD_SHARED "Add module ${_NAME} shared" ${_TARGET_SUPPORTS_SHARED_LIBS})
+  OPTION(PYTHON_MODULE_${_NAME}_BUILD_SHARED "Add module ${_NAME} shared" ${BUILD_SHARED_LIBS})
 
   IF(PYTHON_ENABLE_MODULE_${_NAME})
     IF(PYTHON_MODULE_${_NAME}_BUILD_SHARED)

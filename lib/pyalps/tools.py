@@ -100,7 +100,7 @@ def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX
     cmdline += infiles
     res = executeCommand(cmdline)
     if res != 0:
-      raise "Execution error in evaluateQWL: " + str(res)
+      raise Excpetion("Execution error in evaluateQWL: " + str(res))
     datasets = []
     for infile in infiles:
       datasets.append([])
@@ -125,7 +125,7 @@ def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, 
     cmdline += infiles
     res = executeCommand(cmdline)
     if res != 0:
-      raise "Execution error in evaluateFulldiagVersusT: " + str(res)
+      raise Exception("Execution error in evaluateFulldiagVersusT: " + str(res))
     datasets = []
     for infile in infiles:
       datasets.append([])
@@ -150,7 +150,7 @@ def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, 
     cmdline += infiles
     res = executeCommand(cmdline)
     if res != 0:
-      raise "Execution error in evaluateFulldiagVersusH: " + str(res)
+      raise Exception("Execution error in evaluateFulldiagVersusH: " + str(res))
     datasets = []
     for infile in infiles:
       datasets.append([])
@@ -277,7 +277,7 @@ def recursiveGlob(dirname,pattern):
 def getResultFiles(dirname='.',pattern=None,prefix=None):
     """ get all result files matching the given pattern or prefix """
     if prefix!= None and pattern != None:
-      raise "Cannot define both prefix and pattern"
+      raise Exception("Cannot define both prefix and pattern")
     if prefix == None: prefix = '*'
     if pattern == None:
       pattern = prefix+'.task*.out.xml'
