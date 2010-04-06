@@ -3,7 +3,6 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-include_directories(${SQLite_INCLUDE_DIR})
 
 #
 # basic C++ tools
@@ -38,6 +37,7 @@ else(ALPS_FOR_VISTRAILS)
   install(TARGETS quickbook RUNTIME DESTINATION bin COMPONENT tools)
  
   if(SQLite_FOUND)
+    include_directories(${SQLite_INCLUDE_DIR})
     add_executable(archive archive.cpp archive_index.cpp archive_node.cpp archive_plot.cpp
       archive_sqlite.cpp archive_xml.cpp)
     target_link_libraries(archive alps ${SQLite_LIBRARIES})
