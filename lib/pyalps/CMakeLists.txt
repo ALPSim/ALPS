@@ -11,6 +11,7 @@ if (ALPS_HAVE_PYTHON)
   set(PYALEA_SOURCES ../../src/alps/python/pyalea.cpp)
   set(PYTOOLS_SOURCES ../../src/alps/python/pytools.cpp)
 
+
   python_add_module(pyalea ${PYALEA_SOURCES})
   python_add_module(pytools ${PYTOOLS_SOURCES})
   if(BUILD_SHARED_LIBS)
@@ -23,7 +24,7 @@ if (ALPS_HAVE_PYTHON)
       set_target_properties(pytools PROPERTIES SUFFIX ".pyd")
     endif(WIN32 AND NOT UNIX)
   endif(BUILD_SHARED_LIBS)
-  target_link_libraries(pyalea boost ${LINK_LIBRARIES})
+  target_link_libraries(pyalea alps boost ${LINK_LIBRARIES})
   target_link_libraries(pytools alps boost ${LINK_LIBRARIES})
 
 
