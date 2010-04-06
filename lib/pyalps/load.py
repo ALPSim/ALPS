@@ -100,6 +100,10 @@ class Hdf5Loader:
             for m in LOP:
                 try:
                     dict[m] = pgrp[m].value
+                    try:
+                        dict[m] = float(dict[m])
+                    except ValueError:
+                        pass
                 except AttributeError:
                     pass
                 except KeyError:

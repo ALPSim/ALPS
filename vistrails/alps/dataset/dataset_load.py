@@ -343,7 +343,7 @@ class CollectXY(Module):
             if self.hasInputFromPort('for-each'):
                 for_each = self.getInputFromPort('for-each')
             
-            self.setResult('output',pyalps.collectXY(sets,observable,input,for_each))
+            self.setResult('output',pyalps.collectXY(sets,versus,observable,for_each))
                 
         else:
             raise EmptyInputPort('for-each || observable')
