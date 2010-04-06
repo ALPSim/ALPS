@@ -8,7 +8,7 @@
 
 FIND_PATH(DOCBOOK_XSL_DIR
   NAMES fo/docbook.xsl
-  PATHS /opt/local/share/xsl/docbook-xsl/ /usr/share/xml/docbook/stylesheet/docbook-xsl/
+  PATHS /opt/local/share/xsl/docbook-xsl/ /usr/share/xml/docbook/stylesheet/docbook-xsl/  /usr/share/sgml/docbook/xsl-stylesheets/
   PATH_SUFFIXES ${subdirs}
 )
 
