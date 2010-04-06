@@ -2917,6 +2917,7 @@ System<T>::measure_n(size_t n , const VectorState<T> *v )
     if(gs.qn().equal(res.qn(), _grand_canonical) || _grand_canonical == 0)
       val = t.coef()*product(gs,res)/x/x0;
 
+/*
     cout << setprecision(10) << t.coef();
     for(iter = t.begin(); iter != t.end(); iter++){
       BasicOp<T> &top = *iter;
@@ -2926,8 +2927,9 @@ System<T>::measure_n(size_t n , const VectorState<T> *v )
         cout << "*" << top.name().c_str() << "(" << h.lattice().x(top.site()) << "," << top.internal_site() << ")";
     }
     cout << " = " << val << endl;
+*/
 
-// cout << setprecision(10) << t.name(true) << " = " << val << endl;
+//// cout << setprecision(10) << t.name(true) << " = " << val << endl;
     t.set_value(val);
   }
 
@@ -2964,7 +2966,7 @@ System<T>::measure(const VectorState<T> *v)
       res = T(0);
       res = product_default(*this, *pv, &t[0].hami());
       T val = product(*pv,res)/x;  
-      cout << setprecision(10) << t[0].hami().name() << " = " << val << endl;
+//      cout << setprecision(10) << t[0].hami().name() << " = " << val << endl;
       real_t.set_value(val);
       continue;
     }
@@ -2990,13 +2992,15 @@ System<T>::measure(const VectorState<T> *v)
             res = T(0);
             product(*op1, *op2, *pv, res, ib1, ib2, T(t.coef()));
             T val = product(*pv,res)/x;
-  
+ 
+/* 
             if(h.lattice().type() == LATTICE_1D)
               cout << setprecision(10) << t.coef() << "*" << top1.name().c_str() << "(" << h.lattice().x(top1.site()) << "," << top1.internal_site() << ")" << top2.name().c_str() << "(" << h.lattice().x(top2.site()) << "," << top2.internal_site() << ") = " << val << endl;
             if(h.lattice().type() == LATTICE_2D)
               cout << setprecision(10) << t.coef() << "*" << top1.name().c_str() << "(" << h.lattice().x(top1.site()) << "," << h.lattice().y(top1.site()) << "," << top1.internal_site() << ")" << top2.name().c_str() << "(" << h.lattice().x(top2.site()) << "," << h.lattice().y(top2.site()) << "," << top2.internal_site() << ") = " << val << endl;
+*/
   
-//          cout << setprecision(10) << t.name(true) << " = " << val << endl;
+////          cout << setprecision(10) << t.name(true) << " = " << val << endl;
   
             real_t.set_value(val);
           }
@@ -3010,13 +3014,15 @@ System<T>::measure(const VectorState<T> *v)
             res = T(0);
             product(*op, *pv, res, ib1, T(t.coef()));
             T val = product(*pv,res)/x;
-  
+
+/*  
             if(h.lattice().type() == LATTICE_1D)
               cout << setprecision(10) << t.coef() << "*" << top1.name().c_str() << "(" << h.lattice().x(top1.site()) << "," << top1.internal_site() << ")" << top2.name().c_str() << "(" << h.lattice().x(top2.site()) << "," << top2.internal_site() << ") = " << val << endl;
             if(h.lattice().type() == LATTICE_2D)
               cout << setprecision(10) << t.coef() << "*" << top1.name().c_str() << "(" << h.lattice().x(top1.site()) << "," << h.lattice().y(top1.site()) << "," << top1.internal_site() << ")" << top2.name().c_str() << "(" << h.lattice().x(top2.site()) << "," << h.lattice().y(top2.site()) << "," << top2.internal_site() << ") = " << val << endl;
+*/
   
-//          cout << setprecision(10) << t.name(true) << " = " << val << endl;
+////          cout << setprecision(10) << t.name(true) << " = " << val << endl;
 
             real_t.set_value(val);
           }
@@ -3077,7 +3083,7 @@ System<T>::measure(const VectorState<T> *v)
       }
       T val = product(*pv,res)/sqrt(x)/sqrt(x0);
       real_t.set_value(val*t.coef());
-      cout << setprecision(10) << t.description() << " = " << real_t.value() << endl;
+//      cout << setprecision(10) << t.description() << " = " << real_t.value() << endl;
     }
   }
 }
@@ -3113,11 +3119,13 @@ System<T>::measure_operator(const BasicOp<T> &top, const VectorState<T> *v)
 
   T val = product(gs,res)/x/x0;
 
+/*
   if(h.lattice().type() == LATTICE_2D)
     cout << top.name().c_str() << "(" << h.lattice().x(top.site()) << "," << h.lattice().y(top.site()) << "," << top.internal_site() << ")";
   if(h.lattice().type() == LATTICE_1D)
     cout << top.name().c_str() << "(" << h.lattice().x(top.site()) << "," << top.internal_site() << ")";
   cout << setprecision(10) << " = " << val << endl;
+*/
   return val;
 }
 
