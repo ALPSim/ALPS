@@ -97,8 +97,16 @@ IF (PYTHON_FOUND AND NOT ALPS_FOR_VISTRAILS)
       # Check for Python library path
       #
       #EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print string.join(get_config_vars('VERSION'))"  PYTHON_VERSION_MAJOR_MINOR)         
-#      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import * ;print '-L%s/config -lpython%s'%(get_python_lib(0,1),string.join(get_config_vars('VERSION')))" PYTHON_LIBRARY)
-      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print '%s/config/libpython%s.a' % (get_python_lib(0,1),string.join(get_config_vars('VERSION')))" PYTHON_LIBRARY)
+      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print '%s/config' % get_python_lib(0,1)" PYTHON_LIBRARY_BASE_PATH)
+      EXEC_PYTHON_SCRIPT ("import string; from distutils.sysconfig import *; print 'libpython%s' % string.join(get_config_vars('VERSION'))" PYTHON_LIBRARY_BASE_FILE)
+      IF(BUILD_SHARED_LIBS)
+        FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.so" PATHS ${PYTHON_LIBRARY_BASE_PATH})
+        IF(NOT PYTHON_LIBRARY)
+          FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.a" PATHS ${PYTHON_LIBRARY_BASE_PATH})
+        ENDIF(NOT PYTHON_LIBRARY)
+      ELSE(BUILD_SHARED_LIBS)
+        FIND_FILE(PYTHON_LIBRARY NAMES "${PYTHON_LIBRARY_BASE_FILE}.a" PATHS ${PYTHON_LIBRARY_BASE_PATH})
+      ENDIF(BUILD_SHARED_LIBS)
       MESSAGE(STATUS "PYTHON_LIBRARY = ${PYTHON_LIBRARY}" )
       mark_as_advanced(PYTHON_LIBRARY)
 

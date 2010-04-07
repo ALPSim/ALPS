@@ -245,7 +245,7 @@ def writeInputFiles(fname,parms, baseseed=None):
       f.write('    <INPUT file="'+taskname+'.in.xml"/>\n')
       f.write('    <OUTPUT file="'+taskname+'.out.xml"/>\n')
       f.write('  </TASK>\n')
-      writeTaskXMLFile(taskname+'.in.xml',p)
+      writeTaskXMLFile(os.path.join(dirname,taskname+'.in.xml'),p)
 
     f.write('</JOB>\n')
     f.close()
