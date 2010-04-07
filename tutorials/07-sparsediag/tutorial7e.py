@@ -14,9 +14,10 @@ for sz in [0, 1]:
           'local_S'                   : 0.5,
           'J0'                        : 1,
           'J1'                        : 1,
-          'L'                         : 12,
+          'L'                         : 8,
           'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
-          'Sz_total'                  : sz
+          'Sz_total'                  : sz,
+          'NUMBER_EIGENVALUES'        : 10
         }
       )
 
@@ -29,8 +30,7 @@ data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm7e'))
 
 energies=[]
 # get ground state energy
-for set in data:
-  for s in set:
+for s in pyalps.flatten(data):
     energies += list(s.y)
 
 groundstate_energy = np.min(energies)
@@ -45,6 +45,8 @@ for set in data:
     plot.x = np.concatenate((plot.x,np.array([s.props['TOTAL_MOMENTUM'] for i in range(0,len(s.y))])))
     plot.y = np.concatenate((plot.y,s.y - groundstate_energy))
   spectrumplot.append(plot)
+  
+#spectrumplot[0] = pyalps.subtract_spectrum(spectrumplot[0],spectrumplot[1],tolerance=1e-12)
 
 plt.figure()
 pyalps.pyplot.plot(spectrumplot)

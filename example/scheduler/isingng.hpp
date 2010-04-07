@@ -34,6 +34,7 @@ class ising_sim : public alps::mcbase {
 			}
 		};
 		void do_measurements() {
+			sweeps++;
 			if (sweeps > thermalization_sweeps) {
 				tmag = 0;
 				ten = 0;
@@ -53,7 +54,6 @@ class ising_sim : public alps::mcbase {
 				results["Magnetization^4"] << tmag * tmag * tmag * tmag;
 				results["Correlations"] << corr;
 			}
-			sweeps++;
 		};
 		double fraction_completed() const {
 			return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));

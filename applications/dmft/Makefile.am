@@ -1,4 +1,0 @@
-SUBDIRS =
-if EXIST_DMFT_QMC
-SUBDIRS += qmc
-endif

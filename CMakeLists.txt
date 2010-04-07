@@ -43,7 +43,7 @@ endif (ALPS_FOR_VISTRAILS)
 ######################################################################
 # CMAKE_MODULE_PATH
 ######################################################################
-list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config/CMake)
+list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 
 ######################################################################
 # set default CMAKE_INSTALL_PREFIX
@@ -494,8 +494,8 @@ foreach (l ${LAPACK_LIBRARY})
   set (LAPACK_LIBS "${LAPACK_LIBS} ${l}")
 endforeach(l)
 
-configure_file(config/CMake/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake)
-configure_file(config/CMake/include.mk.in ${PROJECT_BINARY_DIR}/config/CMake/include.mk)
+configure_file(config/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake)
+configure_file(config/include.mk.in ${PROJECT_BINARY_DIR}/config/include.mk)
 
 set (HDF5_LIBRARIES ${HDF5_LIBRARIES_SAVE})
 
@@ -560,13 +560,13 @@ else (ALPS_FOR_VISTRAILS)
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
   install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib COMPONENT xml)
 
-  install(FILES config/CMake/UseALPS.cmake
-          ${PROJECT_BINARY_DIR}/config/CMake/ALPSConfig.cmake
-          ${PROJECT_BINARY_DIR}/config/CMake/include.mk
-          config/CMake/run_test.cmake
+  install(FILES config/UseALPS.cmake
+          ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
+          ${PROJECT_BINARY_DIR}/config/include.mk
+          config/run_test.cmake
           DESTINATION share/alps COMPONENT build)
           
-  add_subdirectory(config/CMake)
+  add_subdirectory(config)
 
   install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
         FILES_MATCHING PATTERN "*.py"

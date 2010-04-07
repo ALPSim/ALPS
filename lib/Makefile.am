@@ -1,6 +1,0 @@
-SUBDIRS = alps
-if ALPS_FULL
-SUBDIRS += xml
-endif
-SUBDIRS += .
-DIST_SUBDIRS = $(SUBDIRS)
