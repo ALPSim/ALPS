@@ -30,7 +30,7 @@ int main(int argc, char *argv[]) {
 		s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
 #ifdef MPI_RUN
 		s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
-		if (s.is_master()) {
+		if (c.rank()==0) {
 			sim_type::results_type results = collect_results(s);
 			{
 				alps::hdf5::oarchive ar("sim.h5");

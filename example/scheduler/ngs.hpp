@@ -269,26 +269,11 @@ namespace alps {
 			results_type results;
 			boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
 	};
-	template<typename Impl> class mcwrapsim {
-		public:
-			typedef typename Impl::parameters_type parameters_type;
-			typedef typename Impl::results_type results_type;
-			typedef typename Impl::result_names_type result_names_type;
-			mcwrapsim(parameters_type const & p)
-				: impl(p)
-			{}
-			void save(boost::filesystem::path const & path) const { return impl.save(path); }
-			void load(boost::filesystem::path const & path) { return impl.load(path); }
-			bool run(boost::function<bool ()> const & stop_callback) { return impl.run(stop_callback); }
-			double fraction_completed() { return impl.fraction_completed(); }
-			result_names_type result_names() const { return impl.result_names(); }
-			result_names_type unsaved_result_names() const { return impl.unsaved_result_names(); }
-			results_type collect_results() const { return impl.collect_results(); }
-			results_type collect_results(result_names_type const & names) const { return impl.collect_results(names); }
-		private:
-			Impl impl;
-	};
-	template<typename Impl> class mcthreadsim : public mcwrapsim<Impl> {
+
+// write atomic class
+// template <class T> class atomic { atomic(), operator=, operator T ; private: T volatile, mutex}
+
+	template<typename Impl> class mcthreadsim : public Impl {
 		public:
 			mcthreadsim(typename mcwrapsim<Impl>::parameters_type const & p)
 				: mcwrapsim<Impl>(p)
@@ -302,21 +287,26 @@ namespace alps {
 			}
 			virtual bool run_callback() {
 				boost::lock_guard<boost::mutex> lock(mutex);
-				return (stop_flag == true);
+				return stop_flag;
 			}
 			virtual void thread_callback(boost::function<bool ()> const & stop_callback) {
 				while (true) {
 					usleep(0.1 * 1e6);
 					{
-						boost::lock_guard<boost::mutex> lock(mutex);
-						if (stop_flag = stop_callback())
+                        bool new_stop_flag = stop_callback();
+                        {
+                            boost::lock_guard<boost::mutex> lock(mutex);
+                            stop_flag = new_stop_flag;
+                        }
+						if (new_stop_flag)
 							return;
 					}
 				}
 			}
 		protected:
-			bool stop_flag;
+			bool volatile stop_flag;
 			boost::mutex mutex;
+            // measurements and configuration need to be locked separately
 	};
 	template<typename Result> class mcmpimerge {
 		public:
@@ -346,6 +336,7 @@ namespace alps {
 				MPI_collect				= 3,
 				MPI_terminate			= 4
 			};
+            
 			mcmpisim(typename mcthreadsim<Impl>::parameters_type const & p, boost::mpi::communicator const & c) 
 				: mcthreadsim<Impl>(p)
 				, next_check(8)
@@ -353,53 +344,54 @@ namespace alps {
 				, check_time(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check))
 				, communicator(c)
 			{}
-			bool run(boost::function<bool ()> const & stop_callback) { return mcthreadsim<Impl>::run(stop_callback); }
+            
 			double fraction_completed() {
-				if (is_master()) {
-					double fraction = mcthreadsim<Impl>::fraction_completed();
-					int action = MPI_get_fraction;
-					boost::mpi::broadcast(communicator, action, 0);
-					boost::mpi::reduce(communicator, mcthreadsim<Impl>::fraction_completed(), fraction, std::plus<double>(), 0);
-					return fraction;
-				} else
-					return mcthreadsim<Impl>::fraction_completed();
+				assert (communicator.rank()==0);
+                
+                double fraction = mcthreadsim<Impl>::fraction_completed();
+                int action = MPI_get_fraction;
+                boost::mpi::broadcast(communicator, action, 0);
+                boost::mpi::reduce(communicator, mcthreadsim<Impl>::fraction_completed(), fraction, std::plus<double>(), 0);
+                return fraction;
 			}
+            
 			typename mcthreadsim<Impl>::results_type collect_results() const {
-				if (is_master()) {
-					int action = MPI_collect;
-					std::vector<char> buf;
-					mcodump odump;
-					odump << mcthreadsim<Impl>::collect_results();
-					boost::mpi::broadcast(communicator, action, 0);
-					boost::mpi::reduce(communicator, odump.data(), buf, mcmpimerge<typename mcthreadsim<Impl>::results_type>(), 0);
-					mcidump idump(buf);
-					typename mcthreadsim<Impl>::results_type results;
-					idump >> results;
-					return results;
-				} else
-					return mcthreadsim<Impl>::collect_results(); 
+				assert (communicator.rank()==0);
+
+                int action = MPI_collect;
+                std::vector<char> buf;
+                mcodump odump;
+                odump << mcthreadsim<Impl>::collect_results();
+                boost::mpi::broadcast(communicator, action, 0);
+                boost::mpi::reduce(communicator, odump.data(), buf, mcmpimerge<typename mcthreadsim<Impl>::results_type>(), 0);
+                mcidump idump(buf);
+                typename mcthreadsim<Impl>::results_type results;
+                idump >> results;
+                return results;
 			}
+            
 			typename mcthreadsim<Impl>::results_type collect_results(typename mcthreadsim<Impl>::result_names_type const & names) const { 
 				typename mcthreadsim<Impl>::results_type results = collect_results(), partial_results;
 				for(typename mcthreadsim<Impl>::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
 					partial_results << results[*it];
 				return partial_results;
 			}
-			bool is_master() const { return !communicator.rank(); }
+            
 			void terminate() const {
-				if (is_master()) {
+				if (communicator.rank()==0) {
 					int action = MPI_terminate;
 					boost::mpi::broadcast(communicator, action, 0);
 				}
 			}
+            
 			void thread_callback(boost::function<bool ()> const & stop_callback) {
-				if (is_master()) {
+				if (communicator.rank()==0) {
 					bool flag = false;
 					while (!flag && !stop_callback()) {
 						usleep(0.1 * 1e6);
 						if (!flag && boost::posix_time::second_clock::local_time() > check_time) {
 							double fraction = fraction_completed();
-							flag = (fraction >= 1);
+							flag = (fraction >= 1.);
 							next_check = std::min(2. * next_check, std::max(double(next_check), 0.8 * (boost::posix_time::second_clock::local_time() - start_time).total_seconds() / fraction * (1 - fraction)));
 							check_time = boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check);
 							std::cerr << std::fixed << std::setprecision(1) << fraction * 100 << "% done next check in " << next_check << "s" << std::endl;
@@ -407,15 +399,18 @@ namespace alps {
 					}
 					{
 						boost::lock_guard<boost::mutex> lock(mcthreadsim<Impl>::mutex);
-						flag = mcthreadsim<Impl>::stop_flag = stop_callback();
+						flag = mcthreadsim<Impl>::stop_flag = true;
 					}
 					int action = MPI_stop;
 					boost::mpi::broadcast(communicator, action, 0);
 				} else
 					process_requests();
 			}
+            
 			void process_requests() {
-				while (!is_master()) {
+				assert (communicator.rank()>0);
+                
+				while (true) {
 					int action;
 					boost::mpi::broadcast(communicator, action, 0);
 					switch (action) {
