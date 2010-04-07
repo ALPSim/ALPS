@@ -1,3 +1,7 @@
+// Copyright (C) 2008 - 2010 Lukas Gamper <gamperl -at- gmail.com>
+// Use, modification and distribution is subject to the Boost Software
+// License, Version 1.0. (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
 #include <alps/alea.h>
 #include <alps/hdf5.hpp>
@@ -21,6 +25,9 @@
 #include <sstream>
 #include <algorithm>
 #include <signal.h>
+
+#ifndef ALPS_NGS_HPP
+#define ALPS_NGS_HPP
 
 namespace alps {
 	class mcidump : public IDump {
@@ -269,65 +276,55 @@ namespace alps {
 			results_type results;
 			boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
 	};
+	template<typename T> class mcatomic {
+		public:
+			mcatomic() {}
+			mcatomic(T const & v): value(v) {}
+			mcatomic(mcatomic const & v): value(v.value) {}
+			
+			mcatomic & operator=(mcatomic const & v) {
+				boost::lock_guard<boost::mutex> lock(mutex);
+				value = v;
+			}
 
-// write atomic class
-// template <class T> class atomic { atomic(), operator=, operator T ; private: T volatile, mutex}
-
+			operator T() const { 
+				boost::lock_guard<boost::mutex> lock(mutex);
+				return value; 
+			}
+		private:
+			T volatile value;
+			boost::mutex mutable mutex;
+	};
 	template<typename Impl> class mcthreadsim : public Impl {
 		public:
-			mcthreadsim(typename mcwrapsim<Impl>::parameters_type const & p)
-				: mcwrapsim<Impl>(p)
+			mcthreadsim(typename Impl::parameters_type const & p)
+				: Impl(p)
 				, stop_flag(false)
 			{}
+			
 			bool run(boost::function<bool ()> const & stop_callback) {
 				boost::thread thread(boost::bind(&mcthreadsim<Impl>::thread_callback, this, stop_callback));
-				mcwrapsim<Impl>::run(boost::bind(&mcthreadsim<Impl>::run_callback, this));
+				Impl::run(boost::bind(&mcthreadsim<Impl>::run_callback, this));
 				thread.join();
 				return stop_flag;
 			}
+			
 			virtual bool run_callback() {
-				boost::lock_guard<boost::mutex> lock(mutex);
 				return stop_flag;
 			}
+			
 			virtual void thread_callback(boost::function<bool ()> const & stop_callback) {
 				while (true) {
 					usleep(0.1 * 1e6);
-					{
-                        bool new_stop_flag = stop_callback();
-                        {
-                            boost::lock_guard<boost::mutex> lock(mutex);
-                            stop_flag = new_stop_flag;
-                        }
-						if (new_stop_flag)
-							return;
-					}
+					if (stop_flag = stop_callback())
+						return;
 				}
 			}
 		protected:
-			bool volatile stop_flag;
-			boost::mutex mutex;
-            // measurements and configuration need to be locked separately
+			mcatomic<bool> stop_flag;
+			// boost::mutex mutex;
+			// measurements and configuration need to be locked separately
 	};
-	template<typename Result> class mcmpimerge {
-		public:
-			std::vector<char> operator()(std::vector<char> const & arg1, std::vector<char> const & arg2) {
-				mcidump idump1(arg1), idump2(arg2);
-				Result results1, results2;
-				idump1 >> results1;
-				idump2 >> results2;
-				results1 << results2;
-				mcodump odump;
-				odump << results1;
-				return odump.data();
-			}
-	};
-}
-namespace boost { 
-	namespace mpi {
-		template<typename Result> struct is_commutative<alps::mcmpimerge<Result>, std::vector<char> > : public mpl::true_ { };
-	} 
-}
-namespace alps {
 	template<typename Impl> class mcmpisim : public mcthreadsim<Impl> {
 		public:
 			enum {
@@ -336,7 +333,7 @@ namespace alps {
 				MPI_collect				= 3,
 				MPI_terminate			= 4
 			};
-            
+
 			mcmpisim(typename mcthreadsim<Impl>::parameters_type const & p, boost::mpi::communicator const & c) 
 				: mcthreadsim<Impl>(p)
 				, next_check(8)
@@ -344,50 +341,62 @@ namespace alps {
 				, check_time(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check))
 				, communicator(c)
 			{}
-            
-			double fraction_completed() {
-				assert (communicator.rank()==0);
-                
-                double fraction = mcthreadsim<Impl>::fraction_completed();
-                int action = MPI_get_fraction;
-                boost::mpi::broadcast(communicator, action, 0);
-                boost::mpi::reduce(communicator, mcthreadsim<Impl>::fraction_completed(), fraction, std::plus<double>(), 0);
-                return fraction;
-			}
-            
-			typename mcthreadsim<Impl>::results_type collect_results() const {
-				assert (communicator.rank()==0);
 
-                int action = MPI_collect;
-                std::vector<char> buf;
-                mcodump odump;
-                odump << mcthreadsim<Impl>::collect_results();
-                boost::mpi::broadcast(communicator, action, 0);
-                boost::mpi::reduce(communicator, odump.data(), buf, mcmpimerge<typename mcthreadsim<Impl>::results_type>(), 0);
-                mcidump idump(buf);
-                typename mcthreadsim<Impl>::results_type results;
-                idump >> results;
-                return results;
+			double fraction_completed() {
+				assert(communicator.rank() == 0);
+
+				double fraction = mcthreadsim<Impl>::fraction_completed();
+				int action = MPI_get_fraction;
+				boost::mpi::broadcast(communicator, action, 0);
+				boost::mpi::reduce(communicator, mcthreadsim<Impl>::fraction_completed(), fraction, std::plus<double>(), 0);
+				return fraction;
 			}
-            
+
+			typename mcthreadsim<Impl>::results_type collect_results() const {
+				assert(communicator.rank() == 0);
+
+				int action = MPI_collect;
+				boost::mpi::broadcast(communicator, action, 0);
+				std::vector<char> buf, data;
+				{
+					mcodump odump;
+					odump << mcthreadsim<Impl>::collect_results();
+					data = odump.data();
+				}
+				std::size_t len = boost::mpi::all_reduce(communicator, data.size(), boost::mpi::maximum<std::size_t>());
+				data.resize(len);
+				buf.resize(len);
+				MPI_Datatype vector_type;
+				assert(MPI_Type_contiguous(len, MPI_BYTE, &vector_type) == MPI_SUCCESS);
+				assert(MPI_Type_commit(&vector_type) == MPI_SUCCESS);
+				MPI_Op collector;
+				assert(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector) == MPI_SUCCESS);
+				assert(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator) == MPI_SUCCESS);
+				assert(MPI_Op_free(&collector) == MPI_SUCCESS);
+				assert(MPI_Type_free(&vector_type) == MPI_SUCCESS);
+				mcidump idump(buf);
+				typename mcthreadsim<Impl>::results_type results;
+				idump >> results;
+				return results;
+			}
+
 			typename mcthreadsim<Impl>::results_type collect_results(typename mcthreadsim<Impl>::result_names_type const & names) const { 
 				typename mcthreadsim<Impl>::results_type results = collect_results(), partial_results;
 				for(typename mcthreadsim<Impl>::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
 					partial_results << results[*it];
 				return partial_results;
 			}
-            
+
 			void terminate() const {
-				if (communicator.rank()==0) {
+				if (communicator.rank() == 0) {
 					int action = MPI_terminate;
 					boost::mpi::broadcast(communicator, action, 0);
 				}
 			}
-            
+
 			void thread_callback(boost::function<bool ()> const & stop_callback) {
-				if (communicator.rank()==0) {
-					bool flag = false;
-					while (!flag && !stop_callback()) {
+				if (communicator.rank() == 0) {
+					for (bool flag = false; !flag && !stop_callback(); ) {
 						usleep(0.1 * 1e6);
 						if (!flag && boost::posix_time::second_clock::local_time() > check_time) {
 							double fraction = fraction_completed();
@@ -397,19 +406,16 @@ namespace alps {
 							std::cerr << std::fixed << std::setprecision(1) << fraction * 100 << "% done next check in " << next_check << "s" << std::endl;
 						}
 					}
-					{
-						boost::lock_guard<boost::mutex> lock(mcthreadsim<Impl>::mutex);
-						flag = mcthreadsim<Impl>::stop_flag = true;
-					}
+					mcthreadsim<Impl>::stop_flag = true;
 					int action = MPI_stop;
 					boost::mpi::broadcast(communicator, action, 0);
 				} else
 					process_requests();
 			}
-            
+
 			void process_requests() {
-				assert (communicator.rank()>0);
-                
+				assert(communicator.rank() > 0);
+
 				while (true) {
 					int action;
 					boost::mpi::broadcast(communicator, action, 0);
@@ -419,20 +425,45 @@ namespace alps {
 							break;
 						case MPI_collect:
 							{
-								mcodump odump;
-								odump << collect_results();
-								boost::mpi::reduce(communicator, odump.data(), mcmpimerge<typename mcthreadsim<Impl>::results_type>(), 0);
+								std::vector<char> buf, data;
+								{
+									mcodump odump;
+									odump << mcthreadsim<Impl>::collect_results();
+									data = odump.data();
+								}
+								std::size_t len = boost::mpi::all_reduce(communicator, data.size(), boost::mpi::maximum<std::size_t>()) * 1.2;
+								data.resize(len);
+								buf.resize(len);
+								MPI_Datatype vector_type;
+								assert(MPI_Type_contiguous(len, MPI_BYTE, &vector_type) == MPI_SUCCESS);
+								assert(MPI_Type_commit(&vector_type) == MPI_SUCCESS);
+								MPI_Op collector;
+								assert(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector) == MPI_SUCCESS);
+								assert(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator) == MPI_SUCCESS);
+								assert(MPI_Op_free(&collector) == MPI_SUCCESS);
+								assert(MPI_Type_free(&vector_type) == MPI_SUCCESS);
 							}
 							break;
 						case MPI_stop:
 						case MPI_terminate:
-							{
-								boost::lock_guard<boost::mutex> lock(mcthreadsim<Impl>::mutex);
-								mcthreadsim<Impl>::stop_flag = false;
-								return;
-							}
+							mcthreadsim<Impl>::stop_flag = false;
+							return;
 					}
 				}
+			}
+			static void merge(void * a, void * b, int * len, MPI_Datatype * type) {
+				int size;
+				MPI_Type_size(*type, &size);
+				std::vector<char> arg1(static_cast<char *>(a), static_cast<char *>(a) + size), arg2(static_cast<char *>(b), static_cast<char *>(b) + size);
+				mcidump idump1(arg1), idump2(arg2);
+				typename mcthreadsim<Impl>::results_type  results1, results2;
+				idump1 >> results1;
+				idump2 >> results2;
+				results1 << results2;
+				mcodump odump;
+				odump << results1;
+				assert(odump.data().size() < size);
+				std::memcpy(b, &(odump.data().front()), odump.data().size());
 			}
 		private:
 			int next_check;
@@ -441,3 +472,5 @@ namespace alps {
 			boost::mpi::communicator communicator;
 	};
 }
+
+#endif

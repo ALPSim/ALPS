@@ -1,4 +1,4 @@
-# include "isingng.hpp"
+# include "ising.hpp"
 
 //#define SINGLE_RUN
 //#define THREAD_RUN
