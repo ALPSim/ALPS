@@ -24,6 +24,10 @@ else(ALPS_FOR_VISTRAILS)
 #
 # quickbook
 # 
+
+# If Boost precompiled libraries found, don't build quickbook,
+# since sources are not available.
+if (NOT Boost_FOUND)
   set (QUICKBOOK_SOURCES "")
   set (DIRECTORY "${Boost_ROOT_DIR}/tools/quickbook/detail")
   set (FILES quickbook.cpp actions.cpp actions_class.cpp utils.cpp 
@@ -35,6 +39,7 @@ else(ALPS_FOR_VISTRAILS)
   add_executable(quickbook ${QUICKBOOK_SOURCES})
   target_link_libraries(quickbook boost)
   install(TARGETS quickbook RUNTIME DESTINATION bin COMPONENT tools)
+endif(NOT Boost_FOUND)
  
   if(SQLite_FOUND)
     include_directories(${SQLite_INCLUDE_DIR})
