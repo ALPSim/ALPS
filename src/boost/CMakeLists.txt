@@ -198,13 +198,9 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
   
 endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
 
-if (Boost_FOUND)
-  # Use precompiled Boost libraries
-  add_library(boost dummy.cpp)
-  target_link_libraries(boost ${Boost_LIBRARIES})
-else (Boost_FOUND)
+# Setting "boost" target not needed when precompiled Boost libraries found.
+if (NOT Boost_FOUND)
   add_library(boost ${BOOST_SOURCES})
-endif (Boost_FOUND)
 
 if(WIN32)
   if(BUILD_SHARED_LIBS)
@@ -227,6 +223,7 @@ if (ALPS_FOR_VISTRAILS)
   )
 endif (ALPS_FOR_VISTRAILS)
 
+endif (NOT Boost_FOUND)
 
 
 
@@ -234,6 +231,7 @@ endif (ALPS_FOR_VISTRAILS)
 #######################################################################
 # install
 #######################################################################
+if (NOT Boost_FOUND)
 if (ALPS_FOR_VISTRAILS)
   if (NOT WIN32 AND NOT APPLE)
     install(TARGETS boost
@@ -252,3 +250,4 @@ else (ALPS_FOR_VISTRAILS)
           ARCHIVE DESTINATION lib
           LIBRARY DESTINATION lib)
 endif (ALPS_FOR_VISTRAILS)
+endif (NOT Boost_FOUND)
