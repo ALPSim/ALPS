@@ -24,8 +24,8 @@ if (ALPS_HAVE_PYTHON)
       set_target_properties(pytools PROPERTIES SUFFIX ".pyd")
     endif(WIN32 AND NOT UNIX)
   endif(BUILD_SHARED_LIBS)
-  target_link_libraries(pyalea alps boost ${LINK_LIBRARIES})
-  target_link_libraries(pytools alps boost ${LINK_LIBRARIES})
+  target_link_libraries(pyalea alps ${LINK_LIBRARIES})
+  target_link_libraries(pytools alps ${LINK_LIBRARIES})
 
 
   #######################################################################

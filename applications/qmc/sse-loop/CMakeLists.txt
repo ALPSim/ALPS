@@ -4,4 +4,4 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
  add_executable(sse-loop loop.C sse.C sse.h vertex.C vertex.h)
- target_link_libraries(sse-loop alps boost)
+ target_link_libraries(sse-loop alps)

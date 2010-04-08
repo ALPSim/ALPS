@@ -92,7 +92,7 @@ if(LAPACK_FOUND AND NOT ALPS_FOR_VISTRAILS)
   add_definitions(${LAPACK_DEFINITIONS} -DBIND_FORTRAN_LOWERCASE_UNDERSCORE)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
   add_executable(maxent maxent.cpp maxent_helper.cpp maxent_simulation.cpp maxent_parms.cpp)
-  target_link_libraries(maxent alps boost ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
+  target_link_libraries(maxent alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   install(TARGETS maxent RUNTIME DESTINATION bin COMPONENT tools)
 endif(LAPACK_FOUND AND NOT ALPS_FOR_VISTRAILS)
 

@@ -4,5 +4,5 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 add_executable(checksign checksign.C)
-target_link_libraries(checksign alps boost)
+target_link_libraries(checksign alps)
 install(TARGETS checksign RUNTIME DESTINATION bin COMPONENT applications)
