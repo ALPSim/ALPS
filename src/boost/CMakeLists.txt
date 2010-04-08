@@ -198,8 +198,13 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
   
 endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
 
-
-add_library(boost ${BOOST_SOURCES})
+if (Boost_FOUND)
+  # Use precompiled Boost libraries
+  add_library(boost dummy.cpp)
+  target_link_libraries(boost ${Boost_LIBRARIES})
+else (Boost_FOUND)
+  add_library(boost ${BOOST_SOURCES})
+endif (Boost_FOUND)
 
 if(WIN32)
   if(BUILD_SHARED_LIBS)
