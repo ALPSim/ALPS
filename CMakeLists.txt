@@ -147,8 +147,8 @@ CHECK_INCLUDE_FILE_CXX(valarray ALPS_HAVE_VALARRAY)
 # Packages
 ######################################################################
 
-# Boost Source File
-find_package(BoostSrc REQUIRED)
+# Boost Libraries
+find_package(BoostForALPS REQUIRED)
 
 # MPI
 IF(NOT MPI_FOUND)
