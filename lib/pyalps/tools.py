@@ -326,3 +326,19 @@ def collectXY(sets,x,y,foreach=[]):
           
           foreach_sets[k] = res
       return foreach_sets.values()
+
+def subtract_spectrum(s1,s2,tolerance=1e-12):
+    res = pyalps.DataSet()
+    res.props = s1.props
+
+    for i in range(len(s1.x)):
+        remove = False
+        for j in range(len(s2.x)):
+            if abs(s1.x[i]-s2.x[j]) < tolerance and abs(s1.y[i]-s2.y[j]) < tolerance:
+                remove = True
+                break
+        if not remove:
+            res.x = np.append(res.x,s1.x[i])
+            res.y = np.append(res.y,s1.y[i])
+    
+    return res

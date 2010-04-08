@@ -46,7 +46,7 @@ for set in data:
     plot.y = np.concatenate((plot.y,s.y - groundstate_energy))
   spectrumplot.append(plot)
   
-#spectrumplot[0] = pyalps.subtract_spectrum(spectrumplot[0],spectrumplot[1],tolerance=1e-12)
+spectrumplot[0] = pyalps.subtract_spectrum(spectrumplot[0],spectrumplot[1],tolerance=1e-12)
 
 plt.figure()
 pyalps.pyplot.plot(spectrumplot)
