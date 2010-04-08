@@ -189,7 +189,7 @@ namespace ietl {
     for(k = eigval_distinct.begin(); k != eigval_distinct.end(); k++,i++) { 
       if(multiplicty[i] == 1) { // test of spuriousness for the eigenvalues whose multiplicity is one.
         for(int j = t2; j < n-2; j++,t2++) { // since size of reduced matrix is n-1
-          if((eval_g[j+1] - *k) >= multol) break;
+          if((eval_g[j] - *k) >= multol) break;
           
           if(fabs(*k - eval_g[j]) < multol) {
             multiplicty[i] = 0;
