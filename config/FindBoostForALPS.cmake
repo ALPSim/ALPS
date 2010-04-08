@@ -20,7 +20,7 @@ if (NOT Boost_ROOT_DIR)
   #  set(Boost_USE_STATIC_LIBS ON)
   # Debug flag for FindBoost.cmake
   #  set(Boost_DEBUG TRUE)
-  find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options system python thread)
+  find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
 endif(NOT Boost_ROOT_DIR)
 
 # Boost_FOUND is set only when FindBoost.cmake succeeds.
