@@ -105,7 +105,10 @@ class SetLabels(Module):
             for label in labels:
                 if label != labels[0]:
                     labelstr += ', '
-                labelstr += '%s = %.4s' % (label,x.props[label])
+                if type(x.props[label]) == str:
+                    labelstr += '%s = %s' % (label,x.props[label])
+                else:
+                    labelstr += '%s = %.4s' % (label,x.props[label])
             ret.props['label'] = labelstr
             return ret
         
