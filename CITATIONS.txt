@@ -23,8 +23,47 @@ The use of any other library, in particular those with headers in the
 subdirectories alps/parser, alps/osiris, alps/random do not carry any
 citation requirement but acknowledgment of the ALPS project is encouraged.
 
+* When the SSE quantum Monte Carlo program sse or sse_mpi was used:
+  - reference the ALPS web page http://alps.comp-phys.org/ 
+  - and cite the publications:
+    F. Alet, S. Wessel and M. Troyer, Phys. Rev. E 71, 036706 (2005).
+    A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+* When the loop quantum Monte Carlo program loop or loop_mpi was used:
+  - reference the ALPS and ALPS/looper web pages
+      http://alps.comp-phys.org/ 
+      http://wistaria.comp-phys.org/alps-looper/
+  - and cite the publications:
+      S. Todo and K. Kato, Phys. Rev. Lett. 87 047203 (2001).
+      A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+* When the classical Monte Carlo program spinmc or spinmc_mpi was 
+  used:
+  - reference the ALPS web page http://alps.comp-phys.org/ 
+  - and cite the publications: 
+      A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+* When the diagonalization programs fulldiag, sparsediag or fulldiag_mpi was 
+  used:
+  - reference the ALPS web page http://alps.comp-phys.org/ 
+  - and cite the publications: 
+    A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+    M. Troyer, Lecture Notes in Computer Science Vol. 1732, p. 164 (1999).
+
+* When the worm quantum Monte Carlo program is used:
+  - reference the ALPS web page http://alps.comp-phys.org/ 
+  - and cite the publications: 
+    A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
+* When the quantum Wang-Landau program is used:
+  - reference the ALPS web page http://alps.comp-phys.org/ 
+  - and cite the publications: 
+    M. Troyer, S. Wessel, and F. Alet, Phys. Rev. Lett. 90, 120201 (2003).
+    A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+
 
   Copyright ALPS collaboration 2002 - 2010
   Distributed under the Boost Software License, Version 1.0.
       (See accompanying file LICENSE_1_0.txt or copy at
           http://www.boost.org/LICENSE_1_0.txt)
+
