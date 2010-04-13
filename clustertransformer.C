@@ -147,32 +147,32 @@ std::complex<double>* DCATransformer::exp_iksite(const int sign) const
 
 int* DCATransformer::momentum_translation() const
 {
-	int *m = new int[n_cluster_sites()*n_cluster_sites()*n_cluster_sites()];
-	std::valarray<double> phase(dimension());
-	int res;
-	for(site_t i=0; i<n_cluster_sites();++i){
-		for(site_t j=0;j<n_cluster_sites();++j){
-			for(site_t k=0;k<n_cluster_sites();++k){
-				for(int d=0;d<dimension();++d){
-					phase[d]=cluster_momentum(i,d)-cluster_momentum(j,d)+cluster_momentum(k,d);
-				}
-				for(site_t p=0;p<n_cluster_sites();++p){
-					for(int d=0;d<dimension();++d){
-						double tmp=(phase[d]-cluster_momentum(p,d))/(2.*M_PI);
-						if(tmp==(int)tmp)
-							res=1;
-						else{
-							res=0;
-							break;
-						}
-					}
-					if(res)
-						m[i*n_cluster_sites()*n_cluster_sites()+j*n_cluster_sites()+k]=p;
-				}
-			}
-		}
+  int *m = new int[n_cluster_sites()*n_cluster_sites()*n_cluster_sites()];
+  std::valarray<double> phase(dimension());
+  int res;
+  for(site_t i=0; i<n_cluster_sites();++i){
+    for(site_t j=0;j<n_cluster_sites();++j){
+      for(site_t k=0;k<n_cluster_sites();++k){
+	for(int d=0;d<dimension();++d){
+	  phase[d]=cluster_momentum(i,d)-cluster_momentum(j,d)+cluster_momentum(k,d);
 	}
-	return m;
+	for(site_t p=0;p<n_cluster_sites();++p){
+	  for(int d=0;d<dimension();++d){
+	    double tmp=(phase[d]-cluster_momentum(p,d))/(2.*M_PI);
+	    if(tmp==(int)tmp)
+	      res=1;
+	    else{
+	      res=0;
+	      break;
+	    }
+	  }
+	  if(res)
+	    m[i*n_cluster_sites()*n_cluster_sites()+j*n_cluster_sites()+k]=p;
+	}
+      }
+    }
+  }
+  return m;
 }
 
 matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
@@ -263,17 +263,32 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     else
       std::cout<<"WARNING: Input file could not be found, proceeding with free solution."<<std::endl;
   }
-  { //proceed with computation of new G0 if we can't find input G0
-    std::cout<<"calculating initial G0_omega"<<std::endl;
-    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-    int n_tau=boost::lexical_cast<int>(parms["N"]);
-    int n_flavor=parms.value_or_default("FLAVORS", 2);
-    double beta = static_cast<double>(parms["BETA"]);
-    double mu = static_cast<double>(parms["MU"]);
-    //double h = static_cast<double>(parms["H"]);
-    //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
-    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
+  //proceed with computation of new G0 if we can't find input G0
+  std::cout<<"calculating initial G0_omega"<<std::endl;
+  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  int n_tau=boost::lexical_cast<int>(parms["N"]);
+  int n_flavor=parms.value_or_default("FLAVORS", 2);
+  double beta = static_cast<double>(parms["BETA"]);
+  double mu = static_cast<double>(parms["MU"]);
+  //double h = static_cast<double>(parms["H"]);
+  //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
+  matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor);
+  G0_omega_new.clear();
+  if (parms.defined("ISOLATING")) {
+    std::cout <<"calculating isolating G0_omega";
+    for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+      const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+      const double std::complex<double> G0 = 1./(iomega_n+mu-dispersion_moments(0));
+      for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
+	for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+	  G0_omega_new(freq, kc, kc, flavor) = G0;
+	}
+      }
+    }
+  } 
+  else {
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
+    matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
     G0_omega.clear();
     for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
       for (site_t i=0; i<n_cluster_sites(); ++i) {
@@ -284,19 +299,19 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     }
     G_omega = G0_omega; 
     //evoke transformation with G_omega==G0_omega (selfenergy=0)
-    matsubara_green_function_t G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
-    itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
-    boost::shared_ptr<FourierTransformer> fourier_ptr;
-    G0_omega_new.write("G0_omega_input");
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
-    fourier_ptr->backward_ft(G0_tau, G0_omega_new);
-    G0_tau.write("G0_tau_input");
-    matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
-    G0_omega_real.write("G0_omega_input_realspace");
-    itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
-    G0_tau_real.write("G0_tau_input_realspace");
-    return G0_omega_new;
+    G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
   }
+  itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
+  boost::shared_ptr<FourierTransformer> fourier_ptr;
+  G0_omega_new.write("G0_omega_input");
+  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  fourier_ptr->backward_ft(G0_tau, G0_omega_new);
+  G0_tau.write("G0_tau_input");
+  matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
+  G0_omega_real.write("G0_omega_input_realspace");
+  itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
+  G0_tau_real.write("G0_tau_input_realspace");
+  return G0_omega_new;
 }
 
 
