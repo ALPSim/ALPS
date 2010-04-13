@@ -278,7 +278,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     std::cout <<"calculating isolating G0_omega";
     for (frequency_t freq=0; freq<n_matsubara; ++freq) {
       const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-      const double std::complex<double> G0 = 1./(iomega_n+mu-dispersion_moments(0));
+      const std::complex<double> G0 = 1./(iomega_n+mu-dispersion_moments(0));
       for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
 	for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
 	  G0_omega_new(freq, kc, kc, flavor) = G0;
