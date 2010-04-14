@@ -52,13 +52,13 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
   }
   itime_green_function_t f_itime(Np1, 1, FLAVORS);
   double mu_shift = u.mu_shift();
-  std::cout << "mu_shift to half filling is: " << mu_shift << std::endl;
+  //std::cout << "mu_shift to half filling is: " << mu_shift << std::endl;
   //general case: SC loop in omega, we have to convert G0(iomega) into F(tau).
   if (parms.defined("OMEGA_LOOP")) {
     matsubara_green_function_t bare_green_matsubara(N, 1, FLAVORS);
     matsubara_green_function_t f_twiddle_matsubara(N, 1, FLAVORS);
     itime_green_function_t f_twiddle_itime(Np1, 1, FLAVORS);
-    std::cout << "U is: " << u << std::endl;
+    //std::cout << "U is: " << u << std::endl;
     //find the second moment of the band structure
     double epssqav = t * t;
     if (parms.defined("DOSFILE")) {
@@ -71,8 +71,8 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
     std::istringstream in_omega(parms["G0(omega)"]);
     read_freq(in_omega, bare_green_matsubara);
     mu = mu + mu_shift;
-    std::cout << "absolute mu is: " << mu << std::endl;
-    FFunctionFourierTransformer Fourier(BETA , mu-mu_shift, epssqav + (mu-mu_shift)*(mu-mu_shift), FLAVORS, 1);
+    //std::cout << "absolute mu is: " << mu << std::endl;
+    FFunctionFourierTransformer Fourier(BETA , 0, epssqav , FLAVORS, 1);
     for (int f = 0; f < FLAVORS; ++f) {
       for (int i = 0; i < N; ++i) {
         f_twiddle_matsubara(i, f) = -1. / bare_green_matsubara(i, f) + (std::complex < double >(mu - mu_shift, (2. * i + 1) * M_PI / BETA));
@@ -286,7 +286,7 @@ std::pair < matsubara_green_function_t, itime_green_function_t > WernerSimFreque
   boost::shared_ptr < FourierTransformer > fourier_ptr;
   alps::RealVectorObsevaluator G = get_measurements()["Greens"];
   alps::RealVectorObsevaluator n = get_measurements()["n"];
-  std::cout << "total measurements done: " << G.count() << std::endl;
+  //std::cout << "total measurements done: " << G.count() << std::endl;
   if(parms.defined("CHECKPOINT")){
     alps::Parameters *p=const_cast<alps::Parameters*>(&parms);
     p->erase(std::string("G0(omega)"));
@@ -297,7 +297,7 @@ std::pair < matsubara_green_function_t, itime_green_function_t > WernerSimFreque
       }
       it++;
     }
-    std::cout<<"end of sim, checkpointing"<<std::endl;
+    //std::cout<<"end of sim, checkpointing"<<std::endl;
     std::string fns=parms["CHECKPOINT"];
     fns+=".xml";
     boost::filesystem::path fn(fns);
@@ -325,7 +325,7 @@ std::pair < matsubara_green_function_t, itime_green_function_t > WernerSimFreque
       }
       it++;
     }
-    std::cout<<"end of sim, checkpointing"<<std::endl;
+    //std::cout<<"end of sim, checkpointing"<<std::endl;
     std::string fns=parms["CHECKPOINT"];
     fns+=".xml";
     boost::filesystem::path fn(fns);

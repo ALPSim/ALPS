@@ -68,7 +68,7 @@ void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
   
   // spline_matrix has dimension (N+1)x(N+1)
   int Np1 = spline_matrix.size1();
-  std::cout<<"spline matrix size is: "<<Np1<<std::endl;
+  //std::cout<<"spline matrix size is: "<<Np1<<std::endl;
   // A is the matrix whose inverse defines spline_matrix
   //   
   //      6                   6

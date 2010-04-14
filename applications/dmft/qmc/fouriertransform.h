@@ -141,7 +141,7 @@ public:
   {
     for(int f=0;f<n_flavor;++f){
       int fbar = f%2==0 ? f+1 : f-1;
-      std::cerr << "dens: " << densities[fbar] << std::endl;
+      //std::cerr << "dens: " << densities[fbar] << std::endl;
       for(int i=0;i<n_site;++i){
         c1_[f][i][i] = 1.;
         c2_[f][i][i] = eps[f][i] - mu + U*densities[fbar]; 
@@ -149,7 +149,7 @@ public:
           + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
         Sc0_[f][i][i] = U * (densities[fbar]-0.5);
         Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
-        std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
+        //std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
         Sc2_[f][i][i] = 0;
       }
     }
@@ -163,7 +163,7 @@ class FFunctionFourierTransformer:public FourierTransformer
 public:
   FFunctionFourierTransformer(double beta, double mu, double epsilonsq_av, int n_flavor, int n_site)
     :FourierTransformer(beta, n_flavor, n_site){
-    std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"epsilonsq_av: "<<epsilonsq_av<<std::endl;
+    //std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"epsilonsq_av: "<<epsilonsq_av<<std::endl;
     epsilonsq_av_=epsilonsq_av; //this is the integral of the second moment of the dos: \int_-\infty^\infty e^2 rho(e) de. It is t^2 for semicircle...
     for(int f=0;f<n_flavor;++f){
       for(int i=0;i<n_site;++i){
@@ -183,7 +183,7 @@ public:
   
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
     FourierTransformer::backward_ft(G_tau, G_omega);
-    std::cout<<"correcting for F function"<<std::endl;
+    //std::cout<<"correcting for F function"<<std::endl;
     for(unsigned int j=0;j<G_tau.nflavor();++j){
       G_tau(G_tau.ntime()-1,j)=-epsilonsq_av_-G_tau(0,j);
     }
