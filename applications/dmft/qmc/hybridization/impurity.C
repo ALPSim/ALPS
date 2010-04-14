@@ -11,7 +11,6 @@
  *****************************************************************************/
 
 #include "types.h"
-#include <alps/model.h>
 #include <alps/lattice.h>
 #include "impurity.h"
 #include "moves.h"
@@ -23,7 +22,7 @@ using namespace std;
 using namespace alps;
 
 
-WernerRun::WernerRun(const alps::ProcessList & where, const alps::Parameters & p, int node)
+HybridizationRun::HybridizationRun(const alps::ProcessList & where, const alps::Parameters & p, int node)
 :alps::scheduler::MCRun(where, p, node), sweeps(0),
 thermalization_sweeps(static_cast < int >(parms["THERMALIZATION"])),
 total_sweeps(static_cast < int >(parms["SWEEPS"])), start_time(time(NULL)),
@@ -126,7 +125,7 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
 
 }
 
-bool WernerRun::change_parameter(const std::string & name, const alps::StringValue & value)
+bool HybridizationRun::change_parameter(const std::string & name, const alps::StringValue & value)
 {
   if (name == "SWEEPS")
     total_sweeps = static_cast < alps::uint32_t > (value);
@@ -137,12 +136,12 @@ bool WernerRun::change_parameter(const std::string & name, const alps::StringVal
   return true;                  // could do it
 }
 
-bool WernerRun::is_thermalized() const
+bool HybridizationRun::is_thermalized() const
 {
   return (sweeps >= thermalization_sweeps);
 }
 
-double WernerRun::work_done() const
+double HybridizationRun::work_done() const
 {
   if (time(NULL) - start_time > max_time)
     return 1.;
@@ -150,7 +149,7 @@ double WernerRun::work_done() const
 
 }
 
-void WernerRun::dostep()
+void HybridizationRun::dostep()
 {
 
   // increment sweep count
@@ -275,7 +274,7 @@ void WernerRun::dostep()
 }
 
 
-std::pair < matsubara_green_function_t, itime_green_function_t > WernerSimFrequency::get_result() 
+std::pair < matsubara_green_function_t, itime_green_function_t > HybridizationSimFrequency::get_result() 
 {
 
   int N = static_cast < int >(parms["N"]);
@@ -357,7 +356,7 @@ std::pair < matsubara_green_function_t, itime_green_function_t > WernerSimFreque
 
 }
 
-itime_green_function_t WernerSimItime::get_result() const
+itime_green_function_t HybridizationSimItime::get_result() const
 {
 
   int N = static_cast < int >(parms["N"]);

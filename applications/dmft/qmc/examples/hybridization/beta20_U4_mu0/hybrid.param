@@ -17,7 +17,7 @@ FLAVORS = 2;
 CONVERGED = 0.0001;
 TOLERANCE = 0.003;
 
-SOLVER = Werner;
+SOLVER = Hybridization;
 OMEGA_LOOP = 1;
 
 SEED = 0;

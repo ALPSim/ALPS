@@ -3,7 +3,7 @@
  * ALPS DMFT Project
  *
  * Copyright (C) 2005 - 2009 by Emanuel Gull <gull@phys.columbia.edu>
- *                              Philipp Werner <werner@itp.phys.ethz.ch>,
+ *                              Philipp  <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
@@ -83,9 +83,9 @@ int main(int argc, char** argv)
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
 #ifdef BUILD_DMFT_QMC_HYBRIDIZATION
-        else if (parms["SOLVER"]=="Werner") {
+        else if (parms["SOLVER"]=="Hybridization") {
           std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
-          alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
+          alps::scheduler::BasicFactory<HybridizationSimItime,HybridizationRun> factory;
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
           std::cout<<"interpreting input value as G_tau, not G0"<<std::endl;
           itime_green_function_t G_tau = transform.initial_G0(parms);
@@ -105,7 +105,7 @@ int main(int argc, char** argv)
         alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; 
 #endif
 #ifdef BUILD_DMFT_QMC_HYBRIDIZATION
-        alps::scheduler::BasicFactory<WernerSimFrequency,WernerRun> werner_factory;
+        alps::scheduler::BasicFactory<HybridizationSimFrequency,HybridizationRun> werner_factory;
 #endif
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
@@ -163,7 +163,7 @@ int main(int argc, char** argv)
         }
 #endif
 #ifdef BUILD_DMFT_QMC_HYBRIDIZATION
-        if (parms["SOLVER"]=="Werner") {
+        if (parms["SOLVER"]=="Hybridization") {
           std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
         }

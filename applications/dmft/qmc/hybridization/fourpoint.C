@@ -33,7 +33,7 @@ inline int compute_perm(double *times){
   //std::cout<<"sorted times: "<<times[0]<<" "<<times[1]<<" "<<times[2]<<" "<<times[3]<<" "<<sign<<std::endl;
   return sign;
 }
-void WernerRun::measure_fourpoint()
+void HybridizationRun::measure_fourpoint()
 {
   
   // increment sweep count
@@ -153,7 +153,7 @@ void WernerRun::measure_fourpoint()
   
 }
 
-void WernerSimFrequency::write_fourpoint() const{
+void HybridizationSimFrequency::write_fourpoint() const{
   std::ofstream fpudfile("fourpoint_ud.dat");
   int N4point=parms["N4point"];
   assert(fpudfile.is_open());

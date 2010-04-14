@@ -88,11 +88,11 @@ inline alps::IDump& operator >> (alps::IDump& idump, times& t) {
 typedef std::vector<times> segment_container_t;
 //typedef std::set<times> segment_container_t;
 
-class WernerRun : public alps::scheduler::MCRun
+class HybridizationRun : public alps::scheduler::MCRun
 {
 public:
-  WernerRun(const alps::ProcessList&,const alps::Parameters&,int);
-  WernerRun(int,const alps::ProcessList&,alps::IDump&,int);
+  HybridizationRun(const alps::ProcessList&,const alps::Parameters&,int);
+  HybridizationRun(int,const alps::ProcessList&,alps::IDump&,int);
   //void save(alps::ODump&) const;
   //void load(alps::IDump&);
   void dostep();
@@ -120,16 +120,16 @@ private:
   std::valarray<double> G_meas;
 };
 
-class WernerSimFrequency : public alps::scheduler::MCSimulation, public alps::MatsubaraImpurityTask
+class HybridizationSimFrequency : public alps::scheduler::MCSimulation, public alps::MatsubaraImpurityTask
 {
 public:
   void write_fourpoint() const;
-  WernerSimFrequency(const alps::ProcessList& w, const boost::filesystem::path& p) 
+  HybridizationSimFrequency(const alps::ProcessList& w, const boost::filesystem::path& p) 
   : alps::scheduler::MCSimulation(w,p)
   { 
   }
   
-  WernerSimFrequency(const alps::ProcessList& w, const alps::Parameters& p) 
+  HybridizationSimFrequency(const alps::ProcessList& w, const alps::Parameters& p) 
   : alps::scheduler::MCSimulation(w,p) 
   {
     p_=p;
@@ -142,15 +142,15 @@ private:
   
 };
 
-class WernerSimItime: public alps::scheduler::MCSimulation, public alps::ImpurityTask
+class HybridizationSimItime: public alps::scheduler::MCSimulation, public alps::ImpurityTask
 {
 public:
-  WernerSimItime(const alps::ProcessList& w, const boost::filesystem::path& p) 
+  HybridizationSimItime(const alps::ProcessList& w, const boost::filesystem::path& p) 
   : alps::scheduler::MCSimulation(w,p)
   { 
   }
   
-  WernerSimItime(const alps::ProcessList& w, const alps::Parameters& p) 
+  HybridizationSimItime(const alps::ProcessList& w, const alps::Parameters& p) 
   : alps::scheduler::MCSimulation(w,p) 
   {
     p_=p;
