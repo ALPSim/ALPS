@@ -136,7 +136,7 @@ write an attribute to hdf5 (an attributes can only be scalar type or string)
 ``
 	alps::hdf5::oarchive ar("data.h5");
 	// the parent of an attribute must exist
-	ar.set_group("/foo");
+	ar.serialize("/foo");
 	ar << alps::make_pvp("/foo/@bar", std::string("hello"));
 ``
 read an attribute from hdf5
