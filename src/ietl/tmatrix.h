@@ -58,7 +58,7 @@ namespace ietl {
     }
     
     const std::vector<magnitude_type>& errors(bool discard_ghosts=true) const {
-      if(!computed) compute();
+      if(!computed || err.empty()) compute(true);
       if (discard_ghosts)
         return err_noghost;
       else
@@ -83,7 +83,7 @@ namespace ietl {
     
     private:
     mutable bool computed;
-    void compute() const;
+    void compute(bool do_err) const;
     mutable magnitude_type multol; 
     mutable std::vector<magnitude_type> err; 
     mutable std::vector<magnitude_type> err_noghost;
@@ -118,7 +118,7 @@ namespace ietl {
   //-----------------------------------------------------------------------
   
   template <class VS>
-    void Tmatrix<VS>::compute() const {
+    void Tmatrix<VS>::compute(bool do_err) const {
     err.resize(0,0);
     eigval_distinct.resize(0,0);
     multiplicty.resize(0,0);
@@ -132,9 +132,14 @@ namespace ietl {
     std::vector<magnitude_type> eval(alpha.size()); 
     // on return from stev function, eval contains the eigen values.
     n = alpha.size();
-    ietl::FortranMatrix<magnitude_type> z2(n,n);
-    
-    info = ietl2lapack::stev(alpha, beta, eval, z2, n);
+    ietl::FortranMatrix<magnitude_type>* z2 = NULL;
+    if(do_err)
+    {
+      z2 = new ietl::FortranMatrix<magnitude_type>(n,n);
+      info = ietl2lapack::stev(alpha, beta, eval, *z2, n);
+    }
+    else
+      info = ietl2lapack::stev(alpha, beta, eval, n);
     if (info > 0)
       throw std::runtime_error("LAPACK error, stev function failed.");
     
@@ -155,9 +160,12 @@ namespace ietl {
         eigval_distinct.push_back(eval[i]);
         temp = eval[i];
         multiplicty.push_back(multiple);
-        if(multiple > 1) err.push_back(0.);
-        else
-          err.push_back(fabs(*beta.rbegin() * z2(n-1,i-1))); // *beta.rbegin() = betaMplusOne.
+        if(do_err)
+        {
+          if(multiple > 1) err.push_back(0.);
+          else
+            err.push_back(fabs(*beta.rbegin() * (*z2)(n-1,i-1))); // *beta.rbegin() = betaMplusOne.
+        }
         multiple = 1;
       }
       else
@@ -166,9 +174,14 @@ namespace ietl {
     
     // for last eigen value.
     multiplicty.push_back(multiple);
-    if(multiple > 1) err.push_back(0); 
-    else
-      err.push_back(fabs(*beta.rbegin() * z2(n-1,n-1))); // *beta.rbegin() = betaMplusOne.
+    if(do_err)
+    {
+      if(multiple > 1) err.push_back(0); 
+      else
+        err.push_back(fabs(*beta.rbegin() * (*z2)(n-1,n-1))); // *beta.rbegin() = betaMplusOne.
+    }
+	
+	delete z2;
     
     // the unique eigen values selection, their multiplicities and corresponding errors calculation ends.
     
@@ -193,7 +206,8 @@ namespace ietl {
           
           if(fabs(*k - eval_g[j]) < multol) {
             multiplicty[i] = 0;
-            err[i] = 0; // if eigen value is a ghost => error calculation not required, 0=> ignore error.
+            if(do_err)
+              err[i] = 0; // if eigen value is a ghost => error calculation not required, 0=> ignore error.
             t2++;
             break;
           }          
@@ -206,7 +220,8 @@ namespace ietl {
       if(multiplicty[i] != 0) {
         eigval_distinct_noghost.push_back(*k);
         multiplicty_noghost.push_back(multiplicty[i]);
-        err_noghost.push_back(err[i]);
+        if(do_err)
+          err_noghost.push_back(err[i]);
       }
     }
   } // end of compute.
