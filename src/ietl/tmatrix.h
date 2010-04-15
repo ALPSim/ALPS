@@ -83,7 +83,7 @@ namespace ietl {
     
     private:
     mutable bool computed;
-    void compute(bool do_err) const;
+    void compute(bool do_err=false) const;
     mutable magnitude_type multol; 
     mutable std::vector<magnitude_type> err; 
     mutable std::vector<magnitude_type> err_noghost;
