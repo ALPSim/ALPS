@@ -220,9 +220,7 @@ if (NOT ALPS_FOR_VISTRAILS)
 endif (NOT ALPS_FOR_VISTRAILS)
 
 # FFTW
-if(ALPS_USE_MPI)
-  find_package(FFTW)
-endif(ALPS_USE_MPI)
+find_package(FFTW)
 
 # LPSolve
 if (NOT ALPS_FOR_VISTRAILS)
