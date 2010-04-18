@@ -614,7 +614,7 @@ if(ALPS_PATCH_VISTRAILS)
               PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
     endforeach(DIR)
     install(FILES ${VISTRAILS_SVN_DIR}/vistrails/vistrails.py  COMPONENT vistrails
-            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR/../..})
+            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/../..})
   else(APPLE)
     if (WIN32) 
         install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails  COMPONENT vistrails
