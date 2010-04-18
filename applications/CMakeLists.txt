@@ -7,13 +7,21 @@
 # applications
 ######################################################################
 
-add_definitions(${LAPACK_DEFINITIONS})
-add_subdirectory(mc)
-add_subdirectory(qmc)
-add_subdirectory(diag)
-add_subdirectory(dmrg)
-add_subdirectory(dmft)
-  
+if (ALPS_BUILD_SOURCE)
+  install(FILES LICENSE.txt CMakeLists.txt DESTINATION applications)
+  install(DIRECTORY mc diag dmft DESTINATION applications
+          FILES_MATCHING PATTERN "*" PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+  add_subdirectory(qmc)
+  add_subdirectory(dmrg)
+else (ALPS_BUILD_SOURCE)
+  add_definitions(${LAPACK_DEFINITIONS})
+  add_subdirectory(mc)
+  add_subdirectory(qmc)
+  add_subdirectory(diag)
+  add_subdirectory(dmrg)
+  add_subdirectory(dmft)
+endif (ALPS_BUILD_SOURCE)
+
 
 ######################################################################
 # GUI's

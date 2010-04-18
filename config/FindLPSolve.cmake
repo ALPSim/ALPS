@@ -9,12 +9,12 @@
 if(NOT LPSolve_INCLUDE_DIR)
   set(__TRIAL_PATHS "$ENV{LPSOLVE_ROOT}/include" "${LPSOLVE_ROOT}" "${LPSOLVE_ROOT}/include"
       /usr/include /usr/local/include /opt/include /usr/local/lpsolve /sw/include /opt/local/include/lpsolve
-      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/include"
+      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/include" "$ENV{HOME}/src/lp_solve_4.0"
      )
   find_path(LPSolve_INCLUDE_DIR lpkit.h ${__TRIAL_PATHS})
   set(__TRIAL_PATHS "$ENV{LPSOLVE_ROOT}/lib" "${LPSOLVE_ROOT}" "${LPSOLVE_ROOT}/lib"
       /usr/lib /usr/local/lib /opt/lib /opt/local/lib /usr/local/lpsolve /sw/lib
-      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/lib"
+      "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/opt/lib" "$ENV{HOME}/src/lp_solve_4.0"
      )
   find_library(LPSolve_LIBRARIES lpsolve ${__TRIAL_PATHS})
   if(NOT LPSolve_LIBRARIES)

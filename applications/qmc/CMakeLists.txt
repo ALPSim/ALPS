@@ -3,13 +3,23 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-add_subdirectory(looper)
-add_subdirectory(sse)
-add_subdirectory(checksign)
-add_subdirectory(worms)
-add_subdirectory(qwl)
-add_subdirectory(lowa)
+if (ALPS_BUILD_SOURCE)
+  install(FILES CMakeLists.txt qmc.h DESTINATION applications/qmc)
+  install(DIRECTORY checksign looper qwl sse worms DESTINATION applications/qmc
+          FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+else (ALPS_BUILD_SOURCE)
 
-IF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse-loop)
-  add_subdirectory(sse-loop)
-ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse-loop)
+  add_subdirectory(checksign)
+  add_subdirectory(looper)
+  add_subdirectory(qwl)
+  add_subdirectory(sse)
+  add_subdirectory(worms)
+
+  IF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse-loop)
+    add_subdirectory(lowa)
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse-loop)
+
+  IF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse-loop)
+    add_subdirectory(sse-loop)
+  ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications/qmc/sse-loop)
+endif (ALPS_BUILD_SOURCE)

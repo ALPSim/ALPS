@@ -106,6 +106,29 @@ add_custom_command(OUTPUT alps.pdf
   add_custom_target(docs ALL DEPENDS html/index.html)
 #endif(FOP_FOUND)
 
+if (ALPS_BUILD_SOURCE)
+
+install(DIRECTORY doc DESTINATION .
+        FILES_MATCHING 
+        PATTERN "*.html" 
+        PATTERN "*.png"
+        PATTERN ".svn" EXCLUDE 
+        PATTERN "CVS" EXCLUDE
+        )
+
+install(DIRECTORY ${PROJECT_BINARY_DIR}/doc DESTINATION .
+        FILES_MATCHING 
+        PATTERN "*.pdf" 
+        PATTERN "*.html" 
+        PATTERN "*.png" 
+        PATTERN "*.gif" 
+        PATTERN "*.xsl" 
+        PATTERN "*.css"
+        PATTERN "CMakeFiles" EXCLUDE
+        PATTERN "src" EXCLUDE
+        )
+
+else (ALPS_BUILD_SOURCE)
 install(DIRECTORY doc COMPONENT documentation DESTINATION .
         FILES_MATCHING 
         PATTERN "*.html" 
@@ -125,4 +148,5 @@ install(DIRECTORY ${PROJECT_BINARY_DIR}/doc COMPONENT documentation DESTINATION 
         PATTERN "CMakeFiles" EXCLUDE
         PATTERN "src" EXCLUDE
         )
+endif (ALPS_BUILD_SOURCE)
 

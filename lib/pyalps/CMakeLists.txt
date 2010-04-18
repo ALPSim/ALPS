@@ -31,23 +31,17 @@ if (ALPS_HAVE_PYTHON)
   #######################################################################
   # install
   #######################################################################
-  if(ALPS_FOR_VISTRAILS)
-    if(NOT WIN32 AND NOT APPLE)
-      install(TARGETS pyalea pytools
-              RUNTIME DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
-              ARCHIVE DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
-              LIBRARY DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps)
-    else (NOT WIN32 AND NOT APPLE)
-      install(TARGETS pyalea pytools
-              RUNTIME DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
-              ARCHIVE DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
-              LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps)
-    endif (NOT WIN32 AND NOT APPLE)
-  else(ALPS_FOR_VISTRAILS)
+  if (ALPS_INSTALL_VISTRAILS_PACKAGES)
+    install(TARGETS pyalea pytools COMPONENT vistrails
+            RUNTIME DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
+            ARCHIVE DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
+            LIBRARY DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps)
+  endif (ALPS_INSTALL_VISTRAILS_PACKAGES)
+  if (NOT ALPS_FOR_VISTRAILS)
     install(TARGETS pyalea pytools COMPONENT python
             RUNTIME DESTINATION bin
             ARCHIVE DESTINATION lib/pyalps
             LIBRARY DESTINATION lib/pyalps)
-  endif(ALPS_FOR_VISTRAILS)
+  endif(NOT ALPS_FOR_VISTRAILS)
 
 endif (ALPS_HAVE_PYTHON)

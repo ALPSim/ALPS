@@ -18,9 +18,9 @@ install_name_tool -id /opt/alps/lib/libsz.2.dylib deplibs/lib/libsz.2.dylib
 install_name_tool -id /opt/alps/lib/libsz.2.dylib deplibs/lib/libsz.2.0.0.dylib
 install_name_tool -id /opt/alps/lib/libz.1.dylib deplibs/lib/libz.dylib
 install_name_tool -id /opt/alps/lib/libz.1.dylib deplibs/lib/libz.1.dylib
-install_name_tool -id /opt/alps/lib/libz.1.dylib deplibs/lib/libz.1.2.3.dylib
+install_name_tool -id /opt/alps/lib/libz.1.dylib deplibs/lib/libz.1.2.*.dylib
 install_name_tool -change /opt/local/lib/libsz.2.dylib /opt/alps/lib/libsz.2.dylib deplibs/lib/libhdf5.dylib
-install_name_tool -change /opt/local/lib/libsz.2.dylib /opt/alps/lib/libsz.2.dylib deplibs/lib/libhdf5.6.dylib
+install_name_tool -change /opt/local/lib/libsz.2.dylib /opt/alps/lib/libsz.2.dylib deplibs/lib/libhdf5.*.dylib
 install_name_tool -change /opt/local/lib/libsz.2.dylib /opt/alps/lib/libsz.2.dylib deplibs/lib/libhdf5_hl.dylib
 install_name_tool -change /opt/local/lib/libsz.2.dylib /opt/alps/lib/libsz.2.dylib deplibs/lib/libhdf5_hl.6.dylib
 install_name_tool -change /opt/local/lib/libz.1.dylib /opt/alps/lib/libz.1.dylib deplibs/lib/libhdf5.dylib

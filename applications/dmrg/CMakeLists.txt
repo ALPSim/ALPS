@@ -3,5 +3,11 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-add_subdirectory(dmrg)
-add_subdirectory(particle_in_box)
+if (ALPS_BUILD_SOURCE)
+  install(FILES CMakeLists.txt DESTINATION applications/dmrg)
+  install(DIRECTORY dmrg particle_in_box DESTINATION applications/dmrg
+          FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+else (ALPS_BUILD_SOURCE)
+  add_subdirectory(dmrg)
+  add_subdirectory(particle_in_box)
+endif (ALPS_BUILD_SOURCE)

@@ -152,7 +152,7 @@ endif(BUILD_BOOST_THREAD)
 
 
 # Boost.MPI Python bindings
-if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
+if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src/python")
   set(SOURCES collectives.cpp py_communicator.cpp datatypes.cpp 
       documentation.cpp py_environment.cpp py_nonblocking.cpp py_exception.cpp
@@ -177,77 +177,64 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
   target_link_libraries(mpi boost ${LINK_LIBRARIES})
 
 
-  if(ALPS_FOR_VISTRAILS) 
-    if (NOT WIN32 AND NOT APPLE)
-      install(TARGETS mpi
+  if(ALPS_INSTALL_VISTRAILS_PACKAGES) 
+      install(TARGETS mpi  COMPONENT vistrails
               RUNTIME DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
               ARCHIVE DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
               LIBRARY DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
-    else (NOT WIN32 AND NOT APPLE)
-      install(TARGETS mpi
-              RUNTIME DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
-              ARCHIVE DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
-              LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR})
-    endif (NOT WIN32 AND NOT APPLE)
-  else(ALPS_FOR_VISTRAILS)
+  endif(ALPS_INSTALL_VISTRAILS_PACKAGES) 
+              
+  if(NOT ALPS_FOR_VISTRAILS)
     install(TARGETS mpi COMPONENT python
             RUNTIME DESTINATION bin
             ARCHIVE DESTINATION lib/pyalps
             LIBRARY DESTINATION lib/pyalps)
-  endif(ALPS_FOR_VISTRAILS)
+  endif(NOT ALPS_FOR_VISTRAILS)
   
-endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON)
-
-# Setting "boost" target not needed when precompiled Boost libraries found.
-if (NOT Boost_FOUND)
-  add_library(boost ${BOOST_SOURCES})
-
-if(WIN32)
-  if(BUILD_SHARED_LIBS)
-    set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS BOOST_THREAD_BUILD_DLL=1)
-  else(BUILD_SHARED_LIBS)
-    set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS BOOST_THREAD_BUILD_LIB=1)
-  endif(BUILD_SHARED_LIBS)
-endif(WIN32)
-
-if(MSVC)
-  get_target_property(LIB_NAME boost LOCATION)
-  add_custom_command(TARGET boost POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
-endif(MSVC)
-
-if (ALPS_FOR_VISTRAILS)
-  SET_TARGET_PROPERTIES(boost
-    PROPERTIES BUILD_WITH_INSTALL_RPATH ON
-    INSTALL_NAME_DIR "@executable_path/../Frameworks"
-  )
-endif (ALPS_FOR_VISTRAILS)
-
-endif (NOT Boost_FOUND)
-
-
-
+endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE)
 
 #######################################################################
 # install
 #######################################################################
+
+# Setting "boost" target not needed when precompiled Boost libraries found.
+
 if (NOT Boost_FOUND)
-if (ALPS_FOR_VISTRAILS)
-  if (NOT WIN32 AND NOT APPLE)
-    install(TARGETS boost
-            RUNTIME DESTINATION ${VISTRAILS_DYLIB_DIR}
-            ARCHIVE DESTINATION ${VISTRAILS_DYLIB_DIR}
-            LIBRARY DESTINATION ${VISTRAILS_DYLIB_DIR})
-  else (NOT WIN32 AND NOT APPLE)
-    install(TARGETS boost
-            RUNTIME DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_DYLIB_DIR}
-            ARCHIVE DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_DYLIB_DIR}
-            LIBRARY DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_DYLIB_DIR})
-  endif (NOT WIN32 AND NOT APPLE)
-else (ALPS_FOR_VISTRAILS)
-  install(TARGETS boost COMPONENT libraries
-          RUNTIME DESTINATION bin
-          ARCHIVE DESTINATION lib
-          LIBRARY DESTINATION lib)
-endif (ALPS_FOR_VISTRAILS)
+  add_library(boost ${BOOST_SOURCES})
+
+  if(WIN32)
+    if(BUILD_SHARED_LIBS)
+      set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS BOOST_THREAD_BUILD_DLL=1)
+    else(BUILD_SHARED_LIBS)
+      set_target_properties(boost PROPERTIES COMPILE_DEFINITIONS BOOST_THREAD_BUILD_LIB=1)
+    endif(BUILD_SHARED_LIBS)
+  endif(WIN32)
+
+  if (NOT ALPS_BUILD_SOURCE)
+    if(MSVC)
+      get_target_property(LIB_NAME boost LOCATION)
+      add_custom_command(TARGET boost POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
+    endif(MSVC)
+
+    if (ALPS_FOR_VISTRAILS)
+      SET_TARGET_PROPERTIES(boost
+        PROPERTIES BUILD_WITH_INSTALL_RPATH ON
+        INSTALL_NAME_DIR "@executable_path/../Frameworks"
+      )
+    endif (ALPS_FOR_VISTRAILS)
+
+    if (ALPS_INSTALL_VISTRAILS_PACKAGES)
+      install(TARGETS boost  COMPONENT vistrails
+              RUNTIME DESTINATION ${VISTRAILS_DYLIB_DIR}
+              ARCHIVE DESTINATION ${VISTRAILS_DYLIB_DIR}
+              LIBRARY DESTINATION ${VISTRAILS_DYLIB_DIR})
+    endif (ALPS_INSTALL_VISTRAILS_PACKAGES)
+    if (NOT ALPS_FOR_VISTRAILS)
+      install(TARGETS boost COMPONENT libraries
+              RUNTIME DESTINATION bin
+              ARCHIVE DESTINATION lib
+              LIBRARY DESTINATION lib)
+    endif (NOT ALPS_FOR_VISTRAILS)
+  endif (NOT ALPS_BUILD_SOURCE)
 endif (NOT Boost_FOUND)

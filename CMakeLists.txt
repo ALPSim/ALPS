@@ -3,42 +3,59 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-include (CMakeDetermineSystem)
-cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
-project(alps)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(ALPS_BUILD_EXAMPLES "Build ALPS examples" ON)
-option(ALPS_BUILD_TESTS "Build ALPS tests" ON)
+option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
-option(ALPS_BUILD_APPLICATIONS "Build ALPS applications" ON)
-option(ALPS_INSTALL_HEADERS "Install headers for ALPS and all dependent libraries" ON)
 option(ALPS_INSTALL_DEPRECATED "Install deprecated headers for ALPS" OFF)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build toold used by developers to maintain ALPS" OFF)
 option(ALPS_ENABLE_OPENMP "Enable OpenMP parallelization" OFF)
 option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
-option(ALPS_BUILD_DOC "Build ALPS documentation" OFF)
-option(ALPS_USE_MPI "Use MPI" ON)
+option(ALPS_BUILD_SOURCE "Build a source distribution" OFF)
+
+if (ALPS_FOR_VISTRAILS)
+  set(NOT_ALPS_FOR_VISTRAILS OFF)
+else (ALPS_FOR_VISTRAILS)
+  set(NOT_ALPS_FOR_VISTRAILS ON)
+endif (ALPS_FOR_VISTRAILS)
+
+set(ALPS_ENABLE_MPI ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Enable MPI Parallelization")
+set(ALPS_INSTALL_HEADERS  ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Install headers for ALPS and all dependent libraries")
+set(ALPS_BUILD_EXAMPLES "Build ALPS examples"  ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build the examples")
+set(ALPS_BUILD_TESTS "Build ALPS tests"  ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build the examples")
+set(ALPS_BUILD_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS documentation")
+
+IF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
+  SET (APPLICATIONS_CAN_BE_BUILT  ${NOT_ALPS_FOR_VISTRAILS})
+ELSE(EXISTS ${PROJECT_SOURCE_DIR}/applications)
+  SET (APPLICATIONS_CAN_BE_BUILT OFF)
+ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
+
+set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
+set(ALPS_USE_VISTRAILS ${ALPS_FOR_VISTRAILS} CACHE BOOL "Use the libraries deployed with VisTrails")
+set(ALPS_INSTALL_VISTRAILS_PACKAGES ${ALPS_FOR_VISTRAILS} CACHE BOOL "Install the ALPS VisTrails extensions")
+
+if (ALPS_USE_VISTRAILS)
+  set(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING "Architectures to build ALPS for")
+  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5" CACHE STRING "OSX minimal deployment version")
+  set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk" CACHE STRING "OSX minimal deployment SDK")
+endif(ALPS_USE_VISTRAILS)
 
 # a workaround for Mac OS X's LLVM compiler
 option(ALPS_LLVM_WORKAROUND "Exclude some parts of ALPS from the build with LLVM" OFF)
 mark_as_advanced(ALPS_LLVM_WORKAROUND)
 
 #maintenance building options
-option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
 option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
 option(ALPS_PATCH_VISTRAILS "Patch Vistrails from Vistrails SVN" OFF)
 
-mark_as_advanced(ALPS_PATCH_VISTRAILS)
+include (CMakeDetermineSystem)
+cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
+project(alps)
 
-if (ALPS_FOR_VISTRAILS)
-  set(ALPS_INSTALL_HEADERS OFF)
-  set(ALPS_INSTALL_DEPRECATED OFF)
-  set(ALPS_BUILD_DOC OFF)
-else (ALPS_FOR_VISTRAILS)
-  set(ALPS_PATCH_VISTRAILS OFF)
-endif (ALPS_FOR_VISTRAILS)
+
+mark_as_advanced(ALPS_PATCH_VISTRAILS)
 
 ######################################################################
 # CMAKE_MODULE_PATH
@@ -51,40 +68,43 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 
 find_package(Vistrails)
 
-if(WIN32 AND NOT UNIX)
-  if (ALPS_FOR_VISTRAILS)
-    set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/Vistrails" CACHE PATH "ALPS install prefix")
-    set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/Vistrails" CACHE PATH "ALPS install prefix")
-  else (ALPS_FOR_VISTRAILS)
-    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-      set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/ALPS" CACHE PATH "ALPS install prefix" FORCE)
-      set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/ALPS" CACHE PATH "ALPS install prefix")
-    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  endif (ALPS_FOR_VISTRAILS)
-else(WIN32 AND NOT UNIX)
-  if (ALPS_FOR_VISTRAILS)
-    if (APPLE)
+if (ALPS_BUILD_SOURCE)
+  set (CMAKE_INSTALL_PREFIX .)
+else (ALPS_BUILD_SOURCE)
+  if(WIN32 AND NOT UNIX)
+    if (ALPS_FOR_VISTRAILS)
+      set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/Vistrails" CACHE PATH "ALPS install prefix")
+      set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/Vistrails" CACHE PATH "ALPS install prefix")
+    else (ALPS_FOR_VISTRAILS)
       if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        set(CMAKE_INSTALL_PREFIX ${VISTRAILS_APP_DIR} CACHE PATH "ALPS install prefix" FORCE)
+        set(CMAKE_INSTALL_PREFIX "$ENV{HOMEDRIVE}/Program Files (x86)/ALPS" CACHE PATH "ALPS install prefix" FORCE)
+        set(CMAKE_INSTALL_ALTERNATE_PREFIX "$ENV{HOMEDRIVE}/Program Files/ALPS" CACHE PATH "ALPS install prefix")
       endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-      set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5")
-    else (APPLE)
-      # what happens to the above variables in this case?
-    endif (APPLE)
-  else (ALPS_FOR_VISTRAILS)
-    if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-      set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
-    endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-  endif (ALPS_FOR_VISTRAILS)
-endif(WIN32 AND NOT UNIX)
-
+    endif (ALPS_FOR_VISTRAILS)
+  else(WIN32 AND NOT UNIX)
+    if (ALPS_FOR_VISTRAILS)
+      if (APPLE)
+        if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+          set(CMAKE_INSTALL_PREFIX ${VISTRAILS_APP_DIR} CACHE PATH "ALPS install prefix" FORCE)
+        endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5")
+      else (APPLE)
+        # what happens to the above variables in this case?
+      endif (APPLE)
+    else (ALPS_FOR_VISTRAILS)
+      if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+        set(CMAKE_INSTALL_PREFIX "/opt/alps" CACHE PATH "ALPS install prefix" FORCE)
+      endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    endif (ALPS_FOR_VISTRAILS)
+  endif(WIN32 AND NOT UNIX)
+endif(ALPS_BUILD_SOURCE)
 
 ######################################################################
 # Version information
 ######################################################################
 set(ALPS_VERSION_MAJOR 2)
 set(ALPS_VERSION_MINOR 0)
-set(ALPS_VERSION_BUILD 0d)
+set(ALPS_VERSION_BUILD 0a1)
 set(ALPS_YEAR 2010)
 set(ALPS_RELEASE_PATCH "")
 
@@ -151,7 +171,7 @@ CHECK_INCLUDE_FILE_CXX(valarray ALPS_HAVE_VALARRAY)
 find_package(BoostForALPS REQUIRED)
 
 # MPI
-if(ALPS_USE_MPI)
+if(ALPS_ENABLE_MPI)
   IF(NOT MPI_FOUND)
     find_package(MPI)
   ENDIF(NOT MPI_FOUND)
@@ -161,22 +181,24 @@ if(ALPS_USE_MPI)
   endif(MPI_INCLUDE_DIR)
  
   set(MPI_INCLUDE_DIR ${MPI_INCLUDE_PATH})
-  IF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
+  IF(MPI_FOUND)
     LINK_LIBRARIES(${MPI_LIBRARIES})
     include_directories(${MPI_INCLUDE_DIR})
     SET(ALPS_HAVE_MPI 1)
     SET(ALPS_HAVE_BOOST_MPI 1)
     set(BUILD_BOOST_MPI TRUE)
-  ELSE(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
-    set(BUILD_BOOST_MPI FALSE)
-  ENDIF(MPI_FOUND AND NOT (ALPS_FOR_VISTRAILS AND WIN32 AND NOT LINUX))
-  IF(MPI_FOUND)
     foreach(arg ${MPI_LIBRARIES})
       set(MPI_LIBS "${MPI_LIBS} ${arg}")
-  endforeach(arg ${MPI_LIBRARIES})
+    endforeach(arg ${MPI_LIBRARIES})
+  ELSE(MPI_FOUND)
+    set(BUILD_BOOST_MPI FALSE)
   ENDIF(MPI_FOUND)
 #add_definitions( -DBOOST_MPI_HOMOGENEOUS )
-endif(ALPS_USE_MPI)
+else (ALPS_ENABLE_MPI)
+    SET(ALPS_HAVE_MPI 0)
+    SET(ALPS_HAVE_BOOST_MPI 0)
+    set(BUILD_BOOST_MPI FALSE)
+endif(ALPS_ENABLE_MPI)
 
 # OpenMP
 if(ALPS_ENABLE_OPENMP)
@@ -211,47 +233,43 @@ endif(MAC_VECLIB)
 set(LAPACK_LINKER_FLAGS ${LAPACK_LDFLAGS})
 
 # SQLite
-if (NOT ALPS_FOR_VISTRAILS)
-  find_package(SQLite)
-  if(MSVC AND SQLite_FOUND)
-    file(COPY ${SQLite_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
-    file(COPY ${SQLite_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
-  endif(MSVC AND SQLite_FOUND)
-endif (NOT ALPS_FOR_VISTRAILS)
+find_package(SQLite)
+if(MSVC AND SQLite_FOUND)
+  file(COPY ${SQLite_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
+  file(COPY ${SQLite_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
+endif(MSVC AND SQLite_FOUND)
 
 # FFTW
 find_package(FFTW)
 
 # LPSolve
-if (NOT ALPS_FOR_VISTRAILS)
-  find_package(LPSolve)
-  if(MSVC)
-    file(COPY ${LPSolve_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
-    file(COPY ${LPSolve_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
-  endif(MSVC)
-endif (NOT ALPS_FOR_VISTRAILS)
+find_package(LPSolve)
+if(MSVC)
+  file(COPY ${LPSolve_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
+  file(COPY ${LPSolve_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
+endif(MSVC)
 
 # Zlib
 find_package(ZLIB)
-if(ZLIB_FOUND AND NOT ALPS_FOR_VISTRAILS)
+if(ZLIB_FOUND AND NOT ALPS_USE_VISTRAILS)
   include_directories(${ZLIB_INCLUDE_DIR})
   link_libraries(${ZLIB_LIBRARIES})
   if(MSVC)
     file(COPY ${ZLIB_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
     file(COPY ${ZLIB_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
-endif(ZLIB_FOUND AND NOT ALPS_FOR_VISTRAILS)
+endif(ZLIB_FOUND AND NOT ALPS_USE_VISTRAILS)
   
 # SZip
 find_package(SZIP)
-if(SZIP_FOUND AND NOT ALPS_FOR_VISTRAILS)
+if(SZIP_FOUND AND NOT ALPS_USE_VISTRAILS)
   include_directories(${SZIP_INCLUDE_DIR})
   link_libraries(${SZIP_LIBRARIES})
   if(MSVC)
     file(COPY ${SZIP_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
     file(COPY ${SZIP_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
-endif(SZIP_FOUND AND NOT ALPS_FOR_VISTRAILS)
+endif(SZIP_FOUND AND NOT ALPS_USE_VISTRAILS)
   
 # HDF5
 find_package(HDF5)
@@ -260,16 +278,15 @@ IF(HDF5_FOUND)
   INCLUDE_DIRECTORIES(${HDF5_INCLUDE_DIR})
   LINK_LIBRARIES(${HDF5_LIBRARIES})
   SET(ALPS_HAVE_HDF5 1)
-  IF (NOT ALPS_FOR_VISTRAILS)
-    if(MSVC)
-      file(COPY ${HDF5_hdf5_LIBRARY_RELEASE} ${HDF5_hdf5_hl_LIBRARY_RELEASE}
-        DESTINATION ${PROJECT_BINARY_DIR}/lib)
-      file(COPY ${HDF5_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
-    endif(MSVC)
-  ENDIF(NOT ALPS_FOR_VISTRAILS)
+  if(MSVC)
+    file(COPY ${HDF5_hdf5_LIBRARY_RELEASE} ${HDF5_hdf5_hl_LIBRARY_RELEASE}
+      DESTINATION ${PROJECT_BINARY_DIR}/lib)
+    file(COPY ${HDF5_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
+  endif(MSVC)
 ELSE(HDF5_FOUND)
   MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
 ENDIF(HDF5_FOUND)
+
 IF(HDF5_IS_PARALLEL)
   SET(ALPS_HAVE_HDF5_PARALLEL 1)
   MESSAGE(WARNING "parallel(MPI) hdf5 is detected. We will compile but ALPS does not use parallel HDF5. The standard version is preferred.")
@@ -291,7 +308,7 @@ if (VISTRAILS_FOUND)
     set(PYTHONHOME "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHONPATH_DIR}")
     set(PYTHONPATH "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHONPATH_DIR}:$PYTHONPATH")
     set(PYTHONBIN "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_INTERPRETER}")
-    set(PYSTARTUP "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps/mpl_setup_macosx.py")
+    set(PYSTARTUP "${VISTRAILS_APP_DIR}/${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps/mpl_setup_macosx.py")
     configure_file(tool/vispython.in ${PROJECT_BINARY_DIR}/tool/vispython)
   endif (APPLE)
   if (WIN32)
@@ -306,26 +323,26 @@ if(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON AND NOT ALPS_FOR_VISTRAILS)
 endif(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON AND NOT ALPS_FOR_VISTRAILS)
 
 set(PYTHON_SCRIPTDIR "${CMAKE_INSTALL_PREFIX}/lib/python")
-if (ALPS_FOR_VISTRAILS)
+if (ALPS_USE_VISTRAILS)
   #set up the installation for Vistrail's Python
   if (APPLE)
-    SET(PYTHON_INCLUDE_DIRS ${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Contents/Frameworks/Python.framework/Headers CACHE PATH "Python include directory")
-    SET(PYTHON_LIBRARY "-F${CMAKE_INSTALL_PREFIX}/${VISTRAILS_APP_NAME}/Contents/Frameworks -framework Python" CACHE STRING "Python libraries")
-    SET(PYTHON_NUMPY_INCLUDE_DIR ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/numpy/core/include CACHE PATH "Numpy include directory")
+    SET(PYTHON_INCLUDE_DIRS ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Frameworks/Python.framework/Headers CACHE PATH "Python include directory")
+    SET(PYTHON_LIBRARY "-F${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Contents/Frameworks -framework Python" CACHE STRING "Python libraries")
+    SET(PYTHON_NUMPY_INCLUDE_DIR ${VISTRAILS_APP_DIR}/${VISTRAILS_PYTHON_EXTENSION_DIR}/numpy/core/include CACHE PATH "Numpy include directory")
   endif(APPLE)
   if (WIN32)
     SET(PYTHON_LIBRARY "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python25/libs/python25.lib" CACHE STRING "Python libraries")
     SET(PYTHON_INCLUDE_DIRS ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python25/include CACHE PATH "Python include directory")
-    SET(PYTHON_NUMPY_INCLUDE_DIR ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}/numpy/core/include CACHE PATH "Numpy include directory")
+    SET(PYTHON_NUMPY_INCLUDE_DIR ${VISTRAILS_APP_DIR}/${VISTRAILS_PYTHON_EXTENSION_DIR}/numpy/core/include CACHE PATH "Numpy include directory")
   endif(WIN32)
   if(NOT APPLE AND NOT WIN32)
-    set(ALPS_FOR_VISTRAILS "FALSE")
+    set(ALPS_USE_VISTRAILS "FALSE")
     find_package(Python)
-    set(ALPS_FOR_VISTRAILS "TRUE")
+    set(ALPS_USE_VISTRAILS "TRUE")
   endif(NOT APPLE AND NOT WIN32)
   set(PYTHONLIBS_FOUND TRUE)
   set(PYTHON_FOUND TRUE)
-endif (ALPS_FOR_VISTRAILS)
+endif (ALPS_USE_VISTRAILS)
 find_package(Python)
 
 
@@ -371,7 +388,7 @@ endif(APPLE)
 # install dependent libraries under Windows, from applications
 ######################################################################
 
-if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
+if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
   # Lapack
   if(LAPACK_LIBRARIES)
     foreach(file ${LAPACK_LIBRARIES})
@@ -424,7 +441,7 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
     COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/ising.exe ${PROJECT_BINARY_DIR}/bin
     # COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml
   )
-endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS)
+endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
 
 ######################################################################
 # setting up ALPSConfig.cmake and include.mk
@@ -510,74 +527,78 @@ set (HDF5_LIBRARIES ${HDF5_LIBRARIES_SAVE})
 ######################################################################
 include(InstallRequiredSystemLibraries)
 
-if (ALPS_INSTALL_HEADERS)
-  set(ALPS_HEADER_DIR "include")
-  install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
-          FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
-          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-  install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
-  if (ALPS_INSTALL_DEPRECATED)
-    install(DIRECTORY legacy/alps COMPONENT deprecated DESTINATION ${ALPS_HEADER_DIR}
+if (ALPS_BUILD_SOURCE)
+  FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.txt")
+  INSTALL(FILES ${files} DESTINATION .)  
+  INSTALL(FILES script/hdf5.sh script/cmake.sh script/lpsolve.sh DESTINATION script)  
+  install(DIRECTORY config doc example legacy lib photos src test tool vistrails DESTINATION .
+          FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+else (ALPS_BUILD_SOURCE)
+  if (ALPS_INSTALL_HEADERS)
+    set(ALPS_HEADER_DIR "include")
+    install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
             FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
             PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-  endif (ALPS_INSTALL_DEPRECATED)
+    install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
+    if (ALPS_INSTALL_DEPRECATED)
+      install(DIRECTORY legacy/alps COMPONENT deprecated DESTINATION ${ALPS_HEADER_DIR}
+              FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+              PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+    endif (ALPS_INSTALL_DEPRECATED)
+
+    if(ALPS_PACKAGE_LIBRARIES)
+       install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR} COMPONENT dependentheaders
+               FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
+               PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+       install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include DESTINATION . COMPONENT dependentheaders)
+    endif(ALPS_PACKAGE_LIBRARIES)
+
+  endif(ALPS_INSTALL_HEADERS)
+
+  if (ALPS_INSTALL_VISTRAILS_PACKAGES)
+    install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR} COMPONENT vistrails)
+  endif (ALPS_INSTALL_VISTRAILS_PACKAGES)
 
   if(ALPS_PACKAGE_LIBRARIES)
-     install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR} COMPONENT dependentheaders
-             FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
-             PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-     install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include DESTINATION . COMPONENT dependentheaders)
+    install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION . COMPONENT dependentlibraries)
+    install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/bin DESTINATION . COMPONENT dependentlibraries)
   endif(ALPS_PACKAGE_LIBRARIES)
 
-endif(ALPS_INSTALL_HEADERS)
+  if (ALPS_INSTALL_VISTRAILS_PACKAGES)
+    install(DIRECTORY lib/xml DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR}  COMPONENT vistrails
+          FILES_MATCHING PATTERN "*.xsl"
+          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
-
-
-if (ALPS_FOR_VISTRAILS)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR})
-else (ALPS_FOR_VISTRAILS)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib COMPONENT xml)
-endif (ALPS_FOR_VISTRAILS)
-
-if(ALPS_PACKAGE_LIBRARIES)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION . COMPONENT dependentlibraries)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/bin DESTINATION . COMPONENT dependentlibraries)
-endif(ALPS_PACKAGE_LIBRARIES)
-
-if (ALPS_FOR_VISTRAILS)
-  if (NOT WIN32 AND NOT APPLE)
-    install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
+    install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR} COMPONENT vistrails
           FILES_MATCHING PATTERN "*.py"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
-  else (NOT WIN32 AND NOT APPLE)
-    install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
-            FILES_MATCHING PATTERN "*.py"
-            PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
-  endif (NOT WIN32 AND NOT APPLE)
-  install(DIRECTORY vistrails/alps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PACKAGE_DIR}
+
+    install(DIRECTORY vistrails/alps DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PACKAGE_DIR} COMPONENT vistrails
         FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-  install(DIRECTORY lib/xml DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_LIB_DIR}
-        FILES_MATCHING PATTERN "*.xsl"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-else (ALPS_FOR_VISTRAILS)
-  install(DIRECTORY lib/xml DESTINATION lib COMPONENT xml
-        FILES_MATCHING PATTERN "*.xsl"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
-  install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib COMPONENT xml)
+  endif (ALPS_INSTALL_VISTRAILS_PACKAGES)
 
-  install(FILES config/UseALPS.cmake
-          ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
-          ${PROJECT_BINARY_DIR}/config/include.mk
-          config/run_test.cmake
-          DESTINATION share/alps COMPONENT build)
-          
-  add_subdirectory(config)
+  if (NOT ALPS_FOR_VISTRAILS)
+    install(DIRECTORY lib/xml DESTINATION lib COMPONENT xml
+          FILES_MATCHING PATTERN "*.xsl"
+          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
-  install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
-        FILES_MATCHING PATTERN "*.py"
-        PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-endif (ALPS_FOR_VISTRAILS)
+    install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
+          FILES_MATCHING PATTERN "*.py"
+          PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+
+    install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION lib COMPONENT xml)
+
+    add_subdirectory(config)
+
+    install(FILES config/UseALPS.cmake
+            ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
+            ${PROJECT_BINARY_DIR}/config/include.mk
+            config/run_test.cmake
+            DESTINATION share/alps COMPONENT build)
+
+  endif (NOT ALPS_FOR_VISTRAILS)
+endif (ALPS_BUILD_SOURCE)
 
 ######################################################################
 # patch Vistrails
@@ -588,15 +609,15 @@ if(ALPS_PATCH_VISTRAILS)
   MESSAGE (STATUS "patching Vistrails from ${VISTRAILS_SVN_DIR}")
   if (APPLE)
     foreach (DIR api core db gui packages tests)
-      install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails/${DIR} 
-              DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR}
+      install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails/${DIR}  COMPONENT vistrails
+              DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
               PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
     endforeach(DIR)
-    install(FILES ${VISTRAILS_SVN_DIR}/vistrails/vistrails.py 
-            DESTINATION ${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_EXTENSION_DIR/../..})
+    install(FILES ${VISTRAILS_SVN_DIR}/vistrails/vistrails.py  COMPONENT vistrails
+            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR/../..})
   else(APPLE)
     if (WIN32) 
-        install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails
+        install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails  COMPONENT vistrails
                 DESTINATION .
                 PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
     else (WIN32)
@@ -610,42 +631,44 @@ endif(ALPS_PATCH_VISTRAILS)
 # documentation
 ######################################################################
 
-if (ALPS_BUILD_DOC AND NOT ALPS_FOR_VISTRAILS AND NOT WIN32)
+if (ALPS_BUILD_DOC AND NOT WIN32)
 add_subdirectory(doc)
-endif (ALPS_BUILD_DOC AND NOT ALPS_FOR_VISTRAILS AND NOT WIN32)
+endif (ALPS_BUILD_DOC AND NOT WIN32)
 
 ######################################################################
 # libraries
 ######################################################################
 
-add_subdirectory(src/alps)
 add_subdirectory(src/boost)
-add_subdirectory(lib/pyalps)
+if (NOT ALPS_BUILD_SOURCE)
+  add_subdirectory(src/alps)
+  add_subdirectory(lib/pyalps)
+endif (NOT ALPS_BUILD_SOURCE)
 
 ######################################################################
 # programs
 ######################################################################
 
 add_subdirectory(tool)
-if (NOT ALPS_FOR_VISTRAILS)
+if (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
   add_subdirectory(example)
-endif (NOT ALPS_FOR_VISTRAILS)
+endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
 
 ######################################################################
 # applications
 ######################################################################
 
-if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
+if (ALPS_BUILD_APPLICATIONS)
   add_subdirectory(applications)
-endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_APPLICATIONS)
+endif (ALPS_BUILD_APPLICATIONS)
 
 ######################################################################
 # developer tools
 ######################################################################
 
-if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
+if (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
   add_subdirectory(script)
-endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_DEVELOPER_TOOLS)
+endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
 
 ######################################################################
 # developer tools
@@ -673,6 +696,7 @@ endif (NOT ALPS_FOR_VISTRAILS)
  set(CPACK_COMPONENT_BUILD_DISPLAY_NAME "Build system support")
  set(CPACK_COMPONENT_DOCUMENTATION_DISPLAY_NAME "Documentation")
  set(CPACK_COMPONENT_TUTORIALS_DISPLAY_NAME "Tutorials")
+ set(CPACK_COMPONENT_VISTRAILS_DISPLAY_NAME "ALPS Vistrails extensions")
  
  set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "The libraries needed by the ALPS applications")
  set(CPACK_COMPONENT_HEADERS_DESCRIPTION "The ALPS header files")
@@ -687,6 +711,7 @@ endif (NOT ALPS_FOR_VISTRAILS)
  set(CPACK_COMPONENT_BUILD_DESCRIPTION "Include files for CMake and make to simplify the building of ALPS applications")
  set(CPACK_COMPONENT_DOCUMENTATION_DESCRIPTION "Documentation for the ALPS libraries")
  set(CPACK_COMPONENT_TUTORIALS_DESCRIPTION "Tutorials for the ALPS libraries and applications")
+ set(CPACK_COMPONENT_VISTRAILS_DESCRIPTION "Vistrails extensions and patches to the latest VisTrails release needed for ALPS")
 
  set(CPACK_COMPONENT_LIBRARIES_GROUP "Runtime")
  set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
@@ -719,13 +744,22 @@ if (ALPS_FOR_VISTRAILS)
   set(CPACK_PACKAGE_NAME "alps-vistrails-patch")
   set(CPACK_NSIS_MODIFY_PATH OFF)
 else(ALPS_FOR_VISTRAILS)
+  if (ALPS_USE_VISTRAILS)
+    set(CPACK_PACKAGE_NAME "alps-vistrails")
+  else (ALPS_USE_VISTRAILS)
+    set(CPACK_PACKAGE_NAME "alps")
+  endif (ALPS_USE_VISTRAILS)
+
   set(CPACK_NSIS_MODIFY_PATH ON)
   if(ALPS_DOWNLOAD_PACKAGES)
-    set(CPACK_PACKAGE_NAME "alps-download")
-  else(ALPS_DOWNLOAD_PACKAGES)
-    set(CPACK_PACKAGE_NAME "alps")
+    set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-download")
   endif(ALPS_DOWNLOAD_PACKAGES)
 endif(ALPS_FOR_VISTRAILS)
+
+if(ALPS_BUILD_SOURCE)
+  set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-src")
+endif(ALPS_BUILD_SOURCE)
+
 set(CPACK_PACKAGE_VENDOR "ALPS Collaboration")
 set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "ALPS ${ALPS_VERSION}")
 set(CPACK_PACKAGE_DESCRIPTION_FILE "${PROJECT_SOURCE_DIR}/README.txt")
@@ -736,7 +770,11 @@ if (ALPS_PACKAGE_LIBRARIES)
   set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE-package.txt")
 else (ALPS_PACKAGE_LIBRARIES)
   set(CPACK_RESOURCE_FILE_README "${PROJECT_SOURCE_DIR}/README.txt")
-  set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/applications/LICENSE.txt")
+  if (ALPS_BUILD_APPLCATIONS)
+    set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/applications/LICENSE.txt")
+  else (ALPS_BUILD_APPLCATIONS)
+    set(CPACK_RESOURCE_FILE_LICENSE "${PROJECT_SOURCE_DIR}/LICENSE.txt")
+  endif (ALPS_BUILD_APPLCATIONS)
 endif (ALPS_PACKAGE_LIBRARIES)
 
 set(CPACK_RESOURCE_FILE_WELCOME "${PROJECT_SOURCE_DIR}/Welcome.txt")
@@ -800,8 +838,7 @@ if(WIN32 AND NOT UNIX)
   set(CPACK_NSIS_HELP_LINK "http://alps.comp-phys.org")
   set(CPACK_NSIS_URL_INFO_ABOUT "http://alps.comp-phys.org")
   
-  # Encode the compiler name in the package 
-#  if(NOT ALPS_FOR_VISTRAILS)
+# Encode the compiler name in the package 
 #    if (MSVC90)
 #      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc9")
 #      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME}")
@@ -809,7 +846,6 @@ if(WIN32 AND NOT UNIX)
 #      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-unknown")  
 #      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for unknown compiler")    
 #    endif (MSVC90)
-#  endif(NOT ALPS_FOR_VISTRAILS)
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
 endif(WIN32 AND NOT UNIX)
 
@@ -831,7 +867,7 @@ endif(ALPS_DOWNLOAD_PACKAGES)
 # tests
 ######################################################################
 
-if (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_TESTS)
+if (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
   ENABLE_TESTING()
   add_subdirectory(test)
-endif (NOT ALPS_FOR_VISTRAILS AND ALPS_BUILD_TESTS)
+endif (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
