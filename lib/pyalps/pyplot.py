@@ -74,7 +74,7 @@ def plot(data):
 
         if 'title' in q.props:
             plt.title(q.props['title'])
-
+        
         if 'line' in q.props and q.props['line'] == 'scatter':
             plt.scatter(xmeans, ymeans, c=colors[icolor], marker=markers[imarker], label=lab)
             imarker = (imarker+1)%len(markers)
@@ -124,12 +124,20 @@ class MplXYPlot_core:
             except AttributeError:
                 ymeans = [float(vvv) for vvv in q.y]
                 yerrors = None
-                
+            
+            thiscolor = self.colors[self.icolor]
+            self.icolor = (self.icolor+1)%len(self.colors)
+            if 'color' in q.props:
+                thiscolor = q.props['color']
+            
             if 'line' in q.props and q.props['line'] == 'scatter':
-                self.lines.append([plt.scatter(xmeans, ymeans, c=self.colors[self.icolor], marker=self.markers[self.imarker])])
+                thismarker = self.markers[self.imarker]
+                if 'marker' in q.props:
+                    thismarker = q.props['marker']
                 self.imarker = (self.imarker+1)%len(self.markers)
+                self.lines.append([plt.scatter(xmeans, ymeans, c=thiscolor, marker=thismarker)])
             else:
-                line_props = self.colors[self.icolor]
+                line_props = thiscolor
                 if 'line' in q.props:
                     line_props += q.props['line']
                 
@@ -145,7 +153,6 @@ class MplXYPlot_core:
             elif 'filename' in q.props:
                 self.lines[-1][0].set_label(q.props['filename'])
             
-            self.icolor = (self.icolor+1)%len(self.colors)
             
             if 'legend' in self.plt:
                 if 'scatter_labels' in self.plt['legend']:

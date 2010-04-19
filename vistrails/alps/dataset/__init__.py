@@ -140,6 +140,8 @@ def selfRegister():
     register(SetLabels,'DataSet|Tools')
     register(PrepareDictionary,'Tools')
     register(MakeScatter,'DataSet|Plot')
+    register(CycleColors,'DataSet|Plot')
+    register(CycleMarkers,'DataSet|Plot')
     
     register(Selector,'DataSet|Select',abst=True)
     register(PropertySelector,'DataSet|Select')

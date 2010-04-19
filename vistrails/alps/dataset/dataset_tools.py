@@ -115,6 +115,68 @@ class SetLabels(Module):
         q2 = hmap(f, q)
         self.setResult('output', q2)
 
+class CycleColors(Module):
+    my_input_ports = [
+        PortDescriptor('input',DataSets),
+        PortDescriptor('for-each',ListOfElements)
+    ]
+    my_output_ports = [
+        PortDescriptor('output',DataSets)
+    ]
+    
+    colors = ['k','b','g','m','c','y']
+    
+    def compute(self):
+        input = self.getInputFromPort('input')
+        foreach = self.getInputFromPort('for-each')
+        
+        all = {}
+        for q in flatten(input):
+            key = tuple([q.props[k] for k in foreach])
+            all[key] = ''
+        
+        icolor = 0
+        for k in all.keys():
+            all[k] = self.colors[icolor]
+            icolor = (icolor+1)%len(self.colors)
+        
+        for q in flatten(input):
+            key = tuple([q.props[k] for k in foreach])
+            q.props['color'] = all[key]
+        
+        self.setResult('output', input)
+
+class CycleMarkers(Module):
+    my_input_ports = [
+        PortDescriptor('input',DataSets),
+        PortDescriptor('for-each',ListOfElements)
+    ]
+    my_output_ports = [
+        PortDescriptor('output',DataSets)
+    ]
+    
+    markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
+    
+    def compute(self):
+        input = self.getInputFromPort('input')
+        foreach = self.getInputFromPort('for-each')
+        
+        all = {}
+        for q in flatten(input):
+            key = tuple([q.props[k] for k in foreach])
+            all[key] = ''
+        
+        imarker = 0
+        for k in all.keys():
+            all[k] = self.markers[imarker]
+            imarker = (imarker+1)%len(self.markers)
+        
+        for q in flatten(input):
+            key = tuple([q.props[k] for k in foreach])
+            q.props['marker'] = all[key]
+        
+        self.setResult('output', input)
+
 class MakeScatter(FitPrototype):
     def transform(self,data):
         data.props['line'] = 'scatter'
