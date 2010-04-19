@@ -57,6 +57,11 @@ project(alps)
 
 mark_as_advanced(ALPS_PATCH_VISTRAILS)
 
+if(NOT CMAKE_BUILD_TYPE)
+  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
+endif(NOT CMAKE_BUILD_TYPE)
+message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
+
 ######################################################################
 # CMAKE_MODULE_PATH
 ######################################################################
@@ -108,33 +113,28 @@ set(ALPS_VERSION_BUILD 0a1)
 set(ALPS_YEAR 2010)
 set(ALPS_RELEASE_PATCH "")
 
-IF (EXISTS ${PROJECT_SOURCE_DIR}/.svn) 
+IF(EXISTS ${PROJECT_SOURCE_DIR}/.svn) 
   # Probably a SVN workspace, determine revision level 
   FIND_PACKAGE(Subversion) 
   IF(Subversion_FOUND) 
     Subversion_WC_INFO(${PROJECT_SOURCE_DIR} ALPS) 
     MESSAGE("Current revision is ${ALPS_WC_REVISION}") 
+    set(VERSION_BUILD "r${ALPS_WC_REVISION}")
   ELSE(Subversion_FOUND) 
-    IF (NOT ALPS_RELEASE_PATCH)
-      SET(ALPS_WC_REVISION "4097")
-    ELSE (NOT ALPS_RELEASE_PATCH)
-      SET(ALPS_WC_REVISION ${ALPS_RELEASE_PATCH})
-    ENDIF (NOT ALPS_RELEASE_PATCH)
+    SET(VERSION_BUILD "unknown")
   ENDIF(Subversion_FOUND) 
+ELSE(EXISTS ${PROJECT_SOURCE_DIR}/.svn) 
+  IF(ALPS_RELEASE_PATCH)
+    SET(VERSION_BUILD ${ALPS_RELEASE_PATCH})
+  ENDIF(ALPS_RELEASE_PATCH)
 ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/.svn) 
 
-set(VERSION_BUILD ${ALPS_WC_REVISION})
+if(VERSION_BUILD)
+  set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_BUILD}-${VERSION_BUILD}")
+else(VERSION_BUILD)
+  set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_BUILD}")
+endif(VERSION_BUILD)
 
-if(MSVC)
-  add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
-endif(MSVC)
-
-if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
-endif(NOT CMAKE_BUILD_TYPE)
-message(STATUS "Build type: " ${CMAKE_BUILD_TYPE})
-
-set(ALPS_VERSION "${ALPS_VERSION_MAJOR}.${ALPS_VERSION_MINOR}.${ALPS_VERSION_BUILD}-r${VERSION_BUILD}")
 set(ALPS_VERSION_STRING "ALPS Libraries version ${ALPS_VERSION}")
 
 set(ALPS_CONFIG_HOST unknown)
@@ -162,6 +162,10 @@ CHECK_INCLUDE_FILE(windows.h ALPS_HAVE_WINDOWS_H)
 
 include(CheckIncludeFileCXX)
 CHECK_INCLUDE_FILE_CXX(valarray ALPS_HAVE_VALARRAY)
+
+if(MSVC)
+  add_definitions(-D_SCL_SECURE_NO_WARNINGS -D_CRT_SECURE_NO_WARNINGS)
+endif(MSVC)
 
 ######################################################################
 # Packages
@@ -651,6 +655,7 @@ endif (NOT ALPS_BUILD_SOURCE)
 
 add_subdirectory(tool)
 if (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
+  ENABLE_TESTING()
   add_subdirectory(example)
 endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
 

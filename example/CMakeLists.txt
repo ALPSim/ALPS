@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-add_subdirectory(parapack/single)
+add_subdirectory(parapack)
 add_subdirectory(scheduler)
 add_subdirectory(ngs)
 add_subdirectory(sampling)

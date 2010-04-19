@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2008 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -31,19 +31,19 @@ int main(int argc, char** argv) {
   alps::oxstream os(std::cout);
   os << alps::start_tag("CLONES");
   for (int i = 1; i < argc; ++i) {
-    boost::filesystem::path file(argv[i]);
-
+    alps::hdf5::iarchive ar(argv[i]);
     alps::Parameters params;
     alps::clone_info info;
+    ar >> make_pvp("/parameters", params)
+       >> make_pvp("/log/alps", info);
     std::vector<alps::ObservableSet> obs;
-    if (alps::load_observable(file, params, info, obs)) {
-      os << alps::start_tag("CLONE")
-         << alps::attribute("dumpfile", argv[i])
-         << params;
-      BOOST_FOREACH(alps::ObservableSet const& m, obs) m.write_xml(os);
-      info.write_xml(os);
-      os << alps::end_tag("CLONE");
-    }
+    alps::load_observable(ar, info.clone_id(), obs);
+    os << alps::start_tag("CLONE")
+       << alps::attribute("dumpfile", argv[i])
+       << params;
+    BOOST_FOREACH(alps::ObservableSet const& m, obs) m.write_xml(os);
+    info.write_xml(os);
+    os << alps::end_tag("CLONE");
   }
   os << alps::end_tag("CLONES");
 }

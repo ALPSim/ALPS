@@ -8,29 +8,29 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
 if(ALPS_BUILD_EXAMPLES)
-add_library(ising_single_common ising.C)
-target_link_libraries(ising_single_common alps)
+add_library(exchange_common ising.C loop.C)
+target_link_libraries(exchange_common alps)
 
-add_executable(ising_single main.C)
-target_link_libraries(ising_single ising_single_common)
+add_executable(exchange main.C)
+target_link_libraries(exchange exchange_common)
 
-add_executable(ising_single_ns main_ns.C)
-target_link_libraries(ising_single_ns ising_single_common)
+add_executable(exchange_ns main_ns.C)
+target_link_libraries(exchange_ns exchange_common)
 if(MSVC)
-  get_target_property(EXE_NAME ising_single_ns LOCATION)
-  add_custom_command(TARGET ising_single_ns POST_BUILD
+  get_target_property(EXE_NAME exchange_ns LOCATION)
+  add_custom_command(TARGET exchange_ns POST_BUILD
     COMMAND ${CMAKE_COMMAND} -E copy ${EXE_NAME} ${PROJECT_BINARY_DIR}/bin)
 endif(MSVC)
 
 add_test(
-  ising_single_ns 
+  exchange_ns 
   ${CMAKE_COMMAND}
-    -Dcmd=ising_single_ns
+    -Dcmd=exchange_ns
     -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
     -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
     -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-    -Dinput=ising_ns.ip
-    -Doutput=ising_ns.op
+    -Dinput=exchange_ns.ip
+    -Doutput=exchange_ns.op
     -Dtimeout=600
     -P ${PROJECT_SOURCE_DIR}/config/run_test.cmake
 )
