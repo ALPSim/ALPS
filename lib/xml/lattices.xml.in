@@ -146,6 +146,11 @@
 <UNITCELL name="simple1d" dimension="1">
   <VERTEX/>
   <EDGE><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="1"/></EDGE>
+</UNITCELL>
+
+<UNITCELL name="complex1d" dimension="1">
+  <VERTEX/>
+  <EDGE type="0"><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="1"/></EDGE>
   <EDGE type="1"><SOURCE vertex="1" offset="0"/><TARGET vertex="1" offset="2"/></EDGE>
 </UNITCELL>
 
@@ -343,6 +348,24 @@
     <BOUNDARY type="open"/>
   </FINITELATTICE>
   <UNITCELL ref="simple1d"/>
+</LATTICEGRAPH>
+
+<LATTICEGRAPH name = "nnn chain lattice">
+  <FINITELATTICE>
+    <LATTICE ref="chain lattice"/>
+    <EXTENT dimension="1" size ="L"/>
+    <BOUNDARY type="periodic"/>
+  </FINITELATTICE>
+  <UNITCELL ref="complex1d"/>
+</LATTICEGRAPH>
+
+<LATTICEGRAPH name = "nnn open chain lattice">
+  <FINITELATTICE>
+    <LATTICE ref="chain lattice"/>
+    <EXTENT dimension="1" size ="L"/>
+    <BOUNDARY type="open"/>
+  </FINITELATTICE>
+  <UNITCELL ref="complex1d"/>
 </LATTICEGRAPH>
 
 <LATTICEGRAPH name = "2 band chain lattice">
