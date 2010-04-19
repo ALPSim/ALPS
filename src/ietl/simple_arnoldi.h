@@ -42,7 +42,7 @@
 
 namespace ietl {
     namespace detail {
-        bool cmp(std::complex<double> a, std::complex<double> b)
+        inline bool cmp(std::complex<double> a, std::complex<double> b)
         {
             return ietl::real(a) > ietl::real(b);
         }

@@ -55,7 +55,7 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         return np
 
     def getoptions(self):
-        options = []
+        options = self.options
         if self.hasInputFromPort('tmin'):
             options += ['--Tmin', str(self.getInputFromPort('tmin'))]
         if self.hasInputFromPort('tmax'):
@@ -77,7 +77,7 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         if self.num_procs()>1:
             cmdline = alpscore._get_mpi_run()+[str(self.num_procs()),an,"--mpi"]
         else:
-          cmdline = [an]
+            cmdline = [an]
         cmdline += self.getoptions()
         if self.hasInputFromPort('continue'):
             cmdline += [result.name]
@@ -102,6 +102,7 @@ class AlpsApplication(alpscore.SystemCommandLogged):
                      ('output_dir', [basic.Directory]),
                      ('log_file',[basic.File])]
     appname=''
+    options=[]
                          
 class AppSpinMC(AlpsApplication):
     """Runs spinmc for given parameter file """
@@ -131,14 +132,17 @@ class AppWorm(AlpsApplication):
 class AppFullDiag(AlpsApplication):
     """Runs fulldiag for given parameter file """
     appname = 'fulldiag'
+    options = ['--Nmax', '1']
 
 class AppSparseDiag(AlpsApplication):
     """Runs sparsediag for given parameter file """
     appname = 'sparsediag'
+    options = ['--Nmax', '1']
 
 class AppDMRG(AlpsApplication):
     """Runs dmrg for given parameter file """
     appname = 'dmrg'
+    options = ['--Nmax', '1']
 
 class AppQWL(AlpsApplication):
     """Runs qwl for given parameter file """
