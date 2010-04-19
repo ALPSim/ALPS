@@ -121,6 +121,7 @@ private:
   unsigned int n_cluster_sites_;
   bool bipartite_;
   const double epsilon_;
+  std::string lattice_momenta_file_name_;
 };
 
 

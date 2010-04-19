@@ -29,8 +29,9 @@
 
 
 ClusterHelper::ClusterHelper(const alps::Parameters& params) :
-  alps::graph_helper<alps::graph_helper<>::graph_type>(params) ,  
-  n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9)
+  alps::graph_helper<alps::graph_helper<>::graph_type>(params),  
+  n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
+  lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
 {
   setup_tables();
   /*std::ofstream siterealstr("SiteClassesRealSpace");
@@ -233,67 +234,93 @@ void ClusterHelper::setup_tables()
     }
   }
   //setup lattice momenta
-  std::vector<double> weights;
-  momentum_iterator itm, itm_end;
-  boost::tie(itm, itm_end) = momenta();
-  for (; itm!=itm_end; ++itm) {
-    vector_type mom=momentum(*itm);
-    vector_type mom_trans = matrix_vector_mult(reciprocal_basis_inv_, mom);
-    std::vector<vector_type> moms;
-    switch (dimension()) {
-    case 1 :
-      for (int s1=-1; s1<=1; s1+=2) {
-	vector_type tmom = mom_trans;
-	tmom[0] = s1*mom_trans[0];
-	moms.push_back(tmom);
-      }
-      break;
-    case 2 :
-      for (int s1=-1; s1<=1; s1+=2) {
-	for (int s2=-1; s2<=1; s2+=2) {
+  std::ifstream latticemomstream(lattice_momenta_file_name_.c_str());
+  if(latticemomstream.is_open()) {
+    while(latticemomstream) {
+      int m;
+      latticemomstream >> m;
+      vector_type momw(dimension()+1);
+      for (int d=0; d<dimension()+1; ++d) 
+	latticemomstream >> momw[d];
+      append_column_no_duplicates(lattice_momenta_, momw);
+    }
+    latticemomstream.close();
+  }
+  else {
+    std::cerr << "cannot read lattice momenta file\n"; 
+    std::cerr << "calculating lattice momenta\n";
+    std::vector<double> weights;
+    momentum_iterator itm, itm_end;
+    boost::tie(itm, itm_end) = momenta();
+    for (; itm!=itm_end; ++itm) {
+      vector_type mom=momentum(*itm);
+      vector_type mom_trans = matrix_vector_mult(reciprocal_basis_inv_, mom);
+      std::vector<vector_type> moms;
+      switch (dimension()) {
+      case 1 :
+	for (int s1=-1; s1<=1; s1+=2) {
 	  vector_type tmom = mom_trans;
 	  tmom[0] = s1*mom_trans[0];
-	  tmom[1] = s2*mom_trans[1];
 	  moms.push_back(tmom);
 	}
-      }
-      break;
-    case 3 :
-      for (int s1=-1; s1<=1; s1+=2) {
-	for (int s2=-1; s2<=1; s2+=2) {
-	  for (int s3=-1; s3<=1; s3+=2) {
+	break;
+      case 2 :
+	for (int s1=-1; s1<=1; s1+=2) {
+	  for (int s2=-1; s2<=1; s2+=2) {
 	    vector_type tmom = mom_trans;
 	    tmom[0] = s1*mom_trans[0];
 	    tmom[1] = s2*mom_trans[1];
-	    tmom[2] = s3*mom_trans[2];
 	    moms.push_back(tmom);
 	  }
 	}
+	break;
+      case 3 :
+	for (int s1=-1; s1<=1; s1+=2) {
+	  for (int s2=-1; s2<=1; s2+=2) {
+	    for (int s3=-1; s3<=1; s3+=2) {
+	      vector_type tmom = mom_trans;
+	      tmom[0] = s1*mom_trans[0];
+	      tmom[1] = s2*mom_trans[1];
+	      tmom[2] = s3*mom_trans[2];
+	      moms.push_back(tmom);
+	    }
+	  }
+	}
+	break;
       }
-      break;
+      double L = pow(n_cluster_cells(), 1./double(dimension()));
+      for (int g=0; g<moms.size(); ++g) {
+	double weight = 1.;
+	for (int d=0; d<dimension(); ++d) {
+	  double m = (moms[g][d]+0.5)*L;
+	  if (almost_equal(m, 0) || almost_equal(m, L))
+	    weight *= 1./3.;
+	  else if ( (((int)abs(round(m)))%2==0 && ((int)abs(round(L)))%2==0) || 
+		    (((int)abs(round(m)))%2==1 && ((int)abs(round(L)))%2==1) )
+	    weight *= 2./3.;
+	  else
+	    weight *= 4./3.;
+	}
+	vector_type momw(dimension()+1);
+	vector_type momt = matrix_vector_mult(reciprocal_basis_, moms[g]);
+	for (int d=0; d<dimension(); ++d) 
+	  momw[d] = momt[d];
+	momw[dimension()] = weight;
+	append_column_no_duplicates(lattice_momenta_, momw);
+      }
     }
-    double L = pow(n_cluster_cells(), 1./double(dimension()));
-    for (int g=0; g<moms.size(); ++g) {
-      double weight = 1.;
-      for (int d=0; d<dimension(); ++d) {
-	double m = (moms[g][d]+0.5)*L;
-	if (almost_equal(m, 0) || almost_equal(m, L))
-	  weight *= 1./3.;
-	else if ( (((int)abs(round(m)))%2==0 && ((int)abs(round(L)))%2==0) || 
-		  (((int)abs(round(m)))%2==1 && ((int)abs(round(L)))%2==1) )
-	  weight *= 2./3.;
-	else
-	  weight *= 4./3.;
+    if (alps::is_master()) {
+      std::ofstream latticemomstream(lattice_momenta_file_name_.c_str());
+      for (int m=0; m<lattice_momenta_.size1(); ++m) {
+	latticemomstream << m << " ";
+	for (int d=0; d<lattice_momenta_.size2(); ++d) 
+	  latticemomstream << lattice_momenta_(m,d) << " ";
+	latticemomstream << std::endl;
       }
-      vector_type momw(dimension()+1);
-      vector_type momt = matrix_vector_mult(reciprocal_basis_, moms[g]);
-      for (int d=0; d<dimension(); ++d) 
-	momw[d] = momt[d];
-      momw[dimension()] = weight;
-      append_column_no_duplicates(lattice_momenta_, momw);
+      latticemomstream.close();
     }
   }
-  /*
+    /*
   lattice_momenta_.resize(n_cluster_cells(), dimension());
   momentum_iterator itm, itm_end;
   boost::tie(itm, itm_end) = momenta();
@@ -303,16 +330,7 @@ void ClusterHelper::setup_tables()
       lattice_momenta_(m,d) = mom[d];
     }
     } */
-  /* if (alps::is_master()) {
-    std::ofstream latticemomstream("LatticeMomenta");
-    for (int m=0; m<lattice_momenta_.size1(); ++m) {
-      latticemomstream << m << " ";
-      for (int d=0; d<lattice_momenta_.size2(); ++d) 
-	latticemomstream << lattice_momenta_(m,d) << " ";
-      latticemomstream << std::endl;
-    }
-  }
-  if(alps::is_master()){
+  /* if(alps::is_master()){
     std::ofstream allmomstream("AllMomenta");
     for (int mc=0; mc<cluster_momenta_.size1(); ++mc) {
       for (int ml=0; ml<lattice_momenta_.size1(); ++ml) {
