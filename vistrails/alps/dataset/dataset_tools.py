@@ -118,15 +118,18 @@ class SetLabels(Module):
 class CycleColors(Module):
     my_input_ports = [
         PortDescriptor('input',DataSets),
-        PortDescriptor('for-each',ListOfElements)
+        PortDescriptor('for-each',ListOfElements),
+        PortDescriptor('colors',ListOfElements)
     ]
     my_output_ports = [
         PortDescriptor('output',DataSets)
     ]
     
-    colors = ['k','b','g','m','c','y']
-    
     def compute(self):
+        colors = ['k','b','g','m','c','y']
+        if self.hasInputFromPort('colors'):
+            colors = self.getInputFromPort('colors')
+        
         input = self.getInputFromPort('input')
         foreach = self.getInputFromPort('for-each')
         
@@ -137,8 +140,8 @@ class CycleColors(Module):
         
         icolor = 0
         for k in all.keys():
-            all[k] = self.colors[icolor]
-            icolor = (icolor+1)%len(self.colors)
+            all[k] = colors[icolor]
+            icolor = (icolor+1)%len(colors)
         
         for q in flatten(input):
             key = tuple([q.props[k] for k in foreach])
@@ -149,15 +152,18 @@ class CycleColors(Module):
 class CycleMarkers(Module):
     my_input_ports = [
         PortDescriptor('input',DataSets),
-        PortDescriptor('for-each',ListOfElements)
+        PortDescriptor('for-each',ListOfElements),
+        PortDescriptor('markers',ListOfElements)
     ]
     my_output_ports = [
         PortDescriptor('output',DataSets)
     ]
     
-    markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
-    
     def compute(self):
+        markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
+        if self.hasInputFromPort('markers'):
+            markers = self.getInputFromPort('markers')
+        
         input = self.getInputFromPort('input')
         foreach = self.getInputFromPort('for-each')
         
@@ -168,8 +174,8 @@ class CycleMarkers(Module):
         
         imarker = 0
         for k in all.keys():
-            all[k] = self.markers[imarker]
-            imarker = (imarker+1)%len(self.markers)
+            all[k] = markers[imarker]
+            imarker = (imarker+1)%len(markers)
         
         for q in flatten(input):
             key = tuple([q.props[k] for k in foreach])
