@@ -4,7 +4,10 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 add_subdirectory(single)
-add_subdirectory(multiple)
 add_subdirectory(loop)
 add_subdirectory(exchange)
 add_subdirectory(wanglandau)
+
+if(${ALPS_HAVE_MPI})
+  add_subdirectory(multiple)
+endif(${ALPS_HAVE_MPI})
