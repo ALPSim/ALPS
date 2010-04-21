@@ -110,8 +110,7 @@ class FileList
          filename = temp_dir + filename;
          filename = filename + "XXXXXX" + '\0';
          filename.copy(this->last_filename,100);
-         int fd = mkstemp(this->last_filename); 
-         close(fd);
+         int fd = mktemp(this->last_filename); 
          _tmp_filenames[std::string(input)] = this->last_filename;
          std::cout << "Creating temp file " << this->last_filename << std::endl;
          return this->last_filename;
