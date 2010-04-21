@@ -8,14 +8,14 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
 if(ALPS_BUILD_EXAMPLES)
-add_library(wanglandau_common wanglandau.C)
-target_link_libraries(wanglandau_common alps)
+add_library(wanglandau_core wanglandau.C)
+target_link_libraries(wanglandau_core alps)
 
 add_executable(wanglandau main.C)
-target_link_libraries(wanglandau wanglandau_common)
+target_link_libraries(wanglandau wanglandau_core)
 
 add_executable(wanglandau_ns main_ns.C)
-target_link_libraries(wanglandau_ns wanglandau_common)
+target_link_libraries(wanglandau_ns wanglandau_core)
 if(MSVC)
   get_target_property(EXE_NAME wanglandau_ns LOCATION)
   add_custom_command(TARGET wanglandau_ns POST_BUILD

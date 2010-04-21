@@ -8,14 +8,14 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
 if(ALPS_BUILD_EXAMPLES)
-add_library(exchange_common ising.C loop.C)
-target_link_libraries(exchange_common alps)
+add_library(exchange_core ising.C loop.C)
+target_link_libraries(exchange_core alps)
 
 add_executable(exchange main.C)
-target_link_libraries(exchange exchange_common)
+target_link_libraries(exchange exchange_core)
 
 add_executable(exchange_ns main_ns.C)
-target_link_libraries(exchange_ns exchange_common)
+target_link_libraries(exchange_ns exchange_core)
 if(MSVC)
   get_target_property(EXE_NAME exchange_ns LOCATION)
   add_custom_command(TARGET exchange_ns POST_BUILD

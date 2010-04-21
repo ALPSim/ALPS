@@ -8,14 +8,14 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
 if(ALPS_BUILD_EXAMPLES)
-add_library(ising_single_common ising.C)
-target_link_libraries(ising_single_common alps)
+add_library(ising_single_core ising.C)
+target_link_libraries(ising_single_core alps)
 
 add_executable(ising_single main.C)
-target_link_libraries(ising_single ising_single_common)
+target_link_libraries(ising_single ising_single_core)
 
 add_executable(ising_single_ns main_ns.C)
-target_link_libraries(ising_single_ns ising_single_common)
+target_link_libraries(ising_single_ns ising_single_core)
 if(MSVC)
   get_target_property(EXE_NAME ising_single_ns LOCATION)
   add_custom_command(TARGET ising_single_ns POST_BUILD

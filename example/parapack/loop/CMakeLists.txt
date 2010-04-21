@@ -8,14 +8,14 @@ include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
 if(ALPS_BUILD_EXAMPLES)
-add_library(loop_single_common loop.C)
-target_link_libraries(loop_single_common alps)
+add_library(loop_single_core loop.C)
+target_link_libraries(loop_single_core alps)
 
 add_executable(loop_single main.C)
-target_link_libraries(loop_single loop_single_common)
+target_link_libraries(loop_single loop_single_core)
 
 add_executable(loop_single_ns main_ns.C)
-target_link_libraries(loop_single_ns loop_single_common)
+target_link_libraries(loop_single_ns loop_single_core)
 if(MSVC)
   get_target_property(EXE_NAME loop_single_ns LOCATION)
   add_custom_command(TARGET loop_single_ns POST_BUILD
