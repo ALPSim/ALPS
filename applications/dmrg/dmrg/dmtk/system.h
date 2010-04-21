@@ -73,6 +73,35 @@ VectorState<T> product(const System<T>& ss, const VectorState<T>& vv);
 template<class T> 
 VectorState<T> product_default(const System<T>& ss, const VectorState<T>& vv, const Hami<T>* hami = NULL, bool only_local = false);
 
+class FileList 
+{
+  private:
+    std::map<std::string,std::string> _tmp_filenames;
+    char last_filename[100];
+  public:
+    FileList() {};
+
+    const char * get_filename(const char *input) 
+      {
+         std::map<std::string,std::string>::iterator old_name = _tmp_filenames.find(std::string(input));
+         if(old_name != _tmp_filenames.end()) return (old_name->second).c_str();
+
+         std::string filename(input);
+         int pos = filename.find_first_of('_');
+         filename = filename.substr(0,pos+1);
+         filename = "./tmp/" + filename;
+         filename = filename + "XXXXXX" + '\0';
+         filename.copy(this->last_filename,100);
+         int fd = mkstemp(this->last_filename); 
+         close(fd);
+         _tmp_filenames[std::string(input)] = this->last_filename;
+         std::cout << "Creating temp file " << this->last_filename << std::endl;
+         return this->last_filename;
+      }
+};
+
+FileList tmp_files;
+
 template<class T>
 class System
 {
@@ -131,6 +160,7 @@ class System
     void rotate_hami(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
     void rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
     void rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
+
 
   public:
 
@@ -433,7 +463,7 @@ class System
 
     void write_status() const
     {
-      char file[] = "system.dat"; 
+      const char *file = tmp_files.get_filename("system_.dat"); 
       ofstream outputfile(file,std::ios::out|std::ios::binary);
       if(!outputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
@@ -451,6 +481,13 @@ class System
       outputfile.write((const char *)&dir, sizeof(size_t));
       outputfile.write((const char *)&iter, sizeof(int));
       outputfile.write((const char *)&_ntargets, sizeof(int));
+/*
+      outputfile.write((const char *)&tmp_filenames.size(), sizeof(int));
+      std::map<std::string,std::string>::const_iterator miter;
+      for(miter = _tmp_filenams.begin(); miter != _tmp_filenames.end(); miter++){
+        outputfile.write((const char *)*miter; (*miter).size());
+      } 
+*/
       qnt.write(outputfile);
       qn.write(outputfile);
 
@@ -459,7 +496,7 @@ class System
 
     void read_status() 
     {
-      char *file = "system.dat"; 
+      const char *file = tmp_files.get_filename("system_.dat"); 
       ifstream inputfile(file,std::ios::in|std::ios::binary);
       if(!inputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
@@ -555,7 +592,7 @@ class System
       else
         sprintf(file,"gs_%s_%i_r.dat",_name,n);
 
-      ofstream outputfile(file,std::ios::out|std::ios::binary);
+      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
       if(!outputfile) 
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
@@ -589,7 +626,7 @@ class System
       else
         sprintf(file,"gs_%s_%i_r.dat",_name,n);
 
-      ifstream inputfile(file,std::ios::in|std::ios::binary);
+      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
       if(!inputfile) 
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
@@ -628,7 +665,7 @@ class System
 #ifdef DMTK_DEBUG
       cout << "SAVING RHO " << file << endl;
 #endif // DMTK_DEBUG
-      ofstream outputfile(file,std::ios::out|std::ios::binary);
+      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
       if(!outputfile) 
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
@@ -649,7 +686,7 @@ class System
 #ifdef DMTK_DEBUG
       cout << "READING RHO " << file << endl;
 #endif // DMTK_DEBUG
-      ifstream inputfile(file,std::ios::in|std::ios::binary);
+      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
       if(!inputfile) 
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
@@ -670,7 +707,7 @@ class System
 #ifdef DMTK_DEBUG
       cout << "SAVING BLOCK " << file << endl;
 #endif // DMTK_DEBUG
-      ofstream outputfile(file,std::ios::out|std::ios::binary);
+      ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::binary);
       if(!outputfile) 
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
@@ -698,7 +735,7 @@ class System
 #ifdef DMTK_DEBUG
       cout << "READING BLOCK " << file << endl;
 #endif // DMTK_DEBUG
-      ifstream inputfile(file,std::ios::in|std::ios::binary);
+      ifstream inputfile(tmp_files.get_filename(file),std::ios::in|std::ios::binary);
       if(!inputfile) 
         cerr << "*** ERROR: Could not open file " << file << endl;
       else{
@@ -758,7 +795,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
   char file[255];
   sprintf(file,"iter_%s.dat",_name);
-  ofstream outputfile(file,std::ios::out|std::ios::app);
+  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   start();
@@ -988,7 +1025,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
 
   char file[255];
   sprintf(file,"iter_%s.dat",_name);
-  ofstream outputfile(file,std::ios::out|std::ios::app);
+  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   cout << "===========================================\n";
@@ -1117,7 +1154,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
 
   char file[255];
   sprintf(file,"iter_%s.dat",_name);
-  ofstream outputfile(file,std::ios::out|std::ios::app);
+  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
   outputfile << "Last iteration to get a symmetric block B(L/2-1)..B(L/2-1)\n";
 
@@ -1319,7 +1356,7 @@ System<T>::init_iteration(const B&b1, const B&b2, const B&b3, const B&b4, bool u
     }
   char file[255];
   sprintf(file,"iter_%s.dat",_name);
-  ofstream outputfile(file,std::ios::out|std::ios::app);
+  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
   outputfile << "TOTAL SIZE : " << size() << " " << lnow << endl;
   outputfile << "LEFT BLOCK SIZE : " << _b1->lattice().size() << " " << _b1->n_orbitals() << endl;
@@ -1519,7 +1556,7 @@ System<T>::diagonalize(bool use_seed)
 
   if(gs.size() > 1) {
 //    verif_hamiltonian<T, System<T>, VectorState<T> >(*this, _state[0]);
-    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, _nstates, a, b, n, tol, use_seed, true, file);
+    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, _nstates, a, b, n, tol, use_seed, true, tmp_files.get_filename(file));
     gs = _state[0];
   } else {
     gs = T(1);
@@ -1540,7 +1577,7 @@ System<T>::diagonalize(bool use_seed)
   } 
 
   sprintf(file,"iter_%s.dat",_name);
-  ofstream outputfile(file,std::ios::out|std::ios::app);
+  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   outputfile << _b1->lattice().size() << " " << _b2->lattice().size() << " " << _b3->lattice().size() << " " <<  _b4->lattice().size() << endl;
@@ -1647,7 +1684,7 @@ System<T>::build_target_states(int /*pos*/)
     _project_states.resize(i+1);
     for(int j = 0; j <= i; j++) _project_states[j] = &_target[j];
 
-    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, 1, a, b, n, tol, _use_seed, true, file);
+    lanczos<T, System<T>, VectorState<T> >(*this, _state, seed, e, 1, a, b, n, tol, _use_seed, true, tmp_files.get_filename(file));
     _target[i+1] = _state[0];
 
     _project = false;
@@ -1944,7 +1981,7 @@ System<T>::truncate(int position, int new_size)
 
   char file[255];
   sprintf(file,"iter_%s.dat",_name);
-  ofstream outputfile(file,std::ios::out|std::ios::app);
+  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   outputfile.precision(10);
@@ -2060,7 +2097,7 @@ System<T>::rotate(int position, Block<T>& b)
   }
   char file[255];
   sprintf(file,"iter_%s.dat",_name);
-  ofstream outputfile(file,std::ios::out|std::ios::app);
+  ofstream outputfile(tmp_files.get_filename(file),std::ios::out|std::ios::app);
   if(!outputfile) cerr << "*** ERROR: could not open " << file << endl;
 
   outputfile << "Rotation time: " << clock.TotalTime().c_str() << endl;
