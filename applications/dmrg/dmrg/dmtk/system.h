@@ -95,6 +95,7 @@ class FileList
            exit(-1);
          }
          closedir(dir_ptr);
+         std::cout << "ALPS DMRG temporary files will be written in " << aux.c_str() << std::endl;
          sprintf(temp_dir, aux.c_str()); 
       }
 
