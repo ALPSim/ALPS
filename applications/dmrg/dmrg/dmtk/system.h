@@ -37,6 +37,8 @@
 #include <string>
 #include <iomanip>
 #include <math.h>
+#include <sys/types.h>
+#include <dirent.h>
 #include "enums.h"
 #include "vector.h"
 #include "matrix.h"
@@ -78,8 +80,23 @@ class FileList
   private:
     std::map<std::string,std::string> _tmp_filenames;
     char last_filename[100];
+    char temp_dir[100];
   public:
-    FileList() {};
+    FileList() { set_temp_dir("./"); };
+    FileList(const char *dir) { set_temp_dir(dir); }
+
+    void set_temp_dir(const char *dir) 
+      { 
+         std::string aux = dir;
+         aux += "/";
+         DIR *dir_ptr = opendir(aux.c_str());
+         if(!dir_ptr){
+           std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " << aux.c_str() << " or choose a different path." << std::endl;
+           exit(-1);
+         }
+         closedir(dir_ptr);
+         sprintf(temp_dir, aux.c_str()); 
+      }
 
     const char * get_filename(const char *input) 
       {
@@ -89,7 +106,7 @@ class FileList
          std::string filename(input);
          int pos = filename.find_first_of('_');
          filename = filename.substr(0,pos+1);
-         filename = "./tmp/" + filename;
+         filename = temp_dir + filename;
          filename = filename + "XXXXXX" + '\0';
          filename.copy(this->last_filename,100);
          int fd = mkstemp(this->last_filename); 
