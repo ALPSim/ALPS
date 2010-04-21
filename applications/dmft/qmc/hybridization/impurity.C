@@ -30,7 +30,6 @@ max_time((int) (parms.value_or_default("MAX_TIME", 86400))),
 mu(static_cast < double >(parms["MU"])),
 BETA(static_cast < double >(parms["BETA"])),
 u(parms),
-t(static_cast < double >(parms["t"])),
 full_line(static_cast < int >(parms["FLAVORS"]), 0),
 sign(static_cast < int >(parms["FLAVORS"])), 
 G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) + 1))
@@ -51,14 +50,16 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
   }
   itime_green_function_t f_itime(Np1, 1, FLAVORS);
   double mu_shift = u.mu_shift();
+  mu = mu + mu_shift;
   //std::cout << "mu_shift to half filling is: " << mu_shift << std::endl;
   //general case: SC loop in omega, we have to convert G0(iomega) into F(tau).
   if (parms.defined("OMEGA_LOOP")) {
     matsubara_green_function_t bare_green_matsubara(N, 1, FLAVORS);
     matsubara_green_function_t f_twiddle_matsubara(N, 1, FLAVORS);
     itime_green_function_t f_twiddle_itime(Np1, 1, FLAVORS);
-    //std::cout << "U is: " << u << std::endl;
+    std::cout << "U is: " << u << std::endl;
     //find the second moment of the band structure
+    t=parms["t"]; //this is essentially an energy unit.
     double epssqav = t * t;
     if (parms.defined("DOSFILE")) {
       if (!parms.defined("EPSSQAV")) {
@@ -69,7 +70,6 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
     }
     std::istringstream in_omega(parms["G0(omega)"]);
     read_freq(in_omega, bare_green_matsubara);
-    mu = mu + mu_shift;
     //std::cout << "absolute mu is: " << mu << std::endl;
     FFunctionFourierTransformer Fourier(BETA , 0, epssqav , FLAVORS, 1);
     for (int f = 0; f < FLAVORS; ++f) {
@@ -90,18 +90,26 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
     itime_green_function_t green_itime(Np1, 1, FLAVORS);
     read_itime(in_tau, green_itime);
     for (int f = 0; f < FLAVORS; ++f) {
+      int orbital=f/2;
+      std::stringstream tname; tname<<"t"<<orbital;
+      if(parms.defined(tname.str())) {
+        t=parms[tname.str()]; 
+        std::cout<<"orbital: "<<f/2<<" flavor: "<<f<<" using t: "<<t<<std::endl;
+      }
+      else 
+        t=parms["t"];
       for (int i = 0; i < Np1; ++i) {
-        f_itime(i, f) = -t * t * green_itime(N - i, f);
+        f_itime(i, f) = -t * t * green_itime(N - i, f);  //this is the self consistency loop, for Bethe lattice!
       }
     }
+    //std::cout<<green_itime<<std::endl;
+    std::cout << "U is: " << u << std::endl;
   }
+  //std::cout<<f_itime<<std::endl;
   for (int i = 0; i < Np1; i++) {
-    //std::cout<<i<<" ";
     for (int j = 0; j < FLAVORS; j++) {
       F[j][i] = f_itime(i, j);
-      //std::cout<<F[j][i]<<" ";
     }
-    //std::cout<<std::endl;
   }
 
   segments.resize(FLAVORS);

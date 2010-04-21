@@ -51,7 +51,7 @@ public:
       assert(parms.defined("U") && parms.defined("J"));     
       double U=(double)(parms["U"]);
       double J=(double)(parms["J"]);
-      double Uprime = parms.value_or_default("Uprime", U-2*J);
+      double Uprime = parms.value_or_default("U'", U-2*J);
       assemble(U, Uprime, J);
     }
     for (unsigned i=0; i<nf_*nf_; ++i)
@@ -77,8 +77,8 @@ public:
           continue;
         operator()(i  ,j  ) = Uprime; //Hubbard repulsion interband same spin 
         operator()(i+1,j+1) = Uprime; //Hubbard repulsion interband same spin
-        operator()(i  ,j+1) = Uprime+J; //Hubbard repulsion interband opposite spin
-        operator()(i+1,j  ) = Uprime+J; //Hubbard repulsion interband opposite spin
+        operator()(i  ,j+1) = Uprime-J; //Hubbard repulsion interband opposite spin (this used to be '+J', the rest of the world uses '-J' -> changed to be consistent).
+        operator()(i+1,j  ) = Uprime-J; //Hubbard repulsion interband opposite spin
       }
     }
   } 

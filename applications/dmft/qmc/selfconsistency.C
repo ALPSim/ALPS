@@ -117,7 +117,6 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
     }
     std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
     print_dressed_tau_green_functions(iteration_ctr++, G_tau, beta);
-    //print_tau_green_functions(iteration_ctr++, G_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged);
   std::cout<<"converged!"<<std::endl;
   // write G (to be read in as an input for a new simulation)
