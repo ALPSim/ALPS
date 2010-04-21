@@ -32,6 +32,7 @@
 #include <dmtk/dmtk.h>
 #include "dmrg.h"
 #include <boost/tokenizer.hpp>
+#include <boost/archive/tmpdir.hpp>
 #include <boost/algorithm/string/replace.hpp>
 #include <alps/scheduler.h>
 #include <boost/foreach.hpp>
@@ -61,7 +62,7 @@ void DMRGTask::init()
     std::string temp_dir = parms["TEMP_DIRECTORY"];
     dmtk::tmp_files.set_temp_dir(temp_dir.c_str());
   } else {
-    dmtk::tmp_files.set_temp_dir("boost::tmpdir()");
+    dmtk::tmp_files.set_temp_dir(boost::archive::tmpdir());
   }
   num_eigenvalues = this->parms.value_or_default("NUMBER_EIGENVALUES",1);
    
