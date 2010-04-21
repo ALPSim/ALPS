@@ -180,6 +180,9 @@ void Lowa::init()
 
 #ifdef MEASURE_TIME_SERIES_DENSITY
   filename_mdns        = obtain_filename_h5("timeseries.mdns");
+#else
+  filename_dns         = obtain_filename("dns");
+  filename_dns_trial   = obtain_filename("tdns");
 #endif
 #ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
   filename_mdnsmat     = obtain_filename_h5("timeseries.mdnsmat");
@@ -255,6 +258,10 @@ void Lowa::init()
   _nrvertex       = 0;
 
   _state        = new fock_basis_type [_N];
+
+#ifndef MEASURE_TIME_SERIES_DENSITY
+  reset_av_dns();
+#endif
 
   av_dnsmat     = new obs_type [_N];
   av_dnsmat_inf = new obs_type [_N];

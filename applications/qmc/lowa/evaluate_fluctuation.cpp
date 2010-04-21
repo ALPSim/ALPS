@@ -62,11 +62,13 @@ int main(int argc, char** argv)
   std::string binsize_str;   double   binsize = 1.;
   std::string temp_str;      double temp = 0.;
   bool is_print = false;
+  std::string nr_meas_str;   int nr_meas = 10;
+  bool is_nr_meas_upperbounded = false;
  
 
   int optchar;
 
-  while ((optchar = getopt (argc, argv, "i:j:k:f:l:u:t:s:d:b:T:p")) != -1)
+  while ((optchar = getopt (argc, argv, "i:j:k:f:l:u:t:s:d:b:T:z:p")) != -1)
   {
     switch (optchar)
     {
@@ -113,6 +115,11 @@ int main(int argc, char** argv)
       case 'p':
         is_print = true;
         break;
+
+      case 'z':
+        is_nr_meas_upperbounded = true;
+        nr_meas_str = (std::string) strdup (optarg);
+        break;
     }
   }
 
@@ -150,6 +157,12 @@ int main(int argc, char** argv)
   {
     std::istringstream ss(temp_str);
     ss >> temp;
+  }
+
+  if (!nr_meas_str.empty())
+  {
+    std::istringstream ss(nr_meas_str);
+    ss >> nr_meas;
   }
 
 
@@ -197,7 +210,11 @@ int main(int argc, char** argv)
           std::valarray<double> raw_data_dns_elem = alps::numeric::vector2valarray<double>(raw_data_dns_elem_vec);
           if ((counter > thermal) && ((counter % skip) == 0))  
           {  
-            raw_data_dns.push_back(raw_data_dns_elem); 
+            if (!is_nr_meas_upperbounded)  { raw_data_dns.push_back(raw_data_dns_elem); }
+            else
+            {
+              if (raw_data_dns.size() < nr_meas)  {  raw_data_dns.push_back(raw_data_dns_elem); }
+            } 
             is_data1_inputed = true; 
             //std::cout << "Dataset (Label " << label << " , Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_dns_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_dns_elem_vec.begin(),raw_data_dns_elem_vec.end(),0.) << std::endl;
           }
@@ -239,7 +256,11 @@ int main(int argc, char** argv)
           std::valarray<double> raw_data_N_elem = alps::numeric::vector2valarray<double>(raw_data_N_elem_vec);
           if ((counter > thermal) && ((counter % skip) == 0))
           {
-            raw_data_N.push_back(raw_data_N_elem);
+            if (!is_nr_meas_upperbounded)  { raw_data_N.push_back(raw_data_N_elem); }
+            else
+            {
+              if (raw_data_N.size() < nr_meas)  {  raw_data_N.push_back(raw_data_N_elem); }
+            }
             is_data2_inputed = true;
             //std::cout << "Dataset (Label " << label << " , Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_N_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_N_elem_vec.begin(),raw_data_N_elem_vec.end(),0.) << std::endl;
           }
@@ -281,7 +302,11 @@ int main(int argc, char** argv)
           std::valarray<double> raw_data_dnsN_elem = alps::numeric::vector2valarray<double>(raw_data_dnsN_elem_vec);
           if ((counter > thermal) && ((counter % skip) == 0))
           {
-            raw_data_dnsN.push_back(raw_data_dnsN_elem);
+            if (!is_nr_meas_upperbounded)  { raw_data_dnsN.push_back(raw_data_dnsN_elem); }
+            else
+            {
+              if (raw_data_dnsN.size() < nr_meas)  {  raw_data_dnsN.push_back(raw_data_dnsN_elem); }
+            }
             is_data3_inputed = true;
             //std::cout << "Dataset (Label " << label << " , Sweep " << counter << " ) read from hdf5 file... ;  Nsites = " << raw_data_dnsN_elem_vec.size() << " , total no of particles = " << std::accumulate(raw_data_dnsN_elem_vec.begin(),raw_data_dnsN_elem_vec.end(),0.) << std::endl;
           }
@@ -356,8 +381,6 @@ int main(int argc, char** argv)
   alps::RealObsevaluator* fluct = new alps::RealObsevaluator [nrbin];
   for (uint32_t r=0; r < nrbin; ++r)   {  fluct[r].rename(""); }
 
-  std::cout << "Reached here...\n";
-
   for (uint32_t p=0; p < Nsites; ++p)  {  
     if (fluct[proj_binnr[p]].count() == 0) 
     {
@@ -369,14 +392,11 @@ int main(int argc, char** argv)
     }
   }
 
-  std::cout << "Reached here...\n";
-
   for (uint32_t r=0; r < nrbin; ++r)   {  fluct[r]             /= proj_binfreq[r];  }
 
 
-  std::cout << "Reached here... " << std::endl;
-
   std::string cur_filename5 = fileOUT2;
+  if (is_nr_meas_upperbounded)  {  cur_filename5 += ".nr.";  cur_filename5 += nr_meas_str; }
 
   cur_filename5 += ".dat";
 

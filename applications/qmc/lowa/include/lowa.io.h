@@ -105,6 +105,12 @@ void Lowa::load_lowa()
 #endif
   }
   inFile.close();
+
+  inFile.open(filename_dns.c_str(), std::ios::in);
+  if (!inFile.good()) { // file is absent
+    reset_av_dns();
+  }
+  inFile.close();
 }
 
 
@@ -142,6 +148,13 @@ void Lowa::export_lowa_simulation(std::ostream& os)
     }
   }
 
+#ifndef MEASURE_TIME_SERIES_DENSITY
+  for (site_type s = 0; s < _N; s++) {
+    os << av_dns[s] << std::endl;
+  }
+  os << _Z_dns << std::endl;
+#endif
+
   for (site_type s = 0; s < _N; s++) {
     os << av_dnsmat[s] << "\t" << av_dnsmat_inf[s] << std::endl;
   }
@@ -149,10 +162,7 @@ void Lowa::export_lowa_simulation(std::ostream& os)
 
   os << is_worm_diagonal << "\t" << is_worm_moving_forward << "\t" << is_worm_rising << std::endl;
   os << _nrvertex << std::endl;
-#ifdef BOUND_WORM
-  os << M__ << std::endl;
-  os << correct_lattice_structure << std::endl;
-#endif
+
   os << _Ekin << "\t" << _Epot << "\t" << new_measurement << std::endl;
   os << no_of_accepted_worm_insertions << "\t" << no_of_proposed_worm_insertions << std::endl;
   os << sweeps << std::endl;
@@ -211,6 +221,13 @@ void Lowa::import_lowa_simulation(std::istream& is)
     }
   } // ... associations
 
+#ifndef MEASURE_TIME_SERIES_DENSITY
+  for (site_type s = 0; s < _N; s++) {
+    is >> av_dns[s];
+  }
+  is >> _Z_dns;
+#endif
+
   for (site_type s = 0; s < _N; s++) {
     is >> av_dnsmat[s] >> av_dnsmat_inf[s];
   }
@@ -218,10 +235,7 @@ void Lowa::import_lowa_simulation(std::istream& is)
 
   is >> is_worm_diagonal >>  is_worm_moving_forward >> is_worm_rising;
   is >> _nrvertex;
-#ifdef BOUND_WORM
-  is >> M__;
-  is >> correct_lattice_structure;
-#endif
+
   is >> _Ekin >> _Epot >> new_measurement;
   is >> no_of_accepted_worm_insertions >> no_of_proposed_worm_insertions;
   is >> sweeps;

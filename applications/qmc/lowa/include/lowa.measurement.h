@@ -128,6 +128,15 @@ void Lowa::take_diagonal_measurements()
   outFile << "\n";
   outFile.close();
 */
+#else
+  _Z_dns += 1.;
+  for (site_type index = 0; index < _N; ++index)  {  av_dns[index] += _state[index];  }
+
+  outFile.open(filename_dns_trial.c_str(),std::ios::out);
+  for (site_type index=0; index < _N; ++index)  {  outFile << (static_cast<obs_type>(av_dns[index])/_Z_dns) << "\t";  }
+  outFile << "\n";
+  outFile.close();
+  int renameinfo1 = std::rename(filename_dns_trial.c_str(),filename_dns.c_str());
 #endif
             
   //measurements["Total Particle Number (Actual)"]     << get_Npart();

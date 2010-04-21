@@ -179,6 +179,8 @@ private:
   std::string filename_N, filename_mN, filename_dns0, filename_mdns0, filename_proj_cymdns, filename_cs_cymdns;
 #ifdef MEASURE_TIME_SERIES_DENSITY
   std::string filename_mdns;
+#else
+  std::string filename_dns, filename_dns_trial;
 #endif
 #ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
   std::string filename_mdnsmat, filename_mdnsmatinf;
@@ -213,6 +215,7 @@ private:
   // member functions
   void calc_N_and_E();
   inline void update_N_and_E()   {  calc_N_and_E();  new_measurement = false;  }
+  inline void reset_av_dns()     {  _Z_dns = 0.;  for (site_type index = 0; index < _N; ++index)  {  av_dns[index] = 0.;  }  }
   inline void reset_av_dnsmat()  {  _Z_dnsmat = 0.;  for (site_type index = 0; index < _N; ++index)  {  av_dnsmat[index] = 0.;  av_dnsmat_inf[index] = 0.;  }  }
   void statebinning();
   inline void update_obs()  {  if (new_measurement)  {  update_N_and_E(); }  statebinning();  }
@@ -226,6 +229,8 @@ private:
   particle_number_type _nrpart, _meas_nrpart;
   fock_basis_type*     _state;             // a particular snap-shot of occupation no on lattice
   obs_type             _Ekin, _Epot;
+  obs_type*            av_dns;
+  obs_type             _Z_dns;
   obs_type*            av_dnsmat;
   obs_type*            av_dnsmat_inf;
   obs_type             _Z_dnsmat;
@@ -310,7 +315,7 @@ public:
     delete [] _proj_binnr;
     delete [] nbs, local_transition_weight, cummulative_local_transition_weight;
     delete [] _mu_eff;
-    delete [] _state, av_dnsmat, av_dnsmat_inf;
+    delete [] _state, av_dns, av_dnsmat, av_dnsmat_inf;
   }
     
   // constructors
