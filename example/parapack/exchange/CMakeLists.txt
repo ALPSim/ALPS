@@ -7,7 +7,6 @@ include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
-if(ALPS_BUILD_EXAMPLES)
 add_library(exchange_core ising.C loop.C)
 target_link_libraries(exchange_core alps)
 
@@ -16,23 +15,4 @@ target_link_libraries(exchange exchange_core)
 
 add_executable(exchange_ns main_ns.C)
 target_link_libraries(exchange_ns exchange_core)
-if(MSVC)
-  get_target_property(EXE_NAME exchange_ns LOCATION)
-  add_custom_command(TARGET exchange_ns POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy ${EXE_NAME} ${PROJECT_BINARY_DIR}/bin)
-endif(MSVC)
-
-add_test(
-  exchange_ns 
-  ${CMAKE_COMMAND}
-    -Dcmd=exchange_ns
-    -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-    -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-    -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-    -Dinput=exchange_ns.ip
-    -Doutput=exchange_ns.op
-    -Dtimeout=600
-    -P ${PROJECT_SOURCE_DIR}/config/run_test.cmake
-)
-
-endif(ALPS_BUILD_EXAMPLES)
+add_alps_test(exchange_ns)

@@ -353,6 +353,11 @@ ELSE (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
 ENDIF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
 
 ######################################################################
+# test environment
+######################################################################
+include(add_alps_test)
+
+######################################################################
 # configuration files
 ######################################################################
 configure_file(src/alps/config.h.in ${PROJECT_BINARY_DIR}/src/alps/config.h)
@@ -591,6 +596,7 @@ else (ALPS_BUILD_SOURCE)
             ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
             ${PROJECT_BINARY_DIR}/config/include.mk
             config/run_test.cmake
+            config/add_alps_test.cmake
             DESTINATION share/alps COMPONENT build)
 
   endif (NOT ALPS_FOR_VISTRAILS)
@@ -647,7 +653,6 @@ endif (NOT ALPS_BUILD_SOURCE)
 
 add_subdirectory(tool)
 if (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
-  ENABLE_TESTING()
   add_subdirectory(example)
 endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
 
@@ -869,6 +874,5 @@ endif(ALPS_DOWNLOAD_PACKAGES)
 ######################################################################
 
 if (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
-  ENABLE_TESTING()
   add_subdirectory(test)
 endif (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
