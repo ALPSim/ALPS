@@ -4,12 +4,12 @@
 #
 #
 
-
 if (NOT Boost_ROOT_DIR)
   if(BOOST_ROOT)
     find_path(Boost_ROOT_DIR "libs/filesystem/src/path.cpp" PATHS ${BOOST_ROOT})
   else(BOOST_ROOT)
     set(DIR0
+      ${PROJECT_SOURCE_DIR}/..
       $ENV{HOME} $ENV{HOME}/src $ENV{HOME}/ALPS/src /usr/local /usr/local/src
       "$ENV{HOMEDRIVE}/Program Files"
       "$ENV{HOMEDRIVE}$ENV{HOMEPATH}"

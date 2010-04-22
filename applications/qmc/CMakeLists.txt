@@ -4,8 +4,8 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 if (ALPS_BUILD_SOURCE)
-  install(FILES CMakeLists.txt qmc.h DESTINATION applications/qmc)
-  install(DIRECTORY checksign looper qwl sse worms DESTINATION applications/qmc
+  install(FILES CMakeLists.txt qmc.h DESTINATION alps/applications/qmc)
+  install(DIRECTORY checksign looper qwl sse worms DESTINATION alps/applications/qmc
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 else (ALPS_BUILD_SOURCE)
 

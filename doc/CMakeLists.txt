@@ -108,7 +108,7 @@ add_custom_command(OUTPUT alps.pdf
 
 if (ALPS_BUILD_SOURCE)
 
-install(DIRECTORY doc DESTINATION .
+install(DIRECTORY doc DESTINATION alps
         FILES_MATCHING 
         PATTERN "*.html" 
         PATTERN "*.png"
@@ -116,7 +116,7 @@ install(DIRECTORY doc DESTINATION .
         PATTERN "CVS" EXCLUDE
         )
 
-install(DIRECTORY ${PROJECT_BINARY_DIR}/doc DESTINATION .
+install(DIRECTORY ${PROJECT_BINARY_DIR}/doc DESTINATION alps
         FILES_MATCHING 
         PATTERN "*.pdf" 
         PATTERN "*.html" 
