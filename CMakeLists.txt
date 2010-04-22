@@ -662,6 +662,9 @@ endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
 
 if (ALPS_BUILD_APPLICATIONS)
   add_subdirectory(applications)
+  if (NOT ALPS_FOR_VISTRAILS)
+    add_subdirectory(tutorials)
+  endif (NOT ALPS_FOR_VISTRAILS)
 endif (ALPS_BUILD_APPLICATIONS)
 
 ######################################################################
@@ -671,15 +674,6 @@ endif (ALPS_BUILD_APPLICATIONS)
 if (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
   add_subdirectory(script)
 endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
-
-######################################################################
-# developer tools
-######################################################################
-
-if (NOT ALPS_FOR_VISTRAILS)
-  add_subdirectory(tutorials)
-endif (NOT ALPS_FOR_VISTRAILS)
-    
 
 ##########################################################################
 # Binary packages                                                        #

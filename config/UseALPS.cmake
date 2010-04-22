@@ -36,6 +36,10 @@ if(NOT ALPS_USE_FILE_INCLUDED)
   # list of ALPS and dependent libraries
   set(ALPS_LIBRARIES alps boost ${ALPS_EXTRA_LIBRARIES})
 
+  # RPATH setting
+  set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/lib")
+  set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+
   # test macro
   include(${CMAKE_INSTALL_PREFIX}/share/alps/add_alps_test.cmake)
 endif(NOT ALPS_USE_FILE_INCLUDED)
