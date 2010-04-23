@@ -28,7 +28,7 @@ if (NOT Boost_ROOT_DIR)
 endif (NOT Boost_ROOT_DIR)
 
 if(Boost_ROOT_DIR)
-  set(Boost_INCLUDE_DIR ${Boost_ROOT_DIR} CACHE PATH "Boost Include Directory")
+  set(Boost_INCLUDE_DIR ${Boost_ROOT_DIR} CACHE PATH "Boost Include Directory" FORCE)
 endif(Boost_ROOT_DIR)
 
 # check Boost version (from Modules/FindBoost.cmake)
@@ -47,6 +47,7 @@ endif(Boost_INCLUDE_DIR)
 
 if(Boost_ROOT_DIR)
   message(STATUS "Found Boost Source: ${Boost_ROOT_DIR}")
+  message(STATUS "Boost Version: ${Boost_MAJOR_VERSION}_${Boost_MINOR_VERSION}_${Boost_SUBMINOR_VERSION}")
   if(Boost_MAJOR_VERSION LESS 1 OR Boost_MINOR_VERSION LESS 41)
     message(FATAL_ERROR "Boost library is too old")
   endif(Boost_MAJOR_VERSION LESS 1 OR Boost_MINOR_VERSION LESS 41)
