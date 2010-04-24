@@ -879,6 +879,7 @@ endif(ALPS_DOWNLOAD_PACKAGES)
 # tests
 ######################################################################
 
-if (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
+if (ALPS_BUILD_TESTS)
+  enable_testing()
   add_subdirectory(test)
-endif (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
+endif (ALPS_BUILD_TESTS)

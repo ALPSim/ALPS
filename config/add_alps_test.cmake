@@ -25,6 +25,7 @@ macro(add_alps_test)
     add_custom_command(TARGET ${name} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${EXE_NAME} ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
+  
   if(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
     add_test(${name}
       ${CMAKE_COMMAND}
