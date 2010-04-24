@@ -442,6 +442,24 @@ find_package_handle_standard_args( HDF5 DEFAULT_MSG
     HDF5_INCLUDE_DIR
 )
 
+# VERSION CHECK
+# If the HDF5 include directory was found, open H5pubconf.h to check its version 
+set(HDF5_VERSION 0)
+set(HDF5_MINIMAL_VERSION "1.8")
+if (HDF5_INCLUDE_DIR)
+    if( EXISTS "${HDF5_INCLUDE_DIR}/H5pubconf.h" )
+       file( STRINGS "${HDF5_INCLUDE_DIR}/H5pubconf.h" 
+             _H5pubconf_content
+             REGEX "H5_PACKAGE_VERSION" )
+       string(REGEX REPLACE ".*#define H5_PACKAGE_VERSION \"([0-9.]+)\""  "\\1"  HDF5_VERSION "${_H5pubconf_content}")
+       MESSAGE (STATUS "HDF5 version found is ${HDF5_VERSION} in ${HDF5_INCLUDE_DIR}")
+       STRING(COMPARE LESS "${HDF5_VERSION}" "${HDF5_MINIMAL_VERSION}" _str_cmp)
+       if (_str_cmp)
+	MESSAGE(FATAL_ERROR "The HDF5 include found is too old : version is ${HDF5_VERSION} while the minimum is ${HDF5_MINIMAL_VERSION}")
+       endif (_str_cmp)
+      endif()
+endif()
+
 mark_as_advanced( 
     HDF5_INCLUDE_DIR 
     HDF5_LIBRARIES 
