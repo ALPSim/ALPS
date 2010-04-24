@@ -451,7 +451,7 @@ if (HDF5_INCLUDE_DIR)
        file( STRINGS "${HDF5_INCLUDE_DIR}/H5pubconf.h" 
              _H5pubconf_content
              REGEX "H5_PACKAGE_VERSION" )
-       string(REGEX REPLACE ".*#define H5_PACKAGE_VERSION \"([0-9.]+)\""  "\\1"  HDF5_VERSION "${_H5pubconf_content}")
+    string(REGEX REPLACE ".*#define H5_PACKAGE_VERSION \"([^\"]+)\""  "\\1"  HDF5_VERSION "${_H5pubconf_content}")
        MESSAGE (STATUS "HDF5 version found is ${HDF5_VERSION} in ${HDF5_INCLUDE_DIR}")
        STRING(COMPARE LESS "${HDF5_VERSION}" "${HDF5_MINIMAL_VERSION}" _str_cmp)
        if (_str_cmp)
