@@ -96,7 +96,7 @@ class FileList
          }
          closedir(dir_ptr);
          std::cout << "ALPS DMRG temporary files will be written in " << aux.c_str() << std::endl;
-         sprintf(temp_dir, aux.c_str()); 
+         std::strcpy(temp_dir, aux.c_str()); 
       }
 
     const char * get_filename(const char *input) 
@@ -110,7 +110,7 @@ class FileList
          filename = temp_dir + filename;
          filename = filename + "XXXXXX" + '\0';
          filename.copy(this->last_filename,100);
-         int fd = mktemp(this->last_filename); 
+         /*int fd =*/ mktemp(this->last_filename); 
          _tmp_filenames[std::string(input)] = this->last_filename;
          std::cout << "Creating temp file " << this->last_filename << std::endl;
          return this->last_filename;

@@ -4,7 +4,7 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 if (ALPS_BUILD_SOURCE)
-  install(FILES CMakeLists.txt cleanup.sh DESTINATION tutorials)
+  install(FILES CMakeLists.txt cleanup.sh DESTINATION alps/tutorials)
 
   install(DIRECTORY 
             00-introduction
