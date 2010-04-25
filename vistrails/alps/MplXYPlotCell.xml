@@ -14,7 +14,7 @@
       <location id="1" x="4.27359847033" y="-155.804490107" />
     </add>
     <add id="4" objectId="2" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="2" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" tag="" version="0.4.0" />
+      <module cache="1" id="2" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" tag="" version="0.5.1" />
     </add>
     <add id="5" objectId="2" parentObjId="2" parentObjType="module" what="location">
       <location id="2" x="-7.50003808567" y="154.615089593" />

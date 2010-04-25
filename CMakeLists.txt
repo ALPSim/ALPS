@@ -26,11 +26,13 @@ set(ALPS_BUILD_TESTS ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS tests")
 set(ALPS_BUILD_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS documentation")
 set(ALPS_INCLUDE_BOOST_SOURCE OFF CACHE BOOL "Include Boost sources in the source tarball")
 
+
 IF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
   SET (APPLICATIONS_CAN_BE_BUILT  ${NOT_ALPS_FOR_VISTRAILS})
 ELSE(EXISTS ${PROJECT_SOURCE_DIR}/applications)
   SET (APPLICATIONS_CAN_BE_BUILT OFF)
 ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
+
 
 set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
 set(ALPS_USE_VISTRAILS ${ALPS_FOR_VISTRAILS} CACHE BOOL "Use the libraries deployed with VisTrails")
@@ -879,7 +881,7 @@ endif(ALPS_DOWNLOAD_PACKAGES)
 # tests
 ######################################################################
 
-if (ALPS_BUILD_TESTS)
+if (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
   enable_testing()
   add_subdirectory(test)
-endif (ALPS_BUILD_TESTS)
+endif (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
