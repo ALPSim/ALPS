@@ -140,10 +140,33 @@ void ParaInterpolator::local_green_function()
 }
 
 
+void Interpolator::bare_dispersion(const unsigned int counter, const unsigned int zone, 
+				   const std::vector<vector_t>& kvec,
+				   const double offset, const int sign)
+{
+  std::stringstream name_str;
+  name_str << "Bare_" << name << zone << "_" << counter;
+  std::ofstream out_str(name_str.str().c_str());
+  for (std::vector<vector_t>::const_iterator itk=kvec.begin(); itk!=kvec.end(); ++itk) {
+    vector_t k = *itk;
+    double l = 0;
+    for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
+      l += (k[d]-kvec[0][d])*(k[d]-kvec[0][d]);
+    l = sqrt(l);
+    for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
+      out_str << k[d] << "\t" ;
+    out_str << (offset+sign*l)/M_PI << "\t" 
+	    << transform_ptr->epsilon(k) << "\n";
+  }
+  out_str.close();
+}
+
+
 void ParaInterpolator::interpolate_spectrum(const unsigned int counter, const unsigned int zone, 
 					    const std::vector<vector_t>& kvec,
 					    const double offset, const int sign)
 {
+  Interpolator::bare_dispersion(counter, zone, kvec, offset, sign);
   std::stringstream name_str;
   name_str << name << zone << "_" << counter;
   std::ofstream out_str(name_str.str().c_str());
@@ -181,6 +204,7 @@ void AntiferroInterpolator::interpolate_spectrum(const unsigned int counter, con
 						 const std::vector<vector_t>& kvec,
 						 const double offset, const int sign)
 {
+  Interpolator::bare_dispersion(counter, zone, kvec, offset, sign);
   std::stringstream name_str;
   name_str << name << zone << "_" << counter;
   std::ofstream out_str(name_str.str().c_str());
