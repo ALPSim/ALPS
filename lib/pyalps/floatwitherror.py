@@ -29,8 +29,12 @@ from math import *
         
 def get_mean(f):
     try:
+        try:
+            return f.mean()
+        except Exception:
+            pass
         return f.mean
-    except AttributeError:
+    except Exception:
         return f
 
 def get_error(f):
