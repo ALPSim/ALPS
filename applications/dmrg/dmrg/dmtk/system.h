@@ -55,6 +55,10 @@
 #include <unistd.h>
 #endif // WITH_PTHREADS
 
+#ifdef BOOST_MSVC
+#include <io.h>
+#endif
+
 using namespace std;
 
 namespace dmtk
