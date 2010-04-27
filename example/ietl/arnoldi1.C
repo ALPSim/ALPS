@@ -23,10 +23,10 @@
 #include <boost/random.hpp>
 #include <boost/limits.hpp>
 
-#include <boost/numeric/bindings/lapack/geev.hpp>
+#include <boost/numeric/bindings/lapack/driver/geev.hpp>
 #include <boost/numeric/ublas/matrix_expression.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
 
 
 #include <ietl/interface/ublas.h>
@@ -65,8 +65,7 @@ int main () {
 	// Check with dense LAPACK
 	{
 		std::vector<std::complex<double> > evals(N);
-		boost::numeric::bindings::lapack::geev(mat, evals, static_cast<Matrix*>(NULL), static_cast<Matrix*>(NULL),
-			boost::numeric::bindings::lapack::optimal_workspace());
+		boost::numeric::bindings::lapack::geev('N', 'N', mat, evals, Matrix(), Matrix());
 			
 		std::sort(evals.begin(), evals.end(), cmp);
 		std::copy(evals.begin(), evals.begin()+nvals, std::ostream_iterator<std::complex<double> >(std::cout, " "));

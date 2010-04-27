@@ -29,7 +29,7 @@
 #define ALPS_TOOL_MAXENT_PARMS_HPP
 
 #include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/bindings/traits/ublas_vector.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/osiris.h>
 #include <alps/alea.h>

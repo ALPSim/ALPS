@@ -30,9 +30,9 @@
 
 #include "dmrg3.h"
 
-#include <boost/numeric/bindings/lapack/syev.hpp> // interface to LAPACK routines
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include <boost/numeric/bindings/traits/ublas_vector.hpp>
+#include <boost/numeric/bindings/lapack/driver/syev.hpp> // interface to LAPACK routines
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/upper.hpp>
 #include <fstream>
 #include <sstream>
 
@@ -377,7 +377,7 @@ std::pair<double, Wavefunction> Superblock::GetGroundState()
 {
   Vector evalues(4);
   // diagonalize superblock Hamiltonian; H contains eigenvectors on output:
-  boost::numeric::bindings::lapack::syev('V','U',H,evalues,boost::numeric::bindings::lapack::optimal_workspace());
+  boost::numeric::bindings::lapack::syev('V',boost::numeric::bindings::upper(H),evalues,boost::numeric::bindings::lapack::optimal_workspace());
   // here: syev() calls LAPACK-routine 'dsyev' 
 
   // ground state vector: first column of the matrix H

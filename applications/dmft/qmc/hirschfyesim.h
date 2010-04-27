@@ -28,7 +28,6 @@
 #include <alps/alea/detailedbinning.h>
 #include <alps/alea/nobinning.h>
 
-#include <boost/numeric/bindings/lapack/lapack.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include <stack>

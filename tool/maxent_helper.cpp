@@ -26,9 +26,12 @@
 *****************************************************************************/
 
 #include "maxent.hpp"
-#include <boost/numeric/bindings/lapack/posv.hpp>
-#include <boost/numeric/bindings/lapack/syev.hpp>
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <boost/numeric/bindings/lapack/driver/posv.hpp>
+#include <boost/numeric/bindings/lapack/computational/potrf.hpp>
+#include <boost/numeric/bindings/lapack/driver/syev.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/upper.hpp>
+#include <boost/numeric/bindings/lower.hpp>
 
 
 MaxEntHelper::MaxEntHelper(const alps::Parameters& p) : 
@@ -156,7 +159,7 @@ double MaxEntHelper::log_prob(const vector_type& u, const double alpha) const
       L(i,j) *= sqrt(A[i])*sqrt(A[j]);
   for (unsigned int i=0; i<L.size1(); ++i)
     L(i,i) += alpha;
-  bindings::lapack::potrf('L', L);
+  bindings::lapack::potrf(bindings::lower(L));
   double log_det = 0.;
   for (unsigned int i=0; i<L.size1(); ++i) 
     log_det  += log(L(i,i)*L(i,i));
@@ -175,7 +178,7 @@ double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const 
     for (unsigned int j=0; j<L.size2(); ++j)
     L(i,j) *= sqrt(A[i])*sqrt(A[j]);
   vector_type lambda(L.size1());
-  bindings::lapack::syev('N', 'U', L , lambda, bindings::lapack::optimal_workspace());
+  bindings::lapack::syev('N', bindings::upper(L) , lambda, bindings::lapack::optimal_workspace());
   double Ng = 0.;
   for (unsigned int i=0; i<lambda.size(); ++i) {
     if (lambda[i]>=0) 

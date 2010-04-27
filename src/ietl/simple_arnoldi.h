@@ -31,8 +31,8 @@
 
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include <boost/numeric/bindings/lapack/geev.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/lapack/driver/geev.hpp>
 
 #include <exception>
 #include <stdexcept>
@@ -107,8 +107,7 @@ namespace ietl {
                 if (j > iter.desired_eigenvalues()) {
                     evals.resize(H.size1());
                     h_matrix_type evecs(H.size1(), H.size2()), H2 = H; // keep a backup because geev destroys the matrix
-                    boost::numeric::bindings::lapack::geev(H2, evals, static_cast<h_matrix_type*>(NULL), &evecs,
-                        boost::numeric::bindings::lapack::optimal_workspace());
+                    boost::numeric::bindings::lapack::geev('N','V',H2, evals, h_matrix_type(), evecs);
                     double resid = 0;
                     for (int k = 0; k < iter.desired_eigenvalues(); ++k)
                         resid += std::abs(evecs(evecs.size2()-1, k))*normw;

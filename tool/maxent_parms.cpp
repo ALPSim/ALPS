@@ -26,11 +26,12 @@
 *****************************************************************************/
 
 #include "maxent_parms.hpp"
-#include <boost/numeric/bindings/traits/ublas_symmetric.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/vector_expression.hpp>
-#include <boost/numeric/bindings/lapack/syev.hpp>
-#include <boost/numeric/bindings/lapack/gesvd.hpp>
+#include <boost/numeric/bindings/lapack/driver/syev.hpp>
+#include <boost/numeric/bindings/lapack/driver/gesvd.hpp>
+#include <boost/numeric/bindings/upper.hpp>
 
 
 ContiParameters::ContiParameters(const alps::Parameters& p) : 
@@ -206,7 +207,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
         cov(i,j) = covariance;
     }
     vector_type var(ndat());
-    bindings::lapack::syev('V', 'U', cov , var, bindings::lapack::optimal_workspace());
+    bindings::lapack::syev('V', bindings::upper(cov) , var, bindings::lapack::optimal_workspace());
     matrix_type cov_trans = ublas::trans(cov);
     K_ = ublas::prec_prod(cov_trans, K_);
     y_ = ublas::prec_prod(cov_trans, y_);
@@ -247,7 +248,7 @@ MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
   setup_kernel(p, nfreq(), omega_coord_);
   vector_type S(ndat());
   matrix_type Kt = K_; // gesvd destroys K!
-  bindings::lapack::gesvd(Kt, S, U_, Vt_);
+  bindings::lapack::gesvd('A','A',Kt, S, U_, Vt_); // the A A is not clear to me 
   std::cout << "# Singular values of the Kernel:\n";
   const double prec = sqrt(std::numeric_limits<double>::epsilon())*nfreq()*S[0];
   for (int s=0; s<S.size(); ++s) 

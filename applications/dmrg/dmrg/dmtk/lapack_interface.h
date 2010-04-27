@@ -27,7 +27,7 @@
 #define __DMTK_LAPACK_INTERFACE_H__
 
 #include <complex>
-#include <boost/numeric/bindings/traits/fortran.h>
+#include <boost/numeric/bindings/detail/config/fortran.hpp>
 
 extern "C" {
 

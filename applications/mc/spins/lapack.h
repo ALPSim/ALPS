@@ -30,15 +30,13 @@
 #include <complex>
 #include <stdexcept>
 
-#include <boost/numeric/bindings/lapack/gesvd.hpp>
-#include <boost/numeric/bindings/lapack/syev.hpp>
-#include <boost/numeric/bindings/lapack/heev.hpp>
-#include <boost/numeric/bindings/traits/matrix_traits.hpp>
-#include <boost/numeric/bindings/traits/traits.hpp>
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include <boost/numeric/bindings/traits/ublas_vector.hpp>
+#include <boost/numeric/bindings/lapack/driver/gesvd.hpp>
+#include <boost/numeric/bindings/lapack/driver/syev.hpp>
+#include <boost/numeric/bindings/lapack/driver/heev.hpp>
+#include <boost/numeric/bindings/size.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/vector.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
 
 //
 // solve_llsp: solving linear least-squares problem
@@ -60,8 +58,8 @@ inline T solve_llsp(
   typedef ublas::matrix<value_type, R, A> matrix_type;
   typedef ublas::vector<value_type> vector_type;
 
-  int const m = bindings::traits::matrix_size1(a);
-  int const n = bindings::traits::matrix_size2(a);
+  int const m = bindings::size_row(a);
+  int const n = bindings::size_column(a);
   int const min_mn = std::min BOOST_PREVENT_MACRO_SUBSTITUTION (m, n);
 
   // temporary storage
@@ -71,7 +69,7 @@ inline T solve_llsp(
   vector_type s(min_mn);
 
   // call SVD
-  int info = bindings::lapack::gesvd(at, s, u, vt);
+  int info = bindings::lapack::gesvd('S','S',at, s, u, vt);
   if (info != 0) throw std::runtime_error("failed in gesvd");
 
   // compute the condition number to return lateron

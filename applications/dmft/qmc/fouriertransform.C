@@ -12,8 +12,8 @@
  *****************************************************************************/
 
 
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include <boost/numeric/bindings/lapack/lapack.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 
 #include "fouriertransform.h"
 #include <valarray>
@@ -95,7 +95,8 @@ void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
   // solve A*spline_matrix=I
   // gesv solves A*X=B, input for B is I, output (=solution X) is spline_matrix
   spline_matrix = boost::numeric::ublas::identity_matrix<double>(Np1);   
-  boost::numeric::bindings::lapack::gesv(A, spline_matrix);
+  boost::numeric::ublas::vector<int> ipivot(A.size1());
+  boost::numeric::bindings::lapack::gesv(A, ipivot,spline_matrix);
 }
 
 

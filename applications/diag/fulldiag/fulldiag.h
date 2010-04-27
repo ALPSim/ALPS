@@ -27,8 +27,8 @@
 /* $Id$ */
 
 #include <cassert>
-#include <boost/numeric/bindings/lapack/syev.hpp>
-#include <boost/numeric/bindings/lapack/heev.hpp>
+#include <boost/numeric/bindings/lapack/driver/syev.hpp>
+#include <boost/numeric/bindings/lapack/driver/heev.hpp>
 
 #include "../diag.h"
 #include "measurementplots.h"
@@ -38,25 +38,25 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/bindings/traits/ublas_symmetric.hpp>
-#include <boost/numeric/bindings/traits/ublas_hermitian.hpp>
-#include <boost/numeric/bindings/traits/ublas_vector.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/upper.hpp>
+#include <boost/numeric/bindings/lower.hpp>
 #include <boost/regex.hpp>
 
 template <class T> 
 struct pick_real_complex 
 {
   template <class Matrix, class Vector>
-  static int heev (const char jobz, const char uplo, Matrix& m, Vector& v)
-   { return boost::numeric::bindings::lapack::syev(jobz,uplo,m,v, boost::numeric::bindings::lapack::optimal_workspace());}
+  static int heev (const char jobz, Matrix const& m, Vector& v)
+   { return boost::numeric::bindings::lapack::syev(jobz,m,v);}
 };
 
 template <class T>
 struct pick_real_complex<std::complex<T> > 
 {
   template <class Matrix, class Vector>
-  static int heev (const char jobz, const char uplo, Matrix& m, Vector& v)
-   { return boost::numeric::bindings::lapack::heev(jobz,uplo,m,v,boost::numeric::bindings::lapack::optimal_workspace());}
+  static int heev (const char jobz, Matrix const& m, Vector& v)
+   { return boost::numeric::bindings::lapack::heev(jobz,m,v);}
 };
 
 template <class T>
@@ -500,7 +500,7 @@ void FullDiagMatrix<T>::do_subspace()
   this->build();
   if (this->dimension()) {
     mag_vector_type eigenvalues(this->dimension());
-    pick_real_complex<T>::heev(this->calc_averages() ? 'V' : 'N','U',this->matrix(),eigenvalues);
+    pick_real_complex<T>::heev(this->calc_averages() ? 'V' : 'N',boost::numeric::bindings::upper(this->matrix()),eigenvalues);
     this->perform_measurements();
     std::copy(eigenvalues.begin(),eigenvalues.end(),std::back_inserter(this->measurements_.rbegin()->average_values["Energy"]));
     this->eigenvalues_.push_back(eigenvalues);

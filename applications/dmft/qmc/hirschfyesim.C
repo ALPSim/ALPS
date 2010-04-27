@@ -26,6 +26,9 @@
 #ifdef FOURPOINT
 #include "blas_classes/vector.h"
 #endif
+
+
+#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 using namespace std;
 using namespace alps;
 
@@ -63,7 +66,8 @@ double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector
   // solve a*Green=Green0
   // gesv solves A*X=B, input for B is Green0, output (=solution X) is Green   
   Green = Green0; 
-  boost::numeric::bindings::lapack::gesv(a,Green);
+  boost::numeric::ublas::vector<int> ipivot(N);
+  boost::numeric::bindings::lapack::gesv(a,ipivot, Green);
   M.convert_from(Green); 
   double det_new=M.determinant();
   return det_new>0?1:-1;

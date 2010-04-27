@@ -23,7 +23,7 @@
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include <stack>
