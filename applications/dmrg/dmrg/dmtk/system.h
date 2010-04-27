@@ -38,7 +38,7 @@
 #include <iomanip>
 #include <math.h>
 #include <sys/types.h>
-#include <dirent.h>
+//#include <dirent.h>
 #include "enums.h"
 #include "vector.h"
 #include "matrix.h"
@@ -89,12 +89,12 @@ class FileList
       { 
          std::string aux = dir;
          aux += "/";
-         DIR *dir_ptr = opendir(aux.c_str());
-         if(!dir_ptr){
-           std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " << aux.c_str() << " or choose a different path." << std::endl;
-           exit(-1);
-         }
-         closedir(dir_ptr);
+//         DIR *dir_ptr = opendir(aux.c_str());
+//         if(!dir_ptr){
+//           std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " << aux.c_str() << " or choose a different path." << std::endl;
+//           exit(-1);
+//         }
+//         closedir(dir_ptr);
          std::cout << "ALPS DMRG temporary files will be written in " << aux.c_str() << std::endl;
          std::strcpy(temp_dir, aux.c_str()); 
       }
