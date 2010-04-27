@@ -23,6 +23,7 @@
 #include <boost/random.hpp>
 #include <boost/limits.hpp>
 
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/lapack/driver/geev.hpp>
 #include <boost/numeric/ublas/matrix_expression.hpp>
 #include <boost/numeric/ublas/io.hpp>

@@ -30,6 +30,7 @@
 
 #include "dmrg3.h"
 
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/lapack/driver/syev.hpp> // interface to LAPACK routines
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/upper.hpp>

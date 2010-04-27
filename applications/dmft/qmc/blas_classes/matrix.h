@@ -24,6 +24,7 @@
 #include <sys/types.h> //on osx for uint
 
 #ifdef UBLAS
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_dense_matrix;

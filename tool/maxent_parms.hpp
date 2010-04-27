@@ -28,6 +28,7 @@
 #ifndef ALPS_TOOL_MAXENT_PARMS_HPP
 #define ALPS_TOOL_MAXENT_PARMS_HPP
 
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/io.hpp>

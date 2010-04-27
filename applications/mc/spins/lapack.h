@@ -30,6 +30,7 @@
 #include <complex>
 #include <stdexcept>
 
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/lapack/driver/gesvd.hpp>
 #include <boost/numeric/bindings/lapack/driver/syev.hpp>
 #include <boost/numeric/bindings/lapack/driver/heev.hpp>

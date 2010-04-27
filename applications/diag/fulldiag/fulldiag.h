@@ -27,6 +27,8 @@
 /* $Id$ */
 
 #include <cassert>
+
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/lapack/driver/syev.hpp>
 #include <boost/numeric/bindings/lapack/driver/heev.hpp>
 

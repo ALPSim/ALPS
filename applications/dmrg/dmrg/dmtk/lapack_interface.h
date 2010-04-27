@@ -27,6 +27,7 @@
 #define __DMTK_LAPACK_INTERFACE_H__
 
 #include <complex>
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/detail/config/fortran.hpp>
 #include <boost/numeric/bindings/traits/type.h>
 

@@ -12,6 +12,7 @@
  *****************************************************************************/
 
 
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 

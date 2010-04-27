@@ -26,6 +26,7 @@
 *****************************************************************************/
 
 #include "maxent.hpp"
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/lapack/driver/posv.hpp>
 #include <boost/numeric/bindings/lapack/computational/potrf.hpp>
 #include <boost/numeric/bindings/lapack/driver/syev.hpp>

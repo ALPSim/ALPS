@@ -29,6 +29,7 @@
 #include <ietl/iteration.h>
 #include <ietl/vectorspace.h>
 
+#include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/bindings/ublas.hpp>
