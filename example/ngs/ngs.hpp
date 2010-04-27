@@ -32,7 +32,7 @@
 namespace alps {
 	class mcidump : public IDump {
 		public:
-			mcidump(std::vector<char> const & buf) : buffer(buf), pos(0) {}
+			mcidump(char * p, std::size_t s) : ptr(p), size(s) {}
 			#define ALPS_MCIDUMP_DO_TYPE(T)																		\
 				void read_simple(T & x) { read_buffer(&x, sizeof(T)); }											\
 				void read_array(std::size_t n, T * p) { read_buffer(p, n * sizeof(T)); }
@@ -57,13 +57,14 @@ namespace alps {
 			void read_string(std::size_t n, char * x) { read_buffer(x, n); }
 		private:
 			void read_buffer(void * p, std::size_t n) {
-				if(pos + n > buffer.size())
+				if(pos + n > size)
 					throw std::runtime_error("read past buffer");
-				std::memcpy(p, &(buffer[pos]), n);
+				std::memcpy(p, ptr, n);
 				pos += n;
 			}
 			std::size_t pos;
-			std::vector<char> buffer;
+			std::size_t size;
+			char * ptr;
 	};
 	class mcodump : public ODump {
 		public:
@@ -145,7 +146,7 @@ namespace alps {
 		public: 
 			mcparams(std::string const & input_file) {
 				hdf5::iarchive ar(input_file);
-				ar >> make_pvp("/parameters", this);
+				ar >> make_pvp("/parameters", *this);
 			}
 			mcparamvalue & operator[](std::string const & k) {
 				return std::map<std::string, mcparamvalue>::operator[](k);
@@ -340,7 +341,9 @@ namespace alps {
 				, start_time(boost::posix_time::second_clock::local_time())
 				, check_time(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check))
 				, communicator(c)
-			{}
+			{
+				MPI_Errhandler_set(communicator, MPI_ERRORS_RETURN);
+			}
 
 			double fraction_completed() {
 				assert(communicator.rank() == 0);
@@ -357,6 +360,16 @@ namespace alps {
 
 				int action = MPI_collect;
 				boost::mpi::broadcast(communicator, action, 0);
+				
+				
+				Observable * obs = mcthreadsim<Impl>::collect_results()["Energy"].convert_mergeable();
+				
+				
+				std::cout << typeid(*obs).name() << std::endl;
+				
+				
+				
+
 				std::vector<char> buf, data;
 				{
 					mcodump odump;
@@ -367,14 +380,14 @@ namespace alps {
 				data.resize(len);
 				buf.resize(len);
 				MPI_Datatype vector_type;
-				assert(MPI_Type_contiguous(len, MPI_BYTE, &vector_type) == MPI_SUCCESS);
-				assert(MPI_Type_commit(&vector_type) == MPI_SUCCESS);
+				assert(check_mpi_error(MPI_Type_contiguous(len, MPI_BYTE, &vector_type)));
+				assert(check_mpi_error(MPI_Type_commit(&vector_type)));
 				MPI_Op collector;
-				assert(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector) == MPI_SUCCESS);
-				assert(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator) == MPI_SUCCESS);
-				assert(MPI_Op_free(&collector) == MPI_SUCCESS);
-				assert(MPI_Type_free(&vector_type) == MPI_SUCCESS);
-				mcidump idump(buf);
+				assert(check_mpi_error(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector)));
+				assert(check_mpi_error(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator)));
+				assert(check_mpi_error(MPI_Op_free(&collector)));
+				assert(check_mpi_error(MPI_Type_free(&vector_type)));
+				mcidump idump(&buf.front(), buf.size());
 				typename mcthreadsim<Impl>::results_type results;
 				idump >> results;
 				return results;
@@ -435,13 +448,13 @@ namespace alps {
 								data.resize(len);
 								buf.resize(len);
 								MPI_Datatype vector_type;
-								assert(MPI_Type_contiguous(len, MPI_BYTE, &vector_type) == MPI_SUCCESS);
-								assert(MPI_Type_commit(&vector_type) == MPI_SUCCESS);
+								assert(check_mpi_error(MPI_Type_contiguous(len, MPI_BYTE, &vector_type)));
+								assert(check_mpi_error(MPI_Type_commit(&vector_type)));
 								MPI_Op collector;
-								assert(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector) == MPI_SUCCESS);
-								assert(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator) == MPI_SUCCESS);
-								assert(MPI_Op_free(&collector) == MPI_SUCCESS);
-								assert(MPI_Type_free(&vector_type) == MPI_SUCCESS);
+								assert(check_mpi_error(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector)));
+								assert(check_mpi_error(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator)));
+								assert(check_mpi_error(MPI_Op_free(&collector)));
+								assert(check_mpi_error(MPI_Type_free(&vector_type)));
 							}
 							break;
 						case MPI_stop:
@@ -454,8 +467,7 @@ namespace alps {
 			static void merge(void * a, void * b, int * len, MPI_Datatype * type) {
 				int size;
 				MPI_Type_size(*type, &size);
-				std::vector<char> arg1(static_cast<char *>(a), static_cast<char *>(a) + size), arg2(static_cast<char *>(b), static_cast<char *>(b) + size);
-				mcidump idump1(arg1), idump2(arg2);
+				mcidump idump1(static_cast<char *>(a), size), idump2(static_cast<char *>(b), size);
 				typename mcthreadsim<Impl>::results_type  results1, results2;
 				idump1 >> results1;
 				idump2 >> results2;
@@ -466,6 +478,15 @@ namespace alps {
 				std::memcpy(b, &(odump.data().front()), odump.data().size());
 			}
 		private:
+			bool check_mpi_error(int code) const {
+				if (code != MPI_SUCCESS) {
+					char buffer[BUFSIZ];
+					int size;
+					MPI_Error_string(code, buffer, &size);
+					std::cerr << buffer << std::endl;
+				}
+				return code == MPI_SUCCESS;
+			}
 			int next_check;
 			boost::posix_time::ptime start_time;
 			boost::posix_time::ptime check_time;
