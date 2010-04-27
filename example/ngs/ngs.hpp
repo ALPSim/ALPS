@@ -32,7 +32,7 @@
 namespace alps {
 	class mcidump : public IDump {
 		public:
-			mcidump(char * p, std::size_t s) : ptr(p), size(s) {}
+			mcidump(char * p, std::size_t s) : size(s), ptr(p) {}
 			#define ALPS_MCIDUMP_DO_TYPE(T)																		\
 				void read_simple(T & x) { read_buffer(&x, sizeof(T)); }											\
 				void read_array(std::size_t n, T * p) { read_buffer(p, n * sizeof(T)); }
@@ -57,14 +57,12 @@ namespace alps {
 			void read_string(std::size_t n, char * x) { read_buffer(x, n); }
 		private:
 			void read_buffer(void * p, std::size_t n) {
-				if(pos + n > size)
-					throw std::runtime_error("read past buffer");
+				assert((size -= n) > 0);
 				std::memcpy(p, ptr, n);
-				pos += n;
+				ptr += n;
 			}
-			std::size_t pos;
 			std::size_t size;
-			char * ptr;
+			char const * ptr;
 	};
 	class mcodump : public ODump {
 		public:
@@ -347,7 +345,6 @@ namespace alps {
 
 			double fraction_completed() {
 				assert(communicator.rank() == 0);
-
 				double fraction = mcthreadsim<Impl>::fraction_completed();
 				int action = MPI_get_fraction;
 				boost::mpi::broadcast(communicator, action, 0);
@@ -357,28 +354,14 @@ namespace alps {
 
 			typename mcthreadsim<Impl>::results_type collect_results() const {
 				assert(communicator.rank() == 0);
-
 				int action = MPI_collect;
 				boost::mpi::broadcast(communicator, action, 0);
-				
-				
 				Observable * obs = mcthreadsim<Impl>::collect_results()["Energy"].convert_mergeable();
-				
-				
-				std::cout << typeid(*obs).name() << std::endl;
-				
-				
-				
-
-				std::vector<char> buf, data;
-				{
-					mcodump odump;
-					odump << mcthreadsim<Impl>::collect_results();
-					data = odump.data();
-				}
-				std::size_t len = boost::mpi::all_reduce(communicator, data.size(), boost::mpi::maximum<std::size_t>());
-				data.resize(len);
-				buf.resize(len);
+				mcodump odump;
+				odump << mcthreadsim<Impl>::collect_results();
+				std::size_t len = boost::mpi::all_reduce(communicator, odump.data().size() * 2, boost::mpi::maximum<std::size_t>());
+				std::vector<char> buf(len), data(len);
+				std::memcpy(&data.front(), &odump.data().front(), odump.data().size());
 				MPI_Datatype vector_type;
 				assert(check_mpi_error(MPI_Type_contiguous(len, MPI_BYTE, &vector_type)));
 				assert(check_mpi_error(MPI_Type_commit(&vector_type)));
@@ -428,7 +411,6 @@ namespace alps {
 
 			void process_requests() {
 				assert(communicator.rank() > 0);
-
 				while (true) {
 					int action;
 					boost::mpi::broadcast(communicator, action, 0);
@@ -438,15 +420,11 @@ namespace alps {
 							break;
 						case MPI_collect:
 							{
-								std::vector<char> buf, data;
-								{
-									mcodump odump;
-									odump << mcthreadsim<Impl>::collect_results();
-									data = odump.data();
-								}
-								std::size_t len = boost::mpi::all_reduce(communicator, data.size(), boost::mpi::maximum<std::size_t>()) * 1.2;
-								data.resize(len);
-								buf.resize(len);
+								mcodump odump;
+								odump << mcthreadsim<Impl>::collect_results();
+								std::size_t len = boost::mpi::all_reduce(communicator, odump.data().size() * 2, boost::mpi::maximum<std::size_t>());
+								std::vector<char> buf(len), data(len);
+								std::memcpy(&data.front(), &odump.data().front(), odump.data().size());
 								MPI_Datatype vector_type;
 								assert(check_mpi_error(MPI_Type_contiguous(len, MPI_BYTE, &vector_type)));
 								assert(check_mpi_error(MPI_Type_commit(&vector_type)));
@@ -475,7 +453,7 @@ namespace alps {
 				mcodump odump;
 				odump << results1;
 				assert(odump.data().size() < size);
-				std::memcpy(b, &(odump.data().front()), odump.data().size());
+				std::memcpy(b, &odump.data().front(), odump.data().size());
 			}
 		private:
 			bool check_mpi_error(int code) const {
