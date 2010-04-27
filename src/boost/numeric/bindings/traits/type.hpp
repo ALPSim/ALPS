@@ -1,16 +1,3 @@
-/*
- * 
- * Copyright (c) 2002, 2003 Kresimir Fresl, Toon Knapen and Karl Meerbergen
- *
- * Distributed under the Boost Software License, Version 1.0.
- * (See accompanying file LICENSE_1_0.txt or copy at
- * http://www.boost.org/LICENSE_1_0.txt)
- *
- * KF acknowledges the support of the Faculty of Civil Engineering, 
- * University of Zagreb, Croatia.
- *
- */
-
 #ifndef boost_numeric_bindings_type_hpp
 #define boost_numeric_bindings_type_hpp
 
@@ -38,6 +25,9 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   T real (std::complex<T> const& c) { return std::real (c); }
   template <typename T> 
   T imag (std::complex<T> const& c) { return std::imag (c); }
+
+
+  struct null_t {};
 
 }}}}
 

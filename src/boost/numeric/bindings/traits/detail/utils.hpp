@@ -23,8 +23,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
   namespace detail {
 
     // complex array => real & imaginary arrays
-    template <typename CIt, typename RIt> 
-    inline 
+    template <typename CIt, typename RIt>
     void disentangle (CIt c, CIt c_end, RIt rr, RIt ri) {
       for (; c != c_end; ++c, ++rr, ++ri) {
         *rr = traits::real (*c); 
@@ -32,8 +31,7 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
       }
     }
     // real & imaginary arrays => complex array
-    template <typename RIt, typename CIt> 
-    inline 
+    template <typename RIt, typename CIt>
     void interlace (RIt r, RIt r_end, RIt ri, CIt c) {
       typedef typename std::iterator_traits<CIt>::value_type cmplx_t;
 #ifdef BOOST_NUMERIC_BINDINGS_BY_THE_BOOK
@@ -50,14 +48,14 @@ namespace boost { namespace numeric { namespace bindings { namespace traits {
     }    
 
 
-    // converts real/complex to int
-    inline int to_int (float f) { return static_cast<int> (f); }
-    inline int to_int (double d) { return static_cast<int> (d); }
-    inline int to_int (traits::complex_f const& cf) { 
-      return static_cast<int> (traits::real (cf)); 
+    // converts real/complex to integer_t
+    inline integer_t to_int (float f) { return static_cast<integer_t> (f); }
+    inline integer_t to_int (double d) { return static_cast<integer_t> (d); }
+    inline integer_t to_int (traits::complex_f const& cf) { 
+      return static_cast<integer_t> (traits::real (cf)); 
     }
-    inline int to_int (traits::complex_d const& cd) { 
-      return static_cast<int> (traits::real (cd)); 
+    inline integer_t to_int (traits::complex_d const& cd) { 
+      return static_cast<integer_t> (traits::real (cd)); 
     }
 
   }
