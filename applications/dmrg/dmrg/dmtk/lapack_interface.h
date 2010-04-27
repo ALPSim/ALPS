@@ -28,6 +28,7 @@
 
 #include <complex>
 #include <boost/numeric/bindings/detail/config/fortran.hpp>
+#include <boost/numeric/bindings/traits/type.h>
 
 extern "C" {
 
@@ -88,7 +89,7 @@ double FORTRAN_ID(ddot)(
             const double*, const int&,
             const double*, const int&);
 
-std::complex<double> FORTRAN_ID(zdotc)(
+dcomplex_t FORTRAN_ID(zdotc)(
             const int&,
             const std::complex<double>*, const int&,
             const std::complex<double>*, const int&);
