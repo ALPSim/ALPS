@@ -17,7 +17,9 @@
 #ifndef BOOST_NUMERIC_BINDINGS_USE_CLAPACK
 #  include <boost/numeric/bindings/detail/config/fortran.hpp>
 #else
+# ifndef FORTRAN_ID
 #  define FORTRAN_ID( id ) id##_
+#endif FORTRAN_ID
 #endif
 
 //

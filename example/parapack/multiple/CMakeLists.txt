@@ -7,7 +7,7 @@ include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
-add_library(ising_multiple_core ising.C)
+add_library(ising_multiple_core STATIC ising.C)
 target_link_libraries(ising_multiple_core alps)
 
 add_executable(ising_multiple main.C)

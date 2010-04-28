@@ -28,7 +28,7 @@
 
 // Next we define macro's to convert our symbols to
 // the current convention
-#if defined(BIND_FORTRAN_LOWERCASE_UNDERSCORE)
+#if defined(BIND_FORTRAN_LOWERCASE_UNDERSCORE) || defined (BOOST_NUMERIC_BINDINGS_USE_CLAPACK)
 #define FORTRAN_ID( id ) id##_
 #elif defined(BIND_FORTRAN_LOWERCASE)
 #define FORTRAN_ID( id ) id

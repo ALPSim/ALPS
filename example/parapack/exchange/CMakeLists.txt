@@ -7,7 +7,7 @@ include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
-add_library(exchange_core ising.C loop.C)
+add_library(exchange_core STATIC ising.C loop.C)
 target_link_libraries(exchange_core alps)
 
 add_executable(exchange main.C)

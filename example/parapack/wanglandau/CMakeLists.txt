@@ -7,7 +7,7 @@ include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
-add_library(wanglandau_core wanglandau.C)
+add_library(wanglandau_core STATIC wanglandau.C)
 target_link_libraries(wanglandau_core alps)
 
 add_executable(wanglandau main.C)

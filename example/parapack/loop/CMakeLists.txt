@@ -7,7 +7,7 @@ include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(${PROJECT_SOURCE_DIR}/src)
 include_directories(${Boost_ROOT_DIR})
 
-add_library(loop_single_core loop.C)
+add_library(loop_single_core STATIC loop.C)
 target_link_libraries(loop_single_core alps)
 
 add_executable(loop_single main.C)
