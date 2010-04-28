@@ -103,12 +103,17 @@ class SetLabels(Module):
             ret.props = copy.deepcopy(x.props)
             labelstr = ''
             for label in labels:
+                val = 'unknown'
+                try:
+                    if type(x.props[label]) == str:
+                        val = x.props[label]
+                    else:
+                        val = '%.4s' % x.props[label]
+                except KeyError:
+                    pass
                 if label != labels[0]:
                     labelstr += ', '
-                if type(x.props[label]) == str:
-                    labelstr += '%s = %s' % (label,x.props[label])
-                else:
-                    labelstr += '%s = %.4s' % (label,x.props[label])
+                labelstr += '%s = %s' % (label,val)
             ret.props['label'] = labelstr
             return ret
         

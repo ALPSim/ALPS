@@ -27,8 +27,11 @@
 #include <boost/numeric/bindings/lapack/driver/geev.hpp>
 #include <boost/numeric/ublas/matrix_expression.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/std/vector.hpp>
 
+#include <boost/lambda/bind.hpp>
+#include <boost/lambda/construct.hpp>
 
 #include <ietl/interface/ublas.h>
 #include <ietl/simple_arnoldi.h>
@@ -63,15 +66,19 @@ int main () {
    for (int i = 0; i < nvals; ++i)
        std::cout << "Eigenvalue " << i << ": " << arni.get_eigenvalue(i) << std::endl;
    
-	// Check with dense LAPACK
-	{
-		std::vector<std::complex<double> > evals(N);
-		boost::numeric::bindings::lapack::geev('N', 'N', mat, evals, Matrix(), Matrix());
-			
-		std::sort(evals.begin(), evals.end(), cmp);
-		std::copy(evals.begin(), evals.begin()+nvals, std::ostream_iterator<std::complex<double> >(std::cout, " "));
-		std::cout << std::endl;
-	}
+    // Check with dense LAPACK
+    {
+     Matrix null1(N,N), null2(N,N);
+     std::vector<std::complex<double> > evals(N);
+     std::vector<double> ev1(N), ev2(N);
+     boost::numeric::bindings::lapack::geev('N', 'N', mat, ev1, ev2, null1, null2);
+     std::transform(ev1.begin(), ev1.end(), ev2.begin(), evals.begin(),
+         boost::lambda::bind(boost::lambda::constructor<std::complex<double> >(), boost::lambda::_1, boost::lambda::_2));
+         
+     std::sort(evals.begin(), evals.end(), cmp);
+     std::copy(evals.begin(), evals.begin()+nvals, std::ostream_iterator<std::complex<double> >(std::cout, " "));
+     std::cout << std::endl;
+    }
 
    return 0;
 }

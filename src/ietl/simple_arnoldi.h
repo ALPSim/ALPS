@@ -31,9 +31,13 @@
 
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/ublas/matrix.hpp>
+#include <boost/numeric/bindings/ublas/matrix.hpp>
+#include <boost/numeric/bindings/std/vector.hpp>
 #include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/lapack/driver/geev.hpp>
+
+#include <boost/lambda/bind.hpp>
+#include <boost/lambda/construct.hpp>
 
 #include <exception>
 #include <stdexcept>
@@ -108,7 +112,12 @@ namespace ietl {
                 if (j > iter.desired_eigenvalues()) {
                     evals.resize(H.size1());
                     h_matrix_type evecs(H.size1(), H.size2()), H2 = H; // keep a backup because geev destroys the matrix
-                    boost::numeric::bindings::lapack::geev('N','V',H2, evals, h_matrix_type(), evecs);
+                    h_matrix_type null_matrix(1,1); // don't ask, just don't ask...
+                    // real matrix -> real eigenvalues, in the world of boost::bindings
+                    std::vector<double> ev1(H.size1()), ev2(H.size1());
+                    boost::numeric::bindings::lapack::geev('N', 'V', H2, ev1, ev2, null_matrix, evecs);
+                    std::transform(ev1.begin(), ev1.end(), ev2.begin(), evals.begin(),
+                        boost::lambda::bind(boost::lambda::constructor<std::complex<double> >(), boost::lambda::_1, boost::lambda::_2));
                     double resid = 0;
                     for (int k = 0; k < iter.desired_eigenvalues(); ++k)
                         resid += std::abs(evecs(evecs.size2()-1, k))*normw;
