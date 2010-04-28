@@ -24,8 +24,10 @@
 #include <alps/osiris/std/vector.h>
 #include <cmath>
 #include <alps/osiris/std/list.h>
-#include "blas_classes/matrix.h"
-#include "blas_classes/vector.h"
+//#include "blas_classes/matrix.h"
+//#include "blas_classes/vector.h"
+#include <alps/numeric/matrix.h>
+#include <alps/numeric/vector.h>
 #include "green_function.h"
 #include "U_matrix.h"
 #include "alps_solver.h"

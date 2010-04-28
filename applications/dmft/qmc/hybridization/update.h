@@ -233,7 +233,8 @@ template <class V> void compute_M_up(int k, blas_matrix & M, V& Fs, V& Fe, doubl
       M_new(i_new,j_new) = M(i,j) + det_rat*M_new(i_new,k)*M_new(k,j_new);
     }
   }
-  M_new.swap(M);
+    swap(M,M_new);
+ // M_new.swap(M);
   /*blas::matrix M2(M);
    blas::vector k_row(M.size());
    blas::vector k_col(M.size());
@@ -311,7 +312,8 @@ template<class Mat> void compute_M_down(int k, Mat& M) {
    M.remove_row_column(k);
    if(M.size()>0)
    M.add_outer_product(row_k, col_k, -1./Mkk);*/
-  M.swap(M_new);
+  //M.swap(M_new);
+    swap(M_new,M);
   //if(M != M_new)
   //  std::cout<<"algo is wrong: "<<M<<" "<<M_new<<std::endl;
 }
@@ -399,8 +401,8 @@ template <class G, class S> void compute_M_move(times & new_segment, int k, blas
       }
     }
   }
-  
-  M_new.swap(M);
+    swap(M,M_new);
+  //M_new.swap(M);
   return;
 }  
 
@@ -600,8 +602,8 @@ template <class G, class S, class V> void compute_M_insert_anti(times & anti_seg
       }
     }  
   }
-  
-  M_new.swap(M);
+    swap(M_new,M);
+  //M_new.swap(M);
   return;
 }
 
@@ -666,8 +668,8 @@ template<class Mat> void compute_M_remove_anti(Mat & M, int s, int r) {
       }
     }  
   }
-  
-  M_new.swap( M);
+    swap(M,M_new);
+  //M_new.swap( M);
   return;
 }
 
