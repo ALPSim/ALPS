@@ -34,6 +34,7 @@ import platform
 import sys
 import glob
 import numpy as np
+import h5py
 
 import pyalps.pytools # the C++ conversion functions
 from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra
@@ -342,3 +343,19 @@ def subtract_spectrum(s1,s2,tolerance=1e-12):
             res.y = np.append(res.y,s1.y[i])
     
     return res
+
+def save_parameters(filename, dict):
+    f1 = h5py.File(filename, 'w')
+    subgroup = f1.create_group('/parameters')
+    
+    for key in dict.keys():
+        if(type(dict[key])==str):
+            tid = h5py.h5t.C_S1.copy()
+            tid.set_size(len(dict[key]))
+        elif(type(dict[key])==int):
+            tid = h5py.h5t.NATIVE_INT32.copy()
+        else:
+            tid = h5py.h5t.NATIVE_DOUBLE.copy()
+        dset=subgroup.create_dataset(key, (), tid)
+        dset[...] = dict[key]
+    f1.close()
