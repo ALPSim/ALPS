@@ -327,10 +327,10 @@ namespace alps {
 	template<typename Impl> class mcmpisim : public mcthreadsim<Impl> {
 		public:
 			enum {
-				MPI_get_fraction		= 1,
-				MPI_stop				= 2,
-				MPI_collect				= 3,
-				MPI_terminate			= 4
+				MPI_get_fraction	= 1,
+				MPI_stop			= 2,
+				MPI_collect			= 3,
+				MPI_terminate		= 4
 			};
 
 			mcmpisim(typename mcthreadsim<Impl>::parameters_type const & p, boost::mpi::communicator const & c) 
@@ -356,20 +356,8 @@ namespace alps {
 				assert(communicator.rank() == 0);
 				int action = MPI_collect;
 				boost::mpi::broadcast(communicator, action, 0);
-				Observable * obs = mcthreadsim<Impl>::collect_results()["Energy"].convert_mergeable();
-				mcodump odump;
-				odump << mcthreadsim<Impl>::collect_results();
-				std::size_t len = boost::mpi::all_reduce(communicator, odump.data().size() * 2, boost::mpi::maximum<std::size_t>());
-				std::vector<char> buf(len), data(len);
-				std::memcpy(&data.front(), &odump.data().front(), odump.data().size());
-				MPI_Datatype vector_type;
-				assert(check_mpi_error(MPI_Type_contiguous(len, MPI_BYTE, &vector_type)));
-				assert(check_mpi_error(MPI_Type_commit(&vector_type)));
-				MPI_Op collector;
-				assert(check_mpi_error(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector)));
-				assert(check_mpi_error(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator)));
-				assert(check_mpi_error(MPI_Op_free(&collector)));
-				assert(check_mpi_error(MPI_Type_free(&vector_type)));
+				std::vector<char> buf;
+				reduce_results(buf);
 				mcidump idump(&buf.front(), buf.size());
 				typename mcthreadsim<Impl>::results_type results;
 				idump >> results;
@@ -420,19 +408,8 @@ namespace alps {
 							break;
 						case MPI_collect:
 							{
-								mcodump odump;
-								odump << mcthreadsim<Impl>::collect_results();
-								std::size_t len = boost::mpi::all_reduce(communicator, odump.data().size() * 2, boost::mpi::maximum<std::size_t>());
-								std::vector<char> buf(len), data(len);
-								std::memcpy(&data.front(), &odump.data().front(), odump.data().size());
-								MPI_Datatype vector_type;
-								assert(check_mpi_error(MPI_Type_contiguous(len, MPI_BYTE, &vector_type)));
-								assert(check_mpi_error(MPI_Type_commit(&vector_type)));
-								MPI_Op collector;
-								assert(check_mpi_error(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector)));
-								assert(check_mpi_error(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator)));
-								assert(check_mpi_error(MPI_Op_free(&collector)));
-								assert(check_mpi_error(MPI_Type_free(&vector_type)));
+								std::vector<char> buf;
+								reduce_results(buf);
 							}
 							break;
 						case MPI_stop:
@@ -442,6 +419,7 @@ namespace alps {
 					}
 				}
 			}
+
 			static void merge(void * a, void * b, int * len, MPI_Datatype * type) {
 				int size;
 				MPI_Type_size(*type, &size);
@@ -455,7 +433,25 @@ namespace alps {
 				assert(odump.data().size() < size);
 				std::memcpy(b, &odump.data().front(), odump.data().size());
 			}
+
 		private:
+			void reduce_results(std::vector<char> & buf) const {
+				mcodump odump;
+				odump << mcthreadsim<Impl>::collect_results();
+				std::size_t len = boost::mpi::all_reduce(communicator, odump.data().size() * 1.2, boost::mpi::maximum<std::size_t>());
+				std::vector<char> data(len);
+				std::memcpy(&data.front(), &odump.data().front(), odump.data().size());
+				buf.resize(len);
+				MPI_Datatype vector_type;
+				assert(check_mpi_error(MPI_Type_contiguous(len, MPI_BYTE, &vector_type)));
+				assert(check_mpi_error(MPI_Type_commit(&vector_type)));
+				MPI_Op collector;
+				assert(check_mpi_error(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector)));
+				assert(check_mpi_error(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator)));
+				assert(check_mpi_error(MPI_Op_free(&collector)));
+				assert(check_mpi_error(MPI_Type_free(&vector_type)));
+			}
+
 			bool check_mpi_error(int code) const {
 				if (code != MPI_SUCCESS) {
 					char buffer[BUFSIZ];
@@ -465,6 +461,7 @@ namespace alps {
 				}
 				return code == MPI_SUCCESS;
 			}
+
 			int next_check;
 			boost::posix_time::ptime start_time;
 			boost::posix_time::ptime check_time;
