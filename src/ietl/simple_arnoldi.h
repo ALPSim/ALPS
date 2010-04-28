@@ -44,12 +44,30 @@
 #include <climits>
 #include <vector>
 #include <iostream>
+#include <iterator>
 
 namespace ietl {
     namespace detail {
         inline bool cmp(std::complex<double> a, std::complex<double> b)
         {
             return ietl::real(a) > ietl::real(b);
+        }
+        
+        template<class MatrixT>
+        void arnoldi_geev(MatrixT& mtx, std::vector<std::complex<double> >& evals, MatrixT& evecs, double)
+        {
+            std::vector<double> ev1(mtx.size1()), ev2(mtx.size1());
+            MatrixT null_matrix(mtx.size1(), mtx.size2());
+            boost::numeric::bindings::lapack::geev('N', 'V', mtx, ev1, ev2, null_matrix, evecs);
+            std::transform(ev1.begin(), ev1.end(), ev2.begin(), evals.begin(),
+                boost::lambda::bind(boost::lambda::constructor<std::complex<double> >(), boost::lambda::_1, boost::lambda::_2));
+        }
+        
+        template<class MatrixT>
+        void arnoldi_geev(MatrixT& mtx, std::vector<std::complex<double> >& evals, MatrixT& evecs, std::complex<double>)
+        {
+            MatrixT null_matrix(mtx.size1(), mtx.size2());
+            boost::numeric::bindings::lapack::geev('N', 'V', mtx, evals, null_matrix, evecs);
         }
     }
     
@@ -102,7 +120,8 @@ namespace ietl {
             do {
                 ietl::mult(mat, vectors[j], w);
                 for (int i = 0; i <= j; ++i) {
-                    H(i,j) = ietl::dot(w, vectors[i]);
+                    // H(i,j) = ietl::dot(w, vectors[i]);
+                    H(i,j) = ietl::dot(vectors[i], w);
                     w -= H(i,j)*vectors[i];
                 }
 
@@ -112,17 +131,14 @@ namespace ietl {
                 if (j > iter.desired_eigenvalues()) {
                     evals.resize(H.size1());
                     h_matrix_type evecs(H.size1(), H.size2()), H2 = H; // keep a backup because geev destroys the matrix
-                    h_matrix_type null_matrix(1,1); // don't ask, just don't ask...
-                    // real matrix -> real eigenvalues, in the world of boost::bindings
-                    std::vector<double> ev1(H.size1()), ev2(H.size1());
-                    boost::numeric::bindings::lapack::geev('N', 'V', H2, ev1, ev2, null_matrix, evecs);
-                    std::transform(ev1.begin(), ev1.end(), ev2.begin(), evals.begin(),
-                        boost::lambda::bind(boost::lambda::constructor<std::complex<double> >(), boost::lambda::_1, boost::lambda::_2));
+                    detail::arnoldi_geev(H2, evals, evecs, scalar_type());
                     double resid = 0;
                     for (int k = 0; k < iter.desired_eigenvalues(); ++k)
                         resid += std::abs(evecs(evecs.size2()-1, k))*normw;
-                    if (verbose)
-                        std::cout << "Arnoldi iteration " << j << ": residual = " << resid << std::endl;
+                    if (verbose) {
+                        std::cout << "Arnoldi iteration " << j << ": residual = " << resid;
+                        std::cout << " norm(w) = " << normw << std::endl;
+                    }
                     if (iter.finished(resid, abs(evals[iter.desired_eigenvalues()-1]))) {
                         std::sort(evals.begin(), evals.end(), detail::cmp);
                         break;
