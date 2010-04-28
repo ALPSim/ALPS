@@ -90,7 +90,7 @@ void MaxEntSimulation::dostep()
   spex_str << "\n";
   for (int a=0; a<chi_sq.size(); ++a) 
     chisq_str << alpha[a] << " " << chi_sq[a] << std::endl;
-  double a_chi = 0;
+  int a_chi = 0;
   double diff = std::abs(chi_sq[0]-ndat());
   for (int a=1; a<chi_sq.size(); ++a) {
     double diff_new = std::abs(chi_sq[a]-ndat());
