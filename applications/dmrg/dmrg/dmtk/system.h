@@ -38,7 +38,7 @@
 #include <iomanip>
 #include <math.h>
 #include <sys/types.h>
-//#include <dirent.h>
+#include <sys/stat.h>
 #include "enums.h"
 #include "vector.h"
 #include "matrix.h"
@@ -93,12 +93,11 @@ class FileList
       { 
          std::string aux = dir;
          aux += "/";
-//         DIR *dir_ptr = opendir(aux.c_str());
-//         if(!dir_ptr){
-//           std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " << aux.c_str() << " or choose a different path." << std::endl;
-//           exit(-1);
-//         }
-//         closedir(dir_ptr);
+         struct stat dir_ptr;
+         if(!stat(aux.c_str(),&dir_ptr) == 0){
+           std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " << aux.c_str() << " or choose a different path." << std::endl;
+           exit(-1);
+         }
          std::cout << "ALPS DMRG temporary files will be written in " << aux.c_str() << std::endl;
          std::strcpy(temp_dir, aux.c_str()); 
       }
@@ -114,7 +113,7 @@ class FileList
          filename = temp_dir + filename;
          filename = filename + "XXXXXX" + '\0';
          filename.copy(this->last_filename,100);
-         /*int fd =*/ mktemp(this->last_filename); 
+         mktemp(this->last_filename); 
          _tmp_filenames[std::string(input)] = this->last_filename;
          std::cout << "Creating temp file " << this->last_filename << std::endl;
          return this->last_filename;
