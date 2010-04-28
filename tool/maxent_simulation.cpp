@@ -179,7 +179,7 @@ MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const d
   matrix_type B(b.size(),1);
   for (int i=0; i<M.size1(); ++i) 
     B(i,0) = -b[i];
-  ublas::vector<int> ipiv(b.size());
+  ublas::vector<fortran_int_t> ipiv(b.size());
   bindings::lapack::gesv(M, ipiv, B);
   return ublas::matrix_column<matrix_type>(B, 0);
 }

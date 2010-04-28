@@ -67,7 +67,7 @@ double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector
   // solve a*Green=Green0
   // gesv solves A*X=B, input for B is Green0, output (=solution X) is Green   
   Green = Green0; 
-  boost::numeric::ublas::vector<int> ipivot(N);
+  boost::numeric::ublas::vector<fortran_int_t> ipivot(N);
   boost::numeric::bindings::lapack::gesv(a,ipivot, Green);
   M.convert_from(Green); 
   double det_new=M.determinant();
