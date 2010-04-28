@@ -55,9 +55,13 @@
 #include <unistd.h>
 #endif // WITH_PTHREADS
 
+#include <sys/stat.h>
+
 #ifdef BOOST_MSVC
 #include <io.h>
 #endif
+
+#include <alps/utility/temporary_filename.hpp>
 
 using namespace std;
 
@@ -83,40 +87,33 @@ class FileList
 {
   private:
     std::map<std::string,std::string> _tmp_filenames;
-    char last_filename[100];
-    char temp_dir[100];
+    std::string last_filename;
+    std::string temp_dir;
   public:
     FileList() { set_temp_dir("./"); };
     FileList(const char *dir) { set_temp_dir(dir); }
 
     void set_temp_dir(const char *dir) 
       { 
-         std::string aux = dir;
-         aux += "/";
+         std::string aux = std::string(dir) + "/";
          struct stat dir_ptr;
-         if(!stat(aux.c_str(),&dir_ptr) == 0){
-           std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " << aux.c_str() << " or choose a different path." << std::endl;
-           exit(-1);
-         }
-         std::cout << "ALPS DMRG temporary files will be written in " << aux.c_str() << std::endl;
-         std::strcpy(temp_dir, aux.c_str()); 
+         if(!stat(aux.c_str(),&dir_ptr) == 0)
+           boost::throw_exception(std::runtime_error("*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path."));
+         std::cout << "ALPS DMRG temporary files will be written to " << aux << std::endl;
+         temp_dir = aux; 
       }
 
     const char * get_filename(const char *input) 
       {
-         std::map<std::string,std::string>::iterator old_name = _tmp_filenames.find(std::string(input));
+         std::string filename(input);
+         std::map<std::string,std::string>::iterator old_name = _tmp_filenames.find(filename);
          if(old_name != _tmp_filenames.end()) return (old_name->second).c_str();
 
-         std::string filename(input);
-         int pos = filename.find_first_of('_');
-         filename = filename.substr(0,pos+1);
-         filename = temp_dir + filename;
-         filename = filename + "XXXXXX" + '\0';
-         filename.copy(this->last_filename,100);
-         mktemp(this->last_filename); 
+         filename = filename.substr(0,filename.find_first_of('_')+1);
+         this->last_filename = alps::temporary_filename(temp_dir + filename+ "XXXXXX");
          _tmp_filenames[std::string(input)] = this->last_filename;
          std::cout << "Creating temp file " << this->last_filename << std::endl;
-         return this->last_filename;
+         return this->last_filename.c_str();
       }
 };
 
