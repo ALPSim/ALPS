@@ -7,5 +7,5 @@ BLAS_CLASSES_DIR=$(HOME)/alps_svn/
 #CXXFLAGS += -Wno-deprecated 
 
 CXXFLAGS += -I$(BLAS_CLASSES_DIR)
-CXXFLAGS += -DWERNER -DRUBTSOV
+CXXFLAGS += -DWERNER -DRUBTSOV -Wno-sign-compare
 

@@ -9,7 +9,7 @@ OMEGA_LOOP=1;
 TOLERANCE=0.0001;
 CONVERGED=0.0003;
 PARAMAGNET=1;
-G0OMEGA_INPUT="G0omega_input"
+G0OMEGA_INPUT="G0_omega_input"
 
 //Solver Parameters
 SOLVER="/Users/emanuel/alps_svn/DMFT-solvers/CTHF/cthf"
@@ -17,7 +17,7 @@ N=500;
 NMATSUBARA=500;
 NSELF=1500;
 K=1; //beta <U>
-START_SLICES=2;
+START_SLICES=1;
 MAX_TIME=120;
 TMPNAME="tmp_solver_file"
 MEASUREMENT_METHOD="SELFENERGY";

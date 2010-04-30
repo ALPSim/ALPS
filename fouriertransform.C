@@ -28,7 +28,6 @@
 #include "fouriertransform.h"
 #include "cluster.h"
 #include <valarray>
-#include <boost/numeric/bindings/lapack/lapack.hpp>
 #include <boost/numeric/bindings/traits/ublas_matrix.hpp>
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/parameter.h>

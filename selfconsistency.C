@@ -71,7 +71,6 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     G0_tau_old = G0_tau;
     std::cout<<"running solver"<<std::endl;
     G_tau = solver.solve(G0_tau, parms);
-    //std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
     G_tau = hilbert.symmetrize(G_tau, paramagnet);
     G0_tau= hilbert(G_tau, mu, h, beta);
