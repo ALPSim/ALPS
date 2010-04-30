@@ -38,8 +38,8 @@ ImpuritySolver::result_type ExternalSolver::solve(
   std::string infile = alps::temporary_filename("alps_external_solver_");
   std::string outfile = alps::temporary_filename("alps_external_solver_out_");
   if(parms.defined("TMPNAME")){
-    infile+=std::string(".in.xml");
-    outfile+=std::string(".out.xml");
+    infile=parms["TMPNAME"]+std::string(".in.xml");
+    outfile=parms["TMPNAME"]+std::string(".out.xml");
   }
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
@@ -95,8 +95,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   std::string infile = alps::temporary_filename("alps_external_solver_");
   std::string outfile = alps::temporary_filename("alps_external_solver_out_");
   if(parms.defined("TMPNAME")){
-    infile+=std::string(".in.xml");
-    outfile+=std::string(".out.xml");
+    infile=parms["TMPNAME"]+std::string(".in.xml");
+    outfile=parms["TMPNAME"]+std::string(".out.xml");
   }
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
