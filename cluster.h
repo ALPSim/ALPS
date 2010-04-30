@@ -31,9 +31,10 @@
 #include "hilberttransformer.h"
 #include <alps/lattice/graph_helper.h>
 
-#include <boost/numeric/ublas/matrix.hpp>
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
-#include <boost/numeric/bindings/lapack/gesv.hpp>
+#include <alps/config.h> // needed to set up correct bindings
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 #include <boost/numeric/bindings/traits/type.h>
 
 
@@ -431,7 +432,8 @@ inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse
   for (unsigned int i=0; i<M.size1(); ++i) 
     for (unsigned int j=0; j<M.size2(); ++j) 
       M_inv(i,j) = (T)(i==j);
-  boost::numeric::bindings::lapack::gesv(M, M_inv);
+  boost::numeric::ublas::vector<fortran_int_t> ipivot(M.size1());
+  boost::numeric::bindings::lapack::gesv(M,ipivot, M_inv);
   return M_inv;
 }
 

@@ -1,6 +1,6 @@
-include /opt/alps/share/alps/include.mk
+include $(HOME)/ALPS_CMAKE/share/alps/include.mk
 #BLAS classes directory
-BLAS_CLASSES_DIR=$(HOME)/alps_svn/
+BLAS_CLASSES_DIR=$(HOME)/alps_svn
 #CXX optimization flags
 #CXXFLAGS +=  -g -O3 -funroll-loops -ftree-vectorize -march=core2 -W -Wno-sign-compare
 #CXX warning flags
