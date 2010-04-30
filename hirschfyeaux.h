@@ -37,7 +37,8 @@
 #include <alps/osiris/dump.h>
 #include <alps/osiris/std/vector.h>
 
-#include <boost/numeric/bindings/traits/ublas_matrix.hpp>
+#include <alps/config.h> // needed to set up correct bindings
+#include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include <stack>
