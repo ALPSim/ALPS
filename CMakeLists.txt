@@ -651,9 +651,9 @@ endif(ALPS_PATCH_VISTRAILS)
 # documentation
 ######################################################################
 
-if (ALPS_BUILD_DOC AND NOT WIN32)
+if (ALPS_BUILD_DOC)
 add_subdirectory(doc)
-endif (ALPS_BUILD_DOC AND NOT WIN32)
+endif (ALPS_BUILD_DOC)
 
 ######################################################################
 # libraries
