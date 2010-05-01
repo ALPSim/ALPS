@@ -1,5 +1,4 @@
 LATTICE="ladder"
-LATTICE_LIBRARY="../lattices.xml"
 L=60
 J0=-1
 J1=-1

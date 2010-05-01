@@ -1,13 +1,11 @@
 LATTICE="chain lattice"
 MODEL="spin"
-LATTICE_LIBRARY="../lattices.xml"
-MODEL_LIBRARY="../models.xml"
 local_S=1/2
 L=60
 J=1
 THERMALIZATION=15000
 SWEEPS=150000
-ALGORITHM="loop; path integral"
+ALGORITHM="loop"
 {T=0.05;}
 {T=0.1;}
 {T=0.2;}

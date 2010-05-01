@@ -1,5 +1,4 @@
 LATTICE="chain lattice"
-LATTICE_LIBRARY="../lattices.xml"
 L=60
 J=-1
 THERMALIZATION=15000
