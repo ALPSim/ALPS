@@ -1,1 +1,1 @@
-rm */parm*xml */*clone* */*.xsl */*.run* */*.dat
+rm */parm*xml */*clone* */*.xsl */*.run* */*.dat */*.h5

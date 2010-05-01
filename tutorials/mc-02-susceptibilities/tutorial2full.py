@@ -33,3 +33,5 @@ plt.xlabel('Temperature $T/J$')
 plt.ylabel('Susceptibility $\chi J$')
 plt.ylim(0,0.25)
 plt.legend()
+plt.show()
+
