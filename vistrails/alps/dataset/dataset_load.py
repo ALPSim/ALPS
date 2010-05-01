@@ -85,7 +85,7 @@ class Loader:
             
             self.sets.append(res)
 
-class LoadDataSet(Module):
+class LoadDataSetsFromTextFile(Module):
     """Load dataset from text data. Description of input ports:
     @file: The file, of which only the name is used.
     @label: A possible label for the dataset
@@ -127,7 +127,7 @@ class LoadDataSet(Module):
             l.read_set(filename,label,xc,yc)
             self.setResult('data', l.sets)
 
-class CustomLoader(Module):
+class LoadCustomFile(Module):
     my_input_ports = [
         PortDescriptor("source",basic.String,use_python_source=True),
         PortDescriptor("base_path",basic.String)
@@ -142,7 +142,7 @@ class CustomLoader(Module):
             proc_code = urllib.unquote(str(code))
             exec proc_code
 
-class LoadProperties(Module):
+class LoadAlpsProperties(Module):
     my_input_ports = [
         PortDescriptor('ResultFiles', ResultFiles),
         PortDescriptor('PropertyPath',basic.String) 
@@ -160,7 +160,7 @@ class LoadProperties(Module):
         dictlist = loader.GetProperties(flist)
         self.setResult('Props', dictlist)
     
-class LoadAlpsHdf5(Module):
+class LoadAlpsMeasurements(Module):
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('Measurements',ListOfElements),
@@ -220,7 +220,7 @@ class LoadBinningAnalysis(Module):
         self.setResult('data',datasets)
 
 
-class LoadSpectrumHdf5(Module):
+class LoadAlpsSpectra(Module):
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('PropertyPath',basic.String),
@@ -241,7 +241,7 @@ class LoadSpectrumHdf5(Module):
         datasets = loader.ReadSpectrumFromFile(files,propPath,resPath)
         self.setResult('data',datasets)
         
-class LoadAlpsDiagData(Module):
+class LoadAlpsEigenstateMeasurements(Module):
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('PropertyPath',basic.String),
@@ -272,7 +272,7 @@ class LoadAlpsDiagData(Module):
             
         self.setResult('data',datasets)
 
-class GroupBy(Module):
+class GroupDataSets(Module):
     my_input_ports = [
         PortDescriptor('for-each',ListOfElements),
         PortDescriptor('input',DataSets)
@@ -319,7 +319,7 @@ class GroupBy(Module):
         else:
             raise EmptyInputPort('for-each || observable')
 
-class CollectXY(Module):
+class CollectDataSets(Module):
     my_input_ports = [
         PortDescriptor('for-each',ListOfElements),
         PortDescriptor('y',basic.String),

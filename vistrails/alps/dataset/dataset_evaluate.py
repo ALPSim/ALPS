@@ -65,7 +65,7 @@ class ConstantDataSet(Module):
         else:
             raise EmptyInputPort('value || source')
 
-class GenerateDataSet(Module):
+class PrepareDataSets(Module):
     my_input_ports = [PortDescriptor('source',basic.String,use_python_source=True)]
     my_output_ports = [PortDescriptor('output',DataSets)]
     
@@ -86,7 +86,7 @@ class GenerateDataSet(Module):
         else:
             raise EmptyInputPort('source')
 
-class Transform(Module):
+class TransformEachDataSet(Module):
     my_input_ports = [
         PortDescriptor("input",DataSets),
         PortDescriptor("source",basic.String,use_python_source=True)
@@ -131,7 +131,7 @@ class Transform(Module):
         else:
             raise EmptyInputPort('input || source')
 
-class GroupedTransform(Module):
+class TransformGroupedDataSets(Module):
     my_input_ports = [
         PortDescriptor("input",DataSets),
         PortDescriptor("source",basic.String,use_python_source=True),
@@ -162,7 +162,7 @@ class GroupedTransform(Module):
         else:
             raise EmptyInputPort('input || source')
 
-class TransformProperties(Transform):
+class TransformProperties(TransformEachDataSet):
     deepcopy_all = False
 
 def AddDataSetsInputPorts(m, Nmax):

@@ -30,10 +30,7 @@ basic = core.modules.basic_modules
 
 ##############################################################################
 
-class SimulationID(basic.String):
-    """ a simulation ID """
-
-class OldSimulationID(basic.String):
+class SimulationName(basic.String):
     """ a simulation ID """
 
 class LatticeModel(parameters.Parameters): 
@@ -43,11 +40,11 @@ class LatticeModel(parameters.Parameters):
         res=self.updateFromPort('lattice',res)
         res=self.updateFromPort('model',res)
         self.setOutput(res)
-    _input_ports = [('lattice', [lattices.LatticeParameters]),
-                     ('model', [models.ModelParameters])]
+    _input_ports = [('lattice', [lattices.Lattice]),
+                     ('model', [models.Model])]
     _output_ports=[('value', [SystemParameters])]
 
-class DiagonalizationSimulation(parameters.Parameters):
+class PrepareDiagonalization(parameters.Parameters):
     """ a module collecting the typical input parameters for exact diagonalization """
     def compute(self):
         res = parameters.ParametersData({})
@@ -55,12 +52,12 @@ class DiagonalizationSimulation(parameters.Parameters):
            res=self.updateFromPort(port_name,res)
         self.setOutput(res)
     _input_ports = [('system', [SystemParameters]),
-                     ('conserved', [alpsparameters.ConservedQuantumnumbers]),
+                     ('conserved', [alpsparameters.ConservedQuantumNumbers]),
                      ('measurements',[alpsparameters.CustomMeasurements])]
     _output_ports=[('value', [SystemParameters])]
 
 
-class MonteCarloSimulation(parameters.Parameters):
+class PrepareMonteCarlo(parameters.Parameters):
     """ a module collecting the typical input parameters for a Monte Carlo simulation """
     def compute(self):
         res = parameters.ParametersData({})
@@ -73,7 +70,7 @@ class MonteCarloSimulation(parameters.Parameters):
                      ('measurements',[alpsparameters.MonteCarloMeasurements])]
     _output_ports=[('value', [SystemParameters])]
 
-class DMRGSimulation(parameters.Parameters):
+class PrepareDMRG(parameters.Parameters):
     """ a module collecting the typical input parameters for a DMRG simulation """
     def compute(self):
         res = parameters.ParametersData({})
@@ -82,77 +79,14 @@ class DMRGSimulation(parameters.Parameters):
         self.setOutput(res)
     _input_ports = [('system', [SystemParameters]),
                      ('dmrgparms', [alpsparameters.DMRGParameters]),
-                     ('conserved', [alpsparameters.ConservedQuantumnumbers]),
+                     ('conserved', [alpsparameters.ConservedQuantumNumbers]),
                      ('measurements',[alpsparameters.CustomMeasurements])]
     _output_ports=[('value', [SystemParameters])]
 
 
-class OldLatticeModel(parameters.Parameters): 
-    """ the simulation parameters, conistsing of model, lattice, and other parameters """
-    def compute(self):
-        res=self.updateFromPort('parms',parameters.ParametersData({}))
-        res=self.updateFromPort('lattice',res)
-        res=self.updateFromPort('model',res)
-        self.setOutput(res)
-    _input_ports = [('lattice', [lattices.LatticeParameters]),
-                     ('model', [models.ModelParameters])]
-    _output_ports=[('value', [SystemParameters])]
-
-class OldDiagonalizationSimulation(parameters.Parameters):
-    """ a module collecting the typical input parameters for exact diagonalization """
-    def compute(self):
-        res = parameters.ParametersData({})
-        for port_name in self.inputPorts:
-           res=self.updateFromPort(port_name,res)
-        self.setOutput(res)
-    _input_ports = [('system', [SystemParameters]),
-                     ('conserved', [alpsparameters.ConservedQuantumnumbers]),
-                     ('measurements',[alpsparameters.CustomMeasurements])]
-    _output_ports=[('value', [SystemParameters])]
-
-
-class OldMonteCarloSimulation(parameters.Parameters):
-    """ a module collecting the typical input parameters for a Monte Carlo simulation """
-    def compute(self):
-        res = parameters.ParametersData({})
-        for port_name in self.inputPorts:
-           res=self.updateFromPort(port_name,res)
-        self.setOutput(res)
-    _input_ports = [('system', [SystemParameters]),
-                     ('mcparms', [alpsparameters.MonteCarloParameters]),
-                     ('temperature',[alpsparameters.Temperature]),
-                     ('measurements',[alpsparameters.MonteCarloMeasurements])]
-    _output_ports=[('value', [SystemParameters])]
-
-class OldDMRGSimulation(parameters.Parameters):
-    """ a module collecting the typical input parameters for a DMRG simulation """
-    def compute(self):
-        res = parameters.ParametersData({})
-        for port_name in self.inputPorts:
-           res=self.updateFromPort(port_name,res)
-        self.setOutput(res)
-    _input_ports = [('system', [SystemParameters]),
-                     ('dmrgparms', [alpsparameters.DMRGParameters]),
-                     ('conserved', [alpsparameters.ConservedQuantumnumbers]),
-                     ('measurements',[alpsparameters.CustomMeasurements])]
-    _output_ports=[('value', [SystemParameters])]
 
 
 def initialize(): pass
 
-def register_parameters(type, ns="Applications"):
-  reg = core.modules.module_registry.get_module_registry()
-  reg.add_module(type,namespace=ns)
-  reg.add_output_port(type, "value", type)
 
-def selfRegister():
-  register_parameters(SimulationID)
-
-  reg = core.modules.module_registry.get_module_registry()
-  reg.add_module(OldSimulationID,name="SimulationID",namespace="System",abstract=True)
-  reg.add_output_port(OldSimulationID, "value", SimulationID)
-  reg.add_module(OldLatticeModel,name="LatticeModel",namespace="System",abstract=True)
-  reg.add_module(OldMonteCarloSimulation,name="MonteCarloSimulation",namespace="System",abstract=True)
-  reg.add_module(OldDiagonalizationSimulation,name="DiagonalizationSimulation",namespace="System",abstract=True)
-  reg.add_module(OldDMRGSimulation,name="DMRGSimulation",namespace="System",abstract=True)
 

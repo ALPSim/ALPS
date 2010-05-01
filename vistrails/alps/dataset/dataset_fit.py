@@ -70,7 +70,7 @@ class FitPrototype(Module):
                 self.transform(newsets[-1])
             self.setResult('output',newsets)
 
-class PolyFit(FitPrototype):
+class DoPolynomialFit(FitPrototype):
     my_input_ports = FitPrototype.my_input_ports + [PortDescriptor("degree",basic.Integer)]
     my_output_ports = FitPrototype.my_output_ports
     
@@ -90,7 +90,7 @@ class PolyFit(FitPrototype):
         
         return data
 
-class NonlinearFit(FitPrototype):
+class DoNonlinearFit(FitPrototype):
     my_input_ports = FitPrototype.my_input_ports + \
     [
         PortDescriptor('parameters',ListOfElements),

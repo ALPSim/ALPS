@@ -21,15 +21,27 @@ basic = core.modules.basic_modules
 ##############################################################################
 
 
-class ModelParameters(parameters.FixedAndDefaultParameters): 
+class Model(parameters.FixedAndDefaultParameters): 
     """ A dictionary of parameters defining a model"""
-    _input_ports = [('MODEL',[basic.String]),
-                    ('MODEL_LIBRARY',[basic.File])]
 
-class ClassicalSpinModel(ModelParameters):
+class ClassicalSpinModel(Model):
     """ the classical spin models for ALPS spinmc """
+    _input_ports = [('MODEL',[basic.String],True)]
 
-class SpinModel(ModelParameters):
+class ClassicalIsingModel(ClassicalSpinModel):
+    """ the classical Ising model for ALPS spinmc """
+    fixed = {'MODEL':'Ising'}
+
+class ClassicalXYModel(ClassicalSpinModel):
+    """ the classical XY model for ALPS spinmc """
+    fixed = {'MODEL':'XY'}
+
+class ClassicalHeisenbergModel(ClassicalSpinModel):
+    """ the classical Heisenberg model for ALPS spinmc """
+    fixed = {'MODEL':'Heisenberg'}
+
+                    
+class SpinModel(Model):
    fixed = {'MODEL'   : 'spin'}
    defaults =      {'J0'    : '0',
                     'J'     : 'J0',
@@ -54,7 +66,7 @@ class SpinModel(ModelParameters):
                     'Jxy#'  : 'J#'
                  }
 
-class BosonHubbardModel(ModelParameters):
+class BosonHubbardModel(Model):
    fixed = {'MODEL'   : 'boson Hubbard'}
    defaults =      {'mu'    : '0',
                     't'     : '1',
@@ -72,7 +84,7 @@ class BosonHubbardModel(ModelParameters):
                     'V#'    : '0'
                  }
 
-class HardcoreBosonModel(ModelParameters):
+class HardcoreBosonModel(Model):
    fixed = {'MODEL'   : 'hardcore boson'}
    defaults =      {'mu'    : '0',
                     't'     : '1',
@@ -91,7 +103,7 @@ class HardcoreBosonModel(ModelParameters):
 def register_model(type):
    reg = core.modules.module_registry.get_module_registry()
    reg.add_module(type,namespace="Models")
-   reg.add_input_port(type,'MODEL',[basic.String],True)
+   reg.add_input_port(type,'MODEL_LIBRARY',[basic.File])
 
 def register_parameters(type, ns="Models"):
    reg = core.modules.module_registry.get_module_registry()
@@ -104,8 +116,13 @@ def selfRegister():
 
    reg = core.modules.module_registry.get_module_registry()
   
-   register_parameters(ModelParameters)
-   reg.add_module(ClassicalSpinModel,namespace="Models")
+   register_parameters(Model)
+   
+   reg.add_module(ClassicalSpinModel,namespace="Models",abstract=True)
+   reg.add_module(ClassicalIsingModel,namespace="Models")
+   reg.add_module(ClassicalXYModel,namespace="Models")
+   reg.add_module(ClassicalHeisenbergModel,namespace="Models")
+   
    register_model(SpinModel)
    register_model(BosonHubbardModel)
    register_model(HardcoreBosonModel)

@@ -41,7 +41,7 @@ from dataset_core import *
 from pyalps.plot_core import *
 from pyalps.pyplot import *
 
-class AxisDescriptor(Descriptor, Module):
+class Axis(Descriptor, Module):
     my_input_ports = [
         PortDescriptor('label',basic.String),
         PortDescriptor('min',basic.Float),
@@ -50,25 +50,25 @@ class AxisDescriptor(Descriptor, Module):
         PortDescriptor('fontsize',basic.Integer)
     ]
 
-class LegendDescriptor(Descriptor, Module):
+class Legend(Descriptor, Module):
     my_input_ports = [
         PortDescriptor('location',basic.Integer),
         PortDescriptor('fontsize',basic.Integer),
         PortDescriptor('scatter_labels',basic.Boolean)
     ]
 
-class PlotDescriptor(Descriptor, Module):
+class PreparePlot(Descriptor, Module):
     my_input_ports = [
-        PortDescriptor('xaxis',AxisDescriptor),
-        PortDescriptor('yaxis',AxisDescriptor),
-        PortDescriptor('legend',LegendDescriptor),
+        PortDescriptor('xaxis',Axis),
+        PortDescriptor('yaxis',Axis),
+        PortDescriptor('legend',Legend),
         PortDescriptor('data',DataSets),
         PortDescriptor('title',basic.String)
     ]
 
 class MplXYPlot(NotCacheable,Module):
     my_input_ports = [
-        PortDescriptor('plot',PlotDescriptor),
+        PortDescriptor('plot',PreparePlot),
         PortDescriptor('hide_buttons',basic.Boolean),
         PortDescriptor('source',basic.String,use_python_source=True)
     ]
@@ -104,8 +104,8 @@ class MplXYPlot(NotCacheable,Module):
             print_exc()
             raise exc
         
-class Convert2Text(Module): 
-    _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
+class WriteTextFile(Module): 
+    _input_ports = [('plot',[(PreparePlot,'the plot')])]
     _output_ports = [('file',[(basic.File, 'the plot file')]),
                      ('value_as_string',[(basic.String, 'the plot as string')])]
     
@@ -119,8 +119,8 @@ class Convert2Text(Module):
         self.setResult('value_as_string',res)
         self.setResult('file',0)
 
-class GraceXYPlot(Module): 
-    _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
+class WriteGraceFile(Module): 
+    _input_ports = [('plot',[(PreparePlot,'the plot')])]
     _output_ports = [('file',[(basic.File, 'the plot file')]),
                      ('value_as_string',[(basic.String, 'the plot as string')])]
     
@@ -136,13 +136,13 @@ class GraceXYPlot(Module):
 
 class LoadXMLPlot(Module): 
     _input_ports = [('file',[(basic.File, 'the plot file')])]
-    _output_ports = [('plot',[(PlotDescriptor,'the plot')])]
+    _output_ports = [('plot',[(PreparePlot,'the plot')])]
     
     def compute(self):
         self.setResult('plot',read_xml(self.getInputFromPort('file').name))
         
-class Convert2Gnuplot(Module): 
-    _input_ports = [('plot',[(PlotDescriptor,'the plot')])]
+class WriteGnuplotFile(Module): 
+    _input_ports = [('plot',[(PreparePlot,'the plot')])]
     _output_ports = [('file',[(basic.File, 'the plot file')]),
                      ('value_as_string',[(basic.String, 'the plot as string')])]
     
@@ -161,9 +161,9 @@ class Plotter(NotCacheable, Module):
     my_input_ports = [
         PortDescriptor('data',DataSets),
         PortDescriptor('title',basic.String,hidden=True),
-        PortDescriptor('xaxis',AxisDescriptor),
-        PortDescriptor('yaxis',AxisDescriptor),
-        PortDescriptor('legend',LegendDescriptor),
+        PortDescriptor('xaxis',Axis),
+        PortDescriptor('yaxis',Axis),
+        PortDescriptor('legend',Legend),
         PortDescriptor('hide_buttons',basic.Boolean,hidden=True),
         PortDescriptor('source',basic.String,use_python_source=True)
     ]

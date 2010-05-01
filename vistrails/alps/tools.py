@@ -68,7 +68,7 @@ class UnzipDirectory(Module):
         
         self.setResult('output_dir',dir)
 
-class MakeParameterFile(Module):
+class WriteParameterFile(Module):
      """Creates a parameter file.
      """
      def compute(self):
@@ -86,9 +86,9 @@ class MakeParameterFile(Module):
          self.setResult('file', o)
          self.setResult('simulationid',os.path.basename(o.name))
      _input_ports = [('parms', [Parameters]),
-                     ('simulationid',[system.SimulationID])]
+                     ('simulationid',[system.SimulationName])]
      _output_ports=[('file', [basic.File]),
-                    ('simulationid',[system.SimulationID])]
+                    ('simulationid',[system.SimulationName])]
 
 
 class WriteInputFiles(Module):
@@ -133,11 +133,9 @@ class WriteInputFiles(Module):
          self.setResult("output_file", ofile)
      _input_ports = [('parms', [Parameters]),
                      ('baseseed',[basic.Integer],True),
-                     ('simulationid',[system.SimulationID])]
+                     ('simulationid',[system.SimulationName])]
      _output_ports = [('output_file', [basic.File]),
                      ('output_dir', [basic.Directory])]
-
-class MakeParameterXMLFiles(WriteInputFiles): pass
 
 class Parameter2XML(alpscore.SystemCommandLogged):
     def compute(self):
@@ -176,7 +174,7 @@ class Glob(Module):
     _input_ports = [('input_file',[basic.File])]
     _output_ports = [('value',[ListOfElements])]
 
-class GetRunFiles(Module):
+class GetCloneFiles(Module):
      def compute(self):
          tasks = '*'
          runs = '*[0-9]'
@@ -255,7 +253,7 @@ class Convert2Text(alpscore.SystemCommand):
     _input_ports = [('input_file', [basic.File])]
     _output_ports = [('output_file', [basic.File])]
 
-class XML2HTML(alpscore.SystemCommand):
+class ConvertXML2HTML(alpscore.SystemCommand):
     def compute(self):
         input_file = self.getInputFromPort('input_file')
         output_file = self.interpreter.filePool.create_file(suffix='.html')
@@ -291,7 +289,7 @@ class GetSimName:
         return l[0]
 
 
-class GetSimulationInDir(basic.Module,GetSimName):
+class GetJobFile(basic.Module,GetSimName):
     def compute(self):
         dir = self.getInputFromPort("dir")
         o = basic.File
@@ -323,21 +321,20 @@ def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
   
-  reg.add_module(MakeParameterFile,namespace="Tools",abstract=True)
+  reg.add_module(WriteParameterFile,namespace="Tools",abstract=True)
   reg.add_module(Parameter2XML,namespace="Tools",abstract=True)
   reg.add_module(WriteInputFiles,namespace="Tools")
-  reg.add_module(MakeParameterXMLFiles,namespace="Tools",abstract=True)
   
   reg.add_module(Glob,namespace="Tools",abstract=True)
-  reg.add_module(GetRunFiles,namespace="Tools")
+  reg.add_module(GetCloneFiles,namespace="Tools")
   reg.add_module(GetResultFiles,namespace="Tools")
   
   reg.add_module(Convert2XML,namespace="Tools")
   reg.add_module(Convert2Text,namespace="Tools")
-  reg.add_module(XML2HTML,namespace="Tools")
+  reg.add_module(ConvertXML2HTML,namespace="Tools")
 
   reg.add_module(UnzipDirectory,namespace="Tools")
 
-  reg.add_module(GetSimulationInDir,namespace="Tools")
+  reg.add_module(GetJobFile,namespace="Tools")
 
   reg.add_module(PickFileFromList,namespace="Tools")

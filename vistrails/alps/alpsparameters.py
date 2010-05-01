@@ -102,7 +102,7 @@ class Temperature(Parameters):
                    ('beta',[(basic.String, 'the inverse temperature')])]
 
 
-class ConservedQuantumnumbers(Parameters):
+class ConservedQuantumNumbers(Parameters):
     """ defines conserved quantum numbers for exact diagonalization """
     _input_ports = [('CONSERVED_QUANTUMNUMBERS', [basic.String])]
 
@@ -152,7 +152,7 @@ def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
 
-  register_parameters(SystemParameters,"System")
+  register_parameters(SystemParameters,"Parameters")
 
   register_parameters(MonteCarloMeasurements)
   register_parameters(MonteCarloParameters)
@@ -163,7 +163,7 @@ def selfRegister():
 
   register_parameters(Temperature)
   
-  register_parameters(ConservedQuantumnumbers)
+  register_parameters(ConservedQuantumNumbers)
   register_abstract_parameters(CustomMeasurements)
   reg.add_module(CustomMeasurement,namespace="Parameters",abstract=True)
   reg.add_module(LocalMeasurement,namespace="Parameters")

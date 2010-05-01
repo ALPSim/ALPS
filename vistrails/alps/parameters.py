@@ -127,11 +127,6 @@ def make_parameter_data(p):
     else:
       raise "unknown type passed to make_parameter_data"
 
-class ParameterValue(basic.String):
-    """ a class holding values for a parameter """
-    @staticmethod
-    def get_widget_class():
-        return StandardConstantWidget
 
 class ParameterValueList(list):
     """ a class holding values for a parameter """
@@ -204,7 +199,7 @@ class MergeParameters(Module):
     _output_ports = [('value',[Parameters])]
 
 
-class CombineParameters(Module,CommonParametersFunctions):
+class ConcatenateParameters(Module,CommonParametersFunctions):
     """ join parameters from several lists, merging the parameters from each index """
     def compute(self):
         if self.hasInputFromPort('parms'):
@@ -308,11 +303,10 @@ def selfRegister():
   register_parameters(Parameters)
   reg.add_input_port(Parameters, "parms", Parameters)
 
-  reg.add_module(ParameterValue,namespace="Parameters")
   reg.add_module(Parameter,namespace="Parameters")
   reg.add_module(FixedAndDefaultParameters,namespace="Parameters",abstract=True)
   reg.add_module(MergeParameters,namespace="Parameters")
-  reg.add_module(CombineParameters,namespace="Parameters")
+  reg.add_module(ConcatenateParameters,namespace="Parameters")
   reg.add_module(IterateParameter,namespace="Parameters")
   reg.add_module(IterateValue,namespace="Parameters")
   reg.add_module(UpdateParameters,namespace="Parameters")

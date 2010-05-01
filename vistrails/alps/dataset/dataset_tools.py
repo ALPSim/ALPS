@@ -44,13 +44,13 @@ from dataset_fit import *
 from pyalps.hlist import deep_flatten, flatten, happly, hmap, depth
 from pyalps.dict_intersect import dict_difference, dict_intersect
 
-class SortByX(FitPrototype):
+class SortEachDataSet(FitPrototype):
     def transform(self,data):
         order = np.argsort(data.x)
         data.x = data.x[order]
         data.y = data.y[order]
 
-class SelectXRange(FitPrototype):
+class RestrictXRange(FitPrototype):
     my_input_ports = [
         PortDescriptor('min',basic.Float),
         PortDescriptor('max',basic.Float)
@@ -188,7 +188,7 @@ class CycleMarkers(Module):
         
         self.setResult('output', input)
 
-class MakeScatter(FitPrototype):
+class SetPlotStyle(FitPrototype):
     def transform(self,data):
         data.props['line'] = 'scatter'
 

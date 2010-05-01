@@ -39,7 +39,7 @@ from dataset_exceptions import *
 
 from pyalps.hlist import flatten
 
-class Selector(Module):
+class Predicate(Module):
     my_input_ports = []
     my_output_ports = []
     
@@ -49,7 +49,7 @@ class Selector(Module):
                 raise EmptyInputPort(inp.name)
         self.setResult('output',self)
 
-class PropertySelector(Selector):
+class PropertyPredicate(Predicate):
     my_input_ports = [
         PortDescriptor('property_name',basic.String),
         PortDescriptor('property_value',basic.String)
@@ -62,7 +62,7 @@ class PropertySelector(Selector):
             return ds.props[pn] == pv
         return False
 
-class PropertyRangeSelector(Selector):
+class PropertyRangePredicate(Predicate):
     my_input_ports = [
         PortDescriptor('property_name',basic.String),
         PortDescriptor('min',basic.String),
@@ -85,7 +85,7 @@ class PropertyRangeSelector(Selector):
                 pmax = type(ds.props[pn])(self.getInputFromPort('max'))
         return False
 
-class ObservableSelector(Selector):
+class ObservablePredicate(Predicate):
     my_input_ports = [
         PortDescriptor('observable',basic.String)
     ]
@@ -99,7 +99,7 @@ class Select(Module):
     my_input_ports = [
         PortDescriptor("input",DataSets),
         PortDescriptor("source",basic.String,use_python_source=True),
-        PortDescriptor('select',Selector)
+        PortDescriptor('select',Predicate)
     ]
     my_output_ports = [
         PortDescriptor("kept",DataSets),
@@ -149,16 +149,16 @@ class SelectFiles(Select):
     my_input_ports = [
         PortDescriptor("input",ResultFiles),
         PortDescriptor("source",basic.String,use_python_source=True),
-        PortDescriptor("select",Selector)
+        PortDescriptor("select",Predicate)
     ]
     my_output_ports = [
         PortDescriptor("kept",ResultFiles),
         PortDescriptor("discarded",ResultFiles)
     ]
 
-class And(Selector):
+class And(Predicate):
     my_input_ports = [
-        PortDescriptor('selectors',Selector)
+        PortDescriptor('selectors',Predicate)
     ]
     
     def compute(self):

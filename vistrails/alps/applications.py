@@ -31,7 +31,7 @@ basic = core.modules.basic_modules
 ##############################################################################
 
 
-class AlpsApplication(alpscore.SystemCommandLogged):
+class RunAlpsApplication(alpscore.SystemCommandLogged):
     """ Runs an ALPS application for a given parameter file """
 
     def get_path(self,appname):
@@ -69,7 +69,7 @@ class AlpsApplication(alpscore.SystemCommandLogged):
         input_file = self.getInputFromPort('input_file')
         result = basic.File()
         result.name = input_file.name.replace('.in.xml', '.out.xml')
-        resultdir = basic.Directory
+        resultdir = basic.Directory()
         resultdir.name = os.path.dirname(result.name)
         an = self.get_app_name()
         if not os.path.isfile(an):
@@ -104,47 +104,43 @@ class AlpsApplication(alpscore.SystemCommandLogged):
     appname=''
     options=[]
                          
-class AppSpinMC(AlpsApplication):
+class RunSpinMC(RunAlpsApplication):
     """Runs spinmc for given parameter file """
     appname = 'spinmc'
 
-class SpinMC(AlpsApplication):
-    """Runs spinmc for given parameter file """
-    appname = 'spinmc'
-
-class AppLoop(AlpsApplication):
+class RunLoop(RunAlpsApplication):
     """Runs loop for given parameter file """
     def getoptions(self):
-        options = []
+        options = ['--auto-evaluate']
         if self.hasInputFromPort('tmin'):
             options += ['--report-interval', str(self.getInputFromPort('tmin'))]
         return options
     appname = 'loop'
 
-class AppDirLoopSSE(AlpsApplication):
+class RunDirLoopSSE(RunAlpsApplication):
     """Runs dirloop_sse for given parameter file """
     appname = 'dirloop_sse'
 
-class AppWorm(AlpsApplication):
+class RunWorm(RunAlpsApplication):
     """Runs worm for given parameter file """
     appname = 'worm'
 
-class AppFullDiag(AlpsApplication):
+class RunFullDiag(RunAlpsApplication):
     """Runs fulldiag for given parameter file """
     appname = 'fulldiag'
     options = ['--Nmax', '1']
 
-class AppSparseDiag(AlpsApplication):
+class RunSparseDiag(RunAlpsApplication):
     """Runs sparsediag for given parameter file """
     appname = 'sparsediag'
     options = ['--Nmax', '1']
 
-class AppDMRG(AlpsApplication):
+class RunDMRG(RunAlpsApplication):
     """Runs dmrg for given parameter file """
     appname = 'dmrg'
     options = ['--Nmax', '1']
 
-class AppQWL(AlpsApplication):
+class RunQWL(RunAlpsApplication):
     """Runs qwl for given parameter file """
     appname = 'qwl'
 
@@ -206,7 +202,7 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
     appname = ''
     options = []
 
-class EvaluateFullDiagT(AlpsEvaluate):
+class EvaluateFullDiagVersusT(AlpsEvaluate):
     appname = 'fulldiag_evaluate'
     _input_ports = [('T_MIN',[basic.Float]),
                     ('T_MAX',[basic.Float]),
@@ -222,7 +218,7 @@ class EvaluateFullDiagT(AlpsEvaluate):
              ('particle_number','Particle number per Site')]
 
 
-class EvaluateFullDiagH(AlpsEvaluate):
+class EvaluateFullDiagVersusH(AlpsEvaluate):
     appname = 'fulldiag_evaluate'
     options = ['--versus', 'h']
     _input_ports = [('H_MIN',[basic.Float]),
@@ -285,32 +281,34 @@ def register_evaluation(type):
     reg.add_output_port(type,port_name,[DataSets])
   reg.add_output_port(type,'log_file',[basic.File])
   
-  
+
 def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
   
 #  register_parameters(system.SimulationID)
   
-  reg.add_module(AlpsApplication,namespace="Applications")
+  reg.add_module(RunAlpsApplication,namespace="Applications")
   
-  register_application(AppSpinMC)
-  register_application(AppLoop)
-  register_application(AppWorm)
-  register_application(AppDirLoopSSE)
-  register_application(AppFullDiag)
-  register_application(AppSparseDiag)
-  register_application(AppDMRG)
-  register_application(AppQWL)
+  register_application(RunSpinMC)
+  register_application(RunLoop)
+  register_application(RunWorm)
+  register_application(RunDirLoopSSE)
+  register_application(RunFullDiag)
+  register_application(RunSparseDiag)
+  register_application(RunDMRG)
+  register_application(RunQWL)
   
   reg.add_module(AlpsEvaluate,namespace="Applications",abstract=True)
   
-  register_evaluation(EvaluateFullDiagT)
-  register_evaluation(EvaluateFullDiagH)
+  register_evaluation(EvaluateFullDiagVersusT)
+  register_evaluation(EvaluateFullDiagVersusH)
   register_application(EvaluateLoop)
   register_evaluation(EvaluateQWL)
   
+  register_parameters(system.SimulationName)
+
   reg.add_module(system.LatticeModel,namespace="Applications")
-  reg.add_module(system.MonteCarloSimulation,namespace="Applications")
-  reg.add_module(system.DiagonalizationSimulation,namespace="Applications")
-  reg.add_module(system.DMRGSimulation,namespace="Applications")
+  reg.add_module(system.PrepareMonteCarlo,namespace="Applications")
+  reg.add_module(system.PrepareDiagonalization,namespace="Applications")
+  reg.add_module(system.PrepareDMRG,namespace="Applications")

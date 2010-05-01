@@ -18,18 +18,18 @@ basic = core.modules.basic_modules
 
 ##############################################################################
 
-class LatticeParameters(parameters.FixedAndDefaultParameters):
+class Lattice(parameters.FixedAndDefaultParameters):
    _input_ports = [('LATTICE',[basic.String]),
                    ('LATTICE_LIBRARY',[basic.File])]
 
-class square_lattice(LatticeParameters):
+class SquareLattice(Lattice):
    """ a square lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
    fixed = {'LATTICE' : 'square lattice'}
    defaults = {'W':'L'}
 
-class simple_cubic_lattice(LatticeParameters):
+class SimpleCubicLattice(Lattice):
    """ a simple cubic lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')]),
@@ -37,33 +37,33 @@ class simple_cubic_lattice(LatticeParameters):
    fixed = {'LATTICE' : 'simple cubic lattice'}
    defaults = {'W':'L', 'H':'L'}
 
-class ladder(LatticeParameters):
-   """ a ladder lattice """
+class LadderLattice(Lattice):
+   """ a LadderLattice lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
-   fixed = {'LATTICE' : 'ladder'}
+   fixed = {'LATTICE' : 'LadderLattice'}
    defaults = {'W':'2'}
 
-class chain_lattice(LatticeParameters):
+class ChainLattice(Lattice):
    """ a chain lattice """
    _input_ports = [('L',[(basic.String, 'the length')])]
    fixed = {'LATTICE' : 'chain lattice'}
 
-class open_chain_lattice(LatticeParameters):
+class OpenChainLattice(Lattice):
    """ an open chain lattice """
    _input_ports = [('L',[(basic.String, 'the length')])]
    fixed = {'LATTICE' : 'open chain lattice'}
 
-class dimerized_chain_lattice(LatticeParameters):
+class DimerizedChainLattice(Lattice):
     """ a chain lattice with two different bonds """
     _input_ports = [('L',[(basic.String, 'the length')])]
     fixed = {'LATTICE' : 'dimerized chain lattice'}
 
-class open_ladder(LatticeParameters):
-   """ an open ladder lattice """
+class OpenLadderLattice(Lattice):
+   """ an open LadderLattice lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
-   fixed = {'LATTICE' : 'open ladder'}
+   fixed = {'LATTICE' : 'open LadderLattice'}
    defaults = {'W':'2'}
 
 
@@ -78,15 +78,15 @@ def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
 
-  reg.add_module(LatticeParameters,namespace="Lattices")
-  reg.add_output_port(LatticeParameters, "value", LatticeParameters)
+  reg.add_module(Lattice,namespace="Lattices")
+  reg.add_output_port(Lattice, "value", Lattice)
 
-  register_lattice(chain_lattice)
-  register_lattice(open_chain_lattice)
-  register_lattice(dimerized_chain_lattice)
-  register_lattice(ladder)
-  register_lattice(open_ladder)
-  register_lattice(square_lattice)
-  register_lattice(simple_cubic_lattice)
+  register_lattice(ChainLattice)
+  register_lattice(OpenChainLattice)
+  register_lattice(DimerizedChainLattice)
+  register_lattice(LadderLattice)
+  register_lattice(OpenLadderLattice)
+  register_lattice(SquareLattice)
+  register_lattice(SimpleCubicLattice)
   
  

@@ -87,7 +87,7 @@ class SystemCommandLogged(Module):
     _output_ports = [('log_file',[basic.File])]
 
 
-class OpenHTML(NotCacheable, SystemCommand):
+class DisplayInBrowser(NotCacheable, SystemCommand):
     """ open the file using the system open command """
     def compute(self):
         cmdlist = 'false'
@@ -105,7 +105,7 @@ class OpenHTML(NotCacheable, SystemCommand):
     _input_ports = [('file', [basic.File]),
                     ('files', [ListOfElements])]
 
-class TextFile(basic.Module):
+class WriteTextFile(basic.Module):
     def compute(self):
         if self.hasInputFromPort('suffix'):
           f = self.interpreter.filePool.create_file(suffix=self.getInputFromPort('suffix'))
@@ -206,8 +206,8 @@ def selfRegister():
 
     reg.add_module(SystemCommand,namespace="Tools",abstract=True)
     reg.add_module(SystemCommandLogged,namespace="Tools",abstract=True)
-    reg.add_module(OpenHTML,namespace="Tools")
-    reg.add_module(TextFile,namespace="Tools")
+    reg.add_module(DisplayInBrowser,namespace="Tools")
+    reg.add_module(WriteTextFile,namespace="Tools")
 
     reg.add_module(TextCell,namespace="Tools")
     reg.add_input_port(TextCell, "Location", CellLocation)
