@@ -86,9 +86,9 @@ class WriteParameterFile(Module):
          self.setResult('file', o)
          self.setResult('simulationid',os.path.basename(o.name))
      _input_ports = [('parms', [Parameters]),
-                     ('simulationid',[system.SimulationName])]
+                     ('simulationid',[basic.String])]
      _output_ports=[('file', [basic.File]),
-                    ('simulationid',[system.SimulationName])]
+                    ('simulationid',[basic.String])]
 
 
 class WriteInputFiles(Module):
@@ -133,7 +133,7 @@ class WriteInputFiles(Module):
          self.setResult("output_file", ofile)
      _input_ports = [('parms', [Parameters]),
                      ('baseseed',[basic.Integer],True),
-                     ('simulationid',[system.SimulationName])]
+                     ('simulationid',[basic.String])]
      _output_ports = [('output_file', [basic.File]),
                      ('output_dir', [basic.Directory])]
 

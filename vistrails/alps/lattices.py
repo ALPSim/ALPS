@@ -41,7 +41,7 @@ class LadderLattice(Lattice):
    """ a LadderLattice lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
-   fixed = {'LATTICE' : 'LadderLattice'}
+   fixed = {'LATTICE' : 'ladder'}
    defaults = {'W':'2'}
 
 class ChainLattice(Lattice):
@@ -63,7 +63,7 @@ class OpenLadderLattice(Lattice):
    """ an open LadderLattice lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
-   fixed = {'LATTICE' : 'open LadderLattice'}
+   fixed = {'LATTICE' : 'open ladder'}
    defaults = {'W':'2'}
 
 
