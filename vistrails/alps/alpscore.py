@@ -91,10 +91,13 @@ class DisplayInBrowser(NotCacheable, SystemCommand):
     """ open the file using the system open command """
     def compute(self):
         cmdlist = 'false'
-        if platform.system() == 'Windows':
-          cmdlist = ['start','C:\Program Files\Internet Explorer\iexplore.exe']
-        if platform.system()=='Darwin':
-          cmdlist = ['open', '-a', 'Safari']
+        if config.check('browser'):
+          cmdlist = config.browser
+        else:
+          if platform.system() == 'Windows':
+            cmdlist = ['start','C:\Program Files\Internet Explorer\iexplore.exe']
+          if platform.system()=='Darwin':
+            cmdlist = ['open', '-a', 'Safari']
         if self.hasInputFromPort('file'):
            cmdlist += [self.getInputFromPort('file').name]
         if self.hasInputFromPort('files'):

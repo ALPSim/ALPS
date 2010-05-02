@@ -32,6 +32,7 @@ import dataset
 
 _subworkflows = [('MplXYPlotCell.xml', {'namespace': 'Tools'}),
                  ('ShowListOfPlots.xml', {'namespace': 'Dataset|Plot'}),
+                 ('ShowMplPlot.xml', {'namespace': 'Dataset|Plot'}),
                  ('ShowListOfXMLFiles.xml', {'namespace': 'Tools'})]
 
 def handle_module_upgrade_request(controller, module_id, pipeline):
@@ -95,7 +96,8 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'LegendDescriptor': (dataset.Legend,{}),
                    'Convert2Text': (dataset.WriteTextFile,{}),
                    'Convert2Grace': (dataset.WriteGraceFile,{}),
-                   
+                   'DisplayXMGRPlot': (plots.DisplayGracePlot,{}),
+                   'GraceXYPlot': (dataset.WriteGraceFile,{}),
                    
                    'PolyFit': (dataset.DoPolynomialFit,{}),
                    'NonlinearFit': (dataset.DoNonlinearFit,{}),
