@@ -102,9 +102,12 @@ private:
   int verbose;
   int nwarmup;
 
-// For resuming a previous run
+  // For resuming a previous run
   int start_sweep;
   int start_dir;
   int start_iter;
+  
+// measurements during iterations
+  std::vector<alps::EigenvectorMeasurements<value_type> > iteration_measurements;
 };
 

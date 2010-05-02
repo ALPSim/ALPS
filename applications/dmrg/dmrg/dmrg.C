@@ -344,6 +344,16 @@ void DMRGTask::dostep()
     average_values["Energy"].push_back(S.energy[i]);
   }
   average_values["Truncation error"].push_back(S.truncation_error());
+  
+  
+  // this shows how to put results into the iteration measurements
+  
+  // add empty measurements for most iterations
+  for (unsigned int i=0; i<num_sweeps ; ++i)
+    iteration_measurements.push_back(alps::EigenvectorMeasurements<value_type>(*this));
+  // just put in the energy for the last
+    iteration_measurements.back().average_values["Energy"].push_back(S.energy[i]);
+  
   finish();
 }
 
@@ -391,6 +401,14 @@ void DMRGTask::serialize(alps::hdf5::oarchive & ar) const
   if (it != average_values.end())
     ar << alps::make_pvp("spectrum/energies",it->second);
   ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<double>&>(*this));
+
+  for (std::size_t i=0;i<iteration_measurements.size();++i) {
+    ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i),iteration_measurements[i]);
+    std::map<std::string,std::vector<value_type> >::const_iterator it = iteration_measurements[i].average_values.find("Energy");
+    if (it != average_values.end())
+      ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i)+"/energies",it->second);
+  }
+    
 }
 #endif
 
