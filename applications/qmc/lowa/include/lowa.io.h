@@ -106,11 +106,13 @@ void Lowa::load_lowa()
   }
   inFile.close();
 
+#ifndef MEASURE_TIME_SERIES_DENSITY
   inFile.open(filename_dns.c_str(), std::ios::in);
   if (!inFile.good()) { // file is absent
     reset_av_dns();
   }
   inFile.close();
+#endif
 }
 
 

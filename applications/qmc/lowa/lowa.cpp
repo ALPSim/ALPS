@@ -260,6 +260,8 @@ void Lowa::init()
   _state        = new fock_basis_type [_N];
 
 #ifndef MEASURE_TIME_SERIES_DENSITY
+  av_dns       = new obs_type [_N];
+
   reset_av_dns();
 #endif
 
