@@ -403,9 +403,10 @@ void DMRGTask::serialize(alps::hdf5::oarchive & ar) const
   ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<double>&>(*this));
 
   for (std::size_t i=0;i<iteration_measurements.size();++i) {
-  //  ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i),iteration_measurements[i]);
-  //  std::map<std::string,std::vector<value_type> >::const_iterator it = iteration_measurements[i].average_values.find("Energy");
-    if (it != average_values.end())
+    std::cerr << "Serializing iteration " << i << "\n";
+    ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i),iteration_measurements[i]);
+    std::map<std::string,std::vector<value_type> >::const_iterator it = iteration_measurements[i].average_values.find("Energy");
+    if (it != iteration_measurements[i].average_values.end())
       ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i)+"/energies",it->second);
   }
     

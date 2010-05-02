@@ -92,7 +92,7 @@ class DisplayInBrowser(NotCacheable, SystemCommand):
     def compute(self):
         cmdlist = 'false'
         if config.check('browser'):
-          cmdlist = config.browser
+          cmdlist = eval(config.browser)
         else:
           if platform.system() == 'Windows':
             cmdlist = ['start','C:\Program Files\Internet Explorer\iexplore.exe']

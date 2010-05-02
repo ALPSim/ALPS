@@ -24,7 +24,7 @@ basic = core.modules.basic_modules
 
 ##############################################################################
 
-class DisplayXMGRPlot(NotCacheable, alpscore.SystemCommand):
+class DisplayGracePlot(NotCacheable, alpscore.SystemCommand):
      """ open the file using  xmgr command """
      def compute(self):
          print alpscore._get_tool_path('xmgrace')
@@ -166,7 +166,6 @@ def selfRegister():
   reg.add_module(PlotDescription,namespace="Plots",abstract=True)
   reg.add_output_port(PlotDescription, "value", PlotDescription)
   reg.add_output_port(PlotDescription, "self", PlotDescription, True)
-#  reg.add_module(PlotDescriptionXML,namespace="Plots")
   reg.add_module(PlotScalarVersusParameter,namespace="Plots",abstract=True)
   reg.add_module(PlotFile,namespace="Plots",abstract=True)
 
@@ -179,9 +178,8 @@ def selfRegister():
   reg.add_module(Plot2Text,namespace="Plots",abstract=True)
   reg.add_module(Plot2Mpl,namespace="Plots",abstract=True)
   
-#  reg.add_module(DisplayXMGRPlot,namespace="Plots",abstract=True)
-  reg.add_module(DisplayXMGRPlot,name="DisplayGracePlot",namespace="DataSet|Plot")
-  reg.add_module(DisplayGnuplot,name="DisplayGnuplotPlot",namespace="DataSet|Plot")
+  reg.add_module(DisplayGracePlot,namespace="DataSet|Plot")
+  reg.add_module(DisplayGnuplot,namespace="DataSet|Plot")
   reg.add_module(AlpsMplPlot,namespace="Plots",abstract=True)
   
  # reg.add_module(MakePlot)

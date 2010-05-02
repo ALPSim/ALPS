@@ -19,9 +19,10 @@ if (ALPS_BUILD_SOURCE)
             09-particle-in-box-dmrg
             10-dmrg
           DESTINATION tutorials
-          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" 
+          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
           PATTERN "*.h5" EXCLUDE PATTERN "*.xml" EXCLUDE 
+          PATTERN "*clone*" EXCLUDE
           PATTERN "*.xsl" EXCLUDE PATTERN "*.run*" EXCLUDE)
 else (ALPS_BUILD_SOURCE)
   install(DIRECTORY . DESTINATION tutorials COMPONENT tutorials

@@ -19,6 +19,7 @@ import tools
 import os
 import system
 import glob
+import copy
 
 from packages.vtlcreator.init import VtlFileCreator
 from core.modules.vistrails_module import ModuleError
@@ -55,7 +56,7 @@ class RunAlpsApplication(alpscore.SystemCommandLogged):
         return np
 
     def getoptions(self):
-        options = self.options
+        options = copy.deepcopy(self.options)
         if self.hasInputFromPort('tmin'):
             options += ['--Tmin', str(self.getInputFromPort('tmin'))]
         if self.hasInputFromPort('tmax'):
