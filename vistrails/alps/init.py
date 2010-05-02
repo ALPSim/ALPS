@@ -30,9 +30,9 @@ import dataset
 
 ##############################################################################
 
-_subworkflows = [('MplXYPlotCell.xml', {'namespace': 'Tools'}) ]
-#_subworkflows = ['MplXYPlotCell.xml']
-
+_subworkflows = [('MplXYPlotCell.xml', {'namespace': 'Tools'}),
+                 ('ShowListOfPlots.xml', {'namespace': 'Dataset|Plot'}),
+                 ('ShowListOfXMLFiles.xml', {'namespace': 'Tools'})]
 
 def handle_module_upgrade_request(controller, module_id, pipeline):
    reg = get_module_registry()

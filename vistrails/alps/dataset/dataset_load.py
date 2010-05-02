@@ -214,7 +214,7 @@ class LoadBinningAnalysis(Module):
             files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
         datasets = []
         if self.hasInputFromPort('Measurements'):
-            datasets = loader.ReadBinningAnalysis(files,propPath,resPath,self.getInputFromPort('Measurements'))
+            datasets = loader.ReadBinningAnalysis(files,self.getInputFromPort('Measurements'),propPath,resPath)
         else:
             datasets = loader.ReadMeasurementFromFile(files,propPath,resPath)
         self.setResult('data',datasets)
