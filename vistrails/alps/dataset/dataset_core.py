@@ -61,7 +61,7 @@ class DataSets(ListOfElements):
 class SelftypePlaceholder:
     is_placeholder = True
 
-class ResultFiles(Module):
+class ResultFiles(ListOfElements):
     my_input_ports = [
         PortDescriptor('filenames', ListOfElements),
         PortDescriptor('resultfiles', SelftypePlaceholder)

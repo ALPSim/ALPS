@@ -36,6 +36,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize, polyfit
 import pyalps.fit_wrapper as fw
+#from pyalps.fit_wrapper import 
 
 from dataset_core import *
 from dataset_exceptions import *

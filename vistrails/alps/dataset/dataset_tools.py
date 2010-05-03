@@ -64,6 +64,20 @@ class RestrictXRange(FitPrototype):
         data.x = data.x[selection]
         data.y = data.y[selection]
 
+class RestrictYRange(FitPrototype):
+    my_input_ports = [
+        PortDescriptor('min',basic.Float),
+        PortDescriptor('max',basic.Float)
+    ]
+    
+    def transform(self,data):
+        min = self.getInputFromPort('min')
+        max = self.getInputFromPort('max')
+        
+        selection = (data.y >= min) & (data.y <= max)
+        data.x = data.x[selection]
+        data.y = data.y[selection]
+
 class WriteTxt(Module):
     my_input_ports = [PortDescriptor('input',DataSets)]
     my_output_ports = []
@@ -189,8 +203,16 @@ class CycleMarkers(Module):
         self.setResult('output', input)
 
 class SetPlotStyle(FitPrototype):
+    my_input_ports = FitPrototype.my_input_ports + [
+        PortDescriptor('scatter',basic.Boolean),
+        PortDescriptor('line',basic.Boolean)
+    ]
+    
     def transform(self,data):
-        data.props['line'] = 'scatter'
+        if self.hasInputFromPort('scatter') and self.getInputFromPort('scatter') == True:
+            data.props['line'] = 'scatter'
+        if self.hasInputFromPort('line') and self.getInputFromPort('line') == True:
+            pass # this is the default
 
 class Flatten(Module):
     my_input_ports = [PortDescriptor('input',DataSets)]

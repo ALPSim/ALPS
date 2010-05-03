@@ -156,7 +156,10 @@ class TransformGroupedDataSets(Module):
                 cmd += '\t' + line + '\n'
             exec cmd
             
-            happly(f, q, level)
+            if level > 0:
+                happly(f, q, level)
+            else:
+                q = f(q)
 
             self.setResult('output',q)
         else:
@@ -169,49 +172,19 @@ def AddDataSetsInputPorts(m, Nmax):
     for i in range(0,Nmax):
         m.my_input_ports.append(PortDescriptor('input'+str(i),DataSets))
 
-class TransformN(Module):
-    my_input_ports = [
-        PortDescriptor("source",basic.String,use_python_source=True)
-    ]
-    my_output_ports = [
-        PortDescriptor("output",DataSets)
-    ]
+class CombineDataSets(Module):
+    my_input_ports = []
+    my_output_ports = [PortDescriptor("output",DataSets)]
     
     def compute(self):
-        if self.hasInputFromPort('source'):
-            Nports = len(self.my_input_ports)-1
-            print Nports
-            
-            inputs = []
-            for i in range(0,Nports):
-                port = 'input'+str(i)
-                if self.hasInputFromPort(port):
-                    r = self.getInputFromPort(port)
-                    inputs.append(flatten(copy.deepcopy(r)))
-            Ninputs = len(inputs)
-            
-            results = []
-            
-            for i in range(1,Ninputs):
-                if len(inputs[0]) != len(inputs[i]):
-                    raise InvalidInput("Input lengths don't match")
-            
-            for iset in range(0,len(inputs[0])):
-                for iport in range(0,Ninputs):
-                    cmd = 'set' + str(iport) + ' = inputs[' + str(iport) + '][' + str(iset) + ']'
-                    exec cmd
-                
-                result = DataSet()
-                
-                code = self.getInputFromPort('source')
-                proc_code = urllib.unquote(str(code))
-                exec proc_code
-                
-                results.append(result)
-            
-            self.setResult('output',results)
-        else:
-            raise EmptyInputPort('source')
+        Nports = len(self.my_input_ports)
+        inputs = []
+        for i in range(Nports):
+            port = 'input'+str(i)
+            if self.hasInputFromPort(port):
+                r = self.getInputFromPort(port)
+                inputs.append(copy.deepcopy(r))
+        self.setResult('output', inputs)
 
 class Reduce(Module):
     my_input_ports = [

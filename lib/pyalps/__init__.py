@@ -28,4 +28,5 @@
 from dataset import *
 from tools import *
 from floatwitherror import FloatWithError
+import fit_wrapper
 

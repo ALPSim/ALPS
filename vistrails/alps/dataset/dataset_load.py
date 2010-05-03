@@ -130,7 +130,8 @@ class LoadDataSetsFromTextFile(Module):
 class LoadCustomFile(Module):
     my_input_ports = [
         PortDescriptor("source",basic.String,use_python_source=True),
-        PortDescriptor("base_path",basic.String)
+        PortDescriptor("base_path",basic.String),
+        PortDescriptor("base_dir",basic.Directory)
     ]
     my_output_ports = [
         PortDescriptor("data",DataSets)

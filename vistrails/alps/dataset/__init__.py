@@ -113,10 +113,10 @@ def selfRegister():
 
     register(TransformEachDataSet,'DataSet|Evaluate')
     register(TransformProperties,'DataSet|Evaluate')
-    AddDataSetsInputPorts(TransformN, 5)
-    register(TransformN,'DataSet|Evaluate')
+    AddDataSetsInputPorts(CombineDataSets, 5)
+    register(CombineDataSets,'DataSet|Tools')
     register(Reduce,'DataSet|Evaluate')
-    register(GeneralTransform,'DataSet|Evaluate')
+    register(GeneralTransform,'DataSet|Evaluate',abst=True)
     
     register(Axis,'DataSet|Plot')
     register(Legend,'DataSet|Plot')
@@ -135,6 +135,7 @@ def selfRegister():
     
     register(SortEachDataSet,'DataSet|Tools')
     register(RestrictXRange,'DataSet|Tools')
+    register(RestrictYRange,'DataSet|Tools')
     register(WriteTxt,'DataSet|Tools',abst=True)
     register(CacheErasure,'DataSet|Tools',abst=True)
     register(PrepareDictionary,'Tools')
@@ -148,9 +149,13 @@ def selfRegister():
     register(ObservablePredicate,'DataSet|Select')
     register(And,'DataSet|Select',abst=True)
     register(Or,'DataSet|Select',abst=True)
-#    register(Select,'DataSet',abst=True)
     register(Select,'DataSet|Select')
     register(SelectFiles,'DataSet|Select')
+    
+    register(SelectBy,'DataSet|Select',abst=True)
+    register(SelectByProperty,'DataSet|Select')
+    register(SelectByPropertyRange,'DataSet|Select')
+    register(SelectByObservable,'DataSet|Select')
     
     register(GroupDataSets,'DataSet|Hierarchy')
     register(TransformGroupedDataSets,'DataSet|Hierarchy')

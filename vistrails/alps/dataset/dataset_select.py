@@ -49,6 +49,27 @@ class Predicate(Module):
                 raise EmptyInputPort(inp.name)
         self.setResult('output',self)
 
+class SelectBy(Module):
+    my_input_ports = [PortDescriptor('input', ListOfElements)]
+    my_output_ports = [
+        PortDescriptor('kept', ListOfElements),
+        PortDescriptor('discarded', ListOfElements)
+    ]
+    
+    def compute(self):
+        q = copy.deepcopy(self.getInputFromPort('input'))
+        kept_sets = []
+        disc_sets = []
+        
+        for iq in flatten(q):
+            if self.decide(iq):
+                kept_sets.append(iq)
+            else:
+                disc_sets.append(iq)
+        
+        self.setResult('kept',kept_sets)
+        self.setResult('discarded',disc_sets)
+
 class PropertyPredicate(Predicate):
     my_input_ports = [
         PortDescriptor('property_name',basic.String),
@@ -95,11 +116,29 @@ class ObservablePredicate(Predicate):
             return True
         return False
 
+class SelectByProperty(SelectBy):
+    my_input_ports = SelectBy.my_input_ports + PropertyPredicate.my_input_ports
+    my_output_ports = SelectBy.my_output_ports
+    
+    decide = PropertyPredicate.decide
+
+class SelectByPropertyRange(SelectBy):
+    my_input_ports = SelectBy.my_input_ports + PropertyRangePredicate.my_input_ports
+    my_output_ports = SelectBy.my_output_ports
+    
+    decide = PropertyRangePredicate.decide
+
+class SelectByObservable(SelectBy):
+    my_input_ports = SelectBy.my_input_ports + ObservablePredicate.my_input_ports
+    my_output_ports = SelectBy.my_output_ports
+    
+    decide = ObservablePredicate.decide
+
 class Select(Module):
     my_input_ports = [
         PortDescriptor("input",DataSets),
         PortDescriptor("source",basic.String,use_python_source=True),
-        PortDescriptor('select',Predicate)
+        PortDescriptor("select",Predicate,hidden=True)
     ]
     my_output_ports = [
         PortDescriptor("kept",DataSets),
@@ -149,7 +188,7 @@ class SelectFiles(Select):
     my_input_ports = [
         PortDescriptor("input",ResultFiles),
         PortDescriptor("source",basic.String,use_python_source=True),
-        PortDescriptor("select",Predicate)
+        PortDescriptor("select",Predicate,hidden=True)
     ]
     my_output_ports = [
         PortDescriptor("kept",ResultFiles),
