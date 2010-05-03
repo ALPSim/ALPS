@@ -98,6 +98,10 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   EXEC_PYTHON_SCRIPT ("import distutils ; from distutils.sysconfig import * ; print distutils.sysconfig.get_python_inc()"  PYTHON_INCLUDE_DIRS )
   message(STATUS "PYTHON_INCLUDE_DIRS =  ${PYTHON_INCLUDE_DIRS}" )
   mark_as_advanced(PYTHON_INCLUDE_DIRS)
+  FIND_PATH(TEST_PYTHON_INCLUDE patchlevel.h PATHS ${PYTHON_INCLUDE_DIRS} NO_DEFAULT_PATH)
+  if (NOT TEST_PYTHON_INCLUDE)
+    message (ERROR "The Python herader files have not been found. Please check that you installed the Python headers and not only the interpreter.")
+  endif (NOT TEST_PYTHON_INCLUDE)
 
   #
   # include files for numpy
