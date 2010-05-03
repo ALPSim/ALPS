@@ -1,7 +1,5 @@
 LATTICE="ladder"
 MODEL="spin"
-LATTICE_LIBRARY="../lattices.xml"
-MODEL_LIBRARY="../models.xml"
 local_S=1/2
 J0       = 1
 J1	= 1

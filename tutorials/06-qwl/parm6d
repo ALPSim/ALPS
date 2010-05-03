@@ -1,7 +1,5 @@
 LATTICE="simple cubic lattice"
 MODEL="spin"
-LATTICE_LIBRARY="../lattices.xml"
-MODEL_LIBRARY="../models.xml"
 local_S=1/2
 T=0.946
 J=1

@@ -1,7 +1,5 @@
 LATTICE="chain lattice"
 MODEL="spin"
-LATTICE_LIBRARY="../lattices.xml"
-MODEL_LIBRARY="../models.xml"
 local_S=1/2
 L=40
 T_MIN   = 0.1

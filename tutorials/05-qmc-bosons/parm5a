@@ -1,8 +1,6 @@
-  LATTICE_LIBRARY="../lattices.xml";
   LATTICE="square lattice";
   L=4;
 
-  MODEL_LIBRARY="../models.xml";
   MODEL="boson Hubbard";
   NONLOCAL=0;
   U    = 1.0;

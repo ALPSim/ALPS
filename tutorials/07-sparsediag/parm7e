@@ -1,7 +1,5 @@
 MODEL="spin";
 LATTICE="ladder";
-LATTICE_LIBRARY="../lattices.xml"
-MODEL_LIBRARY="../models.xml"
 CONSERVED_QUANTUMNUMBERS="Sz";
 local_S=1/2;
 L=8;

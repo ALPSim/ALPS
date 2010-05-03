@@ -1,7 +1,5 @@
 MODEL="spin";
 LATTICE="square lattice";
-LATTICE_LIBRARY="../lattices.xml"
-MODEL_LIBRARY="../models.xml"
 REPRESENTATION="SSE";
 MEASURE[Correlations]=true;
 MEASURE[Structure Factor]=true;
