@@ -27,3 +27,4 @@ for s in pyalps.flatten(data):
   plt.figure()
   pyalps.pyplot.plot(s)
 
+plt.show()

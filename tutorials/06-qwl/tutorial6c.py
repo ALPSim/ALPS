@@ -24,3 +24,4 @@ for s in pyalps.flatten(data):
   plt.figure()
   plt.title("Cubic lattice Heisenberg antiferromagnet L=4")
   pyalps.pyplot.plot(s)
+plt.show()

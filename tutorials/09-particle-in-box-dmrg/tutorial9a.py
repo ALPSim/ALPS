@@ -30,3 +30,4 @@ data.props['xlabel'] = 'x'
 
 plt.figure()
 pyalps.pyplot.plot(data)
+plt.show()

@@ -24,3 +24,4 @@ for s in pyalps.flatten(data):
   plt.figure()
   plt.title("Ferromagnetic Heisenberg chain")
   pyalps.pyplot.plot(s)
+plt.show()

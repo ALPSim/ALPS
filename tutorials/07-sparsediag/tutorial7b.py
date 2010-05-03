@@ -53,7 +53,4 @@ pyalps.pyplot.plot(gapplot)
 plt.legend()
 plt.xlim(0,0.25)
 plt.ylim(0,1.0)
-
-
-
-
+plt.show()

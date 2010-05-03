@@ -54,7 +54,4 @@ plt.legend()
 plt.xlim(0,2*3.1416)
 plt.ylabel('Energy')
 plt.ylim(0,3)
-
-
-
-
+plt.show()

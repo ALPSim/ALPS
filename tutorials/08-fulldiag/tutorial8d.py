@@ -26,3 +26,4 @@ for s in pyalps.flatten(data):
   plt.title("V$_{15}$ molecular magnet")
   pyalps.pyplot.plot(s)
 
+plt.show()

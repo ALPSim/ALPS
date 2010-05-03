@@ -36,6 +36,7 @@ plt.xlabel('binning level')
 plt.ylabel('Error of |Magnetization|')
 pyalps.pyplot.plot(binning)
 plt.legend()
+plt.show()
 
 
 # make individual plots for each system size
@@ -45,6 +46,4 @@ for dataset in binning:
     plt.xlabel('binning level')
     plt.ylabel('Error of |Magnetization|')
     pyalps.pyplot.plot(dataset)
-
-
-
+plt.show()
