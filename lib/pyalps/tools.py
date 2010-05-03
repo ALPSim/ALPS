@@ -65,7 +65,7 @@ def executeCommand(cmdline):
 def executeCommandLogged(cmdline,logfile):
     """ execute the command given as list of arguments and store the result into the log file """
     if platform.system() == 'Windows':
-      cmdline += ['>',logfile]
+      cmdline += ['2>',logfile]
     else:
       cmdline += ['>&',logfile]
     return executeCommand(cmdline)
