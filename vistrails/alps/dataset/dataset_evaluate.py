@@ -228,3 +228,47 @@ class GeneralTransform(Module):
             self.setResult('output', data)
         else:
             raise EmptyInputPort('input || source')
+
+class TransformN(Module):
+    my_input_ports = [
+        PortDescriptor("source",basic.String,use_python_source=True)
+    ]
+    my_output_ports = [
+        PortDescriptor("output",DataSets)
+    ]
+    
+    def compute(self):
+        if self.hasInputFromPort('source'):
+            Nports = len(self.my_input_ports)-1
+            print Nports
+            
+            inputs = []
+            for i in range(0,Nports):
+                port = 'input'+str(i)
+                if self.hasInputFromPort(port):
+                    r = self.getInputFromPort(port)
+                    inputs.append(flatten(copy.deepcopy(r)))
+            Ninputs = len(inputs)
+            
+            results = []
+            
+            for i in range(1,Ninputs):
+                if len(inputs[0]) != len(inputs[i]):
+                    raise InvalidInput("Input lengths don't match")
+            
+            for iset in range(0,len(inputs[0])):
+                for iport in range(0,Ninputs):
+                    cmd = 'set' + str(iport) + ' = inputs[' + str(iport) + '][' + str(iset) + ']'
+                    exec cmd
+                
+                result = DataSet()
+                
+                code = self.getInputFromPort('source')
+                proc_code = urllib.unquote(str(code))
+                exec proc_code
+                
+                results.append(result)
+            
+            self.setResult('output',results)
+        else:
+            raise EmptyInputPort('source')

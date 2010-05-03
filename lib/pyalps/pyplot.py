@@ -136,6 +136,8 @@ class MplXYPlot_core:
                     thismarker = q.props['marker']
                 self.imarker = (self.imarker+1)%len(self.markers)
                 self.lines.append([plt.scatter(xmeans, ymeans, c=thiscolor, marker=thismarker)])
+                if xerrors != None or yerrors != None:
+                    plt.errorbar(xmeans, ymeans, yerr=yerrors, xerr=xerrors, fmt=None)
             else:
                 line_props = thiscolor
                 if 'line' in q.props:
