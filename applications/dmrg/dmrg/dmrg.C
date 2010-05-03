@@ -37,6 +37,20 @@
 #include <alps/scheduler.h>
 #include <boost/foreach.hpp>
 
+template<class T>
+bool
+handler(dmtk::System<T>& S, size_t signal_id, void *data)
+{
+  DMRGTask &task = *S.get_data();
+  if(signal_id == dmtk::SYSTEM_SIGNAL_END_ITER){
+    task.iteration_measurements.push_back(alps::EigenvectorMeasurements<double>(task));
+    task.iteration_measurements.back().average_values["Energy"].push_back(S.energy[0]);
+    task.iteration_measurements.back().average_values["Truncation Error"].push_back(S.truncation_error());
+    task.iteration_measurements.back().average_values["Entropy"].push_back(S.entropy());
+  }
+  return false;
+}
+
 DMRGTask::DMRGTask(const alps::ProcessList& w,const boost::filesystem::path& fn)
   : alps::scheduler::Task(w,fn)
   , alps::graph_helper<>(parms) 
@@ -304,6 +318,7 @@ void DMRGTask::dostep()
     cout << hami.description() << endl;
   this->system = dmtk::System<double>(hami,l,"ALPS");
   dmtk::System<double> &S = this->system;
+  S.set_data(this);
   
   S.set_calc_gap(num_eigenvalues-1); 
   dmtk::Matrix<size_t> nstates(2,num_sweeps);
@@ -346,13 +361,6 @@ void DMRGTask::dostep()
   average_values["Truncation error"].push_back(S.truncation_error());
   
   
-  // this shows how to put results into the iteration measurements
-  
-  // add empty measurements for most iterations
-  for (unsigned int i=0; i<num_sweeps ; ++i)
-    iteration_measurements.push_back(alps::EigenvectorMeasurements<value_type>(*this));
-  // just put in the energy for the last
-    iteration_measurements.back().average_values["Energy"].push_back(S.energy[i]);
   
   finish();
 }
@@ -397,7 +405,7 @@ DMRGTask::save_results()
 void DMRGTask::serialize(alps::hdf5::oarchive & ar) const
 {
   alps::scheduler::Task::serialize(ar);
-  std::map<std::string,std::vector<value_type> >::const_iterator it = average_values.find("Energy");
+  std::map<std::string,std::vector<double> >::const_iterator it = average_values.find("Energy");
   if (it != average_values.end())
     ar << alps::make_pvp("spectrum/energies",it->second);
   ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<double>&>(*this));
@@ -405,7 +413,7 @@ void DMRGTask::serialize(alps::hdf5::oarchive & ar) const
   for (std::size_t i=0;i<iteration_measurements.size();++i) {
     std::cerr << "Serializing iteration " << i << "\n";
     ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i),iteration_measurements[i]);
-    std::map<std::string,std::vector<value_type> >::const_iterator it = iteration_measurements[i].average_values.find("Energy");
+    std::map<std::string,std::vector<double> >::const_iterator it = iteration_measurements[i].average_values.find("Energy");
     if (it != iteration_measurements[i].average_values.end())
       ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i)+"/energies",it->second);
   }

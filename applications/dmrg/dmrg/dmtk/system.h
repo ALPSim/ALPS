@@ -68,6 +68,17 @@ using namespace std;
 namespace dmtk
 {
 
+enum{
+ SYSTEM_SIGNAL_GS,
+ SYSTEM_SIGNAL_TRUNCATE,
+ SYSTEM_SIGNAL_BUILD_DM,
+ SYSTEM_SIGNAL_DM_READY,
+ SYSTEM_SIGNAL_ROTATE,
+ SYSTEM_SIGNAL_START_ITER,
+ SYSTEM_SIGNAL_END_ITER,
+ SYSTEM_SIGNAL_MEASURE,
+};
+
 #define COUT_PRODUCT_DEFAULT(term) \
    cout << "PRODUCT " << term.description() << endl;
 
@@ -143,8 +154,9 @@ class System
     int m3;
     int m4;
 
-    double _error;
+    double _error;  
     double _truncation_error;
+    double _entropy;
     bool _use_error;
     bool _target_subspaces; // build density matrix using all subspaces
     int _nsub; // number states per subspace
@@ -178,8 +190,17 @@ class System
     void rotate_terms(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
     void rotate_corr(int position, Block<T> &b, Basis &basis, Basis &rho_basis, const Hami<T> *this_hami = NULL);
 
+    bool signal_emit(size_t signal_id, void * data)
+      {
+        if(signal_handler)
+          return signal_handler(*this, signal_id, data);
+        return true;
+      }
+    void * _data;
 
   public:
+
+    bool (*signal_handler) (System<T> &, size_t signal_id, void *data);
 
     B rightblock;
     B leftblock;
@@ -475,6 +496,9 @@ class System
     void set_lanczos_maxiter(int n) { _lanczos_maxiter = n; }
     int lanczos_maxiter() { return _lanczos_maxiter; }
     double truncation_error() const { return _truncation_error; }
+    double entropy() const { return _entropy; }
+    System<T>& set_data (void *data) { _data = data; return *this; }
+    void *get_data () const { return _data;}
 
     // Streams
 
@@ -1059,6 +1083,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
   if(dir == RIGHT2LEFT){
     for(iter = start; iter < sweep_max; iter++)
     {
+      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
       read_block(leftblock, ls-iter-2, LEFT);
       read_block(rightblock, iter, RIGHT);
       const Block<T>& site1 = h.get_site(ls-2-iter);
@@ -1090,6 +1115,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
         outputfile << "===========================================\n";
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
+        signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
       }
     }
 
@@ -1102,6 +1128,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
 
   for(iter = start; iter < sweep_max; iter++)
   {
+    signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
     read_block(rightblock, ls-iter-2, RIGHT);
     read_block(leftblock, iter, LEFT);
     const Block<T>& site1 = h.get_site(iter);
@@ -1133,6 +1160,7 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
       outputfile << "===========================================\n";
       outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
       outputfile << "===========================================\n";
+      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
     }
   }
 
@@ -1187,6 +1215,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
   if(dir == RIGHT2LEFT){
     for(iter = _start; iter < sweep_max; iter++) // ls/2-1; iter++);
     {
+      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
       read_block(rightblock, iter, RIGHT);
       read_block(leftblock, ls-iter-2, LEFT);
       const Block<T>& site1 = h.get_site(ls-2-iter);
@@ -1222,6 +1251,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
         outputfile << "===========================================\n";
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
+        signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
       }
     }
     _start = 1;
@@ -1232,6 +1262,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
 
   for(iter = _start; iter < sweep_max; iter++)
   {
+    signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
     read_block(rightblock, ls-iter-2, RIGHT);
     read_block(leftblock, iter, LEFT);
     const Block<T>& site1 = h.get_site(iter);
@@ -1295,6 +1326,7 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
       write_gs(gs, ls/2-1, LEFT);
     }
   }
+  signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
   
   outputfile.close();
 }
@@ -1609,6 +1641,7 @@ System<T>::diagonalize(bool use_seed)
     cout << "-------------------------------------------\n";
   }
   outputfile.close();
+  signal_emit(SYSTEM_SIGNAL_GS, NULL);
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -1729,6 +1762,7 @@ System<T>::truncate(int position, int new_size)
 //********************************************************************
 //                   DENSITY MATRIX
 //********************************************************************
+  signal_emit(SYSTEM_SIGNAL_TRUNCATE, NULL);
 //******* Calculate density matrix (block by block)
 
   Basis basis(_b1->basis(),_b2->basis());
@@ -1773,7 +1807,7 @@ System<T>::truncate(int position, int new_size)
   }
 
 //////////////////////////////////////////////////////////////////////////
-
+  signal_emit(SYSTEM_SIGNAL_BUILD_DM, NULL);
   if(verbose() > 0)
     cout << "Building Density Matrix in blocks \n";
 
@@ -1810,7 +1844,7 @@ System<T>::truncate(int position, int new_size)
 
   if(verbose() > 0)
     cout << "TRACE = " << trace << endl; 
-
+  signal_emit(SYSTEM_SIGNAL_DM_READY, &rho);
 //******* Diagonalize Density Matrix in blocks
   if(verbose() > 0)
     cout << "Diagonalizing Density Matrix in blocks\n";
@@ -1822,16 +1856,17 @@ System<T>::truncate(int position, int new_size)
 
 //******* Calculate entropy
 
-  double entropy = 0.0;
+  _entropy = 0.0;
   for(int i = 0; i < w.size(); i++){
     if(w[i] >= 1.e-5) {
 //      cout << "WARNING: w[i] <= 0 " << w[i] << endl;
-      entropy -= w[i]*log(w[i]);
+      _entropy -= w[i]*log(w[i]);
     }
     if(_verbose > 0) cout << "RHO EIGENVALUE " << i << " " << w[i] << endl;
   }
-//  entropy /= LOG2;
-  cout << "ITER = " << iter << " ENTROPY = " << entropy << endl;
+//  _entropy /= LOG2;
+  cout << "ITER = " << iter << " ENTROPY = " << _entropy << endl;
+  
 
 //******* Reorder eigenvalues and eigenvectors, and truncate
   if(verbose() > 0)
@@ -2015,6 +2050,8 @@ template<class T>
 void
 System<T>::rotate(int position, Block<T>& b)
 {
+  signal_emit(SYSTEM_SIGNAL_ROTATE, NULL);
+
   const Block<T> *pb1 = _b1;
   const Block<T> *pb2 = _b2;
 
