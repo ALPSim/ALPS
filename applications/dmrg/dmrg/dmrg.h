@@ -64,6 +64,8 @@ public:
 #ifdef ALPS_HAVE_HDF5
   void serialize(alps::hdf5::oarchive &) const;
 #endif
+// measurements during iterations
+  std::vector<alps::EigenvectorMeasurements<double> > iteration_measurements;
 
 private:
 
@@ -107,7 +109,5 @@ private:
   int start_dir;
   int start_iter;
   
-// measurements during iterations
-  std::vector<alps::EigenvectorMeasurements<value_type> > iteration_measurements;
 };
 

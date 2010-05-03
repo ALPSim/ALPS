@@ -41,7 +41,7 @@ template<class T>
 bool
 handler(dmtk::System<T>& S, size_t signal_id, void *data)
 {
-  DMRGTask &task = *S.get_data();
+  DMRGTask &task = * (DMRGTask *)S.get_data();
   if(signal_id == dmtk::SYSTEM_SIGNAL_END_ITER){
     task.iteration_measurements.push_back(alps::EigenvectorMeasurements<double>(task));
     task.iteration_measurements.back().average_values["Energy"].push_back(S.energy[0]);
@@ -319,6 +319,7 @@ void DMRGTask::dostep()
   this->system = dmtk::System<double>(hami,l,"ALPS");
   dmtk::System<double> &S = this->system;
   S.set_data(this);
+  S.signal_handler = handler;
   
   S.set_calc_gap(num_eigenvalues-1); 
   dmtk::Matrix<size_t> nstates(2,num_sweeps);
