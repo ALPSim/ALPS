@@ -453,16 +453,16 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
     COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/archive.exe ${PROJECT_BINARY_DIR}/bin
     COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/parameter2xml.exe ${PROJECT_BINARY_DIR}/bin
     COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/ising.exe ${PROJECT_BINARY_DIR}/bin
-    # COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml
-    if (ALPS_USE_VISTRAILS)
-      install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python25/python25.dll DESTINATION lib COMPONENT dependentlibraries)
-      install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr71.dll DESTINATION lib COMPONENT dependentlibraries)
-      install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/hdf5dll.dll DESTINATION lib COMPONENT dependentlibraries)
-      install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/szlibdll.dll DESTINATION lib COMPONENT dependentlibraries)
-      install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/zlib1.dll DESTINATION lib COMPONENT dependentlibraries)
-    endif (ALPS_USE_VISTRAILS)
-    
+    # COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml    
   )
+  if (ALPS_USE_VISTRAILS)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python25/python25.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr71.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/hdf5dll.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/szlibdll.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/zlib1.dll DESTINATION bin COMPONENT dependentlibraries)
+  endif (ALPS_USE_VISTRAILS)
+
 endif(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
 
 ######################################################################
