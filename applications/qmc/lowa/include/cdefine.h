@@ -40,8 +40,6 @@
 //#define HARDCORE
 #define TRAPPEDSYSTEM      // important for distance
 #define PRINT_INFOMATION_WHILE_SAVING
-#define MEASURE_TIME_SERIES_DENSITY
-//#define MEASURE_TIME_SERIES_DENSITY_MATRIX
 
 
 /*

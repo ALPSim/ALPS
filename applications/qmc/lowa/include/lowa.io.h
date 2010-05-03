@@ -106,13 +106,14 @@ void Lowa::load_lowa()
   }
   inFile.close();
 
-#ifndef MEASURE_TIME_SERIES_DENSITY
-  inFile.open(filename_dns.c_str(), std::ios::in);
-  if (!inFile.good()) { // file is absent
-    reset_av_dns();
+  if (!measure_time_series_density)
+  {
+    inFile.open(filename_dns.c_str(), std::ios::in);
+    if (!inFile.good()) { // file is absent
+      reset_av_dns();
+    }
+    inFile.close();
   }
-  inFile.close();
-#endif
 }
 
 
@@ -150,12 +151,12 @@ void Lowa::export_lowa_simulation(std::ostream& os)
     }
   }
 
-#ifndef MEASURE_TIME_SERIES_DENSITY
-  for (site_type s = 0; s < _N; s++) {
-    os << av_dns[s] << std::endl;
+  if (!measure_time_series_density) {
+    for (site_type s = 0; s < _N; s++) {
+      os << av_dns[s] << std::endl;
+    }
+    os << _Z_dns << std::endl;
   }
-  os << _Z_dns << std::endl;
-#endif
 
   for (site_type s = 0; s < _N; s++) {
     os << av_dnsmat[s] << "\t" << av_dnsmat_inf[s] << std::endl;
@@ -223,12 +224,13 @@ void Lowa::import_lowa_simulation(std::istream& is)
     }
   } // ... associations
 
-#ifndef MEASURE_TIME_SERIES_DENSITY
-  for (site_type s = 0; s < _N; s++) {
-    is >> av_dns[s];
+  if (!measure_time_series_density)
+  {
+    for (site_type s = 0; s < _N; s++) {
+      is >> av_dns[s];
+    }
+    is >> _Z_dns;
   }
-  is >> _Z_dns;
-#endif
 
   for (site_type s = 0; s < _N; s++) {
     is >> av_dnsmat[s] >> av_dnsmat_inf[s];

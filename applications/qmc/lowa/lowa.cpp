@@ -95,6 +95,9 @@ Lowa::Lowa(const alps::ProcessList& where,const alps::Parameters& p,int node)
   , _Eoffset(static_cast<parm_type>(p["E_OFF"]))
   , is_doublon_treated_as_hole(static_cast<bool>(p["IS_DOUBLON_OR_HIGHER_TREATED_AS_HOLE"]))
   , _binsize(static_cast<time_type>(p["BIN_SIZE"]))
+
+  , measure_time_series_density(static_cast<bool>(p["MEASURE_TIME_SERIES_DENSITY"]))
+  , measure_time_series_density_matrix(static_cast<bool>(p["MEASURE_TIME_SERIES_DENSITY_MATRIX"]))
 {
   pi   = 3.141592654;
   tol  = 1e-10;
@@ -178,17 +181,18 @@ void Lowa::init()
   filename_proj_cymdns = obtain_filename("proj_cymdns");
   filename_cs_cymdns   = obtain_filename("cs_cymdns");
 
-#ifdef MEASURE_TIME_SERIES_DENSITY
-  filename_mdns        = obtain_filename_h5("timeseries.mdns");
-#else
-  filename_dns         = obtain_filename("dns");
-  filename_dns_trial   = obtain_filename("tdns");
-#endif
-#ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
-  filename_mdnsmat     = obtain_filename_h5("timeseries.mdnsmat");
-  filename_mdnsmatinf  = obtain_filename_h5("timeseries.mdnsmatinf");
-#endif
+  if (measure_time_series_density) {
+    filename_mdns        = obtain_filename_h5("timeseries.mdns");
+  }
+  else {  
+    filename_dns         = obtain_filename("dns");
+    filename_dns_trial   = obtain_filename("tdns");
+  }
 
+  if (measure_time_series_density_matrix) {
+    filename_mdnsmat     = obtain_filename_h5("timeseries.mdnsmat");
+    filename_mdnsmatinf  = obtain_filename_h5("timeseries.mdnsmatinf");
+  }
 
 // ### WOLDLINE DESCRIPTION
 
@@ -259,11 +263,11 @@ void Lowa::init()
 
   _state        = new fock_basis_type [_N];
 
-#ifndef MEASURE_TIME_SERIES_DENSITY
-  av_dns       = new obs_type [_N];
+  if (!measure_time_series_density) {
+    av_dns       = new obs_type [_N];
 
-  reset_av_dns();
-#endif
+    reset_av_dns();
+  }
 
   av_dnsmat     = new obs_type [_N];
   av_dnsmat_inf = new obs_type [_N];

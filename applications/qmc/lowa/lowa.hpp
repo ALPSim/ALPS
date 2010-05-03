@@ -177,14 +177,12 @@ private:
 
   std::string filename1, filename1_trial;
   std::string filename_N, filename_mN, filename_dns0, filename_mdns0, filename_proj_cymdns, filename_cs_cymdns;
-#ifdef MEASURE_TIME_SERIES_DENSITY
-  std::string filename_mdns;
-#else
-  std::string filename_dns, filename_dns_trial;
-#endif
-#ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
-  std::string filename_mdnsmat, filename_mdnsmatinf;
-#endif
+  std::string filename_mdns;                          // for measure_time_series_density == true
+  std::string filename_dns, filename_dns_trial;       // for measure_time_series_density == false
+  std::string filename_mdnsmat, filename_mdnsmatinf;  // for measure_time_series_density_matrix == true
+
+  bool measure_time_series_density;
+  bool measure_time_series_density_matrix;
 
 
 // WORLDLINE DESCRIPTION (ie. LATTICE (space), BAND PARAMETERS (space), LIST OF INTERACTIONS (space-time), DENSITY at a "plane")   

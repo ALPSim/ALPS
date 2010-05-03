@@ -113,31 +113,34 @@ void Lowa::take_diagonal_measurements()
   outFile << "\n";
   outFile.close();
 
-#ifdef MEASURE_TIME_SERIES_DENSITY
-  alps::hdf5::oarchive oa_mdns(filename_mdns.c_str());
+  if (measure_time_series_density)
+  {
+    alps::hdf5::oarchive oa_mdns(filename_mdns.c_str());
 
-  std::string cur_desc_mdns = "TimeSeries/Density/Set" + boost::lexical_cast<std::string>(sweeps);
+    std::string cur_desc_mdns = "TimeSeries/Density/Set" + boost::lexical_cast<std::string>(sweeps);
 
-  oa_mdns << alps::make_pvp("No_of_datasets",sweeps);
-  oa_mdns << alps::make_pvp(cur_desc_mdns,_state,_N);
+    oa_mdns << alps::make_pvp("No_of_datasets",sweeps);
+    oa_mdns << alps::make_pvp(cur_desc_mdns,_state,_N);
 
 /*
-  std::string cur_filename_mdns_ASCII = "./timeseries_density_measurements/" + filename_mdns + "_" + ss.str() + ".o";
-  outFile.open(cur_filename_mdns_ASCII.c_str(),std::ios::app);
-  for (site_type index=0; index < _N; ++index)  {  outFile << static_cast<int>(get_measdensity(index)) << "\t";  }
-  outFile << "\n";
-  outFile.close();
+    std::string cur_filename_mdns_ASCII = "./timeseries_density_measurements/" + filename_mdns + "_" + ss.str() + ".o";
+    outFile.open(cur_filename_mdns_ASCII.c_str(),std::ios::app);
+    for (site_type index=0; index < _N; ++index)  {  outFile << static_cast<int>(get_measdensity(index)) << "\t";  }
+    outFile << "\n";
+    outFile.close();
 */
-#else
-  _Z_dns += 1.;
-  for (site_type index = 0; index < _N; ++index)  {  av_dns[index] += _state[index];  }
+  }
+  else
+  {
+    _Z_dns += 1.;
+    for (site_type index = 0; index < _N; ++index)  {  av_dns[index] += _state[index];  }
 
-  outFile.open(filename_dns_trial.c_str(),std::ios::out);
-  for (site_type index=0; index < _N; ++index)  {  outFile << (static_cast<obs_type>(av_dns[index])/_Z_dns) << "\n";  }
-  outFile << "\n";
-  outFile.close();
-  int renameinfo1 = std::rename(filename_dns_trial.c_str(),filename_dns.c_str());
-#endif
+    outFile.open(filename_dns_trial.c_str(),std::ios::out);
+    for (site_type index=0; index < _N; ++index)  {  outFile << (static_cast<obs_type>(av_dns[index])/_Z_dns) << "\n";  }
+    outFile << "\n";
+    outFile.close();
+    int renameinfo1 = std::rename(filename_dns_trial.c_str(),filename_dns.c_str());
+  }
             
   //measurements["Total Particle Number (Actual)"]     << get_Npart();
   //measurements["Total Particle Number (Measured)"]   << get_Nmeaspart();
@@ -154,18 +157,19 @@ void Lowa::take_diagonal_measurements()
 
 void Lowa::take_offdiagonal_measurements()
 {
-#ifdef MEASURE_TIME_SERIES_DENSITY_MATRIX
-  // *** replace this by hdf5 measurements here
-  outFile.open(filename_mdnsmat.c_str(),std::ios::app);
-  for (site_type index=0; index < _N; ++index)  {  outFile << (static_cast<obs_type>(av_dnsmat[index])/_Z_dnsmat) << "\t";  }
-  outFile << "\n";
-  outFile.close();
+  if (measure_time_series_density_matrix)
+  {
+    // *** replace this by hdf5 measurements here
+    outFile.open(filename_mdnsmat.c_str(),std::ios::app);
+    for (site_type index=0; index < _N; ++index)  {  outFile << (static_cast<obs_type>(av_dnsmat[index])/_Z_dnsmat) << "\t";  }
+    outFile << "\n";
+    outFile.close();
 
-  outFile.open(filename_mdnsmatinf.c_str(),std::ios::app);
-  for (site_type index=0; index < _N; ++index)  {  outFile << (static_cast<obs_type>(av_dnsmat_inf[index])/_Z_dnsmat) << "\t";  }
-  outFile << "\n";
-  outFile.close();
-#endif  
+    outFile.open(filename_mdnsmatinf.c_str(),std::ios::app);
+    for (site_type index=0; index < _N; ++index)  {  outFile << (static_cast<obs_type>(av_dnsmat_inf[index])/_Z_dnsmat) << "\t";  }
+    outFile << "\n";
+    outFile.close();
+  }
 }
 
 
