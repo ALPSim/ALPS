@@ -854,6 +854,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
   for(iter = 1; iter < max; iter++)
   {
+    signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
 //    qn = qns[_grow_symmetric?iter*2+2-1:(SGN(iter) == 1?iter+3:iter+2)];
     qn = qns[_grow_symmetric?iter*2+2-1:iter+3];
 
@@ -914,6 +915,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
       outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
       outputfile << "===========================================\n";
     }
+    signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
   }
 
   qn = qnt;
@@ -925,6 +927,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
     for(iter = mid_size; iter < sweep_max; iter++)
     {
+      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
       read_block(rightblock, ls-iter-2, RIGHT);
       read_block(leftblock, iter, LEFT);
       const Block<T>& site1 = h.get_site(iter);
@@ -956,6 +959,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
       }
+      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
     }
   } else {
     cout << "RIGHT-TO-LEFT sweep to get B(1)B(2)...B(L/2-1)\n";
@@ -964,6 +968,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
     for(iter = 1; iter < sweep_max; iter++)
     {
+      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
       read_block(leftblock, ls-iter-2, LEFT);
       read_block(rightblock, iter, RIGHT);
       const Block<T>& site1 = h.get_site(ls-2-iter);
@@ -995,6 +1000,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
       }
+      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
     }
 
     dir = LEFT2RIGHT;
@@ -1002,6 +1008,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
 
     for(iter = 1; iter < sweep_max; iter++)
     {
+      signal_emit(SYSTEM_SIGNAL_START_ITER, NULL);
       read_block(rightblock, ls-iter-2, RIGHT);
       read_block(leftblock, iter, LEFT);
       const Block<T>& site1 = h.get_site(iter);
@@ -1038,6 +1045,7 @@ System<T>::warmup_loop(size_t t, const Vector<QN> &qns)
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
       }
+      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
     }
   }
     
@@ -1115,8 +1123,8 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
         outputfile << "===========================================\n";
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
-        signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
       }
+      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
     }
 
     start = 1;
@@ -1160,8 +1168,8 @@ System<T>::sweep(size_t t1, size_t t2, size_t _dir, int start)
       outputfile << "===========================================\n";
       outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
       outputfile << "===========================================\n";
-      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
     }
+    signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
   }
 
   outputfile.close();
@@ -1251,8 +1259,8 @@ System<T>::final_sweep(size_t t, size_t _dir, int _start, bool _rotate )
         outputfile << "===========================================\n";
         outputfile << "Iteration time: " << _timer.LapTime().c_str() << endl;
         outputfile << "===========================================\n";
-        signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
       }
+      signal_emit(SYSTEM_SIGNAL_END_ITER, NULL);
     }
     _start = 1;
   }

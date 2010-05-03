@@ -44,7 +44,9 @@ handler(dmtk::System<T>& S, size_t signal_id, void *data)
   DMRGTask &task = * (DMRGTask *)S.get_data();
   if(signal_id == dmtk::SYSTEM_SIGNAL_END_ITER){
     task.iteration_measurements.push_back(alps::EigenvectorMeasurements<double>(task));
-    task.iteration_measurements.back().average_values["Energy"].push_back(S.energy[0]);
+    for(int i = 0; i < S.energy.size(); i++) {
+      task.iteration_measurements.back().average_values["Energy"].push_back(S.energy[i]);
+    }
     task.iteration_measurements.back().average_values["Truncation Error"].push_back(S.truncation_error());
     task.iteration_measurements.back().average_values["Entropy"].push_back(S.entropy());
   }
