@@ -292,6 +292,7 @@ ELSE(HDF5_FOUND)
   MESSAGE(FATAL_ERROR "Require hdf5 1.8.2 or higher. Set HDF5_HOME")
 ENDIF(HDF5_FOUND)
 
+
 IF(HDF5_IS_PARALLEL)
   SET(ALPS_HAVE_HDF5_PARALLEL 1)
   MESSAGE(WARNING "parallel(MPI) hdf5 is detected. We will compile but ALPS does not use parallel HDF5. The standard version is preferred.")
@@ -550,7 +551,8 @@ if (ALPS_BUILD_SOURCE)
   install(DIRECTORY config doc example legacy lib photos src test tool vistrails DESTINATION alps
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   if (ALPS_INCLUDE_BOOST_SOURCE)
-    install(DIRECTORY ${Boost_ROOT_DIR} DESTINATION .)
+    install(DIRECTORY ${Boost_ROOT_DIR} DESTINATION . PATTERN "*" 
+            PATTERN *fop-* EXCLUDE PATTERN "docbook-[dx]*" EXCLUDE)
   endif (ALPS_INCLUDE_BOOST_SOURCE)
 else (ALPS_BUILD_SOURCE)
   if (ALPS_INSTALL_HEADERS)

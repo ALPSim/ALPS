@@ -18,17 +18,19 @@ if (ALPS_BUILD_SOURCE)
             08-fulldiag
             09-particle-in-box-dmrg
             10-dmrg
-          DESTINATION tutorials
-          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt"
+            mc-01-autocorrelations
+            mc-02-susceptibilities
+          DESTINATION alps/tutorials
+          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
-          PATTERN "*.h5" EXCLUDE PATTERN "*.xml" EXCLUDE 
+          PATTERN "*.h5" EXCLUDE  EXCLUDE  PATTERN "parm*xml" EXCLUDE
           PATTERN "*clone*" EXCLUDE
           PATTERN "*.xsl" EXCLUDE PATTERN "*.run*" EXCLUDE)
 else (ALPS_BUILD_SOURCE)
   install(DIRECTORY . DESTINATION tutorials COMPONENT tutorials
-          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" 
+          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
-          PATTERN "*.h5" EXCLUDE PATTERN "*.xml" EXCLUDE 
+          PATTERN "*.h5" EXCLUDE  EXCLUDE  PATTERN "parm*xml" EXCLUDE
           PATTERN "*.xsl" EXCLUDE PATTERN "*.run*" EXCLUDE)
 endif (ALPS_BUILD_SOURCE)
 
