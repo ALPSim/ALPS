@@ -177,7 +177,7 @@ class Hdf5Loader:
             sets.append(fileset)
         return sets
 
-    def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, index=None):
+    def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, index=None, loadIterations=False):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
@@ -192,31 +192,66 @@ class Hdf5Loader:
                     obslist = list_
                 else:
                     obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
-                for m in obslist:
-                    if "mean" in grp['results/'+m].keys():
-                        try:
-                            d = DataSet()
-                            secresultspath = respath+'/results/'+m
-                            d.props['hdf5_path'] = secresultspath 
-                            d.props['observable'] = pt.hdf5_name_decode(m)
-                            if index == None:
-                                d.y = np.array(grp['results/'+m+'/mean/value'].value )
-                                d.x = range(len(d.y))
-                            else:
-                                try:
-                                    d.y = np.array(grp['results/'+m+'/mean/value'].value[index] )
-                                except:
-                                    pass
-                            if "labels" in grp['results/'+m].keys():
-                                d.x = parse_labels(grp['results/'+m+'/labels'].value)
-                            else:
-                                d.x = np.arange(0,len(d.y))
-                            d.props.update(params)
+                if loadIterations==True:
+                    if "iteration" in grp.keys():
+                        iterationset=[]
+                        iteration_grp = self.h5f.require_group(respath+'/iteration')
+                        for it in iteration_grp.keys():
+                            obsset=[]
+                            for m in obslist:
+                                if m in iteration_grp[it+'/results'].keys():
+                                    if "mean" in iteration_grp[it+'/results/'+m].keys():
+                                        try:
+                                            d = DataSet()
+                                            itresultspath = respath+'/iteration/'+it+'results/'+m
+                                            d.props['hdf5_path'] = itresultspath 
+                                            d.props['observable'] = pt.hdf5_name_decode(m)
+                                            d.props['iteration'] = it
+                                            if index == None:
+                                                d.y = np.array(iteration_grp[it+'/results/'+m+'/mean/value'].value )
+                                                d.x = range(len(d.y))
+                                            else:
+                                                try:
+                                                    d.y = np.array(iteration_grp[it+'/results/'+m+'/mean/value'].value[index] )
+                                                except:
+                                                    pass
+                                            if "labels" in iteration_grp[it+'/results/'+m].keys():
+                                                d.x = parse_labels(iteration_grp[it+'/results/'+m+'/labels'].value)
+                                            else:
+                                                d.x = np.arange(0,len(d.y))
+                                            d.props.update(params)
+                                        except AttributeError:
+                                            print "Could not create DataSet"
+                                            pass
+                                    obsset.append(d)
+                            iterationset.append(obsset)
+                        fileset.append(iterationset)
+                else:        
+                    for m in obslist:
+                        if "mean" in grp['results/'+m].keys():
+                            try:
+                                d = DataSet()
+                                secresultspath = respath+'/results/'+m
+                                d.props['hdf5_path'] = secresultspath 
+                                d.props['observable'] = pt.hdf5_name_decode(m)
+                                if index == None:
+                                    d.y = np.array(grp['results/'+m+'/mean/value'].value )
+                                    d.x = range(len(d.y))
+                                else:
+                                    try:
+                                        d.y = np.array(grp['results/'+m+'/mean/value'].value[index] )
+                                    except:
+                                        pass
+                                if "labels" in grp['results/'+m].keys():
+                                    d.x = parse_labels(grp['results/'+m+'/labels'].value)
+                                else:
+                                    d.x = np.arange(0,len(d.y))
+                                d.props.update(params)
 
-                        except AttributeError:
-                            print "Could not create DataSet"
-                            pass
-                    fileset.append(d)
+                            except AttributeError:
+                                print "Could not create DataSet"
+                                pass
+                        fileset.append(d)
             if 'sectors' in grp.keys():
                 sectors_grp = self.h5f.require_group(respath+'/sectors')
                 list_ = self.GetObservableList(respath+'/sectors/0/results')
@@ -406,6 +441,13 @@ def loadEigenstateMeasurements(files,what=None):
     if isinstance(what,str):
       what = [what]
     return ll.ReadDiagDataFromFile(files,measurements=what)
+    
+def loadIterationMeasurements(files,what=None):
+    ll = Hdf5Loader()
+    if isinstance(what,str):
+      what = [what]
+    return ll.ReadDiagDataFromFile(files,measurements=what,loadIterations=True)
+
 
 def loadSpectra(files):
     ll = Hdf5Loader()
