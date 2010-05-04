@@ -43,6 +43,12 @@ from dict_intersect import dict_intersect
 from dataset import DataSet
 from plot_core import read_xml as readAlpsXMLPlot
 
+def make_list(infiles):
+    if type(infiles) == list:
+      return infiles
+    else:
+      return [infiles]
+
 def size(lst):
     try:
       return len(lst)
@@ -81,12 +87,12 @@ def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False):
       cmdline += ['--write-xml']
     return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
 
-def evaluateLoop(parmfiles, appname='loop', write_xml=False):
+def evaluateLoop(infiles, appname='loop', write_xml=False):
     """ evaluate results of the looper QMC application """
     cmdline = [appname,'--evaluate']
     if write_xml:
       cmdline += ['--write_xml']
-    cmdline += parmfiles
+    cmdline += make_list(infiles)
     return executeCommand(cmdline)
 
 def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX=None):
@@ -98,7 +104,7 @@ def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX
       cmdline += ['--T_MIN',str(T_MIN)]
     if T_MAX:
       cmdline += ['--T_MAX',str(T_MAX)]
-    cmdline += infiles
+    cmdline += make_list(infiles)
     res = executeCommand(cmdline)
     if res != 0:
       raise Excpetion("Execution error in evaluateQWL: " + str(res))
@@ -123,7 +129,7 @@ def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, 
       cmdline += ['--T_MAX',str(T_MAX)]
     if H != None:
       cmdline += ['--H',str(H)]
-    cmdline += infiles
+    cmdline += make_list(infiles)
     res = executeCommand(cmdline)
     if res != 0:
       raise Exception("Execution error in evaluateFulldiagVersusT: " + str(res))
@@ -148,7 +154,7 @@ def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, 
       cmdline += ['--H_MAX',str(H_MAX)]
     if T != None:
       cmdline += ['--T',str(T)]
-    cmdline += infiles
+    cmdline += make_list(infiles)
     res = executeCommand(cmdline)
     if res != 0:
       raise Exception("Execution error in evaluateFulldiagVersusH: " + str(res))
@@ -250,8 +256,10 @@ def writeInputFiles(fname,parms, baseseed=None):
 
     f.write('</JOB>\n')
     f.close()
-
-    copyStylesheet('.')
+    if (dirname==''):
+      copyStylesheet('.')
+    else:
+      copyStylesheet(dirname)
     return fname+'.in.xml'
 
 def writeParameterFile(fname,parms):
