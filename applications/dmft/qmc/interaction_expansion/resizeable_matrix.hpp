@@ -162,14 +162,17 @@ public:
   
   double max() const
   {
-    double rowmax[size_];
+    double *rowmax=new double[size_];
     unsigned int rowmax_index, max_index, inc=1;
     for(unsigned int i=0;i<size_;++i){
       rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
       rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
     }
     max_index=idamax_(&size_, rowmax ,&inc);
-    return fabs(rowmax[max_index-1]);
+    double m=fabs(rowmax[max_index-1]);
+    delete[] rowmax;
+    return m;
+
   }
   
   // return functions

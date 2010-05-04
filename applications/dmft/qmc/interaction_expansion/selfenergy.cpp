@@ -139,16 +139,16 @@ void InteractionExpansionRun::measure_densities()
   }
   double tau = beta*random_01();
   for (int z=0; z<n_flavors; ++z) {                 
-    double g0_tauj[M[z].size()];
-    double M_g0_tauj[M[z].size()];
-    double g0_taui[M[z].size()];
+    std::vector<double> g0_tauj(M[z].size());
+    std::vector<double> M_g0_tauj(M[z].size());
+    std::vector<double> g0_taui(M[z].size());
     for (int s=0;s<n_site;++s) {             
       for (int j=0;j<M[z].size();++j) 
 	g0_tauj[j] = green0_spline(M[z].creators()[j].t()-tau, z, M[z].creators()[j].s(), s);
       for (int i=0;i<M[z].size();++i) 
         g0_taui[i] = green0_spline(tau-M[z].annihilators()[i].t(),z, s, M[z].annihilators()[i].s());
       if (M[z].size()>0)
-	M[z].right_multiply(g0_tauj, M_g0_tauj);
+	M[z].right_multiply(&(g0_tauj[0]), &(M_g0_tauj[0]));
       dens[z][s] += green0_spline(0,z,s,s);
       for (int j=0;j<M[z].size();++j) 
 	dens[z][s] -= g0_taui[j]*M_g0_tauj[j]; 
@@ -203,13 +203,13 @@ void InteractionExpansionRun::compute_W_itime()
     }
   }
   int ntaupoints=10; //# of tau points at which we measure.
-  double tau_2[ntaupoints];
+  std::vector<double> tau_2(ntaupoints);
   for(int i=0; i<ntaupoints;++i) 
     tau_2[i]=beta*random_01();
   for(int z=0;z<n_flavors;++z){                  //loop over flavor
-    double g0_tauj[M[z].size()*ntaupoints];
-    double M_g0_tauj[M[z].size()*ntaupoints];
-    double g0_taui[M[z].size()];
+    std::vector<double> g0_tauj(M[z].size()*ntaupoints);
+    std::vector<double> M_g0_tauj(M[z].size()*ntaupoints);
+    std::vector<double> g0_taui(M[z].size());
     for(int s2=0;s2<n_site;++s2){             //site loop - second site.
       for(int j=0;j<ntaupoints;++j) { 
 	for(int i=0;i<M[z].size();++i){ //G0_{s_p s_2}(tau_p - tau_2) where we set t2=0.
@@ -217,7 +217,7 @@ void InteractionExpansionRun::compute_W_itime()
 	}
       }
       if (M[z].size()>0)
-	M[z].matrix_right_multiply(g0_tauj, M_g0_tauj, ntaupoints);
+	M[z].matrix_right_multiply(&(g0_tauj[0]), &(M_g0_tauj[0]), ntaupoints);
       for(int j=0;j<ntaupoints;++j) {
 	for(int p=0;p<M[z].size();++p){       //operator one
 	  double sgn=1;

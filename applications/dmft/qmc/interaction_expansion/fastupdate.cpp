@@ -27,10 +27,10 @@ double InteractionExpansionRun::fastupdate_up(const int flavor, bool compute_onl
   //current size of M: number of vertices -1. We need to add the last vertex. 
   //A pointer to the creator and annihilator is already stored in creators_ and annihilators_ at position M[flavor].size();
   double Green0_n_n=green0_spline(M[flavor].creators()[noperators],M[flavor].annihilators()[noperators]); 
-  double Green0_n_j[noperators];
-  double Green0_j_n[noperators];
-  double lastcolumn[noperators];
-  double lastrow[noperators];
+  std::vector<double> Green0_n_j(noperators);
+  std::vector<double> Green0_j_n(noperators);
+  std::vector<double> lastcolumn(noperators);
+  std::vector<double> lastrow(noperators);
   double lambda;
   //compute the Green's functions with interpolation
   for(unsigned int i=0;i<noperators;++i){
@@ -38,21 +38,21 @@ double InteractionExpansionRun::fastupdate_up(const int flavor, bool compute_onl
     Green0_j_n[i]=green0_spline(M[flavor].creators()[i],M[flavor].annihilators()[noperators]);
   }
   //compute the last row
-  M[flavor].right_multiply(Green0_j_n, lastcolumn);
+  M[flavor].right_multiply(&(Green0_j_n[0]), &(lastcolumn[0]));
   //compute lambda
-  double ip = (noperators==0?0:inner_prod(Green0_n_j, lastcolumn, noperators));
+  double ip = (noperators==0?0:inner_prod(&(Green0_n_j[0]), &(lastcolumn[0]), noperators));
   lambda = Green0_n_n - ip + M[flavor].alpha()[noperators];
   //return weight if we have nothing else to do
   if(compute_only_weight){
     return lambda;
   }
   //compute last column
-  M[flavor].left_multiply(Green0_n_j, lastrow);
+  M[flavor].left_multiply(&(Green0_n_j[0]), &(lastrow[0]));
   //compute norm of vector and mean for roundoff error check
   if(noperators > 0){
-    scale(1./lambda, lastrow, noperators);
-    M[flavor].add_outer_prod(lastcolumn, lastrow);
-    scale(1./lambda, lastcolumn, noperators);
+    scale(1./lambda, &(lastrow[0]), noperators);
+    M[flavor].add_outer_prod(&(lastcolumn[0]), &(lastrow[0]));
+    scale(1./lambda, &(lastcolumn[0]), noperators);
     //std::cout<<lambda<<" "<<M[flavor]<<std::endl;
   }
   //add row and column to M
@@ -95,15 +95,15 @@ double InteractionExpansionRun::fastupdate_down(const int operator_nr, const int
   std::swap(M[flavor].alpha()[operator_nr],        M[flavor].alpha()[noperators-1]);
   double Mnn=M[flavor](noperators-1,noperators-1);
   //now perform fastupdate of M
-  double lastrow[noperators-1];
-  double lastcolumn[noperators-1];
+  std::vector<double> lastrow(noperators-1);
+  std::vector<double> lastcolumn(noperators-1);
   for(unsigned int j=0;j<noperators-1;++j){
     lastrow[j]=M[flavor](noperators-1, j);
     lastcolumn[j]=M[flavor](j,noperators-1);
   }
-  scale(-1./Mnn, lastcolumn, noperators-1);
+  scale(-1./Mnn, &(lastcolumn[0]), noperators-1);
   M[flavor].resize(noperators-1);  //lose the last row and last column, reduce size by one, but keep contents.
-  M[flavor].add_outer_prod(lastcolumn, lastrow);
+  M[flavor].add_outer_prod(&(lastcolumn[0]), &(lastrow[0]));
   return Mnn;  //the determinant ratio det D_{k-1}/det D_{k}
 }
 
