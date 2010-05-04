@@ -38,17 +38,17 @@
 #endif
 
 
+template<class value_type>
 class DMRGTask 
  : public alps::scheduler::Task
  , public alps::graph_helper<>
  , public alps::model_helper<>
- , protected alps::EigenvectorMeasurements<complex<double> >
+ , protected alps::EigenvectorMeasurements<value_type >
 {
 public:  
-  typedef std::complex<double> value_type;
   typedef alps::half_integer<short> half_integer_type;
-  DMRGTask(const alps::ProcessList& , const boost::filesystem::path& );
-  DMRGTask(const alps::ProcessList& w, const alps::Parameters& p);
+  DMRGTask<value_type>(const alps::ProcessList& , const boost::filesystem::path& );
+  DMRGTask<value_type>(const alps::ProcessList& w, const alps::Parameters& p);
   void dostep();
   void write_xml_body(alps::oxstream&, const boost::filesystem::path&,bool) const;
 
@@ -69,6 +69,7 @@ public:
 
   // iteration measurements
   std::vector<alps::EigenvectorMeasurements<value_type> > iteration_measurements;
+
 private:
 
   alps::SiteOperator make_site_term(std::string x)
@@ -82,11 +83,11 @@ private:
   
   
   void init();
-  dmtk::BasicOp<complex<double> > create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type);
-  void build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<complex<double> > &);
-  void build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<complex<double> > &this_hami);  
+  dmtk::BasicOp<value_type > create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type);
+  void build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<value_type > &);
+  void build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami);  
   void build_2site_operator(std::pair<alps::SiteOperator,alps::SiteOperator> const& siteops, 
-                            std::pair<int,int> sites, dmtk::Hami<complex<double> > &this_hami);
+                            std::pair<int,int> sites, dmtk::Hami<value_type > &this_hami);
  
   void save_results(); 
   
@@ -97,10 +98,10 @@ private:
   std::vector<half_integer_type> conserved_quantumnumber_value;
   int qnmask;
 
-  dmtk::System<complex<double> > system;
-  dmtk::Hami<complex<double> > hami;
+  dmtk::System<value_type > system;
+  dmtk::Hami<value_type > hami;
   dmtk::Lattice lattice;
-  std::vector<dmtk::Block<complex<double> > > site_block;
+  std::vector<dmtk::Block<value_type > > site_block;
   
   int num_eigenvalues;
   int verbose;
