@@ -263,21 +263,4 @@ private:
 };
 
 
-
-#ifdef IGOR
-
-class IgorsHilbertTransformer : public FrequencySpaceHilbertTransformer {
-public:
-  IgorsHilbertTransformer() {}
-  
-  virtual matsubara_green_function_t operator()(const matsubara_green_function_t& G_omega, 
-                                                matsubara_green_function_t &G0_omega, 
-                                                const double mu, const double h, const double beta);
-  matsubara_green_function_t initial_G0(const alps::Parameters& parms);
-  
-};
-
-#endif 
-
-
 #endif /*ALPS_DMFT_HILBERTTRANSFORMER_H*/

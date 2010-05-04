@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * ALPS DMFT Project
  *
@@ -28,6 +28,9 @@
 #include <cassert>
 #include <stdio.h>
 
+#ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
+#include "interaction_expansion/interaction_expansion.hpp"
+#endif
 #ifdef BUILD_DMFT_QMC_HYBRIDIZATION
 #include "hybridization/impurity.h"
 #endif
@@ -99,79 +102,75 @@ int main(int argc, char** argv)
         }
       } 
       else {
-#ifdef RUBTSOV
-        alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> rubtsov_factory_sshf;
-        alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory_ss; 
-        alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; 
+#ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
+        alps::scheduler::BasicFactory<InteractionExpansionSim,HalfFillingHubbardInteractionExpansionRun> interaction_expansion_factory_sshf;
+        alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss; 
+        alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd; 
 #endif
 #ifdef BUILD_DMFT_QMC_HYBRIDIZATION
         alps::scheduler::BasicFactory<HybridizationSimFrequency,HybridizationRun> werner_factory;
 #endif
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
-#ifdef IGOR
-        if(parms.defined("IGORS_TRANSFORMER")) {
-          std::cout<<"using Igor's Hilbert transformer\n";
-          transform_ptr = new IgorsHilbertTransformer();
+	if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
+	  transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
+	  std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
+	} 
+	else if(parms.defined("TWODBS")) {
+	  if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
+            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
+              std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
+            }
+            std::cerr<<"implement PM DOS integration!!"<<std::endl;
+            abort();
+          }else{
+            if((bool)(parms["PARAMAGNET"])==true){ 
+              std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
+            }
+            transform_ptr=new TwoDAFMHilbertTransformer(parms);
+          }
         }
-        else 
-#endif
-          if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
-            transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
-            std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
-          }else if(parms.defined("TWODBS")){
-            if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-              if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
-                std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
-              }
-              std::cerr<<"implement PM DOS integration!!"<<std::endl;
-              abort();
-            }else{
-              if((bool)(parms["PARAMAGNET"])==true){ 
-                std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
-              }
-              transform_ptr=new TwoDAFMHilbertTransformer(parms);
+        else{
+          std::cout<<"using DOS Hilbert transform"<<std::endl;
+          if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
+            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
+              std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
             }
-          }
-          else{
-            std::cout<<"using DOS Hilbert transform"<<std::endl;
-            if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-              if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
-                std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
-              }
-              transform_ptr= new FSDOSHilbertTransformer(parms);
-            }else{
-              if((bool)(parms["PARAMAGNET"])==true){ 
-                std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
-              }
-              transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
+            transform_ptr= new FSDOSHilbertTransformer(parms);
+          }else{
+            if((bool)(parms["PARAMAGNET"])==true){ 
+              std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
             }
+            transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
           }
+        }
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
-#ifdef RUBTSOV
-        if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("FLAVORS", "2")=="1")){
+#ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
+        if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("FLAVORS", "2")=="1")){
           std::cout<<"using single site Hubbard solver for half filling"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_sshf,argc,argv));
+          solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_sshf,argc,argv));
         }
-        if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("FLAVORS", "2")=="2")){
+        if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("FLAVORS", "2")=="2")){
           std::cout<<"using single site Hubbard solver"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_ss,argc,argv));
+          solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_ss,argc,argv));
         }
-        else if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("SITES", "1") =="1")){
+        else if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("SITES", "1") =="1")){
           std::cout<<"using multiband Hubbard solver"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
+          solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,argc,argv));
         }
+        else
 #endif
 #ifdef BUILD_DMFT_QMC_HYBRIDIZATION
         if (parms["SOLVER"]=="Hybridization") {
           std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
         }
-        else{
+        else
+#endif
+        {
           boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
           solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
         }
-#endif
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
       }
     }
