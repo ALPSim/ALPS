@@ -20,7 +20,7 @@ void InteractionExpansionRun::interaction_expansion_step(void)
   int pert_order=vertices.size();   //current order of perturbation series
   double metropolis_weight=0.;
   //double oldsign=sign;
-  static uint i=0; ++i;    
+  static unsigned int i=0; ++i;    
   if(random_01()<0.5){  //trying to ADD vertex
     if(vertices.size()>=max_order) 
       return; //we have already reached the highest perturbation order
@@ -63,8 +63,8 @@ double inner_prod(const double* v1, const double *v2, const int size){
 
 
 //vector scaling blas call (level one)
-extern "C" void dscal_(const uint *size, const double *alpha, double *v, const int *inc);
-void scale(const double alpha, double *v, const uint size){
+extern "C" void dscal_(const unsigned int *size, const double *alpha, double *v, const int *inc);
+void scale(const double alpha, double *v, const unsigned int size){
   int inc=1;
   dscal_(&size, &alpha, v, &inc);
 }
@@ -77,18 +77,18 @@ void InteractionExpansionRun::reset_perturbation_series(void)
 {
   std::vector<resizeable_matrix> M2(M); //make a copy of M
   vertex_array vertices_backup;
-  for(uint i=0;i<vertices.size();++i){
+  for(unsigned int i=0;i<vertices.size();++i){
     vertices_backup.push_back(vertices[i]);
   }
   vertices.clear();
   sign=1;
-  for(spin_t z=0;z<n_zone;++z){
+  for(spin_t z=0;z<n_flavors;++z){
     M[z].resize(0);
   }
   green_matsubara = bare_green_matsubara;
   green_itime     = bare_green_itime;
   //recompute M from scratch
-  for(uint i=0;i<vertices_backup.size();++i){
+  for(unsigned int i=0;i<vertices_backup.size();++i){
     vertices.push_back(vertices_backup[i]);
     perform_add();
   }
@@ -101,7 +101,7 @@ void InteractionExpansionRun::reset_perturbation_series(void)
       }
     }
     if(max_diff > 1.e-8)
-      std::cout<<"WARNING: roundoff errors in zone: "<<z<<" max diff "<<max_diff<<std::endl;
+      std::cout<<"WARNING: roundoff errors in flavor: "<<z<<" max diff "<<max_diff<<std::endl;
   }
 }
 

@@ -55,15 +55,15 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   std::cout<<"time for writing checkpoint was: "<<(time1-time0)/(double)CLOCKS_PER_SEC<<std::endl;
   ///end checkpoint
   std::cout<<"getting result!"<<std::endl;
-  uint n_matsubara=p_["NMATSUBARA"];
-  uint n_matsubara_measurements=p_.value_or_default("NMATSUBARA_MEASUREMENTS", n_matsubara);
-  uint n_tau=p_["N"];
-  uint n_self=p_.value_or_default("NSELF", 10*n_tau);
-  spin_t n_zone(p_.value_or_default("FLAVORS",2));
-  uint n_site(p_.value_or_default("SITES",1));
+  unsigned int n_matsubara=p_["NMATSUBARA"];
+  unsigned int n_matsubara_measurements=p_.value_or_default("NMATSUBARA_MEASUREMENTS", n_matsubara);
+  unsigned int n_tau=p_["N"];
+  unsigned int n_self=p_.value_or_default("NSELF", 10*n_tau);
+  spin_t n_flavors(p_.value_or_default("FLAVORS",2));
+  unsigned int n_site(p_.value_or_default("SITES",1));
   double beta(p_["BETA"]);
-  itime_green_function_t green_itime_measured(n_tau+1, n_site, n_zone);
-  matsubara_green_function_t green_matsubara_measured(n_matsubara, n_site, n_zone);
+  itime_green_function_t green_itime_measured(n_tau+1, n_site, n_flavors);
+  matsubara_green_function_t green_matsubara_measured(n_matsubara, n_site, n_flavors);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   boost::shared_ptr<FourierTransformer> fourier_ptr_g0;
   FourierTransformer::generate_transformer(p_, fourier_ptr_g0);
@@ -93,7 +93,7 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   std::valarray<double> mean_order(pert_obseval.mean());
   std::cout<<"average matrix size was: "<<std::endl;
   std::ofstream matrix_size("matrix_size", std::ios::app);
-  for(uint i=0;i<n_zone;++i){
+  for(unsigned int i=0;i<n_flavors;++i){
     std::cout<<mean_order[i]<<"\t";
     matrix_size<<mean_order[i]<<"\t";
   }
@@ -101,23 +101,23 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   matrix_size<<std::endl;
   std::cout<<"average sign was: "<<sign_obseval.mean()<<"+-"<<sign_obseval.error()<<std::endl;
   //single particle Green function measurements
-  matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, n_zone);
-  std::vector<double> densities(n_zone);
+  matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, n_flavors);
+  std::vector<double> densities(n_flavors);
   read_freq(in_omega, bare_green_matsubara);
   if(measure_in_matsubara) {
     evaluate_selfenergy_measurement_matsubara(gathered_measurements, green_matsubara_measured, 
                                               bare_green_matsubara, densities, 
-                                              beta, n_site, n_zone, n_matsubara_measurements);
+                                              beta, n_site, n_flavors, n_matsubara_measurements);
   } 
   else {
-    itime_green_function_t bare_green_itime(n_tau+1, n_site, n_zone);
+    itime_green_function_t bare_green_itime(n_tau+1, n_site, n_flavors);
     fourier_ptr_g0->backward_ft(bare_green_itime, bare_green_matsubara);
     evaluate_selfenergy_measurement_itime_rs(gathered_measurements, green_itime_measured, bare_green_itime, 
-                                             beta, n_site, n_zone, n_tau, n_self);
+                                             beta, n_site, n_flavors, n_tau, n_self);
   }
   //Fourier transformations
   if (!measure_in_matsubara) {
-    for (int z=0; z<n_zone; ++z) {
+    for (int z=0; z<n_flavors; ++z) {
       densities[z] = 0;
       for (int i=0; i<n_site; ++i)
 	densities[z] -= green_itime_measured(n_tau,i,i,z);

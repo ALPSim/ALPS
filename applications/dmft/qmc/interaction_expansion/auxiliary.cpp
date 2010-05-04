@@ -25,8 +25,8 @@ ostream& operator <<(ostream &os, const vertex_array &vertices)
 
 ostream& operator <<(ostream &os, const vertex &v)
 {
-  std::cout <<"z1: "<<v.zone1()<<" c1^dag: "<<v.c_dagger_1()
-            <<" c1: "<<v.c_1()<<" z2: "<<v.zone2()
+  std::cout <<"z1: "<<v.flavor1()<<" c1^dag: "<<v.c_dagger_1()
+            <<" c1: "<<v.c_1()<<" z2: "<<v.flavor2()
             <<" c2^dag: "<<v.c_dagger_2()<<" c2: "
             <<v.c_2()<<"\t"<<v.abs_w();
   return os;
@@ -34,7 +34,7 @@ ostream& operator <<(ostream &os, const vertex &v)
 
 ostream &operator<<(ostream &os, const creator &c)
 {
-  std::cout<<c.zone()<<" "<<c.s()<<" "<<c.t();
+  std::cout<<c.flavor()<<" "<<c.s()<<" "<<c.t();
   return os;
 }
 
@@ -59,9 +59,9 @@ void InteractionExpansionRun::save(alps::ODump &/*dump*/) const
 std::ostream & operator<<(std::ostream &os, const resizeable_matrix &M)
 {
   os<<"[ \n";
-  for(uint i=0;i<M.size();++i){
+  for(unsigned int i=0;i<M.size();++i){
     os<<"[";
-    for(uint j=0;j<M.size();++j){
+    for(unsigned int j=0;j<M.size();++j){
       os<<M(i,j)<<" ";
     }
     os<<"] \n";
@@ -69,11 +69,11 @@ std::ostream & operator<<(std::ostream &os, const resizeable_matrix &M)
   os<<"] "<<std::endl;
   
   std::cout<<"creators: ";
-  for(uint i=0;i<M.creators().size();++i){
+  for(unsigned int i=0;i<M.creators().size();++i){
     os<<M.creators()[i]<<"\t";
   }
   os<<std::endl<<"annihils: ";
-  for(uint i=0;i<M.creators().size();++i){
+  for(unsigned int i=0;i<M.creators().size();++i){
     os<<M.annihilators()[i]<<"\t";
   }
   os<<std::endl;

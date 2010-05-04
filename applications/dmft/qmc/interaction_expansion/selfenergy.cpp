@@ -60,8 +60,8 @@ inline twocomplex fastcmult(const twocomplex &a, const twocomplex &b)
 
 void InteractionExpansionRun::compute_W_matsubara()
 {
-  static std::vector<std::vector<std::valarray<std::complex<double> > > >Wk(n_zone); 
-  for(int z=0;z<n_zone;++z){
+  static std::vector<std::vector<std::valarray<std::complex<double> > > >Wk(n_flavors); 
+  for(int z=0;z<n_flavors;++z){
     Wk[z].resize(n_site);
     for(int j=0;j<n_site;++j){
       Wk[z][j].resize(n_matsubara);
@@ -77,7 +77,7 @@ void InteractionExpansionRun::compute_W_matsubara()
 void InteractionExpansionRun::measure_Wk(std::vector<std::vector<std::valarray<std::complex<double> > > >& Wk, 
                                  const unsigned int nfreq) 
 {
-  for (int z=0; z<n_zone; ++z) {                     
+  for (int z=0; z<n_flavors; ++z) {                     
     for (int k=0; k<n_site; k++) {                   
       for(int p=0;p<M[z].size();++p){         
         site_t site_p=M[z].creators()[p].s();
@@ -111,7 +111,7 @@ void InteractionExpansionRun::measure_Wk(std::vector<std::vector<std::valarray<s
       }
     }
   }
-  for(int flavor=0;flavor<n_zone;++flavor){
+  for(int flavor=0;flavor<n_flavors;++flavor){
     for (int k=0; k<n_site; k++) {                   
       std::stringstream Wk_real_name, Wk_imag_name;
       Wk_real_name  << "Wk_real_"  << flavor << "_" << k << "_" << k;
@@ -132,13 +132,13 @@ void InteractionExpansionRun::measure_Wk(std::vector<std::vector<std::valarray<s
 
 void InteractionExpansionRun::measure_densities()
 {
-  std::vector< std::vector<double> > dens(n_zone);
-  for(int z=0;z<n_zone;++z){
+  std::vector< std::vector<double> > dens(n_flavors);
+  for(int z=0;z<n_flavors;++z){
     dens[z].resize(n_site);
     memset(&(dens[z][0]), 0., sizeof(double)*(n_site));
   }
   double tau = beta*random_01();
-  for (int z=0; z<n_zone; ++z) {                 
+  for (int z=0; z<n_flavors; ++z) {                 
     double g0_tauj[M[z].size()];
     double M_g0_tauj[M[z].size()];
     double g0_taui[M[z].size()];
@@ -154,8 +154,8 @@ void InteractionExpansionRun::measure_densities()
 	dens[z][s] -= g0_taui[j]*M_g0_tauj[j]; 
     }
   }
-  std::valarray<double> densities(0., n_zone);
-  for (int z=0; z<n_zone; ++z) {                  
+  std::valarray<double> densities(0., n_flavors);
+  for (int z=0; z<n_flavors; ++z) {                  
     std::valarray<double> densmeas(n_site);
     for (int i=0; i<n_site; ++i) {
       densities[z] += dens[z][i];
@@ -188,10 +188,10 @@ void InteractionExpansionRun::measure_densities()
 
 void InteractionExpansionRun::compute_W_itime()
 {
-  static std::vector<std::vector<std::vector<std::valarray<double> > > >W_z_i_j(n_zone); 
-  //first index: zone. Second index: momentum. Third index: self energy tau point.
-  std::vector<std::vector<double> >density(n_zone);
-  for(int z=0;z<n_zone;++z){
+  static std::vector<std::vector<std::vector<std::valarray<double> > > >W_z_i_j(n_flavors); 
+  //first index: flavor. Second index: momentum. Third index: self energy tau point.
+  std::vector<std::vector<double> >density(n_flavors);
+  for(int z=0;z<n_flavors;++z){
     W_z_i_j[z].resize(n_site);
     density[z].resize(n_site);
     for(int i=0;i<n_site;++i){
@@ -206,7 +206,7 @@ void InteractionExpansionRun::compute_W_itime()
   double tau_2[ntaupoints];
   for(int i=0; i<ntaupoints;++i) 
     tau_2[i]=beta*random_01();
-  for(int z=0;z<n_zone;++z){                  //loop over zone
+  for(int z=0;z<n_flavors;++z){                  //loop over flavor
     double g0_tauj[M[z].size()*ntaupoints];
     double M_g0_tauj[M[z].size()*ntaupoints];
     double g0_taui[M[z].size()];
@@ -241,7 +241,7 @@ void InteractionExpansionRun::compute_W_itime()
     }
   }
   if(is_thermalized()){
-    for(int flavor=0;flavor<n_zone;++flavor){
+    for(int flavor=0;flavor<n_flavors;++flavor){
       for(int i=0;i<n_site;++i){
         for(int j=0;j<n_site;++j){
           std::stringstream W_name;
@@ -252,7 +252,7 @@ void InteractionExpansionRun::compute_W_itime()
         std::stringstream density_name;
         density_name<<"density_"<<flavor<<"_"<<i;
         measurements[density_name.str().c_str()]<<density[flavor][i]*sign;
-        if(n_zone==2){ //then we know how to compute Sz^2
+        if(n_flavors==2){ //then we know how to compute Sz^2
           std::stringstream sz_name, sz2_name, sz0_szj_name;
           sz_name<<"Sz_"<<i; sz2_name<<"Sz2_"<<i; sz0_szj_name<<"Sz0_Sz"<<i;
           measurements[sz_name.str().c_str()]<<(density[0][i]-density[1][i])*sign;
@@ -272,15 +272,15 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const al
                                                                 const matsubara_green_function_t &bare_green_matsubara, 
                                                                 std::vector<double>& densities,
                                                                 const double &beta, const int n_site, 
-                                                                const int n_zone, const int n_matsubara) const
+                                                                const int n_flavors, const int n_matsubara) const
 {
   double max_error = 0.;
   std::cout<<"evaluating self energy measurement."<<std::endl;
-  matsubara_green_function_t Wk(n_matsubara, n_site, n_zone);
+  matsubara_green_function_t Wk(n_matsubara, n_site, n_flavors);
   Wk.clear();
-  matsubara_green_function_t reduced_bare_green_matsubara(n_matsubara, n_site, n_zone);
+  matsubara_green_function_t reduced_bare_green_matsubara(n_matsubara, n_site, n_flavors);
   reduced_bare_green_matsubara.clear();
-  for(int z=0;z<n_zone;++z){
+  for(int z=0;z<n_flavors;++z){
     for (int k=0; k<n_site; k++) {                   
       std::stringstream Wk_real_name, Wk_imag_name;
       Wk_real_name  <<"Wk_real_"  <<z<<"_"<<k << "_" << k;
@@ -307,13 +307,13 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_matsubara(const al
   }
   std::cout << "Maximal error in Wk: " << max_error << std::endl;
   green_matsubara_measured.clear();
-  for(int z=0;z<n_zone;++z)
+  for(int z=0;z<n_flavors;++z)
     for (int k=0; k<n_site; k++)                    
       for(int w=0;w<n_matsubara;++w)
         green_matsubara_measured(w,k,k, z) = bare_green_matsubara(w,k,k,z) 
           - bare_green_matsubara(w,k,k,z) * bare_green_matsubara(w,k,k,z) * Wk(w,k,k,z);
   std::valarray<double> dens = alps::RealVectorObsevaluator(gathered_measurements["densities"]).mean();
-  for (int z=0; z<n_zone; ++z) 
+  for (int z=0; z<n_flavors; ++z) 
     densities[z] = dens[z];
 }
 
@@ -324,14 +324,14 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_itime_rs(const alp
                                                                itime_green_function_t &green_result,
                                                                const itime_green_function_t &green0, 
                                                                const double &beta, const int n_site, 
-                                                               const int n_zone, const int n_tau, const int n_self) const
+                                                               const int n_flavors, const int n_tau, const int n_self) const
 {
   std::cout<<"evaluating self energy measurement: itime, real space."<<std::endl;
   clock_t time0=clock();
-  std::vector<std::vector<std::vector<std::valarray<double> > > >W_z_i_j(n_zone); 
-  //first index: zone. Second index: momentum. Third index: self energy tau point.
+  std::vector<std::vector<std::vector<std::valarray<double> > > >W_z_i_j(n_flavors); 
+  //first index: flavor. Second index: momentum. Third index: self energy tau point.
   double max_error = 0.;
-  for(int z=0;z<n_zone;++z){
+  for(int z=0;z<n_flavors;++z){
     W_z_i_j[z].resize(n_site);
     for(int i=0;i<n_site;++i){
       W_z_i_j[z][i].resize(n_site);
@@ -376,7 +376,7 @@ void InteractionExpansionSim::evaluate_selfenergy_measurement_itime_rs(const alp
       }
     }
   }
-  if(n_zone==2){  
+  if(n_flavors==2){  
     alps::RealObsevaluator Sz_obs = gathered_measurements["Sz_0"];
     for(int i=1;i<n_site;i++) {
       std::stringstream Sz_name;

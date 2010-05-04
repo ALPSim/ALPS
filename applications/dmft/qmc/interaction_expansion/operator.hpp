@@ -85,12 +85,12 @@ public:
   
 
 
-  inline const spin_t &zone() const {return z_;}
-  inline spin_t &zone() {return z_;}
+  inline const spin_t &flavor() const {return z_;}
+  inline spin_t &flavor() {return z_;}
   inline const itime_t &t() const{return t_;}
   inline itime_t &t() {return t_;}
   inline const site_t &s() const {return s_;}
-  inline void zone(spin_t z){z_=z;}
+  inline void flavor(spin_t z){z_=z;}
   inline void s(site_t s){s_=s;}
   inline const std::complex<double> * exp_iomegat() const {return exp_iomegat_;} 
   //contains exp(iomegat) if its a creator, exp(-iomegat) if it's an annihilator.
@@ -115,7 +115,7 @@ public:
 private:
   site_t s_;      //this vertex's site
   itime_t t_;     //its imaginary time point
-  spin_t z_;      //its flavor or zone
+  spin_t z_;      //its flavor or flavor
   static unsigned int nm_;        //number of matsubara frequencies
   std::complex<double> *exp_iomegat_;
   bool exp_computed_;

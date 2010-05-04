@@ -129,11 +129,11 @@ public:
 						 matsubara_green_function_t &green_matsubara_measured,
 						 const matsubara_green_function_t &bare_green_matsubara, 
 						 std::vector<double>& densities, const double &beta, 
-                                                 const int n_site, const int n_zone, const int n_matsubara) const;
+                                                 const int n_site, const int n_flavors, const int n_matsubara) const;
 
   void evaluate_selfenergy_measurement_itime_rs(const alps::ObservableSet &gathered_measurements, itime_green_function_t &green_result,
 						const itime_green_function_t &green0, const double &beta, const int n_site, 
-						const int n_zone, const int n_tau, const int n_self) const;
+						const int n_flavors, const int n_tau, const int n_self) const;
 
   double green0_spline(const itime_green_function_t &green0, const itime_t delta_t, const int s1, const int s2, 
 		       const spin_t flavor, int n_tau, double beta) const;
@@ -171,8 +171,8 @@ protected:
   /*green's function*/
   // in file spines.cpp
   double green0_spline(const c_or_cdagger &cdagger, const c_or_cdagger &c) const;
-  double green0_spline(const itime_t delta_t, const spin_t zone, const site_t site1, const site_t site2) const;
-  double green0_spline(const itime_t delta_t, const spin_t zone) const;
+  double green0_spline(const itime_t delta_t, const spin_t flavor, const site_t site1, const site_t site2) const;
+  double green0_spline(const itime_t delta_t, const spin_t flavor) const;
   
   /*the actual solver functions*/
   // in file solver.cpp
@@ -181,7 +181,7 @@ protected:
   
   // in file fastupdate.cpp:
   double fastupdate_up(const int operator_nr, bool compute_only_weight);
-  double fastupdate_down(const int operator_nr, const int zone, bool compute_only_weight);
+  double fastupdate_down(const int operator_nr, const int flavor, bool compute_only_weight);
   
   /*measurement functions*/
   // in file measurements.cpp
@@ -203,7 +203,7 @@ protected:
   
   /*private member variables, constant throughout the simulation*/
   const unsigned int max_order;			
-  const spin_t n_zone;				//number of flavors (called 'zones') in InteractionExpansion
+  const spin_t n_flavors;				//number of flavors (called 'flavors') in InteractionExpansion
   const site_t n_site;				//number of sites
   const frequency_t n_matsubara;	//number of matsubara freq
   const itime_index_t n_tau;			//number of imag time slices
@@ -263,12 +263,12 @@ protected:
 typedef class vertex
 {	
 public:
-  vertex(const spin_t &zone1, const site_t &site1, const unsigned int &c_dagger_1, const unsigned int &c_1, 
-         const spin_t &zone2, const site_t &site2, const unsigned int &c_dagger_2, const unsigned int &c_2, 
+  vertex(const spin_t &flavor1, const site_t &site1, const unsigned int &c_dagger_1, const unsigned int &c_1, 
+         const spin_t &flavor2, const site_t &site2, const unsigned int &c_dagger_2, const unsigned int &c_2, 
          const double &abs_w)
   {
-    z1_=zone1;
-    z2_=zone2;
+    z1_=flavor1;
+    z2_=flavor2;
     s1_=site1;
     s2_=site2;
     c1dagger_=c_dagger_1;
@@ -279,8 +279,8 @@ public:
   }
   
   inline const double &abs_w() const {return abs_w_;}
-  inline const unsigned int &zone1() const {return z1_;}
-  inline const unsigned int &zone2() const {return z2_;}
+  inline const unsigned int &flavor1() const {return z1_;}
+  inline const unsigned int &flavor2() const {return z2_;}
   inline const unsigned int &site1() const {return s1_;}
   inline const unsigned int &site2() const {return s2_;}
   inline void set_site1(site_t site1) {s1_=site1;}
@@ -289,8 +289,8 @@ public:
   inline const unsigned int &c_dagger_2() const {return c2dagger_;}
   inline const unsigned int &c_1() const {return c1_;}
   inline const unsigned int &c_2() const {return c2_;}
-  inline unsigned int &zone1() {return z1_;}
-  inline unsigned int &zone2() {return z2_;}
+  inline unsigned int &flavor1() {return z1_;}
+  inline unsigned int &flavor2() {return z2_;}
   inline unsigned int &c_dagger_1() {return c1dagger_;}
   inline unsigned int &c_dagger_2() {return c2dagger_;}
   inline unsigned int &c_1() {return c1_;}
@@ -321,8 +321,8 @@ public:
                                     const alps::Parameters& param, int& i)
     :InteractionExpansionRun(p, param, i)
   {
-    if(n_zone !=1){
-      std::cerr<<"you need a different model for n_zone!=1."<<std::endl;
+    if(n_flavors !=1){
+      std::cerr<<"you need a different model for n_flavors!=1."<<std::endl;
       exit(1);
     }
   }
@@ -340,8 +340,8 @@ class HubbardInteractionExpansionRun: public InteractionExpansionRun{
 public:
   HubbardInteractionExpansionRun(const std::vector<alps::Process, std::allocator<alps::Process> >& p, const alps::Parameters& param, int& i)
     :InteractionExpansionRun(p, param, i){
-    if(n_zone !=2){
-      std::cerr<<"you need a different model for n_zone!=2."<<std::endl;
+    if(n_flavors !=2){
+      std::cerr<<"you need a different model for n_flavors!=2."<<std::endl;
       exit(1);
     }
   }

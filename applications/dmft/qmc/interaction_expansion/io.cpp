@@ -21,11 +21,11 @@ void InteractionExpansionRun::read_bare_green(std::ifstream &G0_omega, std::ifst
   double ignored;
   for(frequency_t o=0;o<n_matsubara;++o){
     G0_omega >>ignored;
-    for(spin_t zone=0;zone<n_zone;++zone){
+    for(spin_t flavor=0;flavor<n_flavors;++flavor){
       for(site_t j=0;j<n_site;++j){
         for(site_t k=0;k<n_site;++k){
           //initialize bare Green's function
-          G0_omega >> bare_green_matsubara(o,j,k, zone);
+          G0_omega >> bare_green_matsubara(o,j,k, flavor);
         }
       }
     }
@@ -33,10 +33,10 @@ void InteractionExpansionRun::read_bare_green(std::ifstream &G0_omega, std::ifst
   green_matsubara=bare_green_matsubara; //starting values for the dressed GF
   for(itime_index_t tau=0;tau<=n_tau;++tau){
     G0_tau>>ignored;
-    for(spin_t zone=0;zone<n_zone;++zone){
+    for(spin_t flavor=0;flavor<n_flavors;++flavor){
       for(site_t j=0;j<n_site;++j){
         for(site_t k=0;k<n_site;++k){
-          G0_tau>>bare_green_itime(tau, j, k, zone);
+          G0_tau>>bare_green_itime(tau, j, k, flavor);
         }
       }
     }
@@ -49,8 +49,8 @@ void InteractionExpansionRun::read_bare_green(std::ifstream &G0_omega, std::ifst
 
 void InteractionExpansionRun::print(std::ostream &os){
   os<<"InteractionExpansion solver, parameters: "<<std::endl;
-  os<<"max order\t"<<max_order<<"\tn_zone: "
-    <<n_zone<<"\tn_site: "<<n_site
+  os<<"max order\t"<<max_order<<"\tn_flavors: "
+    <<n_flavors<<"\tn_site: "<<n_site
     <<"\tn_matsubara"<<n_matsubara<<std::endl;
   os<<"n_tau: "<<n_tau<<"\tmc steps: "<<mc_steps
     <<"\ttherm steps: "<<therm_steps<<std::endl;

@@ -41,37 +41,37 @@ void InteractionExpansionRun::initialize_observables(void)
   measurements<<alps::RealObservable("Sign");
   measurements<<alps::RealVectorObservable("PertOrder");  
   if(measurement_method==selfenergy_measurement_itime_rs) {
-    for(int zone=0;zone<n_zone;++zone){
-      measurements << signed_vec_obs_t("densities_"+boost::lexical_cast<std::string>(zone));
+    for(int flavor=0;flavor<n_flavors;++flavor){
+      measurements << signed_vec_obs_t("densities_"+boost::lexical_cast<std::string>(flavor));
       for(int i=0;i<n_site;++i){
         for(int j=0;j<n_site;++j){
           std::stringstream obs_name;
-          obs_name<<"W_"<<zone<<"_"<<i<<"_"<<j;
+          obs_name<<"W_"<<flavor<<"_"<<i<<"_"<<j;
           measurements<<signed_vec_obs_t(obs_name.str().c_str());
         }
       }
     }
   }
   else {
-    for(int zone=0;zone<n_zone;++zone){
+    for(int flavor=0;flavor<n_flavors;++flavor){
       for (int k=0; k<n_site; k++) {                   
         std::stringstream obs_name_real, obs_name_imag;
-        obs_name_real<<"Wk_real_"<<zone<<"_"<<k << "_" << k;
-        obs_name_imag<<"Wk_imag_"<<zone<<"_"<<k << "_" << k;
+        obs_name_real<<"Wk_real_"<<flavor<<"_"<<k << "_" << k;
+        obs_name_imag<<"Wk_imag_"<<flavor<<"_"<<k << "_" << k;
         measurements<<signed_vec_obs_t(obs_name_real.str().c_str());
         measurements<<signed_vec_obs_t(obs_name_imag.str().c_str());
       }
     }
   }
   measurements << signed_vec_obs_t("densities");
-  for(int zone=0;zone<n_zone;++zone)
-    measurements << signed_vec_obs_t("densities_"+boost::lexical_cast<std::string>(zone));
+  for(int flavor=0;flavor<n_flavors;++flavor)
+    measurements << signed_vec_obs_t("densities_"+boost::lexical_cast<std::string>(flavor));
   measurements << signed_obs_t("density_correlation");
   measurements << signed_vec_obs_t("n_i n_j");
-  for(int zone=0;zone<n_zone;++zone){
+  for(int flavor=0;flavor<n_flavors;++flavor){
     for(int i=0;i<n_site;++i){
       std::stringstream density_name, sz_name;
-      density_name<<"density_"<<zone<<"_"<<i;
+      density_name<<"density_"<<flavor<<"_"<<i;
       measurements<<signed_obs_t(density_name.str().c_str());
     }
   }
@@ -106,8 +106,8 @@ void InteractionExpansionRun::measure_observables(void)
     compute_W_matsubara();
   else if (measurement_method == selfenergy_measurement_itime_rs)
     compute_W_itime();
-  std::valarray<double> pert_order(n_zone);
-  for(uint i=0;i<n_zone;++i) { 
+  std::valarray<double> pert_order(n_flavors);
+  for(unsigned int i=0;i<n_flavors;++i) { 
     pert_order[i]=M[i].size(); 
   }
   measurements["PertOrder"] << pert_order;

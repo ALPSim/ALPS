@@ -127,7 +127,7 @@ public:
     dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
   }
 
-  inline void matrix_right_multiply(const double *M1, double *M2, const uint columns)
+  inline void matrix_right_multiply(const double *M1, double *M2, const unsigned int columns)
   { //perform M2(i,j)=sum_k M(i,k)*M1(k,j)
     //call the BLAS routine for matrix matrix multiplication:     
     char transa='N';
