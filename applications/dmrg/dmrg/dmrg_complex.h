@@ -67,6 +67,8 @@ public:
   void serialize(alps::hdf5::oarchive &) const;
 #endif
 
+  // iteration measurements
+  std::vector<alps::EigenvectorMeasurements<value_type> > iteration_measurements;
 private:
 
   alps::SiteOperator make_site_term(std::string x)
@@ -109,7 +111,5 @@ private:
   int start_dir;
   int start_iter;
 
-  // iteration measurements
-  std::vector<alps::EigenvectorMeasurements<value_type> > iteration_measurements;
 };
 
