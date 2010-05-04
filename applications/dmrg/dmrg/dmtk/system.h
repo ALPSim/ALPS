@@ -121,7 +121,7 @@ class FileList
          if(old_name != _tmp_filenames.end()) return (old_name->second).c_str();
 
          filename = filename.substr(0,filename.find_first_of('_')+1);
-         this->last_filename = alps::temporary_filename(temp_dir + filename+ "XXXXXX");
+         this->last_filename = alps::temporary_filename(temp_dir + filename);
          _tmp_filenames[std::string(input)] = this->last_filename;
          std::cout << "Creating temp file " << this->last_filename << std::endl;
          return this->last_filename.c_str();
@@ -380,6 +380,10 @@ class System
     virtual void measure(const VectorState<T> *v=NULL); 
     virtual void measure_n(size_t n, const VectorState<T> *v=NULL); 
     virtual T measure_operator(const BasicOp<T> &top, const VectorState<T> *v=NULL);
+
+    size_t get_iter() const { return iter; }
+    size_t get_dir() const { return dir; }
+
 
     size_t block(int site) const;
 
