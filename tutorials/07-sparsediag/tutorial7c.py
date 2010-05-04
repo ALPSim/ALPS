@@ -44,7 +44,7 @@ for sim in data:
 gapplot = pyalps.DataSet()
 gapplot.x = 1./np.sort(lengths)
 gapplot.y = [min_energies[(l,1)] -min_energies[(l,0)] for l in np.sort(lengths)]  
-  gapplot.props['xlabel']='$1/L$'
+gapplot.props['xlabel']='$1/L$'
 gapplot.props['ylabel']='Triplet gap $\Delta/J$'
 gapplot.props['label']='S=1/2'
 
