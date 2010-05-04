@@ -38,15 +38,15 @@
 #include <alps/scheduler.h>
 #include <boost/foreach.hpp>
 
-template<class T>
+template<class value_type>
 bool
-handler(dmtk::System<T>& S, size_t signal_id, void *data)
+handler(dmtk::System<value_type>& S, size_t signal_id, void *data)
 {
-  DMRGTask &task = * (DMRGTask *)S.get_data();
+  DMRGTask<value_type> &task = * (DMRGTask<value_type> *)S.get_data();
   if(signal_id == dmtk::SYSTEM_SIGNAL_END_ITER){
-    task.iteration_measurements.push_back(alps::EigenvectorMeasurements<complex<double> >(task));
-    task.iteration_measurements.back().average_values["Iteration"].push_back(S.get_iter());
+    task.iteration_measurements.push_back(alps::EigenvectorMeasurements<value_type >(task));
     task.iteration_measurements.back().average_values["Direction"].push_back(S.get_dir());
+    task.iteration_measurements.back().average_values["Iteration"].push_back(S.get_iter());
     for(int i = 0; i < S.energy.size(); i++) {
       task.iteration_measurements.back().average_values["Energy"].push_back(S.energy[i]);
     }
@@ -56,7 +56,8 @@ handler(dmtk::System<T>& S, size_t signal_id, void *data)
   return false;
 }
 
-DMRGTask::DMRGTask(const alps::ProcessList& w,const boost::filesystem::path& fn)
+template<class value_type>
+DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const boost::filesystem::path& fn)
   : alps::scheduler::Task(w,fn)
   , alps::graph_helper<>(parms) 
   , alps::model_helper<>(*this,parms)
@@ -65,7 +66,8 @@ DMRGTask::DMRGTask(const alps::ProcessList& w,const boost::filesystem::path& fn)
   init();
 }
 
-DMRGTask::DMRGTask(const alps::ProcessList& w,const alps::Parameters& p)
+template<class value_type>
+DMRGTask<value_type>::DMRGTask(const alps::ProcessList& w,const alps::Parameters& p)
   : alps::scheduler::Task(w,p) 
   , alps::graph_helper<>(parms) 
   , alps::model_helper<>(*this,parms)
@@ -75,7 +77,8 @@ DMRGTask::DMRGTask(const alps::ProcessList& w,const alps::Parameters& p)
 }
 
 
-void DMRGTask::init()
+template<class value_type>
+void DMRGTask<value_type>::init()
 {
   if (parms.defined("TEMP_DIRECTORY")) {
     std::string temp_dir = parms["TEMP_DIRECTORY"];
@@ -154,7 +157,8 @@ std::string simplify_name(const SiteOp &op)
   return term;
 }
 
-void DMRGTask::dostep() 
+template<class value_type>
+void DMRGTask<value_type>::dostep() 
 {
   if (finished()) 
     return;
@@ -220,7 +224,7 @@ void DMRGTask::dostep()
   meas_terms.clear();
 
   // calculate local measurements
-  BOOST_FOREACH (string_pair const& ex, local_expressions) {
+  BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
     if (has_bond_operator(ex.second)) {
       int i=0;
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit,++i) {
@@ -244,7 +248,7 @@ void DMRGTask::dostep()
   
   // average measurements will be identical loops, but all terms added instead of stored separately
 
-   BOOST_FOREACH (string_pair const& ex, average_expressions) {
+   BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
     dmtk::Hami<value_type > meas;
     if (has_bond_operator(ex.second)) {
       for (bond_iterator bit=bonds().first; bit!=bonds().second;++bit)
@@ -306,7 +310,7 @@ void DMRGTask::dostep()
     }
   }
 
-  dmtk::Hami<value_type >::iterator iter;
+  typename dmtk::Hami<value_type>::iterator iter;
   int i = 0;
   
   if (verbose) {
@@ -363,33 +367,34 @@ void DMRGTask::dostep()
     save_results();
   }
   for(int i = 0; i < S.energy.size(); i++) {
-    average_values["Energy"].push_back(S.energy[i]);
+    this->average_values["Energy"].push_back(S.energy[i]);
   }
-  average_values["Truncation error"].push_back(S.truncation_error());
+  this->average_values["Truncation error"].push_back(S.truncation_error());
   finish();
 }
 
 
+template<class value_type>
 void
-DMRGTask::save_results()
+DMRGTask<value_type>::save_results()
 {
   dmtk::System<value_type > &S = this->system;
-  dmtk::Hami<value_type >::iterator iter = S.corr.begin();
+  typename dmtk::Hami<value_type>::iterator iter = S.corr.begin();
   typedef std::pair<std::string,std::string> string_pair;
   typedef std::pair<std::string,std::pair<std::string,std::string> > string_string_pair_pair;
 
   // store local measurements
-  BOOST_FOREACH (string_pair const& ex, local_expressions) {
+  BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
     std::vector<value_type> av;
     for (int i=0; i< (has_bond_operator(ex.second) ? num_bonds() : num_sites());++i)
       av.push_back(iter++->value().real());   
-    local_values[ex.first].push_back(av);
+    this->local_values[ex.first].push_back(av);
   }
   
   // average measurements will be identical loops, but all terms added instead of stored separately
 
-   BOOST_FOREACH (string_pair const& ex, average_expressions) {
-    average_values[ex.first].push_back(iter++->value().real());
+   BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
+    this->average_values[ex.first].push_back(iter++->value().real());
   }
   
   // correlations
@@ -397,7 +402,7 @@ DMRGTask::save_results()
     std::vector<value_type> av;
     for (int i=0; i<num_distances();++i)
       av.push_back(iter++->value().real());   
-    correlation_values[ex.first].push_back(av);
+    this->correlation_values[ex.first].push_back(av);
   }
 
   if (iter != S.corr.end())
@@ -405,26 +410,28 @@ DMRGTask::save_results()
 }
     
 #ifdef ALPS_HAVE_HDF5
-void DMRGTask::serialize(alps::hdf5::oarchive & ar) const
+template<class value_type>
+void DMRGTask<value_type>::serialize(alps::hdf5::oarchive & ar) const
 {
   alps::scheduler::Task::serialize(ar);
-  std::map<std::string,std::vector<value_type> >::const_iterator it = average_values.find("Energy");
-  if (it != average_values.end()) {
+  typename std::map<std::string,std::vector<value_type> >::const_iterator it = this->average_values.find("Energy");
+  if (it != this->average_values.end()) {
     std::vector<double> energies = alps::numeric::real(it->second);
     ar << alps::make_pvp("spectrum/energies",energies);
   }
-  ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<std::complex<double> >&>(*this));
+  ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<value_type >&>(*this));
 
   for (std::size_t i=0;i<iteration_measurements.size();++i) {
     ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i),iteration_measurements[i]);
-    std::map<std::string,std::vector<value_type> >::const_iterator it = iteration_measurements[i].average_values.find("Energy");
+    typename std::map<std::string,std::vector<value_type> >::const_iterator it = iteration_measurements[i].average_values.find("Energy");
     if (it != iteration_measurements[i].average_values.end())
       ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i)+"/energies",it->second);
   }
 }
 #endif
 
-void DMRGTask::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
+template<class value_type>
+void DMRGTask<value_type>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
 {
   if (writeallxml) {
     out << alps::start_tag("EIGENSTATES") << alps::attribute("number",num_eigenvalues);
@@ -438,7 +445,9 @@ void DMRGTask::write_xml_body(alps::oxstream& out, const boost::filesystem::path
 }
 
 
-dmtk::BasicOp<DMRGTask::value_type > DMRGTask::create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type)
+template<class value_type>
+dmtk::BasicOp<value_type > 
+DMRGTask<value_type>::create_site_operator(std::string const& name, alps::SiteOperator const& siteop, int type)
 { 
   dmtk::Block<value_type > &block = site_block[type];
   dmtk::BasicOp<value_type > *op = block(name.c_str(),0);
@@ -473,8 +482,9 @@ dmtk::BasicOp<DMRGTask::value_type > DMRGTask::create_site_operator(std::string 
 }
     
     
+template<class value_type>
 void
-DMRGTask::build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<value_type > &this_hami)
+DMRGTask<value_type>::build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::Hami<value_type > &this_hami)
 {
   typedef std::vector<boost::tuple<alps::Term,alps::SiteOperator> > V;
   V  ops = siteop.split();
@@ -492,8 +502,9 @@ DMRGTask::build_site_operator(alps::SiteOperator const& siteop, int site, dmtk::
   }
 }
 
+template<class value_type>
 void
-DMRGTask::build_2site_operator(std::pair<alps::SiteOperator,alps::SiteOperator> const& siteops, 
+DMRGTask<value_type>::build_2site_operator(std::pair<alps::SiteOperator,alps::SiteOperator> const& siteops, 
                             std::pair<int,int> sites, dmtk::Hami<value_type > &this_hami)
 {
   typedef std::vector<boost::tuple<alps::Term,alps::SiteOperator> > V;
@@ -516,8 +527,9 @@ DMRGTask::build_2site_operator(std::pair<alps::SiteOperator,alps::SiteOperator> 
 }
 
 
+template<class value_type>
 void
-DMRGTask::build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami)
+DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond_descriptor const& b, dmtk::Hami<value_type > &this_hami)
 {
   typedef std::vector<boost::tuple<alps::Term,alps::SiteOperator,alps::SiteOperator > > V;
   alps::expression::ParameterEvaluator<value_type > coords(coordinate_as_parameter(b));
@@ -548,8 +560,14 @@ int main(int argc, char** argv)
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
-   
-   return alps::scheduler::start(argc,argv,alps::scheduler::SimpleFactory<DMRGTask>());
+
+//#ifdef DMRG_COMPLEX   
+   return alps::scheduler::start(argc,argv,alps::scheduler::SimpleFactory<DMRGTask<std::complex<double> > >());
+/*
+#else // DMRG_COMPLEX
+   return alps::scheduler::start(argc,argv,alps::scheduler::SimpleFactory<DMRGTask<double> >());
+#endif // DMRG_COMPLEX
+*/
 
 #ifndef BOOST_NO_EXCEPTIONS
 }
