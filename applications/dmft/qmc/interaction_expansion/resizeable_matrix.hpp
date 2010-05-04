@@ -127,7 +127,9 @@ public:
     dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
   }
 
-  inline void matrix_right_multiply(const double *M1, double *M2, const unsigned int columns)
+
+  inline void matrix_right_multiply(const double *M1, double *M2, const unsigned columns)
+
   { //perform M2(i,j)=sum_k M(i,k)*M1(k,j)
     //call the BLAS routine for matrix matrix multiplication:     
     char transa='N';
@@ -162,13 +164,16 @@ public:
   
   double max() const
   {
-    double *rowmax=new double[size_];
+
+    double* rowmax = new double[size_];
+
     unsigned int rowmax_index, max_index, inc=1;
     for(unsigned int i=0;i<size_;++i){
       rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
       rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
     }
     max_index=idamax_(&size_, rowmax ,&inc);
+
     double m=fabs(rowmax[max_index-1]);
     delete[] rowmax;
     return m;

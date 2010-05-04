@@ -134,8 +134,8 @@ public:
   {
     if(!use_static_exp_){
       if(!exp_computed_){
-	double sin_array[n_matsubara];
-	double cos_array[n_matsubara];
+	double* sin_array = new double[n_matsubara];
+	double* cos_array = new double[n_matsubara];
 	//ACML vector functions
 #ifdef ACML
 	int one=1;
@@ -148,11 +148,12 @@ public:
 	//MKL vector functions
 #ifdef MKL
 	int one=1;
-	double arg_array[n_matsubara];
+	double arg_array = new double[n_matsubara];
 	int nm=n_matsubara;
 	memcpy(arg_array, omegan_, n_matsubara*sizeof(double));
 	dscal_(&n_matsubara, &t_, arg_array, &one);
 	vdsincos_(&nm, arg_array, sin_array, cos_array);
+	delete [] arg_array;
 #else
 	//NO vector functions
 	for(frequency_t o=0;o<n_matsubara;++o){
@@ -165,6 +166,8 @@ public:
 	for(frequency_t o=0;o<n_matsubara;++o)
 	  exp_iomegat_[o] = std::complex<double>(cos_array[o], sign*sin_array[o]);
 	exp_computed_=true;
+	delete[] sin_array;
+	delete[] cos_array;
       }
     } else { //use static exp
       int taun=(int)(t_*ntau_/beta_);
@@ -174,6 +177,8 @@ public:
       else
 	exp_iomegat_=&(exp_iomegan_tau_[taun*2*nm_ + nm_]);
     }
+
+
   }
 
 } creator, annihilator;

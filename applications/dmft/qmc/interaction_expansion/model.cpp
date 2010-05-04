@@ -22,10 +22,12 @@ double HalfFillingHubbardInteractionExpansionRun::try_add()
   //construct a creator and an annihilator in flavor 0:
   double t = beta*random_01(); 
   double abs_w = beta*onsite_U*n_site; // onsite_U is const
+
   unsigned int site = random_int(n_site);
   M[flavor].creators().push_back(creator(up, site, t, n_matsubara));
   M[flavor].annihilators().push_back(annihilator(up, site, t, n_matsubara));
   M[flavor].alpha().push_back(random_01()<0.5?alpha:1-alpha); //symmetrized version
+
   //keep track of vertex list
   vertices.push_back(vertex(0, site, M[0].creators().size()-1, M[0].annihilators().size()-1, 0, 0, 0, 0, abs_w)); 
   //second part of list is ignored (symmetry)
