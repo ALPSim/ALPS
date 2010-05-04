@@ -2,8 +2,8 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 2006 -2010 by Adrian Feiguin <afeiguin@uwyo.edu>
-*                             Matthias Troyer <troyer@itp.phys.ethz.ch>
+* Copyright (C) 1994-2010 by Matthias Troyer <troyer@comp-phys.org>,
+*                            Adrian Feiguin <afeiguin@uwyo.edu>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -24,32 +24,26 @@
 *
 *****************************************************************************/
 
-/* $Id: dmrg.C 2896 2008-07-26 15:56:05Z troyer $ */
+/* $Id$ */
 
-
+#include <cstddef>
 #include "factory.h"
-#include <alps/scheduler.h>
+#include "dmrg.h"
 
-
-
-int main(int argc, char** argv)
+alps::scheduler::Task* DMRGFactory::make_task(const alps::ProcessList& w, const boost::filesystem::path& fn, const alps::Parameters& parms) const
 {
-#ifndef BOOST_NO_EXCEPTIONS
-try {
-#endif
-
-   return alps::scheduler::start(argc,argv,DMRGFactory());
-
-#ifndef BOOST_NO_EXCEPTIONS
+  return parms.value_or_default("COMPLEX",false)  ?
+    static_cast<alps::scheduler::Task*>(new DMRGTask<std::complex<double> >(w,fn)) :
+    static_cast<alps::scheduler::Task*>(new DMRGTask<double>(w,fn));
 }
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
+  
+void DMRGFactory::print_copyright(std::ostream& out) const
+{
+   out << "ALPS/dmrg version " DMRG_VERSION " (" DMRG_DATE ")\n"
+       << "  Density Matrix Renormalization Group algorithm\n"
+       << "  for low-dimensional interacting systems.\n"
+       << "  available from http://alps.comp-phys.org/\n"
+       << "  copyright (c) 2006-2013 by Adrian E. Feiguin\n"
+       << "  for details see the publication: \n"
+       << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
 }
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-}
-

@@ -2,8 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 2006 -2010 by Adrian Feiguin <afeiguin@uwyo.edu>
-*                             Matthias Troyer <troyer@itp.phys.ethz.ch>
+* Copyright (C) 1994-2010 by Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -24,32 +23,17 @@
 *
 *****************************************************************************/
 
-/* $Id: dmrg.C 2896 2008-07-26 15:56:05Z troyer $ */
+/* $Id$ */
 
+#ifndef ALPS_APPLICATIONS_DMRG_DMRG_FACTORY_H
+#define ALPS_APPLICATIONS_DMRG_DMRG_FACTORY_H
 
-#include "factory.h"
-#include <alps/scheduler.h>
+#include <alps/scheduler/factory.h>
 
+class DMRGFactory : public alps::scheduler::Factory {
+  alps::scheduler::Task* make_task(const alps::ProcessList&, 
+     const boost::filesystem::path&, const alps::Parameters&) const;  
+  void print_copyright(std::ostream& out) const;
+};
 
-
-int main(int argc, char** argv)
-{
-#ifndef BOOST_NO_EXCEPTIONS
-try {
 #endif
-
-   return alps::scheduler::start(argc,argv,DMRGFactory());
-
-#ifndef BOOST_NO_EXCEPTIONS
-}
-catch (std::exception& exc) {
-  std::cerr << exc.what() << "\n";
-  return -1;
-}
-catch (...) {
-  std::cerr << "Fatal Error: Unknown Exception!\n";
-  return -2;
-}
-#endif
-}
-
