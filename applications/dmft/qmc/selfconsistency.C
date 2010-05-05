@@ -54,10 +54,9 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   double beta = static_cast<double>(parms["BETA"]);
   double h_old = static_cast<double>(parms["H"]);
   double h_init = parms.value_or_default("H_INIT", 0.);
-  double h = h_old + h_init;
-  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
+  double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
+  bool symmetrization = (bool)(parms["SYMMETRIZATION"]);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
 
@@ -74,7 +73,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     G_tau = solver.solve(G0_tau, parms);
     //std::cout<<"G after solver: "<<G_tau.to_multiple_vector()<<std::endl;
     std::cout<<"running Hilbert transform"<<std::endl;
-    G_tau = hilbert.symmetrize(G_tau, paramagnet);
+    G_tau = hilbert.symmetrize(G_tau, symmetrization);
     G0_tau= hilbert(G_tau, mu, h, beta);
     std::cout<<"comparing old and new results"<<std::endl;
     max_diff=0;
@@ -104,7 +103,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
   //double mu = static_cast<double>(parms["MU"]);
   //double h = parms.value_or_default("H", 0);;
   double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
+  bool symmetrization = (bool)(parms["SYMMETRIZATION"]);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
@@ -115,7 +114,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
     G_tau_old=G_tau;
     G_tau= solver.solve(G_tau, parms); //the Werner solver WANTS a G_tau as an input. It then makes an F function out of it.
                                        //symmetrize
-    if(paramagnet){
+    if(symmetrization){
       for(unsigned int f=0;f<G_tau.nflavor();f+=2){
         for(unsigned int i=0;i<G_tau.ntime();++i){
           G_tau(i,f  )=0.5*(G_tau(i,f)+G_tau(i,f+1));
@@ -160,13 +159,13 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   double beta = static_cast<double>(parms["BETA"]);
   double h_old = static_cast<double>(parms["H"]);
   double h_init = parms.value_or_default("H_INIT", 0.);
-  double h = h_old + h_init;
-  (*const_cast<alps::Parameters*>(&parms))["H"] = h;
+  double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
+  bool symmetrization = (bool)(parms["SYMMETRIZATION"]);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  std::string basename=parms["BASENAME"];
   
   matsubara_green_function_t G0_omega = hilbert.initial_G0(parms);
   matsubara_green_function_t G_omega = G0_omega;
@@ -196,8 +195,8 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     //fourier.setmu(mu);
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
-    G_tau = hilbert.symmetrize(G_tau, paramagnet);
-    G_omega = hilbert.symmetrize(G_omega, paramagnet);
+    G_tau = hilbert.symmetrize(G_tau, symmetrization);
+    G_omega = hilbert.symmetrize(G_omega, symmetrization);
     std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
     G0_omega = hilbert(G_omega, G0_omega, mu, h, beta);
     //relaxation to speed up /slow down convergence
@@ -231,7 +230,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
-    print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+    print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     if (iteration_ctr == 1) 
       (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           

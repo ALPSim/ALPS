@@ -114,6 +114,8 @@ InteractionExpansionRun::InteractionExpansionRun(const alps::ProcessList &where,
     vertex_histograms[i]=new simple_hist(vertex_histogram_size);
   }
   c_or_cdagger::initialize_simulation(parms);
+
+  if(n_site !=1) throw std::invalid_argument("you're trying to run this code for more than one site. Do you know what you're doing?!?");
 }
 
 
@@ -185,7 +187,7 @@ void InteractionExpansionRun::initialize_simulation(const alps::Parameters& parm
 void c_or_cdagger::initialize_simulation(const alps::Parameters &p)
 {
   beta_=p["BETA"];
-  nm_=p.value_or_default("NMATSUBARA_MEASUREMENTS", "NMATSUBARA");
+  nm_=p.value_or_default("NMATSUBARA_MEASUREMENTS", p["NMATSUBARA"]);
   omegan_ = new double[nm_];
   for(unsigned int i=0;i<nm_;++i) {
     omegan_[i]=(2.*i+1.)*M_PI/beta_;

@@ -8,24 +8,24 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 
 /// @file main.C
@@ -87,17 +87,18 @@ int main(int argc, char** argv)
       if(!is.is_open()){std::cerr<<"parameter file argv[1] "<<argv[1]<<"is not open! exiting!"<<std::endl; abort(); }
       is>>parms;
       is.close();
+      parms["BASENAME"]=std::string(argv[1]);
     }
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
-      if(!parms.defined("OMEGA_LOOP")){
+      if(!parms.defined("OMEGA_LOOP") || (bool)(parms["OMEGA_LOOP"])==false){
         //...imaginary time tau
         SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
         boost::shared_ptr<ImpuritySolver> solver_ptr;
         if (parms["SOLVER"]=="Hirsch-Fye"){
           std::cout<<"solving Hirsch Fye"<<std::endl;
           // we need a factory to create Hirsch-Fye simulations
-          alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;	
+          alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;  
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
@@ -128,19 +129,19 @@ int main(int argc, char** argv)
 #endif
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
-	if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
-	  transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
-	  std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
-	} 
-	else if(parms.defined("TWODBS")) {
-	  if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
-              std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
+        if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
+          transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
+          std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
+        } 
+        else if(parms.defined("TWODBS")) {
+          if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
+            if((bool)(parms["SYMMETRIZATION"])==false){ 
+              std::cerr<<"AFM and SYMMETRIZATION? redundant parameters! set symmetrization to false."<<std::endl; abort();
             }
             std::cerr<<"implement PM DOS integration!!"<<std::endl;
             abort();
           }else{
-            if((bool)(parms["PARAMAGNET"])==true){ 
+            if((bool)(parms["SYMMETRIZATION"])==true){ 
               std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
             }
             transform_ptr=new TwoDAFMHilbertTransformer(parms);
@@ -149,18 +150,18 @@ int main(int argc, char** argv)
         else{
           std::cout<<"using DOS Hilbert transform"<<std::endl;
           if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
-              std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
+            if((bool)(parms["SYMMATRIZATION"])==false){ 
+              std::cerr<<"AFM and PM? redundant parameters! set symmetrization to false."<<std::endl; abort();
             }
             transform_ptr= new FSDOSHilbertTransformer(parms);
           }else{
-            if((bool)(parms["PARAMAGNET"])==true){ 
-              std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
+            if((bool)(parms["SYMMETRIZATION"])==true){ 
+              std::cerr<<"AFM and SYMMETRIZATION? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
             }
             transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
           }
         }
-        boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
+        boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;  
 #ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
         if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("FLAVORS", "2")=="1")){
           std::cout<<"using single site Hubbard solver for half filling"<<std::endl;
@@ -177,22 +178,22 @@ int main(int argc, char** argv)
         else
 #endif
 #ifdef BUILD_DMFT_QMC_HYBRIDIZATION
-        if (parms["SOLVER"]=="Hybridization") {
-          std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
-        }
-        else
+          if (parms["SOLVER"]=="Hybridization") {
+            std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
+            solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
+          }
+          else
 #endif
-        {
-          boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
-        }
+          {
+            boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
+            solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
+          }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
       }
     }
     else { //CLUSTER_LOOP
       throw std::logic_error("you should use the cluster framework for a cluster calculation.");
-    }		
+    }    
     {
       std::ofstream os(argv[1]);
       os<<parms;

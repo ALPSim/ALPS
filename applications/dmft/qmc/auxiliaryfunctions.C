@@ -239,7 +239,7 @@ void print_green_itime(std::ostream &os, const itime_green_function_t &v, const 
   }
 }
 
-void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega, 
+void print_all_green_functions(std::string const &basename, const int iteration_ctr, const matsubara_green_function_t &G0_omega, 
                                const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, 
                                const itime_green_function_t &G_tau, const double beta, const shape_t shape, 
                                const std::string suffix)
@@ -276,6 +276,12 @@ void print_all_green_functions(const int iteration_ctr, const matsubara_green_fu
   print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta, shape);
   if (shape==diagonal)
     print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
+
+  alps::hdf5::oarchive ar(basename+".h5");
+  std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
+  G_tau.write_hdf5(ar,basepath.str()+"G_tau");
+  G_omega.write_hdf5(ar,basepath.str()+"G_omega");
+  //ar<<alps::make_pvp(basepath.str()+"/selfenergy", selfenergy);
 }
 
 
@@ -372,4 +378,9 @@ std::ostream &operator<<(std::ostream &os, const U_matrix &U){
   os<<"]"<<std::endl;
   return os;
 }
-
+/*alps::hdf5::oarchive& alps::hdf5::serialize(alps::hdf5::oarchive& ar, const std::string& basepath, const matsubara_green_function_t &gf){
+  std::cout<<"trying to store gf to: "<<basepath<<std::endl;
+}
+alps::hdf5::oarchive& alps::hdf5::serialize(alps::hdf5::oarchive& ar, const std::string& basepath, const itime_green_function_t&gf){
+  std::cout<<"trying to store gf to: "<<basepath<<std::endl;
+}*/

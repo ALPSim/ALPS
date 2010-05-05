@@ -87,17 +87,17 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   bool measure_in_matsubara=true;
   if(p_.value_or_default("HISTOGRAM_MEASUREMENT", false)) 
     measure_in_matsubara=false;
-  std::cout<<"getting measurements pertorder: "<<std::endl;
-  clock_t tstart=clock();
+  //std::cout<<"getting measurements pertorder: "<<std::endl;
+  //clock_t tstart=clock();
   const bool compactit = parms.value_or_default("GET_COMPACTED_MEASUREMENTS", true);
   if (!compactit) 
     std::cout << "getting non-compacted measurements\n";
   alps::ObservableSet gathered_measurements=get_measurements(compactit);
-  clock_t tmid=clock();
+  //clock_t tmid=clock();
   alps::RealVectorObsevaluator pert_obseval=gathered_measurements["PertOrder"];
-  clock_t tend=clock();
-  std::cout<<"getting this took: "<<(tend-tstart)/(double)CLOCKS_PER_SEC<<"of which mid was: "
-	   <<(tmid-tstart)/(double)CLOCKS_PER_SEC<<"getting measurements sign: "<<std::endl;
+  //clock_t tend=clock();
+  //std::cout<<"getting this took: "<<(tend-tstart)/(double)CLOCKS_PER_SEC<<"of which mid was: "
+	//   <<(tmid-tstart)/(double)CLOCKS_PER_SEC<<"getting measurements sign: "<<std::endl;
   /*output acceptance ratios*/
   alps::RealObsevaluator vertex_insertion=gathered_measurements["VertexInsertion"];
   alps::RealObsevaluator vertex_removal=gathered_measurements["VertexRemoval"];

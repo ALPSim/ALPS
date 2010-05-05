@@ -35,6 +35,7 @@
 #include <stdexcept>
 #include <cassert>
 #include <cstdlib>
+#include <alps/hdf5.hpp>
 #ifdef USE_MPI
 #include <mpi.h>
 #endif 
@@ -113,9 +114,14 @@ template <typename T> class green_function{
     ///return # of matsubara frequencies. Exactly equivalent to ntime().
     ///In the case of a Matsubara GF 'ntime' sounds odd -> define 'nfreq' instead.
     inline const unsigned int &nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
-
         void read(const char *filename);
         void write(const char *filename) const;
+    void write_hdf5(alps::hdf5::oarchive &ar, const std::string &path) const{
+      ar<<alps::make_pvp(path+"/nt",nt_);
+      ar<<alps::make_pvp(path+"/ns",ns_);
+      ar<<alps::make_pvp(path+"/nf",nf_);
+      ar<<alps::make_pvp(path+"/values",val_, ntnsns_*nf_);
+    }
         std::pair<std::vector<T>,std::vector<T> > to_multiple_vector() const;
         void from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> > &mv);
 #ifdef USE_MPI
@@ -209,12 +215,12 @@ template<typename T> void green_function<T>::from_multiple_vector(const std::pai
 enum shape_t {diagonal, blockdiagonal, nondiagonal};
 
 
-void print_all_green_functions(const int iteration_ctr, const matsubara_green_function_t &G0_omega,
+void print_all_green_functions(std::string const &basename, const int iteration_ctr, const matsubara_green_function_t &G0_omega,
                    const matsubara_green_function_t &G_omega, const itime_green_function_t &G0_tau, 
                    const itime_green_function_t &G_tau, const double beta, const shape_t shape=diagonal,
                    const std::string suffix="");
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape=diagonal);
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape=diagonal);
 void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
-                       const shape_t shape=nondiagonal, const std::string suffix="");
+    const shape_t shape=nondiagonal, const std::string suffix="");
 #endif

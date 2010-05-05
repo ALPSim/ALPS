@@ -61,7 +61,7 @@ public:
   /// @return the result of the Hilbert transform (G0_tau)
   virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
                                             double mu, double h, double beta)=0; 
-  itime_green_function_t symmetrize(const itime_green_function_t& G_tau, const bool paramagnet) const;
+  itime_green_function_t symmetrize(const itime_green_function_t& G_tau, const bool symmetrization) const;
   virtual itime_green_function_t initial_G0(const alps::Parameters& parms);
   virtual ~HilbertTransformer() {}
 };
@@ -162,10 +162,10 @@ public:
   virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms);
   virtual ~FrequencySpaceHilbertTransformer() {}
   template <class T>
-  green_function<T> symmetrize(const green_function<T>& G, const bool paramagnet) const
+  green_function<T> symmetrize(const green_function<T>& G, const bool symmetrization) const
   {
     green_function<T> G_new(G);
-    if (paramagnet) {
+    if (symmetrization) {
       assert(G_new.nflavor()%2==0);
       for(spin_t flavor=0;flavor<G_new.nflavor(); flavor+=2){
         for(itime_index_t tau=0;tau<G_new.ntime();++tau){

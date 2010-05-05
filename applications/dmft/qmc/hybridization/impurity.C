@@ -69,20 +69,22 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
   mu = mu + mu_shift;
   //std::cout << "mu_shift to half filling is: " << mu_shift << std::endl;
   //general case: SC loop in omega, we have to convert G0(iomega) into F(tau).
-  if (parms.defined("OMEGA_LOOP")) {
+  if (parms.defined("OMEGA_LOOP") && (bool)(parms["OMEGA_LOOP"])==true) {
     matsubara_green_function_t bare_green_matsubara(N, 1, FLAVORS);
     matsubara_green_function_t f_twiddle_matsubara(N, 1, FLAVORS);
     itime_green_function_t f_twiddle_itime(Np1, 1, FLAVORS);
     std::cout << "U is: " << u << std::endl;
     //find the second moment of the band structure
-    t=parms["t"]; //this is essentially an energy unit.
-    double epssqav = t * t;
+    double epssqav ;
     if (parms.defined("DOSFILE")) {
       if (!parms.defined("EPSSQAV")) {
         throw std::logic_error("error: you specify a DOS file, please also specify the second moment of the band structure EPSSQAV!");
       } else {
         epssqav = parms["EPSSQAV"];
       }
+    }else{
+      t=parms["t"]; //this is essentially an energy unit.
+      epssqav = t * t;
     }
     std::istringstream in_omega(parms["G0(omega)"]);
     read_freq(in_omega, bare_green_matsubara);
@@ -324,7 +326,6 @@ std::pair < matsubara_green_function_t, itime_green_function_t > HybridizationSi
     std::string fns=parms["CHECKPOINT"];
     fns+=".xml";
     boost::filesystem::path fn(fns);
-    std::cerr << parms;
     checkpoint(fn);
   }
   {
