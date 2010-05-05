@@ -193,6 +193,7 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE)
   
 endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE)
 
+
 #######################################################################
 # install
 #######################################################################
@@ -201,6 +202,54 @@ endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE)
 
 if (NOT Boost_FOUND)
   add_library(boost ${BOOST_SOURCES})
+
+    # Boost.Test
+    if(BUILD_BOOST_TEST)
+      set(DIRECTORY "${Boost_ROOT_DIR}/libs/test/src")
+      
+      set(SOURCES compiler_log_formatter.cpp debug.cpp 
+          execution_monitor.cpp framework.cpp 
+          interaction_based.cpp logged_expectations.cpp plain_report_formatter.cpp
+          progress_monitor.cpp results_collector.cpp results_reporter.cpp
+          test_tools.cpp unit_test_log.cpp unit_test_main.cpp
+          unit_test_monitor.cpp unit_test_parameters.cpp unit_test_suite.cpp
+          xml_log_formatter.cpp xml_report_formatter.cpp
+      )
+      set (TEST_EXEC_MON_SOURCES "")
+      foreach(S ${SOURCES})
+        if(EXISTS ${DIRECTORY}/${S})
+          set(TEST_EXEC_MON_SOURCES ${TEST_EXEC_MON_SOURCES} ${DIRECTORY}/${S})
+        endif(EXISTS ${DIRECTORY}/${S})
+      endforeach(S)
+
+      set(SOURCES ${SOURCES} exception_safety.cpp)
+      set (UTF_SOURCES "")
+      foreach(S ${SOURCES})
+        if(EXISTS ${DIRECTORY}/${S})
+          set(UTF_SOURCES ${UTF_SOURCES} ${DIRECTORY}/${S})
+        endif(EXISTS ${DIRECTORY}/${S})
+      endforeach(S)
+
+      set(SOURCES ${SOURCES} execution_monitor.cpp debug.cpp cpp_main.cpp  )
+      set (PRG_EXEC_MON_SOURCES "")
+      foreach(S ${SOURCES})
+        if(EXISTS ${DIRECTORY}/${S})
+          set(PRG_EXEC_MON_SOURCES ${UTPRG_EXEC_MON_SOURCESF_SOURCES} ${DIRECTORY}/${S})
+        endif(EXISTS ${DIRECTORY}/${S})
+      endforeach(S)
+
+      add_library(boost_unit_test_framework ${UTF_SOURCES})
+      add_library(boost_test_exec_monitor ${TEST_EXEC_MON_SOURCES})
+      add_library(boost_prg_exec_monitor STATIC ${PRG_EXEC_MON_SOURCES})
+      
+      if(BUILD_SHARED_LIBS)
+        set_target_properties(boost_unit_test_framework PROPERTIES COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK=1)
+        set_target_properties(boost_test_exec_monitor PROPERTIES COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK=1)
+#        set_target_properties(boost_prg_exec_monitor PROPERTIES COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK=1)
+      endif(BUILD_SHARED_LIBS)
+
+    endif(BUILD_BOOST_TEST)
+
 
   if(WIN32)
     if(BUILD_SHARED_LIBS)
