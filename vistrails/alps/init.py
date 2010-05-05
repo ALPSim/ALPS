@@ -69,13 +69,19 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'dimerized_chain_lattice': (lattices.DimerizedChainLattice,{}),
                    
                    'ModelParameters': (models.Model,{}),
+                   'ClassicalSpinModel': (models.ClassicalSpinModel,{}),
+                   'SpinModel': (models.SpinModel,{}),
+                   'BosonHubbardModel': (models.BosonHubbardModel,{}),
+                   'HardcoreBosonModel': (models.HardcoreBosonModel,{}),
                    
                    'CombineParameters': (parameters.ConcatenateParameters,{}),
+                   'Parameter': (parameters.Parameter,{}),
                    'ConservedQuantumnumbers': (alpsparameters.ConservedQuantumNumbers,{}),
                    'SystemParameters': (alpsparameters.SystemParameters,{}),
 
                    'MakeParameterFile': (tools.WriteParameterFile,{}),
                    'MakeParameterXMLFiles': (tools.WriteInputFiles,{}),
+                   'WriteInputFiles': (tools.WriteInputFiles,{}),
                    'GetRunFiles': (tools.GetCloneFiles,{}),
                    'XML2HTML': (tools.ConvertXML2HTML,{}),
                    'GetSimulationInDir': (tools.GetJobFile,{}),
@@ -98,6 +104,8 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'Convert2Grace': (dataset.WriteGraceFile,{}),
                    'DisplayXMGRPlot': (plots.DisplayGracePlot,{}),
                    'GraceXYPlot': (dataset.WriteGraceFile,{}),
+                   'MplXYPlot': (dataset.MplXYPlot,{}),
+                   'Select': (dataset.Select,{}),
                    
                    'PolyFit': (dataset.DoPolynomialFit,{}),
                    'NonlinearFit': (dataset.DoNonlinearFit,{}),

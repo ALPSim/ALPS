@@ -309,19 +309,6 @@ ENDIF(NOT WIN32)
 
 # python
 
-if (VISTRAILS_FOUND)
-  if (APPLE)
-    set(PYTHONHOME "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHONPATH_DIR}")
-    set(PYTHONPATH "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHONPATH_DIR}:$PYTHONPATH")
-    set(PYTHONBIN "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/${VISTRAILS_PYTHON_INTERPRETER}")
-    configure_file(tool/vispython.in ${PROJECT_BINARY_DIR}/tool/vispython)
-  endif (APPLE)
-  if (WIN32)
-    configure_file(tool/vispython.bat.in ${PROJECT_BINARY_DIR}/tool/vispython.bat)
-  endif (WIN32)
-endif (VISTRAILS_FOUND)
-
-
 if(WIN32 AND NOT UNIX AND ALPS_BUILD_PYTHON AND NOT ALPS_FOR_VISTRAILS)
   find_package(PyInstaller)
   include(UsePyInstaller)

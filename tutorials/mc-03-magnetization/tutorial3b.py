@@ -4,27 +4,28 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms = []
-for h in [0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.2, 1.4, 1.6, 1.8, 2.0, 2.2, 2.4, 2.5]:
+for h in [0., 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.8, 1.0, 1.25, 1.5, 1.75, 2.0, 2.25, 2.5, 2.75, 3.0, 3.25, 3.5]:
     parms.append(
         { 
-          'LATTICE'        : "chain lattice", 
+          'LATTICE'        : "ladder", 
           'MODEL'          : "spin",
           'local_S'        : 0.5,
           'T'              : 0.08,
-          'J'              : 1 ,
+          'J0'             : 1 ,
+          'J1'             : 1 ,
           'THERMALIZATION' : 1000,
-          'SWEEPS'         : 20000,
+          'SWEEPS'         : 10000,
           'L'              : 20,
           'h'              : h
         }
     )
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm3a',parms)
+input_file = pyalps.writeInputFiles('parm3b',parms)
 res = pyalps.runApplication('dirloop_sse',input_file,Tmin=5)
 
 #load the magnetization and collect it as function of field h
-data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm3a'),'Magnetization Density')
+data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm3b'),'Magnetization Density')
 magnetization = pyalps.collectXY(data,x='h',y='Magnetization Density')
 
 #make plot
@@ -33,5 +34,5 @@ pyalps.pyplot.plot(magnetization)
 plt.xlabel('Field $h$')
 plt.ylabel('Magnetization $m$')
 plt.ylim(0.0,0.5)
-plt.title('Quantum Heisenberg chain')
+plt.title('Quantum Heisenberg ladder')
 plt.show()
