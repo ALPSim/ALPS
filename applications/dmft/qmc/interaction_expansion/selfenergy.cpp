@@ -84,7 +84,7 @@ void InteractionExpansionRun::compute_W_matsubara()
       memset(&(Wk[z][j][0]), 0, sizeof(std::complex<double>)*(n_matsubara));
     }
   }
-  measure_Wk(Wk, n_matsubara);
+  measure_Wk(Wk, n_matsubara_measurements);
   measure_densities();
 }
 

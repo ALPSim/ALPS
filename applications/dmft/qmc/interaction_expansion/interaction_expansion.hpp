@@ -222,6 +222,7 @@ protected:
   const spin_t n_flavors;				//number of flavors (called 'flavors') in InteractionExpansion
   const site_t n_site;				//number of sites
   const frequency_t n_matsubara;	//number of matsubara freq
+  const frequency_t n_matsubara_measurements;	//number of measured matsubara freq
   const itime_index_t n_tau;			//number of imag time slices
   const itime_t n_tau_inv;			//the inverse of n_tau
   const frequency_t n_self;		        //number of self energy (W) binning points
