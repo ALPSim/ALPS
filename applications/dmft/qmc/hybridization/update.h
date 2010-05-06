@@ -249,8 +249,8 @@ template <class V> void compute_M_up(int k, blas_matrix & M, V& Fs, V& Fe, doubl
       M_new(i_new,j_new) = M(i,j) + det_rat*M_new(i_new,k)*M_new(k,j_new);
     }
   }
-    swap(M,M_new);
- // M_new.swap(M);
+ //   swap(M,M_new);
+  M_new.swap(M);
   /*blas::matrix M2(M);
    blas::vector k_row(M.size());
    blas::vector k_col(M.size());
@@ -618,8 +618,8 @@ template <class G, class S, class V> void compute_M_insert_anti(times & anti_seg
       }
     }  
   }
-    swap(M_new,M);
-  //M_new.swap(M);
+    //swap(M_new,M);
+  M_new.swap(M);
   return;
 }
 
