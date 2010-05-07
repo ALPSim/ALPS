@@ -6,20 +6,7 @@
 if (ALPS_BUILD_SOURCE)
   install(FILES CMakeLists.txt cleanup.sh DESTINATION alps/tutorials)
 
-  install(DIRECTORY 
-            00-introduction
-            01-autocorrelations
-            02-mc-qmc-susceptibilities
-            03-qmc-magnetization
-            04-qmc-measurements
-            05-qmc-bosons
-            06-qwl
-            07-sparsediag
-            08-fulldiag
-            09-particle-in-box-dmrg
-            10-dmrg
-            mc-01-autocorrelations
-            mc-02-susceptibilities
+  install(DIRECTORY .
           DESTINATION alps/tutorials
           FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
