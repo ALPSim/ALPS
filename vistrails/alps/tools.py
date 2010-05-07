@@ -11,6 +11,7 @@
 ##############################################################################
 
 from core.modules.vistrails_module import Module, ModuleError, NotCacheable
+from core.configuration import ConfigurationObject
 import core.bundles
 import core.modules.basic_modules
 import core.modules.module_registry
@@ -41,6 +42,7 @@ basic = core.modules.basic_modules
 
 from pyalps import ResultFile
 from dataset import ResultFiles
+from dataset.dataset_exceptions import EmptyInputPort, InvalidInput
 
 class UnzipDirectory(Module):
     _input_ports = [('zipfile',[basic.File])]
@@ -312,8 +314,41 @@ class PickFileFromList(basic.Module):
                     ('index', [basic.Integer])]
     _output_ports = [('file', [basic.File])]
 
-
-
+class ArchiveDirectory(basic.Module):
+    _input_ports = [
+        ('archive', [basic.String]),
+        ('path', [basic.Directory])
+    ]
+    _output_ports = [('output', [basic.Directory])]
+    
+    def compute(self):
+        replace_dict = {}
+        if alpscore.config.check('archives'):
+            replace_dict = basic.Dictionary.translate_to_python(alpscore.config.archives)
+        else:
+            raise InvalidInput("Check configuration!")
+        
+        if self.hasInputFromPort('archive'):
+            path = self.getInputFromPort('archive')
+            for k,v in replace_dict.items():
+                for qq in v:
+                    testpath = path.replace(k, qq)
+                    print 'Testing',testpath
+                    if os.path.exists(testpath):
+                        dir = basic.Directory()
+                        dir.name = testpath
+                        self.setResult('output', dir)
+                        return
+        
+        if self.hasInputFromPort('path'):
+            lp = self.getInputFromPort('path').name
+            if os.path.exists(lp):
+                dir = basic.Directory()
+                dir.name = lp
+                self.setResult('output', dir)
+                return
+        
+        raise InvalidInput("Can't locate file at any location.")
 
 def initialize(): pass
 
@@ -334,6 +369,7 @@ def selfRegister():
   reg.add_module(ConvertXML2HTML,namespace="Tools")
 
   reg.add_module(UnzipDirectory,namespace="Tools")
+  reg.add_module(ArchiveDirectory,namespace="Tools")
 
   reg.add_module(GetJobFile,namespace="Tools")
 
