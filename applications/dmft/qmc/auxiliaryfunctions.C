@@ -281,7 +281,8 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
   G_tau.write_hdf5(ar,basepath.str()+"G_tau");
   G_omega.write_hdf5(ar,basepath.str()+"G_omega");
-  //ar<<alps::make_pvp(basepath.str()+"/selfenergy", selfenergy);
+  G0_tau.write_hdf5(ar,basepath.str()+"G0_tau");
+  G0_omega.write_hdf5(ar,basepath.str()+"G0_omega");
 }
 
 
