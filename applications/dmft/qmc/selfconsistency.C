@@ -53,7 +53,6 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   int flavors = parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
   double h_old = static_cast<double>(parms["H"]);
-  double h_init = parms.value_or_default("H_INIT", 0.);
   double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool symmetrization = (bool)(parms["SYMMETRIZATION"]);
@@ -158,7 +157,6 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   
   double beta = static_cast<double>(parms["BETA"]);
   double h_old = static_cast<double>(parms["H"]);
-  double h_init = parms.value_or_default("H_INIT", 0.);
   double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool symmetrization = (bool)(parms["SYMMETRIZATION"]);

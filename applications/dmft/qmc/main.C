@@ -88,6 +88,8 @@ int main(int argc, char** argv)
       is>>parms;
       is.close();
       parms["BASENAME"]=std::string(argv[1]);
+      alps::hdf5::oarchive dumpfile(std::string(argv[1])+".h5");
+      dumpfile<<alps::make_pvp("/parameters", parms);
     }
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {

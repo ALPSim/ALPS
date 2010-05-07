@@ -120,7 +120,14 @@ template <typename T> class green_function{
       ar<<alps::make_pvp(path+"/nt",nt_);
       ar<<alps::make_pvp(path+"/ns",ns_);
       ar<<alps::make_pvp(path+"/nf",nf_);
-      ar<<alps::make_pvp(path+"/values",val_, ntnsns_*nf_);
+      for(unsigned int i=0;i<nf_;++i){
+        for(unsigned int j=0;j<ns_;++j){
+          for(unsigned int k=0;k<ns_;++k){
+            std::stringstream subpath; subpath<<path<<"/"<<i<<"/"<<j<<"/"<<"/"<<k<<"/values/mean";
+            ar<<alps::make_pvp(subpath.str(), val_, nt_);
+          }
+        }
+      }
     }
         std::pair<std::vector<T>,std::vector<T> > to_multiple_vector() const;
         void from_multiple_vector(const std::pair<std::vector<T>,std::vector<T> > &mv);
