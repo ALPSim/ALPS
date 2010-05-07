@@ -202,11 +202,11 @@ void c_or_cdagger::initialize_simulation(const alps::Parameters &p)
       exit(0);
     }
     std::cout<<"starting computation of exp values for measurement"<<std::endl;
-    for(int i=0;i<ntau_;++i){
+    for(unsigned int i=0;i<ntau_;++i){
       double tau=i*beta_/(double)ntau_;
-      for(int o=0;o<nm_;++o)
+      for(unsigned int o=0;o<nm_;++o)
         exp_iomegan_tau_[2*nm_*i + o] = std::complex<double>(cos(omegan_[o]*tau), sin(omegan_[o]*tau));
-      for(int o=0;o<nm_;++o)
+      for(unsigned int o=0;o<nm_;++o)
         exp_iomegan_tau_[2*nm_*i + nm_ + o] = std::complex<double>(cos(omegan_[o]*tau), -sin(omegan_[o]*tau));
     }
     std::cout<<"done exp computation."<<std::endl;

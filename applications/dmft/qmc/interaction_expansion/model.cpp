@@ -57,7 +57,6 @@ double HalfFillingHubbardInteractionExpansionRun::try_add()
 
 void HalfFillingHubbardInteractionExpansionRun::perform_add()
 {
-  spin_t flavor=0;
   //perform the fastupdate up move
   fastupdate_up(0,false);
 }

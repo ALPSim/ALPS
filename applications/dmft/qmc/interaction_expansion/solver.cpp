@@ -108,10 +108,10 @@ void InteractionExpansionRun::reset_perturbation_series(void)
     vertices.push_back(vertices_backup[i]);
     perform_add();
   }
-  for(int z=0;z<M2.size();++z){
+  for(unsigned int z=0;z<M2.size();++z){
     double max_diff=0;
-    for(int i=0;i<M2[z].size();++i){
-      for(int j=0;j<M2[z].size();++j){
+    for(unsigned int i=0;i<M2[z].size();++i){
+      for(unsigned int j=0;j<M2[z].size();++j){
         double diff=M[z](i,j)-M2[z](i,j);
         if(std::abs(diff)>max_diff) max_diff=std::abs(diff);
       }

@@ -133,9 +133,9 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   }
   //Fourier transformations
   if (!measure_in_matsubara) {
-    for (int z=0; z<n_flavors; ++z) {
+    for (unsigned int z=0; z<n_flavors; ++z) {
       densities[z] = 0;
-      for (int i=0; i<n_site; ++i)
+      for (unsigned int i=0; i<n_site; ++i)
 	densities[z] -= green_itime_measured(n_tau,i,i,z);
       densities[z] /= n_site;
     }

@@ -124,7 +124,7 @@ bool QMCRun<G,StateType>::build_diagonal_operator(std::string const& name)
   if (diagonal_matrix_element.find(name) != diagonal_matrix_element.end())
     return true;
   std::vector<std::vector<double> > vec(number_states_for_site_type_.size());
-  for (int st = 0; st < number_states_for_site_type_.size();++st) 
+  for (unsigned int st = 0; st < number_states_for_site_type_.size();++st) 
     if (number_states_for_site_type_[st]) {
       alps::SiteOperator term(name);
       boost::multi_array<alps::Expression,2> matrix_symbolic =  

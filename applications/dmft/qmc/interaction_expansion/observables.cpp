@@ -57,10 +57,10 @@ void InteractionExpansionRun::initialize_observables(void)
   measurements<<alps::RealObservable("Sign");
   measurements<<alps::RealVectorObservable("PertOrder");  
   if(measurement_method==selfenergy_measurement_itime_rs) {
-    for(int flavor=0;flavor<n_flavors;++flavor){
+    for(unsigned int flavor=0;flavor<n_flavors;++flavor){
       measurements << signed_vec_obs_t("densities_"+boost::lexical_cast<std::string>(flavor));
-      for(int i=0;i<n_site;++i){
-        for(int j=0;j<n_site;++j){
+      for(unsigned int i=0;i<n_site;++i){
+        for(unsigned int j=0;j<n_site;++j){
           std::stringstream obs_name;
           obs_name<<"W_"<<flavor<<"_"<<i<<"_"<<j;
           measurements<<signed_vec_obs_t(obs_name.str().c_str());
@@ -69,8 +69,8 @@ void InteractionExpansionRun::initialize_observables(void)
     }
   }
   else {
-    for(int flavor=0;flavor<n_flavors;++flavor){
-      for (int k=0; k<n_site; k++) {                   
+    for(unsigned int flavor=0;flavor<n_flavors;++flavor){
+      for (unsigned int k=0; k<n_site; k++) {                   
         std::stringstream obs_name_real, obs_name_imag;
         obs_name_real<<"Wk_real_"<<flavor<<"_"<<k << "_" << k;
         obs_name_imag<<"Wk_imag_"<<flavor<<"_"<<k << "_" << k;
@@ -80,18 +80,18 @@ void InteractionExpansionRun::initialize_observables(void)
     }
   }
   measurements << signed_vec_obs_t("densities");
-  for(int flavor=0;flavor<n_flavors;++flavor)
+  for(unsigned int flavor=0;flavor<n_flavors;++flavor)
     measurements << signed_vec_obs_t("densities_"+boost::lexical_cast<std::string>(flavor));
   measurements << signed_obs_t("density_correlation");
   measurements << signed_vec_obs_t("n_i n_j");
-  for(int flavor=0;flavor<n_flavors;++flavor){
-    for(int i=0;i<n_site;++i){
+  for(unsigned int flavor=0;flavor<n_flavors;++flavor){
+    for(unsigned int i=0;i<n_site;++i){
       std::stringstream density_name, sz_name;
       density_name<<"density_"<<flavor<<"_"<<i;
       measurements<<signed_obs_t(density_name.str().c_str());
     }
   }
-  for(int i=0;i<n_site;++i){
+  for(unsigned int i=0;i<n_site;++i){
     std::stringstream sz_name, sz2_name, sz0_szj_name;
     sz_name<<"Sz_"<<i;
     sz2_name<<"Sz2_"<<i;
