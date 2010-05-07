@@ -432,15 +432,15 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
     install(FILES ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}.dll DESTINATION bin COMPONENT dependentlibraries)
   endif(LPSolve_LIBRARIES)
   # alps & boost
-  add_custom_target(libalps ALL
-    COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/bin
-    COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
-    COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib/xml
-    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/archive.exe ${PROJECT_BINARY_DIR}/bin
-    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/parameter2xml.exe ${PROJECT_BINARY_DIR}/bin
-    COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/ising.exe ${PROJECT_BINARY_DIR}/bin
+  # add_custom_target(libalps ALL
+    # COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/bin
+    # COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
+    # COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib/xml
+    # COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/archive.exe ${PROJECT_BINARY_DIR}/bin
+    # COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/parameter2xml.exe ${PROJECT_BINARY_DIR}/bin
+    # COMMAND cmake -E copy_if_different ${CMAKE_INSTALL_PREFIX}/bin/ising.exe ${PROJECT_BINARY_DIR}/bin
     # COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml    
-  )
+  # )
   if (ALPS_USE_VISTRAILS)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python25/python25.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr71.dll DESTINATION bin COMPONENT dependentlibraries)
