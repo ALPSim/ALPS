@@ -3,29 +3,8 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pyalps.pyplot
 
-#prepare the input parameters
-parms = []
-for l in [4, 6, 8, 10]:
-  for s in [0.5, 1]:
-    for sz in [0, 1]:
-      parms.append(
-        { 
-          'LATTICE'                   : "chain lattice", 
-          'MODEL'                     : "spin",
-          'local_S'                   : s,
-          'J'                         : 1,
-          'L'                         : l,
-          'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
-          'Sz_total'                  : sz
-        }
-      )
-
-#write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm1d',parms)
-res = pyalps.runApplication('sparsediag',input_file)
-
-#load all measurements for all states
-data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm1d'))
+data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm2a'))
+data += pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm2b'))
 
 lengths = []
 min_energies = {}

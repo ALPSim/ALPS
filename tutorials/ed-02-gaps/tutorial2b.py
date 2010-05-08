@@ -11,7 +11,7 @@ for l in [4, 6, 8, 10]:
         { 
           'LATTICE'                   : "chain lattice", 
           'MODEL'                     : "spin",
-          'local_S'                   : 1,
+          'local_S'                   : 0.5,
           'J'                         : 1,
           'L'                         : l,
           'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
@@ -20,11 +20,11 @@ for l in [4, 6, 8, 10]:
       )
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm1b',parms)
+input_file = pyalps.writeInputFiles('parm2b',parms)
 res = pyalps.runApplication('sparsediag',input_file)
 
 #load all measurements for all states
-data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm1b'))
+data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm2b'))
 
 lengths = []
 min_energies = {}
@@ -46,7 +46,7 @@ gapplot.x = 1./np.sort(lengths)
 gapplot.y = [min_energies[(l,1)] -min_energies[(l,0)] for l in np.sort(lengths)]  
 gapplot.props['xlabel']='$1/L$'
 gapplot.props['ylabel']='Triplet gap $\Delta/J$'
-gapplot.props['label']='S=1'
+gapplot.props['label']='S=1/2'
 
 plt.figure()
 pyalps.pyplot.plot(gapplot)
