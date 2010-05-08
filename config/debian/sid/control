@@ -8,7 +8,8 @@ Build-Depends: cdbs, debhelper (>= 7.0.50~), cmake,
  (>= 1.42.0), libboost-python-dev (>= 1.42.0), libboost-regex-dev (>=
  1.42.0), libboost-serialization-dev (>= 1.42.0), libboost-system-dev
  (>= 1.42.0), libboost-thread-dev (>= 1.42.0), libhdf5-serial-dev |
- libhdf5-dev, mpi-default-dev, libsqlite3-dev, python-matplotlib
+ libhdf5-dev, mpi-default-dev, libsqlite3-dev, python-matplotlib,
+ liblapack-dev, gfortran
 Standards-Version: 3.8.4
 Homepage: http://alps.comp-phys.org/
 Vcs-Svn: https://rigarash@alps.comp-phys.org/svn/alps1/trunk/alps
