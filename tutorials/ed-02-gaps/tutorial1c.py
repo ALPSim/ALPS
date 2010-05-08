@@ -20,11 +20,11 @@ for l in [4, 6, 8, 10]:
       )
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm7c',parms)
+input_file = pyalps.writeInputFiles('parm1c',parms)
 res = pyalps.runApplication('sparsediag',input_file)
 
 #load all measurements for all states
-data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm7c'))
+data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm1c'))
 
 lengths = []
 min_energies = {}

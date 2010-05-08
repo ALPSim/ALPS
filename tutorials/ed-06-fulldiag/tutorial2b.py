@@ -5,20 +5,21 @@ import numpy as np
 
 #prepare the input parameters
 parms = [{ 
-          'LATTICE'                   : "chain lattice", 
+          'LATTICE'                   : "ladder", 
           'MODEL'                     : "spin",
           'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
-          'local_S'                   : 1,
-          'J'                         : 1,
-          'L'                         : 8
+          'local_S'                   : 0.5,
+          'J0'                        : 1,
+          'J1'                        : 1,
+          'L'                         : 6
         }]
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm8a',parms)
+input_file = pyalps.writeInputFiles('parm2b',parms)
 res = pyalps.runApplication('fulldiag',input_file)
 
 #run the evaluation and load all the plots
-data = pyalps.evaluateFulldiagVersusT(pyalps.getResultFiles(prefix='parm8a'),DELTA_T=0.1, T_MIN=0.1, T_MAX=10.0)
+data = pyalps.evaluateFulldiagVersusT(pyalps.getResultFiles(prefix='parm2b'),DELTA_T=0.05, T_MIN=0.05, T_MAX=5.0)
 
 #make plot
 for s in pyalps.flatten(data):
@@ -28,7 +29,7 @@ for s in pyalps.flatten(data):
 
 
 # make a plot of the spectrum, first load all measurements for all states
-spectrum = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm8a'))
+spectrum = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm2b'))
 
 energies=[]
 # get ground state energy
@@ -57,10 +58,7 @@ plt.legend()
 plt.xlim(0,2*3.1416)
 plt.ylabel('Energy')
 plt.ylim(0,3)
+plt.title('Antiferromagnetic Heisenberg ladder')
 plt.show()
-
-
-
-
 
 

@@ -14,11 +14,11 @@ parms = [{
         }]
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm8d',parms)
+input_file = pyalps.writeInputFiles('parmsd',parms)
 res = pyalps.runApplication('fulldiag',input_file)
 
 #run the evaluation and load all the plots
-data = pyalps.evaluateFulldiagVersusT(pyalps.getResultFiles(prefix='parm8d'),DELTA_T=0.05, T_MIN=0.05, T_MAX=5.0)
+data = pyalps.evaluateFulldiagVersusT(pyalps.getResultFiles(prefix='parmsd'),DELTA_T=0.05, T_MIN=0.05, T_MAX=5.0)
 
 #make plot
 for s in pyalps.flatten(data):

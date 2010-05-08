@@ -22,11 +22,11 @@ for sz in [0, 1]:
       )
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm7e',parms)
+input_file = pyalps.writeInputFiles('parm1e',parms)
 res = pyalps.runApplication('sparsediag',input_file)
 
 #load all measurements for all states
-data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm7e'))
+data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm1e'))
 
 energies=[]
 # get ground state energy

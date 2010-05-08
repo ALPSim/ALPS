@@ -15,11 +15,11 @@ parms = [{
         }]
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm7a',parms)
+input_file = pyalps.writeInputFiles('parm1a',parms)
 res = pyalps.runApplication('sparsediag',input_file)
 
 #load all measurements for all states
-data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm7a'))
+data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm1a'))
 
 # print properties of ground states in all sectors:
 for sector in data[0]:
