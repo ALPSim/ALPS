@@ -1,0 +1,29 @@
+This work was packaged for Debian by:
+
+    Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp> on Sun, 02 May 2010 12:17:02 +0900
+
+It was downloaded from:
+
+    <http://alps.comp-phys.org/>
+
+Upstream Author(s):
+
+    Matthias Troyer <troyer@phys.ethz.ch>
+     and others
+
+Copyright:
+
+    <Copyright (C) 1994-2010 Matthias Troyer>
+     and others
+
+License:
+
+    ALPS LIBRARY LICENSE version 1.1
+    see LICENCE.txt.
+    ALPS APPLICATION LICENCE version 1.0
+    see LICENCE-package.txt.
+
+The Debian packaging is:
+
+    Copyright (C) 2010 Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>
+    and is licensed under the ALPS LIBRARY LICENCE version 1.1.

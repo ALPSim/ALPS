@@ -1,0 +1,5 @@
+debian/tmp/usr/include/alps/* usr/include/alps/
+debian/tmp/usr/include/ietl/* usr/include/ietl/
+debian/tmp/usr/include/boost/*.hpp usr/include/boost/
+debian/tmp/usr/lib/libalps.so usr/lib/
+debian/tmp/usr/share/alps/* usr/share/alps/

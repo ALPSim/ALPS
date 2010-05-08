@@ -1,0 +1,2 @@
+debian/tmp/usr/lib/libalps.so.* usr/lib/
+debian/tmp/usr/lib/xml/* usr/lib/xml/

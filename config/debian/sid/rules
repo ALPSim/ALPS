@@ -1,0 +1,21 @@
+#!/usr/bin/make -f
+
+include /usr/share/cdbs/1/rules/debhelper.mk
+include /usr/share/cdbs/1/class/cmake.mk
+
+# Add here any variable or target overrides you need.
+
+# Extra flags passed to cmake.
+DEB_CMAKE_EXTRA_FLAGS = -DALPS_BUILD_APPLICATIONS:BOOL=ON -DALPS_ENABLE_OPENMP:BOOL=ON
+
+# Allow parallel builds
+DEB_BUILD_PARALLEL = yes
+
+# Copy python files
+install/python-pyalps::
+	mkdir -p debian/python-pyalps/usr/lib/python/pyalps
+	cp -ar debian/tmp/usr/lib/pyalps/* \
+	  debian/python-pyalps/usr/lib/python/pyalps/
+	mkdir -p debian/python-pyalps/usr/lib/python/alps
+	cp -ar debian/tmp/usr/lib/python/alps/* \
+	  debian/python-pyalps/usr/lib/python/alps/
