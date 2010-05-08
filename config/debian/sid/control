@@ -8,7 +8,7 @@ Build-Depends: cdbs, debhelper (>= 7.0.50~), cmake,
  (>= 1.42.0), libboost-python-dev (>= 1.42.0), libboost-regex-dev (>=
  1.42.0), libboost-serialization-dev (>= 1.42.0), libboost-system-dev
  (>= 1.42.0), libboost-thread-dev (>= 1.42.0), libhdf5-serial-dev |
- libhdf5-dev, mpi-default-dev, libsqlite3-dev
+ libhdf5-dev, mpi-default-dev, libsqlite3-dev, python-matplotlib
 Standards-Version: 3.8.4
 Homepage: http://alps.comp-phys.org/
 Vcs-Svn: https://rigarash@alps.comp-phys.org/svn/alps1/trunk/alps
@@ -90,7 +90,8 @@ Description: The ALPS project - Application binaries
 Package: python-pyalps
 Section: python
 Architecture: any
-Depends: libalps2 (= ${binary:Version}), python, ${shlibs:Depends},
+Depends: libalps2 (= ${binary:Version}), python2.5, python-numpy,
+ python-matplotlib, ${shlibs:Depends},
  ${misc:Depends}
 Description: The ALPS project - python modules
  The ALPS project (Algorithms and Libraries for Physics Simulations)
