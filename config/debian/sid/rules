@@ -13,9 +13,9 @@ DEB_BUILD_PARALLEL = yes
 
 # Copy python files
 install/python-pyalps::
-	mkdir -p debian/python-pyalps/usr/lib/python/pyalps
+	mkdir -p debian/python-pyalps/usr/lib/python2.5/pyalps
 	cp -ar debian/tmp/usr/lib/pyalps/* \
-	  debian/python-pyalps/usr/lib/python/pyalps/
-	mkdir -p debian/python-pyalps/usr/lib/python/alps
+	  debian/python-pyalps/usr/lib/python2.5/pyalps/
+	mkdir -p debian/python-pyalps/usr/lib/python2.5/alps
 	cp -ar debian/tmp/usr/lib/python/alps/* \
-	  debian/python-pyalps/usr/lib/python/alps/
+	  debian/python-pyalps/usr/lib/python2.5/alps/
