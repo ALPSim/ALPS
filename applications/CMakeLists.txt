@@ -9,10 +9,9 @@
 
 if (ALPS_BUILD_SOURCE)
   install(FILES LICENSE.txt CMakeLists.txt DESTINATION alps/applications)
-  install(DIRECTORY mc diag dmft DESTINATION alps/applications
+  install(DIRECTORY mc diag dmft dmrg DESTINATION alps/applications
           FILES_MATCHING PATTERN "*" PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   add_subdirectory(qmc)
-  add_subdirectory(dmrg)
 else (ALPS_BUILD_SOURCE)
   add_definitions(${LAPACK_DEFINITIONS})
   add_subdirectory(mc)
