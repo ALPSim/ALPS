@@ -101,3 +101,15 @@ Description: The ALPS project - python modules
  C++ libraries for simplifying the development of such code. ALPS
  strives to increase software reuse in the physics community.
  This package contains python module.
+
+Package: alps2-tutorials
+Architecture: any
+Depends: alps2-applications (= ${binary:Version}), python-pyalps (=
+ ${binary:Version}), libalps2-bin (= ${binary:Version})
+Description: The ALPS project - tutorials
+ The ALPS project (Algorithms and Libraries for Physics Simulations)
+ is an open source effort aiming at providing high-end simulation
+ codes for strongly correlated quantum mechanical systems as well as
+ C++ libraries for simplifying the development of such code. ALPS
+ strives to increase software reuse in the physics community.
+ This package contains tutorials for applications.
