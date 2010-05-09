@@ -105,7 +105,8 @@ Description: The ALPS project - python modules
 Package: alps2-tutorials
 Architecture: any
 Depends: alps2-applications (= ${binary:Version}), python-pyalps (=
- ${binary:Version}), libalps2-bin (= ${binary:Version})
+ ${binary:Version}), libalps2-bin (= ${binary:Version}),
+ ${misc:Depends}
 Description: The ALPS project - tutorials
  The ALPS project (Algorithms and Libraries for Physics Simulations)
  is an open source effort aiming at providing high-end simulation
