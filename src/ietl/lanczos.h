@@ -93,7 +93,7 @@ private:
 
     
     template <class IN, class OUT, class GEN>
-    void eigenvectors(IN in_eigvals_start, IN in_eigvals_end , OUT eig_vectors, Info<magnitude_type>& inf, GEN gen, int maxiter=0);    
+    void eigenvectors(IN in_eigvals_start, IN in_eigvals_end , OUT eig_vectors, Info<magnitude_type>& inf, GEN gen, int maxiter=0, int maxcount=50);    
 
     std::vector<magnitude_type> const& t_eigenvectors() { return Tvectors;}
   private:
@@ -133,7 +133,7 @@ private:
   template <class MATRIX, class VS>
     template <class IN, class OUT, class GEN>
     void lanczos<MATRIX, VS>::eigenvectors(IN in_eigvals_start, 
-         IN in_eigvals_end , OUT eig_vectors, Info<magnitude_type>& inf, GEN gen_, int maxiter) {
+         IN in_eigvals_end , OUT eig_vectors, Info<magnitude_type>& inf, GEN gen_, int maxiter, int maxcount) {
     vector_type vec3 = new_vector(vecspace_); // a temporary vector.
     Tvectors.resize(0);
     std::vector<vector_type> eigvectors; // contains ritz vectors.
@@ -152,7 +152,6 @@ private:
     
     while(in_eigvals_start !=  in_eigvals_end) {
     
-      int maxcount = 10;
       lambda = 0; count = 0;
       typename Info<magnitude_type>::errorinfo errInf = Info<magnitude_type>::ok;
       
