@@ -69,17 +69,21 @@ template < class RNG, class S > void insert_remove_full_line(RNG & rng, double m
     otherlength_u += other_length * u(i, this_flavor);
     
   }
-  
-  //std::cout<<"insert remove full line: BETA * mu - otherlength_u "<<BETA * mu - otherlength_u<<std::endl;
-  //std::cout<<"insert remove full line: BETA:"<<BETA<<" mu: "<< mu<<" otherlength_u: "<<otherlength_u<<std::endl;
-  if (insert) {                 // try to insert full line
-    if (log(rng()) < BETA * mu - otherlength_u)
-      full_line = 1;
-  } else {                      // try to remove full line
-    if (log(rng()) < -BETA * mu + otherlength_u)
-      full_line = 0;
+ 
+  if (insert) { // try to insert full line
+    if (!full_line) {
+      if (log(rng()) < BETA*mu-other_length_u) {
+        full_line = 1;
+      }
+    }
   }
-  
+  else { // try to remove full line
+    if (full_line) {
+      if (log(rng()) < -BETA*mu+other_length_u) {
+        full_line = 0;  
+      }
+    }
+  }
 }
 
 
