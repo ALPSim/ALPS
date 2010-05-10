@@ -9,6 +9,7 @@
 
 set(BOOST_SOURCES "")
 set(BOOST_MPI_PYTHON_SOURCES "")
+set(BOOST_LINK_LIBS "")
 
 # Boost.Date_Time
 if(BUILD_BOOST_DATE_TIME)
@@ -89,6 +90,7 @@ endif(BUILD_BOOST_SERIALIZATION)
 
 # Boost.Python
 if(BUILD_BOOST_PYTHON)
+  set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${PYTHON_LIBRARY} ${PYTHON_EXTRA_LIBS})
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/python/src")
   set(SOURCES dict.cpp errors.cpp exec.cpp import.cpp list.cpp long.cpp
       module.cpp numeric.cpp object_operators.cpp object_protocol.cpp slice.cpp
@@ -120,6 +122,9 @@ endif(BUILD_BOOST_SYSTEM)
 
 # Boost.MPI
 if(BUILD_BOOST_MPI)
+  IF(NOT WIN32)
+    set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${MPI_LIBRARIES})
+  ENDIF(NOT WIN32)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src")
   set(SOURCES broadcast.cpp communicator.cpp computation_tree.cpp 
       content_oarchive.cpp environment.cpp exception.cpp graph_communicator.cpp
@@ -137,6 +142,7 @@ endif(BUILD_BOOST_MPI)
 
 # Boost.Thread
 if(BUILD_BOOST_THREAD)
+  set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${PTHREAD_LIBRARY})
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/thread/src")
   if (WIN32)
     set(SOURCES win32/thread.cpp win32/tss_dll.cpp win32/tss_pe.cpp)
@@ -174,7 +180,7 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE)
   endif (BUILD_SHARED_LIBS)
 
   set_target_properties(mpi PROPERTIES PREFIX "")
-  target_link_libraries(mpi boost ${LINK_LIBRARIES})
+  target_link_libraries(mpi boost ${BOOST_LINK_LIBS})
 
 
   if(ALPS_INSTALL_VISTRAILS_PACKAGES) 
@@ -202,6 +208,7 @@ endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE)
 
 if (NOT Boost_FOUND)
   add_library(boost ${BOOST_SOURCES})
+  target_link_libraries(boost ${BOOST_LINK_LIBS})
 
     # Boost.Test
     if(BUILD_BOOST_TEST)
