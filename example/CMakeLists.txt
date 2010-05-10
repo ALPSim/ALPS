@@ -3,6 +3,8 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
+enable_testing()
+
 add_subdirectory(parapack)
 add_subdirectory(scheduler)
 add_subdirectory(ngs)
