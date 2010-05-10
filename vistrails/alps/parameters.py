@@ -18,7 +18,6 @@ import copy
 from packages.controlflow.list_module import ListOfElements
 basic = core.modules.basic_modules
 
-from alpscore import Dictionary
 from core.modules.constant_configuration import StandardConstantWidget
 
 ##############################################################################

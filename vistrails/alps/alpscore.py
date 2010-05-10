@@ -20,6 +20,7 @@ import os.path
 import platform
 import shutil
 import sys
+import copy
 
 from PyQt4 import QtCore, QtGui
 from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
@@ -173,32 +174,35 @@ class TextCellWidget(QCellWidget):
             self.browser.setText("No text file is specified!")
 
 
+class ConcatenatePath(Module):
+    def compute(self):
+      self.setResult('path', os.path.join(self.getInputFromPort('base').name,self.getInputFromPort('leaf')))
+    _input_ports = [('base', [basic.Directory]),
+                    ('leaf',[basic.String])]
+    _output_ports = [('path', [basic.String])]
 
-def dict_conf(l):
-    if l[0] == '{' and l[-1] == '}':
-        cmd = 'temp = ' + l
-        exec cmd
-        return temp
-    else:
-        pairs = l.split(',')
-        temp = {}
-        for pair in pairs:
-            [k,v] = pair.split('=')
-            temp[eval(k)] = eval(v)
-        return temp
+class DirectorySink(Module,NotCacheable):
+    def compute(self):
+      self.checkInputPort("directory")
+      self.checkInputPort("outputName")
+      v1 = self.getInputFromPort("directory").name
+      v2 = self.getInputFromPort("outputName")
+      is_dir = os.path.isdir(v1)
+      if not os.path.isdir(v1):
+        raise ModuleError(self,'Expected a directory, found file')
+      if (self.hasInputFromPort("overrideDirectory") and
+              self.getInputFromPort("overrideDirectory")):
+        shutil.rmtree(v2)
+      try:
+        shutil.copytree(v1, v2)
+      except OSError, e:
+              msg = "Could not copy to directory '%s': %s" % (v2, e)
+              raise ModuleError(self, msg)
 
-def dict_compute(self):
-    if self.hasInputFromPort('value'):
-        inps = self.forceGetInputListFromPort('value')
-        result = {}
-        for inp in inps:
-            result.update(inp)
-        self.setResult('value',result)
-        self.setResult('value_as_string',str(result))
+    _input_ports = [('directory', [basic.Directory]),
+                    ('outputName',[basic.String]),
+                    ('overrideDirectory',[basic.Boolean])]
 
-
-Dictionary = basic.new_constant('Dictionary', staticmethod(dict_conf), {},\
-    staticmethod(lambda x: type(x) == dict))
 
 def initialize(): pass
 
@@ -216,7 +220,5 @@ def selfRegister():
     reg.add_input_port(TextCell, "Location", CellLocation)
     reg.add_input_port(TextCell, "File", basic.File)
 
-
-    Dictionary.compute = dict_compute
-    basic.init_constant(Dictionary)
-#    reg.add_module(Dictionary,namespace="Parameters")
+    reg.add_module(ConcatenatePath,namespace="Tools")
+    reg.add_module(DirectorySink,namespace="Tools")
