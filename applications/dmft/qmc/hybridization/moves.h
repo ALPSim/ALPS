@@ -72,14 +72,14 @@ template < class RNG, class S > void insert_remove_full_line(RNG & rng, double m
  
   if (insert) { // try to insert full line
     if (!full_line) {
-      if (log(rng()) < BETA*mu-other_length_u) {
+      if (log(rng()) < BETA*mu-otherlength_u) {
         full_line = 1;
       }
     }
   }
   else { // try to remove full line
     if (full_line) {
-      if (log(rng()) < -BETA*mu+other_length_u) {
+      if (log(rng()) < -BETA*mu+otherlength_u) {
         full_line = 0;  
       }
     }

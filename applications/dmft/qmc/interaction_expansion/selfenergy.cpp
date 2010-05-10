@@ -255,9 +255,9 @@ void InteractionExpansionRun::compute_W_itime()
     }
   }
   if(is_thermalized()){
-    for(int flavor=0;flavor<n_flavors;++flavor){
-      for(int i=0;i<n_site;++i){
-        for(int j=0;j<n_site;++j){
+    for(unsigned int flavor=0;flavor<n_flavors;++flavor){
+      for(unsigned int i=0;i<n_site;++i){
+        for(unsigned int j=0;j<n_site;++j){
           std::stringstream W_name;
           W_name  <<"W_"  <<flavor<<"_"<<i<<"_"<<j;
           measurements.get<alps::SignedObservable<vec_obs_t> >(W_name  .str().c_str()) 
