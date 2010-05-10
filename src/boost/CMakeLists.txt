@@ -142,7 +142,9 @@ endif(BUILD_BOOST_MPI)
 
 # Boost.Thread
 if(BUILD_BOOST_THREAD)
-  set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${PTHREAD_LIBRARY})
+  if (NOT WIN32)
+    set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${PTHREAD_LIBRARY})
+  endif (NOT WIN32)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/thread/src")
   if (WIN32)
     set(SOURCES win32/thread.cpp win32/tss_dll.cpp win32/tss_pe.cpp)
