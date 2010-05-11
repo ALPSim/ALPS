@@ -247,6 +247,9 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
   measurements << alps::RealObservable("|Magnetization|");
   measurements << alps::RealObservable("Magnetization along Field");
   measurements << alps::RealObservable("Magnetization^2");
+  measurements << alps::RealObservable("E.Magnetization^2");
+  measurements << alps::RealObservable("Magnetization^4");
+  measurements << alps::RealObservable("E.Magnetization^4");
   measurements << alps::RealObservable("Susceptibility");
   if(cluster_updates_)
     measurements << alps::RealObservable("Cluster size");
