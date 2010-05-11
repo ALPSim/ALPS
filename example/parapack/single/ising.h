@@ -114,9 +114,9 @@ public:
       ene -= coupling_ * spins_[source(bd)] * spins_[target(bd)];
     }
     energy_ = ene;
-    obs["Temperature"] << 1/beta_;
-    obs["Inverse Temperature"] << beta_;
-    obs["Number of Sites"] << (double)num_sites();
+    add_constant(obs["Temperature"], 1/beta_);
+    add_constant(obs["Inverse Temperature"], beta_);
+    add_constant(obs["Number of Sites"], (double)num_sites());
     obs["Energy"] << energy_;
     obs["Energy^2"] << energy_ * energy_;
     obs["Magnetization"] << mag;

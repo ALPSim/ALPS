@@ -42,7 +42,7 @@ Susceptibility: 0.0143433 +/- 0.00354; tau = 0.967 WARNING: ERRORS NOT CONVERGED
     bin #3   : 512      entries: error = 0.00303534
     bin #4   : 256      entries: error = 0.00335558
     bin #5   : 128      entries: error = 0.003544
-Temperature: 0.1 +/- 6.68285e-10 Warning: potential error underflow. Errors might be smaller
+Temperature: 0.1 +/- 0
 Volume: 8 +/- 0
 [input parameters]
 ALGORITHM = loop;
@@ -88,7 +88,7 @@ Susceptibility: 0.083313 +/- 0.0056; tau = 1.15 WARNING: ERRORS NOT CONVERGED!!!
     bin #3   : 512      entries: error = 0.00458258
     bin #4   : 256      entries: error = 0.00522071
     bin #5   : 128      entries: error = 0.00559841
-Temperature: 0.2 +/- 1.33657e-09 Warning: potential error underflow. Errors might be smaller
+Temperature: 0.2 +/- 0
 Volume: 8 +/- 0
 [input parameters]
 ALGORITHM = loop;
@@ -115,7 +115,7 @@ Energy Density: -0.416083 +/- 0.00628; tau = 0.971 WARNING: ERRORS NOT CONVERGED
     bin #3   : 512      entries: error = 0.00520002
     bin #4   : 256      entries: error = 0.0059904
     bin #5   : 128      entries: error = 0.00627829
-Inverse Temperature: 3.33333 +/- 1.08236e-08 Warning: potential error underflow. Errors might be smaller
+Inverse Temperature: 3.33333 +/- 0
 Staggered Magnetization^2: 6.14771 +/- 0.08; tau = 0.324
     bin #1   : 2048     entries: error = 0.0623376
     bin #2   : 1024     entries: error = 0.0725195
@@ -134,7 +134,7 @@ Susceptibility: 0.113627 +/- 0.00408; tau = 0.781 WARNING: ERRORS NOT CONVERGED!
     bin #3   : 512      entries: error = 0.00344804
     bin #4   : 256      entries: error = 0.00387034
     bin #5   : 128      entries: error = 0.00407504
-Temperature: 0.3 +/- 1.27558e-09 Warning: potential error underflow. Errors might be smaller
+Temperature: 0.3 +/- 0
 Volume: 8 +/- 0
 [input parameters]
 ALGORITHM = loop;
@@ -180,7 +180,7 @@ Susceptibility: 0.135498 +/- 0.00314; tau = 0.631 WARNING: ERRORS NOT CONVERGED!
     bin #3   : 512      entries: error = 0.00263231
     bin #4   : 256      entries: error = 0.00297613
     bin #5   : 128      entries: error = 0.00314018
-Temperature: 0.4 +/- 2.67314e-09 Warning: potential error underflow. Errors might be smaller
+Temperature: 0.4 +/- 0
 Volume: 8 +/- 0
 [input parameters]
 ALGORITHM = loop;

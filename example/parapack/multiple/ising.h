@@ -131,9 +131,9 @@ public:
     }
 
     if (comm_.rank() == 0) {
-      obs["Temperature"] << 1/beta_;
-      obs["Inverse Temperature"] << beta_;
-      obs["Number of Sites"] << (double)length_;
+      add_constant(obs["Temperature"], 1/beta_);
+      add_constant(obs["Inverse Temperature"], beta_);
+      add_constant(obs["Number of Sites"], (double)length_);
       obs["Energy"] << energy;
       obs["Energy^2"] << energy * energy;
       obs["Magnetization"] << mag;

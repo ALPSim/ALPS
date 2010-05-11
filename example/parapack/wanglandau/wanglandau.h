@@ -97,8 +97,8 @@ public:
         int index = weight.bin2index(energy);
         double mag = 0;
         BOOST_FOREACH(site_descriptor v, sites()) mag += spins[v];
-        obs[index]["Number of Sites"] << (double)num_sites();
-        obs[index]["Energy"] << (double)energy;
+        add_constant(obs[index]["Number of Sites"], (double)num_sites());
+        add_constant(obs[index]["Energy"], (double)energy);
         obs[index]["Magnetization"] << mag;
         obs[index]["Magnetization^2"] << mag * mag;
         obs[index]["Magnetization^4"] << mag * mag * mag * mag;
@@ -148,18 +148,18 @@ public:
       o << alps::SimpleRealObservable("Temperature")
         << alps::SimpleRealObservable("Inverse Temperature")
         << alps::SimpleRealObservable("Number of Sites")
-        << alps::RealObservable("Energy")
-        << alps::RealObservable("Energy Density")
-        << alps::RealObservable("Energy^2")
-        << alps::RealObservable("Specific Heat")
-        << alps::RealObservable("Free-Energy")
-        << alps::RealObservable("Free-Energy Density")
-        << alps::RealObservable("Entropy")
-        << alps::RealObservable("Entropy Density")
-        << alps::RealObservable("Magnetization")
-        << alps::RealObservable("Magnetization^2")
-        << alps::RealObservable("Magnetization^4")
-        << alps::RealObservable("Binder Ratio of Magnetization");
+        << alps::SimpleRealObservable("Energy")
+        << alps::SimpleRealObservable("Energy Density")
+        << alps::SimpleRealObservable("Energy^2")
+        << alps::SimpleRealObservable("Specific Heat")
+        << alps::SimpleRealObservable("Free-Energy")
+        << alps::SimpleRealObservable("Free-Energy Density")
+        << alps::SimpleRealObservable("Entropy")
+        << alps::SimpleRealObservable("Entropy Density")
+        << alps::SimpleRealObservable("Magnetization")
+        << alps::SimpleRealObservable("Magnetization^2")
+        << alps::SimpleRealObservable("Magnetization^4")
+        << alps::SimpleRealObservable("Binder Ratio of Magnetization");
     }
   }
 

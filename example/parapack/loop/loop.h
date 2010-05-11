@@ -205,9 +205,9 @@ public:
       l2 += power2(pi->length);
     }
 
-    obs["Temperature"] << 1 / beta_;
-    obs["Inverse Temperature"] << beta_;
-    obs["Volume"] << volume_;
+    add_constant(obs["Temperature"], 1 / beta_);
+    add_constant(obs["Inverse Temperature"], beta_);
+    add_constant(obs["Volume"], volume_);
     obs["Energy"] << (0.25 * nbonds_ - operators_.size() / beta_);
     obs["Energy Density"] << (0.25 * nbonds_ - operators_.size() / beta_) / volume_;
     obs["Staggered Magnetization^2"] << 0.25 * s2;
