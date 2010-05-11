@@ -1,0 +1,10 @@
+LATTICE = "ladder"
+MODEL = "spin"
+local_S = 0.5
+J0 = 1
+J1 = 1
+CONSERVED_QUANTUMNUMBERS = "Sz"
+Sz_total = 0
+{ L = 6; }
+{ L = 8; }
+{ L = 10; }
