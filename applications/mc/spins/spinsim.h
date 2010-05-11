@@ -287,6 +287,8 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
   double mh=m_h/this->num_sites();
   double chi;
   double m2;
+  double m4; 
+  double enm2;
   if(this->cluster_updates_ && measurement_traits<M>::use_improved_estimator && this->ferromagnetic_) {
     chi = (update_info.m2_)*(update_info.m2_)*this->beta_/double(update_info.clustersize);
     m2 = (update_info.m2_)*(update_info.m2_)*measurement_traits<M>::component_number()/(update_info.clustersize*double(this->num_sites()));
@@ -294,11 +296,17 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
   else {
     m2=am*am;
     chi=m2*this->beta_*this->num_sites()/measurement_traits<M>::component_number();
+	
   }
-  
+   m4=am*am*am*am; 
+   enm2=en*am*am;
+   
   this->measurements.template get<alps::RealObservable>("|Magnetization|") << am;
   this->measurements.template get<alps::RealObservable>("Magnetization along Field") << mh;
   this->measurements.template get<alps::RealObservable>("Magnetization^2") << m2;
+  this->measurements.template get<alps::RealObservable>("E.Magnetization^2") << enm2;
+  this->measurements.template get<alps::RealObservable>("Magnetization^4") << m4;
+  this->measurements.template get<alps::RealObservable>("E.Magnetization^4") << en*m4;
   this->measurements.template get<alps::RealObservable>("Susceptibility") << chi;
   if (this->is_bipartite()) {
     double amst = abs(mst)/this->num_sites();
@@ -405,6 +413,8 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
   double mh=m_h/this->num_sites();
   double chi;
   double m2;
+  double m4; 
+  double enm2;
   if(this->cluster_updates_ && 
           measurement_traits<M>::use_improved_estimator && 
         this->ferromagnetic_) {
@@ -412,13 +422,17 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
     m2 = (update_info.m2_)*(update_info.m2_)*measurement_traits<M>::component_number()/(update_info.clustersize*double(this->num_sites()));
   }
   else {
-    m2=am*am;
+    m2=am*am; 
     chi=m2*this->beta_*this->num_sites()/measurement_traits<M>::component_number();
   }
-  
+  m4=am*am*am*am;
+  enm2=en*am*am;
   this->measurements.template get<alps::RealObservable>("|Magnetization|") << am;
   this->measurements.template get<alps::RealObservable>("Magnetization along Field") << mh;
   this->measurements.template get<alps::RealObservable>("Magnetization^2") << m2;
+  this->measurements.template get<alps::RealObservable>("E.Magnetization^2") << enm2;
+  this->measurements.template get<alps::RealObservable>("Magnetization^4") << m4;
+  this->measurements.template get<alps::RealObservable>("E.Magnetization^4") << en*m4;
   this->measurements.template get<alps::RealObservable>("Susceptibility") << chi;
   if (this->is_bipartite()) {
     double amst = abs(mst)/this->num_sites();
