@@ -5,7 +5,7 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms=[]
-for l in [4, 6, 8]:
+for l in [6, 8, 10]:
     parms.append(
       { 
         'LATTICE'                   : "ladder", 
@@ -20,14 +20,11 @@ for l in [4, 6, 8]:
     )
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm7g',parms)
+input_file = pyalps.writeInputFiles('parm_ladder',parms)
 res = pyalps.runApplication('sparsediag',input_file)
 
 #load all measurements for all states
-data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm7g'))
-
-groundstates = {} # {L: E_0}
-spectra = {}    # {(L,sz): ([k],[E])}
+data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm_ladder'))
 
 # collect spectra over all momenta for every simulation
 spectra = {}
@@ -49,7 +46,9 @@ for sim in data:
 plt.figure()
 pyalps.pyplot.plot(spectra.values())
 plt.legend()
-plt.xlim(0,2*3.1416)
+plt.title('S=1/2 ladder')
 plt.ylabel('Energy')
+plt.xlabel('Momentum')
+plt.xlim(0,2*3.1416)
 plt.ylim(0,2.5)
 plt.show()

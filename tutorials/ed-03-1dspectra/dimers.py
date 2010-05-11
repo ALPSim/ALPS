@@ -11,8 +11,8 @@ for l in [6, 8, 10]:
         'LATTICE'                   : "ladder", 
         'MODEL'                     : "spin",
         'local_S'                   : 0.5,
-        'J0'                        : 1,
-        'J1'                        : 0,
+        'J0'                        : 0,
+        'J1'                        : 1,
         'L'                         : l,
         'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
         'Sz_total'                  : 0
@@ -25,9 +25,6 @@ res = pyalps.runApplication('sparsediag',input_file)
 
 #load all measurements for all states
 data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm_dimers'))
-
-groundstates = {} # {L: E_0}
-spectra = {}    # {(L,sz): ([k],[E])}
 
 # collect spectra over all momenta for every simulation
 spectra = {}
@@ -49,7 +46,9 @@ for sim in data:
 plt.figure()
 pyalps.pyplot.plot(spectra.values())
 plt.legend()
-plt.xlim(0,2*3.1416)
+plt.title('Isolated S=1/2 dimers')
 plt.ylabel('Energy')
+plt.xlabel('Momentum')
+plt.xlim(0,2*3.1416)
 plt.ylim(0,2.5)
 plt.show()

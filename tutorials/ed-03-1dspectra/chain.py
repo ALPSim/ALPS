@@ -6,6 +6,7 @@ import pyalps.pyplot
 #prepare the input parameters
 parms=[]
 for l in [10, 12, 14, 16]:
+#for l in [6,8,10]:
     parms.append(
       { 
         'LATTICE'                   : "chain lattice", 
@@ -19,11 +20,11 @@ for l in [10, 12, 14, 16]:
     )
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm7f',parms)
+input_file = pyalps.writeInputFiles('parm_chain',parms)
 res = pyalps.runApplication('sparsediag',input_file)
 
 #load all measurements for all states
-data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm7f'))
+data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm_chain'))
 
 # collect spectra over all momenta for every simulation
 spectra = {}
@@ -45,7 +46,9 @@ for sim in data:
 plt.figure()
 pyalps.pyplot.plot(spectra.values())
 plt.legend()
-plt.xlim(0,2*3.1416)
+plt.title('S=1/2 chain')
 plt.ylabel('Energy')
+plt.xlabel('Momentum')
+plt.xlim(0,2*3.1416)
 plt.ylim(0,2)
 plt.show()
