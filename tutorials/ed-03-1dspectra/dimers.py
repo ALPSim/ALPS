@@ -46,7 +46,7 @@ for sim in data:
 plt.figure()
 pyalps.pyplot.plot(spectra.values())
 plt.legend()
-plt.title('Isolated S=1/2 dimers')
+plt.title('Isolated antiferromagnetic S=1/2 dimers')
 plt.ylabel('Energy')
 plt.xlabel('Momentum')
 plt.xlim(0,2*3.1416)

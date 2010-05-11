@@ -46,7 +46,7 @@ for sim in data:
 plt.figure()
 pyalps.pyplot.plot(spectra.values())
 plt.legend()
-plt.title('S=1/2 ladder')
+plt.title('Antiferromagnetic Heisenberg ladder (S=1/2)')
 plt.ylabel('Energy')
 plt.xlabel('Momentum')
 plt.xlim(0,2*3.1416)
