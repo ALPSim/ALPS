@@ -18,9 +18,9 @@ DISORDER_SEED = 2873;
 [results]
 [[replica 0]]
 Binder Ratio of Magnetization: 0.35602 +/- 0.016
-EXMC: Acceptance Rate: 0.817383 +/- 0.0120794
-EXMC: Average Inverse Round-Trip Time: 0.111328 +/- 0.00388471
-EXMC: Inverse Round-Trip Time: 0.113281 +/- 0.0099091
+EXMC: Acceptance Rate: 0.817383 +/- 0.0121
+EXMC: Average Inverse Round-Trip Time: 0.111328 +/- 0.00388
+EXMC: Inverse Round-Trip Time: 0.113281 +/- 0.00991
 EXMC: Inverse Temperature: 0.25 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 1 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 0 +/- 0
@@ -56,11 +56,11 @@ Specific Heat: 0.0596557 +/- 0.00271
 Temperature: 4 +/- 0
 [[replica 1]]
 Binder Ratio of Magnetization: 0.388865 +/- 0.0119
-EXMC: Acceptance Rate: 0.836914 +/- 0.0115508
-EXMC: Inverse Round-Trip Time: 0.106445 +/- 0.00964242
+EXMC: Acceptance Rate: 0.836914 +/- 0.0116
+EXMC: Inverse Round-Trip Time: 0.106445 +/- 0.00964
 EXMC: Inverse Temperature: 0.336915 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0.59668 +/- 0.0153376
-EXMC: Ratio of Upward-Moving Walker: 0.40332 +/- 0.0153376
+EXMC: Ratio of Downward-Moving Walker: 0.59668 +/- 0.0153
+EXMC: Ratio of Upward-Moving Walker: 0.40332 +/- 0.0153
 EXMC: Temperature: 2.9681 +/- 0
 Energy: -5.15625 +/- 0.11; tau = -0.0339
     bin #1   : 1024     entries: error = 0.113892
@@ -93,11 +93,11 @@ Specific Heat: 0.0941363 +/- 0.00373
 Temperature: 2.9681 +/- 0
 [[replica 2]]
 Binder Ratio of Magnetization: 0.384095 +/- 0.0122 WARNING: check error convergence
-EXMC: Acceptance Rate: 0.822266 +/- 0.0119524
-EXMC: Inverse Round-Trip Time: 0.111328 +/- 0.00983412
+EXMC: Acceptance Rate: 0.822266 +/- 0.012
+EXMC: Inverse Round-Trip Time: 0.111328 +/- 0.00983
 EXMC: Inverse Temperature: 0.42026 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0.402344 +/- 0.0153316
-EXMC: Ratio of Upward-Moving Walker: 0.597656 +/- 0.0153316
+EXMC: Ratio of Downward-Moving Walker: 0.402344 +/- 0.0153
+EXMC: Ratio of Upward-Moving Walker: 0.597656 +/- 0.0153
 EXMC: Temperature: 2.37948 +/- 0
 Energy: -6.39844 +/- 0.131; tau = 0.0749
     bin #1   : 1024     entries: error = 0.12227
@@ -130,7 +130,7 @@ Specific Heat: 0.168846 +/- 0.00797
 Temperature: 2.37948 +/- 0
 [[replica 3]]
 Binder Ratio of Magnetization: 0.408778 +/- 0.0125 WARNING: check error convergence
-EXMC: Inverse Round-Trip Time: 0.114258 +/- 0.00994624
+EXMC: Inverse Round-Trip Time: 0.114258 +/- 0.00995
 EXMC: Inverse Temperature: 0.5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 1 +/- 0
@@ -184,9 +184,9 @@ DISORDER_SEED = 2873;
 [results]
 [[replica 0]]
 Binder Ratio of Magnetization: 0.330245 +/- 0.0148
-EXMC: Acceptance Rate: 0.853516 +/- 0.015642
-EXMC: Average Inverse Round-Trip Time: 0.078125 +/- 0.00362296
-EXMC: Inverse Round-Trip Time: 0.0810547 +/- 0.00853289
+EXMC: Acceptance Rate: 0.853516 +/- 0.0156
+EXMC: Average Inverse Round-Trip Time: 0.078125 +/- 0.00362
+EXMC: Inverse Round-Trip Time: 0.0810547 +/- 0.00853
 EXMC: Inverse Temperature: 0.25 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 1 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 0 +/- 0
@@ -222,11 +222,11 @@ Specific Heat: 0.0596533 +/- 0.00295
 Temperature: 4 +/- 0
 [[replica 1]]
 Binder Ratio of Magnetization: 0.36678 +/- 0.0131
-EXMC: Acceptance Rate: 0.8125 +/- 0.0172664
-EXMC: Inverse Round-Trip Time: 0.0751953 +/- 0.00824485
+EXMC: Acceptance Rate: 0.8125 +/- 0.0173
+EXMC: Inverse Round-Trip Time: 0.0751953 +/- 0.00824
 EXMC: Inverse Temperature: 0.327078 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0.574219 +/- 0.0154595
-EXMC: Ratio of Upward-Moving Walker: 0.425781 +/- 0.0154595
+EXMC: Ratio of Downward-Moving Walker: 0.574219 +/- 0.0155
+EXMC: Ratio of Upward-Moving Walker: 0.425781 +/- 0.0155
 EXMC: Temperature: 3.05737 +/- 0
 Energy: -4.84375 +/- 0.125; tau = 0.0278
     bin #1   : 1024     entries: error = 0.122057
@@ -259,11 +259,11 @@ Specific Heat: 0.101907 +/- 0.00451
 Temperature: 3.05737 +/- 0
 [[replica 2]]
 Binder Ratio of Magnetization: 0.37256 +/- 0.0102
-EXMC: Acceptance Rate: 0.841797 +/- 0.0161436
-EXMC: Inverse Round-Trip Time: 0.0791016 +/- 0.00843841
+EXMC: Acceptance Rate: 0.841797 +/- 0.0161
+EXMC: Inverse Round-Trip Time: 0.0791016 +/- 0.00844
 EXMC: Inverse Temperature: 0.412064 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0.433594 +/- 0.0154941
-EXMC: Ratio of Upward-Moving Walker: 0.566406 +/- 0.0154941
+EXMC: Ratio of Downward-Moving Walker: 0.433594 +/- 0.0155
+EXMC: Ratio of Upward-Moving Walker: 0.566406 +/- 0.0155
 EXMC: Temperature: 2.4268 +/- 0
 Energy: -6.17969 +/- 0.111; tau = -0.049
     bin #1   : 1024     entries: error = 0.116513
@@ -296,7 +296,7 @@ Specific Heat: 0.147365 +/- 0.00695
 Temperature: 2.4268 +/- 0
 [[replica 3]]
 Binder Ratio of Magnetization: 0.398979 +/- 0.0125 WARNING: ERRORS NOT CONVERGED!!!
-EXMC: Inverse Round-Trip Time: 0.0771484 +/- 0.00834241
+EXMC: Inverse Round-Trip Time: 0.0771484 +/- 0.00834
 EXMC: Inverse Temperature: 0.5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 1 +/- 0
@@ -349,9 +349,9 @@ WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
 [results]
 [[replica 0]]
-EXMC: Acceptance Rate: 0.311523 +/- 0.0144795
-EXMC: Average Inverse Round-Trip Time: 0.0200195 +/- 0.00212146
-EXMC: Inverse Round-Trip Time: 0.015625 +/- 0.00387751
+EXMC: Acceptance Rate: 0.311523 +/- 0.0145
+EXMC: Average Inverse Round-Trip Time: 0.0200195 +/- 0.00212
+EXMC: Inverse Round-Trip Time: 0.015625 +/- 0.00388
 EXMC: Inverse Temperature: 2 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 1 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 0 +/- 0
@@ -385,11 +385,11 @@ Susceptibility: 0.143677 +/- 0.00401; tau = 0.532 WARNING: ERRORS NOT CONVERGED!
 Temperature: 0.5 +/- 0
 Volume: 8 +/- 0
 [[replica 1]]
-EXMC: Acceptance Rate: 0.322266 +/- 0.0146116
-EXMC: Inverse Round-Trip Time: 0.0253906 +/- 0.00491829
+EXMC: Acceptance Rate: 0.322266 +/- 0.0146
+EXMC: Inverse Round-Trip Time: 0.0253906 +/- 0.00492
 EXMC: Inverse Temperature: 2.89416 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0.650391 +/- 0.0149087
-EXMC: Ratio of Upward-Moving Walker: 0.349609 +/- 0.0149087
+EXMC: Ratio of Downward-Moving Walker: 0.650391 +/- 0.0149
+EXMC: Ratio of Upward-Moving Walker: 0.349609 +/- 0.0149
 EXMC: Temperature: 0.345523 +/- 0
 Energy: -3.14674 +/- 0.0575; tau = 0.271 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 1024     entries: error = 0.0462931
@@ -420,11 +420,11 @@ Susceptibility: 0.131778 +/- 0.0041; tau = 0.281 WARNING: ERRORS NOT CONVERGED!!
 Temperature: 0.345523 +/- 0
 Volume: 8 +/- 0
 [[replica 2]]
-EXMC: Acceptance Rate: 0.337891 +/- 0.0147882
-EXMC: Inverse Round-Trip Time: 0.0205078 +/- 0.00443121
+EXMC: Acceptance Rate: 0.337891 +/- 0.0148
+EXMC: Inverse Round-Trip Time: 0.0205078 +/- 0.00443
 EXMC: Inverse Temperature: 3.8832 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0.305664 +/- 0.0144035
-EXMC: Ratio of Upward-Moving Walker: 0.694336 +/- 0.0144035
+EXMC: Ratio of Downward-Moving Walker: 0.305664 +/- 0.0144
+EXMC: Ratio of Upward-Moving Walker: 0.694336 +/- 0.0144
 EXMC: Temperature: 0.257519 +/- 0
 Energy: -3.52661 +/- 0.0576; tau = 0.546 WARNING: ERRORS NOT CONVERGED!!!
     bin #1   : 1024     entries: error = 0.0398389
@@ -455,7 +455,7 @@ Susceptibility: 0.101678 +/- 0.00464; tau = 0.209 WARNING: check error convergen
 Temperature: 0.257519 +/- 0
 Volume: 8 +/- 0
 [[replica 3]]
-EXMC: Inverse Round-Trip Time: 0.0185547 +/- 0.00421912
+EXMC: Inverse Round-Trip Time: 0.0185547 +/- 0.00422
 EXMC: Inverse Temperature: 5 +/- 0
 EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
 EXMC: Ratio of Upward-Moving Walker: 1 +/- 0
@@ -486,163 +486,5 @@ Susceptibility: 0.0848389 +/- 0.00615; tau = 0.49 WARNING: ERRORS NOT CONVERGED!
     bin #2   : 512      entries: error = 0.0050687
     bin #3   : 256      entries: error = 0.00564185
     bin #4   : 128      entries: error = 0.00614747
-Temperature: 0.2 +/- 0
-Volume: 8 +/- 0
-[input parameters]
-ALGORITHM = "loop; exchange";
-LATTICE_LIBRARY = ../../../lib/xml/lattices.xml;
-LATTICE = "chain lattice";
-L = 8;
-SEED = 1234;
-SWEEPS = 1024;
-NUM_REPLICAS = 4;
-BETA_MIN = 2;
-BETA_MAX = 5;
-TEMPERATURE_DISTRIBUTION_TYPE = 3;
-OPTIMIZE_TEMPERATURE = 1;
-RANDOM_EXCHANGE = 0;
-DIR_NAME = .;
-BASE_NAME = task4;
-WORKER_SEED = 1234;
-DISORDER_SEED = 1234;
-[results]
-[[replica 0]]
-EXMC: Acceptance Rate: 0.376953 +/- 0.0214385
-EXMC: Average Inverse Round-Trip Time: 0.0146484 +/- 0.00183576
-EXMC: Inverse Round-Trip Time: 0.0146484 +/- 0.00375624
-EXMC: Inverse Temperature: 2 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 1 +/- 0
-EXMC: Ratio of Upward-Moving Walker: 0 +/- 0
-EXMC: Temperature: 0.5 +/- 0
-Energy: -2.79785 +/- 0.0887; tau = 0.792 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.05519
-    bin #2   : 512      entries: error = 0.0674697
-    bin #3   : 256      entries: error = 0.0761518
-    bin #4   : 128      entries: error = 0.0887153
-Energy Density: -0.349731 +/- 0.0111; tau = 0.792 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.00689874
-    bin #2   : 512      entries: error = 0.00843371
-    bin #3   : 256      entries: error = 0.00951897
-    bin #4   : 128      entries: error = 0.0110894
-Inverse Temperature: 2 +/- 0
-Staggered Magnetization^2: 4.89453 +/- 0.0648; tau = 0.0887
-    bin #1   : 1024     entries: error = 0.0597615
-    bin #2   : 512      entries: error = 0.0635488
-    bin #3   : 256      entries: error = 0.0605049
-    bin #4   : 128      entries: error = 0.0648447
-Staggered Susceptibility: 0.98049 +/- 0.0154; tau = 0.114
-    bin #1   : 1024     entries: error = 0.0138607
-    bin #2   : 512      entries: error = 0.0153588
-    bin #3   : 256      entries: error = 0.0147748
-    bin #4   : 128      entries: error = 0.0153573
-Susceptibility: 0.138672 +/- 0.00365; tau = 0.398 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.00272061
-    bin #2   : 512      entries: error = 0.00306234
-    bin #3   : 256      entries: error = 0.0032399
-    bin #4   : 128      entries: error = 0.00364545
-Temperature: 0.5 +/- 0
-Volume: 8 +/- 0
-[[replica 1]]
-EXMC: Acceptance Rate: 0.355469 +/- 0.0211745
-EXMC: Inverse Round-Trip Time: 0.0136719 +/- 0.00363067
-EXMC: Inverse Temperature: 2.83278 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0.710938 +/- 0.0141734
-EXMC: Ratio of Upward-Moving Walker: 0.289062 +/- 0.0141734
-EXMC: Temperature: 0.35301 +/- 0
-Energy: -3.11416 +/- 0.0732; tau = 0.725 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.0467849
-    bin #2   : 512      entries: error = 0.0567906
-    bin #3   : 256      entries: error = 0.0647208
-    bin #4   : 128      entries: error = 0.0732253
-Energy Density: -0.38927 +/- 0.00915; tau = 0.725 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.00584811
-    bin #2   : 512      entries: error = 0.00709883
-    bin #3   : 256      entries: error = 0.00809009
-    bin #4   : 128      entries: error = 0.00915316
-Inverse Temperature: 2.83278 +/- 0
-Staggered Magnetization^2: 5.72461 +/- 0.0854; tau = 0.103
-    bin #1   : 1024     entries: error = 0.0777746
-    bin #2   : 512      entries: error = 0.0823242
-    bin #3   : 256      entries: error = 0.0867513
-    bin #4   : 128      entries: error = 0.0853912
-Staggered Susceptibility: 1.4674 +/- 0.0252; tau = 0.162 WARNING: check error convergence
-    bin #1   : 1024     entries: error = 0.0218835
-    bin #2   : 512      entries: error = 0.0231397
-    bin #3   : 256      entries: error = 0.0244201
-    bin #4   : 128      entries: error = 0.0251722
-Susceptibility: 0.130712 +/- 0.0046; tau = 0.436 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.00336421
-    bin #2   : 512      entries: error = 0.00383962
-    bin #3   : 256      entries: error = 0.00417933
-    bin #4   : 128      entries: error = 0.00460413
-Temperature: 0.35301 +/- 0
-Volume: 8 +/- 0
-[[replica 2]]
-EXMC: Acceptance Rate: 0.367188 +/- 0.0213241
-EXMC: Inverse Round-Trip Time: 0.015625 +/- 0.00387751
-EXMC: Inverse Temperature: 3.87675 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0.350586 +/- 0.0149183
-EXMC: Ratio of Upward-Moving Walker: 0.649414 +/- 0.0149183
-EXMC: Temperature: 0.257948 +/- 0
-Energy: -3.39625 +/- 0.0587; tau = 0.559 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.0403354
-    bin #2   : 512      entries: error = 0.048321
-    bin #3   : 256      entries: error = 0.0543566
-    bin #4   : 128      entries: error = 0.0586972
-Energy Density: -0.424532 +/- 0.00734; tau = 0.559 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.00504193
-    bin #2   : 512      entries: error = 0.00604013
-    bin #3   : 256      entries: error = 0.00679458
-    bin #4   : 128      entries: error = 0.00733715
-Inverse Temperature: 3.87675 +/- 0
-Staggered Magnetization^2: 6.43701 +/- 0.1; tau = 0.138
-    bin #1   : 1024     entries: error = 0.0889175
-    bin #2   : 512      entries: error = 0.0985357
-    bin #3   : 256      entries: error = 0.102683
-    bin #4   : 128      entries: error = 0.100478
-Staggered Susceptibility: 1.99268 +/- 0.0281; tau = 0.00674
-    bin #1   : 1024     entries: error = 0.0278984
-    bin #2   : 512      entries: error = 0.0297211
-    bin #3   : 256      entries: error = 0.0301285
-    bin #4   : 128      entries: error = 0.0280858
-Susceptibility: 0.110027 +/- 0.00573; tau = 0.577 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.00390509
-    bin #2   : 512      entries: error = 0.00448788
-    bin #3   : 256      entries: error = 0.00493217
-    bin #4   : 128      entries: error = 0.00573229
-Temperature: 0.257948 +/- 0
-Volume: 8 +/- 0
-[[replica 3]]
-EXMC: Inverse Round-Trip Time: 0.0146484 +/- 0.00375624
-EXMC: Inverse Temperature: 5 +/- 0
-EXMC: Ratio of Downward-Moving Walker: 0 +/- 0
-EXMC: Ratio of Upward-Moving Walker: 1 +/- 0
-EXMC: Temperature: 0.2 +/- 0
-Energy: -3.54531 +/- 0.0513; tau = 0.571 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.0350532
-    bin #2   : 512      entries: error = 0.0427297
-    bin #3   : 256      entries: error = 0.0488778
-    bin #4   : 128      entries: error = 0.0513027
-Energy Density: -0.443164 +/- 0.00641; tau = 0.571 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.00438165
-    bin #2   : 512      entries: error = 0.00534121
-    bin #3   : 256      entries: error = 0.00610973
-    bin #4   : 128      entries: error = 0.00641283
-Inverse Temperature: 5 +/- 0
-Staggered Magnetization^2: 6.66504 +/- 0.0913; tau = 0.0376
-    bin #1   : 1024     entries: error = 0.0880667
-    bin #2   : 512      entries: error = 0.0940642
-    bin #3   : 256      entries: error = 0.094885
-    bin #4   : 128      entries: error = 0.0913212
-Staggered Susceptibility: 2.48952 +/- 0.0453; tau = 0.283 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.0362045
-    bin #2   : 512      entries: error = 0.0408482
-    bin #3   : 256      entries: error = 0.0434817
-    bin #4   : 128      entries: error = 0.0452933
-Susceptibility: 0.0817871 +/- 0.0059; tau = 0.434 WARNING: ERRORS NOT CONVERGED!!!
-    bin #1   : 1024     entries: error = 0.00431854
-    bin #2   : 512      entries: error = 0.00534377
-    bin #3   : 256      entries: error = 0.00576758
-    bin #4   : 128      entries: error = 0.00590309
 Temperature: 0.2 +/- 0
 Volume: 8 +/- 0

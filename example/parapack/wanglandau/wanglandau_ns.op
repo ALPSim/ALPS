@@ -130,7 +130,7 @@ Histogram of Ascending Walker:
 54: 0 entries.
 55: 0 entries.
 56: 0 entries.
-Inverse Round-trip Time: 0.034668 +/- 0.00202132
+Inverse Round-trip Time: 0.034668 +/- 0.00202
 Log(g):
 Entry[-72]: 5274.11 +/- 0
 Entry[-71]: 0 +/- 0
@@ -442,7 +442,7 @@ Histogram of Ascending Walker:
 54: 0 entries.
 55: 0 entries.
 56: 0 entries.
-Inverse Round-trip Time: 0.0328369 +/- 0.00196908
+Inverse Round-trip Time: 0.0328369 +/- 0.00197
 Log(g):
 Entry[-72]: 5274.11 +/- 0
 Entry[-71]: 0 +/- 0
