@@ -5,6 +5,7 @@ MAX_TIME = 180;
 BETA = 20;
 MU = 0;
 H = 0;
+H_INIT = 0;
 U = 6;
 t = 1;
 SYMMETRIZATION = 1;

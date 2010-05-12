@@ -5,6 +5,7 @@ MAX_TIME = 180;
 BETA = 30;
 MU = 0;
 H = 0;
+H_INIT=0;
 U = 2.8;
 J = 0.7;
 t = 1;

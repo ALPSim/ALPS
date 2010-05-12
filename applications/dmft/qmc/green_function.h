@@ -123,7 +123,7 @@ template <typename T> class green_function{
       for(unsigned int i=0;i<nf_;++i){
         for(unsigned int j=0;j<ns_;++j){
           for(unsigned int k=0;k<ns_;++k){
-            std::stringstream subpath; subpath<<path<<"/"<<i<<"/"<<j<<"/"<<"/"<<k<<"/values/mean";
+            std::stringstream subpath; subpath<<path<<"/"<<i<<"/"<<j<<"/"<<k<<"/values/mean";
             //currently we're not writing the error.
             //std::stringstream subpath_e; subpath_e<<path<<"/"<<i<<"/"<<j<<"/"<<"/"<<k<<"/values/error";
             ar<<alps::make_pvp(subpath.str(), val_, nt_);
