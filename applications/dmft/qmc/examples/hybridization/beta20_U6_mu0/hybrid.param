@@ -25,3 +25,4 @@ N_FLIP = 0;
 N_MOVE = 0;
 OVERLAP = 0;
 CHECKPOINT = dump;
+BASENAME = hybrid.param;
