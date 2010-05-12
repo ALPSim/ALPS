@@ -49,18 +49,18 @@ public:
           get(boost::vertex_index, graph())));
     sublat_.clear();
     sublat_.resize(nc);
-    for (int s = 0; s < num_sites(); ++s) sublat_[color[s]].push_back(s);
+    for (std::size_t s = 0; s < num_sites(); ++s) sublat_[color[s]].push_back(s);
     // configuration
     spins_.resize(num_sites());
     #pragma omp parallel
     {
       int r = alps::thread_id();
       #pragma omp for
-      for (int s = 0; s < num_sites(); ++s) spins_[s] = (uniform_01(r) < 0.5 ? 1 : -1);
+      for (std::size_t s = 0; s < num_sites(); ++s) spins_[s] = (uniform_01(r) < 0.5 ? 1 : -1);
     }
     double ene = 0;
     #pragma omp parallel for reduction(+: ene)
-    for (int b = 0; b < num_bonds(); ++b) {
+    for (std::size_t b = 0; b < num_bonds(); ++b) {
       bond_descriptor bd = bond(b);
       ene -= coupling_ * spins_[source(bd)] * spins_[target(bd)];
     }
@@ -85,12 +85,12 @@ public:
   void run(alps::ObservableSet& obs) {
     ++mcs_;
 
-    for (int t = 0; t < sublat_.size(); ++t) {
+    for (std::size_t t = 0; t < sublat_.size(); ++t) {
       #pragma omp parallel
       {
         int r = alps::thread_id();
         #pragma omp for
-        for (int k = 0; k < sublat_[t].size(); ++k) {
+        for (std::size_t k = 0; k < sublat_[t].size(); ++k) {
           int s = sublat_[t][k];
           double diff = 0;
           neighbor_iterator itr, itr_end;
@@ -106,10 +106,10 @@ public:
     // measurements
     double mag = 0;
     #pragma omp parallel for reduction(+: mag)
-    for (int s = 0; s < num_sites(); ++s) mag += spins_[s];
+    for (std::size_t s = 0; s < num_sites(); ++s) mag += spins_[s];
     double ene = 0;
     #pragma omp parallel for reduction(+: ene)
-    for (int b = 0; b < num_bonds(); ++b) {
+    for (std::size_t b = 0; b < num_bonds(); ++b) {
       bond_descriptor bd = bond(b);
       ene -= coupling_ * spins_[source(bd)] * spins_[target(bd)];
     }
