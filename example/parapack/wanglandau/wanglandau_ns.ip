@@ -25,7 +25,7 @@ OBSERVABLE_DUMP_FILE = "observable.dump"
   ALGORITHM = "wanglandau reweight";
   REFERENCE_BIN = -72
   REFERENCE_LOGG = log(2)
-  T_MIN = 0.5;
+  T_MIN = 0.6;
   T_MAX = 4.0;
   T_STEP = 0.1;
 }

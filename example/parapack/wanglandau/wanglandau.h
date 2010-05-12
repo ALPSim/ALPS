@@ -97,6 +97,7 @@ public:
         int index = weight.bin2index(energy);
         double mag = 0;
         BOOST_FOREACH(site_descriptor v, sites()) mag += spins[v];
+        mag /= num_sites();
         add_constant(obs[index]["Number of Sites"], (double)num_sites());
         add_constant(obs[index]["Energy"], (double)energy);
         obs[index]["Magnetization"] << mag;

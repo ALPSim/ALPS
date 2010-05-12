@@ -634,7 +634,7 @@ OBSERVABLE_DUMP_FILE = observable.dump;
 ALGORITHM = "wanglandau reweight";
 REFERENCE_BIN = -72;
 REFERENCE_LOGG = log(2);
-T_MIN = 0.5;
+T_MIN = 0.6;
 T_MAX = 4.0;
 T_STEP = 0.1;
 DIR_NAME = .;
@@ -643,22 +643,6 @@ WORKER_SEED = 3;
 DISORDER_SEED = 3;
 [results]
 [[replica 0]]
-Binder Ratio of Magnetization: 1 +/- inf
-Energy: -72 +/- inf
-Energy Density: -2 +/- inf
-Energy^2: 5184 +/- inf
-Entropy: 0.693216 +/- inf
-Entropy Density: 0.019256 +/- inf
-Free-Energy: -72.3466 +/- inf
-Free-Energy Density: -2.00963 +/- inf
-Inverse Temperature: 2 +/- inf
-Magnetization: -5.96842 +/- inf
-Magnetization^2: 1296 +/- inf
-Magnetization^4: 1.67961e+06 +/- inf
-Number of Sites: 36 +/- inf
-Specific Heat: 2.89562e-05 +/- inf
-Temperature: 0.5 +/- inf
-[[replica 1]]
 Binder Ratio of Magnetization: 0.999999 +/- inf
 Energy: -71.9995 +/- inf
 Energy Density: -1.99999 +/- inf
@@ -668,13 +652,13 @@ Entropy Density: 0.0192775 +/- inf
 Free-Energy: -72.4159 +/- inf
 Free-Energy Density: -2.01155 +/- inf
 Inverse Temperature: 1.66667 +/- inf
-Magnetization: -5.96842 +/- inf
-Magnetization^2: 1295.99 +/- inf
-Magnetization^4: 1.6796e+06 +/- inf
+Magnetization: -0.165789 +/- inf
+Magnetization^2: 0.999994 +/- inf
+Magnetization^4: 0.999988 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.000290702 +/- inf
 Temperature: 0.6 +/- inf
-[[replica 2]]
+[[replica 1]]
 Binder Ratio of Magnetization: 0.999995 +/- inf
 Energy: -71.9968 +/- inf
 Energy Density: -1.99991 +/- inf
@@ -684,13 +668,13 @@ Entropy Density: 0.0193912 +/- inf
 Free-Energy: -72.4855 +/- inf
 Free-Energy Density: -2.01349 +/- inf
 Inverse Temperature: 1.42857 +/- inf
-Magnetization: -5.96839 +/- inf
-Magnetization^2: 1295.94 +/- inf
-Magnetization^4: 1.67948e+06 +/- inf
+Magnetization: -0.165788 +/- inf
+Magnetization^2: 0.999957 +/- inf
+Magnetization^4: 0.999919 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.00144881 +/- inf
 Temperature: 0.7 +/- inf
-[[replica 3]]
+[[replica 2]]
 Binder Ratio of Magnetization: 0.99998 +/- inf
 Energy: -71.9866 +/- inf
 Energy Density: -1.99963 +/- inf
@@ -700,13 +684,13 @@ Entropy Density: 0.0197659 +/- inf
 Free-Energy: -72.5558 +/- inf
 Free-Energy Density: -2.01544 +/- inf
 Inverse Temperature: 1.25 +/- inf
-Magnetization: -5.96829 +/- inf
-Magnetization^2: 1295.76 +/- inf
-Magnetization^4: 1.67904e+06 +/- inf
+Magnetization: -0.165786 +/- inf
+Magnetization^2: 0.999818 +/- inf
+Magnetization^4: 0.999656 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.00470611 +/- inf
 Temperature: 0.8 +/- inf
-[[replica 4]]
+[[replica 3]]
 Binder Ratio of Magnetization: 0.999936 +/- inf
 Energy: -71.9586 +/- inf
 Energy Density: -1.99885 +/- inf
@@ -716,13 +700,13 @@ Entropy Density: 0.0206737 +/- inf
 Free-Energy: -72.6284 +/- inf
 Free-Energy Density: -2.01746 +/- inf
 Inverse Temperature: 1.11111 +/- inf
-Magnetization: -5.96803 +/- inf
-Magnetization^2: 1295.27 +/- inf
-Magnetization^4: 1.67782e+06 +/- inf
+Magnetization: -0.165779 +/- inf
+Magnetization^2: 0.999435 +/- inf
+Magnetization^4: 0.998934 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.0115742 +/- inf
 Temperature: 0.9 +/- inf
-[[replica 5]]
+[[replica 4]]
 Binder Ratio of Magnetization: 0.999835 +/- inf
 Energy: -71.8971 +/- inf
 Energy Density: -1.99714 +/- inf
@@ -732,13 +716,13 @@ Entropy Density: 0.0224623 +/- inf
 Free-Energy: -72.7058 +/- inf
 Free-Energy Density: -2.0196 +/- inf
 Inverse Temperature: 1 +/- inf
-Magnetization: -5.96746 +/- inf
-Magnetization^2: 1294.17 +/- inf
-Magnetization^4: 1.67514e+06 +/- inf
+Magnetization: -0.165763 +/- inf
+Magnetization^2: 0.998585 +/- inf
+Magnetization^4: 0.997337 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.0235547 +/- inf
 Temperature: 1 +/- inf
-[[replica 6]]
+[[replica 5]]
 Binder Ratio of Magnetization: 0.999632 +/- inf
 Energy: -71.7813 +/- inf
 Energy Density: -1.99393 +/- inf
@@ -748,13 +732,13 @@ Entropy Density: 0.0255141 +/- inf
 Free-Energy: -72.7917 +/- inf
 Free-Energy Density: -2.02199 +/- inf
 Inverse Temperature: 0.909091 +/- inf
-Magnetization: -5.96604 +/- inf
-Magnetization^2: 1292.07 +/- inf
-Magnetization^4: 1.67006e+06 +/- inf
+Magnetization: -0.165723 +/- inf
+Magnetization^2: 0.996967 +/- inf
+Magnetization^4: 0.994309 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.0419392 +/- inf
 Temperature: 1.1 +/- inf
-[[replica 7]]
+[[replica 6]]
 Binder Ratio of Magnetization: 0.999262 +/- inf
 Energy: -71.5862 +/- inf
 Energy Density: -1.98851 +/- inf
@@ -764,13 +748,13 @@ Entropy Density: 0.0302135 +/- inf
 Free-Energy: -72.8914 +/- inf
 Free-Energy Density: -2.02476 +/- inf
 Inverse Temperature: 0.833333 +/- inf
-Magnetization: -5.96234 +/- inf
-Magnetization^2: 1288.48 +/- inf
-Magnetization^4: 1.66142e+06 +/- inf
+Magnetization: -0.165621 +/- inf
+Magnetization^2: 0.994201 +/- inf
+Magnetization^4: 0.989165 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.0677692 +/- inf
 Temperature: 1.2 +/- inf
-[[replica 8]]
+[[replica 7]]
 Binder Ratio of Magnetization: 0.998626 +/- inf
 Energy: -71.2834 +/- inf
 Energy Density: -1.98009 +/- inf
@@ -780,13 +764,13 @@ Entropy Density: 0.0369281 +/- inf
 Free-Energy: -73.0116 +/- inf
 Free-Energy Density: -2.0281 +/- inf
 Inverse Temperature: 0.769231 +/- inf
-Magnetization: -5.95309 +/- inf
-Magnetization^2: 1282.82 +/- inf
-Magnetization^4: 1.64789e+06 +/- inf
+Magnetization: -0.165364 +/- inf
+Magnetization^2: 0.98983 +/- inf
+Magnetization^4: 0.981112 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.101917 +/- inf
 Temperature: 1.3 +/- inf
-[[replica 9]]
+[[replica 8]]
 Binder Ratio of Magnetization: 0.997574 +/- inf
 Energy: -70.8414 +/- inf
 Energy Density: -1.96782 +/- inf
@@ -796,13 +780,13 @@ Entropy Density: 0.046007 +/- inf
 Free-Energy: -73.1602 +/- inf
 Free-Energy Density: -2.03223 +/- inf
 Inverse Temperature: 0.714286 +/- inf
-Magnetization: -5.93221 +/- inf
-Magnetization^2: 1274.37 +/- inf
-Magnetization^4: 1.62798e+06 +/- inf
+Magnetization: -0.164784 +/- inf
+Magnetization^2: 0.983313 +/- inf
+Magnetization^4: 0.969256 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.145243 +/- inf
 Temperature: 1.4 +/- inf
-[[replica 10]]
+[[replica 9]]
 Binder Ratio of Magnetization: 0.995869 +/- inf
 Energy: -70.2254 +/- inf
 Energy Density: -1.9507 +/- inf
@@ -812,13 +796,13 @@ Entropy Density: 0.0577918 +/- inf
 Free-Energy: -73.3461 +/- inf
 Free-Energy Density: -2.03739 +/- inf
 Inverse Temperature: 0.666667 +/- inf
-Magnetization: -5.89011 +/- inf
-Magnetization^2: 1262.3 +/- inf
-Magnetization^4: 1.60002e+06 +/- inf
+Magnetization: -0.163614 +/- inf
+Magnetization^2: 0.973998 +/- inf
+Magnetization^4: 0.952608 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.19881 +/- inf
 Temperature: 1.5 +/- inf
-[[replica 11]]
+[[replica 10]]
 Binder Ratio of Magnetization: 0.993129 +/- inf
 Energy: -69.3959 +/- inf
 Energy Density: -1.92766 +/- inf
@@ -828,13 +812,13 @@ Entropy Density: 0.0726387 +/- inf
 Free-Energy: -73.5799 +/- inf
 Free-Energy Density: -2.04389 +/- inf
 Inverse Temperature: 0.625 +/- inf
-Magnetization: -5.81381 +/- inf
-Magnetization^2: 1245.57 +/- inf
-Magnetization^4: 1.56217e+06 +/- inf
+Magnetization: -0.161495 +/- inf
+Magnetization^2: 0.961085 +/- inf
+Magnetization^4: 0.930075 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.26409 +/- inf
 Temperature: 1.6 +/- inf
-[[replica 12]]
+[[replica 11]]
 Binder Ratio of Magnetization: 0.988739 +/- inf
 Energy: -68.3075 +/- inf
 Energy Density: -1.89743 +/- inf
@@ -844,13 +828,13 @@ Entropy Density: 0.0909436 +/- inf
 Free-Energy: -73.8733 +/- inf
 Free-Energy Density: -2.05204 +/- inf
 Inverse Temperature: 0.588235 +/- inf
-Magnetization: -5.68793 +/- inf
-Magnetization^2: 1222.87 +/- inf
-Magnetization^4: 1.51243e+06 +/- inf
+Magnetization: -0.157998 +/- inf
+Magnetization^2: 0.943569 +/- inf
+Magnetization^4: 0.900463 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.343046 +/- inf
 Temperature: 1.7 +/- inf
-[[replica 13]]
+[[replica 12]]
 Binder Ratio of Magnetization: 0.981734 +/- inf
 Energy: -66.9071 +/- inf
 Energy Density: -1.85853 +/- inf
@@ -860,13 +844,13 @@ Entropy Density: 0.113153 +/- inf
 Free-Energy: -74.2394 +/- inf
 Free-Energy Density: -2.06221 +/- inf
 Inverse Temperature: 0.555556 +/- inf
-Magnetization: -5.49684 +/- inf
-Magnetization^2: 1192.58 +/- inf
-Magnetization^4: 1.44871e+06 +/- inf
+Magnetization: -0.15269 +/- inf
+Magnetization^2: 0.920202 +/- inf
+Magnetization^4: 0.862526 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.437725 +/- inf
 Temperature: 1.8 +/- inf
-[[replica 14]]
+[[replica 13]]
 Binder Ratio of Magnetization: 0.970724 +/- inf
 Energy: -65.1361 +/- inf
 Energy Density: -1.80934 +/- inf
@@ -876,13 +860,13 @@ Entropy Density: 0.139724 +/- inf
 Free-Energy: -74.6932 +/- inf
 Free-Energy Density: -2.07481 +/- inf
 Inverse Temperature: 0.526316 +/- inf
-Magnetization: -5.22754 +/- inf
-Magnetization^2: 1152.82 +/- inf
-Magnetization^4: 1.36909e+06 +/- inf
+Magnetization: -0.14521 +/- inf
+Magnetization^2: 0.889525 +/- inf
+Magnetization^4: 0.815118 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.548801 +/- inf
 Temperature: 1.9 +/- inf
-[[replica 15]]
+[[replica 14]]
 Binder Ratio of Magnetization: 0.953958 +/- inf
 Energy: -62.94 +/- inf
 Energy Density: -1.74833 +/- inf
@@ -892,13 +876,13 @@ Entropy Density: 0.170987 +/- inf
 Free-Energy: -75.2511 +/- inf
 Free-Energy Density: -2.09031 +/- inf
 Inverse Temperature: 0.5 +/- inf
-Magnetization: -4.87339 +/- inf
-Magnetization^2: 1101.73 +/- inf
-Magnetization^4: 1.27239e+06 +/- inf
+Magnetization: -0.135372 +/- inf
+Magnetization^2: 0.850099 +/- inf
+Magnetization^4: 0.757547 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.672726 +/- inf
 Temperature: 2 +/- inf
-[[replica 16]]
+[[replica 15]]
 Binder Ratio of Magnetization: 0.929689 +/- inf
 Energy: -60.2899 +/- inf
 Energy Density: -1.67472 +/- inf
@@ -908,13 +892,13 @@ Entropy Density: 0.206878 +/- inf
 Free-Energy: -75.9299 +/- inf
 Free-Energy Density: -2.10916 +/- inf
 Inverse Temperature: 0.47619 +/- inf
-Magnetization: -4.43813 +/- inf
-Magnetization^2: 1038.11 +/- inf
-Magnetization^4: 1.15916e+06 +/- inf
+Magnetization: -0.123281 +/- inf
+Magnetization^2: 0.801007 +/- inf
+Magnetization^4: 0.690137 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.798457 +/- inf
 Temperature: 2.1 +/- inf
-[[replica 17]]
+[[replica 16]]
 Binder Ratio of Magnetization: 0.896864 +/- inf
 Energy: -57.2117 +/- inf
 Energy Density: -1.58921 +/- inf
@@ -924,13 +908,13 @@ Entropy Density: 0.246635 +/- inf
 Free-Energy: -76.7453 +/- inf
 Free-Energy Density: -2.13181 +/- inf
 Inverse Temperature: 0.454545 +/- inf
-Magnetization: -3.93886 +/- inf
-Magnetization^2: 962.357 +/- inf
-Magnetization^4: 1.03263e+06 +/- inf
+Magnetization: -0.109413 +/- inf
+Magnetization^2: 0.742559 +/- inf
+Magnetization^4: 0.614803 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.906882 +/- inf
 Temperature: 2.2 +/- inf
-[[replica 18]]
+[[replica 17]]
 Binder Ratio of Magnetization: 0.85588 +/- inf
 Energy: -53.8076 +/- inf
 Energy Density: -1.49466 +/- inf
@@ -940,13 +924,13 @@ Entropy Density: 0.288657 +/- inf
 Free-Energy: -77.7084 +/- inf
 Free-Energy Density: -2.15857 +/- inf
 Inverse Temperature: 0.434783 +/- inf
-Magnetization: -3.40544 +/- inf
-Magnetization^2: 877.146 +/- inf
-Magnetization^4: 898941 +/- inf
+Magnetization: -0.0945955 +/- inf
+Magnetization^2: 0.67681 +/- inf
+Magnetization^4: 0.535206 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.9762 +/- inf
 Temperature: 2.3 +/- inf
-[[replica 19]]
+[[replica 18]]
 Binder Ratio of Magnetization: 0.808873 +/- inf
 Energy: -50.2481 +/- inf
 Energy Density: -1.39578 +/- inf
@@ -956,13 +940,13 @@ Entropy Density: 0.330736 +/- inf
 Free-Energy: -78.8237 +/- inf
 Free-Energy Density: -2.18955 +/- inf
 Inverse Temperature: 0.416667 +/- inf
-Magnetization: -2.87449 +/- inf
-Magnetization^2: 787.202 +/- inf
-Magnetization^4: 766112 +/- inf
+Magnetization: -0.0798469 +/- inf
+Magnetization^2: 0.607409 +/- inf
+Magnetization^4: 0.456123 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.991865 +/- inf
 Temperature: 2.4 +/- inf
-[[replica 20]]
+[[replica 19]]
 Binder Ratio of Magnetization: 0.759218 +/- inf
 Energy: -46.7311 +/- inf
 Energy Density: -1.29809 +/- inf
@@ -972,13 +956,13 @@ Entropy Density: 0.370621 +/- inf
 Free-Energy: -80.0871 +/- inf
 Free-Energy Density: -2.22464 +/- inf
 Inverse Temperature: 0.4 +/- inf
-Magnetization: -2.37999 +/- inf
-Magnetization^2: 698.119 +/- inf
-Magnetization^4: 641936 +/- inf
+Magnetization: -0.0661109 +/- inf
+Magnetization^2: 0.538672 +/- inf
+Magnetization^4: 0.382192 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.953863 +/- inf
 Temperature: 2.5 +/- inf
-[[replica 21]]
+[[replica 20]]
 Binder Ratio of Magnetization: 0.710483 +/- inf
 Energy: -43.429 +/- inf
 Energy Density: -1.20636 +/- inf
@@ -988,13 +972,13 @@ Entropy Density: 0.406607 +/- inf
 Free-Energy: -81.4874 +/- inf
 Free-Energy Density: -2.26354 +/- inf
 Inverse Temperature: 0.384615 +/- inf
-Magnetization: -1.9453 +/- inf
-Magnetization^2: 614.797 +/- inf
-Magnetization^4: 531997 +/- inf
+Magnetization: -0.0540361 +/- inf
+Magnetization^2: 0.47438 +/- inf
+Magnetization^4: 0.316737 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.875433 +/- inf
 Temperature: 2.6 +/- inf
-[[replica 22]]
+[[replica 21]]
 Binder Ratio of Magnetization: 0.665491 +/- inf
 Energy: -40.4539 +/- inf
 Energy Density: -1.12372 +/- inf
@@ -1004,13 +988,13 @@ Entropy Density: 0.437808 +/- inf
 Free-Energy: -83.0089 +/- inf
 Free-Energy Density: -2.3058 +/- inf
 Inverse Temperature: 0.37037 +/- inf
-Magnetization: -1.58043 +/- inf
-Magnetization^2: 540.416 +/- inf
-Magnetization^4: 438848 +/- inf
+Magnetization: -0.0439008 +/- inf
+Magnetization^2: 0.416988 +/- inf
+Magnetization^4: 0.261279 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.775317 +/- inf
 Temperature: 2.7 +/- inf
-[[replica 23]]
+[[replica 22]]
 Binder Ratio of Magnetization: 0.625899 +/- inf
 Energy: -37.8526 +/- inf
 Energy Density: -1.05146 +/- inf
@@ -1020,13 +1004,13 @@ Entropy Density: 0.464099 +/- inf
 Free-Energy: -84.6337 +/- inf
 Free-Energy Density: -2.35094 +/- inf
 Inverse Temperature: 0.357143 +/- inf
-Magnetization: -1.28436 +/- inf
-Magnetization^2: 476.275 +/- inf
-Magnetization^4: 362419 +/- inf
+Magnetization: -0.0356767 +/- inf
+Magnetization^2: 0.367496 +/- inf
+Magnetization^4: 0.215775 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.670158 +/- inf
 Temperature: 2.8 +/- inf
-[[replica 24]]
+[[replica 23]]
 Binder Ratio of Magnetization: 0.592281 +/- inf
 Energy: -35.6214 +/- inf
 Energy Density: -0.989484 +/- inf
@@ -1036,13 +1020,13 @@ Entropy Density: 0.485857 +/- inf
 Free-Energy: -86.3449 +/- inf
 Free-Energy Density: -2.39847 +/- inf
 Inverse Temperature: 0.344828 +/- inf
-Magnetization: -1.04947 +/- inf
-Magnetization^2: 422.231 +/- inf
-Magnetization^4: 301003 +/- inf
+Magnetization: -0.029152 +/- inf
+Magnetization^2: 0.325795 +/- inf
+Magnetization^4: 0.17921 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.570965 +/- inf
 Temperature: 2.9 +/- inf
-[[replica 25]]
+[[replica 24]]
 Binder Ratio of Magnetization: 0.564459 +/- inf
 Energy: -33.7277 +/- inf
 Energy Density: -0.936882 +/- inf
@@ -1052,13 +1036,13 @@ Entropy Density: 0.503699 +/- inf
 Free-Energy: -88.1272 +/- inf
 Free-Energy Density: -2.44798 +/- inf
 Inverse Temperature: 0.333333 +/- inf
-Magnetization: -0.865563 +/- inf
-Magnetization^2: 377.311 +/- inf
-Magnetization^4: 252213 +/- inf
+Magnetization: -0.0240434 +/- inf
+Magnetization^2: 0.291135 +/- inf
+Magnetization^4: 0.150161 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.483204 +/- inf
 Temperature: 3 +/- inf
-[[replica 26]]
+[[replica 25]]
 Binder Ratio of Magnetization: 0.541837 +/- inf
 Energy: -32.1266 +/- inf
 Energy Density: -0.892407 +/- inf
@@ -1068,13 +1052,13 @@ Entropy Density: 0.518289 +/- inf
 Free-Energy: -89.9677 +/- inf
 Free-Energy Density: -2.4991 +/- inf
 Inverse Temperature: 0.322581 +/- inf
-Magnetization: -0.722448 +/- inf
-Magnetization^2: 340.211 +/- inf
-Magnetization^4: 213613 +/- inf
+Magnetization: -0.020068 +/- inf
+Magnetization^2: 0.262509 +/- inf
+Magnetization^4: 0.12718 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.408463 +/- inf
 Temperature: 3.1 +/- inf
-[[replica 27]]
+[[replica 26]]
 Binder Ratio of Magnetization: 0.523662 +/- inf
 Energy: -30.7718 +/- inf
 Energy Density: -0.854773 +/- inf
@@ -1084,13 +1068,13 @@ Entropy Density: 0.530242 +/- inf
 Free-Energy: -91.8557 +/- inf
 Free-Energy Density: -2.55155 +/- inf
 Inverse Temperature: 0.3125 +/- inf
-Magnetization: -0.611192 +/- inf
-Magnetization^2: 309.601 +/- inf
-Magnetization^4: 183043 +/- inf
+Magnetization: -0.0169776 +/- inf
+Magnetization^2: 0.23889 +/- inf
+Magnetization^4: 0.108979 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.346171 +/- inf
 Temperature: 3.2 +/- inf
-[[replica 28]]
+[[replica 27]]
 Binder Ratio of Magnetization: 0.509174 +/- inf
 Energy: -29.6211 +/- inf
 Energy Density: -0.822808 +/- inf
@@ -1100,13 +1084,13 @@ Entropy Density: 0.540082 +/- inf
 Free-Energy: -93.7829 +/- inf
 Free-Energy Density: -2.60508 +/- inf
 Inverse Temperature: 0.30303 +/- inf
-Magnetization: -0.524495 +/- inf
-Magnetization^2: 284.281 +/- inf
-Magnetization^4: 158719 +/- inf
+Magnetization: -0.0145693 +/- inf
+Magnetization^2: 0.219352 +/- inf
+Magnetization^4: 0.0944971 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.294812 +/- inf
 Temperature: 3.3 +/- inf
-[[replica 29]]
+[[replica 28]]
 Binder Ratio of Magnetization: 0.49768 +/- inf
 Energy: -28.6382 +/- inf
 Energy Density: -0.795505 +/- inf
@@ -1116,13 +1100,13 @@ Entropy Density: 0.548236 +/- inf
 Free-Energy: -95.7423 +/- inf
 Free-Energy Density: -2.65951 +/- inf
 Inverse Temperature: 0.294118 +/- inf
-Magnetization: -0.456624 +/- inf
-Magnetization^2: 263.234 +/- inf
-Magnetization^4: 139230 +/- inf
+Magnetization: -0.012684 +/- inf
+Magnetization^2: 0.203113 +/- inf
+Magnetization^4: 0.0828941 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.252626 +/- inf
 Temperature: 3.4 +/- inf
-[[replica 30]]
+[[replica 29]]
 Binder Ratio of Magnetization: 0.48859 +/- inf
 Energy: -27.7932 +/- inf
 Energy Density: -0.772032 +/- inf
@@ -1132,13 +1116,13 @@ Entropy Density: 0.555043 +/- inf
 Free-Energy: -97.7286 +/- inf
 Free-Energy Density: -2.71468 +/- inf
 Inverse Temperature: 0.285714 +/- inf
-Magnetization: -0.403173 +/- inf
-Magnetization^2: 245.63 +/- inf
-Magnetization^4: 123486 +/- inf
+Magnetization: -0.0111992 +/- inf
+Magnetization^2: 0.189529 +/- inf
+Magnetization^4: 0.0735205 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.217949 +/- inf
 Temperature: 3.5 +/- inf
-[[replica 31]]
+[[replica 30]]
 Binder Ratio of Magnetization: 0.481413 +/- inf
 Energy: -27.0617 +/- inf
 Energy Density: -0.751713 +/- inf
@@ -1148,13 +1132,13 @@ Entropy Density: 0.560769 +/- inf
 Free-Energy: -99.7373 +/- inf
 Free-Energy Density: -2.77048 +/- inf
 Inverse Temperature: 0.277778 +/- inf
-Magnetization: -0.360795 +/- inf
-Magnetization^2: 230.802 +/- inf
-Magnetization^4: 110653 +/- inf
+Magnetization: -0.0100221 +/- inf
+Magnetization^2: 0.178088 +/- inf
+Magnetization^4: 0.0658799 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.189342 +/- inf
 Temperature: 3.6 +/- inf
-[[replica 32]]
+[[replica 31]]
 Binder Ratio of Magnetization: 0.475751 +/- inf
 Energy: -26.4241 +/- inf
 Energy Density: -0.734001 +/- inf
@@ -1164,13 +1148,13 @@ Entropy Density: 0.565623 +/- inf
 Free-Energy: -101.765 +/- inf
 Free-Energy Density: -2.82681 +/- inf
 Inverse Temperature: 0.27027 +/- inf
-Magnetization: -0.326958 +/- inf
-Magnetization^2: 218.222 +/- inf
-Magnetization^4: 100096 +/- inf
+Magnetization: -0.00908217 +/- inf
+Magnetization^2: 0.168381 +/- inf
+Magnetization^4: 0.0595946 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.165616 +/- inf
 Temperature: 3.7 +/- inf
-[[replica 33]]
+[[replica 32]]
 Binder Ratio of Magnetization: 0.471288 +/- inf
 Energy: -25.8645 +/- inf
 Energy Density: -0.718459 +/- inf
@@ -1180,13 +1164,13 @@ Entropy Density: 0.569769 +/- inf
 Free-Energy: -103.809 +/- inf
 Free-Energy Density: -2.88358 +/- inf
 Inverse Temperature: 0.263158 +/- inf
-Magnetization: -0.299748 +/- inf
-Magnetization^2: 207.47 +/- inf
-Magnetization^4: 91332 +/- inf
+Magnetization: -0.00832633 +/- inf
+Magnetization^2: 0.160085 +/- inf
+Magnetization^4: 0.0543767 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.145817 +/- inf
 Temperature: 3.8 +/- inf
-[[replica 34]]
+[[replica 33]]
 Binder Ratio of Magnetization: 0.467772 +/- inf
 Energy: -25.3704 +/- inf
 Energy Density: -0.704733 +/- inf
@@ -1196,9 +1180,9 @@ Entropy Density: 0.573336 +/- inf
 Free-Energy: -105.867 +/- inf
 Free-Energy Density: -2.94074 +/- inf
 Inverse Temperature: 0.25641 +/- inf
-Magnetization: -0.277711 +/- inf
-Magnetization^2: 198.214 +/- inf
-Magnetization^4: 83991.7 +/- inf
+Magnetization: -0.00771419 +/- inf
+Magnetization^2: 0.152943 +/- inf
+Magnetization^4: 0.0500065 +/- inf
 Number of Sites: 36 +/- inf
 Specific Heat: 0.129184 +/- inf
 Temperature: 3.9 +/- inf
