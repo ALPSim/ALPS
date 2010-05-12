@@ -173,13 +173,31 @@ class TextCellWidget(QCellWidget):
         else:
             self.browser.setText("No text file is specified!")
 
+class DirectoryDoesNotExist: pass
+class FileDoesNotExist: pass
+
 
 class ConcatenatePath(Module):
     def compute(self):
-      self.setResult('path', os.path.join(self.getInputFromPort('base').name,self.getInputFromPort('leaf')))
+      f = os.path.join(self.getInputFromPort('base').name,self.getInputFromPort('leaf'))
+      self.setResult('path', f)
+      if os.path.isdir(f):
+        dir = basic.Directory()
+        dir.name =f
+        self.setResult('directory', dir)
+      else:
+        self.setResult('directory', DirectoryDoesNotExist())
+      if os.path.isfile(f):
+        file = basic.File()
+        file.name =f
+        self.setResult('file', file)
+      else:
+        self.setResult('file', FileDoesNotExist())
     _input_ports = [('base', [basic.Directory]),
                     ('leaf',[basic.String])]
-    _output_ports = [('path', [basic.String])]
+    _output_ports = [('path', [basic.String]),
+                     ('directory', [basic.Directory]),
+                     ('file',[basic.File])]
 
 class DirectorySink(Module,NotCacheable):
     def compute(self):
