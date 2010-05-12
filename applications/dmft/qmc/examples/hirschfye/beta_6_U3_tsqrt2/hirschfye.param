@@ -17,6 +17,6 @@ ANTIFERROMAGNET = 1;
 SOLVER = /opt/alps/bin/hirschfye;
 FLAVORS = 2;
 OMEGA_LOOP = 1;
-G0OMEGA_INPUT = G0omega_input;
+G0OMEGA_INPUT = G0_omega_input;
 MAX_IT = 10;
 BASENAME = hirschfye.param;
