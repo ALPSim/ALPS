@@ -6,7 +6,6 @@ import pyalps.pyplot
 #prepare the input parameters
 parms=[]
 for l in [10, 12, 14, 16]:
-#for l in [6,8,10]:
     parms.append(
       { 
         'LATTICE'                   : "chain lattice", 
