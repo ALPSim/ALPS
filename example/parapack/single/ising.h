@@ -56,11 +56,11 @@ public:
     {
       int r = alps::thread_id();
       #pragma omp for
-      for (std::size_t s = 0; s < num_sites(); ++s) spins_[s] = (uniform_01(r) < 0.5 ? 1 : -1);
+      for (int s = 0; s < num_sites(); ++s) spins_[s] = (uniform_01(r) < 0.5 ? 1 : -1);
     }
     double ene = 0;
     #pragma omp parallel for reduction(+: ene)
-    for (std::size_t b = 0; b < num_bonds(); ++b) {
+    for (int b = 0; b < num_bonds(); ++b) {
       bond_descriptor bd = bond(b);
       ene -= coupling_ * spins_[source(bd)] * spins_[target(bd)];
     }
@@ -90,7 +90,7 @@ public:
       {
         int r = alps::thread_id();
         #pragma omp for
-        for (std::size_t k = 0; k < sublat_[t].size(); ++k) {
+        for (int k = 0; k < sublat_[t].size(); ++k) {
           int s = sublat_[t][k];
           double diff = 0;
           neighbor_iterator itr, itr_end;
@@ -106,10 +106,10 @@ public:
     // measurements
     double mag = 0;
     #pragma omp parallel for reduction(+: mag)
-    for (std::size_t s = 0; s < num_sites(); ++s) mag += spins_[s];
+    for (int s = 0; s < num_sites(); ++s) mag += spins_[s];
     double ene = 0;
     #pragma omp parallel for reduction(+: ene)
-    for (std::size_t b = 0; b < num_bonds(); ++b) {
+    for (int b = 0; b < num_bonds(); ++b) {
       bond_descriptor bd = bond(b);
       ene -= coupling_ * spins_[source(bd)] * spins_[target(bd)];
     }
