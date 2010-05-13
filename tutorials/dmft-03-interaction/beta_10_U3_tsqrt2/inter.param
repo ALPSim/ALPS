@@ -24,3 +24,4 @@ OMEGA_LOOP = 1;
 ALPHA = -0.01;
 CHECKPOINT = dump;
 G0OMEGA_INPUT = G0_omega_input;
+BASENAME = inter.param;
