@@ -633,14 +633,13 @@ if(ALPS_PATCH_VISTRAILS)
       install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails/${DIR}  COMPONENT vistrails
               DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
               PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
-      install(DIRECTORY /System/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/sqlite3
-              COMPONENT vistrails
-              DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
-      install(FILES /System/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/lib-dynload/_sqlite3.so
-              COMPONENT vistrails
-              DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
-              
     endforeach(DIR)
+    install(DIRECTORY /System/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/sqlite3
+            COMPONENT vistrails
+            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
+    install(FILES /System/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/lib-dynload/_sqlite3.so
+            COMPONENT vistrails
+            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
     install(FILES ${VISTRAILS_SVN_DIR}/vistrails/vistrails.py  COMPONENT vistrails
             DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/../..})
   else(APPLE)
