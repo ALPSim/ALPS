@@ -16,16 +16,15 @@ parms_ = {
 	'NUMBER_EIGENVALUES' : 5
 }
 
-prefix = 'ising'
 parms = []
 # Change system sizes here, if desired
 for L in [10,12]:
 	parms_.update({'L':L})
 	parms.append(copy.deepcopy(parms_))
 
+prefix = 'ising'
 input_file = pyalps.writeInputFiles(prefix,parms)
 res = pyalps.runApplication('sparsediag', input_file)
-
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix=prefix))
 
 # To perform CFT assignments, we need to calculate the ground state
