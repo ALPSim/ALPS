@@ -106,6 +106,8 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'GraceXYPlot': (dataset.WriteGraceFile,{}),
                    'MplXYPlot': (dataset.MplXYPlot,{}),
                    'Select': (dataset.Select,{}),
+                   'And': (dataset.And,{}),
+                   'Or': (dataset.Or,{}),
                    
                    'PolyFit': (dataset.DoPolynomialFit,{}),
                    'NonlinearFit': (dataset.DoNonlinearFit,{}),

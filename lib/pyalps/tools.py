@@ -297,7 +297,36 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
     if pattern == None:
       pattern = prefix+'.task*.out.xml'
     return recursiveGlob(dirname, pattern)
+
+def groupSets(groups, for_each = []):
+    dd = depth(groups)
+
+    if dd > 1:
+        hgroups = flatten(groups, -1)
+        hgroups_idcs = hgroups.indices()
+    else:
+        hgroups = [groups]
+        hgroups_idcs = [0]
+
+    for idx in hgroups_idcs:
+        sets = hgroups[idx]
     
+        for_each_sets = {}
+        for iset in sets:
+            fe_par_set = tuple((iset.props[m] for m in for_each))
+        
+            if fe_par_set in for_each_sets:
+                for_each_sets[fe_par_set].append(iset)
+            else:
+                for_each_sets[fe_par_set] = [iset]
+    
+        hgroups[idx] = for_each_sets.values()
+
+    if dd > 1:
+    	return groups
+    else:
+    	return hgroups[0]
+
 def collectXY(sets,x,y,foreach=[]):
       foreach_sets = {}
       for iset in flatten(sets):

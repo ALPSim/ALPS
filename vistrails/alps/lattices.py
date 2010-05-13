@@ -54,6 +54,11 @@ class OpenChainLattice(Lattice):
    _input_ports = [('L',[(basic.String, 'the length')])]
    fixed = {'LATTICE' : 'open chain lattice'}
 
+class NNNChainLattice(Lattice):
+    """ a chain lattice with nnn coupling """
+    _input_ports = [('L',[(basic.String, 'the length')])]
+    fixed = {'LATTICE' : 'nnn chain lattice'}
+
 class DimerizedChainLattice(Lattice):
     """ a chain lattice with two different bonds """
     _input_ports = [('L',[(basic.String, 'the length')])]
