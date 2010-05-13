@@ -37,7 +37,7 @@ import numpy as np
 import h5py
 
 import pyalps.pytools # the C++ conversion functions
-from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra
+from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements
 from hlist import deep_flatten, flatten, depth
 from dict_intersect import dict_intersect
 from dataset import DataSet
@@ -96,6 +96,14 @@ def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=
 def evaluateLoop(infiles, appname='loop', write_xml=False):
     """ evaluate results of the looper QMC application """
     cmdline = [appname,'--evaluate']
+    if write_xml:
+      cmdline += ['--write_xml']
+    cmdline += make_list(infiles)
+    return executeCommand(cmdline)
+
+def evaluateSpinMC(infiles, appname='spinmc_evaluate', write_xml=False):
+    """ evaluate results of the Spin MC application """
+    cmdline = [appname]
     if write_xml:
       cmdline += ['--write_xml']
     cmdline += make_list(infiles)
