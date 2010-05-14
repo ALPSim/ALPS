@@ -74,19 +74,22 @@ def plot(data):
 
         if 'title' in q.props:
             plt.title(q.props['title'])
+            
+        thiscolor = colors[icolor]
+        icolor = (icolor+1)%len(colors)
+        if 'color' in q.props:
+            thiscolor = q.props['color']
         
         if 'line' in q.props and q.props['line'] == 'scatter':
             plt.scatter(xmeans, ymeans, c=colors[icolor], marker=markers[imarker], label=lab)
             imarker = (imarker+1)%len(markers)
         else:
-            line_props = colors[icolor]
+            line_props = thiscolor
             if 'line' in q.props:
                 line_props += q.props['line']
             
             plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props,label=lab)
-                    
-        
-        icolor = (icolor+1)%len(colors)
+
 
 
 
