@@ -92,7 +92,14 @@ def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=
     if writexml:
       cmdline += ['--write-xml']
     return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
-
+    
+def runDMFT(infiles):
+    """ run an DMFT application """
+    appname='dmft'
+    cmdline = [appname]
+    cmdline += make_list(infiles)
+    return (executeCommand(cmdline))
+    
 def evaluateLoop(infiles, appname='loop', write_xml=False):
     """ evaluate results of the looper QMC application """
     cmdline = [appname,'--evaluate']
@@ -275,6 +282,7 @@ def writeInputFiles(fname,parms, baseseed=None):
     else:
       copyStylesheet(dirname)
     return fname+'.in.xml'
+        
 
 def writeParameterFile(fname,parms):
     """ This function writes a text input file for simple ALPS applications
