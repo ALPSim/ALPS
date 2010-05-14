@@ -304,7 +304,13 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
     if prefix == None: prefix = '*'
     if pattern == None:
       pattern = prefix+'.task*.out.xml'
-    return recursiveGlob(dirname, pattern)
+      res=recursiveGlob(dirname, pattern)
+      if len(res)==0:
+        pattern = prefix+'.h5'
+        res=recursiveGlob(dirname, pattern)
+    else:
+      res = recursiveGlob(dirname, pattern)
+    return res
 
 def groupSets(groups, for_each = []):
     dd = depth(groups)
