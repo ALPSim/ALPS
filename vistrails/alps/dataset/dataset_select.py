@@ -50,10 +50,10 @@ class Predicate(Module):
         self.setResult('output',self)
 
 class SelectBy(Module):
-    my_input_ports = [PortDescriptor('input', ListOfElements)]
+    my_input_ports = [PortDescriptor('input', DataSets)]
     my_output_ports = [
-        PortDescriptor('kept', ListOfElements),
-        PortDescriptor('discarded', ListOfElements)
+        PortDescriptor('kept', DataSets),
+        PortDescriptor('discarded', DataSets)
     ]
     
     def compute(self):
@@ -76,6 +76,7 @@ class PropertyPredicate(Predicate):
         PortDescriptor('property_value',basic.String)
     ]
     
+    @staticmethod
     def decide(self,ds):
         pn = self.getInputFromPort('property_name')
         if pn in ds.props:
@@ -90,6 +91,7 @@ class PropertyRangePredicate(Predicate):
         PortDescriptor('max',basic.String)
     ]
     
+    @staticmethod
     def decide(self,ds):
         pn = self.getInputFromPort('property_name')
         if pn in ds.props:
@@ -111,6 +113,7 @@ class ObservablePredicate(Predicate):
         PortDescriptor('observable',basic.String)
     ]
     
+    @staticmethod
     def decide(self,ds):
         if ds.props['observable'] == self.getInputFromPort('observable'):
             return True
