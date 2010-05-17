@@ -177,7 +177,7 @@ class Select(Module):
             disc_sets = []
             
             for iq in flatten(q):
-                if s.decide(iq):
+                if s.decide(s, iq): # please don't ask why it wants to be called like this...
                     kept_sets.append(iq)
                 else:
                     disc_sets.append(iq)
@@ -208,16 +208,18 @@ class And(Predicate):
         if self.hasInputFromPort('selectors'):
             self.selectors = self.forceGetInputListFromPort('selectors')
         self.setResult('output',self)
-        
+    
+    @staticmethod
     def decide(self,ds):
         for selector in self.selectors:
-            if selector.decide(ds) == False:
+            if selector.decide(selector, ds) == False:
                 return False
         return True
 
 class Or(And):
+    @staticmethod
     def decide(self,ds):
         for selector in self.selectors:
-            if selector.decide(ds):
+            if selector.decide(selector, ds):
                 return True
         return False
