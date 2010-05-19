@@ -23,6 +23,7 @@
 #include <vector>
 #include <iomanip>
 #include <sstream>
+#include <cstring>
 #include <algorithm>
 #include <signal.h>
 
@@ -30,73 +31,6 @@
 #define ALPS_NGS_HPP
 
 namespace alps {
-	class mcidump : public IDump {
-		public:
-			mcidump(char * p, std::size_t s) : size(s), ptr(p) {}
-			#define ALPS_MCIDUMP_DO_TYPE(T)																		\
-				void read_simple(T & x) { read_buffer(&x, sizeof(T)); }											\
-				void read_array(std::size_t n, T * p) { read_buffer(p, n * sizeof(T)); }
-			ALPS_MCIDUMP_DO_TYPE(bool)
-			ALPS_MCIDUMP_DO_TYPE(char)
-			ALPS_MCIDUMP_DO_TYPE(signed char)
-			ALPS_MCIDUMP_DO_TYPE(unsigned char)
-			ALPS_MCIDUMP_DO_TYPE(short)
-			ALPS_MCIDUMP_DO_TYPE(unsigned short)
-			ALPS_MCIDUMP_DO_TYPE(int)
-			ALPS_MCIDUMP_DO_TYPE(unsigned int)
-			ALPS_MCIDUMP_DO_TYPE(long)
-			ALPS_MCIDUMP_DO_TYPE(unsigned long)
-			#ifdef BOOST_HAS_LONG_LONG
-				ALPS_MCIDUMP_DO_TYPE(long long)
-				ALPS_MCIDUMP_DO_TYPE(unsigned long long)
-			#endif
-			ALPS_MCIDUMP_DO_TYPE(float)
-			ALPS_MCIDUMP_DO_TYPE(double)
-			ALPS_MCIDUMP_DO_TYPE(long double)
-			# undef ALPS_MCIDUMP_DO_TYPE
-			void read_string(std::size_t n, char * x) { read_buffer(x, n); }
-		private:
-			void read_buffer(void * p, std::size_t n) {
-				assert((size -= n) > 0);
-				std::memcpy(p, ptr, n);
-				ptr += n;
-			}
-			std::size_t size;
-			char const * ptr;
-	};
-	class mcodump : public ODump {
-		public:
-			std::vector<char> const & data() { return buffer; }
-			#define ALPS_MCODUMP_DO_TYPE(T)																		\
-				void write_simple(T x) { write_buffer(&x, sizeof(T)); }											\
-				void write_array(std::size_t n, T const * p) { write_buffer(p, n * sizeof(T)); }
-			ALPS_MCODUMP_DO_TYPE(bool)
-			ALPS_MCODUMP_DO_TYPE(char)
-			ALPS_MCODUMP_DO_TYPE(signed char)
-			ALPS_MCODUMP_DO_TYPE(unsigned char)
-			ALPS_MCODUMP_DO_TYPE(short)
-			ALPS_MCODUMP_DO_TYPE(unsigned short)
-			ALPS_MCODUMP_DO_TYPE(int)
-			ALPS_MCODUMP_DO_TYPE(unsigned int)
-			ALPS_MCODUMP_DO_TYPE(long)
-			ALPS_MCODUMP_DO_TYPE(unsigned long)
-			#ifdef BOOST_HAS_LONG_LONG
-				ALPS_MCODUMP_DO_TYPE(long long)
-				ALPS_MCODUMP_DO_TYPE(unsigned long long)
-			#endif
-			ALPS_MCODUMP_DO_TYPE(float)
-			ALPS_MCODUMP_DO_TYPE(double)
-			ALPS_MCODUMP_DO_TYPE(long double)
-			# undef ALPS_MCODUMP_DO_TYPE
-			void write_string(std::size_t n, const char * x) { write_buffer(x, n); }
-		private:
-			void write_buffer(void const * p, std::size_t n) {
-				std::size_t write_pos = buffer.size();
-				buffer.resize(write_pos + n);
-				std::memcpy(&(buffer[write_pos]), p, n);
-			}
-			std::vector<char> buffer;
-	};
 	class mcoptions {
 		public:
 			mcoptions(int argc, char* argv[]) : valid(false) {
@@ -354,21 +288,25 @@ namespace alps {
 
 			typename mcthreadsim<Impl>::results_type collect_results() const {
 				assert(communicator.rank() == 0);
-				int action = MPI_collect;
-				boost::mpi::broadcast(communicator, action, 0);
-				std::vector<char> buf;
-				reduce_results(buf);
-				mcidump idump(&buf.front(), buf.size());
-				typename mcthreadsim<Impl>::results_type results;
-				idump >> results;
-				return results;
+				return collect_results(mcthreadsim<Impl>::result_names());
 			}
 
-			typename mcthreadsim<Impl>::results_type collect_results(typename mcthreadsim<Impl>::result_names_type const & names) const { 
-				typename mcthreadsim<Impl>::results_type results = collect_results(), partial_results;
-				for(typename mcthreadsim<Impl>::result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-					partial_results << results[*it];
+			typename mcthreadsim<Impl>::results_type collect_results(typename mcthreadsim<Impl>::result_names_type const & names) const {
+				int action = MPI_collect;
+				char name[255];
+				typename mcthreadsim<Impl>::results_type partial_results;
+				// TODO ...
 				return partial_results;
+			}
+
+			typename boost::shared_ptr<alea::mcdata<double> > collect_mcdata(std::string const & name) const {
+				assert(name.size() < 255);
+				int action = MPI_collect;
+				boost::mpi::broadcast(communicator, action, 0);
+				char buf[255];
+				std::strcpy(buf, name.c_str());
+				boost::mpi::broadcast(communicator, buf, 0);
+				return boost::shared_ptr<alea::mcdata<double> >(reduce_results(name));
 			}
 
 			void terminate() const {
@@ -408,8 +346,9 @@ namespace alps {
 							break;
 						case MPI_collect:
 							{
-								std::vector<char> buf;
-								reduce_results(buf);
+								char name[255];
+								boost::mpi::broadcast(communicator, name, 0);
+								reduce_results(name);
 							}
 							break;
 						case MPI_stop:
@@ -419,49 +358,35 @@ namespace alps {
 					}
 				}
 			}
-
-			static void merge(void * a, void * b, int * len, MPI_Datatype * type) {
-				int size;
-				MPI_Type_size(*type, &size);
-				mcidump idump1(static_cast<char *>(a), size), idump2(static_cast<char *>(b), size);
-				typename mcthreadsim<Impl>::results_type  results1, results2;
-				idump1 >> results1;
-				idump2 >> results2;
-				results1 << results2;
-				mcodump odump;
-				odump << results1;
-				assert(odump.data().size() < size);
-				std::memcpy(b, &odump.data().front(), odump.data().size());
-			}
-
+			
 		private:
-			void reduce_results(std::vector<char> & buf) const {
-				mcodump odump;
-				odump << mcthreadsim<Impl>::collect_results();
-				std::size_t len = boost::mpi::all_reduce(communicator, odump.data().size() * 1.2, boost::mpi::maximum<std::size_t>());
-				std::vector<char> data(len);
-				std::memcpy(&data.front(), &odump.data().front(), odump.data().size());
-				buf.resize(len);
-				MPI_Datatype vector_type;
-				assert(check_mpi_error(MPI_Type_contiguous(len, MPI_BYTE, &vector_type)));
-				assert(check_mpi_error(MPI_Type_commit(&vector_type)));
-				MPI_Op collector;
-				assert(check_mpi_error(MPI_Op_create(&mcmpisim<Impl>::merge, true, &collector)));
-				assert(check_mpi_error(MPI_Reduce(&data.front(), &buf.front(), 1, vector_type, collector, 0, communicator)));
-				assert(check_mpi_error(MPI_Op_free(&collector)));
-				assert(check_mpi_error(MPI_Type_free(&vector_type)));
-			}
-
-			bool check_mpi_error(int code) const {
-				if (code != MPI_SUCCESS) {
-					char buffer[BUFSIZ];
-					int size;
-					MPI_Error_string(code, buffer, &size);
-					std::cerr << buffer << std::endl;
+			alea::mcdata<double> * reduce_results(std::string const & name) const {
+				alea::mcdata<double> data(dynamic_cast<AbstractSimpleObservable<double> const &>(
+					mcthreadsim<Impl>::collect_results(typename result_names_type<mcthreadsim<Impl> >::type(1, name))[name]
+				));
+				data.set_bin_size(boost::mpi::all_reduce(communicator, data.bin_size(), boost::mpi::maximum<std::size_t>()));
+				std::size_t min_bins = boost::mpi::all_reduce(communicator, data.bin_number(), boost::mpi::minimum<std::size_t>());
+				uint64_t count, count_all;
+				double mean, mean_all, error, error_all, variance, variance_all, binvalue;
+				std::vector<double> binvalues;
+				boost::tie(count, mean, error, variance, binvalue) = data.get_reduceable_data(boost::mpi::all_reduce(communicator, data.bin_number(), boost::mpi::minimum<std::size_t>()));
+				if (communicator.rank()) {
+					boost::mpi::reduce(communicator, count, std::plus<double>(), 0);
+					boost::mpi::reduce(communicator, mean, std::plus<double>(), 0);
+					boost::mpi::reduce(communicator, error, std::plus<double>(), 0);
+					boost::mpi::reduce(communicator, variance, std::plus<double>(), 0);
+					boost::mpi::gather(communicator, binvalue, 0);
+					return NULL;
+				} else {
+					boost::mpi::reduce(communicator, count, count_all, std::plus<double>(), 0);
+					boost::mpi::reduce(communicator, mean, mean_all, std::plus<double>(), 0);
+					boost::mpi::reduce(communicator, error, error_all, std::plus<double>(), 0);
+					boost::mpi::reduce(communicator, variance, variance_all, std::plus<double>(), 0);
+					boost::mpi::gather(communicator, binvalue, binvalues, 0);
+					return new alea::mcdata<double>(count_all, mean_all / double(count_all), sqrt(error_all) / double(count_all), variance_all / double(count_all), data.bin_size(), binvalues);
 				}
-				return code == MPI_SUCCESS;
 			}
-
+			
 			int next_check;
 			boost::posix_time::ptime start_time;
 			boost::posix_time::ptime check_time;

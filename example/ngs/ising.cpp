@@ -31,10 +31,10 @@ int main(int argc, char *argv[]) {
 #ifdef MPI_RUN
 		s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
 		if (c.rank()==0) {
-			sim_type::results_type results = collect_results(s);
 			{
+				boost::shared_ptr<alps::alea::mcdata<double> > energy = s.collect_mcdata("Energy");
 				alps::hdf5::oarchive ar("sim.h5");
-				ar << make_pvp("/parameters", params) << make_pvp("/simulation/results", results);
+				ar << alps::make_pvp("/parameters", params) << alps::make_pvp("/simulation/results/Energy", *energy);
 			}
 			s.terminate();
 		} else
