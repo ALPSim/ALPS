@@ -361,6 +361,9 @@ namespace alps {
 			
 		private:
 			alea::mcdata<double> * reduce_results(std::string const & name) const {
+				using std::sqrt;
+				using alps::numeric::sq;
+				using alps::numeric::sqrt;
 				alea::mcdata<double> data(dynamic_cast<AbstractSimpleObservable<double> const &>(
 					mcthreadsim<Impl>::collect_results(typename result_names_type<mcthreadsim<Impl> >::type(1, name))[name]
 				));
