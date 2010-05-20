@@ -353,7 +353,7 @@ namespace alps {
 							break;
 						case MPI_stop:
 						case MPI_terminate:
-							mcthreadsim<Impl>::stop_flag = false;
+							mcthreadsim<Impl>::stop_flag = true;
 							return;
 					}
 				}
