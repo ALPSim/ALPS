@@ -22,11 +22,14 @@ basic = core.modules.basic_modules
 
 
 class Model(parameters.FixedAndDefaultParameters): 
-    """ A dictionary of parameters defining a model"""
+   """ A dictionary of parameters defining a general model. Specify the model file in the MODEL_LIBRARY input and the model name in MODEL. MODEL_LIBRARY defaults to the default ALPS models.xml file. """
+   _input_ports = [('MODEL',[basic.String]),
+                   ('MODEL_LIBRARY',[basic.File])]
 
 class ClassicalSpinModel(Model):
     """ the classical spin models for ALPS spinmc """
-    _input_ports = [('MODEL',[basic.String],True)]
+    _input_ports = [('MODEL',[basic.String],True),
+                    ('MODEL_LIBRARY',[basic.File],True)]
 
 class ClassicalIsingModel(ClassicalSpinModel):
     """ the classical Ising model for ALPS spinmc """
@@ -42,6 +45,15 @@ class ClassicalHeisenbergModel(ClassicalSpinModel):
 
                     
 class SpinModel(Model):
+   """ 
+   A quantum spin model. The coupling parameters are as follows. The suffix # should be replaced by the site or bond type number, where no number defaults to 0, thus J is the same as J0. A prime (') is the same as 1. Thus J' is the same as J1.
+   
+   Jxy#: the coupling between XY spin ompenents, defaults to J#
+   Jz#: the coupling between Z spin ompenents, defaults to J#
+   h#: a longitudinal field coupling to the Z spin component
+   Gamma#: a transverse field coupling to the X spin component
+   D#: a single-ion anisotropy coupling to the square of the Z spin component
+   """
    fixed = {'MODEL'   : 'spin'}
    defaults =      {'J0'    : '0',
                     'J'     : 'J0',
@@ -67,6 +79,14 @@ class SpinModel(Model):
                  }
 
 class BosonHubbardModel(Model):
+   """ 
+   A Bose Hubbard model. The coupling parameters are as follows. The suffix # should be replaced by the site or bond type number, where no number defaults to 0, thus t is the same as t0. A prime (') is the same as 1. Thus t' is the same as t1.
+   
+   t#: the hopping
+   U#: the on-site repulsion
+   mu#: the chemical potential
+   V#: a nearest neighbor repulsion
+   """
    fixed = {'MODEL'   : 'boson Hubbard'}
    defaults =      {'mu'    : '0',
                     't'     : '1',
@@ -85,6 +105,13 @@ class BosonHubbardModel(Model):
                  }
 
 class HardcoreBosonModel(Model):
+   """ 
+   A hardcore boson model. The coupling parameters are as follows. The suffix # should be replaced by the site or bond type number, where no number defaults to 0, thus t is the same as t0. A prime (') is the same as 1. Thus t' is the same as t1.
+   
+   t#: the hopping
+   mu#: the chemical potential
+   V#: a nearest neighbor repulsion
+   """
    fixed = {'MODEL'   : 'hardcore boson'}
    defaults =      {'mu'    : '0',
                     't'     : '1',

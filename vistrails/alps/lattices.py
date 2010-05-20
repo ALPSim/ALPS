@@ -19,6 +19,7 @@ basic = core.modules.basic_modules
 ##############################################################################
 
 class Lattice(parameters.FixedAndDefaultParameters):
+   """ a general lattice. Specify the lattice file in the LATTICE_LIBRARY input and the lattice name in LATTICE. LATTICE_LIBRARY defaults to the default ALPS lattices.xml file. """
    _input_ports = [('LATTICE',[basic.String]),
                    ('LATTICE_LIBRARY',[basic.File])]
 
@@ -38,7 +39,7 @@ class SimpleCubicLattice(Lattice):
    defaults = {'W':'L', 'H':'L'}
 
 class LadderLattice(Lattice):
-   """ a LadderLattice lattice """
+   """ a ladder lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
    fixed = {'LATTICE' : 'ladder'}
@@ -55,7 +56,7 @@ class OpenChainLattice(Lattice):
    fixed = {'LATTICE' : 'open chain lattice'}
 
 class NNNChainLattice(Lattice):
-    """ a chain lattice with nnn coupling """
+    """ a chain lattice with next nearest neighbor couplings """
     _input_ports = [('L',[(basic.String, 'the length')])]
     fixed = {'LATTICE' : 'nnn chain lattice'}
 
@@ -65,7 +66,7 @@ class DimerizedChainLattice(Lattice):
     fixed = {'LATTICE' : 'dimerized chain lattice'}
 
 class OpenLadderLattice(Lattice):
-   """ an open LadderLattice lattice """
+   """ an open ladder lattice """
    _input_ports = [('L',[(basic.String, 'the length')]),
                    ('W',[(basic.String, 'the width')])]
    fixed = {'LATTICE' : 'open ladder'}

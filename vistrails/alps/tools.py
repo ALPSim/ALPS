@@ -45,6 +45,7 @@ from dataset import ResultFiles
 from dataset.dataset_exceptions import EmptyInputPort, InvalidInput
 
 class UnzipDirectory(Module):
+    """ Unzip a zipped directory """
     _input_ports = [('zipfile',[basic.File])]
     _output_ports = [('output_dir', [basic.Directory])]
     
@@ -177,6 +178,10 @@ class Glob(Module):
     _output_ports = [('value',[ListOfElements])]
 
 class GetCloneFiles(Module):
+     """ 
+     This module gets all ALPS clone files of MC simulations in a given directory.
+     The tasks, runs, and prefix inputs take regular expressions limiting the task numbers, prefix of the simulation, and run (clone) numbers. They default to '*', meaning all.
+     """
      def compute(self):
          tasks = '*'
          runs = '*[0-9]'
@@ -203,6 +208,13 @@ class GetCloneFiles(Module):
      _output_ports = [('value',[ListOfElements])]
 
 class GetResultFiles(Module):
+     """ 
+     This module gets all ALPS resuls files recursively scanning the given directory and all its subdirectories.
+     
+     The prefix and tasks input ports can be used to specify regular expressions limiting the prefix and task number of result files using the ALPS naming convention. 
+     
+     Alternatively the pattern port can be used to specify an arbitrary regular expression that the result files have to match.
+     """
     def compute(self):
         if self.hasInputFromPort('pattern') and self.hasInputFromPort('dir'):
             dir = self.getInputFromPort('dir').name
@@ -235,6 +247,9 @@ class GetResultFiles(Module):
         ('resultfiles',[ResultFiles])]
 
 class Convert2XML(Module):
+    """
+    This module takes a list of ALPS result or clone files and converts each of them to XML. It returns a list of the converted XML files. 
+    """
     def compute(self):
         input_files = self.getInputFromPort('input_file')
         olist = []
@@ -365,7 +380,7 @@ def selfRegister():
   reg.add_module(GetResultFiles,namespace="Tools")
   
   reg.add_module(Convert2XML,namespace="Tools")
-  reg.add_module(Convert2Text,namespace="Tools")
+  reg.add_module(Convert2Text,namespace="Tools",abstract=True)
   reg.add_module(ConvertXML2HTML,namespace="Tools")
 
   reg.add_module(UnzipDirectory,namespace="Tools")

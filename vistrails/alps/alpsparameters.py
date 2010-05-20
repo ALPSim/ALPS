@@ -28,7 +28,7 @@ class SystemParameters(Parameters):
    """
 
 class MonteCarloMeasurements(Parameters):
-    """ a module to specify measurements for Monte Carlo simulations """
+    """ a module to specify measurements for Monte Carlo simulations. One can turn on certain measurements. This is supported at the moment by the dirloop_sse and worm application. """
     def setFromPort(self,port_name,res):
         if self.hasInputFromPort(port_name):
           val  = self.getInputFromPort(port_name)
@@ -47,13 +47,13 @@ class MonteCarloMeasurements(Parameters):
                    ]
 
 class MonteCarloParameters(Parameters): 
-    """ A module to set the Monte Carlo parameters """
+    """ A module to set the parameters for a Monte Carlo simulation: number of sweeps for measurements in SWEEPS and number of sweeps for thermailzation in THERMALIZATION  """
     _input_ports = [('SWEEPS',[(basic.String, 'the number of sweeps for measurements')]),
                     ('THERMALIZATION',[(basic.String, 'the number of sweeps for thermalization')])
                     ]
 
 class LoopMonteCarloParameters(MonteCarloParameters): 
-    """ A module to set the temperature """
+    """ A module to set the parameters for the loop application """
     def compute(self):
         res = self.readInputs(ParametersData({}))
         res.updateIfMissing(self.defaults)

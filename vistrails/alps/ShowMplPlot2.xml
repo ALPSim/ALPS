@@ -1,0 +1,84 @@
+<vistrail id="" name="" version="1.0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vistrails.org/vistrail.xsd">
+  <action date="2010-05-02 13:23:16" id="1" prevId="0" prune="" session="0" user="troyer">
+    <annotation id="0" key="__description__" value="Copied from pipeline" />
+    <add id="0" objectId="0" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="0" name="MplFigure" namespace="" package="edu.utah.sci.vistrails.matplotlib" tag="" version="0.9.0" />
+    </add>
+    <add id="1" objectId="0" parentObjId="0" parentObjType="module" what="location">
+      <location id="0" x="3.22643961533" y="1.18940051333" />
+    </add>
+    <add id="2" objectId="1" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="1" name="MplFigureCell" namespace="" package="edu.utah.sci.vistrails.matplotlib" tag="" version="0.9.0" />
+    </add>
+    <add id="3" objectId="1" parentObjId="1" parentObjType="module" what="location">
+      <location id="1" x="4.27359847033" y="-155.804490107" />
+    </add>
+    <add id="4" objectId="2" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="2" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" tag="" version="0.6.0" />
+    </add>
+    <add id="5" objectId="2" parentObjId="2" parentObjType="module" what="location">
+      <location id="2" x="-7.50003808567" y="154.615089593" />
+    </add>
+    <add id="6" objectId="3" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="" />
+    </add>
+    <add id="7" objectId="0" parentObjId="3" parentObjType="module" what="function">
+      <function id="0" name="name" pos="0" />
+    </add>
+    <add id="8" objectId="0" parentObjId="0" parentObjType="function" what="parameter">
+      <parameter alias="" id="0" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="Location" />
+    </add>
+    <add id="9" objectId="3" parentObjId="3" parentObjType="module" what="location">
+      <location id="3" x="-185.482265685" y="3.97455020333" />
+    </add>
+    <add id="10" objectId="4" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="" />
+    </add>
+    <add id="11" objectId="1" parentObjId="4" parentObjType="module" what="function">
+      <function id="1" name="name" pos="0" />
+    </add>
+    <add id="12" objectId="1" parentObjId="1" parentObjType="function" what="parameter">
+      <parameter alias="" id="1" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="plot" />
+    </add>
+    <add id="13" objectId="4" parentObjId="4" parentObjType="module" what="location">
+      <location id="4" x="-253.223613168" y="338.208164996" />
+    </add>
+    <add id="14" objectId="0" parentObjId="" parentObjType="" what="connection">
+      <connection id="0" />
+    </add>
+    <add id="15" objectId="1" parentObjId="0" parentObjType="connection" what="port">
+      <port id="1" moduleId="3" moduleName="InputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="16" objectId="0" parentObjId="0" parentObjType="connection" what="port">
+      <port id="0" moduleId="1" moduleName="MplFigureCell" name="Location" signature="(edu.utah.sci.vistrails.spreadsheet:CellLocation)" type="destination" />
+    </add>
+    <add id="17" objectId="1" parentObjId="" parentObjType="" what="connection">
+      <connection id="1" />
+    </add>
+    <add id="18" objectId="3" parentObjId="1" parentObjType="connection" what="port">
+      <port id="3" moduleId="1" moduleName="MplFigureCell" name="FigureManager" signature="(edu.utah.sci.vistrails.matplotlib:MplFigureManager)" type="destination" />
+    </add>
+    <add id="19" objectId="2" parentObjId="1" parentObjType="connection" what="port">
+      <port id="2" moduleId="0" moduleName="MplFigure" name="FigureManager" signature="(edu.utah.sci.vistrails.matplotlib:MplFigureManager)" type="source" />
+    </add>
+    <add id="20" objectId="2" parentObjId="" parentObjType="" what="connection">
+      <connection id="2" />
+    </add>
+    <add id="21" objectId="5" parentObjId="2" parentObjType="connection" what="port">
+      <port id="5" moduleId="2" moduleName="MplXYPlot" name="unused" signature="(edu.utah.sci.vistrails.basic:String)" type="source" />
+    </add>
+    <add id="22" objectId="4" parentObjId="2" parentObjType="connection" what="port">
+      <port id="4" moduleId="0" moduleName="MplFigure" name="Script" signature="(edu.utah.sci.vistrails.basic:String)" type="destination" />
+    </add>
+    <add id="23" objectId="3" parentObjId="" parentObjType="" what="connection">
+      <connection id="3" />
+    </add>
+    <add id="24" objectId="7" parentObjId="3" parentObjType="connection" what="port">
+      <port id="7" moduleId="4" moduleName="InputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="25" objectId="6" parentObjId="3" parentObjType="connection" what="port">
+      <port id="6" moduleId="2" moduleName="MplXYPlot" name="plot" signature="(org.comp-phys.alps:PreparePlot:DataSet|Plot)" type="destination" />
+    </add>
+  </action>
+  <annotation id="1" key="__abstraction_uuid__" value="1a6d060e-55dd-11df-a1e2-002500a2cd74" />
+</vistrail>

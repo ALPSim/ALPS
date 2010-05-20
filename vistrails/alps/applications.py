@@ -33,7 +33,7 @@ basic = core.modules.basic_modules
 
 
 class RunAlpsApplication(alpscore.SystemCommandLogged):
-    """ Runs an ALPS application for a given parameter file """
+    """ Runs an ALPS application using a set of XML files as input """
 
     def get_path(self,appname):
         return alpscore._get_path(appname)
@@ -106,11 +106,11 @@ class RunAlpsApplication(alpscore.SystemCommandLogged):
     options=[]
                          
 class RunSpinMC(RunAlpsApplication):
-    """Runs spinmc for given parameter file """
+    """Runs the spinmc classical Monte Carlo application """
     appname = 'spinmc'
 
 class RunLoop(RunAlpsApplication):
-    """Runs loop for given parameter file """
+    """Runs the loop quantum Monte Carlo application """
     def getoptions(self):
         options = ['--auto-evaluate']
         if self.hasInputFromPort('tmin'):
@@ -120,30 +120,30 @@ class RunLoop(RunAlpsApplication):
 
     
 class RunDirLoopSSE(RunAlpsApplication):
-    """Runs dirloop_sse for given parameter file """
+    """Runs the dirloop_sse quantum Monte Carlo application """
     appname = 'dirloop_sse'
 
 class RunWorm(RunAlpsApplication):
-    """Runs worm for given parameter file """
+    """Runs the work quantum Monte Carlo application """
     appname = 'worm'
 
 class RunFullDiag(RunAlpsApplication):
-    """Runs fulldiag for given parameter file """
+    """Runs the fulldiag exact diagonalization application """
     appname = 'fulldiag'
     options = ['--Nmax', '1']
 
 class RunSparseDiag(RunAlpsApplication):
-    """Runs sparsediag for given parameter file """
+    """Runs the sparsediag exact diagonalization application """
     appname = 'sparsediag'
     options = ['--Nmax', '1']
 
 class RunDMRG(RunAlpsApplication):
-    """Runs dmrg for given parameter file """
+    """Runs the DMRG application """
     appname = 'dmrg'
     options = ['--Nmax', '1']
 
 class RunQWL(RunAlpsApplication):
-    """Runs qwl for given parameter file """
+    """Runs the qwl quantum Monte Carlo application """
     appname = 'qwl'
     
 class AlpsEvaluate(alpscore.SystemCommandLogged):
@@ -204,6 +204,17 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
     options = []
 
 class EvaluateFullDiagVersusT(AlpsEvaluate):
+    """ 
+    Runs the evaluation application to produce plots from the spectra calculated by fulldiag as a function of temperature. The input parameters are:
+    
+    T_MIN the lower end of the temperature range
+    T_MAX the upper end of the temperature range
+    DELTA_T the spacing between temperature points
+    
+    The code produces datasets for a number of different quantities as a function of temperature: energy, free energy, entropy, specific heat. 
+    For spin models (models with an Sz quantum number) is also calculates uniform susceptibility and magnetization.
+    For particle models (models with an N quantum number) is also calculates compressibility and particle number.
+    """
     appname = 'fulldiag_evaluate'
     _input_ports = [('T_MIN',[basic.Float]),
                     ('T_MAX',[basic.Float]),
@@ -220,6 +231,16 @@ class EvaluateFullDiagVersusT(AlpsEvaluate):
 
 
 class EvaluateFullDiagVersusH(AlpsEvaluate):
+    """ 
+    Runs the evaluation application to produce plots from the spectra calculated by fulldiag as a function of magnetic field. The input parameters are:
+    
+    H_MIN the lower end of the field range
+    H_MAX the upper end of the field range
+    DELTA_H the spacing between field points
+    
+    The code produces datasets for a number of different quantities as a function of temperature: energy, free energy, entropy, specific heat. 
+    For spin models (models with an Sz quantum number) is also calculates uniform susceptibility and magnetization.
+    """
     appname = 'fulldiag_evaluate'
     options = ['--versus', 'h']
     _input_ports = [('H_MIN',[basic.Float]),
@@ -231,12 +252,14 @@ class EvaluateFullDiagVersusH(AlpsEvaluate):
              ('entropy','Entropy Density'),
              ('specific_heat','Specific Heat per Site'),
              ('uniform_susceptibility','Uniform Susceptibility per Site'),
-             ('magnetization','Magnetization per Site'),
-             ('compressibility','Compressibility per Site'),
-             ('particle_number','Particle number per Site')]
+             ('magnetization','Magnetization per Site')]
 
 
 class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
+    """ 
+    Runs the evaluation tool of the loop application to evaluate all measurements. This is only needed if the application was not run using the --auto-evaluate option. 
+    Note that --auto-evaluare that is automatically used if run by the RunLoop module and this module is thus not needed for pure Vistrails workflows.
+    """
     def compute(self):
         name = self.get_sim_name(self.getInputFromPort('dir').name)
         self.execute([alpscore._get_path('loop'),'--evaluate',name])
@@ -253,6 +276,15 @@ class EvaluateSpinMC(alpscore.SystemCommandLogged,tools.GetSimName):
     _output_ports = [('dir', [basic.Directory])]
 
 class EvaluateQWL(AlpsEvaluate):
+    """ 
+    Runs the evaluation application to produce plots from the density of states calculated by qwl as a function of temperature. The input parameters are:
+    
+    T_MIN the lower end of the temperature range
+    T_MAX the upper end of the temperature range
+    DELTA_T the spacing between temperature points
+    
+    The code produces datasets for a number of different quantities as a function of temperature: energy, free energy, entropy, specific heat, uniform susceptibility, and uniform and staggered structure factor.
+    """
     appname = 'qwl_evaluate'
     _input_ports = [('T_MIN',[basic.Float]),
                     ('T_MAX',[basic.Float]),

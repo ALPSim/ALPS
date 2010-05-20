@@ -31,7 +31,7 @@ basic = core.modules.basic_modules
 ##############################################################################
 
 class SimulationName(basic.String):
-    """ a simulation ID """
+    """ the name given to a simulation, which can then be used in file names or spreadsheet names """
 
 class LatticeModel(parameters.Parameters): 
     """ the simulation parameters, conistsing of model, lattice, and other parameters """

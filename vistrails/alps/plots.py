@@ -25,13 +25,14 @@ basic = core.modules.basic_modules
 ##############################################################################
 
 class DisplayGracePlot(NotCacheable, alpscore.SystemCommand):
-     """ open the file using  xmgr command """
+     """ opens a grace plotfile using  the xmgr command. The path to xmgrace and other tools can be set in the ALPS package preferences """
      def compute(self):
          print alpscore._get_tool_path('xmgrace')
          self.execute(['nohup',alpscore._get_tool_path('xmgrace'), self.getInputFromPort('file').name,'&'])
      _input_ports = [('file', [basic.File])]
 
 class DisplayGnuplot(NotCacheable, alpscore.SystemCommand):
+    """ opens a gnuplot plotfile using  the gnuplot command. The path to gnuplot and other tools can be set in the ALPS package preferences """
     def compute(self):
         lines = [x.strip() for x in open(self.getInputFromPort('file').name).readlines()]
         lines2 = ['set terminal x11 enhanced']

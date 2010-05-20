@@ -22,7 +22,6 @@ import system
 import applications
 import plots
 import tools
-import evaluation
 import platform
 
 import dataset
@@ -42,6 +41,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
    # where remap_dictionary is {<remap_type>: <name_changes>}
    # and <name_changes> is a map from <old_name> to <new_name>
    module_remap = {'AlpsApplication': (applications.RunAlpsApplication,{}),
+                   'AlpsEvaluate': (applications.AlpsEvaluate,{}),
                    'AppSpinMC': (applications.RunSpinMC,{}),
                    'AppLoop': (applications.RunLoop,{}),
                    'AppDirLoopSSE': (applications.RunDirLoopSSE,{}),
@@ -169,7 +169,6 @@ def initialize():
   applications.selfRegister()
   plots.selfRegister()
   tools.selfRegister()
-  evaluation.selfRegister()
   
   alpscore.config = configuration
   

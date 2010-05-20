@@ -179,7 +179,7 @@ class Parameters(Module):
         self.setOutput(self.readInputs(ParametersData({})))
 
 class MergeParameters(Module):
-    """ merge several lists of parameters into one """
+    """ merge several lists of parameters into one, by appending one to the other """
     def compute(self):
         l = []
         if self.hasInputFromPort('parms'):
@@ -199,7 +199,7 @@ class MergeParameters(Module):
 
 
 class ConcatenateParameters(Module,CommonParametersFunctions):
-    """ join parameters from several lists, merging the parameters from each index """
+    """ join parameters from several lists, merging the parameters element-wise """
     def compute(self):
         if self.hasInputFromPort('parms'):
           input_values = self.forceGetInputListFromPort('parms')
@@ -232,7 +232,7 @@ class FixedAndDefaultParameters(Parameters):
 
 
 class IterateValue(Module):
-    """ Iterate a parameter over a list of values """
+    """ This module iterates a parameter value over a list of values. It can be connected to any input port for a paramater. """
     def compute(self):
         self.setResult('value',ParameterValueList(self.getInputFromPort('value_list')))
     _input_ports = [('value_list',[ListOfElements])]
@@ -240,7 +240,7 @@ class IterateValue(Module):
 
 
 class Parameter(Module):
-    """ A module to define a single parameter """
+    """ A module to define a single parameter, given by a name and value """
     def compute(self):
         name = self.getInputFromPort('name')
         value = self.getInputFromPort('value')
@@ -258,7 +258,7 @@ class Parameter(Module):
 
 
 class IterateParameter(Module):
-    """ Iterate a parameter over a list of values """
+    """ This module iterates a parameter over a list of values. Both name and the list of values need to be given. """
     def compute(self):
         if self.hasInputFromPort('name') and self.hasInputFromPort('value_list'):
           name = self.getInputFromPort('name')
@@ -274,6 +274,9 @@ class IterateParameter(Module):
 
 
 class UpdateParameters(Parameters):
+   """ 
+   This module updates all parameters in the list parms by values from the parameters of the 'updated' list. if a parameter in updated does not exist in parms yet, it is created. If a parameter exists, it is replaced by the value in updated. 
+   """
    def compute(self):
        res=self.updateFromPort('parms',ParametersData({}))
        if self.hasInputFromPort('updated'):
@@ -295,9 +298,6 @@ def initialize(): pass
 def selfRegister():
 
   reg = core.modules.module_registry.get_module_registry()
-
-#  reg.add_module(ParametersData,namespace="Parameters")
-#  reg.add_module(ParameterListData,namespace="Parameters")
 
   register_parameters(Parameters)
   reg.add_input_port(Parameters, "parms", Parameters)

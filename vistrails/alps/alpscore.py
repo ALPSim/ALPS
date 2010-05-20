@@ -89,7 +89,10 @@ class SystemCommandLogged(Module):
 
 
 class DisplayInBrowser(NotCacheable, SystemCommand):
-    """ open the file using the system open command """
+    """ 
+    Show one or more files in a web browser. The path to the browser can be set up in the
+    preferences panel of the ALPS package under the 'browser' entry.
+    """
     def compute(self):
         cmdlist = 'false'
         if config.check('browser'):
@@ -110,6 +113,11 @@ class DisplayInBrowser(NotCacheable, SystemCommand):
                     ('files', [ListOfElements])]
 
 class WriteTextFile(basic.Module):
+    """ 
+    Write a string into a text file. A suffix for the file name can optionally
+    be specified through the suffix input port.
+    """
+
     def compute(self):
         if self.hasInputFromPort('suffix'):
           f = self.interpreter.filePool.create_file(suffix=self.getInputFromPort('suffix'))
@@ -126,12 +134,12 @@ class WriteTextFile(basic.Module):
 
 class TextCell(SpreadsheetCell):
     """
-    TextCell is a custom Module to view plain text files
+    TextCell is a custom Module to view plain text files in a spreadsheet.
     
     """
     def compute(self):
         """ compute() -> None
-        Dispatch the HTML contents to the spreadsheet
+        Dispatch the text contents to the spreadsheet
         """
         if self.hasInputFromPort("File"):
             fileValue = self.getInputFromPort("File")
@@ -178,21 +186,29 @@ class FileDoesNotExist: pass
 
 
 class ConcatenatePath(Module):
+    """
+    This module concatentates two portions of a file or directory path.
+    It returns a string for the concatenated name as well as file and directory
+    objects. The latter two are there as convenience functions to avoid having
+    to put the string into a File or Directory module. 
+    Note that the module does not check the existence of these directories or
+    files.
+    """
     def compute(self):
       f = os.path.join(self.getInputFromPort('base').name,self.getInputFromPort('leaf'))
       self.setResult('path', f)
-      if os.path.isdir(f):
-        dir = basic.Directory()
-        dir.name =f
-        self.setResult('directory', dir)
-      else:
-        self.setResult('directory', DirectoryDoesNotExist())
-      if os.path.isfile(f):
-        file = basic.File()
-        file.name =f
-        self.setResult('file', file)
-      else:
-        self.setResult('file', FileDoesNotExist())
+#      if os.path.isdir(f):
+      dir = basic.Directory()
+      dir.name =f
+      self.setResult('directory', dir)
+#      else:
+#        self.setResult('directory', DirectoryDoesNotExist())
+#      if os.path.isfile(f):
+      file = basic.File()
+      file.name =f
+      self.setResult('file', file)
+#      else:
+#        self.setResult('file', FileDoesNotExist())
     _input_ports = [('base', [basic.Directory]),
                     ('leaf',[basic.String])]
     _output_ports = [('path', [basic.String]),
@@ -200,6 +216,11 @@ class ConcatenatePath(Module):
                      ('file',[basic.File])]
 
 class DirectorySink(Module,NotCacheable):
+    """
+    This module copies the contents of a specified directory to a new location
+    given by the outputName. If overrideDirectory is turned on an already
+    existing directory is first removed.
+    """
     def compute(self):
       self.checkInputPort("directory")
       self.checkInputPort("outputName")
