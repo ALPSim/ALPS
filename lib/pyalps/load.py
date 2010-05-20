@@ -36,10 +36,10 @@ from dataset import DataSet
 import pyalps.pytools as pt # the C++ conversion functions
 
 # or the C++ class as alternative
-from pyalps.pyalea import value_with_error as fwe
-from pyalps.pyalea import vector_with_error as vwe
-from pyalps.pyalea import vector_of_value_with_error as vfwe
-from pyalps.pyalea import convert2vector_of_value_with_error as convert2vfwe
+from pyalps.pyalea import MCScalarData as fwe
+from pyalps.pyalea import MCVectorData as vwe
+from pyalps.pyalea import VectorOfMCData as vfwe
+from pyalps.pyalea import MCVectorData2VectorOfMCData as convert2vfwe
 
 def parse_label(label):
     if '--' in label:
@@ -117,7 +117,7 @@ class Hdf5Loader:
         resultfiles = []
         for f in fs:
             rfile = ResultFile()
-            rfile.props = self.ReadParameters(f,proppath)
+            rfile.props = self.ReadParameters(proppath)
             rfile.props["ObservableList"] = self.GetObservableList(f)
             resultfiles.append(rfile)
         return resultfiles
@@ -141,7 +141,7 @@ class Hdf5Loader:
         sets = []
         for f in fs:
             fileset=[]
-            self.h5f = h5py.File(f)
+            self.h5f = h5py.File(f,'r')
             self.h5fname = f
             params = self.ReadParameters(proppath)
             grp = self.h5f.require_group(respath)
@@ -156,7 +156,6 @@ class Hdf5Loader:
                         d.props.update(self.ReadParameters('quantumnumbers' ))
                         fileset.append(d)
                     except AttributeError:
-                        print "Could not create DataSet"
                         pass
             if 'sectors' in grp.keys():
                 sectors_grp = self.h5f.require_group(respath+'/sectors')
@@ -346,7 +345,7 @@ class Hdf5Loader:
         sets = []
         for f in fs:
             fileset = []
-            self.h5f = h5py.File(f)
+            self.h5f = h5py.File(f,'r')
             self.h5fname = f
             list_ = self.GetObservableList(respath)
             # this is exception-safe in the sense that it's also required in the line above
@@ -363,17 +362,13 @@ class Hdf5Loader:
                         d = DataSet()
                         if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
                             mean = grp[m+"/mean/value"].value
-                            error = grp[m+"/mean/error"].value
                             d.props['count'] = grp[m+"/count"].value
                             try:
                                 size = len(mean)
-                                if size == 1:
-                                    d.y = np.array([fwe(mean[0],error[0])])
-                                else:
-                                    d.y = convert2vfwe(vwe(mean,error))
+                                d.y = vwe()
                             except:
-                                size=0
-                                d.y = np.array([fwe(mean,error)])
+                                size=1
+                                d.y = np.array([fwe()])
                         elif "mean" in grp[m].keys():
                             value = grp[m+"/mean/value"].value
                             try:
@@ -386,7 +381,7 @@ class Hdf5Loader:
                             d.x = parse_labels(grp[m+"/labels"].value)
                         else:
                             d.x = np.arange(0,len(d.y))
-                        d.props['hdf5_path'] = respath + m
+                        d.props['hdf5_path'] = respath +"/"+ m
                         d.props['observable'] = pt.hdf5_name_decode(m)
                         d.props.update(params)
                         fileset.append(d)
@@ -420,6 +415,13 @@ class Hdf5Loader:
                             except AttributeError:
                                 print "Could not create DataSet"
                                 pass
+            self.h5f.close()
+            for m in fileset:
+                if (type(m.y) == type(vwe())):
+                    m.y.load(f, m.props['hdf5_path'])
+                    m.y = convert2vfwe(m.y)
+                elif (len(m.y) > 0 and type(d.y[0]) == type(fwe())):
+                    m.y[0].load(f, m.props['hdf5_path'])
             sets.append(fileset)
         return sets
 
