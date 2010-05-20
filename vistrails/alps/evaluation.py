@@ -64,6 +64,14 @@ class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
         self.setResult('dir',self.getInputFromPort('dir'))
     _input_ports = [('dir', [basic.Directory])]
     _output_ports = [('dir', [basic.Directory])]
+    
+class EvaluateSpinMC(alpscore.SystemCommandLogged,tools.GetSimName):
+    def compute(self):
+        name = self.get_sim_name(self.getInputFromPort('dir').name)
+        self.execute([alpscore._get_path('spinmc'),name])
+        self.setResult('dir',self.getInputFromPort('dir'))
+    _input_ports = [('dir', [basic.Directory])]
+    _output_ports = [('dir', [basic.Directory])]
 
 class EvaluateQWL(AlpsEvaluate):
     appname = 'qwl_evaluate'
@@ -87,5 +95,6 @@ def selfRegister():
 
   reg.add_module(AlpsEvaluate,namespace="Evaluation",abstract=True)
   reg.add_module(EvaluateLoop,namespace="Evaluation",abstract=True)
+  reg.add_module(EvaluateSpinMC,namespace="Evaluation",abstract=True)
   reg.add_module(EvaluateQWL,namespace="Evaluation",abstract=True)
   

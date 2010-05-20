@@ -118,6 +118,7 @@ class RunLoop(RunAlpsApplication):
         return options
     appname = 'loop'
 
+    
 class RunDirLoopSSE(RunAlpsApplication):
     """Runs dirloop_sse for given parameter file """
     appname = 'dirloop_sse'
@@ -144,8 +145,7 @@ class RunDMRG(RunAlpsApplication):
 class RunQWL(RunAlpsApplication):
     """Runs qwl for given parameter file """
     appname = 'qwl'
-
-
+    
 class AlpsEvaluate(alpscore.SystemCommandLogged):
     def get_appname(self):
         if self.hasInputFromPort('application'):
@@ -243,6 +243,14 @@ class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
         self.setResult('dir',self.getInputFromPort('dir'))
     _input_ports = [('dir', [basic.Directory])]
     _output_ports = [('dir', [basic.Directory])]
+    
+class EvaluateSpinMC(alpscore.SystemCommandLogged,tools.GetSimName):
+    def compute(self):
+        name = self.get_sim_name(self.getInputFromPort('dir').name)
+        self.execute([alpscore._get_path('spinmc'),name])
+        self.setResult('dir',self.getInputFromPort('dir'))
+    _input_ports = [('dir', [basic.Directory])]
+    _output_ports = [('dir', [basic.Directory])]
 
 class EvaluateQWL(AlpsEvaluate):
     appname = 'qwl_evaluate'
@@ -305,6 +313,7 @@ def selfRegister():
   register_evaluation(EvaluateFullDiagVersusT)
   register_evaluation(EvaluateFullDiagVersusH)
   register_application(EvaluateLoop)
+  register_application(EvaluateSpinMC)
   register_evaluation(EvaluateQWL)
   
   register_parameters(system.SimulationName)
