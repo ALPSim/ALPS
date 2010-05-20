@@ -38,6 +38,7 @@ namespace alps {
 				desc.add_options()
 					("help", "produce help message")
 					("time-limit,T", boost::program_options::value<std::size_t>(&time_limit)->default_value(0), "time limit for the simulation")
+					("max-bin-number,N", boost::program_options::value<std::size_t>(&max_bins)->default_value(0), "the maximum number of bins")
 					("input-file", boost::program_options::value<std::string>(&input_file), "input file in hdf5 format");
 				boost::program_options::positional_options_description p;
 				p.add("input-file", 1);
@@ -50,9 +51,11 @@ namespace alps {
 					boost::throw_exception(std::runtime_error("No job file specified"));
 			}
 			bool valid;
-			std::string input_file;
+			std::size_t max_bins;
 			std::size_t time_limit;
+			std::string input_file;
 	};
+	// TODO: use boost::variant instead of string
 	class mcparamvalue : public std::string {
 		public:
 			mcparamvalue() {}
@@ -88,11 +91,11 @@ namespace alps {
 					throw std::invalid_argument("unknown argument: "  + k);
 				return find(k)->second;
 			}
-/*			
-			
-			value_or_default()
-			
-*/			
+			mcparamvalue value_or_default(std::string const & k, mcparamvalue const & v) const {
+				if (find(k) == end())
+					return mcparamvalue(v);
+				return find(k)->second;
+			}
 			void serialize(hdf5::oarchive & ar) const {
 				for (const_iterator it = begin(); it != end(); ++it)
 					ar << make_pvp(it->first, static_cast<std::string>(it->second));

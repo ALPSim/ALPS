@@ -21,7 +21,7 @@ class ising_sim : public alps::mcbase {
 			results << alps::RealObservable("Magnetization");
 			results << alps::RealObservable("Magnetization^2");
 			results << alps::RealObservable("Magnetization^4");
-			results << alps::RealVectorObservable("Correlations");
+//			results << alps::RealVectorObservable("Correlations");
 		}
 		void do_update() {
 			for (int j = 0; j < length; ++j) {
@@ -52,7 +52,8 @@ class ising_sim : public alps::mcbase {
 				results["Magnetization"] << tmag;
 				results["Magnetization^2"] << tmag * tmag;
 				results["Magnetization^4"] << tmag * tmag * tmag * tmag;
-				results["Correlations"] << corr;
+// TODO: fixit ...
+//				results["Correlations"] << corr;
 			}
 		};
 		double fraction_completed() const {

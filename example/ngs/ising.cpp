@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
 	alps::mcoptions options(argc, argv);
 	if (options.valid) {
 		sim_type::parameters_type params(options.input_file);
+		params["maxbinnumber"] = options.max_bins;
 #ifdef MPI_RUN
 		boost::mpi::environment env(argc, argv);
 		boost::mpi::communicator c;
@@ -36,7 +37,7 @@ int main(int argc, char *argv[]) {
 				alps::hdf5::oarchive ar("sim.h5");
 				ar << alps::make_pvp("/parameters", params);
 				for (alps::result_names_type<sim_type>::type::iterator it = names.begin(); it != names.end(); ++it)
-					ar << alps::make_pvp("/simulation/results/Energy", *s.collect_mcdata(*it));
+					ar << alps::make_pvp("/simulation/results/" + *it, *s.collect_mcdata(*it));
 			}
 			s.terminate();
 		} else
