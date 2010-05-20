@@ -208,13 +208,13 @@ class GetCloneFiles(Module):
      _output_ports = [('value',[ListOfElements])]
 
 class GetResultFiles(Module):
-     """ 
-     This module gets all ALPS resuls files recursively scanning the given directory and all its subdirectories.
-     
-     The prefix and tasks input ports can be used to specify regular expressions limiting the prefix and task number of result files using the ALPS naming convention. 
-     
-     Alternatively the pattern port can be used to specify an arbitrary regular expression that the result files have to match.
-     """
+    """ 
+    This module gets all ALPS resuls files recursively scanning the given directory and all its subdirectories.
+    
+    The prefix and tasks input ports can be used to specify regular expressions limiting the prefix and task number of result files using the ALPS naming convention. 
+    
+    Alternatively the pattern port can be used to specify an arbitrary regular expression that the result files have to match.
+    """
     def compute(self):
         if self.hasInputFromPort('pattern') and self.hasInputFromPort('dir'):
             dir = self.getInputFromPort('dir').name
