@@ -32,9 +32,11 @@ int main(int argc, char *argv[]) {
 		s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
 		if (c.rank()==0) {
 			{
-				boost::shared_ptr<alps::alea::mcdata<double> > energy = s.collect_mcdata("Energy");
+				alps::result_names_type<sim_type>::type names = result_names(s);
 				alps::hdf5::oarchive ar("sim.h5");
-				ar << alps::make_pvp("/parameters", params) << alps::make_pvp("/simulation/results/Energy", *energy);
+				ar << alps::make_pvp("/parameters", params);
+				for (alps::result_names_type<sim_type>::type::iterator it = names.begin(); it != names.end(); ++it)
+					ar << alps::make_pvp("/simulation/results/Energy", *s.collect_mcdata(*it));
 			}
 			s.terminate();
 		} else

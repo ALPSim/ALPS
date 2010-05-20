@@ -88,6 +88,11 @@ namespace alps {
 					throw std::invalid_argument("unknown argument: "  + k);
 				return find(k)->second;
 			}
+/*			
+			
+			value_or_default()
+			
+*/			
 			void serialize(hdf5::oarchive & ar) const {
 				for (const_iterator it = begin(); it != end(); ++it)
 					ar << make_pvp(it->first, static_cast<std::string>(it->second));
