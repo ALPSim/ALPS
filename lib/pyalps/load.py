@@ -420,14 +420,12 @@ class Hdf5Loader:
             self.h5f.close()
             for m in fileset:
                 if (type(m.y) == type(vwe())):
-                    print "Loading vector mcdata for ", m.props['observable'], " from HDF5"
+                    if verbose: print "Loading vector mcdata for ", m.props['observable'], " from HDF5"
                     m.y.load(f, m.props['hdf5_path'])
                     m.y = convert2vfwe(m.y)
-                    print "Loaded vector mcdata for ", m.props['observable'], " from HDF5"
                 elif (len(m.y) > 0 and type(d.y[0]) == type(fwe())):
-                    print "Loading scalar mcdata for ", m.props['observable'], " from HDF5"
+                    if verbose: print "Loading scalar mcdata for ", m.props['observable'], " from HDF5"
                     m.y[0].load(f, m.props['hdf5_path'])
-                    print "Loaded scalar mcdata for ", m.props['observable'], " from HDF5"
             sets.append(fileset)
         return sets
 
