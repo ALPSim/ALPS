@@ -47,13 +47,20 @@ class MonteCarloMeasurements(Parameters):
                    ]
 
 class MonteCarloParameters(Parameters): 
-    """ A module to set the parameters for a Monte Carlo simulation: number of sweeps for measurements in SWEEPS and number of sweeps for thermailzation in THERMALIZATION  """
+    """ A module to set the parameters for a Monte Carlo simulation: 
+      SWEEPS: the number of sweeps for measurements 
+      THERMALIZATION: the number of sweeps for thermailzation  
+    """
     _input_ports = [('SWEEPS',[(basic.String, 'the number of sweeps for measurements')]),
                     ('THERMALIZATION',[(basic.String, 'the number of sweeps for thermalization')])
                     ]
 
 class LoopMonteCarloParameters(MonteCarloParameters): 
-    """ A module to set the parameters for the loop application """
+    """ A module to set the parameters for a loop quantum Monte Carlo simulation: 
+      SWEEPS: the number of sweeps for measurements 
+      THERMALIZATION: the number of sweeps for thermailzation 
+      ALGORITHM:  the specific representation and loop algorithm used. Default is sse. See the loop documentation for more options
+    """
     def compute(self):
         res = self.readInputs(ParametersData({}))
         res.updateIfMissing(self.defaults)
@@ -62,7 +69,7 @@ class LoopMonteCarloParameters(MonteCarloParameters):
     defaults = { 'ALGORITHM':'sse' }
 
 class QWLMonteCarloParameters(MonteCarloParameters): 
-    """ A module to set the temperature """
+    """ A module to set the parameters for a qwl simulation. Please see the ALPS documentation for qwl for an explanation of these parameters """
     _input_ports = [('T_MIN',[basic.String]),
                     ('T_MAX',[basic.String]),
                     ('DELTA_T',[basic.String]),
@@ -79,12 +86,22 @@ class QWLMonteCarloParameters(MonteCarloParameters):
                     ]
 
 class ClassicalMonteCarloParameters(MonteCarloParameters): 
-    """ A module to set the temperature """
+    """ A module to set the parameters for a loop quantum Monte Carlo simulation: 
+      SWEEPS: the number of sweeps for measurements 
+      THERMALIZATION: the number of sweeps for thermailzation 
+      UPDATE: the update type (local or cluster)
+    """
     _input_ports = [('UPDATE',[(basic.String, 'the update method (local or cluster)')])]
 
 
 class DMRGParameters(Parameters): 
-    """ A module to set the Monte Carlo parameters """
+    """ 
+    A module to set the parameters for a DMRG simulation:
+      SWEEPS: the number of sweeps
+      STATES: a comma-separated list of states used in each of the sweeps
+      MAXSTATES: an alternatiove to SWEEPS< the maximum number of states used in the last sweep. The number of states is ramped up linearly.
+      NUMBER_EIGENVALUES: the number of eigenstates to target for
+    """
     _input_ports = [('SWEEPS',[(basic.String, 'the number of sweeps')]),
                     ('STATES',[(basic.String, 'the number of states in each sweep')]),
                     ('MAXSTATES',[(basic.String, 'the maximum number of states')]),
@@ -93,7 +110,7 @@ class DMRGParameters(Parameters):
 
 
 class Temperature(Parameters):
-    """ A module to set the temperature """
+    """ A module to set the temperature. Either T or beta=1/T can be defined but not both. """
     def compute(self):
         if self.hasInputFromPort('T') and self.hasInputFromPort('beta'):
             raise ModuleError(self, "cannot define both T and beta")
@@ -103,12 +120,12 @@ class Temperature(Parameters):
 
 
 class ConservedQuantumNumbers(Parameters):
-    """ defines conserved quantum numbers for exact diagonalization """
+    """ defines conserved quantum numbers for exact diagonalization. This is  string of comma-separated names """
     _input_ports = [('CONSERVED_QUANTUMNUMBERS', [basic.String])]
 
 
 class CustomMeasurements(Parameters): 
-    """ definition of custom measurements for diagonalization and DMRG """
+    """ A collection of custom measurements for diagonalization and DMRG """
 
 
 class CustomMeasurement(basic.Module):
@@ -123,15 +140,27 @@ class CustomMeasurement(basic.Module):
 
 
 class AverageMeasurement(CustomMeasurement): 
+    """
+    The defintion of an average measurements, averaged over all bonds or sites. The operator name used in the defintiion needs to be defined as a site or bond operator in the model.
+    """
     prefix = 'AVERAGE'
 
 class LocalMeasurement(CustomMeasurement): 
+    """
+    The defintion of a local measurement on each bond or site. The operator name used in the defintiion needs to be defined as a site or bond operator in the model.
+    """
     prefix = 'LOCAL'
 
 class CorrelationsMeasurement(CustomMeasurement): 
+    """
+    The defintion of a correlation measurement. If the correlation is symmetric, e.g. density-density, then just one operator name ahs to be given as in "n". On the other hand, for non-summetric measurements like S^+_i S^-_j the two operators need to be separated by a colon as in "Splus:Sminus". The operator names used in the defintiion needs to be defined as a site or bond operator in the model.
+    """
     prefix = 'CORRELATIONS'
                    
 class StructureFactorMeasurement(CustomMeasurement): 
+    """
+    The defintion of a structure factor measurement. If the correlation is symmetric, e.g. density-density, then just one operator name ahs to be given as in "n". On the other hand, for non-summetric measurements like S^+_i S^-_j the two operators need to be separated by a colon as in "Splus:Sminus". The operator names used in the defintiion needs to be defined as a site or bond operator in the model.
+    """
     prefix = 'STRUCTURE_FACTOR'
 
 

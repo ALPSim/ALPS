@@ -340,13 +340,14 @@ class Hdf5Loader:
                                                                             
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with all parameters set
-    def ReadMeasurementFromFile(self,flist,statvar=None,proppath='/parameters',respath='/simulation/results',measurements=None):
+    def ReadMeasurementFromFile(self,flist,statvar=None,proppath='/parameters',respath='/simulation/results',measurements=None,verbose=False):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
             fileset = []
             self.h5f = h5py.File(f,'r')
             self.h5fname = f
+            if verbose: print "Loading from file", f
             list_ = self.GetObservableList(respath)
             # this is exception-safe in the sense that it's also required in the line above
             grp = self.h5f.require_group(respath)
@@ -359,6 +360,7 @@ class Hdf5Loader:
             for m in obslist:
                 if not statvar: #if not a specific statistical variable is specified then use the default mean & error or mean
                     try:
+                        if verbose: print "Loading", m
                         d = DataSet()
                         if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
                             mean = grp[m+"/mean/value"].value
@@ -380,7 +382,7 @@ class Hdf5Loader:
                         if "labels" in grp[m].keys():
                             d.x = parse_labels(grp[m+"/labels"].value)
                         else:
-                            d.x = np.arange(0,len(d.y))
+                            d.x = np.arange(0,size)
                         d.props['hdf5_path'] = respath +"/"+ m
                         d.props['observable'] = pt.hdf5_name_decode(m)
                         d.props.update(params)
@@ -407,7 +409,7 @@ class Hdf5Loader:
                                 if "labels" in grp[m].keys():
                                     d.x = parse_labels(grp[m+"/labels"].value)
                                 else:
-                                    d.x = np.arange(0,len(d.y))
+                                    d.x = np.arange(0,size)
                                 d.props['hdf5_path'] = respath + m
                                 d.props['observable'] = pt.hdf5_name_decode(m+"/"+s+"/"+k)
                                 d.props.update(params)
@@ -418,10 +420,14 @@ class Hdf5Loader:
             self.h5f.close()
             for m in fileset:
                 if (type(m.y) == type(vwe())):
+                    print "Loading vector mcdata for ", m.props['observable'], " from HDF5"
                     m.y.load(f, m.props['hdf5_path'])
                     m.y = convert2vfwe(m.y)
+                    print "Loaded vector mcdata for ", m.props['observable'], " from HDF5"
                 elif (len(m.y) > 0 and type(d.y[0]) == type(fwe())):
+                    print "Loading scalar mcdata for ", m.props['observable'], " from HDF5"
                     m.y[0].load(f, m.props['hdf5_path'])
+                    print "Loaded scalar mcdata for ", m.props['observable'], " from HDF5"
             sets.append(fileset)
         return sets
 
@@ -431,11 +437,11 @@ def loadBinningAnalysis(files,what=None):
       what = [what]
     return ll.ReadBinningAnalysis(files,measurements=what)
 
-def loadMeasurements(files,what=None):
+def loadMeasurements(files,what=None,verbose=False):
     ll = Hdf5Loader()
     if isinstance(what,str):
       what = [what]
-    return ll.ReadMeasurementFromFile(files,measurements=what)
+    return ll.ReadMeasurementFromFile(files,measurements=what,verbose=verbose)
     
     
 def loadEigenstateMeasurements(files,what=None):
