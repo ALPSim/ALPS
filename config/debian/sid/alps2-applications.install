@@ -7,7 +7,6 @@ debian/tmp/usr/bin/loop usr/bin/
 debian/tmp/usr/bin/lowa usr/bin/
 debian/tmp/usr/bin/qwl usr/bin/
 debian/tmp/usr/bin/qwl_evaluate usr/bin/
-debian/tmp/usr/bin/simple_dmrg usr/bin/
 debian/tmp/usr/bin/sparsediag usr/bin/
 debian/tmp/usr/bin/spinmc usr/bin/
 debian/tmp/usr/bin/spinmc_evaluate usr/bin/
