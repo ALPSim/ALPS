@@ -10,10 +10,10 @@
 #include <iostream>
 
 int main(int argc, char **argv) {
-	if (argc < 2)
-		throw std::invalid_argument("no name passed");
-	alps::Parameters parms;
-	std::cin >> parms;
-	alps::hdf5::oarchive ar(argv[1]);
-	ar << make_pvp("/parameters", parms);
+    if (argc < 2)
+        throw std::invalid_argument("no name passed");
+    alps::Parameters parms;
+    std::cin >> parms;
+    alps::hdf5::oarchive ar(argv[1]);
+    ar << make_pvp("/parameters", parms);
 }

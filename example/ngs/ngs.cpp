@@ -1,5 +1,5 @@
 #include "ngs.hpp"
 
 namespace alps {
-	int mcsignal::which = 0;
+    int mcsignal::which = 0;
 }
