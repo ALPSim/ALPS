@@ -141,4 +141,8 @@ class HList:
         for idx in self.indices_:
             rethl[idx] = functor(self[idx])
         return ret
-    
+
+def hlist_to_dict(hl, key = 'Observable'):
+    f = lambda data: dict( [(q.props[key], q) for q in data] )
+    return hmap(f, hl, -1)
+
