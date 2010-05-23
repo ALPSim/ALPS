@@ -71,6 +71,33 @@ class UnzipDirectory(Module):
         
         self.setResult('output_dir',dir)
 
+class ZipDirectory(Module):
+    """Zip a directory"""
+    
+    _input_ports = [('dir',[basic.Directory])]
+    _output_ports = [('zipfile', [basic.File])]
+    
+    def compute(self):
+        inpath = self.getInputFromPort('dir').name
+        
+        outfile = self.interpreter.filePool.create_file()
+        zf = zipfile.ZipFile(outfile.name,'w')
+        fileList = []
+        arcList = []
+        for root, subFolders, files in os.walk(inpath):
+            for file in files:
+                fileList.append(os.path.join(root,file))
+        for file in fileList:
+            arcname = file.replace(inpath,'')
+            if arcname[0] == os.path.sep:
+                arcname = arcname[1:]
+            arcname = os.path.join(os.path.split(inpath)[-1], arcname)
+            arcList.append(arcname)
+            zf.write(file,arcname)
+        zf.close()
+        
+        self.setResult('zipfile',outfile)
+
 class WriteParameterFile(Module):
      """Creates a parameter file.
      """
@@ -400,6 +427,7 @@ def selfRegister():
   reg.add_module(ConvertXML2HTML,namespace="Tools")
 
   reg.add_module(UnzipDirectory,namespace="Tools")
+  reg.add_module(ZipDirectory,namespace="Tools")
   reg.add_module(ArchiveDirectory,namespace="Tools")
 
   reg.add_module(GetJobFile,namespace="Tools")
