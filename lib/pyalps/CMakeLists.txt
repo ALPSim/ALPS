@@ -12,33 +12,33 @@ if (ALPS_HAVE_PYTHON)
   set(PYTOOLS_SOURCES ../../src/alps/python/pytools.cpp)
 
 
-  python_add_module(pyalea ${PYALEA_SOURCES})
-  python_add_module(pytools ${PYTOOLS_SOURCES})
+  python_add_module(pyalea_c ${PYALEA_SOURCES})
+  python_add_module(pytools_c ${PYTOOLS_SOURCES})
   if(BUILD_SHARED_LIBS)
-    set_target_properties(pyalea PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-    set_target_properties(pytools PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
-    set_target_properties(pyalea PROPERTIES PREFIX "")
-    set_target_properties(pytools PROPERTIES PREFIX "")
+    set_target_properties(pyalea_c PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
+    set_target_properties(pytools_c PROPERTIES COMPILE_DEFINITIONS "${ALPS_SHARED_CPPFLAGS}")
+    set_target_properties(pyalea_c PROPERTIES PREFIX "")
+    set_target_properties(pytools_c PROPERTIES PREFIX "")
     if(WIN32 AND NOT UNIX)
-      set_target_properties(pyalea PROPERTIES SUFFIX ".pyd")
-      set_target_properties(pytools PROPERTIES SUFFIX ".pyd")
+      set_target_properties(pyalea_c PROPERTIES SUFFIX ".pyd")
+      set_target_properties(pytools_c PROPERTIES SUFFIX ".pyd")
     endif(WIN32 AND NOT UNIX)
   endif(BUILD_SHARED_LIBS)
-  target_link_libraries(pyalea alps ${LINK_LIBRARIES})
-  target_link_libraries(pytools alps ${LINK_LIBRARIES})
+  target_link_libraries(pyalea_c alps ${LINK_LIBRARIES})
+  target_link_libraries(pytools_c alps ${LINK_LIBRARIES})
 
 
   #######################################################################
   # install
   #######################################################################
   if (ALPS_INSTALL_VISTRAILS_PACKAGES)
-    install(TARGETS pyalea pytools COMPONENT vistrails
+    install(TARGETS pyalea_c pytools_c COMPONENT vistrails
             RUNTIME DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
             ARCHIVE DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps
             LIBRARY DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps)
   endif (ALPS_INSTALL_VISTRAILS_PACKAGES)
   if (NOT ALPS_FOR_VISTRAILS)
-    install(TARGETS pyalea pytools COMPONENT python
+    install(TARGETS pyalea_c pytools_c COMPONENT python
             RUNTIME DESTINATION bin
             ARCHIVE DESTINATION lib/pyalps
             LIBRARY DESTINATION lib/pyalps)
