@@ -112,13 +112,18 @@ class Hdf5Loader:
             pass
         return dict 
         
-    def GetProperties(self,flist,proppath):
+    def GetProperties(self,flist,proppath='/parameters',respath='/simulation/results'):
         fs = self.GetFileNames(flist)
         resultfiles = []
         for f in fs:
-            rfile = ResultFile()
+            self.h5f = h5py.File(f,'r')
+            self.h5fname = f
+            rfile = ResultFile(f)
             rfile.props = self.ReadParameters(proppath)
-            rfile.props["ObservableList"] = self.GetObservableList(f)
+            try:
+              obs = self.GetObservableList(respath)
+              rfile.props["ObservableList"] = [pt.hdf5_name_decode(x) for x in obs]
+            except: pass
             resultfiles.append(rfile)
         return resultfiles
         
@@ -298,6 +303,7 @@ class Hdf5Loader:
         sets = []
         for f in fs:
             fileset = []
+            print 'loading from file ',f
             self.h5f = h5py.File(f)
             self.h5fname = f
             if respath == None:
@@ -458,3 +464,22 @@ def loadIterationMeasurements(files,what=None):
 def loadSpectra(files):
     ll = Hdf5Loader()
     return ll.ReadSpectrumFromFile(files)
+
+def loadProperties(files,proppath='/parameters',respath='/simulation/results'):
+    ll = Hdf5Loader()
+    res = ll.GetProperties(files,proppath,respath)
+    results = []
+    for x in res:
+      results.append(x.props)
+    return results
+
+def loadObservableList(files,respath='/simulation/results'):   
+    ll = Hdf5Loader()
+    res = ll.GetProperties(files)
+    results = []
+    for x in res:
+      results.append(x.props['ObservableList'])
+    return results
+
+
+   

@@ -158,7 +158,7 @@ class LoadAlpsProperties(Module):
         if self.hasInputFromPort('ResultFiles'):
             flist = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
         loader = Hdf5Loader()
-        dictlist = loader.GetProperties(flist)
+        dictlist = loader.GetProperties(flist,proppath=propPath)
         self.setResult('Props', dictlist)
     
 class LoadAlpsMeasurements(Module):

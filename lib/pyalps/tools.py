@@ -37,7 +37,7 @@ import numpy as np
 import h5py
 
 import pyalps.pytools # the C++ conversion functions
-from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements
+from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadObservableList, loadProperties
 from hlist import deep_flatten, flatten, depth
 from dict_intersect import dict_intersect
 from dataset import DataSet

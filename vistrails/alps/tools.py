@@ -95,8 +95,7 @@ class WriteParameterFile(Module):
 
 
 class WriteInputFiles(Module):
-     """ This module writes the XML input files for ALPS
-     """
+     """ This module writes the XML input files for ALPS"""
          
      def compute(self):
          of = self.interpreter.filePool.create_file()
@@ -259,6 +258,46 @@ class Convert2XML(Module):
     _input_ports = [('input_file', [ListOfElements])]
     _output_ports = [('value', [ListOfElements])]
  
+
+class ConvertXML2HTML(alpscore.SystemCommand):
+    """
+    This module takes an XML file or a list of XML files and converts each of them to HTML. 
+    """
+    def convert(self,input_file):
+        output_file = self.interpreter.filePool.create_file(suffix='.html')
+        if platform.system() == 'Windows':
+          cmdlist = ['msxsl.exe',input_file.name] + self.style + ['-o', output_file.name]
+        if platform.system() != 'Windows':
+          cmdlist = [alpscore._get_path('xslttransform')] + self.style + [input_file, '>' , output_file.name]
+        self.execute(cmdlist)
+        if platform.system() == 'Windows': # need to convert to UTF-8
+          fin = codecs.open(output_file.name,"r","utf-16")
+          u = fin.read()
+          fin.close()
+          fout = file(output_file.name,"w")
+          fout.write(u.encode("utf-8"))
+          fout.close()
+        return output_file
+
+    def compute(self):
+        if self.hasInputFromPort('stylesheet'):
+          self.style = [self.getInputFromPort('stylesheet').name]
+        else:
+          self.style = [pyalps.xslPath()]
+        if (self.hasInputFromPort('input_file')):
+            self.setResult('output_file',self.convert(self.getInputFromPort('input_file').name))
+        if (self.hasInputFromPort('input_files')):
+            input_files = self.getInputFromPort('input_files')
+            output_files = []
+            for f in input_files:
+                output_files.append(self.convert(f).name)
+            self.setResult('output_files', output_files)
+    _input_ports = [('input_file', [basic.File]),
+                    ('input_files', [ListOfElements]),
+                    ('stylesheet',[basic.File])]
+    _output_ports = [('output_file', [basic.File]),
+                     ('output_files', [ListOfElements])]
+
 class Convert2Text(alpscore.SystemCommand):
     def compute(self):
         input_file = self.getInputFromPort('input_file')
@@ -268,36 +307,6 @@ class Convert2Text(alpscore.SystemCommand):
     _input_ports = [('input_file', [basic.File])]
     _output_ports = [('output_file', [basic.File])]
 
-class ConvertXML2HTML(alpscore.SystemCommand):
-    def compute(self):
-        input_file = self.getInputFromPort('input_file')
-        output_file = self.interpreter.filePool.create_file(suffix='.html')
-        if platform.system() == 'Windows':
-          cmdlist = ['msxsl.exe',input_file.name]
-          if self.hasInputFromPort('stylesheet'):
-            cmdlist += [self.getInputFromPort('stylesheet').name]
-          else:
-            cmdlist += [pyalps.xslPath()]
-          cmdlist += ['-o', output_file.name]
-        if platform.system() != 'Windows':
-          cmdlist = [alpscore._get_path('xslttransform')]
-          if self.hasInputFromPort('stylesheet'):
-            cmdlist += [self.getInputFromPort('stylesheet').name]
-          cmdlist += [input_file.name, '>' , output_file.name]
-        self.execute(cmdlist)
-        if platform.system() == 'Windows': # need to convert to UTF-8
-          fin = codecs.open(output_file.name,"r","utf-16")
-          u = fin.read()
-          fin.close()
-          fout = file(output_file.name,"w")
-          fout.write(u.encode("utf-8"))
-          fout.close()
-        self.setResult('output_file', output_file)
-    _input_ports = [('input_file', [basic.File]),
-                    ('stylesheet',[basic.File])]
-    _output_ports = [('output_file', [basic.File])]
-
-
 class GetSimName:
     def get_sim_name(self,dirname):
         l = glob.glob(os.path.join(dirname,'*.out.xml'))
@@ -305,6 +314,7 @@ class GetSimName:
 
 
 class GetJobFile(basic.Module,GetSimName):
+    """ This module returns the name of the ALPS job output file in the specified directory. It assumes that there is only one such job file in any directory. """
     def compute(self):
         dir = self.getInputFromPort("dir")
         o = basic.File
@@ -316,6 +326,7 @@ class GetJobFile(basic.Module,GetSimName):
                      ('output_file', [basic.File],True)]
                      
 class PickFileFromList(basic.Module):
+    """ This module picks a specified file (index) from a list of files """
     def compute(self):
         f=basic.File()
         ind = 0
@@ -328,6 +339,13 @@ class PickFileFromList(basic.Module):
     _output_ports = [('file', [basic.File])]
 
 class ArchiveDirectory(basic.Module):
+    """
+    Retrieves the path to an archive directory. 
+    
+    To be portable between machines an archive is specified as a URL. The mapping from URL to local path (typically the mount point of the archive disk can be specified in the configuration preferences as a dict named archives.
+    
+    Optionally a local path can be directly specified, but is only used if the archive was not specified or no mapping from archive to a local path is given.
+    """
     _input_ports = [
         ('archive', [basic.String]),
         ('path', [basic.Directory])
