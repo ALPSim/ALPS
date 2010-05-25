@@ -81,6 +81,7 @@ Lowa::Lowa(const alps::ProcessList& where,const alps::Parameters& p,int node)
   , Ntest(static_cast<uint64_t>(p["N_TEST"]))
   , Nsave(static_cast<uint64_t>(p["N_SAVE"]))
   , sweeps(0)
+  , sweeps_green(0)
   , thermalization_sweeps(static_cast<uint64_t>(p["THERMALIZATION"]))
   , total_sweeps(static_cast<uint64_t>(p["SWEEPS"]))
 
@@ -127,8 +128,8 @@ Lowa::Lowa(const alps::ProcessList& where,const alps::Parameters& p,int node)
     lambda[0] = static_cast<parm_type>(p["WAVELENGTH_x"]);   
     lambda[1] = static_cast<parm_type>(p["WAVELENGTH_y"]);   
     lambda[2] = static_cast<parm_type>(p["WAVELENGTH_z"]);
-    waist[0]  = static_cast<parm_type>(p["WAIST_x"]);       
-    waist[1]  = static_cast<parm_type>(p["WAIST_y"]);        
+    waist[0] = static_cast<parm_type>(p["WAIST_x"]);       
+    waist[1] = static_cast<parm_type>(p["WAIST_y"]);        
     waist[2] = static_cast<parm_type>(p["WAIST_z"]);
     phase[0] = static_cast<parm_type>(p["MASS"]) * amu * lambda[0] * lambda[0] / (8*_tof*hbar) * 1e-8;
     phase[1] = static_cast<parm_type>(p["MASS"]) * amu * lambda[1] * lambda[1] / (8*_tof*hbar) * 1e-8;
@@ -181,18 +182,30 @@ void Lowa::init()
   filename_proj_cymdns = obtain_filename("proj_cymdns");
   filename_cs_cymdns   = obtain_filename("cs_cymdns");
 
-  if (measure_time_series_density) {
+  if (measure_time_series_density) 
+  {
     filename_mdns        = obtain_filename_h5("timeseries.mdns");
   }
-  else {  
+  else 
+  {  
     filename_dns         = obtain_filename("dns");
     filename_dns_trial   = obtain_filename("tdns");
   }
 
-  if (measure_time_series_density_matrix) {
-    filename_mdnsmat     = obtain_filename_h5("timeseries.mdnsmat");
-    filename_mdnsmatinf  = obtain_filename_h5("timeseries.mdnsmatinf");
+  if (measure_time_series_density_matrix)
+  {
+    filename_mdnsmat      = obtain_filename_h5("timeseries.mdnsmat");
+    filename_mdnsmat_inf  = obtain_filename_h5("timeseries.mdnsmat_inf");
   }
+  else 
+  {
+    filename_dnsmat       = obtain_filename("dnsmat");
+    filename_dnsmat_trial = obtain_filename("tdnsmat"); 
+
+    filename_dnsmat_inf       = obtain_filename("dnsmat_inf");
+    filename_dnsmat_inf_trial = obtain_filename("tdnsmat_inf"); 
+  }
+
 
 // ### WOLDLINE DESCRIPTION
 
@@ -289,16 +302,6 @@ void Lowa::init()
 
   _proj_binstate.resize(_nrbin);
   _cs_binstate.resize(_nrbin);
-
-  //measurements << alps::RealObservable("Total Particle Number (Actual)");
-  //measurements << alps::RealObservable("Total Particle Number (Measured)");
-  //measurements << alps::RealObservable("Density at center (Actual)");
-  //measurements << alps::RealObservable("Density at center (Measured)");
-  //measurements << alps::RealObservable("Kinetic Energy");
-  //measurements << alps::RealObservable("Potential Energy");
-  //measurements << alps::RealObservable("Energy");
-  //measurements << alps::RealVectorObservable("Columnn integrated Density (cylindrically binned)");
-  //measurements << alps::RealVectorObservable("Cross sectional Density (cylindrically binned)");
 
 
 // ### ABOUT WORM DESCRIPTION

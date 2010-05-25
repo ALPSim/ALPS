@@ -38,7 +38,8 @@
  */
 
 //#define HARDCORE
-#define TRAPPEDSYSTEM      // important for distance
+#define TRAPPEDSYSTEM             // important for distance
+#define MEASURE_DENSITY_MATRIX    // always leave this on, unless you are very sure of the code...
 #define PRINT_INFOMATION_WHILE_SAVING
 
 

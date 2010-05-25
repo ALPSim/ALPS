@@ -114,6 +114,15 @@ void Lowa::load_lowa()
     }
     inFile.close();
   }
+
+  if (!measure_time_series_density_matrix)
+  {
+    inFile.open(filename_dnsmat.c_str(), std::ios::in);
+    if (!inFile.good()) { // file is absent
+      reset_av_dnsmat();
+    }
+    inFile.close();
+  }
 }
 
 
@@ -163,12 +172,21 @@ void Lowa::export_lowa_simulation(std::ostream& os)
   }
   os << _Z_dnsmat << std::endl;
 
+  if (measure_time_series_density_matrix) {
+    os << counter_MEASURE_GREEN << std::endl; 
+  }
+
   os << is_worm_diagonal << "\t" << is_worm_moving_forward << "\t" << is_worm_rising << std::endl;
   os << _nrvertex << std::endl;
 
   os << _Ekin << "\t" << _Epot << "\t" << new_measurement << std::endl;
   os << no_of_accepted_worm_insertions << "\t" << no_of_proposed_worm_insertions << std::endl;
   os << sweeps << std::endl;
+
+  if (measure_time_series_density_matrix) {
+    os << sweeps_green << std::endl;    
+  }
+
   return;
 }
 
@@ -237,12 +255,20 @@ void Lowa::import_lowa_simulation(std::istream& is)
   }
   is >> _Z_dnsmat;
 
+  if (measure_time_series_density_matrix) {
+    is >> counter_MEASURE_GREEN;    
+  }
+
   is >> is_worm_diagonal >>  is_worm_moving_forward >> is_worm_rising;
   is >> _nrvertex;
 
   is >> _Ekin >> _Epot >> new_measurement;
   is >> no_of_accepted_worm_insertions >> no_of_proposed_worm_insertions;
   is >> sweeps;
+
+  if (measure_time_series_density_matrix) {
+    is >> sweeps_green;    
+  }
 
   calc_N_and_E();
   for (int i = 0; i < _N; i++) {

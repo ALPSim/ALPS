@@ -69,9 +69,7 @@ void Lowa::dostep() {
   }
   else {
     ++counter_MEASURE;
-#ifdef MEASURE_DENSITY_MATRIX
     ++counter_MEASURE_GREEN;
-#endif
     ++counter_TEST;
 
 
@@ -80,25 +78,39 @@ void Lowa::dostep() {
       if ((Ncan < 0) || (get_Npart() == Ncan)) {
         ++sweeps;
         time (&times2);
-        std::cout << "Measuring..." << get_Nmeaspart() << " ( " << get_Npart() << " ),\t Total elapsed MCstep : " << MCstep_total+MCstep << "\t worm insert ratio : " << worm_insertion_acceptance_ratio() << "\t Average nr MCstep per second  : " << (MCstep_total+MCstep - MCold) / ( times2 - times1) << " Sweeps : " << sweeps << "\n";
+        
+        std::cout << "Measuring in real space...\tN = " << get_Nmeaspart() << " ( " << get_Npart() << " ),\t Total elapsed MCstep : " << MCstep_total+MCstep << "\t worm insert ratio : " << worm_insertion_acceptance_ratio() << "\t Average nr MCstep per second  : " << (MCstep_total+MCstep - MCold) / ( times2 - times1) << " Sweeps : " << sweeps << "\t";
+        
         MCold = MCstep_total + MCstep;
         times1 = times2;
 
         update_obs();
         if (is_thermalized())  {  take_diagonal_measurements();  }
+
+        std::cout << "...done\n";
+
       }
+
       counter_MEASURE = 0;
 
     }
 
 
-#ifdef MEASURE_DENSITY_MATRIX
     if (counter_MEASURE_GREEN >= Nmeasure_green) {
+
+      if (measure_time_series_density_matrix)   {  ++sweeps_green;  }
+
+      std::cout << "Measuring in momentum space...\t Sweeps (green) : " << sweeps_green << "\t";            
+
+      update_off_diag_obs();
       if (is_thermalized())  {  take_offdiagonal_measurements();  }
-      reset_av_dnsmat();
+      if (measure_time_series_density_matrix)  {  reset_av_dnsmat();  }
+
+      std::cout << "...done\n";
+
       counter_MEASURE_GREEN = 0;
+
     }
-#endif
 
 
     if (counter_TEST >= Ntest) {

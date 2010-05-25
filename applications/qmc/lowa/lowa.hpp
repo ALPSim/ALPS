@@ -152,7 +152,7 @@ private:
   uint32_t label;
   uint64_t counter_MEASURE, counter_MEASURE_GREEN, counter_TEST;
   uint64_t Nmeasure, Nmeasure_green, Ntest, Nsave;
-  uint64_t sweeps, thermalization_sweeps, total_sweeps;
+  uint64_t sweeps, sweeps_green, thermalization_sweeps, total_sweeps;
   double   MCstep_total, MCold;
   std::time_t times1, times2;
 
@@ -160,8 +160,8 @@ private:
 // ### PRINT and I/O (ASCII/hdf5)   // *** Tama : to include them in <lowa.io.h>
 
   // member functions
-  std::string obtain_filename(std::string original_filename)     {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str());  }
-  std::string obtain_filename_h5(std::string original_filename)  {  std::ostringstream ss;  ss << label;  return (original_filename + ss.str() + ".h5");  }
+  std::string obtain_filename(std::string original_filename)     {  return (original_filename + boost::lexical_cast<std::string>(label));  }
+  std::string obtain_filename_h5(std::string original_filename)  {  return (original_filename + boost::lexical_cast<std::string>(label) + ".h5");  }
   void export_lowa_simulation(std::ostream&);
   void import_lowa_simulation(std::istream&);
   void save(alps::ODump& odump)  {}
@@ -177,9 +177,10 @@ private:
 
   std::string filename1, filename1_trial;
   std::string filename_N, filename_mN, filename_dns0, filename_mdns0, filename_proj_cymdns, filename_cs_cymdns;
-  std::string filename_mdns;                          // for measure_time_series_density == true
-  std::string filename_dns, filename_dns_trial;       // for measure_time_series_density == false
-  std::string filename_mdnsmat, filename_mdnsmatinf;  // for measure_time_series_density_matrix == true
+  std::string filename_mdns;                                                                           // for measure_time_series_density == true
+  std::string filename_dns, filename_dns_trial;                                                        // for measure_time_series_density == false
+  std::string filename_mdnsmat, filename_mdnsmat_inf;                                                  // for measure_time_series_density_matrix == true
+  std::string filename_dnsmat, filename_dnsmat_inf, filename_dnsmat_trial, filename_dnsmat_inf_trial;  // for measure_time_series_density_matrix == false
 
   bool measure_time_series_density;
   bool measure_time_series_density_matrix;
@@ -217,6 +218,7 @@ private:
   inline void reset_av_dnsmat()  {  _Z_dnsmat = 0.;  for (site_type index = 0; index < _N; ++index)  {  av_dnsmat[index] = 0.;  av_dnsmat_inf[index] = 0.;  }  }
   void statebinning();
   inline void update_obs()  {  if (new_measurement)  {  update_N_and_E(); }  statebinning();  }
+  void update_off_diag_obs();
   void take_diagonal_measurements();
   void take_offdiagonal_measurements();
 
