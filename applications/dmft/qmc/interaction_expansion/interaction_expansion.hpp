@@ -78,8 +78,8 @@ public:
     double max=0; 
     for(unsigned int i=0;i<hist_.size();++i){
       if(max<hist_[i]){
-	max=hist_[i];
-	max_index=i;
+        max=hist_[i];
+        max_index=i;
       }
     }
     return max_index;
@@ -90,7 +90,7 @@ public:
     unsigned int top_index=0;
     for(unsigned int i=0;i<hist_.size();++i){
       if(hist_[i]!=0){
-	top_index=i;
+        top_index=i;
       }
     }
     return top_index;
@@ -101,7 +101,7 @@ public:
     double max=0; 
     for(unsigned int i=0;i<index;++i){
       if(max<hist_[i]){
-	max=hist_[i];
+        max=hist_[i];
       }
     }
     return max;
@@ -142,17 +142,17 @@ public:
   std::pair<matsubara_green_function_t,itime_green_function_t> get_result(); 
 
   void evaluate_selfenergy_measurement_matsubara(const alps::ObservableSet &gathered_measurements, 
-						 matsubara_green_function_t &green_matsubara_measured,
-						 const matsubara_green_function_t &bare_green_matsubara, 
-						 std::vector<double>& densities, const double &beta, 
+                                                 matsubara_green_function_t &green_matsubara_measured,
+                                                 const matsubara_green_function_t &bare_green_matsubara, 
+                                                 std::vector<double>& densities, const double &beta, 
                                                  const int n_site, const int n_flavors, const int n_matsubara) const;
 
   void evaluate_selfenergy_measurement_itime_rs(const alps::ObservableSet &gathered_measurements, itime_green_function_t &green_result,
-						const itime_green_function_t &green0, const double &beta, const int n_site, 
-						const int n_flavors, const int n_tau, const int n_self) const;
+                                                const itime_green_function_t &green0, const double &beta, const int n_site, 
+                                                const int n_flavors, const int n_tau, const int n_self) const;
 
   double green0_spline(const itime_green_function_t &green0, const itime_t delta_t, const int s1, const int s2, 
-		       const spin_t flavor, int n_tau, double beta) const;
+                       const spin_t flavor, int n_tau, double beta) const;
   
 private:
 
@@ -218,34 +218,34 @@ protected:
   virtual void reject_remove()=0;
   
   /*private member variables, constant throughout the simulation*/
-  const unsigned int max_order;			
-  const spin_t n_flavors;				//number of flavors (called 'flavors') in InteractionExpansion
-  const site_t n_site;				//number of sites
-  const frequency_t n_matsubara;	//number of matsubara freq
-  const frequency_t n_matsubara_measurements;	//number of measured matsubara freq
-  const itime_index_t n_tau;			//number of imag time slices
-  const itime_t n_tau_inv;			//the inverse of n_tau
-  const frequency_t n_self;		        //number of self energy (W) binning points
-  const uint64_t mc_steps;			
-  const unsigned long therm_steps;		
+  const unsigned int max_order;                        
+  const spin_t n_flavors;                                //number of flavors (called 'flavors') in InteractionExpansion
+  const site_t n_site;                                //number of sites
+  const frequency_t n_matsubara;        //number of matsubara freq
+  const frequency_t n_matsubara_measurements;        //number of measured matsubara freq
+  const itime_index_t n_tau;                        //number of imag time slices
+  const itime_t n_tau_inv;                        //the inverse of n_tau
+  const frequency_t n_self;                        //number of self energy (W) binning points
+  const uint64_t mc_steps;                        
+  const unsigned long therm_steps;                
   const unsigned int nruns;                      
   const double max_time_in_seconds;
   
-  const double beta;				
-  const double temperature;			//only for performance reasons: avoid 1/beta computations where possible	
-  const double onsite_U;			
-  const double alpha;				
+  const double beta;                                
+  const double temperature;                        //only for performance reasons: avoid 1/beta computations where possible        
+  const double onsite_U;                        
+  const double alpha;                                
   const U_matrix U;
   
   
-  const unsigned int recalc_period;		
-  const unsigned int measurement_period;	
-  const unsigned int convergence_check_period;	
+  const unsigned int recalc_period;                
+  const unsigned int measurement_period;        
+  const unsigned int convergence_check_period;        
   
   /*InteractionExpansion's roundoff threshold*/
-  const double almost_zero;			
+  const double almost_zero;                        
   /*PRNG seed*/
-  const int seed;				
+  const int seed;                                
   
   /*private member variables*/
   matsubara_green_function_t green_matsubara;
@@ -268,7 +268,7 @@ protected:
   simple_hist **vertex_histograms;
   unsigned int vertex_histogram_size;
   
-  unsigned long step;	
+  unsigned long step;        
   time_t start_time;
   clock_t update_time;
   clock_t measurement_time;
@@ -278,7 +278,7 @@ protected:
 
 
 typedef class vertex
-{	
+{        
 public:
   vertex(const spin_t &flavor1, const site_t &site1, const unsigned int &c_dagger_1, const unsigned int &c_1, 
          const spin_t &flavor2, const site_t &site2, const unsigned int &c_dagger_2, const unsigned int &c_2, 

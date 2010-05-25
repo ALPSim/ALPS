@@ -296,7 +296,6 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
   else {
     m2=am*am;
     chi=m2*this->beta_*this->num_sites()/measurement_traits<M>::component_number();
-	
   }
    m4=am*am*am*am; 
    enm2=en*am*am;

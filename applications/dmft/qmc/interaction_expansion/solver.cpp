@@ -52,7 +52,7 @@ void InteractionExpansionRun::interaction_expansion_step(void)
   }else{ // try to REMOVE a vertex
     pert_order=vertices.size(); //choose a vertex
     if(pert_order < 1)
-      return; 	//we have an empty list or one with just one vertex
+      return;     //we have an empty list or one with just one vertex
     //this might be the ideal place to do some cleanup, e.g. get rid of the roundoff errors and such.
     int vertex_nr=(int)(random_01() * pert_order);
     metropolis_weight=try_remove(vertex_nr); //get the determinant ratio. don't perform fastupdate yet

@@ -100,13 +100,13 @@
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="" />
             </function>
           </module>
-          <module cache="1" id="6" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.4.2">
+          <module cache="1" id="6" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
             <location id="6" x="144.22033145" y="476.895170066" />
             <function id="4" name="name" pos="0">
               <parameter alias="" id="4" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="data" />
             </function>
           </module>
-          <module cache="1" id="7" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.4.2">
+          <module cache="1" id="7" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
             <location id="7" x="22.52976438" y="-370.346702551" />
             <function id="5" name="name" pos="0">
               <parameter alias="" id="5" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="dummy" />
@@ -313,3 +313,11 @@
   </action>
   <annotation id="1" key="__abstraction_uuid__" value="a70285d8-5828-11df-b401-001d4fff5050" />
 </vistrail>
+<!--
+   Copyright (c) 2010 Matthias Troyer (troyer@ethz.ch)
+  
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+  

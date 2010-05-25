@@ -51,7 +51,7 @@ public:
   {
     delete[] values_;
   }
-	
+        
   const green_matrix& operator=(const green_matrix &g)
   {
     memory_size_=g.memory_size_;
@@ -87,8 +87,8 @@ public:
     } else{ //get new memory
       double *new_values_=new double[nt_*new_nop];
       memcpy(new_values_, values_, sizeof(double)*nop_*nt_);
-      delete[] values_;	//free memory
-      values_=new_values_;	//let the matrix point to the new memory location.
+      delete[] values_;        //free memory
+      values_=new_values_;        //let the matrix point to the new memory location.
       nop_=new_nop;
       memory_size_=new_nop;
     }

@@ -72,19 +72,19 @@
           <module cache="1" id="2101" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" tag="" version="0.6.0">
             <location id="2872" x="-18.1713475845" y="-43.2756497008" />
           </module>
-          <module cache="1" id="2102" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.4.2">
+          <module cache="1" id="2102" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
             <location id="2873" x="60.6541328043" y="134.703987597" />
             <function id="1658" name="name" pos="0">
               <parameter alias="" id="1845" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="filename" />
             </function>
           </module>
-          <module cache="1" id="2103" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.4.2">
+          <module cache="1" id="2103" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
             <location id="2874" x="159.669999398" y="-130.813420028" />
             <function id="1659" name="name" pos="0">
               <parameter alias="" id="1846" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="value" />
             </function>
           </module>
-          <module cache="1" id="2104" name="File" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.4.2">
+          <module cache="1" id="2104" name="File" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
             <location id="2875" x="33.549230776" y="40.1134111317" />
           </module>
         </workflow>
@@ -159,3 +159,11 @@
   </action>
   <annotation id="2" key="__abstraction_uuid__" value="7b1b6666-5561-11df-abac-002500a2cd74" />
 </vistrail>
+<!--
+   Copyright (c) 2010 Matthias Troyer (troyer@ethz.ch)
+  
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+  

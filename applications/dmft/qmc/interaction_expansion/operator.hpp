@@ -72,21 +72,21 @@ public:
       z_ = c.z_;
       t_ = c.t_;
       if(use_static_exp_)
-	exp_iomegat_=c.exp_iomegat_;
+        exp_iomegat_=c.exp_iomegat_;
       else {
-	if (exp_computed_ && c.exp_computed_) {
-	  memcpy(exp_iomegat_, c.exp_iomegat_, sizeof(std::complex<double>)*c.nm_);
-	}
-	else if (exp_computed_ && (!c.exp_computed_)) {
-	  delete [] exp_iomegat_;
-	}
-	else if ((!exp_computed_) && c.exp_computed_) {
-	  exp_iomegat_ = new std::complex<double>[c.nm_];
-	  memcpy(exp_iomegat_, c.exp_iomegat_, sizeof(std::complex<double>)*c.nm_);
-	}
+         if (exp_computed_ && c.exp_computed_) {
+          memcpy(exp_iomegat_, c.exp_iomegat_, sizeof(std::complex<double>)*c.nm_);
+        }
+        else if (exp_computed_ && (!c.exp_computed_)) {
+          delete [] exp_iomegat_;
+        }
+        else if ((!exp_computed_) && c.exp_computed_) {
+          exp_iomegat_ = new std::complex<double>[c.nm_];
+          memcpy(exp_iomegat_, c.exp_iomegat_, sizeof(std::complex<double>)*c.nm_);
+        }
       }
       nm_=c.nm_;
-      exp_computed_=c.exp_computed_;	  
+      exp_computed_=c.exp_computed_;          
     }
     return *this;
   }
@@ -150,48 +150,48 @@ public:
   {
     if(!use_static_exp_){
       if(!exp_computed_){
-	double* sin_array = new double[n_matsubara];
-	double* cos_array = new double[n_matsubara];
-	//ACML vector functions
+        double* sin_array = new double[n_matsubara];
+        double* cos_array = new double[n_matsubara];
+        //ACML vector functions
 #ifdef ACML
-	int one=1;
-	double arg_array[n_matsubara];
-	int nm=n_matsubara;
-	memcpy(arg_array, omegan_, n_matsubara*sizeof(double));
-	dscal_(&n_matsubara, &t_, arg_array, &one);
-	vrda_sincos_(&nm, arg_array, sin_array, cos_array);
+        int one=1;
+        double arg_array[n_matsubara];
+        int nm=n_matsubara;
+        memcpy(arg_array, omegan_, n_matsubara*sizeof(double));
+        dscal_(&n_matsubara, &t_, arg_array, &one);
+        vrda_sincos_(&nm, arg_array, sin_array, cos_array);
 #else 
-	//MKL vector functions
+        //MKL vector functions
 #ifdef MKL
-	int one=1;
-	double arg_array = new double[n_matsubara];
-	int nm=n_matsubara;
-	memcpy(arg_array, omegan_, n_matsubara*sizeof(double));
-	dscal_(&n_matsubara, &t_, arg_array, &one);
-	vdsincos_(&nm, arg_array, sin_array, cos_array);
-	delete [] arg_array;
+        int one=1;
+        double arg_array = new double[n_matsubara];
+        int nm=n_matsubara;
+        memcpy(arg_array, omegan_, n_matsubara*sizeof(double));
+        dscal_(&n_matsubara, &t_, arg_array, &one);
+        vdsincos_(&nm, arg_array, sin_array, cos_array);
+        delete [] arg_array;
 #else
-	//NO vector functions
-	for(frequency_t o=0;o<n_matsubara;++o){
-	  cos_array[o]=cos(omegan_[o]*t_);
-	  sin_array[o]=sin(omegan_[o]*t_);
-	}
+        //NO vector functions
+        for(frequency_t o=0;o<n_matsubara;++o){
+          cos_array[o]=cos(omegan_[o]*t_);
+          sin_array[o]=sin(omegan_[o]*t_);
+        }
 #endif
 #endif    
-	exp_iomegat_=new std::complex<double>[n_matsubara];
-	for(frequency_t o=0;o<n_matsubara;++o)
-	  exp_iomegat_[o] = std::complex<double>(cos_array[o], sign*sin_array[o]);
-	exp_computed_=true;
-	delete[] sin_array;
-	delete[] cos_array;
+        exp_iomegat_=new std::complex<double>[n_matsubara];
+        for(frequency_t o=0;o<n_matsubara;++o)
+          exp_iomegat_[o] = std::complex<double>(cos_array[o], sign*sin_array[o]);
+        exp_computed_=true;
+        delete[] sin_array;
+        delete[] cos_array;
       }
     } else { //use static exp
       int taun=(int)(t_*ntau_/beta_);
       assert(taun<ntau_);
       if(sign==1) 
-	exp_iomegat_=&(exp_iomegan_tau_[taun*2*nm_]);
+        exp_iomegat_=&(exp_iomegan_tau_[taun*2*nm_]);
       else
-	exp_iomegat_=&(exp_iomegan_tau_[taun*2*nm_ + nm_]);
+        exp_iomegat_=&(exp_iomegan_tau_[taun*2*nm_ + nm_]);
     }
 
 

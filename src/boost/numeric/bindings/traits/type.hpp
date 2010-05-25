@@ -1,3 +1,17 @@
+/*
+ * 
+ * Copyright (c) Kresimir Fresl and Toon Knapen 2002, 2003 
+ *
+ * Distributed under the Boost Software License, Version 1.0.
+ * (See accompanying file LICENSE_1_0.txt or copy at
+ * http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * First author acknowledges the support of the Faculty of Civil Engineering, 
+ * University of Zagreb, Croatia.
+ *
+ */
+
+
 #ifndef boost_numeric_bindings_type_hpp
 #define boost_numeric_bindings_type_hpp
 

@@ -1,0 +1,47 @@
+\documentclass[prl, superscriptaddress, showpacs, twocolumn]{revtex4}
+\usepackage{vistrails}
+
+
+\begin{document}
+
+\title{A paper}
+\author{Matthias Troyer}
+\affiliation{Theoretische Physik, ETH Zurich, 8093 Zurich, Switzerland}
+\date{\today}
+
+\begin{abstract}
+This example paper shows how figures can be embedded directly from Vistrails into a LaTeX document.
+\end{abstract}
+
+\pacs{71.10.Fd}
+
+\hyphenation{}
+
+\maketitle
+
+In Fig. ~\ref{susc}) we show the susceptibility of various quasi-one dimensional classical and quantum spin models.
+
+\begin{figure}[h!]
+\begin{center}
+\vistrail[host=alps.ethz.ch,
+db=vistrails,
+vtid=3,
+version=220,
+tag=nice figure,
+showspreadsheetonly]{}
+\caption{Green's function for a random point.}
+\label{green}
+\end{center}
+\end{figure}
+
+
+\acknowledgments
+
+The calculations have been performed on the Brutus  cluster at ETH Z{\"u}rich, using the ALPS library \cite{ALPS} and VisTrails  \cite{VisTrails} .
+
+\begin{thebibliography}{9}
+\bibitem{ALPS} A.F. Albuquerque {\it et al.}, J. of Magn. and Magn. Materials {\bf 310}, 1187 (2007); \url{http://alps.comp-phys.org/}
+\bibitem{VisTrails}  \url{http://www.vistrails.org/}
+\end{thebibliography}
+
+\end{document}

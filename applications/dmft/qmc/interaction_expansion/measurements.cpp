@@ -97,7 +97,7 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   alps::RealVectorObsevaluator pert_obseval=gathered_measurements["PertOrder"];
   //clock_t tend=clock();
   //std::cout<<"getting this took: "<<(tend-tstart)/(double)CLOCKS_PER_SEC<<"of which mid was: "
-	//   <<(tmid-tstart)/(double)CLOCKS_PER_SEC<<"getting measurements sign: "<<std::endl;
+  //   <<(tmid-tstart)/(double)CLOCKS_PER_SEC<<"getting measurements sign: "<<std::endl;
   /*output acceptance ratios*/
   alps::RealObsevaluator vertex_insertion=gathered_measurements["VertexInsertion"];
   alps::RealObsevaluator vertex_removal=gathered_measurements["VertexRemoval"];
@@ -136,7 +136,7 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
     for (unsigned int z=0; z<n_flavors; ++z) {
       densities[z] = 0;
       for (unsigned int i=0; i<n_site; ++i)
-	densities[z] -= green_itime_measured(n_tau,i,i,z);
+        densities[z] -= green_itime_measured(n_tau,i,i,z);
       densities[z] /= n_site;
     }
   }

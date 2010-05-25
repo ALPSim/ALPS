@@ -121,7 +121,7 @@ double HubbardInteractionExpansionRun::try_add()
   M[1].alpha().push_back(alpha1); //symmetrized version
   //keep track of vertex list
   vertices.push_back(vertex(flavor0, site, M[0].creators().size()-1, M[0].annihilators().size()-1, 
-			    flavor1, site, M[1].creators().size()-1, M[1].annihilators().size()-1, abs_w)); 
+                        flavor1, site, M[1].creators().size()-1, M[1].annihilators().size()-1, abs_w)); 
   //perform fastupdate up for weight
   double lambda0=fastupdate_up(flavor0, true); // true means compute_only_weight
   double lambda1=fastupdate_up(flavor1, true);
@@ -215,7 +215,7 @@ double MultiBandDensityHubbardInteractionExpansionRun::try_add()
   M[flavor2].alpha().       push_back(alpha2); //symmetrized version
   
   vertices.push_back(vertex(flavor1, site1, M[flavor1].creators().size()-1, M[flavor1].annihilators().size()-1, 
-			    flavor2, site2, M[flavor2].creators().size()-1, M[flavor2].annihilators().size()-1, abs_w));
+                flavor2, site2, M[flavor2].creators().size()-1, M[flavor2].annihilators().size()-1, abs_w));
   
   double lambda1=fastupdate_up(flavor1, true);
   double lambda2=fastupdate_up(flavor2, true);
@@ -227,7 +227,7 @@ double MultiBandDensityHubbardInteractionExpansionRun::try_add()
 
 
 void MultiBandDensityHubbardInteractionExpansionRun::perform_add()
-{	
+{    
   //find flavors
   spin_t flavor1=vertices.back().flavor1();
   spin_t flavor2=vertices.back().flavor2();

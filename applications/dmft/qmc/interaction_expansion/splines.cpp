@@ -47,7 +47,7 @@ double InteractionExpansionRun::green0_spline(const creator &cdagger, const anni
   //we will receive this as an input into our solver later.
   spin_t flavor;
   if((flavor=cdagger.flavor()) != c.flavor()){
-    return 0;	//the delta in spin space.
+    return 0; //the delta in spin space.
   }
   itime_t delta_t=cdagger.t()-c.t();
   site_t site1 = cdagger.s();

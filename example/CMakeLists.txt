@@ -3,12 +3,22 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-enable_testing()
 
-add_subdirectory(parapack)
-add_subdirectory(scheduler)
-add_subdirectory(ngs)
-add_subdirectory(sampling)
-add_subdirectory(model)
-add_subdirectory(ietl)
+if (ALPS_BUILD_SOURCE)
 
+  INSTALL(FILES CMakeLists.txt DESTINATION alps/example)  
+  install(DIRECTORY parapack scheduler sampling model ietl DESTINATION alps/example
+          FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+
+else (ALPS_BUILD_SOURCE)
+
+  enable_testing()
+
+  add_subdirectory(parapack)
+  add_subdirectory(scheduler)
+  add_subdirectory(ngs)
+  add_subdirectory(sampling)
+  add_subdirectory(model)
+  add_subdirectory(ietl)
+
+endif (ALPS_BUILD_SOURCE)

@@ -345,9 +345,9 @@ def groupSets(groups, for_each = []):
         hgroups[idx] = for_each_sets.values()
 
     if dd > 1:
-    	return groups
+        return groups
     else:
-    	return hgroups[0]
+        return hgroups[0]
 
 def collectXY(sets,x,y,foreach=[]):
       foreach_sets = {}

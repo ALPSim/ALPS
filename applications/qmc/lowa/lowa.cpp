@@ -345,13 +345,13 @@ bool Lowa::test_conf()
     for (kinks_iterator_type it = _kinks_on_lattice[i].begin(); it != _kinks_on_lattice[i].end(); ++it, ++ii) {
       //if (it->before() < 0 || it->before() > _statemax) {
       if (it->before() > _statemax) {
-	std::cout << "\n Error with density  << " << i << "\t "<< &*it << "\t" << it->time();
-	return (0);
+    std::cout << "\n Error with density  << " << i << "\t "<< &*it << "\t" << it->time();
+    return (0);
       }
       //if (it->after() < 0 || it->after() > _statemax) {
       if (it->after() > _statemax) {
-	std::cout << "\n Error with density  << " << i << "\t "<< &*it << "\t" << it->time();
-	return (0);
+    std::cout << "\n Error with density  << " << i << "\t "<< &*it << "\t" << it->time();
+    return (0);
       }
     }
   }

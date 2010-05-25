@@ -56,19 +56,19 @@
             <port id="7" moduleId="2" moduleName="File" name="value" signature="(edu.utah.sci.vistrails.basic:File)" type="source" />
             <port id="8" moduleId="1" moduleName="OutputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="destination" />
           </connection>
-          <module cache="1" id="1" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.4.2">
+          <module cache="1" id="1" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="">
             <location id="1" x="-48.8934150915" y="-127.870323418" />
             <function id="1" name="name" pos="0">
               <parameter alias="" id="1" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="value" />
             </function>
           </module>
-          <module cache="1" id="2" name="File" namespace="" package="edu.utah.sci.vistrails.basic" version="1.4.2">
+          <module cache="1" id="2" name="File" namespace="" package="edu.utah.sci.vistrails.basic" version="">
             <location id="2" x="115.358770876" y="37.9944879918" />
           </module>
           <module cache="1" id="3" name="RichTextCell" namespace="" package="edu.utah.sci.vistrails.spreadsheet" version="0.9.0">
             <location id="3" x="-247.343865277" y="-123.107557088" />
           </module>
-          <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.4.2">
+          <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="">
             <location id="4" x="180.878509492" y="212.983392515" />
             <function id="2" name="name" pos="0">
               <parameter alias="" id="2" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="filename" />
@@ -149,3 +149,11 @@
   </action>
   <annotation id="1" key="__abstraction_uuid__" value="572c9f02-665c-11df-a5d9-002500a2cd74" />
 </vistrail>
+<!--
+   Copyright (c) 2010 Matthias Troyer (troyer@ethz.ch)
+  
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+  

@@ -82,3 +82,11 @@
   </action>
   <annotation id="1" key="__abstraction_uuid__" value="c1720ce0-3456-11df-8e93-002500a2cd74" />
 </vistrail>
+<!--
+   Copyright (c) 2010 Matthias Troyer (troyer@ethz.ch)
+  
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+  

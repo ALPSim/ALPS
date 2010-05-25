@@ -38,8 +38,8 @@
 extern "C" void dgemv_(const void *trans, const void *size1, const void *size2, const void *alpha, const void *values_, const void *memory_size,
                        const void *v1, const void *inc, const void *beta, void *v2, const void *incb);
 extern "C" void dgemm_(const void *transa, const void *transb, const void *m, const void *n, const void *k, 
-		       const void *alpha, const void *A, const void *lda,
-		       const void *B, const void *ldb, const void *beta, const void *C, const void *ldc);
+                     const void *alpha, const void *A, const void *lda,
+                     const void *B, const void *ldb, const void *beta, const void *C, const void *ldc);
 extern "C" void dger_(const void *m, const void* n, const void* alpha,const void*  x, const void* incx, const void*y, const void*  incy,
                       const void* a,const void* lda) ;
 extern "C" int idamax_(const unsigned int *n,const double*  x,const unsigned int* incx);
@@ -117,8 +117,8 @@ public:
       for(unsigned int i=0;i<size_;++i){
         memcpy(new_values+i*new_size, values_+i*memory_size_, sizeof(double)*size_); //for each row: copy the entire row.
       }
-      delete[] values_;	//free memory
-      values_=new_values;	//let the matrix point to the new memory location.
+      delete[] values_;    //free memory
+      values_=new_values;    //let the matrix point to the new memory location.
       size_=new_size;
       memory_size_=new_size;
     }
@@ -138,7 +138,7 @@ public:
   { //perform v2[i]=M[ij]v1[j]
     //call the BLAS routine for matrix vector multiplication:
     char trans='T';
-    double alpha=1., beta=0.;	//no need to multiply a constant or add a vector
+    double alpha=1., beta=0.;    //no need to multiply a constant or add a vector
     int inc=1;
     dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
   }

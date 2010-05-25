@@ -132,7 +132,7 @@ namespace ietl {
     std::vector<magnitude_type> eval(alpha.size()); 
     // on return from stev function, eval contains the eigen values.
     n = alpha.size();
-    ietl::FortranMatrix<magnitude_type>* z2 = NULL;
+    ietl::FortranMatrix<magnitude_type>* z2 = 0;
     if(do_err)
     {
       z2 = new ietl::FortranMatrix<magnitude_type>(n,n);
@@ -180,8 +180,8 @@ namespace ietl {
       else
         err.push_back(fabs(*beta.rbegin() * (*z2)(n-1,n-1))); // *beta.rbegin() = betaMplusOne.
     }
-	
-	delete z2;
+    
+    delete z2;
     
     // the unique eigen values selection, their multiplicities and corresponding errors calculation ends.
     

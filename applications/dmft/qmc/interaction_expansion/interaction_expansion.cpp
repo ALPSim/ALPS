@@ -44,26 +44,26 @@ std::complex<double> *c_or_cdagger::exp_iomegan_tau_;
 InteractionExpansionRun::InteractionExpansionRun(const alps::ProcessList &where, const alps::Parameters &parms, int node)
   : alps::scheduler::MCRun(where,parms,node),
     max_order(parms.value_or_default("MAX_ORDER",2048)),       
-    n_flavors(parms.value_or_default("FLAVORS",2)),	
-    n_site(parms.value_or_default("SITES",1)),	
+    n_flavors(parms.value_or_default("FLAVORS",2)),        
+    n_site(parms.value_or_default("SITES",1)),        
     n_matsubara((int)parms["NMATSUBARA"]),
     n_matsubara_measurements(parms.value_or_default("NMATSUBARA_MEASUREMENTS", n_matsubara)),
     n_tau((int)parms["N"]),
     n_tau_inv(1./n_tau),
     n_self(parms.value_or_default("NSELF",10*n_tau)),
     mc_steps((uint64_t)parms["SWEEPS"]*(uint64_t)parms.value_or_default("SWEEP_MULTIPLICATOR", 1L)),
-    therm_steps((unsigned int)parms["THERMALIZATION"]),	
+    therm_steps((unsigned int)parms["THERMALIZATION"]),        
     nruns(parms.value_or_default("NRUNS", 1)),
-    max_time_in_seconds(parms.value_or_default("MAX_TIME", 86400)),	
-    beta((double)parms["BETA"]),			
+    max_time_in_seconds(parms.value_or_default("MAX_TIME", 86400)),        
+    beta((double)parms["BETA"]),                        
     temperature(1./beta),
-    onsite_U((double)parms["U"]),			
+    onsite_U((double)parms["U"]),                        
     alpha((double)parms["ALPHA"]),
-    U(parms), 			
+    U(parms),                         
     recalc_period(parms.value_or_default("RECALC_PERIOD",5000)),
-    measurement_period(parms.value_or_default("MEASUREMENT_PERIOD",200)),	
-    convergence_check_period(parms.value_or_default("CONVERGENCE_CHECK_PERIOD",recalc_period)),	
-    almost_zero(parms.value_or_default("ALMOSTZERO",1.e-16)),		
+    measurement_period(parms.value_or_default("MEASUREMENT_PERIOD",200)),        
+    convergence_check_period(parms.value_or_default("CONVERGENCE_CHECK_PERIOD",recalc_period)),        
+    almost_zero(parms.value_or_default("ALMOSTZERO",1.e-16)),                
     seed(parms.value_or_default("SEED",0)),
     green_matsubara(n_matsubara, n_site, n_flavors),
     bare_green_matsubara(n_matsubara,n_site, n_flavors), 
@@ -96,14 +96,14 @@ InteractionExpansionRun::InteractionExpansionRun(const alps::ProcessList &where,
   else {
     for(spin_t flavor=0; flavor<n_flavors; ++flavor) 
       for(site_t site1=0; site1<n_site; ++site1) 
-	for(site_t site2=0; site2<n_site; ++site2) 
-	  for(itime_index_t t=0; t<=n_tau; ++t)
-	    bare_green_itime(t, site1, site2, flavor)=-0.5;
+        for(site_t site2=0; site2<n_site; ++site2) 
+          for(itime_index_t t=0; t<=n_tau; ++t)
+            bare_green_itime(t, site1, site2, flavor)=-0.5;
     for(spin_t flavor=0; flavor<n_flavors; ++flavor) 
       for(site_t site1=0; site1<n_site; ++site1) 
-	for(site_t site2=0; site2<n_site; ++site2) 
-	  for(unsigned int k=0; k<n_matsubara; ++k) 
-	    bare_green_matsubara(k, site1, site2, flavor)=std::complex<double>(0, -beta/((2*k+1)*M_PI)); 
+        for(site_t site2=0; site2<n_site; ++site2) 
+          for(unsigned int k=0; k<n_matsubara; ++k) 
+            bare_green_matsubara(k, site1, site2, flavor)=std::complex<double>(0, -beta/((2*k+1)*M_PI)); 
     //fourier transform of -1/2
   }
   //initialize the simulation variables
@@ -128,25 +128,25 @@ void InteractionExpansionRun::dostep()
       //recompute inverse matrix M from scratch to avoid roundoff errors.
       clock_t time0=clock();
       if(step % recalc_period ==0)
-	reset_perturbation_series();
+        reset_perturbation_series();
       if(step> therm_steps)
         thermalized=true; 
       clock_t time1=clock();
-      interaction_expansion_step();		
+      interaction_expansion_step();                
       clock_t time2=clock();
       if(thermalized && step % measurement_period ==0)
-	measure_observables();
+        measure_observables();
       clock_t time3=clock();
       update_time+=time2-time1;
       measurement_time+=time3-time2;
       //increase histogram
       if(vertices.size()<max_order)
-	pert_hist[vertices.size()]++;
+        pert_hist[vertices.size()]++;
       ++step;
       if(time3-time0 !=0){
-	measurements.get<alps::RealObservable>("UpdateTime")<<(time2-time1)/(double)(time3-time0);
-	measurements.get<alps::RealObservable>("MeasurementTime")<<(time3-time2)/(double)(time3-time0);
-	measurements.get<alps::RealObservable>("RecomputeTime")<<(time1-time0)/(double)(time3-time0);
+        measurements.get<alps::RealObservable>("UpdateTime")<<(time2-time1)/(double)(time3-time0);
+        measurements.get<alps::RealObservable>("MeasurementTime")<<(time3-time2)/(double)(time3-time0);
+        measurements.get<alps::RealObservable>("RecomputeTime")<<(time1-time0)/(double)(time3-time0);
       }
     }
     //}
