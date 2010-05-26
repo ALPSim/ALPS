@@ -89,10 +89,10 @@ int main(int argc, char** argv)
     {
       std::ifstream is(argv[1]);
       if(!is.is_open()){std::cerr<<"parameter file argv[1] "<<argv[1]<<"is not open! exiting!"<<std::endl; abort(); }
-      is>>parms;
-      is.close();
-      parms["BASENAME"]=std::string(argv[1]);
-      alps::hdf5::oarchive dumpfile(std::string(argv[1])+".h5");
+	//  parms["BASENAME"]=std::string(argv[1]);
+	  is>>parms;
+	  parms["BASENAME"]=std::string(argv[1]);
+	  alps::hdf5::oarchive dumpfile(std::string(argv[1])+".h5");
       dumpfile<<alps::make_pvp("/parameters", parms);
     }
     //perform selfconsistency loop in...
