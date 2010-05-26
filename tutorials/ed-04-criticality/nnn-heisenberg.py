@@ -84,7 +84,7 @@ pyalps.pyplot.plot(spectrum)
 
 plt.legend(prop={'size':8})
 plt.xlabel("$k$")
-plt.ylabel("E_0")
+plt.ylabel("$E_0$")
 
 plt.xlim(-0.02, math.pi+0.02)
 

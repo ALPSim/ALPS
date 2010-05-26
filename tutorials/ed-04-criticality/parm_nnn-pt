@@ -1,0 +1,55 @@
+LATTICE    = "chain lattice"
+MODEL      = "spin"
+local_S    = 0.5
+J          = 1
+NUMBER_EIGENVALUES = 5
+CONSERVED_QUANTUMNUMBER = 'Sz'
+
+{ L=8; Sz_total=0; J1=0.0 }
+{ L=8; Sz_total=0; J1=0.1 }
+{ L=8; Sz_total=0; J1=0.2 }
+{ L=8; Sz_total=0; J1=0.3 }
+{ L=8; Sz_total=0; J1=0.4 }
+{ L=8; Sz_total=0; J1=0.5 }
+{ L=8; Sz_total=0; J1=0.6 }
+{ L=8; Sz_total=0; J1=0.7 }
+{ L=8; Sz_total=0; J1=0.8 }
+{ L=8; Sz_total=0; J1=0.9 }
+{ L=8; Sz_total=0; J1=1.0 }
+
+{ L=8; Sz_total=1; J1=0.0 }
+{ L=8; Sz_total=1; J1=0.1 }
+{ L=8; Sz_total=1; J1=0.2 }
+{ L=8; Sz_total=1; J1=0.3 }
+{ L=8; Sz_total=1; J1=0.4 }
+{ L=8; Sz_total=1; J1=0.5 }
+{ L=8; Sz_total=1; J1=0.6 }
+{ L=8; Sz_total=1; J1=0.7 }
+{ L=8; Sz_total=1; J1=0.8 }
+{ L=8; Sz_total=1; J1=0.9 }
+{ L=8; Sz_total=1; J1=1.0 }
+
+{ L=12; Sz_total=0; J1=0.0 }
+{ L=12; Sz_total=0; J1=0.1 }
+{ L=12; Sz_total=0; J1=0.2 }
+{ L=12; Sz_total=0; J1=0.3 }
+{ L=12; Sz_total=0; J1=0.4 }
+{ L=12; Sz_total=0; J1=0.5 }
+{ L=12; Sz_total=0; J1=0.6 }
+{ L=12; Sz_total=0; J1=0.7 }
+{ L=12; Sz_total=0; J1=0.8 }
+{ L=12; Sz_total=0; J1=0.9 }
+{ L=12; Sz_total=0; J1=1.0 }
+
+{ L=12; Sz_total=1; J1=0.0 }
+{ L=12; Sz_total=1; J1=0.1 }
+{ L=12; Sz_total=1; J1=0.2 }
+{ L=12; Sz_total=1; J1=0.3 }
+{ L=12; Sz_total=1; J1=0.4 }
+{ L=12; Sz_total=1; J1=0.5 }
+{ L=12; Sz_total=1; J1=0.6 }
+{ L=12; Sz_total=1; J1=0.7 }
+{ L=12; Sz_total=1; J1=0.8 }
+{ L=12; Sz_total=1; J1=0.9 }
+{ L=12; Sz_total=1; J1=1.0 }
+
