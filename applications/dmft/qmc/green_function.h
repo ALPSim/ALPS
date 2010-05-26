@@ -137,7 +137,7 @@ template <typename T> class green_function{
       ar<<alps::make_pvp(path+"/nt",nt_);
       ar<<alps::make_pvp(path+"/nf",nf_);
       for(unsigned int i=0;i<nf_;++i){
-        std::stringstream subpath; subpath<<path<<"/Green_"<<i<<"/values/mean";
+        std::stringstream subpath; subpath<<path<<"/Green_"<<i<<"/mean/value";
         //currently we're not writing the error.
         //std::stringstream subpath_e; subpath_e<<path<<"/"<<i<<"/"<<j<<"/"<<"/"<<k<<"/values/error";
         ar<<alps::make_pvp(subpath.str(), val_, nt_);
