@@ -90,9 +90,9 @@ public:
         {
                 char s[200];
                 int hh, mm, ss, dd;
-                  char cm[3];
-                char cs[3];
-                char cd[3];
+                  char cm[30];
+                char cs[30];
+                char cd[30];
 
                 switch(f){
                   case CTIMER_HOURS:

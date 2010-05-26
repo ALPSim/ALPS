@@ -102,15 +102,17 @@ class FileList
     std::string last_filename;
     boost::filesystem::path temp_dir;
   public:
-    FileList() { set_temp_dir("./"); };
+    FileList() { set_temp_dir("."); };
     FileList(const char *dir) { set_temp_dir(dir); }
 
     void set_temp_dir(const char *dir) 
       { 
          std::string aux = std::string(dir);
          struct stat dir_ptr;
-         if(!stat(aux.c_str(),&dir_ptr) == 0)
+		 if(!stat(aux.c_str(),&dir_ptr) == 0) {
+			 std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path.\n";
            boost::throw_exception(std::runtime_error("*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path."));
+		 }
          std::cout << "ALPS DMRG temporary files will be written to " << aux << std::endl;
          temp_dir = boost::filesystem::path(aux); 
       }
