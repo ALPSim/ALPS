@@ -48,7 +48,7 @@ for l in [4, 6, 8, 10, 12, 14]:
 
 #write the input file and run the simulation
 input_file = pyalps.writeInputFiles('parm2a',parms)
-res = pyalps.runApplication('sparsediag',input_file) # ,MPI=4)
+res = pyalps.runApplication('sparsediag',input_file) #, MPI=4)
 
 #load all measurements for all states
 data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm2a'))
@@ -82,15 +82,13 @@ plt.legend()
 plt.xlim(0,0.25)
 plt.ylim(0,1.0)
 
-d0 = fw.Parameter(0.411)
-L0 = fw.Parameter(1000)
-a = fw.Parameter(1)
-f = lambda self, x: d0()+a()*np.exp(-x/L0())
+pars = [fw.Parameter(0.411), fw.Parameter(1000), fw.Parameter(1)]
+f = lambda self, x, p: p[0]()+p[1]()*np.exp(-x/p[2]())
 # we fit only a range from 8 to 14
-fw.fit(None, f, (d0,L0,a), np.array(gapplot.y)[2:], np.sort(lengths)[2:])
+fw.fit(None, f, pars, np.array(gapplot.y)[2:], np.sort(lengths)[2:])
 
 x = np.linspace(0, 1./min(lengths), 100)
-plt.plot(x, f(None, 1/x))
+plt.plot(x, f(None, 1/x, pars))
 
 plt.show()
 

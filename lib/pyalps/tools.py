@@ -76,11 +76,11 @@ def executeCommandLogged(cmdline,logfile):
       cmdline += ['>&',logfile]
     return executeCommand(cmdline)
 
-def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=None):
+def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):
     """ run an ALPS application """
     cmdline = []
     if MPI != None:
-        cmdline += ['mpirun','-np',str(MPI)]
+        cmdline += [mpirun,'-np',str(MPI)]
     cmdline += [appname]
     if MPI != None:
         cmdline += ['--mpi','--Nmax','1']

@@ -31,7 +31,7 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms = []
-for l in [4, 6, 8, 10]:
+for l in [4, 6, 8, 10, 12, 14]:
   for sz in [0, 1]:
       parms.append(
         { 
