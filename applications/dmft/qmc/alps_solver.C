@@ -41,7 +41,11 @@
 
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
 {
+#ifdef ALPS_HAVE_MPI
 	comm_init(argc,argv, true);
+#else
+	comm_init(argc,argv, false);
+#endif
 	if(is_master()){
           alps::scheduler::NoJobfileOptions opt(1,argv);
           opt.max_check_time=60;
