@@ -40,6 +40,7 @@ class ising_sim : public alps::mcbase {
         {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
+            results << alps::RealObservable("Unused");
             results << alps::RealObservable("Energy");
             results << alps::RealObservable("Magnetization");
             results << alps::RealObservable("Magnetization^2");

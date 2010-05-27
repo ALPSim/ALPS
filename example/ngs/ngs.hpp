@@ -107,28 +107,32 @@ namespace alps {
                 hdf5::iarchive ar(input_file);
                 ar >> make_pvp("/parameters", *this);
             }
+
             mcparamvalue & operator[](std::string const & k) {
                 return std::map<std::string, mcparamvalue>::operator[](k);
             }
+
             mcparamvalue const & operator[](std::string const & k) const {
                 if (find(k) == end())
                     throw std::invalid_argument("unknown argument: "  + k);
                 return find(k)->second;
             }
+
             mcparamvalue value_or_default(std::string const & k, mcparamvalue const & v) const {
                 if (find(k) == end())
                     return mcparamvalue(v);
                 return find(k)->second;
             }
+
             bool defined(std::string const & k) const {
-                if (find(k) == end())
-                    return false;
-                return true;
+                return find(k) == end();
             }
+
             void serialize(hdf5::oarchive & ar) const {
                 for (const_iterator it = begin(); it != end(); ++it)
                     ar << make_pvp(it->first, static_cast<std::string>(it->second));
             }
+
             void serialize(hdf5::iarchive & ar) {
                 std::vector<std::string> list = ar.list_children(ar.get_context());
                 for (std::vector<std::string>::const_iterator it = list.begin(); it != list.end(); ++it) {
@@ -207,6 +211,11 @@ namespace alps {
 
     class mcany {
         public:
+        
+            virtual uint64_t count() const { 
+                throw std::logic_error("not Impl"); 
+            }
+
             virtual void serialize(hdf5::iarchive & ar) { 
                 throw std::logic_error("not Impl"); 
             }
@@ -248,11 +257,19 @@ namespace alps {
                 , std::vector<value_type> const & values
             ): alea::mcdata<T>(count, mean, error, variance, tau, binsize, values) {}
 
+            inline uint64_t count() const { 
+                return alea::mcdata<T>::count();
+            }
+
             typename std::string to_string() const {
-                std::stringstream s;
-                s << std::fixed << std::setprecision(5) << alea::mcdata<T>::mean() << "(" << alea::mcdata<T>::count() << ") +/-" << alea::mcdata<T>::error() << " "
-                  << alea::mcdata<T>::bins() << "#" << alea::mcdata<T>::bin_size();
-                return s.str();
+                if (count() == 0)
+                    return "No Measurements";
+                else {
+                    std::stringstream s;
+                    s << std::fixed << std::setprecision(5) << alea::mcdata<T>::mean() << "(" << count() << ") +/-" << alea::mcdata<T>::error() << " "
+                      << alea::mcdata<T>::bins() << "#" << alea::mcdata<T>::bin_size();
+                    return s.str();
+                }
             }
 
             void serialize(hdf5::iarchive & ar) { 
@@ -270,23 +287,23 @@ namespace alps {
                 using boost::numeric::operators::operator*;
                 using boost::numeric::operators::operator/;
                 uint64_t count_all;
-                boost::mpi::reduce(communicator, alea::mcdata<T>::count(), count_all, std::plus<uint64_t>(), 0);
-                result_type mean = alea::mcdata<T>::mean() * static_cast<typename alea::mcdata<T>::element_type>(alea::mcdata<T>::count()), mean_all;
+                boost::mpi::reduce(communicator, count(), count_all, std::plus<uint64_t>(), 0);
+                result_type mean = alea::mcdata<T>::mean() * static_cast<typename alea::mcdata<T>::element_type>(count()), mean_all;
                 mcresize(mean_all, mcsize(mean));
                 assert(mcmpierror(MPI_Reduce(mcpointer(mean), mcpointer(mean_all), mcsize(mean), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
-                result_type error = sq(alea::mcdata<T>::error()) * sq(static_cast<typename alea::mcdata<T>::element_type>(alea::mcdata<T>::count())), error_all;
+                result_type error = sq(alea::mcdata<T>::error()) * sq(static_cast<typename alea::mcdata<T>::element_type>(count())), error_all;
                 mcresize(error_all, mcsize(error));
                 assert(mcmpierror(MPI_Reduce(mcpointer(error), mcpointer(error_all), mcsize(error), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                 boost::optional<typename alea::mcdata<T>::result_type> variance_all_opt;
                 if (alea::mcdata<T>::has_variance()) {
-                    result_type variance = alea::mcdata<T>::variance() * static_cast<typename alea::mcdata<T>::element_type>(alea::mcdata<T>::count()), variance_all;
+                    result_type variance = alea::mcdata<T>::variance() * static_cast<typename alea::mcdata<T>::element_type>(count()), variance_all;
                     mcresize(variance_all, mcsize(variance));
                     assert(mcmpierror(MPI_Reduce(mcpointer(variance), mcpointer(variance_all), mcsize(variance), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                     variance_all_opt = variance_all / static_cast<typename alea::mcdata<T>::element_type>(count_all);
                 }
                 boost::optional<typename alea::mcdata<T>::time_type> tau_all_opt;
                 if (alea::mcdata<T>::has_tau()) {
-                    result_type tau = alea::mcdata<T>::tau() * static_cast<typename alea::mcdata<T>::element_type>(alea::mcdata<T>::count()), tau_all;
+                    result_type tau = alea::mcdata<T>::tau() * static_cast<typename alea::mcdata<T>::element_type>(count()), tau_all;
                     mcresize(tau_all, mcsize(tau));
                     assert(mcmpierror(MPI_Reduce(mcpointer(tau), mcpointer(tau_all), mcsize(tau), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                     tau_all_opt = tau_all / static_cast<typename alea::mcdata<T>::element_type>(count_all);
@@ -323,17 +340,17 @@ namespace alps {
             void reduce_slave(boost::mpi::communicator const & communicator, boost::mpi::communicator const & group_communicator, boost::mpi::communicator const & master_communicator) {
                 using alps::numeric::sq;
                 using boost::numeric::operators::operator*;
-                boost::mpi::reduce(communicator, alea::mcdata<T>::count(), std::plus<uint64_t>(), 0);
-                result_type mean = alea::mcdata<T>::mean() * static_cast<typename alea::mcdata<T>::element_type>(alea::mcdata<T>::count());
+                boost::mpi::reduce(communicator, count(), std::plus<uint64_t>(), 0);
+                result_type mean = alea::mcdata<T>::mean() * static_cast<typename alea::mcdata<T>::element_type>(count());
                 assert(mcmpierror(MPI_Reduce(mcpointer(mean), NULL, mcsize(mean), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
-                result_type error = sq(alea::mcdata<T>::error()) * sq(static_cast<typename alea::mcdata<T>::element_type>(alea::mcdata<T>::count()));
+                result_type error = sq(alea::mcdata<T>::error()) * sq(static_cast<typename alea::mcdata<T>::element_type>(count()));
                 assert(mcmpierror(MPI_Reduce(mcpointer(error), NULL, mcsize(error), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                 if (alea::mcdata<T>::has_variance()) {
-                    result_type variance = alea::mcdata<T>::variance() * static_cast<typename alea::mcdata<T>::element_type>(alea::mcdata<T>::count());
+                    result_type variance = alea::mcdata<T>::variance() * static_cast<typename alea::mcdata<T>::element_type>(count());
                     assert(mcmpierror(MPI_Reduce(mcpointer(variance), NULL, mcsize(variance), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                 }
                 if (alea::mcdata<T>::has_tau()) {
-                    result_type tau = alea::mcdata<T>::tau() * static_cast<typename alea::mcdata<T>::element_type>(alea::mcdata<T>::count());
+                    result_type tau = alea::mcdata<T>::tau() * static_cast<typename alea::mcdata<T>::element_type>(count());
                     assert(mcmpierror(MPI_Reduce(mcpointer(tau), NULL, mcsize(tau), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                 }
                 result_type binvalue;
@@ -557,8 +574,8 @@ namespace alps {
                 , start_time(boost::posix_time::second_clock::local_time())
                 , check_time(boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(next_check))
                 , communicator(c)
-                , group_communicator(communicator.split(communicator.rank() % static_cast<std::size_t>(p.value_or_default("maxbinnumber", 2))))
-                , master_communicator(communicator.split(communicator.rank() / static_cast<std::size_t>(p.value_or_default("maxbinnumber", 2))))
+                , group_communicator(communicator.split(communicator.rank() % static_cast<std::size_t>(p.value_or_default("maxbinnumber", 128))))
+                , master_communicator(communicator.split(communicator.rank() / static_cast<std::size_t>(p.value_or_default("maxbinnumber", 128))))
             {
                 MPI_Errhandler_set(communicator, MPI_ERRORS_RETURN);
                 MPI_Errhandler_set(group_communicator, MPI_ERRORS_RETURN);
@@ -580,19 +597,19 @@ namespace alps {
             }
 
             typename mcthreadsim<Impl>::results_type collect_results(typename mcthreadsim<Impl>::result_names_type const & names) const {
-            
                 typename mcthreadsim<Impl>::results_type local_results = collect_local_results(names), partial_results;
-                for(typename mcthreadsim<Impl>::results_type::iterator it = local_results.begin(); it != local_results.end(); ++it) {
-                    assert(it->first.size() < 255);
-                    int action = MPI_collect;
-                    boost::mpi::broadcast(communicator, action, 0);
-                    {
-                        char name[255];
-                        std::strcpy(name, it->first.c_str());
-                        boost::mpi::broadcast(communicator, name, 0);
+                for(typename mcthreadsim<Impl>::results_type::iterator it = local_results.begin(); it != local_results.end(); ++it)
+                    if (it->second->count() > 0) {
+                        assert(it->first.size() < 255);
+                        int action = MPI_collect;
+                        boost::mpi::broadcast(communicator, action, 0);
+                        {
+                            char name[255];
+                            std::strcpy(name, it->first.c_str());
+                            boost::mpi::broadcast(communicator, name, 0);
+                        }
+                        it->second->reduce_master(partial_results, it->first, communicator, group_communicator, master_communicator);
                     }
-                    it->second->reduce_master(partial_results, it->first, communicator, group_communicator, master_communicator);
-                }
                 return partial_results;
             }
             
