@@ -43,40 +43,10 @@
 bool stop_callback(boost::posix_time::ptime const & end_time) {
     return alps::mcsignal() || boost::posix_time::second_clock::local_time() > end_time;
 }
-void dump_result(std::string const & name, alps::alea::mcdata<double> const & result, std::string const & rank = "") {
-    std::stringstream s;
-    s << std::fixed << std::setprecision(5) 
-      << name << rank << ": "
-      << " count: " << result.count()
-      << " mean: " << result.mean()
-      << " error: " << result.error()
-      << " variance: " << result.variance()
-      << " tau: " << result.tau()
-      << " bins: [" << result.bins().front() << ",...," << result.bins().back() << "]"
-      << " #bins: " << result.bin_number()
-      << " bin size: " << result.bin_size()
-      << std::endl;
-    std::cout << s.str();
-}
-void dump_result(std::string const & name, alps::alea::mcdata<std::vector<double> > const & result, std::string const & rank = "") {
-    std::stringstream s;
-    s << std::fixed << std::setprecision (5) 
-      << name << rank << ": "
-      << " count: " << result.count()
-      << " mean: [" << result.mean().front() << ",...," << result.mean().back() << "]"
-      << " error: [" << result.error().front() << ",...," << result.error().back() << "]"
-      << " variance: [" << result.variance().front() << ",...," << result.variance().back() << "]"
-      << " tau: [" << result.tau().front() << ",...," << result.tau().back() << "]"
-      << " #bins: " << result.bin_number()
-      << " bin size: " << result.bin_size()
-      << std::endl;
-    std::cout << s.str();
-}
 int main(int argc, char *argv[]) {
     alps::mcoptions options(argc, argv);
     if (options.valid) {
         sim_type::parameters_type params(options.input_file);
-        params["maxbinnumber"] = options.max_bins;
 #ifdef MPI_RUN
         boost::mpi::environment env(argc, argv);
         boost::mpi::communicator c;
@@ -89,12 +59,7 @@ int main(int argc, char *argv[]) {
         s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
         alps::results_type<sim_type>::type results = s.collect_local_results();
         for (alps::results_type<sim_type>::type::const_iterator it = results.begin(); it != results.end(); ++it)
-            if (dynamic_cast<alps::alea::mcdata<double> const *>(it->second) != NULL)
-                dump_result(it->first, *dynamic_cast<alps::alea::mcdata<double> const *>(it->second), "(" + boost::lexical_cast<std::string>(c.rank()) + ")");
-            else if (dynamic_cast<alps::alea::mcdata<std::vector<double> > const *>(it->second) != NULL)
-                dump_result(it->first, *dynamic_cast<alps::alea::mcdata<std::vector<double> > const *>(it->second), "rank: " + boost::lexical_cast<std::string>(c.rank()));
-            else
-                boost::throw_exception(std::runtime_error("unknown observable type"));
+            std::cout << std::fixed << std::setprecision(5) << it->first << " (" << c.rank() << "): " << it->second->to_string() << std::endl;
         if (c.rank()==0) {
             {
                 alps::results_type<sim_type>::type results = collect_results(s);
@@ -103,12 +68,7 @@ int main(int argc, char *argv[]) {
                 for (alps::results_type<sim_type>::type::const_iterator it = results.begin(); it != results.end(); ++it)
                     ar << alps::make_pvp("/simulation/results/" + it->first, *(it->second));
                 for (alps::results_type<sim_type>::type::const_iterator it = results.begin(); it != results.end(); ++it)
-                    if (dynamic_cast<alps::alea::mcdata<double> const *>(it->second) != NULL)
-                        dump_result(it->first, *dynamic_cast<alps::alea::mcdata<double> const *>(it->second));
-                    else if (dynamic_cast<alps::alea::mcdata<std::vector<double> > const *>(it->second) != NULL)
-                        dump_result(it->first, *dynamic_cast<alps::alea::mcdata<std::vector<double> > const *>(it->second));
-                    else
-                        boost::throw_exception(std::runtime_error("unknown observable type"));
+                    std::cout << std::fixed << std::setprecision(5) << it->first << ": " << it->second->to_string() << std::endl;
             }
             s.terminate();
         } else
