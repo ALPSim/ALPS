@@ -31,28 +31,28 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms = []
-for l in [4,8,16]: #[4,8,16]:
-    for t in [2.8,2.7]:#[5.0,4.5,4.0,3.5,3.0,2.9,2.8,2.7]:
+for l in [4,8,16]: 
+    for t in [5.0,4.5,4.0,3.5,3.0,2.9,2.8,2.7]:
         parms.append(
             { 
               'LATTICE'        : "square lattice", 
               'T'              : t,
               'J'              : 1 ,
               'THERMALIZATION' : 1000,
-              'SWEEPS'         : 40000, #400000,
+              'SWEEPS'         : 400000,
               'UPDATE'         : "cluster",
               'MODEL'          : "Ising",
               'L'              : l
             }
     )
-    for t in [2.6, 2.5, 2.4]: #[2.6, 2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 1.9, 1.8, 1.7, 1.6, 1.5, 1.2]:
+    for t in [2.6, 2.5, 2.4, 2.3, 2.2, 2.1, 2.0, 1.9, 1.8, 1.7, 1.6, 1.5, 1.2]:
         parms.append(
             { 
               'LATTICE'        : "square lattice", 
               'T'              : t,
               'J'              : 1 ,
               'THERMALIZATION' : 1000,
-              'SWEEPS'         : 4000, #40000,
+              'SWEEPS'         : 40000,
               'UPDATE'         : "cluster",
               'MODEL'          : "Ising",
               'L'              : l
@@ -73,7 +73,7 @@ spec_heat = pyalps.collectXY(data,x='T',y='Specific Heat',foreach=['L'])
 binder_u4 = pyalps.collectXY(data,x='T',y='Binder Cumulant',foreach=['L'])
 binder_u2 = pyalps.collectXY(data,x='T',y='Binder Cumulant U2',foreach=['L'])
 
-#make plot
+#make plots
 plt.figure()
 pyalps.pyplot.plot(magnetization_abs)
 plt.xlabel('Temperature $T$')

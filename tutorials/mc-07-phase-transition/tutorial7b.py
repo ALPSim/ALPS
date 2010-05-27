@@ -60,6 +60,15 @@ spec_heat = pyalps.collectXY(data,x='T',y='Specific Heat',foreach=['L'])
 binder_u4 = pyalps.collectXY(data,x='T',y='Binder Cumulant',foreach=['L'])
 binder_u2 = pyalps.collectXY(data,x='T',y='Binder Cumulant U2',foreach=['L'])
 
+#make a plot of the Binder cumulant:
+plt.figure()
+pyalps.pyplot.plot(binder_u4)
+plt.xlabel('Temperature $T$')
+plt.ylabel('Binder Cumulant U4 $g$')
+plt.title('2D Ising model')
+plt.show()
+
+#perform a data collapse of the Binder cumulant: 
 Tc=2.269
 a=1
 
@@ -69,19 +78,14 @@ for d in binder_u4:
     l = d.props['L']
     d.x = d.x * pow(float(l),a)
     
-#find maximum in spec_heat and connected susc:
-peaks=[]      
-for d in connected_susc:
-    peaks.append(np.max(d.y)) #can i somehow store the corresponding properties as well?
-
-
-#make plot
 plt.figure()
-pyalps.pyplot.plot(magnetization_abs)
-plt.xlabel('Temperature $T$')
-plt.ylabel('Magnetization $|m|$')
+pyalps.pyplot.plot(binder_u4)
+plt.xlabel('Rescaled Temperature $(T-T_c)/T_c L^{1/\nu}$')
+plt.ylabel('Binder Cumulant U4 $g$')
 plt.title('2D Ising model')
-
+plt.show()
+    
+#make a plot of the specific heat and connected susceptibility:
 plt.figure()
 pyalps.pyplot.plot(connected_susc)
 plt.xlabel('Temperature $T$')
@@ -93,17 +97,97 @@ pyalps.pyplot.plot(spec_heat)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Specific Heat $c_v$')
 plt.title('2D Ising model')
+plt.show()
+
+#make a fit of the connected susceptibility as a function of L:
+cs_mean=[]
+for q in connected_susc:
+    cs_mean.append(np.array([d.mean for d in q.y]))
+
+peak_cs = pyalps.DataSet()
+peak_cs.props = pyalps.dict_intersect([q.props for q in connected_susc])
+peak_cs.y = np.array([np.max(q) for q in cs_mean])
+peak_cs.x = np.array([q.props['L'] for q in connected_susc])
+
+sel = np.argsort(peak_cs.x)
+peak_cs.y = peak_cs.y[sel]
+peak_cs.x = peak_cs.x[sel]
+
+pars = [fw.Parameter(1), fw.Parameter(1)]
+f = lambda self, x, pars: pars[0]()*np.power(x,pars[1]())
+fw.fit(None, f, pars, peak_cs.y, peak_cs.x)
+prefactor = pars[0].get()
+gamma_nu = pars[1].get()
 
 plt.figure()
-pyalps.pyplot.plot(binder_u4)
-plt.xlabel('Temperature $T$')
-plt.ylabel('Binder Cumulant U4 $g$')
-plt.title('2D Ising model')
+plt.plot(peak_cs.x, f(None, peak_cs.x, pars))
+pyalps.pyplot.plot(peak_cs)
+plt.xlabel('System Size $L$')
+plt.ylabel('Connected Susceptibility $\chi_c(T_c)$')
+plt.title('2D Ising model, $\gamma$ is %.4s' % gamma_nu)
+plt.show()
+
+#make a fit of the specific heat as a function of L:
+sh_mean=[]
+for q in spec_heat:
+    sh_mean.append(np.array([d.mean for d in q.y]))
+    
+peak_sh = pyalps.DataSet()
+peak_sh.props = pyalps.dict_intersect([q.props for q in spec_heat])
+peak_sh.y = np.array([np.max(q) for q in sh_mean])
+peak_sh.x = np.array([q.props['L'] for q in spec_heat])
+
+sel = np.argsort(peak_sh.x)
+peak_sh.y = peak_sh.y[sel]
+peak_sh.x = peak_sh.x[sel]
+
+pars = [fw.Parameter(1), fw.Parameter(1)]
+f = lambda self, x, pars: pars[0]()*np.power(x,pars[1]())
+fw.fit(None, f, pars, peak_sh.y, peak_sh.x)
+prefactor = pars[0].get()
+alpha_nu = pars[1].get()
 
 plt.figure()
-pyalps.pyplot.plot(binder_u2)
+plt.plot(peak_sh.x, f(None, peak_sh.x, pars))
+pyalps.pyplot.plot(peak_cs)
+plt.xlabel('System Size $L$')
+plt.ylabel('Specific Heat $c_v(T_c)$')
+plt.title(r'2D Ising model, $\alpha$ is %.4s' % alpha_nu)
+plt.show()
+
+#make a data collapse of the connected susceptibility as a function of (T-Tc)/Tc:
+for d in connected_susc:
+    d.x -= Tc
+    d.x = d.x/Tc
+    l = d.props['L']
+    d.x = d.x * pow(float(l),a)
+
+two_eta=1.75
+for d in connected_susc:
+    l = d.props['L']
+    d.y = d.y/pow(float(l),two_eta)
+
+plt.figure()
+pyalps.pyplot.plot(connected_susc)
 plt.xlabel('Temperature $T$')
-plt.ylabel('Binder Cumulant U2 $g$')
+plt.ylabel('Connected Susceptibility $\chi_c$')
 plt.title('2D Ising model')
 plt.show()
 
+#make a data collapse of the |magnetization| as a function of (T-Tc)/Tc
+for d in magnetization_abs:
+    d.x -= Tc
+    d.x = d.x/Tc
+    l = d.props['L']
+    d.x = d.x * pow(float(l),a)
+beta_nu=-0.125    
+for d in magnetization_abs:
+    l = d.props['L']
+    d.y = d.y / pow(float(l),beta_nu)
+    
+plt.figure()
+pyalps.pyplot.plot(magnetization_abs)
+plt.xlabel('Temperature $T$')
+plt.ylabel('Magnetization $|m|$')
+plt.title('2D Ising model')
+plt.show()
