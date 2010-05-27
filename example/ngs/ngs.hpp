@@ -125,7 +125,7 @@ namespace alps {
             }
 
             bool defined(std::string const & k) const {
-                return find(k) == end();
+                return find(k) != end();
             }
 
             void serialize(hdf5::oarchive & ar) const {
