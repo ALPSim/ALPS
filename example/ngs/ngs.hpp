@@ -120,6 +120,11 @@ namespace alps {
                     return mcparamvalue(v);
                 return find(k)->second;
             }
+            bool defined(std::string const & k) const {
+                if (find(k) == end())
+                    return false;
+                return true;
+            }
             void serialize(hdf5::oarchive & ar) const {
                 for (const_iterator it = begin(); it != end(); ++it)
                     ar << make_pvp(it->first, static_cast<std::string>(it->second));
