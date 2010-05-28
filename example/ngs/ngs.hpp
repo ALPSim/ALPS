@@ -315,78 +315,37 @@ namespace alps {
                     tau_all_opt = tau_all / static_cast<typename alea::mcdata<T>::element_type>(count_all);
                 }
                 std::vector<result_type> bins;
+                std::size_t binsize = 0;
                 if (alea::mcdata<T>::bin_number() > 0) {
+                    std::vector<result_type> local_bins(binnumber);
+                    for (typename std::vector<result_type>::iterator it = local_bins.begin(); it != local_bins.end(); ++it)
+                        mcresize(*it, mcsize(mean));
+                    binsize = partition_bins(local_bins, communicator);
                     bins.resize(binnumber);
-                    std::size_t binsize = partition_bins(bins, communicator);
-                    std::vector<typename alea::mcdata<T>::element_type> raw_bins(binnumber * mcsize(bins[0]));
-//                    for (typename std::vector<result_type>::const_iterator it = bins.begin(); it != bins.end(); ++it)
-//                        std::copy(raw_bins.begin() + (i * mcsize(binvalue), raw_bins.begin() + (i + 1) * mcsize(binvalue), mcpointer(binvalues[i]));
-                    
-                    
-                    
-                    
-                    
-                    bins = bins / static_cast<typename alea::mcdata<T>::element_type>(binsize);
-
-                    
-                }
-                
-/*                
- * 
-                                    assert(mcmpierror(MPI_Gather(
-                          mcpointer(binvalue)
-                        , mcsize(binvalue)
-                        , boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type())
-                        , mcpointer(raw_binvalues)
-                        , mcsize(binvalue)
-                        , boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type())
-                        , 0
-                        , master_communicator
-                    )));
-
-                
-                
-                alea::mcdata<T>::set_bin_size(boost::mpi::all_reduce(communicator, alea::mcdata<T>::bin_size(), boost::mpi::maximum<std::size_t>()));
-                std::size_t bin_number;
-                boost::mpi::reduce(group_communicator, alea::mcdata<T>::bin_number(), bin_number, std::plus<std::size_t>(), 0);
-                std::size_t min_bins = boost::mpi::all_reduce(master_communicator, bin_number, boost::mpi::minimum<std::size_t>());
-                
-                
-                
-                
-                
-                result_type binvalue;
-                std::vector<value_type> binvalues;
-                std::size_t min_bins = 0;
-                if (alea::mcdata<T>::bin_number() > 0) {
-                    min_bins = get_binvalue_master(binvalue, communicator, group_communicator, master_communicator);
-                    std::vector<typename alea::mcdata<T>::element_type> raw_binvalues(master_communicator.size() * mcsize(binvalue));
-                    assert(mcmpierror(MPI_Gather(
-                          mcpointer(binvalue)
-                        , mcsize(binvalue)
-                        , boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type())
-                        , mcpointer(raw_binvalues)
-                        , mcsize(binvalue)
-                        , boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type())
-                        , 0
-                        , master_communicator
-                    )));
-                    binvalues.resize(master_communicator.size());
-                    for (std::size_t i = 0; i < master_communicator.size(); ++i) {
-                        mcresize(binvalues[i], mcsize(binvalue));
-                        std::copy(raw_binvalues.begin() + i * mcsize(binvalue), raw_binvalues.begin() + (i + 1) * mcsize(binvalue), mcpointer(binvalues[i]));
+                    if (boost::is_scalar<result_type>::value) {
+                        assert(mcmpierror(MPI_Reduce(&local_bins.front(), &bins.front(), binnumber, boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
+                    } else {
+                        std::vector<typename alea::mcdata<T>::element_type> raw_local_bins(binnumber * alea::mcdata<T>::bin_size()), raw_bins(binnumber * alea::mcdata<T>::bin_size());
+                        for (typename std::vector<result_type>::iterator it = local_bins.begin(); it != local_bins.end(); ++it)
+                            std::copy(mcpointer(*it), mcpointer(*it) + mcsize(*it), mcpointer(raw_local_bins[(it - local_bins.begin()) * alea::mcdata<T>::bin_size()]));
+                        assert(mcmpierror(MPI_Reduce(&raw_local_bins.front(), &raw_bins.front(), binnumber * alea::mcdata<T>::bin_size(), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
+                        for (typename std::vector<result_type>::iterator it = bins.begin(); it != bins.end(); ++it) {
+                            mcresize(*it, mcsize(mean));
+                            std::copy(raw_bins.begin() + (it - bins.begin()) * mcsize(mean), raw_bins.begin() + (it - bins.begin() + 1) * mcsize(mean), mcpointer(*it));
+                        }
+                        
+                        
+                        
                     }
                 }
-*/
-                std::vector<value_type> binvalues;
                 boost::assign::ptr_map_insert<mcdata<value_type> >(results)(name, mcdata<value_type>(
                       count_all
                     , mean_all / typename alea::mcdata<T>::element_type(count_all)
                     , sqrt(error_all) / typename alea::mcdata<T>::element_type(count_all)
                     , variance_all_opt
                     , tau_all_opt
-                    , 0
-                    , binvalues
+                    , alea::mcdata<T>::bin_size() * binsize
+                    , bins
                 ));
             }
 
@@ -406,31 +365,21 @@ namespace alps {
                     result_type tau = alea::mcdata<T>::tau() * static_cast<typename alea::mcdata<T>::element_type>(count());
                     assert(mcmpierror(MPI_Reduce(mcpointer(tau), NULL, mcsize(tau), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                 }
-                std::vector<result_type> bins;
                 if (alea::mcdata<T>::bin_number() > 0) {
-                    bins.resize(binnumber);
-                    partition_bins(bins, communicator);
+                    std::vector<result_type> local_bins(binnumber);
+                    for (typename std::vector<result_type>::iterator it = local_bins.begin(); it != local_bins.end(); ++it)
+                        mcresize(*it, mcsize(mean));
+                    partition_bins(local_bins, communicator);
+                    if (boost::is_scalar<result_type>::value)
+                        assert(mcmpierror(MPI_Reduce(&local_bins.front(), NULL, binnumber, boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
+                    else {
+                        std::vector<typename alea::mcdata<T>::element_type> raw_local_bins(binnumber * alea::mcdata<T>::bin_size());
+                        for (typename std::vector<result_type>::iterator it = local_bins.begin(); it != local_bins.end(); ++it)
+                            std::copy(mcpointer(*it), mcpointer(*it) + mcsize(*it), mcpointer(raw_local_bins[(it - local_bins.begin()) * alea::mcdata<T>::bin_size()]));
+                        assert(mcmpierror(MPI_Reduce(&raw_local_bins.front(), NULL, binnumber * alea::mcdata<T>::bin_size(), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
+                    }
                 }
-                
-                
-/*                result_type binvalue;
-                if (alea::mcdata<T>::bin_number() > 0) {
-                    if (communicator.rank() < master_communicator.size()) {
-                        get_binvalue_master(binvalue, communicator, group_communicator, master_communicator);
-                        assert(mcmpierror(MPI_Gather(
-                              mcpointer(binvalue)
-                            , mcsize(binvalue)
-                            , boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type())
-                            , NULL
-                            , 0
-                            , boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type())
-                            , 0
-                            , master_communicator
-                        )));
-                    } else
-                        get_binvalue_slave(communicator, group_communicator, master_communicator);
-                }
-*/            }
+            }
 
         private:
         
@@ -452,45 +401,6 @@ namespace alps {
                     }
                 }
                 return perbin;
-            }
-        
-        
-        
-        
-            std::size_t get_binvalue_master(result_type & binvalue_all, boost::mpi::communicator const & communicator, boost::mpi::communicator const & group_communicator, boost::mpi::communicator const & master_communicator) {
-                using alps::numeric::sq;
-                using boost::numeric::operators::operator+;
-                using boost::numeric::operators::operator*;
-                using boost::numeric::operators::operator/;
-                alea::mcdata<T>::set_bin_size(boost::mpi::all_reduce(communicator, alea::mcdata<T>::bin_size(), boost::mpi::maximum<std::size_t>()));
-                std::size_t bin_number;
-                boost::mpi::reduce(group_communicator, alea::mcdata<T>::bin_number(), bin_number, std::plus<std::size_t>(), 0);
-                std::size_t min_bins = boost::mpi::all_reduce(master_communicator, bin_number, boost::mpi::minimum<std::size_t>());
-                boost::mpi::broadcast(group_communicator, min_bins, 0);
-                std::size_t used_bins = min_bins / group_communicator.size() + (group_communicator.rank() < min_bins % group_communicator.size() ? 1 : 0);
-                result_type binvalue = alea::mcdata<T>::bins()[0];
-                for (std::size_t i = 1; i < used_bins; ++i)
-                    binvalue = binvalue + alea::mcdata<T>::bins()[i];
-                mcresize(binvalue_all, mcsize(binvalue));
-                assert(mcmpierror(MPI_Reduce(mcpointer(binvalue), mcpointer(binvalue_all), mcsize(binvalue), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, group_communicator)));
-                binvalue_all = binvalue_all / static_cast<typename alea::mcdata<T>::element_type>(min_bins);
-                return min_bins;
-            }
-
-            void get_binvalue_slave(boost::mpi::communicator const & communicator, boost::mpi::communicator const & group_communicator, boost::mpi::communicator const & master_communicator) {
-                using alps::numeric::sq;
-                using boost::numeric::operators::operator+;
-                using boost::numeric::operators::operator*;
-                using boost::numeric::operators::operator/;
-                alea::mcdata<T>::set_bin_size(boost::mpi::all_reduce(communicator, alea::mcdata<T>::bin_size(), boost::mpi::maximum<std::size_t>()));
-                boost::mpi::reduce(group_communicator, alea::mcdata<T>::bin_number(), std::plus<std::size_t>(), 0);
-                std::size_t min_bins;
-                boost::mpi::broadcast(group_communicator, min_bins, 0);
-                std::size_t used_bins = min_bins / group_communicator.size() + (group_communicator.rank() < min_bins % group_communicator.size() ? 1 : 0);
-                result_type binvalue = alea::mcdata<T>::bins()[0];
-                for (std::size_t i = 1; i < used_bins; ++i)
-                    binvalue = binvalue + alea::mcdata<T>::bins()[i];
-                assert(mcmpierror(MPI_Reduce(mcpointer(binvalue), NULL, mcsize(binvalue), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, group_communicator)));
             }
     };
 
