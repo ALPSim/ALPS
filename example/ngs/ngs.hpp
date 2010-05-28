@@ -333,17 +333,14 @@ namespace alps {
                     if (boost::is_scalar<result_type>::value) {
                         assert(mcmpierror(MPI_Reduce(&local_bins.front(), &bins.front(), binnumber, boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                     } else {
-                        std::vector<typename alea::mcdata<T>::element_type> raw_local_bins(binnumber * alea::mcdata<T>::bin_size()), raw_bins(binnumber * alea::mcdata<T>::bin_size());
+                        std::vector<typename alea::mcdata<T>::element_type> raw_local_bins(binnumber * mcsize(mean)), raw_bins(binnumber * mcsize(mean));
                         for (typename std::vector<result_type>::iterator it = local_bins.begin(); it != local_bins.end(); ++it)
-                            std::copy(mcpointer(*it), mcpointer(*it) + mcsize(*it), mcpointer(raw_local_bins[(it - local_bins.begin()) * alea::mcdata<T>::bin_size()]));
-                        assert(mcmpierror(MPI_Reduce(&raw_local_bins.front(), &raw_bins.front(), binnumber * alea::mcdata<T>::bin_size(), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
+                            std::copy(mcpointer(*it), mcpointer(*it) + mcsize(*it), mcpointer(raw_local_bins[(it - local_bins.begin()) * mcsize(mean)]));
+                        assert(mcmpierror(MPI_Reduce(&raw_local_bins.front(), &raw_bins.front(), binnumber * mcsize(mean), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                         for (typename std::vector<result_type>::iterator it = bins.begin(); it != bins.end(); ++it) {
                             mcresize(*it, mcsize(mean));
                             std::copy(raw_bins.begin() + (it - bins.begin()) * mcsize(mean), raw_bins.begin() + (it - bins.begin() + 1) * mcsize(mean), mcpointer(*it));
                         }
-                        
-                        
-                        
                     }
                 }
                 boost::assign::ptr_map_insert<mcdata<value_type> >(results)(name, mcdata<value_type>(
@@ -352,7 +349,7 @@ namespace alps {
                     , sqrt(error_all) / typename alea::mcdata<T>::element_type(count_all)
                     , variance_all_opt
                     , tau_all_opt
-                    , alea::mcdata<T>::bin_size() * binsize
+                    , mcsize(mean) * binsize
                     , bins
                 ));
             }
@@ -381,10 +378,10 @@ namespace alps {
                     if (boost::is_scalar<result_type>::value)
                         assert(mcmpierror(MPI_Reduce(&local_bins.front(), NULL, binnumber, boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                     else {
-                        std::vector<typename alea::mcdata<T>::element_type> raw_local_bins(binnumber * alea::mcdata<T>::bin_size());
+                        std::vector<typename alea::mcdata<T>::element_type> raw_local_bins(binnumber * mcsize(mean));
                         for (typename std::vector<result_type>::iterator it = local_bins.begin(); it != local_bins.end(); ++it)
-                            std::copy(mcpointer(*it), mcpointer(*it) + mcsize(*it), mcpointer(raw_local_bins[(it - local_bins.begin()) * alea::mcdata<T>::bin_size()]));
-                        assert(mcmpierror(MPI_Reduce(&raw_local_bins.front(), NULL, binnumber * alea::mcdata<T>::bin_size(), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
+                            std::copy(mcpointer(*it), mcpointer(*it) + mcsize(*it), mcpointer(raw_local_bins[(it - local_bins.begin()) * mcsize(mean)]));
+                        assert(mcmpierror(MPI_Reduce(&raw_local_bins.front(), NULL, binnumber * mcsize(mean), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                     }
                 }
             }
