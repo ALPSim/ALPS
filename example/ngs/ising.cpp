@@ -63,7 +63,7 @@ int main(int argc, char *argv[]) {
         if (c.rank()==0) {
             {
                 alps::results_type<sim_type>::type results = collect_results(s);
-                alps::hdf5::oarchive ar("sim.h5");
+                alps::hdf5::oarchive ar(options.output_file);
                 ar << alps::make_pvp("/parameters", params);
                 for (alps::results_type<sim_type>::type::const_iterator it = results.begin(); it != results.end(); ++it)
                     ar << alps::make_pvp("/simulation/results/" + it->first, *(it->second));

@@ -62,9 +62,11 @@ namespace alps {
                 desc.add_options()
                     ("help", "produce help message")
                     ("time-limit,T", boost::program_options::value<std::size_t>(&time_limit)->default_value(0), "time limit for the simulation")
-                    ("input-file", boost::program_options::value<std::string>(&input_file), "input file in hdf5 format");
+                    ("input-file", boost::program_options::value<std::string>(&input_file), "input file in hdf5 format")
+                    ("output-file", boost::program_options::value<std::string>(&output_file)->default_value("sim.h5"), "output file in hdf5 format");
                 boost::program_options::positional_options_description p;
                 p.add("input-file", 1);
+                p.add("output-file", 2);
                 boost::program_options::variables_map vm;
                 boost::program_options::store(boost::program_options::command_line_parser(argc, argv).options(desc).positional(p).run(), vm);
                 boost::program_options::notify(vm);
@@ -76,6 +78,7 @@ namespace alps {
             bool valid;
             std::size_t time_limit;
             std::string input_file;
+            std::string output_file;
     };
 
     // TODO: use boost::variant instead of string
@@ -311,7 +314,25 @@ namespace alps {
                     assert(mcmpierror(MPI_Reduce(mcpointer(tau), mcpointer(tau_all), mcsize(tau), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                     tau_all_opt = tau_all / static_cast<typename alea::mcdata<T>::element_type>(count_all);
                 }
+                std::vector<result_type> bins;
+                if (alea::mcdata<T>::bin_number() > 0) {
+                    bins.resize(binnumber);
+                    std::size_t binsize = partition_bins(bins, communicator);
+                    std::vector<typename alea::mcdata<T>::element_type> raw_bins(binnumber * mcsize(bins[0]));
+//                    for (typename std::vector<result_type>::const_iterator it = bins.begin(); it != bins.end(); ++it)
+//                        std::copy(raw_bins.begin() + (i * mcsize(binvalue), raw_bins.begin() + (i + 1) * mcsize(binvalue), mcpointer(binvalues[i]));
+                    
+                    
+                    
+                    
+                    
+                    bins = bins / static_cast<typename alea::mcdata<T>::element_type>(binsize);
+
+                    
+                }
+                
 /*                
+ * 
                                     assert(mcmpierror(MPI_Gather(
                           mcpointer(binvalue)
                         , mcsize(binvalue)
@@ -385,6 +406,13 @@ namespace alps {
                     result_type tau = alea::mcdata<T>::tau() * static_cast<typename alea::mcdata<T>::element_type>(count());
                     assert(mcmpierror(MPI_Reduce(mcpointer(tau), NULL, mcsize(tau), boost::mpi::get_mpi_datatype(typename alea::mcdata<T>::element_type()), MPI_SUM, 0, communicator)));
                 }
+                std::vector<result_type> bins;
+                if (alea::mcdata<T>::bin_number() > 0) {
+                    bins.resize(binnumber);
+                    partition_bins(bins, communicator);
+                }
+                
+                
 /*                result_type binvalue;
                 if (alea::mcdata<T>::bin_number() > 0) {
                     if (communicator.rank() < master_communicator.size()) {
@@ -405,6 +433,30 @@ namespace alps {
 */            }
 
         private:
+        
+            std::size_t partition_bins (std::vector<result_type> & bins, boost::mpi::communicator const & communicator) {
+                using boost::numeric::operators::operator+;
+                alea::mcdata<T>::set_bin_size(boost::mpi::all_reduce(communicator, alea::mcdata<T>::bin_size(), boost::mpi::maximum<std::size_t>()));
+                std::vector<int> buffer(2 * communicator.size()), index(communicator.size());
+                int data[2] = {communicator.rank(), alea::mcdata<T>::bin_number()};
+                MPI_Allgather (data, 2, MPI_INT, &buffer.front(), 2, MPI_INT, communicator);
+                for (std::vector<int>::const_iterator it = buffer.begin(); it != buffer.end(); it += 2)
+                    index[*it] = *(it + 1);
+                int perbin = std::accumulate(index.begin(), index.end(), 0) / bins.size();
+                int start = std::accumulate(index.begin(), index.begin() + communicator.rank(), 0);
+                for (int i = start / perbin, j = start - i, k = 0; i < bins.size() && k < alea::mcdata<T>::bin_number(); ++k) {
+                    bins[i] = bins[i] + alea::mcdata<T>::bins()[k];
+                    if (++j == perbin) {
+                        ++i;
+                        j = 0;
+                    }
+                }
+                return perbin;
+            }
+        
+        
+        
+        
             std::size_t get_binvalue_master(result_type & binvalue_all, boost::mpi::communicator const & communicator, boost::mpi::communicator const & group_communicator, boost::mpi::communicator const & master_communicator) {
                 using alps::numeric::sq;
                 using boost::numeric::operators::operator+;
