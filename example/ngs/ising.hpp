@@ -41,10 +41,12 @@ class ising_sim : public alps::mcbase {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
             results << alps::RealObservable("Unused");
+            results << alps::SimpleRealObservable("EnergySimple");
             results << alps::RealObservable("Energy");
             results << alps::RealObservable("Magnetization");
             results << alps::RealObservable("Magnetization^2");
             results << alps::RealObservable("Magnetization^4");
+            results << alps::SimpleRealVectorObservable("CorrelationsSimple");
             results << alps::RealVectorObservable("Correlations");
         }
         void do_update() {
@@ -72,10 +74,12 @@ class ising_sim : public alps::mcbase {
                 corr /= double(length);
                 ten /= length;
                 tmag /= length;
+                results["EnergySimple"] << ten;
                 results["Energy"] << ten;
                 results["Magnetization"] << tmag;
                 results["Magnetization^2"] << tmag * tmag;
                 results["Magnetization^4"] << tmag * tmag * tmag * tmag;
+                results["CorrelationsSimple"] << corr;
                 results["Correlations"] << corr;
             }
         };
