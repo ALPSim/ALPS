@@ -267,6 +267,14 @@ namespace alps {
                 return alea::mcdata<T>::count();
             }
 
+            inline result_type const & mean() const {
+                return alea::mcdata<T>::mean();
+            }
+
+            inline result_type const & error() const {
+                return alea::mcdata<T>::error();
+            }
+
             typename std::string to_string() const {
                 if (count() == 0)
                     return "No Measurements";
