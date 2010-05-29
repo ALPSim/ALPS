@@ -26,6 +26,7 @@
 *****************************************************************************/
 
 #include <alps/alea.h>
+#include <alps/parameter.h>
 #include <alps/hdf5.hpp>
 
 #include <boost/mpi.hpp>
@@ -452,7 +453,9 @@ namespace alps {
 
             mcbase(parameters_type const & p)
                 : params(p)
+		, parms(params)
                 , random(boost::mt19937(), boost::uniform_real<>())
+		, random_01(random)
             {}
 
             virtual void do_update() = 0;
@@ -512,11 +515,20 @@ namespace alps {
                         boost::throw_exception(std::runtime_error("unknown observable type"));
                 return partial_results;
             }
-            
+     
+            Parameters get_alps_parameters() {
+                Parameters p;
+                for (mcparams::iterator it = params.begin(); it != params.end(); ++it)
+                    p.push_back(it->first, it->second);
+                return p;
+            }
+
         protected:
             parameters_type params;
+            parameters_type & parms;
             ObservableSet results;
             boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
+            boost::variate_generator<boost::mt19937, boost::uniform_real<> > & random_01;
     };
     template<typename T> class mcatomic {
         public:
