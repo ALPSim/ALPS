@@ -178,7 +178,7 @@ namespace alps {
             char buffer[BUFSIZ];
             int size;
             MPI_Error_string(code, buffer, &size);
-            throw std::logic_error("MPI Error: " << buffer); 
+            throw std::logic_error("MPI Error: " + buffer); 
         }
     }
 
