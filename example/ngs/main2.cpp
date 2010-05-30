@@ -25,8 +25,5 @@
 *
 *****************************************************************************/
 
-#include "ngs.hpp"
-
-namespace alps {
-    int mcsignal::which = 0;
-}
+#include "ising2.hpp"
+#include "main.ipp"

@@ -25,7 +25,7 @@
 *
 *****************************************************************************/
 
-#include "ngs.hpp"
+#include <alps/ngs.hpp>
 
 class ising_sim : public alps::mcbase {
     public:
@@ -97,3 +97,5 @@ class ising_sim : public alps::mcbase {
         std::vector<int> spins;
         std::valarray<double> corr;
 };
+
+typedef ising_sim clone_type;

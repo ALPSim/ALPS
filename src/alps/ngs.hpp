@@ -58,10 +58,14 @@
 namespace alps {
     class mcoptions {
         public:
-            mcoptions(int argc, char* argv[]) : valid(false) {
+            typedef enum { SINGLE, THREADED, MPI } execution_types;
+            mcoptions(int argc, char* argv[]) : valid(false), type(SINGLE) {
                 boost::program_options::options_description desc("Allowed options");
                 desc.add_options()
                     ("help", "produce help message")
+                    ("single", "run a single thread") 
+                    ("threaded", "runing multiple threads") 
+                    ("mpi", "run in parallel using MPI") 
                     ("time-limit,T", boost::program_options::value<std::size_t>(&time_limit)->default_value(0), "time limit for the simulation")
                     ("input-file", boost::program_options::value<std::string>(&input_file), "input file in hdf5 format")
                     ("output-file", boost::program_options::value<std::string>(&output_file)->default_value("sim.h5"), "output file in hdf5 format");
@@ -75,11 +79,16 @@ namespace alps {
                     std::cout << desc << std::endl;
                 else if (input_file.empty())
                     boost::throw_exception(std::runtime_error("No job file specified"));
+                if (vm.count("threaded"))
+                    type = THREADED;
+                else if (vm.count("mpi"))
+                    type = MPI;
             }
             bool valid;
             std::size_t time_limit;
             std::string input_file;
             std::string output_file;
+            execution_types type;
     };
 
     // TODO: use boost::variant instead of string
@@ -147,15 +156,15 @@ namespace alps {
             }
     };
 
-    class mcsignal{
+    template<typename unused = void> class mcsignal_impl{
         public:
-            mcsignal() {
+            mcsignal_impl() {
                 static bool initialized;
                 if (!initialized) {
                     static struct sigaction action;
                     initialized = true;
                     memset(&action, 0, sizeof(action));
-                    action.sa_handler = &mcsignal::slot;
+                    action.sa_handler = &mcsignal_impl<unused>::slot;
                     sigaction(SIGINT, &action, NULL);
                     sigaction(SIGTERM, &action, NULL);
                     sigaction(SIGXCPU, &action, NULL);
@@ -173,6 +182,8 @@ namespace alps {
         private:
             static int which;
     };
+    template<typename unused> int mcsignal_impl<unused>::which = 0;
+    typedef mcsignal_impl<> mcsignal;
 
     template <typename T> void mcmpierror(T code) {
         if (code != MPI_SUCCESS) {
@@ -242,6 +253,12 @@ namespace alps {
                 throw std::logic_error("not Impl"); 
             }
     };
+
+    inline std::ostream & operator<<(std::ostream & os, boost::ptr_map<std::string, mcany>  const & results) {
+        for (boost::ptr_map<std::string, mcany>::const_iterator it = results.begin(); it != results.end(); ++it)
+            std::cout << std::fixed << std::setprecision(5) << it->first << ": " << it->second->to_string() << std::endl;
+        return os;
+    }
 
     template <typename T> class mcdata : public mcany, alea::mcdata<T> {
         public:
@@ -453,9 +470,7 @@ namespace alps {
 
             mcbase(parameters_type const & p)
                 : params(p)
-		, parms(params)
                 , random(boost::mt19937(), boost::uniform_real<>())
-		, random_01(random)
             {}
 
             virtual void do_update() = 0;
@@ -516,20 +531,54 @@ namespace alps {
                 return partial_results;
             }
      
-            Parameters get_alps_parameters() {
-                Parameters p;
-                for (mcparams::iterator it = params.begin(); it != params.end(); ++it)
-                    p.push_back(it->first, it->second);
-                return p;
+        protected:
+            parameters_type params;
+            ObservableSet results;
+            boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
+    };
+
+    class mcdepreciated : public mcbase {
+        public:
+            mcdepreciated(parameters_type const & p)
+                : mcbase(p)
+                , parms(make_alps_parameters(p))
+                , measurements(results)
+                , random_01(random)
+            {}
+
+            void do_update() {}
+
+            void do_measurements() {}
+
+            double fraction_completed() const { work_done(); }
+
+            virtual double work_done() const = 0;
+
+            virtual void dostep() = 0;
+
+            double random_real(double a = 0., double b = 1.) { return a + b * random(); }
+
+            bool run(boost::function<bool ()> const & stop_callback) {
+                do {
+                    dostep();
+                } while(!stop_callback() && fraction_completed() < 1);
+                return fraction_completed() >= 1;
             }
 
         protected:
-            parameters_type params;
-            parameters_type & parms;
-            ObservableSet results;
-            boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
+            Parameters parms;
+            ObservableSet & measurements;
             boost::variate_generator<boost::mt19937, boost::uniform_real<> > & random_01;
+
+        private:
+            static Parameters make_alps_parameters(parameters_type const & s) {
+                Parameters p;
+                for (parameters_type::const_iterator it = s.begin(); it != s.end(); ++it)
+                    p.push_back(it->first, static_cast<std::string>(it->second));
+                return p;
+            }
     };
+    
     template<typename T> class mcatomic {
         public:
             mcatomic() {}
