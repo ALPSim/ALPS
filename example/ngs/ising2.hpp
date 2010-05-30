@@ -35,7 +35,7 @@
 
 #include <alps/ngs.hpp>
 
-class IsingSimulation : public alps::mcdepreciated
+class IsingSimulation : public alps::mcdeprecated
 {
 public:
   static void print_copyright(std::ostream&);
