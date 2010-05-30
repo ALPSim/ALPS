@@ -148,6 +148,11 @@ class MplXYPlot_core:
                 
                 self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props))
                 
+                if 'linewidth' in q.props:
+                    self.lines[-1][0].set_linewidth(q.props['linewidth'])
+                if 'markersize' in q.props:
+                    self.lines[-1][0].set_markersize(q.props['markersize'])
+                
             if xlog:
                 plt.xscale('log')
             if ylog:
