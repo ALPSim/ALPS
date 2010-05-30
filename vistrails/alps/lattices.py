@@ -90,6 +90,7 @@ def selfRegister():
   register_lattice(ChainLattice)
   register_lattice(OpenChainLattice)
   register_lattice(DimerizedChainLattice)
+  register_lattice(NNNChainLattice)
   register_lattice(LadderLattice)
   register_lattice(OpenLadderLattice)
   register_lattice(SquareLattice)

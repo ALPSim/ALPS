@@ -199,6 +199,10 @@ class CycleMarkers(Module):
         for q in flatten(input):
             key = tuple([q.props[k] for k in foreach])
             q.props['marker'] = all[key]
+            if 'line' in q.props:
+                q.props['line'][0] = all[key]
+            else:
+                q.props['line'] = all[key] + '-'
         
         self.setResult('output', input)
 
@@ -209,10 +213,23 @@ class SetPlotStyle(FitPrototype):
     ]
     
     def transform(self,data):
+        line = False
+        scatter = False
         if self.hasInputFromPort('scatter') and self.getInputFromPort('scatter') == True:
-            data.props['line'] = 'scatter'
+            scatter = True
         if self.hasInputFromPort('line') and self.getInputFromPort('line') == True:
-            pass # this is the default
+            line = True
+        
+        if not line and not scatter:
+            line = True
+        if line and not scatter:
+            data.props['line'] = '-'
+        elif scatter and not line:
+            data.props['line'] = 'scatter'
+        elif scatter and line:
+            data.props['line'] = '.-'
+        else:
+            pass # impossible
 
 class Flatten(Module):
     my_input_ports = [PortDescriptor('input',DataSets)]

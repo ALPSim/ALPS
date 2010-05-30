@@ -51,6 +51,7 @@ for L in [10,12]:
 
 prefix = 'ising'
 input_file = pyalps.writeInputFiles(prefix,parms)
+# res = pyalps.runApplication('sparsediag', input_file, MPI=2, mpirun='mpirun')
 res = pyalps.runApplication('sparsediag', input_file)
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix=prefix))
 
