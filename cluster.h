@@ -33,9 +33,7 @@
 
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/ublas.hpp>
-#include <boost/numeric/ublas/io.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
-#include <boost/numeric/bindings/traits/type.h>
 
 
 class ClusterHelper: private alps::graph_helper<alps::graph_helper<>::graph_type>
