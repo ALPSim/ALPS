@@ -424,7 +424,7 @@ inline ClusterHelper::vector_type ClusterHelper::matrix_vector_mult(const Matrix
   return vn;
 }
 
-
+//extern "C" void dgesv_(const int *N, const int *NRHS, double *A, const int *LDA, int *IPIV, double *B, const int *LDB, int *INFO);
 template<typename T>
 inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse(typename Matrix<T>::Type M) 
 {
@@ -433,6 +433,7 @@ inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse
     for (unsigned int j=0; j<M.size2(); ++j) 
       M_inv(i,j) = (T)(i==j);
   boost::numeric::ublas::vector<fortran_int_t> ipivot(M.size1());
+  memset(&(ipivot(0)), 0, sizeof(int)*M.size1());
   boost::numeric::bindings::lapack::gesv(M,ipivot, M_inv);
   return M_inv;
 }

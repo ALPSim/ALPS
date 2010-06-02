@@ -28,32 +28,26 @@
 /* $Id$ */
 
 #include "alps_solver.h"
-#include "xml.h"
 #include "types.h"
 #include <boost/assert.hpp>
 #include <alps/osiris/comm.h>
 #include <alps/scheduler/options.h>
+#include <alps/utility/temporary_filename.hpp>
 #include <vector>
 #include <utility>
 #include <sstream>
 
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
-// : the_scheduler(scheduler::start_single(f,argc,argv))
 {
-  //std::cout<<"constructing solver with arguments"<<std::endl;
-  //for(int i=1;i<argc;++i){
-  //  std::cout<<argv[i]<<std::endl;
-  //}
 	comm_init(argc,argv, true);
 	if(is_master()){
           alps::scheduler::NoJobfileOptions opt(1,argv);
           opt.max_check_time=60;
-          //alps::scheduler::NoJobfileOptions opt(argc,argv);
+          opt.use_mpi=true;
           master_scheduler = new alps::scheduler::SingleScheduler(opt,factory);
-          //master_scheduler.set_max_check_time(300);
 	} else{ //a slave lives for many iterations...
             alps::scheduler::NoJobfileOptions opt(1,argv);
-            //alps::scheduler::NoJobfileOptions opt(argc,argv);
+            opt.use_mpi=true;
 	    int res=0;
 	    alps::scheduler::Scheduler *slave_scheduler = new alps::scheduler::Scheduler(opt,factory);
 	    res = slave_scheduler->run();
@@ -78,69 +72,97 @@ int alps::ImpuritySolver::solve_it(Parameters const& p)
       return master_scheduler->run();
   }
   else{
-	std::cerr<<"a slave should never reach this section."<<std::endl;
-	abort();
+	throw std::logic_error("a slave should never reach this section.");
   }
-  /*std::cout<<"creating task"<<std::endl;
-  the_scheduler->create_task(p);
-  std::cout<<"running task"<<std::endl;
-  return the_scheduler->run();*/
 }
 
 
 itime_green_function_t  alps::ImpuritySolver::solve(
-               const itime_green_function_t & G0, 
-               const alps::Parameters& p)
+               const itime_green_function_t & G0,
+               alps::Parameters p)
 {
   BOOST_ASSERT(is_master());
-  
-  alps::Parameters parms(p);
-  
-  std::ostringstream G0_text;
-  alps::oxstream G0_xml(G0_text);
-  write_itime(G0_xml,G0);
-  parms["G0"] = G0_text.str();
-  
-  int res=solve_it(parms);
+  std::string infile = alps::temporary_filename("alps_external_solver_in_");
+  std::string outfile = alps::temporary_filename("alps_external_solver_out_");
+  if(p.defined("TMPNAME")){
+    infile=p["TMPNAME"]+std::string(".in.h5");
+    outfile=p["TMPNAME"]+std::string(".out.h5");
+  }
+  p["INFILE"]=infile;
+  p["OUTFILE"]=infile;
+
+  // write input file
+  {
+    alps::hdf5::oarchive solver_input(infile);
+    solver_input<<alps::make_pvp("/parameters",p);
+    G0.write_hdf5(solver_input, "/G0");
+  }
+  int res=solve_it(p);
   if (res)
     boost::throw_exception(
       std::runtime_error(" solver finished with nonzero exit code"));
     
   // now extract the resuls
-  itime_green_function_t G = 
-      dynamic_cast<ImpurityTask*>(get_task())->get_result();
+  dynamic_cast<ImpurityTask*>(get_task())->get_result();
   
+
+  // read the output
+  unsigned int N=(unsigned int)p["N"];
+  unsigned int sites     =(unsigned int)p.value_or_default("SITES", 1);
+  unsigned int flavors   =(unsigned int)p.value_or_default("FLAVORS", 2);
+  itime_green_function_t g(N+1, sites, flavors);
+  {
+    alps::hdf5::iarchive ar(outfile);
+    g.read_hdf5(ar, "/G0");
+  }
   clear(); // destroy the simulation
-  return G;
+  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  return g;
 }
 
-std::pair<matsubara_green_function_t, itime_green_function_t>
-alps::ImpuritySolver::solve_omega(
+std::pair<matsubara_green_function_t, itime_green_function_t> alps::ImpuritySolver::solve_omega(
                  const matsubara_green_function_t& G0_omega
-               , const Parameters& p)
+               , Parameters p)
 {
   BOOST_ASSERT(is_master());
-  std::cout<<"solve_omega: building p"<<std::endl;
-  alps::Parameters parms(p);
-  std::ostringstream G0_omega_text;
-  alps::oxstream G0_omega_xml(G0_omega_text);
-  
-  write_freq(G0_omega_xml,G0_omega);
-  parms["G0(omega)"] = G0_omega_text.str();
-  int res=solve_it(parms);
+  std::string infile = alps::temporary_filename("alps_external_solver_");
+  std::string outfile = alps::temporary_filename("alps_external_solver_out_");
+  if(p.defined("TMPNAME")){
+    infile=p["TMPNAME"]+std::string(".in.h5");
+    outfile=p["TMPNAME"]+std::string(".out.h5");
+  }
+  {
+    alps::hdf5::oarchive solver_input(infile);
+    solver_input<<alps::make_pvp("/parameters", p);
+    G0_omega.write_hdf5(solver_input, "/G0");
+  }
+
+  int res=solve_it(p);
   if (res)
     boost::throw_exception(
       std::runtime_error(" solver finished with nonzero exit code"));
     
-  //std::cout<<"solve_omega: getting result."<<std::endl;
   // now extract the results
-  std::pair<matsubara_green_function_t, itime_green_function_t> G = 
       dynamic_cast<MatsubaraImpurityTask*>(get_task())
         ->get_result();
-  //std::cout<<"solve_omega: done getting result."<<std::endl;
-  clear(); // destroy the simulation
-  return G;
 
+  // read the output
+
+  unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
+  unsigned int n_tau=(unsigned int)p["N"];
+  unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
+  unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
+  matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
+  itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
+  {
+    alps::hdf5::iarchive ar(outfile);
+    G_omega.read_hdf5(ar, "/G_omega");
+    G_tau.read_hdf5(ar, "/G_tau");
+  }
+ 
+  clear(); // destroy the simulation
+  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  return std::make_pair(G_omega, G_tau);
 }
 
 

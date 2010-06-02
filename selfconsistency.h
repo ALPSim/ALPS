@@ -34,7 +34,6 @@
 /// @brief declares the selfconsistency loop functions
 
 #include "solver.h"
-#include "xml.h"
 #include "hilberttransformer.h"
 #include "cluster.h"
 #include "fouriertransform.h"

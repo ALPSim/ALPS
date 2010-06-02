@@ -74,6 +74,7 @@ void ClusterHelper::setup_tables()
 { 
   //setup basis vectors
   Matrix<double>::Type basis(dimension(), dimension());
+  memset(&(basis(0,0)), 0, sizeof(double)*dimension()*dimension());
   basis_vector_iterator itb, itb_end;
   boost::tie(itb, itb_end) = basis_vectors();
   int sum = 0;
@@ -122,7 +123,8 @@ void ClusterHelper::setup_tables()
   }
   //arrange vertices for bipartite lattices
   if (bipartite()) {
-    std::cout << "cluster is bipartite\n";
+    if(alps::is_master())
+      std::cout << "cluster is bipartite\n";
     for (int i=0; i<cluster_coordinates_.size1(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
 	int j = i;
@@ -146,6 +148,7 @@ void ClusterHelper::setup_tables()
   }
   //setup reciprocal basis
   reciprocal_basis_.resize(dimension(), dimension());
+  memset(&(reciprocal_basis_(0,0)), 0, sizeof(double)*dimension()*dimension());
   basis_vector_iterator itbr, itbr_end;
   boost::tie(itbr, itbr_end) = reciprocal_basis_vectors();
   for (unsigned int i=0; itbr!=itbr_end; ++itbr, ++i) 
@@ -446,7 +449,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 	group[g](j,i) = gr[i+j*dimension()+g*dimension()*dimension()];
   //setup symmetry table in real space
   Matrix<site_t>::Type symmetry_table_real_space;
-  std::cout << "good symmetries: ";
+  if(alps::is_master())
+    std::cout << "good symmetries: ";
   for (unsigned int g=0; g<group.size(); ++g) {
     std::map<site_t, site_t> vertexmap;
     std::set<site_t> vertexset;
@@ -473,7 +477,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 	break;
     }
     if (vertexset.size()==n_cluster_sites() && vertexmap.size()==n_cluster_sites()) {
-      std::cout  << g << " ";
+      if(alps::is_master())
+        std::cout  << g << " ";
       append_column_no_duplicates(symmetry_table_real_space, vertexmap);
     }
   }
@@ -489,7 +494,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
   boost::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space);
   //setup symmetry table in k space
   Matrix<site_t>::Type symmetry_table_k_space;
-  std::cout << "good symmetries: ";
+  if(alps::is_master())
+    std::cout << "good symmetries: ";
   for (unsigned int g=0; g<group.size(); ++g) {
     std::map<site_t, site_t> vertexmap;
     std::set<site_t> vertexset;
@@ -528,11 +534,13 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
 	break;
     }
     if (vertexset.size()==n_cluster_sites() && vertexmap.size()==n_cluster_sites()) {
-      std::cout  << g << " ";
+      if(alps::is_master())
+        std::cout  << g << " ";
       append_column_no_duplicates(symmetry_table_k_space, vertexmap);
     }
   }
-  std::cout << "\n";
+  if(alps::is_master())
+    std::cout << "\n";
   /*std::cout << "symmetry table k space:\n";
   for (unsigned int i=0; i<symmetry_table_k_space.size1(); ++i) {
     for (unsigned int j=0; j<symmetry_table_k_space.size2(); ++j) {

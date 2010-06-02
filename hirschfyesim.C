@@ -31,7 +31,6 @@
 /// @brief the actual Hirsch-Fye simulation
 
 #include "hirschfyesim.h"
-#include "xml.h"
 #include "cluster.h"
 #include "fouriertransform.h"
 #include <alps/alea.h>
@@ -117,9 +116,8 @@ green_tau(N+1, n_site, 2)
   itime_green_function_t bgf_sc_convention_k(N+1,n_site, 2); //bare green function in k_space
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
-  
-  std::istringstream in_omega(parms["G0(omega)"]);
-  read_freq(in_omega, bare_green_matsubara);
+  alps::hdf5::iarchive ar(parms["INFILE"]);
+  bare_green_matsubara.read_hdf5(ar, "/G0");
   
   if (n_site > 1) {
     matsubara_green_function_t bare_green_matsubara_k_space(bare_green_matsubara);
@@ -346,7 +344,7 @@ void HirschFyeRun::dostep()
 }
 
 
-std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_result() {
+void HirschFyeSim::get_result() {
   std::cout<<"getting results."<<std::endl;
   int N=parms["N"];
   int n_matsubara=parms["NMATSUBARA"];
@@ -376,7 +374,6 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
     //std::cout<<parms<<std::endl;
     std::cout<<"end of sim, checkpointing"<<std::endl;
     std::string fns=parms["CHECKPOINT"];
-    fns+=".xml";
     boost::filesystem::path fn(fns);
     checkpoint(boost::filesystem::complete(fn));
   }
@@ -415,7 +412,9 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
-  return std::make_pair(green_result_matsubara, green_result);
+  alps::hdf5::oarchive ar(parms["OUTFILE"]);
+  green_result.write_hdf5(ar, "/G_tau");
+  green_result_matsubara.write_hdf5(ar, "/G_omega");
 }
 
 /*itime_green_function_t HirschFyeRun::get_result() const {
@@ -486,65 +485,3 @@ const dense_matrix & green_matrix_down)const{
     }
   }
 }
-
-
-/*itime_green_function_t HirschFyeSim::get_result() const {
-  
-  multiple_vector_type g;
-  int N(static_cast<int>(parms["N"]));
-  alps::ObservableSet meas = get_measurements();
-  alps::RealVectorObsevaluator G_meas_up=meas["G_meas_up"];
-  alps::RealVectorObsevaluator G_meas_down=meas["G_meas_down"];  
-#ifdef FOURPOINT
-  if(parms.defined("MEASURE_FOURPOINT_FUNCTION")){
-    int s=N;
-    alps::RealVectorObsevaluator G_fourp_uu=meas["G_fourpoint_uu"];  
-    alps::RealVectorObsevaluator G_fourp_dd=meas["G_fourpoint_dd"];  
-    alps::RealVectorObsevaluator G_fourp_ud=meas["G_fourpoint_ud"];  
-    alps::RealVectorObsevaluator G_fourp_du=meas["G_fourpoint_du"];  
-    std::ofstream fourp_uu("fourpoint_uu.dat");
-    std::ofstream fourp_dd("fourpoint_dd.dat");
-    std::ofstream fourp_ud("fourpoint_ud.dat");
-    std::ofstream fourp_du("fourpoint_du.dat");
-    std::valarray<double> mean_array_uu(G_fourp_uu.mean());
-    std::valarray<double> mean_array_dd(G_fourp_dd.mean());
-    std::valarray<double> mean_array_ud(G_fourp_ud.mean());
-    std::valarray<double> mean_array_du(G_fourp_du.mean());
-    std::valarray<double> error_array_uu(G_fourp_uu.error());
-    std::valarray<double> error_array_dd(G_fourp_dd.error());
-    std::valarray<double> error_array_ud(G_fourp_ud.error());
-    std::valarray<double> error_array_du(G_fourp_du.error());
-    int s3=s*s*s;
-    int s2=s*s;
-    std::cout<<"fourpoint size: "<<mean_array_uu.size()<<" "<<s*s*s*s<<std::endl;
-    for(int i=0;i<s;++i){
-      for(int j=0;j<s;++j){
-        for(int k=0;k<s;++k){
-          for(int l=0;l<s;++l){
-            fourp_uu<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array_uu[i*s3+j*s2+k*s+l]<<" "<<error_array_uu[i*s3+j*s2+k*s+l]<<std::endl;
-            fourp_dd<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array_dd[i*s3+j*s2+k*s+l]<<" "<<error_array_dd[i*s3+j*s2+k*s+l]<<std::endl;
-            fourp_ud<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array_ud[i*s3+j*s2+k*s+l]<<" "<<error_array_ud[i*s3+j*s2+k*s+l]<<std::endl;
-            fourp_du<<i<<" "<<j<<" "<<k<<" "<<l<<" "<<mean_array_du[i*s3+j*s2+k*s+l]<<" "<<error_array_du[i*s3+j*s2+k*s+l]<<std::endl;
-          }
-        }
-      }
-    }
-  }
-#endif //FOURPOINT
-  std::valarray<double> g_up_mean_vector(G_meas_up.mean());
-  std::valarray<double> g_down_mean_vector(G_meas_down.mean());
-  //std::cout<<"measured: "<<std::endl;
-  //also take into account G(beta)
-  g.first.push_back(-1.+g_up_mean_vector[0]);
-  g.second.push_back(-1.+g_down_mean_vector[0]);
-  for(unsigned int i=0;i<g_up_mean_vector.size();++i){
-  	g.first.push_back(-g_up_mean_vector[g_up_mean_vector.size()-1-i]);
-  	g.second.push_back(-g_down_mean_vector[g_up_mean_vector.size()-1-i]);
-    //std::cout<<i<<"\t"<<-g_up_mean_vector[g_up_mean_vector.size()-1-i]<<"\t"<<G_meas_up.error()[g_up_mean_vector.size()-1-i]<<std::endl;
-  }
-  
-  itime_green_function_t multiple_G(N+1, 1, 2);
-  multiple_G.from_multiple_vector(g);
-  return multiple_G;
-}*/
-

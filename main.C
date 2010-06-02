@@ -87,6 +87,7 @@ int main(int argc, char** argv)
       if(!is.is_open()){std::cerr<<"parameter file argv[1] "<<argv[1]<<"is not open! exiting!"<<std::endl; abort(); }
       is>>parms;
       is.close();
+      parms["BASENAME"]=std::string(argv[1]);
     }
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {

@@ -62,11 +62,11 @@ public:
 	
 	ImpuritySolver::result_type solve(
               const itime_green_function_t& G0
-            , const alps::Parameters& parms);
+            , alps::Parameters parms);
     
     MatsubaraImpuritySolver::result_type solve_omega(
               const matsubara_green_function_t& G0_omega
-            , const alps::Parameters& parms =alps::Parameters());
+            , alps::Parameters parms );
             
 private:
     /// call the executable

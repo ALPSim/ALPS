@@ -85,7 +85,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
     if (iteration_ctr == 0) 
       (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
-    print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
+    print_tau_green_functions(iteration_ctr++, G0_tau, G_tau, beta);
   } while (max_diff > converged  && iteration_ctr < max_it);
   std::cout<<"converged!"<<std::endl;
   // write G0 (to be read in as an input for a new simulation)
@@ -131,7 +131,6 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
     }
     std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
     print_dressed_tau_green_functions(iteration_ctr++, G_tau, beta);
-    //print_tau_green_functions(iteration_ctr++, G_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged);
   std::cout<<"converged!"<<std::endl;
   // write G (to be read in as an input for a new simulation)
@@ -223,6 +222,8 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  std::string basename=parms["BASENAME"];
+
   
   matsubara_green_function_t G0_omega = hilbert.initial_G0(parms);
   matsubara_green_function_t G_omega = G0_omega;
@@ -301,7 +302,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
-    print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+    print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
     if (iteration_ctr == 1) 
       (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           
@@ -327,6 +328,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   bool paramagnet = parms.value_or_default("PARAMAGNET", false);
   double relax_rate=static_cast<double>(parms.value_or_default("RELAX_RATE", 1.));
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
+  std::string basename=parms["BASENAME"];
+
   
   matsubara_green_function_t G0_omega=clustertrans.initial_G0(parms);
   matsubara_green_function_t G_omega=G0_omega;
@@ -396,17 +399,15 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
       <<max_diff<<"\tconverged: "<<converged<<std::endl;
     }
     matsubara_green_function_t real_G0_omega = clustertrans.transform_into_real_space(G0_omega);
-    alps::oxstream g0_omega_realspace_debug("/tmp/g0_omega_realspace_debug");
-    write_freq(g0_omega_realspace_debug,real_G0_omega);
     matsubara_green_function_t real_G_omega = clustertrans.transform_into_real_space(G_omega);
     itime_green_function_t real_G0_tau = clustertrans.transform_into_real_space(G0_tau);
     itime_green_function_t real_G_tau = clustertrans.transform_into_real_space(G_tau);
     if (parms.value_or_default("ANTIFERROMAGNET", false)) 
-      print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, blockdiagonal);
+      print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, blockdiagonal);
     else
-      print_all_green_functions(iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, diagonal);
+      print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta, diagonal);
     if(!parms.defined("WRITE_SPARSE"))  
-      print_all_green_functions(iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, nondiagonal, "_realspace");
+      print_all_green_functions(basename, iteration_ctr, real_G0_omega, real_G_omega, real_G0_tau, real_G_tau, beta, nondiagonal, "_realspace");
     if (iteration_ctr == 1) 
       (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
   } while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it); 

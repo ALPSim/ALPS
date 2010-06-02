@@ -59,9 +59,8 @@ public:
   ///  @return the Green's functions for up and down spins as function of 
   ///          imaginary time 
     
-  virtual result_type solve(
-              const itime_green_function_t& G0
-            , const alps::Parameters& parms)=0;
+  virtual result_type solve( const itime_green_function_t& G0,
+            alps::Parameters parms)=0;
             
   virtual ~ImpuritySolver() {}
 };
@@ -86,7 +85,7 @@ public:
     ///          Matsubara frequency
     
   virtual result_type solve_omega(const matsubara_green_function_t& G0_omega,
-				  const alps::Parameters& parms =alps::Parameters())=0;
+				  alps::Parameters parms )=0;
             
   virtual ~MatsubaraImpuritySolver() {}
 };

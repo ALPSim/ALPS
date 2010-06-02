@@ -70,13 +70,12 @@ public:
       master_scheduler->destroy_task();
   }
   
-  itime_green_function_t solve(
-    const itime_green_function_t& G0, 
-    const Parameters& parms =Parameters());
+  itime_green_function_t solve(const itime_green_function_t& G0,
+    Parameters parms);
     
   std::pair<matsubara_green_function_t, itime_green_function_t> solve_omega(
-      const matsubara_green_function_t& G0_omega
-    , const Parameters& parms=Parameters());
+      const matsubara_green_function_t& G0_omega,
+    Parameters parms);
 
 protected:
   int solve_it(Parameters const& p);
@@ -92,7 +91,7 @@ class ImpurityTask
 public:
   ImpurityTask() {}
   virtual ~ImpurityTask() {}
-  virtual itime_green_function_t get_result() const=0;
+  virtual void get_result() const=0;
 };
 
 class MatsubaraImpurityTask
@@ -100,7 +99,7 @@ class MatsubaraImpurityTask
 public:
   MatsubaraImpurityTask() {}
   virtual ~MatsubaraImpurityTask() {}
-  virtual std::pair<matsubara_green_function_t,itime_green_function_t> get_result() =0;
+  virtual void get_result() =0;
 };
 
 
