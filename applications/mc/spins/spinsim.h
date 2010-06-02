@@ -263,7 +263,7 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
       m_h += this->spinfactor_[*si]*spins_[*si].mag_h(this->h_normalized);
 
     if (this->is_bipartite()) 
-      mst+=par*parity(*si)*this->spinfactor_[*si]*spins_[*si].magnetization();
+      mst+=par*this->parity(*si)*this->spinfactor_[*si]*spins_[*si].magnetization();
   }
   
   std::valarray<double> bt_en(bt_energy.size());
@@ -388,7 +388,7 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
     if (this->has_magnetic_field_) 
       m_h += this->spinfactor_[*si]*spins_[*si].mag_h(this->h_normalized);
     if (this->is_bipartite()) 
-      mst+=par*parity(*si)*this->spinfactor_[*si]*spins_[*si].magnetization();
+      mst+=par*this->parity(*si)*this->spinfactor_[*si]*spins_[*si].magnetization();
   }
 
   std::valarray<double> bt_en(bt_energy.size());

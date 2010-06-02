@@ -534,7 +534,7 @@ BasicOp<T>::init_blocks()
     SubSpace row_range = bm::subspace(col_range.qn()+dqn);
     if(row_range.begin() == DMTK_ERROR) continue;
     SubMatrix<T> b(col_range.qn(),col_range,row_range);
-    push_back(b);
+    dmtk::BMatrix<T>::push_back(b);
   }
 }
 
@@ -553,7 +553,7 @@ BasicOp<T>::bmatrix_from_matrix(const Matrix<T>& m)
     if(row_range.begin() == DMTK_ERROR) continue;
     SubMatrix<T> b(col_range.qn(),col_range,row_range);
     b = m(col_range,row_range);
-    push_back(b);
+    dmtk::BMatrix<T>::push_back(b);
   }
 }
 
@@ -590,14 +590,14 @@ class Term: public std::vector<BasicOp<T> >
         if(local_op.is_term())
           operator=(local_op.term());
         else
-          { _V::clear(); push_back(local_op); }
+          { _V::clear(); std::vector<BasicOp<T> >::push_back(local_op); }
       }
 
     Term(const BasicOp<T>& local_op, T coef): _coef(coef), _term_type(TERM_PRODUCT), _value(T(0)) 
-      { _V::clear(); push_back(local_op); }
+      { _V::clear(); std::vector<BasicOp<T> >::push_back(local_op); }
 
     Term(const BasicOp<T>& op1, const BasicOp<T>& op2): _coef(1), _term_type(TERM_PRODUCT), _value(T(0)) 
-      { _V::clear(); push_back(op2); push_back(op1); }
+      { _V::clear(); std::vector<BasicOp<T> >::push_back(op2); std::vector<BasicOp<T> >::push_back(op1); }
 
     Term(const BasicOp<T>& _op1, const BasicOp<T>& _op2, T coef): _coef(coef), _term_type(TERM_PRODUCT), _value(T(0))
           { _V::clear(); _V::push_back(_op2); _V::push_back(_op1); }
@@ -785,7 +785,7 @@ if(_V::size() == 0) cout << "ERROR: size == 0\n";
       for(int i = 0; i < n; i++){
         BasicOp<T> op;
         op.read(s);
-        push_back(op);
+        std::vector<BasicOp<T> >::push_back(op);
       }
     }
 };

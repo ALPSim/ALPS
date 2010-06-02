@@ -344,7 +344,7 @@ private:
     
     if(super_type::alpha.size() == 0) {
       a_and_b = make_first_step(gen_);
-      push_back(a_and_b); // member of T-matrix class.
+      Tmatrix<VS>::push_back(a_and_b); // member of T-matrix class.
       n=1;
     }    
     
@@ -364,7 +364,7 @@ private:
     while(!iter.finished(*this)) {          
       a_and_b = make_step(n,vec3);
       if (n==super_type::alpha.size()) 
-        push_back(a_and_b); // member of T-matrix class 
+        Tmatrix<VS>::push_back(a_and_b); // member of T-matrix class 
       ++iter;
       ++n;
     }

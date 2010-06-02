@@ -76,18 +76,18 @@ class Hami : public std::vector<Term<T> >
       }
 */
     Hami& operator+=(const Term<T>& t) 
-      { push_back(t); return *this; }
+      { std::vector<Term<T> >::push_back(t); return *this; }
     Hami& operator-=(const Term<T>& t) 
-      { t.coef() = - t.coef(); push_back(t); return *this; }
+      { t.coef() = - t.coef(); std::vector<Term<T> >::push_back(t); return *this; }
     Hami& operator+=(const BasicOp<T>& t) 
-      { push_back(Term<T>(t)); return *this; }
+      { std::vector<Term<T> >::push_back(Term<T>(t)); return *this; }
     Hami& operator-=(const BasicOp<T>& t) 
-      { push_back(Term<T>(t,T(-1))); return *this; }
+      { std::vector<Term<T> >::push_back(Term<T>(t,T(-1))); return *this; }
     Hami& operator+=(const Hami& h) 
       {
         const_iterator iter;
         for(iter = h.begin(); iter != h.end(); iter++)
-          push_back(*iter);
+          std::vector<Term<T> >::push_back(*iter);
         return *this;
       }
     Hami& operator*=(const T& v) 

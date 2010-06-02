@@ -19,7 +19,7 @@
 #else
 # ifndef FORTRAN_ID
 #  define FORTRAN_ID( id ) id##_
-#endif FORTRAN_ID
+#endif /* FORTRAN_ID */
 #endif
 
 //

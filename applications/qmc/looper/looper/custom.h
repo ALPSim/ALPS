@@ -109,18 +109,18 @@ struct custom_measurement {
     template<typename M>
     void init_observables(M& m, bool is_signed) {
       BOOST_FOREACH(s_elements_type const& elms, average_elements)
-        add_scalar_obs(m, elms.get<0>(), is_signed);
+        add_scalar_obs(m, boost::get<0>(elms), is_signed);
       if (local_elements.size()) {
         BOOST_FOREACH(s_elements_type const& elms, local_elements)
-          add_vector_obs(m, elms.get<0>(), site_label, is_signed);
+          add_vector_obs(m, boost::get<0>(elms), site_label, is_signed);
       }
       if (correlation_elements.size()) {
         BOOST_FOREACH(p_elements_type const& elms, correlation_elements)
-          add_vector_obs(m, elms.get<0>(), distance_label, is_signed);
+          add_vector_obs(m, boost::get<0>(elms), distance_label, is_signed);
       }
       if (strfactor_elements.size()) {
         BOOST_FOREACH(p_elements_type const& elms, strfactor_elements)
-          add_vector_obs(m, elms.get<0>(), momenta_label, is_signed);
+          add_vector_obs(m, boost::get<0>(elms), momenta_label, is_signed);
       }
     }
 
@@ -150,9 +150,9 @@ struct custom_measurement {
           BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type const& vs,
             sites(lat, rs))
             st += (1 - spins[vs]);
-          v += elms.get<1>()[get(site_type_t(), lat.rg(), rs)][st];
+          v += boost::get<1>(elms)[get(site_type_t(), lat.rg(), rs)][st];
         }
-        m[elms.get<0>()] << sign * v / lat.volume();
+        m[boost::get<0>(elms)] << sign * v / lat.volume();
       }
 
       // local
@@ -164,9 +164,9 @@ struct custom_measurement {
           BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type const& vs,
             sites(lat, rs))
             st += (1 - spins[vs]);
-          local[rs] = sign * elms.get<1>()[get(site_type_t(), lat.rg(), rs)][st];
+          local[rs] = sign * boost::get<1>(elms)[get(site_type_t(), lat.rg(), rs)][st];
         }
-        m[elms.get<0>()] << local;
+        m[boost::get<0>(elms)] << local;
       }
 
       // correlation
@@ -177,14 +177,14 @@ struct custom_measurement {
           BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type const& vs0,
             sites(lat, origin.get()))
             st0 += (1 - spins[vs0]);
-          double v0 = elms.get<1>()[get(site_type_t(), lat.rg(), origin.get())][st0];
+          double v0 = boost::get<1>(elms)[get(site_type_t(), lat.rg(), origin.get())][st0];
           BOOST_FOREACH(typename real_site_descriptor<lattice_t>::type const& rs1,
             sites(lat.rg())) {
             int st1 = 0;
             BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type const& vs1,
               sites(lat, rs1))
               st1 += (1 - spins[vs1]);
-            double v1 = elms.get<2>()[get(site_type_t(), lat.rg(), rs1)][st1];
+            double v1 = boost::get<2>(elms)[get(site_type_t(), lat.rg(), rs1)][st1];
             corr[rs1] = sign * v0 * v1;
           }
         } else {
@@ -194,21 +194,21 @@ struct custom_measurement {
             BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type const& vs0,
               sites(lat, rs0))
               st0 += (1 - spins[vs0]);
-            double v0 = elms.get<1>()[get(site_type_t(), lat.rg(), rs0)][st0];
+            double v0 = boost::get<1>(elms)[get(site_type_t(), lat.rg(), rs0)][st0];
             BOOST_FOREACH(typename real_site_descriptor<lattice_t>::type const& rs1,
               sites(lat.rg())) {
               int st1 = 0;
               BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type const& vs1,
                 sites(lat, rs1))
                 st1 += (1 - spins[vs1]);
-              double v1 = elms.get<2>()[get(site_type_t(), lat.rg(), rs1)][st1];
+              double v1 = boost::get<2>(elms)[get(site_type_t(), lat.rg(), rs1)][st1];
               int d = distance(lat, rs0, rs1);
               corr[d] += v0 * v1;
             }
           }
           corr *= sign * mltplcty;
         }
-        m[elms.get<0>()] << corr;
+        m[boost::get<0>(elms)] << corr;
       }
 
       // structure factor
@@ -225,13 +225,13 @@ struct custom_measurement {
             BOOST_FOREACH(typename virtual_site_descriptor<lattice_t>::type const& vs,
               sites(lat, rs))
               st += (1 - spins[vs]);
-            v0 += elms.get<1>()[t][st] * mit.phase(coordinate(rs));
-            v1 += elms.get<2>()[t][st] * mit.phase(coordinate(rs));
+            v0 += boost::get<1>(elms)[t][st] * mit.phase(coordinate(rs));
+            v1 += boost::get<2>(elms)[t][st] * mit.phase(coordinate(rs));
           }
           sfac[k] = std::real(std::conj(v0) * v1);
         }
         sfac *= (sign / lat.volume());
-        m[elms.get<0>()] << sfac;
+        m[boost::get<0>(elms)] << sfac;
       }
     }
   };

@@ -81,7 +81,10 @@ struct stiffness
 
     struct estimate {
       double winding[MAX_DIM];
-      estimate() : winding() {}
+      estimate()
+      {
+          std::fill(winding, winding+MAX_DIM, 0.0);
+      }
       void init() {
         for (int i = 0; i < MAX_DIM; ++i) winding[i] = 0;
       }

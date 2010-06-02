@@ -114,10 +114,10 @@ void DiagMatrix<T,M>::dostep()
     // set QN
     std::vector<std::pair<std::string,std::string> > qns;
     for (unsigned i=0;i<indices.size();++i) {
-      this->alps::scheduler::Task::parms[ranges_[i].first.second]=ranges_[i].second.get<0>()+indices[i];
+      this->alps::scheduler::Task::parms[ranges_[i].first.second]=boost::get<0>(ranges_[i].second)+indices[i];
       qns.push_back(std::make_pair(
         ranges_[i].first.first,
-        boost::lexical_cast<std::string>(ranges_[i].second.get<0>()+indices[i])));
+        boost::lexical_cast<std::string>(boost::get<0>(ranges_[i].second)+indices[i])));
     }
 
     if (loop_momenta && ik<momenta.size())
@@ -137,8 +137,8 @@ void DiagMatrix<T,M>::dostep()
     if (ik>=momenta.size() || (! loop_momenta)) {
       ik=0;
       while (j!=indices.size()) {
-        indices[j] += ranges_[j].second.get<2>();
-        if (ranges_[j].second.get<0>()+indices[j]<=ranges_[j].second.get<1>())
+        indices[j] += boost::get<2>(ranges_[j].second);
+        if (boost::get<0>(ranges_[j].second)+indices[j]<=boost::get<1>(ranges_[j].second))
           break;
         indices[j]=0;
         ++j;
@@ -174,15 +174,15 @@ void DiagMatrix<T,M>::build_subspaces(const std::string& quantumnumbers)
     half_integer_tuple qn= boost::make_tuple(half_integer_type(0),half_integer_type(0),half_integer_type(1));
     for (unsigned int s=0;s<basis_.size();++s) {
       unsigned int k=alps::get_quantumnumber_index(constraints[i].first,basis_[s].basis());
-      qn.get<0>() += basis_[s].basis()[k].global_min();
-      qn.get<1>() += basis_[s].basis()[k].global_max();
+      boost::get<0>(qn) += basis_[s].basis()[k].global_min();
+      boost::get<1>(qn) += basis_[s].basis()[k].global_max();
       if (basis_[s].basis()[k].global_increment().is_odd())
-        qn.get<2>() = 0.5;
+        boost::get<2>(qn) = 0.5;
     }
     ranges_.push_back(std::make_pair(constraints[i],qn));
     std::cerr << "Quantumnumber " << constraints[i].first << " going from " 
-              << qn.get<0>() << " to " << qn.get<1>() << " with increment "
-              << qn.get<2>() << "\n";
+              << boost::get<0>(qn) << " to " << boost::get<1>(qn) << " with increment "
+              << boost::get<2>(qn) << "\n";
   }
 }
 
@@ -232,7 +232,7 @@ void DiagMatrix<T,M>::perform_measurements()
       std::vector<bool> done(this->num_distances(),false);
       for (site_iterator sit1=this->sites().first; sit1!=this->sites().second ; ++sit1) {
         for (site_iterator sit2=this->sites().first; sit2!=this->sites().second ; ++sit2) {
-          std::size_t d = distance(*sit1,*sit2);
+          std::size_t d = alps::scheduler::DiagTask<T>::distance(*sit1,*sit2);
           if (!done[d] || this->uses_translation_invariance()) {
             std::vector<value_type> av;
             if (*sit1 == *sit2) {
@@ -287,8 +287,8 @@ void DiagMatrix<T,M>::perform_measurements()
             av.resize(corrs[*sit1][*sit2].size());
           for (unsigned i=0;i<corrs[*sit1][*sit2].size();++i)
             av[i] += std::real(corrs[*sit1][*sit2][i]
-                      *std::conj(mit.phase(coordinate(*sit1)))
-                      *mit.phase(coordinate(*sit2)))/static_cast<double>(this->num_sites());
+                      *std::conj(mit.phase(alps::scheduler::DiagTask<T>::coordinate(*sit1)))
+                      *mit.phase(alps::scheduler::DiagTask<T>::coordinate(*sit2)))/static_cast<double>(this->num_sites());
         }
         if (meas.structurefactor_values[ex.first].size() < av.size())
           meas.structurefactor_values[ex.first].resize(av.size());

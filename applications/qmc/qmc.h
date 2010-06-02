@@ -151,7 +151,7 @@ void QMCRun<G,StateType>::initialize_site_states()
   maximum_number_of_states=0;
 
   for (site_iterator it=this->sites().first; it!=this->sites().second;++it) {
-    unsigned int sitetype=site_type(*it);
+    unsigned int sitetype=alps::scheduler::LatticeModelMCRun<G>::site_type(*it);
     std::map<int,int>::const_iterator found = number_states_for_site_type_.find(sitetype);
     if (found != number_states_for_site_type_.end())
       site_number_of_states.push_back(found->second);
@@ -586,8 +586,8 @@ void QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
     for (typename super_type:: momentum_iterator mit=this->momenta().first; mit != this->momenta().second; ++mit) {
       std::complex<double> vala, valb;
       for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit) {
-        vala += local_a[*sit]*mit.phase(coordinate(*sit));
-        valb += local_b[*sit]*mit.phase(coordinate(*sit));
+        vala += local_a[*sit]*mit.phase(alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit));
+        valb += local_b[*sit]*mit.phase(alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit));
       }
       str.push_back(std::real(std::conj(vala)*valb));
     }
@@ -602,7 +602,7 @@ void QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
     for (typename super_type:: momentum_iterator mit=this->momenta().first; mit != this->momenta().second; ++mit) {
       std::complex<double> val;
       for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit)
-        val += local[*sit]*mit.phase(coordinate(*sit));
+        val += local[*sit]*mit.phase(alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit));
       str.push_back(std::abs(val)*std::abs(val));
     }
     std::valarray<double> strv(str.size());
@@ -615,7 +615,7 @@ void QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
         std::complex<double> val;
         for (typename super_type::site_iterator sit=this->sites().first; sit!=this->sites().second;++sit)
         {
-            double phase = M_PI * (coordinate(*sit)[0] + coordinate(*sit)[1]);
+            double phase = M_PI * (alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit)[0] + alps::scheduler::LatticeModelMCRun<G>::coordinate(*sit)[1]);
             val += local[*sit] * (std::complex<double> ( std::cos(phase), std::sin(phase) ));            
         }
         double CBS_order = (std::abs(val) * std::abs(val) * sign) / this->num_sites();
