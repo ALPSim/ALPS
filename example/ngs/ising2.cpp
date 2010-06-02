@@ -44,13 +44,13 @@ void IsingSimulation::print_copyright(std::ostream& out)
 }
 
 IsingSimulation::IsingSimulation(parameters_type const & p)
-  : alps::mcdepreciated(p),
-    length(static_cast<alps::uint32_t>(p["L"])),
-    beta(1./static_cast<double>(p["T"])),
-    sweeps(0),
-    thermalization_sweeps(static_cast<alps::uint32_t>(p["THERMALIZATION"])),
-    total_sweeps(static_cast<alps::uint32_t>(p["SWEEPS"])),
-    spins(length)
+  : alps::mcdeprecated(p)
+  , length(static_cast<alps::uint32_t>(p["L"]))
+  , beta(1./static_cast<double>(p["T"]))
+  , sweeps(0)
+  , thermalization_sweeps(static_cast<alps::uint32_t>(p["THERMALIZATION"]))
+  , total_sweeps(static_cast<alps::uint32_t>(p["SWEEPS"]))
+  , spins(length)
 {
   // initialize random spin configuration
   for(int i=0;i<length;i++)
