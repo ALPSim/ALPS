@@ -32,7 +32,7 @@ void run_single(alps::mcoptions const & options) {
     clone_type::parameters_type params(options.input_file);
     clone_type s(params);
     s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
-//    s.save(options.output_file);
+    s.save(options.output_file);
     collect_results(s);
     std::cout << collect_results(s, "Magnetization");
 }
@@ -40,7 +40,7 @@ void run_threaded(alps::mcoptions const & options) {
     alps::mcthreadsim<clone_type>::parameters_type params(options.input_file);
     alps::mcthreadsim<clone_type> s(params);
     s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
-//    s.save(options.output_file);
+    s.save(options.output_file);
     collect_results(s);
     std::cout << collect_results(s, "Magnetization");
 }
@@ -49,9 +49,8 @@ void run_mpi(alps::mcoptions const & options, int argc, char *argv[]) {
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
     alps::mcmpisim<clone_type> s(params, c);
-
     s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
-//    s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
+    s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
     alps::results_type<clone_type>::type results = s.collect_local_results();
     for (alps::results_type<clone_type>::type::const_iterator it = results.begin(); it != results.end(); ++it)
         std::cout << std::fixed << std::setprecision(5) << it->first << " (" << c.rank() << "): " << it->second->to_string() << std::endl;
