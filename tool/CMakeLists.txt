@@ -135,4 +135,13 @@ endif(SQLite_FOUND)
   endif(PYTHON_INTERPRETER AND NOT ALPS_PACKAGE_LIBRARIES)
 endif (NOT ALPS_BUILD_SOURCE)
 
+  #
+  # ngs tools
+  # 
+  foreach(program p2h5)
+    add_executable(${program} ${program}.cpp)
+    target_link_libraries(${program} alps)
+    install(TARGETS ${program} RUNTIME DESTINATION bin COMPONENT tools) 
+  endforeach(program)
+
 endif(ALPS_FOR_VISTRAILS)

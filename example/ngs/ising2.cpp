@@ -99,6 +99,7 @@ double IsingSimulation::work_done() const
 
 void IsingSimulation::dostep()
 {
+  using std::exp;
   // increment sweep count
   sweeps++;
   

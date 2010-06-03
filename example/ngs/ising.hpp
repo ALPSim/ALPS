@@ -27,9 +27,9 @@
 
 #include <alps/ngs.hpp>
 
-class ising_sim : public alps::mcbase {
+class simulation_type : public alps::mcbase {
     public:
-        ising_sim(parameters_type const & params)
+        simulation_type(parameters_type const & params)
             : alps::mcbase(params)
             , length(params["L"])
             , beta(1. / double(params["T"]))
@@ -51,6 +51,7 @@ class ising_sim : public alps::mcbase {
         }
         void do_update() {
             for (int j = 0; j < length; ++j) {
+                using std::exp;
                 int i = int(double(length) * random());
                 int right = ( i + 1 < length ? i + 1 : 0 );
                 int left = ( i - 1 < 0 ? length - 1 : i - 1 );
@@ -97,5 +98,3 @@ class ising_sim : public alps::mcbase {
         std::vector<int> spins;
         std::valarray<double> corr;
 };
-
-typedef ising_sim clone_type;

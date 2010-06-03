@@ -28,51 +28,18 @@
 bool stop_callback(boost::posix_time::ptime const & end_time) {
     return alps::mcsignal() || boost::posix_time::second_clock::local_time() > end_time;
 }
-void run_single(alps::mcoptions const & options) {
-    clone_type::parameters_type params(options.input_file);
-    clone_type s(params);
-    s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
-    s.save(options.output_file);
-    collect_results(s);
-    std::cout << collect_results(s, "Magnetization");
-}
-void run_threaded(alps::mcoptions const & options) {
-    alps::mcthreadsim<clone_type>::parameters_type params(options.input_file);
-    alps::mcthreadsim<clone_type> s(params);
-    s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
-    s.save(options.output_file);
-    collect_results(s);
-    std::cout << collect_results(s, "Magnetization");
-}
-void run_mpi(alps::mcoptions const & options, int argc, char *argv[]) {
-    alps::mcmpisim<clone_type>::parameters_type params(options.input_file);
-    boost::mpi::environment env(argc, argv);
-    boost::mpi::communicator c;
-    alps::mcmpisim<clone_type> s(params, c);
-    s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
-    s.save("sim-" + boost::lexical_cast<std::string>(c.rank()));
-    alps::results_type<clone_type>::type results = s.collect_local_results();
-    for (alps::results_type<clone_type>::type::const_iterator it = results.begin(); it != results.end(); ++it)
-        std::cout << std::fixed << std::setprecision(5) << it->first << " (" << c.rank() << "): " << it->second->to_string() << std::endl;
-    if (c.rank()==0) {
-        {
-            alps::results_type<clone_type>::type results = collect_results(s);
-            alps::hdf5::oarchive ar(options.output_file);
-            ar << alps::make_pvp("/parameters", params);
-            for (alps::results_type<clone_type>::type::const_iterator it = results.begin(); it != results.end(); ++it)
-                ar << alps::make_pvp("/simulation/results/" + it->first, *(it->second));
-            std::cout << results;
-        }
-        s.terminate();
-    } else
-        s.process_requests();
-}
 int main(int argc, char *argv[]) {
     alps::mcoptions options(argc, argv);
-    if (options.valid)
-        switch(options.type) {
-            case alps::mcoptions::SINGLE: run_single(options); break;
-            case alps::mcoptions::THREADED: run_threaded(options); break;
-            case alps::mcoptions::MPI: run_mpi(options, argc, argv); break;
-        }
+    alps::parameters_type<simulation_type>::type params(options.input_file);
+    if (options.valid && options.type == alps::mcoptions::SINGLE) {
+        simulation_type s(params);
+        s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
+        s.save_collected(options.output_file);
+    } else if(options.valid && options.type == alps::mcoptions::MPI) {
+        boost::mpi::environment env(argc, argv);
+        boost::mpi::communicator c;
+        alps::mcmpisim<simulation_type> s(params, c);
+        s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
+        s.save_collected(options.output_file);
+    }
 }

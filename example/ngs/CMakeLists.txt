@@ -4,9 +4,6 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 if (ALPS_BUILD_EXAMPLES)
-  add_executable(p2h5 p2h5.cpp)
-  add_dependencies(p2h5 alps)
-  target_link_libraries(p2h5 alps)
   if (MPI_FOUND)
     add_executable(ngs main.cpp)
     add_dependencies(ngs alps)

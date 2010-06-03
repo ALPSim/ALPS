@@ -41,6 +41,10 @@ public:
   static void print_copyright(std::ostream&);
   
   IsingSimulation(parameters_type const & p);
+  
+  using alps::mcdeprecated::save;
+  using alps::mcdeprecated::load;
+  
   void save(alps::ODump&) const;
   void load(alps::IDump&);
   void dostep();
@@ -57,4 +61,4 @@ private:
   std::vector<int> spins;           // the vector to store the spins
 };
 
-typedef IsingSimulation clone_type;
+typedef IsingSimulation simulation_type;
