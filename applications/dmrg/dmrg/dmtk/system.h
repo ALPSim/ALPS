@@ -111,7 +111,7 @@ class FileList
          struct stat dir_ptr;
 		 if(!stat(aux.c_str(),&dir_ptr) == 0) {
 			 std::cerr << "*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path.\n";
-           boost::throw_exception(std::runtime_error("*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path."));
+                         boost::throw_exception(std::runtime_error("*** ERROR: ALPS DMRG could not open directory for temporary files. Create the directory " + aux + " or choose a different path."));
 		 }
          std::cout << "ALPS DMRG temporary files will be written to " << aux << std::endl;
          temp_dir = boost::filesystem::path(aux); 
@@ -123,7 +123,7 @@ class FileList
          std::map<std::string,std::string>::iterator old_name = _tmp_filenames.find(filename);
          if(old_name != _tmp_filenames.end()) return (old_name->second).c_str();
 
-         filename = filename.substr(0,filename.find_first_of('_')+1);
+         filename = filename.substr(0,filename.find_first_of('.'));
          this->last_filename = alps::temporary_filename((temp_dir / filename).native_file_string());
          _tmp_filenames[std::string(input)] = this->last_filename;
          std::cout << "Creating temp file " << this->last_filename << std::endl;
@@ -511,7 +511,7 @@ class System
 
     void write_status() const
     {
-      const char *file = tmp_files.get_filename("system_.dat"); 
+      const char *file = tmp_files.get_filename("system.dat"); 
       ofstream outputfile(file,std::ios::out|std::ios::binary);
       if(!outputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
@@ -544,7 +544,7 @@ class System
 
     void read_status() 
     {
-      const char *file = tmp_files.get_filename("system_.dat"); 
+      const char *file = tmp_files.get_filename("system.dat"); 
       ifstream inputfile(file,std::ios::in|std::ios::binary);
       if(!inputfile) {
         cerr << "*** ERROR: Could not open file " << file << endl;
