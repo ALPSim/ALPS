@@ -53,8 +53,8 @@ for cp in coulombparam:
               'N'                   : 1000,
               'NMATSUBARA'          : 1000,
               'FLAVORS'             : 4,
-              'CONVERGED'           : 0.0001,
-              'TOLERANCE'           : 0.003,
+              'CONVERGED'           : 0.01,
+              'TOLERANCE'           : 0.3,
               'SOLVER'              : 'Hybridization',
               'SEED'                : 0,
               'F'                   : 10,
@@ -65,7 +65,7 @@ for cp in coulombparam:
               'N_MOVE'              : 0,
               'OVERLAP'             : 0,
               'CHECKPOINT'          : 'dump',
-              'G0TAU_INPUT'         :'G0_tau_input'
+              'G0TAU_INPUT'         :'G0_tau_input_u_'+str(cp[0])+'_j_'+str(cp[1])
             }
         )
 
@@ -73,4 +73,22 @@ for cp in coulombparam:
 for p in parms:
     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U'])+'_j_'+str(p['J']),p)
     res = pyalps.runDMFT(input_file)
+
+flavors=parms[0]['FLAVORS']
+listobs=[]   
+for f in range(0,flavors):
+    listobs.append('Green_'+str(f))
+    
+ll=pyalps.load.Hdf5Loader()
+data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
+for d in data:
+    for f in range(0,flavors):
+        d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
+        plt.figure()
+        pyalps.pyplot.plot(d[f])
+        plt.xlabel(r'$\tau$')
+        plt.ylabel(r'$G(\tau)$')
+        plt.title('Hubbard model on the Bethe lattice')
+        plt.show()
+
 

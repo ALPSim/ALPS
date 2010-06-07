@@ -48,14 +48,14 @@ for b in [6.,8.,10.,12.,14.,16.]:
               't'                   : 0.707106781186547,
               'MU'                  : 0,
               'H'                   : 0,
-              'TOLERANCE'           : 0.0001,
-              'CONVERGED'           : 0.0003,
+              'TOLERANCE'           : 0.01,
+              'CONVERGED'           : 0.03,
               'SYMMETRIZATION'      : 0,
               'ANTIFERROMAGNET'     : 1,
               'SOLVER'              : '/opt/alps/bin/hirschfye',
               'FLAVORS'             : 2,
               'OMEGA_LOOP'          : 1,
-              'G0OMEGA_INPUT'       : 'G0_omega_input',
+              'G0OMEGA_INPUT'       : 'G0_omega_input_beta_'+str(b),
               'BASENAME'            : 'hirschfye.param'
             }
         )
@@ -64,4 +64,21 @@ for b in [6.,8.,10.,12.,14.,16.]:
 for p in parms:
     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
+
+flavors=parms[0]['FLAVORS']
+listobs=[]   
+for f in range(0,flavors):
+    listobs.append('Green_'+str(f))
+    
+ll=pyalps.load.Hdf5Loader()
+data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
+for d in data:
+    for f in range(0,flavors):
+        d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
+        plt.figure()
+        pyalps.pyplot.plot(d[f])
+        plt.xlabel(r'$\tau$')
+        plt.ylabel(r'$G(\tau)$')
+        plt.title('Hubbard model on the Bethe lattice')
+        plt.show()
 

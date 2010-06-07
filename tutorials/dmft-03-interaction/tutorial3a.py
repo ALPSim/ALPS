@@ -54,14 +54,14 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'MU'                      : 0,
               'H'                       : 0,
               'H_INIT'                  : 0.,
-              'CONVERGED'               : 0.0008,
+              'CONVERGED'               : 0.08,
               'SYMMETRIZATION'          : 0,
               'ANTIFERROMAGNET'         : 1,
               'SOLVER'                  : 'Interaction Expansion',
               'HISTOGRAM_MEASUREMENT'   : 1,
               'NSELF'                   : 5000,
               'ALPHA'                   : -0.01,
-              'G0OMEGA_INUT'            : 'G0_omega_input',
+              'G0OMEGA_INPUT'            : 'G0_omega_input_beta'+str(b),
               'FLAVORS'                 : 2,
               'OMEGA_LOOP'              : 1,
               'CHECKPOINT'              : 'dump',
@@ -71,4 +71,22 @@ for b in [6.,8.,10.,12.,14.,16.]:
 #write the input file and run the simulation
 for p in parms:
     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
-    res = pyalps.runDMFT(input_file)
+    #res = pyalps.runDMFT(input_file)
+
+flavors=parms[0]['FLAVORS']
+listobs=[]   
+for f in range(0,flavors):
+    listobs.append('Green_'+str(f))
+    
+ll=pyalps.load.Hdf5Loader()
+data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
+for d in data:
+    for f in range(0,flavors):
+        d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
+        plt.figure()
+        pyalps.pyplot.plot(d[f])
+        plt.xlabel(r'$\tau$')
+        plt.ylabel(r'$G(\tau)$')
+        plt.title('Hubbard model on the Bethe lattice')
+        plt.show()
+

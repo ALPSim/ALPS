@@ -32,10 +32,10 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms=[]
-for b in [6.,8.,10.,12.,14.,16.]: 
+for b in [6.,8.,10.,12.,14.,16.]:
     parms.append(
-            { 
-              'SEED'                : 0, 
+            {
+              'SEED'                : 0,
               'THERMALIZATION'      : 1000,
               'SWEEPS'              : 100000000,
               'MAX_TIME'            : 60,
@@ -43,33 +43,49 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'BETA'                : b,
               'SITES'               : 1,
               'N'                   : 1000,
-              'NMATSUBARA'          : 1000, 
+              'NMATSUBARA'          : 1000,
               'U'                   : 3,
               't'                   : 0.707106781186547,
               'MU'                  : 0,
               'H'                   : 0,
               'H_INIT'              : 0.2,
-              'TOLERANCE'           : 0.0001,
-              'CONVERGED'           : 0.0003,
+              'TOLERANCE'           : 0.01,
+              'CONVERGED'           : 0.03,
               'SYMMETRIZATION'      : 0,
               'ANTIFERROMAGNET'     : 1,
               'SOLVER'              : 'Hybridization',
               'FLAVORS'             : 2,
               'OMEGA_LOOP'          : 1,
-              'CHECKPOINT'          : 'dump',
+              'CHECKPOINT'          : 'solverdump_beta_'+str(b)+'.task1.out.h5',
               'F'                   : 10,
               'N_ORDER'             : 50,
               'N_MEAS'              : 10000,
               'N_SHIFT'             : 0,
               'N_FLIP'              : 0,
               'N_MOVE'              : 0,
-              'OVERLAP'             : 0
+              'OVERLAP'             : 0,
+              'G0TAU_INPUT'         : 'G0_tau_input_beta_'+str(b)
             }
         )
-
+        
 #write the input file and run the simulation
 for p in parms:
     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
 
-
+flavors=parms[0]['FLAVORS']
+listobs=[]   
+for f in range(0,flavors):
+    listobs.append('Green_'+str(f))
+    
+ll=pyalps.load.Hdf5Loader()
+data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
+for d in data:
+    for f in range(0,flavors):
+        d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
+        plt.figure()
+        pyalps.pyplot.plot(d[f])
+        plt.xlabel(r'$\tau$')
+        plt.ylabel(r'$G(\tau)$')
+        plt.title('Hubbard model on the Bethe lattice')
+        plt.show()
