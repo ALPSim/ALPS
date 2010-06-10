@@ -3494,8 +3494,8 @@ size_t
 System<T>::block(int site) const
 {
   typename Lattice::const_iterator iter;
-  valarray<const Block<T>* > b(4);
-  valarray<int> offset(4);
+  std::vector<const Block<T>* > b(4);
+  std::vector<int> offset(4);
   b[0] = _b1;
   b[1] = _b2;
   b[2] = _b3;
@@ -3527,8 +3527,8 @@ const BasicOp<T>*
 System<T>::operator()(const BasicOp<T>& op) const
 {
   typename Lattice::const_iterator iter;
-  valarray<const Block<T>* > b(4);
-  valarray<int> offset(4);
+  std::vector<const Block<T>* > b(4);
+  std::vector<int> offset(4);
   b[0] = _b1;
   b[1] = _b2;
   b[2] = _b3;

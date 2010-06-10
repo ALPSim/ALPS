@@ -26,7 +26,7 @@
 #ifndef __DMTK_STATE_SLICE_H__
 #define __DMTK_STATE_SLICE_H__
 
-#include <valarray>
+#include <vector>
 #include "slice_iter.h" 
 #include "gslice_iter.h" 
 
@@ -38,7 +38,7 @@ class state_slice
 {
   public:
     state_slice(): v(0),s1(slice(0,0,0)),s2(slice(0,0,0)),s3(slice(0,0,0)),s4(slice(0,0,0)) {};
-    state_slice(valarray<T>* vv, slice _s1, slice _s2, slice _s3, slice _s4):
+    state_slice(vector<T>* vv, slice _s1, slice _s2, slice _s3, slice _s4):
       v(vv),s1(_s1),s2(_s2),s3(_s3),s4(_s4){};
     state_slice(const state_slice<T>& ss):
       v(ss.v),s1(ss.s1),s2(ss.s2),s3(ss.s3),s4(ss.s4){}
@@ -186,7 +186,7 @@ class state_slice
       }
 
   private:
-    valarray<T>* v;
+    vector<T>* v;
     slice s1;
     slice s2;
     slice s3;
@@ -207,7 +207,7 @@ class cstate_slice
 {
   public:
     cstate_slice(): v(0),s1(slice(0,0,0)),s2(slice(0,0,0)),s3(slice(0,0,0)),s4(slice(0,0,0)) {};
-    cstate_slice(const valarray<T>* vv, slice _s1, slice _s2, slice _s3, slice _s4):
+    cstate_slice(const vector<T>* vv, slice _s1, slice _s2, slice _s3, slice _s4):
       v(vv),s1(_s1),s2(_s2),s3(_s3),s4(_s4){};
     cstate_slice(const cstate_slice<T>& ss):
       v(ss.v),s1(ss.s1),s2(ss.s2),s3(ss.s3),s4(ss.s4){}
@@ -341,7 +341,7 @@ class cstate_slice
       }
 
   private:
-    const valarray<T>* v;
+    const vector<T>* v;
     slice s1;
     slice s2;
     slice s3;

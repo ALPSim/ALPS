@@ -28,7 +28,7 @@
 
 // gslice iterator class. From Stroustrup's book.
 
-#include <valarray>
+#include <vector>
 #include "slice_iter.h" 
 
 namespace dmtk
@@ -42,7 +42,7 @@ template <class T>
 class gslice_iter
 {
   public:
-    typedef typename std::valarray<T> _V;
+    typedef typename std::vector<T> _V;
 
     gslice_iter(): v(0),s1(0,0,0),s2(0,0,0),curr1(0),curr2(0) {}
     gslice_iter(_V* vv, std::slice s1, std::slice s2):
@@ -161,7 +161,7 @@ template <class T>
 class cgslice_iter
 {
   public:
-    typedef typename std::valarray<T> _V;
+    typedef typename std::vector<T> _V;
 
     cgslice_iter(): v(0),s1(0,0,0),s2(0,0,0),curr1(0),curr2(0) {}
     cgslice_iter(const _V* vv, std::slice s1, std::slice s2):
@@ -193,7 +193,7 @@ class cgslice_iter
 
 // dirty hack to get the exact address
     const T* get_pointer(size_t i, size_t j) const
-      { return &(const_cast<valarray<T>&>(*v)[s1.start()+i*s1.stride()+s2.start()+j*s2.stride()]); }
+      { return &(const_cast<vector<T>&>(*v)[s1.start()+i*s1.stride()+s2.start()+j*s2.stride()]); }
 
     cslice_iter<T>& operator*() { return ref(curr1); }
 

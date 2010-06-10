@@ -29,7 +29,7 @@
 // slice iterator class. From Stroustrup's book.
 
 #include <iosfwd>
-#include <valarray>
+#include <vector>
 #include "conj.h"
 #include "meta.h"
 #include "array_util.h"
@@ -43,7 +43,7 @@ template <class T>
 class slice_iter
 {
   public:
-    typedef typename std::valarray<T> _V;
+    typedef typename std::vector<T> _V;
     slice_iter():v(0),s(0,0,0),curr(0){};
     slice_iter(_V* vv, std::slice ss):v(vv),s(ss),curr(0){};
     slice_iter(const slice_iter<T>& ss):v(ss.v),s(ss.s),curr(ss.curr){}
@@ -141,7 +141,7 @@ template <class T>
 class cslice_iter
 {
   public:
-    typedef typename std::valarray<T> _V;
+    typedef typename std::vector<T> _V;
 
     cslice_iter():v(0),s(0,0,0),curr(0){};
     cslice_iter(const _V* vv, std::slice ss):v(vv),s(ss),curr(0){};
@@ -163,7 +163,7 @@ class cslice_iter
 
 // Dirty hack to get the exact address
     const T* get_pointer(size_t i) const
-      { return &(const_cast<valarray<T>&>(*v)[s.start()+i*s.stride()]); }
+      { return &(const_cast<vector<T>&>(*v)[s.start()+i*s.stride()]); }
 
 
     bool operator==(const cslice_iter<T>& q)
