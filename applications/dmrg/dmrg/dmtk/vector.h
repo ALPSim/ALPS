@@ -27,7 +27,7 @@
 #define __DMTK_VECTOR_H__
 
 #include <iostream>
-#include <valarray>
+#include <vector>
 #include <iosfwd>
 #include "conj.h"
 #include "slice_iter.h"
@@ -40,27 +40,27 @@ namespace dmtk
 {
 
 template<class T>
-class Vector:public std::valarray<T>
+class Vector:public std::vector<T>
 {
   public:
-    typedef typename std::valarray<T> valarray;
+    typedef typename std::vector<T> vector;
     typedef T*iterator;
     typedef const T* const_iterator;
 
     Vector(): 
-      valarray(1), v_size(0), v_capacity(1) { init(); };
+      vector(1), v_size(0), v_capacity(1) { init(); };
 
     explicit Vector(size_t s):
-      valarray(s),v_size(s),v_capacity(s) { init(); }
+      vector(s),v_size(s),v_capacity(s) { init(); }
 
     Vector(size_t s, const T& v):
-      valarray(v, s),v_size(s),v_capacity(s) { init(); }
+      vector(v, s),v_size(s),v_capacity(s) { init(); }
 
     Vector(size_t s, const T* v):
-      valarray(v, s),v_size(s),v_capacity(s) { init(); }
+      vector(v, s),v_size(s),v_capacity(s) { init(); }
 
     Vector(const Vector<T>& v):
-      valarray(v.capacity()), v_size(v.size()), v_capacity(v.capacity()) 
+      vector(v.capacity()), v_size(v.size()), v_capacity(v.capacity()) 
       { 
         init();
         iterator dest = begin();
@@ -71,7 +71,7 @@ class Vector:public std::valarray<T>
       }
 
     Vector(cslice_iter<T> v):
-      valarray(v.size()),v_size(v.size()),v_capacity(v.size()) 
+      vector(v.size()),v_size(v.size()),v_capacity(v.size()) 
       { 
         init();
         iterator pos = begin();
@@ -82,7 +82,7 @@ class Vector:public std::valarray<T>
       }
 
     Vector(slice_iter<T> v):
-      valarray(v.size()),v_size(v.size()),v_capacity(v.size()) 
+      vector(v.size()),v_size(v.size()),v_capacity(v.size()) 
       { 
         init();
         iterator pos = begin();
@@ -94,7 +94,7 @@ class Vector:public std::valarray<T>
 
     template<class Expr>
     Vector(const IterExpr<T,Expr>& v):
-      valarray(v.size2()),v_size(v.size2()),v_capacity(v.size2()) 
+      vector(v.size2()),v_size(v.size2()),v_capacity(v.size2()) 
       { 
         for(int i = 0; i < size(); i++) this->operator[](i) = v[i];
         init();
@@ -192,8 +192,8 @@ class Vector:public std::valarray<T>
 
     void init() 
       { 
-        v_start = &valarray::operator[](0); 
-        v_end = &valarray::operator[](v_size); 
+        v_start = &vector::operator[](0); 
+        v_end = &vector::operator[](v_size); 
       }
 };
 
@@ -203,28 +203,28 @@ template<class T>
 inline T
 Vector<T>::operator()(size_t i) const 
 {
-  return valarray::operator[](i);
+  return vector::operator[](i);
 }
 
 template<class T>
 inline T&
 Vector<T>::operator()(size_t i) 
 {
-  return valarray::operator[](i);
+  return vector::operator[](i);
 };
 
 template<class T>
 inline T
 Vector<T>::operator[](size_t i) const 
 {
-  return valarray::operator[](i);
+  return vector::operator[](i);
 }
 
 template<class T>
 inline T&
 Vector<T>::operator[](size_t i) 
 {
-  return valarray::operator[](i);
+  return vector::operator[](i);
 };
 
 
@@ -403,7 +403,7 @@ Vector<T>::resize(size_t n)
      Vector<T> aux(*this);
      T* paux = &aux[0];
 
-     valarray::resize(n);
+     vector::resize(n);
      T* p = &operator[](0);
 
      array_copy(aux.size(), paux, p);
@@ -425,7 +425,7 @@ Vector<T>::resize(size_t n, const T& v)
      Vector<T> aux(*this);
      T* paux = &aux[0];
 
-     valarray::resize(n, v);
+     vector::resize(n, v);
      T* p = &operator[](0);
 
      array_copy(aux.size(), paux, p);
@@ -447,7 +447,7 @@ Vector<T>::reserve(size_t n)
      Vector<T> aux(*this);
      T* paux = &aux[0];
 
-     valarray::resize(n);
+     vector::resize(n);
      T* p = &operator[](0);
 
      array_copy(aux.size(), paux, p);

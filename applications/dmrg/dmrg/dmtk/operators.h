@@ -666,7 +666,7 @@ class Term: public std::vector<BasicOp<T> >
       Term t = *this;
       Vector<int> sites(t.size());
       Vector<size_t> indx(t.size());
-      Vector<bool> is_fermion(t.size());
+      Vector<char> is_fermion(t.size());
       bool fermion = false;
       for(int i = 0; i < t.size(); i++){
         const BasicOp<T> &op = t[i];

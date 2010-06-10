@@ -27,13 +27,13 @@
 #define __DMTK_MATRIX_H__
 
 // Generic Matrix class using templates
-// Matrix is a valarray subclass
+// Matrix is a vector subclass
 // The data is stored in Fortran style: column0.column1....column(n-1) 
 // for compatibility with numeric software like BLAS and LAPACK
 // To retrieve the data in Fortran style use m(col,row)
 // To retrieve the data in C style use m[row][col]
 
-#include <valarray>
+#include <vector>
 #include <vector>
 #include <iosfwd>
 #include <iostream>
@@ -53,29 +53,29 @@ namespace dmtk
 template<class T>class Sparse; // defined later in sparse.h
 
 template<class T>
-class Matrix:public std::valarray<T>
+class Matrix:public std::vector<T>
 {
   private:
     T* _data;
     size_t num_rows, num_cols;
     size_t v_capacity;
 
-    void init() { _data = &valarray::operator[](0); }
+    void init() { _data = &vector::operator[](0); }
 
     Matrix& matrix_from_sparse(const Sparse<T>&);
   public:
-    typedef typename std::valarray<T> valarray;
+    typedef typename std::vector<T> vector;
     typedef T value_type;
 
-//    Matrix():valarray(4),num_rows(2),num_cols(2),v_capacity(4) { init(); }
-    Matrix(): valarray(), num_rows(0), num_cols(0), v_capacity(0) { init(); }
+//    Matrix():vector(4),num_rows(2),num_cols(2),v_capacity(4) { init(); }
+    Matrix(): vector(), num_rows(0), num_cols(0), v_capacity(0) { init(); }
 
-    Matrix(size_t ncols, size_t nrows):valarray(nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
-    Matrix(size_t ncols, size_t nrows, const T& v):valarray(v, nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
+    Matrix(size_t ncols, size_t nrows):vector(nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
+    Matrix(size_t ncols, size_t nrows, const T& v):vector(v, nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
 
-    Matrix(size_t ncols, size_t nrows, const T* v):valarray(v, nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
+    Matrix(size_t ncols, size_t nrows, const T* v):vector(v, nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
 
-    Matrix(const Matrix<T>& m):valarray(m.rows()*m.cols()),num_rows(m.rows()),num_cols(m.cols()),v_capacity(m.v_capacity)
+    Matrix(const Matrix<T>& m):vector(m.rows()*m.cols()),num_rows(m.rows()),num_cols(m.cols()),v_capacity(m.v_capacity)
       { 
         init(); 
         const T* orig = m.array();
@@ -86,7 +86,7 @@ class Matrix:public std::valarray<T>
 //        while(n--) *dest++ = *orig++; 
       }
 
-    Matrix(const Sparse<T>& s): valarray(s.cols()*s.rows()),num_rows(s.rows()),num_cols(s.cols()),v_capacity(s.rows()*s.cols()) { matrix_from_sparse(s); }
+    Matrix(const Sparse<T>& s): vector(s.cols()*s.rows()),num_rows(s.rows()),num_cols(s.cols()),v_capacity(s.rows()*s.cols()) { matrix_from_sparse(s); }
 
     Matrix(Vector<T>&, Vector<T>&); // tensor product of two vectors
                                     // c_ij = a_i * b_j
@@ -94,7 +94,7 @@ class Matrix:public std::valarray<T>
     Matrix(Matrix<T>&, Matrix<T>&); // tensor product of two matrices 
                                     // c_ijkl = a_ij * b_kl
 
-    Matrix(cgslice_iter<T> s): valarray(s.size1()*s.size2()),num_rows(s.size2()),num_cols(s.size1()),v_capacity(s.size1()*s.size2())
+    Matrix(cgslice_iter<T> s): vector(s.size1()*s.size2()),num_rows(s.size2()),num_cols(s.size1()),v_capacity(s.size1()*s.size2())
       {
         for(size_t i = 0; i < rows(); i++)
           for(size_t j = 0; j < cols(); j++)
@@ -103,7 +103,7 @@ class Matrix:public std::valarray<T>
         init();
       }
 
-    Matrix(gslice_iter<T> s): valarray(s.size1()*s.size2()),num_rows(s.size2()),num_cols(s.size1()),v_capacity(s.size1()*s.size2())
+    Matrix(gslice_iter<T> s): vector(s.size1()*s.size2()),num_rows(s.size2()),num_cols(s.size1()),v_capacity(s.size1()*s.size2())
       {
         for(size_t i = 0; i < rows(); i++)
           for(size_t j = 0; j < cols(); j++)
@@ -113,7 +113,7 @@ class Matrix:public std::valarray<T>
       }
 
     template<class Expr>
-    Matrix(const IterExpr<T,Expr>& s):valarray(s.size1()*s.size2()),num_rows(s.size2()),num_cols(s.size1()),v_capacity(s.size1()*s.size2())
+    Matrix(const IterExpr<T,Expr>& s):vector(s.size1()*s.size2()),num_rows(s.size2()),num_cols(s.size1()),v_capacity(s.size1()*s.size2())
       {
         for(size_t i = 0; i < rows(); i++)
           for(size_t j = 0; j < cols(); j++)
@@ -242,7 +242,7 @@ template<class T>
 inline 
 Matrix<T>::Matrix(Vector<T> &v1, Vector<T>& v2)
 {
-  valarray(v1.size() * v2.size());
+  vector(v1.size() * v2.size());
   *this = tensor(v1,v2);
   init();
 }
@@ -251,7 +251,7 @@ template<class T>
 inline 
 Matrix<T>::Matrix(Matrix<T> &m1, Matrix<T>& m2)
 {
-  valarray(m1.rows()*m2.rows()*m1.cols()*m2.cols());
+  vector(m1.rows()*m2.rows()*m1.cols()*m2.cols());
   *this = tensor(m1, m2);
   init();
 }
@@ -430,14 +430,14 @@ template<class T>
 inline T 
 Matrix<T>::operator()(size_t ncol, size_t nrow) const 
 {
-  return valarray::operator[](ncol*num_rows+nrow);
+  return vector::operator[](ncol*num_rows+nrow);
 }
 
 template<class T>
 inline T&
 Matrix<T>::operator()(size_t ncol, size_t nrow) 
 {
-  return valarray::operator[](ncol*num_rows+nrow);
+  return vector::operator[](ncol*num_rows+nrow);
 }
 
 template<class T>
@@ -469,7 +469,7 @@ Matrix<T>::resize(size_t ncols, size_t nrows)
   T *orig, *dest;
 
   if(new_size > v_capacity){ 
-    valarray::resize(new_size);
+    vector::resize(new_size);
     v_capacity = new_size;
   } 
 
@@ -483,7 +483,7 @@ Matrix<T>::resize(size_t ncols, size_t nrows)
   num_cols = ncols;
   num_rows = nrows;
 
-  _data = &valarray::operator[](0);
+  _data = &vector::operator[](0);
 
   return *this; 
 }
@@ -500,7 +500,7 @@ Matrix<T>::resize(size_t ncols, size_t nrows, const T& v)
   size_t new_size = nrows * ncols;
 
   if(new_size > v_capacity){ 
-    valarray::resize(new_size, v);
+    vector::resize(new_size, v);
     v_capacity = new_size;
   }
 
@@ -514,7 +514,7 @@ Matrix<T>::resize(size_t ncols, size_t nrows, const T& v)
   num_cols = ncols;
   num_rows = nrows;
 
-  _data = &valarray::operator[](0);
+  _data = &vector::operator[](0);
 
   return *this; 
 }
@@ -528,14 +528,14 @@ Matrix<T>::reshape(size_t ncols, size_t nrows)
   size_t new_size = nrows * ncols;
 
   if(new_size > v_capacity){ 
-    valarray::resize(new_size);
+    vector::resize(new_size);
     v_capacity = new_size;
   }
 
   num_cols = ncols;
   num_rows = nrows;
 
-  _data = &valarray::operator[](0);
+  _data = &vector::operator[](0);
 
   return *this; 
 }
@@ -551,7 +551,7 @@ Matrix<T>::reserve(size_t ncols, size_t nrows)
   size_t new_size = nrows * ncols;
 
   if(new_size > v_capacity){ 
-    valarray::resize(new_size);
+    vector::resize(new_size);
     v_capacity = new_size;
 
     for(uint col = 0 ; col < num_cols; col++){
@@ -563,7 +563,7 @@ Matrix<T>::reserve(size_t ncols, size_t nrows)
     }
   }
 
-  _data = &valarray::operator[](0);
+  _data = &vector::operator[](0);
 
   return *this; 
 }
@@ -668,8 +668,8 @@ Matrix<T>::matrix_from_sparse(const Sparse<T>& s)
 {
   using namespace std;
 
-  vector<int>::const_iterator irow, icol;
-  typename vector<T>::const_iterator data;
+  std::vector<int>::const_iterator irow, icol;
+  typename std::vector<T>::const_iterator data;
   int col, pos;
 
   using namespace std;
