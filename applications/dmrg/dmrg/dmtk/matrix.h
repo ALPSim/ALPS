@@ -71,9 +71,9 @@ class Matrix:public std::vector<T>
     Matrix(): vector(), num_rows(0), num_cols(0), v_capacity(0) { init(); }
 
     Matrix(size_t ncols, size_t nrows):vector(nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
-    Matrix(size_t ncols, size_t nrows, const T& v):vector(v, nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
+    Matrix(size_t ncols, size_t nrows, const T& v):vector(nrows*ncols,v),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
 
-    Matrix(size_t ncols, size_t nrows, const T* v):vector(v, nrows*ncols),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
+    Matrix(size_t ncols, size_t nrows, const T* v):vector(nrows*ncols,v),num_rows(nrows),num_cols(ncols),v_capacity(nrows * ncols) { init(); }
 
     Matrix(const Matrix<T>& m):vector(m.rows()*m.cols()),num_rows(m.rows()),num_cols(m.cols()),v_capacity(m.v_capacity)
       { 

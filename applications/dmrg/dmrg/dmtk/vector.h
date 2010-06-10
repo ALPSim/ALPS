@@ -54,10 +54,10 @@ class Vector:public std::vector<T>
       vector(s),v_size(s),v_capacity(s) { init(); }
 
     Vector(size_t s, const T& v):
-      vector(v, s),v_size(s),v_capacity(s) { init(); }
+      vector(s, v),v_size(s),v_capacity(s) { init(); }
 
     Vector(size_t s, const T* v):
-      vector(v, s),v_size(s),v_capacity(s) { init(); }
+      vector(s, v),v_size(s),v_capacity(s) { init(); }
 
     Vector(const Vector<T>& v):
       vector(v.capacity()), v_size(v.size()), v_capacity(v.capacity()) 
