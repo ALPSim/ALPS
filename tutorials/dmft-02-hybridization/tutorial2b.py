@@ -32,18 +32,17 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms=[]
-coulombparam=[[1.8,0.45],[2.2,0.55],[2.8,0.7]]
-for cp in coulombparam: 
+for b in [6.,8.,10.,12.,14.,16.]:
     parms.append(
-            { 
-              'CHECKPOINT'          : 'dump',
-              'CONVERGED'           : 0.01,
+            {
+              'ANTIFERROMAGNET'     : 1,
+              'CONVERGED'           : 0.03,
               'F'                   : 10,
-              'FLAVORS'             : 4,
+              'FLAVORS'             : 2,
               'H'                   : 0,
-              'H_INIT'              : 0.,
-              'MAX_IT'              : 20,
-              'MAX_TIME'            : 180,
+              'H_INIT'              : 0.2,
+              'MAX_IT'              : 10,
+              'MAX_TIME'            : 60,
               'MU'                  : 0,
               'N'                   : 1000,
               'NMATSUBARA'          : 1000,
@@ -55,24 +54,23 @@ for cp in coulombparam:
               'OMEGA_LOOP'          : 1,
               'OVERLAP'             : 0,
               'SEED'                : 0,
+              'SITES'               : 1,
               'SOLVER'              : 'Hybridization',
-              'SYMMETRIZATION'      : 1,
-              'TOLERANCE'           : 0.3,
-              't'                   : 1,
+              'SYMMETRIZATION'      : 0,
+              'TOLERANCE'           : 0.01,
+              'U'                   : 3,
+              't'                   : 0.707106781186547,
               'SWEEPS'              : 100000000,
-              'BETA'                : 30,
-              'THERMALIZATION'      : 10,
-              'U'                   : cp[0],
-              'J'                   : cp[1],
-              't0'                  : 0.5,
-              't1'                  : 1,
-              'G0TAU_INPUT'         :'G0_tau_input_u_'+str(cp[0])+'_j_'+str(cp[1])
+              'THERMALIZATION'      : 1000,
+              'BETA'                : b,
+              'CHECKPOINT'          : 'solverdump_beta_'+str(b)+'.task1.out.h5',
+              'G0TAU_INPUT'         : 'G0_tau_input_beta_'+str(b)
             }
         )
-
+        
 #write the input file and run the simulation
 for p in parms:
-    input_file = pyalps.writeParameterFile('parm_u_'+str(p['U'])+'_j_'+str(p['J']),p)
+    input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
 
 flavors=parms[0]['FLAVORS']
@@ -81,15 +79,21 @@ for f in range(0,flavors):
     listobs.append('Green_'+str(f))
     
 ll=pyalps.load.Hdf5Loader()
-data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
-for d in data:
-    for f in range(0,flavors):
-        d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
-        plt.figure()
-        pyalps.pyplot.plot(d[f])
-        plt.xlabel(r'$\tau$')
-        plt.ylabel(r'$G(\tau)$')
-        plt.title('Hubbard model on the Bethe lattice')
-        plt.show()
-
-
+for p in parms:
+    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta_'+str(p['BETA'])+'.h5'), measurements=listobs, verbose=True)
+    grouped = pyalps.groupSets(pyalps.flatten(data), ['iteration'])
+    nd=[]
+    for group in grouped:
+        r = pyalps.DataSet()
+        r.y = np.array(group[0].y)
+        r.x = np.array([e*group[0].props['BETA']/float(group[0].props['N']) for e in group[0].x])
+        r.props = group[0].props
+        r.props['label'] = r.props['iteration']
+        nd.append( r )
+    plt.figure()
+    plt.xlabel(r'$\tau$')
+    plt.ylabel(r'$G(\tau)$')
+    plt.title(r'\beta = %.4s' %nd[0].props['BETA'])
+    pyalps.pyplot.plot(nd)
+    plt.legend()
+    plt.show()

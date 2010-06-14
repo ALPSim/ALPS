@@ -32,45 +32,45 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms=[]
-for u in [4.,5.,6.,8.]: 
+for b in [6.,8.,10.,12.,14.,16.]: 
     parms.append(
             { 
               'ANTIFERROMAGNET'         : 1,
-              'CHECKPOINT'              : 'dump'
-              'CONVERGED'               : 0.01,
-              'F'                       : 10,
+              'CHECKPOINT'              : 'dump',
+              'CONVERGED'               : 0.08,
               'FLAVORS'                 : 2,
               'H'                       : 0,
               'H_INIT'                  : 0.,
-              'MAX_IT'                  : 20,
+              'MAX_IT'                  : 10,
               'MAX_TIME'                : 60,
               'MU'                      : 0,
-              'N'                       : 1000,
-              'NMATSUBARA'              : 1000, 
-              'N_FLIP'                  : 0,
-              'N_MEAS'                  : 10000,
-              'N_MOVE'                  : 0,
-              'N_ORDER'                 : 50,
-              'N_SHIFT'                 : 0,
+              'N'                       : 500,
+              'NMATSUBARA'              : 500, 
               'OMEGA_LOOP'              : 1,
-              'OVERLAP'                 : 0,
               'SEED'                    : 0, 
-              'SOLVER'                  : 'Hybridization',
+              'SITES'                   : 1,
+              'SOLVER'                  : 'Interaction Expansion',
               'SYMMETRIZATION'          : 0,
-              'TOLERANCE'               : 0.03,
-              't'                       : 1,
-              'SWEEPS'                  : 100000000,
-              'BETA'                    : 20,
-              'THERMALIZATION'          : 10,
-              'U'                       : u,
+              'U'                       : 3,
+              't'                       : 0.707106781186547,
+              'SWEEPS'                  : 100000,
+              'THERMALIZATION'          : 1000,
+              'ALPHA'                   : -0.01,
+              'CONVERGENCE_CHECK_PERIOD': 500,
+              'HISTOGRAM_MEASUREMENT'   : 1,
+              'MEASUREMENT_PERIOD'      : 10,
+              'NRUNS'                   : 1,
+              'NSELF'                   : 5000,
+              'RECALC_PERIOD'           : 300,
+              'BETA'                    : b,
               'NMATSUBARA_MEASUREMENTS' : 18,
-              'G0OMEGA_INPUT'           : 'G0_omega_input_u_'+str(u),
+              'G0OMEGA_INPUT'            : 'G0_omega_input_beta'+str(b),
             }
         )
 
 #write the input file and run the simulation
 for p in parms:
-    input_file = pyalps.writeParameterFile('parm_u_'+str(p['U']),p)
+    input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
     res = pyalps.runDMFT(input_file)
 
 flavors=parms[0]['FLAVORS']
@@ -79,14 +79,21 @@ for f in range(0,flavors):
     listobs.append('Green_'+str(f))
     
 ll=pyalps.load.Hdf5Loader()
-data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
-for d in data:
-    for f in range(0,flavors):
-        d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
-        plt.figure()
-        pyalps.pyplot.plot(d[f])
-        plt.xlabel(r'$\tau$')
-        plt.ylabel(r'$G(\tau)$')
-        plt.title('Hubbard model on the Bethe lattice')
-        plt.show()
-
+for p in parms:
+    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_beta_'+str(p['BETA'])+'.h5'), measurements=listobs, verbose=True)
+    grouped = pyalps.groupSets(pyalps.flatten(data), ['iteration'])
+    nd=[]
+    for group in grouped:
+        r = pyalps.DataSet()
+        r.y = np.array(group[0].y)
+        r.x = np.array([e*group[0].props['BETA']/float(group[0].props['N']) for e in group[0].x])
+        r.props = group[0].props
+        r.props['label'] = r.props['iteration']
+        nd.append( r )
+    plt.figure()
+    plt.xlabel(r'$\tau$')
+    plt.ylabel(r'$G(\tau)$')
+    plt.title(r'$\beta$ = %.4s' %nd[0].props['BETA'])
+    pyalps.pyplot.plot(nd)
+    plt.legend()
+    plt.show()

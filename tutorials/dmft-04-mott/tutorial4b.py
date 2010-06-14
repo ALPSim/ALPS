@@ -36,7 +36,7 @@ for u in [4.,5.,6.,8.]:
     parms.append(
             { 
               'ANTIFERROMAGNET'         : 1,
-              'CHECKPOINT'              : 'dump'
+              'CHECKPOINT'              : 'dump',
               'CONVERGED'               : 0.01,
               'F'                       : 10,
               'FLAVORS'                 : 2,
@@ -79,14 +79,22 @@ for f in range(0,flavors):
     listobs.append('Green_'+str(f))
     
 ll=pyalps.load.Hdf5Loader()
-data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
-for d in data:
-    for f in range(0,flavors):
-        d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
-        plt.figure()
-        pyalps.pyplot.plot(d[f])
-        plt.xlabel(r'$\tau$')
-        plt.ylabel(r'$G(\tau)$')
-        plt.title('Hubbard model on the Bethe lattice')
-        plt.show()
+for p in parms:
+    data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_u_'+str(p['U'])+'.h5'), measurements=listobs, verbose=True)
+    grouped = pyalps.groupSets(pyalps.flatten(data), ['iteration'])
+    nd=[]
+    for group in grouped:
+        r = pyalps.DataSet()
+        r.y = np.array(group[0].y)
+        r.x = np.array([e*group[0].props['BETA']/float(group[0].props['N']) for e in group[0].x])
+        r.props = group[0].props
+        r.props['label'] = r.props['iteration']
+        nd.append( r )
+    plt.figure()
+    plt.xlabel(r'$\tau$')
+    plt.ylabel(r'$G(\tau)$')
+    plt.title(r'$U$ = %.4s' %nd[0].props['U'])
+    pyalps.pyplot.plot(nd)
+    plt.legend()
+    plt.show()
 
