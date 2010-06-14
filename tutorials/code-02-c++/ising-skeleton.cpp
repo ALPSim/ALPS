@@ -15,28 +15,28 @@ public:
     Simulation(double beta,size_t L)
     :    rng_(eng_, dist_)
     ,    L_(L)
-    ,   beta_(beta)
-    ,    sites_(L,std::vector<int>(L))
+    ,    beta_(beta)
+    ,    spins_(boost::extents[L][L]) 
     ,    energy_("E")
     ,    magnetization_("m")
-    ,    order_("|m|")
+    ,    abs_magnetization_("|m|")
     {
         // Init exponential map
         for(int E = -4; E <= 4; E += 2)
-            exp_[E] = exp(2*beta*E);
+            exp_table_[E] = exp(2*beta*E);
         
         // Init random spin configuration
         for(size_t i = 0; i < L; ++i)
         {
             for(size_t j = 0; j < L; ++j)
-                sites_[i][j] = 2 * randint(2) - 1;
+                spins_[i][j] = 2 * randint(2) - 1;
         }
     }
     
     void run(size_t ntherm,size_t n)
     {
-        n_ = n;
-        ntherm_ = ntherm;
+        ntherm_=ntherm;
+        n_=n;
         // Thermalize for ntherm steps
         while(ntherm--)
             step();
@@ -49,10 +49,17 @@ public:
         }
         
         // Print observables
-        print_observable(energy_);
-        print_observable(order_);
-        print_observable(magnetization_);
+        std::cout << abs_magnetization_;
+        std::cout << energy_.name() << ":\t" << energy_.mean()
+        << " +- " << energy_.error() << ";\ttau = " << energy_.tau() 
+        << ";\tconverged: " << alps::convergence_to_text(energy_.converged_errors()) 
+        << std::endl;
+        std::cout << magnetization_.name() << ":\t" << magnetization_.mean()
+        << " +- " << magnetization_.error() << ";\ttau = " << magnetization_.tau() 
+        << ";\tconverged: " << alps::convergence_to_text(magnetization_.converged_errors())
+        << std::endl;
     }
+    
     void step()
     {
         for(size_t s = 0; s < L_*L_; ++s)
@@ -83,7 +90,7 @@ public:
         // Add sample to observables
         energy_ << E/double(L_*L_);
         magnetization_ << M/double(L_*L_);
-        order_ << fabs(M)/double(L_*L_);
+        abs_magnetization_ << fabs(M)/double(L_*L_);
     }
     
     void save(std::string const & filename) const {
@@ -94,7 +101,7 @@ public:
         ar << alps::make_pvp("/parameters/THERMALIZATION", ntherm_);
         ar << alps::make_pvp("/simulation/results/"+energy_.representation(), energy_);
         ar << alps::make_pvp("/simulation/results/"+magnetization_.representation(), magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+order_.representation(), order_);
+        ar << alps::make_pvp("/simulation/results/"+abs_magnetization_.representation(), abs_magnetization_);
     }
     
     
@@ -104,17 +111,7 @@ protected:
     {
         return static_cast<int>(max * rng_());
     }
-    // Enforce periodic boundary conditions for lattice indices
-    int wrap(int i) const
-    {
-        return (i + L_) % L_;
-    }
-    void print_observable(const alps::RealObservable& o) const
-    {
-        std::cout << o.name() << ":\t" << o.mean() << " +- " << o.error() << ";\ttau = " << o.tau() 
-        << ";\tconverged: " << alps::convergence_to_text(o.converged_errors()) << std::endl;
-    }
-    
+       
 private:
     typedef boost::mt19937 engine_type;
     typedef boost::uniform_real<> distribution_type;
@@ -125,8 +122,8 @@ private:
     
     size_t L_;
     double beta_;
-    std::vector< std::vector<int> > sites_;
-    std::map< int, double > exp_;
+    boost::multi_array<int,2> spins_;
+    std::map< int, double > exp_table_;
     alps::RealObservable energy_;
     alps::RealObservable magnetization_;
     alps::RealObservable order_;
