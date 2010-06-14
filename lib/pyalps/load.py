@@ -368,6 +368,7 @@ class Hdf5Loader:
                     try:
                         if verbose: print "Loading", m
                         d = DataSet()
+                        size=0
                         if "mean" in grp[m].keys() and "error" in grp[m+"/mean"].keys():
                             mean = grp[m+"/mean/value"].value
                             d.props['count'] = grp[m+"/count"].value
@@ -416,7 +417,7 @@ class Hdf5Loader:
                                     d.x = parse_labels(grp[m+"/labels"].value)
                                 else:
                                     d.x = np.arange(0,size)
-                                d.props['hdf5_path'] = respath + m
+                                d.props['hdf5_path'] = respath +"/"+ m
                                 d.props['observable'] = pt.hdf5_name_decode(m+"/"+s+"/"+k)
                                 d.props.update(params)
                                 fileset.append(d)
@@ -435,6 +436,53 @@ class Hdf5Loader:
             sets.append(fileset)
         return sets
 
+    # Pre: file is a h5py file descriptor
+    # Post: returns DataSet with all parameters set
+    def ReadDMFTIterations(self,flist,measurements=None,proppath='/parameters',respath='/simulation/iteration',verbose=False):
+        fs = self.GetFileNames(flist)
+        fileset = []
+        for f in fs:
+            self.h5f = h5py.File(f,'r')
+            self.h5fname = f
+            if verbose: print "Loading from file", f
+            list_ = self.GetObservableList(respath+'/1/results/G0_tau/')
+            grp = self.h5f.require_group(respath)
+            params = self.ReadParameters(proppath)
+            obslist = []
+            if measurements == None:
+                obslist = ['Green_0']
+            else:
+                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+            iterationset=[]
+            for it in grp.keys():
+                obsset=[]
+                for m in obslist:
+                    try:
+                        if verbose: print "Loading", m
+                        d = DataSet()
+                        size=0
+                        path=it+"/results/G0_tau/"+m
+                        if "mean" in grp[path].keys():
+                            value = grp[path+"/mean/value"].value
+                            try:
+                                size=len(value)
+                                d.y = np.array([float(x) for x in value])
+                            except:
+                                size=1
+                                d.y = np.array([value])                       
+                            d.x = np.arange(0,size)
+                        d.props['hdf5_path'] = respath +"/"+ path
+                        d.props['observable'] = pt.hdf5_name_decode(m)
+                        d.props['iteration'] = it
+                        d.props.update(params)
+                    except AttributeError:
+                        print "Could not create DataSet"
+                        pass
+                    obsset.append(d)
+                iterationset.append(obsset)
+            fileset.append(iterationset)
+        return fileset
+        
 def loadBinningAnalysis(files,what=None):
     ll = Hdf5Loader()
     if isinstance(what,str):
