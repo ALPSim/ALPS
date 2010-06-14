@@ -44,6 +44,13 @@ class LadderLattice(Lattice):
                    ('W',[(basic.String, 'the width')])]
    fixed = {'LATTICE' : 'ladder'}
    defaults = {'W':'2'}
+   
+class CoupledLadderLattice(Lattice):
+   """ a coupled ladder lattice """
+   _input_ports = [('L',[(basic.String, 'the length')]),
+                   ('W',[(basic.String, 'the width')])]
+   fixed = {'LATTICE' : 'coupled ladders'}
+   defaults = {'W':'L/2'}
 
 class ChainLattice(Lattice):
    """ a chain lattice """
@@ -92,6 +99,7 @@ def selfRegister():
   register_lattice(DimerizedChainLattice)
   register_lattice(NNNChainLattice)
   register_lattice(LadderLattice)
+  register_lattice(CoupledLadderLattice)
   register_lattice(OpenLadderLattice)
   register_lattice(SquareLattice)
   register_lattice(SimpleCubicLattice)
