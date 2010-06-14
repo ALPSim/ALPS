@@ -14,6 +14,7 @@ import core.modules.basic_modules
 import core.modules.module_registry
 
 import alpscore
+import alpsparameters
 import plots
 import tools
 import os
@@ -145,6 +146,32 @@ class RunDMRG(RunAlpsApplication):
 class RunQWL(RunAlpsApplication):
     """Runs the qwl quantum Monte Carlo application """
     appname = 'qwl'
+            
+class RunDMFT(alpscore.SystemCommandLogged,tools.GetSimName):
+    """Runs the DMFT quantum Monte Carlo application """
+    def compute(self):
+        tmp = self.interpreter.filePool.create_file(suffix='.dummy')
+        resultdir = basic.Directory()
+        resultdir.name = os.path.dirname(tmp.name)
+        id = self.getInputFromPort('fileID')
+        paraminput = self.getInputFromPort('dmftparams')
+        c=0
+        for parms in paraminput:
+            f = file(os.path.join(resultdir.name,id+str(c)),'w')
+            print "file",f.name 
+            for key in parms:
+                value = parms[key]
+                if type(value) == str:
+                    f.write(str(key)+' = "' + value + '"\n')
+                else:
+                    f.write(str(key)+' = ' + str(value) + '\n')
+            f.close()
+            self.execute([alpscore._get_path('dmft'),f.name])
+            c=c+1
+        self.setResult('dir',resultdir)
+    _input_ports = [('dmftparams',[alpsparameters.MonteCarloParameters]),
+                    ('fileID', [basic.String])]
+    _output_ports = [('dir', [basic.Directory])]
     
 class AlpsEvaluate(alpscore.SystemCommandLogged):
     def get_appname(self):
@@ -270,7 +297,8 @@ class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
 class EvaluateSpinMC(alpscore.SystemCommandLogged,tools.GetSimName):
     def compute(self):
         name = self.get_sim_name(self.getInputFromPort('dir').name)
-        self.execute([alpscore._get_path('spinmc'),name])
+        taskname = name.replace('.out.xml', '.task*.out.xml')
+        self.execute([alpscore._get_path('spinmc_evaluate'),taskname])
         self.setResult('dir',self.getInputFromPort('dir'))
     _input_ports = [('dir', [basic.Directory])]
     _output_ports = [('dir', [basic.Directory])]
@@ -339,6 +367,7 @@ def selfRegister():
   register_application(RunSparseDiag)
   register_application(RunDMRG)
   register_application(RunQWL)
+  register_application(RunDMFT)
   
   reg.add_module(AlpsEvaluate,namespace="Applications",abstract=True)
   
