@@ -84,7 +84,49 @@ class QWLMonteCarloParameters(MonteCarloParameters):
                     ('EXPANSION_ORDER_MAXIMUM',[basic.String],True),
                     ('START_STORING',[basic.String],True)
                     ]
-
+class DMFTMonteCarloParameters(MonteCarloParameters): 
+    """ A module to set the temperature """
+    _input_ports = [('SEED',[basic.String]),
+                    ('MAX_TIME',[basic.String]),
+                    ('MAX_IT',[basic.String]),
+                    ('BETA',[basic.String]),
+                    ('SITES',[basic.String]),
+                    ('N',[basic.String],True),
+                    ('NMATSUBARA',[basic.String]),
+                    ('U',[basic.String]),
+                    ('t' ,[basic.String]),
+                    ('MU',[basic.String]),
+                    ('H',[basic.String]),
+                    ('H_INIT',[basic.String]),
+                    ('TOLERANCE',[basic.String]),
+                    ('CONVERGED',[basic.String]),
+                    ('SYMMETRIZATION',[basic.String]),
+                    ('ANTIFERROMAGNET',[basic.String]),
+                    ('SOLVER',[basic.String]),
+                    ('FLAVORS',[basic.String]),
+                    ('OMEGA_LOOP',[basic.String]),
+                    ('CHECKPOINT',[basic.String]),
+                    ('F',[basic.String]),
+                    ('N_ORDER' ,[basic.String]),
+                    ('N_MEAS',[basic.String]),
+                    ('N_SHIFT',[basic.String]),
+                    ('N_FLIP',[basic.String]),
+                    ('N_MOVE',[basic.String]),
+                    ('OVERLAP',[basic.String]),
+                    ('OVERLAP',[basic.String]),
+                    ('CONVERGENCE_CHECK_PERIOD',[basic.String]),
+                    ('MEASUREMENT_PERIOD' ,[basic.String]),
+                    ('NRUNS',[basic.String]),
+                    ('RECALC_PERIOD',[basic.String]),
+                    ('HISTOGRAM_MEASUREMENT',[basic.String]),
+                    ('NSELF',[basic.String]),
+                    ('ALPHA',[basic.String]),
+                    ('J',[basic.String]),
+                    ('NMATSUBARA_MEASUREMENTS',[basic.String]),
+                    ('t0',[basic.String]),
+                    ('t1',[basic.String])
+                    ]
+                    
 class ClassicalMonteCarloParameters(MonteCarloParameters): 
     """ A module to set the parameters for a loop quantum Monte Carlo simulation: 
       SWEEPS: the number of sweeps for measurements 
@@ -189,6 +231,7 @@ def selfRegister():
   reg.add_module(LoopMonteCarloParameters,namespace="Parameters")
   reg.add_module(ClassicalMonteCarloParameters,namespace="Parameters")
   reg.add_module(QWLMonteCarloParameters,namespace="Parameters")
+  reg.add_module(DMFTMonteCarloParameters,namespace="Parameters")
 
   register_parameters(Temperature)
   
