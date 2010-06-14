@@ -71,6 +71,14 @@ def _get_mpi_run():
     else:
       return ['mpirun','-np']
       
+def get_temporary_path(param):
+    of = param.interpreter.filePool.create_file()
+    os.unlink(of.name)
+    os.mkdir(of.name)
+    dir = basic.Directory
+    dir.name = of.name
+    return dir
+   
 class SystemCommand(Module):
     def execute(self,cmdline):
         if pyalps.executeCommand(cmdline) <> 0:
