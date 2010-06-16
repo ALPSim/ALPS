@@ -36,7 +36,7 @@ for u in [4.,5.,6.,8.]:
     parms.append(
             { 
               'ANTIFERROMAGNET'         : 1,
-              'CHECKPOINT'              : 'dump'
+              'CHECKPOINT'              : 'dump',
               'CONVERGED'               : 0.01,
               'F'                       : 10,
               'FLAVORS'                 : 2,
@@ -83,10 +83,12 @@ data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), r
 for d in data:
     for f in range(0,flavors):
         d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
+        d[f].y = -d[f].y
         plt.figure()
+        plt.yscale('log')
         pyalps.pyplot.plot(d[f])
         plt.xlabel(r'$\tau$')
-        plt.ylabel(r'$G(\tau)$')
+        plt.ylabel(str(d[f].props['observable'])+' $U$='+str(d[f].props['U']))
         plt.title('Hubbard model on the Bethe lattice')
         plt.show()
 

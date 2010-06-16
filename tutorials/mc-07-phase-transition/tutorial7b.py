@@ -28,6 +28,8 @@
 import pyalps
 import matplotlib.pyplot as plt
 import pyalps.pyplot
+import numpy as np
+import pyalps.fit_wrapper as fw
 
 #prepare the input parameters
 parms = []
