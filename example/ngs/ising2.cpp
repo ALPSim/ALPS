@@ -43,8 +43,8 @@ void IsingSimulation::print_copyright(std::ostream& out)
       << "  copyright(c) 1994-2006 by Matthias Troyer <troyer@comp-phys.org>\n\n";
 }
 
-IsingSimulation::IsingSimulation(parameters_type const & p)
-  : alps::mcdeprecated(p)
+IsingSimulation::IsingSimulation(parameters_type const & p, std::size_t seed_offset)
+  : alps::mcdeprecated(p, seed_offset)
   , length(static_cast<alps::uint32_t>(p["L"]))
   , beta(1./static_cast<double>(p["T"]))
   , sweeps(0)

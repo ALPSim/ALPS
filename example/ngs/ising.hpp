@@ -29,8 +29,8 @@
 
 class simulation_type : public alps::mcbase {
     public:
-        simulation_type(parameters_type const & params)
-            : alps::mcbase(params)
+        simulation_type(parameters_type const & params, std::size_t seed_offset = 0)
+            : alps::mcbase(params, seed_offset)
             , length(params["L"])
             , beta(1. / double(params["T"]))
             , sweeps(0)

@@ -40,7 +40,7 @@ class IsingSimulation : public alps::mcdeprecated
 public:
   static void print_copyright(std::ostream&);
   
-  IsingSimulation(parameters_type const & p);
+  IsingSimulation(parameters_type const & p, std::size_t seed_offset = 0);
   
   using alps::mcdeprecated::save;
   using alps::mcdeprecated::load;
