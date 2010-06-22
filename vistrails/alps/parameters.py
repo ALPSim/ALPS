@@ -18,6 +18,8 @@ import copy
 from packages.controlflow.list_module import ListOfElements
 basic = core.modules.basic_modules
 
+import numpy as np
+
 from core.modules.constant_configuration import StandardConstantWidget
 
 ##############################################################################
@@ -272,6 +274,24 @@ class IterateParameter(Module):
                     ('value_list',[ListOfElements])]
     _output_ports = [('value', [Parameters])]
 
+class IterateParameterInRange(Module):
+    """ This module iterates a parameter in a range with a given number of steps. """
+    def compute(self):
+        name = self.getInputFromPort('name')
+        min_val = self.getInputFromPort('min')
+        max_val = self.getInputFromPort('max')
+        steps = self.getInputFromPort('num_steps')
+        
+        ll = []
+        for val in np.linspace(min_val, max_val, steps):
+            ll.append({ name: val })
+        self.setResult('value',ll)
+        
+    _input_ports = [('name',[basic.String]),
+                    ('min',[basic.Float]),
+                    ('max',[basic.Float]),
+                    ('num_steps',[basic.Integer])]
+    _output_ports = [('value', [Parameters])]
 
 class UpdateParameters(Parameters):
    """ 
@@ -309,4 +329,4 @@ def selfRegister():
   reg.add_module(IterateParameter,namespace="Parameters")
   reg.add_module(IterateValue,namespace="Parameters")
   reg.add_module(UpdateParameters,namespace="Parameters")
-
+  reg.add_module(IterateParameterInRange,namespace="Parameters")
