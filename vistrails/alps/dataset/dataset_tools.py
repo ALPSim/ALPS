@@ -36,6 +36,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
 import copy
+import string
 
 from dataset_core import *
 from dataset_exceptions import *
@@ -200,7 +201,9 @@ class CycleMarkers(Module):
             key = tuple([q.props[k] for k in foreach])
             q.props['marker'] = all[key]
             if 'line' in q.props:
-                q.props['line'][0] = all[key]
+                ll = list(q.props['line'])
+                ll[0] = all[key]
+                q.props['line'] = string.join(ll, sep='')
             else:
                 q.props['line'] = all[key] + '-'
         
