@@ -445,7 +445,7 @@ class Hdf5Loader:
             self.h5f = h5py.File(f,'r')
             self.h5fname = f
             if verbose: print "Loading from file", f
-            list_ = self.GetObservableList(respath+'/1/results/G0_tau/')
+            list_ = self.GetObservableList(respath+'/1/results/G_tau/')
             grp = self.h5f.require_group(respath)
             params = self.ReadParameters(proppath)
             obslist = []
@@ -461,7 +461,7 @@ class Hdf5Loader:
                         if verbose: print "Loading", m
                         d = DataSet()
                         size=0
-                        path=it+"/results/G0_tau/"+m
+                        path=it+"/results/G_tau/"+m
                         if "mean" in grp[path].keys():
                             value = grp[path+"/mean/value"].value
                             try:
