@@ -161,6 +161,7 @@ class System
     double _truncation_error;
     double _entropy;
     bool _use_error;
+    int _error_max_size;
     bool _target_subspaces; // build density matrix using all subspaces
     int _nsub; // number states per subspace
 
@@ -258,6 +259,7 @@ class System
     , m3(2)
     , m4(2)
     , _use_error(false)
+    , _error_max_size(-1)
     , _target_subspaces(false)
     , _nsub(1)
     , _verbose(0)
@@ -292,6 +294,7 @@ class System
      , _use_hc(false)
      , _grand_canonical(QN::default_mask())
      , _use_error(false)
+     , _error_max_size(-1)
      , _target_subspaces(false)
      , _nsub(1)
      , _verbose(0)
@@ -361,7 +364,7 @@ class System
         resume(1, RIGHT2LEFT, 1);
       }
 
-    void set_error(double err) { _error = err; _use_error = true; }
+    void set_error(double err, int error_max_size = -1) { _error = err; _error_max_size = error_max_size; _use_error = true; }
 
     void set_truncation(size_t _m) { m = _m; }
     bool in_warmup() const { return _in_warmup; }
@@ -1900,6 +1903,8 @@ System<T>::truncate(int position, int new_size)
       if(error <= _error && i >= new_size){
 //        new_size = std::min(new_size, (int)((i+1)*1.1));
         new_size = (int)((i+1)*1.1);
+        if(_error_max_size != -1)
+          new_size = std::min(new_size, _error_max_size);
         cout << "ERROR = " << _error << " " << error << endl;
         cout << "NEW SIZE = " << i+1 << " " << new_size << endl;
         break;

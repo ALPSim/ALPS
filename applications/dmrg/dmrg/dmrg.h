@@ -119,6 +119,8 @@ private:
   int num_eigenvalues;
   int verbose;
   int nwarmup;
+  int maxstates;
+  double error;
 
   // For resuming a previous run
   int start_sweep;
@@ -196,9 +198,14 @@ void DMRGTask<value_type>::init()
 
   // read number of states
   nwarmup = 20;
+  error = -1.;
   if (parms.defined("NUM_WARMUP_STATES")) {
     nwarmup = static_cast<int>(parms["NUM_WARMUP_STATES"]);
   }
+  if (parms.defined("TRUNCATION_ERROR")) {
+    error = static_cast<double>(parms["TRUNCATION_ERROR"]);
+  }
+  maxstates = -1;
   if (parms.defined("STATES")) {
     std::string states_string = parms["STATES"];
     tokenizer state_tokens(states_string, sep);
@@ -208,12 +215,12 @@ void DMRGTask<value_type>::init()
       boost::throw_exception(std::runtime_error("Need to specify either 2*SWEEPS different values in STATES, or one MAXSTATES value"));
   }
   else if (parms.defined("MAXSTATES")) {
-    int maxstates = static_cast<int>(parms["MAXSTATES"]);
+    maxstates = static_cast<int>(parms["MAXSTATES"]);
     for (int i=0; i< 2*num_sweeps; ++i)
       num_states.push_back((i+1)*maxstates/(2*num_sweeps));
   }
   else if (parms.defined("NUMSTATES")) {
-    int maxstates = static_cast<int>(parms["NUMSTATES"]);
+    maxstates = static_cast<int>(parms["NUMSTATES"]);
     for (int i=0; i< 2*num_sweeps; ++i)
       num_states.push_back(maxstates);
   }
@@ -421,6 +428,7 @@ void DMRGTask<value_type>::dostep()
   dmtk::System<value_type > &S = this->system;
   S.set_data(this);
   S.signal_handler = handler;
+  S.set_error(error, maxstates);
   
   S.set_calc_gap(num_eigenvalues-1); 
   dmtk::Matrix<size_t> nstates(2,num_sweeps);
