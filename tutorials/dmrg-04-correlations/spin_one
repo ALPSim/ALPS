@@ -13,7 +13,6 @@ MEASURE_AVERAGE[Exchange]=exchange
 MEASURE_LOCAL[Local magnetization]=Sz
 MEASURE_CORRELATIONS[Diagonal spin correlations]=Sz
 MEASURE_CORRELATIONS[Offdiagonal spin correlations]="Splus:Sminus"
-L=192
 { MAXSTATES=100 }
 { MAXSTATES=150 }
 { MAXSTATES=200 }
