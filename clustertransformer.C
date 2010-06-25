@@ -179,7 +179,9 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
                                                             const matsubara_green_function_t &G0_omega, 
                                                             double &mu, const double h, const double beta)
 {
-  if(h!=0){std::cout<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); }
+  if(h!=0 && G0_omega.nsite()!=1) { 
+    std::cout<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); 
+  }
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
@@ -214,7 +216,8 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
 	    for (unsigned int d=0; d<dimension(); ++d) 
 	      k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
 	    double weight = lattice_momentum(kl,dimension());
-	    G_omega_lattice(freq, kc, kc, flavor) += weight/(iomega_n+mu-epsilon(k)-selfenergy(freq, kc, kc, flavor));
+	    std::complex<double> zeta = iomega_n + mu + (flavor%2 ? -h : h);
+	    G_omega_lattice(freq, kc, kc, flavor) += weight/(zeta-epsilon(k)-selfenergy(freq, kc, kc, flavor));
 	  }
 	  G_omega_lattice(freq, kc, kc, flavor) /= n_cluster_cells();
 	}
@@ -446,10 +449,10 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
 	      << "CAUTION: this may take a while\n";
     int del_z = paramagnet ? 2 : 1;
     std::vector<alps::RealObsevaluator> energy_vec(nfreq);
+    std::vector<alps::RealObsevaluator> energy_kc(nfreq);
     for (int z=0; z<nzone; z+=del_z) {
       for (site_class_set_type::const_iterator it_kc=site_classes_k_space().first; 
 	   it_kc!=site_classes_k_space().second; ++it_kc) {
-	std::vector<alps::RealObsevaluator> energy_kc(nfreq);
 	const int multiplier = it_kc->size();
 	const site_t kc = *((*it_kc).begin());
 	vector_type kc_vec(dimension());
@@ -515,6 +518,20 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
     return kin; 
   }
   else {
+
+    std::ofstream selfout("selftest.dat");
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      selfout << freq << " ";
+      for (int kc=0; kc<n_cluster_sites(); ++kc) {
+	for (int z=0; z<nzone; ++z) {
+	  selfout << selfenergies[z][kc][2*freq].mean() << " " <<  selfenergies[z][kc][2*freq+1].mean() << " ";
+	}
+      }
+      selfout << "\n";
+    }
+    selfout.close();
+
+
     std::vector<std::complex<double> > energy_vec(nfreq, std::complex<double>(0., 0.));
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       const std::complex<double> iom(0., (2.*freq+1.)*M_PI/beta);
@@ -533,11 +550,14 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
       }
       energy_vec[freq] /= n_cluster_cells()*n_cluster_sites();
     }
+    std::ofstream estr("etest.dat");
     double kin = 0.;
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       double om = (2.*freq+1.)*M_PI/beta;
+      estr << om << " " << energy_vec[freq].real() << " "  << energy_vec[freq].imag() << "\n";
       kin += energy_vec[freq].real() + dispersion_moments(1)*nzone/om/om;
     }
+    estr.close();
     kin *= 2./beta;
     kin -= 0.25*nzone*dispersion_moments(1)*beta;
     alps::SimpleRealObservable kin_obs("kinetic energy");
