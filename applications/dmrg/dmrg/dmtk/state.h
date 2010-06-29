@@ -27,6 +27,7 @@
 #define __DMTK_STATE_H__
 
 #include <iosfwd>
+#include <vector>
 #include "enums.h"
 #include "range.h"
 #include "slice_iter.h"
@@ -1668,7 +1669,7 @@ VectorState<T>::condense1 (int mask) const
 // the two blocks as a single block
 
   Vector<StateSpace> aux_qn_space(qn_space.size());
-  typename vector<StateSpace>::const_iterator siter;
+  typename std::vector<StateSpace>::const_iterator siter;
   typename Vector<StateSpace>::iterator titer;
   for(siter = qn_space.begin(), titer = aux_qn_space.begin(); siter != qn_space.end(); siter++, titer++){
     const StateSpace &s = *siter;

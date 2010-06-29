@@ -60,7 +60,7 @@ class Matrix:public std::vector<T>
     size_t num_rows, num_cols;
     size_t v_capacity;
 
-    void init() { _data = &vector::operator[](0); }
+    void init() { if (size()) _data = &vector::operator[](0); else _data=0; }
 
     Matrix& matrix_from_sparse(const Sparse<T>&);
   public:

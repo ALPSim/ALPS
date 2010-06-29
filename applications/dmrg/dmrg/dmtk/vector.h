@@ -192,8 +192,12 @@ class Vector:public std::vector<T>
 
     void init() 
       { 
-        v_start = &vector::operator[](0); 
-        v_end = &vector::operator[](v_size); 
+		if (v_size) {
+           v_start = &vector::operator[](0); 
+           v_end = v_start + v_size; 
+		}
+		else
+		  v_start = v_end = 0;
       }
 };
 

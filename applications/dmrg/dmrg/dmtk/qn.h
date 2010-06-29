@@ -298,7 +298,7 @@ struct meta_and<0>{
 inline int 
 QN::fermion_sign() const
 {
-  return SGN(meta_and<QN_MAX_SIZE>::op(*this));  
+  return SGN(meta_and<QN_MAX_SIZE-1>::op(*this));  
 }
 
 
