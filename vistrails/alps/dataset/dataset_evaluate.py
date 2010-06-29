@@ -66,6 +66,15 @@ class ConstantDataSet(Module):
             raise EmptyInputPort('value || source')
 
 class PrepareDataSets(Module):
+    """
+    Prepare a DataSet or a list of DataSets using some user-provided code.
+    
+    The user code (entered into the PythonSource widget) is expected to create a variable
+    called result which may contain either a single DataSet instance or a list of
+    DataSet instances. In the first case, it will implicitly be converted to a list of
+    length 1.
+    """
+    
     my_input_ports = [PortDescriptor('source',basic.String,use_python_source=True)]
     my_output_ports = [PortDescriptor('output',DataSets)]
     
@@ -87,6 +96,14 @@ class PrepareDataSets(Module):
             raise EmptyInputPort('source')
 
 class TransformEachDataSet(Module):
+    """
+    Perform a transformation on all DataSets in the input separately.
+    
+    The user-supplied code should make use of the three input variables x,y,props and
+    perform in-place transformations on those. The module will perform the iteration
+    over all DataSet instances in the input list, tacitly flattening that list if
+    it is hierarchical. The output will be a flat list.
+    """
     my_input_ports = [
         PortDescriptor("input",DataSets),
         PortDescriptor("source",basic.String,use_python_source=True)
@@ -132,6 +149,21 @@ class TransformEachDataSet(Module):
             raise EmptyInputPort('input || source')
 
 class TransformGroupedDataSets(Module):
+    """
+    Transform a structured list into a structured list, possibly changing the structure.
+    
+    This module generalizes the functionality of TransformEachDataSet and allows more
+    specific control over actions taken on hierarchical list. The user-supplied code can
+    make use of the input variable data, which is either a DataSet or a (possibly hierarchical)
+    list of DataSet instances, depending on the depth of the hierarchy in the input and the
+    level provided by the user.
+    
+    The code should make use of the return statement to yield either a list of a single
+    DataSet instance.
+    
+    The level parameters works identically as for the pyalps.happly() function.
+    """
+    
     my_input_ports = [
         PortDescriptor("input",DataSets),
         PortDescriptor("source",basic.String,use_python_source=True),
@@ -166,6 +198,10 @@ class TransformGroupedDataSets(Module):
             raise EmptyInputPort('input || source')
 
 class TransformProperties(TransformEachDataSet):
+    """
+    This module works just as the TransformEachDataSet module, but should perform operations
+    only on the properties of each DataSet. It will generally be faster.
+    """
     deepcopy_all = False
 
 def AddDataSetsInputPorts(m, Nmax):

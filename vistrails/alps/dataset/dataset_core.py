@@ -85,8 +85,9 @@ class ResultFiles(ListOfElements):
         self.setResult('filenames',[x.props['filename'] for x in rf])
 
 class ConcatenateDataSets(Module):
-    """Takes the sets from several DataSets from the input port and puts them
-    into one DataSets object"""
+    """
+    Takes two DataSets (i.e. lists of DataSet instances) and concatenates the lists.
+    """
     my_input_ports = [
         PortDescriptor('input',DataSets)
     ]
