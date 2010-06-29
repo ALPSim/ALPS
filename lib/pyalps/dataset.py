@@ -38,6 +38,16 @@ class ResultProperties:
         self.props = {}
 
 class DataSet(ResultProperties):
+    """
+    The DataSet class stores a set of data, usually in XY format, along with all the properties
+    describing the data, such as input parameters to the simulation etc.
+    
+    Members are:
+     * x, y - These contain the data and are expected to come as lists of Numpy arrays
+              by many functions operating on DataSets. However, for user-supplied functions,
+              other ways of representing data may be used.
+     * props - This is a dictionary of properties describing the dataset.
+    """
     def __deepcopy__(self,memo):
         ret = DataSet()
         ret.props = copy.deepcopy(self.props,memo)
@@ -50,6 +60,9 @@ class DataSet(ResultProperties):
         
         self.x = np.array([])
         self.y = np.array([])
+    
+    def __repr__(self):
+        return "x=%s\ny=%s\nprops=%s" % (self.x, self.y, self.props)
         
 class ResultFile(ResultProperties):
     def __deepcopy__(self,memo):
