@@ -72,6 +72,14 @@ class FitPrototype(Module):
             self.setResult('output',newsets)
 
 class DoPolynomialFit(FitPrototype):
+    """
+    Perform a polynomial fit using the polyfit function in SciPy.
+    
+    The user only needs to supply the degree of the desired polynomial form. The output
+    will contain the same x values as the input and the y values of the fitted polynomial form.
+    The fit parameters are stored into the property 'fit_parameters' as a list of floating
+    point numbers, with the highest power first.
+    """
     my_input_ports = FitPrototype.my_input_ports + [PortDescriptor("degree",basic.Integer)]
     my_output_ports = FitPrototype.my_output_ports
     
@@ -92,6 +100,33 @@ class DoPolynomialFit(FitPrototype):
         return data
 
 class DoNonlinearFit(FitPrototype):
+    """
+    Perform a non-linear fit, using the fit_wrapper of pyalps, which in turn makes use
+    of SciPy.optimize.
+    
+    The input ports are:
+     * parameters: This is a list of initial values for the parameters. The length of this
+                   determines the number of parameters.
+     * source: The user needs to provide a function (x,A)->y, with A being the list of
+               parameters. The parameters at this point are *not* floating point numbers,
+               but are stored in a special class Parameter. To access the numeric value,
+               use the () operator, i.e. the first parameter should be accessed as
+                 A[0]()
+               x should be expected to be a Numpy array, so should the return value.
+               
+               Ex 1: exponential form
+               return A[0]()+A[1]()*np.exp(A[2]()*x)
+               
+               Ex 2: power law decay to zero
+               return A[0]()*x**A[1]()
+     
+    The output dataset will contain the x values along an equidistant grid of 1000
+    points in the range of the original data and the y values at those points.
+    The list of parameters is stored into the property 'fit'; to access, use the
+    get() method of the Parameter instances, e.g.
+      props['fit][0].get()
+    A label will be created automatically from the fit parameters.
+    """
     my_input_ports = FitPrototype.my_input_ports + \
     [
         PortDescriptor('parameters',ListOfElements),
@@ -118,49 +153,3 @@ class DoNonlinearFit(FitPrototype):
         
         data.x = np.linspace(min(data.x), max(data.x), 1000)
         data.y = f(self,data.x,A)
-
-# class DoNonlinearFit(FitPrototype):
-#    my_input_ports = FitPrototype.my_input_ports + \
-#    [
-#        PortDescriptor('parameters',ListOfElements),
-#        PortDescriptor('source',basic.String,use_python_source=True),
-#        PortDescriptor('xrange_min',basic.Float),
-#        PortDescriptor('xrange_max',basic.Float)
-#    ]
-#    
-#    def transform(self, data):
-#        pars = []
-#        raw_pars = self.getInputFromPort('parameters')
-#        cmd = ''
-#        for i in range(0,len(raw_pars)):
-#             p = raw_pars[i][0]
-#             if p == 'p':
-#                 raise InvalidInput('p is not a good parameter name')
-#             cmd += 'global ' + p + '\n'
-#             cmd += p + ' = fw.Parameter(raw_pars[' + str(i) + '][1])\n'
-#             cmd += 'pars.append(' + p + ')\n'
-#         exec cmd
-#         
-#         code = self.getInputFromPort('source')
-#         proc_code = urllib.unquote(str(code))
-#         cmd = 'def f(self,x):\n'
-#         for line in proc_code.split('\n'):
-#             cmd += '\t' + line + '\n'
-#         exec cmd
-#         
-#         if self.hasInputFromPort('xrange_min') and self.hasInputFromPort('xrange_max'):
-#             xmin = self.getInputFromPort('xrange_min')
-#             xmax = self.getInputFromPort('xrange_max')
-#             selection = (data.x >= xmin) & (data.x <= xmax)
-#             fw.fit(self,f, pars, data.y[selection], data.x[selection])
-#         else:
-#             fw.fit(self,f, pars, data.y, data.x)
-#         
-#         data.props['label'] = ''
-#         for i in range(0,len(pars)):
-#             p = raw_pars[i][0]
-#             data.props['label'] = data.props['label'] + p + ' = ' + str(pars[i].get()) + ', '
-#             data.props[p] = pars[i].get()
-#         
-#         data.x = np.linspace(min(data.x), max(data.x), 1000)
-#         data.y = f(self,data.x)

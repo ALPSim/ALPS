@@ -46,6 +46,9 @@ from pyalps.hlist import deep_flatten, flatten, happly, hmap, depth
 from pyalps.dict_intersect import dict_difference, dict_intersect
 
 class SortEachDataSet(FitPrototype):
+    """
+    Sort the x,y lists in each DataSet according to x.
+    """
     def transform(self,data):
         order = np.argsort(data.x)
         data.x = data.x[order]
@@ -98,6 +101,9 @@ class CacheErasure(NotCacheable,Module):
         self.setResult('output', self.getInputFromPort('input'))
     
 class SetLabels(Module):
+    """
+    Set labels according to the properties given in 'label_props'.
+    """
     my_input_ports = [
         PortDescriptor('input',DataSets),
         PortDescriptor('label_props',ListOfElements)
@@ -136,6 +142,12 @@ class SetLabels(Module):
         self.setResult('output', q2)
 
 class CycleColors(Module):
+    """
+    Cyclically assign colors to the lines/markers that will be used to
+    display the DataSets, based on the properties in 'for-each'. This means
+    that DataSet instances that have the same values for the properties
+    in 'for-each' will receive the same color.
+    """
     my_input_ports = [
         PortDescriptor('input',DataSets),
         PortDescriptor('for-each',ListOfElements),
@@ -170,6 +182,12 @@ class CycleColors(Module):
         self.setResult('output', input)
 
 class CycleMarkers(Module):
+    """
+    Cyclically assign markers to the lines/markers that will be used to
+    display the DataSets, based on the properties in 'for-each'. This means
+    that DataSet instances that have the same values for the properties
+    in 'for-each' will receive the same marker.
+    """
     my_input_ports = [
         PortDescriptor('input',DataSets),
         PortDescriptor('for-each',ListOfElements),
@@ -210,6 +228,11 @@ class CycleMarkers(Module):
         self.setResult('output', input)
 
 class SetPlotStyle(FitPrototype):
+    """
+    Choose plot style (line/scatter).
+    
+    It is possible to choose both, which will lead to a line plot with markers.
+    """
     my_input_ports = FitPrototype.my_input_ports + [
         PortDescriptor('scatter',basic.Boolean),
         PortDescriptor('line',basic.Boolean)

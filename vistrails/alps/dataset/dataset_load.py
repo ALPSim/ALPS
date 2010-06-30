@@ -274,6 +274,37 @@ class LoadAlpsEigenstateMeasurements(Module):
         self.setResult('data',datasets)
 
 class GroupDataSets(Module):
+    """
+    Group a list of DataSet instances into a hierchical list according to some choice of properties.
+    
+    HIERARCHICAL LISTS
+    
+    Hierarchical lists (hlists) allow a more structured storage of a set of DataSets using nested lists.
+    For example, a simulation could be performed for a range of two parameters, t \in {1,2}, V \in {-1,-2}.
+    The results could then be organized by 't':
+    [
+     [x=[] y=[] props={'t': 2, 'V': -1},
+      x=[] y=[] props={'t': 2, 'V': -2}
+     ], [
+      x=[] y=[] props={'t': 1, 'V': -1},
+      x=[] y=[] props={'t': 1, 'V': -2}
+     ]
+    ]
+    This would simplify operations such as finding the minimal y for a given t etc.
+    
+    The ALPS VisTrails package provides several modules to deal with such lists:
+     * GroupDataSets deepends the hierarchy by grouping according to some property.
+     * Flatten will make a flat list of a hierarchical list of any depth.
+     * TransformGroupedDataSets can perform operations at a controllable depth of the hierarchy.
+    
+    The GroupDataSets module
+    
+    This module will group DataSet instances at the lowest level of the existing list, according
+    to the properties given in 'for-each'.
+    Note that regardless of how many properties are provided, the depth of the list will
+    only grow by one level. If you want a separate level for each property, you will need
+    to use several GroupDataSets modules connected in a chain.
+    """
     my_input_ports = [
         PortDescriptor('for-each',ListOfElements),
         PortDescriptor('input',DataSets)
@@ -321,6 +352,38 @@ class GroupDataSets(Module):
             raise EmptyInputPort('for-each || observable')
 
 class CollectDataSets(Module):
+    """
+    Collect data from a list of DataSet instances to obtain XY plot.
+    
+    An example of the usage of CollectDataSets is the following: given the results
+    of a simulation for of some parameters V, L, we would like
+    to make a plot of the energy versus the parameter V, for each possible value of L
+    The input is a list of DataSets:
+    [
+      x=[0] y=[-0.13] props={'observable': 'energy', 'V':0, 'L':8},
+      x=[0] y=[-0.15] props={'observable': 'energy', 'V':1, 'L':8},
+      x=[0] y=[0.28] props={'observable': 'magnetization', 'V':0, 'L':8},
+      x=[0] y=[0.31] props={'observable': 'magnetization', 'V':1, 'L':8},
+      
+      x=[0] y=[-0.18] props={'observable': 'energy', 'V':0, 'L':12},
+      x=[0] y=[-0.2] props={'observable': 'energy', 'V':1, 'L':12},
+      x=[0] y=[0.33] props={'observable': 'magnetization', 'V':0, 'L':12},
+      x=[0] y=[0.41] props={'observable': 'magnetization', 'V':1, 'L':12},
+    ]
+    We would like to collect this into the list:
+    [
+      x=[0, 1] y=[-0.13, -0.15] props={'observable': 'energy, 'L': 8}
+      x=[0, 1] y=[-0.18, -0.2] props={'observable': 'energy, 'L': 12}
+    ]
+    which we can plot as two lines in a plot E vs V.
+    
+    This can be achieved by providing the following parameters to CollectDataSets:
+     * for-each: ['L']
+     * y: 'energy'
+     * x: 'V'
+    
+    A label will automatically be generated.
+    """
     my_input_ports = [
         PortDescriptor('for-each',ListOfElements),
         PortDescriptor('y',basic.String),

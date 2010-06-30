@@ -138,6 +138,16 @@ class SelectByObservable(SelectBy):
     decide = ObservablePredicate.decide
 
 class Select(Module):
+    """
+    Select from a list of DataSet instances based on either a user-provided source code
+    or some predefined predicate.
+    
+    The user-provided code should make use of the variables x,y,props and return True
+    or False.
+    
+    Alternatively, connecting a Predicate to the appropriate input port can be used. This
+    usage is discouraged and should be replaced by the SelectByXXX modules.
+    """
     my_input_ports = [
         PortDescriptor("input",DataSets),
         PortDescriptor("source",basic.String,use_python_source=True),

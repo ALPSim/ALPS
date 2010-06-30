@@ -42,6 +42,9 @@ from pyalps.plot_core import *
 from pyalps.pyplot import *
 
 class Axis(Descriptor, Module):
+    """
+    Connect this to a PreparePlot module to add an axis.
+    """
     my_input_ports = [
         PortDescriptor('label',basic.String),
         PortDescriptor('min',basic.Float),
@@ -51,6 +54,9 @@ class Axis(Descriptor, Module):
     ]
 
 class Legend(Descriptor, Module):
+    """
+   Connect this to a PreparePlot module to add a legend.
+   """
     my_input_ports = [
         PortDescriptor('location',basic.Integer),
         PortDescriptor('fontsize',basic.Integer),
@@ -58,6 +64,9 @@ class Legend(Descriptor, Module):
     ]
 
 class PreparePlot(Descriptor, Module):
+    """
+    Prepare a plot.
+    """
     my_input_ports = [
         PortDescriptor('xaxis',Axis),
         PortDescriptor('yaxis',Axis),

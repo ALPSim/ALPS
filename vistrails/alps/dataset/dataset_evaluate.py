@@ -162,6 +162,9 @@ class TransformGroupedDataSets(Module):
     DataSet instance.
     
     The level parameters works identically as for the pyalps.happly() function.
+    
+    For more introduction to hierarchical lists, refer to the documentation of the
+    GroupDataSets module.
     """
     
     my_input_ports = [
