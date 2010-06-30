@@ -1,6 +1,5 @@
 #include <alps/scheduler/montecarlo.h>
 #include <alps/alea.h>
-#include <alps/python/save_observable_to_hdf5.hpp>
 #include <boost/random.hpp>
 #include <boost/multi_array.hpp>
 #include <iostream>
@@ -107,13 +106,12 @@ public:
     }
     
     void save(std::string const & filename){
-        
-        alps::python::save_observable_to_hdf5<alps::RealObservable>(energy_, filename);
-        alps::python::save_observable_to_hdf5<alps::RealObservable>(magnetization_, filename);
-        alps::python::save_observable_to_hdf5<alps::RealObservable>(abs_magnetization_, filename);
-        alps::python::save_observable_to_hdf5<alps::RealObservable>(m2_, filename);
-        alps::python::save_observable_to_hdf5<alps::RealObservable>(m4_, filename);
         alps::hdf5::oarchive ar(filename);
+        ar << alps::make_pvp("/simulation/results/"+energy_.representation(), energy_);
+        ar << alps::make_pvp("/simulation/results/"+magnetization_.representation(), magnetization_);
+        ar << alps::make_pvp("/simulation/results/"+abs_magnetization_.representation(), abs_magnetization_);
+        ar << alps::make_pvp("/simulation/results/"+m2_.representation(), magnetization_);
+        ar << alps::make_pvp("/simulation/results/"+m4_.representation(), abs_magnetization_);
         ar << alps::make_pvp("/parameters/L", L_);
         ar << alps::make_pvp("/parameters/BETA", beta_);
         ar << alps::make_pvp("/parameters/SWEEPS", sweeps_);
