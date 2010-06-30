@@ -89,6 +89,9 @@ itime_green_function_t  alps::ImpuritySolver::solve(
   BOOST_ASSERT(is_master());
   
   alps::Parameters parms(p);
+  boost::filesystem::remove(std::string(parms["BASENAME"])+".h5");
+  alps::hdf5::oarchive dumpfile(std::string(parms["BASENAME"])+".h5");
+  dumpfile<<alps::make_pvp("/parameters", parms);
   
   std::ostringstream G0_text;
   alps::oxstream G0_xml(G0_text);
@@ -96,6 +99,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(
   parms["G0"] = G0_text.str();
   
   int res=solve_it(parms);
+  boost::filesystem::remove(std::string(parms["BASENAME"])+".h5");
   if (res)
     boost::throw_exception(
       std::runtime_error(" solver finished with nonzero exit code"));
@@ -114,14 +118,19 @@ alps::ImpuritySolver::solve_omega(
                , const Parameters& p)
 {
   BOOST_ASSERT(is_master());
-  std::cout<<"solve_omega: building p"<<std::endl;
   alps::Parameters parms(p);
+
+  boost::filesystem::remove(std::string(parms["BASENAME"])+".h5");
+  alps::hdf5::oarchive dumpfile(std::string(parms["BASENAME"])+".h5");
+  dumpfile<<alps::make_pvp("/parameters", parms);
+
   std::ostringstream G0_omega_text;
   alps::oxstream G0_omega_xml(G0_omega_text);
   
   write_freq(G0_omega_xml,G0_omega);
   parms["G0(omega)"] = G0_omega_text.str();
   int res=solve_it(parms);
+  boost::filesystem::remove(std::string(parms["BASENAME"])+".h5");
   if (res)
     boost::throw_exception(
       std::runtime_error(" solver finished with nonzero exit code"));

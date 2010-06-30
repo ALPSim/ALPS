@@ -50,6 +50,7 @@ full_line(static_cast < int >(parms["FLAVORS"]), 0),
 sign(static_cast < int >(parms["FLAVORS"])), 
 G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) + 1))
 {
+  //std::cout<<"starting hyb run."<<std::endl;
   int N = static_cast < int >(parms["N"]);
   int FLAVORS = static_cast < int >(parms["FLAVORS"]);
   int Np1 = N + 1;
@@ -73,7 +74,7 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
     matsubara_green_function_t bare_green_matsubara(N, 1, FLAVORS);
     matsubara_green_function_t f_twiddle_matsubara(N, 1, FLAVORS);
     itime_green_function_t f_twiddle_itime(Np1, 1, FLAVORS);
-    std::cout << "U is: " << u << std::endl;
+    //std::cout << "U is: " << u << std::endl;
     //find the second moment of the band structure
     double epssqav ;
     if (parms.defined("DOSFILE")) {
@@ -314,10 +315,9 @@ std::pair < matsubara_green_function_t, itime_green_function_t > HybridizationSi
   //std::cout << "total measurements done: " << G.count() << std::endl;
   if(parms.defined("CHECKPOINT")){
     alps::Parameters *p=const_cast<alps::Parameters*>(&parms);
-    p->erase(std::string("G0(omega)"));
     alps::Parameters::iterator it=p->begin();
     while(it!=p->end()){
-      if(strncmp(it->key().c_str(),"G0(omega)",9)==0){
+      if(it->key()==std::string("G0(omega)")){
         it->value()="...ignored, nested...";
       }
       it++;
