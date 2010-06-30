@@ -17,6 +17,7 @@ import alpscore
 import parameters
 import alpsparameters
 import lattices
+import autolattices
 import models
 import system
 import applications
@@ -172,6 +173,7 @@ def initialize():
   applications.selfRegister()
   plots.selfRegister()
   tools.selfRegister()
+  autolattices.selfRegister()
   
   alpscore.config = configuration
   
