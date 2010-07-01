@@ -27,8 +27,8 @@ def camelify(s):
         s = replace_at(s, where, s[where].upper())
     return s
 
-def write_lattice(name, inputs, fixed, defaults, outfile):
-    outfile.write("class %s(Lattice):\n" % camelify(name))
+def write_lattice(name, vtname, inputs, fixed, defaults, outfile):
+    outfile.write("class %s(Lattice):\n" % vtname)
     outfile.write('  """ automatically generated lattice: %s """\n' % name)
     outfile.write('  _input_ports = [\n')
     for i in range(len(inputs)):
@@ -52,6 +52,18 @@ def parse_latticegraphs(fn,outfile):
     for lg in root.findall('LATTICEGRAPH'):
         name = lg.get('name')
         
+        print 'Processing',name,':',
+        
+        if 'vt_skip' in lg.keys():
+            print 'Skipped!'
+            continue
+        
+        if 'vt_name' in lg.keys():
+            vtname = lg.get('vt_name')
+        else:
+            vtname = camelify(name)
+        print 'Will become',vtname
+			
         inputs = []
         fixed = {}
         defaults = {}
@@ -74,8 +86,8 @@ def parse_latticegraphs(fn,outfile):
         
         # print name,inputs,fixed,defaults
         
-        write_lattice(name, inputs, fixed, defaults, outfile)
-        names.append(camelify(name))
+        write_lattice(name, vtname, inputs, fixed, defaults, outfile)
+        names.append(vtname)
     return names
 
 if __name__ == '__main__':
@@ -116,7 +128,7 @@ class Lattice(parameters.FixedAndDefaultParameters):
     outfile.write('''
 def register_lattice(type):
   reg = core.modules.module_registry.get_module_registry()
-  reg.add_module(type,namespace="Automatic lattices")
+  reg.add_module(type,namespace="Lattices")
   reg.add_input_port(type,'LATTICE',[basic.String],True)
 
 def initialize(): pass

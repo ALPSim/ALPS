@@ -234,7 +234,7 @@
 </UNITCELL>
 
 
-<LATTICEGRAPH name = "square lattice 3x3">
+<LATTICEGRAPH name = "square lattice 3x3" vt_skip="true">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
     <EXTENT dimension="1" size="3"/>
@@ -245,7 +245,7 @@
   <UNITCELL ref="simple2d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "square lattice 4x4">
+<LATTICEGRAPH name = "square lattice 4x4" vt_skip="true">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
     <EXTENT dimension="1" size="4"/>
@@ -255,7 +255,7 @@
   <UNITCELL ref="simple2d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "dimer">
+<LATTICEGRAPH name = "dimer" vt_skip="true">
   <FINITELATTICE>
     <LATTICE ref="chain lattice"/>
     <EXTENT dimension="1" size="2"/>
@@ -264,7 +264,7 @@
   <UNITCELL ref="simple1d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "site">
+<LATTICEGRAPH name = "site" vt_skip="true">
   <FINITELATTICE>
     <LATTICE ref="chain lattice"/>
     <EXTENT dimension="1" size="1"/>
@@ -308,7 +308,7 @@
   <UNITCELL ref="simple2d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "coupled ladders">
+<LATTICEGRAPH name = "coupled ladders" vt_name="CoupledLaddersLattice">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
     <PARAMETER name="W" default="L"/>
@@ -359,7 +359,7 @@
   <UNITCELL ref="simple1d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "nnn chain lattice">
+<LATTICEGRAPH name = "nnn chain lattice" vt_name="NNNChainLattice">
   <FINITELATTICE>
     <LATTICE ref="chain lattice"/>
     <EXTENT dimension="1" size ="L"/>
@@ -368,7 +368,7 @@
   <UNITCELL ref="complex1d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "nnn open chain lattice">
+<LATTICEGRAPH name = "nnn open chain lattice" vt_name="NNNOpenChainLattice">
   <FINITELATTICE>
     <LATTICE ref="chain lattice"/>
     <EXTENT dimension="1" size ="L"/>
@@ -406,7 +406,7 @@
   <UNITCELL ref="anisotropic2d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "ladder">
+<LATTICEGRAPH name = "ladder" vt_name="LadderLattice">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
     <PARAMETER name="W" default="2"/>
@@ -418,7 +418,7 @@
   <UNITCELL ref="anisotropic2d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "open ladder">
+<LATTICEGRAPH name = "open ladder" vt_name="OpenLadderLattice">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
     <PARAMETER name="W" default="2"/>
@@ -430,7 +430,7 @@
   <UNITCELL ref="anisotropic2d"/>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "inhomogeneous square lattice">
+<LATTICEGRAPH name = "inhomogeneous square lattice" vt_skip="true">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
     <PARAMETER name="W" default="L"/>
@@ -442,7 +442,7 @@
   <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "inhomogeneous simple cubic lattice">
+<LATTICEGRAPH name = "inhomogeneous simple cubic lattice" vt_skip="true">
   <FINITELATTICE>
     <LATTICE ref="simple cubic lattice"/>
     <PARAMETER name="W" default="L"/>
@@ -456,7 +456,7 @@
   <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>
 </LATTICEGRAPH>
 
-<LATTICEGRAPH name = "depleted square lattice">
+<LATTICEGRAPH name = "depleted square lattice" vt_skip="true">
   <FINITELATTICE>
     <LATTICE ref="square lattice"/>
     <PARAMETER name="W" default="L"/>
