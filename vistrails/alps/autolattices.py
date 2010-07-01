@@ -26,25 +26,25 @@ class SquareLattice3x3(Lattice):
   """ automatically generated lattice: square lattice 3x3 """
   _input_ports = [
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'square lattice 3x3'}
 
 class SquareLattice4x4(Lattice):
   """ automatically generated lattice: square lattice 4x4 """
   _input_ports = [
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'square lattice 4x4'}
 
 class Dimer(Lattice):
   """ automatically generated lattice: dimer """
   _input_ports = [
   ]
-  fixed = {'lattice': 'chain lattice'}
+  fixed = {'lattice': 'dimer'}
 
 class Site(Lattice):
   """ automatically generated lattice: site """
   _input_ports = [
   ]
-  fixed = {'lattice': 'chain lattice'}
+  fixed = {'lattice': 'site'}
 
 class SimpleCubicLattice(Lattice):
   """ automatically generated lattice: simple cubic lattice """
@@ -71,7 +71,7 @@ class OpenSquareLattice(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'open square lattice'}
   defaults = {'W': 'L'}
 
 class CoupledLadders(Lattice):
@@ -80,7 +80,7 @@ class CoupledLadders(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'coupled ladders'}
   defaults = {'W': 'L'}
 
 class TriangularLattice(Lattice):
@@ -98,7 +98,7 @@ class FrustratedSquareLattice(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'frustrated square lattice'}
   defaults = {'W': 'L'}
 
 class ChainLattice(Lattice):
@@ -113,35 +113,35 @@ class OpenChainLattice(Lattice):
   _input_ports = [
     ('L',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'chain lattice'}
+  fixed = {'lattice': 'open chain lattice'}
 
 class NnnChainLattice(Lattice):
   """ automatically generated lattice: nnn chain lattice """
   _input_ports = [
     ('L',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'chain lattice'}
+  fixed = {'lattice': 'nnn chain lattice'}
 
 class NnnOpenChainLattice(Lattice):
   """ automatically generated lattice: nnn open chain lattice """
   _input_ports = [
     ('L',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'chain lattice'}
+  fixed = {'lattice': 'nnn open chain lattice'}
 
 class _2BandChainLattice(Lattice):
   """ automatically generated lattice: 2 band chain lattice """
   _input_ports = [
     ('L',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'chain lattice'}
+  fixed = {'lattice': '2 band chain lattice'}
 
 class _2BandOpenChainLattice(Lattice):
   """ automatically generated lattice: 2 band open chain lattice """
   _input_ports = [
     ('L',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'chain lattice'}
+  fixed = {'lattice': '2 band open chain lattice'}
 
 class AnisotropicSquareLattice(Lattice):
   """ automatically generated lattice: anisotropic square lattice """
@@ -149,7 +149,7 @@ class AnisotropicSquareLattice(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'rectangular lattice'}
+  fixed = {'lattice': 'anisotropic square lattice'}
   defaults = {'W': 'L'}
 
 class Ladder(Lattice):
@@ -158,7 +158,7 @@ class Ladder(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'ladder'}
   defaults = {'W': '2'}
 
 class OpenLadder(Lattice):
@@ -167,7 +167,7 @@ class OpenLadder(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'open ladder'}
   defaults = {'W': '2'}
 
 class InhomogeneousSquareLattice(Lattice):
@@ -176,7 +176,7 @@ class InhomogeneousSquareLattice(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'inhomogeneous square lattice'}
   defaults = {'W': 'L'}
 
 class InhomogeneousSimpleCubicLattice(Lattice):
@@ -186,7 +186,7 @@ class InhomogeneousSimpleCubicLattice(Lattice):
     ('W',[(basic.String, '')]),
     ('H',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'simple cubic lattice'}
+  fixed = {'lattice': 'inhomogeneous simple cubic lattice'}
   defaults = {'H': 'W', 'W': 'L'}
 
 class DepletedSquareLattice(Lattice):
@@ -195,7 +195,7 @@ class DepletedSquareLattice(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'square lattice'}
+  fixed = {'lattice': 'depleted square lattice'}
   defaults = {'W': 'L'}
 
 class KagomeLattice(Lattice):
@@ -204,7 +204,7 @@ class KagomeLattice(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'triangular lattice'}
+  fixed = {'lattice': 'Kagome lattice'}
   defaults = {'W': 'L'}
 
 class HoneycombLattice(Lattice):
@@ -213,7 +213,7 @@ class HoneycombLattice(Lattice):
     ('L',[(basic.String, '')]),
     ('W',[(basic.String, '')])
   ]
-  fixed = {'lattice': 'triangular lattice'}
+  fixed = {'lattice': 'honeycomb lattice'}
   defaults = {'W': 'L'}
 
 

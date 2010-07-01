@@ -57,7 +57,8 @@ def parse_latticegraphs(fn,outfile):
         defaults = {}
         
         fl = lg.find('FINITELATTICE')
-        fixed['lattice'] = fl.find('LATTICE').get('ref')
+        # fixed['lattice'] = fl.find('LATTICE').get('ref')
+        fixed['LATTICE'] = name
         
         for extent in fl.findall('EXTENT'):
             size = extent.get('size')
