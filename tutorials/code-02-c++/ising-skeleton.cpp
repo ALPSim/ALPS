@@ -110,12 +110,12 @@ public:
         ar << alps::make_pvp("/simulation/results/"+energy_.representation(), energy_);
         ar << alps::make_pvp("/simulation/results/"+magnetization_.representation(), magnetization_);
         ar << alps::make_pvp("/simulation/results/"+abs_magnetization_.representation(), abs_magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+m2_.representation(), magnetization_);
-        ar << alps::make_pvp("/simulation/results/"+m4_.representation(), abs_magnetization_);
+        ar << alps::make_pvp("/simulation/results/"+m2_.representation(), m2_);
+        ar << alps::make_pvp("/simulation/results/"+m4_.representation(), m4_);
         ar << alps::make_pvp("/parameters/L", L_);
         ar << alps::make_pvp("/parameters/BETA", beta_);
         ar << alps::make_pvp("/parameters/SWEEPS", sweeps_);
-        ar << alps::make_pvp("/parameters/THERMALIZATION", L_);
+        ar << alps::make_pvp("/parameters/THERMALIZATION", thermalization_);
     }
     
     protected:
