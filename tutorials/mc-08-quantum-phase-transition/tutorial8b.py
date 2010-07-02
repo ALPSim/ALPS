@@ -15,7 +15,7 @@ for l in [8,10,12,16]:
               'local_S'        : 0.5,
               'ALGORITHM'      : 'loop',
               'SEED'           : 0,
-              'BETA'           : l,
+              'BETA'           : 2*l,
               'J0'             : 1 ,
               'J1'             : 1,
               'J2'             : j2,
