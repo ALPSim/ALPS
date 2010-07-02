@@ -132,7 +132,7 @@ class Hami : public std::vector<Term<T> >
     const Block<T>& get_site(int pos) const
       { if(sites[pos]) return *sites[pos]; else { return site;} }
 
-    std::string name() const { return _name; }; 
+    std::string const& name() const { return _name; }; 
     Hami& set_name(const char *name) 
       { _name = std::string(name); return *this; }; 
     T value() const { return _val; }

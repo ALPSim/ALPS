@@ -200,7 +200,7 @@ class BasicOp: public dmtk::BMatrix<T>
     bool apply_sign() const { return fermion(); }
     bool is_diagonal() const { return (dqn == QN()); }
 
-    std::string name() const { return _name; }
+    std::string const& name() const { return _name; }
     int site() const { return _site; }
     int internal_site() const { return _internal_site; }
     int label() const { return _label; }
