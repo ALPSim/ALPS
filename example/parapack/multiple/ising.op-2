@@ -1,4 +1,5 @@
 [input parameters]
+LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
 SWEEPS = 4096;
@@ -50,6 +51,7 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.516299 +/- 0.00963
 Temperature: 2 +/- 0
 [input parameters]
+LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
 SWEEPS = 4096;
@@ -101,6 +103,7 @@ Number of Sites: 16 +/- 0
 Specific Heat: 0.56056 +/- 0.0121
 Temperature: 1.8 +/- 0
 [input parameters]
+LATTICE = "chain lattice";
 L = 16;
 SEED = 2873;
 SWEEPS = 4096;

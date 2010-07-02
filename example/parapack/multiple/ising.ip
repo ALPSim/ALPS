@@ -1,3 +1,4 @@
+LATTICE = "chain lattice"
 L = 16;
 
 SEED = 2873
