@@ -71,8 +71,8 @@ plt.title('2D Ising model')
 plt.show()
 
 #perform a data collapse of the Binder cumulant: 
-Tc=2.269
-a=1
+Tc=... #your estimate
+a=...  #your estimate
 
 for d in binder_u4:
     d.x -= Tc
@@ -164,10 +164,10 @@ for d in connected_susc:
     l = d.props['L']
     d.x = d.x * pow(float(l),a)
 
-two_eta=1.75
+two_minus_eta=... #your estimate
 for d in connected_susc:
     l = d.props['L']
-    d.y = d.y/pow(float(l),two_eta)
+    d.y = d.y/pow(float(l),two_minus_eta)
 
 plt.figure()
 pyalps.pyplot.plot(connected_susc)
@@ -182,10 +182,10 @@ for d in magnetization_abs:
     d.x = d.x/Tc
     l = d.props['L']
     d.x = d.x * pow(float(l),a)
-beta_nu=-0.125    
+beta_over_nu=... #your estimate    
 for d in magnetization_abs:
     l = d.props['L']
-    d.y = d.y / pow(float(l),beta_nu)
+    d.y = d.y / pow(float(l),-beta_over_nu)
     
 plt.figure()
 pyalps.pyplot.plot(magnetization_abs)
