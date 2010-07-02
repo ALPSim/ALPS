@@ -86,6 +86,20 @@ plt.xlabel('$1/L$')
 #plt.xlim(0,2*3.1416)
 #plt.ylim(0,2.5)
 
+# Plot gap vs. 1/D for fixed L
+dplot = []
+for D in dvals:
+    curve = pyalps.DataSet()
+    curve.props['label'] = 'L = ' + str(L)
+    curve.x = np.array([1/D for D in dvals])
+    curve.y = np.array([energies[(D,L,1)]-energies[(D,L,0)] for D in dvals])
+    dplot.append(curve)
+plt.figure()
+pyalps.pyplot.plot(dplot)
+plt.legend()
+plt.title('Gap of antiferromagnetic Heisenberg chain (S=1/2)')
+plt.ylabel('Gap $\Delta$')
+plt.xlabel('$1/D$')
 
 
 plt.show()
