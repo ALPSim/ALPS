@@ -6,7 +6,7 @@ import numpy as np
 #prepare the input parameters
 parms = []
 for l in [8,10,12,16]:
-    for j2 in [0.2,0.25,0.3,0.35,0.4]:
+    for j2 in [1.8,1.85,1.9,1.95,2.,2.05,2.1]:
         parms.append(
             { 
               'LATTICE'        : "coupled ladders", 
@@ -28,7 +28,7 @@ for l in [8,10,12,16]:
     )
     
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm8a',parms)
+input_file = pyalps.writeInputFiles('parm8b',parms)
 res = pyalps.runApplication('loop',input_file)
 output_file = res[1]
 pyalps.evaluateLoop(output_file)

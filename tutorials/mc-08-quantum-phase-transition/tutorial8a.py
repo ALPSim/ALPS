@@ -5,8 +5,8 @@ import numpy as np
 
 #prepare the input parameters
 parms = []
-for l in [8,10,12,16]:
-    for j2 in [0.2,0.25,0.3,0.35,0.4]:
+for j2 in [0.,1.]:
+    for t in [0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8,0.9,1.0]:
         parms.append(
             { 
               'LATTICE'        : "coupled ladders", 
@@ -15,15 +15,15 @@ for l in [8,10,12,16]:
               'local_S'        : 0.5,
               'ALGORITHM'      : 'loop',
               'SEED'           : 0,
-              'BETA'           : l,
+              'T'              : t,
               'J0'             : 1 ,
               'J1'             : 1,
               'J2'             : j2,
               'THERMALIZATION' : 5000,
               'SWEEPS'         : 50000, 
               'MODEL'          : "spin",
-              'L'              : l,
-              'W'              : l/2
+              'L'              : 8,
+              'W'              : 4
             }
     )
     
@@ -33,24 +33,23 @@ res = pyalps.runApplication('loop',input_file)
 output_file = res[1]
 pyalps.evaluateLoop(output_file)
 
-data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm8a.task*.out.h5'),['Binder Ratio of Staggered Magnetization','Stiffness'])
 
-binder=pyalps.collectXY(data,x='J2',y='Binder Ratio of Staggered Magnetization', foreach=['L'])
-stiffness =pyalps.collectXY(data,x='J2',y='Stiffness', foreach=['L'])
+#data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm8a.task*.out.h5'),['Binder Ratio of Staggered Magnetization','Stiffness'])
 
-for q in stiffness:
-    q.y = q.y*q.props['L']
-
-#make plot    
-plt.figure()
-pyalps.pyplot.plot(stiffness)
-plt.xlabel(r'$J2$')
-plt.ylabel(r'Stiffness $\rho_s L$')
-plt.title('coupled ladders')
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm8a.task*.out.h5'),['Staggered Susceptibility','Susceptibility'])
+susc1=pyalps.collectXY(data,x='T',y='Staggered Susceptibility', foreach=['J2'])
+susc2=pyalps.collectXY(data,x='T',y='Staggered Susceptibility', foreach=['J2'])
 
 plt.figure()
-pyalps.pyplot.plot(binder)
-plt.xlabel(r'$J_2$')
-plt.ylabel(r'$g(m_s)$')
-plt.title('coupled ladders')
+pyalps.pyplot.plot(susc1)
+plt.xlabel(r'$T$')
+plt.ylabel(r'$\chi$')
+plt.title('uncoupled ladders')
+plt.show()
+
+plt.figure()
+pyalps.pyplot.plot(susc2)
+plt.xlabel(r'$T$')
+plt.ylabel(r'$\chi$')
+plt.title('uncoupled ladders')
 plt.show()
