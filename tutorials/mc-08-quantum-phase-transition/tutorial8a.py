@@ -37,19 +37,26 @@ pyalps.evaluateLoop(output_file)
 
 data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm8a.task*.out.h5'),['Staggered Susceptibility','Susceptibility'])
 susc1=pyalps.collectXY(data,x='T',y='Susceptibility', foreach=['J2'])
-susc2=pyalps.collectXY(data,x='T',y='Staggered Susceptibility', foreach=['J2'])
-
-data=susc1[0]
-pars = [fw.Parameter(1), fw.Parameter(1)]
-f = lambda self, x, pars: (pars[0]()/sqrt(x))*np.power(-pars[1]()/x)
-fw.fit(None, f, pars,data.y, data.x)
-prefactor = pars[0].get()
-gap = pars[1].get()
+# susc2=pyalps.collectXY(data,x='T',y='Staggered Susceptibility', foreach=['J2'])
 
 plt.figure()
-plt.plot(susc1[0].x, f(None, susc1[0].x, pars))
+
+lines = []
+
+for data in susc1:
+    pars = [fw.Parameter(1), fw.Parameter(1)]
+    f = lambda self, x, pars: (pars[0]()/np.sqrt(x))*np.exp(-pars[1]()/x)
+    fw.fit(None, f, pars, [v.mean for v in data.y], data.x)
+    prefactor = pars[0].get()
+    gap = pars[1].get()
+    print prefactor,gap
+    
+    lines += plt.plot(data.x, f(None, data.x, pars))
+    lines[-1].set_label('$J_2=%.4s$: $\chi = \\frac{%.4s}{T}\exp(\\frac{-%.4s}{T})$' % (data.props['J2'], prefactor,gap))
+
 pyalps.pyplot.plot(susc1)
 plt.xlabel(r'$T$')
 plt.ylabel(r'$\chi$')
 plt.title('gap is %.4s' % gap)
+plt.legend()
 plt.show()
