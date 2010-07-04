@@ -112,12 +112,13 @@ class Hdf5Loader:
             pass
         return dict 
         
-    def GetProperties(self,flist,proppath='/parameters',respath='/simulation/results'):
+    def GetProperties(self,flist,proppath='/parameters',respath='/simulation/results',verbose=False):
         fs = self.GetFileNames(flist)
         resultfiles = []
         for f in fs:
             self.h5f = h5py.File(f,'r')
             self.h5fname = f
+            if verbose: print "Loading from file", f
             rfile = ResultFile(f)
             rfile.props = self.ReadParameters(proppath)
             try:
@@ -141,13 +142,14 @@ class Hdf5Loader:
     def read_one_spectrum(self,path):
         pass
         
-    def ReadSpectrumFromFile(self,flist,proppath='/parameters',respath='/spectrum'):
+    def ReadSpectrumFromFile(self,flist,proppath='/parameters',respath='/spectrum',verbose=False):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
             fileset=[]
             self.h5f = h5py.File(f,'r')
             self.h5fname = f
+            if verbose: print "Loading from file", f
             params = self.ReadParameters(proppath)
             grp = self.h5f.require_group(respath)
             if 'energies' in grp.keys():
@@ -181,13 +183,14 @@ class Hdf5Loader:
             sets.append(fileset)
         return sets
 
-    def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, index=None, loadIterations=False):
+    def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, index=None, loadIterations=False,verbose=False):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
             fileset=[]
             self.h5f = h5py.File(f)
             self.h5fname = f
+            if verbose: print "Loading from file", f
             params = self.ReadParameters(proppath)
             grp = self.h5f.require_group(respath)
             if 'results' in grp.keys():
@@ -208,6 +211,7 @@ class Hdf5Loader:
                                         try:
                                             d = DataSet()
                                             itresultspath = respath+'/iteration/'+it+'results/'+m
+                                            if verbose: print "Loading", m
                                             d.props['hdf5_path'] = itresultspath 
                                             d.props['observable'] = pt.hdf5_name_decode(m)
                                             d.props['iteration'] = it
@@ -234,6 +238,7 @@ class Hdf5Loader:
                     for m in obslist:
                         if "mean" in grp['results/'+m].keys():
                             try:
+                                if verbose: print "Loading", m
                                 d = DataSet()
                                 secresultspath = respath+'/results/'+m
                                 d.props['hdf5_path'] = secresultspath 
@@ -268,6 +273,7 @@ class Hdf5Loader:
                     for m in obslist:
                         if "mean" in sectors_grp[secnum+'/results/'+m].keys():
                             try:
+                                if verbose: print "Loading", m
                                 d = DataSet()
                                 secpath = respath+'/sectors/'+secnum
                                 secresultspath = respath+'/sectors/'+secnum+'/results/'+m
@@ -298,12 +304,12 @@ class Hdf5Loader:
         
     # Pre: file is a h5py file descriptor
     # Post: returns DataSet with the evaluated binning analysis set
-    def ReadBinningAnalysis(self,flist,measurements=None,proppath='/parameters',respath=None):
+    def ReadBinningAnalysis(self,flist,measurements=None,proppath='/parameters',respath=None,verbose=False):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
             fileset = []
-            print 'loading from file ',f
+            if verbose: print 'loading from file ',f
             self.h5f = h5py.File(f)
             self.h5fname = f
             if respath == None:
@@ -323,6 +329,7 @@ class Hdf5Loader:
                     if "timeseries" in grp[m].keys():
                         k = grp[m+'/timeseries'].keys()
                         if "logbinning" in k and "logbinning2" in k and "logbinning_counts" in k:
+                            if verbose: print "Loading", m
                             bins = np.array(grp[m+"/timeseries/logbinning"].value[0:-4])
                             bins2 = np.array(grp[m+"/timeseries/logbinning2"].value[0:-4])
                             counts = np.array(grp[m+"/timeseries/logbinning_counts"].value[0:-4])
@@ -337,6 +344,7 @@ class Hdf5Loader:
                             d.props['hdf5_path'] = respath + m
                             d.props['observable'] = 'binning analysis of ' + pt.hdf5_name_decode(m)
                             d.props.update(params)
+                            if verbose: print '  loaded binnig analysis for ',m
                             fileset.append(d)
                 except AttributeError:
                     print "Could not create DataSet"
@@ -399,6 +407,7 @@ class Hdf5Loader:
                         pass
                 else:
                     for s in statvar:
+                        if verbose: print "Loading",s, "of",  m
                         for k in grp[m+"/"+s]:
                             try:
                                 d=DataSet()
@@ -483,47 +492,126 @@ class Hdf5Loader:
             fileset.append(iterationset)
         return fileset
         
-def loadBinningAnalysis(files,what=None):
+def loadBinningAnalysis(files,what=None,verbose=False):
+    """ loads MC binning analysis from ALPS HDF5 result files
+    
+        this function loads results of a MC binning analysis from ALPS HDF5 result files
+        
+        The parameters are:
+        
+        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+        what: an optional argument that is either a string or list of strings, specifying the names of the observables for which the binning analysis should be loaded
+        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
+        
+        The function returns a list of list of DataSet objects. 
+        The elements of the outer list each correspond to the file names specified as input.
+        The elements of the inner list are each for a different observable.
+        The x-values of the DataSet objects are the logarithmic binning level and the y-values the error estimates at that binning level.
+    """
     ll = Hdf5Loader()
     if isinstance(what,str):
       what = [what]
-    return ll.ReadBinningAnalysis(files,measurements=what)
+    return ll.ReadBinningAnalysis(files,measurements=what,verbose=verbose)
 
 def loadMeasurements(files,what=None,verbose=False):
+    """ loads ALPS measurements from ALPS HDF5 result files
+    
+        this function loads results of ALPS simulations ALPS HDF5 result files
+        
+        The parameters are:
+        
+        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+        what: an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded
+        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
+        
+        The function returns a list of list of DataSet objects. 
+        The elements of the outer list each correspond to the file names specified as input.
+        The elements of the inner list are each for a different observable.
+        The y-values of the DataSet objects are the measurements and the x-values optionally the labels (indices) of array-valued measurements
+    """
     ll = Hdf5Loader()
     if isinstance(what,str):
       what = [what]
     return ll.ReadMeasurementFromFile(files,measurements=what,verbose=verbose)
     
     
-def loadEigenstateMeasurements(files,what=None):
-    ll = Hdf5Loader()
-    if isinstance(what,str):
-      what = [what]
-    return ll.ReadDiagDataFromFile(files,measurements=what)
+def loadEigenstateMeasurements(files,what=None, verbose=False):
+    """ loads ALPS eigenstate measurements from ALPS HDF5 result files
     
-def loadIterationMeasurements(files,what=None):
+        this function loads results of ALPS diagonalization or DMRG simulations from an HDF5 file
+        
+        The parameters are:
+        
+        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+        what: an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded
+        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
+        
+        The function returns a list of list of (lists of) DataSet objects. 
+        The elements of the outer list each correspond to the file names specified as input.
+        The elements of the next level are different quantum number sectors, if any exists
+        The elements of the inner-most list are each for a different observable.
+        The y-values of the DataSet objects is an array of the measurements in all eigenstates calculated in this sector, and the x-values optionally the labels (indices) of array-valued measurements
+    """
     ll = Hdf5Loader()
     if isinstance(what,str):
       what = [what]
-    return ll.ReadDiagDataFromFile(files,measurements=what,loadIterations=True)
-
-
-def loadSpectra(files):
+    return ll.ReadDiagDataFromFile(files,measurements=what,verbose=verbose)
+    
+def loadIterationMeasurements(files,what=None,verbose=False):
     ll = Hdf5Loader()
-    return ll.ReadSpectrumFromFile(files)
+    if isinstance(what,str):
+      what = [what]
+    return ll.ReadDiagDataFromFile(files,measurements=what,loadIterations=True,verbose=verbose)
 
-def loadProperties(files,proppath='/parameters',respath='/simulation/results'):
+
+def loadSpectra(files,verbose=False):
+    """ loads ALPS spectra from ALPS HDF5 result files
+    
+        this function loads the spectra calculated in ALPS diagonalization or DMRG simulations from an HDF5 file
+        
+        The parameters are:
+        
+        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
+        
+        The function returns a list of (lists of) DataSet objects. 
+        The elements of the outer list each correspond to the file names specified as input.
+        The elements of the next level are different quantum number sectors, if any exists
+        The y-values of the DataSet objects are the energies in that quantum number sector
+    """
     ll = Hdf5Loader()
-    res = ll.GetProperties(files,proppath,respath)
+    return ll.ReadSpectrumFromFile(files,verbose=verbose)
+
+def loadProperties(files,proppath='/parameters',respath='/simulation/results',verbose=False):
+    """ loads properties (parameters) of simulations from ALPS HDF5 result files
+    
+        this function loads the properties (parameters) of ALPS simulations ALPS HDF5 result files
+        
+        The parameters are:
+        
+        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
+        
+        The function returns a list of dicts
+    """
+    ll = Hdf5Loader()
+    res = ll.GetProperties(files,proppath,respath,verbose=verbose)
     results = []
     for x in res:
       results.append(x.props)
     return results
 
-def loadObservableList(files,respath='/simulation/results'):   
+def loadObservableList(files,proppath='/parameters',respath='/simulation/results',verbose=False):   
+    """ loads lists of existing measurements from ALPS HDF5 result files
+    
+        The function returns a list of lists, containing the names of measurements that are stored in the result files 
+        The parameters are:
+        
+        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded
+    """
     ll = Hdf5Loader()
-    res = ll.GetProperties(files)
+    res = ll.GetProperties(files,proppath,respath,verbose=verbose)
     results = []
     for x in res:
       results.append(x.props['ObservableList'])

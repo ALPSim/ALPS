@@ -69,7 +69,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'open_ladder': (lattices.OpenLadderLattice,{}),
                    'chain_lattice': (lattices.ChainLattice,{}),
                    'open_chain_lattice': (lattices.OpenChainLattice,{}),
-                   'dimerized_chain_lattice': (lattices.DimerizedChainLattice,{}),
+#                   'dimerized_chain_lattice': (lattices.DimerizedChainLattice,{}),
                    
                    'ModelParameters': (models.Model,{}),
                    'ClassicalSpinModel': (models.ClassicalSpinModel,{}),

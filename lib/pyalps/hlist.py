@@ -58,6 +58,12 @@ def hget__(hl,idx,level):
         return hget__(hl[idx[level]],idx,level+1)
 
 def flatten(sl, fdepth = None):
+    """ turns a hierarchical list of lists into a flat list 
+    
+        this function turns a hierarchical list (a list of lists of lists ....) into just a flat list.
+        The parameters are the hierachical list, and optionally a depth at which the flattening should happen, to keep, e.g. the top-most structure.
+    """
+    
     if fdepth == None:
         fdepth = depth(sl)
     return HList(sl, fdepth)

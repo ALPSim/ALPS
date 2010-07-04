@@ -1,9 +1,0 @@
-LATTICE_LIBRARY = "lattices_dmrg.xml"
-L = 10
-SWEEPS = 10
-OUTPUT_LEVEL = 1
-LATTICE = "chain lattice"
-t = 1
-V = 0
-WAVEFUNCTION_FILE = "psi.dat"
-MODEL = "spin"

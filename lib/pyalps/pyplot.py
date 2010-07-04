@@ -37,6 +37,22 @@ markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']
 
 
 def plot(data):
+    """ plots a list of datasets
+    
+        This function takes a DataSet or a list of DataSets and creates a matplotlib plot.
+        
+        It creates a new plot set for each dataset, using the x and y members of the DataSet.
+        It also inspects the props dictionary and uses the following key-value pairs in that dict:
+        
+         title
+         xlabel
+         ylabel
+         label
+         filename (used as alternative label of the set if no label is specified)
+         color (can be 'k','b','g','m','c', or 'y'
+         line (can be 'line' or 'scatter')
+      
+    """
     lines = []
     icolor = 0
     imarker = 0

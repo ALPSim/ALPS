@@ -91,10 +91,10 @@
               <parameter alias="" id="2" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:Integer" val="" />
             </function>
           </module>
-          <module cache="1" id="4" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" tag="" version="0.6.0">
+          <module cache="1" id="4" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" tag="" version="0.7.0">
             <location id="4" x="25.16484196" y="53.8594491089" />
           </module>
-          <module cache="1" id="5" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" tag="" version="0.6.0">
+          <module cache="1" id="5" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" tag="" version="0.7.0">
             <location id="5" x="33.09713782" y="147.692926157" />
             <function id="3" name="title" pos="0">
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="" />

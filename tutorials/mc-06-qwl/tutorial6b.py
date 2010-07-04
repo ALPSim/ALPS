@@ -51,4 +51,5 @@ for s in pyalps.flatten(data):
   plt.figure()
   plt.title("Antiferromagnetic Heisenberg chain")
   pyalps.pyplot.plot(s)
+
 plt.show()

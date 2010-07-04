@@ -122,6 +122,7 @@ def convertToText(data,title=None,xaxis=None,yaxis=None):
     return output
         
 def convert_to_text(desc):
+    """ converts a plot or list of DataSet to a test string """
     if 'title' in desc: t = desc['title'] 
     else: t = None
     if 'xaxis' in desc: x = desc['xaxis'] 
@@ -237,6 +238,7 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         return output
 
 def convert_to_grace(desc):
+    """ converts a plot or list of DataSet to a grace plot string """
     if 'title' in desc: t = desc['title'] 
     else: t = None
     if 'xaxis' in desc: x = desc['xaxis'] 
@@ -369,6 +371,7 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="
     return output
 
 def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
+    """ converts a plot or list of DataSet to a gnuplot string """
     if 'title' in desc: t = desc['title'] 
     else: t = None
     if 'xaxis' in desc: x = desc['xaxis'] 

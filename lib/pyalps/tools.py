@@ -77,7 +77,18 @@ def executeCommandLogged(cmdline,logfile):
     return executeCommand(cmdline)
 
 def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):
-    """ run an ALPS application """
+    """ run an ALPS application 
+    
+        This function runs an ALPS application. The parameers are:
+        
+        appname: the name of the application
+        parmfile: the name of the main XML input file
+        write_xml: optional parameter, to be set to True if all results should be written to the XML files in addition to the HDF5 files
+        Tmin: optional parameter specifying the minimum time between checks whether a MC simulatio is finished
+        Tmax: optional parameter specifying the maximum time between checks whether a MC simulatio is finished
+        MPI: optional parameter specifying the number of processes to be used in an MPI simulation. MPI is not used if this parameter is left at ots default value  None.
+        mpirun: optional parameter giving the name of the executable used to laucnh MPI applications. The default is 'mpirun'
+    """
     cmdline = []
     if MPI != None:
         cmdline += [mpirun,'-np',str(MPI)]
@@ -94,14 +105,23 @@ def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=
     return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
     
 def runDMFT(infiles):
-    """ run an DMFT application """
+    """ run the ALPS DMFT application 
+    
+        The ALPS DMFT application does not (yet) use the standard ALPS input files and scheduler. Thus there is a separate function to call it. 
+        This function takes only one parameter, the lost of input files.
+    """
     appname='dmft'
     cmdline = [appname]
     cmdline += make_list(infiles)
     return (executeCommand(cmdline))
     
 def evaluateLoop(infiles, appname='loop', write_xml=False):
-    """ evaluate results of the looper QMC application """
+    """ evaluate results of the looper QMC application 
+    
+        this function calls the evaluate tool of the looper application. Additionally evaluated results are written back into the files. Besides a list of result files it takes one optional argument:
+        
+        write_xml: if this optional argument is set to True, the results will also bw written to the XML files
+    """
     cmdline = [appname,'--evaluate']
     if write_xml:
       cmdline += ['--write_xml']
@@ -109,7 +129,14 @@ def evaluateLoop(infiles, appname='loop', write_xml=False):
     return executeCommand(cmdline)
 
 def evaluateSpinMC(infiles, appname='spinmc_evaluate', write_xml=False):
-    """ evaluate results of the Spin MC application """
+    """ evaluate results of the spinmc application 
+    
+        this function calls the evaluate tool of the spinmc application. Additionally evaluated results are written back into the files. Besides a list of result files it takes one optional argument:
+        
+        write_xml: if this optional argument is set to True, the results will also bw written to the XML files
+        
+        
+    """
     cmdline = [appname]
     if write_xml:
       cmdline += ['--write_xml']
@@ -117,7 +144,15 @@ def evaluateSpinMC(infiles, appname='spinmc_evaluate', write_xml=False):
     return executeCommand(cmdline)
 
 def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX=None):
-    """ evaluate results of the quantum Wang-Landau application """
+    """ evaluate results of the quantum Wang-Landau application 
+    
+        this function calls the evaluate tool of the quantum Wang-Landau application. Besides a list of result files it takes the following arguments:
+        T_MIN: the lower end of the temperature range for which quantities are evaluated
+        T_MAX: the upper end of the temperature range for which quantities are evaluated
+        DELTA_T: the temperature steps to be used between T_MIN and T_MAX
+        
+        This function returns a list of lists of DataSet objects, for the various properties evaluated for each of the input files.
+    """
     cmdline = [appname]
     if DELTA_T:
       cmdline += ['--DELTA_T',str(DELTA_T)]
@@ -140,7 +175,16 @@ def evaluateQWL(infiles, appname='qwl_evaluate', DELTA_T=None, T_MIN=None, T_MAX
     return datasets
 
 def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, T_MIN=None, T_MAX=None, H=None):
-    """ evaluate results of the fulldiag application """
+    """ evaluate results of the fulldiag application as a function of temperature
+    
+        this function calls the evaluate tool of the fulldiag application and evaluates several quantities as a function of temperature. Besides a list of result files it takes the following arguments:
+        T_MIN: the lower end of the temperature range for which quantities are evaluated
+        T_MAX: the upper end of the temperature range for which quantities are evaluated
+        DELTA_T: the temperature steps to be used between T_MIN and T_MAX
+        H: (optional) the magnetic field at which all data should be evaluated
+        
+        This function returns a list of lists of DataSet objects, for the various properties evaluated for each of the input files.
+    """
     cmdline = [appname]
     if DELTA_T != None:
       cmdline += ['--DELTA_T',str(DELTA_T)]
@@ -165,7 +209,16 @@ def evaluateFulldiagVersusT(infiles, appname='fulldiag_evaluate', DELTA_T=None, 
     return datasets
 
 def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, H_MIN=None, H_MAX=None, T=None):
-    """ evaluate results of the fulldiag application """
+    """ evaluate results of the fulldiag application as a function of magnetic field h
+    
+        this function calls the evaluate tool of the fulldiag application and evaluates several quantities as a function of magnetic field. Besides a list of result files it takes the following arguments:
+        H_MIN: the lower end of the field range for which quantities are evaluated
+        H_MAX: the upper end of the temperature range for which quantities are evaluated
+        DELTA_H: the field steps to be used between H_MIN and H_MAX
+        T: the temperature field at which all data should be evaluated
+        
+        This function returns a list of lists of DataSet objects, for the various properties evaluated for each of the input files.
+    """
     cmdline = [appname,'--versus', 'h']
     if DELTA_H != None:
       cmdline += ['--DELTA_H',str(DELTA_H)]
@@ -239,6 +292,13 @@ def generateSeed():
 
 def writeInputFiles(fname,parms, baseseed=None):
     """ This function writes the XML input files for ALPS
+    
+         Parameters are:
+         fname: the base file name of the XML files that will be written
+         parms: a list of dicts containing the simulation parameters
+         baseseed: optional parameter giving a random number seed from which seeds for the individual simulations will be calculated. The default value is taken from the current time.
+    
+         The function returns the name of the main XML input file
     """
     dirname = os.path.dirname(fname)
     base_name = os.path.basename(fname)
@@ -286,6 +346,11 @@ def writeInputFiles(fname,parms, baseseed=None):
 
 def writeParameterFile(fname,parms):
     """ This function writes a text input file for simple ALPS applications
+    
+        The arguments are:
+        
+          filename: the name of the parameter file to be written
+          parms: the parameter dict
     """
     f = file(fname,'w')
     for key in parms:
@@ -306,7 +371,20 @@ def recursiveGlob(dirname,pattern):
     return ret
     
 def getResultFiles(dirname='.',pattern=None,prefix=None):
-    """ get all result files matching the given pattern or prefix """
+    """ get all result files matching the given pattern or prefix 
+    
+        This function returns a list of all ALPS result files matching a given pattern, starting recursively from a given directory.
+        The pattern can be either specificed by giving a prefix for the files, which is then augmented with the default ALPS file name suffixes. 
+        ALternatively a fiull custom regular expression pattern can be specified.
+        
+        The paramters are:
+        
+        dirname: The directory from which to start the recursive search, defaulting to the current working directory.
+        pattern: a regular expression pattern resricting the files to be matches
+        prefix: a pattern which the start of the file names has to match. This will be augmented by the standard ALPS file name endings '*.task*.out.xml' or '*.h5' to form the full pattern.
+        
+        The function returns a list of filenames
+    """
     if prefix!= None and pattern != None:
       raise Exception("Cannot define both prefix and pattern")
     if prefix == None: prefix = '*'
@@ -350,6 +428,17 @@ def groupSets(groups, for_each = []):
         return hgroups[0]
 
 def collectXY(sets,x,y,foreach=[]):
+      """ collects specified data from a list of DataSet objects
+         
+          this function is used to collect data from a list of DataSet objects, to prepare plots or evaluation. The parameters are:
+    
+            sets:    the list of datasets
+            x:       the name of the property or measurement to be used as x-value of the collected results 
+            y:       the name of the property or measurement to be used as y-value of the collected results 
+            foreach: an optional list of properties used for grouping the results. A separate DataSet object is created for each unique set of values of the specified parameers.
+            
+          The function returns a list of DataSet objects.
+      """
       foreach_sets = {}
       for iset in flatten(sets):
           if iset.props['observable'] != y:
@@ -423,6 +512,11 @@ def groupSets(groups, for_each = []):
         return hgroups[0]
 
 def subtract_spectrum(s1,s2,tolerance=1e-12):
+    """ subtract one spectrum from another 
+    
+        this function takes two DataSet objects as input and returns a new DataSet that contains all (x,y) values that occur in the first but not in the second.
+        The intended use is for plotting of spectra, where states that occur in several quantum number sectors should sometimes be shown only once.
+    """
     res = pyalps.DataSet()
     res.props = s1.props
 
@@ -438,18 +532,27 @@ def subtract_spectrum(s1,s2,tolerance=1e-12):
     
     return res
 
-def save_parameters(filename, dict):
+def save_parameters(filename, parms):
+    """ saves parameters from a dict into an HDF5 file
+    
+        this function saves parameters from a Python dict into an ALPS HDF5 file.
+        
+        The arguments are:
+        
+          filename: the name of the HDF5 file
+          parms: the parameter dict
+    """
     f1 = h5py.File(filename, 'w')
     subgroup = f1.create_group('/parameters')
     
-    for key in dict.keys():
-        if(type(dict[key])==str):
+    for key in parms.keys():
+        if(type(parms[key])==str):
             tid = h5py.h5t.C_S1.copy()
-            tid.set_size(len(dict[key]))
-        elif(type(dict[key])==int):
+            tid.set_size(len(parms[key]))
+        elif(type(parms[key])==int):
             tid = h5py.h5t.NATIVE_INT32.copy()
         else:
             tid = h5py.h5t.NATIVE_DOUBLE.copy()
         dset=subgroup.create_dataset(key, (), tid)
-        dset[...] = dict[key]
+        dset[...] = parms[key]
     f1.close()
