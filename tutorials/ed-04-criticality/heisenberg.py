@@ -32,22 +32,19 @@ import matplotlib.pyplot as plt
 import copy
 import math
 
-# Some general parameters
-parms_ = {
-    'LATTICE'              : "chain lattice",
-    'MODEL'                : "spin",
-    'local_S'              : 0.5,
-    'J'                    : 1,
-    'NUMBER_EIGENVALUES'   : 5,
-    'CONSERVED_QUANTUMNUMBER' : 'Sz',
-    'Sz_total' : 0
-}
-
 prefix = 'heisenberg'
 parms = []
 for L in [10,12]:
-    parms_.update({'L':L})
-    parms.append(copy.deepcopy(parms_))
+    parms.append({
+        'LATTICE'              : "chain lattice",
+        'MODEL'                : "spin",
+        'local_S'              : 0.5,
+        'J'                    : 1,
+        'NUMBER_EIGENVALUES'   : 5,
+        'CONSERVED_QUANTUMNUMBER' : 'Sz',
+        'Sz_total'             : 0,
+        'L'                    : L
+    })
 
 input_file = pyalps.writeInputFiles(prefix,parms)
 res = pyalps.runApplication('sparsediag', input_file)

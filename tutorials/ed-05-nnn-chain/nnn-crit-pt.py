@@ -33,23 +33,22 @@ import matplotlib.pyplot as plt
 import copy
 import math
 
-# Some general parameters
-parms_ = {
-  'LATTICE'              : "nnn chain lattice",
-  'MODEL'                : "spin",
-  'local_S'              : 0.5,
-  'J'                    : 1,
-  'NUMBER_EIGENVALUES'   : 2,
-  'CONSERVED_QUANTUMNUMBER' : 'Sz'
-}
-
 prefix = 'alps-nnn-heisenberg'
 parms = []
 for L in [8, 12]:
     for Szt in [0,1]:
       for J1 in np.linspace(0,1,11):
-          parms_.update({'Sz_total':Szt, 'J1':J1, 'L':L})
-          parms.append(copy.deepcopy(parms_))
+          parms.append({
+              'LATTICE'              : "nnn chain lattice",
+              'MODEL'                : "spin",
+              'local_S'              : 0.5,
+              'J'                    : 1,
+              'NUMBER_EIGENVALUES'   : 2,
+              'CONSERVED_QUANTUMNUMBER' : 'Sz',
+              'Sz_total'             : Szt,
+              'J1'                   : J1,
+              'L'                    : L
+          })
 
 input_file = pyalps.writeInputFiles(prefix,parms)
 # res = pyalps.runApplication('sparsediag', input_file)

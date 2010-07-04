@@ -46,8 +46,16 @@ parms_ = {
 parms = []
 # Change system sizes here, if desired
 for L in [10,12]:
-    parms_.update({'L':L})
-    parms.append(copy.deepcopy(parms_))
+    parms.append({
+        'LATTICE'    : "chain lattice",
+        'MODEL'      : "spin",
+        'local_S'    : 0.5,
+        'Jxy'        : 0,
+        'Jz'         : -1,
+        'Gamma'      : 0.5,
+        'NUMBER_EIGENVALUES' : 5,
+        'L'          : L
+    })
 
 prefix = 'ising'
 input_file = pyalps.writeInputFiles(prefix,parms)
