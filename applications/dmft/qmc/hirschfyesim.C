@@ -98,7 +98,7 @@ thermalization_sweeps(static_cast<int>(parms["THERMALIZATION"])),
 total_sweeps(static_cast<int>(parms["SWEEPS"])),
 beta(static_cast<double>(parms["BETA"])),
 N(static_cast<int>(parms["N"])),	
-n_site(static_cast<int>(parms["SITES"])),	
+n_site(static_cast<int>(parms.value_or_default("SITES", 1))),	
 u(static_cast<double>(parms["U"])),
 N_check(1000), // value is automatically adjusted during the simulation
 check_counter(0),

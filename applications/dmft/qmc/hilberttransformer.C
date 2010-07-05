@@ -96,7 +96,7 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
   int n_flavor=parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms["H_INIT"]);
+  double h = static_cast<double>(parms.value_or_default("H_INIT",0.));
   std::vector<double> tsq(n_flavor, t_*t_);
   for(int i=0;i<n_flavor;++i){
     std::stringstream ti; ti<<"t"<<i/2;
