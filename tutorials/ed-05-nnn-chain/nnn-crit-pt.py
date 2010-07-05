@@ -52,7 +52,7 @@ for L in [8, 12]:
 
 input_file = pyalps.writeInputFiles(prefix,parms)
 # res = pyalps.runApplication('sparsediag', input_file)
-res = pyalps.runApplication('sparsediag', input_file, MPI=2)
+res = pyalps.runApplication('sparsediag', input_file)
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix=prefix))
 
 # join all momenta

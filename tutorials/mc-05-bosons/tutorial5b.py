@@ -60,7 +60,7 @@ rhos = pyalps.collectXY(data,x='t',y='Stiffness',foreach=['L'])
 # multiply with the system size for the scaling plot
 for s in rhos:
   s.y = s.y * float(s.props['L'])
-  
+
 #make plot
 plt.figure()
 pyalps.pyplot.plot(rhos)
