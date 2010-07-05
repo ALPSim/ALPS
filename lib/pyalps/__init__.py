@@ -27,6 +27,7 @@
 
 from dataset import *
 from tools import *
+from pytools import *
 from floatwitherror import FloatWithError
 import fit_wrapper
 

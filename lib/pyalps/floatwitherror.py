@@ -189,13 +189,13 @@ class FloatWithError:
     return self**(1./3)
 
 
-  def exp(self,a__=e):
-    y__mean_ = a__**self.mean
-    return FloatWithError(y__mean_,abs(y__mean_*log(a__)*self.error))
+  def exp(self):
+    y__mean_ = exp(self.mean)
+    return FloatWithError(y__mean_,abs(y__mean_*self.error))
 
-  def log(self,a__=e):
-    y__mean_ = log(self.mean,a__)
-    y__deri__ = 1./(self.mean * log(a__))
+  def log(self):
+    y__mean_ = log(self.mean)
+    y__deri__ = 1./(self.mean)
     return FloatWithError(y__mean_,abs(y__deri__ * self.error))
 
   

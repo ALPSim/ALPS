@@ -27,7 +27,6 @@
 
 import pyalps
 import pyalps.pyplot
-from pyalps.dict_intersect import dict_intersect
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
@@ -68,7 +67,7 @@ for group in grouped:
     sel = np.argsort(ally)
     r.y = np.array(ally)[sel]
     r.x = np.array(allx)[sel]
-    r.props = dict_intersect([q.props for q in group])
+    r.props = pyalps.dict_intersect([q.props for q in group])
     nd.append( r )
 data = nd
 
@@ -98,7 +97,7 @@ for group in grouped:
     allE = np.sort(allE)
     
     d = pyalps.DataSet()
-    d.props = dict_intersect([q.props for q in group])
+    d.props = pyalps.dict_intersect([q.props for q in group])
     d.x = np.array([0])
     d.y = np.array([allE[0]])
     d.props['which'] = 'gs'
@@ -126,7 +125,7 @@ for J1g in grouped:
             allE += list(q.y)
         allE = np.sort(allE)
         d = pyalps.DataSet()
-        d.props = dict_intersect([q.props for q in Szg])
+        d.props = pyalps.dict_intersect([q.props for q in Szg])
         d.props['observable'] = 'gap'
         d.y = np.array([allE[1]-allE[0]])
         d.x = np.array([0])

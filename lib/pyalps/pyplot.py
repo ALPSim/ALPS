@@ -31,6 +31,7 @@ from hlist import flatten
 from dataset import DataSet
 from matplotlib.font_manager import FontProperties
 import platform
+from plot_core import convert_to_text, convert_to_gnuplot, convert_to_grace
 
 colors = ['k','b','g','m','c','y']
 markers = ['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '8', '+', 'x']

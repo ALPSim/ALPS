@@ -36,12 +36,14 @@ import glob
 import numpy as np
 import h5py
 
+from pyalps.pytools import convert2xml, hdf5_name_encode, hdf5_name_decode, rng
 import pyalps.pytools # the C++ conversion functions
 from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadObservableList, loadProperties
 from hlist import deep_flatten, flatten, depth
 from dict_intersect import dict_intersect
 from dataset import DataSet
 from plot_core import read_xml as readAlpsXMLPlot
+from dict_intersect import *
 
 def make_list(infiles):
     if type(infiles) == list:
@@ -345,7 +347,7 @@ def writeInputFiles(fname,parms, baseseed=None):
         
 
 def writeParameterFile(fname,parms):
-    """ This function writes a text input file for simple ALPS applications
+    """ This function writes a text input file for simple ALPS applications like DMFT
     
         The arguments are:
         
@@ -398,7 +400,14 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
       res = recursiveGlob(dirname, pattern)
     return res
 
-def groupSets(groups, for_each = []):
+def groupSets(data, for_each = []):
+    """ groups a list of DataSet objects into a list of lists
+        
+        this function groups a list of DataSet objects into a list of lists, according to the values of the properties given in the for_ech argument. DataSet objects with the same values of the properties given in for_each are grouped together.
+        The parameters are:
+          data: the data to be grouped
+          for_each: the properties according to which the data is grouped
+    """
     dd = depth(groups)
 
     if dd > 1:
@@ -483,6 +492,13 @@ def collectXY(sets,x,y,foreach=[]):
       return foreach_sets.values()
 
 def groupSets(groups, for_each = []):
+    """ groups a list of DataSet objects into a list of lists
+        
+        this function groups a list of DataSet objects into a list of lists, according to the values of the properties given in the for_ech argument. DataSet objects with the same values of the properties given in for_each are grouped together.
+        The parameters are:
+          data: the data to be grouped
+          for_each: the properties according to which the data is grouped
+    """
     dd = depth(groups)
 
     if dd > 1:

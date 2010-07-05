@@ -26,6 +26,10 @@
 # ****************************************************************************
 
 def dict_intersect(dicts):
+    """ computes the intersection of a list of dicts
+    
+        this function takes a list of dicts as input and returns a dict containing all those key-value pairs that appear with identical values in all dicts 
+    """
     sets = [set(q.keys()) for q in dicts]
     intersection = sets[0]
     for iset in sets:
