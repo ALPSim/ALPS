@@ -56,22 +56,16 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'SWEEPS'                  : 100000,
               'THERMALIZATION'          : 1000,
               'ALPHA'                   : -0.01,
-              'CONVERGENCE_CHECK_PERIOD': 500,
               'HISTOGRAM_MEASUREMENT'   : 1,
-              'MEASUREMENT_PERIOD'      : 10,
-              'NRUNS'                   : 1,
-              'NSELF'                   : 5000,
-              'RECALC_PERIOD'           : 300,
               'BETA'                    : b,
-              'NMATSUBARA_MEASUREMENTS' : 18,
-              'G0OMEGA_INPUT'            : 'G0_omega_input_beta'+str(b),
+              'G0OMEGA_INPUT'            : 'G0_omega_input_beta'+str(b)
             }
         )
 
 #write the input file and run the simulation
 for p in parms:
     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
-    #res = pyalps.runDMFT(input_file)
+    res = pyalps.runDMFT(input_file)
 
 flavors=parms[0]['FLAVORS']
 listobs=[]   

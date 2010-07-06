@@ -56,15 +56,9 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'SWEEPS'                  : 100000,
               'THERMALIZATION'          : 1000,
               'ALPHA'                   : -0.01,
-              'CONVERGENCE_CHECK_PERIOD': 500,
               'HISTOGRAM_MEASUREMENT'   : 1,
-              'MEASUREMENT_PERIOD'      : 10,
-              'NRUNS'                   : 1,
-              'NSELF'                   : 5000,
-              'RECALC_PERIOD'           : 300,
               'BETA'                    : b,
-              'NMATSUBARA_MEASUREMENTS' : 18,
-              'G0OMEGA_INPUT'            : 'G0_omega_input_beta'+str(b),
+              'G0OMEGA_INPUT'           : 'G0_omega_input_beta'+str(b)
             }
         )
 

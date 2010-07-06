@@ -36,9 +36,8 @@ coulombparam=[[1.8,0.45],[2.2,0.55],[2.8,0.7]]
 for cp in coulombparam: 
     parms.append(
             { 
-              'CHECKPOINT'          : 'dump',
+                  'CHECKPOINT'          : 'dump',
               'CONVERGED'           : 0.01,
-              'F'                   : 10,
               'FLAVORS'             : 4,
               'H'                   : 0,
               'H_INIT'              : 0.,
@@ -47,13 +46,9 @@ for cp in coulombparam:
               'MU'                  : 0,
               'N'                   : 1000,
               'NMATSUBARA'          : 1000,
-              'N_FLIP'              : 0,
               'N_MEAS'              : 10000,
-              'N_MOVE'              : 0,
               'N_ORDER'             : 50,
-              'N_SHIFT'             : 0,
               'OMEGA_LOOP'          : 1,
-              'OVERLAP'             : 0,
               'SEED'                : 0,
               'SOLVER'              : 'Hybridization',
               'SYMMETRIZATION'      : 1,
@@ -67,7 +62,7 @@ for cp in coulombparam:
               't0'                  : 0.5,
               't1'                  : 1,
               'G0TAU_INPUT'         :'G0_tau_input_u_'+str(cp[0])+'_j_'+str(cp[1])
-            }
+        }
         )
 
 #write the input file and run the simulation

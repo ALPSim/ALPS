@@ -35,9 +35,8 @@ parms=[]
 for b in [6.,8.,10.,12.,14.,16.]:
     parms.append(
             {
-              'ANTIFERROMAGNET'     : 1,
+             'ANTIFERROMAGNET'     : 1,
               'CONVERGED'           : 0.03,
-              'F'                   : 10,
               'FLAVORS'             : 2,
               'H'                   : 0,
               'H_INIT'              : 0.2,
@@ -46,11 +45,8 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'MU'                  : 0,
               'N'                   : 1000,
               'NMATSUBARA'          : 1000,
-              'N_FLIP'              : 0,
               'N_MEAS'              : 10000,
-              'N_MOVE'              : 0,
               'N_ORDER'             : 50,
-              'N_SHIFT'             : 0,
               'OMEGA_LOOP'          : 1,
               'OVERLAP'             : 0,
               'SEED'                : 0,
@@ -64,8 +60,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'THERMALIZATION'      : 1000,
               'BETA'                : b,
               'CHECKPOINT'          : 'solverdump_beta_'+str(b)+'.task1.out.h5',
-              'G0TAU_INPUT'         : 'G0_tau_input_beta_'+str(b)
-            }
+              'G0TAU_INPUT'         : 'G0_tau_input_beta_'+str(b)            }
         )
         
 #write the input file and run the simulation

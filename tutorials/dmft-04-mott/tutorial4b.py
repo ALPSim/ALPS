@@ -38,7 +38,6 @@ for u in [4.,5.,6.,8.]:
               'ANTIFERROMAGNET'         : 1,
               'CHECKPOINT'              : 'dump',
               'CONVERGED'               : 0.01,
-              'F'                       : 10,
               'FLAVORS'                 : 2,
               'H'                       : 0,
               'H_INIT'                  : 0.,
@@ -47,13 +46,9 @@ for u in [4.,5.,6.,8.]:
               'MU'                      : 0,
               'N'                       : 1000,
               'NMATSUBARA'              : 1000, 
-              'N_FLIP'                  : 0,
               'N_MEAS'                  : 10000,
-              'N_MOVE'                  : 0,
               'N_ORDER'                 : 50,
-              'N_SHIFT'                 : 0,
               'OMEGA_LOOP'              : 1,
-              'OVERLAP'                 : 0,
               'SEED'                    : 0, 
               'SOLVER'                  : 'Hybridization',
               'SYMMETRIZATION'          : 0,
@@ -63,8 +58,7 @@ for u in [4.,5.,6.,8.]:
               'BETA'                    : 20,
               'THERMALIZATION'          : 10,
               'U'                       : u,
-              'NMATSUBARA_MEASUREMENTS' : 18,
-              'G0OMEGA_INPUT'           : 'G0_omega_input_u_'+str(u),
+              'G0OMEGA_INPUT'           : 'G0_omega_input_u_'+str(u)
             }
         )
 
