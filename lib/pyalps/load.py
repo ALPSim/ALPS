@@ -78,6 +78,7 @@ class Hdf5Missing(Exception):
         return 'Failed to find ' + self.what
 
 class Hdf5Loader:
+ """The Hdf5Loader class loads simulation parameters and observables from hdf5-files and returns them as hierarchical datasets"""
     def GetFileNames(self, flist):
         files = []
         for f in flist:

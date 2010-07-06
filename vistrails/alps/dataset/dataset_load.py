@@ -162,6 +162,13 @@ class LoadAlpsProperties(Module):
         self.setResult('Props', dictlist)
     
 class LoadAlpsMeasurements(Module):
+  """Load the data from a Monte Carlo simulation from hdf5-files. Description of input ports:
+    @ResultFiles: The hdf5-files.
+    @Measurements: List of observables to load
+    @StatisticalVariables: Other quantities of your observables than their mean or error. Default: None
+    @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
+    @ResultPath: Hdf5-path to the observables stored. Default: /simulation/results"""
+  
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('Measurements',ListOfElements),
@@ -195,7 +202,50 @@ class LoadAlpsMeasurements(Module):
             print_exc()
             raise exc
 
+class LoadDMFTIterations(Module):
+  """Load the data from successive DMFT-Iterations. Description of input ports:
+    @ResultFiles: The hdf5-files.
+    @Measurements: List of observables to load
+    @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
+    @ResultPath: Hdf5-path to the observables stored. Default: /simulation/iteration"""
+
+    my_input_ports = [
+        PortDescriptor('ResultFiles',ResultFiles),
+        PortDescriptor('Measurements',ListOfElements),
+        PortDescriptor('PropertyPath',basic.String),
+        PortDescriptor('ResultPath',basic.String)
+    ]
+    
+    my_output_ports = [
+        PortDescriptor('data',DataSets)
+    ]    
+    
+    def compute(self):
+        try:
+            propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
+            resPath= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/simulation/iteration"
+            loader = Hdf5Loader()
+            if self.hasInputFromPort('ResultFiles'):
+                files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+            datasets = []
+            if self.hasInputFromPort('Measurements'):
+                datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
+            else:
+                datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=None,proppath=propPath,respath=resPath)
+            self.setResult('data',datasets)
+        except Exception, (exc):
+            from traceback import print_exc
+            print_exc()
+            raise exc
+
+
 class LoadBinningAnalysis(Module):
+  """Load the Binning Analysis from hdf5 files. Description of input ports:
+    @ResultFiles: The hdf5-files.
+    @Measurements: List of observables to load
+    @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
+    @ResultPath: Hdf5-path to the observables stored. Default: None"""
+
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('Measurements',ListOfElements),
@@ -222,6 +272,11 @@ class LoadBinningAnalysis(Module):
 
 
 class LoadAlpsSpectra(Module):
+  """Load the Spectrum from hdf5 files. Description of input ports:
+    @ResultFiles: The hdf5-files.
+    @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
+    @SpectrumPath: Hdf5-path to the spectrum stored. Default: /spectrum"""
+
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('PropertyPath',basic.String),
@@ -243,6 +298,11 @@ class LoadAlpsSpectra(Module):
         self.setResult('data',datasets)
         
 class LoadAlpsEigenstateMeasurements(Module):
+ """Load the observables of an ED or DMRG-simulation from hdf5 files. Description of input ports:
+    @ResultFiles: The hdf5-files.
+    @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
+    @SpectrumPath: Hdf5-path to the spectrum stored. Default: /spectrum"""
+
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('PropertyPath',basic.String),
