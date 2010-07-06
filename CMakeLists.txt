@@ -420,9 +420,11 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
       COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
       COMMAND cmake -E copy_if_different ${LPSolve_LIBRARIES} ${PROJECT_BINARY_DIR}/lib
       COMMAND cmake -E copy_if_different ${LPSolve_BASE}/bin/${LPSolve_NAME}.dll ${PROJECT_BINARY_DIR}/bin
+COMMAND cmake -E copy_if_different ${LPSolve_BASE}/bin/${LPSolve_NAME}.dll ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}51.dll
     )
     install(FILES ${PROJECT_BINARY_DIR}/lib/${LPSolve_NAME}.lib DESTINATION lib COMPONENT dependentlibraries)
     install(FILES ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}51.dll DESTINATION bin COMPONENT dependentlibraries)
   endif(LPSolve_LIBRARIES)
   # alps & boost
   # add_custom_target(libalps ALL
