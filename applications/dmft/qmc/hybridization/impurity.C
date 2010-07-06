@@ -186,7 +186,7 @@ void HybridizationRun::dostep()
   static int FLAVORS(static_cast < int >(parms["FLAVORS"]));
   static int N_order(static_cast < int >(parms["N_ORDER"]));
   static int N_meas(static_cast < int >(parms["N_MEAS"]));
-  static int N_shift(static_cast < int >(parms["N_SHIFT"]));
+  static int N_shift(static_cast < int >(parms.value_or_default("N_SHIFT", 0));
   
   int overlap = true;           //static_cast<int>(parms["OVERLAP"]);
   std::valarray < double >overlap_meas(FLAVORS * (FLAVORS - 1) / 2);
