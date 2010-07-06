@@ -78,7 +78,7 @@ class Hdf5Missing(Exception):
         return 'Failed to find ' + self.what
 
 class Hdf5Loader:
- """The Hdf5Loader class loads simulation parameters and observables from hdf5-files and returns them as hierarchical datasets"""
+    """The Hdf5Loader class loads simulation parameters and observables from hdf5-files and returns them as hierarchical datasets"""
     def GetFileNames(self, flist):
         files = []
         for f in flist:
@@ -137,8 +137,8 @@ class Hdf5Loader:
         olist = obsgrp.keys()
         return olist
 
-  # Pre: file is a h5py file descriptor
-    # Post: returns DataSet with all parameters set
+# Pre: file is a h5py file descriptor
+# Post: returns DataSet with all parameters set
     
     def read_one_spectrum(self,path):
         pass
