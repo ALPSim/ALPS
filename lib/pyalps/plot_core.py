@@ -89,6 +89,7 @@ def Plot(data,xaxis=None,yaxis=None,legend=None):
         d['legend'] = legend
 
 def convertToText(data,title=None,xaxis=None,yaxis=None):
+    output = ''
     if  title!=None:
         output += title + '\n'           
 
@@ -122,7 +123,7 @@ def convertToText(data,title=None,xaxis=None,yaxis=None):
     return output
         
 def convert_to_text(desc):
-    """ converts a plot or list of DataSet to a test string """
+    """ converts a plot descriptor to a text string """
     if 'title' in desc: t = desc['title'] 
     else: t = None
     if 'xaxis' in desc: x = desc['xaxis'] 
@@ -140,9 +141,11 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
 
         xrange = [0,1]
         yrange = [0,1]
-        if 'min' in xaxis and 'max' in xaxis: 
+        if xaxis != None:
+          if 'min' in xaxis and 'max' in xaxis: 
             xrange = [ xaxis['min'],xaxis['max']]
-        if 'min' in yaxis and 'max' in yaxis:
+        if yaxis != None:
+          if 'min' in yaxis and 'max' in yaxis:
             yrange = [ yaxis['min'],yaxis['max']]
 
         output += '@    world ' + str(xrange[0])+', ' + str (yrange[0]) + ','
@@ -154,9 +157,11 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
 
         xlog = False
         ylog = False
-        if  'logarithmic' in xaxis:
+        if xaxis != None:
+          if  'logarithmic' in xaxis:
             xlog = xaxis['logarithmic']
-        if 'logarithmic' in yaxis:
+        if yaxis != None:
+          if 'logarithmic' in yaxis:
             ylog = yaxis['logarithmic']
             
         if xlog:
@@ -169,13 +174,15 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         else:
             output += '@    yaxes scale Normal\n'
 
-        if 'label' in xaxis:
+        if xaxis != None:
+          if 'label' in xaxis:
             output += '@    xaxis  label "' + xaxis['label'] +'"\n'
             output += '@    xaxis  label char size 1.500000\n'
         output += '@    xaxis  ticklabel char size 1.250000\n'
         output += '@    xaxis  tick minor ticks 4\n'
 
-        if 'label' in yaxis:
+        if yaxis != None:
+          if 'label' in yaxis:
             output += '@    yaxis  label "' + yaxis['label'] +'"\n'
             output += '@    yaxis  label char size 1.500000\n'
         output += '@    yaxis  ticklabel char size 1.250000\n'
@@ -238,7 +245,7 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         return output
 
 def convert_to_grace(desc):
-    """ converts a plot or list of DataSet to a grace plot string """
+    """ converts a plot descriptor to a grace plot string """
     if 'title' in desc: t = desc['title'] 
     else: t = None
     if 'xaxis' in desc: x = desc['xaxis'] 
@@ -254,11 +261,12 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="
     output =  '# Gnuplot project file\n'
     output += 'set terminal postscript color eps enhanced '+str(fontsize)+'\n'
     output += 'set output "' + outfile + '"\n'
-
-    if 'min' in xaxis and 'max' in xaxis: 
+    if xaxis != None:
+      if 'min' in xaxis and 'max' in xaxis: 
         xrange = [ xaxis['min'],xaxis['max']]
         output += 'set xrange [' + str(xrange[0])+': ' + str (xrange[1]) + ']\n'
-    if 'min' in yaxis and 'max' in yaxis:
+    if yaxis != None:
+      if 'min' in yaxis and 'max' in yaxis:
         yrange = [ yaxis['min'],yaxis['max']]
         output += 'set yrange [' + str(yrange[0])+': ' + str (yrange[1]) + ']\n'
     
@@ -267,23 +275,27 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="
 
     xlog = False
     ylog = False
-    if 'logarithmic' in xaxis:
+    if xaxis != None:
+      if 'logarithmic' in xaxis:
         xlog = xaxis['logarithmic']
         output += 'set xlogscale \n'
     else:
         output += '# no xlogscale \n'
 
-    if 'logarithmic' in yaxis:
+    if yaxis != None:
+      if 'logarithmic' in yaxis:
         ylog = yaxis['logarithmic']
         output += 'set ylogscale\n'
     else:
         output += '# no ylogscale\n'
         
 
-    if 'label' in xaxis:
+    if xaxis != None:
+      if 'label' in xaxis:
         output += 'set xlabel "' + xaxis['label'] +'"\n'
 
-    if 'label' in yaxis:
+    if yaxis != None:
+      if 'label' in yaxis:
         output += 'set ylabel "' + yaxis['label'] +'"\n'
                     
     if legend != None and legend != False:
@@ -371,7 +383,7 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="
     return output
 
 def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
-    """ converts a plot or list of DataSet to a gnuplot string """
+    """ converts a plot descriptor to a gnuplot string """
     if 'title' in desc: t = desc['title'] 
     else: t = None
     if 'xaxis' in desc: x = desc['xaxis'] 
@@ -381,5 +393,7 @@ def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
     if 'legend' in desc: l = desc['legend'] 
     else: l = None
     makeGnuplotPlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l,outfile=outfile,fontsize=fontsize)    
+
+
 
 

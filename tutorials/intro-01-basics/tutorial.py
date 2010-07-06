@@ -59,30 +59,34 @@ print pyalps.loadObservableList(result_files)
 #load a selection of measurements:
 data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'])
 
-#calculate the Binder cumulants
-
-
-
-
-#make one plot with all data
-for dataset in binning:
-    dataset.props['label'] = 'L='+str(dataset.props['L'])
-
+#make a plot for the magnetization: collect Magnetziation as function of T
+plotdata = pyalps.collectXY(data,'T','|Magnetization|')
 plt.figure()
-plt.title('Binning analysis for cluster updates')
-plt.xlabel('binning level')
-plt.ylabel('Error of |Magnetization|')
-pyalps.pyplot.plot(binning)
-plt.legend()
+pyalps.pyplot.plot(plotdata)
+plt.xlim(0,3)
+plt.ylim(0,1)
+plt.title('Ising model')
 plt.show()
 
+# convert the data to text file foir plotting using another tool
+print pyalps.pyplot.convertToText(plotdata)
 
-# make individual plots for each system size
-for dataset in binning:
-    plt.figure()
-    plt.title('Binning analysis for L='+str(dataset.props['L']))
-    plt.xlabel('binning level')
-    plt.ylabel('Error of |Magnetization|')
-    pyalps.pyplot.plot(dataset)
+# convert the data to grace file foir plotting using xmgrace
+print pyalps.pyplot.makeGracePlot(plotdata)
 
+# convert the data to gnuplot file foir plotting using gnuplot
+print pyalps.pyplot.makeGnuplotPlot(plotdata)
+
+#calculate the Binder cumulants using jackknife-analysis
+binder = pyalps.DataSet()
+binder.props = pyalps.dict_intersect([d[0].props for d in data])
+binder.x = [d[0].props['T'] for d in data]
+binder.y = [d[1].y[0]/(d[0].y[0]*d[0].y[0]) for d in data]
+print binder
+
+# ... and plot them
+plt.figure()
+pyalps.pyplot.plot(binder)
+plt.xlabel('T')
+plt.ylabel('Binder cumulant')
 plt.show()
