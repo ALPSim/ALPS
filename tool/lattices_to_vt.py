@@ -63,7 +63,7 @@ def parse_latticegraphs(fn,outfile):
         else:
             vtname = camelify(name)
         print 'Will become',vtname
-			
+        
         inputs = []
         fixed = {}
         defaults = {}

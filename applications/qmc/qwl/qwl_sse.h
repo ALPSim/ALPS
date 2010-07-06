@@ -298,7 +298,7 @@ void QWL_SSE_Simulation::dostep() {
           block_sweeps_total=parms.value_or_default("SWEEPS",block_sweeps_total);
           for (unsigned int i=g.left();i<g.right();++i)
             transition_prob[i]=exp(g[i]-g[i+1]);
-	      transition_prob[g.right()]=0.;
+          transition_prob[g.right()]=0.;
           cerr << "[" << norder_min << "-" << norder_max << "]  continuing using final weights..." << endl;
           doing_multicanonical=1;
         }

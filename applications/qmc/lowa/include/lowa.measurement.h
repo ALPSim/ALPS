@@ -32,9 +32,9 @@
 
 /*
  *
- * 1) Code modification      											-- partly done
- * 2) Replacing raw pointers 											-- not done yet
- * 3) Replacing ugly loops to std::for_each, std::copy, std::transform, with the help of boost::lambda 		-- partly done
+ * 1) Code modification                                                  -- partly done
+ * 2) Replacing raw pointers                                             -- not done yet
+ * 3) Replacing ugly loops to std::for_each, std::copy, std::transform, with the help of boost::lambda         -- partly done
  *
  */
 
