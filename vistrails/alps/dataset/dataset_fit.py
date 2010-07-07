@@ -58,6 +58,8 @@ class FitPrototype(Module):
                 s = self.transform(s)
 
             self.setResult('output',q)
+        else:
+            raise EmptyInputPort('input')
     
     def property_compute(self):
         if self.hasInputFromPort('input'):
@@ -153,3 +155,5 @@ class DoNonlinearFit(FitPrototype):
         
         data.x = np.linspace(min(data.x), max(data.x), 1000)
         data.y = f(self,data.x,A)
+        
+        return data
