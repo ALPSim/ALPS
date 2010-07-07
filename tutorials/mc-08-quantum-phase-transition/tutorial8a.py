@@ -37,12 +37,8 @@ pyalps.evaluateLoop(output_file)
 
 data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm8a.task*.out.h5'),['Staggered Susceptibility','Susceptibility'])
 susc1=pyalps.collectXY(data,x='T',y='Susceptibility', foreach=['J2'])
-# susc2=pyalps.collectXY(data,x='T',y='Staggered Susceptibility', foreach=['J2'])
-
-plt.figure()
 
 lines = []
-
 for data in susc1:
     pars = [fw.Parameter(1), fw.Parameter(1)]
     data.y= data.y[data.x < 1]
@@ -56,6 +52,7 @@ for data in susc1:
     lines += plt.plot(data.x, f(None, data.x, pars))
     lines[-1].set_label('$J_2=%.4s$: $\chi = \\frac{%.4s}{T}\exp(\\frac{-%.4s}{T})$' % (data.props['J2'], prefactor,gap))
 
+plt.figure()
 pyalps.pyplot.plot(susc1)
 plt.xlabel(r'$T$')
 plt.ylabel(r'$\chi$')
