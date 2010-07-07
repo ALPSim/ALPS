@@ -45,6 +45,8 @@ lines = []
 
 for data in susc1:
     pars = [fw.Parameter(1), fw.Parameter(1)]
+    data.y= data.y[data.x < 1]
+    data.x= data.x[data.x < 1]
     f = lambda self, x, pars: (pars[0]()/np.sqrt(x))*np.exp(-pars[1]()/x)
     fw.fit(None, f, pars, [v.mean for v in data.y], data.x)
     prefactor = pars[0].get()
