@@ -165,7 +165,7 @@ class LoadAlpsMeasurements(Module):
     """Load the data from a Monte Carlo simulation from hdf5-files. Description of input ports:
       @ResultFiles: The hdf5-files.
       @Measurements: List of observables to load
-      @StatisticalVariables: Other quantities of your observables than their mean or error. Default: None
+      @StatisticalVariables: Other quantities than mean and error of your observables like the timeseries ('timeseries'), the variance ('variance'), or the autocorrelation time ('tau'). Default: None
       @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
       @ResultPath: Hdf5-path to the observables stored. Default: /simulation/results"""
   
