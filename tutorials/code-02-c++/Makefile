@@ -1,10 +1,15 @@
-#  Copyright Matthias Troyer 2009 - 2010.
-#  Distributed under the Boost Software License, Version 1.0.
-#      (See accompanying file LICENSE_1_0.txt or copy at
-#          http://www.boost.org/LICENSE_1_0.txt)
+## Uncomment the following line and set the correct path if you haven't set ALPS_ROOT globally
+# ALPS_ROOT = /path/to/your/alps/installation
 
+include $(ALPS_ROOT)/share/alps/include.mk
 
-include /opt/alps/share/alps/include.mk
+all:	ising
 
-ising: ising-skeleton.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ $(OBJ_golden) $(LDFLAGS) $(LIBS)
+ising:	ising.o
+	$(CXX) -o ising ising.o $(LDFLAGS) $(LIBS)
+
+clean:
+	$(RM) $(RMFLAGS) ising.o ising
+
+ising.o:	ising.cpp
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
