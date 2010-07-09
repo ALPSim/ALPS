@@ -1,15 +1,16 @@
-## Uncomment the following line and set the correct path if you haven't set ALPS_ROOT globally
-# ALPS_ROOT = /path/to/your/alps/installation
+#  Copyright Matthias Troyer 2009 - 2010.
+#  Distributed under the Boost Software License, Version 1.0.
+#      (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
+
+## Change ALPS_ROOT if you have installed ALPS in another location
+ALPS_ROOT = /opt/alps
 
 include $(ALPS_ROOT)/share/alps/include.mk
 
 all:	ising
 
-ising:	ising.o
-	$(CXX) -o ising ising.o $(LDFLAGS) $(LIBS)
-
+ising: ising-skeleton.o
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ ising-skeleton.o $(LDFLAGS) $(LIBS)
 clean:
-	$(RM) $(RMFLAGS) ising.o ising
-
-ising.o:	ising.cpp
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
+	$(RM) $(RMFLAGS) *.o ising

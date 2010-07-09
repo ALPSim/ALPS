@@ -363,6 +363,7 @@ configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
 ######################################################################
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(src)
+message(STATUS "Adding Boost dir: ${Boost_ROOT_DIR} " )
 include_directories(${Boost_ROOT_DIR})
 
 ######################################################################
@@ -750,7 +751,7 @@ endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
 
  #set(CPACK_COMPONENT_HEADERS_DISABLED ON)
  set(CPACK_COMPONENT_DEPRECATED_DISABLED ON)
- set(CPACK_COMPONENT_DEPENDENTHEADERS_DISABLED ON)
+ #set(CPACK_COMPONENT_DEPENDENTHEADERS_DISABLED ON)
  #set(CPACK_COMPONENT_BUILD_DISABLED ON)
 
  set(CPACK_COMPONENT_GROUP_DEVELOPMENT_DESCRIPTION "Components needed only to build applications based on the ALPS libraries")
