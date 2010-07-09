@@ -42,7 +42,7 @@ try {
   alps::Parameters parms;
   std::cin >> parms;
 
-  alps::hamiltonian_matrix<compressed_matrix<alps::Expression,row_major> > matrix(parms);
+  alps::hamiltonian_matrix<compressed_matrix<double, row_major> > matrix(parms);
 
   if (matrix.uses_translation_invariance()) {
       std::cout << matrix.bloch_states_vector() << "\n";

@@ -8,7 +8,7 @@
 # 
 
 if (ALPS_BUILD_EXAMPLES)
-  set (EXAMPLES print_numeric print_symbolic print_numeric2 print_symbolic2 print_symbolic3)
+  set (EXAMPLES print_numeric print_symbolic print_numeric2 print_symbolic2 print_numeric3 print_symbolic3)
   set (INPUT parm_numeric parm_symbolic)
   
   foreach(file ${INPUT})
