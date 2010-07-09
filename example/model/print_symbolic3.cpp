@@ -42,7 +42,7 @@ try {
   alps::Parameters parms;
   std::cin >> parms;
 
-  hamiltonian_matrix<compressed_matrix<alps::Expression,row_major> > matrix(parms);
+  alps::hamiltonian_matrix<compressed_matrix<alps::Expression,row_major> > matrix(parms);
 
   std::cout << matrix.matrix() << "\n";
 
