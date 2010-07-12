@@ -38,7 +38,6 @@ parms = [ {
         'Sz_total'                  : 0,
         'J'                         : 1,
         'SWEEPS'                    : 4,
-        'NUMBER_EIGENVALUES'        : 1,
         'L'                         : 32,
         'MAXSTATES'                 : 100,
         'NUMBER_EIGENVALUES'        : 2
