@@ -1,14 +1,28 @@
-# this module look for lapack/blas and other numerical library support
-# it will define the following values
+# - FindLapack.cmake
+# Find LAPACK/BLAS (and compatible) numerical libraries
+#
+# This module will define the following values:
 # LAPACK_LIBRARY
 # BLAS_LIBRARY
 #
 # 1) search ENV MKL 
 # 2) search MKL in usual paths
 # 3) search ENV ATLAS
-# 4) search lapack/blas
+# 4) search generic lapack/blas using CMake-provided FindLAPACK.cmake
+#     if BLA_VENDOR is set, try to use that vendor's LAPACK implementation
 # 5) if build is on cray use hardcoded path
 # 6) give up
+
+#  Copyright (C)  2009-2010 Matthias Troyer <troyer@comp-phys.org>
+#  Copyright (C)  2009-2010 Synge Todo <wistaria@comp-phys.org>
+#  Copyright (C)  2009-2010 Bela Bauer
+#  Copyright (C)  2009-2010 Brigitte Surer
+#  Copyright (C)  2009-2010 Lukas Gamper
+#  Copyright (C)  2009-2010 Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>
+#
+#  Distributed under the Boost Software License, Version 1.0.
+#      (See accompanying file LICENSE_1_0.txt or copy at
+#          http://www.boost.org/LICENSE_1_0.txt)
 
 SET(MKL_PATHS "/usr/local/lib /usr/lib")
 
