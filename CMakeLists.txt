@@ -438,8 +438,9 @@ COMMAND cmake -E copy_if_different ${LPSolve_BASE}/bin/${LPSolve_NAME}.dll ${PRO
     # COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml    
   # )
   if (ALPS_USE_VISTRAILS)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python25/python25.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python26/python26.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr71.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr80.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/hdf5dll.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/szlibdll.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/zlib1.dll DESTINATION bin COMPONENT dependentlibraries)
