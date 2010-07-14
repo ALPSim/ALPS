@@ -66,22 +66,15 @@ for run in data:
             d.props['observable'] = 'Sz correlations'
             d.props['label'] = 'D = '+str(s.props['MAXSTATES'])
             L = int(s.props['L'])
-            print len(s.x), len(s.y)
-            print s.y
             d.x = np.arange(L)
-            d.y = np.array([s.y[0][L*(L/2+int(-(l+1)/2.0))+L/2+int(l/2.0)] for l in range(0,L)])
-            d.y = abs(d.y)
-            curves.append(d)
             
-#            for l in range(0,L):
-#                i = L/2+int(-(l+1)/2.0)
-#                j = L/2+int(l/2.0)
-#                x = i*L+j
-#                print l, j-i, i, j, s.x[x]
-#            sz = s.props['Sz_total']
-#            s.props['label'] = '$S_z = ' + str(sz) + '$'
-#            s.y = s.y.flatten()
-#            curves.append(s)
+            # sites with increasing distance l symmetric to the chain center
+            site1 = np.array([int(-(l+1)/2.0) for l in range(0,L)]) + L/2
+            site2 = np.array([int(  l   /2.0) for l in range(0,L)]) + L/2
+            indices = L*site1 + site2
+            d.y = abs(s.y[0][indices])
+            
+            curves.append(d)
         
 # Plot correlation vs. distance
 plt.figure()
