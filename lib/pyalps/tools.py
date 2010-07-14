@@ -75,7 +75,7 @@ def executeCommandLogged(cmdline,logfile):
     if platform.system() == 'Windows':
       cmdline += ['2>',logfile]
     else:
-      cmdline += ['>&',logfile]
+      cmdline += ['>',logfile]
     return executeCommand(cmdline)
 
 def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):

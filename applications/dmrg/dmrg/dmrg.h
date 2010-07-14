@@ -81,7 +81,7 @@ public:
 #endif
 
   // iteration measurements
-  std::vector<alps::EigenvectorMeasurements<value_type> > iteration_measurements;
+  std::map<std::string,std::vector<double> > iteration_measurements;
 
 private:
 
@@ -137,14 +137,11 @@ handler(dmtk::System<value_type>& S, size_t signal_id, void *data)
 {
   DMRGTask<value_type> &task = * (DMRGTask<value_type> *)S.get_data();
   if(signal_id == dmtk::SYSTEM_SIGNAL_END_ITER){
-    task.iteration_measurements.push_back(alps::EigenvectorMeasurements<value_type >(task));
-    task.iteration_measurements.back().average_values["Direction"].push_back(S.get_dir());
-    task.iteration_measurements.back().average_values["Iteration"].push_back(S.get_iter());
-    for(int i = 0; i < S.energy.size(); i++) {
-      task.iteration_measurements.back().average_values["Energy"].push_back(S.energy[i]);
-    }
-    task.iteration_measurements.back().average_values["Truncation Error"].push_back(S.truncation_error());
-    task.iteration_measurements.back().average_values["Entropy"].push_back(S.entropy());
+    task.iteration_measurements["Direction"].push_back(S.get_dir());
+    task.iteration_measurements["Iteration"].push_back(S.get_iter());
+    task.iteration_measurements["Energy"].push_back(S.energy[0]);
+    task.iteration_measurements["Truncation Error"].push_back(S.truncation_error());
+    task.iteration_measurements["Entropy"].push_back(S.entropy());
   }
   return false;
 }
@@ -520,12 +517,9 @@ void DMRGTask<value_type>::serialize(alps::hdf5::oarchive & ar) const
   }
   ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<value_type >&>(*this));
 
-  for (std::size_t i=0;i<iteration_measurements.size();++i) {
-    ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i),iteration_measurements[i]);
-    typename std::map<std::string,std::vector<value_type> >::const_iterator it = iteration_measurements[i].average_values.find("Energy");
-    if (it != iteration_measurements[i].average_values.end())
-      ar << alps::make_pvp("spectrum/iteration/"+boost::lexical_cast<std::string>(i)+"/energies",it->second);
-  }
+  typedef typename std::map<std::string,std::vector<double> >::const_iterator IT;
+  for (IT it=iteration_measurements.begin(); it != iteration_measurements.end();++it)
+      ar << alps::make_pvp("results/Iteration "+alps::hdf5_name_encode(it->first)+"/mean/value",it->second);
 }
 #endif
 
