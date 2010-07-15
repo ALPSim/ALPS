@@ -41,7 +41,7 @@ for D in [20,40,60]: #[100,150]: #,200,250,300,400]:
         'J'                                     : 1,
         'SWEEPS'                                : 4, #6
         'NUMBER_EIGENVALUES'                    : 1,
-        'L'                                     : 64, #192,
+        'L'                                     : 32, #192,
         'MAXSTATES'                             : D,
         'MEASURE_AVERAGE[Magnetization]'        : 'Sz',
         'MEASURE_AVERAGE[Exchange]'             : 'exchange',
