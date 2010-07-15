@@ -298,7 +298,8 @@ class EvaluateSpinMC(alpscore.SystemCommandLogged,tools.GetSimName):
     def compute(self):
         name = self.get_sim_name(self.getInputFromPort('dir').name)
         taskname = name.replace('.out.xml', '.task*.out.xml')
-        self.execute([alpscore._get_path('spinmc_evaluate'),taskname])
+        tasklist = glob.glob(taskname)
+        self.execute([alpscore._get_path('spinmc_evaluate')]+tasklist)
         self.setResult('dir',self.getInputFromPort('dir'))
     _input_ports = [('dir', [basic.Directory])]
     _output_ports = [('dir', [basic.Directory])]

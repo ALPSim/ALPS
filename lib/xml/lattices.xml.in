@@ -217,7 +217,7 @@
 
 <UNITCELL name="honeycomb" dimension="2">
   <VERTEX><COORDINATE>0 0</COORDINATE></VERTEX>
-  <VERTEX><COORDINATE>-0.1 0.5</COORDINATE></VERTEX>
+  <VERTEX><COORDINATE>0 0.5</COORDINATE></VERTEX>
 
   <EDGE><SOURCE vertex="1"/><TARGET vertex="2"/></EDGE>
   <EDGE><SOURCE vertex="2"/><TARGET vertex="1" offset="0 1"/></EDGE>
