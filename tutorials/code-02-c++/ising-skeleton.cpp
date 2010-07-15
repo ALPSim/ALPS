@@ -25,6 +25,7 @@
 * DEALINGS IN THE SOFTWARE.
 *
 *****************************************************************************/
+
 #include <alps/scheduler/montecarlo.h>
 #include <alps/alea.h>
 #include <boost/random.hpp>
@@ -179,8 +180,8 @@ private:
 
 int main(int,char**)
 {
-    size_t L = 16;	// Linear lattice size
-    size_t N = 5000;	// # of simulation steps
+    size_t L = 16;      // Linear lattice size
+    size_t N = 5000;    // # of simulation steps
 
     std::cout << "# L: " << L << " N: " << N << std::endl;
 

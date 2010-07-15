@@ -1,3 +1,11 @@
+<!--
+   Copyright (c) 2010 Adrian Feiguin
+  
+   Distributed under the Boost Software License, Version 1.0.
+   (See accompanying file LICENSE_1_0.txt or copy at
+   http://www.boost.org/LICENSE_1_0.txt)
+  -->
+  
 <LATTICES>
  <GRAPH name = "open chain lattice with special edges 32" dimension="1" vertices=" 32 " edges="31">
   <VERTEX id="1" type="0"><COORDINATE>0</COORDINATE></VERTEX>
