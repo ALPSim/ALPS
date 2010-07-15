@@ -519,7 +519,7 @@ void DMRGTask<value_type>::serialize(alps::hdf5::oarchive & ar) const
 
   typedef typename std::map<std::string,std::vector<double> >::const_iterator IT;
   for (IT it=iteration_measurements.begin(); it != iteration_measurements.end();++it)
-      ar << alps::make_pvp("results/Iteration "+alps::hdf5_name_encode(it->first)+"/mean/value",it->second);
+      ar << alps::make_pvp("simulation/results/Iteration "+alps::hdf5_name_encode(it->first)+"/mean/value",it->second);
 }
 #endif
 
