@@ -42,7 +42,7 @@ for sz in [0,1,2]:
         'SWEEPS'                                : 4,
         'NUMBER_EIGENVALUES'                    : 1,
         'L'                                     : 96,
-        'MAXSTATES'                             : 200,
+        'MAXSTATES'                             : 40,
         'MEASURE_LOCAL[Local magnetization]'    : 'Sz'
        } )
 
