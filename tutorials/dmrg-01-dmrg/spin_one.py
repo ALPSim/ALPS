@@ -63,7 +63,6 @@ iter = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm_spin_one'),
 plt.figure()
 pyalps.pyplot.plot(iter[0][0])
 plt.title('Iteration history of ground state energy (S=1)')
-plt.ylim(-15,0)
 plt.ylabel('$E_0$')
 plt.xlabel('iteration')
 
