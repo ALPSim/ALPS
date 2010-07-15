@@ -32,7 +32,7 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms = []
-for D in [10,30,50]: #[100,150]: #,200,250,300,400]:
+for D in [20,40,60]: #[100,150]: #,200,250,300,400]:
     parms.append( { 
         'LATTICE'                               : 'open chain lattice', 
         'MODEL'                                 : 'spin',

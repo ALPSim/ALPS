@@ -11,10 +11,7 @@ MEASURE_LOCAL[Local magnetization]=Sz
 MEASURE_CORRELATIONS[Diagonal spin correlations]=Sz
 MEASURE_CORRELATIONS[Offdiagonal spin correlations]="Splus:Sminus"
 L=192
-{ MAXSTATES=100 }
-{ MAXSTATES=150 }
-{ MAXSTATES=200 }
-{ MAXSTATES=250 }
-{ MAXSTATES=300 }
-{ MAXSTATES=400 }
+{ MAXSTATES=20 }
+{ MAXSTATES=40 }
+{ MAXSTATES=60 }
 
