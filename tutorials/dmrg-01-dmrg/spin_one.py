@@ -55,3 +55,23 @@ data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm_spin
 # print properties of the eigenvector:
 for s in data[0]:
     print s.props['observable'], ' : ', s.y[0]
+
+# load and plot iteration history
+iter = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm_spin_one'),
+                               what=['Iteration Energy','Iteration Truncation Error'])
+
+plt.figure()
+pyalps.pyplot.plot(iter[0][0])
+plt.title('Iteration history of ground state energy (S=1)')
+plt.ylim(-15,0)
+plt.ylabel('$E_0$')
+plt.xlabel('iteration')
+
+plt.figure()
+pyalps.pyplot.plot(iter[0][1])
+plt.title('Iteration history of truncation error (S=1)')
+plt.yscale('log')
+plt.ylabel('error')
+plt.xlabel('iteration')
+
+plt.show()
