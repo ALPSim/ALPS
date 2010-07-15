@@ -97,10 +97,9 @@ template<class MAT>
 AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w, 
         const alps::Parameters& myparms,int n)
   : alps::scheduler::LatticeMCRun<>(w,myparms,n),
-  beta_(parms.defined("beta") ? double(parms["beta"]) : 1./double(parms["T"])),
-  sweeps_(static_cast<uint64_t>(parms["SWEEPS"])),
-  h_(parms.defined("h") ? TinyVector<double,MAT::dim>(parms["h"],parms) :
-     (parms.defined("H") ? TinyVector<double,MAT::dim>(parms["H"],parms) : TinyVector<double,MAT::dim>(0.0))),
+  beta_(parms.defined("beta") ? double(parms["beta"]) : 1./double(parms.required_value("T"))),
+  sweeps_(static_cast<uint64_t>(parms.required_value("SWEEPS"))),
+  h_(parms.defined("h") ? TinyVector<double,MAT::dim>(parms["h"],parms) : TinyVector<double,MAT::dim>(0.0)),
   sweeps_done_(0),
   thermalization_(parms.value_or_default("THERMALIZATION",sweeps_/10)),
   thermalization_fraction_(0.),

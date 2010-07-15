@@ -33,7 +33,7 @@ using namespace alps;
 
 double WRun::work_done() const
 {
-  return (is_thermalized() ? (steps-thermal_sweeps)/double(parms["SWEEPS"]) :0.);
+  return (is_thermalized() ? (steps-thermal_sweeps)/double(parms.required_value("SWEEPS")) :0.);
 }  
 
 void WRun::start()

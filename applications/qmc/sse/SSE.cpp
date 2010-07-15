@@ -46,7 +46,7 @@ SSE::SSE(const alps::ProcessList& w, const alps::Parameters& myparms,int n)
   epsilon(parms.value_or_default("EPSILON", 0.)),
   cutoff_L(parms.value_or_default("INITIAL_CUTOFF",10)),
   number_of_worms_per_sweep(parms.value_or_default("NUMBER_OF_WORMS_PER_SWEEP",1)),
-  nb_steps(parms.defined("SWEEPS") ? alps::uint64_t(parms["SWEEPS"]) 
+  nb_steps(parms.defined("SWEEPS") ? alps::uint64_t(parms.required_value("SWEEPS")) 
     :  (parms.defined("MCS") ? alps::uint64_t(parms["MCS"]) : alps::uint64_t(parms["Steps"]))),
   nb_thermalisation_steps(parms.defined("THERMALIZATION") ? alps::uint32_t(parms["THERMALIZATION"]) 
     :  (parms.defined("thermalization") ? alps::uint32_t(parms["thermalization"]) : nb_steps/10)),

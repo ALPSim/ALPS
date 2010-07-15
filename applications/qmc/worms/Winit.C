@@ -57,7 +57,7 @@ WRun::WRun(const alps::ProcessList& w, const alps::Parameters& myparms,int n)
     min_number(parms.value_or_default("MIN_NUMBER",0)),
     max_number(parms.value_or_default("MAX_NUMBER",min_number-1)),
     eta(beta*double(parms.value_or_default("eta", 1.))),
-    thermal_sweeps(parms["THERMALIZATION"]),
+    thermal_sweeps(parms.required_value("THERMALIZATION")),
     skip_measurements(parms.value_or_default("SKIP",1)),
     measurements_done(skip_measurements),
     have_worm(false),
