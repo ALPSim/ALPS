@@ -1,5 +1,5 @@
 LATTICE_LIBRARY="my_lattices.xml"
-LATTICE="open chain lattice with special edges 96"
+LATTICE="open chain lattice with special edges 32"
 MODEL="spin"
 local_S0=0.5
 local_S1=1
