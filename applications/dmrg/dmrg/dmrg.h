@@ -121,6 +121,7 @@ private:
   int nwarmup;
   int maxstates;
   double error;
+  double lanczos_tol;
 
   // For resuming a previous run
   int start_sweep;
@@ -195,12 +196,16 @@ void DMRGTask<value_type>::init()
 
   // read number of states
   nwarmup = 20;
-  error = -1.;
   if (parms.defined("NUM_WARMUP_STATES")) {
     nwarmup = static_cast<int>(parms["NUM_WARMUP_STATES"]);
   }
+  error = -1.;
   if (parms.defined("TRUNCATION_ERROR")) {
     error = static_cast<double>(parms["TRUNCATION_ERROR"]);
+  }
+  lanczos_tol = -1.;
+  if (parms.defined("LANCZOS_TOLERANCE")) {
+    lanczos_tol = static_cast<double>(parms["LANCZOS_TOLERANCE"]);
   }
   maxstates = -1;
   if (parms.defined("STATES")) {
@@ -425,7 +430,8 @@ void DMRGTask<value_type>::dostep()
   dmtk::System<value_type > &S = this->system;
   S.set_data(this);
   S.signal_handler = handler;
-  S.set_error(error, maxstates);
+  if(error > 0.0) S.set_error(error, maxstates);
+  if(lanczos_tol > 0.0) S.set_lanczos_tolerance(lanczos_tol);
   
   S.set_calc_gap(num_eigenvalues-1); 
   dmtk::Matrix<size_t> nstates(2,num_sweeps);
