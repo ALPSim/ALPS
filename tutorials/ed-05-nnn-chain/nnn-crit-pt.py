@@ -31,12 +31,13 @@ import numpy as np
 import matplotlib.pyplot as plt
 import copy
 import math
+from pyalps import flatten
 
 prefix = 'alps-nnn-heisenberg'
 parms = []
-for L in [8, 12]:
+for L in [6,8]:
     for Szt in [0,1]:
-      for J1 in np.linspace(0,1,11):
+      for J1 in np.linspace(0,0.5,6):
           parms.append({
               'LATTICE'              : "nnn chain lattice",
               'MODEL'                : "spin",
@@ -50,8 +51,7 @@ for L in [8, 12]:
           })
 
 input_file = pyalps.writeInputFiles(prefix,parms)
-# res = pyalps.runApplication('sparsediag', input_file)
-res = pyalps.runApplication('sparsediag', input_file)
+res = pyalps.runApplication('sparsediag', input_file, MPI=2)
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix=prefix))
 
 # join all momenta
@@ -101,11 +101,13 @@ for group in grouped:
     d.x = np.array([0])
     d.y = np.array([allE[0]])
     d.props['which'] = 'gs'
+    d.props['line'] = '.-'
     sector_E.append(d)
     
     d2 = copy.deepcopy(d)
     d2.y = np.array([allE[1]])
     d2.props['which'] = 'fe'
+    d2.props['line'] = '.-'
     sector_E.append(d2)
 
 sector_energies = pyalps.collectXY(sector_E, 'J1', 'Energy', ['Sz_total', 'which', 'L'])
@@ -115,10 +117,17 @@ plt.xlabel('$J_1/J$')
 plt.ylabel('$E_0$')
 plt.legend(prop={'size':8})
 
-grouped = pyalps.groupSets( pyalps.groupSets(pyalps.flatten(data), ['Sz_total']), ['J1', 'L'])
+# for each value of J1, L, we need to calculate the singlet and triplet gap:
+# singlet: gap from abs. g.s. to first excited in S=0 sector
+# triplet: gap from abs. g.s. to lowest in S=1 sector
+grouped = pyalps.groupSets( pyalps.groupSets(pyalps.flatten(data), ['J1', 'L']), ['Sz_total'])
 
 gaps = []
 for J1g in grouped:
+    totalmin = 1000
+    for q in flatten(J1g):
+        totalmin = min(totalmin, np.min(q.y))
+    
     for Szg in J1g:
         allE = []
         for q in Szg:
@@ -127,8 +136,13 @@ for J1g in grouped:
         d = pyalps.DataSet()
         d.props = pyalps.dict_intersect([q.props for q in Szg])
         d.props['observable'] = 'gap'
-        d.y = np.array([allE[1]-allE[0]])
+        print totalmin,d.props['Sz_total']
+        if d.props['Sz_total'] == 0:
+            d.y = np.array([allE[1]-totalmin])
+        else:
+            d.y = np.array([allE[0]-totalmin])
         d.x = np.array([0])
+        d.props['line'] = '.-'
         gaps.append(d)
 
 gaps = pyalps.collectXY(gaps, 'J1', 'gap', ['Sz_total', 'L'])
