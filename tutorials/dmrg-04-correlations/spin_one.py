@@ -32,25 +32,25 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms = []
-for D in [20,40,60]: #[100,150]: #,200,250,300,400]:
+L = 32
+for D in [20,40,60]:
     parms.append( { 
         'LATTICE_LIBRARY'                       : 'my_lattices.xml',
-        'LATTICE'                               : 'open chain lattice with special edges 64', #192',
+        'LATTICE'                               : 'open chain lattice with special edges '+str(L),
         'MODEL'                                 : 'spin',
         'local_S0'                              : 0.5,
         'local_S1'                              : 1,
         'CONSERVED_QUANTUMNUMBERS'              : 'N,Sz',
         'Sz_total'                              : 0,
         'J'                                     : 1,
-        'SWEEPS'                                : 4, #6
+        'SWEEPS'                                : 4,
         'NUMBER_EIGENVALUES'                    : 1,
-        'L'                                     : 32, #192,
         'MAXSTATES'                             : D,
         'MEASURE_AVERAGE[Magnetization]'        : 'Sz',
         'MEASURE_AVERAGE[Exchange]'             : 'exchange',
         'MEASURE_LOCAL[Local magnetization]'    : 'Sz',
         'MEASURE_CORRELATIONS[Diagonal spin correlations]'      : 'Sz',
-#        'MEASURE_CORRELATIONS[Offdiagonal spin correlations]'   : 'Splus:Sminus'
+        'MEASURE_CORRELATIONS[Offdiagonal spin correlations]'   : 'Splus:Sminus'
        } )
 
 
@@ -69,7 +69,6 @@ for run in data:
             d = pyalps.DataSet()
             d.props['observable'] = 'Sz correlations'
             d.props['label'] = 'D = '+str(s.props['MAXSTATES'])
-            L = int(s.props['L'])
             d.x = np.arange(L)
             
             # sites with increasing distance l symmetric to the chain center
@@ -79,7 +78,7 @@ for run in data:
             d.y = abs(s.y[0][indices])
             
             curves.append(d)
-        
+
 # Plot correlation vs. distance
 plt.figure()
 pyalps.pyplot.plot(curves)

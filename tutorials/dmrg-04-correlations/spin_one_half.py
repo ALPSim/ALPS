@@ -75,7 +75,7 @@ for run in data:
             d.y = abs(s.y[0][indices])
             
             curves.append(d)
-        
+
 # Plot correlation vs. distance
 plt.figure()
 pyalps.pyplot.plot(curves)
