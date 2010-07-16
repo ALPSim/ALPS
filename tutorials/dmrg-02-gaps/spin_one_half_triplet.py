@@ -32,10 +32,8 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms = []
-for D in range(50,250,50):
-    for L in range(32,160,32):
-        for sz in [0,1]:
-            parms.append( { 
+for sz in [0,1]:
+    parms.append( { 
         'LATTICE'                   : "open chain lattice", 
         'MODEL'                     : "spin",
         'CONSERVED_QUANTUMNUMBERS'  : 'N,Sz',
@@ -43,8 +41,8 @@ for D in range(50,250,50):
         'J'                         : 1,
         'SWEEPS'                    : 4,
         'NUMBER_EIGENVALUES'        : 1,
-        'L'                         : L,
-        'MAXSTATES'                 : D,
+        'L'                         : 32,
+        'MAXSTATES'                 : 40,
         'NUMBER_EIGENVALUES'        : 1
        } )
 
@@ -55,51 +53,14 @@ res = pyalps.runApplication('dmrg',input_file,writexml=True)
 #load all measurements for all states
 data = pyalps.loadEigenstateMeasurements(pyalps.getResultFiles(prefix='parm_spin_one_half_triplet'))
 
-# extract energies
-dvals = []
-lvals = []
+# print results:
 energies = {}
 for run in data:
+    print 'S_z =', run[0].props['Sz_total']
     for s in run:
+        print '\t', s.props['observable'], ':', s.y[0]
         if s.props['observable'] == 'Energy':
-            D = s.props['MAXSTATES']
-            L = s.props['L']
             sz = s.props['Sz_total']
-            dvals.append(D)
-            lvals.append(L)
-            energies[(D,L,sz)] = s.y[0]
-        
-# Plot gap vs. 1/L for fixed D
-lplot = []
-for D in dvals:
-    curve = pyalps.DataSet()
-    curve.props['label'] = 'D = ' + str(D)
-    curve.x = np.array([1/L for L in lvals])
-    curve.y = np.array([energies[(D,L,1)]-energies[(D,L,0)] for L in lvals])
-    lplot.append(curve)
-plt.figure()
-pyalps.pyplot.plot(lplot)
-plt.legend()
-plt.title('Gap of antiferromagnetic Heisenberg chain (S=1/2)')
-plt.ylabel('Gap $\Delta$')
-plt.xlabel('$1/L$')
-#plt.xlim(0,2*3.1416)
-#plt.ylim(0,2.5)
+            energies[sz] = s.y[0]
 
-# Plot gap vs. 1/D for fixed L
-dplot = []
-for D in dvals:
-    curve = pyalps.DataSet()
-    curve.props['label'] = 'L = ' + str(L)
-    curve.x = np.array([1/D for D in dvals])
-    curve.y = np.array([energies[(D,L,1)]-energies[(D,L,0)] for D in dvals])
-    dplot.append(curve)
-plt.figure()
-pyalps.pyplot.plot(dplot)
-plt.legend()
-plt.title('Gap of antiferromagnetic Heisenberg chain (S=1/2)')
-plt.ylabel('Gap $\Delta$')
-plt.xlabel('$1/D$')
-
-
-plt.show()
+print 'Gap:', energies[1]-energies[0]
