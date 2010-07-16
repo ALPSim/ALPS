@@ -37,6 +37,8 @@ for m in [20,40,60]:
         'LATTICE_LIBRARY'           : 'my_lattices.xml',
         'LATTICE'                   : 'open chain lattice with special edges 32',
         'MODEL'                     : 'spin',
+        'local_S0'                  : '0.5',
+        'local_S1'                  : '1',
         'CONSERVED_QUANTUMNUMBERS'  : 'N,Sz',
         'Sz_total'                  : 0,
         'J'                         : 1,
