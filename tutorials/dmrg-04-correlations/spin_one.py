@@ -88,5 +88,4 @@ plt.title('Spin correlations in antiferromagnetic Heisenberg chain (S=1)')
 plt.ylabel('correlations $| \\langle S^z_{L/2-l/2} S^z_{L/2+l/2} \\rangle |$')
 plt.xlabel('distance $l$')
 
-
 plt.show()

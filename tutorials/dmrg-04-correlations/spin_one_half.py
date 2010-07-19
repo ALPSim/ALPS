@@ -32,16 +32,16 @@ import pyalps.pyplot
 
 #prepare the input parameters
 parms = []
-for D in [20,40,60]: #[100,150]: #,200,250,300,400]:
+for D in [20,40,60]:
     parms.append( { 
         'LATTICE'                               : 'open chain lattice', 
         'MODEL'                                 : 'spin',
         'CONSERVED_QUANTUMNUMBERS'              : 'N,Sz',
         'Sz_total'                              : 0,
         'J'                                     : 1,
-        'SWEEPS'                                : 4, #6
+        'SWEEPS'                                : 6,
         'NUMBER_EIGENVALUES'                    : 1,
-        'L'                                     : 32, #192,
+        'L'                                     : 32,
         'MAXSTATES'                             : D,
         'MEASURE_AVERAGE[Magnetization]'        : 'Sz',
         'MEASURE_AVERAGE[Exchange]'             : 'exchange',
