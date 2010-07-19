@@ -3,6 +3,6 @@ REM  Distributed under the Boost Software License, Version 1.0.
 REM      (See accompanying file LICENSE_1_0.txt or copy at
 REM          http://www.boost.org/LICENSE_1_0.txt)
 
-IF EXIST %HOMEDRIVE%\"Program Files"\VisTrails\vistrails %HOMEDRIVE%\"Program Files"\VisTrails\vistrails\Python25\python.exe
-IF EXIST %HOMEDRIVE%\"Program Files (x86)"\VisTrails\vistrails %HOMEDRIVE%\"Program Files (x86)"\VisTrails\vistrails\Python25\python.exe
+IF EXIST %HOMEDRIVE%\"Program Files"\VisTrails\vistrails %HOMEDRIVE%\"Program Files"\VisTrails\vistrails\Python26\python.exe
+IF EXIST %HOMEDRIVE%\"Program Files (x86)"\VisTrails\vistrails %HOMEDRIVE%\"Program Files (x86)"\VisTrails\vistrails\Python26\python.exe
 
