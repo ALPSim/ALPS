@@ -40,7 +40,6 @@ for sz in [0,1]:
         'Sz_total'                  : sz,
         'J'                         : 1,
         'SWEEPS'                    : 4,
-        'NUMBER_EIGENVALUES'        : 1,
         'L'                         : 32,
         'MAXSTATES'                 : 40,
         'NUMBER_EIGENVALUES'        : 1
