@@ -117,7 +117,7 @@ bare_green_tau(N+1, n_site, 2),
 green_tau(N+1, n_site, 2)
 {
   std::cout<<"starting Hirsch Fye Simulation."<<std::endl;
-  std::cout<<"LICENSE HERE"<<std::endl;
+  //std::cout<<"LICENSE HERE"<<std::endl;
   
   unsigned int n_matsubara=parms["NMATSUBARA"];
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, 2);
