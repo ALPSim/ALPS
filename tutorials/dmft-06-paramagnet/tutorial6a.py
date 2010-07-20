@@ -60,4 +60,4 @@ parms.append(
         
 #write the input file and run the simulation
 input_file = pyalps.writeParameterFile('parm_CTHYB',parms[0])
-#res = pyalps.runDMFT(input_file)
+res = pyalps.runDMFT(input_file)
