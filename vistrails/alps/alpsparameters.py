@@ -126,7 +126,57 @@ class DMFTMonteCarloParameters(MonteCarloParameters):
                     ('t0',[basic.String]),
                     ('t1',[basic.String])
                     ]
-                    
+
+class DMFTMonteCarloSolverParameters(MonteCarloParameters):
+    """ Collect parameters to the DMFT MC solvers. """
+    _input_ports = [
+        ('SEED',[basic.String]),
+        ('BETA',[basic.String]),
+        ('CHECKPOINT',[basic.String]),
+
+        ('SOLVER',[basic.String]),
+        ('N',[basic.String],True),
+        ('N_ORDER' ,[basic.String]),
+        ('N_MEAS',[basic.String]),
+        ('MAX_TIME',[basic.String]),
+        ('MAX_IT',[basic.String])
+    ]
+
+class DMFTModelParameters(Parameters):
+    """ Define the model for a DMFT simulation. """
+    _input_ports = [
+        ('U',[basic.String]),
+        ('t' ,[basic.String]),
+        ('t0',[basic.String]),
+        ('t1',[basic.String]),
+        ('MU',[basic.String]),
+        ('H',[basic.String]),
+        ('H_INIT',[basic.String]),
+        ('J',[basic.String]),
+        ('SITES',[basic.String]),
+        ('FLAVORS',[basic.String])
+    ]
+
+class DMFTSelfConsistencyParameters(Parameters):
+    """ Parameters for the DMFT self-consistency loop """
+    _input_ports = [
+        ('NMATSUBARA',[basic.String]),
+        ('TOLERANCE',[basic.String]),
+        ('CONVERGED',[basic.String]),
+        ('OMEGA_LOOP',[basic.String]),
+        ('HISTOGRAM_MEASUREMENT',[basic.String]),
+        ('SYMMETRIZATION',[basic.String]),
+        ('ANTIFERROMAGNET',[basic.String])
+    ]
+
+class DMFTParameters(Parameters):
+    """ Collect DMFT parameters. """
+    _input_ports = [
+        ("MCSolverParameters",[DMFTMonteCarloSolverParameters]),
+        ("ModelParameters",[DMFTModelParameters]),
+        ("SelfConsistencyParameters",[DMFTSelfConsistencyParameters])
+    ]
+
 class ClassicalMonteCarloParameters(MonteCarloParameters): 
     """ A module to set the parameters for a loop quantum Monte Carlo simulation: 
       SWEEPS: the number of sweeps for measurements 
@@ -243,5 +293,8 @@ def selfRegister():
   reg.add_module(CorrelationsMeasurement,namespace="Parameters")
   reg.add_module(StructureFactorMeasurement,namespace="Parameters")
   
-
-    
+  register_parameters(DMFTMonteCarloSolverParameters)
+  register_parameters(DMFTModelParameters)
+  register_parameters(DMFTSelfConsistencyParameters)
+  register_parameters(DMFTParameters)
+  

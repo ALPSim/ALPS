@@ -169,7 +169,7 @@ class RunDMFT(alpscore.SystemCommandLogged,tools.GetSimName):
             self.execute([alpscore._get_path('dmft'),f.name])
             c=c+1
         self.setResult('dir',resultdir)
-    _input_ports = [('dmftparams',[alpsparameters.MonteCarloParameters]),
+    _input_ports = [('dmftparams',[alpsparameters.Parameters]),
                     ('fileID', [basic.String])]
     _output_ports = [('dir', [basic.Directory])]
     
