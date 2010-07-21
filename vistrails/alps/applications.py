@@ -384,3 +384,4 @@ def selfRegister():
   reg.add_module(system.PrepareMonteCarlo,namespace="Applications")
   reg.add_module(system.PrepareDiagonalization,namespace="Applications")
   reg.add_module(system.PrepareDMRG,namespace="Applications")
+  reg.add_module(system.PrepareDMFT,namespace="Applications")

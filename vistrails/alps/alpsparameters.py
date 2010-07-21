@@ -169,14 +169,6 @@ class DMFTSelfConsistencyParameters(Parameters):
         ('ANTIFERROMAGNET',[basic.String])
     ]
 
-class DMFTParameters(Parameters):
-    """ Collect DMFT parameters. """
-    _input_ports = [
-        ("MCSolverParameters",[DMFTMonteCarloSolverParameters]),
-        ("ModelParameters",[DMFTModelParameters]),
-        ("SelfConsistencyParameters",[DMFTSelfConsistencyParameters])
-    ]
-
 class ClassicalMonteCarloParameters(MonteCarloParameters): 
     """ A module to set the parameters for a loop quantum Monte Carlo simulation: 
       SWEEPS: the number of sweeps for measurements 
@@ -296,5 +288,4 @@ def selfRegister():
   register_parameters(DMFTMonteCarloSolverParameters)
   register_parameters(DMFTModelParameters)
   register_parameters(DMFTSelfConsistencyParameters)
-  register_parameters(DMFTParameters)
   

@@ -26,6 +26,7 @@ from packages.spreadsheet.spreadsheet_cell import QCellWidget
 import packages.spreadsheet
 
 from alpsparameters import SystemParameters
+from parameters import Parameters
 basic = core.modules.basic_modules
 
 ##############################################################################
@@ -83,7 +84,18 @@ class PrepareDMRG(parameters.Parameters):
                      ('measurements',[alpsparameters.CustomMeasurements])]
     _output_ports=[('value', [SystemParameters])]
 
-
+class PrepareDMFT(parameters.Parameters):
+    """ A module collecting the typical input parameters for a DMFT simulation """
+    def compute(self):
+        res = parameters.ParametersData({})
+        for port_name in self.inputPorts:
+           res=self.updateFromPort(port_name,res)
+        self.setOutput(res)
+    _input_ports = [
+            ("MCSolverParameters",[alpsparameters.DMFTMonteCarloSolverParameters]),
+            ("ModelParameters",[alpsparameters.DMFTModelParameters]),
+            ("SelfConsistencyParameters",[alpsparameters.DMFTSelfConsistencyParameters])]
+    _output_ports=[('value', [Parameters])]
 
 
 def initialize(): pass
