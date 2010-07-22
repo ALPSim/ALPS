@@ -596,7 +596,7 @@ DMRGTask<value_type>::build_site_operator(alps::SiteOperator const& siteop, int 
     op1.set_site(site);
     dmtk::Term<value_type> real_t = op1;
     it->get<0>().partial_evaluate(coords);
-    real_t.coef() = it->get<0>().value().real();
+    real_t.coef() = it->get<0>().value();
     this_hami += real_t;
   }
 }
@@ -620,7 +620,7 @@ DMRGTask<value_type>::build_2site_operator(std::pair<alps::SiteOperator,alps::Si
       op1.set_site(sites.first);
       op2.set_site(sites.second);
       dmtk::Term<value_type > real_t = op1*op2;
-      real_t.coef() = tit1->get<0>().value().real()*tit2->get<0>().value().real();
+      real_t.coef() = tit1->get<0>().value()*tit2->get<0>().value();
       this_hami += real_t;
    }
 }
@@ -647,7 +647,7 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
     op2.set_site(target(b));
     dmtk::Term<value_type > real_t = op1*op2;
     tit->get<0>().partial_evaluate(coords);
-    real_t.coef() = tit->get<0>().value().real();
+    real_t.coef() = tit->get<0>().value();
     this_hami += real_t;
 
   }
