@@ -552,7 +552,7 @@ DMRGTask<value_type>::create_site_operator(std::string const& name, alps::SiteOp
   dmtk::BasicOp<value_type > *op = block(name.c_str(),0);
   if(!op) {
     // we add new operator to single-site block 
-    boost::multi_array<value_type,2> orig = alps::get_matrix(0.,siteop,site_basis(type),parms,true);
+    boost::multi_array<value_type,2> orig = alps::get_matrix(value_type(),siteop,site_basis(type),parms,true);
     dmtk::Matrix<value_type > dest(orig.shape()[0],orig.shape()[1]);
     dmtk::QN dqn;
     bool first = true;
