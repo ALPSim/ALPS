@@ -74,15 +74,16 @@ for f in range(0,flavors):
     
 ll=pyalps.load.Hdf5Loader()
 data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
-for d in data:
-    for f in range(0,flavors):
-        d[f].x = d[f].x*d[f].props["BETA"]/float(d[f].props["N"])
-        d[f].y = -d[f].y
-        plt.figure()
-        plt.yscale('log')
-        pyalps.pyplot.plot(d[f])
-        plt.xlabel(r'$\tau$')
-        plt.ylabel(str(d[f].props['observable'])+' $U$='+str(d[f].props['U']))
-        plt.title('Hubbard model on the Bethe lattice')
-        plt.show()
 
+for d in pyalps.flatten(data):
+    d.x = d.x*d.props["BETA"]/float(d.props["N"])
+    d.y = -d.y
+    d.props['label'] = r'$U=$'+str(d.props['U'])
+plt.figure()
+plt.yscale('log')
+plt.xlabel(r'$\tau$')
+plt.ylabel(r'$G(\tau)$')
+plt.title('Hubbard model on the Bethe lattice')
+pyalps.pyplot.plot(data)
+plt.legend()
+plt.show()
