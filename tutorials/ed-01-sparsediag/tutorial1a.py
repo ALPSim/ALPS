@@ -34,7 +34,6 @@ parms = [{
           'J'                         : 1,
           'L'                         : 4,
           'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
-          'MEASURE_LOCAL[Local magnetization]'                  : 'Sz',
           'MEASURE_STRUCTURE_FACTOR[Structure Factor S]'        : 'Sz',
           'MEASURE_CORRELATIONS[Diagonal spin correlations]='   : 'Sz',
           'MEASURE_CORRELATIONS[Offdiagonal spin correlations]' : 'Splus:Sminus'
