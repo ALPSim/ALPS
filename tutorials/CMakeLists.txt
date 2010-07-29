@@ -8,14 +8,14 @@ if (ALPS_BUILD_SOURCE)
 
   install(DIRECTORY .
           DESTINATION alps/tutorials
-          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml"
+          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml" PATTERN "*input*"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
           PATTERN "*.h5" EXCLUDE  EXCLUDE  PATTERN "parm*xml" EXCLUDE
           PATTERN "*clone*" EXCLUDE
           PATTERN "*.xsl" EXCLUDE PATTERN "*.run*" EXCLUDE)
 else (ALPS_BUILD_SOURCE)
   install(DIRECTORY . DESTINATION tutorials COMPONENT tutorials
-          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml"
+          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml" PATTERN "*input*"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
           PATTERN "*.h5" EXCLUDE  EXCLUDE  PATTERN "parm*xml" EXCLUDE
           PATTERN "*.xsl" EXCLUDE PATTERN "*.run*" EXCLUDE)
