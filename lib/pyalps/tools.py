@@ -96,7 +96,9 @@ def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=
         cmdline += [mpirun,'-np',str(MPI)]
     cmdline += [appname]
     if MPI != None:
-        cmdline += ['--mpi','--Nmax','1']
+        cmdline += ['--mpi']
+        if appname in ['sparsediag','fulldiag','dmrg']:
+            cmdline += ['--Nmax','1']
     cmdline += [parmfile]
     if Tmin:
       cmdline += ['--Tmin',str(Tmin)]
