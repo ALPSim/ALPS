@@ -276,7 +276,7 @@ void DMRGTask<value_type>::dostep()
   // iterate over all ste types
   for (int type  = 0 ; type < alps::maximum_vertex_type(graph())+1 ; ++type) {
     // create quantum numbers for this site block
-    if(conserved_quantumnumber.size() > 0) {
+    /*if(conserved_quantumnumber.size() > 0)*/ {
       for (int qn = 0 ; qn < site_basis(type).size(); ++qn) {
         int idx = dmtk::QN::add_qn_index(site_basis(type)[qn].name(),site_basis(type)[qn].fermionic()); 
       }
@@ -293,7 +293,8 @@ void DMRGTask<value_type>::dostep()
         if (verbose)
           std::cout << site_basis(type)[qn].name() << "=" << b[s][qn] << "  ";
         int idx = dmtk::QN::get_qn_index(site_basis(type)[qn].name()); 
-        real_qn[idx] = b[s][qn];
+		if (idx < QN_MAX_SIZE)
+          real_qn[idx] = b[s][qn];
       }
       // create the basis state for this block
       basis[s] = dmtk::State(s,real_qn);
