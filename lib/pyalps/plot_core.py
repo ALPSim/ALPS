@@ -94,7 +94,7 @@ def convertToText(data,title=None,xaxis=None,yaxis=None):
         output += title + '\n'           
 
     if xaxis != None:
-        output += 'X'
+        output += '# X'
         if 'label' in xaxis:
             output += ': ' + xaxis['label']
         if 'min' in xaxis and 'max' in xaxis:
@@ -102,7 +102,7 @@ def convertToText(data,title=None,xaxis=None,yaxis=None):
         output+='\n'
 
     if yaxis != None:
-        output += 'Y'
+        output += '# Y'
         if 'label' in yaxis:
             output += ': ' + yaxis['label']
         if 'min' in yaxis and 'max' in yaxis:
@@ -112,9 +112,9 @@ def convertToText(data,title=None,xaxis=None,yaxis=None):
     
     for q in flatten(data):
         if 'label' in q.props and q.props['label'] != 'none':
-            output += q.props['label']
+            output += '# ' + q.props['label']
         elif 'filename' in q.props:
-            output += q.props['filename']
+            output += '# ' + q.props['filename']
         output += '\n'
 
         for i in range(len(q.x)):

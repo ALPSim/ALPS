@@ -126,7 +126,7 @@ class WriteTextFile(Module):
         f.write(res)
         f.close()
         self.setResult('value_as_string',res)
-        self.setResult('file',0)
+        self.setResult('file',o)
 
 class WriteGraceFile(Module): 
     _input_ports = [('plot',[(PreparePlot,'the plot')])]
