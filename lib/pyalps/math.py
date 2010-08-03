@@ -26,25 +26,27 @@
 # 
 # ****************************************************************************
 
+from __future__ import absolute_import
 import numpy as np
-import math
-from pyalea import *
+from pyalps.pyalea import *
+import math as pm
 
 global_function = "def OPERATION(obj): \n\
   # math library \n\
   if (isinstance(obj,float)): \n\
-    return math.OPERATION(obj) \n\
+    return pm.OPERATION(obj) \n\
   if (isinstance(obj,int)): \n\
-    return math.OPERATION(obj) \n\
+    return pm.OPERATION(obj) \n\
 \n\
   # numpy array \n\
   if (isinstance(obj,np.ndarray)) : \n\
     return np.OPERATION(obj)\n\
   # other types \n\
-    return obj.OPERATION() \n\
+  return obj.OPERATION() \n\
 \n\
 "
 
 for operation in ["sq", "sqrt", "cb", "cbrt", "exp", "log", "sin", "cos", "tan", "asin", "acos", "atan", "sinh", "cosh", "tanh", "asinh", "acosh", "atanh"]:
   function = global_function.replace("OPERATION",operation)
+  print function
   exec function
