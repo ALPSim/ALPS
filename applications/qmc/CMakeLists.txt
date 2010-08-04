@@ -13,6 +13,7 @@ else (ALPS_BUILD_SOURCE)
   add_subdirectory(looper)
   add_subdirectory(qwl)
   add_subdirectory(sse)
+  add_subdirectory(sse4)
   add_subdirectory(worms)
 
   IF (NOT ALPS_PACKAGE_LIBRARIES)
