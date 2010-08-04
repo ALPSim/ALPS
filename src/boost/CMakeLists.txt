@@ -25,14 +25,18 @@ endif(BUILD_BOOST_DATE_TIME)
 
 # Boost.Filesystem
 if(BUILD_BOOST_FILESYSTEM)
-  set(DIRECTORY "${Boost_ROOT_DIR}/libs/filesystem/src")
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/filesystem")
   set(SOURCES
-    operations.cpp path.cpp portability.cpp utf8_codecvt_facet.cpp)
-  foreach(S ${SOURCES})
-    if(EXISTS ${DIRECTORY}/${S})
-      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
-    endif(EXISTS ${DIRECTORY}/${S})
-  endforeach(S)
+    codecvt_error_category.cpp operations.cpp path.cpp path_traits.cpp
+    portability.cpp unique_path.cpp utf8_codecvt_facet.cpp 
+    windows_file_codecvt.cpp v2_operations.cpp v2_path.cpp v2_portability.cpp)
+  foreach (D ${DIRECTORY}/src ${DIRECTORY}/v2/src ${DIRECTORY}/v3/src)
+    foreach(S ${SOURCES})
+      if(EXISTS ${D}/${S})
+        set(BOOST_SOURCES ${BOOST_SOURCES} ${D}/${S})
+      endif(EXISTS ${D}/${S})
+    endforeach(S)
+  endforeach(D)
 endif(BUILD_BOOST_FILESYSTEM)
 
 # Boost.ProgramOptions

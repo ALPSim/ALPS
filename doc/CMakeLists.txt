@@ -83,16 +83,24 @@ if (NOT WIN32)
                        DEPENDS src/alps.xml ${ALPS_QBK_DEPENDS} bb2db.in)
 
     file(COPY src/images DESTINATION html)
+    if (EXISTS ${Boost_ROOT_DIR}/doc/html/boostbook.css)
+      set (CSSDIR ${Boost_ROOT_DIR}/doc/html/)
+    endif(EXISTS ${Boost_ROOT_DIR}/doc/html/boostbook.css)
+    if (EXISTS ${Boost_ROOT_DIR}/doc/src/boostbook.css)
+      set (CSSDIR ${Boost_ROOT_DIR}/doc/src/)
+    endif(EXISTS ${Boost_ROOT_DIR}/doc/src/boostbook.css)
+
     add_custom_command(OUTPUT html/index.html 
                        COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/doc/src/alps_logo.gif html
-                       COMMAND cmake -E copy ${Boost_ROOT_DIR}/doc/html/boostbook.css html
+                       COMMAND cmake -E copy ${CSSDIR}/boostbook.css html
                        COMMAND ./db2html src/alps.docbook html/
                        DEPENDS 
                        src/alps.docbook 
-                       ${Boost_ROOT_DIR}/doc/html/boostbook.css
+                       ${CSSDIR}/boostbook.css
                        ${PROJECT_SOURCE_DIR}/doc/src/alps_logo.gif
                        db2html.in
                        )
+
 
     add_custom_command(OUTPUT alps.pdf 
                        COMMAND ./db2pdf src/alps.docbook alps.pdf
