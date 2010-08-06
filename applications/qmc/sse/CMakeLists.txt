@@ -5,11 +5,14 @@
 
 if(LPSolve_FOUND)
   include_directories(${LPSolve_INCLUDE_DIR})
-  add_executable(dirloop_sse
+  add_executable(dirloop_sse_v1
                  SSE.Directed.cpp SSE.Initialization.cpp SSE.Measurements.cpp
 		 SSE.Update.cpp SSE.cpp)
-  target_link_libraries(dirloop_sse alps ${LPSolve_LIBRARIES})
-  install(TARGETS dirloop_sse RUNTIME DESTINATION bin COMPONENT applications)
+  target_link_libraries(dirloop_sse_v1 alps ${LPSolve_LIBRARIES})
+  install(TARGETS dirloop_sse_v1 RUNTIME DESTINATION bin COMPONENT applications)
 else(LPSolve_FOUND)
-  message(STATUS "dirloop_sse will not be built since the lp_solve library has not found")
+  message(STATUS "dirloop_sse_v1 will not be built since the lp_solve library has not found")
 endif(LPSolve_FOUND)
+add_executable(dirloop_sse_evaluate evaluate.C)
+target_link_libraries(dirloop_sse_evaluate alps)
+install(TARGETS dirloop_sse_evaluate RUNTIME DESTINATION bin COMPONENT applications)

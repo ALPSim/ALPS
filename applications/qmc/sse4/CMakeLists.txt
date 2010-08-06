@@ -5,9 +5,9 @@
 
 if(LPSolve_FOUND)
   include_directories(${LPSolve_INCLUDE_DIR})
-  add_executable(sse4 main.cc)
-  target_link_libraries(sse4 alps ${LPSolve_LIBRARIES})
-  install(TARGETS sse4 RUNTIME DESTINATION bin COMPONENT applications)
+  add_executable(dirloop_sse main.cc)
+  target_link_libraries(dirloop_sse alps ${LPSolve_LIBRARIES})
+  install(TARGETS dirloop_sse RUNTIME DESTINATION bin COMPONENT applications)
 else(LPSolve_FOUND)
-  message(STATUS "sse4 will not be built since the lp_solve library has not found")
+  message(STATUS "dirloop_sse will not be built since the lp_solve library has not been found")
 endif(LPSolve_FOUND)

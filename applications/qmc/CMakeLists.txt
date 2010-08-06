@@ -5,7 +5,7 @@
 
 if (ALPS_BUILD_SOURCE)
   install(FILES CMakeLists.txt qmc.h DESTINATION alps/applications/qmc)
-  install(DIRECTORY checksign looper qwl sse worms DESTINATION alps/applications/qmc
+  install(DIRECTORY checksign looper qwl sse sse4 worms DESTINATION alps/applications/qmc
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 else (ALPS_BUILD_SOURCE)
 
