@@ -81,7 +81,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(
                const itime_green_function_t & G0,
                alps::Parameters p)
 {
-  BOOST_ASSERT(is_master());
+  if(!is_master()) throw std::logic_error("a slave should never reach this section.");
   std::string infile = alps::temporary_filename("alps_external_solver_in_");
   std::string outfile = alps::temporary_filename("alps_external_solver_out_");
   if(p.defined("TMPNAME")){
@@ -131,6 +131,9 @@ std::pair<matsubara_green_function_t, itime_green_function_t> alps::ImpuritySolv
     infile=p["TMPNAME"]+std::string(".in.h5");
     outfile=p["TMPNAME"]+std::string(".out.h5");
   }
+  p["INFILE"]=infile;
+  p["OUTFILE"]=infile;
+
   {
     alps::hdf5::oarchive solver_input(infile);
     solver_input<<alps::make_pvp("/parameters", p);
