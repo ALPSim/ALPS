@@ -68,7 +68,7 @@ protected:
   std::valarray<double> site_type_density_;
   std::valarray<double> local;
 
-  
+  unsigned maximum_sitetype;
   state_type maximum_number_of_states;
   std::map<int,int> number_states_for_site_type_;
   std::vector<state_type> site_number_of_states; 
@@ -123,22 +123,28 @@ bool QMCRun<G,StateType>::build_diagonal_operator(std::string const& name)
 {
   if (diagonal_matrix_element.find(name) != diagonal_matrix_element.end())
     return true;
-  std::vector<std::vector<double> > vec(number_states_for_site_type_.size());
-  for (unsigned int st = 0; st < number_states_for_site_type_.size();++st) 
-    if (number_states_for_site_type_[st]) {
+  std::vector<std::vector<double> > vec(maximum_sitetype + 1);
+
+  std::map<int,int>::const_iterator it = number_states_for_site_type_.begin();
+  for (; it != number_states_for_site_type_.end(); ++it) {
+	int sitetype = it->first;
+    int number_states = it->second;
+    if (number_states) {
       alps::SiteOperator term(name);
       boost::multi_array<alps::Expression,2> matrix_symbolic =  
-          alps::get_matrix(alps::Expression(),term,this->model().basis().site_basis(st),this->parms);
-      for (int i=0;i<number_states_for_site_type_[st];++i)
-        for (int j=0;j<number_states_for_site_type_[st];++j) {
+          alps::get_matrix(alps::Expression(),term,this->model().basis().site_basis(sitetype),this->parms);
+      for (int i=0;i<number_states;++i)
+        for (int j=0;j<number_states;++j) {
           if (!matrix_symbolic[i][j].can_evaluate())
             return false;
           else if (i!=j && alps::evaluate<double>(matrix_symbolic[i][j]))
             return false;
           else if (i==j)
-            vec[st].push_back(alps::evaluate<double>(matrix_symbolic[i][j]));
+            vec[sitetype].push_back(alps::evaluate<double>(matrix_symbolic[i][j]));
         }
     }
+  }
+
   diagonal_matrix_element[name]=vec;
   return true;
 }
@@ -149,9 +155,12 @@ template <class G, class StateType>
 void QMCRun<G,StateType>::initialize_site_states()
 {  
   maximum_number_of_states=0;
+  maximum_sitetype = 0;
 
   for (site_iterator it=this->sites().first; it!=this->sites().second;++it) {
     unsigned int sitetype=alps::scheduler::LatticeModelMCRun<G>::site_type(*it);
+    if (sitetype > maximum_sitetype)
+      maximum_sitetype = sitetype;
     std::map<int,int>::const_iterator found = number_states_for_site_type_.find(sitetype);
     if (found != number_states_for_site_type_.end())
       site_number_of_states.push_back(found->second);
@@ -167,7 +176,6 @@ void QMCRun<G,StateType>::initialize_site_states()
   }
   
 // #error get rid of the is_charge_model_ and is_spin_model_ below and replace it by the general measurements
-
   is_charge_model_ = build_diagonal_operator("n");
   is_spin_model_ = build_diagonal_operator("Sz");
    
