@@ -132,7 +132,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t> alps::ImpuritySolv
     outfile=p["TMPNAME"]+std::string(".out.h5");
   }
   p["INFILE"]=infile;
-  p["OUTFILE"]=infile;
+  p["OUTFILE"]=outfile;
 
   {
     alps::hdf5::oarchive solver_input(infile);
