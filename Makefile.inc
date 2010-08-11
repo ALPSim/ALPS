@@ -1,4 +1,4 @@
-include $(HOME)/ALPS_CMAKE3/share/alps/include.mk
+include /opt/alps/share/alps/include.mk
 #BLAS classes directory
 BLAS_CLASSES_DIR=$(HOME)/alps_svn
 #CXX optimization flags

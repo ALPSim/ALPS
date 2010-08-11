@@ -89,7 +89,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(
     outfile=p["TMPNAME"]+std::string(".out.h5");
   }
   p["INFILE"]=infile;
-  p["OUTFILE"]=infile;
+  p["OUTFILE"]=outfile;
 
   // write input file
   {
