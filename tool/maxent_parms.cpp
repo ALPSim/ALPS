@@ -249,7 +249,7 @@ MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
   setup_kernel(p, nfreq(), omega_coord_);
   vector_type S(ndat());
   matrix_type Kt = K_; // gesvd destroys K!
-  bindings::lapack::gesvd('A','A',Kt, S, U_, Vt_); // the A A is not clear to me 
+  bindings::lapack::gesvd('S','S',Kt, S, U_, Vt_); 
   std::cout << "# Singular values of the Kernel:\n";
   const double prec = sqrt(std::numeric_limits<double>::epsilon())*nfreq()*S[0];
   for (int s=0; s<S.size(); ++s) 
