@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * ALPS DMFT Project
  *
@@ -8,24 +8,24 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 /* $Id: hirschfyesim.C 340 2009-01-28 16:20:03Z fuchs $ */
 
@@ -34,7 +34,6 @@
 
 #include "hirschfyesim.h"
 #include "xml.h"
-//#include "cluster.h"
 #include "fouriertransform.h"
 #include <alps/alea.h>
 #include <cmath>
@@ -66,7 +65,6 @@ double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector
   
   blas::matrix M(Green.size1()); //for sign problem cases: figure out determinant...
   M.convert_from(Green); 
-  //double det=M.determinant();
   int N(spins.size());
   std::vector<double> e_ls(N);
   for(int i=0;i<N;++i){
@@ -117,7 +115,7 @@ bare_green_tau(N+1, n_site, 2),
 green_tau(N+1, n_site, 2)
 {
   std::cout<<"starting Hirsch Fye Simulation."<<std::endl;
-  //std::cout<<"LICENSE HERE"<<std::endl;
+  std::cout<<"The Hirsch Fye legacy code is published exclusively for pedagogical purposes."<<std::endl;
   
   unsigned int n_matsubara=parms["NMATSUBARA"];
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, 2);
@@ -127,21 +125,11 @@ green_tau(N+1, n_site, 2)
   
   std::istringstream in_omega(parms["G0(omega)"]);
   read_freq(in_omega, bare_green_matsubara);
- 
+  
   if (n_site > 1) {
     throw std::logic_error("please use the cluster solver version of this solver for clusters!");
-    /*matsubara_green_function_t bare_green_matsubara_k_space(bare_green_matsubara);
-    SimpleDCATransformer clusterhandler(parms);
-    bare_green_matsubara = clusterhandler.transform_into_real_space(bare_green_matsubara_k_space);
-    fourier_ptr->backward_ft(bgf_sc_convention_k, bare_green_matsubara_k_space);
-    std::ofstream bgfsccks("/tmp/bgfsccks");
-    std::ofstream bgmks("/tmp/bgmks");
-    bgfsccks<<bgf_sc_convention_k<<std::endl;
-    bgmks<<bare_green_matsubara_k_space<<std::endl;*/
   } 
   fourier_ptr->backward_ft(bare_green_tau, bare_green_matsubara);
-  std::ofstream bgfsccrs("/tmp/bgfsccrs");
-  bgfsccrs<<bare_green_tau<<std::endl;
   
   for(int i=0;i<2;++i){  //change convention to positive GF
     for(int s1=0;s1<n_site;++s1){
@@ -157,7 +145,6 @@ green_tau(N+1, n_site, 2)
   double tmp = exp(beta/N*u/2);
   lambda = log(tmp + sqrt(tmp*tmp-1));
   
-  std::cout<<"init G."<<std::endl;
   // initialize bath Green's function matrices
   green_matrix_from_vector(bare_green_tau, Green0_up, Green0_down);
   // choose random spin configuration
@@ -166,11 +153,10 @@ green_tau(N+1, n_site, 2)
   
   
   // initialize Green's function matrices
-  /*double s1=*/update_from_zero(Green_up, Green0_up, spins, lambda);
-  /*double s2=*/update_from_zero(Green_down, Green0_down, spins, -lambda);
+  update_from_zero(Green_up, Green0_up, spins, lambda);
+  update_from_zero(Green_down, Green0_down, spins, -lambda);
   
   
-  std::cout<<"init meas."<<std::endl;
   // create measurement objects
   measurements << RealObservable("Sign");
   measurements <<SignedObservable<alps::SimpleRealVectorObservable>("G_meas_up");
@@ -179,15 +165,15 @@ green_tau(N+1, n_site, 2)
   measurements << SimpleRealVectorObservable("G_fourpoint_dd");  
   measurements << SimpleRealVectorObservable("G_fourpoint_ud");  
   measurements << SimpleRealVectorObservable("G_fourpoint_du");  
-     
+  
   measurements.reset(true);
-
+  
 }
 
 
 // in principle, need only save spins (and do update_from_zero after loading)
 void HirschFyeRun::load(alps::IDump& dump) {
-throw std::logic_error("implement load first!");
+  throw std::logic_error("implement load first!");
 }
 
 
@@ -242,6 +228,7 @@ void HirschFyeRun::dostep()
     
   }
 #ifdef FOURPOINT
+  throw std::logic_error("do you know what you're doing? This is the fourpoint measurement...");
   if(is_thermalized() && measure_fourpoint && (sweeps %fp_interval==0)){
     int s=Green_up.size1();
     int s3=s*s*s;
@@ -252,7 +239,6 @@ void HirschFyeRun::dostep()
     static blas::vector G_ijkl_ud(s*s*s, 0);
     static int fpsteps=0;
     fpsteps++;
-    //std::cout<<"size s is: "<<s<<std::endl;
     for(int j=0;j<s;++j){
       double guji=Green_up(j, 0);
       double gdji=Green_down(j, 0);
@@ -264,7 +250,6 @@ void HirschFyeRun::dostep()
           double gdlk=Green_down(l, k);
           double guli=Green_up(l, 0);
           double gdli=Green_down(l, 0);
-          //std::cout<<i<<" "<<j<<" "<<k<<" "<<l<<std::endl;
           G_ijkl_uu(j*s2+k*s+l)+=guji*gulk-gujk*guli; //check review formula 154
           G_ijkl_dd(j*s2+k*s+l)+=gdji*gdlk-gdjk*gdli;
           G_ijkl_ud(j*s2+k*s+l)+=guji*gdlk;;
@@ -274,8 +259,6 @@ void HirschFyeRun::dostep()
     }
     int meas_int=100;
     if(fpsteps% meas_int == 0){
-      //std::cout<<G_ijkl_uu[0]<<" "<<G_ijkl_ud[0]<<" "<<G_ijkl_du[0]<<" "<<G_ijkl_dd[0]<<std::endl;
-      //std::cout<<Green_up(0,0)<<" "<<Green_up(1,1)<<" "<<Green_up(1,0)<<" "<<Green_up(0,1)<<G_ijkl_uu[16+1]<<std::endl;
       std::valarray<double> G_ijkl_uu_va(s*s*s);
       std::valarray<double> G_ijkl_dd_va(s*s*s);
       std::valarray<double> G_ijkl_ud_va(s*s*s);
@@ -324,11 +307,9 @@ void HirschFyeRun::dostep()
 
 
 std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_result() {
-  std::cout<<"getting results."<<std::endl;
   int N=parms["N"];
   int n_matsubara=parms["NMATSUBARA"];
   int n_site=parms["SITES"];
-  std::cout<<"calling get result for both itima and matsubara"  <<std::endl;
   itime_green_function_t green_result(N+1, n_site, 2); //one site, two spins, n+1 time points including first and last
   matsubara_green_function_t green_result_matsubara(n_matsubara, n_site, 2); //n matsubara frequencies
   
@@ -373,7 +354,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
       }
     }
   }
-
+  
   std::vector<double> densities;
   densities.resize(2);
   for(int i=0;i<n_site;++i){
@@ -382,10 +363,6 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   }
   densities[0] /= n_site;
   densities[1] /= n_site;
-  /*if(parms.defined("CLUSTER_LOOP")){
-    SimpleDCATransformer clusterhandler(parms);
-    green_result = clusterhandler.transform_into_k_space(green_result); 
-  }*/
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
@@ -394,11 +371,11 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
 
 ///take a Green's function in vector form G(\tau-\tau') and create a matrix G(\tau, \tau') out of it
 void HirschFyeRun::green_matrix_from_vector(const itime_green_function_t & bare_green_function,\
- dense_matrix & green_matrix_up, dense_matrix & green_matrix_down)const{
- 
+                                            dense_matrix & green_matrix_up, dense_matrix & green_matrix_down)const{
+  
   green_matrix_up  .clear();
   green_matrix_down.clear();
- for (int s1=0; s1<n_site; s1++) {
+  for (int s1=0; s1<n_site; s1++) {
     for (int s2=0; s2<n_site; s2++) {	  
       for (int i=0; i<N; i++) {
         for (int j=i; j<N; j++) {	  
@@ -415,7 +392,7 @@ void HirschFyeRun::green_matrix_from_vector(const itime_green_function_t & bare_
 }
 ///take a Green's function in matrix form and transform it back into vector form.
 void HirschFyeRun::green_vector_from_matrix(itime_green_function_t &green_tau, const dense_matrix & green_matrix_up,\
-const dense_matrix & green_matrix_down)const{
+                                            const dense_matrix & green_matrix_down)const{
   green_tau.clear();
   
   for (int s1=0;s1<n_site;++s1){

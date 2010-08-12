@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * ALPS DMFT Project
  *
@@ -8,24 +8,24 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 /* $Id: externalsolver.h 157 2006-04-04 15:11:22Z gullc $ */
 
@@ -50,32 +50,26 @@
 /// output file. Both files have to conform to the XML schema for impurity 
 /// solvers that is currently being developed
 ///
-/// @todo the XML formats need to be discussed and documented. 
-///        responsible: MT, EG and PW
 
 class ExternalSolver 
- : public ImpuritySolver
- , public MatsubaraImpuritySolver 
+: public ImpuritySolver
+, public MatsubaraImpuritySolver 
 {
 public:
-    /// @param executable the path to the executable
-    ExternalSolver(const boost::filesystem::path& executable) 
-    : exe_(boost::filesystem::complete(executable)) {}
-    
-    ImpuritySolver::result_type solve(
-              const itime_green_function_t& G0
-            , const alps::Parameters& parms);
-    
-    MatsubaraImpuritySolver::result_type solve_omega(
-              const matsubara_green_function_t& G0_omega
-            , const alps::Parameters& parms =alps::Parameters());
-            
+  /// @param executable the path to the executable
+  ExternalSolver(const boost::filesystem::path& executable) 
+  : exe_(boost::filesystem::complete(executable)) {}
+  
+  ImpuritySolver::result_type solve(const itime_green_function_t& G0, const alps::Parameters& parms);
+  
+  MatsubaraImpuritySolver::result_type solve_omega(const matsubara_green_function_t& G0_omega, const alps::Parameters& parms =alps::Parameters());
+  
 private:
-    /// call the executable
-    void call(std::string const& infile, std::string const& outfile);
-      
-    ///path to the solver executable
-    boost::filesystem::path exe_;
+  /// call the executable
+  void call(std::string const& infile, std::string const& outfile);
+  
+  ///path to the solver executable
+  boost::filesystem::path exe_;
 };
 
 

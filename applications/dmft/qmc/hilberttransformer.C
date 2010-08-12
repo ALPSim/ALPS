@@ -193,7 +193,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
                                                                       matsubara_green_function_t &G0_omega_ignored, 
                                                                       const double mu, const double h, const double beta)
 {
-  std::cout<<"SCHT: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" "<<G0_omega_ignored.nfreq()<<std::endl;
+  std::cout<<"Semicircular Hilbert Transform: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" "<<G0_omega_ignored.nfreq()<<std::endl;
   double tsq=t_*t_;
   matsubara_green_function_t G0_omega(G_omega);
   //formula according to review, p. 61, formula 221. 

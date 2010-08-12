@@ -8,24 +8,24 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 #include "types.h"
 #include "green_function.h"
@@ -276,7 +276,7 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta, shape);
   if (shape==diagonal)
     print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
-
+  
   alps::hdf5::oarchive ar(basename+".h5");
   //writeout into hf5 file, using /simulation/iteration/ path
   std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
@@ -284,7 +284,7 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   G_omega.write_hdf5_ss(ar,basepath.str()+"G_omega");
   G0_tau.write_hdf5_ss(ar,basepath.str()+"G0_tau");
   G0_omega.write_hdf5_ss(ar,basepath.str()+"G0_omega");
- 
+  
   //writeout into hf5 file, using /simulation/results/ path
   std::stringstream basepath2; basepath2<<"/simulation/results/";
   G_tau.write_hdf5_ss(ar,basepath2.str()+"G_tau");
@@ -345,19 +345,19 @@ std::istream &operator>>(std::istream &is, green_function<double> &v){
 }
 
 /*std::istream &operator>>(std::istream &is, green_function<std::complex<double> > &v){
-  double index;
-  for(unsigned int o=0;o<v.nfreq();++o){
-    is>>index;
-    for(unsigned int i=0;i<v.nsite();++i)
-      for(unsigned int j=0;j<v.nsite();++j)
-		  for(unsigned int z=0;z<v.nflavor();++z) {
-            double re,im;
-			is >>re >> im;
-            v(o,i,j,z)=std::complex<double>(re,im);
-		  }
-  }
-  return is;
-}*/
+ double index;
+ for(unsigned int o=0;o<v.nfreq();++o){
+ is>>index;
+ for(unsigned int i=0;i<v.nsite();++i)
+ for(unsigned int j=0;j<v.nsite();++j)
+ for(unsigned int z=0;z<v.nflavor();++z) {
+ double re,im;
+ is >>re >> im;
+ v(o,i,j,z)=std::complex<double>(re,im);
+ }
+ }
+ return is;
+ }*/
 
 std::ostream &operator<<(std::ostream &os, const green_function<std::complex<double> > &v){
   os<<std::setprecision(20);
@@ -388,8 +388,8 @@ std::ostream &operator<<(std::ostream &os, const U_matrix &U){
   return os;
 }
 /*alps::hdf5::oarchive& alps::hdf5::serialize(alps::hdf5::oarchive& ar, const std::string& basepath, const matsubara_green_function_t &gf){
-  std::cout<<"trying to store gf to: "<<basepath<<std::endl;
-}
-alps::hdf5::oarchive& alps::hdf5::serialize(alps::hdf5::oarchive& ar, const std::string& basepath, const itime_green_function_t&gf){
-  std::cout<<"trying to store gf to: "<<basepath<<std::endl;
-}*/
+ std::cout<<"trying to store gf to: "<<basepath<<std::endl;
+ }
+ alps::hdf5::oarchive& alps::hdf5::serialize(alps::hdf5::oarchive& ar, const std::string& basepath, const itime_green_function_t&gf){
+ std::cout<<"trying to store gf to: "<<basepath<<std::endl;
+ }*/

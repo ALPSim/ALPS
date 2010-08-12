@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * ALPS DMFT Project
  *
@@ -7,24 +7,24 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 /* $Id: hirschfyeaux.h 328 2008-09-09 19:02:18Z gullc $ */
 
@@ -59,9 +59,9 @@ typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major
 inline alps::ODump& operator << (alps::ODump& odump, const dense_matrix& m) {
   odump << m.size1() << m.size2();
   for (unsigned int i=0; i<m.size1(); i++) {
-      for (unsigned int j=0; j<m.size2(); j++) {
-          odump << m(i,j);
-      }
+    for (unsigned int j=0; j<m.size2(); j++) {
+      odump << m(i,j);
+    }
   }
   return odump;
 }
@@ -75,9 +75,9 @@ inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
   idump >> size2;
   m.resize(size1, size2);
   for (unsigned int i=0; i<m.size1(); i++) {
-      for (unsigned int j=0; j<m.size2(); j++) {
-          idump >> m(i,j);
-      }
+    for (unsigned int j=0; j<m.size2(); j++) {
+      idump >> m(i,j);
+    }
   }  
   return idump;
 }
@@ -103,12 +103,12 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
   
   // if update successful ...
   if (rng() < fabs(det_rat/(1+det_rat))) {
-      //if(det_rat/(1+det_rat) <0)
-      if(det_rat<0)
+    //if(det_rat/(1+det_rat) <0)
+    if(det_rat<0)
       sign *=-1;
-      // update Green's function
-      double tmp1 = exp(-2*lambda*spins[site])-1;
-      double tmp2 = exp(+2*lambda*spins[site])-1;
+    // update Green's function
+    double tmp1 = exp(-2*lambda*spins[site])-1;
+    double tmp2 = exp(+2*lambda*spins[site])-1;
     
     double *vi_up=new double[N];
     double *uj_up=new double[N];
@@ -125,8 +125,8 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
     int one=1;
     dger_(&N,&N,&alpha_up,vi_up,&one,uj_up,&one,&(Green_up  (0,0)),&N);
     dger_(&N,&N,&alpha_dn,vi_dn,&one,uj_dn,&one,&(Green_down(0,0)),&N);
-      // update spin
-      spins[site] = -spins[site];
+    // update spin
+    spins[site] = -spins[site];
     delete[] vi_up;
     delete[] vi_dn;
     delete[] uj_up;

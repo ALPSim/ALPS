@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * ALPS DMFT Project
  *
@@ -8,24 +8,24 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 /* $Id: externalsolver.C 360 2009-06-01 02:32:00Z gullc $ */
 
@@ -48,8 +48,8 @@
 #endif
 
 ImpuritySolver::result_type ExternalSolver::solve(
-      const itime_green_function_t& G0
-    , const alps::Parameters& parms) 
+                                                  const itime_green_function_t& G0
+                                                  , const alps::Parameters& parms) 
 {
   std::string infile = alps::temporary_filename("alps_external_solver_");
   std::string outfile = alps::temporary_filename("alps_external_solver_out_");
@@ -59,42 +59,42 @@ ImpuritySolver::result_type ExternalSolver::solve(
   }
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
- 
+  
   // write input XML file
   {
     alps::oxstream input(boost::filesystem::complete(inpath));
-  
+    
     input << alps::start_tag("SIMULATION") << parms;
-	input << alps::start_tag("G0");
+    input << alps::start_tag("G0");
     write_itime(input,G0);
     input << alps::end_tag("G0");
     input << alps::end_tag("SIMULATION");
-	
+    
     // scope to force closing of file
   }
   call(infile,outfile);
-
+  
   // read the output
   unsigned int N=(unsigned int)parms["N"];
   unsigned int sites     =(unsigned int)parms.value_or_default("SITES", 1);
   unsigned int flavors   =(unsigned int)parms.value_or_default("FLAVORS", 2);
- 
+  
   itime_green_function_t g(N+1, sites, flavors);
   
   {
     std::ifstream output(outfile.c_str());
     alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
-	
-	// search for up and down spin Green's function
-	tag=alps::parse_tag(output);
-	while (tag.name != "GREENFUNCTION") {
-	  if (tag.name=="/SIMULATION")
-	    boost::throw_exception(std::runtime_error("Element <GREENFUNCTION> missing in output file"));
-	  else
-	    alps::skip_element(output,tag);
-	  tag=alps::parse_tag(output);
-	}
-
+    
+    // search for up and down spin Green's function
+    tag=alps::parse_tag(output);
+    while (tag.name != "GREENFUNCTION") {
+      if (tag.name=="/SIMULATION")
+        boost::throw_exception(std::runtime_error("Element <GREENFUNCTION> missing in output file"));
+      else
+        alps::skip_element(output,tag);
+      tag=alps::parse_tag(output);
+    }
+    
     read_itime(output,g);	
     
   } // scope to force closing of file
@@ -105,8 +105,8 @@ ImpuritySolver::result_type ExternalSolver::solve(
 }
 
 MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
-              const matsubara_green_function_t& G0_omega
-            , const alps::Parameters& parms)
+                                                                 const matsubara_green_function_t& G0_omega
+                                                                 , const alps::Parameters& parms)
 {
   std::string infile = alps::temporary_filename("alps_external_solver_");
   std::string outfile = alps::temporary_filename("alps_external_solver_out_");
@@ -116,22 +116,22 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   }
   boost::filesystem::path inpath(infile,boost::filesystem::native);
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
- 
+  
   // write input XML file
   {
     alps::oxstream input(boost::filesystem::complete(inpath));
-  
+    
     input << alps::start_tag("SIMULATION") << parms;
-	input << alps::start_tag("G0");
+    input << alps::start_tag("G0");
     write_freq(input,G0_omega);
     input << alps::end_tag("G0");
     input << alps::end_tag("SIMULATION");
-	
+    
     // scope to force closing of file
   }
   
   call(infile,outfile);
-
+  
   // read the output
   
   unsigned int n_matsubara=(unsigned int)parms["NMATSUBARA"];
@@ -157,7 +157,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   {
     std::ifstream output(outfile.c_str());
     alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
-	
+    
     // search for up and down spin Green's function
     tag=alps::parse_tag(output);
     while (tag.name != "GREENFUNCTION_ITIME") {
@@ -191,10 +191,10 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
   //std::cerr << "\nFinished call to external solver.\n";
-	                                           
+  
   boost::filesystem::remove(boost::filesystem::complete(inpath));
-
+  
   if (!boost::filesystem::exists(outpath))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
-
+  
 }

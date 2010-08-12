@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * ALPS DMFT Project
  *
@@ -8,24 +8,24 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 #ifndef FOURIER_TRANSFORM_H
 #define FOURIER_TRANSFORM_H
@@ -34,12 +34,6 @@
 #include "green_function.h" // for the multiple_vector_type
 #include <alps/parameter.h>
 
-
-//typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
-
-//void generate_spline_matrix(dense_matrix & spline_matrix);
-
-//void solve_second_derivatives(dense_matrix &spline_matrix, std::vector<double> &rhs);
 
 inline std::complex<double> f_omega(std::complex<double> iw, double c1, double c2, double c3) {
   std::complex<double> iwsq=iw*iw;
@@ -91,14 +85,11 @@ public:
       }
     } 
   }
-
-
+  
+  
   virtual ~FourierTransformer() {}
   virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
-  /*virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
-                           const green_function<alps::RealObsevaluator> &G_omega_real,
-                           const green_function<alps::RealObsevaluator> &G_omega_imag) const;*/
   virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
                            const int nfreq_measured) const;
   
@@ -111,20 +102,18 @@ public:
                                      boost::shared_ptr<FourierTransformer> &fourier_ptr,
                                      const std::vector<double> &densities,
                                      const std::vector<double> &magnetization);
-  //void setmu(double mu){ mu_=mu;}
   
 protected:
-
+  
   double beta_;
-  //double mu_;
   std::vector<std::vector<std::vector<double> > > c1_;
   std::vector<std::vector<std::vector<double> > > c2_;
   std::vector<std::vector<std::vector<double> > > c3_;
   std::vector<std::vector<std::vector<double> > > Sc0_; //coefficients for the self-energy
   std::vector<std::vector<std::vector<double> > > Sc1_;  
   std::vector<std::vector<std::vector<double> > > Sc2_;  
-
-
+  
+  
 };
 
 
@@ -134,7 +123,7 @@ class SimpleG0FourierTransformer : public FourierTransformer
 public: 
   SimpleG0FourierTransformer(const double beta, const double mu, const double h, const int n_flavor, 
                              const std::vector<double>& eps, const std::vector<double>& epssq)
-    : FourierTransformer(beta, n_flavor, 1)
+  : FourierTransformer(beta, n_flavor, 1)
   {
     for(int f=0; f<n_flavor; f++) {
       int s = f % 2 ? -1 : 1;
@@ -145,7 +134,7 @@ public:
     }
   }
 };
-  
+
 
 class GFourierTransformer : public FourierTransformer
 {
@@ -162,7 +151,7 @@ public:
         c1_[f][i][i] = 1.;
         c2_[f][i][i] = eps[f][i] - mu + U*densities[fbar]; 
         c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
-          + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
+        + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
         Sc0_[f][i][i] = U * (densities[fbar]-0.5);
         Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
         //std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
@@ -178,7 +167,7 @@ class FFunctionFourierTransformer:public FourierTransformer
 {
 public:
   FFunctionFourierTransformer(double beta, double mu, double epsilonsq_av, int n_flavor, int n_site)
-    :FourierTransformer(beta, n_flavor, n_site){
+  :FourierTransformer(beta, n_flavor, n_site){
     //std::cout<<"FFourier Transformer: beta: "<<beta<<" mu: "<<mu<<"epsilonsq_av: "<<epsilonsq_av<<std::endl;
     epsilonsq_av_=epsilonsq_av; //this is the integral of the second moment of the dos: \int_-\infty^\infty e^2 rho(e) de. It is t^2 for semicircle...
     for(int f=0;f<n_flavor;++f){
@@ -199,25 +188,13 @@ public:
   
   virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
     FourierTransformer::backward_ft(G_tau, G_omega);
-    //std::cout<<"correcting for F function"<<std::endl;
     for(unsigned int j=0;j<G_tau.nflavor();++j){
       G_tau(G_tau.ntime()-1,j)=-epsilonsq_av_-G_tau(0,j);
     }
   }
   
-  /*virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
-                           const green_function<alps::RealObsevaluator> &G_omega_real,
-                           const green_function<alps::RealObsevaluator> &G_omega_imag) const{
-    
-    std::cout<<"backward ft: "<<&G_tau<<std::endl;
-    std::cout<<"backward ft: "<<&G_omega_real<<std::endl;
-    std::cout<<"backward ft: "<<&G_omega_imag<<std::endl;
-    std::cout<<"not implemented for obsevaluators. exiting."<<std::endl;
-    abort();
-  } //not implemented.
-  */
   virtual ~FFunctionFourierTransformer(){}
-
+  
 private:
   double epsilonsq_av_;
 };
