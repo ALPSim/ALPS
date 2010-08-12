@@ -72,6 +72,12 @@ acknowledge the use of the ALPS libraries, and the papers listed below.
     M. Troyer, S. Wessel, and F. Alet, Phys. Rev. Lett. 90, 120201 (2003).
     A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
 
+* When the Continuous-Time quantum Monte Carlo impurity solver programs or the DMFT framework are used:
+ - cite the publication: 
+   A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
+ - cite the ALPS DMFT publication (contact the authors for a current reference): 
+   E. Gull, P. Werner, S. Fuchs, B. Surer, T. Pruschke, and M. Troyer, submitted to Computer Physics Communications.
+
 Since some of the references are to preprints we would like to ask you 
 to check the ALPS web page http://alps.comp-phys.org/ for updates.
 
