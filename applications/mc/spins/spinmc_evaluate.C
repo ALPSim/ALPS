@@ -27,7 +27,7 @@
 #include <alps/scheduler.h>
 #include <alps/alea.h>
 
-void evaluate(const boost::filesystem::path& p) {
+void evaluate(const boost::filesystem::path& p, const bool write_xml) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
   const alps::ObservableSet& m_in=sim.get_measurements();
@@ -68,27 +68,39 @@ void evaluate(const boost::filesystem::path& p) {
 	dm2=beta*beta*((em2-e*m2)); dm4=beta*beta*((em4-e*m4)); 
   sim << du4; sim << dm2; sim << dm4;
  } }
-   sim.checkpoint(p);
+   sim.checkpoint(p,write_xml);
 }
 
 int main(int argc, char** argv)
 {
+  int i;
+  char write_xml_flag[]="--write-xml";
+  bool write_xml;
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
-
   alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);
-
   if (argc < 2) {
-    std::cerr << "Usage: " << argv[0] << " inputfile1 [intputfile2 [...]]\n";
+    std::cerr << "Usage: " << argv[0] << " [--write-xml] inputfile1 [intputfile2 [...]]\n";
     std::exit(-1);
   }
-  for(int i=1; i<argc; i++)
+
+  if (strcmp(write_xml_flag,argv[1])==0)  {
+   write_xml=true;
+   i=2;
+  }
+  else {
+   write_xml=false;
+   i=1;
+  }
+
+
+  for(; i<argc; i++)
    {
     boost::filesystem::path p =
       boost::filesystem::complete(boost::filesystem::path(argv[i]));
-    evaluate(p);
+    evaluate(p,write_xml);
    }
 
 #ifndef BOOST_NO_EXCEPTIONS
