@@ -8,7 +8,7 @@ if (ALPS_BUILD_SOURCE)
 
   install(DIRECTORY .
           DESTINATION alps/tutorials
-          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml" PATTERN "*input*"
+          FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml" PATTERN "*input*" PATTERN "*parm"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
           PATTERN "*.h5" EXCLUDE  EXCLUDE  PATTERN "parm*xml" EXCLUDE
           PATTERN "*clone*" EXCLUDE
