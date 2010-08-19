@@ -36,7 +36,7 @@
 #include <boost/optional.hpp>
 #include <boost/assert.hpp>
 
-template <class G=typename alps::scheduler::LatticeModelMCRun<>::graph_type, class StateType = uint8_t>
+template <class G=typename alps::scheduler::LatticeModelMCRun<>::graph_type, class StateType = boost::uint8_t>
 class QMCRun : public alps::scheduler::LatticeModelMCRun<G> 
              , public alps::MeasurementOperators
 {
