@@ -33,12 +33,15 @@
 /// @file solver.h
 /// @brief declares the abstract base class for the impurity solver
 
-#include "types.h"
-#include "green_function.h"
-
-#include <alps/parameter.h>
 #include <vector>
 #include <utility>
+
+#include "alps/parameter.h"
+
+#include "types.h"
+#include "green_function.h"
+#include "nambu_green_function.h"
+
 
 /// the base class for all impurity solvers taking a Green's function in imaginary time and returning one also in imaginary time.
 class ImpuritySolver {
@@ -90,6 +93,28 @@ public:
   virtual ~MatsubaraImpuritySolver() {}
 };
 
+class NambuImpuritySolver{
+public:
+  NambuImpuritySolver() {}
+    
+  typedef std::pair<nambu_matsubara_green_function_t,nambu_itime_green_function_t> result_type;
+	
+	///  @brief solves the impurity problem taking both G0_tau and G0_omega
+	///
+	///  @param G0_omega the bare Green's function in Matsubara frequency
+	///  @param G0_tau the bare Green's function in imaginary time
+	///  @param parms the simulation parameters
+	///  
+	///  Note that  mu, U and h are passed as simulation parameters inside parms.
+	/// 
+	///  @return the Green's functions for up and down spins as function of 
+    ///          Matsubara frequency
+    
+  virtual result_type solve_nambu(const nambu_matsubara_green_function_t& G0_omega,
+				  alps::Parameters parms )=0;
+            
+  virtual ~NambuImpuritySolver() {}
+};
 
 
 #endif

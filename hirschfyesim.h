@@ -84,10 +84,6 @@ class HirschFyeRun : public alps::scheduler::MCRun
 public:
 	///
 	HirschFyeRun(const alps::ProcessList&,const alps::Parameters&,int);
-	///store a dump of this simulation
-	void save(alps::ODump&) const;
-	///load a previously saved simulation
-	void load(alps::IDump&);
 	///perform one Hirsch Fye step
 	void dostep();
 	///return true if the simulation has been thermalized

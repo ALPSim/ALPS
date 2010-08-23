@@ -61,6 +61,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
 
 
 void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, DCATransformer& clustertrans);
+void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver& solver, DCATransformer& clustertrans);
 
 #endif
 

@@ -24,8 +24,8 @@
  *****************************************************************************/
 
 
+#include "alps/osiris/comm.h"
 #include "cluster.h"
-#include<alps/osiris/comm.h>
 
 
 ClusterHelper::ClusterHelper(const alps::Parameters& params) :

@@ -113,7 +113,7 @@ int main(int argc, char** argv)
         }
 #endif
         else {
-	  boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
+          boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
           solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
@@ -130,43 +130,43 @@ int main(int argc, char** argv)
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
 #ifdef IGOR
-	if(parms.defined("IGORS_TRANSFORMER")) {
-	  std::cout<<"using Igor's Hilbert transformer\n";
-	  transform_ptr = new IgorsHilbertTransformer();
-	}
-	else 
+        if(parms.defined("IGORS_TRANSFORMER")) {
+          std::cout<<"using Igor's Hilbert transformer\n";
+          transform_ptr = new IgorsHilbertTransformer();
+        }
+        else 
 #endif
-        if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
-          transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
-          std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
-        }else if(parms.defined("TWODBS")){
-          if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
-	      std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
-	    }
-            std::cerr<<"implement PM DOS integration!!"<<std::endl;
-            abort();
-          }else{
-            if((bool)(parms["PARAMAGNET"])==true){ 
-	      std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
-	    }
-            transform_ptr=new TwoDAFMHilbertTransformer(parms);
+          if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
+            transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
+            std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
+          }else if(parms.defined("TWODBS")){
+            if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
+              if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
+                std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
+              }
+              std::cerr<<"implement PM DOS integration!!"<<std::endl;
+              abort();
+            }else{
+              if((bool)(parms["PARAMAGNET"])==true){ 
+                std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
+              }
+              transform_ptr=new TwoDAFMHilbertTransformer(parms);
+            }
           }
-        }
-        else{
-          std::cout<<"using DOS Hilbert transform"<<std::endl;
-          if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
-	      std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
-	    }
-            transform_ptr= new FSDOSHilbertTransformer(parms);
-          }else{
-            if((bool)(parms["PARAMAGNET"])==true){ 
-	      std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
-	    }
-            transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
+          else{
+            std::cout<<"using DOS Hilbert transform"<<std::endl;
+            if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
+              if((bool)(parms.value_or_default("PARAMAGNET",true))==false){ 
+                std::cerr<<"AFM and PM? redundant parameters! set paramagnet to false."<<std::endl; abort();
+              }
+              transform_ptr= new FSDOSHilbertTransformer(parms);
+            }else{
+              if((bool)(parms["PARAMAGNET"])==true){ 
+                std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
+              }
+              transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
+            }
           }
-        }
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
         if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("FLAVORS", "2")=="1")){
@@ -190,7 +190,7 @@ int main(int argc, char** argv)
         else{
           //throw exception or commit suicide or even better: 
           //create an external solver that takes its arguments in frequency space.
-	  boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
+          boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
           solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
           //std::cout<<parms["SOLVER"]<<std::endl;
           //boost::throw_exception(std::logic_error("there is no such solver!"));	
@@ -201,14 +201,23 @@ int main(int argc, char** argv)
     }
     else { //CLUSTER_LOOP
       if (parms["CLUSTER_LOOP"]=="DCA") {
+        if(parms.defined("NAMBU") && parms["NAMBU"]){
+          std::cout<<"preparing a NAMBU DMFT calculation"<<std::endl;
+          boost::shared_ptr<DCATransformer> transform_ptr;
+          DCATransformer::generate_transformer(parms, transform_ptr);
+          boost::shared_ptr<NambuImpuritySolver> solver_ptr;	
+          std::cout<<"setting up external NAMBU solver: "<<parms["SOLVER"]<<std::endl;
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+          selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);        
+        }else{
 #ifdef RUBTSOV
         alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> half_fill_rubtsov_factory; 
         alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory;
 #endif
         //perform self consistency loop in Matsubara frequency omega
         // all gfs are formulated in k-space and are diagonal in k! 
-	boost::shared_ptr<DCATransformer> transform_ptr;
-	DCATransformer::generate_transformer(parms, transform_ptr);
+        boost::shared_ptr<DCATransformer> transform_ptr;
+        DCATransformer::generate_transformer(parms, transform_ptr);
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
         if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="1")){
@@ -223,12 +232,11 @@ int main(int argc, char** argv)
 #endif
           std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
           solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
-          //std::cout<<parms["SOLVER"]<<std::endl;
-          //boost::throw_exception(std::logic_error("there is no such cluster solver!"));	
 #ifdef RUBTSOV
         }
 #endif
         selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);
+        }
       }
       else {
         std::cout<<parms["CLUSTER_LOOP"]<<std::endl;

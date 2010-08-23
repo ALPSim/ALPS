@@ -29,16 +29,19 @@
 
 #ifndef GREEN_FUNCTION_H
 #define GREEN_FUNCTION_H
-#include "types.h"
-#include <fstream>
 #include <iostream>
+#include <fstream>
 #include <stdexcept>
-#include <cassert>
-#include <cstdlib>
-#include <alps/hdf5.hpp>
+
 #ifdef USE_MPI
 #include <mpi.h>
 #endif 
+
+#include <alps/hdf5.hpp>
+
+#include "types.h"
+
+
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
 template <typename T> class green_function{
@@ -210,7 +213,6 @@ template<typename T> void green_function<T>::write(const char *filename) const{
   }
 }
 
-enum shape_t {diagonal, blockdiagonal, nondiagonal};
 
 
 void print_all_green_functions(std::string const &basename, const int iteration_ctr, const matsubara_green_function_t &G0_omega,

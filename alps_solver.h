@@ -33,9 +33,10 @@
 /// @file solver.h
 /// @brief defines the ALPS solvers
 
-#include <alps/scheduler.h>
 #include <vector>
-#include <utility>
+
+#include <alps/scheduler.h>
+
 #include "types.h"
 #include "solver.h"
 
@@ -49,7 +50,7 @@ namespace alps {
 /// Please note that only one such solver may exist. If you have more solvers, 
 /// please use a combined factory.
 
-class ImpuritySolver : public ::ImpuritySolver, public ::MatsubaraImpuritySolver
+class ImpuritySolver : public ::ImpuritySolver, public ::MatsubaraImpuritySolver, public ::NambuImpuritySolver
 {
 public:
   ImpuritySolver(const scheduler::Factory& f, int argc=0, char** argv=0);
@@ -75,6 +76,10 @@ public:
     
   std::pair<matsubara_green_function_t, itime_green_function_t> solve_omega(
       const matsubara_green_function_t& G0_omega,
+    Parameters parms);
+
+  std::pair<nambu_matsubara_green_function_t, nambu_itime_green_function_t> solve_nambu(
+      const nambu_matsubara_green_function_t& G0_omega,
     Parameters parms);
 
 protected:

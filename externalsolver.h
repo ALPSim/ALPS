@@ -37,7 +37,6 @@
 #include "solver.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <cstdio>
 
 /// @brief An impurity solver calling an external executable to solve the 
 ///        impurity problem
@@ -54,6 +53,7 @@
 class ExternalSolver 
  : public ImpuritySolver
  , public MatsubaraImpuritySolver 
+ , public NambuImpuritySolver 
 {
 public:
 	/// @param executable the path to the executable
@@ -66,6 +66,10 @@ public:
     
     MatsubaraImpuritySolver::result_type solve_omega(
               const matsubara_green_function_t& G0_omega
+            , alps::Parameters parms );
+    
+    NambuImpuritySolver::result_type solve_nambu(
+              const nambu_matsubara_green_function_t& G0_omega
             , alps::Parameters parms );
             
 private:

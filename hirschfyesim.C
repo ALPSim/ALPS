@@ -29,16 +29,18 @@
 
 /// @file hirschfyesim.h
 /// @brief the actual Hirsch-Fye simulation
-
-#include "hirschfyesim.h"
-#include "cluster.h"
-#include "fouriertransform.h"
-#include <alps/alea.h>
 #include <cmath>
+
 #include <blas_classes/matrix.h>
 #ifdef FOURPOINT
 #include <blas_classes/vector.h>
 #endif
+
+#include "alps/alea/detailedbinning.h"
+
+#include "hirschfyesim.h"
+#include "cluster.h"
+#include "fouriertransform.h"
 using namespace std;
 using namespace alps;
 
@@ -174,28 +176,6 @@ green_tau(N+1, n_site, 2)
   
 }
 
-
-// in principle, need only save spins (and do update_from_zero after loading)
-void HirschFyeRun::load(alps::IDump& dump) {
-std::cerr<<"implement load first!"<<&dump<<std::endl;
-  abort();
-  
-  /*dump >> sweeps;
-  if(!where.empty()) {// skip reading the spins if we are just evaluating
-    dump >> Green_up >> Green_down >> spins; 	 
-  }
-  else
-    measurements.compact(); // and throw away time series*/
-}
-
-
-void HirschFyeRun::save(alps::ODump& /*dump*/) const
-{
-  //std::cerr<<"implement save first!"<<std::endl;
-  //abort();
-
-  //dump << Green_up << Green_down << spins;
-}
 
 
 bool HirschFyeRun::is_thermalized() const

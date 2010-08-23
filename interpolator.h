@@ -29,7 +29,7 @@
 
 
 #include "cluster.h"
-#include <alps/alea.h>
+#include "alps/parameter.h"
 
 
 

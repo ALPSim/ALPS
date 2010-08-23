@@ -33,17 +33,20 @@
 /// @brief implements the external solver
 /// @sa ExternalSolver
 
-#include "externalsolver.h"
-#include <alps/parser/parser.h>
-#include <alps/utility/vectorio.hpp>
-#include <alps/utility/temporary_filename.hpp>
 #include <cstdlib>
 #include <fstream>
-#include <boost/tuple/tuple.hpp>
-
 #ifdef BOOST_MSVC
 #include <io.h>
 #endif
+
+#include "boost/tuple/tuple.hpp"
+
+#include "alps/parser/parser.h"
+#include "alps/utility/vectorio.hpp"
+#include "alps/utility/temporary_filename.hpp"
+
+#include "externalsolver.h"
+
 
 ImpuritySolver::result_type ExternalSolver::solve(
       const itime_green_function_t& G0
@@ -144,6 +147,68 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   return std::make_pair(G_omega, G_tau);
 }
 
+NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
+              const nambu_matsubara_green_function_t& G0_omega
+            , alps::Parameters p)
+{
+  std::cout<<"solve nambu for external solver!"<<std::endl;
+  BOOST_ASSERT(is_master());
+  std::string infile;
+  std::string outfile;
+  if(p.defined("TMPNAME")){
+    infile=p["TMPNAME"]+std::string(".in.h5");
+    outfile=p["TMPNAME"]+std::string(".out.h5");
+  } else{
+    infile= alps::temporary_filename("alps_external_solver_in_");
+    outfile= alps::temporary_filename("alps_external_solver_out_");
+  }
+  p["INFILE"]=infile;
+  p["OUTFILE"]=outfile;
+  {
+    alps::hdf5::oarchive solver_input(infile);
+    solver_input<<alps::make_pvp("/parameters", p);
+    G0_omega.write_hdf5(solver_input, "/G0");
+  }
+
+  call(infile,outfile);
+
+  unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
+  unsigned int n_tau=(unsigned int)p["N"];
+  unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
+  unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
+  nambu_matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
+  nambu_itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
+  {
+    alps::hdf5::iarchive ar(outfile);
+    G_omega.read_hdf5(ar, "/G_omega");
+    G_tau.read_hdf5(ar, "/G_tau");
+  }
+  //this is a safety check for impurity solvers.
+  for(int f1=0;f1<n_orbital; ++f1){
+    for(int f2=0;f2<n_orbital; ++f2){
+      for(int j=0;j<n_site;++j){
+        for(int k=0;k<n_site;++k){
+          for(int l=0;l<n_tau+1;++l){ 
+            if(std::isnan(G_tau(l,j,k,f1,f2)) || std::isinf(G_tau(l,j,k,f1,f2))) {
+              std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<f1<<" "<<f2<<std::endl;
+              std::cerr<<G_tau(l,j,k,f1,f2)<<" "<<std::endl;
+              throw std::runtime_error("returned imag time Green's function contains nan or inf.");
+            }
+          }
+          for(int l=0;l<n_matsubara;++l){ 
+            if(std::isnan(G_omega(l,j,k,f1,f2).real()) || std::isnan(G_omega(l,j,k,f1,f2).imag())|| std::isinf(G_omega(l,j,k,f1,f2).real()) || std::isinf(G_omega(l,j,k,f1,f2).imag())) {
+              std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<f1<<" "<<f2<<std::endl;
+              std::cerr<<G_omega(l,j,k,f1,f2).real()<<" "<<G_omega(l,j,k,f1,f2).imag()<<std::endl;
+              throw std::runtime_error("returned freq Green's function contains nan or inf.");
+            }
+          }
+        }
+      }
+    }
+  }
+  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  return std::make_pair(G_omega, G_tau);
+}
 
 
 void ExternalSolver::call(std::string const& infile, std::string const& outfile)
@@ -151,7 +216,7 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   
   // call the external solver program
   std::string command = exe_.native_file_string() + " " + infile + " " + outfile;
-  std::cerr << "Calling external solver " << exe_.native_file_string() << "as: "<<command<<std::endl;
+  std::cerr << "Calling external solver " << exe_.native_file_string() << " as: "<<command<<std::endl;
   int result = std::system(command.c_str());
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));

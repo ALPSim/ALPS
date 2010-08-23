@@ -34,7 +34,7 @@ bool adjust_chemical_potential(const double &density, double &mu, bool &damping_
 
 
 matsubara_green_function_t ClusterTransformer::initial_G0(const alps::Parameters& parms) {
-  std::cout<<"reading initial G0_omega"<<std::endl;
+  std::cout<<"reading initial G0_omega from: "<<parms["G0OMEGA_INPUT"]<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
@@ -179,8 +179,8 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
                                                             const matsubara_green_function_t &G0_omega, 
                                                             double &mu, const double h, const double beta)
 {
-  if(h!=0 && G0_omega.nsite()!=1) { 
-    std::cout<<"don't know how to handle magn. fields: h="<<h<<" exiting"<<std::endl; abort(); 
+  if(h!=0) { // && G0_omega.nsite()!=1 <-this not understood - looks like a bug to me.
+    throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting"); 
   }
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
@@ -277,8 +277,8 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor);
   G0_omega_new.clear();
-  if (parms.defined("ISOLATING")) {
-    std::cout <<"calculating isolating G0_omega";
+  if (parms.defined("INSULATING")) {
+    std::cout <<"calculating insulating G0_omega";
     for (frequency_t freq=0; freq<n_matsubara; ++freq) {
       const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
       const std::complex<double> G0 = 1./(iomega_n+mu-dispersion_moments(0));
@@ -301,7 +301,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
       }
     }
     G_omega = G0_omega; 
-    //evoke transformation with G_omega==G0_omega (selfenergy=0)
+    //invoke transformation with G_omega==G0_omega (selfenergy=0)
     G0_omega_new = operator()(G_omega, G0_omega, mu, 0, beta);
   }
   itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
@@ -753,4 +753,173 @@ bool adjust_chemical_potential(const double &n_tot,
     mu_it++;
   }
   return computing_mu?false:true;
+}
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////FUNCTIONS FOR NAMBU SPACE//////////////////////////////////////////////////////////////////////////////////
+nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
+                                                                  const nambu_matsubara_green_function_t &G0_omega, 
+                                                                  double &mu, const double h, const double eta1, const double eta2, const double beta)
+{
+  if(h!=0 ) { 
+    throw std::invalid_argument("don't know how to handle magn. fields, exiting"); 
+  }
+  unsigned int nflavor=G0_omega.nflavor();
+  unsigned int nfreq=G0_omega.nfreq();
+  nambu_matsubara_green_function_t selfenergy(G0_omega);
+  nambu_matsubara_green_function_t G0_omega_new(G0_omega);
+  nambu_matsubara_green_function_t G_omega_lattice(G0_omega);
+  //compute the lattice = cluster self energy
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      std::complex<double> g0_block[4]={G0_omega(freq, kc, kc, 0,0),G0_omega(freq, kc, kc, 0,1),G0_omega(freq, kc, kc, 1,0),G0_omega(freq, kc, kc, 1,1)};
+      std::complex<double>  g_block[4]={ G_omega(freq, kc, kc, 0,0), G_omega(freq, kc, kc, 0,1), G_omega(freq, kc, kc, 1,0), G_omega(freq, kc, kc, 1,1)};
+      std::complex<double> det_g0=g0_block[0]*g0_block[3]-g0_block[1]*g0_block[2];
+      std::complex<double>  det_g= g_block[0]* g_block[3]- g_block[1]* g_block[2];
+      
+      selfenergy(freq,kc,kc,0,0)= g0_block[3]/det_g0 - g_block[3]/det_g;
+      selfenergy(freq,kc,kc,0,1)=-g0_block[1]/det_g0 + g_block[1]/det_g;
+      selfenergy(freq,kc,kc,1,0)=-g0_block[2]/det_g0 + g_block[2]/det_g;
+      selfenergy(freq,kc,kc,1,1)= g0_block[0]/det_g0 - g_block[0]/det_g;
+      
+//      std::cout<<"self energy is: "<<selfenergy(freq,kc,kc,0,0)<<" "<<selfenergy(freq,kc,kc,0,1)<<" "<<selfenergy(freq,kc,kc,1,0)<<" "<<selfenergy(freq,kc,kc,1,1)<<std::endl;
+    }
+  }
+  //compute the lattice Green's function
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      G_omega_lattice(freq, kc, kc, 0,0) = 0.;
+      G_omega_lattice(freq, kc, kc, 0,1) = 0.;
+      G_omega_lattice(freq, kc, kc, 1,0) = 0.;
+      G_omega_lattice(freq, kc, kc, 1,1) = 0.;
+      std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+        vector_type k(dimension());
+        for (unsigned int d=0; d<dimension(); ++d) 
+          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+        double weight = lattice_momentum(kl,dimension());
+        std::complex<double> zeta = iomega_n + mu;
+        //this is the self consistency formula!!! note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
+        //note that this external pairing field is k-independent.
+        std::complex<double> G_omega_latt_inv[4]={zeta-epsilon(k)-selfenergy(freq, kc, kc, 0,0),
+          -selfenergy(freq, kc, kc, 0,1) - std::complex<double>(eta1,-eta2),
+          -selfenergy(freq, kc, kc, 1,0) - std::complex<double>(eta1, eta2),
+          zeta-epsilon(k)-selfenergy(freq, kc, kc, 1,1)};
+          
+        std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
+        G_omega_lattice(freq, kc, kc, 0,0) += weight*G_omega_latt_inv[3]/G0omega_latt_inv_det;
+        G_omega_lattice(freq, kc, kc, 0,1) -= weight*G_omega_latt_inv[1]/G0omega_latt_inv_det;
+        G_omega_lattice(freq, kc, kc, 1,0) -= weight*G_omega_latt_inv[2]/G0omega_latt_inv_det;
+        G_omega_lattice(freq, kc, kc, 1,1) += weight*G_omega_latt_inv[0]/G0omega_latt_inv_det;
+      }
+      G_omega_lattice(freq, kc, kc, 0,0) /= n_cluster_cells();
+      G_omega_lattice(freq, kc, kc, 0,1) /= n_cluster_cells();
+      G_omega_lattice(freq, kc, kc, 1,0) /= n_cluster_cells();
+      G_omega_lattice(freq, kc, kc, 1,1) /= n_cluster_cells();
+//      std::cout<<"G_omega_lattice is: "<<G_omega_lattice(freq,kc,kc,0,0)<<" "<<G_omega_lattice(freq,kc,kc,0,1)<<" "<<G_omega_lattice(freq,kc,kc,1,0)<<" "<<G_omega_lattice(freq,kc,kc,1,1)<<std::endl;
+    }
+  }
+
+  
+  //compute the bath Green's function G0
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      std::complex<double> glatt_block[4]={ G_omega_lattice(freq, kc, kc, 0,0), G_omega_lattice(freq, kc, kc, 0,1), G_omega_lattice(freq, kc, kc, 1,0), G_omega_lattice(freq, kc, kc, 1,1)};
+      std::complex<double> det_glatt= glatt_block[0]* glatt_block[3]- glatt_block[1]* glatt_block[2];
+      std::complex<double> glatt_inv[4]={glatt_block[3]/det_glatt,-glatt_block[1]/det_glatt,-glatt_block[2]/det_glatt,glatt_block[0]/det_glatt};
+      std::complex<double> g0_inv[4]={glatt_inv[0]+selfenergy(freq,kc,kc,0,0), glatt_inv[1]+selfenergy(freq,kc,kc,0,1),glatt_inv[2]+selfenergy(freq,kc,kc,1,0),glatt_inv[3]+selfenergy(freq,kc,kc,1,1)};
+      std::complex<double> det_g0inv=g0_inv[0]*g0_inv[3]-g0_inv[1]*g0_inv[2];
+//      std::cout<<" two dets: "<<det_glatt<<" "<<det_g0inv<<std::endl;
+      G0_omega_new(freq, kc, kc, 0,0) = g0_inv[3]/det_g0inv;
+      G0_omega_new(freq, kc, kc, 0,1) =-g0_inv[1]/det_g0inv;
+      G0_omega_new(freq, kc, kc, 1,0) =-g0_inv[2]/det_g0inv;
+      G0_omega_new(freq, kc, kc, 1,1) = g0_inv[0]/det_g0inv;
+//      std::cout<<"G0_omega_new: "<<G0_omega_new(freq,kc,kc,0,0)<<" "<<G0_omega_new(freq,kc,kc,0,1)<<" "<<G0_omega_new(freq,kc,kc,1,0)<<" "<<G0_omega_new(freq,kc,kc,1,1)<<std::endl;
+   }
+  }
+  return G0_omega_new;
+}
+
+nambu_matsubara_green_function_t ClusterTransformer::initial_G0_nambu(const alps::Parameters& parms) {
+  std::cout<<"reading initial (NAMBU) G0_omega from: "<<parms["G0OMEGA_INPUT"]<<std::endl;
+  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
+  int n_site=boost::lexical_cast<int>(parms["SITES"]);
+  if(n_orbital!=2) throw std::invalid_argument("dunnow how to handle nambu in >2 orbitals!");
+  nambu_matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital);
+  G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+  return G0_omega;
+}
+
+nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const alps::Parameters& parms)
+{
+  if (parms.defined("G0OMEGA_INPUT")){
+    std::ifstream in_file(parms["G0OMEGA_INPUT"].c_str());
+    if(in_file.good()){
+      return ClusterTransformer::initial_G0_nambu(parms);
+    }
+    else
+      std::cout<<"WARNING: Input file "<<parms["G0OMEGA_INPUT"]<<" defined but could not be found, proceeding with free solution."<<std::endl;
+  }
+  //proceed with computation of new G0 if we can't find input G0
+  std::cout<<"calculating initial G0_omega"<<std::endl;
+  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  int n_tau=boost::lexical_cast<int>(parms["N"]);
+  int n_flavor=parms.value_or_default("FLAVORS", 2);
+  double beta = static_cast<double>(parms["BETA"]);
+  double mu = static_cast<double>(parms["MU"]);
+
+  double eta1_init = static_cast<double>(parms["ETA1_INIT"]);
+  double eta2_init = static_cast<double>(parms["ETA2_INIT"]);
+  double h_init = static_cast<double>(parms["H_INIT"]);
+  
+  nambu_matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor);
+  G0_omega_new.clear();
+  if (parms.defined("INSULATING")) {
+    std::cout <<"calculating insulating G0_omega starting solution";
+    for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+      const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+      const std::complex<double> G0 = 1./(iomega_n+mu-dispersion_moments(0));
+      for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
+        for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+          G0_omega_new(freq, kc, kc, 0,0) = G0;
+          G0_omega_new(freq, kc, kc, 1,1) = G0;
+          G0_omega_new(freq, kc, kc, 0,1) = 0.;
+          G0_omega_new(freq, kc, kc, 1,0) = 0.;
+        }
+      }
+    }
+  } 
+  else {
+    nambu_matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
+    nambu_matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
+    G0_omega.clear();
+    for (site_t i=0; i<n_cluster_sites(); ++i) {
+      for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+        G0_omega(freq, i, i, 0,0) = 1.;
+        G0_omega(freq, i, i, 0,1) = 0.;
+        G0_omega(freq, i, i, 1,0) = 0.;
+        G0_omega(freq, i, i, 1,1) = 1.;
+      }
+    }
+    G_omega = G0_omega; 
+    //invoke transformation with G_omega==G0_omega (selfenergy=0)
+    std::cout<<"invoking free transform."<<std::endl;
+    G0_omega_new = operator()(G_omega, G0_omega, mu, h_init, eta1_init, eta2_init, beta);
+  }
+  nambu_itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
+  boost::shared_ptr<FourierTransformer> fourier_ptr;
+  G0_omega_new.write("G0_omega_input");
+  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  fourier_ptr->backward_ft(G0_tau, G0_omega_new);
+  G0_tau.write("G0_tau_input");
+  nambu_matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
+  G0_omega_real.write("G0_omega_input_realspace");
+  nambu_itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
+  G0_tau_real.write("G0_tau_input_realspace");
+  return G0_omega_new;
+}
+nambu_matsubara_green_function_t AntiFerroDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
+                                                                     const nambu_matsubara_green_function_t &G0_omega, 
+                                                                     double &mu, const double h, const double eta1, const double eta2, const double beta){
+  throw std::invalid_argument("antiferro & nambu DCA has not yet been implemented!");
 }

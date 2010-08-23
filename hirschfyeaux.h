@@ -32,56 +32,19 @@
 #ifndef ALPS_DMFT_HIRSCHFYEAUX_H
 #define ALPS_DMFT_HIRSCHFYEAUX_H
 
+#include <iostream>
+#include <cmath>
+
+#include "alps/config.h" // needed to set up correct bindings
+#include "boost/numeric/bindings/ublas.hpp"
+#include "boost/numeric/ublas/io.hpp"
+#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
+
 #include "types.h"
 
-#include <alps/osiris/dump.h>
-#include <alps/osiris/std/vector.h>
-
-#include <alps/config.h> // needed to set up correct bindings
-#include <boost/numeric/bindings/ublas.hpp>
-#include <boost/numeric/ublas/io.hpp>
-#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
-
-#include <stack>
-#include <queue>
-#include <vector>
-#include <iostream>
-#include <algorithm>
-#include <cmath>
 extern "C" void dger_(const void *m, const void* n, const void* alpha,const void*  x, const void* incx, const void*y, const void*  incy,
                       const void* a,const void* lda) ;
-
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
-///@brief Save a matrix
-///@parm odump Alps dump
-///@parm m The dense matrix to be stored
-inline alps::ODump& operator << (alps::ODump& odump, const dense_matrix& m) {
-  odump << m.size1() << m.size2();
-  for (unsigned int i=0; i<m.size1(); i++) {
-  	for (unsigned int j=0; j<m.size2(); j++) {
-  		odump << m(i,j);
-  	}
-  }
-  return odump;
-}
-
-///@brief Restore a matrix
-///@parm idump Alps dump
-///@parm m The matrix to be restored
-inline alps::IDump& operator >> (alps::IDump& idump, dense_matrix& m) {
-  int size1, size2;
-  idump >> size1;
-  idump >> size2;
-  m.resize(size1, size2);
-  for (unsigned int i=0; i<m.size1(); i++) {
-  	for (unsigned int j=0; j<m.size2(); j++) {
-  		idump >> m(i,j);
-  	}
-  }  
-  return idump;
-}
-
-
 /// compute Green's function matrix for a given spin configuration, from Greens
 //function for spins set to zero. Return sign of det.
 double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector<int> & spins, double l);

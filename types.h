@@ -25,16 +25,17 @@
 *
 *****************************************************************************/
 
-//#define uint unsigned int 
-#include<sys/types.h>
 #include<complex>
+#include <vector>
+#include <complex>
+#include <iostream>
+#include<sys/types.h>
+
 /// @file types.h
 /// @brief definition for basic types like vectors that are used throughout the solvers.
 #ifndef TYPES_H_
 #define TYPES_H_
 //includes
-#include <vector>
-#include <complex>
 /// the array (vector) type to store frequence dependent Green's functions and Weiss fields
 typedef std::vector<double> vector_type;
 /// two arrays are needed for a single site problem: one for up and one for down spins
@@ -43,10 +44,6 @@ typedef std::vector<std::complex<double> > complex_vector_type;
 /// variant for two complex vectors.
 typedef std::pair<complex_vector_type,complex_vector_type> multiple_complex_vector_type;
 
-///dense matrix
-//typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
-///complex matrix
-//typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_matrix;
 
 ///same as complex_vector_type
 typedef std::vector<std::complex<double> > complex_vector;
@@ -57,6 +54,9 @@ typedef std::vector<int> int_vector;
 
 ///enum for spin up and spin down
 enum  {up=0, down=1} ;
+///enum for green's function shape
+enum shape_t {diagonal, blockdiagonal, nondiagonal};
+
 ///addressing type for site indices (cluster)
 typedef unsigned int site_t;
 ///addressing type for spin indices

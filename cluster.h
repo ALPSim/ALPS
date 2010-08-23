@@ -26,14 +26,17 @@
 #ifndef ALPS_CLUSTER_H
 #define ALPS_CLUSTER_H
 
+#include "alps/config.h" // needed to set up correct bindings
+#include "boost/numeric/bindings/ublas.hpp"
+#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
+
+#include "alps/lattice/graph_helper.h"
+#include "alps/alea.h"
+
 #include "types.h"
 #include "green_function.h"
+#include "nambu_green_function.h"
 #include "hilberttransformer.h"
-#include <alps/lattice/graph_helper.h>
-
-#include <alps/config.h> // needed to set up correct bindings
-#include <boost/numeric/bindings/ublas.hpp>
-#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 
 
 class ClusterHelper: private alps::graph_helper<alps::graph_helper<>::graph_type>
@@ -122,7 +125,7 @@ private:
 };
 
 
-
+//The Cluster transormer presents a framework for operator(), which does the Hilbert transform..
 class ClusterTransformer : protected ClusterHelper
 {
 public:
@@ -130,13 +133,24 @@ public:
   ClusterHelper(params) {}
   virtual ~ClusterTransformer() {} //pro forma virtual destructor.
   
-  virtual matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
+  ///perform a Hilber transform: given a G and a G0, produce a G0 for the next iteration.
+  virtual       matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
                                                 const matsubara_green_function_t &G0_omega, 
                                                 double &mu, const double h, 
                                                 const double beta)=0; 
-  virtual itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const=0;
-  virtual matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const=0;
-  virtual matsubara_green_function_t initial_G0(const alps::Parameters& parms); 
+  virtual nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t & G_omega, 
+                                                const nambu_matsubara_green_function_t &G0_omega, 
+                                                double &mu, const double h, const double eta1, const double eta2, 
+                                                const double beta)=0; 
+  ///perform symmetrizaton in imaginary time
+  virtual       itime_green_function_t symmetrize(const       itime_green_function_t& G, const bool paramagnet) const=0;
+  virtual nambu_itime_green_function_t symmetrize(const nambu_itime_green_function_t& G, const bool paramagnet) const{ throw std::logic_error("not implemented");}
+  ///perform symmetrizaton in matsubara frequencies time
+  virtual       matsubara_green_function_t symmetrize(const       matsubara_green_function_t& G, const bool paramagnet) const=0;
+  virtual nambu_matsubara_green_function_t symmetrize(const nambu_matsubara_green_function_t& G, const bool paramagnet) const{ throw std::logic_error("not implemented");};
+  ///compute an initial G0.
+  virtual       matsubara_green_function_t initial_G0      (const alps::Parameters& parms); 
+  virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms); 
   
   template<typename T>
   T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
@@ -148,7 +162,7 @@ public:
 };
 
 
-
+//The DCA transormer does the Fourier transforms, dispersions, etc that are needed for the DCA.
 class DCATransformer : public ClusterTransformer
 {
 public:
@@ -156,15 +170,30 @@ public:
   virtual ~DCATransformer(){} //pro forma virtual destructor
   static void generate_transformer(const alps::Parameters& parms, boost::shared_ptr<DCATransformer> &trans_ptr);
   
+  //symmetrization in real momentum space - for the normal GF
   template<typename T> green_function<T> symmetrize_real_space(const green_function<T>& G) const 
   { return symmetrize_helper(G, pair_classes_real_space()); }
   template<typename T> green_function<T> symmetrize_k_space(const green_function<T>& G) const 
   { return symmetrize_helper(G, pair_classes_k_space()); }
+
+  //symmetrization in real and momentum space - for the NAMBU GF
+    template<typename T> nambu_green_function<T> symmetrize_real_space(const nambu_green_function<T>& G) const 
+  { return symmetrize_helper(G, pair_classes_real_space()); }
+  template<typename T> nambu_green_function<T> symmetrize_k_space(const nambu_green_function<T>& G) const 
+  { return symmetrize_helper(G, pair_classes_k_space()); }
+
   
+  //Real space and k-space transformers for the Green's functions
   virtual matsubara_green_function_t transform_into_real_space(const matsubara_green_function_t& G) const=0; 
   virtual matsubara_green_function_t transform_into_k_space(const matsubara_green_function_t& G) const=0;
   virtual itime_green_function_t transform_into_real_space(const itime_green_function_t& G) const=0; 
   virtual itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const=0;
+  //Real space and k-space transformers for the Nambu Green's function
+  virtual nambu_matsubara_green_function_t transform_into_real_space(const nambu_matsubara_green_function_t& G) const=0; 
+  virtual nambu_matsubara_green_function_t transform_into_k_space(const nambu_matsubara_green_function_t& G) const=0;
+  virtual nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const=0;
+  virtual nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const=0;
+
   virtual matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_fourpoint,
                                                          const matsubara_green_function_t& G_omega, 
                                                          const matsubara_green_function_t& G0_omega, 
@@ -173,6 +202,14 @@ public:
   virtual alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
                                                 const double beta, const double mu, 
                                                 const bool error_propagation, const bool paramagnet)=0;
+  //Hilbert transform operator
+  virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
+                                        const matsubara_green_function_t &G0_omega, 
+                                        double &mu, const double h, const double beta)=0;
+  //Hilbert transform operator for Nambu GF
+  virtual nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega, 
+                                        const nambu_matsubara_green_function_t &G0_omega, 
+                                        double &mu, const double h, const double eta1, const double eta2, const double beta)=0;
   
   std::complex<double>* exp_iksite(const int sign) const;
   int* momentum_translation() const;
@@ -238,6 +275,10 @@ private:
   green_function<T> symmetrize_helper(const green_function<T>& G, 
                                       const std::pair<std::set<pair_class_type>::const_iterator, 
                                       std::set<pair_class_type>::const_iterator> pair_classes) const;
+  template<typename T>
+  nambu_green_function<T> symmetrize_helper(const nambu_green_function<T>& G, 
+                                      const std::pair<std::set<pair_class_type>::const_iterator, 
+                                      std::set<pair_class_type>::const_iterator> pair_classes) const;
   const double t_, t2_, t3_, t4_;
   double bandwidth_;
   double bandwidth_scale_factor_;
@@ -248,7 +289,7 @@ private:
 };
 
 
-
+//does the DCA cluster transform for the paramagnetic phase (no AFM order)
 class SimpleDCATransformer : public DCATransformer
 {
 public:
@@ -259,10 +300,16 @@ public:
   {
     params_ptr_=&params;
   }
-  
-  matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
+  //Hilbert transform operator
+       matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
                                         const matsubara_green_function_t &G0_omega, 
                                         double &mu, const double h, const double beta);
+  //Hilbert transform operator for Nambu GF
+  nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega, 
+                                        const nambu_matsubara_green_function_t &G0_omega, 
+                                        double &mu, const double h, const double eta1, const double eta2, const double beta);
+
+  //spin symmetrization functions
   itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
   { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
@@ -275,9 +322,24 @@ public:
   { return transform_coordinates<double, Backward>(G); }
   itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const 
   { return transform_coordinates<double, Forward>(G); }
-  
-  
-  matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
+
+   //spin symmetrization functions in Nambu space
+  nambu_itime_green_function_t symmetrize(const nambu_itime_green_function_t& G, const bool paramagnet) const
+  { return spin_symmetrizer(G, paramagnet); }
+  nambu_matsubara_green_function_t symmetrize(const nambu_matsubara_green_function_t& G, const bool paramagnet) const
+  { return spin_symmetrizer(G, paramagnet); }
+  nambu_matsubara_green_function_t transform_into_real_space(const nambu_matsubara_green_function_t& G) const 
+  { return transform_coordinates<std::complex<double>, Backward>(G); }
+  nambu_matsubara_green_function_t transform_into_k_space(const nambu_matsubara_green_function_t& G) const 
+  { return transform_coordinates<std::complex<double>, Forward>(G); }
+  nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const 
+  { return transform_coordinates<double, Backward>(G); }
+  nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const 
+  { return transform_coordinates<double, Forward>(G); }
+ 
+  //initial G0
+        matsubara_green_function_t initial_G0      (const alps::Parameters& parms);  
+  nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms);  
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& G_omega_foupoint,
                                                  const matsubara_green_function_t &G_omega, 
                                                  const matsubara_green_function_t &G0_omega, 
@@ -292,9 +354,13 @@ public:
   
 private:
   template<typename T, class D>
-  green_function<T> transform_coordinates(const green_function<T>& G) const;
+        green_function<T> transform_coordinates(const       green_function<T>& G) const;
+  template<typename T, class D>
+  nambu_green_function<T> transform_coordinates(const nambu_green_function<T>& G) const;
   template <class T>
   green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
+  template <class T>
+  nambu_green_function<T> spin_symmetrizer(const nambu_green_function<T>& G, const bool paramagnet) const;
   matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const unsigned int nt) const;
   template<typename T>
   green_function<T> fourpoint_green_function_add(const green_function<T>& G1, 
@@ -324,6 +390,9 @@ public:
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
                                         const matsubara_green_function_t &G0_omega, 
                                         double &mu, const double h, const double beta);
+  nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega, 
+                                        const nambu_matsubara_green_function_t &G0_omega, 
+                                        double &mu, const double h, const double eta1, const double eta2, const double beta);
   itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
   { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const
@@ -337,6 +406,16 @@ public:
   itime_green_function_t transform_into_k_space(const itime_green_function_t& G) const 
   { return transform_coordinates<double, Forward>(G); }
   
+  nambu_matsubara_green_function_t transform_into_real_space(const nambu_matsubara_green_function_t& G) const {throw std::logic_error("AFM NAMBU not implemented.");}
+  //{ return transform_coordinates<std::complex<double>, Backward>(G); }
+  nambu_matsubara_green_function_t transform_into_k_space(const nambu_matsubara_green_function_t& G) const {throw std::logic_error("AFM NAMBU not implemented.");}
+  //{ return transform_coordinates<std::complex<double>, Forward>(G); }
+  nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const {throw std::logic_error("AFM NAMBU not implemented.");}
+  //{ return transform_coordinates<double, Backward>(G); }
+  nambu_itime_green_function_t transform_into_k_space(const nambu_itime_green_function_t& G) const {throw std::logic_error("AFM NAMBU not implemented.");}
+  //{ return transform_coordinates<double, Forward>(G); }
+
+
   matsubara_green_function_t initial_G0(const alps::Parameters& parms);  
   matsubara_green_function_t transform_fourpoint(const matsubara_green_function_t& /*G_omega_fourpoint*/,
                                                  const matsubara_green_function_t& G_omega, 
@@ -548,6 +627,12 @@ struct SimpleDCATransformer::Forward {
                   double factor) {
     G_new(t, k, k, flavor) += factor * G(t, i, j, flavor);
   }
+  template<typename T>
+  static void add(nambu_green_function<T>& G_new, const nambu_green_function<T>& G, 
+                  const itime_index_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor1, const spin_t flavor2,
+                  double factor) {
+    G_new(t, k, k, flavor1,flavor2) += factor * G(t, i, j, flavor1,flavor2);
+  }
 };
 
 
@@ -558,6 +643,12 @@ struct SimpleDCATransformer::Backward {
                   const itime_index_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor,
                   double factor) {
     G_new(t, i, j, flavor) += factor * G(t, k, k, flavor);
+  }
+  template<typename T>
+  static void add(nambu_green_function<T>& G_new, const nambu_green_function<T>& G, 
+                  const itime_index_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor1, const spin_t flavor2,
+                  double factor) {
+    G_new(t, i, j, flavor1, flavor2) += factor * G(t, k, k, flavor1, flavor2);
   }
 };
 
@@ -899,5 +990,76 @@ green_function<T> AntiFerroDCATransformer::green_function_divide(const green_fun
   return G;
 }
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+//////////////////////////////////FUNCTIONS FOR NAMBU SPACE//////////////////////////////////////////////////////////////////////////////////
+
+template<class T>
+nambu_green_function<T> SimpleDCATransformer::spin_symmetrizer(const nambu_green_function<T>& G, const bool paramagnet) const
+{
+  std::cerr<<"spin symmetrizer: this function will need to be checked. In particular the off-diag entries, and away from 1/2 filling."<<std::endl;
+  //throw std::runtime_error("this function will need to be checked. In particular the off-diag entries.");
+  nambu_green_function<T> G_new(G);
+  if (paramagnet) {
+      for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
+        for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
+          for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+            G_new(freq, k1, k2, 0,0)= 0.5*(G(freq, k1, k2, 0,0)+G_new(freq, k1, k2, 1,1));
+            G_new(freq, k1, k2, 1,1)= 0.5*(G(freq, k1, k2, 0,0)+G_new(freq, k1, k2, 1,1));
+          }
+        }
+      }
+  }
+  return G_new;
+}
+template<typename T, class D>
+nambu_green_function<T> SimpleDCATransformer::transform_coordinates(const nambu_green_function<T>& G) const 
+{
+  unsigned int nsite=G.nsite();
+  unsigned int nt=G.ntime();
+  assert(nsite==n_cluster_sites());
+  nambu_green_function<T> G_new(nt, nsite, 2);
+  G_new.clear();
+  for (site_t k=0; k<nsite; ++k) {
+    for (site_t i=0; i<nsite; ++i) {
+      for (site_t j=0; j<nsite; ++j) {
+        double phase = 0.;
+        for (unsigned int d=0; d<dimension(); ++d) 
+          phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
+        for (itime_index_t t=0; t<nt; ++t) {
+          D::add(G_new, G, t, i, j, k, 0,0, cos(phase)/double(nsite));
+          D::add(G_new, G, t, i, j, k, 0,1, cos(phase)/double(nsite));
+          D::add(G_new, G, t, i, j, k, 1,0, cos(phase)/double(nsite));
+          D::add(G_new, G, t, i, j, k, 1,1, cos(phase)/double(nsite));
+        }
+      }
+    }
+  }
+  return G_new;
+}
+template<typename T>
+nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_function<T>& G, 
+                                                    const std::pair<std::set<pair_class_type>::const_iterator, 
+                                                    std::set<pair_class_type>::const_iterator> pair_classes) const
+{
+  unsigned int nsite=G.nsite();
+  unsigned int nfreq=G.nfreq();
+  nambu_green_function<T> G_new(nfreq, nsite, 2);
+  std::set<pair_class_type>::const_iterator itc, itc_end;
+  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    for (spin_t f1=0; f1<2; ++f1) {
+      for (spin_t f2=0; f2<2; ++f2) {
+        for (frequency_t freq=0; freq<nfreq; ++freq) {
+          T av=0;
+          for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+            av += G(freq, it->first, it->second, f1,f2);
+          av /= itc->size();
+          for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+            G_new(freq, it->first, it->second, f1,f2) = av;
+        }
+      }
+    }
+  }
+  return G_new;
+}
 
 #endif /*ALPS_CLUSTER_H*/

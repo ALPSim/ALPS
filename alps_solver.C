@@ -26,16 +26,17 @@
 *****************************************************************************/
 
 /* $Id$ */
-
-#include "alps_solver.h"
-#include "types.h"
-#include <boost/assert.hpp>
-#include <alps/osiris/comm.h>
-#include <alps/scheduler/options.h>
-#include <alps/utility/temporary_filename.hpp>
 #include <vector>
 #include <utility>
 #include <sstream>
+
+#include "boost/assert.hpp"
+#include "alps/osiris/comm.h"
+#include "alps/scheduler/options.h"
+#include "alps/utility/temporary_filename.hpp"
+
+#include "alps_solver.h"
+#include "types.h"
 
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
 {
@@ -168,5 +169,53 @@ std::pair<matsubara_green_function_t, itime_green_function_t> alps::ImpuritySolv
   return std::make_pair(G_omega, G_tau);
 }
 
+std::pair<nambu_matsubara_green_function_t, nambu_itime_green_function_t> alps::ImpuritySolver::solve_nambu(
+                 const nambu_matsubara_green_function_t& G0_omega
+               , Parameters p)
+{
+  throw std::logic_error("so far we have no NAMBU alps solvers - check if you really want to be here!");
+  BOOST_ASSERT(is_master());
+  std::string infile = alps::temporary_filename("alps_external_solver_");
+  std::string outfile = alps::temporary_filename("alps_external_solver_out_");
+  if(p.defined("TMPNAME")){
+    infile=p["TMPNAME"]+std::string(".in.h5");
+    outfile=p["TMPNAME"]+std::string(".out.h5");
+  }
+  p["INFILE"]=infile;
+  p["OUTFILE"]=outfile;
+
+  {
+    alps::hdf5::oarchive solver_input(infile);
+    solver_input<<alps::make_pvp("/parameters", p);
+    G0_omega.write_hdf5(solver_input, "/G0");
+  }
+
+  int res=solve_it(p);
+  if (res)
+    boost::throw_exception(
+      std::runtime_error(" solver finished with nonzero exit code"));
+    
+  // now extract the results
+      dynamic_cast<MatsubaraImpurityTask*>(get_task())
+        ->get_result();
+
+  // read the output
+
+  unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
+  unsigned int n_tau=(unsigned int)p["N"];
+  unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
+  unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
+  nambu_matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
+  nambu_itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
+  {
+    alps::hdf5::iarchive ar(outfile);
+    G_omega.read_hdf5(ar, "/G_omega");
+    G_tau.read_hdf5(ar, "/G_tau");
+  }
+ 
+  clear(); // destroy the simulation
+  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  return std::make_pair(G_omega, G_tau);
+}
 
 

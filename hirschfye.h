@@ -36,7 +36,6 @@
 
 #include "solver.h"
 #include <boost/filesystem/path.hpp>
-#include <cstdio>
 
 /// An impurity solver using the Hirsch-Fye algorithm
 class HirschFyeSolver : public ImpuritySolver {
