@@ -763,6 +763,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   if(h!=0 ) { 
     throw std::invalid_argument("don't know how to handle magn. fields, exiting"); 
   }
+          if(dimension()!=2 && (eta1 !=0 || eta2 !=0)) throw std::invalid_argument("not clear what to do with dwave symmetry away from dimension 2");
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
   nambu_matsubara_green_function_t selfenergy(G0_omega);
@@ -797,12 +798,13 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
         for (unsigned int d=0; d<dimension(); ++d) 
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
         double weight = lattice_momentum(kl,dimension());
+        double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
         std::complex<double> zeta = iomega_n + mu;
         //this is the self consistency formula!!! note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         //note that this external pairing field is k-independent.
         std::complex<double> G_omega_latt_inv[4]={zeta-epsilon(k)-selfenergy(freq, kc, kc, 0,0),
-          -selfenergy(freq, kc, kc, 0,1) - std::complex<double>(eta1,-eta2),
-          -selfenergy(freq, kc, kc, 1,0) - std::complex<double>(eta1, eta2),
+          -selfenergy(freq, kc, kc, 0,1) - dwave_prefactor*std::complex<double>(eta1,-eta2),
+          -selfenergy(freq, kc, kc, 1,0) - dwave_prefactor*std::complex<double>(eta1, eta2),
           zeta-epsilon(k)-selfenergy(freq, kc, kc, 1,1)};
           
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
