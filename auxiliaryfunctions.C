@@ -38,22 +38,6 @@
 
 
 
-std::ostream &operator<<(std::ostream &os, const double_vector &v){
-  os<<std::setprecision(20);
-  for(unsigned int i=0;i<v.size();++i)
-    os<<i<<"\t"<<v[i]<<std::endl;
-  return os;
-}
-
-std::ostream &operator<<(std::ostream &os, const complex_vector &v){
-  os<<std::setprecision(20);
-  for(unsigned int i=0;i<v.size();++i)
-    os<<i<<"\t"<<v[i].real()<<"\t"<<v[i].imag()<<std::endl;
-  return os;
-}
-
-
-
 
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape)
 {
@@ -292,6 +276,21 @@ std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
   }
   return os;
 }
+std::ostream &operator<<(std::ostream &os, const nambu_green_function<double> &v){
+  os<<std::setprecision(20);
+  for(unsigned int o=0;o<v.nfreq();++o){
+    os<<o<<"\t";
+    for(unsigned int i=0;i<v.nsite();++i)
+      for(unsigned int j=0;j<v.nsite();++j)
+        for(unsigned int z1=0;z1<v.nflavor();++z1)
+        for(unsigned int z2=0;z2<v.nflavor();++z2)
+          os<<v(o,i,j,z1,z2)<<"\t";
+    os<<std::endl;
+    
+  }
+  return os;
+}
+
 std::istream &operator>>(std::istream &is, green_function<double> &v){
   double index;
   for(unsigned int o=0;o<v.nfreq();++o){

@@ -455,11 +455,15 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     fourier_ptr->backward_ft(G0_tau, G0_omega);
     std::cout<<"running NAMBU solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_nambu(G0_omega, parms);
-    std::cout<<"applying point group symmetries"<<std::endl<<std::flush;    
+    std::cout<<"applying point group symmetries"<<std::endl<<std::flush;
+    std::ofstream G_tau_before_symmetrize("G_tau_before_symmetrize.dat"); G_tau_before_symmetrize<<G_tau;
     G_tau = clustertrans.symmetrize(G_tau, paramagnet);
+    std::ofstream G_tau_before_symmetrize_kspace("G_tau_before_symmetrize_kspace.dat"); G_tau_before_symmetrize_kspace<<G_tau;
+    //G_tau = clustertrans.symmetrize_k_space(G_tau); //<- this would symmetrize away the d-wave behavior!
+    std::ofstream G_tau_after_symmetrize_kspace("G_tau_after_symmetrize_kspace.dat"); G_tau_after_symmetrize_kspace<<G_tau;
+exit(0);
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     G_omega = clustertrans.symmetrize_k_space(G_omega);
-    G_tau = clustertrans.symmetrize_k_space(G_tau);
     
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, eta1, eta2, beta);

@@ -1003,8 +1003,10 @@ nambu_green_function<T> SimpleDCATransformer::spin_symmetrizer(const nambu_green
       for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
         for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
           for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
-            G_new(freq, k1, k2, 0,0)= 0.5*(G(freq, k1, k2, 0,0)+G_new(freq, k1, k2, 1,1));
-            G_new(freq, k1, k2, 1,1)= 0.5*(G(freq, k1, k2, 0,0)+G_new(freq, k1, k2, 1,1));
+            G_new(freq, k1, k2, 0,0)= 0.5*(G(freq, k1, k2, 0,0)+G(freq, k1, k2, 1,1));
+            G_new(freq, k1, k2, 1,1)= G_new(freq, k1, k2, 0,0);
+            G_new(freq, k1, k2, 0,1)= G(freq, k1, k2, 0,1);
+            G_new(freq, k1, k2, 1,0)= G(freq, k1, k2, 1,0);
           }
         }
       }
