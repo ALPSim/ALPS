@@ -4,6 +4,26 @@
 #
 #
 
+option(BUILD_BOOST_DATE_TIME "Build Boost Date Time" TRUE)
+option(BUILD_BOOST_FILESYSTEM "Build Boost Filesystem" TRUE)
+option(BUILD_BOOST_PROGRAM_OPTIONS "Build Boost Program Options" TRUE)
+option(BUILD_BOOST_REGEX "Build Boost Regex" TRUE)
+option(BUILD_BOOST_SERIALIZATION "Build Boost Serialization" TRUE)
+option(BUILD_BOOST_SYSTEM "Build Boost System" TRUE)
+option(BUILD_BOOST_PYTHON "Build Boost Python" TRUE)
+option(BUILD_BOOST_THREAD "Build Boost Thread" TRUE)
+option(BUILD_BOOST_TEST "Build Boost Test" TRUE)
+
+mark_as_advanced(BUILD_BOOST_DATE_TIME)
+mark_as_advanced(BUILD_BOOST_FILESYSTEM)
+mark_as_advanced(BUILD_BOOST_PROGRAM_OPTIONS)
+mark_as_advanced(BUILD_BOOST_REGEX)
+mark_as_advanced(BUILD_BOOST_SERIALIZATION)
+mark_as_advanced(BUILD_BOOST_SYSTEM)
+mark_as_advanced(BUILD_BOOST_PYTHON)
+mark_as_advanced(BUILD_BOOST_THREAD)
+mark_as_advanced(BUILD_BOOST_THREAD)
+
 if (NOT Boost_ROOT_DIR)
   if(BOOST_ROOT)
     find_path(Boost_ROOT_DIR "libs/filesystem/src/path.cpp" PATHS ${BOOST_ROOT})
