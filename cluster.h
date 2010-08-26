@@ -996,15 +996,17 @@ green_function<T> AntiFerroDCATransformer::green_function_divide(const green_fun
 template<class T>
 nambu_green_function<T> SimpleDCATransformer::spin_symmetrizer(const nambu_green_function<T>& G, const bool paramagnet) const
 {
-  std::cerr<<"spin symmetrizer: this function will need to be checked. In particular the off-diag entries, and away from 1/2 filling."<<std::endl;
+  std::cerr<<"spin symmetrizer: this function will need to be checked. In particular the off-diag entries, and away from 1/2 filling. For now: doing nothing."<<std::endl;
   //throw std::runtime_error("this function will need to be checked. In particular the off-diag entries.");
   nambu_green_function<T> G_new(G);
   if (paramagnet) {
       for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
         for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
           for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
-            G_new(freq, k1, k2, 0,0)= 0.5*(G(freq, k1, k2, 0,0)+G(freq, k1, k2, 1,1));
-            G_new(freq, k1, k2, 1,1)= G_new(freq, k1, k2, 0,0);
+            /*G_new(freq, k1, k2, 0,0)= 0.5*(G(freq, k1, k2, 0,0)+G(freq, k1, k2, 1,1));
+            G_new(freq, k1, k2, 1,1)= G_new(freq, k1, k2, 0,0);*/
+            G_new(freq, k1, k2, 0,0)= G(freq, k1, k2, 0,0);
+            G_new(freq, k1, k2, 1,1)= G(freq, k1, k2, 1,1);
             G_new(freq, k1, k2, 0,1)= G(freq, k1, k2, 0,1);
             G_new(freq, k1, k2, 1,0)= G(freq, k1, k2, 1,0);
           }
