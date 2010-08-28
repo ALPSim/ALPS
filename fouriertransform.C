@@ -101,13 +101,13 @@ void FourierTransformer::backward_ft(nambu_itime_green_function_t &G_tau,
           G_omega_no_model(k,s1,s2,0,0) -= f_omega(iw, c1_[0][s1][s2],c2_[0][s1][s2], c3_[0][s1][s2]);
           G_omega_no_model(k,s1,s2,0,1) -= 0;
           G_omega_no_model(k,s1,s2,1,0) -= 0;
-          G_omega_no_model(k,s1,s2,1,1) -= f_omega(iw, c1_[1][s1][s2],c2_[1][s1][s2], c3_[1][s1][s2]);
+          G_omega_no_model(k,s1,s2,1,1) -= f_omega(iw, c1_[1][s1][s2],-c2_[1][s1][s2], c3_[1][s1][s2]); //the '-' here is because we have Nambu notation.
         } 
         for (unsigned int i=0; i<N_tau; i++) {
           G_tau(i,s1,s2,0,0) = f_tau(i*dt, beta_, c1_[0][s1][s2], c2_[0][s1][s2], c3_[0][s1][s2]); 
           G_tau(i,s1,s2,0,1) = 0; 
           G_tau(i,s1,s2,1,0) = 0; 
-          G_tau(i,s1,s2,1,1) = f_tau(i*dt, beta_, c1_[1][s1][s2], c2_[1][s1][s2], c3_[1][s1][s2]); 
+          G_tau(i,s1,s2,1,1) = f_tau(i*dt, beta_, c1_[1][s1][s2], -c2_[1][s1][s2], c3_[1][s1][s2]); 
           for (unsigned int k=0; k<N_omega; k++) {
             double wt((2*k+1)*i*M_PI/N_tau);
             G_tau(i,s1,s2,0,0) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,0,0).real()+sin(wt)*G_omega_no_model(k,s1,s2,0,0).imag());

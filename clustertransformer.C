@@ -805,7 +805,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
         std::complex<double> G_omega_latt_inv[4]={zeta-epsilon(k)-selfenergy(freq, kc, kc, 0,0),
           -selfenergy(freq, kc, kc, 0,1) - dwave_prefactor*std::complex<double>( eta1, eta2),
           -selfenergy(freq, kc, kc, 1,0) - dwave_prefactor*std::complex<double>( eta1,-eta2),            //note the '+', which flips F(tau) to F(-tau)
-          -std::conj(zeta-epsilon(k))-selfenergy(freq, kc, kc, 1,1)};                                   //the -std::conj() flips the real part - Nambu
+          zeta-epsilon(k)-selfenergy(freq, kc, kc, 1,1)};                                                //
           
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
         G_omega_lattice(freq, kc, kc, 0,0) += weight*G_omega_latt_inv[3]/G0omega_latt_inv_det;
