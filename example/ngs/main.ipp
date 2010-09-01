@@ -32,7 +32,6 @@ int main(int argc, char *argv[]) {
     alps::mcoptions options(argc, argv);
     if (options.valid && options.type == alps::mcoptions::SINGLE) {
         alps::parameters_type<simulation_type>::type params(options.input_file);
-        std::string seed = params["SWEEPS"];
         simulation_type s(params);
         s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
         s.save_collected(options.output_file);
