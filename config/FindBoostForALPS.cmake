@@ -20,14 +20,10 @@ if (NOT Boost_ROOT_DIR)
   #  set(Boost_USE_STATIC_LIBS ON)
   # Debug flag for FindBoost.cmake
   #  set(Boost_DEBUG TRUE)
-  if (APPLE)
-    find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
-    if (NOT Boost_FOUND)
-      find_package(boost 1.42.0 COMPONENTS date_time-mt filesystem-mt program_options-mt python-mt regex-mt system-mt serialization-mt thread-mt mpi-mt)
-    endif(NOT Boost_FOUND)
-  else(APPLE)
-    find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
-  endif(APPLE)
+  find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
+  if (APPLE AND NOT Boost_FOUND)
+    find_package(boost COMPONENTS date_time-mt filesystem-mt program_options-mt python-mt regex-mt system-mt serialization-mt thread-mt mpi-mt)
+  endif(APPLE AND NOT Boost_FOUND)
 endif(NOT Boost_ROOT_DIR)
 
 # Boost_FOUND is set only when FindBoost.cmake succeeds.
