@@ -38,8 +38,6 @@ import pyalps.pytools as pt # the C++ conversion functions
 # or the C++ class as alternative
 from pyalps.pyalea import MCScalarData as fwe
 from pyalps.pyalea import MCVectorData as vwe
-from pyalps.pyalea import VectorOfMCData as vfwe
-from pyalps.pyalea import MCVectorData2VectorOfMCData as convert2vfwe
 
 def parse_label(label):
     if '--' in label:

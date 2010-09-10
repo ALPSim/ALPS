@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-file(WRITE tmp_${cmd}.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib python ${sourcedir}/${cmd}")
+file(WRITE tmp_${cmd}.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${sourcedir}/lib python ${cmddir}/${cmd}")
 
 execute_process(
     COMMAND sh tmp_${cmd}.sh
@@ -12,7 +12,7 @@ execute_process(
     TIMEOUT 600
 )
 
-file(REMOVE tmp_${cmd}.sh)
+# file(REMOVE tmp_${cmd}.sh)
 
 if(not_successful)
     message(SEND_ERROR "error runing test '${cmd}': ${err}; shell output: ${not_successful}!")

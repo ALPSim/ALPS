@@ -25,5 +25,5 @@
 # 
 # ****************************************************************************
 
-from pyalea_c import *
-from pymcdata_c import *
+from pyhdf5_c import *
+
