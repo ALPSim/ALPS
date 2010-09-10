@@ -12,7 +12,7 @@ execute_process(
     TIMEOUT 600
 )
 
-# file(REMOVE tmp_${cmd}.sh)
+file(REMOVE tmp_${cmd}.sh)
 
 if(not_successful)
     message(SEND_ERROR "error runing test '${cmd}': ${err}; shell output: ${not_successful}!")
