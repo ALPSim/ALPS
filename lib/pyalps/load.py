@@ -437,7 +437,6 @@ class Hdf5Loader:
                 if (type(m.y) == type(vwe())):
                     if verbose: print "Loading vector mcdata for ", m.props['observable'], " from HDF5"
                     m.y.load(f, m.props['hdf5_path'])
-                    m.y = convert2vfwe(m.y)
                 elif (len(m.y) > 0 and type(d.y[0]) == type(fwe())):
                     if verbose: print "Loading scalar mcdata for ", m.props['observable'], " from HDF5"
                     m.y[0].load(f, m.props['hdf5_path'])
