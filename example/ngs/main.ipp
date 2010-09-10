@@ -48,8 +48,7 @@ int main(int argc, char *argv[]) {
         if (options.reload)
             s.load(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
         s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
-        if (options.reload)
-            s.save(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
+        s.save(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
         s.save_collected(options.output_file);
         alps::results_type<alps::mcmpisim<simulation_type> >::type results = collect_results(s);
         for (alps::results_type<alps::mcmpisim<simulation_type> >::type::const_iterator it = results.begin(); it != results.end(); ++it)

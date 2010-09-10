@@ -45,11 +45,11 @@ void IsingSimulation::print_copyright(std::ostream& out)
 
 IsingSimulation::IsingSimulation(parameters_type const & p, std::size_t seed_offset)
   : alps::mcdeprecated(p, seed_offset)
-  , length(static_cast<alps::uint32_t>(p["L"]))
+  , length(static_cast<long>(p["L"]))
   , beta(1./static_cast<double>(p["T"]))
   , sweeps(0)
-  , thermalization_sweeps(static_cast<alps::uint32_t>(p["THERMALIZATION"]))
-  , total_sweeps(static_cast<alps::uint32_t>(p["SWEEPS"]))
+  , thermalization_sweeps(static_cast<long>(p["THERMALIZATION"]))
+  , total_sweeps(static_cast<long>(p["SWEEPS"]))
   , spins(length)
 {
   // initialize random spin configuration
