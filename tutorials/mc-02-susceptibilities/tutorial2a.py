@@ -30,6 +30,7 @@ import matplotlib.pyplot as plt
 import pyalps.pyplot
 
 #prepare the input parameters
+#skip this part if you already ran the simulation from the command line
 parms = []
 for t in [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
     parms.append(
@@ -46,8 +47,10 @@ for t in [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.7
     )
 
 #write the input file and run the simulation
+#skip this part if you already ran the simulation from the command line
 input_file = pyalps.writeInputFiles('parm2a',parms)
 pyalps.runApplication('spinmc',input_file,Tmin=5)
+
 
 #load the susceptibility and collect it as function of temperature T
 data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm2a'),'Susceptibility')

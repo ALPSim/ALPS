@@ -29,6 +29,7 @@ import pyalps
 import matplotlib.pyplot as plt
 import pyalps.pyplot
 
+#### SPLIT THIS !!!! ####
 #prepare the input parameters
 parms = []
 for t in [1.5,2,2.5]:
@@ -68,13 +69,13 @@ plt.ylim(0,1)
 plt.title('Ising model')
 plt.show()
 
-# convert the data to text file foir plotting using another tool
+# convert the data to text file for plotting using another tool
 print pyalps.pyplot.convertToText(plotdata)
 
-# convert the data to grace file foir plotting using xmgrace
+# convert the data to grace file for plotting using xmgrace
 print pyalps.pyplot.makeGracePlot(plotdata)
 
-# convert the data to gnuplot file foir plotting using gnuplot
+# convert the data to gnuplot file for plotting using gnuplot
 print pyalps.pyplot.makeGnuplotPlot(plotdata)
 
 #calculate the Binder cumulants using jackknife-analysis

@@ -75,8 +75,8 @@ template <class G> inline double interpolate_F(double t, double BETA, G& F) {
 
 
 // compute distances up/down to the next segment and iterators of these segments
-// note: s_down always points to a physical segment, while s_up may point to segments.end() 
-template <class S> void compute_intervals(double t, double BETA, double& t_up, double& t_down, S& segments, typename S::iterator & s_up, typename S::iterator& s_down) {  
+template <class S> 
+void compute_intervals(double t, double BETA, double& t_up, double& t_down, S& segments, typename S::iterator & s_up, typename S::iterator& s_down) {  
   
   if (segments.size() == 0) {
     t_up = BETA;
@@ -117,7 +117,8 @@ template <class S> void compute_intervals(double t, double BETA, double& t_up, d
 
 // compute overlap between a segment and a list of segments
 // requires segment with 0<=t_begin<t_end<=BETA
-template <class S> inline double segment_overlap(times segment, const S& other_segments, int other_full_line, double BETA) {
+template <class S> 
+double segment_overlap(times segment, S const& other_segments, int other_full_line, double BETA) {
   
   double length = (segment.t_start()<segment.t_end() ? segment.t_end()-segment.t_start() : segment.t_end()-segment.t_start()+BETA);
   double t_final = segment.t_start()+length;
@@ -164,16 +165,14 @@ template <class S> inline double segment_overlap(times segment, const S& other_s
 }
 
 
-template <class S> inline double compute_overlap(times segment, S& other_segments, int other_full_line, double BETA) {
-  if (segment.t_start()<segment.t_end())
+template <class S> 
+double compute_overlap(times segment, S& other_segments, int other_full_line, double BETA) {
+  if (segment.t_start()<segment.t_end()) {
     return segment_overlap(segment, other_segments, other_full_line, BETA);
+  }
   else {
-    double other_length=0;
-    times segment1(0,segment.t_end());
-    times segment2(segment.t_start(), BETA);
-    other_length += segment_overlap(segment1, other_segments, other_full_line, BETA);
-    other_length += segment_overlap(segment2, other_segments, other_full_line, BETA);
-    return other_length;
+    return segment_overlap(times(0,segment.t_end()), other_segments, other_full_line, BETA);
+         + segment_overlap(times(segment.t_start(), BETA), other_segments, other_full_line, BETA);
   }
 }
 

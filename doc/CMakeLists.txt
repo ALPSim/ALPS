@@ -46,6 +46,7 @@ if (NOT WIN32)
 
     foreach (S ${ALPS_QBK_SOURCES})
       add_custom_command(OUTPUT src/${S}.xml 
+#                         COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/doc/src/*pp src
                          COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/doc/src/${S}.qbk src
                          COMMAND ${PROJECT_BINARY_DIR}/tool/quickbook --input-file src/${S}.qbk --output-file src/${S}.xml
                          DEPENDS quickbook src/${S}.qbk)
