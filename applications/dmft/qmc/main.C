@@ -43,6 +43,7 @@
 #include <fstream>
 #include <cassert>
 #include <stdio.h>
+#include <direct.h>
 
 #ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
 #include "interaction_expansion/interaction_expansion.hpp"
