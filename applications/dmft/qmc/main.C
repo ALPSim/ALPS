@@ -43,7 +43,9 @@
 #include <fstream>
 #include <cassert>
 #include <stdio.h>
+#ifdef BOOST_MSVC
 #include <direct.h>
+#endif
 
 #ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
 #include "interaction_expansion/interaction_expansion.hpp"
