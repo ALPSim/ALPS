@@ -36,6 +36,9 @@
 #include <alps/utility/vectorio.hpp>
 #include <boost/throw_exception.hpp>
 #include <boost/program_options.hpp>
+#ifdef BOOST_MSVC
+#include <direct.h>
+#endif
 
 /// @file solver_main.C
 /// @brief example main program for a Hirsch-Fye solver
@@ -156,7 +159,9 @@ int main(int argc, char** argv)
 		if (!parse_options(argc,argv,infile,outfile))
 			return 0;
 		// read parameters and G0
-		
+        // set working directory
+        boost::filesystem::path p(outfile,boost::filesystem::native);
+        chdir(p.branch_path().native_file_string().c_str());
 		alps::Parameters parms;
 		matsubara_green_function_t G0=read_input(infile,parms);
                 alps::scheduler::BasicFactory<HirschFyeSim,HirschFyeRun> factory;
