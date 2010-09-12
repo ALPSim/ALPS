@@ -29,7 +29,7 @@
 namespace dmtk
 {
 
-#define IS_EVEN(n) ((n) & 1 == 1 ? false : true)
+#define IS_EVEN(n) ((n & 1) == 1 ? false : true)
 #define SGN(n) (1 - (((n) & 1) << 1))
 #define IEOR(n1,n2) ((n1) ^ (n2))
 #define IAND(n1,n2) ((n1) & (1 << (n2)))

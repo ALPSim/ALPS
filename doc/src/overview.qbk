@@ -34,6 +34,8 @@ the ALPS library project:
 
 * [link alea alps/alea]: Monte Carlo measurements and evaluation
 
+* [link graph alps/graph]: Extensions to the Boost Graph library
+
 * [link lattice alps/lattice]: lattices and graphs
 
 * [link model alps/model]: quantum lattice models

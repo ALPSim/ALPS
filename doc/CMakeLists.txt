@@ -40,13 +40,13 @@ if (NOT WIN32)
     set(ALPS_AUTODOC_SOURCES alea lattice model osiris parser scheduler random)
 
     set(ALPS_QBK_SOURCES alea general getting_started hdf5 lattice
-        model osiris overview parser scheduler tools random)
+        model osiris overview parser scheduler tools random graph)
         
     set(ALPS_QBK_DEPENDS src/alps.qbk )
 
+    file(COPY ${PROJECT_SOURCE_DIR}/doc/src DESTINATION .)
     foreach (S ${ALPS_QBK_SOURCES})
-      add_custom_command(OUTPUT src/${S}.xml 
-#                         COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/doc/src/*pp src
+        add_custom_command(OUTPUT src/${S}.xml 
                          COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/doc/src/${S}.qbk src
                          COMMAND ${PROJECT_BINARY_DIR}/tool/quickbook --input-file src/${S}.qbk --output-file src/${S}.xml
                          DEPENDS quickbook src/${S}.qbk)

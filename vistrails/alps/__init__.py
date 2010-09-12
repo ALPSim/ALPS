@@ -14,7 +14,7 @@ import platform
 import h5py
 
 identifier = 'org.comp-phys.alps'
-version = '0.7.0' # version 2.0b2
+version = '0.8.0' # version 2.0b4
 name = 'ALPS'
 
 

@@ -99,7 +99,7 @@ int sort2(size_t n, Vector<T>& arr, bool ascending = true)
 
   if(n == 0){
     cout << "*** WARNING: sort width (n == 0) \n";
-    return;
+    return 0;
   }
 
   Vector<AuxIndex<T> > aux(n);
