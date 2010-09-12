@@ -117,7 +117,7 @@ def runDMFT(infiles):
     appname='dmft'
     cmdline = [appname]
     cmdline += make_list(infiles)
-    return executeCommand(cmdline)
+    return (executeCommand(cmdline))
     
 def evaluateLoop(infiles, appname='loop', write_xml=False):
     """ evaluate results of the looper QMC application 
