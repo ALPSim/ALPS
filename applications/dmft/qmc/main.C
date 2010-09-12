@@ -92,6 +92,10 @@ int main(int argc, char** argv)
       is>>parms;
       parms["BASENAME"]=std::string(argv[1]);
     }
+    // set working directory
+    boost::filesystem::path p(parms["BASENAME"],boost::filesystem::native);
+    chdir(p.branch_path().native_file_string().c_str());
+
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
       if(!parms.defined("OMEGA_LOOP") || (bool)(parms["OMEGA_LOOP"])==false){
