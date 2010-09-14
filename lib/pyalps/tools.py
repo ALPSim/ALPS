@@ -575,7 +575,6 @@ def save_parameters(filename, parms):
         dset[...] = parms[key]
     f1.close()
 
-
 	
 def run_TEBD(infile):
     """ run a TEBD application """
@@ -596,14 +595,51 @@ def write_TEBD_files(parms, fileName):
 		systemSettingsString+=', rtp=.true.'
 	#check for conserved quantum numbers
 	if 'CONSERVED_QUANTUMNUMBERS' in parms[0]:
-		systemSettingsString+=", qswitch=."+str(parms[0]['CONSERVED_QUANTUMNUMBERS'])+"."
+		if str(parms[0]['MODEL'])=='spin':
+			if parms[0]['CONSERVED_QUANTUMNUMBERS']=='Sz':
+				systemSettingsString+=", qswitch=.true."
+				systemSettingsString+=", qType='Sz'"
+			else:
+				raise Exception("Only Sz may be conserved for spin models!")
+				systemSettingsString+=", qswitch=.false."
+				systemSettingsString+=", qType='Sz'"
+		else:
+			if parms[0]['CONSERVED_QUANTUMNUMBERS']=='N':
+				systemSettingsString+=", qswitch=.true."
+				systemSettingsString+=", qType='N'"
+			else:
+				raise Exception("Only N may be conserved for particle models!")
+				systemSettingsString+=", qswitch=.false."
+				systemSettingsString+=", qType='N'"
 	else:
 		systemSettingsString+=", qswitch=.false."
+		systemSettingsString+=", qType='Sz'"
+
 	#check for value of conserved quantum number
-	if 'totQ' in parms[0]:
-		systemSettingsString+=", totQ="+str(parms[0]['totQ'])
+	#Sz
+	if 'Sz' in parms[0]:
+		if str(parms[0]['MODEL'])=='spin':
+			#Add L*S to this number to convert it to an integer appropriate for TEBD
+			parms[0]['Sz']+=str(parms[0]['L'])*str(parms[0]['local_S'])
+			#convert to an integer-complain if it doesn't work
+			if int(parms[0]['Sz'])==parms[0]['Sz']:
+				systemSettingsString+=", totQ="+str(int(parms[0]['Sz']))
+			else:
+				raise Exception("Invalid Sz encountered!")
+				systemSettingsString+=", totQ=0"
+		else:
+			raise Exception("Sz only conserved for spin models!")
+			systemSettingsString+=", totQ=0"
+	#N
+	elif 'N' in parms[0]:
+		if str(parms[0]['MODEL'])=='spin':
+			raise Exception("N only conserved for particle models!")
+			systemSettingsString+=", totQ=0"
+		else:
+			systemSettingsString+=", totQ="+str(int(parms[0]['N']))
 	else:
 		systemSettingsString+=", totQ=0"
+
 	#check for openmp threading
 	if 'NUM_THREADS' in parms[0]:
 		systemSettingsString+=', numThr='+str(parms[0]['NUM_THREADS'])
