@@ -33,7 +33,7 @@ import numpy as np
 #prepare the input parameters
 parms=[]
 count=0
-for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
+for A in [1.0, 1.5, 2.0, 2.5, 3.0]:
 	count+=1
 	parms.append([{ 
 	          'L'                         : 10,
@@ -49,30 +49,28 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
 		  'ITP_DTS' : [0.05, 0.05,0.025],
 		  'ITP_CONVS' : [1E-8, 1E-8, 1E-9],
 		  'INITIAL_STATE' : 'ground',
-		  'CHI_LIMIT' : 80,
+		  'CHI_LIMIT' : 40,
 		  'TRUNC_LIMIT' : 1E-12,
 		  'NUM_THREADS' : 1,
-		  'TAUS' : [10.0, A, 10.0],
-		  'POWS' : [1.0, 0.0,1.0],
-		  'GS' : ['U', 'U', 'U'],
-		  'GIS' : [10.0,1.0, 1.0],
-		  'GFS' : [1.0, 1.0, 10.0],
-		  'NUMSTEPS' : [500, int(A/0.05), 500],
-		  'STEPSFORSTORE' : [5,5, 3],
+		  'TAUS' : [10.0,  10.0],
+		  'POWS' : [1.0, A],
+		  'GS' : ['U',  'U'],
+		  'GIS' : [10.0,  1.0],
+		  'GFS' : [1.0,  10.0],
+		  'NUMSTEPS' : [1000,  1000],
+		  'STEPSFORSTORE' : [10, 5],
 		  'SIMID' : count
 	        }])
 		
 
-baseName='tutorial_2b_holdtime'
+baseName='tutorial_2c_pow'
 for p in parms:
-	nmlname=pyalps.write_TEBD_files(p, baseName+str(p[0]['TAUS'][1]))
+	nmlname=pyalps.write_TEBD_files(p, baseName+str(p[0]['POWS'][1]))
 	res=pyalps.run_TEBD(nmlname)
 
-ll=pyalps.load.Hdf5Loader()
 LEdata=[]
 for p in parms:
-	LEdata.extend(pyalps.load.loadTimeEvolution(p, baseName+str(p[0]['TAUS'][1]), measurements=['U', 'Loschmidt Echo']))
-
+	LEdata.extend(pyalps.load.loadTimeEvolution(p, baseName+str(p[0]['POWS'][1]), measurements=['U', 'Loschmidt Echo']))
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
 plt.figure()

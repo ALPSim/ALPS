@@ -41,7 +41,7 @@ for z in [0.0, 0.3, 0.9, 1.0, 1.1, 1.5]:
 	          'L'                         : 50,
 	          'MODEL'                     : 'spin',
 	          'local_S'                   : 0.5,
-	          'CONSERVED_QUANTUMNUMBERS'  : 'true',
+	          'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
 	          'Jxy'                         : 1,
 	          'Jz'                         : z,
 		  'INITIAL_STATE' : 'kink',
@@ -63,26 +63,18 @@ for p in parms:
 	nmlname=pyalps.write_TEBD_files(p, baseName+str(p[0]['SIMID']))
 	res=pyalps.run_TEBD(nmlname)
 
-ll=pyalps.load.Hdf5Loader()
+
 syssize=parms[0][0]['L']
-
-#Get magnetization data
 Magdata=[]
+#Get magnetization data
 for p in parms:
-	stepper=p[0]['NUMSTEPS']
-	counter=0
-	for d in p[0]['STEPSFORSTORE']:
-		stepper[counter]/=d
-		counter+=1
-	stepper=[i+1 for i in range(sum(stepper))]
-	for d in stepper:
-		data=ll.ReadMeasurementFromFile(['./'+baseName+str(int(p[0]['SIMID']))+'.h5'],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', \
-		respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=['Local Magnetization'])
-		for q in data:
-			loc=0.5*(syssize/2)
-			q[0].y=[0.5*(syssize/2)+sum(q[0].y[syssize/2:syssize])]
-		Magdata.extend(data)
+	Magdata.extend(pyalps.load.loadTimeEvolution(p, baseName+str(p[0]['SIMID']), measurements=['Local Magnetization']))
 
+#Postprocessing
+postData=[]
+for q in Magdata:
+	loc=0.5*(syssize/2)
+	q[0].y=[0.5*(syssize/2)+sum(q[0].y[syssize/2:syssize])]
 
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
 plt.figure()

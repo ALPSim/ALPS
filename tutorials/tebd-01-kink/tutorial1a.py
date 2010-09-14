@@ -29,6 +29,7 @@ import pyalps
 import matplotlib.pyplot as plt
 import pyalps.pyplot
 import numpy as np
+import copy
 import math
 import scipy.special
 
@@ -37,7 +38,7 @@ parms = [{
           'L'                         : 50,
           'MODEL'                     : 'spin',
           'local_S'                   : 0.5,
-          'CONSERVED_QUANTUMNUMBERS'  : 'true',
+          'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
           'Jxy'                         : 1,
 	  'INITIAL_STATE' : 'kink',
 	  'CHI_LIMIT' : 40,
@@ -52,60 +53,49 @@ parms = [{
 	  'STEPSFORSTORE' : [2]
         }]
 
+
 baseName='tutorial_1a'
 nmlname=pyalps.write_TEBD_files(parms, baseName)
 res=pyalps.run_TEBD(nmlname)
 
-ll=pyalps.load.Hdf5Loader()
-
 #Get magnetization data
-stepper=parms[0]['NUMSTEPS']
-counter=0
-syssize=parms[0]['L']
-for d in parms[0]['STEPSFORSTORE']:
-	stepper[counter]/=d
-	counter+=1
-stepper=[i+1 for i in range(sum(stepper))]
-Magdata=[]
-for d in stepper:
-	for i in range(1,5):
-		data=ll.ReadMeasurementFromFile(['./'+baseName+'.h5'],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', \
-		respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=['Local Magnetization'])
-		for q in data:
-			q[0].props['Distance']=i
-			if i%2==0:
-				loc=0.0
-				for n in range(1-i+1,i-1):
-					loc-=0.5*scipy.special.jn(n,q[0].props['Time'])*scipy.special.jn(n,q[0].props['Time'])
-				q[0].y=[loc]
-			else :
-				q[0].y=[q[0].y[syssize/2+i-1] ]
-		Magdata.extend(data)
+Magdata=pyalps.load.loadTimeEvolution(parms, baseName, measurements=['Local Magnetization'])
 
-Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['Distance'])
+#Create deep copies for postprocessing
+syssize=parms[0]['L']
+postData=[]
+Scaldata=[]
+for q in Magdata:
+	Magvec=q[0].y
+	for i in range(1,5):
+		locData=copy.deepcopy(q)
+		locData2=copy.deepcopy(q)
+		locData[0].props['Distance']=i
+		locData2[0].props['Distance']=i
+		#Get the exact result for comparison
+		if i%2==0:
+			loc=0.0
+			for n in range(1-i+1,i-1):
+				loc-=0.5*scipy.special.jn(n,q[0].props['Time'])*scipy.special.jn(n,q[0].props['Time'])			
+			locData[0].y=[loc]
+		else :
+			locData[0].y=[Magvec[syssize/2+i-1] ]
+		postData.extend(locData)
+		#Express magnetization as a function of the scaling form
+		if i==1:
+			locData2[0].props['Time']=i/q[0].props['Time']
+			locData2[0].y=[-(1.0/3.1415926)*math.asin(min(locData2[0].props['Time'],1.0))]
+		else:
+			locData2[0].props['Time']=i/q[0].props['Time']
+			locData2[0].y=[Magvec[syssize/2+i-1] ]
+		Scaldata.extend(locData2)
+
+
+Mag=pyalps.collectXY(postData, x='Time', y='Local Magnetization',foreach=['Distance'])
 plt.figure()
 pyalps.pyplot.plot(Mag)
 plt.xlabel('Time $t$')
 plt.ylabel('Magnetization')
-
-
-#Get Scaling data
-Scaldata=[]
-for d in stepper:
-	for i in range(1,10,2):
-		data=ll.ReadMeasurementFromFile(['./'+baseName+'.h5'],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', \
-		respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=['Local Magnetization'])
-		for q in data:
-			if i==1:
-				q[0].props['Time']=i/q[0].props['Time']
-				q[0].y=[-(1.0/3.1415926)*math.asin(min(q[0].props['Time'],1.0))]
-				q[0].props['Distance']=i
-			else:
-				q[0].props['Time']=i/q[0].props['Time']
-				q[0].props['Distance']=i
-				q[0].y=[q[0].y[syssize/2+i-1] ]
-		Scaldata.extend(data)
-
 
 Scal=pyalps.collectXY(Scaldata, x='Time', y='Local Magnetization', foreach=['Distance'])
 plt.figure()
@@ -114,5 +104,8 @@ plt.xlabel('Scaling variable $n/t$')
 plt.ylabel('Magnetization$(n,t)$')
 plt.xlim(0,1.5)
 plt.show()
+
+
+
 
 

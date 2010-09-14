@@ -33,15 +33,14 @@ import numpy as np
 #prepare the input parameters
 parms=[]
 count=0
-for A in [5.0]:#, 10.0, 15.0, 25.0, 50.0]:
+for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
 	count+=1
 	parms.append([{ 
 	          'L'                         : 10,
 	          'MODEL'                     : 'boson Hubbard',
 	          'Nmax'                   : 5,
-	          'CONSERVED_QUANTUMNUMBERS'  : 'true',
-	          'VERBOSE'  : 'true',
-		  'totQ' : 10,
+	          'CONSERVED_QUANTUMNUMBERS'  : 'N',
+		  'N' : 10,
 	          'ITP_t'                         : 1.0,
 	          'ITP_U'                         : 10.0,
 	          't'                         : 1.0,
@@ -69,31 +68,17 @@ for p in parms:
 	nmlname=pyalps.write_TEBD_files(p, baseName+str(p[0]['TAUS'][0]))
 	res=pyalps.run_TEBD(nmlname)
 
-ll=pyalps.load.Hdf5Loader()
-Udata=[]
 LEdata=[]
-
 for p in parms:
-	stepper=p[0]['NUMSTEPS']
-	counter=0
-	for d in p[0]['STEPSFORSTORE']:
-		stepper[counter]/=d
-		counter+=1
-	stepper=[i+1 for i in range(sum(stepper))]
-	for d in stepper:
-		data=ll.ReadMeasurementFromFile(['./'+baseName+str(p[0]['TAUS'][0])+'.h5'],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=['U'])
-		Udata.extend(data)
-		data=ll.ReadMeasurementFromFile(['./'+baseName+str(p[0]['TAUS'][0])+'.h5'],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=['Loschmidt Echo'])
-		LEdata.extend(data)
-
+	LEdata.extend(pyalps.load.loadTimeEvolution(p, baseName+str(p[0]['TAUS'][0]), measurements=['U', 'Loschmidt Echo']))
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
 plt.figure()
 pyalps.pyplot.plot(LE)
-plt.xlabel('Scaled Time $t/T$')
+plt.xlabel('Time $t$')
 plt.ylabel('Loschmidt Echo $|< \psi(0)|\psi(t) > |^2$')
 
-Ufig=pyalps.collectXY(Udata, x='Time', y='U',foreach=['SIMID'])
+Ufig=pyalps.collectXY(LEdata, x='Time', y='U',foreach=['SIMID'])
 plt.figure()
 pyalps.pyplot.plot(Ufig)
 plt.xlabel('Time $t$')
