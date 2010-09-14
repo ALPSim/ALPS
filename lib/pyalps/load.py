@@ -616,4 +616,22 @@ def loadObservableList(files,proppath='/parameters',respath='/simulation/results
     return results
 
 
+def loadTimeEvolution(parms, baseName, measurements=None):
+	ll=Hdf5Loader()
+
+	stepper=parms[0]['NUMSTEPS']
+	counter=0
+	for d in parms[0]['STEPSFORSTORE']:
+		stepper[counter]/=d
+		counter+=1
+	stepper=[i+1 for i in range(sum(stepper))]
+	data=[]
+	for d in stepper:
+		locdata=ll.ReadMeasurementFromFile(['./'+baseName+'.h5'],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', \
+		respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=measurements)
+		data.extend(locdata)
+	return data
+
+
+
    
