@@ -21,6 +21,7 @@ MODULE Hdf5Interface
 !	Date	Programmer	Description of change
 !	====	==========	=====================
 !       8/18/10  M. L. Wall	alpha release
+!       9/13/10  M. L. Wall	Changed quantum number i/o
 !
 USE GlobalData
 USE LinearOps
@@ -585,6 +586,8 @@ SUBROUTINE WriteSystemSettings()
 !Purpose: Write the simulation parameters into a group in the hdf5 file
 !
 IMPLICIT NONE
+REAL(KIND=rKind) :: locQ
+
 
 CALL InitializeHdf5()
 outputName=nmlName(1:LEN_TRIM(nmlName)-4)//".h5"
@@ -594,9 +597,14 @@ CALL WriteDataToGroup(systemSize,paramsgrpId,"L")
 CALL WriteDataToGroup(HamiType,paramsgrpId,"MODEL")
 CALL WriteDataToGroup(initialState,paramsgrpId,"INITIAL STATE")
 CALL WriteDataToGroup(rtp,paramsgrpId,"RTP")
-CALL WriteDataToGroup(qSwitch,paramsgrpId,"QNUMBERS")
+CALL WriteDataToGroup(qSwitch,paramsgrpId,"QNUMBERS USED")
 IF(qSwitch) THEN
-	CALL WriteDataToGroup(totQ,paramsgrpId,"QNUMBER VALUE")
+	IF(Hamitype=='spin') THEN
+		locQ=totQ-systemSize*spin
+		CALL WriteDataToGroup(locQ,paramsgrpId,qType)
+	ELSE
+		CALL WriteDataToGroup(totQ,paramsgrpId,qType)
+	END IF
 END IF
 CALL WriteDataToGroup(numThr,paramsgrpId,"NUM THREADS")
 CALL WriteDataToGroup(trotterOrder,paramsgrpId,"TROTTER ORDER")

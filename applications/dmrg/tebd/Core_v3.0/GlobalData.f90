@@ -51,6 +51,7 @@ INTEGER :: simId !unique simulation ID
 CHARACTER(32) :: itpDir='ITPDATA/' !Directory where ITP data is stored
 CHARACTER(32) :: rtpDir='RTPDATA/' !Directory where ITP data is stored
 CHARACTER(132) :: HamiType !Name of desired Hamiltonian
+CHARACTER(132) :: qType !Type of quantum number conserved
 CHARACTER(132) :: initialState !Name of desired Hamiltonian
 CHARACTER(132) :: nmlName !NameList input name
 CHARACTER(132) :: itpFileName !NameList input name
