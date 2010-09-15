@@ -112,7 +112,7 @@ private:
 	Worm_prob();
 	
 	static const unsigned NOPERATORS = 2;
-	static const unsigned EMPTY = 0xffffffff;
+	static const unsigned EMPTY;
 	
 	struct Transition {
 		double prob;
@@ -582,5 +582,7 @@ private:
 		vi = index / (2 * UNIT_SIZE);
 	}
 };
+
+template<typename L, typename M> const unsigned Worm_prob<L, M>::EMPTY = 0xffffffff;
 
 #endif
