@@ -54,7 +54,7 @@
     \immediate\write\pythonincludein{other=\string#2}
 \fi
 \immediate\closeout\pythonincludein
-\immediate\write18{export PYTHONHOME=/Applications/VisTrails/Vistrails.app/Contents/Resources ;  /Applications/VisTrails/Vistrails.app/Contents/MacOS/python includevistrail.py \jobname.cmdline > \jobname.cmdline.out 2> \jobname.cmdline.err}
+\immediate\write18{export PYTHONHOME=/Applications/VisTrails/VisTrails.app/Contents/Resources ;  /Applications/VisTrails/VisTrails.app/Contents/MacOS/python includevistrail.py \jobname.cmdline > \jobname.cmdline.out 2> \jobname.cmdline.err}
 \immediate\input\jobname.cmdline.out
 }
 

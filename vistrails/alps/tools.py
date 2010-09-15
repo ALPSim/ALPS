@@ -66,7 +66,7 @@ class UnzipDirectory(Module):
                 os.mkdir(f)
             else:
                 open(f,'w').write(zf.read(f))
-        # This will work when Vistrails moves to Python 2.6
+        # This will work when VisTrails moves to Python 2.6
         # zf.extractall()
         
         self.setResult('output_dir',dir)

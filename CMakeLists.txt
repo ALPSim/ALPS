@@ -5,7 +5,7 @@
 
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
-option(ALPS_FOR_VISTRAILS "Build for use within Vistrails" OFF)
+option(ALPS_FOR_VISTRAILS "Build for use within VisTrails" OFF)
 option(ALPS_BUILD_PYTHON "Build ALPS python extentions" ON)
 option(ALPS_INSTALL_DEPRECATED "Install deprecated headers for ALPS" OFF)
 option(ALPS_BUILD_DEVELOPER_TOOLS "Build toold used by developers to maintain ALPS" OFF)
@@ -57,7 +57,7 @@ mark_as_advanced(ALPS_LLVM_WORKAROUND)
 #maintenance building options
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
 option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
-option(ALPS_PATCH_VISTRAILS "Patch Vistrails from Vistrails SVN" OFF)
+option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails SVN" OFF)
 
 include (CMakeDetermineSystem)
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
@@ -641,12 +641,12 @@ else (ALPS_BUILD_SOURCE)
 endif (ALPS_BUILD_SOURCE)
 
 ######################################################################
-# patch Vistrails
+# patch VisTrails
 ######################################################################
 
 if(ALPS_PATCH_VISTRAILS)
   find_package(VistrailsSVN)
-  MESSAGE (STATUS "patching Vistrails from ${VISTRAILS_SVN_DIR}")
+  MESSAGE (STATUS "patching VisTrails from ${VISTRAILS_SVN_DIR}")
   if (APPLE)
     foreach (DIR api core db gui packages tests)
       install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails/${DIR}  COMPONENT vistrails
@@ -736,7 +736,7 @@ endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
  set(CPACK_COMPONENT_BUILD_DISPLAY_NAME "Build system support")
  set(CPACK_COMPONENT_DOCUMENTATION_DISPLAY_NAME "Documentation")
  set(CPACK_COMPONENT_TUTORIALS_DISPLAY_NAME "Tutorials")
- set(CPACK_COMPONENT_VISTRAILS_DISPLAY_NAME "ALPS Vistrails extensions")
+ set(CPACK_COMPONENT_VISTRAILS_DISPLAY_NAME "ALPS VisTrails extensions")
  
  set(CPACK_COMPONENT_LIBRARIES_DESCRIPTION "The libraries needed by the ALPS applications")
  set(CPACK_COMPONENT_HEADERS_DESCRIPTION "The ALPS header files")
@@ -751,7 +751,7 @@ endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
  set(CPACK_COMPONENT_BUILD_DESCRIPTION "Include files for CMake and make to simplify the building of ALPS applications")
  set(CPACK_COMPONENT_DOCUMENTATION_DESCRIPTION "Documentation for the ALPS libraries")
  set(CPACK_COMPONENT_TUTORIALS_DESCRIPTION "Tutorials for the ALPS libraries and applications")
- set(CPACK_COMPONENT_VISTRAILS_DESCRIPTION "Vistrails extensions and patches to the latest VisTrails release needed for ALPS")
+ set(CPACK_COMPONENT_VISTRAILS_DESCRIPTION "VisTrails extensions and patches to the latest VisTrails release needed for ALPS")
 
  set(CPACK_COMPONENT_LIBRARIES_GROUP "Runtime")
  set(CPACK_COMPONENT_APPLICATIONS_GROUP "Runtime")
