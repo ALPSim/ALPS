@@ -1,0 +1,8 @@
+I want to see standard "main" functions in the ngs library that implement 
+- single threaded program
+- multi threaded program
+- MPI program
+
+and then also export those to Python
+
+Then we need again the multithreaded ngs, which should become the default as otherwise we get real problems with scaling
