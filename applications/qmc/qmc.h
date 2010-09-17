@@ -75,8 +75,12 @@ protected:
 
   std::map<std::string,std::vector<std::vector<double> > > diagonal_matrix_element;
   
+  boost::optional<int> restricted_particle_number;
+  boost::optional<int> restricted_magnetization;
+  
+  
   void create_common_observables();
-  void do_common_measurements(double sign, const std::vector<state_type>& local, 
+  bool do_common_measurements(double sign, const std::vector<state_type>& local, 
             const std::valarray<double>& local_int=std::valarray<double>());
   void initialize_site_states();
 private:
@@ -108,9 +112,15 @@ QMCRun<G,StateType>::QMCRun(const alps::ProcessList& w, const alps::Parameters& 
     measure_CBS_order_(p.value_or_default("MEASURE[CBS Order]",false)),
     num_site_types_(alps::maximum_vertex_type(this->graph())+1),
     num_bond_types_(alps::maximum_edge_type(this->graph())+1)
+    
 {
   if (p.defined("INITIAL_SITE"))
     measurement_origin_=static_cast<int>(p["INITIAL_SITE"]);
+  if (p.defined("RESTRICT_MEASUREMENTS[N]"))
+    restricted_particle_number.reset(static_cast<int>(p["RESTRICT_MEASUREMENTS[N]"]));
+  if (p.defined("RESTRICT_MEASUREMENTS[Sz]"))
+    restricted_magnetization.reset(static_cast<int>(p["RESTRICT_MEASUREMENTS[Sz]"]));
+    
 
   if(beta<0)
     boost::throw_exception(
@@ -419,7 +429,7 @@ if(measure_CBS_order_)
 
 
 template <class G, class StateType>
-void QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<state_type>& state, const std::valarray<double>& localint)
+bool QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<state_type>& state, const std::valarray<double>& localint)
 {
   std::vector<std::vector<double> > const& matrix_element_Sz = diagonal_matrix_element["Sz"];
   std::vector<std::vector<double> > const& matrix_element_n = diagonal_matrix_element["n"];
@@ -438,6 +448,9 @@ void QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
       if (this->is_bipartite())
         ssz += this->parity(i)*x;
     }
+    
+    if (restricted_magnetization && *restricted_magnetization != sz)
+      return false;
     
     this->measurements["Magnetization"] << sz*sign;
     this->measurements["Magnetization Density"] << sz/NbSites*sign;
@@ -480,6 +493,10 @@ void QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
         sn += this->parity(i)*nloc;
       
     }
+    
+    if (restricted_particle_number && *restricted_particle_number != n)
+      return false;
+
     if (this->is_bipartite()) {
       this->measurements["Checkerboard Charge Order"] << sn/NbSites/NbSites*sign;
       this->measurements["Checkerboard Charge Order^2"] << sn*sn/NbSites/NbSites*sign;
@@ -631,6 +648,8 @@ void QMCRun<G,StateType>::do_common_measurements(double sign, const std::vector<
         this->measurements["CBS Order^2"] << CBS_order * CBS_order;
         this->measurements["CBS Order^4"] << CBS_order * CBS_order * CBS_order * CBS_order;
   }
+  
+  return true;
 }
 
 #endif
