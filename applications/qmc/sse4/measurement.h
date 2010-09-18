@@ -73,7 +73,7 @@ public:
 			alps::RealObservable("n^2"), worker.is_signed());
 		measurements << alps::make_observable(
 			alps::RealObservable("n^3"),  worker.is_signed());
-		
+			
 		worker.initialize_site_states();
 		worker.create_common_observables();
 		
@@ -153,37 +153,6 @@ public:
 				}
 			}
 		}
-			
-		double e = (cc - nnonzero) * escale * sign;
-		measurements["Energy"] << e * nsites;
-		measurements["Energy Density"] << e;
-		
-		double ke = -double(noff_diag) * escale * sign;
-		measurements["Kinetic Energy"] << ke * nsites;
-		measurements["Kinetic Energy Density"] << ke;
-		
-		double wn = 0.0;
-		for (unsigned i = 0; i < lattice.dimension(); ++i)
-			wn += wns[i] * wns[i];	
-		measurements["Stiffness"] << wn * sscale * sign;
-		
-		double n = double(nnonzero) * sign;
-		measurements["n"] << n;
-		measurements["n^2"] << n * nnonzero;
-		measurements["n^3"] << n * nnonzero * nnonzero;
-		
-		if (worker.measure_green_function()) {
-			double scale = static_cast<double>(nsites) / nworms;
-			if (worker.do_measurement_origin())
-				for (unsigned i = 0; i < green.size(); ++i)
-					green[i] *= scale;
-			else
-				for (unsigned i = 0; i < green.size(); ++i)
-					green[i] *= scale / worker.distance_mult()[i];
-					
-			measurements["Green's Function"] << green;
-			green = 0.0;
-		}
 		
 		if (worker.measure_site_compressibility()) {
 			for (unsigned i = 0; i < nsites; ++i) {
@@ -196,7 +165,38 @@ public:
 					/ double(nops) / double(nops + 1);
 		}
 
-		worker.do_common_measurements(double(sign), state, localint);
+		if (worker.do_common_measurements(double(sign), state, localint)) {			
+			double e = (cc - nnonzero) * escale * sign;
+			measurements["Energy"] << e * nsites;
+			measurements["Energy Density"] << e;
+		
+			double ke = -double(noff_diag) * escale * sign;
+			measurements["Kinetic Energy"] << ke * nsites;
+			measurements["Kinetic Energy Density"] << ke;
+		
+			double wn = 0.0;
+			for (unsigned i = 0; i < lattice.dimension(); ++i)
+				wn += wns[i] * wns[i];	
+			measurements["Stiffness"] << wn * sscale * sign;
+		
+			double n = double(nnonzero) * sign;
+			measurements["n"] << n;
+			measurements["n^2"] << n * nnonzero;
+			measurements["n^3"] << n * nnonzero * nnonzero;
+		
+			if (worker.measure_green_function()) {
+				double scale = static_cast<double>(nsites) / nworms;
+				if (worker.do_measurement_origin())
+					for (unsigned i = 0; i < green.size(); ++i)
+						green[i] *= scale;
+				else
+					for (unsigned i = 0; i < green.size(); ++i)
+						green[i] *= scale / worker.distance_mult()[i];
+					
+				measurements["Green's Function"] << green;
+				green = 0.0;
+			}
+		}
 	}
 private:
 	Measurement();

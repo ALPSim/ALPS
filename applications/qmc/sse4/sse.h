@@ -193,10 +193,10 @@ public:
 		return super_type::measure_site_compressibility_;
 	}
 	
-	void do_common_measurements(double sign,
+	bool do_common_measurements(double sign,
 		std::vector<state_type> const& state, std::valarray<double> const& localint)
 	{
-		super_type::do_common_measurements(sign, state, localint);
+		return super_type::do_common_measurements(sign, state, localint);
 	}
 	
 	void create_common_observables()
