@@ -154,7 +154,10 @@ void WRun::make_meas()
       chain_n[chain_number[i]]+=matrix_element_n[site_type(i)][s];
   }
 
-  do_common_measurements(Sign,local);
+  if (!do_common_measurements(Sign,local)) {
+    green = 0.;
+    return;
+  }
 
   // measure winding numbers
   bond_iterator bi, bi_end;

@@ -53,14 +53,14 @@ namespace ietl {
             return ietl::real(a) > ietl::real(b);
         }
         
+        std::complex<double> make_complex(double re, double im) { return std::complex<double>(re,im);}
         template<class MatrixT>
         void arnoldi_geev(MatrixT& mtx, std::vector<std::complex<double> >& evals, MatrixT& evecs, double)
         {
             std::vector<double> ev1(mtx.size1()), ev2(mtx.size1());
             MatrixT null_matrix(mtx.size1(), mtx.size2());
             boost::numeric::bindings::lapack::geev('N', 'V', mtx, ev1, ev2, null_matrix, evecs);
-            std::transform(ev1.begin(), ev1.end(), ev2.begin(), evals.begin(),
-                boost::lambda::bind(boost::lambda::constructor<std::complex<double> >(), boost::lambda::_1, boost::lambda::_2));
+            std::transform(ev1.begin(), ev1.end(), ev2.begin(), evals.begin(),&make_complex);
         }
         
         template<class MatrixT>

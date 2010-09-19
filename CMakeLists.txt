@@ -60,8 +60,12 @@ option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of co
 option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails SVN" OFF)
 
 include (CMakeDetermineSystem)
+#include (CMakeDetermineFortranCompiler)
+#message (STATUS "Fortran compiler: ${CMAKE_Fortran_COMPILER}")
+#include (CMakeTestFortranCompiler)
 cmake_minimum_required(VERSION 2.8.0 FATAL_ERROR)
-project(alps)
+#project(alps CXX Fortran)
+project(alps CXX)
 
 
 mark_as_advanced(ALPS_PATCH_VISTRAILS)
