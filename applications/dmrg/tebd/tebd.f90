@@ -54,7 +54,8 @@ INTEGER :: overlapnum
 CHARACTER(16) :: iWstring, mstring
 CHARACTER(64) :: fmtName
 !Read in input parameters
-NAMELIST /SystemSettings/ systemSize,HamiType, initialState, rtp, qSwitch,qtype, totQ, numThr,chiLimit, truncLimit, simId, print_switch
+NAMELIST /SystemSettings/ systemSize,HamiType, initialState, &
+rtp, qSwitch,qtype, totQ, numThr,chiLimit, truncLimit, simId, print_switch
 NAMELIST /ITPsettings/ numITP, itpFileName
 NAMELIST /RTPsettings/ numQuenches, rtpFileName
 NAMELIST /spinpar/ sp

@@ -1,11 +1,11 @@
 #Makefile for the OSTEBD-ALPS interface
 #----------------------------------------------
 HDF5DIR=/usr/local/hdf5
-OFLAGS = -O3 -ffree-line-length-none -fopenmp#Set the optimization flags
+OFLAGS = -O3 -fopenmp#Set the optimization flags
 LIBFLAGS = -llapack -lblas #Link the LAPACK and BLAS libraries
 FC=gfortran#/opt/local/bin/gfortran-mp-4.4
 HDF5Flags = -L$(HDF5DIR)/lib -I$(HDF5DIR)/include -lhdf5 -lhdf5_fortran -Wl,-rpath,$(HDF5DIR)/lib -lz
-MODDIR=../Core_v3.0/
+MODDIR=core/
 
 
 #-----------------------------------

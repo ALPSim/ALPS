@@ -2121,7 +2121,8 @@ IF(measures%fermicorrpres) THEN
 	DO i=1,SIZE(Measures%fermicorr)
 		Measures%fermicorr(i)%value=0.0_rKind
 		DO j=1,SIZE(Measures%fermicorr(i)%MPO%l)
-			CALL TwoSiteExpValG(rho%m, Measures%fermicorr(i)%MPO%l(j)%m, Measures%fermicorr(i)%MPO%r(j)%m, Gammas, Lambdas, LabelLeft, phaseStat=1)
+			CALL TwoSiteExpValG(rho%m, Measures%fermicorr(i)%MPO%l(j)%m, &
+		Measures%fermicorr(i)%MPO%r(j)%m, Gammas, Lambdas, LabelLeft, phaseStat=1)
 			Measures%fermicorr(i)%value=Measures%fermicorr(i)%value+rho%m
 		END DO
 	END DO
@@ -2130,7 +2131,8 @@ END IF
 
 IF(Measures%overlapPres) THEN
 	DO i=1,SIZE(Measures%overlap)
-		Measures%overlap(i)%value=InnerProduct(Gammas,Lambdas,LabelLeft, Measures%overlap(i)%Gammasm,Measures%overlap(i)%Lambdas,Measures%overlap(i)%LL)
+		Measures%overlap(i)%value=InnerProduct(Gammas,Lambdas,LabelLeft, &
+		Measures%overlap(i)%Gammasm,Measures%overlap(i)%Lambdas,Measures%overlap(i)%LL)
 	END DO
 END IF
 
