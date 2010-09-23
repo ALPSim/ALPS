@@ -25,9 +25,20 @@
 # 
 # ****************************************************************************
 
+import sys
+import os.path
+if sys.platform == 'darwin' and not os.path.exists(os.path.expanduser('~/.matplotlib/matplotlibrc')):
+    try:
+        import matplotlib
+        matplotlib.use('macosx')
+        # print 'Set matplotlib backend to macosx'
+    except ImportError:
+        pass
+
 from dataset import *
 from tools import *
 from pytools import *
 from floatwitherror import FloatWithError
 import fit_wrapper
 
+    
