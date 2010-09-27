@@ -576,7 +576,7 @@ def save_parameters(filename, parms):
     f1.close()
 
 	
-def run_TEBD(infile):
+def runTEBD(infile):
     """ run a TEBD application """
     appname='tebd'
     cmdline = [appname]
@@ -584,19 +584,19 @@ def run_TEBD(infile):
     return (executeCommand(cmdline))
 
 
-def write_TEBD_files(parms, fileName):
+def writeTEBDfiles(parms, fileName):
 	#Set up the systemSettings portion of the nameList file
-	systemSettingsString='systemSize='+str(parms[0]['L'])
-	systemSettingsString=systemSettingsString+", Hamitype='"+str(parms[0]['MODEL'])+"'"
-	systemSettingsString=systemSettingsString+", initialState='"+str(parms[0]['INITIAL_STATE'])+"'"
-	if (not 'TAUS' in parms[0]) :
+	systemSettingsString='systemSize='+str(parms['L'])
+	systemSettingsString=systemSettingsString+", Hamitype='"+str(parms['MODEL'])+"'"
+	systemSettingsString=systemSettingsString+", initialState='"+str(parms['INITIAL_STATE'])+"'"
+	if (not 'TAUS' in parms) :
 		systemSettingsString+=', rtp=.false.'
 	else:
 		systemSettingsString+=', rtp=.true.'
 	#check for conserved quantum numbers
-	if 'CONSERVED_QUANTUMNUMBERS' in parms[0]:
-		if str(parms[0]['MODEL'])=='spin':
-			if parms[0]['CONSERVED_QUANTUMNUMBERS']=='Sz':
+	if 'CONSERVED_QUANTUMNUMBERS' in parms:
+		if str(parms['MODEL'])=='spin':
+			if parms['CONSERVED_QUANTUMNUMBERS']=='Sz':
 				systemSettingsString+=", qswitch=.true."
 				systemSettingsString+=", qType='Sz'"
 			else:
@@ -604,7 +604,7 @@ def write_TEBD_files(parms, fileName):
 				systemSettingsString+=", qswitch=.false."
 				systemSettingsString+=", qType='Sz'"
 		else:
-			if parms[0]['CONSERVED_QUANTUMNUMBERS']=='N':
+			if parms['CONSERVED_QUANTUMNUMBERS']=='N':
 				systemSettingsString+=", qswitch=.true."
 				systemSettingsString+=", qType='N'"
 			else:
@@ -617,13 +617,13 @@ def write_TEBD_files(parms, fileName):
 
 	#check for value of conserved quantum number
 	#Sz
-	if 'Sz' in parms[0]:
-		if str(parms[0]['MODEL'])=='spin':
+	if 'Sz' in parms:
+		if str(parms['MODEL'])=='spin':
 			#Add L*S to this number to convert it to an integer appropriate for TEBD
-			parms[0]['Sz']+=str(parms[0]['L'])*str(parms[0]['local_S'])
+			parms['Sz']+=str(parms['L'])*str(parms['local_S'])
 			#convert to an integer-complain if it doesn't work
-			if int(parms[0]['Sz'])==parms[0]['Sz']:
-				systemSettingsString+=", totQ="+str(int(parms[0]['Sz']))
+			if int(parms['Sz'])==parms['Sz']:
+				systemSettingsString+=", totQ="+str(int(parms['Sz']))
 			else:
 				raise Exception("Invalid Sz encountered!")
 				systemSettingsString+=", totQ=0"
@@ -631,38 +631,38 @@ def write_TEBD_files(parms, fileName):
 			raise Exception("Sz only conserved for spin models!")
 			systemSettingsString+=", totQ=0"
 	#N
-	elif 'N' in parms[0]:
-		if str(parms[0]['MODEL'])=='spin':
+	elif 'N' in parms:
+		if str(parms['MODEL'])=='spin':
 			raise Exception("N only conserved for particle models!")
 			systemSettingsString+=", totQ=0"
 		else:
-			systemSettingsString+=", totQ="+str(int(parms[0]['N']))
+			systemSettingsString+=", totQ="+str(int(parms['N']))
 	else:
 		systemSettingsString+=", totQ=0"
 
 	#check for openmp threading
-	if 'NUM_THREADS' in parms[0]:
-		systemSettingsString+=', numThr='+str(parms[0]['NUM_THREADS'])
+	if 'NUM_THREADS' in parms:
+		systemSettingsString+=', numThr='+str(parms['NUM_THREADS'])
 	else:
 		systemSettingsString+=', numThr=1'
 	#check for rtp chi cutoff
-	if 'CHI_LIMIT' in parms[0]:
-		systemSettingsString+=', chiLimit='+str(parms[0]['CHI_LIMIT'])
+	if 'CHI_LIMIT' in parms:
+		systemSettingsString+=', chiLimit='+str(parms['CHI_LIMIT'])
 	else:
 		systemSettingsString+=', chiLimit=100'
 	#check for rtp truncation error cutoff
-	if 'TRUNC_LIMIT' in parms[0]:
-		systemSettingsString+=', truncLimit=%30.15E' % (parms[0]['TRUNC_LIMIT'])
+	if 'TRUNC_LIMIT' in parms:
+		systemSettingsString+=', truncLimit=%30.15E' % (parms['TRUNC_LIMIT'])
 	else:
 		systemSettingsString+=', truncLimit=1.0E-12'
 	#check for rtp truncation error cutoff
-	if 'SIMID' in parms[0]:
-		systemSettingsString+=', simId='+str(parms[0]['SIMID'])
+	if 'SIMID' in parms:
+		systemSettingsString+=', simId='+str(parms['SIMID'])
 	else:
 		systemSettingsString+=', simId=1'
 	#check for verbose switch
-	if 'VERBOSE' in parms[0]:
-		systemSettingsString+=", print_switch=."+str(parms[0]['VERBOSE'])+"."
+	if 'VERBOSE' in parms:
+		systemSettingsString+=", print_switch=."+str(parms['VERBOSE'])+"."
 	else:
 		systemSettingsString+=",  print_switch=.false."
 	systemSettingsString+='\n'
@@ -675,32 +675,32 @@ def write_TEBD_files(parms, fileName):
 	nmlfile.write('&end\n\n')
 
 	#find out which model
-	mymodel=parms[0]['MODEL']
+	mymodel=parms['MODEL']
 
 	#spin and boson models have additional inputs
 	if mymodel=='spin':
 		nmlfile.write('&spinp\n')
-		nmlfile.write('spin='+str(parms[0]['local_S'])+'\n')
+		nmlfile.write('spin='+str(parms['local_S'])+'\n')
 		nmlfile.write('&end\n\n')
 	elif mymodel=='boson Hubbard':
 		nmlfile.write('&bosonp\n')
-		nmlfile.write('nmax='+str(parms[0]['Nmax'])+'\n')
+		nmlfile.write('nmax='+str(parms['Nmax'])+'\n')
 		nmlfile.write('&end\n\n')
 
 
 	#if the ground state is the initial state, output itp parameters
-	if parms[0]['INITIAL_STATE']=='ground':
+	if parms['INITIAL_STATE']=='ground':
 		#find out lengths of chi, trunc, and convCriteria, if they exist
-		if 'ITP_CHIS' in parms[0]:
-			itpChiList=parms[0]['ITP_CHIS']
+		if 'ITP_CHIS' in parms:
+			itpChiList=parms['ITP_CHIS']
 		else:
 			itpChiList=[50]
-		if 'ITP_DTS' in parms[0]:
-			itpDtList=parms[0]['ITP_DTS']
+		if 'ITP_DTS' in parms:
+			itpDtList=parms['ITP_DTS']
 		else:
 			itpDtList=[0.01]
-		if 'ITP_CONVS' in parms[0]:
-			itpConvList=parms[0]['ITP_CONVS']
+		if 'ITP_CONVS' in parms:
+			itpConvList=parms['ITP_CONVS']
 		else:
 			itpConvList=[1.0E-8]
 		numItp=len(itpChiList)
@@ -756,21 +756,21 @@ def write_TEBD_files(parms, fileName):
 			myGamma=0.0
 			myD=0.0
 			myK=0.0
-			if 'ITP_J' in parms[0]:
-				myJz=parms[0]['ITP_J']
-				myJxy=parms[0]['ITP_J']
-			if 'ITP_Jz' in parms[0]:
-				myJz=parms[0]['ITP_Jz']
-			if 'ITP_Jxy' in parms[0]:
-				myJxy=parms[0]['ITP_Jxy']
-			if 'ITP_H' in parms[0]:
-				myH=parms[0]['ITP_H']
-			if 'ITP_Gamma' in parms[0]:
-				myGamma=parms[0]['ITP_Gamma']
-			if 'ITP_D' in parms[0]:
-				myD=parms[0]['ITP_D']
-			if 'ITP_K' in parms[0]:
-				myK=parms[0]['ITP_K']
+			if 'ITP_J' in parms:
+				myJz=parms['ITP_J']
+				myJxy=parms['ITP_J']
+			if 'ITP_Jz' in parms:
+				myJz=parms['ITP_Jz']
+			if 'ITP_Jxy' in parms:
+				myJxy=parms['ITP_Jxy']
+			if 'ITP_H' in parms:
+				myH=parms['ITP_H']
+			if 'ITP_Gamma' in parms:
+				myGamma=parms['ITP_Gamma']
+			if 'ITP_D' in parms:
+				myD=parms['ITP_D']
+			if 'ITP_K' in parms:
+				myK=parms['ITP_K']
 			nmlfile.write('&sp\n')
 			itpnmlString='spinP%Jz='
 			itpnmlString+='%30.15E'%(myJz)
@@ -792,14 +792,14 @@ def write_TEBD_files(parms, fileName):
 			myU=0.0
 			myV=0.0
 			myMu=0.0
-			if 'ITP_t' in parms[0]:
-				myT=parms[0]['ITP_t']
-			if 'ITP_U' in parms[0]:
-				myU=parms[0]['ITP_U']
-			if 'ITP_V' in parms[0]:
-				myV=parms[0]['ITP_V']
-			if 'ITP_mu' in parms[0]:
-				myMu=parms[0]['ITP_mu']
+			if 'ITP_t' in parms:
+				myT=parms['ITP_t']
+			if 'ITP_U' in parms:
+				myU=parms['ITP_U']
+			if 'ITP_V' in parms:
+				myV=parms['ITP_V']
+			if 'ITP_mu' in parms:
+				myMu=parms['ITP_mu']
 			nmlfile.write('&bp\n')
 			itpnmlString='bosonP%mu='
 			itpnmlString+='%30.15E'%(myMu)
@@ -816,12 +816,12 @@ def write_TEBD_files(parms, fileName):
 			myT=1.0
 			myV=0.0
 			myMu=0.0
-			if 'ITP_t' in parms[0]:
-				myT=parms[0]['ITP_t']
-			if 'ITP_V' in parms[0]:
-				myV=parms[0]['ITP_V']
-			if 'ITP_mu' in parms[0]:
-				myMu=parms[0]['ITP_mu']
+			if 'ITP_t' in parms:
+				myT=parms['ITP_t']
+			if 'ITP_V' in parms:
+				myV=parms['ITP_V']
+			if 'ITP_mu' in parms:
+				myMu=parms['ITP_mu']
 			nmlfile.write('&hcbp\n')
 			itpnmlString='hcbosonp%mu='
 			itpnmlString+='%30.15E'%(myMu)
@@ -837,14 +837,14 @@ def write_TEBD_files(parms, fileName):
 			myU=0.0
 			myV=0.0
 			myMu=0.0
-			if 'ITP_t' in parms[0]:
-				myT=parms[0]['ITP_t']
-			if 'ITP_U' in parms[0]:
-				myU=parms[0]['ITP_U']
-			if 'ITP_V' in parms[0]:
-				myV=parms[0]['ITP_V']
-			if 'ITP_mu' in parms[0]:
-				myMu=parms[0]['ITP_mu']
+			if 'ITP_t' in parms:
+				myT=parms['ITP_t']
+			if 'ITP_U' in parms:
+				myU=parms['ITP_U']
+			if 'ITP_V' in parms:
+				myV=parms['ITP_V']
+			if 'ITP_mu' in parms:
+				myMu=parms['ITP_mu']
 			nmlfile.write('&fp\n')
 			itpnmlString='fermiP%mu='
 			itpnmlString+='%30.15E'%(myMu)
@@ -861,12 +861,12 @@ def write_TEBD_files(parms, fileName):
 			myT=1.0
 			myV=0.0
 			myMu=0.0
-			if 'ITP_t' in parms[0]:
-				myT=parms[0]['ITP_t']
-			if 'ITP_V' in parms[0]:
-				myV=parms[0]['ITP_V']
-			if 'ITP_mu' in parms[0]:
-				myMu=parms[0]['ITP_mu']
+			if 'ITP_t' in parms:
+				myT=parms['ITP_t']
+			if 'ITP_V' in parms:
+				myV=parms['ITP_V']
+			if 'ITP_mu' in parms:
+				myMu=parms['ITP_mu']
 			nmlfile.write('&sfp\n')
 			itpnmlString='sfermiP%mu='
 			itpnmlString+='%30.15E'%(myMu)
@@ -878,35 +878,35 @@ def write_TEBD_files(parms, fileName):
 			nmlfile.write('&end\n\n')
 
 	#If rtp is desired, set up the RTP output files
-	if (not 'TAUS' in parms[0]) :
+	if (not 'TAUS' in parms) :
 		numQuenches=0
 	else:
 		#get quench data
-		myTaus=parms[0]['TAUS']
+		myTaus=parms['TAUS']
 		numQuenches=len(myTaus)
-		if 'POWS' in parms[0]:
-			myPows=parms[0]['POWS']
+		if 'POWS' in parms:
+			myPows=parms['POWS']
 		else :
 			myPows=[0.0]
 			numQuenches=1
-		if 'GS' in parms[0]:
-			myGs=parms[0]['GS']
+		if 'GS' in parms:
+			myGs=parms['GS']
 		else:
 			myGs='t'.ljust(10)
-		if 'GIS' in parms[0]:
-			myGis=parms[0]['GIS']
+		if 'GIS' in parms:
+			myGis=parms['GIS']
 		else:
 			myGis=[1]
-		if 'GFS' in parms[0]:
-			myGfs=parms[0]['GFS']
+		if 'GFS' in parms:
+			myGfs=parms['GFS']
 		else:
 			myGfs=[1]
-		if 'NUMSTEPS' in parms[0]:
-			myNumsteps=parms[0]['NUMSTEPS']
+		if 'NUMSTEPS' in parms:
+			myNumsteps=parms['NUMSTEPS']
 		else:
 			myNumsteps=[100]
-		if 'STEPSFORSTORE' in parms[0]:
-			mySfs=parms[0]['STEPSFORSTORE']
+		if 'STEPSFORSTORE' in parms:
+			mySfs=parms['STEPSFORSTORE']
 		else:
 			mySfs=[1]
 
@@ -965,21 +965,21 @@ def write_TEBD_files(parms, fileName):
 			myGamma=0.0
 			myD=0.0
 			myK=0.0
-			if 'J' in parms[0]:
-				myJz=parms[0]['J']
-				myJxy=parms[0]['J']
-			if 'Jz' in parms[0]:
-				myJz=parms[0]['Jz']
-			if 'Jxy' in parms[0]:
-				myJxy=parms[0]['Jxy']
-			if 'H' in parms[0]:
-				myH=parms[0]['H']
-			if 'Gamma' in parms[0]:
-				myGamma=parms[0]['Gamma']
-			if 'D' in parms[0]:
-				myD=parms[0]['D']
-			if 'K' in parms[0]:
-				myK=parms[0]['K']
+			if 'J' in parms:
+				myJz=parms['J']
+				myJxy=parms['J']
+			if 'Jz' in parms:
+				myJz=parms['Jz']
+			if 'Jxy' in parms:
+				myJxy=parms['Jxy']
+			if 'H' in parms:
+				myH=parms['H']
+			if 'Gamma' in parms:
+				myGamma=parms['Gamma']
+			if 'D' in parms:
+				myD=parms['D']
+			if 'K' in parms:
+				myK=parms['K']
 			nmlfile.write('&sp\n')
 			itpnmlString='spinP%Jz='
 			itpnmlString+='%30.15E'%(myJz)
@@ -1001,14 +1001,14 @@ def write_TEBD_files(parms, fileName):
 			myU=0.0
 			myV=0.0
 			myMu=0.0
-			if 't' in parms[0]:
-				myT=parms[0]['t']
-			if 'U' in parms[0]:
-				myU=parms[0]['U']
-			if 'V' in parms[0]:
-				myV=parms[0]['V']
-			if 'mu' in parms[0]:
-				myMu=parms[0]['mu']
+			if 't' in parms:
+				myT=parms['t']
+			if 'U' in parms:
+				myU=parms['U']
+			if 'V' in parms:
+				myV=parms['V']
+			if 'mu' in parms:
+				myMu=parms['mu']
 			nmlfile.write('&bp\n')
 			itpnmlString='bosonP%mu='
 			itpnmlString+='%30.15E'%(myMu)
@@ -1025,12 +1025,12 @@ def write_TEBD_files(parms, fileName):
 			myT=1.0
 			myV=0.0
 			myMu=0.0
-			if 't' in parms[0]:
-				myT=parms[0]['t']
-			if 'V' in parms[0]:
-				myV=parms[0]['V']
-			if 'mu' in parms[0]:
-				myMu=parms[0]['mu']
+			if 't' in parms:
+				myT=parms['t']
+			if 'V' in parms:
+				myV=parms['V']
+			if 'mu' in parms:
+				myMu=parms['mu']
 			nmlfile.write('&hcbp\n')
 			itpnmlString='hcbosonp%mu='
 			itpnmlString+='%30.15E'%(myMu)
@@ -1046,14 +1046,14 @@ def write_TEBD_files(parms, fileName):
 			myU=0.0
 			myV=0.0
 			myMu=0.0
-			if 't' in parms[0]:
-				myT=parms[0]['t']
-			if 'U' in parms[0]:
-				myU=parms[0]['U']
-			if 'V' in parms[0]:
-				myV=parms[0]['V']
-			if 'mu' in parms[0]:
-				myMu=parms[0]['mu']
+			if 't' in parms:
+				myT=parms['t']
+			if 'U' in parms:
+				myU=parms['U']
+			if 'V' in parms:
+				myV=parms['V']
+			if 'mu' in parms:
+				myMu=parms['mu']
 			nmlfile.write('&fp\n')
 			itpnmlString='fermiP%mu='
 			itpnmlString+='%30.15E'%(myMu)
@@ -1070,12 +1070,12 @@ def write_TEBD_files(parms, fileName):
 			myT=1.0
 			myV=0.0
 			myMu=0.0
-			if 't' in parms[0]:
-				myT=parms[0]['t']
-			if 'V' in parms[0]:
-				myV=parms[0]['V']
-			if 'mu' in parms[0]:
-				myMu=parms[0]['mu']
+			if 't' in parms:
+				myT=parms['t']
+			if 'V' in parms:
+				myV=parms['V']
+			if 'mu' in parms:
+				myMu=parms['mu']
 			nmlfile.write('&sfp\n')
 			itpnmlString='sfermiP%mu='
 			itpnmlString+='%30.15E'%(myMu)

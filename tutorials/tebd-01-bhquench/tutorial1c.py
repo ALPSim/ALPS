@@ -35,7 +35,7 @@ parms=[]
 count=0
 for A in [1.0, 1.5, 2.0, 2.5, 3.0]:
 	count+=1
-	parms.append([{ 
+	parms.append({ 
 	          'L'                         : 10,
 	          'MODEL'                     : 'boson Hubbard',
 	          'Nmax'                   : 5,
@@ -60,17 +60,16 @@ for A in [1.0, 1.5, 2.0, 2.5, 3.0]:
 		  'NUMSTEPS' : [1000,  1000],
 		  'STEPSFORSTORE' : [10, 5],
 		  'SIMID' : count
-	        }])
+	        })
 		
 
 baseName='tutorial_2c_pow'
 for p in parms:
-	nmlname=pyalps.write_TEBD_files(p, baseName+str(p[0]['POWS'][1]))
-	res=pyalps.run_TEBD(nmlname)
+	nmlname=pyalps.writeTEBDfiles(p, baseName+str(p['POWS'][1]))
+	res=pyalps.runTEBD(nmlname)
 
-LEdata=[]
-for p in parms:
-	LEdata.extend(pyalps.load.loadTimeEvolution(p, baseName+str(p[0]['POWS'][1]), measurements=['U', 'Loschmidt Echo']))
+#Load the loschmidt echo and U
+LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_2c*h5'), measurements=['U', 'Loschmidt Echo'])
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
 plt.figure()

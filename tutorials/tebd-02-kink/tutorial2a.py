@@ -34,7 +34,7 @@ import math
 import scipy.special
 
 #prepare the input parameters
-parms = [{ 
+parms = { 
           'L'                         : 50,
           'MODEL'                     : 'spin',
           'local_S'                   : 0.5,
@@ -51,18 +51,18 @@ parms = [{
 	  'GFS' : [0.0],
 	  'NUMSTEPS' : [500],
 	  'STEPSFORSTORE' : [2]
-        }]
+        }
 
 
 baseName='tutorial_1a'
-nmlname=pyalps.write_TEBD_files(parms, baseName)
-res=pyalps.run_TEBD(nmlname)
+nmlname=pyalps.writeTEBDfiles(parms, baseName)
+res=pyalps.runTEBD(nmlname)
 
 #Get magnetization data
-Magdata=pyalps.load.loadTimeEvolution(parms, baseName, measurements=['Local Magnetization'])
+Magdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix=baseName), measurements=['Local Magnetization'])
 
 #Create deep copies for postprocessing
-syssize=parms[0]['L']
+syssize=parms['L']
 postData=[]
 Scaldata=[]
 for q in Magdata:

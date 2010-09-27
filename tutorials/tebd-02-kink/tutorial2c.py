@@ -29,66 +29,56 @@ import pyalps
 import matplotlib.pyplot as plt
 import pyalps.pyplot
 import numpy as np
+import math
+import scipy.special
 
 #prepare the input parameters
 parms=[]
 count=0
-for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
+for chi in [10, 20, 30, 40]:
 	count+=1
-	parms.append([{ 
-	          'L'                         : 10,
-	          'MODEL'                     : 'boson Hubbard',
-	          'Nmax'                   : 5,
-	          'CONSERVED_QUANTUMNUMBERS'  : 'N',
-		  'N' : 10,
-	          'ITP_t'                         : 1.0,
-	          'ITP_U'                         : 10.0,
-	          't'                         : 1.0,
-	          'U'                         : 10.0,
-		  'ITP_CHIS' : [20, 30, 35],
-		  'ITP_DTS' : [0.05, 0.05,0.025],
-		  'ITP_CONVS' : [1E-8, 1E-8, 1E-9],
-		  'INITIAL_STATE' : 'ground',
-		  'CHI_LIMIT' : 40,
+	parms.append({ 
+	          'L'                         : 50,
+	          'MODEL'                     : 'spin',
+	          'local_S'                   : 0.5,
+	          'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
+	          'Jxy'                         : 1,
+		  'INITIAL_STATE' : 'kink',
+		  'CHI_LIMIT' : chi,
 		  'TRUNC_LIMIT' : 1E-12,
 		  'NUM_THREADS' : 1,
-		  'TAUS' : [A,  A],
-		  'POWS' : [1.0, 1.0],
-		  'GS' : ['U',  'U'],
-		  'GIS' : [10.0,  1.0],
-		  'GFS' : [1.0,  10.0],
-		  'NUMSTEPS' : [1000,  1000],
-		  'STEPSFORSTORE' : [10, 5],
-		  'SIMID' : count
-	        }])
-		
+		  'TAUS' : [20.0],
+		  'POWS' : [0.0],
+		  'GS' : ['H'],
+		  'GIS' : [0.0],
+		  'GFS' : [0.0],
+		  'NUMSTEPS' : [500],
+		  'STEPSFORSTORE' : [5],
+		  'SIMID': count
+	        })
 
-baseName='tutorial_2a_tau'
+baseName='tutorial_1c_'
 for p in parms:
-	nmlname=pyalps.write_TEBD_files(p, baseName+str(p[0]['TAUS'][0]))
-	res=pyalps.run_TEBD(nmlname)
+	nmlname=pyalps.writeTEBDfiles(p, baseName+str(p['SIMID']))
+	res=pyalps.runTEBD(nmlname)
 
-LEdata=[]
-for p in parms:
-	LEdata.extend(pyalps.load.loadTimeEvolution(p, baseName+str(p[0]['TAUS'][0]), measurements=['U', 'Loschmidt Echo']))
+#Get magnetization data
+Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(pattern='tutorial_1c_*h5'), measurements=['Local Magnetization'])
 
-LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
+#Postprocessing-get the exact result for comparison
+syssize=parms[0]['L']
+for q in Magdata:
+	loc=-0.5*scipy.special.jn(0,q[0].props['Time'])*scipy.special.jn(0,q[0].props['Time'])
+	q[0].y=[abs(q[0].y[syssize/2+1-1]-loc)]
+
+
+
+Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
 plt.figure()
-pyalps.pyplot.plot(LE)
+pyalps.pyplot.plot(Mag)
 plt.xlabel('Time $t$')
-plt.ylabel('Loschmidt Echo $|< \psi(0)|\psi(t) > |^2$')
-
-Ufig=pyalps.collectXY(LEdata, x='Time', y='U',foreach=['SIMID'])
-plt.figure()
-pyalps.pyplot.plot(Ufig)
-plt.xlabel('Time $t$')
-plt.ylabel('U')
+plt.yscale('log')
+plt.ylabel('Magnetization Error')
 plt.show()
-
-
-
-
-
-
 
 

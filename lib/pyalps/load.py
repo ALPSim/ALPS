@@ -100,7 +100,10 @@ class Hdf5Loader:
                 try:
                     dict[m] = pgrp[m].value
                     try:
-                        dict[m] = float(dict[m])
+			try:
+                        	dict[m] = float(dict[m])
+			except:
+                        	dict[m] = map(float,dict[m])
                     except ValueError:
                         pass
                 except AttributeError:
@@ -616,20 +619,29 @@ def loadObservableList(files,proppath='/parameters',respath='/simulation/results
     return results
 
 
-def loadTimeEvolution(parms, baseName, measurements=None):
+def loadTimeEvolution( flist, measurements=None):
 	ll=Hdf5Loader()
-
-	stepper=parms[0]['NUMSTEPS']
-	counter=0
-	for d in parms[0]['STEPSFORSTORE']:
-		stepper[counter]/=d
-		counter+=1
-	stepper=[i+1 for i in range(sum(stepper))]
+	#Get top level props to extract number of timesteps
 	data=[]
-	for d in stepper:
-		locdata=ll.ReadMeasurementFromFile(['./'+baseName+'.h5'],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', \
-		respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=measurements)
-		data.extend(locdata)
+	for f in flist:
+		propz=ll.GetProperties([f],'/parameters')
+		counter=0
+		if(type(propz[0].props['NUM TIME STEPS'])==list):
+			stepper=map(int,propz[0].props['NUM TIME STEPS'])		
+		else:
+			stepper=[int(propz[0].props['NUM TIME STEPS'])]			
+		if(type(propz[0].props['STEPS FOR STORE'])==list):
+			summer=map(int,propz[0].props['STEPS FOR STORE'])
+		else:
+			summer=[int(propz[0].props['STEPS FOR STORE'])]
+		for d in summer:
+			stepper[counter]/=d
+			counter+=1
+		stepper=[i+1 for i in range(sum(stepper))]
+		for d in stepper:
+			locdata=ll.ReadMeasurementFromFile([f],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', \
+			respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=measurements)
+			data.extend(locdata)
 	return data
 
 

@@ -37,7 +37,7 @@ parms=[]
 count=0
 for nsteps in [100, 250, 500, 750, 1000]:
 	count+=1
-	parms.append([{ 
+	parms.append({ 
 	          'L'                         : 50,
 	          'MODEL'                     : 'spin',
 	          'local_S'                   : 0.5,
@@ -55,25 +55,22 @@ for nsteps in [100, 250, 500, 750, 1000]:
 		  'NUMSTEPS' : [nsteps],
 		  'STEPSFORSTORE' : [int(math.floor(nsteps/100))],
 		  'SIMID': count
-	        }])
+	        })
+
 
 baseName='tutorial_1b_'
 for p in parms:
-	nmlname=pyalps.write_TEBD_files(p, baseName+str(p[0]['SIMID']))
-	res=pyalps.run_TEBD(nmlname)
+	nmlname=pyalps.writeTEBDfiles(p, baseName+str(p['SIMID']))
+	res=pyalps.runTEBD(nmlname)
 
-syssize=parms[0][0]['L']
-Magdata=[]
 #Get magnetization data
-for p in parms:
-	Magdata.extend(pyalps.load.loadTimeEvolution(p, baseName+str(p[0]['SIMID']), measurements=['Local Magnetization']))
+Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(pattern='tutorial_1b_*h5'), measurements=['Local Magnetization'])
 
-#Postprocessing
-postData=[]
+#Postprocessing-get the exact result for comparison
+syssize=parms[0]['L']
 for q in Magdata:
 	loc=-0.5*scipy.special.jn(0,q[0].props['Time'])*scipy.special.jn(0,q[0].props['Time'])
 	q[0].y=[abs(q[0].y[syssize/2+1-1]-loc)]
-
 
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
 plt.figure()
