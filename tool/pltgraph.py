@@ -3,9 +3,6 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-import matplotlib
-matplotlib.use('macosx')
-
 import matplotlib.pyplot as plt
 from xml.etree import ElementTree
 
@@ -35,7 +32,6 @@ def showgraph(graph):
     plt.scatter(x, y)
     
     for edge in edges.values():
-        print edge
         s = edge['source']
         t = edge['target']
         

@@ -58,7 +58,7 @@ for j2 in [0.,1.]:
     
 #write the input file and run the simulation
 input_file = pyalps.writeInputFiles('parm8a',parms)
-res = pyalps.runApplication('loop',input_file, MPI=4)
+res = pyalps.runApplication('loop',input_file)
 output_file = res[1]
 pyalps.evaluateLoop(output_file)
 
