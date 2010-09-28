@@ -171,7 +171,7 @@ double compute_overlap(times segment, S& other_segments, int other_full_line, do
     return segment_overlap(segment, other_segments, other_full_line, BETA);
   }
   else {
-    return segment_overlap(times(0,segment.t_end()), other_segments, other_full_line, BETA);
+    return segment_overlap(times(0,segment.t_end()), other_segments, other_full_line, BETA)
          + segment_overlap(times(segment.t_start(), BETA), other_segments, other_full_line, BETA);
   }
 }

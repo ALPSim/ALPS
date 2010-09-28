@@ -322,7 +322,7 @@ bool QWL_SSE_Simulation::is_thermalized() const {
 
 
 double QWL_SSE_Simulation::work_done() const {
-  return ( (all_done) ? 1. : 0.);
+  return all_done? 1. : ( doing_multicanonical ? (histo.min()>=minimum_histogram || parms.defined("SWEEPS") ? double(block_sweeps)/double(block_sweeps_total) : 0. ) : 0.);
 }
 
 
