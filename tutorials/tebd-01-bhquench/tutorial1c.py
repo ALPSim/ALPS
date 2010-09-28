@@ -28,7 +28,6 @@
 import pyalps
 import matplotlib.pyplot as plt
 import pyalps.pyplot
-import numpy as np
 
 #prepare the input parameters
 parms=[]
@@ -63,13 +62,14 @@ for A in [1.0, 1.5, 2.0, 2.5, 3.0]:
 	        })
 		
 
-baseName='tutorial_2c_pow'
-for p in parms:
-	nmlname=pyalps.writeTEBDfiles(p, baseName+str(p['POWS'][1]))
-	res=pyalps.runTEBD(nmlname)
+baseName='tutorial_1c'
+#write output files
+nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
+#run the application
+res=pyalps.runTEBD(nmlnameList)
 
 #Load the loschmidt echo and U
-LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_2c*h5'), measurements=['U', 'Loschmidt Echo'])
+LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_1c*h5'), measurements=['U', 'Loschmidt Echo'])
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
 plt.figure()

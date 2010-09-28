@@ -34,7 +34,7 @@ import math
 import scipy.special
 
 #prepare the input parameters
-parms = { 
+parms = [{ 
           'L'                         : 50,
           'MODEL'                     : 'spin',
           'local_S'                   : 0.5,
@@ -51,53 +51,85 @@ parms = {
 	  'GFS' : [0.0],
 	  'NUMSTEPS' : [500],
 	  'STEPSFORSTORE' : [2]
-        }
+        }]
 
 
-baseName='tutorial_1a'
+baseName='tutorial_2a'
 nmlname=pyalps.writeTEBDfiles(parms, baseName)
 res=pyalps.runTEBD(nmlname)
 
-#Get magnetization data
-Magdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix=baseName), measurements=['Local Magnetization'])
+#Get the results of the simulation
+Data=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_2a*h5'), measurements=['Local Magnetization'])
+#define a dataset numericalSolution to contain the numerical result
+numericalResult=[]
+#define a dataset exactSolution to contain the exact solution
+exactResult=[]
+#define a dataset scalingForm to contain the scaling form
+scalingForm=[]
 
-#Create deep copies for postprocessing
-syssize=parms['L']
-postData=[]
-Scaldata=[]
-for q in Magdata:
-	Magvec=q[0].y
-	for i in range(1,5):
-		locData=copy.deepcopy(q)
-		locData2=copy.deepcopy(q)
-		locData[0].props['Distance']=i
-		locData2[0].props['Distance']=i
-		#Get the exact result for comparison
-		if i%2==0:
-			loc=0.0
-			for n in range(1-i+1,i-1):
-				loc-=0.5*scipy.special.jn(n,q[0].props['Time'])*scipy.special.jn(n,q[0].props['Time'])			
-			locData[0].y=[loc]
-		else :
-			locData[0].y=[Magvec[syssize/2+i-1] ]
-		postData.extend(locData)
-		#Express magnetization as a function of the scaling form
-		if i==1:
-			locData2[0].props['Time']=i/q[0].props['Time']
-			locData2[0].y=[-(1.0/3.1415926)*math.asin(min(locData2[0].props['Time'],1.0))]
+#Compute the exact result M(n,t)=<S_n^z>=-(1/2)*sum_{i=1-n}^{n-1} j_i(t)^2, where
+# j_i(t) is the Bessel function of order i and compare to the numerically obtained result
+for q in Data:
+	syssize=q[0].props['L']
+	#Assign a label 'Distance' denoting the distance from the center n (only do the first two sites
+	#to avoid cluttering the plot)
+	for n in range(1,3):
+		#Create copies of the data for postprocessing
+		numericalCopy=copy.deepcopy(q)
+		exactCopy=copy.deepcopy(q)
+		
+		numericalCopy[0].props['Distance']=n
+		exactCopy[0].props['Distance']=n
+
+		#compute the exact result of the manetization n sites from the center
+		loc=0.0
+		for i in range(1-n,n):
+			loc-=0.5*scipy.special.jn(i,q[0].props['Time'])*scipy.special.jn(i,q[0].props['Time'])			
+		exactCopy[0].y=[loc]
+		#add to the the exact dataset
+		exactResult.extend(exactCopy)
+
+		#get the numerical result of the magnetization n sites from the center
+		numericalCopy[0].y=[q[0].y[syssize/2+n-1]]
+		#add to the the numerical dataset
+		numericalResult.extend(numericalCopy)
+
+#compute the scaling form
+# \phi(n/t)=-(1/pi)*arcsin(n/t) that M(n,t) approaches as n->infinity and t->infinity
+# and compare it with the numerically computed values of M(n/t)
+for q in Data:
+	syssize=q[0].props['L']
+	#Assign a label 'Distance' denoting the distance from the center n (only do the first few sites
+	#to avoid cluttering the plot)
+	for n in range(0,5):
+		#Create a copy of the data for postprocessing
+		scalingCopy=copy.deepcopy(q)
+		scalingCopy[0].props['Distance']=n
+
+		#The first distance contains the exact scaling form \phi(n/t)=-(1/pi)*arcsin(n/t)
+		if n==0:
+			scalingCopy[0].props['Time']=1.0/scalingCopy[0].props['Time']
+			scalingCopy[0].y=[-(1.0/3.1415926)*math.asin(min(scalingCopy[0].props['Time'],1.0))]
+
+		#The other distances contain the numerical data as a function of the scaling variable M(n/t)
 		else:
-			locData2[0].props['Time']=i/q[0].props['Time']
-			locData2[0].y=[Magvec[syssize/2+i-1] ]
-		Scaldata.extend(locData2)
+			scalingCopy[0].props['Time']=n/scalingCopy[0].props['Time']
+			scalingCopy[0].y=[scalingCopy[0].y[syssize/2+n-1] ]
+		#add to the scaling dataset
+		scalingForm.extend(scalingCopy)
 
 
-Mag=pyalps.collectXY(postData, x='Time', y='Local Magnetization',foreach=['Distance'])
+
+#Plot the numerical and exact magnetization for comparison
+exactMag=pyalps.collectXY(exactResult, x='Time', y='Local Magnetization',foreach=['Distance'])
+numericalMag=pyalps.collectXY(numericalResult, x='Time', y='Local Magnetization',foreach=['Distance'])
 plt.figure()
-pyalps.pyplot.plot(Mag)
+pyalps.pyplot.plot([exactMag, numericalMag])
 plt.xlabel('Time $t$')
 plt.ylabel('Magnetization')
 
-Scal=pyalps.collectXY(Scaldata, x='Time', y='Local Magnetization', foreach=['Distance'])
+#Plot the scaling form with the numerical data for comparison
+Scal=pyalps.collectXY(scalingForm, x='Time', y='Local Magnetization', foreach=['Distance'])
 plt.figure()
 pyalps.pyplot.plot(Scal)
 plt.xlabel('Scaling variable $n/t$')

@@ -576,516 +576,523 @@ def save_parameters(filename, parms):
     f1.close()
 
 	
-def runTEBD(infile):
+def runTEBD(infileList):
     """ run a TEBD application """
+    resList=[]
     appname='tebd'
-    cmdline = [appname]
-    cmdline += [infile]
-    return (executeCommand(cmdline))
+    for infile in infileList:
+	    cmdline = [appname]
+	    cmdline += [infile]
+    	    resList.append(executeCommand(cmdline))
+    return resList
 
-
-def writeTEBDfiles(parms, fileName):
-	#Set up the systemSettings portion of the nameList file
-	systemSettingsString='systemSize='+str(parms['L'])
-	systemSettingsString=systemSettingsString+", Hamitype='"+str(parms['MODEL'])+"'"
-	systemSettingsString=systemSettingsString+", initialState='"+str(parms['INITIAL_STATE'])+"'"
-	if (not 'TAUS' in parms) :
-		systemSettingsString+=', rtp=.false.'
-	else:
-		systemSettingsString+=', rtp=.true.'
-	#check for conserved quantum numbers
-	if 'CONSERVED_QUANTUMNUMBERS' in parms:
-		if str(parms['MODEL'])=='spin':
-			if parms['CONSERVED_QUANTUMNUMBERS']=='Sz':
-				systemSettingsString+=", qswitch=.true."
-				systemSettingsString+=", qType='Sz'"
-			else:
-				raise Exception("Only Sz may be conserved for spin models!")
-				systemSettingsString+=", qswitch=.false."
-				systemSettingsString+=", qType='Sz'"
+def writeTEBDfiles(parmsList, fileName):
+	counter=0
+	nmlList=[]
+	for parms in parmsList:
+		counter+=1
+		#Set up the systemSettings portion of the nameList file
+		systemSettingsString='systemSize='+str(parms['L'])
+		systemSettingsString=systemSettingsString+", Hamitype='"+str(parms['MODEL'])+"'"
+		systemSettingsString=systemSettingsString+", initialState='"+str(parms['INITIAL_STATE'])+"'"
+		if (not 'TAUS' in parms) :
+			systemSettingsString+=', rtp=.false.'
 		else:
-			if parms['CONSERVED_QUANTUMNUMBERS']=='N':
-				systemSettingsString+=", qswitch=.true."
-				systemSettingsString+=", qType='N'"
+			systemSettingsString+=', rtp=.true.'
+		#check for conserved quantum numbers
+		if 'CONSERVED_QUANTUMNUMBERS' in parms:
+			if str(parms['MODEL'])=='spin':
+				if parms['CONSERVED_QUANTUMNUMBERS']=='Sz':
+					systemSettingsString+=", qswitch=.true."
+					systemSettingsString+=", qType='Sz'"
+				else:
+					raise Exception("Only Sz may be conserved for spin models!")
+					systemSettingsString+=", qswitch=.false."
+					systemSettingsString+=", qType='Sz'"
 			else:
-				raise Exception("Only N may be conserved for particle models!")
-				systemSettingsString+=", qswitch=.false."
-				systemSettingsString+=", qType='N'"
-	else:
-		systemSettingsString+=", qswitch=.false."
-		systemSettingsString+=", qType='Sz'"
+				if parms['CONSERVED_QUANTUMNUMBERS']=='N':
+					systemSettingsString+=", qswitch=.true."
+					systemSettingsString+=", qType='N'"
+				else:
+					raise Exception("Only N may be conserved for particle models!")
+					systemSettingsString+=", qswitch=.false."
+					systemSettingsString+=", qType='N'"
+		else:
+			systemSettingsString+=", qswitch=.false."
+			systemSettingsString+=", qType='Sz'"
 
-	#check for value of conserved quantum number
-	#Sz
-	if 'Sz' in parms:
-		if str(parms['MODEL'])=='spin':
-			#Add L*S to this number to convert it to an integer appropriate for TEBD
-			parms['Sz']+=str(parms['L'])*str(parms['local_S'])
-			#convert to an integer-complain if it doesn't work
-			if int(parms['Sz'])==parms['Sz']:
-				systemSettingsString+=", totQ="+str(int(parms['Sz']))
+		#check for value of conserved quantum number
+		#Sz
+		if 'Sz' in parms:
+			if str(parms['MODEL'])=='spin':
+				#Add L*S to this number to convert it to an integer appropriate for TEBD
+				parms['Sz']+=str(parms['L'])*str(parms['local_S'])
+				#convert to an integer-complain if it doesn't work
+				if int(parms['Sz'])==parms['Sz']:
+					systemSettingsString+=", totQ="+str(int(parms['Sz']))
+				else:
+					raise Exception("Invalid Sz encountered!")
+					systemSettingsString+=", totQ=0"
 			else:
-				raise Exception("Invalid Sz encountered!")
+				raise Exception("Sz only conserved for spin models!")
 				systemSettingsString+=", totQ=0"
+		#N
+		elif 'N' in parms:
+			if str(parms['MODEL'])=='spin':
+				raise Exception("N only conserved for particle models!")
+				systemSettingsString+=", totQ=0"
+			else:
+				systemSettingsString+=", totQ="+str(int(parms['N']))
 		else:
-			raise Exception("Sz only conserved for spin models!")
 			systemSettingsString+=", totQ=0"
-	#N
-	elif 'N' in parms:
-		if str(parms['MODEL'])=='spin':
-			raise Exception("N only conserved for particle models!")
-			systemSettingsString+=", totQ=0"
+
+		#check for openmp threading
+		if 'NUM_THREADS' in parms:
+			systemSettingsString+=', numThr='+str(parms['NUM_THREADS'])
 		else:
-			systemSettingsString+=", totQ="+str(int(parms['N']))
-	else:
-		systemSettingsString+=", totQ=0"
+			systemSettingsString+=', numThr=1'
+		#check for rtp chi cutoff
+		if 'CHI_LIMIT' in parms:
+			systemSettingsString+=', chiLimit='+str(parms['CHI_LIMIT'])
+		else:
+			systemSettingsString+=', chiLimit=100'
+		#check for rtp truncation error cutoff
+		if 'TRUNC_LIMIT' in parms:
+			systemSettingsString+=', truncLimit=%30.15E' % (parms['TRUNC_LIMIT'])
+		else:
+			systemSettingsString+=', truncLimit=1.0E-12'
+		#check for rtp truncation error cutoff
+		if 'SIMID' in parms:
+			systemSettingsString+=', simId='+str(parms['SIMID'])
+		else:
+			systemSettingsString+=', simId=1'
+		#check for verbose switch
+		if 'VERBOSE' in parms:
+			systemSettingsString+=", print_switch=."+str(parms['VERBOSE'])+"."
+		else:
+			systemSettingsString+=",  print_switch=.false."
+		systemSettingsString+='\n'
 
-	#check for openmp threading
-	if 'NUM_THREADS' in parms:
-		systemSettingsString+=', numThr='+str(parms['NUM_THREADS'])
-	else:
-		systemSettingsString+=', numThr=1'
-	#check for rtp chi cutoff
-	if 'CHI_LIMIT' in parms:
-		systemSettingsString+=', chiLimit='+str(parms['CHI_LIMIT'])
-	else:
-		systemSettingsString+=', chiLimit=100'
-	#check for rtp truncation error cutoff
-	if 'TRUNC_LIMIT' in parms:
-		systemSettingsString+=', truncLimit=%30.15E' % (parms['TRUNC_LIMIT'])
-	else:
-		systemSettingsString+=', truncLimit=1.0E-12'
-	#check for rtp truncation error cutoff
-	if 'SIMID' in parms:
-		systemSettingsString+=', simId='+str(parms['SIMID'])
-	else:
-		systemSettingsString+=', simId=1'
-	#check for verbose switch
-	if 'VERBOSE' in parms:
-		systemSettingsString+=", print_switch=."+str(parms['VERBOSE'])+"."
-	else:
-		systemSettingsString+=",  print_switch=.false."
-	systemSettingsString+='\n'
-
-	#Output system settings
-	nmlfileName=fileName+'.nml'
-	nmlfile=open(nmlfileName,'w')
-	nmlfile.write('&SystemSettings\n')
-	nmlfile.write(systemSettingsString)
-	nmlfile.write('&end\n\n')
-
-	#find out which model
-	mymodel=parms['MODEL']
-
-	#spin and boson models have additional inputs
-	if mymodel=='spin':
-		nmlfile.write('&spinp\n')
-		nmlfile.write('spin='+str(parms['local_S'])+'\n')
-		nmlfile.write('&end\n\n')
-	elif mymodel=='boson Hubbard':
-		nmlfile.write('&bosonp\n')
-		nmlfile.write('nmax='+str(parms['Nmax'])+'\n')
+		#Output system settings
+		nmlfileName=fileName+str(counter)+'.nml'
+		nmlfile=open(nmlfileName,'w')
+		nmlfile.write('&SystemSettings\n')
+		nmlfile.write(systemSettingsString)
 		nmlfile.write('&end\n\n')
 
+		#find out which model
+		mymodel=parms['MODEL']
 
-	#if the ground state is the initial state, output itp parameters
-	if parms['INITIAL_STATE']=='ground':
-		#find out lengths of chi, trunc, and convCriteria, if they exist
-		if 'ITP_CHIS' in parms:
-			itpChiList=parms['ITP_CHIS']
-		else:
-			itpChiList=[50]
-		if 'ITP_DTS' in parms:
-			itpDtList=parms['ITP_DTS']
-		else:
-			itpDtList=[0.01]
-		if 'ITP_CONVS' in parms:
-			itpConvList=parms['ITP_CONVS']
-		else:
-			itpConvList=[1.0E-8]
-		numItp=len(itpChiList)
-		if len(itpChiList)==0:
-			numItp=1
-			itpChiList=[50]
-		if len(itpDtList)==0:
-			itpDtList=[0.01]
-		if len(itpConvList)==0:
-			itpConvList=[1.0E-8]
-		if len(itpDtList)>numItp:
-			itpChiList[numItp:len(itpDtList)-1]=itpChiList[numItp-1]
-			numItp=len(itpDtList)
-		elif len(itpDtList)<numItp:
-			itpDtList[len(itpDtList):numItp-1]=itpDtList[len(itpDtList)-1]	
-		if len(itpConvList)>numItp:
-			itpChiList[numItp:len(itpDtList)-1]=itpChiList[numItp-1]
-			itpDtList[numItp:len(itpConvList)-1]=itpDtList[numItp-1]
-			numItp=len(itpConvList)
-		elif len(itpConvList)<numItp:
-			itpConvList[len(itpConvList):numItp-1]=itpConvList[len(itpConvList)-1]	
-		itpfileName=fileName+'_itp.dat'
-		#Write itp data to namelist file
-		nmlfile.write('&ITPsettings\n')
-		nmlfile.write('numITP='+str(numItp)+", itpfilename='"+itpfileName+"'\n")
-		nmlfile.write('&end\n\n')
-
-		#Write ITP data to itp file
-		itpfile=open(itpfileName,'w')
-		chiString=''
-		for s in itpChiList:
-			chiString+='%16i' %s
-		chiString=chiString+'\n'
-		itpfile.write(chiString)
-		dtString=''
-		for s in itpDtList:
-			dtString+='%30.15E' %s
-		dtString=dtString+'\n'
-		itpfile.write(dtString)
-		convString=''
-		for s in itpConvList:
-			convString+='%30.15E' %s
-		convString=convString+'\n'
-		itpfile.write(convString)
-		itpfile.close()
-
-		#Write ITP Hamiltonian parameters to namelist
+		#spin and boson models have additional inputs
 		if mymodel=='spin':
-			#Set up spin parameters
-			myJz=0.0
-			myJxy=0.0
-			myH=0.0
-			myGamma=0.0
-			myD=0.0
-			myK=0.0
-			if 'ITP_J' in parms:
-				myJz=parms['ITP_J']
-				myJxy=parms['ITP_J']
-			if 'ITP_Jz' in parms:
-				myJz=parms['ITP_Jz']
-			if 'ITP_Jxy' in parms:
-				myJxy=parms['ITP_Jxy']
-			if 'ITP_H' in parms:
-				myH=parms['ITP_H']
-			if 'ITP_Gamma' in parms:
-				myGamma=parms['ITP_Gamma']
-			if 'ITP_D' in parms:
-				myD=parms['ITP_D']
-			if 'ITP_K' in parms:
-				myK=parms['ITP_K']
-			nmlfile.write('&sp\n')
-			itpnmlString='spinP%Jz='
-			itpnmlString+='%30.15E'%(myJz)
-			itpnmlString+=', spinP%Jxy='
-			itpnmlString+='%30.15E'%(myJxy)
-			itpnmlString+=', spinP%h='
-			itpnmlString+='%30.15E'%(myH)
-			itpnmlString+=', spinP%gam='
-			itpnmlString+='%30.15E'%(myGamma)
-			itpnmlString+=', spinP%d='
-			itpnmlString+='%30.15E'%(myD)
-			itpnmlString+=', spinP%k='
-			itpnmlString+='%30.15E\n'%(myK)
-			nmlfile.write(itpnmlString)
+			nmlfile.write('&spinp\n')
+			nmlfile.write('spin='+str(parms['local_S'])+'\n')
 			nmlfile.write('&end\n\n')
 		elif mymodel=='boson Hubbard':
-			#Set up boson Hubbard parameters
-			myT=1.0
-			myU=0.0
-			myV=0.0
-			myMu=0.0
-			if 'ITP_t' in parms:
-				myT=parms['ITP_t']
-			if 'ITP_U' in parms:
-				myU=parms['ITP_U']
-			if 'ITP_V' in parms:
-				myV=parms['ITP_V']
-			if 'ITP_mu' in parms:
-				myMu=parms['ITP_mu']
-			nmlfile.write('&bp\n')
-			itpnmlString='bosonP%mu='
-			itpnmlString+='%30.15E'%(myMu)
-			itpnmlString+=', bosonP%t='
-			itpnmlString+='%30.15E'%(myT)
-			itpnmlString+=', bosonP%V='
-			itpnmlString+='%30.15E'%(myV)
-			itpnmlString+=', bosonP%U='
-			itpnmlString+='%30.15E\n'%(myU)
-			nmlfile.write(itpnmlString)
-			nmlfile.write('&end\n\n')
-		elif mymodel=='hardcore boson':
-			#Set up boson Hubbard parameters
-			myT=1.0
-			myV=0.0
-			myMu=0.0
-			if 'ITP_t' in parms:
-				myT=parms['ITP_t']
-			if 'ITP_V' in parms:
-				myV=parms['ITP_V']
-			if 'ITP_mu' in parms:
-				myMu=parms['ITP_mu']
-			nmlfile.write('&hcbp\n')
-			itpnmlString='hcbosonp%mu='
-			itpnmlString+='%30.15E'%(myMu)
-			itpnmlString+=', hcbosonp%t='
-			itpnmlString+='%30.15E'%(myT)
-			itpnmlString+=', hcbosonp%V='
-			itpnmlString+='%30.15E\n'%(myV)
-			nmlfile.write(itpnmlString)
-			nmlfile.write('&end\n\n')
-		elif mymodel=='fermion Hubbard':
-			#Set up fermion Hubbard parameters
-			myT=1.0
-			myU=0.0
-			myV=0.0
-			myMu=0.0
-			if 'ITP_t' in parms:
-				myT=parms['ITP_t']
-			if 'ITP_U' in parms:
-				myU=parms['ITP_U']
-			if 'ITP_V' in parms:
-				myV=parms['ITP_V']
-			if 'ITP_mu' in parms:
-				myMu=parms['ITP_mu']
-			nmlfile.write('&fp\n')
-			itpnmlString='fermiP%mu='
-			itpnmlString+='%30.15E'%(myMu)
-			itpnmlString+=', fermiP%t='
-			itpnmlString+='%30.15E'%(myT)
-			itpnmlString+=', fermiP%V='
-			itpnmlString+='%30.15E'%(myV)
-			itpnmlString+=', fermiP%U='
-			itpnmlString+='%30.15E\n'%(myU)
-			nmlfile.write(itpnmlString)
-			nmlfile.write('&end\n\n')
-		elif mymodel=='spinless fermions':
-			#Set up spinless fermions parameters
-			myT=1.0
-			myV=0.0
-			myMu=0.0
-			if 'ITP_t' in parms:
-				myT=parms['ITP_t']
-			if 'ITP_V' in parms:
-				myV=parms['ITP_V']
-			if 'ITP_mu' in parms:
-				myMu=parms['ITP_mu']
-			nmlfile.write('&sfp\n')
-			itpnmlString='sfermiP%mu='
-			itpnmlString+='%30.15E'%(myMu)
-			itpnmlString+=', sfermiP%t='
-			itpnmlString+='%30.15E'%(myT)
-			itpnmlString+=', sfermiP%V='
-			itpnmlString+='%30.15E\n'%(myV)
-			nmlfile.write(itpnmlString)
+			nmlfile.write('&bosonp\n')
+			nmlfile.write('nmax='+str(parms['Nmax'])+'\n')
 			nmlfile.write('&end\n\n')
 
-	#If rtp is desired, set up the RTP output files
-	if (not 'TAUS' in parms) :
-		numQuenches=0
-	else:
-		#get quench data
-		myTaus=parms['TAUS']
-		numQuenches=len(myTaus)
-		if 'POWS' in parms:
-			myPows=parms['POWS']
-		else :
-			myPows=[0.0]
-			numQuenches=1
-		if 'GS' in parms:
-			myGs=parms['GS']
-		else:
-			myGs='t'.ljust(10)
-		if 'GIS' in parms:
-			myGis=parms['GIS']
-		else:
-			myGis=[1]
-		if 'GFS' in parms:
-			myGfs=parms['GFS']
-		else:
-			myGfs=[1]
-		if 'NUMSTEPS' in parms:
-			myNumsteps=parms['NUMSTEPS']
-		else:
-			myNumsteps=[100]
-		if 'STEPSFORSTORE' in parms:
-			mySfs=parms['STEPSFORSTORE']
-		else:
-			mySfs=[1]
 
-		rtpfileName=fileName+'_rtp.dat'
-		#Write rtp data to namelist file
-		nmlfile.write('&RTPsettings\n')
-		nmlfile.write('numQuenches='+str(numQuenches)+", rtpfilename='"+rtpfileName+"'\n")
-		nmlfile.write('&end\n\n')
+		#if the ground state is the initial state, output itp parameters
+		if parms['INITIAL_STATE']=='ground':
+			#find out lengths of chi, trunc, and convCriteria, if they exist
+			if 'ITP_CHIS' in parms:
+				itpChiList=parms['ITP_CHIS']
+			else:
+				itpChiList=[50]
+			if 'ITP_DTS' in parms:
+				itpDtList=parms['ITP_DTS']
+			else:
+				itpDtList=[0.01]
+			if 'ITP_CONVS' in parms:
+				itpConvList=parms['ITP_CONVS']
+			else:
+				itpConvList=[1.0E-8]
+			numItp=len(itpChiList)
+			if len(itpChiList)==0:
+				numItp=1
+				itpChiList=[50]
+			if len(itpDtList)==0:
+				itpDtList=[0.01]
+			if len(itpConvList)==0:
+				itpConvList=[1.0E-8]
+			if len(itpDtList)>numItp:
+				itpChiList[numItp:len(itpDtList)-1]=itpChiList[numItp-1]
+				numItp=len(itpDtList)
+			elif len(itpDtList)<numItp:
+				itpDtList[len(itpDtList):numItp-1]=itpDtList[len(itpDtList)-1]	
+			if len(itpConvList)>numItp:
+				itpChiList[numItp:len(itpDtList)-1]=itpChiList[numItp-1]
+				itpDtList[numItp:len(itpConvList)-1]=itpDtList[numItp-1]
+				numItp=len(itpConvList)
+			elif len(itpConvList)<numItp:
+				itpConvList[len(itpConvList):numItp-1]=itpConvList[len(itpConvList)-1]	
+			itpfileName=fileName+str(counter)+'_itp.dat'
+			#Write itp data to namelist file
+			nmlfile.write('&ITPsettings\n')
+			nmlfile.write('numITP='+str(numItp)+", itpfilename='"+itpfileName+"'\n")
+			nmlfile.write('&end\n\n')
 
-		#Write RTP data to rtp file
-		rtpfile=open(rtpfileName,'w')
-		tauString=''
-		for s in myTaus:
-			tauString+='%30.15E' %s
-		tauString=tauString+'\n'
-		rtpfile.write(tauString)
-		powString=''
-		for s in myPows:
-			powString+='%30.15E' %s
-		powString=powString+'\n'
-		rtpfile.write(powString)
-		giString=''
-		for s in myGis:
-			giString+='%30.15E' %s
-		giString=giString+'\n'
-		rtpfile.write(giString)
-		gfString=''
-		for s in myGfs:
-			gfString+='%30.15E' %s
-		gfString=gfString+'\n'
-		rtpfile.write(gfString)
-		gsString=''
-		for s in myGs:
-			gsString+=s.ljust(10)
-		gsString=gsString+'\n'
-		rtpfile.write(gsString)
-		nsString=''
-		for s in myNumsteps:
-			nsString+='%16i' %s
-		nsString=nsString+'\n'
-		rtpfile.write(nsString)
-		sfsString=''
-		for s in mySfs:
-			sfsString+='%16i' %s
-		sfsString=sfsString+'\n'
-		rtpfile.write(sfsString)
-		rtpfile.close()
+			#Write ITP data to itp file
+			itpfile=open(itpfileName,'w')
+			chiString=''
+			for s in itpChiList:
+				chiString+='%16i' %s
+			chiString=chiString+'\n'
+			itpfile.write(chiString)
+			dtString=''
+			for s in itpDtList:
+				dtString+='%30.15E' %s
+			dtString=dtString+'\n'
+			itpfile.write(dtString)
+			convString=''
+			for s in itpConvList:
+				convString+='%30.15E' %s
+			convString=convString+'\n'
+			itpfile.write(convString)
+			itpfile.close()
+
+			#Write ITP Hamiltonian parameters to namelist
+			if mymodel=='spin':
+				#Set up spin parameters
+				myJz=0.0
+				myJxy=0.0
+				myH=0.0
+				myGamma=0.0
+				myD=0.0
+				myK=0.0
+				if 'ITP_J' in parms:
+					myJz=parms['ITP_J']
+					myJxy=parms['ITP_J']
+				if 'ITP_Jz' in parms:
+					myJz=parms['ITP_Jz']
+				if 'ITP_Jxy' in parms:
+					myJxy=parms['ITP_Jxy']
+				if 'ITP_H' in parms:
+					myH=parms['ITP_H']
+				if 'ITP_Gamma' in parms:
+					myGamma=parms['ITP_Gamma']
+				if 'ITP_D' in parms:
+					myD=parms['ITP_D']
+				if 'ITP_K' in parms:
+					myK=parms['ITP_K']
+				nmlfile.write('&sp\n')
+				itpnmlString='spinP%Jz='
+				itpnmlString+='%30.15E'%(myJz)
+				itpnmlString+=', spinP%Jxy='
+				itpnmlString+='%30.15E'%(myJxy)
+				itpnmlString+=', spinP%h='
+				itpnmlString+='%30.15E'%(myH)
+				itpnmlString+=', spinP%gam='
+				itpnmlString+='%30.15E'%(myGamma)
+				itpnmlString+=', spinP%d='
+				itpnmlString+='%30.15E'%(myD)
+				itpnmlString+=', spinP%k='
+				itpnmlString+='%30.15E\n'%(myK)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+			elif mymodel=='boson Hubbard':
+				#Set up boson Hubbard parameters
+				myT=1.0
+				myU=0.0
+				myV=0.0
+				myMu=0.0
+				if 'ITP_t' in parms:
+					myT=parms['ITP_t']
+				if 'ITP_U' in parms:
+					myU=parms['ITP_U']
+				if 'ITP_V' in parms:
+					myV=parms['ITP_V']
+				if 'ITP_mu' in parms:
+					myMu=parms['ITP_mu']
+				nmlfile.write('&bp\n')
+				itpnmlString='bosonP%mu='
+				itpnmlString+='%30.15E'%(myMu)
+				itpnmlString+=', bosonP%t='
+				itpnmlString+='%30.15E'%(myT)
+				itpnmlString+=', bosonP%V='
+				itpnmlString+='%30.15E'%(myV)
+				itpnmlString+=', bosonP%U='
+				itpnmlString+='%30.15E\n'%(myU)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+			elif mymodel=='hardcore boson':
+				#Set up boson Hubbard parameters
+				myT=1.0
+				myV=0.0
+				myMu=0.0
+				if 'ITP_t' in parms:
+					myT=parms['ITP_t']
+				if 'ITP_V' in parms:
+					myV=parms['ITP_V']
+				if 'ITP_mu' in parms:
+					myMu=parms['ITP_mu']
+				nmlfile.write('&hcbp\n')
+				itpnmlString='hcbosonp%mu='
+				itpnmlString+='%30.15E'%(myMu)
+				itpnmlString+=', hcbosonp%t='
+				itpnmlString+='%30.15E'%(myT)
+				itpnmlString+=', hcbosonp%V='
+				itpnmlString+='%30.15E\n'%(myV)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+			elif mymodel=='fermion Hubbard':
+				#Set up fermion Hubbard parameters
+				myT=1.0
+				myU=0.0
+				myV=0.0
+				myMu=0.0
+				if 'ITP_t' in parms:
+					myT=parms['ITP_t']
+				if 'ITP_U' in parms:
+					myU=parms['ITP_U']
+				if 'ITP_V' in parms:
+					myV=parms['ITP_V']
+				if 'ITP_mu' in parms:
+					myMu=parms['ITP_mu']
+				nmlfile.write('&fp\n')
+				itpnmlString='fermiP%mu='
+				itpnmlString+='%30.15E'%(myMu)
+				itpnmlString+=', fermiP%t='
+				itpnmlString+='%30.15E'%(myT)
+				itpnmlString+=', fermiP%V='
+				itpnmlString+='%30.15E'%(myV)
+				itpnmlString+=', fermiP%U='
+				itpnmlString+='%30.15E\n'%(myU)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+			elif mymodel=='spinless fermions':
+				#Set up spinless fermions parameters
+				myT=1.0
+				myV=0.0
+				myMu=0.0
+				if 'ITP_t' in parms:
+					myT=parms['ITP_t']
+				if 'ITP_V' in parms:
+					myV=parms['ITP_V']
+				if 'ITP_mu' in parms:
+					myMu=parms['ITP_mu']
+				nmlfile.write('&sfp\n')
+				itpnmlString='sfermiP%mu='
+				itpnmlString+='%30.15E'%(myMu)
+				itpnmlString+=', sfermiP%t='
+				itpnmlString+='%30.15E'%(myT)
+				itpnmlString+=', sfermiP%V='
+				itpnmlString+='%30.15E\n'%(myV)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+
+		#If rtp is desired, set up the RTP output files
+		if (not 'TAUS' in parms) :
+			numQuenches=0
+		else:
+			#get quench data
+			myTaus=parms['TAUS']
+			numQuenches=len(myTaus)
+			if 'POWS' in parms:
+				myPows=parms['POWS']
+			else :
+				myPows=[0.0]
+				numQuenches=1
+			if 'GS' in parms:
+				myGs=parms['GS']
+			else:
+				myGs='t'.ljust(10)
+			if 'GIS' in parms:
+				myGis=parms['GIS']
+			else:
+				myGis=[1]
+			if 'GFS' in parms:
+				myGfs=parms['GFS']
+			else:
+				myGfs=[1]
+			if 'NUMSTEPS' in parms:
+				myNumsteps=parms['NUMSTEPS']
+			else:
+				myNumsteps=[100]
+			if 'STEPSFORSTORE' in parms:
+				mySfs=parms['STEPSFORSTORE']
+			else:
+				mySfs=[1]
+
+			rtpfileName=fileName+str(counter)+'_rtp.dat'
+			#Write rtp data to namelist file
+			nmlfile.write('&RTPsettings\n')
+			nmlfile.write('numQuenches='+str(numQuenches)+", rtpfilename='"+rtpfileName+"'\n")
+			nmlfile.write('&end\n\n')
+
+			#Write RTP data to rtp file
+			rtpfile=open(rtpfileName,'w')
+			tauString=''
+			for s in myTaus:
+				tauString+='%30.15E' %s
+			tauString=tauString+'\n'
+			rtpfile.write(tauString)
+			powString=''
+			for s in myPows:
+				powString+='%30.15E' %s
+			powString=powString+'\n'
+			rtpfile.write(powString)
+			giString=''
+			for s in myGis:
+				giString+='%30.15E' %s
+			giString=giString+'\n'
+			rtpfile.write(giString)
+			gfString=''
+			for s in myGfs:
+				gfString+='%30.15E' %s
+			gfString=gfString+'\n'
+			rtpfile.write(gfString)
+			gsString=''
+			for s in myGs:
+				gsString+=s.ljust(10)
+			gsString=gsString+'\n'
+			rtpfile.write(gsString)
+			nsString=''
+			for s in myNumsteps:
+				nsString+='%16i' %s
+			nsString=nsString+'\n'
+			rtpfile.write(nsString)
+			sfsString=''
+			for s in mySfs:
+				sfsString+='%16i' %s
+			sfsString=sfsString+'\n'
+			rtpfile.write(sfsString)
+			rtpfile.close()
 
 
-		#Write RTP Hamiltonian parameters to namelist
-		if mymodel=='spin':
-			#Set up spin parameters
-			myJz=0.0
-			myJxy=0.0
-			myH=0.0
-			myGamma=0.0
-			myD=0.0
-			myK=0.0
-			if 'J' in parms:
-				myJz=parms['J']
-				myJxy=parms['J']
-			if 'Jz' in parms:
-				myJz=parms['Jz']
-			if 'Jxy' in parms:
-				myJxy=parms['Jxy']
-			if 'H' in parms:
-				myH=parms['H']
-			if 'Gamma' in parms:
-				myGamma=parms['Gamma']
-			if 'D' in parms:
-				myD=parms['D']
-			if 'K' in parms:
-				myK=parms['K']
-			nmlfile.write('&sp\n')
-			itpnmlString='spinP%Jz='
-			itpnmlString+='%30.15E'%(myJz)
-			itpnmlString+=', spinP%Jxy='
-			itpnmlString+='%30.15E'%(myJxy)
-			itpnmlString+=', spinP%h='
-			itpnmlString+='%30.15E'%(myH)
-			itpnmlString+=', spinP%gam='
-			itpnmlString+='%30.15E'%(myGamma)
-			itpnmlString+=', spinP%d='
-			itpnmlString+='%30.15E'%(myD)
-			itpnmlString+=', spinP%k='
-			itpnmlString+='%30.15E\n'%(myK)
-			nmlfile.write(itpnmlString)
-			nmlfile.write('&end\n\n')
-		elif mymodel=='boson Hubbard':
-			#Set up boson Hubbard parameters
-			myT=1.0
-			myU=0.0
-			myV=0.0
-			myMu=0.0
-			if 't' in parms:
-				myT=parms['t']
-			if 'U' in parms:
-				myU=parms['U']
-			if 'V' in parms:
-				myV=parms['V']
-			if 'mu' in parms:
-				myMu=parms['mu']
-			nmlfile.write('&bp\n')
-			itpnmlString='bosonP%mu='
-			itpnmlString+='%30.15E'%(myMu)
-			itpnmlString+=', bosonP%t='
-			itpnmlString+='%30.15E'%(myT)
-			itpnmlString+=', bosonP%V='
-			itpnmlString+='%30.15E'%(myV)
-			itpnmlString+=', bosonP%U='
-			itpnmlString+='%30.15E\n'%(myU)
-			nmlfile.write(itpnmlString)
-			nmlfile.write('&end\n\n')
-		elif mymodel=='hardcore boson':
-			#Set up boson Hubbard parameters
-			myT=1.0
-			myV=0.0
-			myMu=0.0
-			if 't' in parms:
-				myT=parms['t']
-			if 'V' in parms:
-				myV=parms['V']
-			if 'mu' in parms:
-				myMu=parms['mu']
-			nmlfile.write('&hcbp\n')
-			itpnmlString='hcbosonp%mu='
-			itpnmlString+='%30.15E'%(myMu)
-			itpnmlString+=', hcbosonp%t='
-			itpnmlString+='%30.15E'%(myT)
-			itpnmlString+=', hcbosonp%V='
-			itpnmlString+='%30.15E\n'%(myV)
-			nmlfile.write(itpnmlString)
-			nmlfile.write('&end\n\n')
-		elif mymodel=='fermion Hubbard':
-			#Set up fermion Hubbard parameters
-			myT=1.0
-			myU=0.0
-			myV=0.0
-			myMu=0.0
-			if 't' in parms:
-				myT=parms['t']
-			if 'U' in parms:
-				myU=parms['U']
-			if 'V' in parms:
-				myV=parms['V']
-			if 'mu' in parms:
-				myMu=parms['mu']
-			nmlfile.write('&fp\n')
-			itpnmlString='fermiP%mu='
-			itpnmlString+='%30.15E'%(myMu)
-			itpnmlString+=', fermiP%t='
-			itpnmlString+='%30.15E'%(myT)
-			itpnmlString+=', fermiP%V='
-			itpnmlString+='%30.15E'%(myV)
-			itpnmlString+=', fermiP%U='
-			itpnmlString+='%30.15E\n'%(myU)
-			nmlfile.write(itpnmlString)
-			nmlfile.write('&end\n\n')
-		elif mymodel=='spinless fermions':
-			#Set up spinless fermions parameters
-			myT=1.0
-			myV=0.0
-			myMu=0.0
-			if 't' in parms:
-				myT=parms['t']
-			if 'V' in parms:
-				myV=parms['V']
-			if 'mu' in parms:
-				myMu=parms['mu']
-			nmlfile.write('&sfp\n')
-			itpnmlString='sfermiP%mu='
-			itpnmlString+='%30.15E'%(myMu)
-			itpnmlString+=', sfermiP%t='
-			itpnmlString+='%30.15E'%(myT)
-			itpnmlString+=', sfermiP%V='
-			itpnmlString+='%30.15E\n'%(myV)
-			nmlfile.write(itpnmlString)
-			nmlfile.write('&end\n\n')
-	return nmlfileName
+			#Write RTP Hamiltonian parameters to namelist
+			if mymodel=='spin':
+				#Set up spin parameters
+				myJz=0.0
+				myJxy=0.0
+				myH=0.0
+				myGamma=0.0
+				myD=0.0
+				myK=0.0
+				if 'J' in parms:
+					myJz=parms['J']
+					myJxy=parms['J']
+				if 'Jz' in parms:
+					myJz=parms['Jz']
+				if 'Jxy' in parms:
+					myJxy=parms['Jxy']
+				if 'H' in parms:
+					myH=parms['H']
+				if 'Gamma' in parms:
+					myGamma=parms['Gamma']
+				if 'D' in parms:
+					myD=parms['D']
+				if 'K' in parms:
+					myK=parms['K']
+				nmlfile.write('&sp\n')
+				itpnmlString='spinP%Jz='
+				itpnmlString+='%30.15E'%(myJz)
+				itpnmlString+=', spinP%Jxy='
+				itpnmlString+='%30.15E'%(myJxy)
+				itpnmlString+=', spinP%h='
+				itpnmlString+='%30.15E'%(myH)
+				itpnmlString+=', spinP%gam='
+				itpnmlString+='%30.15E'%(myGamma)
+				itpnmlString+=', spinP%d='
+				itpnmlString+='%30.15E'%(myD)
+				itpnmlString+=', spinP%k='
+				itpnmlString+='%30.15E\n'%(myK)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+			elif mymodel=='boson Hubbard':
+				#Set up boson Hubbard parameters
+				myT=1.0
+				myU=0.0
+				myV=0.0
+				myMu=0.0
+				if 't' in parms:
+					myT=parms['t']
+				if 'U' in parms:
+					myU=parms['U']
+				if 'V' in parms:
+					myV=parms['V']
+				if 'mu' in parms:
+					myMu=parms['mu']
+				nmlfile.write('&bp\n')
+				itpnmlString='bosonP%mu='
+				itpnmlString+='%30.15E'%(myMu)
+				itpnmlString+=', bosonP%t='
+				itpnmlString+='%30.15E'%(myT)
+				itpnmlString+=', bosonP%V='
+				itpnmlString+='%30.15E'%(myV)
+				itpnmlString+=', bosonP%U='
+				itpnmlString+='%30.15E\n'%(myU)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+			elif mymodel=='hardcore boson':
+				#Set up boson Hubbard parameters
+				myT=1.0
+				myV=0.0
+				myMu=0.0
+				if 't' in parms:
+					myT=parms['t']
+				if 'V' in parms:
+					myV=parms['V']
+				if 'mu' in parms:
+					myMu=parms['mu']
+				nmlfile.write('&hcbp\n')
+				itpnmlString='hcbosonp%mu='
+				itpnmlString+='%30.15E'%(myMu)
+				itpnmlString+=', hcbosonp%t='
+				itpnmlString+='%30.15E'%(myT)
+				itpnmlString+=', hcbosonp%V='
+				itpnmlString+='%30.15E\n'%(myV)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+			elif mymodel=='fermion Hubbard':
+				#Set up fermion Hubbard parameters
+				myT=1.0
+				myU=0.0
+				myV=0.0
+				myMu=0.0
+				if 't' in parms:
+					myT=parms['t']
+				if 'U' in parms:
+					myU=parms['U']
+				if 'V' in parms:
+					myV=parms['V']
+				if 'mu' in parms:
+					myMu=parms['mu']
+				nmlfile.write('&fp\n')
+				itpnmlString='fermiP%mu='
+				itpnmlString+='%30.15E'%(myMu)
+				itpnmlString+=', fermiP%t='
+				itpnmlString+='%30.15E'%(myT)
+				itpnmlString+=', fermiP%V='
+				itpnmlString+='%30.15E'%(myV)
+				itpnmlString+=', fermiP%U='
+				itpnmlString+='%30.15E\n'%(myU)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+			elif mymodel=='spinless fermions':
+				#Set up spinless fermions parameters
+				myT=1.0
+				myV=0.0
+				myMu=0.0
+				if 't' in parms:
+					myT=parms['t']
+				if 'V' in parms:
+					myV=parms['V']
+				if 'mu' in parms:
+					myMu=parms['mu']
+				nmlfile.write('&sfp\n')
+				itpnmlString='sfermiP%mu='
+				itpnmlString+='%30.15E'%(myMu)
+				itpnmlString+=', sfermiP%t='
+				itpnmlString+='%30.15E'%(myT)
+				itpnmlString+=', sfermiP%V='
+				itpnmlString+='%30.15E\n'%(myV)
+				nmlfile.write(itpnmlString)
+				nmlfile.write('&end\n\n')
+		nmlList.append(nmlfileName)
+	return nmlList
 
 
 

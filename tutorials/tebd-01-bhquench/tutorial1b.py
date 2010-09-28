@@ -28,7 +28,6 @@
 import pyalps
 import matplotlib.pyplot as plt
 import pyalps.pyplot
-import numpy as np
 
 #prepare the input parameters
 parms=[]
@@ -45,7 +44,7 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
 	          'ITP_U'                         : 10.0,
 	          't'                         : 1.0,
 	          'U'                         : 10.0,
-		  'ITP_CHIS' : [20, 30, 35],
+		  'ITP_CHIS' : [20, 30, 35], 
 		  'ITP_DTS' : [0.05, 0.05,0.025],
 		  'ITP_CONVS' : [1E-8, 1E-8, 1E-9],
 		  'INITIAL_STATE' : 'ground',
@@ -63,13 +62,14 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
 	        })
 		
 
-baseName='tutorial_2b_holdtime'
-for p in parms:
-	nmlname=pyalps.writeTEBDfiles(p, baseName+str(p['TAUS'][1]))
-	res=pyalps.runTEBD(nmlname)
+baseName='tutorial_1b'
+#write output files
+nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
+#run the application
+res=pyalps.runTEBD(nmlnameList)
 
 #Load the loschmidt echo and U
-LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_2b*h5'), measurements=['U', 'Loschmidt Echo'])
+LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_1b*h5'), measurements=['U', 'Loschmidt Echo'])
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
 plt.figure()

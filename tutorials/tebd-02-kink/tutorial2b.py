@@ -58,20 +58,23 @@ for nsteps in [100, 250, 500, 750, 1000]:
 	        })
 
 
-baseName='tutorial_1b_'
-for p in parms:
-	nmlname=pyalps.writeTEBDfiles(p, baseName+str(p['SIMID']))
-	res=pyalps.runTEBD(nmlname)
+baseName='tutorial_2b_'
+nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
+res=pyalps.runTEBD(nmlnameList)
 
 #Get magnetization data
-Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(pattern='tutorial_1b_*h5'), measurements=['Local Magnetization'])
+Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(pattern='tutorial_2b_*h5'), measurements=['Local Magnetization'])
 
 #Postprocessing-get the exact result for comparison
-syssize=parms[0]['L']
 for q in Magdata:
+	syssize=q[0].props['L']
+	#Get the exact result of M(1,t)=-(1/2)*(j_0(t)^2), where j_0(t) is the 0^{th} order
+	# bessel function and M(1,t) is the magnetization one site to the right of the chain center
 	loc=-0.5*scipy.special.jn(0,q[0].props['Time'])*scipy.special.jn(0,q[0].props['Time'])
+	#Get the difference between the computed and exact results
 	q[0].y=[abs(q[0].y[syssize/2+1-1]-loc)]
 
+#Plot the Error in the magnetization one site to the right of the chain center
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
 plt.figure()
 pyalps.pyplot.plot(Mag)

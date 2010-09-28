@@ -619,28 +619,27 @@ def loadObservableList(files,proppath='/parameters',respath='/simulation/results
     return results
 
 
-def loadTimeEvolution( flist, measurements=None):
+def loadTimeEvolution( flist,globalproppath='/parameters/',resroot='/timesteps/',localpropsuffix='/Local Props', measurements=None):
 	ll=Hdf5Loader()
-	#Get top level props to extract number of timesteps
 	data=[]
+	#loop over files
 	for f in flist:
-		propz=ll.GetProperties([f],'/parameters')
-		counter=0
-		if(type(propz[0].props['NUM TIME STEPS'])==list):
-			stepper=map(int,propz[0].props['NUM TIME STEPS'])		
-		else:
-			stepper=[int(propz[0].props['NUM TIME STEPS'])]			
-		if(type(propz[0].props['STEPS FOR STORE'])==list):
-			summer=map(int,propz[0].props['STEPS FOR STORE'])
-		else:
-			summer=[int(propz[0].props['STEPS FOR STORE'])]
-		for d in summer:
-			stepper[counter]/=d
-			counter+=1
-		stepper=[i+1 for i in range(sum(stepper))]
+		#open the file and open the results root group
+		h5file=h5py.File(f,'r')
+		#enumerate the subgroups
+		L=list(h5file[resroot])
+		h5file.close()
+		#Create an iterator of length the number of subgroups
+		stepper=[i+1 for i in range(len(L))]
+		#Read in global props
+		globalprops=ll.GetProperties([f],globalproppath)
 		for d in stepper:
-			locdata=ll.ReadMeasurementFromFile([f],proppath='/timesteps/'+str(d).rjust(8)+'/Local Props', \
-			respath='/timesteps/'+str(d).rjust(8)+'/results', measurements=measurements)
+			#Get the measurements from the numbered subgroups
+			locdata=ll.ReadMeasurementFromFile([f],proppath=resroot+str(d).rjust(8)+localpropsuffix, \
+			respath=resroot+str(d).rjust(8)+'/results', measurements=measurements)
+			#Append the global props to the local props
+			locdata[0][0].props.update(globalprops[0].props)
+			#Extend the total dataset with this data
 			data.extend(locdata)
 	return data
 
