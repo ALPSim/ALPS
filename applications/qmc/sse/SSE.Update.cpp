@@ -122,6 +122,7 @@ void SSE::link_legs()
   
   std::vector<vertex_type>::iterator it; 
   alps::uint32_t i=0;
+  alps::uint32_t opcount = 0;
   // Loop over all vertices
   for (it=operator_string.begin();it!=operator_string.end();++it,++i) { 
     if (!(it->identity())) { // Non-Identity vertices
@@ -147,6 +148,7 @@ void SSE::link_legs()
         // Put this vertex as the current vertex on this site
         current_vertex[site]=i;
       }
+      op_indices[opcount++] = i;
     }
   }
   
@@ -193,14 +195,7 @@ std::pair<alps::uint32_t,SSE::state_type> SSE::initial_vertex()
   alps::uint32_t current_vertex;
   state_type current_leg_number;
   if (!measure_green_function_) {
-    current_vertex=random_int(0,cutoff_L-1); 
- 
-    // go to the first non trivial vertex
-    while(operator_string[current_vertex].identity()) { 
-      if ((++current_vertex)==cutoff_L)
-        current_vertex=0;
-    }
-    
+	current_vertex = op_indices[random_int(0, current_number_of_non_identity - 1)];	
     current_leg_number=random_int(0,3);
   }
   else {
@@ -484,6 +479,9 @@ SSE::state_type SSE::return_exit_leg(alps::uint32_t vertex,state_type incomingle
 // Increase the cutoff by adding randomly dL Identity operators
 void SSE::increase_cutoff_L(alps::uint32_t dL)
 {
+  op_indices.reserve(cutoff_L+dL);
+  op_indices.resize(cutoff_L+dL);
+	
   vector<vertex_type> new_OS(cutoff_L+dL);
   double proba=double(dL)/(cutoff_L+dL);
  

@@ -91,7 +91,7 @@ public:
 		// diagonal probabilities
 		d10_probs.resize(model.nvertices());
 		d01_probs.resize(model.nvertices());
-		for (unsigned vi = 0; vi < model.nvertices(); vi++) {
+		for (unsigned vi = 0; vi < model.nvertices(); ++vi) {
 			vertex_type const& vertex = model.vertex(vi);
 			if (!vertex.diagonal)
 				continue;
@@ -107,9 +107,10 @@ public:
 		first.resize(nsites);
 		last.resize(nsites);
 		opstring.resize(nops);
+		op_indices.resize(nops);
 		
 		// startconf
-		for (unsigned i = 0; i < nsites; i++)
+		for (unsigned i = 0; i < nsites; ++i)
 			state[i] = worker.mrandom_int(nbstates[lattice.sitei2alps_type(i)]);
 		for (op_iterator op = opstring.begin() ; op != opstring.end(); ++op)
 			op->vertex_index = IDENTITY;
@@ -139,12 +140,12 @@ public:
 				update_free_states();
 			else {
 				if (nworms > 0) {
-					for (unsigned i = 0; i < nworms; i++)
+					for (unsigned i = 0; i < nworms; ++i)
 						worm_update();
 				} else {
 					// adjust nworms
 					double len1 = 0.0;
-					unsigned nworms_therm2 = 0;
+					uint64_t nworms_therm2 = 0;
 					do {
 						++nworms_therm2;
 						len1 += worm_update();
@@ -174,7 +175,7 @@ public:
 			if (nnonzero == 0)
 				update_free_states();
 				
-			for (unsigned i = 0; i < nworms; i++)
+			for (unsigned i = 0; i < nworms; ++i)
 				worm_update();
 
 			opstring2state();
@@ -200,14 +201,15 @@ private:
 	
 	unsigned nworms;
 	
-	unsigned nworms_therm;
-	unsigned count_therm;
+	uint64_t nworms_therm;
+	uint64_t count_therm;
 	
 	unsigned nsites;
 	
 	std::vector<state_type> state;
 	std::vector<Operator> opstring;
 	std::vector<Operator> opstring_copy;
+	std::vector<unsigned> op_indices;
 
 	std::vector<unsigned> first;
 	std::vector<unsigned> last;
@@ -229,35 +231,32 @@ private:
 		std::memset(&first[0], 0xff, nsites * sizeof(unsigned));
 		std::memset(&last[0], 0xff, nsites * sizeof(unsigned));
 
-		unsigned cur_leg = 0;
-		for (op_iterator op = opstring.begin(); op != opstring.end(); ++op) {
+		unsigned oi = 0;
+		unsigned opcount = 0;
+		for (op_iterator op = opstring.begin(); op != opstring.end(); ++op, ++oi) {
 			if (op->vertex_index == IDENTITY) {
 				// try 0->1 update
-			
+				
 				unsigned ui = worker.mrandom_int(lat_units.size());
 				lat_unit_type const& lat_unit = lat_units[ui];
 
 				lat_unit_state_type unit_state;
-				for (unsigned i = 0; i < UNIT_SIZE; i++)
+				for (unsigned i = 0; i < UNIT_SIZE; ++i)
 					unit_state[i] = state[lat_unit.sites[i]];
 
 				unsigned vertex_index = model.diag_vertex_index(unit_state,
 					lat_unit.type, lat_unit.sites);
-				if (vertex_index == model_type::INVALID_VERTEX) {
-					cur_leg += 2 * UNIT_SIZE;
+				if (vertex_index == model_type::INVALID_VERTEX)
 					continue;
-				}
 									
 				double p = d01_probs[vertex_index];
 				if (p >= (nops - nnonzero)
 						|| p >= (worker.mrandom_real() * (nops - nnonzero))) {
 					op->vertex_index = vertex_index;
 					op->unit_ref = ui;
-					nnonzero++;
-				} else {
-					cur_leg += 2 * UNIT_SIZE;
+					++nnonzero;
+				} else
 					continue;
-				}
 			} else {
 				lat_unit_type const& lat_unit = lat_units[op->unit_ref];
 				vertex_type const& vertex = model.vertex(op->vertex_index);
@@ -268,20 +267,20 @@ private:
 					double p = d10_probs[op->vertex_index] * (nops - nnonzero + 1);
 					if (p >= 1.0 || p >= worker.mrandom_real()) {
 						op->vertex_index = IDENTITY;
-						nnonzero--;
-						
-						cur_leg += 2 * UNIT_SIZE;
+						--nnonzero;
 						continue;
 					}
 				} else
 					// propagate state
-					for (unsigned i = 0; i < UNIT_SIZE; i++)
+					for (unsigned i = 0; i < UNIT_SIZE; ++i)
 						state[lat_unit.sites[i]] = vertex.state[UNIT_SIZE + i];
 			}
 					
 			// build vertex list
+			op_indices[opcount++] = oi;
+			unsigned cur_leg = 2 * UNIT_SIZE * oi;
 			lat_unit_sites_type const& sites = lat_units[op->unit_ref].sites;
-			for (unsigned j = 0; j < UNIT_SIZE; j++) {
+			for (unsigned j = 0; j < UNIT_SIZE; ++j) {
 				unsigned s = sites[j];
 
 				unsigned last_leg = last[s];
@@ -295,13 +294,12 @@ private:
 				}
 
 				last[s] = cur_leg + UNIT_SIZE;
-				cur_leg++;
+				++cur_leg;
 			}
-			cur_leg += UNIT_SIZE;
 		}
 		
 		// vertex list --- force periodic boundary conditions
-		for (unsigned i = 0; i < nsites; i++) {
+		for (unsigned i = 0; i < nsites; ++i) {
 			unsigned first_leg = first[i];
 			if (first_leg == MAX_NUMBER)
 				continue;
@@ -317,7 +315,7 @@ private:
 					"Please increase THERMALIZATION.");
 	}
 	
-	unsigned worm_update()
+	uint64_t worm_update()
 	{
 		unsigned start_site, start_level, start_vertex, start_leg;
 		
@@ -331,12 +329,9 @@ private:
 			if (nnonzero == 0)
 				return 0;
 			
-			start_vertex = worker.mrandom_int(nops);
-			while (opstring[start_vertex].vertex_index == IDENTITY)
-				if (++start_vertex == nops)
-					start_vertex = 0;
-
+			start_vertex = op_indices[worker.mrandom_int(nnonzero)];
 			start_leg = worker.mrandom_int(2 * UNIT_SIZE);
+
 			Operator& start_op = opstring[start_vertex];
 			lat_unit_type const& lat_unit = lat_units[start_op.unit_ref];
 			start_site = lat_unit.sites[start_leg % UNIT_SIZE];
@@ -368,7 +363,7 @@ private:
 			worm_weight = gf_start(head_op, start_site, start_site_type,
 				start_leg, vertex);
 
-		unsigned len = 0;
+		uint64_t len = 0;
 
 		unsigned cur_leg = start_leg;
 		unsigned cur_vertex = start_vertex;
@@ -534,23 +529,22 @@ private:
 		
 	void update_free_states()
 	{
-		for (unsigned i = 0; i < nsites; i++)
+		for (unsigned i = 0; i < nsites; ++i)
 			state[i] = worker.mrandom_int(nbstates[lattice.sitei2alps_type(i)]);
 	}
 	
 	void opstring2state()
 	{
-		for (unsigned i = 0; i < nsites; i++) {
+		for (unsigned i = 0; i < nsites; ++i) {
 			unsigned first_pos = first[i];
 
 			if (first_pos != MAX_NUMBER) {
 				unsigned cur_vertex = first_pos / (2 * UNIT_SIZE);
 				unsigned cur_leg = first_pos % (2 * UNIT_SIZE);
 				state[i] = model.vertex_state(opstring[cur_vertex].vertex_index)[cur_leg];
-			} else {
+			} else
 				// update "free" states
 				state[i] = worker.mrandom_int(nbstates[lattice.sitei2alps_type(i)]);
-			}
 		}
 	}
 	
@@ -564,6 +558,8 @@ private:
 
 		opstring.reserve(nops1);
 		opstring.resize(nops1);
+		op_indices.reserve(nops1);
+		op_indices.resize(nops1);
 
 		unsigned j = 0;
 		for (unsigned i = 0; i < nops; ++i)

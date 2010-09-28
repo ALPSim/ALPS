@@ -59,6 +59,7 @@ SSE::SSE(const alps::ProcessList& w, const alps::Parameters& myparms,int n)
   count_worms_thermalization(0),
   site_state(num_sites(),0),
   operator_string(cutoff_L),
+  op_indices(cutoff_L),
   current_number_of_non_identity(0),
   boundary_crossing(alps::get_or_default(alps::boundary_crossing_t(),graph(),alps::boundary_crossing())),
   worm_abort(parms.value_or_default("WORM_ABORT", 0.))

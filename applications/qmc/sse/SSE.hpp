@@ -114,6 +114,7 @@ private :
   vector<double> energy_offset;
   vector<vertex_type> operator_string;
   vector<vertex_type> operator_string_copy;
+  std::vector<alps::uint32_t> op_indices;
   alps::uint32_t current_number_of_non_identity;
   std::valarray<double> green;
   double worm_weight;

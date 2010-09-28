@@ -311,7 +311,7 @@ private:
 					site_tensor0, site_tensor1, nneighbors0, nneighbors1);
 					
 				vertex.diagonal = true;
-				for (unsigned k = 0; k < UNIT_SIZE; k++)
+				for (unsigned k = 0; k < UNIT_SIZE; ++k)
 					if (vertex.state[k] != vertex.state[UNIT_SIZE + k]) {
 						vertex.diagonal = false;
 						break;
@@ -335,7 +335,7 @@ private:
 						_max_diag_me[i] = vertex.me;
 				}
 									
-				vertex_index++;
+				++vertex_index;
 			}
 		}
 		

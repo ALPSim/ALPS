@@ -218,7 +218,7 @@ private:
 			}
 			
 			// construct new vertex state
-			for (unsigned i = 0; i < 2 * UNIT_SIZE; i++)
+			for (unsigned i = 0; i < 2 * UNIT_SIZE; ++i)
 				nstate[i] = vstate[i];
 			nstate[en.leg] += phys_en_op;
 			nstate[ex_leg] += phys_ex_op;
