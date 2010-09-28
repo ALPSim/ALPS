@@ -10,7 +10,7 @@ option(BUILD_BOOST_PROGRAM_OPTIONS "Build Boost Program Options" TRUE)
 option(BUILD_BOOST_REGEX "Build Boost Regex" TRUE)
 option(BUILD_BOOST_SERIALIZATION "Build Boost Serialization" TRUE)
 option(BUILD_BOOST_SYSTEM "Build Boost System" TRUE)
-option(BUILD_BOOST_PYTHON "Build Boost Python" TRUE)
+#option(BUILD_BOOST_PYTHON "Build Boost Python" FALSE) # will be set later after looking for Python
 option(BUILD_BOOST_THREAD "Build Boost Thread" TRUE)
 option(BUILD_BOOST_TEST "Build Boost Test" TRUE)
 

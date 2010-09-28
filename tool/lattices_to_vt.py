@@ -6,6 +6,14 @@
 import os, sys
 from xml.etree import ElementTree
 
+skip = ['inhomogeneous square lattice', 'inhomogeneous simple cubic lattice', 'depleted square lattice']
+
+nameexceptions = {
+  'NnnChainLattice':'NNNChainLattice',
+  'NnnOpenChainLattice':'NNNOpenChainLattice',
+  ''
+}
+
 def replace_at(input, where, by):
     l = list(input)
     l[where] = by
