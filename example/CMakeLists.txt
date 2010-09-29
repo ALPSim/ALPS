@@ -16,6 +16,7 @@ else (ALPS_BUILD_SOURCE)
 
   add_subdirectory(parapack)
   add_subdirectory(scheduler)
+  add_subdirectory(ng)
   add_subdirectory(ngs)
   add_subdirectory(sampling)
   add_subdirectory(model)
