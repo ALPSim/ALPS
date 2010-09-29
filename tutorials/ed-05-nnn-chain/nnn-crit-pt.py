@@ -26,7 +26,7 @@
 # ****************************************************************************
 
 import pyalps
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
@@ -112,7 +112,7 @@ for group in grouped:
 
 sector_energies = pyalps.collectXY(sector_E, 'J1', 'Energy', ['Sz_total', 'which', 'L'])
 plt.figure()
-pyalps.pyplot.plot(sector_energies)
+pyalps.plot.plot(sector_energies)
 plt.xlabel('$J_1/J$')
 plt.ylabel('$E_0$')
 plt.legend(prop={'size':8})
@@ -148,7 +148,7 @@ for J1g in grouped:
 gaps = pyalps.collectXY(gaps, 'J1', 'gap', ['Sz_total', 'L'])
 
 plt.figure()
-pyalps.pyplot.plot(gaps)
+pyalps.plot.plot(gaps)
 plt.xlabel('$J_1/J$')
 plt.ylabel('$\Delta$')
 plt.legend(prop={'size':8})

@@ -30,7 +30,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 # load all files
 data = pyalps.loadMeasurements(pyalps.getResultFiles(),'Susceptibility')
@@ -55,7 +55,7 @@ for s in susceptibility:
 
 #make plot
 plt.figure()
-pyalps.pyplot.plot(susceptibility)
+pyalps.plot.plot(susceptibility)
 plt.xlabel('Temperature $T/J$')
 plt.ylabel('Susceptibility $\chi J$')
 plt.ylim(0,0.25)

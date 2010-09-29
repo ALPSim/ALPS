@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 import math
 import scipy.special
@@ -77,7 +77,7 @@ for q in Magdata:
 #Plot the Error in the magnetization one site to the right of the chain center
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
 plt.figure()
-pyalps.pyplot.plot(Mag)
+pyalps.plot.plot(Mag)
 plt.xlabel('Time $t$')
 plt.yscale('log')
 plt.ylabel('Magnetization Error')

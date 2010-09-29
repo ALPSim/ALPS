@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import copy
 
 #prepare the input parameters
@@ -66,7 +66,7 @@ for s in pyalps.flatten(results):
 #make plot
 plt.figure()
 plt.title("Scaling plot for cubic lattice Heisenberg antiferromagnet")
-pyalps.pyplot.plot(data)
+pyalps.plot.plot(data)
 plt.legend()
 plt.xlabel('Temperature $T/J$')
 plt.ylabel('$S(\pi,\pi,\pi) L^{-2+\eta}$')

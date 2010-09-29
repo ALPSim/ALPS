@@ -27,7 +27,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 
 #prepare the input parameters
@@ -79,6 +79,6 @@ plt.figure()
 plt.xlabel(r'$\tau$')
 plt.ylabel(r'$G(\tau)$')
 plt.title('Hubbard model on the Bethe lattice')
-pyalps.pyplot.plot(data)
+pyalps.plot.plot(data)
 plt.legend()
 plt.show()

@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = [{ 
@@ -50,6 +50,6 @@ data = pyalps.evaluateQWL(pyalps.getResultFiles(prefix='parm6c'),DELTA_T=0.05, T
 for s in pyalps.flatten(data):
   plt.figure()
   plt.title("Cubic lattice Heisenberg antiferromagnet L=4")
-  pyalps.pyplot.plot(s)
+  pyalps.plot.plot(s)
 
 plt.show()

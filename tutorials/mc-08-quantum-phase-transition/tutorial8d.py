@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 
 #prepare the input parameters
@@ -70,13 +70,13 @@ for q in stiffness:
 
 #make plot    
 plt.figure()
-pyalps.pyplot.plot(stiffness)
+pyalps.plot.plot(stiffness)
 plt.xlabel(r'$J2$')
 plt.ylabel(r'Stiffness $\rho_s L$')
 plt.title('coupled ladders')
 
 plt.figure()
-pyalps.pyplot.plot(binder)
+pyalps.plot.plot(binder)
 plt.xlabel(r'$J_2$')
 plt.ylabel(r'$g(m_s)$')
 plt.title('coupled ladders')

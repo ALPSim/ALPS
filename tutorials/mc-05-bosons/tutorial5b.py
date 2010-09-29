@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = []
@@ -63,7 +63,7 @@ for s in rhos:
 
 #make plot
 plt.figure()
-pyalps.pyplot.plot(rhos)
+pyalps.plot.plot(rhos)
 plt.xlabel('Hopping $t/U$')
 plt.ylabel('$\\rho _sL$')
 plt.legend()

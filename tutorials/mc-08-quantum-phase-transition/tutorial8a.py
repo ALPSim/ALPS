@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 import pyalps.fit_wrapper as fw
 from math import sqrt
@@ -80,7 +80,7 @@ for data in susc1:
     lines[-1].set_label('$J_2=%.4s$: $\chi = \\frac{%.4s}{T}\exp(\\frac{-%.4s}{T})$' % (data.props['J2'], prefactor,gap))
 
 plt.figure()
-pyalps.pyplot.plot(susc1)
+pyalps.plot.plot(susc1)
 plt.xlabel(r'$T$')
 plt.ylabel(r'$\chi$')
 plt.title('gap is %.4s' % gap)

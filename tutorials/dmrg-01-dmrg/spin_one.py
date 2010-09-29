@@ -28,7 +28,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = [ { 
@@ -61,13 +61,13 @@ iter = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm_spin_one'),
                                what=['Iteration Energy','Iteration Truncation Error'])
 
 plt.figure()
-pyalps.pyplot.plot(iter[0][0])
+pyalps.plot.plot(iter[0][0])
 plt.title('Iteration history of ground state energy (S=1)')
 plt.ylabel('$E_0$')
 plt.xlabel('iteration')
 
 plt.figure()
-pyalps.pyplot.plot(iter[0][1])
+pyalps.plot.plot(iter[0][1])
 plt.title('Iteration history of truncation error (S=1)')
 plt.yscale('log')
 plt.ylabel('error')

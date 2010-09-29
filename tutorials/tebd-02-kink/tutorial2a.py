@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 import copy
 import math
@@ -124,14 +124,14 @@ for q in Data:
 exactMag=pyalps.collectXY(exactResult, x='Time', y='Local Magnetization',foreach=['Distance'])
 numericalMag=pyalps.collectXY(numericalResult, x='Time', y='Local Magnetization',foreach=['Distance'])
 plt.figure()
-pyalps.pyplot.plot([exactMag, numericalMag])
+pyalps.plot.plot([exactMag, numericalMag])
 plt.xlabel('Time $t$')
 plt.ylabel('Magnetization')
 
 #Plot the scaling form with the numerical data for comparison
 Scal=pyalps.collectXY(scalingForm, x='Time', y='Local Magnetization', foreach=['Distance'])
 plt.figure()
-pyalps.pyplot.plot(Scal)
+pyalps.plot.plot(Scal)
 plt.xlabel('Scaling variable $n/t$')
 plt.ylabel('Magnetization$(n,t)$')
 plt.xlim(0,1.5)

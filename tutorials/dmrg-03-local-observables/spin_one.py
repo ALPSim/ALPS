@@ -28,7 +28,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = []
@@ -67,7 +67,7 @@ for run in data:
         
 # Plot local magnetization vs. site
 plt.figure()
-pyalps.pyplot.plot(curves)
+pyalps.plot.plot(curves)
 plt.legend()
 plt.title('Magnetization of antiferromagnetic Heisenberg chain (S=1)')
 plt.ylabel('local magnetization')

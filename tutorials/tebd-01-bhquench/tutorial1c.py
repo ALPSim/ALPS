@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms=[]
@@ -73,13 +73,13 @@ LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_1c*
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
 plt.figure()
-pyalps.pyplot.plot(LE)
+pyalps.plot.plot(LE)
 plt.xlabel('Time $t$')
 plt.ylabel('Loschmidt Echo $|< \psi(0)|\psi(t) > |^2$')
 
 Ufig=pyalps.collectXY(LEdata, x='Time', y='U',foreach=['SIMID'])
 plt.figure()
-pyalps.pyplot.plot(Ufig)
+pyalps.plot.plot(Ufig)
 plt.xlabel('Time $t$')
 plt.ylabel('U')
 plt.show()

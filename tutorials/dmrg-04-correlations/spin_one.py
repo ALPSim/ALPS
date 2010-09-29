@@ -28,7 +28,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = []
@@ -81,7 +81,7 @@ for run in data:
 
 # Plot correlation vs. distance
 plt.figure()
-pyalps.pyplot.plot(curves)
+pyalps.plot.plot(curves)
 plt.yscale('log')
 plt.legend()
 plt.title('Spin correlations in antiferromagnetic Heisenberg chain (S=1)')

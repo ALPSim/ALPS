@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 #skip this part if you already ran the simulation from the command line
@@ -58,7 +58,7 @@ susceptibility = pyalps.collectXY(data,x='T',y='Susceptibility')
 
 #make plot
 plt.figure()
-pyalps.pyplot.plot(susceptibility)
+pyalps.plot.plot(susceptibility)
 plt.xlabel('Temperature $T/J$')
 plt.ylabel('Susceptibility $\chi J$')
 plt.ylim(0,0.22)

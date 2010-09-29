@@ -27,7 +27,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = []
@@ -75,7 +75,7 @@ gapplot.props['ylabel']='Triplet gap $\Delta/J$'
 gapplot.props['label']='S=1/2'
 
 plt.figure()
-pyalps.pyplot.plot(gapplot)
+pyalps.plot.plot(gapplot)
 plt.legend()
 plt.xlim(0,0.25)
 plt.ylim(0,1.0)

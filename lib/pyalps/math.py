@@ -28,7 +28,7 @@
 
 from __future__ import absolute_import
 import numpy as np
-from pyalps.pyalea import *
+from pyalps.alea import *
 import math as pm
 
 global_function = "def OPERATION(obj): \n\

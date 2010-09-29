@@ -27,7 +27,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 data = pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm2a'))
 data += pyalps.loadSpectra(pyalps.getResultFiles(prefix='parm2b'))
@@ -56,7 +56,7 @@ for s in [0.5,1]:
   gapplot.props['xlabel']='$1/L$'
   gapplot.props['ylabel']='Triplet gap $\Delta/J$'
   gapplot.props['label']='S='+str(s)
-  pyalps.pyplot.plot(gapplot)
+  pyalps.plot.plot(gapplot)
 
 plt.legend()
 plt.xlim(0,0.25)

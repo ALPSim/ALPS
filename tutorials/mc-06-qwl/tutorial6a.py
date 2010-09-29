@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = [{ 
@@ -50,6 +50,6 @@ data = pyalps.evaluateQWL(pyalps.getResultFiles(prefix='parm6a'),DELTA_T=0.1, T_
 for s in pyalps.flatten(data):
   plt.figure()
   plt.title("Ferromagnetic Heisenberg chain")
-  pyalps.pyplot.plot(s)
+  pyalps.plot.plot(s)
 
 plt.show()

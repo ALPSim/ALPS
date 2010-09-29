@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 import pyalps.fit_wrapper as fw
 
@@ -64,7 +64,7 @@ binder_u2 = pyalps.collectXY(data,x='T',y='Binder Cumulant U2',foreach=['L'])
 
 #make a plot of the Binder cumulant:
 plt.figure()
-pyalps.pyplot.plot(binder_u4)
+pyalps.plot.plot(binder_u4)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Binder Cumulant U4 $g$')
 plt.title('2D Ising model')
@@ -81,7 +81,7 @@ for d in binder_u4:
     d.x = d.x * pow(float(l),a)
     
 plt.figure()
-pyalps.pyplot.plot(binder_u4)
+pyalps.plot.plot(binder_u4)
 plt.xlabel('Rescaled Temperature $(T-T_c)/T_c L^{1/\nu}$')
 plt.ylabel('Binder Cumulant U4 $g$')
 plt.title('2D Ising model')
@@ -89,13 +89,13 @@ plt.show()
     
 #make a plot of the specific heat and connected susceptibility:
 plt.figure()
-pyalps.pyplot.plot(connected_susc)
+pyalps.plot.plot(connected_susc)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Connected Susceptibility $\chi_c$')
 plt.title('2D Ising model')
 
 plt.figure()
-pyalps.pyplot.plot(spec_heat)
+pyalps.plot.plot(spec_heat)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Specific Heat $c_v$')
 plt.title('2D Ising model')
@@ -123,7 +123,7 @@ gamma_nu = pars[1].get()
 
 plt.figure()
 plt.plot(peak_cs.x, f(None, peak_cs.x, pars))
-pyalps.pyplot.plot(peak_cs)
+pyalps.plot.plot(peak_cs)
 plt.xlabel('System Size $L$')
 plt.ylabel('Connected Susceptibility $\chi_c(T_c)$')
 plt.title('2D Ising model, $\gamma$ is %.4s' % gamma_nu)
@@ -151,7 +151,7 @@ alpha_nu = pars[1].get()
 
 plt.figure()
 plt.plot(peak_sh.x, f(None, peak_sh.x, pars))
-pyalps.pyplot.plot(peak_cs)
+pyalps.plot.plot(peak_cs)
 plt.xlabel('System Size $L$')
 plt.ylabel('Specific Heat $c_v(T_c)$')
 plt.title(r'2D Ising model, $\alpha$ is %.4s' % alpha_nu)
@@ -170,7 +170,7 @@ for d in connected_susc:
     d.y = d.y/pow(float(l),two_minus_eta)
 
 plt.figure()
-pyalps.pyplot.plot(connected_susc)
+pyalps.plot.plot(connected_susc)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Connected Susceptibility $\chi_c$')
 plt.title('2D Ising model')
@@ -188,7 +188,7 @@ for d in magnetization_abs:
     d.y = d.y / pow(float(l),-beta_over_nu)
     
 plt.figure()
-pyalps.pyplot.plot(magnetization_abs)
+pyalps.plot.plot(magnetization_abs)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Magnetization $|m|$')
 plt.title('2D Ising model')

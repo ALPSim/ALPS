@@ -30,7 +30,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 # load all files
 data = pyalps.loadMeasurements(pyalps.getResultFiles(),'Magnetization Density')
@@ -43,7 +43,7 @@ magnetization = pyalps.collectXY(data,x='h',y='Magnetization Density',foreach=['
 
 #make plot
 plt.figure()
-pyalps.pyplot.plot(magnetization)
+pyalps.plot.plot(magnetization)
 plt.xlabel('Field $h$')
 plt.ylabel('Magnetization $m$')
 plt.ylim(0.0,0.5)

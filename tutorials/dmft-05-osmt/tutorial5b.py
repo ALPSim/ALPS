@@ -27,7 +27,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 
 #prepare the input parameters
@@ -91,7 +91,7 @@ for p in parms:
     plt.xlabel(r'$\tau$')
     plt.ylabel(r'$G(\tau)$')
     plt.title(r'$U$ = %.4s' %nd[0].props['U'])
-    pyalps.pyplot.plot(nd)
+    pyalps.plot.plot(nd)
     plt.legend()
     plt.show()
 

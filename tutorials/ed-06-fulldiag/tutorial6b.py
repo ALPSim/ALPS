@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 
 #prepare the input parameters
@@ -52,4 +52,4 @@ data = pyalps.evaluateFulldiagVersusT(pyalps.getResultFiles(prefix='parm2b'),DEL
 for s in pyalps.flatten(data):
   plt.figure()
   plt.title("Antiferromagnetic Heisenberg ladder")
-  pyalps.pyplot.plot(s)
+  pyalps.plot.plot(s)

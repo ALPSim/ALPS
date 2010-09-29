@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 
 #prepare the input parameters
@@ -51,6 +51,6 @@ data = pyalps.evaluateFulldiagVersusT(pyalps.getResultFiles(prefix='parmsd'),DEL
 for s in pyalps.flatten(data):
   plt.figure()
   plt.title("V$_{15}$ molecular magnet")
-  pyalps.pyplot.plot(s)
+  pyalps.plot.plot(s)
 
 plt.show()

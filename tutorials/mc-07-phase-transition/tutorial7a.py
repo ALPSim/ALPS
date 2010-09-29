@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = []
@@ -75,31 +75,31 @@ binder_u2 = pyalps.collectXY(data,x='T',y='Binder Cumulant U2',foreach=['L'])
 
 #make plots
 plt.figure()
-pyalps.pyplot.plot(magnetization_abs)
+pyalps.plot.plot(magnetization_abs)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Magnetization $|m|$')
 plt.title('2D Ising model')
 
 plt.figure()
-pyalps.pyplot.plot(connected_susc)
+pyalps.plot.plot(connected_susc)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Connected Susceptibility $\chi_c$')
 plt.title('2D Ising model')
 
 plt.figure()
-pyalps.pyplot.plot(spec_heat)
+pyalps.plot.plot(spec_heat)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Specific Heat $c_v$')
 plt.title('2D Ising model')
 
 plt.figure()
-pyalps.pyplot.plot(binder_u4)
+pyalps.plot.plot(binder_u4)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Binder Cumulant U4 $g$')
 plt.title('2D Ising model')
 
 plt.figure()
-pyalps.pyplot.plot(binder_u2)
+pyalps.plot.plot(binder_u2)
 plt.xlabel('Temperature $T$')
 plt.ylabel('Binder Cumulant U2 $g$')
 plt.title('2D Ising model')

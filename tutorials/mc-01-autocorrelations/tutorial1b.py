@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms = []
@@ -61,7 +61,7 @@ plt.figure()
 plt.title('Binning analysis for cluster updates')
 plt.xlabel('binning level')
 plt.ylabel('Error of |Magnetization|')
-pyalps.pyplot.plot(binning)
+pyalps.plot.plot(binning)
 plt.legend()
 plt.show()
 
@@ -72,6 +72,6 @@ for dataset in binning:
     plt.title('Binning analysis for L='+str(dataset.props['L']))
     plt.xlabel('binning level')
     plt.ylabel('Error of |Magnetization|')
-    pyalps.pyplot.plot(dataset)
+    pyalps.plot.plot(dataset)
 
 plt.show()

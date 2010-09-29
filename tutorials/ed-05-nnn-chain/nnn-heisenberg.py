@@ -26,7 +26,7 @@
 # ****************************************************************************
 
 import pyalps
-import pyalps.pyplot
+import pyalps.plot
 import numpy as np
 import matplotlib.pyplot as plt
 import copy
@@ -77,7 +77,7 @@ for SD in [0.5, 1, 1+0.5, 1+1]:
     # d.props['label'] = str(SD)
     spectrum += [d]
 
-pyalps.pyplot.plot(spectrum)
+pyalps.plot.plot(spectrum)
 
 plt.legend(prop={'size':8})
 plt.xlabel("$k$")

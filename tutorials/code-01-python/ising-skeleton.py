@@ -28,7 +28,7 @@
 # ****************************************************************************
 
 import math
-import pyalps.pyalea as alpsalea
+import pyalps.alea as alpsalea
 import pyalps.pytools as alpstools
 
 class Simulation:

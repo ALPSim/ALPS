@@ -27,7 +27,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 
 #prepare the input parameters
 parms=[]
@@ -69,7 +69,7 @@ for sim in data:
 
 # plot
 plt.figure()
-pyalps.pyplot.plot(spectra.values())
+pyalps.plot.plot(spectra.values())
 plt.legend()
 plt.title('Antiferromagnetic Heisenberg chain (S=1/2)')
 plt.ylabel('Energy')
