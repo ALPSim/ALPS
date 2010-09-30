@@ -109,16 +109,19 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         resultfiles = []
         for f in fs:
-            self.h5f = h5.iArchive(f)
-            self.h5fname = f
-            if verbose: print "Loading from file", f
-            rfile = ResultFile(f)
-            rfile.props = self.ReadParameters(proppath)
             try:
-              obs = self.GetObservableList(respath)
-              rfile.props["ObservableList"] = [pt.hdf5_name_decode(x) for x in obs]
-            except: pass
-            resultfiles.append(rfile)
+                self.h5f = h5.iArchive(f)
+                self.h5fname = f
+                if verbose: print "Loading from file", f
+                rfile = ResultFile(f)
+                rfile.props = self.ReadParameters(proppath)
+                try:
+                  obs = self.GetObservableList(respath)
+                  rfile.props["ObservableList"] = [pt.hdf5_name_decode(x) for x in obs]
+                except: pass
+                resultfiles.append(rfile)
+            except:
+                print "FILE ", f, " DOES NOT EXIST"
         return resultfiles
         
     def GetObservableList(self,respath):
@@ -135,156 +138,162 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
-            fileset=[]
-            self.h5f = h5.iArchive(f)
-            self.h5fname = f
-            if verbose: print "Loading from file", f
-            params = self.ReadParameters(proppath)
-            if 'energies' in self.h5f.list_children(respath):
-                    try:
-                        d = DataSet()
-                        d.props['hdf5_path'] = respath 
-                        d.props['observable'] = 'spectrum'
-                        d.y = self.h5f.read(respath+'/energies')
-                        d.x = range(len(d.y))
-                        d.props.update(params)
-                        d.props.update(self.ReadParameters('quantumnumbers'))
-                        fileset.append(d)
-                    except AttributeError:
-                        pass
-            if 'sectors' in self.h5f.list_children(respath):
-                for secnum in self.h5f.list_children(respath+'/sectors'):
-                    try:
-                        d = DataSet()
-                        secpath = respath+'/sectors/'+secnum
-                        d.props['hdf5_path'] = secpath 
-                        d.props['observable'] = 'spectrum'
-                        d.y = self.h5f.read(secpath+'/energies')
-                        d.x = range(len(d.y))
-                        d.props.update(params)
-                        d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
-                        fileset.append(d)
-                    except AttributeError:
-                        print "Could not create DataSet"
-                        pass
-            sets.append(fileset)
+            try:
+                fileset=[]
+                self.h5f = h5.iArchive(f)
+                self.h5fname = f
+                if verbose: print "Loading from file", f
+                params = self.ReadParameters(proppath)
+                if 'energies' in self.h5f.list_children(respath):
+                        try:
+                            d = DataSet()
+                            d.props['hdf5_path'] = respath 
+                            d.props['observable'] = 'spectrum'
+                            d.y = self.h5f.read(respath+'/energies')
+                            d.x = range(len(d.y))
+                            d.props.update(params)
+                            d.props.update(self.ReadParameters('quantumnumbers'))
+                            fileset.append(d)
+                        except AttributeError:
+                            pass
+                if 'sectors' in self.h5f.list_children(respath):
+                    for secnum in self.h5f.list_children(respath+'/sectors'):
+                        try:
+                            d = DataSet()
+                            secpath = respath+'/sectors/'+secnum
+                            d.props['hdf5_path'] = secpath 
+                            d.props['observable'] = 'spectrum'
+                            d.y = self.h5f.read(secpath+'/energies')
+                            d.x = range(len(d.y))
+                            d.props.update(params)
+                            d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                            fileset.append(d)
+                        except AttributeError:
+                            print "Could not create DataSet"
+                            pass
+                sets.append(fileset)
+            except:
+                print "FILE ", f, " DOES NOT EXIST"
         return sets
 
     def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, index=None, loadIterations=False,verbose=False):
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
-            fileset=[]
-            self.h5f = h5.iArchive(f)
-            self.h5fname = f
-            if verbose: print "Loading from file", f
-            params = self.ReadParameters(proppath)
-            if 'results' in self.h5f.list_children(respath):
-                list_ = self.GetObservableList(respath+'/results')
-                if measurements == None:
-                    obslist = list_
-                else:
-                    obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
-                if loadIterations==True:
-                    if "iteration" in self.h5f.list_children(respath):
-                        iterationset=[]
-                        #iteration_grp = self.h5f.require_group(respath+'/iteration')
-                        for it in self.h5f.list_children(respath+'/iteration'):
-                            obsset=[]
-                            for m in obslist:
-                                if m in self.h5f.list_children(respath+'/iteration/'+it+'/results'):
-                                    if "mean" in self.h5f.list_children(respath+'/iteration/'+it+'/results/'+m):
+            try:
+                fileset=[]
+                self.h5f = h5.iArchive(f)
+                self.h5fname = f
+                if verbose: print "Loading from file", f
+                params = self.ReadParameters(proppath)
+                if 'results' in self.h5f.list_children(respath):
+                    list_ = self.GetObservableList(respath+'/results')
+                    if measurements == None:
+                        obslist = list_
+                    else:
+                        obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+                    if loadIterations==True:
+                        if "iteration" in self.h5f.list_children(respath):
+                            iterationset=[]
+                            #iteration_grp = self.h5f.require_group(respath+'/iteration')
+                            for it in self.h5f.list_children(respath+'/iteration'):
+                                obsset=[]
+                                for m in obslist:
+                                    if m in self.h5f.list_children(respath+'/iteration/'+it+'/results'):
+                                        if "mean" in self.h5f.list_children(respath+'/iteration/'+it+'/results/'+m):
+                                            try:
+                                                d = DataSet()
+                                                itresultspath = respath+'/iteration/'+it+'results/'+m
+                                                if verbose: print "Loading", m
+                                                d.props['hdf5_path'] = itresultspath 
+                                                d.props['observable'] = pt.hdf5_name_decode(m)
+                                                d.props['iteration'] = it
+                                                if index == None:
+                                                    d.y = self.h5f.read(itresultspath+'/mean/value')
+                                                    d.x = np.arange(0,len(d.y))
+                                                else:
+                                                    try:
+                                                        d.y = self.h5f.read(itresultspath+'/mean/value')[index]
+                                                    except:
+                                                        pass
+                                                if "labels" in self.h5f.list_children(itresultspath):
+                                                    d.x = self.h5f.read(itresultspath+'/labels') 
+                                                else:
+                                                    d.x = np.arange(0,len(d.y))
+                                                d.props.update(params)
+                                            except AttributeError:
+                                                print "Could not create DataSet"
+                                                pass
+                                        obsset.append(d)
+                                iterationset.append(obsset)
+                            fileset.append(iterationset)
+                    else:        
+                        for m in obslist:
+                            if "mean" in self.h5f.list_children(respath+'/results/'+m):
+                                try:
+                                    if verbose: print "Loading", m
+                                    d = DataSet()
+                                    secresultspath = respath+'/results/'+m
+                                    d.props['hdf5_path'] = secresultspath 
+                                    d.props['observable'] = pt.hdf5_name_decode(m)
+                                    if index == None:
+                                        d.y = self.h5f.read(secresultspath+'/mean/value') 
+                                        d.x = np.arange(0,len(d.y))
+                                    else:
                                         try:
-                                            d = DataSet()
-                                            itresultspath = respath+'/iteration/'+it+'results/'+m
-                                            if verbose: print "Loading", m
-                                            d.props['hdf5_path'] = itresultspath 
-                                            d.props['observable'] = pt.hdf5_name_decode(m)
-                                            d.props['iteration'] = it
-                                            if index == None:
-                                                d.y = self.h5f.read(itresultspath+'/mean/value')
-                                                d.x = np.arange(0,len(d.y))
-                                            else:
-                                                try:
-                                                    d.y = self.h5f.read(itresultspath+'/mean/value')[index]
-                                                except:
-                                                    pass
-                                            if "labels" in self.h5f.list_children(itresultspath):
-                                                d.x = self.h5f.read(itresultspath+'/labels') 
-                                            else:
-                                                d.x = np.arange(0,len(d.y))
-                                            d.props.update(params)
-                                        except AttributeError:
-                                            print "Could not create DataSet"
+                                            d.y = self.h5f.read(secresultspath+'/mean/value')[index]
+                                        except:
                                             pass
-                                    obsset.append(d)
-                            iterationset.append(obsset)
-                        fileset.append(iterationset)
-                else:        
-                    for m in obslist:
-                        if "mean" in self.h5f.list_children(respath+'/results/'+m):
-                            try:
-                                if verbose: print "Loading", m
-                                d = DataSet()
-                                secresultspath = respath+'/results/'+m
-                                d.props['hdf5_path'] = secresultspath 
-                                d.props['observable'] = pt.hdf5_name_decode(m)
-                                if index == None:
-                                    d.y = self.h5f.read(secresultspath+'/mean/value') 
-                                    d.x = np.arange(0,len(d.y))
-                                else:
-                                    try:
-                                        d.y = self.h5f.read(secresultspath+'/mean/value')[index]
-                                    except:
-                                        pass
-                                if "labels" in self.h5f.list_children(secresultspath):
-                                    d.x = parse_labels(self.h5f.read(secresultspath+'/labels'))
-                                else:
-                                    d.x = np.arange(0,len(d.y))
-                                d.props.update(params)
+                                    if "labels" in self.h5f.list_children(secresultspath):
+                                        d.x = parse_labels(self.h5f.read(secresultspath+'/labels'))
+                                    else:
+                                        d.x = np.arange(0,len(d.y))
+                                    d.props.update(params)
 
-                            except AttributeError:
-                                print "Could not create DataSet"
-                                pass
-                        fileset.append(d)
-            if 'sectors' in self.h5f.list_children(respath):
-                list_ = self.GetObservableList(respath+'/sectors/0/results')
-                if measurements == None:
-                    obslist = list_
-                else:
-                    obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
-                for secnum in self.h5f.list_children(respath+'/sectors'):
-                    sector_sets=[]
-                    for m in obslist:
-                        if "mean" in self.h5f.list_children(respath+'/sectors/'+secnum+'/results/'+m):
-                            try:
-                                if verbose: print "Loading", m
-                                d = DataSet()
-                                secpath = respath+'/sectors/'+secnum
-                                secresultspath = respath+'/sectors/'+secnum+'/results/'+m
-                                d.props['hdf5_path'] = secresultspath 
-                                d.props['observable'] = pt.hdf5_name_decode(m)
-                                if index == None:
-                                    d.y = self.h5f.read(secresultspath+'/mean/value') 
-                                    d.x = np.arange(0,len(d.y))
-                                else:
-                                    try:
-                                        d.y = self.h5f.read(secresultspath+'/mean/value')[index]
-                                    except:
-                                        pass
-                                if "labels" in self.h5f.list_children(secresultspath):
-                                    d.x = parse_labels(self.h5f.read(secresultspath+'/labels')) 
-                                else:
-                                    d.x = np.arange(0,len(d.y))
-                                d.props.update(params)
-                                d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
-                                sector_sets.append(d)
+                                except AttributeError:
+                                    print "Could not create DataSet"
+                                    pass
+                            fileset.append(d)
+                if 'sectors' in self.h5f.list_children(respath):
+                    list_ = self.GetObservableList(respath+'/sectors/0/results')
+                    if measurements == None:
+                        obslist = list_
+                    else:
+                        obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+                    for secnum in self.h5f.list_children(respath+'/sectors'):
+                        sector_sets=[]
+                        for m in obslist:
+                            if "mean" in self.h5f.list_children(respath+'/sectors/'+secnum+'/results/'+m):
+                                try:
+                                    if verbose: print "Loading", m
+                                    d = DataSet()
+                                    secpath = respath+'/sectors/'+secnum
+                                    secresultspath = respath+'/sectors/'+secnum+'/results/'+m
+                                    d.props['hdf5_path'] = secresultspath 
+                                    d.props['observable'] = pt.hdf5_name_decode(m)
+                                    if index == None:
+                                        d.y = self.h5f.read(secresultspath+'/mean/value') 
+                                        d.x = np.arange(0,len(d.y))
+                                    else:
+                                        try:
+                                            d.y = self.h5f.read(secresultspath+'/mean/value')[index]
+                                        except:
+                                            pass
+                                    if "labels" in self.h5f.list_children(secresultspath):
+                                        d.x = parse_labels(self.h5f.read(secresultspath+'/labels')) 
+                                    else:
+                                        d.x = np.arange(0,len(d.y))
+                                    d.props.update(params)
+                                    d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                                    sector_sets.append(d)
 
-                            except AttributeError:
-                                print "Could not create DataSet"
-                                pass
-                    fileset.append(sector_sets)
-            sets.append(fileset)
+                                except AttributeError:
+                                    print "Could not create DataSet"
+                                    pass
+                        fileset.append(sector_sets)
+                sets.append(fileset)
+            except:
+                print "FILE ", f, " DOES NOT EXIST"
         return sets
         
     # Pre: file is a hdf5 file descriptor
@@ -293,48 +302,51 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
-            fileset = []
-            if verbose: print 'loading from file ',f
-            self.h5f = h5.iArchive(f)
-            self.h5fname = f
-            if respath == None:
-              respath="/simulation/results"
-            list_ = self.GetObservableList(respath)
-            # this is exception-safe in the sense that it's also required in the line above
-            #grp = self.h5f.require_group(respath)
-            params = self.ReadParameters(proppath)
-            obslist = []
-            if measurements == None:
-                obslist = list_
-            else:
-                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
-            for m in obslist:
-                try:
-                    d = DataSet()
-                    if "timeseries" in  self.h5f.list_children(respath+'/'+m):
-                        k = self.h5f.list_children(respath+'/'+m+'/timeseries')
-                        if "logbinning" in k and "logbinning2" in k and "logbinning_counts" in k:
-                            if verbose: print "Loading", m
-                            bins = self.h5f.read(respath+'/'+m+'/timeseries/logbinning')[0:-4] 
-                            bins2 = self.h5f.read(respath+'/'+m+'/timeseries/logbinning2')[0:-4] 
-                            counts = self.h5f.read(respath+'/'+m+'/timeseries/logbinning_counts')[0:-4] 
-                            scale = 1
-                            for i in range(len(counts)):
-                                mean = bins[i]/(counts[i]*scale)
-                                mean2 = bins2[i]/counts[i]
-                                bins2[i] = np.sqrt((mean2-mean*mean)/counts[i])
-                                scale *=2
-                            d.y = bins2
-                            d.x = np.arange(0,len(d.y))
-                            d.props['hdf5_path'] = respath + m
-                            d.props['observable'] = 'binning analysis of ' + pt.hdf5_name_decode(m)
-                            d.props.update(params)
-                            if verbose: print '  loaded binnig analysis for ',m
-                            fileset.append(d)
-                except AttributeError:
-                    print "Could not create DataSet"
-                    pass
-            sets.append(fileset)
+            try:
+                fileset = []
+                if verbose: print 'loading from file ',f
+                self.h5f = h5.iArchive(f)
+                self.h5fname = f
+                if respath == None:
+                  respath="/simulation/results"
+                list_ = self.GetObservableList(respath)
+                # this is exception-safe in the sense that it's also required in the line above
+                #grp = self.h5f.require_group(respath)
+                params = self.ReadParameters(proppath)
+                obslist = []
+                if measurements == None:
+                    obslist = list_
+                else:
+                    obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+                for m in obslist:
+                    try:
+                        d = DataSet()
+                        if "timeseries" in  self.h5f.list_children(respath+'/'+m):
+                            k = self.h5f.list_children(respath+'/'+m+'/timeseries')
+                            if "logbinning" in k and "logbinning2" in k and "logbinning_counts" in k:
+                                if verbose: print "Loading", m
+                                bins = self.h5f.read(respath+'/'+m+'/timeseries/logbinning')[0:-4] 
+                                bins2 = self.h5f.read(respath+'/'+m+'/timeseries/logbinning2')[0:-4] 
+                                counts = self.h5f.read(respath+'/'+m+'/timeseries/logbinning_counts')[0:-4] 
+                                scale = 1
+                                for i in range(len(counts)):
+                                    mean = bins[i]/(counts[i]*scale)
+                                    mean2 = bins2[i]/counts[i]
+                                    bins2[i] = np.sqrt((mean2-mean*mean)/counts[i])
+                                    scale *=2
+                                d.y = bins2
+                                d.x = np.arange(0,len(d.y))
+                                d.props['hdf5_path'] = respath + m
+                                d.props['observable'] = 'binning analysis of ' + pt.hdf5_name_decode(m)
+                                d.props.update(params)
+                                if verbose: print '  loaded binnig analysis for ',m
+                                fileset.append(d)
+                    except AttributeError:
+                        print "Could not create DataSet"
+                        pass
+                sets.append(fileset)
+            except:
+                print "FILE ", f, " DOES NOT EXIST"
         return sets
     
     # Pre: file is a hdf5 file descriptor
@@ -343,51 +355,54 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         sets = []
         for f in fs:
-            fileset = []
-            self.h5f = h5.iArchive(f)
-            self.h5fname = f
-            if verbose: print "Loading from file", f
-            list_ = self.GetObservableList(respath)
-            params = self.ReadParameters(proppath)
-            obslist = []
-            if measurements == None:
-                obslist = list_
-            else:
-                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
-            for m in obslist:
-                if verbose: print "Loading", m
-                size=0
-                #TODO check if there is mean AND error, otherwise only read mean value!!!
-                if "error" in self.h5f.list_children(respath+'/'+m): 
-                    if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
-                        obs = pa.MCScalarData()
-                        obs.load(self.h5fname, respath+'/'+m)
-                        obs=np.array([obs])
-                        size=1
-                    else:
-                        obs = pa.MCVectorData()
-                        obs.load(self.h5fname, respath+'/'+m)
-                        size=len(obs.mean)
+            try:
+                fileset = []
+                self.h5f = h5.iArchive(f)
+                self.h5fname = f
+                if verbose: print "Loading from file", f
+                list_ = self.GetObservableList(respath)
+                params = self.ReadParameters(proppath)
+                obslist = []
+                if measurements == None:
+                    obslist = list_
                 else:
-                    if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
-                        obs = self.h5f.read(respath+'/'+m+'/mean/value')
-                        obs=np.array([obs])
-                        size=1
+                    obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+                for m in obslist:
+                    if verbose: print "Loading", m
+                    size=0
+                    #TODO check if there is mean AND error, otherwise only read mean value!!!
+                    if "error" in self.h5f.list_children(respath+'/'+m): 
+                        if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
+                            obs = pa.MCScalarData()
+                            obs.load(self.h5fname, respath+'/'+m)
+                            obs=np.array([obs])
+                            size=1
+                        else:
+                            obs = pa.MCVectorData()
+                            obs.load(self.h5fname, respath+'/'+m)
+                            size=len(obs.mean)
                     else:
-                        obs = self.h5f.read(respath+'/'+m+'/mean/value')
-                        size=len(obs)
-                try:
-                    d = DataSet()
-                    d.y = obs
-                    d.x = np.arange(0,size)
-                    d.props['hdf5_path'] = respath +"/"+ m
-                    d.props['observable'] = pt.hdf5_name_decode(m)
-                    d.props.update(params)
-                    fileset.append(d)
-                except AttributeError:
-                    print "Could not create DataSet"
-                    pass
-            sets.append(fileset)
+                        if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
+                            obs = self.h5f.read(respath+'/'+m+'/mean/value')
+                            obs=np.array([obs])
+                            size=1
+                        else:
+                            obs = self.h5f.read(respath+'/'+m+'/mean/value')
+                            size=len(obs)
+                    try:
+                        d = DataSet()
+                        d.y = obs
+                        d.x = np.arange(0,size)
+                        d.props['hdf5_path'] = respath +"/"+ m
+                        d.props['observable'] = pt.hdf5_name_decode(m)
+                        d.props.update(params)
+                        fileset.append(d)
+                    except AttributeError:
+                        print "Could not create DataSet"
+                        pass
+                sets.append(fileset)
+            except:
+                print "FILE ", f, " DOES NOT EXIST"
         return sets
 
     # Pre: file is a hdf5 file descriptor
@@ -396,46 +411,49 @@ class Hdf5Loader:
         fs = self.GetFileNames(flist)
         fileset = []
         for f in fs:
-            self.h5f = h5.iArchive(f)
-            self.h5fname = f
-            if verbose: print "Loading from file", f
-            list_ = self.GetObservableList(respath+'/1/results/G_tau/')
-            #grp = self.h5f.require_group(respath)
-            params = self.ReadParameters(proppath)
-            obslist = []
-            if measurements == None:
-                obslist = ['Green_0']
-            else:
-                obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
-            iterationset=[]
-            for it in  self.h5f.list_children(respath):
-                obsset=[]
-                for m in obslist:
-                    try:
-                        if verbose: print "Loading", m
-                        d = DataSet()
-                        size=0
-                        path=it+"/results/G_tau/"+m
-                        if "mean" in self.h5f.list_children(respath+'/'+path):
-                            if self.h5f.is_scalar(respath+'/'+path+'/mean/value'):
-                                size=1
-                                obs=self.h5f.read(respath+'/'+path+'/mean/value')
-                                d.y = np.array([obs]) 
-                            else:
-                                obs=self.h5f.read(respath+'/'+path+'/mean/value')
-                                size=len(obs)
-                                d.y = obs
-                            d.x = np.arange(0,size)
-                        d.props['hdf5_path'] = respath +"/"+ path
-                        d.props['observable'] = pt.hdf5_name_decode(m)
-                        d.props['iteration'] = it
-                        d.props.update(params)
-                    except AttributeError:
-                        print "Could not create DataSet"
-                        pass
-                    obsset.append(d)
-                iterationset.append(obsset)
-            fileset.append(iterationset)
+            try:
+                self.h5f = h5.iArchive(f)
+                self.h5fname = f
+                if verbose: print "Loading from file", f
+                list_ = self.GetObservableList(respath+'/1/results/G_tau/')
+                #grp = self.h5f.require_group(respath)
+                params = self.ReadParameters(proppath)
+                obslist = []
+                if measurements == None:
+                    obslist = ['Green_0']
+                else:
+                    obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
+                iterationset=[]
+                for it in  self.h5f.list_children(respath):
+                    obsset=[]
+                    for m in obslist:
+                        try:
+                            if verbose: print "Loading", m
+                            d = DataSet()
+                            size=0
+                            path=it+"/results/G_tau/"+m
+                            if "mean" in self.h5f.list_children(respath+'/'+path):
+                                if self.h5f.is_scalar(respath+'/'+path+'/mean/value'):
+                                    size=1
+                                    obs=self.h5f.read(respath+'/'+path+'/mean/value')
+                                    d.y = np.array([obs]) 
+                                else:
+                                    obs=self.h5f.read(respath+'/'+path+'/mean/value')
+                                    size=len(obs)
+                                    d.y = obs
+                                d.x = np.arange(0,size)
+                            d.props['hdf5_path'] = respath +"/"+ path
+                            d.props['observable'] = pt.hdf5_name_decode(m)
+                            d.props['iteration'] = it
+                            d.props.update(params)
+                        except AttributeError:
+                            print "Could not create DataSet"
+                            pass
+                        obsset.append(d)
+                    iterationset.append(obsset)
+                fileset.append(iterationset)
+            except:
+                print "FILE ", f, " DOES NOT EXIST"
         return fileset
         
 def loadBinningAnalysis(files,what=None,verbose=False):
@@ -568,22 +586,25 @@ def loadTimeEvolution( flist,globalproppath='/parameters/',resroot='/timesteps/'
     data=[]
     #loop over files
     for f in flist:
-        #open the file and open the results root group
-        h5file = h5.iArchive(f)
-        #enumerate the subgroups
-        L=h5file.list_children(resroot)
-        #Create an iterator of length the number of subgroups
-        stepper=[i+1 for i in range(len(L))]
-        #Read in global props
-        globalprops=ll.GetProperties([f],globalproppath)
-        for d in stepper:
-            #Get the measurements from the numbered subgroups
-            locdata=ll.ReadMeasurementFromFile([f],proppath=resroot+str(d).rjust(8)+localpropsuffix, \
-            respath=resroot+str(d).rjust(8)+'/results', measurements=measurements)
-            #Append the global props to the local props
-            locdata[0][0].props.update(globalprops[0].props)
-            #Extend the total dataset with this data
-            data.extend(locdata)
+        try:
+            #open the file and open the results root group
+            h5file = h5.iArchive(f)
+            #enumerate the subgroups
+            L=h5file.list_children(resroot)
+            #Create an iterator of length the number of subgroups
+            stepper=[i+1 for i in range(len(L))]
+            #Read in global props
+            globalprops=ll.GetProperties([f],globalproppath)
+            for d in stepper:
+                #Get the measurements from the numbered subgroups
+                locdata=ll.ReadMeasurementFromFile([f],proppath=resroot+str(d).rjust(8)+localpropsuffix, \
+                respath=resroot+str(d).rjust(8)+'/results', measurements=measurements)
+                #Append the global props to the local props
+                locdata[0][0].props.update(globalprops[0].props)
+                #Extend the total dataset with this data
+                data.extend(locdata)
+        except:
+            print "FILE ", f, " DOES NOT EXIST"
     return data
     
 
