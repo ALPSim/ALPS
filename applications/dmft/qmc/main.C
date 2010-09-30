@@ -122,8 +122,9 @@ int main(int argc, char** argv)
         }
 #endif
         else {
-          boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
+            /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/*,boost::filesystem::native*/);
+          
+          solver_ptr.reset(new ExternalSolver(/*boost::filesystem::complete(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
       } 
@@ -194,8 +195,8 @@ int main(int argc, char** argv)
           else
 #endif
           {
-            boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
-            solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
+              /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/*,boost::filesystem::native*/);
+            solver_ptr.reset(new ExternalSolver(/*boost::filesystem::complete(*/p/*)*/));
           }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
       }

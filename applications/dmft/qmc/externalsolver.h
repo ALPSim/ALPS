@@ -57,8 +57,8 @@ class ExternalSolver
 {
 public:
   /// @param executable the path to the executable
-  ExternalSolver(const boost::filesystem::path& executable) 
-  : exe_(boost::filesystem::complete(executable)) {}
+    ExternalSolver(const /*boost::filesystem::path&*/ std::string executable) 
+  : exe_(executable) {}
   
   ImpuritySolver::result_type solve(const itime_green_function_t& G0, const alps::Parameters& parms);
   
@@ -69,7 +69,7 @@ private:
   void call(std::string const& infile, std::string const& outfile);
   
   ///path to the solver executable
-  boost::filesystem::path exe_;
+    /* boost::filesystem::path*/ std::string exe_;
 };
 
 
