@@ -59,7 +59,7 @@ nmlname=pyalps.writeTEBDfiles(parms, baseName)
 res=pyalps.runTEBD(nmlname)
 
 #Get the results of the simulation
-Data=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_2a*h5'), measurements=['Local Magnetization'])
+Data=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_2a'), measurements=['Local Magnetization'])
 #define a dataset numericalSolution to contain the numerical result
 numericalResult=[]
 #define a dataset exactSolution to contain the exact solution

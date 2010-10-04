@@ -27,8 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.plot
-import numpy as np
+import pyalps.pyplot
 import math
 import scipy.special
 
@@ -37,7 +36,7 @@ parms=[]
 count=0
 for z in [0.0, 0.3, 0.9, 1.0, 1.1, 1.5]:
 	count+=1
-	parms.append([{ 
+	parms.append({ 
 	          'L'                         : 50,
 	          'MODEL'                     : 'spin',
 	          'local_S'                   : 0.5,
@@ -56,29 +55,28 @@ for z in [0.0, 0.3, 0.9, 1.0, 1.1, 1.5]:
 		  'NUMSTEPS' : [500],
 		  'STEPSFORSTORE' : [5],
 		  'SIMID': count
-	        }])
+	        })
 
-baseName='tutorial_1d_'
-for p in parms:
-	nmlname=pyalps.write_TEBD_files(p, baseName+str(p[0]['SIMID']))
-	res=pyalps.run_TEBD(nmlname)
+baseName='tutorial_2d'
+nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
+res=pyalps.runTEBD(nmlnameList)
 
-
-syssize=parms[0][0]['L']
-Magdata=[]
 #Get magnetization data
-for p in parms:
-	Magdata.extend(pyalps.load.loadTimeEvolution(p, baseName+str(p[0]['SIMID']), measurements=['Local Magnetization']))
+Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(prefix='tutorial_2d'), measurements=['Local Magnetization'])
 
-#Postprocessing
-postData=[]
+#Compute the integrated magnetization across the center
 for q in Magdata:
+	syssize=q[0].props['L']
+	#Compute the integrated flow of magnetization through the center \Delta M=\sum_{n>L/2}^{L} (<S_n^z(t)>+1/2)
+	#\Delta M= L/4
 	loc=0.5*(syssize/2)
+	#\Delta M-=<S_n^z(t)> from n=L/2 to L
 	q[0].y=[0.5*(syssize/2)+sum(q[0].y[syssize/2:syssize])]
 
+#Plot the integrated magnetization
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
 plt.figure()
-pyalps.plot.plot(Mag)
+pyalps.pyplot.plot(Mag)
 plt.xlabel('Time $t$')
 plt.ylabel('Change in Magnetization $\Delta M(t)$')
 plt.show()

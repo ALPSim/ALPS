@@ -70,7 +70,7 @@ res=pyalps.runTEBD(nmlnameList)
 
 
 #Load the loschmidt echo and U
-LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(pattern='tutorial_1a*h5'), measurements=['U', 'Loschmidt Echo'])
+LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1a'), measurements=['U', 'Loschmidt Echo'])
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
 plt.figure()

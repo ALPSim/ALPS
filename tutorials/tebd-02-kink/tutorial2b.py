@@ -63,7 +63,7 @@ nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
 res=pyalps.runTEBD(nmlnameList)
 
 #Get magnetization data
-Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(pattern='tutorial_2b_*h5'), measurements=['Local Magnetization'])
+Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(prefix='tutorial_2b'), measurements=['Local Magnetization'])
 
 #Postprocessing-get the exact result for comparison
 for q in Magdata:
