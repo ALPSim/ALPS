@@ -30,7 +30,7 @@
 #include <alps/alea.h>
 #include <fstream>
 
-void evaluate(const boost::filesystem::path& p, std::ostream& out) {
+void evaluate(const boost::filesystem::path& p, std::ostream& out, const bool write_xml) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
 
@@ -45,8 +45,8 @@ void evaluate(const boost::filesystem::path& p, std::ostream& out) {
   double numsites = graph.num_sites();
 
   // determine compressibility
-  alps::RealObsevaluator n  = sim.get_measurements()["Particle number"];
-  alps::RealObsevaluator n2 = sim.get_measurements()["Particle number^2"];
+  alps::RealObsevaluator n  = sim.get_measurements()["Density"];
+  alps::RealObsevaluator n2 = sim.get_measurements()["Density^2"];
 
   alps::RealObsevaluator kappa= beta*(n2 - numsites*n*n);  // add factor of beta
   kappa.rename("Compressibility");
@@ -88,29 +88,48 @@ void evaluate(const boost::filesystem::path& p, std::ostream& out) {
    //   << intervals << "\n"
    //   << ratio << "\n";
   sim << kappa;
-  sim.checkpoint(p);
+  sim.checkpoint(p,write_xml);
 }
 
+
 int main(int argc, char** argv)
-{
+{  
+  int i;
+  char write_xml_flag[]="--write-xml";
+  bool write_xml;
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
   alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);
-  
-  if (argc<2 || argc>3) {
-    std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename]\n";
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " [--write-xml] inputfile1 [intputfile2 [...]]\n";
     std::exit(-1);
+  } 
+  if (strcmp(write_xml_flag,argv[1])==0)  {
+   write_xml=true;
+   i=2;
   }
-  boost::filesystem::path p(argv[1],boost::filesystem::native);
+  else {
+   write_xml=false;
+   i=1;
+  }
+
+  for(; i<argc; i++)
+   {
+    boost::filesystem::path p =
+      boost::filesystem::complete(boost::filesystem::path(argv[i]));
+    evaluate(p,std::cout,write_xml);
+   }
+
+/*  boost::filesystem::path p(argv[1],boost::filesystem::native);
   std::string name=argv[1];
   if (argc==2)
     evaluate(p,std::cout);
   else {
     std::ofstream output(argv[2]);
     evaluate(p,output);
-  }
+  }*/
 
 #ifndef BOOST_NO_EXCEPTIONS
 }
