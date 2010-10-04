@@ -29,7 +29,7 @@
 #include <alps/alea.h>
 #include <fstream>
 
-void evaluate(const boost::filesystem::path& p) {
+void evaluate(const boost::filesystem::path& p, const bool write_xml) {
   alps::ProcessList nowhere;
   alps::scheduler::MCSimulation sim(nowhere,p);
 
@@ -47,8 +47,8 @@ void evaluate(const boost::filesystem::path& p) {
   alps::RealObsevaluator cv = (n2-n*n-n)/numsites;
   cv.rename("Specific Heat");
   std::cout << cv << "\n";
-  for (int i=0;i<cv.bin_number();++i)
-    std::cout << std::setprecision(20) << cv.bin_value(i)/cv.bin_size() << "\n";
+//  for (int i=0;i<cv.bin_number();++i)
+//    std::cout << std::setprecision(20) << cv.bin_value(i)/cv.bin_size() << "\n";
 	
   sim << cv;
 
@@ -86,22 +86,41 @@ void evaluate(const boost::filesystem::path& p) {
 	  }
   }
   // save
-  sim.checkpoint(p);
+  sim.checkpoint(p,write_xml);
 }
 
 int main(int argc, char** argv)
-{
+{  
+  int i;
+  char write_xml_flag[]="--write-xml";
+  bool write_xml;
 #ifndef BOOST_NO_EXCEPTIONS
 try {
 #endif
   alps::scheduler::SimpleMCFactory<alps::scheduler::DummyMCRun> factory;
   alps::scheduler::init(factory);
-  
-  if (argc!=2) {
-    std::cerr << "Usage: " << argv[0] << " inputfile\n";
+  if (argc < 2) {
+    std::cerr << "Usage: " << argv[0] << " [--write-xml] inputfile1 [intputfile2 [...]]\n";
     std::exit(-1);
   }
-  evaluate(boost::filesystem::path(argv[1],boost::filesystem::native));
+
+  if (strcmp(write_xml_flag,argv[1])==0)  {
+   write_xml=true;
+   i=2;
+  }
+  else {
+   write_xml=false;
+   i=1;
+  }
+
+
+  for(; i<argc; i++)
+   {
+    boost::filesystem::path p =
+      boost::filesystem::complete(boost::filesystem::path(argv[i]));
+    evaluate(p,write_xml);
+   }
+  
 
 #ifndef BOOST_NO_EXCEPTIONS
 }
