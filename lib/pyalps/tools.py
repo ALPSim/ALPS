@@ -396,7 +396,7 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
       pattern = prefix+'.task*.out.xml'
       res=recursiveGlob(dirname, pattern)
       if len(res)==0:
-        pattern = prefix+'.h5'
+        pattern = prefix+'*.h5'
         res=recursiveGlob(dirname, pattern)
     else:
       res = recursiveGlob(dirname, pattern)
