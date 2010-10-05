@@ -11,7 +11,6 @@
 
 from core.configuration import ConfigurationObject
 import platform
-import h5py
 
 identifier = 'org.comp-phys.alps'
 version = '0.8.0' # version 2.0b4

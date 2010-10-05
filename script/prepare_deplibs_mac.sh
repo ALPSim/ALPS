@@ -7,6 +7,7 @@
 mkdir -p deplibs/lib
 mkdir -p deplibs/bin
 cp /opt/local/lib/libhdf5*dylib deplibs/lib
+cp /opt/alps/lib/libhdf5*a deplibs/lib
 cp /opt/local/lib/libsz*dylib deplibs/lib
 cp /opt/local/lib/libz*dylib deplibs/lib
 install_name_tool -id /opt/alps/lib/libhdf5.6.dylib deplibs/lib/libhdf5.dylib

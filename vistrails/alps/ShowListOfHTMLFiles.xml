@@ -2,7 +2,7 @@
   <action date="2010-05-23 13:14:22" id="1" prevId="0" session="0" user="troyer">
     <annotation id="0" key="__description__" value="Copied from pipeline" />
     <add id="0" objectId="0" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="0" name="Map" namespace="" package="edu.utah.sci.vistrails.control_flow" version="0.1.1" />
+      <module cache="1" id="0" name="Map" namespace="" package="edu.utah.sci.vistrails.control_flow" version="0.2.0" />
     </add>
     <add id="1" objectId="1" parentObjId="0" parentObjType="module" what="function">
       <function id="1" name="OutputPort" pos="1" />
@@ -14,7 +14,7 @@
       <function id="0" name="InputPort" pos="1" />
     </add>
     <add id="4" objectId="0" parentObjId="0" parentObjType="function" what="parameter">
-      <parameter alias="" id="0" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.control_flow:ListOfElements" val="[&apos;filename&apos;]" />
+      <parameter alias="" id="0" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:List" val="[&apos;filename&apos;]" />
     </add>
     <add id="5" objectId="0" parentObjId="0" parentObjType="module" what="location">
       <location id="0" x="15.8873863474" y="-111.695479043" />
@@ -144,7 +144,7 @@
       <port id="7" moduleId="4" moduleName="InputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="source" />
     </add>
     <add id="33" objectId="6" parentObjId="3" parentObjType="connection" what="port">
-      <port id="6" moduleId="0" moduleName="Map" name="InputList" signature="(edu.utah.sci.vistrails.control_flow:ListOfElements)" type="destination" />
+      <port id="6" moduleId="0" moduleName="Map" name="InputList" signature="(edu.utah.sci.vistrails.basic:List)" type="destination" />
     </add>
   </action>
   <annotation id="1" key="__abstraction_uuid__" value="572c9f02-665c-11df-a5d9-002500a2cd74" />

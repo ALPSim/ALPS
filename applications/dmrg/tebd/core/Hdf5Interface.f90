@@ -283,9 +283,11 @@ INTEGER(HID_T) :: dataspaceID, dataSetID
 CHARACTER(len=*), INTENT(IN) :: myData
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
+INTEGER(HSIZE_T) len
 
  CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
- CALL h5tset_size_f(strtype,LEN_TRIM(myData),error)
+ len=LEN_TRIM(myData)
+ CALL h5tset_size_f(strtype,len,error)
  dims=1
  rank=1
  CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
@@ -309,9 +311,11 @@ INTEGER(HID_T) :: dataspaceID, dataSetID
 CHARACTER(len=*), INTENT(IN) :: myData(:)
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
+INTEGER(HSIZE_T) ten
 
+ ten=10
  CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
- CALL h5tset_size_f(strtype,10,error)
+ CALL h5tset_size_f(strtype,ten,error)
  dims=SIZE(myData)
  rank=1
  CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
@@ -505,9 +509,11 @@ INTEGER(HID_T) :: dataspaceID, dataSetID, meangrpID
 CHARACTER(len=*), INTENT(IN) :: myData
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
+INTEGER(HSIZE_T) len
 
  CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
- CALL h5tset_size_f(strtype,LEN_TRIM(myData),error)
+ len=LEN_TRIM(myData)
+ CALL h5tset_size_f(strtype,len,error)
  dims=1
  rank=1
  CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
@@ -534,9 +540,12 @@ INTEGER(HID_T) :: dataspaceID, dataSetID, meangrpID
 CHARACTER(len=*), INTENT(IN) :: myData(:)
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
+INTEGER(HSIZE_T) ten
+
+ ten=10
 
  CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
- CALL h5tset_size_f(strtype,10,error)
+ CALL h5tset_size_f(strtype,ten,error)
  dims=SIZE(myData)
  rank=1
  CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset

@@ -15,7 +15,6 @@ import core.modules.basic_modules
 import core.modules.module_registry
 import copy
 # import packages.controlflow
-from packages.controlflow.list_module import ListOfElements
 basic = core.modules.basic_modules
 
 import numpy as np
@@ -237,7 +236,7 @@ class IterateValue(Module):
     """ This module iterates a parameter value over a list of values. It can be connected to any input port for a paramater. """
     def compute(self):
         self.setResult('value',ParameterValueList(self.getInputFromPort('value_list')))
-    _input_ports = [('value_list',[ListOfElements])]
+    _input_ports = [('value_list',[basic.List])]
     _output_ports = [('value', [basic.String])]
 
 
@@ -271,7 +270,7 @@ class IterateParameter(Module):
           self.list = list 
         self.setResult('value',list)
     _input_ports = [('name',[basic.String]),
-                    ('value_list',[ListOfElements])]
+                    ('value_list',[basic.List])]
     _output_ports = [('value', [Parameters])]
 
 class IterateParameterInRange(Module):

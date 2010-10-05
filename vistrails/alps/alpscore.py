@@ -27,8 +27,6 @@ from packages.spreadsheet.basic_widgets import SpreadsheetCell, CellLocation
 from packages.spreadsheet.spreadsheet_cell import QCellWidget
 import packages.spreadsheet
 
-from packages.controlflow.list_module import ListOfElements
-
 import pyalps
 
 basic = core.modules.basic_modules
@@ -116,9 +114,9 @@ class DisplayInBrowser(NotCacheable, SystemCommand):
            cmdlist += self.getInputFromPort('files')
         self.execute(cmdlist)
     _input_ports = [('file', [basic.File]),
-                    ('files', [ListOfElements])]
+                    ('files', [basic.List])]
     _input_ports = [('file', [basic.File]),
-                    ('files', [ListOfElements])]
+                    ('files', [basic.List])]
 
 class WriteTextFile(basic.Module):
     """ 

@@ -18,8 +18,6 @@ import tempfile
 import alpscore
 from packages.pylab.plot import MplPlot, MplPlotConfigurationWidget
 
-from packages.controlflow.list_module import ListOfElements
-
 basic = core.modules.basic_modules
 
 ##############################################################################
@@ -111,7 +109,7 @@ class ExtractAnything(alpscore.SystemCommand):
         self.setResult('file',outputfile)
         f = file(outputfile.name,'r')
         self.setResult('source',f.read())
-    _input_ports = [('data',[ListOfElements]),
+    _input_ports = [('data',[basic.List]),
                     ('plotdescription',[PlotDescription])]
     _output_ports = [('file',[basic.File]),
                      ('source',[basic.String])]

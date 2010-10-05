@@ -30,12 +30,10 @@ import core.modules.module_registry
 import core.modules.basic_modules as basic
 from core.modules.vistrails_module import Module, ModuleError, NotCacheable
 from core.modules.python_source_configure import PythonSourceConfigurationWidget
-from packages.controlflow.list_module import ListOfElements
 
 import urllib, copy
 import matplotlib.pyplot as plt
 import numpy as np
-import h5py
 from scipy import optimize
 
 from dataset_core import *
@@ -90,14 +88,14 @@ class LoadDataSetsFromTextFile(Module):
     @file: The file, of which only the name is used.
     @label: A possible label for the dataset
     @x-column: The column of the data used for x data. Default: 0
-    @y-columns: A ListOfElements of the columns. Default: 1
+    @y-columns: A basic.List of the columns. Default: 1
     Catch: if the file only has one columns, set x-column to -1!
     The following properties are set: filename, [label], column"""
     my_input_ports = [
         PortDescriptor("file",basic.File),
         PortDescriptor("label",basic.String),
         PortDescriptor("x-column",basic.Integer),
-        PortDescriptor("y-columns",ListOfElements)
+        PortDescriptor("y-columns",basic.List)
     ]
 
     my_output_ports = [
@@ -171,8 +169,8 @@ class LoadAlpsMeasurements(Module):
   
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
-        PortDescriptor('Measurements',ListOfElements),
-        PortDescriptor('StatisticalVariables',ListOfElements),
+        PortDescriptor('Measurements',basic.List),
+        PortDescriptor('StatisticalVariables',basic.List),
         PortDescriptor('PropertyPath',basic.String),
         PortDescriptor('ResultPath',basic.String)
     ]
@@ -211,7 +209,7 @@ class LoadDMFTIterations(Module):
 
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
-        PortDescriptor('Measurements',ListOfElements),
+        PortDescriptor('Measurements',basic.List),
         PortDescriptor('PropertyPath',basic.String),
         PortDescriptor('ResultPath',basic.String)
     ]
@@ -248,7 +246,7 @@ class LoadBinningAnalysis(Module):
 
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
-        PortDescriptor('Measurements',ListOfElements),
+        PortDescriptor('Measurements',basic.List),
         PortDescriptor('PropertyPath',basic.String),
         PortDescriptor('ResultPath',basic.String)
     ]
@@ -307,7 +305,7 @@ class LoadAlpsEigenstateMeasurements(Module):
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('PropertyPath',basic.String),
         PortDescriptor('SpectrumPath',basic.String),
-        PortDescriptor('Measurements',ListOfElements),
+        PortDescriptor('Measurements',basic.List),
         PortDescriptor('index',basic.Integer)        
     ]
     
@@ -366,7 +364,7 @@ class GroupDataSets(Module):
     to use several GroupDataSets modules connected in a chain.
     """
     my_input_ports = [
-        PortDescriptor('for-each',ListOfElements),
+        PortDescriptor('for-each',basic.List),
         PortDescriptor('input',DataSets)
     ]
     my_output_ports = [
@@ -445,7 +443,7 @@ class CollectDataSets(Module):
     A label will automatically be generated.
     """
     my_input_ports = [
-        PortDescriptor('for-each',ListOfElements),
+        PortDescriptor('for-each',basic.List),
         PortDescriptor('y',basic.String),
         PortDescriptor('x',basic.String),
         PortDescriptor('input',DataSets)

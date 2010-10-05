@@ -40,17 +40,17 @@ parms = [{
           'local_S'                   : 0.5,
           'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
           'Jxy'                         : 1,
-	  'INITIAL_STATE' : 'kink',
-	  'CHI_LIMIT' : 40,
-	  'TRUNC_LIMIT' : 1E-12,
-	  'NUM_THREADS' : 1,
-	  'TAUS' : [20.0],
-	  'POWS' : [0.0],
-	  'GS' : ['H'],
-	  'GIS' : [0.0],
-	  'GFS' : [0.0],
-	  'NUMSTEPS' : [500],
-	  'STEPSFORSTORE' : [2]
+          'INITIAL_STATE' : 'kink',
+          'CHI_LIMIT' : 40,
+          'TRUNC_LIMIT' : 1E-12,
+          'NUM_THREADS' : 1,
+          'TAUS' : [20.0],
+          'POWS' : [0.0],
+          'GS' : ['H'],
+          'GIS' : [0.0],
+          'GFS' : [0.0],
+          'NUMSTEPS' : [500],
+          'STEPSFORSTORE' : [2]
         }]
 
 
@@ -70,53 +70,53 @@ scalingForm=[]
 #Compute the exact result M(n,t)=<S_n^z>=-(1/2)*sum_{i=1-n}^{n-1} j_i(t)^2, where
 # j_i(t) is the Bessel function of order i and compare to the numerically obtained result
 for q in Data:
-	syssize=q[0].props['L']
-	#Assign a label 'Distance' denoting the distance from the center n (only do the first two sites
-	#to avoid cluttering the plot)
-	for n in range(1,3):
-		#Create copies of the data for postprocessing
-		numericalCopy=copy.deepcopy(q)
-		exactCopy=copy.deepcopy(q)
-		
-		numericalCopy[0].props['Distance']=n
-		exactCopy[0].props['Distance']=n
+        syssize=q[0].props['L']
+        #Assign a label 'Distance' denoting the distance from the center n (only do the first two sites
+        #to avoid cluttering the plot)
+        for n in range(1,3):
+                #Create copies of the data for postprocessing
+                numericalCopy=copy.deepcopy(q)
+                exactCopy=copy.deepcopy(q)
+                
+                numericalCopy[0].props['Distance']=n
+                exactCopy[0].props['Distance']=n
 
-		#compute the exact result of the manetization n sites from the center
-		loc=0.0
-		for i in range(1-n,n):
-			loc-=0.5*scipy.special.jn(i,q[0].props['Time'])*scipy.special.jn(i,q[0].props['Time'])			
-		exactCopy[0].y=[loc]
-		#add to the the exact dataset
-		exactResult.extend(exactCopy)
+                #compute the exact result of the manetization n sites from the center
+                loc=0.0
+                for i in range(1-n,n):
+                        loc-=0.5*scipy.special.jn(i,q[0].props['Time'])*scipy.special.jn(i,q[0].props['Time'])                        
+                exactCopy[0].y=[loc]
+                #add to the the exact dataset
+                exactResult.extend(exactCopy)
 
-		#get the numerical result of the magnetization n sites from the center
-		numericalCopy[0].y=[q[0].y[syssize/2+n-1]]
-		#add to the the numerical dataset
-		numericalResult.extend(numericalCopy)
+                #get the numerical result of the magnetization n sites from the center
+                numericalCopy[0].y=[q[0].y[syssize/2+n-1]]
+                #add to the the numerical dataset
+                numericalResult.extend(numericalCopy)
 
 #compute the scaling form
 # \phi(n/t)=-(1/pi)*arcsin(n/t) that M(n,t) approaches as n->infinity and t->infinity
 # and compare it with the numerically computed values of M(n/t)
 for q in Data:
-	syssize=q[0].props['L']
-	#Assign a label 'Distance' denoting the distance from the center n (only do the first few sites
-	#to avoid cluttering the plot)
-	for n in range(0,5):
-		#Create a copy of the data for postprocessing
-		scalingCopy=copy.deepcopy(q)
-		scalingCopy[0].props['Distance']=n
+        syssize=q[0].props['L']
+        #Assign a label 'Distance' denoting the distance from the center n (only do the first few sites
+        #to avoid cluttering the plot)
+        for n in range(0,5):
+                #Create a copy of the data for postprocessing
+                scalingCopy=copy.deepcopy(q)
+                scalingCopy[0].props['Distance']=n
 
-		#The first distance contains the exact scaling form \phi(n/t)=-(1/pi)*arcsin(n/t)
-		if n==0:
-			scalingCopy[0].props['Time']=1.0/scalingCopy[0].props['Time']
-			scalingCopy[0].y=[-(1.0/3.1415926)*math.asin(min(scalingCopy[0].props['Time'],1.0))]
+                #The first distance contains the exact scaling form \phi(n/t)=-(1/pi)*arcsin(n/t)
+                if n==0:
+                        scalingCopy[0].props['Time']=1.0/scalingCopy[0].props['Time']
+                        scalingCopy[0].y=[-(1.0/3.1415926)*math.asin(min(scalingCopy[0].props['Time'],1.0))]
 
-		#The other distances contain the numerical data as a function of the scaling variable M(n/t)
-		else:
-			scalingCopy[0].props['Time']=n/scalingCopy[0].props['Time']
-			scalingCopy[0].y=[scalingCopy[0].y[syssize/2+n-1] ]
-		#add to the scaling dataset
-		scalingForm.extend(scalingCopy)
+                #The other distances contain the numerical data as a function of the scaling variable M(n/t)
+                else:
+                        scalingCopy[0].props['Time']=n/scalingCopy[0].props['Time']
+                        scalingCopy[0].y=[scalingCopy[0].y[syssize/2+n-1] ]
+                #add to the scaling dataset
+                scalingForm.extend(scalingCopy)
 
 
 

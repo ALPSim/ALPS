@@ -33,34 +33,34 @@ import pyalps.plot
 parms=[]
 count=0
 for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
-	count+=1
-	parms.append({ 
-	          'L'                         : 10,
-	          'MODEL'                     : 'boson Hubbard',
-	          'Nmax'                   : 5,
-	          'CONSERVED_QUANTUMNUMBERS'  : 'N',
-		  'N' : 10,
-	          'ITP_t'                         : 1.0,
-	          'ITP_U'                         : 10.0,
-	          't'                         : 1.0,
-	          'U'                         : 10.0,
-		  'ITP_CHIS' : [20, 30, 35],
-		  'ITP_DTS' : [0.05, 0.05,0.025],
-		  'ITP_CONVS' : [1E-8, 1E-8, 1E-9],
-		  'INITIAL_STATE' : 'ground',
-		  'CHI_LIMIT' : 40, 
-		  'TRUNC_LIMIT' : 1E-12,
-		  'NUM_THREADS' : 1,
-		  'TAUS' : [A,  A],
-		  'POWS' : [1.0, 1.0],
-		  'GS' : ['U',  'U'],
-		  'GIS' : [10.0,  1.0],
-		  'GFS' : [1.0,  10.0],
-		  'NUMSTEPS' : [500,  500],
-		  'STEPSFORSTORE' : [5, 3],
-		  'SIMID' : count
-	        })
-		
+        count+=1
+        parms.append({ 
+                  'L'                         : 10,
+                  'MODEL'                     : 'boson Hubbard',
+                  'Nmax'                   : 5,
+                  'CONSERVED_QUANTUMNUMBERS'  : 'N',
+                  'N' : 10,
+                  'ITP_t'                         : 1.0,
+                  'ITP_U'                         : 10.0,
+                  't'                         : 1.0,
+                  'U'                         : 10.0,
+                  'ITP_CHIS' : [20, 30, 35],
+                  'ITP_DTS' : [0.05, 0.05,0.025],
+                  'ITP_CONVS' : [1E-8, 1E-8, 1E-9],
+                  'INITIAL_STATE' : 'ground',
+                  'CHI_LIMIT' : 40, 
+                  'TRUNC_LIMIT' : 1E-12,
+                  'NUM_THREADS' : 1,
+                  'TAUS' : [A,  A],
+                  'POWS' : [1.0, 1.0],
+                  'GS' : ['U',  'U'],
+                  'GIS' : [10.0,  1.0],
+                  'GFS' : [1.0,  10.0],
+                  'NUMSTEPS' : [500,  500],
+                  'STEPSFORSTORE' : [5, 3],
+                  'SIMID' : count
+                })
+                
 
 baseName='tutorial_1a'
 #write output files

@@ -30,7 +30,6 @@ import parameters
 import alpscore
 import system
 from parameters import Parameters
-from packages.controlflow.list_module import ListOfElements
 
 import pyalps
 import pyalps.pytools # the C++ conversion functions
@@ -201,7 +200,7 @@ class Glob(Module):
     def compute(self):
       self.expand(self.getInputFromPort('input_file').name)
     _input_ports = [('input_file',[basic.File])]
-    _output_ports = [('value',[ListOfElements])]
+    _output_ports = [('value',[basic.List])]
 
 class GetCloneFiles(Module):
      """ 
@@ -231,7 +230,7 @@ class GetCloneFiles(Module):
                      ('prefix',[basic.String]), 
                      ('tasks',[basic.String]),
                      ('runs',[basic.String])]
-     _output_ports = [('value',[ListOfElements])]
+     _output_ports = [('value',[basic.List])]
 
 class GetResultFiles(Module):
     """ 
@@ -267,7 +266,7 @@ class GetResultFiles(Module):
         ('prefix',[basic.String]), 
         ('tasks',[basic.String]),
         ('pattern',[basic.String])]
-    _output_ports = [('value',[ListOfElements]),
+    _output_ports = [('value',[basic.List]),
         ('resultfiles',[ResultFiles])]
 
 class Convert2XML(Module):
@@ -282,8 +281,8 @@ class Convert2XML(Module):
           olist.append(pyalps.pytools.convert2xml(str(f)))
           pyalps.copyStylesheet(os.path.dirname(f))
         self.setResult('value', olist)
-    _input_ports = [('input_file', [ListOfElements])]
-    _output_ports = [('value', [ListOfElements])]
+    _input_ports = [('input_file', [basic.List])]
+    _output_ports = [('value', [basic.List])]
  
 
 class ConvertXML2HTML(alpscore.SystemCommand):
@@ -320,10 +319,10 @@ class ConvertXML2HTML(alpscore.SystemCommand):
                 output_files.append(self.convert(f).name)
             self.setResult('output_files', output_files)
     _input_ports = [('input_file', [basic.File]),
-                    ('input_files', [ListOfElements]),
+                    ('input_files', [basic.List]),
                     ('stylesheet',[basic.File])]
     _output_ports = [('output_file', [basic.File]),
-                     ('output_files', [ListOfElements])]
+                     ('output_files', [basic.List])]
 
 class Convert2Text(alpscore.SystemCommand):
     def compute(self):
@@ -361,7 +360,7 @@ class PickFileFromList(basic.Module):
           ind = self.getInputFromPort('index')
         f.name = self.getInputFromPort('files')[ind]
         self.setResult('file',f)
-    _input_ports = [('files', [ListOfElements]),
+    _input_ports = [('files', [basic.List]),
                     ('index', [basic.Integer])]
     _output_ports = [('file', [basic.File])]
 

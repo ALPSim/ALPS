@@ -58,7 +58,7 @@ mark_as_advanced(ALPS_LLVM_WORKAROUND)
 #maintenance building options
 option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
 option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
-option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails SVN" OFF)
+option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
 
 include (CMakeDetermineSystem)
 #include (CMakeDetermineFortranCompiler)
@@ -654,29 +654,23 @@ endif (ALPS_BUILD_SOURCE)
 ######################################################################
 
 if(ALPS_PATCH_VISTRAILS)
-  find_package(VistrailsSVN)
-  MESSAGE (STATUS "patching VisTrails from ${VISTRAILS_SVN_DIR}")
+  find_package(VistrailsGit)
+  MESSAGE (STATUS "patching VisTrails from ${VISTRAILS_GIT_DIR}")
   if (APPLE)
     foreach (DIR api core db gui packages tests)
-      install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails/${DIR}  COMPONENT vistrails
+      install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails/${DIR}  COMPONENT vistrails
               DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}
               PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
     endforeach(DIR)
-#    install(DIRECTORY /System/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/sqlite3
-#            COMPONENT vistrails
-#            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
-#    install(FILES /System/Library/Frameworks/Python.framework/Versions/2.5/lib/python2.5/lib-dynload/_sqlite3.so
-#            COMPONENT vistrails
-#            DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR})
-    install(FILES ${VISTRAILS_SVN_DIR}/vistrails/vistrails.py  COMPONENT vistrails
+    install(FILES ${VISTRAILS_GIT_DIR}/vistrails/vistrails.py  COMPONENT vistrails
             DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/../..)
   else(APPLE)
     if (WIN32) 
-        install(DIRECTORY ${VISTRAILS_SVN_DIR}/vistrails  COMPONENT vistrails
+        install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails  COMPONENT vistrails
                 DESTINATION .
                 PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
     else (WIN32)
-      message(ERROR "Cannot patch VisTrails on your systems yet. Please add the needed code.")
+      message(ERROR "Cannot patch VisTrails on this system. Probably you can just install the latest Vistrails nightly snapshot.")
     endif (WIN32)
   endif(APPLE)
 endif(ALPS_PATCH_VISTRAILS)

@@ -29,7 +29,6 @@ import core.modules.module_registry
 import core.modules.basic_modules as basic
 from core.modules.vistrails_module import Module, ModuleError, NotCacheable
 from core.modules.python_source_configure import PythonSourceConfigurationWidget
-from packages.controlflow.list_module import ListOfElements
 
 import urllib, copy
 import matplotlib.pyplot as plt
@@ -106,7 +105,7 @@ class SetLabels(Module):
     """
     my_input_ports = [
         PortDescriptor('input',DataSets),
-        PortDescriptor('label_props',ListOfElements)
+        PortDescriptor('label_props',basic.List)
     ]
     my_output_ports = [
         PortDescriptor('output',DataSets)
@@ -150,8 +149,8 @@ class CycleColors(Module):
     """
     my_input_ports = [
         PortDescriptor('input',DataSets),
-        PortDescriptor('for-each',ListOfElements),
-        PortDescriptor('colors',ListOfElements)
+        PortDescriptor('for-each',basic.List),
+        PortDescriptor('colors',basic.List)
     ]
     my_output_ports = [
         PortDescriptor('output',DataSets)
@@ -190,8 +189,8 @@ class CycleMarkers(Module):
     """
     my_input_ports = [
         PortDescriptor('input',DataSets),
-        PortDescriptor('for-each',ListOfElements),
-        PortDescriptor('markers',ListOfElements)
+        PortDescriptor('for-each',basic.List),
+        PortDescriptor('markers',basic.List)
     ]
     my_output_ports = [
         PortDescriptor('output',DataSets)

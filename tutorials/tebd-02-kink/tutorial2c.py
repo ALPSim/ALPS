@@ -35,26 +35,26 @@ import scipy.special
 parms=[]
 count=0
 for chi in [10, 20, 30, 40]:
-	count+=1
-	parms.append({ 
-	          'L'                         : 50,
-	          'MODEL'                     : 'spin',
-	          'local_S'                   : 0.5,
-	          'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
-	          'Jxy'                         : 1,
-		  'INITIAL_STATE' : 'kink',
-		  'CHI_LIMIT' : chi,
-		  'TRUNC_LIMIT' : 1E-12,
-		  'NUM_THREADS' : 1,
-		  'TAUS' : [20.0],
-		  'POWS' : [0.0],
-		  'GS' : ['H'],
-		  'GIS' : [0.0],
-		  'GFS' : [0.0],
-		  'NUMSTEPS' : [500],
-		  'STEPSFORSTORE' : [5],
-		  'SIMID': count
-	        })
+        count+=1
+        parms.append({ 
+                  'L'                         : 50,
+                  'MODEL'                     : 'spin',
+                  'local_S'                   : 0.5,
+                  'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
+                  'Jxy'                         : 1,
+                  'INITIAL_STATE' : 'kink',
+                  'CHI_LIMIT' : chi,
+                  'TRUNC_LIMIT' : 1E-12,
+                  'NUM_THREADS' : 1,
+                  'TAUS' : [20.0],
+                  'POWS' : [0.0],
+                  'GS' : ['H'],
+                  'GIS' : [0.0],
+                  'GFS' : [0.0],
+                  'NUMSTEPS' : [500],
+                  'STEPSFORSTORE' : [5],
+                  'SIMID': count
+                })
 
 baseName='tutorial_2c_'
 nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
@@ -65,12 +65,12 @@ Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(prefix='tutorial_2c
 
 #Postprocessing-get the exact result for comparison
 for q in Magdata:
-	syssize=q[0].props['L']
-	#Get the exact result of M(1,t)=-(1/2)*(j_0(t)^2), where j_0(t) is the 0^{th} order
-	# bessel function and M(1,t) is the magnetization one site to the right of the chain center
-	loc=-0.5*scipy.special.jn(0,q[0].props['Time'])*scipy.special.jn(0,q[0].props['Time'])
-	#Get the difference between the computed and exact results
-	q[0].y=[abs(q[0].y[syssize/2+1-1]-loc)]
+        syssize=q[0].props['L']
+        #Get the exact result of M(1,t)=-(1/2)*(j_0(t)^2), where j_0(t) is the 0^{th} order
+        # bessel function and M(1,t) is the magnetization one site to the right of the chain center
+        loc=-0.5*scipy.special.jn(0,q[0].props['Time'])*scipy.special.jn(0,q[0].props['Time'])
+        #Get the difference between the computed and exact results
+        q[0].y=[abs(q[0].y[syssize/2+1-1]-loc)]
 
 #Plot the Error in the magnetization one site to the right of the chain center
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])

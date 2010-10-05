@@ -30,8 +30,6 @@ import core.modules.basic_modules as basic
 from core.modules.vistrails_module import Module, ModuleError, NotCacheable
 from core.modules.python_source_configure import PythonSourceConfigurationWidget
 
-from packages.controlflow.list_module import ListOfElements
-
 import urllib, copy
 import numpy as np
 
@@ -51,7 +49,7 @@ class PortDescriptor:
     use_python_source = False
     hidden = False
 
-class DataSets(ListOfElements):
+class DataSets(basic.List):
     my_input_ports = []
     my_output_ports = []
 
@@ -61,13 +59,13 @@ class DataSets(ListOfElements):
 class SelftypePlaceholder:
     is_placeholder = True
 
-class ResultFiles(ListOfElements):
+class ResultFiles(basic.List):
     my_input_ports = [
-        PortDescriptor('filenames', ListOfElements),
+        PortDescriptor('filenames', basic.List),
         PortDescriptor('resultfiles', SelftypePlaceholder)
     ]
     my_output_ports = [
-        PortDescriptor('filenames', ListOfElements),
+        PortDescriptor('filenames', basic.List),
         PortDescriptor('resultfiles', SelftypePlaceholder)
     ]
     

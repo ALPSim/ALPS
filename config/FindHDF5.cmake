@@ -106,6 +106,11 @@ IF(ALPS_PACKAGE_LIBRARIES AND NOT ALPS_USE_VISTRAILS)
   ENDIF (UNIX AND NOT WIN32)
 ENDIF(ALPS_PACKAGE_LIBRARIES AND NOT ALPS_USE_VISTRAILS)
 
+IF(ALPS_BUILD_FORTRAN AND NOT HDF5_STATIC_LIBRARIES)
+  FIND_LIBRARY(HDF5_STATIC_LIBRARIES hdf5_fortran /opt/alps/lib)
+  MARK_AS_ADVANCED(HDF5_STATIC_LIBRARIES)
+ENDIF(ALPS_BUILD_FORTRAN AND NOT HDF5_STATIC_LIBRARIES)
+
 ##############################################################################
 # ALPS addition end
 ##############################################################################

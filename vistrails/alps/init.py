@@ -86,7 +86,10 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'MakeParameterXMLFiles': (tools.WriteInputFiles,{}),
                    'WriteInputFiles': (tools.WriteInputFiles,{}),
                    'GetRunFiles': (tools.GetCloneFiles,{}),
+                   'GetResultFiles': (tools.GetResultFiles,{}),
+                   'GetCloneFiles': (tools.GetCloneFiles,{}),
                    'XML2HTML': (tools.ConvertXML2HTML,{}),
+                   'ConvertXML2HTML': (tools.ConvertXML2HTML,{}),
                    'GetSimulationInDir': (tools.GetJobFile,{}),
                    'OpenHTML': (alpscore.DisplayInBrowser,{}),
                    'TextFile': (alpscore.WriteTextFile,{}),
@@ -95,10 +98,14 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'LoadDataSet': (dataset.LoadDataSetsFromTextFile,{}),
                    'CustomLoader': (dataset.LoadCustomFile,{}),
                    'CollectXY': (dataset.CollectDataSets,{}),
+                   'CollectDataSets': (dataset.CollectDataSets,{}),
                    'LoadProperties': (dataset.LoadAlpsProperties,{}),
                    'LoadAlpsHdf5': (dataset.LoadAlpsMeasurements,{}),
+                   'LoadAlpsMeasurements': (dataset.LoadAlpsMeasurements,{}),
                    'LoadSpectrumHdf5': (dataset.LoadAlpsSpectra,{}),
+                   'LoadBinningAnalysis': (dataset.LoadBinningAnalysis,{}),
                    'LoadAlpsDiagData': (dataset. LoadAlpsEigenstateMeasurements,{}),
+                   'LoadAlpsEigenstateMeasurements': (dataset. LoadAlpsEigenstateMeasurements,{}),
                    'Transform': (dataset.TransformEachDataSet,{}),
                    'PlotDescriptor': (dataset.PreparePlot,{}),
                    'AxisDescriptor': (dataset.Axis,{}),
@@ -114,6 +121,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    
                    'PolyFit': (dataset.DoPolynomialFit,{}),
                    'NonlinearFit': (dataset.DoNonlinearFit,{}),
+                   'DoNonlinearFit': (dataset.DoNonlinearFit,{}),
                    
                    'SortByX': (dataset.SortEachDataSet,{}),
                    'SelectXRange': (dataset.RestrictXRange,{}),
@@ -124,9 +132,16 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'PropertyRangeSelector': (dataset.PropertyRangePredicate,{}),
                    'ObservableSelector': (dataset.ObservablePredicate,{}),
                    'GroupBy': (dataset.GroupDataSets,{}),
+                   'GroupDataSets': (dataset.GroupDataSets,{}),
                    'GroupedTransform': (dataset.TransformGroupedDataSets,{}),
                    'GenerateDataSet': (dataset.PrepareDataSets,{}),
                    'GenerateDataSet': (dataset.PrepareDataSets,{}),
+                   
+                   'CycleColors': (dataset.CycleColors,{}),
+                   'CycleMarkers': (dataset.CycleMarkers,{}),
+                   'Convert2XML': (tools.Convert2XML,{}),
+                   'IterateValue': (parameters.IterateValue,{}),
+                   'IterateParameter': (parameters.IterateParameter,{})
                    }
 
 

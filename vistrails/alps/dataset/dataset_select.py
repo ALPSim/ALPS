@@ -29,7 +29,6 @@ import core.modules.module_registry
 import core.modules.basic_modules as basic
 from core.modules.vistrails_module import Module, ModuleError, NotCacheable
 from core.modules.python_source_configure import PythonSourceConfigurationWidget
-from packages.controlflow.list_module import ListOfElements
 
 import urllib, copy
 import numpy as np

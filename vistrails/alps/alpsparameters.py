@@ -11,12 +11,9 @@
 
 from core.modules.vistrails_module import Module, ModuleError, NotCacheable
 import core.bundles
-import core.modules.basic_modules
+import core.modules.basic_modules as basic
 import core.modules.module_registry
 import copy
-# import packages.controlflow
-from packages.controlflow.list_module import ListOfElements
-basic = core.modules.basic_modules
 
 import parameters
 from parameters import Parameters, ParametersData
