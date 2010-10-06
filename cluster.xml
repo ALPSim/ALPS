@@ -12837,10 +12837,12 @@
     <UNITCELL ref="simple2d"/>
   </LATTICEGRAPH>
 
+
+
  <LATTICE name="Fuchs3D-46B superlattice" dimension="2">
     <BASIS>
       <VECTOR>3 2 -1</VECTOR>
-      <VECTOR>-2 2 -2</VECTOR
+      <VECTOR>-2 2 -2</VECTOR>
       <VECTOR>-1 3 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -12866,7 +12868,7 @@
  <LATTICE name="Fuchs3D-48B superlattice" dimension="2">
     <BASIS>
       <VECTOR>3 2 -1</VECTOR>
-      <VECTOR>-2 2 -2</VECTOR
+      <VECTOR>-2 2 -2</VECTOR>
       <VECTOR>-1 2 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -12892,7 +12894,7 @@
  <LATTICE name="Fuchs3D-50B superlattice" dimension="2">
     <BASIS>
       <VECTOR>3 2 -1</VECTOR>
-      <VECTOR>-1 -2 -3</VECTOR
+      <VECTOR>-1 -2 -3</VECTOR>
       <VECTOR>-2 3 -1</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -12918,7 +12920,7 @@
  <LATTICE name="Fuchs3D-52B superlattice" dimension="2">
     <BASIS>
       <VECTOR>3 2 -1</VECTOR>
-      <VECTOR>-2 1 -3</VECTOR
+      <VECTOR>-2 1 -3</VECTOR>
       <VECTOR>-1 3 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -12944,7 +12946,7 @@
  <LATTICE name="Fuchs3D-54B superlattice" dimension="2">
     <BASIS>
       <VECTOR>3 3 0</VECTOR>
-      <VECTOR>-2 2 -2</VECTOR
+      <VECTOR>-2 2 -2</VECTOR>
       <VECTOR>-2 1 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -12970,7 +12972,7 @@
  <LATTICE name="Fuchs3D-56B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 2 0</VECTOR>
-      <VECTOR>-2 2 -2</VECTOR
+      <VECTOR>-2 2 -2</VECTOR>
       <VECTOR>-1 2 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -12996,7 +12998,7 @@
  <LATTICE name="Fuchs3D-58B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-3 1 -2</VECTOR
+      <VECTOR>-3 1 -2</VECTOR>
       <VECTOR>-2 2 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13022,7 +13024,7 @@
  <LATTICE name="Fuchs3D-60B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-1 -3 2</VECTOR
+      <VECTOR>-1 -3 2</VECTOR>
       <VECTOR>3 0 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13048,7 +13050,7 @@
  <LATTICE name="Fuchs3D-62B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 4 -1</VECTOR>
-      <VECTOR>-3 -1 -2</VECTOR
+      <VECTOR>-3 -1 -2</VECTOR>
       <VECTOR>-1 3 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13074,7 +13076,7 @@
  <LATTICE name="Fuchs3D-64B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 2 -2</VECTOR>
-      <VECTOR>-3 1 -2</VECTOR
+      <VECTOR>-3 1 -2</VECTOR>
       <VECTOR>-1 3 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13100,7 +13102,7 @@
  <LATTICE name="Fuchs3D-66B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-2 2 2</VECTOR
+      <VECTOR>-2 2 2</VECTOR>
       <VECTOR>3 0 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13126,7 +13128,7 @@
  <LATTICE name="Fuchs3D-68B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-1 4 -1</VECTOR
+      <VECTOR>-1 4 -1</VECTOR>
       <VECTOR>-2 -1 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13152,7 +13154,7 @@
  <LATTICE name="Fuchs3D-70B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-1 -3 2</VECTOR
+      <VECTOR>-1 -3 2</VECTOR>
       <VECTOR>-3 -3 -2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13178,7 +13180,7 @@
  <LATTICE name="Fuchs3D-72B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -3</VECTOR>
-      <VECTOR>-3 0 3</VECTOR
+      <VECTOR>-3 0 3</VECTOR>
       <VECTOR>-2 -4 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13204,7 +13206,7 @@
  <LATTICE name="Fuchs3D-74B superlattice" dimension="2">
     <BASIS>
       <VECTOR>3 4 -1</VECTOR>
-      <VECTOR>-2 2 -2</VECTOR
+      <VECTOR>-2 2 -2</VECTOR>
       <VECTOR>-4 1 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13230,7 +13232,7 @@
  <LATTICE name="Fuchs3D-76B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-3 3 2</VECTOR
+      <VECTOR>-3 3 2</VECTOR>
       <VECTOR>2 1 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13256,7 +13258,7 @@
  <LATTICE name="Fuchs3D-78B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 7 -3</VECTOR>
-      <VECTOR>-3 -2 3</VECTOR
+      <VECTOR>-3 -2 3</VECTOR>
       <VECTOR>2 -3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13282,7 +13284,7 @@
  <LATTICE name="Fuchs3D-80B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 1 -1</VECTOR>
-      <VECTOR>-3 2 -3</VECTOR
+      <VECTOR>-3 2 -3</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13308,7 +13310,7 @@
  <LATTICE name="Fuchs3D-82B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 2 0</VECTOR>
-      <VECTOR>-3 2 -3</VECTOR
+      <VECTOR>-3 2 -3</VECTOR>
       <VECTOR>-3 3 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13334,7 +13336,7 @@
  <LATTICE name="Fuchs3D-84B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -3</VECTOR>
-      <VECTOR>-2 -4 2</VECTOR
+      <VECTOR>-2 -4 2</VECTOR>
       <VECTOR>-3 -3 -2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13360,7 +13362,7 @@
  <LATTICE name="Fuchs3D-86B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -1</VECTOR>
-      <VECTOR>-2 -4 0</VECTOR
+      <VECTOR>-2 -4 0</VECTOR>
       <VECTOR>-4 -1 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13386,7 +13388,7 @@
  <LATTICE name="Fuchs3D-88B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 0 -9</VECTOR>
-      <VECTOR>-3 -2 3</VECTOR
+      <VECTOR>-3 -2 3</VECTOR>
       <VECTOR>-1 0 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13412,7 +13414,7 @@
  <LATTICE name="Fuchs3D-90B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 2 0</VECTOR>
-      <VECTOR>-2 3 -3</VECTOR
+      <VECTOR>-2 3 -3</VECTOR>
       <VECTOR>-3 2 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13438,7 +13440,7 @@
  <LATTICE name="Fuchs3D-92B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-2 -4 2</VECTOR
+      <VECTOR>-2 -4 2</VECTOR>
       <VECTOR>-3 -2 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13464,7 +13466,7 @@
  <LATTICE name="Fuchs3D-94B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 7 -2</VECTOR>
-      <VECTOR>-5 0 1</VECTOR
+      <VECTOR>-5 0 1</VECTOR>
       <VECTOR>3 3 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13490,7 +13492,7 @@
  <LATTICE name="Fuchs3D-96B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 2 -2</VECTOR>
-      <VECTOR>-4 2 -2</VECTOR
+      <VECTOR>-4 2 -2</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13516,7 +13518,7 @@
  <LATTICE name="Fuchs3D-98B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-5 1 2</VECTOR
+      <VECTOR>-5 1 2</VECTOR>
       <VECTOR>-2 -3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13542,7 +13544,7 @@
  <LATTICE name="Fuchs3D-100B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 2 -2</VECTOR>
-      <VECTOR>-3 2 -3</VECTOR
+      <VECTOR>-3 2 -3</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13568,7 +13570,7 @@
  <LATTICE name="Fuchs3D-102B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-3 2 -3</VECTOR
+      <VECTOR>-3 2 -3</VECTOR>
       <VECTOR>-3 2 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13594,7 +13596,7 @@
  <LATTICE name="Fuchs3D-104B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 2 -2</VECTOR>
-      <VECTOR>-3 2 -3</VECTOR
+      <VECTOR>-3 2 -3</VECTOR>
       <VECTOR>-2 4 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13620,7 +13622,7 @@
  <LATTICE name="Fuchs3D-106B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-3 2 -3</VECTOR
+      <VECTOR>-3 2 -3</VECTOR>
       <VECTOR>4 3 1</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13646,7 +13648,7 @@
  <LATTICE name="Fuchs3D-108B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-3 2 3</VECTOR
+      <VECTOR>-3 2 3</VECTOR>
       <VECTOR>2 -2 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13672,7 +13674,7 @@
  <LATTICE name="Fuchs3D-110B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-3 2 -3</VECTOR
+      <VECTOR>-3 2 -3</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13698,7 +13700,7 @@
  <LATTICE name="Fuchs3D-112B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-2 3 -3</VECTOR
+      <VECTOR>-2 3 -3</VECTOR>
       <VECTOR>-2 2 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13724,7 +13726,7 @@
  <LATTICE name="Fuchs3D-114B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-3 3 -2</VECTOR
+      <VECTOR>-3 3 -2</VECTOR>
       <VECTOR>1 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13750,7 +13752,7 @@
  <LATTICE name="Fuchs3D-116B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-2 2 -4</VECTOR
+      <VECTOR>-2 2 -4</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13776,7 +13778,7 @@
  <LATTICE name="Fuchs3D-118B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 3 -1</VECTOR>
-      <VECTOR>-3 1 -4</VECTOR
+      <VECTOR>-3 1 -4</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13802,7 +13804,7 @@
  <LATTICE name="Fuchs3D-120B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 2 -1</VECTOR>
-      <VECTOR>-2 2 -4</VECTOR
+      <VECTOR>-2 2 -4</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13828,7 +13830,7 @@
  <LATTICE name="Fuchs3D-122B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 2 -1</VECTOR>
-      <VECTOR>-3 3 -2</VECTOR
+      <VECTOR>-3 3 -2</VECTOR>
       <VECTOR>1 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13854,7 +13856,7 @@
  <LATTICE name="Fuchs3D-124B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 1 0</VECTOR>
-      <VECTOR>-4 2 -2</VECTOR
+      <VECTOR>-4 2 -2</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13880,7 +13882,7 @@
  <LATTICE name="Fuchs3D-126B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -1</VECTOR>
-      <VECTOR>-3 -3 -2</VECTOR
+      <VECTOR>-3 -3 -2</VECTOR>
       <VECTOR>-1 3 -4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13906,7 +13908,7 @@
  <LATTICE name="Fuchs3D-128B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-2 2 4</VECTOR
+      <VECTOR>-2 2 4</VECTOR>
       <VECTOR>2 -3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13932,7 +13934,7 @@
  <LATTICE name="Fuchs3D-130B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-3 -4 -1</VECTOR
+      <VECTOR>-3 -4 -1</VECTOR>
       <VECTOR>-4 1 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13958,7 +13960,7 @@
  <LATTICE name="Fuchs3D-132B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 4 -2</VECTOR>
-      <VECTOR>-2 2 -4</VECTOR
+      <VECTOR>-2 2 -4</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -13984,7 +13986,7 @@
  <LATTICE name="Fuchs3D-134B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 0</VECTOR>
-      <VECTOR>-4 3 -1</VECTOR
+      <VECTOR>-4 3 -1</VECTOR>
       <VECTOR>2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14010,7 +14012,7 @@
  <LATTICE name="Fuchs3D-136B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 2 -1</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>-2 2 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14036,7 +14038,7 @@
  <LATTICE name="Fuchs3D-138B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 0</VECTOR>
-      <VECTOR>-5 1 -2</VECTOR
+      <VECTOR>-5 1 -2</VECTOR>
       <VECTOR>-2 3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14062,7 +14064,7 @@
  <LATTICE name="Fuchs3D-140B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 2 -1</VECTOR>
-      <VECTOR>-4 4 -2</VECTOR
+      <VECTOR>-4 4 -2</VECTOR>
       <VECTOR>-2 2 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14088,7 +14090,7 @@
  <LATTICE name="Fuchs3D-142B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 2 -1</VECTOR>
-      <VECTOR>-1 4 -3</VECTOR
+      <VECTOR>-1 4 -3</VECTOR>
       <VECTOR>-3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14114,7 +14116,7 @@
  <LATTICE name="Fuchs3D-144B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 0 -4</VECTOR>
-      <VECTOR>-5 -3 -2</VECTOR
+      <VECTOR>-5 -3 -2</VECTOR>
       <VECTOR>-2 3 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14140,7 +14142,7 @@
  <LATTICE name="Fuchs3D-146B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 7 0</VECTOR>
-      <VECTOR>-4 1 -3</VECTOR
+      <VECTOR>-4 1 -3</VECTOR>
       <VECTOR>3 5 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14166,7 +14168,7 @@
  <LATTICE name="Fuchs3D-148B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 0 -3</VECTOR>
-      <VECTOR>-2 -2 -4</VECTOR
+      <VECTOR>-2 -2 -4</VECTOR>
       <VECTOR>-4 4 -2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14192,7 +14194,7 @@
  <LATTICE name="Fuchs3D-150B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 0 0</VECTOR>
-      <VECTOR>-3 -4 -3</VECTOR
+      <VECTOR>-3 -4 -3</VECTOR>
       <VECTOR>-3 3 -4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14218,7 +14220,7 @@
  <LATTICE name="Fuchs3D-152B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 7 0</VECTOR>
-      <VECTOR>-4 0 -4</VECTOR
+      <VECTOR>-4 0 -4</VECTOR>
       <VECTOR>2 5 1</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14244,7 +14246,7 @@
  <LATTICE name="Fuchs3D-154B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 1 -1</VECTOR>
-      <VECTOR>-3 -3 -4</VECTOR
+      <VECTOR>-3 -3 -4</VECTOR>
       <VECTOR>-4 3 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14270,7 +14272,7 @@
  <LATTICE name="Fuchs3D-156B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 2 -2</VECTOR
+      <VECTOR>-4 2 -2</VECTOR>
       <VECTOR>2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14296,7 +14298,7 @@
  <LATTICE name="Fuchs3D-158B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 1 -3</VECTOR
+      <VECTOR>-4 1 -3</VECTOR>
       <VECTOR>-3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14322,7 +14324,7 @@
  <LATTICE name="Fuchs3D-160B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 0</VECTOR>
-      <VECTOR>-4 2 -4</VECTOR
+      <VECTOR>-4 2 -4</VECTOR>
       <VECTOR>2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14348,7 +14350,7 @@
  <LATTICE name="Fuchs3D-162B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 2 -1</VECTOR>
-      <VECTOR>-2 -4 -4</VECTOR
+      <VECTOR>-2 -4 -4</VECTOR>
       <VECTOR>-4 3 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14374,7 +14376,7 @@
  <LATTICE name="Fuchs3D-164B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 0</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>-4 2 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14400,7 +14402,7 @@
  <LATTICE name="Fuchs3D-166B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 1 -1</VECTOR>
-      <VECTOR>-4 2 -4</VECTOR
+      <VECTOR>-4 2 -4</VECTOR>
       <VECTOR>-3 4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14426,7 +14428,7 @@
  <LATTICE name="Fuchs3D-168B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 0 -4</VECTOR
+      <VECTOR>-4 0 -4</VECTOR>
       <VECTOR>-3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14452,7 +14454,7 @@
  <LATTICE name="Fuchs3D-170B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -1</VECTOR>
-      <VECTOR>-1 5 2</VECTOR
+      <VECTOR>-1 5 2</VECTOR>
       <VECTOR>-3 -4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14478,7 +14480,7 @@
  <LATTICE name="Fuchs3D-172B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 0</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>2 3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14504,7 +14506,7 @@
  <LATTICE name="Fuchs3D-174B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 2 -3</VECTOR>
-      <VECTOR>-3 5 0</VECTOR
+      <VECTOR>-3 5 0</VECTOR>
       <VECTOR>3 4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14530,7 +14532,7 @@
  <LATTICE name="Fuchs3D-176B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 4 -2</VECTOR>
-      <VECTOR>-5 3 -2</VECTOR
+      <VECTOR>-5 3 -2</VECTOR>
       <VECTOR>3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14556,7 +14558,7 @@
  <LATTICE name="Fuchs3D-178B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -6</VECTOR>
-      <VECTOR>-4 3 3</VECTOR
+      <VECTOR>-4 3 3</VECTOR>
       <VECTOR>-2 -3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14582,7 +14584,7 @@
  <LATTICE name="Fuchs3D-180B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 4 -2</VECTOR>
-      <VECTOR>-4 -2 -4</VECTOR
+      <VECTOR>-4 -2 -4</VECTOR>
       <VECTOR>-3 4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14608,7 +14610,7 @@
  <LATTICE name="Fuchs3D-182B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -1</VECTOR>
-      <VECTOR>-4 3 3</VECTOR
+      <VECTOR>-4 3 3</VECTOR>
       <VECTOR>-3 -4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14634,7 +14636,7 @@
  <LATTICE name="Fuchs3D-184B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 4 -1</VECTOR>
-      <VECTOR>-3 -2 -5</VECTOR
+      <VECTOR>-3 -2 -5</VECTOR>
       <VECTOR>-3 4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14660,7 +14662,7 @@
  <LATTICE name="Fuchs3D-186B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-5 2 -3</VECTOR
+      <VECTOR>-5 2 -3</VECTOR>
       <VECTOR>2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14686,7 +14688,7 @@
  <LATTICE name="Fuchs3D-188B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-2 4 -4</VECTOR
+      <VECTOR>-2 4 -4</VECTOR>
       <VECTOR>-3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14712,7 +14714,7 @@
  <LATTICE name="Fuchs3D-190B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-5 2 -3</VECTOR
+      <VECTOR>-5 2 -3</VECTOR>
       <VECTOR>-3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14738,7 +14740,7 @@
  <LATTICE name="Fuchs3D-192B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 9 -4</VECTOR>
-      <VECTOR>-6 2 2</VECTOR
+      <VECTOR>-6 2 2</VECTOR>
       <VECTOR>-3 -3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14764,7 +14766,7 @@
  <LATTICE name="Fuchs3D-194B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-2 -4 -4</VECTOR
+      <VECTOR>-2 -4 -4</VECTOR>
       <VECTOR>-4 3 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14790,7 +14792,7 @@
  <LATTICE name="Fuchs3D-196B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 2 -4</VECTOR
+      <VECTOR>-4 2 -4</VECTOR>
       <VECTOR>-3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14816,7 +14818,7 @@
  <LATTICE name="Fuchs3D-198B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>2 3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14842,7 +14844,7 @@
  <LATTICE name="Fuchs3D-200B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -5</VECTOR>
-      <VECTOR>-2 -3 5</VECTOR
+      <VECTOR>-2 -3 5</VECTOR>
       <VECTOR>4 -3 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14868,7 +14870,7 @@
  <LATTICE name="Fuchs3D-202B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>-2 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14894,7 +14896,7 @@
  <LATTICE name="Fuchs3D-204B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 4 -2</VECTOR
+      <VECTOR>-4 4 -2</VECTOR>
       <VECTOR>2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14920,7 +14922,7 @@
  <LATTICE name="Fuchs3D-206B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>-2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14946,7 +14948,7 @@
  <LATTICE name="Fuchs3D-208B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -2</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>-2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14972,7 +14974,7 @@
  <LATTICE name="Fuchs3D-210B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>-2 3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -14998,7 +15000,7 @@
  <LATTICE name="Fuchs3D-212B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>-3 2 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15024,7 +15026,7 @@
  <LATTICE name="Fuchs3D-214B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-4 2 -4</VECTOR
+      <VECTOR>-4 2 -4</VECTOR>
       <VECTOR>-3 4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15050,7 +15052,7 @@
  <LATTICE name="Fuchs3D-216B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -2</VECTOR>
-      <VECTOR>-4 2 -4</VECTOR
+      <VECTOR>-4 2 -4</VECTOR>
       <VECTOR>-2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15076,7 +15078,7 @@
  <LATTICE name="Fuchs3D-218B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 7 0</VECTOR>
-      <VECTOR>-5 -2 -3</VECTOR
+      <VECTOR>-5 -2 -3</VECTOR>
       <VECTOR>-2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15102,7 +15104,7 @@
  <LATTICE name="Fuchs3D-220B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 4 -3</VECTOR>
-      <VECTOR>-3 -2 -5</VECTOR
+      <VECTOR>-3 -2 -5</VECTOR>
       <VECTOR>-3 4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15128,7 +15130,7 @@
  <LATTICE name="Fuchs3D-222B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 1 -4</VECTOR>
-      <VECTOR>-5 -4 -3</VECTOR
+      <VECTOR>-5 -4 -3</VECTOR>
       <VECTOR>-3 3 -4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15154,7 +15156,7 @@
  <LATTICE name="Fuchs3D-224B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -2</VECTOR>
-      <VECTOR>-2 -5 -3</VECTOR
+      <VECTOR>-2 -5 -3</VECTOR>
       <VECTOR>-2 4 -4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15180,7 +15182,7 @@
  <LATTICE name="Fuchs3D-226B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 -2</VECTOR>
-      <VECTOR>-4 3 -3</VECTOR
+      <VECTOR>-4 3 -3</VECTOR>
       <VECTOR>2 3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15206,7 +15208,7 @@
  <LATTICE name="Fuchs3D-228B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-1 5 -4</VECTOR
+      <VECTOR>-1 5 -4</VECTOR>
       <VECTOR>-3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15232,7 +15234,7 @@
  <LATTICE name="Fuchs3D-230B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 0</VECTOR>
-      <VECTOR>-5 2 -3</VECTOR
+      <VECTOR>-5 2 -3</VECTOR>
       <VECTOR>-2 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15258,7 +15260,7 @@
  <LATTICE name="Fuchs3D-232B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-1 -4 5</VECTOR
+      <VECTOR>-1 -4 5</VECTOR>
       <VECTOR>3 -4 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15284,7 +15286,7 @@
  <LATTICE name="Fuchs3D-234B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-3 3 4</VECTOR
+      <VECTOR>-3 3 4</VECTOR>
       <VECTOR>2 -2 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15310,7 +15312,7 @@
  <LATTICE name="Fuchs3D-236B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-3 4 -3</VECTOR
+      <VECTOR>-3 4 -3</VECTOR>
       <VECTOR>-5 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15336,7 +15338,7 @@
  <LATTICE name="Fuchs3D-238B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-3 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15362,7 +15364,7 @@
  <LATTICE name="Fuchs3D-240B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -2</VECTOR>
-      <VECTOR>-4 2 -4</VECTOR
+      <VECTOR>-4 2 -4</VECTOR>
       <VECTOR>-3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15388,7 +15390,7 @@
  <LATTICE name="Fuchs3D-242B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -9</VECTOR>
-      <VECTOR>-3 -5 2</VECTOR
+      <VECTOR>-3 -5 2</VECTOR>
       <VECTOR>-2 2 -6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15414,7 +15416,7 @@
  <LATTICE name="Fuchs3D-244B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-3 -1 -6</VECTOR
+      <VECTOR>-3 -1 -6</VECTOR>
       <VECTOR>-1 6 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15440,7 +15442,7 @@
  <LATTICE name="Fuchs3D-246B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 4 -3</VECTOR>
-      <VECTOR>-4 2 -4</VECTOR
+      <VECTOR>-4 2 -4</VECTOR>
       <VECTOR>-2 3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15466,7 +15468,7 @@
  <LATTICE name="Fuchs3D-248B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 4 -4</VECTOR>
-      <VECTOR>-5 -3 -4</VECTOR
+      <VECTOR>-5 -3 -4</VECTOR>
       <VECTOR>-3 5 -2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15492,7 +15494,7 @@
  <LATTICE name="Fuchs3D-250B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -2</VECTOR>
-      <VECTOR>-2 -5 -3</VECTOR
+      <VECTOR>-2 -5 -3</VECTOR>
       <VECTOR>-5 3 -4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15518,7 +15520,7 @@
  <LATTICE name="Fuchs3D-252B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -2</VECTOR>
-      <VECTOR>-4 2 -4</VECTOR
+      <VECTOR>-4 2 -4</VECTOR>
       <VECTOR>-3 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15544,7 +15546,7 @@
  <LATTICE name="Fuchs3D-254B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -2</VECTOR>
-      <VECTOR>-2 -5 -3</VECTOR
+      <VECTOR>-2 -5 -3</VECTOR>
       <VECTOR>-5 2 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15570,7 +15572,7 @@
  <LATTICE name="Fuchs3D-256B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-5 4 -3</VECTOR
+      <VECTOR>-5 4 -3</VECTOR>
       <VECTOR>-3 2 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15596,7 +15598,7 @@
  <LATTICE name="Fuchs3D-258B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 3 -4</VECTOR>
-      <VECTOR>-4 1 -5</VECTOR
+      <VECTOR>-4 1 -5</VECTOR>
       <VECTOR>2 6 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15622,7 +15624,7 @@
  <LATTICE name="Fuchs3D-260B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-4 4 4</VECTOR
+      <VECTOR>-4 4 4</VECTOR>
       <VECTOR>1 -5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15648,7 +15650,7 @@
  <LATTICE name="Fuchs3D-262B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-2 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15674,7 +15676,7 @@
  <LATTICE name="Fuchs3D-264B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-4 4 4</VECTOR
+      <VECTOR>-4 4 4</VECTOR>
       <VECTOR>-1 -4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15700,7 +15702,7 @@
  <LATTICE name="Fuchs3D-266B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 0</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-2 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15726,7 +15728,7 @@
  <LATTICE name="Fuchs3D-268B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 5 -3</VECTOR>
-      <VECTOR>-5 3 4</VECTOR
+      <VECTOR>-5 3 4</VECTOR>
       <VECTOR>4 -4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15752,7 +15754,7 @@
  <LATTICE name="Fuchs3D-270B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -3</VECTOR>
-      <VECTOR>-5 2 -3</VECTOR
+      <VECTOR>-5 2 -3</VECTOR>
       <VECTOR>3 6 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15778,7 +15780,7 @@
  <LATTICE name="Fuchs3D-272B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15804,7 +15806,7 @@
  <LATTICE name="Fuchs3D-274B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-3 -5 -4</VECTOR
+      <VECTOR>-3 -5 -4</VECTOR>
       <VECTOR>-5 3 -4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15830,7 +15832,7 @@
  <LATTICE name="Fuchs3D-276B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-4 4 4</VECTOR
+      <VECTOR>-4 4 4</VECTOR>
       <VECTOR>5 -3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15856,7 +15858,7 @@
  <LATTICE name="Fuchs3D-278B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-4 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15882,7 +15884,7 @@
  <LATTICE name="Fuchs3D-280B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-4 4 4</VECTOR
+      <VECTOR>-4 4 4</VECTOR>
       <VECTOR>4 1 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15908,7 +15910,7 @@
  <LATTICE name="Fuchs3D-282B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -2</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15934,7 +15936,7 @@
  <LATTICE name="Fuchs3D-284B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-5 2 -3</VECTOR
+      <VECTOR>-5 2 -3</VECTOR>
       <VECTOR>2 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15960,7 +15962,7 @@
  <LATTICE name="Fuchs3D-286B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 -2</VECTOR>
-      <VECTOR>-3 -2 -5</VECTOR
+      <VECTOR>-3 -2 -5</VECTOR>
       <VECTOR>-4 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -15986,7 +15988,7 @@
  <LATTICE name="Fuchs3D-288B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-5 4 -3</VECTOR
+      <VECTOR>-5 4 -3</VECTOR>
       <VECTOR>3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16012,7 +16014,7 @@
  <LATTICE name="Fuchs3D-290B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 0</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>2 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16038,7 +16040,7 @@
  <LATTICE name="Fuchs3D-292B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -1</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>2 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16064,7 +16066,7 @@
  <LATTICE name="Fuchs3D-294B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -2</VECTOR>
-      <VECTOR>-4 3 -5</VECTOR
+      <VECTOR>-4 3 -5</VECTOR>
       <VECTOR>-3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16090,7 +16092,7 @@
  <LATTICE name="Fuchs3D-296B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 0</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>2 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16116,7 +16118,7 @@
  <LATTICE name="Fuchs3D-298B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 4 -3</VECTOR>
-      <VECTOR>-4 -3 -5</VECTOR
+      <VECTOR>-4 -3 -5</VECTOR>
       <VECTOR>-4 5 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16142,7 +16144,7 @@
  <LATTICE name="Fuchs3D-300B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 1 -1</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>-4 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16168,7 +16170,7 @@
  <LATTICE name="Fuchs3D-302B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 0</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>-5 4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16194,7 +16196,7 @@
  <LATTICE name="Fuchs3D-304B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 6 -2</VECTOR>
-      <VECTOR>-6 2 4</VECTOR
+      <VECTOR>-6 2 4</VECTOR>
       <VECTOR>4 -4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16220,7 +16222,7 @@
  <LATTICE name="Fuchs3D-306B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-4 3 5</VECTOR
+      <VECTOR>-4 3 5</VECTOR>
       <VECTOR>6 -3 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16246,7 +16248,7 @@
  <LATTICE name="Fuchs3D-308B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 2 -4</VECTOR>
-      <VECTOR>-4 6 0</VECTOR
+      <VECTOR>-4 6 0</VECTOR>
       <VECTOR>4 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16272,7 +16274,7 @@
  <LATTICE name="Fuchs3D-310B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -1</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>2 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16298,7 +16300,7 @@
  <LATTICE name="Fuchs3D-312B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-6 3 -3</VECTOR
+      <VECTOR>-6 3 -3</VECTOR>
       <VECTOR>3 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16324,7 +16326,7 @@
  <LATTICE name="Fuchs3D-314B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 -2</VECTOR>
-      <VECTOR>-5 4 3</VECTOR
+      <VECTOR>-5 4 3</VECTOR>
       <VECTOR>3 -4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16350,7 +16352,7 @@
  <LATTICE name="Fuchs3D-316B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-4 3 5</VECTOR
+      <VECTOR>-4 3 5</VECTOR>
       <VECTOR>4 -5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16376,7 +16378,7 @@
  <LATTICE name="Fuchs3D-318B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-6 3 -3</VECTOR
+      <VECTOR>-6 3 -3</VECTOR>
       <VECTOR>3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16402,7 +16404,7 @@
  <LATTICE name="Fuchs3D-320B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 4 -3</VECTOR>
-      <VECTOR>-4 2 -6</VECTOR
+      <VECTOR>-4 2 -6</VECTOR>
       <VECTOR>2 6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16428,7 +16430,7 @@
  <LATTICE name="Fuchs3D-322B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 -2</VECTOR>
-      <VECTOR>-5 -2 -5</VECTOR
+      <VECTOR>-5 -2 -5</VECTOR>
       <VECTOR>-3 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16454,7 +16456,7 @@
  <LATTICE name="Fuchs3D-324B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-4 3 5</VECTOR
+      <VECTOR>-4 3 5</VECTOR>
       <VECTOR>3 -5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16480,7 +16482,7 @@
  <LATTICE name="Fuchs3D-326B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 0</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>-4 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16506,7 +16508,7 @@
  <LATTICE name="Fuchs3D-328B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-2 5 -5</VECTOR
+      <VECTOR>-2 5 -5</VECTOR>
       <VECTOR>-4 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16532,7 +16534,7 @@
  <LATTICE name="Fuchs3D-330B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -3</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16558,7 +16560,7 @@
  <LATTICE name="Fuchs3D-332B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-4 3 5</VECTOR
+      <VECTOR>-4 3 5</VECTOR>
       <VECTOR>2 -5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16584,7 +16586,7 @@
  <LATTICE name="Fuchs3D-334B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -4</VECTOR>
-      <VECTOR>-3 4 -5</VECTOR
+      <VECTOR>-3 4 -5</VECTOR>
       <VECTOR>-4 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16610,7 +16612,7 @@
  <LATTICE name="Fuchs3D-336B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -1</VECTOR>
-      <VECTOR>-3 5 -4</VECTOR
+      <VECTOR>-3 5 -4</VECTOR>
       <VECTOR>-5 3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16636,7 +16638,7 @@
  <LATTICE name="Fuchs3D-338B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-2 5 -5</VECTOR
+      <VECTOR>-2 5 -5</VECTOR>
       <VECTOR>-4 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16662,7 +16664,7 @@
  <LATTICE name="Fuchs3D-340B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>-4 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16688,7 +16690,7 @@
  <LATTICE name="Fuchs3D-342B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 3 -3</VECTOR>
-      <VECTOR>-3 -5 -4</VECTOR
+      <VECTOR>-3 -5 -4</VECTOR>
       <VECTOR>-5 5 -2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16714,7 +16716,7 @@
  <LATTICE name="Fuchs3D-344B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-4 -2 -6</VECTOR
+      <VECTOR>-4 -2 -6</VECTOR>
       <VECTOR>-4 5 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16740,7 +16742,7 @@
  <LATTICE name="Fuchs3D-346B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-2 5 -5</VECTOR
+      <VECTOR>-2 5 -5</VECTOR>
       <VECTOR>3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16766,7 +16768,7 @@
  <LATTICE name="Fuchs3D-348B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -1</VECTOR>
-      <VECTOR>-3 6 -3</VECTOR
+      <VECTOR>-3 6 -3</VECTOR>
       <VECTOR>4 2 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16792,7 +16794,7 @@
  <LATTICE name="Fuchs3D-350B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16818,7 +16820,7 @@
  <LATTICE name="Fuchs3D-352B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-3 5 4</VECTOR
+      <VECTOR>-3 5 4</VECTOR>
       <VECTOR>5 -3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16844,7 +16846,7 @@
  <LATTICE name="Fuchs3D-354B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 4 -3</VECTOR
+      <VECTOR>-5 4 -3</VECTOR>
       <VECTOR>-3 3 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16870,7 +16872,7 @@
  <LATTICE name="Fuchs3D-356B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -3</VECTOR>
-      <VECTOR>-5 -2 -5</VECTOR
+      <VECTOR>-5 -2 -5</VECTOR>
       <VECTOR>-4 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16896,7 +16898,7 @@
  <LATTICE name="Fuchs3D-358B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-3 4 5</VECTOR
+      <VECTOR>-3 4 5</VECTOR>
       <VECTOR>5 -2 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16922,7 +16924,7 @@
  <LATTICE name="Fuchs3D-360B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -1</VECTOR>
-      <VECTOR>-4 4 4</VECTOR
+      <VECTOR>-4 4 4</VECTOR>
       <VECTOR>2 -6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16948,7 +16950,7 @@
  <LATTICE name="Fuchs3D-362B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -1</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>-4 3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -16974,7 +16976,7 @@
  <LATTICE name="Fuchs3D-364B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 7 -1</VECTOR>
-      <VECTOR>-7 1 4</VECTOR
+      <VECTOR>-7 1 4</VECTOR>
       <VECTOR>4 -4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17000,7 +17002,7 @@
  <LATTICE name="Fuchs3D-366B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 4 -3</VECTOR
+      <VECTOR>-5 4 -3</VECTOR>
       <VECTOR>4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17026,7 +17028,7 @@
  <LATTICE name="Fuchs3D-368B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -3</VECTOR>
-      <VECTOR>-4 4 4</VECTOR
+      <VECTOR>-4 4 4</VECTOR>
       <VECTOR>4 2 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17052,7 +17054,7 @@
  <LATTICE name="Fuchs3D-370B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -3</VECTOR>
-      <VECTOR>-3 5 4</VECTOR
+      <VECTOR>-3 5 4</VECTOR>
       <VECTOR>5 2 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17078,7 +17080,7 @@
  <LATTICE name="Fuchs3D-372B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -1</VECTOR>
-      <VECTOR>-4 2 6</VECTOR
+      <VECTOR>-4 2 6</VECTOR>
       <VECTOR>5 -4 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17104,7 +17106,7 @@
  <LATTICE name="Fuchs3D-374B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>-3 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17130,7 +17132,7 @@
  <LATTICE name="Fuchs3D-376B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -2</VECTOR>
-      <VECTOR>-4 -2 -6</VECTOR
+      <VECTOR>-4 -2 -6</VECTOR>
       <VECTOR>-5 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17156,7 +17158,7 @@
  <LATTICE name="Fuchs3D-378B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-3 3 6</VECTOR
+      <VECTOR>-3 3 6</VECTOR>
       <VECTOR>2 -5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17182,7 +17184,7 @@
  <LATTICE name="Fuchs3D-380B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -1</VECTOR>
-      <VECTOR>-4 3 5</VECTOR
+      <VECTOR>-4 3 5</VECTOR>
       <VECTOR>2 -6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17208,7 +17210,7 @@
  <LATTICE name="Fuchs3D-382B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-1 6 -5</VECTOR
+      <VECTOR>-1 6 -5</VECTOR>
       <VECTOR>-3 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17234,7 +17236,7 @@
  <LATTICE name="Fuchs3D-384B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 6 -2</VECTOR>
-      <VECTOR>-4 -2 -6</VECTOR
+      <VECTOR>-4 -2 -6</VECTOR>
       <VECTOR>-4 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17260,7 +17262,7 @@
  <LATTICE name="Fuchs3D-386B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 5 -2</VECTOR
+      <VECTOR>-5 5 -2</VECTOR>
       <VECTOR>-3 2 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17286,7 +17288,7 @@
  <LATTICE name="Fuchs3D-388B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -3</VECTOR>
-      <VECTOR>-5 5 4</VECTOR
+      <VECTOR>-5 5 4</VECTOR>
       <VECTOR>4 3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17312,7 +17314,7 @@
  <LATTICE name="Fuchs3D-390B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>3 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17338,7 +17340,7 @@
  <LATTICE name="Fuchs3D-392B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17364,7 +17366,7 @@
  <LATTICE name="Fuchs3D-394B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 3 -4</VECTOR
+      <VECTOR>-5 3 -4</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17390,7 +17392,7 @@
  <LATTICE name="Fuchs3D-396B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -1</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>3 -6 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17416,7 +17418,7 @@
  <LATTICE name="Fuchs3D-398B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 4 -3</VECTOR
+      <VECTOR>-5 4 -3</VECTOR>
       <VECTOR>3 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17442,7 +17444,7 @@
  <LATTICE name="Fuchs3D-400B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-4 5 5</VECTOR
+      <VECTOR>-4 5 5</VECTOR>
       <VECTOR>2 -6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17468,7 +17470,7 @@
  <LATTICE name="Fuchs3D-402B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -4</VECTOR>
-      <VECTOR>-4 -5 -5</VECTOR
+      <VECTOR>-4 -5 -5</VECTOR>
       <VECTOR>-5 5 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17494,7 +17496,7 @@
  <LATTICE name="Fuchs3D-404B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 2 -2</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17520,7 +17522,7 @@
  <LATTICE name="Fuchs3D-406B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -4</VECTOR>
-      <VECTOR>-5 -1 -6</VECTOR
+      <VECTOR>-5 -1 -6</VECTOR>
       <VECTOR>-2 7 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17546,7 +17548,7 @@
  <LATTICE name="Fuchs3D-408B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -4</VECTOR>
-      <VECTOR>-4 -5 -5</VECTOR
+      <VECTOR>-4 -5 -5</VECTOR>
       <VECTOR>-4 6 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17572,7 +17574,7 @@
  <LATTICE name="Fuchs3D-410B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 4 -3</VECTOR
+      <VECTOR>-5 4 -3</VECTOR>
       <VECTOR>3 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17598,7 +17600,7 @@
  <LATTICE name="Fuchs3D-412B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -3</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>4 2 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17624,7 +17626,7 @@
  <LATTICE name="Fuchs3D-414B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-5 2 -5</VECTOR
+      <VECTOR>-5 2 -5</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17650,7 +17652,7 @@
  <LATTICE name="Fuchs3D-416B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-4 4 6</VECTOR
+      <VECTOR>-4 4 6</VECTOR>
       <VECTOR>2 -6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17676,7 +17678,7 @@
  <LATTICE name="Fuchs3D-418B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 2 0</VECTOR>
-      <VECTOR>-5 4 -5</VECTOR
+      <VECTOR>-5 4 -5</VECTOR>
       <VECTOR>-5 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17702,7 +17704,7 @@
  <LATTICE name="Fuchs3D-420B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -1</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>2 -6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17728,7 +17730,7 @@
  <LATTICE name="Fuchs3D-422B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-1 6 -5</VECTOR
+      <VECTOR>-1 6 -5</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17754,7 +17756,7 @@
  <LATTICE name="Fuchs3D-424B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 -4</VECTOR>
-      <VECTOR>-6 -2 -4</VECTOR
+      <VECTOR>-6 -2 -4</VECTOR>
       <VECTOR>-3 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17780,7 +17782,7 @@
  <LATTICE name="Fuchs3D-426B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -1</VECTOR>
-      <VECTOR>-3 6 -3</VECTOR
+      <VECTOR>-3 6 -3</VECTOR>
       <VECTOR>-5 3 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17806,7 +17808,7 @@
  <LATTICE name="Fuchs3D-428B superlattice" dimension="2">
     <BASIS>
       <VECTOR>4 4 -6</VECTOR>
-      <VECTOR>-7 4 3</VECTOR
+      <VECTOR>-7 4 3</VECTOR>
       <VECTOR>2 6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17832,7 +17834,7 @@
  <LATTICE name="Fuchs3D-430B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-5 4 3</VECTOR
+      <VECTOR>-5 4 3</VECTOR>
       <VECTOR>4 3 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17858,7 +17860,7 @@
  <LATTICE name="Fuchs3D-432B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -1</VECTOR>
-      <VECTOR>-1 -6 5</VECTOR
+      <VECTOR>-1 -6 5</VECTOR>
       <VECTOR>5 -3 -6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17884,7 +17886,7 @@
  <LATTICE name="Fuchs3D-434B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 2 -1</VECTOR>
-      <VECTOR>-6 4 -4</VECTOR
+      <VECTOR>-6 4 -4</VECTOR>
       <VECTOR>4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17910,7 +17912,7 @@
  <LATTICE name="Fuchs3D-436B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 2 -5</VECTOR
+      <VECTOR>-7 2 -5</VECTOR>
       <VECTOR>-4 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17936,7 +17938,7 @@
  <LATTICE name="Fuchs3D-438B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-6 3 -3</VECTOR
+      <VECTOR>-6 3 -3</VECTOR>
       <VECTOR>3 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17962,7 +17964,7 @@
  <LATTICE name="Fuchs3D-440B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 2 -2</VECTOR>
-      <VECTOR>-6 4 -4</VECTOR
+      <VECTOR>-6 4 -4</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -17988,7 +17990,7 @@
  <LATTICE name="Fuchs3D-442B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 1 -5</VECTOR>
-      <VECTOR>-1 -3 -8</VECTOR
+      <VECTOR>-1 -3 -8</VECTOR>
       <VECTOR>-4 5 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18014,7 +18016,7 @@
  <LATTICE name="Fuchs3D-444B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-5 5 4</VECTOR
+      <VECTOR>-5 5 4</VECTOR>
       <VECTOR>4 2 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18040,7 +18042,7 @@
  <LATTICE name="Fuchs3D-446B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 2 -1</VECTOR>
-      <VECTOR>-6 3 -5</VECTOR
+      <VECTOR>-6 3 -5</VECTOR>
       <VECTOR>-5 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18066,7 +18068,7 @@
  <LATTICE name="Fuchs3D-448B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -3</VECTOR>
-      <VECTOR>-4 4 6</VECTOR
+      <VECTOR>-4 4 6</VECTOR>
       <VECTOR>6 1 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18092,7 +18094,7 @@
  <LATTICE name="Fuchs3D-450B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -1</VECTOR>
-      <VECTOR>-3 -6 -5</VECTOR
+      <VECTOR>-3 -6 -5</VECTOR>
       <VECTOR>-6 3 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18118,7 +18120,7 @@
  <LATTICE name="Fuchs3D-452B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-6 2 -4</VECTOR
+      <VECTOR>-6 2 -4</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18144,7 +18146,7 @@
  <LATTICE name="Fuchs3D-454B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -1</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>6 -3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18170,7 +18172,7 @@
  <LATTICE name="Fuchs3D-456B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 2 -2</VECTOR>
-      <VECTOR>-4 -5 -5</VECTOR
+      <VECTOR>-4 -5 -5</VECTOR>
       <VECTOR>-6 5 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18196,7 +18198,7 @@
  <LATTICE name="Fuchs3D-458B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 1 -5</VECTOR>
-      <VECTOR>-5 -5 -4</VECTOR
+      <VECTOR>-5 -5 -4</VECTOR>
       <VECTOR>-3 4 -7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18222,7 +18224,7 @@
  <LATTICE name="Fuchs3D-460B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-4 5 5</VECTOR
+      <VECTOR>-4 5 5</VECTOR>
       <VECTOR>6 -2 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18248,7 +18250,7 @@
  <LATTICE name="Fuchs3D-462B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 -4</VECTOR>
-      <VECTOR>-6 3 -3</VECTOR
+      <VECTOR>-6 3 -3</VECTOR>
       <VECTOR>3 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18274,7 +18276,7 @@
  <LATTICE name="Fuchs3D-464B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 3 -2</VECTOR>
-      <VECTOR>-6 4 -4</VECTOR
+      <VECTOR>-6 4 -4</VECTOR>
       <VECTOR>3 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18300,7 +18302,7 @@
  <LATTICE name="Fuchs3D-466B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -1</VECTOR>
-      <VECTOR>-6 4 -4</VECTOR
+      <VECTOR>-6 4 -4</VECTOR>
       <VECTOR>3 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18326,7 +18328,7 @@
  <LATTICE name="Fuchs3D-468B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-5 6 3</VECTOR
+      <VECTOR>-5 6 3</VECTOR>
       <VECTOR>4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18352,7 +18354,7 @@
  <LATTICE name="Fuchs3D-470B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 2 -1</VECTOR>
-      <VECTOR>-4 -4 -6</VECTOR
+      <VECTOR>-4 -4 -6</VECTOR>
       <VECTOR>-6 5 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18378,7 +18380,7 @@
  <LATTICE name="Fuchs3D-472B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 2 -2</VECTOR>
-      <VECTOR>-4 -4 -6</VECTOR
+      <VECTOR>-4 -4 -6</VECTOR>
       <VECTOR>-6 5 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18404,7 +18406,7 @@
  <LATTICE name="Fuchs3D-474B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-4 5 5</VECTOR
+      <VECTOR>-4 5 5</VECTOR>
       <VECTOR>4 1 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18430,7 +18432,7 @@
  <LATTICE name="Fuchs3D-476B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -1</VECTOR>
-      <VECTOR>-5 3 6</VECTOR
+      <VECTOR>-5 3 6</VECTOR>
       <VECTOR>5 -5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18456,7 +18458,7 @@
  <LATTICE name="Fuchs3D-478B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -1</VECTOR>
-      <VECTOR>-6 4 -4</VECTOR
+      <VECTOR>-6 4 -4</VECTOR>
       <VECTOR>3 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18482,7 +18484,7 @@
  <LATTICE name="Fuchs3D-480B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -4</VECTOR>
-      <VECTOR>-6 0 -6</VECTOR
+      <VECTOR>-6 0 -6</VECTOR>
       <VECTOR>3 8 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18508,7 +18510,7 @@
  <LATTICE name="Fuchs3D-482B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -1</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>5 -3 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18534,7 +18536,7 @@
  <LATTICE name="Fuchs3D-484B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 -4</VECTOR>
-      <VECTOR>-6 3 -5</VECTOR
+      <VECTOR>-6 3 -5</VECTOR>
       <VECTOR>-2 2 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18560,7 +18562,7 @@
  <LATTICE name="Fuchs3D-486B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 4 -3</VECTOR
+      <VECTOR>-7 4 -3</VECTOR>
       <VECTOR>4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18586,7 +18588,7 @@
  <LATTICE name="Fuchs3D-488B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-4 -6 -4</VECTOR
+      <VECTOR>-4 -6 -4</VECTOR>
       <VECTOR>0 7 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18612,7 +18614,7 @@
  <LATTICE name="Fuchs3D-490B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -3</VECTOR>
-      <VECTOR>-5 -3 -6</VECTOR
+      <VECTOR>-5 -3 -6</VECTOR>
       <VECTOR>-4 6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18638,7 +18640,7 @@
  <LATTICE name="Fuchs3D-492B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-5 6 -3</VECTOR
+      <VECTOR>-5 6 -3</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18664,7 +18666,7 @@
  <LATTICE name="Fuchs3D-494B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-7 3 -4</VECTOR
+      <VECTOR>-7 3 -4</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18690,7 +18692,7 @@
  <LATTICE name="Fuchs3D-496B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-7 4 -3</VECTOR
+      <VECTOR>-7 4 -3</VECTOR>
       <VECTOR>4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18716,7 +18718,7 @@
  <LATTICE name="Fuchs3D-498B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-4 5 5</VECTOR
+      <VECTOR>-4 5 5</VECTOR>
       <VECTOR>3 -6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18742,7 +18744,7 @@
  <LATTICE name="Fuchs3D-500B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-4 4 6</VECTOR
+      <VECTOR>-4 4 6</VECTOR>
       <VECTOR>4 -6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18768,7 +18770,7 @@
  <LATTICE name="Fuchs3D-502B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -1</VECTOR>
-      <VECTOR>-5 5 4</VECTOR
+      <VECTOR>-5 5 4</VECTOR>
       <VECTOR>4 3 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18794,7 +18796,7 @@
  <LATTICE name="Fuchs3D-504B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 6 -2</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>3 -6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18820,7 +18822,7 @@
  <LATTICE name="Fuchs3D-506B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 2 -5</VECTOR
+      <VECTOR>-7 2 -5</VECTOR>
       <VECTOR>-5 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18846,7 +18848,7 @@
  <LATTICE name="Fuchs3D-508B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-3 6 -5</VECTOR
+      <VECTOR>-3 6 -5</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18872,7 +18874,7 @@
  <LATTICE name="Fuchs3D-510B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-7 3 -4</VECTOR
+      <VECTOR>-7 3 -4</VECTOR>
       <VECTOR>-4 6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18898,7 +18900,7 @@
  <LATTICE name="Fuchs3D-512B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-7 3 -4</VECTOR
+      <VECTOR>-7 3 -4</VECTOR>
       <VECTOR>3 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18924,7 +18926,7 @@
  <LATTICE name="Fuchs3D-514B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-3 6 -5</VECTOR
+      <VECTOR>-3 6 -5</VECTOR>
       <VECTOR>-5 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18950,7 +18952,7 @@
  <LATTICE name="Fuchs3D-516B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-4 4 6</VECTOR
+      <VECTOR>-4 4 6</VECTOR>
       <VECTOR>2 -6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -18976,7 +18978,7 @@
  <LATTICE name="Fuchs3D-518B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-4 4 6</VECTOR
+      <VECTOR>-4 4 6</VECTOR>
       <VECTOR>7 -3 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19002,7 +19004,7 @@
  <LATTICE name="Fuchs3D-520B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-5 3 6</VECTOR
+      <VECTOR>-5 3 6</VECTOR>
       <VECTOR>4 -6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19028,7 +19030,7 @@
  <LATTICE name="Fuchs3D-522B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-4 4 6</VECTOR
+      <VECTOR>-4 4 6</VECTOR>
       <VECTOR>3 -5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19054,7 +19056,7 @@
  <LATTICE name="Fuchs3D-524B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>3 -6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19080,7 +19082,7 @@
  <LATTICE name="Fuchs3D-526B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>2 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19106,7 +19108,7 @@
  <LATTICE name="Fuchs3D-528B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-5 5 4</VECTOR
+      <VECTOR>-5 5 4</VECTOR>
       <VECTOR>2 -6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19132,7 +19134,7 @@
  <LATTICE name="Fuchs3D-530B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-3 6 -5</VECTOR
+      <VECTOR>-3 6 -5</VECTOR>
       <VECTOR>-5 3 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19158,7 +19160,7 @@
  <LATTICE name="Fuchs3D-532B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-7 4 -3</VECTOR
+      <VECTOR>-7 4 -3</VECTOR>
       <VECTOR>-3 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19184,7 +19186,7 @@
  <LATTICE name="Fuchs3D-534B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-5 -2 -7</VECTOR
+      <VECTOR>-5 -2 -7</VECTOR>
       <VECTOR>-5 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19210,7 +19212,7 @@
  <LATTICE name="Fuchs3D-536B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -1</VECTOR>
-      <VECTOR>-3 6 -5</VECTOR
+      <VECTOR>-3 6 -5</VECTOR>
       <VECTOR>-6 4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19236,7 +19238,7 @@
  <LATTICE name="Fuchs3D-538B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-6 5 -3</VECTOR
+      <VECTOR>-6 5 -3</VECTOR>
       <VECTOR>3 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19262,7 +19264,7 @@
  <LATTICE name="Fuchs3D-540B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 4 -3</VECTOR>
-      <VECTOR>-6 2 -6</VECTOR
+      <VECTOR>-6 2 -6</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19288,7 +19290,7 @@
  <LATTICE name="Fuchs3D-542B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 5 -2</VECTOR
+      <VECTOR>-7 5 -2</VECTOR>
       <VECTOR>-4 3 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19314,7 +19316,7 @@
  <LATTICE name="Fuchs3D-544B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-3 7 -4</VECTOR
+      <VECTOR>-3 7 -4</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19340,7 +19342,7 @@
  <LATTICE name="Fuchs3D-546B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 5 4</VECTOR
+      <VECTOR>-5 5 4</VECTOR>
       <VECTOR>5 3 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19366,7 +19368,7 @@
  <LATTICE name="Fuchs3D-548B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-4 -5 -5</VECTOR
+      <VECTOR>-4 -5 -5</VECTOR>
       <VECTOR>-6 6 -2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19392,7 +19394,7 @@
  <LATTICE name="Fuchs3D-550B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-6 4 -4</VECTOR
+      <VECTOR>-6 4 -4</VECTOR>
       <VECTOR>-3 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19418,7 +19420,7 @@
  <LATTICE name="Fuchs3D-552B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-6 3 -5</VECTOR
+      <VECTOR>-6 3 -5</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19444,7 +19446,7 @@
  <LATTICE name="Fuchs3D-554B superlattice" dimension="2">
     <BASIS>
       <VECTOR>5 5 -6</VECTOR>
-      <VECTOR>-7 4 3</VECTOR
+      <VECTOR>-7 4 3</VECTOR>
       <VECTOR>3 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19470,7 +19472,7 @@
  <LATTICE name="Fuchs3D-556B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-6 3 -5</VECTOR
+      <VECTOR>-6 3 -5</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19496,7 +19498,7 @@
  <LATTICE name="Fuchs3D-558B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 -3 -6</VECTOR
+      <VECTOR>-5 -3 -6</VECTOR>
       <VECTOR>-4 6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19522,7 +19524,7 @@
  <LATTICE name="Fuchs3D-560B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-3 -6 -5</VECTOR
+      <VECTOR>-3 -6 -5</VECTOR>
       <VECTOR>-6 5 -3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19548,7 +19550,7 @@
  <LATTICE name="Fuchs3D-562B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-4 5 5</VECTOR
+      <VECTOR>-4 5 5</VECTOR>
       <VECTOR>6 2 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19574,7 +19576,7 @@
  <LATTICE name="Fuchs3D-564B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-5 5 4</VECTOR
+      <VECTOR>-5 5 4</VECTOR>
       <VECTOR>4 2 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19600,7 +19602,7 @@
  <LATTICE name="Fuchs3D-566B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-4 5 5</VECTOR
+      <VECTOR>-4 5 5</VECTOR>
       <VECTOR>6 -2 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19626,7 +19628,7 @@
  <LATTICE name="Fuchs3D-568B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-3 6 -5</VECTOR
+      <VECTOR>-3 6 -5</VECTOR>
       <VECTOR>-6 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19652,7 +19654,7 @@
  <LATTICE name="Fuchs3D-570B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -5</VECTOR>
-      <VECTOR>-6 2 -6</VECTOR
+      <VECTOR>-6 2 -6</VECTOR>
       <VECTOR>3 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19678,7 +19680,7 @@
  <LATTICE name="Fuchs3D-572B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 5 4</VECTOR
+      <VECTOR>-5 5 4</VECTOR>
       <VECTOR>4 3 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19704,7 +19706,7 @@
  <LATTICE name="Fuchs3D-574B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 4 -4</VECTOR>
-      <VECTOR>-5 4 -7</VECTOR
+      <VECTOR>-5 4 -7</VECTOR>
       <VECTOR>3 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19730,7 +19732,7 @@
  <LATTICE name="Fuchs3D-576B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 -2 -7</VECTOR
+      <VECTOR>-5 -2 -7</VECTOR>
       <VECTOR>-5 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19756,7 +19758,7 @@
  <LATTICE name="Fuchs3D-578B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>3 -6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19782,7 +19784,7 @@
  <LATTICE name="Fuchs3D-580B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-6 2 -6</VECTOR
+      <VECTOR>-6 2 -6</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19808,7 +19810,7 @@
  <LATTICE name="Fuchs3D-582B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-4 -3 -7</VECTOR
+      <VECTOR>-4 -3 -7</VECTOR>
       <VECTOR>-4 6 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19834,7 +19836,7 @@
  <LATTICE name="Fuchs3D-584B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -2</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>3 -7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19860,7 +19862,7 @@
  <LATTICE name="Fuchs3D-586B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-4 4 6</VECTOR
+      <VECTOR>-4 4 6</VECTOR>
       <VECTOR>3 -7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19886,7 +19888,7 @@
  <LATTICE name="Fuchs3D-588B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -1</VECTOR>
-      <VECTOR>-2 7 -5</VECTOR
+      <VECTOR>-2 7 -5</VECTOR>
       <VECTOR>-5 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19912,7 +19914,7 @@
  <LATTICE name="Fuchs3D-590B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-1 7 -6</VECTOR
+      <VECTOR>-1 7 -6</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19938,7 +19940,7 @@
  <LATTICE name="Fuchs3D-592B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 -2 -7</VECTOR
+      <VECTOR>-5 -2 -7</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19964,7 +19966,7 @@
  <LATTICE name="Fuchs3D-594B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-6 2 -6</VECTOR
+      <VECTOR>-6 2 -6</VECTOR>
       <VECTOR>3 8 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -19990,7 +19992,7 @@
  <LATTICE name="Fuchs3D-596B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-6 6 4</VECTOR
+      <VECTOR>-6 6 4</VECTOR>
       <VECTOR>4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20016,7 +20018,7 @@
  <LATTICE name="Fuchs3D-598B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 -4 -7</VECTOR
+      <VECTOR>-5 -4 -7</VECTOR>
       <VECTOR>-5 5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20042,7 +20044,7 @@
  <LATTICE name="Fuchs3D-600B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -4</VECTOR>
-      <VECTOR>-3 -9 -2</VECTOR
+      <VECTOR>-3 -9 -2</VECTOR>
       <VECTOR>-3 6 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20068,7 +20070,7 @@
  <LATTICE name="Fuchs3D-602B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-5 6 5</VECTOR
+      <VECTOR>-5 6 5</VECTOR>
       <VECTOR>5 3 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20094,7 +20096,7 @@
  <LATTICE name="Fuchs3D-604B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -5</VECTOR>
-      <VECTOR>-2 5 -7</VECTOR
+      <VECTOR>-2 5 -7</VECTOR>
       <VECTOR>5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20120,7 +20122,7 @@
  <LATTICE name="Fuchs3D-606B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 4 -5</VECTOR
+      <VECTOR>-7 4 -5</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20146,7 +20148,7 @@
  <LATTICE name="Fuchs3D-608B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-6 3 -5</VECTOR
+      <VECTOR>-6 3 -5</VECTOR>
       <VECTOR>-4 5 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20172,7 +20174,7 @@
  <LATTICE name="Fuchs3D-610B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-6 3 -5</VECTOR
+      <VECTOR>-6 3 -5</VECTOR>
       <VECTOR>3 7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20198,7 +20200,7 @@
  <LATTICE name="Fuchs3D-612B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 -3 -6</VECTOR
+      <VECTOR>-5 -3 -6</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20224,7 +20226,7 @@
  <LATTICE name="Fuchs3D-614B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-4 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20250,7 +20252,7 @@
  <LATTICE name="Fuchs3D-616B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-6 5 -3</VECTOR
+      <VECTOR>-6 5 -3</VECTOR>
       <VECTOR>4 6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20276,7 +20278,7 @@
  <LATTICE name="Fuchs3D-618B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-6 3 -5</VECTOR
+      <VECTOR>-6 3 -5</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20302,7 +20304,7 @@
  <LATTICE name="Fuchs3D-620B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -5</VECTOR>
-      <VECTOR>-5 4 -7</VECTOR
+      <VECTOR>-5 4 -7</VECTOR>
       <VECTOR>3 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20328,7 +20330,7 @@
  <LATTICE name="Fuchs3D-622B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -1</VECTOR>
-      <VECTOR>-7 5 -4</VECTOR
+      <VECTOR>-7 5 -4</VECTOR>
       <VECTOR>-5 3 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20354,7 +20356,7 @@
  <LATTICE name="Fuchs3D-624B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-6 3 -5</VECTOR
+      <VECTOR>-6 3 -5</VECTOR>
       <VECTOR>-4 6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20380,7 +20382,7 @@
  <LATTICE name="Fuchs3D-626B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>4 3 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20406,7 +20408,7 @@
  <LATTICE name="Fuchs3D-628B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 4 5</VECTOR
+      <VECTOR>-5 4 5</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20432,7 +20434,7 @@
  <LATTICE name="Fuchs3D-630B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-3 -7 -4</VECTOR
+      <VECTOR>-3 -7 -4</VECTOR>
       <VECTOR>-7 4 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20458,7 +20460,7 @@
  <LATTICE name="Fuchs3D-632B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 6 -4</VECTOR>
-      <VECTOR>-6 -4 -6</VECTOR
+      <VECTOR>-6 -4 -6</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20484,7 +20486,7 @@
  <LATTICE name="Fuchs3D-634B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>2 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20510,7 +20512,7 @@
  <LATTICE name="Fuchs3D-636B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 5 -5</VECTOR>
-      <VECTOR>-6 3 -7</VECTOR
+      <VECTOR>-6 3 -7</VECTOR>
       <VECTOR>3 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20536,7 +20538,7 @@
  <LATTICE name="Fuchs3D-638B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-4 3 7</VECTOR
+      <VECTOR>-4 3 7</VECTOR>
       <VECTOR>7 -5 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20562,7 +20564,7 @@
  <LATTICE name="Fuchs3D-640B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 -2 -7</VECTOR
+      <VECTOR>-5 -2 -7</VECTOR>
       <VECTOR>-6 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20588,7 +20590,7 @@
  <LATTICE name="Fuchs3D-642B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-6 -2 -6</VECTOR
+      <VECTOR>-6 -2 -6</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20614,7 +20616,7 @@
  <LATTICE name="Fuchs3D-644B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-5 -5 -6</VECTOR
+      <VECTOR>-5 -5 -6</VECTOR>
       <VECTOR>-5 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20640,7 +20642,7 @@
  <LATTICE name="Fuchs3D-646B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>5 2 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20666,7 +20668,7 @@
  <LATTICE name="Fuchs3D-648B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -1</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>2 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20692,7 +20694,7 @@
  <LATTICE name="Fuchs3D-650B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 7 -2</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>4 3 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20718,7 +20720,7 @@
  <LATTICE name="Fuchs3D-652B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 6 -4</VECTOR>
-      <VECTOR>-7 -2 -5</VECTOR
+      <VECTOR>-7 -2 -5</VECTOR>
       <VECTOR>-4 5 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20744,7 +20746,7 @@
  <LATTICE name="Fuchs3D-654B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>4 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20770,7 +20772,7 @@
  <LATTICE name="Fuchs3D-656B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 2 -5</VECTOR>
-      <VECTOR>-3 6 -7</VECTOR
+      <VECTOR>-3 6 -7</VECTOR>
       <VECTOR>6 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20796,7 +20798,7 @@
  <LATTICE name="Fuchs3D-658B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-7 0 -7</VECTOR
+      <VECTOR>-7 0 -7</VECTOR>
       <VECTOR>-4 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20822,7 +20824,7 @@
  <LATTICE name="Fuchs3D-660B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-6 6 4</VECTOR
+      <VECTOR>-6 6 4</VECTOR>
       <VECTOR>4 5 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20848,7 +20850,7 @@
  <LATTICE name="Fuchs3D-662B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -2</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>6 -1 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20874,7 +20876,7 @@
  <LATTICE name="Fuchs3D-664B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 -4 -7</VECTOR
+      <VECTOR>-5 -4 -7</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20900,7 +20902,7 @@
  <LATTICE name="Fuchs3D-666B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-4 -5 -7</VECTOR
+      <VECTOR>-4 -5 -7</VECTOR>
       <VECTOR>-7 4 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20926,7 +20928,7 @@
  <LATTICE name="Fuchs3D-668B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-4 -6 -6</VECTOR
+      <VECTOR>-4 -6 -6</VECTOR>
       <VECTOR>-7 4 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20952,7 +20954,7 @@
  <LATTICE name="Fuchs3D-670B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-4 -7 -5</VECTOR
+      <VECTOR>-4 -7 -5</VECTOR>
       <VECTOR>-7 4 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -20978,7 +20980,7 @@
  <LATTICE name="Fuchs3D-672B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 4 -5</VECTOR
+      <VECTOR>-7 4 -5</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21004,7 +21006,7 @@
  <LATTICE name="Fuchs3D-674B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-5 6 5</VECTOR
+      <VECTOR>-5 6 5</VECTOR>
       <VECTOR>7 -4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21030,7 +21032,7 @@
  <LATTICE name="Fuchs3D-676B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 -2 -7</VECTOR
+      <VECTOR>-5 -2 -7</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21056,7 +21058,7 @@
  <LATTICE name="Fuchs3D-678B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-4 7 -5</VECTOR
+      <VECTOR>-4 7 -5</VECTOR>
       <VECTOR>-3 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21082,7 +21084,7 @@
  <LATTICE name="Fuchs3D-680B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-6 4 6</VECTOR
+      <VECTOR>-6 4 6</VECTOR>
       <VECTOR>4 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21108,7 +21110,7 @@
  <LATTICE name="Fuchs3D-682B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -1</VECTOR>
-      <VECTOR>-4 7 -5</VECTOR
+      <VECTOR>-4 7 -5</VECTOR>
       <VECTOR>-7 4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21134,7 +21136,7 @@
  <LATTICE name="Fuchs3D-684B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 0</VECTOR>
-      <VECTOR>-6 5 -5</VECTOR
+      <VECTOR>-6 5 -5</VECTOR>
       <VECTOR>3 5 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21160,7 +21162,7 @@
  <LATTICE name="Fuchs3D-686B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-5 7 -4</VECTOR
+      <VECTOR>-5 7 -4</VECTOR>
       <VECTOR>-3 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21186,7 +21188,7 @@
  <LATTICE name="Fuchs3D-688B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 5 -4</VECTOR
+      <VECTOR>-7 5 -4</VECTOR>
       <VECTOR>4 6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21212,7 +21214,7 @@
  <LATTICE name="Fuchs3D-690B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-6 3 -7</VECTOR
+      <VECTOR>-6 3 -7</VECTOR>
       <VECTOR>4 7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21238,7 +21240,7 @@
  <LATTICE name="Fuchs3D-692B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-6 -1 -7</VECTOR
+      <VECTOR>-6 -1 -7</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21264,7 +21266,7 @@
  <LATTICE name="Fuchs3D-694B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21290,7 +21292,7 @@
  <LATTICE name="Fuchs3D-696B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 3 -3</VECTOR>
-      <VECTOR>-4 -6 -6</VECTOR
+      <VECTOR>-4 -6 -6</VECTOR>
       <VECTOR>-7 5 -4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21316,7 +21318,7 @@
  <LATTICE name="Fuchs3D-698B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-7 5 4</VECTOR
+      <VECTOR>-7 5 4</VECTOR>
       <VECTOR>3 -6 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21342,7 +21344,7 @@
  <LATTICE name="Fuchs3D-700B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 6 -4</VECTOR>
-      <VECTOR>-9 -1 -4</VECTOR
+      <VECTOR>-9 -1 -4</VECTOR>
       <VECTOR>-7 6 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21368,7 +21370,7 @@
  <LATTICE name="Fuchs3D-702B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-7 1 -6</VECTOR
+      <VECTOR>-7 1 -6</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21394,7 +21396,7 @@
  <LATTICE name="Fuchs3D-704B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -4</VECTOR>
-      <VECTOR>-5 -4 -7</VECTOR
+      <VECTOR>-5 -4 -7</VECTOR>
       <VECTOR>-5 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21420,7 +21422,7 @@
  <LATTICE name="Fuchs3D-706B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-4 -2 -8</VECTOR
+      <VECTOR>-4 -2 -8</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21446,7 +21448,7 @@
  <LATTICE name="Fuchs3D-708B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 3 -6</VECTOR
+      <VECTOR>-7 3 -6</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21472,7 +21474,7 @@
  <LATTICE name="Fuchs3D-710B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-4 -5 -7</VECTOR
+      <VECTOR>-4 -5 -7</VECTOR>
       <VECTOR>-4 7 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21498,7 +21500,7 @@
  <LATTICE name="Fuchs3D-712B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -1</VECTOR>
-      <VECTOR>-3 8 -5</VECTOR
+      <VECTOR>-3 8 -5</VECTOR>
       <VECTOR>-6 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21524,7 +21526,7 @@
  <LATTICE name="Fuchs3D-714B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 4 7</VECTOR
+      <VECTOR>-5 4 7</VECTOR>
       <VECTOR>2 -4 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21550,7 +21552,7 @@
  <LATTICE name="Fuchs3D-716B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-4 -5 -7</VECTOR
+      <VECTOR>-4 -5 -7</VECTOR>
       <VECTOR>-6 7 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21576,7 +21578,7 @@
  <LATTICE name="Fuchs3D-718B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>4 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21602,7 +21604,7 @@
  <LATTICE name="Fuchs3D-720B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 4 -4</VECTOR>
-      <VECTOR>-4 -5 -7</VECTOR
+      <VECTOR>-4 -5 -7</VECTOR>
       <VECTOR>-6 7 3</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21628,7 +21630,7 @@
  <LATTICE name="Fuchs3D-722B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 4 -5</VECTOR
+      <VECTOR>-7 4 -5</VECTOR>
       <VECTOR>-4 5 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21654,7 +21656,7 @@
  <LATTICE name="Fuchs3D-724B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21680,7 +21682,7 @@
  <LATTICE name="Fuchs3D-726B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-5 -4 -7</VECTOR
+      <VECTOR>-5 -4 -7</VECTOR>
       <VECTOR>-5 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21706,7 +21708,7 @@
  <LATTICE name="Fuchs3D-728B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>8 -4 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21732,7 +21734,7 @@
  <LATTICE name="Fuchs3D-730B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 3 -2</VECTOR>
-      <VECTOR>-7 4 -5</VECTOR
+      <VECTOR>-7 4 -5</VECTOR>
       <VECTOR>3 5 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21758,7 +21760,7 @@
  <LATTICE name="Fuchs3D-732B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21784,7 +21786,7 @@
  <LATTICE name="Fuchs3D-734B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-8 3 -5</VECTOR
+      <VECTOR>-8 3 -5</VECTOR>
       <VECTOR>4 7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21810,7 +21812,7 @@
  <LATTICE name="Fuchs3D-736B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -2</VECTOR>
-      <VECTOR>-6 6 4</VECTOR
+      <VECTOR>-6 6 4</VECTOR>
       <VECTOR>4 4 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21836,7 +21838,7 @@
  <LATTICE name="Fuchs3D-738B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-4 -7 -5</VECTOR
+      <VECTOR>-4 -7 -5</VECTOR>
       <VECTOR>0 8 -6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21862,7 +21864,7 @@
  <LATTICE name="Fuchs3D-740B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-5 4 7</VECTOR
+      <VECTOR>-5 4 7</VECTOR>
       <VECTOR>5 -7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21888,7 +21890,7 @@
  <LATTICE name="Fuchs3D-742B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 6 5</VECTOR
+      <VECTOR>-5 6 5</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21914,7 +21916,7 @@
  <LATTICE name="Fuchs3D-744B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -2</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21940,7 +21942,7 @@
  <LATTICE name="Fuchs3D-746B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>4 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21966,7 +21968,7 @@
  <LATTICE name="Fuchs3D-748B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -3</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-4 7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -21992,7 +21994,7 @@
  <LATTICE name="Fuchs3D-750B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 4 7</VECTOR
+      <VECTOR>-5 4 7</VECTOR>
       <VECTOR>5 -7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22018,7 +22020,7 @@
  <LATTICE name="Fuchs3D-752B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-6 4 6</VECTOR
+      <VECTOR>-6 4 6</VECTOR>
       <VECTOR>4 -8 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22044,7 +22046,7 @@
  <LATTICE name="Fuchs3D-754B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>8 -3 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22070,7 +22072,7 @@
  <LATTICE name="Fuchs3D-756B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22096,7 +22098,7 @@
  <LATTICE name="Fuchs3D-758B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 7 -2</VECTOR>
-      <VECTOR>-7 3 6</VECTOR
+      <VECTOR>-7 3 6</VECTOR>
       <VECTOR>5 -6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22122,7 +22124,7 @@
  <LATTICE name="Fuchs3D-760B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 4 7</VECTOR
+      <VECTOR>-5 4 7</VECTOR>
       <VECTOR>4 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22148,7 +22150,7 @@
  <LATTICE name="Fuchs3D-762B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-7 -2 -7</VECTOR
+      <VECTOR>-7 -2 -7</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22174,7 +22176,7 @@
  <LATTICE name="Fuchs3D-764B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 5 -4</VECTOR>
-      <VECTOR>-3 -8 -5</VECTOR
+      <VECTOR>-3 -8 -5</VECTOR>
       <VECTOR>-6 2 -8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22200,7 +22202,7 @@
  <LATTICE name="Fuchs3D-766B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 4 7</VECTOR
+      <VECTOR>-5 4 7</VECTOR>
       <VECTOR>5 -6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22226,7 +22228,7 @@
  <LATTICE name="Fuchs3D-768B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -2</VECTOR>
-      <VECTOR>-6 4 6</VECTOR
+      <VECTOR>-6 4 6</VECTOR>
       <VECTOR>4 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22252,7 +22254,7 @@
  <LATTICE name="Fuchs3D-770B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 4 7</VECTOR
+      <VECTOR>-5 4 7</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22278,7 +22280,7 @@
  <LATTICE name="Fuchs3D-772B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -2</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22304,7 +22306,7 @@
  <LATTICE name="Fuchs3D-774B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-3 8 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22330,7 +22332,7 @@
  <LATTICE name="Fuchs3D-776B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-4 7 -5</VECTOR
+      <VECTOR>-4 7 -5</VECTOR>
       <VECTOR>-6 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22356,7 +22358,7 @@
  <LATTICE name="Fuchs3D-778B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-8 3 -5</VECTOR
+      <VECTOR>-8 3 -5</VECTOR>
       <VECTOR>3 6 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22382,7 +22384,7 @@
  <LATTICE name="Fuchs3D-780B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-7 3 -6</VECTOR
+      <VECTOR>-7 3 -6</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22408,7 +22410,7 @@
  <LATTICE name="Fuchs3D-782B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -5</VECTOR>
-      <VECTOR>-6 7 -3</VECTOR
+      <VECTOR>-6 7 -3</VECTOR>
       <VECTOR>-4 5 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22434,7 +22436,7 @@
  <LATTICE name="Fuchs3D-784B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-6 -2 -8</VECTOR
+      <VECTOR>-6 -2 -8</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22460,7 +22462,7 @@
  <LATTICE name="Fuchs3D-786B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22486,7 +22488,7 @@
  <LATTICE name="Fuchs3D-788B superlattice" dimension="2">
     <BASIS>
       <VECTOR>6 6 -4</VECTOR>
-      <VECTOR>-8 5 5</VECTOR
+      <VECTOR>-8 5 5</VECTOR>
       <VECTOR>5 -4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22512,7 +22514,7 @@
  <LATTICE name="Fuchs3D-790B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-7 4 -5</VECTOR
+      <VECTOR>-7 4 -5</VECTOR>
       <VECTOR>3 7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22538,7 +22540,7 @@
  <LATTICE name="Fuchs3D-792B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -2</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>3 -8 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22564,7 +22566,7 @@
  <LATTICE name="Fuchs3D-794B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-4 7 -5</VECTOR
+      <VECTOR>-4 7 -5</VECTOR>
       <VECTOR>-5 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22590,7 +22592,7 @@
  <LATTICE name="Fuchs3D-796B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-5 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22616,7 +22618,7 @@
  <LATTICE name="Fuchs3D-798B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-5 4 7</VECTOR
+      <VECTOR>-5 4 7</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22642,7 +22644,7 @@
  <LATTICE name="Fuchs3D-800B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 6 -5</VECTOR>
-      <VECTOR>-4 4 8</VECTOR
+      <VECTOR>-4 4 8</VECTOR>
       <VECTOR>6 -8 2</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22668,7 +22670,7 @@
  <LATTICE name="Fuchs3D-802B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-5 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22694,7 +22696,7 @@
  <LATTICE name="Fuchs3D-804B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 6 4</VECTOR
+      <VECTOR>-6 6 4</VECTOR>
       <VECTOR>5 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22720,7 +22722,7 @@
  <LATTICE name="Fuchs3D-806B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-7 2 -7</VECTOR
+      <VECTOR>-7 2 -7</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22746,7 +22748,7 @@
  <LATTICE name="Fuchs3D-808B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22772,7 +22774,7 @@
  <LATTICE name="Fuchs3D-810B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22798,7 +22800,7 @@
  <LATTICE name="Fuchs3D-812B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-4 6 6</VECTOR
+      <VECTOR>-4 6 6</VECTOR>
       <VECTOR>7 -4 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22824,7 +22826,7 @@
  <LATTICE name="Fuchs3D-814B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -5</VECTOR>
-      <VECTOR>-5 -4 -7</VECTOR
+      <VECTOR>-5 -4 -7</VECTOR>
       <VECTOR>-5 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22850,7 +22852,7 @@
  <LATTICE name="Fuchs3D-816B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>4 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22876,7 +22878,7 @@
  <LATTICE name="Fuchs3D-818B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-7 4 -5</VECTOR
+      <VECTOR>-7 4 -5</VECTOR>
       <VECTOR>3 5 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22902,7 +22904,7 @@
  <LATTICE name="Fuchs3D-820B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-7 3 -6</VECTOR
+      <VECTOR>-7 3 -6</VECTOR>
       <VECTOR>-4 5 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22928,7 +22930,7 @@
  <LATTICE name="Fuchs3D-822B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-3 7 -6</VECTOR
+      <VECTOR>-3 7 -6</VECTOR>
       <VECTOR>-6 6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22954,7 +22956,7 @@
  <LATTICE name="Fuchs3D-824B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -22980,7 +22982,7 @@
  <LATTICE name="Fuchs3D-826B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-7 -2 -7</VECTOR
+      <VECTOR>-7 -2 -7</VECTOR>
       <VECTOR>-5 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23006,7 +23008,7 @@
  <LATTICE name="Fuchs3D-828B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-5 6 5</VECTOR
+      <VECTOR>-5 6 5</VECTOR>
       <VECTOR>2 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23032,7 +23034,7 @@
  <LATTICE name="Fuchs3D-830B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 7 -2</VECTOR>
-      <VECTOR>-9 3 -4</VECTOR
+      <VECTOR>-9 3 -4</VECTOR>
       <VECTOR>-4 7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23058,7 +23060,7 @@
  <LATTICE name="Fuchs3D-832B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -2</VECTOR>
-      <VECTOR>-7 5 6</VECTOR
+      <VECTOR>-7 5 6</VECTOR>
       <VECTOR>4 -7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23084,7 +23086,7 @@
  <LATTICE name="Fuchs3D-834B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23110,7 +23112,7 @@
  <LATTICE name="Fuchs3D-836B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23136,7 +23138,7 @@
  <LATTICE name="Fuchs3D-838B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-5 7 -4</VECTOR
+      <VECTOR>-5 7 -4</VECTOR>
       <VECTOR>3 8 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23162,7 +23164,7 @@
  <LATTICE name="Fuchs3D-840B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>5 3 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23188,7 +23190,7 @@
  <LATTICE name="Fuchs3D-842B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-7 4 -5</VECTOR
+      <VECTOR>-7 4 -5</VECTOR>
       <VECTOR>4 7 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23214,7 +23216,7 @@
  <LATTICE name="Fuchs3D-844B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-7 -4 -7</VECTOR
+      <VECTOR>-7 -4 -7</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23240,7 +23242,7 @@
  <LATTICE name="Fuchs3D-846B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-3 7 -6</VECTOR
+      <VECTOR>-3 7 -6</VECTOR>
       <VECTOR>-6 6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23266,7 +23268,7 @@
  <LATTICE name="Fuchs3D-848B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 6 4</VECTOR
+      <VECTOR>-6 6 4</VECTOR>
       <VECTOR>4 4 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23292,7 +23294,7 @@
  <LATTICE name="Fuchs3D-850B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-4 3 9</VECTOR
+      <VECTOR>-4 3 9</VECTOR>
       <VECTOR>3 -6 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23318,7 +23320,7 @@
  <LATTICE name="Fuchs3D-852B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-6 7 5</VECTOR
+      <VECTOR>-6 7 5</VECTOR>
       <VECTOR>5 3 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23344,7 +23346,7 @@
  <LATTICE name="Fuchs3D-854B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23370,7 +23372,7 @@
  <LATTICE name="Fuchs3D-856B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 -2 -8</VECTOR
+      <VECTOR>-6 -2 -8</VECTOR>
       <VECTOR>-6 4 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23396,7 +23398,7 @@
  <LATTICE name="Fuchs3D-858B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-7 6 -3</VECTOR
+      <VECTOR>-7 6 -3</VECTOR>
       <VECTOR>-4 3 9</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23422,7 +23424,7 @@
  <LATTICE name="Fuchs3D-860B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-4 5 7</VECTOR
+      <VECTOR>-4 5 7</VECTOR>
       <VECTOR>2 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23448,7 +23450,7 @@
  <LATTICE name="Fuchs3D-862B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -5</VECTOR>
-      <VECTOR>-6 -5 -7</VECTOR
+      <VECTOR>-6 -5 -7</VECTOR>
       <VECTOR>-5 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23474,7 +23476,7 @@
  <LATTICE name="Fuchs3D-864B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -3</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>2 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23500,7 +23502,7 @@
  <LATTICE name="Fuchs3D-866B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-4 5 7</VECTOR
+      <VECTOR>-4 5 7</VECTOR>
       <VECTOR>3 -8 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23526,7 +23528,7 @@
  <LATTICE name="Fuchs3D-868B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 -4 -8</VECTOR
+      <VECTOR>-6 -4 -8</VECTOR>
       <VECTOR>-5 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23552,7 +23554,7 @@
  <LATTICE name="Fuchs3D-870B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 7 5</VECTOR
+      <VECTOR>-6 7 5</VECTOR>
       <VECTOR>5 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23578,7 +23580,7 @@
  <LATTICE name="Fuchs3D-872B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -2</VECTOR>
-      <VECTOR>-6 7 5</VECTOR
+      <VECTOR>-6 7 5</VECTOR>
       <VECTOR>5 3 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23604,7 +23606,7 @@
  <LATTICE name="Fuchs3D-874B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-7 7 4</VECTOR
+      <VECTOR>-7 7 4</VECTOR>
       <VECTOR>4 5 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23630,7 +23632,7 @@
  <LATTICE name="Fuchs3D-876B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-6 6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23656,7 +23658,7 @@
  <LATTICE name="Fuchs3D-878B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 7 5</VECTOR
+      <VECTOR>-6 7 5</VECTOR>
       <VECTOR>5 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23682,7 +23684,7 @@
  <LATTICE name="Fuchs3D-880B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 6 4</VECTOR
+      <VECTOR>-6 6 4</VECTOR>
       <VECTOR>5 5 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23708,7 +23710,7 @@
  <LATTICE name="Fuchs3D-882B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -3</VECTOR>
-      <VECTOR>-6 5 5</VECTOR
+      <VECTOR>-6 5 5</VECTOR>
       <VECTOR>4 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23734,7 +23736,7 @@
  <LATTICE name="Fuchs3D-884B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-7 5 6</VECTOR
+      <VECTOR>-7 5 6</VECTOR>
       <VECTOR>6 3 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23760,7 +23762,7 @@
  <LATTICE name="Fuchs3D-886B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-7 4 -5</VECTOR
+      <VECTOR>-7 4 -5</VECTOR>
       <VECTOR>-5 7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23786,7 +23788,7 @@
  <LATTICE name="Fuchs3D-888B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>3 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23812,7 +23814,7 @@
  <LATTICE name="Fuchs3D-890B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-7 5 -4</VECTOR
+      <VECTOR>-7 5 -4</VECTOR>
       <VECTOR>4 8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23838,7 +23840,7 @@
  <LATTICE name="Fuchs3D-892B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-5 5 6</VECTOR
+      <VECTOR>-5 5 6</VECTOR>
       <VECTOR>4 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23864,7 +23866,7 @@
  <LATTICE name="Fuchs3D-894B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>3 -9 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23890,7 +23892,7 @@
  <LATTICE name="Fuchs3D-896B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 7 -2</VECTOR>
-      <VECTOR>-6 6 4</VECTOR
+      <VECTOR>-6 6 4</VECTOR>
       <VECTOR>5 3 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23916,7 +23918,7 @@
  <LATTICE name="Fuchs3D-898B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-4 3 9</VECTOR
+      <VECTOR>-4 3 9</VECTOR>
       <VECTOR>2 -7 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23942,7 +23944,7 @@
  <LATTICE name="Fuchs3D-900B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 6 6</VECTOR
+      <VECTOR>-6 6 6</VECTOR>
       <VECTOR>5 3 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23968,7 +23970,7 @@
  <LATTICE name="Fuchs3D-902B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-5 7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -23994,7 +23996,7 @@
  <LATTICE name="Fuchs3D-904B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-4 -4 -8</VECTOR
+      <VECTOR>-4 -4 -8</VECTOR>
       <VECTOR>-6 7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24020,7 +24022,7 @@
  <LATTICE name="Fuchs3D-906B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 -3 -7</VECTOR
+      <VECTOR>-6 -3 -7</VECTOR>
       <VECTOR>-6 7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24046,7 +24048,7 @@
  <LATTICE name="Fuchs3D-908B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>2 -7 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24072,7 +24074,7 @@
  <LATTICE name="Fuchs3D-910B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-5 6 7</VECTOR
+      <VECTOR>-5 6 7</VECTOR>
       <VECTOR>7 -3 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24098,7 +24100,7 @@
  <LATTICE name="Fuchs3D-912B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-7 6 5</VECTOR
+      <VECTOR>-7 6 5</VECTOR>
       <VECTOR>4 4 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24124,7 +24126,7 @@
  <LATTICE name="Fuchs3D-914B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-8 4 -6</VECTOR
+      <VECTOR>-8 4 -6</VECTOR>
       <VECTOR>-4 5 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24150,7 +24152,7 @@
  <LATTICE name="Fuchs3D-916B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-7 5 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24176,7 +24178,7 @@
  <LATTICE name="Fuchs3D-918B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -2</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>3 -8 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24202,7 +24204,7 @@
  <LATTICE name="Fuchs3D-920B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-5 6 7</VECTOR
+      <VECTOR>-5 6 7</VECTOR>
       <VECTOR>2 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24228,7 +24230,7 @@
  <LATTICE name="Fuchs3D-922B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 7 -4</VECTOR>
-      <VECTOR>-7 6 5</VECTOR
+      <VECTOR>-7 6 5</VECTOR>
       <VECTOR>4 -7 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24254,7 +24256,7 @@
  <LATTICE name="Fuchs3D-924B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -3</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>4 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24280,7 +24282,7 @@
  <LATTICE name="Fuchs3D-926B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 8 4</VECTOR
+      <VECTOR>-6 8 4</VECTOR>
       <VECTOR>5 4 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24306,7 +24308,7 @@
  <LATTICE name="Fuchs3D-928B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 -4 -8</VECTOR
+      <VECTOR>-6 -4 -8</VECTOR>
       <VECTOR>-5 7 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24332,7 +24334,7 @@
  <LATTICE name="Fuchs3D-930B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-5 -3 -8</VECTOR
+      <VECTOR>-5 -3 -8</VECTOR>
       <VECTOR>-6 6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24358,7 +24360,7 @@
  <LATTICE name="Fuchs3D-932B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>6 -8 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24384,7 +24386,7 @@
  <LATTICE name="Fuchs3D-934B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -1</VECTOR>
-      <VECTOR>-7 5 6</VECTOR
+      <VECTOR>-7 5 6</VECTOR>
       <VECTOR>3 -8 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24410,7 +24412,7 @@
  <LATTICE name="Fuchs3D-936B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 -4 -8</VECTOR
+      <VECTOR>-6 -4 -8</VECTOR>
       <VECTOR>-6 6 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24436,7 +24438,7 @@
  <LATTICE name="Fuchs3D-938B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -5</VECTOR>
-      <VECTOR>-6 -5 -7</VECTOR
+      <VECTOR>-6 -5 -7</VECTOR>
       <VECTOR>-5 8 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24462,7 +24464,7 @@
  <LATTICE name="Fuchs3D-940B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -5</VECTOR>
-      <VECTOR>-6 2 -8</VECTOR
+      <VECTOR>-6 2 -8</VECTOR>
       <VECTOR>3 9 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24488,7 +24490,7 @@
  <LATTICE name="Fuchs3D-942B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>6 -8 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24514,7 +24516,7 @@
  <LATTICE name="Fuchs3D-944B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-5 7 6</VECTOR
+      <VECTOR>-5 7 6</VECTOR>
       <VECTOR>5 3 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24540,7 +24542,7 @@
  <LATTICE name="Fuchs3D-946B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 7 5</VECTOR
+      <VECTOR>-6 7 5</VECTOR>
       <VECTOR>5 5 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24566,7 +24568,7 @@
  <LATTICE name="Fuchs3D-948B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -2</VECTOR>
-      <VECTOR>-7 5 6</VECTOR
+      <VECTOR>-7 5 6</VECTOR>
       <VECTOR>4 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24592,7 +24594,7 @@
  <LATTICE name="Fuchs3D-950B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -5</VECTOR>
-      <VECTOR>-7 -2 -7</VECTOR
+      <VECTOR>-7 -2 -7</VECTOR>
       <VECTOR>-4 7 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24618,7 +24620,7 @@
  <LATTICE name="Fuchs3D-952B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -1</VECTOR>
-      <VECTOR>-2 8 -6</VECTOR
+      <VECTOR>-2 8 -6</VECTOR>
       <VECTOR>-7 6 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24644,7 +24646,7 @@
  <LATTICE name="Fuchs3D-954B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 7 5</VECTOR
+      <VECTOR>-6 7 5</VECTOR>
       <VECTOR>5 5 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24670,7 +24672,7 @@
  <LATTICE name="Fuchs3D-956B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-1 8 -7</VECTOR
+      <VECTOR>-1 8 -7</VECTOR>
       <VECTOR>-5 6 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24696,7 +24698,7 @@
  <LATTICE name="Fuchs3D-958B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -5</VECTOR>
-      <VECTOR>-7 1 -8</VECTOR
+      <VECTOR>-7 1 -8</VECTOR>
       <VECTOR>3 9 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24722,7 +24724,7 @@
  <LATTICE name="Fuchs3D-958C superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-8 1 -7</VECTOR
+      <VECTOR>-8 1 -7</VECTOR>
       <VECTOR>3 9 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24748,7 +24750,7 @@
  <LATTICE name="Fuchs3D-960B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>4 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24774,7 +24776,7 @@
  <LATTICE name="Fuchs3D-962B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 5 -5</VECTOR>
-      <VECTOR>-5 -5 -8</VECTOR
+      <VECTOR>-5 -5 -8</VECTOR>
       <VECTOR>-5 8 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24800,7 +24802,7 @@
  <LATTICE name="Fuchs3D-964B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>6 2 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24826,7 +24828,7 @@
  <LATTICE name="Fuchs3D-966B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -3</VECTOR>
-      <VECTOR>-6 7 5</VECTOR
+      <VECTOR>-6 7 5</VECTOR>
       <VECTOR>5 3 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24852,7 +24854,7 @@
  <LATTICE name="Fuchs3D-968B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-7 7 4</VECTOR
+      <VECTOR>-7 7 4</VECTOR>
       <VECTOR>4 6 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24878,7 +24880,7 @@
  <LATTICE name="Fuchs3D-970B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-7 7 4</VECTOR
+      <VECTOR>-7 7 4</VECTOR>
       <VECTOR>4 6 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24904,7 +24906,7 @@
  <LATTICE name="Fuchs3D-972B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 6 -3</VECTOR>
-      <VECTOR>-6 6 6</VECTOR
+      <VECTOR>-6 6 6</VECTOR>
       <VECTOR>6 2 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24930,7 +24932,7 @@
  <LATTICE name="Fuchs3D-974B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 -4 -8</VECTOR
+      <VECTOR>-6 -4 -8</VECTOR>
       <VECTOR>-5 7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24956,7 +24958,7 @@
  <LATTICE name="Fuchs3D-976B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 4 8</VECTOR
+      <VECTOR>-6 4 8</VECTOR>
       <VECTOR>6 -8 4</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -24982,7 +24984,7 @@
  <LATTICE name="Fuchs3D-978B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 -4 -8</VECTOR
+      <VECTOR>-6 -4 -8</VECTOR>
       <VECTOR>-6 7 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25008,7 +25010,7 @@
  <LATTICE name="Fuchs3D-980B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 6 -4</VECTOR>
-      <VECTOR>-6 4 8</VECTOR
+      <VECTOR>-6 4 8</VECTOR>
       <VECTOR>5 -8 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25034,7 +25036,7 @@
  <LATTICE name="Fuchs3D-982B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>4 -8 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25060,7 +25062,7 @@
  <LATTICE name="Fuchs3D-984B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-5 7 6</VECTOR
+      <VECTOR>-5 7 6</VECTOR>
       <VECTOR>6 2 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25086,7 +25088,7 @@
  <LATTICE name="Fuchs3D-986B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 7 -2</VECTOR>
-      <VECTOR>-6 7 5</VECTOR
+      <VECTOR>-6 7 5</VECTOR>
       <VECTOR>5 3 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25112,7 +25114,7 @@
  <LATTICE name="Fuchs3D-988B superlattice" dimension="2">
     <BASIS>
       <VECTOR>7 7 -4</VECTOR>
-      <VECTOR>-7 6 -5</VECTOR
+      <VECTOR>-7 6 -5</VECTOR>
       <VECTOR>5 5 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25138,7 +25140,7 @@
  <LATTICE name="Fuchs3D-990B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 6 6</VECTOR
+      <VECTOR>-6 6 6</VECTOR>
       <VECTOR>3 -8 7</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25164,7 +25166,7 @@
  <LATTICE name="Fuchs3D-992B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -1</VECTOR>
-      <VECTOR>-4 8 -6</VECTOR
+      <VECTOR>-4 8 -6</VECTOR>
       <VECTOR>-8 5 5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25190,7 +25192,7 @@
  <LATTICE name="Fuchs3D-994B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 4 -3</VECTOR>
-      <VECTOR>-4 -8 -6</VECTOR
+      <VECTOR>-4 -8 -6</VECTOR>
       <VECTOR>-8 5 -5</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25216,7 +25218,7 @@
  <LATTICE name="Fuchs3D-996B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-5 -7 -6</VECTOR
+      <VECTOR>-5 -7 -6</VECTOR>
       <VECTOR>-3 7 -8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25242,7 +25244,7 @@
  <LATTICE name="Fuchs3D-998B superlattice" dimension="2">
     <BASIS>
       <VECTOR>9 5 -4</VECTOR>
-      <VECTOR>-6 5 7</VECTOR
+      <VECTOR>-6 5 7</VECTOR>
       <VECTOR>5 -7 6</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
@@ -25268,7 +25270,7 @@
  <LATTICE name="Fuchs3D-1000B superlattice" dimension="2">
     <BASIS>
       <VECTOR>8 7 -3</VECTOR>
-      <VECTOR>-6 8 4</VECTOR
+      <VECTOR>-6 8 4</VECTOR>
       <VECTOR>4 4 8</VECTOR>
     </BASIS>
     <RECIPROCALBASIS>
