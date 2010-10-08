@@ -88,7 +88,10 @@ class Hdf5Loader:
           else:
             if f[-3:]!='.h5':
               f += '.h5'
-          files.append(f)
+          if os.path.exists(f):
+            files.append(f)
+          else:
+            print "FILE ", f, "DOES NOT EXIST!"
         return files
         
     def ReadParameters(self,proppath):
