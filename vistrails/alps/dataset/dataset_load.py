@@ -163,14 +163,12 @@ class LoadAlpsMeasurements(Module):
     """Load the data from a Monte Carlo simulation from hdf5-files. Description of input ports:
       @ResultFiles: The hdf5-files.
       @Measurements: List of observables to load
-      @StatisticalVariables: Other quantities than mean and error of your observables like the timeseries ('timeseries'), the variance ('variance'), or the autocorrelation time ('tau'). Default: None
       @PropertyPath: Hdf5-path to the parameters stored. Default: /parameters
       @ResultPath: Hdf5-path to the observables stored. Default: /simulation/results"""
   
     my_input_ports = [
         PortDescriptor('ResultFiles',ResultFiles),
         PortDescriptor('Measurements',basic.List),
-        PortDescriptor('StatisticalVariables',basic.List),
         PortDescriptor('PropertyPath',basic.String),
         PortDescriptor('ResultPath',basic.String)
     ]
@@ -187,13 +185,10 @@ class LoadAlpsMeasurements(Module):
             if self.hasInputFromPort('ResultFiles'):
                 files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
             datasets = []
-            statisticalvariables = []
-            if self.hasInputFromPort('StatisticalVariables'):
-                statisticalvariables = self.getInputFromPort('StatisticalVariables')    
             if self.hasInputFromPort('Measurements'):
-                datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
+                datasets = loader.ReadMeasurementFromFile(files,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
             else:
-                datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=None,proppath=propPath,respath=resPath)
+                datasets = loader.ReadMeasurementFromFile(files,measurements=None,proppath=propPath,respath=resPath)
             self.setResult('data',datasets)
         except Exception, (exc):
             from traceback import print_exc
@@ -227,9 +222,9 @@ class LoadDMFTIterations(Module):
                 files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
             datasets = []
             if self.hasInputFromPort('Measurements'):
-                datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
+                datasets = loader.ReadMeasurementFromFile(files,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
             else:
-                datasets = loader.ReadMeasurementFromFile(files,statisticalvariables,measurements=None,proppath=propPath,respath=resPath)
+                datasets = loader.ReadMeasurementFromFile(files,measurements=None,proppath=propPath,respath=resPath)
             self.setResult('data',datasets)
         except Exception, (exc):
             from traceback import print_exc
