@@ -44,7 +44,7 @@ void IsingSimulation::print_copyright(std::ostream& out)
 }
 
 IsingSimulation::IsingSimulation(parameters_type const & p, std::size_t seed_offset)
-  : alps::ng::deprecated_simulation(p, seed_offset)
+  : alps::ng::scheduler::deprecated(p, seed_offset)
   , length(static_cast<long>(p["L"]))
   , beta(1./static_cast<double>(p["T"]))
   , sweeps(0)

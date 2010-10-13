@@ -35,15 +35,15 @@
 
 #include <alps/ng.hpp>
 
-class IsingSimulation : public alps::ng::deprecated_simulation
+class IsingSimulation : public alps::ng::scheduler::deprecated
 {
 public:
   static void print_copyright(std::ostream&);
   
   IsingSimulation(parameters_type const & p, std::size_t seed_offset = 0);
   
-  using alps::ng::deprecated_simulation::save;
-  using alps::ng::deprecated_simulation::load;
+  using alps::ng::scheduler::deprecated::save;
+  using alps::ng::scheduler::deprecated::load;
   
   void save(alps::ODump&) const;
   void load(alps::IDump&);
