@@ -30,29 +30,30 @@ bool stop_callback(boost::posix_time::ptime const & end_time) {
     return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 int main(int argc, char *argv[]) {
-    alps::ng::options options(argc, argv);
-    if (options.valid && options.type == alps::ng::options::SINGLE) {
-        alps::ng::parameters_type<simulation_type>::type params(options.input_file);
+    using namespace alps::ng;
+    options options(argc, argv);
+    if (options.valid && options.type == options::SINGLE) {
+        parameters_type<simulation_type>::type params(options.input_file);
         simulation_type s(params);
         if (options.reload)
             s.load(options.output_file);
         s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
         s.save(options.output_file);
-        alps::ng::results_type<alps::ng::mpi_simulation<simulation_type> >::type results = collect_results(s);
-        for (alps::ng::results_type<alps::ng::mpi_simulation<simulation_type> >::type::const_iterator it = results.begin(); it != results.end(); ++it)
+        results_type<scheduler::mpi<simulation_type> >::type results = collect_results(s);
+        for (results_type<scheduler::mpi<simulation_type> >::type::const_iterator it = results.begin(); it != results.end(); ++it)
             std::cout << std::fixed << std::setprecision(5) << it->first << ": " << it->second->to_string() << std::endl;
-    } else if(options.valid && options.type == alps::ng::options::MPI) {
+    } else if(options.valid && options.type == options::MPI) {
         boost::mpi::environment env(argc, argv);
         boost::mpi::communicator c;
-        alps::ng::parameters_type<simulation_type>::type params(options.input_file);
-        alps::ng::mpi_simulation<simulation_type> s(params, c);
+        parameters_type<simulation_type>::type params(options.input_file);
+        scheduler::mpi<simulation_type> s(params, c);
         if (options.reload)
             s.load(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
         s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
         s.save(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
         s.save_collected(options.output_file);
-        alps::ng::results_type<alps::ng::mpi_simulation<simulation_type> >::type results = collect_results(s);
-        for (alps::ng::results_type<alps::ng::mpi_simulation<simulation_type> >::type::const_iterator it = results.begin(); it != results.end(); ++it)
+        results_type<scheduler::mpi<simulation_type> >::type results = collect_results(s);
+        for (results_type<scheduler::mpi<simulation_type> >::type::const_iterator it = results.begin(); it != results.end(); ++it)
             std::cout << std::fixed << std::setprecision(5) << it->first << ": " << it->second->to_string() << std::endl;
     }
 }
