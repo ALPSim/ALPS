@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2002-2009 by Matthias Troyer <troyer@comp-phys.org>,
+* Copyright (C) 2002-2010 by Matthias Troyer <troyer@comp-phys.org>,
 *                            Simon Trebst <trebst@comp-phys.org>,
 *                            Synge Todo <wistaria@comp-phys.org>
 *
@@ -49,7 +49,10 @@ void convert_params(const std::string& inname, const std::string& basename,
     std::ifstream in(inname.c_str());
     in >> list;
   }
-  if (list.size() == 0) return;
+  if (list.size() == 0) {
+    std::cerr << "Warning: no parameter set is found.  No XML files will be generated.\n";
+    return;
+  }
 
   BOOST_FOREACH(alps::Parameters& params, list) {
     BOOST_FOREACH(alps::Parameter const& padd, params_add) {
@@ -92,9 +95,9 @@ void convert_params(const std::string& inname, const std::string& basename,
 
   // make sure ths stylesheet is there
   alps::copy_stylesheet(infile.remove_filename());
-  
-  
-  
+
+
+
   out << alps::header("UTF-8")
       << alps::stylesheet(alps::xslt_path("ALPS.xsl"))
       << alps::start_tag("JOB")
@@ -182,6 +185,19 @@ try {
 
   if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
   if (outbase.size() >= 2 && outbase.substr(0, 2) == "./") outbase.erase(0, 2);
+
+  if (boost::filesystem::exists(outbase + ".out.xml")) {
+    std::cerr << "Output files ("outbase + ".out.xml, etc) exist.  "
+              << "Do you really want to delete them? [y/N] ";
+    char res;
+    std::cin >> res;
+    if (res == 'y' || res == 'Y') {
+      boost::filesystem::remove(outbase + ".out.xml");
+    } else {
+      std::cerr << "Aborted.\n";
+      return 255;
+    }
+  }
 
   convert_params(inname, outbase, params_add);
 
