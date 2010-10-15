@@ -53,7 +53,8 @@ namespace ietl {
             return ietl::real(a) > ietl::real(b);
         }
         
-        std::complex<double> make_complex(double re, double im) { return std::complex<double>(re,im);}
+        inline std::complex<double> make_complex(double re, double im) { return std::complex<double>(re,im);}
+        
         template<class MatrixT>
         void arnoldi_geev(MatrixT& mtx, std::vector<std::complex<double> >& evals, MatrixT& evecs, double)
         {
