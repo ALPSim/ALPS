@@ -187,7 +187,7 @@ try {
   if (outbase.size() >= 2 && outbase.substr(0, 2) == "./") outbase.erase(0, 2);
 
   if (boost::filesystem::exists(outbase + ".out.xml")) {
-    std::cerr << "Output files ("outbase + ".out.xml, etc) exist.  "
+    std::cerr << "Output files (" + outbase + ".out.xml, etc) exist.  "
               << "Do you really want to delete them? [y/N] ";
     char res;
     std::cin >> res;
@@ -200,6 +200,8 @@ try {
   }
 
   convert_params(inname, outbase, params_add);
+
+  return 0;
 
 #ifndef BOOST_NO_EXCEPTIONS
 }
