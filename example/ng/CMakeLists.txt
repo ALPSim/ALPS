@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-if (ALPS_BUILD_EXAMPLES)
+if (ALPS_BUILD_NG AND ALPS_BUILD_EXAMPLES)
   if (MPI_FOUND)
     add_executable(ng main.cpp)
     add_dependencies(ng alps)
@@ -13,4 +13,4 @@ if (ALPS_BUILD_EXAMPLES)
     add_dependencies(ngdeprecated alps)
     target_link_libraries(ngdeprecated alps)
   endif(MPI_FOUND)
-endif (ALPS_BUILD_EXAMPLES)
+endif (ALPS_BUILD_NG AND ALPS_BUILD_EXAMPLES)

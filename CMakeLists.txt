@@ -14,6 +14,8 @@ option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
 option(ALPS_BUILD_SOURCE "Build a source distribution" OFF)
 option(LAPACK_64_BIT "Use 64-bit version of LAPACK" OFF)
 option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
+option(ALPS_BUILD_NG "Build the next generation scheduler" OFF)
+
 
 if (ALPS_FOR_VISTRAILS)
   if (NOT WIN32 AND NOT APPLE)
