@@ -670,6 +670,8 @@ if(ALPS_PATCH_VISTRAILS)
         install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails  COMPONENT vistrails
                 DESTINATION .
                 PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
+    install(FILES ${VISTRAILS_GIT_DIR}/dist/windows/Input/git.exe COMPONENT vistrails
+            DESTINATION ${VISTRAILS_APP_NAME})
     else (WIN32)
       message(ERROR "Cannot patch VisTrails on this system. Probably you can just install the latest Vistrails nightly snapshot.")
     endif (WIN32)
