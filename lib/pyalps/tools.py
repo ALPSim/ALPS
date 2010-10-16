@@ -34,7 +34,6 @@ import platform
 import sys
 import glob
 import numpy as np
-import h5py
 
 from pyalps.pytools import convert2xml, hdf5_name_encode, hdf5_name_decode, rng
 import pyalps.pytools # the C++ conversion functions

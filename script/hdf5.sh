@@ -4,7 +4,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-VERSION=1.8.4-patch1
+VERSION=1.8.5-patch1
 
 PREFIX="$1"
 BUILD_DIR="$2"
@@ -48,7 +48,16 @@ echo "building..." && \
 echo "installing..." && \
 (cd "$BUILD_DIR/hdf5-$VERSION" && make install) && \
 echo "cleaning up..." && \
+(cd "$BUILD_DIR/hdf5-$VERSION" && make distclean) && \
+echo "configuring with Fortran..." && \
+(cd "$BUILD_DIR/hdf5-$VERSION" && ./configure --prefix="$PREFIX" --enable-fortran) && \
+echo "building with Fortran..." && \
+(cd "$BUILD_DIR/hdf5-$VERSION" && make) && \
+echo "installing with Fortran..." && \
+(cd "$BUILD_DIR/hdf5-$VERSION" && make install) && \
+echo "cleaning up..." && \
 rm -rf "$BUILD_DIR/hdf5-$VERSION" && \
+
 echo "done" \
 ) 2>&1 | tee -a "$LOG"
 
