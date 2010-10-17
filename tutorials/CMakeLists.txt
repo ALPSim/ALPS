@@ -4,10 +4,16 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 if (ALPS_BUILD_SOURCE)
-  install(FILES CMakeLists.txt cleanup.sh DESTINATION alps/tutorials)
+  if (ALPS_BUILD_TUTORIALS_PACKAGE)
+    set (destdir .)
+  else (ALPS_BUILD_TUTORIALS_PACKAGE)
+    set(destdir alps/tutorials)
+  endif (ALPS_BUILD_TUTORIALS_PACKAGE)
+    
+  install(FILES CMakeLists.txt cleanup.sh DESTINATION ${destdir})
 
   install(DIRECTORY .
-          DESTINATION alps/tutorials
+          DESTINATION ${destdir}
           FILES_MATCHING PATTERN "*.py" PATTERN "parm*" PATTERN "*.vt" PATTERN "*.xml" PATTERN "*input*" PATTERN "*parm"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE 
           PATTERN "*.h5" EXCLUDE  EXCLUDE  PATTERN "parm*xml" EXCLUDE
