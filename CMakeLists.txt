@@ -362,7 +362,9 @@ ENDIF (PYTHONLIBS_FOUND AND ALPS_BUILD_PYTHON)
 ######################################################################
 # test environment
 ######################################################################
+if (NOT ALPS_BUILD_SOURCE)
 include(add_alps_test)
+endif (NOT ALPS_BUILD_SOURCE)
 
 ######################################################################
 # configuration files
@@ -714,6 +716,7 @@ if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
     add_subdirectory(example)
   endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
 endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+
 
 ######################################################################
 # applications
