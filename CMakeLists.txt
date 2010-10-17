@@ -15,7 +15,9 @@ option(ALPS_BUILD_SOURCE "Build a source distribution" OFF)
 option(LAPACK_64_BIT "Use 64-bit version of LAPACK" OFF)
 option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
 option(ALPS_BUILD_NG "Build the next generation scheduler" OFF)
-
+option(ALPS_INCLUDE_TUTORIALS "Include the ALPS tutorials" ON)
+option(ALPS_BUILD_TUTORIALS_PACKAGE "Build only a tutorials package" OFF)
+mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
 
 if (ALPS_FOR_VISTRAILS)
   if (NOT WIN32 AND NOT APPLE)
@@ -560,6 +562,7 @@ set (HDF5_LIBRARIES ${HDF5_LIBRARIES_SAVE})
 ######################################################################
 include(InstallRequiredSystemLibraries)
 
+if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 if (ALPS_BUILD_SOURCE)
   FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.txt")
   INSTALL(FILES ${files} DESTINATION alps)  
@@ -649,6 +652,7 @@ else (ALPS_BUILD_SOURCE)
 
   endif (NOT ALPS_FOR_VISTRAILS)
 endif (ALPS_BUILD_SOURCE)
+endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 
 ######################################################################
 # patch VisTrails
@@ -683,39 +687,45 @@ endif(ALPS_PATCH_VISTRAILS)
 # documentation
 ######################################################################
 
-if (ALPS_BUILD_DOC)
+if (ALPS_BUILD_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 add_subdirectory(doc)
-endif (ALPS_BUILD_DOC)
+endif (ALPS_BUILD_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 
 ######################################################################
 # libraries
 ######################################################################
 
-add_subdirectory(src/boost)
-if (NOT ALPS_BUILD_SOURCE)
-  add_subdirectory(src/alps)
-  add_subdirectory(lib/pyalps)
-endif (NOT ALPS_BUILD_SOURCE)
+if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+  add_subdirectory(src/boost)
+  if (NOT ALPS_BUILD_SOURCE)
+    add_subdirectory(src/alps)
+    add_subdirectory(lib/pyalps)
+  endif (NOT ALPS_BUILD_SOURCE)
+endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+
 
 ######################################################################
 # programs
 ######################################################################
 
-add_subdirectory(tool)
-if (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
-  add_subdirectory(example)
-endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
+if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+  add_subdirectory(tool)
+  if (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
+    add_subdirectory(example)
+  endif (ALPS_BUILD_EXAMPLES AND NOT ALPS_BUILD_SOURCE)
+endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 
 ######################################################################
 # applications
 ######################################################################
 
-if (ALPS_BUILD_APPLICATIONS)
+if (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
   add_subdirectory(applications)
-  if (NOT ALPS_FOR_VISTRAILS)
-    add_subdirectory(tutorials)
-  endif (NOT ALPS_FOR_VISTRAILS)
-endif (ALPS_BUILD_APPLICATIONS)
+endif (ALPS_BUILD_APPLICATIONS AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+
+if (NOT ALPS_FOR_VISTRAILS AND ALPS_INCLUDE_TUTORIALS)
+  add_subdirectory(tutorials)
+endif (NOT ALPS_FOR_VISTRAILS AND ALPS_INCLUDE_TUTORIALS)
 
 ######################################################################
 # developer tools
@@ -729,6 +739,7 @@ endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
 # Binary packages                                                        #
 ##########################################################################
 
+if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "ALPS and Boost libraries")
  set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "ALPS headers")
  set(CPACK_COMPONENT_DEPRECATED_DISPLAY_NAME "Deprecated ALPS headers")
@@ -785,21 +796,26 @@ endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
  set(CPACK_COMPONENT_EXAMPLES_DEPENDS libraries)
  set(CPACK_COMPONENT_TUTORIALS_DEPENDS python applications libraries tools)
  
+endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  
 if (ALPS_FOR_VISTRAILS)
   set(CPACK_PACKAGE_NAME "alps-vistrails")
   set(CPACK_NSIS_MODIFY_PATH OFF)
 else(ALPS_FOR_VISTRAILS)
-  if (BUILD_SHARED_LIBS)
-    set(CPACK_PACKAGE_NAME "alps")
-  elseif (BUILD_SHARED_LIBS)
-    set(CPACK_PACKAGE_NAME "alps-static")
-  endif (BUILD_SHARED_LIBS)
+  if (ALPS_BUILD_TUTORIALS_PACKAGE)
+    set(CPACK_PACKAGE_NAME "alps-tutorials")
+  elseif (ALPS_BUILD_TUTORIALS_PACKAGE)
+    if (BUILD_SHARED_LIBS)
+      set(CPACK_PACKAGE_NAME "alps")
+    elseif (BUILD_SHARED_LIBS)
+      set(CPACK_PACKAGE_NAME "alps-static")
+    endif (BUILD_SHARED_LIBS)
 
-  set(CPACK_NSIS_MODIFY_PATH ON)
-  if(ALPS_DOWNLOAD_PACKAGES)
-    set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-download")
-  endif(ALPS_DOWNLOAD_PACKAGES)
+    set(CPACK_NSIS_MODIFY_PATH ON)
+    if(ALPS_DOWNLOAD_PACKAGES)
+      set(CPACK_PACKAGE_NAME "${CPACK_PACKAGE_NAME}-download")
+    endif(ALPS_DOWNLOAD_PACKAGES)
+  endif (ALPS_BUILD_TUTORIALS_PACKAGE)
 endif(ALPS_FOR_VISTRAILS)
 
 set(CPACK_PACKAGE_VENDOR "ALPS Collaboration")
