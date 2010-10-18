@@ -47,7 +47,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'OMEGA_LOOP'          : 1,
               'SEED'                : 0, 
               'SITES'               : 1,
-              'SOLVER'              : '/opt/alps/bin/hirschfye',
+              'SOLVER'              : 'hirschfye',
               'SYMMETRIZATION'      : 0,
               'TOLERANCE'           : 0.01,
               'U'                   : 3,
