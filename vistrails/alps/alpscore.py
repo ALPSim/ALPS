@@ -221,6 +221,41 @@ class ConcatenatePath(Module):
                      ('directory', [basic.Directory]),
                      ('file',[basic.File])]
 
+class ConcatenatePathList(Module):
+    """
+    This module concatentates two portions of a file or directory path.
+    It returns a string for the concatenated name as well as file and directory
+    objects. The latter two are there as convenience functions to avoid having
+    to put the string into a File or Directory module. 
+    Note that the module does not check the existence of these directories or
+    files.
+    """
+    def compute(self):
+        base = self.getInputFromPort('base').name
+        leafs = self.getInputFromPort('leafs')
+        
+        paths = [os.path.join(base, l) for l in leafs]
+        
+        self.setResult('paths', paths)
+        
+        def f(p):
+            d = basic.Directory()
+            d.name = p
+            return d
+        self.setResult('directories', [f(p) for p in paths])
+        
+        def f(p):
+            d = basic.File()
+            d.name = p
+            return d
+        self.setResult('files', [f(p) for p in paths])
+    
+    _input_ports = [('base', [basic.Directory]),
+                 ('leafs',[basic.List])]
+    _output_ports = [('paths', [basic.List]),
+                  ('directories', [basic.List]),
+                  ('files',[basic.List])]
+
 class DirectorySink(Module,NotCacheable):
     """
     This module copies the contents of a specified directory to a new location
@@ -266,4 +301,5 @@ def selfRegister():
     reg.add_input_port(TextCell, "File", basic.File)
 
     reg.add_module(ConcatenatePath,namespace="Tools")
+    reg.add_module(ConcatenatePathList,namespace="Tools")
     reg.add_module(DirectorySink,namespace="Tools")
