@@ -368,9 +368,12 @@ class ArchiveDirectory(basic.Module):
     """
     Retrieves the path to an archive directory. 
     
-    To be portable between machines an archive is specified as a URL. The mapping from URL to local path (typically the mount point of the archive disk can be specified in the configuration preferences as a dict named archives.
+    To be portable between machines an archive is specified as a URL. The mapping from URL to
+    local path (typically the mount point of the archive disk can be specified in the configuration
+    preferences as a dict named archives.
     
-    Optionally a local path can be directly specified, but is only used if the archive was not specified or no mapping from archive to a local path is given.
+    Optionally a local path can be directly specified, but is only used if the archive was not
+    specified or no mapping from archive to a local path is given.
     """
     _input_ports = [
         ('archive', [basic.String]),
@@ -379,33 +382,40 @@ class ArchiveDirectory(basic.Module):
     _output_ports = [('output', [basic.Directory])]
     
     def compute(self):
+        fixpath = lambda path: os.path.normpath(path.replace('/', os.path.sep))
+        listify = lambda l: type(l) == type([1,2]) and l or [l]
+        
         replace_dict = {}
         if alpscore.config.check('archives'):
             replace_dict = basic.Dictionary.translate_to_python(alpscore.config.archives)
         else:
             raise InvalidInput("Check configuration!")
+        replace_dict = dict([(k,listify(v)) for k,v in replace_dict.items()])
+        replace_dict = dict([(k,[vv+os.path.sep for vv in v]) for k,v in replace_dict.items()])
+        
+        fpath = None
         
         if self.hasInputFromPort('archive'):
             path = self.getInputFromPort('archive')
             for k,v in replace_dict.items():
                 for qq in v:
-                    testpath = path.replace(k, qq)
+                    testpath = fixpath(path.replace(k, qq))
                     print 'Testing',testpath
                     if os.path.exists(testpath):
-                        dir = basic.Directory()
-                        dir.name = testpath
-                        self.setResult('output', dir)
-                        return
+                        fpath = testpath
         
-        if self.hasInputFromPort('path'):
+        if self.hasInputFromPort('path') and fpath == None:
             lp = self.getInputFromPort('path').name
             if os.path.exists(lp):
-                dir = basic.Directory()
-                dir.name = lp
-                self.setResult('output', dir)
-                return
+                fpath = lp
         
-        raise InvalidInput("Can't locate file at any location.")
+        if fpath == None:
+            raise InvalidInput("Can't locate file at any location.")
+        
+        fpath = os.path.normpath(fpath)
+        dir = basic.Directory()
+        dir.name = fpath
+        self.setResult('output', dir)
 
 def initialize(): pass
 
