@@ -27,7 +27,7 @@
 
 import pyalps
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import math
 import scipy.special
 
@@ -76,7 +76,7 @@ for q in Magdata:
 #Plot the integrated magnetization
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
 plt.figure()
-pyalps.pyplot.plot(Mag)
+pyalps.plot.plot(Mag)
 plt.xlabel('Time $t$')
 plt.ylabel('Change in Magnetization $\Delta M(t)$')
 plt.show()

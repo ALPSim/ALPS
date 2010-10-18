@@ -27,7 +27,7 @@
 import pyalps
 import numpy as np
 import matplotlib.pyplot as plt
-import pyalps.pyplot
+import pyalps.plot
 import pyalps.fit_wrapper as fw
 
 #prepare the input parameters
@@ -77,7 +77,7 @@ gapplot.props['label']='S=1'
 gapplot.props['line']='.'
 
 plt.figure()
-pyalps.pyplot.plot(gapplot)
+pyalps.plot.plot(gapplot)
 plt.legend()
 plt.xlim(0,0.25)
 plt.ylim(0,1.0)
