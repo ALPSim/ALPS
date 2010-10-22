@@ -8,21 +8,23 @@
 #  $ cmake -DALPS_USE_MACHINE=/full/path/to/macnine.cmake
 # or
 #  $ cmake -DALPS_USE_MACHINE=machiine-name
-if (EXISTS ${ALPS_USE_MACHINE})
-  # given full-path case
-  set(ALPS_MACHINE_CONF ${ALPS_USE_MACHINE})
-  message("-- Loading machine configuration: ${ALPS_MACHINE_CONF}")
-  include(${ALPS_MACHINE_CONF})
-else (EXISTS ${ALPS_USE_MACHINE})
-  # given machine-name case
-  set(ALPS_MACHINE_CONF "${CMAKE_CURRENT_SOURCE_DIR}/config/${ALPS_USE_MACHINE}.cmake")
-  if (EXISTS ${ALPS_MACHINE_CONF})
+if (ALPS_USE_MACHINE)
+  if (EXISTS ${ALPS_USE_MACHINE})
+    # given full-path case
+    set(ALPS_MACHINE_CONF ${ALPS_USE_MACHINE})
     message("-- Loading machine configuration: ${ALPS_MACHINE_CONF}")
     include(${ALPS_MACHINE_CONF})
-  else (EXISTS ${ALPS_MACHINE_CONF})
-    message(FATAL_ERROR "Can't find your macnine-configuration file")
-  endif (EXISTS ${ALPS_MACHINE_CONF})
-endif (EXISTS ${ALPS_USE_MACHINE})
+  else (EXISTS ${ALPS_USE_MACHINE})
+    # given machine-name case
+    set(ALPS_MACHINE_CONF "${CMAKE_CURRENT_SOURCE_DIR}/config/${ALPS_USE_MACHINE}.cmake")
+    if (EXISTS ${ALPS_MACHINE_CONF})
+      message("-- Loading machine configuration: ${ALPS_MACHINE_CONF}")
+      include(${ALPS_MACHINE_CONF})
+    else (EXISTS ${ALPS_MACHINE_CONF})
+      message(FATAL_ERROR "Can't find your macnine-configuration file")
+    endif (EXISTS ${ALPS_MACHINE_CONF})
+  endif (EXISTS ${ALPS_USE_MACHINE})
+endif (ALPS_USE_MACHINE)
 
 option(BUILD_SHARED_LIBS "Build shared libraries" ON)
 option(ALPS_FOR_VISTRAILS "Build for use within VisTrails" OFF)
