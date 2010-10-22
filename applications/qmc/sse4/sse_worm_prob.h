@@ -308,7 +308,7 @@ private:
 		for (unsigned en_op = 0; en_op < NOPERATORS; ++en_op) {
 			
 			double w[4] = {0.0, 0.0, 0.0, 0.0};
-			double ti_matrix[4][4];
+			unsigned ti_matrix[4][4];
 			for (unsigned i = 0; i < 4; ++i)
 				for (unsigned j = 0; j < 4; ++j)
 					ti_matrix[i][j] = EMPTY;
