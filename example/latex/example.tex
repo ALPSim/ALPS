@@ -1,6 +1,8 @@
 \documentclass[prl, superscriptaddress, showpacs, twocolumn]{revtex4}
 \usepackage{vistrails}
 
+\renewcommand{\vistrailspath}{http://alps.comp-phys.org/vistrails/run_vistrails.php}
+\renewcommand{\vistrailspythonpath}{vispython}
 
 \begin{document}
 
@@ -19,16 +21,15 @@ This example paper shows how figures can be embedded directly from VisTrails int
 
 \maketitle
 
-In Fig. ~\ref{susc}) we show the susceptibility of various quasi-one dimensional classical and quantum spin models.
+In Fig. ~\ref{green} we show the susceptibility of various quasi-one dimensional classical and quantum spin models.
 
 \begin{figure}[h!]
 \begin{center}
 \vistrail[host=alps.ethz.ch,
-db=vistrails,
-vtid=3,
-version=220,
-tag=nice figure,
-showspreadsheetonly]{}
+db=tutorials,
+vtid=2,
+version=225,
+showspreadsheetonly]{width=8cm}
 \caption{Green's function for a random point.}
 \label{green}
 \end{center}
