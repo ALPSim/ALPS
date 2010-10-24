@@ -687,10 +687,13 @@ else (ALPS_BUILD_SOURCE)
             config/add_alps_test.cmake
             DESTINATION share/alps COMPONENT build)
 
+    install(DIRECTORY latex DESTINATION share/alps COMPONENT vistrails)
+
   endif (NOT ALPS_FOR_VISTRAILS)
 endif (ALPS_BUILD_SOURCE)
 endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 
+#
 ######################################################################
 # patch VisTrails
 ######################################################################
