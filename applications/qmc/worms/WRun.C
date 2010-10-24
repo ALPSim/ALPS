@@ -576,7 +576,7 @@ void WRun::remove_jump(wormhead_type& head, wormhead_type& , int dir, int nb)
     creation_matrix_element(state1,state1<state2,head.site());
   if(fabs(q)<1e-10) {      
     std::cerr << " q = " << q << " state1 = " << int(state1) << " state2 = " << int(state2) 
-              << " bond_type = " << bond_type[bond] << std::endl;
+              << " bond_type = " << bond_type[bond] << " id " << k1->id() << " " << k2->id() << std::endl;
     print_spins();
     boost::throw_exception(std::logic_error("zero matrix element in remove_jump"));
   }
