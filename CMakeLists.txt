@@ -722,8 +722,12 @@ if(ALPS_PATCH_VISTRAILS)
         install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails  COMPONENT vistrails
                 DESTINATION .
                 PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
-    install(FILES ${VISTRAILS_GIT_DIR}/dist/windows/Input/git.exe ${VISTRAILS_GIT_DIR}/dist/windows/Input/git.exe/libiconv2.dll COMPONENT vistrails
-            DESTINATION ${VISTRAILS_APP_NAME})
+    install(FILES ${VISTRAILS_GIT_DIR}/dist/windows/Input/git.exe 
+                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/tar.exe 
+                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/libiconv2.dll 
+                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/msys-1.0.dll
+                  COMPONENT vistrails
+                  DESTINATION ${VISTRAILS_APP_NAME})
     else (WIN32)
       message(ERROR "Cannot patch VisTrails on this system. Probably you can just install the latest Vistrails nightly snapshot.")
     endif (WIN32)
@@ -954,6 +958,7 @@ if(WIN32 AND NOT UNIX)
   set(CPACK_NSIS_CONTACT "wistaria@comp-phys.org")
   set(CPACK_NSIS_HELP_LINK "http://alps.comp-phys.org")
   set(CPACK_NSIS_URL_INFO_ABOUT "http://alps.comp-phys.org")
+  set(CPACK_NSIS_MODIFY_PATH ON)
   
 # Encode the compiler name in the package 
 #    if (MSVC90)
