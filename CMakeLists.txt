@@ -675,7 +675,7 @@ else (ALPS_BUILD_SOURCE)
     install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
           FILES_MATCHING PATTERN "*.py"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-
+          
     install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
 
     add_subdirectory(config)
@@ -687,7 +687,15 @@ else (ALPS_BUILD_SOURCE)
             config/add_alps_test.cmake
             DESTINATION share/alps COMPONENT build)
 
-    install(DIRECTORY latex DESTINATION share/alps COMPONENT vistrails)
+    if (APPLE OR WIN32)
+      set(PYTHONEXEC vispython)
+    else (APPLE OR WIN32)
+      set(PYTHONEXEC python)
+    endif (APPLE OR WIN32)
+    configure_file(latex/vistrails.sty.in ${PROJECT_BINARY_DIR}/latex/vistrails.sty)
+
+    install(FILES latex/includevistrail.py ${PROJECT_BINARY_DIR}/latex/vistrails.sty 
+            DESTINATION share/alps/latex COMPONENT vistrails)
 
   endif (NOT ALPS_FOR_VISTRAILS)
 endif (ALPS_BUILD_SOURCE)

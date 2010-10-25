@@ -39,10 +39,10 @@
 \newwrite\pythonincludein
 
 %% by default we will run vistrails on the web server
-\newcommand{\vistrailspath}{http://www.vistrails.org/extensions/run_vistrails.php}
+\newcommand{\vistrailspath}{http://alps.comp-phys.org/vistrails/run_vistrails.php}
 
 %% full path to python or just python if it is on PATH
-\newcommand{\vistrailspythonpath}{python}
+\newcommand{\vistrailspythonpath}{@PYTHONEXEC@}
 
 %% this is for allowing line breaks, empty values in vistrails command's options
 \def\vistrail{\kernel@ifnextchar [{\@vistrail}{\@vistrail[]}}
