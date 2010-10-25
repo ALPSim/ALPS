@@ -687,11 +687,11 @@ else (ALPS_BUILD_SOURCE)
             config/add_alps_test.cmake
             DESTINATION share/alps COMPONENT build)
 
-    if (APPLE OR WIN32)
+    if (VISTRAILS_FOUND AND (APPLE OR WIN32))
       set(PYTHONEXEC vispython)
-    else (APPLE OR WIN32)
+    else (VISTRAILS_FOUND AND (APPLE OR WIN32))
       set(PYTHONEXEC python)
-    endif (APPLE OR WIN32)
+    endif (VISTRAILS_FOUND AND (APPLE OR WIN32))
     configure_file(latex/vistrails.sty.in ${PROJECT_BINARY_DIR}/latex/vistrails.sty)
 
     install(FILES latex/includevistrail.py ${PROJECT_BINARY_DIR}/latex/vistrails.sty 
