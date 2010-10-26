@@ -703,7 +703,7 @@ endif (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 
 #
 ######################################################################
-# patch VisTrails
+# patch VisTrailss
 ######################################################################
 
 if(ALPS_PATCH_VISTRAILS)
@@ -724,8 +724,9 @@ if(ALPS_PATCH_VISTRAILS)
                 PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
     install(FILES ${VISTRAILS_GIT_DIR}/dist/windows/Input/git.exe 
                   ${VISTRAILS_GIT_DIR}/dist/windows/Input/tar.exe 
+                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/libiconv-2.dll 
                   ${VISTRAILS_GIT_DIR}/dist/windows/Input/libiconv2.dll 
-                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/msys-1.0.dll
+                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/libintl-2.dll
                   COMPONENT vistrails
                   DESTINATION ${VISTRAILS_APP_NAME})
     else (WIN32)
