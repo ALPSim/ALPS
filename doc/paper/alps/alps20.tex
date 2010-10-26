@@ -1,0 +1,124 @@
+\documentclass[3p,twocolumn]{elsarticle}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsmath}
+\usepackage{color}
+\usepackage{hyperref}
+\journal{Computer Physics Communications}
+%\journal{The Onion}
+
+\begin{document}
+
+\begin{frontmatter}
+
+\title{The ALPS project release 2.0: \\ open source software for strongly correlated systems}
+
+\author[eth]{B. Bauer} \ead{bauerb@phys.ethz.ch}
+\author[wyoming]{A. Feiguin} \ead{afeiguin@uwyo.edu}
+\author[utah]{J. Freire} \ead{juliana@cs.utah.edu}
+\author[goettingen]{S. Fuchs} \ead{fuchs@theorie.physik.uni-goettingen.de}
+\author[eth]{L. Gamper} \ead{gamperl@gmail.com}
+\author[eth]{J. Gukelberger} \ead{hehn@phys.ethz.ch}
+\author[columbia]{E. Gull} \ead{gull@phys.columbia.edu}
+\author[eth]{A. Hehn} \ead{gukelberger@phys.ethz.ch}
+\author[japan]{R.~Igarashi} \ead{rigarash@hosi.phys.s.u-tokyo.ac.jp}
+\author[utah]{D. Koop} \ead{dakoop@cs.utah.edu}
+\author[eth]{P.N. Ma} \ead{pingnang@phys.ethz.ch}
+\author[eth,utah]{P. Mates} \ead{phillipmates@gmail.com}
+\author[harvard,eth]{L. Pollet} \ead{pollet@phys.ethz.ch}
+%\author[goettingen]{Thomas Pruschke} \ead{pruschke@theorie.physik.uni-goettingen.de}
+\author[brazil,utah]{E. Santos} \ead{emanuele@sci.utah.edu}
+\author[lmu]{U.~Schollw\"ock} \ead{schollwoeck@lmu.de}
+\author[utah]{C. Silva} \ead{csilva@sci.utah.edu}
+\author[eth]{B.~Surer} \ead{surerb@phys.ethz.ch}
+\author[tokyo]{S. Todo} \ead{wistaria@ap.t.u-tokyo.ac.jp}
+\author[stationq]{S. Trebst} \ead{trebst@kitp.ucsb.edu}
+\author[eth]{M. Troyer}\ead{troyer@ethz.ch}
+\author[eth]{P. Werner} \ead{werner@phys.ethz.ch}
+\author[rwth,stuttgart]{S. Wessel} \ead{wessel@phys.ethz.ch}
+
+\address[eth]{Theoretische Physik, ETH Zurich, 8093 Zurich, Switzerland}
+\address[wyoming]{}
+\address[utah]{}
+\address[goettingen]{Institut f\"ur Theoretische Physik, Georg-August-Universit\"{a}t G\"{o}ttingen, G\"{o}ttingen, Germany}
+\address[columbia]{Columbia University, New York, NY 10027, USA}
+\address[harvard]{} 
+\address[brazil]{} 
+\address[lmu]{}
+\address[tokyo]{Department of Applied Physics, University of Tokyo, 113-8656 Tokyo, Japan}
+\address[stationq]{Microsoft Research, Station Q, University of California, Santa Barbara, CA 93106, USA}
+\address[rwth]{}
+\address[stuttgart]{Institut f\"ur Theoretische Physik III, Universit\"at Stuttgart, Pfaffenwaldring 57, D-70550 Stuttgart, Germany}
+
+\begin{abstract}
+We present release 2.0 of the ALPS (Algorithms and Libraries for Physics Simulations)
+project, an international open source software project to develop
+libraries and application programs for the simulation of strongly
+correlated quantum lattice models such as quantum magnets, lattice
+bosons, and strongly correlated fermion systems. Development is
+centered on common XML and binary data formats, on libraries to
+simplify and speed up code development, and on full-featured
+simulation programs. The programs enable non-experts to start carrying
+out numerical simulations by providing basic implementations of the
+important algorithms for quantum lattice models: classical and quantum
+Monte Carlo (QMC) using non-local updates, extended ensemble
+simulations, exact and full diagonalization (ED), as well as the
+density matrix renormalization group (DMRG) and quantum Montre Carlo solvers for dynamical mean field theory (DMFT). Major changes in release 2.0 include the use of HDF5 for binary data, evaluation tools in Python, support for Windows  operating system the use of CMake as build system and binary installation packages for Mac OS X and Windows, as well as integration with the VisTrails workflow provenance tool.
+The software is available
+from our web server at \url{http://alps.comp-phys.org/}.
+\end{abstract}
+
+\end{frontmatter}
+
+\eject
+\newpage
+\section*{ PROGRAM SUMMARY}
+  %Delete as appropriate.
+
+\begin{small}
+\noindent
+{\em Manuscript Title:} The ALPS project release 2.0:  open source software for strongly correlated systems \\ 
+{\em Authors:} ... \\ 
+{\em Program Title:} ALPS2.0  \\
+{\em Journal Reference:}                                      \\
+  %Leave blank, supplied by Elsevier.
+{\em Catalogue identifier:}                                   \\
+  %Leave blank, supplied by Elsevier.
+{\em Licensing provisions:} Use of `ALPS2.0' requires citation of this paper.\\
+{\em Programming language:} \verb*#C++#, Fortran, Python \\
+{\em Computer:} Any \\ 
+  %Computer(s) for which program has been designed.
+{\em Operating system:} Any\\ 
+  %Operating system(s) for which program has been designed.
+{\em RAM:} from 100 MB.\\ 
+  %RAM in bytes required to execute program with typical data.
+{\em Number of processors used:} 1 - 2048.\\ 
+  %If more than one processor.
+{\em Keywords:} .\\ 
+  % Please give some freely chosen keywords that we can use in a
+  % cumulative keyword index.
+{\em Classification:} 7.3 \\ 
+  %Classify using CPC Program Library Subject Index, see (
+  % http://cpc.cs.qub.ac.uk/subjectIndex/SUBJECT_index.html)
+  %e.g. 4.4 Feynman diagrams, 5 Computer Algebra.
+{\em External routines/libraries:}  BLAS/LAPACK, HDF5, LPSolve, Python, NumPy, SciPy\\ 
+{\em Running time:} 60s - 1  month\\
+  %Give an indication of the typical running time here.
+\end{small}
+%% main text
+
+\section{Introduction}
+\label{}
+
+In this paper we present release 2.0 of the ALPS project  (Algorithms and Libraries for Physics Simulations), an open source software development project for strongly correlated lattice models. We will present a short overview  and focus on new features compared to the previous releases \cite{ALPS1.2,ALPS1.3}.
+
+\begin{thebibliography}{99} 
+\bibitem{ALPS1.2} F. Alet {\it et al.},  J. Phys. Soc. Jpn. Suppl. {\bf 74}, 30 (2005).
+\bibitem{ALPS1.3} F. Albuquerque {\it et al.}, J. Magn. Magn. Mat. ....
+
+
+\end{thebibliography}
+
+
+\end{document}
+
