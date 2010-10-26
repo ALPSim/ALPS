@@ -370,7 +370,9 @@ void WRun::shift_kink(wormhead_type& head,wormhead_type&)
   cyclic_iterator end   = h+1;
 
   time_struct newtime;
-  
+ 
+
+  do { 
   if (!nonlocal) {
     double time_interval  = end->time() - start->time();
     double delta_e = onsite_energy(start->state(),head.site()) -onsite_energy(h->state(),head.site());
@@ -394,6 +396,8 @@ void WRun::shift_kink(wormhead_type& head,wormhead_type&)
     newtime = subinterval[isub].start_time 
       + new_finite_exponential_random(random_y, -beta*subinterval[isub].delta_e, subinterval[isub].delta_t)();
   }
+// avoid problems with hitting the end or start of the interval
+  } while (newtime == end->time() || newtime == start->time());
 
   head = move_kink(head.site(),h,newtime);
 #ifdef USE_VECTOR
@@ -678,6 +682,8 @@ bool WRun::create_worm()
 
   // determine kink segment
   cyclic_iterator start = adjacent(first_kink(s), t1);
+  if (start->time() == t1)
+    return false;
   cyclic_iterator end   = (start.valid() ? start+1 : start);
 
   // determine states
@@ -721,6 +727,8 @@ bool WRun::create_worm()
 
   // choose time t2 - will be shifted afterwards
   time_struct t2 = t1+0.5*time;
+  if (end->time()==t2)
+    return false;
 
   // insert wormheads
   worm_head[0].set_site(s);
