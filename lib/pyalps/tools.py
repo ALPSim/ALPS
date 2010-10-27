@@ -305,8 +305,6 @@ def writeInputFiles(fname,parms, baseseed=None):
     """
     dirname = os.path.dirname(fname)
     base_name = os.path.basename(fname)
-    if os.path.exists(fname+'.out.xml'):
-      os.remove(fname+'.out.xml')
     f = file(fname+'.in.xml','w')
     f.write('<?xml version="1.0" encoding="UTF-8"?>\n')
     f.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')
