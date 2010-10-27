@@ -151,10 +151,11 @@ try {
 #endif
 
   if (argc < 2) {
-    std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename] [[NAME=value]...]\n";
+    std::cerr << "Usage: " << argv[0] << " [-f] inputfile [outputbasename] [[NAME=value]...]\n";
     std::exit(-1);
   }
 
+  bool force = false;
   bool find_in = false;
   bool find_out = false;
   std::string inname;
@@ -171,6 +172,8 @@ try {
         std::cerr << "Error: invalid parameter \"" << arg << "\"\n";
         std::exit(-1);
       }
+    } else if (arg == "-f") {
+      force = true;
     } else if (!find_in) {
       inname = arg;
       outbase = arg;
@@ -178,7 +181,7 @@ try {
     } else if (!find_out) {
       outbase = arg;
     } else {
-      std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename] [[NAME=value]...]\n";
+      std::cerr << "Usage: " << argv[0] << " [-f] inputfile [outputbasename] [[NAME=value]...]\n";
       std::exit(-1);
     }
   }
@@ -186,14 +189,13 @@ try {
   if (inname.size() >= 2 && inname.substr(0, 2) == "./") inname.erase(0, 2);
   if (outbase.size() >= 2 && outbase.substr(0, 2) == "./") outbase.erase(0, 2);
 
-  if (boost::filesystem::exists(outbase + ".out.xml")) {
+  if (!force && boost::filesystem::exists(outbase + ".out.xml")) {
     std::cerr << "Output files (" + outbase + ".out.xml, etc) exist.  "
-              << "Do you really want to delete them? [y/N] ";
+              << "Please use '-f' option to force replacing input XML files.\n"
+              << "Do you really want to overwrite input files? [y/N] ";
     char res;
     std::cin >> res;
-    if (res == 'y' || res == 'Y') {
-      boost::filesystem::remove(outbase + ".out.xml");
-    } else {
+    if (res != 'y' && res != 'Y') {
       std::cerr << "Aborted.\n";
       return 255;
     }

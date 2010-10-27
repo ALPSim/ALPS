@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   std::string simname;
   std::vector<alps::task> tasks;
 
-  alps::parapack::load_tasks(file_in, file_out, basedir, false, simname, tasks);
+  alps::parapack::load_tasks(file_in, file_out, basedir, simname, tasks, false);
 
   os << alps::start_tag("ARCHIVE")
      << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")

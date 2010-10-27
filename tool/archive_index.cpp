@@ -145,8 +145,7 @@ void Index::exec(fs::path xmlPath) {
           fs::path file_in = complete(fs::path(file_in_str), basedir);
           fs::path file_out = complete(fs::path(file_out_str), basedir);
           std::string simname;
-          alps::parapack::load_tasks(file_in, file_out, basedir,
-                                     /* check_parameter = */ false, simname, tasks);
+          alps::parapack::load_tasks(file_in, file_out, basedir, simname, tasks, false);
           BOOST_FOREACH(alps::task& t, tasks) {
             fs::path f = complete(fs::path(t.file_out_str()), basedir);
             if (fs::exists(f)) {
