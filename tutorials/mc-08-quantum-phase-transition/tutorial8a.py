@@ -58,9 +58,7 @@ for j2 in [0.,1.]:
     
 #write the input file and run the simulation
 input_file = pyalps.writeInputFiles('parm8a',parms)
-res = pyalps.runApplication('loop',input_file)
-output_file = res[1]
-pyalps.evaluateLoop(output_file)
+pyalps.runApplication('loop',input_file)
 
 data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm8a.task*.out.h5'),['Staggered Susceptibility','Susceptibility'])
 susc1=pyalps.collectXY(data,x='T',y='Susceptibility', foreach=['J2'])
