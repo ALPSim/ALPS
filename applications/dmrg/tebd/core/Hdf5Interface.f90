@@ -284,7 +284,7 @@ INTEGER(HID_T) :: dataspaceID, dataSetID
 CHARACTER(len=*), INTENT(IN) :: myData
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
-INTEGER(HID_T) len
+INTEGER(SIZE_T) len
 
  CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
  len=LEN_TRIM(myData)
@@ -343,7 +343,8 @@ CHARACTER(len=*), INTENT(IN) :: myData(:)
 INTEGER, ALLOCATABLE :: lengths(:)
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
-INTEGER :: tot_len, i
+INTEGER ::  i
+INTEGER(SIZE_T) :: tot_len
 
 ALLOCATE(lengths(SIZE(myData)))
 
