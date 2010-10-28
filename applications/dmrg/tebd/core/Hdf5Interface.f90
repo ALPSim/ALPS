@@ -22,6 +22,7 @@ MODULE Hdf5Interface
 !	====	==========	=====================
 !       8/18/10  M. L. Wall	alpha release
 !       9/13/10  M. L. Wall	Changed quantum number i/o
+!       10/27/10  M. L. Wall	Changed "Local Props" to "parameters" and truncated /timesteps/\\\\\\\# string
 !
 USE GlobalData
 USE LinearOps
@@ -283,20 +284,50 @@ INTEGER(HID_T) :: dataspaceID, dataSetID
 CHARACTER(len=*), INTENT(IN) :: myData
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
-INTEGER(HSIZE_T) len
+INTEGER(HID_T) len
 
  CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
  len=LEN_TRIM(myData)
  CALL h5tset_size_f(strtype,len,error)
  dims=1
  rank=1
- CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
+! CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
+ CALL h5screate_f(H5S_SCALAR_F,dataspaceID,error)
  CALL h5dcreate_f(groupId, dataName, strtype, dataspaceID, dataSetID, error) ! Create a dataset in group "MyGroup" with default properties.
  CALL h5dwrite_f(dataSetID, strtype, myData, dims, error)
  CALL h5sclose_f(dataspaceID, error) ! Close the dataspace for the first dataset.
  CALL h5dclose_f(dataSetID, error) ! Close the first dataset.
 
 END SUBROUTINE WriteDataToGroup_c
+
+FUNCTION ConcatenateLongString(stringLengths,strings)
+!
+!Purpose : Return the proper length concatenation of the strings in the character array strings
+! 
+IMPLICIT NONE
+INTEGER :: stringlengths(:)
+CHARACTER(len=*) :: strings(:)
+CHARACTER(len=SUM(stringLengths)+2*(SIZE(stringLengths)-1)) :: ConcatenateLongString
+INTEGER :: i, counter
+
+counter=0
+IF(SIZE(stringLengths).ne.1) THEN
+	ConcatenateLongString(counter+1:counter+stringLengths(1)+2)=TRIM(strings(1))//', '
+	counter=counter+stringLengths(1)+2
+ELSE
+	ConcatenateLongString(counter+1:counter+stringLengths(1)+2)=TRIM(strings(1))
+END IF
+DO i=2,SIZE(stringLengths)
+	IF(i.ne.SIZE(stringLengths)) THEN
+		ConcatenateLongString(counter+1:counter+stringLengths(i)+2)=TRIM(strings(i))//', '
+		counter=counter+stringLengths(i)+2
+	ELSE
+		ConcatenateLongString(counter+1:counter+stringLengths(i)+2)=TRIM(strings(i))
+	END IF
+END DO
+
+END FUNCTION ConcatenateLongString
+
 
 SUBROUTINE WriteDataToGroup_cv(myData, groupId, dataName)
 !
@@ -309,20 +340,29 @@ INTEGER(HID_T), INTENT(IN) :: groupId
 INTEGER :: rank
 INTEGER(HID_T) :: dataspaceID, dataSetID
 CHARACTER(len=*), INTENT(IN) :: myData(:)
+INTEGER, ALLOCATABLE :: lengths(:)
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
-INTEGER(HSIZE_T) ten
+INTEGER :: tot_len, i
 
- ten=10
+ALLOCATE(lengths(SIZE(myData)))
+
+DO i=1,SIZE(myData)
+	lengths(i)=LEN_TRIM(myData(i))
+END DO
+tot_len=SUM(lengths)+2*(SIZE(lengths)-1)
+
  CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
- CALL h5tset_size_f(strtype,ten,error)
+ CALL h5tset_size_f(strtype,tot_len,error)
  dims=SIZE(myData)
  rank=1
- CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
+! CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
+ CALL h5screate_f(H5S_SCALAR_F,dataspaceID,error)
  CALL h5dcreate_f(groupId, dataName, strtype, dataspaceID, dataSetID, error) ! Create a dataset in group "MyGroup" with default properties.
- CALL h5dwrite_f(dataSetID, strtype, myData, dims, error)
+ CALL h5dwrite_f(dataSetID, strtype, ConcatenateLongString(lengths,myData), dims, error)
  CALL h5sclose_f(dataspaceID, error) ! Close the dataspace for the first dataset.
  CALL h5dclose_f(dataSetID, error) ! Close the first dataset.
+
 
 END SUBROUTINE WriteDataToGroup_cv
 
@@ -509,7 +549,7 @@ INTEGER(HID_T) :: dataspaceID, dataSetID, meangrpID
 CHARACTER(len=*), INTENT(IN) :: myData
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
-INTEGER(HSIZE_T) len
+INTEGER(HID_T) len
 
  CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
  len=LEN_TRIM(myData)
@@ -540,7 +580,7 @@ INTEGER(HID_T) :: dataspaceID, dataSetID, meangrpID
 CHARACTER(len=*), INTENT(IN) :: myData(:)
 INTEGER(HSIZE_T) :: dims(1)
 INTEGER(HID_T) :: strtype
-INTEGER(HSIZE_T) ten
+INTEGER(HID_T) ten
 
  ten=10
 
@@ -763,6 +803,7 @@ CALL OpenHdf5File(outputName,outputFileID, openKind='rw')
 CALL OpenGroup("timesteps", timestepsgrpID, outputFileID) !Open timesteps group
 
 WRITE(mString,'(I8)') counter
+mString=TRIM(ADJUSTL(mString))
 CALL CreateSubGroup(mstring,counterID,timestepsgrpID) !Create new # subgroup
 	CALL CreateSubGroup("results",resultsID,counterID) !Create new results subgroup
 		CALL CreateSubGroup("cumulative truncation error",teID,resultsID) !Create new truncerr subgroup
@@ -787,7 +828,7 @@ CALL CreateSubGroup(mstring,counterID,timestepsgrpID) !Create new # subgroup
 SELECT CASE(HamiType)
 	CASE ('spin')
 		ALLOCATE(hpId(6))
-		CALL CreateSubGroup("Local Props",lpId,counterID) !Create new props subgroup
+		CALL CreateSubGroup("parameters",lpId,counterID) !Create new props subgroup
 			CALL WriteDataToGroup(time,lpId,"Time") !Write time data to /timesteps/#/
 			CALL WriteDataToGroup(simId,lpId,"SIMID")
 			CALL WriteDataToGroup(HparamsList%sp(Othercounter)%Jz,lpId,"Jz") 
@@ -851,7 +892,7 @@ SELECT CASE(HamiType)
 		DEALLOCATE(avIds, localIds, corrIds)
 	CASE ('boson Hubbard')
 		ALLOCATE(hpId(4))
-		CALL CreateSubGroup("Local Props",lpId,counterID) !Create new props subgroup
+		CALL CreateSubGroup("parameters",lpId,counterID) !Create new props subgroup
 			CALL WriteDataToGroup(time,lpId,"Time") !Write time data to /timesteps/#/
 			CALL WriteDataToGroup(simId,lpId,"SIMID")
 			CALL WriteDataToGroup(HparamsList%bp(Othercounter)%mu,lpId,"mu") 
@@ -894,7 +935,7 @@ SELECT CASE(HamiType)
 		DEALLOCATE(avIds, localIds, corrIds)
 	CASE ('hardcore boson')
 		ALLOCATE(hpId(3))
-		CALL CreateSubGroup("Local Props",lpId,counterID) !Create new props subgroup
+		CALL CreateSubGroup("parameters",lpId,counterID) !Create new props subgroup
 			CALL WriteDataToGroup(time,lpId,"Time") !Write time data to /timesteps/#/
 			CALL WriteDataToGroup(simId,lpId,"SIMID")
 			CALL WriteDataToGroup(HparamsList%hcbp(Othercounter)%mu,lpId,"mu") 
@@ -933,7 +974,7 @@ SELECT CASE(HamiType)
 		DEALLOCATE(avIds, localIds, corrIds)
 	CASE ('fermion Hubbard')
 		ALLOCATE(hpId(4))
-		CALL CreateSubGroup("Local Props",lpId,counterID) !Create new props subgroup
+		CALL CreateSubGroup("parameters",lpId,counterID) !Create new props subgroup
 			CALL WriteDataToGroup(time,lpId,"Time") !Write time data to /timesteps/#/
 			CALL WriteDataToGroup(simId,lpId,"SIMID")
 			CALL WriteDataToGroup(HparamsList%fhp(Othercounter)%mu,lpId,"mu") 
@@ -997,7 +1038,7 @@ SELECT CASE(HamiType)
 		DEALLOCATE(avIds, localIds, corrIds)
 	CASE ('spinless fermions')
 		ALLOCATE(hpId(3))
-		CALL CreateSubGroup("Local Props",lpId,counterID) !Create new props subgroup
+		CALL CreateSubGroup("parameters",lpId,counterID) !Create new props subgroup
 			CALL WriteDataToGroup(time,lpId,"Time") !Write time data to /timesteps/#/
 			CALL WriteDataToGroup(simId,lpId,"SIMID")
 			CALL WriteDataToGroup(HparamsList%sfp(Othercounter)%mu,lpId,"mu") 
