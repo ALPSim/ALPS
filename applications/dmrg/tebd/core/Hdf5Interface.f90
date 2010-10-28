@@ -42,7 +42,7 @@ END INTERFACE WriteDataToGroup
 
 INTERFACE WriteDataToMeanGroup
 	MODULE PROCEDURE WriteDataToMeanGroup_I, WriteDataToMeanGroup_Iv, WriteDataToMeanGroup_Im, WriteDataToMeanGroup_r,&
-	 WriteDataToMeanGroup_rv, WriteDataToMeanGroup_rm, WriteDataToMeanGroup_c,  WriteDataToMeanGroup_L, WriteDataToMeanGroup_cv
+	 WriteDataToMeanGroup_rv, WriteDataToMeanGroup_rm
 END INTERFACE WriteDataToMeanGroup
 
 CONTAINS 
@@ -536,88 +536,6 @@ INTEGER(HSIZE_T) :: dims(2)
  CALL CloseGroup(meangrpID)
 
 END SUBROUTINE WriteDataToMeanGroup_rm
-
-SUBROUTINE WriteDataToMeanGroup_c(myData, groupId, dataName)
-!
-!Purpose : Write myData to the group with absolute group name absGroupName and name dataStub in the file indicated by fileName
-!
-IMPLICIT NONE
-CHARACTER(len=*), INTENT(IN) ::  dataName
-CHARACTER(len=132) :: dsetName
-INTEGER(HID_T), INTENT(IN) :: groupId
-INTEGER :: rank
-INTEGER(HID_T) :: dataspaceID, dataSetID, meangrpID
-CHARACTER(len=*), INTENT(IN) :: myData
-INTEGER(HSIZE_T) :: dims(1)
-INTEGER(HID_T) :: strtype
-INTEGER(HID_T) len
-
- CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
- len=LEN_TRIM(myData)
- CALL h5tset_size_f(strtype,len,error)
- dims=1
- rank=1
- CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
- CALL CreateSubGroup("mean",meangrpID,groupId)
- CALL h5dcreate_f(meangrpID, dataName, strtype, dataspaceID, dataSetID, error) ! Create a dataset in group "MyGroup" with default properties.
- CALL h5dwrite_f(dataSetID, strtype, myData, dims, error)
- CALL h5sclose_f(dataspaceID, error) ! Close the dataspace for the first dataset.
- CALL h5dclose_f(dataSetID, error) ! Close the first dataset.
- CALL CloseGroup(meangrpID)
-
-END SUBROUTINE WriteDataToMeanGroup_c
-
-
-SUBROUTINE WriteDataToMeanGroup_cv(myData, groupId, dataName)
-!
-!Purpose : Write myData to the group with absolute group name absGroupName and name dataStub in the file indicated by fileName
-!
-IMPLICIT NONE
-CHARACTER(len=*), INTENT(IN) ::  dataName
-CHARACTER(len=132) :: dsetName
-INTEGER(HID_T), INTENT(IN) :: groupId
-INTEGER :: rank
-INTEGER(HID_T) :: dataspaceID, dataSetID, meangrpID
-CHARACTER(len=*), INTENT(IN) :: myData(:)
-INTEGER(HSIZE_T) :: dims(1)
-INTEGER(HID_T) :: strtype
-INTEGER(HID_T) ten
-
- ten=10
-
- CALL h5tcopy_f(H5T_NATIVE_CHARACTER,strtype,error)
- CALL h5tset_size_f(strtype,ten,error)
- dims=SIZE(myData)
- rank=1
- CALL h5screate_simple_f(rank, dims, dataspaceID, error) ! Create the data space for the first dataset
- CALL CreateSubGroup("mean",meangrpID,groupId)
- CALL h5dcreate_f(meangrpID, dataName, strtype, dataspaceID, dataSetID, error) ! Create a dataset in group "MyGroup" with default properties.
- CALL h5dwrite_f(dataSetID, strtype, myData, dims, error)
- CALL h5sclose_f(dataspaceID, error) ! Close the dataspace for the first dataset.
- CALL h5dclose_f(dataSetID, error) ! Close the first dataset.
- CALL CloseGroup(meangrpID)
-
-END SUBROUTINE WriteDataToMeanGroup_cv
-
-SUBROUTINE WriteDataToMeanGroup_L(myData, groupId, dataName)
-!
-!Purpose : Write myData to the group with absolute group name absGroupName and name dataStub in the file indicated by fileName
-!
-IMPLICIT NONE
-CHARACTER(len=*), INTENT(IN) ::  dataName
-INTEGER(HID_T), INTENT(IN) :: groupId
-LOGICAL, INTENT(IN) :: myData
-CHARACTER(len=5) :: strData
-
-IF(myData) THEN
-	strDAta='TRUE'
-ELSE
-	strDAta='FALSE'
-END IF
-
-CALL WriteDataToMeanGroup(strData, groupId, dataName)
-
-END SUBROUTINE WriteDataToMeanGroup_L
 
 SUBROUTINE CloseGroup(groupId)
 !
