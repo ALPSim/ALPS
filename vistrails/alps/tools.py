@@ -15,6 +15,7 @@ from core.configuration import ConfigurationObject
 import core.bundles
 import core.modules.basic_modules
 import core.modules.module_registry
+from packages.HTTP.init import HTTPFile
 import os
 import os.path
 import tempfile
@@ -381,6 +382,8 @@ class ArchiveDirectory(basic.Module):
     ]
     _output_ports = [('output', [basic.Directory])]
     
+    check_file = False
+    
     def compute(self):
         fixpath = lambda path: os.path.normpath(path.replace('/', os.path.sep))
         listify = lambda l: type(l) == type([1,2]) and l or [l]
@@ -409,13 +412,34 @@ class ArchiveDirectory(basic.Module):
             if os.path.exists(lp):
                 fpath = lp
         
+        if self.check_file:
+            try:
+                loader = HTTPFile()
+                fpath = loader.execute(self.getInputFromPort('archive')).name
+            except:
+                pass
+        
         if fpath == None:
             raise InvalidInput("Can't locate file at any location.")
         
         fpath = os.path.normpath(fpath)
-        dir = basic.Directory()
-        dir.name = fpath
-        self.setResult('output', dir)
+        
+        if self.check_file:
+            f = basic.File()
+            f.name = fpath
+            self.setResult('output', f)
+        else:
+            dir = basic.Directory()
+            dir.name = fpath
+            self.setResult('output', dir)
+
+class ArchiveFile(ArchiveDirectory):
+    _input_ports = [
+        ('archive', [basic.String]),
+        ('path', [basic.File])
+    ]
+    _output_ports = [('output', [basic.File])]
+    check_file = True
 
 def initialize(): pass
 
@@ -438,6 +462,7 @@ def selfRegister():
   reg.add_module(UnzipDirectory,namespace="Tools")
   reg.add_module(ZipDirectory,namespace="Tools")
   reg.add_module(ArchiveDirectory,namespace="Tools")
+  reg.add_module(ArchiveFile,namespace="Tools")
 
   reg.add_module(GetJobFile,namespace="Tools")
 
