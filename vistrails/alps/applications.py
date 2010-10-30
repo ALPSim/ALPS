@@ -285,7 +285,7 @@ class EvaluateFullDiagVersusH(AlpsEvaluate):
 class EvaluateLoop(alpscore.SystemCommandLogged,tools.GetSimName):
     """ 
     Runs the evaluation tool of the loop application to evaluate all measurements. This is only needed if the application was not run using the --auto-evaluate option. 
-    Note that --auto-evaluare that is automatically used if run by the RunLoop module and this module is thus not needed for pure Vistrails workflows.
+    Note that --auto-evaluate that is automatically used if run by the RunLoop module and this module is thus not needed for pure VisTrails workflows.
     """
     def compute(self):
         name = self.get_sim_name(self.getInputFromPort('dir').name)
