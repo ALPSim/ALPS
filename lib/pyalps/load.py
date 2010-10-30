@@ -26,7 +26,7 @@
 # 
 # ****************************************************************************
 
-import urllib, copy, os
+import urllib, copy, os, traceback
 import numpy as np
 
 import pyalps.hdf5 as h5
@@ -119,16 +119,20 @@ class Hdf5Loader:
                 rfile = ResultFile(f)
                 rfile.props = self.ReadParameters(proppath)
                 try:
-                  obs = self.GetObservableList(respath)
-                  rfile.props["ObservableList"] = [pt.hdf5_name_decode(x) for x in obs]
+                    obs = self.GetObservableList(respath)
+                    rfile.props["ObservableList"] = [pt.hdf5_name_decode(x) for x in obs]
                 except: pass
                 resultfiles.append(rfile)
-            except:
-                print "FILE ", f, " DOES NOT EXIST"
+            except Exception as e:
+                print e
+                print traceback.format_exc()
         return resultfiles
         
     def GetObservableList(self,respath):
-        olist = self.h5f.list_children(respath)
+        if self.h5f.is_group(respath):
+            olist = self.h5f.list_children(respath)
+        else:
+            olist = []
         return olist
 
 # Pre: file is a hdf5 file descriptor
@@ -175,8 +179,9 @@ class Hdf5Loader:
                             print "Could not create DataSet"
                             pass
                 sets.append(fileset)
-            except:
-                print "FILE ", f, " DOES NOT EXIST"
+            except Exception as e:
+                print e
+                print traceback.format_exc()
         return sets
 
     def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, index=None, loadIterations=False,verbose=False):
@@ -295,8 +300,9 @@ class Hdf5Loader:
                                     pass
                         fileset.append(sector_sets)
                 sets.append(fileset)
-            except:
-                print "FILE ", f, " DOES NOT EXIST"
+            except Exception as e:
+                print e
+                print traceback.format_exc()
         return sets
         
     # Pre: file is a hdf5 file descriptor
@@ -348,8 +354,9 @@ class Hdf5Loader:
                         print "Could not create DataSet"
                         pass
                 sets.append(fileset)
-            except:
-                print "FILE ", f, " DOES NOT EXIST"
+            except Exception as e:
+                print e
+                print traceback.format_exc()
         return sets
     
     # Pre: file is a hdf5 file descriptor
@@ -404,8 +411,9 @@ class Hdf5Loader:
                         print "Could not create DataSet"
                         pass
                 sets.append(fileset)
-            except:
-                print "FILE ", f, " DOES NOT EXIST"
+            except Exception as e:
+                print e
+                print traceback.format_exc()
         return sets
 
     # Pre: file is a hdf5 file descriptor
@@ -455,8 +463,9 @@ class Hdf5Loader:
                         obsset.append(d)
                     iterationset.append(obsset)
                 fileset.append(iterationset)
-            except:
-                print "FILE ", f, " DOES NOT EXIST"
+            except Exception as e:
+                print e
+                print traceback.format_exc()
         return fileset
         
 def loadBinningAnalysis(files,what=None,verbose=False):
@@ -584,7 +593,7 @@ def loadObservableList(files,proppath='/parameters',respath='/simulation/results
       results.append(x.props['ObservableList'])
     return results
 
-def loadTimeEvolution( flist,globalproppath='/parameters/',resroot='/timesteps/',localpropsuffix='/Local Props', measurements=None):
+def loadTimeEvolution( flist,globalproppath='/parameters/',resroot='/timesteps/',localpropsuffix='/parameters', measurements=None):
     ll=Hdf5Loader()
     data=[]
     #loop over files
@@ -600,14 +609,15 @@ def loadTimeEvolution( flist,globalproppath='/parameters/',resroot='/timesteps/'
             globalprops=ll.GetProperties([f],globalproppath)
             for d in stepper:
                 #Get the measurements from the numbered subgroups
-                locdata=ll.ReadMeasurementFromFile([f],proppath=resroot+str(d).rjust(8)+localpropsuffix, \
-                respath=resroot+str(d).rjust(8)+'/results', measurements=measurements)
+                locdata=ll.ReadMeasurementFromFile([f],proppath=resroot+str(d)+localpropsuffix, \
+                respath=resroot+str(d)+'/results', measurements=measurements)
                 #Append the global props to the local props
                 locdata[0][0].props.update(globalprops[0].props)
                 #Extend the total dataset with this data
                 data.extend(locdata)
-        except:
-            print "FILE ", f, " DOES NOT EXIST"
+        except Exception as e:
+            print e
+            print traceback.format_exc()
     return data
     
 
