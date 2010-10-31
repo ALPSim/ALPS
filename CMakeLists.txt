@@ -648,22 +648,22 @@ else (ALPS_BUILD_SOURCE)
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
     install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR} COMPONENT vistrails
-          FILES_MATCHING PATTERN "*.py"
+          FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
 
     install(DIRECTORY vistrails/alps DESTINATION ${VISTRAILS_PACKAGE_DIR} COMPONENT vistrails
-        FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml"
+        FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml" PATTERN "*.pyc"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   endif (ALPS_FOR_VISTRAILS)
 
   if (NOT ALPS_FOR_VISTRAILS)
     if(ALPS_INSTALL_VISTRAILS_PACKAGES)
       install(DIRECTORY vistrails/alps DESTINATION  ${VISTRAILS_APP_DIR}/${VISTRAILS_PACKAGE_DIR} COMPONENT vistrails
-          FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml"
+          FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml" PATTERN "*.pyc"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
         install(DIRECTORY lib/pyalps DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR} COMPONENT vistrails
-              FILES_MATCHING PATTERN "*.py"
+              FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
               PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
 
     endif(ALPS_INSTALL_VISTRAILS_PACKAGES)
@@ -673,7 +673,7 @@ else (ALPS_BUILD_SOURCE)
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
     install(DIRECTORY lib/pyalps DESTINATION lib  COMPONENT python
-          FILES_MATCHING PATTERN "*.py"
+          FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
           
     install(DIRECTORY ${PROJECT_BINARY_DIR}/lib/xml DESTINATION ${ALPS_XML_PATH} COMPONENT xml)
@@ -722,13 +722,6 @@ if(ALPS_PATCH_VISTRAILS)
         install(DIRECTORY ${VISTRAILS_GIT_DIR}/vistrails  COMPONENT vistrails
                 DESTINATION .
                 PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
-    install(FILES ${VISTRAILS_GIT_DIR}/dist/windows/Input/git.exe 
-                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/tar.exe 
-                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/libiconv-2.dll 
-                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/libiconv2.dll 
-                  ${VISTRAILS_GIT_DIR}/dist/windows/Input/libintl-2.dll
-                  COMPONENT vistrails
-                  DESTINATION ${VISTRAILS_APP_NAME})
     else (WIN32)
       message(ERROR "Cannot patch VisTrails on this system. Probably you can just install the latest Vistrails nightly snapshot.")
     endif (WIN32)
