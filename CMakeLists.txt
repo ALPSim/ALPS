@@ -692,9 +692,9 @@ else (ALPS_BUILD_SOURCE)
     else (VISTRAILS_FOUND AND (APPLE OR WIN32))
       set(PYTHONEXEC python)
     endif (VISTRAILS_FOUND AND (APPLE OR WIN32))
-    configure_file(latex/vistrails.sty.in ${PROJECT_BINARY_DIR}/latex/vistrails.sty)
+    configure_file(vistrails/latex/vistrails.sty.in ${PROJECT_BINARY_DIR}/vistrails/latex/vistrails.sty)
 
-    install(FILES latex/includevistrail.py ${PROJECT_BINARY_DIR}/latex/vistrails.sty 
+    install(FILES vistrails/latex/includevistrail.py ${PROJECT_BINARY_DIR}/vistrails/latex/vistrails.sty 
             DESTINATION share/alps/latex COMPONENT vistrails)
 
   endif (NOT ALPS_FOR_VISTRAILS)
@@ -960,7 +960,9 @@ if(WIN32 AND NOT UNIX)
   set(CPACK_NSIS_CONTACT "wistaria@comp-phys.org")
   set(CPACK_NSIS_HELP_LINK "http://alps.comp-phys.org")
   set(CPACK_NSIS_URL_INFO_ABOUT "http://alps.comp-phys.org")
-  set(CPACK_NSIS_MODIFY_PATH ON)
+  if (NOT ALPS_FOR_VISTRAILS)
+    set(CPACK_NSIS_MODIFY_PATH ON)
+  endif (NOT ALPS_FOR_VISTRAILS)
   
 # Encode the compiler name in the package 
 #    if (MSVC90)

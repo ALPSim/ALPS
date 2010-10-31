@@ -39,17 +39,35 @@
 \newwrite\pythonincludein
 
 %% by default we will run vistrails on the web server
-\newcommand{\vistrailspath}{http://alps.comp-phys.org/vistrails/run_vistrails.php}
+\newcommand{\vistrailspath}{http://www.vistrails.org/extensions/run_vistrails.php}
+
+%% by default we will run ALPS vistrails on the ALPS  server
+\newcommand{\alpsvistrailspath}{http://alps.comp-phys.org/vistrails/run_vistrails.php}
 
 %% full path to python or just python if it is on PATH
 \newcommand{\vistrailspythonpath}{@PYTHONEXEC@}
 
 %% this is for allowing line breaks, empty values in vistrails command's options
 \def\vistrail{\kernel@ifnextchar [{\@vistrail}{\@vistrail[]}}
+\def\alpsvistrail{\kernel@ifnextchar [{\@alpsvistrail}{\@alpsvistrail[]}}
 
 \def\@vistrail[#1]#2{%
 \immediate\openout\pythonincludein=\jobname.cmdline
 \immediate\write\pythonincludein{path=\vistrailspath}
+\setkeys{vt}{#1}
+\ifx\@empty#2\@empty
+    \immediate\write\pythonincludein{other=}
+\else
+    \immediate\write\pythonincludein{other=\string#2}
+\fi
+\immediate\closeout\pythonincludein
+\immediate\write18{\vistrailspythonpath \space includevistrail.py \jobname.cmdline > \jobname.cmdline.out 2> \jobname.cmdline.err}
+\immediate\input\jobname.cmdline.out
+}
+
+\def\@alpsvistrail[#1]#2{%
+\immediate\openout\pythonincludein=\jobname.cmdline
+\immediate\write\pythonincludein{path=\alpsvistrailspath}
 \setkeys{vt}{#1}
 \ifx\@empty#2\@empty
     \immediate\write\pythonincludein{other=}
