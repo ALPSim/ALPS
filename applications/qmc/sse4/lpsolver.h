@@ -96,6 +96,8 @@ public:
 		lp = make_lp(0, size);
 		if (lp == NULL)
 			throw std::runtime_error("Cannot initialize lpkit.");
+			
+		set_verbose(lp, IMPORTANT);
 	}
 	
 	bool add_constraint(Equation& eq, unsigned type, double value)

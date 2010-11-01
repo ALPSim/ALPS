@@ -114,7 +114,8 @@ bool SSE::find_minbounce(double weight_before[4],double weight_after[4],double w
   lprec *lp1;
   
   lp1=make_lp(0,16); // 16 variables, 0 constraints 
-  
+  set_verbose(lp1, IMPORTANT);
+
   // Probabilities constraints (16)
   for (int i=1;i<=16;i++) {
     set_lowbo(lp1,i,0.); 
