@@ -79,6 +79,7 @@ pyalps.plot.plot(Mag)
 plt.xlabel('Time $t$')
 plt.yscale('log')
 plt.ylabel('Magnetization Error')
+plt.title('Error in the magnetization vs. time for $\chi$=10, 20, 30, 40')
 plt.show()
 
 

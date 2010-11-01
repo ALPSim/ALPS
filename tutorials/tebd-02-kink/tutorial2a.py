@@ -55,8 +55,8 @@ parms = [{
 
 
 baseName='tutorial_2a'
-nmlname=pyalps.writeTEBDfiles(parms, baseName)
-res=pyalps.runTEBD(nmlname)
+#nmlname=pyalps.writeTEBDfiles(parms, baseName)
+#res=pyalps.runTEBD(nmlname)
 
 #Get the results of the simulation
 Data=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_2a'), measurements=['Local Magnetization'])
@@ -127,6 +127,7 @@ plt.figure()
 pyalps.plot.plot([exactMag, numericalMag])
 plt.xlabel('Time $t$')
 plt.ylabel('Magnetization')
+plt.title('Magnetization vs. time for $n=1,2$; numerical and exact results')
 
 #Plot the scaling form with the numerical data for comparison
 Scal=pyalps.collectXY(scalingForm, x='Time', y='Local Magnetization', foreach=['Distance'])
@@ -135,6 +136,7 @@ pyalps.plot.plot(Scal)
 plt.xlabel('Scaling variable $n/t$')
 plt.ylabel('Magnetization$(n,t)$')
 plt.xlim(0,1.5)
+plt.title('Magnetization scaling function; numerical and exact results')
 plt.show()
 
 

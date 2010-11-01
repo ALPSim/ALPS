@@ -73,16 +73,19 @@ res=pyalps.runTEBD(nmlnameList)
 LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1a'), measurements=['U', 'Loschmidt Echo'])
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
+
 plt.figure()
 pyalps.plot.plot(LE)
 plt.xlabel('Time $t$')
 plt.ylabel('Loschmidt Echo $|< \psi(0)|\psi(t) > |^2$')
+plt.title(r'Loschmidt Echo vs. Time for $\tau =5,10,15,25,50$')
 
 Ufig=pyalps.collectXY(LEdata, x='Time', y='U',foreach=['SIMID'])
 plt.figure()
 pyalps.plot.plot(Ufig)
 plt.xlabel('Time $t$')
 plt.ylabel('U')
+plt.title(r'Interaction parameter $U$ vs. Time for $\tau =5,10,15,25,50$')
 plt.show()
 
 
