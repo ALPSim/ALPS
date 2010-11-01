@@ -102,7 +102,7 @@ namespace ietl {
     }
     vector_type new_vector() const {
       vector_wrapper<V> v(new V(n_));
-      clear(v.get());
+      clear(*v.get());
       return v;
     }
     

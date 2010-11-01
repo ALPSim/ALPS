@@ -42,8 +42,8 @@ namespace ietl {
     std::generate(c.begin(),c.end(),gen);
   }  
 
-  template < class T> 
-    inline void clear(boost::numeric::ublas::vector<T>& c) {
+  template < class T, class S>
+    inline void clear(boost::numeric::ublas::vector<T,S>& c) {
     c.clear();
   }  
 
