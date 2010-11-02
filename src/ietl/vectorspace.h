@@ -122,11 +122,13 @@ template <class VS>
    return vs.vec_dimension();
  } 
 
+   /*
  template <class V, class VS>
    void project(ietl::vector_wrapper<V>& v, const VS& vs) {
    vs.project(v);
  }
- 
+ */
+
  template <class V, class S>
    class scaled_vector_wrapper {
    public:
