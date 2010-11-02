@@ -10,12 +10,3 @@ DEB_CMAKE_EXTRA_FLAGS = -DALPS_BUILD_APPLICATIONS:BOOL=ON -DALPS_ENABLE_OPENMP:B
 
 # Allow parallel builds
 DEB_BUILD_PARALLEL = yes
-
-# Copy python files
-install/python-pyalps::
-	mkdir -p debian/python-pyalps/usr/lib/pyshared/python2.6/pyalps
-	cp -ar debian/tmp/usr/lib/pyalps/* \
-	  debian/python-pyalps/usr/lib/pyshared/python2.6/pyalps
-	mkdir -p debian/python-pyalps/usr/share/pyshared/alps
-	cp -ar debian/tmp/usr/lib/python/alps/* \
-	  debian/python-pyalps/usr/share/pyshared/alps
