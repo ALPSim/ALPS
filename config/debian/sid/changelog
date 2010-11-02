@@ -1,6 +1,6 @@
 alps (2.0.0~b4-1) unstable; urgency=low
 
-  * Initial release. (Closes: #317973)
-  * Create debian packages for 2.0.0 beta 4.
+  * Initial release for 2.0.0b4. (Closes: #317973)
+  * lintian-clean (except for binary-without-manpage).
 
- -- Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>  Tue, 02 Nov 2010 14:25:25 +0900
+ -- Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>  Tue, 02 Nov 2010 16:42:13 +0900
