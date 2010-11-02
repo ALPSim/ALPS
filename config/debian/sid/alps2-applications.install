@@ -4,7 +4,6 @@ debian/tmp/usr/bin/fulldiag usr/bin/
 debian/tmp/usr/bin/fulldiag_evaluate usr/bin/
 debian/tmp/usr/bin/hirschfye usr/bin/
 debian/tmp/usr/bin/loop usr/bin/
-debian/tmp/usr/bin/lowa usr/bin/
 debian/tmp/usr/bin/qwl usr/bin/
 debian/tmp/usr/bin/qwl_evaluate usr/bin/
 debian/tmp/usr/bin/sparsediag usr/bin/
