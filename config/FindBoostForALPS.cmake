@@ -20,7 +20,16 @@ if (NOT Boost_ROOT_DIR)
   #  set(Boost_USE_STATIC_LIBS ON)
   # Debug flag for FindBoost.cmake
   #  set(Boost_DEBUG TRUE)
-  find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
+
+  # We do not require Boost.MPI, therefore check whether Boost.MPI exists
+  # before actual find_package for Boost.
+  # - Ubuntu 10.10 does not have Boost.MPI package.
+  find_package(Boost 1.42.0 COMPONENTS mpi)
+  if (Boost_FOUND)
+    find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
+  else (Boost_FOUND)
+    find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread)
+  endif (Boost_FOUND)
   if (APPLE AND NOT Boost_FOUND)
     find_package(boost COMPONENTS date_time-mt filesystem-mt program_options-mt python-mt regex-mt system-mt serialization-mt thread-mt mpi-mt)
   endif(APPLE AND NOT Boost_FOUND)
