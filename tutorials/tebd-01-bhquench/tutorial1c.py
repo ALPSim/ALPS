@@ -36,14 +36,13 @@ for A in [1.0, 1.5, 2.0, 2.5, 3.0]:
         count+=1
         parms.append({ 
                   'L'                         : 10,
-                  'MODEL'                     : 'boson Hubbard',
-                  'Nmax'                   : 5,
+                  'MODEL'                     : 'hardcore boson',
                   'CONSERVED_QUANTUMNUMBERS'  : 'N',
-                  'N' : 10,
+                  'N' : 5,
                   'ITP_t'                         : 1.0,
-                  'ITP_U'                         : 10.0,
+                  'ITP_V'                         : 10.0,
                   't'                         : 1.0,
-                  'U'                         : 10.0,
+                  'V'                         : 10.0,
                   'ITP_CHIS' : [20, 30, 35],
                   'ITP_DTS' : [0.05, 0.05,0.025],
                   'ITP_CONVS' : [1E-8, 1E-8, 1E-9],
@@ -53,9 +52,9 @@ for A in [1.0, 1.5, 2.0, 2.5, 3.0]:
                   'NUM_THREADS' : 1,
                   'TAUS' : [10.0,  10.0],
                   'POWS' : [1.0, A],
-                  'GS' : ['U',  'U'],
-                  'GIS' : [10.0,  1.0],
-                  'GFS' : [1.0,  10.0],
+                  'GS' : ['V',  'V'],
+                  'GIS' : [10.0,  0.0],
+                  'GFS' : [0.0,  10.0],
                   'NUMSTEPS' : [1000,  1000],
                   'STEPSFORSTORE' : [10, 5],
                   'SIMID' : count
@@ -69,7 +68,7 @@ nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
 res=pyalps.runTEBD(nmlnameList)
 
 #Load the loschmidt echo and U
-LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1c'), measurements=['U', 'Loschmidt Echo'])
+LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1c'), measurements=['V', 'Loschmidt Echo'])
 for q in LEdata:
 	q[0].props['']='$p$='+str(q[0].props['POWS'][1])
 	q[1].props['']='$p$='+str(q[0].props['POWS'][1])
@@ -83,12 +82,12 @@ plt.title('Loschmidt Echo vs. Time ')
 plt.legend(loc='lower left')
 
 
-Ufig=pyalps.collectXY(LEdata, x='Time', y='U',foreach=[''])
+Ufig=pyalps.collectXY(LEdata, x='Time', y='V',foreach=[''])
 plt.figure()
 pyalps.plot.plot(Ufig)
 plt.xlabel('Time $t$')
 plt.ylabel('U')
-plt.title('Interaction parameter $U$ vs. Time')
+plt.title('Interaction parameter $V$ vs. Time')
 plt.legend(loc='lower left')
 plt.show()
 

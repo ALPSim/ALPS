@@ -32,18 +32,17 @@ import pyalps.plot
 #prepare the input parameters
 parms=[]
 count=0
-for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
+for A in [5.0, 12.0, 15.0, 25.0, 50.0]:
         count+=1
         parms.append({ 
                   'L'                         : 10,
-                  'MODEL'                     : 'boson Hubbard',
-                  'Nmax'                   : 5,
+                  'MODEL'                     : 'hardcore boson',
                   'CONSERVED_QUANTUMNUMBERS'  : 'N',
-                  'N' : 10,
+                  'N' : 5,
                   'ITP_t'                         : 1.0,
-                  'ITP_U'                         : 10.0,
+                  'ITP_V'                         : 10.0,
                   't'                         : 1.0,
-                  'U'                         : 10.0,
+                  'V'                         : 10.0,
                   'ITP_CHIS' : [20, 30, 35], 
                   'ITP_DTS' : [0.05, 0.05,0.025],
                   'ITP_CONVS' : [1E-8, 1E-8, 1E-9],
@@ -53,9 +52,9 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
                   'NUM_THREADS' : 1,
                   'TAUS' : [10.0, A, 10.0],
                   'POWS' : [1.0, 0.0,1.0],
-                  'GS' : ['U', 'U', 'U'],
-                  'GIS' : [10.0,1.0, 1.0],
-                  'GFS' : [1.0, 1.0, 10.0],
+                  'GS' : ['V', 'V', 'V'],
+                  'GIS' : [10.0,0.0, 0.0],
+                  'GFS' : [0.0, 0.0, 10.0],
                   'NUMSTEPS' : [500, int(A/0.05), 500],
                   'STEPSFORSTORE' : [5,5, 3],
                   'SIMID' : count
@@ -68,7 +67,7 @@ nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
 res=pyalps.runTEBD(nmlnameList)
 
 #Load the loschmidt echo and U
-LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1b'), measurements=['Loschmidt Echo', 'U'])
+LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1b'), measurements=['Loschmidt Echo', 'V'])
 for q in LEdata:
 	q[0].props['']=r'$\tau_{\mathrm{hold}}=$'+str(q[0].props['TAUS'][1])
 	q[1].props['']=r'$\tau_{\mathrm{hold}}=$'+str(q[0].props['TAUS'][1])
@@ -82,12 +81,12 @@ plt.ylabel('Loschmidt Echo $|< \psi(0)|\psi(t) > |^2$')
 plt.title('Loschmidt Echo vs. Time')
 plt.legend(loc='lower right')
 
-Ufig=pyalps.collectXY(LEdata, x='Time', y='U',foreach=[''])
+Ufig=pyalps.collectXY(LEdata, x='Time', y='V',foreach=[''])
 plt.figure()
 pyalps.plot.plot(Ufig)
 plt.xlabel('Time $t$')
-plt.ylabel('U')
-plt.title('Interaction parameter $U$ vs. Time')
+plt.ylabel('V')
+plt.title('Interaction parameter $V$ vs. Time')
 plt.legend()
 plt.show()
 
