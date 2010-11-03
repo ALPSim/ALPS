@@ -73,15 +73,18 @@ for q in Magdata:
         loc=-0.5*scipy.special.jn(0,q[0].props['Time'])*scipy.special.jn(0,q[0].props['Time'])
         #Get the difference between the computed and exact results
         q[0].y=[abs(q[0].y[syssize/2+1-1]-loc)]
+	dt=round(q[0].props['TAUS']/q[0].props['NUM TIME STEPS'],3)
+	q[0].props['']='dt='+str(dt)
 
 #Plot the Error in the magnetization one site to the right of the chain center
-Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
+Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=[''])
 plt.figure()
 pyalps.plot.plot(Mag)
 plt.xlabel('Time $t$')
 plt.yscale('log')
 plt.ylabel('Magnetization Error')
-plt.title('Error in the magnetization vs. time for dt=0.2, 0.08, 0.04, 0.026, and 0.02')
+plt.title('Error in the magnetization vs. time')
+plt.legend(loc='lower left')
 plt.show()
 
 

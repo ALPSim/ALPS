@@ -55,8 +55,8 @@ parms = [{
 
 
 baseName='tutorial_2a'
-#nmlname=pyalps.writeTEBDfiles(parms, baseName)
-#res=pyalps.runTEBD(nmlname)
+nmlname=pyalps.writeTEBDfiles(parms, baseName)
+res=pyalps.runTEBD(nmlname)
 
 #Get the results of the simulation
 Data=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_2a'), measurements=['Local Magnetization'])
@@ -79,7 +79,9 @@ for q in Data:
                 exactCopy=copy.deepcopy(q)
                 
                 numericalCopy[0].props['Distance']=n
+                numericalCopy[0].props['']='Numerical at n='+str(n)
                 exactCopy[0].props['Distance']=n
+                exactCopy[0].props['']='Exact at n='+str(n)
 
                 #compute the exact result of the manetization n sites from the center
                 loc=0.0
@@ -110,31 +112,35 @@ for q in Data:
                 if n==0:
                         scalingCopy[0].props['Time']=1.0/scalingCopy[0].props['Time']
                         scalingCopy[0].y=[-(1.0/3.1415926)*math.asin(min(scalingCopy[0].props['Time'],1.0))]
+	                scalingCopy[0].props['']='Exact'
 
                 #The other distances contain the numerical data as a function of the scaling variable M(n/t)
                 else:
                         scalingCopy[0].props['Time']=n/scalingCopy[0].props['Time']
                         scalingCopy[0].y=[scalingCopy[0].y[syssize/2+n-1] ]
+	                scalingCopy[0].props['']='Numerical at n='+str(n)
                 #add to the scaling dataset
                 scalingForm.extend(scalingCopy)
 
 
 
 #Plot the numerical and exact magnetization for comparison
-exactMag=pyalps.collectXY(exactResult, x='Time', y='Local Magnetization',foreach=['Distance'])
-numericalMag=pyalps.collectXY(numericalResult, x='Time', y='Local Magnetization',foreach=['Distance'])
+exactMag=pyalps.collectXY(exactResult, x='Time', y='Local Magnetization',foreach=[''])
+numericalMag=pyalps.collectXY(numericalResult, x='Time', y='Local Magnetization',foreach=[''])
 plt.figure()
 pyalps.plot.plot([exactMag, numericalMag])
 plt.xlabel('Time $t$')
 plt.ylabel('Magnetization')
-plt.title('Magnetization vs. time for $n=1,2$; numerical and exact results')
+plt.legend(loc='lower right')
+plt.title('Magnetization vs. time')
 
 #Plot the scaling form with the numerical data for comparison
-Scal=pyalps.collectXY(scalingForm, x='Time', y='Local Magnetization', foreach=['Distance'])
+Scal=pyalps.collectXY(scalingForm, x='Time', y='Local Magnetization', foreach=[''])
 plt.figure()
 pyalps.plot.plot(Scal)
 plt.xlabel('Scaling variable $n/t$')
 plt.ylabel('Magnetization$(n,t)$')
+plt.legend()
 plt.xlim(0,1.5)
 plt.title('Magnetization scaling function; numerical and exact results')
 plt.show()

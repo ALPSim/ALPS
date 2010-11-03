@@ -70,21 +70,26 @@ res=pyalps.runTEBD(nmlnameList)
 
 #Load the loschmidt echo and U
 LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1c'), measurements=['U', 'Loschmidt Echo'])
+for q in LEdata:
+	q[0].props['']='$p$='+str(q[0].props['POWS'][1])
+	q[1].props['']='$p$='+str(q[0].props['POWS'][1])
 
-LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
+LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=[''])
 plt.figure()
 pyalps.plot.plot(LE)
 plt.xlabel('Time $t$')
 plt.ylabel('Loschmidt Echo $|< \psi(0)|\psi(t) > |^2$')
-plt.title(r'Loschmidt Echo vs. Time for $p =1, 3/2, 3, 5/2, 3$')
+plt.title('Loschmidt Echo vs. Time ')
+plt.legend(loc='lower left')
 
 
-Ufig=pyalps.collectXY(LEdata, x='Time', y='U',foreach=['SIMID'])
+Ufig=pyalps.collectXY(LEdata, x='Time', y='U',foreach=[''])
 plt.figure()
 pyalps.plot.plot(Ufig)
 plt.xlabel('Time $t$')
 plt.ylabel('U')
-plt.title(r'Interaction parameter $U$ vs. Time for $p =1, 3/2, 3, 5/2, 3$')
+plt.title('Interaction parameter $U$ vs. Time')
+plt.legend(loc='lower left')
 plt.show()
 
 

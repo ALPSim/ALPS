@@ -58,8 +58,8 @@ for z in [0.0, 0.3, 0.9, 1.0, 1.1, 1.5]:
 	        })
 
 baseName='tutorial_2d'
-#nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
-#res=pyalps.runTEBD(nmlnameList)
+nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
+res=pyalps.runTEBD(nmlnameList)
 
 #Get magnetization data
 Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(prefix='tutorial_2d'), measurements=['Local Magnetization'])
@@ -72,14 +72,16 @@ for q in Magdata:
 	loc=0.5*(syssize/2)
 	#\Delta M-=<S_n^z(t)> from n=L/2 to L
 	q[0].y=[0.5*(syssize/2)+sum(q[0].y[syssize/2:syssize])]
+	q[0].props['']='Jz='+str(q[0].props['Jz'])
 
 #Plot the integrated magnetization
-Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
+Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['Jz'])
 plt.figure()
 pyalps.plot.plot(Mag)
 plt.xlabel('Time $t$')
 plt.ylabel('Integrated Magnetization $\Delta M(t)$')
-plt.title('Integrated Magnetization vs. Time, Jz=0, 0.3, 0.9, 1.0, 1.1, 1.5')
+plt.title('Integrated Magnetization vs. Time')
+plt.legend(loc='upper left')
 plt.show()
 
 
