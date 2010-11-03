@@ -96,6 +96,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
 
                    'GenerateDataSet': (dataset.PrepareDataSets,{}),
                    'LoadDataSet': (dataset.LoadDataSetsFromTextFile,{}),
+                   'LoadDataSetsFromTextFile': (dataset.LoadDataSetsFromTextFile,{}),
                    'CustomLoader': (dataset.LoadCustomFile,{}),
                    'CollectXY': (dataset.CollectDataSets,{}),
                    'CollectDataSets': (dataset.CollectDataSets,{}),
