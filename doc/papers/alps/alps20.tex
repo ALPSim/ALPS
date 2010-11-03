@@ -1,9 +1,11 @@
 \documentclass[3p,twocolumn]{elsarticle}
+\usepackage{vistrails}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{amsmath}
 \usepackage{color}
 \usepackage{hyperref}
+
 \journal{Computer Physics Communications}
 %\journal{The Onion}
 
@@ -50,7 +52,7 @@
 \address[goettingen]{Institut f\"ur Theoretische Physik, Georg-August-Universit\"{a}t G\"{o}ttingen, G\"{o}ttingen, Germany}
 \address[columbia]{Columbia University, New York, NY 10027, USA}
 \address[bonn]{Bethe Center for Theoretical Phyics, Universit\"{a}t Bonn, Bonn, Germany}
-\address[jaea]{Center for Computational Science & e-Systems, Japan Atomic Energy Agency, 110-0015 Tokyo, Japan}
+\address[jaea]{Center for Computational Science \& e-Systems, Japan Atomic Energy Agency, 110-0015 Tokyo, Japan}
 \address[crest]{Core Research for Evolutional Science and Technology, Japan Science and Technology Agency, 332-0012 Kawaguchi, Japan}
 \address[harvard]{} 
 \address[affpol]{Institute of Physics, A. Mickiewicz University, ul. Umultowska 85, 61-614 Poznan, Poland}
@@ -123,6 +125,53 @@ from our web server at \url{http://alps.comp-phys.org/}.
 \label{}
 
 In this paper we present release 2.0 of the ALPS project  (Algorithms and Libraries for Physics Simulations), an open source software development project for strongly correlated lattice models. We will present a short overview  and focus on new features compared to the previous releases \cite{ALPS1.2,ALPS1.3}.
+
+\begin{figure}
+\begin{center}
+\vistrail[host=alps.ethz.ch,
+db=tutorials,
+vtid=2,
+version=225,
+pdf,
+showspreadsheetonly]{width=8cm}
+\caption{A figure}
+\label{green}
+\end{center}
+\end{figure}
+
+
+\begin{figure}
+\begin{center}
+\vistrail[host=alps.ethz.ch,
+db=tutorials,
+vtid=2,
+version=225,
+pdf,
+showworkflow,
+showspreadsheetonly]{width=8cm}
+\caption{A workflow}
+\label{workflow}
+\end{center}
+\end{figure}
+
+
+
+\begin{figure}
+\begin{center}
+\vistrail[host=alps.ethz.ch,
+db=tutorials,
+vtid=2,
+version=225,
+pdf,
+showtree,
+showspreadsheetonly]{width=8cm}
+\caption{A workflow}
+\label{tree}
+\end{center}
+\end{figure}
+
+
+
 
 \begin{thebibliography}{99} 
 \bibitem{ALPS1.2} F. Alet {\it et al.},  J. Phys. Soc. Jpn. Suppl. {\bf 74}, 30 (2005).

@@ -688,13 +688,13 @@ else (ALPS_BUILD_SOURCE)
             DESTINATION share/alps COMPONENT build)
 
     if (VISTRAILS_FOUND AND (APPLE OR WIN32))
-      set(PYTHONEXEC vispython)
+      set(PYTHONEXEC "${CMAKE_INSTALL_PREFIX}/bin/vispython")
     else (VISTRAILS_FOUND AND (APPLE OR WIN32))
       set(PYTHONEXEC python)
     endif (VISTRAILS_FOUND AND (APPLE OR WIN32))
-    configure_file(vistrails/latex/vistrails.sty.in ${PROJECT_BINARY_DIR}/vistrails/latex/vistrails.sty)
+    configure_file(vistrails/latex/alpsvistrails.sty.in ${PROJECT_BINARY_DIR}/vistrails/latex/alpsvistrails.sty)
 
-    install(FILES vistrails/latex/includevistrail.py ${PROJECT_BINARY_DIR}/vistrails/latex/vistrails.sty 
+    install(FILES vistrails/latex/includevistrail.py ${PROJECT_BINARY_DIR}/vistrails/latex/alpsvistrails.sty 
             DESTINATION share/alps/latex COMPONENT vistrails)
 
   endif (NOT ALPS_FOR_VISTRAILS)
