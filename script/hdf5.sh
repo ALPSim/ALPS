@@ -19,6 +19,7 @@ LOG="$0.log.$$"
 echo "executing $0 $*" | tee "$LOG"
 
 URL="http://ftp.hdfgroup.org/ftp/HDF5/current/src/hdf5-$VERSION.tar.gz"
+# URL="http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-$VERSION/src/hdf5-$VERSION.tar.gz"
 SRC="$SRC_DIR/hdf5-$VERSION.tar.gz"
 
 echo "cleaning up..." | tee -a "$LOG"
