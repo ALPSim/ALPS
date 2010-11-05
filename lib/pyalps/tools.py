@@ -34,7 +34,7 @@ import platform
 import sys
 import glob
 import numpy as np
-
+import pyalps.hdf5 as h5
 from pyalps.pytools import convert2xml, hdf5_name_encode, hdf5_name_decode, rng
 import pyalps.pytools # the C++ conversion functions
 from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadObservableList, loadProperties
@@ -557,21 +557,9 @@ def save_parameters(filename, parms):
           filename: the name of the HDF5 file
           parms: the parameter dict
     """
-    f1 = h5py.File(filename, 'w')
-    subgroup = f1.create_group('/parameters')
-    
+    f1=h5.oArchive(filename)
     for key in parms.keys():
-        if(type(parms[key])==str):
-            tid = h5py.h5t.C_S1.copy()
-            tid.set_size(len(parms[key]))
-        elif(type(parms[key])==int):
-            tid = h5py.h5t.NATIVE_INT32.copy()
-        else:
-            tid = h5py.h5t.NATIVE_DOUBLE.copy()
-        dset=subgroup.create_dataset(key, (), tid)
-        dset[...] = parms[key]
-    f1.close()
-
+        f1.write('/parameters/'+key,parms[key])
 	
 def runTEBD(infileList):
     """ run a TEBD application """
