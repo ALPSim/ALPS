@@ -20,7 +20,7 @@
       <location id="2" x="-7.50003808567" y="154.615089593" />
     </add>
     <add id="6" objectId="3" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="" />
+      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6" />
     </add>
     <add id="7" objectId="0" parentObjId="3" parentObjType="module" what="function">
       <function id="0" name="name" pos="0" />
@@ -32,7 +32,7 @@
       <location id="3" x="-211.395928575" y="320.022215173" />
     </add>
     <add id="10" objectId="4" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="" />
+      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6" />
     </add>
     <add id="11" objectId="1" parentObjId="4" parentObjType="module" what="function">
       <function id="1" name="name" pos="0" />

@@ -38,7 +38,7 @@
       <location id="1" x="-11.247987532" y="128.808470094" />
     </add>
     <add id="12" objectId="2" parentObjId="" parentObjType="" what="group">
-      <group cache="1" id="2" name="Group" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
+      <group cache="1" id="2" name="Group" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
         <workflow id="" name="untitled" version="" vistrail_id="">
           <connection id="4">
             <port id="7" moduleId="5" moduleName="RichTextCell" name="Location" signature="(edu.utah.sci.vistrails.spreadsheet:CellLocation)" type="destination" />
@@ -63,7 +63,7 @@
           <module cache="1" id="5" name="RichTextCell" namespace="" package="edu.utah.sci.vistrails.spreadsheet" tag="" version="0.9.0">
             <location id="5" x="8.65697381113" y="-140.770322814" />
           </module>
-          <module cache="1" id="6" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
+          <module cache="1" id="6" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
             <location id="6" x="-244.358989205" y="140.041993813" />
             <function id="3" name="name" pos="0">
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="Location" />
@@ -72,19 +72,19 @@
           <module cache="1" id="2101" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" tag="" version="0.8.0">
             <location id="2872" x="-18.1713475845" y="-43.2756497008" />
           </module>
-          <module cache="1" id="2102" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
+          <module cache="1" id="2102" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
             <location id="2873" x="60.6541328043" y="134.703987597" />
             <function id="1658" name="name" pos="0">
               <parameter alias="" id="1845" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="filename" />
             </function>
           </module>
-          <module cache="1" id="2103" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
+          <module cache="1" id="2103" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
             <location id="2874" x="159.669999398" y="-130.813420028" />
             <function id="1659" name="name" pos="0">
               <parameter alias="" id="1846" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="value" />
             </function>
           </module>
-          <module cache="1" id="2104" name="File" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="">
+          <module cache="1" id="2104" name="File" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
             <location id="2875" x="33.549230776" y="40.1134111317" />
           </module>
         </workflow>
@@ -97,7 +97,7 @@
       <location id="2" x="1.33423112822" y="13.5808740986" />
     </add>
     <add id="15" objectId="3" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="" />
+      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6" />
     </add>
     <add id="16" objectId="4" parentObjId="3" parentObjType="module" what="function">
       <function id="4" name="name" pos="0" />
@@ -109,7 +109,7 @@
       <location id="3" x="-350.660196884" y="481.132833072" />
     </add>
     <add id="19" objectId="4" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="" />
+      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6" />
     </add>
     <add id="20" objectId="5" parentObjId="4" parentObjType="module" what="function">
       <function id="5" name="name" pos="0" />

@@ -28,7 +28,7 @@
 import math
 import pyalps
 import pyalps.alea as alpsalea
-import pyalps.pytools as alpstools
+import pyalps.tools as alpstools
 
 class Simulation:
     # Seed random number generator: self.rng() will give a random float from the interval [0,1)

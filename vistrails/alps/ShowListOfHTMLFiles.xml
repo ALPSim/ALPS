@@ -38,7 +38,7 @@
       <location id="1" x="-2.28459363555" y="113.235922976" />
     </add>
     <add id="12" objectId="2" parentObjId="" parentObjType="" what="group">
-      <group cache="1" id="2" name="Group" namespace="" package="edu.utah.sci.vistrails.basic" version="">
+      <group cache="1" id="2" name="Group" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
         <workflow id="" name="untitled" version="" vistrail_id="">
           <connection id="1">
             <port id="2" moduleId="3" moduleName="RichTextCell" name="Location" signature="(edu.utah.sci.vistrails.spreadsheet:CellLocation)" type="destination" />
@@ -56,25 +56,25 @@
             <port id="7" moduleId="2" moduleName="File" name="value" signature="(edu.utah.sci.vistrails.basic:File)" type="source" />
             <port id="8" moduleId="1" moduleName="OutputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="destination" />
           </connection>
-          <module cache="1" id="1" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="">
+          <module cache="1" id="1" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
             <location id="1" x="-48.8934150915" y="-127.870323418" />
             <function id="1" name="name" pos="0">
               <parameter alias="" id="1" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="value" />
             </function>
           </module>
-          <module cache="1" id="2" name="File" namespace="" package="edu.utah.sci.vistrails.basic" version="">
+          <module cache="1" id="2" name="File" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
             <location id="2" x="115.358770876" y="37.9944879918" />
           </module>
           <module cache="1" id="3" name="RichTextCell" namespace="" package="edu.utah.sci.vistrails.spreadsheet" version="0.9.0">
             <location id="3" x="-247.343865277" y="-123.107557088" />
           </module>
-          <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="">
+          <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
             <location id="4" x="180.878509492" y="212.983392515" />
             <function id="2" name="name" pos="0">
               <parameter alias="" id="2" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="filename" />
             </function>
           </module>
-          <module cache="1" id="5" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="">
+          <module cache="1" id="5" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
             <location id="5" x="174.222439296" y="449.397383666" />
             <function id="3" name="name" pos="0">
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="Location" />
@@ -87,7 +87,7 @@
       <location id="2" x="-13.6027927119" y="-1.54044393256" />
     </add>
     <add id="14" objectId="3" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="" />
+      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6" />
     </add>
     <add id="15" objectId="4" parentObjId="3" parentObjType="module" what="function">
       <function id="4" name="name" pos="0" />
@@ -99,7 +99,7 @@
       <location id="3" x="-431.355827802" y="552.377140625" />
     </add>
     <add id="18" objectId="4" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="" />
+      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6" />
     </add>
     <add id="19" objectId="5" parentObjId="4" parentObjType="module" what="function">
       <function id="5" name="name" pos="0" />
