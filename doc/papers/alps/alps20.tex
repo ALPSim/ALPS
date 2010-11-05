@@ -1,68 +1,75 @@
-\documentclass[3p,twocolumn]{elsarticle}
+%\documentclass[3p,twocolumn]{elsarticle}
+\documentclass[12pt]{iopart}
+
 \usepackage{vistrails}
-\usepackage{amsmath}
-\usepackage{amssymb}
-\usepackage{amsmath}
+%\usepackage{amsmath}
+%\usepackage{amssymb}
+%\usepackage{amsmath}
 \usepackage{color}
 \usepackage{hyperref}
 
-\journal{Computer Physics Communications}
-%\journal{The Onion}
-
 \begin{document}
-
-\begin{frontmatter}
 
 \title{The ALPS project release 2.0: \\ open source software for strongly correlated systems}
 
-\author[eth]{B. Bauer} \ead{bauerb@phys.ethz.ch}
-\author[colorado]{L. Carr} \ead{lcarr@mines.edu}
-\author[wyoming]{A. Feiguin} \ead{afeiguin@uwyo.edu}
-\author[utah]{J. Freire} \ead{juliana@cs.utah.edu}
-\author[goettingen]{S. Fuchs} \ead{fuchs@theorie.physik.uni-goettingen.de}
-\author[eth]{L. Gamper} \ead{gamperl@gmail.com}
-\author[eth]{J. Gukelberger} \ead{gukelberger@phys.ethz.ch}
-\author[columbia]{E. Gull} \ead{gull@phys.columbia.edu}
-\author[bonn]{S.~Guertler} \ead{guertler@th.physik.uni-bonn.de}
-\author[eth]{A. Hehn} \ead{hehn@phys.ethz.ch}
-\author[jaea,crest]{R.~Igarashi} \ead{rigarash@hosi.phys.s.u-tokyo.ac.jp}
-\author[utah]{D. Koop} \ead{dakoop@cs.utah.edu}
-\author[eth]{P.N. Ma} \ead{pingnang@phys.ethz.ch}
-\author[tokyo]{H. Matsuo} \ead{halm@looper.t.u-tokyo.ac.jp}
-\author[eth,utah]{P. Mates} \ead{phillipmates@gmail.com}
-\author[affpol]{G. Paw{\l}owski}
-\author[harvard,eth]{L.~Pollet} \ead{pollet@phys.ethz.ch}
-%\author[goettingen]{Thomas Pruschke} \ead{pruschke@theorie.physik.uni-goettingen.de}
-\author[brazil,utah]{E.~Santos} \ead{emanuele@sci.utah.edu}
-\author[virginia]{V. Scarola} \ead{scarola@vt.edu}
-\author[lmu]{U.~Schollw\"ock} \ead{schollwoeck@lmu.de}
-\author[utah]{C.~Silva} \ead{csilva@sci.utah.edu}
-\author[eth]{B.~Surer} \ead{surerb@phys.ethz.ch}
-\author[tokyo]{S. Todo} \ead{wistaria@ap.t.u-tokyo.ac.jp}
-\author[stationq]{S. Trebst} \ead{trebst@kitp.ucsb.edu}
-\author[eth]{M.~Troyer}\ead{troyer@ethz.ch}
-\author[colorado]{M. Wall} \ead{mwall@mymail.mines.edu}
-\author[eth]{P. Werner} \ead{werner@phys.ethz.ch}
-\author[rwth,stuttgart]{S. Wessel} \ead{wessel@phys.ethz.ch}
 
-\address[eth]{Theoretische Physik, ETH Zurich, 8093 Zurich, Switzerland}
-\address[colorado] {Department of Physics, Colorado School of Mines, Golden, CO 80401, USA}
-\address[wyoming]{}
-\address[utah]{}
-\address[goettingen]{Institut f\"ur Theoretische Physik, Georg-August-Universit\"{a}t G\"{o}ttingen, G\"{o}ttingen, Germany}
-\address[columbia]{Columbia University, New York, NY 10027, USA}
-\address[bonn]{Bethe Center for Theoretical Phyics, Universit\"{a}t Bonn, Bonn, Germany}
-\address[jaea]{Center for Computational Science \& e-Systems, Japan Atomic Energy Agency, 110-0015 Tokyo, Japan}
-\address[crest]{Core Research for Evolutional Science and Technology, Japan Science and Technology Agency, 332-0012 Kawaguchi, Japan}
-\address[harvard]{} 
-\address[affpol]{Institute of Physics, A. Mickiewicz University, ul. Umultowska 85, 61-614 Poznan, Poland}
-\address[brazil]{} 
-\address[virginia]{}
-\address[lmu]{}
-\address[tokyo]{Department of Applied Physics, University of Tokyo, 113-8656 Tokyo, Japan}
-\address[stationq]{Microsoft Research, Station Q, University of California, Santa Barbara, CA 93106, USA}
-\address[rwth]{}
-\address[stuttgart]{Institut f\"ur Theoretische Physik III, Universit\"at Stuttgart, Pfaffenwaldring 57, D-70550 Stuttgart, Germany}
+\newcounter{affiliation}
+% with email addresses
+%\newcommand{\myauthor}[3]{#2 {\small (#3)}$^{#1}$}
+% without them
+\newcommand{\myauthor}[3]{#2$^{#1}$}
+\newcommand{\myaddress}[2]{\address{\refstepcounter{affiliation} $^{\arabic{affiliation}}$#2 \label{#1}}}
+
+\author{
+	\myauthor{\ref{eth}}{B. Bauer}{bauerb@phys.ethz.ch}
+	\myauthor{\ref{colorado}}{L. Carr}{lcarr@mines.edu}
+	\myauthor{\ref{wyoming}}{A. Feiguin}{afeiguin@uwyo.edu}
+	\myauthor{\ref{utah}}{J. Freire}{juliana@cs.utah.edu}
+	\myauthor{\ref{goettingen}}{S. Fuchs}{fuchs@theorie.physik.uni-goettingen.de}
+	\myauthor{\ref{eth}}{L. Gamper}{gamperl@gmail.com}
+	\myauthor{\ref{eth}}{J. Gukelberger}{gukelberger@phys.ethz.ch}
+	\myauthor{\ref{columbia}}{E. Gull}{gull@phys.columbia.edu}
+	\myauthor{\ref{bonn}}{S.~Guertler}{guertler@th.physik.uni-bonn.de}
+	\myauthor{\ref{eth}}{A. Hehn}{hehn@phys.ethz.ch}
+	\myauthor{\ref{jaea},\ref{crest}}{R.~Igarashi}{rigarash@hosi.phys.s.u-tokyo.ac.jp}
+	\myauthor{\ref{utah}}{D. Koop}{dakoop@cs.utah.edu}
+	\myauthor{\ref{eth}}{P.N. Ma}{pingnang@phys.ethz.ch}
+	\myauthor{\ref{tokyo}}{H. Matsuo}{halm@looper.t.u-tokyo.ac.jp}
+	\myauthor{\ref{eth},\ref{utah}}{P. Mates}{phillipmates@gmail.com}
+	\myauthor{\ref{affpol}}{G. Pawlowski}{}
+	\myauthor{\ref{harvard},\ref{eth}}{L.~Pollet}{pollet@phys.ethz.ch}
+	\myauthor{\ref{goettingen}}{Thomas Pruschke}{pruschke@theorie.physik.uni-goettingen.de}
+	\myauthor{\ref{brazil},\ref{utah}}{E.~Santos}{emanuele@sci.utah.edu}
+	\myauthor{\ref{virginia}}{V. Scarola}{scarola@vt.edu}
+	\myauthor{\ref{lmu}}{U.~Schollw\"ock}{schollwoeck@lmu.de}
+	\myauthor{\ref{utah}}{C.~Silva}{csilva@sci.utah.edu}
+	\myauthor{\ref{eth}}{B.~Surer}{surerb@phys.ethz.ch}
+	\myauthor{\ref{tokyo}}{S. Todo}{wistaria@ap.t.u-tokyo.ac.jp}
+	\myauthor{\ref{stationq}}{S. Trebst}{trebst@kitp.ucsb.edu}
+	\myauthor{\ref{eth}}{M.~Troyer}{troyer@ethz.ch}
+	\myauthor{\ref{colorado}}{M. Wall}{mwall@mymail.mines.edu}
+	\myauthor{\ref{eth}}{P. Werner}{werner@phys.ethz.ch}
+	\myauthor{\ref{rwth},\ref{stuttgart}}{S. Wessel}{wessel@phys.ethz.ch}
+}
+
+\myaddress{eth}{Theoretische Physik, ETH Zurich, 8093 Zurich, Switzerland}
+\myaddress{colorado}{Department of Physics, Colorado School of Mines, Golden, CO 80401, USA}
+\myaddress{wyoming}{}
+\myaddress{utah}{}
+\myaddress{goettingen}{Institut f\"ur Theoretische Physik, Georg-August-Universit\"{a}t G\"{o}ttingen, G\"{o}ttingen, Germany}
+\myaddress{columbia}{Columbia University, New York, NY 10027, USA}
+\myaddress{bonn}{Bethe Center for Theoretical Phyics, Universit\"{a}t Bonn, Bonn, Germany}
+\myaddress{jaea}{Center for Computational Science \& e-Systems, Japan Atomic Energy Agency, 110-0015 Tokyo, Japan}
+\myaddress{crest}{Core Research for Evolutional Science and Technology, Japan Science and Technology Agency, 332-0012 Kawaguchi, Japan}
+\myaddress{harvard}{} 
+\myaddress{affpol}{Institute of Physics, A. Mickiewicz University, ul. Umultowska 85, 61-614 Poznan, Poland}
+\myaddress{brazil}{} 
+\myaddress{virginia}{}
+\myaddress{lmu}{}
+\myaddress{tokyo}{Department of Applied Physics, University of Tokyo, 113-8656 Tokyo, Japan}
+\myaddress{stationq}{Microsoft Research, Station Q, University of California, Santa Barbara, CA 93106, USA}
+\myaddress{rwth}{}
+\myaddress{stuttgart}{Institut f\"ur Theoretische Physik III, Universit\"at Stuttgart, Pfaffenwaldring 57, D-70550 Stuttgart, Germany}
 
 \begin{abstract}
 We present release 2.0 of the ALPS (Algorithms and Libraries for Physics Simulations)
@@ -82,44 +89,42 @@ The software is available
 from our web server at \url{http://alps.comp-phys.org/}.
 \end{abstract}
 
-\end{frontmatter}
+%\eject
+%\newpage
+%\section*{ PROGRAM SUMMARY}
+%  %Delete as appropriate.
 
-\eject
-\newpage
-\section*{ PROGRAM SUMMARY}
-  %Delete as appropriate.
-
-\begin{small}
-\noindent
-{\em Manuscript Title:} The ALPS project release 2.0:  open source software for strongly correlated systems \\ 
-{\em Authors:} ... \\ 
-{\em Program Title:} ALPS2.0  \\
-{\em Journal Reference:}                                      \\
-  %Leave blank, supplied by Elsevier.
-{\em Catalogue identifier:}                                   \\
-  %Leave blank, supplied by Elsevier.
-{\em Licensing provisions:} Use of `ALPS2.0' requires citation of this paper.\\
-{\em Programming language:} \verb*#C++#, Fortran, Python \\
-{\em Computer:} Any \\ 
-  %Computer(s) for which program has been designed.
-{\em Operating system:} Any\\ 
-  %Operating system(s) for which program has been designed.
-{\em RAM:} from 100 MB.\\ 
-  %RAM in bytes required to execute program with typical data.
-{\em Number of processors used:} 1 - 2048.\\ 
-  %If more than one processor.
-{\em Keywords:} .\\ 
-  % Please give some freely chosen keywords that we can use in a
-  % cumulative keyword index.
-{\em Classification:} 7.3 \\ 
-  %Classify using CPC Program Library Subject Index, see (
-  % http://cpc.cs.qub.ac.uk/subjectIndex/SUBJECT_index.html)
-  %e.g. 4.4 Feynman diagrams, 5 Computer Algebra.
-{\em External routines/libraries:}  BLAS/LAPACK, HDF5, LPSolve, Python, NumPy, SciPy\\ 
-{\em Running time:} 60s - 1  month\\
-  %Give an indication of the typical running time here.
-\end{small}
-%% main text
+%\begin{small}
+%\noindent
+%{\em Manuscript Title:} The ALPS project release 2.0:  open source software for strongly correlated systems \\ 
+%{\em Authors:} ... \\ 
+%{\em Program Title:} ALPS2.0  \\
+%{\em Journal Reference:}                                      \\
+%  %Leave blank, supplied by Elsevier.
+%{\em Catalogue identifier:}                                   \\
+%  %Leave blank, supplied by Elsevier.
+%{\em Licensing provisions:} Use of `ALPS2.0' requires citation of this paper.\\
+%{\em Programming language:} \verb*#C++#, Fortran, Python \\
+%{\em Computer:} Any \\ 
+%  %Computer(s) for which program has been designed.
+%{\em Operating system:} Any\\ 
+%  %Operating system(s) for which program has been designed.
+%{\em RAM:} from 100 MB.\\ 
+%  %RAM in bytes required to execute program with typical data.
+%{\em Number of processors used:} 1 - 2048.\\ 
+%  %If more than one processor.
+%{\em Keywords:} .\\ 
+%  % Please give some freely chosen keywords that we can use in a
+%  % cumulative keyword index.
+%{\em Classification:} 7.3 \\ 
+%  %Classify using CPC Program Library Subject Index, see (
+%  % http://cpc.cs.qub.ac.uk/subjectIndex/SUBJECT_index.html)
+%  %e.g. 4.4 Feynman diagrams, 5 Computer Algebra.
+%{\em External routines/libraries:}  BLAS/LAPACK, HDF5, LPSolve, Python, NumPy, SciPy\\ 
+%{\em Running time:} 60s - 1  month\\
+%  %Give an indication of the typical running time here.
+%\end{small}
+%%% main text
 
 \section{Introduction}
 \label{}
