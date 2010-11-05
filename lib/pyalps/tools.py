@@ -613,7 +613,7 @@ def writeTEBDfiles(parmsList, fileName):
 				#Add L*S to this number to convert it to an integer appropriate for TEBD
 				parms['Sz']+=str(parms['L'])*str(parms['local_S'])
 				#convert to an integer-complain if it doesn't work
-				if int(parms['Sz'])==parms['Sz']:
+				if int(parms['Sz'])==float(parms['Sz']):
 					systemSettingsString+=", totQ="+str(int(parms['Sz']))
 				else:
 					raise Exception("Invalid Sz encountered!")
@@ -643,7 +643,7 @@ def writeTEBDfiles(parmsList, fileName):
 			systemSettingsString+=', chiLimit=100'
 		#check for rtp truncation error cutoff
 		if 'TRUNC_LIMIT' in parms:
-			systemSettingsString+=', truncLimit=%30.15E' % (parms['TRUNC_LIMIT'])
+			systemSettingsString+=', truncLimit=%30.15E' % (float(parms['TRUNC_LIMIT']))
 		else:
 			systemSettingsString+=', truncLimit=1.0E-12'
 		#check for rtp truncation error cutoff
@@ -683,15 +683,26 @@ def writeTEBDfiles(parmsList, fileName):
 		if parms['INITIAL_STATE']=='ground':
 			#find out lengths of chi, trunc, and convCriteria, if they exist
 			if 'ITP_CHIS' in parms:
-				itpChiList=parms['ITP_CHIS']
+				#convert from strings of the form '[float, float]' to
+				# [float, float] etc. for use with vistrails modules
+				if type(parms['ITP_CHIS'])==str:
+					itpChiList=map(int,(parms['ITP_CHIS'].replace('[','').replace(']','').replace(' ','').split(',')))
+				else:
+					itpChiList=parms['ITP_CHIS']
 			else:
 				itpChiList=[50]
 			if 'ITP_DTS' in parms:
-				itpDtList=parms['ITP_DTS']
+				if type(parms['ITP_DTS'])==str:
+					itpDtList=map(float,(parms['ITP_DTS'].replace('[','').replace(']','').replace(' ','').split(',')))
+				else:
+					itpDtList=parms['ITP_DTS']
 			else:
 				itpDtList=[0.01]
 			if 'ITP_CONVS' in parms:
-				itpConvList=parms['ITP_CONVS']
+				if type(parms['ITP_CONVS'])==str:
+					itpConvList=map(float,(parms['ITP_CONVS'].replace('[','').replace(']','').replace(' ','').split(',')))
+				else:
+					itpConvList=parms['ITP_CONVS']
 			else:
 				itpConvList=[1.0E-8]
 			numItp=len(itpChiList)
@@ -748,20 +759,20 @@ def writeTEBDfiles(parmsList, fileName):
 				myD=0.0
 				myK=0.0
 				if 'ITP_J' in parms:
-					myJz=parms['ITP_J']
-					myJxy=parms['ITP_J']
+					myJz=float(parms['ITP_J'])
+					myJxy=float(parms['ITP_J'])
 				if 'ITP_Jz' in parms:
-					myJz=parms['ITP_Jz']
+					myJz=float(parms['ITP_Jz'])
 				if 'ITP_Jxy' in parms:
-					myJxy=parms['ITP_Jxy']
+					myJxy=float(parms['ITP_Jxy'])
 				if 'ITP_H' in parms:
-					myH=parms['ITP_H']
+					myH=float(parms['ITP_H'])
 				if 'ITP_Gamma' in parms:
-					myGamma=parms['ITP_Gamma']
+					myGamma=float(parms['ITP_Gamma'])
 				if 'ITP_D' in parms:
-					myD=parms['ITP_D']
+					myD=float(parms['ITP_D'])
 				if 'ITP_K' in parms:
-					myK=parms['ITP_K']
+					myK=float(parms['ITP_K'])
 				nmlfile.write('&sp\n')
 				itpnmlString='spinP%Jz='
 				itpnmlString+='%30.15E'%(myJz)
@@ -784,13 +795,13 @@ def writeTEBDfiles(parmsList, fileName):
 				myV=0.0
 				myMu=0.0
 				if 'ITP_t' in parms:
-					myT=parms['ITP_t']
+					myT=float(parms['ITP_t'])
 				if 'ITP_U' in parms:
-					myU=parms['ITP_U']
+					myU=float(parms['ITP_U'])
 				if 'ITP_V' in parms:
-					myV=parms['ITP_V']
+					myV=float(parms['ITP_V'])
 				if 'ITP_mu' in parms:
-					myMu=parms['ITP_mu']
+					myMu=float(parms['ITP_mu'])
 				nmlfile.write('&bp\n')
 				itpnmlString='bosonP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -808,11 +819,11 @@ def writeTEBDfiles(parmsList, fileName):
 				myV=0.0
 				myMu=0.0
 				if 'ITP_t' in parms:
-					myT=parms['ITP_t']
+					myT=float(parms['ITP_t'])
 				if 'ITP_V' in parms:
-					myV=parms['ITP_V']
+					myV=float(parms['ITP_V'])
 				if 'ITP_mu' in parms:
-					myMu=parms['ITP_mu']
+					myMu=float(parms['ITP_mu'])
 				nmlfile.write('&hcbp\n')
 				itpnmlString='hcbosonp%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -829,13 +840,13 @@ def writeTEBDfiles(parmsList, fileName):
 				myV=0.0
 				myMu=0.0
 				if 'ITP_t' in parms:
-					myT=parms['ITP_t']
+					myT=float(parms['ITP_t'])
 				if 'ITP_U' in parms:
-					myU=parms['ITP_U']
+					myU=float(parms['ITP_U'])
 				if 'ITP_V' in parms:
-					myV=parms['ITP_V']
+					myV=float(parms['ITP_V'])
 				if 'ITP_mu' in parms:
-					myMu=parms['ITP_mu']
+					myMu=float(parms['ITP_mu'])
 				nmlfile.write('&fp\n')
 				itpnmlString='fermiP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -853,11 +864,11 @@ def writeTEBDfiles(parmsList, fileName):
 				myV=0.0
 				myMu=0.0
 				if 'ITP_t' in parms:
-					myT=parms['ITP_t']
+					myT=float(parms['ITP_t'])
 				if 'ITP_V' in parms:
-					myV=parms['ITP_V']
+					myV=float(parms['ITP_V'])
 				if 'ITP_mu' in parms:
-					myMu=parms['ITP_mu']
+					myMu=float(parms['ITP_mu'])
 				nmlfile.write('&sfp\n')
 				itpnmlString='sfermiP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -873,31 +884,52 @@ def writeTEBDfiles(parmsList, fileName):
 			numQuenches=0
 		else:
 			#get quench data
-			myTaus=parms['TAUS']
+			if type(parms['TAUS'])==str:
+				myTaus=map(float,(parms['TAUS'].replace('[','').replace(']','').replace(' ','').split(',')))
+			else:
+				myTaus=parms['TAUS']
 			numQuenches=len(myTaus)
 			if 'POWS' in parms:
-				myPows=parms['POWS']
+				if type(parms['POWS'])==str:
+					myPows=map(float,(parms['POWS'].replace('[','').replace(']','').replace(' ','').split(',')))
+				else:
+					myPows=parms['POWS']
 			else :
 				myPows=[0.0]
 				numQuenches=1
 			if 'GS' in parms:
-				myGs=parms['GS']
+				if type(parms['GS'])==str:
+					myGs=parms['GS'].replace('[','').replace(']','').replace(' ','').replace("'",'').split(',')
+				else:
+					myGs=parms['GS']
 			else:
 				myGs='t'.ljust(10)
 			if 'GIS' in parms:
-				myGis=parms['GIS']
+				if type(parms['GIS'])==str:
+					myGis=map(float,(parms['GIS'].replace('[','').replace(']','').replace(' ','').split(',')))
+				else:
+					myGis=parms['GIS']
 			else:
 				myGis=[1]
 			if 'GFS' in parms:
-				myGfs=parms['GFS']
+				if type(parms['GFS'])==str:
+					myGfs=map(float,(parms['GFS'].replace('[','').replace(']','').replace(' ','').split(',')))
+				else:
+					myGfs=parms['GFS']
 			else:
 				myGfs=[1]
 			if 'NUMSTEPS' in parms:
-				myNumsteps=parms['NUMSTEPS']
+				if type(parms['NUMSTEPS'])==str:
+					myNumsteps=map(int,(parms['NUMSTEPS'].replace('[','').replace(']','').replace(' ','').split(',')))
+				else:
+					myNumsteps=parms['NUMSTEPS']
 			else:
 				myNumsteps=[100]
 			if 'STEPSFORSTORE' in parms:
-				mySfs=parms['STEPSFORSTORE']
+				if type(parms['STEPSFORSTORE'])==str:
+					mySfs=map(int,(parms['STEPSFORSTORE'].replace('[','').replace(']','').replace(' ','').split(',')))
+				else:
+					mySfs=parms['STEPSFORSTORE']
 			else:
 				mySfs=[1]
 
@@ -957,20 +989,20 @@ def writeTEBDfiles(parmsList, fileName):
 				myD=0.0
 				myK=0.0
 				if 'J' in parms:
-					myJz=parms['J']
-					myJxy=parms['J']
+					myJz=float(parms['J'])
+					myJxy=float(parms['J'])
 				if 'Jz' in parms:
-					myJz=parms['Jz']
+					myJz=float(parms['Jz'])
 				if 'Jxy' in parms:
-					myJxy=parms['Jxy']
+					myJxy=float(parms['Jxy'])
 				if 'H' in parms:
-					myH=parms['H']
+					myH=float(parms['H'])
 				if 'Gamma' in parms:
-					myGamma=parms['Gamma']
+					myGamma=float(parms['Gamma'])
 				if 'D' in parms:
-					myD=parms['D']
+					myD=float(parms['D'])
 				if 'K' in parms:
-					myK=parms['K']
+					myK=float(parms['K'])
 				nmlfile.write('&sp\n')
 				itpnmlString='spinP%Jz='
 				itpnmlString+='%30.15E'%(myJz)
@@ -993,13 +1025,13 @@ def writeTEBDfiles(parmsList, fileName):
 				myV=0.0
 				myMu=0.0
 				if 't' in parms:
-					myT=parms['t']
+					myT=float(parms['t'])
 				if 'U' in parms:
-					myU=parms['U']
+					myU=float(parms['U'])
 				if 'V' in parms:
-					myV=parms['V']
+					myV=float(parms['V'])
 				if 'mu' in parms:
-					myMu=parms['mu']
+					myMu=float(parms['mu'])
 				nmlfile.write('&bp\n')
 				itpnmlString='bosonP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -1017,11 +1049,11 @@ def writeTEBDfiles(parmsList, fileName):
 				myV=0.0
 				myMu=0.0
 				if 't' in parms:
-					myT=parms['t']
+					myT=float(parms['t'])
 				if 'V' in parms:
-					myV=parms['V']
+					myV=float(parms['V'])
 				if 'mu' in parms:
-					myMu=parms['mu']
+					myMu=float(parms['mu'])
 				nmlfile.write('&hcbp\n')
 				itpnmlString='hcbosonp%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -1038,13 +1070,13 @@ def writeTEBDfiles(parmsList, fileName):
 				myV=0.0
 				myMu=0.0
 				if 't' in parms:
-					myT=parms['t']
+					myT=float(parms['t'])
 				if 'U' in parms:
-					myU=parms['U']
+					myU=float(parms['U'])
 				if 'V' in parms:
-					myV=parms['V']
+					myV=float(parms['V'])
 				if 'mu' in parms:
-					myMu=parms['mu']
+					myMu=float(parms['mu'])
 				nmlfile.write('&fp\n')
 				itpnmlString='fermiP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -1062,11 +1094,11 @@ def writeTEBDfiles(parmsList, fileName):
 				myV=0.0
 				myMu=0.0
 				if 't' in parms:
-					myT=parms['t']
+					myT=float(parms['t'])
 				if 'V' in parms:
-					myV=parms['V']
+					myV=float(parms['V'])
 				if 'mu' in parms:
-					myMu=parms['mu']
+					myMu=float(parms['mu'])
 				nmlfile.write('&sfp\n')
 				itpnmlString='sfermiP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -1078,6 +1110,7 @@ def writeTEBDfiles(parmsList, fileName):
 				nmlfile.write('&end\n\n')
 		nmlList.append(nmlfileName)
 	return nmlList
+
 
 
 

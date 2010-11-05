@@ -52,6 +52,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'AppFullDiag': (applications.RunFullDiag,{}),
                    'AppSparseDiag': (applications.RunSparseDiag,{}),
                    'AppDMRG': (applications.RunDMRG,{}),
+                   'AppTEBD': (applications.RunTEBD,{}),
                    'AppQWL': (applications.RunQWL,{}),
                    'EvaluateFullDiagT': (applications.EvaluateFullDiagVersusT,{}),
                    'EvaluateFullDiagH': (applications.EvaluateFullDiagVersusH,{}),
@@ -59,6 +60,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'MonteCarloSimulation': (system.PrepareMonteCarlo,{}),
                    'DiagonalizationSimulation': (system.PrepareDiagonalization,{}),
                    'DMRGSimulation': (system.PrepareDMRG,{}),
+                   'TEBDSimulation': (system.PrepareTEBD,{}),
                    'SimulationID': (system.SimulationName,{}),
                    'LatticeModel': (system.LatticeModel,{}),
 
@@ -96,7 +98,6 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
 
                    'GenerateDataSet': (dataset.PrepareDataSets,{}),
                    'LoadDataSet': (dataset.LoadDataSetsFromTextFile,{}),
-                   'LoadDataSetsFromTextFile': (dataset.LoadDataSetsFromTextFile,{}),
                    'CustomLoader': (dataset.LoadCustomFile,{}),
                    'CollectXY': (dataset.CollectDataSets,{}),
                    'CollectDataSets': (dataset.CollectDataSets,{}),

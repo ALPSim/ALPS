@@ -172,6 +172,30 @@ class RunDMFT(alpscore.SystemCommandLogged,tools.GetSimName):
     _input_ports = [('dmftparams',[alpsparameters.Parameters]),
                     ('fileID', [basic.String])]
     _output_ports = [('dir', [basic.Directory])]
+
+
+class RunTEBD(RunAlpsApplication):
+    """Runs the TEBD application """
+    appname = 'tebd'
+
+    def compute(self):
+        input_files = self.getInputFromPort('input_files')
+        result = basic.File()
+        result.name = input_files[0].replace('.nml', '.h5')
+        resultdir = basic.Directory()
+        resultdir.name = os.path.dirname(result.name)
+        for input_file in input_files:
+	    cmdline=[self.get_app_name()]
+	    cmdline += [input_file]
+            self.execute(cmdline)
+        f = file(os.path.join(resultdir.name,'workflow.vtl'),'w')
+        f.write(VtlFileCreator.generate_vtl(self.moduleInfo['locator'],self.moduleInfo['version'],self.moduleInfo['pipeline']))
+        f.close()
+        self.setResult('output_file', result)
+        self.setResult('output_dir', resultdir)
+
+    _input_ports = [('input_files', [basic.File])]
+    _output_ports = [('output_dir', [basic.Directory])]
     
 class AlpsEvaluate(alpscore.SystemCommandLogged):
     def get_appname(self):
@@ -369,6 +393,7 @@ def selfRegister():
   register_application(RunDMRG)
   register_application(RunQWL)
   register_application(RunDMFT)
+  register_application(RunTEBD)
   
   reg.add_module(AlpsEvaluate,namespace="Applications",abstract=True)
   
@@ -385,3 +410,4 @@ def selfRegister():
   reg.add_module(system.PrepareDiagonalization,namespace="Applications")
   reg.add_module(system.PrepareDMRG,namespace="Applications")
   reg.add_module(system.PrepareDMFT,namespace="Applications")
+  reg.add_module(system.PrepareTEBD,namespace="Applications")

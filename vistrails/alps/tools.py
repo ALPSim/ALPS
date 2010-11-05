@@ -166,6 +166,37 @@ class WriteInputFiles(Module):
      _output_ports = [('output_file', [basic.File]),
                      ('output_dir', [basic.Directory])]
 
+
+class WriteTEBDInputFiles(Module):
+     """ This module writes the tebd input files for ALPS"""
+         
+     def compute(self):
+         of = self.interpreter.filePool.create_file()
+         os.unlink(of.name)
+         os.mkdir(of.name)
+         dir = basic.Directory
+         dir.name = of.name
+         o = self.interpreter.filePool.create_file()
+         if self.hasInputFromPort('simulationid'):
+           base_name = self.getInputFromPort('simulationid')
+         else:
+           base_name = os.path.basename(o.name)
+
+	 input_values = self.forceGetInputListFromPort('parms')
+	 if type(input_values[0])==list:
+	 	input_values=input_values[0]
+	 nmlList=pyalps.writeTEBDfiles(input_values, os.path.join(dir.name,base_name))
+         pyalps.copyStylesheet(dir.name)
+           
+         self.setResult("output_dir", dir)
+         self.setResult("output_files", nmlList)
+     _input_ports = [('parms', [Parameters]),
+                     ('baseseed',[basic.Integer],True),
+                     ('simulationid',[basic.String])]
+     _output_ports = [('output_files', [basic.File]),
+                     ('output_dir', [basic.Directory])]
+
+
 class Parameter2XML(alpscore.SystemCommandLogged):
     def compute(self):
         o = self.interpreter.filePool.create_file()
@@ -448,6 +479,7 @@ def selfRegister():
   reg = core.modules.module_registry.get_module_registry()
   
   reg.add_module(WriteParameterFile,namespace="Tools",abstract=True)
+  reg.add_module(WriteTEBDInputFiles,namespace="Tools")
   reg.add_module(Parameter2XML,namespace="Tools",abstract=True)
   reg.add_module(WriteInputFiles,namespace="Tools")
   

@@ -190,6 +190,40 @@ class DMRGParameters(Parameters):
                     ]
 
 
+class TEBDParameters(Parameters): 
+    """ 
+    A module to set the parameters for a TEBD simulation:
+    """
+    _input_ports = [('ITP_CHIS',[basic.String]),
+                   ('ITP_DTS',[basic.String]),
+                   ('ITP_CONVS',[basic.String]),
+                   ('CHI_LIMIT',[basic.String]),
+                   ('TRUNC_LIMIT',[basic.String]),
+                   ('NUM_THREADS',[basic.String]),
+                   ('TAUS',[basic.String]),
+                   ('POWS',[basic.String]),
+                   ('GS',[basic.String]),
+                   ('GIS',[basic.String]),
+                   ('GFS',[basic.String]),
+                   ('NUMSTEPS',[basic.String]),
+                   ('ITP_t',[basic.String]),
+                   ('ITP_U',[basic.String]),
+                   ('ITP_V',[basic.String]),
+                   ('ITP_mu',[basic.String]),
+                   ('ITP_J',[basic.String]),
+                   ('ITP_Jz',[basic.String]),
+                   ('ITP_Jxy',[basic.String]),
+                   ('ITP_H',[basic.String]),
+                   ('ITP_Gamma',[basic.String]),
+                   ('ITP_D',[basic.String]),
+                   ('ITP_K',[basic.String]),
+                   ('VERBOSE',[basic.String]),
+                   ('STEPSFORSTORE',[basic.String]),
+                   ('SIMID',[basic.String]),
+                    ('INITIAL_STATE',[basic.String])
+                    ]
+
+
 class Temperature(Parameters):
     """ A module to set the temperature. Either T or beta=1/T can be defined but not both. """
     def compute(self):
@@ -267,6 +301,7 @@ def selfRegister():
   register_parameters(MonteCarloMeasurements)
   register_parameters(MonteCarloParameters)
   register_parameters(DMRGParameters)
+  register_parameters(TEBDParameters)
   reg.add_module(LoopMonteCarloParameters,namespace="Parameters")
   reg.add_module(ClassicalMonteCarloParameters,namespace="Parameters")
   reg.add_module(QWLMonteCarloParameters,namespace="Parameters")

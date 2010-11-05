@@ -97,6 +97,17 @@ class PrepareDMFT(parameters.Parameters):
             ("SelfConsistencyParameters",[alpsparameters.DMFTSelfConsistencyParameters])]
     _output_ports=[('value', [Parameters])]
 
+class PrepareTEBD(parameters.Parameters):
+    """ a module collecting the typical input parameters for a TEBD simulation """
+    def compute(self):
+        res = parameters.ParametersData({})
+        for port_name in self.inputPorts:
+           res=self.updateFromPort(port_name,res)
+        self.setOutput(res)
+    _input_ports = [('system', [SystemParameters]),
+                     ('tebdparms', [alpsparameters.TEBDParameters]),
+                     ('conserved', [alpsparameters.ConservedQuantumNumbers])]
+    _output_ports=[('value', [SystemParameters])]
 
 def initialize(): pass
 

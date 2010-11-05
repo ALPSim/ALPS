@@ -41,6 +41,7 @@ from dataset_exceptions import *
 from pyalps.load import Hdf5Loader
 from pyalps.hlist import flatten, depth
 import pyalps
+import pyalps.hdf5 as h5
 
 class Loader:
     def __init__(self,filename,label,xcolumn,ycolumns,props={}):
@@ -225,6 +226,114 @@ class LoadDMFTIterations(Module):
                 datasets = loader.ReadMeasurementFromFile(files,measurements=self.getInputFromPort('Measurements'),proppath=propPath,respath=resPath)
             else:
                 datasets = loader.ReadMeasurementFromFile(files,measurements=None,proppath=propPath,respath=resPath)
+            self.setResult('data',datasets)
+        except Exception, (exc):
+            from traceback import print_exc
+            print_exc()
+            raise exc
+
+class AppendLegend(Module):
+    my_input_ports = [
+        PortDescriptor('inData',DataSets),
+        PortDescriptor('appendCall',basic.String),
+        PortDescriptor('propname',basic.String),
+        PortDescriptor('propelement',basic.Integer)
+    ]
+
+    my_output_ports = [
+        PortDescriptor('data',DataSets)
+    ]    
+
+    def compute(self):
+	locdata=self.getInputFromPort('inData')
+	for q in locdata:
+		for i in range(len(q)):
+			if self.hasInputFromPort('propelement') :
+				 q[i].props['']=self.getInputFromPort('appendCall')+\
+				 str(q[0].props[self.getInputFromPort('propname').replace("'",'')][self.getInputFromPort('propelement')])
+			else:
+				 q[i].props['']=self.getInputFromPort('appendCall')+\
+				 str(q[0].props[self.getInputFromPort('propname').replace("'",'')])
+        self.setResult('data',locdata)
+
+
+class LoadTimeEvolutionModule(Module):
+    """Load the data from successive TEBD-Iterations. Description of input ports:
+      @ResultFiles: The hdf5-files.
+      @Measurements: List of observables to load
+      @GlobalPropertyPath: Hdf5-path to the global parameters stored. Default: /parameters/
+      @LocalPropertySuffix: Hdf5-path to the parameters for each timestep. Default: /parameters
+      @ResultPath: Hdf5-path to the observables stored. Default: /timesteps/"""
+
+    my_input_ports = [
+        PortDescriptor('ResultFiles',ResultFiles),
+        PortDescriptor('Measurements',basic.List),
+        PortDescriptor('GlobalPropertyPath',basic.String),
+        PortDescriptor('LocalPropertySuffix',basic.String),
+        PortDescriptor('ResultPath',basic.String)
+    ]
+    
+    my_output_ports = [
+        PortDescriptor('data',DataSets)
+    ]    
+    
+    def compute(self):
+        try:
+            globalproppath= self.getInputFromPort('GlobalPropertyPath') if self.hasInputFromPort('GlobalPropertyPath') else "/parameters/"
+            localpropsuffix= self.getInputFromPort('LocalPropertySuffix') if self.hasInputFromPort('LocalPropertySuffix') else "/parameters"
+            resroot= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/timesteps/"
+            loader = Hdf5Loader()
+	    self.getInputFromPort('ResultFiles')
+            if self.hasInputFromPort('ResultFiles'):
+                files = [f.props["filename"] for f in self.getInputFromPort('ResultFiles')]
+            datasets = []
+            if self.hasInputFromPort('Measurements'):
+		   files
+ 		   #loop over files
+ 		   for f in files:
+ 		       try:
+ 		           #open the file and open the results root group
+ 		           h5file = h5.iArchive(f)
+ 		           #enumerate the subgroups
+ 		           L=h5file.list_children(resroot)
+ 		           #Create an iterator of length the number of subgroups
+ 		           stepper=[i+1 for i in range(len(L))]
+ 		           #Read in global props
+ 		           globalprops=loader.GetProperties([f],globalproppath)
+ 		           for d in stepper:
+ 		               #Get the measurements from the numbered subgroups
+ 		               locdata=loader.ReadMeasurementFromFile([f],proppath=resroot+str(d)+localpropsuffix, \
+ 		               respath=resroot+str(d)+'/results', measurements=self.getInputFromPort('Measurements'))
+ 		               #Append the global props to the local props
+ 		               locdata[0][0].props.update(globalprops[0].props)
+ 		               #Extend the total dataset with this data
+ 		               datasets.extend(locdata)
+ 		       except Exception as e:
+ 		           print e
+ 		           print traceback.format_exc()
+            else:
+ 		   #loop over files
+ 		   for f in files:
+ 		       try:
+ 		           #open the file and open the results root group
+ 		           h5file = h5.iArchive(f)
+ 		           #enumerate the subgroups
+ 		           L=h5file.list_children(resroot)
+ 		           #Create an iterator of length the number of subgroups
+ 		           stepper=[i+1 for i in range(len(L))]
+ 		           #Read in global props
+ 		           globalprops=loader.GetProperties([f],globalproppath)
+ 		           for d in stepper:
+ 		               #Get the measurements from the numbered subgroups
+ 		               locdata=loader.ReadMeasurementFromFile([f],proppath=resroot+str(d)+localpropsuffix, \
+ 		               respath=resroot+str(d)+'/results', measurements=None)
+ 		               #Append the global props to the local props
+ 		               locdata[0][0].props.update(globalprops[0].props)
+ 		               #Extend the total dataset with this data
+ 		               datasets.extend(locdata)
+ 		       except Exception as e:
+ 		           print e
+ 		           print traceback.format_exc()
             self.setResult('data',datasets)
         except Exception, (exc):
             from traceback import print_exc
