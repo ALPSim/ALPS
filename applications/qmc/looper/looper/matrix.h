@@ -30,6 +30,12 @@
 #include <alps/model/half_integer.h>
 #include <boost/multi_array.hpp>
 
+
+// IBM workaround
+#ifdef hz
+#undef hz
+#endif
+
 namespace looper {
 
 //
