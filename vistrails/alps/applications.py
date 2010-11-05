@@ -188,9 +188,6 @@ class RunTEBD(RunAlpsApplication):
 	    cmdline=[self.get_app_name()]
 	    cmdline += [input_file]
             self.execute(cmdline)
-        f = file(os.path.join(resultdir.name,'workflow.vtl'),'w')
-        f.write(VtlFileCreator.generate_vtl(self.moduleInfo['locator'],self.moduleInfo['version'],self.moduleInfo['pipeline']))
-        f.close()
         self.setResult('output_file', result)
         self.setResult('output_dir', resultdir)
 
