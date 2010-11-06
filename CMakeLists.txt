@@ -39,6 +39,9 @@ option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
 option(ALPS_BUILD_NG "Build the next generation scheduler" OFF)
 option(ALPS_INCLUDE_TUTORIALS "Include the ALPS tutorials" ON)
 option(ALPS_BUILD_TUTORIALS_PACKAGE "Build only a tutorials package" OFF)
+option(BIND_FORTRAN_LOWERCASE "FORTRAN functions are compiled without a trailing underscore" OFF)
+
+mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
 
 if (ALPS_FOR_VISTRAILS)
@@ -394,6 +397,11 @@ endif (ALPS_FOR_VISTRAILS)
 message (STATUS "ALPS XML dir is ${ALPS_XML_DIR}")
 
 
+if (BIND_FORTRAN_LOWERCASE)
+  add_definitions(-DBIND_FORTRAN_LOWERCASE)
+endif (BIND_FORTRAN_LOWERCASE)
+  
+  
 ######################################################################
 # test environment
 ######################################################################
