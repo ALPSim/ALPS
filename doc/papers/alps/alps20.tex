@@ -7,6 +7,9 @@
 %\usepackage{amsmath}
 \usepackage{color}
 \usepackage{hyperref}
+\bibliographystyle{unsrt} %bibtex style according to iop latex guidelines
+%\usepackage{harvard}
+%\bibliographystyle{jphysicsB} %bibtex style according to iop latex guidelines
 
 \renewcommand{\vistrailspath}{http://alps.comp-phys.org/vistrails/run_vistrails.php}
 \renewcommand{\vistrailsdownload}{http://alps.comp-phys.org/vistrails/download.php}
@@ -108,7 +111,18 @@ In this paper we present release 2.0 of the ALPS project  (Algorithms and Librar
 \section{Evaluation tools in Python}
 \section{New and updated applications}
 \subsection{Updated directed loop application {\tt dirloop\_sse}}
-\subsection{Dynamical mean field theory solver {\tt dmft}}
+\subsection{Dynamical mean field theory solvers {\tt dmft}}
+Dynamical mean field theory is a method to simulate correlated electronic systems by approximating the self-energy $\Sigma(k,\omega)$ by a momentum-independent 
+function $\Sigma(\omega)$. For such a ``local'' self-energy, the diagrammmatics simplifies radically and the  problem may be mapped onto an impurity problem
+coupled to a self-consistently determined bath \cite{Georges96,Kotliar06}. The method may be extended to clusters, thereby rendering it controlled in practice \cite{Maier05}.
+To obtain a self-consistent solution of the impurity model we provide a simple implementation of the DMFT self-consistency condition for general single-site multi-orbital problems.
+For the solution of the quantum impurity problem we provide a legacy Hirsch-Fye QMC code \cite{Hirsch86} as well as two continuous-time QMC algorithms.
+
+The interaction expansion or ``weak coupling'' algorithm \cite{Rubtsov04,Rubtsov05} expands the impurity model partition function in the interaction around the non-interacting solution. This method, historically
+the first continuous-time quantum Monte Carlo impurity solver algorithm, is widely used for the simulation of cluster problems.
+The complementary hybridization expansion algorithm \cite{Werner06,Werner06Kondo} expands the impurity model partition function in the impurity-bath hybridization, treating the local (impurity) hamiltonian exactly. 
+The method is usually used to simulate multi-orbital models where its capability to treat general interactions is unparalleled. A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
+
 \subsection{Time evolving block decimation code {\tt tebd}}
 
 \section{Integration with the VisTrails workflow and computational provenance tools}
@@ -162,15 +176,5 @@ showspreadsheetonly]{width=8cm}
 \end{figure}
 
 
-
-
-\begin{thebibliography}{99} 
-\bibitem{ALPS1.2} F. Alet {\it et al.},  J. Phys. Soc. Jpn. Suppl. {\bf 74}, 30 (2005).
-\bibitem{ALPS1.3} F. Albuquerque {\it et al.}, J. Magn. Magn. Mat. ....
-
-
-\end{thebibliography}
-
-
+\bibliography{refs}
 \end{document}
-
