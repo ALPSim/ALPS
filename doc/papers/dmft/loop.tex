@@ -1,0 +1,54 @@
+\documentclass[10pt]{article}
+
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{amsmath}
+\begin{document}
+\thispagestyle{empty}
+
+\begin{equation*}
+  \mathcal{G}_0\ \longrightarrow
+  \ \text{\setlength\fboxsep{7pt}\fbox{Impurity Solver}}\ 
+  \longrightarrow\  G
+  \vspace*{-3mm}
+\end{equation*}
+\begin{center}
+  \begin{minipage}[c]{0.42\linewidth}
+    \begin{equation*}
+      \uparrow
+    \end{equation*}
+  \end{minipage}
+  \begin{minipage}[c]{0.42\linewidth}
+    \begin{equation*}
+      \downarrow
+    \end{equation*}
+  \end{minipage}
+\end{center}
+\vspace*{0mm}
+\begin{equation*}
+  \mathcal{G}_0^{-1} = \bar G^{-1} +
+  \Sigma
+  \quad\quad\quad
+  \Sigma = \mathcal{G}_0^{-1} - G^{-1}
+  \vspace*{-3mm}
+\end{equation*}
+\begin{center}
+  \begin{minipage}[c]{0.3\linewidth}
+    \begin{equation*}
+      \vspace*{-3mm}
+      \nwarrow
+    \end{equation*}
+  \end{minipage}
+  \begin{minipage}[c]{0.3\linewidth}
+    \begin{equation*}
+      \vspace*{-3mm}
+      \swarrow
+    \end{equation*}
+  \end{minipage}
+\end{center}
+\begin{equation*}
+  \bar G = \int\limits_{-\infty}^{\infty}\!{\rm d}\epsilon\, \frac{D(\epsilon)}
+    {\mathrm{i}\omega_n + \mu - \epsilon - \Sigma}
+\end{equation*}
+
+\end{document}

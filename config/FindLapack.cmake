@@ -199,7 +199,7 @@ ENDIF(NOT LAPACK_LIBRARY_INIT)
 #    /sw/lib
 #    )
 #  IF(BLAS_LIBRARY)
-#    MESSAGE(STATUS "Found netlib blas is found")
+#    MESSAGE(STATUS "Found netlib blas")
 #    SET(BLAS_LIBRARY_INIT 1)
 #  ENDIF(BLAS_LIBRARY)
 #ENDIF(NOT BLAS_LIBRARY_INIT)

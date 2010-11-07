@@ -289,9 +289,9 @@ if(MSVC)
   file(COPY ${LPSolve_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
   file(COPY ${LPSolve_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
 endif(MSVC)
-if (LPSolve_FOUND)
+if (LPSolve_FOUND AND NOT MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -idirafter /usr/include/sys")
-endif(LPSolve_FOUND)
+endif(LPSolve_FOUND AND NOT MSVC)
 
 # Zlib
 find_package(ZLIB)
@@ -701,9 +701,8 @@ else (ALPS_BUILD_SOURCE)
     else (VISTRAILS_FOUND AND (APPLE OR WIN32))
       set(PYTHONEXEC python)
     endif (VISTRAILS_FOUND AND (APPLE OR WIN32))
-    configure_file(vistrails/latex/alpsvistrails.sty.in ${PROJECT_BINARY_DIR}/vistrails/latex/alpsvistrails.sty)
 
-    install(FILES vistrails/latex/includevistrail.py ${PROJECT_BINARY_DIR}/vistrails/latex/alpsvistrails.sty 
+    install(FILES vistrails/latex/includevistrail.py vistrails/latex/alpsvistrails.sty 
             DESTINATION share/alps/latex COMPONENT vistrails)
 
   endif (NOT ALPS_FOR_VISTRAILS)
