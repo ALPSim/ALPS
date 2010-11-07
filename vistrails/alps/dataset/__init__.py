@@ -66,7 +66,6 @@ def register(m,ns,abst=False):
             input_port.porttype = m
         
         if ups and input_port.hidden:
-            warn("use_python_source and hidden ports is currently not possible")
             if input_port.use_python_source:
                 reg.add_input_port(m, input_port.name, (input_port.porttype, input_port.description), True)
             else:
