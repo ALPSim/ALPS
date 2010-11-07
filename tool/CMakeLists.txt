@@ -22,13 +22,17 @@ else(ALPS_FOR_VISTRAILS)
 # since sources are not available.
 if (NOT Boost_FOUND)
   set (QUICKBOOK_SOURCES "")
-  set (DIRECTORY "${Boost_ROOT_DIR}/tools/quickbook/detail")
-  set (FILES quickbook.cpp actions.cpp actions_class.cpp utils.cpp 
-       input_path.cpp post_process.cpp collector.cpp template_stack.cpp
-       markups.cpp)
-  foreach(S ${FILES})
-    set(QUICKBOOK_SOURCES ${QUICKBOOK_SOURCES} ${DIRECTORY}/${S})
-  endforeach(S)
+  foreach (D "${Boost_ROOT_DIR}/tools/quickbook/detail" "${Boost_ROOT_DIR}/tools/quickbook/src")
+    set (FILES actions.cpp actions_class.cpp block_grammar.cpp code_snippet.cpp
+               collector.cpp doc_info_actions.cpp doc_info_grammar.cpp
+               input_path.cpp markups.cpp phrase_grammar.cpp post_process.cpp
+               quickbook.cpp syntax_highlight.cpp template_stack.cpp utils.cpp)
+    foreach(S ${FILES})
+      if(EXISTS ${D}/${S})
+        set(QUICKBOOK_SOURCES ${QUICKBOOK_SOURCES} ${D}/${S})
+      endif(EXISTS ${D}/${S})
+    endforeach(S)
+  endforeach (D)
   add_executable(quickbook ${QUICKBOOK_SOURCES})
   target_link_libraries(quickbook boost)
   if (NOT ALPS_BUILD_SOURCE)

@@ -34,6 +34,11 @@
 #include <alps/numeric/round.hpp>
 #include <alps/model.h>
 
+// IBM workaround
+#ifdef hz
+#undef hz
+#endif
+
 namespace looper {
 
 //

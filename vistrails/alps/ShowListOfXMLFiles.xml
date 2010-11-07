@@ -69,7 +69,7 @@
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="Location" />
             </function>
           </module>
-          <module cache="1" id="2101" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" tag="" version="0.8.0">
+          <module cache="1" id="2101" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" tag="" version="2.0.0">
             <location id="2872" x="-18.1713475845" y="-43.2756497008" />
           </module>
           <module cache="1" id="2102" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">

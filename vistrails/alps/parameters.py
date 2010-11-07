@@ -179,7 +179,7 @@ class Parameters(Module):
     def compute(self):
         self.setOutput(self.readInputs(ParametersData({})))
 
-class MergeParameters(Module):
+class ConcatenateParameters(Module):
     """ merge several lists of parameters into one, by appending one to the other """
     def compute(self):
         l = []
@@ -199,7 +199,8 @@ class MergeParameters(Module):
     _output_ports = [('value',[Parameters])]
 
 
-class ConcatenateParameters(Module,CommonParametersFunctions):
+
+class MergeParameters(Module,CommonParametersFunctions):
     """ join parameters from several lists, merging the parameters element-wise """
     def compute(self):
         if self.hasInputFromPort('parms'):
