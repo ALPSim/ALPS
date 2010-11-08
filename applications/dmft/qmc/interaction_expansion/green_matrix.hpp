@@ -33,7 +33,6 @@
 //tau_A-tau_i, where i is a vertex and A is a measuring point for the imag
 //time greens function.
 
-extern "C" void dswap_(unsigned int* n, double *a, int *inca, double *b, int *incb);
 double green0_spline(const double, const unsigned int,const unsigned int,const unsigned int);
 
 class green_matrix
@@ -97,15 +96,15 @@ public:
   inline void swap_vertices(unsigned int p, unsigned int q)
   {
     int inc=1;
-    dswap_(&nt_, values_+p*nt_, &inc, values_+q*nt_, &inc);
+    FORTRAN_ID(dswap)(&nt_, values_+p*nt_, &inc, values_+q*nt_, &inc);
   }
   
   inline double* values(){return values_;}
   inline int memory_size(){return memory_size_;}
 
 private:
-  unsigned int memory_size_;
-  unsigned int nop_;
-  unsigned int nt_;
+  fortran_int_t memory_size_;
+  fortran_int_t nop_;
+  fortran_int_t nt_;
   double *values_;
 };

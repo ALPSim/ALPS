@@ -41,6 +41,7 @@
 
 #include <alps/config.h> // needed to set up correct bindings
 #include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/blas.hpp>
 #include <boost/numeric/ublas/io.hpp>
 
 #include <stack>
@@ -49,8 +50,6 @@
 #include <iostream>
 #include <algorithm>
 #include <cmath>
-extern "C" void dger_(const void *m, const void* n, const void* alpha,const void*  x, const void* incx, const void*y, const void*  incy,
-                      const void* a,const void* lda) ;
 
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 ///@brief Save a matrix
@@ -92,7 +91,7 @@ double update_from_zero(dense_matrix & Green, dense_matrix & Green0, std::vector
 template<class RNG> 
 void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green_down, std::vector<int> & spins, double lambda, int &sign) 
 {
-  unsigned int N(spins.size());
+  fortran_int_t N(spins.size());
   
   // choose random site
   unsigned int site = (unsigned int)(N*rng());
@@ -122,9 +121,9 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
       uj_up[i]=Green_up  (site, i);
       uj_dn[i]=Green_down(site, i);
     }
-    int one=1;
-    dger_(&N,&N,&alpha_up,vi_up,&one,uj_up,&one,&(Green_up  (0,0)),&N);
-    dger_(&N,&N,&alpha_dn,vi_dn,&one,uj_dn,&one,&(Green_down(0,0)),&N);
+    fortran_int_t one=1;
+    FORTRAN_ID(dger)(&N,&N,&alpha_up,vi_up,&one,uj_up,&one,&(Green_up  (0,0)),&N);
+    FORTRAN_ID(dger)(&N,&N,&alpha_dn,vi_dn,&one,uj_dn,&one,&(Green_down(0,0)),&N);
     // update spin
     spins[site] = -spins[site];
     delete[] vi_up;

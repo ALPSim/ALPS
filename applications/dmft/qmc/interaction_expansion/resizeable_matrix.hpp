@@ -32,28 +32,17 @@
 
 #include<fstream>
 #include "operator.hpp"
+#include <boost/numeric/bindings/blas.hpp>
 //this implements all functinons necessary for an inverse 'M' - matrix.
 
-//BLAS calls
-extern "C" void dgemv_(const void *trans, const void *size1, const void *size2, const void *alpha, const void *values_, const void *memory_size,
-                       const void *v1, const void *inc, const void *beta, void *v2, const void *incb);
-extern "C" void dgemm_(const void *transa, const void *transb, const void *m, const void *n, const void *k, 
-                     const void *alpha, const void *A, const void *lda,
-                     const void *B, const void *ldb, const void *beta, const void *C, const void *ldc);
-extern "C" void dger_(const void *m, const void* n, const void* alpha,const void*  x, const void* incx, const void*y, const void*  incy,
-                      const void* a,const void* lda) ;
-extern "C" int idamax_(const unsigned int *n,const double*  x,const unsigned int* incx);
-extern "C" int dnrm2_ (const unsigned int *n,const double*  x,const unsigned int* incx);
-extern "C" double ddot_(const int *size,const double * v1,const int *inc,const double *v2,const int *inc2);
 double inner_prod(const double* v1, const double *v2, const int size);
-extern "C" void dscal_(const unsigned int *size, const double *alpha, double *v, const int *inc);
-void scale(const double alpha, double *v, const unsigned int size);
+void scale(const double alpha, double *v, const fortran_int_t size);
 
 
-inline double vector_max(const double *v, const unsigned int noperators)
+inline double vector_max(const double *v, const fortran_int_t noperators)
 {
-  unsigned int inc=1;
-  unsigned int max_index=idamax_(&noperators, v ,&inc);
+  fortran_int_t inc=1;
+  fortran_int_t max_index=FORTRAN_ID(idamax)(&noperators, v ,&inc);
   return fabs(v[max_index-1]); //fortran indexing
 }
 
@@ -130,8 +119,8 @@ public:
   {
   //smart people call this 'rank one update'.
     double alpha=1.;
-    unsigned int inc=1;
-    dger_(&size_, &size_, &alpha, v2, &inc, v1, &inc, values_, &memory_size_); 
+    fortran_int_t inc=1;
+    FORTRAN_ID(dger)(&size_, &size_, &alpha, v2, &inc, v1, &inc, values_, &memory_size_); 
   }
 
   inline void right_multiply(const double *v1, double *v2)
@@ -140,11 +129,11 @@ public:
     char trans='T';
     double alpha=1., beta=0.;    //no need to multiply a constant or add a vector
     int inc=1;
-    dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
+    FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
   }
 
 
-  inline void matrix_right_multiply(const double *M1, double *M2, const unsigned columns)
+  inline void matrix_right_multiply(const double *M1, double *M2, const fortran_int_t columns)
 
   { //perform M2(i,j)=sum_k M(i,k)*M1(k,j)
     //call the BLAS routine for matrix matrix multiplication:     
@@ -152,7 +141,7 @@ public:
     char transb='N';
     double alpha=1.;
     double beta=0.;
-    dgemm_(&transa, &transb, &columns, &size_, &size_, &alpha, M1, &columns, values_, &memory_size_, &beta, M2, &columns);
+    FORTRAN_ID(dgemm)(&transa, &transb, &columns, &size_, &size_, &alpha, M1, &columns, values_, &memory_size_, &beta, M2, &columns);
   }
   
   void left_multiply(const double *v1, double *v2)
@@ -161,7 +150,7 @@ public:
     char trans='N';
     double alpha=1., beta=0.;       //no need to multiply a constant or add a vector
     int inc=1;
-    dgemv_(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
+    FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
   }
   
   bool check()
@@ -183,12 +172,12 @@ public:
 
     double* rowmax = new double[size_];
 
-    unsigned int rowmax_index, max_index, inc=1;
+    fortran_int_t rowmax_index, max_index, inc=1;
     for(unsigned int i=0;i<size_;++i){
-      rowmax_index=idamax_(&size_, values_+i*memory_size_,&inc);
+      rowmax_index=FORTRAN_ID(idamax)(&size_, values_+i*memory_size_,&inc);
       rowmax[i]=*(values_+i*memory_size_+rowmax_index-1); //fortran convention: start counting from one
     }
-    max_index=idamax_(&size_, rowmax ,&inc);
+    max_index=FORTRAN_ID(idamax)(&size_, rowmax ,&inc);
 
     double m=fabs(rowmax[max_index-1]);
     delete[] rowmax;
@@ -213,9 +202,9 @@ private:
   std::vector<annihilator> annihilators_; //an array of to annihilation operators c corresponding to the column of the matrix
   std::vector<double> alpha_;             //an array of doubles corresponding to the alphas of Rubtsov for the c, cdaggers at the same index.
   
-  unsigned int memory_size_; //size of matrix for which we have memory allocated
-  unsigned int size_; //current size of matrix
-  unsigned int max_size_; //max size of matrix
+  fortran_int_t memory_size_; //size of matrix for which we have memory allocated
+  fortran_int_t size_; //current size of matrix
+  fortran_int_t max_size_; //max size of matrix
   double *values_; //where the actual values are stored
 };
 

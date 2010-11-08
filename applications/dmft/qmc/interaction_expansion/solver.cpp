@@ -73,16 +73,15 @@ void InteractionExpansionRun::interaction_expansion_step(void)
 //dot product blas call (level one)
 double inner_prod(const double* v1, const double *v2, const int size){
   int inc=1;
-  return ddot_(&size, v1,&inc,v2,&inc); 
+  return FORTRAN_ID(ddot)(&size, v1,&inc,v2,&inc); 
 }
 
 
 
 //vector scaling blas call (level one)
-extern "C" void dscal_(const unsigned int *size, const double *alpha, double *v, const int *inc);
-void scale(const double alpha, double *v, const unsigned int size){
+void scale(const double alpha, double *v, const fortran_int_t size){
   int inc=1;
-  dscal_(&size, &alpha, v, &inc);
+  FORTRAN_ID(dscal)(&size, &alpha, v, &inc);
 }
 
 

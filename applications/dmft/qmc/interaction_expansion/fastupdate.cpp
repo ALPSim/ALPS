@@ -29,8 +29,6 @@
 
 #include "interaction_expansion.hpp"
 
-extern "C" void zaxpy_(const unsigned int *size, const void *alpha, const void *x, const int *incx, void *y, const int *incy);
-
 /// @brief This function performs the InteractionExpansion update of adding one vertex to the set of vertices. If the 
 ///        Green's function for the measurement has to be tracked it calls the function that does that.
 /// @param vertex_nr specify which of the U n_up n_down you want to look at.

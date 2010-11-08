@@ -36,8 +36,6 @@ extern "C" void vdsin_(const int *n, const double *a, double *y);
 extern "C" void vdcos_(const int *n, const double *a, double *y);
 extern "C" void vdsincos_(const int *n, const double *a, double *s, double *c);
 extern "C" void vrda_sincos_(const int *n, const double *a, double *s, double *c);
-extern "C" void daxpy_(const unsigned int *size, const double *alpha, const double *x, const int *incx, double *y, const int *incy);
-extern "C" void dscal_(const unsigned int *size, const double *alpha, double *v, const int *inc);
 
 
 
