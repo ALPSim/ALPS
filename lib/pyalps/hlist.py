@@ -78,17 +78,17 @@ def copy_structure(sl):
     except Exception:
         return 1
 
-def happly(functor, sl, fdepth = None):
+def happly(functor, sl, fdepth = None, params = None):
     if fdepth == None:
         fdepth = depth(sl)
     hl = HList(sl, fdepth)
-    hl.apply(functor)
+    hl.apply(functor, params)
 
-def hmap(functor, sl, fdepth = None):
+def hmap(functor, sl, fdepth = None, params = None):
     if fdepth == None:
         fdepth = depth(sl)
     hl = HList(sl, fdepth)
-    return hl.map(functor)
+    return hl.map(functor, params)
 
 class HList:
     def __init__(self):
@@ -137,15 +137,21 @@ class HList:
     def data(self):
         return self.data_
     
-    def apply(self, functor):
+    def apply(self, functor, params = None):
         for idx in self.indices_:
-            self[idx] = functor(self[idx])
+            if params == None:
+                self[idx] = functor(self[idx])
+            else:
+                self[idx] = functor(self[idx], params)
     
-    def map(self, functor):
+    def map(self, functor, params = None):
         ret = copy_structure(self.data_)
         rethl = HList(ret)
         for idx in self.indices_:
-            rethl[idx] = functor(self[idx])
+            if params == None:
+                rethl[idx] = functor(self[idx])
+            else:
+                rethl[idx] = functor(self[idx], params)
         return ret
 
 def hlist_to_dict(hl, key = 'Observable'):

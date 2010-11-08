@@ -185,15 +185,15 @@ class TransformGroupedDataSets(Module):
             
             code = self.getInputFromPort('source')
             proc_code = urllib.unquote(str(code))
-            cmd = 'def f(data):\n'
+            cmd = 'def f(data, self):\n'
             for line in proc_code.split('\n'):
                 cmd += '\t' + line + '\n'
             exec cmd
             
             if level > 0:
-                happly(f, q, level)
+                happly(f, q, level, self)
             else:
-                q = f(q)
+                q = f(q, self)
 
             self.setResult('output',q)
         else:
