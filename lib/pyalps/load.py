@@ -380,8 +380,7 @@ class Hdf5Loader:
                 for m in obslist:
                     if verbose: print "Loading", m
                     size=0
-                    #TODO check if there is mean AND error, otherwise only read mean value!!!
-                    if "error" in self.h5f.list_children(respath+'/'+m): 
+                    if "error" in self.h5f.list_children(respath+'/'+m+'/mean'): 
                         if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
                             obs = pa.MCScalarData()
                             obs.load(self.h5fname, respath+'/'+m)
