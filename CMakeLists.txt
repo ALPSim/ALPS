@@ -289,9 +289,9 @@ if(MSVC)
   file(COPY ${LPSolve_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
   file(COPY ${LPSolve_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
 endif(MSVC)
-if (LPSolve_FOUND AND NOT MSVC)
+if (LPSolve_FOUND AND APPLE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -idirafter /usr/include/sys")
-endif(LPSolve_FOUND AND NOT MSVC)
+endif(LPSolve_FOUND AND APPLE)
 
 # Zlib
 find_package(ZLIB)
