@@ -124,6 +124,12 @@ The complementary hybridization expansion algorithm \cite{Werner06,Werner06Kondo
 The method is usually used to simulate multi-orbital models where its capability to treat general interactions is unparalleled. A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
 
 \subsection{Time evolving block decimation code {\tt tebd}}
+Release 2.0 contains interfaces to the Open Source TEBD project\cite{ostebd}, which is a collection of Fortran libraries using the Time-Evolving Block Decimation (TEBD) algorithm\cite{vidal1, vidal2} to simulate time evolution of one-dimensional quantum systems.  The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.  TEBD can also find ground states via imaginary time evolution.  Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times.
+
+At present, the TEBD routines can simulate the spin, boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models from the ALPS models library.  All Hamiltonian parameters are assumed uniform throughout the system.  The measures calculated are the $z$ and $x$ magnetization, their squares, and the $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ and $\langle \hat{S}^x_i \hat{S}^x_j\rangle$ correlations for the spin model; the number, its square, and the $\langle \hat{n}_i \hat{n}_j\rangle$ and $\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the boson Hubbard, hardcore boson, spinless ferimons, and fermion Hubbard models; and, additionally, the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model.  All models calculate the energy, von Neumann entanglement entropy of each site, von Neumann entanglement entropy of each bond, and the overlap of the wavefunction at time $t$ with its $t=0$ value.
+
+In the future we plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States.  These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
+
 
 \section{Integration with the VisTrails workflow and computational provenance tools}
 \section{Future development plans}
