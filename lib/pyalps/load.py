@@ -592,7 +592,7 @@ def loadObservableList(files,proppath='/parameters',respath='/simulation/results
       results.append(x.props['ObservableList'])
     return results
 
-def loadTimeEvolution( flist,globalproppath='/parameters/',resroot='/timesteps/',localpropsuffix='/parameters', measurements=None):
+def loadTimeEvolution( flist,globalproppath='/parameters',resroot='/timesteps/',localpropsuffix='/parameters', measurements=None):
     ll=Hdf5Loader()
     data=[]
     #loop over files
@@ -611,7 +611,8 @@ def loadTimeEvolution( flist,globalproppath='/parameters/',resroot='/timesteps/'
                 locdata=ll.ReadMeasurementFromFile([f],proppath=resroot+str(d)+localpropsuffix, \
                 respath=resroot+str(d)+'/results', measurements=measurements)
                 #Append the global props to the local props
-                locdata[0][0].props.update(globalprops[0].props)
+		for i in range(len(locdata[0])):
+	                locdata[0][i].props.update(globalprops[0].props)
                 #Extend the total dataset with this data
                 data.extend(locdata)
         except Exception as e:

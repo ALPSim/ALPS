@@ -232,32 +232,8 @@ class LoadDMFTIterations(Module):
             print_exc()
             raise exc
 
-class AppendLegend(Module):
-    my_input_ports = [
-        PortDescriptor('inData',DataSets),
-        PortDescriptor('appendCall',basic.String),
-        PortDescriptor('propname',basic.String),
-        PortDescriptor('propelement',basic.Integer)
-    ]
 
-    my_output_ports = [
-        PortDescriptor('data',DataSets)
-    ]    
-
-    def compute(self):
-	locdata=self.getInputFromPort('inData')
-	for q in locdata:
-		for i in range(len(q)):
-			if self.hasInputFromPort('propelement') :
-				 q[i].props['']=self.getInputFromPort('appendCall')+\
-				 str(q[0].props[self.getInputFromPort('propname').replace("'",'')][self.getInputFromPort('propelement')])
-			else:
-				 q[i].props['']=self.getInputFromPort('appendCall')+\
-				 str(q[0].props[self.getInputFromPort('propname').replace("'",'')])
-        self.setResult('data',locdata)
-
-
-class LoadTimeEvolutionModule(Module):
+class LoadTimeEvolution(Module):
     """Load the data from successive TEBD-Iterations. Description of input ports:
       @ResultFiles: The hdf5-files.
       @Measurements: List of observables to load
@@ -279,7 +255,7 @@ class LoadTimeEvolutionModule(Module):
     
     def compute(self):
         try:
-            globalproppath= self.getInputFromPort('GlobalPropertyPath') if self.hasInputFromPort('GlobalPropertyPath') else "/parameters/"
+            globalproppath= self.getInputFromPort('GlobalPropertyPath') if self.hasInputFromPort('GlobalPropertyPath') else "/parameters"
             localpropsuffix= self.getInputFromPort('LocalPropertySuffix') if self.hasInputFromPort('LocalPropertySuffix') else "/parameters"
             resroot= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/timesteps/"
             loader = Hdf5Loader()
@@ -305,7 +281,8 @@ class LoadTimeEvolutionModule(Module):
  		               locdata=loader.ReadMeasurementFromFile([f],proppath=resroot+str(d)+localpropsuffix, \
  		               respath=resroot+str(d)+'/results', measurements=self.getInputFromPort('Measurements'))
  		               #Append the global props to the local props
- 		               locdata[0][0].props.update(globalprops[0].props)
+			       for i in range(len(locdata[0])):
+			                locdata[0][i].props.update(globalprops[0].props)
  		               #Extend the total dataset with this data
  		               datasets.extend(locdata)
  		       except Exception as e:
@@ -328,7 +305,8 @@ class LoadTimeEvolutionModule(Module):
  		               locdata=loader.ReadMeasurementFromFile([f],proppath=resroot+str(d)+localpropsuffix, \
  		               respath=resroot+str(d)+'/results', measurements=None)
  		               #Append the global props to the local props
- 		               locdata[0][0].props.update(globalprops[0].props)
+			       for i in range(len(locdata[0])):
+			                locdata[0][i].props.update(globalprops[0].props)
  		               #Extend the total dataset with this data
  		               datasets.extend(locdata)
  		       except Exception as e:

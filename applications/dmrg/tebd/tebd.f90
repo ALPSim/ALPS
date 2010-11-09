@@ -51,7 +51,7 @@ TYPE(measure) :: Measures !Measures derived type
 REAL(KIND=rKIND) :: tick, tock, energy, time, localTruncerr,rtpTruncLimit, totalTruncerr !Timing Variables
 INTEGER :: i,j,k,l,p,alpha,beta, numProcs, counter,rtpChiLimit, inCounter !Dummy integers
 INTEGER :: overlapnum
-CHARACTER(16) :: iWstring, mstring
+CHARACTER(16) :: iWstring, mstring, anothermString
 CHARACTER(64) :: fmtName
 !Read in input parameters
 NAMELIST /SystemSettings/ systemSize,HamiType, initialState, &
@@ -171,19 +171,41 @@ CLOSE(138)
 IF(numQuenches.gt.0) THEN
 	ALLOCATE(rtpD%tau(numQuenches), rtpD%pow(numQuenches), rtpD%gi(numQuenches), &
 	rtpD%gf(numQuenches),rtpD%gquench(numQuenches),rtpD%nsteps(numQuenches),rtpD%stepsForStore(numQuenches))
+	ALLOCATE(rtpD%nparams(numQuenches))
 	!Read in RTP params
 	WRITE(mString,'(I4)') numQuenches
 	OPEN(137, file=rtpFileName)
+	!Read in those things indexed by numQuenches
 	fmtName='('//TRIM(ADJUSTL(mString))//'E30.15)'
 	READ(137,fmtname) (rtpD%tau(j),j=1,numQuenches)
-	READ(137,fmtname) (rtpD%pow(j),j=1,numQuenches)
-	READ(137,fmtname) (rtpD%gi(j),j=1,numQuenches)
-	READ(137,fmtname) (rtpD%gf(j),j=1,numQuenches)
-	fmtName='('//TRIM(ADJUSTL(mString))//'A10)'
-	READ(137,fmtname) (rtpD%gquench(j),j=1,numQuenches)
 	fmtName='('//TRIM(ADJUSTL(mString))//'I16)'
 	READ(137,fmtname) (rtpD%nsteps(j),j=1,numQuenches)
 	READ(137,fmtname) (rtpD%stepsForStore(j),j=1,numQuenches)
+	READ(137,fmtname) (rtpD%nparams(j),j=1,numQuenches)
+	DO j=1,numQuenches
+		ALLOCATE(rtpD%gquench(j)%v(rtpD%nparams(j)),rtpD%pow(j)%v(rtpD%nparams(j)),&
+		rtpD%gi(j)%v(rtpD%nparams(j)),rtpD%gf(j)%v(rtpD%nparams(j)))
+	END DO
+	DO j=1,numQuenches
+		WRITE(anothermString,'(I4)') rtpD%nparams(j)
+		fmtName='('//TRIM(ADJUSTL(anothermString))//'E30.15)'
+		READ(137,fmtname) (rtpD%pow(j)%v(p),p=1,rtpD%nparams(j))
+	END DO
+	DO j=1,numQuenches
+		WRITE(anothermString,'(I4)') rtpD%nparams(j)
+		fmtName='('//TRIM(ADJUSTL(anothermString))//'E30.15)'
+		READ(137,fmtname) (rtpD%gi(j)%v(p),p=1,rtpD%nparams(j))
+	END DO
+	DO j=1,numQuenches
+		WRITE(anothermString,'(I4)') rtpD%nparams(j)
+		fmtName='('//TRIM(ADJUSTL(anothermString))//'E30.15)'
+		READ(137,fmtname) (rtpD%gf(j)%v(p),p=1,rtpD%nparams(j))
+	END DO
+	DO j=1,numQuenches
+		WRITE(anothermString,'(I4)') rtpD%nparams(j)
+		fmtName='('//TRIM(ADJUSTL(anothermString))//'A10)'
+		READ(137,fmtname) (rtpD%gquench(j)%v(p),p=1,rtpD%nparams(j))
+	END DO
 	CLOSE(137)
 
 	!Get Initial Hamiltonian

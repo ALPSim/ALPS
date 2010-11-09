@@ -72,10 +72,11 @@ for q in Magdata:
 	loc=0.5*(syssize/2)
 	#\Delta M-=<S_n^z(t)> from n=L/2 to L
 	q[0].y=[0.5*(syssize/2)+sum(q[0].y[syssize/2:syssize])]
-	q[0].props['']='Jz='+str(q[0].props['Jz'])
+
 
 #Plot the integrated magnetization
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['Jz'])
+
 plt.figure()
 pyalps.plot.plot(Mag)
 plt.xlabel('Time $t$')

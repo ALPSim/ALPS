@@ -583,6 +583,88 @@ def runTEBD(infileList):
     	    resList.append(executeCommand(cmdline))
     return resList
 
+def stringListToList(inList):
+	""" Convert a string which is of the form [...] with ... a collection of lists of floats and floats separated by commas
+	into the list [...]."""
+	outList=[]
+	#sort out strings vs. floats
+	if type(inList)==str:
+		#remove whitespace and initial/final []
+		dum=inList[1:len(inList)-1].replace(' ','')
+		#find number of bracketed items (they come in pairs)
+		numbrackets=dum.count('[')
+		if numbrackets==0 :
+			unbracketed=map(float,dum.replace('[','').replace(']','').replace(' ','').split(','))
+			for q in unbracketed:
+				outList.append([q])
+		elif numbrackets>0:
+			count=0
+			for i in range(numbrackets):
+				#find the first bracketed pair starting at count
+				startInd=dum.find('[',count)
+				finishInd=dum.find(']', count)
+				if startInd>count:
+					unbracketed=map(float,(dum[count:startInd-1].replace('[','').replace(']','')\
+					.replace(' ','').split(',')))
+					for q in unbracketed:
+						outList.append([q])
+				outList.append(map(float,dum[startInd:finishInd+1].replace('[','').\
+				replace(']','').replace(' ','').split(',')))
+				count=finishInd+2
+			if len(dum)-count>0:
+				unbracketed=map(float,dum[count:len(dum)].replace('[','').replace(']','')\
+				.replace(' ','').split(','))
+				for q in unbracketed:
+					outList.append([q])
+	else:
+		outList=inList
+		for i in range(len(outList)):
+			if type(outList[i])!=list:
+				outList[i]=[outList[i]]
+	return outList
+
+def stringListToListstring(inList):
+	""" Convert a string which is of the form [...] with ... a collection of lists of strings and strings separated by commas
+	into the list [...]."""
+
+	outList=[]
+	#sort out strings vs. floats
+	if type(inList)==str:
+		#remove whitespace and initial/final []
+		dum=inList[1:len(inList)-1].replace(' ','').replace("'",'')
+		#find number of bracketed items (they come in pairs)
+		numbrackets=dum.count('[')
+		if numbrackets==0 :
+			unbracketed=dum.replace('[','').replace(']','').replace(' ','').split(',')
+			for q in unbracketed:
+				outList.append([q.replace("'",'')])
+		elif numbrackets>0:
+			count=0
+			for i in range(numbrackets):
+				#find the first bracketed pair starting at count
+				startInd=dum.find('[',count)
+				finishInd=dum.find(']', count)
+				if startInd>count:
+					unbracketed=(dum[count:startInd-1].replace('[','').replace(']','')\
+					.replace(' ','').split(','))
+					for q in unbracketed:
+						outList.append([q.replace("'",'')])
+				outList.append(dum[startInd:finishInd+1].replace('[','').\
+				replace(']','').replace(' ','').split(','))
+				count=finishInd+2
+			if len(dum)-count>0:
+				unbracketed=dum[count:len(dum)].replace('[','').replace(']','')\
+				.replace(' ','').split(',')
+				for q in unbracketed:
+					outList.append([q.replace("'",'')])
+	else:
+		outList=inList
+		for i in range(len(outList)):
+			if type(outList[i])!=list:
+				outList[i]=[outList[i]]
+	return outList
+
+
 def writeTEBDfiles(parmsList, fileName):
 	counter=0
 	nmlList=[]
@@ -662,7 +744,7 @@ def writeTEBDfiles(parmsList, fileName):
 		if 'SIMID' in parms:
 			systemSettingsString+=', simId='+str(parms['SIMID'])
 		else:
-			systemSettingsString+=', simId=1'
+			systemSettingsString+=', simId='+str(counter)
 		#check for verbose switch
 		if 'VERBOSE' in parms:
 			systemSettingsString+=", print_switch=."+str(parms['VERBOSE'])+"."
@@ -770,21 +852,22 @@ def writeTEBDfiles(parmsList, fileName):
 				myGamma=0.0
 				myD=0.0
 				myK=0.0
-				if 'ITP_J' in parms:
-					myJz=float(parms['ITP_J'])
-					myJxy=float(parms['ITP_J'])
-				if 'ITP_Jz' in parms:
-					myJz=float(parms['ITP_Jz'])
-				if 'ITP_Jxy' in parms:
-					myJxy=float(parms['ITP_Jxy'])
-				if 'ITP_H' in parms:
-					myH=float(parms['ITP_H'])
-				if 'ITP_Gamma' in parms:
-					myGamma=float(parms['ITP_Gamma'])
-				if 'ITP_D' in parms:
-					myD=float(parms['ITP_D'])
-				if 'ITP_K' in parms:
-					myK=float(parms['ITP_K'])
+				if 'J' in parms:
+					if parms['J']!='J0':
+						myJz=float(parms['J'])
+						myJxy=float(parms['J'])
+				if 'Jz' in parms:
+					myJz=float(parms['Jz'])
+				if 'Jxy' in parms:
+					myJxy=float(parms['Jxy'])
+				if 'H' in parms:
+					myH=float(parms['H'])
+				if 'Gamma' in parms:
+					myGamma=float(parms['Gamma'])
+				if 'D' in parms:
+					myD=float(parms['D'])
+				if 'K' in parms:
+					myK=float(parms['K'])
 				nmlfile.write('&sp\n')
 				itpnmlString='spinP%Jz='
 				itpnmlString+='%30.15E'%(myJz)
@@ -806,14 +889,14 @@ def writeTEBDfiles(parmsList, fileName):
 				myU=0.0
 				myV=0.0
 				myMu=0.0
-				if 'ITP_t' in parms:
-					myT=float(parms['ITP_t'])
-				if 'ITP_U' in parms:
-					myU=float(parms['ITP_U'])
-				if 'ITP_V' in parms:
-					myV=float(parms['ITP_V'])
-				if 'ITP_mu' in parms:
-					myMu=float(parms['ITP_mu'])
+				if 't' in parms:
+					myT=float(parms['t'])
+				if 'U' in parms:
+					myU=float(parms['U'])
+				if 'V' in parms:
+					myV=float(parms['V'])
+				if 'mu' in parms:
+					myMu=float(parms['mu'])
 				nmlfile.write('&bp\n')
 				itpnmlString='bosonP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -830,12 +913,12 @@ def writeTEBDfiles(parmsList, fileName):
 				myT=1.0
 				myV=0.0
 				myMu=0.0
-				if 'ITP_t' in parms:
-					myT=float(parms['ITP_t'])
-				if 'ITP_V' in parms:
-					myV=float(parms['ITP_V'])
-				if 'ITP_mu' in parms:
-					myMu=float(parms['ITP_mu'])
+				if 't' in parms:
+					myT=float(parms['t'])
+				if 'V' in parms:
+					myV=float(parms['V'])
+				if 'mu' in parms:
+					myMu=float(parms['mu'])
 				nmlfile.write('&hcbp\n')
 				itpnmlString='hcbosonp%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -851,14 +934,14 @@ def writeTEBDfiles(parmsList, fileName):
 				myU=0.0
 				myV=0.0
 				myMu=0.0
-				if 'ITP_t' in parms:
-					myT=float(parms['ITP_t'])
-				if 'ITP_U' in parms:
-					myU=float(parms['ITP_U'])
-				if 'ITP_V' in parms:
-					myV=float(parms['ITP_V'])
-				if 'ITP_mu' in parms:
-					myMu=float(parms['ITP_mu'])
+				if 't' in parms:
+					myT=float(parms['t'])
+				if 'U' in parms:
+					myU=float(parms['U'])
+				if 'V' in parms:
+					myV=float(parms['V'])
+				if 'mu' in parms:
+					myMu=float(parms['mu'])
 				nmlfile.write('&fp\n')
 				itpnmlString='fermiP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -875,12 +958,12 @@ def writeTEBDfiles(parmsList, fileName):
 				myT=1.0
 				myV=0.0
 				myMu=0.0
-				if 'ITP_t' in parms:
-					myT=float(parms['ITP_t'])
-				if 'ITP_V' in parms:
-					myV=float(parms['ITP_V'])
-				if 'ITP_mu' in parms:
-					myMu=float(parms['ITP_mu'])
+				if 't' in parms:
+					myT=float(parms['t'])
+				if 'V' in parms:
+					myV=float(parms['V'])
+				if 'mu' in parms:
+					myMu=float(parms['mu'])
 				nmlfile.write('&sfp\n')
 				itpnmlString='sfermiP%mu='
 				itpnmlString+='%30.15E'%(myMu)
@@ -895,41 +978,14 @@ def writeTEBDfiles(parmsList, fileName):
 		if (not 'TAUS' in parms) :
 			numQuenches=0
 		else:
+
 			#get quench data
 			if type(parms['TAUS'])==str:
 				myTaus=map(float,(parms['TAUS'].replace('[','').replace(']','').replace(' ','').split(',')))
 			else:
 				myTaus=parms['TAUS']
 			numQuenches=len(myTaus)
-			if 'POWS' in parms:
-				if type(parms['POWS'])==str:
-					myPows=map(float,(parms['POWS'].replace('[','').replace(']','').replace(' ','').split(',')))
-				else:
-					myPows=parms['POWS']
-			else :
-				myPows=[0.0]
-				numQuenches=1
-			if 'GS' in parms:
-				if type(parms['GS'])==str:
-					myGs=parms['GS'].replace('[','').replace(']','').replace(' ','').replace("'",'').split(',')
-				else:
-					myGs=parms['GS']
-			else:
-				myGs='t'.ljust(10)
-			if 'GIS' in parms:
-				if type(parms['GIS'])==str:
-					myGis=map(float,(parms['GIS'].replace('[','').replace(']','').replace(' ','').split(',')))
-				else:
-					myGis=parms['GIS']
-			else:
-				myGis=[1]
-			if 'GFS' in parms:
-				if type(parms['GFS'])==str:
-					myGfs=map(float,(parms['GFS'].replace('[','').replace(']','').replace(' ','').split(',')))
-				else:
-					myGfs=parms['GFS']
-			else:
-				myGfs=[1]
+
 			if 'NUMSTEPS' in parms:
 				if type(parms['NUMSTEPS'])==str:
 					myNumsteps=map(int,(parms['NUMSTEPS'].replace('[','').replace(']','').replace(' ','').split(',')))
@@ -937,6 +993,7 @@ def writeTEBDfiles(parmsList, fileName):
 					myNumsteps=parms['NUMSTEPS']
 			else:
 				myNumsteps=[100]
+
 			if 'STEPSFORSTORE' in parms:
 				if type(parms['STEPSFORSTORE'])==str:
 					mySfs=map(int,(parms['STEPSFORSTORE'].replace('[','').replace(']','').replace(' ','').split(',')))
@@ -945,12 +1002,47 @@ def writeTEBDfiles(parmsList, fileName):
 			else:
 				mySfs=[1]
 
+
+			numParams=[]
+			
+			#find the number of parameters quenched in each quench
+			if 'POWS' in parms:
+				myPows=stringListToList(parms['POWS'])
+				#check if any of the pows are list-valued
+				for q in myPows:
+					if type(q)==list:
+						numParams.append(len(q))
+					else:
+						numParams.append(1)
+			else :
+				myPows=[0.0]
+				numQuenches=1
+
+
+			if 'GIS' in parms:
+				myGis=stringListToList(parms['GIS'])
+			else :
+				myGis=[0.0]
+				numQuenches=1
+
+			if 'GFS' in parms:
+				myGfs=stringListToList(parms['GFS'])
+			else :
+				myGfs=[0.0]
+				numQuenches=1
+
+			if 'GS' in parms:
+				myGs=stringListToListstring(parms['GS'])
+			else :
+				myGs=['t']
+				numQuenches=1
+
+
 			rtpfileName=fileName+str(counter)+'_rtp.dat'
 			#Write rtp data to namelist file
 			nmlfile.write('&RTPsettings\n')
 			nmlfile.write('numQuenches='+str(numQuenches)+", rtpfilename='"+rtpfileName+"'\n")
 			nmlfile.write('&end\n\n')
-
 			#Write RTP data to rtp file
 			rtpfile=open(rtpfileName,'w')
 			tauString=''
@@ -958,26 +1050,6 @@ def writeTEBDfiles(parmsList, fileName):
 				tauString+='%30.15E' %s
 			tauString=tauString+'\n'
 			rtpfile.write(tauString)
-			powString=''
-			for s in myPows:
-				powString+='%30.15E' %s
-			powString=powString+'\n'
-			rtpfile.write(powString)
-			giString=''
-			for s in myGis:
-				giString+='%30.15E' %s
-			giString=giString+'\n'
-			rtpfile.write(giString)
-			gfString=''
-			for s in myGfs:
-				gfString+='%30.15E' %s
-			gfString=gfString+'\n'
-			rtpfile.write(gfString)
-			gsString=''
-			for s in myGs:
-				gsString+=s.ljust(10)
-			gsString=gsString+'\n'
-			rtpfile.write(gsString)
 			nsString=''
 			for s in myNumsteps:
 				nsString+='%16i' %s
@@ -988,6 +1060,37 @@ def writeTEBDfiles(parmsList, fileName):
 				sfsString+='%16i' %s
 			sfsString=sfsString+'\n'
 			rtpfile.write(sfsString)
+
+			#write the nparams to file
+			nParamsString=''
+			for s in numParams:
+				nParamsString+='%16i' %s
+			nParamsString=nParamsString+'\n'
+			rtpfile.write(nParamsString)
+			powString=''
+			for s in myPows:
+				for q in s:
+					powString+='%30.15E' %q
+				powString=powString+'\n'
+			rtpfile.write(powString)
+			giString=''
+			for s in myGis:
+				for q in s:
+					giString+='%30.15E' %q
+				giString=giString+'\n'
+			rtpfile.write(giString)
+			gfString=''
+			for s in myGfs:
+				for q in s:
+					gfString+='%30.15E' %q
+				gfString=gfString+'\n'
+			rtpfile.write(gfString)
+			gsString=''
+			for s in myGs:
+				for q in s:
+					gsString+=q.ljust(10)
+				gsString=gsString+'\n'
+			rtpfile.write(gsString)
 			rtpfile.close()
 
 
@@ -1123,7 +1226,6 @@ def writeTEBDfiles(parmsList, fileName):
 				nmlfile.write('&end\n\n')
 		nmlList.append(nmlfileName)
 	return nmlList
-
 
 
 

@@ -136,13 +136,24 @@ TYPE HamiParamslist
 END TYPE HamiParamslist
 
 TYPE rtpData
+	!indexed by numquenches only
 	REAL(KIND=rKind), ALLOCATABLE :: tau(:) !timescale of :th quench
-	REAL(KIND=rKind), ALLOCATABLE :: pow(:) !power of :th quench
-	CHARACTER(len=10), ALLOCATABLE :: gquench(:) !define which parameter the :th quench is changing
-	REAL(KIND=rKind), ALLOCATABLE :: gi(:) !initial value of :th quench
-	REAL(KIND=rKind), ALLOCATABLE :: gf(:) !final value of :th quench
 	INTEGER, ALLOCATABLE :: nsteps(:) !number of timesteps for the :th quench
 	INTEGER, ALLOCATABLE :: stepsForStore(:) !number of timesteps between each measurement
+	INTEGER, ALLOCATABLE :: nparams(:) !number of Hami params being quenched
+
+	!indexed by numquenches then nparams
+	Type(vector), POINTER :: pow(:) !power of :th quench
+	Type(Charvec), POINTER :: gquench(:) !define which parameter the :th quench is changing
+	Type(vector), POINTER :: gi(:) !initial value of :th quench
+	Type(vector), POINTER :: gf(:) !final value of :th quench
+!	REAL(KIND=rKind), ALLOCATABLE :: tau(:) !timescale of :th quench
+!	REAL(KIND=rKind), ALLOCATABLE :: pow(:) !power of :th quench
+!	CHARACTER(len=10), ALLOCATABLE :: gquench(:) !define which parameter the :th quench is changing
+!	REAL(KIND=rKind), ALLOCATABLE :: gi(:) !initial value of :th quench
+!	REAL(KIND=rKind), ALLOCATABLE :: gf(:) !final value of :th quench
+!	INTEGER, ALLOCATABLE :: nsteps(:) !number of timesteps for the :th quench
+!	INTEGER, ALLOCATABLE :: stepsForStore(:) !number of timesteps between each measurement
 END TYPE rtpData
 
 !Spin system parameters
@@ -933,7 +944,7 @@ TYPE(HamiParams) :: Hparams
 TYPE(HamiParamsList) :: HparamsList
 TYPE(rtpData) :: rtpD
 REAL(KIND=rKIND) :: step
-INTEGER :: i, j, counter
+INTEGER :: i, j,p, counter, stride
 
 
 
@@ -942,152 +953,152 @@ SELECT CASE(HamiType)
 		!Allocate total number of time steps worth of parameter sets
 		ALLOCATE(HparamsList%sp(SUM(rtpD%nsteps)+1))
 		HparamsList%sp(1)=Hparams%sp
-		counter=1
+		stride=0
 		DO i=1, numQuenches
-			IF(rtpD%pow(i).le.10.0_8**(-10)) THEN
-					IF(rtpD%pow(i).lt.0.0_8) THEN
-						STOP "Negative quench powers not supported!"
-					END IF
-					DO j=1,rtpD%nsteps(i)
-						counter=counter+1
-						HparamsList%sp(counter)=HparamsList%sp(counter-1)
-					END DO
-				CYCLE
-			END IF
+			!Initialize
+			DO j=1,rtpD%nsteps(i)
+				HparamsList%sp(stride+j+1)=HparamsList%sp(stride+j)
+			END DO
+
 			step=rtpD%tau(i)/((rtpD%nsteps(i))*1.0_rKind)
-			SELECT CASE(rtpD%gquench(i))
+			!Loop over different params
+			DO p=1,rtpD%nparams(i)
+				!catch errors			
+				IF(rtpD%pow(i)%v(p).lt.0.0_8) THEN
+					STOP "Negative quench powers not supported!"
+				END IF
+				!Cycle if power close to 0
+				IF(rtpD%pow(i)%v(p).le.10.0_8**(-10)) THEN
+					CYCLE
+				END IF
+
+			SELECT CASE(rtpD%gquench(i)%v(p))
 				CASE('Jz')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sp(counter)%Jz=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sp(counter)=HparamsList%sp(counter-1)
+						HparamsList%sp(stride+j+1)%Jz=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('Jxy')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sp(counter)%Jxy=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sp(counter)=HparamsList%sp(counter-1)
+						HparamsList%sp(stride+j+1)%Jxy=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('H')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sp(counter)%h=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sp(counter)=HparamsList%sp(counter-1)
+						HparamsList%sp(stride+j+1)%h=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('Gamma')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sp(counter)%gam=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sp(counter)=HparamsList%sp(counter-1)
+						HparamsList%sp(stride+j+1)%gam=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('D')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sp(counter)%d=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sp(counter)=HparamsList%sp(counter-1)
+						HparamsList%sp(stride+j+1)%d=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('K')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sp(counter)%k=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sp(counter)=HparamsList%sp(counter-1)
+						HparamsList%sp(stride+j+1)%k=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE DEFAULT
 					PRINT *, "quench parameter not recognized!"
 					PRINT *, "use Jz, Jxy, H, Gamma, D, or K for spin models!"
 					STOP
 			END SELECT
+			END DO
+			stride=stride+rtpD%nsteps(i)
 		END DO	
 	CASE ('boson Hubbard')
 		!Allocate total number of time steps worth of parameter sets
+		stride=0
 		ALLOCATE(HparamsList%bp(SUM(rtpD%nsteps)+1))
 		HparamsList%bp(1)=Hparams%bp
-		counter=1
 		DO i=1, numQuenches
-			IF(rtpD%pow(i).le.10.0_8**(-10)) THEN
-					IF(rtpD%pow(i).lt.0.0_8) THEN
-						STOP "Negative quench powers not supported!"
-					END IF
-					DO j=1,rtpD%nsteps(i)
-						counter=counter+1
-						HparamsList%bp(counter)=HparamsList%bp(counter-1)
-					END DO
-				CYCLE
-			END IF
+			!Initialize
+			DO j=1,rtpD%nsteps(i)
+				HparamsList%bp(stride+j+1)=HparamsList%bp(stride+j)
+			END DO
+
 			step=rtpD%tau(i)/((rtpD%nsteps(i))*1.0_rKind)
-			SELECT CASE(rtpD%gquench(i))
+			!Loop over different params
+			DO p=1,rtpD%nparams(i)
+				!catch errors			
+				IF(rtpD%pow(i)%v(p).lt.0.0_8) THEN
+					STOP "Negative quench powers not supported!"
+				END IF
+				!Cycle if power close to 0
+				IF(rtpD%pow(i)%v(p).le.10.0_8**(-10)) THEN
+					CYCLE
+				END IF
+			SELECT CASE(rtpD%gquench(i)%v(p))
 				CASE('mu')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%bp(counter)%mu=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%bp(counter)=HparamsList%bp(counter-1)
+						HparamsList%bp(stride+j+1)%mu=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('t')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%bp(counter)%t=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%bp(counter)=HparamsList%bp(counter-1)
+						HparamsList%bp(stride+j+1)%t=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('V')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%bp(counter)%V=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%bp(counter)=HparamsList%bp(counter-1)
+						HparamsList%bp(stride+j+1)%V=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('U')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%bp(counter)%U=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%bp(counter)=HparamsList%bp(counter-1)
+						HparamsList%bp(stride+j+1)%U=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE DEFAULT
 					PRINT *, "quench parameter not recognized!"
 					PRINT *, "use mu, t, V, or U for boson hubbard models!"
 					STOP
 			END SELECT
+			END DO
+			stride=stride+rtpD%nsteps(i)
 		END DO
 
 	CASE ('hardcore boson')
 		!Allocate total number of time steps worth of parameter sets
 		ALLOCATE(HparamsList%hcbp(SUM(rtpD%nsteps)+1))
+		stride=0
 		HparamsList%hcbp(1)=Hparams%hcbp
-		counter=1
 		DO i=1, numQuenches
-			IF(rtpD%pow(i).le.10.0_8**(-10)) THEN
-					IF(rtpD%pow(i).lt.0.0_8) THEN
-						STOP "Negative quench powers not supported!"
-					END IF
-					DO j=1,rtpD%nsteps(i)
-						counter=counter+1
-						HparamsList%hcbp(counter)=HparamsList%hcbp(counter-1)
-					END DO
-				CYCLE
-			END IF
+			!Initialize
+			DO j=1,rtpD%nsteps(i)
+				HparamsList%hcbp(stride+j+1)=HparamsList%hcbp(stride+j)
+			END DO
+
 			step=rtpD%tau(i)/((rtpD%nsteps(i))*1.0_rKind)
-			SELECT CASE(rtpD%gquench(i))
+			!Loop over different params
+			DO p=1,rtpD%nparams(i)
+				!catch errors			
+				IF(rtpD%pow(i)%v(p).lt.0.0_8) THEN
+					STOP "Negative quench powers not supported!"
+				END IF
+				!Cycle if power close to 0
+				IF(rtpD%pow(i)%v(p).le.10.0_8**(-10)) THEN
+					CYCLE
+				END IF
+
+			SELECT CASE(rtpD%gquench(i)%v(p))
 				CASE('mu')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%hcbp(counter)%mu=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%hcbp(counter)=HparamsList%hcbp(counter-1)
+						HparamsList%hcbp(stride+j+1)%mu=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('t')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%hcbp(counter)%t=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%hcbp(counter)=HparamsList%hcbp(counter-1)
+						HparamsList%hcbp(stride+j+1)%t=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('V')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%hcbp(counter)%V=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%hcbp(counter)=HparamsList%hcbp(counter-1)
+						HparamsList%hcbp(stride+j+1)%V=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE DEFAULT
 					PRINT *, "quench parameter not recognized!"
 					PRINT *, "use mu, t, or V for hardcore boson models!"
 					STOP
 			END SELECT
+			END DO
+!			DO j=1,rtpD%nsteps(i)+1
+!					print *, 'I P j quench params',i,p, HparamsList%hcbp(j)%mu, HparamsList%hcbp(j)%t, HparamsList%hcbp(j)%V
+!			END DO
+			stride=stride+rtpD%nsteps(i)
 		END DO	
 
 
@@ -1095,92 +1106,95 @@ SELECT CASE(HamiType)
 		!Allocate total number of time steps worth of parameter sets
 		ALLOCATE(HparamsList%fhp(SUM(rtpD%nsteps)+1))
 		HparamsList%fhp(1)=Hparams%fhp
-		counter=1
+		stride=0
 		DO i=1, numQuenches
-			IF(rtpD%pow(i).le.10.0_8**(-10)) THEN
-					IF(rtpD%pow(i).lt.0.0_8) THEN
-						STOP "Negative quench powers not supported!"
-					END IF
-					DO j=1,rtpD%nsteps(i)
-						counter=counter+1
-						HparamsList%fhp(counter)=HparamsList%fhp(counter-1)
-					END DO
-				CYCLE
-			END IF
+			!Initialize
+			DO j=1,rtpD%nsteps(i)
+				HparamsList%fhp(stride+j+1)=HparamsList%fhp(stride+j)
+			END DO
+
 			step=rtpD%tau(i)/((rtpD%nsteps(i))*1.0_rKind)
-			SELECT CASE(rtpD%gquench(i))
+			!Loop over different params
+			DO p=1,rtpD%nparams(i)
+				!catch errors			
+				IF(rtpD%pow(i)%v(p).lt.0.0_8) THEN
+					STOP "Negative quench powers not supported!"
+				END IF
+				!Cycle if power close to 0
+				IF(rtpD%pow(i)%v(p).le.10.0_8**(-10)) THEN
+					CYCLE
+				END IF
+
+			SELECT CASE(rtpD%gquench(i)%v(p))
 				CASE('mu')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%fhp(counter)%mu=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%fhp(counter)=HparamsList%fhp(counter-1)
+						HparamsList%fhp(stride+j+1)%mu=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('t')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%fhp(counter)%t=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%fhp(counter)=HparamsList%fhp(counter-1)
+						HparamsList%fhp(stride+j+1)%t=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('V')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%fhp(counter)%V=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%fhp(counter)=HparamsList%fhp(counter-1)
+						HparamsList%fhp(stride+j+1)%V=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('U')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%fhp(counter)%U=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%fhp(counter)=HparamsList%fhp(counter-1)
+						HparamsList%fhp(stride+j+1)%U=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE DEFAULT
 					PRINT *, "quench parameter not recognized!"
 					PRINT *, "use mu, t, V, or U for fermion hubbard models!"
 					STOP
 			END SELECT
+			END DO
+			stride=stride+rtpD%nsteps(i)
 		END DO
 
 	CASE ('spinless fermions')
 		!Allocate total number of time steps worth of parameter sets
 		ALLOCATE(HparamsList%sfp(SUM(rtpD%nsteps)+1))
+		stride=0
 		HparamsList%sfp(1)=Hparams%sfp
-		counter=1
 		DO i=1, numQuenches
-			IF(rtpD%pow(i).le.10.0_8**(-10)) THEN
-					IF(rtpD%pow(i).lt.0.0_8) THEN
-						STOP "Negative quench powers not supported!"
-					END IF
-					DO j=1,rtpD%nsteps(i)
-						counter=counter+1
-						HparamsList%sfp(counter)=HparamsList%sfp(counter-1)
-					END DO
-				CYCLE
-			END IF
+			!Initialize
+			DO j=1,rtpD%nsteps(i)
+				HparamsList%sfp(stride+j+1)=HparamsList%sfp(j)
+			END DO
+
 			step=rtpD%tau(i)/((rtpD%nsteps(i))*1.0_rKind)
-			SELECT CASE(rtpD%gquench(i))
+			!Loop over different params
+			DO p=1,rtpD%nparams(i)
+				!catch errors			
+				IF(rtpD%pow(i)%v(p).lt.0.0_8) THEN
+					STOP "Negative quench powers not supported!"
+				END IF
+				!Cycle if power close to 0
+				IF(rtpD%pow(i)%v(p).le.10.0_8**(-10)) THEN
+					CYCLE
+				END IF
+
+
+			SELECT CASE(rtpD%gquench(i)%v(p))
 				CASE('mu')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sfp(counter)%mu=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sfp(counter)=HparamsList%sfp(counter-1)
+						HparamsList%sfp(stride+j+1)%mu=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('t')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sfp(counter)%t=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sfp(counter)=HparamsList%sfp(counter-1)
+						HparamsList%sfp(stride+j+1)%t=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE('V')
 					DO j=1,rtpD%nsteps(i)
-						HparamsList%sfp(counter)%V=rtpd%gi(i)+((j*step/rtpD%tau(i))**rtpD%pow(i))*(rtpd%gf(i)-rtpd%gi(i))
-						counter=counter+1
-						HparamsList%sfp(counter)=HparamsList%sfp(counter-1)
+						HparamsList%sfp(stride+j+1)%V=rtpd%gi(i)%v(p)+((j*step/rtpD%tau(i))**rtpD%pow(i)%v(p))*(rtpd%gf(i)%v(p)-rtpd%gi(i)%v(p))
 					END DO
 				CASE DEFAULT
 					PRINT *, "quench parameter not recognized!"
 					PRINT *, "use mu, t, or V for spinless fermion models!"
 					STOP
 			END SELECT
+			END DO
+			stride=stride+rtpD%nsteps(i)
 		END DO	
 	CASE DEFAULT
 		PRINT *, "Hamiltonian type not recognized!"

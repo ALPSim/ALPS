@@ -563,10 +563,11 @@ CALL OpenHdf5File(outputName,outputFileID)
 CALL CreateGroup("parameters", paramsgrpId, outputFileID) !Create parameters group
 CALL WriteDataToGroup(systemSize,paramsgrpId,"L")
 CALL WriteDataToGroup(HamiType,paramsgrpId,"MODEL")
-CALL WriteDataToGroup(initialState,paramsgrpId,"INITIAL STATE")
-CALL WriteDataToGroup(rtp,paramsgrpId,"RTP")
-CALL WriteDataToGroup(qSwitch,paramsgrpId,"QNUMBERS USED")
+CALL WriteDataToGroup(initialState,paramsgrpId,"INITIAL_STATE")
+!CALL WriteDataToGroup(rtp,paramsgrpId,"RTP")
+!CALL WriteDataToGroup(qSwitch,paramsgrpId,"QNUMBERS USED")
 IF(qSwitch) THEN
+	CALL WriteDataToGroup(qType,paramsgrpId,"CONSERVED_QUANTUMNUMBERS")
 	IF(Hamitype=='spin') THEN
 		locQ=totQ-systemSize*spin
 		CALL WriteDataToGroup(locQ,paramsgrpId,qType)
@@ -574,10 +575,10 @@ IF(qSwitch) THEN
 		CALL WriteDataToGroup(totQ,paramsgrpId,qType)
 	END IF
 END IF
-CALL WriteDataToGroup(numThr,paramsgrpId,"NUM THREADS")
-CALL WriteDataToGroup(trotterOrder,paramsgrpId,"TROTTER ORDER")
-CALL WriteDataToGroup(chiLimit,paramsgrpId,"LIMITING RTP CHI VALUE")
-CALL WriteDataToGroup(truncLimit,paramsgrpId,"LIMITING RTP TRUNC VALUE")
+CALL WriteDataToGroup(numThr,paramsgrpId,"NUM_THREADS")
+!CALL WriteDataToGroup(trotterOrder,paramsgrpId,"TROTTER ORDER")
+CALL WriteDataToGroup(chiLimit,paramsgrpId,"CHI_LIMIT")
+CALL WriteDataToGroup(truncLimit,paramsgrpId,"TRUNC_LIMIT")
 CALL WriteDataToGroup(simId,paramsgrpId,"SIMID")
 CALL CloseGroup(paramsgrpID)
 CALL CloseHdf5File(outputFileID)
@@ -596,38 +597,38 @@ TYPE(HamiParams) :: Hparams
 CALL OpenHdf5File(outputName,outputFileID, openKind='rw')
 CALL OpenGroup("parameters", paramsgrpId, outputFileID) !Create parameters group
 CALL WriteDataToGroup(numITP,paramsgrpId,"NUMITP")
-CALL WriteDataToGroup(chivals,paramsgrpId,"CHIVALS")
-CALL WriteDataToGroup(dtITPvals,paramsgrpId,"DTITPVALS")
-CALL WriteDataToGroup(convCriterion,paramsgrpId,"CONVCRITERIA")
+CALL WriteDataToGroup(chivals,paramsgrpId,"ITP_CHIS")
+CALL WriteDataToGroup(dtITPvals,paramsgrpId,"ITP_DTS")
+CALL WriteDataToGroup(convCriterion,paramsgrpId,"ITP_CONVS")
 
 SELECT CASE(HamiType)
 	CASE ('spin')
 		CALL WriteDataToGroup(spin,paramsgrpId,"SPIN")
-		CALL WriteDataToGroup(Hparams%sp%Jz,paramsgrpId,"ITP JZ")
-		CALL WriteDataToGroup(Hparams%sp%Jxy,paramsgrpId,"ITP JXY")
-		CALL WriteDataToGroup(Hparams%sp%h,paramsgrpId,"ITP H")
-		CALL WriteDataToGroup(Hparams%sp%gam,paramsgrpId,"ITP GAMMA")
-		CALL WriteDataToGroup(Hparams%sp%d,paramsgrpId,"ITP D")
-		CALL WriteDataToGroup(Hparams%sp%k,paramsgrpId,"ITP K")
+		CALL WriteDataToGroup(Hparams%sp%Jz,paramsgrpId,"Jz")
+		CALL WriteDataToGroup(Hparams%sp%Jxy,paramsgrpId,"Jxy")
+		CALL WriteDataToGroup(Hparams%sp%h,paramsgrpId,"H")
+		CALL WriteDataToGroup(Hparams%sp%gam,paramsgrpId,"Gamma")
+		CALL WriteDataToGroup(Hparams%sp%d,paramsgrpId,"D")
+		CALL WriteDataToGroup(Hparams%sp%k,paramsgrpId,"K")
 	CASE ('boson Hubbard')
 		CALL WriteDataToGroup(Nmax,paramsgrpId,"Nmax")
-		CALL WriteDataToGroup(Hparams%bp%t,paramsgrpId,"ITP T")
-		CALL WriteDataToGroup(Hparams%bp%U,paramsgrpId,"ITP U")
-		CALL WriteDataToGroup(Hparams%bp%V,paramsgrpId,"ITP V")
-		CALL WriteDataToGroup(Hparams%bp%mu,paramsgrpId,"ITP MU")
+		CALL WriteDataToGroup(Hparams%bp%t,paramsgrpId,"t")
+		CALL WriteDataToGroup(Hparams%bp%U,paramsgrpId,"U")
+		CALL WriteDataToGroup(Hparams%bp%V,paramsgrpId,"V")
+		CALL WriteDataToGroup(Hparams%bp%mu,paramsgrpId,"mu")
 	CASE ('hardcore boson')
-		CALL WriteDataToGroup(Hparams%hcbp%t,paramsgrpId,"ITP T")
-		CALL WriteDataToGroup(Hparams%hcbp%V,paramsgrpId,"ITP V")
-		CALL WriteDataToGroup(Hparams%hcbp%mu,paramsgrpId,"ITP MU")
+		CALL WriteDataToGroup(Hparams%hcbp%t,paramsgrpId,"t")
+		CALL WriteDataToGroup(Hparams%hcbp%V,paramsgrpId,"V")
+		CALL WriteDataToGroup(Hparams%hcbp%mu,paramsgrpId,"mu")
 	CASE ('fermion Hubbard')
-		CALL WriteDataToGroup(Hparams%fhp%t,paramsgrpId,"ITP T")
-		CALL WriteDataToGroup(Hparams%fhp%U,paramsgrpId,"ITP U")
-		CALL WriteDataToGroup(Hparams%fhp%V,paramsgrpId,"ITP V")
-		CALL WriteDataToGroup(Hparams%fhp%mu,paramsgrpId,"ITP MU")
+		CALL WriteDataToGroup(Hparams%fhp%t,paramsgrpId,"t")
+		CALL WriteDataToGroup(Hparams%fhp%U,paramsgrpId,"U")
+		CALL WriteDataToGroup(Hparams%fhp%V,paramsgrpId,"V")
+		CALL WriteDataToGroup(Hparams%fhp%mu,paramsgrpId,"mu")
 	CASE ('spinless fermions')
-		CALL WriteDataToGroup(Hparams%sfp%t,paramsgrpId,"ITP T")
-		CALL WriteDataToGroup(Hparams%sfp%V,paramsgrpId,"ITP V")
-		CALL WriteDataToGroup(Hparams%sfp%mu,paramsgrpId,"ITP MU")
+		CALL WriteDataToGroup(Hparams%sfp%t,paramsgrpId,"t")
+		CALL WriteDataToGroup(Hparams%sfp%V,paramsgrpId,"V")
+		CALL WriteDataToGroup(Hparams%sfp%mu,paramsgrpId,"mu")
 	CASE DEFAULT
 		PRINT *, "Hamiltonian type not recognized in WriteITPSettings!"
 		PRINT *, "Use 'spin', 'boson Hubbard', 'hardcore boson', 'fermion Hubbard', or 'spinless fermions'."
@@ -647,58 +648,69 @@ IMPLICIT NONE
 CHARACTER(len=*) :: HamiType
 TYPE(rtpData) :: rtpD
 TYPE(HamiParams) :: Hparams
+CHARACTER(len=132) :: mylongChar
+REAL(KIND=8), ALLOCATABLE :: dum(:)
+REAL(KIND=8) :: idio
+INTEGER :: i, j, counter
 
 CALL OpenHdf5File(outputName,outputFileID, openKind='rw')
 CALL OpenGroup("parameters", paramsgrpId, outputFileID) !Open parameters group
-SELECT CASE(HamiType)
-	CASE ('spin')
-		IF(.not.itp) THEN
-			CALL WriteDataToGroup(spin,paramsgrpId,"SPIN")
+!no longer need Hami parameters outputs-taken care of in quench values below
+	CALL WriteDataToGroup(numQuenches,paramsgrpId,"numQuenches")
+	CALL WriteDataToGroup(rtpD%tau,paramsgrpId,"TAUS")
+	CALL WriteDataToGroup(rtpD%nsteps,paramsgrpId,"NUMSTEPS")
+	CALL WriteDataToGroup(rtpD%stepsforStore,paramsgrpId,"STEPSFORSTORE")
+	CALL WriteDataToGroup(rtpD%nparams,paramsgrpId,"NPARAMS")
+	mylongChar=TRIM(rtpD%gquench(1)%v(1))
+	DO i=1,numQuenches
+		IF(i==1) THEN
+			DO j=2,rtpD%nparams(i)
+				mylongChar=TRIM(mylongChar)//', '//TRIM(rtpD%gquench(i)%v(j))
+			END DO
+		ELSE
+			DO j=1,rtpD%nparams(i)
+				mylongChar=TRIM(mylongChar)//', '//TRIM(rtpD%gquench(i)%v(j))
+			END DO
 		END IF
-		CALL WriteDataToGroup(Hparams%sp%Jz,paramsgrpId,"JZ")
-		CALL WriteDataToGroup(Hparams%sp%Jxy,paramsgrpId,"JXY")
-		CALL WriteDataToGroup(Hparams%sp%h,paramsgrpId,"H")
-		CALL WriteDataToGroup(Hparams%sp%gam,paramsgrpId,"GAMMA")
-		CALL WriteDataToGroup(Hparams%sp%d,paramsgrpId,"D")
-		CALL WriteDataToGroup(Hparams%sp%k,paramsgrpId,"K")
-	CASE ('boson Hubbard')
-		IF(.not.itp) THEN
-			CALL WriteDataToGroup(Nmax,paramsgrpId,"Nmax")
-		END IF
-		CALL WriteDataToGroup(Hparams%bp%t,paramsgrpId,"T")
-		CALL WriteDataToGroup(Hparams%bp%U,paramsgrpId,"U")
-		CALL WriteDataToGroup(Hparams%bp%V,paramsgrpId,"V")
-		CALL WriteDataToGroup(Hparams%bp%mu,paramsgrpId,"MU")
-	CASE ('hardcore boson')
-		CALL WriteDataToGroup(Hparams%hcbp%t,paramsgrpId,"T")
-		CALL WriteDataToGroup(Hparams%hcbp%V,paramsgrpId,"V")
-		CALL WriteDataToGroup(Hparams%hcbp%mu,paramsgrpId,"MU")
-	CASE ('fermion Hubbard')
-		CALL WriteDataToGroup(Hparams%fhp%t,paramsgrpId,"T")
-		CALL WriteDataToGroup(Hparams%fhp%U,paramsgrpId,"U")
-		CALL WriteDataToGroup(Hparams%fhp%V,paramsgrpId,"V")
-		CALL WriteDataToGroup(Hparams%fhp%mu,paramsgrpId,"MU")
-	CASE ('spinless fermions')
-		CALL WriteDataToGroup(Hparams%sfp%t,paramsgrpId,"T")
-		CALL WriteDataToGroup(Hparams%sfp%V,paramsgrpId,"V")
-		CALL WriteDataToGroup(Hparams%sfp%mu,paramsgrpId,"MU")
-	CASE DEFAULT
-		PRINT *, "Hamiltonian type not recognized in WriteITPSettings!"
-		PRINT *, "Use 'spin', 'boson Hubbard', 'hardcore boson', 'fermion Hubbard', or 'spinless fermions'."
-		STOP 
-END SELECT
-CALL WriteDataToGroup(numQuenches,paramsgrpId,"numQuenches")
-CALL WriteDataToGroup(rtpD%tau,paramsgrpId,"TAUS")
-CALL WriteDataToGroup(rtpD%pow,paramsgrpId,"POWS")
-CALL WriteDataToGroup(rtpD%gquench,paramsgrpId,"QUENCH IDS")
-CALL WriteDataToGroup(rtpD%gi,paramsgrpId,"INITIAL QUENCH VALUES")
-CALL WriteDataToGroup(rtpD%gf,paramsgrpId,"FINAL QUENCH VALUES")
-CALL WriteDataToGroup(rtpD%nsteps,paramsgrpId,"NUM TIME STEPS")
-CALL WriteDataToGroup(rtpD%stepsforStore,paramsgrpId,"STEPS FOR STORE")
-CALL CloseGroup(paramsgrpID)
-CALL CreateGroup("timesteps", timestepsgrpID, outputFileID) !Create timesteps group
-CALL CloseGroup(timestepsgrpID)
-CALL CloseHdf5File(outputFileID)
+	END DO
+	CALL WriteDataToGroup(mylongChar,paramsgrpId,"GS")
+
+	ALLOCATE(dum(SUM(rtpD%nparams)))
+	counter=1
+	dum=0.0_rKind
+	DO i=1,numQuenches
+		DO j=1,rtpD%nparams(i)
+			dum(counter)=rtpD%pow(i)%v(j)
+			counter=counter+1
+		END DO
+	END DO
+	CALL WriteDataToGroup(dum,paramsgrpId,"POWS")
+
+	dum=0.0_rKind
+	counter=1
+	DO i=1,numQuenches
+		DO j=1,rtpD%nparams(i)
+			dum(counter)=rtpD%gi(i)%v(j)
+			counter=counter+1
+		END DO
+	END DO
+	CALL WriteDataToGroup(dum,paramsgrpId,"GIS")
+
+	dum=0.0_rKind
+	counter=1
+	DO i=1,numQuenches
+		DO j=1,rtpD%nparams(i)
+			dum(counter)=rtpD%gf(i)%v(j)
+			counter=counter+1
+		END DO
+	END DO
+	CALL WriteDataToGroup(dum,paramsgrpId,"GFS")
+	DEALLOCATE(dum)
+
+	CALL CloseGroup(paramsgrpID)
+	CALL CreateGroup("timesteps", timestepsgrpID, outputFileID) !Create timesteps group
+	CALL CloseGroup(timestepsgrpID)
+	CALL CloseHdf5File(outputFileID)
 
 
 END SUBROUTINE WriteRTPSettings
@@ -720,6 +732,7 @@ CHARACTER(len=8) :: mString
 
 CALL OpenHdf5File(outputName,outputFileID, openKind='rw')
 CALL OpenGroup("timesteps", timestepsgrpID, outputFileID) !Open timesteps group
+
 
 WRITE(mString,'(I8)') counter
 mString=TRIM(ADJUSTL(mString))

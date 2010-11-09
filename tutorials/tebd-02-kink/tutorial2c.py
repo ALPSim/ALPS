@@ -71,10 +71,12 @@ for q in Magdata:
         loc=-0.5*scipy.special.jn(0,q[0].props['Time'])*scipy.special.jn(0,q[0].props['Time'])
         #Get the difference between the computed and exact results
         q[0].y=[abs(q[0].y[syssize/2+1-1]-loc)]
-	q[0].props['']='$\chi$='+str(q[0].props['LIMITING RTP CHI VALUE'])
+
 
 #Plot the Error in the magnetization one site to the right of the chain center
-Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=[''])
+Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
+for q in Mag:
+	q.props['label']='$\chi$='+str(q.props['CHI_LIMIT'])
 plt.figure()
 pyalps.plot.plot(Mag)
 plt.xlabel('Time $t$')

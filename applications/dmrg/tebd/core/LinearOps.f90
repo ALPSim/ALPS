@@ -37,6 +37,10 @@ TYPE vectorComplex
 	COMPLEX(KIND=rKind), POINTER :: vc(:)
 END TYPE vectorComplex
 
+TYPE Charvec
+	CHARACTER(len=10), POINTER :: v(:)
+END TYPE Charvec
+
 TYPE matrix
 	COMPLEX(KIND=rKind), POINTER :: m(:,:)
 END TYPE matrix

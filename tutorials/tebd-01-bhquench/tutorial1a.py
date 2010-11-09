@@ -39,8 +39,6 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
                   'MODEL'                     : 'hardcore boson',
                   'CONSERVED_QUANTUMNUMBERS'  : 'N',
                   'N' : 5,
-                  'ITP_t'                         : 1.0,
-                  'ITP_V'                         : 10.0,
                   't'                         : 1.0,
                   'V'                         : 10.0,
                   'ITP_CHIS' : [20, 30, 35],
@@ -51,7 +49,7 @@ for A in [5.0, 10.0, 15.0, 25.0, 50.0]:
                   'TRUNC_LIMIT' : 1E-12,
                   'NUM_THREADS' : 1,
                   'TAUS' : [A,  A],
-                  'POWS' : [1.0, 1.0],
+                  'POWS' : [ 1.0, 1.0],
                   'GS' : ['V',  'V'],
                   'GIS' : [10.0,  0.0],
                   'GFS' : [0.0,  10.0],
@@ -69,12 +67,11 @@ res=pyalps.runTEBD(nmlnameList)
 
 #Load the loschmidt echo and U
 LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1a'), measurements=['Loschmidt Echo', 'V'])
-for q in LEdata:
-	q[0].props['']=r'$\tau=$'+str(q[0].props['TAUS'][0])
-	q[1].props['']=r'$\tau=$'+str(q[0].props['TAUS'][0])
 
+LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
+for q in LE:
+	q.props['label']=r'$\tau=$'+str(q.props['TAUS'][0])
 
-LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=[''])
 plt.figure()
 pyalps.plot.plot(LE)
 plt.xlabel('Time $t$')
@@ -82,7 +79,10 @@ plt.ylabel('Loschmidt Echo $|< \psi(0)|\psi(t) > |^2$')
 plt.title('Loschmidt Echo vs. Time')
 plt.legend(loc='lower right')
 
-Ufig=pyalps.collectXY(LEdata, x='Time', y='V',foreach=[''])
+Ufig=pyalps.collectXY(LEdata, x='Time', y='V',foreach=['SIMID'])
+for q in Ufig:
+	q.props['label']=r'$\tau=$'+str(q.props['TAUS'][0])
+
 plt.figure()
 pyalps.plot.plot(Ufig)
 plt.xlabel('Time $t$')
