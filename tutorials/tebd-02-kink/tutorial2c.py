@@ -76,7 +76,7 @@ for q in Magdata:
 #Plot the Error in the magnetization one site to the right of the chain center
 Mag=pyalps.collectXY(Magdata, x='Time', y='Local Magnetization', foreach=['SIMID'])
 for q in Mag:
-	q.props['label']='$\chi$='+str(q.props['CHI_LIMIT'])
+    q.props['label']='$\chi$='+str(q.props['CHI_LIMIT'])
 plt.figure()
 pyalps.plot.plot(Mag)
 plt.xlabel('Time $t$')

@@ -293,7 +293,7 @@ void DMRGTask<value_type>::dostep()
         if (verbose)
           std::cout << site_basis(type)[qn].name() << "=" << b[s][qn] << "  ";
         int idx = dmtk::QN::get_qn_index(site_basis(type)[qn].name()); 
-		if (idx < QN_MAX_SIZE)
+        if (idx < QN_MAX_SIZE)
           real_qn[idx] = b[s][qn];
       }
       // create the basis state for this block

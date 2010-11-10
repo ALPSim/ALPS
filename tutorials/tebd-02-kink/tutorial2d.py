@@ -35,27 +35,27 @@ import scipy.special
 parms=[]
 count=0
 for z in [0.0, 0.3, 0.9, 1.0, 1.1, 1.5]:
-	count+=1
-	parms.append({ 
-	          'L'                         : 50,
-	          'MODEL'                     : 'spin',
-	          'local_S'                   : 0.5,
-	          'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
-	          'Jxy'                         : 1,
-	          'Jz'                         : z,
-		  'INITIAL_STATE' : 'kink',
-		  'CHI_LIMIT' : 40,
-		  'TRUNC_LIMIT' : 1E-12,
-		  'NUM_THREADS' : 1,
-		  'TAUS' : [20.0],
-		  'POWS' : [0.0],
-		  'GS' : ['H'],
-		  'GIS' : [0.0],
-		  'GFS' : [0.0],
-		  'NUMSTEPS' : [500],
-		  'STEPSFORSTORE' : [5],
-		  'SIMID': count
-	        })
+    count+=1
+    parms.append({ 
+              'L'                         : 50,
+              'MODEL'                     : 'spin',
+              'local_S'                   : 0.5,
+              'CONSERVED_QUANTUMNUMBERS'  : 'Sz',
+              'Jxy'                         : 1,
+              'Jz'                         : z,
+          'INITIAL_STATE' : 'kink',
+          'CHI_LIMIT' : 40,
+          'TRUNC_LIMIT' : 1E-12,
+          'NUM_THREADS' : 1,
+          'TAUS' : [20.0],
+          'POWS' : [0.0],
+          'GS' : ['H'],
+          'GIS' : [0.0],
+          'GFS' : [0.0],
+          'NUMSTEPS' : [500],
+          'STEPSFORSTORE' : [5],
+          'SIMID': count
+            })
 
 baseName='tutorial_2d'
 nmlnameList=pyalps.writeTEBDfiles(parms, baseName)
@@ -66,12 +66,12 @@ Magdata=pyalps.load.loadTimeEvolution( pyalps.getResultFiles(prefix='tutorial_2d
 
 #Compute the integrated magnetization across the center
 for q in Magdata:
-	syssize=q[0].props['L']
-	#Compute the integrated flow of magnetization through the center \Delta M=\sum_{n>L/2}^{L} (<S_n^z(t)>+1/2)
-	#\Delta M= L/4
-	loc=0.5*(syssize/2)
-	#\Delta M-=<S_n^z(t)> from n=L/2 to L
-	q[0].y=[0.5*(syssize/2)+sum(q[0].y[syssize/2:syssize])]
+    syssize=q[0].props['L']
+    #Compute the integrated flow of magnetization through the center \Delta M=\sum_{n>L/2}^{L} (<S_n^z(t)>+1/2)
+    #\Delta M= L/4
+    loc=0.5*(syssize/2)
+    #\Delta M-=<S_n^z(t)> from n=L/2 to L
+    q[0].y=[0.5*(syssize/2)+sum(q[0].y[syssize/2:syssize])]
 
 
 #Plot the integrated magnetization

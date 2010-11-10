@@ -38,196 +38,196 @@
 #include "measurement.h"
 #include "sse_alg.h"
 
-class SSE_run : public QMCRun<> {	
+class SSE_run : public QMCRun<> {    
 public:
-	typedef SSE_run self_type;
-	typedef QMCRun<> super_type;
-	typedef Lattice<self_type> lattice_type;
-	typedef Model<self_type, Lattice<self_type> > model_type;
-	typedef SSE_alg<lattice_type, model_type, self_type> algorithm_type;
-	
-	SSE_run(alps::ProcessList const& w, alps::Parameters const& params,
-											int n, bool issymbolic = false) :
-		super_type(w, params, n, issymbolic),
-		lattice(params, *this),
-		model(params, *this, lattice),
-		algorithm(lattice, model, *this, params)
-	{
-		nsweeps = params.defined("SWEEPS") ?
-			uint64_t(params["SWEEPS"]) : (params.defined("MCS") ? 
-				uint64_t(params["MCS"]) : uint64_t(params["Steps"]));
-		
-		nthermalization = params.defined("THERMALIZATION") ?
-				uint64_t(params["THERMALIZATION"]) : (params.defined("thermalization") ?
-				uint64_t(params["thermalization"]) : nsweeps / 10);
-				
-		measurements_skip = parms.value_or_default("SKIP", 1);
+    typedef SSE_run self_type;
+    typedef QMCRun<> super_type;
+    typedef Lattice<self_type> lattice_type;
+    typedef Model<self_type, Lattice<self_type> > model_type;
+    typedef SSE_alg<lattice_type, model_type, self_type> algorithm_type;
+    
+    SSE_run(alps::ProcessList const& w, alps::Parameters const& params,
+                                            int n, bool issymbolic = false) :
+        super_type(w, params, n, issymbolic),
+        lattice(params, *this),
+        model(params, *this, lattice),
+        algorithm(lattice, model, *this, params)
+    {
+        nsweeps = params.defined("SWEEPS") ?
+            uint64_t(params["SWEEPS"]) : (params.defined("MCS") ? 
+                uint64_t(params["MCS"]) : uint64_t(params["Steps"]));
+        
+        nthermalization = params.defined("THERMALIZATION") ?
+                uint64_t(params["THERMALIZATION"]) : (params.defined("thermalization") ?
+                uint64_t(params["thermalization"]) : nsweeps / 10);
+                
+        measurements_skip = parms.value_or_default("SKIP", 1);
 
-		if (is_signed())
-			std::cout << "Warning: hamiltonian has a sign problem.\n";
-			
-		sweeps_done = 0;
-		measurements_done = 0;
-	}
-	
-	void save(alps::ODump& dump) const
-	{
-		dump << nthermalization << sweeps_done << measurements_done;
-		algorithm.save(dump);
-	}
-	
-	void load(alps::IDump& dump)
-	{
-		if(super_type::where.empty())
-			super_type::measurements.compact();
-		else {
-			dump >> nthermalization >> sweeps_done >> measurements_done;
-			algorithm.load(dump);
-		}
-	}
-	
-	void dostep()
-	{
-		algorithm.do_step();
-		
-		if (is_thermalized() && ++measurements_done == measurements_skip) {
-			algorithm.do_measurement();
-			measurements_done = 0;
-		}
+        if (is_signed())
+            std::cout << "Warning: hamiltonian has a sign problem.\n";
+            
+        sweeps_done = 0;
+        measurements_done = 0;
+    }
+    
+    void save(alps::ODump& dump) const
+    {
+        dump << nthermalization << sweeps_done << measurements_done;
+        algorithm.save(dump);
+    }
+    
+    void load(alps::IDump& dump)
+    {
+        if(super_type::where.empty())
+            super_type::measurements.compact();
+        else {
+            dump >> nthermalization >> sweeps_done >> measurements_done;
+            algorithm.load(dump);
+        }
+    }
+    
+    void dostep()
+    {
+        algorithm.do_step();
+        
+        if (is_thermalized() && ++measurements_done == measurements_skip) {
+            algorithm.do_measurement();
+            measurements_done = 0;
+        }
 
-		++sweeps_done;
-	}
-	
-	bool is_thermalized() const
-	{
-		return sweeps_done >= nthermalization;
-	}
-	
-	double work_done() const
-	{
-		return sweeps_done / double(nthermalization + nsweeps);
-	}
-	
-	bool change_parameter(std::string const& name, alps::StringValue const& value)
-	{
-		uint64_t new_nsweeps = 0;
-		
-		if (name == "SWEEPS")
-			new_nsweeps = uint64_t(value);
-		if (name == "MCS")
-			new_nsweeps = uint64_t(value);
-		if (name == "Steps")
-			new_nsweeps = uint64_t(value);
+        ++sweeps_done;
+    }
+    
+    bool is_thermalized() const
+    {
+        return sweeps_done >= nthermalization;
+    }
+    
+    double work_done() const
+    {
+        return sweeps_done / double(nthermalization + nsweeps);
+    }
+    
+    bool change_parameter(std::string const& name, alps::StringValue const& value)
+    {
+        uint64_t new_nsweeps = 0;
+        
+        if (name == "SWEEPS")
+            new_nsweeps = uint64_t(value);
+        if (name == "MCS")
+            new_nsweeps = uint64_t(value);
+        if (name == "Steps")
+            new_nsweeps = uint64_t(value);
 
-		if (new_nsweeps > 0) {
-			nsweeps = new_nsweeps;
-			return true;
-		}
-		
-		// cannot change anyting else
-		return false;
-	}
-	
-	static void print_copyright(std::ostream& out)
-	{
-		out << "Quantum Monte Carlo simulations using the SSE algorithm v. 4.0\n"
-			<< "  available from http://alps.comp-phys.org/\n"
-			<< "  copyright (c) 2003-2010 by Sergei Isakov <isakov@itp.phys.ethz.ch>\n\n";
-	}
-	
-	bool is_thermalization_done(double percentage) const
-	{
-		return double(sweeps_done) > percentage * nthermalization;
-	}
-	
-	int mrandom_int(int n)
-	{
-		return super_type::random_int(n);
-	}
-	
-	double mrandom_real()
-	{
-		return super_type::random_01();
-	}
-	
-	alps::ObservableSet& measurements()
-	{
-		return super_type::measurements;
-	}
-	
-	bool is_signed() const
-	{
-		return super_type::is_signed_;
-	}
-	
-	void measure_green_function(bool flag)
-	{
-		super_type::measure_green_function_ = flag;
-	}
-	
-	bool measure_green_function() const
-	{
-		return super_type::measure_green_function_;
-	}
-	
-	bool do_measurement_origin() const
-	{
-		if (super_type::measurement_origin_)
-			return true;
-		else
-			return false;
-	}
-	
-	int measurement_origin() const
-	{
-		return super_type::measurement_origin_.get();
-	}
-	
-	std::vector<unsigned> const& distance_mult() const
-	{
-		return super_type::distance_mult;
-	}
-	
-	bool measure_site_compressibility() const
-	{
-		return super_type::measure_site_compressibility_;
-	}
-	
-	bool do_common_measurements(double sign,
-		std::vector<state_type> const& state, std::valarray<double> const& localint)
-	{
-		return super_type::do_common_measurements(sign, state, localint);
-	}
-	
-	void create_common_observables()
-	{
-		super_type::create_common_observables();
-	}
-	
-	void initialize_site_states()
-	{
-		super_type::initialize_site_states();
-	}
-	
-	double beta() const
-	{
-		return super_type::beta;
-	}
-	
-	std::vector<std::vector<double> > const& phys_states_n()
-	{
-		return super_type::diagonal_matrix_element["n"];
-	}
+        if (new_nsweeps > 0) {
+            nsweeps = new_nsweeps;
+            return true;
+        }
+        
+        // cannot change anyting else
+        return false;
+    }
+    
+    static void print_copyright(std::ostream& out)
+    {
+        out << "Quantum Monte Carlo simulations using the SSE algorithm v. 4.0\n"
+            << "  available from http://alps.comp-phys.org/\n"
+            << "  copyright (c) 2003-2010 by Sergei Isakov <isakov@itp.phys.ethz.ch>\n\n";
+    }
+    
+    bool is_thermalization_done(double percentage) const
+    {
+        return double(sweeps_done) > percentage * nthermalization;
+    }
+    
+    int mrandom_int(int n)
+    {
+        return super_type::random_int(n);
+    }
+    
+    double mrandom_real()
+    {
+        return super_type::random_01();
+    }
+    
+    alps::ObservableSet& measurements()
+    {
+        return super_type::measurements;
+    }
+    
+    bool is_signed() const
+    {
+        return super_type::is_signed_;
+    }
+    
+    void measure_green_function(bool flag)
+    {
+        super_type::measure_green_function_ = flag;
+    }
+    
+    bool measure_green_function() const
+    {
+        return super_type::measure_green_function_;
+    }
+    
+    bool do_measurement_origin() const
+    {
+        if (super_type::measurement_origin_)
+            return true;
+        else
+            return false;
+    }
+    
+    int measurement_origin() const
+    {
+        return super_type::measurement_origin_.get();
+    }
+    
+    std::vector<unsigned> const& distance_mult() const
+    {
+        return super_type::distance_mult;
+    }
+    
+    bool measure_site_compressibility() const
+    {
+        return super_type::measure_site_compressibility_;
+    }
+    
+    bool do_common_measurements(double sign,
+        std::vector<state_type> const& state, std::valarray<double> const& localint)
+    {
+        return super_type::do_common_measurements(sign, state, localint);
+    }
+    
+    void create_common_observables()
+    {
+        super_type::create_common_observables();
+    }
+    
+    void initialize_site_states()
+    {
+        super_type::initialize_site_states();
+    }
+    
+    double beta() const
+    {
+        return super_type::beta;
+    }
+    
+    std::vector<std::vector<double> > const& phys_states_n()
+    {
+        return super_type::diagonal_matrix_element["n"];
+    }
 private:
-	lattice_type lattice;
-	model_type model;
-	algorithm_type algorithm;
-	
-	uint64_t nsweeps;
-	uint64_t nthermalization;
-	uint64_t sweeps_done;
-	unsigned measurements_skip;
-	unsigned measurements_done;
+    lattice_type lattice;
+    model_type model;
+    algorithm_type algorithm;
+    
+    uint64_t nsweeps;
+    uint64_t nthermalization;
+    uint64_t sweeps_done;
+    unsigned measurements_skip;
+    unsigned measurements_done;
 };
 
 #endif

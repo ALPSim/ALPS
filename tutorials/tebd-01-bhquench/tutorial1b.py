@@ -69,7 +69,7 @@ LEdata=pyalps.load.loadTimeEvolution(pyalps.getResultFiles(prefix='tutorial_1b')
 
 LE=pyalps.collectXY(LEdata, x='Time', y='Loschmidt Echo',foreach=['SIMID'])
 for q in LE:
-	q.props['label']=r'$\tau_{\mathrm{hold}}=$'+str(q.props['TAUS'][1])
+    q.props['label']=r'$\tau_{\mathrm{hold}}=$'+str(q.props['TAUS'][1])
 plt.figure()
 pyalps.plot.plot(LE)
 plt.xlabel('Time $t$')
@@ -79,7 +79,7 @@ plt.legend(loc='lower right')
 
 Ufig=pyalps.collectXY(LEdata, x='Time', y='V',foreach=['SIMID'])
 for q in Ufig:
-	q.props['label']=r'$\tau_{\mathrm{hold}}=$'+str(q.props['TAUS'][1])
+    q.props['label']=r'$\tau_{\mathrm{hold}}=$'+str(q.props['TAUS'][1])
 plt.figure()
 pyalps.plot.plot(Ufig)
 plt.xlabel('Time $t$')

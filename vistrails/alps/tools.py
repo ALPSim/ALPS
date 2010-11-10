@@ -182,10 +182,10 @@ class WriteTEBDInputFiles(Module):
          else:
            base_name = os.path.basename(o.name)
 
-	 input_values = self.forceGetInputListFromPort('parms')
-	 if type(input_values[0])==list:
-	 	input_values=input_values[0]
-	 nmlList=pyalps.writeTEBDfiles(input_values, os.path.join(dir.name,base_name))
+         input_values = self.forceGetInputListFromPort('parms')
+         if type(input_values[0])==list:
+                 input_values=input_values[0]
+         nmlList=pyalps.writeTEBDfiles(input_values, os.path.join(dir.name,base_name))
          pyalps.copyStylesheet(dir.name)
            
          self.setResult("output_dir", dir)

@@ -185,8 +185,8 @@ class RunTEBD(RunAlpsApplication):
         resultdir = basic.Directory()
         resultdir.name = os.path.dirname(result.name)
         for input_file in input_files:
-	    cmdline=[self.get_app_name()]
-	    cmdline += [input_file]
+        cmdline=[self.get_app_name()]
+        cmdline += [input_file]
             self.execute(cmdline)
         self.setResult('output_file', result)
         self.setResult('output_dir', resultdir)

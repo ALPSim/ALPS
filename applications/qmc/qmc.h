@@ -137,7 +137,7 @@ bool QMCRun<G,StateType>::build_diagonal_operator(std::string const& name)
 
   std::map<int,int>::const_iterator it = number_states_for_site_type_.begin();
   for (; it != number_states_for_site_type_.end(); ++it) {
-	int sitetype = it->first;
+    int sitetype = it->first;
     int number_states = it->second;
     if (number_states) {
       alps::SiteOperator term(name);

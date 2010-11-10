@@ -6,15 +6,23 @@
  * Copyright (C) 2001-2003 by Prakash Dayal <prakash@comp-phys.org>
  *                            Matthias Troyer <troyer@comp-phys.org>
  *
- * This program is free software; you can redistribute it and/or
- * modify it under the terms of the GNU General Public License
- * as published by the Free Software Foundation; either version 2
- * of the License, or (at your option) any later version.
- *
- * This program is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- * GNU General Public License for more details.
+* This software is part of the ALPS libraries, published under the ALPS
+* Library License; you can use, redistribute it and/or modify it under
+* the terms of the license, either version 1 or (at your option) any later
+* version.
+* 
+* You should have received a copy of the ALPS Library License along with
+* the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
+* available from http://alps.comp-phys.org/.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+* DEALINGS IN THE SOFTWARE.
+*
  *
  **************************************************************************/
 
@@ -74,7 +82,7 @@ int main() {
   std::cout.precision(10);
   for (int i=0;i<eigen.size();++i)
     std::cout << i << "\t" << eigen[i] << "\t" << err[i] << "\t" 
-	      << multiplicity[i] << "\n";
+          << multiplicity[i] << "\n";
   
   // call of eigenvectors function follows:   
   std::cout << "\nEigen vectors computations for 3 lowest eigenvalues:\n\n";  
@@ -98,10 +106,10 @@ int main() {
   std::cout << " Information about the eigen vectors computations:\n\n";
   for(int i = 0; i < info.size(); i++) {
     std::cout << " m1(" << i+1 << "): " << info.m1(i) << ", m2(" << i+1 << "): "
-	      << info.m2(i) << ", ma(" << i+1 << "): " << info.ma(i) << " eigenvalue("
-	      << i+1 << "): " << info.eigenvalue(i) << " residual(" << i+1 << "): "
-	      << info.residual(i) << " error_info(" << i+1 << "): "
-	      << info.error_info(i) << std::endl << std::endl;
+          << info.m2(i) << ", ma(" << i+1 << "): " << info.ma(i) << " eigenvalue("
+          << i+1 << "): " << info.eigenvalue(i) << " residual(" << i+1 << "): "
+          << info.residual(i) << " error_info(" << i+1 << "): "
+          << info.error_info(i) << std::endl << std::endl;
   }
   return 0;
 }
