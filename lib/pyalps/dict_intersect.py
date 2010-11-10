@@ -39,11 +39,11 @@ def dict_intersect(dicts):
         take = True
         val0 = dicts[0][key]
         for idict in dicts:
-        try:
+            try:
                 if val0 != idict[key]:
                     take = False
-        except:
-        if all(val0 != idict[key]):
+            except:
+                if all(val0 != idict[key]):
                     take = False
         if take:
             ret[key] = dicts[0][key]
