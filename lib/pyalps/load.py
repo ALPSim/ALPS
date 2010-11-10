@@ -123,7 +123,7 @@ class Hdf5Loader:
                     rfile.props["ObservableList"] = [pt.hdf5_name_decode(x) for x in obs]
                 except: pass
                 resultfiles.append(rfile)
-            except Exception as e:
+            except Exception, e:
                 print e
                 print traceback.format_exc()
         return resultfiles
@@ -179,7 +179,7 @@ class Hdf5Loader:
                             print "Could not create DataSet"
                             pass
                 sets.append(fileset)
-            except Exception as e:
+            except Exception, e:
                 print e
                 print traceback.format_exc()
         return sets
@@ -300,7 +300,7 @@ class Hdf5Loader:
                                     pass
                         fileset.append(sector_sets)
                 sets.append(fileset)
-            except Exception as e:
+            except Exception, e:
                 print e
                 print traceback.format_exc()
         return sets
@@ -354,7 +354,7 @@ class Hdf5Loader:
                         print "Could not create DataSet"
                         pass
                 sets.append(fileset)
-            except Exception as e:
+            except Exception, e:
                 print e
                 print traceback.format_exc()
         return sets
@@ -410,7 +410,7 @@ class Hdf5Loader:
                         print "Could not create DataSet"
                         pass
                 sets.append(fileset)
-            except Exception as e:
+            except Exception, e:
                 print e
                 print traceback.format_exc()
         return sets
@@ -462,7 +462,7 @@ class Hdf5Loader:
                         obsset.append(d)
                     iterationset.append(obsset)
                 fileset.append(iterationset)
-            except Exception as e:
+            except Exception, e:
                 print e
                 print traceback.format_exc()
         return fileset
@@ -615,7 +615,7 @@ def loadTimeEvolution( flist,globalproppath='/parameters',resroot='/timesteps/',
 	                locdata[0][i].props.update(globalprops[0].props)
                 #Extend the total dataset with this data
                 data.extend(locdata)
-        except Exception as e:
+        except Exception, e:
             print e
             print traceback.format_exc()
     return data
