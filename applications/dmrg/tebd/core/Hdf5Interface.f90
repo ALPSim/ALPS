@@ -569,7 +569,7 @@ CALL WriteDataToGroup(initialState,paramsgrpId,"INITIAL_STATE")
 IF(qSwitch) THEN
 	CALL WriteDataToGroup(qType,paramsgrpId,"CONSERVED_QUANTUMNUMBERS")
 	IF(Hamitype=='spin') THEN
-		locQ=totQ-systemSize*spin
+		locQ=systemSize*spin-totQ
 		CALL WriteDataToGroup(locQ,paramsgrpId,qType)
 	ELSE
 		CALL WriteDataToGroup(totQ,paramsgrpId,qType)

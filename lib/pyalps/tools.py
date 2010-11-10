@@ -705,7 +705,7 @@ def writeTEBDfiles(parmsList, fileName):
 		if 'Sz' in parms:
 			if str(parms['MODEL'])=='spin':
 				#Add L*S to this number to convert it to an integer appropriate for TEBD
-				parms['Sz']+=str(parms['L'])*str(parms['local_S'])
+				parms['Sz']=float(parms['L'])*float(parms['local_S'])-float(parms['Sz'])
 				#convert to an integer-complain if it doesn't work
 				if int(parms['Sz'])==float(parms['Sz']):
 					systemSettingsString+=", totQ="+str(int(parms['Sz']))
