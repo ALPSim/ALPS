@@ -4,8 +4,8 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_
 
-for f in [m-z]*/*.py
+for f in ed-* mc-* dmrg-* dmft-* tebd-*
 do
-  vispython $f
+  runtutorial $f
 done
 
