@@ -280,7 +280,7 @@ class LoadTimeEvolution(Module):
                             locdata=loader.ReadMeasurementFromFile([f],proppath=resroot+str(d)+localpropsuffix, \
                             respath=resroot+str(d)+'/results', measurements=self.getInputFromPort('Measurements'))
                             #Append the global props to the local props
-                         for i in range(len(locdata[0])):
+                            for i in range(len(locdata[0])):
                                   locdata[0][i].props.update(globalprops[0].props)
                             #Extend the total dataset with this data
                             datasets.extend(locdata)
@@ -304,7 +304,7 @@ class LoadTimeEvolution(Module):
                             locdata=loader.ReadMeasurementFromFile([f],proppath=resroot+str(d)+localpropsuffix, \
                             respath=resroot+str(d)+'/results', measurements=None)
                             #Append the global props to the local props
-                         for i in range(len(locdata[0])):
+                            for i in range(len(locdata[0])):
                                   locdata[0][i].props.update(globalprops[0].props)
                             #Extend the total dataset with this data
                             datasets.extend(locdata)
