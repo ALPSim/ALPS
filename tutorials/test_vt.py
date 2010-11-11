@@ -1,11 +1,9 @@
-import sys, os, subprocess
+import sys, os, subprocess, glob
 
 vtapp = '/Applications/VisTrails/Vistrails.app/Contents/MacOS/vistrails'
 
 # Find .vt files
-cmd = 'find ' + os.getcwd() + ' -name "*.vt"'
-vtfiles = subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]
-vtfiles = vtfiles.split()
+vtfiles = glob.glob('*/*.vt')
 
 # Extract workflow tags from vt files
 workflows = []
