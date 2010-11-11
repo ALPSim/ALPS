@@ -1,18 +1,40 @@
 import sys, os, subprocess
 
-workflows = [('mc-02-susceptibilities/mc-02-susceptibilities.vt','quantum_ladder'),('ed-02-gaps/ed-02-gaps.vt','Flexible_system_sizes')]
-vt = '/Applications/VisTrails/Vistrails.app/Contents/MacOS/vistrails'
+vtapp = '/Applications/VisTrails/Vistrails.app/Contents/MacOS/vistrails'
 
-logfile = open('log.log', 'w')
+# Find .vt files
+cmd = 'find ' + os.getcwd() + ' -name "*.vt"'
+vtfiles = subprocess.Popen(cmd, stdout=subprocess.PIPE,shell=True).communicate()[0]
+vtfiles = vtfiles.split()
+
+# Extract workflow tags from vt files
+workflows = []
+for vt in vtfiles:
+    cmd = ['unzip', '-c', vt, 'vistrail']
+    xmltrail = subprocess.Popen(cmd, stdout=subprocess.PIPE).communicate()[0]
+    for line in xmltrail.splitlines():
+        if line.find('key="__tag__"') == -1:
+            continue
+        tagstart = line.find('value="')+len('value="')
+        tagend = line.find('"', tagstart+1)
+        tag = line[tagstart:tagend]
+        if tag != 'cannot prune':   # this seems to be some auto-generated tag
+            workflows.append( (vt,tag) )
+            #print os.path.basename(vt) + ':"' + tag + '"'
+    
+# Test all tagged workflows
+logfile = open('vttest.log', 'w')
 for workflow in workflows:
-    fn = os.path.join(os.getcwd(), workflow[0])
+    (fn,tag) = workflow
     if not os.path.exists(fn):
         print fn,'does not exist!'
-    cmd = [vt, '-b', fn+':'+workflow[1]]
+    print fn + ':"' + tag + '" ',
+    cmd = [vtapp, '-b', fn+':'+tag]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = process.communicate()
-    logfile.write(workflow[0]+':'+workflow[1]+'\n')
+    logfile.write(fn+':'+tag+'\n')
     for k in output:
         logfile.write(k)
-    print 'Return code of',workflow,process.returncode
+    logfile.write('===============================================================\n')
+    print 'returned',process.returncode
 
