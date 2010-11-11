@@ -55,10 +55,10 @@ for l in [8,10,12,16]:
     )
     
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm8b',parms)
+input_file = pyalps.writeInputFiles('parm8d',parms)
 pyalps.runApplication('loop',input_file)
 
-data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm8a.task*.out.h5'),['Binder Ratio of Staggered Magnetization','Stiffness'])
+data = pyalps.loadMeasurements(pyalps.getResultFiles(pattern='parm8d.task*.out.h5'),['Binder Ratio of Staggered Magnetization','Stiffness'])
 
 binder=pyalps.collectXY(data,x='J2',y='Binder Ratio of Staggered Magnetization', foreach=['L'])
 stiffness =pyalps.collectXY(data,x='J2',y='Stiffness', foreach=['L'])
