@@ -28,7 +28,7 @@
 import pyalps
 import pyalps.plot
 import numpy as np
-import matplotlib.plot as plt
+import matplotlib.pyplot as plt
 import copy
 import math
 
