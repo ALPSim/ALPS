@@ -1,6 +1,9 @@
-import sys, os, subprocess, glob
+import sys, os, subprocess, glob, platform
 
-vtapp = '/Applications/VisTrails/Vistrails.app/Contents/MacOS/vistrails'
+if platform.system()=='Darwin':
+  vtapp = '/Applications/VisTrails/Vistrails.app/Contents/MacOS/vistrails'
+if platform.system()=='Windows':
+  vtapp = 'C:\Program Files (x86)\VisTrails\vistrails\vistrails'
 
 # Find .vt files
 vtfiles = glob.glob('[d-z]*/*.vt')
