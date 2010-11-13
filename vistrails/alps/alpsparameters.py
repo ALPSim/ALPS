@@ -29,7 +29,6 @@ class MonteCarloMeasurements(Parameters):
     def setFromPort(self,port_name,res):
         if self.hasInputFromPort(port_name):
           val  = self.getInputFromPort(port_name)
-          print port_name," ",type(val)
           if type(val) == bool:
             res.set('MEASURE['+port_name+']',val)
           else:
@@ -234,8 +233,6 @@ class CustomMeasurements(Parameters):
 
 class CustomMeasurement(basic.Module):
     def compute(self):
-        print 'key:', self.getInputFromPort('name')
-        print 'def:', self.getInputFromPort('definition')
         key = 'MEASURE_'+ self.prefix+'['+str(self.getInputFromPort('name'))+']'
         self.setResult('value',{key : self.getInputFromPort('definition')})
     _input_ports = [('name',[(basic.String, 'the name of the measurement')]),

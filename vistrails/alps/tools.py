@@ -309,7 +309,6 @@ class Convert2XML(Module):
         input_files = self.getInputFromPort('input_file')
         olist = []
         for f in input_files:
-          print "Converting", f
           olist.append(pyalps.pytools.convert2xml(str(f)))
           pyalps.copyStylesheet(os.path.dirname(f))
         self.setResult('value', olist)
@@ -434,7 +433,6 @@ class ArchiveDirectory(basic.Module):
             for k,v in replace_dict.items():
                 for qq in v:
                     testpath = fixpath(path.replace(k, qq))
-                    print 'Testing',testpath
                     if os.path.exists(testpath):
                         fpath = testpath
         

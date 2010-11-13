@@ -104,7 +104,6 @@ class ExtractAnything(alpscore.SystemCommand):
                    self.getInputFromPort('plotdescription').name ]
         cmdlist += self.getInputFromPort('data')
         cmdlist += [ '>', outputfile.name]
-#        print cmdlist
         self.execute(cmdlist)
         self.setResult('file',outputfile)
         f = file(outputfile.name,'r')
@@ -119,7 +118,6 @@ class Plot2Anything(alpscore.SystemCommand):
         outputfile = self.interpreter.filePool.create_file(suffix=self.suffix)
         cmdlist = [alpscore._get_path(self.extractapp), 
                    self.getInputFromPort('plot').name, '>', outputfile.name]
-#        print cmdlist
         self.execute(cmdlist)
         self.setResult('file',outputfile)
         f = file(outputfile.name,'r')

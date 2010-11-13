@@ -3,7 +3,7 @@ import sys, os, subprocess, glob
 vtapp = '/Applications/VisTrails/Vistrails.app/Contents/MacOS/vistrails'
 
 # Find .vt files
-vtfiles = glob.glob('*/*.vt')
+vtfiles = glob.glob('[d-z]*/*.vt')
 
 # Extract workflow tags from vt files
 workflows = []
@@ -19,7 +19,7 @@ for vt in vtfiles:
         if tag != 'cannot prune':   # this seems to be some auto-generated tag
             workflows.append( (vt,tag) )
             #print os.path.basename(vt) + ':"' + tag + '"'
-    
+
 # Test all tagged workflows
 logfile = open('vttest.log', 'w')
 for workflow in workflows:
@@ -36,4 +36,3 @@ for workflow in workflows:
         logfile.write(k)
     logfile.write('===============================================================\n')
     print 'returned',process.returncode
-

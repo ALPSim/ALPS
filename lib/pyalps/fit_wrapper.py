@@ -51,6 +51,4 @@ def fit(self,function, parameters, y, x = None):
 
     if x == None: x = np.arange(y.shape[0])
     p = [param() for param in parameters]
-    print p
-    print [type(q) for q in p]
     optimize.leastsq(f, p)

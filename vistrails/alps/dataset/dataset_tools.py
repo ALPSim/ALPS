@@ -278,7 +278,6 @@ class PrepareDictionary(Module):
                 lines1.append(line.strip())
         
         d = {}
-        print lines1
         for line in lines1:
             pair = line.split('=')
             if len(pair) == 2:
@@ -303,4 +302,3 @@ class PrintHierarchyStructure(Module):
             return d
         
         q2 = hmap(f, q)
-        print q2

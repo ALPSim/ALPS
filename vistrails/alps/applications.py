@@ -158,7 +158,6 @@ class RunDMFT(alpscore.SystemCommandLogged,tools.GetSimName):
         c=0
         for parms in paraminput:
             f = file(os.path.join(resultdir.name,id+str(c)),'w')
-            print "file",f.name 
             for key in parms:
                 value = parms[key]
                 if type(value) == str:
@@ -215,22 +214,17 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
              cmdlist += ['--'+str(port_name),str(self.getInputFromPort(port_name))]
         rf = self.getInputFromPort('files')
         infiles = [x.props['filename'] for x in rf]
-        print "Files", infiles
         cmdlist += infiles
-        print cmdlist
         self.execute(cmdlist)
         datasetmap = {}
         datasets = []
         for infile in infiles:
-          print "Looking at file", infile
           ofname = infile.replace('.out.xml', '.plot.*.xml')
           l = glob.glob(ofname)
-          print "Have plots", l
           for fn in l:
             dataset = read_xml(fn)
             datasets.append(dataset)
             ylabel = dataset.props['ylabel']
-            print ylabel
             if datasetmap.has_key(ylabel):
               datasetmap[ylabel].append(dataset)
             else:
@@ -239,10 +233,8 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
         for (port_name,ylabel) in self.plots:
           if datasetmap.has_key(ylabel):
             self.setResult(port_name,datasetmap[ylabel])
-            print "For ",port_name,len(datasetmap[ylabel])
           else:
             self.setResult(port_name,[])
-            print "Nothing for",port_name
           
     _input_ports = [('file',[basic.File],True),
                     ('files',[ResultFiles]),

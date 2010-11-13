@@ -137,6 +137,18 @@ class WriteTextFile(basic.Module):
                     ('suffix', [basic.String])]
     _output_ports = [('file',[basic.File])]
 
+class AlpsExecutablePath(basic.Module):
+    """
+    Returns the directory containing the ALPS executables. This directory can be set in the VisTrails 
+    Preferences dialog by configuring alpspath in the ALPS module.
+    """
+
+    def compute(self):
+        dir = basic.Directory()
+        dir.name = config.alpspath
+        self.setResult('dir',dir)
+    _output_ports = [('dir',[basic.Directory])]
+
 
 class TextCell(SpreadsheetCell):
     """
@@ -303,3 +315,5 @@ def selfRegister():
     reg.add_module(ConcatenatePath,namespace="Tools")
     reg.add_module(ConcatenatePathList,namespace="Tools")
     reg.add_module(DirectorySink,namespace="Tools")
+
+    reg.add_module(AlpsExecutablePath,namespace="Tools")

@@ -278,7 +278,6 @@ class TransformN(Module):
     def compute(self):
         if self.hasInputFromPort('source'):
             Nports = len(self.my_input_ports)-1
-            print Nports
             
             inputs = []
             for i in range(0,Nports):
