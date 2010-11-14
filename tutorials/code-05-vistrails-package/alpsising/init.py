@@ -18,16 +18,6 @@ import os
 from packages.alps.parameters import Parameters 
 basic = core.modules.basic_modules
 
-identifier = 'org.comp-phys.spinmc'
-version = '1.0.0'
-name = 'ALPS Package tutorial'
-
-
-##############################################################################
-
-def package_dependencies():
-  return ['org.comp-phys.alps']
-
 class IsingAlpsSimulation(Module):
     def compute(self): 
         result_file = self.interpreter.filePool.create_file().name
@@ -50,6 +40,4 @@ class IsingAlpsSimulation(Module):
     _output_ports = [('dir', [basic.Directory])]
 
     
-def initialize():
-    reg = core.modules.module_registry.get_module_registry()
-    reg.add_module(IsingAlpsSimulation,namespace="MyPackages")
+_modules = [IsingAlpsSimulation]

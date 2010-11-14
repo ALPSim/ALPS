@@ -11,21 +11,9 @@
 
 from core.modules.vistrails_module import Module
 import core.modules.basic_modules
-import os.path
 import ising
 
 basic = core.modules.basic_modules
-
-identifier = 'org.comp-phys.ising'
-version = '1.0.0'
-name = 'ALPS Ising tutorial'
-
-
-##############################################################################
-
-def package_dependencies():
-  return []
-
 
 class IsingSimulation(Module):
     def compute(self): 
@@ -45,7 +33,4 @@ class IsingSimulation(Module):
     _output_ports = [('result_file', [basic.File])]
 
     
-def initialize():
-    reg = core.modules.module_registry.get_module_registry()
-    reg.add_module(IsingSimulation,namespace="MyPackages")
-
+_modules = [IsingSimulation]
