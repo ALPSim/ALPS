@@ -1,9 +1,13 @@
 import sys, os, subprocess, glob, platform
 
-if platform.system()=='Darwin':
-  vtapp = '/Applications/VisTrails/Vistrails.app/Contents/MacOS/vistrails'
+vistrailspath = '/root/gamperl/git/vistrails/vistrails/vistrails.py'
 if platform.system()=='Windows':
-  vtapp = 'C:\Program Files (x86)\VisTrails\vistrails\vistrails'
+  vistrailspath = 'C:/Program Files (x86)/VisTrails/vistrails/vistrails/vistrails.py'
+
+vtapp = ['python', vistrailspath]
+
+if platform.system()=='Darwin':
+  vtapp = ['/Applications/VisTrails/Vistrails.app/Contents/MacOS/vistrails']
 
 # Find .vt files
 vtfiles = glob.glob('[d-z]*/*.vt')
@@ -21,7 +25,7 @@ for vt in vtfiles:
         tag = line[tagstart:tagend]
         if tag != 'cannot prune':   # this seems to be some auto-generated tag
             workflows.append( (vt,tag) )
-            #print os.path.basename(vt) + ':"' + tag + '"'
+#            print os.path.basename(vt) + ':"' + tag + '"'
 
 # Test all tagged workflows
 logfile = open('vttest.log', 'w')
@@ -31,7 +35,7 @@ for workflow in workflows:
     if not os.path.exists(fn):
         print fn,'does not exist!'
     print fn + ':"' + tag + '" ',
-    cmd = [vtapp, '-b', fn+':'+tag]
+    cmd = vtapp + ['-b', fn+':'+tag]
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     output = process.communicate()
     logfile.write(fn+':'+tag+'\n')
