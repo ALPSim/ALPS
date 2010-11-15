@@ -37,6 +37,7 @@ class Simulation:
     
     def __init__(self,beta,L):
         self.L = L
+        self.beta = beta
         
         # Init exponential map
         self.exp_table = dict()
@@ -50,8 +51,17 @@ class Simulation:
         self.magnetization = alpsalea.RealObservable('m')
         self.abs_magnetization = alpsalea.RealObservable('|m|')
 
+    def save(self, filename):
+        pyalps.save_parameters(filename, {'L':self.L, 'BETA':self.beta, 'SWEEPS':self.n, 'THERMALIZATION':self.ntherm})
+        self.abs_magnetization.save(filename)
+        self.energy.save(filename)
+        self.magnetization.save(filename)
+
+
     def run(self,ntherm,n):
         # Thermalize for ntherm steps
+        self.n = n
+        self.ntherm = ntherm
         while ntherm > 0:
             self.step()
             ntherm = ntherm-1
@@ -107,3 +117,4 @@ if __name__ == '__main__':
         print 'beta =', beta
         sim = Simulation(beta,L)
         sim.run(N/2,N)
+        sim.save('ising.L_'+str(L)+'beta_'+str(beta)+'.h5')
