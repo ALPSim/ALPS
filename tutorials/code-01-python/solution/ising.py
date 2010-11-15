@@ -54,13 +54,9 @@ class Simulation:
         self.abs_magnetization = alpsalea.RealObservable('|m|')
     
     def save(self, filename):
-        print "Save params"
         pyalps.save_parameters(filename, {'L':self.L, 'BETA':self.beta, 'SWEEPS':self.n, 'THERMALIZATION':self.ntherm})
-        print "Save mag"
         self.abs_magnetization.save(filename)
-        print "Save mag"
         self.energy.save(filename)
-        print "Save mag"
         self.magnetization.save(filename)
         
         
