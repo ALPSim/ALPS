@@ -695,7 +695,10 @@ else (ALPS_BUILD_SOURCE)
             config/run_test.cmake
             config/add_alps_test.cmake
             DESTINATION share/alps COMPONENT build)
-
+            
+    install(FILES LICENSE.txt README.txt  LICENSE-applications.txt CITATIONS.txt
+            DESTINATION share/alps COMPONENT libraries)
+            
     if (VISTRAILS_FOUND AND (APPLE OR WIN32))
       set(PYTHONEXEC "${CMAKE_INSTALL_PREFIX}/bin/vispython")
     else (VISTRAILS_FOUND AND (APPLE OR WIN32))
