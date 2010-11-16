@@ -92,7 +92,7 @@ out numerical simulations by providing basic implementations of the
 important algorithms for quantum lattice models: classical and quantum
 Monte Carlo (QMC) using non-local updates, extended ensemble
 simulations, exact and full diagonalization (ED), as well as the
-density matrix renormalization group (DMRG) both in a static version and a dynamic time-evolving block decimation (TEBD) code, and quantum Monte Carlo solvers for dynamical mean field theory (DMFT). Major changes in release 2.0 include the use of HDF5 for binary data, evaluation tools in Python, support for Windows  operating system the use of CMake as build system and binary installation packages for Mac OS X and Windows, as well as integration with the VisTrails workflow provenance tool.
+density matrix renormalization group (DMRG) both in a static version and a dynamic time-evolving block decimation (TEBD) code, and quantum Monte Carlo solvers for dynamical mean field theory (DMFT). Major changes in release 2.0 include the use of HDF5 for binary data, evaluation tools in Python, support for Windows  operating system, the use of CMake as build system and binary installation packages for Mac OS X and Windows, as well as integration with the VisTrails workflow provenance tool.
 The software is available from our web server at \url{http://alps.comp-phys.org/}.
 \end{abstract}
 
@@ -161,10 +161,10 @@ materials.
  \begin{itemize}
 \item CMake build system \cite{cmake}, simplifying configuration and enabling ALPS to be built on  Windows.
 \item Binary installer packages for MacOS X and Windows.
-\item Using the binary file format HDF-5 \cite{hdf5} in addition to XML is much faster and needs less space.
+\item Using the binary file format HDF5 \cite{hdf5} in addition to XML is much faster and needs less space.
 \item More flexible and powerful evaluation tools using Python.
 \item A revised and substantially faster version of the directed loop quantum Monte Carlo (QMC) code {\tt dirloop\_sse}, and two new applications: QMC solvers for dynamical mean field theory (DMFT) ({\tt dmft}) and a time-evolving block-decimation (TEBD) algorithm ({\tt tebd}) for dynamics of one-dimensional quantum systems.
-\item Integration with VisTrails workflow provenance system \cite{vistrails}
+\item Integration with VisTrails workflow provenance system \cite{vistrails}.
 \item An expanded set of tutorials.
  \end{itemize}
  
@@ -179,8 +179,8 @@ The following tools and libraries are required to build ALPS:
 \item The CMake build system \cite{cmake}.
 \item The BLAS \cite{blasnetlib} and LAPACK libraries \cite{lapack}. Ideally optimized versions for the target architecture should be used instead of the generic netlib versions.
 \item The Boost C++ libraries version (included in one version of the source tarball) \cite{boost}.
-\item The HDF-5 library version 1.8 \cite{hdf5}.
-\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.3, 4.3 and 4.4 as well as MSVC 9.
+\item The HDF5 library version 1.8 \cite{hdf5}.
+\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.3, 4.3 \textbf{??should this be a third version or is it a duplicate??} and 4.4 as well as MSVC 9.
 \end{itemize}
 To build optional parts of ALPS it is recommended to install in addition
 \begin{itemize}
@@ -195,14 +195,14 @@ To build optional parts of ALPS it is recommended to install in addition
 
 To ease the installation on MacOS X and Windows, we provide CMake-generated binary installation packages for these operating systems. To use all features of ALPS we recommend to download and install a binary installer for VisTrails \cite{vistrails} in addition to the ALPS installers. On both operating systems the PATH variable should be adjusted to include the directory containing the ALPS binaries. The Windows installer gives the option to automatically do that. The default installation directory on Mac OS X is {\tt /opt/alps/bin} and on Windows {\tt C:$\backslash$Program Files$\backslash$ALPS$\backslash$bin} on 32-bit versions and  {\tt C:$\backslash$Program Files (x86)$\backslash$ALPS$\backslash$bin} on 64-bit versions respectively.
 
-Source and binary installation packages for MacOS X using macports \cite{macports} and for Linux using Ubunto and Debian package managers are planned soon after this release is published.
+Source and binary installation packages for MacOS X using macports \cite{macports} and for Linux using Ubuntu and Debian package managers are planned soon after this release is published.
 
 
 \subsection{LiveALPS.}
 
 For Linux we additionally provide an ISO disk image, called liveALPS, of a full Linux distribution with ALPS preinstalled.  It is  
 based on remastered CD-release of Knoppix \cite{knoppix} and is ready to use 
-on a PC without special configuration. While it can burned to a DVD we recommend using it with a USB flash drive for performance reasons.
+on a PC without special configuration. While it can be burned to a DVD we recommend using it with a USB flash drive for performance reasons.
 This  solution is especially useful for Linux users that want to try ALPS, or in summers schools or lectures.
 
 \section{Data formats}
@@ -224,11 +224,11 @@ supported by a large and growing number of tools.
 
 A number of XML  schemas \cite{xmlschema} have been designed in ALPS 1 to describe the input of simulation parameters,  the lattices,  quantum lattice models, and the output of results. ALPS 2 uses the same XML schemas to maintain compatibility.
 
-\subsection{HDF-5}
+\subsection{HDF5}
 
-ALPS 2.0 complements XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  Also for HDF5 a wide array of tools is available for C, C++, Fortran, Python and other languages. It is also directly supported by many visualization and data analysis tools. In ALPS 2 we use HDF5 as the default format for simulation result since writing binary files is substantially faster then text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
+ALPS 2.0 complements XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  Also for HDF5 a wide array of tools is available for C, C++, Fortran, Python and other languages. It is also directly supported by many visualization and data analysis tools. In ALPS 2 we use HDF5 as the default format for simulation results since writing binary files is substantially faster then text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
 
-The ALPS HDF5 files store simulation parameters and the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF-5. The exact schema of the HDF-5 files is available on the ALPS web page \cite{alps}. For backward compatibility with user's evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to write all results also in XML. 
+The ALPS HDF5 files store simulation parameters and the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page \cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to write all results also in XML. 
 
 \section{Evaluation Tools in Python}
 
@@ -250,7 +250,7 @@ included with the sources that can be found on the ALPS web
 page \cite{alps}.
 
 \subsection{Existing applications}
-All applications from ALPS 1.3, with the exception of the single particle DMRG demonstration program, have been retained in ALPS 2.0. They continue to work in the same way, with a minor bug fixes and patches for incompatibilities. Specifically we include:
+All applications from ALPS 1.3, with the exception of the single particle DMRG demonstration program, have been retained in ALPS 2.0. They continue to work in the same way, with minor bug fixes and patches for incompatibilities. Specifically we include:
 
 \subsubsection{Exact diagonalization}
 codes include {\tt sparsediag} and {\tt fulldiag}. The former calculates the ground state
@@ -265,7 +265,7 @@ simulations of classical magnets employing local and cluster
 updates \cite{Swendsen87} are implemented in the {\tt spinmc} application.
 
 \subsubsection{Quantum Monte Carlo} codes include the {\tt loop}  program using the loop cluster
-algorithm \cite{Evertz03,Todo01,looper}, a updated directed loop QMC \cite{Sylyuasen,Alet2005} program {\tt dirloop\_sse} and a  worm algorithm \cite{Prokofev98A} program  {\tt worm} and the {\tt qwl} program implementing Wang-Landau sampling for quantum spin systems \cite{Troyer03}. The {\tt dirloop\_sse} program has reimplemented by S. Isakov, resulting in a substantial speedup.
+algorithm \cite{Evertz03,Todo01,looper}, an updated directed loop QMC \cite{Sylyuasen,Alet2005} program {\tt dirloop\_sse} and a  worm algorithm \cite{Prokofev98A} program  {\tt worm} and the {\tt qwl} program implementing Wang-Landau sampling for quantum spin systems \cite{Troyer03}. The {\tt dirloop\_sse} program has been reimplemented by S. Isakov, resulting in a substantial speedup.
 
   
 \subsubsection{Density Matrix Renormalization Group (DMRG):} The {\tt dmrg} code implementing the DMRG algorithm \cite{White1992,Schollwock2005}  of ALPS 1.3 has been updated to support complex-valued Hamiltonians.
@@ -431,7 +431,7 @@ plt.show()
 \label{fig:python}
 \end{figure}
 
-An example for running an ALPS application from the command line is shown in Fig. \ref{fig:commandline}. This example calculates the uniform susceptibility of a quantum Heisenberg spin chain. The same example, containing additional code to evaluate and plot the results  using Python is shown in Fig. \ref{fig:python}. The workflow using VisTrails, making a  is shown in Fig. \ref{fig:workflow}, and its version history in Fig. \ref{fig:history}. Following the links in the PDF version of the latter figures retrieves the corresponding vistrail files.
+An example for running an ALPS application from the command line is shown in Fig. \ref{fig:commandline}. This example calculates the uniform susceptibility of a quantum Heisenberg spin chain. The same example, containing additional code to evaluate and plot the results  using Python is shown in Fig. \ref{fig:python}. The workflow using VisTrails is shown in Fig. \ref{fig:workflow}, and its version history in Fig. \ref{fig:history}. Following the links in the PDF version of the latter figures retrieves the corresponding vistrail files.
 
 \section{License}
 The ALPS libraries are licensed under the ALPS library license \cite{librarylicense} and the applications under the ALPS application license  \cite{applicationlicense}. These licenses are modeled after the GNU General Public License (GPL), but contain an additional requirement to cite this paper as well as relevant papers for each of the application codes. These papers need to be cited and the use of ALPS acknowledged in any scientific project that makes use of ALPS. This includes the case when ALPS has only been used to test a scientist's application code.
