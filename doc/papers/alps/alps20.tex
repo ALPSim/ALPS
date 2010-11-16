@@ -14,9 +14,6 @@
 \renewcommand{\vistrailspath}{http://alps.comp-phys.org/vistrails/run_vistrails.php}
 \renewcommand{\vistrailsdownload}{http://alps.comp-phys.org/vistrails/download.php}
 
-\renewcommand{\vistrailspythonpath}{nopython}
-
-
 \begin{document}
 
 \title{The ALPS project release 2.0: \\ open source software for strongly correlated systems}
@@ -191,7 +188,7 @@ To build optional parts of ALPS it is recommended to install in addition
 \item The numpy \cite{numpy}, scipy \cite{scipy} and matplotlib \cite{matplotlib} Python packages.
 \item lpsolve version 4.0 \cite{lpsolve}.
 \item The VisTrails scientific workflow and provenance management system \cite{vistrails} and all its dependencies.
-\item A Fortran compiler for the {\tt tebd} code.
+\item A Fortran-90 compiler for the {\tt tebd} code.
 \end{itemize}
 
 \subsection{Binary Installation Packages}
@@ -229,20 +226,19 @@ A number of XML  schemas \cite{xmlschema} have been designed in ALPS 1 to descri
 
 \subsection{HDF-5}
 
-ALPS 2.0 complements XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  Also for HDF5 a wide array of tools is available for C, C++, Fortran, Python and other languages. It is also directly supported by many visualization and data analysis tools. In ALPS 2 we use HDF5 as the default format for simulation result since writing binary files is substantially faster then text-based formats when lots of data has to be written, and the files will be smaller. For backward compatibility with user's evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to write all results also in XML. 
+ALPS 2.0 complements XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  Also for HDF5 a wide array of tools is available for C, C++, Fortran, Python and other languages. It is also directly supported by many visualization and data analysis tools. In ALPS 2 we use HDF5 as the default format for simulation result since writing binary files is substantially faster then text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
 
-The ALPS HDF5 files store simulation parameters and the detailed results of Monte Carlo, diagonalization, 
-\begin{itemize}
-\item the input of simulation parameters,
-\item the lattices,
-\item quantum lattice models,   
-\item and the output of results.
-\end{itemize}
-
-
-
+The ALPS HDF5 files store simulation parameters and the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF-5. The exact schema of the HDF-5 files is available on the ALPS web page \cite{alps}. For backward compatibility with user's evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to write all results also in XML. 
 
 \section{Evaluation Tools in Python}
+
+ALPS 1 had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML file using XSLT. In contrast to this, data evaluation in ALPS 2.0 is based on the powerful Python language \cite{python}. Python is an easy to learn interpreted object-oriented language, allowing interactive evaluation of the data and arbitrarily complex evaluations. 
+
+We provide a large number of functions to write and read ALPS files, to evaluate the simulation results and to make plots. In particular the ALPS classes for the recoding and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis \cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
+The creation of 2D plots is easy, using the widely available Python matplotlib package \cite{matplotlib} or by using ALPS functions to create grace \cite{grace} or gnuplot \cite{gnuplot} input files. Creation of 3D graphs is supported through VisTrails and the Visualization ToolKit (VTK) \cite{vtk} VisTrails modules.
+
+
+
 \section{Applications}
 \label{sec:applications}
 In addition to common libraries, the ALPS project includes a number of ready to use applications implementing the most important unbiased
@@ -345,21 +341,92 @@ showspreadsheetonly]{width=8cm}
 \subsection{VisTrails}
 \subsection{CrowdLabs}
 also mention VisMashups
+\subsection{The ALPS VisTrails package}
+The ALPS team will write this after the above sections are done.
 \section{Tutorials and Examples}
 
 The ALPS web page \cite{alps} contains an extensive list of tutorials, explaining the use of the various application codes and evaluation tools and how to use of the ALPS libraries in the user's code. We provide tutorials and instructions for using ALPS in three ways: from the command line, using Python scripts, and using the VisTrails workflow system. The input files needed for the tutorials are available on the web page but are also included in the source and binary distributions.
 
 \begin{figure}
+\begin{small}
 \begin{verbatim}
+cat  > parm << EOF
+LATTICE="chain lattice"
+MODEL="spin"
+local_S=1/2
+L=60
+J=1
+THERMALIZATION=5000
+SWEEPS=50000
+ALGORITHM="loop"
+{T=0.05;}
+{T=0.1;}
+{T=0.2;}
+{T=0.3;}
+{T=0.4;}
+{T=0.5;}
+{T=0.6;}
+{T=0.7;}
+{T=0.75;}
+{T=0.8;}
+{T=0.9;}
+{T=1.0;}
+{T=1.25;}
+{T=1.5;}
+{T=1.75;}
+{T=2.0;}
+EOF
+
+parameter2xml parm
+loop --auto-evaluate --write-xml parm.in.xml
 \end{verbatim}
+\end{small}
 \caption{A shell script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain. Evaluation options are limited to viewing the output files. Any further evaluation requires the use of Python, VisTrails, or a program written by the user.}
 \label{fig:commandline}
 \end{figure}
 
 
 \begin{figure}
+\begin{small}
 \begin{verbatim}
+import pyalps
+import matplotlib.pyplot as plt
+import pyalps.plot
+
+#prepare the input parameters
+parms = []
+for t in [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
+    parms.append(
+        { 
+          'LATTICE'        : "chain lattice", 
+          'MODEL'          : "spin",
+          'local_S'        : 0.5,
+          'T'              : t,
+          'J'              : 1 ,
+          'THERMALIZATION' : 5000,
+          'SWEEPS'         : 50000,
+          'L'              : 60,
+          'ALGORITHM'      : "loop"
+        }
+    )
+
+#write the input file and run the simulation
+input_file = pyalps.writeInputFiles('parm2c',parms)
+pyalps.runApplication('loop',input_file)
+
+#load the susceptibility and collect it as function of temperature T
+data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm2c'),'Susceptibility')
+susceptibility = pyalps.collectXY(data,x='T',y='Susceptibility')
+
+#make plot
+plt.figure()
+pyalps.plot.plot(susceptibility)
+plt.xlabel('Temperature $T/J$')
+plt.ylabel('Susceptibility $\chi J$')
+plt.title('Quantum Heisenberg chain')
+plt.show()
 \end{verbatim}
+\end{small}
 \caption{A Python script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain, load and evaluate the data and make a plot.}
 \label{fig:python}
 \end{figure}
@@ -372,6 +439,18 @@ The ALPS libraries are licensed under the ALPS library license \cite{librarylice
 The detailed license text is included in the files {\tt LICENSE.txt} \cite{librarylicense} and {\tt LICENSE-applications.txt}  \cite{applicationlicense}. Any use of ALPS requires citing this paper.  These files can be found at he top level of the source distribution and in the directory {\tt share/alps} of the binary distrubutions. The papers that need to be cited for the use of a specific application are printed to the standard output when that application is run. The list of papers is also included in the file {\tt CITATIONS.txt}. Since some of those references are to preprints we recommend that the ALPS web page \cite{alps} is checked for updates.
 
 \section{Future development plans}
+
+The ALPS project is work in progress and development will continue after this release 2.0. Immediate plans for release 2.1 within about a year include the development of  more evaluation tools for Monte Carlo simulations and more 2D and 3D plotting functionality.
+
+ALPS 2.1 will also provide support for more programming languages. In addition to the Python support in the current version we plan to add a Fortran library to write the ALPS HDF5 files from Fortran. This will enable the use of the ALPS evaluation tools not only with C++ or Python codes, but also with results of Fortran codes.
+
+A key part of ALPS 2.1 will be a more flexible and optimized scheduler. It will allow  the simple integration of the ALPS codes into other programs and Python scripts. It is also designed to scale to tens of thousands of CPUs, compared to the current scheduler that scales only to a few thousand CPUs. 
+
+Besides improved versions of some of the simulation codes, there will be a new worm algorithm program for optical lattice simulations with millions of lattice sites, and an extension of the DMFT codes to clusters.
+
+ALPS is an open initiative and we welcome contributions from the community.
+
+
 \section{Acknowledgements}
 
 We thank A.F. Albuquerque, F. Alet, P. Corboz, P.Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. We thank P. Zoller for the suggestion to provide binary installers. The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Kavli Institute for Theoretical Physics in Santa Barbara, the Aspen Center for Physics, the Swiss National Science Foundation, and a grant from the Army Research Office with funding from the DARPA OLE program.
