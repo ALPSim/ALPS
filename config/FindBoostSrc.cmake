@@ -51,7 +51,7 @@ if (NOT Boost_ROOT_DIR)
       "$ENV{HOMEDRIVE}$ENV{HOMEPATH}"
       "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/src"
       "$ENV{HOMEDRIVE}$ENV{HOMEPATH}/ALPS/src")
-    set(DIR1 boost boostsrc boost_1_44_0 boost_1_43_0 boost_1_42_0 boost_1_41_0)
+    set(DIR1 boost boostsrc boost_1_45_0 boost_1_44_0 boost_1_43_0 boost_1_42_0 boost_1_41_0)
     set(_boost_SEARCH_PATH "")
     foreach(D0 ${DIR0})
       foreach(D1 ${DIR1})
@@ -63,7 +63,7 @@ if (NOT Boost_ROOT_DIR)
 endif (NOT Boost_ROOT_DIR)
 
 if(Boost_ROOT_DIR)
-  set(Boost_INCLUDE_DIR ${Boost_ROOT_DIR} CACHE PATH "Boost Include Directory" FORCE)
+  set(Boost_INCLUDE_DIR ${Boost_ROOT_DIR} CACHE PATH "Boost Include Directory")
 endif(Boost_ROOT_DIR)
 
 # check Boost version (from Modules/FindBoost.cmake)
