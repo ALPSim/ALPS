@@ -76,7 +76,7 @@
 \myaddress{lmu}{Arnold Sommerfeld Center for Theoretical Physics and Center for NanoScience, University of Munich, Theresienstrasse 37, 80333 Munich, Germany}
 \myaddress{tokyo}{Department of Applied Physics, University of Tokyo, 113-8656 Tokyo, Japan}
 \myaddress{stationq}{Microsoft Research, Station Q, University of California, Santa Barbara, CA 93106, USA}
-\myaddress{rwth}{}
+\myaddress{rwth}{Institute for Solid State Theory, RWTH Aachen University, 52056 Aachen, Germany}
 \myaddress{stuttgart}{Institut f\"ur Theoretische Physik III, Universit\"at Stuttgart, Pfaffenwaldring 57, D-70550 Stuttgart, Germany}
 \eject
 \begin{abstract}
@@ -163,7 +163,8 @@ materials.
 \item Binary installer packages for MacOS X and Windows.
 \item Using the binary file format HDF5 \cite{hdf5} in addition to XML is much faster and needs less space.
 \item More flexible and powerful evaluation tools using Python.
-\item A revised and substantially faster version of the directed loop quantum Monte Carlo (QMC) code {\tt dirloop\_sse}, and two new applications: QMC solvers for dynamical mean field theory (DMFT) ({\tt dmft}) and a time-evolving block-decimation (TEBD) algorithm ({\tt tebd}) for dynamics of one-dimensional quantum systems.
+\item A revised and substantially faster version of the directed loop quantum Monte Carlo (QMC) code {\tt dirloop\_sse}, and two new applications: QMC solvers for dynamical 
+mean field theory (DMFT) ({\tt dmft}) and a time-evolving block-decimation (TEBD) algorithm ({\tt tebd}) for the dynamics of one-dimensional quantum systems.
 \item Integration with VisTrails workflow provenance system \cite{vistrails}.
 \item An expanded set of tutorials.
  \end{itemize}
@@ -226,7 +227,8 @@ A number of XML  schemas \cite{xmlschema} have been designed in ALPS 1 to descri
 
 \subsection{HDF5}
 
-ALPS 2.0 complements XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  Also for HDF5 a wide array of tools is available for C, C++, Fortran, Python and other languages. It is also directly supported by many visualization and data analysis tools. In ALPS 2 we use HDF5 as the default format for simulation results since writing binary files is substantially faster then text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
+ALPS 2.0 complements XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  Also for HDF5 a wide array of tools is 
+available for C, C++, Fortran, Python and other languages. It is also directly supported by many visualization and data analysis tools. In ALPS 2 we use HDF5 as the default format for simulation results since writing binary files is substantially faster than text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
 
 The ALPS HDF5 files store simulation parameters and the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page \cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to write all results also in XML. 
 
@@ -279,13 +281,19 @@ For the solution of the quantum impurity problem we provide a legacy Hirsch-Fye 
 
 The interaction expansion or ``weak coupling'' algorithm \cite{Rubtsov04,Rubtsov05} expands the impurity model partition function in the interaction around the non-interacting solution. This method, historically
 the first continuous-time quantum Monte Carlo impurity solver algorithm, is widely used for the simulation of cluster problems.
-The complementary hybridization expansion algorithm \cite{Werner06,Werner06Kondo} expands the impurity model partition function in the impurity-bath hybridization, treating the local (impurity) hamiltonian exactly. 
+The complementary hybridization expansion algorithm \cite{Werner06,Werner06Kondo} expands the impurity model partition function in the impurity-bath hybridization, treating 
+the local (impurity) Hamiltonian exactly. 
 The method is usually used to simulate multi-orbital models where its capability to treat general interactions is unparalleled. A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
 
 \subsection{New Time Evolving Block Decimation Code {\tt tebd}}
 Release 2.0 contains interfaces to the Open Source TEBD project \cite{ostebd}, which is a collection of Fortran libraries using the Time-Evolving Block Decimation (TEBD) algorithm\cite{vidal1, vidal2} to simulate time evolution of one-dimensional quantum systems.  The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.  TEBD can also find ground states via imaginary time evolution.  Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times.
 
-At present, the TEBD routines can simulate the spin, boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models from the ALPS models library.  All Hamiltonian parameters are assumed uniform throughout the system.  The measures calculated are the $z$ and $x$ magnetization, their squares, and the $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ and $\langle \hat{S}^x_i \hat{S}^x_j\rangle$ correlations for the spin model; the number, its square, and the $\langle \hat{n}_i \hat{n}_j\rangle$ and $\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the boson Hubbard, hardcore boson, spinless ferimons, and fermion Hubbard models; and, additionally, the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model.  All models calculate the energy, von Neumann entanglement entropy of each site, von Neumann entanglement entropy of each bond, and the overlap of the wavefunction at time $t$ with its $t=0$ value.
+At present, the TEBD routines can simulate the spin, boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models from the ALPS models library.  All 
+Hamiltonian parameters are assumed uniform throughout the system.  Observables calculated are the $z$ and $x$ magnetizations, their squares, and the $\langle \hat{S}^z_i 
+\hat{S}^z_j\rangle$ and $\langle \hat{S}^x_i \hat{S}^x_j\rangle$ correlations for the spin model; the number, its square, and the $\langle \hat{n}_i \hat{n}_j\rangle$ and 
+$\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the boson Hubbard, hardcore boson, spinless ferimons, and fermion Hubbard models; and, additionally, 
+the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model.  All models calculate the energy, von Neumann entanglement 
+entropy of each site, the von Neumann entanglement entropy of each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ (i.e. the Loschmidt echo).
 
 In the future we plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States.  These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
 
@@ -300,7 +308,8 @@ vtid=10,
 version=163,
 pdf,
 showspreadsheetonly]{width=8cm}
-\caption{A figure produced by an ALPS VisTrails workflow: the uniform susceptibility of the Heisenberg chain and ladder. Clicking the figure retrieves the workflow used to create it. Opening that workflow lets the reader execute the full calculation.}
+\caption{A figure produced by an ALPS VisTrails workflow: the uniform susceptibility of the Heisenberg chain and ladder. Clicking the figure retrieves the workflow used to 
+create it. Opening that workflow lets the reader execute the full calculation. >>>SHOULD ERROR BARS NOT BE BETTER INCLUDED IN THIS EXAMPE PLOT?<<<}
 \label{fig:figure}
 \end{center}
 \end{figure}
@@ -427,7 +436,8 @@ plt.title('Quantum Heisenberg chain')
 plt.show()
 \end{verbatim}
 \end{small}
-\caption{A Python script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain, load and evaluate the data and make a plot.}
+\caption{A Python script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain, load and evaluate the data and make a plot. 
+>>SHOULD ONE NOT BETTER INCLUDE ERROR BARS IN THIS EXAMPLE?<<}
 \label{fig:python}
 \end{figure}
 
