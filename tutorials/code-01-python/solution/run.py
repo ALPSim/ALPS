@@ -38,5 +38,5 @@ print '# L:', L, 'N:', N
 for beta in [0.,.1,.2,.3,.4,.5,.6,.7,.8,.9,1.]:
     print '-----------'
     print 'beta =', beta
-    sim = Simulation(beta,L)
+    sim = ising.Simulation(beta,L)
     sim.run(N/2,N)

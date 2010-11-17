@@ -150,8 +150,8 @@ if __name__ == '__main__':
         u.append(d)
     
     plt.figure()
-    pyalps.pyplot.plot(u)
-    plt.xlabel('Inverse Temperature $\beta$')
+    pyalps.plot.plot(u)
+    plt.xlabel('Inverse Temperature $\\beta$')
     plt.ylabel('Binder Cumulant U4 $g$')
     plt.title('2D Ising model')
     plt.show()
