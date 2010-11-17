@@ -65,4 +65,6 @@ parms.append(
 
 #write the input file and run the simulation
 input_file = pyalps.writeParameterFile('parm_CTINT',parms[0])
-res = pyalps.runDMFT(input_file)
+print "THIS TUTORIAL WILL RUN FOR A VERY LONG TIME ON A SINGLE WORKSTATION!" 
+print "IF YOU REALLY WANT TO RUN THE SIMULATION YOU CAN COMMENT OUT THE LINE BELOW"
+#res = pyalps.runDMFT(input_file)
