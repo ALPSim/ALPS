@@ -284,7 +284,7 @@ class LoadTimeEvolution(Module):
                                   locdata[0][i].props.update(globalprops[0].props)
                             #Extend the total dataset with this data
                             datasets.extend(locdata)
-                    except Exception as e:
+                    except Exception, e:
                         print e
                         print traceback.format_exc()
             else:
@@ -308,7 +308,7 @@ class LoadTimeEvolution(Module):
                                   locdata[0][i].props.update(globalprops[0].props)
                             #Extend the total dataset with this data
                             datasets.extend(locdata)
-                    except Exception as e:
+                    except Exception, e:
                         print e
                         print traceback.format_exc()
             self.setResult('data',datasets)
