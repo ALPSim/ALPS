@@ -52,7 +52,8 @@ double InteractionExpansionRun::fastupdate_up(const int flavor, bool compute_onl
     Green0_j_n[i]=green0_spline(M[flavor].creators()[i],M[flavor].annihilators()[noperators]);
   }
   //compute the last row
-  M[flavor].right_multiply(&(Green0_j_n[0]), &(lastcolumn[0]));
+  if(noperators!=0)
+    M[flavor].right_multiply(&(Green0_j_n[0]), &(lastcolumn[0]));
   //compute lambda
   double ip = (noperators==0?0:inner_prod(&(Green0_n_j[0]), &(lastcolumn[0]), noperators));
   lambda = Green0_n_n - ip + M[flavor].alpha()[noperators];
@@ -61,7 +62,8 @@ double InteractionExpansionRun::fastupdate_up(const int flavor, bool compute_onl
     return lambda;
   }
   //compute last column
-  M[flavor].left_multiply(&(Green0_n_j[0]), &(lastrow[0]));
+  if(noperators!=0)
+    M[flavor].left_multiply(&(Green0_n_j[0]), &(lastrow[0]));
   //compute norm of vector and mean for roundoff error check
   if(noperators > 0){
     scale(1./lambda, &(lastrow[0]), noperators);
