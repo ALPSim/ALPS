@@ -58,7 +58,6 @@ void InteractionExpansionRun::initialize_observables(void)
   measurements<<alps::RealVectorObservable("PertOrder");  
   if(measurement_method==selfenergy_measurement_itime_rs) {
     for(unsigned int flavor=0;flavor<n_flavors;++flavor){
-      measurements << signed_vec_obs_t("densities_"+boost::lexical_cast<std::string>(flavor));
       for(unsigned int i=0;i<n_site;++i){
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream obs_name;
