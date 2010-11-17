@@ -117,9 +117,11 @@ double InteractionExpansionRun::fastupdate_down(const int operator_nr, const int
     lastrow[j]=M[flavor](noperators-1, j);
     lastcolumn[j]=M[flavor](j,noperators-1);
   }
-  scale(-1./Mnn, &(lastcolumn[0]), noperators-1);
+  if(noperators>1)
+    scale(-1./Mnn, &(lastcolumn[0]), noperators-1);
   M[flavor].resize(noperators-1);  //lose the last row and last column, reduce size by one, but keep contents.
-  M[flavor].add_outer_prod(&(lastcolumn[0]), &(lastrow[0]));
+  if(noperators>1)
+    M[flavor].add_outer_prod(&(lastcolumn[0]), &(lastrow[0]));
   return Mnn;  //the determinant ratio det D_{k-1}/det D_{k}
 }
 
