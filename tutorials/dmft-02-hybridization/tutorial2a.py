@@ -39,7 +39,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'CONVERGED'           : 0.03,
               'FLAVORS'             : 2,
               'H'                   : 0,
-              'H_INIT'              : 0.2,
+              'H_INIT'              : 0.0,
               'MAX_IT'              : 10,
               'MAX_TIME'            : 60,
               'MU'                  : 0,

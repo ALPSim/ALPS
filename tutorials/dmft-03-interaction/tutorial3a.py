@@ -55,6 +55,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
               't'                       : 0.707106781186547,
               'SWEEPS'                  : 100000,
               'THERMALIZATION'          : 1000,
+              'TOLERANCE'               : 0.01,
               'ALPHA'                   : -0.01,
               'HISTOGRAM_MEASUREMENT'   : 1,
               'BETA'                    : b,

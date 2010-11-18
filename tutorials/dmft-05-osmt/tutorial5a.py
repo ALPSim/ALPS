@@ -36,7 +36,7 @@ coulombparam=[[1.8,0.45],[2.2,0.55],[2.8,0.7]]
 for cp in coulombparam: 
     parms.append(
             { 
-                  'CHECKPOINT'          : 'dump',
+              'CHECKPOINT'          : 'dump',
               'CONVERGED'           : 0.01,
               'FLAVORS'             : 4,
               'H'                   : 0,

@@ -52,11 +52,11 @@ for u in [4.,5.,6.,8.]:
               'SEED'                    : 0, 
               'SOLVER'                  : 'Hybridization',
               'SYMMETRIZATION'          : 0,
-              'TOLERANCE'               : 0.03,
+              'TOLERANCE'               : 0.01,
               't'                       : 1,
               'SWEEPS'                  : 100000000,
               'BETA'                    : 20,
-              'THERMALIZATION'          : 10,
+              'THERMALIZATION'          : 1000,
               'U'                       : u,
               'G0OMEGA_INPUT'           : 'G0_omega_input_u_'+str(u)
             }
