@@ -273,17 +273,16 @@ algorithm \cite{Evertz03,Todo01,looper}, an updated directed loop QMC \cite{Syly
 \subsubsection{Density Matrix Renormalization Group (DMRG):} The {\tt dmrg} code implementing the DMRG algorithm \cite{White1992,Schollwock2005}  of ALPS 1.3 has been updated to support complex-valued Hamiltonians.
 
 \subsection{New Dynamical Mean Field Theory QMC Solvers {\tt dmft}}
-Dynamical mean field theory is a method to simulate correlated electronic systems by approximating the self-energy $\Sigma(k,\omega)$ by a momentum-independent 
-function $\Sigma(\omega)$. For such a ``local'' self-energy, the diagrammatics simplify radically and the problem may be mapped onto an impurity problem
-coupled to a self-consistently determined bath \cite{Georges96,Kotliar06}. The method may be extended to clusters, thereby rendering it controlled in practice \cite{Maier05}.
-To obtain a self-consistent solution of the impurity model we provide a simple implementation of the DMFT self-consistency condition for general single-site multi-orbital problems.
-For the solution of the quantum impurity problem we provide a legacy Hirsch-Fye QMC code \cite{Hirsch86} as well as two continuous-time QMC algorithms.
+Dynamical mean field theory (DMFT) is a method to simulate fermionic lattice systems which approximates the self-energy $\Sigma(k,\omega)$ by a momentum-independent 
+function $\Sigma(\omega)$. For such a ``local'' self-energy, the diagrammatic structure simplifies considerably and the lattice problem can be mapped onto an impurity problem subject to a self-consistency condition for the bath \cite{Georges96,Kotliar06}. The method may be extended from a single-site to a cluster formalism, thereby rendering it controlled in practice \cite{Maier05}.
+We provide a simple implementation of the DMFT self-consistency loop for general single-site multi-orbital problems.
+For the solution of the quantum impurity model we provide a legacy Hirsch-Fye QMC code \cite{Hirsch86} as well as two continuous-time QMC algorithms.
 
-The interaction expansion or ``weak coupling'' algorithm \cite{Rubtsov04,Rubtsov05} expands the impurity model partition function in the interaction around the non-interacting solution. This method, historically
-the first continuous-time quantum Monte Carlo impurity solver algorithm, is widely used for the simulation of cluster problems.
+The ``weak coupling'' algorithm \cite{Rubtsov04,Rubtsov05} expands the impurity model partition function in powers of the interaction terms and samples the resulting diagrams stochastically. This method, historically
+the first continuous-time quantum Monte Carlo impurity solver algorithm, is particularly suitable for the simulation of impurity clusters.
 The complementary hybridization expansion algorithm \cite{Werner06,Werner06Kondo} expands the impurity model partition function in the impurity-bath hybridization, treating 
 the local (impurity) Hamiltonian exactly. 
-The method is usually used to simulate multi-orbital models where its capability to treat general interactions is unparalleled. A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
+The method is useful to simulate multi-orbital models, since it can easily treat general interaction terms. A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
 
 \subsection{New Time Evolving Block Decimation Code {\tt tebd}}
 Release 2.0 contains interfaces to the Open Source TEBD project \cite{ostebd}, which is a collection of Fortran libraries using the Time-Evolving Block Decimation (TEBD) algorithm\cite{vidal1, vidal2} to simulate time evolution of one-dimensional quantum systems.  The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.  TEBD can also find ground states via imaginary time evolution.  Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times.
