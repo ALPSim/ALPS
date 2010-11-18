@@ -5,9 +5,9 @@
 
 # If you want to load a machine configuration,
 # give the filename with full-path or the name of your machine:
-#  $ cmake -DALPS_USE_MACHINE=/full/path/to/macnine.cmake
+#  $ cmake -DALPS_USE_MACHINE=/full/path/to/machine.cmake
 # or
-#  $ cmake -DALPS_USE_MACHINE=machiine-name
+#  $ cmake -DALPS_USE_MACHINE=machine-name
 if (ALPS_USE_MACHINE)
   if (EXISTS ${ALPS_USE_MACHINE})
     # given full-path case
@@ -797,6 +797,9 @@ endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
 # Binary packages                                                        #
 ##########################################################################
 
+#set (CPACK_SET_DESTDIR ON)
+
+
 if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
  set(CPACK_COMPONENT_LIBRARIES_DISPLAY_NAME "ALPS and Boost libraries")
  set(CPACK_COMPONENT_HEADERS_DISPLAY_NAME "ALPS headers")
@@ -910,6 +913,8 @@ if (ALPS_FOR_VISTRAILS)
 else (ALPS_FOR_VISTRAILS)
   set(CPACK_PACKAGE_INSTALL_DIRECTORY "ALPS")
 endif (ALPS_FOR_VISTRAILS)
+
+
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
 
 # override package name manually
@@ -939,7 +944,7 @@ set(CPACK_PACKAGE_DEFAULT_LOCATION ${CMAKE_INSTALL_PREFIX})
 # set(CPACK_RPM_PACKAGE_VERSION "${CPACK_PACKAGE_VERSION}")
 set(CPACK_RPM_PACKAGE_ARCHITECTURE "x86_64")
 # set(CPACK_RPM_PACKAGE_RELEASE 1)
-set(CPACK_RPM_PACKAGE_LICENCE "ALPS Licence")
+set(CPACK_RPM_PACKAGE_LICENCE "ALPS License")
 set(CPACK_RPM_PACKAGE_GROUP "${CPACK_PACKAGE_VENDOR}")
 # set(CPACK_RPM_PACKAGE_VENDOR "${CPACK_PACKAGE_VENDOR}")
 # set(CPACK_RPM_PACKAGE_DESCRIPTION "${CPACK_PACKAGE_DESCRIPTION_FILE}")
