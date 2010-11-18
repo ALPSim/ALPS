@@ -1,0 +1,72 @@
+###################################################
+#SPHINX IN 1 MINUTE
+###################################################
+Install sphinx. Then create a folder (here ``doc/``) for the documentation 
+and once in it run 
+
+sphinx_quickstart
+
+to create the config file ``conf.py`` with the right options (create Makefile : 
+answer yes, autodoc answer yes).
+
+There are a lot of option available as the possibility 
+- to modify all defaults as root folder, root file, prefix of directories....
+- to give links to the code
+- to format math text with a good renderer
+- of todo entries that can be shown or hidden
+- of conditional inclusion of content based on config values
+so try it in a dummy folder.
+
+It also creates the root file of the documentation (called by default``index.rst``
+but called in the present case modules.txt). After filling this file with the relevant 
+reST formatted documentation, run
+
+make html
+
+to create the html version of the doc. That will be by default in the folder
+``foo_build/html`` as ``index.html``.
+
+
+###################################################
+#INDEX.RST
+###################################################
+
+
+The root file, (called``index.rst`` by default but called modules.txt in the present case) 
+should at least contain the toctree directive
+
+.. toctree
+
+followed by the names of the .rst or .txt files to include to create the 
+documentation. In the present case, 
+
+	       dataset.txt
+	       fit_wrapper.txt
+	       ....
+
+or by the documentation itself.
+
+###################################################
+#AUTODOC
+###################################################
+
+In order to save time, you can tel Sphinx to scan through the .py files 
+of your module and extract itself the __doc__ available. The directive is
+
+.. automodule::pyalps.dataset
+
+(see dataset.txt) if you want Sphinx to get the full doc from the file 
+dataset.py. But it can also be just a class you want to document so the 
+directives
+
+.. autoclass:: name_of_the_class
+.. autodata::
+.. automethod:: 
+.. autofunction
+ etc. 
+
+
+also exist. BUT of course THE LIBRARY MUST BE IN PYTHONPATH.
+
+
+

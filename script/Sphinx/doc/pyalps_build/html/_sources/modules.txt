@@ -1,0 +1,18 @@
+Pyalps Documentation
+=====================
+
+This page contains the Pyalps Modules documentation.
+
+Modules:
+--------
+
+.. toctree::
+   :maxdepth: 4
+
+   dataset
+   dict_intersect
+   fit_wrapper
+   floatwitherror
+   hlist
+   load
+   plot_core

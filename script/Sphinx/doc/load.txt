@@ -1,0 +1,9 @@
+Load Documentation
+==================
+
+This page contains the Load Module documentation.
+
+.. automodule:: pyalps.load
+    :members:
+    :undoc-members:
+    :show-inheritance:

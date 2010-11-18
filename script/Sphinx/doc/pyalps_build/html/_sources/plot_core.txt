@@ -1,0 +1,9 @@
+Plot_Core Documentation
+=======================
+
+This page contains the Plot_Core Module documentation.
+
+.. automodule:: pyalps.plot_core
+    :members:
+    :undoc-members:
+    :show-inheritance:

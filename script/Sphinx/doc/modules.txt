@@ -1,0 +1,20 @@
+Pyalps Documentation
+=====================
+
+* :ref:`genindex`
+
+Modules:
+--------
+
+.. toctree::
+   :maxdepth: 4
+
+   dataset
+   dict_intersect
+   fit_wrapper
+   floatwitherror
+   hlist
+   load
+   plot
+   plot_core
+   tools

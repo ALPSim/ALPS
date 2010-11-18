@@ -1,0 +1,9 @@
+Plot Documentation
+==================
+
+This page contains the Plot Module documentation.
+
+.. automodule:: pyalps.plot
+    :members:
+    :undoc-members:
+    :show-inheritance:

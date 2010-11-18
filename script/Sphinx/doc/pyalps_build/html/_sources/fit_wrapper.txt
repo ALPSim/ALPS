@@ -1,0 +1,9 @@
+Fit_Wrapper Documentation
+=========================
+
+This page contains the Fit_Wrapper Module documentation.
+
+.. automodule:: pyalps.fit_wrapper
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,9 @@
+Dataset Documentation
+=====================
+
+This page contains the Dataset Module documentation.
+
+.. automodule:: pyalps.dataset
+    :members:
+    :undoc-members:
+    :show-inheritance:
