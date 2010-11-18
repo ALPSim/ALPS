@@ -184,7 +184,7 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   boost::filesystem::path outpath(outfile,boost::filesystem::native);
   
   // call the external solver program
-  std::string command = exe_/*.native_file_string()*/ + " " + infile + " " + outfile;
+  std::string command = "\""+exe_/*.native_file_string()*/ + "\" " + infile + " " + outfile;
   std::cerr << "Calling external solver " << exe_/*.native_file_string()*/ << "\n\n";
   std::cerr <<" command is: "<<command<<std::endl;
   int result = std::system(command.c_str());
