@@ -8,7 +8,7 @@
 ######################################################################
 
 if (ALPS_BUILD_SOURCE)
-  install(FILES LICENSE.txt CMakeLists.txt DESTINATION alps/applications)
+  install(FILES CMakeLists.txt DESTINATION alps/applications)
   install(DIRECTORY mc diag dmft dmrg DESTINATION alps/applications
           FILES_MATCHING PATTERN "*" PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   add_subdirectory(qmc)

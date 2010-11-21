@@ -4,5 +4,5 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-rm */parm*xml */*clone* */*.xsl */*.run* */*.dat */*.h5* */*out.xml */*in.xml
-rm parm*xml *clone* *.xsl *.run* *.dat *.h5* *out.xml *in.xml G* 
+rm */parm*xml */*clone* */*.xsl */*.run* */*.dat */*.h5* */*out.xml */*in.xml */selfenergy*
+rm parm*xml *clone* *.xsl *.run* *.dat *.h5* *out.xml *in.xml 
