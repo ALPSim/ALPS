@@ -7,7 +7,7 @@
 %\usepackage{amsmath}
 \usepackage{color}
 \usepackage{hyperref}
-\bibliographystyle{unsrt} %bibtex style according to iop latex guidelines
+%\bibliographystyle{unsrt} %bibtex style according to iop latex guidelines
 %\usepackage{harvard}
 %\bibliographystyle{jphysicsB} %bibtex style according to iop latex guidelines
 
@@ -29,23 +29,24 @@
 \author{
 	\myauthor{\ref{eth}}{B. Bauer}{bauerb@phys.ethz.ch}
 	\myauthor{\ref{colorado}}{L. Carr}{lcarr@mines.edu}
+	\myauthor{\ref{graz}}{H.G. Evertz}{evertz@tugraz.at}
 	\myauthor{\ref{wyoming}}{A. Feiguin}{afeiguin@uwyo.edu}
 	\myauthor{\ref{utah}}{J. Freire}{juliana@cs.utah.edu}
-	\myauthor{\ref{goettingen}}{S. Fuchs}{fuchs@theorie.physik.uni-goettingen.de}
+	\myauthor{\ref{goettingen}}{S.~Fuchs}{fuchs@theorie.physik.uni-goettingen.de}
 	\myauthor{\ref{eth}}{L. Gamper}{gamperl@gmail.com}
 	\myauthor{\ref{eth}}{J. Gukelberger}{gukelberger@phys.ethz.ch}
 	\myauthor{\ref{columbia}}{E. Gull}{gull@phys.columbia.edu}
 	\myauthor{\ref{bonn}}{S.~Guertler}{guertler@th.physik.uni-bonn.de}
-	\myauthor{\ref{eth}}{A. Hehn}{hehn@phys.ethz.ch}
+	\myauthor{\ref{eth}}{A.~Hehn}{hehn@phys.ethz.ch}
 	\myauthor{\ref{jaea},\ref{crest}}{R.~Igarashi}{rigarash@hosi.phys.s.u-tokyo.ac.jp}
 	\myauthor{\ref{utah}}{D. Koop}{dakoop@cs.utah.edu}
 	\myauthor{\ref{eth}}{P.N. Ma}{pingnang@phys.ethz.ch}
 	\myauthor{\ref{tokyo}}{H. Matsuo}{halm@looper.t.u-tokyo.ac.jp}
-	\myauthor{\ref{eth},\ref{utah}}{P. Mates}{phillipmates@gmail.com}
+	\myauthor{\ref{eth},\ref{utah}}{P.~Mates}{phillipmates@gmail.com}
 	\myauthor{\ref{paris}}{O. Parcollet}{parcolle@spht.saclay.cea.fr}
 	\myauthor{\ref{affpol}}{G.~Pawlowski}{gpawlo@amu.edu.pl}
 	\myauthor{\ref{harvard},\ref{eth}}{L.~Pollet}{pollet@phys.ethz.ch}
-	\myauthor{\ref{goettingen}}{T. Pruschke}{pruschke@theorie.physik.uni-goettingen.de}
+	\myauthor{\ref{goettingen}}{T.~Pruschke}{pruschke@theorie.physik.uni-goettingen.de}
 	\myauthor{\ref{brazil},\ref{utah}}{E.~Santos}{emanuele@sci.utah.edu}
 	\myauthor{\ref{virginia}}{V.~Scarola}{scarola@vt.edu}
 	\myauthor{\ref{lmu}}{U.~Schollw\"ock}{schollwoeck@lmu.de}
@@ -61,6 +62,7 @@
 
 \myaddress{eth}{Theoretische Physik, ETH Zurich, 8093 Zurich, Switzerland}
 \myaddress{colorado}{Department of Physics, Colorado School of Mines, Golden, CO 80401, USA}
+\myaddress{graz}{Institut f\"ur Theoretische Physik, Technische Universit\"at Graz, A-8010 Graz, Austria}
 \myaddress{wyoming}{Department of Physics and Astronomy, University of Wyoming, Laramie, Wyoming 82071, USA}
 \myaddress{utah}{Scientific Computing and Imaging Institute, University of Utah, Salt Lake City, Utah 84112, USA}
 \myaddress{goettingen}{Institut f\"ur Theoretische Physik, Georg-August-Universit\"{a}t G\"{o}ttingen, G\"{o}ttingen, Germany}
@@ -78,15 +80,17 @@
 \myaddress{stationq}{Microsoft Research, Station Q, University of California, Santa Barbara, CA 93106, USA}
 \myaddress{rwth}{Institute for Solid State Theory, RWTH Aachen University, 52056 Aachen, Germany}
 \myaddress{stuttgart}{Institut f\"ur Theoretische Physik III, Universit\"at Stuttgart, Pfaffenwaldring 57, 70550 Stuttgart, Germany}
+
 \eject
+
 \begin{abstract}
 We present release 2.0 of the ALPS (Algorithms and Libraries for Physics Simulations)
 project, an international open source software project to develop
 libraries and application programs for the simulation of strongly
 correlated quantum lattice models such as quantum magnets, lattice
 bosons, and strongly correlated fermion systems. Development is
-centered on common XML and binary data formats, on libraries to
-simplify and speed up code development, and on full-featured
+centered on common XML and HDF5 data formats, on libraries to
+simplify and speed up code development, on common evaluation and plotting tools, and on full-featured
 simulation programs. The programs enable non-experts to start carrying
 out numerical simulations by providing basic implementations of the
 important algorithms for quantum lattice models: classical and quantum
@@ -113,12 +117,12 @@ properties of these systems.
 The last two decades have seen tremendous progress in the development of
 algorithms.  Speedups of many orders of magnitude have been 
 achieved \cite{Evertz03,Troyer03,White1992,Schollwock2005,vidal1,vidal2,Daley2004,White2004,Rubtsov04,Rubtsov05,Werner06,Werner06Kondo, Gull08_ctaux}. These
-advances come at the cost of substantially increased algorithmic
+advances often come at the cost of increased algorithmic
 complexity and challenge the current model of program development in
 this research field. In contrast to other research areas, in which
 large ``community codes'' are being used, the field of strongly
 correlated systems has so far been based mostly on single codes developed by
-individual researchers for particular projects. While the simple
+individual researchers for particular projects. While simple
 algorithms used a decade ago could be easily programmed by a beginning
 graduate student in a matter of weeks, it now takes substantially
 longer to master and implement the new algorithms while at the same time the use of numerical approaches is increasing.  
@@ -128,16 +132,21 @@ overcome the problems posed by the growing complexity of algorithms
 and the specialization of researchers onto single algorithms through
 an open-source software development initiative. Its goals are to simplify the development of new codes through libraries and evaluation tools, and to help users with ``black box'' codes of some of the most popular algorithms. To achieve these goals the ALPS project provides:
 \begin{itemize}
-\item {\bf standardized file formats} to simplify exchange,
+\item {\bf standardized file formats} in XML \cite{xml} and HDF5 \cite{hdf5} to simplify exchange,
 distribution and archiving of simulation results, and to achieve
 interoperability between codes.
 
 \item {\bf evaluation tools} for reading, writing and post processing simulation results, including the creation of 2D and 3D plots.
 
-\item {\bf generic libraries} for common aspects of
+\item {\bf libraries} for common aspects of
 simulations of quantum and classical lattice models, to simplify code
 development.
-\item a set of {\bf applications} covering the major algorithms.
+\item a set of {\bf applications} covering the major algorithms. These are useful both for 
+{\it theoreticians} who want to test theoretical ideas about quantum
+lattice models and to explore their properties, as well as for 
+{\it experimentalists} trying to fit experimental data to theoretical
+models to obtain information about the microscopic properties of
+materials.
 \item{\bf license} conditions \cite{librarylicense,applicationlicense} that encourage researchers to contribute
 to the ALPS project by gaining scientific credit for use of their
 work.
@@ -148,12 +157,7 @@ about the algorithms and the use of the applications.
 publishing source codes used to obtain published results and by integration with the VisTrails \cite{vistrails} provenance enabled workflow system.
 \end{itemize}
 
-The ready-to-use applications are useful both for 
-{\it theoreticians} who want to test theoretical ideas about quantum
-lattice models and to explore their properties, as well as for 
-{\it experimentalists} trying to fit experimental data to theoretical
-models to obtain information about the microscopic properties of
-materials.
+
 
  In the following, we present a quick review of these
  aspects of the ALPS project, focusing on new features in release 2.0:
@@ -164,7 +168,7 @@ materials.
 \item Using the binary file format HDF5 \cite{hdf5} in addition to XML is much faster and needs less space.
 \item More flexible and powerful evaluation tools using Python.
 \item A revised and substantially faster version of the directed loop quantum Monte Carlo (QMC) code {\tt dirloop\_sse}, and two new applications: QMC solvers for dynamical 
-mean field theory (DMFT) ({\tt dmft}) and a time-evolving block-decimation (TEBD) algorithm ({\tt tebd}) for the dynamics of one-dimensional quantum systems.
+mean field theory ({\tt dmft}) and a time-evolving block-decimation algorithm ({\tt tebd}) for the dynamics of one-dimensional quantum systems.
 \item Integration with VisTrails workflow provenance system \cite{vistrails}.
 \item An expanded set of tutorials.
  \end{itemize}
@@ -172,7 +176,7 @@ mean field theory (DMFT) ({\tt dmft}) and a time-evolving block-decimation (TEBD
  
 \section{Building and Installing ALPS}
 \subsection{Build system}
-One of the main new features in ALPS 2.0 is the change of the build system to CMake \cite{cmake}. CMake is more flexible and portable than the previously used autotools. CMake includes a graphical user interface to let the user choose installation options and manually override the paths to needed libraries if they have not been found automatically. Furthermore,  CMake supports the automatic creation of binary installation packages and building ALPS on Windows, both of which have been an often requested feature. A snapshot of the build instructions at the time of the release are included in the source distribution. Updated instructions as operating systems change will be available on the ALPS web page \cite{alps}.
+One of the main new features in ALPS 2.0 is the change of the build system to CMake \cite{cmake}, which is more flexible and portable than the previously used autotools. CMake includes a graphical user interface to let the user choose installation options and manually override the paths to needed libraries if they have not been found automatically. Furthermore,  CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested feature. A snapshot of the build instructions at the time of the release are included in the source distribution. Updated instructions as operating systems change will be made available on the ALPS web page \cite{alps}.
 
 The following tools and libraries are required to build ALPS:
 
@@ -196,7 +200,7 @@ To build optional parts of ALPS it is recommended to install in addition
 
 To ease the installation on MacOS X and Windows, we provide CMake-generated binary installation packages for these operating systems. To use all features of ALPS we recommend to download and install a binary installer for VisTrails \cite{vistrails} in addition to the ALPS installers. On both operating systems the PATH variable should be adjusted to include the directory containing the ALPS binaries. The Windows installer gives the option to automatically do that. The default installation directory on Mac OS X is {\tt /opt/alps/bin} and on Windows {\tt C:$\backslash$Program Files$\backslash$ALPS$\backslash$bin} on 32-bit versions and  {\tt C:$\backslash$Program Files (x86)$\backslash$ALPS$\backslash$bin} on 64-bit versions respectively.
 
-Source and binary installation packages for MacOS X using macports \cite{macports} and for Linux using Ubuntu and Debian package managers are planned soon after this release is published.
+Source and binary installation packages for MacOS X using macports \cite{macports} and for Linux using Ubuntu and Debian package managers will be made available in the near future.
 
 
 \subsection{LiveALPS.}
@@ -208,7 +212,7 @@ This  solution is especially useful for Linux users that want to try ALPS, or in
 
 \section{Data formats}
 
-The most basic part of the ALPS project is the definition of
+The most fundamental part of the ALPS project is the definition of
 common standardized file formats suitable for a wide range of
 applications. Standardized file formats enable the exchange of data
 between applications, allow the development of common evaluation
@@ -222,22 +226,21 @@ standard XML \cite{xml} was chosen in ALPS version 1 \cite{ALPS1.2,ALPS1.3} for 
 because it has become
 the main text-based data format on the internet and because it is
 supported by a large and growing number of tools.
-
 A number of XML  schemas \cite{xmlschema} have been designed in ALPS 1 to describe the input of simulation parameters,  the lattices,  quantum lattice models, and the output of results. ALPS 2 uses the same XML schemas to maintain compatibility.
 
 \subsection{HDF5}
 
-ALPS 2.0 complements XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  Also for HDF5 a wide array of tools is 
-available for C, C++, Fortran, Python and other languages. It is also directly supported by many visualization and data analysis tools. In ALPS 2 we use HDF5 as the default format for simulation results since writing binary files is substantially faster than text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
+We now complement XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  HDF5 is directly supported by many visualization and data analysis tools and a wide array of tools is 
+available for C, C++, Fortran, Python and other languages. in ALPS, HDF5 is now used as the default format for simulation results since writing binary files is substantially faster than text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
 
-The ALPS HDF5 files store simulation parameters and the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page \cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to write all results also in XML. 
+The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page \cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to write all results also in XML. 
 
 \section{Evaluation Tools in Python}
 
-ALPS 1 had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML file using XSLT. In contrast to this, data evaluation in ALPS 2.0 is based on the powerful Python language \cite{python}. Python is an easy to learn interpreted object-oriented language, allowing interactive evaluation of the data and arbitrarily complex evaluations. 
+The previous versions of ALPS  only had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML file using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language \cite{python}. Python is an easy to learn interpreted object-oriented language, allowing interactive evaluation of the data and arbitrarily complex evaluations. 
 
-We provide a large number of functions to write and read ALPS files, to evaluate the simulation results and to make plots. In particular the ALPS classes for the recoding and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis \cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
-The creation of 2D plots is easy, using the widely available Python matplotlib package \cite{matplotlib} or by using ALPS functions to create grace \cite{grace} or gnuplot \cite{gnuplot} input files. Creation of 3D graphs is supported through VisTrails and the Visualization ToolKit (VTK) \cite{vtk} VisTrails modules.
+We provide a complete set of library functions to write and read ALPS files, and a number of useful functions to evaluate the simulation results and to make plots. In particular the ALPS classes for the recoding and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis \cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
+Two-dimensional plots are created using the widely available Python matplotlib package \cite{matplotlib} or by using ALPS functions to write grace \cite{grace} or gnuplot \cite{gnuplot} input files. Creation of 3D graphs is supported through VisTrails and the Visualization ToolKit (VTK) \cite{vtk} VisTrails modules.
 
 
 
@@ -251,11 +254,11 @@ more than one method. Tutorials on the use of the applications are
 included with the sources that can be found on the ALPS web
 page \cite{alps}.
 
-\subsection{Existing applications}
+\subsection{Applications already existing in the previous version}
 All applications from ALPS 1.3, with the exception of the single particle DMRG demonstration program, have been retained in ALPS 2.0. They continue to work in the same way, with minor bug fixes and patches for incompatibilities. Specifically we include:
 
 \subsubsection{Exact diagonalization}
-codes include {\tt sparsediag} and {\tt fulldiag}. The former calculates the ground state
+codes {\tt sparsediag} and {\tt fulldiag}. The former calculates the ground state
 and low lying excited states of quantum lattice models using the
 Lanczos \cite{lanczos} algorithm, while the latter calculates the complete
 spectrum of quantum lattice models and from it all thermodynamic
@@ -294,7 +297,7 @@ $\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the bos
 the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model.  All models calculate the energy, von Neumann entanglement 
 entropy of each site, the von Neumann entanglement entropy of each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ (i.e. the Loschmidt echo).
 
-In the future we plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States.  These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
+We plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States.  These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
 
 
 \section{Integration with the VisTrails Workflow and Computational Provenance Tools}
@@ -306,6 +309,7 @@ db=vistrails,
 vtid=10,
 version=163,
 pdf,
+getvtl,
 showspreadsheetonly]{width=8cm}
 \caption{A figure produced by an ALPS VisTrails workflow: the uniform susceptibility of the Heisenberg chain and ladder. Clicking the figure retrieves the workflow used to 
 create it. Opening that workflow lets the reader execute the full calculation.}
@@ -321,6 +325,7 @@ db=vistrails,
 vtid=10,
 version=163,
 pdf,
+getvtl,
 showworkflow,
 showspreadsheetonly]{width=8cm}
 \caption{The workflow that created Fig. \ref{fig:figure}. The workflow image has been created by VisTrails for the specific workflow used to create the exact version shown in the figure. Clicking the figure retrieves the workflow from the ALPS server.}
@@ -337,6 +342,7 @@ db=vistrails,
 vtid=10,
 version=163,
 pdf,
+getvtl,
 showtree,
 showspreadsheetonly]{width=8cm}
 \caption{The version history tree of the workflow that created Fig. \ref{fig:figure}. Each ellipsis corresponds to a version of the workflow, as shown in Fig. \ref{fig:workflow}. Clicking the figure retrieves the vistrail including all workflow versions from the ALPS server.}
@@ -353,10 +359,18 @@ also mention VisMashups
 The ALPS team will write this after the above sections are done.
 \section{Tutorials and Examples}
 
-The ALPS web page \cite{alps} contains an extensive list of tutorials, explaining the use of the various application codes and evaluation tools and how to use of the ALPS libraries in the user's code. We provide tutorials and instructions for using ALPS in three ways: from the command line, using Python scripts, and using the VisTrails workflow system. The input files needed for the tutorials are available on the web page but are also included in the source and binary distributions.
+The ALPS web page \cite{alps} contains an extensive list of tutorials, explaining the use of the various application codes and evaluation tools and how to use of the ALPS libraries in the user's code. We provide tutorials and instructions for using ALPS in three ways: 
+\begin{enumerate}
+\item from the command line (without data evaluation and plotting)
+\item using Python scripts
+\item and using the VisTrails workflow system. 
+\end{enumerate}
+
+The input files needed for the tutorials are available on the web page but are also included in the source and binary distributions.
 
 \begin{figure}
-\begin{small}
+\begin{tiny}
+\begin{center}
 \begin{verbatim}
 cat  > parm << EOF
 LATTICE="chain lattice"
@@ -388,14 +402,16 @@ EOF
 parameter2xml parm
 loop --auto-evaluate --write-xml parm.in.xml
 \end{verbatim}
-\end{small}
+\end{center}
+\end{tiny}
 \caption{A shell script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain. Evaluation options are limited to viewing the output files. Any further evaluation requires the use of Python, VisTrails, or a program written by the user.}
 \label{fig:commandline}
 \end{figure}
 
 
 \begin{figure}
-\begin{small}
+\begin{tiny}
+\begin{center}
 \begin{verbatim}
 import pyalps
 import matplotlib.pyplot as plt
@@ -434,7 +450,8 @@ plt.ylabel('Susceptibility $\chi J$')
 plt.title('Quantum Heisenberg chain')
 plt.show()
 \end{verbatim}
-\end{small}
+\end{center}
+\end{tiny}
 \caption{A Python script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain, load and evaluate the data and make a plot. }
 \label{fig:python}
 \end{figure}
@@ -461,10 +478,11 @@ ALPS is an open initiative and we welcome contributions from the community.
 
 \section{Acknowledgements}
 
-We thank A.F. Albuquerque, F. Alet, P. Corboz, P.Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. We thank P. Zoller for the suggestion to provide binary installers. The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Kavli Institute for Theoretical Physics in Santa Barbara, the Aspen Center for Physics, the Swiss National Science Foundation, and a grant from the Army Research Office with funding from the DARPA OLE program.
+We thank A.F. Albuquerque, F. Alet, P. Corboz, P.Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. We thank P. Zoller for the suggestion to provide binary installers. The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara, the Aspen Center for Physics, the Swiss National Science Foundation, and a grant from the Army Research Office with funding from the DARPA OLE program.
 
 
 \section*{References}
 
+\bibliographystyle{iopart-num}
 \bibliography{refs}
 \end{document}

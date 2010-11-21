@@ -1,0 +1,181 @@
+\providecommand{\newblock}{}
+\begin{thebibliography}{10}
+\expandafter\ifx\csname url\endcsname\relax
+  \def\url#1{{\tt #1}}\fi
+\expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
+\providecommand{\eprint}[2][]{\url{#2}}
+% Bibliography created with iopart-num v2.1
+% /biblio/bibtex/contrib/iopart-num
+
+\bibitem{ALPS1.2}
+Alet F, Dayal P, Grzesik A, Honecker A, K\"{o}rner M, L\"{a}uchli A, Manmana
+  S~R, McCulloch I~P, Michel F, Noack R~M, Schmid G, Schollw\"{o}ck U,
+  St\"{o}ckli F, Todo S, Trebst S, Troyer M, Werner P and Wessel S 2005 {\em
+  Journal of the Physical Society of Japan\/} {\bf 74S} 30--35
+
+\bibitem{ALPS1.3}
+Albuquerque A, Alet F, Corboz P {\em et~al.\/} 2007 {\em Journal of Magnetism
+  and Magnetic Materials\/} {\bf 310} 1187--1193
+  \urlprefix\url{http://dx.doi.org/10.1016/j.jmmm.2006.10.304}
+
+\bibitem{Evertz03}
+Evertz H~G 2003 {\em Advances in Physics\/} {\bf 52}(1) 1--66
+  \urlprefix\url{http://www.informaworld.com/10.1080/0001873021000049195}
+
+\bibitem{Troyer03}
+Troyer M, Wessel S and Alet F 2003 {\em Phys. Rev. Lett.\/} {\bf 90} 120201
+
+\bibitem{White1992}
+White S~R 1992 {\em Phys. Rev. Lett.\/} {\bf 69} 2863--2866
+
+\bibitem{Schollwock2005}
+Schollw\"ock U 2005 {\em Rev. Mod. Phys.\/} {\bf 77} 259--315
+
+\bibitem{vidal1}
+Vidal G 2003 {\em Phys. Rev. Lett.\/} {\bf 91} 147902
+
+\bibitem{vidal2}
+Vidal G 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 040502
+
+\bibitem{Daley2004}
+Daley A~J, Kollath C, Schollwöck U and Vidal G 2004 {\em Journal of
+  Statistical Mechanics: Theory and Experiment\/} {\bf 2004} P04005
+  \urlprefix\url{http://stacks.iop.org/1742-5468/2004/i=04/a=P04005}
+
+\bibitem{White2004}
+White S~R and Feiguin A~E 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 076401
+
+\bibitem{Rubtsov04}
+Rubtsov A~N and Lichtenstein A~I 2004 {\em JETP Letters\/} {\bf 80} 61--65
+  \urlprefix\url{http://www.springerlink.com/content/9820175336x10771}
+
+\bibitem{Rubtsov05}
+Rubtsov A~N, Savkin V~V and Lichtenstein A~I 2005 {\em Phys. Rev. B\/} {\bf 72}
+  035122 \urlprefix\url{http://dx.doi.org/10.1103/PhysRevB.72.035122}
+
+\bibitem{Werner06}
+Werner P, Comanac A, de' Medici L {\em et~al.\/} 2006 {\em Phys. Rev. Lett.\/}
+  {\bf 97} 076405
+
+\bibitem{Werner06Kondo}
+Werner P and Millis A~J 2006 {\em Phys. Rev. B\/} {\bf 74} 155107
+  \urlprefix\url{http://dx.doi.org/10.1103/PhysRevB.74.155107}
+
+\bibitem{Gull08_ctaux}
+Gull E, Werner P, Parcollet O and Troyer M 2008 {\em EPL (Europhysics
+  Letters)\/} {\bf 82} 57003
+  \urlprefix\url{http://stacks.iop.org/0295-5075/82/57003}
+
+\bibitem{xml}
+\url{http://www.w3.org/XML/}
+
+\bibitem{hdf5}
+\url{http://www.hdf5.org/}
+
+\bibitem{librarylicense}
+\url{http://alps.comp-phys.org/static/software//LICENSE.txt}
+
+\bibitem{applicationlicense}
+\url{http://alps.comp-phys.org/static/software//LICENSE-applications.txt}
+
+\bibitem{alps}
+\url{http://alps.comp-phys.org/}
+
+\bibitem{vistrails}
+\url{http://www.vistrails.org/}
+
+\bibitem{cmake}
+\url{http://www.cmake.org/}
+
+\bibitem{blasnetlib}
+\url{http://www.netlib.org/blas/}
+
+\bibitem{lapack}
+\url{http://www.netlib.org/lapack/}
+
+\bibitem{boost}
+\url{http://www.boost.org/}
+
+\bibitem{python}
+\url{http://www.python.org/}
+
+\bibitem{numpy}
+\url{http://numpy.scipy.org/}
+
+\bibitem{scipy}
+\url{http://www.scipy.org/}
+
+\bibitem{matplotlib}
+\url{http://matplotlib.sourceforge.net/}
+
+\bibitem{lpsolve}
+\url{http://sourceforge.net/projects/lpsolve/files/lpsolve/4.0.1.11//}
+
+\bibitem{macports}
+\url{http://www.macports.org/}
+
+\bibitem{knoppix}
+\url{http://www.knoppix.net}
+
+\bibitem{xmlschema}
+\url{http://xml.comp-phys.org/}
+
+\bibitem{Ambegaokar2010}
+Ambegaokar V and Troyer M 2010 {\em American Journal of Physics\/} {\bf 78}
+  150--157
+
+\bibitem{grace}
+\url{http://plasma-gate.weizmann.ac.il/Grace/}
+
+\bibitem{gnuplot}
+\url{http://www.gnuplot.info/}
+
+\bibitem{vtk}
+\url{http://www.vtk.org/}
+
+\bibitem{lanczos}
+Lanczos C 1950 {\em J. Res. Natl. Bur. Stand.\/} {\bf 49} 225
+
+\bibitem{Swendsen87}
+Swendsen R~H and Wang J~S 1987 {\em Phys. Rev. Lett.\/} {\bf 58} 86--88
+
+\bibitem{Todo01}
+Todo S and Kato K 2001 {\em Phys. Rev. Lett.\/} {\bf 87} 047203
+
+\bibitem{looper}
+\url{http://wistaria.comp-phys.org/alps-looper/}
+
+\bibitem{Sylyuasen}
+Sylju\aa{}sen O~F and Sandvik A~W 2002 {\em Phys. Rev. E\/} {\bf 66} 046701
+
+\bibitem{Alet2005}
+Alet F, Wessel S and Troyer M 2005 {\em Phys. Rev.E.\/} {\bf 71} 036706
+
+\bibitem{Prokofev98A}
+Prokof'ev N~V, Svistunov B~V and Tupitsyn I~S 1998 {\em JETP Sov. Phys.\/} {\bf
+  87} 310 \urlprefix\url{http://arxiv.org/abs/cond-mat/9703200}
+
+\bibitem{Georges96}
+Georges A, Kotliar G, Krauth W and Rozenberg M~J 1996 {\em Rev. Mod. Phys.\/}
+  {\bf 68} 13
+
+\bibitem{Kotliar06}
+Kotliar G, Savrasov S~Y, Haule K {\em et~al.\/} 2006 {\em Rev. Mod. Phys.\/}
+  {\bf 78} 865 \urlprefix\url{http://dx.doi.org/10.1103/RevModPhys.78.865}
+
+\bibitem{Maier05}
+Maier T, Jarrell M, Pruschke T and Hettler M~H 2005 {\em Rev. Mod. Phys.\/}
+  {\bf 77} 1027
+
+\bibitem{Hirsch86}
+Hirsch J~E and Fye R~M 1986 {\em Phys. Rev. Lett.\/} {\bf 56} 2521--2524
+  \urlprefix\url{http://dx.doi.org/10.1103/PhysRevLett.56.2521}
+
+\bibitem{ALPSDMFT}
+Gull E, Werner P, Fuchs S, Surer B, Pruschke T and Troyer M 2010
+  Continuous-time quantum monte carlo impurity solvers
+
+\bibitem{ostebd}
+\url{http://physics.mines.edu/downloads/software/tebd/}
+
+\end{thebibliography}
