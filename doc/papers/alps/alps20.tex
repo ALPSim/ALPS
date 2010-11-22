@@ -49,7 +49,7 @@
 	\myauthor{\ref{harvard},\ref{eth}}{L.~Pollet}{pollet@phys.ethz.ch}
 	\myauthor{\ref{goettingen}}{T.~Pruschke}{pruschke@theorie.physik.uni-goettingen.de}
 	\myauthor{\ref{brazil},\ref{utah}}{E.~Santos}{emanuele@sci.utah.edu}
-	\myauthor{\ref{virginia}}{V.~Scarola}{scarola@vt.edu}
+	\myauthor{\ref{virginia}}{V.W.~Scarola}{scarola@vt.edu}
 	\myauthor{\ref{lmu}}{U.~Schollw\"ock}{schollwoeck@lmu.de}
 	\myauthor{\ref{utah}}{C.~Silva}{csilva@sci.utah.edu}
 	\myauthor{\ref{eth}}{B.~Surer}{surerb@phys.ethz.ch}
@@ -76,7 +76,7 @@
 \myaddress{affpol}{Faculty of Physics, A. Mickiewicz University, ul. Umultowska 85, 61-614 Poznan, Poland}
 \myaddress{epfl}{Institute of Theoretical Physics, EPF Lausanne, CH-1015 Lausanne, Switzerland}
 \myaddress{brazil}{} 
-\myaddress{virginia}{Physics Department, Virginia Tech, Blacksburg, Virginia 24061, USA}
+\myaddress{virginia}{Department of Physics, Virginia Tech, Blacksburg, Virginia 24061, USA}
 \myaddress{lmu}{Arnold Sommerfeld Center for Theoretical Physics and Center for NanoScience, University of Munich, Theresienstrasse 37, 80333 Munich, Germany}
 \myaddress{tokyo}{Department of Applied Physics, University of Tokyo, 113-8656 Tokyo, Japan}
 \myaddress{stationq}{Microsoft Research, Station Q, University of California, Santa Barbara, CA 93106, USA}
@@ -92,7 +92,7 @@ bosons, and strongly correlated fermion systems. Development is
 centered on common XML and HDF5 data formats, on libraries to
 simplify and speed up code development, on common evaluation and plotting tools, and on full-featured
 simulation programs. The programs enable non-experts to start carrying
-out numerical simulations by providing basic implementations of the
+out serial or parallel numerical simulations by providing basic implementations of the
 important algorithms for quantum lattice models: classical and quantum
 Monte Carlo (QMC) using non-local updates, extended ensemble
 simulations, exact and full diagonalization (ED), as well as the
@@ -140,13 +140,13 @@ interoperability between codes.
 
 \item {\bf libraries} for common aspects of
 simulations of quantum and classical lattice models, to simplify code
-development.
-\item a set of {\bf applications} covering the major algorithms. These are useful both for 
+development and allow implementation on a variety of serial and parallel platforms.
+\item a set of {\bf applications} covering the major algorithms. These are useful for: 
 {\it theoreticians} who want to test theoretical ideas about quantum
-lattice models and to explore their properties, as well as for 
+lattice models and to explore their properties,  
 {\it experimentalists} trying to fit experimental data to theoretical
 models to obtain information about the microscopic properties of
-materials.
+materials, and {\it students} learning computational physics and many-body theory.
 \item{\bf license} conditions \cite{librarylicense,applicationlicense} that encourage researchers to contribute
 to the ALPS project by gaining scientific credit for use of their
 work.
@@ -288,7 +288,7 @@ the local (impurity) Hamiltonian exactly.
 The method is useful to simulate multi-orbital models, since it can easily treat general interaction terms. A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
 
 \subsection{New Time Evolving Block Decimation Code {\tt tebd}}
-Release 2.0 contains interfaces to the Open Source TEBD project \cite{ostebd}, which is a collection of Fortran libraries using the Time-Evolving Block Decimation (TEBD) algorithm\cite{vidal1, vidal2} to simulate time evolution of one-dimensional quantum systems.  The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.  TEBD can also find ground states via imaginary time evolution.  Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times.
+Release 2.0 contains interfaces to the Open Source TEBD project \cite{ostebd}, which is a collection of Fortran libraries using the Time-Evolving Block Decimation (TEBD) algorithm \cite{vidal1, vidal2} to simulate time evolution of one-dimensional quantum systems.  The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.  TEBD can also find ground states via imaginary time evolution.  Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times.
 
 At present, the TEBD routines can simulate the spin, boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models from the ALPS models library.  All 
 Hamiltonian parameters are assumed uniform throughout the system.  Observables calculated are the $z$ and $x$ magnetizations, their squares, and the $\langle \hat{S}^z_i 
@@ -328,7 +328,7 @@ pdf,
 getvtl,
 showworkflow,
 showspreadsheetonly]{width=8cm}
-\caption{The workflow that created Fig. \ref{fig:figure}. The workflow image has been created by VisTrails for the specific workflow used to create the exact version shown in the figure. Clicking the figure retrieves the workflow from the ALPS server.}
+\caption{The workflow that created Fig.~\ref{fig:figure}. The workflow image has been created by VisTrails for the specific workflow used to create the exact version shown in the figure. Clicking the figure retrieves the workflow from the ALPS server.}
 \label{fig:workflow}
 \end{center}
 \end{figure}
@@ -345,14 +345,21 @@ pdf,
 getvtl,
 showtree,
 showspreadsheetonly]{width=8cm}
-\caption{The version history tree of the workflow that created Fig. \ref{fig:figure}. Each ellipsis corresponds to a version of the workflow, as shown in Fig. \ref{fig:workflow}. Clicking the figure retrieves the vistrail including all workflow versions from the ALPS server.}
+\caption{The version history tree of the workflow that created Fig.~\ref{fig:figure}. Each ellipsis corresponds to a version of the workflow, as shown in Fig.~\ref{fig:workflow}. Clicking the figure retrieves the vistrail including all workflow versions from the ALPS server.}
 \label{fig:history}
 \end{center}
 \end{figure}
 
 \subsection{Computational Provenance}
+
+ALPS 2.0 seeks to ensure result reproducibility.  Provenance (also referred to as history, audit trail, lineage, or pedigree) captures information about the steps used to generate a given result.  Such information is crucial in data preservation and determining data quality and well as interpretation, reproduction, sharing, and publishing results.  ALPS 2.0 improves upon previous ALPS versions by using the VisTrails workflow system to record provenance related information, including algorithm workflows, data parameters, and version history to automate reproducibility. 
+
+\subsection{VisTrails} 
+VisTrails is an open-source system that was designed to support exploratory computational tasks such as visualization and data mining while ensuring computational provenance \cite{vistrails}.  VisTrails accomplishes this with workflows that allow a capture mechanism and an infrastructure for storage, access, and queries.
+
 \subsection{Workflow systems}
-\subsection{VisTrails}
+Workflow systems provide well-defined languages for specifying complex tasks from simpler ones; they capture complex processes at various levels of detail and systematically record the provenance information necessary for automation, reproducibility, and result sharing.  VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs to capture underlying python scrips which, in turn, execute ALPS algorithms.  Fig.~\ref{fig:workflow} shows an example ALPS workflow that takes input lattice parameters and model definitions (noun examples include ChainLattice and LatticeModel), executes the quantum Monte Carlo looper code, and then renders the data (examples of verb use include RunLoop and PreparePlot).
+
 \subsection{CrowdLabs}
 also mention VisMashups
 \subsection{The ALPS VisTrails package}
@@ -456,7 +463,7 @@ plt.show()
 \label{fig:python}
 \end{figure}
 
-An example for running an ALPS application from the command line is shown in Fig. \ref{fig:commandline}. This example calculates the uniform susceptibility of a quantum Heisenberg spin chain. The same example, containing additional code to evaluate and plot the results  using Python is shown in Fig. \ref{fig:python}. The workflow using VisTrails is shown in Fig. \ref{fig:workflow}, and its version history in Fig. \ref{fig:history}. Following the links in the PDF version of the latter figures retrieves the corresponding vistrail files.
+An example for running an ALPS application from the command line is shown in Fig.~\ref{fig:commandline}. This example calculates the uniform susceptibility of a quantum Heisenberg spin chain. The same example, containing additional code to evaluate and plot the results  using Python is shown in Fig.~\ref{fig:python}. The workflow using VisTrails is shown in Fig.~\ref{fig:workflow}, and its version history in Fig.~\ref{fig:history}. Following the links in the PDF version of the latter figures retrieves the corresponding vistrail files.
 
 \section{License}
 The ALPS libraries are licensed under the ALPS library license \cite{librarylicense} and the applications under the ALPS application license  \cite{applicationlicense}. These licenses are modeled after the GNU General Public License (GPL), but contain an additional requirement to cite this paper as well as relevant papers for each of the application codes. These papers need to be cited and the use of ALPS acknowledged in any scientific project that makes use of ALPS. This includes the case when ALPS has only been used to test a scientist's application code.
@@ -478,7 +485,7 @@ ALPS is an open initiative and we welcome contributions from the community.
 
 \section{Acknowledgements}
 
-We thank A.F. Albuquerque, F. Alet, P. Corboz, P.Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. We thank P. Zoller for the suggestion to provide binary installers. The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara, the Aspen Center for Physics, the Swiss National Science Foundation, and a grant from the Army Research Office with funding from the DARPA OLE program.
+We thank A.F. Albuquerque, F. Alet, P. Corboz, P.Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. We thank P. Zoller for the suggestion to provide binary installers. The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, and a grant from the Army Research Office with funding from the DARPA OLE program.
 
 
 \section*{References}
