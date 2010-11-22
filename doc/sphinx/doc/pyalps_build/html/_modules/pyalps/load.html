@@ -1,0 +1,717 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyalps.load &mdash; Pyalps v0.1.a documentation</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Pyalps v0.1.a documentation" href="../../index.html" />
+    <link rel="up" title="pyalps" href="../pyalps.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../modules.html">Pyalps v0.1.a documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pyalps.html" accesskey="U">pyalps</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyalps.load</h1><div class="highlight"><pre>
+<span class="c"># ****************************************************************************</span>
+<span class="c"># </span>
+<span class="c"># ALPS Project: Algorithms and Libraries for Physics Simulations</span>
+<span class="c"># </span>
+<span class="c"># ALPS Libraries</span>
+<span class="c"># </span>
+<span class="c"># Copyright (C) 2009-2010 by Bela Bauer &lt;bauerb@phys.ethz.ch&gt;</span>
+<span class="c">#                            Brigitte Surer &lt;surerb@phys.ethz.ch&gt; </span>
+<span class="c"># </span>
+<span class="c"># This software is part of the ALPS libraries, published under the ALPS</span>
+<span class="c"># Library License; you can use, redistribute it and/or modify it under</span>
+<span class="c"># the terms of the license, either version 1 or (at your option) any later</span>
+<span class="c"># version.</span>
+<span class="c">#  </span>
+<span class="c"># You should have received a copy of the ALPS Library License along with</span>
+<span class="c"># the ALPS Libraries; see the file LICENSE.txt. If not, the license is also</span>
+<span class="c"># available from http://alps.comp-phys.org/.</span>
+<span class="c"># </span>
+<span class="c"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR </span>
+<span class="c"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, </span>
+<span class="c"># FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT </span>
+<span class="c"># SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE </span>
+<span class="c"># FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, </span>
+<span class="c"># ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER </span>
+<span class="c"># DEALINGS IN THE SOFTWARE.</span>
+<span class="c"># </span>
+<span class="c"># ****************************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">urllib</span><span class="o">,</span> <span class="nn">copy</span><span class="o">,</span> <span class="nn">os</span><span class="o">,</span> <span class="nn">traceback</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="kn">as</span> <span class="nn">np</span>
+
+<span class="kn">import</span> <span class="nn">pyalps.hdf5</span> <span class="kn">as</span> <span class="nn">h5</span>
+<span class="kn">import</span> <span class="nn">pyalps.alea</span> <span class="kn">as</span> <span class="nn">pa</span>
+
+<span class="kn">from</span> <span class="nn">dataset</span> <span class="kn">import</span> <span class="n">ResultFile</span>
+<span class="kn">from</span> <span class="nn">dataset</span> <span class="kn">import</span> <span class="n">DataSet</span>
+<span class="c">#from floatwitherror import FloatWithError as fwe</span>
+
+<span class="kn">import</span> <span class="nn">pyalps.pytools</span> <span class="kn">as</span> <span class="nn">pt</span> <span class="c"># the C++ conversion functions</span>
+
+<span class="c"># or the C++ class as alternative</span>
+<span class="kn">from</span> <span class="nn">pyalps.alea</span> <span class="kn">import</span> <span class="n">MCScalarData</span> <span class="k">as</span> <span class="n">fwe</span>
+<span class="kn">from</span> <span class="nn">pyalps.alea</span> <span class="kn">import</span> <span class="n">MCVectorData</span> <span class="k">as</span> <span class="n">vwe</span>
+
+<div class="viewcode-block" id="parse_label"><a class="viewcode-back" href="../../load.html#pyalps.load.parse_label">[docs]</a><span class="k">def</span> <span class="nf">parse_label</span><span class="p">(</span><span class="n">label</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s">&#39;--&#39;</span> <span class="ow">in</span> <span class="n">label</span><span class="p">:</span>
+      <span class="n">vals</span> <span class="o">=</span> <span class="n">label</span><span class="o">.</span><span class="n">rsplit</span><span class="p">(</span><span class="s">&#39;--&#39;</span><span class="p">)</span>
+      <span class="k">return</span> <span class="p">(</span><span class="nb">eval</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span><span class="nb">eval</span><span class="p">(</span><span class="n">vals</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+    <span class="k">else</span><span class="p">:</span>
+      <span class="k">return</span> <span class="nb">eval</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">label</span><span class="p">))</span>
+ 
+ </div>
+<div class="viewcode-block" id="parse_labels"><a class="viewcode-back" href="../../load.html#pyalps.load.parse_labels">[docs]</a><span class="k">def</span> <span class="nf">parse_labels</span><span class="p">(</span><span class="n">labels</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">labels</span><span class="p">)</span><span class="o">==</span><span class="nb">int</span><span class="p">:</span> 
+      <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">labels</span><span class="p">])</span>
+    <span class="n">larr</span><span class="o">=</span><span class="p">[]</span>
+    <span class="n">allsame</span> <span class="o">=</span> <span class="bp">True</span>
+    <span class="n">first</span> <span class="o">=</span> <span class="bp">None</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">labels</span><span class="p">:</span>
+      <span class="n">v</span> <span class="o">=</span> <span class="n">parse_label</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+      <span class="n">larr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
+      <span class="k">if</span> <span class="s">&#39;--&#39;</span> <span class="ow">in</span> <span class="n">x</span><span class="p">:</span>      
+        <span class="k">if</span> <span class="n">first</span><span class="o">==</span><span class="bp">None</span><span class="p">:</span>
+          <span class="n">first</span> <span class="o">=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">first</span> <span class="o">!=</span> <span class="n">v</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">allsame</span> <span class="o">=</span> <span class="bp">False</span>
+      <span class="k">else</span><span class="p">:</span>
+        <span class="n">allsame</span> <span class="o">=</span> <span class="bp">False</span>
+    <span class="k">if</span> <span class="n">allsame</span><span class="p">:</span>
+      <span class="n">larr</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">larr</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">larr</span><span class="p">)</span>
+       </div>
+<div class="viewcode-block" id="Hdf5Missing"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Missing">[docs]</a><span class="k">class</span> <span class="nc">Hdf5Missing</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">what</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">what</span> <span class="o">=</span> <span class="n">what</span>
+    
+    <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s">&#39;Failed to find &#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">what</span>
+</div>
+<div class="viewcode-block" id="Hdf5Loader"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader">[docs]</a><span class="k">class</span> <span class="nc">Hdf5Loader</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;The Hdf5Loader class loads simulation parameters and observables from hdf5-files and returns them as hierarchical datasets&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Hdf5Loader.GetFileNames"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.GetFileNames">[docs]</a>    <span class="k">def</span> <span class="nf">GetFileNames</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flist</span><span class="p">):</span>
+        <span class="n">files</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flist</span><span class="p">:</span>
+          <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">4</span><span class="p">:]</span><span class="o">==</span><span class="s">&#39;.xml&#39;</span><span class="p">:</span>
+            <span class="n">f</span> <span class="o">=</span> <span class="n">f</span><span class="p">[:</span><span class="o">-</span><span class="mi">3</span><span class="p">]</span><span class="o">+</span><span class="s">&#39;h5&#39;</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">f</span><span class="p">[</span><span class="o">-</span><span class="mi">3</span><span class="p">:]</span><span class="o">!=</span><span class="s">&#39;.h5&#39;</span><span class="p">:</span>
+              <span class="n">f</span> <span class="o">+=</span> <span class="s">&#39;.h5&#39;</span>
+          <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+            <span class="n">files</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+          <span class="k">else</span><span class="p">:</span>
+            <span class="k">print</span> <span class="s">&quot;FILE &quot;</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="s">&quot;DOES NOT EXIST!&quot;</span>
+        <span class="k">return</span> <span class="n">files</span>
+        </div>
+<div class="viewcode-block" id="Hdf5Loader.ReadParameters"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.ReadParameters">[docs]</a>    <span class="k">def</span> <span class="nf">ReadParameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">proppath</span><span class="p">):</span>
+        <span class="nb">dict</span> <span class="o">=</span> <span class="p">{</span><span class="s">&#39;filename&#39;</span> <span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span><span class="p">}</span>
+        <span class="n">LOP</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">proppath</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">LOP</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="nb">dict</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">proppath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="nb">dict</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="nb">dict</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+                    <span class="k">except</span><span class="p">:</span>
+                        <span class="nb">dict</span><span class="p">[</span><span class="n">m</span><span class="p">]</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="nb">float</span><span class="p">,</span><span class="nb">dict</span><span class="p">[</span><span class="n">m</span><span class="p">])</span>
+                <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+                    <span class="k">pass</span>
+        <span class="k">return</span> <span class="nb">dict</span> 
+        </div>
+<div class="viewcode-block" id="Hdf5Loader.GetProperties"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.GetProperties">[docs]</a>    <span class="k">def</span> <span class="nf">GetProperties</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">flist</span><span class="p">,</span><span class="n">proppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">respath</span><span class="o">=</span><span class="s">&#39;/simulation/results&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetFileNames</span><span class="p">(</span><span class="n">flist</span><span class="p">)</span>
+        <span class="n">resultfiles</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">iArchive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span> <span class="o">=</span> <span class="n">f</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading from file&quot;</span><span class="p">,</span> <span class="n">f</span>
+                <span class="n">rfile</span> <span class="o">=</span> <span class="n">ResultFile</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="n">rfile</span><span class="o">.</span><span class="n">props</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="n">proppath</span><span class="p">)</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetObservableList</span><span class="p">(</span><span class="n">respath</span><span class="p">)</span>
+                    <span class="n">rfile</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&quot;ObservableList&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_decode</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">obs</span><span class="p">]</span>
+                <span class="k">except</span><span class="p">:</span> <span class="k">pass</span>
+                <span class="n">resultfiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rfile</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">resultfiles</span>
+        </div>
+<div class="viewcode-block" id="Hdf5Loader.GetObservableList"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.GetObservableList">[docs]</a>    <span class="k">def</span> <span class="nf">GetObservableList</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">respath</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">is_group</span><span class="p">(</span><span class="n">respath</span><span class="p">):</span>
+            <span class="n">olist</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">olist</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">olist</span>
+
+<span class="c"># Pre: file is a hdf5 file descriptor</span>
+<span class="c"># Post: returns DataSet with all parameters set</span>
+    </div>
+<div class="viewcode-block" id="Hdf5Loader.read_one_spectrum"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.read_one_spectrum">[docs]</a>    <span class="k">def</span> <span class="nf">read_one_spectrum</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">path</span><span class="p">):</span>
+        <span class="k">pass</span>
+        </div>
+<div class="viewcode-block" id="Hdf5Loader.ReadSpectrumFromFile"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.ReadSpectrumFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">ReadSpectrumFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">flist</span><span class="p">,</span><span class="n">proppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">respath</span><span class="o">=</span><span class="s">&#39;/spectrum&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetFileNames</span><span class="p">(</span><span class="n">flist</span><span class="p">)</span>
+        <span class="n">sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fileset</span><span class="o">=</span><span class="p">[]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">iArchive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span> <span class="o">=</span> <span class="n">f</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading from file&quot;</span><span class="p">,</span> <span class="n">f</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="n">proppath</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&#39;energies&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">d</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">()</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;hdf5_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">respath</span> 
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;observable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;spectrum&#39;</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/energies&#39;</span><span class="p">)</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="s">&#39;quantumnumbers&#39;</span><span class="p">))</span>
+                            <span class="n">fileset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                            <span class="k">pass</span>
+                <span class="k">if</span> <span class="s">&#39;sectors&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">secnum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/sectors&#39;</span><span class="p">):</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="n">d</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">()</span>
+                            <span class="n">secpath</span> <span class="o">=</span> <span class="n">respath</span><span class="o">+</span><span class="s">&#39;/sectors/&#39;</span><span class="o">+</span><span class="n">secnum</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;hdf5_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">secpath</span> 
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;observable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;spectrum&#39;</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">secpath</span><span class="o">+</span><span class="s">&#39;/energies&#39;</span><span class="p">)</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="n">secpath</span><span class="o">+</span><span class="s">&#39;/quantumnumbers&#39;</span><span class="p">))</span>
+                            <span class="n">fileset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                            <span class="k">print</span> <span class="s">&quot;Could not create DataSet&quot;</span>
+                            <span class="k">pass</span>
+                <span class="n">sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fileset</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sets</span>
+</div>
+<div class="viewcode-block" id="Hdf5Loader.ReadDiagDataFromFile"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.ReadDiagDataFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">ReadDiagDataFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">flist</span><span class="p">,</span><span class="n">proppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">respath</span><span class="o">=</span><span class="s">&#39;/spectrum&#39;</span><span class="p">,</span> <span class="n">measurements</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">loadIterations</span><span class="o">=</span><span class="bp">False</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetFileNames</span><span class="p">(</span><span class="n">flist</span><span class="p">)</span>
+        <span class="n">sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fileset</span><span class="o">=</span><span class="p">[]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">iArchive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span> <span class="o">=</span> <span class="n">f</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading from file&quot;</span><span class="p">,</span> <span class="n">f</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="n">proppath</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&#39;results&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="p">):</span>
+                    <span class="n">list_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetObservableList</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/results&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">measurements</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">obslist</span> <span class="o">=</span> <span class="n">list_</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">obslist</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">measurements</span> <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_</span><span class="p">]</span>
+                    <span class="k">if</span> <span class="n">loadIterations</span><span class="o">==</span><span class="bp">True</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="s">&quot;iteration&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="p">):</span>
+                            <span class="n">iterationset</span><span class="o">=</span><span class="p">[]</span>
+                            <span class="c">#iteration_grp = self.h5f.require_group(respath+&#39;/iteration&#39;)</span>
+                            <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/iteration&#39;</span><span class="p">):</span>
+                                <span class="n">obsset</span><span class="o">=</span><span class="p">[]</span>
+                                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">obslist</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">m</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/iteration/&#39;</span><span class="o">+</span><span class="n">it</span><span class="o">+</span><span class="s">&#39;/results&#39;</span><span class="p">):</span>
+                                        <span class="k">if</span> <span class="s">&quot;mean&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/iteration/&#39;</span><span class="o">+</span><span class="n">it</span><span class="o">+</span><span class="s">&#39;/results/&#39;</span><span class="o">+</span><span class="n">m</span><span class="p">):</span>
+                                            <span class="k">try</span><span class="p">:</span>
+                                                <span class="n">d</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">()</span>
+                                                <span class="n">itresultspath</span> <span class="o">=</span> <span class="n">respath</span><span class="o">+</span><span class="s">&#39;/iteration/&#39;</span><span class="o">+</span><span class="n">it</span><span class="o">+</span><span class="s">&#39;results/&#39;</span><span class="o">+</span><span class="n">m</span>
+                                                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading&quot;</span><span class="p">,</span> <span class="n">m</span>
+                                                <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;hdf5_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">itresultspath</span> 
+                                                <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;observable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_decode</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                                                <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;iteration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">it</span>
+                                                <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                                                    <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">itresultspath</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)</span>
+                                                    <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                                                <span class="k">else</span><span class="p">:</span>
+                                                    <span class="k">try</span><span class="p">:</span>
+                                                        <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">itresultspath</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)[</span><span class="n">index</span><span class="p">]</span>
+                                                    <span class="k">except</span><span class="p">:</span>
+                                                        <span class="k">pass</span>
+                                                <span class="k">if</span> <span class="s">&quot;labels&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">itresultspath</span><span class="p">):</span>
+                                                    <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">itresultspath</span><span class="o">+</span><span class="s">&#39;/labels&#39;</span><span class="p">)</span> 
+                                                <span class="k">else</span><span class="p">:</span>
+                                                    <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                                                <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                                            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                                                <span class="k">print</span> <span class="s">&quot;Could not create DataSet&quot;</span>
+                                                <span class="k">pass</span>
+                                        <span class="n">obsset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                                <span class="n">iterationset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obsset</span><span class="p">)</span>
+                            <span class="n">fileset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iterationset</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>        
+                        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">obslist</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="s">&quot;mean&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/results/&#39;</span><span class="o">+</span><span class="n">m</span><span class="p">):</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading&quot;</span><span class="p">,</span> <span class="n">m</span>
+                                    <span class="n">d</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">()</span>
+                                    <span class="n">secresultspath</span> <span class="o">=</span> <span class="n">respath</span><span class="o">+</span><span class="s">&#39;/results/&#39;</span><span class="o">+</span><span class="n">m</span>
+                                    <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;hdf5_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">secresultspath</span> 
+                                    <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;observable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_decode</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                                        <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">secresultspath</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)</span> 
+                                        <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">secresultspath</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)[</span><span class="n">index</span><span class="p">]</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="k">pass</span>
+                                    <span class="k">if</span> <span class="s">&quot;labels&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">secresultspath</span><span class="p">):</span>
+                                        <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">parse_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">secresultspath</span><span class="o">+</span><span class="s">&#39;/labels&#39;</span><span class="p">))</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                                    <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+
+                                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                                    <span class="k">print</span> <span class="s">&quot;Could not create DataSet&quot;</span>
+                                    <span class="k">pass</span>
+                            <span class="n">fileset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                <span class="k">if</span> <span class="s">&#39;sectors&#39;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="p">):</span>
+                    <span class="n">list_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetObservableList</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/sectors/0/results&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">measurements</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                        <span class="n">obslist</span> <span class="o">=</span> <span class="n">list_</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="n">obslist</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">measurements</span> <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_</span><span class="p">]</span>
+                    <span class="k">for</span> <span class="n">secnum</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/sectors&#39;</span><span class="p">):</span>
+                        <span class="n">sector_sets</span><span class="o">=</span><span class="p">[]</span>
+                        <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">obslist</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="s">&quot;mean&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/sectors/&#39;</span><span class="o">+</span><span class="n">secnum</span><span class="o">+</span><span class="s">&#39;/results/&#39;</span><span class="o">+</span><span class="n">m</span><span class="p">):</span>
+                                <span class="k">try</span><span class="p">:</span>
+                                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading&quot;</span><span class="p">,</span> <span class="n">m</span>
+                                    <span class="n">d</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">()</span>
+                                    <span class="n">secpath</span> <span class="o">=</span> <span class="n">respath</span><span class="o">+</span><span class="s">&#39;/sectors/&#39;</span><span class="o">+</span><span class="n">secnum</span>
+                                    <span class="n">secresultspath</span> <span class="o">=</span> <span class="n">respath</span><span class="o">+</span><span class="s">&#39;/sectors/&#39;</span><span class="o">+</span><span class="n">secnum</span><span class="o">+</span><span class="s">&#39;/results/&#39;</span><span class="o">+</span><span class="n">m</span>
+                                    <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;hdf5_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">secresultspath</span> 
+                                    <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;observable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_decode</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                                    <span class="k">if</span> <span class="n">index</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                                        <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">secresultspath</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)</span> 
+                                        <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="k">try</span><span class="p">:</span>
+                                            <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">secresultspath</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)[</span><span class="n">index</span><span class="p">]</span>
+                                        <span class="k">except</span><span class="p">:</span>
+                                            <span class="k">pass</span>
+                                    <span class="k">if</span> <span class="s">&quot;labels&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">secresultspath</span><span class="p">):</span>
+                                        <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">parse_labels</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">secresultspath</span><span class="o">+</span><span class="s">&#39;/labels&#39;</span><span class="p">))</span> 
+                                    <span class="k">else</span><span class="p">:</span>
+                                        <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                                    <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                                    <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="n">secpath</span><span class="o">+</span><span class="s">&#39;/quantumnumbers&#39;</span><span class="p">))</span>
+                                    <span class="n">sector_sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+
+                                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                                    <span class="k">print</span> <span class="s">&quot;Could not create DataSet&quot;</span>
+                                    <span class="k">pass</span>
+                        <span class="n">fileset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sector_sets</span><span class="p">)</span>
+                <span class="n">sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fileset</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sets</span>
+        
+    <span class="c"># Pre: file is a hdf5 file descriptor</span>
+    <span class="c"># Post: returns DataSet with the evaluated binning analysis set</span></div>
+<div class="viewcode-block" id="Hdf5Loader.ReadBinningAnalysis"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.ReadBinningAnalysis">[docs]</a>    <span class="k">def</span> <span class="nf">ReadBinningAnalysis</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">flist</span><span class="p">,</span><span class="n">measurements</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">proppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">respath</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetFileNames</span><span class="p">(</span><span class="n">flist</span><span class="p">)</span>
+        <span class="n">sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fileset</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;loading from file &#39;</span><span class="p">,</span><span class="n">f</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">iArchive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span> <span class="o">=</span> <span class="n">f</span>
+                <span class="k">if</span> <span class="n">respath</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                  <span class="n">respath</span><span class="o">=</span><span class="s">&quot;/simulation/results&quot;</span>
+                <span class="n">list_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetObservableList</span><span class="p">(</span><span class="n">respath</span><span class="p">)</span>
+                <span class="c"># this is exception-safe in the sense that it&#39;s also required in the line above</span>
+                <span class="c">#grp = self.h5f.require_group(respath)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="n">proppath</span><span class="p">)</span>
+                <span class="n">obslist</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">measurements</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">obslist</span> <span class="o">=</span> <span class="n">list_</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obslist</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">measurements</span> <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">obslist</span><span class="p">:</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">d</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">()</span>
+                        <span class="k">if</span> <span class="s">&quot;timeseries&quot;</span> <span class="ow">in</span>  <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="p">):</span>
+                            <span class="n">k</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/timeseries&#39;</span><span class="p">)</span>
+                            <span class="k">if</span> <span class="s">&quot;logbinning&quot;</span> <span class="ow">in</span> <span class="n">k</span> <span class="ow">and</span> <span class="s">&quot;logbinning2&quot;</span> <span class="ow">in</span> <span class="n">k</span> <span class="ow">and</span> <span class="s">&quot;logbinning_counts&quot;</span> <span class="ow">in</span> <span class="n">k</span><span class="p">:</span>
+                                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading&quot;</span><span class="p">,</span> <span class="n">m</span>
+                                <span class="n">bins</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/timeseries/logbinning&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> 
+                                <span class="n">bins2</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/timeseries/logbinning2&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> 
+                                <span class="n">counts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/timeseries/logbinning_counts&#39;</span><span class="p">)[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">]</span> 
+                                <span class="n">scale</span> <span class="o">=</span> <span class="mi">1</span>
+                                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">counts</span><span class="p">)):</span>
+                                    <span class="n">mean</span> <span class="o">=</span> <span class="n">bins</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="p">(</span><span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">*</span><span class="n">scale</span><span class="p">)</span>
+                                    <span class="n">mean2</span> <span class="o">=</span> <span class="n">bins2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">/</span><span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+                                    <span class="n">bins2</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">((</span><span class="n">mean2</span><span class="o">-</span><span class="n">mean</span><span class="o">*</span><span class="n">mean</span><span class="p">)</span><span class="o">/</span><span class="n">counts</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+                                    <span class="n">scale</span> <span class="o">*=</span><span class="mi">2</span>
+                                <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">bins2</span>
+                                <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">y</span><span class="p">))</span>
+                                <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;hdf5_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">respath</span> <span class="o">+</span> <span class="n">m</span>
+                                <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;observable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s">&#39;binning analysis of &#39;</span> <span class="o">+</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_decode</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                                <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&#39;  loaded binnig analysis for &#39;</span><span class="p">,</span><span class="n">m</span>
+                                <span class="n">fileset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                        <span class="k">print</span> <span class="s">&quot;Could not create DataSet&quot;</span>
+                        <span class="k">pass</span>
+                <span class="n">sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fileset</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sets</span>
+    
+    <span class="c"># Pre: file is a hdf5 file descriptor</span>
+    <span class="c"># Post: returns DataSet with all parameters set</span></div>
+<div class="viewcode-block" id="Hdf5Loader.ReadMeasurementFromFile"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.ReadMeasurementFromFile">[docs]</a>    <span class="k">def</span> <span class="nf">ReadMeasurementFromFile</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">flist</span><span class="p">,</span><span class="n">proppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">respath</span><span class="o">=</span><span class="s">&#39;/simulation/results&#39;</span><span class="p">,</span><span class="n">measurements</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetFileNames</span><span class="p">(</span><span class="n">flist</span><span class="p">)</span>
+        <span class="n">sets</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">fileset</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">iArchive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span> <span class="o">=</span> <span class="n">f</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading from file&quot;</span><span class="p">,</span> <span class="n">f</span>
+                <span class="n">list_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetObservableList</span><span class="p">(</span><span class="n">respath</span><span class="p">)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="n">proppath</span><span class="p">)</span>
+                <span class="n">obslist</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">measurements</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">obslist</span> <span class="o">=</span> <span class="n">list_</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obslist</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">measurements</span> <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_</span><span class="p">]</span>
+                <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">obslist</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading&quot;</span><span class="p">,</span> <span class="n">m</span>
+                    <span class="n">size</span><span class="o">=</span><span class="mi">0</span>
+                    <span class="k">if</span> <span class="s">&quot;error&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/mean&#39;</span><span class="p">):</span> 
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">is_scalar</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">):</span>
+                            <span class="n">obs</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">MCScalarData</span><span class="p">()</span>
+                            <span class="n">obs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span><span class="p">,</span> <span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="p">)</span>
+                            <span class="n">obs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">obs</span><span class="p">])</span>
+                            <span class="n">size</span><span class="o">=</span><span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">obs</span> <span class="o">=</span> <span class="n">pa</span><span class="o">.</span><span class="n">MCVectorData</span><span class="p">()</span>
+                            <span class="n">obs</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span><span class="p">,</span> <span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="p">)</span>
+                            <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">is_scalar</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">):</span>
+                            <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)</span>
+                            <span class="n">obs</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">obs</span><span class="p">])</span>
+                            <span class="n">size</span><span class="o">=</span><span class="mi">1</span>
+                        <span class="k">else</span><span class="p">:</span>
+                            <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">m</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)</span>
+                            <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
+                    <span class="k">try</span><span class="p">:</span>
+                        <span class="n">d</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">()</span>
+                        <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">obs</span>
+                        <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">size</span><span class="p">)</span>
+                        <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;hdf5_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">respath</span> <span class="o">+</span><span class="s">&quot;/&quot;</span><span class="o">+</span> <span class="n">m</span>
+                        <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;observable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_decode</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                        <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                        <span class="n">fileset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                        <span class="k">print</span> <span class="s">&quot;Could not create DataSet&quot;</span>
+                        <span class="k">pass</span>
+                <span class="n">sets</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">fileset</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">sets</span>
+
+    <span class="c"># Pre: file is a hdf5 file descriptor</span>
+    <span class="c"># Post: returns DataSet with all parameters set</span></div>
+<div class="viewcode-block" id="Hdf5Loader.ReadDMFTIterations"><a class="viewcode-back" href="../../load.html#pyalps.load.Hdf5Loader.ReadDMFTIterations">[docs]</a>    <span class="k">def</span> <span class="nf">ReadDMFTIterations</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">flist</span><span class="p">,</span><span class="n">measurements</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">proppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">respath</span><span class="o">=</span><span class="s">&#39;/simulation/iteration&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+        <span class="n">fs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetFileNames</span><span class="p">(</span><span class="n">flist</span><span class="p">)</span>
+        <span class="n">fileset</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">fs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">iArchive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">h5fname</span> <span class="o">=</span> <span class="n">f</span>
+                <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading from file&quot;</span><span class="p">,</span> <span class="n">f</span>
+                <span class="n">list_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">GetObservableList</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/1/results/G_tau/&#39;</span><span class="p">)</span>
+                <span class="c">#grp = self.h5f.require_group(respath)</span>
+                <span class="n">params</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">ReadParameters</span><span class="p">(</span><span class="n">proppath</span><span class="p">)</span>
+                <span class="n">obslist</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">if</span> <span class="n">measurements</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                    <span class="n">obslist</span> <span class="o">=</span> <span class="p">[</span><span class="s">&#39;Green_0&#39;</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">obslist</span> <span class="o">=</span> <span class="p">[</span><span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="k">for</span> <span class="n">obs</span> <span class="ow">in</span> <span class="n">measurements</span> <span class="k">if</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_encode</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span> <span class="ow">in</span> <span class="n">list_</span><span class="p">]</span>
+                <span class="n">iterationset</span><span class="o">=</span><span class="p">[]</span>
+                <span class="k">for</span> <span class="n">it</span> <span class="ow">in</span>  <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="p">):</span>
+                    <span class="n">obsset</span><span class="o">=</span><span class="p">[]</span>
+                    <span class="k">for</span> <span class="n">m</span> <span class="ow">in</span> <span class="n">obslist</span><span class="p">:</span>
+                        <span class="k">try</span><span class="p">:</span>
+                            <span class="k">if</span> <span class="n">verbose</span><span class="p">:</span> <span class="k">print</span> <span class="s">&quot;Loading&quot;</span><span class="p">,</span> <span class="n">m</span>
+                            <span class="n">d</span> <span class="o">=</span> <span class="n">DataSet</span><span class="p">()</span>
+                            <span class="n">size</span><span class="o">=</span><span class="mi">0</span>
+                            <span class="n">path</span><span class="o">=</span><span class="n">it</span><span class="o">+</span><span class="s">&quot;/results/G_tau/&quot;</span><span class="o">+</span><span class="n">m</span>
+                            <span class="k">if</span> <span class="s">&quot;mean&quot;</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">path</span><span class="p">):</span>
+                                <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">is_scalar</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">path</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">):</span>
+                                    <span class="n">size</span><span class="o">=</span><span class="mi">1</span>
+                                    <span class="n">obs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">path</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)</span>
+                                    <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">obs</span><span class="p">])</span> 
+                                <span class="k">else</span><span class="p">:</span>
+                                    <span class="n">obs</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">h5f</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">respath</span><span class="o">+</span><span class="s">&#39;/&#39;</span><span class="o">+</span><span class="n">path</span><span class="o">+</span><span class="s">&#39;/mean/value&#39;</span><span class="p">)</span>
+                                    <span class="n">size</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
+                                    <span class="n">d</span><span class="o">.</span><span class="n">y</span> <span class="o">=</span> <span class="n">obs</span>
+                                <span class="n">d</span><span class="o">.</span><span class="n">x</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">arange</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span><span class="n">size</span><span class="p">)</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;hdf5_path&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">respath</span> <span class="o">+</span><span class="s">&quot;/&quot;</span><span class="o">+</span> <span class="n">path</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;observable&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pt</span><span class="o">.</span><span class="n">hdf5_name_decode</span><span class="p">(</span><span class="n">m</span><span class="p">)</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;iteration&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">it</span>
+                            <span class="n">d</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+                        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                            <span class="k">print</span> <span class="s">&quot;Could not create DataSet&quot;</span>
+                            <span class="k">pass</span>
+                        <span class="n">obsset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+                    <span class="n">iterationset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">obsset</span><span class="p">)</span>
+                <span class="n">fileset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">iterationset</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">print</span> <span class="n">e</span>
+                <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">fileset</span>
+        </div></div>
+<div class="viewcode-block" id="loadBinningAnalysis"><a class="viewcode-back" href="../../load.html#pyalps.load.loadBinningAnalysis">[docs]</a><span class="k">def</span> <span class="nf">loadBinningAnalysis</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">what</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; loads MC binning analysis from ALPS HDF5 result files</span>
+<span class="sd">    </span>
+<span class="sd">        this function loads results of a MC binning analysis from ALPS HDF5 result files</span>
+<span class="sd">        </span>
+<span class="sd">        The parameters are:</span>
+<span class="sd">        </span>
+<span class="sd">        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.</span>
+<span class="sd">        what: an optional argument that is either a string or list of strings, specifying the names of the observables for which the binning analysis should be loaded</span>
+<span class="sd">        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</span>
+<span class="sd">        </span>
+<span class="sd">        The function returns a list of list of DataSet objects. </span>
+<span class="sd">        The elements of the outer list each correspond to the file names specified as input.</span>
+<span class="sd">        The elements of the inner list are each for a different observable.</span>
+<span class="sd">        The x-values of the DataSet objects are the logarithmic binning level and the y-values the error estimates at that binning level.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">Hdf5Loader</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">what</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+      <span class="n">what</span> <span class="o">=</span> <span class="p">[</span><span class="n">what</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ll</span><span class="o">.</span><span class="n">ReadBinningAnalysis</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">measurements</span><span class="o">=</span><span class="n">what</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="loadMeasurements"><a class="viewcode-back" href="../../load.html#pyalps.load.loadMeasurements">[docs]</a><span class="k">def</span> <span class="nf">loadMeasurements</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">what</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; loads ALPS measurements from ALPS HDF5 result files</span>
+<span class="sd">    </span>
+<span class="sd">        this function loads results of ALPS simulations ALPS HDF5 result files</span>
+<span class="sd">        </span>
+<span class="sd">        The parameters are:</span>
+<span class="sd">        </span>
+<span class="sd">        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.</span>
+<span class="sd">        what: an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded</span>
+<span class="sd">        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</span>
+<span class="sd">        </span>
+<span class="sd">        The function returns a list of list of DataSet objects. </span>
+<span class="sd">        The elements of the outer list each correspond to the file names specified as input.</span>
+<span class="sd">        The elements of the inner list are each for a different observable.</span>
+<span class="sd">        The y-values of the DataSet objects are the measurements and the x-values optionally the labels (indices) of array-valued measurements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">Hdf5Loader</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">what</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+      <span class="n">what</span> <span class="o">=</span> <span class="p">[</span><span class="n">what</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ll</span><span class="o">.</span><span class="n">ReadMeasurementFromFile</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">measurements</span><span class="o">=</span><span class="n">what</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    
+    </div>
+<div class="viewcode-block" id="loadEigenstateMeasurements"><a class="viewcode-back" href="../../load.html#pyalps.load.loadEigenstateMeasurements">[docs]</a><span class="k">def</span> <span class="nf">loadEigenstateMeasurements</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">what</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; loads ALPS eigenstate measurements from ALPS HDF5 result files</span>
+<span class="sd">    </span>
+<span class="sd">        this function loads results of ALPS diagonalization or DMRG simulations from an HDF5 file</span>
+<span class="sd">        </span>
+<span class="sd">        The parameters are:</span>
+<span class="sd">        </span>
+<span class="sd">        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.</span>
+<span class="sd">        what: an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded</span>
+<span class="sd">        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</span>
+<span class="sd">        </span>
+<span class="sd">        The function returns a list of list of (lists of) DataSet objects. </span>
+<span class="sd">        The elements of the outer list each correspond to the file names specified as input.</span>
+<span class="sd">        The elements of the next level are different quantum number sectors, if any exists</span>
+<span class="sd">        The elements of the inner-most list are each for a different observable.</span>
+<span class="sd">        The y-values of the DataSet objects is an array of the measurements in all eigenstates calculated in this sector, and the x-values optionally the labels (indices) of array-valued measurements</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">Hdf5Loader</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">what</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+      <span class="n">what</span> <span class="o">=</span> <span class="p">[</span><span class="n">what</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ll</span><span class="o">.</span><span class="n">ReadDiagDataFromFile</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">measurements</span><span class="o">=</span><span class="n">what</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="loadIterationMeasurements"><a class="viewcode-back" href="../../load.html#pyalps.load.loadIterationMeasurements">[docs]</a><span class="k">def</span> <span class="nf">loadIterationMeasurements</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">what</span><span class="o">=</span><span class="bp">None</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">Hdf5Loader</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">what</span><span class="p">,</span><span class="nb">str</span><span class="p">):</span>
+      <span class="n">what</span> <span class="o">=</span> <span class="p">[</span><span class="n">what</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">ll</span><span class="o">.</span><span class="n">ReadDiagDataFromFile</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">measurements</span><span class="o">=</span><span class="n">what</span><span class="p">,</span><span class="n">loadIterations</span><span class="o">=</span><span class="bp">True</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="loadSpectra"><a class="viewcode-back" href="../../load.html#pyalps.load.loadSpectra">[docs]</a><span class="k">def</span> <span class="nf">loadSpectra</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; loads ALPS spectra from ALPS HDF5 result files</span>
+<span class="sd">    </span>
+<span class="sd">        this function loads the spectra calculated in ALPS diagonalization or DMRG simulations from an HDF5 file</span>
+<span class="sd">        </span>
+<span class="sd">        The parameters are:</span>
+<span class="sd">        </span>
+<span class="sd">        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.</span>
+<span class="sd">        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</span>
+<span class="sd">        </span>
+<span class="sd">        The function returns a list of (lists of) DataSet objects. </span>
+<span class="sd">        The elements of the outer list each correspond to the file names specified as input.</span>
+<span class="sd">        The elements of the next level are different quantum number sectors, if any exists</span>
+<span class="sd">        The y-values of the DataSet objects are the energies in that quantum number sector</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">Hdf5Loader</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">ll</span><span class="o">.</span><span class="n">ReadSpectrumFromFile</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="loadProperties"><a class="viewcode-back" href="../../load.html#pyalps.load.loadProperties">[docs]</a><span class="k">def</span> <span class="nf">loadProperties</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">proppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">respath</span><span class="o">=</span><span class="s">&#39;/simulation/results&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; loads properties (parameters) of simulations from ALPS HDF5 result files</span>
+<span class="sd">    </span>
+<span class="sd">        this function loads the properties (parameters) of ALPS simulations ALPS HDF5 result files</span>
+<span class="sd">        </span>
+<span class="sd">        The parameters are:</span>
+<span class="sd">        </span>
+<span class="sd">        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.</span>
+<span class="sd">        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</span>
+<span class="sd">        </span>
+<span class="sd">        The function returns a list of dicts</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">Hdf5Loader</span><span class="p">()</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">ll</span><span class="o">.</span><span class="n">GetProperties</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">proppath</span><span class="p">,</span><span class="n">respath</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">props</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">results</span>
+</div>
+<div class="viewcode-block" id="loadObservableList"><a class="viewcode-back" href="../../load.html#pyalps.load.loadObservableList">[docs]</a><span class="k">def</span> <span class="nf">loadObservableList</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">proppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">respath</span><span class="o">=</span><span class="s">&#39;/simulation/results&#39;</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="bp">False</span><span class="p">):</span>   
+    <span class="sd">&quot;&quot;&quot; loads lists of existing measurements from ALPS HDF5 result files</span>
+<span class="sd">    </span>
+<span class="sd">        The function returns a list of lists, containing the names of measurements that are stored in the result files </span>
+<span class="sd">        The parameters are:</span>
+<span class="sd">        </span>
+<span class="sd">        files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.</span>
+<span class="sd">        verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">ll</span> <span class="o">=</span> <span class="n">Hdf5Loader</span><span class="p">()</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">ll</span><span class="o">.</span><span class="n">GetProperties</span><span class="p">(</span><span class="n">files</span><span class="p">,</span><span class="n">proppath</span><span class="p">,</span><span class="n">respath</span><span class="p">,</span><span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
+    <span class="n">results</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">res</span><span class="p">:</span>
+      <span class="n">results</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="s">&#39;ObservableList&#39;</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">results</span>
+</div>
+<div class="viewcode-block" id="loadTimeEvolution"><a class="viewcode-back" href="../../load.html#pyalps.load.loadTimeEvolution">[docs]</a><span class="k">def</span> <span class="nf">loadTimeEvolution</span><span class="p">(</span> <span class="n">flist</span><span class="p">,</span><span class="n">globalproppath</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span><span class="n">resroot</span><span class="o">=</span><span class="s">&#39;/timesteps/&#39;</span><span class="p">,</span><span class="n">localpropsuffix</span><span class="o">=</span><span class="s">&#39;/parameters&#39;</span><span class="p">,</span> <span class="n">measurements</span><span class="o">=</span><span class="bp">None</span><span class="p">):</span>
+    <span class="n">ll</span><span class="o">=</span><span class="n">Hdf5Loader</span><span class="p">()</span>
+    <span class="n">data</span><span class="o">=</span><span class="p">[]</span>
+    <span class="c">#loop over files</span>
+    <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">flist</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c">#open the file and open the results root group</span>
+            <span class="n">h5file</span> <span class="o">=</span> <span class="n">h5</span><span class="o">.</span><span class="n">iArchive</span><span class="p">(</span><span class="n">f</span><span class="p">)</span>
+            <span class="c">#enumerate the subgroups</span>
+            <span class="n">L</span><span class="o">=</span><span class="n">h5file</span><span class="o">.</span><span class="n">list_children</span><span class="p">(</span><span class="n">resroot</span><span class="p">)</span>
+            <span class="c">#Create an iterator of length the number of subgroups</span>
+            <span class="n">stepper</span><span class="o">=</span><span class="p">[</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">L</span><span class="p">))]</span>
+            <span class="c">#Read in global props</span>
+            <span class="n">globalprops</span><span class="o">=</span><span class="n">ll</span><span class="o">.</span><span class="n">GetProperties</span><span class="p">([</span><span class="n">f</span><span class="p">],</span><span class="n">globalproppath</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">stepper</span><span class="p">:</span>
+                <span class="c">#Get the measurements from the numbered subgroups</span>
+                <span class="n">locdata</span><span class="o">=</span><span class="n">ll</span><span class="o">.</span><span class="n">ReadMeasurementFromFile</span><span class="p">([</span><span class="n">f</span><span class="p">],</span><span class="n">proppath</span><span class="o">=</span><span class="n">resroot</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">+</span><span class="n">localpropsuffix</span><span class="p">,</span> \
+                <span class="n">respath</span><span class="o">=</span><span class="n">resroot</span><span class="o">+</span><span class="nb">str</span><span class="p">(</span><span class="n">d</span><span class="p">)</span><span class="o">+</span><span class="s">&#39;/results&#39;</span><span class="p">,</span> <span class="n">measurements</span><span class="o">=</span><span class="n">measurements</span><span class="p">)</span>
+                <span class="c">#Append the global props to the local props</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">locdata</span><span class="p">[</span><span class="mi">0</span><span class="p">])):</span>
+                    <span class="n">locdata</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">props</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">globalprops</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">props</span><span class="p">)</span>
+                <span class="c">#Extend the total dataset with this data</span>
+                <span class="n">data</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">locdata</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">,</span> <span class="n">e</span><span class="p">:</span>
+            <span class="k">print</span> <span class="n">e</span>
+            <span class="k">print</span> <span class="n">traceback</span><span class="o">.</span><span class="n">format_exc</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">data</span>
+    
+
+   </div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../modules.html">Pyalps v0.1.a documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pyalps.html" >pyalps</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Matthias Troyer.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

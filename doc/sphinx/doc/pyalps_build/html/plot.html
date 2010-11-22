@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Pyalps v0.1.a documentation" href="index.html" />
     <link rel="next" title="Plot_Core Documentation" href="plot_core.html" />
-    <link rel="prev" title="Load Documentation" href="load.html" /> 
+    <link rel="prev" title="Math Documentation" href="math.html" /> 
   </head>
   <body>
     <div class="related">
@@ -34,10 +34,13 @@
           <a href="genindex.html" title="General Index"
              accesskey="I">index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="plot_core.html" title="Plot_Core Documentation"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="load.html" title="Load Documentation"
+          <a href="math.html" title="Math Documentation"
              accesskey="P">previous</a> |</li>
         <li><a href="modules.html">Pyalps v0.1.a documentation</a> &raquo;</li> 
       </ul>
@@ -51,6 +54,33 @@
   <div class="section" id="plot-documentation">
 <h1>Plot Documentation<a class="headerlink" href="#plot-documentation" title="Permalink to this headline">¶</a></h1>
 <p>This page contains the Plot Module documentation.</p>
+<span class="target" id="module-pyalps.plot"></span><dl class="class">
+<dt id="pyalps.plot.MplXYPlot_core">
+<em class="property">class </em><tt class="descclassname">pyalps.plot.</tt><tt class="descname">MplXYPlot_core</tt><a class="reference internal" href="_modules/pyalps/plot.html#MplXYPlot_core"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.plot.MplXYPlot_core" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pyalps.plot.MplXYPlot_core.draw_lines">
+<tt class="descname">draw_lines</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/pyalps/plot.html#MplXYPlot_core.draw_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.plot.MplXYPlot_core.draw_lines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.plot.plot">
+<tt class="descclassname">pyalps.plot.</tt><tt class="descname">plot</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/pyalps/plot.html#plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.plot.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>plots a list of datasets</p>
+<p>This function takes a DataSet or a list of DataSets and creates a matplotlib plot.</p>
+<p>It creates a new plot set for each dataset, using the x and y members of the DataSet.
+It also inspects the props dictionary and uses the following key-value pairs in that dict:</p>
+<blockquote>
+title
+xlabel
+ylabel
+label
+filename (used as alternative label of the set if no label is specified)
+color (can be &#8216;k&#8217;,&#8217;b&#8217;,&#8217;g&#8217;,&#8217;m&#8217;,&#8217;c&#8217;, or &#8216;y&#8217;
+line (can be &#8216;line&#8217; or &#8216;scatter&#8217;)</blockquote>
+</dd></dl>
+
 </div>
 
 
@@ -60,8 +90,8 @@
       <div class="sphinxsidebar">
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
-  <p class="topless"><a href="load.html"
-                        title="previous chapter">Load Documentation</a></p>
+  <p class="topless"><a href="math.html"
+                        title="previous chapter">Math Documentation</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="plot_core.html"
                         title="next chapter">Plot_Core Documentation</a></p>
@@ -94,10 +124,13 @@
           <a href="genindex.html" title="General Index"
              >index</a></li>
         <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
           <a href="plot_core.html" title="Plot_Core Documentation"
              >next</a> |</li>
         <li class="right" >
-          <a href="load.html" title="Load Documentation"
+          <a href="math.html" title="Math Documentation"
              >previous</a> |</li>
         <li><a href="modules.html">Pyalps v0.1.a documentation</a> &raquo;</li> 
       </ul>

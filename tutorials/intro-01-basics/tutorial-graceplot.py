@@ -26,10 +26,9 @@
 # ****************************************************************************
 
 import pyalps
-import matplotlib.pyplot as plt
 import pyalps.plot
+import subprocess
 
-#### SPLIT THIS !!!! ####
 #prepare the input parameters
 parms = []
 for t in [1.5,2,2.5]:
@@ -52,9 +51,10 @@ pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
 
 #get the list of result files
 result_files = pyalps.getResultFiles(prefix='parm1')
-print result_files
+print "Loading results from the files: ", result_files
 
 #print the observables stored in those files:
+print "The files contain the following mesurements:",
 print pyalps.loadObservableList(result_files)
 
 #load a selection of measurements:
@@ -62,32 +62,16 @@ data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'
 
 #make a plot for the magnetization: collect Magnetziation as function of T
 plotdata = pyalps.collectXY(data,'T','|Magnetization|')
-plt.figure()
-pyalps.plot.plot(plotdata)
-plt.xlim(0,3)
-plt.ylim(0,1)
-plt.title('Ising model')
-plt.show()
-
-# convert the data to text file for plotting using another tool
-print pyalps.plot.convertToText(plotdata)
 
 # convert the data to grace file for plotting using xmgrace
+print "The results in grace format are:"
 print pyalps.plot.makeGracePlot(plotdata)
 
-# convert the data to gnuplot file for plotting using gnuplot
-print pyalps.plot.makeGnuplotPlot(plotdata)
+print "Saving into file parm1.gr"
+f = open ('parm1.gr','w')
+f.write(pyalps.plot.makeGracePlot(plotdata))
+f.close()
 
-#calculate the Binder cumulants using jackknife-analysis
-binder = pyalps.DataSet()
-binder.props = pyalps.dict_intersect([d[0].props for d in data])
-binder.x = [d[0].props['T'] for d in data]
-binder.y = [d[1].y[0]/(d[0].y[0]*d[0].y[0]) for d in data]
-print binder
+print "Trying to launch xmgrace"
+process = subprocess.Popen(['xmgrace','parm1.gr'])
 
-# ... and plot them
-plt.figure()
-pyalps.plot.plot(binder)
-plt.xlabel('T')
-plt.ylabel('Binder cumulant')
-plt.show()

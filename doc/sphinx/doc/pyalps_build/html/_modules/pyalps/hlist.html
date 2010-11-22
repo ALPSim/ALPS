@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyalps.hlist &mdash; Pyalps v0.1.a documentation</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '0.1.a',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Pyalps v0.1.a documentation" href="../../index.html" />
+    <link rel="up" title="pyalps" href="../pyalps.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../modules.html">Pyalps v0.1.a documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pyalps.html" accesskey="U">pyalps</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyalps.hlist</h1><div class="highlight"><pre>
+<span class="c"># ****************************************************************************</span>
+<span class="c"># </span>
+<span class="c"># ALPS Project: Algorithms and Libraries for Physics Simulations</span>
+<span class="c"># </span>
+<span class="c"># ALPS Libraries</span>
+<span class="c"># </span>
+<span class="c"># Copyright (C) 1994-2009 by Bela Bauer &lt;bauerb@phys.ethz.ch&gt;</span>
+<span class="c"># </span>
+<span class="c"># This software is part of the ALPS libraries, published under the ALPS</span>
+<span class="c"># Library License; you can use, redistribute it and/or modify it under</span>
+<span class="c"># the terms of the license, either version 1 or (at your option) any later</span>
+<span class="c"># version.</span>
+<span class="c">#  </span>
+<span class="c"># You should have received a copy of the ALPS Library License along with</span>
+<span class="c"># the ALPS Libraries; see the file LICENSE.txt. If not, the license is also</span>
+<span class="c"># available from http://alps.comp-phys.org/.</span>
+<span class="c"># </span>
+<span class="c"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR </span>
+<span class="c"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, </span>
+<span class="c"># FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT </span>
+<span class="c"># SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE </span>
+<span class="c"># FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, </span>
+<span class="c"># ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER </span>
+<span class="c"># DEALINGS IN THE SOFTWARE.</span>
+<span class="c"># </span>
+<span class="c"># ****************************************************************************</span>
+
+<span class="kn">import</span> <span class="nn">copy</span>
+
+<div class="viewcode-block" id="depth"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.depth">[docs]</a><span class="k">def</span> <span class="nf">depth</span><span class="p">(</span><span class="n">hl</span><span class="p">):</span>
+    <span class="n">ret</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">hl</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+    <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">hl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span><span class="o">+</span><span class="n">depth</span><span class="p">(</span><span class="n">hl</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="index__"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.index__">[docs]</a><span class="k">def</span> <span class="nf">index__</span><span class="p">(</span><span class="n">hl</span><span class="p">,</span><span class="n">indices</span><span class="p">,</span><span class="n">idx</span><span class="p">,</span><span class="n">level</span><span class="p">,</span><span class="n">max_level</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">ie</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">hl</span><span class="p">)):</span>
+        <span class="n">idx</span><span class="p">[</span><span class="n">level</span><span class="p">]</span> <span class="o">=</span> <span class="n">ie</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">hl</span><span class="p">[</span><span class="n">ie</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">&lt;</span> <span class="n">max_level</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="n">index__</span><span class="p">(</span><span class="n">e</span><span class="p">,</span><span class="n">indices</span><span class="p">,</span><span class="n">idx</span><span class="p">,</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">max_level</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">indices</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">idx</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="hset__"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.hset__">[docs]</a><span class="k">def</span> <span class="nf">hset__</span><span class="p">(</span><span class="n">hl</span><span class="p">,</span><span class="n">idx</span><span class="p">,</span><span class="n">level</span><span class="p">,</span><span class="n">value</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="n">hl</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="n">level</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">hset__</span><span class="p">(</span><span class="n">hl</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="n">level</span><span class="p">]],</span><span class="n">idx</span><span class="p">,</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="hget__"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.hget__">[docs]</a><span class="k">def</span> <span class="nf">hget__</span><span class="p">(</span><span class="n">hl</span><span class="p">,</span><span class="n">idx</span><span class="p">,</span><span class="n">level</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">idx</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hl</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="n">level</span><span class="p">]]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">hget__</span><span class="p">(</span><span class="n">hl</span><span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="n">level</span><span class="p">]],</span><span class="n">idx</span><span class="p">,</span><span class="n">level</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="flatten"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.flatten">[docs]</a><span class="k">def</span> <span class="nf">flatten</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span> <span class="n">fdepth</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; turns a hierarchical list of lists into a flat list </span>
+<span class="sd">    </span>
+<span class="sd">        this function turns a hierarchical list (a list of lists of lists ....) into just a flat list.</span>
+<span class="sd">        The parameters are the hierachical list, and optionally a depth at which the flattening should happen, to keep, e.g. the top-most structure.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    
+    <span class="k">if</span> <span class="n">fdepth</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fdepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">(</span><span class="n">sl</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">HList</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span> <span class="n">fdepth</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="deep_flatten"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.deep_flatten">[docs]</a><span class="k">def</span> <span class="nf">deep_flatten</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span> <span class="n">fdepth</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">flatten</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span> <span class="n">fdepth</span><span class="p">)]</span>
+</div>
+<div class="viewcode-block" id="copy_structure"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.copy_structure">[docs]</a><span class="k">def</span> <span class="nf">copy_structure</span><span class="p">(</span><span class="n">sl</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ll</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sl</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">copy_structure</span><span class="p">(</span><span class="n">isl</span><span class="p">)</span> <span class="k">for</span> <span class="n">isl</span> <span class="ow">in</span> <span class="n">sl</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">1</span>
+</div>
+<div class="viewcode-block" id="happly"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.happly">[docs]</a><span class="k">def</span> <span class="nf">happly</span><span class="p">(</span><span class="n">functor</span><span class="p">,</span> <span class="n">sl</span><span class="p">,</span> <span class="n">fdepth</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fdepth</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fdepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">(</span><span class="n">sl</span><span class="p">)</span>
+    <span class="n">hl</span> <span class="o">=</span> <span class="n">HList</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span> <span class="n">fdepth</span><span class="p">)</span>
+    <span class="n">hl</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">functor</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="hmap"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.hmap">[docs]</a><span class="k">def</span> <span class="nf">hmap</span><span class="p">(</span><span class="n">functor</span><span class="p">,</span> <span class="n">sl</span><span class="p">,</span> <span class="n">fdepth</span> <span class="o">=</span> <span class="bp">None</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">fdepth</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+        <span class="n">fdepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">(</span><span class="n">sl</span><span class="p">)</span>
+    <span class="n">hl</span> <span class="o">=</span> <span class="n">HList</span><span class="p">(</span><span class="n">sl</span><span class="p">,</span> <span class="n">fdepth</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">hl</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="n">functor</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
+</div>
+<div class="viewcode-block" id="HList"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.HList">[docs]</a><span class="k">class</span> <span class="nc">HList</span><span class="p">:</span>
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span> <span class="o">=</span> <span class="p">[]</span>
+    
+    <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">init</span><span class="p">,</span><span class="n">fdepth</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">data_</span> <span class="o">=</span> <span class="n">init</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span> <span class="o">=</span> <span class="p">[]</span>
+        
+        <span class="k">if</span> <span class="n">fdepth</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+            <span class="n">fdepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">fdepth</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="n">fdepth</span> <span class="o">=</span> <span class="n">depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">)</span> <span class="o">+</span> <span class="n">fdepth</span>
+        
+        <span class="n">index__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">depth</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">))],</span> <span class="mi">0</span><span class="p">,</span> <span class="n">fdepth</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span> <span class="o">=</span> <span class="p">[</span><span class="n">idx</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">fdepth</span><span class="p">]</span> <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">]</span>
+    
+    <span class="k">def</span> <span class="nf">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">)</span>
+    
+    <span class="k">def</span> <span class="nf">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
+<span class="c">#        print &#39;Get key&#39;,key</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">hget__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="n">key</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+    
+    <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">([</span><span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">])</span>
+    
+    <span class="k">def</span> <span class="nf">__setitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+<span class="c">#        print &#39;Set key&#39;,key</span>
+        <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">tuple</span><span class="p">:</span>
+            <span class="n">hset__</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">,</span><span class="n">key</span><span class="p">,</span><span class="mi">0</span><span class="p">,</span><span class="n">value</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="n">key</span><span class="p">)</span> <span class="o">==</span> <span class="nb">list</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s">&quot;Assigning to slices is not supported&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span> <span class="o">=</span> <span class="n">value</span>
+    
+<div class="viewcode-block" id="HList.indices"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.HList.indices">[docs]</a>    <span class="k">def</span> <span class="nf">indices</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span>
+    </div>
+<div class="viewcode-block" id="HList.data"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.HList.data">[docs]</a>    <span class="k">def</span> <span class="nf">data</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">data_</span>
+    </div>
+<div class="viewcode-block" id="HList.apply"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.HList.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functor</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">params</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">functor</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">functor</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">params</span><span class="p">)</span>
+    </div>
+<div class="viewcode-block" id="HList.map"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.HList.map">[docs]</a>    <span class="k">def</span> <span class="nf">map</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">functor</span><span class="p">,</span> <span class="n">params</span> <span class="o">=</span> <span class="bp">None</span><span class="p">):</span>
+        <span class="n">ret</span> <span class="o">=</span> <span class="n">copy_structure</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">data_</span><span class="p">)</span>
+        <span class="n">rethl</span> <span class="o">=</span> <span class="n">HList</span><span class="p">(</span><span class="n">ret</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">idx</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">indices_</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">params</span> <span class="o">==</span> <span class="bp">None</span><span class="p">:</span>
+                <span class="n">rethl</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">functor</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rethl</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span> <span class="o">=</span> <span class="n">functor</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">params</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ret</span>
+</div></div>
+<div class="viewcode-block" id="hlist_to_dict"><a class="viewcode-back" href="../../hlist.html#pyalps.hlist.hlist_to_dict">[docs]</a><span class="k">def</span> <span class="nf">hlist_to_dict</span><span class="p">(</span><span class="n">hl</span><span class="p">,</span> <span class="n">key</span> <span class="o">=</span> <span class="s">&#39;Observable&#39;</span><span class="p">):</span>
+    <span class="n">f</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">data</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span> <span class="p">[(</span><span class="n">q</span><span class="o">.</span><span class="n">props</span><span class="p">[</span><span class="n">key</span><span class="p">],</span> <span class="n">q</span><span class="p">)</span> <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="n">data</span><span class="p">]</span> <span class="p">)</span>
+    <span class="k">return</span> <span class="n">hmap</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="n">hl</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+</pre></div></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../modules.html">Pyalps v0.1.a documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pyalps.html" >pyalps</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, Matthias Troyer.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

@@ -1,0 +1,9 @@
+PyTools Documentation
+===================
+
+This page contains the alea Module documentation.
+
+.. automodule:: pyalps.pytools
+    :members:
+    :undoc-members:
+    :show-inheritance:

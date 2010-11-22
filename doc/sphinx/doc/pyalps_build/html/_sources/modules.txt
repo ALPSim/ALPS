@@ -1,7 +1,7 @@
 Pyalps Documentation
 =====================
 
-This page contains the Pyalps Modules documentation.
+* :ref:`genindex`
 
 Modules:
 --------
@@ -9,10 +9,17 @@ Modules:
 .. toctree::
    :maxdepth: 4
 
+   pyalps
+   alea
    dataset
    dict_intersect
    fit_wrapper
    floatwitherror
+   hdf5
    hlist
    load
+   math
+   plot
    plot_core
+   pytools
+   tools
