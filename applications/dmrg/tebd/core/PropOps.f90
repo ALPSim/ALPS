@@ -78,6 +78,7 @@ TYPE(tensor), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
 INTEGER :: i
+REAL(KIND=rKind) :: truncSum
 TYPE(matrix) :: eyeMat
 
 ALLOCATE(eyeMat%m(localSize*localSize,localSize*localSize))
@@ -85,15 +86,18 @@ eyeMat%m=0.0_rKind
 DO i=1,SIZE(eyeMat%m,1)
 	eyeMat%m(i,i)=1.0_rKind
 END DO
+truncSum=0.0_rKind
 
 i=systemSize-1
 CALL TwoSiteOpEdge(i,eyeMat%m,Gammas,Lambdas,localTruncerr)
-
+truncSum=truncSum+localTruncerr
 DO i=systemSize-2,1,(-1)
 	CALL TwoSiteOpR(i,eyeMat%m,Gammas,Lambdas,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
 
 DEALLOCATE(eyeMat%m)
+localTruncerr=truncSum
 
 END SUBROUTINE LeftSweep_I
 
@@ -109,15 +113,20 @@ IMPLICIT NONE
 TYPE(tensor), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix), POINTER :: U(:)
 
+truncSum=0.0_rKind
+
 i=systemSize-1
 CALL TwoSiteOpEdge(i,U(i)%m,Gammas,Lambdas,localTruncerr)
-
+truncSum=truncSum+localTruncerr
 DO i=systemSize-2,1,(-1)
 	CALL TwoSiteOpR(i,U(i)%m,Gammas,Lambdas,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
+localTruncerr=truncSum
 
 
 END SUBROUTINE LeftSweep_u
@@ -134,6 +143,7 @@ IMPLICIT NONE
 TYPE(tensor), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix) :: eyeMat
 
@@ -143,14 +153,19 @@ DO i=1,SIZE(eyeMat%m,1)
 	eyeMat%m(i,i)=1.0_rKind
 END DO
 
+truncSum=0.0_rKind
+
 i=1
 CALL TwoSiteOpEdge(i,eyeMat%m,Gammas,Lambdas,localTruncerr)
+truncSum=truncSum+localTruncerr
 
 DO i=2,systemSize-1
 	CALL TwoSiteOpL(i,eyeMat%m,Gammas,Lambdas,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
 
 DEALLOCATE(eyeMat%m)
+localTruncerr=truncSum
 
 END SUBROUTINE RightSweep_I
 
@@ -166,15 +181,22 @@ IMPLICIT NONE
 TYPE(tensor), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix), POINTER :: U(:)
 
+truncSum=0.0_rKind
+
 i=1
 CALL TwoSiteOpEdge(i,U(i)%m,Gammas,Lambdas,localTruncerr)
+truncSum=truncSum+localTruncerr
 
 DO i=2,systemSize-1
 	CALL TwoSiteOpL(i,U(i)%m,Gammas,Lambdas,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
+
+localTruncerr=truncSum
 
 END SUBROUTINE RightSweep_u
 
@@ -412,6 +434,7 @@ TYPE(tensor), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 TYPE(vectorInt), POINTER :: LabelLeft(:), LabelRight(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix) :: eyeMat
 
@@ -421,13 +444,16 @@ DO i=1,SIZE(eyeMat%m,1)
 	eyeMat%m(i,i)=1.0_rKind
 END DO
 
+truncSum=0.0_rKind
 i=systemSize-1
 	CALL TwoSiteOpNCEdge(i,eyeMat%m,Gammas,Lambdas,LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 
 DO i=systemSize-2,1,(-1)
 	CALL TwoSiteOpNCR(i,eyeMat%m,Gammas,Lambdas,LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
-
+localTruncerr=truncSum
 DEALLOCATE(eyeMat%m)
 
 END SUBROUTINE LeftSweepNC_It
@@ -445,6 +471,7 @@ TYPE(matrix), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 TYPE(vectorInt), POINTER :: LabelLeft(:), LabelRight(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix) :: eyeMat
 
@@ -454,13 +481,16 @@ DO i=1,SIZE(eyeMat%m,1)
 	eyeMat%m(i,i)=1.0_rKind
 END DO
 
+truncSum=0.0_rKind
 i=systemSize-1
 	CALL TwoSiteOpNCEdge(i,eyeMat%m,Gammas,Lambdas,LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 
 DO i=systemSize-2,1,(-1)
 	CALL TwoSiteOpNCR(i,eyeMat%m,Gammas,Lambdas,LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
-
+localTruncerr=truncSum
 DEALLOCATE(eyeMat%m)
 
 END SUBROUTINE LeftSweepNC_Im
@@ -478,16 +508,20 @@ TYPE(tensor), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 TYPE(vectorInt), POINTER :: LabelLeft(:), LabelRight(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix), POINTER :: U(:)
 
+truncSum=0.0_rKind
 i=systemSize-1
 	CALL TwoSiteOpNCEdge(i,U(i)%m,Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 
 DO i=systemSize-2,1,(-1)
 	CALL TwoSiteOpNCR(i,U(i)%m,Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
-
+localTruncerr=truncSum
 END SUBROUTINE LeftSweepNC_ut
 
 SUBROUTINE LeftSweepNC_um(U,Gammas,Lambdas, LabelLeft, LabelRight, localTruncerr)
@@ -503,16 +537,20 @@ TYPE(matrix), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 TYPE(vectorInt), POINTER :: LabelLeft(:), LabelRight(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix), POINTER :: U(:)
 
+truncSum=0.0_rKind
 i=systemSize-1
 	CALL TwoSiteOpNCEdge(i,U(i)%m,Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 
 DO i=systemSize-2,1,(-1)
 	CALL TwoSiteOpNCR(i,U(i)%m,Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
-
+localTruncerr=truncSum
 END SUBROUTINE LeftSweepNC_um
 
 SUBROUTINE RightSweepNC_It(Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
@@ -528,6 +566,7 @@ TYPE(tensor), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 TYPE(vectorInt), POINTER :: LabelLeft(:), LabelRight(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix) :: eyeMat
 
@@ -537,13 +576,18 @@ DO i=1,SIZE(eyeMat%m,1)
 	eyeMat%m(i,i)=1.0_rKind
 END DO
 
+truncSum=0.0_rKind
+
 i=1
 	CALL TwoSiteOpNCEdge(i,eyeMat%m,Gammas,Lambdas,LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 
 DO i=2,systemSize-1
 	CALL TwoSiteOpNCL(i,eyeMat%m,Gammas,Lambdas,LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
 
+localTruncerr=truncSum
 DEALLOCATE(eyeMat%m)
 
 END SUBROUTINE RightSweepNC_It
@@ -561,6 +605,7 @@ TYPE(matrix), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 TYPE(vectorInt), POINTER :: LabelLeft(:), LabelRight(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix) :: eyeMat
 
@@ -570,13 +615,15 @@ DO i=1,SIZE(eyeMat%m,1)
 	eyeMat%m(i,i)=1.0_rKind
 END DO
 
+truncSum=0.0_rKind
 i=1
 	CALL TwoSiteOpNCEdge(i,eyeMat%m,Gammas,Lambdas,LabelLeft, LabelRight,localTruncerr)
-
+    truncSum=truncSum+localTruncerr
 DO i=2,systemSize-1
 	CALL TwoSiteOpNCL(i,eyeMat%m,Gammas,Lambdas,LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
-
+localTruncerr=truncSum
 DEALLOCATE(eyeMat%m)
 
 END SUBROUTINE RightSweepNC_Im
@@ -594,16 +641,21 @@ TYPE(tensor), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 TYPE(vectorInt), POINTER :: LabelLeft(:), LabelRight(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix), POINTER :: U(:)
 
+truncSum=0.0_rKind
+
 i=1
 	CALL TwoSiteOpNCEdge(i,U(i)%m,Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 
 DO i=2,systemSize-1
 	CALL TwoSiteOpNCL(i,U(i)%m,Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
-
+localTruncerr=truncSum
 END SUBROUTINE RightSweepNC_ut
 
 SUBROUTINE RightSweepNC_um(U,Gammas,Lambdas, LabelLeft, LabelRight, localTruncerr)
@@ -619,16 +671,21 @@ TYPE(matrix), POINTER :: Gammas(:)
 TYPE(vector), POINTER :: Lambdas(:)
 TYPE(vectorInt), POINTER :: LabelLeft(:), LabelRight(:)
 REAL(KIND=rKind), INTENT(OUT) :: localTruncerr
+REAL(KIND=rKind) :: truncSum
 INTEGER :: i
 TYPE(matrix), POINTER :: U(:)
 
+truncSum=0.0_rKind
+
 i=1
 	CALL TwoSiteOpNCEdge(i,U(i)%m,Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 
 DO i=2,systemSize-1
 	CALL TwoSiteOpNCL(i,U(i)%m,Gammas,Lambdas, LabelLeft, LabelRight,localTruncerr)
+    truncSum=truncSum+localTruncerr
 END DO
-
+localTruncerr=truncSum
 END SUBROUTINE RightSweepNC_um
 
 
