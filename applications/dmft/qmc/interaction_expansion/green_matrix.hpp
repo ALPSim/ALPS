@@ -95,7 +95,7 @@ public:
   
   inline void swap_vertices(unsigned int p, unsigned int q)
   {
-    int inc=1;
+    fortran_int_t inc=1;
     FORTRAN_ID(dswap)(&nt_, values_+p*nt_, &inc, values_+q*nt_, &inc);
   }
   

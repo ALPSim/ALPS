@@ -35,7 +35,7 @@
 #include <boost/numeric/bindings/blas.hpp>
 //this implements all functinons necessary for an inverse 'M' - matrix.
 
-double inner_prod(const double* v1, const double *v2, const int size);
+double inner_prod(const double* v1, const double *v2, const fortran_int_t size);
 void scale(const double alpha, double *v, const fortran_int_t size);
 
 
@@ -128,7 +128,7 @@ public:
     //call the BLAS routine for matrix vector multiplication:
     char trans='T';
     double alpha=1., beta=0.;    //no need to multiply a constant or add a vector
-    int inc=1;
+    fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
   }
 
@@ -149,7 +149,7 @@ public:
     //call the BLAS routine for matrix vector multiplication:
     char trans='N';
     double alpha=1., beta=0.;       //no need to multiply a constant or add a vector
-    int inc=1;
+    fortran_int_t inc=1;
     FORTRAN_ID(dgemv)(&trans, &size_, &size_, &alpha, values_, &memory_size_, v1, &inc, &beta, v2, &inc);
   }
   
