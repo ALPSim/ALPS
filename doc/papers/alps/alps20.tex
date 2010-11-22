@@ -95,10 +95,8 @@ simulation programs. The programs enable non-experts to start carrying
 out serial or parallel numerical simulations by providing basic implementations of the
 important algorithms for quantum lattice models: classical and quantum
 Monte Carlo (QMC) using non-local updates, extended ensemble
-simulations, sparse and full diagonalization (ED), as well as the
-density matrix renormalization group (DMRG) for static problems and the
-time-evolving block decimation (TEBD) algorithm for time-dependent
-simulations, and quantum Monte Carlo solvers for dynamical mean field theory (DMFT). Major changes in release 2.0 include the use of HDF5 for binary data, evaluation tools in Python, support for Windows  operating system, the use of CMake as build system and binary installation packages for Mac OS X and Windows, as well as integration with the VisTrails workflow provenance tool.
+simulations, exact and full diagonalization (ED), as well as the
+density matrix renormalization group (DMRG) both in a static version and a dynamic time-evolving block decimation (TEBD) code, and quantum Monte Carlo solvers for dynamical mean field theory (DMFT). Major changes in release 2.0 include the use of HDF5 for binary data, evaluation tools in Python, support for Windows  operating system, the use of CMake as build system and binary installation packages for Mac OS X and Windows, as well as integration with the VisTrails workflow provenance tool.
 The software is available from our web server at \url{http://alps.comp-phys.org/}.
 \end{abstract}
 
@@ -134,11 +132,11 @@ overcome the problems posed by the growing complexity of algorithms
 and the specialization of researchers onto single algorithms through
 an open-source software development initiative. Its goals are to simplify the development of new codes through libraries and evaluation tools, and to help users with ``black box'' codes of some of the most popular algorithms. To achieve these goals the ALPS project provides:
 \begin{itemize}
-\item {\bf standardized file formats} built upon XML \cite{xml} and HDF5 \cite{hdf5} to simplify exchange,
+\item {\bf standardized file formats} in XML \cite{xml} and HDF5 \cite{hdf5} to simplify exchange,
 distribution and archiving of simulation results, and to achieve
 interoperability between codes.
 
-\item {\bf evaluation tools} for reading, writing and post-processing simulation results, including the creation of 2D and 3D plots.
+\item {\bf evaluation tools} for reading, writing and post processing simulation results, including the creation of 2D and 3D plots.
 
 \item {\bf libraries} for common aspects of
 simulations of quantum and classical lattice models, to simplify code
@@ -165,12 +163,12 @@ publishing source codes used to obtain published results and by integration with
  aspects of the ALPS project, focusing on new features in release 2.0:
  
  \begin{itemize}
-\item CMake-based build system \cite{cmake}, simplifying configuration and enabling ALPS to be built on  Windows.
+\item CMake build system \cite{cmake}, simplifying configuration and enabling ALPS to be built on  Windows.
 \item Binary installer packages for MacOS X and Windows.
-\item Use of the binary file format HDF5 \cite{hdf5} in addition to XML, which is much faster and needs less space.
+\item Using the binary file format HDF5 \cite{hdf5} in addition to XML is much faster and needs less space.
 \item More flexible and powerful evaluation tools using Python.
 \item A revised and substantially faster version of the directed loop quantum Monte Carlo (QMC) code {\tt dirloop\_sse}, and two new applications: QMC solvers for dynamical 
-mean field theory ({\tt dmft}) and a time-evolving block-decimation algorithm ({\tt tebd}) for the time evolution of one-dimensional quantum systems.
+mean field theory ({\tt dmft}) and a time-evolving block-decimation algorithm ({\tt tebd}) for the dynamics of one-dimensional quantum systems.
 \item Integration with VisTrails workflow provenance system \cite{vistrails}.
 \item An expanded set of tutorials.
  \end{itemize}
@@ -178,7 +176,7 @@ mean field theory ({\tt dmft}) and a time-evolving block-decimation algorithm ({
  
 \section{Building and Installing ALPS}
 \subsection{Build system}
-One of the main new features in ALPS 2.0 is the change of the build system to CMake \cite{cmake}, which is more flexible and portable than the previously used autotools. CMake includes a graphical user interface to let the user choose installation options and manually override the paths to required libraries if they have not been found automatically. Furthermore,  CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested features. A snapshot of the build instructions at the time of the release are included in the source distribution. Updated instructions as operating systems change will be made available on the ALPS web page \cite{alps}.
+One of the main new features in ALPS 2.0 is the change of the build system to CMake \cite{cmake}, which is more flexible and portable than the previously used autotools. CMake includes a graphical user interface to let the user choose installation options and manually override the paths to needed libraries if they have not been found automatically. Furthermore,  CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested feature. A snapshot of the build instructions at the time of the release are included in the source distribution. Updated instructions as operating systems change will be made available on the ALPS web page \cite{alps}.
 
 The following tools and libraries are required to build ALPS:
 
@@ -187,7 +185,7 @@ The following tools and libraries are required to build ALPS:
 \item The BLAS \cite{blasnetlib} and LAPACK libraries \cite{lapack}. Ideally optimized versions for the target architecture should be used instead of the generic netlib versions.
 \item The Boost C++ libraries version (included in one version of the source tarball) \cite{boost}.
 \item The HDF5 library version 1.8 \cite{hdf5}.
-\item A standard-complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9.
+\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9.
 \end{itemize}
 To build optional parts of ALPS it is recommended to install in addition
 \begin{itemize}
@@ -207,10 +205,10 @@ Source and binary installation packages for MacOS X using macports \cite{macport
 
 \subsection{LiveALPS.}
 
-For Linux we additionally provide an ISO disk image, called LiveALPS, of a full Linux distribution with ALPS preinstalled.  It is  
+For Linux we additionally provide an ISO disk image, called liveALPS, of a full Linux distribution with ALPS preinstalled.  It is  
 based on remastered CD-release of Knoppix \cite{knoppix} and is ready to use 
 on a PC without special configuration. While it can be burned to a DVD we recommend using it with a USB flash drive for performance reasons.
-This  solution is especially useful for Linux users that want to try ALPS, or for summers schools and lectures.
+This  solution is especially useful for Linux users that want to try ALPS, or in summers schools or lectures.
 
 \section{Data formats}
 
@@ -233,15 +231,15 @@ A number of XML  schemas \cite{xmlschema} have been designed in ALPS 1 to descri
 \subsection{HDF5}
 
 We now complement XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  HDF5 is directly supported by many visualization and data analysis tools and a wide array of tools is 
-available for C, C++, Fortran, Python and other languages. In ALPS, HDF5 is now used as the default format for simulation results since writing binary files is substantially faster than text-based formats when a large amount of data has to be written, and the files will be smaller thanks to compression of the binary data. 
+available for C, C++, Fortran, Python and other languages. in ALPS, HDF5 is now used as the default format for simulation results since writing binary files is substantially faster than text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
 
 The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page \cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to write all results also in XML. 
 
 \section{Evaluation Tools in Python}
 
-The previous versions of ALPS  only had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML file using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language \cite{python}. Python is an easy-to-learn interpreted object-oriented language, allowing interactive evaluation of the data and arbitrarily complex evaluations. 
+The previous versions of ALPS  only had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML file using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language \cite{python}. Python is an easy to learn interpreted object-oriented language, allowing interactive evaluation of the data and arbitrarily complex evaluations. 
 
-We provide a complete set of library functions to write and read ALPS files, and a number of useful functions to evaluate the simulation results and to make plots. In particular the ALPS classes for the recording and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis \cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
+We provide a complete set of library functions to write and read ALPS files, and a number of useful functions to evaluate the simulation results and to make plots. In particular the ALPS classes for the recoding and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis \cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
 Two-dimensional plots are created using the widely available Python matplotlib package \cite{matplotlib} or by using ALPS functions to write grace \cite{grace} or gnuplot \cite{gnuplot} input files. Creation of 3D graphs is supported through VisTrails and the Visualization ToolKit (VTK) \cite{vtk} VisTrails modules.
 
 
@@ -250,7 +248,7 @@ Two-dimensional plots are created using the widely available Python matplotlib p
 \label{sec:applications}
 In addition to common libraries, the ALPS project includes a number of ready to use applications implementing the most important unbiased
 algorithms for quantum many body systems. The applications all
-share the same input and output file formats, simplifying their use, reducing the
+share the same file formats, simplifying their use, reducing the
 learning curve, and enabling the easy investigation of a model with
 more than one method. Tutorials on the use of the applications are
 included with the sources that can be found on the ALPS web
@@ -290,7 +288,7 @@ the local (impurity) Hamiltonian exactly.
 The method is useful to simulate multi-orbital models, since it can easily treat general interaction terms. A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
 
 \subsection{New Time Evolving Block Decimation Code {\tt tebd}}
-Release 2.0 contains interfaces to the Open Source TEBD project \cite{ostebd}, which is a collection of Fortran libraries for the simulation of time evolution in one-dimensional quantum systems using the time-evolving block decimation (TEBD) algorithm \cite{vidal1,vidal2}. The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.  TEBD can also find ground states via imaginary time evolution.  Because TEBD produces wavefunctions, a wide array of properties can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times.
+Release 2.0 contains interfaces to the Open Source TEBD project \cite{ostebd}, which is a collection of Fortran libraries using the Time-Evolving Block Decimation (TEBD) algorithm \cite{vidal1, vidal2} to simulate time evolution of one-dimensional quantum systems.  The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.  TEBD can also find ground states via imaginary time evolution.  Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times.
 
 At present, the TEBD routines can simulate the spin, boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models from the ALPS models library.  All 
 Hamiltonian parameters are assumed uniform throughout the system.  Observables calculated are the $z$ and $x$ magnetizations, their squares, and the $\langle \hat{S}^z_i 
@@ -300,6 +298,7 @@ the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation funct
 entropy of each site, the von Neumann entanglement entropy of each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ (i.e. the Loschmidt echo).
 
 We plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States.  These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
+
 
 \section{Integration with the VisTrails Workflow and Computational Provenance Tools}
 \begin{figure}
@@ -353,16 +352,16 @@ showspreadsheetonly]{width=8cm}
 
 \subsection{Computational Provenance}
 
-ALPS 2.0 seeks to ensure result reproducibility.  Provenance (also referred to as history, audit trail, lineage, or pedigree) captures information about the steps used to generate a given result.  Such information is crucial in data preservation and determining data quality and well as interpretation, reproduction, sharing, and publishing results.  ALPS 2.0 improves upon previous ALPS versions by using the VisTrails workflow system to record provenance related information, including algorithm workflows, data parameters, and version history to automate reproducibility. 
+ALPS 2.0 seeks to ensure result reproducibility.  Provenance (also referred to as history, audit trail, lineage, or pedigree) captures information about the steps used to generate a given result \cite{Silva07,Freire08}.  Such information is crucial in data preservation and determining data quality and well as interpretation, reproduction, sharing, and publishing results.  ALPS 2.0 improves upon previous ALPS versions by using the VisTrails \cite{vistrails} workflow system to record provenance related information, including algorithm workflows, data parameters, and version history to automate reproducibility. 
 
 \subsection{VisTrails} 
-VisTrails is an open-source system that was designed to support exploratory computational tasks such as visualization and data mining while ensuring computational provenance \cite{vistrails}.  VisTrails accomplishes this with workflows that allow a capture mechanism and an infrastructure for storage, access, and queries.
+VisTrails is an open-source system that was designed to support exploratory computational tasks such as visualization and data mining while ensuring computational provenance \cite{vistrails,Bavoil05}.  VisTrails enforces provenance with workflows that allow a capture mechanism and an infrastructure for storage, access, and queries.
 
 \subsection{Workflow systems}
 Workflow systems provide well-defined languages for specifying complex tasks from simpler ones; they capture complex processes at various levels of detail and systematically record the provenance information necessary for automation, reproducibility, and result sharing.  VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs to capture underlying python scrips which, in turn, execute ALPS algorithms.  Fig.~\ref{fig:workflow} shows an example ALPS workflow that takes input lattice parameters and model definitions (noun examples include ChainLattice and LatticeModel), executes the quantum Monte Carlo looper code, and then renders the data (examples of verb use include RunLoop and PreparePlot).
 
 \subsection{CrowdLabs}
-also mention VisMashups
+also mention VisMashups \cite{Santos09}
 \subsection{The ALPS VisTrails package}
 The ALPS team will write this after the above sections are done.
 \section{Tutorials and Examples}
