@@ -257,10 +257,11 @@ def convert_to_grace(desc):
     return makeGracePlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l)    
 
   
-def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="output.eps", fontsize=24):
+def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile='output.eps', terminal='postscript color eps enhanced', fontsize=24):
     output =  '# Gnuplot project file\n'
-    output += 'set terminal postscript color eps enhanced '+str(fontsize)+'\n'
-    output += 'set output "' + outfile + '"\n'
+    if terminal != 'x11':
+        output += 'set terminal ' + str(terminal) + ' ' +str(fontsize)+'\n'
+        output += 'set output "' + outfile + '"\n'
     if xaxis != None:
       if 'min' in xaxis and 'max' in xaxis: 
         xrange = [ xaxis['min'],xaxis['max']]
@@ -382,7 +383,7 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="
                      
     return output
 
-def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
+def convert_to_gnuplot(desc, outfile='output.eps', terminal='postscript color eps enhanced',fontsize=24):
     """ converts a plot descriptor to a gnuplot string """
     if 'title' in desc: t = desc['title'] 
     else: t = None
@@ -392,7 +393,8 @@ def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
     else: y = None
     if 'legend' in desc: l = desc['legend'] 
     else: l = None
-    return makeGnuplotPlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l,outfile=outfile,fontsize=fontsize)    
+    return makeGnuplotPlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l,outfile=outfile, terminal=terminal, fontsize=fontsize)    
+
 
 
 

@@ -34,9 +34,9 @@ import urllib, copy
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
-
 from dataset_exceptions import *
 from dataset_core import *
+from pyalps import executeCommand
 from pyalps.plot_core import *
 from pyalps.plot import *
 
@@ -150,20 +150,34 @@ class LoadXMLPlot(Module):
         self.setResult('plot',read_xml(self.getInputFromPort('file').name))
         
 class WriteGnuplotFile(Module): 
-    _input_ports = [('plot',[(PreparePlot,'the plot')]),('filename',[(basic.String, 'the output filename')])]
+    _input_ports = [('plot',[(PreparePlot,'the plot')]),('filename',[(basic.String, 'the output filename')]),('terminal',[(basic.String, 'the gnuplot terminal')]) ]
     _output_ports = [('file',[(basic.File, 'the plot file')]),
                      ('value_as_string',[(basic.String, 'the plot as string')])]
     
     def compute(self):
         description = self.getInputFromPort('plot')
-        outputname = self.getInputFromPort('filename')
-        res = convert_to_gnuplot(desc=description, outfile=outputname)
+        outputname = 'output.eps'
+        term='postscript color eps enhanced'
+        if self.hasInputFromPort('terminal'):
+            term = self.getInputFromPort('terminal')
+        if self.hasInputFromPort('filename'):
+            outputname = self.getInputFromPort('filename')
+        else:
+            term = 'x11'
+        res = convert_to_gnuplot(desc=description, outfile=outputname, terminal=term)
         o = self.interpreter.filePool.create_file()
+        print "which FILE?", o.name
         f = file(o.name,'w')
+        print "OUTPUT"
+        print res
         f.write(res)
         f.close()
         self.setResult('value_as_string',res)
         self.setResult('file',o)
+        if term == 'x11':
+            executeCommand(['nohup','gnuplot', '-persist' , o.name,'&'])
+            
+        
         
 
 class Plotter(NotCacheable, Module):
