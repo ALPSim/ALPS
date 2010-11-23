@@ -682,7 +682,7 @@ bool WRun::create_worm()
 
   // determine kink segment
   cyclic_iterator start = adjacent(first_kink(s), t1);
-  if (start->time() == t1)
+  if (start.valid() && start->time() == t1)
     return false;
   cyclic_iterator end   = (start.valid() ? start+1 : start);
 
@@ -727,7 +727,7 @@ bool WRun::create_worm()
 
   // choose time t2 - will be shifted afterwards
   time_struct t2 = t1+0.5*time;
-  if (end->time()==t2)
+  if (end.valid() && end->time()==t2)
     return false;
 
   // insert wormheads
