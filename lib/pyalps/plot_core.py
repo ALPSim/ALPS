@@ -158,10 +158,10 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
         xlog = False
         ylog = False
         if xaxis != None:
-          if  'logarithmic' in xaxis:
+          if  'logarithmic' in xaxis: 
             xlog = xaxis['logarithmic']
         if yaxis != None:
-          if 'logarithmic' in yaxis:
+          if 'logarithmic' in yaxis and yaxis['logarithmic'] != None:
             ylog = yaxis['logarithmic']
             
         if xlog:
@@ -271,7 +271,7 @@ def makeGnuplotPlot(data,title=None,xaxis=None,yaxis=None,legend=None, outfile="
         output += 'set yrange [' + str(yrange[0])+': ' + str (yrange[1]) + ']\n'
     
     if title != None:
-        output += 'set title "'+ desc['title'] + '"\n'           
+        output += 'set title "'+ title + '"\n'           
 
     xlog = False
     ylog = False
@@ -392,7 +392,7 @@ def convert_to_gnuplot(desc, outfile="output.eps", fontsize=24):
     else: y = None
     if 'legend' in desc: l = desc['legend'] 
     else: l = None
-    makeGnuplotPlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l,outfile=outfile,fontsize=fontsize)    
+    return makeGnuplotPlot(desc['data'],title=t,xaxis=x,yaxis=y,legend=l,outfile=outfile,fontsize=fontsize)    
 
 
 
