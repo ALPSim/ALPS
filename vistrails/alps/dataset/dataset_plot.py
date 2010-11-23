@@ -150,13 +150,14 @@ class LoadXMLPlot(Module):
         self.setResult('plot',read_xml(self.getInputFromPort('file').name))
         
 class WriteGnuplotFile(Module): 
-    _input_ports = [('plot',[(PreparePlot,'the plot')])]
+    _input_ports = [('plot',[(PreparePlot,'the plot')]),('filename',[(basic.String, 'the output filename')])]
     _output_ports = [('file',[(basic.File, 'the plot file')]),
                      ('value_as_string',[(basic.String, 'the plot as string')])]
     
     def compute(self):
-        desc = self.getInputFromPort('plot')
-        res = convert_to_gnuplot(desc)
+        description = self.getInputFromPort('plot')
+        outputname = self.getInputFromPort('filename')
+        res = convert_to_gnuplot(desc=description, outfile=outputname)
         o = self.interpreter.filePool.create_file()
         f = file(o.name,'w')
         f.write(res)
