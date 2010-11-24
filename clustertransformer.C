@@ -288,7 +288,22 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
         }
       }
     }
-  } 
+  }
+  else if (parms.defined("ISOLATED")) {
+    std::cout << "calculating G0_omega for isolated cluster";
+    for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+      for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
+        const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+        for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+          vector_type k(dimension());
+          for (unsigned int d=0; d<dimension(); ++d) 
+            k[d] = cluster_momentum(kc,d);
+          const std::complex<double> G0 = 1./(iomega_n+mu-epsilon(k));
+          G0_omega_new(freq, kc, kc, flavor) = G0;
+        }
+      }
+    }
+  }
   else {
     matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
     matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
