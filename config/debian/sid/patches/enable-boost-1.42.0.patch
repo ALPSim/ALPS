@@ -1,0 +1,29 @@
+ALPS upstream only supports boost >= 1.43.0 due to the bug in
+boost/accumulators. However, Debian squeeze only have 1.42.0.
+Therefore, allow 1.42.0 and patch boost/accumulators when building.
+--- a/config/FindBoostForALPS.cmake
++++ b/config/FindBoostForALPS.cmake
+@@ -12,7 +12,7 @@
+ if (NOT Boost_ROOT_DIR)
+   message(STATUS "Looking for precompiled Boost libraries")
+   # Boost 1.42 is not (yet) supported version number on CMake 1.8.0.
+-  set(Boost_ADDITIONAL_VERSIONS "1.45" "1.45.0" "1.45" "1.44.0" "1.43" "1.43.0")
++  set(Boost_ADDITIONAL_VERSIONS "1.45" "1.45.0" "1.45" "1.44.0" "1.43" "1.43.0" "1.42" "1.42.0")
+   # Debian and Ubuntu packages are multithreaded.
+   # Commented out because default is ON.
+   #  set(Boost_USE_MULTITHREADED ON)
+@@ -24,11 +24,11 @@
+   # We do not require Boost.MPI, therefore check whether Boost.MPI exists
+   # before actual find_package for Boost.
+   # - Ubuntu 10.10 does not have Boost.MPI package.
+-  find_package(Boost 1.43.0 COMPONENTS mpi)
++  find_package(Boost 1.42.0 COMPONENTS mpi)
+   if (Boost_FOUND)
+-    find_package(Boost 1.43.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
++    find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
+   else (Boost_FOUND)
+-    find_package(Boost 1.43.0 COMPONENTS date_time filesystem program_options python regex system serialization thread)
++    find_package(Boost 1.42.0 COMPONENTS date_time filesystem program_options python regex system serialization thread)
+   endif (Boost_FOUND)
+   if (APPLE AND NOT Boost_FOUND)
+     find_package(boost COMPONENTS date_time-mt filesystem-mt program_options-mt python-mt regex-mt system-mt serialization-mt thread-mt mpi-mt)
