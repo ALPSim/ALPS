@@ -1,6 +1,7 @@
 alps (2.0.0~rc2-1) unstable; urgency=low
 
   * New upstream release (2.0.0rc2).
+  * Switch to dpkg-source 3.0 (quilt) format.
 
  -- Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>  Thu, 25 Nov 2010 09:54:24 +0900
 
