@@ -2,6 +2,7 @@
 %\documentclass[3p,twocolumn]{elsarticle}
 \documentclass[12pt]{iopart}
 
+\usepackage{xspace}
 \usepackage{vistrails}
 %\usepackage{amsmath}
 %\usepackage{amssymb}
@@ -14,6 +15,17 @@
 
 \renewcommand{\vistrailspath}{http://alps.comp-phys.org/vistrails/run_vistrails.php}
 \renewcommand{\vistrailsdownload}{http://alps.comp-phys.org/vistrails/download.php}
+
+\newcommand{\eg}{e.g.,\xspace}
+\newcommand{\ie}{i.e.,\xspace}
+\newcommand{\etc}{etc.\@\xspace}
+% \newcommand{\etal}{~et~al.\@\xspace}
+
+\newcommand{\markref}[1]{#1}
+\newcommand{\freiremarkref}[1]{#1}
+\newcommand{\me}{Juliana Freire}
+\newcommand{\meabbrev}{J.~Freire}
+
 
 \begin{document}
 
@@ -43,21 +55,20 @@
 	\myauthor{\ref{eth}}{S.~Isakov}{isakov@phys.ethz.ch}
 	\myauthor{\ref{utah}}{D. Koop}{dakoop@cs.utah.edu}
 	\myauthor{\ref{eth}}{P.N. Ma}{pingnang@phys.ethz.ch}
-	\myauthor{\ref{tokyo}}{H.~Matsuo}{halm@looper.t.u-tokyo.ac.jp}
 	\myauthor{\ref{eth},\ref{utah}}{P.~Mates}{mates@sci.utah.edu}
 	\myauthor{\ref{paris}}{O. Parcollet}{parcolle@spht.saclay.cea.fr}
 	\myauthor{\ref{affpol}}{G.~Pawlowski}{gpawlo@amu.edu.pl}
 	\myauthor{\ref{epfl}}{J.D.~Picon}{jean-david.picon@epfl.chl}
 	\myauthor{\ref{harvard},\ref{eth}}{L.~Pollet}{pollet@phys.ethz.ch}
 	\myauthor{\ref{goettingen}}{T.~Pruschke}{pruschke@theorie.physik.uni-goettingen.de}
-	\myauthor{\ref{brazil},\ref{utah}}{E.~Santos}{emanuele@sci.utah.edu}
+	\myauthor{\ref{utah},\ref{brazil}}{E.~Santos}{emanuele@sci.utah.edu}
 	\myauthor{\ref{virginia}}{V.W.~Scarola}{scarola@vt.edu}
 	\myauthor{\ref{lmu}}{U.~Schollw\"ock}{schollwoeck@lmu.de}
 	\myauthor{\ref{utah}}{C.~Silva}{csilva@sci.utah.edu}
 	\myauthor{\ref{eth}}{B.~Surer}{surerb@phys.ethz.ch}
 	\myauthor{\ref{tokyo}}{S. Todo}{wistaria@ap.t.u-tokyo.ac.jp}
 	\myauthor{\ref{stationq}}{S.~Trebst}{trebst@kitp.ucsb.edu}
-	\myauthor{\ref{eth}}{M.~Troyer}{troyer@ethz.ch}
+	\myauthor{\ref{eth}}{M.~Troyer}{troyer@ethz.ch}\footnote{Corresponding author}
 	\myauthor{\ref{colorado}}{M. Wall}{mwall@mymail.mines.edu}
 	\myauthor{\ref{eth}}{P. Werner}{werner@phys.ethz.ch}
 	\myauthor{\ref{rwth},\ref{stuttgart}}{S. Wessel}{wessel@phys.ethz.ch}
@@ -161,8 +172,8 @@ publishing source codes used to obtain published results and by integration with
 
 
 
- In the following, we present a quick review of these
- aspects of the ALPS project, focusing on new features in release 2.0:
+ In this paper, we present an overview of these
+ aspects of the ALPS project, emphasizing the new features in release 2.0:
  
  \begin{itemize}
 \item CMake build system \cite{cmake}, simplifying configuration and enabling ALPS to be built on  Windows.
@@ -210,7 +221,7 @@ Source and binary installation packages for MacOS X using macports \cite{macport
 For Linux we additionally provide an ISO disk image, called liveALPS, of a full Linux distribution with ALPS preinstalled.  It is  
 based on remastered CD-release of Knoppix \cite{knoppix} and is ready to use 
 on a PC without special configuration. While it can be burned to a DVD we recommend using it with a USB flash drive for performance reasons.
-This  solution is especially useful for Linux users that want to try ALPS, or in summers schools or lectures.
+This  solution is especially useful for Linux users that want to try ALPS, or for summer schools or lectures.
 
 \section{Data formats}
 
@@ -242,6 +253,7 @@ The ALPS HDF5 files store simulation parameters, the detailed results of Monte C
 The previous versions of ALPS  only had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML file using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language \cite{python}. Python is an easy to learn interpreted object-oriented language, allowing interactive evaluation of the data and arbitrarily complex evaluations. 
 
 We provide a complete set of library functions to write and read ALPS files, and a number of useful functions to evaluate the simulation results and to make plots. In particular the ALPS classes for the recoding and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis \cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
+
 Two-dimensional plots are created using the widely available Python matplotlib package \cite{matplotlib} or by using ALPS functions to write grace \cite{grace} or gnuplot \cite{gnuplot} input files. Creation of 3D graphs is supported through VisTrails and the Visualization ToolKit (VTK) \cite{vtk} VisTrails modules.
 
 
@@ -256,7 +268,7 @@ more than one method. Tutorials on the use of the applications are
 included with the sources that can be found on the ALPS web
 page \cite{alps}.
 
-\subsection{Applications already existing in the previous version}
+\subsection{Updated applications from previous versions}
 All applications from ALPS 1.3, with the exception of the single particle DMRG demonstration program, have been retained in ALPS 2.0. They continue to work in the same way, with minor bug fixes and patches for incompatibilities. Specifically we include:
 
 \subsubsection{Exact diagonalization}
@@ -299,10 +311,181 @@ $\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the bos
 the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model.  All models calculate the energy, von Neumann entanglement 
 entropy of each site, the von Neumann entanglement entropy of each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ (i.e. the Loschmidt echo).
 
-We plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States.  These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
-
+%We plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States.  These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
 
 \section{Integration with the VisTrails Workflow and Computational Provenance Tools}
+
+\subsection{Computational Provenance}
+
+ALPS 2.0 seeks to ensure result reproducibility.  Provenance (also
+referred to as history, audit trail, lineage, or pedigree) captures
+information about the steps used to generate a given result
+\cite{Silva07,Freire08}.  Such information is crucial in data
+preservation and determining data quality as well as interpretation,
+reproduction, sharing, and publishing results.  Release 2.0 improves
+upon previous ALPS versions by using the VisTrails \cite{vistrails}
+workflow system to record provenance related information, including
+algorithm workflows, data parameters, and version history to automate
+reproducibility.
+
+VisTrails is an open-source system that was designed to support
+exploratory computational tasks such as visualization and data mining
+while ensuring computational provenance \cite{vistrails,Bavoil05}.
+VisTrails enforces provenance with workflows that allow a capture
+mechanism and an infrastructure for storage, access, and queries.
+
+\subsection{ Workflows}
+
+Workflow systems provide well-defined languages for specifying complex
+tasks from simpler ones; they capture complex processes at various
+levels of detail and systematically record the provenance information
+necessary for automation, reproducibility, and result sharing.
+
+We start by introducing basic concepts underlying
+workflows and provenance along with basic the terminology.
+Scientific workflows are often used to perform data intensive tasks
+and are represented as dataflow networks~\cite{lee@ieee1995} where the
+execution order is determined by the flow of data through the
+workflow. Scientific workflow systems offer a number of advantages
+over programs, scripts, and business workflows, for constructing and
+managing computational tasks. In addition to providing a simple
+programming model, many systems provide intuitive visual programming
+interfaces, which make them more usable for users who do not have
+substantial programming expertise. As we discuss below, the structure
+present in workflow definitions also enables a series of operations
+and queries that simplify the manipulation and re-use of workflows.
+From now on, we use the terms scientific workflow, workflow, pipeline,
+and dataflow, interchangeably.
+
+\begin{figure}[t]
+\includegraphics[width=\linewidth]{figures/provenance_types.pdf}
+\caption{(XXX: change to an ALPS workflow) The workflow specification (on the left)
+  generates isosurface visualizations of a structured grid data
+  set. The workflow instance (in the middle), in addition to the
+  workflow specification, contains value assignments for parameters of
+  the modules. This instance was used to derive the head visualization
+  (in the bottom left). The workflow runs (on the right) consist of
+  information collected while the workflow instance was executed.  
+}
+\vspace{0cm}
+\label{fig:workflow-spec-run}
+\end{figure}
+
+Formally, a \emph{workflow specification} is defined by a tuple
+$(M,I,O,C,p:O \cup I \rightarrow M)$, where $M, I, O, C$ are,
+respectively, sets of {\it modules}, {\it input ports}, {\it output
+  ports}, {\it connections}, and $p$ is a function that assigns a
+unique module to input and output ports.  If $x \in I \cup O$ and $m =
+p(x)$ then we say that $x$ {\it is a port of module} $m$ and that $m$
+is {\it the module of} $x$.  The set $C$ of connections is a subset of
+$O \times I$.  In a {\it connection} $(o,i) \in C$, $o$ is called the
+{\it source port} and $i$ is called the {\it target
+  port}. Furthermore, the module of the source port cannot be the same
+as the module of the target port.  An input port can be the target
+port of at most one connection in $C$.  Additionally each port (input
+or output) has an associated type and a {\it name} that is unique
+across the ports of the same module.  A {\it module signature} is
+defined as the set pairs, where each pair contains a port names and
+its type.  Each module has a set of {\it parameters}.  Each parameter
+has a unique {\it name} across the set of parameters of the same
+module.
+
+A \emph{workflow instance} consists of a specification combined with
+bindings that provide values to parameters in the modules.  A {\it
+  workflow run} is the execution of the following algorithm for a
+workflow instance: each module checks whether all its input ports that
+are target ports of a connection have a value; if false it waits; if
+true, the module, according to its semantics, produces output values
+on its output ports; values that are produced in an output port flow
+to target ports of all the connections that have that output port as
+its source port; this algorithm continues until there are no more
+modules to execute.
+%
+These concepts are illustrated in Figure~\ref{fig:workflow-spec-run}.
+
+\subsection{Data Provenance.}
+In the context of scientific workflows, data provenance is a record of
+the derivation of a set of results.  There are two distinct forms of
+provenance~\cite{VDL:Challenge06}: prospective and retrospective.
+\emph{Prospective provenance} captures the specification of a
+computational task (\ie a workflow specification or instance)---it
+corresponds to the \emph{steps that need to be followed} (or a recipe)
+to generate a data product or class of data products.
+\emph{Retrospective provenance} captures the \emph{steps that were
+  executed} (\ie the workflow run) as well as information about the
+execution environment used to derive a specific data product---a
+detailed log of the execution of a computational task.
+
+An important piece of information present in workflow provenance is
+information about \emph{causality}: the dependency relationships
+between data products and the processes that generate them.  Causality
+can be inferred from both prospective and retrospective provenance.
+Data provenance also includes \emph{user-defined information}, such as
+documentation that cannot be automatically captured but records
+important decisions and notes.  This data is often captured in the
+form of annotations.
+
+\paragraph{Provenance of Workflow Evolution.}
+%
+Although workflows have been traditionally used to automate repetitive
+processes, for many exploratory scientific tasks such as data analysis
+and visualization, change is the norm. As users formulate and test
+hypotheses, they often need to refine and compare the results of
+several workflows. The VisTrails~\cite{vistrails} supports a novel
+change-based provenance model that treats workflow instances as
+first-class data
+products~\cite{Freire:2006:IPAW,callahan@sciflow2006}.  As a scientist
+makes modifications to a workflow, the system transparently records
+those changes (\eg the addition of a module, the modification of a
+parameter, \etc) akin to a database transaction log. Note that the
+change-based model uniformly captures both changes to parameter values
+and to workflow definitions. This sequence of changes is sufficient to
+determine the provenance of data products, and it also captures
+information about how the workflows evolve over time.  We refer to
+this detailed provenance of the workflow evolution as a visual trail,
+or a \emph{vistrail}.
+
+\begin{figure}[t]
+\centering
+\begin{center}
+  \includegraphics[width = 0.75\linewidth,clip=false]{Figures/croos-tree-3.png}
+\caption{(XXX: change to an ALPS example) Workflow evolution provenance. An example
+    of exploratory visualization for studying salinity changes at the
+    interface between the Columbia River Inlet and the Pacific Ocean
+    using VisTrails.  Complete provenance of the exploration process
+    is displayed as a history tree with each node representing a
+    workflow instance that generates a visualization.  Detailed
+    meta-data is also stored including free-text notes made by the
+    scientist, the date and time the workflow was created or modified,
+    an optional descriptive tag, and the user that created
+    it.} \label{fig:cmop} \vspace{-.3cm}
+\end{center}
+\end{figure}
+
+As Figure~\ref{fig:cmop} illustrates, each node in a vistrail
+corresponds to a workflow instance and contains value assignments for
+the module parameters. A series of workflow runs may be associated
+with a node as well as additional metadata, such as user annotations.
+A tree-based view of a vistrail allows a scientist to return to a
+previous version in an intuitive way, to undo bad changes, to compare
+different workflows, and to be reminded of the actions that led to a
+particular result.  Another important benefit of the change-based
+provenance model is that it enables a series of operations that
+simplify the exploration process, in particular, the ability to refine
+workflows by analogy~\cite{analogies@tvcg2007}, as well as to visually
+compare workflows and their results~\cite{Freire:2006:IPAW}.
+
+It is important to note that the provenance of workflow execution and
+workflow evolution help inform each other, leading to improved methods
+for using the combined information. Knowing which workflow instances
+have executed correctly can explain why workflows were updated, and
+the number of times that an instance has been executed can help
+highlight important versions of workflows.  Similarly, knowing how a
+workflow evolved can help users debug errors that occur when running
+modified versions.  Change-based provenance from workflow evolution
+can also speed up runs of similar workflows via
+caching~\cite{bavoil@vis2005}.
+
 \begin{figure}
 \begin{center}
 
@@ -352,21 +535,30 @@ showspreadsheetonly]{width=8cm}
 \end{center}
 \end{figure}
 
-\subsection{Computational Provenance}
 
-ALPS 2.0 seeks to ensure result reproducibility.  Provenance (also referred to as history, audit trail, lineage, or pedigree) captures information about the steps used to generate a given result \cite{Silva07,Freire08}.  Such information is crucial in data preservation and determining data quality as well as interpretation, reproduction, sharing, and publishing results.  Release 2.0 improves upon previous ALPS versions by using the VisTrails \cite{vistrails} workflow system to record provenance related information, including algorithm workflows, data parameters, and version history to automate reproducibility. 
+\subsection{Caching and persistent storage}
 
-\subsection{VisTrails} 
-VisTrails is an open-source system that was designed to support exploratory computational tasks such as visualization and data mining while ensuring computational provenance \cite{vistrails,Bavoil05}.  VisTrails enforces provenance with workflows that allow a capture mechanism and an infrastructure for storage, access, and queries.
+We should discuss how VisTrails caches results, with the advantage that only those part of a workflow that have been changed have to be reexecuted - a bug advantage over scripts. Also, we should mention Dave's paper on strong links and persistent storage.
 
-\subsection{Workflow systems}
-Workflow systems provide well-defined languages for specifying complex tasks from simpler ones; they capture complex processes at various levels of detail and systematically record the provenance information necessary for automation, reproducibility, and result sharing.  VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs to capture underlying python scrips which, in turn, execute ALPS algorithms.  Fig.~\ref{fig:workflow} shows an example ALPS workflow that takes input lattice parameters and model definitions (noun examples include ChainLattice and LatticeModel), executes the quantum Monte Carlo looper code, and then renders the data (examples of verb use include RunLoop and PreparePlot).
-
-\subsection{CrowdLabs}
-CrowdLabs is an social online workflow repository for the VisTrails system. It combines workflow management tools with a scalable infrastructure to allow scientists to collaboratively analyze and visualize data. CrowdLabs is capable of hosting, executing, and serving results from VisTrails workflows, including those that make use of the ALPS VisTrails package. VisMashups \cite{Santos09} are also integrated into CrowdLabs, enabling users to modify parameters and re-execute workflows from within their web browsers. This provides an entry point for non-experts to explore and interact with complicated simulations workflows.
+\subsection{CrowdLabs, VisMashup, Latex and wiki extensions ....}
+CrowdLabs is an social online workflow repository for the VisTrails system. It combines workflow management tools with a scalable infrastructure to allow scientists to collaboratively analyze and visualize data. CrowdLabs is capable of hosting, executing, and serving results from VisTrails workflows, including those that make use of the ALPS VisTrails package. VisMashups \cite{Santos09} are also integrated into CrowdLabs, enabling users to modify parameters and re-execute workflows from within their web browsers. This provides an entry point for non-experts to explore and interact with complicated simulation workflows.
 
 \subsection{The ALPS VisTrails package}
-The ALPS team will write this after the above sections are done.
+
+ALPS 2.0 provides package of modules for VisTrails, for the preparation of input files, the execution of simulations, and data analysis and plotting.
+
+VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs for the names of modules that execute
+ Python scripts which, in turn execute ALPS
+algorithms in Python or compiled code.  Fig.~\ref{fig:workflow} shows an example ALPS workflow
+that takes input lattice parameters and model definitions (described by nouns, such as 
+ ChainLattice and LatticeModel), executes the quantum
+Monte Carlo looper code, and then renders the data (described by verbs such as  RunLoop and PreparePlot).
+
+The creation of such workflows is explained in a set of tutorials and on the web page. Furthermore, all ALPS tutorials, discussed in the next section, are available  as VisTrails workflows, providing an extensive set of examples that can be used as templates for the user's simulations. 
+
+This paper already makes use of ALPS 2.0 and VisTrails. Full provenance information for the results in Fig. \ref{fig:figure} is available from the URL linked to the figure. Clicking the figure will download the workflow that has been used to prepare the figure and its version history. After installing VisTrails and ALPS the reader of the paper can redo the full simulation.
+
+
 \section{Tutorials and Examples}
 
 The ALPS web page \cite{alps} contains an extensive list of tutorials, explaining the use of the various application codes and evaluation tools and how to use of the ALPS libraries in the user's code. We provide tutorials and instructions for using ALPS in three ways: 
@@ -488,7 +680,11 @@ ALPS is an open initiative and we welcome contributions from the community.
 
 \section{Acknowledgements}
 
-We thank A.F. Albuquerque, F. Alet, P. Corboz, P.Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. We thank P. Zoller for the suggestion to provide binary installers. The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, Grant No.~J-992, the National Science Foundation under Grant No.~PHY-0903457, the Deutsche Forschungsgemeischaft through SFB 602, and a grant from the Army Research Office with funding from the DARPA OLE program.
+We thank A.F. Albuquerque, F. Alet, P. Corboz, P.Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. 
+
+We thank all users of the previous versions of ALPS and beta testers of ALPS 2.0, especially J. Alfonsi, S. Aicardi, A. Akande, P. Anders, A. Anfossi, Z. Asadzadeh, R.~Bhat, J.H. Brewer, S. Bulut, E. Burovskiy, G. Carleo, G. Chen, M.D. Costa, M.~Dolfi, J. Figgins, S.~Gazit, U.~Gerber, R. Ghulghazaryan, C. Gils, S. Greschner, C.~Hamer, J. Hammond, K. Hassan, N. Heine, F.-J. Jiang, R. Jordens, H.G. Katzgraber, B.~Keiyh, J. Kim, J. Kolasinski, B.~Koopman, F. K\"ormann E.~Kozik, M.F. Krenn, F.~Kruger, M. Laurent, J. Lopes, M. Maik, M. Maksymenko, N. Moran, A. Nunnenkamp, J.D. Peel, S.~Pilati, K. Prsa, N.~Rahman, M. Rofiq, H. R\o nnow, J. Ruostekoski, J.~Schnack, N. Schuch, A. Sen, K. Shtengel, J. Single, M. Skoulatos, C. Sliwa, M.~Spenke, M.~Stoudenmire, V. Tangoulis, A.~Taroni, B. Thielemann, M. Tovar, H. Tran, V.~Varma, S. Ward, T. Wasiutynski, J. Wen, J. Wilms, H. Wunderlich, F. Xiao, X.Q. Yu, J.~Zakrzewski, Z.-X. Zhou, and R. Ziemkiewicz. We thank P. Zoller for the suggestion to provide binary installers. 
+
+The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, Grant No.~J-992, the National Science Foundation under Grant No.~PHY-0903457, the Deutsche Forschungsgemeischaft through SFB 602, and a grant from the Army Research Office with funding from the DARPA OLE program.
 
 
 \section*{References}

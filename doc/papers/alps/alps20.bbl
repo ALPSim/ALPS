@@ -16,11 +16,9 @@ Alet F, Dayal P, Grzesik A, Honecker A, K\"{o}rner M, L\"{a}uchli A, Manmana
 \bibitem{ALPS1.3}
 Albuquerque A, Alet F, Corboz P {\em et~al.\/} 2007 {\em Journal of Magnetism
   and Magnetic Materials\/} {\bf 310} 1187--1193
-  \urlprefix\url{http://dx.doi.org/10.1016/j.jmmm.2006.10.304}
 
 \bibitem{Evertz03}
 Evertz H~G 2003 {\em Advances in Physics\/} {\bf 52}(1) 1--66
-  \urlprefix\url{http://www.informaworld.com/10.1080/0001873021000049195}
 
 \bibitem{Troyer03}
 Troyer M, Wessel S and Alet F 2003 {\em Phys. Rev. Lett.\/} {\bf 90} 120201
@@ -40,18 +38,16 @@ Vidal G 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 040502
 \bibitem{Daley2004}
 Daley A~J, Kollath C, Schollwöck U and Vidal G 2004 {\em Journal of
   Statistical Mechanics: Theory and Experiment\/} {\bf 2004} P04005
-  \urlprefix\url{http://stacks.iop.org/1742-5468/2004/i=04/a=P04005}
 
 \bibitem{White2004}
 White S~R and Feiguin A~E 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 076401
 
 \bibitem{Rubtsov04}
 Rubtsov A~N and Lichtenstein A~I 2004 {\em JETP Letters\/} {\bf 80} 61--65
-  \urlprefix\url{http://www.springerlink.com/content/9820175336x10771}
 
 \bibitem{Rubtsov05}
 Rubtsov A~N, Savkin V~V and Lichtenstein A~I 2005 {\em Phys. Rev. B\/} {\bf 72}
-  035122 \urlprefix\url{http://dx.doi.org/10.1103/PhysRevB.72.035122}
+  035122
 
 \bibitem{Werner06}
 Werner P, Comanac A, de' Medici L {\em et~al.\/} 2006 {\em Phys. Rev. Lett.\/}
@@ -59,12 +55,10 @@ Werner P, Comanac A, de' Medici L {\em et~al.\/} 2006 {\em Phys. Rev. Lett.\/}
 
 \bibitem{Werner06Kondo}
 Werner P and Millis A~J 2006 {\em Phys. Rev. B\/} {\bf 74} 155107
-  \urlprefix\url{http://dx.doi.org/10.1103/PhysRevB.74.155107}
 
 \bibitem{Gull08_ctaux}
 Gull E, Werner P, Parcollet O and Troyer M 2008 {\em EPL (Europhysics
   Letters)\/} {\bf 82} 57003
-  \urlprefix\url{http://stacks.iop.org/0295-5075/82/57003}
 
 \bibitem{xml}
 \url{http://www.w3.org/XML/}
@@ -153,7 +147,7 @@ Alet F, Wessel S and Troyer M 2005 {\em Phys. Rev.E.\/} {\bf 71} 036706
 
 \bibitem{Prokofev98A}
 Prokof'ev N~V, Svistunov B~V and Tupitsyn I~S 1998 {\em JETP Sov. Phys.\/} {\bf
-  87} 310 \urlprefix\url{http://arxiv.org/abs/cond-mat/9703200}
+  87} 310
 
 \bibitem{Georges96}
 Georges A, Kotliar G, Krauth W and Rozenberg M~J 1996 {\em Rev. Mod. Phys.\/}
@@ -161,7 +155,7 @@ Georges A, Kotliar G, Krauth W and Rozenberg M~J 1996 {\em Rev. Mod. Phys.\/}
 
 \bibitem{Kotliar06}
 Kotliar G, Savrasov S~Y, Haule K {\em et~al.\/} 2006 {\em Rev. Mod. Phys.\/}
-  {\bf 78} 865 \urlprefix\url{http://dx.doi.org/10.1103/RevModPhys.78.865}
+  {\bf 78} 865
 
 \bibitem{Maier05}
 Maier T, Jarrell M, Pruschke T and Hettler M~H 2005 {\em Rev. Mod. Phys.\/}
@@ -169,7 +163,6 @@ Maier T, Jarrell M, Pruschke T and Hettler M~H 2005 {\em Rev. Mod. Phys.\/}
 
 \bibitem{Hirsch86}
 Hirsch J~E and Fye R~M 1986 {\em Phys. Rev. Lett.\/} {\bf 56} 2521--2524
-  \urlprefix\url{http://dx.doi.org/10.1103/PhysRevLett.56.2521}
 
 \bibitem{ALPSDMFT}
 Gull E, Werner P, Fuchs S, Surer B, Pruschke T and Troyer M 2010
@@ -177,5 +170,50 @@ Gull E, Werner P, Fuchs S, Surer B, Pruschke T and Troyer M 2010
 
 \bibitem{ostebd}
 \url{http://physics.mines.edu/downloads/software/tebd/}
+
+\bibitem{Silva07}
+Silva C, Freire J and Callahan S 2007 {\em IEEE Computing in Science and
+  Engineering\/} {\bf 9} 82
+
+\bibitem{Freire08}
+Freire J, Koop D and Silva C 2008 {\em Computing in Science and Engineering\/}
+  {\bf 10} 11
+
+\bibitem{Bavoil05}
+Bavoil L, Callahan S, Crossno P, Freire J, Scheidegger C, Silva C and Vo H 2005
+  {\em Proceeding of IEEE Visualization\/}  18
+
+\bibitem{lee@ieee1995}
+Lee E~A and Parks T~M 1995 {\em Proceedings of the IEEE\/} {\bf 83} 773--801
+
+\bibitem{VDL:Challenge06}
+Clifford B, Foster I, Hategan M, Stef-Praun T, Wilde M and Zhao Y 2007 {\em
+  Concurrency and Computation: Practice and Experience\/}
+
+\bibitem{Freire:2006:IPAW}
+\markref{J Freire}, \markref{C T Silva}, \markref{S P Callahan}, Santos E,
+  Scheidegger C~E and Vo H~T 2006 Managing rapidly-evolving scientific
+  workflows {\em International Provenance and Annotation Workshop (IPAW)\/}
+  LNCS 4145 pp 10--18 invited paper
+
+\bibitem{callahan@sciflow2006}
+Callahan S, \freiremarkref{\meabbrev}, Santos E, Scheidegger C, Silva C and Vo
+  H 2006 {Managing the Evolution of Dataflows with VisTrails \emph{(Extended
+  Abstract)}} {\em IEEE Workshop on Workflow and Data Flow for Scientific
+  Applications (SciFlow)\/}
+
+\bibitem{analogies@tvcg2007}
+Scheidegger C~E, Vo H~T, Koop D, Freire J and Silva C~T 2007 {\em IEEE
+  Transactions on Visualization and Computer Graphics (Proceedings of
+  Visualization)\/} {\bf 13} 1560--1567
+
+\bibitem{bavoil@vis2005}
+Bavoil L, Callahan S, Crossno P, \freiremarkref{\meabbrev}, Scheidegger C,
+  Silva C and Vo H 2005 Vistrails: Enabling interactive multiple-view
+  visualizations {\em Prof. of IEEE Visualization\/} pp 135--142
+
+\bibitem{Santos09}
+Santos E, Lins L, Ahrens J, Freire J and Silva C 2009 {\em IEEE Transactions on
+  Visualization and Computer Graphics\/} {\bf 15} 1539
 
 \end{thebibliography}
