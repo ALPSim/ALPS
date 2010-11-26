@@ -31,7 +31,6 @@
 #include "green_function.h"
 #include "nambu_green_function.h"
 #include "U_matrix.h"
-#include "cluster.h"
 #include <fstream>
 #include <sstream>
 #include <math.h>
@@ -85,50 +84,14 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
         os<<std::endl;
       }
       break;
-  case blockdiagonal:
+    case blockdiagonal:
     {
-      matsubara_green_function_t selfenergy = AntiFerroDCATransformer::green_function_inverse(g_bare);
-      selfenergy = AntiFerroDCATransformer::green_function_subtract(selfenergy, AntiFerroDCATransformer::green_function_inverse(g_dressed));
-      for(unsigned int i=0;i<g_bare.nfreq();++i){
-        os<<(2*i+1)*M_PI/beta<<"\t";
-        for (unsigned int k=0; k<g_bare.nsite(); k+=2)
-          for (unsigned int p1=0; p1<=1; p1++)
-            for (unsigned int p2=0; p2<=1; p2++)
-              for(unsigned int f=0;f<g_bare.nflavor();++f)
-                os<<selfenergy(i,k+p1,k+p2,f).real()<<"\t"<<selfenergy(i,k+p1,k+p2,f).imag()<<"\t";
-        os<<std::endl;
-      }
-      break;
+      std::cerr<<"please use cluster framework for block diag GF"<<std::endl;;
     }
-  case nondiagonal:
+    case nondiagonal:
     {
-      matsubara_green_function_t selfenergy(g_bare);
-      for(unsigned int i=0;i<g_bare.nfreq();++i){
-        os<<(2*i+1)*M_PI/beta<<"\t";
-        typedef ClusterHelper::Matrix<std::complex<double> >::Type matrix_t;
-        std::vector<matrix_t> M_bare(g_bare.nflavor(), matrix_t(g_bare.nsite(), g_bare.nsite()));
-        std::vector<matrix_t> M_dressed(M_bare);
-        for(unsigned int f=0;f<g_bare.nflavor();++f) {
-          for (unsigned int s1=0; s1<g_bare.nsite(); ++s1) { 
-            for (unsigned int s2=0; s2<g_bare.nsite(); ++s2) {    
-              M_bare[f](s1, s2) = g_bare(i,s1,s2,f);
-              M_dressed[f](s1, s2) = g_dressed(i,s1,s2,f);
-            }
-          }
-          M_bare[f] = ClusterHelper::Matrix<std::complex<double> >::inverse(M_bare[f]); 
-          M_dressed[f] = ClusterHelper::Matrix<std::complex<double> >::inverse(M_dressed[f]); 
-        }
-        for (unsigned int s1=0; s1<g_bare.nsite(); ++s1) {
-          for (unsigned int s2=0; s2<g_bare.nsite(); ++s2) {
-            for(unsigned int f=0;f<g_bare.nflavor();++f) {
-              std::complex<double> selfenergy = M_bare[f](s1,s2) - M_dressed[f](s1,s2);
-              os<<selfenergy.real()<<"\t"<<selfenergy.imag()<<"\t";
-            }
-          }
-        }
-        os<<std::endl;
-      }
-      break;
+      std::cerr<<"please use cluster framework for block diag GF"<<std::endl;;
+      //throw std::invalid_argument("please use cluster framework for full nondiag GF");
     }
   }
 }

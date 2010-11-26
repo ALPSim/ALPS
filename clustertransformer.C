@@ -277,7 +277,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   //bool paramagnet = static_cast<bool>(parms["PARAMAGNET"]);
   matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor);
   G0_omega_new.clear();
-  if (parms.value_or_default("INSULATING", false)) {
+  if (parms.defined("INSULATING")) {
     std::cout <<"calculating insulating G0_omega";
     for (frequency_t freq=0; freq<n_matsubara; ++freq) {
       const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
@@ -289,7 +289,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
       }
     }
   }
-  else if (parms.value_or_default("ISOLATED", false)) {
+  else if (parms.defined("ISOLATED")) {
     std::cout << "calculating G0_omega for isolated cluster";
     for (frequency_t freq=0; freq<n_matsubara; ++freq) {
       for (spin_t flavor=0; flavor<n_flavor; ++flavor) {

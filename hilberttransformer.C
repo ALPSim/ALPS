@@ -56,7 +56,7 @@ itime_green_function_t HilbertTransformer::symmetrize(const itime_green_function
 
 itime_green_function_t HilbertTransformer::initial_G0(const alps::Parameters& parms) 
 {
-  if (parms.defined("INSULATING")) {
+  if (parms.defined("ISOLATING")) {
     std::cout<<"calculating initial G0_tau"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_time=boost::lexical_cast<int>(parms["N"]);
@@ -123,7 +123,7 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
 
 itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Parameters& parms) 
 {
-  if (parms.defined("G0TAU_INPUT") || parms.defined("INSULATING"))
+  if (parms.defined("G0TAU_INPUT") || parms.defined("ISOLATING"))
     return HilbertTransformer::initial_G0(parms);
   else {
     std::cout<<"calculating initial G0_tau"<<std::endl;
@@ -160,7 +160,7 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=parms.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G0_omega(n_matsubara, n_orbital);
-  if (parms.defined("INSULATING")) {
+  if (parms.defined("ISOLATING")) {
     std::cout<<"calculating initial G0_omega"<<std::endl;
     int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
     int n_time=boost::lexical_cast<int>(parms["N"]);
@@ -251,7 +251,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
 matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps::Parameters& parms)
 {
   //std::cout<<"Semicirc Hilbert: initial G0"<<std::endl;
-  if ( parms.defined("INSULATING"))
+  if ( parms.defined("ISOLATING"))
     return FrequencySpaceHilbertTransformer::initial_G0(parms);
   if (parms.defined("G0OMEGA_INPUT")){
     std::ifstream g0_file("G0OMEGA_INPUT");

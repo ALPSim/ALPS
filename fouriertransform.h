@@ -206,31 +206,55 @@ public:
 class GFourierTransformer : public FourierTransformer
 {
 public: 
-  GFourierTransformer(const double beta, const double mu, const double h, const double U, 
-                      const int n_flavor, const int n_site, const std::vector<double>& densities, 
-		      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
-    : FourierTransformer(beta, n_flavor, n_site)  
+  GFourierTransformer(const double beta, const double mu, const double U, const int n_flavor, const int n_site, 
+                      const std::vector<double>& densities, 
+                      const std::vector<std::vector<double> >& eps, const std::vector<std::vector<double> >& epssq)
+  : FourierTransformer(beta, n_flavor, n_site)  
   {
     for(int f=0;f<n_flavor;++f){
       int fbar = f%2==0 ? f+1 : f-1;
-      int s = f % 2 ? -1 : 1;
-      double mub = mu + s*h;
       std::cerr << "dens: " << densities[fbar] << std::endl;
       for(int i=0;i<n_site;++i){
-	c1_[f][i][i] = 1.;
-	c2_[f][i][i] = eps[f][i] - mub + U*densities[fbar]; 
-	c3_[f][i][i] = epssq[f][i] - 2.*mub*eps[f][i] + mub*mub 
-	  + 2.*U*densities[fbar]*(eps[f][i]-mub) + U*U*densities[fbar];
-	Sc0_[f][i][i] = U * (densities[fbar]-0.5);
-	Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
-	std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
-	Sc2_[f][i][i] = 0;/*U*U * densities[fbar] * (1-densities[fbar])
-			   * ( U * (1-densities[fbar]) + (eps[f][i]-mu) );*/
+        c1_[f][i][i] = 1.;
+        c2_[f][i][i] = eps[f][i] - mu + U*densities[fbar]; 
+        c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu 
+        + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
+        Sc0_[f][i][i] = U * (densities[fbar]-0.5);
+        Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
+        std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
+        Sc2_[f][i][i] = 0;/*U*U * densities[fbar] * (1-densities[fbar])
+                           * ( U * (1-densities[fbar]) + (eps[f][i]-mu) );*/
       }
     }
   }
 };
 
+
+
+
+class SimpleAntiFerroGFourierTransformer : public FourierTransformer
+{
+public: 
+  SimpleAntiFerroGFourierTransformer(const double beta, const double /*mu*/, const double /*h*/, const double /*U*/, const int n_flavor, 
+                                     const std::vector<double>& /*densities*/, const std::vector<double>& /*magnetization*/,  
+                                     const std::vector<double>& /*eps*/, const std::vector<double>& /*epssq*/)
+  : FourierTransformer(beta, n_flavor, 1)
+  {
+    std::cerr << "to be implemented\n";
+    exit(1);
+    for(int f=0;f<n_flavor;++f){
+      //int fbar = f%2==0 ? f+1 : f-1;
+      //int s = f % 2 ? -1 : 1;
+      //double mub = mu + s*h;
+      c1_[f][0][0] = 1.;
+      c2_[f][0][0] = 0;
+      c3_[f][0][0] = 0;
+      Sc0_[f][0][0] = 0;
+      Sc1_[f][0][0] = 0;
+      Sc2_[f][0][0] = 0;
+    }
+  }
+};
 
 
 
@@ -247,22 +271,19 @@ public:
       int fbar = f%2==0 ? f+1 : f-1;
       int s = f % 2 ? -1 : 1;
       for(int i=0;i<n_site;++i){
-	c1_[f][i][i] = 1.;
-	c2_[f][i][i] = eps[f][i] - mu + U*density[fbar]; 
-	c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu + h*h/4 
-	  + 2.*U*density[fbar]*(eps[f][i]-mu) + U*U*density[fbar] + U*s*h*magnetization[fbar];
-	Sc0_[f][i][i] = U * (density[fbar]-0.5);
-	Sc1_[f][i][i] = U*U * (density[fbar]*(1-density[fbar]) - magnetization[fbar]*magnetization[fbar]);
-	/*
-          double m = magnetization[fbar];
-          double n = density[fbar];
-          double e = eps[f][i];
-          double eq = i%2 ? eps[f][i-1] : eps[f][i+1];
-        */
-	Sc2_[f][i][i] = 0.;
-        /*U*U*n*(1-n) * (U*(1-n) + (e-mu))
-	  + U*U*m * (2*U*(n-1)*m + U*m*n - (eq-mu)*n + eq)
-	  + U*s*h*m* ( U*(0.5-n) + (e-eq) );*/
+        c1_[f][i][i] = 1.;
+        c2_[f][i][i] = eps[f][i] - mu + U*density[fbar]; 
+        c3_[f][i][i] = epssq[f][i] - 2.*mu*eps[f][i] + mu*mu + h*h/4 
+        + 2.*U*density[fbar]*(eps[f][i]-mu) + U*U*density[fbar] + U*s*h*magnetization[fbar];
+        Sc0_[f][i][i] = U * (density[fbar]-0.5);
+        Sc1_[f][i][i] = U*U * (density[fbar]*(1-density[fbar]) - magnetization[fbar]*magnetization[fbar]);
+        /*double m = magnetization[fbar];
+         double n = density[fbar];
+         double e = eps[f][i];
+         double eq = i%2 ? eps[f][i-1] : eps[f][i+1];*/
+        Sc2_[f][i][i] = 0.;/*U*U*n*(1-n) * (U*(1-n) + (e-mu))
+                            + U*U*m * (2*U*(n-1)*m + U*m*n - (eq-mu)*n + eq)
+                            + U*s*h*m* ( U*(0.5-n) + (e-eq) );*/
       }
       for(int i=0; i<n_site; i+=2) {
         c2_[f][i+1][i] = s*h/2 + U*magnetization[fbar];

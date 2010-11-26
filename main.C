@@ -36,12 +36,12 @@
 #include "externalsolver.h"
 #include "hilberttransformer.h"
 #include "cluster.h"
-// #ifdef RUBTSOV
-#include "solvers/Rubtsov/rubtsov.h"
-// #endif
-// #ifdef WERNER
-#include "solvers/Werner/impurity.h"
-// #endif
+#ifdef RUBTSOV
+#include "../DMFT-solvers/Rubtsov/rubtsov.h"
+#endif
+#ifdef WERNER
+#include "../DMFT-solvers/Werner/impurity.h"
+#endif
 
 #include <alps/parameter.h>
 #include <alps/utility/copyright.hpp>
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
-        // #ifdef WERNER
+#ifdef WERNER
         else if (parms["SOLVER"]=="Werner") {
           std::cout<<"solving Werner"<<std::endl;
           alps::scheduler::BasicFactory<WernerSimItime,WernerRun> factory;
@@ -111,7 +111,7 @@ int main(int argc, char** argv)
 	        itime_green_function_t G_tau = transform.initial_G0(parms);
           F_selfconsistency_loop(parms, *solver_ptr, G_tau);
         }
-        // #endif
+#endif
         else {
           boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
           solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
@@ -119,14 +119,14 @@ int main(int argc, char** argv)
         }
       } 
       else {
-        // #ifdef RUBTSOV
+#ifdef RUBTSOV
         alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> rubtsov_factory_sshf;
         alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory_ss; 
         alps::scheduler::BasicFactory<RubtsovSim,MultiBandDensityHubbardRubtsovRun> rubtsov_factory_mbd; 
-        // #endif
-        // #ifdef WERNER
+#endif
+#ifdef WERNER
         alps::scheduler::BasicFactory<WernerSimFrequency,WernerRun> werner_factory;
-        // #endif
+#endif
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
 #ifdef IGOR
@@ -168,7 +168,7 @@ int main(int argc, char** argv)
             }
           }
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
-        // #ifdef RUBTSOV
+#ifdef RUBTSOV
         if ((parms["SOLVER"]=="Rubtsov") && (parms.value_or_default("FLAVORS", "2")=="1")){
           std::cout<<"using single site Hubbard solver for half filling"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_sshf,argc,argv));
@@ -181,8 +181,8 @@ int main(int argc, char** argv)
           std::cout<<"using multiband Hubbard solver"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory_mbd,argc,argv));
         }
-        // #endif
-        // #ifdef WERNER
+#endif
+#ifdef WERNER
         else if (parms["SOLVER"]=="Werner") {
           std::cout<<"solving Werner -- using omega loop"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
@@ -195,7 +195,7 @@ int main(int argc, char** argv)
           //std::cout<<parms["SOLVER"]<<std::endl;
           //boost::throw_exception(std::logic_error("there is no such solver!"));	
         }
-        // #endif
+#endif
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
       }
     }
@@ -210,32 +210,32 @@ int main(int argc, char** argv)
           solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
           selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);        
         }else{
-	  // #ifdef RUBTSOV
-	  alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> half_fill_rubtsov_factory; 
-	  alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory;
-	  // #endif
-	  //perform self consistency loop in Matsubara frequency omega
-	  // all gfs are formulated in k-space and are diagonal in k! 
-	  boost::shared_ptr<DCATransformer> transform_ptr;
-	  DCATransformer::generate_transformer(parms, transform_ptr);
-	  boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
-	  // #ifdef RUBTSOV
-	  if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="1")){
-	    std::cout<<"using Rubtsov Solver for half filling"<<std::endl;
-	    solver_ptr.reset(new alps::ImpuritySolver(half_fill_rubtsov_factory,argc,argv));
-	  }
-	  else if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="2")){
-	    std::cout<<"using Rubtsov Solver"<<std::endl;
-	    solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory,argc,argv));
-	  }
-	  else{
-	    // #endif
-	    std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
-	    solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
-	    // #ifdef RUBTSOV
-	  }
-	  // #endif
-	  selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);
+#ifdef RUBTSOV
+        alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> half_fill_rubtsov_factory; 
+        alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory;
+#endif
+        //perform self consistency loop in Matsubara frequency omega
+        // all gfs are formulated in k-space and are diagonal in k! 
+        boost::shared_ptr<DCATransformer> transform_ptr;
+        DCATransformer::generate_transformer(parms, transform_ptr);
+        boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
+#ifdef RUBTSOV
+        if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="1")){
+          std::cout<<"using Rubtsov Solver for half filling"<<std::endl;
+          solver_ptr.reset(new alps::ImpuritySolver(half_fill_rubtsov_factory,argc,argv));
+        }
+        else if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="2")){
+          std::cout<<"using Rubtsov Solver"<<std::endl;
+          solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory,argc,argv));
+        }
+        else{
+#endif
+          std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+#ifdef RUBTSOV
+        }
+#endif
+        selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);
         }
       }
       else {

@@ -22,22 +22,20 @@ $(RUBTSOV_DIR)/rubtsov_selfenergy.o
 OBJECTS_IGOR=$(IGOR_DIR)/a1.o $(IGOR_DIR)/cdln2.o $(IGOR_DIR)/ek22idn.o $(IGOR_DIR)/fexit.o $(IGOR_DIR)/hamilt.o $(IGOR_DIR)/iprint.o $(IGOR_DIR)/applysym.o $(IGOR_DIR)/cekord.o $(IGOR_DIR)/ek2idn.o $(IGOR_DIR)/fopna.o $(IGOR_DIR)/i1mach.o $(IGOR_DIR)/kintegration.o $(IGOR_DIR)/arbek.o $(IGOR_DIR)/cg.o $(IGOR_DIR)/ek3idn.o $(IGOR_DIR)/gfprodctn.o $(IGOR_DIR)/ietol.o $(IGOR_DIR)/cdln1.o $(IGOR_DIR)/creorder.o $(IGOR_DIR)/errmsg.o $(IGOR_DIR)/grnatm.o $(IGOR_DIR)/inverc.o $(IGOR_DIR)/wrrdmtrx.o
 OBJECTS_SOLVERS=$(OBJECTS_RUBTSOV) $(OBJECTS_WERNER)
 
-all: dmft interpolate 
+all: dmft 
 
 all-igor: dmft_igor dmft_igor_mpi 
 
 dmft : $(OBJECTS_DMFT) werner rubtsov
 				$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CT_ALGOS) -o dmft $(OBJECTS_DMFT) $(OBJECTS_SOLVERS) $(LDFLAGS) $(LIBS)
 energy : energy.o auxiliaryfunctions.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o energy energy.o auxiliaryfunctions.o $(LDFLAGS) $(LIBS) 
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o energy energy.o auxiliaryfunctions.o $(LDFLAGS) $(LIBS)
 dmft_igor : $(OBJECTS_DMFT) werner rubtsov igor
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CT_ALGOS) -o dmft_igor $(OBJECTS_DMFT) $(OBJECTS_IGOR) $(OBJECTS_SOLVERS) $(LDFLAGS) $(LIBS) -L//sw/lib/gcc4.3/lib/ -lgfortran 
 dmft_igor_mpi : $(OBJECTS_DMFT) werner rubtsov igor
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) $(CT_ALGOS) -o dmft_igor_mpi $(OBJECTS_DMFT) $(OBJECTS_IGOR) $(OBJECTS_SOLVERS) $(LDFLAGS_MPI) $(LIBS_MPI) -L//sw/lib/gcc4.3/lib/ -lgfortran 
 hirschfye : $(OBJECTS_HIRSCHFYE)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o hirschfye $(OBJECTS_HIRSCHFYE) $(LDFLAGS) $(LIBS)
-interpolate : $(OBJECTS_INTERPOLATE)
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o interpolate $(OBJECTS_INTERPOLATE) $(LDFLAGS) $(LIBS) 
 compute_sigma: compute_sigma.cpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o compute_sigma compute_sigma.cpp $(LDFLAGS) $(LIBS)
 rubtsov:

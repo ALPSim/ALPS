@@ -37,7 +37,7 @@ Interpolator::Interpolator(const alps::Parameters& parms) :
   delta_green(parms.value_or_default("DELTA_GREEN", delta)),
   name("Dispersion_"), 
   n_zone(parms["FLAVORS"]),
-  n_k(parms.value_or_default("NK", 10))
+  n_k(parms.value_or_default("NK", 30))
 {
   DCATransformer::generate_transformer(parms, transform_ptr);
 }
@@ -70,7 +70,7 @@ void Interpolator::interpolate()
 
 
 ParaInterpolator::ParaInterpolator(const alps::Parameters& parms)  : 
-  Interpolator(parms), selfenergies(n_zone), averaged_selfenergy(n_zone)
+  Interpolator(parms), selfenergies(n_zone)
 {
   const unsigned int n_sites = parms["SITES"];
   std::ifstream data(parms["SELFENERGIES"].c_str());
@@ -86,16 +86,8 @@ ParaInterpolator::ParaInterpolator(const alps::Parameters& parms)  :
     if (selfenergies[z].find(omega)==selfenergies[z].end()) {
       std::vector<std::complex<double> > kd(n_sites);
       selfenergies[z][omega] = kd;
-      averaged_selfenergy[z][omega] = std::complex<double>(0., 0.);
     }
     selfenergies[z][omega][k] = std::complex<double>(Sigma_real, Sigma_imag);
-    averaged_selfenergy[z][omega] += std::complex<double>(Sigma_real, Sigma_imag);
-  }
-  for (std::vector<std::map<double, std::complex<double> > >::iterator itz=averaged_selfenergy.begin(); 
-       itz!=averaged_selfenergy.end(); ++itz) {
-    for (std::map<double, std::complex<double> >::iterator itw=itz->begin(); itw!=itz->end(); ++itw) {
-      itw->second /= n_sites;
-    }
   }
 }
 
@@ -175,66 +167,21 @@ void ParaInterpolator::interpolate_spectrum(const unsigned int counter, const un
 					    const double offset, const int sign)
 {
   Interpolator::bare_dispersion(counter, zone, kvec, offset, sign);
-  dmft_spectrum(counter, zone, kvec, offset, sign);
   std::stringstream name_str;
   name_str << name << zone << "_" << counter;
   std::ofstream out_str(name_str.str().c_str());
-  std::stringstream selfname_str;
-  selfname_str << "Selfenergy_" << zone << "_" << counter;
-  std::ofstream self_str(selfname_str.str().c_str());
   for (std::vector<vector_t>::const_iterator itk=kvec.begin(); itk!=kvec.end(); ++itk) {
     vector_t k = *itk;
     std::map<double, std::complex<double> > interpolated_selfenergy;
     for (selfenergy_t::const_iterator it=selfenergies[zone].begin(); it!=selfenergies[zone].end(); ++it) {
-      interpolated_selfenergy[it->first] = transform_ptr->interpolation(k, it->second, false);
+      interpolated_selfenergy[it->first] = transform_ptr->interpolate(k, it->second, false);
     }
     double l = 0;
     for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
       l += (k[d]-kvec[0][d])*(k[d]-kvec[0][d]);
     l = sqrt(l);
     for (std::map<double, std::complex<double> >::const_iterator it=interpolated_selfenergy.begin(); 
-         it!=interpolated_selfenergy.end(); ++it) {
-      std::complex<double> idelta(0., delta);
-      std::complex<double> G = it->first + mu - transform_ptr->epsilon(k) - it->second + idelta;
-      G = 1./G;
-      for (unsigned int d=0; d<transform_ptr->dimension(); ++d) {
-        out_str << k[d] << "\t" ;
-        self_str << k[d] << "\t";
-      }
-      out_str << (offset+sign*l)/M_PI << "\t" 
-              << it->first << "\t" 
-              << G.real() << "\t" 
-              << G.imag() << "\n";
-      double mass = 1 - it->second.imag()/it->first;
-      self_str << (offset+sign*l)/M_PI << "\t" 
-               << it->first << "\t" 
-               << it->second.real() << "\t"
-               << it->second.imag() << "\t"
-               << mass << "\n";
-    }
-    out_str << "\n";
-  }
-  out_str.close();
-  self_str.close();
-}
-
-
-
-void ParaInterpolator::dmft_spectrum(const unsigned int counter, const unsigned int zone, 
-                                     const std::vector<vector_t>& kvec,
-                                     const double offset, const int sign)
-{
-  std::stringstream name_str;
-  name_str << "DMFT_" << name << zone << "_" << counter;
-  std::ofstream out_str(name_str.str().c_str());
-  for (std::vector<vector_t>::const_iterator itk=kvec.begin(); itk!=kvec.end(); ++itk) {
-    vector_t k = *itk;
-    double l = 0;
-    for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
-      l += (k[d]-kvec[0][d])*(k[d]-kvec[0][d]);
-    l = sqrt(l);
-    for (std::map<double, std::complex<double> >::const_iterator it=averaged_selfenergy[zone].begin(); 
-	 it!=averaged_selfenergy[zone].end(); ++it) {
+	 it!=interpolated_selfenergy.end(); ++it) {
       std::complex<double> idelta(0., delta);
       std::complex<double> G = it->first + mu - transform_ptr->epsilon(k) - it->second + idelta;
       G = 1./G;
@@ -268,7 +215,7 @@ void AntiferroInterpolator::interpolate_spectrum(const unsigned int counter, con
       k2[d] += M_PI;
     std::map<double, matrix_t> interpolated_selfenergy;
     for (selfenergy_t::const_iterator it=selfenergies[zone].begin(); it!=selfenergies[zone].end(); ++it) {
-      interpolated_selfenergy[it->first] = transform_ptr->interpolation(k1, it->second, true);
+      interpolated_selfenergy[it->first] = transform_ptr->interpolate(k1, it->second, true);
     }
     double l = 0;
     for (unsigned int d=0; d<transform_ptr->dimension(); ++d) 
@@ -325,7 +272,7 @@ void AntiferroInterpolator::interpolate_1D(const unsigned int zone)
 
 void ParaInterpolator::interpolate_2D(const unsigned int zone) 
 {
-  unsigned int n = n_k*M_PI*sqrt(2.);
+  unsigned int n = n_k*M_PI*sqrt(2);
   std::vector<ClusterHelper::vector_type> kvec(n+1);
   for (unsigned int i=0; i<=n; ++i) {
     kvec[i].resize(2);
@@ -345,13 +292,7 @@ void ParaInterpolator::interpolate_2D(const unsigned int zone)
     kvec[i][0] = M_PI;
     kvec[i][1] = double(i)/n*M_PI;
   }
-  interpolate_spectrum(2, zone, kvec, sqrt(2.)*M_PI, 1);
-  n = n_k*M_PI/sqrt(2.);
-  for (unsigned int i=0; i<=n; ++i) {
-    kvec[i][0] = M_PI - double(i)/n*M_PI/2.;
-    kvec[i][1] = double(i)/n*M_PI/2.;
-  }
-  interpolate_spectrum(3, zone, kvec, -M_PI, -1);
+  interpolate_spectrum(2, zone, kvec, -M_PI, -1);
 }
 
 
