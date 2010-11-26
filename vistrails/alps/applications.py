@@ -150,7 +150,9 @@ class RunQWL(RunAlpsApplication):
 class RunDMFT(alpscore.SystemCommandLogged,tools.GetSimName):
     """Runs the DMFT quantum Monte Carlo application """
     def compute(self):
-        tmp = self.interpreter.filePool.create_file(suffix='.dummy')
+        tmp = self.interpreter.filePool.create_file()
+        os.unlink(tmp.name)
+        os.mkdir(tmp.name)
         resultdir = basic.Directory()
         resultdir.name = os.path.dirname(tmp.name)
         id = self.getInputFromPort('fileID')
