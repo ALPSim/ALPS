@@ -26,14 +26,15 @@
 *****************************************************************************/
 
 bool stop_callback(boost::posix_time::ptime const & end_time) {
-    return alps::mcsignal() || boost::posix_time::second_clock::local_time() > end_time;
+    static alps::mcsignal signal;
+    return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 int main(int argc, char *argv[]) {
     alps::mcoptions options(argc, argv);
     if (options.valid && options.type == alps::mcoptions::SINGLE) {
         alps::parameters_type<simulation_type>::type params(options.input_file);
         simulation_type s(params);
-        if (options.reload)
+        if (options.continueing)
             s.load(options.output_file);
         s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
         s.save(options.output_file);
@@ -45,7 +46,7 @@ int main(int argc, char *argv[]) {
         boost::mpi::communicator c;
         alps::parameters_type<simulation_type>::type params(options.input_file);
         alps::mcmpisim<simulation_type> s(params, c);
-        if (options.reload)
+        if (options.continueing)
             s.load(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
         s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
         s.save(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
