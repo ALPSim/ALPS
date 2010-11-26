@@ -154,7 +154,7 @@ class RunDMFT(alpscore.SystemCommandLogged,tools.GetSimName):
         os.unlink(tmp.name)
         os.mkdir(tmp.name)
         resultdir = basic.Directory()
-        resultdir.name = os.path.dirname(tmp.name)
+        resultdir.name = tmp.name
         id = self.getInputFromPort('fileID')
         paraminput = self.getInputFromPort('dmftparams')
         c=0
