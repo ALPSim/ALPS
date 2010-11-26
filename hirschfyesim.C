@@ -30,10 +30,9 @@
 /// @file hirschfyesim.h
 /// @brief the actual Hirsch-Fye simulation
 #include <cmath>
-
-#include <blas_classes/matrix.h>
+#include <solvers/blas_classes/matrix.h>
 #ifdef FOURPOINT
-#include <blas_classes/vector.h>
+#include "solvers/blas_classes/vector.h"
 #endif
 
 #include "alps/alea/detailedbinning.h"

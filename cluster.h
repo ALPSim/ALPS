@@ -38,7 +38,6 @@
 #include "nambu_green_function.h"
 #include "hilberttransformer.h"
 
-
 class ClusterHelper: private alps::graph_helper<alps::graph_helper<>::graph_type>
 {
 public:
@@ -64,7 +63,7 @@ public:
   typedef std::pair<pair_class_set_type::const_iterator, pair_class_set_type::const_iterator> pair_class_set_itpair_type;
   
   ClusterHelper(const alps::Parameters& params);
-  
+
   double cluster_coordinate(const unsigned int i, const unsigned int j) const { return cluster_coordinates_(i,j); }
   double cluster_momentum(const unsigned int i, const unsigned int j) const { return cluster_momenta_(i,j); }
   double lattice_momentum(const unsigned int i, const unsigned int j) const { return lattice_momenta_(i,j); }
@@ -76,9 +75,18 @@ public:
   unsigned int cluster_momentum_approximation(vector_type k) const;
   
   template<typename T>
-  T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const;
+  T interpolation(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const;
+  template<typename T>
+  T linear_interpolation(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const;
+
   double site_distance(const unsigned int i, const unsigned int j) const;
   
+  static double round(const double d);
+  static bool almost_equal(const double d1, const double d2) { return fabs(d1-d2)<epsilon_; }
+  static vector_type map_back_into_cluster(vector_type v, 
+                                           const Matrix<double>::Type& B_inv, const Matrix<double>::Type& B);
+  static bool append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v);
+
   site_class_set_itpair_type site_classes_real_space() const 
   { return site_class_set_itpair_type (site_class_set_real_space_.begin(), site_class_set_real_space_.end()); }
   pair_class_set_itpair_type pair_classes_real_space() const 
@@ -96,17 +104,28 @@ private:
   std::pair<site_class_set_type, pair_class_set_type> setup_classes(const Matrix<site_t>::Type& symmetry_table) const;
   bool inside_cluster(vector_type v, const Matrix<double>::Type& b) const;
   bool inside_reduced_brillouin_zone(vector_type v) const;
-  bool append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v) const;
   bool append_column_no_duplicates(Matrix<site_t>::Type& m, std::map<site_t, site_t>& smap) const;
   vector_type map_back_into_brillouin_zone(vector_type v) const;
-  vector_type map_back_into_cluster(vector_type v, 
-                                    const Matrix<double>::Type& B_inv, const Matrix<double>::Type& B) const;
   unsigned int identify_vertex(const vector_type& v, const Matrix<double>::Type& coordinate_matrix) const;
   unsigned int identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const unsigned int i) const;
-  double round(const double d) const;
-  vector_type round(vector_type v) const;
-  bool almost_equal(const double d1, const double d2) const { return fabs(d1-d2)<epsilon_; }
-  vector_type matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v) const;
+  vector_type map_interpolation_vertex(vector_type k, const bool antiferromagnet) const;
+  vector_type round(vector_type v) const;  
+  static vector_type matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v);
+
+  bool almost_equal(const vector_type& v1, const vector_type& v2) const 
+  {
+    bool equal = true;
+    for (unsigned int d=0; d<v1.size(); ++d) 
+      equal &= almost_equal(v1[d], v2[d]);
+    return equal;
+  }
+
+  
+  template<typename T>
+  T interpolator(const vector_type k, const int d, const std::vector<T>& values,
+                const bool antiferromagnet) const;
+  template<typename T>
+  T interpolate(const double k, const std::map<double, T>& data) const;
   
   Matrix<double>::Type cluster_coordinates_;
   Matrix<double>::Type cluster_momenta_;
@@ -120,8 +139,9 @@ private:
   pair_class_set_type pair_class_set_k_space_;
   unsigned int n_cluster_sites_;
   bool bipartite_;
-  const double epsilon_;
+  static const double epsilon_ = 1e-9;
   std::string lattice_momenta_file_name_;
+
 };
 
 
@@ -153,8 +173,13 @@ public:
   virtual nambu_matsubara_green_function_t initial_G0_nambu(const alps::Parameters& parms); 
   
   template<typename T>
-  T interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
-    return ClusterHelper::interpolate(k, values, antiferromagnet);
+  T interpolation(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
+    return ClusterHelper::interpolation(k, values, antiferromagnet);
+  }
+
+  template<typename T>
+  T linear_interpolation(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const {
+    return ClusterHelper::linear_interpolation(k, values, antiferromagnet);
   }
   
   unsigned int dimension() const { return ClusterHelper::dimension(); }  
@@ -301,7 +326,7 @@ public:
     params_ptr_=&params;
   }
   //Hilbert transform operator
-       matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
+  matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
                                         const matsubara_green_function_t &G0_omega, 
                                         double &mu, const double h, const double beta);
   //Hilbert transform operator for Nambu GF
@@ -348,6 +373,7 @@ public:
   alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
                                         const double beta, const double mu, 
                                         const bool error_propagation, const bool paramagnet);
+
   std::map<double, std::complex<double> > local_green_function_from_selfenergies(const std::map<double, 
                                                                                  std::vector<std::complex<double> > >& selfenergies, 
                                                                                  const double mu, const double delta);
@@ -441,6 +467,7 @@ public:
   alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
                                         const double beta, const double mu, 
                                         const bool error_propagation, const bool paramagnet);
+
   std::map<double, ClusterHelper::Matrix<std::complex<double> >::Type> 
   local_green_function_from_selfenergies(const std::map<double, 
                                          std::vector<ClusterHelper::Matrix<std::complex<double> >::Type> >& selfenergies,
@@ -460,12 +487,12 @@ private:
 
 
 
-//implementation (see also clusterhelper.C, clustertransformer.C)
+//implementation (see also clusterhelper.C, clustertransformer.C, interpolator.h)
 
 
 
 
-inline double ClusterHelper::round(const double d) const
+inline double ClusterHelper::round(const double d)
 {
   int rounded = int(d > 0.0 ? d + 0.5 : d - 0.5);
   if (almost_equal(rounded, d))
@@ -485,7 +512,7 @@ inline ClusterHelper::vector_type ClusterHelper::round(vector_type v) const
 
 
 
-inline ClusterHelper::vector_type ClusterHelper::matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v) const
+inline ClusterHelper::vector_type ClusterHelper::matrix_vector_mult(const Matrix<double>::Type& M, const vector_type& v)
 {
   vector_type vn(v.size());
   for (unsigned int i=0; i<v.size(); ++i) {
@@ -509,86 +536,6 @@ inline typename ClusterHelper::Matrix<T>::Type ClusterHelper::Matrix<T>::inverse
   memset(&(ipivot(0)), 0, sizeof(int)*M.size1());
   boost::numeric::bindings::lapack::gesv(M,ipivot, M_inv);
   return M_inv;
-}
-
-
-
-
-template<typename T>
-inline T ClusterHelper::interpolate(vector_type k, const std::vector<T>& values, const bool antiferromagnet) const 
-{
-  k = round(matrix_vector_mult(reciprocal_basis_inv_, k));
-  std::vector<vector_type> neighbor;
-  std::vector<unsigned int> neighbor_index;
-  switch (dimension()) {
-    case 1:
-      neighbor.resize(2);
-      neighbor_index.resize(2);
-      for (int i=0; i<2; ++i) 
-        neighbor[i].resize(1);
-      neighbor[0][0] = floor(k[0]);
-      neighbor[1][0] = ceil(k[0]);
-      break;
-    case 2:
-      neighbor.resize(4);
-      neighbor_index.resize(4);
-      for (int i=0; i<4; ++i) 
-        neighbor[i].resize(2);
-      for (int x=0; x<=1; ++x) {
-        double xt = (x==0) ? floor(k[0]) : ceil(k[0]);
-        for (int y=0; y<=1; ++y) {
-          double yt = (y==0) ? floor(k[1]) : ceil(k[1]);
-          neighbor[y*2+x][0] = xt;
-          neighbor[y*2+x][1] = yt;
-        }
-      }
-      break;
-    case 3:
-      neighbor.resize(8);
-      neighbor_index.resize(8);
-      for (int i=0; i<8; ++i) 
-        neighbor[i].resize(3);
-      for (int x=0; x<=1; ++x) {
-        double xt = (x==0) ? floor(k[0]) : ceil(k[0]);
-        for (int y=0; y<=1; ++y) {
-          double yt = (y==0) ? floor(k[1]) : ceil(k[1]);
-          for (int z=0; z<=1; ++z) {
-            double zt = (z==0) ? floor(k[2]) : ceil(k[2]);
-            neighbor[z*2*2+y*2+x][0] = xt;
-            neighbor[z*2*2+y*2+x][1] = yt;
-            neighbor[z*2*2+y*2+x][2] = zt;
-          }
-        }
-      }
-      break;
-  }
-  for (int i=0; i<neighbor.size(); ++i) {
-    vector_type nv = matrix_vector_mult(reciprocal_basis_, neighbor[i]);
-    nv = map_back_into_brillouin_zone(nv);
-    if (antiferromagnet) {
-      if (!inside_reduced_brillouin_zone(nv)) {
-        for (int d=0; d<dimension(); ++d) 
-          nv[d] -= M_PI;
-        nv = map_back_into_brillouin_zone(nv);
-      }
-      if (!inside_reduced_brillouin_zone(nv)) {
-        boost::throw_exception(std::logic_error("something doesn't work in ClusterHelper::interpolate)"));
-      }
-    }
-    neighbor_index[i] = identify_vertex(nv, cluster_momenta_);
-  }
-  std::vector<T> av(neighbor_index.size());
-  for (int i=0; i<neighbor_index.size(); ++i) 
-    av[i] = values[neighbor_index[i]];
-  for (int d=0; d<dimension(); ++d) {
-    double c = k[d] - floor(k[d]) ;
-    std::vector<T> t(av.size()/2);
-    for (int i=0; i<av.size(); i+=2) {
-      t[i/2] = (1-c)*av[i] + c*av[i+1];
-    }
-    av = t;
-  }
-  return av[0];
 }
 
 
@@ -826,18 +773,18 @@ green_function<T> AntiFerroDCATransformer::transform_coordinates(const green_fun
   for (site_t k=0; k<nsite; k+=2) {
     for (site_t q1=0; q1<=1; ++q1) {
       for (site_t q2=0; q2<=1; ++q2) {
-        for (site_t i=0; i<nsite; ++i) {
-          for (site_t j=0; j<nsite; ++j) {
-            double phase = 0.;
-            for (unsigned int d=0; d<dimension(); ++d) 
-              phase += cluster_momentum(k+q1,d)*cluster_coordinate(i,d)-cluster_momentum(k+q2,d)*cluster_coordinate(j,d);
-            for (itime_index_t t=0; t<nt; ++t) {
-              for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-                D::add(G_new, G, t, i, j, k+q1, k+q2, flavor, cos(phase)/double(nsite));
-              }
-            }
-          }
-        }
+        for (site_t i=0; i<nsite; i++) {
+          for (site_t j=0; j<nsite; j++) {
+	    double phase = 0.;
+	    for (unsigned int d=0; d<dimension(); ++d) 
+	      phase += cluster_momentum(k+q1,d)*cluster_coordinate(i,d)-cluster_momentum(k+q2,d)*cluster_coordinate(j,d);
+	    for (itime_index_t t=0; t<nt; ++t) {
+	      for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+		D::add(G_new, G, t, i, j, k+q1, k+q2, flavor, cos(phase)/double(nsite));
+	      }
+	    }
+	  }
+	}
       }
     }
   }

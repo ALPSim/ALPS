@@ -29,9 +29,9 @@
 
 
 ClusterHelper::ClusterHelper(const alps::Parameters& params) :
-alps::graph_helper<alps::graph_helper<>::graph_type>(params),  
-n_cluster_sites_(boost::lexical_cast<int>(params["SITES"])), epsilon_(1e-9),
-lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
+  alps::graph_helper<alps::graph_helper<>::graph_type>(params)
+  , n_cluster_sites_(boost::lexical_cast<int>(params["SITES"]))
+  , lattice_momenta_file_name_(params.value_or_default("LATTICE_MOMENTA_FILE", "LatticeMomenta"))
 {
   setup_tables();
 }
@@ -58,7 +58,8 @@ void ClusterHelper::setup_tables()
   Matrix<double>::Type basis_inv = Matrix<double>::inverse(basis);
   //setup cluster coordinates
   int maxc=n_cluster_sites_;
-  vector_type c(dimension());
+  vector_type c(dimension(), 0.);
+  append_column_no_duplicates(cluster_coordinates_, c);
   switch(dimension()) {
     case 1 :
       for (int i=-maxc; i<=maxc; ++i) {
@@ -316,8 +317,8 @@ void ClusterHelper::setup_tables()
    }
    }
    }*/
-  if (cluster_coordinates_.size1() != n_cluster_sites())
-    boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition"));
+  if (cluster_coordinates_.size1() != n_cluster_sites()) 
+    boost::throw_exception(std::logic_error("parameter SITES does not match cluster definition: "));
   if (cluster_momenta_.size1() != n_cluster_sites())
     boost::throw_exception(std::logic_error("setup of cluster momenta table failed"));
   symmetry_analysis(basis, basis_inv/*, reciprocal_basis, reciprocal_basis_inv*/);
@@ -634,7 +635,7 @@ bool ClusterHelper::inside_reduced_brillouin_zone(vector_type v) const
 
 
 
-bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v) const
+bool ClusterHelper::append_column_no_duplicates(Matrix<double>::Type& m, const vector_type& v) 
 {
   for (unsigned int i=0; i<m.size1(); ++i) {
     bool equal = true;
@@ -690,7 +691,7 @@ ClusterHelper::vector_type ClusterHelper::map_back_into_brillouin_zone(vector_ty
 
 ClusterHelper::vector_type ClusterHelper::map_back_into_cluster(vector_type v, 
                                                                 const Matrix<double>::Type& B_inv, 
-                                                                const Matrix<double>::Type& B) const
+                                                                const Matrix<double>::Type& B) 
 {
   v = matrix_vector_mult(B_inv, v);
   for (unsigned int d=0; d<v.size(); ++d) {
@@ -790,3 +791,19 @@ unsigned int ClusterHelper::identify_sublattice(const Matrix<double>::Type& coor
 }
 
 
+vector_type ClusterHelper::map_interpolation_vertex(vector_type k, const bool antiferromagnet) const
+{
+  k = matrix_vector_mult(reciprocal_basis_, k);
+  k = map_back_into_brillouin_zone(k);
+  if (antiferromagnet) {
+    if (!inside_reduced_brillouin_zone(k)) {
+      for (int d=0; d<dimension(); ++d) 
+        k[d] -= M_PI;
+      k = map_back_into_brillouin_zone(k);
+    }
+    if (!inside_reduced_brillouin_zone(k)) {
+      boost::throw_exception(std::logic_error("something doesn't work in ClusterHelper::identify_interpolation_vertex)"));
+    }
+  }
+  return k;
+}

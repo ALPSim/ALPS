@@ -52,7 +52,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
       const itime_green_function_t& G0
     , alps::Parameters p) 
 {
-   BOOST_ASSERT(is_master());
+  BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile; 
   if(p.defined("TMPNAME")){
@@ -91,7 +91,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
               const matsubara_green_function_t& G0_omega
             , alps::Parameters p)
 {
-  BOOST_ASSERT(is_master());
+  BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile;
   if(p.defined("TMPNAME")){

@@ -379,14 +379,27 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
                                                      n_flavors, eps, epssq));
   } 
   else if (parms.defined("CLUSTER_LOOP")){
-    if(!(std::string(parms["CLUSTER_LOOP"])==std::string("DCA"))) throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA");
+    if(!(std::string(parms["CLUSTER_LOOP"])==std::string("DCA")))
+      throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA");
     std::cout << "using cluster fourier transformer" << "\n";
     boost::shared_ptr<DCATransformer> clusterhandler;
     DCATransformer::generate_transformer(parms, clusterhandler);
     std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
     std::vector<std::vector<double> > epssq_f(n_flavors, clusterhandler->epssqav());
-    fourier_ptr.reset(new ClusterG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"], 
-                                                      n_flavors, n_site, eps_f, epssq_f));    
+    if (n_site==1) {
+      std::vector<double> eps(n_flavors);
+      std::vector<double> epssq(n_flavors);
+      for (int f=0; f<n_flavors; ++f) {
+        eps[f] = eps_f[f][0];
+        epssq[f] = epssq_f[f][0];
+      }
+      fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"],
+                                                       n_flavors, eps, epssq));
+      
+    }
+    else 
+      fourier_ptr.reset(new ClusterG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"], 
+                                                        n_flavors, n_site, eps_f, epssq_f));    
   } 
   else {
     std::cout << "using Bethe lattice fourier transformer" << "\n";
@@ -422,7 +435,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
       eps[f][0] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
       epssq[f][0] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]; 
     }
-    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
+    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
                                               n_flavors, 1, densities, eps, epssq));
   } 
   else if (parms.defined("CLUSTER_LOOP")){
@@ -432,7 +445,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
     DCATransformer::generate_transformer(parms, clusterhandler);
     std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
     std::vector<std::vector<double> > epssq_f(n_flavors, clusterhandler->epssqav());
-    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
+    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
                                               n_flavors, n_site, densities, eps_f, epssq_f));    
   }
   else {
@@ -446,7 +459,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
       eps[f][0] = 0.;
       epssq[f][0] = t*t;
     }
-    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
+    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
                                               n_flavors, 1, densities, eps, epssq));
   }
 }
@@ -462,14 +475,16 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   double U = parms["U"];
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
     std::cout << "using general fourier transformer" << "\n";
-    std::vector<double> eps(n_flavors);
-    std::vector<double> epssq(n_flavors);
+    std::vector<std::vector<double> >eps(n_flavors);
+    std::vector<std::vector<double> >epssq(n_flavors);
     for (int f=0; f<n_flavors; ++f) {
-      eps[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
-      epssq[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]; 
+      eps[f].resize(1);
+      epssq[f].resize(1);
+      eps[f][0] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
+      epssq[f][0] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)]; 
     }
-    fourier_ptr.reset(new SimpleAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U,
-                                                             n_flavors, densities, magnetization,  eps, epssq));
+    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U,
+                                              n_flavors, 1, densities,  eps, epssq));
   }
   else if (parms.defined("CLUSTER_LOOP")){
     if(!(std::string(parms["CLUSTER_LOOP"])==std::string("DCA"))) throw std::logic_error("please figure out how to do fourier transforms in your cluster framwork if it is not DCA");
@@ -478,19 +493,25 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
     DCATransformer::generate_transformer(parms, clusterhandler);
     std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
     std::vector<std::vector<double> > epssq_f(n_flavors, clusterhandler->epssqav());
-    fourier_ptr.reset(new ClusterAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
-                                                              n_flavors, n_site, densities, magnetization, eps_f, epssq_f));
+    if (n_site==1) 
+      fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"], U, 
+                                                n_flavors, n_site, densities, eps_f, epssq_f));
+    else
+      fourier_ptr.reset(new ClusterAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
+                                                                n_flavors, n_site, densities, magnetization, eps_f, epssq_f));
   } else {
     std::cout << "using Bethe lattice fourier transformer" << "\n";
-    std::vector<double> eps(n_flavors);
-    std::vector<double> epssq(n_flavors);
+    std::vector<std::vector<double> > eps(n_flavors);
+    std::vector<std::vector<double> > epssq(n_flavors);
     double t = parms["t"];
     for (int f=0; f<n_flavors; ++f) {
-      eps[f] = 0.;
-      epssq[f] = t*t;
+      eps[f].resize(1);
+      epssq[f].resize(1);
+      eps[f][0] = 0.;
+      epssq[f][0] = t*t;
     }
-    fourier_ptr.reset(new SimpleAntiFerroGFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
-                                                             n_flavors, densities, magnetization, eps, epssq));
+    fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., (double)parms["H"], U, 
+                                              n_flavors, n_site, densities, eps, epssq));
   }
 }
 
