@@ -28,6 +28,7 @@
 import pyalps
 import matplotlib.pyplot as plt
 import pyalps.plot
+import numpy as np
 
 #prepare the input parameters
 parms = []
@@ -46,8 +47,8 @@ for t in [1.5,2,2.5]:
     )
 
 #write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm1',parms)
-pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
+# input_file = pyalps.writeInputFiles('parm1',parms)
+# pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
 
 #get the list of result files
 result_files = pyalps.getResultFiles(prefix='parm1')
@@ -60,12 +61,20 @@ print pyalps.loadObservableList(result_files)
 #load a selection of measurements:
 data = pyalps.loadMeasurements(result_files,['|Magnetization|','Magnetization^2'])
 
-#calculate the Binder cumulants using jackknife-analysis
-binder = pyalps.DataSet()
-binder.props = pyalps.dict_intersect([d[0].props for d in data])
-binder.x = [d[0].props['T'] for d in data]
-binder.y = [d[1].y[0]/(d[0].y[0]*d[0].y[0]) for d in data]
-print binder
+obschoose = lambda d, o: np.array(d)[np.nonzero([xx.props['observable'] == o for xx in d])]
+binder = []
+for dd in data:
+    magn2 = obschoose(dd, 'Magnetization^2')[0]
+    magnabs = obschoose(dd, '|Magnetization|')[0]
+    
+    res = pyalps.DataSet()
+    res.props = pyalps.dict_intersect([d.props for d in dd])
+    res.x = np.array([magnabs.props['T']])
+    res.y = np.array([magn2.y[0]/(magnabs.y[0]*magnabs.y[0])])
+    res.props['observable'] = 'Binder cumulant'
+    binder.append(res)
+
+binder = pyalps.collectXY(binder, 'T', 'Binder cumulant')
 
 # ... and plot them
 plt.figure()
