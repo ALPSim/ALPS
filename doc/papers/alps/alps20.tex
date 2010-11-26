@@ -43,7 +43,7 @@
 	\myauthor{\ref{utah}}{D. Koop}{dakoop@cs.utah.edu}
 	\myauthor{\ref{eth}}{P.N. Ma}{pingnang@phys.ethz.ch}
 	\myauthor{\ref{tokyo}}{H.~Matsuo}{halm@looper.t.u-tokyo.ac.jp}
-	\myauthor{\ref{eth},\ref{utah}}{P.~Mates}{phillipmates@gmail.com}
+	\myauthor{\ref{eth},\ref{utah}}{P.~Mates}{mates@sci.utah.edu}
 	\myauthor{\ref{paris}}{O. Parcollet}{parcolle@spht.saclay.cea.fr}
 	\myauthor{\ref{affpol}}{G.~Pawlowski}{gpawlo@amu.edu.pl}
 	\myauthor{\ref{epfl}}{J.D.~Picon}{jean-david.picon@epfl.chl}
@@ -362,7 +362,8 @@ VisTrails is an open-source system that was designed to support exploratory comp
 Workflow systems provide well-defined languages for specifying complex tasks from simpler ones; they capture complex processes at various levels of detail and systematically record the provenance information necessary for automation, reproducibility, and result sharing.  VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs to capture underlying python scrips which, in turn, execute ALPS algorithms.  Fig.~\ref{fig:workflow} shows an example ALPS workflow that takes input lattice parameters and model definitions (noun examples include ChainLattice and LatticeModel), executes the quantum Monte Carlo looper code, and then renders the data (examples of verb use include RunLoop and PreparePlot).
 
 \subsection{CrowdLabs}
-also mention VisMashups \cite{Santos09}
+CrowdLabs is an social online workflow repository for the VisTrails system. It combines workflow management tools with a scalable infrastructure to allow scientists to collaboratively analyze and visualize data. CrowdLabs is capable of hosting, executing, and serving results from VisTrails workflows, including those that make use of the ALPS VisTrails package. VisMashups \cite{Santos09} are also integrated into CrowdLabs, enabling users to modify parameters and re-execute workflows from within their web browsers. This provides an entry point for non-experts to explore and interact with complicated simulations workflows.
+
 \subsection{The ALPS VisTrails package}
 The ALPS team will write this after the above sections are done.
 \section{Tutorials and Examples}
@@ -469,11 +470,11 @@ An example for running an ALPS application from the command line is shown in Fig
 \section{License}
 The ALPS libraries are licensed under the ALPS library license \cite{librarylicense} and the applications under the ALPS application license  \cite{applicationlicense}. These licenses are modeled after the GNU General Public License (GPL), but contain an additional requirement to cite this paper as well as relevant papers for each of the application codes. These papers need to be cited and the use of ALPS acknowledged in any scientific project that makes use of ALPS. This includes the case when ALPS has only been used to test a scientist's application code.
 
-The detailed license text is included in the files {\tt LICENSE.txt} \cite{librarylicense} and {\tt LICENSE-applications.txt}  \cite{applicationlicense}. Any use of ALPS requires citing this paper.  These files can be found at he top level of the source distribution and in the directory {\tt share/alps} of the binary distrubutions. The papers that need to be cited for the use of a specific application are printed to the standard output when that application is run. The list of papers is also included in the file {\tt CITATIONS.txt}. Since some of those references are to preprints we recommend that the ALPS web page \cite{alps} is checked for updates.
+The detailed license text is included in the files {\tt LICENSE.txt} \cite{librarylicense} and {\tt LICENSE-applications.txt}  \cite{applicationlicense}. Any use of ALPS requires citing this paper.  These files can be found at the top level of the source distribution and in the directory {\tt share/alps} of the binary distrubutions. The papers that need to be cited for the use of a specific application are printed to the standard output when that application is run. The list of papers is also included in the file {\tt CITATIONS.txt}. Since some of those references are to preprints we recommend that the ALPS web page \cite{alps} is checked for updates.
 
 \section{Future development plans}
 
-The ALPS project is work in progress and development will continue after this release 2.0. Immediate plans for release 2.1 within about a year include the development of  more evaluation tools for Monte Carlo simulations and more 2D and 3D plotting functionality.
+The ALPS project is a work in progress and development will continue after this release 2.0. Immediate plans for release 2.1 within about a year include the development of  more evaluation tools for Monte Carlo simulations and more 2D and 3D plotting functionality.
 
 ALPS 2.1 will also provide support for more programming languages. In addition to the Python support in the current version we plan to add a Fortran library to write the ALPS HDF5 files from Fortran. This will enable the use of the ALPS evaluation tools not only with C++ or Python codes, but also with results of Fortran codes.
 
