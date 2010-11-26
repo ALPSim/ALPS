@@ -41,6 +41,7 @@ int main(int argc, char *argv[]) {
         alps::results_type<alps::mcmpisim<simulation_type> >::type results = collect_results(s);
         for (alps::results_type<alps::mcmpisim<simulation_type> >::type::const_iterator it = results.begin(); it != results.end(); ++it)
             std::cout << std::fixed << std::setprecision(5) << it->first << ": " << it->second->to_string() << std::endl;
+        std::cout << "Sin of energy: " << sin(results["Energy"].get_mcdata<double>()) << std::endl;
     } else if(options.valid && options.type == alps::mcoptions::MPI) {
         boost::mpi::environment env(argc, argv);
         boost::mpi::communicator c;
