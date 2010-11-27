@@ -65,7 +65,9 @@ class UnzipDirectory(Module):
             if f[-1] == '/':
                 os.mkdir(f)
             else:
-                open(f,'w').write(zf.read(f))
+                file = open(f,'w')
+                file.write(zf.read(f))
+                file.close()
         # This will work when VisTrails moves to Python 2.6
         # zf.extractall()
         
