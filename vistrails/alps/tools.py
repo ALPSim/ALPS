@@ -70,6 +70,10 @@ class UnzipDirectory(Module):
                 file.close()
         # This will work when VisTrails moves to Python 2.6
         # zf.extractall()
+        zf.close()
+        # chdir outside of the temporary directories to let VisTrails clean up
+        os.chdir('..')
+        os.chdir('..')
         
         self.setResult('output_dir',dir)
 
