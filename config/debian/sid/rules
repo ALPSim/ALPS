@@ -6,7 +6,18 @@ include /usr/share/cdbs/1/class/cmake.mk
 # Add here any variable or target overrides you need.
 
 # Extra flags passed to cmake.
-DEB_CMAKE_EXTRA_FLAGS = -DALPS_BUILD_APPLICATIONS:BOOL=ON -DALPS_ENABLE_OPENMP:BOOL=ON -DALPS_BUILD_FORTRAN:BOOL=ON -DCMAKE_Fortran_FLAGS:STRING=-fopenmp
+#  ALPS specific options
+DEB_CMAKE_EXTRA_FLAGS = \
+    -DALPS_BUILD_APPLICATIONS:BOOL=ON \
+    -DALPS_ENABLE_OPENMP:BOOL=ON \
+    -DALPS_BUILD_FORTRAN:BOOL=ON \
+    -DCMAKE_Fortran_FLAGS:STRING=-fopenmp
+
+#  Linker flags for reduce binary size
+DEB_CMAKE_EXTRA_FLAGS += \
+    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--no-undefined -Wl,--as-needed" \
+    -DCMAKE_MODULE_LINKER_FLAGS="-Wl,--no-undefined -Wl,--as-needed" \
+    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined -Wl,--as-needed"
 
 # Allow parallel builds
 DEB_BUILD_PARALLEL = yes

@@ -1,3 +1,11 @@
+alps (2.0.0~rc3-1) unstable; urgency=low
+
+  * New upstream release (2.0.0rc3).
+  * Add "-Wl,--no-undefined" and "-Wl,--as-needed" option
+    for reducing binary size.
+
+ -- Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>  Mon, 29 Nov 2010 10:17:44 +0900
+
 alps (2.0.0~rc2-2) unstable; urgency=low
 
   * Add TEBD application to build.
