@@ -9,5 +9,6 @@ debian/tmp/usr/bin/qwl_evaluate usr/bin/
 debian/tmp/usr/bin/sparsediag usr/bin/
 debian/tmp/usr/bin/spinmc usr/bin/
 debian/tmp/usr/bin/spinmc_evaluate usr/bin/
+debian/tmp/usr/bin/tebd usr/bin/
 debian/tmp/usr/bin/worm usr/bin/
 debian/tmp/usr/bin/worm_evaluate usr/bin/
