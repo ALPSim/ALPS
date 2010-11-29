@@ -61,7 +61,7 @@
 	\myauthor{\ref{epfl}}{J.D.~Picon}{jean-david.picon@epfl.chl}
 	\myauthor{\ref{harvard},\ref{eth}}{L.~Pollet}{pollet@phys.ethz.ch}
 	\myauthor{\ref{goettingen}}{T.~Pruschke}{pruschke@theorie.physik.uni-goettingen.de}
-	\myauthor{\ref{utah},\ref{brazil}}{E.~Santos}{emanuele@sci.utah.edu}
+	\myauthor{\ref{utah}}{E.~Santos}{emanuele@sci.utah.edu}
 	\myauthor{\ref{virginia}}{V.W.~Scarola}{scarola@vt.edu}
 	\myauthor{\ref{lmu}}{U.~Schollw\"ock}{schollwoeck@lmu.de}
 	\myauthor{\ref{utah}}{C.~Silva}{csilva@sci.utah.edu}
@@ -88,7 +88,6 @@
 \myaddress{paris}{Institut de Physique Theorique, CEA/DSM/IPhT-CNRS/URA 2306, CEA-Saclay, F-91191 Gif-sur-Yvette, France} 
 \myaddress{affpol}{Faculty of Physics, A. Mickiewicz University, ul. Umultowska 85, 61-614 Poznan, Poland}
 \myaddress{epfl}{Institute of Theoretical Physics, EPF Lausanne, CH-1015 Lausanne, Switzerland}
-\myaddress{brazil}{} 
 \myaddress{virginia}{Department of Physics, Virginia Tech, Blacksburg, Virginia 24061, USA}
 \myaddress{lmu}{Arnold Sommerfeld Center for Theoretical Physics and Center for NanoScience, University of Munich, Theresienstrasse 37, 80333 Munich, Germany}
 \myaddress{tokyo}{Department of Applied Physics, University of Tokyo, 113-8656 Tokyo, Japan}
@@ -359,15 +358,14 @@ From now on, we use the terms scientific workflow, workflow, pipeline,
 and dataflow, interchangeably.
 
 \begin{figure}[t]
-\includegraphics[width=\linewidth]{figures/provenance_types.pdf}
-\caption{(XXX: change to an ALPS workflow) The workflow specification (on the left)
-  generates isosurface visualizations of a structured grid data
-  set. The workflow instance (in the middle), in addition to the
-  workflow specification, contains value assignments for parameters of
-  the modules. This instance was used to derive the head visualization
-  (in the bottom left). The workflow runs (on the right) consist of
-  information collected while the workflow instance was executed.  
-}
+\includegraphics[width=\linewidth]{figures/alps_provenance_types.pdf}
+\caption{The workflow specification (on the left) TODO: Add
+  description of the workflow. The workflow
+  instance (in the middle), in addition to the workflow specification,
+  contains value assignments for parameters of the modules. This
+  instance was used to derive the plot in the bottom left. The
+  workflow runs (on the right) consist of information collected while
+  the workflow instance was executed. }
 \vspace{0cm}
 \label{fig:workflow-spec-run}
 \end{figure}
@@ -449,21 +447,19 @@ or a \emph{vistrail}.
 \begin{figure}[t]
 \centering
 \begin{center}
-  \includegraphics[width = 0.75\linewidth,clip=false]{Figures/croos-tree-3.png}
-\caption{(XXX: change to an ALPS example) Workflow evolution provenance. An example
-    of exploratory visualization for studying salinity changes at the
-    interface between the Columbia River Inlet and the Pacific Ocean
-    using VisTrails.  Complete provenance of the exploration process
-    is displayed as a history tree with each node representing a
-    workflow instance that generates a visualization.  Detailed
-    meta-data is also stored including free-text notes made by the
-    scientist, the date and time the workflow was created or modified,
-    an optional descriptive tag, and the user that created
-    it.} \label{fig:cmop} \vspace{-.3cm}
+  \includegraphics[width = 1.0\linewidth,clip=false]{Figures/alps_tree.png}
+  \caption{Workflow evolution provenance. TODO: Add exploration
+    description. Complete provenance of the exploration process is
+    displayed as a history tree with each node representing a workflow
+    instance that generates a plot. Detailed meta-data is
+    also stored including free-text notes made by the scientist, the
+    date and time the workflow was created or modified, an optional
+    descriptive tag, and the user that created it.} \label{fig:alps-tree}
+  \vspace{-.3cm}
 \end{center}
 \end{figure}
 
-As Figure~\ref{fig:cmop} illustrates, each node in a vistrail
+As Figure~\ref{fig:alps-tree} illustrates, each node in a vistrail
 corresponds to a workflow instance and contains value assignments for
 the module parameters. A series of workflow runs may be associated
 with a node as well as additional metadata, such as user annotations.
@@ -541,8 +537,37 @@ showspreadsheetonly]{width=8cm}
 
 We should discuss how VisTrails caches results, with the advantage that only those parts of a workflow that have been changed have to be re-executed - a big advantage over scripts. Also, we should mention Dave's paper on strong links and persistent storage.
 
-\subsection{CrowdLabs, VisMashup, Latex and wiki extensions ....}
-CrowdLabs is an social online workflow repository for the VisTrails system. It combines workflow management tools with a scalable infrastructure to allow scientists to collaboratively analyze and visualize data. CrowdLabs is capable of hosting, executing, and serving results from VisTrails workflows, including those that make use of the ALPS VisTrails package. VisMashups \cite{Santos09} are also integrated into CrowdLabs, enabling users to modify parameters and re-execute workflows from within their web browsers. This provides an entry point for non-experts to explore and interact with complicated simulation workflows.
+\subsection{Sharing content and reproducible research}
+CrowdLabs is a social online workflow repository for the VisTrails
+system. It combines workflow management tools with a scalable
+infrastructure to allow scientists to collaboratively analyze and
+visualize data. CrowdLabs is capable of hosting, executing, and
+serving results from VisTrails workflows, including those that make
+use of the ALPS VisTrails package. CrowdLabs also leverages provenance
+information (\eg workflow/pipeline specifications, libraries,
+packages, users, datasets and results) to provide a richer sharing
+experience: users can search and query this information.
+
+VisMashups \cite{Santos09}, a system for simplifying the creation,
+maintenance and use of customized workflows, is also
+integrated into CrowdLabs. It enables users to modify parameters and
+re-execute workflows from within their web browsers. This provides an
+entry point for non-experts to explore and interact with complicated
+simulation workflows.
+
+One of the goals of the VisTrails system and CrowdLabs is to
+facilitate the publication of scientific results. VisTrails and
+CrowdLabs greatly simplify the process of packaging workflows and
+results for publication. By supporting the publication on wikis, other
+Web sites, or scientific documents, this framework allows users to create
+documents whose digital artifacts (\eg figures) include a deep
+caption: detailed provenance information which contains the
+specification of the computational process (or workflow) and
+associated parameters used to produce the
+artifact. Figures~\ref{fig:figure} and \ref{fig:workflow} are examples
+of this mechanism in action: both images were included by using
+VisTrails directly and clicking on the images will download the
+workflow with the parameters used to generate them.
 
 \subsection{The ALPS VisTrails package}
 
