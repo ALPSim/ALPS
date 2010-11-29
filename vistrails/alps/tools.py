@@ -55,6 +55,7 @@ class UnzipDirectory(Module):
         os.mkdir(o.name)
         dir = basic.Directory
         dir.name = o.name
+        current_directory = os.getcwd()
         os.chdir(dir.name)
         
         input_file = self.getInputFromPort('zipfile').name
@@ -72,8 +73,7 @@ class UnzipDirectory(Module):
         # zf.extractall()
         zf.close()
         # chdir outside of the temporary directories to let VisTrails clean up
-        os.chdir('..')
-        os.chdir('..')
+        os.chdir(current_directory)
         
         self.setResult('output_dir',dir)
 
