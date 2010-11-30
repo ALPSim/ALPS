@@ -15,6 +15,11 @@ DIR_NAME = .;
 BASE_NAME = task1;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
+EXMC: number of replicas = 4
+EXMC: initial inverse temperature set = 0.25 0.3 0.375 0.5
+EXMC stage 0: acceptance rate = 0.89062 0.89062 0.80469
+EXMC stage 1: acceptance rate = 0.91406 0.84375 0.76562
+EXMC stage 1: optimized inverse temperature set = 0.25 0.33692 0.42026 0.5
 [results]
 [[replica 0]]
 Binder Ratio of Magnetization: 0.35602 +/- 0.016
@@ -181,6 +186,11 @@ DIR_NAME = .;
 BASE_NAME = task2;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
+EXMC: number of replicas = 4
+EXMC: initial inverse temperature set = 0.25 0.3 0.375 0.5
+EXMC stage 0: acceptance rate = 0.90625 0.85938 0.73438
+EXMC stage 1: acceptance rate = 0.92188 0.875 0.75
+EXMC stage 1: optimized inverse temperature set = 0.25 0.32708 0.41206 0.5
 [results]
 [[replica 0]]
 Binder Ratio of Magnetization: 0.330245 +/- 0.0148
@@ -347,6 +357,11 @@ DIR_NAME = .;
 BASE_NAME = task3;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
+EXMC: number of replicas = 4
+EXMC: initial inverse temperature set = 2 2.8499 3.8499 5
+EXMC stage 0: acceptance rate = 0.32812 0.39844 0.35156
+EXMC stage 1: acceptance rate = 0.35938 0.36719 0.35156
+EXMC stage 1: optimized inverse temperature set = 2 2.8942 3.8832 5
 [results]
 [[replica 0]]
 EXMC: Acceptance Rate: 0.311523 +/- 0.0145

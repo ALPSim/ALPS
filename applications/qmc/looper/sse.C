@@ -125,7 +125,7 @@ loop_worker::loop_worker(alps::Parameters const& p)
   model.check_parameter(/* support_longitudinal_field = */ false, support_negative_sign);
 
   use_improved_estimator = (!model.has_field()) && (!p.defined("DISABLE_IMPROVED_ESTIMATOR"));
-  if (!use_improved_estimator) std::cerr << "WARNING: improved estimator is disabled\n";
+  if (!use_improved_estimator) std::cout << "WARNING: improved estimator is disabled\n";
 
   // configuration
   int nvs = num_sites(lattice.vg());

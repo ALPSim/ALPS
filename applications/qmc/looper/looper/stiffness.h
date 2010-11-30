@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -66,7 +66,7 @@ struct stiffness
                                                   coordinate_type());
       dim = get_property(lat.rg(), dimension_t());
       if (improved && dim > MAX_DIM) {
-        std::cerr << "Spatial dimension (=" << dim << ") is too large.  "
+        std::cout << "WARNING: Spatial dimension (=" << dim << ") is too large.  "
                   << "Stiffness will be measured only for the first "
                   << MAX_DIM << " dimensions\n";
         dim = MAX_DIM;

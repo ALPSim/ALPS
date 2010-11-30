@@ -175,6 +175,10 @@ DIR_NAME = .;
 BASE_NAME = task4;
 WORKER_SEED = 2873;
 DISORDER_SEED = 2873;
+TEMPSCAN: number of temperatures = 3
+TEMPSCAN: initial temperature = 2
+TEMPSCAN: final temperature = 1.6
+Warning: unknown evaluator: "ising; temperature scan".  The only evaluator "ising" will be used instead.
 [results]
 [[replica 0]]
 Binder Ratio of Magnetization: 0.400668 +/- 0.00668

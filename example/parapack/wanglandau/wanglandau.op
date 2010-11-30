@@ -13,6 +13,23 @@ DIR_NAME = .;
 BASE_NAME = task1;
 WORKER_SEED = 3;
 DISORDER_SEED = 3;
+stage 0: 1024: flatness check PASSED (mean = 2628.92, Hmin = 2575, ratio = 0.979489)
+stage 0: 1024: update factor is reduced to exp(0.5) (target = exp(0.00995033))
+stage 1: 2048: flatness check PASSED (mean = 2636.08, Hmin = 2583, ratio = 0.979865)
+stage 1: 2048: update factor is reduced to exp(0.25) (target = exp(0.00995033))
+stage 2: 3072: flatness check PASSED (mean = 2635.31, Hmin = 2610, ratio = 0.990397)
+stage 2: 3072: update factor is reduced to exp(0.125) (target = exp(0.00995033))
+stage 3: 4096: flatness check PASSED (mean = 2636.69, Hmin = 2575, ratio = 0.976602)
+stage 3: 4096: update factor is reduced to exp(0.0625) (target = exp(0.00995033))
+stage 4: 5120: flatness check PASSED (mean = 2635.46, Hmin = 2604, ratio = 0.988062)
+stage 4: 5120: update factor is reduced to exp(0.03125) (target = exp(0.00995033))
+stage 5: 6144: flatness check PASSED (mean = 2638.31, Hmin = 2569, ratio = 0.97373)
+stage 5: 6144: update factor is reduced to exp(0.015625) (target = exp(0.00995033))
+stage 6: 7168: flatness check FAILED (mean = 2630.77, Hmin = 2494, ratio = 0.948012)
+stage 6: 8192: flatness check PASSED (mean = 5266.77, Hmin = 5227, ratio = 0.992449)
+stage 6: 8192: update factor is reduced to exp(0.0078125) (target = exp(0.00995033))
+stage 7: 9216: flatness check PASSED (mean = 2630.38, Hmin = 2557, ratio = 0.972101)
+stage 7: 9216: Wang-Landau optimization done
 [results]
 Final Histogram:
 0: 2664 entries.

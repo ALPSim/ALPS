@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -55,17 +55,17 @@ public:
   void check_parameter(bool support_longitudinal_field, bool support_negative_sign) const {
     if (has_field()) {
       if (support_longitudinal_field) {
-        std::cerr << "WARNING: model has a magnetic field\n";
+        std::cout << "WARNING: model has a magnetic field\n";
       } else {
         boost::throw_exception(std::invalid_argument("longitudinal magnetic field not supported"));
       }
     }
     if (is_frustrated()) {
-      std::cerr << "WARNING: model is classically frustrated\n";
+      std::cout << "WARNING: model is classically frustrated\n";
     }
     if (is_signed()) {
       if (support_negative_sign) {
-        std::cerr << "WARNING: model has negative signs\n";
+        std::cout << "WARNING: model has negative signs\n";
       } else {
         boost::throw_exception(std::invalid_argument("negative signs not supported"));
       }

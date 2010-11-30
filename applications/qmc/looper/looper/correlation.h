@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -74,7 +74,7 @@ struct correlation {
       improved = use_improved_estimator;
 
       if (measure_green_function && !improved) {
-        std::cerr << "WARNING: Green funciton measurement is disabled\n";
+        std::cout << "WARNING: Green funciton measurement is disabled\n";
         measure_green_function = false;
       }
 

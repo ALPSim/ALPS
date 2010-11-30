@@ -97,7 +97,7 @@ init(lattice_t const& lat,
       BOOST_FOREACH(unsigned int t, types)
         valid &= build_diagonal_matrix(ex.second, params_, mh, t, elms.get<1>()[t]);
       if (!valid) {
-        std::cerr << "WARNING: \"" << ex.first
+        std::cout << "WARNING: \"" << ex.first
                   << "\" will not be measured since it contains an off-diagonal or "
                   << "multi-site operator\n";
         average_elements.pop_back();
@@ -112,7 +112,7 @@ init(lattice_t const& lat,
       BOOST_FOREACH(unsigned int t, types)
         valid &= build_diagonal_matrix(ex.second, params_, mh, t, elms.get<1>()[t]);
       if (!valid) {
-        std::cerr << "WARNING: \"" << ex.first
+        std::cout << "WARNING: \"" << ex.first
                   << "\" will not be measured since it contains an off-diagonal or "
                   << "multi-site operator\n";
         local_elements.pop_back();
@@ -130,7 +130,7 @@ init(lattice_t const& lat,
         valid &= build_diagonal_matrix(ex.second.second, params_, mh, t, elms.get<2>()[t]);
       }
       if (!valid) {
-        std::cerr << "WARNING: \"" << ex.first
+        std::cout << "WARNING: \"" << ex.first
                   << "\" will not be measured since it contains an off-diagonal or "
                   << "multi-site operator\n";
         correlation_elements.pop_back();
@@ -148,7 +148,7 @@ init(lattice_t const& lat,
         valid &= build_diagonal_matrix(ex.second.second, params_, mh, t, elms.get<2>()[t]);
       }
       if (!valid) {
-        std::cerr << "WARNING: \"" << ex.first
+        std::cout << "WARNING: \"" << ex.first
                   << "\" will not be measured since it contains an off-diagonal or "
                   << "multi-site operator\n";
         strfactor_elements.pop_back();

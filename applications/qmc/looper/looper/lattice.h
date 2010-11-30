@@ -2,7 +2,7 @@
 *
 * ALPS Project Applications
 *
-* Copyright (C) 1997-2009 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -342,7 +342,7 @@ protected:
               f += alternating_tensor(i,j,k) * vecs[0][i] * vecs[1][j] * vecs[2][k];
         break;
       default :
-        std::cerr << "WARNING: can not calculate unit lattice volume.  Assume 1.\n";
+        std::cout << "WARNING: can not calculate unit lattice volume.  Assume 1.\n";
         f = 1;
       }
       vol *= std::abs(f);
