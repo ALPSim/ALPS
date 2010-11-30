@@ -30,6 +30,7 @@ import core.modules.module_registry
 import core.modules.basic_modules as basic
 from core.modules.vistrails_module import Module, ModuleError, NotCacheable
 from core.modules.python_source_configure import PythonSourceConfigurationWidget
+from core import debug
 
 import urllib, copy
 import matplotlib.pyplot as plt
@@ -179,7 +180,6 @@ class LoadAlpsMeasurements(Module):
     ]    
     
     def compute(self):
-        try:
             propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
             resPath= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/simulation/results"
             loader = Hdf5Loader()
@@ -191,10 +191,6 @@ class LoadAlpsMeasurements(Module):
             else:
                 datasets = loader.ReadMeasurementFromFile(files,measurements=None,proppath=propPath,respath=resPath)
             self.setResult('data',datasets)
-        except Exception, (exc):
-            from traceback import print_exc
-            print_exc()
-            raise exc
 
 class LoadDMFTIterations(Module):
     """Load the data from successive DMFT-Iterations. Description of input ports:
@@ -215,7 +211,6 @@ class LoadDMFTIterations(Module):
     ]    
     
     def compute(self):
-        try:
             propPath= self.getInputFromPort('PropertyPath') if self.hasInputFromPort('PropertyPath') else "/parameters"
             resPath= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/simulation/iteration"
             loader = Hdf5Loader()
@@ -227,10 +222,6 @@ class LoadDMFTIterations(Module):
             else:
                 datasets = loader.ReadMeasurementFromFile(files,measurements=None,proppath=propPath,respath=resPath)
             self.setResult('data',datasets)
-        except Exception, (exc):
-            from traceback import print_exc
-            print_exc()
-            raise exc
 
 
 class LoadTimeEvolution(Module):
@@ -254,7 +245,6 @@ class LoadTimeEvolution(Module):
     ]    
     
     def compute(self):
-        try:
             globalproppath= self.getInputFromPort('GlobalPropertyPath') if self.hasInputFromPort('GlobalPropertyPath') else "/parameters"
             localpropsuffix= self.getInputFromPort('LocalPropertySuffix') if self.hasInputFromPort('LocalPropertySuffix') else "/parameters"
             resroot= self.getInputFromPort('ResultPath') if self.hasInputFromPort('ResultPath') else "/timesteps/"
@@ -285,8 +275,7 @@ class LoadTimeEvolution(Module):
                             #Extend the total dataset with this data
                             datasets.extend(locdata)
                     except Exception, e:
-                        print e
-                        print traceback.format_exc()
+                        debug.log(traceback.format_exc())
             else:
                 #loop over files
                 for f in files:
@@ -309,13 +298,8 @@ class LoadTimeEvolution(Module):
                             #Extend the total dataset with this data
                             datasets.extend(locdata)
                     except Exception, e:
-                        print e
-                        print traceback.format_exc()
+                        debug.log(traceback.format_exc())
             self.setResult('data',datasets)
-        except Exception, (exc):
-            from traceback import print_exc
-            print_exc()
-            raise exc
 
 
 class LoadBinningAnalysis(Module):

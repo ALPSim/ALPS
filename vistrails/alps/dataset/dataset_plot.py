@@ -93,7 +93,6 @@ class MplXYPlot(NotCacheable,Module):
         return self.getInputFromPort(m)
             
     def compute(self):
-        try:
             if self.hifp('plot'):
                 self.plt = self.gifp('plot')
             else:
@@ -107,10 +106,6 @@ class MplXYPlot(NotCacheable,Module):
             if self.hasInputFromPort('source'):
                 code = self.getInputFromPort('source')
                 exec urllib.unquote(str(code))
-        except Exception, (exc):
-            from traceback import print_exc
-            print_exc()
-            raise exc
         
 class WriteTextFile(Module): 
     _input_ports = [('plot',[(PreparePlot,'the plot')])]
@@ -156,20 +151,15 @@ class WriteGnuplotFile(Module):
     
     def compute(self):
         description = self.getInputFromPort('plot')
-        outputname = 'output.eps'
-        term='postscript color eps enhanced'
-        if self.hasInputFromPort('terminal'):
-            term = self.getInputFromPort('terminal')
+        outputname = None
+        term=None
         if self.hasInputFromPort('filename'):
             outputname = self.getInputFromPort('filename')
-        else:
-            term = 'x11'
+        if self.hasInputFromPort('terminal'):
+            term = self.getInputFromPort('terminal')
         res = convert_to_gnuplot(desc=description, outfile=outputname, terminal=term)
         o = self.interpreter.filePool.create_file()
-        print "which FILE?", o.name
         f = file(o.name,'w')
-        print "OUTPUT"
-        print res
         f.write(res)
         f.close()
         self.setResult('value_as_string',res)

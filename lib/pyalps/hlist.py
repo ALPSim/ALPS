@@ -111,7 +111,6 @@ class HList:
         return len(self.indices_)
     
     def __getitem__(self, key):
-#        print 'Get key',key
         if type(key) == tuple:
             return hget__(self.data_,key,0)
         elif type(key) == list:
@@ -123,7 +122,6 @@ class HList:
         return str([self[k] for k in self.indices_])
     
     def __setitem__(self, key, value):
-#        print 'Set key',key
         if type(key) == tuple:
             hset__(self.data_,key,0,value)
         elif type(key) == list:

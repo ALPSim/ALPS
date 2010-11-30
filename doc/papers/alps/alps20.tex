@@ -359,8 +359,8 @@ and dataflow, interchangeably.
 
 \begin{figure}[t]
 \includegraphics[width=\linewidth]{figures/alps_provenance_types.pdf}
-\caption{The workflow specification (on the left) TODO: Add
-  description of the workflow. The workflow
+\caption{The workflow specification (on the left) shows a workflow to calculate the uniform magnetic susceptibility of a quantum Heisenberg spin ladder and plot it as a function of temperature.
+ The workflow
   instance (in the middle), in addition to the workflow specification,
   contains value assignments for parameters of the modules. This
   instance was used to derive the plot in the bottom left. The
@@ -448,8 +448,9 @@ or a \emph{vistrail}.
 \centering
 \begin{center}
   \includegraphics[width = 1.0\linewidth,clip=false]{figures/alps_tree.png}
-  \caption{Workflow evolution provenance. TODO: Add exploration
-    description. Complete provenance of the exploration process is
+  \caption{Workflow evolution provenance.  
+    In this example we have calculated the system size dependence of the spin gap of spin-1 and spin 1/2 Heisenberg chains, first calculating the gap by exact diagonalization and then performing fits to $\Delta(L)=  c/L$ and  $\Delta(L)=  \Delta_0 + c \exp(-L\xi)$. As expected from the Haldane conjecture the plots show that the first fit is best for the gapless spin-1/2 chain and the second fit is best for the gapped spin-1 chain.
+    Complete provenance of the exploration process is
     displayed as a history tree with each node representing a workflow
     instance that generates a plot. Detailed meta-data is
     also stored including free-text notes made by the scientist, the
@@ -494,7 +495,7 @@ pdf,
 getvtl,
 showspreadsheetonly]{width=8cm}
 \caption{A figure produced by an ALPS VisTrails workflow: the uniform susceptibility of the Heisenberg chain and ladder. Clicking the figure retrieves the workflow used to 
-create it. Opening that workflow lets the reader execute the full calculation.}
+create it. Opening that workflow on a machine with VisTrails and ALPS installed lets the reader execute the full calculation.}
 \label{fig:figure}
 \end{center}
 \end{figure}
@@ -538,6 +539,21 @@ showspreadsheetonly]{width=8cm}
 We should discuss how VisTrails caches results, with the advantage that only those parts of a workflow that have been changed have to be re-executed - a big advantage over scripts. Also, we should mention Dave's paper on strong links and persistent storage.
 
 \subsection{Sharing content and reproducible research}
+
+One of the goals of the VisTrails system is to
+facilitate the publication of scientific results. VisTrails and
+CrowdLabs greatly simplify the process of packaging workflows and
+results for publication. By supporting the publication on wikis, 
+Web sites, or scientific documents (through LaTeX extensions such as in this paper), this framework allows users to create
+documents whose digital artifacts (\eg figures) include a deep
+caption: detailed provenance information which contains the
+specification of the computational process (or workflow) and
+associated parameters used to produce the
+artifact. Figures~\ref{fig:figure} and \ref{fig:workflow} are examples
+of this mechanism in action: both images were included by using
+VisTrails directly and clicking on the images will download the
+workflow with the parameters used to generate them. This workflow can then be used by the reader to reproduce the figures.
+
 CrowdLabs is a social online workflow repository for the VisTrails
 system. It combines workflow management tools with a scalable
 infrastructure to allow scientists to collaboratively analyze and
@@ -548,26 +564,13 @@ information (\eg workflow/pipeline specifications, libraries,
 packages, users, datasets and results) to provide a richer sharing
 experience: users can search and query this information.
 
-VisMashups \cite{Santos09}, a system for simplifying the creation,
-maintenance and use of customized workflows, is also
-integrated into CrowdLabs. It enables users to modify parameters and
+VisMashups \cite{Santos09}, another component developed on top of VisTrails, is a system for simplifying the creation,
+maintenance and use of customized workflows. it is also
+integrated into CrowdLabs and enables users to modify parameters and
 re-execute workflows from within their web browsers. This provides an
 entry point for non-experts to explore and interact with complicated
-simulation workflows.
+simulation workflows. We will develop ALPS tutorials also as VisMashups, enabling the interactive exploration of tutorial problems with the reader's web browser, without the need to install ALPS.
 
-One of the goals of the VisTrails system and CrowdLabs is to
-facilitate the publication of scientific results. VisTrails and
-CrowdLabs greatly simplify the process of packaging workflows and
-results for publication. By supporting the publication on wikis, other
-Web sites, or scientific documents, this framework allows users to create
-documents whose digital artifacts (\eg figures) include a deep
-caption: detailed provenance information which contains the
-specification of the computational process (or workflow) and
-associated parameters used to produce the
-artifact. Figures~\ref{fig:figure} and \ref{fig:workflow} are examples
-of this mechanism in action: both images were included by using
-VisTrails directly and clicking on the images will download the
-workflow with the parameters used to generate them.
 
 \subsection{The ALPS VisTrails package}
 
@@ -576,9 +579,9 @@ ALPS 2.0 provides a package of modules for VisTrails for the preparation of inpu
 VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs for the names of modules that execute
  Python scripts which, in turn execute ALPS
 algorithms in Python or compiled code.  Fig.~\ref{fig:workflow} shows an example ALPS workflow
-that takes input lattice parameters and model definitions (described by nouns, such as 
+that takes input lattice parameters and model definitions (modules described by nouns, such as 
  ChainLattice and LatticeModel), executes the quantum
-Monte Carlo looper code, and then renders the data (described by verbs such as  RunLoop and PreparePlot).
+Monte Carlo looper code, and then renders the data (modules described by verbs such as  RunLoop and PreparePlot).
 
 The creation of such workflows is explained in a set of tutorials and on the web page. Furthermore, all ALPS tutorials, discussed in the next section, are available  as VisTrails workflows, providing an extensive set of examples that can be used as templates for the user's simulations. 
 

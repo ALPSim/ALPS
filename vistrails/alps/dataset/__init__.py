@@ -46,9 +46,6 @@ from dataset_plot import *
 from dataset_tools import *
 from dataset_select import *
 
-def warn(m):
-    print m
-
 def register(m,ns,abst=False):
     reg = core.modules.module_registry.registry
     

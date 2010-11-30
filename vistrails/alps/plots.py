@@ -25,15 +25,18 @@ basic = core.modules.basic_modules
 class DisplayGracePlot(NotCacheable, alpscore.SystemCommand):
      """ opens a grace plotfile using  the xmgr command. The path to xmgrace and other tools can be set in the ALPS package preferences """
      def compute(self):
-         print alpscore._get_tool_path('xmgrace')
-         self.execute(['nohup',alpscore._get_tool_path('xmgrace'), self.getInputFromPort('file').name,'&'])
+         cmd = ['nohup',alpscore._get_tool_path('xmgrace'), self.getInputFromPort('file').name,'&']
+         if alpscore.config.check("xdisplay"):
+           cmd = ['export','DISPLAY='+alpscore.config.xdisplay,';']+cmd
+         self.execute(cmd)
      _input_ports = [('file', [basic.File])]
 
 class DisplayGnuplot(NotCacheable, alpscore.SystemCommand):
     """ opens a gnuplot plotfile using  the gnuplot command. The path to gnuplot and other tools can be set in the ALPS package preferences """
     def compute(self):
         lines = [x.strip() for x in open(self.getInputFromPort('file').name).readlines()]
-        lines2 = ['set terminal x11 enhanced']
+        if alpscore.config.check("gnuplot_term"):
+          lines2 = ['set terminal '+alpscore.config.gnuplot_term]
         for line in lines:
             if not line.startswith('set terminal'):
                 lines2.append(line)
@@ -41,21 +44,14 @@ class DisplayGnuplot(NotCacheable, alpscore.SystemCommand):
         for line in lines2:
             outf.write(line + '\n')
         outf.close()
-        self.execute(['nohup',alpscore._get_tool_path('gnuplot'), '-persist' , self.getInputFromPort('file').name,'&'])
+        cmd=['nohup',alpscore._get_tool_path('gnuplot'), '-persist' , self.getInputFromPort('file').name,'&']
+        if alpscore.config.check("xdisplay"):
+           cmd = ['export','DISPLAY='+alpscore.config.xdisplay,';']+cmd
+        self.execute(cmd)
     _input_ports = [('file', [basic.File])]
     
 class PlotDescription(basic.File):
     """ a plot desription file """
-
-#class PlotDescriptionXML(Module):
-#    def compute(self):
-#        self = self.interpreter.filePool.create_file(suffix='.txt')
-#        f = file(self.name,'w')
-#        f.write(str(self.getInputFromPort('xml')))
-#        f.close()
-#        self.setResult('value',self)
-#    _input_ports = [('xml', [basic.String])]
-#    _output_ports = [('value',PlotDescription)]
 
 class PlotScalarVersusParameter(PlotDescription):
     def compute(self):
@@ -92,10 +88,6 @@ class PlotScalarVersusParameter(PlotDescription):
 
 class PlotFile(basic.File):
    """ a plot in XML """
-
-#class MakePlot(PlotFile,SystemCommand):
-#    _input_ports = [('datafiles',[basic.File]),
-#                    ('plotdescription',[PlotDescription])]
 
 class ExtractAnything(alpscore.SystemCommand):
     def compute(self):

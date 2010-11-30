@@ -39,7 +39,7 @@ import pyalps.hdf5 as h5
 
 from pyalps.pytools import convert2xml, hdf5_name_encode, hdf5_name_decode, rng
 import pyalps.pytools # the C++ conversion functions
-from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadObservableList, loadProperties
+from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadObservableList, loadProperties, in_vistrails, log
 from hlist import deep_flatten, flatten, depth
 from dict_intersect import dict_intersect
 from dataset import DataSet
@@ -68,7 +68,7 @@ def list2cmdline(lst):
 def executeCommand(cmdline):
     """ execute the command given as list of arguments """
     cmd = list2cmdline(cmdline)
-    print cmd
+    log(cmd)
     return os.system(cmd)
 
 def executeCommandLogged(cmdline,logfile):
@@ -250,11 +250,6 @@ def evaluateFulldiagVersusH(infiles, appname='fulldiag_evaluate', DELTA_H=None, 
        
 def inVistrails():
     """ returns True if called from within VisTrails """
-    in_vistrails=True
-    try:
-      import core.modules.basic_modules
-    except:
-      in_vistrails=False
     return in_vistrails
     
 def xslPath():

@@ -31,7 +31,6 @@ if sys.platform == 'darwin' and not os.path.exists(os.path.expanduser('~/.matplo
     try:
         import matplotlib
         matplotlib.use('macosx')
-        # print 'Set matplotlib backend to macosx'
     except ImportError:
         pass
 

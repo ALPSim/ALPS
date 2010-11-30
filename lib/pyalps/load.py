@@ -42,6 +42,20 @@ import pyalps.pytools as pt # the C++ conversion functions
 from pyalps.alea import MCScalarData as fwe
 from pyalps.alea import MCVectorData as vwe
 
+in_vistrails=True
+try:
+  import core.modules.basic_modules
+  from core import debug
+except:
+  in_vistrails=False
+
+def log(m):
+    """ print a log message either to the console or through the VisTrails logger """
+    if in_vistrails:
+      debug.log(m)
+    else:
+      print m
+    
 def parse_label(label):
     if '--' in label:
       vals = label.rsplit('--')
@@ -91,7 +105,7 @@ class Hdf5Loader:
           if os.path.exists(f):
             files.append(f)
           else:
-            print "FILE ", f, "DOES NOT EXIST!"
+            log( "FILE ", f, "DOES NOT EXIST!")
         return files
         
     def ReadParameters(self,proppath):
@@ -115,7 +129,7 @@ class Hdf5Loader:
             try:
                 self.h5f = h5.iArchive(f)
                 self.h5fname = f
-                if verbose: print "Loading from file", f
+                if verbose: log( "Loading from file" + f)
                 rfile = ResultFile(f)
                 rfile.props = self.ReadParameters(proppath)
                 try:
@@ -124,8 +138,8 @@ class Hdf5Loader:
                 except: pass
                 resultfiles.append(rfile)
             except Exception, e:
-                print e
-                print traceback.format_exc()
+                log(e)
+                log(traceback.format_exc())
         return resultfiles
         
     def GetObservableList(self,respath):
@@ -149,7 +163,7 @@ class Hdf5Loader:
                 fileset=[]
                 self.h5f = h5.iArchive(f)
                 self.h5fname = f
-                if verbose: print "Loading from file", f
+                if verbose: log("Loading from file " + f)
                 params = self.ReadParameters(proppath)
                 if 'energies' in self.h5f.list_children(respath):
                         try:
@@ -176,12 +190,12 @@ class Hdf5Loader:
                             d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
                             fileset.append(d)
                         except AttributeError:
-                            print "Could not create DataSet"
+                            log( "Could not create DataSet")
                             pass
                 sets.append(fileset)
             except Exception, e:
-                print e
-                print traceback.format_exc()
+                log(e)
+                log(traceback.format_exc())
         return sets
 
     def ReadDiagDataFromFile(self,flist,proppath='/parameters',respath='/spectrum', measurements=None, index=None, loadIterations=False,verbose=False):
@@ -192,7 +206,7 @@ class Hdf5Loader:
                 fileset=[]
                 self.h5f = h5.iArchive(f)
                 self.h5fname = f
-                if verbose: print "Loading from file", f
+                if verbose: log("Loading from file"+ f)
                 params = self.ReadParameters(proppath)
                 if 'results' in self.h5f.list_children(respath):
                     list_ = self.GetObservableList(respath+'/results')
@@ -212,7 +226,7 @@ class Hdf5Loader:
                                             try:
                                                 d = DataSet()
                                                 itresultspath = respath+'/iteration/'+it+'results/'+m
-                                                if verbose: print "Loading", m
+                                                if verbose: log("Loading "+ m)
                                                 d.props['hdf5_path'] = itresultspath 
                                                 d.props['observable'] = pt.hdf5_name_decode(m)
                                                 d.props['iteration'] = it
@@ -230,8 +244,7 @@ class Hdf5Loader:
                                                     d.x = np.arange(0,len(d.y))
                                                 d.props.update(params)
                                             except AttributeError:
-                                                print "Could not create DataSet"
-                                                pass
+                                                log( "Could not create DataSet")
                                         obsset.append(d)
                                 iterationset.append(obsset)
                             fileset.append(iterationset)
@@ -239,7 +252,7 @@ class Hdf5Loader:
                         for m in obslist:
                             if "mean" in self.h5f.list_children(respath+'/results/'+m):
                                 try:
-                                    if verbose: print "Loading", m
+                                    if verbose: log("Loading" + m)
                                     d = DataSet()
                                     secresultspath = respath+'/results/'+m
                                     d.props['hdf5_path'] = secresultspath 
@@ -259,8 +272,7 @@ class Hdf5Loader:
                                     d.props.update(params)
 
                                 except AttributeError:
-                                    print "Could not create DataSet"
-                                    pass
+                                    log("Could not create DataSet")
                             fileset.append(d)
                 if 'sectors' in self.h5f.list_children(respath):
                     list_ = self.GetObservableList(respath+'/sectors/0/results')
@@ -273,7 +285,7 @@ class Hdf5Loader:
                         for m in obslist:
                             if "mean" in self.h5f.list_children(respath+'/sectors/'+secnum+'/results/'+m):
                                 try:
-                                    if verbose: print "Loading", m
+                                    if verbose: log("Loading" + m)
                                     d = DataSet()
                                     secpath = respath+'/sectors/'+secnum
                                     secresultspath = respath+'/sectors/'+secnum+'/results/'+m
@@ -296,13 +308,13 @@ class Hdf5Loader:
                                     sector_sets.append(d)
 
                                 except AttributeError:
-                                    print "Could not create DataSet"
+                                    log( "Could not create DataSet")
                                     pass
                         fileset.append(sector_sets)
                 sets.append(fileset)
             except Exception, e:
-                print e
-                print traceback.format_exc()
+                log(e)
+                log(traceback.format_exc())
         return sets
         
     # Pre: file is a hdf5 file descriptor
@@ -313,7 +325,7 @@ class Hdf5Loader:
         for f in fs:
             try:
                 fileset = []
-                if verbose: print 'loading from file ',f
+                if verbose: log( 'loading from file ' +f)
                 self.h5f = h5.iArchive(f)
                 self.h5fname = f
                 if respath == None:
@@ -333,7 +345,7 @@ class Hdf5Loader:
                         if "timeseries" in  self.h5f.list_children(respath+'/'+m):
                             k = self.h5f.list_children(respath+'/'+m+'/timeseries')
                             if "logbinning" in k and "logbinning2" in k and "logbinning_counts" in k:
-                                if verbose: print "Loading", m
+                                if verbose: log("Loading"+ m)
                                 bins = self.h5f.read(respath+'/'+m+'/timeseries/logbinning')[0:-4] 
                                 bins2 = self.h5f.read(respath+'/'+m+'/timeseries/logbinning2')[0:-4] 
                                 counts = self.h5f.read(respath+'/'+m+'/timeseries/logbinning_counts')[0:-4] 
@@ -348,15 +360,14 @@ class Hdf5Loader:
                                 d.props['hdf5_path'] = respath + m
                                 d.props['observable'] = 'binning analysis of ' + pt.hdf5_name_decode(m)
                                 d.props.update(params)
-                                if verbose: print '  loaded binnig analysis for ',m
+                                if verbose: log( '  loaded binnig analysis for '+m)
                                 fileset.append(d)
                     except AttributeError:
-                        print "Could not create DataSet"
-                        pass
+                        log( "Could not create DataSet")
                 sets.append(fileset)
             except Exception, e:
-                print e
-                print traceback.format_exc()
+                log( e)
+                log( traceback.format_exc())
         return sets
     
     # Pre: file is a hdf5 file descriptor
@@ -369,7 +380,7 @@ class Hdf5Loader:
                 fileset = []
                 self.h5f = h5.iArchive(f)
                 self.h5fname = f
-                if verbose: print "Loading from file", f
+                if verbose: log("Loading from file" + f)
                 list_ = self.GetObservableList(respath)
                 params = self.ReadParameters(proppath)
                 obslist = []
@@ -378,7 +389,7 @@ class Hdf5Loader:
                 else:
                     obslist = [pt.hdf5_name_encode(obs) for obs in measurements if pt.hdf5_name_encode(obs) in list_]
                 for m in obslist:
-                    if verbose: print "Loading", m
+                    if verbose: log( "Loading " + m)
                     size=0
                     if "error" in self.h5f.list_children(respath+'/'+m+'/mean'): 
                         if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
@@ -407,12 +418,11 @@ class Hdf5Loader:
                         d.props.update(params)
                         fileset.append(d)
                     except AttributeError:
-                        print "Could not create DataSet"
-                        pass
+                        log( "Could not create DataSet")
                 sets.append(fileset)
             except Exception, e:
-                print e
-                print traceback.format_exc()
+                log(e)
+                log(traceback.format_exc())
         return sets
 
     # Pre: file is a hdf5 file descriptor
@@ -424,7 +434,7 @@ class Hdf5Loader:
             try:
                 self.h5f = h5.iArchive(f)
                 self.h5fname = f
-                if verbose: print "Loading from file", f
+                if verbose: log("Loading from file "+ f)
                 list_ = self.GetObservableList(respath+'/1/results/G_tau/')
                 #grp = self.h5f.require_group(respath)
                 params = self.ReadParameters(proppath)
@@ -438,7 +448,7 @@ class Hdf5Loader:
                     obsset=[]
                     for m in obslist:
                         try:
-                            if verbose: print "Loading", m
+                            if verbose: log( "Loading "+ m)
                             d = DataSet()
                             size=0
                             path=it+"/results/G_tau/"+m
@@ -457,14 +467,14 @@ class Hdf5Loader:
                             d.props['iteration'] = it
                             d.props.update(params)
                         except AttributeError:
-                            print "Could not create DataSet"
+                            log( "Could not create DataSet")
                             pass
                         obsset.append(d)
                     iterationset.append(obsset)
                 fileset.append(iterationset)
             except Exception, e:
-                print e
-                print traceback.format_exc()
+                log( e)
+                log( traceback.format_exc())
         return fileset
         
 def loadBinningAnalysis(files,what=None,verbose=False):
@@ -616,8 +626,8 @@ def loadTimeEvolution( flist,globalproppath='/parameters',resroot='/timesteps/',
                 #Extend the total dataset with this data
                 data.extend(locdata)
         except Exception, e:
-            print e
-            print traceback.format_exc()
+            log(e)
+            log( traceback.format_exc())
     return data
     
 

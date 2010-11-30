@@ -27,6 +27,6 @@ if platform.system()=='Windows':
   configuration = ConfigurationObject(alpspath="C:\\Program Files\\ALPS\\bin",toolpath="C:\\Program Files\\ALPS\\bin",mpirun="",mpiprocs=0,browser="['start','C:\\Program Files\\Internet Explorer\\iexplore.exe']",archives="{}")
 else:
   if platform.system()=='Darwin':
-    configuration = ConfigurationObject(alpspath="/opt/alps/bin",toolpath="/opt/local/bin",mpirun="['mpirun','-np']",mpiprocs=0,browser="['open', '-a', 'Safari']",archives="{}")
+    configuration = ConfigurationObject(alpspath="/opt/alps/bin",toolpath="/opt/local/bin",mpirun="['mpirun','-np']",mpiprocs=0,browser="['open', '-a', 'Safari']",archives="{}",xdisplay=":0.",gnuplot_term="aqua")
   else:
-    configuration = ConfigurationObject(alpspath="/opt/alps/bin",toolpath="/opt/local/bin",mpirun="['mpirun','-np']",mpiprocs=0,browser="['firefox']",archives="{}")
+    configuration = ConfigurationObject(alpspath="/opt/alps/bin",toolpath="/opt/local/bin",mpirun="['mpirun','-np']",mpiprocs=0,browser="['firefox']",archives="{}",xdisplay=":0.",gnuplot_term="x11 enhanced")
