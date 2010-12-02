@@ -1417,6 +1417,7 @@ INTEGER :: Label0(MAXVAL((/SIZE(LabelLeft(link)%vi,1),SIZE(LabelRight(link+2)%vi
 chi=SIZE(LabelLeft(link)%vi,1)
 !as few as 0 particles on site i
 minNL=MINVAL(LabelLeft(link)%vi)
+Label0=0
 DO alpha=1,SIZE(LabelLeft(link)%vi)
 	!Label=10000 means the state is notinitialized (not enough entanglement to need it)
 	IF(LabelLeft(link)%vi(alpha)==10000) THEN
@@ -1429,6 +1430,7 @@ END DO
 maxNL=MAXVAL(Label0)+Nmax
 !as few as 0 particles on site j
 minNR=MINVAL(LabelRight(link+2)%vi)
+Label0=0
 DO gamma=1,SIZE(LabelRight(link+2)%vi)
 	!Label=10000 means the state is notinitialized (not enough entanglement to need it)
 	IF(LabelRight(link+2)%vi(gamma)==10000) THEN
