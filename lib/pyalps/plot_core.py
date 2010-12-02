@@ -178,6 +178,12 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
           if 'label' in xaxis:
             output += '@    xaxis  label "' + xaxis['label'] +'"\n'
             output += '@    xaxis  label char size 1.500000\n'
+        else:
+            for ds in data:
+                if 'xlabel' in ds.props:
+                    output += '@    xaxis label "%s"\n' % ds.props['xlabel']
+                    output += '@    xaxis  label char size 1.500000\n'
+                    break
         output += '@    xaxis  ticklabel char size 1.250000\n'
         output += '@    xaxis  tick minor ticks 4\n'
 
@@ -185,6 +191,12 @@ def makeGracePlot(data,title=None,xaxis=None,yaxis=None,legend=None):
           if 'label' in yaxis:
             output += '@    yaxis  label "' + yaxis['label'] +'"\n'
             output += '@    yaxis  label char size 1.500000\n'
+        else:
+            for ds in data:
+                if 'ylabel' in ds.props:
+                    output += '@    yaxis  label "%s"\n' % ds.props['ylabel']
+                    output += '@    yaxis  label char size 1.500000\n'
+                    break
         output += '@    yaxis  ticklabel char size 1.250000\n'
         output += '@    yaxis  tick minor ticks 4\n'
         

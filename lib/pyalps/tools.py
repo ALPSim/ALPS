@@ -69,15 +69,14 @@ def executeCommand(cmdline):
     """ execute the command given as list of arguments """
     cmd = list2cmdline(cmdline)
     log(cmd)
-    return os.system(cmd)
+    return subprocess.call(cmd, shell=True)
 
 def executeCommandLogged(cmdline,logfile):
     """ execute the command given as list of arguments and store the result into the log file """
-    if platform.system() == 'Windows':
-      cmdline += ['2>',logfile]
-    else:
-      cmdline += ['>',logfile]
-    return executeCommand(cmdline)
+    # subprocess is stupid: the interpretation of a list of args depends on shell=True|False
+    # I'm using shell=True for backward compatibility to os.system
+    cmd = list2cmdline(cmdline)
+    return subprocess.call(cmd, shell=True, stdout=open(logfile, 'w'), stderr=subprocess.STDOUT)
 
 def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):
     """ run an ALPS application 
