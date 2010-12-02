@@ -566,11 +566,11 @@ manage their data and provide persistent caching.  This package
 provides storage and versioning of input, intermediate, and output
 data to ensure that workflows are able to access their data.  Data is
 identified by unique ids rather than file paths, and users can name
-and annotate the data in order to search.  The data can be linked to
-local filepaths but is stored in a managed repository to ensure that
-it is retained.  VisTrails will create new versions if data changes,
-and provides persistent caching using the same signature scheme as
-in-memory caching.  In constrast to the in-memory caching mechanism, a
+and annotate the data in order to search.  The data can be linked to a
+local disk but is stored in a managed repository to ensure that it is
+retained.  VisTrails will create new versions if data changes, and
+provides persistent caching using the same signature scheme as
+in-memory caching.  In contrast to the in-memory caching mechanism, a
 persistent intermediate result can be recalled in later sessions.
 Using the metadata stored in persistent store and provenance
 information, it is possible to connect data with the workflows that
