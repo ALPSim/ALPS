@@ -4,7 +4,7 @@
   \def\url#1{{\tt #1}}\fi
 \expandafter\ifx\csname urlprefix\endcsname\relax\def\urlprefix{URL }\fi
 \providecommand{\eprint}[2][]{\url{#2}}
-% Bibliography created with iopart-num v2.0
+% Bibliography created with iopart-num v2.1
 % /biblio/bibtex/contrib/iopart-num
 
 \bibitem{ALPS1.2}
@@ -192,12 +192,14 @@ Clifford B, Foster I, Hategan M, Stef-Praun T, Wilde M and Zhao Y 2007 {\em
 
 \bibitem{Freire:2006:IPAW}
 \markref{J Freire}, \markref{C T Silva}, \markref{S P Callahan}, Santos E,
-  Scheidegger C~E and Vo H~T 2006 {\em International Provenance and Annotation
-  Workshop (IPAW)\/} LNCS 4145 pp 10--18 invited paper
+  Scheidegger C~E and Vo H~T 2006 Managing rapidly-evolving scientific
+  workflows {\em International Provenance and Annotation Workshop (IPAW)\/}
+  LNCS 4145 pp 10--18 invited paper
 
 \bibitem{callahan@sciflow2006}
 Callahan S, \freiremarkref{\meabbrev}, Santos E, Scheidegger C, Silva C and Vo
-  H 2006 {\em IEEE Workshop on Workflow and Data Flow for Scientific
+  H 2006 {Managing the Evolution of Dataflows with VisTrails \emph{(Extended
+  Abstract)}} {\em IEEE Workshop on Workflow and Data Flow for Scientific
   Applications (SciFlow)\/}
 
 \bibitem{analogies@tvcg2007}
@@ -207,7 +209,15 @@ Scheidegger C~E, Vo H~T, Koop D, Freire J and Silva C~T 2007 {\em IEEE
 
 \bibitem{bavoil@vis2005}
 Bavoil L, Callahan S, Crossno P, \freiremarkref{\meabbrev}, Scheidegger C,
-  Silva C and Vo H 2005 {\em Prof. of IEEE Visualization\/} pp 135--142
+  Silva C and Vo H 2005 Vistrails: Enabling interactive multiple-view
+  visualizations {\em Prof. of IEEE Visualization\/} pp 135--142
+
+\bibitem{koop@ssdbm2010}
+Koop D, Santos E, Bauer B, Troyer M, Freire J and Silva C 2010 Bridging
+  workflow and data provenance using strong links {\em Scientific and
+  Statistical Database Management\/} ({\em Lecture Notes in Computer Science\/}
+  vol 6187) ed Gertz M and Ludäscher B (Springer Berlin / Heidelberg) pp
+  397--415
 
 \bibitem{Santos09}
 Santos E, Lins L, Ahrens J, Freire J and Silva C 2009 {\em IEEE Transactions on

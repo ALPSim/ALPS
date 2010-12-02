@@ -537,7 +537,47 @@ showspreadsheetonly]{width=8cm}
 
 \subsection{Caching and persistent storage}
 
-We should discuss how VisTrails caches results, with the advantage that only those parts of a workflow that have been changed have to be re-executed - a big advantage over scripts. Also, we should mention Dave's paper on strong links and persistent storage.
+%% We should discuss how VisTrails caches results, with the advantage
+%% that only those parts of a workflow that have been changed have to be
+%% re-executed - a big advantage over scripts. Also, we should mention
+%% Dave's paper on strong links and persistent storage.
+
+One important piece of infrastructure provided by VisTrails is the
+management of data both used and produced by computational processes,
+including intermediate results.  While parameters and workflow
+structure may change form execution to execution, many of the
+intermediate results can be reused without recomputation.  Note that
+with traditional scripts, users must manually record and recall
+intermediate results, meaning it is often necessary to repeat the
+entire computation.  VisTrails supports efficient exploration of such
+analyses by automatically caching intermediate results.  The results
+in the cache are identified by the signature of the upstream
+subworkflow (a hash computed from all of the computations that led to
+the value).  If the signature exists in the cache, we need not compute
+any of the upstream subworkflow but instead return the value in the
+cache.  If anything in the subworkflow changes, the signature will
+also change, and VisTrails will recompute the value.  VisTrails also
+allows modules that are not deterministic to be flagged as
+non-cacheable; note that all modules downstream of such modules must
+also be recomputed each time.
+
+In addition, VisTrails provides a persistence package to help users
+manage their data and provide persistent caching.  This package
+provides storage and versioning of input, intermediate, and output
+data to ensure that workflows are able to access their data.  Data is
+identified by unique ids rather than file paths, and users can name
+and annotate the data in order to search.  The data can be linked to
+local filepaths but is stored in a managed repository to ensure that
+it is retained.  VisTrails will create new versions if data changes,
+and provides persistent caching using the same signature scheme as
+in-memory caching.  In constrast to the in-memory caching mechanism, a
+persistent intermediate result can be recalled in later sessions.
+Using the metadata stored in persistent store and provenance
+information, it is possible to connect data with the workflows that
+either used or generated it and vice versa~\cite{koop@ssdbm2010}.  In
+addition, users can not only trace data lineage but also retrieve the
+exact input data---even if that data was changed or removed.
+
 
 \subsection{Sharing content and reproducible research}
 
