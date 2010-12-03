@@ -364,7 +364,7 @@ and dataflow, interchangeably.
  The workflow
   instance (in the middle), in addition to the workflow specification,
   contains value assignments for parameters of the modules. This
-  instance was used to derive the plot in the bottom left. The
+  instance was used to derive the plot in the bottom right. The
   workflow runs (on the right) consist of information collected while
   the workflow instance was executed. }
 \vspace{0cm}
@@ -385,8 +385,8 @@ as the module of the target port.  An input port can be the target
 port of at most one connection in $C$.  Additionally each port (input
 or output) has an associated type and a {\it name} that is unique
 across the ports of the same module.  A {\it module signature} is
-defined as the set pairs, where each pair contains a port names and
-its type.  Each module has a set of {\it parameters}.  Each parameter
+defined as a set of pairs, where each pair contains a port name and
+its type.  In addition, each module has a set of {\it parameters}.  Each parameter
 has a unique {\it name} across the set of parameters of the same
 module.
 
