@@ -36,7 +36,7 @@ Vidal G 2003 {\em Phys. Rev. Lett.\/} {\bf 91} 147902
 Vidal G 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 040502
 
 \bibitem{Daley2004}
-Daley A~J, Kollath C, Schollwöck U and Vidal G 2004 {\em Journal of
+Daley A~J, Kollath C, Schollw\"ock U and Vidal G 2004 {\em Journal of
   Statistical Mechanics: Theory and Experiment\/} {\bf 2004} P04005
 
 \bibitem{White2004}
@@ -101,9 +101,6 @@ Gull E, Werner P, Parcollet O and Troyer M 2008 {\em EPL (Europhysics
 
 \bibitem{matplotlib}
 \url{http://matplotlib.sourceforge.net/}
-
-\bibitem{lpsolve}
-\url{http://sourceforge.net/projects/lpsolve/files/lpsolve/4.0.1.11//}
 
 \bibitem{macports}
 \url{http://www.macports.org/}

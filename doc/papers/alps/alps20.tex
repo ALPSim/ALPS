@@ -69,7 +69,7 @@
 	\myauthor{\ref{eth}}{B.~Surer}{surerb@phys.ethz.ch}
 	\myauthor{\ref{tokyo},\ref{crest}}{S. Todo}{wistaria@ap.t.u-tokyo.ac.jp}
 	\myauthor{\ref{stationq}}{S.~Trebst}{trebst@kitp.ucsb.edu}
-	\myauthor{\ref{eth}}{M.~Troyer}{troyer@ethz.ch}\footnote{Corresponding author}
+	\myauthor{\ref{eth}}{M.~Troyer}{troyer@ethz.ch}\footnote{Corresponding author: troyer@comp-phys.org}
 	\myauthor{\ref{colorado}}{M.~L.~Wall}{mwall@mymail.mines.edu}
 	\myauthor{\ref{eth}}{P. Werner}{werner@phys.ethz.ch}
 	\myauthor{\ref{rwth},\ref{stuttgart}}{S. Wessel}{wessel@phys.ethz.ch}
@@ -90,7 +90,7 @@
 \myaddress{affpol}{Faculty of Physics, A. Mickiewicz University, ul. Umultowska 85, 61-614 Poznan, Poland}
 \myaddress{epfl}{Institute of Theoretical Physics, EPF Lausanne, CH-1015 Lausanne, Switzerland}
 \myaddress{virginia}{Department of Physics, Virginia Tech, Blacksburg, Virginia 24061, USA}
-\myaddress{lmu}{Arnold Sommerfeld Center for Theoretical Physics and Center for NanoScience, University of Munich, Theresienstrasse 37, 80333 Munich, Germany}
+\myaddress{lmu}{Department for Physics, Arnold Sommerfeld Center for Theoretical Physics and Center for NanoScience, University of Munich,  80333 Munich, Germany}
 \myaddress{tokyo}{Department of Applied Physics, University of Tokyo, 113-8656 Tokyo, Japan}
 \myaddress{stationq}{Microsoft Research, Station Q, University of California, Santa Barbara, CA 93106, USA}
 \myaddress{rwth}{Institute for Solid State Theory, RWTH Aachen University, 52056 Aachen, Germany}
@@ -98,12 +98,12 @@
 
 \begin{abstract}
 We present release 2.0 of the ALPS (Algorithms and Libraries for Physics Simulations)
-project, an international open source software project to develop
+project, an open source software project to develop
 libraries and application programs for the simulation of strongly
 correlated quantum lattice models such as quantum magnets, lattice
 bosons, and strongly correlated fermion systems. Development is
-centered on common XML and HDF5 data formats, on libraries to
-simplify and speed up code development, on common evaluation and plotting tools, and on full-featured
+centered on common XML and HDF5 data formats, libraries to
+simplify and speed up code development, common evaluation and plotting tools, and
 simulation programs. The programs enable non-experts to start carrying
 out serial or parallel numerical simulations by providing basic implementations of the
 important algorithms for quantum lattice models: classical and quantum
@@ -198,13 +198,12 @@ The following tools and libraries are required to build ALPS:
 \item The BLAS \cite{blasnetlib} and LAPACK libraries \cite{lapack}. Ideally optimized versions for the target architecture should be used instead of the generic netlib versions.
 \item The Boost C++ libraries version (included in one version of the source tarball) \cite{boost}.
 \item The HDF5 library version 1.8 \cite{hdf5}.
-\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9.
+\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9 and IBM xlC++ 11.1.
 \end{itemize}
 To build optional parts of ALPS it is recommended to install in addition
 \begin{itemize}
 \item Python version 2.5 or 2.6 \cite{python}.
 \item The numpy \cite{numpy}, scipy \cite{scipy}, and matplotlib \cite{matplotlib} Python packages.
-\item lpsolve version 4.0 \cite{lpsolve}.
 \item The VisTrails scientific workflow and provenance management system \cite{vistrails} and all its dependencies.
 \item A Fortran 90 compiler for the {\tt tebd} code.
 \end{itemize}
@@ -252,7 +251,7 @@ The ALPS HDF5 files store simulation parameters, the detailed results of Monte C
 
 The previous versions of ALPS had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML files using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language \cite{python}. Python is an easy-to-learn, interpreted, object-oriented language allowing interactive evaluation of data and arbitrarily complex evaluations. 
 
-We provide a complete set of library functions to write and read ALPS files and a number of useful functions to evaluate the simulation results and to make plots. In particular, the ALPS classes for the recoding and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis \cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
+We provide a complete set of library functions to write and read ALPS files and a number of useful functions to evaluate the simulation results and to make plots. In particular, the ALPS classes for the recording and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis \cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
 Two-dimensional plots are created using the widely available Python matplotlib package \cite{matplotlib} or by using ALPS functions to write grace \cite{grace} or gnuplot \cite{gnuplot} input files. Creation of 3D graphs is supported through VisTrails and the Visualization ToolKit (VTK) \cite{vtk} VisTrails modules.
 
 
@@ -431,7 +430,7 @@ Although workflows have been traditionally used to automate repetitive
 processes, for many exploratory scientific tasks such as data analysis
 and visualization, change is the norm. As users formulate and test
 hypotheses, they often need to refine and compare the results of
-several workflows. The VisTrails~\cite{vistrails} supports a novel
+several workflows. VisTrails~\cite{vistrails} supports a novel
 change-based provenance model that treats workflow instances as
 first-class data
 products~\cite{Freire:2006:IPAW,callahan@sciflow2006}.  As a scientist
@@ -450,7 +449,7 @@ or a \emph{vistrail}.
 \begin{center}
   \includegraphics[width = 1.0\linewidth,clip=false]{figures/alps_tree.png}
   \caption{Workflow evolution provenance.  
-    In this example we have calculated the system size dependence of the spin gap of spin-1 and spin 1/2 Heisenberg chains, first calculating the gap by exact diagonalization and then performing fits to $\Delta(L)=  c/L$ and  $\Delta(L)=  \Delta_0 + c \exp(-L\xi)$. As expected from the Haldane conjecture the plots show that the first fit is best for the gapless spin-1/2 chain and the second fit is best for the gapped spin-1 chain.
+    In this example we have calculated the system size dependence of the spin gap of spin-1 and spin 1/2 Heisenberg chains, first calculating the gap by exact diagonalization and then performing fits to $\Delta(L)=  c/L$ and  $\Delta(L)=  \Delta_0 + c \exp(-L/\xi)$. As expected from the Haldane conjecture the plots show that the first fit is best for the gapless spin-1/2 chain and the second fit is best for the gapped spin-1 chain.
     Complete provenance of the exploration process is
     displayed as a history tree with each node representing a workflow
     instance that generates a plot. Detailed meta-data is
@@ -512,7 +511,7 @@ pdf,
 getvtl,
 showworkflow,
 showspreadsheetonly]{width=8cm}
-\caption{The workflow that created Fig.~\ref{fig:figure}. The workflow image has been created by VisTrails for the specific workflow used to create the exact version shown in the figure. Clicking the figure retrieves the workflow from the ALPS server.}
+\caption{The workflow that created Fig.~\ref{fig:figure}. The workflow image has been created by VisTrails for the specific workflow used to create the exact version shown in the figure. Clicking the figure retrieves the workflow.}
 \label{fig:workflow}
 \end{center}
 \end{figure}
@@ -529,7 +528,7 @@ pdf,
 getvtl,
 showtree,
 showspreadsheetonly]{width=8cm}
-\caption{The version history tree of the workflow that created Fig.~\ref{fig:figure}. Each ellipsis corresponds to a version of the workflow, as shown in Fig.~\ref{fig:workflow}. Clicking the figure retrieves the vistrail including all workflow versions from the ALPS server.}
+\caption{The version history tree of the workflow that created Fig.~\ref{fig:figure}. Each ellipsis corresponds to a version of the workflow, as shown in Fig.~\ref{fig:workflow}. Clicking the figure retrieves the vistrail including all workflow versions.}
 \label{fig:history}
 \end{center}
 \end{figure}
