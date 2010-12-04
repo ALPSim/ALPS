@@ -297,13 +297,6 @@ find_package(FFTW)
 
 # LPSolve
 find_package(LPSolve)
-if(MSVC)
-  file(COPY ${LPSolve_LIBRARIES} DESTINATION ${PROJECT_BINARY_DIR}/lib)
-  file(COPY ${LPSolve_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
-endif(MSVC)
-if (LPSolve_FOUND AND APPLE)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -idirafter /usr/include/sys")
-endif(LPSolve_FOUND AND APPLE)
 
 # Zlib
 find_package(ZLIB)
@@ -488,21 +481,6 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
     install(FILES ${PROJECT_BINARY_DIR}/lib/${SQLite_NAME}.lib DESTINATION lib COMPONENT dependentlibraries)
     install(FILES ${PROJECT_BINARY_DIR}/bin/${SQLite_NAME}.dll DESTINATION bin COMPONENT dependentlibraries)
   endif(SQLite_LIBRARIES)
-  # LPSolve
-  if(LPSolve_LIBRARIES)
-    get_filename_component(LPSolve_PATH ${LPSolve_LIBRARIES} PATH)
-    get_filename_component(LPSolve_BASE ${LPSolve_PATH} PATH)
-    get_filename_component(LPSolve_NAME ${LPSolve_LIBRARIES} NAME_WE)
-    add_custom_target(liblpsolve ALL
-      COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/lib
-      COMMAND cmake -E copy_if_different ${LPSolve_LIBRARIES} ${PROJECT_BINARY_DIR}/lib
-      COMMAND cmake -E copy_if_different ${LPSolve_BASE}/bin/${LPSolve_NAME}.dll ${PROJECT_BINARY_DIR}/bin
-COMMAND cmake -E copy_if_different ${LPSolve_BASE}/bin/${LPSolve_NAME}.dll ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}51.dll
-    )
-    install(FILES ${PROJECT_BINARY_DIR}/lib/${LPSolve_NAME}.lib DESTINATION lib COMPONENT dependentlibraries)
-    install(FILES ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}.dll DESTINATION bin COMPONENT dependentlibraries)
-    install(FILES ${PROJECT_BINARY_DIR}/bin/${LPSolve_NAME}51.dll DESTINATION bin COMPONENT dependentlibraries)
-  endif(LPSolve_LIBRARIES)
   # alps & boost
   # add_custom_target(libalps ALL
     # COMMAND cmake -E make_directory ${PROJECT_BINARY_DIR}/bin
@@ -553,9 +531,6 @@ endif(MPI_INCLUDE_DIR)
 #if(SQLite_INCLUDE_DIR)
 #  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${SQLite_INCLUDE_DIR})
 #endif(SQLite_INCLUDE_DIR)
-#if(LPSolve_INCLUDE_DIR)
-#  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${LPSolve_INCLUDE_DIR})
-#endif(LPSolve_INCLUDE_DIR)
 if(HDF5_INCLUDE_DIR)
   list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${HDF5_INCLUDE_DIR})
 endif(HDF5_INCLUDE_DIR)
@@ -582,9 +557,6 @@ endif(LAPACK_LIBRARIES)
 #if(SQLite_LIBRARIES)
 #  list(APPEND ALPS_EXTRA_LIBRARIES ${SQLite_LIBRARIES})
 #endif(SQLite_LIBRARIES)
-#if(LPSolve_LIBRARIES)
-#  list(APPEND ALPS_EXTRA_LIBRARIES ${LPSolve_LIBRARIES})
-#endif(LPSolve_LIBRARIES)
 if(HDF5_LIBRARIES)
   list(APPEND ALPS_EXTRA_LIBRARIES ${HDF5_LIBRARIES})
 endif(HDF5_LIBRARIES)
@@ -624,7 +596,7 @@ if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 if (ALPS_BUILD_SOURCE)
   FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.txt")
   INSTALL(FILES ${files} DESTINATION alps)  
-  INSTALL(FILES script/hdf5.sh script/cmake.sh script/lpsolve.sh DESTINATION alps/script)  
+  INSTALL(FILES script/hdf5.sh script/cmake.sh DESTINATION alps/script)  
   install(DIRECTORY config doc example legacy lib src test tool vistrails DESTINATION alps
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   if (ALPS_INCLUDE_BOOST_SOURCE)

@@ -32,7 +32,7 @@
 #include <algorithm>
 #include <numeric>
 
-#include "../lp/lp_sse.h"
+#include "lp_sse.h"
 #include "lattice.h"
 #include "model.h"
 
