@@ -47,7 +47,7 @@ public:
     typedef SSE_alg<lattice_type, model_type, self_type> algorithm_type;
     
     SSE_run(alps::ProcessList const& w, alps::Parameters const& params,
-                                            int n, bool issymbolic = false) :
+            int n, bool issymbolic = false) :
         super_type(w, params, n, issymbolic),
         lattice(params, *this),
         model(params, *this, lattice),
@@ -88,6 +88,9 @@ public:
     
     void dostep()
     {
+//        if (sweeps_done >= nthermalization + nsweeps)
+//            return;
+        
         algorithm.do_step();
         
         if (is_thermalized() && ++measurements_done == measurements_skip) {
@@ -130,7 +133,7 @@ public:
     
     static void print_copyright(std::ostream& out)
     {
-        out << "Quantum Monte Carlo simulations using the SSE algorithm v. 4.0\n"
+        out << "Quantum Monte Carlo simulations using the SSE algorithm v. 4.1\n"
             << "  available from http://alps.comp-phys.org/\n"
             << "  copyright (c) 2003-2010 by Sergei Isakov <isakov@itp.phys.ethz.ch>\n\n";
     }

@@ -3,11 +3,6 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-if(LPSolve_FOUND)
-  include_directories(${LPSolve_INCLUDE_DIR})
-  add_executable(dirloop_sse main.cc)
-  target_link_libraries(dirloop_sse alps ${LPSolve_LIBRARIES})
-  install(TARGETS dirloop_sse RUNTIME DESTINATION bin COMPONENT applications)
-else(LPSolve_FOUND)
-  message(STATUS "dirloop_sse will not be built since the lp_solve library has not been found")
-endif(LPSolve_FOUND)
+add_executable(dirloop_sse main.cc ../lp/lp_sse.cpp)
+target_link_libraries(dirloop_sse alps)
+install(TARGETS dirloop_sse RUNTIME DESTINATION bin COMPONENT applications)
