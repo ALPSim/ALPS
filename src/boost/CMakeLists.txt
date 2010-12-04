@@ -219,7 +219,7 @@ if (NOT Boost_FOUND)
   target_link_libraries(boost ${BOOST_LINK_LIBS})
 
     # Boost.Test
-    if(BUILD_BOOST_TEST)
+    if(BUILD_BOOST_TEST AND NOT ALPS_FOR_VISTRAILS)
       set(DIRECTORY "${Boost_ROOT_DIR}/libs/test/src")
       
       set(SOURCES compiler_log_formatter.cpp debug.cpp 
@@ -263,7 +263,7 @@ if (NOT Boost_FOUND)
         set_target_properties(boost_prg_exec_monitor PROPERTIES COMPILE_DEFINITIONS BOOST_TEST_DYN_LINK=1)
       endif(BUILD_SHARED_LIBS)
 
-    endif(BUILD_BOOST_TEST)
+    endif(BUILD_BOOST_TEST AND NOT ALPS_FOR_VISTRAILS)
 
 
   if(WIN32)
