@@ -198,7 +198,7 @@ The following tools and libraries are required to build ALPS:
 \item The BLAS \cite{blasnetlib} and LAPACK libraries \cite{lapack}. Ideally optimized versions for the target architecture should be used instead of the generic netlib versions.
 \item The Boost C++ libraries version (included in one version of the source tarball) \cite{boost}.
 \item The HDF5 library version 1.8 \cite{hdf5}.
-\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9 and IBM xlC++ 11.1.
+\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9, IBM xlC++ 11.1, and Intel's icpc 10 and 11.
 \end{itemize}
 To build optional parts of ALPS it is recommended to install in addition
 \begin{itemize}
@@ -242,8 +242,8 @@ A number of XML  schemas \cite{xmlschema} were designed in ALPS 1 to describe th
 
 \subsection{HDF5}
 
-We now complement XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for large binary files.  HDF5 is directly supported by many visualization and data analysis tools and a wide array of tools are 
-available for C, C++, Fortran, Python, and other languages. In ALPS, HDF5 is now used as the default format for simulation.  This approach is significantly faster than writing to text-based formats when lots of data has to be written, and the files will be smaller thanks to compression of the binary data. 
+We now complement XML by the widely used Hierarchical Data Format 5 (HDF5) \cite{hdf5}, a de-facto standard for writing large binary files in a portable, machine-independent way.  HDF5 is directly supported by many visualization and data analysis tools and a wide array of tools are 
+available for C, C++, Fortran, Python, and other languages. In ALPS, HDF5 is now used as the default output format for simulation data.  This approach is significantly faster than writing to text-based formats when large files need to be written. On-the-fly compression of binary data further reduces file size. 
 
 The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page \cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to also write all results in XML. 
 
@@ -294,7 +294,7 @@ function $\Sigma(\omega)$. For such a ``local'' self-energy, the diagrammatic st
 We provide a simple implementation of the DMFT self-consistency loop for general single-site multi-orbital problems.
 For the solution of the quantum impurity model we provide a legacy Hirsch-Fye QMC code \cite{Hirsch86} as well as two continuous-time QMC algorithms.
 
-The ``weak coupling'' algorithm \cite{Rubtsov04,Rubtsov05} expands the impurity model partition function in powers of the interaction terms and samples the resulting diagrams stochastically. This method, historically
+The ``interaction expansion'' algorithm \cite{Rubtsov04,Rubtsov05} expands the impurity model partition function in powers of the interaction terms and samples the resulting diagrams stochastically. This method, historically
 the first continuous-time quantum Monte Carlo impurity solver algorithm, is particularly suitable for the simulation of impurity clusters.
 The complementary hybridization expansion algorithm \cite{Werner06,Werner06Kondo} expands the impurity model partition function in the impurity-bath hybridization, treating 
 the local (impurity) Hamiltonian exactly. 
@@ -754,7 +754,7 @@ We thank A.F. Albuquerque, F. Alet, P. Corboz, P.Dayal, A. Honecker, A. L\"auchl
 
 We thank all users of the previous versions of ALPS and beta testers of ALPS 2.0, especially J. Alfonsi, S. Aicardi, A. Akande, P. Anders, A. Anfossi, Z. Asadzadeh, R.~Bhat, J.H. Brewer, S. Bulut, E. Burovskiy, G. Carleo, G. Chen, M.D. Costa, M.~Dolfi, J. Figgins, S.~Gazit, U.~Gerber, R. Ghulghazaryan, C. Gils, S. Greschner, C.~Hamer, J. Hammond, K. Hassan, N. Heine, F.-J. Jiang, R. Jordens, H.G. Katzgraber, B.~Keiyh, J. Kim, J. Kolasinski, B.~Koopman, F. K\"ormann E.~Kozik, M.F. Krenn, F.~Kruger, M. Laurent, J. Lopes, M. Maik, M. Maksymenko, N. Moran, A. Nunnenkamp, J.D. Peel, S.~Pilati, K. Prsa, N.~Rahman, M. Rofiq, H. R\o nnow, J. Ruostekoski, J.~Schnack, N. Schuch, A. Sen, K. Shtengel, J. Single, M. Skoulatos, C. Sliwa, M.~Spenke, M.~Stoudenmire, V. Tangoulis, A.~Taroni, B. Thielemann, M. Tovar, H. Tran, V.~Varma, S. Ward, T. Wasiutynski, J. Wen, J. Wilms, H. Wunderlich, F. Xiao, X.Q. Yu, J.~Zakrzewski, Z.-X. Zhou, and R. Ziemkiewicz. We thank P. Zoller for the suggestion to provide binary installers. 
 
-The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara supported by NSF grant  PHY-0551164, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, Grant No.~J-992, the National Science Foundation under Grant No.~PHY-0903457, the Deutsche Forschungsgemeinschaft through SFB 602, Japan Society for the Promotion of Science through KAKENHI No.\,20540364, Next-Generation Supercomputer Project from MEXT Japan, and a grant from the Army Research Office with funding from the DARPA OLE program.
+The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara supported by NSF grant  PHY-0551164 and DMR-0705847, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, Grant No.~J-992, the National Science Foundation under Grant No.~PHY-0903457, the Deutsche Forschungsgemeinschaft through SFB 602, Japan Society for the Promotion of Science through KAKENHI No.\,20540364, Next-Generation Supercomputer Project from MEXT Japan, and a grant from the Army Research Office with funding from the DARPA OLE program.
 
 
 \section*{References}
