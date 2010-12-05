@@ -25,5 +25,10 @@
 # 
 # ****************************************************************************
 
+""" 
+This module contains two classes: iArchive and oArchive, used to read or
+write HDF5 files
+"""
+
 from pyhdf5_c import *
 

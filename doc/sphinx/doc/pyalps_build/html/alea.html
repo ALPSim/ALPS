@@ -53,8 +53,326 @@
             
   <div class="section" id="alea-documentation">
 <h1>Alea Documentation<a class="headerlink" href="#alea-documentation" title="Permalink to this headline">¶</a></h1>
-<p>This page contains the alea Module documentation.</p>
-<span class="target" id="module-pyalps.alea"></span></div>
+<p>This module contains classes for the evaluation of Monte Carlo measurements:</p>
+<ul class="simple">
+<li>RealObservable</li>
+<li>RealVectorObservable</li>
+<li>RealTimeSeriesObservable</li>
+<li>RealVectorTimeSeriesObservable</li>
+</ul>
+<span class="target" id="module-pyalps.alea"></span><dl class="class">
+<dt id="pyalps.alea.RealObservable">
+<em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">RealObservable</tt><a class="headerlink" href="#pyalps.alea.RealObservable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is an ALPS observable class to record results of Monte Carlo measurements and evaluate mean values, error, and autocorrelations.</p>
+<dl class="method">
+<dt id="pyalps.alea.RealObservable.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealObservable.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__init__( (object)arg1, (str)arg2 [, (int)arg3]) -&gt; None :</dt>
+<dd><p class="first">The constructor takes two arguments: a string with the name of the observable and optionally a second integer argument specifying the number of entries per bin in the time series.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void __init__(_object*,std::string [,int])</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.RealObservable.__lshift__">
+<tt class="descname">__lshift__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealObservable.__lshift__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__lshift__( (RealObservable)arg1, (float)arg2) -&gt; None :</dt>
+<dd><p class="first">New measurements are added using the left shift operator &lt;&lt;.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void __lshift__(alps::SimpleObservable&lt;double, alps::DetailedBinning&lt;double&gt; &gt; {lvalue},double)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.RealObservable.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealObservable.save" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>save( (RealObservable)arg1, (str)arg2) -&gt; None :</dt>
+<dd><p class="first">Save the obseravble into the HDF5 file specified as the argument.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void save(alps::SimpleObservable&lt;double, alps::DetailedBinning&lt;double&gt; &gt;,std::string)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealObservable.mean">
+<tt class="descname">mean</tt><a class="headerlink" href="#pyalps.alea.RealObservable.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>the mean value of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealObservable.error">
+<tt class="descname">error</tt><a class="headerlink" href="#pyalps.alea.RealObservable.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>the error of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealObservable.variance">
+<tt class="descname">variance</tt><a class="headerlink" href="#pyalps.alea.RealObservable.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>the variance of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealObservable.tau">
+<tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.RealObservable.tau" title="Permalink to this definition">¶</a></dt>
+<dd><p>the autocorrealtion time estimate of the recorded measurements.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealObservable.count">
+<tt class="descname">count</tt><a class="headerlink" href="#pyalps.alea.RealObservable.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of measurements recorded.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyalps.alea.RealVectorObservable">
+<em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">RealVectorObservable</tt><a class="headerlink" href="#pyalps.alea.RealVectorObservable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is an ALPS observable class to record results of Monte Carlo measurements and evaluate mean values, error, and autocorrelations.</p>
+<dl class="method">
+<dt id="pyalps.alea.RealVectorObservable.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealVectorObservable.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__init__( (object)arg1, (str)arg2 [, (int)arg3]) -&gt; None :</dt>
+<dd><p class="first">The constructor takes two arguments: a string with the name of the observable and optionally a second integer argument specifying the number of bins to be stored.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void __init__(_object*,std::string [,int])</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.RealVectorObservable.__lshift__">
+<tt class="descname">__lshift__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealVectorObservable.__lshift__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__lshift__( (RealVectorObservable)arg1, (object)arg2) -&gt; None :</dt>
+<dd><p class="first">New measurements are added using the left shift operator &lt;&lt;.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void __lshift__(alps::alea::WrappedValarrayObservable&lt;alps::SimpleObservable&lt;std::valarray&lt;double&gt;, alps::DetailedBinning&lt;std::valarray&lt;double&gt; &gt; &gt; &gt; {lvalue},boost::python::api::object)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.RealVectorObservable.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealVectorObservable.save" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>save( (RealVectorObservable)arg1, (str)arg2) -&gt; None :</dt>
+<dd><p class="first">Save the obseravble into the HDF5 file specified as the argument.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void save(alps::alea::WrappedValarrayObservable&lt;alps::SimpleObservable&lt;std::valarray&lt;double&gt;, alps::DetailedBinning&lt;std::valarray&lt;double&gt; &gt; &gt; &gt; {lvalue},std::string)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorObservable.mean">
+<tt class="descname">mean</tt><a class="headerlink" href="#pyalps.alea.RealVectorObservable.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>the mean value of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorObservable.error">
+<tt class="descname">error</tt><a class="headerlink" href="#pyalps.alea.RealVectorObservable.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>the error of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorObservable.variance">
+<tt class="descname">variance</tt><a class="headerlink" href="#pyalps.alea.RealVectorObservable.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>the variance of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorObservable.tau">
+<tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.RealVectorObservable.tau" title="Permalink to this definition">¶</a></dt>
+<dd><p>the autocorrealtion time estimate of the recorded measurements.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorObservable.count">
+<tt class="descname">count</tt><a class="headerlink" href="#pyalps.alea.RealVectorObservable.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of measurements recorded.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyalps.alea.RealTimeSeriesObservable">
+<em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">RealTimeSeriesObservable</tt><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is an ALPS observable class to record results of Monte Carlo measurements and evaluate mean values, error, and autocorrelations. It records a full binned time series of measurements, where the number of elements per bin can be specified.</p>
+<dl class="method">
+<dt id="pyalps.alea.RealTimeSeriesObservable.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__init__( (object)arg1, (str)arg2 [, (int)arg3]) -&gt; None :</dt>
+<dd><p class="first">The constructor takes two arguments: a string with the name of the observable and optionally a second integer argument specifying the number of entries per bin in the time series.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void __init__(_object*,std::string [,int])</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.RealTimeSeriesObservable.__lshift__">
+<tt class="descname">__lshift__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.__lshift__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__lshift__( (RealTimeSeriesObservable)arg1, (float)arg2) -&gt; None :</dt>
+<dd><p class="first">New measurements are added using the left shift operator &lt;&lt;.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void __lshift__(alps::SimpleObservable&lt;double, alps::FixedBinning&lt;double&gt; &gt; {lvalue},double)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.RealTimeSeriesObservable.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.save" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>save( (RealTimeSeriesObservable)arg1, (str)arg2) -&gt; None :</dt>
+<dd><p class="first">Save the obseravble into the HDF5 file specified as the argument.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void save(alps::SimpleObservable&lt;double, alps::FixedBinning&lt;double&gt; &gt;,std::string)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealTimeSeriesObservable.mean">
+<tt class="descname">mean</tt><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>the mean value of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealTimeSeriesObservable.error">
+<tt class="descname">error</tt><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>the error of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealTimeSeriesObservable.variance">
+<tt class="descname">variance</tt><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>the variance of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealTimeSeriesObservable.tau">
+<tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.tau" title="Permalink to this definition">¶</a></dt>
+<dd><p>the autocorrealtion time estimate of the recorded measurements.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealTimeSeriesObservable.count">
+<tt class="descname">count</tt><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of measurements recorded.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable">
+<em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">RealVectorTimeSeriesObservable</tt><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable" title="Permalink to this definition">¶</a></dt>
+<dd><p>This class is an ALPS observable class to record results of Monte Carlo measurements and evaluate mean values, error, and autocorrelations. It records a full binned time series of measurements, where the number of elements per bin can be specified.</p>
+<dl class="method">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__init__( (object)arg1, (str)arg2 [, (int)arg3]) -&gt; None :</dt>
+<dd><p class="first">The constructor takes two arguments: a string with the name of the observable and optionally a second integer argument specifying the number of entries per bin in the time series.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void __init__(_object*,std::string [,int])</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable.__lshift__">
+<tt class="descname">__lshift__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.__lshift__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__lshift__( (RealVectorTimeSeriesObservable)arg1, (object)arg2) -&gt; None :</dt>
+<dd><p class="first">New measurements are added using the left shift operator &lt;&lt;.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void __lshift__(alps::alea::WrappedValarrayObservable&lt;alps::SimpleObservable&lt;std::valarray&lt;double&gt;, alps::FixedBinning&lt;std::valarray&lt;double&gt; &gt; &gt; &gt; {lvalue},boost::python::api::object)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.save" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>save( (RealVectorTimeSeriesObservable)arg1, (str)arg2) -&gt; None :</dt>
+<dd><p class="first">Save the obseravble into the HDF5 file specified as the argument.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>void save(alps::alea::WrappedValarrayObservable&lt;alps::SimpleObservable&lt;std::valarray&lt;double&gt;, alps::FixedBinning&lt;std::valarray&lt;double&gt; &gt; &gt; &gt; {lvalue},std::string)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable.mean">
+<tt class="descname">mean</tt><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>the mean value of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable.error">
+<tt class="descname">error</tt><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>the error of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable.variance">
+<tt class="descname">variance</tt><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>the variance of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable.tau">
+<tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.tau" title="Permalink to this definition">¶</a></dt>
+<dd><p>the autocorrealtion time estimate of the recorded measurements.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.RealVectorTimeSeriesObservable.count">
+<tt class="descname">count</tt><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of measurements recorded.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 
 
           </div>

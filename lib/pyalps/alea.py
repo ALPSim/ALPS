@@ -25,5 +25,13 @@
 # 
 # ****************************************************************************
 
+""" 
+This module contains classes for the evaluation of Monte Carlo measurements:
+- RealObservable
+- RealVectorObservable
+- RealTimeSeriesObservable
+- RealVectorTimeSeriesObservable
+"""
+
 from pyalea_c import *
 from pymcdata_c import *

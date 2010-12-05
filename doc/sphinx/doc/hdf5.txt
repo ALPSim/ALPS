@@ -1,9 +1,7 @@
 HDF5 Documentation
 ===================
 
-This page contains the HDF5 Module documentation.
-
 .. automodule:: pyalps.hdf5
-    :members:
+    :members: iArchive, oArchive
     :undoc-members:
     :show-inheritance:

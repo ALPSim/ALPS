@@ -1,9 +1,31 @@
 Alea Documentation
-===================
+==================
 
-This page contains the alea Module documentation.
+This module contains classes for the evaluation of Monte Carlo measurements:
+
+* RealObservable
+
+* RealVectorObservable
+
+* RealTimeSeriesObservable
+
+* RealVectorTimeSeriesObservable
+
+
 
 .. automodule:: pyalps.alea
     :members:
     :undoc-members:
     :show-inheritance:
+
+.. autoclass:: RealObservable
+    :members: __init__, __lshift__, save, mean, error, variance, tau, count
+
+.. autoclass:: RealVectorObservable
+    :members: __init__, __lshift__, save, mean, error, variance, tau, count
+
+.. autoclass:: RealTimeSeriesObservable
+    :members: __init__, __lshift__, save, mean, error, variance, tau, count
+
+.. autoclass:: RealVectorTimeSeriesObservable
+    :members: __init__, __lshift__, save, mean, error, variance, tau, count
