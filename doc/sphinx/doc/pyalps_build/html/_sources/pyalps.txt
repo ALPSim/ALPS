@@ -1,5 +1,5 @@
 Pyalps Documentation
-===================-
+====================
 
 This page contains the Pyalps Module documentation.
 

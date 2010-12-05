@@ -1,7 +1,7 @@
 Alea Documentation
 ==================
 
-This module contains classes for the evaluation of Monte Carlo measurements:
+This module contains classes for the aggregation of Monte Carlo measurements:
 
 * RealObservable
 
@@ -11,6 +11,11 @@ This module contains classes for the evaluation of Monte Carlo measurements:
 
 * RealVectorTimeSeriesObservable
 
+and two classes for the evaluation of Monte Carlo measurements:
+
+* MCScalarData
+
+* MCVectorData
 
 
 .. automodule:: pyalps.alea
@@ -29,3 +34,9 @@ This module contains classes for the evaluation of Monte Carlo measurements:
 
 .. autoclass:: RealVectorTimeSeriesObservable
     :members: __init__, __lshift__, save, mean, error, variance, tau, count
+
+.. autoclass:: MCScalarData
+    :members: __init__, save, load, mean, error, variance, tau, count, bins
+
+.. autoclass:: MCVectorData
+    :members: __init__, save, load, mean, error, variance, tau, count, bins

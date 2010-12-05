@@ -24,7 +24,7 @@
     <script type="text/javascript" src="_static/doctools.js"></script>
     <link rel="top" title="Pyalps v2.0.0rc4 documentation" href="index.html" />
     <link rel="next" title="Dataset Documentation" href="dataset.html" />
-    <link rel="prev" title="&lt;no title&gt;" href="pyalps.html" /> 
+    <link rel="prev" title="Pyalps Documentation" href="pyalps.html" /> 
   </head>
   <body>
     <div class="related">
@@ -40,7 +40,7 @@
           <a href="dataset.html" title="Dataset Documentation"
              accesskey="N">next</a> |</li>
         <li class="right" >
-          <a href="pyalps.html" title="&lt;no title&gt;"
+          <a href="pyalps.html" title="Pyalps Documentation"
              accesskey="P">previous</a> |</li>
         <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
       </ul>
@@ -53,12 +53,17 @@
             
   <div class="section" id="alea-documentation">
 <h1>Alea Documentation<a class="headerlink" href="#alea-documentation" title="Permalink to this headline">¶</a></h1>
-<p>This module contains classes for the evaluation of Monte Carlo measurements:</p>
+<p>This module contains classes for the aggregation of Monte Carlo measurements:</p>
 <ul class="simple">
 <li>RealObservable</li>
 <li>RealVectorObservable</li>
 <li>RealTimeSeriesObservable</li>
 <li>RealVectorTimeSeriesObservable</li>
+</ul>
+<p>and two classes for the evaluation of Monte Carlo measurements:</p>
+<ul class="simple">
+<li>MCScalarData</li>
+<li>MCVectorData</li>
 </ul>
 <span class="target" id="module-pyalps.alea"></span><dl class="class">
 <dt id="pyalps.alea.RealObservable">
@@ -372,6 +377,88 @@
 
 </dd></dl>
 
+<dl class="class">
+<dt id="pyalps.alea.MCScalarData">
+<em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">MCScalarData</tt><a class="headerlink" href="#pyalps.alea.MCScalarData" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pyalps.alea.MCScalarData.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCScalarData.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)arg1 [, (float)arg2 [, (float)arg3]]) -&gt; None :</p>
+<blockquote>
+<dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void __init__(_object* [,double [,double]])</dd>
+</dl>
+</blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.MCScalarData.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCScalarData.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>save( (MCScalarData)arg1, (str)arg2, (str)arg3) -&gt; None :</p>
+<blockquote>
+<dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void save(alps::alea::mcdata&lt;double&gt; {lvalue},std::string,std::string)</dd>
+</dl>
+</blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.MCScalarData.load">
+<tt class="descname">load</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCScalarData.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>load( (MCScalarData)arg1, (str)arg2, (str)arg3) -&gt; None :</p>
+<blockquote>
+<dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void load(alps::alea::mcdata&lt;double&gt; {lvalue},std::string,std::string)</dd>
+</dl>
+</blockquote>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="class">
+<dt id="pyalps.alea.MCVectorData">
+<em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">MCVectorData</tt><a class="headerlink" href="#pyalps.alea.MCVectorData" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pyalps.alea.MCVectorData.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCVectorData.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><p>__init__( (object)arg1 [, (object)arg2 [, (object)arg3]]) -&gt; None :</p>
+<blockquote>
+<dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void __init__(_object* [,boost::python::api::object [,boost::python::api::object]])</dd>
+</dl>
+</blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.MCVectorData.save">
+<tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCVectorData.save" title="Permalink to this definition">¶</a></dt>
+<dd><p>save( (MCVectorData)arg1, (str)arg2, (str)arg3) -&gt; None :</p>
+<blockquote>
+<dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void save(alps::alea::mcdata&lt;std::vector&lt;double, std::allocator&lt;double&gt; &gt; &gt; {lvalue},std::string,std::string)</dd>
+</dl>
+</blockquote>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.alea.MCVectorData.load">
+<tt class="descname">load</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCVectorData.load" title="Permalink to this definition">¶</a></dt>
+<dd><p>load( (MCVectorData)arg1, (str)arg2, (str)arg3) -&gt; None :</p>
+<blockquote>
+<dl class="docutils">
+<dt>C++ signature :</dt>
+<dd>void load(alps::alea::mcdata&lt;std::vector&lt;double, std::allocator&lt;double&gt; &gt; &gt; {lvalue},std::string,std::string)</dd>
+</dl>
+</blockquote>
+</dd></dl>
+
+</dd></dl>
+
 </div>
 
 
@@ -382,7 +469,7 @@
         <div class="sphinxsidebarwrapper">
   <h4>Previous topic</h4>
   <p class="topless"><a href="pyalps.html"
-                        title="previous chapter">&lt;no title&gt;</a></p>
+                        title="previous chapter">Pyalps Documentation</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="dataset.html"
                         title="next chapter">Dataset Documentation</a></p>
@@ -421,7 +508,7 @@
           <a href="dataset.html" title="Dataset Documentation"
              >next</a> |</li>
         <li class="right" >
-          <a href="pyalps.html" title="&lt;no title&gt;"
+          <a href="pyalps.html" title="Pyalps Documentation"
              >previous</a> |</li>
         <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
       </ul>
