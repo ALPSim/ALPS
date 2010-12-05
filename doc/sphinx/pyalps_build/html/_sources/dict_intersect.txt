@@ -1,0 +1,9 @@
+Dict_Intersect Documentation
+============================
+
+This page contains the Dict_Intersect Module documentation.
+
+.. automodule:: pyalps.dict_intersect
+    :members:
+    :undoc-members:
+    :show-inheritance:

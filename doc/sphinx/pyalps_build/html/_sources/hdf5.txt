@@ -1,0 +1,7 @@
+HDF5 Documentation
+===================
+
+.. automodule:: pyalps.hdf5
+    :members: iArchive, oArchive
+    :undoc-members:
+    :show-inheritance:

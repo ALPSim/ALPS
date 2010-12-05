@@ -1,0 +1,143 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Plot Documentation &mdash; Pyalps v2.0.0rc4 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0.0rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pyalps v2.0.0rc4 documentation" href="index.html" />
+    <link rel="next" title="Plot_Core Documentation" href="plot_core.html" />
+    <link rel="prev" title="Math Documentation" href="math.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_core.html" title="Plot_Core Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="math.html" title="Math Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="plot-documentation">
+<h1>Plot Documentation<a class="headerlink" href="#plot-documentation" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the Plot Module documentation.</p>
+<span class="target" id="module-pyalps.plot"></span><dl class="class">
+<dt id="pyalps.plot.MplXYPlot_core">
+<em class="property">class </em><tt class="descclassname">pyalps.plot.</tt><tt class="descname">MplXYPlot_core</tt><a class="reference internal" href="_modules/pyalps/plot.html#MplXYPlot_core"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.plot.MplXYPlot_core" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="method">
+<dt id="pyalps.plot.MplXYPlot_core.draw_lines">
+<tt class="descname">draw_lines</tt><big>(</big><big>)</big><a class="reference internal" href="_modules/pyalps/plot.html#MplXYPlot_core.draw_lines"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.plot.MplXYPlot_core.draw_lines" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.plot.plot">
+<tt class="descclassname">pyalps.plot.</tt><tt class="descname">plot</tt><big>(</big><em>data</em><big>)</big><a class="reference internal" href="_modules/pyalps/plot.html#plot"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.plot.plot" title="Permalink to this definition">¶</a></dt>
+<dd><p>plots a list of datasets</p>
+<p>This function takes a DataSet or a list of DataSets and creates a matplotlib plot.</p>
+<p>It creates a new plot set for each dataset, using the x and y members of the DataSet.
+It also inspects the props dictionary and uses the following key-value pairs in that dict:</p>
+<blockquote>
+title
+xlabel
+ylabel
+label
+filename (used as alternative label of the set if no label is specified)
+color (can be &#8216;k&#8217;,&#8217;b&#8217;,&#8217;g&#8217;,&#8217;m&#8217;,&#8217;c&#8217;, or &#8216;y&#8217;
+line (can be &#8216;line&#8217; or &#8216;scatter&#8217;)</blockquote>
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="math.html"
+                        title="previous chapter">Math Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="plot_core.html"
+                        title="next chapter">Plot_Core Documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/plot.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="plot_core.html" title="Plot_Core Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="math.html" title="Math Documentation"
+             >previous</a> |</li>
+        <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, ALPS collaboration.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

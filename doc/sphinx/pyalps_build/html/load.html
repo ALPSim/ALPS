@@ -1,0 +1,285 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>Load Documentation &mdash; Pyalps v2.0.0rc4 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0.0rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pyalps v2.0.0rc4 documentation" href="index.html" />
+    <link rel="next" title="Math Documentation" href="math.html" />
+    <link rel="prev" title="Hlist Documentation" href="hlist.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="math.html" title="Math Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="hlist.html" title="Hlist Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="load-documentation">
+<h1>Load Documentation<a class="headerlink" href="#load-documentation" title="Permalink to this headline">¶</a></h1>
+<p>This page contains the Load Module documentation.</p>
+<span class="target" id="module-pyalps.load"></span><dl class="class">
+<dt id="pyalps.load.Hdf5Loader">
+<em class="property">class </em><tt class="descclassname">pyalps.load.</tt><tt class="descname">Hdf5Loader</tt><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader" title="Permalink to this definition">¶</a></dt>
+<dd><p>The Hdf5Loader class loads simulation parameters and observables from hdf5-files and returns them as hierarchical datasets</p>
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.GetFileNames">
+<tt class="descname">GetFileNames</tt><big>(</big><em>flist</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.GetFileNames"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.GetFileNames" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.GetObservableList">
+<tt class="descname">GetObservableList</tt><big>(</big><em>respath</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.GetObservableList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.GetObservableList" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.GetProperties">
+<tt class="descname">GetProperties</tt><big>(</big><em>flist</em>, <em>proppath='/parameters'</em>, <em>respath='/simulation/results'</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.GetProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.GetProperties" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.ReadBinningAnalysis">
+<tt class="descname">ReadBinningAnalysis</tt><big>(</big><em>flist</em>, <em>measurements=None</em>, <em>proppath='/parameters'</em>, <em>respath=None</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.ReadBinningAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.ReadBinningAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.ReadDMFTIterations">
+<tt class="descname">ReadDMFTIterations</tt><big>(</big><em>flist</em>, <em>measurements=None</em>, <em>proppath='/parameters'</em>, <em>respath='/simulation/iteration'</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.ReadDMFTIterations"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.ReadDMFTIterations" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.ReadDiagDataFromFile">
+<tt class="descname">ReadDiagDataFromFile</tt><big>(</big><em>flist</em>, <em>proppath='/parameters'</em>, <em>respath='/spectrum'</em>, <em>measurements=None</em>, <em>index=None</em>, <em>loadIterations=False</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.ReadDiagDataFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.ReadDiagDataFromFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.ReadMeasurementFromFile">
+<tt class="descname">ReadMeasurementFromFile</tt><big>(</big><em>flist</em>, <em>proppath='/parameters'</em>, <em>respath='/simulation/results'</em>, <em>measurements=None</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.ReadMeasurementFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.ReadMeasurementFromFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.ReadParameters">
+<tt class="descname">ReadParameters</tt><big>(</big><em>proppath</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.ReadParameters"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.ReadParameters" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.ReadSpectrumFromFile">
+<tt class="descname">ReadSpectrumFromFile</tt><big>(</big><em>flist</em>, <em>proppath='/parameters'</em>, <em>respath='/spectrum'</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.ReadSpectrumFromFile"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.ReadSpectrumFromFile" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="method">
+<dt id="pyalps.load.Hdf5Loader.read_one_spectrum">
+<tt class="descname">read_one_spectrum</tt><big>(</big><em>path</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Loader.read_one_spectrum"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Loader.read_one_spectrum" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</dd></dl>
+
+<dl class="exception">
+<dt id="pyalps.load.Hdf5Missing">
+<em class="property">exception </em><tt class="descclassname">pyalps.load.</tt><tt class="descname">Hdf5Missing</tt><big>(</big><em>what</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#Hdf5Missing"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.Hdf5Missing" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <tt class="xref py py-class docutils literal"><span class="pre">exceptions.Exception</span></tt></p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.loadBinningAnalysis">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">loadBinningAnalysis</tt><big>(</big><em>files</em>, <em>what=None</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#loadBinningAnalysis"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.loadBinningAnalysis" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads MC binning analysis from ALPS HDF5 result files</p>
+<p>this function loads results of a MC binning analysis from ALPS HDF5 result files</p>
+<p>The parameters are:</p>
+<p>files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+what: an optional argument that is either a string or list of strings, specifying the names of the observables for which the binning analysis should be loaded
+verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</p>
+<p>The function returns a list of list of DataSet objects. 
+The elements of the outer list each correspond to the file names specified as input.
+The elements of the inner list are each for a different observable.
+The x-values of the DataSet objects are the logarithmic binning level and the y-values the error estimates at that binning level.</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.loadEigenstateMeasurements">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">loadEigenstateMeasurements</tt><big>(</big><em>files</em>, <em>what=None</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#loadEigenstateMeasurements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.loadEigenstateMeasurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads ALPS eigenstate measurements from ALPS HDF5 result files</p>
+<p>this function loads results of ALPS diagonalization or DMRG simulations from an HDF5 file</p>
+<p>The parameters are:</p>
+<p>files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+what: an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded
+verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</p>
+<p>The function returns a list of list of (lists of) DataSet objects. 
+The elements of the outer list each correspond to the file names specified as input.
+The elements of the next level are different quantum number sectors, if any exists
+The elements of the inner-most list are each for a different observable.
+The y-values of the DataSet objects is an array of the measurements in all eigenstates calculated in this sector, and the x-values optionally the labels (indices) of array-valued measurements</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.loadIterationMeasurements">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">loadIterationMeasurements</tt><big>(</big><em>files</em>, <em>what=None</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#loadIterationMeasurements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.loadIterationMeasurements" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.loadMeasurements">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">loadMeasurements</tt><big>(</big><em>files</em>, <em>what=None</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#loadMeasurements"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.loadMeasurements" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads ALPS measurements from ALPS HDF5 result files</p>
+<p>this function loads results of ALPS simulations ALPS HDF5 result files</p>
+<p>The parameters are:</p>
+<p>files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+what: an optional argument that is either a string or list of strings, specifying the names of the observables which should be loaded
+verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</p>
+<p>The function returns a list of list of DataSet objects. 
+The elements of the outer list each correspond to the file names specified as input.
+The elements of the inner list are each for a different observable.
+The y-values of the DataSet objects are the measurements and the x-values optionally the labels (indices) of array-valued measurements</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.loadObservableList">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">loadObservableList</tt><big>(</big><em>files</em>, <em>proppath='/parameters'</em>, <em>respath='/simulation/results'</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#loadObservableList"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.loadObservableList" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads lists of existing measurements from ALPS HDF5 result files</p>
+<p>The function returns a list of lists, containing the names of measurements that are stored in the result files 
+The parameters are:</p>
+<p>files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.loadProperties">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">loadProperties</tt><big>(</big><em>files</em>, <em>proppath='/parameters'</em>, <em>respath='/simulation/results'</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#loadProperties"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.loadProperties" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads properties (parameters) of simulations from ALPS HDF5 result files</p>
+<p>this function loads the properties (parameters) of ALPS simulations ALPS HDF5 result files</p>
+<p>The parameters are:</p>
+<p>files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</p>
+<p>The function returns a list of dicts</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.loadSpectra">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">loadSpectra</tt><big>(</big><em>files</em>, <em>verbose=False</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#loadSpectra"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.loadSpectra" title="Permalink to this definition">¶</a></dt>
+<dd><p>loads ALPS spectra from ALPS HDF5 result files</p>
+<p>this function loads the spectra calculated in ALPS diagonalization or DMRG simulations from an HDF5 file</p>
+<p>The parameters are:</p>
+<p>files: a list of ALPS result files which can be either XML or HDF5 files. XML file names will be changed to the corresponding HDF5 names.
+verbose: an optional boolean argument that if set to True causes more output to be printed as the data is loaded</p>
+<p>The function returns a list of (lists of) DataSet objects. 
+The elements of the outer list each correspond to the file names specified as input.
+The elements of the next level are different quantum number sectors, if any exists
+The y-values of the DataSet objects are the energies in that quantum number sector</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.loadTimeEvolution">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">loadTimeEvolution</tt><big>(</big><em>flist</em>, <em>globalproppath='/parameters'</em>, <em>resroot='/timesteps/'</em>, <em>localpropsuffix='/parameters'</em>, <em>measurements=None</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#loadTimeEvolution"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.loadTimeEvolution" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.log">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">log</tt><big>(</big><em>m</em><big>)</big><a class="headerlink" href="#pyalps.load.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>print a log message either to the console or through the VisTrails logger</p>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.parse_label">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">parse_label</tt><big>(</big><em>label</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#parse_label"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.parse_label" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="function">
+<dt id="pyalps.load.parse_labels">
+<tt class="descclassname">pyalps.load.</tt><tt class="descname">parse_labels</tt><big>(</big><em>labels</em><big>)</big><a class="reference internal" href="_modules/pyalps/load.html#parse_labels"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pyalps.load.parse_labels" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="hlist.html"
+                        title="previous chapter">Hlist Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="math.html"
+                        title="next chapter">Math Documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/load.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="math.html" title="Math Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="hlist.html" title="Hlist Documentation"
+             >previous</a> |</li>
+        <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, ALPS collaboration.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

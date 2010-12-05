@@ -1,0 +1,30 @@
+Pyalps Documentation
+====================
+
+ALPS provides the pyalps modulem, an extensive collection of Python functions
+and classes, both native Python and exports from the C++ libraries. Below we 
+list all modules. In addition there is a long list of Python modules for
+VisTrails that can be accessed using VisTrails.
+
+Modules:
+--------
+
+.. toctree::
+   :maxdepth: 4
+
+   pyalps
+   alea
+   dataset
+   dict_intersect
+   fit_wrapper
+   floatwitherror
+   hdf5
+   hlist
+   load
+   math
+   plot
+   plot_core
+   pytools
+   tools
+
+* :ref:`genindex`

@@ -1,0 +1,355 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>pyalps.floatwitherror &mdash; Pyalps v2.0.0rc4 documentation</title>
+    <link rel="stylesheet" href="../../_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '../../',
+        VERSION:     '2.0.0rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="../../_static/jquery.js"></script>
+    <script type="text/javascript" src="../../_static/underscore.js"></script>
+    <script type="text/javascript" src="../../_static/doctools.js"></script>
+    <link rel="top" title="Pyalps v2.0.0rc4 documentation" href="../../index.html" />
+    <link rel="up" title="pyalps" href="../pyalps.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pyalps.html" accesskey="U">pyalps</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <h1>Source code for pyalps.floatwitherror</h1><div class="highlight"><pre>
+<span class="c"># ****************************************************************************</span>
+<span class="c"># </span>
+<span class="c"># ALPS Project: Algorithms and Libraries for Physics Simulations</span>
+<span class="c"># </span>
+<span class="c"># ALPS Libraries</span>
+<span class="c"># </span>
+<span class="c"># Copyright (C) 2009 by Ping Nang (Tama) Ma &lt;pingnang@phys.ethz.ch&gt;</span>
+<span class="c"># </span>
+<span class="c"># This software is part of the ALPS libraries, published under the ALPS</span>
+<span class="c"># Library License; you can use, redistribute it and/or modify it under</span>
+<span class="c"># the terms of the license, either version 1 or (at your option) any later</span>
+<span class="c"># version.</span>
+<span class="c">#  </span>
+<span class="c"># You should have received a copy of the ALPS Library License along with</span>
+<span class="c"># the ALPS Libraries; see the file LICENSE.txt. If not, the license is also</span>
+<span class="c"># available from http://alps.comp-phys.org/.</span>
+<span class="c"># </span>
+<span class="c"># THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR </span>
+<span class="c"># IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, </span>
+<span class="c"># FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT </span>
+<span class="c"># SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE </span>
+<span class="c"># FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, </span>
+<span class="c"># ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER </span>
+<span class="c"># DEALINGS IN THE SOFTWARE.</span>
+<span class="c"># </span>
+<span class="c"># ****************************************************************************</span>
+<span class="kn">from</span> <span class="nn">sys</span>  <span class="kn">import</span> <span class="n">stdin</span>
+<span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="o">*</span>
+        
+<div class="viewcode-block" id="get_mean"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.get_mean">[docs]</a><span class="k">def</span> <span class="nf">get_mean</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+            <span class="k">pass</span>
+        <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">mean</span>
+    <span class="k">except</span> <span class="ne">Exception</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span>
+</div>
+<div class="viewcode-block" id="get_error"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.get_error">[docs]</a><span class="k">def</span> <span class="nf">get_error</span><span class="p">(</span><span class="n">f</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">error</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span>
+</div>
+<div class="viewcode-block" id="FloatWithError"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError">[docs]</a><span class="k">class</span> <span class="nc">FloatWithError</span><span class="p">:</span>
+
+
+  <span class="k">def</span> <span class="nf">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span><span class="n">mean_</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span><span class="n">error_</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>  <span class="o">=</span> <span class="n">mean_</span>
+    <span class="bp">self</span><span class="o">.</span><span class="n">error</span> <span class="o">=</span> <span class="n">error_</span>
+
+  <span class="k">def</span> <span class="nf">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__expr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">expr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span> <span class="o">+</span> <span class="s">&#39;</span><span class="se">\t</span><span class="s">&#39;</span> <span class="o">+</span> <span class="n">expr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+  <span class="k">def</span> <span class="nf">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">__str__</span><span class="p">()</span>
+  
+  <span class="k">def</span> <span class="nf">__add__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="o">+</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">+</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__radd__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="o">+</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">+</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__sub__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="o">-</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">+</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__rsub__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="o">-</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">+</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__iadd__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="o">+</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">+</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+  <span class="k">def</span> <span class="nf">__isub__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="o">-</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">+</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+
+  <span class="k">def</span> <span class="nf">__mul__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="n">z__mean_</span>      <span class="o">=</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span> <span class="o">*</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="c">#x__rel_error_ = x__.error / x__.mean</span>
+    <span class="c">#y__rel_error_ = y__.error / y__.mean</span>
+    <span class="c">#return FloatWithError(z__mean_,z__mean_*sqrt(x__rel_error_*x__rel_error_ + y__rel_error_*y__rel_error_))</span>
+    <span class="n">z__deri__x__</span>   <span class="o">=</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="n">z__deri__y__</span>   <span class="o">=</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">z__mean_</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span> <span class="o">+</span> <span class="n">z__deri__y__</span><span class="o">*</span><span class="n">z__deri__y__</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__div__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="n">z__mean_</span>      <span class="o">=</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span> <span class="o">/</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="c">#x__rel_error_ = x__.error / x__.mean</span>
+    <span class="c">#y__rel_error_ = y__.error / y__.mean</span>
+    <span class="c">#return FloatWithError(z__mean_,z__mean_*sqrt(x__rel_error_*x__rel_error_ + y__rel_error_*y__rel_error_))</span>
+    <span class="n">z__deri__x__</span>   <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="n">z__deri__y__</span>   <span class="o">=</span> <span class="o">-</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="o">/</span><span class="p">(</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">z__mean_</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span> <span class="o">+</span> <span class="n">z__deri__y__</span><span class="o">*</span><span class="n">z__deri__y__</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__rmul__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="n">z__mean_</span>      <span class="o">=</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span> <span class="o">*</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="c">#x__rel_error_ = x__.error / x__.mean</span>
+    <span class="c">#y__rel_error_ = y__.error / y__.mean</span>
+    <span class="c">#return FloatWithError(z__mean_,z__mean_*sqrt(y__rel_error_*y__rel_error_ + x__rel_error_*x__rel_error_))</span>
+    <span class="n">z__deri__x__</span>   <span class="o">=</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="n">z__deri__y__</span>   <span class="o">=</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">z__mean_</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span> <span class="o">+</span> <span class="n">z__deri__y__</span><span class="o">*</span><span class="n">z__deri__y__</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__rdiv__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="n">z__mean_</span>      <span class="o">=</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span> <span class="o">/</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="c">#x__rel_error_ = x__.error / x__.mean</span>
+    <span class="c">#y__rel_error_ = y__.error / y__.mean</span>
+    <span class="c">#return FloatWithError(z__mean_,z__mean_*sqrt(y__rel_error_*y__rel_error_ + x__rel_error_*x__rel_error_))</span>
+    <span class="n">z__deri__y__</span>   <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="n">z__deri__x__</span>   <span class="o">=</span> <span class="o">-</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="o">/</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">z__mean_</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span> <span class="o">+</span> <span class="n">z__deri__y__</span><span class="o">*</span><span class="n">z__deri__y__</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__imul__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="n">z__mean_</span>      <span class="o">=</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span> <span class="o">*</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="c">#x__rel_error_ = x__.error / x__.mean</span>
+    <span class="c">#y__rel_error_ = y__.error / y__.mean</span>
+    <span class="c">#return FloatWithError(z__mean_,z__mean_*sqrt(x__rel_error_*x__rel_error_ + y__rel_error_*y__rel_error_))</span>
+    <span class="n">z__deri__x__</span>   <span class="o">=</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="n">z__deri__y__</span>   <span class="o">=</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">z__mean_</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span> <span class="o">+</span> <span class="n">z__deri__y__</span><span class="o">*</span><span class="n">z__deri__y__</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__idiv__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="k">if</span> <span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">float</span><span class="p">)</span> <span class="o">|</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">y__</span><span class="p">,</span><span class="nb">int</span><span class="p">)):</span>
+      <span class="n">y__</span> <span class="o">=</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__</span><span class="p">)</span>
+    <span class="n">z__mean_</span>      <span class="o">=</span> <span class="n">x__</span><span class="o">.</span><span class="n">mean</span> <span class="o">/</span> <span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="c">#x__rel_error_ = x__.error / x__.mean</span>
+    <span class="c">#y__rel_error_ = y__.error / y__.mean</span>
+    <span class="c">#return FloatWithError(z__mean_,z__mean_*sqrt(x__rel_error_*x__rel_error_ + y__rel_error_*y__rel_error_))</span>
+    <span class="n">z__deri__x__</span>   <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span>
+    <span class="n">z__deri__y__</span>   <span class="o">=</span> <span class="o">-</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="o">/</span><span class="p">(</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">z__mean_</span><span class="p">,</span><span class="n">sqrt</span><span class="p">(</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">z__deri__x__</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span> <span class="o">+</span> <span class="n">z__deri__y__</span><span class="o">*</span><span class="n">z__deri__y__</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="o">*</span><span class="n">y__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+
+  <span class="k">def</span> <span class="nf">__neg__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="mi">0</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__pos__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+
+  <span class="k">def</span> <span class="nf">__abs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">),</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">)</span>
+
+
+  <span class="k">def</span> <span class="nf">__pow__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="n">z__mean_</span>      <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">y__</span><span class="p">)</span>
+    <span class="c">#x__rel_error_ = x__.error / x__.mean</span>
+    <span class="c">#return FloatWithError(z__mean_,z__mean_*y__*x__rel_error_)</span>
+    <span class="n">z__deri__</span>      <span class="o">=</span> <span class="n">y__</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">y__</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">z__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">z__deri__</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  <span class="k">def</span> <span class="nf">__ipow__</span><span class="p">(</span><span class="n">x__</span><span class="p">,</span><span class="n">y__</span><span class="p">):</span>
+    <span class="n">z__mean_</span>      <span class="o">=</span> <span class="nb">pow</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">y__</span><span class="p">)</span>
+    <span class="c">#x__rel_error_ = x__.error / x__.mean</span>
+    <span class="c">#return FloatWithError(z__mean_,z__mean_*y__*x__rel_error_)</span>
+    <span class="n">z__deri__</span>      <span class="o">=</span> <span class="n">y__</span><span class="o">*</span><span class="nb">pow</span><span class="p">(</span><span class="n">x__</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span><span class="n">y__</span><span class="o">-</span><span class="mf">1.</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">z__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">z__deri__</span><span class="o">*</span><span class="n">x__</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+
+<div class="viewcode-block" id="FloatWithError.sq"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.sq">[docs]</a>  <span class="k">def</span> <span class="nf">sq</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">**</span><span class="mi">2</span></div>
+<div class="viewcode-block" id="FloatWithError.cb"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.cb">[docs]</a>  <span class="k">def</span> <span class="nf">cb</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">**</span><span class="mi">3</span></div>
+<div class="viewcode-block" id="FloatWithError.sqrt"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.sqrt">[docs]</a>  <span class="k">def</span> <span class="nf">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">**</span><span class="mf">0.5</span></div>
+<div class="viewcode-block" id="FloatWithError.cbrt"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.cbrt">[docs]</a>  <span class="k">def</span> <span class="nf">cbrt</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">return</span> <span class="bp">self</span><span class="o">**</span><span class="p">(</span><span class="mf">1.</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span>
+
+</div>
+<div class="viewcode-block" id="FloatWithError.exp"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.exp">[docs]</a>  <span class="k">def</span> <span class="nf">exp</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__mean_</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.log"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.log">[docs]</a>  <span class="k">def</span> <span class="nf">log</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">log</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  </div>
+<div class="viewcode-block" id="FloatWithError.sin"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.sin">[docs]</a>  <span class="k">def</span> <span class="nf">sin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.cos"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.cos">[docs]</a>  <span class="k">def</span> <span class="nf">cos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="o">-</span><span class="n">sin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.tan"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.tan">[docs]</a>  <span class="k">def</span> <span class="nf">tan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">tan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span><span class="o">*</span><span class="n">cos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.asin"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.asin">[docs]</a>  <span class="k">def</span> <span class="nf">asin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">asin</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.acos"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.acos">[docs]</a>  <span class="k">def</span> <span class="nf">acos</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">acos</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="o">-</span><span class="mf">1.</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.atan"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.atan">[docs]</a>  <span class="k">def</span> <span class="nf">atan</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">atan</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+
+  </div>
+<div class="viewcode-block" id="FloatWithError.sinh"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.sinh">[docs]</a>  <span class="k">def</span> <span class="nf">sinh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">sinh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="n">cosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.cosh"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.cosh">[docs]</a>  <span class="k">def</span> <span class="nf">cosh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">cosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="n">sinh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.tanh"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.tanh">[docs]</a>  <span class="k">def</span> <span class="nf">tanh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">tanh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="n">cosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span><span class="o">*</span><span class="n">cosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.asinh"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.asinh">[docs]</a>  <span class="k">def</span> <span class="nf">asinh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">asinh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">+</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.acosh"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.acosh">[docs]</a>  <span class="k">def</span> <span class="nf">acosh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">acosh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span> <span class="o">-</span> <span class="mf">1.</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+</div>
+<div class="viewcode-block" id="FloatWithError.atanh"><a class="viewcode-back" href="../../floatwitherror.html#pyalps.floatwitherror.FloatWithError.atanh">[docs]</a>  <span class="k">def</span> <span class="nf">atanh</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="n">y__mean_</span> <span class="o">=</span> <span class="n">atanh</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="n">y__deri__</span> <span class="o">=</span> <span class="mf">1.</span><span class="o">/</span><span class="p">(</span><span class="mf">1.</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">FloatWithError</span><span class="p">(</span><span class="n">y__mean_</span><span class="p">,</span><span class="nb">abs</span><span class="p">(</span><span class="n">y__deri__</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">error</span><span class="p">))</span>
+ </div></div>
+</pre></div>
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="../../search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="../../genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="../../py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li><a href="../../modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li>
+          <li><a href="../index.html" >Module code</a> &raquo;</li>
+          <li><a href="../pyalps.html" >pyalps</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, ALPS collaboration.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

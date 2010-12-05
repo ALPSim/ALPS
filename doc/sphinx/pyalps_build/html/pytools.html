@@ -1,0 +1,205 @@
+
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+  "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    
+    <title>PyTools Documentation &mdash; Pyalps v2.0.0rc4 documentation</title>
+    <link rel="stylesheet" href="_static/default.css" type="text/css" />
+    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
+    <script type="text/javascript">
+      var DOCUMENTATION_OPTIONS = {
+        URL_ROOT:    '',
+        VERSION:     '2.0.0rc4',
+        COLLAPSE_INDEX: false,
+        FILE_SUFFIX: '.html',
+        HAS_SOURCE:  true
+      };
+    </script>
+    <script type="text/javascript" src="_static/jquery.js"></script>
+    <script type="text/javascript" src="_static/underscore.js"></script>
+    <script type="text/javascript" src="_static/doctools.js"></script>
+    <link rel="top" title="Pyalps v2.0.0rc4 documentation" href="index.html" />
+    <link rel="next" title="Tools Documentation" href="tools.html" />
+    <link rel="prev" title="Plot_Core Documentation" href="plot_core.html" /> 
+  </head>
+  <body>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tools.html" title="Tools Documentation"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="plot_core.html" title="Plot_Core Documentation"
+             accesskey="P">previous</a> |</li>
+        <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body">
+            
+  <div class="section" id="module-pyalps.pytools">
+<span id="pytools-documentation"></span><h1>PyTools Documentation<a class="headerlink" href="#module-pyalps.pytools" title="Permalink to this headline">¶</a></h1>
+<p>This module contains functions and classes imported from the 
+ALPS C++ libraries.</p>
+<dl class="function">
+<dt id="pyalps.pytools.convert2xml">
+<tt class="descclassname">pyalps.pytools.</tt><tt class="descname">convert2xml</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.convert2xml" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>convert2xml( (str)arg1) -&gt; str :</dt>
+<dd><p class="first">converts a file to XML</p>
+<p>This function takes the path to an ALPS file as input and converts it to XML.
+It returns a string with the path to the resulting XML file</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>std::string convert2xml(std::string)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.pytools.hdf5_name_encode">
+<tt class="descclassname">pyalps.pytools.</tt><tt class="descname">hdf5_name_encode</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.hdf5_name_encode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>hdf5_name_encode( (str)arg1) -&gt; str :</dt>
+<dd><p class="first">encodes a string for use in HDF5 paths</p>
+<p>This function takes a string and escapes all needed characters for it to be used in HDF5 path names.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>std::string hdf5_name_encode(std::string)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.pytools.hdf5_name_decode">
+<tt class="descclassname">pyalps.pytools.</tt><tt class="descname">hdf5_name_decode</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.hdf5_name_decode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>hdf5_name_decode( (str)arg1) -&gt; str :</dt>
+<dd><p class="first">decodes a string fromHDF5 paths</p>
+<p>This function takes a string used in an HDF5 path name and replaces all escaped characters.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>std::string hdf5_name_decode(std::string)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.pytools.search_xml_library_path">
+<tt class="descclassname">pyalps.pytools.</tt><tt class="descname">search_xml_library_path</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.search_xml_library_path" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>search_xml_library_path( (str)arg1) -&gt; str :</dt>
+<dd><p class="first">returns the full path for an ALPS XML file</p>
+<p>This function takes the name for an ALPS library XML or XSL file and returns the full path.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>std::string search_xml_library_path(std::string)</dd>
+</dl>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyalps.pytools.rng">
+<em class="property">class </em><tt class="descclassname">pyalps.pytools.</tt><tt class="descname">rng</tt><a class="headerlink" href="#pyalps.pytools.rng" title="Permalink to this definition">¶</a></dt>
+<dd><p>a uniform random number generator class</p>
+<p>This class uses the Mersenne Twister rgenerator mt19937 to generate uniform random numbers in the range [0,1).
+The constructor takes an optional integer random seed argument.
+Random numbers are created using the function call operator.</p>
+<dl class="method">
+<dt id="pyalps.pytools.rng.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.rng.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__init__( (object)arg1 [, (int)arg2]) -&gt; None :</dt>
+<dd>the constructor takes an optional integer argument as random number seed</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.pytools.rng.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.rng.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__call__( (rng)arg1) -&gt; float :</dt>
+<dd>returns a uniform random number in [0,1)</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+
+
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar">
+        <div class="sphinxsidebarwrapper">
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="plot_core.html"
+                        title="previous chapter">Plot_Core Documentation</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="tools.html"
+                        title="next chapter">Tools Documentation</a></p>
+  <h3>This Page</h3>
+  <ul class="this-page-menu">
+    <li><a href="_sources/pytools.txt"
+           rel="nofollow">Show Source</a></li>
+  </ul>
+<div id="searchbox" style="display: none">
+  <h3>Quick search</h3>
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" size="18" />
+      <input type="submit" value="Go" />
+      <input type="hidden" name="check_keywords" value="yes" />
+      <input type="hidden" name="area" value="default" />
+    </form>
+    <p class="searchtip" style="font-size: 90%">
+    Enter search terms or a module, class or function name.
+    </p>
+</div>
+<script type="text/javascript">$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="tools.html" title="Tools Documentation"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="plot_core.html" title="Plot_Core Documentation"
+             >previous</a> |</li>
+        <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
+      </ul>
+    </div>
+    <div class="footer">
+        &copy; Copyright 2010, ALPS collaboration.
+      Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
+    </div>
+  </body>
+</html>

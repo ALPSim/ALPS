@@ -1,0 +1,42 @@
+Alea Documentation
+==================
+
+This module contains classes for the aggregation of Monte Carlo measurements:
+
+* RealObservable
+
+* RealVectorObservable
+
+* RealTimeSeriesObservable
+
+* RealVectorTimeSeriesObservable
+
+and two classes for the evaluation of Monte Carlo measurements:
+
+* MCScalarData
+
+* MCVectorData
+
+
+.. automodule:: pyalps.alea
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: RealObservable
+    :members: __init__, __lshift__, save, mean, error, variance, tau, count
+
+.. autoclass:: RealVectorObservable
+    :members: __init__, __lshift__, save, mean, error, variance, tau, count
+
+.. autoclass:: RealTimeSeriesObservable
+    :members: __init__, __lshift__, save, mean, error, variance, tau, count
+
+.. autoclass:: RealVectorTimeSeriesObservable
+    :members: __init__, __lshift__, save, mean, error, variance, tau, count
+
+.. autoclass:: MCScalarData
+    :members: __init__, save, load, mean, error, variance, tau, count, bins
+
+.. autoclass:: MCVectorData
+    :members: __init__, save, load, mean, error, variance, tau, count, bins

@@ -1,0 +1,10 @@
+PyTools Documentation
+=====================
+
+.. automodule:: pyalps.pytools
+    :members: convert2xml, hdf5_name_encode, hdf5_name_decode, search_xml_library_path
+    :undoc-members:
+    :show-inheritance:
+
+.. autoclass:: rng
+    :members: __init__, __call__

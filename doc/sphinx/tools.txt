@@ -1,0 +1,9 @@
+Tools Documentation
+===================
+
+This page contains the Tools Module documentation.
+
+.. automodule:: pyalps.tools
+    :members:
+    :undoc-members:
+    :show-inheritance:

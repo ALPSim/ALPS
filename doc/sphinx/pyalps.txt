@@ -1,0 +1,9 @@
+Pyalps Documentation
+====================
+
+This page contains the Pyalps Module documentation.
+
+.. automodule:: pyalps
+    :members:
+    :undoc-members:
+    :show-inheritance:

@@ -1,0 +1,9 @@
+Floatwitherror Documentation
+============================
+
+This page contains the Floatwitherror Module documentation.
+
+.. automodule:: pyalps.floatwitherror
+    :members:
+    :undoc-members:
+    :show-inheritance:
