@@ -25,5 +25,10 @@
 # 
 # ****************************************************************************
 
+"""
+This module contains functions and classes imported from the 
+ALPS C++ libraries.
+"""
+
 from pytools_c import *
 

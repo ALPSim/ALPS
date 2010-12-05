@@ -1,0 +1,9 @@
+Math Documentation
+===================
+
+This page contains the math Module documentation.
+
+.. automodule:: pyalps.math
+    :members:
+    :undoc-members:
+    :show-inheritance:

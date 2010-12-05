@@ -7,13 +7,13 @@
   <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     
-    <title>PyTools Documentation &mdash; Pyalps v0.1.a documentation</title>
+    <title>PyTools Documentation &mdash; Pyalps v2.0.0rc4 documentation</title>
     <link rel="stylesheet" href="_static/default.css" type="text/css" />
     <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
     <script type="text/javascript">
       var DOCUMENTATION_OPTIONS = {
         URL_ROOT:    '',
-        VERSION:     '0.1.a',
+        VERSION:     '2.0.0rc4',
         COLLAPSE_INDEX: false,
         FILE_SUFFIX: '.html',
         HAS_SOURCE:  true
@@ -22,7 +22,7 @@
     <script type="text/javascript" src="_static/jquery.js"></script>
     <script type="text/javascript" src="_static/underscore.js"></script>
     <script type="text/javascript" src="_static/doctools.js"></script>
-    <link rel="top" title="Pyalps v0.1.a documentation" href="index.html" />
+    <link rel="top" title="Pyalps v2.0.0rc4 documentation" href="index.html" />
     <link rel="next" title="Tools Documentation" href="tools.html" />
     <link rel="prev" title="Plot_Core Documentation" href="plot_core.html" /> 
   </head>
@@ -42,7 +42,7 @@
         <li class="right" >
           <a href="plot_core.html" title="Plot_Core Documentation"
              accesskey="P">previous</a> |</li>
-        <li><a href="modules.html">Pyalps v0.1.a documentation</a> &raquo;</li> 
+        <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
       </ul>
     </div>  
 
@@ -51,55 +51,96 @@
         <div class="bodywrapper">
           <div class="body">
             
-  <div class="section" id="pytools-documentation">
-<h1>PyTools Documentation<a class="headerlink" href="#pytools-documentation" title="Permalink to this headline">¶</a></h1>
-<p>This page contains the alea Module documentation.</p>
-<span class="target" id="module-pyalps.pytools"></span><dl class="function">
+  <div class="section" id="module-pyalps.pytools">
+<span id="pytools-documentation"></span><h1>PyTools Documentation<a class="headerlink" href="#module-pyalps.pytools" title="Permalink to this headline">¶</a></h1>
+<p>This module contains functions and classes imported from the 
+ALPS C++ libraries.</p>
+<dl class="function">
 <dt id="pyalps.pytools.convert2xml">
 <tt class="descclassname">pyalps.pytools.</tt><tt class="descname">convert2xml</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.convert2xml" title="Permalink to this definition">¶</a></dt>
-<dd><p>convert2xml( (str)arg1) -&gt; str :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>convert2xml( (str)arg1) -&gt; str :</dt>
+<dd><p class="first">converts a file to XML</p>
+<p>This function takes the path to an ALPS file as input and converts it to XML.
+It returns a string with the path to the resulting XML file</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>std::string convert2xml(std::string)</dd>
 </dl>
-</blockquote>
-</dd></dl>
-
-<dl class="function">
-<dt id="pyalps.pytools.hdf5_name_decode">
-<tt class="descclassname">pyalps.pytools.</tt><tt class="descname">hdf5_name_decode</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.hdf5_name_decode" title="Permalink to this definition">¶</a></dt>
-<dd><p>hdf5_name_decode( (str)arg1) -&gt; str :</p>
-<blockquote>
-<dl class="docutils">
-<dt>C++ signature :</dt>
-<dd>std::string hdf5_name_decode(std::string)</dd>
+</dd>
 </dl>
-</blockquote>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyalps.pytools.hdf5_name_encode">
 <tt class="descclassname">pyalps.pytools.</tt><tt class="descname">hdf5_name_encode</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.hdf5_name_encode" title="Permalink to this definition">¶</a></dt>
-<dd><p>hdf5_name_encode( (str)arg1) -&gt; str :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>hdf5_name_encode( (str)arg1) -&gt; str :</dt>
+<dd><p class="first">encodes a string for use in HDF5 paths</p>
+<p>This function takes a string and escapes all needed characters for it to be used in HDF5 path names.</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>std::string hdf5_name_encode(std::string)</dd>
 </dl>
-</blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="function">
+<dt id="pyalps.pytools.hdf5_name_decode">
+<tt class="descclassname">pyalps.pytools.</tt><tt class="descname">hdf5_name_decode</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.hdf5_name_decode" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>hdf5_name_decode( (str)arg1) -&gt; str :</dt>
+<dd><p class="first">decodes a string fromHDF5 paths</p>
+<p>This function takes a string used in an HDF5 path name and replaces all escaped characters.</p>
+<dl class="last docutils">
+<dt>C++ signature :</dt>
+<dd>std::string hdf5_name_decode(std::string)</dd>
+</dl>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="function">
 <dt id="pyalps.pytools.search_xml_library_path">
 <tt class="descclassname">pyalps.pytools.</tt><tt class="descname">search_xml_library_path</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.search_xml_library_path" title="Permalink to this definition">¶</a></dt>
-<dd><p>search_xml_library_path( (str)arg1) -&gt; str :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>search_xml_library_path( (str)arg1) -&gt; str :</dt>
+<dd><p class="first">returns the full path for an ALPS XML file</p>
+<p>This function takes the name for an ALPS library XML or XSL file and returns the full path.</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>std::string search_xml_library_path(std::string)</dd>
 </dl>
-</blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="class">
+<dt id="pyalps.pytools.rng">
+<em class="property">class </em><tt class="descclassname">pyalps.pytools.</tt><tt class="descname">rng</tt><a class="headerlink" href="#pyalps.pytools.rng" title="Permalink to this definition">¶</a></dt>
+<dd><p>a uniform random number generator class</p>
+<p>This class uses the Mersenne Twister rgenerator mt19937 to generate uniform random numbers in the range [0,1).
+The constructor takes an optional integer random seed argument.
+Random numbers are created using the function call operator.</p>
+<dl class="method">
+<dt id="pyalps.pytools.rng.__init__">
+<tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.rng.__init__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__init__( (object)arg1 [, (int)arg2]) -&gt; None :</dt>
+<dd>the constructor takes an optional integer argument as random number seed</dd>
+</dl>
+</dd></dl>
+
+<dl class="method">
+<dt id="pyalps.pytools.rng.__call__">
+<tt class="descname">__call__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.pytools.rng.__call__" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="docutils">
+<dt>__call__( (rng)arg1) -&gt; float :</dt>
+<dd>returns a uniform random number in [0,1)</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </div>
@@ -153,11 +194,11 @@
         <li class="right" >
           <a href="plot_core.html" title="Plot_Core Documentation"
              >previous</a> |</li>
-        <li><a href="modules.html">Pyalps v0.1.a documentation</a> &raquo;</li> 
+        <li><a href="modules.html">Pyalps v2.0.0rc4 documentation</a> &raquo;</li> 
       </ul>
     </div>
     <div class="footer">
-        &copy; Copyright 2010, Matthias Troyer.
+        &copy; Copyright 2010, ALPS collaboration.
       Created using <a href="http://sphinx.pocoo.org/">Sphinx</a> 1.0.4.
     </div>
   </body>

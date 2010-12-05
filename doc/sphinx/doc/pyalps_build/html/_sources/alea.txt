@@ -1,0 +1,9 @@
+Alea Documentation
+===================
+
+This page contains the alea Module documentation.
+
+.. automodule:: pyalps.alea
+    :members:
+    :undoc-members:
+    :show-inheritance:
