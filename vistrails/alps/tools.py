@@ -422,7 +422,7 @@ class ArchiveDirectory(basic.Module):
     
     def compute(self):
         fixpath = lambda path: os.path.normpath(path.replace('/', os.path.sep))
-        listify = lambda l: type(l) == type([1,2]) and l or [l]
+        listify = lambda l: l if type(l) == list else [l]
         
         replace_dict = {}
         if alpscore.config.check('archives'):
@@ -441,18 +441,21 @@ class ArchiveDirectory(basic.Module):
                     testpath = fixpath(path.replace(k, qq))
                     if os.path.exists(testpath):
                         fpath = testpath
+                        break
+            if self.check_file and fpath == None:
+                try:
+                    print 'Attempting HTTP'
+                    loader = HTTPFile()
+                    errcode, f, fn = loader.download(path)
+                    if errcode == 0 or errcode == 1:
+                        fpath = fn
+                except Exception, e:
+                    print e
         
         if self.hasInputFromPort('path') and fpath == None:
             lp = self.getInputFromPort('path').name
             if os.path.exists(lp):
                 fpath = lp
-        
-        if self.check_file:
-            try:
-                loader = HTTPFile()
-                fpath = loader.execute(self.getInputFromPort('archive')).name
-            except:
-                pass
         
         if fpath == None:
             raise InvalidInput("Can't locate file at any location.")
