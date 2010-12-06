@@ -1,3 +1,5 @@
+debian/tmp/usr/bin/dirloop_sse usr/bin/
+debian/tmp/usr/bin/dirloop_sse_evaluate usr/bin/
 debian/tmp/usr/bin/dmft usr/bin/
 debian/tmp/usr/bin/dmrg usr/bin/
 debian/tmp/usr/bin/fulldiag usr/bin/
