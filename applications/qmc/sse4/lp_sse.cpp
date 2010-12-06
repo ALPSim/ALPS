@@ -1,5 +1,6 @@
 #include "lp_sse.h"
 
+#include <cstdlib>
 
 void LP_Solve_SSE::init(const vector<double>& v) {
 	int n = v.size();
@@ -230,7 +231,7 @@ int LP_Solve_SSE::find_pivot_row(const int s ) const {
 	}
 	if (min_row < 0) {
 		cerr << "# Error in find_pivot_row.\n";
-		exit(1);
+                std::exit(1);
 	}
 	return(min_row);
 }
