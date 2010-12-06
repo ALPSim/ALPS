@@ -1,6 +1,9 @@
 #include "lp_sse.h"
 
 #include <cstdlib>
+#include <stdexcept>
+#include <boost/throw_exception.hpp>
+
 
 void LP_Solve_SSE::init(const vector<double>& v) {
 	int n = v.size();
@@ -229,10 +232,8 @@ int LP_Solve_SSE::find_pivot_row(const int s ) const {
 			}
 		}
 	}
-	if (min_row < 0) {
-		cerr << "# Error in find_pivot_row.\n";
-                std::exit(1);
-	}
+	if (min_row < 0)
+		boost::throw_exception(std::runtime_error("# Error in find_pivot_row"));
 	return(min_row);
 }
 
@@ -291,12 +292,9 @@ double LP_Solve_SSE::calc_loc_opt_bounce() {
 	for (int i = 0; i < n; i++) w[i] /= s;
 	
 	// check
-	for (int i =0; i < n-1; i++) {
-		if (w[i] > w[i+1]) {
-			cerr << "Order weights.\n";
-			exit(1);
-		}
-	}
+	for (int i =0; i < n-1; i++)
+		if (w[i] > w[i+1]) 
+			boost::throw_exception(std::runtime_error("Order weights"));
 	
 	
 	if (n == 2) {
@@ -313,10 +311,8 @@ double LP_Solve_SSE::calc_loc_opt_bounce() {
 		double y3 = (1-y1-y2)*w[2]/w[3];
 		return(1-y1-y2-y3);
 	}
-	else {
-		cerr << "# Not implemented.\n";
-		exit(1);
-	}
+	else
+		boost::throw_exception(std::runtime_error("# Not implemented"));
 }
 
 
