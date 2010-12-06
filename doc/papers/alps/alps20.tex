@@ -249,7 +249,7 @@ available for C, C++, Fortran, Python, and other languages. In ALPS, HDF5 is now
 
 The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page~\cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to also write all results in XML.
 
-The implementation of HDF5 capabilities within ALPS is split into two layers. The lower layer implements a generic and general-purpose C++ interface to the C HDF5 library. This layer is not tied to other parts of the ALPS library and can therefore be used by user code that is otherwise independent from ALPS and its file formats. On top of that, the specific file formats used by the ALPS library and applications are implemented in the respective components of the ALPS library.
+The implementation of HDF5 capabilities within ALPS is split into two layers. The lower layer implements a generic and general-purpose C++ interface to the C HDF5 library. This layer is not tied to other parts of the ALPS library and can therefore be used by user code that is otherwise independent from ALPS and its file formats. The functions of this library are also exposed to Python, and can thus be used not only from C++ codes but also from Python scripts. On top of that, the specific file formats used by the ALPS library and applications are implemented in the respective components of the ALPS library.
 
 \section{Evaluation Tools in Python}
 
@@ -336,7 +336,201 @@ VisTrails is an open-source system that was designed to support
 exploratory computational tasks such as visualization and data mining
 while ensuring computational provenance~\cite{vistrails,Bavoil05}.
 VisTrails enforces provenance with workflows that allow a capture
-mechanism and an infrastructure for storage, access, and queries.
+mechanism and an infrastructure for storage, access, and queries. In the appendix we present a concise introduction to scientific workflows and VisTrails.
+
+\begin{figure}
+\begin{center}
+
+\vistrail[host=alps.ethz.ch,
+db=vistrails,
+vtid=10,
+version=169,
+pdf,
+getvtl,
+showspreadsheetonly]{width=8cm}
+\caption{A figure produced by an ALPS VisTrails workflow: the uniform susceptibility of the Heisenberg chain and ladder. Clicking the figure retrieves the workflow used to 
+create it. Opening that workflow on a machine with VisTrails and ALPS installed lets the reader execute the full calculation.}
+\label{fig:figure}
+\end{center}
+\end{figure}
+
+
+\begin{figure}
+\begin{center}
+\vistrail[host=alps.ethz.ch,
+db=vistrails,
+vtid=10,
+version=169,
+pdf,
+getvtl,
+showworkflow,
+showspreadsheetonly]{width=8cm}
+\caption{The workflow that created Fig.~\ref{fig:figure}. The workflow image has been created by VisTrails for the specific workflow used to create the exact version shown in the figure. Clicking the figure retrieves the workflow.}
+\label{fig:workflow}
+\end{center}
+\end{figure}
+
+
+
+\subsection{The ALPS VisTrails package}
+
+ALPS 2.0 provides a package of modules for VisTrails that allows the user to perform the three major steps of a scientific workflow, namely i) the preparation of input files, ii) the execution of simulations, iii) the analysis and plotting of simulation data. The three groups of modules are intended to integrate seamlessly, but at the same time allow the separate use of each group, which for example allows the user to analyze data with VisTrails that has not been prepared using the ALPS library or file formats.
+
+The design goal of the data analysis modules is to take care of common, repetitive tasks, while at the same time being as flexible as scripts.  Common data formats, designed to allow interoperability with the powerful Numpy/Scipy libraries, are used by all modules. A set of self-contained modules are provided for common tasks, such as fitting or various types of plots. A framework of {\it Transform} modules allows the user to specify arbitrary transformations by providing small Python codes.
+
+The modules for input preparation and data analysis are designed to assist the user in dealing with a large number of simulations. For example, modules are provided to sweep parameter ranges or combine data from many simulations. Modules are provided to load data from ALPS files and text files; loading data from custom file formats can easily be implemented.
+
+VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs for the names of modules that execute
+ Python scripts which, in turn execute ALPS
+algorithms in Python or compiled code. Fig.~\ref{fig:workflow} shows an example ALPS workflow
+that takes input lattice parameters and model definitions (modules described by nouns, such as 
+ ChainLattice and LatticeModel), executes the quantum
+Monte Carlo looper code, and then renders the data (modules described by verbs such as  RunLoop and PreparePlot).
+
+The creation of such workflows is explained in a set of tutorials and on the web page. Furthermore, all ALPS tutorials, discussed in the next section, are available  as VisTrails workflows, providing an extensive set of examples that can be used as templates for the user's simulations. 
+
+This paper already makes use of ALPS 2.0 and VisTrails. Full provenance information for the results in Fig.~\ref{fig:figure} is available from the URL linked to the figure. Clicking the figure will download the workflow that has been used to prepare the figure and its version history. After installing VisTrails and ALPS, the reader of the paper can redo the full simulation.
+
+
+\section{Tutorials and Examples}
+
+The ALPS web page~\cite{alps} contains an extensive list of tutorials, explaining the use of the various application codes and evaluation tools. We also present tutorials that show how to use the ALPS libraries in the user's own code. 
+
+\subsection{Tutorials on Using the ALPS Codes}
+We provide tutorials and instructions for using ALPS in three ways: 
+\begin{enumerate}
+\item from the command line (without data evaluation and plotting)
+\item using Python scripts
+\item and using the VisTrails workflow system. 
+\end{enumerate}
+
+The input files needed for the tutorials are available on the web page but are also included in the source and binary distributions.
+
+\begin{figure}
+\begin{tiny}
+\begin{center}
+\begin{verbatim}
+cat  > parm << EOF
+LATTICE="chain lattice"
+MODEL="spin"
+local_S=1/2
+L=60
+J=1
+THERMALIZATION=5000
+SWEEPS=50000
+ALGORITHM="loop"
+{T=0.05;}
+{T=0.1;}
+{T=0.2;}
+{T=0.3;}
+{T=0.4;}
+{T=0.5;}
+{T=0.6;}
+{T=0.7;}
+{T=0.75;}
+{T=0.8;}
+{T=0.9;}
+{T=1.0;}
+{T=1.25;}
+{T=1.5;}
+{T=1.75;}
+{T=2.0;}
+EOF
+
+parameter2xml parm
+loop --auto-evaluate --write-xml parm.in.xml
+\end{verbatim}
+\end{center}
+\end{tiny}
+\caption{A shell script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain. Evaluation options are limited to viewing the output files. Any further evaluation requires the use of Python, VisTrails, or a program written by the user.}
+\label{fig:commandline}
+\end{figure}
+
+
+\begin{figure}
+\begin{tiny}
+\begin{center}
+\begin{verbatim}
+import pyalps
+import matplotlib.pyplot as plt
+import pyalps.plot
+
+#prepare the input parameters
+parms = []
+for t in [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
+    parms.append(
+        { 
+          'LATTICE'        : "chain lattice", 
+          'MODEL'          : "spin",
+          'local_S'        : 0.5,
+          'T'              : t,
+          'J'              : 1 ,
+          'THERMALIZATION' : 5000,
+          'SWEEPS'         : 50000,
+          'L'              : 60,
+          'ALGORITHM'      : "loop"
+        }
+    )
+
+#write the input file and run the simulation
+input_file = pyalps.writeInputFiles('parm2c',parms)
+pyalps.runApplication('loop',input_file)
+
+#load the susceptibility and collect it as function of temperature T
+data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm2c'),'Susceptibility')
+susceptibility = pyalps.collectXY(data,x='T',y='Susceptibility')
+
+#make plot
+plt.figure()
+pyalps.plot.plot(susceptibility)
+plt.xlabel('Temperature $T/J$')
+plt.ylabel('Susceptibility $\chi J$')
+plt.title('Quantum Heisenberg chain')
+plt.show()
+\end{verbatim}
+\end{center}
+\end{tiny}
+\caption{A Python script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain, load and evaluate the data, and make a plot. }
+\label{fig:python}
+\end{figure}
+
+An example for running an ALPS application from the command line is shown in Fig.~\ref{fig:commandline}. This example calculates the uniform susceptibility of a quantum Heisenberg spin chain. The same example, containing additional code to evaluate and plot the results  using Python is shown in Fig.~\ref{fig:python}. The workflow using VisTrails is shown in Fig.~\ref{fig:workflow}, and its version history in Fig.~\ref{fig:history}. Following the links in the PDF version of the latter figures retrieves the corresponding vistrail files.
+
+\subsection{Tutorials on Writing Codes with ALPS}
+
+A second set of tutorials demonstrate how to use ALPS libraries and tools in new simulation codes. We provide examples of how to write a simple Monte Carlo simulation in either Python or C++  and how to integrate it with the ALPS tools. We also demonstrate how a user's code can be  easily integrated into the VisTrails workflow system.
+
+
+\section{License}
+The ALPS libraries are licensed under the ALPS library license~\cite{librarylicense} and the applications under the ALPS application license~\cite{applicationlicense}. These licenses are modeled after the GNU General Public License (GPL), but contain an additional requirement to cite this paper as well as relevant papers for each of the application codes. These papers need to be cited and the use of ALPS acknowledged in any scientific project that makes use of ALPS. This includes the case when ALPS has only been used to test a scientist's application code.
+
+The detailed license text is included in the files {\tt LICENSE.txt}~\cite{librarylicense} and {\tt LICENSE-applications.txt}~\cite{applicationlicense}. Any use of ALPS requires citing this paper.  These files can be found at the top level of the source distribution and in the directory {\tt share/alps} of the binary distributions. The papers that need to be cited for the use of a specific application are printed to the standard output when that application is run. The list of papers is also included in the file {\tt CITATIONS.txt}. Since some of those references are to preprints we recommend that the ALPS web page~\cite{alps} is checked for updates.
+
+\section{Future Development plans}
+
+The ALPS project is a work in progress and development will continue after this release 2.0. Immediate plans for release 2.1 within about a year include the development of  more evaluation tools for Monte Carlo simulations and more 2D and 3D plotting functionality.
+
+ALPS 2.1 will also provide support for more programming languages. In addition to the Python support in the current version we plan to add a Fortran library to write the ALPS HDF5 files from Fortran. This will enable the use of the ALPS evaluation tools not only with C++ or Python codes, but also with results of Fortran codes.
+
+A key part of ALPS 2.1 will be a more flexible and optimized scheduler. It will allow  the simple integration of ALPS codes into other programs and Python scripts. It is also designed to scale to tens of thousands of CPUs, compared to the current scheduler that scales only to a few thousand CPUs. 
+
+Besides improved versions of some of the simulation codes, there will be a new worm algorithm program for optical lattice simulations with millions of lattice sites, and an extension of the DMFT codes to clusters.
+
+ALPS is an open initiative and we welcome contributions from the community.
+
+
+\section{Acknowledgements}
+
+We thank A.F. Albuquerque, F. Alet, P. Corboz, P. Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, M. Matsumoto, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. 
+
+We thank all users of the previous versions of ALPS and beta testers of ALPS 2.0, especially J. Alfonsi, S. Aicardi, A. Akande, P. Anders, A. Anfossi, Z. Asadzadeh, R.~Bhat, J.H. Brewer, S. Bulut, E. Burovski, G. Carleo, G. Chen, M.D. Costa, M.~Dolfi, J. Figgins, S.~Gazit, U.~Gerber, R. Ghulghazaryan, C. Gils, S. Greschner, C.~Hamer, J. Hammond, K. Hassan, N. Heine, F.-J. Jiang, R. Jordens, H.G. Katzgraber, B.~Keiyh, J. Kim, J. Kolasinski, B.~Koopman, F. K\"ormann, E.~Kozik, M.F. Krenn, F.~Kruger, M. Laurent, J. Lopes, M. Maik, M. Maksymenko, N. Moran, A. Nunnenkamp, J.D. Peel, S.~Pilati, K. Prsa, N.~Rahman, M. Rofiq, H. R\o nnow, J. Ruostekoski, J.~Schnack, N. Schuch, A. Sen, K. Shtengel, J. Single, M. Skoulatos, C. Sliwa, M.~Spenke, M.~Stoudenmire, V. Tangoulis, A.~Taroni, B. Thielemann, M. Tovar, H. Tran, V.~Varma, S. Ward, T. Wasiutynski, J. Wen, J. Wilms, H. Wunderlich, F. Xiao, X.Q. Yu, J.~Zakrzewski, Z.-X. Zhou, and R. Ziemkiewicz. We thank P. Zoller for the suggestion to provide binary installers. 
+
+The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara supported by NSF grant  PHY-0551164 and DMR-0705847, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, Grant No.~J-992, the National Science Foundation under Grant No.~PHY-0903457, the Deutsche Forschungsgemeinschaft through the collaborative research center SFB 602, Japan Society for the Promotion of Science through KAKENHI No.\,20540364, Next-Generation Supercomputer Project from MEXT Japan, and a grant from the Army Research Office with funding from the DARPA OLE program.
+
+\appendix
+
+\section{Scientific Workflows and VisTrails}
+
 
 \subsection{ Workflows}
 
@@ -488,38 +682,6 @@ modified versions.  Change-based provenance from workflow evolution
 can also speed up runs of similar workflows via
 caching~\cite{bavoil@vis2005}.
 
-\begin{figure}
-\begin{center}
-
-\vistrail[host=alps.ethz.ch,
-db=vistrails,
-vtid=10,
-version=169,
-pdf,
-getvtl,
-showspreadsheetonly]{width=8cm}
-\caption{A figure produced by an ALPS VisTrails workflow: the uniform susceptibility of the Heisenberg chain and ladder. Clicking the figure retrieves the workflow used to 
-create it. Opening that workflow on a machine with VisTrails and ALPS installed lets the reader execute the full calculation.}
-\label{fig:figure}
-\end{center}
-\end{figure}
-
-
-\begin{figure}
-\begin{center}
-\vistrail[host=alps.ethz.ch,
-db=vistrails,
-vtid=10,
-version=169,
-pdf,
-getvtl,
-showworkflow,
-showspreadsheetonly]{width=8cm}
-\caption{The workflow that created Fig.~\ref{fig:figure}. The workflow image has been created by VisTrails for the specific workflow used to create the exact version shown in the figure. Clicking the figure retrieves the workflow.}
-\label{fig:workflow}
-\end{center}
-\end{figure}
-
 
 
 \begin{figure}
@@ -617,152 +779,6 @@ entry point for non-experts to explore and interact with complicated
 simulation workflows. We will develop ALPS tutorials also as VisMashups, enabling the interactive exploration of tutorial problems with the reader's web browser, without the need to install ALPS.
 
 
-\subsection{The ALPS VisTrails package}
-
-ALPS 2.0 provides a package of modules for VisTrails that allows the user to perform the three major steps of a scientific workflow, namely i) the preparation of input files, ii) the execution of simulations, iii) the analysis and plotting of simulation data. The three groups of modules are intended to integrate seamlessly, but at the same time allow the separate use of each group, which for example allows the user to analyze data with VisTrails that has not been prepared using the ALPS library or file formats.
-
-The design goal of the data analysis modules is to take care of common, repetitive tasks, while at the same time being as flexible as scripts.  Common data formats, designed to allow interoperability with the powerful Numpy/Scipy libraries, are used by all modules. A set of self-contained modules are provided for common tasks, such as fitting or various types of plots. A framework of {\it Transform} modules allows the user to specify arbitrary transformations by providing small Python codes.
-
-Both the modules for input preparation and data analysis are designed to assist the user in dealing with a large number of simulations. For example, modules are provided to sweep parameter ranges or combine data from many simulations. Modules are provided to load data from ALPS files and text/ASCII files; loading data from custom file formats can easily be implemented.
-
-VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs for the names of modules that execute
- Python scripts which, in turn execute ALPS
-algorithms in Python or compiled code. Fig.~\ref{fig:workflow} shows an example ALPS workflow
-that takes input lattice parameters and model definitions (modules described by nouns, such as 
- ChainLattice and LatticeModel), executes the quantum
-Monte Carlo looper code, and then renders the data (modules described by verbs such as  RunLoop and PreparePlot).
-
-The creation of such workflows is explained in a set of tutorials and on the web page. Furthermore, all ALPS tutorials, discussed in the next section, are available  as VisTrails workflows, providing an extensive set of examples that can be used as templates for the user's simulations. 
-
-This paper already makes use of ALPS 2.0 and VisTrails. Full provenance information for the results in Fig.~\ref{fig:figure} is available from the URL linked to the figure. Clicking the figure will download the workflow that has been used to prepare the figure and its version history. After installing VisTrails and ALPS, the reader of the paper can redo the full simulation.
-
-
-\section{Tutorials and Examples}
-
-The ALPS web page~\cite{alps} contains an extensive list of tutorials, explaining the use of the various application codes and evaluation tools.  Also, tutorials demonstrate how to use the ALPS libraries in the user's own code. We provide tutorials and instructions for using ALPS in three ways: 
-\begin{enumerate}
-\item from the command line (without data evaluation and plotting)
-\item using Python scripts
-\item and using the VisTrails workflow system. 
-\end{enumerate}
-
-The input files needed for the tutorials are available on the web page but are also included in the source and binary distributions.
-
-\begin{figure}
-\begin{tiny}
-\begin{center}
-\begin{verbatim}
-cat  > parm << EOF
-LATTICE="chain lattice"
-MODEL="spin"
-local_S=1/2
-L=60
-J=1
-THERMALIZATION=5000
-SWEEPS=50000
-ALGORITHM="loop"
-{T=0.05;}
-{T=0.1;}
-{T=0.2;}
-{T=0.3;}
-{T=0.4;}
-{T=0.5;}
-{T=0.6;}
-{T=0.7;}
-{T=0.75;}
-{T=0.8;}
-{T=0.9;}
-{T=1.0;}
-{T=1.25;}
-{T=1.5;}
-{T=1.75;}
-{T=2.0;}
-EOF
-
-parameter2xml parm
-loop --auto-evaluate --write-xml parm.in.xml
-\end{verbatim}
-\end{center}
-\end{tiny}
-\caption{A shell script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain. Evaluation options are limited to viewing the output files. Any further evaluation requires the use of Python, VisTrails, or a program written by the user.}
-\label{fig:commandline}
-\end{figure}
-
-
-\begin{figure}
-\begin{tiny}
-\begin{center}
-\begin{verbatim}
-import pyalps
-import matplotlib.pyplot as plt
-import pyalps.plot
-
-#prepare the input parameters
-parms = []
-for t in [0.05, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0]:
-    parms.append(
-        { 
-          'LATTICE'        : "chain lattice", 
-          'MODEL'          : "spin",
-          'local_S'        : 0.5,
-          'T'              : t,
-          'J'              : 1 ,
-          'THERMALIZATION' : 5000,
-          'SWEEPS'         : 50000,
-          'L'              : 60,
-          'ALGORITHM'      : "loop"
-        }
-    )
-
-#write the input file and run the simulation
-input_file = pyalps.writeInputFiles('parm2c',parms)
-pyalps.runApplication('loop',input_file)
-
-#load the susceptibility and collect it as function of temperature T
-data = pyalps.loadMeasurements(pyalps.getResultFiles(prefix='parm2c'),'Susceptibility')
-susceptibility = pyalps.collectXY(data,x='T',y='Susceptibility')
-
-#make plot
-plt.figure()
-pyalps.plot.plot(susceptibility)
-plt.xlabel('Temperature $T/J$')
-plt.ylabel('Susceptibility $\chi J$')
-plt.title('Quantum Heisenberg chain')
-plt.show()
-\end{verbatim}
-\end{center}
-\end{tiny}
-\caption{A Python script to perform an ALPS simulation to calculate the uniform susceptibility of a Heisenberg spin chain, load and evaluate the data, and make a plot. }
-\label{fig:python}
-\end{figure}
-
-An example for running an ALPS application from the command line is shown in Fig.~\ref{fig:commandline}. This example calculates the uniform susceptibility of a quantum Heisenberg spin chain. The same example, containing additional code to evaluate and plot the results  using Python is shown in Fig.~\ref{fig:python}. The workflow using VisTrails is shown in Fig.~\ref{fig:workflow}, and its version history in Fig.~\ref{fig:history}. Following the links in the PDF version of the latter figures retrieves the corresponding vistrail files.
-
-\section{License}
-The ALPS libraries are licensed under the ALPS library license~\cite{librarylicense} and the applications under the ALPS application license~\cite{applicationlicense}. These licenses are modeled after the GNU General Public License (GPL), but contain an additional requirement to cite this paper as well as relevant papers for each of the application codes. These papers need to be cited and the use of ALPS acknowledged in any scientific project that makes use of ALPS. This includes the case when ALPS has only been used to test a scientist's application code.
-
-The detailed license text is included in the files {\tt LICENSE.txt}~\cite{librarylicense} and {\tt LICENSE-applications.txt}~\cite{applicationlicense}. Any use of ALPS requires citing this paper.  These files can be found at the top level of the source distribution and in the directory {\tt share/alps} of the binary distributions. The papers that need to be cited for the use of a specific application are printed to the standard output when that application is run. The list of papers is also included in the file {\tt CITATIONS.txt}. Since some of those references are to preprints we recommend that the ALPS web page~\cite{alps} is checked for updates.
-
-\section{Future development plans}
-
-The ALPS project is a work in progress and development will continue after this release 2.0. Immediate plans for release 2.1 within about a year include the development of  more evaluation tools for Monte Carlo simulations and more 2D and 3D plotting functionality.
-
-ALPS 2.1 will also provide support for more programming languages. In addition to the Python support in the current version we plan to add a Fortran library to write the ALPS HDF5 files from Fortran. This will enable the use of the ALPS evaluation tools not only with C++ or Python codes, but also with results of Fortran codes.
-
-A key part of ALPS 2.1 will be a more flexible and optimized scheduler. It will allow  the simple integration of ALPS codes into other programs and Python scripts. It is also designed to scale to tens of thousands of CPUs, compared to the current scheduler that scales only to a few thousand CPUs. 
-
-Besides improved versions of some of the simulation codes, there will be a new worm algorithm program for optical lattice simulations with millions of lattice sites, and an extension of the DMFT codes to clusters.
-
-ALPS is an open initiative and we welcome contributions from the community.
-
-
-\section{Acknowledgements}
-
-We thank A.F. Albuquerque, F. Alet, P. Corboz, P. Dayal, A. Honecker, A. L\"auchli, M. K\"orner,  A. Kozhevnikov, S. Manmana, M. Matsumoto, I.P. McCulloch, F. Michel and R.M. Noack, for their contributions to previous versions of ALPS and  for useful discussions. 
-
-We thank all users of the previous versions of ALPS and beta testers of ALPS 2.0, especially J. Alfonsi, S. Aicardi, A. Akande, P. Anders, A. Anfossi, Z. Asadzadeh, R.~Bhat, J.H. Brewer, S. Bulut, E. Burovski, G. Carleo, G. Chen, M.D. Costa, M.~Dolfi, J. Figgins, S.~Gazit, U.~Gerber, R. Ghulghazaryan, C. Gils, S. Greschner, C.~Hamer, J. Hammond, K. Hassan, N. Heine, F.-J. Jiang, R. Jordens, H.G. Katzgraber, B.~Keiyh, J. Kim, J. Kolasinski, B.~Koopman, F. K\"ormann, E.~Kozik, M.F. Krenn, F.~Kruger, M. Laurent, J. Lopes, M. Maik, M. Maksymenko, N. Moran, A. Nunnenkamp, J.D. Peel, S.~Pilati, K. Prsa, N.~Rahman, M. Rofiq, H. R\o nnow, J. Ruostekoski, J.~Schnack, N. Schuch, A. Sen, K. Shtengel, J. Single, M. Skoulatos, C. Sliwa, M.~Spenke, M.~Stoudenmire, V. Tangoulis, A.~Taroni, B. Thielemann, M. Tovar, H. Tran, V.~Varma, S. Ward, T. Wasiutynski, J. Wen, J. Wilms, H. Wunderlich, F. Xiao, X.Q. Yu, J.~Zakrzewski, Z.-X. Zhou, and R. Ziemkiewicz. We thank P. Zoller for the suggestion to provide binary installers. 
-
-The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara supported by NSF grant  PHY-0551164 and DMR-0705847, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, Grant No.~J-992, the National Science Foundation under Grant No.~PHY-0903457, the Deutsche Forschungsgemeinschaft through the collaborative research center SFB 602, Japan Society for the Promotion of Science through KAKENHI No.\,20540364, Next-Generation Supercomputer Project from MEXT Japan, and a grant from the Army Research Office with funding from the DARPA OLE program.
 
 
 \section*{References}
