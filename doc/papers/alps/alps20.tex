@@ -83,7 +83,8 @@
 \myaddress{utah}{Scientific Computing and Imaging Institute, University of Utah, Salt Lake City, Utah 84112, USA}
 \myaddress{goettingen}{Institut f\"ur Theoretische Physik, Georg-August-Universit\"{a}t G\"{o}ttingen, G\"{o}ttingen, Germany}
 \myaddress{columbia}{Columbia University, New York, NY 10027, USA}
-\myaddress{bonn}{Bethe Center for Theoretical Phyics, Universit\"{a}t Bonn, Bonn, Germany}
+\myaddress{bonn}{Bethe Center for Theoretical Physics, Universit\"{a}t Bonn,
+  Nussallee 12, 53115 Bonn, Germany}
 \myaddress{jaea}{Center for Computational Science \& e-Systems, Japan Atomic Energy Agency, 110-0015 Tokyo, Japan}
 \myaddress{crest}{Core Research for Evolutional Science and Technology, Japan Science and Technology Agency, 332-0012 Kawaguchi, Japan}
 \myaddress{tokyo}{Department of Applied Physics, University of Tokyo, 113-8656 Tokyo, Japan}
@@ -257,7 +258,7 @@ A number of XML  schemas~\cite{xmlschema} were designed in ALPS 1 to describe th
 We now complement XML by the widely used Hierarchical Data Format 5 (HDF5)~\cite{hdf5}, a de-facto standard for writing large binary files in a portable, machine-independent way.  HDF5 is directly supported by many visualization and data analysis tools and a wide array of tools are 
 available for C, C++, Fortran, Python, and other languages. In ALPS, HDF5 is now used as the default output format for simulation data.  This approach is significantly faster than writing to text-based formats when large files need to be written. On-the-fly compression of binary data further reduces file size. 
 
-The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page~\cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to also write all results in XML.
+The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page~\cite{alps}. For backward compatibility with user's evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to also write all results in XML.
 
 The implementation of HDF5 capabilities within ALPS is split into two layers. The lower layer implements a generic and general-purpose C++ interface to the C HDF5 library. This layer is not tied to other parts of the ALPS library and can therefore be used by user code that is otherwise independent from ALPS and its file formats. The functions of this library are also exposed to Python, and can thus be used not only from C++ codes but also from Python scripts. On top of that, the specific file formats used by the ALPS library and applications are implemented in the respective components of the ALPS library.
 
