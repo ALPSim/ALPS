@@ -55,7 +55,7 @@ namespace ietl_lapack_dispatch {
   inline void stev(const char& jobz, const int& n, float sd[],float se[],
                    float sz[],const int& ldz,int& info) {
     float* swork = new float[2*n -2];
-    MTL_FCALL(sstev)(jobz,n,sd,se,sz,ldz,swork,info); 
+    ietl::MTL_FCALL(sstev)(jobz,n,sd,se,sz,ldz,swork,info); 
     delete[] swork;
     if (info)
       throw std::runtime_error("Error return from sstev");
@@ -64,7 +64,7 @@ namespace ietl_lapack_dispatch {
   inline void stev(const char& jobz, const int& n, double dd[],double de[],
                    double dz[],const int& ldz,int& info) {
     double* dwork = new double[2*n -2];
-    MTL_FCALL(dstev)(jobz,n,dd,de,dz,ldz,dwork,info);
+    ietl::MTL_FCALL(dstev)(jobz,n,dd,de,dz,ldz,dwork,info);
     delete[] dwork;
     if (info)
       throw std::runtime_error("Error return from dstev");
@@ -73,7 +73,7 @@ namespace ietl_lapack_dispatch {
   inline void stev(const char& jobz, const int& n, float sd[],float se[],
                    std::complex<float> sz[],const int& ldz,int& info) {
     float* swork = new float[2*n -2];
-    MTL_FCALL(csteqr)(jobz,n,sd,se,sz,ldz,swork,info); 
+    ietl::MTL_FCALL(csteqr)(jobz,n,sd,se,sz,ldz,swork,info); 
     delete[] swork;
     if (info)
       throw std::runtime_error("Error return from csteqr");
@@ -82,7 +82,7 @@ namespace ietl_lapack_dispatch {
   inline void stev(const char& jobz, const int& n, double dd[],double de[],
                    std::complex<double> dz[],const int& ldz,int& info) {
     double* dwork = new double[2*n -2];
-    MTL_FCALL(zsteqr)(jobz,n,dd,de,dz,ldz,dwork,info);
+    ietl::MTL_FCALL(zsteqr)(jobz,n,dd,de,dz,ldz,dwork,info);
     delete[] dwork;
     if (info)
       throw std::runtime_error("Error return from zsteqr");
@@ -97,7 +97,7 @@ namespace ietl2lapack {
     int lwork=4*dim;
     int info;
     double* work = new double[lwork];
-    MTL_FCALL(dsyev)(jobz, uplo, dim, a, dim, w, work, lwork, info);
+    ietl::MTL_FCALL(dsyev)(jobz, uplo, dim, a, dim, w, work, lwork, info);
     delete[] work;
     if (info)
       throw std::runtime_error("Error return from dsyev");
@@ -108,7 +108,7 @@ namespace ietl2lapack {
     int lwork=4*dim;
     int info;
     float* work = new float[lwork];
-    MTL_FCALL(ssyev)(jobz, uplo, dim, a, dim, w, work, lwork, info);
+    ietl::MTL_FCALL(ssyev)(jobz, uplo, dim, a, dim, w, work, lwork, info);
     delete[] work;
     if (info)
       throw std::runtime_error("Error return from ssyev");
@@ -120,7 +120,7 @@ namespace ietl2lapack {
     int info;
     std::complex<double>* work = new std::complex<double>[lwork];
     double* rwork = new double[lwork];
-    MTL_FCALL(zheev)(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
+    ietl::MTL_FCALL(zheev)(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
     delete[] work;
     delete[] rwork;
     if (info)
@@ -140,7 +140,7 @@ namespace ietl2lapack {
     int info;
     std::complex<float>* work = new std::complex<float>[lwork];
     float* rwork = new float[lwork];
-    MTL_FCALL(cheev)(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
+    ietl::MTL_FCALL(cheev)(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
     delete[] work;
     delete[] rwork;
     if (info)
