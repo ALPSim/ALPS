@@ -17,11 +17,8 @@ Alet F, Dayal P, Grzesik A, Honecker A, K\"{o}rner M, L\"{a}uchli A, Manmana
 Albuquerque A, Alet F, Corboz P {\em et~al.\/} 2007 {\em Journal of Magnetism
   and Magnetic Materials\/} {\bf 310} 1187--1193
 
-\bibitem{Evertz03}
-Evertz H~G 2003 {\em Advances in Physics\/} {\bf 52}(1) 1--66
-
-\bibitem{Troyer03}
-Troyer M, Wessel S and Alet F 2003 {\em Phys. Rev. Lett.\/} {\bf 90} 120201
+\bibitem{lanczos}
+Lanczos C 1950 {\em J. Res. Natl. Bur. Stand.\/} {\bf 49} 225
 
 \bibitem{White1992}
 White S~R 1992 {\em Phys. Rev. Lett.\/} {\bf 69} 2863--2866
@@ -29,18 +26,64 @@ White S~R 1992 {\em Phys. Rev. Lett.\/} {\bf 69} 2863--2866
 \bibitem{Schollwock2005}
 Schollw\"ock U 2005 {\em Rev. Mod. Phys.\/} {\bf 77} 259--315
 
+\bibitem{Daley2004}
+Daley A~J, Kollath C, Schollw\"ock U and Vidal G 
+2004 {\em Journal of  Statistical Mechanics: Theory and Experiment} P04005
+
+\bibitem{White2004}
+White S~R and Feiguin A~E 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 076401
+
+\bibitem{Evertz03}
+Evertz H~G 2003 {\em Advances in Physics\/} {\bf 52}(1) 1--66
+
 \bibitem{vidal1}
 Vidal G 2003 {\em Phys. Rev. Lett.\/} {\bf 91} 147902
 
 \bibitem{vidal2}
 Vidal G 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 040502
 
-\bibitem{Daley2004}
-Daley A~J, Kollath C, Schollw\"ock U and Vidal G 2004 {\em Journal of
-  Statistical Mechanics: Theory and Experiment\/} {\bf 2004} P04005
+\bibitem{Swendsen87}
+Swendsen R~H and Wang J~S 1987 {\em Phys. Rev. Lett.\/} {\bf 58} 86--88
 
-\bibitem{White2004}
-White S~R and Feiguin A~E 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 076401
+\bibitem{Prokofev98A}
+Prokof'ev N~V, Svistunov B~V and Tupitsyn I~S 1998 {\em JETP Sov. Phys.\/} {\bf
+  87} 310
+
+\bibitem{Todo01}
+Todo S and Kato K 2001 {\em Phys. Rev. Lett.\/} {\bf 87} 047203
+
+\bibitem{looper}
+\url{http://wistaria.comp-phys.org/alps-looper/}
+
+\bibitem{Sylyuasen}
+Sylju\aa{}sen O~F and Sandvik A~W 2002 {\em Phys. Rev. E\/} {\bf 66} 046701
+
+\bibitem{Alet2005}
+Alet F, Wessel S and Troyer M 2005 {\em Phys. Rev.E.\/} {\bf 71} 036706
+
+\bibitem{WangLandau01a}
+F. Wang and D. P. Landau 
+(2001) {\em Phys. Rev. Lett.} {\bf 86}, 2050Ð2053 
+
+\bibitem{WangLandau01b}
+F. Wang and D. P. Landau 
+(2001)  {\em Phys. Rev. E} {\bf 64}, 056101 
+
+\bibitem{Troyer03}
+Troyer M, Wessel S and Alet F 2003 {\em Phys. Rev. Lett.\/} {\bf 90} 120201
+
+\bibitem{Trebst04}
+S. Trebst, D.A. Huse, and M. Troyer
+(2004) {\em Phys. Rev. E} {\bf} 70, 046701
+
+\bibitem{Katzgraber06}
+H.G. Katzgraber, S. Trebst, D.A. Huse, and M. Troyer
+(2006) {\em Journal of Statistical Mechanics: Theory and Experiment} P03018
+
+\bibitem{Wessel07}
+S. Wessel, N. Stoop, E. Gull, S. Trebst, and M. Troyer
+(2007) {\em Journal of Statistical Mechanics: Theory and Experiment} P12005
+
 
 \bibitem{Rubtsov04}
 Rubtsov A~N and Lichtenstein A~I 2004 {\em JETP Letters\/} {\bf 80} 61--65
@@ -123,28 +166,6 @@ Ambegaokar V and Troyer M 2010 {\em American Journal of Physics\/} {\bf 78}
 
 \bibitem{vtk}
 \url{http://www.vtk.org/}
-
-\bibitem{lanczos}
-Lanczos C 1950 {\em J. Res. Natl. Bur. Stand.\/} {\bf 49} 225
-
-\bibitem{Swendsen87}
-Swendsen R~H and Wang J~S 1987 {\em Phys. Rev. Lett.\/} {\bf 58} 86--88
-
-\bibitem{Todo01}
-Todo S and Kato K 2001 {\em Phys. Rev. Lett.\/} {\bf 87} 047203
-
-\bibitem{looper}
-\url{http://wistaria.comp-phys.org/alps-looper/}
-
-\bibitem{Sylyuasen}
-Sylju\aa{}sen O~F and Sandvik A~W 2002 {\em Phys. Rev. E\/} {\bf 66} 046701
-
-\bibitem{Alet2005}
-Alet F, Wessel S and Troyer M 2005 {\em Phys. Rev.E.\/} {\bf 71} 036706
-
-\bibitem{Prokofev98A}
-Prokof'ev N~V, Svistunov B~V and Tupitsyn I~S 1998 {\em JETP Sov. Phys.\/} {\bf
-  87} 310
 
 \bibitem{Georges96}
 Georges A, Kotliar G, Krauth W and Rozenberg M~J 1996 {\em Rev. Mod. Phys.\/}

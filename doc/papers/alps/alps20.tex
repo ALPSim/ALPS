@@ -130,9 +130,15 @@ direct numerical simulations are essential to increase our understanding of the 
 properties of these systems. 
 
 The last two decades have seen tremendous progress in the development of
-algorithms.  Speedups of many orders of magnitude have been 
-achieved~\cite{Evertz03,Troyer03,White1992,Schollwock2005,vidal1,vidal2,Daley2004,White2004,Rubtsov04,Rubtsov05,Werner06,Werner06Kondo, Gull08_ctaux}. These
-advances often come at the cost of increased algorithmic
+algorithms, including refinements to existing numerical algorithms, such as exact diagonalization \cite{lanczos},
+the density matrix renormalization group \cite{White1992,Schollwock2005,Daley2004,White2004} and (quantum) 
+Monte Carlo (QMC) techniques \cite{Evertz03}, as well as the  advent of a new class of variational approaches based on 
+tensor network states \cite{vidal1,vidal2}. 
+Some of the algorithmic refinements have led to computational speedups of many order of magnitudes, such as 
+the development of non-local update schemes \cite{Swendsen87} in QMC methods \cite{Prokofev98A,Evertz03,Todo01,looper,Sylyuasen,Alet2005}, 
+the sampling of extended ensembles \cite{WangLandau01a,WangLandau01b,Troyer03,Trebst04,Katzgraber06,Wessel07},
+or the continuous-time approach to quantum impurity problems \cite{Rubtsov04,Rubtsov05,Werner06,Werner06Kondo, Gull08_ctaux}.
+These advances often come at the cost of increased algorithmic
 complexity and challenge the current model of program development in
 this research field. In contrast to other research areas, in which
 large ``community codes'' are being used, the field of strongly
@@ -786,3 +792,9 @@ simulation workflows. We will develop ALPS tutorials also as VisMashups, enablin
 \bibliographystyle{iopart-num}
 \bibliography{refs}
 \end{document}
+
+\begin{references}
+
+\end{references}
+
+
