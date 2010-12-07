@@ -47,14 +47,6 @@ Besides the helper tools for the [link scheduler scheduler library] we
 have provided a few [link tools sample tools] for the manipulation of
 the XML files created by the ALPS programs.
 
-[h1 Applications]
-
-Applications based on the ALPS libraries are available separately from
-[@http://alps.comp-phys.org/software/applications/doc/index.html].
-
-[endsect]
-
-
 [section License]
 
 The ALPS libraries are free for non-commerical use but require

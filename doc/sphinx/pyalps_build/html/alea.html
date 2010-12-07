@@ -65,7 +65,12 @@
 <li>MCScalarData</li>
 <li>MCVectorData</li>
 </ul>
-<span class="target" id="module-pyalps.alea"></span><dl class="class">
+<span class="target" id="module-pyalps.alea"></span><p>This module contains classes for the evaluation of Monte Carlo measurements:
+- RealObservable
+- RealVectorObservable
+- RealTimeSeriesObservable
+- RealVectorTimeSeriesObservable</p>
+<dl class="class">
 <dt id="pyalps.alea.RealObservable">
 <em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">RealObservable</tt><a class="headerlink" href="#pyalps.alea.RealObservable" title="Permalink to this definition">¶</a></dt>
 <dd><p>This class is an ALPS observable class to record results of Monte Carlo measurements and evaluate mean values, error, and autocorrelations.</p>
@@ -132,7 +137,7 @@
 <dl class="attribute">
 <dt id="pyalps.alea.RealObservable.tau">
 <tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.RealObservable.tau" title="Permalink to this definition">¶</a></dt>
-<dd><p>the autocorrealtion time estimate of the recorded measurements.</p>
+<dd><p>the autocorrelation time estimate of the recorded measurements.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -210,7 +215,7 @@
 <dl class="attribute">
 <dt id="pyalps.alea.RealVectorObservable.tau">
 <tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.RealVectorObservable.tau" title="Permalink to this definition">¶</a></dt>
-<dd><p>the autocorrealtion time estimate of the recorded measurements.</p>
+<dd><p>the autocorrelation time estimate of the recorded measurements.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -288,7 +293,7 @@
 <dl class="attribute">
 <dt id="pyalps.alea.RealTimeSeriesObservable.tau">
 <tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.RealTimeSeriesObservable.tau" title="Permalink to this definition">¶</a></dt>
-<dd><p>the autocorrealtion time estimate of the recorded measurements.</p>
+<dd><p>the autocorrelation time estimate of the recorded measurements.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -366,7 +371,7 @@
 <dl class="attribute">
 <dt id="pyalps.alea.RealVectorTimeSeriesObservable.tau">
 <tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.RealVectorTimeSeriesObservable.tau" title="Permalink to this definition">¶</a></dt>
-<dd><p>the autocorrealtion time estimate of the recorded measurements.</p>
+<dd><p>the autocorrelation time estimate of the recorded measurements.</p>
 </dd></dl>
 
 <dl class="attribute">
@@ -380,40 +385,83 @@
 <dl class="class">
 <dt id="pyalps.alea.MCScalarData">
 <em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">MCScalarData</tt><a class="headerlink" href="#pyalps.alea.MCScalarData" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>This class is used to evaluate Monte Carlo data and functions on them. Besides the documented functions and properties, the class supports the arithmetic operations +, -, <a href="#id1"><span class="problematic" id="id2">*</span></a>, /, +=, -=, <a href="#id3"><span class="problematic" id="id4">*</span></a>=, /=, and the functions abs, acos, acosh, asin, asinh, atan, atanh, cb, cbrt, cos, cosh, exp, log, pow, sin, sinh, sq, sqrt, tan and tanh.</p>
+<dl class="method">
 <dt id="pyalps.alea.MCScalarData.__init__">
 <tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCScalarData.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>__init__( (object)arg1 [, (float)arg2 [, (float)arg3]]) -&gt; None :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>__init__( (object)arg1 [, (float)arg2 [, (float)arg3]]) -&gt; None :</dt>
+<dd><p class="first">Optionally the constructor takes one argument for the mean values, and a second optional argumnt for the error.</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>void __init__(_object* [,double [,double]])</dd>
 </dl>
-</blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyalps.alea.MCScalarData.save">
 <tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCScalarData.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>save( (MCScalarData)arg1, (str)arg2, (str)arg3) -&gt; None :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>save( (MCScalarData)arg1, (str)arg2, (str)arg3) -&gt; None :</dt>
+<dd><p class="first">Saves the object into the HDF5 file specified as the first string argument, using as observable name the second string argument.</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>void save(alps::alea::mcdata&lt;double&gt; {lvalue},std::string,std::string)</dd>
 </dl>
-</blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyalps.alea.MCScalarData.load">
 <tt class="descname">load</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCScalarData.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>load( (MCScalarData)arg1, (str)arg2, (str)arg3) -&gt; None :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>load( (MCScalarData)arg1, (str)arg2, (str)arg3) -&gt; None :</dt>
+<dd><p class="first">Loads the object into from HDF5 file specified as the first string argument, using as observable name the second string argument.</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>void load(alps::alea::mcdata&lt;double&gt; {lvalue},std::string,std::string)</dd>
 </dl>
-</blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCScalarData.mean">
+<tt class="descname">mean</tt><a class="headerlink" href="#pyalps.alea.MCScalarData.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>the mean value of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCScalarData.error">
+<tt class="descname">error</tt><a class="headerlink" href="#pyalps.alea.MCScalarData.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>the error of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCScalarData.variance">
+<tt class="descname">variance</tt><a class="headerlink" href="#pyalps.alea.MCScalarData.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>the variance of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCScalarData.tau">
+<tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.MCScalarData.tau" title="Permalink to this definition">¶</a></dt>
+<dd><p>the autocorrelation time estimate of the recorded measurements.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCScalarData.count">
+<tt class="descname">count</tt><a class="headerlink" href="#pyalps.alea.MCScalarData.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCScalarData.bins">
+<tt class="descname">bins</tt><a class="headerlink" href="#pyalps.alea.MCScalarData.bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of bins recorded for a jackknife analysis.</p>
 </dd></dl>
 
 </dd></dl>
@@ -421,40 +469,83 @@
 <dl class="class">
 <dt id="pyalps.alea.MCVectorData">
 <em class="property">class </em><tt class="descclassname">pyalps.alea.</tt><tt class="descname">MCVectorData</tt><a class="headerlink" href="#pyalps.alea.MCVectorData" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="method">
+<dd><p>This class is used to evaluate Monte Carlo data and functions on them. Besides the documented functions and properties, the class supports the arithmetic operations +, -, <a href="#id5"><span class="problematic" id="id6">*</span></a>, /, +=, -=, <a href="#id7"><span class="problematic" id="id8">*</span></a>=, /=, and the functions abs, acos, acosh, asin, asinh, atan, atanh, cb, cbrt, cos, cosh, exp, log, pow, sin, sinh, sq, sqrt, tan and tanh.</p>
+<dl class="method">
 <dt id="pyalps.alea.MCVectorData.__init__">
 <tt class="descname">__init__</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCVectorData.__init__" title="Permalink to this definition">¶</a></dt>
-<dd><p>__init__( (object)arg1 [, (object)arg2 [, (object)arg3]]) -&gt; None :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>__init__( (object)arg1 [, (object)arg2 [, (object)arg3]]) -&gt; None :</dt>
+<dd><p class="first">Optionally the constructor takes one argument for the mean values, and a second optional argumnt for the error.</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>void __init__(_object* [,boost::python::api::object [,boost::python::api::object]])</dd>
 </dl>
-</blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyalps.alea.MCVectorData.save">
 <tt class="descname">save</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCVectorData.save" title="Permalink to this definition">¶</a></dt>
-<dd><p>save( (MCVectorData)arg1, (str)arg2, (str)arg3) -&gt; None :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>save( (MCVectorData)arg1, (str)arg2, (str)arg3) -&gt; None :</dt>
+<dd><p class="first">Saves the object into the HDF5 file specified as the first string argument, using as observable name the second string argument.</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>void save(alps::alea::mcdata&lt;std::vector&lt;double, std::allocator&lt;double&gt; &gt; &gt; {lvalue},std::string,std::string)</dd>
 </dl>
-</blockquote>
+</dd>
+</dl>
 </dd></dl>
 
 <dl class="method">
 <dt id="pyalps.alea.MCVectorData.load">
 <tt class="descname">load</tt><big>(</big><big>)</big><a class="headerlink" href="#pyalps.alea.MCVectorData.load" title="Permalink to this definition">¶</a></dt>
-<dd><p>load( (MCVectorData)arg1, (str)arg2, (str)arg3) -&gt; None :</p>
-<blockquote>
-<dl class="docutils">
+<dd><dl class="docutils">
+<dt>load( (MCVectorData)arg1, (str)arg2, (str)arg3) -&gt; None :</dt>
+<dd><p class="first">Loads the object into from HDF5 file specified as the first string argument, using as observable name the second string argument.</p>
+<dl class="last docutils">
 <dt>C++ signature :</dt>
 <dd>void load(alps::alea::mcdata&lt;std::vector&lt;double, std::allocator&lt;double&gt; &gt; &gt; {lvalue},std::string,std::string)</dd>
 </dl>
-</blockquote>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCVectorData.mean">
+<tt class="descname">mean</tt><a class="headerlink" href="#pyalps.alea.MCVectorData.mean" title="Permalink to this definition">¶</a></dt>
+<dd><p>the mean value of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCVectorData.error">
+<tt class="descname">error</tt><a class="headerlink" href="#pyalps.alea.MCVectorData.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>the error of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCVectorData.variance">
+<tt class="descname">variance</tt><a class="headerlink" href="#pyalps.alea.MCVectorData.variance" title="Permalink to this definition">¶</a></dt>
+<dd><p>the variance of all measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCVectorData.tau">
+<tt class="descname">tau</tt><a class="headerlink" href="#pyalps.alea.MCVectorData.tau" title="Permalink to this definition">¶</a></dt>
+<dd><p>the autocorrelation time estimate of the recorded measurements.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCVectorData.count">
+<tt class="descname">count</tt><a class="headerlink" href="#pyalps.alea.MCVectorData.count" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of measurements recorded.</p>
+</dd></dl>
+
+<dl class="attribute">
+<dt id="pyalps.alea.MCVectorData.bins">
+<tt class="descname">bins</tt><a class="headerlink" href="#pyalps.alea.MCVectorData.bins" title="Permalink to this definition">¶</a></dt>
+<dd><p>the number of bins recorded for a jackknife analysis.</p>
 </dd></dl>
 
 </dd></dl>

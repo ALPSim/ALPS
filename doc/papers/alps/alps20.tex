@@ -1,4 +1,5 @@
 
+
 %\documentclass[3p,twocolumn]{elsarticle}
 \documentclass[12pt]{iopart}
 
@@ -193,7 +194,7 @@ publishing source codes used to obtain published results and by integration with
 \item More flexible and powerful evaluation tools using Python.
 \item A revised and substantially faster version of the directed loop quantum Monte Carlo (QMC) code {\tt dirloop\_sse}, and two new applications: QMC solvers for dynamical 
 mean field theory ({\tt dmft}) and a time-evolving block decimation code ({\tt tebd}) for the dynamics of one-dimensional quantum systems.
-\item Integration with VisTrails workflow provenance system~\cite{vistrails}.
+\item Integration with the VisTrails workflow provenance system~\cite{vistrails}.
 \item An expanded set of tutorials.
  \end{itemize}
  
@@ -207,7 +208,7 @@ The following tools and libraries are required to build ALPS:
 \begin{itemize}
 \item The CMake build system~\cite{cmake}.
 \item The BLAS~\cite{blasnetlib} and LAPACK libraries~\cite{lapack}. Ideally optimized versions for the target architecture should be used instead of the generic netlib versions.
-\item The Boost C++ libraries version 1.43.0 or later (included in one version of the source tarball)~\cite{boost}.
+\item The Boost C++ libraries version 1.43.0 or later (Boost 1.45.0 is included in one version of the source tarball)~\cite{boost}.
 \item The HDF5 library version 1.8~\cite{hdf5}.
 \item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9, IBM xlC++ 11.1, and Intel's icpc 10 and 11.
 \end{itemize}
@@ -228,8 +229,8 @@ Source and binary installation packages for MacOS X using macports~\cite{macport
 
 \subsection{LiveALPS.}
 
-For Linux we additionally provide an ISO disk image, called LiveALPS, of a full Linux distribution with ALPS preinstalled.  It is  
-based on a remastered CD-release of Knoppix~\cite{knoppix} and is ready to use 
+For Linux we additionally provide an ISO disk image, called LiveALPS, of a full Linux distribution with ALPS preinstalled.    
+Based on a remastered CD-release of Knoppix~\cite{knoppix} it is ready to use 
 on a PC without special configuration. While it can be burned to a DVD we recommend using it with a USB flash drive for performance reasons.
 This  solution is especially useful for Linux users that want to try ALPS, in summer schools, or in lectures.
 
@@ -319,7 +320,7 @@ Release 2.0 contains interfaces to the Open Source TEBD project~\cite{ostebd}, w
 
 At present, the TEBD routines can simulate the spin, boson Hubbard, hardcore boson, spinless fermion, and fermion Hubbard models from the ALPS models library.  All 
 Hamiltonian parameters are assumed uniform throughout the system.  Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times.  Observables calculated are the $z$ and $x$ magnetizations, their squares, and the $\langle \hat{S}^z_i 
-\hat{S}^z_j\rangle$ and $\langle \hat{S}^x_i \hat{S}^x_j\rangle$ correlations for the spin model; the occupation number, its square, and the $\langle \hat{n}_i \hat{n}_j\rangle$ and 
+\hat{S}^z_j\rangle$ and $\langle \hat{S}^x_i \hat{S}^x_j\rangle$ correlations for the spin model, the occupation number, its square, and the $\langle \hat{n}_i \hat{n}_j\rangle$ and 
 $\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models; and, additionally, 
 the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model.  All models calculate the energy, von Neumann entanglement 
 entropy of each site, the von Neumann entanglement entropy on each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ (i.e. the Loschmidt echo).
@@ -760,7 +761,7 @@ data was changed or removed on the filesystem.
 \subsection{Sharing content and reproducible research}
 
 One of the goals of the VisTrails system is to
-facilitate the publication of scientific results. VisTrails and
+facilitate the publication of scientific results. VisTrails and is social workflow repository
 CrowdLabs greatly simplify the process of packaging workflows and
 results for publication. By supporting the publication on wikis, 
 Web sites, or scientific documents (through LaTeX extensions such as in this paper), this framework allows users to create
