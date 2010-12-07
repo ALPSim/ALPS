@@ -33,14 +33,20 @@ Daley A~J, Kollath C, Schollw\"ock U and Vidal G 2004 {\em Journal of
 \bibitem{White2004}
 White S~R and Feiguin A~E 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 076401
 
-\bibitem{Evertz03}
-Evertz H~G 2003 {\em Advances in Physics\/} {\bf 52}(1) 1--66
-
 \bibitem{vidal1}
 Vidal G 2003 {\em Phys. Rev. Lett.\/} {\bf 91} 147902
 
 \bibitem{vidal2}
 Vidal G 2004 {\em Phys. Rev. Lett.\/} {\bf 93} 040502
+
+\bibitem{Verstraete04}
+Verstraete F and Cirac J~I 2004 {\em preprint cond-mat/0407066 (unpublished)\/}
+
+\bibitem{Murg07}
+Murg V, Verstraete F and Cirac J~I 2007 {\em Phys. Rev. A\/} {\bf 75} 033605
+
+\bibitem{vidal07}
+Vidal G 2007 {\em Phys. Rev. Lett.\/} {\bf 99} 220405
 
 \bibitem{Swendsen87}
 Swendsen R~H and Wang J~S 1987 {\em Phys. Rev. Lett.\/} {\bf 58} 86--88
@@ -61,11 +67,28 @@ Sylju\aa{}sen O~F and Sandvik A~W 2002 {\em Phys. Rev. E\/} {\bf 66} 046701
 \bibitem{Alet2005}
 Alet F, Wessel S and Troyer M 2005 {\em Phys. Rev.E.\/} {\bf 71} 036706
 
+\bibitem{Wang01}
+Wang F and Landau D~P 2001 {\em Phys. Rev. Lett.\/} {\bf 86} 2050--2053
+
+\bibitem{Wang01b}
+Wang F and Landau D~P 2001 {\em Phys. Rev. E\/} {\bf 64} 056101
+
 \bibitem{Troyer03}
 Troyer M, Wessel S and Alet F 2003 {\em Phys. Rev. Lett.\/} {\bf 90} 120201
 
 \bibitem{Trebst04}
 Trebst S, Huse D~A and Troyer M 2004 {\em Phys. Rev. E\/} {\bf 70} 046701
+
+\bibitem{Katzgraber06}
+Katzgraber H, Trebst S, Huse D and Troyer M 2006 {\em Journal of Statistical
+  Mechanics: Theory and Experiment\/}  P03018
+
+\bibitem{Wessel07}
+Wessel S, Stoop N, Gull E, Trebst S and Troyer M 2007 {\em Journal of
+  Statistical Mechanics: Theory and Experiment\/}  P12005
+
+\bibitem{Evertz03}
+Evertz H~G 2003 {\em Advances in Physics\/} {\bf 52}(1) 1--66
 
 \bibitem{Rubtsov04}
 Rubtsov A~N and Lichtenstein A~I 2004 {\em JETP Letters\/} {\bf 80} 61--65
