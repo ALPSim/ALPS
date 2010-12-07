@@ -238,7 +238,7 @@ common archive.
  The ISO
 standard XML~\cite{xml} was chosen in ALPS version 1~\cite{ALPS1.2,ALPS1.3} for the specification of these formats
 because it has become
-the main text-based data format on the internet and because it is
+the main text-based data format on the Internet and because it is
 supported by a large and growing number of tools.
 A number of XML  schemas~\cite{xmlschema} were designed in ALPS 1 to describe the input of simulation parameters, lattices,  quantum lattice models, and the output of results. ALPS 2 uses the same XML schemas to maintain compatibility.
 
@@ -253,7 +253,7 @@ The implementation of HDF5 capabilities within ALPS is split into two layers. Th
 
 \section{Evaluation Tools in Python}
 
-The previous versions of ALPS had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML files using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language~\cite{python}. Python is an easy-to-learn, interpreted, object-oriented language allowing interactive analysis of data and arbitrarily complex evaluations. 
+The previous versions of ALPS had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML files using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language~\cite{python}. Python is an easy-to-learn, interpreted, object-oriented language allowing interactive analysis of data and arbitrary complex evaluations. 
 
 We provide a complete set of library functions to write and read ALPS files and a number of useful functions to evaluate the simulation results and to make plots. In particular, the ALPS classes for the recording and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis~\cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
 Two-dimensional plots are created using the widely available Python matplotlib package~\cite{matplotlib} or by using ALPS functions to write grace~\cite{grace} or gnuplot~\cite{gnuplot} input files. Creation of 3D graphs is supported through VisTrails and the Visualization ToolKit (VTK)~\cite{vtk} VisTrails modules.
@@ -378,7 +378,7 @@ ALPS 2.0 provides a package of modules for VisTrails that allows the user to per
 
 The design goal of the data analysis modules is to take care of common, repetitive tasks, while at the same time being as flexible as scripts.  Common data formats, designed to allow interoperability with the powerful Numpy/Scipy libraries, are used by all modules. A set of self-contained modules are provided for common tasks, such as fitting or various types of plots. A framework of {\it Transform} modules allows the user to specify arbitrary transformations by providing small Python codes.
 
-The modules for input preparation and data analysis are designed to assist the user in dealing with a large number of simulations. For example, modules are provided to sweep parameter ranges or combine data from many simulations. Modules are provided to load data from ALPS files and text files; loading data from custom file formats can easily be implemented.
+The modules for input preparation and data analysis are designed to assist the user in dealing with a large number of simulations. For example, modules are provided to sweep parameter ranges, to combine data from many simulations or to load data from ALPS files and text files.  Modules to load data from custom file formats can also easily be implemented.
 
 VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs for the names of modules that execute
  Python scripts which, in turn execute ALPS
@@ -540,7 +540,7 @@ levels of detail and systematically record the provenance information
 necessary for automation, reproducibility, and result sharing.
 
 We start by introducing basic concepts underlying
-workflows and provenance along with basic the terminology.
+workflows and provenance along with the basic terminology.
 Scientific workflows are often used to perform data intensive tasks
 and are represented as dataflow networks~\cite{lee@ieee1995} where the
 execution order is determined by the flow of data through the
