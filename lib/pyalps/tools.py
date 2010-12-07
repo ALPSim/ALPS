@@ -69,10 +69,11 @@ def executeCommand(cmdline):
     """ execute the command given as list of arguments """
     cmd = list2cmdline(cmdline)
     log(cmd)
-    proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
-    sout, serr = proc.communicate() # serr should be empty
-    log(sout)
-    return proc.returncode
+    # proc = subprocess.Popen(cmd, shell=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    # sout, serr = proc.communicate() # serr should be empty
+    # log(sout)
+    # return proc.returncode
+    return subprocess.call(cmd, shell=True)
 
 def executeCommandLogged(cmdline,logfile):
     """ execute the command given as list of arguments and store the result into the log file """
