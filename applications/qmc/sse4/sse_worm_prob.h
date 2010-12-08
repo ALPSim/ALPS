@@ -86,9 +86,7 @@ public:
         nvertices = model.nvertices();
         
         unsigned ne = nvertices * 2 * UNIT_SIZE * NOPERATORS;
-        unsigned nt = ne * 2 * UNIT_SIZE * NOPERATORS * NOPERATORS;
-
-        wprobs.resize(nt);
+        wprobs.resize(ne);
         entrances_done.resize(ne);
         
         Matrix_type type;
@@ -205,6 +203,9 @@ private:
                 else
                     w2 *= model.raising_matrix_elements()[stype][state];
             }
+            if (std::fabs(w2) < 1e-14)
+                // zero weight
+                continue;
             
             Exit exit = {w2, vi2, ex_leg, ex_op};
             exits.push_back(exit);
@@ -239,8 +240,12 @@ private:
             for (unsigned j = 0; j < exits.size(); ++j) {
                 double prob = matrix[exits.size() * i + j];
                 if (prob > 1e-13)
+                    // nonzero matrix element
                     ++count;
             }
+            
+            if (count == 0)
+                throw std::runtime_error("Invalid transition matrix.");
             
             unsigned wi = w_index(exits[i].vi, exits[i].leg, 1 - exits[i].op);
             
@@ -251,6 +256,7 @@ private:
             for (unsigned j = 0; j < exits.size(); ++j) {
                 double prob = matrix[exits.size() * i + j];
                 if (prob > 1e-13) {
+                    // nonzero matrix element
                     Wprob wprob;
 
                     wprob.prob = prob;
@@ -272,7 +278,7 @@ private:
             }
 
             if (std::fabs(psum - 1.0) > 1e-12)
-                std::cerr << "Sum of probabilities must be equal to 1.\n";
+                std::cerr << "Sum of probabilities must be equal to 1.";
         }
     }
     
