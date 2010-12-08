@@ -607,12 +607,12 @@ else (ALPS_BUILD_SOURCE)
   if (ALPS_INSTALL_HEADERS)
     set(ALPS_HEADER_DIR "include")
     install(DIRECTORY src/alps src/boost src/ietl src/mocasito COMPONENT headers DESTINATION ${ALPS_HEADER_DIR}
-            FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+            FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
             PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
     install(FILES ${PROJECT_BINARY_DIR}/src/alps/config.h ${PROJECT_BINARY_DIR}/src/alps/version.h DESTINATION ${ALPS_HEADER_DIR}/alps COMPONENT headers)
     if (ALPS_INSTALL_DEPRECATED)
       install(DIRECTORY legacy/alps COMPONENT deprecated DESTINATION ${ALPS_HEADER_DIR}
-              FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp"
+              FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" 
               PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
     endif (ALPS_INSTALL_DEPRECATED)
 
