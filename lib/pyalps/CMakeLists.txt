@@ -7,6 +7,9 @@
 # pyalea
 #
 
+set(ALPS_SHARED_CPPFLAGS ALPS_EXPORTS=1)
+set(ALPS_STATIC_CPPFLAGS "")
+
 if (ALPS_HAVE_PYTHON)
   set(PYALEA_SOURCES ../../src/alps/python/pyalea.cpp ../../src/alps/python/numpy_array.cpp)
   set(PYMCDATA_SOURCES ../../src/alps/python/pymcdata.cpp ../../src/alps/python/numpy_array.cpp)
