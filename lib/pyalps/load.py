@@ -52,7 +52,7 @@ except:
 def log(m):
     """ print a log message either to the console or through the VisTrails logger """
     if in_vistrails:
-      debug.log(m)
+      debug.log(str(m))
     else:
       print m
     
