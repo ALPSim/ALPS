@@ -313,7 +313,9 @@ The ``interaction expansion'' algorithm~\cite{Rubtsov04,Rubtsov05} expands the i
 the first continuous-time quantum Monte Carlo impurity solver algorithm, is particularly suitable for the simulation of impurity clusters.
 The complementary hybridization expansion algorithm~\cite{Werner06,Werner06Kondo} expands the impurity model partition function in the impurity-bath hybridization, treating 
 the local (impurity) Hamiltonian exactly. 
-The method is useful to simulate multi-orbital models, since it can easily treat general interaction terms. A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
+The method is useful to simulate multi-orbital models, since it can easily treat general interaction terms. 
+The current implementation of the ALPS code (both for the interaction expansion and the hybridization expansion) is restricted to single site and density-density interactions.
+A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
 
 
 \subsection{New Time Evolving Block Decimation Code {\tt tebd}}
