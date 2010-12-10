@@ -44,13 +44,15 @@ option(ALPS_BUILD_ON_CRAY "Build ALPS for cray" OFF)
 option(ALPS_BUILD_SOURCE "Build a source distribution" OFF)
 option(LAPACK_64_BIT "Use 64-bit version of LAPACK" OFF)
 option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
-option(ALPS_BUILD_NGS "Build the next generation scheduler" OFF)
 option(ALPS_INCLUDE_TUTORIALS "Include the ALPS tutorials" ON)
 option(ALPS_BUILD_TUTORIALS_PACKAGE "Build only a tutorials package" OFF)
 option(BIND_FORTRAN_LOWERCASE "FORTRAN functions are compiled without a trailing underscore" OFF)
-
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
+
+option(ALPS_BUILD_NGS CACHE BOOL "Build the next generation scheduler" OFF)
+
+MARK_AS_ADVANCED(ALPS_BUILD_NGS)
 
 if (ALPS_FOR_VISTRAILS)
   if (NOT WIN32 AND NOT APPLE)

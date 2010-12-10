@@ -14,7 +14,8 @@ if (ALPS_HAVE_PYTHON)
   set(PYALEA_SOURCES ../../src/alps/python/pyalea.cpp ../../src/alps/python/numpy_array.cpp)
   set(PYMCDATA_SOURCES ../../src/alps/python/pymcdata.cpp ../../src/alps/python/numpy_array.cpp)
   set(PYTOOLS_SOURCES ../../src/alps/python/pytools.cpp)
-  set(PYHDF5_SOURCES ../../src/alps/python/pyhdf5.cpp ../../src/alps/python/numpy_array.cpp ../../src/alps/hdf5/hdf5.cpp)
+  # hdf5.cpp ist included into pyhdf5.cpp, else gcc-4.5 produces garbage!
+  set(PYHDF5_SOURCES ../../src/alps/python/pyhdf5.cpp ../../src/alps/python/numpy_array.cpp)# ../../src/alps/hdf5/hdf5.cpp)
 
   python_add_module(pyalea_c ${PYALEA_SOURCES})
   python_add_module(pymcdata_c ${PYMCDATA_SOURCES})
