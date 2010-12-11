@@ -31,7 +31,11 @@ if (ALPS_HAVE_PYTHON)
       endif(WIN32 AND NOT UNIX)
     endif(BUILD_SHARED_LIBS)
     find_package(HDF5)
-    target_link_libraries(${name} boost ${LINK_LIBRARIES} ${HDF5_LIBRARIES})
+    if (Boost_FOUND)
+      target_link_libraries(${name} ${Boost_LIBRARIES} ${LINK_LIBRARIES} ${HDF5_LIBRARIES})
+    else (Boost_FOUND)
+      target_link_libraries(${name} boost ${LINK_LIBRARIES} ${HDF5_LIBRARIES})
+    endif (Boost_FOUND)
   ENDFOREACH(name)
 
 
