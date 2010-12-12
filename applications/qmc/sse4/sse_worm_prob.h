@@ -214,8 +214,6 @@ private:
         if (type == LOCOPT)
             std::sort(exits.begin(), exits.end());
         
-        static unsigned count = 0;
-        
         std::vector<double> ws(exits.size());
         for (unsigned i = 0; i < exits.size(); ++i)
             ws[i] = exits[i].w;
