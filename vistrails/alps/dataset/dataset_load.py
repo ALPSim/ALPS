@@ -33,6 +33,7 @@ from core.modules.python_source_configure import PythonSourceConfigurationWidget
 from core import debug
 
 import urllib, copy
+import traceback
 import matplotlib.pyplot as plt
 import numpy as np
 from scipy import optimize
