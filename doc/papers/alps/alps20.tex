@@ -30,7 +30,7 @@
 
 \begin{document}
 
-\title{The ALPS project release 2.0: \\ open source software for strongly correlated systems}
+\title{The ALPS project release 2.0: \\ Open source software for strongly correlated systems}
 
 
 \newcounter{affiliation}
@@ -260,7 +260,7 @@ To build optional parts of ALPS it is recommended to install in addition
 
 \subsection{Binary Installation Packages}
 
-To simplify installation on Mac OS X and Windows, we provide CMake-generated binary installation packages for these operating systems. To use all features of ALPS we recommend to download and install a binary installer for VisTrails~\cite{vistrails} in addition to the ALPS installers. On both operating systems the PATH variable should be adjusted to include the directory containing the ALPS binaries. The Windows installer gives the option to do so automatically. The default installation directory on Mac OS X is {\tt /opt/alps/bin} and on Windows {\tt C:$\backslash$Program Files$\backslash$ALPS$\backslash$bin} on 32-bit versions and  {\tt C:$\backslash$Program Files (x86)$\backslash$ALPS$\backslash$bin} on 64-bit versions, respectively.
+To simplify installation on Mac OS X and Windows, we provide CMake-generated binary installation packages for these operating systems. To take advantage of all features of ALPS we recommend the user to download and install a binary installer for VisTrails~\cite{vistrails} in addition to the ALPS installers. On both operating systems the PATH variable should be adjusted to include the directory containing the ALPS binaries. The Windows installer gives one the option to do so automatically. The default installation directory on Mac OS X is {\tt /opt/alps/bin} and on Windows {\tt C:$\backslash$Program Files$\backslash$ALPS$\backslash$bin} on 32-bit versions and  {\tt C:$\backslash$Program Files (x86)$\backslash$ALPS$\backslash$bin} on 64-bit versions, respectively.
 
 Source and binary installation packages for Mac OS X using macports~\cite{macports} and for Linux using Ubuntu and Debian package managers will be made available in the near future.
 
@@ -363,7 +363,7 @@ Hamiltonian parameters are assumed uniform throughout the system.  Because TEBD 
 \hat{S}^z_j\rangle$ and $\langle \hat{S}^x_i \hat{S}^x_j\rangle$ correlations for the spin model, the occupation number, its square, and the $\langle \hat{n}_i \hat{n}_j\rangle$ and 
 $\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models; and, additionally, 
 the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model.  All models calculate the energy, von Neumann entanglement 
-entropy of each site, the von Neumann entanglement entropy on each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ (i.e. the Loschmidt echo).
+entropy of each site, the von Neumann entanglement entropy on each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ ({\it i.e.}, the Loschmidt echo).
 
 %We plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States.  These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
 
@@ -378,7 +378,7 @@ information about the steps used to generate a given result
 preservation and determining data quality as well as interpreting,
 reproducing, sharing, and publishing results.  Release 2.0 improves
 upon previous ALPS versions by using the VisTrails~\cite{vistrails}
-workflow system to record provenance related information, including
+workflow system to record provenance-related information, including
 algorithm workflows, simulation parameters, and version history to automate
 reproducibility.
 
@@ -703,7 +703,7 @@ or a \emph{vistrail}.
 \begin{center}
   \includegraphics[width = 1.0\linewidth,clip=false]{figures/alps_tree.png}
   \caption{Workflow evolution provenance.  
-    In this example we have calculated the system size dependence of the spin gap of spin-1 and spin 1/2 Heisenberg chains, first calculating the gap by exact diagonalization and then performing fits to $\Delta(L)=  c/L$ and  $\Delta(L)=  \Delta_0 + c \exp(-L/\xi)$. As expected from the Haldane conjecture the plots show that the first fit is best for the gapless spin-1/2 chain and the second fit is best for the gapped spin-1 chain.
+    In this example we have calculated the system size dependence of the spin gap of spin-1 and spin-1/2 Heisenberg chains, first calculating the gap by exact diagonalization and then performing fits to $\Delta(L)=  c/L$ and  $\Delta(L)=  \Delta_0 + c \exp(-L/\xi)$. As expected from the Haldane conjecture the plots show that the first fit is best for the gapless spin-1/2 chain and the second fit is best for the gapped spin-1 chain.
     Complete provenance of the exploration process is
     displayed as a history tree with each node representing a workflow
     instance that generates a plot. Detailed meta-data is
@@ -786,7 +786,7 @@ In addition, VisTrails provides a persistence package to help users
 manage their data and provide persistent caching.  This package
 provides storage and versioning of input, intermediate, and output
 data to ensure that workflows are able to access their data.  Data is
-identified by unique ids rather than file paths, and users can name
+identified by unique IDs rather than file paths, and users can name
 and annotate the data in order to facilitate searching.  The data can
 be linked to a local disk but is stored in a managed repository to
 ensure that it is retained.  VisTrails will create new versions if
