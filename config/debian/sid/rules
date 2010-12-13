@@ -15,9 +15,9 @@ DEB_CMAKE_EXTRA_FLAGS = \
 
 #  Linker flags for reduce binary size
 DEB_CMAKE_EXTRA_FLAGS += \
-    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--no-undefined -Wl,--as-needed" \
-    -DCMAKE_MODULE_LINKER_FLAGS="-Wl,--no-undefined -Wl,--as-needed" \
-    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--no-undefined -Wl,--as-needed"
+    -DCMAKE_SHARED_LINKER_FLAGS="-Wl,--as-needed" \
+    -DCMAKE_MODULE_LINKER_FLAGS="-Wl,--as-needed" \
+    -DCMAKE_EXE_LINKER_FLAGS="-Wl,--as-needed"
 
 # Allow parallel builds
 DEB_BUILD_PARALLEL = yes

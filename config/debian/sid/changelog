@@ -1,3 +1,11 @@
+alps (2.0.0~rc4-1) unstable; urgency=low
+
+  * New upstream release (2.0.0rc4).
+  * Add dirloop_sse to build.
+  * Remove "-Wl,--no-undefined" flag, since it causes build failure.
+
+ -- Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>  Mon, 13 Dec 2010 17:21:37 +0900
+
 alps (2.0.0~rc3-1) unstable; urgency=low
 
   * New upstream release (2.0.0rc3).
