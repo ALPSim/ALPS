@@ -173,7 +173,11 @@ class Hdf5Loader:
                             d.y = self.h5f.read(respath+'/energies')
                             d.x = range(len(d.y))
                             d.props.update(params)
-                            d.props.update(self.ReadParameters('quantumnumbers'))
+                            try:
+                                d.props.update(self.ReadParameters('quantumnumbers'))
+                            except:
+                                if verbose: log("no quantumnumbers stored ")
+                                pass
                             fileset.append(d)
                         except AttributeError:
                             pass
@@ -187,7 +191,10 @@ class Hdf5Loader:
                             d.y = self.h5f.read(secpath+'/energies')
                             d.x = range(len(d.y))
                             d.props.update(params)
-                            d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                            try:
+                                d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                                if verbose: log("no quantumnumbers stored ")
+                                pass
                             fileset.append(d)
                         except AttributeError:
                             log( "Could not create DataSet")
@@ -304,7 +311,10 @@ class Hdf5Loader:
                                     else:
                                         d.x = np.arange(0,len(d.y))
                                     d.props.update(params)
-                                    d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                                    try:
+                                        d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                                        if verbose: log("no quantumnumbers stored ")
+                                        pass
                                     sector_sets.append(d)
 
                                 except AttributeError:
