@@ -193,6 +193,7 @@ class Hdf5Loader:
                             d.props.update(params)
                             try:
                                 d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                            except:
                                 if verbose: log("no quantumnumbers stored ")
                                 pass
                             fileset.append(d)
@@ -313,6 +314,7 @@ class Hdf5Loader:
                                     d.props.update(params)
                                     try:
                                         d.props.update(self.ReadParameters(secpath+'/quantumnumbers'))
+                                    except:
                                         if verbose: log("no quantumnumbers stored ")
                                         pass
                                     sector_sets.append(d)
