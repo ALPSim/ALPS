@@ -11,14 +11,9 @@
 
 identifier = 'org.comp-phys.alpsising'
 version = '2.0.0'
-name = 'Full ALPS Package tutorial'
+name = 'ALPS Package tutorial'
 
 
 def package_dependencies():
-    import core.packagemanager
-    manager = core.packagemanager.get_package_manager()
-    if manager.has_package('org.comp-phys.alps'):
-      return ['org.comp-phys.alps']
-    else:
-      return []
+    return ['org.comp-phys.alps']
 
