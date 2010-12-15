@@ -15,6 +15,8 @@ if(NOT output_path)
   find_file(output_path ${output}.op ${binarydir} ${sourcedir})
 endif(NOT output_path)
 
+set(ENV{OMP_NUM_THREADS} 1)
+
 if(input_path)
   execute_process(
     COMMAND ${cmd_path}
@@ -35,7 +37,7 @@ else(input_path)
 endif(input_path)
 
 if(not_successful)
-	message(SEND_ERROR "error runing test '${cmd}': ${err};shell output: ${not_successful}!")
+    message(SEND_ERROR "error runing test '${cmd}': ${err};shell output: ${not_successful}!")
 endif(not_successful)
 
 if(output_path)
