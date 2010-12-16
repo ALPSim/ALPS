@@ -441,7 +441,7 @@ showspreadsheetonly]{width=8cm}
 
 \subsection{The ALPS VisTrails package}
 
-ALPS 2.0 provides a package of modules for VisTrails that allows the user to perform the three major steps of a scientific workflow, namely i) the preparation of input files, ii) the execution of simulations, iii) the analysis and plotting of simulation data. The three groups of modules are intended to integrate seamlessly, but at the same time allow the separate use of each group, which for example allows the user to analyze data with VisTrails that has not been prepared using the ALPS library or file formats.
+ALPS 2.0 provides a package of modules for VisTrails, built on top of the pyalps package, that allows the user to perform the three major steps of a scientific workflow, namely i) the preparation of input files, ii) the execution of simulations, iii) the analysis and plotting of simulation data. The three groups of modules are intended to integrate seamlessly, but at the same time allow the separate use of each group, which for example allows the user to analyze data with VisTrails that has not been prepared using the ALPS library or file formats.
 
 The design goal of the data analysis modules is to take care of common, repetitive tasks, while at the same time being as flexible as scripts. Common data formats, designed to allow interoperability with the powerful Numpy/Scipy libraries, are used by all modules. A set of self-contained modules are provided for common tasks, such as fitting or various types of plots. A framework of {\it Transform} modules allows the user to specify arbitrary transformations by providing small Python codes.
 
