@@ -136,7 +136,7 @@ std::complex<double>* DCATransformer::exp_iksite(const int sign) const
   for (site_t k=0; k<n_cluster_sites(); ++k) {
     for (site_t i=0; i<n_cluster_sites(); ++i) {
       double phase = 0.;
-      for (int d=0; d<dimension(); ++d) 
+      for (std::size_t d=0; d<dimension(); ++d) 
         phase += cluster_momentum(k,d)*cluster_coordinate(i,d);
       phase *= sign;
       m[k+n_cluster_sites()*i]=std::complex<double>(cos(phase), sin(phase));
@@ -149,15 +149,15 @@ int* DCATransformer::momentum_translation() const
 {
   int *m = new int[n_cluster_sites()*n_cluster_sites()*n_cluster_sites()];
   std::valarray<double> phase(dimension());
-  int res;
+  int res=-1;
   for(site_t i=0; i<n_cluster_sites();++i){
     for(site_t j=0;j<n_cluster_sites();++j){
       for(site_t k=0;k<n_cluster_sites();++k){
-        for(int d=0;d<dimension();++d){
+        for(std::size_t d=0;d<dimension();++d){
           phase[d]=cluster_momentum(i,d)-cluster_momentum(j,d)+cluster_momentum(k,d);
         }
         for(site_t p=0;p<n_cluster_sites();++p){
-          for(int d=0;d<dimension();++d){
+          for(std::size_t d=0;d<dimension();++d){
             double tmp=(phase[d]-cluster_momentum(p,d))/(2.*M_PI);
             if(tmp==(int)tmp)
               res=1;
@@ -268,9 +268,9 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   }
   //proceed with computation of new G0 if we can't find input G0
   std::cout<<"calculating initial G0_omega"<<std::endl;
-  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-  int n_tau=boost::lexical_cast<int>(parms["N"]);
-  int n_flavor=parms.value_or_default("FLAVORS", 2);
+  unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
+  unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
   //double h = static_cast<double>(parms["H"]);
@@ -339,7 +339,7 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
                                                                      const matsubara_green_function_t& G_omega,
                                                                      const matsubara_green_function_t& G0_omega, 
                                                                      const double mu, const double h, 
-                                                                     const double beta, const int n_matsubara) const
+                                                                     const double beta, const unsigned int n_matsubara) const
 {
   std::cout << "transforming cluster green function\n";
   assert(h==0); 
@@ -351,7 +351,7 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
     int zbar = z%nz==0 ? z+1 : z-1;
     for(site_t k=0;k<n_cluster_sites();++k) {
       int kpq = k%2==0 ? k+1 : k-1;
-      for (int om=0; om<2*n_matsubara; ++om) {
+      for (std::size_t om=0; om<2*n_matsubara; ++om) {
         std::complex<double> g_kpq_z;
         std::complex<double> g_k_zbar;
         if (om<n_matsubara) {
@@ -385,7 +385,7 @@ matsubara_green_function_t SimpleDCATransformer::transform_fourpoint(const matsu
     spin_t zbar = z%nz==0 ? z+1 : z-1;
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       int kcpq = kc%2==0 ? kc+1 : kc-1;
-      for (int om=0; om<2*n_matsubara; ++om) {
+      for (std::size_t om=0; om<2*n_matsubara; ++om) {
         std::complex<double> iomega_n;
         if(om<n_matsubara) 
           iomega_n = std::complex<double>(0, (2.*om+1.)*M_PI/beta);
@@ -433,8 +433,8 @@ SimpleDCATransformer::local_green_function_from_selfenergies(const std::map<doub
   typedef std::map<double, std::vector<std::complex<double> > > selfenergy_t;
   std::map<double, std::complex<double> > local_G;
   for (selfenergy_t::const_iterator it=selfenergies.begin(); it!=selfenergies.end(); ++it) {
-    for (int kc=0; kc<n_cluster_sites(); ++kc) { 
-      for (int kl=0; kl<n_lattice_momenta(); ++kl) { 
+    for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) { 
+      for (unsigned int kl=0; kl<n_lattice_momenta(); ++kl) { 
         vector_type k(dimension());
         for (unsigned int d=0; d<dimension(); ++d) 
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
@@ -465,7 +465,7 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
     int del_z = paramagnet ? 2 : 1;
     std::vector<alps::RealObsevaluator> energy_vec(nfreq);
     std::vector<alps::RealObsevaluator> energy_kc(nfreq);
-    for (int z=0; z<nzone; z+=del_z) {
+    for (unsigned int z=0; z<nzone; z+=del_z) {
       for (site_class_set_type::const_iterator it_kc=site_classes_k_space().first; 
            it_kc!=site_classes_k_space().second; ++it_kc) {
         const int multiplier = it_kc->size();
@@ -537,8 +537,8 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
     std::ofstream selfout("selftest.dat");
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       selfout << freq << " ";
-      for (int kc=0; kc<n_cluster_sites(); ++kc) {
-        for (int z=0; z<nzone; ++z) {
+      for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) {
+        for (unsigned int z=0; z<nzone; ++z) {
           selfout << selfenergies[z][kc][2*freq].mean() << " " <<  selfenergies[z][kc][2*freq+1].mean() << " ";
         }
       }
@@ -550,10 +550,10 @@ alps::RealObsevaluator SimpleDCATransformer::kinetic_energy(const std::vector<st
     std::vector<std::complex<double> > energy_vec(nfreq, std::complex<double>(0., 0.));
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       const std::complex<double> iom(0., (2.*freq+1.)*M_PI/beta);
-      for (int z=0; z<nzone; ++z) {
-        for (int kc=0; kc<n_cluster_sites(); ++kc) {
+      for (unsigned int z=0; z<nzone; ++z) {
+        for (unsigned int kc=0; kc<n_cluster_sites(); ++kc) {
           const std::complex<double> Sigma(selfenergies[z][kc][2*freq].mean(), selfenergies[z][kc][2*freq+1].mean());
-          for (int kl=0; kl<n_lattice_momenta(); ++kl) { 
+          for (unsigned int kl=0; kl<n_lattice_momenta(); ++kl) { 
             vector_type k(dimension());
             for (unsigned int d=0; d<dimension(); ++d) 
               k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
@@ -643,9 +643,9 @@ matsubara_green_function_t AntiFerroDCATransformer::initial_G0(const alps::Param
     return ClusterTransformer::initial_G0(parms);
   else {
     std::cout<<"calculating initial G0_omega"<<std::endl;
-    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-    int n_tau=boost::lexical_cast<int>(parms["N"]);
-    int n_flavor=parms.value_or_default("FLAVORS", 2);
+    unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+    unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
+    unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
     double beta = static_cast<double>(parms["BETA"]);
     double mu = static_cast<double>(parms["MU"]);
     double h = static_cast<double>(parms["H"]);
@@ -879,9 +879,9 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   }
   //proceed with computation of new G0 if we can't find input G0
   std::cout<<"calculating initial G0_omega"<<std::endl;
-  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-  int n_tau=boost::lexical_cast<int>(parms["N"]);
-  int n_flavor=parms.value_or_default("FLAVORS", 2);
+  unsigned int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  unsigned int n_tau=boost::lexical_cast<int>(parms["N"]);
+  unsigned int n_flavor=parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
 

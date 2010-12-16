@@ -310,7 +310,7 @@ void FourierTransformer::append_tail(matsubara_green_function_t& G_omega,
 
 void ClusterAntiFerroGFourierTransformer::append_tail(matsubara_green_function_t& G_omega, 
                                                       const matsubara_green_function_t& G0_omega,
-                                                      const int nfreq_measured) const
+                                                      const unsigned int nfreq_measured) const
 {
   matsubara_green_function_t selfenergy_tail(G0_omega.nfreq()-nfreq_measured, G0_omega.nsite(), G0_omega.nflavor());
   selfenergy_tail.clear();

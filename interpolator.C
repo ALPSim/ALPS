@@ -127,7 +127,7 @@ AntiferroInterpolator::AntiferroInterpolator(const alps::Parameters& parms) :
 
 void ParaInterpolator::local_green_function() 
 {
-  for (int z=0; z<n_zone; ++z) {
+  for (std::size_t z=0; z<n_zone; ++z) {
     std::stringstream name;
     name << "greenloc_" << z << ".dat"; 
     std::ofstream green_str(name.str().c_str());

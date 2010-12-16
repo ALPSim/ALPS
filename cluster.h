@@ -198,7 +198,7 @@ public:
                                                          const matsubara_green_function_t& G_omega, 
                                                          const matsubara_green_function_t& G0_omega, 
                                                          const double mu, const double h, const double beta,
-                                                         const int n_matsubara) const =0; 
+                                                         const unsigned int n_matsubara) const =0; 
   virtual alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies,
                                                 const double beta, const double mu, 
                                                 const bool error_propagation, const bool paramagnet)=0;
@@ -344,7 +344,7 @@ public:
                                                  const matsubara_green_function_t &G_omega, 
                                                  const matsubara_green_function_t &G0_omega, 
                                                  const double mu, const double h, const double beta,
-                                                 const int n_matsubara) const; 
+                                                 const unsigned int n_matsubara) const; 
   alps::RealObsevaluator kinetic_energy(const std::vector<std::vector<std::vector<alps::RealObsevaluator> > >& selfenergies, 
                                         const double beta, const double mu, 
                                         const bool error_propagation, const bool paramagnet);
@@ -421,7 +421,7 @@ public:
                                                  const matsubara_green_function_t& G_omega, 
                                                  const matsubara_green_function_t& /*G0_omega*/, 
                                                  const double /*mu*/, const double /*h*/, const double /*beta*/,
-                                                 const int /*n_matsubara*/) const
+                                                 const unsigned int /*n_matsubara*/) const
   {
     boost::throw_exception(std::logic_error("transform fourpoint function for antiferromagnetic phases not yet implemented"));
     return G_omega;
@@ -562,12 +562,12 @@ inline T ClusterHelper::interpolate(vector_type k, const std::vector<T>& values,
       }
       break;
   }
-  for (int i=0; i<neighbor.size(); ++i) {
+  for (std::size_t i=0; i<neighbor.size(); ++i) {
     vector_type nv = matrix_vector_mult(reciprocal_basis_, neighbor[i]);
     nv = map_back_into_brillouin_zone(nv);
     if (antiferromagnet) {
       if (!inside_reduced_brillouin_zone(nv)) {
-        for (int d=0; d<dimension(); ++d) 
+        for (std::size_t d=0; d<dimension(); ++d) 
           nv[d] -= M_PI;
         nv = map_back_into_brillouin_zone(nv);
       }
@@ -578,12 +578,12 @@ inline T ClusterHelper::interpolate(vector_type k, const std::vector<T>& values,
     neighbor_index[i] = identify_vertex(nv, cluster_momenta_);
   }
   std::vector<T> av(neighbor_index.size());
-  for (int i=0; i<neighbor_index.size(); ++i) 
+  for (std::size_t i=0; i<neighbor_index.size(); ++i) 
     av[i] = values[neighbor_index[i]];
-  for (int d=0; d<dimension(); ++d) {
+  for (std::size_t d=0; d<dimension(); ++d) {
     double c = k[d] - floor(k[d]) ;
     std::vector<T> t(av.size()/2);
-    for (int i=0; i<av.size(); i+=2) {
+    for (std::size_t i=0; i<av.size(); i+=2) {
       t[i/2] = (1-c)*av[i] + c*av[i+1];
     }
     av = t;
@@ -710,10 +710,10 @@ inline matsubara_green_function_t SimpleDCATransformer::fourpoint_green_function
   matsubara_green_function_t G_inv(G);
   for (spin_t f=0; f<G.nflavor(); ++f) {
     Matrix<std::complex<double> >::Type M(nf*G.nsite(), nf*G.nsite());
-    for (int k1=0; k1<G.nsite(); k1++) {
-      for (int k2=0; k2<G.nsite(); k2++) {
-        for (int t1=0; t1<nf; t1++) {
-          for (int t2=0; t2<nf; t2++) {
+    for (std::size_t k1=0; k1<G.nsite(); k1++) {
+      for (std::size_t k2=0; k2<G.nsite(); k2++) {
+        for (std::size_t t1=0; t1<nf; t1++) {
+          for (std::size_t t2=0; t2<nf; t2++) {
             M(k1*nf+t1, k2*nf+t2) = G(nf*t1+t2, k1, k2, f);
           }
         }
@@ -732,10 +732,10 @@ inline matsubara_green_function_t SimpleDCATransformer::fourpoint_green_function
      zgesv_(&n, &nrhs, (double* )(&M(0,0)), &lda, ipiv, (double* )(&M_inv(0,0)), &ldb, &info);
      std::cout << "(INFO: " << info << ")\n";*/
     Matrix<std::complex<double> >::Type M_inv = Matrix<std::complex<double> >::inverse(M);
-    for (int k1=0; k1<G.nsite(); k1++) {
-      for (int k2=0; k2<G.nsite(); k2++) {
-        for (int t1=0; t1<nf; t1++) { 
-          for (int t2=0; t2<nf; t2++) {
+    for (std::size_t k1=0; k1<G.nsite(); k1++) {
+      for (std::size_t k2=0; k2<G.nsite(); k2++) {
+        for (std::size_t t1=0; t1<nf; t1++) { 
+          for (std::size_t t2=0; t2<nf; t2++) {
             G_inv(nf*t1+t2, k1, k2, f) = M_inv(k1*nf+t1, k2*nf+t2);
           }
         }
@@ -773,8 +773,8 @@ green_function<T> SimpleDCATransformer::fourpoint_green_function_subtract(const 
   green_function<T> G(G1);
   for (time_t t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (int k1=0; k1<G.nsite(); k1++) {
-        for (int k2=0; k2<G.nsite(); k2++) {
+      for (std::size_t k1=0; k1<G.nsite(); k1++) {
+        for (std::size_t k2=0; k2<G.nsite(); k2++) {
           G(t, k1, k2, f) -= G2(t, k1, k2, f);
         }
       }
@@ -886,7 +886,7 @@ green_function<T> AntiFerroDCATransformer::green_function_inverse(const green_fu
   green_function<T> G_inv(G);
   for (unsigned int t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (int k=0; k<G.nsite(); k+=2) {
+      for (std::size_t k=0; k<G.nsite(); k+=2) {
         T detG = G(t, k, k, f)*G(t, k+1, k+1, f) - G(t, k+1, k, f)*G(t, k, k+1, f);
         G_inv(t, k, k, f) = G(t, k+1, k+1, f)/detG;
         G_inv(t, k+1, k+1, f) = G(t, k, k, f)/detG;
@@ -910,7 +910,7 @@ green_function<T> AntiFerroDCATransformer::green_function_multiply(const green_f
   typename Matrix<T>::Type M(2,2);
   for (unsigned int t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (int k=0; k<G.nsite(); k+=2) {
+      for (unsigned int k=0; k<G.nsite(); k+=2) {
         M1(0,0) = G1(t, k  , k  , f);
         M1(1,0) = G1(t, k+1, k  , f);
         M1(0,1) = G1(t, k  , k+1, f);
@@ -939,7 +939,7 @@ green_function<T> AntiFerroDCATransformer::green_function_add(const green_functi
   green_function<T> G(G1);
   for (unsigned int t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (int k=0; k<G.nsite(); k+=2) {
+      for (unsigned int k=0; k<G.nsite(); k+=2) {
         G(t, k, k, f) += G2(t, k, k, f);
         G(t, k+1, k+1, f) += G2(t, k+1, k+1, f);
         G(t, k+1, k, f) += G2(t, k+1, k, f);
@@ -959,7 +959,7 @@ green_function<T> AntiFerroDCATransformer::green_function_subtract(const green_f
   green_function<T> G(G1);
   for (unsigned int t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (int k=0; k<G.nsite(); k+=2) {
+      for (std::size_t k=0; k<G.nsite(); k+=2) {
         G(t, k, k, f) -= G2(t, k, k, f);
         G(t, k+1, k+1, f) -= G2(t, k+1, k+1, f);
         G(t, k+1, k, f) -= G2(t, k+1, k, f);
@@ -979,7 +979,7 @@ green_function<T> AntiFerroDCATransformer::green_function_divide(const green_fun
   green_function<T> G(G1);
   for (unsigned int t=0; t<G.ntime(); ++t) {
     for (spin_t f=0; f<G.nflavor(); ++f) {
-      for (int k=0; k<G.nsite(); k+=2) {
+      for (unsigned int k=0; k<G.nsite(); k+=2) {
         G(t, k, k, f) /= d;
         G(t, k+1, k+1, f) /= d;
         G(t, k+1, k, f) /= d;

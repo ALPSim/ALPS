@@ -44,6 +44,7 @@
 #include "alps/parser/parser.h"
 #include "alps/utility/vectorio.hpp"
 #include "alps/utility/temporary_filename.hpp"
+#include "alps/osiris/comm.h"
 
 #include "externalsolver.h"
 
@@ -52,7 +53,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
       const itime_green_function_t& G0
     , alps::Parameters p) 
 {
-   BOOST_ASSERT(is_master());
+   BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile; 
   if(p.defined("TMPNAME")){
@@ -91,7 +92,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
               const matsubara_green_function_t& G0_omega
             , alps::Parameters p)
 {
-  BOOST_ASSERT(is_master());
+  BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile;
   if(p.defined("TMPNAME")){
@@ -123,17 +124,17 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     G_tau.read_hdf5(ar, "/G_tau");
   }
   //this is a safety check for impurity solvers.
-  for(int i=0;i<n_orbital; ++i){
-    for(int j=0;j<n_site;++j){
-      for(int k=0;k<n_site;++k){
-        for(int l=0;l<n_tau+1;++l){ 
+  for(std::size_t i=0;i<n_orbital; ++i){
+    for(std::size_t j=0;j<n_site;++j){
+      for(std::size_t k=0;k<n_site;++k){
+        for(std::size_t l=0;l<n_tau+1;++l){ 
           if(std::isnan(G_tau(l,j,k,i)) || std::isinf(G_tau(l,j,k,i))) {
             std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<i<<std::endl;
             std::cerr<<G_tau(l,j,k,i)<<" "<<std::endl;
             throw std::runtime_error("returned imag time Green's function contains nan or inf.");
           }
         }
-        for(int l=0;l<n_matsubara;++l){ 
+        for(std::size_t l=0;l<n_matsubara;++l){ 
           if(std::isnan(G_omega(l,j,k,i).real()) || std::isnan(G_omega(l,j,k,i).imag())|| std::isinf(G_omega(l,j,k,i).real()) || std::isinf(G_omega(l,j,k,i).imag())) {
             std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<i<<std::endl;
             std::cerr<<G_omega(l,j,k,i).real()<<" "<<G_omega(l,j,k,i).imag()<<std::endl;
@@ -152,7 +153,7 @@ NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
             , alps::Parameters p)
 {
   std::cout<<"solve nambu for external solver!"<<std::endl;
-  BOOST_ASSERT(is_master());
+  BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile;
   if(p.defined("TMPNAME")){
@@ -184,18 +185,18 @@ NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
     G_tau.read_hdf5(ar, "/G_tau");
   }
   //this is a safety check for impurity solvers.
-  for(int f1=0;f1<n_orbital; ++f1){
-    for(int f2=0;f2<n_orbital; ++f2){
-      for(int j=0;j<n_site;++j){
-        for(int k=0;k<n_site;++k){
-          for(int l=0;l<n_tau+1;++l){ 
+  for(std::size_t f1=0;f1<n_orbital; ++f1){
+    for(std::size_t f2=0;f2<n_orbital; ++f2){
+      for(std::size_t j=0;j<n_site;++j){
+        for(std::size_t k=0;k<n_site;++k){
+          for(std::size_t l=0;l<n_tau+1;++l){ 
             if(std::isnan(G_tau(l,j,k,f1,f2)) || std::isinf(G_tau(l,j,k,f1,f2))) {
               std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<f1<<" "<<f2<<std::endl;
               std::cerr<<G_tau(l,j,k,f1,f2)<<" "<<std::endl;
               throw std::runtime_error("returned imag time Green's function contains nan or inf.");
             }
           }
-          for(int l=0;l<n_matsubara;++l){ 
+          for(std::size_t l=0;l<n_matsubara;++l){ 
             if(std::isnan(G_omega(l,j,k,f1,f2).real()) || std::isnan(G_omega(l,j,k,f1,f2).imag())|| std::isinf(G_omega(l,j,k,f1,f2).real()) || std::isinf(G_omega(l,j,k,f1,f2).imag())) {
               std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<f1<<" "<<f2<<std::endl;
               std::cerr<<G_omega(l,j,k,f1,f2).real()<<" "<<G_omega(l,j,k,f1,f2).imag()<<std::endl;

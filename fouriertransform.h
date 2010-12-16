@@ -324,7 +324,7 @@ public:
   }
   
   virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
-                           const int nfreq_measured) const;
+                           const unsigned int nfreq_measured) const;
   
 };
 

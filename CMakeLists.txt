@@ -3,7 +3,7 @@ find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
 include(${ALPS_USE_FILE})
 
 project (DMFT)
-include_directories("/home/esg/alps_svn/")
+include_directories("/Users/emanuel/alps_svn/")
 add_executable(dmft 
 2dsimpson.C clusterhelper.C fouriertransform.C selfconsistency.C
 alps_solver.C clustertransformer.C hilberttransformer.C interpolator.C

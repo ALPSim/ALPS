@@ -93,11 +93,11 @@ void ClusterHelper::setup_tables()
   if (bipartite()) {
     if(alps::is_master())
       std::cout << "cluster is bipartite\n";
-    for (int i=0; i<cluster_coordinates_.size1(); ++i) {
+    for (std::size_t i=0; i<cluster_coordinates_.size1(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
-        int j = i;
+        std::size_t j = i;
         while (identify_sublattice(cluster_coordinates_, ++j)!=i%2) {};
-        for (int d=0; d<cluster_coordinates_.size2(); ++d) {
+        for (std::size_t d=0; d<cluster_coordinates_.size2(); ++d) {
           double t=cluster_coordinates_(i,d);
           cluster_coordinates_(i,d) = cluster_coordinates_(j,d);
           cluster_coordinates_(j,d) = t;
@@ -107,9 +107,9 @@ void ClusterHelper::setup_tables()
   }
   if(alps::is_master()){
     std::ofstream clustercoordstream("ClusterCoordinates");
-    for (int m=0; m<cluster_coordinates_.size1(); ++m) {
+    for (std::size_t m=0; m<cluster_coordinates_.size1(); ++m) {
       clustercoordstream << m << " ";
-      for (int d=0; d<cluster_coordinates_.size2(); ++d) 
+      for (std::size_t d=0; d<cluster_coordinates_.size2(); ++d) 
         clustercoordstream << cluster_coordinates_(m,d) << " ";
       clustercoordstream << std::endl;
     }
@@ -155,7 +155,7 @@ void ClusterHelper::setup_tables()
         c = map_back_into_brillouin_zone(c);
         if (inside_reduced_brillouin_zone(c)) {
           append_column_no_duplicates(cluster_momenta_, c);
-          for (int d=0; d<dimension(); ++d) 
+          for (std::size_t d=0; d<dimension(); ++d) 
             c[d] += M_PI;
           c = map_back_into_brillouin_zone(c);
           append_column_no_duplicates(cluster_momenta_, c);
@@ -197,9 +197,9 @@ void ClusterHelper::setup_tables()
   }
   if(alps::is_master()){
     std::ofstream clustermomstream("ClusterMomenta");
-    for (int m=0; m<cluster_momenta_.size1(); ++m) {
+    for (std::size_t m=0; m<cluster_momenta_.size1(); ++m) {
       clustermomstream << m << " ";
-      for (int d=0; d<cluster_momenta_.size2(); ++d) 
+      for (std::size_t d=0; d<cluster_momenta_.size2(); ++d) 
         clustermomstream << cluster_momenta_(m,d) << " ";
       clustermomstream << std::endl;
     }
@@ -211,7 +211,7 @@ void ClusterHelper::setup_tables()
       int m;
       latticemomstream >> m;
       vector_type momw(dimension()+1);
-      for (int d=0; d<dimension()+1; ++d) 
+      for (std::size_t d=0; d<dimension()+1; ++d) 
         latticemomstream >> momw[d];
       append_column_no_duplicates(lattice_momenta_, momw);
     }
@@ -260,9 +260,9 @@ void ClusterHelper::setup_tables()
           break;
       }
       double L = pow(n_cluster_cells(), 1./double(dimension()));
-      for (int g=0; g<moms.size(); ++g) {
+      for (std::size_t g=0; g<moms.size(); ++g) {
         double weight = 1.;
-        for (int d=0; d<dimension(); ++d) {
+        for (std::size_t d=0; d<dimension(); ++d) {
           double m = (moms[g][d]+0.5)*L;
           if (almost_equal(m, 0) || almost_equal(m, L))
             weight *= 1./3.;
@@ -274,7 +274,7 @@ void ClusterHelper::setup_tables()
         }
         vector_type momw(dimension()+1);
         vector_type momt = matrix_vector_mult(reciprocal_basis_, moms[g]);
-        for (int d=0; d<dimension(); ++d) 
+        for (std::size_t d=0; d<dimension(); ++d) 
           momw[d] = momt[d];
         momw[dimension()] = weight;
         append_column_no_duplicates(lattice_momenta_, momw);
@@ -282,9 +282,9 @@ void ClusterHelper::setup_tables()
     }
     if (alps::is_master()) {
       std::ofstream latticemomstream(lattice_momenta_file_name_.c_str());
-      for (int m=0; m<lattice_momenta_.size1(); ++m) {
+      for (std::size_t m=0; m<lattice_momenta_.size1(); ++m) {
         latticemomstream << m << " ";
-        for (int d=0; d<lattice_momenta_.size2(); ++d) 
+        for (std::size_t d=0; d<lattice_momenta_.size2(); ++d) 
           latticemomstream << lattice_momenta_(m,d) << " ";
         latticemomstream << std::endl;
       }
@@ -592,7 +592,7 @@ ClusterHelper::setup_classes(const Matrix<site_t>::Type& symmetry_table) const
 double ClusterHelper::site_distance(const unsigned int i, const unsigned int j) const
 {
   double dist = 0;
-  for (int d=0; d<dimension(); ++d) {
+  for (std::size_t d=0; d<dimension(); ++d) {
     double del = cluster_coordinate(i, d);
     del -= cluster_coordinate(j, d);
     dist += del*del;
@@ -616,13 +616,13 @@ bool ClusterHelper::inside_cluster(vector_type v, const Matrix<double>::Type& B)
 
 bool ClusterHelper::inside_reduced_brillouin_zone(vector_type v) const 
 {
-  for (int i=0; i<rbzone_boundaries_.size1(); ++i) {
+  for (std::size_t i=0; i<rbzone_boundaries_.size1(); ++i) {
     double norm = 0.;
-    for (int d=0; d<rbzone_boundaries_.size2(); ++d) 
+    for (std::size_t d=0; d<rbzone_boundaries_.size2(); ++d) 
       norm += rbzone_boundaries_(i,d)*rbzone_boundaries_(i,d);
     //norm = sqrt(norm);
     double projection = 0.;
-    for (int d=0; d<rbzone_boundaries_.size2(); ++d) 
+    for (std::size_t d=0; d<rbzone_boundaries_.size2(); ++d) 
       projection +=  v[d] * rbzone_boundaries_(i,d);
     projection /= norm;
     projection = round(projection);
@@ -739,8 +739,8 @@ unsigned int ClusterHelper::cluster_momentum_approximation(vector_type v) const
       T(11,0) =  2*M_PI; T(11,1) = -2*M_PI; T(11,2) =  2*M_PI;
       T(12,0) =  2*M_PI; T(12,1) =  2*M_PI; T(12,2) = -2*M_PI;
   }
-  for (int i=0; i<cluster_momenta_.size1(); ++i) {
-    for (int t=0; t<T.size1(); ++t) {
+  for (std::size_t i=0; i<cluster_momenta_.size1(); ++i) {
+    for (std::size_t t=0; t<T.size1(); ++t) {
       for (int s=-1; s<=1; ++s) {
         vector_type diff(dimension());
         for (unsigned int d=0; d<dimension(); ++d) 
@@ -782,7 +782,7 @@ unsigned int ClusterHelper::identify_vertex(const vector_type& v, const Matrix<d
 unsigned int ClusterHelper::identify_sublattice(const Matrix<double>::Type& coordinate_matrix, const unsigned int i) const
 {
   double sum=0;
-  for (int d=0; d<coordinate_matrix.size2(); ++d) 
+  for (std::size_t d=0; d<coordinate_matrix.size2(); ++d) 
     sum += coordinate_matrix(i,d);
   sum = round(sum);
   sum *= sum<0 ? -1 : 1;
