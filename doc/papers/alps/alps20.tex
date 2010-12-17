@@ -858,7 +858,7 @@ The Python language and its use for the evaluation tools of ALPS are explained i
 Python contains a large number of built-in high-level data types, such as strings, integers, floating point numbers, lists, and dictionaries.  The dictionary type in Python is called a {\tt dict}, and is a mutable group of key and value pairs.  This type is used in ALPS 2.0 to pass metadata about a simulation to the simulation execution commands.  An example of this is is shown in Fig.~\ref{fig:python}, where the parameters for a series of Monte Carlo simulations are stored in the dict {\tt parms} and passed to the {\tt writeInputFiles} function of the Pyalps package to write input files for the loop application. % In addition to having many built-in types, Python is also duck typed. This means that a statement such as {\tt c=a+b} will execute properly as long as {\tt a}, {\tt b}, and {\tt c} are of compatible types.  Duck typing simplifies the syntax, leading to clearer code.
 
 The {\tt def} statement defines a function or method.  An example of a simple Python function from the Pyalps package is given in Fig.~\ref{fig:Pythonfunction}.  This function determines if its input {\tt infiles} is of type list and converts it to type list if it is not.  This example also demonstrates the unusual feature of Python that tab indentation is used for block delimiters.
-\begin{figure}[h]
+\begin{figure}
 \begin{tiny}
 \begin{center}
 \begin{verbatim}
@@ -874,8 +874,8 @@ def make_list(infiles):
 \label{fig:Pythonfunction}
 \end{figure}
 
-In addition to the procedural programming paradigm, Python supports object-oriented programming. Since the {\tt DataSet} class is, as explained above, a crucial part of the pyalps package, a slightly reduced version is shown as example class in Fig.~\ref{fig:Pythonclass}. The declaration of a class is started by the {\tt def} statement. A constructor can be provided as {\tt \_\_init\_\_}; in general, method names that start and end with {\tt \_\_} define special methods, such as operators. As an example, the {\tt \_\_repr\_\_} method of the {\tt DataSet} is used for converting to a string for the {\tt print} statement.
-\begin{figure}[h]
+In addition to the procedural programming paradigm, Python supports object-oriented programming. Since the {\tt DataSet} class is a crucial part of the pyalps package, a slightly reduced version is shown as example class in Fig.~\ref{fig:Pythonclass}. The declaration of a class is started by the {\tt def} statement. A constructor can be provided as {\tt \_\_init\_\_}; in general, method names that start and end with {\tt \_\_} define special methods, such as operators. As an example, the {\tt \_\_repr\_\_} method of the {\tt DataSet} is used for converting to a string for the {\tt print} statement.
+\begin{figure}
 \begin{tiny}
 \begin{center}
 \begin{verbatim}
@@ -895,6 +895,34 @@ class DataSet(ResultProperties):
 \label{fig:Pythonclass}
 \end{figure}
 All non-static methods of a Python class must take the instance of the class as a first argument; this is commonly called {\tt self}.
+
+\begin{figure}
+\begin{tiny}
+\begin{center}
+\begin{verbatim}
+import pyalps
+from pyalps.plot import plot
+import numpy as np
+import matplotlib.pyplot as plt
+
+ds = pyalps.DataSet()
+ds.x = np.linspace(0,1,10)
+ds.y = ds.x**2
+ds.props['xlabel'] = '$\gamma$'
+ds.props['ylabel'] = '$\gamma^2$'
+ds.props['label'] = 'Example legend'
+
+plot([ds])
+plt.legend()
+plt.show()
+\end{verbatim}
+\end{center}
+\end{tiny}
+\caption{Simple example of a Python class from the Pyalps package.}
+\label{fig:plotting}
+\end{figure}
+
+In Fig.~\ref{fig:plotting}, an example script is shown which creates a {\tt DataSet} instance, creates some data ($y = x^2, x \in [0,1]$) and makes a plot using plotting functionality from the pyalps package. We store the legend string and the axis labels for the final plot into the {\tt props} dict of the {\tt DataSet} instance. Note that the plotting function from pyalps is passed a list with one {\tt DataSet} -- this function, like most other pyalps functions, operates directly on lists of {\tt DataSet}s in order to assist the user in dealing with larger sets of data.
 
 %Large blocks of Python code can be stored in modules with a {\tt .py} extension.  The contents of a Python module {\tt module\_name.py} can be used in a different Python script by placing {\tt import module\_name} in the script.  Python has a very extensive standard library which provides modules for many common tasks such as string operations and special functions.  Python also allows the user to combine a collection of modules into a package by including a script {\tt \_\_init\_\_.py} which initializes a package.  In the simplest case, {\tt \_\_init\_\_.py} is an empty file which only signifies that the contents of the directory are a package, but it may also contain methods to initialize routines in the package.  Using packages, an individual module {\tt module} can be imported from the package {\tt package} by placing {\tt import package.module} in the calling script.  Packages structure Python's namespace to avoid conflicts in global variable definitions between modules, and also simplify the structuring of the code itself.  There exist many third party packages which extend Python to more specialized tasks.  Examples of such packages used in ALPS 2.0 are the numpy~\cite{numpy}, scipy~\cite{scipy}, and matplotlib~\cite{matplotlib} packages which provide efficient classes and operations for large multidimensional arrays and MATLAB-style plotting capabilities.  
 
