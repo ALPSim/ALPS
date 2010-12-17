@@ -64,6 +64,9 @@ endif (NOT Boost_ROOT_DIR)
 
 if(Boost_ROOT_DIR)
   set(Boost_INCLUDE_DIR ${Boost_ROOT_DIR} CACHE PATH "Boost Include Directory")
+  if (NOT Boost_INCLUDE_DIR)
+    set(Boost_INCLUDE_DIR ${Boost_ROOT_DIR} CACHE PATH "Boost Include Directory" FORCE)
+  endif (NOT Boost_INCLUDE_DIR)
 endif(Boost_ROOT_DIR)
 
 # check Boost version (from Modules/FindBoost.cmake)
