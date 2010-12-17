@@ -299,7 +299,7 @@ The ALPS HDF5 files store simulation parameters, the detailed results of Monte C
 
 The implementation of HDF5 capabilities within ALPS is split into two layers. The lower layer implements a generic and general-purpose C++ interface to the C HDF5 library. This layer is not tied to other parts of the ALPS library and can therefore be used by user code that is otherwise independent from ALPS and its file formats. The functions of this library are also exposed to Python, and can thus be used not only from C++ codes but also from Python scripts. On top of that, the specific file formats used by the ALPS library and applications are implemented in the respective components of the ALPS library.
 
-\section{Evaluation Tools in Python}
+\section{Evaluation Tools in Python} \label{sct:python}
 
 The previous versions of ALPS had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML files using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language~\cite{python}. Python is an easy-to-learn, interpreted, object-oriented language allowing interactive analysis of data and arbitrary complex evaluations. A brief introduction to the Python language as well as the Pyalps Python package new to ALPS 2.0 can be found in Appendix B.
 
@@ -850,6 +850,78 @@ integrated into CrowdLabs and enables users to modify parameters and
 re-execute workflows from within their web browsers. This provides an
 entry point for non-experts to explore and interact with complicated
 simulation workflows. We will develop ALPS tutorials also as VisMashups, enabling the interactive exploration of tutorial problems with the reader's web browser, without the need to install ALPS.
+
+\section{Python examples}
+
+The Python language and its use for the evaluation tools of ALPS are explained in Section~\ref{sct:python}. In this appendix, we give some examples for the usage of Python and the pyalps package.
+
+Python contains a large number of built-in high-level data types, such as strings, integers, floating point numbers, lists, and dictionaries.  The dictionary type in Python is called a {\tt dict}, and is a mutable group of key and value pairs.  This type is used in ALPS 2.0 to pass metadata about a simulation to the simulation execution commands.  An example of this is is shown in Fig.~\ref{fig:python}, where the parameters for a series of Monte Carlo simulations are stored in the dict {\tt parms} and passed to the {\tt writeInputFiles} function of the Pyalps package to write input files for the loop application. % In addition to having many built-in types, Python is also duck typed. This means that a statement such as {\tt c=a+b} will execute properly as long as {\tt a}, {\tt b}, and {\tt c} are of compatible types.  Duck typing simplifies the syntax, leading to clearer code.
+
+The {\tt def} statement defines a function or method.  An example of a simple Python function from the Pyalps package is given in Fig.~\ref{fig:Pythonfunction}.  This function determines if its input {\tt infiles} is of type list and converts it to type list if it is not.  This example also demonstrates the unusual feature of Python that tab indentation is used for block delimiters.
+\begin{figure}[h]
+\begin{tiny}
+\begin{center}
+\begin{verbatim}
+def make_list(infiles):
+    if type(infiles) == list:
+      return infiles
+    else:
+      return [infiles]
+\end{verbatim}
+\end{center}
+\end{tiny}
+\caption{Simple example of a Python function from the Pyalps package.}
+\label{fig:Pythonfunction}
+\end{figure}
+
+In addition to the procedural programming paradigm, Python supports object-oriented programming. Since the {\tt DataSet} class is, as explained above, a crucial part of the pyalps package, a slightly reduced version is shown as example class in Fig.~\ref{fig:Pythonclass}. The declaration of a class is started by the {\tt def} statement. A constructor can be provided as {\tt \_\_init\_\_}; in general, method names that start and end with {\tt \_\_} define special methods, such as operators. As an example, the {\tt \_\_repr\_\_} method of the {\tt DataSet} is used for converting to a string for the {\tt print} statement.
+\begin{figure}[h]
+\begin{tiny}
+\begin{center}
+\begin{verbatim}
+class DataSet(ResultProperties):
+    def __init__(self):
+        ResultProperties.__init__(self)
+        
+        self.x = np.array([])
+        self.y = np.array([])
+        
+    def __repr__(self):
+        return "x=%s\ny=%s\nprops=%s" % (self.x, self.y, self.props)
+\end{verbatim}
+\end{center}
+\end{tiny}
+\caption{Simple example of a Python class from the Pyalps package.}
+\label{fig:Pythonclass}
+\end{figure}
+All non-static methods of a Python class must take the instance of the class as a first argument; this is commonly called {\tt self}.
+
+%Large blocks of Python code can be stored in modules with a {\tt .py} extension.  The contents of a Python module {\tt module\_name.py} can be used in a different Python script by placing {\tt import module\_name} in the script.  Python has a very extensive standard library which provides modules for many common tasks such as string operations and special functions.  Python also allows the user to combine a collection of modules into a package by including a script {\tt \_\_init\_\_.py} which initializes a package.  In the simplest case, {\tt \_\_init\_\_.py} is an empty file which only signifies that the contents of the directory are a package, but it may also contain methods to initialize routines in the package.  Using packages, an individual module {\tt module} can be imported from the package {\tt package} by placing {\tt import package.module} in the calling script.  Packages structure Python's namespace to avoid conflicts in global variable definitions between modules, and also simplify the structuring of the code itself.  There exist many third party packages which extend Python to more specialized tasks.  Examples of such packages used in ALPS 2.0 are the numpy~\cite{numpy}, scipy~\cite{scipy}, and matplotlib~\cite{matplotlib} packages which provide efficient classes and operations for large multidimensional arrays and MATLAB-style plotting capabilities.  
+
+%Python is designed to be highly extensible, allowing it to easily interface with other programming languages.  In ALPS 2.0 interfacing to C++ is done via the Boost.Python libraries from the Boost C++ libraries~\cite{boost}.  An example of this extension is shown in Fig.~\ref{fig:BoostPython}.  Here the python module {\tt pytools\_c} is created containing the C++ functions {\tt wrap\_with\_signature()} and {\tt wrap\_without\_signature()}.  This module can then be used in a Python script by placing {\tt import pytools\_c} in the script as usual.
+%\begin{figure}[h]
+%\begin{tiny}
+%\begin{center}
+%\begin{verbatim}
+%BOOST_PYTHON_MODULE(pytools_c)
+%{
+%  using namespace boost::python;
+%  wrap_with_signature();
+%  wrap_without_signature();
+%}
+%\end{verbatim}
+%\end{center}
+%\end{tiny}
+%\caption{Demonstration of the use of Boost.Python to generate a Python module from C++ functions.}
+%\label{fig:BoostPython}
+%\end{figure}
+
+%\subsection{The Pyalps package}
+%ALPS 2.0 contains a package of Python modules for interfacing the low-level ALPS code to Python and vice versa, running simulations, and evaluation and post-processing of data.  This package is known as Pyalps.  The advantages of using Python versus exclusively using low-level code for the above tasks are manifold.  For example, Python's large standard library and ability to easily interface with low-level code allow for great flexibility in post-processing of data.  Also, the use of Python facilitates use of the VisTrails workflow provenance tool, as VisTrails is written in Python.
+
+%Pyalps includes functions to write the xml files read by most applications, and additional functions to write special input files for applications with non-xml interfaces such as {\tt dmft} and {\tt tebd}.  It also includes functions to run applications with specified input files both in series and in parallel.  An example of the preparation of input files and running a simulation using Pyalps is shown in Fig.~\ref{fig:python}.
+
+%Once the simulation has been run we must extract and evaluate data from it.  At the heart of the Pyalps evaluation tools is the {\tt DataSet} class.  A {\tt DataSet} has as members {\tt x} and {\tt y} which are numpy arrays containing numerical data.  A {\tt DataSet} also has a member {\tt props} which is a dictionary of metadata describing the numerical data.  The presence of the metadata allows for complex evaluations such as constructing scaling functions as is done in many of the tutorials.  Using Boost.Python as described above, the jackknife and binning analysis of Monte Carlo from the ALPS C++ libraries are extended to Python functionality, as well as functions to read hdf5 output into a {\tt DataSet}.  In addition to evaluation, Pyalps includes wrapper programs which plot data stored in a {\tt DataSet} using the matplotlib package.
 
 \section*{References}
 

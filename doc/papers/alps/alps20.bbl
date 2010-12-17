@@ -172,6 +172,13 @@ Ambegaokar V and Troyer M 2010 {\em American Journal of Physics\/} {\bf 78}
 \bibitem{vtk}
 \url{http://www.vtk.org/}
 
+\bibitem{LearningPython}
+Lutz M 2009 {\em Learning Python\/} (O'Reilly \& Associates)
+
+\bibitem{ProgrammingPython}
+Lutz M 2006 {\em Programming Python ({T}hird {E}dition)\/} (O'Reilly \&
+  Associates)
+
 \bibitem{Georges96}
 Georges A, Kotliar G, Krauth W and Rozenberg M~J 1996 {\em Rev. Mod. Phys.\/}
   {\bf 68} 13
@@ -245,12 +252,5 @@ Koop D, Santos E, Bauer B, Troyer M, Freire J and Silva C 2010 Bridging
 \bibitem{Santos09}
 Santos E, Lins L, Ahrens J, Freire J and Silva C 2009 {\em IEEE Transactions on
   Visualization and Computer Graphics\/} {\bf 15} 1539
-
-\bibitem{LearningPython}
-Lutz M 2009 {\em Learning Python\/} (O'Reilly \& Associates)
-
-\bibitem{ProgrammingPython}
-Lutz M 2006 {\em Programming Python ({T}hird {E}dition)\/} (O'Reilly \&
-  Associates)
 
 \end{thebibliography}
