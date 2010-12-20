@@ -353,7 +353,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G0_old_tau = G0_tau;
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     fourier_ptr->backward_ft(G0_tau, G0_omega);
-    std::cout<<"running nambu solver in omega."<<std::endl<<std::flush;
+    std::cout<<"running solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
     std::cout<<"applying point group symmetries"<<std::endl<<std::flush;    
     G_tau = clustertrans.symmetrize(G_tau, paramagnet);
@@ -425,7 +425,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
   double eta1 = static_cast<double>(parms["ETA1"]);
   double eta2 = static_cast<double>(parms["ETA2"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
-  bool paramagnet = parms.value_or_default("PARAMAGNET", false);
+  bool paramagnet = parms.value_or_default("PARAMAGNET", true);
   int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   std::string basename=parms["BASENAME"];
   
@@ -456,11 +456,11 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     std::cout<<"running NAMBU solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_nambu(G0_omega, parms);
     std::cout<<"applying point group symmetries"<<std::endl<<std::flush;
-    std::ofstream G_tau_before_symmetrize("G_tau_before_symmetrize.dat"); G_tau_before_symmetrize<<G_tau;
+    std::ofstream G_tau_before_symmetrize("G_tau_before_symmetrize.dat"); G_tau_before_symmetrize<<std::make_pair(G_tau,beta);
     G_tau = clustertrans.symmetrize(G_tau, paramagnet);
-    std::ofstream G_tau_before_symmetrize_kspace("G_tau_before_symmetrize_kspace.dat"); G_tau_before_symmetrize_kspace<<G_tau;
+    std::ofstream G_tau_before_symmetrize_kspace("G_tau_before_symmetrize_kspace.dat"); G_tau_before_symmetrize_kspace<<std::make_pair(G_tau,beta);
     //G_tau = clustertrans.symmetrize_k_space(G_tau); //<- this would symmetrize away the d-wave behavior!
-    std::ofstream G_tau_after_symmetrize_kspace("G_tau_after_symmetrize_kspace.dat"); G_tau_after_symmetrize_kspace<<G_tau;
+    std::ofstream G_tau_after_symmetrize_kspace("G_tau_after_symmetrize_kspace.dat"); G_tau_after_symmetrize_kspace<<std::make_pair(G_tau,beta);
     G_omega = clustertrans.symmetrize(G_omega, paramagnet);
     G_omega = clustertrans.symmetrize_k_space(G_omega);
     

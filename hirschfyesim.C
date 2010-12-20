@@ -128,13 +128,13 @@ green_tau(N+1, n_site, 2)
     fourier_ptr->backward_ft(bgf_sc_convention_k, bare_green_matsubara_k_space);
     std::ofstream bgfsccks("/tmp/bgfsccks");
     std::ofstream bgmks("/tmp/bgmks");
-    bgfsccks<<bgf_sc_convention_k<<std::endl;
-    bgmks<<bare_green_matsubara_k_space<<std::endl;
+    bgfsccks<<std::make_pair(bgf_sc_convention_k,beta)<<std::endl;
+    bgmks<<std::make_pair(bare_green_matsubara_k_space,beta)<<std::endl;
   } 
   fourier_ptr->backward_ft(bare_green_tau, bare_green_matsubara);
   //std::cout<<"bgf sc convention: "<<bgf_sc_convention<<std::endl;
   std::ofstream bgfsccrs("/tmp/bgfsccrs");
-  bgfsccrs<<bare_green_tau<<std::endl;
+  bgfsccrs<<std::make_pair(bare_green_tau,beta)<<std::endl;
   
   for(int i=0;i<2;++i){  //change convention to positive GF
     for(int s1=0;s1<n_site;++s1){
@@ -327,6 +327,7 @@ void HirschFyeRun::dostep()
 void HirschFyeSim::get_result() {
   std::cout<<"getting results."<<std::endl;
   int N=parms["N"];
+  double beta=parms["BETA"];
   int n_matsubara=parms["NMATSUBARA"];
   int n_site=parms["SITES"];
   std::cout<<"calling get result for both itima and matsubara"  <<std::endl;
@@ -367,7 +368,7 @@ void HirschFyeSim::get_result() {
       green_result(N,i,j,1)=(i==j?1-green_result(0,i,j,1):-green_result(0,i,j,1));
     }
   }
-  std::cout<<"green result is: "<<green_result<<std::endl;
+  std::cout<<"green result is: "<<std::make_pair(green_result,beta)<<std::endl;
   for(int i=0;i<n_site;++i){ //change to SC condition convention
     for(int j=0;j<n_site;++j){
       for(int t=0;t<=N;++t){

@@ -100,7 +100,8 @@ template <typename T> class nambu_green_function{
 typedef nambu_green_function<std::complex<double> > nambu_matsubara_green_function_t;
 typedef nambu_green_function<double> nambu_itime_green_function_t;
 ///write out imag time Green function
-std::ostream &operator<<(std::ostream &os, const nambu_green_function<double> &v);
+std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<double>, double> &v_and_beta);
+std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<std::complex<double> >, double> &v_and_beta);
 ///read in imag time Green function
 std::istream &operator>>(std::istream &is, const nambu_green_function<double> &v);
 ///write out Matsubara Green function

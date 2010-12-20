@@ -36,21 +36,6 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 //includes
-/// the array (vector) type to store frequence dependent Green's functions and Weiss fields
-typedef std::vector<double> vector_type;
-/// two arrays are needed for a single site problem: one for up and one for down spins
-/// variant if you want complex vectors
-typedef std::vector<std::complex<double> > complex_vector_type;
-/// variant for two complex vectors.
-typedef std::pair<complex_vector_type,complex_vector_type> multiple_complex_vector_type;
-
-
-///same as complex_vector_type
-typedef std::vector<std::complex<double> > complex_vector;
-///same as vector_type
-typedef std::vector<double> double_vector;
-///vector of ints
-typedef std::vector<int> int_vector;
 
 ///enum for spin up and spin down
 enum  {up=0, down=1} ;
@@ -67,17 +52,6 @@ typedef double itime_t;
 typedef unsigned int itime_index_t;
 ///addressing type of matsubara frequency
 typedef unsigned int frequency_t;
-
-///typedef to easily distinguish imaginary time and frequency (multiple) vectors
-///typedef to easily distinguish imaginary time and frequency (multiple) vectors
-
-
-std::ostream &operator<<(std::ostream &os, const multiple_complex_vector_type &v);
-std::ostream &operator<<(std::ostream &os, const double_vector &v);
-std::ostream &operator<<(std::ostream &os, const complex_vector &v);
-void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta);
-void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta);
-  
 
 struct hifreq_moments{
   std::vector<std::vector<std::vector<double> > >c0;

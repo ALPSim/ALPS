@@ -38,7 +38,7 @@
 #include "nambu_green_function.h"
 #include "hilberttransformer.h"
 
-
+//forward declarations
 class ClusterHelper: private alps::graph_helper<alps::graph_helper<>::graph_type>
 {
 public:
@@ -359,8 +359,11 @@ private:
   nambu_green_function<T> transform_coordinates(const nambu_green_function<T>& G) const;
   template <class T>
   green_function<T> spin_symmetrizer(const green_function<T>& G, const bool paramagnet) const;
-  template <class T>
-  nambu_green_function<T> spin_symmetrizer(const nambu_green_function<T>& G, const bool paramagnet) const;
+  
+  //in nambu case: <double> very different from <complex<double> > -> no template
+  nambu_green_function<std::complex<double> > spin_symmetrizer(const nambu_green_function<std::complex<double> >& G, const bool paramagnet) const;
+  nambu_green_function<double> spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet) const;
+
   matsubara_green_function_t fourpoint_green_function_inverse(const matsubara_green_function_t& G, const unsigned int nt) const;
   template<typename T>
   green_function<T> fourpoint_green_function_add(const green_function<T>& G1, 
@@ -629,9 +632,12 @@ struct SimpleDCATransformer::Forward {
   }
   template<typename T>
   static void add(nambu_green_function<T>& G_new, const nambu_green_function<T>& G, 
-                  const itime_index_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor1, const spin_t flavor2,
+                  const itime_index_t t, const site_t i, const site_t j, const site_t k,
                   double factor) {
-    G_new(t, k, k, flavor1,flavor2) += factor * G(t, i, j, flavor1,flavor2);
+    G_new(t, k, k, 0,0) += factor * G(t, i, j, 0,0);
+    G_new(t, k, k, 0,1) += factor * G(t, i, j, 0,1);
+    G_new(t, k, k, 1,0) += factor * G(t, i, j, 1,0);
+    G_new(t, k, k, 1,1) += factor * G(t, i, j, 1,1);
   }
 };
 
@@ -646,9 +652,12 @@ struct SimpleDCATransformer::Backward {
   }
   template<typename T>
   static void add(nambu_green_function<T>& G_new, const nambu_green_function<T>& G, 
-                  const itime_index_t t, const site_t i, const site_t j, const site_t k, const spin_t flavor1, const spin_t flavor2,
+                  const itime_index_t t, const site_t i, const site_t j, const site_t k,
                   double factor) {
-    G_new(t, i, j, flavor1, flavor2) += factor * G(t, k, k, flavor1, flavor2);
+    G_new(t, i, j, 0, 0) += factor * G(t, k, k, 0, 0);
+    G_new(t, i, j, 0, 1) += factor * G(t, k, k, 0, 1);
+    G_new(t, i, j, 1, 0) += factor * G(t, k, k, 1, 0);
+    G_new(t, i, j, 1, 1) += factor * G(t, k, k, 1, 1);
   }
 };
 
@@ -993,28 +1002,7 @@ green_function<T> AntiFerroDCATransformer::green_function_divide(const green_fun
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////FUNCTIONS FOR NAMBU SPACE//////////////////////////////////////////////////////////////////////////////////
 
-template<class T>
-nambu_green_function<T> SimpleDCATransformer::spin_symmetrizer(const nambu_green_function<T>& G, const bool paramagnet) const
-{
-  std::cerr<<"spin symmetrizer: this function will need to be checked. In particular the off-diag entries, and away from 1/2 filling. For now: doing nothing."<<std::endl;
-  //throw std::runtime_error("this function will need to be checked. In particular the off-diag entries.");
-  nambu_green_function<T> G_new(G);
-  if (paramagnet) {
-      for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
-        for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
-          for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
-            /*G_new(freq, k1, k2, 0,0)= 0.5*(G(freq, k1, k2, 0,0)+G(freq, k1, k2, 1,1));
-            G_new(freq, k1, k2, 1,1)= G_new(freq, k1, k2, 0,0);*/
-            G_new(freq, k1, k2, 0,0)= G(freq, k1, k2, 0,0);
-            G_new(freq, k1, k2, 1,1)= G(freq, k1, k2, 1,1);
-            G_new(freq, k1, k2, 0,1)= G(freq, k1, k2, 0,1);
-            G_new(freq, k1, k2, 1,0)= G(freq, k1, k2, 1,0);
-          }
-        }
-      }
-  }
-  return G_new;
-}
+
 template<typename T, class D>
 nambu_green_function<T> SimpleDCATransformer::transform_coordinates(const nambu_green_function<T>& G) const 
 {
@@ -1023,6 +1011,7 @@ nambu_green_function<T> SimpleDCATransformer::transform_coordinates(const nambu_
   assert(nsite==n_cluster_sites());
   nambu_green_function<T> G_new(nt, nsite, 2);
   G_new.clear();
+  //compute G = \sum_{ij} \sum_K exp(i K (R_i-R_j)) G(R_i, R_j)
   for (site_t k=0; k<nsite; ++k) {
     for (site_t i=0; i<nsite; ++i) {
       for (site_t j=0; j<nsite; ++j) {
@@ -1030,10 +1019,7 @@ nambu_green_function<T> SimpleDCATransformer::transform_coordinates(const nambu_
         for (unsigned int d=0; d<dimension(); ++d) 
           phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
         for (itime_index_t t=0; t<nt; ++t) {
-          D::add(G_new, G, t, i, j, k, 0,0, cos(phase)/double(nsite));
-          D::add(G_new, G, t, i, j, k, 0,1, cos(phase)/double(nsite));
-          D::add(G_new, G, t, i, j, k, 1,0, cos(phase)/double(nsite));
-          D::add(G_new, G, t, i, j, k, 1,1, cos(phase)/double(nsite));
+          D::add(G_new, G, t, i, j, k, cos(phase)/double(nsite));
         }
       }
     }

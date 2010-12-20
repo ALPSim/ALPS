@@ -97,7 +97,7 @@ public:
 					    double mu, double h, double beta)
   {
     //to implement
-    std::cout<<"Square Lattice Hilbert transformer"<<G_tau<<std::endl;
+    std::cout<<"Square Lattice Hilbert transformer"<<std::make_pair(G_tau,beta)<<std::endl;
     std::cout<<mu;
     std::cout<<beta;
     std::cout<<h;
@@ -118,13 +118,13 @@ public:
   /// @param D the density of states. 
   ///          Note that issues such as units are still undecided and might require further 
   ///          additions to the interface
-  GeneralHilbertTransformer(const vector_type& D) : D_(D) {}
+  GeneralHilbertTransformer(const std::vector<double> & D) : D_(D) {}
   virtual itime_green_function_t operator()(const itime_green_function_t& G_tau, 
 					    double mu, double h, double beta)
   {
     //to implement
     //std::cout<<Sigma;
-    std::cout<<G_tau<<std::endl;
+    std::cout<<std::make_pair(G_tau,beta)<<std::endl;
     std::cout<<mu;
     std::cout<<beta;
     std::cout<<h;
@@ -132,7 +132,7 @@ public:
     return itime_green_function_t(0,0,0);
   }
 private:
-  vector_type D_; // or band width
+  std::vector<double> D_; // or band width
 };
 
 

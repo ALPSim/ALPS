@@ -329,6 +329,8 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
   G0_omega_real.write("G0_omega_input_realspace");
   itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
   G0_tau_real.write("G0_tau_input_realspace");
+  std::ofstream g0_omega_input_hr("g0_omega_input_hr.dat"); g0_omega_input_hr<<std::make_pair(G0_omega_new,beta);
+  std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
   return G0_omega_new;
 }
 
@@ -778,35 +780,35 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   if(h!=0 ) { 
     throw std::invalid_argument("don't know how to handle magn. fields, exiting"); 
   }
-          if(dimension()!=2 && (eta1 !=0 || eta2 !=0)) throw std::invalid_argument("not clear what to do with dwave symmetry away from dimension 2");
+  if(dimension()!=2 && (eta1 !=0 || eta2 !=0)) throw std::invalid_argument("not clear what to do with dwave symmetry away from dimension 2");
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
   nambu_matsubara_green_function_t selfenergy(G0_omega);
   nambu_matsubara_green_function_t G0_omega_new(G0_omega);
-  nambu_matsubara_green_function_t G_omega_lattice(G0_omega);
+  nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
   //compute the lattice = cluster self energy
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (frequency_t freq=0; freq<nfreq; ++freq) {
       std::complex<double> g0_block[4]={G0_omega(freq, kc, kc, 0,0),G0_omega(freq, kc, kc, 0,1),G0_omega(freq, kc, kc, 1,0),G0_omega(freq, kc, kc, 1,1)};
       std::complex<double>  g_block[4]={ G_omega(freq, kc, kc, 0,0), G_omega(freq, kc, kc, 0,1), G_omega(freq, kc, kc, 1,0), G_omega(freq, kc, kc, 1,1)};
-      std::complex<double> det_g0=g0_block[0]*g0_block[3]-g0_block[1]*g0_block[2];
-      std::complex<double>  det_g= g_block[0]* g_block[3]- g_block[1]* g_block[2];
+      std::complex<double>      det_g0=g0_block[0]*g0_block[3]-g0_block[1]*g0_block[2];
+      std::complex<double>      det_g = g_block[0]* g_block[3]- g_block[1]* g_block[2];
       
       selfenergy(freq,kc,kc,0,0)= g0_block[3]/det_g0 - g_block[3]/det_g;
       selfenergy(freq,kc,kc,0,1)=-g0_block[1]/det_g0 + g_block[1]/det_g;
       selfenergy(freq,kc,kc,1,0)=-g0_block[2]/det_g0 + g_block[2]/det_g;
       selfenergy(freq,kc,kc,1,1)= g0_block[0]/det_g0 - g_block[0]/det_g;
       
-//      std::cout<<"self energy is: "<<selfenergy(freq,kc,kc,0,0)<<" "<<selfenergy(freq,kc,kc,0,1)<<" "<<selfenergy(freq,kc,kc,1,0)<<" "<<selfenergy(freq,kc,kc,1,1)<<std::endl;
+      //      std::cout<<"self energy is: "<<selfenergy(freq,kc,kc,0,0)<<" "<<selfenergy(freq,kc,kc,0,1)<<" "<<selfenergy(freq,kc,kc,1,0)<<" "<<selfenergy(freq,kc,kc,1,1)<<std::endl;
     }
   }
   //compute the lattice Green's function
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (frequency_t freq=0; freq<nfreq; ++freq) {
-      G_omega_lattice(freq, kc, kc, 0,0) = 0.;
-      G_omega_lattice(freq, kc, kc, 0,1) = 0.;
-      G_omega_lattice(freq, kc, kc, 1,0) = 0.;
-      G_omega_lattice(freq, kc, kc, 1,1) = 0.;
+      G_omega_lattice_kav(freq, kc, kc, 0,0) = 0.;
+      G_omega_lattice_kav(freq, kc, kc, 0,1) = 0.;
+      G_omega_lattice_kav(freq, kc, kc, 1,0) = 0.;
+      G_omega_lattice_kav(freq, kc, kc, 1,1) = 0.;
       std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
       for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
         vector_type k(dimension());
@@ -814,44 +816,44 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
         double weight = lattice_momentum(kl,dimension());
         double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
-        std::complex<double> zeta = iomega_n + mu;
         //this is the self consistency formula!!! note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         //note that this external pairing field is k-independent.
-        std::complex<double> G_omega_latt_inv[4]={zeta-epsilon(k)-selfenergy(freq, kc, kc, 0,0),
+        std::complex<double> G_omega_latt_inv[4]=
+        {iomega_n + mu -epsilon(k)-selfenergy(freq, kc, kc, 0,0),
           -selfenergy(freq, kc, kc, 0,1) - dwave_prefactor*std::complex<double>( eta1, eta2),
-          -selfenergy(freq, kc, kc, 1,0) - dwave_prefactor*std::complex<double>( eta1,-eta2),            //note the '+', which flips F(tau) to F(-tau)
-          zeta-epsilon(k)-selfenergy(freq, kc, kc, 1,1)};                                                //
-          
+          -selfenergy(freq, kc, kc, 1,0) - dwave_prefactor*std::complex<double>( eta1,-eta2),
+         iomega_n - mu +epsilon(k)-selfenergy(freq, kc, kc, 1,1)};
+        
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
-        G_omega_lattice(freq, kc, kc, 0,0) += weight*G_omega_latt_inv[3]/G0omega_latt_inv_det;
-        G_omega_lattice(freq, kc, kc, 0,1) -= weight*G_omega_latt_inv[1]/G0omega_latt_inv_det;
-        G_omega_lattice(freq, kc, kc, 1,0) -= weight*G_omega_latt_inv[2]/G0omega_latt_inv_det;
-        G_omega_lattice(freq, kc, kc, 1,1) += weight*G_omega_latt_inv[0]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 0,0) += weight*G_omega_latt_inv[3]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 0,1) -= weight*G_omega_latt_inv[1]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 1,0) -= weight*G_omega_latt_inv[2]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 1,1) += weight*G_omega_latt_inv[0]/G0omega_latt_inv_det;
       }
-      G_omega_lattice(freq, kc, kc, 0,0) /= n_cluster_cells();
-      G_omega_lattice(freq, kc, kc, 0,1) /= n_cluster_cells();
-      G_omega_lattice(freq, kc, kc, 1,0) /= n_cluster_cells();
-      G_omega_lattice(freq, kc, kc, 1,1) /= n_cluster_cells();
-//      std::cout<<"G_omega_lattice is: "<<G_omega_lattice(freq,kc,kc,0,0)<<" "<<G_omega_lattice(freq,kc,kc,0,1)<<" "<<G_omega_lattice(freq,kc,kc,1,0)<<" "<<G_omega_lattice(freq,kc,kc,1,1)<<std::endl;
+      G_omega_lattice_kav(freq, kc, kc, 0,0) /= n_cluster_cells();
+      G_omega_lattice_kav(freq, kc, kc, 0,1) /= n_cluster_cells();
+      G_omega_lattice_kav(freq, kc, kc, 1,0) /= n_cluster_cells();
+      G_omega_lattice_kav(freq, kc, kc, 1,1) /= n_cluster_cells();
+      //      std::cout<<"G_omega_lattice is: "<<G_omega_lattice(freq,kc,kc,0,0)<<" "<<G_omega_lattice(freq,kc,kc,0,1)<<" "<<G_omega_lattice(freq,kc,kc,1,0)<<" "<<G_omega_lattice(freq,kc,kc,1,1)<<std::endl;
     }
   }
-
+  
   
   //compute the bath Green's function G0
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (frequency_t freq=0; freq<nfreq; ++freq) {
-      std::complex<double> glatt_block[4]={ G_omega_lattice(freq, kc, kc, 0,0), G_omega_lattice(freq, kc, kc, 0,1), G_omega_lattice(freq, kc, kc, 1,0), G_omega_lattice(freq, kc, kc, 1,1)};
-      std::complex<double> det_glatt= glatt_block[0]* glatt_block[3]- glatt_block[1]* glatt_block[2];
-      std::complex<double> glatt_inv[4]={glatt_block[3]/det_glatt,-glatt_block[1]/det_glatt,-glatt_block[2]/det_glatt,glatt_block[0]/det_glatt};
-      std::complex<double> g0_inv[4]={glatt_inv[0]+selfenergy(freq,kc,kc,0,0), glatt_inv[1]+selfenergy(freq,kc,kc,0,1),glatt_inv[2]+selfenergy(freq,kc,kc,1,0),glatt_inv[3]+selfenergy(freq,kc,kc,1,1)};
-      std::complex<double> det_g0inv=g0_inv[0]*g0_inv[3]-g0_inv[1]*g0_inv[2];
-//      std::cout<<" two dets: "<<det_glatt<<" "<<det_g0inv<<std::endl;
+      std::complex<double> glatt_block[4]={ G_omega_lattice_kav(freq, kc, kc, 0,0), G_omega_lattice_kav(freq, kc, kc, 0,1), G_omega_lattice_kav(freq, kc, kc, 1,0), G_omega_lattice_kav(freq, kc, kc, 1,1)};
+      std::complex<double> det_glatt     = glatt_block[0]* glatt_block[3]- glatt_block[1]* glatt_block[2];
+      std::complex<double> glatt_inv[4]  ={glatt_block[3]/det_glatt,-glatt_block[1]/det_glatt,-glatt_block[2]/det_glatt,glatt_block[0]/det_glatt};
+      std::complex<double> g0_inv[4]     ={glatt_inv[0]+selfenergy(freq,kc,kc,0,0), glatt_inv[1]+selfenergy(freq,kc,kc,0,1),glatt_inv[2]+selfenergy(freq,kc,kc,1,0),glatt_inv[3]+selfenergy(freq,kc,kc,1,1)};
+      std::complex<double> det_g0inv     =g0_inv[0]*g0_inv[3]-g0_inv[1]*g0_inv[2];
+      //      std::cout<<" two dets: "<<det_glatt<<" "<<det_g0inv<<std::endl;
       G0_omega_new(freq, kc, kc, 0,0) = g0_inv[3]/det_g0inv;
       G0_omega_new(freq, kc, kc, 0,1) =-g0_inv[1]/det_g0inv;
       G0_omega_new(freq, kc, kc, 1,0) =-g0_inv[2]/det_g0inv;
       G0_omega_new(freq, kc, kc, 1,1) = g0_inv[0]/det_g0inv;
-//      std::cout<<"G0_omega_new: "<<G0_omega_new(freq,kc,kc,0,0)<<" "<<G0_omega_new(freq,kc,kc,0,1)<<" "<<G0_omega_new(freq,kc,kc,1,0)<<" "<<G0_omega_new(freq,kc,kc,1,1)<<std::endl;
-   }
+      //      std::cout<<"G0_omega_new: "<<G0_omega_new(freq,kc,kc,0,0)<<" "<<G0_omega_new(freq,kc,kc,0,1)<<" "<<G0_omega_new(freq,kc,kc,1,0)<<" "<<G0_omega_new(freq,kc,kc,1,1)<<std::endl;
+    }
   }
   return G0_omega_new;
 }
@@ -933,10 +935,59 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   G0_omega_real.write("G0_omega_input_realspace");
   nambu_itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
   G0_tau_real.write("G0_tau_input_realspace");
+  std::ofstream g0_omega_input_hr("g0_omega_input_hr.dat"); g0_omega_input_hr<<std::make_pair(G0_omega_new,beta);
+  std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
   return G0_omega_new;
 }
 nambu_matsubara_green_function_t AntiFerroDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
                                                                      const nambu_matsubara_green_function_t &G0_omega, 
                                                                      double &mu, const double h, const double eta1, const double eta2, const double beta){
   throw std::invalid_argument("antiferro & nambu DCA has not yet been implemented!");
+}
+nambu_green_function<double> SimpleDCATransformer::spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet) const
+{
+  std::cout<<"this is the Itime Nambu symmetrizer. Implement symmetries for Nambu offidag terms"<<std::endl;
+  nambu_green_function<double> G_new(G);
+  if (paramagnet) {
+    for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
+      for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
+        for(itime_index_t n=0; n<G_new.nfreq(); ++n) {
+          itime_index_t other_n=G_new.nfreq()-1-n;
+          G_new(n, k1, k2, 0,0)= 0.5*(G(n, k1, k2, 0,0)+G(other_n, k1, k2, 1,1));
+          G_new(other_n, k1, k2, 1,1)= G_new(n, k1, k2, 0,0);
+          /*G_new(n, k1, k2, 0,1)= 0.5*(G(n, k1, k2, 0,1)+G(other_n, k1, k2, 1,0));
+          G_new(other_n, k1, k2, 1,0)= G_new(n, k1, k2, 0,1);*/
+          //std::cout<<"symmetrizing: "<<G(n, k1, k2, 0,0)<<" "<<G(other_n, k1, k2, 1,1)<<" and: "<<G(n, k1, k2, 0,1)<<" "<<G(other_n, k1, k2, 1,0)<<std::endl;
+          //std::cout<<"new values  : "<<G_new(n, k1, k2, 0,0)<<" "<<G_new(other_n, k1, k2, 1,1)<<" and: "<<G_new(n, k1, k2, 0,1)<<" "<<G_new(other_n, k1, k2, 1,0)<<std::endl;
+        }
+      }
+    }
+  }else {
+    throw std::logic_error("do Nambu & AFM!!");
+  }
+  return G_new;
+}
+nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetrizer(const nambu_green_function<std::complex<double> >& G, const bool paramagnet) const
+{
+  std::cout<<"this is the Matsubara Nambu symmetrizer. Implement symmetries for Nambu offidag terms"<<std::endl;
+  nambu_green_function<std::complex<double> > G_new(G);
+  std::ofstream nambu_before_file("beforespin.dat");
+  nambu_before_file<<std::make_pair(G, 10.)<<std::endl;;
+  if (paramagnet) {
+      for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
+        for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
+          for(frequency_t freq=0; freq<G_new.nfreq(); ++freq) {
+            G_new(freq, k1, k2, 0,0).imag()= 0.5*(G(freq, k1, k2, 0,0).imag()+G_new(freq, k1, k2, 1,1).imag());
+            G_new(freq, k1, k2, 0,0).real()= 0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real());
+            G_new(freq, k1, k2, 1,1).real()= -G_new(freq, k1, k2, 0,0).real();
+            G_new(freq, k1, k2, 1,1).imag()=  G_new(freq, k1, k2, 0,0).imag();
+            G_new(freq, k1, k2, 0,1)= G(freq, k1, k2, 0,1);
+            G_new(freq, k1, k2, 1,0)= G(freq, k1, k2, 1,0);
+          }
+        }
+      }
+  }
+  std::ofstream nambu_after_file("afterspin.dat");
+  nambu_after_file<<std::make_pair(G_new, 10.);
+  return G_new;
 }

@@ -90,7 +90,7 @@ void print_selfenergy_matsubara(std::ostream &os, const matsubara_green_function
     }
     case nondiagonal:
     {
-      std::cerr<<"please use cluster framework for block diag GF"<<std::endl;;
+      std::cerr<<"please use cluster framework for non diag GF"<<std::endl;;
       //throw std::invalid_argument("please use cluster framework for full nondiag GF");
     }
   }
@@ -263,30 +263,55 @@ void print_dressed_tau_green_functions(const int iteration_ctr, const itime_gree
   print_green_itime(G_tau_file_2,G_tau,beta,shape);
 }
 
-std::ostream &operator<<(std::ostream &os, const green_function<double> &v){
-  os<<std::setprecision(20);
-  for(unsigned int o=0;o<v.nfreq();++o){
-    os<<o<<"\t";
-    for(unsigned int i=0;i<v.nsite();++i)
-      for(unsigned int j=0;j<v.nsite();++j)
-        for(unsigned int z=0;z<v.nflavor();++z)
-          os<<v(o,i,j,z)<<"\t";
+std::ostream &operator<<(std::ostream &os, const std::pair<green_function<double>,double> &v_and_beta){
+  os<<std::setprecision(14);
+  double dtau=v_and_beta.second/(v_and_beta.first.ntime()-1);
+  for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
+    os<<o*dtau<<"\t";
+    for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
+      for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+        for(unsigned int z=0;z<v_and_beta.first.nflavor();++z)
+          os<<v_and_beta.first(o,i,j,z)<<"\t";
     os<<std::endl;
-    
   }
   return os;
 }
-std::ostream &operator<<(std::ostream &os, const nambu_green_function<double> &v){
+std::ostream &operator<<(std::ostream &os, const std::pair<green_function<std::complex<double> >, double> &v_and_beta){
   os<<std::setprecision(20);
-  for(unsigned int o=0;o<v.nfreq();++o){
-    os<<o<<"\t";
-    for(unsigned int i=0;i<v.nsite();++i)
-      for(unsigned int j=0;j<v.nsite();++j)
-        for(unsigned int z1=0;z1<v.nflavor();++z1)
-        for(unsigned int z2=0;z2<v.nflavor();++z2)
-          os<<v(o,i,j,z1,z2)<<"\t";
+  for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
+    os<<(2.*o+1)*M_PI/v_and_beta.second<<"\t";
+    for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
+      for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+        for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
+            os<<v_and_beta.first(o,i,j,z1).real()<<" "<<v_and_beta.first(o,i,j,z1).imag()<<" ";
     os<<std::endl;
-    
+  }
+  return os;
+}
+std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<double>, double> &v_and_beta){
+  os<<std::setprecision(14);
+  double dtau=v_and_beta.second/(v_and_beta.first.ntime()-1);
+  for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
+    os<<o*dtau<<"\t";
+    for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
+      for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
+        for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+          for(unsigned int z2=0;z2<v_and_beta.first.nflavor();++z2)
+            os<<v_and_beta.first(o,i,j,z1,z2)<<"\t";
+    os<<std::endl;
+  }
+  return os;
+}
+std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<std::complex<double> >, double> &v_and_beta){
+  os<<std::setprecision(20);
+  for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
+    os<<(2.*o+1)*M_PI/v_and_beta.second<<"\t";
+    for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
+      for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
+        for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+          for(unsigned int z2=0;z2<v_and_beta.first.nflavor();++z2)
+            os<<v_and_beta.first(o,i,j,z1,z2).real()<<" "<<v_and_beta.first(o,i,j,z1,z2).imag()<<" ";
+    os<<std::endl;
   }
   return os;
 }
@@ -464,7 +489,7 @@ void print_selfenergy_matsubara(std::ostream &os, const nambu_matsubara_green_fu
     }
     case nondiagonal:
     {
-      std::cerr<<"please use cluster framework for block diag GF"<<std::endl;;
+      std::cerr<<"please use cluster framework for non diag GF"<<std::endl;;
       //throw std::invalid_argument("please use cluster framework for full nondiag GF");
     }
   }
