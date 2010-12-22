@@ -12,7 +12,8 @@
     [last-revision $Date: 2010-01-28 00:00:03 +0100 (Do, 28 Jan 2010) $]
 ]
 
-[xinclude hdf5.autodoc]
+[section Supported types]
+
 
 [section Examples]
 write a scalar to hdf5
