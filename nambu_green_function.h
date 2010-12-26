@@ -9,12 +9,12 @@
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
 template <typename T> class nambu_green_function{
-
-	public:
+  
+public:
 	//construction and destruction, assignement and copy constructor
 	///constructor: how many time slices, how many sites, how many flavors
-	nambu_green_function(unsigned int ntime, unsigned int nsite, unsigned int nflavor):nt_(ntime), ns_(nsite), nf_(nflavor),
-		 ntnsns_(ntime*nsite*nsite), ntns_(ntime*nsite), ntnsnsnf_(ntime*nsite*nsite*nflavor){
+	nambu_green_function(unsigned int ntime, unsigned int nsite, unsigned int nflavor, shape_t shape):nt_(ntime), ns_(nsite), nf_(nflavor),
+  ntnsns_(ntime*nsite*nsite), ntns_(ntime*nsite), ntnsnsnf_(ntime*nsite*nsite*nflavor), shape_(shape){
 		val_=new T[nt_*ns_*ns_*nf_*nf_];
 	}
 	///destructor
@@ -22,36 +22,36 @@ template <typename T> class nambu_green_function{
 		delete [] val_;
 	}
 	///copy constructor
-	nambu_green_function(const nambu_green_function &g):nt_(g.nt_), ns_(g.ns_), nf_(g.nf_), ntnsns_(g.ntnsns_), ntns_(g.ntns_), ntnsnsnf_(g.ntnsnsnf_){
+	nambu_green_function(const nambu_green_function &g):nt_(g.nt_), ns_(g.ns_), nf_(g.nf_), ntnsns_(g.ntnsns_), ntns_(g.ntns_), ntnsnsnf_(g.ntnsnsnf_), shape_(g.shape_){
 		val_=new T[nt_*ns_*ns_*nf_*nf_];
 		operator=(g);
 	}
 	///operator= (assignement operator)
 	const nambu_green_function &operator=(const nambu_green_function &g){
 		memcpy(val_, g(), sizeof(T)*nt_*ns_*ns_*nf_*nf_);
-                return *this;
-        }
+    return *this;
+  }
   void clear(){ memset(val_, 0, ns_*ns_*nt_*nf_*nf_*sizeof(T)); }
 	//access of vectors and elements
 	///return an entire vector of times for a given flavor
 	///access element with given time, site 1, site 2, and flavor
-        inline T &operator()(unsigned int t, unsigned int site1, unsigned int site2, unsigned int flavor1, unsigned int flavor2){
-          return val_[t+nt_*site1+ntns_*site2+ntnsns_*flavor1+ntnsnsnf_*flavor2];
-        }
+  inline T &operator()(unsigned int t, unsigned int site1, unsigned int site2, unsigned int flavor1, unsigned int flavor2){
+    return val_[t+nt_*site1+ntns_*site2+ntnsns_*flavor1+ntnsnsnf_*flavor2];
+  }
 	///access element with given time, site 1, site 2, and flavor (const reference)
-        inline const T &operator()(unsigned int t, unsigned int site1, unsigned int site2, unsigned int flavor1, unsigned int flavor2)const{
-          return val_[t+nt_*site1+ntns_*site2+ntnsns_*flavor1+ntnsnsnf_*flavor2];
-        }
+  inline const T &operator()(unsigned int t, unsigned int site1, unsigned int site2, unsigned int flavor1, unsigned int flavor2)const{
+    return val_[t+nt_*site1+ntns_*site2+ntnsns_*flavor1+ntnsnsnf_*flavor2];
+  }
 	///return an entire vector of imaginary time values for a given site 1,
-        //site2, flavor1, flavor2
-        inline T *operator()(unsigned int site1, unsigned int site2, unsigned int flavor1, unsigned int flavor2){
-          return val_+nt_*site1+ntns_*site2+ntnsns_*flavor1+ntnsnsnf_*flavor2;
-        }
+  //site2, flavor1, flavor2
+  inline T *operator()(unsigned int site1, unsigned int site2, unsigned int flavor1, unsigned int flavor2){
+    return val_+nt_*site1+ntns_*site2+ntnsns_*flavor1+ntnsnsnf_*flavor2;
+  }
 	///get all values at once
 	inline const T *operator()() const {return val_;}
 	///get all errors at once
 	inline const T *error() const {return err_;}
-
+  
 	//size information
 	///how many flavors do we have? (flavors are usually spins, GF of different flavors are zero)
 	inline const unsigned int &nflavor()const{return nf_;}
@@ -62,29 +62,29 @@ template <typename T> class nambu_green_function{
 	///return # of matsubara frequencies. Exactly equivalent to ntime().
 	///In the case of a Matsubara GF 'ntime' sounds odd -> define 'nfreq' instead.
 	inline const unsigned int &nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
-
-        void read(const char *filename);
-        void write(const char *filename);
-    void write_hdf5(alps::hdf5::oarchive &ar, const std::string &path) const{
-      ar<<alps::make_pvp(path+"/nt",nt_);
-      ar<<alps::make_pvp(path+"/ns",ns_);
-      ar<<alps::make_pvp(path+"/nf",nf_);
-      std::stringstream subpath; subpath<<path<<"/values/mean";
-      std::cout<<path<<" nt: "<<nt_<<" new: "<<nt_<<" ns: "<<ns_<<" "<<ns_<<" nf: "<<nf_<<" "<<nf_<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
-      ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
-    }
-    void read_hdf5(alps::hdf5::iarchive &ar, const std::string &path) {
-      unsigned int nt, ns, nf;
-      clear();
-      ar>>alps::make_pvp(path+"/nt",nt);
-      ar>>alps::make_pvp(path+"/ns",ns);
-      ar>>alps::make_pvp(path+"/nf",nf);
-      if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
-      std::cout<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
-      std::stringstream subpath; subpath<<path<<"/values/mean";
-      ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
-    }
-	private:
+  
+  void read(const char *filename);
+  void write(const char *filename);
+  void write_hdf5(alps::hdf5::oarchive &ar, const std::string &path) const{
+    ar<<alps::make_pvp(path+"/nt",nt_);
+    ar<<alps::make_pvp(path+"/ns",ns_);
+    ar<<alps::make_pvp(path+"/nf",nf_);
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    std::cout<<path<<" nt: "<<nt_<<" new: "<<nt_<<" ns: "<<ns_<<" "<<ns_<<" nf: "<<nf_<<" "<<nf_<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
+    ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
+  }
+  void read_hdf5(alps::hdf5::iarchive &ar, const std::string &path) {
+    unsigned int nt, ns, nf;
+    clear();
+    ar>>alps::make_pvp(path+"/nt",nt);
+    ar>>alps::make_pvp(path+"/ns",ns);
+    ar>>alps::make_pvp(path+"/nf",nf);
+    if(nt!=nt_ || ns!=ns_ || nf!=nf_){ std::cerr<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" dimensions do not match."<<std::endl; throw std::runtime_error("Green's function read in: dimensions do not match."); }
+    std::cout<<path<<" nt: "<<nt_<<" new: "<<nt<<" ns: "<<ns_<<" "<<ns<<" nf: "<<nf_<<" "<<nf<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
+    std::stringstream subpath; subpath<<path<<"/values/mean";
+    ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
+  }
+private:
 	//const values
 	const unsigned int nt_; ///imag time points
 	const unsigned int ns_; ///number of sites
@@ -92,10 +92,11 @@ template <typename T> class nambu_green_function{
 	const unsigned int ntnsnsnf_; ///nt*ns*ns*nf
 	const unsigned int ntnsns_; ///nt*ns*ns
 	const unsigned int ntns_; ///nt*ns
+  const shape_t shape_;
 	// the actual values and errors.
-        T *val_;
-        T *err_;
-
+  T *val_;
+  T *err_;
+  
 };
 typedef nambu_green_function<std::complex<double> > nambu_matsubara_green_function_t;
 typedef nambu_green_function<double> nambu_itime_green_function_t;
@@ -117,10 +118,10 @@ template<typename T> void nambu_green_function<T>::read(const char *filename){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
     for(unsigned int s0=0; s0<ns_; ++s0) {
       for(unsigned int s1=0; s1<ns_; ++s1){
-	for(unsigned int f1=0; f1<nf_; ++f1) {
-	  for(unsigned int f2=0; f2<nf_; ++f2) {
-	    in_file>>operator()(i, s0, s1, f1, f2); //read the actual value
-	  }
+        for(unsigned int f1=0; f1<nf_; ++f1) {
+          for(unsigned int f2=0; f2<nf_; ++f2) {
+            in_file>>operator()(i, s0, s1, f1, f2); //read the actual value
+          }
         }
       }
     }
@@ -134,11 +135,17 @@ template<typename T> void nambu_green_function<T>::write(const char *filename){
     out_file << i << " ";
     for(unsigned int s0=0; s0<ns_; ++s0) {
       for(unsigned int s1=0; s1<ns_; ++s1){
-	for(unsigned int f1=0; f1<nf_; ++f1) {
-	  for(unsigned int f2=0; f2<nf_; ++f2) {
-	    out_file<<operator()(i, s0, s1, f1,f2) << " "; 
+        if(shape_==diagonal){
+        for(unsigned int f1=0; f1<nf_; ++f1) {
+            out_file<<operator()(i, s0, s1, f1,f1) << " "; 
+        }
+        }else{
+        for(unsigned int f1=0; f1<nf_; ++f1) {
+          for(unsigned int f2=0; f2<nf_; ++f2) {
+            out_file<<operator()(i, s0, s1, f1,f2) << " "; 
           }
-	}
+        }
+        }
       }
     }
     out_file << std::endl;
@@ -146,9 +153,9 @@ template<typename T> void nambu_green_function<T>::write(const char *filename){
 }
 
 void print_all_nambu_green_functions(std::string const &basename, const int iteration_ctr, const nambu_matsubara_green_function_t &G0_omega,
-			       const nambu_matsubara_green_function_t &G_omega, const nambu_itime_green_function_t &G0_tau, 
-			       const nambu_itime_green_function_t &G_tau, const double beta, const shape_t shape=diagonal,
-			       const std::string suffix="");
+                                     const nambu_matsubara_green_function_t &G_omega, const nambu_itime_green_function_t &G0_tau, 
+                                     const nambu_itime_green_function_t &G_tau, const double beta, const shape_t shape=diagonal,
+                                     const std::string suffix="");
 void print_real_green_matsubara(std::ostream &os, const nambu_matsubara_green_function_t &v, const double beta, const shape_t shape=diagonal);
 void print_imag_green_matsubara(std::ostream &os, const nambu_matsubara_green_function_t &v, const double beta, const shape_t shape=diagonal);
 #endif

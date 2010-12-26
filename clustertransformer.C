@@ -290,7 +290,7 @@ matsubara_green_function_t SimpleDCATransformer::initial_G0(const alps::Paramete
     }
   }
   else if (parms.value_or_default("ISOLATED", false)) {
-    std::cout << "calculating G0_omega for isolated cluster";
+    std::cout << "calculating G0_omega for isolated cluster"<<std::endl;
     for (frequency_t freq=0; freq<n_matsubara; ++freq) {
       for (spin_t flavor=0; flavor<n_flavor; ++flavor) {
         const std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
@@ -864,7 +864,7 @@ nambu_matsubara_green_function_t ClusterTransformer::initial_G0_nambu(const alps
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
   if(n_orbital!=2) throw std::invalid_argument("dunnow how to handle nambu in >2 orbitals!");
-  nambu_matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital);
+  nambu_matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
   G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
   return G0_omega;
 }
@@ -891,7 +891,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   double eta2_init = static_cast<double>(parms["ETA2_INIT"]);
   double h_init = static_cast<double>(parms["H_INIT"]);
   
-  nambu_matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor);
+  nambu_matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
   G0_omega_new.clear();
   if (parms.defined("INSULATING")) {
     std::cout <<"calculating insulating G0_omega starting solution";
@@ -909,8 +909,8 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
     }
   } 
   else {
-    nambu_matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor);  
-    nambu_matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor);
+    nambu_matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);  
+    nambu_matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
     G0_omega.clear();
     for (site_t i=0; i<n_cluster_sites(); ++i) {
       for (frequency_t freq=0; freq<n_matsubara; ++freq) {
@@ -925,7 +925,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
     std::cout<<"invoking free transform."<<std::endl;
     G0_omega_new = operator()(G_omega, G0_omega, mu, h_init, eta1_init, eta2_init, beta);
   }
-  nambu_itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor);
+  nambu_itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, diagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   G0_omega_new.write("G0_omega_input");
   FourierTransformer::generate_transformer(parms, fourier_ptr);

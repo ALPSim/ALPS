@@ -4,6 +4,8 @@ include(${ALPS_USE_FILE})
 
 project (DMFT)
 include_directories("/Users/emanuel/alps_svn/")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -DUSE_MPI -DNDEBUG")
+
 add_executable(dmft 
 2dsimpson.C clusterhelper.C fouriertransform.C selfconsistency.C
 alps_solver.C clustertransformer.C hilberttransformer.C interpolator.C
