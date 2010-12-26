@@ -205,8 +205,8 @@ std::pair<nambu_matsubara_green_function_t, nambu_itime_green_function_t> alps::
   unsigned int n_tau=(unsigned int)p["N"];
   unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
   unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
-  nambu_matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
-  nambu_itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
+  nambu_matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital, diagonal);
+  nambu_itime_green_function_t G_tau(n_tau+1, n_site, n_orbital, diagonal);
   {
     alps::hdf5::iarchive ar(outfile);
     G_omega.read_hdf5(ar, "/G_omega");

@@ -436,10 +436,10 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
   int iteration_ctr = 0;
   nambu_matsubara_green_function_t G_old_omega(G0_omega);
   nambu_matsubara_green_function_t G0_old_omega(G0_omega);
-  nambu_itime_green_function_t G_tau(n_tau +1, n_site, 2);
-  nambu_itime_green_function_t G0_tau(n_tau+1, n_site, 2);
-  nambu_itime_green_function_t G_old_tau(n_tau+1, n_site, 2);
-  nambu_itime_green_function_t G0_old_tau(n_tau+1, n_site, 2);
+  nambu_itime_green_function_t G_tau(n_tau +1, n_site, 2, diagonal);
+  nambu_itime_green_function_t G0_tau(n_tau+1, n_site, 2, diagonal);
+  nambu_itime_green_function_t G_old_tau(n_tau+1, n_site, 2, diagonal);
+  nambu_itime_green_function_t G0_old_tau(n_tau+1, n_site, 2, diagonal);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   double max_diff;	

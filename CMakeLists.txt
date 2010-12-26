@@ -3,7 +3,8 @@ find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
 include(${ALPS_USE_FILE})
 
 project (DMFT)
-include_directories("/Users/emanuel/alps_svn/")
+#include_directories("/home/esg/alps_svn/")
+include_directories("/cluster/home/phys/gullc/alps_svn")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -DUSE_MPI -DNDEBUG")
 
 add_executable(dmft 
@@ -26,4 +27,4 @@ auxiliaryfunctions.C externalsolver.C hirschfyesim.C main.C
 ../DMFT-solvers/Rubtsov/rubtsov_fourpoint.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_observables.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_selfenergy.cpp)
-target_link_libraries(dmft ${ALPS_LIBRARIES} pthread)
+target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
