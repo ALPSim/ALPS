@@ -84,6 +84,7 @@ public:
     std::stringstream subpath; subpath<<path<<"/values/mean";
     ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
   }
+  const shape_t &shape() const{return shape_;}
 private:
 	//const values
 	const unsigned int nt_; ///imag time points

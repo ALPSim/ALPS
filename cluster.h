@@ -1009,7 +1009,7 @@ nambu_green_function<T> SimpleDCATransformer::transform_coordinates(const nambu_
   unsigned int nsite=G.nsite();
   unsigned int nt=G.ntime();
   assert(nsite==n_cluster_sites());
-  nambu_green_function<T> G_new(nt, nsite, 2, diagonal);
+  nambu_green_function<T> G_new(nt, nsite, 2, G.shape()==diagonal?nondiagonal:diagonal);
   G_new.clear();
   //compute G = \sum_{ij} \sum_K exp(i K (R_i-R_j)) G(R_i, R_j)
   for (site_t k=0; k<nsite; ++k) {
@@ -1034,8 +1034,14 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
   unsigned int nsite=G.nsite();
   unsigned int nfreq=G.nfreq();
   nambu_green_function<T> G_new(nfreq, nsite, 2, diagonal);
+  std::cout<<"in Nambu symmetrization helper."<<std::endl;
+  std::cout<<"symmetrization over: "<<std::endl;
   std::set<pair_class_type>::const_iterator itc, itc_end;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    std::cout<<"symmetrization over sites..."<<std::endl;
+    for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+      std::cout<<it->first<<" "<<it->second<<std::endl;
+    }
     for (spin_t f1=0; f1<2; ++f1) {
       for (spin_t f2=0; f2<2; ++f2) {
         for (frequency_t freq=0; freq<nfreq; ++freq) {
@@ -1049,6 +1055,7 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
       }
     }
   }
+  std::cout<<"done Nambu symmetrization helper."<<std::endl;
   return G_new;
 }
 
