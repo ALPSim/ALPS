@@ -34,27 +34,33 @@ int main(int argc, char *argv[]) {
     if (options.valid && options.type == alps::mcoptions::SINGLE) {
         alps::parameters_type<simulation_type>::type params(options.input_file);
         simulation_type s(params);
-        if (options.continueing)
-            s.load(options.output_file);
+        if (options.resume)
+            s.load(static_cast<std::string>(params.value_or_default("DUMP", "dump")));
         s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
-        s.save(options.output_file);
+        s.save(static_cast<std::string>(params.value_or_default("DUMP", "dump")));
         alps::results_type<alps::mcmpisim<simulation_type> >::type results = collect_results(s);
-        for (alps::results_type<alps::mcmpisim<simulation_type> >::type::const_iterator it = results.begin(); it != results.end(); ++it)
-            std::cout << std::fixed << std::setprecision(5) << it->first << ": " << it->second->to_string() << std::endl;
-        std::cout << "Sin of energy: " << sin(results["Energy"].get_mcdata<double>()) << std::endl;
-        std::cout << "Mean of correlations: " << results["Correlations"].get_mcdata<std::vector<double> >().mean().size() << std::endl;
+        std::cout << results;
+        { 
+            using namespace alps;
+            std::cout << "Mean of Energy:       " << short_print(results["Energy"].mean<double>()) << std::endl;
+            std::cout << "Mean of Correlations: " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+            std::cout << "Sin of Energy:        " << short_print(sin(results["Energy"])) << std::endl;
+//            std::cout << "2 * Energy / 13:      " << short_print(2 * results["Energy"] / 13) << std::endl;
+        }
+        save_results(results, params, options.output_file, "/simulation/results");
     } else if(options.valid && options.type == alps::mcoptions::MPI) {
         boost::mpi::environment env(argc, argv);
         boost::mpi::communicator c;
         alps::parameters_type<simulation_type>::type params(options.input_file);
         alps::mcmpisim<simulation_type> s(params, c);
-        if (options.continueing)
+        if (options.resume)
             s.load(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
         s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time() + boost::posix_time::seconds(options.time_limit)));
         s.save(static_cast<std::string>(params.value_or_default("DUMP", "dump")) + boost::lexical_cast<std::string>(c.rank()));
-        s.save_collected(options.output_file);
         alps::results_type<alps::mcmpisim<simulation_type> >::type results = collect_results(s);
-        for (alps::results_type<alps::mcmpisim<simulation_type> >::type::const_iterator it = results.begin(); it != results.end(); ++it)
-            std::cout << std::fixed << std::setprecision(5) << it->first << ": " << it->second->to_string() << std::endl;
+        if (!c.rank()) {
+            save_results(results, params, options.output_file, "/simulation/results");
+            std::cout << results;
+        }
     }
 }
