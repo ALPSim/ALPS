@@ -39,7 +39,7 @@ if (NOT WIN32)
 
     set(ALPS_AUTODOC_SOURCES alea lattice model osiris parser scheduler random)
 
-    set(ALPS_QBK_SOURCES alea general getting_started hdf5 lattice
+    set(ALPS_QBK_SOURCES alea general hdf5 lattice
         model osiris overview parser scheduler tools random graph)
         
     set(ALPS_QBK_DEPENDS src/alps.qbk )

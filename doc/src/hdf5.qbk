@@ -14,7 +14,7 @@
 
 [section Supported types]
 
-
+[endsect]
 [section Examples]
 write a scalar to hdf5
 ``

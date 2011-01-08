@@ -53,7 +53,7 @@ Besides the helper tools for the [link scheduler scheduler library] we
 have provided a few [link tools sample tools] for the manipulation of
 the XML files created by the ALPS programs.
 
-
+[endsect]
 
 [section Support]
 
