@@ -1,3 +1,14 @@
+# VisTrails package for ALPS, Algorithms and Libraries for Physics Simulations
+#
+# Copyright (C) 2009 - 2010 by Matthias Troyer <troyer@itp.phys.ethz.ch>,
+#                              Brigitte Surer <surerb@phys.ethz.ch>
+#
+# Distributed under the Boost Software License, Version 1.0. (See accompany-
+# ing file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+#
+#
+##############################################################################
+
 import math
 import pyalps
 import pyalps.alea as alpsalea
@@ -65,8 +76,8 @@ class Simulation:
        
         
     def measure(self):
-        E = 0.	# energy
-        M = 0.	# magnetization
+        E = 0.    # energy
+        M = 0.    # magnetization
         for i in range(self.L):
             for j in range(self.L):
                 E -= self.spins[i][j] * (self.spins[(i+1)%self.L][j] + self.spins[i][(j+1)%self.L])

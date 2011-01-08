@@ -20,14 +20,16 @@ increase software reuse in the physics community.
 
 [section Libraries]
 
-Currently the following libraries are publicly available as part of
+The following libraries are publicly available as part of
 the ALPS library project:
 
 * [link general alps/general](*): generally usefull
   classes and traits
 
-* [link osiris alps/osiris](*): serialization and
-  communication
+* [link random alps/random](*): extensions to the Boost and C++ random number
+  libraries.
+
+* [link osiris alps/osiris](*): serialization and communication
 
 * [link parser alps/parser](*): helper functions to parse and write
   XML files
@@ -43,9 +45,43 @@ the ALPS library project:
 * [link scheduler alps/scheduler]: an automatically
   parallelizing scheduler for Monte Carlo simulations
 
+* [link graph alps/graph]: graph algorithms extending the Boost graph library
+
+* [link hdf5 alps/hdf5]: a library to read an write HDF5 files from C++
+
 Besides the helper tools for the [link scheduler scheduler library] we
 have provided a few [link tools sample tools] for the manipulation of
 the XML files created by the ALPS programs.
+
+
+
+[section Support]
+
+[h1 Mailing List]
+
+We offer the following mailing lists related to the libraries in
+the ALPS project:
+
+* Announcements of new releases:
+  [@https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-announce
+  comp-phys-alps-announce@lists.comp-phys.org]
+
+* Discussion and questions regarding the use of the ALPS libraries:
+  [@https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-users
+  comp-phys-alps-users@lists.comp-phys.org] 
+
+* Discussion of the ALPS libraries and their development:
+  [https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-devel
+  comp-phys-alps-devel@lists.comp-phys.org]
+
+[h1 Support]
+
+For questions about the libraries please contact
+[@mailto:alps-support@comp-phys.org alps-support@comp-phys.org].
+
+[endsect]
+
+
 
 [section License]
 
@@ -149,90 +185,6 @@ WHETHER IN CONTRACT, TORT OR OTHERWISE, ARISING OUT OF OR IN
 CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 
-[h1 CITATIONS.txt]
-
-Any publication for which one of the following libraries are used has
-to acknowledge the use of the ALPS libraries, and the papers listed
-below:
-
-When alps/model.h or any header in alps/model was used: reference
-the web page [@http://alps.comp-phys.org/] and cite the publication:
-
-* __alps_paper.
-
-When alps/lattice.h or any header in alps/lattice was used:
-reference the web page [@http://alps.comp-phys.org/] and cite the
-publication: 
-
-* __alps_paper.
-
-When alps/alea.h or any header in alps/alea was used: reference the
-web page [@http://alps.comp-phys.org/] and cite the publications:
-
-* __alps_paper.
-
-* M. Troyer /et al/., Lecture Notes in Computer Science, *1505*, 191
-  (1998).
-
-When alps/scheduler.h or any header in alps/scheduler was used:
-reference the web page [@http://alps.comp-phys.org/] and cite the
-publications:
-
-* __alps_paper.
-
-* M. Troyer /et al/., Lecture Notes in Computer Science, *1505*, 191
-  (1998).
-
-The use of any other library, in particular those with headers in
-the subdirectories alps/parser, alps/osiris, alps/random do not
-carry any citation requirement but acknowledgment of the ALPS
-project is encouraged.
 
 [endsect]
   
-
-[section Support]
-
-[h1 Mailing List]
-
-We offer the following mailing lists related to the libraries in
-the ALPS project:
-
-* Announcements of new releases:
-  [@https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-announce
-  comp-phys-alps-announce@lists.comp-phys.org]
-
-* Discussion and questions regarding the use of the ALPS libraries:
-  [@https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-users
-  comp-phys-alps-users@lists.comp-phys.org] 
-
-* Discussion of the ALPS libraries and their development:
-  [https://webmail.phys.ethz.ch/mailman/listinfo/comp-phys-alps-devel
-  comp-phys-alps-devel@lists.comp-phys.org]
-
-[h1 Support]
-
-For questions about the libraries please contact
-[@mailto:alps-support@comp-phys.org alps-support@comp-phys.org].
-
-[endsect]
-
-
-[section Contributors]
-
-The following people (in alphabetical order) have contributed to the
-ALPS project:
-
-* [@http://www.itp.phys.ethz.ch/staff/alet/ Fabien Alet] (alet@comp-phys.org)
-* Beat Ammon (beat.ammon@citadelgroup.com)
-* [@http://www.itp.phys.ethz.ch/staff/prakash/ Prakash Dayal] (prakash@comp-phys.org)
-* [@http://theorie.physik.uni-wuerzburg.de/%7Eardornei/ Ansgar Dorneich] (dorneich@de.ibm.com)
-* Axel Grzesik (axel@th.physik.uni-bonn.de)
-* [@http://w3-phystheo.ups-tlse.fr/%7Elaeuchli/ Andreas Läuchli] (laeuchli@comp-phys.org)
-* [@http://www.itp.phys.ethz.ch/staff/gschmid/ Guido Schmid] (gschmid@comp-phys.org)
-* [@http://wistaria.comp-phys.org Synge Todo] (wistaria@comp-phys.org)
-* [@http://www.itp.phys.ethz.ch/staff/trebst/ Simon Trebst] (trebst@comp-phys.org)
-* [@http://www.itp.phys.ethz.ch/staff/troyer/ Matthias Troyer] (troyer@comp-phys.org)
-* [@http://www.itp.phys.ethz.ch/staff/wessel/ Stefan Wessel] (wessel@comp-phys.org)
-
-[endsect]

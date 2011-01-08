@@ -10,7 +10,6 @@
 ]
 
 [xinclude overview.xml]
-[xinclude getting_started.xml]
 [xinclude general.xml]
 [xinclude random.xml]
 [xinclude osiris.xml]
