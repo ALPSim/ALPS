@@ -31,7 +31,7 @@
 #include "boost/numeric/bindings/lapack/driver/gesv.hpp"
 
 #include "alps/lattice/graph_helper.h"
-#include "alps/alea.h"
+//#include "alps/alea.h"
 
 #include "types.h"
 #include "green_function.h"
@@ -39,6 +39,12 @@
 #include "hilberttransformer.h"
 
 //forward declarations
+namespace alps{
+template <class T> class SimpleObservableEvaluator;
+typedef class SimpleObservableEvaluator<double> RealObsevaluator;
+}
+
+
 class ClusterHelper: private alps::graph_helper<alps::graph_helper<>::graph_type>
 {
 public:

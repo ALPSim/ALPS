@@ -294,8 +294,8 @@ std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<o*dtau<<"\t";
     for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
-      for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
-        for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+      for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+        for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
           for(unsigned int z2=0;z2<v_and_beta.first.nflavor();++z2)
             os<<v_and_beta.first(o,i,j,z1,z2)<<"\t";
     os<<std::endl;
@@ -307,8 +307,8 @@ std::ostream &operator<<(std::ostream &os, const std::pair<nambu_green_function<
   for(unsigned int o=0;o<v_and_beta.first.ntime();++o){
     os<<(2.*o+1)*M_PI/v_and_beta.second<<"\t";
     for(unsigned int i=0;i<v_and_beta.first.nsite();++i)
-      for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
-        for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+      for(unsigned int j=0;j<v_and_beta.first.nsite();++j)
+        for(unsigned int z1=0;z1<v_and_beta.first.nflavor();++z1)
           for(unsigned int z2=0;z2<v_and_beta.first.nflavor();++z2)
             os<<v_and_beta.first(o,i,j,z1,z2).real()<<" "<<v_and_beta.first(o,i,j,z1,z2).imag()<<" ";
     os<<std::endl;
@@ -485,11 +485,11 @@ void print_selfenergy_matsubara(std::ostream &os, const nambu_matsubara_green_fu
       break;
     case blockdiagonal:
     {
-      std::cerr<<"please use cluster framework for block diag GF"<<std::endl;;
+      std::cerr<<"please use cluster framework for block diag sigma"<<std::endl;;
     }
     case nondiagonal:
     {
-      std::cerr<<"please use cluster framework for non diag GF"<<std::endl;;
+      std::cerr<<"please use cluster framework for non diag sigma"<<std::endl;;
       //throw std::invalid_argument("please use cluster framework for full nondiag GF");
     }
   }

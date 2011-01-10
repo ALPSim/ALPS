@@ -25,6 +25,7 @@
 
 
 #include "cluster.h"
+#include "alps/alea.h"
 
 
 bool adjust_chemical_potential(const double &density, double &mu, bool &damping_mu, 
@@ -815,13 +816,14 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
         for (unsigned int d=0; d<dimension(); ++d) 
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
         double weight = lattice_momentum(kl,dimension());
-        double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
-        //this is the self consistency formula!!! note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
-        //note that this external pairing field is k-independent.
+        //double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+        double prefactor=1.;//(k[0]==0 && k[1]==0)?1.:0.; //cos kx - cos ky
+        //this is the self consistency formula!!!
+        //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         std::complex<double> G_omega_latt_inv[4]=
         {iomega_n + mu -epsilon(k)-selfenergy(freq, kc, kc, 0,0),
-          -selfenergy(freq, kc, kc, 0,1) - dwave_prefactor*std::complex<double>( eta1, eta2),
-          -selfenergy(freq, kc, kc, 1,0) - dwave_prefactor*std::complex<double>( eta1,-eta2),
+          -selfenergy(freq, kc, kc, 0,1) - prefactor*std::complex<double>( eta1, eta2),
+          -selfenergy(freq, kc, kc, 1,0) - prefactor*std::complex<double>( eta1,-eta2),
          iomega_n - mu +epsilon(k)-selfenergy(freq, kc, kc, 1,1)};
         
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
