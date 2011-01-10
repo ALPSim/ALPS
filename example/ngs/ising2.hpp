@@ -34,6 +34,7 @@
 //=======================================================================
 
 #include <alps/ngs.hpp>
+#include <alps/ngs/mcdeprecated.hpp>
 
 class IsingSimulation : public alps::mcdeprecated
 {

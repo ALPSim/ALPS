@@ -40,14 +40,14 @@ class simulation_type : public alps::mcbase {
         {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
-            results << alps::RealObservable("Unused");
-            results << alps::SimpleRealObservable("EnergySimple");
-            results << alps::RealObservable("Energy");
-            results << alps::RealObservable("Magnetization");
-            results << alps::RealObservable("Magnetization^2");
-            results << alps::RealObservable("Magnetization^4");
-            results << alps::SimpleRealVectorObservable("CorrelationsSimple");
-            results << alps::RealVectorObservable("Correlations");
+            results.create_RealObservable("Unused");
+            results.create_SimpleRealObservable("EnergySimple");
+            results.create_RealObservable("Energy");
+            results.create_RealObservable("Magnetization");
+            results.create_RealObservable("Magnetization^2");
+            results.create_RealObservable("Magnetization^4");
+            results.create_SimpleRealVectorObservable("CorrelationsSimple");
+            results.create_RealVectorObservable("Correlations");
         }
         void do_update() {
             for (int j = 0; j < length; ++j) {
