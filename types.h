@@ -27,9 +27,7 @@
 
 #include<complex>
 #include <vector>
-#include <complex>
 #include <iostream>
-#include<sys/types.h>
 
 /// @file types.h
 /// @brief definition for basic types like vectors that are used throughout the solvers.
