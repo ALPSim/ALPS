@@ -40,7 +40,7 @@ int main(int argc, char *argv[]) {
         s.save(static_cast<std::string>(params.value_or_default("DUMP", "dump")));
         alps::results_type<alps::mcmpisim<simulation_type> >::type results = collect_results(s);
         std::cout << results;
-        { 
+        {
             using namespace alps;
             std::cout << "Mean of Energy:       " << short_print(results["Energy"].mean<double>()) << std::endl;
             std::cout << "Mean of Correlations: " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
