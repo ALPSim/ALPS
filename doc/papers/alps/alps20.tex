@@ -461,6 +461,11 @@ The creation of such workflows is explained in a set of tutorials and on the web
 
 This paper already makes use of ALPS 2.0 and VisTrails. Full provenance information for the results in Fig.~\ref{fig:figure} is available from the URL linked to the figure. Clicking the figure will download the workflow that has been used to prepare the figure and its version history. After installing VisTrails and ALPS, the reader of the paper can redo the full simulation.
 
+ALPS VisTrails is also suitable for data analysis only. For compute-intensive problems requiring computer cluster resources the data analysis within Vistrails is performed by reading the observables from stored result files. Operating in this way is the workflow producing Fig.~\ref{fig:datacollapse} showing a data collapse of the Binder cumulant in the classical Ising model. The workflow downloads the corresponding result files from a server, loads the Binder Cumulant observable and allows to interactively determine the critical exponents by a parameter exploration. The reader is invited to explore the sensitivity of the data collapse to the correlation length critical exponent.
+\begin{figure}[t]
+\caption{In this example we show a data collapse of the Binder Cumulant in the classical Ising model. The data has been produced by remotely run simulations and the critical exponent has been obtained with the help of the VisTrails parameter exploration functionality.}
+\label{fig:datacollapse}
+\end{figure}
 
 \begin{figure}[t]
 \begin{multicols}{2}
