@@ -84,7 +84,7 @@ write / read a class to / from hdf5 (if the path inside a class does not start w
 			my_class(double v = 0): d(v) {}
 			double get_value() { return d; }
 			void serialize(hdf5::iarchive & ar) { ar >> make_pvp("value", d); }
-			void serialize(hdf5::oarchive &) const { ar << make_pvp("value", d); }
+			void serialize(hdf5::oarchive & ar) const { ar << make_pvp("value", d); }
 		private:
 			double d;
 		};
