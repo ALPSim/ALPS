@@ -48,6 +48,8 @@ class simulation_type : public alps::mcbase {
             results.create_RealObservable("Magnetization^4");
             results.create_SimpleRealVectorObservable("CorrelationsSimple");
             results.create_RealVectorObservable("Correlations");
+            results.create_RealObservable("Sign");
+            results.create_SignedRealObservable("SignedEnergy");
         }
         void do_update() {
             for (int j = 0; j < length; ++j) {
@@ -65,9 +67,11 @@ class simulation_type : public alps::mcbase {
             if (sweeps > thermalization_sweeps) {
                 tmag = 0;
                 ten = 0;
+                sign = 1;
                 corr.resize(length, 0.);
                 for (int i = 0; i < length; ++i) {
                     tmag += spins[i];
+                    sign *= spins[i];
                     ten += -spins[i] * spins[ i + 1 < length ? i + 1 : 0 ];
                     for (int d = 0; d < length; ++d)
                         corr[d] += spins[i] * spins[( i + d ) % length ];
@@ -82,6 +86,8 @@ class simulation_type : public alps::mcbase {
                 results["Magnetization^4"] << tmag * tmag * tmag * tmag;
                 results["CorrelationsSimple"] << corr;
                 results["Correlations"] << corr;
+                results["Sign"] << sign;
+                results["SignedEnergy"] << ten;
             }
         };
         double fraction_completed() const {
@@ -95,6 +101,7 @@ class simulation_type : public alps::mcbase {
         double beta;
         double tmag;
         double ten;
+        double sign;
         std::vector<int> spins;
         std::valarray<double> corr;
 };
