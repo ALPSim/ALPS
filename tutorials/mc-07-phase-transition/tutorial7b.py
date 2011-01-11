@@ -50,7 +50,7 @@ for l in [32,48,64]:
 
 #write the input file and run the simulation
 input_file = pyalps.writeInputFiles('parm7b',parms)
-pyalps.runApplication('spinmc',input_file,Tmin=5)
+pyalps.runApplication('spinmc',input_file,Tmin=5,MPI=4)
 
 pyalps.evaluateSpinMC(pyalps.getResultFiles(prefix='parm7b'))
 
