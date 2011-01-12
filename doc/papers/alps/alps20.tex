@@ -322,7 +322,7 @@ Python programs can interoperate with code written in a different language. As a
 \subsection{The pyalps package}
 ALPS 2.0 contains a package of Python modules for interfacing the low-level ALPS code to Python and vice versa, running simulations, and evaluation and post-processing of data. This package is known as pyalps. The advantages of using Python versus exclusively using low-level code for the above tasks are manifold. For example, Python's large standard library and ability to easily interface with low-level code allow for great flexibility in post-processing of data. Also, the use of Python facilitates use of the VisTrails workflow provenance tool, as VisTrails is written in Python.
 
- pyalps includes functions to write the xml files read by most applications, and additional functions to write special input files for applications with non-xml interfaces such as {\tt dmft} and {\tt tebd}. It also includes functions to run applications with specified input files both in series and in parallel. An example of the preparation of input files and running a simulation using pyalps is shown in Fig.~\ref{fig:python}.
+Pyalps includes functions to write the xml files read by most applications, and additional functions to write special input files for applications with non-xml interfaces such as {\tt dmft} and {\tt tebd}. It also includes functions to run applications with specified input files both in series and in parallel. An example of the preparation of input files and running a simulation using pyalps is shown in Fig.~\ref{fig:python}.
 
 Once the simulation has been run we must extract and evaluate data from it. At the heart of the pyalps evaluation tools is the {\tt DataSet} class. A {\tt DataSet} has as members {\tt x} and {\tt y} which are Numpy arrays containing numerical data. A {\tt DataSet} also has a member {\tt props} which is a dictionary -- one of the built-in types of Python -- of metadata describing the numerical data. The presence of the metadata allows for complex evaluations, for example when dealing with many {\tt DataSet}s from a parameter scan.
 
@@ -462,7 +462,17 @@ The creation of such workflows is explained in a set of tutorials and on the web
 This paper already makes use of ALPS 2.0 and VisTrails. Full provenance information for the results in Fig.~\ref{fig:figure} is available from the URL linked to the figure. Clicking the figure will download the workflow that has been used to prepare the figure and its version history. After installing VisTrails and ALPS, the reader of the paper can redo the full simulation.
 
 ALPS VisTrails is also suitable for data analysis only. For compute-intensive problems requiring computer cluster resources the data analysis within Vistrails is performed by reading the observables from stored result files. Operating in this way is the workflow producing Fig.~\ref{fig:datacollapse} showing a data collapse of the Binder cumulant in the classical Ising model. The workflow downloads the corresponding result files from a server, loads the Binder Cumulant observable and allows to interactively determine the critical exponents by a parameter exploration. The reader is invited to explore the sensitivity of the data collapse to the correlation length critical exponent.
+
 \begin{figure}[t]
+\centering
+\vistrail[host=alps.comp-phys.org,
+db=vistrails,
+vtid=15,
+version=332,
+pdf,
+getvtl,
+%showtree,
+showspreadsheetonly]{width=8cm}
 \caption{In this example we show a data collapse of the Binder Cumulant in the classical Ising model. The data has been produced by remotely run simulations and the critical exponent has been obtained with the help of the VisTrails parameter exploration functionality.}
 \label{fig:datacollapse}
 \end{figure}
