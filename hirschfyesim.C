@@ -31,6 +31,7 @@
 /// @brief the actual Hirsch-Fye simulation
 #include <cmath>
 
+#include "alps/config.h"
 #include <blas_classes/matrix.h>
 #ifdef FOURPOINT
 #include <blas_classes/vector.h>

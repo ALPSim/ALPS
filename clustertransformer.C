@@ -816,8 +816,9 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
         for (unsigned int d=0; d<dimension(); ++d) 
           k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
         double weight = lattice_momentum(kl,dimension());
-        //double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
-        double prefactor=1.;//(k[0]==0 && k[1]==0)?1.:0.; //cos kx - cos ky
+        double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+        //double prefactor=1.;//(k[0]==0 && k[1]==0)?1.:0.; //cos kx - cos ky
+        double prefactor=dwave_prefactor;
         //this is the self consistency formula!!!
         //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         std::complex<double> G_omega_latt_inv[4]=
@@ -948,7 +949,6 @@ nambu_matsubara_green_function_t AntiFerroDCATransformer::operator()(const nambu
 }
 nambu_green_function<double> SimpleDCATransformer::spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet) const
 {
-  std::cout<<"this is the Itime Nambu symmetrizer. Implement symmetries for Nambu offidag terms"<<std::endl;
   nambu_green_function<double> G_new(G);
   if (paramagnet) {
     for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
@@ -957,11 +957,11 @@ nambu_green_function<double> SimpleDCATransformer::spin_symmetrizer(const nambu_
           itime_index_t other_n=G_new.nfreq()-1-n;
           G_new(n, k1, k2, 0,0)= 0.5*(G(n, k1, k2, 0,0)+G(other_n, k1, k2, 1,1));
           G_new(other_n, k1, k2, 1,1)= G_new(n, k1, k2, 0,0);
-          /*G_new(n, k1, k2, 0,1)= 0.5*(G(n, k1, k2, 0,1)+G(other_n, k1, k2, 1,0));
-          G_new(other_n, k1, k2, 1,0)= G_new(n, k1, k2, 0,1);*/
-          //std::cout<<"symmetrizing: "<<G(n, k1, k2, 0,0)<<" "<<G(other_n, k1, k2, 1,1)<<" and: "<<G(n, k1, k2, 0,1)<<" "<<G(other_n, k1, k2, 1,0)<<std::endl;
-          //std::cout<<"new values  : "<<G_new(n, k1, k2, 0,0)<<" "<<G_new(other_n, k1, k2, 1,1)<<" and: "<<G_new(n, k1, k2, 0,1)<<" "<<G_new(other_n, k1, k2, 1,0)<<std::endl;
+          G_new(n, k1, k2, 0,1)= 0.5*(G(n, k1, k2, 0,1)-G(other_n, k1, k2, 1,0));
+          G_new(other_n, k1, k2, 1,0)=-G_new(n, k1, k2, 0,1);
         }
+        //std::cout<<"symmetrizing: "<<G(0, k1, k2, 0,0)<<" "<<G(G_new.nfreq()-1, k1, k2, 1,1)<<" and: "<<G(0, k1, k2, 0,1)<<" "<<G(G_new.nfreq()-1, k1, k2, 1,0)<<std::endl;
+        //std::cout<<"new values  : "<<G_new(0, k1, k2, 0,0)<<" "<<G_new(G_new.nfreq()-1, k1, k2, 1,1)<<" and: "<<G_new(0, k1, k2, 0,1)<<" "<<G_new(G_new.nfreq()-1, k1, k2, 1,0)<<std::endl;
       }
     }
   }else {
@@ -971,10 +971,9 @@ nambu_green_function<double> SimpleDCATransformer::spin_symmetrizer(const nambu_
 }
 nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetrizer(const nambu_green_function<std::complex<double> >& G, const bool paramagnet) const
 {
-  std::cout<<"this is the Matsubara Nambu symmetrizer. Implement symmetries for Nambu offidag terms"<<std::endl;
   nambu_green_function<std::complex<double> > G_new(G);
-  std::ofstream nambu_before_file("beforespin.dat");
-  nambu_before_file<<std::make_pair(G, 10.)<<std::endl;;
+  //std::ofstream nambu_before_file("beforespin.dat");
+  //nambu_before_file<<std::make_pair(G, 10.)<<std::endl;;
   if (paramagnet) {
       for (site_t k1=0; k1<n_cluster_sites(); ++k1) {
         for (site_t k2=0; k2<n_cluster_sites(); ++k2) {
@@ -983,13 +982,16 @@ nambu_green_function<std::complex<double> > SimpleDCATransformer::spin_symmetriz
             G_new(freq, k1, k2, 0,0).real()= 0.5*(G(freq, k1, k2, 0,0).real()-G_new(freq, k1, k2, 1,1).real());
             G_new(freq, k1, k2, 1,1).real()= -G_new(freq, k1, k2, 0,0).real();
             G_new(freq, k1, k2, 1,1).imag()=  G_new(freq, k1, k2, 0,0).imag();
-            G_new(freq, k1, k2, 0,1)= G(freq, k1, k2, 0,1);
-            G_new(freq, k1, k2, 1,0)= G(freq, k1, k2, 1,0);
+            //symmetrize the  F.
+            G_new(freq, k1, k2, 0,1)= (G(freq, k1, k2, 0,1)+std::conj(G(freq, k1, k2, 1,0)))/2.;
+            G_new(freq, k1, k2, 1,0)= std::conj(G_new(freq, k1, k2, 0,1));
           }
+        //std::cout<<"symmetrizing: "<<G(0, k1, k2, 0,0)<<" "<<G(0, k1, k2, 1,1)<<" and: "<<G(0, k1, k2, 0,1)<<" "<<G(0, k1, k2, 1,0)<<std::endl;
+        //std::cout<<"new values  : "<<G_new(0, k1, k2, 0,0)<<" "<<G_new(0, k1, k2, 1,1)<<" and: "<<G_new(0, k1, k2, 0,1)<<" "<<G_new(0, k1, k2, 1,0)<<std::endl;
         }
       }
   }
-  std::ofstream nambu_after_file("afterspin.dat");
-  nambu_after_file<<std::make_pair(G_new, 10.);
+  //std::ofstream nambu_after_file("afterspin.dat");
+  //nambu_after_file<<std::make_pair(G_new, 10.);
   return G_new;
 }

@@ -1040,28 +1040,45 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
   unsigned int nsite=G.nsite();
   unsigned int nfreq=G.nfreq();
   nambu_green_function<T> G_new(nfreq, nsite, 2, diagonal);
-  std::cout<<"in Nambu symmetrization helper."<<std::endl;
-  std::cout<<"symmetrization over: "<<std::endl;
   std::set<pair_class_type>::const_iterator itc, itc_end;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
-    std::cout<<"symmetrization over sites..."<<std::endl;
-    for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
-      std::cout<<it->first<<" "<<it->second<<std::endl;
-    }
-    for (spin_t f1=0; f1<2; ++f1) {
-      for (spin_t f2=0; f2<2; ++f2) {
-        for (frequency_t freq=0; freq<nfreq; ++freq) {
-          T av=0;
-          for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
-            av += G(freq, it->first, it->second, f1,f2);
-          av /= itc->size();
-          for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
-            G_new(freq, it->first, it->second, f1,f2) = av;
-        }
+    for (spin_t f=0; f<2; ++f) {
+      for (frequency_t freq=0; freq<nfreq; ++freq) {
+        T av=0;
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+          av += G(freq, it->first, it->second, f,f);
+        av /= itc->size();
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+          G_new(freq, it->first, it->second, f,f) = av;
       }
     }
   }
-  std::cout<<"done Nambu symmetrization helper."<<std::endl;
+
+  //this is the k-space symmetrization respecting d-wave symmetry
+  std::vector<double> dwave_prefactor(nsite);
+  for(unsigned int i=0;i<nsite;++i){
+    double dwave=cos(cluster_momentum(i,0))-cos(cluster_momentum(i,1));
+    if(dwave < -1.e-5) dwave_prefactor[i]=-1;
+    else if(dwave >  1.e-5) dwave_prefactor[i]=1;
+    else dwave_prefactor[i]=0.;
+  }
+  for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    for (frequency_t freq=0; freq<nfreq; ++freq) { 
+      T av01=0;
+      T av10=0;
+      for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+        if(it->first != it-> second) continue;
+        av01 += dwave_prefactor[it->first]*G(freq, it->first, it->second, 0,1);
+        av10+= dwave_prefactor[it->first]*G(freq, it->first, it->second, 1,0);
+      }
+      av01/= itc->size();
+      av10/= itc->size();
+      for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+        G_new(freq, it->first, it->second, 0,1) = dwave_prefactor[it->first]*av01;
+        G_new(freq, it->first, it->second, 1,0) = dwave_prefactor[it->first]*av10;
+      }
+    }
+  }
   return G_new;
 }
 
