@@ -117,11 +117,21 @@ template<typename T> void nambu_green_function<T>::read(const char *filename){
   double ignored;
   for(unsigned int i=0;i<nt_;++i){
     in_file>>ignored; //read first entry, which could be # matsubara frequencies, or tau-point, or N/beta*tau, or...
-    for(unsigned int s0=0; s0<ns_; ++s0) {
-      for(unsigned int s1=0; s1<ns_; ++s1){
-        for(unsigned int f1=0; f1<nf_; ++f1) {
+    if(shape_==diagonal){
+      for(unsigned int s0=0; s0<ns_; ++s0) {
+        for(unsigned int f1=0; f1<nf_; ++f1){
           for(unsigned int f2=0; f2<nf_; ++f2) {
-            in_file>>operator()(i, s0, s1, f1, f2); //read the actual value
+            in_file>>operator()(i, s0, s0, f1,f2); 
+          }
+        }
+      }
+    }else{
+      for(unsigned int s0=0; s0<ns_; ++s0) {
+        for(unsigned int s1=0; s1<ns_; ++s1){
+          for(unsigned int f1=0; f1<nf_; ++f1) {
+            for(unsigned int f2=0; f2<nf_; ++f2) {
+              in_file>>operator()(i, s0, s1, f1, f2); //read the actual value
+            }
           }
         }
       }
@@ -134,18 +144,22 @@ template<typename T> void nambu_green_function<T>::write(const char *filename){
   if(!out_file.is_open()){ std::cerr<<"output file "<<filename<<" could not be opened!"<<std::endl; exit(1);}
   for(unsigned int i=0;i<nt_;++i){
     out_file << i << " ";
-    for(unsigned int s0=0; s0<ns_; ++s0) {
-      for(unsigned int s1=0; s1<ns_; ++s1){
-        if(shape_==diagonal){
-        for(unsigned int f1=0; f1<nf_; ++f1) {
-            out_file<<operator()(i, s0, s1, f1,f1) << " "; 
-        }
-        }else{
-        for(unsigned int f1=0; f1<nf_; ++f1) {
+    if(shape_==diagonal){
+      for(unsigned int s0=0; s0<ns_; ++s0) {
+        for(unsigned int f1=0; f1<nf_; ++f1){
           for(unsigned int f2=0; f2<nf_; ++f2) {
-            out_file<<operator()(i, s0, s1, f1,f2) << " "; 
+            out_file<<operator()(i, s0, s0, f1,f2)<<" ";
           }
         }
+      }
+    }else{
+      for(unsigned int s0=0; s0<ns_; ++s0) {
+        for(unsigned int s1=0; s1<ns_; ++s1){
+          for(unsigned int f1=0; f1<nf_; ++f1) {
+            for(unsigned int f2=0; f2<nf_; ++f2) {
+              out_file<<operator()(i, s0, s1, f1,f2) << " "; 
+            }
+          }
         }
       }
     }

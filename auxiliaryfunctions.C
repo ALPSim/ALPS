@@ -31,6 +31,7 @@
 #include "green_function.h"
 #include "nambu_green_function.h"
 #include "U_matrix.h"
+#include "blas_classes/general_matrix.h"
 #include <fstream>
 #include <sstream>
 #include <math.h>
@@ -39,6 +40,7 @@
 
 
 
+void matrix_inversion(blas::general_matrix<std::complex<double> >&A, blas::general_matrix<std::complex<double> >&A_inv);
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape)
 {
   os<<std::setprecision(20);
@@ -489,7 +491,39 @@ void print_selfenergy_matsubara(std::ostream &os, const nambu_matsubara_green_fu
     }
     case nondiagonal:
     {
-      std::cerr<<"please use cluster framework for non diag sigma"<<std::endl;;
+  int nsite=g_dressed.nsite();
+      for(unsigned int w=0;w<g_dressed.nfreq();++w){
+        os<<(2*w+1)*M_PI/beta<<"\t";
+      blas::general_matrix<std::complex<double> > G(nsite*2, nsite*2);
+      blas::general_matrix<std::complex<double> > G_inv(nsite*2, nsite*2);
+      blas::general_matrix<std::complex<double> > G0(nsite*2, nsite*2);
+      blas::general_matrix<std::complex<double> > G0_inv(nsite*2, nsite*2);
+      for(unsigned int i=0;i<nsite;++i){
+        for(unsigned int j=0;j<nsite;++j){
+        G(2*i  , 2*j  )=g_dressed(w,i,j,0,0);
+        G(2*i  , 2*j+1)=g_dressed(w,i,j,0,1);
+        G(2*i+1, 2*j  )=g_dressed(w,i,j,1,0);
+        G(2*i+1, 2*j+1)=g_dressed(w,i,j,1,1);
+        G0(2*i  , 2*j  )=g_bare(w,i,j,0,0);
+        G0(2*i  , 2*j+1)=g_bare(w,i,j,0,1);
+        G0(2*i+1, 2*j  )=g_bare(w,i,j,1,0);
+        G0(2*i+1, 2*j+1)=g_bare(w,i,j,1,1);
+      }
+    }
+    matrix_inversion(G, G_inv);
+    matrix_inversion(G0, G0_inv);
+    for(unsigned int i=0;i<nsite;++i){
+      for(unsigned int j=0;j<nsite;++j){
+        std::complex<double> sigma00=G0_inv(2*i  , 2*i  )-G_inv(2*i  ,2*i  );
+        std::complex<double> sigma01=G0_inv(2*i  , 2*i+1)-G_inv(2*i  ,2*i+1);
+        std::complex<double> sigma10=G0_inv(2*i+1, 2*i  )-G_inv(2*i+1,2*i  );
+        std::complex<double> sigma11=G0_inv(2*i+1, 2*i+1)-G_inv(2*i+1,2*i+1);
+          os<<sigma00.real()<<" "<<sigma00.imag()<<" "<<sigma01.real()<<" "<<sigma01.imag()<<" ";
+          os<<sigma10.real()<<" "<<sigma10.imag()<<" "<<sigma11.real()<<" "<<sigma11.imag()<<" ";
+      }
+    }
+    os<<std::endl;
+  }
       //throw std::invalid_argument("please use cluster framework for full nondiag GF");
     }
   }
@@ -530,3 +564,26 @@ void print_all_nambu_green_functions(std::string const &basename, const int iter
   print_green_itime(G_tau_file_2,G_tau,beta, shape);
   print_selfenergy_matsubara(selfenergy_file, G0_omega, G_omega, beta, shape);
 }
+void matrix_inversion(blas::general_matrix<std::complex<double> >&A, blas::general_matrix<std::complex<double> >&A_inv){
+  std::size_t size=A.size1();
+  if(A.size1()==0){
+    return;
+  }
+  //build the unit matrix
+  memset(&(A_inv(0,0)), 0, A_inv.size1()*A_inv.size1()*sizeof(std::complex<double>));
+  for(uint i=0;i<size;++i){
+    A_inv(i,i)=1;
+  }
+  //solve 1=A^{-1}A
+  //destructive in-place solver - will overwrite unit matrix
+  if(A.size1()==1){
+    A_inv(0,0)=1./A(0,0);
+  }else{
+    int size=A.size1();
+    int ipiv[size];
+    int info;
+    lapack::zgesv_(&size, &size, &(A(0,0)),&(A.size1()), ipiv, &(A_inv(0,0)), &(A_inv.size1()), &info);
+    if(info!=0) std::cerr<<"dgesv went wrong!!"<<std::endl;
+  }
+}
+

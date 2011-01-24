@@ -3,8 +3,8 @@ find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
 include(${ALPS_USE_FILE})
 
 project (DMFT)
-include_directories("/Users/emanuel/alps_svn/")
-#include_directories("/cluster/home/phys/gullc/alps_svn")
+#include_directories("/Users/emanuel/alps_svn/")
+include_directories("/cluster/home/phys/gullc/alps_svn")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=native -O3 -DUSE_MPI -DNDEBUG")
 
 add_executable(dmft 

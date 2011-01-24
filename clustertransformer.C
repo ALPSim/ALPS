@@ -866,7 +866,7 @@ nambu_matsubara_green_function_t ClusterTransformer::initial_G0_nambu(const alps
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
-  if(n_orbital!=2) throw std::invalid_argument("dunnow how to handle nambu in >2 orbitals!");
+  if(n_orbital!=2) throw std::invalid_argument("dunno how to handle nambu in >2 orbitals!");
   nambu_matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
   G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
   return G0_omega;

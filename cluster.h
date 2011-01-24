@@ -1032,11 +1032,36 @@ nambu_green_function<T> SimpleDCATransformer::transform_coordinates(const nambu_
   }
   return G_new;
 }
+/*  unsigned int nflavor=G.nflavor();
+  unsigned int nsite=G.nsite();
+  unsigned int nt=G.ntime();
+  assert(nsite==n_cluster_sites());
+  green_function<T> G_new(nt, nsite, nflavor);
+  G_new.clear();
+  for (site_t k=0; k<nsite; ++k) {
+    for (site_t i=0; i<nsite; ++i) {
+      for (site_t j=0; j<nsite; ++j) { 
+        double phase = 0.;
+        for (unsigned int d=0; d<dimension(); ++d)
+          phase += cluster_momentum(k,d)*(cluster_coordinate(i,d)-cluster_coordinate(j,d));
+        for (itime_index_t t=0; t<nt; ++t) {
+          for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+            D::add(G_new, G, t, i, j, k, flavor, cos(phase)/double(nsite));
+          }
+        }
+      }
+    }
+  }
+  return G_new; 
+*/
 template<typename T>
 nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_function<T>& G, 
                                                           const std::pair<std::set<pair_class_type>::const_iterator, 
                                                           std::set<pair_class_type>::const_iterator> pair_classes) const
 {
+  std::cout<<"ignoring symmetrization."<<std::endl;
+  return G;
+/*
   unsigned int nsite=G.nsite();
   unsigned int nfreq=G.nfreq();
   nambu_green_function<T> G_new(nfreq, nsite, 2, diagonal);
@@ -1080,6 +1105,6 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
     }
   }
   return G_new;
-}
+*/}
 
 #endif /*ALPS_CLUSTER_H*/
