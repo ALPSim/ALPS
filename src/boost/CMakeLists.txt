@@ -187,7 +187,7 @@ if (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boost_R
     endif (BUILD_SHARED_LIBS)
 
     set_target_properties(mpi PROPERTIES PREFIX "")
-    target_link_libraries(mpi boost ${BOOST_LINK_LIBS})
+    target_link_libraries(mpi ${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
 
 
     if(ALPS_INSTALL_VISTRAILS_PACKAGES) 
@@ -215,8 +215,8 @@ endif (BUILD_BOOST_MPI AND BUILD_BOOST_PYTHON AND NOT ALPS_BUILD_SOURCE AND Boos
 # Setting "boost" target not needed when precompiled Boost libraries found.
 
 if (NOT Boost_FOUND)
-  add_library(boost ${BOOST_SOURCES})
-  target_link_libraries(boost ${BOOST_LINK_LIBS})
+  add_library(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_SOURCES})
+  target_link_libraries(${ALPS_BOOST_LIBRARY_NAME} ${BOOST_LINK_LIBS})
 
     # Boost.Test
     if(BUILD_BOOST_TEST AND NOT ALPS_FOR_VISTRAILS)
@@ -276,26 +276,26 @@ if (NOT Boost_FOUND)
 
   if (NOT ALPS_BUILD_SOURCE)
     if(MSVC)
-      get_target_property(LIB_NAME boost LOCATION)
-      add_custom_command(TARGET boost POST_BUILD
+      get_target_property(LIB_NAME ${ALPS_BOOST_LIBRARY_NAME} LOCATION)
+      add_custom_command(TARGET ${ALPS_BOOST_LIBRARY_NAME} POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy ${LIB_NAME} ${PROJECT_BINARY_DIR}/bin)
     endif(MSVC)
 
     if (ALPS_FOR_VISTRAILS)
-      SET_TARGET_PROPERTIES(boost
+      SET_TARGET_PROPERTIES(${ALPS_BOOST_LIBRARY_NAME}
         PROPERTIES BUILD_WITH_INSTALL_RPATH ON
         INSTALL_NAME_DIR "@executable_path/../Frameworks"
       )
     endif (ALPS_FOR_VISTRAILS)
 
     if (ALPS_INSTALL_VISTRAILS_PACKAGES)
-      install(TARGETS boost  COMPONENT vistrails
+      install(TARGETS ${ALPS_BOOST_LIBRARY_NAME}  COMPONENT vistrails
               RUNTIME DESTINATION ${VISTRAILS_DYLIB_DIR}
               ARCHIVE DESTINATION ${VISTRAILS_DYLIB_DIR}
               LIBRARY DESTINATION ${VISTRAILS_DYLIB_DIR})
     endif (ALPS_INSTALL_VISTRAILS_PACKAGES)
     if (NOT ALPS_FOR_VISTRAILS)
-      install(TARGETS boost COMPONENT libraries
+      install(TARGETS ${ALPS_BOOST_LIBRARY_NAME} COMPONENT libraries
               RUNTIME DESTINATION bin
               ARCHIVE DESTINATION lib
               LIBRARY DESTINATION lib)

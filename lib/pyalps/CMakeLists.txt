@@ -34,7 +34,7 @@ if (ALPS_HAVE_PYTHON)
     if (Boost_FOUND)
       target_link_libraries(${name} ${Boost_LIBRARIES} ${LINK_LIBRARIES} ${HDF5_LIBRARIES})
     else (Boost_FOUND)
-      target_link_libraries(${name} boost ${LINK_LIBRARIES} ${HDF5_LIBRARIES})
+      target_link_libraries(${name} ${ALPS_BOOST_LIBRARY_NAME} ${LINK_LIBRARIES} ${HDF5_LIBRARIES})
     endif (Boost_FOUND)
   ENDFOREACH(name)
 
