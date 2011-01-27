@@ -65,21 +65,22 @@
 \def\vtworkflow{false}
 \def\vttree{false}
 \def\vtgetvtl{false}
-\newread\myinput
-%% We use '\jobname.python.temp' to store a unique file saying if python is present
-\immediate\write18{type -P \vistrailspythonpath > \jobname.python.temp}
-\immediate\openin\myinput=\jobname.python.temp
-% The group localizes the change to \endlinechar
-\bgroup
-  \endlinechar=-1
-  \immediate\read\myinput to \localline
-  % Since everything in the group is local, we have to explicitly make the
-  % assignment global
-  \global\let\pythonexists\localline
-\egroup
-\immediate\closein\myinput
-% Clean up after ourselves
-\immediate\write18{rm -f -- \jobname.python.temp}
+
+% \newread\myinput
+% %% We use '\jobname.python.temp' to store a unique file saying if python is present
+% \immediate\write18{type -P \vistrailspythonpath > \jobname.python.temp}
+% \immediate\openin\myinput=\jobname.python.temp
+% % The group localizes the change to \endlinechar
+% \bgroup
+%   \endlinechar=-1
+%   \immediate\read\myinput to \localline
+%   % Since everything in the group is local, we have to explicitly make the
+%   % assignment global
+%   \global\let\pythonexists\localline
+% \egroup
+% \immediate\closein\myinput
+% % Clean up after ourselves
+% \immediate\write18{rm -f -- \jobname.python.temp}
 
 \setkeys{vt}{#1}
 \ifthenelse{\equal{\vtpdf}{true}}{\def\vttype{pdf}}{\def\vttype{png}}
