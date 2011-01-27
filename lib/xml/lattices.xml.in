@@ -224,16 +224,6 @@
   <EDGE><SOURCE vertex="1"/><TARGET vertex="2" offset="1 -1"/></EDGE>
 </UNITCELL>
 
-<UNITCELL name="stag2d" dimension="2">
-  <VERTEX type="0"><COORDINATE>0 0</COORDINATE></VERTEX>
-  <VERTEX type="1"><COORDINATE>0 0.5</COORDINATE></VERTEX>
-
-  <EDGE><SOURCE vertex="1"/><TARGET vertex="2"/></EDGE>
-  <EDGE><SOURCE vertex="1"/><TARGET vertex="1" offset="1 0"/></EDGE>
-  <EDGE><SOURCE vertex="2"/><TARGET vertex="2" offset="1 0"/></EDGE>
-  <EDGE><SOURCE vertex="2"/><TARGET vertex="1" offset="0 1"/></EDGE>
-</UNITCELL>
-
 <UNITCELL name="coupled ladders" dimension="2">
   <VERTEX type="0"/>
   <VERTEX type="0"/>
@@ -305,17 +295,6 @@
     <BOUNDARY type="periodic"/>
   </FINITELATTICE>
   <UNITCELL ref="simple2d"/>
-</LATTICEGRAPH>
-
-<LATTICEGRAPH name = "staggered square lattice">
-  <FINITELATTICE>
-    <LATTICE ref="square lattice"/>
-    <PARAMETER name="W" default="L"/>
-    <EXTENT dimension="1" size="L"/>
-    <EXTENT dimension="2" size="W"/>
-    <BOUNDARY type="periodic"/>
-  </FINITELATTICE>
-  <UNITCELL ref="stag2d"/>
 </LATTICEGRAPH>
 
 <LATTICEGRAPH name = "open square lattice">
