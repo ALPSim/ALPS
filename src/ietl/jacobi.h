@@ -129,10 +129,10 @@ namespace ietl
     template <class MATRIX, class VS>
     void jcd_simple_solver<MATRIX, VS>::operator()(const vector_type& u, const magnitude_type& theta, const vector_type& r, vector_type& t, const magnitude_type& rel_tol)
     {
-       for (int i=0;i<n_;i++)
-           t[i] = -r[i] / ( matrix_(i,i) - theta );
+       //for (int i=0;i<n_;i++)
+         //  t[i] = -r[i] / ( matrix_(i,i) - theta );
         // std::cout << "Preconditioner, theta = " << theta << std::endl;
-        // t = -1*r / (1-theta);
+        t = -1*r / (1-theta);
     }
     
     
@@ -270,16 +270,9 @@ namespace ietl
             get_extremal_eigenvalue(theta,s,iter.iterations()+1);
             
             // u = V s
-            for (i=0;i<n_;i++)
-            {
-               // u[i] = V[0][i] * s[0];
-                u = V[0] * s[0];
-                for (j=1;j<=iter.iterations();j++)
-                {
-                    u += V[j] * s[j];
-                   // u[i] += V[j][i] * s[j];
-                }
-            }
+            u = V[0] * s[0];
+            for (j=1;j<=iter.iterations();j++)
+                u += V[j] * s[j];
             
             // u^A = V^A s
             ietl::mult(matrix_,u,uA);
