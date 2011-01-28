@@ -25313,4 +25313,49 @@
     <UNITCELL ref="simple3d"/>
   </LATTICEGRAPH>
 
+ <LATTICE name="Gull2D-36B superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>6 0</VECTOR>
+      <VECTOR>0 6</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR> 2*pi/6 0</VECTOR>
+      <VECTOR> 0 2*pi/6</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Gull2D-36B">
+    <FINITELATTICE>
+      <LATTICE ref="Gull2D-36B superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+
 </LATTICES>
+
+ <LATTICE name="Gull2D-50A superlattice" dimension="2">
+    <BASIS>
+      <VECTOR>5 5</VECTOR>
+      <VECTOR>5 -5</VECTOR>
+    </BASIS>
+    <RECIPROCALBASIS>
+      <VECTOR> -10*pi/50 -10*pi/50</VECTOR>
+      <VECTOR> -10*pi/50 10*pi/50</VECTOR>
+    </RECIPROCALBASIS>
+  </LATTICE>
+
+  <LATTICEGRAPH name = "Gull2D-50A">
+    <FINITELATTICE>
+      <LATTICE ref="Gull2D-50A superlattice"/>
+      <PARAMETER name="L" default="30"/>
+      <EXTENT dimension="1" size="L"/>
+      <EXTENT dimension="2" size="L"/>
+      <BOUNDARY type="periodic"/>
+    </FINITELATTICE>
+    <UNITCELL ref="simple2d"/>
+  </LATTICEGRAPH>
+

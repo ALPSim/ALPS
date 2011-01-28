@@ -866,6 +866,7 @@ nambu_matsubara_green_function_t ClusterTransformer::initial_G0_nambu(const alps
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_orbital=boost::lexical_cast<int>(parms["FLAVORS"]);
   int n_site=boost::lexical_cast<int>(parms["SITES"]);
+  double beta =boost::lexical_cast<double>(parms["BETA"]);
   if(n_orbital!=2) throw std::invalid_argument("dunno how to handle nambu in >2 orbitals!");
   nambu_matsubara_green_function_t G0_omega(n_matsubara, n_site, n_orbital, diagonal);
   G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
@@ -934,12 +935,12 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   FourierTransformer::generate_transformer(parms, fourier_ptr);
   fourier_ptr->backward_ft(G0_tau, G0_omega_new);
   G0_tau.write("G0_tau_input");
-  nambu_matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
-  G0_omega_real.write("G0_omega_input_realspace");
-  nambu_itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
-  G0_tau_real.write("G0_tau_input_realspace");
-  std::ofstream g0_omega_input_hr("g0_omega_input_hr.dat"); g0_omega_input_hr<<std::make_pair(G0_omega_new,beta);
-  std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
+  //nambu_matsubara_green_function_t G0_omega_real = transform_into_real_space(G0_omega_new);
+  //G0_omega_real.write("G0_omega_input_realspace");
+  //nambu_itime_green_function_t G0_tau_real = transform_into_real_space(G0_tau);
+  //G0_tau_real.write("G0_tau_input_realspace");
+  //std::ofstream g0_omega_input_hr("g0_omega_input_hr.dat"); g0_omega_input_hr<<std::make_pair(G0_omega_new,beta);
+  //std::ofstream g0_omega_input_rs_hr("g0_omega_input_rs_hr.dat"); g0_omega_input_rs_hr<<std::make_pair(G0_omega_real,beta);
   return G0_omega_new;
 }
 nambu_matsubara_green_function_t AntiFerroDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 

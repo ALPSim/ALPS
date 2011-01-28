@@ -1,7 +1,8 @@
 #ifndef nambu_green_function_H
 #define nambu_green_function_H
-#include <DMFT/types.h>
+#include "DMFT/types.h"
 #include <fstream>
+#include <iomanip>
 #include <cstdlib>
 #include <iostream>
 #include <alps/hdf5.hpp>
@@ -121,10 +122,11 @@ template<typename T> void nambu_green_function<T>::read(const char *filename){
       for(unsigned int s0=0; s0<ns_; ++s0) {
         for(unsigned int f1=0; f1<nf_; ++f1){
           for(unsigned int f2=0; f2<nf_; ++f2) {
-            in_file>>operator()(i, s0, s0, f1,f2); 
+            in_file>>operator()(i, s0, s0, f1,f2)>>std::ws; 
           }
         }
       }
+      in_file>>std::ws;
     }else{
       for(unsigned int s0=0; s0<ns_; ++s0) {
         for(unsigned int s1=0; s1<ns_; ++s1){

@@ -349,12 +349,12 @@ public:
     }
   }
   
-  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const{
+  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) {
     std::cout<<"implement 2nd derivatives for F function before using this!"<<std::endl;
     FourierTransformer::forward_ft(G_tau, G_omega);
   }
   
-  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
+  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega){
     FourierTransformer::backward_ft(G_tau, G_omega);
     std::cout<<"correcting for F function"<<std::endl;
     for(unsigned int j=0;j<G_tau.nflavor();++j){
@@ -401,13 +401,13 @@ public:
     }
   }
   
-  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const
+  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) 
   {
     std::cout<<"implement 2nd derivatives for F function before using this!"<<std::endl;
     FourierTransformer::forward_ft(G_tau, G_omega);
   }
   
-  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega);
+  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) ;
   
   /*  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
    const green_function<alps::RealObsevaluator> &G_omega_real,

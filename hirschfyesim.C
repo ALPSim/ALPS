@@ -32,9 +32,9 @@
 #include <cmath>
 
 #include "alps/config.h"
-#include <blas_classes/matrix.h>
+#include "blas_classes/matrix.h"
 #ifdef FOURPOINT
-#include <blas_classes/vector.h>
+#include "blas_classes/vector.h"
 #endif
 
 #include "alps/alea/detailedbinning.h"

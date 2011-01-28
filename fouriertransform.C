@@ -498,7 +498,7 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
 
 
 void FittingFourierTransformer::backward_ft(itime_green_function_t &G_tau, 
-                                            const matsubara_green_function_t &G_omega) 
+                                            const matsubara_green_function_t &G_omega)
 {
   //fit c1_ to G_omega
   std::cout << "Fitting Fourier Transformer:" << std::endl;
