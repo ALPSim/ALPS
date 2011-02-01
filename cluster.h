@@ -146,8 +146,9 @@ public:
                                                       const double beta)=0; 
   virtual nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t & G_omega, 
                                                       const nambu_matsubara_green_function_t &G0_omega, 
+                                                      nambu_matsubara_green_function_t &selfenergy, 
                                                       double &mu, const double h, const double eta1, const double eta2, 
-                                                      const double beta)=0; 
+                                                      const double beta, const bool use_selfenergy)=0; 
   ///perform symmetrizaton in imaginary time
   virtual       itime_green_function_t symmetrize(const       itime_green_function_t& G, const bool paramagnet) const=0;
   virtual nambu_itime_green_function_t symmetrize(const nambu_itime_green_function_t& G, const bool paramagnet) const{ throw std::logic_error("not implemented");}
@@ -215,7 +216,8 @@ public:
   //Hilbert transform operator for Nambu GF
   virtual nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega, 
                                                       const nambu_matsubara_green_function_t &G0_omega, 
-                                                      double &mu, const double h, const double eta1, const double eta2, const double beta)=0;
+                                                      nambu_matsubara_green_function_t &selfenergy, 
+                                                      double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy)=0;
   
   std::complex<double>* exp_iksite(const int sign) const;
   int* momentum_translation() const;
@@ -313,7 +315,8 @@ public:
   //Hilbert transform operator for Nambu GF
   nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega, 
                                               const nambu_matsubara_green_function_t &G0_omega, 
-                                              double &mu, const double h, const double eta1, const double eta2, const double beta);
+                                              nambu_matsubara_green_function_t &selfenergy, 
+                                              double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy);
   
   //spin symmetrization functions
   itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
@@ -331,11 +334,19 @@ public:
   
   //spin symmetrization functions in Nambu space
   nambu_itime_green_function_t symmetrize(const nambu_itime_green_function_t& G, const bool paramagnet) const
-  { return spin_symmetrizer(G, paramagnet); }
+  { 
+    std::cout<<"tried to symmetrize nambu itime."<<std::endl;
+    return spin_symmetrizer(G, paramagnet); 
+  }
   nambu_matsubara_green_function_t symmetrize(const nambu_matsubara_green_function_t& G, const bool paramagnet) const
-  { return spin_symmetrizer(G, paramagnet); }
+  { 
+    std::cout<<"tried to symmetrize nambu matsubara."<<std::endl;
+    return spin_symmetrizer(G, paramagnet); 
+  }
   nambu_matsubara_green_function_t transform_into_real_space(const nambu_matsubara_green_function_t& G) const 
-  { return transform_coordinates<std::complex<double>, Backward>(G); }
+  { 
+    return transform_coordinates<std::complex<double>, Backward>(G); 
+  }
   nambu_matsubara_green_function_t transform_into_k_space(const nambu_matsubara_green_function_t& G) const 
   { return transform_coordinates<std::complex<double>, Forward>(G); }
   nambu_itime_green_function_t transform_into_real_space(const nambu_itime_green_function_t& G) const 
@@ -401,7 +412,8 @@ public:
                                         double &mu, const double h, const double beta);
   nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega, 
                                               const nambu_matsubara_green_function_t &G0_omega, 
-                                              double &mu, const double h, const double eta1, const double eta2, const double beta);
+                                              nambu_matsubara_green_function_t &selfenergy, 
+                                              double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy);
   itime_green_function_t symmetrize(const itime_green_function_t& G, const bool paramagnet) const
   { return spin_symmetrizer(G, paramagnet); }
   matsubara_green_function_t symmetrize(const matsubara_green_function_t& G, const bool paramagnet) const

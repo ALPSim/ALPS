@@ -776,7 +776,8 @@ bool adjust_chemical_potential(const double &n_tot,
 //////////////////////////////////FUNCTIONS FOR NAMBU SPACE//////////////////////////////////////////////////////////////////////////////////
 nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
                                                                   const nambu_matsubara_green_function_t &G0_omega, 
-                                                                  double &mu, const double h, const double eta1, const double eta2, const double beta)
+                                                                  nambu_matsubara_green_function_t &selfenergy, 
+                                                                  double &mu, const double h, const double eta1, const double eta2, const double beta, bool use_selfenergy)
 {
   if(h!=0 ) { 
     throw std::invalid_argument("don't know how to handle magn. fields, exiting"); 
@@ -784,9 +785,11 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   if(dimension()!=2 && (eta1 !=0 || eta2 !=0)) throw std::invalid_argument("not clear what to do with dwave symmetry away from dimension 2");
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
-  nambu_matsubara_green_function_t selfenergy(G0_omega);
   nambu_matsubara_green_function_t G0_omega_new(G0_omega);
   nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
+
+  if(!use_selfenergy){ //compute selfenergy out of G and G0 first
+  nambu_matsubara_green_function_t selfenergy=G0_omega;
   //compute the lattice = cluster self energy
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
     for (frequency_t freq=0; freq<nfreq; ++freq) {
@@ -802,6 +805,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
       
       //      std::cout<<"self energy is: "<<selfenergy(freq,kc,kc,0,0)<<" "<<selfenergy(freq,kc,kc,0,1)<<" "<<selfenergy(freq,kc,kc,1,0)<<" "<<selfenergy(freq,kc,kc,1,1)<<std::endl;
     }
+  }
   }
   //compute the lattice Green's function
   for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
@@ -896,6 +900,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
   double h_init = static_cast<double>(parms["H_INIT"]);
   
   nambu_matsubara_green_function_t G0_omega_new(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
+  nambu_matsubara_green_function_t selfenergy(n_matsubara,n_cluster_sites(),n_flavor, diagonal);
   G0_omega_new.clear();
   if (parms.defined("INSULATING")) {
     std::cout <<"calculating insulating G0_omega starting solution";
@@ -927,7 +932,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
     G_omega = G0_omega; 
     //invoke transformation with G_omega==G0_omega (selfenergy=0)
     std::cout<<"invoking free transform."<<std::endl;
-    G0_omega_new = operator()(G_omega, G0_omega, mu, h_init, eta1_init, eta2_init, beta);
+    G0_omega_new = operator()(G_omega, G0_omega, selfenergy, mu, h_init, eta1_init, eta2_init, beta, false);
   }
   nambu_itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, diagonal);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
@@ -945,7 +950,8 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
 }
 nambu_matsubara_green_function_t AntiFerroDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
                                                                      const nambu_matsubara_green_function_t &G0_omega, 
-                                                                     double &mu, const double h, const double eta1, const double eta2, const double beta){
+                                                                     nambu_matsubara_green_function_t &selfenergy, 
+                                                                     double &mu, const double h, const double eta1, const double eta2, const double beta, const bool use_selfenergy){
   throw std::invalid_argument("antiferro & nambu DCA has not yet been implemented!");
 }
 nambu_green_function<double> SimpleDCATransformer::spin_symmetrizer(const nambu_green_function<double>& G, const bool paramagnet) const

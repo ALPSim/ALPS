@@ -238,6 +238,7 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
+  FourierTransformer::generate_transformer(parms, fourier_ptr);
   double max_diff;	
   do {
     iteration_ctr++;
@@ -247,7 +248,6 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
     fourier_ptr->backward_ft(G0_tau, G0_omega);
     //fourier.setmu(mu);
     std::cout<<"running solver."<<std::endl<<std::flush;
@@ -342,6 +342,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
   itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
+  FourierTransformer::generate_transformer(parms, fourier_ptr);
   double max_diff;	
   do {
     iteration_ctr++;
@@ -351,7 +352,6 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
     fourier_ptr->backward_ft(G0_tau, G0_omega);
     std::cout<<"running solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega, parms);
@@ -363,7 +363,6 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySo
     
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, mu, h, beta);
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
@@ -436,12 +435,14 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
   int iteration_ctr = 0;
   nambu_matsubara_green_function_t G_old_omega(G0_omega);
   nambu_matsubara_green_function_t G0_old_omega(G0_omega);
+  nambu_matsubara_green_function_t selfenergy(G0_omega);
   nambu_itime_green_function_t G_tau(n_tau +1, n_site, 2, diagonal);
   nambu_itime_green_function_t G0_tau(n_tau+1, n_site, 2, diagonal);
   nambu_itime_green_function_t G_old_tau(n_tau+1, n_site, 2, diagonal);
   nambu_itime_green_function_t G0_old_tau(n_tau+1, n_site, 2, diagonal);
   //initialize space for multiple vectors
   boost::shared_ptr<FourierTransformer> fourier_ptr;
+  FourierTransformer::generate_transformer(parms, fourier_ptr);
   double max_diff;	
   do {
     iteration_ctr++;
@@ -451,7 +452,6 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     G0_old_omega = G0_omega;
     G_old_tau = G_tau;
     G0_old_tau = G0_tau;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
     fourier_ptr->backward_ft(G0_tau, G0_omega);
     std::cout<<"running NAMBU solver in omega."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_nambu(G0_omega, parms);
@@ -467,8 +467,7 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     //std::ofstream G_omega_after_symmetrize_kspace("G_omega_after_symmetrize_kspace.dat"); G_omega_after_symmetrize_kspace<<std::make_pair(G_omega,beta);
     
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
-    G0_omega = clustertrans(G_omega, G0_omega, mu, h, eta1, eta2, beta);
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
+    G0_omega = clustertrans(G_omega, G0_omega, selfenergy, mu, h, eta1, eta2, beta, false);
     
     G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;

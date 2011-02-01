@@ -3,9 +3,14 @@ find_package(ALPS REQUIRED NO_SYSTEM_ENVIRONMENT_PATH)
 include(${ALPS_USE_FILE})
 
 project (DMFT)
-include_directories("/home/esg/alps_svn/")
+#include_directories("/home/esg/alps_svn/")
+include_directories("/Users/emanuel/alps_svn/")
+include_directories("/opt/local/include")
 #include_directories("/cluster/home/phys/gullc/alps_svn")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=core2 -O3 -DUSE_MPI -DNDEBUG")
+
+link_directories("/opt/local/lib")
+
 
 add_executable(dmft 
 2dsimpson.C clusterhelper.C fouriertransform.C selfconsistency.C
@@ -31,5 +36,10 @@ auxiliaryfunctions.C externalsolver.C hirschfyesim.C main.C
 add_executable(energy ../DMFT-solvers/Rubtsov/energy.cpp
 auxiliaryfunctions.C clustertransformer.C clusterhelper.C fouriertransform.C
 ../DMFT-solvers/Rubtsov/obs_auxiliary.cpp)
+add_executable(sigma_interpolate sigma_interpolate.C
+auxiliaryfunctions.C clustertransformer.C clusterhelper.C
+fouriertransform.C)
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
+target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
+${LAPACK_LIBRARY} gsl pthread)
