@@ -28,7 +28,6 @@ int main(int argc, char **argv){
   
   
   parms["LATTICE_LIBRARY"]=std::string(argv[2]);
-  SimpleDCATransformer clustertrans(parms);
 
 
   nambu_matsubara_green_function_t selfenergy(nfreq, nsites, 2, diagonal);
@@ -95,11 +94,15 @@ int main(int argc, char **argv){
 
   //compute the self consistency
   //std::cout<<"new self energy is: "<<std::make_pair(selfenergy_new,beta_new)<<std::endl;
-  green0 = clustertrans(green, green0, selfenergy, mu, h, eta1, eta2, beta, true);  
+  parms["BETA"]=beta_new;
+  SimpleDCATransformer clustertrans(parms);
+  green0 = clustertrans(green, green0, selfenergy_new, mu, h, eta1, eta2, beta_new, true);  
   green0 = clustertrans.symmetrize(green0, paramagnet);
   green0 = clustertrans.symmetrize_k_space(green0);
 
   std::cout<<"new green0 is: "<<std::make_pair(green0,beta_new)<<std::endl;
+std::stringstream filename_new; filename_new<<"G0_omega_input_beta"<<beta_new;
+  green0.write(filename_new.str().c_str());
   
 
 }
