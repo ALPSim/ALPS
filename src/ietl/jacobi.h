@@ -4,9 +4,10 @@
  *
  * ALPS Libraries
  *
- * Copyright (C) 2001-2002 by Rene Villiger <rvilliger@smile.ch>,
+ * Copyright (C) 2001-2011 by Rene Villiger <rvilliger@smile.ch>,
  *                            Prakash Dayal <prakash@comp-phys.org>,
  *                            Matthias Troyer <troyer@comp-phys.org>
+ *                            Bela Bauer <bauerb@phys.ethz.ch>
  *
  * This software is part of the ALPS libraries, published under the ALPS
  * Library License; you can use, redistribute it and/or modify it under
@@ -34,7 +35,10 @@
 
 #include <ietl/traits.h>
 #include <ietl/fmatrix.h>
-#include <ietl/ietl2lapack.h>
+#include <ietl/ietl2lapack.h> 
+ 
+#include <ietl/cg.h>
+
 #include <complex>
 #include <vector>
 
@@ -81,6 +85,94 @@ namespace ietl
         
     private:
         MATRIX matrix_;
+        VS vecspace_;
+        int n_;
+    };
+    
+    template<class Matrix, class VS, class Vector>
+    class jcd_cg_solver_operator
+    {
+    public:
+        typedef typename vectorspace_traits<VS>::vector_type vector_type;
+        typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
+        typedef typename ietl::number_traits<scalar_type>::magnitude_type magnitude_type;
+        
+        jcd_cg_solver_operator(const vector_type& u,
+            const magnitude_type& theta,
+            const vector_type& r,
+            const Matrix & m,
+            bool make_positive = true)
+        : u_(u), theta_(theta), r_(r), m_(m), make_positive_(make_positive) { }
+        
+        void operator()(vector_type const & x, vector_type & y, bool once = false) const
+        {
+            // calculate (1-uu*)(A-theta*1)(1-uu*)
+            
+            // possibly apply twice to make positive definite
+            // this is not absolutely necessary, but will improve stability
+            int iter;
+            if (make_positive_)
+                iter = (once ? 1 : 2);
+            else
+                iter = (once ? 0 : 1);
+            
+            vector_type t = x, t2, t3;
+            for (int i = 0; i < iter; ++i)
+            {
+                // t2 = (1-uu*) t
+                double ust = dot(u_, t);
+                t2 = t - ust*u_;
+                
+                // y = (A-theta*1) t2
+                mult(m_, t2, t3);
+                y = t3 - theta_*t2;
+                
+                // t = (1-uu*) y
+                ust = dot(u_, y);
+                t = y - ust*u_;
+            }
+            
+            y = t;
+        }
+        
+    private:
+        vector_type const & u_, r_;
+        magnitude_type const & theta_;
+        Matrix const & m_;
+        bool make_positive_;
+    };
+    
+    template<class Matrix, class VS, class Vector>
+    void mult(jcd_cg_solver_operator<Matrix, VS, Vector> const & m,
+        typename jcd_cg_solver_operator<Matrix, VS, Vector>::vector_type const & x,
+        typename jcd_cg_solver_operator<Matrix, VS, Vector>::vector_type & y)
+    {
+        m(x,y);
+    }
+    
+    template<class Matrix, class VS>
+    class jcd_cg_solver
+    {
+    public:
+        typedef typename vectorspace_traits<VS>::vector_type vector_type;
+        typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
+        typedef typename ietl::number_traits<scalar_type>::magnitude_type magnitude_type;
+        
+        jcd_cg_solver(Matrix const & matrix, VS const & vec)
+        : matrix_(matrix), vecspace_(vec), n_(vec_dimension(vec)) { }
+        
+        void operator()(const vector_type& u, const magnitude_type& theta, const vector_type& r, vector_type& t, const magnitude_type& rel_tol)
+        {
+            jcd_cg_solver_operator<Matrix, VS, vector_type> op(u, theta, r, matrix_, false);
+            
+            vector_type inh0 = -r, inh;
+            op(inh0, inh, true);
+            
+            t = ietl_cg(op, inh, inh0, 10, rel_tol);
+        }
+        
+    private:
+        Matrix matrix_;
         VS vecspace_;
         int n_;
     };
