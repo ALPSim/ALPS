@@ -38,6 +38,7 @@
 #include <ietl/ietl2lapack.h> 
  
 #include <ietl/cg.h>
+#include <ietl/gmres.h>
 
 #include <complex>
 #include <vector>
@@ -90,91 +91,65 @@ namespace ietl
     };
     
     template<class Matrix, class VS, class Vector>
-    class jcd_cg_solver_operator
+    class jcd_gmres_solver_operator
     {
     public:
         typedef typename vectorspace_traits<VS>::vector_type vector_type;
         typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
         typedef typename ietl::number_traits<scalar_type>::magnitude_type magnitude_type;
         
-        jcd_cg_solver_operator(const vector_type& u,
+        jcd_gmres_solver_operator(const vector_type& u,
             const magnitude_type& theta,
             const vector_type& r,
-            const Matrix & m,
-            bool make_positive = true)
-        : u_(u), theta_(theta), r_(r), m_(m), make_positive_(make_positive) { }
+            const Matrix & m)
+        : u_(u), theta_(theta), r_(r), m_(m) { }
         
-        void operator()(vector_type const & x, vector_type & y, bool once = false) const
-        {
-            // calculate (1-uu*)(A-theta*1)(1-uu*)
-            
-            // possibly apply twice to make positive definite
-            // this is not absolutely necessary, but will improve stability
-            int iter;
-            if (make_positive_)
-                iter = (once ? 1 : 2);
-            else
-                iter = (once ? 0 : 1);
-            
-            vector_type t = x, t2, t3;
-            for (int i = 0; i < iter; ++i)
-            {
-                // t2 = (1-uu*) t
-                double ust = dot(u_, t);
-                t2 = t - ust*u_;
-                
-                // y = (A-theta*1) t2
-                mult(m_, t2, t3);
-                y = t3 - theta_*t2;
-                
-                // t = (1-uu*) y
-                ust = dot(u_, y);
-                t = y - ust*u_;
-            }
-            
-            y = t;
-        }
+        void operator()(vector_type const & x, vector_type & y) const;
         
     private:
         vector_type const & u_, r_;
         magnitude_type const & theta_;
         Matrix const & m_;
-        bool make_positive_;
     };
     
     template<class Matrix, class VS, class Vector>
-    void mult(jcd_cg_solver_operator<Matrix, VS, Vector> const & m,
-        typename jcd_cg_solver_operator<Matrix, VS, Vector>::vector_type const & x,
-        typename jcd_cg_solver_operator<Matrix, VS, Vector>::vector_type & y)
+    void mult(jcd_gmres_solver_operator<Matrix, VS, Vector> const & m,
+        typename jcd_gmres_solver_operator<Matrix, VS, Vector>::vector_type const & x,
+        typename jcd_gmres_solver_operator<Matrix, VS, Vector>::vector_type & y)
     {
         m(x,y);
     }
     
     template<class Matrix, class VS>
-    class jcd_cg_solver
+    class jcd_gmres_solver
     {
     public:
         typedef typename vectorspace_traits<VS>::vector_type vector_type;
         typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
         typedef typename ietl::number_traits<scalar_type>::magnitude_type magnitude_type;
         
-        jcd_cg_solver(Matrix const & matrix, VS const & vec)
-        : matrix_(matrix), vecspace_(vec), n_(vec_dimension(vec)) { }
+        jcd_gmres_solver(Matrix const & matrix, VS const & vec,
+            std::size_t max_iter = 5, bool verbose = false)
+        : matrix_(matrix), vecspace_(vec), n_(vec_dimension(vec))
+        , max_iter_(max_iter), verbose_(verbose){ }
         
         void operator()(const vector_type& u, const magnitude_type& theta, const vector_type& r, vector_type& t, const magnitude_type& rel_tol)
         {
-            jcd_cg_solver_operator<Matrix, VS, vector_type> op(u, theta, r, matrix_, false);
+            jcd_gmres_solver_operator<Matrix, VS, vector_type> op(u, theta, r, matrix_);
             
-            vector_type inh0 = -r, inh;
-            op(inh0, inh, true);
+            vector_type inh = -r;
             
-            t = ietl_cg(op, inh, inh0, 10, rel_tol);
+            // initial guess for better convergence
+            t = -r + ietl::dot(r,u)/ietl::dot(u,u)*u;
+            if (max_iter_ > 0)
+                t = ietl_gmres(op, inh, t, max_iter_, rel_tol, verbose_);
         }
         
     private:
         Matrix matrix_;
         VS vecspace_;
-        int n_;
+        std::size_t n_, max_iter_;
+        bool verbose_;
     };
     
     template <class MATRIX, class VS>
@@ -209,7 +184,6 @@ namespace ietl
         DesiredEigenvalue desired_;
     };
     
-    
     template <class MATRIX, class VS>
     jcd_simple_solver<MATRIX, VS>::jcd_simple_solver(const MATRIX& matrix, const VS& vec) :
     matrix_(matrix),
@@ -224,9 +198,30 @@ namespace ietl
        //for (int i=0;i<n_;i++)
          //  t[i] = -r[i] / ( matrix_(i,i) - theta );
         // std::cout << "Preconditioner, theta = " << theta << std::endl;
-        t = -1*r / (1-theta);
+        // t = -1*r / (1-theta);
+        t = -r + ietl::dot(r,u)/ietl::dot(u,u)*u;
     }
     
+    template<class Matrix, class VS, class Vector>
+    void jcd_gmres_solver_operator<Matrix, VS, Vector>::operator()(vector_type const & x, vector_type & y) const
+    {
+        // calculate (1-uu*)(A-theta*1)(1-uu*)
+        
+        vector_type t, t2, t3;
+        // t2 = (1-uu*) x
+        double ust = dot(u_, x);
+        t2 = x - ust*u_;
+        
+        // y = (A-theta*1) t2
+        mult(m_, t2, t3);
+        y = t3 - theta_*t2;
+        
+        // t = (1-uu*) y
+        ust = dot(u_, y);
+        t = y - ust*u_;
+        
+        y = t;
+    }
     
     template <class MATRIX, class VS>
     jcd_left_preconditioner<MATRIX, VS>::jcd_left_preconditioner(const MATRIX& matrix, const VS& vec, const int& max_iter) :
@@ -323,8 +318,8 @@ namespace ietl
         vector_type r  = new_vector(vecspace_);
         scalar_type s[iter.max_iterations()];
         std::vector<vector_type> V(iter.max_iterations());
-        for (int k=0;k<iter.max_iterations();k++)
-            V[k] = new_vector(vecspace_);
+        // for (int k=0;k<iter.max_iterations();k++)
+        //     V[k] = new_vector(vecspace_);
         int i,j;
         M.resize(iter.max_iterations(), iter.max_iterations());
         magnitude_type theta, tau;
@@ -371,6 +366,7 @@ namespace ietl
             
             // r = u^A - \theta u
             r = uA-theta*u;
+            // std::cout << "Iteration " << iter.iterations() << ", resid = " << ietl::two_norm(r) << std::endl;
             
             // if (|r|_2 < \epsilon) stop
             ++iter;
@@ -380,7 +376,10 @@ namespace ietl
             // solve (approximately) a t orthogonal to u from
             //   (I-uu^\star)(A-\theta I)(I- uu^\star)t = -r
             rel_tol = 1. / pow(2.,double(iter.iterations()+1));
+            vector_type told = t;
             solver(u, theta, r, t, rel_tol);
+            // std::cout << "Orthogonal? " << ietl::dot(t, u) << std::endl;
+            // std::cout << "Expansion? " << ietl::dot(t, told) << std::endl;
         } while (true);
         
         // accept lambda=theta and x=u

@@ -1,10 +1,11 @@
 /***************************************************************************
- * $Id: lanczos1.cpp,v 1.9 2004/06/29 08:31:02 troyer Exp $
+ * $Id: jacobi.cpp,v 1.9 2004/06/29 08:31:02 troyer Exp $
  *
  * An example of the Lanczos method for the calculation of n lowest eigenvalues.
  *
  * Copyright (C) 2001-2003 by Prakash Dayal <prakash@comp-phys.org>
  *                            Matthias Troyer <troyer@comp-phys.org>
+ *                            Bela Bauer <bauerb@phys.ethz.ch>
  *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -50,28 +51,31 @@ typedef boost::numeric::ublas::vector<double> Vector;
 
 int main() {
     // Creation of an example matrix:
-    int N = 100;
+    int N = 500;
     Matrix mat(N, N);
     int n = 1;
     for(int i=0;i<N;i++)
         for(int j=0;j<=i;j++) {
-            mat(i,j) = n;
-            mat(j,i) = n++;
+            mat(i,j) = drand48(); // n++;
+            if (i == j)
+                mat(i,i) += 10;
+            mat(j,i) = mat(i,j);
         }
-
+    
     typedef ietl::vectorspace<Vector> Vecspace;
     typedef boost::lagged_fibonacci607 Gen;  
-
+    
     Vecspace vec(N);
     Gen mygen;
-
+    
     ietl::jcd_simple_solver<Matrix, Vecspace> jcd_ss(mat, vec);
+    ietl::jcd_gmres_solver<Matrix, Vecspace> jcd_gmres(mat, vec);
     ietl::jacobi_davidson<Matrix, Vecspace> jd(mat, vec, ietl::Smallest);
-
+    
     ietl::basic_iteration<double> iter(1000, 1e-8, 1e-8);
-
-    std::pair<double, Vector> r0 = jd.calculate_eigenvalue(mygen, jcd_ss, iter);
+    std::pair<double, Vector> r0 = jd.calculate_eigenvalue(mygen, jcd_gmres, iter);
     std::cout << "Jacobi-Davidson says: " << r0.first << std::endl;
+    std::cout << "It used " << iter.iterations() << " iterations." << std::endl;
     
     Vector v2 = new_vector(vec);
     ietl::mult(mat, r0.second, v2);
@@ -82,7 +86,7 @@ int main() {
         std::cout << "LAPACK says: ";
         Vector evals(N);
         boost::numeric::bindings::lapack::heev('N', mat, evals);
-
+    
         std::copy(evals.begin(), evals.begin()+3, std::ostream_iterator<double>(std::cout, " "));
         std::cout << std::endl;
     }
