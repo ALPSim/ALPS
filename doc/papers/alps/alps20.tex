@@ -1,6 +1,3 @@
-
-
-
 %\documentclass[3p,twocolumn]{elsarticle}
 \documentclass[12pt]{iopart}
 
@@ -242,7 +239,7 @@ mean field theory ({\tt dmft}) and a time-evolving block decimation code ({\tt t
  \end{itemize}
  
  
-\section{Building and Installing ALPS}
+\section{Building and Installing ALPS} \label{sct:build_and_install}
 \subsection{Build system}
 One of the main new features in ALPS 2.0 is the change of the build system to CMake~\cite{cmake}, which is more flexible and portable than the previously used autotools. CMake includes a graphical user interface to let the user choose installation options and manually override the paths to needed libraries if they have not been found automatically. Furthermore, CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested features. A snapshot of the build instructions at the time of the release are included in the source distribution. Updated instructions as operating systems change will be made available on the ALPS web page~\cite{alps}.
 
@@ -419,13 +416,13 @@ vtid=10,
 version=169,
 pdf,
 getvtl,
+buildalways,
 showspreadsheetonly]{width=8cm}
 \caption{A figure produced by an ALPS VisTrails workflow: the uniform susceptibility of the Heisenberg chain and ladder. Clicking the figure retrieves the workflow used to 
 create it. Opening that workflow on a machine with VisTrails and ALPS installed lets the reader execute the full calculation.}
 \label{fig:figure}
 \end{center}
 \end{figure}
-
 
 \begin{figure}
 \begin{center}
@@ -435,6 +432,7 @@ vtid=10,
 version=169,
 pdf,
 getvtl,
+buildalways,
 showworkflow,
 showspreadsheetonly]{width=8cm}
 \caption{The workflow that created Fig.~\ref{fig:figure}. The workflow image has been created by VisTrails for the specific workflow used to create the exact version shown in the figure. Clicking the figure retrieves the workflow.}
@@ -473,6 +471,7 @@ vtid=15,
 version=332,
 pdf,
 getvtl,
+buildalways,
 %showtree,
 showspreadsheetonly]{width=8cm}
 \caption{In this example we show a data collapse of the Binder Cumulant in the classical Ising model. The data has been produced by remotely run simulations and the critical exponent has been obtained with the help of the VisTrails parameter exploration functionality.}
@@ -779,6 +778,7 @@ vtid=10,
 version=172,
 pdf,
 getvtl,
+buildalways,
 showtree,
 showspreadsheetonly]{width=8cm}
 \caption{The version history tree of the workflow that created Fig.~\ref{fig:figure}. Each ellipsis corresponds to a version of the workflow, as shown in Fig.~\ref{fig:workflow}. Clicking the figure retrieves the vistrail including all workflow versions.}
@@ -998,6 +998,62 @@ In Fig.~\ref{fig:plotting}, an example script is shown which creates a {\tt Data
 % pyalps includes functions to write the xml files read by most applications, and additional functions to write special input files for applications with non-xml interfaces such as {\tt dmft} and {\tt tebd}. It also includes functions to run applications with specified input files both in series and in parallel. An example of the preparation of input files and running a simulation using pyalps is shown in Fig.~\ref{fig:python}.
 
 %Once the simulation has been run we must extract and evaluate data from it. At the heart of the pyalps evaluation tools is the {\tt DataSet} class. A {\tt DataSet} has as members {\tt x} and {\tt y} which are numpy arrays containing numerical data. A {\tt DataSet} also has a member {\tt props} which is a dictionary of metadata describing the numerical data. The presence of the metadata allows for complex evaluations such as constructing scaling functions as is done in many of the tutorials. Using Boost.Python as described above, the jackknife and binning analysis of Monte Carlo from the ALPS C++ libraries are extended to Python functionality, as well as functions to read hdf5 output into a {\tt DataSet}. In addition to evaluation, pyalps includes wrapper programs which plot data stored in a {\tt DataSet} using the matplotlib package.
+
+\section{ALPS Installation with CMake}
+
+This release of ALPS makes use of the CMake build system~\cite{cmake} for the build and installation process. For inexperienced users, we generally recommend the use of the binary installation packages available from our website. These are currently available for Mac OS X 10.5 and 10.6, as well as Microsoft Windows. On other platforms or if advanced users desire more customization options for the installation than the binary installers can offer, a source installation is necessary. Advantages of the source installation for advanced users include:
+\begin{itemize}
+\item The binary installers are tied to a specific version of Python, whereas the source installation can be built against the version of Python that the user prefers.
+\item Custom versions of external libraries such as the BLAS and LAPACK libraries can be provided.
+\end{itemize}
+
+The prerequisites for this installation are listed in Section~\ref{sct:build_and_install}. For some widely used Linux distributions, we describe the installation of these prerequisites on the website of the ALPS project; for other cases, please refer to your system documentation. Note also that Boost does not have to be compiled to build ALPS.
+
+The CMake build process is controlled by a set of variables describing the build environment, paths, and targets (libraries and programs) to be built. Most of these variables are determined in the global file {\tt CMakeLists.txt}. Each source directory also contains such a file, which usually contain prescriptions for building certain targets given the global configuration variables. A major advantage of CMake over other build systems such as the {\tt autotools} is that it allows the user easy access and modification of all variables via a graphical interface, the tool {\tt ccmake} or by directly editing the file {\tt CMakeCache.txt}.
+
+Some of the most important CMake variables for the ALPS build system are listed in Tables~\ref{table:cmake_variables} and \ref{table:cmake_variables2}. Note that library paths have to be given as absolute paths; if several libraries are required, e.g. for BLAS, the paths should be separated with semicolons. An important point is linking against the correct versions of BLAS and LAPACK, since this may seriously affect the performance of some applications. ALPS will try to determine automatically which libraries should be used and will give optimized libraries like Intel's MKL precedence over standard libraries. Nevertheless, it is recommended to check whether this has been recognized correctly.
+
+It is strongly recommended to perform the configuration and compilation of ALPS in a separate directory and not the source directory. The procedure for configuring and installing ALPS is given below, where we assume that all commands are run from the build directory:
+\begin{verbatim}
+cmake -D VARIABLE1=... -D VARIABLE2=... path/to/alps/source/directory
+ccmake
+make
+make test
+make install
+\end{verbatim}
+The options starting with {\tt -D} are used to pass variables that are needed in the initial stages of CMake; cf. Table~\ref{table:cmake_variables}. Running {\tt ccmake} after this is not mandatory and can be used to change all other variables, including those described in Table~\ref{table:cmake_variables2}.
+
+\begin{table}
+\centering
+\begin{tabular}{l|p{10cm}}
+\hline 
+{\it Name} &{\it Description} \\ \hline
+{\tt Boost\_LIBRARY\_PATH} &Path to the Boost source tree. If Boost is not available as binary, this has to be set by the user when first running {\tt cmake}. \\ \hline
+{\tt CMAKE\_C\_COMPILER} &{\tt C} compiler. This is determined from the environment variables {\tt CC}. \\ \hline
+{\tt CMAKE\_CXX\_COMPILER} &{\tt C++} compiler. This is determined from the environment variables {\tt CXX}. \\ \hline
+{\tt PYTHON\_INTERPRETER} &Path of the Python interpreter that {\tt pyalps} should be built for. If not set, a default or will be determined or Python disabled. \\ \hline
+\end{tabular}
+\caption{List of CMake variables that have to be provided when first running {\tt cmake}. These cannot be changed afterwards. \label{table:cmake_variables}}
+\end{table}
+
+\begin{table}
+\centering
+\begin{tabular}{l|p{10cm}}
+\hline
+{\it Name} &{\it Description} \\ \hline
+{\tt CMAKE\_INSTALL\_PREFIX} & \\ \hline
+{\tt VISTRAILS\_APP\_DIR} & \\ \hline
+{\tt ALPS\_BUILD\_APPLICATIONS} &Enable or disable build process for ALPS applications. \\ \hline
+{\tt ALPS\_BUILD\_EXAMPLES} &Enable or disable build process for ALPS examples. \\ \hline
+{\tt ALPS\_BUILD\_TESTS} &Enable or disable build process for ALPS tests. \\ \hline
+{\tt ALPS\_BUILD\_PYTHON} &Enable or disable build process for {\tt pyalps}. \\ \hline
+{\tt HDF5\_LIBRARIES} &Path of the HDF5 libraries. \\ \hline
+{\tt HDF5\_INCLUDE\_DIR} &Path to HDF5 header files. \\ \hline
+{\tt BLAS\_LIBRARY} &Path of the BLAS library. \\ \hline
+{\tt LAPACK\_LIBRARY} &Path of the LAPACK library. \\ \hline
+\end{tabular}
+\caption{List of CMake variables that can be changed at any time. Some of these are mandatory, i.e. if ALPS is unable to determine a value automatically, an error will be generated. \label{table:cmake_variables2}}
+\end{table}
 
 \section*{References}
 
