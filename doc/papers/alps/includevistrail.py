@@ -25,6 +25,7 @@
 #   env=DYLD_LIBRARY_PATH= 
 #   download=http://url.from.where.download.vt.files
 #   host=vistrails.sci.utah.edu
+#   user=username
 #   db=vistrails
 #   filename=path_to_vtfile
 #   version=598
@@ -36,11 +37,13 @@
 #   workflow=false
 #   tree=false
 #   getvtl=false
+#   embedworkflow=false
+#   includefulltree=false
 #   other=width=0.45\linewidth 
 #
 # the buildalways and port lines are optional
 # at least a version or a tag must be provided
-# if filename is provided host, db and vtid are ignored
+# if filename is provided host, db, user and vtid are ignored
 # please notice that the tag has precedence over version. If a tag is passed
 # we will query the database to get the latest version number.
 
@@ -52,6 +55,7 @@ from urlparse import urlparse
 import urllib2
 import re
 import logging
+import shutil
 
 debug = False
 logger = None
@@ -115,21 +119,61 @@ def vtl_exists_in_folder(path):
 ###############################################################################
 
 def build_vtl_file(download_url, filename, version, tag, 
-                   execute, showspreadsheetonly, embedWorkflow=False):
-    embedWorkflow=True
+                   execute, showspreadsheetonly, embedWorkflow=True,
+                   includeFullTree=False):
     log("build_vtl_file")
     try:
         basename = os.path.splitext(os.path.basename(filename))[0]
         if version != None:
-            basename += "_%s_%s"%(version,showspreadsheetonly)
+            basename += "_%s_%s_%s_%s"%(version,tag,showspreadsheetonly,execute)
         basename += ".vtl"
         vtl_filename = os.path.join(download_url, basename)
         header = '<vtlink filename="%s" version="%s" execute="%s" showSpreadsheetOnly="%s" \
-forceDB="%s"/>'%(os.path.abspath(filename),
+forceDB="%s" tag="%s"/>'%(os.path.abspath(filename),
               str(version),
               str(execute),
               str(showspreadsheetonly),
-              str(False))
+              str(False),
+              str(tag))
+    except Exception, e:
+        log("Error: %s"%str(e))
+    log("will open %s"%vtl_filename)
+    log("vtlfile contents: %s"%header)
+    f = open(vtl_filename, "w")
+    f.write(header)
+    f.close()
+    return "run:"+ os.path.abspath(vtl_filename)
+
+###############################################################################
+
+def build_vtl_db(download_url, host, db_name, vt_id, version, port, tag, 
+                   execute, showspreadsheetonly, embedWorkflow=True, 
+                   includeFullTree=False):
+    """build_download_vtl_request(host: str, db_name:str, vt_id: str, version: str,
+                      port:str, tag: str, execute: bool,
+                      showspreadsheetonly: bool)  -> str  """
+    log("build_vtl_db")
+    try:
+        basename = "%s_%s_%s_%s_%s_%s_%s_%s_%s.vtl"%(host,
+                                               db_name,
+                                               port,
+                                               vt_id,
+                                               version,
+                                               execute,
+                                               embedWorkflow,
+                                               includeFullTree,
+                                               showspreadsheetonly)
+        vtl_filename = os.path.join(download_url, basename)
+        header = '<vtlink host="%s" database="%s" port="%s" vtid="%s" \
+version="%s" execute="%s" showSpreadsheetOnly="%s" forceDB="%s" />'%(
+              host,
+              db_name,
+              str(port),
+              str(vt_id),
+              str(version),
+              str(execute),
+              str(showspreadsheetonly),
+              str(True))
     except Exception, e:
         log("Error: %s"%str(e))
     log("will open %s"%vtl_filename)
@@ -181,15 +225,15 @@ def download_as_text(url):
 ###############################################################################
 
 def build_download_vtl_request(download_url, host, db_name, vt_id, version, port, tag, 
-                   execute, showspreadsheetonly, embedWorkflow=False, 
+                   execute, showspreadsheetonly, embedWorkflow=True, 
                    includeFullTree=False):
-    """generate_latex(host: str, db_name:str, vt_id: str, version: str,
+    """build_download_vtl_request(host: str, db_name:str, vt_id: str, version: str,
                       port:str, tag: str, execute: bool,
                       showspreadsheetonly: bool)  -> str
         This generates a piece of latex code containing the \href command and
         a \includegraphics command for each image generated.
     """
-    embedWorkflow=True 
+    
     url_params = "getvt=%s&db=%s&host=%s&port=%s&tag=%s&\
 execute=%s&showspreadsheetonly=%s&embedWorkflow=%s&includeFullTree=%s" % (vt_id,
                                                     db_name,
@@ -267,8 +311,9 @@ def _download_content(url, request, path_to_figures):
         return (False, str(e))
     
 def build_vistrails_cmd_line_db(path_to_vistrails, env_for_vistrails, host, 
-                                db_name, vt_id, version, port, path_to_figures, 
-                                pdf=False, wgraph=False, tree=False):
+                                db_name, db_user, vt_id, version, port, 
+                                path_to_figures, pdf=False, wgraph=False, 
+                                tree=False):
     """ build_vistrails_cmd_line_db(path_to_vistrails: str, env_for_vistrails: str,
                                      host: str, db_name: str, vt_id: str, 
                                      version: str, path_to_figures: str,
@@ -280,13 +325,18 @@ def build_vistrails_cmd_line_db(path_to_vistrails, env_for_vistrails, host,
         pdfoption = "-p"
     else:
         pdfoption = ""
+    #user
+    if db_user is not None and db_user != "":
+        useroption = '-u %s'%db_user
+    else:
+        useroption = ""
     #dump tree and workflow graph
     if wgraph:
-        graphoption = '-G "%s"'%path_to_figures
+        graphoption = '-G "%s"'%os.path.abspath(path_to_figures)
     elif tree:
-        graphoption = '-U "%s"'%path_to_figures
+        graphoption = '-U "%s"'%os.path.abspath(path_to_figures)
     else:
-        graphoption = '-e "%s"'%path_to_figures
+        graphoption = '-e "%s"'%os.path.abspath(path_to_figures)
     #don't select a workflow
     if version is not None:
         voption = ":%s"%version
@@ -297,11 +347,12 @@ def build_vistrails_cmd_line_db(path_to_vistrails, env_for_vistrails, host,
     if path_to_vistrails.endswith(".py"):
         prefix = '%s python "%s"'%(env_for_vistrails, path_to_vistrails)
     
-    cmd_line = '%s -b %s -t %s -f %s -r %s %s "%s%s" > \
+    cmd_line = '%s -b %s -t %s -f %s %s -r %s %s "%s%s" > \
 vistrails_run.log' % (prefix,
                   graphoption,
                   host,
                   db_name,
+                  useroption,
                   port,
                   pdfoption,
                   vt_id,
@@ -326,11 +377,11 @@ def build_vistrails_cmd_line_file(path_to_vistrails, env_for_vistrails, filename
         pdfoption = ""
     #dump tree and workflow graph
     if wgraph:
-        graphoption = '-G "%s"'%path_to_figures
+        graphoption = '-G "%s"'%os.path.abspath(path_to_figures)
     elif tree:
-        graphoption = '-U "%s"'%path_to_figures
+        graphoption = '-U "%s"'%os.path.abspath(path_to_figures)
     else:
-        graphoption = '-e "%s"'%path_to_figures
+        graphoption = '-e "%s"'%os.path.abspath(path_to_figures)
     #don't select a workflow
     if version is not None:
         voption = ":%s"%version
@@ -345,7 +396,7 @@ def build_vistrails_cmd_line_file(path_to_vistrails, env_for_vistrails, filename
 vistrails_run.log' % (prefix,
                       graphoption,
                       pdfoption,
-                      filename,
+                      os.path.abspath(filename),
                       voption)
     return cmd_line
 
@@ -353,11 +404,13 @@ vistrails_run.log' % (prefix,
 
 def generate_latex_db(is_local, download_url, host, db_name, vt_id, version, port, tag, 
                       execute, showspreadsheetonly, path_to_figures, 
-                      graphics_options):
+                      graphics_options, embedWorkflow=True, 
+                      includeFullTree=False):
     """generate_latex(host: str, db_name:str, vt_id: str, version: str,
                       port:str, tag: str, execute: bool,
                       showspreadsheetonly: bool, path_to_figures: str,
-                      graphics_options: str)  -> str
+                      graphics_options: str, embedWorkflow: bool, 
+                      includeFullTree:bool)  -> str
         This generates a piece of latex code containing the \href command and
         a \includegraphics command for each image generated.
     """
@@ -365,13 +418,16 @@ def generate_latex_db(is_local, download_url, host, db_name, vt_id, version, por
         if download_url is not None and download_url != "":
             url = build_download_vtl_request(download_url, host, db_name, vt_id, 
                                              version, port, tag, execute, 
-                                             showspreadsheetonly, embedWorkflow=False)
+                                             showspreadsheetonly, 
+                                             embedWorkflow=embedWorkflow,
+                                             includeFullTree=includeFullTree)
             href = "\href{%s}{" % url
     else:
         if download_url is not None and download_url != "":
             url = build_vtl_db(download_url, host, db_name, vt_id, 
                             version, port, tag, execute, 
-                            showspreadsheetonly, embedWorkflow=False)
+                            showspreadsheetonly, embedWorkflow=embedWorkflow,
+                            includeFullTree=includeFullTree)
             href = "\href{%s}{" % url
     ALLOWED_GRAPHICS = [".png", ".jpg", ".pdf"]
     images = []
@@ -400,7 +456,8 @@ def generate_latex_db(is_local, download_url, host, db_name, vt_id, version, por
 
 def generate_latex_file(download_url, vtfile, version, tag, 
                       execute, showspreadsheetonly, path_to_figures, 
-                      graphics_options):
+                      graphics_options,embedWorkflow=True, 
+                      includeFullTree=False):
     """generate_latex(host: str, db_name:str, vt_id: str, version: str,
                       port:str, tag: str, execute: bool,
                       showspreadsheetonly: bool, path_to_figures: str,
@@ -411,7 +468,7 @@ def generate_latex_file(download_url, vtfile, version, tag,
     log("generate_latex_file")
     if download_url is not None and download_url != "":
         url = build_vtl_file(download_url, vtfile, version, tag, execute, 
-                             showspreadsheetonly, embedWorkflow=False)
+                             showspreadsheetonly, embedWorkflow)
         href = "\href{%s}{" % url
         log(url)
     ALLOWED_GRAPHICS = [".png", ".jpg", ".pdf"]
@@ -451,47 +508,53 @@ def generate_latex_error(error_msg):
 ###############################################################################
 
 def run_vistrails_locally_db(path_to_vistrails, env_for_vistrails, host, db_name, 
-                             vt_id,
-                          version, port, path_to_figures, build_always=False,
-                          tag='', execute=False, showspreadsheetonly=False,
-                          pdf=False):
+                             db_user, vt_id,
+                             version, port, path_to_figures, build_always=False,
+                             tag='', execute=False, showspreadsheetonly=False,
+                             pdf=False, embedWorkflow=True, 
+                             includeFullTree=False):
     """run_vistrails_locally_db(path_to_vistrails: str, host: str,
                              db_name: str, vt_id: str, version: str, port: str,
                              path_to_figures: str) -> tuple(bool, str)
         Run vistrails and returns a tuple containing a boolean saying if it was
         successful or not and the latex code.
     """
+    v = version
+    if tag != '':
+        v = tag
     cmd_line = build_vistrails_cmd_line_db(path_to_vistrails, env_for_vistrails, 
-                                           host, db_name, vt_id,
-                                           version, port, path_to_figures, pdf)
+                                           host, db_name, db_user, vt_id,
+                                           v, port, path_to_figures, pdf)
     log("run_vistrails_locally_db")
     log("cmdline: %s"%cmd_line)
+
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not os.path.exists(path_to_figures):
         os.makedirs(path_to_figures)
+        
+    if build_always or not path_exists_and_not_empty(path_to_figures):
         result = os.system(cmd_line)
         if result != 0:
-            os.rmdir(path_to_figures)
-            msg = "See vistrails.log for more information."
+            shutil.rmtree(path_to_figures)
+            msg = "See vistrails.log and vistrails_run.log for more information."
             return (False, generate_latex_error(msg))
-        
-    else:
-        if build_always or not path_exists_and_not_empty(path_to_figures):
-            result = os.system(cmd_line)
-            if result != 0:
-                os.rmdir(path_to_figures)
-                msg = "See vistrails.log for more information."
-                return (False, generate_latex_error(msg))
 
-    return (True, generate_latex_db(True,"", host, db_name, vt_id, version, port, tag,
-                                 execute, showspreadsheetonly,
-                                 path_to_figures, graphics_options))
+    return (True, generate_latex_db(True,os.getcwd(), host, db_name, vt_id, version, port, tag,
+                                    execute, showspreadsheetonly, 
+                                    path_to_figures, graphics_options, 
+                                    embedWorkflow, includeFullTree))
 
 ###############################################################################
 
 def run_vistrails_locally_file(path_to_vistrails, env_for_vistrails, filename, 
                                version, path_to_figures, build_always=False,
                                tag='', execute=False, showspreadsheetonly=False,
-                               pdf=False):
+                               pdf=False, embedWorkflow=True, 
+                               includeFullTree=False):
     """run_vistrails_locally_file(path_to_vistrails: str, filename: str,
                                   version: str, path_to_figures: str,
                                   build_always:bool, tag:str, execute:bool,
@@ -500,37 +563,43 @@ def run_vistrails_locally_file(path_to_vistrails, env_for_vistrails, filename,
         Run vistrails and returns a tuple containing a boolean saying if it was
         successful or not and the latex code.
     """
+    v = version
+    if tag != '':
+        v = tag
     cmd_line = build_vistrails_cmd_line_file(path_to_vistrails, env_for_vistrails,
-                                             filename, version, path_to_figures, 
+                                             filename, v, path_to_figures, 
                                              pdf)
     log("run_vistrails_locally_file")
     log("cmdline: %s"%cmd_line)
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not os.path.exists(path_to_figures):
         os.makedirs(path_to_figures)
+                
+    if build_always or not path_exists_and_not_empty(path_to_figures):
         result = os.system(cmd_line)
         if result != 0:
-            os.rmdir(path_to_figures)
-            msg = "See vistrails_run.log for more information."
+            shutil.rmtree(path_to_figures)
+            msg = "See vistrails.log and vistrails_run.log for more information."
             return (False, generate_latex_error(msg))
-        
-    else:
-        if build_always or not path_exists_and_not_empty(path_to_figures):
-            result = os.system(cmd_line)
-            if result != 0:
-                os.rmdir(path_to_figures)
-                msg = "See vistrails.log for more information."
-                return (False, generate_latex_error(msg))
-            
-    return (True, generate_latex_file(os.path.dirname(os.path.abspath(filename)), 
+    log("will generate latex")
+    try:
+        return (True, generate_latex_file(os.path.dirname(os.path.abspath(filename)), 
                                       filename, version, tag,
                                       execute, showspreadsheetonly,
-                                      path_to_figures, graphics_options))
-
+                                      path_to_figures, graphics_options,
+                                      embedWorkflow, includeFullTree))
+    except Exception, e:
+        log("Error: %s"%str(e))
 ###############################################################################
 
-def get_vt_graph_locally_db(path_to_vistrails, env_for_vistrails, host, db_name, vt_id,
-                         port, path_to_figures, build_always=False,
-                         pdf=False):
+def get_vt_graph_locally_db(path_to_vistrails, env_for_vistrails, host, db_name,
+                            db_user, vt_id, port, path_to_figures, 
+                            build_always=False, pdf=False,
+                            embedWorkflow=True, includeFullTree=False):
     """get_vt_graph_locally_db(path_to_vistrails: str, host: str,
                              db_name: str, vt_id: str, port: str,
                              path_to_figures: str, build_always: bool,
@@ -540,11 +609,16 @@ def get_vt_graph_locally_db(path_to_vistrails, env_for_vistrails, host, db_name,
         successful or not and the latex code.
     """
     cmd_line = build_vistrails_cmd_line_db(path_to_vistrails, env_for_vistrails, 
-                                           host, db_name, vt_id,
+                                           host, db_name, db_user, vt_id,
                                            None, port, path_to_figures, pdf, False,
                                            True)
     log("get_vt_graph_locally_db")
     log("cmdline: %s"%cmd_line)
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not os.path.exists(path_to_figures):
         os.makedirs(path_to_figures)
     
@@ -555,14 +629,16 @@ def get_vt_graph_locally_db(path_to_vistrails, env_for_vistrails, host, db_name,
             msg = "See vistrails.log and vistrails_run.log for more information."
             return (False, generate_latex_error(msg))
 
-    return (True, generate_latex_db(True, "", host, db_name, vt_id, None, port, '',
+    return (True, generate_latex_db(True, os.getcwd(), host, db_name, vt_id, None, port, '',
                                  False, False,
-                                 path_to_figures, graphics_options))
+                                 path_to_figures, graphics_options,
+                                 embedWorkflow, includeFullTree))
 
 ###############################################################################
 
 def get_vt_graph_locally_file(path_to_vistrails, env_for_vistrails, filename,
-                              path_to_figures, build_always=False, pdf=False):
+                              path_to_figures, build_always=False, pdf=False,
+                              embedWorkflow=True, includeFullTree=False):
     """get_vt_graph_locally_file(path_to_vistrails: str, env_for_vistrails: str,
                                  filename: str, version: str, 
                                  path_to_figures: str,build_always: bool,
@@ -576,6 +652,12 @@ def get_vt_graph_locally_file(path_to_vistrails, env_for_vistrails, filename,
                                              pdf, False, True)
     log("get_vt_graph_locally_file")
     log("cmdline: %s"%cmd_line)
+    
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not os.path.exists(path_to_figures):
         log("  creating images folder")
         os.makedirs(path_to_figures)
@@ -593,13 +675,15 @@ def get_vt_graph_locally_file(path_to_vistrails, env_for_vistrails, filename,
     return (True, generate_latex_file(os.path.dirname(os.path.abspath(filename)), 
                                       filename, None, '', False, 
                                       False, path_to_figures, 
-                                      graphics_options))    
+                                      graphics_options, embedWorkflow, 
+                                      includeFullTree))    
 
 ###############################################################################    
 
-def get_wf_graph_locally_db(path_to_vistrails, env_for_vistrails, host, db_name, 
-                            vt_id, version, port, path_to_figures, 
-                            build_always=False, tag='', pdf=False):
+def get_wf_graph_locally_db(path_to_vistrails, env_for_vistrails, host, db_name,
+                            db_user, vt_id, version, port, path_to_figures, 
+                            build_always=False, tag='', pdf=False,
+                            embedWorkflow=True, includeFullTree=False):
     """get_wf_graph_locally_db(path_to_vistrails: str, host: str,
                              db_name: str, vt_id: str, version: str, port: str,
                              path_to_figures: str,build_always: bool,
@@ -608,12 +692,20 @@ def get_wf_graph_locally_db(path_to_vistrails, env_for_vistrails, host, db_name,
         returns a tuple containing a boolean saying if it was
         successful or not and the latex code.
     """
+    v = version
+    if tag != '':
+        v = tag
     cmd_line = build_vistrails_cmd_line_db(path_to_vistrails, env_for_vistrails, 
-                                           host, db_name, vt_id,
-                                           version, port, path_to_figures, pdf, 
+                                           host, db_name, db_user, vt_id,
+                                           v, port, path_to_figures, pdf, 
                                            True, False)
     log("get_wf_graph_locally_db")
     log("cmdline: %s"%cmd_line)
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not os.path.exists(path_to_figures):
         log("  creating images folder")
         os.makedirs(path_to_figures)
@@ -628,15 +720,17 @@ def get_wf_graph_locally_db(path_to_vistrails, env_for_vistrails, host, db_name,
     else:
         log("  found cached images")
         
-    return (True, generate_latex_db(True, "", host, db_name, vt_id, version, 
+    return (True, generate_latex_db(True, os.getcwd(), host, db_name, vt_id, version, 
                                     port, tag, execute, showspreadsheetonly,
-                                    path_to_figures, graphics_options))
+                                    path_to_figures, graphics_options,
+                                    embedWorkflow, includeFullTree))
 
 ###############################################################################
 
 def get_wf_graph_locally_file(path_to_vistrails, env_for_vistrails, filename,
                           version, path_to_figures, build_always=False,
-                          tag='', pdf=False):
+                          tag='', pdf=False, embedWorkflow=True, 
+                          includeFullTree=False):
     """get_wf_graph_locally_file(path_to_vistrails: str, env_for_vistrails: str,
                                  filename: str, version: str, 
                              path_to_figures: str,build_always: bool,
@@ -645,11 +739,19 @@ def get_wf_graph_locally_file(path_to_vistrails, env_for_vistrails, filename,
         returns a tuple containing a boolean saying whether it was
         successful and the latex code.
     """
+    v = version
+    if tag != '':
+        v = tag
     cmd_line = build_vistrails_cmd_line_file(path_to_vistrails, env_for_vistrails, 
-                                             filename, version, path_to_figures, 
+                                             filename, v, path_to_figures, 
                                              pdf, True, False)
     log("get_wf_graph_locally_file")
     log("cmdline: %s"%cmd_line)
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not os.path.exists(path_to_figures):
         log("  creating images folder")
         os.makedirs(path_to_figures)
@@ -668,25 +770,33 @@ def get_wf_graph_locally_file(path_to_vistrails, env_for_vistrails, filename,
     return (True, generate_latex_file(os.path.dirname(os.path.abspath(filename)), 
                                       filename, version, tag, execute, 
                                       showspreadsheetonly, path_to_figures, 
-                                      graphics_options))    
+                                      graphics_options, embedWorkflow, 
+                                      includeFullTree))    
 
 ###############################################################################
 
 def run_vistrails_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
                            version, port, path_to_figures, build_always=False,
                            tag='', execute=False, showspreadsheetonly=False,
-                           pdf=False):
+                           pdf=False, embedWorkflow=True, 
+                           includeFullTree=False):
     """run_vistrails_remotely(path_to_vistrails: str, download_url: str host: str,
                               db_name: str, vt_id: str, version: str, port: str,
                               path_to_figures: str, build_always: bool,
                               tag:str, execute: bool, showspreadsheetonly: bool,
-                              pdf: bool)
+                              pdf: bool, embedWorkflow:bool, 
+                              includeFullTree:bool)
                                    -> tuple(bool, str)
         Call vistrails remotely to execute a workflow and returns a tuple 
         containing a boolean saying whether it was successful and the latex 
         code.
     """ 
     log("run_vistrails_remotely")
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not path_exists_and_not_empty(path_to_figures) or build_always:
         if not os.path.exists(path_to_figures):
             os.makedirs(path_to_figures)
@@ -709,7 +819,8 @@ def run_vistrails_remotely(path_to_vistrails, download_url, host, db_name, vt_id
                                                version, port, tag, execute,
                                                showspreadsheetonly,
                                                path_to_figures, 
-                                               graphics_options))
+                                               graphics_options,
+                                               embedWorkflow, includeFullTree))
             else:
                 log("Error: " + msg)
                 return (result, generate_latex_error(msg))
@@ -722,12 +833,14 @@ def run_vistrails_remotely(path_to_vistrails, download_url, host, db_name, vt_id
         return (True, generate_latex_db(False, download_url, host, db_name, vt_id, 
                                      version, port, tag, execute, 
                                      showspreadsheetonly,
-                                     path_to_figures, graphics_options))
+                                     path_to_figures, graphics_options,
+                                     embedWorkflow, includeFullTree))
                 
 ###############################################################################
 
 def get_vt_graph_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
-                          port, path_to_figures, build_always=False, pdf=False):
+                          port, path_to_figures, build_always=False, pdf=False,
+                          embedWorkflow=True, includeFullTree=False):
     """get_vt_graph_remotely(path_to_vistrails: str, download_url: str, host: str,
                               db_name: str, vt_id: str, port: str,
                               path_to_figures: str, build_always: bool, pdf: bool)
@@ -736,6 +849,11 @@ def get_vt_graph_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
         a boolean saying whether it was successful and the latex code.
     """    
     log("get_vt_graph_remotely")
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not path_exists_and_not_empty(path_to_figures) or build_always:
         if not os.path.exists(path_to_figures):
             os.makedirs(path_to_figures)
@@ -754,11 +872,12 @@ def get_vt_graph_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
             if result == True:
                 log("success")
                 return (result, generate_latex_db(False, download_url, host, db_name, 
-                                               vt_id, None, 
-                                               port, '', False,
-                                               False,
-                                               path_to_figures, 
-                                               graphics_options))
+                                                  vt_id, None, 
+                                                  port, '', False,
+                                                  False,
+                                                  path_to_figures, 
+                                                  graphics_options,
+                                                  embedWorkflow, includeFullTree))
             else:
                 log("Error: " + msg)
                 return (result, generate_latex_error(msg))
@@ -771,13 +890,15 @@ def get_vt_graph_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
         return (True, generate_latex_db(False, download_url, host, db_name, vt_id, 
                                      None, port, '', 
                                      False, False,
-                                     path_to_figures, graphics_options))
+                                     path_to_figures, graphics_options,
+                                     embedWorkflow, includeFullTree))
         
 ###############################################################################
 
 def get_wf_graph_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
                            version, port, path_to_figures, build_always=False, 
-                           tag='', pdf=False):
+                           tag='', pdf=False, embedWorkflow=True, 
+                           includeFullTree=False):
     """get_wf_graph_remotely(path_to_vistrails: str, download_url:str, host: str,
                               db_name: str, vt_id: str, version: str, port: str,
                               path_to_figures: str, build_always: bool, 
@@ -786,6 +907,12 @@ def get_wf_graph_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
         saying whether it was successful and the latex code.
     """
     log("get_wf_graph_remotely") 
+    
+    if build_always:
+        #force to remove the folder so we avoid stale results
+        if os.path.exists(path_to_figures):
+            shutil.rmtree(path_to_figures)
+            
     if not path_exists_and_not_empty(path_to_figures) or build_always:
         if not os.path.exists(path_to_figures):
             os.makedirs(path_to_figures)
@@ -809,7 +936,8 @@ def get_wf_graph_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
                                                port, tag, False,
                                                False,
                                                path_to_figures, 
-                                               graphics_options))
+                                               graphics_options,
+                                               embedWorkflow, includeFullTree))
             else:
                 log("Error: " + msg)
                 return (result, generate_latex_error(msg))
@@ -822,7 +950,8 @@ def get_wf_graph_remotely(path_to_vistrails, download_url, host, db_name, vt_id,
         return (True, generate_latex_db(False, download_url, host, db_name, vt_id, 
                                      version, port, tag, 
                                      False, False,
-                                     path_to_figures, graphics_options))
+                                     path_to_figures, graphics_options,
+                                     embedWorkflow, includeFullTree))
             
 ###############################################################################
 
@@ -881,6 +1010,7 @@ download_url = None
 env_for_vistrails = None
 host = None
 db_name = None
+db_user = None
 vt_id = None
 filename = None
 version = None
@@ -894,7 +1024,8 @@ pdf = False
 wgraph = False
 tree = False
 getvtl = False
-
+embedWorkflow=True
+includeFullTree=False
 for line in lines:
     args = line.split("=")
     if len(args) > 2:
@@ -909,6 +1040,8 @@ for line in lines:
         host = args[1].strip(" \n")
     elif args[0] == "db":
         db_name = args[1].strip(" \n")
+    elif args[0] == "user":
+        db_user = args[1].strip(" \n")
     elif args[0] == "vtid":
         vt_id = args[1].strip(" \n")
     elif args[0] == "filename":
@@ -925,8 +1058,6 @@ for line in lines:
         execute = bool_conv(args[1].strip(" \n"))
     elif args[0] == "showspreadsheetonly":
         showspreadsheetonly = bool_conv(args[1].strip(" \n"))
-        if showspreadsheetonly:
-            execute = True
     elif args[0] == 'pdf':
         pdf = bool_conv(args[1].strip(" \n"))
     elif args[0] == 'workflow':
@@ -935,9 +1066,15 @@ for line in lines:
         tree = bool_conv(args[1].strip(" \n"))
     elif args[0] == 'getvtl':
         getvtl = bool_conv(args[1].strip(" \n"))
+    elif args[0] == 'embedworkflow':
+        embedWorkflow = bool_conv(args[1].strip(" \n"))
+    elif args[0] == 'includefulltree':
+        includeFullTree = bool_conv(args[1].strip(" \n"))
     elif args[0] == "other":
         graphics_options = args[1].strip(" \n")
 
+if showspreadsheetonly:
+    execute = True
 # then we use the combination host_db_name_port_vt_id_version or
 # filename_version to create a unique folder.
 
@@ -989,22 +1126,28 @@ if check_path(path_to_vistrails) and filename is None: #run locally
         log("will run get_vt_graph_locally_db")
         result, latex = get_vt_graph_locally_db(path_to_vistrails, 
                                                 env_for_vistrails, host, db_name,
+                                                db_user,
                                                 vt_id, port, path_to_figures,
-                                                build_always, pdf)
+                                                build_always, pdf, embedWorkflow,
+                                                includeFullTree)
     elif wgraph:
         # we don't need to actually run the workflow, we just get the
         # workflow graph
         log("will run get_wf_graph_locally_db")
         result, latex = get_wf_graph_locally_db(path_to_vistrails,
                                                 env_for_vistrails, host, db_name,
+                                                db_user,
                                                 vt_id, version, port, path_to_figures,
-                                                build_always, version_tag, pdf)
+                                                build_always, version_tag, pdf,
+                                                embedWorkflow, includeFullTree)
     else:    
         result, latex = run_vistrails_locally_db(path_to_vistrails, 
                                                  env_for_vistrails, host, db_name,
+                                                 db_user,
                                                  vt_id, version, port, path_to_figures,
                                                  build_always, version_tag, execute,
-                                                 showspreadsheetonly,pdf)
+                                                 showspreadsheetonly, pdf,
+                                                 embedWorkflow, includeFullTree)
 elif check_path(path_to_vistrails) and filename is not None: #run locally
     if tree:
         # we don't need to actually run the workflow, we just get the
@@ -1012,7 +1155,8 @@ elif check_path(path_to_vistrails) and filename is not None: #run locally
         result, latex = get_vt_graph_locally_file(path_to_vistrails, 
                                                   env_for_vistrails, filename,
                                                   path_to_figures,
-                                                  build_always, pdf)
+                                                  build_always, pdf,
+                                                  embedWorkflow, includeFullTree)
     elif wgraph:
         # we don't need to actually run the workflow, we just get the
         # workflow graph
@@ -1020,32 +1164,37 @@ elif check_path(path_to_vistrails) and filename is not None: #run locally
         result, latex = get_wf_graph_locally_file(path_to_vistrails, 
                                                   env_for_vistrails, filename,
                                                   version, path_to_figures,
-                                                  build_always, version_tag, pdf)
+                                                  build_always, version_tag, pdf,
+                                                  embedWorkflow, includeFullTree)
     else:    
         result, latex = run_vistrails_locally_file(path_to_vistrails, 
                                                    env_for_vistrails, filename,
                                                    version, path_to_figures,
                                                    build_always, version_tag, 
                                                    execute, showspreadsheetonly,
-                                                   pdf)
+                                                   pdf,embedWorkflow, 
+                                                   includeFullTree)
 elif (not build_always or
       (build_always and check_url(path_to_vistrails))): #run from the web
     if tree:
         result, latex = get_vt_graph_remotely(path_to_vistrails, download_url,
                                               host, db_name,
                                               vt_id, port, path_to_figures,
-                                              build_always, pdf)
+                                              build_always, pdf, embedWorkflow,
+                                              includeFullTree)
     elif wgraph:
         result, latex = get_wf_graph_remotely(path_to_vistrails, download_url,
                                               host, db_name,
                                               vt_id, version, port, path_to_figures,
-                                              build_always,version_tag, pdf)
+                                              build_always,version_tag, pdf,
+                                              embedWorkflow, includeFullTree)
     else:
         result, latex = run_vistrails_remotely(path_to_vistrails, download_url,
                                                host, db_name,
                                                vt_id, version, port, path_to_figures,
                                                build_always, version_tag, execute,
-                                               showspreadsheetonly,pdf)
+                                               showspreadsheetonly,pdf,
+                                               embedWorkflow, includeFullTree)
     #download vtl file
     if getvtl:
         if (not build_always and not vtl_exists_in_folder(path_to_figures) or
@@ -1053,8 +1202,8 @@ elif (not build_always or
                 url = build_download_vtl_request(download_url, host, db_name, 
                                                  vt_id, version, port, version_tag, 
                                                  execute, showspreadsheetonly, 
-                                                 embedWorkflow=True, 
-                                                 includeFullTree=tree)
+                                                 embedWorkflow=embedWorkflow, 
+                                                 includeFullTree=includeFullTree)
                 log("get_vtl %s"%url)
                 if download(url, filename=None, folder=path_to_figures) == False:
                     log("Error when downloading vtl to %s"%path_to_figures)
