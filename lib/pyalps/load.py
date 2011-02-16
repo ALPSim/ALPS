@@ -403,7 +403,14 @@ class Hdf5Loader:
                 for m in obslist:
                     if verbose: log( "Loading " + m)
                     size=0
-                    if "error" in self.h5f.list_children(respath+'/'+m+'/mean'): 
+                    xmin=0
+                    xstep=1
+                    if "histogram" in self.h5f.list_children(respath+'/'+m):
+                        obs = self.h5f.read(respath+'/'+m+'/histogram')
+                        xmin = self.h5f.read(respath+'/'+m+'/@min')
+                        xstep = self.h5f.read(respath+'/'+m+'/@stepsize')
+                        size = len(obs)
+                    elif "error" in self.h5f.list_children(respath+'/'+m+'/mean'): 
                         if self.h5f.is_scalar(respath+'/'+m+'/mean/value'):
                             obs = pa.MCScalarData()
                             obs.load(self.h5fname, respath+'/'+m)
@@ -424,7 +431,7 @@ class Hdf5Loader:
                     try:
                         d = DataSet()
                         d.y = obs
-                        d.x = np.arange(0,size)
+                        d.x = np.arange(xmin,xmin+xstep*size,xstep)
                         d.props['hdf5_path'] = respath +"/"+ m
                         d.props['observable'] = pt.hdf5_name_decode(m)
                         d.props.update(params)
