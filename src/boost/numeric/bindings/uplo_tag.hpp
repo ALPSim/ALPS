@@ -45,7 +45,7 @@ struct uplo_tag_impl< tag::lower, TransTag > {
 };
 
 template< typename TransTag >
-struct uplo_tag_impl< mpl_::void_, TransTag > {
+struct uplo_tag_impl< mpl::void_, TransTag > {
     typedef tag::upper type;
 };
 
