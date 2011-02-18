@@ -78,7 +78,7 @@ public:
     
     void load(alps::IDump& dump)
     {
-        if(super_type::where.empty())
+        if (super_type::where.empty())
             super_type::measurements.compact();
         else {
             dump >> nthermalization >> sweeps_done >> measurements_done;

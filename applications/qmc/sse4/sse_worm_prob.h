@@ -203,7 +203,7 @@ private:
                 else
                     w2 *= model.raising_matrix_elements()[stype][state];
             }
-            if (std::fabs(w2) < 1e-14)
+            if (w2 < 1e-15)
                 // zero weight
                 continue;
             
@@ -237,7 +237,7 @@ private:
             unsigned count = 0;
             for (unsigned j = 0; j < exits.size(); ++j) {
                 double prob = matrix[exits.size() * i + j];
-                if (prob > 1e-13)
+                if (prob > 1e-14)
                     // nonzero matrix element
                     ++count;
             }
@@ -253,7 +253,7 @@ private:
             count = 0;
             for (unsigned j = 0; j < exits.size(); ++j) {
                 double prob = matrix[exits.size() * i + j];
-                if (prob > 1e-13) {
+                if (prob > 1e-14) {
                     // nonzero matrix element
                     Wprob wprob;
 

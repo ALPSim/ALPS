@@ -96,8 +96,14 @@ public:
             if (!vertex.diagonal)
                 continue;
 
-            d01_probs[vi] = (model.c(vertex.unit_type) - vertex.me)
-                    * worker.beta() * lat_units.size();
+            double w = model.c(vertex.unit_type) - vertex.me;
+            if (w < 1e-15) {
+                // zero weight
+				d01_probs[vi] = 0.0;
+				continue;
+			}
+
+            d01_probs[vi] = w * worker.beta() * lat_units.size();
             d10_probs[vi] = 1.0 / d01_probs[vi];
         }
         
@@ -129,6 +135,7 @@ public:
     {
         dump >> nworms >> state >> opstring >> nops >> nnonzero
                 >> nworms_therm >> count_therm;
+		op_indices.resize(nops);
     }
     
     void do_step()

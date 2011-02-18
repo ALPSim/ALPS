@@ -132,9 +132,10 @@ void SSE::load(alps::IDump& dump)
     // perform the conversion which may be necessary
     steps_done_total = steps_done_total_tmp;
    }
-  if(!where.empty())
+  if(!where.empty()) {
     dump >>  site_state >> operator_string >>  cutoff_L >> current_number_of_non_identity >> number_of_worms_per_sweep >>  nb_worms_thermalization >> count_worms_thermalization;
-  else
+    op_indices.resize(cutoff_L);
+  } else
     measurements.compact();
 }
 
