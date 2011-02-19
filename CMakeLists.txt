@@ -167,7 +167,7 @@ endif(ALPS_BUILD_SOURCE)
 ######################################################################
 # Version information
 ######################################################################
-set(ALPS_YEAR 2010)
+set(ALPS_YEAR 2011)
 set(ALPS_VERSION_MAJOR 2)
 set(ALPS_VERSION_MINOR 0)
 set(ALPS_VERSION_PATCH 0)
