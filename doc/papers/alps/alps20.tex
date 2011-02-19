@@ -162,7 +162,7 @@ The software is available from our web server at \url{http://alps.comp-phys.org/
 \section{Introduction}
 \label{}
 
-In this paper we present release 2.0 of the ALPS project (Algorithms and Libraries for Physics Simulations), an open source software development project for strongly correlated lattice models. We will present a short overview and focus on new features compared to the previous releases~\cite{ALPS1.2,ALPS1.3}.
+In this paper we present release 2.0 of the ALPS project (Algorithms and Libraries for Physics Simulations), an open source software development project for strongly correlated lattice models. This paper updates the publications on the previous releases~\cite{ALPS1.2,ALPS1.3} to include changes and new features in version 2.0.
 
 Quantum fluctuations and competing interactions in quantum many body
 systems lead to unusual and exciting properties of strongly correlated
@@ -179,9 +179,9 @@ the density matrix renormalization group \cite{White1992,Schollwock2005,Daley200
 Monte Carlo (QMC) techniques, as well as the advent of a new class of variational approaches based on 
 tensor network states \cite{vidal1,vidal2,Verstraete04,Murg07,vidal07}. 
 Some of the algorithmic refinements have led to computational speedups of many order of magnitudes, such as 
-the development of non-local update schemes \cite{Swendsen87} in QMC methods \cite{Prokofev98A,Todo01,looper,Sylyuasen,Alet2005}, 
+the development of non-local update schemes \cite{Swendsen87,Wolff89} in QMC methods \cite{Evertz93,Prokofev98A,Sandvik99,Todo01,looper,Sylyuasen, Evertz03,Alet2005}, 
 the sampling of extended ensembles \cite{Wang01,Wang01b,Troyer03,Trebst04,Katzgraber06,Wessel07},
-or the continuous-time approach to quantum impurity problems \cite{Evertz03,Rubtsov04,Rubtsov05,Werner06,Werner06Kondo, Gull08_ctaux}.
+or the continuous-time approach to quantum impurity problems \cite{Rubtsov04,Rubtsov05,Werner06,Werner06Kondo, Gull08_ctaux}.
 These advances often come at the cost of increased algorithmic
 complexity and challenge the current model of program development in
 this research field. In contrast to other research areas, in which
@@ -192,6 +192,9 @@ algorithms used a decade ago could be easily programmed by a beginning
 graduate student in a matter of weeks, it now takes substantially
 longer to master and implement the new algorithms. At the same time, the use of numerical approaches is increasing. 
 
+\section{The ALPS project}
+
+\subsection{Overview}
 The ALPS project aims to
 overcome the problems posed by the growing complexity of algorithms
 and the specialization of researchers to single algorithms through
@@ -212,6 +215,9 @@ lattice models and to explore their properties,
 {\it experimentalists} trying to fit experimental data to theoretical
 models to obtain information about the microscopic properties of
 materials, and {\it students} learning computational physics and many-body theory.
+\item A {\bf build system} allowing ALPS to be built on Linux, MacOS X, Windows, and supercomputing platforms, and the creation of simple binary installers.
+\item An extensive set of {\bf tutorials} teaching the use of the ALPS libraries and the various applications.
+
 \item{\bf License} conditions~\cite{librarylicense,applicationlicense} that encourage researchers to contribute
 to the ALPS project by gaining scientific credit for use of their
 work.
@@ -223,10 +229,17 @@ publishing source codes used to obtain published results and by integration with
 \end{itemize}
 
 
- In this paper, we present an overview of these
- aspects of the ALPS project, emphasizing the new features in release 2.0:
- 
- 
+In contrast to other fields, where open-source development efforts started decade ago, we can directly build our design on recent developments in computer science, especially:
+\begin{itemize}
+\item XML\cite{xml} (eXtenden Markup Language) and HDF5\cite{hdf5} (Hierarchical Data Format version 5)  as portable data formats supported by a large number of standard tools
+\item generic and object oriented programming in C++ to achieve flexible but still optimal codes
+\item OpenMP\cite{openmp} and MPI\cite{mpi} for parallelization on shared memory machines, clusters, and high performance supercomputers.
+\end{itemize} 
+
+
+\subsection{New features in version 2.0}
+
+The specific new features in version 2.0 are:
  \begin{itemize}
 \item CMake build system~\cite{cmake}, simplifying configuration and enabling ALPS to be built on Windows.
 \item Binary installer packages for MacOS X and Windows.
@@ -235,30 +248,16 @@ publishing source codes used to obtain published results and by integration with
 \item A revised and substantially faster version of the directed loop quantum Monte Carlo (QMC) code {\tt dirloop\_sse}, and two new applications: QMC solvers for dynamical 
 mean field theory ({\tt dmft}) and a time-evolving block decimation code ({\tt tebd}) for the dynamics of one-dimensional quantum systems.
 \item Integration with the VisTrails workflow provenance system~\cite{vistrails}.
-\item An expanded set of tutorials.
+\item An expanded set of tutorials, and completely new tutorials using Python and VisTrails.
  \end{itemize}
  
  
 \section{Building and Installing ALPS} \label{sct:build_and_install}
 \subsection{Build system}
-One of the main new features in ALPS 2.0 is the change of the build system to CMake~\cite{cmake}, which is more flexible and portable than the previously used autotools. CMake includes a graphical user interface to let the user choose installation options and manually override the paths to needed libraries if they have not been found automatically. Furthermore, CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested features. A snapshot of the build instructions at the time of the release are included in the source distribution. Updated instructions as operating systems change will be made available on the ALPS web page~\cite{alps}.
+ALPS 2.0 uses the CMake~\cite{cmake}, which is more flexible and portable than the previously used autotools. CMake includes a graphical user interface to let the user choose installation options and manually override the paths to needed libraries if they have not been found automatically. Furthermore, CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested features. A snapshot of the build instructions at the time of the release are included in the source distribution. 
+\subsection{Building ALPS from source}
 
-The following tools and libraries are required to build ALPS:
-
-\begin{itemize}
-\item The CMake build system~\cite{cmake}.
-\item The BLAS~\cite{blasnetlib} and LAPACK libraries~\cite{lapack}. Ideally optimized versions for the target architecture should be used instead of the generic netlib versions.
-\item The Boost C++ libraries version 1.43.0 or later (Boost 1.45.0 is included in one version of the source tarball)~\cite{boost}.
-\item The HDF5 library version 1.8~\cite{hdf5}.
-\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9, IBM xlC++ 11.1, and Intel's icpc 10 and 11.
-\end{itemize}
-To build optional parts of ALPS it is recommended to install in addition
-\begin{itemize}
-\item Python version 2.5 or 2.6~\cite{python}.
-\item The numpy~\cite{numpy}, scipy~\cite{scipy}, and matplotlib~\cite{matplotlib} Python packages.
-\item The VisTrails scientific workflow and provenance management system~\cite{vistrails} and all its dependencies.
-\item A Fortran 90 compiler for the {\tt tebd} code.
-\end{itemize}
+Details about building ALPS from source, and the required tools and libraries are discussed in \ref{sec:cmake}. This is the recommended way of building ALPS on Unix and Linux systems, or if one wants to use specific BLAS libraries or Python interpreters on MacOS or Windows. Updated instructions as operating systems change will be made available on the ALPS web page~\cite{alps}.
 
 \subsection{Binary Installation Packages}
 
@@ -280,28 +279,70 @@ The most fundamental part of the ALPS project is the definition of
 common standardized file formats suitable for a wide range of
 applications. Standardized file formats enable the exchange of data
 between applications, allow the development of common evaluation
-tools, simplify the application of more than one algorithm to a given
+tools, reduce the leaning curve, simplify the application of more than one algorithm to a given
 model, and are a prerequisite for the storage of simulation data in a
 common archive.
 
+
 \subsection{XML}
+
+
  The ISO
 standard XML~\cite{xml} was chosen in ALPS version 1~\cite{ALPS1.2,ALPS1.3} for the specification of these formats
 because it has become
 the main text-based data format on the Internet and because it is
 supported by a large and growing number of tools.
-A number of XML schemas~\cite{xmlschema} were designed in ALPS 1 to describe the input of simulation parameters, lattices, quantum lattice models, and the output of results. ALPS 2 uses the same XML schemas to maintain compatibility.
+
+We have designed a number of XML  schemas \cite{xmlschema} to describe
+\begin{itemize}
+\item the input of simulation parameters,
+\item the lattices,
+\item quantum lattice models,   
+\item and the output of results.
+\end{itemize}
+
+An intgroduction to XML and the ALPS XML formats is given in \ref{sec:xml}, and a  detailed specification of the formats is provided on
+our web pages \cite{alps,xmlschema}.
+
+
 
 \subsection{HDF5}
 
-We now complement XML by the widely used Hierarchical Data Format 5 (HDF5)~\cite{hdf5}, a de-facto standard for writing large binary files in a portable, machine-independent way. HDF5 is directly supported by many visualization and data analysis tools and a wide array of tools are 
+We now complement XML by the widely used Hierarchical Data Format 5 (HDF5)~\cite{hdf5}, a de-facto standard for writing large binary files in a portable, machine-independent way. HDF5 is directly supported by many visualization and data analysis tools and a       wide array of tools are 
 available for C, C++, Fortran, Python, and other languages. In ALPS, HDF5 is now used as the default output format for simulation data. This approach is significantly faster than writing to text-based formats when large files need to be written. On-the-fly compression of binary data further reduces file size. 
 
 The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page~\cite{alps}. For backward compatibility with user's evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to also write all results in XML.
 
 The implementation of HDF5 capabilities within ALPS is split into two layers. The lower layer implements a generic and general-purpose C++ interface to the C HDF5 library. This layer is not tied to other parts of the ALPS library and can therefore be used by user code that is otherwise independent from ALPS and its file formats. The functions of this library are also exposed to Python, and can thus be used not only from C++ codes but also from Python scripts. On top of that, the specific file formats used by the ALPS library and applications are implemented in the respective components of the ALPS library.
 
+
+
+
+\section{ALPS Libraries}
+\noindent {\it Main developers:} L. Gamper, E. Gull. A. Hehn, B. Surer, S. Todo and M. Troyer. 
+
+\medskip
+
+The ALPS libraries are the foundation of all the ALPS applications, providing the functionality common to all of them:
+\begin{itemize}
+\item an XML parser and output stream to read and write the ALPS XML files.
+\item a HDF5 library to read and write HDF5 files
+\item an expression library to manipulate and evaluate symbolic expressions.
+\item a scheduler for the automatic parallelization of Monte Carlo simulations and other embarrassingly parallel applications, implementing load balancing and checkpointing \cite{palm}.
+\item a lattice structure library for the creation of arbitrary graphs and Bravais lattices from XML input.
+\item a model library for the construction of basis sets, operators and Hamiltonians from XML input.
+\item the ``alea'' library for the statistical analysis and evaluation of Monte Carlo data including a binning analysis of errors and jackknife analysis of cross-correlations \cite{palm}.
+\item a serialization library ``osiris'' for the serialization of C++ data structures, used for writing program checkpoints and portable binary result files \cite{palm}.
+\end{itemize}
+These libraries make full use of object oriented and generic\cite{CE} programming techniques, thus being flexible while still not losing any performance compared to FORTRAN programs. To give just one example, the lattice library, implemented generically using C++ template features, is based on the Boost Graph Library\cite{BGL,boost} (BGL) and does not restrict the user to a specific data structure as in C or Fortran libraries. Instead the application programmer can choose the data structure best suited for the application, and as long as the data structure provides the BGL graph interface, the ALPS lattice library can construct the lattice from the XML description.
+
+
+
+
 \section{Evaluation Tools in Python} \label{sct:python}
+\noindent {\it Main developers:} B. Bauer, L. Gamper, J. Gukelberger, P.N. Ma, O. Parcollet, M.~Troyer, and M.L. Wall. 
+
+\medskip
 
 The previous versions of ALPS had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML files using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language~\cite{python}. Python is an easy-to-learn, interpreted, object-oriented language allowing interactive analysis of data and arbitrary complex evaluations. A brief introduction to the Python language as well as the pyalps Python package new to ALPS 2.0 can be found in Appendix B.
 
@@ -330,36 +371,120 @@ Using Boost.Python, large parts of the ALPS alea library for Monte Carlo observa
 \section{Applications}
 \label{sec:applications}
 In addition to common libraries, the ALPS project includes a number of ready-to-use applications implementing the most important unbiased
-algorithms for quantum many-body systems. The applications all
+algorithms for quantum many-body systems. All applications from ALPS 1.3, with the exception of the single particle DMRG demonstration program, have been retained in ALPS 2.0. They continue to work in the same way, with minor bug fixes and patches for incompatibilities, and we have added a number of new applications in version 2.0.
+
+The applications all
 share the same file formats, simplifying their use, reducing the
 learning curve, and enabling the easy investigation of a model with
 more than one method. Tutorials on the use of the applications are
 included with the sources that can be found on the ALPS web
 page~\cite{alps}.
 
-\subsection{Applications already existing in the previous version}
-All applications from ALPS 1.3, with the exception of the single particle DMRG demonstration program, have been retained in ALPS 2.0. They continue to work in the same way, with minor bug fixes and patches for incompatibilities. Specifically, we include:
+\subsection{Exact diagonalization}
 
-\subsubsection{Exact diagonalization}
-codes {\tt sparsediag} and {\tt fulldiag}. The former calculates the ground state
-and low lying excited states of quantum lattice models using the
-Lanczos~\cite{lanczos} algorithm, while the latter calculates the complete
+The exact diagonalization codes have been optimized for flexibility and not the highest performance or the goal to reach the biggest system sizes.
+
+The codes make use of conserved quantum numbers, such as particle number or magnetization and use translation symmetry to reduce the Hilbert space dimension. This speeds up the calculations and allows larger systems to be calculated. In addition, by calculating the energy eigenvalues separately for each momentum, the momentum-resolved excitation spectrum can be calculated.
+
+The user may also specify custom measurements of averaged or local site- and bond operators, as well as arbitrary 2-point correlation functions. As an example, for the inhomogeneous bosonic Hubbard model of figure \ref{fig:hubmodel}, one can specify the measurement of the average double occupancy, local density, density correlations, and Green's function by defining the following input parameters, which use the definitions of site and bond operators provided with the model:
+
+\begin{verbatim}
+MEASURE_AVERAGE[Double] = double_occupancy
+MEASURE_LOCAL[Local density] = n
+MEASURE_CORRELATION[Density correlation] = n
+MEASURE_CORRELATION[Green function] = "bdag:b"
+MEASURE_STRUCTURE_FACTOR[Density Structure Factor] = n
+\end{verbatim}
+
+
+
+
+\subsubsection{Sparse diagonalization code {\tt sparsediag},} main developer: M. Troyer
+
+\smallskip
+
+\noindent  {\tt sparsediag} calculates the ground state and low lying excited states of quantum lattice models using the
+Lanczos~\cite{lanczos} algorithm.
+
+
+\subsubsection{Full diagonalization code {\tt fulldiag},} main developer: M. Troyer
+
+\smallskip
+
+\noindent {\tt fulldiag} calculates the complete
 spectrum of quantum lattice models and from it all thermodynamic
-properties. A new feature in {\tt fulldiag} allows the calculation of thermal averages of custom measurements specified by the user.
+properties. Access to the complete spectrum allos the calculation of all thermodynamic properties and of the temperature dependence of any measurement specified by the user.
 
 
 
-\subsubsection{Classical Monte Carlo} 
-simulations of classical magnets employing local and cluster
-updates~\cite{Swendsen87} are implemented in the {\tt spinmc} application.
+\subsection{Classical Monte Carlo simulations} 
 
-\subsubsection{Quantum Monte Carlo} codes include the {\tt loop} program using the loop cluster
-algorithm~\cite{Evertz03,Todo01,looper}, an updated directed loop QMC~\cite{Sylyuasen,Alet2005} program {\tt dirloop\_sse}, a worm algorithm~\cite{Prokofev98A} program {\tt worm}, and the {\tt qwl} program implementing Wang-Landau sampling for quantum spin systems~\cite{Troyer03}. The {\tt dirloop\_sse} program has been reimplemented by S. Isakov, resulting in a substantial speedup.
+\subsubsection{Classical Monte Carlo codes for spin models {\tt spinmc},} main developer: M. Troyer
+
+\smallskip
+
+\noindent {\tt spinmc} is a classical Monte Carlo code for classical magnets employing local and cluster
+updates~\cite{Swendsen87,Wolff89}. Supported models are Ising, XY, Heisenberg, and Potts models with isotropic and anisotropic interactions and magnetic fields.
+
+\subsection{Quantum Monte Carlo simulations} 
+
+\subsubsection{The looper code,} main developer: S. Todo
+
+\smallskip
+
+\noindent The {\tt loop} program implements the loop cluster
+algorithm~\cite{Evertz93,Todo01,looper, Evertz03}, a generalization of the classical cluster updates \cite{Swendsen87,Wolff89} to quantum systems in both a path integral and a stochastic series expansion (SSE) representation \cite{Sandvik91,Sandvik99}. It supports isotropic and anisotropic models of quantum magnets in transverse and longitudinal fields.
+
+
+\subsubsection{The directed loop algorithm code {\tt dirloop\_sse},} main developer: S. Isakov
+
+\smallskip
+
+\noindent The {\tt dirloop\_sse} code in ALPS 2.0 is a completely new and improved implementation of the directed loop QMC algorithm~\cite{Sylyuasen,Alet2005}, replacing the previous one in ALPS 1.2 and 1.3.  It is ideal for spin models in magnetic fields, frustrated spin models, and hard-core boson models.
+ 
+\subsubsection{The worm algorithm code {\tt worm},} main developers: S. Trebst and M. Troyer
+
+\smallskip
+
+\noindent The {\tt worm} code implements the worm algorithm~\cite{Prokofev98A} and is ideal for bosonic models.
+
+
+\subsubsection{The extended ensemble code {\tt qwl},} main developers: M. Troyer and S. Wessel
+
+\smallskip
+
+\noindent The {\tt qwl} code is an extended ensemble QMC program using a generalization of the Wang-Landau\cite{Wang01,Wang01b} algorithm to quantum systems,\cite{Troyer03} to obtain thermodynamic quantities over large temperature ranges.
 
  
-\subsubsection{Density Matrix Renormalization Group (DMRG):} The {\tt dmrg} code implementing the DMRG algorithm~\cite{White1992,Schollwock2005} of ALPS 1.3 has been updated to support complex-valued Hamiltonians.
+\subsection{Density Matrix Renormalization Group (DMRG) algorithms} 
 
-\subsection{New Dynamical Mean Field Theory QMC Solvers {\tt dmft}}
+\subsubsection{The {\tt dmrg} code,} main developers: A. Feiguin (core code) and M. Troyer (ALPS interface)
+
+\smallskip 
+
+The {\tt dmrg} code implements the DMRG algorithm~\cite{White1992,Schollwock2005} to calculate ground states and low-lying excited states of quasi-one dimensional quantum systems. It can also measure arbitrary local quantitis and two-point functions.
+
+\subsubsection{Time Evolving Block Decimation Code {\tt tebd},} main developers: L. Carr and M.L. Wall
+
+\smallskip
+
+Release 2.0 contains interfaces to the Open Source TEBD project~\cite{ostebd}, which is a collection of Fortran libraries using the Time-Evolving Block Decimation (TEBD) algorithm~\cite{vidal1, vidal2} to simulate time evolution of one-dimensional quantum systems. TEBD can also find ground states via imaginary time evolution. The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.
+
+At present, the TEBD routines can simulate the spin, boson Hubbard, hardcore boson, spinless fermion, and fermion Hubbard models from the ALPS models library. All 
+Hamiltonian parameters are assumed uniform throughout the system. Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times. Observables calculated are the $z$ and $x$ magnetizations, their squares, and the $\langle \hat{S}^z_i 
+\hat{S}^z_j\rangle$ and $\langle \hat{S}^x_i \hat{S}^x_j\rangle$ correlations for the spin model, the occupation number, its square, and the $\langle \hat{n}_i \hat{n}_j\rangle$ and 
+$\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models; and, additionally, 
+the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model. All models calculate the energy, von Neumann entanglement 
+entropy of each site, the von Neumann entanglement entropy on each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ ({\it i.e.}, the Loschmidt echo).
+
+
+
+\subsection{Dynamical Mean Field Theory QMC Solvers {\tt dmft}}
+
+\noindent {\it Main developers: } S. Fuchs, E. Gull, B. Surer, M. Troyer and P. Werner
+
+\medskip
+
 Dynamical mean field theory (DMFT) is a method to simulate fermionic lattice systems which approximates the self-energy $\Sigma(k,\omega)$ by a momentum-independent 
 function $\Sigma(\omega)$. For such a ``local'' self-energy, the diagrammatic structure simplifies considerably and the lattice problem can be mapped onto an impurity problem subject to a self-consistency condition for the bath~\cite{Georges96,Kotliar06}. The method may be extended from a single-site to a cluster formalism, thereby rendering it controlled in practice~\cite{Maier05}.
 We provide a simple implementation of the DMFT self-consistency loop for general single-site multi-orbital problems.
@@ -374,19 +499,10 @@ The current implementation of the ALPS code (both for the interaction expansion 
 A detailed description of the ALPS DMFT algorithms is given in Ref.~\cite{ALPSDMFT}.
 
 
-\subsection{New Time Evolving Block Decimation Code {\tt tebd}}
-Release 2.0 contains interfaces to the Open Source TEBD project~\cite{ostebd}, which is a collection of Fortran libraries using the Time-Evolving Block Decimation (TEBD) algorithm~\cite{vidal1, vidal2} to simulate time evolution of one-dimensional quantum systems. TEBD can also find ground states via imaginary time evolution. The TEBD routines included in ALPS are an updated version of the v2.0 release of Open Source TEBD with improvements for speed and numerical stability.
 
-At present, the TEBD routines can simulate the spin, boson Hubbard, hardcore boson, spinless fermion, and fermion Hubbard models from the ALPS models library. All 
-Hamiltonian parameters are assumed uniform throughout the system. Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between the state at different times. Observables calculated are the $z$ and $x$ magnetizations, their squares, and the $\langle \hat{S}^z_i 
-\hat{S}^z_j\rangle$ and $\langle \hat{S}^x_i \hat{S}^x_j\rangle$ correlations for the spin model, the occupation number, its square, and the $\langle \hat{n}_i \hat{n}_j\rangle$ and 
-$\langle \hat{a}_i^{\dagger} \hat{a}_j\rangle$ correlation functions for the boson Hubbard, hardcore boson, spinless fermions, and fermion Hubbard models; and, additionally, 
-the magnetization and $\langle \hat{S}^z_i \hat{S}^z_j\rangle$ correlation function for the fermion Hubbard model. All models calculate the energy, von Neumann entanglement 
-entropy of each site, the von Neumann entanglement entropy on each bond, and the overlap of the wavefunction at time $t$ with the state at $t=0$ ({\it i.e.}, the Loschmidt echo).
-
-%We plan to develop C++ libraries for performing real time evolution using the more flexible formalism of variational Matrix Product States. These libraries will allow for more general specification of models, lattices, and observables, and improve the speed of simulations. 
 
 \section{Integration with the VisTrails Workflow and Computational Provenance Tools}
+\noindent{\it Main developers:} B. Bauer, J. Freire, L. Gamper, J. Gukelberger, D. Koop, P. Mates, E. Santos, V.W. Scarola, C. Silva, B. Surer and M. Troyer.
 
 \subsection{Computational Provenance}
 
@@ -516,6 +632,10 @@ loop --auto-evaluate --write-xml parm.in.xml
 \label{fig:commandline}
 \end{figure}
 \section{Tutorials and Examples}
+
+\noindent{\it Main contributors: } B. Bauer, A. Feiguin, J. Gukelberger, E. Gull, U. Schollw\"ock, B.~Surer, S. Todo, S. Trebst, M. Troyer, M.L. Wall and S. Wessel
+
+\medskip
 
 The ALPS web page~\cite{alps}, which is a community-maintained wiki system and the central resource for code developments, 
 also offers extensive resources to ALPS users. In particular, the web pages feature an extensive set of tutorials, which for each ALPS application 
@@ -1000,6 +1120,26 @@ In Fig.~\ref{fig:plotting}, an example script is shown which creates a {\tt Data
 %Once the simulation has been run we must extract and evaluate data from it. At the heart of the pyalps evaluation tools is the {\tt DataSet} class. A {\tt DataSet} has as members {\tt x} and {\tt y} which are numpy arrays containing numerical data. A {\tt DataSet} also has a member {\tt props} which is a dictionary of metadata describing the numerical data. The presence of the metadata allows for complex evaluations such as constructing scaling functions as is done in many of the tutorials. Using Boost.Python as described above, the jackknife and binning analysis of Monte Carlo from the ALPS C++ libraries are extended to Python functionality, as well as functions to read hdf5 output into a {\tt DataSet}. In addition to evaluation, pyalps includes wrapper programs which plot data stored in a {\tt DataSet} using the matplotlib package.
 
 \section{ALPS Installation with CMake}
+\label{sec:cmake}
+
+The following tools and libraries are required to build ALPS:
+
+\begin{itemize}
+\item The CMake build system~\cite{cmake}.
+\item The BLAS~\cite{blasnetlib} and LAPACK libraries~\cite{lapack}. Ideally optimized versions for the target architecture should be used instead of the generic netlib versions.
+\item The Boost C++ libraries version 1.43.0 or later (Boost 1.45.0 is included in one version of the source tarball)~\cite{boost}.
+\item The HDF5 library version 1.8~\cite{hdf5}.
+\item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9, IBM xlC++ 11.1, and Intel's icpc 10 and 11.
+\end{itemize}
+To build optional parts of ALPS it is recommended to install in addition
+\begin{itemize}
+\item Python version 2.5 or 2.6~\cite{python}.
+\item The numpy~\cite{numpy}, scipy~\cite{scipy}, and matplotlib~\cite{matplotlib} Python packages.
+\item The VisTrails scientific workflow and provenance management system~\cite{vistrails} and all its dependencies.
+\item A Fortran 90 compiler for the {\tt tebd} code.
+\end{itemize}
+
+
 
 \begin{table}
 \centering
@@ -1057,6 +1197,201 @@ make install
 The options starting with {\tt -D} are used to pass variables that are needed in the initial stages of CMake; cf. Table~\ref{table:cmake_variables}. Running {\tt ccmake} is not mandatory, but can be used to change all other variables, including those described in Table~\ref{table:cmake_variables2}. This can also be done after the compilation has finished. It is sufficient to re-execute {\tt make} and {\tt make install} after changing variables with {\tt ccmake}.
 
 The VisTrails packages can also be installed from the CMake installation process. On most platforms, it is sufficient to set the CMake variable {\tt VISTRAILS\_APP\_DIR}. On Mac OS X, a more advanced build type is needed since VisTrails delivers a specific version of Python. For instructions for this special case, we refer to our website.
+
+\section{The ALPS XML schemas}
+\label{sec:xml}
+
+\begin{figure}[tb]
+\begin{lstlisting}
+<PARAMETERS>
+  <PARAMETER name="LATTICE"> square </PARAMETER>
+  <PARAMETER name="MODEL">     spin </PARAMETER>
+  <PARAMETER name="L">           10 </PARAMETER>
+  <PARAMETER name="T">          0.5 </PARAMETER>
+</PARAMETERS>
+\end{lstlisting}
+\caption{Excerpt from an XML file for simulation input parameters .}
+\label{fig:parm}
+\end{figure}
+\begin{figure}[tb]
+\begin{lstlisting}
+<SCALAR_AVERAGE name="Susceptibility">
+  <MEAN>                     421.3 </MEAN>
+  <ERROR converged="yes">     1.54 </ERROR>
+  <VARIANCE>              1.06e+05 </VARIANCE>
+</SCALAR_AVERAGE>
+\end{lstlisting}
+\caption{Excerpt from an XML file for simulation results of the uniform susceptibility in a Monte Carlo simulation.}
+\label{fig:result}
+\end{figure}
+
+
+XML is the format of choice for text-based ALPS files. Unlike simple formats, where the location of a number in the file specifies its meaning (e.g. the first number is system size, the second temperature), XML specifies the meaning of data through meta-information provided by markup with tags, as shown in figure \ref{fig:parm} for input parameters and in  figure \ref{fig:result} for simulation results. The meaning of these files is easy to decipher even years after the simulation, unlike many other formats. A resemblance to HTML is no chance, since HTML (XHTML) is indeed also an XML format. Instead of looking directly at the long (and sometimes ugly) output files in XML format, the XML files can be easily transformed to other formats using XSLT transformations.\cite{xslt} and viewed, e.g. directly as HTML in a web browser, or printed as plain text. 
+
+\begin{figure}
+\begin{lstlisting}
+<LATTICEGRAPH name = "square">
+  <FINITELATTICE>
+    <LATTICE dimension="2"/>  
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="L"/>
+    <BOUNDARY type="periodic"/>  
+  </FINITELATTICE>
+  <UNITCELL>
+    <VERTEX/>
+    <EDGE>
+      <SOURCE vertex="1" offset="0 0"/>
+      <TARGET vertex="1" offset="0 1"/>
+    </EDGE>
+    <EDGE>
+      <SOURCE vertex="1" offset="0 0"/>
+      <TARGET vertex="1" offset="1 0"/>
+    </EDGE>
+  </UNITCELL> 
+</LATTICEGRAPH>
+\end{lstlisting}
+\caption{The definition of a square lattice with one site (vertex) per unit cell and bonds (edges) only to nearest neighbors. After describing the dimension, extent and boundary conditions of the Bravais lattice in the {\tt <FINITELATTICE>} element, the unit cell including the bonds in the lattice is defined.}
+\label{fig:lattice}
+\end{figure}
+\begin{figure}
+\begin{lstlisting}
+<BASIS name="spin">
+  <SITEBASIS>
+    <QUANTUMNUMBER name="S" min="1/2" max="1/2"/>
+    <QUANTUMNUMBER name="Sz" min="-S" max="S"/>
+    <OPERATOR name="Splus" matrixelement="sqrt(S*(S+1)-Sz*(Sz+1))">   
+      <CHANGE quantumnumber="Sz" change="1"/>
+    </OPERATOR>
+    <OPERATOR name="Sminus" matrixelement="sqrt(S*(S+1)-Sz*(Sz-1))">  
+      <CHANGE quantumnumber="Sz" change="-1"/>
+    </OPERATOR>
+    <OPERATOR name="Sz" matrixelement="Sz"/>  
+  </SITEBASIS>
+</BASIS>
+
+<HAMILTONIAN name="spin">
+  <BASIS ref="spin"/>
+  <SITETERM> -h*Sz </SITETERM>   
+  <BONDTERM source="i" target="j">
+    Jxy/2*(Splus(i)*Sminus(j) + Sminus(i)*Splus(j)) + Jz*Sz(i)*Sz(j)
+  </BONDTERM>
+</HAMILTONIAN>
+\end{lstlisting}
+\caption{The definition of a spin-1/2 $XXZ$ spin Hamiltonian with one type of exchange coupling only: $H=-h\sum_iS_i^z+\sum_{\langle i,j\rangle} \left((J_{\rm xy}/2)(S_i^+S_j^-+S_i^-S_j^+)+J_zS_i^zS_j^z\right)$.  After describing the local basis for each site and operators acting on it, the Hamiltonian is defined.}
+\label{fig:model}
+\end{figure}
+
+Besides XML schemas for parameter input and output of results we have developed XML schemas for the description of lattices and models. Examples are shown in figures \ref{fig:lattice} and \ref{fig:model}. For detailed specification of the formats see our XML web page.\cite{xmlschema} 
+
+Providing an input file (such as the one where an excerpt is shown in figure \ref{fig:parm} together with lattice and model definitions in figures  \ref{fig:lattice} and \ref{fig:model} to any of the ALPS applications will run that application on the given model (provided the application supports that type of models) and returns an output file containing data such as shown in figure \ref{fig:result}. 
+
+\subsection{Lattice definitions}
+
+\begin{figure}
+\begin{lstlisting}
+<LATTICEGRAPH name = "depleted inhomogeneous square lattice">
+  <FINITELATTICE>
+    <LATTICE dimension="2"/>  
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="L"/>
+    <BOUNDARY type="periodic"/>  
+  </FINITELATTICE>
+  <UNITCELL>
+    <VERTEX/>
+    <EDGE>
+      <SOURCE vertex="1" offset="0 0"/>
+      <TARGET vertex="1" offset="0 1"/>
+    </EDGE>
+    <EDGE>
+      <SOURCE vertex="1" offset="0 0"/>
+      <TARGET vertex="1" offset="1 0"/>
+    </EDGE>
+  </UNITCELL> 
+  <INHOMOGENEOUS><VERTEX/></INHOMOGENEOUS>}
+  <DEPLETION>
+    <VERTEX probability="DEPLETION" seed="DEPLETION_SEED"/>
+  </DEPLETION>
+</LATTICEGRAPH>
+\end{lstlisting}
+
+\caption{The definition of a square lattice with one site (vertex) per
+unit cell and bonds (edges) only to nearest neighbors. First the
+dimension, extent, and boundary conditions of the Bravais lattice are
+described in the {\tt <FINITELATTICE>} element, then the unit cell
+including the bonds in the lattice is defined. The new feature shown here is the specification of an inhomogeneous lattice, allowing to specify different couplings on the sites (in this example), and the depletion of the vertices of the lattices.}
+\label{fig:deplattice}
+\end{figure}
+Besides the ability to specify translation invariant lattices as shown in Fig. \ref{fig:lattice}, starting in release 1.3 ALPS has included the possibility to specify inhomogeneity and depletion. While in a regular lattice, the model Hamiltonian is the same for all bonds or sites with the same type, in an inhomogeneous lattice the couplings in the model can be different for each bond or site. Examples are disordered systems, with randomly chosen couplings such as spin glasses, or systems in spatially varying trapping potentials, such as optical lattices in harmonic traps.
+Inhomogeneities can be specified for vertices (sites) and edges (bonds), either for all (such as for all vertices in figure \ref{fig:deplattice}), or only for one type of vertex or edge. 
+
+One can also randomly deplete the lattice by removing a fraction of sites or bonds is randomly removed from a lattice. Currently only site depletion is implemented, but additional types of depletion can be added easily if  the need arises. Please contact the authors if you need that feature. In the example in figure  \ref{fig:deplattice}, the fraction of depleted sites is specified to be passed in the {\tt DEPLETION} input parameter, and the random number generator seed {\tt DEPLETION\_SEED} can be changed to give different random realizations of the depletion pattern.
+
+For more examples of lattices we refer the reader to the file {\tt lattices.xml} included in ALPS that contains a number of commonly used lattices. A detailed discussion of the creation of lattice files is presented on the ALPS web page.
+
+
+\subsection{Model defintiions}
+
+Figure \ref{fig:model} shows the simplest definition of an XXZ spin model with Hamiltonian
+\begin{equation}
+H=-h\sum_iS_i^z+\sum_{\langle i,j\rangle} \left((J_{\rm xy}/2)(S_i^+S_j^-+S_i^-S_j^+)+J_zS_i^zS_j^z\right)
+\end{equation}
+
+Figure \ref{fig:hubmodel} shows the definition of the Hamiltonian of a bosonic Hubbard model in a harmonic trap
+ \begin{eqnarray}
+ H&=&-\mu\sum_in_i+\frac{U}{2}\sum_in_i(n_i-1)   \label{eq:model} \\
+    && -t \sum_{\langle
+    i,j\rangle} \left(b_i^\dag b_j + b_j^\dag b_i\right) + \frac{K}{2}\sum_i(x_i^2+y_i^2). \nonumber
+  \end{eqnarray}
+One feature shown in this example, is the ability to specify composite site and bond operators, such as the {\tt double\_occupancy} site term or the {\tt boson\_hop} bond term. These site and bond operators can be used in the specification of the model and of measurements.
+  The other new feature, also shown in the example, is the ability, in conjunction with the specification of an inhomogeneous lattice,  to use site-dependent couplings, such as the harmonic trapping potential $K$ which depends on the $x$ and $y$ coordinates of the site. This feature has been used for the simulation of cold bosonic gases in optical lattices \cite{Wessel2004}.
+
+
+\begin{figure}
+\begin{lstlisting}
+<BASIS name="boson">
+<SITEBASIS>
+  <PARAMETER name="Nmax" default="infinity"/>
+  <QUANTUMNUMBER name="N" min="0" max="Nmax"/>
+  <OPERATOR name="bdag" matrixelement="sqrt(N+1)">
+    <CHANGE quantumnumber="N" change="1"/>
+  </OPERATOR>
+  <OPERATOR name="b" matrixelement="sqrt(N)">
+    <CHANGE quantumnumber="N" change="-1"/>
+  </OPERATOR>
+  <OPERATOR name="n" matrixelement="N"/>
+</SITEBASIS>
+</BASIS>
+
+<SITEOPERATOR name="double_occupancy" site="x">
+  n(x)*(n(x)-1)/2
+</SITEOPERATOR>
+
+<BONDOPERATOR name="boson_hop" source="x" target="y">
+  bdag(x)*b(y)+bdag(y)*b(x)
+</BONDOPERATOR>
+
+<HAMILTONIAN name="trapped boson Hubbard">
+  <PARAMETER name="mu" default="0"/>
+  <PARAMETER name="t" default="1"/>
+  <PARAMETER name="U" default="0"/>
+  <PARAMETER name="K" default="0"/>
+  <BASIS ref="boson"/>
+  <SITETERM site="i">
+    -mu*n(i) + U*double_occupancy(i) + K/2*((x-L/2)^2 + (y-L/2)^2)
+  </SITETERM> 
+  <BONDTERM source="i" target="j">
+    -t*boson_hop(i,j)
+  </BONDTERM>
+</HAMILTONIAN>
+\end{lstlisting}
+\caption{The definition of a bosonic Hubbard Hamiltonian (\ref{eq:model}) in a harmonic trap.  After
+  describing the local basis for each site and operators acting on it, one can also define composite site and bond operators, such as the double occupancy and bosonic hopping terms, which are then used in the definition of the Hamiltonian, instead of writing all terms explicitly as in the example in Fig. \ref{fig:model}. Another feature shown here is the use of the parameters $x$ and $y$ in the couplings to create spatially-dependent couplings when combined with an inhomogeneous lattice.}
+\label{fig:hubmodel}
+\end{figure}
+
+
+
+For more examples of models we refer the reader to the file {\tt lattices.xml} included in ALPS that contains a number of commonly used models. A detailed discussion of the creation of model files is presented on the ALPS web page.
 
 \section*{References}
 

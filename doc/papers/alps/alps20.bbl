@@ -51,9 +51,18 @@ Vidal G 2007 {\em Phys. Rev. Lett.\/} {\bf 99} 220405
 \bibitem{Swendsen87}
 Swendsen R~H and Wang J~S 1987 {\em Phys. Rev. Lett.\/} {\bf 58} 86--88
 
+\bibitem{Wolff89}
+Wolff U 1989 {\em Phys. Rev. Lett.\/} {\bf 62} 361--364
+
+\bibitem{Evertz93}
+Evertz H~G, Lana G and Marcu M 1993 {\em Phys. Rev. Lett.\/} {\bf 70} 875--879
+
 \bibitem{Prokofev98A}
 Prokof'ev N~V, Svistunov B~V and Tupitsyn I~S 1998 {\em JETP Sov. Phys.\/} {\bf
   87} 310
+
+\bibitem{Sandvik99}
+Sandvik A~W 1999 {\em Phys. Rev. B\/} {\bf 59} R14157--R14160
 
 \bibitem{Todo01}
 Todo S and Kato K 2001 {\em Phys. Rev. Lett.\/} {\bf 87} 047203
@@ -63,6 +72,9 @@ Todo S and Kato K 2001 {\em Phys. Rev. Lett.\/} {\bf 87} 047203
 
 \bibitem{Sylyuasen}
 Sylju\aa{}sen O~F and Sandvik A~W 2002 {\em Phys. Rev. E\/} {\bf 66} 046701
+
+\bibitem{Evertz03}
+Evertz H~G 2003 {\em Advances in Physics\/} {\bf 52}(1) 1--66
 
 \bibitem{Alet2005}
 Alet F, Wessel S and Troyer M 2005 {\em Phys. Rev.E.\/} {\bf 71} 036706
@@ -86,9 +98,6 @@ Katzgraber H, Trebst S, Huse D and Troyer M 2006 {\em Journal of Statistical
 \bibitem{Wessel07}
 Wessel S, Stoop N, Gull E, Trebst S and Troyer M 2007 {\em Journal of
   Statistical Mechanics: Theory and Experiment\/}  P12005
-
-\bibitem{Evertz03}
-Evertz H~G 2003 {\em Advances in Physics\/} {\bf 52}(1) 1--66
 
 \bibitem{Rubtsov04}
 Rubtsov A~N and Lichtenstein A~I 2004 {\em JETP Letters\/} {\bf 80} 61--65
@@ -126,29 +135,14 @@ Gull E, Werner P, Parcollet O and Troyer M 2008 {\em EPL (Europhysics
 \bibitem{vistrails}
 \url{http://www.vistrails.org/}
 
+\bibitem{openmp}
+\url{http://www.openmp.org/}
+
+\bibitem{mpi}
+\url{http://www.mpi-forum.org/}
+
 \bibitem{cmake}
 \url{http://www.cmake.org/}
-
-\bibitem{blasnetlib}
-\url{http://www.netlib.org/blas/}
-
-\bibitem{lapack}
-\url{http://www.netlib.org/lapack/}
-
-\bibitem{boost}
-\url{http://www.boost.org/}
-
-\bibitem{python}
-\url{http://www.python.org/}
-
-\bibitem{numpy}
-\url{http://numpy.scipy.org/}
-
-\bibitem{scipy}
-\url{http://www.scipy.org/}
-
-\bibitem{matplotlib}
-\url{http://matplotlib.sourceforge.net/}
 
 \bibitem{macports}
 \url{http://www.macports.org/}
@@ -159,9 +153,30 @@ Gull E, Werner P, Parcollet O and Troyer M 2008 {\em EPL (Europhysics
 \bibitem{xmlschema}
 \url{http://xml.comp-phys.org/}
 
+\bibitem{palm}
+Troyer M, Ammon B and Heeb E 1998 {\em Lecture Notes in Computer Science\/}
+  {\bf 1505} 191
+
+\bibitem{CE}
+Czarnecki K and Eisenecker U 2000 {\em Generative Programming\/}
+  (Addison-Wesley)
+
+\bibitem{BGL}
+Siek J, Lee L~Q and Lumsdaine A 2001 {\em The Boost Graph Library User Guide
+  and Reference Manual\/} (Addison-Wesley)
+
+\bibitem{boost}
+\url{http://www.boost.org/}
+
+\bibitem{python}
+\url{http://www.python.org/}
+
 \bibitem{Ambegaokar2010}
 Ambegaokar V and Troyer M 2010 {\em American Journal of Physics\/} {\bf 78}
   150--157
+
+\bibitem{matplotlib}
+\url{http://matplotlib.sourceforge.net/}
 
 \bibitem{grace}
 \url{http://plasma-gate.weizmann.ac.il/Grace/}
@@ -178,6 +193,15 @@ Lutz M 2009 {\em Learning Python\/} (O'Reilly \& Associates)
 \bibitem{ProgrammingPython}
 Lutz M 2006 {\em Programming Python ({T}hird {E}dition)\/} (O'Reilly \&
   Associates)
+
+\bibitem{numpy}
+\url{http://numpy.scipy.org/}
+
+\bibitem{scipy}
+\url{http://www.scipy.org/}
+
+\bibitem{Sandvik91}
+Sandvik A~W and Kurkij\"arvi J 1991 {\em Phys. Rev. B\/} {\bf 43} 5950--5961
 
 \bibitem{Georges96}
 Georges A, Kotliar G, Krauth W and Rozenberg M~J 1996 {\em Rev. Mod. Phys.\/}
@@ -252,5 +276,18 @@ Koop D, Santos E, Bauer B, Troyer M, Freire J and Silva C 2010 Bridging
 \bibitem{Santos09}
 Santos E, Lins L, Ahrens J, Freire J and Silva C 2009 {\em IEEE Transactions on
   Visualization and Computer Graphics\/} {\bf 15} 1539
+
+\bibitem{blasnetlib}
+\url{http://www.netlib.org/blas/}
+
+\bibitem{lapack}
+\url{http://www.netlib.org/lapack/}
+
+\bibitem{xslt}
+\url{http://www.w3.org/TR/xslt/}
+
+\bibitem{Wessel2004}
+Wessel S, Alet F, Troyer M and Batrouni G~G 2004 {\em Phys. Rev. A\/} {\bf 70}
+  053615
 
 \end{thebibliography}

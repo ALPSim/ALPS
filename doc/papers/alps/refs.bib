@@ -858,23 +858,23 @@ doi = {10.1063/1.1699114}
   abstract={An algorithm for the simulation of the evolution of slightly entangled quantum states has been recently proposed as a tool to study time-dependent phenomena in one-dimensional quantum systems. Its key feature is a time-evolving block-decimation (TEBD) procedure to identify and dynamically update the relevant, conveniently small, subregion of the otherwise exponentially large Hilbert space. Potential applications of the TEBD algorithm are the simulation of time-dependent Hamiltonians, transport in quantum systems far from equilibrium and dissipative quantum mechanics. In this paper we translate the TEBD algorithm into the language of matrix product states in order to both highlight and exploit its resemblances to the widely used density-matrix renormalization-group (DMRG) algorithms. The TEBD algorithm, being based on updating a matrix product state in time, is very accessible to the DMRG community and it can be enhanced by using well-known DMRG techniques, for instance in the event of good quantum numbers. More importantly, we show how it can be simply incorporated into existing DMRG implementations to produce a remarkably effective and versatile 'adaptive time-dependent DMRG' variant, that we also test and compare to previous proposals.}
 }
 	
-	
-	
-@Article{Sandvik91,
-  title = {Quantum Monte Carlo simulation method for spin systems},
-  author = {Sandvik, Anders W. and Kurkij\"arvi, Juhani },
+	@Article{Sandvik99,
+  title = {Stochastic series expansion method with operator-loop update},
+  author = {Sandvik, Anders W.},
   journal = {Phys. Rev. B},
-  volume = {43},
-  number = {7},
-  pages = {5950--5961},
-  numpages = {11},
-  year = {1991},
-  month = {Mar},
-  doi = {10.1103/PhysRevB.43.5950},
+  volume = {59},
+  number = {22},
+  pages = {R14157--R14160},
+  numpages = {3},
+  year = {1999},
+  month = {Jun},
+  doi = {10.1103/PhysRevB.59.R14157},
   publisher = {American Physical Society}
 }
 
-Article{Sandvik91,
+
+	
+@Article{Sandvik91,
   title = {Quantum Monte Carlo simulation method for spin systems},
   author = {Sandvik, Anders W. and Kurkij\"arvi, Juhani },
   journal = {Phys. Rev. B},
@@ -5239,6 +5239,10 @@ author="J. Friedel"
   }
   
   
+  @misc {openmp, howpublished ={\url{http://www.openmp.org/}}}
+  @misc {mpi, howpublished ={\url{http://www.mpi-forum.org/}}}
+  @misc {xslt, howpublished ={\url{http://www.w3.org/TR/xslt/}}}
+  
 
 
 
@@ -5471,3 +5475,41 @@ year = {2007}
    title     = {Programming Python ({T}hird {E}dition)},
    year      = 2006,
 }
+
+@Article{Wessel2004,
+  title = {Quantum Monte Carlo simulations of confined bosonic atoms in optical lattices},
+  author = {Wessel, Stefan  and Alet, Fabien  and Troyer, Matthias  and Batrouni, G. George},
+  journal = {Phys. Rev. A},
+  volume = {70},
+  number = {5},
+  pages = {053615},
+  numpages = {14},
+  year = {2004},
+  month = {Nov},
+  doi = {10.1103/PhysRevA.70.053615},
+  publisher = {American Physical Society}
+}
+
+@Article{palm,
+author =  {M. Troyer and B. Ammon and E. Heeb},
+journal={Lecture Notes in Computer Science},
+volume=1505,
+year= 1998,
+pages= 191,
+title={Parallel object oriented Monte Carlo simulations}
+}
+
+
+@book{BGL,
+  title={The Boost Graph Library User Guide and Reference Manual},
+  author={J.G. Siek and L.-Q. Lee and A. Lumsdaine},
+  year=2001,
+  publisher={Addison-Wesley}
+ }
+
+@book{CE,
+  title={Generative Programming},
+  author={K. Czarnecki and U.W. Eisenecker},
+  year=2000,
+  publisher={Addison-Wesley}
+ }
