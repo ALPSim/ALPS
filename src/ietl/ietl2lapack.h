@@ -32,7 +32,7 @@
 #define IETL_LAPACK_H
 
 #include <boost/numeric/bindings/lapack/driver/stev.hpp>
-#include <boost/numeric/bindings/lapack/driver/steqr.hpp>
+#include <boost/numeric/bindings/lapack/computational/steqr.hpp>
 #include <boost/numeric/bindings/lapack/driver/syev.hpp>
 #include <boost/numeric/bindings/lapack/driver/heev.hpp>
 #include <complex>
@@ -58,7 +58,7 @@ namespace ietl_lapack_dispatch {
   inline void stev(const char& jobz, fortran_int_t n, double dd[],double de[],
                    double dz[],fortran_int_t ldz,fortran_int_t info) {
     double* dwork = new double[2*n -2];
-    LAPACK_DSTEV(jobz,n,dd,de,dz,ldz,dwork,info);
+    LAPACK_DSTEV(&jobz,&n,dd,de,dz,&ldz,dwork,&info);
     delete[] dwork;
     if (info)
       throw std::runtime_error("Error return from dstev");
@@ -68,7 +68,7 @@ namespace ietl_lapack_dispatch {
   inline void stev(const char& jobz, fortran_int_t n, double dd[],double de[],
                    std::complex<double> dz[],fortran_int_t ldz,fortran_int_t info) {
     double* dwork = new double[2*n -2];
-    LAPACK_ZSTEQR(jobz,n,dd,de,dz,ldz,dwork,info);
+    LAPACK_ZSTEQR(&jobz,&n,dd,de,dz,&ldz,dwork,&info);
     delete[] dwork;
     if (info)
       throw std::runtime_error("Error return from zsteqr");
