@@ -400,7 +400,7 @@ namespace ietl
         fortran_int_t ldz=n;         fortran_int_t lwork=8*n;    double work[lwork];
         fortran_int_t iwork[5*n];    fortran_int_t ifail[n];     fortran_int_t info;
         double vl, vu;
-        LAPACK_DSYEVX(jobz, range, uplo, n, M_.data(), lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, iwork, ifail, info);
+        LAPACK_DSYEVX(&jobz, &range, &uplo, &n, M_.data(), &lda, &vl, &vu, &il, &iu, &abstol, &m, w, z, &ldz, work, &lwork, iwork, ifail, &info);
         theta = w[0];
         for (int i=0;i<n;i++)
             s[i] = z[i];
@@ -425,7 +425,7 @@ namespace ietl
         fortran_int_t ldz=n;         fortran_int_t lwork=8*n;    std::complex<double> work[lwork];
         fortran_int_t iwork[5*n];    fortran_int_t ifail[n];     fortran_int_t info; 
         double vl, vu;     double rwork[7*n];
-        LAPACK_ZHEEVX(jobz, range, uplo, n, M_.data(), lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, rwork, iwork, ifail, info);
+        LAPACK_ZHEEVX(&jobz, &range, &uplo, &n, M_.data(), &lda, &vl, &vu, &il, &iu, &abstol, &m, w, z, &ldz, work, &lwork, rwork, iwork, ifail, &info);
         theta = w[0];
         for (int i=0;i<n;i++)
             s[i] = z[i];
