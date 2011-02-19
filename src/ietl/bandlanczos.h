@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2001-2003 by Rene Villiger <rvilliger@smile.ch>,
+* Copyright (C) 2001-2010 by Rene Villiger <rvilliger@smile.ch>,
 *                            Prakash Dayal <prakash@comp-phys.org>,
 *                            Matthias Troyer <troyer@comp-phys.org>
 *
@@ -37,7 +37,8 @@
 #include <ietl/fmatrix.h>
 #include <ietl/traits.h>
 #include <ietl/iteration.h>
-#include <ietl/ietl2lapack_interface.h>
+#include <boost/numeric/bindings/lapack/driver/syev.hpp>
+#include <boost/numeric/bindings/lapack/driver/heev.hpp>
 
 namespace ietl {  
   
@@ -79,10 +80,10 @@ namespace ietl {
     private:
     bool convergence_test(const int dim, int pc, int evs, magnitude_type dep_tol, magnitude_type ghost_tol, bool ghost_discarding, bool low);
     int calc_approx_eigenvalues(const int& dim, int evs, magnitude_type ghost_tol, bool ghost_discarding, bool low); // store evs eigenvalues, if evs==-1, store all of them
-    void getev_(const int dim, double w[], int info, double type);
-    void getev_(const int dim, float w[], int info, float type);
-    void getev_(const int dim, double w[], int info, std::complex<double> type);
-    void getev_(const int dim, float w[], int info, std::complex<float> type);
+    void getev_(const fortran_int_t dim, double w[], fortran_int_t info, double type);
+    void getev_(const fortran_int_t dim, float w[], fortran_int_t info, float type);
+    void getev_(const fortran_int_t dim, double w[], fortran_int_t info, std::complex<double> type);
+    void getev_(const fortran_int_t dim, float w[], fortran_int_t info, std::complex<float> type);
     
     const MATRIX& matrix_;
     VS vecspace_;
@@ -482,51 +483,51 @@ namespace ietl {
   }
       
   template<class MATRIX, class VS>
-    void bandlanczos<MATRIX, VS>::getev_(const int dim, double w[], int info, double type) {
+    void bandlanczos<MATRIX, VS>::getev_(const fortran_int_t dim, double w[], fortran_int_t info, double type) {
     char jobz='V';
     char uplo='U';
-    const int in=dim;
-    int lda=dim;
-    const int lwork=4*in; 
+    const fortran_int_t in=dim;
+    fortran_int_t lda=dim;
+    const fortran_int_t lwork=4*in; 
     double* work = new double[lwork];
-    dsyev_(jobz, uplo, in, Tjpr.data(), lda, w, work, lwork, info);
+    LAPACK_DSYEV(jobz, uplo, in, Tjpr.data(), lda, w, work, lwork, info);
     delete[] work;
   }
   
   template<class MATRIX, class VS>
-    void bandlanczos<MATRIX, VS>::getev_(const int dim, float w[], int info, float type){
+    void bandlanczos<MATRIX, VS>::getev_(const fortran_int_t dim, float w[], fortran_int_t info, float type){
     char jobz='V';
     char uplo='U';
     int in=dim;
     int lda=dim;
     int lwork=4*in;
     float* work = new float[lwork];
-    ssyev_(jobz, uplo, in, Tjpr.data(), lda, w, work, lwork, info);
+    LAPACK_SSYEV(jobz, uplo, in, Tjpr.data(), lda, w, work, lwork, info);
     delete[] work;
   }
   
   template<class MATRIX, class VS>
-    void bandlanczos<MATRIX, VS>::getev_(const int dim, double w[], int info, std::complex<double> type) {
+    void bandlanczos<MATRIX, VS>::getev_(const fortran_int_t dim, double w[], fortran_int_t info, std::complex<double> type) {
     char jobz='V';
     char uplo='U';
-    int in=dim;
-    int lda=dim;
-    int lwork=4*in;
+    fortran_int_t in=dim;
+    fortran_int_t lda=dim;
+    fortran_int_t lwork=4*in;
     std::complex<double> work[lwork];
     double rwork[lwork];
-    zheev_(jobz, uplo, in, Tjpr.data(), lda, w, work, lwork, rwork, info);
+    LAPACK_ZHEEV(jobz, uplo, in, Tjpr.data(), lda, w, work, lwork, rwork, info);
   }
       
   template<class MATRIX, class VS>
-    void bandlanczos<MATRIX, VS>::getev_(const int dim, float w[], int info, std::complex<float> type) {
+    void bandlanczos<MATRIX, VS>::getev_(const fortran_int_t dim, float w[], fortran_int_t info, std::complex<float> type) {
     char jobz='V';
     char uplo='U';
-    int in=dim;
-    int lda=dim;
-    int lwork=4*in;
+    fortran_int_t in=dim;
+    fortran_int_t lda=dim;
+    fortran_int_t lwork=4*in;
     std::complex<float> work[lwork];
     float rwork[lwork];
-    cheev_(jobz, uplo, in, Tjpr.data(), lda, w, work, lwork, rwork, info);
+    LAPACK_CHEEV(jobz, uplo, in, Tjpr.data(), lda, w, work, lwork, rwork, info);
   }  
   // E N D   O F   C L A S S   B A N D L A N C Z O S /////////////////////////
 }

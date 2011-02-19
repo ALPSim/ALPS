@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2001-2002 by Prakash Dayal <prakash@comp-phys.org>,
+* Copyright (C) 2001-2010 by Prakash Dayal <prakash@comp-phys.org>,
 *                            Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -31,7 +31,10 @@
 #ifndef IETL_LAPACK_H
 #define IETL_LAPACK_H
 
-#include <ietl/ietl2lapack_interface.h>
+#include <boost/numeric/bindings/lapack/driver/stev.hpp>
+#include <boost/numeric/bindings/lapack/driver/steqr.hpp>
+#include <boost/numeric/bindings/lapack/driver/syev.hpp>
+#include <boost/numeric/bindings/lapack/driver/heev.hpp>
 #include <complex>
 #include <cstdlib>
 #include <vector>
@@ -52,37 +55,20 @@ namespace ietl {
  
 namespace ietl_lapack_dispatch {  
 
-  inline void stev(const char& jobz, const int& n, float sd[],float se[],
-                   float sz[],const int& ldz,int& info) {
-    float* swork = new float[2*n -2];
-    ietl::MTL_FCALL(sstev)(jobz,n,sd,se,sz,ldz,swork,info); 
-    delete[] swork;
-    if (info)
-      throw std::runtime_error("Error return from sstev");
-  }  
-
-  inline void stev(const char& jobz, const int& n, double dd[],double de[],
-                   double dz[],const int& ldz,int& info) {
+  inline void stev(const char& jobz, fortran_int_t n, double dd[],double de[],
+                   double dz[],fortran_int_t ldz,fortran_int_t info) {
     double* dwork = new double[2*n -2];
-    ietl::MTL_FCALL(dstev)(jobz,n,dd,de,dz,ldz,dwork,info);
+    LAPACK_DSTEV(jobz,n,dd,de,dz,ldz,dwork,info);
     delete[] dwork;
     if (info)
       throw std::runtime_error("Error return from dstev");
   }
 
-  inline void stev(const char& jobz, const int& n, float sd[],float se[],
-                   std::complex<float> sz[],const int& ldz,int& info) {
-    float* swork = new float[2*n -2];
-    ietl::MTL_FCALL(csteqr)(jobz,n,sd,se,sz,ldz,swork,info); 
-    delete[] swork;
-    if (info)
-      throw std::runtime_error("Error return from csteqr");
-  }  
 
-  inline void stev(const char& jobz, const int& n, double dd[],double de[],
-                   std::complex<double> dz[],const int& ldz,int& info) {
+  inline void stev(const char& jobz, fortran_int_t n, double dd[],double de[],
+                   std::complex<double> dz[],fortran_int_t ldz,fortran_int_t info) {
     double* dwork = new double[2*n -2];
-    ietl::MTL_FCALL(zsteqr)(jobz,n,dd,de,dz,ldz,dwork,info);
+    LAPACK_ZSTEQR(jobz,n,dd,de,dz,ldz,dwork,info);
     delete[] dwork;
     if (info)
       throw std::runtime_error("Error return from zsteqr");
@@ -91,70 +77,9 @@ namespace ietl_lapack_dispatch {
 } // ietl2lapack_dispatch ends here.
 
 namespace ietl2lapack {
-
-  inline void syev(int dim, double a[], double w[], char jobz='V', char uplo='U') 
-  {
-    int lwork=4*dim;
-    int info;
-    double* work = new double[lwork];
-    ietl::MTL_FCALL(dsyev)(jobz, uplo, dim, a, dim, w, work, lwork, info);
-    delete[] work;
-    if (info)
-      throw std::runtime_error("Error return from dsyev");
-  }
       
-  inline void syev(int dim, float a[], float w[], char jobz='V', char uplo='U')
-  {
-    int lwork=4*dim;
-    int info;
-    float* work = new float[lwork];
-    ietl::MTL_FCALL(ssyev)(jobz, uplo, dim, a, dim, w, work, lwork, info);
-    delete[] work;
-    if (info)
-      throw std::runtime_error("Error return from ssyev");
-  }
-      
-  inline void heev(int dim, std::complex<double> a[], double w[], char jobz='V', char uplo='U')
-  {
-    int lwork=4*dim;
-    int info;
-    std::complex<double>* work = new std::complex<double>[lwork];
-    double* rwork = new double[lwork];
-    ietl::MTL_FCALL(zheev)(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
-    delete[] work;
-    delete[] rwork;
-    if (info)
-      throw std::runtime_error("Error return from zheev");
-    
-  }
-
-  inline void syev(int dim, std::complex<double> a[], double w[], char jobz='V', char uplo='U')
-  {
-    heev(dim,a,w,jobz,uplo);
-  }
-  
-      
-  inline void heev(int dim, std::complex<float> a[], float w[], char jobz='V', char uplo='U')
-  {
-    int lwork=4*dim;
-    int info;
-    std::complex<float>* work = new std::complex<float>[lwork];
-    float* rwork = new float[lwork];
-    ietl::MTL_FCALL(cheev)(jobz, uplo, dim, a, dim, w, work, lwork, rwork, info);
-    delete[] work;
-    delete[] rwork;
-    if (info)
-      throw std::runtime_error("Error return from cheev");
-  }
-
-  inline void syev(int dim, std::complex<float> a[], float w[], char jobz='V', char uplo='U')
-  {
-    heev(dim,a,w,jobz,uplo);
-  }
-
-
   template<class Vector>
-    int stev(const Vector& alpha, const Vector& beta, Vector& eval, unsigned int n) {  
+    fortran_int_t stev(const Vector& alpha, const Vector& beta, Vector& eval, fortran_int_t n) {  
     if (n==0) n = alpha.size();
     std::copy(alpha.begin(),alpha.begin() + n, eval.begin()); 
     assert(eval.size() >= n);
@@ -164,14 +89,14 @@ namespace ietl2lapack {
     std::copy(beta.begin(),beta.begin() + n, beta_tmp.begin()); 
     Vector z; // not referenced
     char _jobz = 'N';
-    int _info;    
-    int _ldz = 1; 
+    fortran_int_t _info=0;    
+    fortran_int_t _ldz = 1; 
     ietl_lapack_dispatch::stev(_jobz, n, ietl::get_data(eval), ietl::get_data(beta_tmp), ietl::get_data(z),_ldz, _info);
     return _info;
   }
   
   template<class Vector, class FortranMatrix>
-    int stev(const Vector& alpha, const Vector& beta, Vector& eval, FortranMatrix& z, unsigned int n) {  
+    int stev(const Vector& alpha, const Vector& beta, Vector& eval, FortranMatrix& z, fortran_int_t n) {  
     if (n==0) n = alpha.size();
     std::copy(alpha.begin(),alpha.begin() + n, eval.begin()); 
     assert(eval.size()>=n);
@@ -180,9 +105,9 @@ namespace ietl2lapack {
     Vector beta_tmp(n);
     std::copy(beta.begin(),beta.begin() + n, beta_tmp.begin()); 
     char _jobz;
-    int _info;
+    fortran_int_t _info=0;
     _jobz = 'V';
-    int _ldz = z.minor(); 
+    fortran_int_t _ldz = z.minor(); 
     ietl_lapack_dispatch::stev(_jobz, n, ietl::get_data(eval), ietl::get_data(beta_tmp),z.data(),_ldz, _info);
     return _info;
   }

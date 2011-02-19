@@ -59,14 +59,10 @@ namespace ietl
         void operator()(const vector_type& u, const magnitude_type& theta, const vector_type& r, vector_type& t, const magnitude_type& rel_tol);
         
     private:
-        void sysv(const char& uplo, const int& n, const int& nrhs, float a[], const int& lda, int ipiv[], float b[], const int& ldb, float work[], const int& lwork, int& info)
-        { ssysv_(uplo, n, nrhs, a, lda, ipiv, b, ldb, work, lwork, info); };
-        void sysv(const char& uplo, const int& n, const int& nrhs, double a[], const int& lda, int ipiv[], double b[], const int& ldb, double work[], const int& lwork, int& info)
-        { dsysv_(uplo, n, nrhs, a, lda, ipiv, b, ldb, work, lwork, info); };
-        void sysv(const char& uplo, const int& n, const int& nrhs, std::complex<float> a[], const int& lda, int ipiv[], std::complex<float> b[], const int& ldb, std::complex<float> work[], const int& lwork, int& info)
-        { chesv_(uplo, n, nrhs, a, lda, ipiv, b, ldb, work, lwork, info); };
-        void sysv(const char& uplo, const int& n, const int& nrhs, std::complex<double> a[], const int& lda, int ipiv[], std::complex<double> b[], const int& ldb, std::complex<double> work[], const int& lwork, int& info)
-        { zhesv_(uplo, n, nrhs, a, lda, ipiv, b, ldb, work, lwork, info); };
+        void sysv(const char& uplo, fortran_int_t n, fortran_int_t nrhs, double a[], fortran_int_t lda, fortran_int_t ipiv[], double b[], fortran_int_t ldb, double work[], fortran_int_t lwork, fortran_int_t& info)
+        { LAPACK_DSYSV(uplo, n, nrhs, a, lda, ipiv, b, ldb, work, lwork, info); };
+        void sysv(const char& uplo, fortran_int_t n, fortran_int_t nrhs, std::complex<double> a[], fortran_int_t lda, fortran_int_t ipiv[], std::complex<double> b[], fortran_int_t ldb, std::complex<double> work[], fortran_int_t lwork, fortran_int_t& info)
+        { LAPACK_ZHESV(uplo, n, nrhs, a, lda, ipiv, b, ldb, work, lwork, info); };
         MATRIX K;
         VS vecspace_;
         int n_;
@@ -172,10 +168,8 @@ namespace ietl
                                                                     ITER& iter);
         
     private:
-        void get_extremal_eigenvalue(magnitude_type& theta, double s[], int dim);
-        void get_extremal_eigenvalue(magnitude_type& theta, float s[], int dim);
-        void get_extremal_eigenvalue(magnitude_type& theta, std::complex<float> s[], int dim);
-        void get_extremal_eigenvalue(magnitude_type& theta, std::complex<double> s[], int dim);
+        void get_extremal_eigenvalue(magnitude_type& theta, double s[], fortran_int_t dim);
+        void get_extremal_eigenvalue(magnitude_type& theta, std::complex<double> s[], fortran_int_t dim);
         MATRIX matrix_;
         VS vecspace_;
         int n_;
@@ -249,7 +243,8 @@ namespace ietl
             Ktmp(i,i) -= theta;
         
         // define variables for LAPACK
-        char uplo='U'; int n=n_; int nrhs=1; int lda=n; int ipiv[n]; int ldb=n; int lwork=n*n; scalar_type work[lwork]; int info;
+        char uplo='U'; fortran_int_t n=n_; fortran_int_t nrhs=1; fortran_int_t lda=n; fortran_int_t ipiv[n]; fortran_int_t ldb=n; fortran_int_t lwork=n*n; scalar_type work[lwork]; 
+        fortran_int_t info;
         
         // Solve u_hat from K*u_hat = u,  mu = u^star * u_hat
         ietl::copy(u,u_hat);
@@ -387,104 +382,55 @@ namespace ietl
     }
     
     template <class MATRIX, class VS>
-    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, double s[], int dim)
+    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, double s[], fortran_int_t dim)
     {
         FortranMatrix<scalar_type> M_(dim,dim);
         for (int i=0;i<dim;i++) for (int j=0;j<=i;j++)
             M_(j,i) = M(j,i);
         double abstol = atol_;
         char jobz='V';     char range='I';   char uplo='U';
-        int n=dim;
-        int lda=dim;       
-        int il, iu;
+        fortran_int_t n=dim;
+        fortran_int_t lda=dim;       
+        fortran_int_t il, iu;
         if (desired_ == Largest)
             il = iu = n;
         else
             il = iu = 1;
-        int m;             double w[n];      double z[n];
-        int ldz=n;         int lwork=8*n;    double work[lwork];
-        int iwork[5*n];    int ifail[n];     int info;
+        fortran_int_t m;             double w[n];      double z[n];
+        fortran_int_t ldz=n;         fortran_int_t lwork=8*n;    double work[lwork];
+        fortran_int_t iwork[5*n];    fortran_int_t ifail[n];     fortran_int_t info;
         double vl, vu;
-        dsyevx_(jobz, range, uplo, n, M_.data(), lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, iwork, ifail, info);
+        LAPACK_DSYEVX(jobz, range, uplo, n, M_.data(), lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, iwork, ifail, info);
         theta = w[0];
         for (int i=0;i<n;i++)
             s[i] = z[i];
     }
-    
+        
     template <class MATRIX, class VS>
-    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, float s[], int dim)
-    {
-        FortranMatrix<scalar_type> M_(dim,dim);
-        for (int i=0;i<dim;i++) for (int j=0;j<=i;j++)
-            M_(j,i) = M(j,i);
-        float abstol = atol_;
-        char jobz='V';     char range='I';   char uplo='U';
-        int n=dim;
-        int lda=dim;
-        int il, iu;
-        if (desired_ == Largest)
-            il = iu = n;
-        else
-            il = iu = 1;
-        int m;             float w[n];       float z[n];
-        int ldz=n;         int lwork=8*n;    float work[lwork];
-        int iwork[5*n];    int ifail[n];     int info;
-        float vl, vu;
-        ssyevx_(jobz, range, uplo, n, M_.data(), lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, iwork, ifail, info);
-        theta = w[0];
-        for (int i=0;i<n;i++)
-            s[i] = z[i];
-    }
-    
-    template <class MATRIX, class VS>
-    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, std::complex<double> s[], int dim)
+    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, std::complex<double> s[], fortran_int_t dim)
     {
         FortranMatrix<scalar_type> M_(dim,dim);
         for (int i=0;i<dim;i++) for (int j=0;j<=i;j++)
             M_(j,i) = M(j,i);
         double abstol = atol_;
         char jobz='V';     char range='I';   char uplo='U';
-        int n=dim;
-        int lda=dim;
-        int il, iu;
+        fortran_int_t n=dim;
+        fortran_int_t lda=dim;
+        fortran_int_t il, iu;
         if (desired_ == Largest)
             il = iu = n;
         else
             il = iu = 1;
-        int m;             double w[n];      std::complex<double> z[n];
-        int ldz=n;         int lwork=8*n;    std::complex<double> work[lwork];
-        int iwork[5*n];    int ifail[n];     int info; 
+        fortran_int_t m;             double w[n];      std::complex<double> z[n];
+        fortran_int_t ldz=n;         fortran_int_t lwork=8*n;    std::complex<double> work[lwork];
+        fortran_int_t iwork[5*n];    fortran_int_t ifail[n];     fortran_int_t info; 
         double vl, vu;     double rwork[7*n];
-        zheevx_(jobz, range, uplo, n, M_.data(), lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, rwork, iwork, ifail, info);
+        LAPACK_ZHEEVX(jobz, range, uplo, n, M_.data(), lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, rwork, iwork, ifail, info);
         theta = w[0];
         for (int i=0;i<n;i++)
             s[i] = z[i];
     }
     
-    template <class MATRIX, class VS>
-    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, std::complex<float> s[], int dim)
-    {
-        FortranMatrix<scalar_type> M_(dim,dim);
-        for (int i=0;i<dim;i++) for (int j=0;j<=i;j++)
-            M_(j,i) = M(j,i);
-        float abstol = atol_;
-        char jobz='V';     char range='I';   char uplo='U';
-        int n=dim;
-        int lda=dim;
-        int il, iu;
-        if (desired_ == Largest)
-            il = iu = n;
-        else
-            il = iu = 1;
-        int m;             float w[n];       std::complex<float> z[n];
-        int ldz=n;         int lwork=8*n;    std::complex<float> work[lwork];
-        int iwork[5*n];    int ifail[n];     int info; 
-        float vl, vu;     float rwork[7*n];
-        cheevx_(jobz, range, uplo, n, M_.data(), lda, vl, vu, il, iu, abstol, m, w, z, ldz, work, lwork, rwork, iwork, ifail, info);
-        theta = w[0];
-        for (int i=0;i<n;i++)
-            s[i] = z[i];
-    }     
 }
 #endif
 
