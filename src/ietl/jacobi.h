@@ -311,7 +311,7 @@ namespace ietl
         vector_type uA = new_vector(vecspace_);
         vector_type vA = new_vector(vecspace_);
         vector_type r  = new_vector(vecspace_);
-        scalar_type s[iter.max_iterations()];
+        std::vector<scalar_type> s(iter.max_iterations());
         std::vector<vector_type> V(iter.max_iterations());
         // for (int k=0;k<iter.max_iterations();k++)
         //     V[k] = new_vector(vecspace_);
@@ -382,7 +382,7 @@ namespace ietl
     }
     
     template <class MATRIX, class VS>
-    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, double s[], fortran_int_t dim)
+    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, std::vector<double>& s, fortran_int_t dim)
     {
         FortranMatrix<scalar_type> M_(dim,dim);
         for (int i=0;i<dim;i++) for (int j=0;j<=i;j++)
@@ -407,7 +407,7 @@ namespace ietl
     }
         
     template <class MATRIX, class VS>
-    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, std::complex<double> s[], fortran_int_t dim)
+    void jacobi_davidson<MATRIX, VS>::get_extremal_eigenvalue(magnitude_type& theta, std::vector<std::complex<double> >& s, fortran_int_t dim)
     {
         FortranMatrix<scalar_type> M_(dim,dim);
         for (int i=0;i<dim;i++) for (int j=0;j<=i;j++)
