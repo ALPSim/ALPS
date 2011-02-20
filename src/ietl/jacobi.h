@@ -168,8 +168,8 @@ namespace ietl
                                                                     ITER& iter);
         
     private:
-        void get_extremal_eigenvalue(magnitude_type& theta, double s[], fortran_int_t dim);
-        void get_extremal_eigenvalue(magnitude_type& theta, std::complex<double> s[], fortran_int_t dim);
+        void get_extremal_eigenvalue(magnitude_type& theta, std::vector<double>& s, fortran_int_t dim);
+        void get_extremal_eigenvalue(magnitude_type& theta, std::vector<std::complex<double> >& s, fortran_int_t dim);
         MATRIX matrix_;
         VS vecspace_;
         int n_;
