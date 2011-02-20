@@ -254,7 +254,7 @@ mean field theory ({\tt dmft}) and a time-evolving block decimation code ({\tt t
  
 \section{Building and Installing ALPS} \label{sct:build_and_install}
 \subsection{Build system}
-ALPS 2.0 uses the CMake~\cite{cmake}, which is more flexible and portable than the previously used autotools. CMake includes a graphical user interface to let the user choose installation options and manually override the paths to needed libraries if they have not been found automatically. Furthermore, CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested features. A snapshot of the build instructions at the time of the release are included in the source distribution. 
+ALPS 2.0 uses the CMake~\cite{cmake}, which is more flexible and portable than the previously used {\tt autotools}. All aspects of the build process are controlled by CMake variables, which can be easily changed in several ways, including a graphical user interface. This allows the user a large degree of customization of the ALPS installation. Furthermore, CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested features. A snapshot of the build instructions at the time of the release are included in the source distribution. 
 \subsection{Building ALPS from source}
 
 Details about building ALPS from source, and the required tools and libraries are discussed in \ref{sec:cmake}. This is the recommended way of building ALPS on Unix and Linux systems, or if one wants to use specific BLAS libraries or Python interpreters on MacOS or Windows. Updated instructions as operating systems change will be made available on the ALPS web page~\cite{alps}.
@@ -355,7 +355,7 @@ Python~\cite{python} is an open-source, high-level, object-oriented interpreted 
 
 Python is an interpreted language, meaning that the source code is executed without an intermediate compilation step. This allows for interactive use, and easy analysis of simulation data. It also is simplifies ode development and exchange, in particular since using an interpreted language also often improves the portability of the resulting code.
 
-In addition to the Python standard library, the PyLab environment, which consists in particular of the Numpy~\cite{numpy}, Scipy~\cite{scipy} and matplotlib~\cite{matplotlib} libraries, offers powerful tools for numerical calculations and plotting. This makes Python particularly suitable for the data analysis part of the overall ALPS workflow. Wherever possible, the data types used in the pyalps package are built on top of the Numpy data types, allowing direct use of the PyLab libraries.
+In addition to the Python standard library, the PyLab environment, which consists in particular of the NumPy~\cite{numpy}, SciPy~\cite{scipy} and matplotlib~\cite{matplotlib} libraries, offers powerful tools for numerical calculations and plotting. This makes Python particularly suitable for the data analysis part of the overall ALPS workflow. Wherever possible, the data types used in the pyalps package are built on top of the NumPy data types, allowing direct use of the PyLab libraries.
 
 Python programs can interoperate with code written in a different language. As an example, a low-level numerical method could be implemented in C/C++ for performance reasons but still be called from a high-level Python code. This can be significantly simplified by using the Boost.Python~\cite{boost} library. Specifically, this library provides a simple interface to export C++ functions and classes to Python while taking care of Python internals, such as memory management. We make use of this library to export parts of the ALPS library to Python in the pyalps package.
 
@@ -364,7 +364,7 @@ ALPS 2.0 contains a package of Python modules for interfacing the low-level ALPS
 
 Pyalps includes functions to write the xml files read by most applications, and additional functions to write special input files for applications with non-xml interfaces such as {\tt dmft} and {\tt tebd}. It also includes functions to run applications with specified input files both in series and in parallel. An example of the preparation of input files and running a simulation using pyalps is shown in Fig.~\ref{fig:python}.
 
-Once the simulation has been run we must extract and evaluate data from it. At the heart of the pyalps evaluation tools is the {\tt DataSet} class. A {\tt DataSet} has as members {\tt x} and {\tt y} which are Numpy arrays containing numerical data. A {\tt DataSet} also has a member {\tt props} which is a dictionary -- one of the built-in types of Python -- of metadata describing the numerical data. The presence of the metadata allows for complex evaluations, for example when dealing with many {\tt DataSet}s from a parameter scan.
+Once the simulation has been run we must extract and evaluate data from it. At the heart of the pyalps evaluation tools is the {\tt DataSet} class. A {\tt DataSet} has as members {\tt x} and {\tt y} which are NumPy arrays containing numerical data. A {\tt DataSet} also has a member {\tt props} which is a dictionary -- one of the built-in types of Python -- of metadata describing the numerical data. The presence of the metadata allows for complex evaluations, for example when dealing with many {\tt DataSet}s from a parameter scan.
 
 Using Boost.Python, large parts of the ALPS alea library for Monte Carlo observables are exported to Python. This allows the user to write Monte Carlo applications in Python while profiting from the full functionality of the ALPS C++ libraries. In addition, this allows the definition of numerical data types in Python which carry full statistical information. These types allow calculations with the syntax of normal floating-point numbers, but will perform a full error analysis. We also provide functions to read HDF5 files into a {\tt DataSet}. Wrapper functions around matplotlib for plotting of data stored in {\tt DataSet}s help the user by, e.g., automatically setting axis labels or legends from the metadata.
 
@@ -562,7 +562,7 @@ showspreadsheetonly]{width=8cm}
 
 ALPS 2.0 provides a package of modules for VisTrails, built on top of the pyalps package, that allows the user to perform the three major steps of a scientific workflow, namely i) the preparation of input files, ii) the execution of simulations, iii) the analysis and plotting of simulation data. The three groups of modules are intended to integrate seamlessly, but at the same time allow the separate use of each group, which for example allows the user to analyze data with VisTrails that has not been prepared using the ALPS library or file formats.
 
-The design goal of the data analysis modules is to take care of common, repetitive tasks, while at the same time being as flexible as scripts. Common data formats, designed to allow interoperability with the powerful Numpy/Scipy libraries, are used by all modules. A set of self-contained modules are provided for common tasks, such as fitting or various types of plots. A framework of {\it Transform} modules allows the user to specify arbitrary transformations by providing small Python codes.
+The design goal of the data analysis modules is to take care of common, repetitive tasks, while at the same time being as flexible as scripts. Common data formats, designed to allow interoperability with the powerful NumPy/SciPy libraries, are used by all modules. A set of self-contained modules are provided for common tasks, such as fitting or various types of plots. A framework of {\it Transform} modules allows the user to specify arbitrary transformations by providing small Python codes.
 
 The modules for input preparation and data analysis are designed to assist the user in dealing with a large number of simulations. For example, modules are provided to sweep parameter ranges, to combine data from many simulations or to load data from ALPS files and text files. Modules to load data from custom file formats can also easily be implemented.
 
@@ -1072,7 +1072,7 @@ All non-static methods of a Python class must take the instance of the class as 
 \begin{lstlisting}
 import pyalps
 from pyalps.plot import plot
-import numpy as np
+import  NumPy as np
 import matplotlib.pyplot as plt
 
 ds = pyalps.DataSet()
@@ -1092,7 +1092,7 @@ plt.show()
 
 In Fig.~\ref{fig:plotting}, an example script is shown which creates a {\tt DataSet} instance, creates some data ($y = x^2, x \in [0,1]$) and makes a plot using plotting functionality from the pyalps package. We store the legend string and the axis labels for the final plot into the {\tt props} dict of the {\tt DataSet} instance. Note that the plotting function from pyalps is passed a list with one {\tt DataSet} -- this function, like most other pyalps functions, operates directly on lists of {\tt DataSet}s in order to assist the user in dealing with larger sets of data.
 
-%Large blocks of Python code can be stored in modules with a {\tt .py} extension. The contents of a Python module {\tt module\_name.py} can be used in a different Python script by placing {\tt import module\_name} in the script. Python has a very extensive standard library which provides modules for many common tasks such as string operations and special functions. Python also allows the user to combine a collection of modules into a package by including a script {\tt \_\_init\_\_.py} which initializes a package. In the simplest case, {\tt \_\_init\_\_.py} is an empty file which only signifies that the contents of the directory are a package, but it may also contain methods to initialize routines in the package. Using packages, an individual module {\tt module} can be imported from the package {\tt package} by placing {\tt import package.module} in the calling script. Packages structure Python's namespace to avoid conflicts in global variable definitions between modules, and also simplify the structuring of the code itself. There exist many third party packages which extend Python to more specialized tasks. Examples of such packages used in ALPS 2.0 are the numpy~\cite{numpy}, scipy~\cite{scipy}, and matplotlib~\cite{matplotlib} packages which provide efficient classes and operations for large multidimensional arrays and MATLAB-style plotting capabilities. 
+%Large blocks of Python code can be stored in modules with a {\tt .py} extension. The contents of a Python module {\tt module\_name.py} can be used in a different Python script by placing {\tt import module\_name} in the script. Python has a very extensive standard library which provides modules for many common tasks such as string operations and special functions. Python also allows the user to combine a collection of modules into a package by including a script {\tt \_\_init\_\_.py} which initializes a package. In the simplest case, {\tt \_\_init\_\_.py} is an empty file which only signifies that the contents of the directory are a package, but it may also contain methods to initialize routines in the package. Using packages, an individual module {\tt module} can be imported from the package {\tt package} by placing {\tt import package.module} in the calling script. Packages structure Python's namespace to avoid conflicts in global variable definitions between modules, and also simplify the structuring of the code itself. There exist many third party packages which extend Python to more specialized tasks. Examples of such packages used in ALPS 2.0 are the  NumPy~\cite{ NumPy}, SciPy~\cite{scipy}, and matplotlib~\cite{matplotlib} packages which provide efficient classes and operations for large multidimensional arrays and MATLAB-style plotting capabilities. 
 
 %Python is designed to be highly extensible, allowing it to easily interface with other programming languages. In ALPS 2.0 interfacing to C++ is done via the Boost.Python libraries from the Boost C++ libraries~\cite{boost}. An example of this extension is shown in Fig.~\ref{fig:BoostPython}. Here the python module {\tt pytools\_c} is created containing the C++ functions {\tt wrap\_with\_signature()} and {\tt wrap\_without\_signature()}. This module can then be used in a Python script by placing {\tt import pytools\_c} in the script as usual.
 %\begin{figure}[h]
@@ -1117,29 +1117,29 @@ In Fig.~\ref{fig:plotting}, an example script is shown which creates a {\tt Data
 
 % pyalps includes functions to write the xml files read by most applications, and additional functions to write special input files for applications with non-xml interfaces such as {\tt dmft} and {\tt tebd}. It also includes functions to run applications with specified input files both in series and in parallel. An example of the preparation of input files and running a simulation using pyalps is shown in Fig.~\ref{fig:python}.
 
-%Once the simulation has been run we must extract and evaluate data from it. At the heart of the pyalps evaluation tools is the {\tt DataSet} class. A {\tt DataSet} has as members {\tt x} and {\tt y} which are numpy arrays containing numerical data. A {\tt DataSet} also has a member {\tt props} which is a dictionary of metadata describing the numerical data. The presence of the metadata allows for complex evaluations such as constructing scaling functions as is done in many of the tutorials. Using Boost.Python as described above, the jackknife and binning analysis of Monte Carlo from the ALPS C++ libraries are extended to Python functionality, as well as functions to read hdf5 output into a {\tt DataSet}. In addition to evaluation, pyalps includes wrapper programs which plot data stored in a {\tt DataSet} using the matplotlib package.
+%Once the simulation has been run we must extract and evaluate data from it. At the heart of the pyalps evaluation tools is the {\tt DataSet} class. A {\tt DataSet} has as members {\tt x} and {\tt y} which are  NumPy arrays containing numerical data. A {\tt DataSet} also has a member {\tt props} which is a dictionary of metadata describing the numerical data. The presence of the metadata allows for complex evaluations such as constructing scaling functions as is done in many of the tutorials. Using Boost.Python as described above, the jackknife and binning analysis of Monte Carlo from the ALPS C++ libraries are extended to Python functionality, as well as functions to read hdf5 output into a {\tt DataSet}. In addition to evaluation, pyalps includes wrapper programs which plot data stored in a {\tt DataSet} using the matplotlib package.
 
 \section{ALPS Installation with CMake}
 \label{sec:cmake}
 
+\subsection{Prerequisites}
+
 The following tools and libraries are required to build ALPS:
 
 \begin{itemize}
-\item The CMake build system~\cite{cmake}.
+\item The CMake build system~\cite{cmake} of version 2.8.0 or newer.
 \item The BLAS~\cite{blasnetlib} and LAPACK libraries~\cite{lapack}. Ideally optimized versions for the target architecture should be used instead of the generic netlib versions.
-\item The Boost C++ libraries version 1.43.0 or later (Boost 1.45.0 is included in one version of the source tarball)~\cite{boost}.
+\item The Boost C++ libraries version 1.43.0 or later (Boost 1.45.0 is included in one version of the source tarball)~\cite{boost}. Boost does not have to be installed; instead, the ALPS installation process can build the required Boost libraries if necessary.
 \item The HDF5 library version 1.8~\cite{hdf5}.
 \item A standard complying C++ compiler. ALPS has been tested with gcc versions 4.2, 4.3 and 4.4 as well as MSVC 9, IBM xlC++ 11.1, and Intel's icpc 10 and 11.
 \end{itemize}
-To build optional parts of ALPS it is recommended to install in addition
+To build optional parts of ALPS it is recommended to install in addition:
 \begin{itemize}
 \item Python version 2.5 or 2.6~\cite{python}.
-\item The numpy~\cite{numpy}, scipy~\cite{scipy}, and matplotlib~\cite{matplotlib} Python packages.
+\item The  NumPy~\cite{numpy}, SciPy~\cite{scipy}, and matplotlib~\cite{matplotlib} Python packages.
 \item The VisTrails scientific workflow and provenance management system~\cite{vistrails} and all its dependencies.
 \item A Fortran 90 compiler for the {\tt tebd} code.
 \end{itemize}
-
-
 
 \begin{table}
 \centering
@@ -1173,30 +1173,54 @@ To build optional parts of ALPS it is recommended to install in addition
 \caption{List of CMake variables that can be changed at any time. Some of these are mandatory, i.e., if ALPS is unable to determine a value automatically, an error will be generated. \label{table:cmake_variables2}}
 \end{table}
 
-This release of ALPS makes use of the CMake build system~\cite{cmake} for the build and installation process. For inexperienced users, we generally recommend the use of the binary installation packages available from our website. These are currently available for Mac OS X 10.5 and 10.6, as well as Microsoft Windows. On other platforms or if advanced users desire more customization options for the installation than the binary installers can offer, a source installation is necessary. Advantages of the source installation for advanced users include:
+\subsection{The CMake build system}
+
+While we generally recommend the use of the binary installation packages whenever available, the source installation using the CMake build system may offer several advantages to experienced users:
 \begin{itemize}
+\item Specific compiler versions and optimization flags can be provided.
 \item The binary installers are tied to a specific version of Python, whereas the source installation can be built against the version of Python that the user prefers.
 \item Custom versions of external libraries such as the BLAS and LAPACK libraries can be provided.
 \end{itemize}
 
-In the following, we describe the build process for all systems except Windows, which is a special case and therefore not documented here. The prerequisites for the installation are listed in Section~\ref{sct:build_and_install}. For some widely used Linux distributions, we describe the installation of these prerequisites on the website of the ALPS project; for other cases, please refer to your system documentation. Note also that Boost does not have to be compiled to build ALPS; instead, the ALPS build process will also build Boost if necessary.
+The CMake build process is controlled by a set of variables describing the build environment, paths, and targets (libraries and programs) to be built. Most of these variables are automatically determined in the top-level file {\tt CMakeLists.txt}. Each source directory also contains such a file with prescriptions for building certain targets given the global configuration variables. A major advantage of CMake over other build systems such as the {\tt autotools} is that it allows the user easy access and modification of all variables via a graphical interface, the tool {\tt ccmake} or by directly editing the file {\tt CMakeCache.txt}.
 
-The CMake build process is controlled by a set of variables describing the build environment, paths, and targets (libraries and programs) to be built. Most of these variables are determined in the top-level file {\tt CMakeLists.txt}. Each source directory also contains such a file with prescriptions for building certain targets given the global configuration variables. A major advantage of CMake over other build systems such as the {\tt autotools} is that it allows the user easy access and modification of all variables via a graphical interface, the tool {\tt ccmake} or by directly editing the file {\tt CMakeCache.txt}.
+With a few exceptions (which are listed below), all CMake variables can be changed at any point during the installation. CMake will be able to determine the effects of changing a variable and, if necessary, repeat the compilation of parts of ALPS given the new configuration. This gives the user the possibility to change aspects of the configuration without repeating the entire installation process.
 
 Some of the most important CMake variables for the ALPS build system are listed in Tables~\ref{table:cmake_variables} and \ref{table:cmake_variables2}. Note that library paths have to be given as absolute paths; if several libraries are required, e.g. for BLAS, the paths should be separated with semicolons. An important point is linking against the correct versions of BLAS and LAPACK, since this may seriously affect the performance of some applications. ALPS will try to determine automatically which libraries should be used and will give optimized libraries like Intel's MKL precedence over standard libraries. Nevertheless, it is recommended to check whether this has been recognized correctly.
 
-It is strongly recommended to perform the configuration and compilation of ALPS in a separate directory ({\it build directory}). The procedure for configuring and installing ALPS is given below, where we assume that all commands are run from the build directory:
+\subsection{Installation steps}
+
+It is strongly recommended to perform the configuration and compilation of ALPS in a separate directory ({\it build directory}). Running any CMake commands in the source directory will likely cause problems in later stages.
+For concreteness, we will assume in the following that the ALPS source can be found in {\tt /home/user/alps} and Boost sources can be found in {\tt /home/user/boost\_1\_43\_0}. For other libraries, we will assume that they are installed in standard system paths. All commands should be executed in the build directory, which initially must be empty.
+
+The first step is to create an initial CMake configuration:
 {\small
 \begin{verbatim}
-cmake -D VARIABLE1=... -D VARIABLE2=... path/to/alps/source/directory
-ccmake
+cmake -D Boost_ROOT_DIR:PATH=/home/user/boost_1_43_0 /home/user/alps
+\end{verbatim} }
+Additional variables can be passed with the {\tt -D} flag. For example, if the HDF5 libraries are not found in a standard path, Python should not be used, and a non-standard compiler should be used, the following commands need to be executed:
+{\small
+\begin{verbatim}
+export CC=/opt/local/bin/gcc-mp-4.4
+export CXX=/opt/local/bin/g++-mp-4.4
+cmake -D Boost_ROOT_DIR:PATH=/home/user/boost_1_43_0 \
+-D HDF5_LIBRARIES=/home/user/HDF5/lib/libhdf5.so \
+-D HDF5_INCLUDE_DIR=/home/user/HDF5/include \
+-D ALPS_BUILD_PYTHON=OFF /home/user/alps
+\end{verbatim} }
+Please note that {\tt cmake} should always be run from an empty directory. If an error occurs, please clear all files from the build directory before running {\tt cmake} again. By default, CMake will generate a set of UNIX Makefiles. It is also possible to use other generators; for example, project files for XCode or KDevelop can be created.
+
+In the next step, additional variables can be customized by either editing the file {\tt CMakeCache.txt} directly, running the command {\tt ccmake} or invoking the CMake GUI.
+
+Now the standard procedure is to build, test, and install ALPS using
+{\small \begin{verbatim}
 make
 make test
 make install
 \end{verbatim}}
-The options starting with {\tt -D} are used to pass variables that are needed in the initial stages of CMake; cf. Table~\ref{table:cmake_variables}. Running {\tt ccmake} is not mandatory, but can be used to change all other variables, including those described in Table~\ref{table:cmake_variables2}. This can also be done after the compilation has finished. It is sufficient to re-execute {\tt make} and {\tt make install} after changing variables with {\tt ccmake}.
 
-The VisTrails packages can also be installed from the CMake installation process. On most platforms, it is sufficient to set the CMake variable {\tt VISTRAILS\_APP\_DIR}. On Mac OS X, a more advanced build type is needed since VisTrails delivers a specific version of Python. For instructions for this special case, we refer to our website.
+The VisTrails packages can also be installed from the CMake installation process. On UNIX or Linux platforms, it is sufficient to set the CMake variable {\tt VISTRAILS\_APP\_DIR}. If, for example, the file {\tt vistrails.py} from the VisTrails installation is found in the directory {\tt /home/user/vistrails/vistrails/}, {\tt VISTRAILS\_APP\_DIR} should be set to {\tt /home/user/vistrails/}.
+On Mac OS X, a more advanced build type is needed since VisTrails delivers a specific version of Python. For instructions for this special case, we refer to our website.
 
 \section{The ALPS XML schemas}
 \label{sec:xml}

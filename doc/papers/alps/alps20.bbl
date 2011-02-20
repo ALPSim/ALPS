@@ -203,6 +203,9 @@ Lutz M 2006 {\em Programming Python ({T}hird {E}dition)\/} (O'Reilly \&
 \bibitem{Sandvik91}
 Sandvik A~W and Kurkij\"arvi J 1991 {\em Phys. Rev. B\/} {\bf 43} 5950--5961
 
+\bibitem{ostebd}
+\url{http://physics.mines.edu/downloads/software/tebd/}
+
 \bibitem{Georges96}
 Georges A, Kotliar G, Krauth W and Rozenberg M~J 1996 {\em Rev. Mod. Phys.\/}
   {\bf 68} 13
@@ -221,9 +224,6 @@ Hirsch J~E and Fye R~M 1986 {\em Phys. Rev. Lett.\/} {\bf 56} 2521--2524
 \bibitem{ALPSDMFT}
 Gull E, Werner P, Fuchs S, Surer B, Pruschke T and Troyer M 2010
   Continuous-time quantum monte carlo impurity solvers
-
-\bibitem{ostebd}
-\url{http://physics.mines.edu/downloads/software/tebd/}
 
 \bibitem{Silva07}
 Silva C, Freire J and Callahan S 2007 {\em IEEE Computing in Science and
