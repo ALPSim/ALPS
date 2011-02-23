@@ -21,7 +21,6 @@ class IsingSimulation(Module):
         L = self.getInputFromPort('L')
         beta = self.getInputFromPort('beta')
         N = self.getInputFromPort('N')
-        fname = self.getInputFromPort('fname')
         sim = ising.Simulation(beta,L)
         sim.run(N/2,N)
         sim.save(result_file.name)
@@ -29,7 +28,7 @@ class IsingSimulation(Module):
         self.setResult('result_file', result_file)  
 
     _input_ports = [('L', [basic.Integer]),
-                    ('beta', [basic.Float]), ('N', [basic.Integer]),('fname', [basic.String]) ]
+                    ('beta', [basic.Float]), ('N', [basic.Integer]) ]
     _output_ports = [('result_file', [basic.File])]
 
     
