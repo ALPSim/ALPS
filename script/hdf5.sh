@@ -4,7 +4,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-VERSION=1.8.5-patch1
+VERSION=1.8.6
 
 PREFIX="$1"
 BUILD_DIR="$2"
@@ -18,8 +18,7 @@ fi
 LOG="$0.log.$$"
 echo "executing $0 $*" | tee "$LOG"
 
-URL="http://ftp.hdfgroup.org/ftp/HDF5/current/src/hdf5-$VERSION.tar.gz"
-# URL="http://www.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-$VERSION/src/hdf5-$VERSION.tar.gz"
+URL="http://ftp.hdfgroup.org/ftp/HDF5/prev-releases/hdf5-$VERSION/src/hdf5-$VERSION.tar.gz"
 SRC="$SRC_DIR/hdf5-$VERSION.tar.gz"
 
 echo "cleaning up..." | tee -a "$LOG"
