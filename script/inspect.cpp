@@ -40,6 +40,7 @@
 #include "tab_check.hpp"
 #include "ascii_check.hpp"
 #include "apple_macro_check.hpp"
+#include "assert_macro_check.hpp"
 #include "minmax_check.hpp"
 #include "unnamed_namespace_check.hpp"
 
@@ -144,7 +145,7 @@ namespace
   bool visit_predicate( const path & pth )
   {
     string local( boost::inspect::relative_to( pth, fs::initial_path() ) );
-    string leaf( pth.leaf() );
+    string leaf( pth.leaf().string() );
     return
       // so we can inspect a checkout
       leaf != "CVS"
@@ -154,6 +155,7 @@ namespace
       // this really out of our hands
       && leaf != "jam_src"
       && local.find("tools/jam/src") != 0
+      && local.find("tools/build/v2/engine") != 0
       // too many issues with generated HTML files
       && leaf != "status"
       // no point in checking doxygen xml output
@@ -201,7 +203,7 @@ namespace
   bool find_signature( const path & file_path,
     const boost::inspect::string_set & signatures )
   {
-    string name( file_path.leaf() );
+    string name( file_path.leaf().string() );
     if ( signatures.find( name ) == signatures.end() )
     {
       string::size_type pos( name.rfind( '.' ) );
@@ -547,6 +549,7 @@ namespace
          "  -tab\n"
          "  -ascii\n"
          "  -apple_macro\n"
+         "  -assert_macro\n"
          "  -minmax\n"
          "  -unnamed\n"
          " default is all checks on; otherwise options specify desired checks"
@@ -673,13 +676,12 @@ namespace boost
     // may return an empty string [gps]
     string impute_library( const path & full_dir_path )
     {
-      path relative( relative_to( full_dir_path, fs::initial_path() ),
-        fs::no_check );
+      path relative( relative_to( full_dir_path, fs::initial_path() ) );
       if ( relative.empty() ) return "alps-root";
-      string first( *relative.begin() );
+      string first( (*relative.begin()).string() );
       string second =  // borland 5.61 requires op=
         ++relative.begin() == relative.end()
-          ? string() : *++relative.begin();
+          ? string() : (*++relative.begin()).string();
 
       if ( first == "boost" )
         return second;
@@ -719,6 +721,7 @@ int cpp_main( int argc_param, char * argv_param[] )
   bool tab_ck = true;
   bool ascii_ck = true;
   bool apple_ok = true;
+  bool assert_ok = true;
   bool minmax_ck = true;
   bool unnamed_ck = true;
   bool cvs = false;
@@ -752,6 +755,7 @@ int cpp_main( int argc_param, char * argv_param[] )
     tab_ck = false;
     ascii_ck = false;
     apple_ok = false;
+    assert_ok = false;
     minmax_ck = false;
     unnamed_ck = false;
   }
@@ -777,6 +781,8 @@ int cpp_main( int argc_param, char * argv_param[] )
       ascii_ck = true;
     else if ( std::strcmp( argv[1], "-apple_macro" ) == 0 )
       apple_ok = true;
+    else if ( std::strcmp( argv[1], "-assert_macro" ) == 0 )
+      assert_ok = true;
     else if ( std::strcmp( argv[1], "-minmax" ) == 0 )
         minmax_ck = true;
     else if ( std::strcmp( argv[1], "-unnamed" ) == 0 )
@@ -822,6 +828,8 @@ int cpp_main( int argc_param, char * argv_param[] )
       inspectors.push_back( inspector_element( new boost::inspect::ascii_check ) );
   if ( apple_ok )
       inspectors.push_back( inspector_element( new boost::inspect::apple_macro_check ) );
+  if ( assert_ok )
+      inspectors.push_back( inspector_element( new boost::inspect::assert_macro_check ) );
   if ( minmax_ck )
       inspectors.push_back( inspector_element( new boost::inspect::minmax_check ) );
   if ( unnamed_ck )
@@ -849,7 +857,7 @@ int cpp_main( int argc_param, char * argv_param[] )
   {
     std::cout
       <<
-        "Boost Inspection Report\n"
+        "ALPS Inspection Report\n"
         "Run Date: " << run_date  << "\n"
         "\n"
         "An inspection program <http://www.boost.org/tools/inspect/index.html>\n"
@@ -875,14 +883,13 @@ int cpp_main( int argc_param, char * argv_param[] )
       << "<html>\n"
       "<head>\n"
       "<style> body { font-family: sans-serif; } </style>\n"
-      "<title>ALPS Inspection Report</title>\n"
+      "<title>Boost Inspection Report</title>\n"
       "</head>\n"
 
       "<body>\n"
       // we should not use a table, of course [gps]
       "<table>\n"
       "<tr>\n"
-      "<td></td>\n"
       "<td>\n"
       "<h1>ALPS Inspection Report</h1>\n"
       "<b>Run Date:</b> " << run_date  << "\n"
