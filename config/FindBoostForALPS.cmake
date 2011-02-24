@@ -12,7 +12,8 @@
 if (NOT Boost_ROOT_DIR)
   message(STATUS "Looking for precompiled Boost libraries")
   # Boost 1.42 is not (yet) supported version number on CMake 1.8.0.
-  set(Boost_ADDITIONAL_VERSIONS "1.45" "1.45.0" "1.45" "1.44.0" "1.43" "1.43.0")
+  # FIXIT: | TODO: | TBD: THIS IS UGLY!
+  set(Boost_ADDITIONAL_VERSIONS "1.46" "1.46.0" "1.45" "1.45.0" "1.44" "1.44.0" "1.43" "1.43.0")
   # Debian and Ubuntu packages are multithreaded.
   # Commented out because default is ON.
   #  set(Boost_USE_MULTITHREADED ON)

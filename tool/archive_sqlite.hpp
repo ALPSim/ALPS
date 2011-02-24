@@ -31,6 +31,8 @@
 #ifndef _SQLITE_H_
 #define _SQLITE_H_
 
+#include <alps/config.h>
+
 #include <string>
 #include <list>
 #include <map>

@@ -28,10 +28,13 @@
 
 /* $Id$ */
 
+#include <alps/config.h>
+
 #include <string>
 #include <iostream>
 #include <stdexcept>
 #include <fstream>
+
 #include <boost/program_options.hpp>
 #include <boost/filesystem/operations.hpp>
 #include <boost/filesystem/path.hpp>

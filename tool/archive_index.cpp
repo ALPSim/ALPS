@@ -28,6 +28,8 @@
 
 /* $Id$ */
 
+#include <alps/config.h>
+
 #include <fstream>
 #include <string>
 #include <list>

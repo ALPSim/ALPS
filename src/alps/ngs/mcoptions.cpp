@@ -5,7 +5,6 @@
  * ALPS Libraries                                                                  *
  *                                                                                 *
  * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
- *                           Matthias Troyer <troyer@comp-phys.org>                *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -26,6 +25,7 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/ngs/macros.hpp>
 #include <alps/ngs/mcoptions.hpp>
 
 #include <boost/program_options.hpp>
@@ -58,19 +58,19 @@ namespace alps {
         if (!(valid = !vm.count("help")))
             std::cout << desc << std::endl;
         else if (input_file.empty())
-            throw std::invalid_argument("No job file specified");
+            ALPS_NGS_THROW_INVALID_ARGUMENT("No job file specified");
         if (vm.count("threaded") && vm.count("mpi"))
             type = HYBRID;
         else if (vm.count("threaded"))
             #ifdef ALPS_NGS_SINGLE_THREAD
-                throw std::logic_error("Not build with multithread support");
+                ALPS_NGS_THROW_LOGIC_ERROR("Not build with multithread support");
             #else
                 type = THREADED;
             #endif
         else if (vm.count("mpi")) {
             type = MPI;
             #ifndef ALPS_HAVE_MPI
-                throw std::logic_error("Not build with MPI");
+                ALPS_NGS_THROW_LOGIC_ERROR("Not build with MPI");
             #endif
         }
         if (vm.count("continue"))

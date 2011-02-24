@@ -30,6 +30,8 @@
 #ifndef _PLOT_HPP_
 #define _PLOT_HPP_
 
+#include <alps/config.h>
+
 #include <string>
 #include <map>
 #include <list>
