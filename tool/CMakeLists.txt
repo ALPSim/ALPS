@@ -26,7 +26,8 @@ if (NOT Boost_FOUND)
     set (FILES actions.cpp actions_class.cpp block_grammar.cpp code_snippet.cpp
                collector.cpp doc_info_actions.cpp doc_info_grammar.cpp
                input_path.cpp markups.cpp phrase_grammar.cpp post_process.cpp
-               quickbook.cpp syntax_highlight.cpp template_stack.cpp utils.cpp)
+               quickbook.cpp syntax_highlight.cpp template_stack.cpp utils.cpp
+               block_element_grammar.cpp phrase_element_grammar.cpp main_grammar.cpp grammar.cpp)
     foreach(S ${FILES})
       if(EXISTS ${D}/${S})
         set(QUICKBOOK_SOURCES ${QUICKBOOK_SOURCES} ${D}/${S})
