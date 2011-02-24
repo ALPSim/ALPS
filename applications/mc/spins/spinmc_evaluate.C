@@ -23,9 +23,11 @@
 *
 *****************************************************************************/
 
-#include <boost/filesystem/operations.hpp>
-#include <alps/scheduler.h>
+#include <alps/config.h>
 #include <alps/alea.h>
+#include <alps/scheduler.h>
+
+#include <boost/filesystem/operations.hpp>
 
 void evaluate(const boost::filesystem::path& p, const bool write_xml) {
   alps::ProcessList nowhere;
