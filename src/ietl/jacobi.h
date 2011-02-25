@@ -309,12 +309,11 @@ namespace ietl
         vector_type t  = new_vector(vecspace_);
         vector_type u  = new_vector(vecspace_);
         vector_type uA = new_vector(vecspace_);
-        vector_type vA = new_vector(vecspace_);
+        // vector_type vA = new_vector(vecspace_);
         vector_type r  = new_vector(vecspace_);
         std::vector<scalar_type> s(iter.max_iterations());
         std::vector<vector_type> V(iter.max_iterations());
-        // for (int k=0;k<iter.max_iterations();k++)
-        //     V[k] = new_vector(vecspace_);
+        std::vector<vector_type> VA(iter.max_iterations());
         int i,j;
         M.resize(iter.max_iterations(), iter.max_iterations());
         magnitude_type theta, tau;
@@ -340,13 +339,13 @@ namespace ietl
             
             // v_m = t / |t|_2,  v_m^A = A v_m
             V[iter.iterations()] = t/ietl::two_norm(t);
-            ietl::mult(matrix_, V[iter.iterations()], vA);
+            ietl::mult(matrix_, V[iter.iterations()], VA[iter.iterations()]);
             
             // for i=1, ..., iter
             //   M_{i,m} = v_i ^\star v_m ^A
             // end for
             for (i=1;i<=iter.iterations()+1;i++)
-                M(i-1,iter.iterations()) = ietl::dot(V[i-1],vA);
+                M(i-1,iter.iterations()) = ietl::dot(V[i-1], VA[iter.iterations()]);
             
             // compute the largest eigenpair (\theta, s) of M (|s|_2 = 1)
             get_extremal_eigenvalue(theta,s,iter.iterations()+1);
@@ -357,7 +356,10 @@ namespace ietl
                 u += V[j] * s[j];
             
             // u^A = V^A s
-            ietl::mult(matrix_,u,uA);
+            // ietl::mult(matrix_,u,uA);
+            uA = VA[0] * s[0];
+            for (j=1;j<=iter.iterations();++j)
+                uA += VA[j] * s[j];
             
             // r = u^A - \theta u
             r = uA-theta*u;
