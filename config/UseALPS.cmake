@@ -45,5 +45,5 @@ if(NOT ALPS_USE_FILE_INCLUDED)
   set(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" FORCE)
 
   # test macro
-  include(${CMAKE_INSTALL_PREFIX}/share/alps/add_alps_test.cmake)
+  #include(${CMAKE_INSTALL_PREFIX}/share/alps/add_alps_test.cmake)
 endif(NOT ALPS_USE_FILE_INCLUDED)
