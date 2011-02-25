@@ -70,7 +70,7 @@
 	\myauthor{\ref{crest},\ref{tokyo}}{S. Todo}{wistaria@ap.t.u-tokyo.ac.jp}
 	\myauthor{\ref{stationq}}{S.~Trebst}{trebst@kitp.ucsb.edu}
 	\myauthor{\ref{eth}}{M.~Troyer}{troyer@ethz.ch}\footnote{Corresponding author: troyer@comp-phys.org}
-	\myauthor{\ref{colorado}}{M.L.~Wall}{mwall@mymail.mines.edu}
+	\myauthor{\ref{colorado}}{M.~L.~Wall}{mwall@mymail.mines.edu}
 	\myauthor{\ref{eth}}{P.~Werner}{werner@phys.ethz.ch}
 	\myauthor{\ref{rwth},\ref{stuttgart}}{S. Wessel}{wessel@phys.ethz.ch}
 }
@@ -178,7 +178,7 @@ algorithms, including refinements to existing numerical algorithms, such as exac
 the density matrix renormalization group \cite{White1992,Schollwock2005,Daley2004,White2004} and (quantum) 
 Monte Carlo (QMC) techniques, as well as the advent of a new class of variational approaches based on 
 tensor network states \cite{vidal1,vidal2,Verstraete04,Murg07,vidal07}. 
-Some of the algorithmic refinements have led to computational speedups of many order of magnitudes, such as 
+Some of the algorithmic refinements have led to computational speedups of many orders of magnitude, such as 
 the development of non-local update schemes \cite{Swendsen87,Wolff89} in QMC methods \cite{Evertz93,Prokofev98A,Sandvik99,Todo01,looper,Sylyuasen, Evertz03,Alet2005}, 
 the sampling of extended ensembles \cite{Wang01,Wang01b,Troyer03,Trebst04,Katzgraber06,Wessel07},
 or the continuous-time approach to quantum impurity problems \cite{Rubtsov04,Rubtsov05,Werner06,Werner06Kondo, Gull08_ctaux}.
@@ -229,9 +229,9 @@ publishing source codes used to obtain published results and by integration with
 \end{itemize}
 
 
-In contrast to other fields, where open-source development efforts started decade ago, we can directly build our design on recent developments in computer science, especially:
+In contrast to other fields, where open-source development efforts started decades ago, we can directly build our design on recent developments in computer science, especially:
 \begin{itemize}
-\item XML\cite{xml} (eXtenden Markup Language) and HDF5\cite{hdf5} (Hierarchical Data Format version 5)  as portable data formats supported by a large number of standard tools
+\item XML\cite{xml} (eXtensible Markup Language) and HDF5\cite{hdf5} (Hierarchical Data Format version 5)  as portable data formats supported by a large number of standard tools
 \item generic and object oriented programming in C++ to achieve flexible but still optimal codes
 \item OpenMP\cite{openmp} and MPI\cite{mpi} for parallelization on shared memory machines, clusters, and high performance supercomputers.
 \end{itemize} 
@@ -254,10 +254,10 @@ mean field theory ({\tt dmft}) and a time-evolving block decimation code ({\tt t
  
 \section{Building and Installing ALPS} \label{sct:build_and_install}
 \subsection{Build system}
-ALPS 2.0 uses the CMake~\cite{cmake}, which is more flexible and portable than the previously used {\tt autotools}. All aspects of the build process are controlled by CMake variables, which can be easily changed in several ways, including a graphical user interface. This allows the user a large degree of customization of the ALPS installation. Furthermore, CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested features. A snapshot of the build instructions at the time of the release are included in the source distribution. 
+ALPS 2.0 uses CMake~\cite{cmake}, which is more flexible and portable than the previously used {\tt autotools}. All aspects of the build process are controlled by CMake variables, which can be easily changed in several ways, including a graphical user interface. This allows the user a large degree of customization of the ALPS installation. Furthermore, CMake supports the automatic creation of binary installation packages and building ALPS on Windows -- two often requested features. A snapshot of the build instructions at the time of the release are included in the source distribution. 
 \subsection{Building ALPS from source}
 
-Details about building ALPS from source, and the required tools and libraries are discussed in \ref{sec:cmake}. This is the recommended way of building ALPS on Unix and Linux systems, or if one wants to use specific BLAS libraries or Python interpreters on MacOS or Windows. Updated instructions as operating systems change will be made available on the ALPS web page~\cite{alps}.
+Details about building ALPS from source and the required tools and libraries are discussed in \ref{sec:cmake}. This is the recommended way of building ALPS on Unix and Linux systems or if one wants to use specific BLAS libraries or Python interpreters on MacOS or Windows. Updated instructions as operating systems change will be made available on the ALPS web page~\cite{alps}.
 
 \subsection{Binary Installation Packages}
 
@@ -311,7 +311,7 @@ our web pages \cite{alps,xmlschema}.
 We now complement XML by the widely used Hierarchical Data Format 5 (HDF5)~\cite{hdf5}, a de-facto standard for writing large binary files in a portable, machine-independent way. HDF5 is directly supported by many visualization and data analysis tools and a       wide array of tools are 
 available for C, C++, Fortran, Python, and other languages. In ALPS, HDF5 is now used as the default output format for simulation data. This approach is significantly faster than writing to text-based formats when large files need to be written. On-the-fly compression of binary data further reduces file size. 
 
-The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page~\cite{alps}. For backward compatibility with user's evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to also write all results in XML.
+The ALPS HDF5 files store simulation parameters, the detailed results of Monte Carlo simulations, spectra and expectation values of exact diagonalization and DMRG simulations, and time evolutions in the TEBD code. ALPS comes with a library of C++ and Python functions to load these results, but they can also be read with any other tool supporting HDF5. The exact schema of the HDF5 files is available on the ALPS web page~\cite{alps}. For backward compatibility with users' evaluation tools, the simulation codes accept a {\tt --write-xml} command line option to also write all results in XML.
 
 The implementation of HDF5 capabilities within ALPS is split into two layers. The lower layer implements a generic and general-purpose C++ interface to the C HDF5 library. This layer is not tied to other parts of the ALPS library and can therefore be used by user code that is otherwise independent from ALPS and its file formats. The functions of this library are also exposed to Python, and can thus be used not only from C++ codes but also from Python scripts. On top of that, the specific file formats used by the ALPS library and applications are implemented in the respective components of the ALPS library.
 
@@ -340,11 +340,11 @@ These libraries make full use of object oriented and generic\cite{CE} programmin
 
 
 \section{Evaluation Tools in Python} \label{sct:python}
-\noindent {\it Main developers:} B. Bauer, L. Gamper, J. Gukelberger, P.N. Ma, O. Parcollet, B.~Surer, M.~Troyer, and M.L. Wall. 
+\noindent {\it Main developers:} B. Bauer, L. Gamper, J. Gukelberger, P.N. Ma, O. Parcollet, B.~Surer, M.~Troyer, and M.~L.~Wall. 
 
 \medskip
 
-The previous versions of ALPS had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML files using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language~\cite{python}. Python is an easy-to-learn, interpreted, object-oriented language allowing interactive analysis of data and arbitrary complex evaluations. A brief introduction to the Python language as well as the pyalps Python package new to ALPS 2.0 can be found in Appendix B.
+The previous versions of ALPS had very limited data evaluation capabilities that were restricted to extracting plots from collections of XML files using XSLT. This is remedied in ALPS 2.0 by basing data evaluation on the powerful Python language~\cite{python}. Python is an easy-to-learn, interpreted, object-oriented language allowing interactive analysis of data and arbitrary complex evaluations.  Some brief examples of the Python language as well as the pyalps Python package new to ALPS 2.0 can be found in Appendix B.
 
 We provide a complete set of library functions to write and read ALPS files and a number of useful functions to evaluate the simulation results and to make plots. In particular, the ALPS classes for the recording and evaluation of Monte Carlo data are all exported from C++ to Python, enabling an easy binning analysis~\cite{Ambegaokar2010} and jackknife analysis of Monte Carlo data.
 Two-dimensional plots are created using the widely available Python matplotlib package~\cite{matplotlib} or by using ALPS functions to write grace~\cite{grace} or gnuplot~\cite{gnuplot} input files. Creation of 3D graphs is supported through VisTrails and the Visualization ToolKit (VTK)~\cite{vtk} VisTrails modules.
@@ -353,11 +353,11 @@ Two-dimensional plots are created using the widely available Python matplotlib p
 
 Python~\cite{python} is an open-source, high-level, object-oriented interpreted programming language developed with a focus on portability and high productivity. This is achieved with a clear syntax and extensive standard libraries. A wealth of material is available for learning the language, including its own extensive standard documentation and several books\cite{LearningPython, ProgrammingPython}.
 
-Python is an interpreted language, meaning that the source code is executed without an intermediate compilation step. This allows for interactive use, and easy analysis of simulation data. It also is simplifies ode development and exchange, in particular since using an interpreted language also often improves the portability of the resulting code.
+Python is an interpreted language, meaning that the source code is executed without an intermediate compilation step. This allows for interactive use, and easy analysis of simulation data. It also is simplifies code development and exchange, in particular since using an interpreted language also often improves the portability of the resulting code.
 
 In addition to the Python standard library, the PyLab environment, which consists in particular of the NumPy~\cite{numpy}, SciPy~\cite{scipy} and matplotlib~\cite{matplotlib} libraries, offers powerful tools for numerical calculations and plotting. This makes Python particularly suitable for the data analysis part of the overall ALPS workflow. Wherever possible, the data types used in the pyalps package are built on top of the NumPy data types, allowing direct use of the PyLab libraries.
 
-Python programs can interoperate with code written in a different language. As an example, a low-level numerical method could be implemented in C/C++ for performance reasons but still be called from a high-level Python code. This can be significantly simplified by using the Boost.Python~\cite{boost} library. Specifically, this library provides a simple interface to export C++ functions and classes to Python while taking care of Python internals, such as memory management. We make use of this library to export parts of the ALPS library to Python in the pyalps package.
+Python programs can interoperate with code written in a different language. As an example, a low-level numerical method could be implemented in C/C++ for performance reasons but still be called from a high-level Python code. This can be significantly simplified by using the Boost.Python~\cite{boost} library. Specifically, this library provides a simple interface to export C++ functions and classes to Python while taking care of Python internals such as memory management. We make use of this library to export parts of the ALPS library to Python in the pyalps package.
 
 \subsection{The pyalps package}
 ALPS 2.0 contains a package of Python modules for interfacing the low-level ALPS code to Python and vice versa, running simulations, and evaluation and post-processing of data. This package is known as pyalps. The advantages of using Python versus exclusively using low-level code for the above tasks are manifold. For example, Python's large standard library and ability to easily interface with low-level code allow for great flexibility in post-processing of data. Also, the use of Python facilitates use of the VisTrails workflow provenance tool, as VisTrails is written in Python.
@@ -384,7 +384,7 @@ page~\cite{alps}.
 
 The exact diagonalization codes have been optimized for flexibility and not the highest performance or the goal to reach the biggest system sizes.
 
-The codes make use of conserved quantum numbers, such as particle number or magnetization and use translation symmetry to reduce the Hilbert space dimension. This speeds up the calculations and allows larger systems to be calculated. In addition, by calculating the energy eigenvalues separately for each momentum, the momentum-resolved excitation spectrum can be calculated.
+The codes make use of conserved quantum numbers, such as particle number or magnetization, and use translation symmetry to reduce the Hilbert space dimension. This speeds up the calculations and allows larger systems to be calculated. In addition, by calculating the energy eigenvalues separately for each momentum, the momentum-resolved excitation spectrum can be calculated.
 
 The user may also specify custom measurements of averaged or local site- and bond operators, as well as arbitrary 2-point correlation functions. As an example, for the inhomogeneous bosonic Hubbard model of figure \ref{fig:hubmodel}, one can specify the measurement of the average double occupancy, local density, density correlations, and Green's function by defining the following input parameters, which use the definitions of site and bond operators provided with the model:
 
@@ -464,7 +464,7 @@ algorithm~\cite{Evertz93,Todo01,looper, Evertz03}, a generalization of the class
 
 The {\tt dmrg} code implements the DMRG algorithm~\cite{White1992,Schollwock2005} to calculate ground states and low-lying excited states of quasi-one dimensional quantum systems. It can also measure arbitrary local quantities and two-point functions.
 
-\subsubsection{Time Evolving Block Decimation Code {\tt tebd},} main developers: L. Carr and M.L. Wall
+\subsubsection{Time Evolving Block Decimation Code {\tt tebd},} main developers: L.~D.~Carr and M.~L.~Wall
 
 \smallskip
 
@@ -567,7 +567,7 @@ The design goal of the data analysis modules is to take care of common, repetiti
 The modules for input preparation and data analysis are designed to assist the user in dealing with a large number of simulations. For example, modules are provided to sweep parameter ranges, to combine data from many simulations or to load data from ALPS files and text files. Modules to load data from custom file formats can also easily be implemented.
 
 VisTrails workflows in ALPS 2.0 use descriptive nouns and verbs for the names of modules that execute
- Python scripts which, in turn execute ALPS
+ Python scripts which in turn execute ALPS
 algorithms in Python or compiled code. Fig.~\ref{fig:workflow} shows an example ALPS workflow
 that takes input lattice parameters and model definitions (modules described by nouns, such as 
  ChainLattice and LatticeModel), executes the quantum
@@ -728,7 +728,9 @@ We thank A.F. Albuquerque, F. Alet, P. Corboz, P. Dayal, A. Honecker, A. L\"auch
 
 We thank all users of the previous versions of ALPS and beta testers of ALPS 2.0, especially J. Alfonsi, S. Aicardi, A. Akande, P. Anders, A. Anfossi, Z. Asadzadeh, R.~Bhat, J.H. Brewer, S. Bulut, E. Burovski, G. Carleo, G. Chen, M.D. Costa, M.~Dolfi, M.~Ferrero, J. Figgins, S.~Gazit, U.~Gerber, R. Ghulghazaryan, C. Gils, S. Greschner, C.~Hamer, J. Hammond, K. Hassan, N. Heine, F.-J. Jiang, R. Jordens, H.G. Katzgraber, B.~Keiyh, J. Kim, J. Kolasinski, B.~Koopman, F. K\"ormann, E.~Kozik, M.F. Krenn, F.~Kruger, M. Laurent, J. Lopes, M. Maik, M. Maksymenko, N. Moran, A. Nunnenkamp, J.D. Peel, S.~Pilati, K. Prsa, N.~Rahman, M. Rofiq, H. R\o nnow, J. Ruostekoski, J.~Schnack, N. Schuch, A. Sen, K. Shtengel, J. Single, M. Skoulatos, C. Sliwa, M.~Spenke, M.~Stoudenmire, V. Tangoulis, A.~Taroni, B. Thielemann, M. Tovar, H. Tran, V.~Varma, S. Ward, T. Wasiutynski, J. Wen, J. Wilms, H. Wunderlich, F. Xiao, X.Q. Yu, J.~Zakrzewski, Z.-X. Zhou, and R. Ziemkiewicz. We thank P. Zoller for the suggestion to provide binary installers. 
 
-The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara through NSF grants PHY-0551164 and DMR-0705847, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, Grant No.~J-992, the National Science Foundation under grant PHY-0903457 and DMR-0955707, the Deutsche Forschungsgemeinschaft through the collaborative research center SFB 602, Japan Society for the Promotion of Science through KAKENHI No.\,20540364, Next-Generation Supercomputer Project from MEXT Japan, and a grant from the Army Research Office with funding from the DARPA OLE program. 
+The development of ALPS has profited from support of the Pauli Center at ETH Z\"urich, the Swiss HP$^2$C initiative, the Kavli Institute for Theoretical Physics in Santa Barbara through NSF grants PHY-0551164 and DMR-0705847, the Aspen Center for Physics, the Swiss National Science Foundation, the Jeffress Memorial Trust, Grant No.~J-992, the National Science Foundation under grant PHY-0903457 and DMR-0955707, the Golden Energy Computing Organization at the Colorado
+School of Mines for the use of resources acquired with financial assistance from the
+National Science Foundation and the National Renewable Energy Laboratories, the Deutsche Forschungsgemeinschaft through the collaborative research center SFB 602, Japan Society for the Promotion of Science through KAKENHI No.\,20540364, Next-Generation Supercomputer Project from MEXT Japan, and a grant from the Army Research Office with funding from the DARPA OLE program.
 
 Work on VisTrails is primarily supported by grants and contracts from
 the U.S. National Science Foundation, the U.S. Department of Energy,
@@ -1353,7 +1355,7 @@ One can also randomly deplete the lattice by removing a fraction of sites or bon
 For more examples of lattices we refer the reader to the file {\tt lattices.xml} included in ALPS that contains a number of commonly used lattices. A detailed discussion of the creation of lattice files is presented on the ALPS web page.
 
 
-\subsection{Model defintiions}
+\subsection{Model definitions}
 
 Figure \ref{fig:model} shows the simplest definition of an XXZ spin model with Hamiltonian
 \begin{equation}
