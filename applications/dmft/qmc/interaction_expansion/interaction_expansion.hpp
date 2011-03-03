@@ -131,6 +131,51 @@ private:
 
 
 
+typedef class vertex
+{        
+public:
+  vertex(const spin_t &flavor1, const site_t &site1, const unsigned int &c_dagger_1, const unsigned int &c_1, 
+         const spin_t &flavor2, const site_t &site2, const unsigned int &c_dagger_2, const unsigned int &c_2, 
+         const double &abs_w)
+  {
+    z1_=flavor1;
+    z2_=flavor2;
+    s1_=site1;
+    s2_=site2;
+    c1dagger_=c_dagger_1;
+    c2dagger_=c_dagger_2;
+    c1_=c_1;
+    c2_=c_2;
+    abs_w_=abs_w;
+  }
+  
+  inline const double &abs_w() const {return abs_w_;}
+  inline const unsigned int &flavor1() const {return z1_;}
+  inline const unsigned int &flavor2() const {return z2_;}
+  inline const unsigned int &site1() const {return s1_;}
+  inline const unsigned int &site2() const {return s2_;}
+  inline void set_site1(site_t site1) {s1_=site1;}
+  inline void set_site2(site_t site2) {s2_=site2;}
+  inline const unsigned int &c_dagger_1() const {return c1dagger_;}
+  inline const unsigned int &c_dagger_2() const {return c2dagger_;}
+  inline const unsigned int &c_1() const {return c1_;}
+  inline const unsigned int &c_2() const {return c2_;}
+  inline unsigned int &flavor1() {return z1_;}
+  inline unsigned int &flavor2() {return z2_;}
+  inline unsigned int &c_dagger_1() {return c1dagger_;}
+  inline unsigned int &c_dagger_2() {return c2dagger_;}
+  inline unsigned int &c_1() {return c1_;}
+  inline unsigned int &c_2() {return c2_;}
+private:
+  unsigned int z1_, z2_;
+  unsigned int s1_, s2_;
+  unsigned int c1_, c2_;
+  unsigned int c1dagger_, c2dagger_;
+  double abs_w_;
+} vertex;
+
+
+
 class InteractionExpansionSim: public alps::scheduler::MCSimulation, public alps::MatsubaraImpurityTask
 {
 public:
@@ -274,51 +319,6 @@ protected:
   clock_t measurement_time;
 
 };
-
-
-
-typedef class vertex
-{        
-public:
-  vertex(const spin_t &flavor1, const site_t &site1, const unsigned int &c_dagger_1, const unsigned int &c_1, 
-         const spin_t &flavor2, const site_t &site2, const unsigned int &c_dagger_2, const unsigned int &c_2, 
-         const double &abs_w)
-  {
-    z1_=flavor1;
-    z2_=flavor2;
-    s1_=site1;
-    s2_=site2;
-    c1dagger_=c_dagger_1;
-    c2dagger_=c_dagger_2;
-    c1_=c_1;
-    c2_=c_2;
-    abs_w_=abs_w;
-  }
-  
-  inline const double &abs_w() const {return abs_w_;}
-  inline const unsigned int &flavor1() const {return z1_;}
-  inline const unsigned int &flavor2() const {return z2_;}
-  inline const unsigned int &site1() const {return s1_;}
-  inline const unsigned int &site2() const {return s2_;}
-  inline void set_site1(site_t site1) {s1_=site1;}
-  inline void set_site2(site_t site2) {s2_=site2;}
-  inline const unsigned int &c_dagger_1() const {return c1dagger_;}
-  inline const unsigned int &c_dagger_2() const {return c2dagger_;}
-  inline const unsigned int &c_1() const {return c1_;}
-  inline const unsigned int &c_2() const {return c2_;}
-  inline unsigned int &flavor1() {return z1_;}
-  inline unsigned int &flavor2() {return z2_;}
-  inline unsigned int &c_dagger_1() {return c1dagger_;}
-  inline unsigned int &c_dagger_2() {return c2dagger_;}
-  inline unsigned int &c_1() {return c1_;}
-  inline unsigned int &c_2() {return c2_;}
-private:
-  unsigned int z1_, z2_;
-  unsigned int s1_, s2_;
-  unsigned int c1_, c2_;
-  unsigned int c1dagger_, c2dagger_;
-  double abs_w_;
-} vertex;
 
 
 
