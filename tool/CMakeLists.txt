@@ -20,7 +20,7 @@ else(ALPS_FOR_VISTRAILS)
 
 # If Boost precompiled libraries found, don't build quickbook,
 # since sources are not available.
-if (NOT Boost_FOUND)
+if (NOT Boost_FOUND AND ALPS_BUILD_DOC)
   set (QUICKBOOK_SOURCES "")
   foreach (D "${Boost_ROOT_DIR}/tools/quickbook/detail" "${Boost_ROOT_DIR}/tools/quickbook/src")
     set (FILES actions.cpp actions_class.cpp block_grammar.cpp code_snippet.cpp
@@ -39,7 +39,7 @@ if (NOT Boost_FOUND)
   if (NOT ALPS_BUILD_SOURCE)
     install(TARGETS quickbook RUNTIME DESTINATION bin COMPONENT tools)
   endif (NOT ALPS_BUILD_SOURCE)
-endif(NOT Boost_FOUND)
+endif (NOT Boost_FOUND AND ALPS_BUILD_DOC)
 
 if (NOT ALPS_BUILD_SOURCE)
 
