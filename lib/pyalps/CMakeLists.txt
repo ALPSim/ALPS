@@ -30,7 +30,7 @@ if (ALPS_HAVE_PYTHON)
         set_target_properties(${name} PROPERTIES SUFFIX ".pyd")
       endif(WIN32 AND NOT UNIX)
     endif(BUILD_SHARED_LIBS)
-    # find_package(HDF5)
+    find_package(HDF5)
     
     if (ALPS_BUILD_NGS)
         add_dependencies(${name} alps)
