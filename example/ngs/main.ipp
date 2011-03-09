@@ -46,6 +46,9 @@ int main(int argc, char *argv[]) {
             std::cout << "Mean of Correlations: " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
             std::cout << "Sin of Energy:        " << short_print(sin(results["Energy"])) << std::endl;
             std::cout << "2 * Energy / 13:      " << short_print(2. * results["Energy"] / 13.) << std::endl;
+            std::cout << "Correlations:         " << short_print(results["Correlations"]) << std::endl;
+            std::cout << "Sign:                 " << short_print(results["Sign"]) << std::endl;
+            std::cout << "Correlations / Sign:  " << short_print(results["Correlations"] / results["Sign"]) << std::endl;
         }
         save_results(results, params, options.output_file, "/simulation/results");
     } else if(options.valid && options.type == alps::mcoptions::MPI) {
