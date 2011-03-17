@@ -3,6 +3,8 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
+import pyalps
+
 import matplotlib.pyplot as plt
 from xml.etree import ElementTree
 
@@ -30,6 +32,8 @@ def showgraph(graph):
     x = [v[0] for v in vertices.values()]
     y = [v[1] for v in vertices.values()]
     plt.scatter(x, y)
+    for k, v in vertices.items():
+        plt.annotate(k, v)
     
     for edge in edges.values():
         s = edge['source']
