@@ -224,8 +224,10 @@ void HybridizationRun::dostep()
 
       }
 
-      if ((int) (segments[j].size()) < N_order)
-        order_meas[j * FLAVORS + segments[j].size()] += 1;
+      // measure perturbation order
+      if ((int)(segments[j].size())<N_order)
+        order_meas[j*N_order+segments[j].size()]++;
+
 
       if (segments[j].size() > 0) {
         double N_div_beta = N / BETA;
