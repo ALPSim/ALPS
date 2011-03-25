@@ -105,7 +105,7 @@ class Hdf5Loader:
           if os.path.exists(f):
             files.append(f)
           else:
-            log( "FILE ", f, "DOES NOT EXIST!")
+            log( "FILE "+ f+ "DOES NOT EXIST!")
         return files
         
     def ReadParameters(self,proppath):
