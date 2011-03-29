@@ -7,13 +7,14 @@ project (DMFT)
 include_directories("/Users/emanuel/alps_svn/")
 include_directories("/opt/local/include")
 #include_directories("/cluster/home/phys/gullc/alps_svn")
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -march=core2 -O3 -DUSE_MPI -DNDEBUG")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -march=core2 -O3 -DUSE_MPI -DNDEBUG")
 
 link_directories("/opt/local/lib")
 
 
 add_executable(dmft 
 2dsimpson.C clusterhelper.C fouriertransform.C selfconsistency.C
+selfconsistency_DCA.C selfconsistency_CDMFT.C
 alps_solver.C clustertransformer.C hilberttransformer.C interpolator.C
 auxiliaryfunctions.C externalsolver.C hirschfyesim.C main.C
 
@@ -32,10 +33,11 @@ auxiliaryfunctions.C externalsolver.C hirschfyesim.C main.C
 ../DMFT-solvers/Rubtsov/rubtsov_fourpoint.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_observables.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_selfenergy.cpp)
-
 add_executable(energy ../DMFT-solvers/Rubtsov/energy.cpp
-auxiliaryfunctions.C clustertransformer.C clusterhelper.C fouriertransform.C
-../DMFT-solvers/Rubtsov/obs_auxiliary.cpp)
+../DMFT-Solvers/Rubtsov/obs_auxiliary.cpp clustertransformer.C
+hilberttransformer.C clusterhelper.C fouriertransform.C 2dsimpson.C
+auxiliaryfunctions.C
+)
 add_executable(sigma_interpolate sigma_interpolate.C
 auxiliaryfunctions.C clustertransformer.C clusterhelper.C
 fouriertransform.C)

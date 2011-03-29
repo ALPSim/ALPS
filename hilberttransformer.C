@@ -102,7 +102,7 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
   exit(1);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   //FourierTransformer::generate_transformer(parms, fourier_ptr); ????
-  fourier_ptr->forward_ft(G_tau, G_omega);
+  fourier_ptr->time_to_frequency_ft(G_tau, G_omega);
   //std::cout<<"G omega real: "<<std::endl;
   print_real_green_matsubara(std::cout, G_omega, beta);
   for(uint i=0; i<G_omega.nfreq(); i++) {
@@ -114,7 +114,7 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
   }
   //std::cout<<"symmetrized G0 omega real: "<<std::endl;
   print_real_green_matsubara(std::cout, G0_omega, beta);
-  fourier_ptr->backward_ft(G0_tau, G0_omega);
+  fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
   return G0_tau;
 }
 
@@ -180,7 +180,7 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
     boost::shared_ptr<FourierTransformer> fourier_ptr;
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     itime_green_function_t G0_tau(n_time,n_flavor);
-    fourier_ptr->backward_ft(G0_tau, G0_omega);
+    fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     G0_tau.write("G0_tau_input");
     return G0_omega;
   }
@@ -205,7 +205,7 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
       boost::shared_ptr<FourierTransformer> fourier_ptr;
       FourierTransformer::generate_transformer(parms, fourier_ptr);
       itime_green_function_t G0_tau(n_time,n_flavor);
-      fourier_ptr->backward_ft(G0_tau, G0_omega);
+      fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
       G0_tau.write("G0_tau_input");
 
     }
@@ -284,7 +284,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps
     boost::shared_ptr<FourierTransformer> fourier_ptr;
     FourierTransformer::generate_transformer(parms, fourier_ptr);
     itime_green_function_t G0_tau(n_time,n_flavor);
-    fourier_ptr->backward_ft(G0_tau, G0_omega);
+    fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     G0_tau.write("G0_tau_input");
     //std::cout<<"written G0 in omega and tau, returning."<<std::endl;
     return G0_omega;

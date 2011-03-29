@@ -35,6 +35,7 @@
 #include "nambu_green_function.h" 
 
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
+typedef boost::numeric::ublas::matrix<std::complex<double> ,boost::numeric::ublas::column_major> complex_dense_matrix;
 
 void generate_spline_matrix(dense_matrix & spline_matrix);
 
@@ -94,12 +95,12 @@ public:
   
   virtual ~FourierTransformer() {}
   //standard forward and backward transformer
-  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
-  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
+  virtual void time_to_frequency_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const;
+  virtual void frequency_to_time_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
   //NAMBU forward and backward transformer
-  virtual void forward_ft(const nambu_itime_green_function_t &G_tau, nambu_matsubara_green_function_t &G_omega) const;
-  virtual void backward_ft(nambu_itime_green_function_t &G_tau, const nambu_matsubara_green_function_t &G_omega) const;
-  /*  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
+  virtual void time_to_frequency_ft(const nambu_itime_green_function_t &G_tau, nambu_matsubara_green_function_t &G_omega) const;
+  virtual void frequency_to_time_ft(nambu_itime_green_function_t &G_tau, const nambu_matsubara_green_function_t &G_omega) const;
+  /*  virtual void frequency_to_time_ft(green_function<alps::RealObsevaluator> &G_tau, 
    const green_function<alps::RealObsevaluator> &G_omega_real,
    const green_function<alps::RealObsevaluator> &G_omega_imag) const;*/
   virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
@@ -181,7 +182,7 @@ public:
   : FourierTransformer(beta, n_flavor, n_site)
   { 
     if (n_site%2!=0 && h!=0) 
-      boost::throw_exception(std::logic_error("FourierTransformer: cannot handle antiferromagnetism with uneven cluster size\n"));
+      boost::throw_exception(std::logic_error("FourierTransformer: cannot handle antiferromagnetism with odd cluster size\n"));
     for(int f=0; f<n_flavor; f++) {
       int s = f % 2 ? -1 : 1;
       for(int i=0; i<n_site; i++) {
@@ -349,20 +350,20 @@ public:
     }
   }
   
-  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) {
+  virtual void time_to_frequency_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) {
     std::cout<<"implement 2nd derivatives for F function before using this!"<<std::endl;
-    FourierTransformer::forward_ft(G_tau, G_omega);
+    FourierTransformer::time_to_frequency_ft(G_tau, G_omega);
   }
   
-  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega){
-    FourierTransformer::backward_ft(G_tau, G_omega);
+  virtual void frequency_to_time_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega){
+    FourierTransformer::frequency_to_time_ft(G_tau, G_omega);
     std::cout<<"correcting for F function"<<std::endl;
     for(unsigned int j=0;j<G_tau.nflavor();++j){
       G_tau(G_tau.ntime()-1,j)=-epsilonsq_av_-G_tau(0,j);
     }
   }
   
-  /*  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
+  /*  virtual void frequency_to_time_ft(green_function<alps::RealObsevaluator> &G_tau, 
    const green_function<alps::RealObsevaluator> &G_omega_real,
    const green_function<alps::RealObsevaluator> &G_omega_imag) const{
    
@@ -401,15 +402,15 @@ public:
     }
   }
   
-  virtual void forward_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) 
+  virtual void time_to_frequency_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) 
   {
     std::cout<<"implement 2nd derivatives for F function before using this!"<<std::endl;
-    FourierTransformer::forward_ft(G_tau, G_omega);
+    FourierTransformer::time_to_frequency_ft(G_tau, G_omega);
   }
   
-  virtual void backward_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) ;
+  virtual void frequency_to_time_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) ;
   
-  /*  virtual void backward_ft(green_function<alps::RealObsevaluator> &G_tau, 
+  /*  virtual void frequency_to_time_ft(green_function<alps::RealObsevaluator> &G_tau, 
    const green_function<alps::RealObsevaluator> &G_omega_real,
    const green_function<alps::RealObsevaluator> &G_omega_imag) const
    {

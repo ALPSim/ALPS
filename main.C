@@ -211,31 +211,48 @@ int main(int argc, char** argv)
           selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);        
         }else{
 #ifdef RUBTSOV
-        alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> half_fill_rubtsov_factory; 
-        alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory;
+          alps::scheduler::BasicFactory<RubtsovSim,HalfFillingHubbardRubtsovRun> half_fill_rubtsov_factory; 
+          alps::scheduler::BasicFactory<RubtsovSim,HubbardRubtsovRun> rubtsov_factory;
 #endif
-        //perform self consistency loop in Matsubara frequency omega
-        // all gfs are formulated in k-space and are diagonal in k! 
-        boost::shared_ptr<DCATransformer> transform_ptr;
-        DCATransformer::generate_transformer(parms, transform_ptr);
-        boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
+          //perform self consistency loop in Matsubara frequency omega
+          // all gfs are formulated in k-space and are diagonal in k! 
+          boost::shared_ptr<DCATransformer> transform_ptr;
+          DCATransformer::generate_transformer(parms, transform_ptr);
+          boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
 #ifdef RUBTSOV
-        if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="1")){
-          std::cout<<"using Rubtsov Solver for half filling"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(half_fill_rubtsov_factory,argc,argv));
-        }
-        else if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="2")){
-          std::cout<<"using Rubtsov Solver"<<std::endl;
-          solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory,argc,argv));
-        }
-        else{
+          if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="1")){
+            std::cout<<"using Rubtsov Solver for half filling"<<std::endl;
+            solver_ptr.reset(new alps::ImpuritySolver(half_fill_rubtsov_factory,argc,argv));
+          }
+          else if (parms["SOLVER"]=="Rubtsov" && (parms.value_or_default("FLAVORS", "2")=="2")){
+            std::cout<<"using Rubtsov Solver"<<std::endl;
+            solver_ptr.reset(new alps::ImpuritySolver(rubtsov_factory,argc,argv));
+          }
+          else{
 #endif
+            std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
+            solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+#ifdef RUBTSOV
+          }
+#endif
+          selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);
+        }
+      }else if (parms["CLUSTER_LOOP"]=="CDMFT") {
+        if(parms.defined("NAMBU") && parms["NAMBU"]){
+          std::cout<<"preparing a NAMBU DMFT calculation"<<std::endl;
+          boost::shared_ptr<CDMFTTransformer> transform_ptr;
+          CDMFTTransformer::generate_transformer(parms, transform_ptr);
+          boost::shared_ptr<NambuImpuritySolver> solver_ptr;	
+          std::cout<<"setting up external NAMBU solver: "<<parms["SOLVER"]<<std::endl;
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+          selfconsistency_loop_CDMFT(parms, *solver_ptr, *transform_ptr);        
+        }else{
+          boost::shared_ptr<CDMFTTransformer> transform_ptr;
+          CDMFTTransformer::generate_transformer(parms, transform_ptr);
+          boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
           std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
           solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
-#ifdef RUBTSOV
-        }
-#endif
-        selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);
+          selfconsistency_loop_CDMFT(parms, *solver_ptr, *transform_ptr);
         }
       }
       else {

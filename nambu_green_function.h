@@ -1,6 +1,6 @@
 #ifndef nambu_green_function_H
 #define nambu_green_function_H
-#include "DMFT/types.h"
+#include "types.h"
 #include <fstream>
 #include <iomanip>
 #include <cstdlib>

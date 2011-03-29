@@ -126,13 +126,13 @@ green_tau(N+1, n_site, 2)
     matsubara_green_function_t bare_green_matsubara_k_space(bare_green_matsubara);
     SimpleDCATransformer clusterhandler(parms);
     bare_green_matsubara = clusterhandler.transform_into_real_space(bare_green_matsubara_k_space);
-    fourier_ptr->backward_ft(bgf_sc_convention_k, bare_green_matsubara_k_space);
+    fourier_ptr->frequency_to_time_ft(bgf_sc_convention_k, bare_green_matsubara_k_space);
     std::ofstream bgfsccks("/tmp/bgfsccks");
     std::ofstream bgmks("/tmp/bgmks");
     bgfsccks<<std::make_pair(bgf_sc_convention_k,beta)<<std::endl;
     bgmks<<std::make_pair(bare_green_matsubara_k_space,beta)<<std::endl;
   } 
-  fourier_ptr->backward_ft(bare_green_tau, bare_green_matsubara);
+  fourier_ptr->frequency_to_time_ft(bare_green_tau, bare_green_matsubara);
   //std::cout<<"bgf sc convention: "<<bgf_sc_convention<<std::endl;
   std::ofstream bgfsccrs("/tmp/bgfsccrs");
   bgfsccrs<<std::make_pair(bare_green_tau,beta)<<std::endl;
@@ -393,7 +393,7 @@ void HirschFyeSim::get_result() {
   }
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
-  fourier_ptr->forward_ft(green_result, green_result_matsubara);
+  fourier_ptr->time_to_frequency_ft(green_result, green_result_matsubara);
   alps::hdf5::oarchive ar(parms["OUTFILE"]);
   green_result.write_hdf5(ar, "/G_tau");
   green_result_matsubara.write_hdf5(ar, "/G_omega");
