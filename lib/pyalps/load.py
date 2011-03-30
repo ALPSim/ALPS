@@ -59,7 +59,10 @@ def log(m):
 def parse_label(label):
     if '--' in label:
       vals = label.rsplit('--')
-      return (eval(vals[0]),eval(vals[1]))
+      ret = ()
+      for val in vals:
+          ret = ret + (eval(val),)
+      return ret
     else:
       return eval(str(label))
  
