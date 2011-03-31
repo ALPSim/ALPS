@@ -1,0 +1,11 @@
+Query 1: Please change the sentence to: 'Because TEBD produces wavefunctions, a wide array of observables can be computed including local quantities, two-point correlation functions, entanglement measures, and overlaps between states at differenr times.'
+
+Query 3: ?
+
+Query 6: Please change to: 'One can also deplete the lattice by removing a fraction of sites or bonds randomly from a lattice.'
+
+Ref 69: The complete reference is IEEE Visualization 2005, Proceedings, p. 135-142.
+
+Additional changes:
+
+Please remove the dots in the verbatim commands in Section C.3, as these are commands that have to be typed in literally and the additional dot will most likely create confusion.
