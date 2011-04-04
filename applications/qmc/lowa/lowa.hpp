@@ -50,12 +50,12 @@
 #include "band_structure_calculations/band_structure_calculations_BHM.h"
 
 #include <alps/scheduler/montecarlo.h>
+
 #include <iostream>
 #include <iomanip>
 #include <time.h>
 #include <sstream>
 #include <fstream>
-#include <alps/hdf5.hpp>
 #include <vector>
 #include <valarray>
 #include <list>

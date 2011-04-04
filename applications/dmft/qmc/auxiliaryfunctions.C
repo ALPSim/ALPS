@@ -277,7 +277,7 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   if (shape==diagonal)
     print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
   
-  alps::hdf5::oarchive ar(basename+".h5");
+  alps::hdf5::archive ar(basename+".h5", alps::hdf5::archive::WRITE);
   //writeout into hf5 file, using /simulation/iteration/ path
   std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
   G_tau.write_hdf5_ss(ar,basepath.str()+"G_tau");
@@ -387,9 +387,9 @@ std::ostream &operator<<(std::ostream &os, const U_matrix &U){
   os<<"]"<<std::endl;
   return os;
 }
-/*alps::hdf5::oarchive& alps::hdf5::serialize(alps::hdf5::oarchive& ar, const std::string& basepath, const matsubara_green_function_t &gf){
+/*alps::hdf5::archive& alps::hdf5::save(alps::hdf5::archive& ar, const std::string& basepath, const matsubara_green_function_t &gf){
  std::cout<<"trying to store gf to: "<<basepath<<std::endl;
  }
- alps::hdf5::oarchive& alps::hdf5::serialize(alps::hdf5::oarchive& ar, const std::string& basepath, const itime_green_function_t&gf){
+ alps::hdf5::archive& alps::hdf5::save(alps::hdf5::archive& ar, const std::string& basepath, const itime_green_function_t&gf){
  std::cout<<"trying to store gf to: "<<basepath<<std::endl;
  }*/

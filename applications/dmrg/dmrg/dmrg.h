@@ -47,10 +47,7 @@
 #define DMRG_VERSION "1.0.0"
 #define DMRG_DATE "2006/10/02"
 
-#ifdef ALPS_HAVE_HDF5
-#include <alps/hdf5.hpp>
-#endif
-
+#include <alps/ngs/mchdf5.hpp>
 
 template<class value_type>
 class DMRGTask 
@@ -77,9 +74,7 @@ public:
        << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
   }
 
-#ifdef ALPS_HAVE_HDF5
-  void serialize(alps::hdf5::oarchive &) const;
-#endif
+  void save(alps::hdf5::archive &) const;
 
   // iteration measurements
   std::map<std::string,std::vector<double> > iteration_measurements;
@@ -515,9 +510,9 @@ DMRGTask<value_type>::save_results()
     
 #ifdef ALPS_HAVE_HDF5
 template<class value_type>
-void DMRGTask<value_type>::serialize(alps::hdf5::oarchive & ar) const
+void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
 {
-  alps::scheduler::Task::serialize(ar);
+  alps::scheduler::Task::save(ar);
   typename std::map<std::string,std::vector<value_type> >::const_iterator it = this->average_values.find("Energy");
   if (it != this->average_values.end()) {
     std::vector<double> energies = alps::numeric::real(it->second);

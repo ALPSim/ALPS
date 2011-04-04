@@ -31,7 +31,7 @@ int main(int argc, char** argv) {
   alps::oxstream os(std::cout);
   os << alps::start_tag("CLONES");
   for (int i = 1; i < argc; ++i) {
-    alps::hdf5::iarchive ar(argv[i]);
+    alps::hdf5::archive ar(argv[i]);
     alps::Parameters params;
     alps::clone_info info;
     ar >> make_pvp("/parameters", params)

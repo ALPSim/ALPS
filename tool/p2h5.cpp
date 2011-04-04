@@ -27,7 +27,7 @@
 
 /* $Id: abstract_task.C 3822 2010-01-30 22:02:39Z troyer $ */
 
-#include <alps/hdf5.hpp>
+#include <alps/ngs/mchdf5.hpp>
 #include <alps/parameter.h>
 
 #include <iostream>
@@ -37,6 +37,6 @@ int main(int argc, char **argv) {
         throw std::invalid_argument("no name passed");
     alps::Parameters parms;
     std::cin >> parms;
-    alps::hdf5::oarchive ar(argv[1]);
+    alps::hdf5::archive ar(argv[1], alps::hdf5::archive::WRITE);
     ar << make_pvp("/parameters", parms);
 }

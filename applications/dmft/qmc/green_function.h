@@ -35,7 +35,11 @@
 #include <stdexcept>
 #include <cassert>
 #include <cstdlib>
-#include <alps/hdf5.hpp>
+
+#include <alps/ngs/mchdf5.hpp>
+#include <alps/ngs/mchdf5/pointer.hpp>
+#include <alps/ngs/mchdf5/complex.hpp>
+
 #ifdef USE_MPI
 #include <mpi.h>
 #endif 
@@ -116,7 +120,7 @@ public:
   inline const unsigned int &nfreq()const{return nt_;} //nfreq is an alias to ntime - more intuitive use for Matsubara GF
   void read(const char *filename);
   void write(const char *filename) const;
-  void write_hdf5(alps::hdf5::oarchive &ar, const std::string &path) const{
+  void write_hdf5(alps::hdf5::archive & ar, const std::string &path) const{
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
@@ -132,7 +136,7 @@ public:
       }
     }
   }
-  void write_hdf5_ss(alps::hdf5::oarchive &ar, const std::string &path) const{
+  void write_hdf5_ss(alps::hdf5::archive &ar, const std::string &path) const{
     if(ns_!=1) throw std::runtime_error("single site hdf5 write function called for multisite Green's function");
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/nf",nf_);

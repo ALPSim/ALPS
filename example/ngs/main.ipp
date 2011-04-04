@@ -49,8 +49,8 @@ int main(int argc, char *argv[]) {
             std::cout << "Correlations:         " << short_print(results["Correlations"]) << std::endl;
             std::cout << "Sign:                 " << short_print(results["Sign"]) << std::endl;
             std::cout << "Correlations / Sign:  " << short_print(results["Correlations"] / results["Sign"]) << std::endl;
-//            std::cout << "Sign / Correlations:  " << short_print(results["Sign"] / results["Correlations"]) << std::endl;
-//            std::cout << "Sign / Correlations:  " << short_print(1. / results["Correlations"] * results["Sign"]) << std::endl;
+            std::cout << "Sign / Correlations:  " << short_print(results["Sign"] / results["Correlations"]) << std::endl;
+            std::cout << "                      " << short_print(1. / results["Correlations"] * results["Sign"]) << std::endl;
         }
         save_results(results, params, options.output_file, "/simulation/results");
     } else if(options.valid && options.type == alps::mcoptions::MPI) {

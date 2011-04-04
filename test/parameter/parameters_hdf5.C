@@ -41,12 +41,12 @@ try {
   alps::Parameters params(std::cin);
   std::cout << params;
   {
-    alps::hdf5::oarchive h5(file);
+    alps::hdf5::archive h5(file, alps::hdf5::archive::WRITE);
     h5 << make_pvp("/parameters", params);
   }
   params.clear();
   {
-    alps::hdf5::iarchive h5(file);
+    alps::hdf5::archive h5(file, alps::hdf5::archive::WRITE);
     h5 >> make_pvp("/parameters", params);
   }
   std::cout << params;
