@@ -36,9 +36,9 @@
 #include <cassert>
 #include <cstdlib>
 
-#include <alps/ngs/mchdf5.hpp>
-#include <alps/ngs/mchdf5/pointer.hpp>
-#include <alps/ngs/mchdf5/complex.hpp>
+#include <alps/hdf5.hpp>
+#include <alps/hdf5/pointer.hpp>
+#include <alps/hdf5/complex.hpp>
 
 #ifdef USE_MPI
 #include <mpi.h>

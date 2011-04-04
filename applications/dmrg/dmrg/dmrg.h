@@ -47,7 +47,7 @@
 #define DMRG_VERSION "1.0.0"
 #define DMRG_DATE "2006/10/02"
 
-#include <alps/ngs/mchdf5.hpp>
+#include <alps/hdf5.hpp>
 
 template<class value_type>
 class DMRGTask 
