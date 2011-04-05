@@ -32,3 +32,10 @@ write HDF5 files
 
 from pyhdf5_c import *
 
+class iArchive(archive):
+    def __init__(self, filename):
+        archive.__init__(self, filename, 0)
+
+class oArchive(archive):
+    def __init__(self, filename):
+        archive.__init__(self, filename, 1)
