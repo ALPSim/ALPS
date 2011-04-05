@@ -119,7 +119,7 @@ green_tau(N+1, n_site, 2)
   itime_green_function_t bgf_sc_convention_k(N+1,n_site, 2); //bare green function in k_space
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
-  alps::hdf5::iarchive ar(parms["INFILE"]);
+  alps::hdf5::archive ar(parms["INFILE"], alps::hdf5::archive::READ);
   bare_green_matsubara.read_hdf5(ar, "/G0");
   
   if (n_site > 1) {
@@ -394,7 +394,7 @@ void HirschFyeSim::get_result() {
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->time_to_frequency_ft(green_result, green_result_matsubara);
-  alps::hdf5::oarchive ar(parms["OUTFILE"]);
+  alps::hdf5::archive ar(parms["OUTFILE"], alps::hdf5::archive::WRITE);
   green_result.write_hdf5(ar, "/G_tau");
   green_result_matsubara.write_hdf5(ar, "/G_omega");
 }

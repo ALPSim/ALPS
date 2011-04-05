@@ -4,9 +4,9 @@ include(${ALPS_USE_FILE})
 
 project (DMFT)
 #include_directories("/home/esg/alps_svn/")
-include_directories("/Users/emanuel/alps_svn/")
-include_directories("/opt/local/include")
-#include_directories("/cluster/home/phys/gullc/alps_svn")
+#include_directories("/Users/emanuel/alps_svn/")
+#include_directories("/opt/local/include")
+include_directories("/cluster/home/phys/gullc/alps_svn")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -march=core2 -O3 -DUSE_MPI -DNDEBUG")
 
 link_directories("/opt/local/lib")
@@ -33,15 +33,15 @@ auxiliaryfunctions.C externalsolver.C hirschfyesim.C main.C
 ../DMFT-solvers/Rubtsov/rubtsov_fourpoint.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_observables.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_selfenergy.cpp)
-add_executable(energy ../DMFT-solvers/Rubtsov/energy.cpp
-../DMFT-Solvers/Rubtsov/obs_auxiliary.cpp clustertransformer.C
-hilberttransformer.C clusterhelper.C fouriertransform.C 2dsimpson.C
-auxiliaryfunctions.C
-)
+#add_executable(energy ../DMFT-solvers/Rubtsov/energy.cpp
+#../DMFT-Solvers/Rubtsov/obs_auxiliary.cpp clustertransformer.C
+#hilberttransformer.C clusterhelper.C fouriertransform.C 2dsimpson.C
+#auxiliaryfunctions.C
+#)
 add_executable(sigma_interpolate sigma_interpolate.C
 auxiliaryfunctions.C clustertransformer.C clusterhelper.C
 fouriertransform.C)
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
-target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
+#target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
 ${LAPACK_LIBRARY} gsl pthread)

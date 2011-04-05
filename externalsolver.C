@@ -68,7 +68,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
   
   // write input file
   {
-    alps::hdf5::oarchive solver_input(infile);
+    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
     solver_input<<alps::make_pvp("/parameters",p);
     G0.write_hdf5(solver_input, "/G0");
   } 
@@ -81,7 +81,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
   unsigned int flavors   =(unsigned int)p.value_or_default("FLAVORS", 2);
   itime_green_function_t g(N+1, sites, flavors);
   {
-    alps::hdf5::iarchive ar(outfile);
+    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     g.read_hdf5(ar, "/G0");
   }
   boost::filesystem::remove(boost::filesystem::complete(outfile));
@@ -105,7 +105,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   p["INFILE"]=infile;
   p["OUTFILE"]=outfile;
   {
-    alps::hdf5::oarchive solver_input(infile);
+    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
   }
@@ -119,7 +119,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
   {
-    alps::hdf5::iarchive ar(outfile);
+    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
   }
@@ -166,7 +166,7 @@ NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
   p["INFILE"]=infile;
   p["OUTFILE"]=outfile;
   {
-    alps::hdf5::oarchive solver_input(infile);
+    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
   }
@@ -180,7 +180,7 @@ NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
   nambu_matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital, nondiagonal);
   nambu_itime_green_function_t G_tau(n_tau+1, n_site, n_orbital, nondiagonal);
   {
-    alps::hdf5::iarchive ar(outfile);
+    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
   }

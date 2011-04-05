@@ -6,6 +6,8 @@
 #include <cstdlib>
 #include <iostream>
 #include <alps/hdf5.hpp>
+#include <alps/hdf5/pointer.hpp>
+#include <alps/hdf5/complex.hpp>
 
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
@@ -66,7 +68,7 @@ public:
   
   void read(const char *filename);
   void write(const char *filename);
-  void write_hdf5(alps::hdf5::oarchive &ar, const std::string &path) const{
+  void write_hdf5(alps::hdf5::archive &ar, const std::string &path) const{
     ar<<alps::make_pvp(path+"/nt",nt_);
     ar<<alps::make_pvp(path+"/ns",ns_);
     ar<<alps::make_pvp(path+"/nf",nf_);
@@ -74,7 +76,7 @@ public:
     std::cout<<path<<" nt: "<<nt_<<" new: "<<nt_<<" ns: "<<ns_<<" "<<ns_<<" nf: "<<nf_<<" "<<nf_<<" total size should be: "<<nt_*ns_*ns_*nf_*nf_<<std::endl;
     ar<<alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
   }
-  void read_hdf5(alps::hdf5::iarchive &ar, const std::string &path) {
+  void read_hdf5(alps::hdf5::archive &ar, const std::string &path) {
     unsigned int nt, ns, nf;
     clear();
     ar>>alps::make_pvp(path+"/nt",nt);

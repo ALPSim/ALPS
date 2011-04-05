@@ -43,6 +43,7 @@ namespace alps{
 template <class T> class SimpleObservableEvaluator;
 typedef class SimpleObservableEvaluator<double> RealObsevaluator;
 }
+typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_dense_matrix;
 
 
 class ClusterHelper: private alps::graph_helper<alps::graph_helper<>::graph_type>
