@@ -4,7 +4,7 @@ include(${ALPS_USE_FILE})
 
 project (DMFT)
 #include_directories("/home/esg/alps_svn/")
-#include_directories("/Users/emanuel/alps_svn/")
+include_directories("/Users/emanuel/alps_svn/")
 #include_directories("/opt/local/include")
 include_directories("/cluster/home/phys/gullc/alps_svn")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -march=core2 -O3 -DUSE_MPI -DNDEBUG")

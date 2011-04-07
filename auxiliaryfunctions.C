@@ -31,7 +31,7 @@
 #include "green_function.h"
 #include "nambu_green_function.h"
 #include "U_matrix.h"
-#include "blas_classes/general_matrix.h"
+#include <blas_classes/general_matrix.h>
 #include <fstream>
 #include <sstream>
 #include <math.h>

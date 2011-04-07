@@ -212,9 +212,9 @@ void FourierTransformer::time_to_frequency_ft(const itime_green_function_t & gta
   int N_omega = v_omega.size();
   double dt = beta_/N;
   
-  for(uint f=0;f<gtau.nflavor();++f){
-    for(uint p=0;p<gtau.nsite();++p){
-      for(uint q=0;q<gtau.nsite();++q){
+  for(unsigned int f=0;f<gtau.nflavor();++f){
+    for(unsigned int p=0;p<gtau.nsite();++p){
+      for(unsigned int q=0;q<gtau.nsite();++q){
         for(int tau=0;tau<Np1;++tau){
           v[tau]=gtau(tau,p,q,f);
         }
@@ -251,10 +251,10 @@ void FourierTransformer::time_to_frequency_ft(const nambu_itime_green_function_t
   int N_omega = v_omega.size();
   double dt = beta_/N;
   
-  for(uint f1=0;f1<gtau.nflavor();++f1){
-    for(uint f2=0;f2<gtau.nflavor();++f2){
-      for(uint p=0;p<gtau.nsite();++p){
-        for(uint q=0;q<gtau.nsite();++q){
+  for(unsigned int f1=0;f1<gtau.nflavor();++f1){
+    for(unsigned int f2=0;f2<gtau.nflavor();++f2){
+      for(unsigned int p=0;p<gtau.nsite();++p){
+        for(unsigned int q=0;q<gtau.nsite();++q){
           for(int tau=0;tau<Np1;++tau){
             v[tau]=gtau(tau,p,q,f1,f2);
           }
