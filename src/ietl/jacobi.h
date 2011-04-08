@@ -243,9 +243,22 @@ namespace ietl
             Ktmp(i,i) -= theta;
         
         // define variables for LAPACK
-        char uplo='U'; fortran_int_t n=n_; fortran_int_t nrhs=1; fortran_int_t lda=n; fortran_int_t ipiv[n]; fortran_int_t ldb=n; fortran_int_t lwork=n*n; scalar_type work[lwork]; 
+        char uplo='U';
+        fortran_int_t n=n_;
+        fortran_int_t nrhs=1;
+        fortran_int_t lda=n;
+        fortran_int_t ldb=n;
+        fortran_int_t lwork=n*n;
         fortran_int_t info;
-        
+#ifndef __FCC__VERSION
+        fortran_int_t ipiv[n];
+        scalar_type work[lwork]; 
+#else
+        fortran_int_t *ipiv;
+        ipiv = new fortran_int_t[n];
+        scalar_type *work; 
+        work = new scalar_type[lwork]; 
+#endif        
         // Solve u_hat from K*u_hat = u,  mu = u^star * u_hat
         ietl::copy(u,u_hat);
         sysv(uplo, n, nrhs, Ktmp.data(), lda, ipiv, u_hat.data(), ldb, work, lwork, info);
@@ -280,6 +293,9 @@ namespace ietl
             if ( ietl::two_norm(vec2) < rel_tol * std::abs(norm) )
                 break;
         }
+#ifdef __FCC_VERSION
+        delete [] ipiv, work;
+#endif        
     }
     
     // C L A S S :   J A C O B I _ D A V I D S O N ////////////////////////////////////
@@ -398,11 +414,33 @@ namespace ietl
             il = iu = n;
         else
             il = iu = 1;
-        fortran_int_t m;             double w[n];      double z[n];
-        fortran_int_t ldz=n;         fortran_int_t lwork=8*n;    double work[lwork];
-        fortran_int_t iwork[5*n];    fortran_int_t ifail[n];     fortran_int_t info;
+        fortran_int_t m;
+        fortran_int_t ldz=n;
+        fortran_int_t lwork=8*n;
+        fortran_int_t info;
         double vl, vu;
+#ifndef __FCC_VERSION
+        double w[n];
+        double z[n];
+        double work[lwork];
+        fortran_int_t iwork[5*n];
+        fortran_int_t ifail[n];
+#else
+        double *w;
+        w = new double[n];
+        double *z;
+        z = new double[n];
+        double *work;
+        work = new double[lwork];
+        fortran_int_t *iwork;
+        iwork = new fortran_int_t[5*n];
+        fortran_int_t *ifail;
+        ifail = new fortran_int_t[n];
+#endif
         LAPACK_DSYEVX(&jobz, &range, &uplo, &n, M_.data(), &lda, &vl, &vu, &il, &iu, &abstol, &m, w, z, &ldz, work, &lwork, iwork, ifail, &info);
+#ifdef __FCC_VERSION
+        delete [] w, z, work, iwork, ifail;
+#endif
         theta = w[0];
         for (int i=0;i<n;i++)
             s[i] = z[i];
@@ -423,11 +461,36 @@ namespace ietl
             il = iu = n;
         else
             il = iu = 1;
-        fortran_int_t m;             double w[n];      std::complex<double> z[n];
-        fortran_int_t ldz=n;         fortran_int_t lwork=8*n;    std::complex<double> work[lwork];
-        fortran_int_t iwork[5*n];    fortran_int_t ifail[n];     fortran_int_t info; 
-        double vl, vu;     double rwork[7*n];
+        fortran_int_t m;
+        fortran_int_t ldz=n;
+        fortran_int_t lwork=8*n;
+        fortran_int_t info; 
+        double vl, vu;
+#ifndef __FCC_VERSION
+        double w[n];
+        std::complex<double> z[n];
+        std::complex<double> work[lwork];
+        fortran_int_t iwork[5*n];
+        fortran_int_t ifail[n];
+        double rwork[7*n];
+#else
+        double *w;
+        w = new double[n];
+        std::complex<double> *z;
+        z = new std::complex<double>[n]
+        std::complex<double> *work;
+        work = new std::complex<double>[lwork];
+        fortran_int_t *iwork;
+        iwork = new fortran_int_t[5*n];
+        fortran_int_t *ifail;
+        ifail = new fortran_int_t[n];
+        double *rwork;
+        rwork = new double[7*n];
+#endif
         LAPACK_ZHEEVX(&jobz, &range, &uplo, &n, M_.data(), &lda, &vl, &vu, &il, &iu, &abstol, &m, w, z, &ldz, work, &lwork, rwork, iwork, ifail, &info);
+#ifdef __FCC_VERSION
+        delete [] w, z, work, iwork, ifail, rwork;
+#endif        
         theta = w[0];
         for (int i=0;i<n;i++)
             s[i] = z[i];
@@ -435,4 +498,3 @@ namespace ietl
     
 }
 #endif
-
