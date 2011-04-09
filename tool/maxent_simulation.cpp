@@ -53,7 +53,7 @@ MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::file
   const double alpha_min = parms["ALPHA_MIN"];
   const double alpha_max = parms["ALPHA_MAX"];
   alpha[0] = alpha_max;
-  for (int a=1; a<alpha.size(); ++a) 
+  for (std::size_t a=1; a<alpha.size(); ++a) 
     alpha[a] =  alpha[a-1] * std::pow(alpha_min/alpha_max, 1./double(alpha.size()-1));
 }
 
@@ -73,12 +73,12 @@ void MaxEntSimulation::dostep()
   vector_type chi_sq(alpha.size());
   std::vector<vector_type> spectra(alpha.size());
   vector_type u = transform_into_singular_space(Default());
-  for (int a=0; a<alpha.size(); ++a) {
+  for (std::size_t a=0; a<alpha.size(); ++a) {
     std::cerr << "alpha it: " << a << "\t";
     u = levenberg_marquardt(u, alpha[a]);
     vector_type A = get_spectrum(u);
     std::cerr << "norm: " << boost::numeric::ublas::sum(transform_into_real_space(u)) << "\t";
-    for (int i=0; i<A.size(); ++i) 
+    for (std::size_t i=0; i<A.size(); ++i) 
       spex_str << alpha[a] << " " << omega_coord(i) << " " << A[i] << "\n";
     spex_str << "\n";
     lprob[a] = log_prob(u, alpha[a]);
@@ -88,11 +88,11 @@ void MaxEntSimulation::dostep()
     std::cerr << "chi2  : " << chi_squared << std::endl;
   }
   spex_str << "\n";
-  for (int a=0; a<chi_sq.size(); ++a) 
+  for (std::size_t a=0; a<chi_sq.size(); ++a) 
     chisq_str << alpha[a] << " " << chi_sq[a] << std::endl;
   int a_chi = 0;
   double diff = std::abs(chi_sq[0]-ndat());
-  for (int a=1; a<chi_sq.size(); ++a) {
+  for (std::size_t a=1; a<chi_sq.size(); ++a) {
     double diff_new = std::abs(chi_sq[a]-ndat());
     if (diff_new < diff) {
       diff = diff_new;
@@ -100,35 +100,35 @@ void MaxEntSimulation::dostep()
     }
   }
   vector_type def = get_spectrum(transform_into_singular_space(Default()));
-  for (int i=0; i<spectra[0].size(); ++i) 
+  for (std::size_t i=0; i<spectra[0].size(); ++i) 
     chispec_str << omega_coord(i) << " " << spectra[a_chi][i]*norm << " " << def[i]*norm << std::endl;
   boost::numeric::ublas::vector<double>::const_iterator max_lprob = std::max_element(lprob.begin(), lprob.end());  
   const int max_a = max_lprob-lprob.begin();
   const double factor = chi_scale_factor(spectra[max_a], chi_sq[max_a], alpha[max_a]);
   std::cerr << "chi scale factor: " << factor << std::endl;
-  for (int i=0; i<spectra[0].size(); ++i) 
+  for (std::size_t i=0; i<spectra[0].size(); ++i) 
     maxspec_str << omega_coord(i) << " " << spectra[max_a][i]*norm << " " << def[i]*norm << std::endl;
   vector_type prob(lprob.size());
-  for (int a=0; a<prob.size(); ++a) 
+  for (std::size_t a=0; a<prob.size(); ++a) 
     prob[a] = exp(lprob[a]-*max_lprob);
   double probnorm = 0;
-  for (int a=0; a<prob.size()-1; ++a) 
+  for (std::size_t a=0; a<prob.size()-1; ++a) 
     probnorm += 0.5*(prob[a]+prob[a+1])*(alpha[a]-alpha[a+1]);
   prob /= probnorm;
-  for (int a=0; a<prob.size(); ++a) {
+  for (std::size_t a=0; a<prob.size(); ++a) {
     prob_str << alpha[a] << "\t" << prob[a] << "\n";
   }
   double postprobdef = 0;
-  for (int a=0; a<lprob.size()-1; ++a) 
+  for (std::size_t a=0; a<lprob.size()-1; ++a) 
     postprobdef += 0.5*(exp(lprob[a])+exp(lprob[a+1]))*(alpha[a]-alpha[a+1]);
   std::cout << "posterior probability of the default model: " << postprobdef << std::endl;
   vector_type avspec(spectra[0].size());
-  for (int i=0; i<avspec.size(); ++i) {
+  for (std::size_t i=0; i<avspec.size(); ++i) {
     avspec[i] = 0.;
-    for (int a=0; a<prob.size()-1; ++a) 
+    for (std::size_t a=0; a<prob.size()-1; ++a) 
       avspec[i] += 0.5*(prob[a]*spectra[a][i] +prob[a+1]*spectra[a+1][i])*(alpha[a]-alpha[a+1]);
   }
-  for (int i=0; i<avspec.size(); ++i) 
+  for (std::size_t  i=0; i<avspec.size(); ++i) 
     avspec_str << omega_coord(i) << " " << avspec[i]*norm << " " << def[i]*norm << std::endl;
   finish();
 }
@@ -173,11 +173,11 @@ MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const d
 {
   using namespace boost::numeric;
   matrix_type M = left_side(u);
-  for (int i=0; i<M.size1(); ++i) 
+  for (std::size_t i=0; i<M.size1(); ++i) 
     M(i,i) += alpha + mu;
   vector_type b = right_side(u) + alpha*u;
   matrix_type B(b.size(),1);
-  for (int i=0; i<M.size1(); ++i) 
+  for (std::size_t i=0; i<M.size1(); ++i) 
     B(i,0) = -b[i];
   ublas::vector<fortran_int_t> ipiv(b.size());
   bindings::lapack::gesv(M, ipiv, B);

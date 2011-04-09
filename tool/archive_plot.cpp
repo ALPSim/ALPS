@@ -142,7 +142,7 @@ void write_result(std::string& buffer, std::string& bufferBody,
                   std::vector<unsigned int> const& foreachOffset) {
   std::string label;
   int p = table;
-  for (int v = 0; v < foreachData.size(); ++v, p %= foreachOffset[v-1]) {
+  for (std::size_t v = 0; v < foreachData.size(); ++v, p %= foreachOffset[v-1]) {
     if (label.size()) label += " ";
     label += foreachName[v] + "=" + foreachData[v][p / foreachOffset[v]];
   }
@@ -449,7 +449,7 @@ void Plot::exec(Node inNode, std::string inInFile) {
     for (int p = 0; p < num_plots; ++p) {
       std::string where = SQLWhere;
       int q = p;
-      for (int v = 0; v < foreachData.size(); ++v, q = q % foreachOffset[v-1]) {
+      for (std::size_t v = 0; v < foreachData.size(); ++v, q = q % foreachOffset[v-1]) {
         std::string name = foreachName[v];
         append_where(where, parameter_aliases[name] + ".name='" + SQLite::quote(name) + "'");
         append_where(where, parameter_aliases[name] + ".value='"

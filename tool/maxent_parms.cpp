@@ -252,7 +252,7 @@ MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
   bindings::lapack::gesvd('S','S',Kt, S, U_, Vt_); 
   std::cout << "# Singular values of the Kernel:\n";
   const double prec = sqrt(std::numeric_limits<double>::epsilon())*nfreq()*S[0];
-  for (int s=0; s<S.size(); ++s) 
+  for (unsigned int s=0; s<S.size(); ++s) 
     ns_ = (S[s] >= prec) ? s : ns_;
   if (ns() == 0) 
     boost::throw_exception(std::logic_error("all singular values smaller than the precision"));

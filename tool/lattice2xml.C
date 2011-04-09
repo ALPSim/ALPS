@@ -83,7 +83,7 @@ try {
         // crossing direction
         int bc_s = 0;
         int bc_t = 0;
-        for (int d = 0; d < lattice.dimension(); ++d) {
+        for (std::size_t d = 0; d < lattice.dimension(); ++d) {
           bc_s += (crossing.crosses(d) + 1) << (2*d);
           bc_t += (1- crossing.crosses(d)) << (2*d);
         }
@@ -92,7 +92,7 @@ try {
         alps::graph_helper<>::vector_type cord_s = lattice.coordinate(lattice.target(b));
         alps::graph_helper<>::vector_type cord_t = lattice.coordinate(lattice.source(b));
         alps::graph_helper<>::vector_type vec = lattice.bond_vector(b);
-        for (int d = 0; d < lattice.dimension(); ++d) {
+        for (std::size_t d = 0; d < lattice.dimension(); ++d) {
           cord_s[d] -= vec[d];
           cord_t[d] += vec[d];
         }
