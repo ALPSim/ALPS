@@ -330,7 +330,7 @@ namespace ietl
         std::vector<scalar_type> s(iter.max_iterations());
         std::vector<vector_type> V(iter.max_iterations());
         std::vector<vector_type> VA(iter.max_iterations());
-        int i,j;
+        unsigned int i,j;
         M.resize(iter.max_iterations(), iter.max_iterations());
         magnitude_type theta, tau;
         magnitude_type kappa = 0.25;
@@ -414,10 +414,12 @@ namespace ietl
             il = iu = n;
         else
             il = iu = 1;
+
         fortran_int_t m;
         fortran_int_t ldz=n;
         fortran_int_t lwork=8*n;
         fortran_int_t info;
+
         double vl, vu;
 #ifndef __FCC_VERSION
         double w[n];
@@ -442,6 +444,11 @@ namespace ietl
         delete [] w, z, work, iwork, ifail;
 #endif
         theta = w[0];
+		delete[] w;
+		delete[] z;
+		delete[] work;
+		delete[] iwork;
+		delete[] ifail;
         for (int i=0;i<n;i++)
             s[i] = z[i];
     }

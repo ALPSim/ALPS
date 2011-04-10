@@ -304,7 +304,7 @@ AbstractFitter::AbstractFitter(const std::string& fit_file_name)
     in >> fit_param;
   }
   // handle the time limit
-  long time_limit = static_cast<int64_t>
+  long time_limit = static_cast<boost::int64_t>
                (fit_param.value_or_default("TIME_LIMIT",-1l));
   start_time = boost::posix_time::second_clock::local_time();
   end_time = start_time + boost::posix_time::seconds(time_limit);
@@ -696,9 +696,9 @@ std::string AbstractFitter::print_to_file(alps::ParameterList list) const
   int bits = 31;
   for (int n = 1; n < list.size(); n<<=1, --bits);
 
-  uint32_t baseseed;
+  boost::uint32_t baseseed;
   if (list[0].defined("BASESEED")) {
-    baseseed = boost::lexical_cast<uint32_t>(list[0]["BASESEED"]);
+	  baseseed = boost::lexical_cast<boost::uint32_t>(list[0]["BASESEED"]);
   } else {
     baseseed =
       boost::posix_time::microsec_clock::local_time().time_of_day().

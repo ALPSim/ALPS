@@ -271,7 +271,7 @@ protected:
   const itime_index_t n_tau;                        //number of imag time slices
   const itime_t n_tau_inv;                        //the inverse of n_tau
   const frequency_t n_self;                        //number of self energy (W) binning points
-  const uint64_t mc_steps;                        
+  const boost::uint64_t mc_steps;                        
   const unsigned long therm_steps;                
   const unsigned int nruns;                      
   const double max_time_in_seconds;
