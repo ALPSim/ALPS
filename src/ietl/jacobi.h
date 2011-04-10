@@ -444,11 +444,6 @@ namespace ietl
         delete [] w, z, work, iwork, ifail;
 #endif
         theta = w[0];
-		delete[] w;
-		delete[] z;
-		delete[] work;
-		delete[] iwork;
-		delete[] ifail;
         for (int i=0;i<n;i++)
             s[i] = z[i];
     }

@@ -90,7 +90,7 @@ if (ALPS_USE_VISTRAILS)
   set(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING "Architectures to build ALPS for")
   set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5" CACHE STRING "OSX minimal deployment version")
   set(CPACK_OSX_PACKAGE_VERSION "10.5")
-  set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk" CACHE STRING "OSX minimal deployment SDK")
+#  set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk" CACHE STRING "OSX minimal deployment SDK")
 endif(ALPS_USE_VISTRAILS)
 
 # a workaround for Mac OS X's LLVM compiler
