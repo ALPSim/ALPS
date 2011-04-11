@@ -47,12 +47,8 @@
 #include <direct.h>
 #endif
 
-#ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
 #include "interaction_expansion/interaction_expansion.hpp"
-#endif
-#ifdef BUILD_DMFT_QMC_HYBRIDIZATION
 #include "hybridization/impurity.h"
-#endif
 
 
 
@@ -112,7 +108,6 @@ int main(int argc, char** argv)
           solver_ptr.reset(new alps::ImpuritySolver(factory,argc,argv));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
-#ifdef BUILD_DMFT_QMC_HYBRIDIZATION
         else if (parms["SOLVER"]=="Hybridization") {
           std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
           alps::scheduler::BasicFactory<HybridizationSimItime,HybridizationRun> factory;
@@ -120,7 +115,6 @@ int main(int argc, char** argv)
           itime_green_function_t G_tau = transform.initial_G0(parms);
           F_selfconsistency_loop(parms, *solver_ptr, G_tau);
         }
-#endif
         else {
             /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/*,boost::filesystem::native*/);
           
@@ -129,14 +123,10 @@ int main(int argc, char** argv)
         }
       } 
       else {
-#ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
         alps::scheduler::BasicFactory<InteractionExpansionSim,HalfFillingHubbardInteractionExpansionRun> interaction_expansion_factory_sshf;
         alps::scheduler::BasicFactory<InteractionExpansionSim,HubbardInteractionExpansionRun> interaction_expansion_factory_ss; 
         alps::scheduler::BasicFactory<InteractionExpansionSim,MultiBandDensityHubbardInteractionExpansionRun> interaction_expansion_factory_mbd; 
-#endif
-#ifdef BUILD_DMFT_QMC_HYBRIDIZATION
         alps::scheduler::BasicFactory<HybridizationSimFrequency,HybridizationRun> werner_factory;
-#endif
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
         if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
@@ -172,7 +162,6 @@ int main(int argc, char** argv)
           }
         }
         boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;  
-#ifdef BUILD_DMFT_QMC_INTERACTION_EXPANSION
         if ((parms["SOLVER"]=="Interaction Expansion") && (parms.value_or_default("FLAVORS", "2")=="1")){
           std::cout<<"using single site Hubbard solver for half filling"<<std::endl;
           solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_sshf,argc,argv));
@@ -186,14 +175,11 @@ int main(int argc, char** argv)
           solver_ptr.reset(new alps::ImpuritySolver(interaction_expansion_factory_mbd,argc,argv));
         }
         else
-#endif
-#ifdef BUILD_DMFT_QMC_HYBRIDIZATION
           if (parms["SOLVER"]=="Hybridization") {
             std::cout<<"Using Single Site Hybridization Expansion Solver"<<std::endl;
             solver_ptr.reset(new alps::ImpuritySolver(werner_factory,argc,argv));
           }
           else
-#endif
           {
               /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/*,boost::filesystem::native*/);
             solver_ptr.reset(new ExternalSolver(/*boost::filesystem::complete(*/p/*)*/));

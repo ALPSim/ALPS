@@ -39,7 +39,6 @@
 #include "solver.h"
 #include <boost/filesystem/path.hpp>
 #include <boost/filesystem/operations.hpp>
-#include <cstdio>
 
 /// @brief An impurity solver calling an external executable to solve the 
 ///        impurity problem
@@ -52,25 +51,29 @@
 ///
 
 class ExternalSolver 
-: public ImpuritySolver
-, public MatsubaraImpuritySolver 
+ : public ImpuritySolver
+ , public MatsubaraImpuritySolver 
 {
 public:
-  /// @param executable the path to the executable
-    ExternalSolver(const /*boost::filesystem::path&*/ std::string executable) 
-  : exe_(executable) {}
-  
-  ImpuritySolver::result_type solve(const itime_green_function_t& G0, const alps::Parameters& parms);
-  
-  MatsubaraImpuritySolver::result_type solve_omega(const matsubara_green_function_t& G0_omega, const alps::Parameters& parms =alps::Parameters());
-  
-private:
-  /// call the executable
-  void call(std::string const& infile, std::string const& outfile);
-  
-  ///path to the solver executable
-    /* boost::filesystem::path*/ std::string exe_;
+	/// @param executable the path to the executable
+	ExternalSolver(const boost::filesystem::path& executable) 
+    : exe_(boost::filesystem::complete(executable)) {}
+	
+	ImpuritySolver::result_type solve(
+              const itime_green_function_t& G0
+            , const alps::Parameters& parms);
+    
+    MatsubaraImpuritySolver::result_type solve_omega(
+              const matsubara_green_function_t& G0_omega
+            , const alps::Parameters& parms );
+    private:
+    /// call the executable
+    void call(std::string const& infile, std::string const& outfile);
+      
+	///path to the solver executable
+	boost::filesystem::path exe_;
 };
+
 
 
 #endif

@@ -1,11 +1,9 @@
-#  Copyright Matthias Troyer 2009 - 2010.
+#  cOPYRIGHT mATTHIAS tROYER 2009 - 2010.
 #  Distributed under the Boost Software License, Version 1.0.
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 if(LAPACK_FOUND)
-  set (BUILD_DMFT_QMC_INTERACTION_EXPANSION TRUE)
-  set (BUILD_DMFT_QMC_HYBRIDIZATION TRUE)
 
   set (DMFT_QMC_SOURCE
        externalsolver.C 
@@ -31,31 +29,41 @@ if(LAPACK_FOUND)
   set (DMFT_QMC_HYBRIDIZATION_SOURCE
        hybridization/impurity.C 
        hybridization/fourpoint.C)
+  set (DMFT_QMC_HYBRIDIZATION2_SOURCE
+       hybridization2/impurity.C 
+       fouriertransform.C
+       hybridization2/moves.C
+       hybridization2/update.C)
 
   set (DMFT_QMC_SOLVERS "")
-  if(BUILD_DMFT_QMC_INTERACTION_EXPANSION)
-    set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} interaction_expansion_impl)
-    add_library (interaction_expansion_impl STATIC ${DMFT_QMC_INTERACTION_EXPANSION_SOURCE})
-  endif(BUILD_DMFT_QMC_INTERACTION_EXPANSION)
-  if(BUILD_DMFT_QMC_HYBRIDIZATION)
-    set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} hybridization_impl)
-    add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
-  endif(BUILD_DMFT_QMC_HYBRIDIZATION)
+ 
+  #Interaction Expansion
+  set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} interaction_expansion_impl)
+  add_library (interaction_expansion_impl STATIC ${DMFT_QMC_INTERACTION_EXPANSION_SOURCE})
+  
+  #Hybridization Expansion
+  set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} hybridization_impl)
+  add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
+  
+  #Hybridization Expansion - separate solver
+  set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} hybridization2_impl)
+  add_library (hybridization2_impl STATIC ${DMFT_QMC_HYBRIDIZATION2_SOURCE})
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
-  add_definitions(${LAPACK_DEFINITIONS}
-                  -DBUILD_DMFT_QMC_INTERACTION_EXPANSION 
-                  -DBUILD_DMFT_QMC_HYBRIDIZATION) 
+  add_definitions(${LAPACK_DEFINITIONS} )
   include_directories(${PROJECT_SOURCE_DIR}/applications/dmft/qmc)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${LAPACK_LINKER_FLAGS}")
 
   add_executable(dmft main.C selfconsistency.C)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
+  add_executable(hybridization hybridization2/main.C)
 
   target_link_libraries(dmft dmft_qmc_impl  ${DMFT_QMC_SOLVERS})
   target_link_libraries(hirschfye dmft_qmc_impl)
+  target_link_libraries(hybridization dmft_qmc_impl hybridization2_impl)
   install(TARGETS dmft RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
+  install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
 else(LAPACK_FOUND)
   message(STATUS "dmft will not be built since the lapack library has not been found")
 endif(LAPACK_FOUND)

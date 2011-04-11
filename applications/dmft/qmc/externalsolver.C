@@ -2,7 +2,7 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005 - 2009 by Emanuel Gull <gull@phys.columbia.edu>
+ * Copyright (C) 2005 - 2010 by Emanuel Gull <gull@phys.columbia.edu>
  *                              Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
@@ -32,170 +32,128 @@
 /// @file externalsolver.C
 /// @brief implements the external solver
 /// @sa ExternalSolver
-
 #include "externalsolver.h"
-#include "xml.h"
-#include <alps/xml.h>
-#include <alps/parser/parser.h>
-#include <alps/utility/vectorio.hpp>
-#include <alps/utility/temporary_filename.hpp>
 #include <cstdlib>
 #include <fstream>
-#include <boost/tuple/tuple.hpp>
-
 #ifdef BOOST_MSVC
 #include <io.h>
 #endif
+#include "boost/tuple/tuple.hpp"
+#include "alps/parser/parser.h"
+#include "alps/utility/vectorio.hpp"
+#include "alps/utility/temporary_filename.hpp"
 
-ImpuritySolver::result_type ExternalSolver::solve(
-                                                  const itime_green_function_t& G0
-                                                  , const alps::Parameters& parms) 
+ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& G0, const alps::Parameters& parms) 
 {
-  std::string infile = alps::temporary_filename("alps_external_solver_");
-  std::string outfile = alps::temporary_filename("alps_external_solver_out_");
-  if(parms.defined("TMPNAME")){
-    infile=parms["TMPNAME"]+std::string(".in.xml");
-    outfile=parms["TMPNAME"]+std::string(".out.xml");
+  alps::Parameters p(parms);
+   BOOST_ASSERT(alps::is_master());
+  std::string infile;
+  std::string outfile; 
+  if(p.defined("TMPNAME")){
+    infile=p["TMPNAME"]+std::string(".in.h5");
+    outfile=p["TMPNAME"]+std::string(".out.h5");
+  } else{
+    infile= alps::temporary_filename("alps_external_solver_in_");
+    outfile= alps::temporary_filename("alps_external_solver_out_");
   }
-  boost::filesystem::path inpath(infile,boost::filesystem::native);
-  boost::filesystem::path outpath(outfile,boost::filesystem::native);
+  p["INFILE"]=infile;
+  p["OUTFILE"]=infile;
   
-  // write input XML file
+  // write input file
   {
-    alps::oxstream input(boost::filesystem::complete(inpath));
-    
-    input << alps::start_tag("SIMULATION") << parms;
-    input << alps::start_tag("G0");
-    write_itime(input,G0);
-    input << alps::end_tag("G0");
-    input << alps::end_tag("SIMULATION");
-    
-    // scope to force closing of file
-  }
+    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
+    solver_input<<alps::make_pvp("/parameters",p);
+    G0.write_hdf5(solver_input, "/G0");
+  } 
+  
   call(infile,outfile);
-  
+
   // read the output
-  unsigned int N=(unsigned int)parms["N"];
-  unsigned int sites     =(unsigned int)parms.value_or_default("SITES", 1);
-  unsigned int flavors   =(unsigned int)parms.value_or_default("FLAVORS", 2);
-  
+  unsigned int N=(unsigned int)p["N"];
+  unsigned int sites     =(unsigned int)p.value_or_default("SITES", 1);
+  unsigned int flavors   =(unsigned int)p.value_or_default("FLAVORS", 2);
   itime_green_function_t g(N+1, sites, flavors);
-  
   {
-    std::ifstream output(outfile.c_str());
-    alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
-    
-    // search for up and down spin Green's function
-    tag=alps::parse_tag(output);
-    while (tag.name != "GREENFUNCTION") {
-      if (tag.name=="/SIMULATION")
-        boost::throw_exception(std::runtime_error("Element <GREENFUNCTION> missing in output file"));
-      else
-        alps::skip_element(output,tag);
-      tag=alps::parse_tag(output);
-    }
-    
-    read_itime(output,g);	
-    
-  } // scope to force closing of file
-  
-  boost::filesystem::remove(boost::filesystem::complete(outpath));
-  
+    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
+    g.read_hdf5(ar, "/G0");
+  }
+  boost::filesystem::remove(boost::filesystem::complete(outfile));
   return g;
 }
 
-MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
-                                                                 const matsubara_green_function_t& G0_omega
-                                                                 , const alps::Parameters& parms)
+MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara_green_function_t& G0_omega, const alps::Parameters &parms)
 {
-  std::string infile = alps::temporary_filename("alps_external_solver_");
-  std::string outfile = alps::temporary_filename("alps_external_solver_out_");
-  if(parms.defined("TMPNAME")){
-    infile=parms["TMPNAME"]+std::string(".in.xml");
-    outfile=parms["TMPNAME"]+std::string(".out.xml");
+  alps::Parameters p(parms);
+  BOOST_ASSERT(alps::is_master());
+  std::string infile;
+  std::string outfile;
+  if(p.defined("TMPNAME")){
+    infile=p["TMPNAME"]+std::string(".in.h5");
+    outfile=p["TMPNAME"]+std::string(".out.h5");
+  } else{
+    infile= alps::temporary_filename("alps_external_solver_in_");
+    outfile= alps::temporary_filename("alps_external_solver_out_");
   }
-  boost::filesystem::path inpath(infile,boost::filesystem::native);
-  boost::filesystem::path outpath(outfile,boost::filesystem::native);
-  
-  // write input XML file
+  p["INFILE"]=infile;
+  p["OUTFILE"]=outfile;
   {
-    alps::oxstream input(boost::filesystem::complete(inpath));
-    
-    input << alps::start_tag("SIMULATION") << parms;
-    input << alps::start_tag("G0");
-    write_freq(input,G0_omega);
-    input << alps::end_tag("G0");
-    input << alps::end_tag("SIMULATION");
-    
-    // scope to force closing of file
+    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
+    solver_input<<alps::make_pvp("/parameters", p);
+    G0_omega.write_hdf5(solver_input, "/G0");
   }
-  
+
   call(infile,outfile);
-  
-  // read the output
-  
-  unsigned int n_matsubara=(unsigned int)parms["NMATSUBARA"];
-  unsigned int n_tau=(unsigned int)parms["N"];
-  unsigned int n_site     =(unsigned int)parms.value_or_default("SITES", 1);
-  unsigned int n_orbital  =(unsigned int)parms.value_or_default("FLAVORS", 2);
+
+  unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
+  unsigned int n_tau=(unsigned int)p["N"];
+  unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
+  unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
   {
-    std::ifstream output(outfile.c_str());
-    alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
-    // search for up and down spin Green's function
-    tag=alps::parse_tag(output);
-    while (tag.name != "GREENFUNCTION_OMEGA") {
-      if (tag.name=="/SIMULATION")
-        boost::throw_exception(std::runtime_error("Element <GREENFUNCTION_OMEGA> missing in output file"));
-      else
-        alps::skip_element(output,tag);
-      tag=alps::parse_tag(output);
+    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
+    G_omega.read_hdf5(ar, "/G_omega");
+    G_tau.read_hdf5(ar, "/G_tau");
+  }
+  //this is a safety check for impurity solvers.
+  for(std::size_t i=0;i<n_orbital; ++i){
+    for(std::size_t j=0;j<n_site;++j){
+      for(std::size_t k=0;k<n_site;++k){
+        for(std::size_t l=0;l<n_tau+1;++l){ 
+          if(std::isnan(G_tau(l,j,k,i)) || std::isinf(G_tau(l,j,k,i))) {
+            std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<i<<std::endl;
+            std::cerr<<G_tau(l,j,k,i)<<" "<<std::endl;
+            throw std::runtime_error("returned imag time Green's function contains nan or inf.");
+          }
+        }
+        for(std::size_t l=0;l<n_matsubara;++l){ 
+          if(std::isnan(G_omega(l,j,k,i).real()) || std::isnan(G_omega(l,j,k,i).imag())|| std::isinf(G_omega(l,j,k,i).real()) || std::isinf(G_omega(l,j,k,i).imag())) {
+            std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<i<<std::endl;
+            std::cerr<<G_omega(l,j,k,i).real()<<" "<<G_omega(l,j,k,i).imag()<<std::endl;
+            throw std::runtime_error("returned freq Green's function contains nan or inf.");
+          }
+        }
+      }
     }
-    read_freq(output,G_omega);	
-  } // scope to force closing of file
-  {
-    std::ifstream output(outfile.c_str());
-    alps::XMLTag tag=alps::parse_tag(output); // skip outermost element <SIMULATION>
-    
-    // search for up and down spin Green's function
-    tag=alps::parse_tag(output);
-    while (tag.name != "GREENFUNCTION_ITIME") {
-      if (tag.name=="/SIMULATION")
-        boost::throw_exception(std::runtime_error("Element <GREENFUNCTION_ITIME> missing in output file"));
-      else
-        alps::skip_element(output,tag);
-      tag=alps::parse_tag(output);
-    }
-    read_itime(output,G_tau);	
-  } // scope to force closing of file
-  
-  
-  boost::filesystem::remove(boost::filesystem::complete(outpath));
-  
+  }
+  boost::filesystem::remove(boost::filesystem::complete(outfile));
   return std::make_pair(G_omega, G_tau);
 }
 
 
-
 void ExternalSolver::call(std::string const& infile, std::string const& outfile)
 {
-  boost::filesystem::path inpath(infile,boost::filesystem::native);
-  boost::filesystem::path outpath(outfile,boost::filesystem::native);
   
   // call the external solver program
-  std::string command = "\""+exe_/*.native_file_string()*/ + "\" " + infile + " " + outfile;
-  std::cerr << "Calling external solver " << exe_/*.native_file_string()*/ << "\n\n";
-  std::cerr <<" command is: "<<command<<std::endl;
+  std::string command = exe_.native_file_string() + " " + infile + " " + outfile;
+  std::cerr << "Calling external solver " << exe_.native_file_string() << " as: "<<command<<std::endl;
   int result = std::system(command.c_str());
-   
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
-  std::cerr << "\nFinished call to external solver.\n";
-  
-  boost::filesystem::remove(boost::filesystem::complete(inpath));
-  
-  if (!boost::filesystem::exists(outpath))
+	                                           
+  boost::filesystem::remove(infile);
+
+  if (!boost::filesystem::exists(outfile))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
-  
 }
+
