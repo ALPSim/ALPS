@@ -45,7 +45,7 @@ double det_rat_up(times & new_segment, blas_matrix & M, segment_container_t& seg
 
 void compute_M_up(int k, blas_matrix & M, vector_t& Fs, vector_t& Fe, double det_rat);
 
-double det_rat_down(int k, blas_matrix & M, segment_container_t& segments_old, double & det_rat_sign);
+double det_rat_down(std::size_t k, blas_matrix & M, segment_container_t& segments_old, double & det_rat_sign);
 
 void compute_M_down(int k, blas_matrix & M);
 
@@ -55,15 +55,15 @@ double det_rat_move(times & new_segment, int k, blas_matrix & M, segment_contain
 void compute_M_move(times & new_segment, int k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat);
 
 // shift end point of segment
-double det_rat_shift(times & new_segment, int k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap);
+double det_rat_shift(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap);
 
-void compute_M_shift(times & new_segment, int k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat);
+void compute_M_shift(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat);
 
 double det_rat_insert_anti(times & anti_segment, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap, vector_t& R);
 
 void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat, vector_t& R);
 
-double det_rat_remove_anti(times anti_segment, int r, int s, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign);
+double det_rat_remove_anti(times anti_segment, int r, std::size_t s, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign);
 
 void compute_M_remove_anti(blas_matrix & M, int s, int r); 
 

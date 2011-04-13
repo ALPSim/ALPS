@@ -116,7 +116,7 @@ void InteractionExpansionRun::initialize_observables(void)
 ///measurement function. 
 void InteractionExpansionRun::measure_observables(void) 
 {
-  measurements.get<simple_obs_t>("Sign")<<sign;
+  measurements["Sign"]<<sign;
   if (measurement_method == selfenergy_measurement_matsubara)
     compute_W_matsubara();
   else if (measurement_method == selfenergy_measurement_itime_rs)

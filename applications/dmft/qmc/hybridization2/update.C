@@ -177,7 +177,7 @@ double compute_overlap(times segment, segment_container_t& other_segments, int o
 double det_rat_up(times & new_segment, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, vector_t& Fs, vector_t& Fe, double BETA, double & det_rat_sign, double & overlap) {
   
   segment_container_t::iterator it=segments_old.begin();
-  for (int i=0; i<segments_old.size(); i++) {
+  for (std::size_t i=0; i<segments_old.size(); i++) {
     Fe[i] = interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);
     Fs[i] = interpolate_F(it->t_end()-new_segment.t_start(), BETA, F);
     it++;
@@ -247,7 +247,7 @@ void compute_M_up(int k, blas_matrix & M, vector_t& Fs, vector_t &Fe, double det
 }  
 
 
-double det_rat_down(int k, blas_matrix & M, segment_container_t& segments_old, double & det_rat_sign) {
+double det_rat_down(std::size_t k, blas_matrix & M, segment_container_t& segments_old, double & det_rat_sign) {
   
   double det_rat = M(k,k);
   
@@ -288,7 +288,7 @@ void compute_M_down(int k, blas_matrix & M) {
 }
 
 // move segment without changin its length
-double det_rat_move(times & new_segment, int k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap) {
+double det_rat_move(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap) {
   
   double F_i, F_j;
   segment_container_t::iterator it1, it2;
@@ -296,12 +296,12 @@ double det_rat_move(times & new_segment, int k, blas_matrix & M, segment_contain
   double det_rat = M(k,k)*interpolate_F(new_segment.t_end()-new_segment.t_start(), BETA, F);
   
   it1=segments_old.begin();
-  for (int i=0; i<M.size1(); i++) {
+  for (std::size_t i=0; i<(std::size_t)M.size1(); i++) {
     if (i != k) {
       F_i = interpolate_F(new_segment.t_end()-it1->t_start(), BETA, F);
       
       it2=segments_old.begin();
-      for (int j=0; j<M.size1(); j++) {
+      for (std::size_t j=0; j<(std::size_t)M.size1(); j++) {
         if (j != k) {
           F_j = interpolate_F(it2->t_end()-new_segment.t_start(), BETA, F);
           det_rat -= F_i*(M(k,k)*M(i,j)-M(i,k)*M(k,j))*F_j;
@@ -375,7 +375,7 @@ void compute_M_move(times & new_segment, int k, blas_matrix & M, segment_contain
 }  
 
 // shift end point of segment
-double det_rat_shift(times & new_segment, int k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap) {
+double det_rat_shift(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap) {
   
   segment_container_t::iterator it;
   double det_rat = 0;
@@ -409,25 +409,25 @@ double det_rat_shift(times & new_segment, int k, blas_matrix & M, segment_contai
 }
 
 
-void compute_M_shift(times & new_segment, int k, blas_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat) {
+void compute_M_shift(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat) {
   
   std::vector<double> R(M.size1(),0), M_k(M.size1(),0), Fe(M.size1(),0);
   
   segment_container_t::iterator it=segments_old.begin();
-  for (int i=0; i<M_k.size(); i++) {
+  for (std::size_t i=0; i<M_k.size(); i++) {
     M_k[i] = M(i,k);
     Fe[i] = interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);  
     it++;
   }
   
-  for (int i=0; i<R.size(); i++) {
+  for (std::size_t i=0; i<R.size(); i++) {
     if (i!=k) {
-      for (int j=0; j<R.size(); j++) 
+      for (std::size_t j=0; j<R.size(); j++) 
         R[i] += Fe[j]*M(j,i); 
     }
   }
   
-  for (int m=0; m<M.size1(); m++) {
+  for (std::size_t m=0; m<(std::size_t)M.size1(); m++) {
     if (m!=k) {
       for (int n=0; n<M.size1(); n++) {
         M(n,m) -= M_k[n]*R[m]/det_rat;
@@ -449,7 +449,7 @@ double det_rat_insert_anti(times & anti_segment, blas_matrix & M, segment_contai
   std::vector<double> F_k(R.size());
   
   segment_container_t::iterator it=segments_old.begin();
-  for (int i=0; i<F_k.size(); i++) {
+  for (std::size_t i=0; i<F_k.size(); i++) {
     F_k[i]=interpolate_F(anti_segment.t_start()-it->t_start(), BETA, F);
     it++;
   }
@@ -457,9 +457,9 @@ double det_rat_insert_anti(times & anti_segment, blas_matrix & M, segment_contai
   double det_rat = -interpolate_F(anti_segment.t_start()-anti_segment.t_end(), BETA, F);
   
   it=segments_old.begin();
-  for (int i=0; i<R.size(); i++) {
+  for (std::size_t i=0; i<R.size(); i++) {
     R[i]=0;
-    for (int l=0; l<R.size(); l++) {  
+    for (std::size_t l=0; l<R.size(); l++) {  
       R[i] += F_k[l]*M(l,i);
     }
     det_rat += interpolate_F(it->t_end()-anti_segment.t_end(), BETA, F)*R[i];
@@ -497,14 +497,14 @@ void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, 
   std::vector<double> F_kp1(R.size()), L(R.size());
   
   segment_container_t::iterator it=segments_old.begin();
-  for (int i=0; i<F_kp1.size(); i++) {
+  for (std::size_t i=0; i<F_kp1.size(); i++) {
     F_kp1[i]=interpolate_F(it->t_end()-anti_segment.t_end(), BETA, F);
     it++;
   }
   
-  for (int i=0; i<L.size(); i++) {
+  for (std::size_t i=0; i<L.size(); i++) {
     L[i]=0;
-    for (int l=0; l<L.size(); l++) {  
+    for (std::size_t l=0; l<L.size(); l++) {  
       L[i] += M(i,l)*F_kp1[l];
     }
   }
@@ -560,7 +560,7 @@ void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, 
   return;
 }
 
-double det_rat_remove_anti(times anti_segment, int r, int s, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign) {
+double det_rat_remove_anti(times anti_segment, int r, std::size_t s, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign) {
   
   // r is the index of the segment which is removed
   // s is the index of the segment which is shifted
@@ -572,7 +572,7 @@ double det_rat_remove_anti(times anti_segment, int r, int s, blas_matrix & M, se
   
   double inv_det_rat = -interpolate_F(its->t_end()-itr->t_start(), BETA, F);
   
-  for (int i=0; i<segments_old.size(); i++) {
+  for (std::size_t i=0; i<segments_old.size(); i++) {
     if (i!=s) {
       inv_det_rat -= interpolate_F(it->t_end()-itr->t_start(), BETA, F)*M(r,i)/M(r,s);
     }

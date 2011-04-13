@@ -150,7 +150,7 @@ void hybridization::do_update()
       }
       
       // measure perturbation order
-      if (segments[j].size()<N_order)
+      if (segments[j].size()<(std::size_t)N_order)
         order_meas[j*N_order+segments[j].size()]++;
       
       
@@ -195,7 +195,7 @@ void hybridization::do_update()
       n_vectors[flavor].resize(N_corr+1, 1);
       if (segments[flavor].size()==0) {
         if (full_line[flavor]==0) {
-          for (int i=0; i<n_vectors[flavor].size(); ++i)
+          for (std::size_t i=0; i<n_vectors[flavor].size(); ++i)
             n_vectors[flavor][i]=0;
         }
       }
@@ -215,7 +215,7 @@ void hybridization::do_update()
           n_vectors[flavor][index] *= -1;
         }
         // fill vector with occupation number
-        for (int i=1; i<n_vectors[flavor].size(); i++) {
+        for (std::size_t i=1; i<n_vectors[flavor].size(); i++) {
           if (n_vectors[flavor][i]==-1)
             n_vectors[flavor][i]=1-n_vectors[flavor][i-1];
           else

@@ -26,6 +26,17 @@ if(LAPACK_FOUND)
        interaction_expansion/interaction_expansion.cpp 
        interaction_expansion/measurements.cpp 
       interaction_expansion/model.cpp)
+  set (DMFT_QMC_INTERACTION_EXPANSION2_SOURCE 
+       interaction_expansion2/auxiliary.cpp
+       interaction_expansion2/observables.cpp 
+       interaction_expansion2/fastupdate.cpp
+       interaction_expansion2/selfenergy.cpp 
+       interaction_expansion2/solver.cpp 
+       interaction_expansion2/io.cpp 
+       interaction_expansion2/splines.cpp 
+       interaction_expansion2/interaction_expansion.cpp 
+       interaction_expansion2/measurements.cpp 
+       interaction_expansion2/model.cpp)
   set (DMFT_QMC_HYBRIDIZATION_SOURCE
        hybridization/impurity.C 
        hybridization/fourpoint.C)
@@ -45,8 +56,10 @@ if(LAPACK_FOUND)
   set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} hybridization_impl)
   add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
   
+  #Interaction Expansion - separate solver
+  add_library (interaction_expansion2_impl STATIC  ${DMFT_QMC_INTERACTION_EXPANSION2_SOURCE})
+
   #Hybridization Expansion - separate solver
-  set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} hybridization2_impl)
   add_library (hybridization2_impl STATIC ${DMFT_QMC_HYBRIDIZATION2_SOURCE})
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
@@ -57,13 +70,17 @@ if(LAPACK_FOUND)
   add_executable(dmft main.C selfconsistency.C)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
   add_executable(hybridization hybridization2/main.C)
+  add_executable(interaction interaction_expansion2/main.cpp)
 
   target_link_libraries(dmft dmft_qmc_impl  ${DMFT_QMC_SOLVERS})
   target_link_libraries(hirschfye dmft_qmc_impl)
   target_link_libraries(hybridization dmft_qmc_impl hybridization2_impl)
+  target_link_libraries(interaction dmft_qmc_impl interaction_expansion2_impl)
+
   install(TARGETS dmft RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
+  install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
 else(LAPACK_FOUND)
   message(STATUS "dmft will not be built since the lapack library has not been found")
 endif(LAPACK_FOUND)
