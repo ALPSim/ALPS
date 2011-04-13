@@ -26,8 +26,10 @@ if(LAPACK_FOUND)
        interaction_expansion/interaction_expansion.cpp 
        interaction_expansion/measurements.cpp 
       interaction_expansion/model.cpp)
+
 IF(ALPS_BUILD_NGS)
   set (DMFT_QMC_INTERACTION_EXPANSION2_SOURCE 
+       fouriertransform.C
        interaction_expansion2/auxiliary.cpp
        interaction_expansion2/observables.cpp 
        interaction_expansion2/fastupdate.cpp
@@ -39,9 +41,11 @@ IF(ALPS_BUILD_NGS)
        interaction_expansion2/measurements.cpp 
        interaction_expansion2/model.cpp)
 ENDIF(ALPS_BUILD_NGS)
+
   set (DMFT_QMC_HYBRIDIZATION_SOURCE
        hybridization/impurity.C 
        hybridization/fourpoint.C)
+
 IF(ALPS_BUILD_NGS)
   set (DMFT_QMC_HYBRIDIZATION2_SOURCE
        hybridization2/impurity.C 
