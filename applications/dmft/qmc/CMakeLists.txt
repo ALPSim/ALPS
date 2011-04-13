@@ -26,6 +26,7 @@ if(LAPACK_FOUND)
        interaction_expansion/interaction_expansion.cpp 
        interaction_expansion/measurements.cpp 
       interaction_expansion/model.cpp)
+IF(ALPS_BUILD_NGS)
   set (DMFT_QMC_INTERACTION_EXPANSION2_SOURCE 
        interaction_expansion2/auxiliary.cpp
        interaction_expansion2/observables.cpp 
@@ -37,14 +38,17 @@ if(LAPACK_FOUND)
        interaction_expansion2/interaction_expansion.cpp 
        interaction_expansion2/measurements.cpp 
        interaction_expansion2/model.cpp)
+ENDIF(ALPS_BUILD_NGS)
   set (DMFT_QMC_HYBRIDIZATION_SOURCE
        hybridization/impurity.C 
        hybridization/fourpoint.C)
+IF(ALPS_BUILD_NGS)
   set (DMFT_QMC_HYBRIDIZATION2_SOURCE
        hybridization2/impurity.C 
        fouriertransform.C
        hybridization2/moves.C
        hybridization2/update.C)
+ENDIF(ALPS_BUILD_NGS)
 
   set (DMFT_QMC_SOLVERS "")
  
@@ -56,11 +60,14 @@ if(LAPACK_FOUND)
   set (DMFT_QMC_SOLVERS ${DMFT_QMC_SOLVERS} hybridization_impl)
   add_library (hybridization_impl STATIC ${DMFT_QMC_HYBRIDIZATION_SOURCE})
   
+IF(ALPS_BUILD_NGS)
   #Interaction Expansion - separate solver
   add_library (interaction_expansion2_impl STATIC  ${DMFT_QMC_INTERACTION_EXPANSION2_SOURCE})
-
+ENDIF(ALPS_BUILD_NGS)
+IF(ALPS_BUILD_NGS)
   #Hybridization Expansion - separate solver
   add_library (hybridization2_impl STATIC ${DMFT_QMC_HYBRIDIZATION2_SOURCE})
+ENDIF(ALPS_BUILD_NGS)
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   add_definitions(${LAPACK_DEFINITIONS} )
@@ -69,18 +76,26 @@ if(LAPACK_FOUND)
 
   add_executable(dmft main.C selfconsistency.C)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
+IF(ALPS_BUILD_NGS)
   add_executable(hybridization hybridization2/main.C)
   add_executable(interaction interaction_expansion2/main.cpp)
+ENDIF(ALPS_BUILD_NGS)
 
   target_link_libraries(dmft dmft_qmc_impl  ${DMFT_QMC_SOLVERS})
   target_link_libraries(hirschfye dmft_qmc_impl)
+
+IF(ALPS_BUILD_NGS)
   target_link_libraries(hybridization dmft_qmc_impl hybridization2_impl)
   target_link_libraries(interaction dmft_qmc_impl interaction_expansion2_impl)
+ENDIF(ALPS_BUILD_NGS)
 
   install(TARGETS dmft RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
+IF(ALPS_BUILD_NGS)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
+ENDIF(ALPS_BUILD_NGS)
+
 else(LAPACK_FOUND)
   message(STATUS "dmft will not be built since the lapack library has not been found")
 endif(LAPACK_FOUND)
