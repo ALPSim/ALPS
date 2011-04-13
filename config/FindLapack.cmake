@@ -5,6 +5,7 @@
 # LAPACK_LIBRARY
 # BLAS_LIBRARY
 #
+# 0) check if BLAS_LIBRARY and LAPACK_LIBRARY have already been set on command line, if so: take these values.
 # 1) search ENV MKL 
 # 2) search MKL in usual paths
 # 3) search ENV ATLAS
@@ -19,6 +20,7 @@
 #  Copyright (C)  2009-2010 Brigitte Surer
 #  Copyright (C)  2009-2010 Lukas Gamper
 #  Copyright (C)  2009-2010 Ryo IGARASHI <rigarash@hosi.phys.s.u-tokyo.ac.jp>
+#  Copyright (C)       2010 Emanuel Gull <gull@phys.columbia.edu>
 #
 #  Distributed under the Boost Software License, Version 1.0.
 #      (See accompanying file LICENSE_1_0.txt or copy at
@@ -27,6 +29,13 @@
 SET(MKL_PATHS "/usr/local/lib /usr/lib")
 
 #IF(NOT QMC_BUILD_STATIC)
+
+IF(BLAS_LIBRARY AND LAPACK_LIBRARY)
+ SET(LAPACK_LIBRARY_INIT 1)
+ SET(BLAS_LIBRARY_INIT 1)
+ENDIF(BLAS_LIBRARY AND LAPACK_LIBRARY)
+
+ 
 IF($ENV{MKL} MATCHES "mkl")
   MESSAGE(STATUS "Using intel/mkl library: $ENV{MKL}")
   #look for the path where the mkl is installed
