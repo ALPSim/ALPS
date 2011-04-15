@@ -25,38 +25,63 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_HDF5_POINTER_HPP
-#define ALPS_NGS_HDF5_POINTER_HPP
+#include <alps/hdf5.hpp>
 
-#include <alps/ngs/hdf5/pair.hpp>
+#include <boost/filesystem.hpp>
 
-namespace alps {
+#include <string>
+#include <iostream>
 
-    template <typename T> hdf5::detail::make_pvp_proxy<std::pair<T *, std::vector<std::size_t> > > make_pvp(
-          std::string const & path
-        , T * value
-        , std::size_t size
-    ) {
-        return hdf5::detail::make_pvp_proxy<std::pair<T *, std::vector<std::size_t> > >(
-              path
-            , std::make_pair(value, size > 0 
-                ? std::vector<std::size_t>(1, size)
-                : std::vector<std::size_t>()
-            )
-        );
+typedef enum { PLUS, MINUS } enum_type;
+
+void save(
+      alps::hdf5::archive & ar
+    , std::string const & path
+    , enum_type const & value
+    , std::vector<std::size_t> size = std::vector<std::size_t>()
+    , std::vector<std::size_t> chunk = std::vector<std::size_t>()
+    , std::vector<std::size_t> offset = std::vector<std::size_t>()
+) {
+    switch (value) {
+        case PLUS: ar << alps::make_pvp(path, std::string("plus")); break;
+        case MINUS: ar << alps::make_pvp(path, std::string("minus")); break;
     }
-
-    template <typename T> hdf5::detail::make_pvp_proxy<std::pair<T *, std::vector<std::size_t> > > make_pvp(
-          std::string const & path
-        , T * value
-        , std::vector<std::size_t> const & size
-    ) {
-        return hdf5::detail::make_pvp_proxy<std::pair<T *, std::vector<std::size_t> > >(
-              path
-            , std::make_pair(value, size)
-        );
-    }
-
 }
 
-#endif
+void load(
+      alps::hdf5::archive & ar
+    , std::string const & path
+    , enum_type & value
+    , std::vector<std::size_t> chunk = std::vector<std::size_t>()
+    , std::vector<std::size_t> offset = std::vector<std::size_t>()
+) {
+    std::string s;
+    ar >> alps::make_pvp(path, s);
+    value = (s == "plus" ? PLUS : MINUS);
+}
+
+int main() {
+
+    std::string const filename = "example.h5";
+
+    if (boost::filesystem::exists(boost::filesystem::path(filename)))
+        boost::filesystem::remove(boost::filesystem::path(filename));
+
+    enum_type read, write = PLUS;
+
+    {
+        alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
+        ar << alps::make_pvp("/enum", write);
+    }
+
+    {
+        alps::hdf5::archive ar(filename);
+        ar >> alps::make_pvp("/enum", read);
+    }
+
+    boost::filesystem::remove(boost::filesystem::path(filename));
+
+    bool match = (read == write);
+    std::cout << (match ? "SUCCESS" : "FAILURE") << std::endl;
+    return match ? EXIT_SUCCESS : EXIT_FAILURE;
+}

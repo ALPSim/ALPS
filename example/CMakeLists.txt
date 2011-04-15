@@ -22,5 +22,6 @@ else (ALPS_BUILD_SOURCE)
   add_subdirectory(sampling)
   add_subdirectory(model)
   add_subdirectory(ietl)
+  add_subdirectory(hdf5)
 
 endif (ALPS_BUILD_SOURCE)
