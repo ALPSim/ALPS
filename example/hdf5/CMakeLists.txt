@@ -8,7 +8,7 @@
 # 
 
 if (ALPS_BUILD_EXAMPLES)
-    foreach(program enum_as_class enum_vectorizable)
+    foreach(program enum_as_class enum_vectorizable pair_int_vectorizable)
       add_executable(${program} ${program}.cpp)
       add_dependencies(${program} alps)
       target_link_libraries(${program} alps)
