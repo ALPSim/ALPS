@@ -36,7 +36,6 @@
 
 typedef enum { PLUS, MINUS } enum_type;
 
-
 namespace alps {
     namespace hdf5 {
 
