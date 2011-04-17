@@ -65,13 +65,13 @@ namespace alps {
             };
 
             template<> struct get_pointer<std::pair<int, int> > {
-                static typename scalar_type<std::pair<int, int> >::type * apply(std::pair<int, int> & value) {
+                static scalar_type<std::pair<int, int> >::type * apply(std::pair<int, int> & value) {
                     return &value.first;
                 }
             };
         
             template<> struct get_pointer<std::pair<int, int> const> {
-                static typename scalar_type<std::pair<int, int> >::type const * apply(std::pair<int, int> const & value) {
+                static scalar_type<std::pair<int, int> >::type const * apply(std::pair<int, int> const & value) {
                     return &value.first;
                 }
             };
