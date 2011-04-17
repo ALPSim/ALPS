@@ -40,7 +40,7 @@ namespace alps {
     namespace hdf5 {
 
         template<> struct scalar_type<enum_type> {
-            typedef typename boost::int_t<sizeof(enum_type)>::least type;
+            typedef boost::int_t<sizeof(enum_type)>::least type;
         };
 
         template<> struct is_continous<enum_type> : public boost::false_type {};
@@ -66,14 +66,14 @@ namespace alps {
             };
 
             template<> struct get_pointer<enum_type> {
-                static typename scalar_type<enum_type>::type * apply(enum_type & value) {
-                    return reinterpret_cast<typename scalar_type<enum_type>::type *>(&value);
+                static scalar_type<enum_type>::type * apply(enum_type & value) {
+                    return reinterpret_cast<scalar_type<enum_type>::type *>(&value);
                 }
             };
         
             template<> struct get_pointer<enum_type const> {
-                static typename scalar_type<enum_type>::type const * apply(enum_type const & value) {
-                    return reinterpret_cast<typename scalar_type<enum_type>::type const *>(&value);
+                static scalar_type<enum_type>::type const * apply(enum_type const & value) {
+                    return reinterpret_cast<scalar_type<enum_type>::type const *>(&value);
                 }
             };
         }
