@@ -28,6 +28,11 @@
 
 #include "measurement.h"
 
+// workaround for SuSE 11.4, which defines macro TIME in pyconfig.h
+#ifdef TIME
+# undef TIME
+#endif
+
 namespace looper {
 
 //

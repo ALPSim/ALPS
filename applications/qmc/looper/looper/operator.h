@@ -33,6 +33,11 @@
 #include <boost/throw_exception.hpp>
 #include <stdexcept>
 
+// workaround for SuSE 11.4, which defines macro TIME in pyconfig.h
+#ifdef TIME
+# undef TIME
+#endif
+
 namespace looper {
 
 struct local_operator_type {
