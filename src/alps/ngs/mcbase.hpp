@@ -87,7 +87,7 @@ namespace alps {
             virtual bool complete_callback(boost::function<bool ()> const & stop_callback);
 
             parameters_type params;
-            mcobservables results;
+            mcobservables measurements;
             boost::variate_generator<boost::mt19937, boost::uniform_real<> > random;
 
         private:

@@ -51,18 +51,18 @@ typedef const alps::SimpleObservable<double,alps::DetailedBinning<double> > cons
 ///iteration.
 void InteractionExpansion::initialize_observables(void) 
 {
-  if(results.has("Sign")){
-    results.clear();
+  if(measurements.has("Sign")){
+    measurements.clear();
   }
-  results.create_RealObservable("Sign");
-  results.create_RealVectorObservable("PertOrder");  
+  measurements.create_RealObservable("Sign");
+  measurements.create_RealVectorObservable("PertOrder");  
   if(measurement_method==selfenergy_measurement_itime_rs) {
     for(unsigned int flavor=0;flavor<n_flavors;++flavor){
       for(unsigned int i=0;i<n_site;++i){
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream obs_name;
           obs_name<<"W_"<<flavor<<"_"<<i<<"_"<<j;
-          results.create_SignedRealVectorObservable(obs_name.str().c_str());
+          measurements.create_SignedRealVectorObservable(obs_name.str().c_str());
         }
       }
     }
@@ -73,21 +73,21 @@ void InteractionExpansion::initialize_observables(void)
         std::stringstream obs_name_real, obs_name_imag;
         obs_name_real<<"Wk_real_"<<flavor<<"_"<<k << "_" << k;
         obs_name_imag<<"Wk_imag_"<<flavor<<"_"<<k << "_" << k;
-        results.create_SignedRealVectorObservable(obs_name_real.str().c_str());
-        results.create_SignedRealVectorObservable(obs_name_imag.str().c_str());
+        measurements.create_SignedRealVectorObservable(obs_name_real.str().c_str());
+        measurements.create_SignedRealVectorObservable(obs_name_imag.str().c_str());
       }
     }
   }
-  results.create_SignedRealVectorObservable("densities");
+  measurements.create_SignedRealVectorObservable("densities");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor)
-    results.create_SignedRealVectorObservable("densities_"+boost::lexical_cast<std::string>(flavor));
-  results.create_SignedRealObservable("density_correlation");
-  results.create_SignedRealVectorObservable("n_i n_j");
+    measurements.create_SignedRealVectorObservable("densities_"+boost::lexical_cast<std::string>(flavor));
+  measurements.create_SignedRealObservable("density_correlation");
+  measurements.create_SignedRealVectorObservable("n_i n_j");
   for(unsigned int flavor=0;flavor<n_flavors;++flavor){
     for(unsigned int i=0;i<n_site;++i){
       std::stringstream density_name, sz_name;
       density_name<<"density_"<<flavor<<"_"<<i;
-      results.create_SignedRealObservable(density_name.str().c_str());
+      measurements.create_SignedRealObservable(density_name.str().c_str());
     }
   }
   for(unsigned int i=0;i<n_site;++i){
@@ -95,28 +95,28 @@ void InteractionExpansion::initialize_observables(void)
     sz_name<<"Sz_"<<i;
     sz2_name<<"Sz2_"<<i;
     sz0_szj_name<<"Sz0_Sz"<<i;
-    results.create_SignedRealObservable(sz_name.str().c_str());
-    results.create_SignedRealObservable(sz2_name.str().c_str());
-    results.create_SignedRealObservable(sz0_szj_name.str().c_str());
+    measurements.create_SignedRealObservable(sz_name.str().c_str());
+    measurements.create_SignedRealObservable(sz2_name.str().c_str());
+    measurements.create_SignedRealObservable(sz0_szj_name.str().c_str());
   }
   //acceptance probabilities
-  results.create_RealObservable("VertexInsertion");
-  results.create_RealObservable("VertexRemoval");
-  results.create_RealObservable("MeasurementTime");
-  results.create_RealObservable("UpdateTime");
-  results.create_RealObservable("RecomputeTime");
-  results.reset(true);
+  measurements.create_RealObservable("VertexInsertion");
+  measurements.create_RealObservable("VertexRemoval");
+  measurements.create_RealObservable("MeasurementTime");
+  measurements.create_RealObservable("UpdateTime");
+  measurements.create_RealObservable("RecomputeTime");
+  measurements.reset(true);
 }
 
 
 
 
-///this function is called whenever results should be performed. Depending
+///this function is called whenever measurements should be performed. Depending
 ///on the value of  measurement_method it will choose one particular
 ///measurement function. 
 void InteractionExpansion::measure_observables(void) 
 {
-  results["Sign"]<<sign;
+  measurements["Sign"]<<sign;
   if (measurement_method == selfenergy_measurement_matsubara)
     compute_W_matsubara();
   else if (measurement_method == selfenergy_measurement_itime_rs)
@@ -125,7 +125,7 @@ void InteractionExpansion::measure_observables(void)
   for(unsigned int i=0;i<n_flavors;++i) { 
     pert_order[i]=M[i].size(); 
   }
-  results["PertOrder"] << pert_order;
+  measurements["PertOrder"] << pert_order;
 }
 
 

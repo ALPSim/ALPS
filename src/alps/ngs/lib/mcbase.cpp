@@ -32,12 +32,12 @@
 namespace alps {
 
     void mcbase::save(boost::filesystem::path const & path) const {
-        save_results(results, params, path, "/simulation/realizations/0/clones/0/results");
+        save_results(measurements, params, path, "/simulation/realizations/0/clones/0/results");
     }
 
     void mcbase::load(boost::filesystem::path const & path) {
         hdf5::archive ar(path.file_string() + ".h5", hdf5::archive::READ);
-        ar >> make_pvp("/simulation/realizations/0/clones/0/results", results);
+        ar >> make_pvp("/simulation/realizations/0/clones/0/results", measurements);
     }
 
     bool mcbase::run(boost::function<bool ()> const & stop_callback) {
@@ -50,7 +50,7 @@ namespace alps {
 
     mcbase::result_names_type mcbase::result_names() const {
         result_names_type names;
-        for(mcobservables::const_iterator it = results.begin(); it != results.end(); ++it)
+        for(mcobservables::const_iterator it = measurements.begin(); it != measurements.end(); ++it)
             names.push_back(it->first);
         return names;
     }
@@ -66,7 +66,7 @@ namespace alps {
     mcbase::results_type mcbase::collect_results(result_names_type const & names) const {
         results_type partial_results;
         for(result_names_type::const_iterator it = names.begin(); it != names.end(); ++it)
-            partial_results.insert(*it, mcresult(results[*it]));
+            partial_results.insert(*it, mcresult(measurements[*it]));
         return partial_results;
     }
 

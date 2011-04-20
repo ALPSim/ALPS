@@ -136,8 +136,8 @@ void InteractionExpansion::measure_Wk(std::vector<std::vector<std::valarray<std:
         Wk_real[w] = Wk[flavor][k][w].real();
         Wk_imag[w] = Wk[flavor][k][w].imag();
       }
-      results[Wk_real_name.str().c_str()]<<static_cast<std::valarray<double> > (Wk_real*sign);
-      results[Wk_imag_name.str().c_str()]<<static_cast<std::valarray<double> > (Wk_imag*sign);
+      measurements[Wk_real_name.str().c_str()]<<static_cast<std::valarray<double> > (Wk_real*sign);
+      measurements[Wk_imag_name.str().c_str()]<<static_cast<std::valarray<double> > (Wk_imag*sign);
     }
   }
 }
@@ -175,17 +175,17 @@ void InteractionExpansion::measure_densities()
       densities[z] += dens[z][i];
       densmeas[i] = 1+dens[z][i];
     }
-    results["densities_"+boost::lexical_cast<std::string>(z)] << static_cast<std::valarray<double> > (densmeas*sign);
+    measurements["densities_"+boost::lexical_cast<std::string>(z)] << static_cast<std::valarray<double> > (densmeas*sign);
     densities[z] /= n_site;
     densities[z] = 1 + densities[z];
   }
-  results["densities"] << static_cast<std::valarray<double> > (densities*sign);
+  measurements["densities"] << static_cast<std::valarray<double> > (densities*sign);
   double density_correlation = 0.;
   for (unsigned int i=0; i<n_site; ++i) {
     density_correlation += (1+dens[0][i])*(1+dens[1][i]);
   }
   density_correlation /= n_site;
-  results["density_correlation"] << (density_correlation*sign);
+  measurements["density_correlation"] << (density_correlation*sign);
   std::valarray<double> ninj(n_site*n_site*4);
   for (unsigned int i=0; i<n_site; ++i) {
     for (unsigned int j=0; j<n_site; ++j) {
@@ -195,7 +195,7 @@ void InteractionExpansion::measure_densities()
       ninj[i*n_site+j+3] = (1+dens[1][i])*(1+dens[1][j]);
     }
   }
-  results["n_i n_j"] << static_cast<std::valarray<double> > (ninj*sign);
+  measurements["n_i n_j"] << static_cast<std::valarray<double> > (ninj*sign);
 }
 
 
@@ -260,17 +260,17 @@ void InteractionExpansion::compute_W_itime()
         for(unsigned int j=0;j<n_site;++j){
           std::stringstream W_name;
           W_name  <<"W_"  <<flavor<<"_"<<i<<"_"<<j;
-          results[W_name  .str().c_str()] << static_cast<std::valarray<double> > (W_z_i_j[flavor][i][j]*(sign/ntaupoints));
+          measurements[W_name  .str().c_str()] << static_cast<std::valarray<double> > (W_z_i_j[flavor][i][j]*(sign/ntaupoints));
         }
         std::stringstream density_name;
         density_name<<"density_"<<flavor<<"_"<<i;
-        results[density_name.str().c_str()]<<(density[flavor][i]*sign);
+        measurements[density_name.str().c_str()]<<(density[flavor][i]*sign);
         if(n_flavors==2){ //then we know how to compute Sz^2
           std::stringstream sz_name, sz2_name, sz0_szj_name;
           sz_name<<"Sz_"<<i; sz2_name<<"Sz2_"<<i; sz0_szj_name<<"Sz0_Sz"<<i;
-          results[sz_name.str().c_str()]<<((density[0][i]-density[1][i])*sign);
-          results[sz2_name.str().c_str()]<<((density[0][i]-density[1][i])*(density[0][i]-density[1][i])*sign);
-          results[sz0_szj_name.str().c_str()]<<((density[0][0]-density[1][0])*(density[0][i]-density[1][i])*sign);
+          measurements[sz_name.str().c_str()]<<((density[0][i]-density[1][i])*sign);
+          measurements[sz2_name.str().c_str()]<<((density[0][i]-density[1][i])*(density[0][i]-density[1][i])*sign);
+          measurements[sz0_szj_name.str().c_str()]<<((density[0][0]-density[1][0])*(density[0][i]-density[1][i])*sign);
         }
       }
     }

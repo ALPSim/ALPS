@@ -40,16 +40,16 @@ class ising_simulation : public alps::mcbase {
         {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
-            results << alps::ngs::RealObservable("Unused")
-                    << alps::ngs::SimpleRealObservable("EnergySimple")
-                    << alps::ngs::RealObservable("Energy")
-                    << alps::ngs::RealObservable("Magnetization")
-                    << alps::ngs::RealObservable("Magnetization^2")
-                    << alps::ngs::RealObservable("Magnetization^4")
-                    << alps::ngs::SimpleRealVectorObservable("CorrelationsSimple")
-                    << alps::ngs::RealVectorObservable("Correlations")
-                    << alps::ngs::RealObservable("Sign")
-                    << alps::ngs::SignedRealObservable("SignedEnergy");
+            measurements << alps::ngs::RealObservable("Unused")
+                         << alps::ngs::SimpleRealObservable("EnergySimple")
+                         << alps::ngs::RealObservable("Energy")
+                         << alps::ngs::RealObservable("Magnetization")
+                         << alps::ngs::RealObservable("Magnetization^2")
+                         << alps::ngs::RealObservable("Magnetization^4")
+                         << alps::ngs::SimpleRealVectorObservable("CorrelationsSimple")
+                         << alps::ngs::RealVectorObservable("Correlations")
+                         << alps::ngs::RealObservable("Sign")
+                         << alps::ngs::SignedRealObservable("SignedEnergy");
         }
         void do_update() {
             for (int j = 0; j < length; ++j) {
@@ -79,15 +79,15 @@ class ising_simulation : public alps::mcbase {
                 corr /= double(length);
                 ten /= length;
                 tmag /= length;
-                results["EnergySimple"] << ten;
-                results["Energy"] << ten;
-                results["Magnetization"] << tmag;
-                results["Magnetization^2"] << tmag * tmag;
-                results["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                results["CorrelationsSimple"] << corr;
-                results["Correlations"] << corr;
-                results["Sign"] << sign;
-                results["SignedEnergy"] << ten;
+                measurements["EnergySimple"] << ten;
+                measurements["Energy"] << ten;
+                measurements["Magnetization"] << tmag;
+                measurements["Magnetization^2"] << tmag * tmag;
+                measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
+                measurements["CorrelationsSimple"] << corr;
+                measurements["Correlations"] << corr;
+                measurements["Sign"] << sign;
+                measurements["SignedEnergy"] << ten;
             }
         };
         double fraction_completed() const {

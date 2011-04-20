@@ -90,17 +90,16 @@ F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms
   }
   
   // create measurement objects
-  results.create_RealVectorObservable("n"); 
-  results.create_RealVectorObservable("order");
-  results.create_RealVectorObservable("Greens");
-  results.create_RealVectorObservable("Greens_imp");
-  results.create_RealVectorObservable("nn_corr");
-  results.create_RealVectorObservable("nn_corr_equalt");
-  //results.create_RealVectorObservable("overlap");
-  results.create_RealObservable("sign"); 
-  results.create_RealVectorObservable("matrix_size"); 
-  
-  results.reset(true);
+  measurements << alps::ngs::RealVectorObservable("n")
+               << alps::ngs::RealVectorObservable("order")
+               << alps::ngs::RealVectorObservable("Greens")
+               << alps::ngs::RealVectorObservable("Greens_imp")
+               << alps::ngs::RealVectorObservable("nn_corr")
+//               << alps::ngs::RealVectorObservable("overlap")
+               << alps::ngs::RealObservable("sign")
+               << alps::ngs::RealVectorObservable("matrix_size");
+
+  measurements.reset(true);
   
   //resizing measurement vectors
   n_meas.resize(FLAVORS,0.);
@@ -110,7 +109,7 @@ F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms
   n_vectors.resize(FLAVORS);
   matrix_size.resize(FLAVORS, 0.);
   
-  std::cout<<"starting simulation"<<std::endl;	
+  std::cout<<"starting simulation"<<std::endl;  
 }
 
 
@@ -190,7 +189,7 @@ void hybridization::do_update()
     }
 
     // measure density correlation functions 
-    segment_container_t::iterator it;	
+    segment_container_t::iterator it;
     for (int flavor=0; flavor<FLAVORS; ++flavor) {
       n_vectors[flavor].resize(N_corr+1, 1);
       if (segments[flavor].size()==0) {
@@ -250,28 +249,28 @@ void hybridization::do_update()
 void hybridization::do_measurements(){
   if(is_thermalized()){
     nn_corr_meas /= (N_corr+1);
-    results["nn_corr"] << nn_corr_meas;
+    measurements["nn_corr"] << nn_corr_meas;
     nn_corr_equalt_meas/=(double)N_corr;
-    results["nn_corr_equalt"] << (nn_corr_equalt_meas);
+    measurements["nn_corr_equalt"] << (nn_corr_equalt_meas);
     
     order_meas /= N_meas;
-    results["order"] << order_meas;
+    measurements["order"] << order_meas;
     
     G_meas *= (1.*N)/N_meas/(BETA*BETA);
-    results["Greens"] << (G_meas); //*sign;
+    measurements["Greens"] << (G_meas); //*sign;
     
     G_meas_imp *= (1.*N)/N_meas/(BETA*BETA);
-    results["Greens_imp"] << (G_meas_imp); //*sign;
+    measurements["Greens_imp"] << (G_meas_imp); //*sign;
     
     sign_meas /= N_meas;
-    results["sign"] << sign_meas;
+    measurements["sign"] << sign_meas;
     //if(sign_meas != 1.) throw std::runtime_error("negative sign encountered. The current code is not able to deal with this (in the segment representation such a situation should not arise for diagonal hybridizations). Do you know what you're doing?!?");
     
     n_meas /= N_meas;
-    results["n"]<< n_meas;
+    measurements["n"]<< n_meas;
     
     matrix_size /= N_meas;
-    results["matrix_size"]<< matrix_size;
+    measurements["matrix_size"]<< matrix_size;
   }
   memset(&(G_meas[0]),0, G_meas.size()*sizeof(double));
   memset(&(G_meas_imp[0]),0, G_meas.size()*sizeof(double));

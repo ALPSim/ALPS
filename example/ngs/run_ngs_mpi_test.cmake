@@ -3,10 +3,10 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-find_file(param_path param.h5 ${binarydir} ${sourcedir})
+find_program(cmd_path ngs_single ${binarydir} ${dllexedir})
 
 execute_process(
-    COMMAND mpirun -n 4 ${cmddir}/ngs_mpi -T 15 --mpi ${sourcedir}/param.h5 sim.mpi
+    COMMAND mpirun -n 4 ${cmd_path} -T 15 --mpi ${sourcedir}/param.h5 sim.mpi
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_mpi_output_1
     ERROR_VARIABLE err
@@ -18,7 +18,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND mpirun -n 4 ${cmddir}/ngs_mpi -T 15 --continue --mpi ${sourcedir}/param.h5 sim.mpi
+    COMMAND mpirun -n 4 ${cmd_path} -T 15 --continue --mpi ${sourcedir}/param.h5 sim.mpi
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_mpi_output_2
     ERROR_VARIABLE err
