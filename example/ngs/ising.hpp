@@ -27,9 +27,9 @@
 
 #include <alps/ngs.hpp>
 
-class simulation_type : public alps::mcbase {
+class ising_simulation : public alps::mcbase {
     public:
-        simulation_type(parameters_type const & params, std::size_t seed_offset = 0)
+        ising_simulation(parameters_type const & params, std::size_t seed_offset = 0)
             : alps::mcbase(params, seed_offset)
             , length(params["L"])
             , beta(1. / double(params["T"]))
@@ -40,16 +40,16 @@ class simulation_type : public alps::mcbase {
         {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
-            results.create_RealObservable("Unused");
-            results.create_SimpleRealObservable("EnergySimple");
-            results.create_RealObservable("Energy");
-            results.create_RealObservable("Magnetization");
-            results.create_RealObservable("Magnetization^2");
-            results.create_RealObservable("Magnetization^4");
-            results.create_SimpleRealVectorObservable("CorrelationsSimple");
-            results.create_RealVectorObservable("Correlations");
-            results.create_RealObservable("Sign");
-            results.create_SignedRealObservable("SignedEnergy");
+            results << alps::ngs::RealObservable("Unused")
+                    << alps::ngs::SimpleRealObservable("EnergySimple")
+                    << alps::ngs::RealObservable("Energy")
+                    << alps::ngs::RealObservable("Magnetization")
+                    << alps::ngs::RealObservable("Magnetization^2")
+                    << alps::ngs::RealObservable("Magnetization^4")
+                    << alps::ngs::SimpleRealVectorObservable("CorrelationsSimple")
+                    << alps::ngs::RealVectorObservable("Correlations")
+                    << alps::ngs::RealObservable("Sign")
+                    << alps::ngs::SignedRealObservable("SignedEnergy");
         }
         void do_update() {
             for (int j = 0; j < length; ++j) {
