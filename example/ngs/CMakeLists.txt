@@ -13,7 +13,7 @@ if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
         ${CMAKE_COMMAND}
             -Dsourcedir=${PROJECT_SOURCE_DIR}
             -Dbinarydir=${PROJECT_BINARY_DIR}
-            -Dcmddir=${CMAKE_CURRENT_SOURCE_DIR}
+            -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
             -P ${CMAKE_CURRENT_SOURCE_DIR}/run_ngs_single_test.cmake
     )
 

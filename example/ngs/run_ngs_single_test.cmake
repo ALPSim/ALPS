@@ -3,10 +3,10 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-find_file(param_path param.h5 ${binarydir} ${sourcedir})
+find_program(cmd_path ngs_single ${binarydir} ${dllexedir})
 
 execute_process(
-    COMMAND ${cmddir}/ngs_single -T 15 --single ${sourcedir}/param.h5 sim.single
+    COMMAND ${cmd_path} -T 15 --single ${currentdir}/param.h5 sim.single
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_single_output_1
     ERROR_VARIABLE err
@@ -18,7 +18,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND ${cmddir}/ngs_single -T 15 --continue --single ${sourcedir}/param.h5 sim.single
+    COMMAND ${cmd_path} -T 15 --continue --single ${currentdir}/param.h5 sim.single
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_single_output_2
     ERROR_VARIABLE err

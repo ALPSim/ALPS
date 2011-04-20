@@ -518,7 +518,13 @@ void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
     std::vector<double> energies = alps::numeric::real(it->second);
     ar << alps::make_pvp("spectrum/energies",energies);
   }
-  ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<value_type >&>(*this));
+  
+  std::string context = ar.get_context();
+  ar.set_context(ar.complete_path("spectrum"));
+  alps::EigenvectorMeasurements<value_type>::save(ar);
+  ar.set_context(context);
+  
+//  ar << alps::make_pvp("spectrum",static_cast<const alps::EigenvectorMeasurements<value_type >&>(*this));
 
   typedef typename std::map<std::string,std::vector<double> >::const_iterator IT;
   for (IT it=iteration_measurements.begin(); it != iteration_measurements.end();++it)
