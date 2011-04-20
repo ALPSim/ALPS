@@ -51,6 +51,9 @@ option(BIND_FORTRAN_LOWERCASE "FORTRAN functions are compiled without a trailing
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
 
+option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framwork" OFF)
+mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
+
 option(ALPS_BUILD_NGS CACHE BOOL "Build the next generation scheduler" OFF)
 set(ALPS_BOOST_LIBRARY_NAME "boost" CACHE STRING "name of the boost library")
 

@@ -299,6 +299,13 @@ if (NOT Boost_FOUND)
               RUNTIME DESTINATION bin
               ARCHIVE DESTINATION lib
               LIBRARY DESTINATION lib)
+      if (ALPS_INSTALL_BOOST_TEST)
+        install(TARGETS boost_unit_test_framework boost_test_exec_monitor boost_prg_exec_monitor
+              COMPONENT libraries
+              RUNTIME DESTINATION bin
+              ARCHIVE DESTINATION lib
+              LIBRARY DESTINATION lib)
+      endif(ALPS_INSTALL_BOOST_TEST)
     endif (NOT ALPS_FOR_VISTRAILS)
   endif (NOT ALPS_BUILD_SOURCE)
 endif (NOT Boost_FOUND)
