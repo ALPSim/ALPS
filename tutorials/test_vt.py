@@ -39,6 +39,7 @@ if platform.system()=='Darwin':
 
 # Find .vt files
 vtfiles = glob.glob('[d-z]*/*.vt')
+vtfiles.sort()
 
 # Extract workflow tags from vt files
 workflows = []

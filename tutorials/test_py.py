@@ -36,6 +36,7 @@ cwd = os.getcwd()
 
 # Find .py files in subdirectories
 pyfiles = glob.glob('[d-z]*/*.py')
+pyfiles.sort()
 
 # Test all Python tutorials
 logfile = open('pytest.log', 'w')
