@@ -97,7 +97,7 @@ int main(int argc, char** argv)
       }
       {
         std::cout<<"converting ALPS parameters"<<std::endl;
-        alps::Parameters p(alps::mcdeprecated::make_alps_parameters(parms));
+        alps::Parameters p(alps::make_alps_parameters(parms));
         FourierTransformer::generate_transformer_U(p, fourier_ptr, n); //still takes old alps parameter class.
         fourier_ptr->forward_ft(green_itime, green_matsubara);      
       }

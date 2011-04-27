@@ -60,7 +60,7 @@ beta((double)parms["BETA"]),
 temperature(1./beta),
 onsite_U((double)parms["U"]),                        
 alpha((double)parms["ALPHA"]),
-U(alps::mcdeprecated::make_alps_parameters(parms)),                         
+U(alps::make_alps_parameters(parms)),                         
 recalc_period(parms.value_or_default("RECALC_PERIOD",5000)),
 measurement_period(parms.value_or_default("MEASUREMENT_PERIOD",200)),        
 convergence_check_period(parms.value_or_default("CONVERGENCE_CHECK_PERIOD",(int)recalc_period)),        
@@ -92,7 +92,7 @@ pert_hist(max_order)
       alps::hdf5::archive ar(parms["INFILE"], alps::hdf5::archive::READ);
       bare_green_matsubara.read_hdf5(ar, "/G0") ;
     }
-    FourierTransformer::generate_transformer(alps::mcdeprecated::make_alps_parameters(parms), fourier_ptr);
+    FourierTransformer::generate_transformer(alps::make_alps_parameters(parms), fourier_ptr);
     fourier_ptr->backward_ft(bare_green_itime, bare_green_matsubara);
   }
   else {
