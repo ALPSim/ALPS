@@ -397,6 +397,8 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
         res=recursiveGlob(dirname, pattern)
     else:
       res = recursiveGlob(dirname, pattern)
+    replicas=recursiveGlob(dirname, prefix+'*replica*h5')
+    res += replicas
     return res
 
 def groupSets(data, for_each = []):
