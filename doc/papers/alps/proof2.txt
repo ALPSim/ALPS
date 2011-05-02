@@ -10,4 +10,4 @@ thank you very much for sending a second round of proofs. Since there are still 
 
 - The link to the supporting files is missing in the caption of Figure 3.
 
-For checking the links to the auxiliary files, is it possible to send us a version of the manuscript that contains links to final destinations? Also, we would like to update the source code of our project, which will be part of the auxiliary files, with the final journal reference. Therefore, we would like to request that you send us the reference so that we can make a final update of the auxiliary files. Is this possible?
+For checking the links to the auxiliary files, is it possible to send us a version of the manuscript that contains links to final destinations? Also, we would like to update the source code of our project, which will be part of the auxiliary files, with the final journal reference. Therefore, we would like to request that you send us the reference so that we can make a final update of the auxiliary files.

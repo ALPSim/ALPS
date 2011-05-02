@@ -65,6 +65,7 @@
 \def\vtworkflow{false}
 \def\vttree{false}
 \def\vtgetvtl{false}
+\def\vtincludefulltree{false}
 
 \newread\myinput
 %% We use '\jobname.python.temp' to store a unique file saying if python is present
@@ -116,6 +117,7 @@
     \immediate\write\pythonincludein{workflow=\vtworkflow}
     \immediate\write\pythonincludein{tree=\vttree}
     \immediate\write\pythonincludein{getvtl=\vtgetvtl}
+    \immediate\write\pythonincludein{includefulltree=\vtincludefulltree}
     \ifx\@empty#2\@empty
         \immediate\write\pythonincludein{other=}
     \else
@@ -139,5 +141,6 @@
 \define@key{vt}{pdf}[true]{\def\vtpdf{#1}}
 \define@key{vt}{showworkflow}[true]{\def\vtworkflow{#1}}
 \define@key{vt}{showtree}[true]{\def\vttree{#1}}
+\define@key{vt}{includefulltree}[true]{\def\vtincludefulltree{#1}}
 \define@key{vt}{getvtl}[true]{\def\vtgetvtl{#1}}
 
