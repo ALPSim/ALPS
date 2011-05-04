@@ -66,7 +66,7 @@ PRINT *, "  available from http://alps.comp-phys.org/"
 PRINT *, "  copyright(c) 2010 by Michael L. Wall <mwall@mines.edu>"
 PRINT *, "                       Lincoln D. Carr <lcarr@mines.edu>"
 PRINT *, "  For details see the publication: "
-PRINT *, "  B. Bauer et al., arXiv: arXiv:1101.2646, submitted to JSTAT."
+PRINT *, "  B. Bauer et al., J. Stat. Mech. (2011) P05001."
 PRINT *, ''
 PRINT *, " Based on the ALPS libraries version 2.0"!ALPS_VERSION,
 PRINT *, "  available from http://alps.comp-phys.org/"
@@ -74,7 +74,7 @@ PRINT *, "  copyright (c) 1994-2011 by the ALPS collaboration."
 PRINT *, "  Consult the web page for license details."
 PRINT *, "  For details see the publications:"
 PRINT *, "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007)."
-PRINT *, "  B. Bauer et al., arXiv: arXiv:1101.2646, submitted to JSTAT."
+PRINT *, "  B. Bauer et al., J. Stat. Mech. (2011) P05001."
 
 
 CALL CPU_TIME(tick)
