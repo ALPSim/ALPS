@@ -80,8 +80,9 @@ citation requirement but acknowledgment of the ALPS project is encouraged.
  - cite the publication: 
    A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).
    B. Bauer et al., J. Stat. Mech. (2011) P05001
- - cite the ALPS DMFT publication (contact the authors for a current reference): 
-   E. Gull, P. Werner, S. Fuchs, B. Surer, T. Pruschke, and M. Troyer, submitted to Computer Physics Communications.
+ - cite the ALPS DMFT publication:
+   E. Gull, P. Werner, S. Fuchs, B. Surer, T. Pruschke, and M. Troyer,
+   Computer Physics Communications 182, 1078 (2011). 
 
   Copyright ALPS collaboration 2002 - 2010
   Distributed under the Boost Software License, Version 1.0.
