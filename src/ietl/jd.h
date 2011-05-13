@@ -32,17 +32,20 @@ namespace ietl{
     class jd_iteration : public basic_iteration<T> {
         public: 
 
-        jd_iteration(size_t m_min, size_t m_max, size_t max_iter, T reltol = 0., T abstol = 0.) 
-            : basic_iteration<T>(max_iter, reltol, abstol), m_min_(m_min), m_max_(m_max) {}
+        jd_iteration(size_t m_min, size_t m_max, size_t max_iter, T reltol = 0., T abstol = 0., size_t smi = 5) 
+            : basic_iteration<T>(max_iter, reltol, abstol), m_min_(m_min), m_max_(m_max), smi_(smi) {}
 
         inline size_t m_min() const
             {   return m_min_;  }
         inline size_t m_max() const
             {   return m_max_;  }
+        //maximal number iterations for the correction equation solver
+        inline size_t sub_max_iter() const
+            {   return smi_;  }
         const std::string& error_msg() 
             { return basic_iteration<T>::err_msg; }    
         private:
-        size_t m_min_, m_max_;
+        size_t m_min_, m_max_, smi_;
     };
 //jd_iterator//////////////////////////////////////////////////////
     namespace detail{
@@ -78,7 +81,7 @@ namespace ietl{
         void mult(  const deflated_matrix<MATRIX,VS>& Adef, 
                     const VECTOR& v, 
                     VECTOR& r)
-        {// (I-QQ*)(A-thetaI)(I-QQ*)v = r 
+        {// (I-QQ*)(A-thetaI)(I-QQ*)v = r
                 VECTOR temp = v;
 
                 for(size_t i = 0; i < Adef.Q_.size() ; ++i) 
@@ -329,7 +332,7 @@ namespace solver {
         {
             Adef_.set_theta(theta);
             r *= -1;
-            t = ietl_gmres(Adef_, r, x0_, 5, iter.absolute_tolerance(), false); 
+            t = ietl_gmres(Adef_, r, x0_, iter.sub_max_iter(), iter.absolute_tolerance(), false);
         }
 }//end namespace solver/////////////////////////////////////////////////////////////////////////////////
 
@@ -392,6 +395,11 @@ namespace solver {
             }
 
         //access functions
+        std::pair<real_type,vector_type> eigenpair(size_type k)
+            {
+                assert (k < Lambda_.size());
+                return std::make_pair (Lambda_[k], X_[k]);
+            }
         real_type eigenvalue(size_type k)
             {
                 assert (k < Lambda_.size());
@@ -401,7 +409,7 @@ namespace solver {
             {
                 return Lambda_;
             }
-        const vector_type& eigenvector (size_type k)
+        vector_type eigenvector (size_type k)
             {
                 assert (k < X_.size());
                 return X_[k];
@@ -487,13 +495,13 @@ namespace solver {
 
             if(norm_t == 0/*< iter.absolute_tolerance()*/) {
             //if the correction solver returns a t approx 0, numerical errors might create u non orthogonal to X_i
-            //tau might be too far away? which seems not to matter for the first eigenvalue!
                     std::cerr << "Correction vector t is (almost) zero:\n";
                     if(iter.first())
                         throw std::runtime_error("generating a starting vector failed.");
                     else
                         throw std::runtime_error("try to solve the correction equation more accurately.");
                     }
+
             for(size_type i = 0; i < m; ++i) 
                 t -= ietl::dot(V[i],t) * V[i];
             if(ietl::two_norm(t) <= kappa * norm_t)
@@ -617,6 +625,14 @@ namespace solver {
 
             // correction equation
             solver(theta, r, t, iter); //solver is allowed to change r
+
+            //assure t is orthogonal to Q
+            norm_t = ietl::two_norm(t);
+            for(size_t i = 0; i< X_.size();++i)
+                t -= ietl::dot(t,X_[i])*X_[i];
+            if(ietl::two_norm(t) <= kappa * norm_t)
+                for(size_t i = 0; i< X_.size();++i)
+                    t -= ietl::dot(t,X_[i])*X_[i];
 
             ++iter;
             if(iter.error_code() == 1)
