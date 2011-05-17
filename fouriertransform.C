@@ -291,7 +291,7 @@ void FourierTransformer::time_to_frequency_ft(const nambu_itime_green_function_t
 
 void FourierTransformer::append_tail(matsubara_green_function_t& G_omega, 
                                      const matsubara_green_function_t& G0_omega,
-                                     const int nfreq_measured) const
+                                     const unsigned int nfreq_measured) const
 {
   for (spin_t flavor=0; flavor<G0_omega.nflavor(); ++flavor) {
     for (site_t k=0; k<G0_omega.nsite(); ++k) {
@@ -526,8 +526,8 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
 
 
 
-void FittingFourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau, 
-                                            const matsubara_green_function_t &G_omega)
+/*void FittingFourierTransformer::frequency_to_time_ft(itime_green_function_t &G_tau, 
+                                            const matsubara_green_function_t &G_omega) const
 {
   //fit c1_ to G_omega
   std::cout << "Fitting Fourier Transformer:" << std::endl;
@@ -568,4 +568,4 @@ void FittingFourierTransformer::frequency_to_time_ft(itime_green_function_t &G_t
       }
     }  
   }
-}
+}*/

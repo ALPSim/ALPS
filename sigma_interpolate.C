@@ -28,13 +28,13 @@ int main(int argc, char **argv){
   
   
   parms["LATTICE_LIBRARY"]=std::string(argv[2]);
-
-
+  
+  
   nambu_matsubara_green_function_t selfenergy(nfreq, nsites, 2, diagonal);
   nambu_matsubara_green_function_t selfenergy_new(nfreq, nsites, 2, diagonal);
   nambu_matsubara_green_function_t green(nfreq, nsites, 2, diagonal);
   nambu_matsubara_green_function_t green0(nfreq, nsites, 2, diagonal);
-
+  
   int iteration=atoi(argv[3]);
   double beta_new=atof(argv[4]);
   std::stringstream selfenergy_name; selfenergy_name<<"selfenergy_"<<iteration;
@@ -67,23 +67,32 @@ int main(int argc, char **argv){
   gsl_spline *spline_real = gsl_spline_alloc (gsl_interp_cspline, nfreq);
   gsl_interp_accel *acc_imag = gsl_interp_accel_alloc ();
   gsl_spline *spline_imag = gsl_spline_alloc (gsl_interp_cspline, nfreq);
-            
+  
   std::vector<double> sigma_real(nfreq);
   std::vector<double> sigma_imag(nfreq);
   for(int j=0;j<nsites;++j){
     for(int p=0;p<2;++p){
       for(int q=0;q<2;++q){
-  for(int i=0;i<nfreq;++i){
-    sigma_real[i]=selfenergy(i,j,j,p,q).real();
-    sigma_imag[i]=selfenergy(i,j,j,p,q).imag();
-  }
-  gsl_spline_init (spline_real, &(matsubara_freqs_old[0]), &(sigma_real[0]), nfreq);
-  gsl_spline_init (spline_imag, &(matsubara_freqs_old[0]), &(sigma_imag[0]), nfreq);
-
-  double xi,yi;                     
-  for (int i=0; i<nfreq; ++i){
-    selfenergy_new(i,j,j,p,q) = std::complex<double>(gsl_spline_eval (spline_real, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag, matsubara_freqs_new[i], acc_imag));
-  }
+        for(int i=0;i<nfreq;++i){
+          sigma_real[i]=selfenergy(i,j,j,p,q).real();
+          sigma_imag[i]=selfenergy(i,j,j,p,q).imag();
+        }
+        gsl_spline_init (spline_real, &(matsubara_freqs_old[0]), &(sigma_real[0]), nfreq);
+        gsl_spline_init (spline_imag, &(matsubara_freqs_old[0]), &(sigma_imag[0]), nfreq);
+        
+        double xi,yi;                     
+        double selfenergy_real_sign=selfenergy(0,j,j,p,q).real()>0?1:-1;
+        double selfenergy_imag_sign=selfenergy(0,j,j,p,q).imag()>0?1:-1;
+        for (int i=0; i<nfreq; ++i){
+          selfenergy_new(i,j,j,p,q) = std::complex<double>(gsl_spline_eval (spline_real, matsubara_freqs_new[i], acc_real), gsl_spline_eval (spline_imag, matsubara_freqs_new[i], acc_imag));
+          if(selfenergy_new(i,j,j,p,q).imag()>0 && selfenergy_imag_sign<0){
+            std::cerr<<"problem with self energy sign after interpolation."<<i<<" "<<j<<" "<<p<<" "<<q<<std::endl;
+          }else if(selfenergy_new(i,j,j,p,q).real()>0 && selfenergy_real_sign<0){
+            std::cerr<<"problem with self energy real after interpolation."<<i<<" "<<j<<" "<<p<<" "<<q<<std::endl;
+          }else if(selfenergy_new(i,j,j,p,q).real()<0 && selfenergy_real_sign>0){
+            std::cerr<<"problem with self energy real after interpolation."<<i<<" "<<j<<" "<<p<<" "<<q<<std::endl;
+          }
+        }
       }
     }
   }
@@ -91,7 +100,7 @@ int main(int argc, char **argv){
   gsl_spline_free (spline_imag);
   gsl_interp_accel_free (acc_real);
   gsl_interp_accel_free (acc_imag);
-
+  
   //compute the self consistency
   //std::cout<<"new self energy is: "<<std::make_pair(selfenergy_new,beta_new)<<std::endl;
   parms["BETA"]=beta_new;
@@ -99,11 +108,11 @@ int main(int argc, char **argv){
   green0 = clustertrans(green, green0, selfenergy_new, mu, h, eta1, eta2, beta_new, true);  
   green0 = clustertrans.symmetrize(green0, paramagnet);
   green0 = clustertrans.symmetrize_k_space(green0);
-
+  
   std::cout<<"new green0 is: "<<std::make_pair(green0,beta_new)<<std::endl;
-std::stringstream filename_new; filename_new<<"G0_omega_input_beta"<<beta_new;
+  std::stringstream filename_new; filename_new<<"G0_omega_input_beta"<<beta_new;
   green0.write(filename_new.str().c_str());
   
-
+  
 }
 

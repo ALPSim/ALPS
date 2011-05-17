@@ -802,7 +802,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
   
   if(!use_selfenergy){ //compute selfenergy out of G and G0 first
-    nambu_matsubara_green_function_t selfenergy=G0_omega;
+    selfenergy=G0_omega;
     //compute the lattice = cluster self energy
     for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {

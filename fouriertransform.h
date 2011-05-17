@@ -104,7 +104,7 @@ public:
    const green_function<alps::RealObsevaluator> &G_omega_real,
    const green_function<alps::RealObsevaluator> &G_omega_imag) const;*/
   virtual void append_tail(matsubara_green_function_t& G_omega, const matsubara_green_function_t& G0_omega,
-                           const int nfreq_measured) const;
+                           const unsigned int nfreq_measured) const;
   
   static void generate_transformer(const alps::Parameters &parms,
                                    boost::shared_ptr<FourierTransformer> &fourier_ptr);
@@ -350,18 +350,20 @@ public:
     }
   }
   
-  virtual void time_to_frequency_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) {
+  virtual void time_to_frequency_ft(const itime_green_function_t &G_tau, matsubara_green_function_t &G_omega) const{
     std::cout<<"implement 2nd derivatives for F function before using this!"<<std::endl;
     FourierTransformer::time_to_frequency_ft(G_tau, G_omega);
   }
+  virtual void time_to_frequency_ft(const nambu_itime_green_function_t &G_tau, nambu_matsubara_green_function_t &G_omega) const{ throw std::logic_error("not implemented.");}
   
-  virtual void frequency_to_time_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega){
+  virtual void frequency_to_time_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const{
     FourierTransformer::frequency_to_time_ft(G_tau, G_omega);
     std::cout<<"correcting for F function"<<std::endl;
     for(unsigned int j=0;j<G_tau.nflavor();++j){
       G_tau(G_tau.ntime()-1,j)=-epsilonsq_av_-G_tau(0,j);
     }
   }
+  virtual void frequency_to_time_ft(nambu_itime_green_function_t &G_tau, const nambu_matsubara_green_function_t &G_omega) const{throw std::logic_error("not implemented");}
   
   /*  virtual void frequency_to_time_ft(green_function<alps::RealObsevaluator> &G_tau, 
    const green_function<alps::RealObsevaluator> &G_omega_real,
@@ -407,8 +409,10 @@ public:
     std::cout<<"implement 2nd derivatives for F function before using this!"<<std::endl;
     FourierTransformer::time_to_frequency_ft(G_tau, G_omega);
   }
+  virtual void time_to_frequency_ft(const nambu_itime_green_function_t &G_tau, nambu_matsubara_green_function_t &G_omega) const{throw std::logic_error("not implemented");}
   
-  virtual void frequency_to_time_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) ;
+  virtual void frequency_to_time_ft(itime_green_function_t &G_tau, const matsubara_green_function_t &G_omega) const;
+  virtual void frequency_to_time_ft(nambu_itime_green_function_t &G_tau, const nambu_matsubara_green_function_t &G_omega) const{throw std::logic_error("not implemented");}
   
   /*  virtual void frequency_to_time_ft(green_function<alps::RealObsevaluator> &G_tau, 
    const green_function<alps::RealObsevaluator> &G_omega_real,
