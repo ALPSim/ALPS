@@ -30,6 +30,8 @@
 #include <alps/hdf5.hpp>
 #include <alps/parameter.h>
 
+#include <boost/filesystem.hpp>
+
 #include <iostream>
 
 int main(int argc, char **argv) {
@@ -37,6 +39,8 @@ int main(int argc, char **argv) {
         throw std::invalid_argument("no name passed");
     alps::Parameters parms;
     std::cin >> parms;
+    if (boost::filesystem::exists(boost::filesystem::path(argv[1])))
+        boost::filesystem::remove(boost::filesystem::path(argv[1]));
     alps::hdf5::archive ar(argv[1], alps::hdf5::archive::WRITE);
     ar << make_pvp("/parameters", parms);
 }
