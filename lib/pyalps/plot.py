@@ -236,6 +236,10 @@ class MplXYPlot_core:
         
         if 'title' in self.plt:
             plt.title(self.plt['title'])
+        
+        if 'grid' in self.plt:
+            plt.grid(self.plt['grid'])
+        
             
  
  

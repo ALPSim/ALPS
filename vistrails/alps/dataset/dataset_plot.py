@@ -71,7 +71,8 @@ class PreparePlot(Descriptor, Module):
         PortDescriptor('yaxis',Axis),
         PortDescriptor('legend',Legend),
         PortDescriptor('data',DataSets),
-        PortDescriptor('title',basic.String)
+        PortDescriptor('title',basic.String),
+        PortDescriptor('grid',basic.Boolean),
     ]
 
 class MplXYPlot(NotCacheable,Module):
