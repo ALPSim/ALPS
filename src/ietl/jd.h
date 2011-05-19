@@ -16,7 +16,6 @@
 //for lapack::getrs
 #include <boost/numeric/bindings/lapack/computational.hpp>
 //#include <boost/numeric/bindings/detail/config/fortran.hpp>
-
 #include <boost/numeric/bindings/ublas/matrix.hpp>
 #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/bindings/ublas/hermitian.hpp>
@@ -49,6 +48,8 @@ namespace ietl{
     };
 //jd_iterator//////////////////////////////////////////////////////
     namespace detail{
+
+//deflated matrix multiplication (I-QQ*)(A-\theta I)(I-QQ*)////////
 
         template <class MATRIX, class VS> 
             class deflated_matrix;
@@ -94,74 +95,15 @@ namespace ietl{
                     r -= ietl::dot(Adef.Q_[i], r) * Adef.Q_[i];
         }
 
-        template <class MATRIX, class VS, class PREC> 
-            class deflated_matrix_prec;
-        template <class MATRIX, class VS, class PREC, class VECTOR>
-            void mult(const deflated_matrix_prec<MATRIX,VS,PREC> & Adef, const VECTOR& v, VECTOR& r);
-
-        template <class MATRIX, class VS, class PREC>
-        class deflated_matrix_prec   {
-            public:
-                typedef typename vectorspace_traits<VS>::vector_type vector_type;
-                typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
-                typedef typename real_type<scalar_type>::type real_type;
-
-                deflated_matrix_prec(const PREC& K, const MATRIX& A, double theta, const std::vector<vector_type>& Q) 
-                    : A_(A) , theta_(theta) , Q_(Q), K_(K) {}
-                ~deflated_matrix_prec() {}
-
-                void set_theta(real_type theta) 
-                    { theta_ = theta; }
-
-                friend void mult<>(const deflated_matrix_prec& A_def, const vector_type& v, vector_type& r);
-
-            private:
-                const MATRIX& A_;
-                const PREC& K_;
-                real_type theta_;
-                const std::vector<vector_type>& Q_;    
-        };
-
-        template <class MATRIX, class VS, class PREC, class VECTOR>
-        void mult(  const deflated_matrix_prec<MATRIX,VS,PREC>& Adef, 
-                    const VECTOR& v, 
-                    VECTOR& r)
-        {// (I-QQ*)K(A-thetaI)(I-QQ*)v = r 
-                VECTOR temp = v;
-
-                for(size_t i = 0; i < Adef.Q_.size() ; ++i) 
-                    temp -= ietl::dot(Adef.Q_[i], temp) * Adef.Q_[i];
-
-                ietl::mult(Adef.A_, temp, r);
-                r -= Adef.theta_ * temp;
-
-                ietl::mult(Adef.K_, r, r);
-
-                for(size_t i = 0; i < Adef.Q_.size() ; ++i) 
-                    r -= ietl::dot(Adef.Q_[i], r) * Adef.Q_[i];
-        }
-
-        template <class REAL>
-        class mycmp{
-            public:
-                typedef std::pair<size_t, REAL> pair_type;
-
-                mycmp(REAL t)
-                    : tau_(t) {}
-
-                inline bool operator() (pair_type i, pair_type j)
-                    { return ( std::abs(i.second-tau_) < std::abs(j.second-tau_) ); }
-            private:
-            REAL tau_;
-        };
-
-        template <class REAL>
-        inline REAL mysecond (std::pair<size_t,REAL> i)
-            { return i.second; }
-
-}//end namespace detail
-//solver//////////////////////////////////////////////////////////////////////////////////////
+}//end namespace detail///////////////////////////////////////////////////////
+//solver//////////////////////////////////////////////////////////////////////
 namespace solver {
+
+//left preconditioned correction-equation-solver
+    template <class MATRIX, class VS, class PREC>   class left_prec_solver;
+
+    template <class MATRIX, class VS, class PREC, class VECTOR>
+    void mult (const left_prec_solver<MATRIX,VS,PREC>&, const VECTOR&, VECTOR&);
 
     template <class MATRIX, class VS, class PREC>
     class left_prec_solver {
@@ -175,7 +117,9 @@ namespace solver {
             : A_(A) , Q_(Q) , vspace_(vs) , K_(K) , x0_(new_vector(vs))  {}
 
         template <class IT>
-        void operator() ( scalar_type theta, vector_type& r, vector_type& t, IT& iter );
+        void operator() ( real_type theta, vector_type& r, vector_type& t, IT& iter );
+
+        friend void mult<>(const left_prec_solver& A_def, const vector_type& v, vector_type& z);
 
     protected:
         const MATRIX& A_;
@@ -184,129 +128,81 @@ namespace solver {
         std::vector<vector_type> Q_hat_;
         PREC& K_;
         vector_type x0_;
+        real_type theta_;
+        mutable ublas::vector<scalar_type> gamma_;
+        std::vector<int> pivot_;
+        matrix_type LU_, M_;
     };
 
-    // K preconditioner for (A - theta *I)
-    template <class MATRIX, class VS, class PREC> template <class IT>
-    void left_prec_solver<MATRIX,VS,PREC>::operator() ( scalar_type theta, vector_type& r, vector_type& t, IT& iter )
+    template <class MATRIX, class VS, class PREC, class VECTOR>
+    void mult (const left_prec_solver<MATRIX,VS,PREC>& LPS, const VECTOR& v, VECTOR& z)
     {
-        for(size_t i = 0; i < vec_dimension(vspace_); ++i)
-            K_(i,i) = 1./(A_(i,i) - theta); // inv(K) instead of K
+        VECTOR temp;
 
-        const size_t max_iter = 5;
-        size_t m = Q_.size();
-        size_t m_old = 0;//Q_hat_.size();
+        z = LPS.theta_ * v;
+
+        ietl::mult(LPS.A_, v, temp);
+
+        temp -= z;
+        // K y_tilde = y
+        ietl::mult(LPS.K_, temp, z);
+
+        for(size_t i = 0; i < LPS.Q_.size(); ++i)
+            LPS.gamma_(i) = ietl::dot(LPS.Q_[i],z);
+
+        int info = lapack::getrs(LPS.LU_, LPS.pivot_, LPS.gamma_);
+            if(info != 0)   throw std::runtime_error("lapack::getrs failed.");
+
+        for(size_t i = 0; i < LPS.Q_hat_.size(); ++i)
+            z -= LPS.Q_hat_[i]* LPS.gamma_(i);
+    }
+
+    // jacobi preconditioner for (A - theta *I)
+    template <class MATRIX, class VS, class PREC> template <class IT>
+    void left_prec_solver<MATRIX,VS,PREC>::operator() ( real_type theta, vector_type& r, vector_type& t, IT& iter )
+    {
+        theta_ = theta;
+        const unsigned int m = Q_.size(), m_old = Q_hat_.size();//if K changes =0;
+        const size_t max_iter = iter.sub_max_iter();
         double abs_tol = iter.absolute_tolerance();
         abs_tol *= abs_tol;
-        int info;
-        matrix_type M(m,m);
-        matrix_type LU;
-        ublas::vector<scalar_type> b(m);
-        std::vector<int> pivot(m);
-        ublas::vector<scalar_type> gamma(m);
-        detail::deflated_matrix_prec<MATRIX,VS,PREC> Adef(K_, A_, theta, Q_);
 
+        M_.resize(m,m);
+        gamma_.resize(m);
+        pivot_.resize(m);
         Q_hat_.resize(m);
 
         for(size_t i = m_old; i < m; ++i)
-        {
-            // starting with x0 = b is good if K_ approx. I
-            //Q_hat_[i] = ietl_gmres(K_, Q_[i], Q_[i], max_iter, abs_tol, false);
             ietl::mult(K_, Q_[i], Q_hat_[i]);
-        }
 
         for(size_t i = 0; i < m; ++i)
             for(size_t j = ( (i<m_old) ? m_old : 0 ); j < m; ++j)
-                M(i,j) = ietl::dot(Q_[i], Q_hat_[j]);
+                M_(i,j) = ietl::dot(Q_[i], Q_hat_[j]);
 
-        LU = M;
-        info = lapack::getrf(LU, pivot);
+        LU_ = M_;
+
+        int info = lapack::getrf(LU_, pivot_);
             if(info != 0)   throw std::runtime_error("lapack::getrf failed.");
 
-        //compute r_tilde
-        //t = ietl_gmres(K_, r, r, max_iter, abs_tol, false);
-        ietl::mult(K_, r, t)
-;
-        for(size_t i = 0; i < m; ++i)
-            gamma(i) = ietl::dot(Q_[i],t);
-
-        //calculate alpha from M alpha = gamma
-        info = lapack::getrs(LU, pivot, gamma);
-            if(info != 0)   throw std::runtime_error("lapack::getrs failed.");
-
-        for(size_t i = 0; i < m; ++i)
-            t -= Q_hat_[i]*gamma(i);
-
-         t *= -1;
-
-        //apply krylov solver for A_tilde v = -r_tilde
-        r = ietl_gmres(Adef, t, x0_, max_iter, abs_tol, false);
-
-        //r = y, t = y_hat
-        ietl::mult(A_, r, t);
-        r *= -theta;
-        r += t;
-
-        //t = ietl_gmres(K_, r, r, max_iter, abs_tol, false);
         ietl::mult(K_, r, t);
 
         for(size_t i = 0; i < m; ++i)
-            gamma(i) = ietl::dot(Q_[i],t);
+            gamma_(i) = ietl::dot(Q_[i],t);
 
-        info = lapack::getrs(LU, pivot, gamma);
+        //calculate alpha from M alpha = gamma
+        info = lapack::getrs(LU_, pivot_, gamma_);
             if(info != 0)   throw std::runtime_error("lapack::getrs failed.");
 
-        //z = y_hat - Q_hat alpha
+        r = -t;
+
         for(size_t i = 0; i < m; ++i)
-            t -= Q_hat_[i]*gamma(i);
+            r += gamma_(i)*Q_hat_[i];
+
+        t = ietl_gmres(*this, r, x0_, max_iter, abs_tol, false);
 
     }//left_prec_solver::void()
 
-///////simple left preconditioned solver///////////////////////////////////////////
-//solving (I-QQ*)K(A-theta*I)(I-QQ*)t = -Kr
-    template <class MATRIX, class VS, class PREC>
-    class left_prec_simple {
-    public:
-        typedef typename vectorspace_traits<VS>::vector_type vector_type;
-        typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
-        typedef typename real_type<scalar_type>::type real_type;
-        typedef ublas::matrix< scalar_type, ublas::column_major > matrix_type;
-
-        left_prec_simple ( const MATRIX& A, const std::vector<vector_type>& Q, const VS& vs, PREC& K) 
-            : A_(A) , Q_(Q) , vspace_(vs) , K_(K), Adefp_(K, A, 0., Q) , x0_(new_vector(vs))  {}
-
-        template <class IT>
-        void operator() ( scalar_type theta, vector_type& r, vector_type& t, IT& iter );
-
-    protected:
-        const MATRIX& A_;
-        PREC& K_;
-        detail::deflated_matrix_prec<MATRIX, VS, PREC> Adefp_;
-        const std::vector<vector_type>& Q_;
-        const VS& vspace_;
-        std::vector<vector_type> Q_hat_;
-        vector_type x0_;
-    };
-
-    template <class MATRIX, class VS, class PREC> template <class IT>
-    void left_prec_simple<MATRIX,VS,PREC>::operator() ( scalar_type theta, vector_type& r, vector_type& t, IT& iter )
-    {
-        Adefp_.set_theta(theta);
-
-        for(size_t i = 0; i < vec_dimension(vspace_); ++i)
-        {
-            K_(i,i) = 1./(A_(i,i) - theta);
-        }
-
-        r *= -1;
-        //ietl::mult(K_, r, r);
-
-        t = ietl_gmres(Adefp_, r, x0_, 5, iter.absolute_tolerance(), false);
-
-    }
-
-
-//////////simple solver with gmres/////////////////////////
+//simple solver with gmres//////////////////////////////////////////////////////
     template <class MATRIX, class VS>
     class jd_solver {
     public:
@@ -315,8 +211,8 @@ namespace solver {
         typedef typename real_type<scalar_type>::type real_type;
 
         jd_solver (const MATRIX& A, const std::vector<vector_type>& Q, const VS& vspace)
-            : Adef_(A, 0, Q), vspace_(vspace)
-             {      x0_ = new_vector(vspace);    }
+            : Adef_(A, 0, Q), vspace_(vspace), Q_(Q), x0_(new_vector(vspace))
+             {}
         
         template <class IT>
         void operator() ( scalar_type theta, vector_type& r, vector_type& t, IT& iter );
@@ -325,16 +221,25 @@ namespace solver {
         detail::deflated_matrix<MATRIX, VS> Adef_;
         const VS& vspace_;
         vector_type x0_;
+        const std::vector<vector_type>& Q_;
     };
         template <class MATRIX, class VS>
         template <class IT>
         void jd_solver<MATRIX, VS>::operator()( scalar_type theta, vector_type& r, vector_type& t, IT& iter)
         {
             Adef_.set_theta(theta);
+
+            //one step approximation
+            /*x0_ = -r;
+            for(size_t i = 0; i < Q_.size(); ++i)
+                x0_ += ietl::dot(Q_[i],r)/ietl::dot(Q_[i],Q_[i]) * Q_[i];*/
+
             r *= -1;
-            t = ietl_gmres(Adef_, r, x0_, iter.sub_max_iter(), iter.absolute_tolerance(), false);
+
+            //starting with x0_ = 0
+            t = ietl_gmres(Adef_, r, x0_, iter.sub_max_iter(), iter.absolute_tolerance()*iter.absolute_tolerance(), false);
         }
-}//end namespace solver/////////////////////////////////////////////////////////////////////////////////
+}//end namespace solver///////////////////////////////////////////////////////////
 
     template <class MATRIX, class VS>
     class jd {
@@ -353,32 +258,21 @@ namespace solver {
         //default: search for lowest eigenvalues
         template <class SOLVER, class IT, class GEN>
         void eigensystem(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, bool search_highest);
-        //with a target value tau
-        template <class SOLVER, class IT, class GEN>
-        void eigensystem(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau);
 
         //without preconditioning
         template <class IT, class GEN>
         void eigensystem(IT& iter, GEN& gen, size_type k_max, bool search_highest = false)    
             {
                 typedef solver::jd_solver<MATRIX,VS> solver_type;
-                solver_type default_solver(A_, X_, vspace_);
-                eigensystem <solver_type,IT,GEN> (default_solver, iter, gen, k_max, search_highest);
+                solver_type solver(A_, X_, vspace_);
+                eigensystem <solver_type,IT,GEN> (solver, iter, gen, k_max, search_highest);
             }
 
-        template <class IT, class GEN>
-        void eigensystem(IT& iter, GEN& gen, size_type k_max, real_type tau)    
-            {
-                typedef solver::jd_solver<MATRIX,VS> solver_type;
-                solver_type default_solver(A_, X_, vspace_);
-                eigensystem <solver_type,IT,GEN> (default_solver, iter, gen, k_max, tau );
-            }
-
-        //with left preconditioner K, for (A - theta * I)
+        //with left preconditioner K with K (A - \theta I) ~= I
         template <class IT, class GEN, class PREC>
         void eigensystem( IT& iter, GEN& gen, size_type k_max, PREC& K, bool search_highest = false)
             {
-                typedef solver::left_prec_simple<MATRIX,VS,PREC> solver_type;
+                typedef solver::left_prec_solver<MATRIX,VS,PREC> solver_type;
                 solver_type lp_solver(A_, X_, vspace_, K);
                 eigensystem <solver_type,IT,GEN> (lp_solver, iter, gen, k_max, search_highest);
             }
@@ -390,8 +284,8 @@ namespace solver {
         void eigensystem_harmonic(IT& iter, GEN& gen, size_type k_max, real_type tau)    
             {
                 typedef solver::jd_solver<MATRIX,VS> solver_type;
-                solver_type default_solver(A_, X_, vspace_);
-                eigensystem_harmonic <solver_type,IT,GEN> (default_solver, iter, gen, k_max, tau);
+                solver_type solver(A_, X_, vspace_);
+                eigensystem_harmonic <solver_type,IT,GEN> (solver, iter, gen, k_max, tau);
             }
 
         //access functions
@@ -419,8 +313,6 @@ namespace solver {
                 X_.clear();
                 Lambda_.clear();
             }
-        template <class IT>
-        void filter_ghosts(IT& iter);
 
     protected:
         MATRIX& A_;
@@ -431,33 +323,7 @@ namespace solver {
         size_t verbose_;    //verbosity levels: 0 = no, 1 = yes, 2 = all
     };// end of class jd
 
-    // filter ghosts after(!) applying the jd-algorithm, because one way to prevent new
-    // ghosts is using gram-schmidt repeatedly, and having the ghost-eigenvectors in X_,
-    // does just that
-    // might not filter all ghosts, especially if the eigenvector is close to 0
-    template <class MATRIX, class VS>
-    template <class IT>
-    void jd<MATRIX,VS>::filter_ghosts(IT& iter)
-    {
-        for (size_t i = 1; i < Lambda_.size(); ++i)
-            for (size_t j = 0; j < i; ++j)
-                if( std::abs( Lambda_[i] - Lambda_[j] ) < iter.absolute_tolerance() ) 
-                    if( ietl::two_norm( X_[i] - X_[j] ) < iter.absolute_tolerance() )   //eigenpair i is equal to j
-                    {
-                        if( verbose_ > 1)
-                            std::cout <<"removing eigenvalue... "<< Lambda_[i] << "\n";
-                        //remove i
-                        Lambda_.erase( Lambda_.begin() + i);
-                        for( size_t k = i; k < Lambda_.size()-1 ; ++k)
-                        {
-                            std::swap( X_[k], X_[k+1] );
-                        }
-                        X_.pop_back();
-                        --i;
-                    }
-    }
-
-//////jd for exterior eigenvalues
+//jd for exterior eigenvalues ///////////////////////////////////////////////////
     template <class MATRIX, class VS>
     template <class SOLVER, class IT, class GEN>
     void jd<MATRIX,VS>::eigensystem(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, bool search_highest)
@@ -466,6 +332,8 @@ namespace solver {
         typedef std::vector<real_type> real_set_type;
         typedef ublas::hermitian_matrix< scalar_type, ublas::upper > herm_matrix_type;
         typedef ublas::matrix< scalar_type, ublas::column_major > matrix_type;
+
+        assert(k_max <= n_);
 
         const magnitude_type kappa = 0.25; // kappa < 1
         magnitude_type norm_t, norm_r;
@@ -477,7 +345,7 @@ namespace solver {
         vector_set_type VA;
         X_.resize( X_.size()+1 ); //X_.back() == u
 
-        herm_matrix_type M; //might be better with preset size (k_max, k_max)
+        herm_matrix_type M;
 
         real_set_type Theta;
         matrix_type S;
@@ -493,15 +361,6 @@ namespace solver {
             //modified Gram-Schmidt
             norm_t = ietl::two_norm(t);
 
-            if(norm_t == 0/*< iter.absolute_tolerance()*/) {
-            //if the correction solver returns a t approx 0, numerical errors might create u non orthogonal to X_i
-                    std::cerr << "Correction vector t is (almost) zero:\n";
-                    if(iter.first())
-                        throw std::runtime_error("generating a starting vector failed.");
-                    else
-                        throw std::runtime_error("try to solve the correction equation more accurately.");
-                    }
-
             for(size_type i = 0; i < m; ++i) 
                 t -= ietl::dot(V[i],t) * V[i];
             if(ietl::two_norm(t) <= kappa * norm_t)
@@ -509,6 +368,15 @@ namespace solver {
                     t -= ietl::dot(V[i],t) * V[i];
 
             norm_t = ietl::two_norm(t);
+
+            if(norm_t == 0/*< iter.absolute_tolerance()*/) {
+                    std::cerr << "Correction vector t is zero:\n";
+                    if(iter.first())
+                        throw std::runtime_error("generating a starting vector failed.");
+                    else
+                        throw std::runtime_error("try to solve the correction equation more accurately.");
+                    }
+
             V.push_back(t/norm_t);
             ++m;
             VA.resize(m);
@@ -542,10 +410,11 @@ namespace solver {
             r = uA - theta * X_.back();
 
             // accept eigenpairs
-            norm_r = ietl::two_norm(r);     //use 1-norm
+            norm_r = ietl::two_norm(r);
 
             while(iter.finished(norm_r,theta)) 
             {
+
                 if(iter.error_code() == 1)
                     throw std::runtime_error(iter.error_msg());
 
@@ -556,10 +425,13 @@ namespace solver {
 
                 if(++k == k_max) return;
 
+                if(m < 1) {//could start anew with a random vector
+                    throw std::runtime_error("search space is depleted, try a different generator.");
+                }
                 --m;
                 M = ublas::zero_matrix<scalar_type>(m,m);
 
-                //use VA temp as V
+                //use VA temporary as V
                 VA.resize(m);
                 for(size_type i = 0; i < m; ++i)
                 {
@@ -628,8 +500,10 @@ namespace solver {
 
             //assure t is orthogonal to Q
             norm_t = ietl::two_norm(t);
+
             for(size_t i = 0; i< X_.size();++i)
                 t -= ietl::dot(t,X_[i])*X_[i];
+
             if(ietl::two_norm(t) <= kappa * norm_t)
                 for(size_t i = 0; i< X_.size();++i)
                     t -= ietl::dot(t,X_[i])*X_[i];
@@ -638,190 +512,13 @@ namespace solver {
             if(iter.error_code() == 1)
                 throw std::runtime_error(iter.error_msg());
             if(verbose_ > 1)
-                std::cout << "JD iteration " << iter.iterations() << "\tresid = " << norm_r << "\n";
+                std::cout << "JD iteration " << iter.iterations() << "\t resid = " << norm_r << "\n";
         }// main loop
 
     }// eigensystem
 
-//////again jd for exterior eigenvalues, but with target value tau/////////////
-    template <class MATRIX, class VS>
-    template <class SOLVER, class IT, class GEN >
-    void jd<MATRIX,VS>::eigensystem(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau)
-    {
-        typedef std::vector<vector_type> vector_set_type;
-        typedef std::vector<real_type> real_set_type;
-        typedef ublas::hermitian_matrix< scalar_type, ublas::upper > herm_matrix_type; //todo: ublas::lower is faster
-        typedef ublas::matrix< scalar_type, ublas::column_major > matrix_type;
+//jd for interior eigenvalues with harmonic ritz values//////////////////////////////////////////////////
 
-        const magnitude_type kappa = 0.25; // kappa < 1
-        magnitude_type norm_t, norm_r;
-        const size_type m_min = iter.m_min(), m_max = iter.m_max();
-        size_type k = 0, m = 0;
-        size_type row;
-        int info;
-
-        vector_set_type V;
-        vector_set_type VA;
-        X_.resize( X_.size()+1 ); //X_.back() == u
-
-        herm_matrix_type M; //might be better with preset size (k_max, k_max)
-
-        std::vector<std::pair<size_t, real_type> > pivot;
-        detail::mycmp<real_type> cmp(tau);
-
-        real_set_type Theta;
-        matrix_type S;
-
-        vector_type uA, r;
-        vector_type t = new_vector(vspace_);
-
-        generate(t, gen);
-        project(t, vspace_);
-
-        while(true) 
-        {
-            //modified Gram-Schmidt
-            norm_t = ietl::two_norm(t);
-
-            if(norm_t < iter.absolute_tolerance() /*== 0*/) {
-            //if the correction solver returns a t approx 0, numerical errors might create u non orthogonal to X_i
-            //tau might be too far away? which seems not to matter for the first eigenvalue!
-                    std::cerr << "Correction vector t is (almost) zero:\n";
-                    if(iter.first())
-                        throw std::runtime_error("generating a starting vector failed.");
-                    else
-                        throw std::runtime_error("try to solve the correction equation more accurately.");
-                    }
-            for(size_type i = 0; i < m; ++i) 
-                t -= ietl::dot(V[i],t) * V[i];
-            if(ietl::two_norm(t) <= kappa * norm_t)
-                for(size_type i = 0; i < m; ++i)
-                    t -= ietl::dot(V[i],t) * V[i];
-
-            norm_t = ietl::two_norm(t);
-            V.push_back(t/norm_t);
-            ++m;
-            VA.resize(m);
-
-            ietl::mult(A_, V[m-1], VA[m-1]);
-            assert(m == V.size() && m == VA.size());
-
-            M.resize(m,m);
-
-            for(size_type i = 0; i < m; ++i)
-                M(i, m-1) = ietl::dot(V[i], VA[m-1]);
-
-            //eigendecomposition M = S THETA S*
-            Theta.resize(m);
-
-            S = M; //copy M
-
-            info = lapack::heev('V', S, Theta); //eigenvectors in columns of S
-                if(info < 0) throw std::runtime_error("lapack::heev - illegal value.");
-                if(info > 0) throw std::runtime_error("lapack::heev - failed to converge.");
-
-            //sort
-            pivot.resize(m);
-            for(size_type i = 0; i < m; ++i) 
-                pivot[i] = std::make_pair(i,Theta[i]);
-            std::sort(pivot.begin(), pivot.end(), cmp);
-            std::transform(pivot.begin(), pivot.end(), Theta.begin(), detail::mysecond<real_type>);
-
-            // u = V s_1
-            row = pivot[0].first;
-            X_.back() = V[0] * S(0,row);
-            for(size_type j = 1; j < m; ++j) 
-                X_.back() += V[j] * S(j,row);
-
-            ietl::mult(A_, X_.back(), uA);
-            r = uA - Theta[0] * X_.back();
-
-            // accept eigenpairs
-            norm_r = ietl::two_norm(r);    
-
-            while(iter.finished(norm_r,Theta[0])) 
-            {
-                if(iter.error_code() == 1)
-                    throw std::runtime_error(iter.error_msg());
-
-                if(verbose_ > 0)
-                    std::cout << "Accepted eigenpair #"<< k+1 << "\t" << Theta[0] << "\tResidual: " << norm_r << "\n";
-
-                Lambda_.push_back( Theta[0] ); //Lambda_[k] = Theta[0];
-
-                if(++k == k_max) return;
-
-                --m;
-                M = ublas::zero_matrix<scalar_type>(m,m);
-
-                //use VA temp as V
-                VA.resize(m);
-                for(size_type i = 0; i < m; ++i)
-                {
-                        row = pivot[i+1].first;
-                        VA[i] = V[0] * S(0,row);
-                        for(size_type j = 1; j < m+1; ++j)
-                            VA[i] += V[j] * S(j,row);
-                }
-                V.resize(m);
-                for(size_type i = 0; i < m; ++i)
-                {
-                    std::swap(VA[i], V[i]);
-                    ietl::mult(A_, V[i], VA[i]);
-                    M(i,i) = Theta[i+1];
-                    ublas::column(S, pivot[i].first) = ublas::unit_vector<scalar_type> (S.size1(), i);
-                }
-                Theta.erase( Theta.begin() );
-
-                X_.resize(X_.size()+1);
-                X_.back() = V[0];
-                r = VA[0] - Theta[0] * X_.back();
-                norm_r = ietl::two_norm(r);
-            } // accept eigenpairs
-
-            // restart
-            if(m >= m_max) {
-                if(verbose_ > 1) 
-                    std::cout<<"restart...\n";
-                M = ublas::zero_matrix<scalar_type>(m_min,m_min);
-                assert(M.size1() == m_min);
-
-                VA.resize(m_min);
-
-                for(size_type i = 1; i < m_min; ++i) {
-                    row = pivot[i].first;
-                    VA[i] = V[0] * S(0,row);
-                    for(size_type j = 1; j < m_max; ++j)
-                        VA[i] += V[j] * S(j,row);
-                }
-                    
-                V.resize(m_min);
-                for(size_type i = 1; i < m_min; ++i)
-                {
-                    std::swap(V[i], VA[i]);
-                    ietl::mult(A_, V[i], VA[i]);
-                }
-
-                V[0] = X_.back();
-                VA[0] = uA;
-                for(size_type i = 0; i < m_min; ++i)    M(i,i) = Theta[i];
-                Theta.resize(m_min);
-                m = m_min;
-            }// restart
-
-            // correction equation
-            solver(Theta[0], r, t, iter); //solver is allowed to change r
-
-            ++iter;
-            if(iter.error_code() == 1)
-                throw std::runtime_error(iter.error_msg());
-            if(verbose_ > 1)
-                std::cout << "JD iteration " << iter.iterations() << "\tresid = " << norm_r << "\n";
-        }// main loop
-
-    }// eigensystem
-
-//////jd for interior eigenvalues with harmonic ritz values////////////////
     template <class MATRIX, class VS>
     template <class SOLVER, class IT, class GEN >
     void jd<MATRIX,VS>::eigensystem_harmonic(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau)
@@ -861,6 +558,9 @@ namespace solver {
 
             ++m;
             scalar_type norm_w = ietl::two_norm(W.back());
+            if(norm_w == 0)
+                throw std::runtime_error("New search vector is zero.");
+
             W.back() /= norm_w;
             V.push_back( t/norm_w );
 
@@ -900,11 +600,13 @@ namespace solver {
                     throw std::runtime_error(iter.error_msg());
 
                 if(verbose_ > 0)
-                    std::cout << "Accepted eigenpair #"<< k+1 << "\t" << theta + tau << "\tResidual: " << norm_r << "\n";
+                    std::cout << "Accepted eigenpair #"<< k+1 << "\t" << theta + tau << "\t Residual: " << norm_r << "\n";
                 Lambda_.push_back( theta + tau );
 
                 if(++k == k_max) return;
 
+                if(m < 1)
+                    throw std::runtime_error("search space is depleted, try a different generator.");
                 --m;
                 M = ublas::zero_matrix<scalar_type>(m,m);
 
@@ -986,6 +688,9 @@ namespace solver {
 
             // correction equation
             solver(theta, r, t, iter); //solver is allowed to change r
+
+            for(size_t i = 0; i < X_.size(); ++i)
+                t -= ietl::dot(t,X_[i])*X_[i];
 
             ++iter;
             if(iter.error_code() == 1)
