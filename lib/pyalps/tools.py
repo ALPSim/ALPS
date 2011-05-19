@@ -401,42 +401,6 @@ def getResultFiles(dirname='.',pattern=None,prefix=None):
     res += replicas
     return res
 
-def groupSets(data, for_each = []):
-    """ groups a list of DataSet objects into a list of lists
-        
-        this function groups a list of DataSet objects into a list of lists, according to the values of the properties given in the for_ech argument. DataSet objects with the same values of the properties given in for_each are grouped together.
-        The parameters are:
-          data: the data to be grouped
-          for_each: the properties according to which the data is grouped
-    """
-    dd = depth(groups)
-
-    if dd > 1:
-        hgroups = flatten(groups, -1)
-        hgroups_idcs = hgroups.indices()
-    else:
-        hgroups = [groups]
-        hgroups_idcs = [0]
-
-    for idx in hgroups_idcs:
-        sets = hgroups[idx]
-    
-        for_each_sets = {}
-        for iset in sets:
-            fe_par_set = tuple((iset.props[m] for m in for_each))
-        
-            if fe_par_set in for_each_sets:
-                for_each_sets[fe_par_set].append(iset)
-            else:
-                for_each_sets[fe_par_set] = [iset]
-    
-        hgroups[idx] = for_each_sets.values()
-
-    if dd > 1:
-        return groups
-    else:
-        return hgroups[0]
-
 def collectXY(sets,x,y,foreach=[]):
       """ collects specified data from a list of DataSet objects
          
