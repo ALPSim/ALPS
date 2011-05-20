@@ -29,16 +29,5 @@ if(not_successful)
     message(SEND_ERROR "error runing test 'ngs_single': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
-#execute_process(
-#    COMMAND ${CMAKE_COMMAND} -E compare_files ${output_path} ${cmd}_output
-#    RESULT_VARIABLE not_successful
-#    OUTPUT_VARIABLE out
-#    ERROR_VARIABLE err
-#    TIMEOUT 600
-#)
-#if(not_successful)
-#    message(SEND_ERROR "output does not match for 'python_${cmd}': ${err}; ${out}; shell output: ${not_successful}!")
-#endif(not_successful)
-
 file(REMOVE ngs_single_output_1)
 file(REMOVE ngs_single_output_2)

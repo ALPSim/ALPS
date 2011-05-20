@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
     // load parameterfile
     alps::parameters_type<ising_simulation>::type params(options.input_file);
 
+    // create simulation
     ising_simulation s(params);
 
     // resume if --continue is passed
@@ -47,7 +48,7 @@ int main(int argc, char *argv[]) {
     // save observables to hdf5
     s.save(params.value_or_default("DUMP", "dump").str());
 
-    alps::results_type<alps::mcmpisim<ising_simulation> >::type results = collect_results(s);
+    alps::results_type<ising_simulation>::type results = collect_results(s);
     {
         using namespace alps;
         // print whole result

@@ -27,40 +27,30 @@
 
 #include "ising.hpp"
 
-// check for signals and time limit
-bool stop_callback(boost::posix_time::ptime const & start_time, int time_limit) {
-    static alps::mcsignal signal;
-    return !signal.empty() 
-        || (time_limit > 0 && boost::posix_time::second_clock::local_time() > start_time + boost::posix_time::seconds(time_limit));
-}
-
 int main(int argc, char *argv[]) {
 
     // load command line argumen
     alps::mcoptions options(argc, argv);
 
-    // initialize mpi
-    boost::mpi::environment env(argc, argv);
-    boost::mpi::communicator c;
-    
     // load parameterfile
-    alps::parameters_type<alps::mcmpisim<ising_simulation> >::type params(options.input_file);
+    alps::parameters_type<ising_simulation>::type params(options.input_file);
+
 
     // create simulation
-    alps::mcmpisim<ising_simulation> s(params, c);
-    
+    alps::mcthreadedsim<ising_simulation> s(params);
+
     // resume if --continue is passed
     if (options.resume)
-        s.load(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()));
+        s.load(params.value_or_default("DUMP", "dump").str());
 
     // runs simulation
-    s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time(), options.time_limit));
+    s.run(boost::bind(&alps::basic_stop_callback, options.time_limit));
 
-    // save observables to hdf5 
-    s.save(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()));
+    // save observables to hdf5
+    s.save(params.value_or_default("DUMP", "dump").str());
 
-    alps::results_type<alps::mcmpisim<ising_simulation> >::type results = collect_results(s);
-    if (!c.rank()) {
+    alps::results_type<alps::mcthreadedsim<ising_simulation> >::type results = collect_results(s);
+    {
         using namespace alps;
         // print whole result
         std::cout << "Correlations:           " << short_print(results["Correlations"]) << std::endl;
@@ -81,10 +71,9 @@ int main(int argc, char *argv[]) {
         // more complex functions can be applied
         std::cout << "Sin(Energy):            " << short_print(sin(results["Energy"])) << std::endl;
         std::cout << "Tanh(Correlations):     " << short_print(tanh(results["Correlations"])) << std::endl;
-
-        // save results to hdf5
-        save_results(results, params, options.output_file, "/simulation/results");
     }
 
+    // save results to hdf5
+    save_results(results, params, options.output_file, "/simulation/results");
 }
 

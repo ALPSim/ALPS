@@ -44,10 +44,10 @@ int main(int argc, char *argv[]) {
     boost::mpi::communicator c;
     
     // load parameterfile
-    alps::parameters_type<alps::mcmpisim<ising_simulation> >::type params(options.input_file);
+    alps::parameters_type<alps::mcmpisim<alps::mcthreadedsim<ising_simulation> > >::type params(options.input_file);
 
     // create simulation
-    alps::mcmpisim<ising_simulation> s(params, c);
+    alps::mcmpisim<alps::mcthreadedsim<ising_simulation> > s(params, c);
     
     // resume if --continue is passed
     if (options.resume)
@@ -56,10 +56,10 @@ int main(int argc, char *argv[]) {
     // runs simulation
     s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time(), options.time_limit));
 
-    // save observables to hdf5 
+    // save observables to hdf5
     s.save(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()));
 
-    alps::results_type<alps::mcmpisim<ising_simulation> >::type results = collect_results(s);
+    alps::results_type<alps::mcmpisim<alps::mcthreadedsim<ising_simulation> > >::type results = collect_results(s);
     if (!c.rank()) {
         using namespace alps;
         // print whole result
