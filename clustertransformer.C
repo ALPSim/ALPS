@@ -929,7 +929,36 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
         }
       }
     }
-  } 
+  }else if (parms.value_or_default("ISOLATED", false)){
+    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+      for (frequency_t freq=0; freq<n_matsubara; ++freq) {
+        G0_omega_new(freq, kc, kc, 0,0) = 0.;
+        G0_omega_new(freq, kc, kc, 0,1) = 0.;
+        G0_omega_new(freq, kc, kc, 1,0) = 0.;
+        G0_omega_new(freq, kc, kc, 1,1) = 0.;
+        std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+        
+        vector_type k(dimension());
+        for (unsigned int d=0; d<dimension(); ++d) 
+          k[d] = cluster_momentum(kc,d);
+        double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+        double prefactor=dwave_prefactor;
+        
+        //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
+        std::complex<double> G0_omega_latt_inv[4]=
+        {iomega_n + mu -epsilon(k),
+          - prefactor*std::complex<double>( eta1_init, eta2_init),
+          - prefactor*std::complex<double>( eta1_init,-eta2_init),
+          iomega_n - mu +epsilon(k)};
+        
+        std::complex<double> G0omega_latt_inv_det=G0_omega_latt_inv[0]*G0_omega_latt_inv[3]-G0_omega_latt_inv[1]*G0_omega_latt_inv[2];
+        G0_omega_new(freq, kc, kc, 0,0) =  G0_omega_latt_inv[3]/G0omega_latt_inv_det;
+        G0_omega_new(freq, kc, kc, 0,1) =- G0_omega_latt_inv[1]/G0omega_latt_inv_det;
+        G0_omega_new(freq, kc, kc, 1,0) =- G0_omega_latt_inv[2]/G0omega_latt_inv_det;
+        G0_omega_new(freq, kc, kc, 1,1) =  G0_omega_latt_inv[0]/G0omega_latt_inv_det;
+      }
+    }
+  }
   else {
     nambu_matsubara_green_function_t G0_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);  
     nambu_matsubara_green_function_t G_omega(n_matsubara,n_cluster_sites(),n_flavor, diagonal);

@@ -1081,8 +1081,8 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
   std::set<pair_class_type>::const_iterator itc, itc_end;
   std::cout<<"doing spatial symmetries: "<<std::endl;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
-    std::cout<<"new symmetry: "<<std::endl;
     for (spin_t f=0; f<2; ++f) {
+      std::cout<<"new symmetry: "<<std::endl;
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         T av=0;
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
