@@ -193,6 +193,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     G0_old_tau = G0_tau;
     fourier_ptr->frequency_to_time_ft(G0_tau, G0_omega);
     std::cout<<"running NAMBU solver in omega."<<std::endl<<std::flush;
+    //running additional symmetrizations:
+    G0_omega = clustertrans.symmetrize_k_space(G0_omega);
     boost::tie(G_omega, G_tau) = solver.solve_nambu(G0_omega, parms);
     //std::ofstream G_tau_before_symmetrize("G_tau_before_symmetrize.dat"); G_tau_before_symmetrize<<std::make_pair(G_tau,beta);
     G_tau = clustertrans.symmetrize(G_tau, paramagnet);

@@ -1072,19 +1072,23 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
                                                           const std::pair<std::set<pair_class_type>::const_iterator, 
                                                           std::set<pair_class_type>::const_iterator> pair_classes) const
 {
-  std::cout<<"ignoring symmetrization."<<std::endl;
-  return G;
-/*
+//  std::cout<<"ignoring symmetrization."<<std::endl;
+//  return G;
+
   unsigned int nsite=G.nsite();
   unsigned int nfreq=G.nfreq();
   nambu_green_function<T> G_new(nfreq, nsite, 2, diagonal);
   std::set<pair_class_type>::const_iterator itc, itc_end;
+  std::cout<<"doing spatial symmetries: "<<std::endl;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    std::cout<<"new symmetry: "<<std::endl;
     for (spin_t f=0; f<2; ++f) {
       for (frequency_t freq=0; freq<nfreq; ++freq) {
         T av=0;
-        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
+        for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+          if(freq==0){ std::cout<<"symmetrizing spatial GF: "<<it->first<<" "<<it->second<<" entry: "<<G(freq, it->first, it->second, f,f)<<std::endl;}
           av += G(freq, it->first, it->second, f,f);
+        }
         av /= itc->size();
         for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++)
           G_new(freq, it->first, it->second, f,f) = av;
@@ -1092,6 +1096,7 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
     }
   }
 
+  std::cout<<"doing d-wave symmetries."<<std::endl;
   //this is the k-space symmetrization respecting d-wave symmetry
   std::vector<double> dwave_prefactor(nsite);
   for(unsigned int i=0;i<nsite;++i){
@@ -1101,24 +1106,28 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
     else dwave_prefactor[i]=0.;
   }
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
+    std::cout<<"new symmetry: "<<std::endl;
     for (frequency_t freq=0; freq<nfreq; ++freq) { 
       T av01=0;
       T av10=0;
       for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
         if(it->first != it-> second) continue;
-        av01 += dwave_prefactor[it->first]*G(freq, it->first, it->second, 0,1);
+        av01+= dwave_prefactor[it->first]*G(freq, it->first, it->second, 0,1);
         av10+= dwave_prefactor[it->first]*G(freq, it->first, it->second, 1,0);
+        if(freq==0){ std::cout<<"symmetrizing spatial GF: "<<it->first<<" "<<it->second<<" dwave: "<<dwave_prefactor[it->first]<<" entry: "<<dwave_prefactor[it->first]*G(freq, it->first, it->second, 0,1)<<" "<<dwave_prefactor[it->first]*G(freq, it->first, it->second, 1,0)<<std::endl;}
       }
       av01/= itc->size();
       av10/= itc->size();
+      if(freq==0){ std::cout<<"setting average to: "<<av01<<" "<<av10<<std::endl; }
       for(pair_class_type::const_iterator it=itc->begin(); it!=itc->end(); it++){
+        if(it->first != it-> second) continue;
         G_new(freq, it->first, it->second, 0,1) = dwave_prefactor[it->first]*av01;
         G_new(freq, it->first, it->second, 1,0) = dwave_prefactor[it->first]*av10;
       }
     }
   }
   return G_new;
-*/}
+}
 
 //The DCA transormer does the Fourier transforms, dispersions, etc that are needed for the DCA.
 class CDMFTTransformer : public ClusterTransformer

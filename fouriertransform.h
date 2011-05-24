@@ -40,7 +40,6 @@
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_dense_matrix;
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
-
 inline std::complex<double> f_omega(std::complex<double> iw, double c1, double c2, double c3) {
   std::complex<double> iwsq=iw*iw;
   return c1/iw + c2/(iwsq) + c3/(iw*iwsq);
