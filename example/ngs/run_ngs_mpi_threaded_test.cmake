@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-find_program(cmd_path ngs_single ${binarydir} ${dllexedir})
+find_program(cmd_path ngs_mpi_threaded ${binarydir} ${dllexedir})
 
 execute_process(
     COMMAND mpirun -n 4 ${cmd_path} -T 15 --mpi --threaded ${currentdir}/param.h5 sim.mpi_threaded
