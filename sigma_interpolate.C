@@ -141,7 +141,7 @@ int main(int argc, char **argv){
   std::ofstream green0_interpolated_tau_file("green0_interpolated_tau.dat");
   
   green0_interpolated_tau_file<<std::make_pair(green0_itime,beta_new)<<std::endl;
-  std::stringstream filename_new; filename_new<<"G0_omega_input_beta"<<beta_new;
+  std::stringstream filename_new; filename_new<<"G0_omega_input_beta"<<beta_new<<"_mu"<<mu_new<<"_eta"<<eta1_new;
   std::stringstream filename_sigma_new; filename_sigma_new<<"sigma_beta"<<beta_new;
   green0.write(filename_new.str().c_str());
   std::ofstream sigma_file(filename_sigma_new.str().c_str());

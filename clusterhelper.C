@@ -91,8 +91,8 @@ void ClusterHelper::setup_tables()
   }
   //arrange vertices for bipartite lattices
   if (bipartite()) {
-    if(alps::is_master())
-      std::cout << "cluster is bipartite\n";
+    /*if(alps::is_master())
+      std::cout << "cluster is bipartite\n";*/
     for (std::size_t i=0; i<cluster_coordinates_.size1(); ++i) {
       if (identify_sublattice(cluster_coordinates_, i)!=i%2) {
         std::size_t j = i;
@@ -105,7 +105,7 @@ void ClusterHelper::setup_tables()
       }
     }
   }
-  if(alps::is_master()){
+  /*if(alps::is_master()){
     std::ofstream clustercoordstream("ClusterCoordinates");
     for (std::size_t m=0; m<cluster_coordinates_.size1(); ++m) {
       clustercoordstream << m << " ";
@@ -113,7 +113,7 @@ void ClusterHelper::setup_tables()
         clustercoordstream << cluster_coordinates_(m,d) << " ";
       clustercoordstream << std::endl;
     }
-  }
+  }*/
   //setup reciprocal basis
   reciprocal_basis_.resize(dimension(), dimension());
   memset(&(reciprocal_basis_(0,0)), 0, sizeof(double)*dimension()*dimension());
@@ -195,7 +195,7 @@ void ClusterHelper::setup_tables()
      }
      */
   }
-  if(alps::is_master()){
+  /*if(alps::is_master()){
     std::ofstream clustermomstream("ClusterMomenta");
     for (std::size_t m=0; m<cluster_momenta_.size1(); ++m) {
       clustermomstream << m << " ";
@@ -203,9 +203,9 @@ void ClusterHelper::setup_tables()
         clustermomstream << cluster_momenta_(m,d) << " ";
       clustermomstream << std::endl;
     }
-  }
+  }*/
   //setup lattice momenta
-  std::ifstream latticemomstream(lattice_momenta_file_name_.c_str());
+  /*std::ifstream latticemomstream(lattice_momenta_file_name_.c_str());
   if(latticemomstream.is_open()) {
     while(latticemomstream) {
       int m;
@@ -216,10 +216,10 @@ void ClusterHelper::setup_tables()
       append_column_no_duplicates(lattice_momenta_, momw);
     }
     latticemomstream.close();
-  }
-  else {
-    std::cerr << "cannot read lattice momenta file\n"; 
-    std::cerr << "calculating lattice momenta\n";
+  }*/
+  //else {
+    //std::cerr << "cannot read lattice momenta file\n"; 
+    //std::cerr << "calculating lattice momenta\n";
     std::vector<double> weights;
     momentum_iterator itm, itm_end;
     boost::tie(itm, itm_end) = momenta();
@@ -280,7 +280,7 @@ void ClusterHelper::setup_tables()
         append_column_no_duplicates(lattice_momenta_, momw);
       }
     }
-    if (alps::is_master()) {
+    /*if (alps::is_master()) {
       std::ofstream latticemomstream(lattice_momenta_file_name_.c_str());
       for (std::size_t m=0; m<lattice_momenta_.size1(); ++m) {
         latticemomstream << m << " ";
@@ -289,8 +289,8 @@ void ClusterHelper::setup_tables()
         latticemomstream << std::endl;
       }
       latticemomstream.close();
-    }
-  }
+    }*/
+  //}
   /*
    lattice_momenta_.resize(n_cluster_cells(), dimension());
    momentum_iterator itm, itm_end;
@@ -417,8 +417,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
         group[g](j,i) = gr[i+j*dimension()+g*dimension()*dimension()];
   //setup symmetry table in real space
   Matrix<site_t>::Type symmetry_table_real_space;
-  if(alps::is_master())
-    std::cout << "good symmetries: ";
+  /*if(alps::is_master())
+    std::cout << "good symmetries: ";*/
   for (unsigned int g=0; g<group.size(); ++g) {
     std::map<site_t, site_t> vertexmap;
     std::set<site_t> vertexset;
@@ -445,12 +445,12 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
         break;
     }
     if (vertexset.size()==n_cluster_sites() && vertexmap.size()==n_cluster_sites()) {
-      if(alps::is_master())
-        std::cout  << g << " ";
+      /*if(alps::is_master())
+        std::cout  << g << " ";*/
       append_column_no_duplicates(symmetry_table_real_space, vertexmap);
     }
   }
-  std::cout << "\n";
+  //std::cout << "\n";
   /*std::cout << "symmetry table in real space:\n";
    for (unsigned int i=0; i<symmetry_table_real_space.size1(); ++i) {
    for (unsigned int j=0; j<symmetry_table_real_space.size2(); ++j) {
@@ -462,8 +462,8 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
   boost::tie(site_class_set_real_space_, pair_class_set_real_space_) = setup_classes(symmetry_table_real_space);
   //setup symmetry table in k space
   Matrix<site_t>::Type symmetry_table_k_space;
-  if(alps::is_master())
-    std::cout << "good symmetries: ";
+  /*if(alps::is_master())
+    std::cout << "good symmetries: ";*/
   for (unsigned int g=0; g<group.size(); ++g) {
     std::map<site_t, site_t> vertexmap;
     std::set<site_t> vertexset;
@@ -502,13 +502,13 @@ void ClusterHelper::symmetry_analysis(const Matrix<double>::Type& basis,
         break;
     }
     if (vertexset.size()==n_cluster_sites() && vertexmap.size()==n_cluster_sites()) {
-      if(alps::is_master())
-        std::cout  << g << " ";
+      /*if(alps::is_master())
+        std::cout  << g << " ";*/
       append_column_no_duplicates(symmetry_table_k_space, vertexmap);
     }
   }
-  if(alps::is_master())
-    std::cout << "\n";
+  /*if(alps::is_master())
+    std::cout << "\n";*/
   /*std::cout << "symmetry table k space:\n";
    for (unsigned int i=0; i<symmetry_table_k_space.size1(); ++i) {
    for (unsigned int j=0; j<symmetry_table_k_space.size2(); ++j) {
