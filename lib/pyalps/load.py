@@ -236,7 +236,7 @@ class Hdf5Loader:
                                         if "mean" in self.h5f.list_children(respath+'/iteration/'+it+'/results/'+m):
                                             try:
                                                 d = DataSet()
-                                                itresultspath = respath+'/iteration/'+it+'results/'+m
+                                                itresultspath = respath+'/iteration/'+it+'/results/'+m
                                                 if verbose: log("Loading "+ m)
                                                 d.props['hdf5_path'] = itresultspath 
                                                 d.props['observable'] = pt.hdf5_name_decode(m)
