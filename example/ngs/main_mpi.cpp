@@ -27,6 +27,7 @@
 
 #include "ising.hpp"
 
+// TODO: replace by builtin callback function alsp::???
 // check for signals and time limit
 bool stop_callback(boost::posix_time::ptime const & start_time, int time_limit) {
     static alps::mcsignal signal;
