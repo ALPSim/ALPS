@@ -61,7 +61,7 @@ def size(lst):
 def list2cmdline(lst):
     """ convert a list of arguments to a valid commandline """
     if platform.system() == 'Windows':
-      return '"%s"' % subprocess.list2cmdline(lst)
+      return subprocess.list2cmdline(lst)
     else:
       return subprocess.list2cmdline(lst)
 
@@ -80,6 +80,7 @@ def executeCommandLogged(cmdline,logfile):
     # subprocess is stupid: the interpretation of a list of args depends on shell=True|False
     # I'm using shell=True for backward compatibility to os.system
     cmd = list2cmdline(cmdline)
+    log(cmd)
     return subprocess.call(cmd, shell=True, stdout=open(logfile, 'w'), stderr=subprocess.STDOUT)
 
 def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=None, mpirun='mpirun'):
