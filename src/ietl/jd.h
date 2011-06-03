@@ -1,8 +1,12 @@
+// according to http://web.eecs.utk.edu/~dongarra/etemplates/node144.html
 #ifndef JACOBI_DAVIDSON_H
 #define JACOBI_DAVIDSON_H
 #include <ietl/traits.h>
 #include <ietl/complex.h>
+#include <ietl/iteration.h>
+#include <ietl/vectorspace.h>
 #include <ietl/gmres.h>
+#include <ietl/bicgstabl.h>
 #include <vector>
 #include <cassert>
 #include <algorithm>
@@ -99,6 +103,12 @@ namespace ietl{
 //solver//////////////////////////////////////////////////////////////////////
 namespace solver {
 
+// the correction equation solver, provided are 'ietl_gmres' and 'ietl_bicgstabl<scalar_type>'
+#ifndef COREQSOLV
+#define COREQSOLV ietl_gmres
+#endif
+//#warning USING CORRECTION EQUATION SOLVER #COREQSOLV
+
 //left preconditioned correction-equation-solver
     template <class MATRIX, class VS, class PREC>   class left_prec_solver;
 
@@ -157,7 +167,7 @@ namespace solver {
             z -= LPS.Q_hat_[i]* LPS.gamma_(i);
     }
 
-    // jacobi preconditioner for (A - theta *I)
+    // provide a function ietl::mult(Prec K, v1, v2): v2 ~= K v1
     template <class MATRIX, class VS, class PREC> template <class IT>
     void left_prec_solver<MATRIX,VS,PREC>::operator() ( real_type theta, vector_type& r, vector_type& t, IT& iter )
     {
@@ -198,11 +208,11 @@ namespace solver {
         for(size_t i = 0; i < m; ++i)
             r += gamma_(i)*Q_hat_[i];
 
-        t = ietl_gmres(*this, r, x0_, max_iter, abs_tol, false);
+        t = COREQSOLV (*this, r, x0_, max_iter, abs_tol, false);
 
     }//left_prec_solver::void()
 
-//simple solver with gmres//////////////////////////////////////////////////////
+// non-preconditioned simple solver//////////////////////////////////////////////////////
     template <class MATRIX, class VS>
     class jd_solver {
     public:
@@ -237,7 +247,7 @@ namespace solver {
             r *= -1;
 
             //starting with x0_ = 0
-            t = ietl_gmres(Adef_, r, x0_, iter.sub_max_iter(), iter.absolute_tolerance()*iter.absolute_tolerance(), false);
+            t = COREQSOLV (Adef_, r, x0_, iter.sub_max_iter(), iter.absolute_tolerance()*iter.absolute_tolerance(), false);
         }
 }//end namespace solver///////////////////////////////////////////////////////////
 
@@ -252,7 +262,7 @@ namespace solver {
         typedef std::vector<vector_type> vector_set_type;
         typedef std::vector<real_type> real_set_type;
 
-        jd (MATRIX& A, VS& vspace, size_t v = 0)
+        jd (const MATRIX& A, VS& vspace, size_t v = 0)
             : A_(A), vspace_(vspace), n_(vec_dimension(vspace)), verbose_(v) {}
 
         //default: search for lowest eigenvalues
@@ -268,7 +278,7 @@ namespace solver {
                 eigensystem <solver_type,IT,GEN> (solver, iter, gen, k_max, search_highest);
             }
 
-        //with left preconditioner K with K (A - \theta I) ~= I
+        //with left preconditioner K with K ~= (A - \theta I)
         template <class IT, class GEN, class PREC>
         void eigensystem( IT& iter, GEN& gen, size_type k_max, PREC& K, bool search_highest = false)
             {
@@ -315,7 +325,7 @@ namespace solver {
             }
 
     protected:
-        MATRIX& A_;
+        const MATRIX& A_;
         VS& vspace_;
         size_type n_;
         vector_set_type X_;
@@ -355,6 +365,10 @@ namespace solver {
 
         generate(t, gen);
         project(t, vspace_);
+
+        //if eigenvectors already exist
+        for(size_t i = 0; i < X_.size()-1;++i)
+            t -= ietl::dot(t,X_[i])*X_[i];
 
         while(true) 
         {
@@ -425,9 +439,9 @@ namespace solver {
 
                 if(++k == k_max) return;
 
-                if(m < 1) {//could start anew with a random vector
+                if(m < 1)
                     throw std::runtime_error("search space is depleted, try a different generator.");
-                }
+
                 --m;
                 M = ublas::zero_matrix<scalar_type>(m,m);
 
@@ -511,6 +525,7 @@ namespace solver {
             ++iter;
             if(iter.error_code() == 1)
                 throw std::runtime_error(iter.error_msg());
+
             if(verbose_ > 1)
                 std::cout << "JD iteration " << iter.iterations() << "\t resid = " << norm_r << "\n";
         }// main loop
@@ -540,6 +555,10 @@ namespace solver {
 
         generate(t, gen);
         project(t, vspace_);
+
+        //if eigenvectors already exist
+        for(size_t i = 0; i < X_.size()-1;++i)
+            t -= ietl::dot(t,X_[i])*X_[i];
 
         size_t m = 0, k = 0;
 
@@ -689,8 +708,15 @@ namespace solver {
             // correction equation
             solver(theta, r, t, iter); //solver is allowed to change r
 
-            for(size_t i = 0; i < X_.size(); ++i)
+            //assure t is orthogonal to Q
+            norm_w = ietl::two_norm(t);
+
+            for(size_t i = 0; i < X_.size();++i)
                 t -= ietl::dot(t,X_[i])*X_[i];
+
+            if(ietl::two_norm(t) <= 0.25 * norm_w)
+                for(size_t i = 0; i< X_.size();++i)
+                    t -= ietl::dot(t,X_[i])*X_[i];
 
             ++iter;
             if(iter.error_code() == 1)
@@ -700,6 +726,5 @@ namespace solver {
         } //main loop
 
     }// eigensystem exterior
-
 }// end namespace ietl
 #endif
