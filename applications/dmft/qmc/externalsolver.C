@@ -42,6 +42,8 @@
 #include "alps/parser/parser.h"
 #include "alps/utility/vectorio.hpp"
 #include "alps/utility/temporary_filename.hpp"
+#include "alps/numeric/isnan.hpp"
+#include "alps/numeric/isinf.hpp"
 
 ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& G0, const alps::Parameters& parms) 
 {
@@ -120,14 +122,14 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
     for(std::size_t j=0;j<n_site;++j){
       for(std::size_t k=0;k<n_site;++k){
         for(std::size_t l=0;l<n_tau+1;++l){ 
-          if(std::isnan(G_tau(l,j,k,i)) || std::isinf(G_tau(l,j,k,i))) {
+          if(alps::numeric::isnan(G_tau(l,j,k,i)) || alps::numeric::isinf(G_tau(l,j,k,i))) {
             std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<i<<std::endl;
             std::cerr<<G_tau(l,j,k,i)<<" "<<std::endl;
             throw std::runtime_error("returned imag time Green's function contains nan or inf.");
           }
         }
         for(std::size_t l=0;l<n_matsubara;++l){ 
-          if(std::isnan(G_omega(l,j,k,i).real()) || std::isnan(G_omega(l,j,k,i).imag())|| std::isinf(G_omega(l,j,k,i).real()) || std::isinf(G_omega(l,j,k,i).imag())) {
+          if(alps::numeric::isnan(G_omega(l,j,k,i).real()) || alps::numeric::isnan(G_omega(l,j,k,i).imag())|| alps::numeric::isinf(G_omega(l,j,k,i).real()) || alps::numeric::isinf(G_omega(l,j,k,i).imag())) {
             std::cerr<<"freq: "<<l<<" sites: "<<j<<" "<<k<<" spin: "<<i<<std::endl;
             std::cerr<<G_omega(l,j,k,i).real()<<" "<<G_omega(l,j,k,i).imag()<<std::endl;
             throw std::runtime_error("returned freq Green's function contains nan or inf.");
