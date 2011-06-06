@@ -213,7 +213,7 @@ public:
   {
     for(int f=0;f<n_flavor;++f){
       int fbar = f%2==0 ? f+1 : f-1;
-      std::cerr << "dens: " << densities[fbar] << std::endl;
+      //std::cerr << "dens: " << densities[fbar] << std::endl;
       for(int i=0;i<n_site;++i){
         c1_[f][i][i] = 1.;
         c2_[f][i][i] = eps[f][i] - mu + U*densities[fbar]; 
@@ -221,7 +221,7 @@ public:
         + 2.*U*densities[fbar]*(eps[f][i]-mu) + U*U*densities[fbar];
         Sc0_[f][i][i] = U * (densities[fbar]-0.5);
         Sc1_[f][i][i] = U*U * densities[fbar] * (1-densities[fbar]);
-        std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
+        //std::cout << "eps: " << f << " " << i << " " << eps[f][i] << "\n";
         Sc2_[f][i][i] = 0;/*U*U * densities[fbar] * (1-densities[fbar])
                            * ( U * (1-densities[fbar]) + (eps[f][i]-mu) );*/
       }

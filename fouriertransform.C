@@ -395,7 +395,6 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
   } 
   else if (parms.defined("CLUSTER_LOOP")){
     if(std::string(parms["CLUSTER_LOOP"])==std::string("DCA")){
-      std::cout << "using DCA cluster fourier transformer" << "\n";
       boost::shared_ptr<DCATransformer> clusterhandler;
       DCATransformer::generate_transformer(parms, clusterhandler);
       std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());
@@ -451,7 +450,6 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   } 
   else if (parms.defined("CLUSTER_LOOP")){
     if(std::string(parms["CLUSTER_LOOP"])==std::string("DCA")){
-      std::cout << "using cluster fourier transformer" << "\n";
       boost::shared_ptr<DCATransformer> clusterhandler;
       DCATransformer::generate_transformer(parms, clusterhandler);
       std::vector<std::vector<double> > eps_f(n_flavors, clusterhandler->epsav());

@@ -55,7 +55,7 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
     trans_ptr.reset(new AntiFerroDCATransformer(parms));
   }
   else {
-    std::cout<<"using simple DCA transformer"<<std::endl;
+    //std::cout<<"using simple DCA transformer"<<std::endl;
     trans_ptr.reset(new SimpleDCATransformer(parms));
   }
 }
@@ -109,8 +109,8 @@ dispersion_moments_(2, 0.)
   }
   dispersion_moments_[0] /= n_cluster_sites();
   dispersion_moments_[1] /= n_cluster_sites();
-  std::cout << "dispersion moments: " << dispersion_moments(0) << " " 
-  << dispersion_moments(1) << std::endl;
+  //std::cout << "dispersion moments: " << dispersion_moments(0) << " " 
+  //<< dispersion_moments(1) << std::endl;
   double hf = 0.;
   double bw = 0.;
   if (t2_==0. && t3_==0. && t4_==0.) {
@@ -131,7 +131,7 @@ dispersion_moments_(2, 0.)
     std::cout << "half-filling " << hf << " shifted to zero\n"; 
   }
   else 
-    std::cout << "half-filling: " << hf << "\n"; 
+    ; //std::cout << "half-filling: " << hf << "\n"; 
   if (params.defined("W")) {
     bandwidth_scale_factor_ = bandwidth_/bw;
     std::cout << "bandwidth scale factor: " << bandwidth_scale_factor_ << "\n";
@@ -140,7 +140,7 @@ dispersion_moments_(2, 0.)
     bandwidth_ = bw;
   }
   
-  std::cout << "bandwidth: " << bandwidth_ << "\n";
+  //std::cout << "bandwidth: " << bandwidth_ << "\n";
 }
 
 
