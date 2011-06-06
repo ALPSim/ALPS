@@ -56,9 +56,9 @@ public:
 
 private:
   double beta;                      // the inverse temperature
-  uint32_t sweeps;                  // the number of sweeps done
-  uint32_t thermalization_sweeps;   // the number of sweeps to be done for equilibration
-  uint32_t total_sweeps;            // the total number of sweeps to be done after equilibration
+  boost::uint32_t sweeps;                  // the number of sweeps done
+  boost::uint32_t thermalization_sweeps;   // the number of sweeps to be done for equilibration
+  boost::uint32_t total_sweeps;            // the total number of sweeps to be done after equilibration
   std::vector<int> spins;           // the vector to store the spins
 };
 

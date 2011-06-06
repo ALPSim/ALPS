@@ -723,7 +723,7 @@ std::string AbstractFitter::print_to_file(alps::ParameterList list) const
       basename+".task"+boost::lexical_cast<std::string,int>(i+1);
 
     if (!list[i].defined("SEED")) {
-      uint32_t seed = baseseed ^ (i << bits);
+      unsigned seed = baseseed ^ (i << bits);
       list[i]["SEED"] = seed;
     }
 

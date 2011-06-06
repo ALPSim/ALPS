@@ -37,6 +37,7 @@ if (ALPS_USE_VISTRAILS)
     SET(PYTHON_VISTRAILS_OVERRIDE ON)
     set(PYTHONLIBS_FOUND TRUE)
     set(PYTHON_FOUND TRUE)
+    message (STATUS "Using Vistrails Python: ${PYTHON_LIBRARY}" )
   endif(WIN32)
 endif (ALPS_USE_VISTRAILS)
 

@@ -54,12 +54,12 @@ public:
         algorithm(lattice, model, *this, params)
     {
         nsweeps = params.defined("SWEEPS") ?
-            uint64_t(params["SWEEPS"]) : (params.defined("MCS") ? 
-                uint64_t(params["MCS"]) : uint64_t(params["Steps"]));
+            boost::uint64_t(params["SWEEPS"]) : (params.defined("MCS") ? 
+                boost::uint64_t(params["MCS"]) : boost::uint64_t(params["Steps"]));
         
         nthermalization = params.defined("THERMALIZATION") ?
-                uint64_t(params["THERMALIZATION"]) : (params.defined("thermalization") ?
-                uint64_t(params["thermalization"]) : nsweeps / 10);
+                boost::uint64_t(params["THERMALIZATION"]) : (params.defined("thermalization") ?
+                boost::uint64_t(params["thermalization"]) : nsweeps / 10);
                 
         measurements_skip = parms.value_or_default("SKIP", 1);
 
@@ -113,14 +113,14 @@ public:
     
     bool change_parameter(std::string const& name, alps::StringValue const& value)
     {
-        uint64_t new_nsweeps = 0;
+        boost::uint64_t new_nsweeps = 0;
         
         if (name == "SWEEPS")
-            new_nsweeps = uint64_t(value);
+            new_nsweeps = boost::uint64_t(value);
         if (name == "MCS")
-            new_nsweeps = uint64_t(value);
+            new_nsweeps = boost::uint64_t(value);
         if (name == "Steps")
-            new_nsweeps = uint64_t(value);
+            new_nsweeps = boost::uint64_t(value);
 
         if (new_nsweeps > 0) {
             nsweeps = new_nsweeps;
@@ -226,9 +226,9 @@ private:
     model_type model;
     algorithm_type algorithm;
     
-    uint64_t nsweeps;
-    uint64_t nthermalization;
-    uint64_t sweeps_done;
+    boost::uint64_t nsweeps;
+    boost::uint64_t nthermalization;
+    boost::uint64_t sweeps_done;
     unsigned measurements_skip;
     unsigned measurements_done;
 };

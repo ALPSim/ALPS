@@ -152,7 +152,7 @@ public:
                 } else {
                     // adjust nworms
                     double len1 = 0.0;
-                    uint64_t nworms_therm2 = 0;
+                    boost::uint64_t nworms_therm2 = 0;
                     do {
                         ++nworms_therm2;
                         len1 += worm_update();
@@ -208,8 +208,8 @@ private:
     
     unsigned nworms;
     
-    uint64_t nworms_therm;
-    uint64_t count_therm;
+    boost::uint64_t nworms_therm;
+    boost::uint64_t count_therm;
     
     unsigned nsites;
     
@@ -322,7 +322,7 @@ private:
                     "Please increase THERMALIZATION.");
     }
     
-    uint64_t worm_update()
+    boost::uint64_t worm_update()
     {
         unsigned start_site, start_level, start_vertex, start_leg;
         
@@ -370,7 +370,7 @@ private:
             worm_weight = gf_start(head_op, start_site, start_site_type,
                 start_leg, vertex);
 
-        uint64_t len = 0;
+        boost::uint64_t len = 0;
 
         unsigned cur_leg = start_leg;
         unsigned cur_vertex = start_vertex;
