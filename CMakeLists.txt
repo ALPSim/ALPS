@@ -506,7 +506,7 @@ if(WIN32 AND NOT UNIX AND NOT ALPS_FOR_VISTRAILS AND NOT ALPS_BUILD_SOURCE)
     # COMMAND cmake -E copy_directory ${CMAKE_INSTALL_PREFIX}/lib/xml ${PROJECT_BINARY_DIR}/lib/xml    
   # )
   if (ALPS_USE_VISTRAILS)
-    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python26/python26.dll DESTINATION bin COMPONENT dependentlibraries)
+    install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/Python27/python27.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr71.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/msvcr80.dll DESTINATION bin COMPONENT dependentlibraries)
     install(FILES ${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/hdf5dll.dll DESTINATION bin COMPONENT dependentlibraries)
