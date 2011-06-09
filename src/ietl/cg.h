@@ -38,44 +38,46 @@ namespace ietl
     template<class Vector, class Matrix>
     Vector ietl_cg(Matrix const & A, Vector const & b, Vector const & x0, std::size_t max_iter = 100, double abs_tol = 1e-6, bool verbose = false)
     {   
-        std::vector<double> rho(max_iter);
+        std::vector<double> rho(2);
     
         // I assume cheap default-constructibility for now
-        std::vector<Vector> p(max_iter), q(max_iter), x(max_iter), r(max_iter);
+        Vector x, p, q;
     
-        mult(A, x0, x[0]);
-        r[0] = b - x[0];
+        mult(A, x0, x);
+        Vector r = b - x;
         
-        x[0] = x0;
+        x = x0;
     
         for (std::size_t k = 1; k < max_iter; ++k)
         {
-            rho[k-1] = two_norm(r[k-1]);
-            rho[k-1] *= rho[k-1];
-            if (rho[k-1] < abs_tol)
-                return x[k-1];
+            rho[0] = rho[1];
+            rho[1] = two_norm(r);
+            rho[1] *= rho[1];
+            if (rho[1] < abs_tol)
+                return x;
             
             if (k == 1)
-                p[1] = r[0];
+                p = r;
             else {
-                double beta = rho[k-1]/rho[k-2];
-                p[k] = r[k-1] + beta*p[k-1];
+                double beta = rho[1]/rho[0];
+                p = r + beta*p;
             }
         
-            mult(A, p[k], q[k]);
-            double alpha = rho[k-1]/dot(p[k], q[k]);
-            x[k] = x[k-1] + alpha*p[k];
-            r[k] = r[k-1] - alpha*q[k];
+            mult(A, p, q);
+            double alpha = rho[1]/dot(p, q);
+            x += alpha*p;
+            r -= alpha*q;
         
-            Vector diff = x[k] - x[k-1];
+            Vector diff = alpha*p;
             double resid = two_norm(diff);
             if (verbose)
                 std::cout << "Iteration " << k << ", resid = " << resid << std::endl;
             if (resid < abs_tol)
-                return x[k];
+                return x;
+
         }
         
-        return x[max_iter-1];
+        return x;
     }
 }
  
