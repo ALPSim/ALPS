@@ -30,6 +30,28 @@ namespace ietl{
     namespace ublas=boost::numeric::ublas;
     namespace lapack=boost::numeric::bindings::lapack;
 
+//solver wrapper///////////////////////////////////////////////////
+    // MAKE_WRAPPER(name,solver)
+    // creates a function object / class name_wrapper
+    #undef MAKE_WRAPPER
+    #define MAKE_WRAPPER(name,solver) \
+    class name##_wrapper { \
+        public: \
+            template <class VECTOR, class MATRIX, class N, class REAL> \
+            VECTOR operator() ( const MATRIX & A, \
+                                const VECTOR & b, \
+                                const VECTOR & x0, \
+                                N maxiter, \
+                                REAL abstol, \
+                                bool verbose ) \
+                { \
+                    return solver (A, b, x0, maxiter, abstol, verbose); \
+                } \
+    };
+    MAKE_WRAPPER(gmres,ietl::ietl_gmres)
+    #undef MAKE_WRAPPER
+
+//solver wrapper///////////////////////////////////////////////////
 //jd_iterator//////////////////////////////////////////////////////
     template <class T>
     class jd_iteration : public basic_iteration<T> {
@@ -51,6 +73,7 @@ namespace ietl{
         size_t m_min_, m_max_, smi_;
     };
 //jd_iterator//////////////////////////////////////////////////////
+
     namespace detail{
 
 //deflated matrix multiplication (I-QQ*)(A-\theta I)(I-QQ*)////////
@@ -103,19 +126,14 @@ namespace ietl{
 //solver//////////////////////////////////////////////////////////////////////
 namespace solver {
 
-// the correction equation solver, provided are 'ietl_gmres' and 'ietl_bicgstabl<scalar_type>'
-#ifndef COREQSOLV
-#define COREQSOLV ietl_gmres
-#endif
-//#warning USING CORRECTION EQUATION SOLVER #COREQSOLV
-
 //left preconditioned correction-equation-solver
-    template <class MATRIX, class VS, class PREC>   class left_prec_solver;
+    template <class SOLV, class MATRIX, class VS, class PREC>
+        class left_prec_solver;
 
-    template <class MATRIX, class VS, class PREC, class VECTOR>
-    void mult (const left_prec_solver<MATRIX,VS,PREC>&, const VECTOR&, VECTOR&);
+    template <class SOLV, class MATRIX, class VS, class PREC, class VECTOR>
+    void mult (const left_prec_solver<SOLV,MATRIX,VS,PREC>&, const VECTOR&, VECTOR&);
 
-    template <class MATRIX, class VS, class PREC>
+    template <class SOLV, class MATRIX, class VS, class PREC>
     class left_prec_solver {
     public:
         typedef typename vectorspace_traits<VS>::vector_type vector_type;
@@ -123,8 +141,8 @@ namespace solver {
         typedef typename real_type<scalar_type>::type real_type;
         typedef ublas::matrix< scalar_type, ublas::column_major > matrix_type;
 
-        left_prec_solver ( const MATRIX& A, const std::vector<vector_type>& Q, const VS& vs, PREC& K) 
-            : A_(A) , Q_(Q) , vspace_(vs) , K_(K) , x0_(new_vector(vs))  {}
+        left_prec_solver (SOLV& s, const MATRIX& A, const std::vector<vector_type>& Q, const VS& vs, PREC& K) 
+            : solv_(s), A_(A) , Q_(Q) , vspace_(vs) , K_(K) , x0_(new_vector(vs))  {}
 
         template <class IT>
         void operator() ( real_type theta, vector_type& r, vector_type& t, IT& iter );
@@ -132,6 +150,7 @@ namespace solver {
         friend void mult<>(const left_prec_solver& A_def, const vector_type& v, vector_type& z);
 
     protected:
+        SOLV& solv_;
         const MATRIX& A_;
         const std::vector<vector_type>& Q_;
         const VS& vspace_;
@@ -144,8 +163,8 @@ namespace solver {
         matrix_type LU_, M_;
     };
 
-    template <class MATRIX, class VS, class PREC, class VECTOR>
-    void mult (const left_prec_solver<MATRIX,VS,PREC>& LPS, const VECTOR& v, VECTOR& z)
+    template <class SOLV, class MATRIX, class VS, class PREC, class VECTOR>
+    void mult (const left_prec_solver<SOLV,MATRIX,VS,PREC>& LPS, const VECTOR& v, VECTOR& z)
     {
         VECTOR temp;
 
@@ -167,9 +186,9 @@ namespace solver {
             z -= LPS.Q_hat_[i]* LPS.gamma_(i);
     }
 
-    // provide a function ietl::mult(Prec K, v1, v2): v2 ~= K v1
-    template <class MATRIX, class VS, class PREC> template <class IT>
-    void left_prec_solver<MATRIX,VS,PREC>::operator() ( real_type theta, vector_type& r, vector_type& t, IT& iter )
+    // provide a function ietl::mult(Prec K, v1, v2) with v2 ~= K v1
+    template <class SOLV, class MATRIX, class VS, class PREC> template <class IT>
+    void left_prec_solver<SOLV,MATRIX,VS,PREC>::operator() ( real_type theta, vector_type& r, vector_type& t, IT& iter )
     {
         theta_ = theta;
         const unsigned int m = Q_.size(), m_old = Q_hat_.size();//if K changes =0;
@@ -208,20 +227,21 @@ namespace solver {
         for(size_t i = 0; i < m; ++i)
             r += gamma_(i)*Q_hat_[i];
 
-        t = COREQSOLV (*this, r, x0_, max_iter, abs_tol, false);
+        t = solv_ (*this, r, x0_, max_iter, abs_tol, false);
 
     }//left_prec_solver::void()
 
+
 // non-preconditioned simple solver//////////////////////////////////////////////////////
-    template <class MATRIX, class VS>
+    template <class SOLV, class MATRIX, class VS>
     class jd_solver {
     public:
         typedef typename vectorspace_traits<VS>::vector_type vector_type;
         typedef typename vectorspace_traits<VS>::scalar_type scalar_type;
         typedef typename real_type<scalar_type>::type real_type;
 
-        jd_solver (const MATRIX& A, const std::vector<vector_type>& Q, const VS& vspace)
-            : Adef_(A, 0, Q), vspace_(vspace), Q_(Q), x0_(new_vector(vspace))
+        jd_solver (SOLV& s, const MATRIX& A, const std::vector<vector_type>& Q, const VS& vspace)
+            : solv_(s), Adef_(A, 0, Q), vspace_(vspace), Q_(Q), x0_(new_vector(vspace))
              {}
         
         template <class IT>
@@ -232,10 +252,11 @@ namespace solver {
         const VS& vspace_;
         vector_type x0_;
         const std::vector<vector_type>& Q_;
+        SOLV& solv_;
     };
-        template <class MATRIX, class VS>
+        template <class SOLV, class MATRIX, class VS>
         template <class IT>
-        void jd_solver<MATRIX, VS>::operator()( scalar_type theta, vector_type& r, vector_type& t, IT& iter)
+        void jd_solver<SOLV,MATRIX,VS>::operator()( scalar_type theta, vector_type& r, vector_type& t, IT& iter)
         {
             Adef_.set_theta(theta);
 
@@ -247,7 +268,7 @@ namespace solver {
             r *= -1;
 
             //starting with x0_ = 0
-            t = COREQSOLV (Adef_, r, x0_, iter.sub_max_iter(), iter.absolute_tolerance()*iter.absolute_tolerance(), false);
+            t = solv_ (Adef_, r, x0_, iter.sub_max_iter(), iter.absolute_tolerance()*iter.absolute_tolerance(), false);
         }
 }//end namespace solver///////////////////////////////////////////////////////////
 
@@ -267,35 +288,40 @@ namespace solver {
 
         //default: search for lowest eigenvalues
         template <class SOLVER, class IT, class GEN>
-        void eigensystem(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, bool search_highest);
+        void jdqr(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, bool search_highest);
 
         //without preconditioning
-        template <class IT, class GEN>
-        void eigensystem(IT& iter, GEN& gen, size_type k_max, bool search_highest = false)    
+        #ifndef __GXX_EXPERIMENTAL_CXX0X__
+        template <class SOLV, class IT, class GEN>
+        void eigensystem(IT& iter, GEN& gen, size_type k_max, SOLV f, bool search_highest = false)
+        #else
+        template <class SOLV=gmres_wrapper, class IT, class GEN>
+        void eigensystem(IT& iter, GEN& gen, size_type k_max, SOLV f = gmres_wrapper(), bool search_highest = false)
+        #endif
             {
-                typedef solver::jd_solver<MATRIX,VS> solver_type;
-                solver_type solver(A_, X_, vspace_);
-                eigensystem <solver_type,IT,GEN> (solver, iter, gen, k_max, search_highest);
+                typedef solver::jd_solver<SOLV,MATRIX,VS> solver_type;
+                solver_type solver(f, A_, X_, vspace_);
+                jdqr <solver_type,IT,GEN> (solver, iter, gen, k_max, search_highest);
             }
 
         //with left preconditioner K with K ~= (A - \theta I)
-        template <class IT, class GEN, class PREC>
-        void eigensystem( IT& iter, GEN& gen, size_type k_max, PREC& K, bool search_highest = false)
+        template <class SOLV, class IT, class GEN, class PREC>
+        void eigensystem( IT& iter, GEN& gen, size_type k_max, PREC& K, SOLV f, bool search_highest = false)
             {
-                typedef solver::left_prec_solver<MATRIX,VS,PREC> solver_type;
-                solver_type lp_solver(A_, X_, vspace_, K);
-                eigensystem <solver_type,IT,GEN> (lp_solver, iter, gen, k_max, search_highest);
+                typedef solver::left_prec_solver<SOLV,MATRIX,VS,PREC> solver_type;
+                solver_type lp_solver(f, A_, X_, vspace_, K);
+                jdqr <solver_type,IT,GEN> (lp_solver, iter, gen, k_max, search_highest);
             }
 
-        //jd with harmonic ritz values
+        //jdqr with harmonic ritz values
         template <class SOLVER, class IT, class GEN>
-        void eigensystem_harmonic(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau);
-        template <class IT, class GEN>
-        void eigensystem_harmonic(IT& iter, GEN& gen, size_type k_max, real_type tau)    
+        void jdqr_harmonic(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau);
+        template <class SOLV, class IT, class GEN>
+        void eigensystem_harmonic(IT& iter, GEN& gen, size_type k_max, real_type tau, SOLV& f)    
             {
-                typedef solver::jd_solver<MATRIX,VS> solver_type;
-                solver_type solver(A_, X_, vspace_);
-                eigensystem_harmonic <solver_type,IT,GEN> (solver, iter, gen, k_max, tau);
+                typedef solver::jd_solver<SOLV,MATRIX,VS> solver_type;
+                solver_type solver(f, A_, X_, vspace_);
+                jdqr_harmonic <solver_type,IT,GEN> (solver, iter, gen, k_max, tau);
             }
 
         //access functions
@@ -333,10 +359,10 @@ namespace solver {
         size_t verbose_;    //verbosity levels: 0 = no, 1 = yes, 2 = all
     };// end of class jd
 
-//jd for exterior eigenvalues ///////////////////////////////////////////////////
+//jdqr for exterior eigenvalues ///////////////////////////////////////////////////
     template <class MATRIX, class VS>
     template <class SOLVER, class IT, class GEN>
-    void jd<MATRIX,VS>::eigensystem(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, bool search_highest)
+    void jd<MATRIX,VS>::jdqr(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, bool search_highest)
     {
         typedef std::vector<vector_type> vector_set_type;
         typedef std::vector<real_type> real_set_type;
@@ -530,13 +556,12 @@ namespace solver {
                 std::cout << "JD iteration " << iter.iterations() << "\t resid = " << norm_r << "\n";
         }// main loop
 
-    }// eigensystem
+    }// jdqr for exterior evs
 
-//jd for interior eigenvalues with harmonic ritz values//////////////////////////////////////////////////
-
+//jdqr for interior eigenvalues with harmonic ritz values////////////////////////////////////////
     template <class MATRIX, class VS>
     template <class SOLVER, class IT, class GEN >
-    void jd<MATRIX,VS>::eigensystem_harmonic(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau)
+    void jd<MATRIX,VS>::jdqr_harmonic(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau)
     {
         typedef std::vector<vector_type> vector_set_type;
         typedef std::vector<real_type> real_set_type;
@@ -725,6 +750,7 @@ namespace solver {
                 std::cout << "JD iteration " << iter.iterations() << "\tresid = " << norm_r << "\n";         
         } //main loop
 
-    }// eigensystem exterior
+    }// jdqr interior exterior
+
 }// end namespace ietl
 #endif
