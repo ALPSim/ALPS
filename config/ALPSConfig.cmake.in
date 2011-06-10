@@ -5,6 +5,9 @@
 # This file is configured by ALPS and used by the UseALPS.cmake module
 # to load ALPS's settings for an external project.
 
+# The ALPS root directory.
+set(ALPS_ROOT_DIR "@CMAKE_INSTALL_PREFIX@")
+
 # The ALPS include file directories.
 set(ALPS_INCLUDE_DIRS "@ALPS_INCLUDE_DIRS_CONFIG@")
 
