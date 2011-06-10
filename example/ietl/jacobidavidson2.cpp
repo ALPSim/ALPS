@@ -17,7 +17,9 @@ typedef ublas::matrix<double> matrix_type;
 typedef boost::lagged_fibonacci44497 gen_t;
 typedef boost::normal_distribution<double> dist_t;
 
-// jacobi preconditioner 
+// jacobi preconditioner as an example
+// the preconditioner must provide a function
+// ietl::mult(A, x, b) with b ~= A x
     template <class MATRIX, class SCALAR>
     class jacobi_prec {
         public:
@@ -77,7 +79,7 @@ int main () {
     int m_min = 10, m_max = 20;
 
     ietl::jd_iteration<double> iter(m_min, m_max, max_iter, rel_tol, abs_tol, 5);
-    // correction equation solver steps are more expencive with preconditioning,
+    // correction equation solver steps are more expensive with preconditioning,
     // but fewer are needed to have 'good' convergence
     ietl::jd_iteration<double> iter3(m_min, m_max, max_iter, rel_tol, abs_tol, 2);
     ietl::jd_iteration<double> iter2(m_min, m_max, max_iter, 0.1, abs_tol);
@@ -92,9 +94,13 @@ int main () {
     std::cout.precision(10);
     std::cout.flush();
     boost::timer clock;
+
+    //correction equation solver
+    ietl::gmres_wrapper solver;
+
     //search k lowest eigenvalue
     try{
-        jd_test.eigensystem(iter, gen, k, false);
+        jd_test.eigensystem(iter, gen, k, solver);
     }
     catch (std::runtime_error& e) {
         std::cerr << "Something went wrong: " << e.what() << "\n";
@@ -105,9 +111,8 @@ int main () {
 
     std::cout << "find approximate eigenvalue to create jacobi preconditioner... ";
     std::cout.flush();
-    clock.restart();
     try{
-        jd_test.eigensystem(iter2, gen, 1, false);
+        jd_test.eigensystem(iter2, gen, 1, solver);
     }
     catch (std::runtime_error& e) {
         std::cerr << "Something went wrong: " << e.what() << "\n";
@@ -115,7 +120,7 @@ int main () {
 
     double lambda = jd_test.eigenvalue(0);
 
-    std::cout <<"done. \napprox eigenvalue: "<<lambda<<"\ncreating preconditioner...\n";
+    std::cout <<"done. \napprox eigenvalue: "<<lambda<<"\ncreating preconditioner... done.\n";
 
     // create jacobi preconditioner
     jacobi_prec<matrix_t,double> K(A, lambda);
@@ -124,15 +129,15 @@ int main () {
 
     std::cout << "solve with jacobi preconditioning...";
     std::cout.flush();
-
+    clock.restart();
     try{
-        jd_test.eigensystem(iter3, gen, k, K, false);
+        jd_test.eigensystem(iter3, gen, k, K, solver);
     }
     catch (std::runtime_error& e) {
         std::cerr << "Something went wrong: " << e.what() << "\n";
     }
 
-    std::cout << "done. \n\t time: "<< clock.elapsed() << " \t iterations: " << iter3.iterations() << "\n";
+    std::cout << "done. \n time: "<< clock.elapsed() << " \t iterations: " << iter3.iterations() << "\n";
 
     for(int i = 0; i < jd_test.eigenvalues().size(); ++i)
         std::cout <<"eigenvalue #"<< i <<"\t" << jd_test.eigenvalue(i) <<"\n";/*<<jd_test.eigenvector(i)*///<<"\n\n";
