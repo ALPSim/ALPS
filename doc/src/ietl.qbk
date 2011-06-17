@@ -1,0 +1,25 @@
+[library IETL
+    [authors [Surer, Brigitte], [Troyer, Matthias] ]
+    [copyright 2006 2007 2008 Brigitte Surer, Matthias Troyer]
+    [purpose
+        Parallel random number generators and extenstions to the Boost
+        Random library
+    ]
+    [id ietl]
+    [dirname ietl]
+    [license
+        Distributed under the Boost Software License, Version 1.0.
+        (See accompanying file LICENSE_1_0.txt or copy at
+        <ulink url="http://www.boost.org/LICENSE_1_0.txt">
+            http://www.boost.org/LICENSE_1_0.txt
+        </ulink>)
+    ]
+]
+
+[section:ietl IETL]
+
+
+[endsect]
+
+
+[xinclude ietl.autodoc]

@@ -39,7 +39,7 @@ if (NOT WIN32)
 
     set(ALPS_AUTODOC_SOURCES alea lattice model osiris parser scheduler random)
 
-    set(ALPS_QBK_SOURCES alea general hdf5 lattice
+    set(ALPS_QBK_SOURCES alea general hdf5 ietl lattice
         model osiris overview parser scheduler tools random graph)
         
     set(ALPS_QBK_DEPENDS src/alps.qbk )
@@ -65,6 +65,11 @@ if (NOT WIN32)
                        DEPENDS ${HEADERS} autodoc.in)
     set(ALPS_QBK_DEPENDS ${ALPS_QBK_DEPENDS} src/hdf5.autodoc)
 
+    file(GLOB HEADERS ${PROJECT_SOURCE_DIR}/src/ietl/*.h ${PROJECT_SOURCE_DIR}/src/ietl/*.hpp ${PROJECT_SOURCE_DIR}/src/ietl/interface/*.h ${PROJECT_SOURCE_DIR}/src/ietl/interface/*.hpp)
+    add_custom_command(OUTPUT src/ietl.autodoc 
+                       COMMAND ./autodoc src/ietl.autodoc ${HEADERS}
+                       DEPENDS ${HEADERS} autodoc.in)
+    set(ALPS_QBK_DEPENDS ${ALPS_QBK_DEPENDS} src/ietl.autodoc)
 
     foreach (S ${ALPS_AUTODOC_SOURCES})
       file(GLOB_RECURSE HEADERS ${PROJECT_SOURCE_DIR}/src/alps/${S}/*.hpp ${PROJECT_SOURCE_DIR}/src/alps/${S}/*.h)

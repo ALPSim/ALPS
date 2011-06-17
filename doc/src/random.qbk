@@ -30,7 +30,7 @@ multi-variate normal distribution of correlated normally distributed random numb
 Multivariate normally distributed random numbers are sequences of n random numbers, distributed with given mean values M(i), 
 and covariance matrix Cov(i,j). 
 
-Instead of using a sequence type a`result_type`> the design decision was to keep the underlying real 
+Instead of using a sequence type a`result_type` the design decision was to keep the underlying real 
 number type as the `result_type`. Hence, n succesive calls are required to obtain all n multivariate
 normal numbers. This removes the need to choose a specific container type as`result_type`,
 while still allowing any container to be filled using, for example, `std::generate`.
