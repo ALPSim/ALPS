@@ -1,4 +1,30 @@
-// according to http://web.eecs.utk.edu/~dongarra/etemplates/node144.html
+// jdqr() according to http://web.eecs.utk.edu/~dongarra/etemplates/node144.html
+/*****************************************************************************
+ *
+ * ALPS Project: Algorithms and Libraries for Physics Simulations
+ *
+ * ALPS Libraries
+ *
+ * Copyright (C) 2011 by Robin Jäger <jaegerr@phys.ethz.ch>
+ *
+ * This software is part of the ALPS libraries, published under the ALPS
+ * Library License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Library License along with
+ * the ALPS Libraries; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 #ifndef JACOBI_DAVIDSON_H
 #define JACOBI_DAVIDSON_H
 #include <ietl/traits.h>
@@ -37,16 +63,18 @@ namespace ietl{
     #define MAKE_WRAPPER(name,solver) \
     class name##_wrapper { \
         public: \
-            template <class VECTOR, class MATRIX, class N, class REAL> \
+            name##_wrapper(size_t i = 5) \
+                : maxiter_(i) {} \
+            template <class VECTOR, class MATRIX, class REAL> \
             VECTOR operator() ( const MATRIX & A, \
                                 const VECTOR & b, \
                                 const VECTOR & x0, \
-                                N maxiter, \
-                                REAL abstol, \
-                                bool verbose ) \
+                                REAL abstol ) \
                 { \
-                    return solver (A, b, x0, maxiter, abstol, verbose); \
+                    return solver (A, b, x0, maxiter_, abstol); \
                 } \
+        private: \
+            size_t maxiter_; \
     };
     MAKE_WRAPPER(gmres,ietl::ietl_gmres)
     #undef MAKE_WRAPPER
@@ -55,22 +83,23 @@ namespace ietl{
 //jd_iterator//////////////////////////////////////////////////////
     template <class T>
     class jd_iteration : public basic_iteration<T> {
-        public: 
-
-        jd_iteration(size_t m_min, size_t m_max, size_t max_iter, T reltol = 0., T abstol = 0., size_t smi = 5) 
-            : basic_iteration<T>(max_iter, reltol, abstol), m_min_(m_min), m_max_(m_max), smi_(smi) {}
+        public:
+        jd_iteration(   size_t max_iter, 
+                        size_t m_min = 10, 
+                        size_t m_max = 20, 
+                        T reltol = sqrt(std::numeric_limits<double>::epsilon()), 
+                        T abstol = sqrt(std::numeric_limits<double>::epsilon())
+                    ) 
+            : basic_iteration<T>(max_iter, reltol, abstol), m_min_(m_min), m_max_(m_max) {}
 
         inline size_t m_min() const
             {   return m_min_;  }
         inline size_t m_max() const
             {   return m_max_;  }
-        //maximal number iterations for the correction equation solver
-        inline size_t sub_max_iter() const
-            {   return smi_;  }
         const std::string& error_msg() 
             { return basic_iteration<T>::err_msg; }    
         private:
-        size_t m_min_, m_max_, smi_;
+        size_t m_min_, m_max_;
     };
 //jd_iterator//////////////////////////////////////////////////////
 
@@ -192,7 +221,6 @@ namespace solver {
     {
         theta_ = theta;
         const unsigned int m = Q_.size(), m_old = Q_hat_.size();//if K changes =0;
-        const size_t max_iter = iter.sub_max_iter();
         double abs_tol = iter.absolute_tolerance();
         abs_tol *= abs_tol;
 
@@ -227,7 +255,7 @@ namespace solver {
         for(size_t i = 0; i < m; ++i)
             r += gamma_(i)*Q_hat_[i];
 
-        t = solv_ (*this, r, x0_, max_iter, abs_tol, false);
+        t = solv_ (*this, r, x0_, abs_tol);
 
     }//left_prec_solver::void()
 
@@ -268,7 +296,7 @@ namespace solver {
             r *= -1;
 
             //starting with x0_ = 0
-            t = solv_ (Adef_, r, x0_, iter.sub_max_iter(), iter.absolute_tolerance()*iter.absolute_tolerance(), false);
+            t = solv_ (Adef_, r, x0_, iter.absolute_tolerance()*iter.absolute_tolerance());
         }
 }//end namespace solver///////////////////////////////////////////////////////////
 
@@ -287,8 +315,7 @@ namespace solver {
             : A_(A), vspace_(vspace), n_(vec_dimension(vspace)), verbose_(v) {}
 
         //default: search for lowest eigenvalues
-        template <class SOLVER, class IT, class GEN>
-        void jdqr(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, bool search_highest);
+
 
         //without preconditioning
         #ifndef __GXX_EXPERIMENTAL_CXX0X__
@@ -304,9 +331,9 @@ namespace solver {
                 jdqr <solver_type,IT,GEN> (solver, iter, gen, k_max, search_highest);
             }
 
-        //with left preconditioner K with K ~= (A - \theta I)
+        //with left preconditioner K with K ~= inv (A - \theta I)
         template <class SOLV, class IT, class GEN, class PREC>
-        void eigensystem( IT& iter, GEN& gen, size_type k_max, PREC& K, SOLV f, bool search_highest = false)
+        void eigensystem(IT& iter, GEN& gen, size_type k_max, PREC& K, SOLV f, bool search_highest = false)
             {
                 typedef solver::left_prec_solver<SOLV,MATRIX,VS,PREC> solver_type;
                 solver_type lp_solver(f, A_, X_, vspace_, K);
@@ -314,8 +341,6 @@ namespace solver {
             }
 
         //jdqr with harmonic ritz values
-        template <class SOLVER, class IT, class GEN>
-        void jdqr_harmonic(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau);
         template <class SOLV, class IT, class GEN>
         void eigensystem_harmonic(IT& iter, GEN& gen, size_type k_max, real_type tau, SOLV& f)    
             {
@@ -357,6 +382,12 @@ namespace solver {
         vector_set_type X_;
         real_set_type Lambda_;
         size_t verbose_;    //verbosity levels: 0 = no, 1 = yes, 2 = all
+        
+        template <class SOLVER, class IT, class GEN>
+        void jdqr(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, bool search_highest);
+        
+        template <class SOLVER, class IT, class GEN>
+        void jdqr_harmonic(SOLVER& solver, IT& iter, GEN& gen, size_type k_max, real_type tau);
     };// end of class jd
 
 //jdqr for exterior eigenvalues ///////////////////////////////////////////////////
