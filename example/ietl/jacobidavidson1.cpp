@@ -102,11 +102,11 @@ int main(int argc, char **argv)
     unsigned max_cor_iter = 10;
     // on default 5 steps are used
 
-    ietl::jd_iteration<double> iter(m_min, m_max, max_iter, rel_tol, abs_tol, max_cor_iter);
+    ietl::jd_iteration<double> iter(max_iter, m_min, m_max, rel_tol, abs_tol);
     ietl::jd<Hamiltonian<vector_t>, vecspace_t> jd(H, vs /*, 2 for verbose mode */ );
 
     // the correction equation solver must be an function object
-    ietl::gmres_wrapper gmres;
+    ietl::gmres_wrapper gmres(max_cor_iter);
 
     // to find degenerated (or not well seperated) eigenvalues in the right order
     // the correction equation has to be solved exactly, this is very expensive. 
@@ -128,7 +128,7 @@ int main(int argc, char **argv)
     std::copy(evals.begin(), evals.end(), std::ostream_iterator<double>(cout, "\n"));
 
     // calculate some more eigenvalues
-    ietl::ietl_bicgstabl<double,2> bicgstab;
+    ietl::bicgstab_wrapper<double,2> bicgstab;
 
     try {
         jd.eigensystem(iter, gen, n_evals, bicgstab);

@@ -78,11 +78,9 @@ int main () {
     double abs_tol = 1e-8;
     int m_min = 10, m_max = 20;
 
-    ietl::jd_iteration<double> iter(m_min, m_max, max_iter, rel_tol, abs_tol, 5);
-    // correction equation solver steps are more expensive with preconditioning,
-    // but fewer are needed to have 'good' convergence
-    ietl::jd_iteration<double> iter3(m_min, m_max, max_iter, rel_tol, abs_tol, 2);
-    ietl::jd_iteration<double> iter2(m_min, m_max, max_iter, 0.1, abs_tol);
+    ietl::jd_iteration<double> iter(max_iter, m_min, m_max, rel_tol, abs_tol);
+    ietl::jd_iteration<double> iter3(max_iter, m_min, m_max, rel_tol, abs_tol);
+    ietl::jd_iteration<double> iter2(max_iter, m_min, m_max, 0.1, abs_tol);
 
     std::cout.precision(10);  
 
@@ -126,12 +124,15 @@ int main () {
     jacobi_prec<matrix_t,double> K(A, lambda);
 
     jd_test.reset();
+    // correction equation solver steps are more expensive with preconditioning,
+    // but fewer are needed to have 'good' convergence
+    ietl::gmres_wrapper solver2(3);
 
     std::cout << "solve with jacobi preconditioning...";
     std::cout.flush();
     clock.restart();
     try{
-        jd_test.eigensystem(iter3, gen, k, K, solver);
+        jd_test.eigensystem(iter3, gen, k, K, solver2);
     }
     catch (std::runtime_error& e) {
         std::cerr << "Something went wrong: " << e.what() << "\n";
