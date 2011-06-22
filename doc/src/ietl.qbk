@@ -1,9 +1,8 @@
 [library IETL
-    [authors [Surer, Brigitte], [Troyer, Matthias] ]
-    [copyright 2006 2007 2008 Brigitte Surer, Matthias Troyer]
+    [authors [Jäger, Robin] ]
+    [copyright 2011  Matthias Troyer, Bela Bauer, Robin Jäger]
     [purpose
-        Parallel random number generators and extenstions to the Boost
-        Random library
+        Iterative Eigensolver Template Library
     ]
     [id ietl]
     [dirname ietl]
@@ -15,11 +14,176 @@
         </ulink>)
     ]
 ]
-
 [section:ietl IETL]
+[section:jd Jacobi-Davidson]
 
+Generic implementation of the Jacobi-Davidson algorithm for hermitian hamiltonians.
 
-[endsect]
+[section:intro Usage]
+This eigensolver can be used with any linear algebra library fullfilling the requirements of the IETL.
+[note Note that a function ietl::mult(A, x, b), calculating the matrix-vector product b = A x, must be defined and has to be declared before including the header [headerref alps/src/ietl/jd.h ietl/jd.h].]
+If you are using the boost::ublas library, [headerref alps/src/ietl/interface/ublas.h ietl/interface/ublas.h] holds the proper function interface.
 
+The header [headerref alps/src/ietl/jd.h ietl/jd.h] basically provides two functions:
+
+* [memberref ietl::jd::eigensystem eigensystem()] to calculate exterior eigenpairs.
+* [memberref ietl::jd::eigensystem_harmonic eigensystem_harmonic()] to calculate interior eigenpairs.
+
+These are implementations of the algorithm templates [@http://web.eecs.utk.edu/~dongarra/etemplates/node144.html#alg:jdqr jdqr] and [@http://web.eecs.utk.edu/~dongarra/etemplates/node145.html#alg:jdqrhar jdqrhar]. The first can be used with a constant preconditioner.
+
+[table 
+[[Parameter] [Description] [Example] [Info]]
+[[`IT& iter`] [[link ietl.iter Iterator] object] [`ietl::jd_iteration(N)`] []]
+[[`GEN& gen`] [Random number generator for generating a starting vector] [`boost::lagged_fibonacci607()`] []]
+[[`size_t k`] [Number of eigenpairs to be calculated] [`3`] []]
+[[`PREC& K`] [Constant Preconditioner] [[link ietl.example2 example2]] [*optional* for `eigensystem()`]]
+[[`SOLV& solver`] [[link ietl.krylov Krylov solver]] [`ietl::gmres_wrapper()`] []]
+[[`bool search_highest = false`] [On default search for the lowest eigenpairs] [true]  [*only* for eigensystem()]]
+[[`real_t tau`] [Target value near which eigenpairs are searched] [`0.`] [*only* for eigensystem_harmonic()]]
+] 
+
+[endsect] [/intro]
+[section:iter Iterator]
+The iterator [classref ietl::jd_iteration jd_iteration] contains all required parameters.
+
+[table 
+[[Parameter] [Description] [Default] [reasonable constraints]]
+[[`size_t max_iter`] [max. number of iterations] [] [ ~N ]]
+[[`size_t m_min`] [size of the vectorset after a restart] [10] [ >= 3 ]]
+[[`size_t m_max`] [max. size of the vectorset] [20] [ > m_min ]]
+[[`T reltol`] [relative tolerance] [`sqrt(std::numeric_limits<double>::epsilon())`] [ >= default]]
+[[`T abstol`] [absolute tolerance] [`sqrt(std::numeric_limits<double>::epsilon())`] [ >= default]]
+]
+
+[endsect][/iter]
+[section:krylov Krylov Solver]
+For the Jacobi-Davidson algorithm one needs a Krylov solver to approximately solve the correction equation (I - QQ\*)(A - \theta I)(I - QQ\*) t = -r. The krylov-solver has to be wrapped in a function object. Already provided are [macroref MAKE_WRAPPER GMRES] and [classref ietl::bicgstab_wrapper BiCGSTAB(L)].
+
+The function object must have the following syntax:
+``
+ class krylov_wrapper {
+    public:
+        template <class VECTOR, class MATRIX, class REAL>
+        //solve x from A x = b
+        VECTOR operator() ( const MATRIX & A, // deflated matrix
+                            const VECTOR & b,
+                            const VECTOR & x0, // starting vector
+                            REAL absolute_tolerance )
+ };
+``
+The class [classref ietl::detail::deflated_matrix detail::deflated_matrix] defines a deflated matrix-vector product.
+
+[endsect] [/ krylov]
+
+[section:example1 Example 1 A simple Hamiltonian]
+Here is the code skeleton. To see the full sourcecode, look at [@../../example/ietl/jacobidavidson1.cpp jacobidavidson1.cpp].
+[c++]
+``
+ template<class Vector>
+ class Hamiltonian
+ {
+    typedef unsigned int state;
+    
+    public:
+        Hamiltonian(unsigned int L_) : L(L_) { }
+    
+    void mult(Vector const & vin, Vector & vout) const
+    {
+        ++count;
+        
+        vout = vin;
+        fill(vout.begin(), vout.end(), 0);
+        
+        for (unsigned int s = 0; s < L; ++s) {
+            vout[(s+1)%L] += -vin[s];
+            vout[((s+L)-1)%L] += -vin[s];
+        }
+    }
+    unsigned int basis_size() const { return L; }
+    
+ private:
+    unsigned int L;
+ };
+ 
+ #include <boost/numeric/ublas/io.hpp>
+ #include <ietl/interface/ublas.h>
+ #include <ietl/jd.h>
+ #include <boost/random.hpp>
+
+ typedef boost::numeric::ublas::vector<double> vector_t;
+ typedef ietl::vectorspace<vector_t> vecspace_t;
+ typedef boost::lagged_fibonacci607 gen_t;
+ typedef Hamiltonian<vector_t> ham_t;
+ 
+ int main()
+ {
+    int L = 100;
+    vecspace_t vs(L);
+    ham_t H(L);
+  
+    ietl::jd_iteration<double> iter(max_iter, m_min, m_max, rel_tol, abs_tol);
+    ietl::jd<ham_t, vecspace_t> jd(H, vs);
+  
+    ietl::gmres_wrapper gmres(10); //for 10 steps of the krylov-solver
+  
+    try {
+         jd.eigensystem(iter, gen, n_evals, gmres); // calculate n_evals eigenpairs
+    }
+
+    std::vector<double> evals = jd.eigenvalues();
+  
+    std::sort(evals.begin(), evals.end());
+    std::copy(evals.begin(), evals.end(), std::ostream_iterator<double>(cout, "\n"));
+ }
+
+``
+
+[endsect] [/ example1 ]
+[section:example2 Example 2 Jacobi preconditioning for a random matrix]
+Again here is only the code skeleton. Look at [@../../example/ietl/jacobidavidson2.cpp jacobidavidson2.cpp] for the source code.
+The preconditioner has to define a function ietl::mult(K, x, r) which approximates r ~= K x.
+``
+ template <class MATRIX, class SCALAR>
+ class jacobi_prec {
+  public:
+    jacobi_prec( const MATRIX& a, SCALAR l )
+        : A_(a), lambda_(l) {}
+
+    template <class VECTOR>
+    void mult( const VECTOR & x, VECTOR & y ) const
+    {
+        for(unsigned i = 0; i < x.size(); ++i)
+            y(i) = x(i) / ( A_(i,i) - lambda_);
+    }
+  private:
+    const MATRIX& A_;
+    SCALAR lambda_;
+ };
+
+ namespace ietl {
+ template <class MATRIX, class SCALAR, class VECTOR>
+    void mult( jacobi_prec<MATRIX,SCALAR> const & K, const VECTOR & x, VECTOR & y )
+    {
+        K.mult(x, y);
+    }
+ }
+ 
+ #include <ietl/jd.h>
+ 
+ int main()
+ {
+ 
+    ietl::jd<matrix_t, vectorspace_t > jd (A, vs);
+ 
+    jacobi_prec<matrix_t,double> K(A, lambda); //lambda is a rough approximation of the eigenvalue
+ 
+    jd.eigensystem(iter, gen, 3, K, ietl::gmres_wrapper());
+ }
+``
+
+[endsect] [/ example2]
+
+[endsect] [/ jd ]
+[endsect] [/ ietl ]
 
 [xinclude ietl.autodoc]
