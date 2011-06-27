@@ -51,6 +51,7 @@ private:
 // The ietl eigensolvers require an operator ietl::mult( A, x, b ) calculating b = A x,
 // it has to be declared before the eigensolver is included.
 // Look at the documentation to see a full list of requirements.
+//[ example1
 namespace ietl {
     template<class Vector>
     void mult(Hamiltonian<Vector> const & H, Vector& x, Vector& y)
@@ -73,10 +74,11 @@ typedef Hamiltonian<vector_t> ham_t;
 int main(int argc, char **argv)
 {
     int L = 100;    // dimension of the Hamiltonian
-
+    //<-
     if( argc > 1 )
         L = atoi(argv[1]);
-
+    //->
+    
     vecspace_t vs(L);
     ham_t H(L);
 
@@ -88,13 +90,10 @@ int main(int argc, char **argv)
     int n_evals = 10;   // number of eigenpairs to be calculated
     int max_iter = L*10; // maximal number of iterations
 
-    // the jacobi-davidson algorithm creates a subspace (dimension m) 
-    // of the vectorspace to find eigenpairs
-    // m <= m_max
     int m_max = 40;
-    // if(m==m_max) m <- m_min
     int m_min = 20;
-    // relative and absolute tolerance
+ 
+    // tolerance
     double rel_tol = sqrt(std::numeric_limits<double>::epsilon());
     double abs_tol = rel_tol;
 
@@ -107,7 +106,7 @@ int main(int argc, char **argv)
 
     // the correction equation solver must be an function object
     ietl::gmres_wrapper gmres(max_cor_iter);
-
+    
     // to find degenerated (or not well seperated) eigenvalues in the right order
     // the correction equation has to be solved exactly, this is very expensive. 
     // here we use different starting vectors instead.
@@ -126,7 +125,7 @@ int main(int argc, char **argv)
     std::sort(evals.begin(), evals.end());
     cout << "Sorted Eigenvalues: \n";
     std::copy(evals.begin(), evals.end(), std::ostream_iterator<double>(cout, "\n"));
-
+    //<-
     // calculate some more eigenvalues
     ietl::bicgstab_wrapper<double,2> bicgstab;
 
@@ -142,4 +141,6 @@ int main(int argc, char **argv)
     std::copy(evals.begin(), evals.end(), std::ostream_iterator<double>(cout, "\n"));
 
     return 0;
+    //->
 }
+    //] example1

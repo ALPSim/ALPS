@@ -16,10 +16,10 @@ typedef ublas::vector<double> vector_t;
 typedef ublas::matrix<double> matrix_type;
 typedef boost::lagged_fibonacci44497 gen_t;
 typedef boost::normal_distribution<double> dist_t;
-
 // jacobi preconditioner as an example
 // the preconditioner must provide a function
 // ietl::mult(A, x, b) with b ~= A x
+//[ preconditioner
     template <class MATRIX, class SCALAR>
     class jacobi_prec {
         public:
@@ -48,7 +48,7 @@ namespace ietl {
         K.mult(x, y);
     }
 }
-
+//] preconditioner
 #include <ietl/jd.h>
 
 int main () {
@@ -120,6 +120,7 @@ int main () {
 
     std::cout <<"done. \napprox eigenvalue: "<<lambda<<"\ncreating preconditioner... done.\n";
 
+    //[ funccall
     // create jacobi preconditioner
     jacobi_prec<matrix_t,double> K(A, lambda);
 
@@ -137,6 +138,7 @@ int main () {
     catch (std::runtime_error& e) {
         std::cerr << "Something went wrong: " << e.what() << "\n";
     }
+    //] funccall
 
     std::cout << "done. \n time: "<< clock.elapsed() << " \t iterations: " << iter3.iterations() << "\n";
 
