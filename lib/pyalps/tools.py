@@ -324,7 +324,7 @@ def writeInputFiles(fname,parms, baseseed=None):
     count = 0
     for p in parms:
       count += 1
-      if not p.has_key('SEED'):
+      if not 'SEED' in p:
         seed = baseseed
         for j in range(0,32/bits+1):
           seed ^= ((count-1) << (j * bits))

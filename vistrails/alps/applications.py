@@ -227,13 +227,13 @@ class AlpsEvaluate(alpscore.SystemCommandLogged):
             dataset = read_xml(fn)
             datasets.append(dataset)
             ylabel = dataset.props['ylabel']
-            if datasetmap.has_key(ylabel):
+            if ylabel in datasetmap:
               datasetmap[ylabel].append(dataset)
             else:
               datasetmap[ylabel] = [dataset]
               
         for (port_name,ylabel) in self.plots:
-          if datasetmap.has_key(ylabel):
+          if ylabel in datasetmap:
             self.setResult(port_name,datasetmap[ylabel])
           else:
             self.setResult(port_name,[])

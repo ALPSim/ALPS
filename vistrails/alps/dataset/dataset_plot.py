@@ -199,11 +199,11 @@ class Plotter(NotCacheable, Module):
                 lines.append(plt.plot(q.x,q.y,self.colors[icolor]))
                 icolor = (icolor+1)%len(self.colors)
 
-                if q.props.has_key('label'):
+                if 'label' in q.props:
                     label = q.props['label']
                     if label != 'none':
                         lines[-1][0].set_label(q.props['label'])
-                elif q.props.has_key('filename'):
+                elif 'filename' in q.props:
                     lines[-1][0].set_label(q.props['filename'])
 
             if self.hifp('title'):

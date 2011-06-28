@@ -27,7 +27,7 @@ class CommonParametersFunctions:
     def set_checked(self,p,key,value):
         if isinstance(value,basic.File):
           value = value.name
-        if p.has_key(key) and p[key] != value:
+        if key in p and p[key] != value:
           raise ModuleError(self, "parameter " + key + " defined twice and the values differ")
         else:
           p[key] = value
@@ -54,7 +54,7 @@ class ParametersData(CommonParametersFunctions):
 
     def updateIfMissing(self,defaults):
         for k in defaults.keys():
-          if not self.parms.has_key(k):
+          if not k in self.parms:
             self.parms[k] = defaults[k]
 
     def write(self,out):
@@ -102,7 +102,7 @@ class ParameterListData(CommonParametersFunctions):
     def updateIfMissing(self,defaults):
         for k in defaults.keys():
           for p in self.list:
-            if not p.has_key(k):
+            if not k in p:
               p[k] = defaults[k]
 
     def write(self,out):
