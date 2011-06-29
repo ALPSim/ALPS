@@ -85,7 +85,6 @@ void FourierTransformer::frequency_to_time_ft(nambu_itime_green_function_t &G_ta
   unsigned int N_omega = G_omega.nfreq();
   unsigned int N_site = G_omega.nsite();
   nambu_matsubara_green_function_t G_omega_no_model(G_omega);
-  nambu_matsubara_green_function_t test(G_omega);
   double dt = beta_/N_tau;
   for (unsigned int s1=0; s1<N_site; ++s1){
     for (unsigned int s2=0; s2<N_site; ++s2) {
@@ -104,6 +103,7 @@ void FourierTransformer::frequency_to_time_ft(nambu_itime_green_function_t &G_ta
           G_omega_no_model(k,s1,s2,0,1) -= 0;
           G_omega_no_model(k,s1,s2,1,0) -= 0;
           G_omega_no_model(k,s1,s2,1,1) -= f_omega(iw, c1_[1][s1][s2],-c2_[1][s1][s2], c3_[1][s1][s2]); //the '-' here is because we have Nambu notation.
+
           //std::cout<<k<<" "<<G_omega_no_model(k,s1,s2,0,0).real()<<" "<<G_omega_no_model(k,s1,s2,0,0).imag()<<" "<<G_omega_no_model(k,s1,s2,1,1).real()<<" "<<G_omega_no_model(k,s1,s2,1,1).imag()<<std::endl;
         } 
         for (unsigned int i=0; i<N_tau; i++) {
@@ -124,13 +124,15 @@ void FourierTransformer::frequency_to_time_ft(nambu_itime_green_function_t &G_ta
         G_tau(N_tau,s1,s2,1,0)=  - G_tau(0,s1,s2,1,0);
         G_tau(N_tau,s1,s2,1,1)= (s1==s2 ? -1. : 0.) - G_tau(0,s1,s2,1,1);
       }
-      for(int i=0;i<=N_tau;++i){
+      for(unsigned int i=0;i<=N_tau;++i){
+        //panic... this means we have a real problem.
         if(G_tau(i,s1,s2,0,0)<=-1.01 || G_tau(i,s1,s2,0,0) >=1.01){ std::cout<<G_tau(i,s1,s2,0,0)<<" (s1,s2,f1,f2): "<<s1<<" "<<s2<<" "<<0<<" "<<0<<std::endl; throw std::runtime_error("problem with G0 at index."); }
         if(G_tau(i,s1,s2,0,1)<=-1.01 || G_tau(i,s1,s2,0,1) >=1.01){ std::cout<<G_tau(i,s1,s2,0,1)<<" (s1,s2,f1,f2): "<<s1<<" "<<s2<<" "<<0<<" "<<1<<std::endl; throw std::runtime_error("problem with G0 at index."); }
         if(G_tau(i,s1,s2,1,0)<=-1.01 || G_tau(i,s1,s2,1,0) >=1.01){ std::cout<<G_tau(i,s1,s2,1,0)<<" (s1,s2,f1,f2): "<<s1<<" "<<s2<<" "<<1<<" "<<0<<std::endl; throw std::runtime_error("problem with G0 at index."); }
         if(G_tau(i,s1,s2,1,1)<=-1.01 || G_tau(i,s1,s2,1,1) >=1.01){ std::cout<<G_tau(i,s1,s2,1,1)<<" (s1,s2,f1,f2): "<<s1<<" "<<s2<<" "<<1<<" "<<1<<std::endl; throw std::runtime_error("problem with G0 at index."); }
       }
-      for(int i=0;i<=N_tau;++i){
+      for(unsigned int i=0;i<=N_tau;++i){
+        //roundoff error. We should probably use more frequencies.
         if(G_tau(i,s1,s2,0,0)<=-1.0){ G_tau(i,s1,s2,0,0)=-1.0+1.e-6; std::cerr<<"adjusting G at "<<i<<" "<<s1<<" "<<s2<<" "<<0<<" "<<0<<" to be larger than -1"<<std::endl; }
         if(G_tau(i,s1,s2,0,1)<=-1.0){ G_tau(i,s1,s2,0,1)=-1.0+1.e-6; std::cerr<<"adjusting G at "<<i<<" "<<s1<<" "<<s2<<" "<<0<<" "<<1<<" to be larger than -1"<<std::endl; }
         if(G_tau(i,s1,s2,1,0)<=-1.0){ G_tau(i,s1,s2,1,0)=-1.0+1.e-6; std::cerr<<"adjusting G at "<<i<<" "<<s1<<" "<<s2<<" "<<1<<" "<<0<<" to be larger than -1"<<std::endl; }

@@ -29,7 +29,7 @@
 //Data structure for repulsion for density density bands.
 #ifndef U_MATRIX_H
 #define U_MATRIX_H
-#include <alps/parameter.h>
+#include "alps/parameter.h"
 #include "types.h"
 
 class U_matrix{

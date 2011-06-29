@@ -35,7 +35,7 @@
 
 #include <vector>
 
-#include <alps/scheduler.h>
+#include "alps/scheduler.h"
 
 #include "types.h"
 #include "solver.h"

@@ -35,9 +35,9 @@
 #include "nambu_green_function.h" 
 
 
-#include <alps/config.h> // needed to set up correct bindings
-#include <boost/numeric/bindings/ublas.hpp>
-#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
+#include "alps/config.h" // needed to set up correct bindings
+#include "boost/numeric/bindings/ublas.hpp"
+#include "boost/numeric/bindings/lapack/driver/gesv.hpp"
 typedef boost::numeric::ublas::matrix<std::complex<double>,boost::numeric::ublas::column_major> complex_dense_matrix;
 typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> dense_matrix;
 inline std::complex<double> f_omega(std::complex<double> iw, double c1, double c2, double c3) {
@@ -135,6 +135,27 @@ public:
         break;
     }
   }
+  double SE_moments(const unsigned int z, const unsigned int i, const unsigned int j, 
+                 const unsigned int mom) const 
+  {
+    switch (mom) {
+      case 0 :
+        return Sc0_[z][i][j];
+        break;
+      case 1 :
+        return Sc1_[z][i][j];
+        break;
+      case 2 :
+        return Sc2_[z][i][j];
+        break;
+      default :
+        boost::throw_exception(std::invalid_argument("no such coefficient stored in FourierTransformer"));
+        return 0.;
+        break;
+    }
+  }
+  
+  
   
   
   

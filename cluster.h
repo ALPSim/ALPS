@@ -278,6 +278,8 @@ public:
     }
     return eps*bandwidth_scale_factor_;
   }
+  double cluster_momentum(const unsigned int i, const unsigned int j) const { return ClusterHelper::cluster_momentum(i,j); }
+
   
 private:
   template<typename T>
@@ -1078,6 +1080,7 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
   unsigned int nsite=G.nsite();
   unsigned int nfreq=G.nfreq();
   nambu_green_function<T> G_new(nfreq, nsite, 2, diagonal);
+  G_new=G;
   std::set<pair_class_type>::const_iterator itc, itc_end;
   //std::cout<<"doing spatial symmetries: "<<std::endl;
   for(boost::tie(itc, itc_end)=pair_classes; itc!=itc_end; itc++) {
@@ -1096,7 +1099,6 @@ nambu_green_function<T> DCATransformer::symmetrize_helper(const nambu_green_func
     }
   }
 
-  //std::cout<<"doing d-wave symmetries."<<std::endl;
   //this is the k-space symmetrization respecting d-wave symmetry
   std::vector<double> dwave_prefactor(nsite);
   for(unsigned int i=0;i<nsite;++i){

@@ -35,7 +35,7 @@
 /// @sa HirschFyeSolver
 
 #include "solver.h"
-#include <boost/filesystem/path.hpp>
+#include "boost/filesystem/path.hpp"
 
 /// An impurity solver using the Hirsch-Fye algorithm
 class HirschFyeSolver : public ImpuritySolver {

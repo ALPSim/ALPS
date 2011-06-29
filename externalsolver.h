@@ -35,8 +35,8 @@
 /// @sa ExternalSolver
 
 #include "solver.h"
-#include <boost/filesystem/path.hpp>
-#include <boost/filesystem/operations.hpp>
+#include "boost/filesystem/path.hpp"
+#include "boost/filesystem/operations.hpp"
 
 /// @brief An impurity solver calling an external executable to solve the 
 ///        impurity problem

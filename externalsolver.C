@@ -48,7 +48,6 @@
 
 #include "externalsolver.h"
 
-
 ImpuritySolver::result_type ExternalSolver::solve(
       const itime_green_function_t& G0
     , alps::Parameters p) 
@@ -109,8 +108,9 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
   }
-
+  
   call(infile,outfile);
+
 
   unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
   unsigned int n_tau=(unsigned int)p["N"];

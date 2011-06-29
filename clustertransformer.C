@@ -130,9 +130,9 @@ dispersion_moments_(2, 0.)
     half_filling_ = hf;
     std::cout << "half-filling " << hf << " shifted to zero\n"; 
   }
-  else 
+  else{ 
     ; //std::cout << "half-filling: " << hf << "\n"; 
-  if (params.defined("W")) {
+  }if (params.defined("W")) {
     bandwidth_scale_factor_ = bandwidth_/bw;
     std::cout << "bandwidth scale factor: " << bandwidth_scale_factor_ << "\n";
   }

@@ -38,14 +38,14 @@
 #include "alps_solver.h"
 #include "green_function.h"
 
-#include <alps/scheduler/montecarlo.h>
-#include <alps/osiris/dump.h>
-#include <alps/osiris/std/vector.h>
-#include <alps/alea/detailedbinning.h>
-#include <alps/alea/detailedbinning.h>
-#include <alps/alea/nobinning.h>
+#include "alps/scheduler/montecarlo.h"
+#include "alps/osiris/dump.h"
+#include "alps/osiris/std/vector.h"
+#include "alps/alea/detailedbinning.h"
+#include "alps/alea/detailedbinning.h"
+#include "alps/alea/nobinning.h"
 
-#include <boost/numeric/ublas/io.hpp>
+#include "boost/numeric/ublas/io.hpp"
 
 #include <stack>
 #include <queue>

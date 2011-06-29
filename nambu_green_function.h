@@ -5,9 +5,14 @@
 #include <iomanip>
 #include <cstdlib>
 #include <iostream>
-#include <alps/hdf5.hpp>
-#include <alps/hdf5/pointer.hpp>
-#include <alps/hdf5/complex.hpp>
+#include "alps/hdf5.hpp"
+#include "alps/hdf5/pointer.hpp"
+#include "alps/hdf5/complex.hpp"
+
+#ifdef USE_MPI
+#include <mpi.h>
+#endif
+
 
 //Matsubara GF: use T=std::complex<double>
 //Imaginary time: use T=double
@@ -87,6 +92,13 @@ public:
     std::stringstream subpath; subpath<<path<<"/values/mean";
     ar>>alps::make_pvp(subpath.str(), val_, nt_*ns_*ns_*nf_*nf_);
   }
+#ifdef USE_MPI
+    void broadcast(){
+      MPI_Bcast( val_, ntnsnsnf_*nf_*sizeof(T)/sizeof(double), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+      MPI_Bcast( err_, ntnsnsnf_*nf_*sizeof(T)/sizeof(double), MPI_DOUBLE, 0, MPI_COMM_WORLD);
+    }
+#endif
+
   const shape_t &shape() const{return shape_;}
 private:
 	//const values
