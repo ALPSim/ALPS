@@ -22,6 +22,7 @@ if (NOT WIN32)
     set(SRC_DIR ${PROJECT_SOURCE_DIR})
     set(INCLUDE_PATH ${Boost_ROOT_DIR})
     set(JAVA ${JAVA_RUNTIME})
+    
 
     configure_file(autodoc.in ${PROJECT_BINARY_DIR}/doc/autodoc)
     configure_file(bb2db.in ${PROJECT_BINARY_DIR}/doc/bb2db)
@@ -30,7 +31,8 @@ if (NOT WIN32)
     configure_file(db2pdf.in ${PROJECT_BINARY_DIR}/doc/db2pdf)
     configure_file(doxygen.conf.in ${PROJECT_BINARY_DIR}/doc/doxygen.conf)
     configure_file(singledoc.in ${PROJECT_BINARY_DIR}/doc/singledoc)
-
+    configure_file(src/ietl.qbk.in ${SRC_DIR}/doc/src/ietl.qbk)
+    
     make_directory(${PROJECT_BINARY_DIR}/doc/src)
     make_directory(${PROJECT_BINARY_DIR}/doc/html)
     make_directory(${PROJECT_BINARY_DIR}/doc/html/search)
@@ -47,6 +49,7 @@ if (NOT WIN32)
     file(COPY ${PROJECT_SOURCE_DIR}/doc/src DESTINATION .)
     foreach (S ${ALPS_QBK_SOURCES})
         add_custom_command(OUTPUT src/${S}.xml 
+                         COMMAND echo ${S}
                          COMMAND cmake -E copy ${PROJECT_SOURCE_DIR}/doc/src/${S}.qbk src
                          COMMAND ${PROJECT_BINARY_DIR}/tool/quickbook --input-file src/${S}.qbk --output-file src/${S}.xml
                          DEPENDS quickbook src/${S}.qbk)
