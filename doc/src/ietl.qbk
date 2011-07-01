@@ -191,19 +191,19 @@ The class [classref ietl::detail::deflated_matrix detail::deflated_matrix] defin
 
 [section:example1 Example 1 A simple Hamiltonian]
 In this example a hamiltonian from electrodynamics is shown, it does not store a matrix. The lowest eigenvalue is `-2` and all interior eigenvalues are two-fold degenerate.
-Here is part of the code. To see the full sourcecode, look at [@../../example/ietl/jacobidavidson1.cpp jacobidavidson1.cpp].
+Here is part of the code. To see the full sourcecode, look at [@/home/robin/alps2/alps/example/ietl/jacobidavidson1.cpp jacobidavidson1.cpp].
 [c++]
-[import ../../example/ietl/jacobidavidson1.cpp]
+[import /home/robin/alps2/alps/example/ietl/jacobidavidson1.cpp]
 [example1]
 
 [endsect] [/ example1 ]
 
 [section:example2 Example 2 Jacobi preconditioning for a random matrix]
 Here we calculate the eigenvalues of a diagonal dominant random matrix. First we do this without preconditioning, then with preconditioning comparing the iterations and time used until convergence is reached.
-Again here is only the code skeleton of the example [@../../example/ietl/jacobidavidson2.cpp jacobidavidson2.cpp].
+Again here is only the code skeleton of the example [@/home/robin/alps2/alps/example/ietl/jacobidavidson2.cpp jacobidavidson2.cpp].
 The preconditioner has to define a function ietl::mult(K, x, r) which approximates r ~= K x.
 
-[import ../../example/ietl/jacobidavidson2.cpp]
+[import /home/robin/alps2/alps/example/ietl/jacobidavidson2.cpp]
 The preconditioner:
 
 [preconditioner]
