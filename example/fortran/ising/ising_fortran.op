@@ -1,0 +1,104 @@
+[input parameters]
+ALGORITHM = ising;
+SEED = 1234;
+TEMPERATURE = 2.5;
+MCS = 1000;
+INT = 1000;
+L = 10;
+DIR_NAME = .;
+BASE_NAME = task1;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+Energy: 116.256 +/- 1.34; tau = 0.918 WARNING: check error convergence
+    bin #1   : 1000     entries: error = 0.795819
+    bin #2   : 500      entries: error = 1.04005
+    bin #3   : 250      entries: error = 1.3402
+Magnetization: 29.816 +/- 3.02; tau = 1.43 WARNING: check error convergence
+    bin #1   : 1000     entries: error = 1.53769
+    bin #2   : 500      entries: error = 2.1587
+    bin #3   : 250      entries: error = 3.02067
+[input parameters]
+ALGORITHM = ising;
+SEED = 1234;
+TEMPERATURE = 2.3;
+MCS = 900;
+INT = 1100;
+L = 20;
+DIR_NAME = .;
+BASE_NAME = task2;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+Energy: 506.253 +/- 2.82; tau = 0.984 WARNING: check error convergence
+    bin #1   : 900      entries: error = 1.63938
+    bin #2   : 450      entries: error = 2.14631
+    bin #3   : 225      entries: error = 2.82402
+Magnetization: 73.3178 +/- 10.5; tau = 1.48 WARNING: check error convergence
+    bin #1   : 900      entries: error = 5.28711
+    bin #2   : 450      entries: error = 7.46102
+    bin #3   : 225      entries: error = 10.5228
+[input parameters]
+ALGORITHM = ising;
+SEED = 1234;
+TEMPERATURE = 2.1;
+MCS = 800;
+INT = 1200;
+L = 30;
+DIR_NAME = .;
+BASE_NAME = task3;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+Energy: 1475.88 +/- 3.79; tau = 0.798 WARNING: check error convergence
+    bin #1   : 800      entries: error = 2.35206
+    bin #2   : 400      entries: error = 3.03223
+    bin #3   : 200      entries: error = 3.79019
+Magnetization: 769.403 +/- 2.63; tau = 1.14 WARNING: check error convergence
+    bin #1   : 800      entries: error = 1.45379
+    bin #2   : 400      entries: error = 1.97323
+    bin #3   : 200      entries: error = 2.62958
+[input parameters]
+ALGORITHM = ising;
+SEED = 1234;
+TEMPERATURE = 1.9;
+MCS = 700;
+INT = 1300;
+L = 40;
+DIR_NAME = .;
+BASE_NAME = task4;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+Energy: 2890.03 +/- 3.33; tau = 0.535 WARNING: check error convergence
+    bin #1   : 700      entries: error = 2.31328
+    bin #2   : 350      entries: error = 2.77133
+    bin #3   : 175      entries: error = 3.32896
+Magnetization: 1498.06 +/- 1.69; tau = 0.815 WARNING: check error convergence
+    bin #1   : 700      entries: error = 1.04244
+    bin #2   : 350      entries: error = 1.34158
+    bin #3   : 175      entries: error = 1.69082
+ ----- alps_init -----
+    TEMP =    2.5000000    
+    MCS =         1000
+    INT =         1000
+    L =           10
+    SEED =         1234
+ ----- alps_init -----
+    TEMP =    2.3000000    
+    MCS =          900
+    INT =         1100
+    L =           20
+    SEED =         1234
+ ----- alps_init -----
+    TEMP =    2.0999999    
+    MCS =          800
+    INT =         1200
+    L =           30
+    SEED =         1234
+ ----- alps_init -----
+    TEMP =    1.9000000    
+    MCS =          700
+    INT =         1300
+    L =           40
+    SEED =         1234

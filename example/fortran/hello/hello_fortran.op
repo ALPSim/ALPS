@@ -1,0 +1,81 @@
+[input parameters]
+ALGORITHM = "hello fortran";
+SEED = 1234;
+WORLD = world;
+X = 3.2;
+Y = 0;
+Z = defined;
+DIR_NAME = .;
+BASE_NAME = task1;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+[input parameters]
+ALGORITHM = "hello fortran";
+SEED = 1234;
+WORLD = alps;
+X = -3.1;
+Y = 3*2;
+DIR_NAME = .;
+BASE_NAME = task2;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+[input parameters]
+ALGORITHM = "hello fortran";
+SEED = 1234;
+WORLD = looper;
+X = 0.001;
+Y = -100;
+DIR_NAME = .;
+BASE_NAME = task3;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+[input parameters]
+ALGORITHM = "hello fortran";
+SEED = 1234;
+WORLD = japan;
+X = 100.0;
+Y = 2;
+DIR_NAME = .;
+BASE_NAME = task4;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+[input parameters]
+ALGORITHM = "hello fortran";
+SEED = 1234;
+WORLD = wistaria;
+X = 3;
+Y = 0;
+DIR_NAME = .;
+BASE_NAME = task5;
+WORKER_SEED = 1234;
+DISORDER_SEED = 1234;
+[results]
+  ##### alps_init() ##### 
+   parameter X     =    3.2000000000000002     
+   parameter Y     =            0
+   parameter WORLD = world                           
+   defined parameter Z =            1 
+  ##### alps_init() ##### 
+   parameter X     =   -3.1000000000000001     
+   parameter Y     =            6
+   parameter WORLD = alps                            
+   defined parameter Z =            0 
+  ##### alps_init() ##### 
+   parameter X     =   1.00000000000000002E-003
+   parameter Y     =         -100
+   parameter WORLD = looper                          
+   defined parameter Z =            0 
+  ##### alps_init() ##### 
+   parameter X     =    100.00000000000000     
+   parameter Y     =            2
+   parameter WORLD = japan                           
+   defined parameter Z =            0 
+  ##### alps_init() ##### 
+   parameter X     =    3.0000000000000000     
+   parameter Y     =            0
+   parameter WORLD = wistaria                        
+   defined parameter Z =            0 

@@ -23,6 +23,10 @@ if(NOT ALPS_USE_FILE_INCLUDED)
     set(CMAKE_CXX_FLAGS ${ALPS_CMAKE_CXX_FLAGS} CACHE STRING "Flags used by the compiler during all build types." FORCE)
     set(CMAKE_CXX_FLAGS_DEBUG ${ALPS_CMAKE_CXX_FLAGS_DEBUG} CACHE STRING "Flags used by the compiler during debug builds." FORCE)
     set(CMAKE_CXX_FLAGS_RELEASE ${ALPS_CMAKE_CXX_FLAGS_RELEASE} CACHE STRING "Flags used by the compiler during release builds." FORCE)
+    set(CMAKE_Fortran_COMPILER ${ALPS_CMAKE_Fortran_COMPILER} CACHE FILEPATH "Fortran compiler." FORCE)
+    set(CMAKE_Fortran_FLAGS ${ALPS_CMAKE_Fortran_FLAGS} CACHE STRING "Flags used by the compiler during all build types." FORCE)
+    set(CMAKE_Fortran_FLAGS_DEBUG ${ALPS_CMAKE_Fortran_FLAGS_DEBUG} CACHE STRING "Flags used by the compiler during debug builds." FORCE)
+    set(CMAKE_Fortran_FLAGS_RELEASE ${ALPS_CMAKE_Fortran_FLAGS_RELEASE} CACHE STRING "Flags used by the compiler during release builds." FORCE)
   endif(NOT PREVENT_ALPS_COMPILERS)
 
   # Add macro definitions needed to use ALPS and dependent libraries
@@ -44,6 +48,7 @@ if(NOT ALPS_USE_FILE_INCLUDED)
 
   # list of ALPS and dependent libraries
   set(ALPS_LIBRARIES alps boost ${ALPS_EXTRA_LIBRARIES} CACHE STRING "List of ALPS and dependent libraries." FORCE)
+  set(ALPS_FORTRAN_LIBRARIES alps_fortran CACHE STRING "List of ALPS-Fortran library." FORCE)
 
   # RPATH setting
   set(CMAKE_INSTALL_NAME_DIR "${ALPS_ROOT_DIR}/lib" FORCE)
