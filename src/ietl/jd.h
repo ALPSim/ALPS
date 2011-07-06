@@ -522,7 +522,7 @@ namespace solver {
                     ublas::column(S, row + ( search_highest ? +1 : -1) ) = ublas::unit_vector<scalar_type> (S.size1(), i);
                 }
 
-                Theta.erase( (search_highest) ? --Theta.end() : Theta.begin() );
+                Theta.erase( (search_highest) ? (Theta.end() - 1) : Theta.begin() );
 
                 theta = (search_highest) ? Theta.back() : Theta[0];
 
