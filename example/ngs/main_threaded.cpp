@@ -27,53 +27,29 @@
 
 #include "ising.hpp"
 
-typedef ising_simulation<alps::mcthreadedsim<alps::mcbase> > Simulation;
-
 int main(int argc, char *argv[]) {
 
     // load command line argumen
     alps::mcoptions options(argc, argv);
 
     // load parameterfile
-    alps::parameters_type<Simulation>::type params(options.input_file);
+    alps::parameters_type<ising_simulation>::type params(options.input_file);
 
 
     // create simulation
-    Simulation s(params);
+    alps::mcthreadedsim<ising_simulation> s(params);
 
     // resume if --continue is passed
     if (options.resume)
         s.load(params.value_or_default("DUMP", "dump").str());
 
-    // make callback
-    alps::threaded_callback_wrapper stopper(boost::bind<bool>(&alps::basic_stop_callback, options.time_limit));
-
     // runs simulation
-    boost::thread thread(boost::bind<bool>(&Simulation::run, boost::ref(s), stopper));
-    // output limits
-    boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
-    boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
-    do {
-        usleep(0.1 * 1e6);
-        // print progress every 5s
-        if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
-            std::cout << "progress: " << s.fraction_completed() << std::endl;
-            progress_time = boost::posix_time::second_clock::local_time();
-        }
-        // checkpoint every 15 s
-        if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(10)) {
-            std::cout << "checkpointing ... " << std::endl;
-            // save observables to hdf5
-            s.save(params.value_or_default("DUMP", "dump").str());
-            checkpoint_time = boost::posix_time::second_clock::local_time();
-        }
-    } while (!stopper.check());
-    thread.join();
+    s.run(boost::bind(&alps::basic_stop_callback, options.time_limit));
 
     // save observables to hdf5
     s.save(params.value_or_default("DUMP", "dump").str());
 
-    alps::results_type<Simulation>::type results = collect_results(s);
+    alps::results_type<alps::mcthreadedsim<ising_simulation> >::type results = collect_results(s);
     {
         using namespace alps;
         // print whole result
@@ -99,6 +75,5 @@ int main(int argc, char *argv[]) {
 
     // save results to hdf5
     save_results(results, params, options.output_file, "/simulation/results");
-
 }
 

@@ -25,39 +25,42 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/hdf5.hpp>
-#include <alps/ngs/params.hpp>
+#ifndef ALPS_NGS_MCATOMIC_HPP
+#define ALPS_NGS_MCATOMIC_HPP
 
-#include <fstream>
-#include <iostream>
-#include <iterator>
+#ifndef ALPS_NGS_SINGLE_THREAD
+    #include <boost/thread.hpp>
+    #include <boost/thread/mutex.hpp>
+#endif
 
-int main(int argc, char *argv[]) {
+namespace alps {
 
-    // load a hdf5 file into a parameter object
-    alps::hdf5::archive ar("param.h5");
-    alps::params params_h5(ar);
+    #ifndef ALPS_NGS_SINGLE_THREAD
 
-    std::vector<std::string> keys_h5 = params_h5.keys();
-    for (std::vector<std::string>::const_iterator it = keys_h5.begin(); it != keys_h5.end(); ++it)
-        std::cout << *it << ":" << params_h5[*it] << std::endl;
+        template<typename T> class mcatomic {
+            public:
 
-    std::cout << std::endl;
+                mcatomic() {}
+                mcatomic(T const & v): value(v) {}
+                mcatomic(mcatomic<T> const & v): value(v.value) {}
 
-    // load a text file into a parameter object
-    std::ifstream file;
-    file.open("param.txt");
-    std::string txt;
-    while(file.good()) {
-        std::string line;
-        file >> line;
-        txt += line + "\n";
-    }
-    file.close();
-    alps::params params_txt(txt);
+                mcatomic<T> & operator=(T const & v) {
+                    boost::lock_guard<boost::mutex> lock(mutex);
+                    value = v;
+                }
 
-    std::vector<std::string> keys_txt = params_txt.keys();
-    for (std::vector<std::string>::const_iterator it = keys_txt.begin(); it != keys_txt.end(); ++it)
-        std::cout << *it << ":" << params_txt[*it] << std::endl;
+                operator T() const {
+                    boost::lock_guard<boost::mutex> lock(mutex);
+                    return value;
+                }
 
+            private:
+
+                T volatile value;
+                boost::mutex mutable mutex;
+        };
+
+    #endif
 }
+
+#endif

@@ -27,8 +27,15 @@
 
 #include "ising.hpp"
 
+// check for signals and time limit
+bool stop_callback(boost::posix_time::ptime const & start_time, int time_limit) {
+    static alps::mcsignal signal;
+    return !signal.empty() 
+        || (time_limit > 0 && boost::posix_time::second_clock::local_time() > start_time + boost::posix_time::seconds(time_limit));
+}
+
 int main(int argc, char *argv[]) {
-/*
+
     // load command line argumen
     alps::mcoptions options(argc, argv);
 
@@ -47,7 +54,7 @@ int main(int argc, char *argv[]) {
         s.load(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()));
 
     // runs simulation
-    s.run(boost::bind(&alps::basic_stop_callback, boost::posix_time::second_clock::local_time(), options.time_limit));
+    s.run(boost::bind(&stop_callback, boost::posix_time::second_clock::local_time(), options.time_limit));
 
     // save observables to hdf5
     s.save(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()));
@@ -78,6 +85,6 @@ int main(int argc, char *argv[]) {
         // save results to hdf5
         save_results(results, params, options.output_file, "/simulation/results");
     }
-*/
+
 }
 
