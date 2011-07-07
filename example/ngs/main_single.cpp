@@ -28,7 +28,7 @@
 #include "ising.hpp"
 
 int main(int argc, char *argv[]) {
-
+/*
     // load command line argumen
     alps::mcoptions options(argc, argv);
 
@@ -74,5 +74,6 @@ int main(int argc, char *argv[]) {
 
     // save results to hdf5
     save_results(results, params, options.output_file, "/simulation/results");
+*/
 }
 

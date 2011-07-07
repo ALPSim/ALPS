@@ -27,10 +27,13 @@
 
 #include <alps/ngs.hpp>
 
-class ising_simulation : public alps::mcbase {
+#include <boost/lambda/lambda.hpp>
+
+template<typename Impl> class ising_simulation : public Impl {
     public:
-        ising_simulation(parameters_type const & params, std::size_t seed_offset = 0)
-            : alps::mcbase(params, seed_offset)
+
+        ising_simulation(typename Impl::parameters_type const & params, std::size_t seed_offset = 0)
+            : Impl(params, seed_offset)
             , length(params["L"])
             , beta(1. / double(params["T"]))
             , sweeps(0)
@@ -40,7 +43,7 @@ class ising_simulation : public alps::mcbase {
         {
             for(int i = 0; i < length; ++i)
                 spins[i] = (random() < 0.5 ? 1 : -1);
-            measurements << alps::ngs::RealObservable("Unused")
+            Impl::measurements << alps::ngs::RealObservable("Unused")
                          << alps::ngs::SimpleRealObservable("EnergySimple")
                          << alps::ngs::RealObservable("Energy")
                          << alps::ngs::RealObservable("Magnetization")
@@ -51,10 +54,21 @@ class ising_simulation : public alps::mcbase {
                          << alps::ngs::RealObservable("Sign")
                          << alps::ngs::SignedRealObservable("SignedEnergy");
         }
+
+        void save(boost::filesystem::path const & path) const {
+            // TODO save state, get ar!
+            Impl::save(path);
+        }
+
+        void load(boost::filesystem::path const & path) {
+            // TODO load state, get ar!
+            Impl::load(path);
+        }
+
         void do_update() {
             for (int j = 0; j < length; ++j) {
                 using std::exp;
-                int i = int(double(length) * random());
+                int i = int(double(length) * Impl::random());
                 int right = ( i + 1 < length ? i + 1 : 0 );
                 int left = ( i - 1 < 0 ? length - 1 : i - 1 );
                 double p = exp( 2. * beta * spins[i] * ( spins[right] + spins[left] ));
@@ -62,6 +76,7 @@ class ising_simulation : public alps::mcbase {
                     spins[i] =- spins[i];
             }
         };
+
         void do_measurements() {
             sweeps++;
             if (sweeps > thermalization_sweeps) {
@@ -76,24 +91,30 @@ class ising_simulation : public alps::mcbase {
                     for (int d = 0; d < length; ++d)
                         corr[d] += spins[i] * spins[( i + d ) % length ];
                 }
-                corr /= double(length);
+                {
+                    using boost::lambda::_1;
+                    std::transform(corr.begin(), corr.end(), corr.begin(), _1 / double(length));
+                }
                 ten /= length;
                 tmag /= length;
-                measurements["EnergySimple"] << ten;
-                measurements["Energy"] << ten;
-                measurements["Magnetization"] << tmag;
-                measurements["Magnetization^2"] << tmag * tmag;
-                measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                measurements["CorrelationsSimple"] << corr;
-                measurements["Correlations"] << corr;
-                measurements["Sign"] << sign;
-                measurements["SignedEnergy"] << ten;
+                Impl::measurements["EnergySimple"] << ten;
+                Impl::measurements["Energy"] << ten;
+                Impl::measurements["Magnetization"] << tmag;
+                Impl::measurements["Magnetization^2"] << tmag * tmag;
+                Impl::measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
+                Impl::measurements["CorrelationsSimple"] << corr;
+                Impl::measurements["Correlations"] << corr;
+                Impl::measurements["Sign"] << sign;
+                Impl::measurements["SignedEnergy"] << ten;
             }
         };
+
         double fraction_completed() const {
             return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
         }
+
     private:
+
         int length;
         int sweeps;
         int thermalization_sweeps;
@@ -103,5 +124,5 @@ class ising_simulation : public alps::mcbase {
         double ten;
         double sign;
         std::vector<int> spins;
-        std::valarray<double> corr;
+        std::vector<double> corr;
 };

@@ -29,6 +29,11 @@ if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
             -P ${CMAKE_CURRENT_SOURCE_DIR}/run_ngs_threaded_test.cmake
     )
 
+    foreach(program params)
+        add_executable(ngs_${program} ${program}.cpp)
+        target_link_libraries(ngs_${program} alps)
+    endforeach(program)
+
     if (MPI_FOUND)
     
         add_executable(ngs_mpi main_mpi.cpp)
