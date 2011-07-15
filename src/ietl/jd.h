@@ -42,7 +42,7 @@
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 //for lapack::heev
-#include <boost/numeric/bindings/lapack/driver.hpp>
+#include <boost/numeric/bindings/lapack/driver/heev.hpp>
 //for lapack::getrs
 #include <boost/numeric/bindings/lapack/computational.hpp>
 //#include <boost/numeric/bindings/detail/config/fortran.hpp>
