@@ -28,7 +28,9 @@
 #ifndef ALPS_NGS_STACKTRACE_HPP
 #define ALPS_NGS_STACKTRACE_HPP
 
-#define ALPS_NGS_MAX_FRAMES 63
+#ifndef ALPS_NGS_MAX_FRAMES
+    #define ALPS_NGS_MAX_FRAMES 63
+#endif
 
 #include <alps/config.h>
 #include <sstream>

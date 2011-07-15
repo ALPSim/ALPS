@@ -27,48 +27,56 @@
 
 #include <alps/ngs.hpp>
 
-class ising_simulation : public alps::mcbase {
+#include <boost/lambda/lambda.hpp>
+
+template<typename Impl> class ising_sim : public Impl {
     public:
-        ising_simulation(parameters_type const & params, std::size_t seed_offset = 0)
-            : alps::mcbase(params, seed_offset)
+
+        ising_sim(typename Impl::parameters_type const & params, std::size_t seed_offset = 42)
+            : Impl(params, seed_offset)
             , length(params["L"])
-            , beta(1. / double(params["T"]))
-            , sweeps(0)
             , thermalization_sweeps(int(params["THERMALIZATION"]))
             , total_sweeps(int(params["SWEEPS"]))
+            , beta(1. / double(params["T"]))
             , spins(length)
         {
-            for(int i = 0; i < length; ++i)
-                spins[i] = (random() < 0.5 ? 1 : -1);
-            measurements << alps::ngs::RealObservable("Unused")
-                         << alps::ngs::SimpleRealObservable("EnergySimple")
-                         << alps::ngs::RealObservable("Energy")
-                         << alps::ngs::RealObservable("Magnetization")
-                         << alps::ngs::RealObservable("Magnetization^2")
-                         << alps::ngs::RealObservable("Magnetization^4")
-                         << alps::ngs::SimpleRealVectorObservable("CorrelationsSimple")
-                         << alps::ngs::RealVectorObservable("Correlations")
-                         << alps::ngs::RealObservable("Sign")
-                         << alps::ngs::SignedRealObservable("SignedEnergy");
+            create();
         }
+
+        #ifdef ALPS_HAVE_MPI
+
+            ising_sim(typename Impl::parameters_type const & params, boost::mpi::communicator comm)
+                : Impl(params, comm)
+                , length(params["L"])
+                , thermalization_sweeps(int(params["THERMALIZATION"]))
+                , total_sweeps(int(params["SWEEPS"]))
+                , beta(1. / double(params["T"]))
+                , spins(length)
+            {
+                create();
+            }
+
+        #endif
+
         void do_update() {
             for (int j = 0; j < length; ++j) {
                 using std::exp;
-                int i = int(double(length) * random());
+                int i = int(double(length) * Impl::random());
                 int right = ( i + 1 < length ? i + 1 : 0 );
                 int left = ( i - 1 < 0 ? length - 1 : i - 1 );
                 double p = exp( 2. * beta * spins[i] * ( spins[right] + spins[left] ));
-                if ( p >= 1. || random() < p )
+                if ( p >= 1. || Impl::random() < p )
                     spins[i] =- spins[i];
             }
         };
+
         void do_measurements() {
             sweeps++;
             if (sweeps > thermalization_sweeps) {
-                tmag = 0;
-                ten = 0;
-                sign = 1;
-                corr.resize(length, 0.);
+                double tmag = 0;
+                double ten = 0;
+                double sign = 1;
+                std::vector<double> corr(length);
                 for (int i = 0; i < length; ++i) {
                     tmag += spins[i];
                     sign *= spins[i];
@@ -76,32 +84,41 @@ class ising_simulation : public alps::mcbase {
                     for (int d = 0; d < length; ++d)
                         corr[d] += spins[i] * spins[( i + d ) % length ];
                 }
-                corr /= double(length);
+                {
+                    using boost::lambda::_1;
+                    std::transform(corr.begin(), corr.end(), corr.begin(), _1 / double(length));
+                }
                 ten /= length;
                 tmag /= length;
-                measurements["EnergySimple"] << ten;
-                measurements["Energy"] << ten;
-                measurements["Magnetization"] << tmag;
-                measurements["Magnetization^2"] << tmag * tmag;
-                measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                measurements["CorrelationsSimple"] << corr;
-                measurements["Correlations"] << corr;
-                measurements["Sign"] << sign;
-                measurements["SignedEnergy"] << ten;
+                Impl::measurements["Energy"] << ten;
+                Impl::measurements["Magnetization"] << tmag;
+                Impl::measurements["Magnetization^2"] << tmag * tmag;
+                Impl::measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
+                Impl::measurements["Correlations"] << corr;
             }
         };
+
         double fraction_completed() const {
             return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
         }
+
     private:
+
+        void create() {
+            for(int i = 0; i < length; ++i)
+                spins[i] = (Impl::random() < 0.5 ? 1 : -1);
+            Impl::measurements << alps::ngs::RealObservable("Energy")
+                               << alps::ngs::RealObservable("Magnetization")
+                               << alps::ngs::RealObservable("Magnetization^2")
+                               << alps::ngs::RealObservable("Magnetization^4")
+                               << alps::ngs::RealVectorObservable("Correlations")
+            ;
+        }
+
         int length;
         int sweeps;
         int thermalization_sweeps;
         int total_sweeps;
         double beta;
-        double tmag;
-        double ten;
-        double sign;
         std::vector<int> spins;
-        std::valarray<double> corr;
 };
