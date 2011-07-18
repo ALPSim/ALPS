@@ -313,7 +313,7 @@ void hybridization::read_external_input_data(const parameters_type &parms){
   for(int i=0;i<FLAVORS;++i){
     if(!mu_dc_solver.good()) throw(std::invalid_argument("mu dc solver file has not enough lines?"));
     mu_dc_solver>>dummy>>mu_e[i]>>std::ws;
-    mu_e[i]*=t; //we need to adjust this to the right onints
+    mu_e[i]*=t; //we need to adjust this to the right units
   }
   
   
