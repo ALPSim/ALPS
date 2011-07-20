@@ -68,12 +68,18 @@ def plot(data):
         except AttributeError:
             xmeans = [float(vvv) for vvv in q.x]
             xerrors = None
+        except TypeError:
+            xmeans = [q.x]
+            xerrors = None
         
         try:
             ymeans = np.array([xx.mean for xx in q.y])
             yerrors = np.array([xx.error for xx in q.y])
         except AttributeError:
             ymeans = [float(vvv) for vvv in q.y]
+            yerrors = None
+        except TypeError: # this usually means that it's scalar
+            ymeans = [q.y]
             yerrors = None
 
         if 'label' in q.props and q.props['label'] != 'none':

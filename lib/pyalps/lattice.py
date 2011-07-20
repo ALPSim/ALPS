@@ -15,14 +15,17 @@ import sys
 # and the value:
 # - a coordinate tuple in the case of vertices
 # - a dict in the case of edges, containing source, target, type and all other attributes from the XML
+# A third dict is returned, which maps vertex IDs to vertex types
 def parse(fn):
     root = ElementTree.parse(fn).getroot()
     vertices = {}
+    vtype = {}
     
     for vertex in root.findall('VERTEX'):
         vid = int(vertex.get('id'))
         vpos = tuple([float(x) for x in vertex.find('COORDINATE').text.split()])
         vertices[vid] = vpos
+        vtype[vid] = vertex.get('type')
     
     edges = {}
     for edge in root.findall('EDGE'):
@@ -31,17 +34,18 @@ def parse(fn):
         for c in ['source', 'target', 'type']:
             edges[eid][c] = int(edges[eid][c])
     
-    return (vertices,edges)
+    return (vertices,edges,vtype)
 
 def showgraph(graph):
     vertices = graph[0]
     edges = graph[1]
+    vtypes = graph[2]
     
     x = [v[0] for v in vertices.values()]
     y = [v[1] for v in vertices.values()]
     plt.scatter(x, y)
     for k, v in vertices.items():
-        plt.annotate(k, v)
+        plt.annotate('%s (%s)' % (k, vtypes[k]), v)
     
     for edge in edges.values():
         s = edge['source']
