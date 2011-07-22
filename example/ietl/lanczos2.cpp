@@ -59,8 +59,6 @@ int main() {
   ietl::lanczos<Matrix,Vecspace> lanczos(mat,vec);
   
   int max_iter = 2*N;  
-  double rel_tol = 500*std::numeric_limits<double>::epsilon();
-  double abs_tol = std::pow(std::numeric_limits<double>::epsilon(),2./3);
   std::cout << "Computation of eigenvalues with fixed size of T-matrix\n\n";
   std::cout << "-----------------------------------\n\n";
 
@@ -80,7 +78,7 @@ int main() {
  // Printing eigenvalues with error & multiplicities:  
   std::cout << "#         eigenvalue         error         multiplicity\n";  
   std::cout.precision(10);
-  for (int i=0;i<eigen.size();++i)
+  for (unsigned int i=0;i<eigen.size();++i)
     std::cout << i << "\t" << eigen[i] << "\t" << err[i] << "\t" 
           << multiplicity[i] << "\n";
   

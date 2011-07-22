@@ -7,7 +7,7 @@
 #  Python settings : 
 #
 #  This module checks that : 
-#  - the python interpreter is working and version >= 2.5
+#  - the python interpreter is working and version >= 2.6
 #  - it has modules : distutils, numpy, tables
 # 
 #  This module defines the variables
@@ -53,7 +53,7 @@ else (NOT PYTHON_INTERPRETER AND NOT PYTHON_VISTRAILS_OVERRIDE)
   set(PYTHON_FOUND TRUE)
 endif (NOT PYTHON_INTERPRETER AND NOT PYTHON_VISTRAILS_OVERRIDE)
 
-set(PYTHON_MINIMAL_VERSION 2.5)
+set(PYTHON_MINIMAL_VERSION 2.6)
 
 if (WIN32 AND NOT ALPS_USE_VISTRAILS)
   MESSAGE (STATUS "Looking for PythonLibs")

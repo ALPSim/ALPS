@@ -84,7 +84,7 @@ int main() {
   // Printing eigenvalues with error & multiplicities:  
   std::cout << "#        eigenvalue            error         multiplicity\n";  
   std::cout.precision(10);
-  for (int i=0;i<eigen.size();++i) 
+  for (unsigned int i=0;i<eigen.size();++i) 
     std::cout << i << "\t" << eigen[i] << "\t" << err[i] << "\t" 
           << multiplicity[i] << "\n";
 
@@ -106,7 +106,7 @@ int main() {
   } 
   
   std::cout << "#        eigenvalue            error         multiplicity\n";
-  for (int i=0;i<eigen.size();++i) 
+  for (unsigned int i=0;i<eigen.size();++i) 
     std::cout << i << "\t" << eigen[i] << "\t" << err[i] << "\t" 
           << multiplicity[i] << "\n";  
 

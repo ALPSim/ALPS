@@ -60,7 +60,7 @@ void arnoldi1() {
 
     boost::lagged_fibonacci607 gen;
 
-    int N = 10, n = 1;
+    int N = 10;
     Matrix mat(N, N);
     for(int i=0;i<N;i++)
         for(int j=0;j<N;j++)
@@ -74,7 +74,7 @@ void arnoldi1() {
     ietl::simple_arnoldi<Matrix, ietl::vectorspace<Vector>, boost::lagged_fibonacci607> arni(mat, vs, gen);
     arni.calculate_eigenvalues(iter, true);
 
-    for (int i = 0; i < nvals; ++i)
+    for (unsigned int i = 0; i < nvals; ++i)
        std::cout << "Eigenvalue " << i << ": " << arni.get_eigenvalue(i) << std::endl;
 
     // Check with dense LAPACK

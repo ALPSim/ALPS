@@ -223,7 +223,7 @@ private:
         }
         else { // if error is small enough.
           if(ma != 0) {
-            for(int i = 0; i < ma; i++)
+            for(unsigned int i = 0; i < ma; i++)
               (Tvectors.back()).push_back(z(i,nth));
             if(ma > maMax) maMax = ma;
             lambda = eval[nth];

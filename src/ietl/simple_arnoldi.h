@@ -113,14 +113,14 @@ namespace ietl {
             
             h_matrix_type H(1,1);
             
-            magnitude_type normw, resid;
+            magnitude_type normw;
             
             vectors.push_back(w);
             
             unsigned int j = 0;
             do {
                 ietl::mult(mat, vectors[j], w);
-                for (int i = 0; i <= j; ++i) {
+                for (unsigned int i = 0; i <= j; ++i) {
                     // H(i,j) = ietl::dot(w, vectors[i]);
                     H(i,j) = ietl::dot(vectors[i], w);
                     w -= H(i,j)*vectors[i];
@@ -134,7 +134,7 @@ namespace ietl {
                     h_matrix_type evecs(H.size1(), H.size2()), H2 = H; // keep a backup because geev destroys the matrix
                     detail::arnoldi_geev(H2, evals, evecs, scalar_type());
                     double resid = 0;
-                    for (int k = 0; k < iter.desired_eigenvalues(); ++k)
+                    for (unsigned int k = 0; k < iter.desired_eigenvalues(); ++k)
                         resid += std::abs(evecs(evecs.size2()-1, k))*normw;
                     if (verbose) {
                         std::cout << "Arnoldi iteration " << j << ": residual = " << resid;
@@ -147,7 +147,7 @@ namespace ietl {
                 }
                 
                 H.resize(j+2, j+2, true);
-                for (int k = 0; k < j+2; ++k) {
+                for (unsigned int k = 0; k < j+2; ++k) {
                     H(j+1, k) = 0;
                     H(k, j+1) = 0;
                 }

@@ -99,9 +99,9 @@ namespace ietl2lapack {
     int stev(const Vector& alpha, const Vector& beta, Vector& eval, FortranMatrix& z, fortran_int_t n) {  
     if (n==0) n = alpha.size();
     std::copy(alpha.begin(),alpha.begin() + n, eval.begin()); 
-    assert(eval.size()>=n);
-    assert(alpha.size()>=n);
-    assert(beta.size()>=n); 
+        assert(eval.size()>=static_cast<std::size_t>(n));
+    assert(alpha.size()>=static_cast<std::size_t>(n));
+    assert(beta.size()>=static_cast<std::size_t>(n)); 
     Vector beta_tmp(n);
     std::copy(beta.begin(),beta.begin() + n, beta_tmp.begin()); 
     char _jobz;
