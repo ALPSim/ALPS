@@ -95,6 +95,7 @@ F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms
                << alps::ngs::RealVectorObservable("Greens")
                << alps::ngs::RealVectorObservable("Greens_imp")
                << alps::ngs::RealVectorObservable("nn_corr")
+               << alps::ngs::RealVectorObservable("nn_corr_equalt")
 //               << alps::ngs::RealVectorObservable("overlap")
                << alps::ngs::RealObservable("sign")
                << alps::ngs::RealVectorObservable("matrix_size");
