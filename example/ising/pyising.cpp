@@ -48,14 +48,14 @@ namespace alps {
             public:
 
                 ising_export(boost::python::object arg, std::size_t seed_offset = 42)
-                    : ising_sim(alps::params(arg), seed_offset)
+                    : ising_sim<alps::base>(alps::params(arg), seed_offset)
                 {}
 
                 bool run(boost::python::object stop_callback) {
-                    ising_sim::run(boost::bind(ising_export::callback_wrapper, stop_callback));
+                    ising_sim<alps::base>::run(boost::bind(ising_export::callback_wrapper, stop_callback));
                 }
 
-                typename base::parameters_type & get_params() {
+                base::parameters_type & get_params() {
                     return base::params;
                 }
 
