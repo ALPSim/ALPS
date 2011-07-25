@@ -37,32 +37,35 @@ namespace ietl
 {
     namespace detail
     {
-        void GeneratePlaneRotation(double dx, double dy, double & cs, double & sn)
+        template<class T>
+        void GeneratePlaneRotation(T dx, T dy, T & cs, T & sn)
         {
-            if (dy == 0) {
+            if (dy == T()) {
                 cs = 1; sn = 0;
             } else if (std::abs(dy) > std::abs(dx)) {
-                double tmp = dx / dy;
-                sn = 1 / sqrt(1+tmp*tmp);
+                T tmp = dx / dy;
+                sn = T(1) / sqrt(T(1)+tmp*tmp);
                 cs = tmp*sn;
             } else {
-                double tmp = dy / dx;
-                cs = 1 / sqrt(1+tmp*tmp);
+                T tmp = dy / dx;
+                cs = T(1) / sqrt(T(1)+tmp*tmp);
                 sn = tmp*cs;
             }
         }
         
-        void ApplyPlaneRotation(double & dx, double & dy, double cs, double sn)
+        template<class T>
+        void ApplyPlaneRotation(T & dx, T & dy, T cs, T sn)
         {
-            double r0 = cs * dx + sn * dy;
-            double r1 = -sn * dx + cs * dy;
+            T r0 = cs * dx + sn * dy;
+            T r1 = -sn * dx + cs * dy;
             dx = r0;
             dy = r1;
         }
         
-        std::vector<double> Update(boost::numeric::ublas::matrix<double> const & H, std::vector<double> const & S, std::size_t k)
+        template<class T>
+        std::vector<T> Update(boost::numeric::ublas::matrix<T> const & H, std::vector<T> const & S, std::size_t k)
         {
-            std::vector<double> y(S.begin(), S.begin()+k);
+            std::vector<T> y(S.begin(), S.begin()+k);
             for (int i = k-1; i >= 0; --i) {
                 y[i] /= H(i,i);
                 for (int j = i-1; j >= 0; --j)
@@ -80,7 +83,7 @@ namespace ietl
         double abs_tol = 1e-6,
         bool verbose = false)
     {   
-        std::vector<double> s(max_iter+1), cs(max_iter+1), sn(max_iter+1);
+        std::vector<typename Vector::value_type> s(max_iter+1), cs(max_iter+1), sn(max_iter+1);
         std::vector<Vector> v(max_iter+1);
         
         Vector r, w;
@@ -89,7 +92,7 @@ namespace ietl
         r = b - v[0];
         s[0] = two_norm(r);
         
-        if (s[0] < abs_tol) {
+        if (std::abs(s[0]) < abs_tol) {
             if (verbose)
                 std::cout << "Already done with x0." << std::endl;
             return x0;
@@ -97,7 +100,7 @@ namespace ietl
         
         v[0] = r / s[0];
         
-        boost::numeric::ublas::matrix<double> H(max_iter+1, max_iter+1);
+        boost::numeric::ublas::matrix<typename Vector::value_type> H(max_iter+1, max_iter+1);
         std::size_t i = 0;
         
         for ( ; i < max_iter-1; ++i)
@@ -125,7 +128,7 @@ namespace ietl
                 break;
         }
         
-        std::vector<double> y = detail::Update(H, s, i);
+        std::vector<typename Vector::value_type> y = detail::Update(H, s, i);
         r = x0;
         for (std::size_t k = 0; k < i; ++k)
             r += y[k] * v[k];

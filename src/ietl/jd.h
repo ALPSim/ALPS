@@ -123,7 +123,7 @@ namespace ietl{
                     : A_(A) , theta_(theta) , Q_(Q) {}
                 ~deflated_matrix() {}
 
-                void set_theta(double theta) 
+                void set_theta(real_type theta) 
                     { theta_ = theta; }
 
                 friend void mult<>(const deflated_matrix& A_def, const vector_type& v, vector_type& r);
@@ -273,7 +273,7 @@ namespace solver {
              {}
         
         template <class IT>
-        void operator() ( scalar_type theta, vector_type& r, vector_type& t, IT& iter );
+        void operator() ( real_type theta, vector_type& r, vector_type& t, IT& iter );
 
     protected:
         detail::deflated_matrix<MATRIX, VS> Adef_;
@@ -284,7 +284,7 @@ namespace solver {
     };
         template <class SOLV, class MATRIX, class VS>
         template <class IT>
-        void jd_solver<SOLV,MATRIX,VS>::operator()( scalar_type theta, vector_type& r, vector_type& t, IT& iter)
+        void jd_solver<SOLV,MATRIX,VS>::operator()( real_type theta, vector_type& r, vector_type& t, IT& iter)
         {
             Adef_.set_theta(theta);
 
