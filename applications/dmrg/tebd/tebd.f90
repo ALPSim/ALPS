@@ -167,7 +167,7 @@ ELSE IF(initialState=='kink') THEN
 		IF(i.le.FLOOR(0.5_rKind*systemSize)) THEN
 		carray(1,i)=1.0_rKind
 		ELSE
-		carray(2,i)=1.0_rKind
+		carray(localSize,i)=1.0_rKind
 		END IF
 	END DO
 	CALL ProductStateMPD(Gammasm,LabelLeft,LabelRight, Lambdas, carray)
