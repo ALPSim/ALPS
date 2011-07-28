@@ -190,7 +190,7 @@ The class [classref ietl::detail::deflated_matrix detail::deflated_matrix] defin
 [endsect] [/ krylov]
 
 [section:example1 Example 1 A simple Hamiltonian]
-In this example a hamiltonian from electrodynamics is shown, it does not store a matrix. The lowest eigenvalue is `-2` and all interior eigenvalues are two-fold degenerate.
+In this example a hamiltonian of a simple one particle system with periodic boundary conditions is shown, it does not store a matrix. The lowest eigenvalue is `-2` and all interior eigenvalues are two-fold degenerate.
 Here is part of the code. To see the full sourcecode, look at [@@PROJECT_SOURCE_DIR@/example/ietl/jacobidavidson1.cpp jacobidavidson1.cpp].
 [c++]
 [import @PROJECT_SOURCE_DIR@/example/ietl/jacobidavidson1.cpp]
