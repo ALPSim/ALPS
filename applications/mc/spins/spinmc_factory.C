@@ -139,6 +139,8 @@ alps::scheduler::Worker* SpinFactory::make_worker(
       produceError(parms);
       return 0;
     }
+  else if (parms["MODEL"]=="O(4)")
+    return new SpinSim<ONMoment<4>,MIdMatrix<double,4> >(where,parms,node);
   else if (parms["MODEL"]=="Heisenberg")
     switch (maxElemCount) {
       case 1:
