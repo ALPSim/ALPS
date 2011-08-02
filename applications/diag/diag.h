@@ -199,7 +199,7 @@ void DiagMatrix<T,M>::perform_measurements()
 
     BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
       //std::cerr << "Evaluating " << ex.first << "\n";
-      meas.average_values[ex.first] = calculate(ex.second);
+        meas.average_values[ex.first] = calculate("("+ex.second +")/"+ boost::lexical_cast<std::string>(this->num_sites()));
     }
 
     // calculate local measurements
