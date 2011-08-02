@@ -230,8 +230,12 @@ find_package(BoostForALPS REQUIRED)
 # MPI
 if(ALPS_ENABLE_MPI)
   IF(NOT MPI_FOUND)
+    IF(ALPS_PACKAGE_LIBRARIES AND NOT ALPS_USE_VISTRAILS AND APPLE)
+      set(MPI_COMPILER ${CMAKE_INSTALL_PREFIX}/bin/mpicxx)
+    ENDIF(ALPS_PACKAGE_LIBRARIES AND NOT ALPS_USE_VISTRAILS AND APPLE)
     find_package(MPI)
   ENDIF(NOT MPI_FOUND)
+
   set(MPI_DEFINITIONS ${MPI_COMPILE_FLAGS})
   if(MPI_INCLUDE_DIR)
     set(MPI_DEFINITIONS "${MPI_COMPILE_FLAGS} -I${MPI_INCLUDE_DIR}")
@@ -637,7 +641,11 @@ else (ALPS_BUILD_SOURCE)
        install(DIRECTORY ${Boost_ROOT_DIR}/boost DESTINATION ${ALPS_HEADER_DIR} COMPONENT dependentheaders
                FILES_MATCHING PATTERN "*.h" PATTERN "*.hpp" PATTERN "*.ipp"
                PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
-       install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include DESTINATION . COMPONENT dependentheaders)
+       install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/include
+                         ${PROJECT_BINARY_DIR}/deplibs/etc
+                         ${PROJECT_BINARY_DIR}/deplibs/share
+               DESTINATION . COMPONENT dependentheaders)
+       install(DIRECTORY  DESTINATION . COMPONENT dependentheaders)
     endif(ALPS_PACKAGE_LIBRARIES)
 
   endif(ALPS_INSTALL_HEADERS)

@@ -10,6 +10,12 @@ cp /opt/alps/lib/libhdf5*dylib deplibs/lib
 cp /opt/alps/lib/libhdf5*a deplibs/lib
 cp /opt/local/lib/libsz*dylib deplibs/lib
 cp /opt/local/lib/libz*dylib deplibs/lib
+cp /opt/alps/lib/libmpi* deplibs/lib
+cp /opt/alps/lib/libvt* deplibs/lib
+cp /opt/alps/lib/libotf* deplibs/lib
+cp /opt/alps/lib/libmca_common_sm* deplibs/lib
+cp /opt/alps/lib/libopen-* deplibs/lib
+cp -r /opt/alps/lib/openmpi deplibs/lib
 install_name_tool -id /opt/alps/lib/libsz.2.dylib deplibs/lib/libsz.dylib
 install_name_tool -id /opt/alps/lib/libsz.2.dylib deplibs/lib/libsz.2.dylib
 install_name_tool -id /opt/alps/lib/libsz.2.dylib deplibs/lib/libsz.2.0.0.dylib
@@ -33,6 +39,25 @@ cp /opt/local/include/zlib.h deplibs/include
 cp /opt/local/include/szlib.h deplibs/include
 cp /opt/local/include/szip_adpt.h deplibs/include
 cp /opt/local/include/ricehdf.h deplibs/include
+cp /opt/alps/include/mpi.h deplibs/include
+cp -r /opt/alps/include/openmpi deplibs/include
+cp -r /opt/alps/include/vampirtrace deplibs/include
 
-sudo cp deplibs/lib/* /opt/alps/lib
+mkdir -p deplibs/bin
+cp /opt/alps/bin/mpi* deplibs/bin
+cp /opt/alps/bin/ompi* deplibs/bin
+cp /opt/alps/bin/orte* deplibs/bin
+cp /opt/alps/bin/opal_wrapper deplibs/bin
+
+mkdir -p deplibs/etc
+cp /opt/alps/etc/openmpi* deplibs/etc
+
+mkdir -p deplibs/share
+cp -r /opt/alps/share/openmpi deplibs/share
+cp -r /opt/alps/share/man deplibs/share
+
+sudo cp -r deplibs/lib/* /opt/alps/lib
 sudo cp -r deplibs/include/* /opt/alps/include
+sudo cp deplibs/bin/* /opt/alps/bin
+sudo cp deplibs/etc/* /opt/alps/etc
+sudo cp -r deplibs/share/* /opt/alps/share
