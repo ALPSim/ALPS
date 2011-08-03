@@ -37,8 +37,6 @@ for l in [8,10,12,16]:
         parms.append(
             { 
               'LATTICE'        : "coupled ladders", 
-              'LATTICE_LIBRARY': 'lattices.xml',
-              'MODEL_LIBRARY'  : 'models.xml',
               'local_S'        : 0.5,
               'ALGORITHM'      : 'loop',
               'SEED'           : 0,
