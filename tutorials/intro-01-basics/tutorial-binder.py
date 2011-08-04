@@ -47,8 +47,8 @@ for t in [1.5,2,2.5]:
     )
 
 #write the input file and run the simulation
-# input_file = pyalps.writeInputFiles('parm1',parms)
-# pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
+input_file = pyalps.writeInputFiles('parm1',parms)
+pyalps.runApplication('spinmc',input_file,Tmin=5,writexml=True)
 
 #get the list of result files
 result_files = pyalps.getResultFiles(prefix='parm1')

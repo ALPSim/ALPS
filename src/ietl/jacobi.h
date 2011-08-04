@@ -421,13 +421,7 @@ namespace ietl
         fortran_int_t info;
 
         double vl, vu;
-#ifndef __FCC_VERSION
-        double w[n];
-        double z[n];
-        double work[lwork];
-        fortran_int_t iwork[5*n];
-        fortran_int_t ifail[n];
-#else
+
         double *w;
         w = new double[n];
         double *z;
@@ -438,11 +432,10 @@ namespace ietl
         iwork = new fortran_int_t[5*n];
         fortran_int_t *ifail;
         ifail = new fortran_int_t[n];
-#endif
+
         LAPACK_DSYEVX(&jobz, &range, &uplo, &n, M_.data(), &lda, &vl, &vu, &il, &iu, &abstol, &m, w, z, &ldz, work, &lwork, iwork, ifail, &info);
-#ifdef __FCC_VERSION
+
         delete [] w, z, work, iwork, ifail;
-#endif
         theta = w[0];
         for (int i=0;i<n;i++)
             s[i] = z[i];
