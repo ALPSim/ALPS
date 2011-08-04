@@ -373,6 +373,7 @@ class Convert2Text(alpscore.SystemCommand):
 class GetSimName:
     def get_sim_name(self,dirname):
         l = glob.glob(os.path.join(dirname,'*.out.xml'))
+        l.sort()
         return l[0]
 
 
