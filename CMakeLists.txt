@@ -452,8 +452,13 @@ configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
 ######################################################################
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(src)
-message(STATUS "Adding Boost dir: ${Boost_ROOT_DIR} " )
-include_directories(${Boost_ROOT_DIR})
+if(Boost_ROOT_DIR)
+  message(STATUS "Adding Boost dir: ${Boost_ROOT_DIR} " )
+  include_directories(${Boost_ROOT_DIR})
+else(Boost_ROOT_DIR)
+  message(STATUS "Adding Boost dir: ${Boost_INCLUDE_DIR} " )
+  include_directories(${Boost_INCLUDE_DIR})
+endif(Boost_ROOT_DIR)
 
 ######################################################################
 # RPATH setting
@@ -563,6 +568,12 @@ endif(PYTHON_INCLUDE_DIRS)
 if(PYTHON_NUMPY_INCLUDE_DIR)
   list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${PYTHON_NUMPY_INCLUDE_DIR})
 endif(PYTHON_NUMPY_INCLUDE_DIR)
+if(Boost_ROOT_DIR)
+  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${Boost_ROOT_DIR})
+endif(Boost_ROOT_DIR)
+if(Boost_INCLUDE_DIR)
+  list(APPEND ALPS_EXTRA_INCLUDE_DIRS ${Boost_INCLUDE_DIR})
+endif(Boost_INCLUDE_DIR)
 
 if(MPI_LINKER_FLAGS)
   set(ALPS_EXTRA_LINKER_FLAGS "${ALPS_EXTRA_LINKER_FLAGS} ${MPI_LINKER_FLAGS}")
