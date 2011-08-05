@@ -17,6 +17,7 @@
 #include <boost/assert.hpp>
 #include <boost/numeric/bindings/begin.hpp>
 #include <boost/numeric/bindings/detail/array.hpp>
+#include <boost/numeric/bindings/detail/complex_utils.hpp>
 #include <boost/numeric/bindings/is_column_major.hpp>
 #include <boost/numeric/bindings/is_complex.hpp>
 #include <boost/numeric/bindings/is_mutable.hpp>
@@ -442,7 +443,9 @@ gees( const char jobvs, const char sort, external_fp select, MatrixA& a,
 //
 template< typename MatrixA, typename VectorW, typename MatrixVS,
         typename Workspace >
-inline typename boost::enable_if< detail::is_workspace< Workspace >,
+inline typename boost::enable_if< mpl::and_< is_complex<
+        typename bindings::value_type< MatrixA >::type >,
+        detail::is_workspace< Workspace > >,
         std::ptrdiff_t >::type
 gees( const char jobvs, const char sort, external_fp select, MatrixA& a,
         fortran_int_t& sdim, VectorW& w, MatrixVS& vs, Workspace work ) {
@@ -456,13 +459,55 @@ gees( const char jobvs, const char sort, external_fp select, MatrixA& a,
 // * Default workspace-type (optimal)
 //
 template< typename MatrixA, typename VectorW, typename MatrixVS >
-inline typename boost::disable_if< detail::is_workspace< MatrixVS >,
+inline typename boost::disable_if< mpl::or_< is_real<
+        typename bindings::value_type< MatrixA >::type >,
+        detail::is_workspace< MatrixVS > >,
         std::ptrdiff_t >::type
 gees( const char jobvs, const char sort, external_fp select, MatrixA& a,
         fortran_int_t& sdim, VectorW& w, MatrixVS& vs ) {
     return gees_impl< typename bindings::value_type<
             MatrixA >::type >::invoke( jobvs, sort, select, a, sdim, w, vs,
             optimal_workspace() );
+}
+//
+// Overloaded function for gees. Its overload differs for
+// * VectorW
+// * User-defined workspace
+//
+template< typename MatrixA, typename VectorW, typename MatrixVS,
+        typename Workspace >
+inline typename boost::enable_if< mpl::and_< is_real<
+        typename bindings::value_type< MatrixA >::type >,
+        detail::is_workspace< Workspace > >,
+        std::ptrdiff_t >::type
+gees( const char jobvs, const char sort, external_fp select, MatrixA& a,
+        fortran_int_t& sdim, VectorW& w, MatrixVS& vs, Workspace work ) {
+    std::ptrdiff_t info = gees_impl< typename bindings::value_type<
+            MatrixA >::type >::invoke( jobvs, sort, select, a, sdim,
+            bindings::detail::real_part_view(w), bindings::detail::imag_part_view(w),
+            vs, work );
+    bindings::detail::interlace(w);
+    return info;
+}
+
+//
+// Overloaded function for gees. Its overload differs for
+// * VectorW
+// * Default workspace-type (optimal)
+//
+template< typename MatrixA, typename VectorW, typename MatrixVS >
+inline typename boost::disable_if< mpl::or_< is_complex<
+        typename bindings::value_type< MatrixA >::type >,
+        detail::is_workspace< MatrixVS > >,
+        std::ptrdiff_t >::type
+gees( const char jobvs, const char sort, external_fp select, MatrixA& a,
+        fortran_int_t& sdim, VectorW& w, MatrixVS& vs ) {
+    std::ptrdiff_t info = gees_impl< typename bindings::value_type<
+            MatrixA >::type >::invoke( jobvs, sort, select, a, sdim,
+            bindings::detail::real_part_view(w), bindings::detail::imag_part_view(w),
+            vs, optimal_workspace() );
+    bindings::detail::interlace(w);
+    return info;
 }
 
 } // namespace lapack

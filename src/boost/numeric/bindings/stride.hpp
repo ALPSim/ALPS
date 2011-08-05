@@ -117,7 +117,7 @@ struct apply_fold< T, std::ptrdiff_t, AddressingIndex > {
 template< typename T >
 struct apply_fold< T, std::ptrdiff_t, 0 > {
 
-    static std::ptrdiff_t invoke( const T& t ) {
+    static std::ptrdiff_t invoke( const T& ) {
         return 0;
     }
 

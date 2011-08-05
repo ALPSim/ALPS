@@ -27,6 +27,8 @@
  *****************************************************************************/
 #ifndef JACOBI_DAVIDSON_H
 #define JACOBI_DAVIDSON_H
+#include <alps/config.h> // needed to set up correct bindings
+
 #include <ietl/traits.h>
 #include <ietl/complex.h>
 #include <ietl/iteration.h>
@@ -43,6 +45,7 @@
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 //for lapack::heev
 #include <boost/numeric/bindings/lapack/driver/heev.hpp>
+#include <boost/numeric/bindings/lapack/driver/syev.hpp>
 //for lapack::getrs
 #include <boost/numeric/bindings/lapack/computational.hpp>
 //#include <boost/numeric/bindings/detail/config/fortran.hpp>
@@ -50,6 +53,10 @@
 #include <boost/numeric/bindings/ublas/vector.hpp>
 #include <boost/numeric/bindings/ublas/hermitian.hpp>
 #include <boost/numeric/bindings/std.hpp>
+#include <boost/numeric/bindings/ublas.hpp>
+#include <boost/numeric/bindings/upper.hpp>
+#include <boost/numeric/bindings/lower.hpp>
+
 
 namespace ietl{
 
@@ -465,7 +472,7 @@ namespace solver {
 
             S = M; //copy M
 
-            info = lapack::heev('V', S, Theta); //eigenvectors in columns of S
+            info = lapack::heev('V', boost::numeric::bindings::upper(S), Theta); //eigenvectors in columns of S
                 if(info < 0) throw std::runtime_error("lapack::heev - illegal value.");
                 if(info > 0) throw std::runtime_error("lapack::heev - failed to converge.");
 

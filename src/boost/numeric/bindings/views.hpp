@@ -20,6 +20,7 @@
 #include <boost/numeric/bindings/unit_lower.hpp>
 #include <boost/numeric/bindings/unit_upper.hpp>
 #include <boost/numeric/bindings/upper.hpp>
+#include <boost/numeric/bindings/vector_view.hpp>
 
 #endif
 

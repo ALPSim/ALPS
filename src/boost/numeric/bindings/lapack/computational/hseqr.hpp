@@ -17,6 +17,7 @@
 #include <boost/assert.hpp>
 #include <boost/numeric/bindings/begin.hpp>
 #include <boost/numeric/bindings/detail/array.hpp>
+#include <boost/numeric/bindings/detail/complex_utils.hpp>
 #include <boost/numeric/bindings/is_column_major.hpp>
 #include <boost/numeric/bindings/is_complex.hpp>
 #include <boost/numeric/bindings/is_mutable.hpp>
@@ -386,7 +387,9 @@ hseqr( const char job, const char compz, const fortran_int_t ilo,
 //
 template< typename MatrixH, typename VectorW, typename MatrixZ,
         typename Workspace >
-inline typename boost::enable_if< detail::is_workspace< Workspace >,
+inline typename boost::enable_if< mpl::and_< is_complex<
+        typename bindings::value_type< MatrixH >::type >,
+        detail::is_workspace< Workspace > >,
         std::ptrdiff_t >::type
 hseqr( const char job, const char compz, const fortran_int_t ilo,
         const fortran_int_t ihi, MatrixH& h, VectorW& w, MatrixZ& z,
@@ -400,13 +403,54 @@ hseqr( const char job, const char compz, const fortran_int_t ilo,
 // * Default workspace-type (optimal)
 //
 template< typename MatrixH, typename VectorW, typename MatrixZ >
-inline typename boost::disable_if< detail::is_workspace< MatrixZ >,
+inline typename boost::disable_if< mpl::or_< is_real<
+        typename bindings::value_type< MatrixH >::type >,
+        detail::is_workspace< MatrixZ > >,
         std::ptrdiff_t >::type
 hseqr( const char job, const char compz, const fortran_int_t ilo,
         const fortran_int_t ihi, MatrixH& h, VectorW& w, MatrixZ& z ) {
     return hseqr_impl< typename bindings::value_type<
             MatrixH >::type >::invoke( job, compz, ilo, ihi, h, w, z,
             optimal_workspace() );
+}
+//
+// Overloaded function for hseqr. Its overload differs for
+// * User-defined workspace
+//
+template< typename MatrixH, typename VectorW, typename MatrixZ,
+        typename Workspace >
+inline typename boost::enable_if< mpl::and_< is_real<
+        typename bindings::value_type< MatrixH >::type >,
+        detail::is_workspace< Workspace > >,
+        std::ptrdiff_t >::type
+hseqr( const char job, const char compz, const fortran_int_t ilo,
+        const fortran_int_t ihi, MatrixH& h, VectorW& w, MatrixZ& z,
+        Workspace work ) {
+    std::ptrdiff_t info = hseqr_impl< typename bindings::value_type<
+            MatrixH >::type >::invoke( job, compz, ilo, ihi, h,
+            bindings::detail::real_part_view(w), bindings::detail::imag_part_view(w),
+            z, work );
+    bindings::detail::interlace(w);
+    return info;
+}
+
+//
+// Overloaded function for hseqr. Its overload differs for
+// * Default workspace-type (optimal)
+//
+template< typename MatrixH, typename VectorW, typename MatrixZ >
+inline typename boost::disable_if< mpl::or_< is_complex<
+        typename bindings::value_type< MatrixH >::type >,
+        detail::is_workspace< MatrixZ > >,
+        std::ptrdiff_t >::type
+hseqr( const char job, const char compz, const fortran_int_t ilo,
+        const fortran_int_t ihi, MatrixH& h, VectorW& w, MatrixZ& z ) {
+    std::ptrdiff_t info = hseqr_impl< typename bindings::value_type<
+            MatrixH >::type >::invoke( job, compz, ilo, ihi, h,
+            bindings::detail::real_part_view(w), bindings::detail::imag_part_view(w),
+            z, optimal_workspace() );
+    bindings::detail::interlace(w);
+    return info;
 }
 
 } // namespace lapack

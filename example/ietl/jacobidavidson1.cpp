@@ -4,6 +4,9 @@
 #include <vector>
 #include <iostream>
 #include <boost/array.hpp>
+#include <boost/numeric/ublas/io.hpp>
+#include <ietl/interface/ublas.h>
+#include <boost/random.hpp>
 
 using std::cerr;
 using std::cout;
@@ -60,10 +63,7 @@ namespace ietl {
     }
 }
 
-#include <boost/numeric/ublas/io.hpp>
-#include <ietl/interface/ublas.h>
 #include <ietl/jd.h>
-#include <boost/random.hpp>
 
 typedef boost::numeric::ublas::vector<double> vector_t;
 typedef ietl::vectorspace<vector_t> vecspace_t;

@@ -14,8 +14,28 @@
 #ifndef BOOST_NUMERIC_BINDINGS_BLAS_DETAIL_CBLAS_H
 #define BOOST_NUMERIC_BINDINGS_BLAS_DETAIL_CBLAS_H
 
+//
+// MKL-specific CBLAS include
+//
+#if defined BOOST_NUMERIC_BINDINGS_BLAS_MKL
+
 extern "C" {
-#include <cblas.h> 
+#include <mkl_cblas.h>
+#include <mkl_service.h>
+//
+// mkl_types.h defines P4 macro which breaks MPL, undefine it here.
+//
+#undef P4
 }
 
+//
+// Default CBLAS include
+//
+#else
+
+extern "C" {
+#include <cblas.h>
+}
+
+#endif
 #endif 

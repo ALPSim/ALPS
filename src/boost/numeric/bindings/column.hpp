@@ -10,6 +10,7 @@
 #define BOOST_NUMERIC_BINDINGS_COLUMN_HPP
 
 #include <boost/numeric/bindings/begin.hpp>
+#include <boost/numeric/bindings/end.hpp>
 #include <boost/numeric/bindings/detail/adaptable_type.hpp>
 #include <boost/numeric/bindings/detail/offset.hpp>
 #include <boost/numeric/bindings/size.hpp>
