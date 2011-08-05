@@ -3,8 +3,8 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.f90rg/LICENSE_1_0.txt)
 
-if(LAPACK_FOUND AND ALPS_BUILD_FORTRAN)
-  find_package(HDF5)
+find_package(HDF5)
+if(LAPACK_FOUND AND ALPS_BUILD_FORTRAN AND HDF5_STATIC_LIBRARIES)
   set(SOURCES core/GlobalData.f90 core/LinearOps.f90 core/HamiOps.f90 
               core/StateOps.f90 core/LocalOps.f90 core/ObOps.f90
               core/PropOps.f90 core/Hdf5Interface.f90 tebd.f90)
@@ -14,4 +14,4 @@ if(LAPACK_FOUND AND ALPS_BUILD_FORTRAN)
   install(TARGETS tebd RUNTIME DESTINATION bin COMPONENT applications)
 else(LAPACK_FOUND AND ALPS_BUILD_FORTRAN)
   message(STATUS "tebd will not be built")
-endif(LAPACK_FOUND AND ALPS_BUILD_FORTRAN)
+endif(LAPACK_FOUND AND ALPS_BUILD_FORTRAN AND HDF5_STATIC_LIBRARIES)
