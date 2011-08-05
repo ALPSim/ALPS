@@ -23,11 +23,13 @@ else(ALPS_FOR_VISTRAILS)
 if (NOT Boost_FOUND AND ALPS_BUILD_DOC)
   set (QUICKBOOK_SOURCES "")
   foreach (D "${Boost_ROOT_DIR}/tools/quickbook/detail" "${Boost_ROOT_DIR}/tools/quickbook/src")
-    set (FILES actions.cpp actions_class.cpp block_grammar.cpp code_snippet.cpp
-               collector.cpp doc_info_actions.cpp doc_info_grammar.cpp
-               input_path.cpp markups.cpp phrase_grammar.cpp post_process.cpp
+    set (FILES actions.cpp actions_class.cpp block_element_grammar.cpp
+               block_grammar.cpp code_snippet.cpp collector.cpp 
+               doc_info_actions.cpp doc_info_grammar.cpp
+               grammar.cpp input_path.cpp main_grammar.cpp markups.cpp
+               phrase_element_grammar.cpp phrase_grammar.cpp post_process.cpp
                quickbook.cpp syntax_highlight.cpp template_stack.cpp utils.cpp
-               block_element_grammar.cpp phrase_element_grammar.cpp main_grammar.cpp grammar.cpp)
+               values.cpp)
     foreach(S ${FILES})
       if(EXISTS ${D}/${S})
         set(QUICKBOOK_SOURCES ${QUICKBOOK_SOURCES} ${D}/${S})
