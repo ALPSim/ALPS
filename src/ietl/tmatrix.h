@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2001-2002 by Prakash Dayal <prakash@comp-phys.org>,
+* Copyright (C) 2001-2011 by Prakash Dayal <prakash@comp-phys.org>,
 *                            Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -75,12 +75,27 @@ namespace ietl {
     
     std::vector<magnitude_type> const& diagonal() const { return alpha;}
     std::vector<magnitude_type> const& subdiagonal() const { return beta;}
+
+      
+      template <class Archive>
+      void save(Archive& ar) const
+      {
+        ar << alpha << beta <<  error_tol << alpha_max << beta_max << beta_min;
+      }
+      
+      template <class Archive>
+      void load(Archive& ar)
+      {
+        ar >> alpha >> beta >>  error_tol >> alpha_max >> beta_max >> beta_min;
+        computed = false;
+      }
+
     protected:
     std::vector<magnitude_type> alpha;
     std::vector<magnitude_type> beta;
     magnitude_type error_tol;
     mutable magnitude_type thold; 
-    
+
     private:
     mutable bool computed;
     void compute(bool do_err=false) const;

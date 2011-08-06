@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 2001-2003 by Prakash Dayal <prakash@comp-phys.org>,
+* Copyright (C) 2001-2011 by Prakash Dayal <prakash@comp-phys.org>,
 *                            Matthias Troyer <troyer@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
@@ -96,6 +96,21 @@ private:
     void eigenvectors(IN in_eigvals_start, IN in_eigvals_end , OUT eig_vectors, Info<magnitude_type>& inf, GEN gen, int maxiter=0, int maxcount=50);    
 
     std::vector<magnitude_type> const& t_eigenvectors() { return Tvectors;}
+
+    template <class Archive>
+    void save(Archive& ar) const
+    {
+      ar << static_cast<super_type const&>(*this);
+      ar << startvector << vec2 << n << M1 << M2 << Ma << Tvectors;
+    }
+    
+    template <class Archive>
+    void load(Archive& ar)
+    {
+      ar >> static_cast<super_type&>(*this);
+      ar >> startvector >> vec2 >> n >> M1 >> M2 >> Ma >> Tvectors;
+    }
+
   private:
     template <class IN> void find_m1m2(IN in_eigvals_start, IN in_eigvals_end);
     // m1 m2 finder for eigen vector calculation.
