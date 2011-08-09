@@ -34,6 +34,7 @@
 #include <boost/numeric/bindings/ublas.hpp>
 #include <boost/numeric/bindings/std.hpp>
 #include <boost/numeric/bindings/lapack/driver/heev.hpp>
+#include <boost/numeric/bindings/upper.hpp> 
 
 #include <ietl/interface/ublas.h>
 #include <ietl/vectorspace.h>
@@ -73,7 +74,7 @@ int main() {
     ietl::jcd_gmres_solver<Matrix, Vecspace> jcd_gmres(mat, vec);
     ietl::jacobi_davidson<Matrix, Vecspace> jd(mat, vec, ietl::Smallest);
     
-    ietl::basic_iteration<double> iter(1000, 1e-8, 1e-8);
+    ietl::basic_iteration<double> iter(200, 1e-8, 1e-8);
     std::pair<double, Vector> r0 = jd.calculate_eigenvalue(mygen, jcd_gmres, iter);
     std::cout << "Jacobi-Davidson says: " << r0.first << std::endl;
     std::cout << "It used " << iter.iterations() << " iterations." << std::endl;
@@ -86,7 +87,7 @@ int main() {
     {
         std::cout << "LAPACK says: ";
         Vector evals(N);
-        boost::numeric::bindings::lapack::heev('N', mat, evals);
+        boost::numeric::bindings::lapack::heev('N', boost::numeric::bindings::upper(mat), evals);
     
         std::copy(evals.begin(), evals.begin()+3, std::ostream_iterator<double>(std::cout, " "));
         std::cout << std::endl;
