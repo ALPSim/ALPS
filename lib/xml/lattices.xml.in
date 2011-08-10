@@ -21,6 +21,11 @@
   <RECIPROCALBASIS><VECTOR>2*pi/a 0</VECTOR><VECTOR>0 2*pi/a</VECTOR></RECIPROCALBASIS>
 </LATTICE>
 
+<LATTICE name="tilted square lattice" dimension="2">
+  <PARAMETER name="a" default="1"/>
+  <BASIS><VECTOR>a a</VECTOR><VECTOR>a -a</VECTOR></BASIS>
+</LATTICE>
+
 <LATTICE name="rectangular lattice" dimension="2">
   <PARAMETER name="a" default="1"/>
   <PARAMETER name="b" default="a"/>
@@ -160,6 +165,12 @@
   <EDGE><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="1 0"/></EDGE>
 </UNITCELL>
 
+<UNITCELL name="tilted2d" dimension="2">
+  <VERTEX/>
+  <EDGE><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="0 1"/></EDGE>
+  <EDGE><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="1 0"/></EDGE>
+</UNITCELL>
+
 <UNITCELL name="triangular" dimension="2">
   <VERTEX/>
   <EDGE><SOURCE vertex="1" offset="0 0"/><TARGET vertex="1" offset="0 1"/></EDGE>
@@ -219,9 +230,9 @@
   <VERTEX><COORDINATE>0 0</COORDINATE></VERTEX>
   <VERTEX><COORDINATE>-0.288665771484375 0.5773468017578125</COORDINATE></VERTEX>
 
-  <EDGE><SOURCE vertex="1"/><TARGET vertex="2"/></EDGE>
-  <EDGE><SOURCE vertex="2"/><TARGET vertex="1" offset="0 1"/></EDGE>
-  <EDGE><SOURCE vertex="1"/><TARGET vertex="2" offset="1 -1"/></EDGE>
+  <EDGE type="0"><SOURCE vertex="1"/><TARGET vertex="2"/></EDGE>
+  <EDGE type="1"><SOURCE vertex="2"/><TARGET vertex="1" offset="0 1"/></EDGE>
+  <EDGE type="1"><SOURCE vertex="1"/><TARGET vertex="2" offset="1 -1"/></EDGE>
 </UNITCELL>
 
 <UNITCELL name="coupled ladders" dimension="2">
@@ -306,6 +317,17 @@
     <BOUNDARY type="open"/>
   </FINITELATTICE>
   <UNITCELL ref="simple2d"/>
+</LATTICEGRAPH>
+
+<LATTICEGRAPH name = "tilted square lattice">
+  <FINITELATTICE>
+    <LATTICE ref="tilted square lattice"/>
+    <PARAMETER name="W" default="L"/>
+    <EXTENT dimension="1" size="L"/>
+    <EXTENT dimension="2" size="W"/>
+    <BOUNDARY type="periodic"/>
+  </FINITELATTICE>
+  <UNITCELL ref="tilted2d"/>
 </LATTICEGRAPH>
 
 <LATTICEGRAPH name = "coupled ladders" vt_name="CoupledLaddersLattice">
