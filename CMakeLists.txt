@@ -48,6 +48,7 @@ option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
 option(ALPS_INCLUDE_TUTORIALS "Include the ALPS tutorials" ON)
 option(ALPS_BUILD_TUTORIALS_PACKAGE "Build only a tutorials package" OFF)
 option(BIND_FORTRAN_LOWERCASE "FORTRAN functions are compiled without a trailing underscore" OFF)
+option (ALPS_VISTRAILS_32BIT "Force Vistrails packages to be built in 32 bit" ON)
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
 
@@ -90,12 +91,16 @@ set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS 
 set(ALPS_USE_VISTRAILS ${ALPS_FOR_VISTRAILS} CACHE BOOL "Use the libraries deployed with VisTrails")
 set(ALPS_INSTALL_VISTRAILS_PACKAGES ${ALPS_FOR_VISTRAILS} CACHE BOOL "Install the ALPS VisTrails extensions")
 
-if (ALPS_USE_VISTRAILS)
-  set(CMAKE_OSX_ARCHITECTURES "i386" CACHE STRING "Architectures to build ALPS for")
-  set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5" CACHE STRING "OSX minimal deployment version")
-  set(CPACK_OSX_PACKAGE_VERSION "10.5")
-#  set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.5.sdk" CACHE STRING "OSX minimal deployment SDK")
-endif(ALPS_USE_VISTRAILS)
+
+if (ALPS_USE_VISTRAILS AND ALPS_VISTRAILS_32BIT)
+    set(CMAKE_OSX_ARCHITECTURES "i386")
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.5")
+    set(CPACK_OSX_PACKAGE_VERSION "10.5")
+else (ALPS_USE_VISTRAILS AND ALPS_VISTRAILS_32BIT)
+    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
+    set(CPACK_OSX_PACKAGE_VERSION "10.6")
+    #set(CMAKE_OSX_SYSROOT "/Developer/SDKs/MacOSX10.6.sdk" CACHE STRING "OSX minimal deployment SDK")
+endif (ALPS_USE_VISTRAILS AND ALPS_VISTRAILS_32BIT)
 
 # a workaround for Mac OS X's LLVM compiler
 option(ALPS_LLVM_WORKAROUND "Exclude some parts of ALPS from the build with LLVM" OFF)
