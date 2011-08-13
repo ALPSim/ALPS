@@ -85,8 +85,7 @@ template<typename Impl> class ising_sim : public Impl {
                         corr[d] += spins[i] * spins[( i + d ) % length ];
                 }
                 {
-                    using boost::lambda::_1;
-                    std::transform(corr.begin(), corr.end(), corr.begin(), _1 / double(length));
+                    std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
                 }
                 ten /= length;
                 tmag /= length;
