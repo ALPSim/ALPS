@@ -52,6 +52,11 @@ option (ALPS_VISTRAILS_32BIT "Force Vistrails packages to be built in 32 bit" ON
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
 
+message (STATUS "CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
+message (STATUS "CMAKE_CL_64: ${CMAKE_CL_64}")
+message (STATUS "WIN32: ${WIN32}")
+message (STATUS "WIN64: ${WINs64}")
+
 option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framwork" OFF)
 mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
 
