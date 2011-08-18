@@ -123,33 +123,21 @@ InteractionExpansionRun::InteractionExpansionRun(const alps::ProcessList &where,
 
 void InteractionExpansionRun::dostep()
 {
-  //if (step < mc_steps+therm_steps) {
     for(unsigned int i=0;i<convergence_check_period;++i){
       //recompute inverse matrix M from scratch to avoid roundoff errors.
-      clock_t time0=clock();
       if(step % recalc_period ==0)
         reset_perturbation_series();
       if(step> therm_steps)
         thermalized=true; 
-      clock_t time1=clock();
       interaction_expansion_step();                
-      clock_t time2=clock();
       if(thermalized && step % measurement_period ==0)
         measure_observables();
-      clock_t time3=clock();
-      update_time+=time2-time1;
-      measurement_time+=time3-time2;
-      //increase histogram
+      
+      //increase perturbation order histogram
       if(vertices.size()<max_order)
         pert_hist[vertices.size()]++;
       ++step;
-      if(time3-time0 !=0){
-        measurements.get<alps::RealObservable>("UpdateTime")<<(time2-time1)/(double)(time3-time0);
-        measurements.get<alps::RealObservable>("MeasurementTime")<<(time3-time2)/(double)(time3-time0);
-        measurements.get<alps::RealObservable>("RecomputeTime")<<(time1-time0)/(double)(time3-time0);
-      }
     }
-    //}
 }
 
 

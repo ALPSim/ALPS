@@ -159,12 +159,14 @@ green_tau(N+1, n_site, 2)
   
   // create measurement objects
   measurements << RealObservable("Sign");
-  measurements <<SignedObservable<alps::SimpleRealVectorObservable>("G_meas_up");
-  measurements <<SignedObservable<alps::SimpleRealVectorObservable>("G_meas_down");  
+  measurements <<SignedObservable<alps::RealVectorObservable>("G_meas_up");
+  measurements <<SignedObservable<alps::RealVectorObservable>("G_meas_down");  
+#ifdef FOURPOINT
   measurements << SimpleRealVectorObservable("G_fourpoint_uu");  
   measurements << SimpleRealVectorObservable("G_fourpoint_dd");  
   measurements << SimpleRealVectorObservable("G_fourpoint_ud");  
   measurements << SimpleRealVectorObservable("G_fourpoint_du");  
+#endif //FOURPOINT
   
   measurements.reset(true);
   
@@ -222,8 +224,8 @@ void HirschFyeRun::dostep()
     }
   }
   if(is_thermalized()){
-  	measurements.get<SignedObservable<alps::SimpleRealVectorObservable> >("G_meas_up") << (G_up*(double)sign);
-  	measurements.get<SignedObservable<alps::SimpleRealVectorObservable> >("G_meas_down") << (G_down*(double)sign);
+  	measurements.get<SignedObservable<alps::RealVectorObservable> >("G_meas_up") << (G_up*(double)sign);
+  	measurements.get<SignedObservable<alps::RealVectorObservable> >("G_meas_down") << (G_down*(double)sign);
     measurements.get<RealObservable>("Sign")<<sign;
     
   }
@@ -308,8 +310,10 @@ void HirschFyeRun::dostep()
 
 std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_result() {
   int N=parms["N"];
+  double beta=parms["BETA"];
   int n_matsubara=parms["NMATSUBARA"];
   int n_site=parms["SITES"];
+
   itime_green_function_t green_result(N+1, n_site, 2); //one site, two spins, n+1 time points including first and last
   matsubara_green_function_t green_result_matsubara(n_matsubara, n_site, 2); //n matsubara frequencies
   
@@ -331,7 +335,6 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
     }
     std::cout<<"end of sim, checkpointing"<<std::endl;
     std::string fns=parms["CHECKPOINT"];
-    fns+=".xml";
     boost::filesystem::path fn(fns);
     checkpoint(boost::filesystem::complete(fn));
   }
@@ -354,7 +357,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
       }
     }
   }
-  
+
   std::vector<double> densities;
   densities.resize(2);
   for(int i=0;i<n_site;++i){
@@ -363,9 +366,13 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   }
   densities[0] /= n_site;
   densities[1] /= n_site;
+
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
+  alps::hdf5::archive ar(parms["OUTFILE"], alps::hdf5::archive::WRITE);
+  green_result.write_hdf5(ar, "/G_tau");
+  green_result_matsubara.write_hdf5(ar, "/G_omega");
   return std::make_pair(green_result_matsubara, green_result);
 }
 

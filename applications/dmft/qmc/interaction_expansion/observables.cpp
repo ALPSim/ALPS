@@ -102,9 +102,6 @@ void InteractionExpansionRun::initialize_observables(void)
   //acceptance probabilities
   measurements<<alps::RealObservable("VertexInsertion");
   measurements<<alps::RealObservable("VertexRemoval");
-  measurements<<alps::RealObservable("MeasurementTime");
-  measurements<<alps::RealObservable("UpdateTime");
-  measurements<<alps::RealObservable("RecomputeTime");
   measurements.reset(true);
 }
 
@@ -114,18 +111,25 @@ void InteractionExpansionRun::initialize_observables(void)
 ///this function is called whenever measurements should be performed. Depending
 ///on the value of  measurement_method it will choose one particular
 ///measurement function. 
-void InteractionExpansionRun::measure_observables(void) 
+void InteractionExpansionRun::measure_observables() 
 {
+  //measure the fermionic sign
   measurements["Sign"]<<sign;
-  if (measurement_method == selfenergy_measurement_matsubara)
-    compute_W_matsubara();
-  else if (measurement_method == selfenergy_measurement_itime_rs)
-    compute_W_itime();
+  //measure the expansion order (perturbation order)
   std::valarray<double> pert_order(n_flavors);
   for(unsigned int i=0;i<n_flavors;++i) { 
     pert_order[i]=M[i].size(); 
   }
   measurements["PertOrder"] << pert_order;
+
+  //measure observables in frequency space
+  if (measurement_method == selfenergy_measurement_matsubara){
+    compute_W_matsubara();
+  }
+  //measure observables in imaginary time space
+  else if (measurement_method == selfenergy_measurement_itime_rs){
+    compute_W_itime();
+  }
 }
 
 

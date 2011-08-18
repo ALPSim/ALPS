@@ -70,7 +70,7 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   clock_t time1=clock();
   std::cout<<"time for writing checkpoint was: "<<(time1-time0)/(double)CLOCKS_PER_SEC<<std::endl;
   ///end checkpoint
-  std::cout<<"getting result!"<<std::endl;
+  std::cout<<"collecting results."<<std::endl;
   unsigned int n_matsubara=p_["NMATSUBARA"];
   unsigned int n_matsubara_measurements=p_.value_or_default("NMATSUBARA_MEASUREMENTS", n_matsubara);
   unsigned int n_tau=p_["N"];
@@ -87,18 +87,12 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   bool measure_in_matsubara=true;
   if(p_.value_or_default("HISTOGRAM_MEASUREMENT", false)) 
     measure_in_matsubara=false;
-  //std::cout<<"getting measurements pertorder: "<<std::endl;
-  //clock_t tstart=clock();
+  
   const bool compactit = parms.value_or_default("GET_COMPACTED_MEASUREMENTS", true);
   if (!compactit) 
     std::cout << "getting non-compacted measurements\n";
   alps::ObservableSet gathered_measurements=get_measurements(compactit);
-  //clock_t tmid=clock();
   alps::RealVectorObsevaluator pert_obseval=gathered_measurements["PertOrder"];
-  //clock_t tend=clock();
-  //std::cout<<"getting this took: "<<(tend-tstart)/(double)CLOCKS_PER_SEC<<"of which mid was: "
-  //   <<(tmid-tstart)/(double)CLOCKS_PER_SEC<<"getting measurements sign: "<<std::endl;
-  /*output acceptance ratios*/
   alps::RealObsevaluator vertex_insertion=gathered_measurements["VertexInsertion"];
   alps::RealObsevaluator vertex_removal=gathered_measurements["VertexRemoval"];
   if(vertex_insertion.count()!=0) 
@@ -121,11 +115,13 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
   std::vector<double> densities(n_flavors);
   read_freq(in_omega, bare_green_matsubara);
   if(measure_in_matsubara) {
+    std::cout<<"evaluating Matsubara data"<<std::endl;
     evaluate_selfenergy_measurement_matsubara(gathered_measurements, green_matsubara_measured, 
                                               bare_green_matsubara, densities, 
                                               beta, n_site, n_flavors, n_matsubara_measurements);
   } 
   else {
+    std::cout<<"evaluating imaginary time data"<<std::endl;
     itime_green_function_t bare_green_itime(n_tau+1, n_site, n_flavors);
     fourier_ptr_g0->backward_ft(bare_green_itime, bare_green_matsubara);
     evaluate_selfenergy_measurement_itime_rs(gathered_measurements, green_itime_measured, bare_green_itime, 
