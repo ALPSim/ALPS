@@ -152,14 +152,14 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
 
    new_remap = {}
    for name, (new_module, d) in module_remap.iteritems():
-      new_remap[name] = [(None, '2.0.0', new_module, d)]
+      new_remap[name] = [(None, '2.0.2', new_module, d)]
 
    # [(<start_version>, <end_version>, <new_module (None=same module, new version)>, <remap_dict>)]
-   new_remap['ShowListOfHTMLFiles'] = [(None, '2.0.0', None, {})]
-   new_remap['ShowListOfXMLFiles'] = [(None, '2.0.0', None, {})]
-   new_remap['ShowListOfPlots'] = [(None, '2.0.0', None, {})]
-   new_remap['ShowMplPlot'] = [(None, '2.0.0', None, {})]
-   new_remap['MplXYPlotCell'] = [(None, '2.0.0', None, {})]
+   new_remap['ShowListOfHTMLFiles'] = [(None, '2.0.2', None, {})]
+   new_remap['ShowListOfXMLFiles'] = [(None, '2.0.2', None, {})]
+   new_remap['ShowListOfPlots'] = [(None, '2.0.2', None, {})]
+   new_remap['ShowMplPlot'] = [(None, '2.0.2', None, {})]
+   new_remap['MplXYPlotCell'] = [(None, '2.0.2', None, {})]
 
    return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
                                              new_remap)
