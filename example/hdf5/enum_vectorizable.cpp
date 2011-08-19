@@ -40,7 +40,7 @@ namespace alps {
     namespace hdf5 {
 
         template<> struct scalar_type<enum_type> {
-            typedef boost::int_t<sizeof(enum_type)>::least type;
+            typedef boost::int_t<sizeof(enum_type) * 8>::exact type;
         };
 
         template<> struct is_continous<enum_type> : public boost::false_type {};
