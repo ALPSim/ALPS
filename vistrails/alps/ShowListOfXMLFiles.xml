@@ -1,8 +1,8 @@
-<vistrail id="" name="" version="1.0.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vistrails.org/vistrail.xsd">
-  <action date="2010-05-01 22:38:20" id="1" prevId="0" prune="" session="0" user="troyer">
+<vistrail id="" name="" version="1.0.2" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.vistrails.org/vistrail.xsd">
+  <action date="2010-05-01 22:38:20" id="1" prevId="0" session="0" user="troyer">
     <annotation id="1" key="__description__" value="Copied from pipeline" />
     <add id="0" objectId="0" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="0" name="Map" namespace="" package="edu.utah.sci.vistrails.control_flow" tag="" version="0.2.0" />
+      <module cache="1" id="0" name="Map" namespace="" package="edu.utah.sci.vistrails.control_flow" version="0.2.0" />
     </add>
     <add id="1" objectId="1" parentObjId="0" parentObjType="module" what="function">
       <function id="1" name="OutputPort" pos="1" />
@@ -14,13 +14,13 @@
       <function id="0" name="InputPort" pos="1" />
     </add>
     <add id="4" objectId="0" parentObjId="0" parentObjType="function" what="parameter">
-      <parameter alias="" id="0" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:List" val="[&apos;filename&apos;]" />
+      <parameter alias="" id="0" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:List" val="['filename']" />
     </add>
     <add id="5" objectId="0" parentObjId="0" parentObjType="module" what="location">
       <location id="0" x="9.91375640376" y="-142.389344192" />
     </add>
     <add id="6" objectId="1" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="1" name="CellLocation" namespace="" package="edu.utah.sci.vistrails.spreadsheet" tag="" version="0.9.0" />
+      <module cache="1" id="1" name="CellLocation" namespace="" package="edu.utah.sci.vistrails.spreadsheet" version="0.9.0" />
     </add>
     <add id="7" objectId="3" parentObjId="1" parentObjType="module" what="function">
       <function id="3" name="Row" pos="1" />
@@ -38,7 +38,7 @@
       <location id="1" x="-11.247987532" y="128.808470094" />
     </add>
     <add id="12" objectId="2" parentObjId="" parentObjType="" what="group">
-      <group cache="1" id="2" name="Group" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
+      <group cache="1" id="2" name="Group" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
         <workflow id="" name="untitled" version="" vistrail_id="">
           <connection id="4">
             <port id="7" moduleId="5" moduleName="RichTextCell" name="Location" signature="(edu.utah.sci.vistrails.spreadsheet:CellLocation)" type="destination" />
@@ -60,31 +60,31 @@
             <port id="4696" moduleId="2102" moduleName="InputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="source" />
             <port id="4697" moduleId="2104" moduleName="File" name="name" signature="(edu.utah.sci.vistrails.basic:String)" type="destination" />
           </connection>
-          <module cache="1" id="5" name="RichTextCell" namespace="" package="edu.utah.sci.vistrails.spreadsheet" tag="" version="0.9.0">
+          <module cache="1" id="5" name="RichTextCell" namespace="" package="edu.utah.sci.vistrails.spreadsheet" version="0.9.0">
             <location id="5" x="8.65697381113" y="-140.770322814" />
           </module>
-          <module cache="1" id="6" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
+          <module cache="1" id="6" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
             <location id="6" x="-244.358989205" y="140.041993813" />
             <function id="3" name="name" pos="0">
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="Location" />
             </function>
           </module>
-          <module cache="1" id="2101" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" tag="" version="2.0.2">
+          <module cache="1" id="2101" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" version="2.0.2">
             <location id="2872" x="-18.1713475845" y="-43.2756497008" />
           </module>
-          <module cache="1" id="2102" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
+          <module cache="1" id="2102" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
             <location id="2873" x="60.6541328043" y="134.703987597" />
             <function id="1658" name="name" pos="0">
               <parameter alias="" id="1845" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="filename" />
             </function>
           </module>
-          <module cache="1" id="2103" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
+          <module cache="1" id="2103" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
             <location id="2874" x="159.669999398" y="-130.813420028" />
             <function id="1659" name="name" pos="0">
               <parameter alias="" id="1846" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="value" />
             </function>
           </module>
-          <module cache="1" id="2104" name="File" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6">
+          <module cache="1" id="2104" name="File" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
             <location id="2875" x="33.549230776" y="40.1134111317" />
           </module>
         </workflow>
@@ -97,7 +97,7 @@
       <location id="2" x="1.33423112822" y="13.5808740986" />
     </add>
     <add id="15" objectId="3" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6" />
+      <module cache="1" id="3" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6" />
     </add>
     <add id="16" objectId="4" parentObjId="3" parentObjType="module" what="function">
       <function id="4" name="name" pos="0" />
@@ -109,7 +109,7 @@
       <location id="3" x="-350.660196884" y="481.132833072" />
     </add>
     <add id="19" objectId="4" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" tag="" version="1.6" />
+      <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6" />
     </add>
     <add id="20" objectId="5" parentObjId="4" parentObjType="module" what="function">
       <function id="5" name="name" pos="0" />
@@ -157,13 +157,131 @@
       <port id="6" moduleId="2" moduleName="Group" name="Location" signature="(edu.utah.sci.vistrails.spreadsheet:CellLocation)" type="destination" />
     </add>
   </action>
+  <action date="2011-08-24 14:50:57" id="2" prevId="1" session="3" user="troyer">
+    <annotation id="6" key="__description__" value="Upgrade" />
+    <delete id="35" objectId="3" parentObjId="1" parentObjType="connection" what="port" />
+    <delete id="36" objectId="2" parentObjId="1" parentObjType="connection" what="port" />
+    <delete id="37" objectId="1" parentObjId="" parentObjType="" what="connection" />
+    <delete id="38" objectId="7" parentObjId="3" parentObjType="connection" what="port" />
+    <delete id="39" objectId="6" parentObjId="3" parentObjType="connection" what="port" />
+    <delete id="40" objectId="3" parentObjId="" parentObjType="" what="connection" />
+    <delete id="41" objectId="2" parentObjId="2" parentObjType="group" what="location" />
+    <delete id="42" objectId="0" parentObjId="2" parentObjType="group" what="annotation" />
+    <delete id="43" objectId="2" parentObjId="" parentObjType="" what="group" />
+    <delete id="44" objectId="1" parentObjId="0" parentObjType="connection" what="port" />
+    <delete id="45" objectId="0" parentObjId="0" parentObjType="connection" what="port" />
+    <delete id="46" objectId="0" parentObjId="" parentObjType="" what="connection" />
+    <delete id="47" objectId="1" parentObjId="1" parentObjType="module" what="location" />
+    <delete id="48" objectId="2" parentObjId="2" parentObjType="function" what="parameter" />
+    <delete id="49" objectId="2" parentObjId="1" parentObjType="module" what="function" />
+    <delete id="50" objectId="3" parentObjId="3" parentObjType="function" what="parameter" />
+    <delete id="51" objectId="3" parentObjId="1" parentObjType="module" what="function" />
+    <delete id="52" objectId="1" parentObjId="" parentObjType="" what="module" />
+    <add id="53" objectId="7" parentObjId="" parentObjType="" what="group">
+      <group cache="1" id="7" name="Group" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
+        <workflow id="" name="untitled" version="" vistrail_id="">
+          <connection id="3">
+            <port id="5" moduleId="6" moduleName="File" name="value" signature="(edu.utah.sci.vistrails.basic:File)" type="source" />
+            <port id="6" moduleId="3" moduleName="ConvertXML2HTML" name="input_file" signature="(edu.utah.sci.vistrails.basic:File)" type="destination" />
+          </connection>
+          <connection id="4">
+            <port id="7" moduleId="6" moduleName="File" name="value_as_string" signature="(edu.utah.sci.vistrails.basic:String)" type="source" />
+            <port id="8" moduleId="5" moduleName="OutputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="destination" />
+          </connection>
+          <connection id="5">
+            <port id="9" moduleId="4" moduleName="InputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="source" />
+            <port id="10" moduleId="6" moduleName="File" name="name" signature="(edu.utah.sci.vistrails.basic:String)" type="destination" />
+          </connection>
+          <connection id="6">
+            <port id="11" moduleId="2" moduleName="InputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="source" />
+            <port id="12" moduleId="7" moduleName="RichTextCell" name="Location" signature="(edu.utah.sci.vistrails.spreadsheet:CellLocation)" type="destination" />
+          </connection>
+          <connection id="7">
+            <port id="13" moduleId="3" moduleName="ConvertXML2HTML" name="output_file" signature="(edu.utah.sci.vistrails.basic:File)" type="source" />
+            <port id="14" moduleId="7" moduleName="RichTextCell" name="File" signature="(edu.utah.sci.vistrails.basic:File)" type="destination" />
+          </connection>
+          <module cache="1" id="2" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
+            <location id="2" x="-244.358989205" y="140.041993813" />
+            <function id="1" name="name" pos="0">
+              <parameter alias="" id="1" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="Location" />
+            </function>
+          </module>
+          <module cache="1" id="3" name="ConvertXML2HTML" namespace="Tools" package="org.comp-phys.alps" version="2.0.2">
+            <location id="3" x="-18.1713475845" y="-43.2756497008" />
+          </module>
+          <module cache="1" id="4" name="InputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
+            <location id="4" x="60.6541328043" y="134.703987597" />
+            <function id="2" name="name" pos="0">
+              <parameter alias="" id="2" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="filename" />
+            </function>
+          </module>
+          <module cache="1" id="5" name="OutputPort" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
+            <location id="5" x="159.669999398" y="-130.813420028" />
+            <function id="3" name="name" pos="0">
+              <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="value" />
+            </function>
+          </module>
+          <module cache="1" id="6" name="File" namespace="" package="edu.utah.sci.vistrails.basic" version="1.6">
+            <location id="6" x="33.549230776" y="40.1134111317" />
+          </module>
+          <module cache="1" id="7" name="RichTextCell" namespace="" package="edu.utah.sci.vistrails.spreadsheet" version="0.9.1">
+            <location id="7" x="8.65697381113" y="-140.770322814" />
+          </module>
+        </workflow>
+      </group>
+    </add>
+    <add id="54" objectId="5" parentObjId="7" parentObjType="group" what="annotation">
+      <annotation id="5" key="__desc__" value="ShowAsHTML" />
+    </add>
+    <add id="55" objectId="7" parentObjId="7" parentObjType="group" what="location">
+      <location id="7" x="1.33423112822" y="13.5808740986" />
+    </add>
+    <add id="56" objectId="8" parentObjId="" parentObjType="" what="connection">
+      <connection id="8" />
+    </add>
+    <add id="57" objectId="16" parentObjId="8" parentObjType="connection" what="port">
+      <port id="16" moduleId="7" moduleName="Group" name="self" signature="(edu.utah.sci.vistrails.basic:Group)" type="source" />
+    </add>
+    <add id="58" objectId="17" parentObjId="8" parentObjType="connection" what="port">
+      <port id="17" moduleId="0" moduleName="Map" name="FunctionPort" signature="(edu.utah.sci.vistrails.basic:Module)" type="destination" />
+    </add>
+    <add id="59" objectId="8" parentObjId="" parentObjType="" what="module">
+      <module cache="1" id="8" name="CellLocation" namespace="" package="edu.utah.sci.vistrails.spreadsheet" version="0.9.1" />
+    </add>
+    <add id="60" objectId="9" parentObjId="8" parentObjType="module" what="function">
+      <function id="9" name="Row" pos="1" />
+    </add>
+    <add id="61" objectId="9" parentObjId="9" parentObjType="function" what="parameter">
+      <parameter alias="" id="9" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:Integer" val="" />
+    </add>
+    <add id="62" objectId="8" parentObjId="8" parentObjType="module" what="function">
+      <function id="8" name="Column" pos="0" />
+    </add>
+    <add id="63" objectId="8" parentObjId="8" parentObjType="function" what="parameter">
+      <parameter alias="" id="8" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:Integer" val="" />
+    </add>
+    <add id="64" objectId="8" parentObjId="8" parentObjType="module" what="location">
+      <location id="8" x="-11.247987532" y="128.808470094" />
+    </add>
+    <add id="65" objectId="10" parentObjId="" parentObjType="" what="connection">
+      <connection id="10" />
+    </add>
+    <add id="66" objectId="20" parentObjId="10" parentObjType="connection" what="port">
+      <port id="20" moduleId="8" moduleName="CellLocation" name="self" signature="(edu.utah.sci.vistrails.spreadsheet:CellLocation)" type="source" />
+    </add>
+    <add id="67" objectId="21" parentObjId="10" parentObjType="connection" what="port">
+      <port id="21" moduleId="7" moduleName="Group" name="Location" signature="(edu.utah.sci.vistrails.spreadsheet:CellLocation)" type="destination" />
+    </add>
+    <add id="68" objectId="11" parentObjId="" parentObjType="" what="connection">
+      <connection id="11" />
+    </add>
+    <add id="69" objectId="22" parentObjId="11" parentObjType="connection" what="port">
+      <port id="22" moduleId="3" moduleName="InputPort" name="InternalPipe" signature="(edu.utah.sci.vistrails.basic:Variant)" type="source" />
+    </add>
+    <add id="70" objectId="23" parentObjId="11" parentObjType="connection" what="port">
+      <port id="23" moduleId="8" moduleName="CellLocation" name="SheetReference" signature="(edu.utah.sci.vistrails.spreadsheet:SheetReference)" type="destination" />
+    </add>
+  </action>
   <annotation id="2" key="__abstraction_uuid__" value="7b1b6666-5561-11df-abac-002500a2cd74" />
+  <actionAnnotation actionId="1" date="2011-08-24 14:50:57" id="7" key="__upgrade__" user="troyer" value="2" />
 </vistrail>
-<!--
-   Copyright (c) 2010 Matthias Troyer (troyer@ethz.ch)
-  
-   Distributed under the Boost Software License, Version 1.0.
-   (See accompanying file LICENSE_1_0.txt or copy at
-   http://www.boost.org/LICENSE_1_0.txt)
-  -->
-  
