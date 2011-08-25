@@ -63,14 +63,17 @@ def main(limit, resume, output):
 
     print "Mean of Energy:         ", results["Energy"].mean
     print "Error of Energy:        ", results["Energy"].error
-    print "Mean of Correlations:   ", results["Correlations"].mean
+#TODO: implement!
+#    print "Mean of Correlations:   ", results["Correlations"].mean
 
-    print "-2 * Energy / 13:        ", -2. * results["Energy"] / 13.
-    print "1 / Correlations        ", 1. / results["Correlations"]
+    print "-2 * Energy / 13:       ", -2. * results["Energy"] / 13.
+#TODO: implement!
+#    print "1 / Correlations        ", 1. / results["Correlations"]
     print "Energy - Magnetization: ", results["Energy"] - results["Magnetization"]
 
     print "Sin(Energy):            ", results["Energy"].sin()
-    print "Tanh(Correlations):     ", results["Correlations"].tanh()
+#TODO: implement!
+#    print "Tanh(Correlations):     ", results["Correlations"].tanh()
 
     ngs.saveResults(results, sim.params, ngs.h5ar(output, ngs.h5ar.REPLACE), "/simulation/results")
 

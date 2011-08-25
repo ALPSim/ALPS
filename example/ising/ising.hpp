@@ -93,7 +93,8 @@ template<typename Impl> class ising_sim : public Impl {
                 Impl::measurements["Magnetization"] << tmag;
                 Impl::measurements["Magnetization^2"] << tmag * tmag;
                 Impl::measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                Impl::measurements["Correlations"] << corr;
+                // TODO: implement!
+//                Impl::measurements["Correlations"] << corr;
             }
         };
 

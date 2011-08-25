@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-file(WRITE run_ngs_ising_python_native_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${sourcedir}/lib python ${currentdir}/main_native.py 15 f sim.single.h5")
+file(WRITE run_ngs_ising_python_native_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${sourcedir}/lib mpirun -n 2 ${python_interpreter} ${currentdir}/main_native.py 15 f sim.mpi.h5")
 
 execute_process(
     COMMAND sh run_ngs_ising_python_native_tmp.sh
@@ -14,7 +14,7 @@ execute_process(
 )
 
 file(REMOVE run_ngs_ising_python_native_tmp.sh)
-file(REMOVE sim.single.h5)
+file(REMOVE sim.mpi.h5)
 
 if(not_successful)
     message(SEND_ERROR "error runing test 'ngs_ising_python_native': ${err}; shell output: ${not_successful}!")
