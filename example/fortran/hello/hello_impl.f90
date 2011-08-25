@@ -48,11 +48,12 @@ subroutine alps_init(caller)
 
   call alps_get_parameter(cval, "WORLD", ALPS_CHAR, caller)
   write(*, *) '  parameter WORLD = ',cval
-  ! print '("parameter WORLD = (",a,")")', cval
 
   ival = 0
   call alps_parameter_defined(ival, 'Z', caller);
   write(*, *) '  defined parameter Z = ',ival, ''
+
+  call flush(6)
   return
 end subroutine alps_init
 
