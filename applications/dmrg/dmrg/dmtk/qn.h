@@ -37,7 +37,7 @@ namespace dmtk
 
 #define QN_MAX_SIZE 4
 
-class QN:public dmtk::Vector<alps::half_integer<short> >
+class QN
 {
   private:
     static Vector<std::string> _qn_name;
@@ -45,20 +45,61 @@ class QN:public dmtk::Vector<alps::half_integer<short> >
     static size_t QN_LAST;
 
     typedef alps::half_integer<short> half_integer_type;
-    typedef dmtk::Vector<alps::half_integer<short> > _V;
+
+    alps::half_integer<short> _qn0;
+    alps::half_integer<short> _qn1;
+    alps::half_integer<short> _qn2;
+    alps::half_integer<short> _qn3;
+    alps::half_integer<short> _qn4;
+    alps::half_integer<short> _qn5;
+
   public:
-    QN() { this->resize(QN_MAX_SIZE); }
-    QN(half_integer_type val) { _V::resize(QN_MAX_SIZE); _V::operator=(val); }
-    QN(const dmtk::Vector<half_integer_type> &v) : dmtk::Vector<alps::half_integer<short> >(v) {}
+    QN(): _qn0(0),_qn1(0),_qn2(0),_qn3(0),_qn4(0),_qn5(0) {}
+    QN(half_integer_type val): _qn0(val),_qn1(val),_qn2(val),_qn3(val),_qn4(val),_qn5(val) {}
+    QN(const QN &_qn):
+      _qn0(_qn._qn0),_qn1(_qn._qn1),_qn2(_qn._qn2),_qn3(_qn._qn3),_qn4(_qn._qn4),_qn5(_qn._qn5) {}
 
-    QN& operator=(const dmtk::Vector<half_integer_type>&v) { _V::operator=(v); return *this; }
-    QN& operator=(const QN &_qn) { _V::operator=(_qn); return *this; }
-    QN& operator=(half_integer_type  val) { _V::resize(QN_MAX_SIZE); _V::operator=(val); return *this; }
 
-    half_integer_type operator[](size_t t) const { return _V::operator[](t); }
-    half_integer_type& operator[](size_t t) { return _V::operator[](t); }
-    half_integer_type operator()(size_t t) const { return _V::operator[](t); }
-    half_integer_type& operator()(size_t t) { return _V::operator[](t); }
+    QN& operator=(const QN &_qn)
+      { _qn0 = _qn._qn0; _qn1 = _qn._qn1; _qn2 = _qn._qn2; _qn3 = _qn._qn3; _qn4 = _qn._qn4; _qn5 = _qn._qn5; return *this; }
+    QN& operator=(half_integer_type  val) { _qn0=_qn1=_qn2=_qn3=_qn4=_qn5=val; return *this; }
+
+    half_integer_type operator[](int i) const {
+      switch(i){
+        case 0:
+          return _qn0;
+        case 1:
+          return _qn1;
+        case 2:
+          return _qn2;
+        case 3:
+          return _qn3;
+        case 4:
+          return _qn4;
+        case 5:
+          return _qn5;
+        default:
+          return DMTK_ERROR;
+       }
+    }
+    half_integer_type & operator[](int i) {
+      switch(i){
+        case 0:
+          return _qn0;
+        case 1:
+          return _qn1;
+        case 2:
+          return _qn2;
+        case 3:
+          return _qn3;
+        case 4:
+          return _qn4;
+        case 5:
+          return _qn5;
+       }
+    }
+
+
 
     half_integer_type operator[](const std::string& str) const
       { return operator[](get_qn_index(str)); }
@@ -145,7 +186,7 @@ class QN:public dmtk::Vector<alps::half_integer<short> >
     void write(std::ostream &s) const
     {
       for(int i = 0; i < QN_LAST; i++){
-        short n = _V::operator[](i).get_twice();
+        short n = this->operator[](i).get_twice();
         s.write((const char *)&n, sizeof(short));
       }
     }
