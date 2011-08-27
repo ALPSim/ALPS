@@ -1902,7 +1902,7 @@ System<T>::truncate(int position, int new_size)
     double error = 1.;
     for(int i = 0; i < basis.dim(); i++){
       error -= w(idx(i));
-      if(error <= _error && i >= new_size){
+      if(error <= _error){
 //        new_size = std::min(new_size, (int)((i+1)*1.1));
         new_size = (int)((i+1)*1.1);
         if(_error_max_size != -1)
