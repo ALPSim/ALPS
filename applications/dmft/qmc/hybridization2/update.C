@@ -626,3 +626,20 @@ void compute_M_remove_anti(blas_matrix & M, int s, int r) {
 }
 
 
+double get_occupation(segment_container_t &segments, int full_line, double tau, double BETA){
+//get occupation for given flavor and time tau:
+//check if there is a segment at this time
+if(segments.size()==0){
+    if(full_line) return 1.0;
+    else return 0.0;
+}
+    for(segment_container_t::iterator it=segments.begin(); it!=segments.end(); it++){
+	if(it->t_end()>it->t_start()){//regular segment
+	    if(it->t_start()<=tau && tau <= it->t_end() ) return 1.0;
+	}//brackets mandatory
+	else//segment winds around the circle
+	    if(( tau>=0.0 && tau<=it->t_end()) || (tau>=it->t_start() && tau<=BETA)) return 1.0;
+    }//end::for
+return 0.0;
+}
+

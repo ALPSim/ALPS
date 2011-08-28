@@ -67,4 +67,6 @@ double det_rat_remove_anti(times anti_segment, int r, std::size_t s, blas_matrix
 
 void compute_M_remove_anti(blas_matrix & M, int s, int r); 
 
+double get_occupation(segment_container_t &segments, int full_line, double tau, double BETA);
+
 #endif

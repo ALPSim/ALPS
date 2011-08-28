@@ -1,9 +1,10 @@
-/*****************************************************************************
+/************************************************************************************
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005 - 2010 by Philipp Werner <werner@itp.phys.ethz.ch>,
+ * Copyright (C) 2005 - 2011 by Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Emanuel Gull <gull@phys.columbia.edu>,
+ *                              Hartmut Hafermann <hafermann@cpht.polytechnique.fr>
  *
  *
  * This software is part of the ALPS Applications, published under the ALPS
@@ -23,7 +24,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  *
- *****************************************************************************/
+ ************************************************************************************/
 
 #include "impurity.h"
 #include "moves.h"
@@ -48,14 +49,25 @@ full_line(static_cast<int>(parms["FLAVORS"]),0),                                
 sign(static_cast<int>(parms["FLAVORS"]), 1.),                                                    //fermionic sign. plus or minus one.
 BETA(static_cast<double>(parms["BETA"])),                                                        //inverse temperature
 N(static_cast<int>(parms["N"])),                                                                 //number of points on which Green's function is known
+N_nn(static_cast<int>(parms.value_or_default("N_nn", 0))),                                       //number of tau-points on which density density correlator is measured
+N_w(static_cast<int>(parms.value_or_default("N_w", 0))),                                         //number of Matsubara frequencies for gw
+N_w2(static_cast<int>(parms.value_or_default("N_w2", 0))),                                       //number of Matsubara frequencies for two-particle Green's function
+N_W(static_cast<int>(parms.value_or_default("N_W", 0))),                                         //number of bosonic frequncies for the two-particle Green's function
+N_l(static_cast<int>(parms.value_or_default("N_l", 0))),                                         //number of Legendre coefficients
 N_order(static_cast<int>(parms["N_ORDER"])),                                                     //number of orders that are measured for the order histogram
 G_meas(static_cast<int>(parms["FLAVORS"])*(static_cast<int>(parms["N"])+1)),                     //Measured Green's function
-G_meas_imp(static_cast<int>(parms["FLAVORS"])*(static_cast<int>(parms["N"])+1)),                 ///---PHILIPP CHECK///
-N_corr(static_cast<int>(parms.value_or_default("N_CORR", 0))),                                   //number of tau-points on which density density correlator is measured
 N_meas(static_cast<int>(parms["N_MEAS"])),                                                       //number of updates per measurement
 N_shift(static_cast<int>(parms.value_or_default("N_SHIFT", 0))),                                 //number of times a segment start / end point is shifted per insertion/removal update
 N_swap(static_cast<int>(parms.value_or_default("N_SWAP", 0))),                                   //number of times an orbital swap move is attempted.
-F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms["N"])+1,0.))
+F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms["N"])+1,0.)),   //hybridization function
+MEASURE_gw(static_cast<int>(parms.value_or_default("MEASURE_gw", 0))),                           //measure Green's function on Matsubara frequencies
+MEASURE_fw(static_cast<int>(parms.value_or_default("MEASURE_fw", 0))),                           //measure Sigma*G on Matsubara frequencies
+MEASURE_gl(static_cast<int>(parms.value_or_default("MEASURE_gl", 0))),                           //measure Green's function in Legendre basis
+MEASURE_fl(static_cast<int>(parms.value_or_default("MEASURE_fl", 0))),                           //measure Sigma*G in Legendre basis
+MEASURE_g2w(static_cast<int>(parms.value_or_default("MEASURE_g2w", 0))),                         //measure two-particle Green's function
+MEASURE_hw(static_cast<int>(parms.value_or_default("MEASURE_hw", 0))),                           //measure correlator for vertex function
+MEASURE_nnt(static_cast<int>(parms.value_or_default("MEASURE_nnt", 0))),                         //measure density-density correlation function
+MEASURE_nn(static_cast<int>(parms.value_or_default("MEASURE_nn", 0)))                            //measure density-density correlation function at equal times
 {
   
   /*reading parameters from the self consistency*/
@@ -68,7 +80,7 @@ F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms
   }
   
   if(crank==0){
-    std::cout<<"*****************The interaction (\"U\")-matrix is: ************************"<<std::endl;
+    std::cout<<"*******************The interaction (\"U\")-matrix is: ************************"<<std::endl;
     for(int i=0;i<FLAVORS;++i){ for(int j=0;j<FLAVORS;++j){ std::cout<<u(i,j)<<" "; } std::cout<<std::endl;}
     std::cout<<"****************************************************************************"<<std::endl;
     
@@ -90,27 +102,11 @@ F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms
   }
   
   // create measurement objects
-  measurements << alps::ngs::RealVectorObservable("n")
-               << alps::ngs::RealVectorObservable("order")
-               << alps::ngs::RealVectorObservable("Greens")
-               << alps::ngs::RealVectorObservable("Greens_imp")
-               << alps::ngs::RealVectorObservable("nn_corr")
-               << alps::ngs::RealVectorObservable("nn_corr_equalt")
-//               << alps::ngs::RealVectorObservable("overlap")
-               << alps::ngs::RealObservable("sign")
-               << alps::ngs::RealVectorObservable("matrix_size");
-
+  create_measurements();
   measurements.reset(true);
   
-  //resizing measurement vectors
-  n_meas.resize(FLAVORS,0.);
-  order_meas.resize(N_order*FLAVORS,0.);
-  nn_corr_meas.resize(FLAVORS*(FLAVORS+1)/2*(N_corr+1),0.);
-  nn_corr_equalt_meas.resize(FLAVORS*FLAVORS,0.);
-  n_vectors.resize(FLAVORS);
-  matrix_size.resize(FLAVORS, 0.);
-  
-  std::cout<<"starting simulation"<<std::endl;  
+  resize_measurement_vectors(crank);
+  std::cout<<"process " << crank << " starting simulation"<<std::endl;
 }
 
 
@@ -122,17 +118,12 @@ bool hybridization::is_thermalized() const
 double hybridization::work_done() const
 {
   return (is_thermalized() ? (sweeps-thermalization_sweeps)/double(total_sweeps) : 0.);
-  
 }
 
 void hybridization::do_update()
 {
-  
   // increment sweep count
   sweeps++;
-
-  segment_container_t::iterator it1, it2;
-  double s=1;
   for (int i=0; i<N_meas; i++) {
    //do an update for each FLAVORS
     for (int j=0; j<FLAVORS; j++) {
@@ -148,139 +139,11 @@ void hybridization::do_update()
         for (int k=0; k<N_shift; k++) 
           shift_segment(random, segments[j], BETA, mu_e[j], u, F[j], M[j], sign[j], segments, full_line, j);
       }
-      
-      // measure perturbation order
-      if (segments[j].size()<(std::size_t)N_order)
-        order_meas[j*N_order+segments[j].size()]++;
-      
-      
-      // measure Green functions
-      if (segments[j].size()>0) {
-        for (int i=0; i<M[j].size1(); i++) {
-          (i==0 ? it1 = segments[j].begin() : it1++);
-          for (int k=0; k<M[j].size1(); k++) {
-            (k==0 ? it2 = segments[j].begin() : it2++);
-            if (M[j](k,i)!=0) {
-              double argument = it1->t_end()-it2->t_start();
-              double bubble_sign=1;
-              if (argument > 0) {
-                bubble_sign = 1;
-              }
-              else {
-                bubble_sign = -1;
-                argument += BETA;
-              }
-              int index = (int)(argument/BETA*N+0.5);
-              G_meas[j*(N+1)+index] += M[j](k,i)*bubble_sign;
-            }
-          }
-        }
-      }
-      
-      s *= sign[j];
-      times full_segment(0,BETA);
-      n_meas[j] += compute_overlap(full_segment, segments[j], full_line[j], BETA)/BETA;
-      
     }
-    
-    //these are measurement things that are done every single step (and buffered before stored in ALPS.)
-    sign_meas += s;
-    for(int i=0;i<FLAVORS;++i){
-      matrix_size[i]+=M[i].size();
-    }
-
-    // measure density correlation functions 
-    segment_container_t::iterator it;
-    for (int flavor=0; flavor<FLAVORS; ++flavor) {
-      n_vectors[flavor].resize(N_corr+1, 1);
-      if (segments[flavor].size()==0) {
-        if (full_line[flavor]==0) {
-          for (std::size_t i=0; i<n_vectors[flavor].size(); ++i)
-            n_vectors[flavor][i]=0;
-        }
-      }
-      else {
-        it=segments[flavor].end(); it--;
-        if (it->t_end()<it->t_start()) 
-          n_vectors[flavor][0]=1;
-        else
-          n_vectors[flavor][0]=0;
-        
-        // mark segment start and end points
-        int index;
-        for (it=segments[flavor].begin(); it!=segments[flavor].end(); it++) {
-          index = (int)(it->t_start()/BETA*N_corr+1);
-          n_vectors[flavor][index] *= -1;
-          index = (int)(it->t_end()/BETA*N_corr+1);
-          n_vectors[flavor][index] *= -1;
-        }
-        // fill vector with occupation number
-        for (std::size_t i=1; i<n_vectors[flavor].size(); i++) {
-          if (n_vectors[flavor][i]==-1)
-            n_vectors[flavor][i]=1-n_vectors[flavor][i-1];
-          else
-            n_vectors[flavor][i]=n_vectors[flavor][i-1];
-        }
-      }  
-    }
-    
-    // compute n(\tau)n(0)
-    memset(&(nn_corr_meas[0]), 0, FLAVORS*(FLAVORS+1)/2*(N_corr+1)*sizeof(double));
-    memset(&(nn_corr_equalt_meas[0]), 0, FLAVORS*FLAVORS*sizeof(double));
-    for (int flavor1=0; flavor1<FLAVORS; ++flavor1) {
-      for (int flavor2=0; flavor2<FLAVORS; ++flavor2) {
-        for(int i=0;i<N_corr;++i)
-          nn_corr_equalt_meas[flavor1*FLAVORS+flavor2] += n_vectors[flavor1][i]*n_vectors[flavor2][i];
-      }
-    }
-    int position=0;
-    for (int flavor1=0; flavor1<FLAVORS; ++flavor1) {
-      for (int flavor2=0; flavor2<=flavor1; ++flavor2) {
-        for (int i=0; i<N_corr+1; ++i) {
-          int index = 0; // measure only equal time correlations here
-          int j=i+index;
-          if (j>N_corr) j -= N_corr;   
-          nn_corr_meas[position+index] += n_vectors[flavor1][i]*n_vectors[flavor2][j];
-        }
-        position += (N_corr+1);
-      }
-    }
+  //these are measurements that are done every single step (and buffered before stored in ALPS.)
+  set_measurement_vectors();
   }
 }
-void hybridization::do_measurements(){
-  if(is_thermalized()){
-    nn_corr_meas /= (N_corr+1);
-    measurements["nn_corr"] << nn_corr_meas;
-    nn_corr_equalt_meas/=(double)N_corr;
-    measurements["nn_corr_equalt"] << (nn_corr_equalt_meas);
-    
-    order_meas /= N_meas;
-    measurements["order"] << order_meas;
-    
-    G_meas *= (1.*N)/N_meas/(BETA*BETA);
-    measurements["Greens"] << (G_meas); //*sign;
-    
-    G_meas_imp *= (1.*N)/N_meas/(BETA*BETA);
-    measurements["Greens_imp"] << (G_meas_imp); //*sign;
-    
-    sign_meas /= N_meas;
-    measurements["sign"] << sign_meas;
-    //if(sign_meas != 1.) throw std::runtime_error("negative sign encountered. The current code is not able to deal with this (in the segment representation such a situation should not arise for diagonal hybridizations). Do you know what you're doing?!?");
-    
-    n_meas /= N_meas;
-    measurements["n"]<< n_meas;
-    
-    matrix_size /= N_meas;
-    measurements["matrix_size"]<< matrix_size;
-  }
-  memset(&(G_meas[0]),0, G_meas.size()*sizeof(double));
-  memset(&(G_meas_imp[0]),0, G_meas.size()*sizeof(double));
-  memset(&(n_meas[0]),0, n_meas.size()*sizeof(double));
-  memset(&(matrix_size[0]),0, matrix_size.size()*sizeof(double));
-  sign_meas=0;
-  
-}
-
 
 std::ostream &operator<<(std::ostream & os, segment_container_t segments){
   for(segment_container_t::iterator it=segments.begin(); it !=segments.end();++it){

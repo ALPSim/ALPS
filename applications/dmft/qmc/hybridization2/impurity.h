@@ -1,9 +1,10 @@
-/*****************************************************************************
+/***********************************************************************************
  *
  * ALPS DMFT Project
  *
  * Copyright (C) 2005 - 2010 by Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Emanuel Gull <gull@phys.columbia.edu>,
+ *                              Hartmut Hafermann <hafermann@cpht.polytechnique.fr>
  *
  *
  * This software is part of the ALPS Applications, published under the ALPS
@@ -23,7 +24,7 @@
  * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
  * DEALINGS IN THE SOFTWARE.
  *
- *****************************************************************************/
+ ***********************************************************************************/
 
 #ifndef ___IMP___
 #define ___IMP___
@@ -93,6 +94,11 @@ public:
   double work_done() const;
   bool is_thermalized() const;
   
+  void create_measurements();
+  void set_measurement_vectors();
+  void reset_measurement_vectors();
+  void resize_measurement_vectors(int crank);
+  
 private:
   int sweeps;                                        // sweeps done so far
   int thermalization_sweeps;                         // sweeps to be done for equilibration
@@ -108,23 +114,54 @@ private:
   std::vector<double>        sign;                   // sign of Z_n_up
   std::vector<blas_matrix>      M;                   // inverse matrix for up-spins
   std::valarray<double> G_meas;
-  std::valarray<double> G_meas_imp;
   std::valarray<double> order_meas;
   std::valarray<double> n_meas;
-  std::valarray<double> nn_corr_meas;
   std::valarray<double> matrix_size;
-  std::valarray<double> nn_corr_equalt_meas;
+
+  std::valarray<double> gw_meas_re;
+  std::valarray<double> gw_meas_im;
+  std::valarray<double> fw_meas_re;
+  std::valarray<double> fw_meas_im;
+  std::valarray<double> gl_meas;
+  std::valarray<double> fl_meas;
+
+  std::valarray<std::complex<double> >  mw_meas;
+  std::valarray<std::complex<double> > nmw_meas;
+  std::valarray<double> g2w_meas_re;
+  std::valarray<double> g2w_meas_im;
+  std::valarray<double> hw_meas_re;
+  std::valarray<double> hw_meas_im;
+
   std::vector<std::vector<double> > n_vectors;
+  std::valarray<double> nn_meas;
+  std::valarray<double> nnt_meas;
+
   double sign_meas;
  
   const double BETA;
   const int N;
   const int FLAVORS;
   const int N_order;
-  const int N_corr;
   const int N_meas;
   const int N_shift;
   const int N_swap;
+  
+  const int N_nn;
+  const int N_w;
+  const int N_w2;
+  const int N_W;
+  const int N_l;
+  int N_w_aux;
+  
+  const int MEASURE_gw;
+  const int MEASURE_fw;
+  const int MEASURE_gl;
+  const int MEASURE_fl;
+  const int MEASURE_g2w;
+  const int MEASURE_hw;
+  const int MEASURE_nn;
+  const int MEASURE_nnt;
+  
 };
 
 std::ostream &operator<<(std::ostream & os, segment_container_t segments);
