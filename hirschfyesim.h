@@ -1,29 +1,29 @@
 /*****************************************************************************
-*
-* ALPS DMFT Project
-*
-* Copyright (C) 2005-2006 by Philipp Werner <werner@comp-phys.org>,
-*                            Emanuel Gull <gullc@comp-phys.org>
-*                            Matthias Troyer <troyer@comp-phys.org>
-*
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ *
+ * ALPS DMFT Project
+ *
+ * Copyright (C) 2005-2006 by Philipp Werner <werner@comp-phys.org>,
+ *                            Emanuel Gull <gullc@comp-phys.org>
+ *                            Matthias Troyer <troyer@comp-phys.org>
+ *
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 /* $Id$ */
 
@@ -63,18 +63,18 @@ class HirschFyeSim : public alps::scheduler::MCSimulation, public alps::Matsubar
 public:
   HirschFyeSim(const alps::ProcessList& w, const boost::filesystem::path& p) 
   : alps::scheduler::MCSimulation(w,p)
-{ 
-}
-
-HirschFyeSim(const alps::ProcessList& w, const alps::Parameters& p) 
-: alps::scheduler::MCSimulation(w,p) 
-{
-}
-
+  { 
+  }
+  
+  HirschFyeSim(const alps::ProcessList& w, const alps::Parameters& p) 
+  : alps::scheduler::MCSimulation(w,p) 
+  {
+  }
+  
 	///return the Green's function G
 	//itime_green_function_t get_result() const;
-        void get_result();
-
+  void get_result();
+  
 };
 
 
@@ -101,7 +101,7 @@ public:
 	
 	
 private:
-    int sweeps;					// sweeps done
+  int sweeps;					// sweeps done
 	int thermalization_sweeps;		// sweeps to be done for equilibration
 	int total_sweeps;				// sweeps to be done after equilibration
 	double beta;					// inverse temperature
@@ -112,9 +112,9 @@ private:
 	int N_check;					// number of sweeps with single-spin updates
 	int check_counter;				// counts the number of single-spin updates
 	int fp_interval;				// counts the interval between measurements of the fourpoint function
-        bool measure_fourpoint;
+  bool measure_fourpoint;
 	double tolerance;				// tolerance for deterioration of precision
-                          // (maximum deviation of Green's function matrix elements)
+  // (maximum deviation of Green's function matrix elements)
 	//std::valarray<double> G_up;		// Green's function for up spins
 	dense_matrix Green0_up;       	// bath Green's function matrix for up spins
 	dense_matrix Green_up;        	// Green's function matrix for up spins  
@@ -125,10 +125,10 @@ private:
 	double max_time;
 	double start_time;
   int sign;
-
+  
   itime_green_function_t bare_green_tau;
   itime_green_function_t green_tau;
-
+  
 	
 };
 

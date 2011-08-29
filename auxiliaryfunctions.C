@@ -505,8 +505,8 @@ void print_selfenergy_matsubara(std::ostream &os, const nambu_matsubara_green_fu
       blas::general_matrix<std::complex<double> > G_inv(nsite*2, nsite*2);
       blas::general_matrix<std::complex<double> > G0(nsite*2, nsite*2);
       blas::general_matrix<std::complex<double> > G0_inv(nsite*2, nsite*2);
-      for(unsigned int i=0;i<nsite;++i){
-        for(unsigned int j=0;j<nsite;++j){
+      for(unsigned int i=0;i<(unsigned int) nsite;++i){
+        for(unsigned int j=0;j<(unsigned int) nsite;++j){
         G(2*i  , 2*j  )=g_dressed(w,i,j,0,0);
         G(2*i  , 2*j+1)=g_dressed(w,i,j,0,1);
         G(2*i+1, 2*j  )=g_dressed(w,i,j,1,0);
@@ -519,8 +519,8 @@ void print_selfenergy_matsubara(std::ostream &os, const nambu_matsubara_green_fu
     }
     matrix_inversion(G, G_inv);
     matrix_inversion(G0, G0_inv);
-    for(unsigned int i=0;i<nsite;++i){
-      for(unsigned int j=0;j<nsite;++j){
+    for(unsigned int i=0;i<(unsigned int)nsite;++i){
+      for(unsigned int j=0;j<(unsigned int)nsite;++j){
         std::complex<double> sigma00=G0_inv(2*i  , 2*i  )-G_inv(2*i  ,2*i  );
         std::complex<double> sigma01=G0_inv(2*i  , 2*i+1)-G_inv(2*i  ,2*i+1);
         std::complex<double> sigma10=G0_inv(2*i+1, 2*i  )-G_inv(2*i+1,2*i  );

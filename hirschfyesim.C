@@ -331,7 +331,7 @@ void HirschFyeSim::get_result() {
   double beta=parms["BETA"];
   int n_matsubara=parms["NMATSUBARA"];
   int n_site=parms["SITES"];
-  std::cout<<"calling get result for both itima and matsubara"  <<std::endl;
+  std::cout<<"calling get result for both itime and matsubara"  <<std::endl;
   itime_green_function_t green_result(N+1, n_site, 2); //one site, two spins, n+1 time points including first and last
   matsubara_green_function_t green_result_matsubara(n_matsubara, n_site, 2); //n matsubara frequencies
   
