@@ -51,6 +51,7 @@ IF(ALPS_BUILD_NGS)
        hybridization2/impurity.C 
        fouriertransform.C
        hybridization2/moves.C
+       hybridization2/measurements.C
        hybridization2/update.C)
 ENDIF(ALPS_BUILD_NGS)
 
