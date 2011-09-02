@@ -310,7 +310,7 @@ void HirschFyeRun::dostep()
 
 std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_result() {
   int N=parms["N"];
-  double beta=parms["BETA"];
+  //double beta=parms["BETA"];
   int n_matsubara=parms["NMATSUBARA"];
   int n_site=parms["SITES"];
 

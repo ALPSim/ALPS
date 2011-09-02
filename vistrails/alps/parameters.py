@@ -19,7 +19,7 @@ basic = core.modules.basic_modules
 
 import numpy as np
 
-from core.modules.constant_configuration import StandardConstantWidget
+from gui.modules.constant_configuration import StandardConstantWidget
 
 ##############################################################################
 
