@@ -46,6 +46,7 @@ int main(int argc, char *argv[]) {
     
     if (options.resume) {
     	// TODO: remove .str()
+      // add a save and load function in base: sim.load(params.value_or_default("DUMP", "dump").str())
 		hdf5::archive ar(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()));
     	ar >> make_pvp("/checkpoint", sim);
     }

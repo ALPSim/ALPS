@@ -29,7 +29,7 @@ import pyalps.ngs as ngs
 import numpy as np
 
 class sim(ngs.base):
-    def __init__(self, par, comm = None, seed = 24):
+    def __init__(self, par, comm = None, seed = 42):
         apply(ngs.base.__init__, [self, par])
 # TODO:
 #        apply(ngs.base.__init__, [self, par, seed, comm] if comm != None else [self, par, seed])
