@@ -657,7 +657,7 @@ if (ALPS_BUILD_SOURCE)
   FILE(GLOB files "${CMAKE_CURRENT_SOURCE_DIR}/*.txt")
   INSTALL(FILES ${files} DESTINATION alps)  
   INSTALL(FILES script/hdf5.sh script/cmake.sh DESTINATION alps/script)  
-  install(DIRECTORY config doc example legacy lib src test tool vistrails DESTINATION alps
+  install(DIRECTORY config example legacy lib src test tool vistrails DESTINATION alps
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
   if (ALPS_INCLUDE_BOOST_SOURCE)
     install(DIRECTORY ${Boost_ROOT_DIR} DESTINATION . PATTERN "*" 

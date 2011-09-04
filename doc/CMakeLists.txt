@@ -131,6 +131,7 @@ install(DIRECTORY doc DESTINATION alps
         FILES_MATCHING 
         PATTERN "*.html" 
         PATTERN "*.png"
+        PATTERN "*.pdf" 
         PATTERN ".svn" EXCLUDE 
         PATTERN "CVS" EXCLUDE
         )
@@ -152,6 +153,7 @@ install(DIRECTORY doc COMPONENT documentation DESTINATION .
         FILES_MATCHING 
         PATTERN "*.html" 
         PATTERN "*.png"
+        PATTERN "*.pdf" 
         PATTERN ".svn" EXCLUDE 
         PATTERN "CVS" EXCLUDE
         )
