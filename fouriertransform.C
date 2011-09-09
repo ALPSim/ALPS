@@ -86,6 +86,15 @@ void FourierTransformer::frequency_to_time_ft(nambu_itime_green_function_t &G_ta
   unsigned int N_site = G_omega.nsite();
   nambu_matsubara_green_function_t G_omega_no_model(G_omega);
   double dt = beta_/N_tau;
+  std::vector<std::vector<double> >cos_wt(N_tau, std::vector<double>(N_omega));
+  std::vector<std::vector<double> >sin_wt(N_tau, std::vector<double>(N_omega));
+  for (unsigned int i=0; i<N_tau; i++) {
+    for (unsigned int k=0; k<N_omega; k++) {
+      double wt((2*k+1)*i*M_PI/N_tau);
+      cos_wt[i][k]=cos(wt);
+      sin_wt[i][k]=sin(wt);
+    }
+  }
   for (unsigned int s1=0; s1<N_site; ++s1){
     for (unsigned int s2=0; s2<N_site; ++s2) {
       if(c1_[0][s1][s2]==0 && c2_[0][s1][s2] == 0 && c3_[0][s1][s2]){  //nothing happening in this gf - this fct is completely zero.
@@ -112,11 +121,10 @@ void FourierTransformer::frequency_to_time_ft(nambu_itime_green_function_t &G_ta
           G_tau(i,s1,s2,1,0) = 0; 
           G_tau(i,s1,s2,1,1) = f_tau(i*dt, beta_, c1_[1][s1][s2], -c2_[1][s1][s2], c3_[1][s1][s2]); 
           for (unsigned int k=0; k<N_omega; k++) {
-            double wt((2*k+1)*i*M_PI/N_tau);
-            G_tau(i,s1,s2,0,0) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,0,0).real()+sin(wt)*G_omega_no_model(k,s1,s2,0,0).imag());
-            G_tau(i,s1,s2,0,1) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,0,1).real()+sin(wt)*G_omega_no_model(k,s1,s2,0,1).imag());
-            G_tau(i,s1,s2,1,0) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,1,0).real()+sin(wt)*G_omega_no_model(k,s1,s2,1,0).imag());
-            G_tau(i,s1,s2,1,1) += 2/beta_*(cos(wt)*G_omega_no_model(k,s1,s2,1,1).real()+sin(wt)*G_omega_no_model(k,s1,s2,1,1).imag());
+            G_tau(i,s1,s2,0,0) += 2/beta_*(cos_wt[i][k]*G_omega_no_model(k,s1,s2,0,0).real()+sin_wt[i][k]*G_omega_no_model(k,s1,s2,0,0).imag());
+            G_tau(i,s1,s2,0,1) += 2/beta_*(cos_wt[i][k]*G_omega_no_model(k,s1,s2,0,1).real()+sin_wt[i][k]*G_omega_no_model(k,s1,s2,0,1).imag());
+            G_tau(i,s1,s2,1,0) += 2/beta_*(cos_wt[i][k]*G_omega_no_model(k,s1,s2,1,0).real()+sin_wt[i][k]*G_omega_no_model(k,s1,s2,1,0).imag());
+            G_tau(i,s1,s2,1,1) += 2/beta_*(cos_wt[i][k]*G_omega_no_model(k,s1,s2,1,1).real()+sin_wt[i][k]*G_omega_no_model(k,s1,s2,1,1).imag());
           }
         }
         G_tau(N_tau,s1,s2,0,0)= (s1==s2 ? -1. : 0.) - G_tau(0,s1,s2,0,0);
