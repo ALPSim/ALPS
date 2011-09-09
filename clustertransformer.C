@@ -132,7 +132,8 @@ dispersion_moments_(2, 0.)
   }
   else{ 
     ; //std::cout << "half-filling: " << hf << "\n"; 
-  }if (params.defined("W")) {
+  }
+  if (params.defined("W")) {
     bandwidth_scale_factor_ = bandwidth_/bw;
     std::cout << "bandwidth scale factor: " << bandwidth_scale_factor_ << "\n";
   }
@@ -219,6 +220,18 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
   double mu_old;
   double mu_new;
   double mu_orig=mu;
+  std::vector<std::vector<double> >epsilon_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+  std::vector<double> weight_kl(n_lattice_momenta());
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+      vector_type k(dimension());
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+      epsilon_kckl[kc][kl]=epsilon(k);
+    }
+  }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+    weight_kl[kl]= lattice_momentum(kl,dimension());
+  }
   do{ //find the right particle density
     for (spin_t flavor=0; flavor<nflavor; ++flavor) {
       for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
@@ -226,12 +239,8 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
           G_omega_lattice(freq, kc, kc, flavor) = 0.;
           std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
           for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
-            vector_type k(dimension());
-            for (unsigned int d=0; d<dimension(); ++d) 
-              k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-            double weight = lattice_momentum(kl,dimension());
             std::complex<double> zeta = iomega_n + mu + (flavor%2 ? -h : h);
-            G_omega_lattice(freq, kc, kc, flavor) += weight/(zeta-epsilon(k)-selfenergy(freq, kc, kc, flavor));
+            G_omega_lattice(freq, kc, kc, flavor) += weight_kl[kl]/(zeta-epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, flavor));
           }
           G_omega_lattice(freq, kc, kc, flavor) /= n_cluster_cells();
         }
