@@ -810,6 +810,21 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
   nambu_matsubara_green_function_t G0_omega_new(G0_omega);
   nambu_matsubara_green_function_t G_omega_lattice_kav(G0_omega);
   
+  std::vector<std::vector<double> >epsilon_kckl        (n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+  std::vector<std::vector<double> >dwave_prefactor_kckl(n_cluster_sites(), std::vector<double>(n_lattice_momenta()));
+  std::vector<double> weight_kl(n_lattice_momenta());
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+      vector_type k(dimension());
+      for (unsigned int d=0; d<dimension(); ++d)
+        k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
+      epsilon_kckl[kc][kl]=epsilon(k);
+      dwave_prefactor_kckl[kc][kl]= cos(k[0]) - cos(k[1]); //cos kx - cos ky
+    }
+  }for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+    weight_kl[kl]= lattice_momentum(kl,dimension());
+  }
+
   if(!use_selfenergy){ //compute selfenergy out of G and G0 first
     selfenergy=G0_omega;
     //compute the lattice = cluster self energy
@@ -838,26 +853,21 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
       G_omega_lattice_kav(freq, kc, kc, 1,1) = 0.;
       std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
       for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
-        vector_type k(dimension());
-        for (unsigned int d=0; d<dimension(); ++d) 
-          k[d] = lattice_momentum(kl,d) + cluster_momentum(kc,d);
-        double weight = lattice_momentum(kl,dimension());
-        double dwave_prefactor= cos(k[0]) - cos(k[1]); //cos kx - cos ky
         //double prefactor=1.;//(k[0]==0 && k[1]==0)?1.:0.; //cos kx - cos ky
-        double prefactor=dwave_prefactor;
+        double prefactor=dwave_prefactor_kckl[kc][kl];
         //this is the self consistency formula!!!
         //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
         std::complex<double> G_omega_latt_inv[4]=
-        {iomega_n + mu -epsilon(k)-selfenergy(freq, kc, kc, 0,0),
+        {iomega_n + mu -epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, 0,0),
           -selfenergy(freq, kc, kc, 0,1) - prefactor*std::complex<double>( eta1, eta2),
           -selfenergy(freq, kc, kc, 1,0) - prefactor*std::complex<double>( eta1,-eta2),
-          iomega_n - mu +epsilon(k)-selfenergy(freq, kc, kc, 1,1)};
+          iomega_n - mu +epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, 1,1)};
         
         std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
-        G_omega_lattice_kav(freq, kc, kc, 0,0) += weight*G_omega_latt_inv[3]/G0omega_latt_inv_det;
-        G_omega_lattice_kav(freq, kc, kc, 0,1) -= weight*G_omega_latt_inv[1]/G0omega_latt_inv_det;
-        G_omega_lattice_kav(freq, kc, kc, 1,0) -= weight*G_omega_latt_inv[2]/G0omega_latt_inv_det;
-        G_omega_lattice_kav(freq, kc, kc, 1,1) += weight*G_omega_latt_inv[0]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 0,0) += weight_kl[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 0,1) -= weight_kl[kl]*G_omega_latt_inv[1]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 1,0) -= weight_kl[kl]*G_omega_latt_inv[2]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 1,1) += weight_kl[kl]*G_omega_latt_inv[0]/G0omega_latt_inv_det;
       }
       G_omega_lattice_kav(freq, kc, kc, 0,0) /= n_cluster_cells();
       G_omega_lattice_kav(freq, kc, kc, 0,1) /= n_cluster_cells();
