@@ -42,7 +42,7 @@ double *c_or_cdagger::omegan_;
 std::complex<double> *c_or_cdagger::exp_iomegan_tau_;
 
 
-InteractionExpansion::InteractionExpansion(const alps::mcparams &parms, int node)
+InteractionExpansion::InteractionExpansion(const alps::params &parms, int node)
 : alps::mcbase(parms,node),
 max_order(parms.value_or_default("MAX_ORDER",2048)),       
 n_flavors(parms.value_or_default("FLAVORS",2)),        
@@ -154,7 +154,7 @@ double InteractionExpansion::fraction_completed() const{
 
 
 ///do all the setup that has to be done before running the simulation.
-void InteractionExpansion::initialize_simulation(const alps::mcparams &parms)
+void InteractionExpansion::initialize_simulation(const alps::params &parms)
 {
   weight=0;
   sign=1;
@@ -171,10 +171,10 @@ void InteractionExpansion::initialize_simulation(const alps::mcparams &parms)
 
 
 
-void c_or_cdagger::initialize_simulation(const alps::mcparams &p)
+void c_or_cdagger::initialize_simulation(const alps::params &p)
 {
   beta_=p["BETA"];
-  nm_=p.value_or_default("NMATSUBARA_MEASUREMENTS", p["NMATSUBARA"]);
+  nm_=p.value_or_default("NMATSUBARA_MEASUREMENTS", p["NMATSUBARA"].str());
   omegan_ = new double[nm_];
   for(unsigned int i=0;i<nm_;++i) {
     omegan_[i]=(2.*i+1.)*M_PI/beta_;

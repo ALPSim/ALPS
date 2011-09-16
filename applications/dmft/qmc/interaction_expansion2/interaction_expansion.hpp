@@ -211,7 +211,7 @@ class InteractionExpansion: public alps::mcbase
 {
 public:
 
-  InteractionExpansion(const alps::mcparams& p, int rank);
+  InteractionExpansion(const alps::params& p, int rank);
   ~InteractionExpansion() {}
   bool is_thermalized() const {return true;} //thermalization is done in the constructor. It's not a big deal here.
   void do_update();
@@ -222,7 +222,7 @@ protected:
   
   /*functions*/
   /*io & initialization*/
-  void initialize_simulation(const alps::mcparams &parms); // called by constructor
+  void initialize_simulation(const alps::params &parms); // called by constructor
   // in file io.cpp
   void read_bare_green(std::ifstream &G0_omega, std::ifstream &G0_tau);
   void print(std::ostream &os);
@@ -332,7 +332,7 @@ std::ostream& operator << (std::ostream& os, const simple_hist &h);
 //Use this for the most simple single site Hubbard model.
 class HalfFillingHubbardInteractionExpansion: public InteractionExpansion{
 public:
-  HalfFillingHubbardInteractionExpansion(const alps::mcparams& p, int rank)
+  HalfFillingHubbardInteractionExpansion(const alps::params& p, int rank)
     :InteractionExpansion(p, rank)
   {
     if(n_flavors !=1){throw std::invalid_argument("you need a different model for n_flavors!=1.");}
@@ -349,7 +349,7 @@ public:
 
 class HubbardInteractionExpansion: public InteractionExpansion{
 public:
-  HubbardInteractionExpansion(const alps::mcparams& p, int rank)
+  HubbardInteractionExpansion(const alps::params& p, int rank)
     :InteractionExpansion(p, rank)
   {
     if(n_flavors !=2){throw std::invalid_argument("you need a different model for n_flavors!=2.");}
@@ -367,7 +367,7 @@ public:
 //Use this for multiple bands where you have terms Un_i n_j
 class MultiBandDensityHubbardInteractionExpansion: public InteractionExpansion{
 public:
-  MultiBandDensityHubbardInteractionExpansion(const alps::mcparams& p, int rank)
+  MultiBandDensityHubbardInteractionExpansion(const alps::params& p, int rank)
     :InteractionExpansion(p, rank)
   {
     if(n_site !=1){throw std::invalid_argument("you need a different model for n_site!=1.");}

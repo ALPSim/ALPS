@@ -80,7 +80,7 @@ typedef std::vector<std::vector<double> > hybridization_container_t;
 class hybridization : public alps::mcbase
 {
 public:
-  hybridization(const alps::mcparams& p, int rank);
+  hybridization(const alps::params& p, int rank);
   void do_update();
   void do_measurements();
   //getting data into the ALPS solver
