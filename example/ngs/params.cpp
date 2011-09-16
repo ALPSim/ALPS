@@ -27,12 +27,15 @@
 
 #include <alps/ngs/hdf5.hpp>
 #include <alps/ngs/params.hpp>
+#include <alps/ngs/mcsignal.hpp>
 
 #include <fstream>
 #include <iostream>
 #include <iterator>
 
 int main(int argc, char *argv[]) {
+
+    alps::mcsignal signal;
 
     // load a hdf5 file into a parameter object
     alps::hdf5::archive ar("param.h5");
@@ -65,5 +68,12 @@ int main(int argc, char *argv[]) {
     std::vector<std::string> keys_txt = params_txt.keys();
     for (std::vector<std::string>::const_iterator it = keys_txt.begin(); it != keys_txt.end(); ++it)
         std::cout << *it << ":" << params_txt[*it] << std::endl;
+
+	std::cout << std::endl;
+    params_txt["dbl"] = 1e-8;
+    
+    std::cout << __LINE__ << std::endl;
+    
+    std::cout << params_txt["dbl"] << " " << static_cast<double>(params_txt["dbl"]) << std::endl;
 
 }

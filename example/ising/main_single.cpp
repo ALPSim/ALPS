@@ -62,14 +62,17 @@ int main(int argc, char *argv[]) {
 
     std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
     std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-    std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+//TODO: implement!
+//    std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
 
     std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
-    std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
+//TODO: implement!
+//    std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
     std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
 
-    std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
-    std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
+    std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;//
+//TODO: implement!
+//    std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 
     save_results(results, params, options.output_file, "/simulation/results");
 

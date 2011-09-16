@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-find_program(cmd_path ngs_single ${binarydir} ${dllexedir})
+find_program(cmd_path ngs_ising_single ${binarydir} ${dllexedir})
 
 execute_process(
     COMMAND ${cmd_path} -T 15 --single ${currentdir}/param.h5 sim.single
