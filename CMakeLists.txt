@@ -200,7 +200,7 @@ endif(ALPS_BUILD_SOURCE)
 set(ALPS_YEAR 2011)
 set(ALPS_VERSION_MAJOR 2)
 set(ALPS_VERSION_MINOR 0)
-set(ALPS_VERSION_PATCH 2b1)
+set(ALPS_VERSION_PATCH 2)
 set(ALPS_VERSION_BUILD "")
 
 IF(NOT ALPS_VERSION_BUILD AND EXISTS ${PROJECT_SOURCE_DIR}/.svn) 
@@ -684,7 +684,7 @@ else (ALPS_BUILD_SOURCE)
                          ${PROJECT_BINARY_DIR}/deplibs/etc
                          ${PROJECT_BINARY_DIR}/deplibs/share
                DESTINATION . COMPONENT dependentheaders)
-       install(DIRECTORY  DESTINATION . COMPONENT dependentheaders)
+       #install(DIRECTORY  DESTINATION . COMPONENT dependentheaders)
     endif(ALPS_PACKAGE_LIBRARIES)
 
   endif(ALPS_INSTALL_HEADERS)
