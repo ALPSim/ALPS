@@ -158,15 +158,15 @@ void hybridization::read_external_input_data(const parameters_type &parms){
   u.resize(FLAVORS, FLAVORS);
   ifstream infile_u(boost::lexical_cast<std::string>(parms["U_MATRIX"]).c_str());
   if(!infile_u.good()){
-    throw(std::invalid_argument(std::string("U-matrix parameter ") + std::string(parms["U_MATRIX"])+" invalid. File could not be opened."));
+    throw(std::invalid_argument(std::string("U-matrix parameter ") + parms["U_MATRIX"].str() + " invalid. File could not be opened."));
   }
   for (int i=0; i<FLAVORS; i++) {
     if(!infile_u.good()){
-      throw(std::invalid_argument(std::string("U-matrix file ") + std::string(parms["U_MATRIX"])+" not good. Probably too few lines."));
+      throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].str() + " not good. Probably too few lines."));
     }
     for (int j=0; j<FLAVORS; j++) {
       if(!infile_u.good()){
-        throw(std::invalid_argument(std::string("U-matrix file ") + std::string(parms["U_MATRIX"])+" not good. Probably too few columns."));
+        throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].str() + " not good. Probably too few columns."));
       }
       infile_u >> u(i,j);
     }
@@ -185,17 +185,17 @@ void hybridization::read_external_input_data(const parameters_type &parms){
   if(parms.defined("F")){
     ifstream infile(boost::lexical_cast<std::string>(parms["F"]).c_str());
     if(!infile.good()){
-      throw(std::invalid_argument(std::string("could not open file ") +std::string(parms["F"])+"for F function"));
+      throw(std::invalid_argument(std::string("could not open file ") + parms["F"].str() + "for F function"));
     }
     for (int i=0; i<N+1; i++) {
       if(!infile.good()){
-        throw(std::invalid_argument(std::string("bad file ") +std::string(parms["F"])+"probably wrong number of lines"));
+        throw(std::invalid_argument(std::string("bad file ") + parms["F"].str() + "probably wrong number of lines"));
       }
       double dummy;
       infile >> dummy; 
       for (int j=0; j<FLAVORS; j++){
         if(!infile.good()){
-          throw(std::invalid_argument(std::string("bad file ")+std::string(parms["F"])+"probably wrong number of columns"));
+          throw(std::invalid_argument(std::string("bad file ") + parms["F"].str() + "probably wrong number of columns"));
         }
         infile >> F[j][i];
       }
