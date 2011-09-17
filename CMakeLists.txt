@@ -45,7 +45,11 @@ fouriertransform.C auxiliaryfunctions.C
 clustertransformer.C)
 
 
-add_executable(sigma_interpolate sigma_interpolate.C
+add_executable(sigma_interpolate_sc sigma_interpolate_sc.C
+auxiliaryfunctions.C clustertransformer.C clusterhelper.C
+fouriertransform.C)
+
+add_executable(sigma_interpolate sigma_interpolate_normal.C
 auxiliaryfunctions.C clustertransformer.C clusterhelper.C
 fouriertransform.C)
 
@@ -56,6 +60,9 @@ add_executable(hdf5_changeval hdf5_changeval.C)
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
+${LAPACK_LIBRARY} gsl pthread)
+target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES})
+target_link_libraries(sigma_interpolate_sc ${ALPS_LIBRARIES}
 ${LAPACK_LIBRARY} gsl pthread)
 target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES})
 

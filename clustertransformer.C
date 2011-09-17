@@ -194,20 +194,30 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
                                                             const matsubara_green_function_t &G0_omega, 
                                                             double &mu, const double h, const double beta)
 {
-  if(h!=0) { // && G0_omega.nsite()!=1 <-this not understood - looks like a bug to me.
+  matsubara_green_function_t selfenergy(G_omega);
+  return this->operator()(G_omega, G0_omega, selfenergy, mu, h, beta, false);
+}
+
+matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_green_function_t &G_omega, 
+                                                            const matsubara_green_function_t &G0_omega, 
+                                                            matsubara_green_function_t &selfenergy,
+                                                            double &mu, const double h, const double beta, const bool use_selfenergy)
+{
+  if(h!=0) {
     throw std::invalid_argument("don't know how to handle magn. fields (use the AFM transformer for that!), exiting"); 
   }
   unsigned int nflavor=G0_omega.nflavor();
   unsigned int nfreq=G0_omega.nfreq();
   assert(G0_omega.nsite()==n_cluster_sites());
-  matsubara_green_function_t selfenergy(G0_omega);
   matsubara_green_function_t G0_omega_new(G0_omega);
   matsubara_green_function_t G_omega_lattice(G0_omega);
-  for (spin_t flavor=0; flavor<nflavor; ++flavor) {
-    for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-      for (frequency_t freq=0; freq<nfreq; ++freq) {
-        selfenergy(freq, kc, kc, flavor)  = 1./G0_omega(freq, kc, kc, flavor);
-        selfenergy(freq, kc, kc, flavor) -= 1./G_omega(freq, kc, kc, flavor);
+  if(!use_selfenergy){ //compute selfenergy out of G and G0 first
+    for (spin_t flavor=0; flavor<nflavor; ++flavor) {
+      for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+        for (frequency_t freq=0; freq<nfreq; ++freq) {
+          selfenergy(freq, kc, kc, flavor)  = 1./G0_omega(freq, kc, kc, flavor);
+          selfenergy(freq, kc, kc, flavor) -= 1./G_omega(freq, kc, kc, flavor);
+        }
       }
     }
   }

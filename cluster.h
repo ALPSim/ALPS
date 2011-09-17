@@ -311,9 +311,14 @@ public:
   {
     params_ptr_=&params;
   }
-  //Hilbert transform operator
+  //self-consistency transform operator
   matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
-                                        const matsubara_green_function_t &G0_omega, 
+                                        const matsubara_green_function_t &G0_omega,
+                                        matsubara_green_function_t &selfenergy, 
+                                        double &mu, const double h, const double beta, const bool use_selfenergy);
+  //legacy operator without self-energy
+  matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
+                                        const matsubara_green_function_t &G0_omega,
                                         double &mu, const double h, const double beta);
   //Hilbert transform operator for Nambu GF
   nambu_matsubara_green_function_t operator()(const nambu_matsubara_green_function_t &G_omega, 
