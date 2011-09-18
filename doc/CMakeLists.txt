@@ -127,9 +127,10 @@ endif (NOT WIN32)
 
 if (ALPS_BUILD_SOURCE)
 
-install(DIRECTORY doc DESTINATION alps
+install(DIRECTORY . DESTINATION alps/doc
         FILES_MATCHING 
         PATTERN "*.html" 
+        PATTERN "*.pdf" 
         PATTERN "*.png"
         PATTERN "*.pdf" 
         PATTERN ".svn" EXCLUDE 
@@ -152,6 +153,7 @@ else (ALPS_BUILD_SOURCE)
 install(DIRECTORY doc COMPONENT documentation DESTINATION .
         FILES_MATCHING 
         PATTERN "*.html" 
+        PATTERN "*.pdf" 
         PATTERN "*.png"
         PATTERN "*.pdf" 
         PATTERN ".svn" EXCLUDE 

@@ -154,7 +154,7 @@ namespace ietl {
   
 
   template <class V>
-    typename V::value_type two_norm(const ietl::vector_wrapper<V>& src) {
+  typename number_traits<typename V::value_type>::magnitude_type two_norm(const ietl::vector_wrapper<V>& src) {
     return ietl::two_norm(*src.get());
   }
   
