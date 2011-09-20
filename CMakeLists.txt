@@ -172,7 +172,7 @@ else (ALPS_BUILD_SOURCE)
     endif (ALPS_FOR_VISTRAILS)
   else(WIN32 AND NOT UNIX)
     set(CMAKE_OSX_DEPLOYMENT_TARGET "10.6")
-    set(CPACK_OSX_PACKAGE_VERSION "10.6")
+    set(CPACK_OSX_PACKAGE_VERSION "10.5")
     if (ALPS_FOR_VISTRAILS)
       if (APPLE)
         if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
@@ -846,7 +846,7 @@ endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
 # Binary packages                                                        #
 ##########################################################################
 
-#set (CPACK_SET_DESTDIR ON)
+set (CPACK_SET_DESTDIR ON)
 
 
 if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
@@ -965,6 +965,7 @@ endif (ALPS_FOR_VISTRAILS)
 
 
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
+set(CPACK_PACKAGE_DEFAULT_LOCATION "${CMAKE_INSTALL_PREFIX}")
 
 # override package name manually
 if (ALPS_SYSTEM_NAME)
