@@ -51,11 +51,19 @@ int main(int argc, char *argv[]) {
     sim_type sim(params, comm_local);
 
     if (options.resume)
-	    sim.load(params.value_or_default("DUMP", "dump").str() + "." + boost::lexical_cast<std::string>(color) + "." + boost::lexical_cast<std::string>(comm_local.rank()));
+	    sim.load(
+	    	  params.value_or_default("DUMP", "dump") 
+	    	+ "." + boost::lexical_cast<std::string>(color) 
+	    	+ "." + boost::lexical_cast<std::string>(comm_local.rank())
+	    );
 
     sim.run(boost::bind(&basic_stop_callback, options.time_limit));
 
-    sim.save(params.value_or_default("DUMP", "dump").str() + "." + boost::lexical_cast<std::string>(color) + "." + boost::lexical_cast<std::string>(comm_local.rank()));
+    sim.save(
+    	  params.value_or_default("DUMP", "dump") 
+    	+ "." + boost::lexical_cast<std::string>(color) 
+    	+ "." + boost::lexical_cast<std::string>(comm_local.rank())
+    );
 
     results_type<sim_type>::type results = collect_results(sim);
 

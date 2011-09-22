@@ -45,21 +45,13 @@ int main(int argc, char *argv[]) {
 	params.broadcast();
 
     sim_type sim(params, c);
-    
-    if (options.resume) {
-    	// TODO: remove .str()
-      // add a save and load function in base: sim.load(params.value_or_default("DUMP", "dump").str())
-		hdf5::archive ar(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()));
-    	ar >> make_pvp("/checkpoint", sim);
-    }
+
+    if (options.resume)
+	    sim.load(params.value_or_default("DUMP", "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
     sim.run(boost::bind(&basic_stop_callback, options.time_limit));
 
-	{
-    	// TODO: remove .str()
-		hdf5::archive ar(params.value_or_default("DUMP", "dump").str(), hdf5::archive::REPLACE);
-		ar << make_pvp("/checkpoint", sim);
-	}
+    sim.save(params.value_or_default("DUMP", "dump") + "." + boost::lexical_cast<std::string>(comm_local.rank()));
 
     results_type<sim_type>::type results = collect_results(sim);
 
@@ -69,17 +61,14 @@ int main(int argc, char *argv[]) {
 
 		std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
 		std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-//TODO: implement!
-//		std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+		std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
 
 		std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
-//TODO: implement!
-//		std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
+		std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
 		std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
 
 		std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
-//TODO: implement!
-//		std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
+		std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 
 	    save_results(results, params, options.output_file, "/simulation/results");
 
