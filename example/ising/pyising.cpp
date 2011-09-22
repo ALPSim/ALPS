@@ -96,8 +96,8 @@ BOOST_PYTHON_MODULE(pyising) {
         .def("run", &alps::detail::ising_export::run)
         .def("random", &alps::detail::ising_export::get_random)
         .def("fraction_completed", boost::python::pure_virtual(&alps::detail::ising_export::fraction_completed))
-        .def("save", &alps::detail::ising_export::save)
-        .def("load", &alps::detail::ising_export::load)
+        .def("save", static_cast<void(alps::detail::ising_export::*)(alps::hdf5::archive &) const>(&alps::detail::ising_export::save))
+        .def("load", static_cast<void(alps::detail::ising_export::*)(alps::hdf5::archive &, std::string const &)>(&alps::detail::ising_export::load))
     ;
 
 }

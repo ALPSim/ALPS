@@ -41,6 +41,6 @@ int main(int argc, char **argv) {
     std::cin >> parms;
     if (boost::filesystem::exists(boost::filesystem::path(argv[1])))
         boost::filesystem::remove(boost::filesystem::path(argv[1]));
-    alps::hdf5::archive ar(argv[1], alps::hdf5::archive::WRITE);
+    alps::hdf5::archive ar(argv[1], alps::hdf5::archive::REPLACE);
     ar << make_pvp("/parameters", parms);
 }
