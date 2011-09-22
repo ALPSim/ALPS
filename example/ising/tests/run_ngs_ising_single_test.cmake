@@ -6,7 +6,7 @@
 find_program(cmd_path ngs_ising_single ${binarydir} ${dllexedir})
 
 execute_process(
-    COMMAND ${cmd_path} -T 15 --single ${currentdir}/param.h5 sim.single
+    COMMAND ${cmd_path} -T 15 ${currentdir}/param.h5 sim.single
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_single_output_1
     ERROR_VARIABLE err
@@ -18,7 +18,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND ${cmd_path} -T 15 --continue --single ${currentdir}/param.h5 sim.single
+    COMMAND ${cmd_path} -T 15 --continue ${currentdir}/param.h5 sim.single
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_single_output_2
     ERROR_VARIABLE err
