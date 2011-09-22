@@ -84,17 +84,14 @@ template<typename Impl> class ising_sim : public Impl {
                     for (int d = 0; d < length; ++d)
                         corr[d] += spins[i] * spins[( i + d ) % length ];
                 }
-                {
-                    std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
-                }
+                std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
                 ten /= length;
                 tmag /= length;
                 Impl::measurements["Energy"] << ten;
                 Impl::measurements["Magnetization"] << tmag;
                 Impl::measurements["Magnetization^2"] << tmag * tmag;
                 Impl::measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-                // TODO: implement!
-//                Impl::measurements["Correlations"] << corr;
+                Impl::measurements["Correlations"] << corr;
             }
         };
 

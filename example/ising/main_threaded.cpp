@@ -34,18 +34,11 @@ typedef ising_sim<multithread<base> > sim_type;
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
-    parameters_type<sim_type>::type params;
-    {
-        hdf5::archive ar(options.input_file);
-        ar >> make_pvp("/parameters", params);
-    }
+    parameters_type<sim_type>::type params(hdf5::archive(options.input_file));
     sim_type sim(params);
 
-    if (options.resume) {
-    	// TODO: remove .str()
-		hdf5::archive ar(params.value_or_default("DUMP", "dump").str());
-    	ar >> make_pvp("/checkpoint", sim);
-    }
+    if (options.resume)
+        sim.load(params.value_or_default("DUMP", "dump"));
 
     threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
     boost::thread thread(boost::bind<bool>(&sim_type::run, boost::ref(sim), stopper));
@@ -62,22 +55,17 @@ int main(int argc, char *argv[]) {
         }
 
         // checkpoint every 15 s
-        if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(10)) {
+        if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(15)) {
             std::cout << "checkpointing ... " << std::endl;
-        	// TODO: remove .str()
-        	hdf5::archive ar(params.value_or_default("DUMP", "dump").str(), hdf5::archive::REPLACE);
-			ar << make_pvp("/checkpoint", sim);
+            sim.save(params.value_or_default("DUMP", "dump"));
             checkpoint_time = boost::posix_time::second_clock::local_time();
         }
 
     } while (!stopper.check());
     thread.join();
 
-	{
-    	// TODO: remove .str()
-		hdf5::archive ar(params.value_or_default("DUMP", "dump").str(), hdf5::archive::REPLACE);
-		ar << make_pvp("/checkpoint", sim);
-	}
+    // save simulation to checkpoint
+    sim.save(params.value_or_default("DUMP", "dump"));
 
     results_type<sim_type>::type results = collect_results(sim);
 

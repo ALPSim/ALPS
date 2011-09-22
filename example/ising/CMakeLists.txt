@@ -55,6 +55,18 @@ if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_threaded_test.cmake
         )
 
+        add_executable(ngs_ising_mpi_pscan main_mpi_pscan.cpp)
+        add_dependencies(ngs_ising_mpi_pscan alps)
+        target_link_libraries(ngs_ising_mpi_pscan alps)
+    
+        add_test(ngs_ising_mpi_pscan
+            ${CMAKE_COMMAND}
+                -Dsourcedir=${PROJECT_SOURCE_DIR}
+                -Dbinarydir=${PROJECT_BINARY_DIR}
+                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_pscan_test.cmake
+        )
+
     endif(MPI_FOUND)
 
     if (ALPS_HAVE_PYTHON)
