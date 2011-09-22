@@ -8,26 +8,26 @@ find_program(cmd_path ngs_ising_single ${binarydir} ${dllexedir})
 execute_process(
     COMMAND ${cmd_path} -T 15 ${currentdir}/param.h5 sim.single
     RESULT_VARIABLE not_successful
-    OUTPUT_FILE ngs_single_output_1
+    OUTPUT_FILE ngs_ising_single_output_1
     ERROR_VARIABLE err
     TIMEOUT 600
 )
 
 if(not_successful)
-    message(SEND_ERROR "error runing test 'ngs_single': ${err}; shell output: ${not_successful}!")
+    message(SEND_ERROR "error runing test 'ngs_ising_single': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
 execute_process(
     COMMAND ${cmd_path} -T 15 --continue ${currentdir}/param.h5 sim.single
     RESULT_VARIABLE not_successful
-    OUTPUT_FILE ngs_single_output_2
+    OUTPUT_FILE ngs_ising_single_output_2
     ERROR_VARIABLE err
     TIMEOUT 600
 )
 
 if(not_successful)
-    message(SEND_ERROR "error runing test 'ngs_single': ${err}; shell output: ${not_successful}!")
+    message(SEND_ERROR "error runing test 'ngs_ising_single': ${err}; shell output: ${not_successful}!")
 endif(not_successful)
 
-file(REMOVE ngs_single_output_1)
-file(REMOVE ngs_single_output_2)
+file(REMOVE ngs_ising_single_output_1)
+file(REMOVE ngs_ising_single_output_2)

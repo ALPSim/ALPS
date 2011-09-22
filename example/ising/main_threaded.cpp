@@ -64,7 +64,6 @@ int main(int argc, char *argv[]) {
     } while (!stopper.check());
     thread.join();
 
-    // save simulation to checkpoint
     sim.save(params.value_or_default("DUMP", "dump"));
 
     results_type<sim_type>::type results = collect_results(sim);
