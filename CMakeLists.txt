@@ -846,7 +846,9 @@ endif (ALPS_BUILD_DEVELOPER_TOOLS AND NOT ALPS_BUILD_SOURCE)
 # Binary packages                                                        #
 ##########################################################################
 
-set (CPACK_SET_DESTDIR ON)
+if (NOT WIN32)
+  set (CPACK_SET_DESTDIR ON)
+endif (NOT WIN32)
 
 
 if (NOT ALPS_BUILD_TUTORIALS_PACKAGE)
@@ -965,7 +967,7 @@ endif (ALPS_FOR_VISTRAILS)
 
 
 set(CPACK_PACKAGING_INSTALL_PREFIX "/")
-set(CPACK_PACKAGE_DEFAULT_LOCATION "${CMAKE_INSTALL_PREFIX}")
+#set(CPACK_PACKAGE_DEFAULT_LOCATION "${CMAKE_INSTALL_PREFIX}")
 
 # override package name manually
 if (ALPS_SYSTEM_NAME)
