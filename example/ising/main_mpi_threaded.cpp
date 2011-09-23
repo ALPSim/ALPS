@@ -32,24 +32,23 @@ using namespace alps;
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
-    parameters_type<base>::type params;
-    {
-        hdf5::archive ar(options.input_file);
-        ar >> make_pvp("/parameters", params);
-    }
-    
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
-    
+
+    parameters_type<base>::type params(c);
+
     if (!c.rank()) {
     
-        parallel<ising_sim<multithread<base> > > sim(params, c);
-        
-        if (options.resume) {
-            // TODO: remove .str()
-            hdf5::archive ar(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()));
-            ar >> make_pvp("/checkpoint", sim);
+        {
+            hdf5::archive ar(options.input_file);
+            ar >> make_pvp("/parameters", params);
         }
+        params.broadcast();
+
+        parallel<ising_sim<multithread<base> > > sim(params, c);
+
+        if (options.resume)
+            sim.load(params.value_or_default("DUMP", "dump") + ".0");
 
         threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
         boost::thread thread(boost::bind<bool>(&parallel<ising_sim<multithread<base> > >::run, boost::ref(sim), stopper));
@@ -68,11 +67,7 @@ int main(int argc, char *argv[]) {
         } while (!stopper.check());
         thread.join();
 
-        {
-            // TODO: remove .str()
-            hdf5::archive ar(params.value_or_default("DUMP", "dump").str(), hdf5::archive::REPLACE);
-            ar << make_pvp("/checkpoint", sim);
-        }
+        sim.save(params.value_or_default("DUMP", "dump") + ".0");
 
         results_type<base>::type results = collect_results(sim);
 
@@ -92,24 +87,18 @@ int main(int argc, char *argv[]) {
 
         save_results(results, params, options.output_file, "/simulation/results");
 
-    
     } else {
+
+        params.broadcast();
 
         parallel<ising_sim<base> > sim(params, c);
 
-        if (options.resume) {
-            // TODO: remove .str()
-            hdf5::archive ar(params.value_or_default("DUMP", "dump").str() + boost::lexical_cast<std::string>(c.rank()), hdf5::archive::READ);
-            ar >> make_pvp("/checkpoint", sim);
-        }
+        if (options.resume)
+            sim.load(params.value_or_default("DUMP", "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
         sim.run(boost::bind(&basic_stop_callback, options.time_limit));
 
-        {
-            // TODO: remove .str()
-            hdf5::archive ar(params.value_or_default("DUMP", "dump").str(), hdf5::archive::REPLACE);
-            ar << make_pvp("/checkpoint", sim);
-        }
+        sim.save(params.value_or_default("DUMP", "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
         results_type<base>::type results = collect_results(sim);
 

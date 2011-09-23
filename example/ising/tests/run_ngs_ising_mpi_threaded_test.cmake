@@ -6,7 +6,7 @@
 find_program(cmd_path ngs_ising_mpi_threaded ${binarydir} ${dllexedir})
 
 execute_process(
-    COMMAND mpirun -n 4 ${cmd_path} -T 15 ${currentdir}/param.h5 sim.mpi_threaded
+    COMMAND mpirun -n 4 ${cmd_path} -T 15 ${currentdir}/params/param.h5 sim.mpi_threaded
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_ising_mpi_threaded_output_1
     ERROR_VARIABLE err
@@ -18,7 +18,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND mpirun -n 4 ${cmd_path} -T 15 --continue ${currentdir}/param.h5 sim.mpi_threaded
+    COMMAND mpirun -n 4 ${cmd_path} -T 15 --continue ${currentdir}/params/param.h5 sim.mpi_threaded
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_ising_mpi_threaded_output_2
     ERROR_VARIABLE err

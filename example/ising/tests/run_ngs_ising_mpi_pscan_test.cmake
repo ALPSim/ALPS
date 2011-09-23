@@ -6,7 +6,7 @@
 find_program(cmd_path ngs_ising_mpi_pscan ${binarydir} ${dllexedir})
 
 execute_process(
-    COMMAND mpirun -n 4 ${cmd_path} -T 15 ${currentdir}/param.h5 sim.pscan
+    COMMAND mpirun -n 4 ${cmd_path} -T 15 ${currentdir}/params/param.h5 sim.pscan
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_ising_mpi_pscan_output_1
     ERROR_VARIABLE err
@@ -18,7 +18,7 @@ if(not_successful)
 endif(not_successful)
 
 execute_process(
-    COMMAND mpirun -n 4 ${cmd_path} -T 15 --continue ${currentdir}/param.h5 sim.pscan
+    COMMAND mpirun -n 4 ${cmd_path} -T 15 --continue ${currentdir}/params/param.h5 sim.pscan
     RESULT_VARIABLE not_successful
     OUTPUT_FILE ngs_ising_mpi_pscan_output_2
     ERROR_VARIABLE err

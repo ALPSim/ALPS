@@ -41,8 +41,8 @@ int main(int argc, char *argv[]) {
         sim.load(params.value_or_default("DUMP", "dump"));
 
     threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
-    boost::thread thread(boost::bind<bool>(&sim_type::run, boost::ref(sim), stopper));
-    
+    boost::thread thread(&sim_type::run, boost::ref(sim), static_cast<boost::function<bool()> >(boost::ref(stopper)));
+
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
     do {
