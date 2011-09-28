@@ -43,6 +43,7 @@
 #include <boost/numeric/ublas/hermitian.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
+#include <boost/numeric/ublas/io.hpp>
 //for lapack::heev
 #include <boost/numeric/bindings/lapack/driver/heev.hpp>
 #include <boost/numeric/bindings/lapack/driver/syev.hpp>
@@ -156,6 +157,23 @@ namespace ietl{
 
                 for(size_t i = 0; i < Adef.Q_.size() ; ++i) 
                     r -= ietl::dot(Adef.Q_[i], r) * Adef.Q_[i];
+        }
+        
+        //vector-set - matrix multiplication, you may want to provide your own
+        //for your specific linalg library
+        //overwrites vecset
+        template <class VECTOR, class MATRIX>
+        void mult( std::vector<VECTOR>& vecset, const MATRIX& mat)
+        {
+            assert(vecset.size() == mat.size1());
+            std::vector<VECTOR> tmp(mat.size2());
+            for(std::size_t i = 0; i < tmp.size(); ++i)
+            {
+                tmp[i] = vecset[0] * mat(0,i);
+                for(std::size_t j = 1; j < vecset.size(); ++j)
+                    tmp[i] += vecset[j] * mat(j,i);
+            }
+            std::swap(vecset, tmp);
         }
 
 }//end namespace detail///////////////////////////////////////////////////////
@@ -417,6 +435,10 @@ namespace solver {
 
         vector_set_type V;
         vector_set_type VA;
+        V.reserve(m_max);
+        VA.reserve(m_max);
+        X_.reserve(X_.size()+k_max);
+        
         X_.resize( X_.size()+1 ); //X_.back() == u
 
         herm_matrix_type M;
@@ -477,12 +499,20 @@ namespace solver {
                 if(info > 0) throw std::runtime_error("lapack::heev - failed to converge.");
 
             real_type theta = (search_highest) ? Theta.back() : Theta[0];
+            
+            //resort S if searching for highest eigenvalues
+            if(search_highest)
+            {
+                for(size_type i = 0; i < size_type(m/2); ++i)
+                {
+                    swap( ublas::column(S, i), ublas::column(S, m-1-i) ); 
+                }
+            }
 
             // u = V s_1
-            size_t row = (search_highest) ? Theta.size()-1 : 0;
-            X_.back() = V[0] * S(0,row);
+            X_.back() = V[0] * S(0,0);
             for(size_type j = 1; j < m; ++j) 
-                X_.back() += V[j] * S(j,row);
+                X_.back() += V[j] * S(j,0);
 
             ietl::mult(A_, X_.back(), uA);
             r = uA - theta * X_.back();
@@ -509,21 +539,15 @@ namespace solver {
                 --m;
                 M = ublas::zero_matrix<scalar_type>(m,m);
 
-                //use VA temporary as V
-                VA.resize(m);
-                for(size_type i = 0; i < m; ++i)
-                {
-                        size_t row = (search_highest) ? (Theta.size()-2-i) : (i+1);
-                        VA[i] = V[0] * S(0,row);
-                        for(size_type j = 1; j < m+1; ++j)
-                            VA[i] += V[j] * S(j,row);
-                }
+                ublas::matrix_range< matrix_type > Sproxy (S, ublas::range(0,S.size1()), ublas::range(1,S.size2()) );
+                // v_i = V s_i+1
+                detail::mult(V, Sproxy);
 
-                V.resize(m);
+                // vA_i = VA s_i+1
+                detail::mult(VA, Sproxy);
+                
                 for(size_type i = 0; i < m; ++i)
                 {
-                    std::swap(VA[i], V[i]);
-                    ietl::mult(A_, V[i], VA[i]);
                     size_t row = (search_highest) ? (Theta.size()-2-i) : (i+1);
                     M(i,i) = Theta[row];
                     ublas::column(S, row + ( search_highest ? +1 : -1) ) = ublas::unit_vector<scalar_type> (S.size1(), i);
@@ -546,25 +570,15 @@ namespace solver {
                     std::cout<<"restart...\n";
                 M = ublas::zero_matrix<scalar_type>(m_min,m_min);
 
-                VA.resize(m_min);
+                ublas::matrix_range< matrix_type > Sproxy (S, ublas::range(0,S.size1()), ublas::range(1,m_min) );
 
-                for(size_type i = 1; i < m_min; ++i) {
-                    size_t row = (search_highest) ? Theta.size()-1-i : i;
-                    VA[i] = V[0] * S(0,row);
-                    for(size_type j = 1; j < m_max; ++j)
-                        VA[i] += V[j] * S(j,row);
-                }
+                detail::mult(V, Sproxy);
                     
-                V.resize(m_min);
-                for(size_type i = 1; i < m_min; ++i)
-                {
-                    std::swap(V[i], VA[i]);
-                    ietl::mult(A_, V[i], VA[i]);
-                }
+                detail::mult(VA, Sproxy);
 
-                V[0] = X_.back();
+                V.insert(V.begin(), X_.back());
                 ietl::mult(A_, X_.back(), uA);
-                VA[0] = uA;
+                VA.insert(VA.begin(), uA);
 
                 for(size_type i = 0; i < m_min; ++i)
                     M(i,i) = Theta[(search_highest) ? Theta.size()-1-i : i];
@@ -612,8 +626,11 @@ namespace solver {
         real_set_type Theta;
 
         vector_set_type V, W;
+        V.reserve(iter.m_max());
+        W.reserve(iter.m_max());
         vector_type t = new_vector(vspace_);
 
+        X_.reserve(X_.size()+k_max);
         X_.resize(X_.size()+1);
 
         generate(t, gen);
