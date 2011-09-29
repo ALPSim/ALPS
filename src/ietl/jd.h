@@ -160,7 +160,7 @@ namespace ietl{
         }
         
         //vector-set - matrix multiplication, you may want to provide your own
-        //for your specific linalg library
+        //for your specific vector type
         //overwrites vecset
         template <class VECTOR, class MATRIX>
         void mult( std::vector<VECTOR>& vecset, const MATRIX& mat)
@@ -514,7 +514,11 @@ namespace solver {
             for(size_type j = 1; j < m; ++j) 
                 X_.back() += V[j] * S(j,0);
 
-            ietl::mult(A_, X_.back(), uA);
+            // uA = VA s_1
+            uA = VA[0] * S(0,0);
+            for(size_type j = 1; j < m; ++j) 
+                uA += VA[j] * S(j,0);
+
             r = uA - theta * X_.back();
 
             // accept eigenpairs
