@@ -52,9 +52,8 @@ n_matsubara_measurements(parms.value_or_default("NMATSUBARA_MEASUREMENTS", (int)
 n_tau((int)parms["N"]),
 n_tau_inv(1./n_tau),
 n_self(parms.value_or_default("NSELF",(int)(10*n_tau))),
-mc_steps((uint64_t)parms["SWEEPS"]*(uint64_t)parms.value_or_default("SWEEP_MULTIPLICATOR", (int)1)),
+mc_steps((uint64_t)parms["SWEEPS"]),
 therm_steps((unsigned int)parms["THERMALIZATION"]),        
-nruns(parms.value_or_default("NRUNS", 1)),
 max_time_in_seconds(parms.value_or_default("MAX_TIME", 86400)),        
 beta((double)parms["BETA"]),                        
 temperature(1./beta),
@@ -148,7 +147,7 @@ double InteractionExpansion::fraction_completed() const{
     std::cout<<"we ran out of time!"<<std::endl;
     return 1;
   }
-  return ((step-therm_steps) / (double) mc_steps)/nruns;
+  return ((step-therm_steps) / (double) mc_steps);
 }
 
 

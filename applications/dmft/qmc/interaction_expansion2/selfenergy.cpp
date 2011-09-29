@@ -265,7 +265,7 @@ void InteractionExpansion::compute_W_itime()
         std::stringstream density_name;
         density_name<<"density_"<<flavor<<"_"<<i;
         measurements[density_name.str().c_str()]<<(density[flavor][i]*sign);
-        if(n_flavors==2){ //then we know how to compute Sz^2
+        if(n_flavors==2 && flavor==0){ //then we know how to compute Sz^2
           std::stringstream sz_name, sz2_name, sz0_szj_name;
           sz_name<<"Sz_"<<i; sz2_name<<"Sz2_"<<i; sz0_szj_name<<"Sz0_Sz"<<i;
           measurements[sz_name.str().c_str()]<<((density[0][i]-density[1][i])*sign);

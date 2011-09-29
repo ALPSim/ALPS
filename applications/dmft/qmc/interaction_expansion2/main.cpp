@@ -41,7 +41,7 @@ int main(int argc, char** argv)
   if (options.valid) {
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
-    alps::parameters_type<HubbardInteractionExpansion>::type parms(options.input_file);
+    alps::parameters_type<HubbardInteractionExpansion>::type parms(alps::hdf5::archive(options.input_file, alps::hdf5::archive::READ));
     alps::mcmpisim<HubbardInteractionExpansion> s(parms, c);
     if(options.time_limit!=0)
       throw std::invalid_argument("time limit is passed in the parameter file!");

@@ -42,7 +42,7 @@ int main(int argc, char** argv)
   if (options.valid) {
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
-    alps::parameters_type<hybridization>::type parms(options.input_file);
+    alps::parameters_type<hybridization>::type parms(alps::hdf5::archive(options.input_file, alps::hdf5::archive::READ));
     alps::mcmpisim<hybridization> s(parms, c);
     if(options.time_limit!=0)
       throw std::invalid_argument("time limit is passed in the parameter file!");
@@ -68,7 +68,7 @@ int main(int argc, char** argv)
           std::ofstream matrix_size("matrix_size", std::ios::app);
           std::vector<double> order_mean =results["matrix_size"].mean <std::vector<double> >();
           std::vector<double> order_error=results["matrix_size"].error<std::vector<double> >();
-          for(int i=0;i<order_mean.size();++i){
+          for(unsigned int i=0;i<order_mean.size();++i){
             matrix_size << order_mean[i] << " "<<order_error[i]<<" ";
           }
           double total_size=std::accumulate(order_mean.begin(), order_mean.end(), 0.);

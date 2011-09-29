@@ -271,7 +271,6 @@ protected:
   const frequency_t n_self;                        //number of self energy (W) binning points
   const boost::uint64_t mc_steps;                        
   const unsigned long therm_steps;                
-  const unsigned int nruns;                      
   const double max_time_in_seconds;
   
   const double beta;                                
