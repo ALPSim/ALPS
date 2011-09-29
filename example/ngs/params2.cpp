@@ -27,56 +27,14 @@
 
 #include <alps/ngs/hdf5.hpp>
 #include <alps/ngs/params.hpp>
-#include <alps/ngs/mcsignal.hpp>
 
-#include <fstream>
-#include <iostream>
-#include <iterator>
-
-int main(int argc, char *argv[]) {
-
-    alps::mcsignal signal;
-
-    // load a hdf5 file into a parameter object
-    alps::hdf5::archive ar("param.h5");
-    alps::params params_h5(ar);
-
-    std::vector<std::string> keys_h5 = params_h5.keys();
-    for (std::vector<std::string>::const_iterator it = keys_h5.begin(); it != keys_h5.end(); ++it)
-        std::cout << *it << ":" << params_h5[*it] << std::endl;
-
-    std::cout << std::endl;
-
-    // save params to file
-    {
-        alps::hdf5::archive ar("param.out.h5", alps::hdf5::archive::REPLACE);
-        ar << make_pvp("/parameters", params_h5);
-    }
-
-    // load a text file into a parameter object
-    std::ifstream file;
-    file.open("param.txt");
-    std::string txt;
-    while(file.good()) {
-        std::string line;
-        file >> line;
-        txt += line + "\n";
-    }
-    file.close();
-    alps::params params_txt(txt);
-
-    std::vector<std::string> keys_txt = params_txt.keys();
-    for (std::vector<std::string>::const_iterator it = keys_txt.begin(); it != keys_txt.end(); ++it)
-        std::cout << *it << ":" << params_txt[*it] << std::endl;
-
-	std::cout << std::endl;
-    params_txt["dbl"] = 1e-8;
-    std::cout << params_txt["dbl"] << " " << static_cast<double>(params_txt["dbl"]) << std::endl;
-
-	std::cout << std::endl;
-	params_txt["NOT_EXISTING_PARAM"] = "";
-    int i = params_txt.value_or_default("NOT_EXISTING_PARAM", 2048);
-    int j(params_txt.value_or_default("NOT_EXISTING_PARAM", 2048));
-    std::cout << static_cast<int>(params_txt.value_or_default("NOT_EXISTING_PARAM", 2048)) << " " << i << " " << j << std::endl;
-
+int main(int argc, char **argv){
+	std::string infile=argv[1];
+	std::cout<<"building parameters."<<std::endl;
+	alps::hdf5::archive ar(infile);
+	alps::params parms(ar);
+	std::cout<<"done building parameters."<<std::endl;
+	std::cout<<"parms N is:" << parms["N"] << std::endl;
+	int n_tau = parms["N"];
+	std::cout<<"survived N."<< n_tau << std::endl;
 }
