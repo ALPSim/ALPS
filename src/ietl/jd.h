@@ -164,7 +164,7 @@ namespace ietl{
         //overwrites vecset
         template <class VECTOR, class MATRIX>
         void mult( std::vector<VECTOR>& vecset, const MATRIX& mat)
-        {
+        {   // mat.size1() = m, mat.size2() = m-1
             assert(vecset.size() == mat.size1());
             std::vector<VECTOR> tmp(mat.size2());
             for(std::size_t i = 0; i < tmp.size(); ++i)
@@ -174,6 +174,44 @@ namespace ietl{
                     tmp[i] += vecset[j] * mat(j,i);
             }
             std::swap(vecset, tmp);
+        }
+        //vector-set - matrix multiplication for std::vector<T>
+        template <class T, class MATRIX>
+        void mult( std::vector< std::vector<T> >& vecset, const MATRIX& mat)
+        {
+            assert(vecset.size() == mat.size1());
+            for (std::size_t i = 0; i < vecset[0].size(); ++i) 
+            {
+	            std::vector<T> tmp(mat.size2(), 0);
+
+	            for (std::size_t j = 0; j < mat.size2(); ++j)
+		            for (std::size_t k = 0; k < vecset.size(); ++k)
+			            tmp[j] += vecset[k][i] * mat(k, j);
+
+	            for (unsigned j = 0; j < mat.size2(); ++j)
+		            vecset[j][i] = tmp[j];
+            }
+
+            vecset.resize(mat.size2());
+        }
+        //vector-set - matrix multiplication for boost::numeric::ublas::vector<T>
+        template <class T, class MATRIX>
+        void mult( std::vector< ublas::vector<T> >& vecset, const MATRIX& mat)
+        {
+            assert(vecset.size() == mat.size1());
+            for (std::size_t i = 0; i < vecset[0].size(); ++i) 
+            {
+	            ublas::vector<T> tmp(mat.size2(), 0);
+
+	            for (std::size_t j = 0; j < mat.size2(); ++j)
+		            for (std::size_t k = 0; k < vecset.size(); ++k)
+			            tmp(j) += vecset[k](i) * mat(k, j);
+
+	            for (std::size_t j = 0; j < mat.size2(); ++j)
+		            vecset[j](i) = tmp(j);
+            }
+
+            vecset.resize(mat.size2());
         }
 
 }//end namespace detail///////////////////////////////////////////////////////
