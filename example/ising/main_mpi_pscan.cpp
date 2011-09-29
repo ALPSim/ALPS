@@ -37,6 +37,7 @@ int main(int argc, char *argv[]) {
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator comm_world;
 
+    // ??????? either uniform or depending on a WORKLOAD parameter
     std::size_t color = comm_world.rank() < comm_world.size() * 3 / 4 ? 0 : 1;
 
     boost::mpi::communicator comm_local = comm_world.split(color);

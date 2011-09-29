@@ -29,25 +29,25 @@
 
 using namespace alps;
 
-typedef parallel<ising_sim<base> > sim_type;
+typedef parallel<ising_sim<base> > sim_type; // rename parallel to mpi_parallel or mpi_sim
 
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
-	boost::mpi::environment env(argc, argv);
+    boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
 
     parameters_type<sim_type>::type params(c);
-	if (!c.rank()) {
+    if (c.rank() == 0) {
         hdf5::archive ar(options.input_file);
         ar >> make_pvp("/parameters", params);
     }
-	params.broadcast();
+    params.broadcast(); // HELP!!!!! broadcast(c,params) or similar - since when do we require params to have a broadcast member function?
 
     sim_type sim(params, c);
 
     if (options.resume)
-	    sim.load(params.value_or_default("DUMP", "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+        sim.load(params.value_or_default("DUMP", "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
 
     sim.run(boost::bind(&basic_stop_callback, options.time_limit));
 
@@ -55,22 +55,22 @@ int main(int argc, char *argv[]) {
 
     results_type<sim_type>::type results = collect_results(sim);
 
-    if (!c.rank()) {
-		std::cout << "Correlations:           " << results["Correlations"] << std::endl;
-		std::cout << "Energy:                 " << results["Energy"] << std::endl;
+    if (c.rank() == 0) {
+        std::cout << "Correlations:           " << results["Correlations"] << std::endl;
+        std::cout << "Energy:                 " << results["Energy"] << std::endl;
 
-		std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
-		std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-		std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+        std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
+        std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
+        std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
 
-		std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
-		std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
-		std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
+        std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
+        std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;
+        std::cout << "Energy - Magnetization: " << results["Energy"] - results["Magnetization"] << std::endl;
 
-		std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
-		std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
+        std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
+        std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 
-	    save_results(results, params, options.output_file, "/simulation/results");
+        save_results(results, params, options.output_file, "/simulation/results");
 
     }
 

@@ -43,6 +43,9 @@ int main(int argc, char *argv[]) {
     threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
     boost::thread thread(&sim_type::run, boost::ref(sim), static_cast<boost::function<bool()> >(boost::ref(stopper)));
 
+  // create one sensible exampel: progress every 5 minutes, checkpoint every hour
+  // and call this a "tiny" example main_threaded_tiny
+  
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
     do {
@@ -68,6 +71,8 @@ int main(int argc, char *argv[]) {
 
     results_type<sim_type>::type results = collect_results(sim);
 
+    save_results(results, params, options.output_file, "/simulation/results");
+
     std::cout << "Correlations:           " << results["Correlations"] << std::endl;
     std::cout << "Energy:                 " << results["Energy"] << std::endl;
 
@@ -82,6 +87,5 @@ int main(int argc, char *argv[]) {
     std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
     std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 
-    save_results(results, params, options.output_file, "/simulation/results");
 
 }

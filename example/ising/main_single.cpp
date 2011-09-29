@@ -34,6 +34,7 @@ typedef ising_sim<base> sim_type;
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
+    // create other examples using text (or XML)
     parameters_type<sim_type>::type params(hdf5::archive(options.input_file));
     sim_type sim(params);
 
@@ -45,6 +46,8 @@ int main(int argc, char *argv[]) {
     sim.save(params.value_or_default("DUMP", "dump"));
 
     results_type<sim_type>::type results = collect_results(sim);
+  
+    save_results(results, params, options.output_file, "/simulation/results");
 
     std::cout << "Correlations:           " << results["Correlations"] << std::endl;
     std::cout << "Energy:                 " << results["Energy"] << std::endl;
@@ -60,6 +63,5 @@ int main(int argc, char *argv[]) {
     std::cout << "Sin(Energy):            " << sin(results["Energy"]) << std::endl;
     std::cout << "Tanh(Correlations):     " << tanh(results["Correlations"]) << std::endl;
 
-    save_results(results, params, options.output_file, "/simulation/results");
 
 }

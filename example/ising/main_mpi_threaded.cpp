@@ -29,6 +29,8 @@
 
 using namespace alps;
 
+// write a version that is just many-threaded but does not use MPI
+
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);

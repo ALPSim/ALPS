@@ -29,6 +29,7 @@
 
 #include <boost/lambda/lambda.hpp>
 
+// rename Impl to Base or similar
 template<typename Impl> class ising_sim : public Impl {
     public:
 
@@ -44,7 +45,7 @@ template<typename Impl> class ising_sim : public Impl {
         }
 
         #ifdef ALPS_HAVE_MPI
-
+// replace: template <class Arg> .... , Arg comm)
             ising_sim(typename Impl::parameters_type const & params, boost::mpi::communicator comm)
                 : Impl(params, comm)
                 , length(params["L"])
@@ -57,7 +58,7 @@ template<typename Impl> class ising_sim : public Impl {
             }
 
         #endif
-
+// update()
         void do_update() {
             for (int j = 0; j < length; ++j) {
                 using std::exp;
@@ -70,6 +71,7 @@ template<typename Impl> class ising_sim : public Impl {
             }
         };
 
+  // measure() ... use verbs
         void do_measurements() {
             sweeps++;
             if (sweeps > thermalization_sweeps) {
@@ -87,6 +89,7 @@ template<typename Impl> class ising_sim : public Impl {
                 std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
                 ten /= length;
                 tmag /= length;
+               // use this-> instead of Impl::
                 Impl::measurements["Energy"] << ten;
                 Impl::measurements["Magnetization"] << tmag;
                 Impl::measurements["Magnetization^2"] << tmag * tmag;
@@ -100,7 +103,7 @@ template<typename Impl> class ising_sim : public Impl {
         }
 
     private:
-
+        // call it init()
         void create() {
             for(int i = 0; i < length; ++i)
                 spins[i] = (Impl::random() < 0.5 ? 1 : -1);
