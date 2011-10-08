@@ -1184,4 +1184,17 @@ def writeTEBDfiles(parmsList, fileName):
 
 
 
+def select(inp,condition):
+    data_ = []
+    for ds in pyalps.flatten(inp):
+        if condition(ds):
+            data_.append(ds)
+    return data_
+
+def values(data, key):
+    vals = []
+    for ds in pyalps.flatten(data):
+        if ds.props[key] not in vals:
+            vals.append(ds.props[key])
+    return np.sort(vals)
 
