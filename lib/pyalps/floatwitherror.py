@@ -49,6 +49,10 @@ class FloatWithError:
   def __init__(self,mean_=0,error_=0):
     self.mean  = mean_
     self.error = error_
+    try:
+      self.shape = self.mean.shape
+    except ValueError:
+      pass
 
   def __str__(self):
     return str(self.mean) + '\t' + str(self.error)
@@ -56,6 +60,12 @@ class FloatWithError:
     return expr(self.mean) + '\t' + expr(self.error)
   def __repr__(self):
     return self.__str__()
+  
+  def __len__(self):
+    return len(self.mean)
+  
+  def __getitem__(self,key):
+    return FloatWithError(self.mean[key],self.error[key])
   
   def __add__(x__,y__):
     if (isinstance(y__,float) | isinstance(y__,int)):
