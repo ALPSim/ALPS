@@ -51,7 +51,7 @@ class FloatWithError:
     self.error = error_
     try:
       self.shape = self.mean.shape
-    except ValueError:
+    except AttributeError,ValueError:
       pass
 
   def __str__(self):
