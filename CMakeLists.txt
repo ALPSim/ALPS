@@ -6,10 +6,12 @@ project (DMFT)
 #include_directories("/home/esg/alps_svn/")
 include_directories("/Users/emanuel/alps_svn/")
 #include_directories("/opt/local/include")
-include_directories("/cluster/home/phys/gullc/alps_svn")
+include_directories("/global/homes/g/gull/alps_svn/")
+include_directories("/usr/common/usg/gsl/1.14/include")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -march=core2 -O3 -DUSE_MPI -DNDEBUG")
 
 link_directories("/opt/local/lib")
+link_directories("/usr/common/usg/gsl/1.14/lib")
 
 
 add_executable(dmft 
@@ -33,18 +35,15 @@ auxiliaryfunctions.C externalsolver.C hirschfyesim.C main.C
 ../DMFT-solvers/Rubtsov/rubtsov_fourpoint.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_observables.cpp
 ../DMFT-solvers/Rubtsov/rubtsov_selfenergy.cpp)
-
-add_executable(energy ../DMFT-solvers/Rubtsov/energy.cpp
-../DMFT-Solvers/Rubtsov/obs_auxiliary.cpp clustertransformer.C
-hilberttransformer.C clusterhelper.C fouriertransform.C 2dsimpson.C
-auxiliaryfunctions.C
-)
-
+#add_executable(energy ../DMFT-solvers/Rubtsov/energy.cpp
+#../DMFT-Solvers/Rubtsov/obs_auxiliary.cpp clustertransformer.C
+#hilberttransformer.C clusterhelper.C fouriertransform.C 2dsimpson.C
+#auxiliaryfunctions.C
+#)
 add_executable(kspace_interpolate interpolate.C clusterhelper.C
 fouriertransform.C auxiliaryfunctions.C
 clustertransformer.C)
-
-
+target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 add_executable(sigma_interpolate_sc sigma_interpolate_sc.C
 auxiliaryfunctions.C clustertransformer.C clusterhelper.C
 fouriertransform.C)
@@ -58,14 +57,13 @@ add_executable(bg_parameter bg_parameter.C)
 add_executable(hdf5_changeval hdf5_changeval.C)
 
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
-target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
+#target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
 ${LAPACK_LIBRARY} gsl pthread)
-target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES})
 target_link_libraries(sigma_interpolate_sc ${ALPS_LIBRARIES}
 ${LAPACK_LIBRARY} gsl pthread)
-target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES})
+target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 
-target_link_libraries(bg_parameter ${ALPS_LIBRARIES})
-target_link_libraries(hdf5_changeval ${ALPS_LIBRARIES})
+target_link_libraries(bg_parameter ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
+target_link_libraries(hdf5_changeval ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 

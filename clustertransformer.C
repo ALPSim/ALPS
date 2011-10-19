@@ -55,7 +55,7 @@ void DCATransformer::generate_transformer(const alps::Parameters& parms, boost::
     trans_ptr.reset(new AntiFerroDCATransformer(parms));
   }
   else {
-    //std::cout<<"using simple DCA transformer"<<std::endl;
+    std::cout<<"creating simple DCA transformer"<<std::endl;
     trans_ptr.reset(new SimpleDCATransformer(parms));
   }
 }
@@ -141,7 +141,7 @@ dispersion_moments_(2, 0.)
     bandwidth_ = bw;
   }
   
-  //std::cout << "bandwidth: " << bandwidth_ << "\n";
+  std::cout << "bandwidth: " << bandwidth_ << "\n";
 }
 
 
