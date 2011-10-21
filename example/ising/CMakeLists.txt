@@ -67,6 +67,10 @@ if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_pscan_test.cmake
         )
 
+        add_executable(ngs_ising_mpi2 main_mpi2.cpp)
+        add_dependencies(ngs_ising_mpi2 alps)
+        target_link_libraries(ngs_ising_mpi2 alps)
+    
     endif(MPI_FOUND)
 
     if (ALPS_HAVE_PYTHON)
