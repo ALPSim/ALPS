@@ -34,17 +34,20 @@ import platform
 import sys
 import glob
 import numpy as np
+import copy
 
 import pyalps.hdf5 as h5
 
 from pyalps.pytools import convert2xml, hdf5_name_encode, hdf5_name_decode, rng
 import pyalps.pytools # the C++ conversion functions
-from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadObservableList, loadProperties, in_vistrails, log
+from load import loadBinningAnalysis, loadMeasurements,loadEigenstateMeasurements, loadSpectra, loadIterationMeasurements, loadObservableList, loadProperties, in_vistrails, log, Hdf5Loader
 from hlist import deep_flatten, flatten, depth
 from dict_intersect import dict_intersect
 from dataset import DataSet
+from floatwitherror import FloatWithError
 from plot_core import read_xml as readAlpsXMLPlot
 from dict_intersect import *
+import alea
 
 def make_list(infiles):
     if type(infiles) == list:
@@ -1197,4 +1200,48 @@ def values(data, key):
         if ds.props[key] not in vals:
             vals.append(ds.props[key])
     return np.sort(vals)
+
+def mergeDataSets(dsets):
+    props = dict_intersect([d.props for d in dsets])
+    merged = copy.deepcopy(dsets.pop())
+    for d in dsets:
+        if (d.x != merged.x).any():   raise ValueError('cannot merge datasets: x values mismatch')
+        if len(d.y) != len(merged.y): raise ValueError('cannot merge datasets: y shape mismatch')
+        if isinstance(merged.y,alea.MCVectorData):
+            merged.y.merge(d.y)
+        for i in range(len(merged.y)):
+            merged.y[i].merge(d.y[i])
+    merged.props = props
+    return merged
+
+def mergeMeasurements(measurements):
+    byname = {}
+    for mset in measurements:
+        for m in mset:
+            key = m.props['observable']
+            if key not in byname:   byname[key] = [m]
+            else:                   byname[key].append(m)
+    merged = [mergeDataSets(v) for v in byname.values()]
+    return merged
+
+def mergeMeasurementsFromFiles(files,respath='/simulation/realizations/0/clones/0/results'):
+    ll = Hdf5Loader()
+    meas = ll.ReadMeasurementFromFile(files,respath=respath)
+    return mergeMeasurements(meas)
+
+def saveMeasurements(measurements,outfile,respath='/simulation/results'):
+    for m in measurements:
+        path = respath+'/'+m.props['observable']
+        if isinstance(m.y,alea.MCVectorData):
+            m.y.save(outfile,path)
+        elif isinstance(m.y,np.ndarray) and isinstance(m.y[0],alea.MCScalarData):
+            m.y[0].save(outfile,path)
+        elif isinstance(m.y,FloatWithError):
+            h5f = h5.oArchive(fn)
+            h5f.write(path+'/mean/value',np.array(m.y.mean))
+            h5f.write(path+'/mean/error',np.array(m.y.error))
+            try:
+                h5f.write(path+'/jackknife',np.array(m.jacks))
+            except AttributeError:
+                pass
 

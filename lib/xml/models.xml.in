@@ -100,6 +100,7 @@
   <OPERATOR name="n" matrixelement="Nup+Ndown"/>
   <OPERATOR name="n_up" matrixelement="Nup"/>
   <OPERATOR name="n_down" matrixelement="Ndown"/>
+  <OPERATOR name="DoubleOccupancy" matrixelement="Nup*Ndown"/>
 </SITEBASIS>
 
 <SITEBASIS name="alternative fermion">
