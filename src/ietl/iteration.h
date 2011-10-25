@@ -147,6 +147,43 @@ namespace ietl {
     unsigned int n_; 
   };
   
+  template <class T>
+  class lanczos_nlowest_better : public basic_lanczos_iteration<T, lanczos_nlowest_better<T> >
+  {
+    typedef basic_lanczos_iteration<T, lanczos_nlowest_better<T> > super_type;
+    
+  public:
+    lanczos_nlowest_better(unsigned int max_iter, unsigned int n, 
+                           T r = 100.*std::numeric_limits<T>::epsilon(), 
+                           T a = 100.*std::numeric_limits<T>::epsilon(),
+                           unsigned int check_each = 50)
+    : basic_lanczos_iteration<T, lanczos_nlowest_better<T> >(max_iter,r,a)
+    , n_(n)
+    , ce_(check_each)
+    { }   
+
+    template <class Tmatrix>
+    bool converged(const Tmatrix& tmatrix) const
+    {
+      if(super_type::iterations() > 1 && super_type::iterations() % ce_ == 0) {
+        const std::vector<T>& errs = tmatrix.errors();
+        const std::vector<T>& vals = tmatrix.eigenvalues();      
+        if(vals.size()<n_)
+          return false;
+        else { 
+          for (unsigned int i = 0; i < n_; i++)
+            if (errs[i] > std::max(super_type::absolute_tolerance(),super_type::relative_tolerance()*std::abs(vals[i])))
+                  return false;
+              return true;
+            }
+      }
+      return false;
+    }    
+
+    private:
+      unsigned int n_, ce_;
+    };
+  
 
   template <class T>
     class lanczos_iteration_nhighest : public basic_lanczos_iteration<T,lanczos_iteration_nhighest<T> > {

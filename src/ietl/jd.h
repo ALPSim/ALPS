@@ -698,7 +698,7 @@ namespace solver {
             }
 
             ++m;
-            scalar_type norm_w = ietl::two_norm(W.back());
+            real_type norm_w = ietl::two_norm(W.back());
             if(norm_w == 0)
                 throw std::runtime_error("New search vector is zero.");
 
@@ -713,7 +713,7 @@ namespace solver {
             Theta.resize(m);
             S = M; //copy M
 
-            int info = lapack::heev('V', S, Theta); //eigenvectors in columns of S
+            int info = lapack::heev('V', boost::numeric::bindings::upper(S), Theta); //eigenvectors in columns of S
                 if(info < 0) throw std::runtime_error("lapack::heev - illegal value.");
                 if(info > 0) throw std::runtime_error("lapack::heev - failed to converge.");
             //ascending instead of descending
@@ -785,7 +785,8 @@ namespace solver {
                 X_.push_back(V[0]/mu);
 
                 r = W[0] / mu - theta * X_.back();
-
+                norm_r = ietl::two_norm(r);
+                
             }//accept
             // restart
             if(m >= iter.m_max()) {
