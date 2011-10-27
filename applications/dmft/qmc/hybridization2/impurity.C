@@ -91,6 +91,7 @@ MEASURE_nn(static_cast<int>(parms.value_or_default("MEASURE_nn", 0)))           
     std::cout<<"*****************The hybridization function is: ****************************"<<std::endl;
     for(int i=0;i<10;++i){ std::cout<<i<<" "; for(int j=0;j<FLAVORS;++j){ std::cout<<F[j][i]<<" ";} std::cout<<std::endl; }
     std::cout<<"... *** etc *** ...\n";
+    std::cout<<F[0].size()-1<<" "; for(int j=0;j<FLAVORS;++j){ std::cout<<F[j].back()<<" ";} std::cout<<std::endl;
     std::cout<<"****************************************************************************"<<std::endl;
   }
   segments.resize(FLAVORS);
@@ -158,7 +159,7 @@ void hybridization::read_external_input_data(const parameters_type &parms){
   u.resize(FLAVORS, FLAVORS);
   ifstream infile_u(boost::lexical_cast<std::string>(parms["U_MATRIX"]).c_str());
   if(!infile_u.good()){
-    throw(std::invalid_argument(std::string("U-matrix parameter ") + parms["U_MATRIX"].str() + " invalid. File could not be opened."));
+    throw(std::invalid_argument(std::string("U-matrix parameter \'") + parms["U_MATRIX"].str() + "\' not specified or not pointing to a valid file. File could not be opened."));
   }
   for (int i=0; i<FLAVORS; i++) {
     if(!infile_u.good()){
@@ -171,13 +172,13 @@ void hybridization::read_external_input_data(const parameters_type &parms){
       infile_u >> u(i,j);
     }
   }
-  ifstream mu_dc_solver("mu_dc_solver");
+  std::string mu_dc_solver_string=parms.value_or_default("EPSILOND_VECTOR","mu_dc_solver");
+  ifstream mu_dc_solver(mu_dc_solver_string.c_str());
   int dummy;
-  if(!mu_dc_solver.good()) throw(std::invalid_argument("file mu_dc_solver could not be found. Aborting"));
+  if(!mu_dc_solver.good()) throw(std::invalid_argument("file for level shifts "+mu_dc_solver_string+" could not be found. Check paramter EPSILOND_VECTOR. Aborting"));
   for(int i=0;i<FLAVORS;++i){
-    if(!mu_dc_solver.good()) throw(std::invalid_argument("mu dc solver file has not enough lines?"));
+    if(!mu_dc_solver.good()) throw(std::invalid_argument("mu dc solver file "+mu_dc_solver_string+" does not have enough lines? check format of mu file"));
     mu_dc_solver>>dummy>>mu_e[i]>>std::ws;
-    mu_e[i]*=t; //we need to adjust this to the right units
   }
   
   

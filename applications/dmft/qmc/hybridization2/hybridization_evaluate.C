@@ -170,7 +170,7 @@ int main(int argc, char ** argv){
   }//closes ar
     
     if(PARAMAGNETIC) spin_average(Greens, FLAVORS);
-    for(int i=0; i<Greens.size(); ++i) Greens[i]*=-1; //different sign convention
+    for(std::size_t i=0; i<Greens.size(); ++i) Greens[i]*=-1; //different sign convention
     for(int f=0; f<FLAVORS; ++f){
       Greens[f*(N+1)]=-(1-density[f]);
       Greens[f*(N+1)+N]=-density[f];
@@ -289,7 +289,7 @@ int main(int argc, char ** argv){
       ar>>alps::make_pvp("/simulation/results/gw_re/mean/value",gw_re);
       ar>>alps::make_pvp("/simulation/results/gw_im/mean/value",gw_im);
     }
-    for(int i=0; i<gw_re.size(); ++i) gw.push_back(std::complex<double>(gw_re[i],gw_im[i]));
+    for(std::size_t i=0; i<gw_re.size(); ++i) gw.push_back(std::complex<double>(gw_re[i],gw_im[i]));
     if(PARAMAGNETIC)spin_average(gw,FLAVORS);
     {
       alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
@@ -321,7 +321,7 @@ int main(int argc, char ** argv){
         spin_average(fw_re,FLAVORS);
         spin_average(fw_im,FLAVORS);
       }
-      for(int i=0; i<fw_re.size(); ++i){ 
+      for(std::size_t i=0; i<fw_re.size(); ++i){ 
         fw.push_back(std::complex<double>(fw_re[i],fw_im[i]));
         sigmaw.push_back(fw[i]/gw[i]);
       }

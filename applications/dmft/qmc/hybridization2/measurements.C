@@ -37,43 +37,41 @@ the self-energy and vertex function, arXiv:1108.1936.
 */
 
 using namespace std;
-using alps::SimpleRealVectorObservable;
 
 void hybridization::create_measurements(){
   //basic measurements
-  measurements << alps::ngs::SimpleRealVectorObservable("n")
-               << alps::ngs::SimpleRealVectorObservable("order")
-               << alps::ngs::SimpleRealVectorObservable("Greens")
-//             << alps::ngs::SimpleRealVectorObservable("overlap")
-               << alps::ngs::SimpleRealObservable("sign")
-               << alps::ngs::SimpleRealVectorObservable("matrix_size");
+  measurements << alps::ngs::RealVectorObservable("n")
+               << alps::ngs::RealVectorObservable("order")
+               << alps::ngs::RealVectorObservable("Greens")
+               << alps::ngs::RealObservable("sign")
+               << alps::ngs::RealVectorObservable("matrix_size");
 
   //additional measurements
   if(MEASURE_gw){ 
-    measurements << alps::ngs::SimpleRealVectorObservable("gw_re");
-    measurements << alps::ngs::SimpleRealVectorObservable("gw_im");
+    measurements << alps::ngs::RealVectorObservable("gw_re");
+    measurements << alps::ngs::RealVectorObservable("gw_im");
   }
   if(MEASURE_fw){ 
-    measurements << alps::ngs::SimpleRealVectorObservable("fw_re");
-    measurements << alps::ngs::SimpleRealVectorObservable("fw_im");
+    measurements << alps::ngs::RealVectorObservable("fw_re");
+    measurements << alps::ngs::RealVectorObservable("fw_im");
   }
   if(MEASURE_gl) 
-    measurements << alps::ngs::SimpleRealVectorObservable("gl");
+    measurements << alps::ngs::RealVectorObservable("gl");
   if(MEASURE_fl) 
-    measurements << alps::ngs::SimpleRealVectorObservable("fl");
+    measurements << alps::ngs::RealVectorObservable("fl");
   
   if(MEASURE_g2w){ 
-    measurements << alps::ngs::SimpleRealVectorObservable("g2w_re");
-    measurements << alps::ngs::SimpleRealVectorObservable("g2w_im");
+    measurements << alps::ngs::RealVectorObservable("g2w_re");
+    measurements << alps::ngs::RealVectorObservable("g2w_im");
   }
   if(MEASURE_hw){ 
-    measurements << alps::ngs::SimpleRealVectorObservable("hw_re");
-    measurements << alps::ngs::SimpleRealVectorObservable("hw_im");
+    measurements << alps::ngs::RealVectorObservable("hw_re");
+    measurements << alps::ngs::RealVectorObservable("hw_im");
   }
   if(MEASURE_nn) 
-    measurements << alps::ngs::SimpleRealVectorObservable("nn");
+    measurements << alps::ngs::RealVectorObservable("nn");
   if(MEASURE_nnt) 
-    measurements << alps::ngs::SimpleRealVectorObservable("nnt");
+    measurements << alps::ngs::RealVectorObservable("nnt");
 
 return;
 }
@@ -256,7 +254,7 @@ void hybridization::set_measurement_vectors(){
       for(int i=0; i<N_nn+1; i++) n_vectors[flavor][i]=1;//reset
       if(segments[flavor].size()==0){
         if(full_line[flavor]==0){
-        for(int i=0; i<n_vectors[flavor].size(); ++i)
+        for(std::size_t i=0; i<n_vectors[flavor].size(); ++i)
           n_vectors[flavor][i]=0;
         }
       }
@@ -273,7 +271,7 @@ void hybridization::set_measurement_vectors(){
           n_vectors[flavor][index] *= -1;
         }
         // fill vector with occupation number
-        for(int i=1; i<n_vectors[flavor].size(); i++){
+        for(std::size_t i=1; i<n_vectors[flavor].size(); i++){
           if(n_vectors[flavor][i]==-1) n_vectors[flavor][i]=1-n_vectors[flavor][i-1];//segment starts or ends -> occupation number changes
           else n_vectors[flavor][i]=n_vectors[flavor][i-1];//on the same segment -> occupation number identical to that of previous segment
         }

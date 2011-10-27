@@ -83,6 +83,8 @@ ENDIF(ALPS_BUILD_NGS)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
 IF(ALPS_BUILD_NGS)
   add_executable(hybridization hybridization2/main.C)
+  add_executable(hybridization_eval
+  hybridization2/hybridization_evaluate.C)
   add_executable(interaction interaction_expansion2/main.cpp)
 ENDIF(ALPS_BUILD_NGS)
 
@@ -91,6 +93,7 @@ ENDIF(ALPS_BUILD_NGS)
 
 IF(ALPS_BUILD_NGS)
   target_link_libraries(hybridization dmft_qmc_impl hybridization2_impl)
+  target_link_libraries(hybridization_eval dmft_qmc_impl hybridization2_impl)
   target_link_libraries(interaction dmft_qmc_impl interaction_expansion2_impl)
 ENDIF(ALPS_BUILD_NGS)
 
@@ -98,6 +101,7 @@ ENDIF(ALPS_BUILD_NGS)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
 IF(ALPS_BUILD_NGS)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
+  install(TARGETS hybridization_eval RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
 ENDIF(ALPS_BUILD_NGS)
 
