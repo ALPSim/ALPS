@@ -5,6 +5,7 @@
 * Copyright (C) 2010 by Sebastian  Fuchs <fuchs@comp-phys.org>
 *                       Thomas Pruschke <pruschke@comp-phys.org>
 *                       Matthias Troyer <troyer@comp-phys.org>
+*               2011 by Emanuel Gull  <gull@phys.columbia.edu>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -55,7 +56,7 @@ MaxEntHelper::vector_type MaxEntHelper::transform_into_singular_space(vector_typ
     A[i] /= Default(i);
     A[i] = A[i]==0. ? 0. : log(A[i]);
   }
-  return boost::numeric::ublas::prec_prod(Vt(), A);
+  return prec_prod(Vt(), A);
 }
 
 
@@ -63,7 +64,6 @@ MaxEntHelper::vector_type MaxEntHelper::transform_into_singular_space(vector_typ
 
 MaxEntHelper::vector_type MaxEntHelper::transform_into_real_space(vector_type u) const
 {
-  using namespace boost::numeric::ublas;
   u = prec_prod(trans(Vt()), u);
   for (unsigned int i=0; i<u.size(); ++i) {
     u[i] = exp(u[i]);
@@ -88,7 +88,6 @@ MaxEntHelper::vector_type MaxEntHelper::get_spectrum(const vector_type& u) const
 
 MaxEntHelper::matrix_type MaxEntHelper::left_side(const vector_type& u) const 
 {
-  using namespace boost::numeric::ublas;
   vector_type A = transform_into_real_space(u);
   matrix_type M = trans(Vt());
   for (unsigned int i=0; i<M.size1(); ++i) 
@@ -106,7 +105,6 @@ MaxEntHelper::matrix_type MaxEntHelper::left_side(const vector_type& u) const
 
 MaxEntHelper::vector_type MaxEntHelper::right_side(const vector_type& u) const 
 {
-  using namespace boost::numeric::ublas;
   vector_type b = 2./ndat()*(prec_prod(K(), transform_into_real_space(u)) - y());
   b = prec_prod(trans(U()), b);
   b = prec_prod(Sigma(), b);
@@ -118,7 +116,6 @@ MaxEntHelper::vector_type MaxEntHelper::right_side(const vector_type& u) const
 
 double MaxEntHelper::step_length(const vector_type& delta, const vector_type& u) const 
 {
-  using namespace boost::numeric::ublas;
   vector_type A = transform_into_real_space(u);
   matrix_type L = trans(Vt());
   for (unsigned int i=0; i<L.size1(); ++i) 
@@ -152,15 +149,14 @@ double MaxEntHelper::convergence(const vector_type& u, const double alpha) const
 
 double MaxEntHelper::log_prob(const vector_type& u, const double alpha) const
 {
-  using namespace boost::numeric;
-  matrix_type L = ublas::prec_prod(ublas::trans(K()), K());
+  matrix_type L = prec_prod_trans(K(), K());
   const vector_type A = transform_into_real_space(u);
   for (unsigned int i=0; i<L.size1(); ++i)
     for (unsigned int j=0; j<L.size2(); ++j)
       L(i,j) *= sqrt(A[i])*sqrt(A[j]);
   for (unsigned int i=0; i<L.size1(); ++i)
     L(i,i) += alpha;
-  bindings::lapack::potrf(bindings::lower(L));
+  boost::numeric::bindings::lapack::potrf(boost::numeric::bindings::lower(L));
   double log_det = 0.;
   for (unsigned int i=0; i<L.size1(); ++i) 
     log_det  += log(L(i,i)*L(i,i));
@@ -174,7 +170,7 @@ double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const 
   for (unsigned int i=0; i<A.size(); ++i) 
     A[i] *= delta_omega(i);
   using namespace boost::numeric;
-  matrix_type L = ublas::prec_prod(ublas::trans(K()), K());
+  matrix_type L = prec_prod_trans(K(), K());
   for (unsigned int i=0; i<L.size1(); ++i)
     for (unsigned int j=0; j<L.size2(); ++j)
     L(i,j) *= sqrt(A[i])*sqrt(A[j]);

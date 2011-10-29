@@ -5,6 +5,7 @@
 * Copyright (C) 2010 by Sebastian Fuchs <fuchs@comp-phys.org>
 *                       Thomas Pruschke <pruschke@comp-phys.org>
 *                       Matthias Troyer <troyer@comp-phys.org>
+*               2011 by Emanuel Gull <gull@phys.columbia.edu>
 *
 * This software is part of the ALPS Applications, published under the ALPS
 * Application License; you can use, redistribute it and/or modify it under
@@ -31,8 +32,10 @@
 #define ALPS_TOOL_MAXENT_HPP
 
 #include <alps/scheduler.h>
+#include <alps/config.h>
+#include <boost/numeric/bindings/blas/level3/gemm.hpp>
+#include <boost/numeric/bindings/blas/level2/gemv.hpp>
 #include "maxent_parms.hpp"
-
 
 
 
@@ -80,6 +83,50 @@ public :
   double chi2(const vector_type& u) const;
   double entropy(const vector_type& u) const;
   
+vector_type prec_prod(const matrix_type &p, const vector_type &q) const{
+#ifdef ALPS_HAVE_LAPACK
+  vector_type r(p.size1());
+  double alpha=1.;
+  double beta=0.;
+  boost::numeric::bindings::blas::gemv( alpha, p,q,beta,r);
+  return r;
+#else
+  return boost::numeric::ublas::prec_prod(p,q);
+#endif
+}
+vector_type prec_prod_trans(const matrix_type &p, const vector_type &q) const{
+#ifdef ALPS_HAVE_LAPACK
+  vector_type r(p.size2());
+  double alpha=1.;
+  double beta=0.;
+  boost::numeric::bindings::blas::gemv( alpha, boost::numeric::ublas::trans(p),q,beta,r);
+  return r;
+#else
+  return boost::numeric::ublas::prec_prod(boost::numeric::ublas::trans(p),q);
+#endif
+}
+matrix_type prec_prod(const matrix_type &p, const matrix_type &q) const{
+#ifdef ALPS_HAVE_LAPACK
+  matrix_type r(p.size1(), q.size2());
+  double alpha=1.;
+  double beta=0.;
+  boost::numeric::bindings::blas::gemm(alpha, p, q, beta, r); 
+  return r;
+#else
+  return boost::numeric::ublas::prec_prod(p,q);
+#endif
+}
+matrix_type prec_prod_trans(const matrix_type &p, const matrix_type &q) const{
+#ifdef ALPS_HAVE_LAPACK
+  matrix_type r(p.size2(), q.size2());
+  double alpha=1.;
+  double beta=0.;
+  boost::numeric::bindings::blas::gemm(alpha, boost::numeric::ublas::trans(p), q, beta, r); 
+  return r;
+#else
+  return boost::numeric::ublas::prec_prod(boost::numeric::ublas::trans(p),q);
+#endif
+}
   private:
 
   vector_type def_;
@@ -104,7 +151,7 @@ private:
 
   vector_type alpha;
   const double norm;
-  const double hartree;
+  const int max_it;
   std::string name;
   boost::filesystem::path dir;
   std::ofstream spex_str;
@@ -114,6 +161,5 @@ private:
   std::ofstream chispec_str;
   std::ofstream prob_str;
 }; 
-
 
 #endif

@@ -40,7 +40,7 @@ MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::file
  , MaxEntHelper(parms)
  , alpha(parms["N_ALPHA"])
  , norm(parms.value_or_default("NORM", 1.))
- , hartree(parms.value_or_default("HARTREE", 0.))
+ , max_it(parms.value_or_default("MAX_IT", 1000))
  , name(fn.leaf(),0,fn.leaf().size()-6)
  , dir(fn.branch_path())
  , spex_str(boost::filesystem::complete(name+"spex.dat", dir).string().c_str())
@@ -141,13 +141,12 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
   using namespace boost::numeric;
   double mu = 1e-18;
   const double nu = 1.3;
-  const int max_it = 1000;
-  double Q1;
+  double Q1=0.;
   int it = 0;
+  int it2 = 0;
   for (; it<max_it; it++) {
     vector_type delta;
-    int it2 = 0;
-    for (; it2<max_it; ++it2) {
+    for (it2=0; it2<max_it; ++it2) {
       delta = iteration(u, alpha, mu);
       Q1 = Q(u+delta, alpha);
       if (step_length(delta, u)<=0.02) {
