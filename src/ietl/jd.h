@@ -175,25 +175,6 @@ namespace ietl{
             }
             std::swap(vecset, tmp);
         }
-        //vector-set - matrix multiplication for std::vector<T>
-        template <class T, class MATRIX>
-        void mult( std::vector< std::vector<T> >& vecset, const MATRIX& mat)
-        {
-            assert(vecset.size() == mat.size1());
-            for (std::size_t i = 0; i < vecset[0].size(); ++i) 
-            {
-	            std::vector<T> tmp(mat.size2(), 0);
-
-	            for (std::size_t j = 0; j < mat.size2(); ++j)
-		            for (std::size_t k = 0; k < vecset.size(); ++k)
-			            tmp[j] += vecset[k][i] * mat(k, j);
-
-	            for (unsigned j = 0; j < mat.size2(); ++j)
-		            vecset[j][i] = tmp[j];
-            }
-
-            vecset.resize(mat.size2());
-        }
         //vector-set - matrix multiplication for boost::numeric::ublas::vector<T>
         template <class T, class MATRIX>
         void mult( std::vector< ublas::vector<T> >& vecset, const MATRIX& mat)
@@ -482,6 +463,7 @@ namespace solver {
         herm_matrix_type M;
 
         real_set_type Theta;
+        Theta.reserve(m_max);
         matrix_type S;
 
         vector_type uA, r;
@@ -535,16 +517,13 @@ namespace solver {
             info = lapack::heev('V', boost::numeric::bindings::upper(S), Theta); //eigenvectors in columns of S
                 if(info < 0) throw std::runtime_error("lapack::heev - illegal value.");
                 if(info > 0) throw std::runtime_error("lapack::heev - failed to converge.");
-
-            real_type theta = (search_highest) ? Theta.back() : Theta[0];
             
             //resort S if searching for highest eigenvalues
             if(search_highest)
             {
+                reverse( Theta.begin(), Theta.end() );
                 for(size_type i = 0; i < size_type(m/2); ++i)
-                {
                     swap( ublas::column(S, i), ublas::column(S, m-1-i) ); 
-                }
             }
 
             // u = V s_1
@@ -557,21 +536,21 @@ namespace solver {
             for(size_type j = 1; j < m; ++j) 
                 uA += VA[j] * S(j,0);
 
-            r = uA - theta * X_.back();
+            r = uA - Theta[0] * X_.back();
 
             // accept eigenpairs
             norm_r = ietl::two_norm(r);
 
-            while(iter.finished(norm_r,theta)) 
+            while(iter.finished(norm_r,Theta[0])) 
             {
-
+            
                 if(iter.error_code() == 1)
                     throw std::runtime_error(iter.error_msg());
 
                 if(verbose_ > 0)
-                    std::cout << "Accepted eigenpair #"<< k+1 << "\t" << theta << "\tResidual: " << norm_r << "\n";
+                    std::cout << "Accepted eigenpair #"<< k+1 << "\t" << Theta[0] << "\tResidual: " << norm_r << "\n";
 
-                Lambda_.push_back( theta ); //Lambda_[k] = Theta[0];
+                Lambda_.push_back( Theta[0] );
 
                 if(++k == k_max) return;
 
@@ -582,26 +561,25 @@ namespace solver {
                 M = ublas::zero_matrix<scalar_type>(m,m);
 
                 ublas::matrix_range< matrix_type > Sproxy (S, ublas::range(0,S.size1()), ublas::range(1,S.size2()) );
+
                 // v_i = V s_i+1
                 detail::mult(V, Sproxy);
-
+                
                 // vA_i = VA s_i+1
                 detail::mult(VA, Sproxy);
                 
+                Theta.erase( Theta.begin() );
+                S.resize(m,m);         
                 for(size_type i = 0; i < m; ++i)
                 {
-                    size_t row = (search_highest) ? (Theta.size()-2-i) : (i+1);
-                    M(i,i) = Theta[row];
-                    ublas::column(S, row + ( search_highest ? +1 : -1) ) = ublas::unit_vector<scalar_type> (S.size1(), i);
+                    M(i,i) = Theta[i];
+                    ublas::column(S, i) = ublas::unit_vector<scalar_type> (S.size1(), i);
                 }
-
-                Theta.erase( (search_highest) ? (Theta.end() - 1) : Theta.begin() );
-
-                theta = (search_highest) ? Theta.back() : Theta[0];
+                assert ( S.size1() == m && S.size2() == m );
 
                 X_.resize(X_.size()+1);
                 X_.back() = V[0];
-                r = VA[0] - theta * X_.back();
+                r = VA[0] - Theta[0] * X_.back();
                 norm_r = ietl::two_norm(r);
 
             } // accept eigenpairs
@@ -623,14 +601,14 @@ namespace solver {
                 VA.insert(VA.begin(), uA);
 
                 for(size_type i = 0; i < m_min; ++i)
-                    M(i,i) = Theta[(search_highest) ? Theta.size()-1-i : i];
+                    M(i,i) = Theta[i];
 
                 Theta.resize(m_min);
                 m = m_min;
             }// restart
 
             // correction equation
-            solver(theta, r, t, iter); //solver is allowed to change r
+            solver(Theta[0], r, t, iter); //solver is allowed to change r
 
             //assure t is orthogonal to Q
             norm_t = ietl::two_norm(t);
