@@ -5,13 +5,14 @@ EXTERNAL_INPUT_DATA = 1;
 t = 1;
 BETA = 10;
 U_MATRIX="Umatrix";
+EPSILOND_VECTOR="mu_dc_solver";
+F = "F_1";
 N = 200;
 FLAVORS = 2;
 SEED = 0;
-F = F_1;
 N_ORDER = 50;
 N_MEAS = 10000;
-N_SHIFT = 0;
+N_SHIFT = 10;
 MEASURE_gw = 1;
 MEASURE_fw = 1;
 MEASURE_gl = 1;
@@ -26,4 +27,5 @@ N_W = 2;
 N_l = 25;
 N_nn =10;
 PARAMAGNETIC=1;
+
 

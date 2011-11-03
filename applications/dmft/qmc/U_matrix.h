@@ -86,15 +86,15 @@ public:
     for(spin_t i=0;i<nf_;i+=2){
       operator()(i  , i  ) = 0; //Pauli
       operator()(i+1, i+1) = 0; //Pauli
-      operator()(i  , i+1) =U; //Hubbard repulsion same band
-      operator()(i+1, i  ) =U; //Hubbard repulsion same band
+      operator()(i  , i+1) = U; //Hubbard repulsion same band
+      operator()(i+1, i  ) = U; //Hubbard repulsion same band
       for(spin_t j=0; j<nf_; j+=2){
         if(j==i) 
           continue;
-        operator()(i  ,j  ) = Uprime; //Hubbard repulsion interband same spin 
-        operator()(i+1,j+1) = Uprime; //Hubbard repulsion interband same spin
-        operator()(i  ,j+1) = Uprime-J; //Hubbard repulsion interband opposite spin (this used to be '+J', the rest of the world uses '-J' -> changed to be consistent).
-        operator()(i+1,j  ) = Uprime-J; //Hubbard repulsion interband opposite spin
+        operator()(i  ,j  ) = Uprime-J; //Hubbard repulsion interband same spin 
+        operator()(i+1,j+1) = Uprime-J; //Hubbard repulsion interband same spin
+        operator()(i  ,j+1) = Uprime; //Hubbard repulsion interband opposite spin (this used to be '+J', the rest of the world uses '-J' -> changed to be consistent).
+        operator()(i+1,j  ) = Uprime; //Hubbard repulsion interband opposite spin
       }
     }
   } 

@@ -180,29 +180,49 @@ void hybridization::read_external_input_data(const parameters_type &parms){
     if(!mu_dc_solver.good()) throw(std::invalid_argument("mu dc solver file "+mu_dc_solver_string+" does not have enough lines? check format of mu file"));
     mu_dc_solver>>dummy>>mu_e[i]>>std::ws;
   }
-  
-  
+
   // read F from file
   if(parms.defined("F")){
-    ifstream infile(boost::lexical_cast<std::string>(parms["F"]).c_str());
-    if(!infile.good()){
-      throw(std::invalid_argument(std::string("could not open file ") + parms["F"].str() + "for F function"));
+    std::string fname=boost::lexical_cast<std::string>(parms["F"]);
+    size_t found=fname.find(".h5",fname.size()-3);
+    if(found!=string::npos){//attempt to read from h5 archive
+      alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
+      int N_, FLAVORS_;
+      ar>>alps::make_pvp("/N",N_);
+      ar>>alps::make_pvp("/FLAVORS",FLAVORS_);
+      if(N_!=N) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of time slices");
+      if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of flavors");
+      std::vector<double> tmp(FLAVORS*(N+1));
+      ar>>alps::make_pvp("/data",tmp);
+      for(int j=0; j<FLAVORS; j++)
+        for(int i=0; i<N+1; i++)
+          F[j][i]=tmp[j*(N+1)+i];
+      tmp.clear();
     }
-    for (int i=0; i<N+1; i++) {
+    else{
+      ifstream infile(fname.c_str());
       if(!infile.good()){
-        throw(std::invalid_argument(std::string("bad file ") + parms["F"].str() + "probably wrong number of lines"));
+        throw(std::invalid_argument(std::string("could not open file ") + parms["F"].str() + "for F function"));
       }
-      double dummy;
-      infile >> dummy; 
-      for (int j=0; j<FLAVORS; j++){
+      for (int i=0; i<N+1; i++) {
         if(!infile.good()){
-          throw(std::invalid_argument(std::string("bad file ") + parms["F"].str() + "probably wrong number of columns"));
+          throw(std::invalid_argument(std::string("bad file ") + parms["F"].str() + "probably wrong number of lines"));
         }
-        infile >> F[j][i];
+        double dummy;
+        infile >> dummy; 
+        for (int j=0; j<FLAVORS; j++){
+          if(!infile.good()){
+            throw(std::invalid_argument(std::string("bad file ") + parms["F"].str() + "probably wrong number of columns"));
+          }
+          infile >> F[j][i];
+        }
       }
     }
   }
+
 }
+
+
 void hybridization::read_alps_framework_input_data_omega(const parameters_type &parms){
   
   if(!parms.defined("U")) throw std::runtime_error("parameter U (for the interaction strength) is missing!");

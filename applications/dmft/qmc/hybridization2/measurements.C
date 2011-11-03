@@ -97,9 +97,10 @@ void hybridization::resize_measurement_vectors(int crank){
   }
 
 //  if(MEASURE_nn) nn_meas.resize(FLAVORS*FLAVORS, 0.);
-  if(MEASURE_nn) nn_meas.resize((FLAVORS*(FLAVORS+1))/2, 0.);
+  if(MEASURE_nn){ nn_meas.resize((FLAVORS*(FLAVORS+1))/2, 0.); if(!crank) cout << "measuring <nn>" << endl; }
   if(MEASURE_nnt){
     nnt_meas.resize(((FLAVORS*(FLAVORS+1))/2)*(N_nn+1));//store only for f1>=f2
+    if(!crank) cout << "measuring <n(tau)n(0)>" << endl;
   }
 
   N_w_aux=N_w2+N_W-1;

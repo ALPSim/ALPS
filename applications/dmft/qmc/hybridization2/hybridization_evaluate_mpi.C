@@ -27,6 +27,7 @@
  ************************************************************************************/
 
 #include <iostream>
+#include <utility>
 #include <fstream>
 #include <complex>
 #include <cmath>
@@ -35,10 +36,22 @@
 #include <alps/hdf5/pointer.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/hdf5/vector.hpp>
+#include <alps/ngs/hdf5.hpp>
+#include <alps/ngs/params.hpp>
 #include <boost/math/special_functions/bessel.hpp>
 #include <boost/math/constants/constants.hpp>
+#include <boost/mpi.hpp>
+#include <boost/mpi/environment.hpp> 
+#include <boost/mpi/communicator.hpp> 
+#include <boost/serialization/vector.hpp>
+#include <boost/serialization/complex.hpp>
 
 using namespace boost::math;
+namespace mpi = boost::mpi;
+
+#ifdef ALPS_HAVE_MPI
+#define USE_MPI
+#endif
 
 const std::complex<double> i_c(0.0,1.0);
 const double pi = constants::pi<double>();
@@ -50,6 +63,12 @@ return (sqrt(2*l+1)/sqrt(2*n+1)) * exp(i_c*(n+0.5)*pi) * pow(i_c,l) * cyl_bessel
 template <typename T>
 T sqr(T x){
   return x*x;
+}
+
+inline std::string int2str(int i){
+std::ostringstream str;
+str << i;
+return str.str();
 }
 
 template <typename T>
@@ -64,13 +83,52 @@ void spin_average(std::vector<T> &vec, int FLAVORS){
 }
 
 
+//simple operator to print the contents of an std::vector<T>
+template <typename T>
+std::ostream &operator <<(std::ostream &os, std::vector<T> &v){
+    for(typename std::vector<T>::iterator it = v.begin(); it != v.end(); ++it)
+	os << (*it) << " ";
+    os << std::endl;
+    return os;
+}
+
+#ifdef USE_MPI
+inline std::pair<int,int> frequency_range(const int world_size, const int world_rank, const int nbosonic){
+static int msg=0;
+if(world_size>nbosonic){
+  if(!world_rank && !msg){ std::cout << "warning::number processes is larger than the number of frequencies." << std::endl; ++msg; }
+  if(world_rank>=nbosonic) return std::pair<int,int>(0,0);
+  else return std::pair<int,int>(world_rank,world_rank+1);
+}
+else{
+  int remaining=nbosonic%world_size;
+  int share=nbosonic/world_size;
+  if( remaining && !world_rank && !msg){ std::cout << "warning::number bosonic frequencies is not divisible by the number of processes." << std::endl; ++msg; }
+
+  if(world_rank==world_size-1 && remaining) return std::pair<int,int>(world_rank*share, (world_rank+1)*share+remaining);
+  else return std::pair<int,int>(world_rank*share,(world_rank+1)*share);
+}
+
+}
+#endif
+
+
+
 int main(int argc, char ** argv){
-  std::string basename=std::string(argv[1]);
-  bool write_hr = false;
-  if(argc==3 && std::string(argv[2]) == "hr"){
-    write_hr=true; //write results in human readable format for quick plotting
-    std::cout << "recognized option \"hr\"" << std::endl;
-  }
+
+std::string basename=std::string(argv[1]);
+bool write_hr = false;
+
+if(argc==3 && std::string(argv[2]) == "hr"){
+  write_hr=true; //write results in human readable format for quick plotting
+  std::cout << "recognized option \"hr\"" << std::endl;
+}
+
+#ifdef USE_MPI
+mpi::environment env(argc, argv); 
+mpi::communicator world;
+#endif
+
   double BETA;
   double N;
   int N_ORDER;
@@ -90,13 +148,54 @@ int main(int argc, char ** argv){
   int N_l;
   int N_nn;
   int PARAMAGNETIC;
+  bool evaluate_gamma=false;
   std::ofstream str;
   std::vector<double> Greens;
   std::vector<double> density;
   std::vector<std::complex<double> >gw;//also needed for evaluation
   std::vector<std::complex<double> >fw;//of the vertex function
+
+#ifdef USE_MPI
+  alps::params parms(world);
+  if(world.rank()==0){//evaluate single-particle quantities (fast) only on master
+    alps::hdf5::archive ar(basename+".h5");
+    ar >> make_pvp("/parameters", parms);
+  }
+  parms.broadcast();
+#else 
   {
+    alps::hdf5::archive ar(basename+".h5");
+    alps::params parms(ar);
+  }
+#endif
+
+  BETA=static_cast<double>(parms["BETA"]);
+  N=static_cast<int>(parms["N"]);
+  N_ORDER=static_cast<int>(parms["N_ORDER"]);
+  FLAVORS=static_cast<int>(parms["FLAVORS"]);
+  N_MEAS=static_cast<int>(parms["N_MEAS"]);
+  MEASURE_gw= static_cast<int>(parms.value_or_default("MEASURE_gw", 0));
+  MEASURE_fw= static_cast<int>(parms.value_or_default("MEASURE_fw", 0));
+  MEASURE_gl= static_cast<int>(parms.value_or_default("MEASURE_gl", 0));
+  MEASURE_fl= static_cast<int>(parms.value_or_default("MEASURE_fl", 0));
+  MEASURE_g2w=static_cast<int>(parms.value_or_default("MEASURE_g2w", 0));
+  MEASURE_hw= static_cast<int>(parms.value_or_default("MEASURE_hw", 0));
+  MEASURE_nnt=static_cast<int>(parms.value_or_default("MEASURE_nnt", 0));
+  MEASURE_nn= static_cast<int>(parms.value_or_default("MEASURE_nn", 0));
+  N_w= static_cast<int>(parms.value_or_default("N_w", 0));
+  N_W= static_cast<int>(parms.value_or_default("N_W", 0));
+  N_w2=static_cast<int>(parms.value_or_default("N_w2", 0));
+  N_l= static_cast<int>(parms.value_or_default("N_l", 0));
+  N_nn=static_cast<int>(parms.value_or_default("N_nn", 0));
+  PARAMAGNETIC= static_cast<int>(parms.value_or_default("PARAMAGNETIC", 0));
+
+#ifdef USE_MPI
+  if(world.rank()==0){
+#endif
+
+  {//scope for ar
     alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+/*
     ar>>alps::make_pvp("/parameters/BETA", BETA);
     ar>>alps::make_pvp("/parameters/N", N);
     ar>>alps::make_pvp("/parameters/N_ORDER", N_ORDER);
@@ -116,9 +215,10 @@ int main(int argc, char ** argv){
     ar>>alps::make_pvp("/parameters/N_l", N_l);
     ar>>alps::make_pvp("/parameters/N_nn", N_nn);
     ar>>alps::make_pvp("/parameters/PARAMAGNETIC", PARAMAGNETIC);
+*/
 
     double N_SWEEPS; ar>>alps::make_pvp("/simulation/results/order/count",N_SWEEPS);
-  
+
     std::vector<double> matrix_size; matrix_size.resize(FLAVORS); ar>>alps::make_pvp("/simulation/results/matrix_size/mean/value",matrix_size);
 
     std::cout << "simulation details:" << std::endl;
@@ -191,7 +291,7 @@ int main(int argc, char ** argv){
     }
     std::cout << "done." << std::endl;
   
-  if(MEASURE_nn || write_hr){
+  if(MEASURE_nn){
     std::cout << "evaluating <nn>..." << std::flush;
     std::vector<double> nn; nn.resize(FLAVORS*(FLAVORS+1)/2);  
     {
@@ -289,8 +389,14 @@ int main(int argc, char ** argv){
       ar>>alps::make_pvp("/simulation/results/gw_re/mean/value",gw_re);
       ar>>alps::make_pvp("/simulation/results/gw_im/mean/value",gw_im);
     }
-    for(std::size_t i=0; i<gw_re.size(); ++i) gw.push_back(std::complex<double>(gw_re[i],gw_im[i]));
-    if(PARAMAGNETIC)spin_average(gw,FLAVORS);
+    if(PARAMAGNETIC){
+      spin_average(gw_re,FLAVORS);
+      spin_average(gw_im,FLAVORS);
+    }
+    for(int orb=0; orb<FLAVORS/2; ++orb)
+      for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s)
+        for(int wn=0; wn<N_w; ++wn)
+          gw.push_back(std::complex<double>(gw_re[(2*orb+s)*N_w+wn],gw_im[(2*orb+s)*N_w+wn]));
     {
       alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
       oar << alps::make_pvp("/simulation/results/gw",gw);
@@ -299,8 +405,11 @@ int main(int argc, char ** argv){
       str.open("gw.dat");
       for(int wn=0; wn<N_w; ++wn){
         str << (2*wn+1)*M_PI/BETA;
-        for(int f=0; f<FLAVORS; ++f)
-          str << " " << gw[f*N_w+wn].real() << " " << gw[f*N_w+wn].imag();
+        for(int n=0; n<FLAVORS/2; ++n)
+          for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
+            int m=(PARAMAGNETIC ? n : 2*n+s);
+            str << " " << gw[m*N_w+wn].real() << " " << gw[m*N_w+wn].imag();
+          }
         str  << std::endl;
       }
       str.close();
@@ -321,10 +430,13 @@ int main(int argc, char ** argv){
         spin_average(fw_re,FLAVORS);
         spin_average(fw_im,FLAVORS);
       }
-      for(std::size_t i=0; i<fw_re.size(); ++i){ 
-        fw.push_back(std::complex<double>(fw_re[i],fw_im[i]));
-        sigmaw.push_back(fw[i]/gw[i]);
-      }
+
+      for(int orb=0; orb<FLAVORS/2; ++orb)
+        for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s)
+          for(int wn=0; wn<N_w; ++wn)
+            fw.push_back(std::complex<double>(fw_re[(2*orb+s)*N_w+wn],fw_im[(2*orb+s)*N_w+wn]));
+
+      for(std::size_t i=0; i<fw.size(); ++i) sigmaw.push_back(fw[i]/gw[i]);
       {
         alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
         oar << alps::make_pvp("/simulation/results/sigmaw",sigmaw);
@@ -334,9 +446,11 @@ int main(int argc, char ** argv){
         str.open("sigmaw.dat");
         for(int wn=0; wn<N_w; ++wn){
           str << (2*wn+1)*M_PI/BETA;
-          for(int f=0; f<FLAVORS; ++f){
-            str << " " << real(sigmaw[f*N_w+wn]) << " " << imag(sigmaw[f*N_w+wn]);
-          }
+          for(int n=0; n<FLAVORS/2; ++n)
+            for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
+              int m=(PARAMAGNETIC ? n : 2*n+s);
+              str << " " << real(sigmaw[m*N_w+wn]) << " " << imag(sigmaw[m*N_w+wn]);
+            }
           str  << std::endl;
         }
         str.close();
@@ -354,13 +468,14 @@ int main(int argc, char ** argv){
     }
     if(PARAMAGNETIC) spin_average(gl,FLAVORS);
     std::vector<std::complex<double> >gwl;
-    for(int f=0; f<FLAVORS; ++f)
-      for(int wn=0; wn<N_w; ++wn){
-        std::complex<double> gw_(0.);
-          for(int l=0; l<N_l; ++l)
-            gw_+=t(wn,l)*sqrt(2.*l+1)*gl[f*N_l+l]; //sqrt(2l+1) has been omitted in the measurement
-        gwl.push_back(gw_);
-      }
+    for(int orb=0; orb<FLAVORS/2; ++orb)
+      for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s)
+        for(int wn=0; wn<N_w; ++wn){
+          std::complex<double> gw_(0.);
+            for(int l=0; l<N_l; ++l)
+              gw_+=t(wn,l)*sqrt(2.*l+1)*gl[(2*orb+s)*N_l+l]; //sqrt(2l+1) has been omitted in the measurement
+          gwl.push_back(gw_);
+        }
     {
       alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
       oar << alps::make_pvp("/simulation/results/gw_from_l",gwl);
@@ -369,8 +484,11 @@ int main(int argc, char ** argv){
       str.open("gw_from_l.dat");
       for(int wn=0; wn<N_w; ++wn){
         str << (2*wn+1)*M_PI/BETA;
-        for(int f=0; f<FLAVORS; ++f)
-          str << " " << gwl[f*N_w+wn].real() << " " << gwl[f*N_w+wn].imag();
+        for(int n=0; n<FLAVORS/2; ++n)
+          for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
+            int m=(PARAMAGNETIC ? n : 2*n+s);
+            str << " " << gwl[m*N_w+wn].real() << " " << gwl[m*N_w+wn].imag();
+          }
         str  << std::endl;
       }
       str.close();
@@ -379,7 +497,6 @@ int main(int argc, char ** argv){
     if(MEASURE_fl){
       std::cout << "evaluating sigmaw from l..." << std::flush;
       std::vector<double> fl; fl.resize(FLAVORS*N_l);
-
       {
         alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
         ar>>alps::make_pvp("/simulation/results/fl/mean/value",fl);
@@ -387,14 +504,15 @@ int main(int argc, char ** argv){
       if(PARAMAGNETIC) spin_average(fl,FLAVORS);
       std::vector<std::complex<double> >fwl;
       std::vector<std::complex<double> >sigmawl;
-      for(int f=0; f<FLAVORS; ++f)
-        for(int wn=0; wn<N_w; ++wn){
-          std::complex<double> fw_(0.);
-            for(int l=0; l<N_l; ++l)
-              fw_+=t(wn,l)*sqrt(2.*l+1)*fl[f*N_l+l]; 
-          fwl.push_back(fw_);
-          sigmawl.push_back(fw_/gwl[f*N_w+wn]);
-        }
+      for(int n=0; n<FLAVORS/2; ++n)
+        for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s)
+          for(int wn=0; wn<N_w; ++wn){
+            std::complex<double> fw_(0.);
+              for(int l=0; l<N_l; ++l)
+                fw_+=t(wn,l)*sqrt(2.*l+1)*fl[(2*n+s)*N_l+l];
+            fwl.push_back(fw_);
+          }
+      for(std::size_t i=0; i<fwl.size(); ++i) sigmawl.push_back(fwl[i]/gwl[i]);
       {
         alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
         oar << alps::make_pvp("/simulation/results/fw_from_l",fwl);
@@ -404,79 +522,130 @@ int main(int argc, char ** argv){
         str.open("sigmaw_from_l.dat");
         for(int wn=0; wn<N_w; ++wn){
           str << (2*wn+1)*M_PI/BETA;
-          for(int f=0; f<FLAVORS; ++f){
-            str << " " << real(sigmawl[f*N_w+wn]) << " " << imag(sigmawl[f*N_w+wn]);
-          }
+          for(int n=0; n<FLAVORS/2; ++n)
+            for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
+              int m=(PARAMAGNETIC ? n : 2*n+s);
+              str << " " << real(sigmawl[m*N_w+wn]) << " " << imag(sigmawl[m*N_w+wn]);
+            }
           str  << std::endl;
         }
         str.close();
       }
       std::cout << "done." << std::endl;
-    }
+    }//MEASURE_fl
+  }//if MEASURE_gl
+  if(MEASURE_g2w && MEASURE_fw && MEASURE_gw && MEASURE_hw){
+    evaluate_gamma=true;
   }
 
+#ifdef USE_MPI
+}//end if world.rank()==0
+  broadcast(world, evaluate_gamma, 0);
+#endif
 
-  if(MEASURE_g2w && MEASURE_fw && MEASURE_gw && MEASURE_hw){
+  if(evaluate_gamma){
     std::cout << "evaluating gamma..." << std::flush;
-    const int Nwh=N_w2/2;
-    std::vector<double> g2w_re; g2w_re.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-    std::vector<double> g2w_im; g2w_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-    std::vector<double> hw_re; hw_re.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-    std::vector<double> hw_im; hw_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-    std::vector<std::complex<double> > gammaw; 
-    if(PARAMAGNETIC) gammaw.resize((FLAVORS/2)*FLAVORS*N_w2*N_w2*N_W, 0.);
-    else gammaw.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-    {
-      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
-      ar>>alps::make_pvp("/simulation/results/g2w_re/mean/value",g2w_re);
-      ar>>alps::make_pvp("/simulation/results/g2w_im/mean/value",g2w_im);
-      ar>>alps::make_pvp("/simulation/results/hw_re/mean/value",hw_re);
-      ar>>alps::make_pvp("/simulation/results/hw_im/mean/value",hw_im);
+    std::vector<double> g2w_re;
+    std::vector<double> g2w_im;
+    std::vector<double> hw_re;
+    std::vector<double> hw_im;
+#ifdef USE_MPI
+
+    broadcast(world, fw, 0);
+    broadcast(world, gw, 0);
+
+    std::pair<int,int> range=frequency_range(world.size(), world.rank(), N_W);
+    std::cout << world.size() << " " << world.rank() << " " << N_W << std::endl;
+    
+    int N_W_p = range.second-range.first;
+    std::cout << "process #" << world.rank() << " will compute frequencies " << range.first << " to " << range.second-1 
+              << " (" << N_W_p << " total)" << std::endl;
+
+    if(world.rank()==0){
+#else
+    int N_W_p = N_W;
+#endif
+      g2w_re.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
+      g2w_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
+      hw_re.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
+      hw_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
+      {
+        alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+        ar>>alps::make_pvp("/simulation/results/g2w_re/mean/value",g2w_re);
+        ar>>alps::make_pvp("/simulation/results/g2w_im/mean/value",g2w_im);
+        ar>>alps::make_pvp("/simulation/results/hw_re/mean/value",hw_re);
+        ar>>alps::make_pvp("/simulation/results/hw_im/mean/value",hw_im);
+      }
+#ifdef USE_MPI
     }
+    broadcast(world, g2w_re, 0);
+    broadcast(world, g2w_im, 0);
+    broadcast(world, hw_re, 0);
+    broadcast(world, hw_im, 0);
+#endif
+    const int Nwh=N_w2/2;
+    std::vector<std::complex<double> > gammaw;
+    if(PARAMAGNETIC) gammaw.resize((FLAVORS/2)*FLAVORS*N_w2*N_w2*N_W_p, 0.);
+    else gammaw.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W_p, 0.);
+
     std::ofstream chi_str;
     std::ofstream chi_irr_str;
     std::ofstream gamma_str;
 
-    if(write_hr){
+#ifdef USE_MPI
+if(world.rank()==0){
+#endif
+    if(write_hr && world.size()==1){
       chi_str.open("g2w.dat");
       chi_irr_str.open("g2_irr.dat");
       gamma_str.open("gamma.dat");
     }
+#ifdef USE_MPI
+}
+#endif
     std::complex<double> chi, chi_irr, gamma, f, g1, g2, g3, g4;
     std::complex<double> chi_irr_new, chi_irr_sf, gamma_new, gamma_sf, h, chi0;
-
       for(int n1=0; n1<FLAVORS/2; ++n1)//n1,n2 label orbital indices only
         for(int n2=0; n2<FLAVORS/2; ++n2)
          for(int s1=0; s1<(PARAMAGNETIC ? 1 : 2); ++s1) //in paramagnetic case take spin components 00 and 01 only
           for(int s2=0; s2<2; ++s2){
-            int f1=2*n1+s1;
-            int f2=2*n2+s2;
+            int f1=2*n1+s1; int m1=(PARAMAGNETIC ? n1 : f1);//in paramagnetic case, gw has orbital index only
+            int f2=2*n2+s2; int m2=(PARAMAGNETIC ? n2 : f2);
             for(int w2n=-Nwh; w2n<Nwh; ++w2n){
-              g2=(w2n<0 ? conj(gw[f1*N_w+(-w2n-1)]) : gw[f1*N_w+w2n]);//g2:w2n,n1
+              g2=(w2n<0 ? conj(gw[m1*N_w+(-w2n-1)]) : gw[m1*N_w+w2n]);//g2:w2n,n1
               for(int w3n=-Nwh; w3n<Nwh; ++w3n){
-                g3=(w3n<0 ? conj(gw[f2*N_w+(-w3n-1)]) : gw[f2*N_w+w3n]);//g3:w4n,n2
-                for(int Wn=0; Wn<N_W; ++Wn){
+                g3=(w3n<0 ? conj(gw[m2*N_w+(-w3n-1)]) : gw[m2*N_w+w3n]);//g3:w4n,n2
+                for(int Wind=0; Wind<N_W_p; ++Wind){
+                  int Wn=Wind; //Wn is the actual frequency index
+#ifdef USE_MPI
+                  Wn+=range.first;
+#endif
                   int w1n=w2n+Wn; int w4n=w3n+Wn;
-                  f = (w1n<0 ? conj(fw[f1*N_w+(-w1n-1)]) : fw[f1*N_w+w1n]);
-                  g1= (w1n<0 ? conj(gw[f1*N_w+(-w1n-1)]) : gw[f1*N_w+w1n]);// g1:w1n,f1
-                  g4= (w4n<0 ? conj(gw[f2*N_w+(-w4n-1)]) : gw[f2*N_w+w4n]);// g4:w4n,f2
+                  f = (w1n<0 ? conj(fw[m1*N_w+(-w1n-1)]) : fw[m1*N_w+w1n]);
+                  g1= (w1n<0 ? conj(gw[m1*N_w+(-w1n-1)]) : gw[m1*N_w+w1n]);// g1:w1n,f1
+                  g4= (w4n<0 ? conj(gw[m2*N_w+(-w4n-1)]) : gw[m2*N_w+w4n]);// g4:w4n,f2
                   chi0=0.0;
                   if(w1n==w2n)chi0+=BETA*g1*g3;
                   if(w2n==w3n && f1==f2) chi0-=BETA*g1*g3; //this gives chi0
                   int f1r=2*n1+(1-s1);
                   int f2r=2*n2+(1-s2);
+                  int index_g;
 //                int index  =(FLAVORS*f1 +f2 )*N_w2*N_w2*N_W + (w2n+Nwh)*N_w2*N_W + (w3n+Nwh)*N_W+Wn;
                   int index=Wn*FLAVORS*FLAVORS*N_w2*N_w2 + (FLAVORS*f1+f2) *N_w2*N_w2 + (w2n+Nwh)*N_w2 + w3n+Nwh;
                   if(PARAMAGNETIC){
 //                    int index_r=(FLAVORS*f1r+f2r)*N_w2*N_w2*N_W + (w2n+Nwh)*N_w2*N_W + (w3n+Nwh)*N_W+Wn;
-                  int index_r=Wn*FLAVORS*FLAVORS*N_w2*N_w2 + (FLAVORS*f1r+f2r) *N_w2*N_w2 + (w2n+Nwh)*N_w2 + w3n+Nwh;
+                    int index_r=Wn*FLAVORS*FLAVORS*N_w2*N_w2 + (FLAVORS*f1r+f2r) *N_w2*N_w2 + (w2n+Nwh)*N_w2 + w3n+Nwh;
+
                     chi=0.5*std::complex<double>( g2w_re[index] + g2w_re[index_r],//spin average
                                                   g2w_im[index] + g2w_im[index_r] );
                       h=0.5*std::complex<double>(  hw_re[index] +  hw_re[index_r],//spin average
                                                    hw_im[index] +  hw_im[index_r] );
+                    index_g=Wind*(FLAVORS/2)*FLAVORS*N_w2*N_w2 + (FLAVORS*n1+f2) *N_w2*N_w2 + (w2n+Nwh)*N_w2 + w3n+Nwh; //CHECK
+
                   }else{
                     chi=std::complex<double>( g2w_re[index], g2w_im[index] );
                       h=std::complex<double>(  hw_re[index],  hw_im[index] );
+                        index_g=Wind*(FLAVORS)*FLAVORS*N_w2*N_w2 + (FLAVORS*f1+f2) *N_w2*N_w2 + (w2n+Nwh)*N_w2 + w3n+Nwh; //CHECK
                   }
                   chi_irr=g1*h - f*chi; //most accurate results
 //                  chi_irr=(g1*h-f*chi0)/(1.0+f); //somewhat less accurate; chi not needed
@@ -484,28 +653,41 @@ int main(int argc, char ** argv){
 
                   gamma=chi_irr/(g1*g2*g3*g4);
                   
-                  gammaw[index] = gamma;
-                  
-                  if(write_hr){
-                    chi_str << "w: " << (2*w2n+1) << " wp: " << (2*w3n+1) << " W: " << Wn << " " << " z1: " << s1 << " z2: " << s2 << "  "
-                            << "   n1: " << n1 << " n2: " << n2 << "   "
-                            << chi.real() << " " << chi.imag() << "   " << chi0.real() << " " << chi0.imag() << std::endl;
-
-                    chi_irr_str << "w: " << (2*w2n+1) << " wp: " << (2*w3n+1) << " W: " << Wn << " " << " z1: " << s1 << " z2: " << s2 << "  "
-                                << "   n1: " << n1 << " n2: " << n2 << "   "
-                                << chi_irr.real() << " " << chi_irr.imag() << std::endl;
-
-                    gamma_str << "w: " << (2*w2n+1) << " wp: " << (2*w3n+1) << " W: " << Wn << " " << " z1: " << s1 << " z2: " << s2 << "  "
+                  gammaw[index_g] = gamma;
+#ifdef USE_MPI
+                  if(world.rank()==0){
+#endif                  
+                    if(write_hr && world.size()==1){
+                      chi_str << "w: " << (2*w2n+1) << " wp: " << (2*w3n+1) << " W: " << Wn << " " << " z1: " << s1 << " z2: " << s2 << "  "
                               << "   n1: " << n1 << " n2: " << n2 << "   "
-                              << gamma.real() << " " << gamma.imag()  << std::endl;
+                              << chi.real() << " " << chi.imag() << "   " << chi0.real() << " " << chi0.imag() << std::endl;
+
+                      chi_irr_str << "w: " << (2*w2n+1) << " wp: " << (2*w3n+1) << " W: " << Wn << " " << " z1: " << s1 << " z2: " << s2 << "  "
+                                  << "   n1: " << n1 << " n2: " << n2 << "   "
+                                  << chi_irr.real() << " " << chi_irr.imag() << std::endl;
+
+                      gamma_str << "w: " << (2*w2n+1) << " wp: " << (2*w3n+1) << " W: " << Wn << " " << " z1: " << s1 << " z2: " << s2 << "  "
+                                << "   n1: " << n1 << " n2: " << n2 << "   "
+                                << gamma.real() << " " << gamma.imag()  << std::endl;
+                    }
+#ifdef USE_MPI
                   }
+#endif
                 }//Wn
               }//w3n
             }//w2n
           }//s2
     {
-      alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
-      oar << alps::make_pvp("/simulation/results/gammaw",gammaw);
+      std::string fname="gammaw";
+#ifdef USE_MPI
+      fname+=std::string(".part")+int2str(world.rank());
+#endif
+      fname+=std::string(".h5");
+      alps::hdf5::archive oar(fname, alps::hdf5::archive::WRITE);
+      oar << alps::make_pvp("/data",gammaw);
+      oar << alps::make_pvp("/size",gammaw.size());
+      oar << alps::make_pvp("/Wrange",N_W_p);
+      oar << alps::make_pvp("/Woffset",range.first);
     }
 
   std::cout << "done." << std::endl;
@@ -513,3 +695,5 @@ int main(int argc, char ** argv){
 
   return 0;
 }
+
+
