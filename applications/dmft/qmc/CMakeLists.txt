@@ -46,14 +46,14 @@ ENDIF(ALPS_BUILD_NGS)
        hybridization/impurity.C 
        hybridization/fourpoint.C)
 
-IF(ALPS_BUILD_NGS)
+IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   set (DMFT_QMC_HYBRIDIZATION2_SOURCE
        hybridization2/impurity.C 
        fouriertransform.C
        hybridization2/moves.C
        hybridization2/measurements.C
        hybridization2/update.C)
-ENDIF(ALPS_BUILD_NGS)
+ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
   set (DMFT_QMC_SOLVERS "")
  
@@ -69,10 +69,10 @@ IF(ALPS_BUILD_NGS)
   #Interaction Expansion - separate solver
   add_library (interaction_expansion2_impl STATIC  ${DMFT_QMC_INTERACTION_EXPANSION2_SOURCE})
 ENDIF(ALPS_BUILD_NGS)
-IF(ALPS_BUILD_NGS)
+IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   #Hybridization Expansion - separate solver
   add_library (hybridization2_impl STATIC ${DMFT_QMC_HYBRIDIZATION2_SOURCE})
-ENDIF(ALPS_BUILD_NGS)
+ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
   add_definitions(${LAPACK_DEFINITIONS} )
@@ -81,27 +81,29 @@ ENDIF(ALPS_BUILD_NGS)
 
   add_executable(dmft main.C selfconsistency.C)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
-IF(ALPS_BUILD_NGS)
+IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   add_executable(hybridization hybridization2/main.C)
   add_executable(hybridization_eval
   hybridization2/hybridization_evaluate.C)
   add_executable(interaction interaction_expansion2/main.cpp)
-ENDIF(ALPS_BUILD_NGS)
+ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
   target_link_libraries(dmft dmft_qmc_impl  ${DMFT_QMC_SOLVERS})
   target_link_libraries(hirschfye dmft_qmc_impl)
 
-IF(ALPS_BUILD_NGS)
+IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   target_link_libraries(hybridization dmft_qmc_impl hybridization2_impl)
   target_link_libraries(hybridization_eval dmft_qmc_impl hybridization2_impl)
   target_link_libraries(interaction dmft_qmc_impl interaction_expansion2_impl)
-ENDIF(ALPS_BUILD_NGS)
+ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
   install(TARGETS dmft RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
-IF(ALPS_BUILD_NGS)
+IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS hybridization_eval RUNTIME DESTINATION bin COMPONENT applications)
+ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
+IF(ALPS_BUILD_NGS)
   install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
 ENDIF(ALPS_BUILD_NGS)
 
