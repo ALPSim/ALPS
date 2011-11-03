@@ -84,7 +84,7 @@ ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   add_executable(hybridization hybridization2/main.C)
   add_executable(hybridization_evaluate
-  hybridization2/hybridization_evaluate.C)
+  hybridization2/hybridization_evaluate_mpi.C)
   add_executable(interaction interaction_expansion2/main.cpp)
 ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
