@@ -1194,12 +1194,24 @@ def select(inp,condition):
             data_.append(ds)
     return data_
 
-def values(data, key):
+def select_by_property(data,proplist):
+    for k,v in proplist.items():
+        data = select(data, lambda ds: ds.props[k]==v)
+    return data
+
+def values(data, key):    
     vals = []
-    for ds in pyalps.flatten(data):
-        if ds.props[key] not in vals:
-            vals.append(ds.props[key])
-    return np.sort(vals)
+    if type(key) == list:
+        for ds in pyalps.flatten(data):
+            keyv = tuple([ds.props[kk] for kk in key])
+            if keyv not in vals:
+                vals.append(keyv)
+        return vals
+    else:
+        for ds in pyalps.flatten(data):
+            if ds.props[key] not in vals:
+                vals.append(ds.props[key])
+        return np.sort(vals)
 
 def mergeDataSets(dsets):
     props = dict_intersect([d.props for d in dsets])
