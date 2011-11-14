@@ -521,7 +521,7 @@ namespace solver {
             //resort S if searching for highest eigenvalues
             if(search_highest)
             {
-                reverse( Theta.begin(), Theta.end() );
+                std::reverse( Theta.begin(), Theta.end() );
                 for(size_type i = 0; i < size_type(m/2); ++i)
                     swap( ublas::column(S, i), ublas::column(S, m-1-i) ); 
             }
