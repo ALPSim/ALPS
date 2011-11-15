@@ -34,6 +34,7 @@
 /// @brief declares the external solver
 /// @sa ExternalSolver
 
+    #include <boost/mpi.hpp>
 #include "solver.h"
 #include "boost/filesystem/path.hpp"
 #include "boost/filesystem/operations.hpp"
@@ -75,11 +76,22 @@ public:
             
 private:
     /// call the executable
-    void call(std::string const& infile, std::string const& outfile);
+    virtual void call(std::string const& infile, std::string const& outfile);
       
 	///path to the solver executable
 	boost::filesystem::path exe_;
 };
-
+class CallbackSolver: public ExternalSolver
+{
+public:
+	CallbackSolver(void(*call_function)(std::string const&, std::string const&, boost::mpi::communicator&c),boost::mpi::communicator&com)
+  :ExternalSolver("/bin/false"),call_fun(call_function), c(com){}
+	
+private:
+    //function pointer to the callback function
+    void (*call_fun)(std::string const& infile, std::string const& outfile, boost::mpi::communicator&c);
+    virtual void call(std::string const& infile, std::string const& outfile){ call_fun(infile, outfile, c); }
+    boost::mpi::communicator &c;
+};
 
 #endif

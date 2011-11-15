@@ -1,4 +1,4 @@
- /*****************************************************************************
+/*****************************************************************************
  *
  * ALPS DMFT Project
  *
@@ -8,24 +8,24 @@
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
  *
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 /* $Id$ */
 
@@ -49,10 +49,10 @@
 #include "externalsolver.h"
 
 ImpuritySolver::result_type ExternalSolver::solve(
-      const itime_green_function_t& G0
-    , alps::Parameters p) 
+                                                  const itime_green_function_t& G0
+                                                  , alps::Parameters p) 
 {
-   BOOST_ASSERT(alps::is_master());
+  BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile; 
   if(p.defined("TMPNAME")){
@@ -73,7 +73,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
   } 
   
   call(infile,outfile);
-
+  
   // read the output
   unsigned int N=(unsigned int)p["N"];
   unsigned int sites     =(unsigned int)p.value_or_default("SITES", 1);
@@ -88,8 +88,8 @@ ImpuritySolver::result_type ExternalSolver::solve(
 }
 
 MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
-              const matsubara_green_function_t& G0_omega
-            , alps::Parameters p)
+                                                                 const matsubara_green_function_t& G0_omega
+                                                                 , alps::Parameters p)
 {
   BOOST_ASSERT(alps::is_master());
   std::string infile;
@@ -110,8 +110,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
   }
   
   call(infile,outfile);
-
-
+  
+  
   unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
   unsigned int n_tau=(unsigned int)p["N"];
   unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
@@ -149,8 +149,8 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
 }
 
 NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
-              const nambu_matsubara_green_function_t& G0_omega
-            , alps::Parameters p)
+                                                             const nambu_matsubara_green_function_t& G0_omega
+                                                             , alps::Parameters p)
 {
   std::cout<<"solve nambu for external solver!"<<std::endl;
   BOOST_ASSERT(alps::is_master());
@@ -170,9 +170,9 @@ NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
   }
-
+  
   call(infile,outfile);
-
+  
   unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
   unsigned int n_tau=(unsigned int)p["N"];
   unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
@@ -221,9 +221,9 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
   int result = std::system(command.c_str());
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
-	                                           
+  
   boost::filesystem::remove(infile);
-
+  
   if (!boost::filesystem::exists(outfile))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
 }
