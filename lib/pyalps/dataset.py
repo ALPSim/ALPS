@@ -29,11 +29,6 @@ import copy
 import numpy as np
 
 class ResultProperties:
-    def __deepcopy__(self,memo):
-        ret = ResultProperties()
-        ret.props = copy.deepcopy(self.props,memo)
-        return ret
-    
     def __init__(self):
         self.props = {}
 
@@ -48,13 +43,6 @@ class DataSet(ResultProperties):
               other ways of representing data may be used.
      * props - This is a dictionary of properties describing the dataset.
     """
-    def __deepcopy__(self,memo):
-        ret = DataSet()
-        ret.props = copy.deepcopy(self.props,memo)
-        ret.x = copy.deepcopy(self.x,memo)
-        ret.y = copy.deepcopy(self.y,memo)
-        return ret
-
     def __init__(self):
         ResultProperties.__init__(self)
         
@@ -65,11 +53,6 @@ class DataSet(ResultProperties):
         return "x=%s\ny=%s\nprops=%s" % (self.x, self.y, self.props)
         
 class ResultFile(ResultProperties):
-    def __deepcopy__(self,memo):
-        ret = ResultFile
-        ret.props = copy.deepcopy(self.props,memo)
-        return ret
-    
     def __init__(self,fn=None):
         ResultProperties.__init__(self)
         if fn != None:
