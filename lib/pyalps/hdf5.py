@@ -34,8 +34,8 @@ from pyhdf5_c import *
 
 class iArchive(archive):
     def __init__(self, filename):
-        archive.__init__(self, filename, 0)
+        archive.__init__(self, str(filename), 0)
 
 class oArchive(archive):
     def __init__(self, filename):
-        archive.__init__(self, filename, 1)
+        archive.__init__(self, str(filename), 1)
