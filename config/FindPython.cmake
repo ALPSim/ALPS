@@ -72,8 +72,13 @@ IF (PYTHON_FOUND AND NOT PYTHON_VISTRAILS_OVERRIDE)
   # and set the variable of output_var_name in the calling scope
   #
   FUNCTION ( EXEC_PYTHON_SCRIPT the_script output_var_name)
-    EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} -c "${the_script}" 
-      OUTPUT_VARIABLE res RESULT_VARIABLE returncode OUTPUT_STRIP_TRAILING_WHITESPACE)
+    IF ("${PYTHON_INTERPRETER}" MATCHES ".*ipython.*")
+      EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} "--c=${the_script}" 
+        OUTPUT_VARIABLE res RESULT_VARIABLE returncode OUTPUT_STRIP_TRAILING_WHITESPACE)
+    ELSE ("${PYTHON_INTERPRETER}" MATCHES ".*ipython.*")
+      EXECUTE_PROCESS(COMMAND ${PYTHON_INTERPRETER} -c "${the_script}" 
+        OUTPUT_VARIABLE res RESULT_VARIABLE returncode OUTPUT_STRIP_TRAILING_WHITESPACE)
+    ENDIF ("${PYTHON_INTERPRETER}" MATCHES ".*ipython.*")
     IF (NOT returncode EQUAL 0)
       MESSAGE(FATAL_ERROR "The script : ${the_script} \n did not run properly in the Python interpreter. Check your python installation.") 
     ENDIF (NOT returncode EQUAL 0)
