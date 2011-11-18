@@ -47,6 +47,7 @@ from dataset import DataSet
 from floatwitherror import FloatWithError
 from plot_core import read_xml as readAlpsXMLPlot
 from dict_intersect import *
+from natural_sort import natural_sort
 import alea
 
 def make_list(infiles):
