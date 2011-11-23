@@ -33,6 +33,7 @@ set(ALPS_USE_FILE "@ALPS_USE_FILE@")
 # The Boost Root Dir used by ALPS
 set(ALPS_Boost_ROOT_DIR "@Boost_ROOT_DIR@")
 set(ALPS_Boost_INCLUDE_DIR "@Boost_INCLUDE_DIR@")
+set(ALPS_Boost_LIBRARIES "@Boost_LIBRARIES@")
 
 # ALPS Configuration options.
 set(ALPS_BUILD_SHARED_LIBS "@BUILD_SHARED_LIBS@")

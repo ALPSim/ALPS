@@ -32,6 +32,7 @@ if(NOT ALPS_USE_FILE_INCLUDED)
   # The Boost Root Dir used by ALPS
   set(Boost_ROOT_DIR ${ALPS_Boost_ROOT_DIR})
   set(Boost_INCLUDE_DIR ${ALPS_Boost_INCLUDE_DIR})
+	set(Boost_LIBRARIES ${ALPS_Boost_LIBRARIES})
 
   # OpenMP
   set(OpenMP_C_FLAGS ${ALPS_OpenMP_C_FLAGS})
@@ -101,7 +102,7 @@ if(NOT ALPS_USE_FILE_INCLUDED)
   set(CMAKE_SHARED_LINKER_FLAGS_RELEASE "${CMAKE_SHARED_LINKER_FLAGS_RELEASE} ${ALPS_CMAKE_SHARED_LINKER_FLAGS_RELEASE}" CACHE STRING "Flags used by the linker during release builds." FORCE)
 
   # list of ALPS and dependent libraries
-  set(ALPS_LIBRARIES alps boost ${ALPS_EXTRA_LIBRARIES} CACHE STRING "List of ALPS and dependent libraries." FORCE)
+  set(ALPS_LIBRARIES alps ${Boost_LIBRARIES} ${ALPS_EXTRA_LIBRARIES} CACHE STRING "List of ALPS and dependent libraries." FORCE)
   set(ALPS_FORTRAN_LIBRARIES alps_fortran CACHE STRING "List of ALPS-Fortran library." FORCE)
 
   # RPATH setting
