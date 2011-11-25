@@ -73,13 +73,6 @@ for dataset in binning:
     plt.ylabel('Error of |Magnetization|')
     pyalps.plot.plot(dataset)
 
-for dataset in binning:
-    plt.figure()
-    plt.title('Binning analysis for L='+str(dataset.props['L']))
-    plt.xlabel('binning level')
-    plt.ylabel('Error of |Magnetization|')
-    pyalps.plot.plot(dataset)
-
 plt.show()
 
 
