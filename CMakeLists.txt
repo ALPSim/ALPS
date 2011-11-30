@@ -746,6 +746,7 @@ else (ALPS_BUILD_SOURCE)
             ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake
             ${PROJECT_BINARY_DIR}/config/include.mk
             config/run_test.cmake
+            config/run_test_mpi.cmake
             config/add_alps_test.cmake
             DESTINATION share/alps COMPONENT build)
             
