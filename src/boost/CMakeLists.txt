@@ -23,6 +23,17 @@ if(BUILD_BOOST_DATE_TIME)
   endforeach(S)
 endif(BUILD_BOOST_DATE_TIME)
 
+# Boost.Chrono
+if(BUILD_BOOST_CHRONO)
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/chrono/src")
+  set(SOURCES chrono.cpp process_cpu_clocks.cpp thread_clock.cpp)
+  foreach(S ${SOURCES})
+    if(EXISTS ${DIRECTORY}/${S})
+      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
+    endif(EXISTS ${DIRECTORY}/${S})
+  endforeach(S)
+endif(BUILD_BOOST_CHRONO)
+
 # Boost.Filesystem
 if(BUILD_BOOST_FILESYSTEM)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/filesystem")
