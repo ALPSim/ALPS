@@ -32,6 +32,10 @@ if(BUILD_BOOST_CHRONO)
       set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
     endif(EXISTS ${DIRECTORY}/${S})
   endforeach(S)
+    #boost librt linking
+    if(NOT WIN32 AND NOT APPLE)
+        set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} rt)
+    endif(NOT WIN32 AND NOT APPLE)
 endif(BUILD_BOOST_CHRONO)
 
 # Boost.Filesystem
