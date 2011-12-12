@@ -38,6 +38,17 @@ if(BUILD_BOOST_CHRONO)
     endif(NOT WIN32 AND NOT APPLE)
 endif(BUILD_BOOST_CHRONO)
 
+#Boost.Timer
+if(BUILD_BOOST_TIMER)
+  set(DIRECTORY "${Boost_ROOT_DIR}/libs/timer/src")
+  set(SOURCES auto_timers_construction.cpp  cpu_timer.cpp)
+  foreach(S ${SOURCES})
+    if(EXISTS ${DIRECTORY}/${S})
+      set(BOOST_SOURCES ${BOOST_SOURCES} ${DIRECTORY}/${S})
+    endif(EXISTS ${DIRECTORY}/${S})
+  endforeach(S)
+endif(BUILD_BOOST_TIMER)
+
 # Boost.Filesystem
 if(BUILD_BOOST_FILESYSTEM)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/filesystem")
