@@ -2,7 +2,7 @@
 # Find Boost precompiled libraries or Boost source tree for ALPS
 #
 
-#  Copyright Ryo IGARASHI 2010.
+#  Copyright Ryo IGARASHI 2010, 2011.
 #  Distributed under the Boost Software License, Version 1.0.
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
@@ -11,9 +11,8 @@
 # we use precompiled Boost libraries only when Boost_ROOT_DIR is not set.
 if (NOT Boost_ROOT_DIR)
   message(STATUS "Looking for precompiled Boost libraries")
-  # Boost 1.42 is not (yet) supported version number on CMake 1.8.0.
-  # FIXIT: | TODO: | TBD: THIS IS UGLY!
-  set(Boost_ADDITIONAL_VERSIONS "1.46" "1.46.0" "1.45" "1.45.0" "1.44" "1.44.0" "1.43" "1.43.0")
+  # Boost 1.47.0 or later is not yet supported by FindBoost.cmake (CMake 2.8.5).
+  set(Boost_ADDITIONAL_VERSIONS "1.48" "1.48.0" "1.47" "1.47.0")
   # Debian and Ubuntu packages are multithreaded.
   # Commented out because default is ON.
   #  set(Boost_USE_MULTITHREADED ON)
@@ -24,12 +23,12 @@ if (NOT Boost_ROOT_DIR)
 
   # We do not require Boost.MPI, therefore check whether Boost.MPI exists
   # before actual find_package for Boost.
-  # - Ubuntu 10.10 does not have Boost.MPI package.
-  find_package(Boost 1.43.0 COMPONENTS mpi)
+  # - Ubuntu does not have Boost.MPI package.
+  find_package(Boost 1.47.0 COMPONENTS mpi)
   if (Boost_FOUND)
-    find_package(Boost 1.43.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
+    find_package(Boost 1.47.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
   else (Boost_FOUND)
-    find_package(Boost 1.43.0 COMPONENTS date_time filesystem program_options python regex system serialization thread)
+    find_package(Boost 1.47.0 COMPONENTS date_time filesystem program_options python regex system serialization thread)
   endif (Boost_FOUND)
   if (APPLE AND NOT Boost_FOUND)
     find_package(boost COMPONENTS date_time-mt filesystem-mt program_options-mt python-mt regex-mt system-mt serialization-mt thread-mt mpi-mt)
