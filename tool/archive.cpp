@@ -130,7 +130,7 @@ int main(int ac, char* av[]) {
                                 if (vm.count("positional-arg"))
                                   plotPath = complete(fs::path(vm["positional-arg"].as<std::string>()));
                                 fs::path outputPath = complete(fs::path(vm["output-path"].as<std::string>()));
-                                Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.leaf());
+                                Plot(outputPath, db).exec(XML(true)(plotPath, true), plotPath.filename().string());
 
                         } else {
                                 if (!vm.count("xml-file") && !vm.count("positional-arg"))

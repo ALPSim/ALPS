@@ -126,7 +126,7 @@ class FileList
          if(old_name != _tmp_filenames.end()) return (old_name->second).c_str();
 
          filename = filename.substr(0,filename.find_first_of('.'));
-         this->last_filename = alps::temporary_filename((temp_dir / filename).native_file_string());
+         this->last_filename = alps::temporary_filename((temp_dir / filename).string());
          _tmp_filenames[std::string(input)] = this->last_filename;
          std::cout << "Creating temp file " << this->last_filename << std::endl;
          return this->last_filename.c_str();

@@ -90,7 +90,7 @@ void convert_params(const std::string& inname, const std::string& basename,
     if (p.defined("SIMULATION_NAME")) p.erase("SIMULATION_NAME");
   }
 
-  boost::filesystem::path infile((basename+".in.xml").c_str(), boost::filesystem::native);
+  boost::filesystem::path infile((basename+".in.xml").c_str());
   alps::oxstream out(infile);
 
   // make sure ths stylesheet is there
@@ -129,7 +129,7 @@ void convert_params(const std::string& inname, const std::string& basename,
         << alps::end_tag("OUTPUT")
         << alps::end_tag("TASK");
 
-    alps::oxstream task(boost::filesystem::path((taskname+".in.xml").c_str(),boost::filesystem::native));
+    alps::oxstream task(boost::filesystem::path((taskname+".in.xml").c_str()));
     task << alps::header("UTF-8")
          << alps::stylesheet(alps::xslt_path("ALPS.xsl"));
     task << alps::start_tag("SIMULATION")

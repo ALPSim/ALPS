@@ -101,7 +101,7 @@ try {
   for(; i<argc; i++)
    {
     boost::filesystem::path p =
-      boost::filesystem::complete(boost::filesystem::path(argv[i]));
+      boost::filesystem::absolute(boost::filesystem::path(argv[i]));
     evaluate(p,write_xml);
    }
 

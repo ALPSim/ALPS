@@ -199,8 +199,8 @@ try {
   }
   
   while (i < argc) {
-    boost::filesystem::path p(argv[i],boost::filesystem::native);
-    evaluate(boost::filesystem::complete(p),parms);
+    boost::filesystem::path p(argv[i]);
+    evaluate(boost::filesystem::absolute(p),parms);
     ++i;
   }
 

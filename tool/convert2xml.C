@@ -56,8 +56,7 @@ try {
     if (inname.size() >= 2 && inname.substr(0, 2) == "./") 
       inname.erase(0, 2);
     alps::convert2xml(inname);
-    boost::filesystem::path dir = boost::filesystem::path(inname,
-                              boost::filesystem::native).remove_filename();
+    boost::filesystem::path dir = boost::filesystem::path(inname).remove_filename();
     if (paths.find(dir)==paths.end()) {
       alps::copy_stylesheet(dir);
       paths.insert(dir);

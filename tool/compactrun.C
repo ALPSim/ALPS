@@ -44,11 +44,11 @@ try {
   std::string inname=argv[1];
   std::string outname = argv[argc-1];
   
-  boost::filesystem::path inpath(inname, boost::filesystem::native);
-  boost::filesystem::path outpath(outname, boost::filesystem::native);
+  boost::filesystem::path inpath(inname);
+  boost::filesystem::path outpath(outname);
   
   bool make_backup = boost::filesystem::exists(outpath);
-  boost::filesystem::path writepath = (make_backup ? outpath.branch_path()/(outpath.leaf()+".bak") : outpath);
+  boost::filesystem::path writepath = (make_backup ? outpath.branch_path()/(outpath.filename().string()+".bak") : outpath);
   
   std::cout << "Compacting run file " << inname << " to " <<  outname
             <<std::endl;

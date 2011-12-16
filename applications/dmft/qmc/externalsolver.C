@@ -79,7 +79,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
     alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     g.read_hdf5(ar, "/G0");
   }
-  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  boost::filesystem::remove(boost::filesystem::absolute(outfile));
   return g;
 }
 
@@ -138,7 +138,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       }
     }
   }
-  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  boost::filesystem::remove(boost::filesystem::absolute(outfile));
   return std::make_pair(G_omega, G_tau);
 }
 
@@ -147,8 +147,8 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
 {
   
   // call the external solver program
-  std::string command = exe_.native_file_string() + " " + infile + " " + outfile;
-  std::cerr << "Calling external solver " << exe_.native_file_string() << " as: "<<command<<std::endl;
+  std::string command = exe_.string() + " " + infile + " " + outfile;
+  std::cerr << "Calling external solver " << exe_.string() << " as: "<<command<<std::endl;
   int result = std::system(command.c_str());
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));

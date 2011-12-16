@@ -153,7 +153,7 @@ void Index::exec(fs::path xmlPath) {
             if (fs::exists(f)) {
               files.push_back(f);
             } else {
-              std::cerr << "Warning: " << f.native_file_string() << " not found\n";
+              std::cerr << "Warning: " << f.string() << " not found\n";
             }
           }
         } else {

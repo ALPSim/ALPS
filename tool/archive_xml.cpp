@@ -329,7 +329,7 @@ struct PlotDTD : public sp::grammar<PlotDTD>
 
 std::string XML::readFile(fs::path filename)
 {
-  std::ifstream fin(filename.native_directory_string().c_str());
+  std::ifstream fin(filename.string().c_str());
   std::string buffer;
   if (!fin.good())
     boost::throw_exception(std::runtime_error(std::string(

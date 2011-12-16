@@ -171,7 +171,7 @@ void DMRGTask<value_type>::init()
     std::string temp_dir = parms["TEMP_DIRECTORY"];
     dmtk::tmp_files.set_temp_dir(temp_dir.c_str());
   } else {
-    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().native_file_string().c_str());
+    dmtk::tmp_files.set_temp_dir(alps::temp_directory_path().string().c_str());
   }
 
   num_eigenvalues = this->parms.value_or_default("NUMBER_EIGENVALUES",1);

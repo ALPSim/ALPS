@@ -49,7 +49,7 @@ std::string Plot::strToLower(std::string inStr) {
 void Plot::writeFile(fs::path inOutFile, std::string inBuffer) {
         if (mVerbose)
                 std::cout << "Writing Datafile '" << inOutFile.string() << "'";
-        std::ofstream fout(inOutFile.native_directory_string().c_str());
+        std::ofstream fout(inOutFile.string().c_str());
     if (!fout.good())
             throw std::runtime_error(std::string("Could not open file: ") + inOutFile.string());
     fout << inBuffer;

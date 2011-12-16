@@ -28,6 +28,7 @@
 #include <alps/scheduler.h>
 #include <alps/alea.h>
 #include <fstream>
+#include <boost/filesystem/operations.hpp>
 
 void evaluate(const boost::filesystem::path& p, const bool write_xml) {
   alps::ProcessList nowhere;
@@ -117,7 +118,7 @@ try {
   for(; i<argc; i++)
    {
     boost::filesystem::path p =
-      boost::filesystem::complete(boost::filesystem::path(argv[i]));
+      boost::filesystem::absolute(boost::filesystem::path(argv[i]));
     evaluate(p,write_xml);
    }
   

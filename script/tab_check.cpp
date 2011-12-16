@@ -30,7 +30,7 @@ namespace boost
       const path & full_path,   // example: c:/foo/boost/filesystem/path.hpp
       const string & contents )     // contents of file to be inspected
     {
-      if ( full_path.leaf() == "Makefile.in") return; // Makefilees need tabs
+      if ( full_path.filename() == "Makefile.in") return; // Makefilees need tabs
       if (contents.find( "boostinspect:" "notab" ) != string::npos) return;
 
       if ( contents.find( '\t' ) != string::npos )

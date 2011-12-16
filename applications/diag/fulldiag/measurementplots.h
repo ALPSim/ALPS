@@ -212,7 +212,7 @@ void MeasurementsPlot<T>::write_one(std::string const& basename,
 template <class T>
 void MeasurementsPlot<T>::write_plot(std::string const& name, alps::plot::Plot<T> const& plot) const
 {
-  boost::filesystem::path p(name+".plot.xml",boost::filesystem::native);
+  boost::filesystem::path p(name+".plot.xml");
   alps::oxstream out(p);
   out << plot;
 }

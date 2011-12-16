@@ -322,26 +322,26 @@ void FullDiagMatrix<T>::evaluate(const alps::Parameters& parmsin,const std::stri
   }
 
   // write plots to files
-  boost::filesystem::path enp(basename+".plot.energy.xml",boost::filesystem::native);
+  boost::filesystem::path enp(basename+".plot.energy.xml");
   alps::oxstream ens(enp);
   ens << energy_plot;
-  boost::filesystem::path fenp(basename+".plot.free_energy.xml",boost::filesystem::native);
+  boost::filesystem::path fenp(basename+".plot.free_energy.xml");
   alps::oxstream fens(fenp);
   fens << free_energy_plot;
-  boost::filesystem::path entp(basename+".plot.entropy.xml",boost::filesystem::native);
+  boost::filesystem::path entp(basename+".plot.entropy.xml");
   alps::oxstream ents(entp);
   ents << entropy_plot;
-  boost::filesystem::path shp(basename+".plot.specific_heat.xml",boost::filesystem::native);
+  boost::filesystem::path shp(basename+".plot.specific_heat.xml");
   alps::oxstream shs(shp);
   shs << specific_heat_plot;
   
   plots.write(basename);
   
   if (have_Conserved && measure_properties) {
-     boost::filesystem::path magp(basename+".plot."+conserved_label_lc+".xml",boost::filesystem::native);
+     boost::filesystem::path magp(basename+".plot."+conserved_label_lc+".xml");
      alps::oxstream mags(magp);
      mags << magnetization_plot;
-     boost::filesystem::path susp(basename+".plot."+second_moment_name_lc+".xml",boost::filesystem::native);
+     boost::filesystem::path susp(basename+".plot."+second_moment_name_lc+".xml");
      alps::oxstream suss(susp);
      suss << susceptibility_plot;
     }

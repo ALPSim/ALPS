@@ -706,8 +706,7 @@ std::string AbstractFitter::print_to_file(alps::ParameterList list) const
   }
   baseseed &= ((1<<30)|((1<<30)-1));
 
-  alps::oxstream out(boost::filesystem::path((basename+".in.xml").c_str(),
-               boost::filesystem::native));
+  alps::oxstream out(boost::filesystem::path(basename+".in.xml"));
   out << alps::header("UTF-8")
       << alps::stylesheet(alps::xslt_path("ALPS.xsl"))
       << alps::start_tag("JOB")
@@ -736,8 +735,7 @@ std::string AbstractFitter::print_to_file(alps::ParameterList list) const
         << alps::end_tag("OUTPUT")
         << alps::end_tag("TASK");
 
-    alps::oxstream task(boost::filesystem::path((taskname+".in.xml").c_str(),
-               boost::filesystem::native));
+    alps::oxstream task(boost::filesystem::path(taskname+".in.xml"));
     task << alps::header("UTF-8")
          << alps::stylesheet(alps::xslt_path("ALPS.xsl"));
     task << alps::start_tag("SIMULATION")

@@ -64,7 +64,7 @@ try {
     std::cerr << "Usage: " << argv[0] << " inputfile [outputbasename]\n";
     std::exit(-1);
   }
-  boost::filesystem::path p(argv[1],boost::filesystem::native);
+  boost::filesystem::path p(argv[1]);
   std::string name=argv[1];
   if (argc==2)
     evaluate(p,std::cout);

@@ -27,6 +27,7 @@
 
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
+#include <boost/filesystem/operations.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 #include <boost/numeric/ublas/matrix_proxy.hpp>
 #include <boost/numeric/bindings/ublas.hpp>
@@ -41,14 +42,14 @@ MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::file
  , alpha(parms["N_ALPHA"])
  , norm(parms.value_or_default("NORM", 1.))
  , max_it(parms.value_or_default("MAX_IT", 1000))
- , name(fn.leaf(),0,fn.leaf().size()-6)
+ , name(fn.filename().string(),0,fn.filename().string().size()-6)
  , dir(fn.branch_path())
- , spex_str(boost::filesystem::complete(name+"spex.dat", dir).string().c_str())
- , chisq_str(boost::filesystem::complete(name+"chi2.dat", dir).string().c_str())
- , avspec_str(boost::filesystem::complete(name+"avspec.dat", dir).string().c_str())
- , maxspec_str(boost::filesystem::complete(name+"maxspec.dat", dir).string().c_str())
- , chispec_str(boost::filesystem::complete(name+"chispec.dat", dir).string().c_str())
- , prob_str(boost::filesystem::complete(name+"prob.dat", dir).string().c_str())
+ , spex_str(boost::filesystem::absolute(name+"spex.dat", dir).string().c_str())
+ , chisq_str(boost::filesystem::absolute(name+"chi2.dat", dir).string().c_str())
+ , avspec_str(boost::filesystem::absolute(name+"avspec.dat", dir).string().c_str())
+ , maxspec_str(boost::filesystem::absolute(name+"maxspec.dat", dir).string().c_str())
+ , chispec_str(boost::filesystem::absolute(name+"chispec.dat", dir).string().c_str())
+ , prob_str(boost::filesystem::absolute(name+"prob.dat", dir).string().c_str())
 {
   const double alpha_min = parms["ALPHA_MIN"];
   const double alpha_max = parms["ALPHA_MAX"];

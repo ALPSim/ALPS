@@ -62,7 +62,7 @@ public:
       : PARENT(opt,p)
   { 
     std::cerr << "\nFittingScheduler is being constructed\n"; 
-    checkpoint_filename = boost::filesystem::complete(
+    checkpoint_filename = boost::filesystem::absolute(
                std::string(sim_file_name) + ".checkpoint");
 
     alps::Parameters sim_param;
@@ -93,7 +93,7 @@ public:
     loaded_from_checkpoint = false;
     if (boost::filesystem::exists(checkpoint_filename)) {
       // read from checkpoint file
-      std::ifstream in(checkpoint_filename.leaf().c_str());
+      std::ifstream in(checkpoint_filename.filename().string().c_str());
       theFitter->initialize(in);
       loaded_from_checkpoint = true;
     } else
@@ -243,7 +243,7 @@ protected:
     boost::filesystem::path dir = checkpoint_filename.branch_path();
                                                                                 
     if (make_backup)
-      fname=dir/(fname.leaf()+".bak");
+      fname=dir/(fname.filename().string()+".bak");
                                                                                 
     oxstream out(fname);
     out << header("UTF-8") << stylesheet(xslt_path("ALPS.xsl"));

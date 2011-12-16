@@ -145,7 +145,7 @@ namespace
   bool visit_predicate( const path & pth )
   {
     string local( boost::inspect::relative_to( pth, fs::initial_path() ) );
-    string leaf( pth.leaf().string() );
+    string leaf( pth.filename().string() );
     return
       // so we can inspect a checkout
       leaf != "CVS"
@@ -203,7 +203,7 @@ namespace
   bool find_signature( const path & file_path,
     const boost::inspect::string_set & signatures )
   {
-    string name( file_path.leaf().string() );
+    string name( file_path.filename().string() );
     if ( signatures.find( name ) == signatures.end() )
     {
       string::size_type pos( name.rfind( '.' ) );
@@ -386,7 +386,7 @@ namespace
             {
               std::cout << "\n  " << this_rel_path.branch_path().string() << '/';
             }
-            std::cout << "\n    " << this_rel_path.leaf() << ':';
+            std::cout << "\n    " << this_rel_path.filename() << ':';
           }
         }
         if ( current.library != itr->library

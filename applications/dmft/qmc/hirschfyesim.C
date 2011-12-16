@@ -42,8 +42,8 @@
 #include <alps/numeric/detail/vector.hpp>
 #endif
 
-
 #include <alps/config.h> // needed to set up correct bindings
+#include <boost/filesystem/operations.hpp>
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 using namespace std;
 using namespace alps;
@@ -336,7 +336,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
     std::cout<<"end of sim, checkpointing"<<std::endl;
     std::string fns=parms["CHECKPOINT"];
     boost::filesystem::path fn(fns);
-    checkpoint(boost::filesystem::complete(fn));
+    checkpoint(boost::filesystem::absolute(fn));
   }
   for(int i=0;i<n_site;++i){
     for(int j=0;j<n_site;++j){

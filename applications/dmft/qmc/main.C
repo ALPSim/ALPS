@@ -92,8 +92,8 @@ int main(int argc, char** argv)
       parms["BASENAME"]=std::string(argv[1]);
     }
     // set working directory
-    boost::filesystem::path p(parms["BASENAME"],boost::filesystem::native);
-    chdir(p.branch_path().native_file_string().c_str());
+    boost::filesystem::path p(parms["BASENAME"]);
+    chdir(p.branch_path().string().c_str());
 
     //perform selfconsistency loop in...
     if(!parms.defined("CLUSTER_LOOP")) {
@@ -116,9 +116,9 @@ int main(int argc, char** argv)
           F_selfconsistency_loop(parms, *solver_ptr, G_tau);
         }
         else {
-            /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/*,boost::filesystem::native*/);
+            /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
           
-          solver_ptr.reset(new ExternalSolver(/*boost::filesystem::complete(*/p/*)*/));
+          solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
       } 
@@ -181,8 +181,8 @@ int main(int argc, char** argv)
           }
           else
           {
-              /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/*,boost::filesystem::native*/);
-            solver_ptr.reset(new ExternalSolver(/*boost::filesystem::complete(*/p/*)*/));
+              /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
+            solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
           }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
       }

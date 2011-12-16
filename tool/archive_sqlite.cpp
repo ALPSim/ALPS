@@ -52,7 +52,7 @@ void SQLite::open(fs::path filename) {
                 if (mVerbose)
                         std::cout << "Open database '" << filename.string() << "'" << std::endl;
         #endif
-        if(sqlite3_open(filename.native_directory_string().c_str(), &mDB))
+        if(sqlite3_open(filename.string().c_str(), &mDB))
                 throw std::runtime_error(std::string("Can't open database: ") + sqlite3_errmsg(mDB));
         operator()("BEGIN;");
  }
