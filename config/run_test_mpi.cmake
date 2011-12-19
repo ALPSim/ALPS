@@ -26,7 +26,7 @@ set(ENV{OMP_NUM_THREADS} 1)
 
 if(input_path)
   execute_process(
-	COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd}
+	COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd} ${opt}
 	RESULT_VARIABLE not_successful
 	INPUT_FILE ${input_path}
 	OUTPUT_FILE ${cmd}_output_${procs}
@@ -35,7 +35,7 @@ if(input_path)
   )
 else(input_path)
   execute_process(
-	COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd}
+	COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd} ${opt}
 	RESULT_VARIABLE not_successful
 	OUTPUT_FILE ${cmd}_output_${procs}
 	ERROR_VARIABLE err
@@ -44,7 +44,7 @@ else(input_path)
 endif(input_path)
 
 if(not_successful)
-	message(SEND_ERROR "error runing test '${cmd}': ${err};shell output: ${not_successful}!")
+	message(SEND_ERROR "error runing test '${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd} ${opt}': ${err};shell output: ${not_successful}!")
 endif(not_successful)
 
 if(output_path)
@@ -56,7 +56,7 @@ if(output_path)
 	TIMEOUT 600
   )
   if(not_successful)
-  	message(SEND_ERROR "output does not match for '${cmd}': ${err}; ${out}; shell output: ${not_successful}!")
+  	message(SEND_ERROR "output does not match for '${cmd} ${opt}': ${err}; ${out}; shell output: ${not_successful}!")
   endif(not_successful)
 endif(output_path)
 
