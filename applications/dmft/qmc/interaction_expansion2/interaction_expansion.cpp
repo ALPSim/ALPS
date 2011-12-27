@@ -52,7 +52,7 @@ n_matsubara_measurements(parms.value_or_default("NMATSUBARA_MEASUREMENTS", (int)
 n_tau((int)parms["N"]),
 n_tau_inv(1./n_tau),
 n_self(parms.value_or_default("NSELF",(int)(10*n_tau))),
-mc_steps((uint64_t)parms["SWEEPS"]),
+mc_steps((boost::uint64_t)parms["SWEEPS"]),
 therm_steps((unsigned int)parms["THERMALIZATION"]),        
 max_time_in_seconds(parms.value_or_default("MAX_TIME", 86400)),        
 beta((double)parms["BETA"]),                        
