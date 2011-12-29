@@ -561,11 +561,8 @@ void WRun::remove_jump(wormhead_type& head, wormhead_type& , int dir, int nb)
     k2++;
   if(k1->time()!=k2->time()) 
     return;
-  if (k1->id()!=k2->id())
-  {
-    std::cerr << "Avoided problem\n";
+  if (k1->id()!=k2->id()) // this is not the same bond
     return;
-  }
 
   state_type state1=(k1-1)->state();
   state_type state2=k1->state();
