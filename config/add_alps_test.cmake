@@ -25,30 +25,27 @@ macro(add_alps_test)
     add_custom_command(TARGET ${name} POST_BUILD
       COMMAND ${CMAKE_COMMAND} -E copy ${EXE_NAME} ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
-  
-  if(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
-    add_test(${name}
-      ${CMAKE_COMMAND}
-        -Dcmd=${name}
-        -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-        -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-        -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-        -Dinput=${input}
-        -Doutput=${output}
-        -P ${PROJECT_SOURCE_DIR}/config/run_test.cmake
-      )
-  else(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
-    add_test(${name}
-      ${CMAKE_COMMAND}
-        -Dcmd=${name}
-        -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-        -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-        -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-        -Dinput=${input}
-        -Doutput=${output}
-        -P ${CMAKE_INSTALL_PREFIX}/share/alps/run_test.cmake
-      )
-  endif(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
+
+  if(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
+    set(RUN_TEST ${RUN_TEST_DIR}/run_test.cmake)
+  else(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
+    if(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
+      set(RUN_TEST ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
+    else(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
+      set(RUN_TEST ${CMAKE_INSTALL_PREFIX}/share/alps/run_test.cmake)
+    endif(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
+  endif(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test.cmake)
+    
+  add_test(${name}
+    ${CMAKE_COMMAND}
+      -Dcmd=${name}
+      -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+      -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+      -Ddllexedir=${PROJECT_BINARY_DIR}/bin
+      -Dinput=${input}
+      -Doutput=${output}
+      -P ${RUN_TEST}
+    )
 endmacro(add_alps_test)
 
 macro(add_alps_test_mpi)
@@ -96,39 +93,30 @@ macro(add_alps_test_mpi)
       COMMAND ${CMAKE_COMMAND} -E copy ${EXE_NAME} ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
   
-  if(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test_mpi.cmake)
-    add_test(${name}-np${procs}
-      ${CMAKE_COMMAND}
-        -Dcmd=${name}
-        -Dopt=${opt}
-        -Dmpiexec=${MPIEXEC}
-        -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-        -Dprocs=${procs}
-        -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-        -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-        -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-        -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-        -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-        -Dinput=${input}
-        -Doutput=${output}
-        -P ${PROJECT_SOURCE_DIR}/config/run_test_mpi.cmake
-      )
-  else(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test.cmake)
-    add_test(${name}-np${procs}
-      ${CMAKE_COMMAND}
-        -Dcmd=${name}
-        -Dopt=${opt}
-        -Dmpiexec=${MPIEXEC}
-        -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
-        -Dprocs=${procs}
-        -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
-        -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
-        -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
-        -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
-        -Ddllexedir=${PROJECT_BINARY_DIR}/bin
-        -Dinput=${input}
-        -Doutput=${output}
-        -P ${CMAKE_INSTALL_PREFIX}/share/alps/run_test_mpi.cmake
-      )
-  endif(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test_mpi.cmake)
+  if(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test_mpi.cmake)
+    set(RUN_TEST ${RUN_TEST_DIR}/run_test_mpi.cmake)
+  else(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test_mpi.cmake)
+    if(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test_mpi.cmake)
+      set(RUN_TEST ${PROJECT_SOURCE_DIR}/config/run_test_mpi.cmake)
+    else(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test_mpi.cmake)
+      set(RUN_TEST ${CMAKE_INSTALL_PREFIX}/share/alps/run_test_mpi.cmake)
+    endif(EXISTS ${PROJECT_SOURCE_DIR}/config/run_test_mpi.cmake)
+  endif(RUN_TEST_DIR AND EXISTS ${RUN_TEST_DIR}/run_test_mpi.cmake)
+    
+  add_test(${name}-np${procs}
+    ${CMAKE_COMMAND}
+      -Dcmd=${name}
+      -Dopt=${opt}
+      -Dmpiexec=${MPIEXEC}
+      -Dmpiexec_numproc_flag=${MPIEXEC_NUMPROC_FLAG}
+      -Dprocs=${procs}
+      -Dmpiexec_preflags=${MPIEXEC_PREFLAGS}
+      -Dmpiexec_postflags=${MPIEXEC_POSTFLAGS}
+      -Dsourcedir=${CMAKE_CURRENT_SOURCE_DIR}
+      -Dbinarydir=${CMAKE_CURRENT_BINARY_DIR}
+      -Ddllexedir=${PROJECT_BINARY_DIR}/bin
+      -Dinput=${input}
+      -Doutput=${output}
+      -P ${RUN_TEST}
+    )
 endmacro(add_alps_test_mpi)
