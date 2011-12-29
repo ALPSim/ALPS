@@ -94,7 +94,7 @@ void generate_spline_matrix(dense_matrix & spline_matrix, double dt) {
   // A =        ...
   //
   //                    1  4  1
-  //    -2  0              0  2    
+  //    -2  1     0        1  2    
   spline_matrix.clear(); 
   dense_matrix A = 4*dt/6.*boost::numeric::ublas::identity_matrix<double>(Np1);
   
