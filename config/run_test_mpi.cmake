@@ -26,7 +26,7 @@ set(ENV{OMP_NUM_THREADS} 1)
 
 if(input_path)
   execute_process(
-	COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd} ${opt}
+	COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} ${opt}
 	RESULT_VARIABLE not_successful
 	INPUT_FILE ${input_path}
 	OUTPUT_FILE ${cmd}_output_${procs}
@@ -35,7 +35,7 @@ if(input_path)
   )
 else(input_path)
   execute_process(
-	COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd} ${opt}
+	COMMAND ${mpiexec} ${mpiexec_numproc_flag} ${procs} ${cmd_path} ${opt}
 	RESULT_VARIABLE not_successful
 	OUTPUT_FILE ${cmd}_output_${procs}
 	ERROR_VARIABLE err
