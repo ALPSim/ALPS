@@ -139,13 +139,13 @@ private:
   double sign_meas;
  
   const double BETA;
-  const int N;
   const int FLAVORS;
   const int N_order;
   const int N_meas;
   const int N_shift;
   const int N_swap;
-  
+
+  const int N;
   const int N_nn;
   const int N_w;
   const int N_w2;

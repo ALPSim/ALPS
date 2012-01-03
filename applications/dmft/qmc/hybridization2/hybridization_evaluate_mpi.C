@@ -119,18 +119,12 @@ int main(int argc, char ** argv){
 std::string basename=std::string(argv[1]);
 bool write_hr = false;
 
-if(argc==3 && std::string(argv[2]) == "hr"){
-  write_hr=true; //write results in human readable format for quick plotting
-  std::cout << "recognized option \"hr\"" << std::endl;
-}
-
 #ifdef USE_MPI
 mpi::environment env(argc, argv); 
 mpi::communicator world;
 #endif
 
   double BETA;
-  double N;
   int N_ORDER;
   int FLAVORS;
   int N_MEAS;
@@ -142,6 +136,7 @@ mpi::communicator world;
   int MEASURE_hw;
   int MEASURE_nn;
   int MEASURE_nnt;
+  int N;
   int N_w;
   int N_W;
   int N_w2;
@@ -155,9 +150,14 @@ mpi::communicator world;
   std::vector<std::complex<double> >gw;//also needed for evaluation
   std::vector<std::complex<double> >fw;//of the vertex function
 
+if(argc==3 && std::string(argv[2]) == "hr"){
+  write_hr=true; //write results in human readable format for quick plotting
+}
+
 #ifdef USE_MPI
   alps::params parms(world);
   if(world.rank()==0){//evaluate single-particle quantities (fast) only on master
+    if(write_hr) std::cout << "recognized option \"hr\"" << std::endl;
     alps::hdf5::archive ar(basename+".h5");
     ar >> make_pvp("/parameters", parms);
   }
@@ -195,29 +195,8 @@ mpi::communicator world;
 
   {//scope for ar
     alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
-/*
-    ar>>alps::make_pvp("/parameters/BETA", BETA);
-    ar>>alps::make_pvp("/parameters/N", N);
-    ar>>alps::make_pvp("/parameters/N_ORDER", N_ORDER);
-    ar>>alps::make_pvp("/parameters/FLAVORS", FLAVORS);
-    ar>>alps::make_pvp("/parameters/N_MEAS", N_MEAS);
-    ar>>alps::make_pvp("/parameters/MEASURE_gw", MEASURE_gw);
-    ar>>alps::make_pvp("/parameters/MEASURE_fw", MEASURE_fw);
-    ar>>alps::make_pvp("/parameters/MEASURE_gl", MEASURE_gl);
-    ar>>alps::make_pvp("/parameters/MEASURE_fl", MEASURE_fl);
-    ar>>alps::make_pvp("/parameters/MEASURE_g2w", MEASURE_g2w);
-    ar>>alps::make_pvp("/parameters/MEASURE_hw", MEASURE_hw);
-    ar>>alps::make_pvp("/parameters/MEASURE_nn", MEASURE_nn);
-    ar>>alps::make_pvp("/parameters/MEASURE_nnt", MEASURE_nnt);
-    ar>>alps::make_pvp("/parameters/N_w", N_w);
-    ar>>alps::make_pvp("/parameters/N_W", N_W);
-    ar>>alps::make_pvp("/parameters/N_w2", N_w2);
-    ar>>alps::make_pvp("/parameters/N_l", N_l);
-    ar>>alps::make_pvp("/parameters/N_nn", N_nn);
-    ar>>alps::make_pvp("/parameters/PARAMAGNETIC", PARAMAGNETIC);
-*/
 
-    double N_SWEEPS; ar>>alps::make_pvp("/simulation/results/order/count",N_SWEEPS);
+    int N_SWEEPS; ar>>alps::make_pvp("/simulation/results/order/count",N_SWEEPS);
 
     std::vector<double> matrix_size; matrix_size.resize(FLAVORS); ar>>alps::make_pvp("/simulation/results/matrix_size/mean/value",matrix_size);
 
@@ -226,9 +205,10 @@ mpi::communicator world;
     std::cout << "total number of sweeps: " << N_SWEEPS << std::endl;
     std::cout << "total number of measurements: " << N_SWEEPS*N_MEAS << std::endl;
     std::cout << "perturbation order:" << std::endl;
-
     for(int f=0; f<FLAVORS; ++f)
       std::cout << "orbital " << f/2 << " spin " << f%2 << ": " << matrix_size[f] << std:: endl;
+    std::cout << "paramagnetic=" << PARAMAGNETIC << std::endl;
+
 
     std::cout << std::endl;
     std::cout << "evaluating observables:" << std::endl;
@@ -237,6 +217,11 @@ mpi::communicator world;
     density.resize(FLAVORS); ar>>alps::make_pvp("/simulation/results/n/mean/value",density);
     if(PARAMAGNETIC) spin_average(density,FLAVORS);
     std::cout << "done." << std::endl;
+    {
+      alps::hdf5::archive oar("density.h5", alps::hdf5::archive::WRITE);
+      oar << alps::make_pvp("/FLAVORS",FLAVORS);
+      oar << alps::make_pvp("/data",density);
+    }
   
     if(write_hr){
       str.open("observables.dat"); double total_density(0.);
@@ -264,11 +249,13 @@ mpi::communicator world;
       str.close();
       std::cout << "done." << std::endl;
     }
+
+
     std::cout << "evaluating gt..." << std::flush;
     Greens.resize(FLAVORS*(N+1)); 
     ar>>alps::make_pvp("/simulation/results/Greens/mean/value",Greens);
   }//closes ar
-    
+
     if(PARAMAGNETIC) spin_average(Greens, FLAVORS);
     for(std::size_t i=0; i<Greens.size(); ++i) Greens[i]*=-1; //different sign convention
     for(int f=0; f<FLAVORS; ++f){
@@ -276,9 +263,13 @@ mpi::communicator world;
       Greens[f*(N+1)+N]=-density[f];
     }
     {
-      alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
-      oar << alps::make_pvp("/simulation/results/gt",Greens);
+      alps::hdf5::archive oar("gt.h5", alps::hdf5::archive::WRITE);
+      oar << alps::make_pvp("/N",N);
+      oar << alps::make_pvp("/BETA",BETA);
+      oar << alps::make_pvp("/FLAVORS",FLAVORS);
+      oar << alps::make_pvp("/data",Greens);
     }
+    
     if(write_hr){
       str.open("gt.dat");
       for(int i=0; i<N+1; ++i){
@@ -290,14 +281,204 @@ mpi::communicator world;
       str.close();
     }
     std::cout << "done." << std::endl;
-  
-  if(MEASURE_nn){
-    std::cout << "evaluating <nn>..." << std::flush;
-    std::vector<double> nn; nn.resize(FLAVORS*(FLAVORS+1)/2);  
+
+  if(MEASURE_gw && N_w >0){
+    std::cout << "evaluating gw..." << std::flush;
+    std::vector<double> gw_re; gw_re.resize(FLAVORS*N_w);
+    std::vector<double> gw_im; gw_im.resize(FLAVORS*N_w);
     {
       alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
-      ar>>alps::make_pvp("/simulation/results/nn/mean/value",nn);
+      ar>>alps::make_pvp("/simulation/results/gw_re/mean/value",gw_re);
+      ar>>alps::make_pvp("/simulation/results/gw_im/mean/value",gw_im);
     }
+    if(PARAMAGNETIC){
+      spin_average(gw_re,FLAVORS);
+      spin_average(gw_im,FLAVORS);
+    }
+    for(int f=0; f<FLAVORS; ++f)
+        for(int wn=0; wn<N_w; ++wn)
+          gw.push_back(std::complex<double>(gw_re[f*N_w+wn],gw_im[f*N_w+wn]));
+    {
+      alps::hdf5::archive oar("gw.h5", alps::hdf5::archive::WRITE);
+      oar << alps::make_pvp("/N_w",N_w);
+      oar << alps::make_pvp("/BETA",BETA);
+      oar << alps::make_pvp("/FLAVORS",FLAVORS);
+      oar << alps::make_pvp("/data",gw);
+    }
+
+    if(write_hr){
+      str.open("gw.dat");
+      for(int wn=0; wn<N_w; ++wn){
+        str << (2*wn+1)*M_PI/BETA;
+        for(int f=0; f<FLAVORS; ++f)
+          str << "   " << gw[f*N_w+wn].real() << " " << gw[f*N_w+wn].imag();
+        str  << std::endl;
+      }
+      str.close();
+    }
+    std::cout << "done." << std::endl;
+
+    if(MEASURE_fw){
+      std::cout << "evaluating sigmaw..." << std::flush;
+      std::vector<double> fw_re; fw_re.resize(FLAVORS*N_w);
+      std::vector<double> fw_im; fw_im.resize(FLAVORS*N_w);
+      {
+        alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+        ar>>alps::make_pvp("/simulation/results/fw_re/mean/value",fw_re);
+        ar>>alps::make_pvp("/simulation/results/fw_im/mean/value",fw_im);
+      }
+
+      std::vector<std::complex<double> > sigmaw;
+      if(PARAMAGNETIC){
+        spin_average(fw_re,FLAVORS);
+        spin_average(fw_im,FLAVORS);
+      }
+
+      for(int f=0; f<FLAVORS; ++f)
+        for(int wn=0; wn<N_w; ++wn)
+          fw.push_back(std::complex<double>(fw_re[f*N_w+wn],fw_im[f*N_w+wn]));
+
+      for(std::size_t i=0; i<fw.size(); ++i) sigmaw.push_back(fw[i]/gw[i]);
+      {
+        alps::hdf5::archive oar("sigmaw.h5", alps::hdf5::archive::WRITE);
+        oar << alps::make_pvp("/N_w",N_w);
+        oar << alps::make_pvp("/BETA",BETA);
+        oar << alps::make_pvp("/FLAVORS",FLAVORS);
+        oar << alps::make_pvp("/data",sigmaw);
+      }
+
+      if(write_hr){
+        str.open("sigmaw.dat");
+        for(int wn=0; wn<N_w; ++wn){
+          str << (2*wn+1)*M_PI/BETA;
+          for(int f=0; f<FLAVORS/2; ++f)
+              str << "   " << real(sigmaw[f*N_w+wn]) << " " << imag(sigmaw[f*N_w+wn]);
+          str  << std::endl;
+        }
+        str.close();
+      }
+      std::cout << "done." << std::endl;
+
+    }//MEASURE_fw
+  }//MEASURE_gw
+
+  if(MEASURE_gl && N_l >0){
+    std::cout << "evaluating gw from l..." << std::flush;
+    std::vector<double> gl; gl.resize(FLAVORS*N_l); 
+    {
+      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+      ar>>alps::make_pvp("/simulation/results/gl/mean/value",gl);
+    }
+    if(PARAMAGNETIC) spin_average(gl,FLAVORS);
+
+    std::vector<std::complex<double> >gwl;
+    for(int f=0; f<FLAVORS; ++f)
+      for(int wn=0; wn<N_w; ++wn){
+        std::complex<double> gw_(0.);
+        for(int l=0; l<N_l; ++l)
+          gw_+=t(wn,l)*sqrt(2.*l+1)*gl[f*N_l+l]; //sqrt(2l+1) has been omitted in the measurement
+          gwl.push_back(gw_);
+      }
+    {
+      alps::hdf5::archive oar("gwl.h5", alps::hdf5::archive::WRITE);
+      oar << alps::make_pvp("/N_w",N_w);
+      oar << alps::make_pvp("/BETA",BETA);
+      oar << alps::make_pvp("/FLAVORS",FLAVORS);
+      oar << alps::make_pvp("/data",gwl);
+    }
+
+    if(write_hr){
+      str.open("gw_from_l.dat");
+      for(int wn=0; wn<N_w; ++wn){
+        str << (2*wn+1)*M_PI/BETA;
+        for(int n=0; n<FLAVORS/2; ++n)
+          for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
+            int m=(PARAMAGNETIC ? n : 2*n+s);
+            str << " " << gwl[m*N_w+wn].real() << " " << gwl[m*N_w+wn].imag();
+          }
+        str  << std::endl;
+      }
+      str.close();
+    }
+    std::cout << "done." << std::endl;
+
+    if(MEASURE_fl){
+      std::cout << "evaluating sigmaw from l..." << std::flush;
+      std::vector<double> fl; fl.resize(FLAVORS*N_l);
+      {
+        alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+        ar>>alps::make_pvp("/simulation/results/fl/mean/value",fl);
+      }
+      if(PARAMAGNETIC) spin_average(fl,FLAVORS);
+
+      std::vector<std::complex<double> >fwl;
+      std::vector<std::complex<double> >sigmawl;
+      for(int f=0; f<FLAVORS; ++f)
+        for(int wn=0; wn<N_w; ++wn){
+          std::complex<double> fw_(0.);
+          for(int l=0; l<N_l; ++l)
+            fw_+=t(wn,l)*sqrt(2.*l+1)*fl[f*N_l+l];
+          fwl.push_back(fw_);
+        }
+      for(std::size_t i=0; i<fwl.size(); ++i) sigmawl.push_back(fwl[i]/gwl[i]);
+      {
+        alps::hdf5::archive oar("sigmawl.h5", alps::hdf5::archive::WRITE);
+        oar << alps::make_pvp("/N_w",N_w);
+        oar << alps::make_pvp("/BETA",BETA);
+        oar << alps::make_pvp("/FLAVORS",FLAVORS);
+        oar << alps::make_pvp("/data",sigmawl);
+      }
+
+      if(write_hr){
+        str.open("sigmawl.dat");
+        for(int wn=0; wn<N_w; ++wn){
+          str << (2*wn+1)*M_PI/BETA;
+          for(int f=0; f<FLAVORS; ++f)
+            str << "   " << real(sigmawl[f*N_w+wn]) << " " << imag(sigmawl[f*N_w+wn]);
+          str  << std::endl;
+        }
+        str.close();
+      }
+      std::cout << "done." << std::endl;
+
+    }//MEASURE_fl
+  }//if MEASURE_gl
+
+
+  if(MEASURE_nn){
+    std::cout << "evaluating <nn>..." << std::flush;
+    std::vector<double> nn_; nn_.resize(FLAVORS*(FLAVORS+1)/2);
+    {
+      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+      ar>>alps::make_pvp("/simulation/results/nn/mean/value",nn_);
+    }
+    if(PARAMAGNETIC){
+      for(int n1=0; n1<FLAVORS/2; ++n1)//spin average
+        for(int n2=0; n2<=n1; ++n2){
+          //uu=(uu+dd); dd=uu;
+          int f1up=2*n1; int f1dn=2*n1+1;
+          int f2up=2*n2; int f2dn=2*n2+1;
+          nn_[(f1up*(f1up+1))/2+f2up]=(nn_[(f1up*(f1up+1))/2+f2up]+nn_[(f1dn*(f1dn+1))/2+f2dn])/2.0;
+          nn_[(f1dn*(f1dn+1))/2+f2dn]=nn_[(f1up*(f1up+1))/2+f2up];
+          if(n2<n1){
+            //ud=(ud+du); du=ud;
+            nn_[(f1up*(f1up+1))/2+f2dn]=(nn_[(f1up*(f1up+1))/2+f2dn]+nn_[(f1dn*(f1dn+1))/2+f2up])/2.0;
+            nn_[(f1dn*(f1dn+1))/2+f2up]=nn_[(f1up*(f1up+1))/2+f2dn];
+          }
+        }
+    }
+    std::vector<double> nn; nn.resize(sqr(FLAVORS));
+    for(int f1=0; f1<FLAVORS; ++f1)
+      for(int f2=0; f2<FLAVORS; ++f2){
+        if(f2>f1) nn[f1*FLAVORS+f2]=nn_[(f2*(f2+1))/2+f1];
+        else      nn[f1*FLAVORS+f2]=nn_[(f1*(f1+1))/2+f2];
+      }
+    {
+      alps::hdf5::archive oar("nn.h5", alps::hdf5::archive::WRITE);
+      oar << alps::make_pvp("/FLAVORS",FLAVORS);
+      oar << alps::make_pvp("/data",nn);
+    }
+
     if(write_hr){
       str.open("observables.dat",std::ios::app); //write in format that is easy to read from python
       double SzSz=0.0;//total spin
@@ -305,7 +486,7 @@ mpi::communicator world;
         for(int f2=0; f2<=f1; f2++){
           int n1=f1/2; int s1=f1%2;
           int n2=f2/2; int s2=f2%2;
-          double docc=nn[(f1*(f1+1))/2+f2];
+          double docc=nn_[(f1*(f1+1))/2+f2];
           str << "N" << n1+1; if(s1==0) str << "up"; else str << "dn";
           str << "N" << n2+1; if(s2==0) str << "up"; else str << "dn";
           str << "=" << docc << ";" << std::endl;
@@ -315,8 +496,8 @@ mpi::communicator world;
         for(int n2=0; n2<=n1; ++n2){
           int f1up=2*n1; int f1dn=2*n1+1;
           int f2up=2*n2; int f2dn=2*n2+1;
-          double szsz=  nn[f1up*(f1up+1)/2+f2up] - nn[f1up*(f1up+1)/2+f2dn]
-                      - nn[f1dn*(f1dn+1)/2+f2up] + nn[f1dn*(f1dn+1)/2+f2dn];
+          double szsz=  nn_[f1up*(f1up+1)/2+f2up] - nn_[f1up*(f1up+1)/2+f2dn]
+                      - nn_[f1dn*(f1dn+1)/2+f2up] + nn_[f1dn*(f1dn+1)/2+f2dn];
                  szsz*=0.25; SzSz+=szsz;
           str << "s" << n1+1 << "zs" << n2+1 << "z=" << szsz << ";" << std::endl;
         }
@@ -326,7 +507,8 @@ mpi::communicator world;
     }
     std::cout << "done." << std::endl;
   }//MEASURE_nn
-  
+
+
   if(MEASURE_nnt && write_hr){
     std::cout << "evaluating <Sz(tau)Sz(0)>..." << std::flush;
     std::vector<double> nnt; nnt.resize(sqr(FLAVORS)*(N_nn+1));
@@ -340,25 +522,27 @@ mpi::communicator world;
     str << "#tau  ";
     for(int n1=0; n1<FLAVORS/2; n1++)//orbitals
         for(int n2=0; n2<=n1; n2++)//orbitals
-          str << "s" << n1+1 << "zs" << n2+1 << "z val, err, rel. err"; 
+          str << "s" << n1+1 << "zs" << n2+1 << "z"; 
     str << std::endl;
+
     for(int i=0; i<N_nn+1; ++i){
       double tau=i*BETA/static_cast<double>(N_nn);
       str << tau;
       int pos=0;
-      double SzSzt(0.);
+      double SzSzt(0.); double factor;
       for(int n1=0; n1<FLAVORS/2; n1++){//orbitals
         for(int n2=0; n2<=n1; n2++){//orbitals
+          if(n2<n1) factor=2.0; else factor=1.0; //multiply by 2 if n2<n1 to take into account corresponding contribution from n2>n1
           int f1up = 2*n1; int f1dn = 2*n1+1;
           int f2up = 2*n2; int f2dn = 2*n2+1;
           double szsz     =  0.25* (  nnt[(f1up*(f1up+1)/2+f2up)*(N_nn+1)+i] - nnt[(f1up*(f1up+1)/2+f2dn)*(N_nn+1)+i]
                                     - nnt[(f1dn*(f1dn+1)/2+f2up)*(N_nn+1)+i] + nnt[(f1dn*(f1dn+1)/2+f2dn)*(N_nn+1)+i] );
 
-          if(i==0 || i==N_nn){ SzSz_static+=0.5*szsz; //trapezoidal rule: factor 1/2 for boundary terms
+          if(i==0 || i==N_nn){ SzSz_static+=0.5*szsz*factor; //trapezoidal rule: factor 1/2 for boundary terms
                                szsz_static[n1*(n1+1)/2+n2]+=0.5*szsz;
                              }
           else{
-            SzSz_static+=szsz;
+            SzSz_static+=szsz*factor;
             szsz_static[n1*(n1+1)/2+n2]+=szsz;
           }
           SzSzt+=szsz;
@@ -380,160 +564,7 @@ mpi::communicator world;
   }
 
 
-  if(MEASURE_gw && N_w >0){
-    std::cout << "evaluating gw..." << std::flush;
-    std::vector<double> gw_re; gw_re.resize(FLAVORS*N_w);
-    std::vector<double> gw_im; gw_im.resize(FLAVORS*N_w);
-    {
-      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
-      ar>>alps::make_pvp("/simulation/results/gw_re/mean/value",gw_re);
-      ar>>alps::make_pvp("/simulation/results/gw_im/mean/value",gw_im);
-    }
-    if(PARAMAGNETIC){
-      spin_average(gw_re,FLAVORS);
-      spin_average(gw_im,FLAVORS);
-    }
-    for(int orb=0; orb<FLAVORS/2; ++orb)
-      for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s)
-        for(int wn=0; wn<N_w; ++wn)
-          gw.push_back(std::complex<double>(gw_re[(2*orb+s)*N_w+wn],gw_im[(2*orb+s)*N_w+wn]));
-    {
-      alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
-      oar << alps::make_pvp("/simulation/results/gw",gw);
-    }
-    if(write_hr){
-      str.open("gw.dat");
-      for(int wn=0; wn<N_w; ++wn){
-        str << (2*wn+1)*M_PI/BETA;
-        for(int n=0; n<FLAVORS/2; ++n)
-          for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
-            int m=(PARAMAGNETIC ? n : 2*n+s);
-            str << " " << gw[m*N_w+wn].real() << " " << gw[m*N_w+wn].imag();
-          }
-        str  << std::endl;
-      }
-      str.close();
-    }
-    std::cout << "done." << std::endl;
-    if(MEASURE_fw){
-      std::cout << "evaluating sigmaw..." << std::flush;
-      std::vector<double> fw_re; fw_re.resize(FLAVORS*N_w);
-      std::vector<double> fw_im; fw_im.resize(FLAVORS*N_w);
-      {
-        alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
-        ar>>alps::make_pvp("/simulation/results/fw_re/mean/value",fw_re);
-        ar>>alps::make_pvp("/simulation/results/fw_im/mean/value",fw_im);
-      }
 
-      std::vector<std::complex<double> > sigmaw;
-      if(PARAMAGNETIC){
-        spin_average(fw_re,FLAVORS);
-        spin_average(fw_im,FLAVORS);
-      }
-
-      for(int orb=0; orb<FLAVORS/2; ++orb)
-        for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s)
-          for(int wn=0; wn<N_w; ++wn)
-            fw.push_back(std::complex<double>(fw_re[(2*orb+s)*N_w+wn],fw_im[(2*orb+s)*N_w+wn]));
-
-      for(std::size_t i=0; i<fw.size(); ++i) sigmaw.push_back(fw[i]/gw[i]);
-      {
-        alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
-        oar << alps::make_pvp("/simulation/results/sigmaw",sigmaw);
-        oar << alps::make_pvp("/simulation/results/fw",fw);
-      }
-      if(write_hr){
-        str.open("sigmaw.dat");
-        for(int wn=0; wn<N_w; ++wn){
-          str << (2*wn+1)*M_PI/BETA;
-          for(int n=0; n<FLAVORS/2; ++n)
-            for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
-              int m=(PARAMAGNETIC ? n : 2*n+s);
-              str << " " << real(sigmaw[m*N_w+wn]) << " " << imag(sigmaw[m*N_w+wn]);
-            }
-          str  << std::endl;
-        }
-        str.close();
-      }
-      std::cout << "done." << std::endl;
-    }
-  }
-
-  if(MEASURE_gl && N_l >0){
-    std::cout << "evaluating gw from l..." << std::flush;
-    std::vector<double> gl; gl.resize(FLAVORS*N_l); 
-    {
-      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
-      ar>>alps::make_pvp("/simulation/results/gl/mean/value",gl);
-    }
-    if(PARAMAGNETIC) spin_average(gl,FLAVORS);
-    std::vector<std::complex<double> >gwl;
-    for(int orb=0; orb<FLAVORS/2; ++orb)
-      for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s)
-        for(int wn=0; wn<N_w; ++wn){
-          std::complex<double> gw_(0.);
-            for(int l=0; l<N_l; ++l)
-              gw_+=t(wn,l)*sqrt(2.*l+1)*gl[(2*orb+s)*N_l+l]; //sqrt(2l+1) has been omitted in the measurement
-          gwl.push_back(gw_);
-        }
-    {
-      alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
-      oar << alps::make_pvp("/simulation/results/gw_from_l",gwl);
-    }
-    if(write_hr){
-      str.open("gw_from_l.dat");
-      for(int wn=0; wn<N_w; ++wn){
-        str << (2*wn+1)*M_PI/BETA;
-        for(int n=0; n<FLAVORS/2; ++n)
-          for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
-            int m=(PARAMAGNETIC ? n : 2*n+s);
-            str << " " << gwl[m*N_w+wn].real() << " " << gwl[m*N_w+wn].imag();
-          }
-        str  << std::endl;
-      }
-      str.close();
-    }
-    std::cout << "done." << std::endl;
-    if(MEASURE_fl){
-      std::cout << "evaluating sigmaw from l..." << std::flush;
-      std::vector<double> fl; fl.resize(FLAVORS*N_l);
-      {
-        alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
-        ar>>alps::make_pvp("/simulation/results/fl/mean/value",fl);
-      }
-      if(PARAMAGNETIC) spin_average(fl,FLAVORS);
-      std::vector<std::complex<double> >fwl;
-      std::vector<std::complex<double> >sigmawl;
-      for(int n=0; n<FLAVORS/2; ++n)
-        for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s)
-          for(int wn=0; wn<N_w; ++wn){
-            std::complex<double> fw_(0.);
-              for(int l=0; l<N_l; ++l)
-                fw_+=t(wn,l)*sqrt(2.*l+1)*fl[(2*n+s)*N_l+l];
-            fwl.push_back(fw_);
-          }
-      for(std::size_t i=0; i<fwl.size(); ++i) sigmawl.push_back(fwl[i]/gwl[i]);
-      {
-        alps::hdf5::archive oar(basename+".out.h5", alps::hdf5::archive::WRITE);
-        oar << alps::make_pvp("/simulation/results/fw_from_l",fwl);
-        oar << alps::make_pvp("/simulation/results/sigmaw_from_l",sigmawl);
-      }
-      if(write_hr){
-        str.open("sigmaw_from_l.dat");
-        for(int wn=0; wn<N_w; ++wn){
-          str << (2*wn+1)*M_PI/BETA;
-          for(int n=0; n<FLAVORS/2; ++n)
-            for(int s=0; s<(PARAMAGNETIC ? 1 : 2); ++s){
-              int m=(PARAMAGNETIC ? n : 2*n+s);
-              str << " " << real(sigmawl[m*N_w+wn]) << " " << imag(sigmawl[m*N_w+wn]);
-            }
-          str  << std::endl;
-        }
-        str.close();
-      }
-      std::cout << "done." << std::endl;
-    }//MEASURE_fl
-  }//if MEASURE_gl
   if(MEASURE_g2w && MEASURE_fw && MEASURE_gw && MEASURE_hw){
     evaluate_gamma=true;
   }
@@ -544,19 +575,18 @@ mpi::communicator world;
 #endif
 
   if(evaluate_gamma){
-    std::cout << "evaluating gamma..." << std::flush;
     std::vector<double> g2w_re;
     std::vector<double> g2w_im;
     std::vector<double> hw_re;
     std::vector<double> hw_im;
 #ifdef USE_MPI
+    if(world.rank()==0) std::cout << "evaluating gamma..." << std::endl << std::flush;
 
     broadcast(world, fw, 0);
     broadcast(world, gw, 0);
 
     std::pair<int,int> range=frequency_range(world.size(), world.rank(), N_W);
-    std::cout << world.size() << " " << world.rank() << " " << N_W << std::endl;
-    
+
     int N_W_p = range.second-range.first;
     std::cout << "process #" << world.rank() << " will compute frequencies " << range.first << " to " << range.second-1 
               << " (" << N_W_p << " total)" << std::endl;
@@ -591,39 +621,40 @@ mpi::communicator world;
     std::ofstream chi_str;
     std::ofstream chi_irr_str;
     std::ofstream gamma_str;
-
+    std::string part;
 #ifdef USE_MPI
-if(world.rank()==0){
+//if(world.rank()==0){
+  part+=std::string(".part")+int2str(world.rank());
 #endif
-    if(write_hr && world.size()==1){
-      chi_str.open("g2w.dat");
-      chi_irr_str.open("g2_irr.dat");
-      gamma_str.open("gamma.dat");
+    if(write_hr){
+      chi_str.open(("g2w"+part+".dat").c_str());
+      chi_irr_str.open(("g2_irrw"+part+".dat").c_str());
+      gamma_str.open(("gammaw"+part+".dat").c_str());
     }
-#ifdef USE_MPI
-}
-#endif
+//#ifdef USE_MPI
+//}
+//#endif
     std::complex<double> chi, chi_irr, gamma, f, g1, g2, g3, g4;
     std::complex<double> chi_irr_new, chi_irr_sf, gamma_new, gamma_sf, h, chi0;
       for(int n1=0; n1<FLAVORS/2; ++n1)//n1,n2 label orbital indices only
         for(int n2=0; n2<FLAVORS/2; ++n2)
          for(int s1=0; s1<(PARAMAGNETIC ? 1 : 2); ++s1) //in paramagnetic case take spin components 00 and 01 only
           for(int s2=0; s2<2; ++s2){
-            int f1=2*n1+s1; int m1=(PARAMAGNETIC ? n1 : f1);//in paramagnetic case, gw has orbital index only
-            int f2=2*n2+s2; int m2=(PARAMAGNETIC ? n2 : f2);
+            int f1=2*n1+s1;
+            int f2=2*n2+s2;
             for(int w2n=-Nwh; w2n<Nwh; ++w2n){
-              g2=(w2n<0 ? conj(gw[m1*N_w+(-w2n-1)]) : gw[m1*N_w+w2n]);//g2:w2n,n1
+              g2=(w2n<0 ? conj(gw[f1*N_w+(-w2n-1)]) : gw[f1*N_w+w2n]);//g2:w2n,n1
               for(int w3n=-Nwh; w3n<Nwh; ++w3n){
-                g3=(w3n<0 ? conj(gw[m2*N_w+(-w3n-1)]) : gw[m2*N_w+w3n]);//g3:w4n,n2
+                g3=(w3n<0 ? conj(gw[f2*N_w+(-w3n-1)]) : gw[f2*N_w+w3n]);//g3:w4n,n2
                 for(int Wind=0; Wind<N_W_p; ++Wind){
                   int Wn=Wind; //Wn is the actual frequency index
 #ifdef USE_MPI
                   Wn+=range.first;
 #endif
                   int w1n=w2n+Wn; int w4n=w3n+Wn;
-                  f = (w1n<0 ? conj(fw[m1*N_w+(-w1n-1)]) : fw[m1*N_w+w1n]);
-                  g1= (w1n<0 ? conj(gw[m1*N_w+(-w1n-1)]) : gw[m1*N_w+w1n]);// g1:w1n,f1
-                  g4= (w4n<0 ? conj(gw[m2*N_w+(-w4n-1)]) : gw[m2*N_w+w4n]);// g4:w4n,f2
+                  f = (w1n<0 ? conj(fw[f1*N_w+(-w1n-1)]) : fw[f1*N_w+w1n]);
+                  g1= (w1n<0 ? conj(gw[f1*N_w+(-w1n-1)]) : gw[f1*N_w+w1n]);// g1:w1n,f1
+                  g4= (w4n<0 ? conj(gw[f2*N_w+(-w4n-1)]) : gw[f2*N_w+w4n]);// g4:w4n,f2
                   chi0=0.0;
                   if(w1n==w2n)chi0+=BETA*g1*g3;
                   if(w2n==w3n && f1==f2) chi0-=BETA*g1*g3; //this gives chi0
@@ -652,12 +683,12 @@ if(world.rank()==0){
 //                  chi_irr=chi-chi0; //straightforward evaluation; least accurate
 
                   gamma=chi_irr/(g1*g2*g3*g4);
-                  
+
                   gammaw[index_g] = gamma;
-#ifdef USE_MPI
-                  if(world.rank()==0){
-#endif                  
-                    if(write_hr && world.size()==1){
+//#ifdef USE_MPI
+//                  if(world.rank()==0){
+//#endif
+                    if(write_hr){
                       chi_str << "w: " << (2*w2n+1) << " wp: " << (2*w3n+1) << " W: " << Wn << " " << " z1: " << s1 << " z2: " << s2 << "  "
                               << "   n1: " << n1 << " n2: " << n2 << "   "
                               << chi.real() << " " << chi.imag() << "   " << chi0.real() << " " << chi0.imag() << std::endl;
@@ -670,9 +701,9 @@ if(world.rank()==0){
                                 << "   n1: " << n1 << " n2: " << n2 << "   "
                                 << gamma.real() << " " << gamma.imag()  << std::endl;
                     }
-#ifdef USE_MPI
-                  }
-#endif
+//#ifdef USE_MPI
+//                  }
+//#endif
                 }//Wn
               }//w3n
             }//w2n
@@ -686,11 +717,13 @@ if(world.rank()==0){
       alps::hdf5::archive oar(fname, alps::hdf5::archive::WRITE);
       oar << alps::make_pvp("/data",gammaw);
       oar << alps::make_pvp("/size",gammaw.size());
+      oar << alps::make_pvp("/BETA",BETA);
       oar << alps::make_pvp("/Wrange",N_W_p);
       oar << alps::make_pvp("/Woffset",range.first);
     }
-
-  std::cout << "done." << std::endl;
+#ifdef USE_MPI
+  if(world.rank()==0) std::cout << "done." << std::endl;
+#endif
   }//MEASURE_g2w
 
   return 0;

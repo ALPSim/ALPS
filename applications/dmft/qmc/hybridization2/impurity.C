@@ -157,28 +157,57 @@ std::ostream &operator<<(std::ostream & os, segment_container_t segments){
 void hybridization::read_external_input_data(const parameters_type &parms){
   // define interactions between flavors. Read in interaction file.
   u.resize(FLAVORS, FLAVORS);
-  ifstream infile_u(boost::lexical_cast<std::string>(parms["U_MATRIX"]).c_str());
-  if(!infile_u.good()){
-    throw(std::invalid_argument(std::string("U-matrix parameter \'") + parms["U_MATRIX"].str() + "\' not specified or not pointing to a valid file. File could not be opened."));
-  }
-  for (int i=0; i<FLAVORS; i++) {
-    if(!infile_u.good()){
-      throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].str() + " not good. Probably too few lines."));
+  if(parms.defined("U_MATRIX")){
+    std::string fname=boost::lexical_cast<std::string>(parms["U_MATRIX"]);
+    size_t found=fname.find(".h5",fname.size()-3);
+    if(found!=string::npos){//attempt to read from h5 archive
+      alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
+      int FLAVORS_;
+      ar>>alps::make_pvp("/FLAVORS",FLAVORS_);
+      if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of flavors");
+      std::vector<double> tmp(FLAVORS*FLAVORS);
+      ar>>alps::make_pvp("/data",tmp);
+      for(int i=0; i<FLAVORS; i++)
+        for(int j=0; j<FLAVORS; j++)
+          u(i,j)=tmp[i*FLAVORS+j];
+      tmp.clear();
     }
-    for (int j=0; j<FLAVORS; j++) {
+    else{//read from text file
+      ifstream infile_u(fname.c_str());
       if(!infile_u.good()){
-        throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].str() + " not good. Probably too few columns."));
+        throw(std::invalid_argument(std::string("U-matrix parameter \'") + parms["U_MATRIX"].str() + "\' not specified or not pointing to a valid file. File could not be opened."));
       }
-      infile_u >> u(i,j);
+      for (int i=0; i<FLAVORS; i++) {
+        if(!infile_u.good()){
+          throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].str() + " not good. Probably too few lines."));
+        }
+        for (int j=0; j<FLAVORS; j++) {
+          if(!infile_u.good()){
+            throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].str() + " not good. Probably too few columns."));
+          }
+          infile_u >> u(i,j);
+        }
+      }
     }
   }
+  else throw(std::invalid_argument(std::string("file name for U matrix not specified")));
+
   std::string mu_dc_solver_string=parms.value_or_default("EPSILOND_VECTOR","mu_dc_solver");
-  ifstream mu_dc_solver(mu_dc_solver_string.c_str());
-  int dummy;
-  if(!mu_dc_solver.good()) throw(std::invalid_argument("file for level shifts "+mu_dc_solver_string+" could not be found. Check paramter EPSILOND_VECTOR. Aborting"));
-  for(int i=0;i<FLAVORS;++i){
-    if(!mu_dc_solver.good()) throw(std::invalid_argument("mu dc solver file "+mu_dc_solver_string+" does not have enough lines? check format of mu file"));
-    mu_dc_solver>>dummy>>mu_e[i]>>std::ws;
+  size_t found=mu_dc_solver_string.find(".h5",mu_dc_solver_string.size()-3);
+  if(found!=string::npos){//attempt to read from h5 archive
+    alps::hdf5::archive ar(mu_dc_solver_string, alps::hdf5::archive::READ);
+    int FLAVORS_;
+    ar>>alps::make_pvp("/FLAVORS",FLAVORS_);
+    if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of flavors");
+    ar>>alps::make_pvp("/data",mu_e);
+  }
+  else{
+    ifstream mu_dc_solver(mu_dc_solver_string.c_str());
+    if(!mu_dc_solver.good()) throw(std::invalid_argument("file for level shifts "+mu_dc_solver_string+" could not be found. Check parameter EPSILOND_VECTOR. Aborting"));
+    for(int i=0;i<FLAVORS;++i){
+      if(!mu_dc_solver.good()) throw(std::invalid_argument("mu dc solver file "+mu_dc_solver_string+" does not have enough lines? check format of mu file"));
+      mu_dc_solver>>mu_e[i]>>std::ws;
+    }
   }
 
   // read F from file
@@ -187,10 +216,12 @@ void hybridization::read_external_input_data(const parameters_type &parms){
     size_t found=fname.find(".h5",fname.size()-3);
     if(found!=string::npos){//attempt to read from h5 archive
       alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
-      int N_, FLAVORS_;
+      int N_, FLAVORS_; double BETA_;
       ar>>alps::make_pvp("/N",N_);
+      ar>>alps::make_pvp("/BETA",BETA_);
       ar>>alps::make_pvp("/FLAVORS",FLAVORS_);
       if(N_!=N) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of time slices");
+      if(BETA_!=BETA) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong inverse temperature");
       if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of flavors");
       std::vector<double> tmp(FLAVORS*(N+1));
       ar>>alps::make_pvp("/data",tmp);
@@ -199,7 +230,7 @@ void hybridization::read_external_input_data(const parameters_type &parms){
           F[j][i]=tmp[j*(N+1)+i];
       tmp.clear();
     }
-    else{
+    else{//read from text file
       ifstream infile(fname.c_str());
       if(!infile.good()){
         throw(std::invalid_argument(std::string("could not open file ") + parms["F"].str() + "for F function"));
@@ -219,6 +250,7 @@ void hybridization::read_external_input_data(const parameters_type &parms){
       }
     }
   }
+  else throw(std::invalid_argument(std::string("filename for hybridization function not specified.")));
 
 }
 
