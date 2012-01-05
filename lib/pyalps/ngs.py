@@ -4,7 +4,7 @@
  #                                                                                 #
  # ALPS Libraries                                                                  #
  #                                                                                 #
- # Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   #
+ # Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   #
  #                                                                                 #
  # This software is part of the ALPS libraries, published under the ALPS           #
  # Library License; you can use, redistribute it and/or modify it under            #
@@ -87,8 +87,8 @@ class h5ar(hdf5_archive_impl):
             self.set_context(current)
         else:
             dtp = type(data).__name__
-            while dtp == 'ndarray':
-                dtp = type(el = data[0]).__name__
+            if dtp == 'ndarray':
+                dtp = str(data.dtype)
             hdf5_archive_impl.save(self, path, data, dtp)
 
 from pyngsapi_c import *
