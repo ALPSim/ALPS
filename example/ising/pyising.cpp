@@ -52,7 +52,7 @@ namespace alps {
                 {}
 
                 bool run(boost::python::object stop_callback) {
-                    ising_sim<alps::base>::run(boost::bind(ising_export::callback_wrapper, stop_callback));
+                    return ising_sim<alps::base>::run(boost::bind(ising_export::callback_wrapper, stop_callback));
                 }
 
                 base::parameters_type & get_params() {

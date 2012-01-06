@@ -92,7 +92,7 @@ int main(int argc, char** argv)
       parms["BASENAME"]=std::string(argv[1]);
     }
     // set working directory
-    boost::filesystem::path p(parms["BASENAME"]);
+    boost::filesystem::path p(static_cast<std::string>(parms["BASENAME"]));
     chdir(p.branch_path().string().c_str());
 
     //perform selfconsistency loop in...

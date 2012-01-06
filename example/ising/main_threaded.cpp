@@ -49,7 +49,7 @@ int main(int argc, char *argv[]) {
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
     do {
-        usleep(0.1 * 1e6);
+       // usleep(0.1 * 1e6);
 
         // print progress every 5s
         if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {

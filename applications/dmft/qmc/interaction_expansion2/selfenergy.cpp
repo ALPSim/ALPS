@@ -398,7 +398,7 @@ void evaluate_selfenergy_measurement_itime_rs(const alps::results_type<HubbardIn
       Sz_err += Sz_i_err;
     }
     Sz_obs /= n_site;
-    Sz_err /= std::sqrt(n_site);
+    Sz_err /= std::sqrt(double(n_site));
     std::ofstream szstream("staggered_sz", std::ios::app);
     szstream << Sz_obs << "\t" << Sz_err << std::endl;
   }
