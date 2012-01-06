@@ -199,7 +199,9 @@ void DiagMatrix<T,M>::perform_measurements()
 
     BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
       //std::cerr << "Evaluating " << ex.first << "\n";
-        meas.average_values[ex.first] = calculate("("+ex.second +")/"+ boost::lexical_cast<std::string>(this->num_sites()));
+      alps::SiteOperator op(ex.second+"(i)/"+ boost::lexical_cast<std::string>(this->num_sites()),"i");
+      this->substitute_operators(op,this->alps::scheduler::Task::parms);
+      meas.average_values[ex.first] = calculate(op);
     }
 
     // calculate local measurements
@@ -307,6 +309,7 @@ template <class T, class M>
 template <class Op>
 std::vector<T> DiagMatrix<T,M>::calculate(Op const& op) const
 {
+  
   return calculate(this->template operator_matrix<operator_matrix_type>(op));
 }
 
