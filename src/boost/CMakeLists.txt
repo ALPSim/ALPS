@@ -153,16 +153,16 @@ endif(BUILD_BOOST_SYSTEM)
 
 # Boost.MPI
 if(BUILD_BOOST_MPI)
-  IF(NOT WIN32)
-    set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${MPI_LIBRARIES})
-  ENDIF(NOT WIN32)
+  #IF(NOT WIN32)
+  set(BOOST_LINK_LIBS ${BOOST_LINK_LIBS} ${MPI_LIBRARIES})
+  #ENDIF(NOT WIN32)
   set(DIRECTORY "${Boost_ROOT_DIR}/libs/mpi/src")
   set(SOURCES broadcast.cpp communicator.cpp computation_tree.cpp 
       content_oarchive.cpp environment.cpp exception.cpp graph_communicator.cpp
       group.cpp intercommunicator.cpp mpi_datatype_cache.cpp 
       mpi_datatype_oarchive.cpp packed_iarchive.cpp packed_oarchive.cpp
       packed_skeleton_iarchive.cpp packed_skeleton_oarchive.cpp
-      point_to_point.cpp request.cpp timer.cpp
+      point_to_point.cpp request.cpp text_skeleton_oarchive.cpp timer.cpp
   )
   foreach(S ${SOURCES})
     if(EXISTS ${DIRECTORY}/${S})
