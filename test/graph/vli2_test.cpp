@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,42 +25,18 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_CALLBACK_HPP
-#define ALPS_NGS_CALLBACK_HPP
+#include <alps/graph/vli.hpp>
 
-#include <alps/ngs/config.hpp>
+#include <iostream>
 
-#ifndef ALPS_NGS_SINGLE_THREAD
-    #include <alps/ngs/atomic.hpp>
-#endif
-
-namespace alps {
-
-    ALPS_DECL bool basic_stop_callback(int time_limit = 0);
-
-    #ifndef ALPS_NGS_SINGLE_THREAD
-
-        class ALPS_DECL threaded_callback_wrapper {
-
-            public:
-
-                threaded_callback_wrapper(boost::function<bool ()> const & callback)
-                    : stop_flag(false)
-                    , stop_callback(callback)
-                {}
-
-                bool check();
-
-                bool operator()();
-
-            private:
-
-                atomic<bool> mutable stop_flag;
-                boost::function<bool ()> stop_callback;
-
-        };
-
-    #endif
-}
-
-#endif
+int main() {
+	{
+		alps::graph::vli<6> a(1), b(8264), c(-1), d(-862), e(100005), f(72677163250000LL);
+		std::cout << a << " " << b << " " << c << " " << d << " " << e << " " << (f += 18947077082LL) << std::endl;
+	}
+	{
+		alps::graph::vli<4> a(0);
+		a -= 854116085LL;
+		std::cout << a << std::endl;
+	}
+};
