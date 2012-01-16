@@ -49,7 +49,11 @@ int main(int argc, char *argv[]) {
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
     boost::posix_time::ptime checkpoint_time = boost::posix_time::second_clock::local_time();
     do {
-       // usleep(0.1 * 1e6);
+        // TODO: make a wrapper for that ... like alsp::ngs::sleep(0.1 * 1e9)
+        boost::xtime xt;
+		boost::xtime_get(&xt, boost::TIME_UTC);
+		xt.nsec += 0.1 * 1e9;
+		boost::thread::sleep(xt);
 
         // print progress every 5s
         if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
