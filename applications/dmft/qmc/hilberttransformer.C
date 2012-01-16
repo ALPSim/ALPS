@@ -268,16 +268,16 @@ FSDOSHilbertTransformer::FSDOSHilbertTransformer(const alps::Parameters& params)
     dos.push_back(d);
     //std::cout<<eps<<" "<<d<<std::endl;
   }
-  if(dos.size()%2!=0){ throw std::runtime_error("please use even number of DOS points"); }
+  if(dos.size()%2!=1){ throw std::runtime_error("please use odd number of DOS points (due to Simpson integration)"); }
   //normalize DOS to one:
   double s=0;
   for(unsigned i=1;i<epsilon.size()-2;i+=2){
-    s+=4.*dos[i]+2*dos[i+1];
+    s+=4.*dos[i]+2*dos[i+1];                   // Assuming equidistant epsilon points
   }
   s+=dos[0]+dos[epsilon.size()-1]+4.*dos[epsilon.size()-2];
   s/=(3.);
   std::cout<<"normalization constant: "<<s<<std::endl;
-  std::cout<<"step size h is: "<<(epsilon[1]-epsilon[0])<<std::endl;
+  std::cout<<"step size h is: " << (epsilon[1]-epsilon[0]) << "   (Note: Assuming equidistant energy intervals.)" << std::endl;
   for(unsigned i=0;i<epsilon.size()-1;++i){
     dos[i]/=s;
   }
@@ -353,7 +353,7 @@ matsubara_green_function_t AFM_FSDOSHilbertTransformer::operator()(const matsuba
     std::complex<double>zeta_B=std::complex<double>(mu+h,wn)-Sigma(w,1);
     
     //Simpson: integrate dos(e)/(zeta_A zeta_B-e^2)
-    if(dos.size()%2 !=0){throw std::runtime_error("for Simpson precision: use a DOS with even number of integration points. "); }
+    if(dos.size()%2 !=1){throw std::runtime_error("for Simpson precision: use a DOS with odd number of integration points. "); }
     std::complex<double> I=0;
     for(unsigned i=1;i<dos.size()-2;i+=2){
       I+=4.*integrand(i,dos,epsilon,zeta_A,zeta_B)+2.*integrand(i+1,dos,epsilon,zeta_A,zeta_B);
