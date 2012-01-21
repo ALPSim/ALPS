@@ -61,12 +61,12 @@ void hybridization::create_measurements(){
     measurements << alps::ngs::RealVectorObservable("fl");
   
   if(MEASURE_g2w){ 
-    measurements << alps::ngs::RealVectorObservable("g2w_re");
-    measurements << alps::ngs::RealVectorObservable("g2w_im");
+    measurements << alps::ngs::SimpleRealVectorObservable("g2w_re");
+    measurements << alps::ngs::SimpleRealVectorObservable("g2w_im");
   }
   if(MEASURE_hw){ 
-    measurements << alps::ngs::RealVectorObservable("hw_re");
-    measurements << alps::ngs::RealVectorObservable("hw_im");
+    measurements << alps::ngs::SimpleRealVectorObservable("hw_re");
+    measurements << alps::ngs::SimpleRealVectorObservable("hw_im");
   }
   if(MEASURE_nn) 
     measurements << alps::ngs::RealVectorObservable("nn");
