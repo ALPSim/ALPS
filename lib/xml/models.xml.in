@@ -280,7 +280,7 @@
   1/2*(Splus(x)*Sminus(y)+Sminus(x)*Splus(y))
 </BONDOPERATOR>
 
-<BONDOPERATOR name="biquadratic" source="x" target="y">
+<BONDOPERATOR name="biquadratic" source="i" target="j">
   (exchange_xy(i,j)+Sz(i)*Sz(j))*(exchange_xy(i,j)+Sz(i)*Sz(j))
 </BONDOPERATOR>
 

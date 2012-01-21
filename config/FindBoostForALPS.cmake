@@ -23,8 +23,13 @@ if (NOT Boost_ROOT_DIR)
 
   # We do not require Boost.MPI, therefore check whether Boost.MPI exists
   # before actual find_package for Boost.
+<<<<<<< .mine
+  # - Ubuntu 10.10 does not have Boost.MPI package.
+  find_package(Boost 1.47.0 COMPONENTS mpi)
+=======
   # - Ubuntu does not have Boost.MPI package.
   find_package(Boost 1.47.0 COMPONENTS mpi)
+>>>>>>> .r5962
   if (Boost_FOUND)
     find_package(Boost 1.47.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
   else (Boost_FOUND)

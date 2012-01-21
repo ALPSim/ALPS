@@ -44,6 +44,7 @@ IF($ENV{MKL} MATCHES "mkl")
 ENDIF($ENV{MKL} MATCHES "mkl")
 
 SET(MKL_PATHS 
+  $ENV{MKL_HOME}/lib/intel64${QMC_BITS}
   $ENV{MKL_HOME}/lib/em${QMC_BITS}t
   $ENV{MKL_HOME}/lib/${QMC_BITS}
   $ENV{MKL_HOME}/lib
