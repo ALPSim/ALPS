@@ -718,8 +718,9 @@ if(argc==3 && std::string(argv[2]) == "hr"){
       oar << alps::make_pvp("/data",gammaw);
       oar << alps::make_pvp("/size",gammaw.size());
       oar << alps::make_pvp("/BETA",BETA);
-      oar << alps::make_pvp("/Wrange",N_W_p);
-      oar << alps::make_pvp("/Woffset",range.first);
+      oar << alps::make_pvp("/N_w2",N_w2);
+      oar << alps::make_pvp("/N_W",N_W_p);
+      oar << alps::make_pvp("/W_offset",range.first);
     }
 #ifdef USE_MPI
   if(world.rank()==0) std::cout << "done." << std::endl;
