@@ -278,7 +278,7 @@ FSDOSHilbertTransformer::FSDOSHilbertTransformer(const alps::Parameters& params)
   s/=(3.);
   std::cout<<"normalization constant: "<<s<<std::endl;
   std::cout<<"step size h is: " << (epsilon[1]-epsilon[0]) << "   (Note: Assuming equidistant energy intervals.)" << std::endl;
-  for(unsigned i=0;i<epsilon.size()-1;++i){
+  for(unsigned i=0;i<epsilon.size();++i){
     dos[i]/=s;
   }
   double S=0;
