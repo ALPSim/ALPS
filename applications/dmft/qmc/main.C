@@ -136,13 +136,13 @@ int main(int argc, char** argv)
         else if(parms.defined("TWODBS")) {
           if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
             if((bool)(parms["SYMMETRIZATION"])==false){ 
-              std::cerr<<"AFM and SYMMETRIZATION? redundant parameters! set symmetrization to false."<<std::endl; abort();
+              std::cerr<<"ANTIFERROMAGNET==false  and  SYMMETRIZATION==false? redundant parameters! Set SYMMETRIZATION=1 (true) for a paramagnetic solution."<<std::endl; abort();
             }
             std::cerr<<"implement PM DOS integration!!"<<std::endl;
             abort();
           }else{
             if((bool)(parms["SYMMETRIZATION"])==true){ 
-              std::cerr<<"AFM and PM? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
+              std::cerr<<"ANTIFERROMAGNET==true  and  SYMMETRIZATION==true? redundant parameters! Set SYMMETRIZATION=0 (false) for an antiferromagnetic solution."<<std::endl; abort(); 
             }
             transform_ptr=new TwoDAFMHilbertTransformer(parms);
           }
@@ -150,13 +150,13 @@ int main(int argc, char** argv)
         else{
           std::cout<<"using DOS Hilbert transform"<<std::endl;
           if(!parms.defined("ANTIFERROMAGNET") || ((bool)(parms.value_or_default("ANTIFERROMAGNET",false))==false)){
-            if((bool)(parms["SYMMATRIZATION"])==false){ 
-              std::cerr<<"AFM and PM? redundant parameters! set symmetrization to false."<<std::endl; abort();
+            if((bool)(parms["SYMMETRIZATION"])==false){ 
+              std::cerr<<"ANTIFERROMAGNET==false  and  SYMMETRIZATION==false? redundant parameters! Set SYMMETRIZATION=1 (true) for a paramagnetic solution."<<std::endl; abort();
             }
             transform_ptr= new FSDOSHilbertTransformer(parms);
           }else{
             if((bool)(parms["SYMMETRIZATION"])==true){ 
-              std::cerr<<"AFM and SYMMETRIZATION? redundant parameters! set ANTIFERROMAGNET to false."<<std::endl; abort(); 
+              std::cerr<<"ANTIFERROMAGNET==true  and  SYMMETRIZATION==true? redundant parameters! Set SYMMETRIZATION=0 (false) for an antiferromagnetic solution."<<std::endl; abort(); 
             }
             transform_ptr= new AFM_FSDOSHilbertTransformer(parms);
           }
