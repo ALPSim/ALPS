@@ -78,27 +78,3 @@ Magnetization: 1498.06 +/- 1.69; tau = 0.815 WARNING: check error convergence
     bin #1   : 700      entries: error = 1.04244
     bin #2   : 350      entries: error = 1.34158
     bin #3   : 175      entries: error = 1.69082
- ----- alps_init -----
-    TEMP =    2.5000000    
-    MCS =         1000
-    INT =         1000
-    L =           10
-    SEED =         1234
- ----- alps_init -----
-    TEMP =    2.3000000    
-    MCS =          900
-    INT =         1100
-    L =           20
-    SEED =         1234
- ----- alps_init -----
-    TEMP =    2.0999999    
-    MCS =          800
-    INT =         1200
-    L =           30
-    SEED =         1234
- ----- alps_init -----
-    TEMP =    1.9000000    
-    MCS =          700
-    INT =         1300
-    L =           40
-    SEED =         1234

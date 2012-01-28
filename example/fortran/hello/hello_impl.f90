@@ -39,21 +39,20 @@ subroutine alps_init(caller)
   integer :: ival
   character*32 :: cval
 
-  write(*, *) ' ##### alps_init() ##### '
+  write(0, *) ' ##### alps_init() ##### '
   call alps_get_parameter(dval, 'X', ALPS_DOUBLE_PRECISION, caller)
-  write(*, *) '  parameter X     = ',dval
+  write(0, *) '  parameter X     = ',dval
 
   call alps_get_parameter(ival, 'Y', ALPS_INT, caller)
-  write(*, *) '  parameter Y     = ',ival
+  write(0, *) '  parameter Y     = ',ival
 
   call alps_get_parameter(cval, "WORLD", ALPS_CHAR, caller)
-  write(*, *) '  parameter WORLD = ',cval
+  write(0, *) '  parameter WORLD = ',cval
 
   ival = 0
   call alps_parameter_defined(ival, 'Z', caller);
-  write(*, *) '  defined parameter Z = ',ival, ''
+  write(0, *) '  defined parameter Z = ',ival, ''
 
-  call flush(6)
   return
 end subroutine alps_init
 

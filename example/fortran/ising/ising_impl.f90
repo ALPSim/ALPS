@@ -54,12 +54,12 @@ subroutine alps_init(caller)
   call alps_get_parameter(INT, "INT", ALPS_INT, caller)
   call alps_get_parameter(IX, "WORKER_SEED", ALPS_INT, caller)
 
-  write(*, *) "----- alps_init -----"
-  write(*, *) "   TEMP = ", TEMP
-  write(*, *) "   MCS = ", MCS
-  write(*, *) "   INT = ", INT
-  write(*, *) "   L = ", L
-  write(*, *) "   SEED = ", IX
+  write(0, *) "----- alps_init -----"
+  write(0, *) "   TEMP = ", TEMP
+  write(0, *) "   MCS = ", MCS
+  write(0, *) "   INT = ", INT
+  write(0, *) "   L = ", L
+  write(0, *) "   SEED = ", IX
 
   allocate( IP(L) )
   allocate( IM(L) )

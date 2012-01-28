@@ -9,11 +9,6 @@ DIR_NAME = .;
 BASE_NAME = task1;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
-  ##### alps_init() ##### 
-   parameter X     =    3.2000000000000002     
-   parameter Y     =            0
-   parameter WORLD = world                           
-   defined parameter Z =            1 
 [results]
 [input parameters]
 ALGORITHM = "hello fortran";
@@ -25,11 +20,6 @@ DIR_NAME = .;
 BASE_NAME = task2;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
-  ##### alps_init() ##### 
-   parameter X     =   -3.1000000000000001     
-   parameter Y     =            6
-   parameter WORLD = alps                            
-   defined parameter Z =            0 
 [results]
 [input parameters]
 ALGORITHM = "hello fortran";
@@ -41,11 +31,6 @@ DIR_NAME = .;
 BASE_NAME = task3;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
-  ##### alps_init() ##### 
-   parameter X     =   1.00000000000000002E-003
-   parameter Y     =         -100
-   parameter WORLD = looper                          
-   defined parameter Z =            0 
 [results]
 [input parameters]
 ALGORITHM = "hello fortran";
@@ -57,11 +42,6 @@ DIR_NAME = .;
 BASE_NAME = task4;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
-  ##### alps_init() ##### 
-   parameter X     =    100.00000000000000     
-   parameter Y     =            2
-   parameter WORLD = japan                           
-   defined parameter Z =            0 
 [results]
 [input parameters]
 ALGORITHM = "hello fortran";
@@ -73,9 +53,4 @@ DIR_NAME = .;
 BASE_NAME = task5;
 WORKER_SEED = 1234;
 DISORDER_SEED = 1234;
-  ##### alps_init() ##### 
-   parameter X     =    3.0000000000000000     
-   parameter Y     =            0
-   parameter WORLD = wistaria                        
-   defined parameter Z =            0 
 [results]
