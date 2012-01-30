@@ -24,67 +24,18 @@
  # DEALINGS IN THE SOFTWARE.                                                       #
  #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
+import pyalps.hdf5 as h5
 
-from collections import MutableMapping
-import types
+o = h5.oArchive('blubb')
+o.write('/a',0)
+del o
 
-from pyngsparams_c import *
-params.__bases__ = (MutableMapping, ) + params.__bases__
+i = h5.iArchive('blubb')
+o = h5.oArchive('blubb')
+o.write('/a',0)
+del o
 
-from pyngsobservable_c import *
-class ObservableOperators:
-    def __lshift__(self, other):
-        self.append(other)
-observable.__bases__ = (ObservableOperators, ) + observable.__bases__
-
-class RealObservable:
-    def __init__(self, name, binnum = 0):
-        self.name = name
-        self.binnum = binnum
-    def addToObservables(self, observables):
-        observables.createRealObservable(self.name, self.binnum)
-
-class RealVectorObservable:
-    def __init__(self, name, binnum = 0):
-        self.name = name
-        self.binnum = binnum
-    def addToObservables(self, observables):
-        observables.createRealVectorObservable(self.name, self.binnum)
-
-from pyngsobservables_c import *
-class ObservablesOperators:
-    def __lshift__(self, other):
-        other.addToObservables(self)
-observables.__bases__ = (ObservablesOperators, MutableMapping, ) + observables.__bases__
-
-from pyngsresult_c import *
-
-from pyngsresults_c import *
-results.__bases__ = (MutableMapping, ) + results.__bases__
-
-from pyngsbase_c import *
-class base(base_impl):
-    def run(self, callback = lambda: True):
-        base_impl.run(self, callback)
-
-from pyngshdf5_c import *
-class h5ar(hdf5_archive_impl):
-    def __init__(self, filename, mode = 'r'):
-        hdf5_archive_impl.__init__(self, filename, mode)
-    def __getitem__(self, path):
-        return self.load(path)
-    def __setitem__(self, path, value):
-        self.save(path, value)
-    def save(self, path, data):
-        if hasattr(data, 'save') and type(getattr(data, 'save')) == types.MethodType:
-            current = self.context
-            self.set_context(path)
-            data.save(self)
-            self.set_context(current)
-        else:
-            dtp = type(data).__name__
-            if dtp == 'ndarray':
-                dtp = str(data.dtype)
-            hdf5_archive_impl.save(self, path, data, dtp)
-
-from pyngsapi_c import *
+del i
+o = h5.oArchive('blubb')
+o.write('/a',0)
+del o
