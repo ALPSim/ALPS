@@ -39,9 +39,9 @@
 MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::filesystem::path& fn) 
  : alps::scheduler::Task(w,fn)
  , MaxEntHelper(parms)
- , alpha(parms["N_ALPHA"])
- , norm(parms.value_or_default("NORM", 1.))
- , max_it(parms.value_or_default("MAX_IT", 1000))
+ , alpha(parms["N_ALPHA"])                                                              //This is the # of \alpha parameters that should be tried.
+ , norm(parms.value_or_default("NORM", 1.))                                             //The integral is normalized to NORM (use e.g. for self-energies
+ , max_it(parms.value_or_default("MAX_IT", 1000))                                       //The number of iterations done in the root finding procedure
  , name(fn.filename().string(),0,fn.filename().string().size()-6)
  , dir(fn.branch_path())
  , spex_str(boost::filesystem::absolute(name+"spex.dat", dir).string().c_str())
@@ -51,10 +51,10 @@ MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::file
  , chispec_str(boost::filesystem::absolute(name+"chispec.dat", dir).string().c_str())
  , prob_str(boost::filesystem::absolute(name+"prob.dat", dir).string().c_str())
 {
-  const double alpha_min = parms["ALPHA_MIN"];
-  const double alpha_max = parms["ALPHA_MAX"];
+  const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried
+  const double alpha_max = parms["ALPHA_MAX"];                                          //Largest  value of \alpha that is tried
   alpha[0] = alpha_max;
-  for (std::size_t a=1; a<alpha.size(); ++a) 
+  for (std::size_t a=1; a<alpha.size(); ++a)                                            //These are all the alpa values on a log grid
     alpha[a] =  alpha[a-1] * std::pow(alpha_min/alpha_max, 1./double(alpha.size()-1));
 }
 
@@ -107,6 +107,8 @@ void MaxEntSimulation::dostep()
   const int max_a = max_lprob-lprob.begin();
   const double factor = chi_scale_factor(spectra[max_a], chi_sq[max_a], alpha[max_a]);
   std::cerr << "chi scale factor: " << factor << std::endl;
+
+  //output 'maximum' spectral function (classical maxent metod)
   for (std::size_t i=0; i<spectra[0].size(); ++i) 
     maxspec_str << omega_coord(i) << " " << spectra[max_a][i]*norm << " " << def[i]*norm << std::endl;
   vector_type prob(lprob.size());
@@ -123,6 +125,8 @@ void MaxEntSimulation::dostep()
   for (std::size_t a=0; a<lprob.size()-1; ++a) 
     postprobdef += 0.5*(exp(lprob[a])+exp(lprob[a+1]))*(alpha[a]-alpha[a+1]);
   std::cout << "posterior probability of the default model: " << postprobdef << std::endl;
+ 
+  //compute 'average' spectral function (Brian's metod)
   vector_type avspec(spectra[0].size());
   for (std::size_t i=0; i<avspec.size(); ++i) {
     avspec[i] = 0.;
@@ -186,7 +190,7 @@ MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const d
 
 
 
-
+//this function is crap. Why do we need it? It has zero content!
 void MaxEntSimulation::write_xml_body(alps::oxstream& out, const boost::filesystem::path&, bool write_all_xml) const
 {
   if (write_all_xml) {

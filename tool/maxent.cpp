@@ -45,6 +45,7 @@ void MaxEntFactory::print_copyright(std::ostream& out) const
       << "  copyright (c) 2010 by Sebastian  Fuchs <fuchs@comp-phys.org>\n"
       << "                        Thomas Pruschke <pruschke@comp-phys.org>\n"
       << "                        Matthias Troyer <troyer@comp-phys.org>\n"
+      << "  copyright (c) 2011 by Emanuel Gull <gull@phys.columbia.edu>\n"
       << " for details see the publication:\n"
       << "  A.F. Albuquerque et al., J. of Magn. and Magn. Materials 310, 1187 (2007).\n\n";
 }
