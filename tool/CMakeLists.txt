@@ -4,6 +4,8 @@
 #          http://www.boost.org/LICENSE_1_0.txt)
 
 
+add_subdirectory(alea)
+
 #
 # basic C++ tools
 # 

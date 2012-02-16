@@ -7,13 +7,14 @@
 if (ALPS_BUILD_SOURCE)
 
   INSTALL(FILES CMakeLists.txt DESTINATION alps/example)  
-  install(DIRECTORY parapack scheduler sampling model ietl fortran DESTINATION alps/example
+  install(DIRECTORY alea parapack scheduler sampling model ietl fortran DESTINATION alps/example
           FILES_MATCHING PATTERN "*"  PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
 
 else (ALPS_BUILD_SOURCE)
 
   enable_testing()
 
+  add_subdirectory(alea)
   add_subdirectory(parapack)
   add_subdirectory(scheduler)
   if (ALPS_BUILD_NGS)
