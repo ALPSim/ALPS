@@ -35,3 +35,14 @@ This module contains classes for the evaluation of Monte Carlo measurements:
 
 from pyalea_c import *
 from pymcdata_c import *
+
+def autocorrelation(obs, distance = None, limit = None):
+  if distance != None:
+    return autocorrelation_distance(obs, distance)
+  if limit != None:
+    return autocorrelation_limit(obs, limit)
+  print "Usage: autocorrelation(obs, [distance = XXX | limit = XXX] )"
+
+
+
+

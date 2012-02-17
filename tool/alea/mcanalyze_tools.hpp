@@ -99,13 +99,6 @@ public:
         return 1;
       }
 
-      //if (!vm.count("variable")) {
-      //  alps::hdf5::iarchive iar(file_names.front());
-      //  variable_names = iar.list_children("/simulation/results");
-      //}
-      //std::cout << "Variables: " << variable_names << std::endl;
-    
-
     
       for (const_string_iterator file_it = file_names.begin(); file_it != file_names.end(); ++file_it) {
         alps::hdf5::archive ar(*file_it, alps::hdf5::archive::WRITE);
