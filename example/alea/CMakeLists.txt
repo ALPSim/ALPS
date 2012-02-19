@@ -9,6 +9,9 @@
 #include_directories(${Boost_ROOT_DIR})
 
 
+  FILE ( COPY testfile.h5 DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+
+
   FOREACH(example mean variance autocorrelation error running_mean)
     add_executable(example_${example} example_${example}.cpp)
     add_dependencies(example_${example} alps)
@@ -16,3 +19,4 @@
     #install(TARGETS example_${example} RUNTIME DESTINATION bin COMPONENT example) 
   ENDFOREACH(example)
 
+  

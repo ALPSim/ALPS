@@ -36,13 +36,40 @@ This module contains classes for the evaluation of Monte Carlo measurements:
 from pyalea_c import *
 from pymcdata_c import *
 
-def autocorrelation(obs, distance = None, limit = None):
-  if distance != None:
-    return autocorrelation_distance(obs, distance)
-  if limit != None:
-    return autocorrelation_limit(obs, limit)
-  print "Usage: autocorrelation(obs, [distance = XXX | limit = XXX] )"
+def autocorrelation(obs, _distance = None, _limit = None):
+  if _distance != None:
+    return autocorrelation_distance(obs, _distance)
+  if _limit != None:
+    return autocorrelation_limit(obs, _limit)
+  print "Usage: autocorrelation(obs, [_distance = XXX | _limit = XXX] )"
 
+def cut_head(obs, _distance = None, _limit = None):
+  if _distance != None:
+    return cut_head_distance(obs, _distance)
+  if _limit != None:
+    return cut_head_limit(obs, _limit)
+  print "Usage: cut_head(obs, [_distance = XXX | _limit = XXX] )"
 
+def cut_tail(obs, _distance = None, _limit = None):
+  if _distance != None:
+    return cut_tail_distance(obs, _distance)
+  if _limit != None:
+    return cut_tail_limit(obs, _limit)
+  print "Usage: cut_head(obs, [_distance = XXX | _limit = XXX] )"
 
+def exponential_autocorrelation_time(obs, _from = None, _to = None, _max = None, _min = None):
+  if (_from != None and _to != None):
+    return exponential_autocorrelation_time_distance(obs, _from, _to)
+  if (_max != None and _min != None):
+    return exponential_autocorrelation_time_limit(obs, _max, _min)
+  print "Usage: exponential_autocorrelation_time(obs, [_from = XXX, _to = XXX | _max = XXX, _min = XXX] )"
+
+binning = "binning"
+uncorrelated = "uncorrelated"
+
+def error(obs, selector = "uncorrelated"):
+  if selector == "binning":
+    return binning_error(obs)
+  if selector == "uncorrelated":
+    return uncorrelated_error(obs)
 

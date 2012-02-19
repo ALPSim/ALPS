@@ -1,6 +1,3 @@
-#include <alps/alea.h>
-#include <alps/alea/mcanalyze.hpp>
-
 /*****************************************************************************
 *
 * ALPS Project: Algorithms and Libraries for Physics Simulations
@@ -28,6 +25,8 @@
 *
 *****************************************************************************/
 
+#include <alps/alea.h>
+#include <alps/alea/mcanalyze.hpp>
 #include <alps/utility/encode.hpp>
 
 #include <alps/hdf5.hpp>
@@ -54,7 +53,7 @@ int main() {
   mctimeseries<double> auto_corr = autocorrelation(obs, _distance = (size(obs) - 1));
   
   // fit the autocorrelation exponentially between the values where it is at 80% and at 20% of the value at t = 1
-  std::pair<double, double> fit = exponential_autocorrelation_time(auto_corr, (_min=.2, _max=.8));
+  std::pair<double, double> fit = exponential_autocorrelation_time(auto_corr, _min=.2, _max=.8);
 
   // calculate the integrated autocorrelation time by summing up the autocorrelation until a specific point
   //(here when the autocorrelation reaches 20% of its value at t = 1) and integrating the fit for the tail

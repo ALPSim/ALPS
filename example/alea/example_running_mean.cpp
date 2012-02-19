@@ -27,7 +27,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea/mcanalyze.hpp>
-
 #include <alps/utility/encode.hpp>
 
 #include <alps/hdf5.hpp>
@@ -55,8 +54,8 @@ int main() {
   alps::alea::mctimeseries<double> reverse_running_mean = alps::alea::reverse_running_mean(obs);
 
   // write to std::cout
-  std::cout << "The running mean of E is: " << running_mean << std::endl;
-  std::cout << "The reverse running mean of E is: " << reverse_running_mean << std::endl;
+  std::cout << "The running mean of E is: " << running_mean << "\n\n";
+  std::cout << "The reverse running mean of E is: " << reverse_running_mean << "\n\n";
 
   return 0;
 }

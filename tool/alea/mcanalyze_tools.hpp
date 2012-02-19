@@ -36,9 +36,6 @@
 #include <boost/program_options.hpp>
 #include <iostream>
 
-//template <class TimeseriesType>
-//struct return_type;
-
 template <class TimeseriesType>
 struct return_type {
 typedef typename alps::average_type< typename TimeseriesType::value_type >::type type;

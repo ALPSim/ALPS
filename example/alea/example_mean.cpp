@@ -27,7 +27,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea/mcanalyze.hpp>
-
 #include <alps/utility/encode.hpp>
 
 #include <alps/hdf5.hpp>
@@ -53,7 +52,7 @@ int main() {
 
   // write to std::cout
   std::cout << "The mean of E is: " << mean << std::endl;
-  
+
   // write the result back to the file
   alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
   ar << alps::make_pvp("simulation/results/" + alps::hdf5_name_encode("E") + "/mean/value", mean);

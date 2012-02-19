@@ -27,7 +27,6 @@
 
 #include <alps/alea.h>
 #include <alps/alea/mcanalyze.hpp>
-
 #include <alps/utility/encode.hpp>
 
 #include <alps/hdf5.hpp>
@@ -54,7 +53,7 @@ int main() {
   mctimeseries<double> auto_corr = autocorrelation(obs, _limit = 0.2);
   
   // fit the autocorrelation exponentially between the values where it is at 80% and at 20% of the value at t = 1
-  std::pair<double, double> fit = exponential_autocorrelation_time(auto_corr, (_min=.2, _max=.8));
+  std::pair<double, double> fit = exponential_autocorrelation_time(auto_corr, _max=0.8, _min=0.2);
 
   // calculate the integrated autocorrelation time by summing up the autocorrelation and integrating the fit for the tail
   double int_autocorr_time = integrated_autocorrelation_time(cut_tail(auto_corr, _limit=0.2), fit);
@@ -75,8 +74,8 @@ int main() {
   std::cout << "The estimated integrated autocorrelation time is: " << int_autocorr_time << "\n";
   std::cout << "The different error estimates are:\n";
   std::cout << "uncorrelated:\t\t" << error_uncorr << "\n";
-  std::cout << "binning:\t\t" << error_binning << "\n";
-  std::cout << "correlation time:\t" << error_corrtime << "\n";
+  std::cout << "with binning:\t\t" << error_binning << "\n";
+  std::cout << "with correlation time:\t" << error_corrtime << "\n";
 
 
   // we can also write one of the errors back to the file
