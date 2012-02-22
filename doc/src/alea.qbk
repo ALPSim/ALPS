@@ -1,5 +1,5 @@
 [/==============================================================================
-    Copyright (C) 1994-2010 Matthias Troyer and Synge Todo
+    Copyright (C) 1994-2012 Matthias Troyer, Synge Todo and Maximilian Poprawe
 
     Distributed under the Boost Software License, Version 1.0. (See accompanying
     file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
@@ -8,11 +8,50 @@
 [library Alps/Alea Library
     [id alea]
     [dirname alea]
-    [copyright 1994 2002 2003 2004 2005 Matthias Troyer, Synge Todo]
+    [copyright 1994 2002 2003 2004 2012 Matthias Troyer, Synge Todo, Maximilian Poprawe]
     [last-revision $Date$]
 ]
 
 [section Introduction]
+The ALEA library is used to handle, store and analyze Monte-Carlo simulation data.
 [endsect]
 
+[section Analyzing Monte-Carlo data]
+There is a range of functions that allow the calculation of statistical properties of Monte-Carlo data.
+
+In general, when running a simulation, the results are recorded with an Observable-class and stored in a HDF5 file.
+These files can then later be read and statistical properties can be calculated. These results can also be written back into the file. There are several examples on how to do this in the examples/alea folder.
+
+Here is an overview of the functions available
+
+[table
+[[Function Name] [Argument(s)] [Options] [Return Type]]
+[[`mean`] [Timeseries] [None] [`AverageType`]]
+[[`variance`] [Timeseries] [None] [`AverageType`]]
+[[`error`] [Timeseries] [uncorrelated, binning] [`AverageType`]]
+[[`autocorrelation`] [Timeseries] [_distance, _limit] [`mctimeseries<AverageType>`]]
+[[`exponential_autocorrelation_time`] [Scalar MCTimeseries] [_from & _to, _max & _min] [`std::pair<AverageType, AverageType>`]]
+[[`integrated_autocorrelation_time`] [Scalar MCTimeseries, `std::pair<AverageType, AverageType>`] [None] [`AverageType`]]
+[[`running_mean`] [Timeseries] [None] [`mctimeseries<AverageType>`]]
+[[`reverse_running_mean`] [Timeseries] [None] [`mctimeseries<AverageType>`]]
+]
+
+where `AverageType` is `typename average_type<ValueType>::type,\\
+`Timeseries` is one of mcdata<ValueType>, mctimeseries<ValueType> or mctimeseries_view<ValueType>[newline]
+and `Scalar MCTimeseries` is one of mctimeseries<double> or mctimeseries_view<double>\\
+
+The objects `mctimeseries<ValueType>` and `mctimeseries_view<ValueType>` are essentially wrapped boost::shared_ptr's to the timeseries. while the constructor of the mctimeseries class copies the whole data, the constructor of the mctimeseries_view class only creates a reference.
+One can easily create views of timeseries by using the functions cut_head and cut_tail:
+
+[table
+[[Function Name] [Argument(s)] [Options] [Return Type]]
+[[`cut_head`] [Timeseries] [_distance, _limit] [`mctimeseries_view<ValueType>`]]
+[[`cut_tail`] [Timeseries] [_distance, _limit] [`mctimeseries_view<ValueType>`]]
+]
+
+[section Mean]
+Mean
+[endsect]
+
+[endsect]
 [xinclude alea.autodoc]

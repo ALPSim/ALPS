@@ -43,10 +43,17 @@ from pyalea_c import RealObservable, RealVectorObservable, RealTimeSeriesObserva
 from pyalea_c import MCScalarTimeseries, MCScalarTimeseriesView, MCVectorTimeseries, MCVectorTimeseries, ValueWithError, StdPairDouble, size, mean, variance, integrated_autocorrelation_time, running_mean, reverse_running_mean
 import alea_detail as detail
 
-
+# TODO: __repr__ function for StdPairDouble
 #def std_pair_double.__repr__():
 #  return str(self.first) + ", " + str(self.second)
 
+def make_dataset(MCTimeseries):
+  "Makes a pyalps.dataset from a MCTimeseries object making it possible to plot one using pyalps.plot"
+  d = detail.pyalps.dataset.DataSet()
+  d.y = MCTimeseries.timeseries()
+  d.x = detail.numpy.arange(1,len(d.y)+1,1)
+  d.props['line'] = 'scatter'
+  return d
 
 def autocorrelation(timeseries, _distance = None, _limit = None):
   "Calculates the autocorrelation of a given timeseries. Can be invoked with _distance or _limit.\n\
