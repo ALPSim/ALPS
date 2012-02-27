@@ -25,63 +25,28 @@
  #                                                                                 #
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
-from collections import MutableMapping
-import types
+import numpy as np
+import pyalps.ngs as ngs
 
-from pyngsparams_c import *
-params.__bases__ = (MutableMapping, ) + params.__bases__
+ar = ngs.h5ar('test.h5', 'w')
+a = np.array([1, 2, 3]);
+b = np.array([1.1, 2.0, 3.5]);
+c = np.array([1.1 + 1j, 2.0j, 3.5]);
+d = {"a": a, 2 + 3j: "foo"}
 
-from pyngsobservable_c import *
-class ObservableOperators:
-    def __lshift__(self, other):
-        self.append(other)
-observable.__bases__ = (ObservableOperators, ) + observable.__bases__
-
-class RealObservable:
-    def __init__(self, name, binnum = 0):
-        self.name = name
-        self.binnum = binnum
-    def addToObservables(self, observables):
-        observables.createRealObservable(self.name, self.binnum)
-
-class RealVectorObservable:
-    def __init__(self, name, binnum = 0):
-        self.name = name
-        self.binnum = binnum
-    def addToObservables(self, observables):
-        observables.createRealVectorObservable(self.name, self.binnum)
-
-from pyngsobservables_c import *
-class ObservablesOperators:
-    def __lshift__(self, other):
-        other.addToObservables(self)
-observables.__bases__ = (ObservablesOperators, MutableMapping, ) + observables.__bases__
-
-from pyngsresult_c import *
-
-from pyngsresults_c import *
-results.__bases__ = (MutableMapping, ) + results.__bases__
-
-from pyngsbase_c import *
-class base(base_impl):
-    def run(self, callback = lambda: True):
-        base_impl.run(self, callback)
-
-from pyngshdf5_c import *
-class h5ar(hdf5_archive_impl):
-    def __init__(self, filename, mode = 'r'):
-        hdf5_archive_impl.__init__(self, filename, mode)
-    def __getitem__(self, path):
-        return self.load(path)
-    def __setitem__(self, path, value):
-        self.save(path, value)
-    def save(self, path, data):
-        if hasattr(data, 'save') and type(getattr(data, 'save')) == types.MethodType:
-            current = self.context
-            self.set_context(path)
-            data.save(self)
-            self.set_context(current)
-        else:
-            hdf5_archive_impl.save(self, path, data)
-
-from pyngsapi_c import *
+ar["/list"] = [1, 2, 3]
+ar["/list2"] = [[[1, 2], [3, 4]], [[1, 2], [3, 4]], [[1, 2], [3, 4]], [[1, 2], [3, 4]]]
+ar["/dict"] = {"scalar": 1, "numpy": a, "numpycpx": c, "list": [1, 2, 3], "string": "str", 1: 1, 4: d}
+ar["/numpy"] = a
+ar["/numpy2"] = b
+ar["/numpy3"] = c
+ar["/numpyel"] = a[0]
+ar["/numpyel2"] = b[0]
+ar["/numpyel3"] = c[0]
+ar["/int"] = int(1)
+ar["/long"] = long(1)
+ar["/double"] = float(1)
+ar["/complex"] = complex(1, 1)
+ar["/string"] = "str"
+ar["/inhomogenious"] = [[1, 2, 3], a, "gurke", [[a, 2, 3], ["x", complex(1, 1)]]]
+ar["/inhomogenious2"] = [[[1, 2], [3, 4]], [[1, 2], [3, 4]], [[1, 2], [3, 4]], [[1, 2], [3]]]
