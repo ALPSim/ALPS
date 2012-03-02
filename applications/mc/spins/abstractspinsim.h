@@ -136,6 +136,11 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
   else
     use_error_limit = false; 
 
+  if (has_magnetic_field_ && quantum_convention_) 
+    boost::throw_exception(
+      std::runtime_error("Cannot use quantum convention with nonzero magnetic field ."));
+
+
   if (parms["UPDATE"]=="cluster" && has_magnetic_field_) 
     {boost::throw_exception(std::runtime_error("Illegal update type " 
                + std::string(parms["UPDATE"]) 
@@ -159,7 +164,7 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
         spinvalue = quantum_convention_ ? 0.5 : 1.;
       else 
         spinvalue = alps::evaluate<double>(parms[spin],parms);
-      spinfactor_[*si]=std::sqrt(spinvalue*(spinvalue+(quantum_convention_ ? 1. : 0.)))*g_;
+      spinfactor_[*si]=std::sqrt(spinvalue*(spinvalue+(quantum_convention_ ? 1. : 0.)));
 
       // set the values for the diagonal matrix terms
       site_type_visited[type]=true;
@@ -176,7 +181,7 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
         selfinteraction_[*si].setMatrix(diag_string,parms);
         general_case_=true;
       }
-      selfinteraction_[*si] = selfinteraction_[*si]*spinvalue*(spinvalue+(quantum_convention_ ? 1. : 0.));
+      selfinteraction_[*si] = selfinteraction_[*si]*spinvalue*spinvalue;
       
       if (!selfinteraction_[*si].is_symmetric())
          boost::throw_exception(std::runtime_error("Invalid matrix for D"));

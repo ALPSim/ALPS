@@ -246,14 +246,14 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
     m_h = this->spinfactor_[*si]*spins_[*si].mag_h(this->h_normalized);
 
   if (this->has_magnetic_field_) 
-    en+=this->spinfactor_[*si]*site_energy(spins_[*si],this->h_);
+    en+=this->spinfactor_[*si]*site_energy(spins_[*si],this->h_)*this->g_;
 
   double par=this->parity(*si);
   ++si;
   
   for (; si !=this->sites().second ; ++si) {
     if (this->has_magnetic_field_) 
-      en+=this->spinfactor_[*si]*site_energy(spins_[*si],this->h_);
+      en+=this->spinfactor_[*si]*site_energy(spins_[*si],this->h_)*this->g_;
       
     if (this->general_case_)
       en+=onsite_energy(spins_[*si],this->selfinteraction_[*si]);
@@ -321,7 +321,6 @@ void SpinSim<M,MAT>::do_measurements(update_info_type update_info)
   if (this->print_sweeps_) {
     int good_sweeps = this->sweeps_done_-this->thermalization_sweeps_;
     if (good_sweeps > 0 && (good_sweeps % this->print_sweeps_ ==0)) {
-      std::cout << "Dumping configuration: \n";
       for (int i=0;i<this->num_sites();++i) {
         std::cout << i << " ";
         std::vector<double> coord = this->coordinate(i);
@@ -350,7 +349,7 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
       bt_energy.resize(bt+1);
       bt_count.resize(bt+1);
     }
-    double be = bond_energy(spins_[this->source(*bi)],spins_[this->target(*bi)],
+    double be = this->spinfactor_[this->source(*bi)]*this->spinfactor_[this->target(*bi)]*bond_energy(spins_[this->source(*bi)],spins_[this->target(*bi)],
         this->couplings_[*bi]);
 
     en -= be;
@@ -374,13 +373,16 @@ void SpinSim<M,MIdMatrix<double,M::dim> >::do_measurements(update_info_type upda
   mst *= this->spinfactor_[*si];
   double m_h = 0.;
   if (this->has_magnetic_field_) 
+      {
         m_h = this->spinfactor_[*si]*spins_[*si].mag_h(this->h_normalized);
+        en+=this->spinfactor_[*si]*site_energy(spins_[*si],this->h_)*this->g_;
+      }
   double par=this->parity(*si);
   ++si;
   
   for (; si !=this->sites().second ; ++si) {
     if (this->has_magnetic_field_) 
-      en+=site_energy(spins_[*si],this->h_);
+      en+=this->spinfactor_[*si]*site_energy(spins_[*si],this->h_)*this->g_;
     if (this->general_case_)
       en+=onsite_energy(spins_[*si],this->selfinteraction_[*si]);
     
