@@ -43,7 +43,7 @@ fi
 fdggdfgdf
 ( \
 echo "configuring..." && \
-(cd "$BUILD_DIR/openmpi-$VERSION" && ./configure --prefix="$PREFIX") && \
+(cd "$BUILD_DIR/openmpi-$VERSION" && ./configure --prefix="$PREFIX" --enable-f77 --enable-f90) && \
 echo "building..." && \
 (cd "$BUILD_DIR/openmpi-$VERSION" && make) && \
 echo "installing..." && \
