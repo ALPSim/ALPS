@@ -87,7 +87,7 @@ int main(int argc, char** argv)
     alps::Parameters parms;
     {
       std::ifstream is(argv[1]);
-      if(!is.is_open()){std::cerr<<"parameter file argv[1] "<<argv[1]<<"is not open! exiting!"<<std::endl; abort(); }
+      if(!is.is_open()){std::cerr<<"parameter file argv[1] "<<argv[1]<<" is not open! exiting!"<<std::endl; abort(); }
       is>>parms;
       parms["BASENAME"]=std::string(argv[1]);
     }
