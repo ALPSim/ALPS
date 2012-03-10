@@ -19,7 +19,10 @@ basic = core.modules.basic_modules
 
 import numpy as np
 
-from gui.modules.constant_configuration import StandardConstantWidget
+try:
+  from gui.modules.constant_configuration import StandardConstantWidget
+except:
+  from core.modules.constant_configuration import StandardConstantWidget
 
 ##############################################################################
 

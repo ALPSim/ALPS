@@ -115,15 +115,15 @@ class slice_iter
     T& operator*() const { return ref(curr);}
 
     bool operator==(const slice_iter<T>& q)
-      {return curr==q.curr && s.stride==q.s.stride && s.start == q.s.start;}
+      {return curr==q.curr && s.stride()==q.s.stride() && s.start() == q.s.start();}
 
     bool operator!=(const slice_iter<T>& q){return !(*this==q);}
 
     bool operator<(const slice_iter<T>& q)
-      {return curr<q.curr && s.stride==q.s.stride && s.start == q.s.start;}
+      {return curr<q.curr && s.stride()==q.s.stride() && s.start() == q.s.start();}
 
     bool operator>(const slice_iter<T>& q)
-      {return curr>q.curr && s.stride==q.s.stride && s.start == q.s.start;}
+      {return curr>q.curr && s.stride()==q.s.stride() && s.start() == q.s.start();}
 
 //  IterExpr auxiliary methods
 
@@ -167,15 +167,15 @@ class cslice_iter
 
 
     bool operator==(const cslice_iter<T>& q)
-      {return curr==q.curr && s.stride==q.s.stride && s.start == q.s.start;}
+      {return curr==q.curr && s.stride()==q.s.stride() && s.start() == q.s.start();}
 
     bool operator!=(const cslice_iter<T>& q){return !(*this==q);}
 
     bool operator<(const cslice_iter<T>& q)
-      {return curr<q.curr && s.stride==q.s.stride && s.start == q.s.start;}
+      {return curr<q.curr() && s.stride()==q.s.stride() && s.start() == q.s.start();}
 
     bool operator>(const cslice_iter<T>& q)
-      {return curr>q.curr && s.stride==q.s.stride && s.start == q.s.start;}
+      {return curr>q.curr() && s.stride()==q.s.stride() && s.start() == q.s.start();}
 
 //  IterExpr auxiliary methods
 
