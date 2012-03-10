@@ -91,10 +91,10 @@
               <parameter alias="" id="2" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:Integer" val="" />
             </function>
           </module>
-          <module cache="1" id="4" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.0.2">
+          <module cache="1" id="4" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.0.4">
             <location id="4" x="25.16484196" y="53.8594491089" />
           </module>
-          <module cache="1" id="5" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.0.2">
+          <module cache="1" id="5" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.0.4">
             <location id="5" x="33.09713782" y="147.692926157" />
             <function id="3" name="title" pos="0">
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="" />
@@ -393,10 +393,10 @@
           <module cache="1" id="2" name="MplFigure" namespace="" package="edu.utah.sci.vistrails.matplotlib" version="0.9.0">
             <location id="2" x="35.89131966" y="-99.5662399711" />
           </module>
-          <module cache="1" id="4" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.0.2">
+          <module cache="1" id="4" name="MplXYPlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.0.4">
             <location id="4" x="25.16484196" y="53.8594491089" />
           </module>
-          <module cache="1" id="5" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.0.2">
+          <module cache="1" id="5" name="PreparePlot" namespace="DataSet|Plot" package="org.comp-phys.alps" version="2.0.4">
             <location id="5" x="33.09713782" y="147.692926157" />
             <function id="3" name="title" pos="0">
               <parameter alias="" id="3" name="&lt;no description&gt;" pos="0" type="edu.utah.sci.vistrails.basic:String" val="" />
@@ -531,7 +531,7 @@
   </action>
   <action date="2011-08-24 15:04:23" id="3" prevId="2" session="3" user="troyer">
     <add id="108" objectId="14" parentObjId="" parentObjType="" what="module">
-      <module cache="1" id="14" name="EvaluateFullDiagVersusH" namespace="Applications" package="org.comp-phys.alps" version="2.0.2" />
+      <module cache="1" id="14" name="EvaluateFullDiagVersusH" namespace="Applications" package="org.comp-phys.alps" version="2.0.4" />
     </add>
     <add id="109" objectId="14" parentObjId="14" parentObjType="module" what="location">
       <location id="14" x="-360.35880292" y="938.29273213" />

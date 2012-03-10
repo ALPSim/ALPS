@@ -30,8 +30,8 @@ import dataset
 ##############################################################################
 
 _subworkflows = [('MplXYPlotCell.xml', {'namespace': 'Tools'}),
-                 ('ShowListOfPlots.xml', {'namespace': 'Dataset|Plot'}),
-                 ('ShowMplPlot.xml', {'namespace': 'Dataset|Plot'}),
+                 ('ShowListOfPlots.xml', {'namespace': 'DataSet|Plot'}),
+                 ('ShowMplPlot.xml', {'namespace': 'DataSet|Plot'}),
 #                 ('ShowListOfPlots2.xml', {'namespace': 'DataSet|Plot', 'name':'ShowListOfPlots'}),
 #                 ('ShowMplPlot2.xml', {'namespace': 'DataSet|Plot', 'name':'ShowMplPlot'}),
                  ('ShowListOfXMLFiles.xml', {'namespace': 'Tools'}),
@@ -99,8 +99,8 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'GenerateDataSet': (dataset.PrepareDataSets,{}),
                    'LoadDataSet': (dataset.LoadDataSetsFromTextFile,{}),
                    'CustomLoader': (dataset.LoadCustomFile,{}),
-                   'CollectXY': (dataset.CollectDataSets,{}),
-                   'CollectDataSets': (dataset.CollectDataSets,{}),
+                   'CollectXY': (dataset.CollectDataSets,{'dst_port_remap': {'for-each': 'for-each'}}),
+                   'Parameters|CollectDataSets': (dataset.CollectDataSets,{'dst_port_remap': {'for-each': 'for-each'}}),
                    'LoadProperties': (dataset.LoadAlpsProperties,{}),
                    'LoadAlpsHdf5': (dataset.LoadAlpsMeasurements,{}),
                    'LoadAlpsMeasurements': (dataset.LoadAlpsMeasurements,{}),
@@ -119,7 +119,7 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'Convert2Grace': (dataset.WriteGraceFile,{}),
                    'DisplayXMGRPlot': (plots.DisplayGracePlot,{}),
                    'GraceXYPlot': (dataset.WriteGraceFile,{}),
-                   'MplXYPlot': (dataset.MplXYPlot,{}),
+                   'MplXYPlot': (dataset.MplXYPlot,{'dst_port_remap': {'plot': 'plot'}}),
                    'Select': (dataset.Select,{}),
                    'And': (dataset.And,{}),
                    'Or': (dataset.Or,{}),
@@ -136,8 +136,8 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'PropertySelector': (dataset.PropertyPredicate,{}),
                    'PropertyRangeSelector': (dataset.PropertyRangePredicate,{}),
                    'ObservableSelector': (dataset.ObservablePredicate,{}),
-                   'GroupBy': (dataset.GroupDataSets,{}),
-                   'GroupDataSets': (dataset.GroupDataSets,{}),
+                   'GroupBy': (dataset.GroupDataSets,{'dst_port_remap': {'for-each': 'for-each'}}),
+                   'GroupDataSets': (dataset.GroupDataSets,{'dst_port_remap': {'for-each': 'for-each'}}),
                    'GroupedTransform': (dataset.TransformGroupedDataSets,{}),
                    'GenerateDataSet': (dataset.PrepareDataSets,{}),
                    'GenerateDataSet': (dataset.PrepareDataSets,{}),
@@ -145,22 +145,26 @@ def handle_module_upgrade_request(controller, module_id, pipeline):
                    'CycleColors': (dataset.CycleColors,{}),
                    'CycleMarkers': (dataset.CycleMarkers,{}),
                    'Convert2XML': (tools.Convert2XML,{}),
-                   'IterateValue': (parameters.IterateValue,{}),
-                   'IterateParameter': (parameters.IterateParameter,{})
+                   'IterateValue': (parameters.IterateValue,{'dst_port_remap': {'value_list': 'value_list'}}),
+                   'IterateParameter': (parameters.IterateParameter,{'dst_port_remap': {'value_list': 'value_list'}})
                    }
 
 
    new_remap = {}
    for name, (new_module, d) in module_remap.iteritems():
-      new_remap[name] = [(None, '2.0.2', new_module, d)]
+      new_remap[name] = [(None, '2.0.4', new_module, d)]
 
    # [(<start_version>, <end_version>, <new_module (None=same module, new version)>, <remap_dict>)]
-   new_remap['ShowListOfHTMLFiles'] = [(None, '2.0.2', None, {})]
-   new_remap['Tools|ShowListOfXMLFiles'] = [(None, '2.0.2', None, {})]
-   new_remap['ShowListOfPlots'] = [(None, '2.0.2', None, {})]
-   new_remap['DataSet|Plot|ShowMplPlot'] = [(None, '2.0.2', None, {})]
-   new_remap['MplXYPlotCell'] = [(None, '2.0.2', None, {})]
+   new_remap['ShowListOfHTMLFiles'] = [(None, '2.0.4', None, {})]
+   new_remap['Tools|ShowListOfXMLFiles'] = [(None, '2.0.4', None, {})]
+   new_remap['ShowListOfPlots'] = [(None, '2.0.4', None, {})]
+   new_remap['DataSet|Plot|ShowMplPlot'] = [(None, '2.0.4', None, {})]
+   new_remap['Dataset|Plot|ShowMplPlot'] = [('DataSet|Plot|ShowMplPlot', '2.0.4', None, {})]
+   new_remap['MplXYPlotCell'] = [(None, '2.0.4', None, {})]
    new_remap['DataSet|Plot|MplXYPlot'] = [('2.0.0', '2.0.1', None, {})]
+   new_remap['Parameters|IterateValue'] = [(None, '2.0.4', None, {'dst_port_remap': {'value_list': 'value_list'}})]
+   new_remap['Parameters|IterateParameter'] = [(None, '2.0.4', None, {'dst_port_remap': {'value_list': 'value_list'}})]
+   new_remap['Parameters|GroupDataSets'] = [(None, '2.0.4', None, {'dst_port_remap': {'for-each': 'for-each'}})]
 
    return UpgradeWorkflowHandler.remap_module(controller, module_id, pipeline,
                                              new_remap)
