@@ -94,6 +94,7 @@ void WRun::check_spins()
   
 void WRun::print_spins()
 {     
+  std::cout << parms;
   std::cout << "Spin configuration:\n";
   std::cout << "Wormheads at " << worm_head[0].site() << " " << worm_head[0].time() 
             << " and " << worm_head[1].site() << " " << worm_head[1].time() << std::endl;
