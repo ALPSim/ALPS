@@ -1,7 +1,7 @@
 SWEEPS = 100000000;
 THERMALIZATION = 1000;
 MAX_IT = 20;
-MAX_TIME = 60;
+MAX_TIME = 180;
 BETA = 12;
 MU = 0;
 H = 0;
@@ -26,4 +26,4 @@ N_FLIP = 0;
 N_MOVE = 0;
 OVERLAP = 0;
 CHECKPOINT = dump;
-BASENAME = hybrid.param;
+BASENAME = hybrid.parm;

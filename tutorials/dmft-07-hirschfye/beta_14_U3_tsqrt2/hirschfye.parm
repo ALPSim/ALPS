@@ -19,3 +19,4 @@ SOLVER = hirschfye;
 FLAVORS = 2;
 OMEGA_LOOP = 1;
 G0OMEGA_INPUT = G0_omega_input;
+BASENAME = hirschfye.parm;
