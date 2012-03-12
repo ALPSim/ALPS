@@ -56,7 +56,7 @@ template<typename Impl> class parallel_ising_sim : public Impl {
 
         parallel_ising_sim(typename Impl::parameters_type const & params, std::size_t seed_offset) 
         {
-                    ALPS_NGS_THROW_RUNTIME_ERROR("No communicator passed");
+            throw std::runtime_error("No communicator passed" + ALPS_STACKTRACE);
         }
   
         #ifdef ALPS_HAVE_MPI

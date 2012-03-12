@@ -25,73 +25,44 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/signal.hpp>
-#include <alps/ngs/stacktrace.hpp>
-#include <alps/ngs/hdf5.hpp>
+#include <alps/hdf5.hpp>
+#include <alps/hdf5/vector.hpp>
 
-#include <cstring>
-#include <sstream>
-#include <cstdlib>
-#include <iostream>
-#include <stdexcept>
+#include <boost/multi_array.hpp>
+#include <boost/filesystem.hpp>
 
-#include <signal.h>
+#include <vector>
 
-namespace alps {
-    namespace ngs {
+using namespace std;
+using boost::multi_array;
 
-        signal::signal() {
-            #if not ( defined BOOST_MSVC || defined ALPS_NGS_NO_SIGNALS )
-                static bool initialized;
-                if (!initialized) {
-                    initialized = true;
+int main()
+{
+    if (boost::filesystem::exists(boost::filesystem::path("test.h5")))
+        boost::filesystem::remove(boost::filesystem::path("test.h5"));
 
-                    static struct sigaction action;
-                    memset(&action, 0, sizeof(action));
-                    action.sa_handler = &signal::slot;
-                    sigaction(SIGINT, &action, NULL);
-                    sigaction(SIGTERM, &action, NULL);
-                    sigaction(SIGXCPU, &action, NULL);
-                    sigaction(SIGQUIT, &action, NULL);
-                    sigaction(SIGUSR1, &action, NULL);
-                    sigaction(SIGUSR2, &action, NULL);
-                    sigaction(SIGSTOP, &action, NULL);
-                    sigaction(SIGKILL, &action, NULL);
+    multi_array<double,2> a( boost::extents[3][3] );
+    multi_array<double,2> b( boost::extents[4][4] );
 
-                    static struct sigaction segv;
-                    memset(&segv, 0, sizeof(segv));
-                    segv.sa_handler = &signal::segfault;
-                    sigaction(SIGSEGV, &segv, NULL);
-                    sigaction(SIGBUS, &segv, NULL);
-                }
-            #endif
-        }
-
-        bool signal::empty() {
-            return !signals_.size();
-        }
-
-        int signal::top() {
-            return signals_.back();
-        }
-
-        void signal::pop() {
-            return signals_.pop_back();
-        }
-
-        void signal::slot(int signal) {
-            std::cerr << "Received signal " << signal << std::endl;
-            signals_.push_back(signal);
-        }
-
-        void signal::segfault(int signal) {
-            std::cerr << "Abort by signal " << signal << ":" << ngs::stacktrace() << std::endl;
-            signals_.push_back(signal);
-            hdf5::archive::abort();
-            std::abort();
-        }
-
-        std::vector<int> signal::signals_;
-
+    // Write
+    {
+        alps::hdf5::archive ar("test.h5",alps::hdf5::archive::WRITE);
+        vector< multi_array<double,2> > v(2,a);
+        ar << alps::make_pvp("uniform",v);
+        v.push_back(b);
+        ar << alps::make_pvp("nonuniform",v);
     }
+
+    // Read
+    {
+        alps::hdf5::archive ar("test.h5",alps::hdf5::archive::READ);
+        vector< multi_array<double,2> > w;
+        ar >> alps::make_pvp("nonuniform",w);
+        cout << "read nonuniform" << endl;
+        ar >> alps::make_pvp("uniform",w); // throws runtime_error
+        cout << "read uniform" << endl;
+    }
+	
+    if (boost::filesystem::exists(boost::filesystem::path("test.h5")))
+        boost::filesystem::remove(boost::filesystem::path("test.h5"));
 }
