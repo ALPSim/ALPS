@@ -5,13 +5,14 @@ include(${ALPS_USE_FILE})
 project (DMFT)
 #include_directories("/home/esg/alps_svn/")
 include_directories("/Users/emanuel/alps_svn/")
+include_directories("/home/gull/alps_svn/")
 #include_directories("/opt/local/include")
 include_directories("/global/homes/g/gull/alps_svn/")
-include_directories("/usr/common/usg/gsl/1.14/include")
+#include_directories("/usr/common/usg/gsl/1.14/include")
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g -march=core2 -O3 -DUSE_MPI -DNDEBUG")
 
 link_directories("/opt/local/lib")
-link_directories("/usr/common/usg/gsl/1.14/lib")
+#link_directories("/usr/common/usg/gsl/1.14/lib")
 
 
 add_executable(dmft 
@@ -59,9 +60,9 @@ add_executable(hdf5_changeval hdf5_changeval.C)
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 #target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
-${LAPACK_LIBRARY} gsl pthread)
+${LAPACK_LIBRARY} pthread)
 target_link_libraries(sigma_interpolate_sc ${ALPS_LIBRARIES}
-${LAPACK_LIBRARY} gsl pthread)
+${LAPACK_LIBRARY} pthread)
 target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 
 target_link_libraries(bg_parameter ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})

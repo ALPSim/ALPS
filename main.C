@@ -114,7 +114,7 @@ int main(int argc, char** argv)
 #endif
         else {
           boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::system_complete(p)));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
       } 
@@ -191,7 +191,7 @@ int main(int argc, char** argv)
           //throw exception or commit suicide or even better: 
           //create an external solver that takes its arguments in frequency space.
           boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::complete(p)));
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::system_complete(p)));
           //std::cout<<parms["SOLVER"]<<std::endl;
           //boost::throw_exception(std::logic_error("there is no such solver!"));	
         }

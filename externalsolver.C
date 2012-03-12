@@ -83,7 +83,7 @@ ImpuritySolver::result_type ExternalSolver::solve(
     alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
     g.read_hdf5(ar, "/G0");
   }
-  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  boost::filesystem::remove(boost::filesystem::system_complete(outfile));
   return g;
 }
 
@@ -144,7 +144,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(
       }
     }
   }
-  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  boost::filesystem::remove(boost::filesystem::system_complete(outfile));
   return std::make_pair(G_omega, G_tau);
 }
 
@@ -207,7 +207,7 @@ NambuImpuritySolver::result_type ExternalSolver::solve_nambu(
       }
     }
   }
-  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  boost::filesystem::remove(boost::filesystem::system_complete(outfile));
   return std::make_pair(G_omega, G_tau);
 }
 

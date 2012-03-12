@@ -37,6 +37,9 @@
 
 #include "alps_solver.h"
 #include "types.h"
+#include "boost/filesystem.hpp"
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/exception.hpp>
 
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
 {
@@ -117,7 +120,7 @@ itime_green_function_t  alps::ImpuritySolver::solve(
     g.read_hdf5(ar, "/G0");
   }
   clear(); // destroy the simulation
-  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  boost::filesystem::remove(boost::filesystem::system_complete(outfile));
   return g;
 }
 
@@ -165,7 +168,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t> alps::ImpuritySolv
   }
  
   clear(); // destroy the simulation
-  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  boost::filesystem::remove(boost::filesystem::system_complete(outfile));
   return std::make_pair(G_omega, G_tau);
 }
 
@@ -214,7 +217,7 @@ std::pair<nambu_matsubara_green_function_t, nambu_itime_green_function_t> alps::
   }
  
   clear(); // destroy the simulation
-  boost::filesystem::remove(boost::filesystem::complete(outfile));
+  boost::filesystem::remove(boost::filesystem::system_complete(outfile));
   return std::make_pair(G_omega, G_tau);
 }
 
