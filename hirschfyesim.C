@@ -30,6 +30,7 @@
 /// @file hirschfyesim.h
 /// @brief the actual Hirsch-Fye simulation
 #include <cmath>
+#include <boost/filesystem.hpp>
 
 #include "alps/config.h"
 #include "blas_classes/matrix.h"
@@ -357,7 +358,7 @@ void HirschFyeSim::get_result() {
     std::cout<<"end of sim, checkpointing"<<std::endl;
     std::string fns=parms["CHECKPOINT"];
     boost::filesystem::path fn(fns);
-    checkpoint(boost::filesystem::complete(fn));
+    checkpoint(boost::filesystem::system_complete(fn));
   }
   for(int i=0;i<n_site;++i){
     for(int j=0;j<n_site;++j){

@@ -45,13 +45,13 @@ add_executable(kspace_interpolate interpolate.C clusterhelper.C
 fouriertransform.C auxiliaryfunctions.C
 clustertransformer.C)
 target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
-add_executable(sigma_interpolate_sc sigma_interpolate_sc.C
-auxiliaryfunctions.C clustertransformer.C clusterhelper.C
-fouriertransform.C)
+#add_executable(sigma_interpolate_sc sigma_interpolate_sc.C
+#auxiliaryfunctions.C clustertransformer.C clusterhelper.C
+#fouriertransform.C)
 
-add_executable(sigma_interpolate sigma_interpolate_normal.C
-auxiliaryfunctions.C clustertransformer.C clusterhelper.C
-fouriertransform.C)
+#add_executable(sigma_interpolate sigma_interpolate_normal.C
+#auxiliaryfunctions.C clustertransformer.C clusterhelper.C
+#fouriertransform.C)
 
 add_executable(bg_parameter bg_parameter.C)
 
@@ -59,10 +59,10 @@ add_executable(hdf5_changeval hdf5_changeval.C)
 
 target_link_libraries(dmft ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
 #target_link_libraries(energy ${ALPS_LIBRARIES} ${LAPACK_LIBRARY} pthread)
-target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
-${LAPACK_LIBRARY} pthread)
-target_link_libraries(sigma_interpolate_sc ${ALPS_LIBRARIES}
-${LAPACK_LIBRARY} pthread)
+#target_link_libraries(sigma_interpolate ${ALPS_LIBRARIES}
+#${LAPACK_LIBRARY} pthread)
+#target_link_libraries(sigma_interpolate_sc ${ALPS_LIBRARIES}
+#${LAPACK_LIBRARY} pthread)
 target_link_libraries(kspace_interpolate ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})
 
 target_link_libraries(bg_parameter ${ALPS_LIBRARIES} ${LAPACK_LIBRARY})

@@ -113,7 +113,7 @@ int main(int argc, char** argv)
         }
 #endif
         else {
-          boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
+          boost::filesystem::path p(parms["SOLVER"]);
           solver_ptr.reset(new ExternalSolver(boost::filesystem::system_complete(p)));
           selfconsistency_loop(parms, *solver_ptr, transform);
         }
@@ -190,7 +190,7 @@ int main(int argc, char** argv)
         else{
           //throw exception or commit suicide or even better: 
           //create an external solver that takes its arguments in frequency space.
-          boost::filesystem::path p(parms["SOLVER"],boost::filesystem::native);
+          boost::filesystem::path p(parms["SOLVER"]);
           solver_ptr.reset(new ExternalSolver(boost::filesystem::system_complete(p)));
           //std::cout<<parms["SOLVER"]<<std::endl;
           //boost::throw_exception(std::logic_error("there is no such solver!"));	
@@ -207,7 +207,7 @@ int main(int argc, char** argv)
           DCATransformer::generate_transformer(parms, transform_ptr);
           boost::shared_ptr<NambuImpuritySolver> solver_ptr;	
           std::cout<<"setting up external NAMBU solver: "<<parms["SOLVER"]<<std::endl;
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
           selfconsistency_loop_DCA(parms, *solver_ptr, *transform_ptr);        
         }else{
 #ifdef RUBTSOV
@@ -231,7 +231,7 @@ int main(int argc, char** argv)
           else{
 #endif
             std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
-            solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+            solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
 #ifdef RUBTSOV
           }
 #endif
@@ -244,14 +244,14 @@ int main(int argc, char** argv)
           CDMFTTransformer::generate_transformer(parms, transform_ptr);
           boost::shared_ptr<NambuImpuritySolver> solver_ptr;	
           std::cout<<"setting up external NAMBU solver: "<<parms["SOLVER"]<<std::endl;
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
           selfconsistency_loop_CDMFT(parms, *solver_ptr, *transform_ptr);        
         }else{
           boost::shared_ptr<CDMFTTransformer> transform_ptr;
           CDMFTTransformer::generate_transformer(parms, transform_ptr);
           boost::shared_ptr<MatsubaraImpuritySolver> solver_ptr;	
           std::cout<<"starting external solver "<<parms["SOLVER"]<<std::endl;
-          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"],boost::filesystem::native)));
+          solver_ptr.reset(new ExternalSolver(boost::filesystem::path(parms["SOLVER"])));
           selfconsistency_loop_CDMFT(parms, *solver_ptr, *transform_ptr);
         }
       }
