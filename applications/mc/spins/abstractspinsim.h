@@ -205,7 +205,7 @@ AbstractSpinSim<MAT>::AbstractSpinSim(const alps::ProcessList& w,
       MAT this_J;
       this_J.setMatrix(J_name,parms);
       bond_type[*b] = num_bond_types;
-      this_J = this_J /(g_*g_) * (quantum_convention_ ? 1. : -1.);
+      this_J = this_J * (quantum_convention_ ? 1. : -1.);
       couplings_[*b]=this_J;
       double det = this_J.det();
       couplings_det[*b] = det;

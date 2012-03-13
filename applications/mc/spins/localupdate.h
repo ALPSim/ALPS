@@ -42,7 +42,7 @@
 template <class Graph, class MomentMap, class RNG, class CouplingMap, class SpinfactorMap>
 void local_update(const Graph& graph, MomentMap& moment,
                   double beta, RNG& rng,  const CouplingMap& coupling,
-                  const SpinfactorMap& spinfactor,
+                  const SpinfactorMap& spinfactor, double g,
                   TinyVector<double,CouplingMap::value_type::dim>
                     h = TinyVector<double,CouplingMap::value_type::dim>(0.0))
 
@@ -72,7 +72,7 @@ void local_update(const Graph& graph, MomentMap& moment,
           delta_E += bond_energy_change(moment[boost::source(*edge,graph)],
                                moment[boost::target(*edge,graph)],J,update);
     }
-    delta_E += spinfactor[vertex]*site_energy_change(moment[vertex], h, update);
+    delta_E += spinfactor[vertex]*site_energy_change(moment[vertex], h, update)  * g;
     
     // step iv)
     if (delta_E<0 || rng() < exp(-beta*delta_E)) 
@@ -86,7 +86,7 @@ template <class Graph, class MomentMap, class RNG, class CouplingMap,
 void local_update_self(const Graph& graph, MomentMap& moment,
                   double beta, RNG& rng,  const CouplingMap& coupling, 
                   const SelfinteractionMap& selfinteraction, 
-                  const SpinfactorMap& spinfactor, 
+                  const SpinfactorMap& spinfactor, double g,
                   TinyVector<double,CouplingMap::value_type::dim> 
                     h = TinyVector<double,CouplingMap::value_type::dim>(0.0))
 {
@@ -115,7 +115,7 @@ void local_update_self(const Graph& graph, MomentMap& moment,
       delta_E += bond_energy_change(moment[boost::source(*edge,graph)],
                                 moment[boost::target(*edge,graph)],J,update);
     }
-    delta_E += spinfactor[vertex]*site_energy_change(moment[vertex], h, update);
+    delta_E += spinfactor[vertex]*site_energy_change(moment[vertex], h, update) * g;
     
     delta_E += onsite_energy_change(moment[vertex], selfinteraction[vertex],update);
     

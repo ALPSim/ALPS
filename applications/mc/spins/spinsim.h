@@ -166,10 +166,10 @@ update_info_type SpinSim<M,MAT>::do_update()
     typedef AbstractSpinSim<MAT> parent;
     if (this->general_case_)
       local_update_self(this->graph(),spins_, this->beta_,this->random_01,
-          this->couplings_,this->selfinteraction_,this->spinfactor_,this->h_);
+          this->couplings_,this->selfinteraction_,this->spinfactor_,this->g_,this->h_);
     else
       local_update(this->graph(),spins_, this->beta_,this->random_01,
-          this->couplings_,this->spinfactor_,this->h_);
+          this->couplings_,this->spinfactor_,this->g_,this->h_);
     update_info_type up_info;
     up_info.clustersize = this->num_sites();
     up_info.m2_ = 0;
@@ -190,10 +190,10 @@ update_info_type SpinSim<M,MIdMatrix<double,M::dim> >::do_update()
  else {
     if (this->general_case_)
       local_update_self(this->graph(),spins_,this->beta_,this->random_01,
-          this->couplings_,this->selfinteraction_,this->spinfactor_,this->h_);
+          this->couplings_,this->selfinteraction_,this->spinfactor_,this->g_,this->h_);
     else
       local_update(this->graph(),spins_,this->beta_,this->random_01,
-          this->couplings_,this->spinfactor_,this->h_);
+          this->couplings_,this->spinfactor_,this->g_,this->h_);
     update_info_type up_info;
     up_info.clustersize = this->num_sites();
     up_info.m2_ = 0;
