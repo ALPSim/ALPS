@@ -52,32 +52,42 @@ option(ALPS_BUILD_FORTRAN "Build the ALPS fortran applications and tools" OFF)
 option(ALPS_INCLUDE_TUTORIALS "Include the ALPS tutorials" ON)
 option(ALPS_BUILD_TUTORIALS_PACKAGE "Build only a tutorials package" OFF)
 option(BIND_FORTRAN_LOWERCASE "FORTRAN functions are compiled without a trailing underscore" OFF)
-option (ALPS_VISTRAILS_32BIT "Force Vistrails packages to be built in 32 bit" OFF)
+option(ALPS_VISTRAILS_32BIT "Force Vistrails packages to be built in 32 bit" OFF)
+option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framework" OFF)
+option(ALPS_BUILD_NGS CACHE BOOL "Build the next generation scheduler" ON)
+option(ALPS_LLVM_WORKAROUND "Exclude some parts of ALPS from the build with LLVM" OFF)
+option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
+option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
+option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
+
+mark_as_advanced(ALPS_LLVM_WORKAROUND)
 mark_as_advanced(BIND_FORTRAN_LOWERCASE)
 mark_as_advanced(ALPS_BUILD_TUTORIALS_PACKAGE)
+mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
+mark_as_advanced(ALPS_PATCH_VISTRAILS)
 
-message (STATUS "CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
-message (STATUS "CMAKE_CL_64: ${CMAKE_CL_64}")
-message (STATUS "CMAKE_SIZEOF_VOID_P: ${CMAKE_SIZEOF_VOID_P}")
+set(ALPS_BOOST_LIBRARY_NAME "boost" CACHE STRING "name of the boost library")
+set(PYTHON_EXTENSION_DIR "lib" CACHE STRING "path for Python extensions")
+set(ALPS_ENABLE_MPI ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Enable MPI Parallelization")
+set(ALPS_INSTALL_HEADERS  ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Install headers for ALPS and all dependent libraries")
+set(ALPS_BUILD_EXAMPLES ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS examples")
+set(ALPS_BUILD_TESTS ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS tests")
+set(ALPS_BUILD_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS documentation")
+set(ALPS_INCLUDE_BOOST_SOURCE OFF CACHE BOOL "Include Boost sources in the source tarball")
+set(ALPS_SYSTEM_NAME "" CACHE STRING "Override the package name")
+set(ALPS_PACKAGE_VERSION "" CACHE STRING "Override the package version")
+set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
+set(ALPS_USE_VISTRAILS ${ALPS_FOR_VISTRAILS} CACHE BOOL "Use the libraries deployed with VisTrails")
+set(ALPS_INSTALL_VISTRAILS_PACKAGES ${ALPS_FOR_VISTRAILS} CACHE BOOL "Install the ALPS VisTrails extensions")
+
+mark_as_advanced(ALPS_BOOST_LIBRARY_NAME)
+mark_as_advanced(PYTHON_EXTENSION_DIR)
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
   if (NOT ALPS_VISTRAILS_32BIT)
     set (ALPS_64BIT ON)
   endif (NOT ALPS_VISTRAILS_32BIT)
 endif(CMAKE_SIZEOF_VOID_P EQUAL 8 OR CMAKE_GENERATOR MATCHES Win64)
-
-
-message (STATUS "CMAKE_GENERATOR: ${CMAKE_GENERATOR}")
-message (STATUS "CMAKE_CL_64: ${CMAKE_CL_64}")
-
-option(ALPS_INSTALL_BOOST_TEST "Install Boost Test framework" OFF)
-mark_as_advanced(ALPS_INSTALL_BOOST_TEST)
-
-option(ALPS_BUILD_NGS CACHE BOOL "Build the next generation scheduler" OFF)
-set(ALPS_BOOST_LIBRARY_NAME "boost" CACHE STRING "name of the boost library")
-
-MARK_AS_ADVANCED(ALPS_BUILD_NGS)
-MARK_AS_ADVANCED(ALPS_BOOST_LIBRARY_NAME)
 
 if (ALPS_FOR_VISTRAILS)
   if (NOT WIN32 AND NOT APPLE)
@@ -88,15 +98,6 @@ else (ALPS_FOR_VISTRAILS)
   set(NOT_ALPS_FOR_VISTRAILS ON)
 endif (ALPS_FOR_VISTRAILS)
 
-set(ALPS_ENABLE_MPI ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Enable MPI Parallelization")
-set(ALPS_INSTALL_HEADERS  ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Install headers for ALPS and all dependent libraries")
-set(ALPS_BUILD_EXAMPLES ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS examples")
-set(ALPS_BUILD_TESTS ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS tests")
-set(ALPS_BUILD_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS documentation")
-set(ALPS_INCLUDE_BOOST_SOURCE OFF CACHE BOOL "Include Boost sources in the source tarball")
-set(ALPS_SYSTEM_NAME "" CACHE STRING "Override the package name")
-set(ALPS_PACKAGE_VERSION "" CACHE STRING "Override the package version")
-
 
 #IF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
   SET (APPLICATIONS_CAN_BE_BUILT  ${NOT_ALPS_FOR_VISTRAILS})
@@ -104,18 +105,7 @@ set(ALPS_PACKAGE_VERSION "" CACHE STRING "Override the package version")
 #  SET (APPLICATIONS_CAN_BE_BUILT OFF)
 #ENDIF(EXISTS ${PROJECT_SOURCE_DIR}/applications)
 
-set(ALPS_BUILD_APPLICATIONS ${APPLICATIONS_CAN_BE_BUILT} CACHE BOOL "Build ALPS applications")
-set(ALPS_USE_VISTRAILS ${ALPS_FOR_VISTRAILS} CACHE BOOL "Use the libraries deployed with VisTrails")
-set(ALPS_INSTALL_VISTRAILS_PACKAGES ${ALPS_FOR_VISTRAILS} CACHE BOOL "Install the ALPS VisTrails extensions")
-
-# a workaround for Mac OS X's LLVM compiler
-option(ALPS_LLVM_WORKAROUND "Exclude some parts of ALPS from the build with LLVM" OFF)
-mark_as_advanced(ALPS_LLVM_WORKAROUND)
-
 #maintenance building options
-option(ALPS_PACKAGE_LIBRARIES "Install all dependent libraries into package" OFF)
-option(ALPS_DOWNLOAD_PACKAGES "Prepare an installer that downloads instead of containing the installation packages" OFF)
-option(ALPS_PATCH_VISTRAILS "Patch VisTrails from VisTrails git repository" OFF)
 
 include (CMakeDetermineSystem)
 #include (CMakeDetermineFortranCompiler)
@@ -131,7 +121,6 @@ else(ALPS_BUILD_FORTRAN)
   project(alps C CXX)
 endif(ALPS_BUILD_FORTRAN)
 
-mark_as_advanced(ALPS_PATCH_VISTRAILS)
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE "Release" CACHE STRING "Type of build" FORCE)
@@ -202,10 +191,10 @@ endif(ALPS_BUILD_SOURCE)
 ######################################################################
 # Version information
 ######################################################################
-set(ALPS_YEAR 2011)
+set(ALPS_YEAR 2012)
 set(ALPS_VERSION_MAJOR 2)
-set(ALPS_VERSION_MINOR 0)
-set(ALPS_VERSION_PATCH 2)
+set(ALPS_VERSION_MINOR 1)
+set(ALPS_VERSION_PATCH 0d1)
 set(ALPS_VERSION_BUILD "")
 
 IF(NOT ALPS_VERSION_BUILD AND EXISTS ${PROJECT_SOURCE_DIR}/.svn) 
@@ -1040,14 +1029,6 @@ if(WIN32 AND NOT UNIX)
     set(CPACK_NSIS_MODIFY_PATH ON)
   endif (NOT ALPS_FOR_VISTRAILS)
   
-# Encode the compiler name in the package 
-#    if (MSVC90)
-#      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-vc9")
-#      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME}")
-#    elseif (MSVC90)
-#      set(CPACK_PACKAGE_FILE_NAME "ALPS-${ALPS_VERSION}-unknown")  
-#      set(CPACK_NSIS_DISPLAY_NAME "${CPACK_NSIS_DISPLAY_NAME} for unknown compiler")    
-#    endif (MSVC90)
   set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "${CPACK_NSIS_DISPLAY_NAME}")
 endif(WIN32 AND NOT UNIX)
 

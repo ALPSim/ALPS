@@ -72,8 +72,8 @@ if (ALPS_HAVE_PYTHON)
     install(TARGETS ${PYALPS_SOURCES}
             COMPONENT python
             RUNTIME DESTINATION bin
-            ARCHIVE DESTINATION lib/pyalps
-            LIBRARY DESTINATION lib/pyalps)
+            ARCHIVE DESTINATION ${PYTHON_EXTENSION_DIR}/pyalps
+            LIBRARY DESTINATION ${PYTHON_EXTENSION_DIR}/pyalps)
   endif(NOT ALPS_FOR_VISTRAILS)
 
 endif (ALPS_HAVE_PYTHON)
