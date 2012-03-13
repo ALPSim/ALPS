@@ -57,8 +57,7 @@ public:
   void perform_measurements();
   
   std::size_t dimension() const { return this->alps::hamiltonian_matrix<M>::dimension();}
-
-
+  
 private:
   typedef std::pair<std::string,std::string> string_pair;
   typedef std::pair<half_integer_type,half_integer_type> half_integer_pair;
@@ -79,6 +78,9 @@ private:
   
   template <class Op, class D> 
   std::vector<value_type> calculate(Op const& op, std::pair<D,D>  const&) const;
+  
+  void print() const;
+  virtual void print_eigenvectors(std::ostream& os) const=0;
 
   std::vector<unsigned int> multiplicities_;    
   QNRangeType ranges_;
@@ -188,9 +190,25 @@ void DiagMatrix<T,M>::build_subspaces(const std::string& quantumnumbers)
 
 
 template <class T, class M>
+void DiagMatrix<T,M>::print() const
+{
+  std::cout << "------------------------------------------------------------------------------------------\n";
+  std::cout << "Eigenvectors for the sector with parameters";
+  std::cout << this->get_parameters();
+  std::cout << "\n\nBasis:\n";
+  this->print_basis(std::cout);
+  std::cout << "\n\nVectors:\n";
+  this->print_eigenvectors(std::cout);
+}
+
+
+template <class T, class M>
 void DiagMatrix<T,M>::perform_measurements()
 {
   typedef std::pair<std::string,std::string> string_pair;
+  
+  if (this->print_vectors())
+    print();
   
   alps::EigenvectorMeasurements<value_type> meas(*this);
   if (this->calc_averages()) {

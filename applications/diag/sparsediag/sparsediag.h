@@ -55,7 +55,9 @@ public:
   SparseDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
   void do_subspace();
   void write_xml_body(alps::oxstream&, const boost::filesystem::path&) const;
+  void print_eigenvectors(std::ostream& os) const;
 private:
+  
   std::vector<value_type> calculate(operator_matrix_type const& m) const;
   std::vector<vector_type> eigenvectors;
 };
@@ -132,7 +134,7 @@ void SparseDiagMatrix<T>::do_subspace()
     ev.resize(1);
     ev[0]=alps::numeric::real(value_type(this->matrix()(0,0)));
   }
-  if (this->calc_averages()) {
+  if (this->calc_vectors()) {
     if  (this->dimension()>1) {
       // calculate eigen vectors
       ietl::Info<magnitude_type> info; // (m1, m2, ma, eigenvalue, residualm, status).
@@ -166,4 +168,12 @@ std::vector<T> SparseDiagMatrix<T>::calculate(operator_matrix_type const& m) con
   for(typename std::vector<vector_type>::const_iterator it = eigenvectors.begin();it!=eigenvectors.end();it++)
     av.push_back(inner_prod(boost::numeric::ublas::conj(*it),prod(m,*it)));
   return av;
+}
+
+template <class T>
+void SparseDiagMatrix<T>::print_eigenvectors(std::ostream& os) const
+{
+  unsigned int n=0;
+  for(typename std::vector<vector_type>::const_iterator it = eigenvectors.begin();it!=eigenvectors.end();it++)
+    os << "Eigenvector# " << n++ << ":\n" << *it << "\n";
 }

@@ -79,6 +79,7 @@ public:
   
   FullDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
   void evaluate(const alps::Parameters&, const std::string&) const;
+  void print_eigenvectors(std::ostream& os) const;
 private:
   magnitude_type groundstate_energy() const;
   void do_subspace();
@@ -497,12 +498,20 @@ std::vector<T> FullDiagMatrix<T>::calculate(operator_matrix_type const& m) const
 
 
 template <class T>
+void FullDiagMatrix<T>::print_eigenvectors(std::ostream& os) const
+{
+  using namespace boost::numeric::ublas;
+  for (unsigned i=0;i<this->matrix().size1();++i)
+    os << "Eigenvector# " << i << ":\n" << matrix_column<matrix_type const>(this->matrix(),i) << "\n";
+}
+
+template <class T>
 void FullDiagMatrix<T>::do_subspace()
 {
   this->build();
   if (this->dimension()) {
     mag_vector_type eigenvalues(this->dimension());
-    pick_real_complex<T>::heev(this->calc_averages() ? 'V' : 'N',boost::numeric::bindings::upper(this->matrix()),eigenvalues);
+    pick_real_complex<T>::heev(this->calc_vectors() ? 'V' : 'N',boost::numeric::bindings::upper(this->matrix()),eigenvalues);
     this->perform_measurements();
     std::copy(eigenvalues.begin(),eigenvalues.end(),std::back_inserter(this->measurements_.rbegin()->average_values["Energy"]));
     this->eigenvalues_.push_back(eigenvalues);
