@@ -104,14 +104,14 @@ def plot(data):
             thiscolor = q.props['color']
         
         if 'line' in q.props and q.props['line'] == 'scatter':
-            plt.scatter(xmeans, ymeans, c=colors[icolor], marker=markers[imarker], label=lab)
+            plt.scatter(xmeans, ymeans, c=thiscolor, marker=markers[imarker], label=lab)
             imarker = (imarker+1)%len(markers)
         else:
-            line_props = thiscolor
+            line_props = None
             if 'line' in q.props:
-                line_props += q.props['line']
+                line_props = q.props['line']
             
-            plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props,label=lab)
+            plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props,color=thiscolor,label=lab)
 
 
 
