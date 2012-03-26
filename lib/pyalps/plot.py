@@ -107,7 +107,7 @@ def plot(data):
             plt.scatter(xmeans, ymeans, c=thiscolor, marker=markers[imarker], label=lab)
             imarker = (imarker+1)%len(markers)
         else:
-            line_props = None
+            line_props = '-'
             if 'line' in q.props:
                 line_props = q.props['line']
             
