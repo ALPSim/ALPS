@@ -84,41 +84,18 @@ ContiParameters::ContiParameters(const alps::Parameters& p) :
   else 
     boost::throw_exception(std::invalid_argument("No valid frequency grid specified"));
   for (int i=0; i<ndat(); ++i) 
-    y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)]);
+    y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-//This function builds the 'kernel' K.
-//Available kernels are:
-// 1. in the TIME domain:
-// 1.1 For Fermions: the standard kernel e.g. for G(tau), see Eq. 1 and Eq. 10 in [1]
-// ----> -1/(\exp(\omega\tau)+\exp(-\omega (\beta-\tau)))
-// 1.2 For Bosons: The bosonic kernel of Eq. 9 in [1]
-//     Note that this kernel is symmetrized between \tau and (\beta-\tau), which (I guess) is OK if the input function is symmetric in \tau.
-// ----> -0.5\omega*(\exp(-\omega \tau)+\exp(-\omega(\beta-\tau)))/(1-\exp(-\beta\omega)
-// 1.3 The 'Boris' Kernel is undocumented. Not clear why it's there & why we should care. Neither bosonic nor fermionic?
-// ----> K(\tau,\omega)=\exp(-\omega\tau)
-//
-// 2. In the FREQUENCY domain:
-// 2.1 For Fermions: The frequency-dependent, particle-hole symmetric kernel which (I guess) assumes Re G(i\omega_n)=0
-// ----> K(\tau,\omega)=-\omegan/(\omegan^2+\omega^2)
-// 2.2 For Fermions: The frequency-dependent, general kernel. See Eq. 4 in [1]
-// ----> K(\tau,\omega)=1./(\omegan - \omega)
-// 2.3 For Bosons: the general frequency-depenent kernel. Same as the fermionic one but note that \omegan-s are now bosonic Matsubara frequencies
-// ----> K(\tau,\omega)=1./(\omegan - \omega)
-// Reference [1]: MAXIMUM ENTROPY ANALYTIC CONTINUATION OF QUANTUM MONTE CARLO DATA, Mark Jarrell, Adv. Phys.
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+
 
 void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, const vector_type& freq)
 {
   using namespace boost::numeric;
   K_.resize(ndat_, ntab);
   for (int i=0; i<ndat(); ++i) 
-    y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)]);
+    y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
   if(p["DATASPACE"]=="time") { 
     if (alps::is_master())
       std::cerr << "assume time space data" << std::endl;
@@ -169,12 +146,23 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
   } 
   else if (p["DATASPACE"]=="frequency" && p["KERNEL"] == "fermionic" &&
            p.value_or_default("PARTICLE_HOLE_SYMMETRY", false)) {
-    std::cerr << "using particle hole symmetric fermionic frequency space kernel" << std::endl;
+    std::cerr << "using particle hole symmetric kernel for fermionic data" << std::endl;
     for (int i=0; i<ndat(); ++i) {
       double omegan = (2*i+1)*M_PI*T_;
       for (int j=0; j<ntab; ++j) {
         double omega = freq[j]; 
         K_(i,j) =  -omegan / (omegan*omegan + omega*omega);
+      }
+    }
+  } 
+  else if (p["DATASPACE"]=="frequency" && p["KERNEL"] == "anomalous" &&
+           p.value_or_default("PARTICLE_HOLE_SYMMETRY", false)) {
+    std::cerr << "using particle hole symmetric kernel for anomalous fermionic data" << std::endl;
+    for (int i=0; i<ndat()/*-1*/; ++i) {
+      double omegan = (2*i+1)*M_PI*T_;
+      for (int j=0; j<ntab; ++j) {
+        double omega = freq[j]; 
+        K_(i,j) =  omega*omega / (omegan*omegan + omega*omega);
       }
     }
   } 
@@ -245,12 +233,21 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
   } 
   else {
     for (int i=0; i<ndat(); ++i) 
-      sigma[i] = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)]);
+      sigma[i] = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
   }
   for (int i=0; i<ndat(); ++i) {
     y_[i] /= sigma[i];
     for (int j=0; j<ntab; ++j) 
       K_(i,j) /= sigma[i];
+  }
+  //this enforces the normalization
+  if(p.value_or_default("ENFORCE_STRICT_NORMALIZATION",false)){
+    std::cout<<"enforcing strict normalization."<<std::endl;
+    double artificial_norm_enforcement_sigma=1.e-5;
+    for(int j=0;j<ntab;++j){
+      K_(ndat()-1,j) = 1./artificial_norm_enforcement_sigma;
+    }
+    y_[ndat()-1]=1./artificial_norm_enforcement_sigma;
   }
 }
 
@@ -269,7 +266,6 @@ MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
     omega_coord_[i] = (Default().omega_of_t(t_array_[i]) + Default().omega_of_t(t_array_[i+1]))/2.;
     delta_omega_[i] = Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
   }
-  //This function builds the 'kernel' matrix K
   setup_kernel(p, nfreq(), omega_coord_);
   vector_type S(ndat());
   matrix_type Kt = K_; // gesvd destroys K!

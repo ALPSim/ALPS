@@ -51,6 +51,7 @@ MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::file
  , chispec_str(boost::filesystem::absolute(name+"chispec.dat", dir).string().c_str())
  , prob_str(boost::filesystem::absolute(name+"prob.dat", dir).string().c_str())
 {
+  if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
   const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried
   const double alpha_max = parms["ALPHA_MAX"];                                          //Largest  value of \alpha that is tried
   alpha[0] = alpha_max;
@@ -135,6 +136,28 @@ void MaxEntSimulation::dostep()
   }
   for (std::size_t  i=0; i<avspec.size(); ++i) 
     avspec_str << omega_coord(i) << " " << avspec[i]*norm << " " << def[i]*norm << std::endl;
+  if(parms["KERNEL"]=="anomalous"){ //for the anomalous function: use A(omega)=Im Sigma(omega)/pi omega. 
+    std::ofstream maxspec_anom_str(boost::filesystem::absolute(name+"maxspec_anom.dat", dir).string().c_str());
+    std::ofstream avspec_anom_str (boost::filesystem::absolute(name+"avspec_anom.dat", dir).string().c_str());
+    for (std::size_t  i=0; i<avspec.size(); ++i){ 
+      //if(omega_coord(i)>=0.)
+        avspec_anom_str << omega_coord(i) << " " << avspec[i]*norm*omega_coord(i)*M_PI<<std::endl;
+    }
+    for (std::size_t i=0; i<spectra[0].size(); ++i){
+      //if(omega_coord(i)>=0.)
+        maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
+    }
+  }
+  if(parms.defined("SELF")){ //for the self energy: use Im Sigma(omega)=-A(omega)*pi
+    std::ofstream maxspec_self_str(boost::filesystem::absolute(name+"maxspec_self.dat", dir).string().c_str());
+    std::ofstream avspec_self_str (boost::filesystem::absolute(name+"avspec_self.dat", dir).string().c_str());
+    for (std::size_t  i=0; i<avspec.size(); ++i){ 
+        avspec_self_str << omega_coord(i) << " " << -avspec[i]*norm*M_PI<<std::endl;
+    }
+    for (std::size_t i=0; i<spectra[0].size(); ++i){
+        maxspec_self_str << omega_coord(i) << " " << -spectra[max_a][i]*norm*M_PI << std::endl;
+    }
+  }
   finish();
 }
 
