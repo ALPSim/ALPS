@@ -53,15 +53,15 @@ IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
        hybridization2/moves.C
        hybridization2/measurements.C
        hybridization2/update.C)
-  set (DMFT_QMC_HYBRIDIZATION3_SOURCE
-       hybridization3/hybsim.cpp
-       hybridization3/hyblocal.cpp
-       hybridization3/hybint.cpp
-       hybridization3/hybfun.cpp
-       hybridization3/hybmatrix.cpp
-       hybridization3/hybconfig.cpp
-       hybridization3/hybupdates.cpp
-       hybridization3/hybmeasurements.cpp)
+#  set (DMFT_QMC_HYBRIDIZATION3_SOURCE
+#       hybridization3/hybsim.cpp
+#       hybridization3/hyblocal.cpp
+#       hybridization3/hybint.cpp
+#       hybridization3/hybfun.cpp
+#       hybridization3/hybmatrix.cpp
+#       hybridization3/hybconfig.cpp
+#       hybridization3/hybupdates.cpp
+#       hybridization3/hybmeasurements.cpp)
 ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
   set (DMFT_QMC_SOLVERS "")
@@ -81,7 +81,7 @@ ENDIF(ALPS_BUILD_NGS)
 IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   #Hybridization Expansion - separate solver
   add_library (hybridization2_impl STATIC ${DMFT_QMC_HYBRIDIZATION2_SOURCE})
-  add_library (hybridization3_impl STATIC ${DMFT_QMC_HYBRIDIZATION3_SOURCE})
+#  add_library (hybridization3_impl STATIC ${DMFT_QMC_HYBRIDIZATION3_SOURCE})
 ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
   target_link_libraries(dmft_qmc_impl alps ${LAPACK_LIBRARY} ${BLAS_LIBRARY})
@@ -93,7 +93,7 @@ ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   add_executable(hirschfye solver_main.C hirschfyesim.C)
 IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   add_executable(hybridization hybridization2/main.C)
-  add_executable(hybridization3 hybridization3/hybmain.cpp)
+#  add_executable(hybridization3 hybridization3/hybmain.cpp)
 if(ALPS_LLVM_WORKAROUND)
   message(STATUS "hybridization_evaluate will not be built since llvm workaround is enabled")
 else(ALPS_LLVM_WORKAROUND)
@@ -108,7 +108,7 @@ ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
 
 IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   target_link_libraries(hybridization dmft_qmc_impl hybridization2_impl)
-  target_link_libraries(hybridization3 dmft_qmc_impl hybridization3_impl)
+#  target_link_libraries(hybridization3 dmft_qmc_impl hybridization3_impl)
 if(ALPS_LLVM_WORKAROUND)
 else(ALPS_LLVM_WORKAROUND)
   target_link_libraries(hybridization_evaluate dmft_qmc_impl hybridization2_impl)
@@ -120,7 +120,7 @@ ENDIF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   install(TARGETS hirschfye  RUNTIME DESTINATION bin COMPONENT applications)
 IF(ALPS_BUILD_NGS AND ALPS_HAVE_MPI)
   install(TARGETS hybridization RUNTIME DESTINATION bin COMPONENT applications)
-  install(TARGETS hybridization3 RUNTIME DESTINATION bin COMPONENT applications)
+#  install(TARGETS hybridization3 RUNTIME DESTINATION bin COMPONENT applications)
   install(TARGETS interaction RUNTIME DESTINATION bin COMPONENT applications)
 if(ALPS_LLVM_WORKAROUND)
 else(ALPS_LLVM_WORKAROUND)
