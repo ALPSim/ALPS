@@ -4,8 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
- *                           Matthias Troyer <troyer@comp-phys.org>                *
+ * Copyright (C) 2011 - 2012 by Mario Koenz <mkoenz@ethz.ch>                       *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -26,38 +25,47 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_HPP
-#define ALPS_NGS_HPP
 
-#include <alps/ngs/api.hpp>
-#include <alps/ngs/base.hpp>
-#include <alps/ngs/signal.hpp>
-#include <alps/ngs/convert.hpp>
-#include <alps/ngs/parallel.hpp>
-#include <alps/ngs/callback.hpp>
-#include <alps/ngs/boost_mpi.hpp>
-#include <alps/ngs/multithread.hpp>
-#include <alps/ngs/short_print.hpp>
-#include <alps/ngs/thread_interrupted.hpp>
-#include <alps/ngs/observablewrappers.hpp>
+#include <alps/ngs.hpp>
 
-// TODO: remove these deprecated headers:
-#include <alps/ngs/mcbase.hpp>
-#include <alps/ngs/mcmpisim.hpp>
-#include <alps/ngs/mcparams.hpp>
-#include <alps/ngs/mcsignal.hpp>
-#include <alps/ngs/mcresult.hpp>
-#include <alps/ngs/mcresults.hpp>
-#include <alps/ngs/mcoptions.hpp>
-#include <alps/ngs/mcobservable.hpp>
-#include <alps/ngs/mcobservables.hpp>
-#include <alps/ngs/mcthreadedsim.hpp>
+#include "custom_accum.hpp"
 
-//alea includes:
-#include <alps/ngs/alea/type_traits.hpp>
-#include <alps/ngs/alea/detail/properties.hpp>
-#include <alps/ngs/alea/histogram.hpp>
-#include <alps/ngs/alea/accumulator.hpp>
-#include <alps/ngs/alea/measurement.hpp>
+#include <iostream>
 
-#endif
+using namespace std;
+using namespace alps::alea;
+
+int main()
+{
+    cout << "test custom_accum" << endl;
+    cout << "-----------------" << endl;
+    
+    custom_accum a;
+    
+    a << 1;
+    a << 2;
+    a << 3;
+    a << 4;
+    a << 5;
+    
+    count(a);
+    mean(a);
+    
+    cout << a << endl;
+    
+    measurement m(a);
+    
+    m << 6;
+    m << 7;
+    m << 8;
+    
+    // get infos via intermediate type m.get<int>(), where int is the value_type of custom_accum
+    m.get<int>().count();
+    m.get<int>().mean();
+    
+    // extract the accumulator (and get count/mean info)
+    count(extract<custom_accum>(m));
+    mean(m.extract<custom_accum>());
+    
+    cout << m;
+}
