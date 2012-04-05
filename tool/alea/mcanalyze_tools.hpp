@@ -98,7 +98,7 @@ public:
 
     
       for (const_string_iterator file_it = file_names.begin(); file_it != file_names.end(); ++file_it) {
-        alps::hdf5::archive ar(*file_it, alps::hdf5::archive::WRITE);
+        alps::hdf5::archive ar(*file_it, "a");
         if (!vm.count("name")) {
           variable_names = ar.list_children(path);
           if (vm.count("verbose")) std::cout << "Variables in file " << *file_it << ":  " << variable_names << std::endl;

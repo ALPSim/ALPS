@@ -89,7 +89,7 @@ int main(int argc, char** argv)
 			return 0;
 		// read parameters and G0
 		
-    alps::hdf5::archive ar(infile, alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(infile, "r");
 		alps::Parameters parms;
     ar>>alps::make_pvp("/parameters", parms);
     parms["INFILE"]=infile;

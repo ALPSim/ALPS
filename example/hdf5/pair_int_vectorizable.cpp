@@ -117,7 +117,7 @@ int main() {
     std::vector<std::pair<int, int> > vector_read, vector_write(10, std::make_pair(3, 4));
 
     {
-        alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
+        alps::hdf5::archive ar(filename, "a");
         ar 
           << alps::make_pvp("/enum/scalar", scalar_write)
           << alps::make_pvp("/enum/vector", vector_write)

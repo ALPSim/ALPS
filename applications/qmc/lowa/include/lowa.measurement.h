@@ -132,7 +132,7 @@ void Lowa::take_diagonal_measurements()
 
   if (measure_time_series_density)
   {
-    alps::hdf5::archive oa_mdns(filename_mdns.c_str(), alps::hdf5::archive::WRITE);
+    alps::hdf5::archive oa_mdns(filename_mdns.c_str(), "a");
 
     std::string cur_desc_mdns = "TimeSeries/Density/Set" + boost::lexical_cast<std::string>(sweeps);
 
@@ -157,7 +157,7 @@ void Lowa::take_offdiagonal_measurements()
   if (measure_time_series_density_matrix)
   {
     // finite TOF...
-    alps::hdf5::archive oa_mdnsmat(filename_mdnsmat.c_str(), alps::hdf5::archive::WRITE);
+    alps::hdf5::archive oa_mdnsmat(filename_mdnsmat.c_str(), "a");
 
     std::string cur_desc_mdnsmat     = "TimeSeries/DensityMatrix/Set" + boost::lexical_cast<std::string>(sweeps_green);
    
@@ -166,7 +166,7 @@ void Lowa::take_offdiagonal_measurements()
 
 
     // infinite TOF...
-    alps::hdf5::archive oa_mdnsmat_inf(filename_mdnsmat_inf.c_str(), alps::hdf5::archive::WRITE);
+    alps::hdf5::archive oa_mdnsmat_inf(filename_mdnsmat_inf.c_str(), "a");
 
     std::string cur_desc_mdnsmat_inf = "TimeSeries/DensityMatrixInfinity/Set" + boost::lexical_cast<std::string>(sweeps_green);
 

@@ -30,7 +30,7 @@
 #include "interaction_expansion.hpp"
 #include <ctime>
 #include "xml.h"
-#include "alps/ngs/mcdeprecated.hpp"
+#include "alps/ngs/make_deprecated_parameters.hpp"
 
 //global variables
 
@@ -44,27 +44,27 @@ std::complex<double> *c_or_cdagger::exp_iomegan_tau_;
 
 InteractionExpansion::InteractionExpansion(const alps::params &parms, int node)
 : alps::mcbase(parms,node),
-max_order(parms.value_or_default("MAX_ORDER",2048)),       
-n_flavors(parms.value_or_default("FLAVORS",2)),        
-n_site(parms.value_or_default("SITES",1)),        
+max_order(parms["MAX_ORDER"] | 2048),
+n_flavors(parms["FLAVORS"] | 2),        
+n_site(parms["SITES"] | 1),
 n_matsubara((int)parms["NMATSUBARA"]),
-n_matsubara_measurements(parms.value_or_default("NMATSUBARA_MEASUREMENTS", (int)n_matsubara)),
+n_matsubara_measurements(parms["NMATSUBARA_MEASUREMENTS"] | (int)n_matsubara),
 n_tau((int)parms["N"]),
 n_tau_inv(1./n_tau),
-n_self(parms.value_or_default("NSELF",(int)(10*n_tau))),
+n_self(parms["NSELF"] | (int)(10*n_tau)),
 mc_steps((boost::uint64_t)parms["SWEEPS"]),
 therm_steps((unsigned int)parms["THERMALIZATION"]),        
-max_time_in_seconds(parms.value_or_default("MAX_TIME", 86400)),        
+max_time_in_seconds(parms["MAX_TIME"] | 86400),
 beta((double)parms["BETA"]),                        
 temperature(1./beta),
 onsite_U((double)parms["U"]),                        
 alpha((double)parms["ALPHA"]),
-U(alps::make_alps_parameters(parms)),                         
-recalc_period(parms.value_or_default("RECALC_PERIOD",5000)),
-measurement_period(parms.value_or_default("MEASUREMENT_PERIOD",200)),        
-convergence_check_period(parms.value_or_default("CONVERGENCE_CHECK_PERIOD",(int)recalc_period)),        
-almost_zero(parms.value_or_default("ALMOSTZERO",1.e-16)),                
-seed(parms.value_or_default("SEED",0)),
+U(alps::make_deprecated_parameters(parms)),                         
+recalc_period(parms["RECALC_PERIOD"] | 5000),
+measurement_period(parms["MEASUREMENT_PERIOD"] | 200),
+convergence_check_period(parms["CONVERGENCE_CHECK_PERIOD"] | (int)recalc_period),
+almost_zero(parms["ALMOSTZERO"] | 1.e-16),
+seed(parms["SEED"] | 0),
 green_matsubara(n_matsubara, n_site, n_flavors),
 bare_green_matsubara(n_matsubara,n_site, n_flavors), 
 bare_green_itime(n_tau+1, n_site, n_flavors),
@@ -72,9 +72,9 @@ green_itime(n_tau+1, n_site, n_flavors),
 pert_hist(max_order)
 {
   //initialize measurement method
-  if (parms.value_or_default("HISTOGRAM_MEASUREMENT", false)) 
+  if (parms["HISTOGRAM_MEASUREMENT"] | false)
     measurement_method=selfenergy_measurement_itime_rs;
-  else 
+  else
     measurement_method=selfenergy_measurement_matsubara;
   for(unsigned int i=0;i<n_flavors;++i)
     g0.push_back(green_matrix(n_tau, 20));
@@ -88,10 +88,10 @@ pert_hist(max_order)
   thermalized=therm_steps==0?true:false;
   if(!parms.defined("ATOMIC")) {
     {
-      alps::hdf5::archive ar(parms["INFILE"], alps::hdf5::archive::READ);
+      alps::hdf5::archive ar(parms["INFILE"], "r");
       bare_green_matsubara.read_hdf5(ar, "/G0") ;
     }
-    FourierTransformer::generate_transformer(alps::make_alps_parameters(parms), fourier_ptr);
+    FourierTransformer::generate_transformer(alps::make_deprecated_parameters(parms), fourier_ptr);
     fourier_ptr->backward_ft(bare_green_itime, bare_green_matsubara);
   }
   else {
@@ -173,7 +173,7 @@ void InteractionExpansion::initialize_simulation(const alps::params &parms)
 void c_or_cdagger::initialize_simulation(const alps::params &p)
 {
   beta_=p["BETA"];
-  nm_=p.value_or_default("NMATSUBARA_MEASUREMENTS", p["NMATSUBARA"].str());
+  nm_=p["NMATSUBARA_MEASUREMENTS"] | p["NMATSUBARA"];
   omegan_ = new double[nm_];
   for(unsigned int i=0;i<nm_;++i) {
     omegan_[i]=(2.*i+1.)*M_PI/beta_;

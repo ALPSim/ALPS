@@ -49,25 +49,25 @@ full_line(static_cast<int>(parms["FLAVORS"]),0),                                
 sign(static_cast<int>(parms["FLAVORS"]), 1.),                                                    //fermionic sign. plus or minus one.
 BETA(static_cast<double>(parms["BETA"])),                                                        //inverse temperature
 N(static_cast<int>(parms["N"])),                                                                 //number of points on which Green's function is known
-N_nn(static_cast<int>(parms.value_or_default("N_nn", 0))),                                       //number of tau-points on which density density correlator is measured
-N_w(static_cast<int>(parms.value_or_default("N_w", 0))),                                         //number of Matsubara frequencies for gw
-N_w2(static_cast<int>(parms.value_or_default("N_w2", 0))),                                       //number of Matsubara frequencies for two-particle Green's function
-N_W(static_cast<int>(parms.value_or_default("N_W", 0))),                                         //number of bosonic frequncies for the two-particle Green's function
-N_l(static_cast<int>(parms.value_or_default("N_l", 0))),                                         //number of Legendre coefficients
+N_nn(parms["N_nn"] | 0),																		 //number of tau-points on which density density correlator is measured
+N_w(parms["N_w"] | 0),                                                                           //number of Matsubara frequencies for gw
+N_w2(parms["N_w2"] | 0),                                                                         //number of Matsubara frequencies for two-particle Green's function
+N_W(parms["N_W"] | 0),                                                                           //number of bosonic frequncies for the two-particle Green's function
+N_l(parms["N_l"] | 0),                                                                           //number of Legendre coefficients
 N_order(static_cast<int>(parms["N_ORDER"])),                                                     //number of orders that are measured for the order histogram
 G_meas(static_cast<int>(parms["FLAVORS"])*(static_cast<int>(parms["N"])+1)),                     //Measured Green's function
 N_meas(static_cast<int>(parms["N_MEAS"])),                                                       //number of updates per measurement
-N_shift(static_cast<int>(parms.value_or_default("N_SHIFT", 0))),                                 //number of times a segment start / end point is shifted per insertion/removal update
-N_swap(static_cast<int>(parms.value_or_default("N_SWAP", 0))),                                   //number of times an orbital swap move is attempted.
+N_shift(parms["N_SHIFT"] | 0),                                                                   //number of times a segment start / end point is shifted per insertion/removal update
+N_swap(parms["N_SWAP"] | 0),                                                                     //number of times an orbital swap move is attempted.
 F(static_cast<int>(parms["FLAVORS"]), std::vector<double>(static_cast<int>(parms["N"])+1,0.)),   //hybridization function
-MEASURE_gw(static_cast<int>(parms.value_or_default("MEASURE_gw", 0))),                           //measure Green's function on Matsubara frequencies
-MEASURE_fw(static_cast<int>(parms.value_or_default("MEASURE_fw", 0))),                           //measure Sigma*G on Matsubara frequencies
-MEASURE_gl(static_cast<int>(parms.value_or_default("MEASURE_gl", 0))),                           //measure Green's function in Legendre basis
-MEASURE_fl(static_cast<int>(parms.value_or_default("MEASURE_fl", 0))),                           //measure Sigma*G in Legendre basis
-MEASURE_g2w(static_cast<int>(parms.value_or_default("MEASURE_g2w", 0))),                         //measure two-particle Green's function
-MEASURE_hw(static_cast<int>(parms.value_or_default("MEASURE_hw", 0))),                           //measure correlator for vertex function
-MEASURE_nnt(static_cast<int>(parms.value_or_default("MEASURE_nnt", 0))),                         //measure density-density correlation function
-MEASURE_nn(static_cast<int>(parms.value_or_default("MEASURE_nn", 0)))                            //measure density-density correlation function at equal times
+MEASURE_gw(parms["MEASURE_gw"] | 0),                                                             //measure Green's function on Matsubara frequencies
+MEASURE_fw(parms["MEASURE_fw"] | 0),                                                             //measure Sigma*G on Matsubara frequencies
+MEASURE_gl(parms["MEASURE_gl"] | 0),                                                             //measure Green's function in Legendre basis
+MEASURE_fl(parms["MEASURE_fl"] | 0),                                                             //measure Sigma*G in Legendre basis
+MEASURE_g2w(parms["MEASURE_g2w"] | 0),                                                           //measure two-particle Green's function
+MEASURE_hw(parms["MEASURE_hw"] | 0),                                                             //measure correlator for vertex function
+MEASURE_nnt(parms["MEASURE_nnt"] | 0),                                                           //measure density-density correlation function
+MEASURE_nn(parms["MEASURE_nn"] | 0)                                                              //measure density-density correlation function at equal times
 {
   
   /*reading parameters from the self consistency*/
@@ -158,13 +158,13 @@ void hybridization::read_external_input_data(const parameters_type &parms){
   // define interactions between flavors. Read in interaction file.
   u.resize(FLAVORS, FLAVORS);
   if(parms.defined("U_MATRIX")){
-    std::string fname=boost::lexical_cast<std::string>(parms["U_MATRIX"]);
+    std::string fname=parms["U_MATRIX"].cast<std::string>();
     size_t found=fname.find(".h5",fname.size()-3);
     if(found!=string::npos){//attempt to read from h5 archive
-      alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
+      alps::hdf5::archive ar(fname, "r");
       int FLAVORS_;
       ar>>alps::make_pvp("/FLAVORS",FLAVORS_);
-      if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of flavors");
+      if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].cast<std::string>() + "wrong number of flavors");
       std::vector<double> tmp(FLAVORS*FLAVORS);
       ar>>alps::make_pvp("/data",tmp);
       for(int i=0; i<FLAVORS; i++)
@@ -175,15 +175,15 @@ void hybridization::read_external_input_data(const parameters_type &parms){
     else{//read from text file
       ifstream infile_u(fname.c_str());
       if(!infile_u.good()){
-        throw(std::invalid_argument(std::string("U-matrix parameter \'") + parms["U_MATRIX"].str() + "\' not specified or not pointing to a valid file. File could not be opened."));
+        throw(std::invalid_argument(std::string("U-matrix parameter \'") + parms["U_MATRIX"].cast<std::string>() + "\' not specified or not pointing to a valid file. File could not be opened."));
       }
       for (int i=0; i<FLAVORS; i++) {
         if(!infile_u.good()){
-          throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].str() + " not good. Probably too few lines."));
+          throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].cast<std::string>() + " not good. Probably too few lines."));
         }
         for (int j=0; j<FLAVORS; j++) {
           if(!infile_u.good()){
-            throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].str() + " not good. Probably too few columns."));
+            throw(std::invalid_argument(std::string("U-matrix file ") + parms["U_MATRIX"].cast<std::string>() + " not good. Probably too few columns."));
           }
           infile_u >> u(i,j);
         }
@@ -192,13 +192,13 @@ void hybridization::read_external_input_data(const parameters_type &parms){
   }
   else throw(std::invalid_argument(std::string("file name for U matrix not specified")));
 
-  std::string mu_dc_solver_string=parms.value_or_default("EPSILOND_VECTOR","mu_dc_solver");
+  std::string mu_dc_solver_string=parms["EPSILOND_VECTOR"] | "mu_dc_solver";
   size_t found=mu_dc_solver_string.find(".h5",mu_dc_solver_string.size()-3);
   if(found!=string::npos){//attempt to read from h5 archive
-    alps::hdf5::archive ar(mu_dc_solver_string, alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(mu_dc_solver_string, "r");
     int FLAVORS_;
     ar>>alps::make_pvp("/FLAVORS",FLAVORS_);
-    if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of flavors");
+    if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].cast<std::string>() + "wrong number of flavors");
     ar>>alps::make_pvp("/data",mu_e);
   }
   else{
@@ -212,17 +212,17 @@ void hybridization::read_external_input_data(const parameters_type &parms){
 
   // read F from file
   if(parms.defined("F")){
-    std::string fname=boost::lexical_cast<std::string>(parms["F"]);
+    std::string fname=parms["F"].cast<std::string>();
     size_t found=fname.find(".h5",fname.size()-3);
     if(found!=string::npos){//attempt to read from h5 archive
-      alps::hdf5::archive ar(fname, alps::hdf5::archive::READ);
+      alps::hdf5::archive ar(fname, "r");
       int N_, FLAVORS_; double BETA_;
       ar>>alps::make_pvp("/N",N_);
       ar>>alps::make_pvp("/BETA",BETA_);
       ar>>alps::make_pvp("/FLAVORS",FLAVORS_);
-      if(N_!=N) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of time slices");
-      if(BETA_!=BETA) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong inverse temperature");
-      if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].str() + "wrong number of flavors");
+      if(N_!=N) throw::std::invalid_argument(std::string("bad file ") + parms["F"].cast<std::string>() + "wrong number of time slices");
+      if(BETA_!=BETA) throw::std::invalid_argument(std::string("bad file ") + parms["F"].cast<std::string>() + "wrong inverse temperature");
+      if(FLAVORS_!=FLAVORS) throw::std::invalid_argument(std::string("bad file ") + parms["F"].cast<std::string>() + "wrong number of flavors");
       std::vector<double> tmp(FLAVORS*(N+1));
       ar>>alps::make_pvp("/data",tmp);
       for(int j=0; j<FLAVORS; j++)
@@ -233,17 +233,17 @@ void hybridization::read_external_input_data(const parameters_type &parms){
     else{//read from text file
       ifstream infile(fname.c_str());
       if(!infile.good()){
-        throw(std::invalid_argument(std::string("could not open file ") + parms["F"].str() + "for F function"));
+        throw(std::invalid_argument(std::string("could not open file ") + parms["F"].cast<std::string>() + "for F function"));
       }
       for (int i=0; i<N+1; i++) {
         if(!infile.good()){
-          throw(std::invalid_argument(std::string("bad file ") + parms["F"].str() + "probably wrong number of lines"));
+          throw(std::invalid_argument(std::string("bad file ") + parms["F"].cast<std::string>() + "probably wrong number of lines"));
         }
         double dummy;
         infile >> dummy; 
         for (int j=0; j<FLAVORS; j++){
           if(!infile.good()){
-            throw(std::invalid_argument(std::string("bad file ") + parms["F"].str() + "probably wrong number of columns"));
+            throw(std::invalid_argument(std::string("bad file ") + parms["F"].cast<std::string>() + "probably wrong number of columns"));
           }
           infile >> F[j][i];
         }
@@ -271,7 +271,7 @@ void hybridization::read_alps_framework_input_data_omega(const parameters_type &
   matsubara_green_function_t f_twiddle_matsubara(N, 1, FLAVORS);
   itime_green_function_t f_twiddle_itime(N+1, 1, FLAVORS);
   {
-    alps::hdf5::archive ar(parms["INFILE"], alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(parms["INFILE"], "r");
     bare_green_matsubara.read_hdf5(ar,"/G0");
   }
   //find the second moment of the band structure
@@ -310,7 +310,7 @@ void hybridization::read_alps_framework_input_data_omega(const parameters_type &
 void hybridization::read_alps_framework_input_data_tau(const parameters_type &parms){
   itime_green_function_t green_itime(N+1, 1, FLAVORS);
   {
-    alps::hdf5::archive ar(parms["INFILE"], alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(parms["INFILE"], "r");
     green_itime.read_hdf5(ar,"/G0");
   }
   for (int f = 0; f < FLAVORS; ++f) {

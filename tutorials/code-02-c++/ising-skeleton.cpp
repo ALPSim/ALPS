@@ -134,7 +134,7 @@ public:
     }
     
     void save(std::string const & filename){
-        alps::hdf5::archive ar(filename,alps::hdf5::archive::WRITE);
+        alps::hdf5::archive ar(filename, "a");
         ar << alps::make_pvp("/simulation/results/"+energy_.representation(), energy_);
         ar << alps::make_pvp("/simulation/results/"+magnetization_.representation(), magnetization_);
         ar << alps::make_pvp("/simulation/results/"+abs_magnetization_.representation(), abs_magnetization_);

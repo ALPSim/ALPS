@@ -70,7 +70,7 @@ int main() {
     enum_type read, write = PLUS;
 
     {
-        alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
+        alps::hdf5::archive ar(filename, "a");
         ar << alps::make_pvp("/enum", write);
     }
 

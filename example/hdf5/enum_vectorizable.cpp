@@ -122,7 +122,7 @@ int main() {
     std::vector<enum_type> vector_read, vector_write(10, MINUS);
 
     {
-        alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
+        alps::hdf5::archive ar(filename, "a");
         ar 
           << alps::make_pvp("/enum/scalar", scalar_write)
           << alps::make_pvp("/enum/vector", vector_write)

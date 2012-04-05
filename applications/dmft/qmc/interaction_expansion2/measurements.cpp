@@ -30,7 +30,7 @@
 #include "interaction_expansion.hpp"
 #include <complex>
 #include <alps/alea.h>
-#include "alps/ngs/mcdeprecated.hpp"
+#include "alps/ngs/make_deprecated_parameters.hpp"
 
 void evaluate_selfenergy_measurement_matsubara(const alps::results_type<HubbardInteractionExpansion>::type &results, 
                                                                         matsubara_green_function_t &green_matsubara_measured,
@@ -50,20 +50,20 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
 {
   std::cout<<"getting result!"<<std::endl;
   unsigned int n_matsubara=parms["NMATSUBARA"];
-  unsigned int n_matsubara_measurements=parms.value_or_default("NMATSUBARA_MEASUREMENTS", (int)n_matsubara);
+  unsigned int n_matsubara_measurements=parms["NMATSUBARA_MEASUREMENTS"] | (int)n_matsubara;
   unsigned int n_tau=parms["N"];
-  unsigned int n_self=parms.value_or_default("NSELF", (int)(10*n_tau));
-  spin_t n_flavors(parms.value_or_default("FLAVORS",2));
-  unsigned int n_site(parms.value_or_default("SITES",1));
+  unsigned int n_self=parms["NSELF"] | (int)(10*n_tau);
+  spin_t n_flavors(parms["FLAVORS"] | 2);
+  unsigned int n_site(parms["SITES"] | 1);
   double beta(parms["BETA"]);
   itime_green_function_t green_itime_measured(n_tau+1, n_site, n_flavors);
   matsubara_green_function_t green_matsubara_measured(n_matsubara, n_site, n_flavors);
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   boost::shared_ptr<FourierTransformer> fourier_ptr_g0;
-  FourierTransformer::generate_transformer(alps::make_alps_parameters(parms), fourier_ptr_g0);
+  FourierTransformer::generate_transformer(alps::make_deprecated_parameters(parms), fourier_ptr_g0);
   //find whether our data is in imaginary time or frequency:
   bool measure_in_matsubara=true;
-  if(parms.value_or_default("HISTOGRAM_MEASUREMENT", false)) 
+  if(parms["HISTOGRAM_MEASUREMENT"] | false) 
     measure_in_matsubara=false;
   std::vector<double> mean_order=results["PertOrder"].mean<std::vector<double> >();
   
@@ -80,7 +80,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
   matsubara_green_function_t bare_green_matsubara(n_matsubara, n_site, n_flavors);
   std::vector<double> densities(n_flavors);
   {
-    alps::hdf5::archive ar(parms["INFILE"], alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(parms["INFILE"], "r");
     bare_green_matsubara.read_hdf5(ar, "/G0") ;
   }
   if(measure_in_matsubara) {
@@ -103,7 +103,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
       densities[z] /= n_site;
     }
   }
-  FourierTransformer::generate_transformer_U(alps::make_alps_parameters(parms), fourier_ptr, densities);
+  FourierTransformer::generate_transformer_U(alps::make_deprecated_parameters(parms), fourier_ptr, densities);
   if (measure_in_matsubara) {
     fourier_ptr->append_tail(green_matsubara_measured, bare_green_matsubara, n_matsubara_measurements);
     fourier_ptr->backward_ft(green_itime_measured, green_matsubara_measured);
@@ -111,7 +111,7 @@ void compute_greens_functions(const alps::results_type<HubbardInteractionExpansi
   else 
     fourier_ptr->forward_ft(green_itime_measured, green_matsubara_measured);
   {
-    alps::hdf5::archive ar(output_file, alps::hdf5::archive::WRITE);
+    alps::hdf5::archive ar(output_file, "a");
     green_matsubara_measured.write_hdf5(ar, "/G_omega");
     green_itime_measured.write_hdf5(ar, "/G_tau");
   }

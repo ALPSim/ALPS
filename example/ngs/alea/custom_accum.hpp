@@ -77,9 +77,9 @@ namespace alps
         };
 
         // this is the free mean function for the custom_accum (return value via mean trait)
-        typename mean_type<typename value_type<custom_accum>::type>::type mean(const custom_accum & arg)
+        mean_type<value_type<custom_accum>::type>::type mean(const custom_accum & arg)
         {
-            typedef typename mean_type<typename value_type<custom_accum>::type>::type mean_type;
+            typedef mean_type<value_type<custom_accum>::type>::type mean_type;
             
             return mean_type(std::accumulate(arg.begin(), arg.end(), 0))/arg.size();
         }

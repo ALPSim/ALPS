@@ -63,7 +63,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
   
   // write input file
   {
-    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
+    alps::hdf5::archive solver_input(infile, "a");
     solver_input<<alps::make_pvp("/parameters",p);
     G0.write_hdf5(solver_input, "/G0");
   } 
@@ -76,7 +76,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
   unsigned int flavors   =(unsigned int)p.value_or_default("FLAVORS", 2);
   itime_green_function_t g(N+1, sites, flavors);
   {
-    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(outfile, "r");
     g.read_hdf5(ar, "/G0");
   }
   boost::filesystem::remove(boost::filesystem::absolute(outfile));
@@ -99,7 +99,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   p["INFILE"]=infile;
   p["OUTFILE"]=outfile;
   {
-    alps::hdf5::archive solver_input(infile, alps::hdf5::archive::WRITE);
+    alps::hdf5::archive solver_input(infile, "a");
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
   }
@@ -113,7 +113,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
   {
-    alps::hdf5::archive ar(outfile, alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(outfile, "r");
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
   }

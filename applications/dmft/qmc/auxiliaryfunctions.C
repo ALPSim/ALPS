@@ -277,7 +277,7 @@ void print_all_green_functions(std::string const &basename, const int iteration_
   if (shape==diagonal)
     print_quasiparticle_estimate(std::cout, G_omega, G0_omega, beta);
   
-  alps::hdf5::archive ar(basename+".h5", alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(basename+".h5", "a");
   //writeout into hf5 file, using /simulation/iteration/ path
   std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
   G_tau.write_hdf5_ss(ar,basepath.str()+"G_tau");

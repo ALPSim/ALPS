@@ -79,7 +79,7 @@ int main() {
 
 
   // we can also write one of the errors back to the file
-  alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(filename, "a");
   ar << alps::make_pvp("simulation/results/" + alps::hdf5_name_encode("m") + "/mean/error", error_corrtime);
 
   return 0;

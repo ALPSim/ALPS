@@ -370,7 +370,7 @@ std::pair<matsubara_green_function_t, itime_green_function_t>HirschFyeSim::get_r
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer_U(parms, fourier_ptr, densities);
   fourier_ptr->forward_ft(green_result, green_result_matsubara);
-  alps::hdf5::archive ar(parms["OUTFILE"], alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(parms["OUTFILE"], "a");
   green_result.write_hdf5(ar, "/G_tau");
   green_result_matsubara.write_hdf5(ar, "/G_omega");
   return std::make_pair(green_result_matsubara, green_result);

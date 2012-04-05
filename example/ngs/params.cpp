@@ -41,18 +41,19 @@ int main(int argc, char *argv[]) {
     alps::hdf5::archive ar("param.h5");
     alps::params params_h5(ar);
 
-    std::vector<std::string> keys_h5 = params_h5.keys();
-    for (std::vector<std::string>::const_iterator it = keys_h5.begin(); it != keys_h5.end(); ++it)
-        std::cout << *it << ":" << params_h5[*it] << std::endl;
+	for (alps::params::const_iterator it = params_h5.begin(); it != params_h5.end(); ++it)
+		std::cout << it->first << ":" << it->second << std::endl;
 
     std::cout << std::endl;
 
     // save params to file
     {
-        alps::hdf5::archive ar("param.out.h5", alps::hdf5::archive::REPLACE);
+        alps::hdf5::archive ar("param.out.h5", "w");
         ar << make_pvp("/parameters", params_h5);
     }
 
+	// TODO: fixit!
+	/*
     // load a text file into a parameter object
     std::ifstream file;
     file.open("param.txt");
@@ -65,9 +66,8 @@ int main(int argc, char *argv[]) {
     file.close();
     alps::params params_txt(txt);
 
-    std::vector<std::string> keys_txt = params_txt.keys();
-    for (std::vector<std::string>::const_iterator it = keys_txt.begin(); it != keys_txt.end(); ++it)
-        std::cout << *it << ":" << params_txt[*it] << std::endl;
+	for (alps::params::const_iterator it = params_txt.begin(); it != params_txt.end(); ++it)
+		std::cout << it->first << ":" << it->second << std::endl;
 
 	std::cout << std::endl;
     params_txt["dbl"] = 1e-8;
@@ -75,8 +75,8 @@ int main(int argc, char *argv[]) {
 
 	std::cout << std::endl;
 	params_txt["NOT_EXISTING_PARAM"] = "";
-    int i = params_txt.value_or_default("NOT_EXISTING_PARAM", 2048);
-    int j(params_txt.value_or_default("NOT_EXISTING_PARAM", 2048));
-    std::cout << static_cast<int>(params_txt.value_or_default("NOT_EXISTING_PARAM", 2048)) << " " << i << " " << j << std::endl;
-
+    int i = params_txt["NOT_EXISTING_PARAM"] | 2048;
+    int j(params_txt["NOT_EXISTING_PARAM"] | 2048);
+    std::cout << static_cast<int>(params_txt["NOT_EXISTING_PARAM"] | 2048) << " " << i << " " << j << std::endl;
+	*/
 }

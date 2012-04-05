@@ -36,6 +36,7 @@
 #include <alps/hdf5/pointer.hpp>
 #include <alps/hdf5/complex.hpp>
 #include <alps/hdf5/vector.hpp>
+#include <alps/ngs/api.hpp>
 #include <alps/ngs/hdf5.hpp>
 #include <alps/ngs/params.hpp>
 #include <boost/math/special_functions/bessel.hpp>
@@ -155,46 +156,46 @@ if(argc==3 && std::string(argv[2]) == "hr"){
 }
 
 #ifdef USE_MPI
-  alps::params parms(world);
+  alps::params parms;
   if(world.rank()==0){//evaluate single-particle quantities (fast) only on master
     if(write_hr) std::cout << "recognized option \"hr\"" << std::endl;
     alps::hdf5::archive ar(basename+".h5");
     ar >> make_pvp("/parameters", parms);
   }
-  parms.broadcast();
+  broadcast(world, parms);
 #else 
   {
-    alps::hdf5::archive ar(basename+".h5");
+    alps::hdf5::archive ar(basename + ".h5");
     alps::params parms(ar);
   }
 #endif
-
+	
   BETA=static_cast<double>(parms["BETA"]);
   N=static_cast<int>(parms["N"]);
   N_ORDER=static_cast<int>(parms["N_ORDER"]);
   FLAVORS=static_cast<int>(parms["FLAVORS"]);
   N_MEAS=static_cast<int>(parms["N_MEAS"]);
-  MEASURE_gw= static_cast<int>(parms.value_or_default("MEASURE_gw", 0));
-  MEASURE_fw= static_cast<int>(parms.value_or_default("MEASURE_fw", 0));
-  MEASURE_gl= static_cast<int>(parms.value_or_default("MEASURE_gl", 0));
-  MEASURE_fl= static_cast<int>(parms.value_or_default("MEASURE_fl", 0));
-  MEASURE_g2w=static_cast<int>(parms.value_or_default("MEASURE_g2w", 0));
-  MEASURE_hw= static_cast<int>(parms.value_or_default("MEASURE_hw", 0));
-  MEASURE_nnt=static_cast<int>(parms.value_or_default("MEASURE_nnt", 0));
-  MEASURE_nn= static_cast<int>(parms.value_or_default("MEASURE_nn", 0));
-  N_w= static_cast<int>(parms.value_or_default("N_w", 0));
-  N_W= static_cast<int>(parms.value_or_default("N_W", 0));
-  N_w2=static_cast<int>(parms.value_or_default("N_w2", 0));
-  N_l= static_cast<int>(parms.value_or_default("N_l", 0));
-  N_nn=static_cast<int>(parms.value_or_default("N_nn", 0));
-  PARAMAGNETIC= static_cast<int>(parms.value_or_default("PARAMAGNETIC", 0));
+  MEASURE_gw= static_cast<int>(parms["MEASURE_gw"] | 0);
+  MEASURE_fw= static_cast<int>(parms["MEASURE_fw"] | 0);
+  MEASURE_gl= static_cast<int>(parms["MEASURE_gl"] | 0);
+  MEASURE_fl= static_cast<int>(parms["MEASURE_fl"] | 0);
+  MEASURE_g2w=static_cast<int>(parms["MEASURE_g2w"] | 0);
+  MEASURE_hw= static_cast<int>(parms["MEASURE_hw"] | 0);
+  MEASURE_nnt=static_cast<int>(parms["MEASURE_nnt"] | 0);
+  MEASURE_nn= static_cast<int>(parms["MEASURE_nn"] | 0);
+  N_w= static_cast<int>(parms["N_w"] | 0);
+  N_W= static_cast<int>(parms["N_W"] | 0);
+  N_w2=static_cast<int>(parms["N_w2"] | 0);
+  N_l= static_cast<int>(parms["N_l"] | 0);
+  N_nn=static_cast<int>(parms["N_nn"] | 0);
+  PARAMAGNETIC= static_cast<int>(parms["PARAMAGNETIC"] | 0);
 
 #ifdef USE_MPI
   if(world.rank()==0){
 #endif
 
   {//scope for ar
-    alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+    alps::hdf5::archive ar(basename+".out.h5", "r");
 
     int N_SWEEPS; ar>>alps::make_pvp("/simulation/results/order/count",N_SWEEPS);
 
@@ -218,7 +219,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
     if(PARAMAGNETIC) spin_average(density,FLAVORS);
     std::cout << "done." << std::endl;
     {
-      alps::hdf5::archive oar("density.h5", alps::hdf5::archive::WRITE);
+      alps::hdf5::archive oar("density.h5", "a");
       oar << alps::make_pvp("/FLAVORS",FLAVORS);
       oar << alps::make_pvp("/data",density);
     }
@@ -263,7 +264,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
       Greens[f*(N+1)+N]=-density[f];
     }
     {
-      alps::hdf5::archive oar("gt.h5", alps::hdf5::archive::WRITE);
+      alps::hdf5::archive oar("gt.h5", "a");
       oar << alps::make_pvp("/N",N);
       oar << alps::make_pvp("/BETA",BETA);
       oar << alps::make_pvp("/FLAVORS",FLAVORS);
@@ -287,7 +288,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
     std::vector<double> gw_re; gw_re.resize(FLAVORS*N_w);
     std::vector<double> gw_im; gw_im.resize(FLAVORS*N_w);
     {
-      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+      alps::hdf5::archive ar(basename+".out.h5", "r");
       ar>>alps::make_pvp("/simulation/results/gw_re/mean/value",gw_re);
       ar>>alps::make_pvp("/simulation/results/gw_im/mean/value",gw_im);
     }
@@ -299,7 +300,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
         for(int wn=0; wn<N_w; ++wn)
           gw.push_back(std::complex<double>(gw_re[f*N_w+wn],gw_im[f*N_w+wn]));
     {
-      alps::hdf5::archive oar("gw.h5", alps::hdf5::archive::WRITE);
+      alps::hdf5::archive oar("gw.h5", "a");
       oar << alps::make_pvp("/N_w",N_w);
       oar << alps::make_pvp("/BETA",BETA);
       oar << alps::make_pvp("/FLAVORS",FLAVORS);
@@ -323,7 +324,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
       std::vector<double> fw_re; fw_re.resize(FLAVORS*N_w);
       std::vector<double> fw_im; fw_im.resize(FLAVORS*N_w);
       {
-        alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+        alps::hdf5::archive ar(basename+".out.h5", "r");
         ar>>alps::make_pvp("/simulation/results/fw_re/mean/value",fw_re);
         ar>>alps::make_pvp("/simulation/results/fw_im/mean/value",fw_im);
       }
@@ -340,7 +341,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
 
       for(std::size_t i=0; i<fw.size(); ++i) sigmaw.push_back(fw[i]/gw[i]);
       {
-        alps::hdf5::archive oar("sigmaw.h5", alps::hdf5::archive::WRITE);
+        alps::hdf5::archive oar("sigmaw.h5", "a");
         oar << alps::make_pvp("/N_w",N_w);
         oar << alps::make_pvp("/BETA",BETA);
         oar << alps::make_pvp("/FLAVORS",FLAVORS);
@@ -366,7 +367,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
     std::cout << "evaluating gw from l..." << std::flush;
     std::vector<double> gl; gl.resize(FLAVORS*N_l); 
     {
-      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+      alps::hdf5::archive ar(basename+".out.h5", "r");
       ar>>alps::make_pvp("/simulation/results/gl/mean/value",gl);
     }
     if(PARAMAGNETIC) spin_average(gl,FLAVORS);
@@ -380,7 +381,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
           gwl.push_back(gw_);
       }
     {
-      alps::hdf5::archive oar("gwl.h5", alps::hdf5::archive::WRITE);
+      alps::hdf5::archive oar("gwl.h5", "a");
       oar << alps::make_pvp("/N_w",N_w);
       oar << alps::make_pvp("/BETA",BETA);
       oar << alps::make_pvp("/FLAVORS",FLAVORS);
@@ -406,7 +407,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
       std::cout << "evaluating sigmaw from l..." << std::flush;
       std::vector<double> fl; fl.resize(FLAVORS*N_l);
       {
-        alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+        alps::hdf5::archive ar(basename+".out.h5", "r");
         ar>>alps::make_pvp("/simulation/results/fl/mean/value",fl);
       }
       if(PARAMAGNETIC) spin_average(fl,FLAVORS);
@@ -422,7 +423,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
         }
       for(std::size_t i=0; i<fwl.size(); ++i) sigmawl.push_back(fwl[i]/gwl[i]);
       {
-        alps::hdf5::archive oar("sigmawl.h5", alps::hdf5::archive::WRITE);
+        alps::hdf5::archive oar("sigmawl.h5", "a");
         oar << alps::make_pvp("/N_w",N_w);
         oar << alps::make_pvp("/BETA",BETA);
         oar << alps::make_pvp("/FLAVORS",FLAVORS);
@@ -449,7 +450,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
     std::cout << "evaluating <nn>..." << std::flush;
     std::vector<double> nn_; nn_.resize(FLAVORS*(FLAVORS+1)/2);
     {
-      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+      alps::hdf5::archive ar(basename+".out.h5", "r");
       ar>>alps::make_pvp("/simulation/results/nn/mean/value",nn_);
     }
     if(PARAMAGNETIC){
@@ -474,7 +475,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
         else      nn[f1*FLAVORS+f2]=nn_[(f1*(f1+1))/2+f2];
       }
     {
-      alps::hdf5::archive oar("nn.h5", alps::hdf5::archive::WRITE);
+      alps::hdf5::archive oar("nn.h5", "a");
       oar << alps::make_pvp("/FLAVORS",FLAVORS);
       oar << alps::make_pvp("/data",nn);
     }
@@ -513,7 +514,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
     std::cout << "evaluating <Sz(tau)Sz(0)>..." << std::flush;
     std::vector<double> nnt; nnt.resize(sqr(FLAVORS)*(N_nn+1));
     {
-      alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+      alps::hdf5::archive ar(basename+".out.h5", "r");
       ar>>alps::make_pvp("/simulation/results/nnt/mean/value",nnt);
     }
     std::vector<double> szsz_static; szsz_static.resize((FLAVORS/2)*(FLAVORS/2+1)/2, 0.);
@@ -600,7 +601,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
       hw_re.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
       hw_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
       {
-        alps::hdf5::archive ar(basename+".out.h5", alps::hdf5::archive::READ);
+        alps::hdf5::archive ar(basename+".out.h5", "r");
         ar>>alps::make_pvp("/simulation/results/g2w_re/mean/value",g2w_re);
         ar>>alps::make_pvp("/simulation/results/g2w_im/mean/value",g2w_im);
         ar>>alps::make_pvp("/simulation/results/hw_re/mean/value",hw_re);
@@ -714,7 +715,7 @@ if(argc==3 && std::string(argv[2]) == "hr"){
       fname+=std::string(".part")+int2str(world.rank());
 #endif
       fname+=std::string(".h5");
-      alps::hdf5::archive oar(fname, alps::hdf5::archive::WRITE);
+      alps::hdf5::archive oar(fname, "a");
       oar << alps::make_pvp("/data",gammaw);
       oar << alps::make_pvp("/size",gammaw.size());
       oar << alps::make_pvp("/BETA",BETA);

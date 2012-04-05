@@ -42,7 +42,7 @@ def main(limit, resume, output):
     })
 
     if resume == 't':
-        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), ngs.h5ar.READ)
+        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'r')
         sim.load(ar)
         del ar
 
@@ -52,7 +52,7 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + int(limit))
 
-    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), ngs.h5ar.REPLACE)
+    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'w')
     sim.save(ar)
     del ar
 
@@ -75,7 +75,7 @@ def main(limit, resume, output):
 #TODO: implement!
 #    print "Tanh(Correlations):     ", results["Correlations"].tanh()
 
-    ngs.saveResults(results, sim.params, ngs.h5ar(output, ngs.h5ar.REPLACE), "/simulation/results")
+    ngs.saveResults(results, sim.params, ngs.h5ar(output, 'w'), "/simulation/results")
 
 if __name__ == "__main__":
     apply(main, sys.argv[1:])

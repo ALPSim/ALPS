@@ -54,7 +54,7 @@ int main() {
   std::cout << "The variance of E is: " << variance << std::endl;
   
   // write the result back to the file
-  alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(filename, "a");
   ar << alps::make_pvp("simulation/results/" + alps::hdf5_name_encode("E") + "/variance/value", variance);
 
   return 0;

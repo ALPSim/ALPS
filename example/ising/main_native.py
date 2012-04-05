@@ -54,7 +54,7 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + int(limit))
 
-    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), ngs.h5ar.REPLACE)
+    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), "a")
     sim.save(ar)
     del ar
 

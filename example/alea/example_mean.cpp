@@ -54,7 +54,7 @@ int main() {
   std::cout << "The mean of E is: " << mean << std::endl;
 
   // write the result back to the file
-  alps::hdf5::archive ar(filename, alps::hdf5::archive::WRITE);
+  alps::hdf5::archive ar(filename, "a");
   ar << alps::make_pvp("simulation/results/" + alps::hdf5_name_encode("E") + "/mean/value", mean);
 
   return 0;

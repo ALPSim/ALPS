@@ -27,7 +27,7 @@
 
 #include "impurity.h"
 #include "fouriertransform.h"
-#include "alps/ngs/mcdeprecated.hpp"
+#include "alps/ngs/make_deprecated_parameters.hpp"
 #include<numeric>
 typedef alps::mcmpisim<hybridization> sim_type;
 
@@ -42,7 +42,7 @@ int main(int argc, char** argv)
   if (options.valid) {
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
-    alps::parameters_type<hybridization>::type parms(alps::hdf5::archive(options.input_file, alps::hdf5::archive::READ));
+    alps::parameters_type<hybridization>::type parms(alps::hdf5::archive(options.input_file, "r"));
     alps::mcmpisim<hybridization> s(parms, c);
     if(options.time_limit!=0)
       throw std::invalid_argument("time limit is passed in the parameter file!");
@@ -96,12 +96,12 @@ int main(int argc, char** argv)
         }
         {
           std::cout<<"converting ALPS parameters"<<std::endl;
-          alps::Parameters p(alps::make_alps_parameters(parms));
+          alps::Parameters p(alps::make_deprecated_parameters(parms));
           FourierTransformer::generate_transformer_U(p, fourier_ptr, n); //still takes old alps parameter class.
           fourier_ptr->forward_ft(green_itime, green_matsubara);      
         }
         {
-          alps::hdf5::archive ar(options.output_file, alps::hdf5::archive::WRITE);
+          alps::hdf5::archive ar(options.output_file, "a");
           green_matsubara.write_hdf5(ar, "/G_omega");
           green_itime.write_hdf5(ar, "/G_tau");
         }

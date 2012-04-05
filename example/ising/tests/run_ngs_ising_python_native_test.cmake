@@ -3,7 +3,7 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-file(WRITE run_ngs_ising_python_native_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${sourcedir}/lib ${python_interpreter} ${currentdir}/main_native.py 15 f sim.single.h5")
+file(WRITE run_ngs_ising_python_native_tmp.sh "PYTHONPATH=\$PYTHONPATH:${binarydir}/lib/pyalps:${binarydir}/src/boost:${sourcedir}/lib:${currentdir} ${python_interpreter} ${currentdir}/main_native.py 15 f sim.single.h5")
 
 execute_process(
     COMMAND sh run_ngs_ising_python_native_tmp.sh
