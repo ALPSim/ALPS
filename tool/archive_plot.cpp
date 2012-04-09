@@ -239,7 +239,10 @@ void Plot::exec(Node inNode, std::string inInFile) {
   std::string constraintSQLWhere;
   Node context = inNode.nodeTest("plot").front();
   while (context.nodeTest("for-each").size() > 0) context = context.nodeTest("for-each").front();
-  BOOST_FOREACH(Node const& constraint, context.nodeTest("constraint")) {
+  // BOOST_FOREACH(Node const& constraint, context.nodeTest("constraint")) {
+  std::list<Node> constraints = context.nodeTest("constraint");
+  for (std::list<Node>::const_iterator itr = constraints.begin(); itr != constraints.end(); ++itr) {
+    const Node& constraint = *itr;
     std::string name = constraint.getAttribute("name");
     std::string type = strToLower(constraint.getAttribute("type"));
     std::string value = constraint.getAttribute("value");
