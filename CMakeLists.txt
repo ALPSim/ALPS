@@ -1056,5 +1056,6 @@ endif(ALPS_DOWNLOAD_PACKAGES)
 
 if (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
   enable_testing()
+  include(CTest)
   add_subdirectory(test)
 endif (ALPS_BUILD_TESTS AND NOT ALPS_BUILD_SOURCE)
