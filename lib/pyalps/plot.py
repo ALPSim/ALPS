@@ -5,6 +5,7 @@
 # ALPS Libraries
 # 
 # Copyright (C) 2009-2010 by Bela Bauer <bauerb@phys.ethz.ch>
+# Copyright (C) 2012-2012 by Michele Dolfi <dolfim@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -103,15 +104,27 @@ def plot(data):
         if 'color' in q.props:
             thiscolor = q.props['color']
         
+        fillmarkers = True
+        if 'fillmarkers' in q.props and q.props['fillmarkers'] == False:
+            fillmarkers = False
+        
         if 'line' in q.props and q.props['line'] == 'scatter':
-            plt.scatter(xmeans, ymeans, c=thiscolor, marker=markers[imarker], label=lab)
+            if fillmarkers:
+                plt.scatter(xmeans, ymeans, c=thiscolor, marker=markers[imarker], label=lab)
+            else:
+                plt.scatter(xmeans, ymeans, label=lab,
+                            marker=markers[imarker], c=thiscolor, facecolors='none')
             imarker = (imarker+1)%len(markers)
         else:
             line_props = '-'
             if 'line' in q.props:
                 line_props = q.props['line']
             
-            plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props,color=thiscolor,label=lab)
+            if fillmarkers:
+                plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props,color=thiscolor,label=lab)
+            else:
+                plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,label=lab,
+                            fmt=line_props,color=thiscolor, mfc='none', mec=thiscolor)
 
 
 
@@ -156,20 +169,33 @@ class MplXYPlot_core:
             if 'color' in q.props:
                 thiscolor = q.props['color']
             
+            fillmarkers = True
+            if 'fillmarkers' in q.props and q.props['fillmarkers'] == False:
+                fillmarkers = False
+            
             if 'line' in q.props and q.props['line'] == 'scatter':
                 thismarker = self.markers[self.imarker]
                 if 'marker' in q.props:
                     thismarker = q.props['marker']
                 self.imarker = (self.imarker+1)%len(self.markers)
-                self.lines.append([plt.scatter(xmeans, ymeans, c=thiscolor, marker=thismarker)])
+                if fillmarkers:
+                    self.lines.append([plt.scatter(xmeans, ymeans, c=thiscolor, marker=thismarker)])
+                else:
+                    self.lines.append([plt.scatter(xmeans, ymeans,
+                                        marker=thismarker, c=thiscolor, facecolors='none')])
                 if xerrors != None or yerrors != None:
                     plt.errorbar(xmeans, ymeans, yerr=yerrors, xerr=xerrors, fmt=None)
             else:
-                line_props = thiscolor
+                line_props = '-'
                 if 'line' in q.props:
-                    line_props += q.props['line']
+                    line_props = q.props['line']
                 
-                self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props))
+                if fillmarkers:
+                    self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,
+                                                   fmt=line_props,color=thiscolor))
+                else:
+                    self.lines.append(plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,
+                                                   fmt=line_props,color=thiscolor, mfc='none', mec=thiscolor))
                 
                 if 'linewidth' in q.props:
                     self.lines[-1][0].set_linewidth(q.props['linewidth'])
