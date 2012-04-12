@@ -84,7 +84,7 @@ private:
   magnitude_type groundstate_energy() const;
   void do_subspace();
   magnitude_type calculate_averages(MeasurementsPlot<magnitude_type>&) const;
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&) const;
+  void write_xml_body(alps::oxstream&, const boost::filesystem::path&,bool) const;
   std::vector<value_type> calculate(operator_matrix_type const& m) const;
 
   mutable magnitude_type energy;
@@ -442,13 +442,14 @@ typename FullDiagMatrix<T>::magnitude_type FullDiagMatrix<T>::calculate_averages
 
 
 template <class T>
-void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p) const
+void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
 {
-  if (this->parms.defined("T") || this->parms.defined("beta")) {
+    alps::Parameters pa = this ->get_parameters();
+    if (writeallxml && (pa.defined("T") || pa.defined("beta"))) {
   
-    beta = (this->parms.defined("T") ? 1./double(this->parms["T"]) 
-                           : double(this->parms["beta"]));
-    field0 = field = this->parms.value_or_default("H",this->parms.value_or_default("h",0.));
+        beta = (pa.defined("T") ? 1./double(pa["T"]) 
+                           : double(pa["beta"]));
+        field0 = field = pa.value_or_default("H",pa.value_or_default("h",0.));
     conserved_name = "Sz";    // Here we support only a coupling -h Sz
 
     min_val = groundstate_energy();
@@ -481,7 +482,7 @@ void FullDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesys
     }
     out << alps::end_tag("AVERAGES");
   }
-  super_type::write_xml_body(out,p);
+  super_type::write_xml_body(out,p,writeallxml);
 }
    
 template <class T>

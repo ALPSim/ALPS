@@ -31,7 +31,11 @@
 alps::scheduler::Task* SparseDiagFactory::make_task(const alps::ProcessList& w, const boost::filesystem::path& fn, const alps::Parameters& parms) const
 {
   alps::LatticeLibrary lib(parms);
-  bool is_graph = lib.has_graph(parms.value_or_default("GRAPH",parms["LATTICE"]));
+  bool is_graph = false;
+  if (parms.defined("GRAPH"))
+    is_graph = is_graph || lib.has_graph("GRAPH");
+  if (parms.defined("LATTICE"))
+      is_graph = is_graph || lib.has_graph("LATTICE");
   bool transl = parms.value_or_default("TRANSLATION_SYMMETRY",true) || parms.defined("TOTAL_MOMENTUM");
   bool use_complex = (is_graph ? false : transl);
   return parms.value_or_default("COMPLEX",use_complex) ?

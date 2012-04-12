@@ -54,7 +54,7 @@ public:
   
   SparseDiagMatrix (const alps::ProcessList& where , const boost::filesystem::path& p);
   void do_subspace();
-  void write_xml_body(alps::oxstream&, const boost::filesystem::path&) const;
+  void write_xml_body(alps::oxstream&, const boost::filesystem::path&, bool) const;
   void print_eigenvectors(std::ostream& os) const;
 private:
   
@@ -71,35 +71,36 @@ SparseDiagMatrix<T>::SparseDiagMatrix(const alps::ProcessList& where , const boo
 
 
 template <class T>
-void SparseDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p) const
+void SparseDiagMatrix<T>::write_xml_body(alps::oxstream& out, const boost::filesystem::path& p, bool writeallxml) const
 {
-  // Get minimum energy (over all sectors)
-  magnitude_type min_val = std::numeric_limits<magnitude_type>::max();
-  magnitude_type exc_val = std::numeric_limits<magnitude_type>::max();
-  for (typename std::vector<mag_vector_type>::const_iterator vit=this->eigenvalues_.begin(); vit!=this->eigenvalues_.end(); ++vit)
-    if(vit->size()>=1) {
-      if ((*vit)[0] < min_val) {
-        exc_val = min_val;
-        min_val = (*vit)[0];
-        if (vit->size()>=2 && (*vit)[1] < exc_val)
-          exc_val = (*vit)[1];
-      }
-      else if ((*vit)[0] < exc_val)
-        exc_val = (*vit)[0];
-    }
+  if (writeallxml) {   
+      // Get minimum energy (over all sectors)
+      magnitude_type min_val = std::numeric_limits<magnitude_type>::max();
+      magnitude_type exc_val = std::numeric_limits<magnitude_type>::max();
+      for (typename std::vector<mag_vector_type>::const_iterator vit=this->eigenvalues_.begin(); vit!=this->eigenvalues_.end(); ++vit)
+        if(vit->size()>=1) {
+          if ((*vit)[0] < min_val) {
+            exc_val = min_val;
+            min_val = (*vit)[0];
+            if (vit->size()>=2 && (*vit)[1] < exc_val)
+              exc_val = (*vit)[1];
+          }
+          else if ((*vit)[0] < exc_val)
+            exc_val = (*vit)[0];
+        }
 
-  out << alps::start_tag("AVERAGES");
-  if (min_val!=std::numeric_limits<magnitude_type>::max())
-    out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Ground State Energy") << alps::no_linebreak
-        << alps::start_tag("MEAN") << min_val << alps::end_tag("MEAN")
-        << alps::end_tag("SCALAR_AVERAGE");
-  if (exc_val!=std::numeric_limits<magnitude_type>::max())
-    out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Energy Gap") << alps::no_linebreak
-        << alps::start_tag("MEAN") << alps::no_linebreak << exc_val-min_val << alps::end_tag("MEAN")
-        << alps::end_tag("SCALAR_AVERAGE");
-  out << alps::end_tag("AVERAGES");
-  
-  super_type::write_xml_body(out,p);
+      out << alps::start_tag("AVERAGES");
+      if (min_val!=std::numeric_limits<magnitude_type>::max())
+        out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Ground State Energy") << alps::no_linebreak
+            << alps::start_tag("MEAN") << min_val << alps::end_tag("MEAN")
+            << alps::end_tag("SCALAR_AVERAGE");
+      if (exc_val!=std::numeric_limits<magnitude_type>::max())
+        out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Energy Gap") << alps::no_linebreak
+            << alps::start_tag("MEAN") << alps::no_linebreak << exc_val-min_val << alps::end_tag("MEAN")
+            << alps::end_tag("SCALAR_AVERAGE");
+      out << alps::end_tag("AVERAGES");
+  }
+  super_type::write_xml_body(out,p,writeallxml);
 }
    
 
