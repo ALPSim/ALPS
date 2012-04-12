@@ -55,6 +55,7 @@ using namespace alps::alea;
 
 int main()
 {
+
     //is an accum with count, mean, error and fix_size_bin functions
     typedef accumulator<int, FixSizeBinning> accum; 
     
@@ -66,6 +67,7 @@ int main()
      * bin_log for LogBinning with default 10
      * bin_auto for Autocorrelation with default 10
      */
+
     accum demo_all(bin_size = 2, bin_number = 4);
     //order with boost::parameter doesn't matter
     accum demo_all_order(bin_number = 4, bin_size = 2);
