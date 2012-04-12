@@ -305,8 +305,8 @@ void hybridization::read_alps_framework_input_data_omega(const parameters_type &
 /**lattice (semicircular density of states) we can compute the hybridization function F        ***/
 /**directly from G via F = -t*t*G (note that the usual convention has Delta(omega)=-F(-omega)  ***/
 /**hence Delta =  t*t*G (t is the hopping matrix element of the semicircular DOS, the quarter  ***/
-/**bandwidth.
- /*************************************************************************************************/
+/**bandwidth.                                                                                  ***/
+/*************************************************************************************************/
 void hybridization::read_alps_framework_input_data_tau(const parameters_type &parms){
   itime_green_function_t green_itime(N+1, 1, FLAVORS);
   {

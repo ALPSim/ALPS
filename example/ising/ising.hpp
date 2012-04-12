@@ -64,7 +64,7 @@ template<typename Base> class ising_sim : public Base {
 				int left = ( i - 1 < 0 ? length - 1 : i - 1 );
 				double p = exp( 2. * beta * spins[i] * ( spins[right] + spins[left] ));
 				if ( p >= 1. || this->random() < p )
-					spins[i] =- spins[i];
+					spins[i] = -spins[i];
 			}
 		};
 
