@@ -48,7 +48,7 @@ namespace alps {
             public:
 
 				// TODO: move to base class
-                ising_export(boost::python::object arg, std::size_t seed_offset = 42)
+                ising_export(boost::python::dict arg, std::size_t seed_offset = 42)
                     : ising_sim<alps::base>(alps::params(arg), seed_offset)
                 {}
 
@@ -94,7 +94,7 @@ BOOST_PYTHON_MODULE(pyising) {
 
     boost::python::class_<alps::detail::ising_export, boost::noncopyable, boost::python::bases<alps::base> >(
           "sim",
-          boost::python::init<boost::python::object, boost::python::optional<std::size_t> >()
+          boost::python::init<boost::python::dict, boost::python::optional<std::size_t> >()
     )
         .add_property("params", boost::python::make_function(&alps::detail::ising_export::get_params, boost::python::return_internal_reference<>()))
         .add_property("measurements", boost::python::make_function(&alps::detail::ising_export::get_measurements, boost::python::return_internal_reference<>()))
