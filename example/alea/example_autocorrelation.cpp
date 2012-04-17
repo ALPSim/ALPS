@@ -28,6 +28,7 @@
 #include <alps/alea.h>
 #include <alps/alea/mcanalyze.hpp>
 #include <alps/utility/encode.hpp>
+#include <alps/utility/size.hpp>
 
 #include <alps/hdf5.hpp>
 
@@ -40,6 +41,7 @@
 int main() {
   // this using-statement makes life easier when entering the named parameters
   using namespace alps::alea;
+  using alps::size;
  
   const std::string filename = "testfile.h5";
 
