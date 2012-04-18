@@ -53,16 +53,16 @@ echo "downloading more source files" && \
 (cd "$BUILD_DIR" && curl "$GMPURL" } bzcat | tar xf -  && curl "$MPFRURL" | tar zxf - && curl "$MPCURL" | tar zxf -) 2>&1 | tee -a "$LOG"
 
 echo "building gmp ... " && \
-(cd "$BUILD_DIR/gmp-$GMPVERSION" && ./configure --prefix=$BUILD_DIR/aux && make install) 2>&1 | tee -a "$LOG"
+(cd "$BUILD_DIR/gmp-$GMPVERSION" && ./configure --prefix=$PREFIX && make install) 2>&1 | tee -a "$LOG"
 
 echo "building mpfr ... " && \
-(cd "$BUILD_DIR/mpfr-$MPFRVERSION" && ./configure --prefix=$BUILD_DIR/aux --with-gmp=$BUILD_DIR/aux && make install) 2>&1 | tee -a "$LOG"
+(cd "$BUILD_DIR/mpfr-$MPFRVERSION" && ./configure --prefix=$PREFIX --with-gmp=$PREFIX && make install) 2>&1 | tee -a "$LOG"
 
 echo "building mpc ... " && \ 
-(cd "$BUILD_DIR/mpc-$MPCVERSION" && ./configure --prefix=$BUILD_DIR/aux --with-gmp=$BUILD_DIR/aux --with-mpfr=$BUILD_DIR/aux && make install) 2>&1 | tee -a "$LOG"
+(cd "$BUILD_DIR/mpc-$MPCVERSION" && ./configure --prefix=$BUILD_DIR/aux --with-gmp=$PREFIX --with-mpfr=$PREFIX && make install) 2>&1 | tee -a "$LOG"
 ( \
 echo "configuring..." && \
-(cd "$BUILD_DIR/gcc-$VERSION" && ./configure --prefix="$PREFIX" --with-gmp=$BUILD_DIR/aux --with-mpfr=$BUILD_DIR/aux --with-mpc=$BUILD_DIR/aux ) && \
+(cd "$BUILD_DIR/gcc-$VERSION" && ./configure --prefix="$PREFIX" --with-gmp=$BUILD_DIR/aux --with-mpfr=$PREFIX --with-mpc=$PREFIX ) && \
 echo "building..." && \
 (cd "$BUILD_DIR/gcc-$VERSION" && make bootstrap) && \
 echo "installing..." && \

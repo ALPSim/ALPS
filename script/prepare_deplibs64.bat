@@ -10,6 +10,6 @@ mkdir deplibs\lib
 mkdir deplibs\include
 mkdir deplibs\share
 mkdir deplibs\etc
-copy ..\..\opt\lib deplibs\lib
-copy ..\..\opt\bin deplibs\bin
-copy ..\..\opt\include deplibs\include
+copy ..\..\opt64\lib deplibs\lib
+copy ..\..\opt64\bin deplibs\bin
+copy ..\..\opt64\include deplibs\include
