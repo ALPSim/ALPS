@@ -4,7 +4,10 @@
 #      (See accompanying file LICENSE_1_0.txt or copy at
 #          http://www.boost.org/LICENSE_1_0.txt)
 
-VERSION=4.4.6
+VERSION=4.6.3
+GMPVERSION=5.0.4
+MPFRVERSION=3.1.0
+MPCVERSION=0.8.2
 
 PREFIX="$1"
 BUILD_DIR="$2"
@@ -18,12 +21,19 @@ fi
 LOG="$0.log.$$"
 echo "executing $0 $*" | tee "$LOG"
 
-URL="http://gcc.parentingamerica.com/releases/gcc-$VERSION/gcc-$VERSION.tar.gz"
+URL="ftp://ftp.fu-berlin.de/unix/languages/gcc/releases/gcc-$VERSION/gcc-$VERSION.tar.gz"
+GMPURL=ftp://ftp.gnu.org/gnu/gmp/gmp-$GMPVERSION.tar.bz2
+MPFRURL=http://www.mpfr.org/mpfr-current/mpfr-$MPFRVERSION.tar.gz
+MPCURL=http://www.multiprecision.org/mpc/download/mpc-$MPCVERSION.tar.gz
 SRC="$SRC_DIR/gcc-$VERSION.tar.gz"
 
 echo "cleaning up..." | tee -a "$LOG"
 if test -d "$BUILD_DIR"; then
   rm -rf "$BUILD_DIR/gcc-$VERSION"
+  rm -rf "$BUILD_DIR/gmp-$GMPVERSION"
+  rm -rf "$BUILD_DIR//mpfr-$MPFRVERSION"
+  rm -rf "$BUILD_DIR/mpc-$MPCVERSION"
+  rm -rf "$BUILD_DIR/aux"
 else
   mkdir -p "$BUILD_DIR"
 fi
@@ -39,17 +49,30 @@ else
   fi
   (cd "$BUILD_DIR" && "$CURL" "$URL" | tar zxf -) 2>&1 | tee -a "$LOG"
 fi
+echo "downloading more source files" && \
+(cd "$BUILD_DIR" && curl "$GMPURL" } bzcat | tar xf -  && curl "$MPFRURL" | tar zxf - && curl "$MPCURL" | tar zxf -) 2>&1 | tee -a "$LOG"
 
-fdggdfgdf
+echo "building gmp ... " && \
+(cd "$BUILD_DIR/gmp-$GMPVERSION" && ./configure --prefix=$BUILD_DIR/aux && make install) 2>&1 | tee -a "$LOG"
+
+echo "building mpfr ... " && \
+(cd "$BUILD_DIR/mpfr-$MPFRVERSION" && ./configure --prefix=$BUILD_DIR/aux --with-gmp=$BUILD_DIR/aux && make install) 2>&1 | tee -a "$LOG"
+
+echo "building mpc ... " && \ 
+(cd "$BUILD_DIR/mpc-$MPCVERSION" && ./configure --prefix=$BUILD_DIR/aux --with-gmp=$BUILD_DIR/aux --with-mpfr=$BUILD_DIR/aux && make install) 2>&1 | tee -a "$LOG"
 ( \
 echo "configuring..." && \
-(cd "$BUILD_DIR/gcc-$VERSION" && ./configure --prefix="$PREFIX" --with-gmp=/opt/local --with-mpfr=/opt/local) && \
+(cd "$BUILD_DIR/gcc-$VERSION" && ./configure --prefix="$PREFIX" --with-gmp=$BUILD_DIR/aux --with-mpfr=$BUILD_DIR/aux --with-mpc=$BUILD_DIR/aux ) && \
 echo "building..." && \
 (cd "$BUILD_DIR/gcc-$VERSION" && make bootstrap) && \
 echo "installing..." && \
 (cd "$BUILD_DIR/gcc-$VERSION" && make install) && \
 echo "cleaning up..." && \
 rm -rf "$BUILD_DIR/gcc-$VERSION" && \
+rm -rf "$BUILD_DIR/gmp-$GMPVERSION" && \
+rm -rf "$BUILD_DIR//mpfr-$MPFRVERSION" && \
+rm -rf "$BUILD_DIR/mpc-$MPCVERSION" && \
+rm -rf "$BUILD_DIR/aux" && \
 
 echo "done" \
 ) 2>&1 | tee -a "$LOG"
