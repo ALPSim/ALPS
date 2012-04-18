@@ -327,6 +327,8 @@ class Hdf5Loader:
                                     pass
                         fileset.append(sector_sets)
                 sets.append(fileset)
+            except RuntimeError:
+                raise
             except Exception, e:
                 log(e)
                 log(traceback.format_exc())
