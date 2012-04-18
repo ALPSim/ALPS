@@ -91,8 +91,8 @@ def Plot(data,xaxis=None,yaxis=None,legend=None):
 def convertToText(data,title=None,xaxis=None,yaxis=None):
     output = ''
     if  title!=None:
-        output += title + '\n'           
-
+        output += title + '\n'
+    
     if xaxis != None:
         output += '# X'
         if 'label' in xaxis:
@@ -116,6 +116,10 @@ def convertToText(data,title=None,xaxis=None,yaxis=None):
         elif 'filename' in q.props:
             output += '# ' + q.props['filename']
         output += '\n'
+        if 'xlabel' in q.props:
+            output += '# X: ' + q.props['xlabel'] + '\n'
+        if 'ylabel' in q.props:
+            output += '# Y: ' + q.props['ylabel'] + '\n'
 
         for i in range(len(q.x)):
             output += str(q.x[i]) + '\t' + str(q.y[i]) + '\n'
