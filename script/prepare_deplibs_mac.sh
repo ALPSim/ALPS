@@ -15,6 +15,9 @@ cp /opt/alps/lib/libvt* deplibs/lib
 cp /opt/alps/lib/libotf* deplibs/lib
 cp /opt/alps/lib/libmca_common_sm* deplibs/lib
 cp /opt/alps/lib/libopen-* deplibs/lib
+cp /opt/alps/lib/libgfortran* deplibs/lib
+cp /opt/alps/lib/libgcc* deplibs/lib
+cp /opt/alps/lib/libquadmath* deplibs/lib
 cp -r /opt/alps/lib/openmpi deplibs/lib
 install_name_tool -id /opt/alps/lib/libsz.2.dylib deplibs/lib/libsz.dylib
 install_name_tool -id /opt/alps/lib/libsz.2.dylib deplibs/lib/libsz.2.dylib
