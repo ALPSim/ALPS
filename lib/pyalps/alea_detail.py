@@ -26,6 +26,3 @@
 # ****************************************************************************
 
 from pyalea_c import *
-import numpy
-import pyalps.plot
-import pyalps.dataset
