@@ -10,8 +10,7 @@
 # Since Boost_ROOT_DIR is used for setting Boost source directory,
 # we use precompiled Boost libraries only when Boost_ROOT_DIR is not set.
 if (NOT Boost_ROOT_DIR)
-  message(STATUS "Looking for precompiled Boost libraries")
-  # Boost 1.47.0 or later is not yet supported by FindBoost.cmake (CMake 2.8.5).
+
   set(Boost_ADDITIONAL_VERSIONS "1.48" "1.48.0" "1.47" "1.47.0")
   # Debian and Ubuntu packages are multithreaded.
   # Commented out because default is ON.
@@ -24,15 +23,36 @@ if (NOT Boost_ROOT_DIR)
   # We do not require Boost.MPI, therefore check whether Boost.MPI exists
   # before actual find_package for Boost.
   # - Ubuntu 10.10 does not have Boost.MPI package.
-  find_package(Boost 1.47.0 COMPONENTS mpi)
-  if (Boost_FOUND)
-    find_package(Boost 1.47.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
-  else (Boost_FOUND)
-    find_package(Boost 1.47.0 COMPONENTS date_time filesystem program_options python regex system serialization thread)
-  endif (Boost_FOUND)
-  if (APPLE AND NOT Boost_FOUND)
-    find_package(boost COMPONENTS date_time-mt filesystem-mt program_options-mt python-mt regex-mt system-mt serialization-mt thread-mt mpi-mt)
-  endif(APPLE AND NOT Boost_FOUND)
+  if (NOT ALPS_BUILD_NGS)
+    # Boost 1.47.0 or later is not yet supported by FindBoost.cmake (CMake 2.8.5).
+    message(STATUS "Looking for precompiled Boost libraries (version >= 1.47)")
+
+    find_package(Boost 1.47.0 COMPONENTS mpi)
+    if (Boost_FOUND)
+      find_package(Boost 1.47.0 COMPONENTS date_time filesystem program_options python regex system serialization thread mpi)
+    else (Boost_FOUND)
+      find_package(Boost 1.47.0 COMPONENTS date_time filesystem program_options python regex system serialization thread)
+    endif (Boost_FOUND)
+    if (APPLE AND NOT Boost_FOUND)
+      find_package(boost COMPONENTS date_time-mt filesystem-mt program_options-mt python-mt regex-mt system-mt serialization-mt thread-mt mpi-mt)
+    endif(APPLE AND NOT Boost_FOUND)
+
+  else(NOT ALPS_BUILD_NGS)
+    ## NGS requires boost-chrono
+    message(STATUS "Looking for precompiled Boost libraries (version >= 1.48) for ALPS with NGS")
+
+    find_package(Boost 1.48.0 COMPONENTS mpi)
+    if (Boost_FOUND)
+      find_package(Boost 1.48.0 COMPONENTS chrono date_time filesystem program_options python regex system serialization thread mpi)
+    else (Boost_FOUND)
+      find_package(Boost 1.48.0 COMPONENTS chrono date_time filesystem program_options python regex system serialization thread)
+    endif (Boost_FOUND)
+    if (APPLE AND NOT Boost_FOUND)
+      find_package(boost COMPONENTS chrono-mt date_time-mt filesystem-mt program_options-mt python-mt regex-mt system-mt serialization-mt thread-mt mpi-mt)
+    endif(APPLE AND NOT Boost_FOUND)
+
+  endif(NOT ALPS_BUILD_NGS)
+  
 endif(NOT Boost_ROOT_DIR)
 
 # Boost_FOUND is set only when FindBoost.cmake succeeds.
