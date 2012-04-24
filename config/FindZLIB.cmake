@@ -19,6 +19,7 @@
 # (To distributed this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+
 IF(ALPS_PACKAGE_LIBRARIES)
   IF (UNIX AND NOT WIN32)
     MESSAGE(STATUS "Using ALPS-installed ZLIB")
@@ -50,3 +51,10 @@ SET(ZLIB_DLLS         "${ZLIB_DLL}")
 # all listed variables are TRUE
 INCLUDE(FindPackageHandleStandardArgs)
 FIND_PACKAGE_HANDLE_STANDARD_ARGS(ZLIB DEFAULT_MSG ZLIB_LIBRARIES ZLIB_INCLUDE_DIRS)
+
+
+IF(ALPS_USE_VISTRAILS AND WIN32 AND NOT UNIX)
+  MESSAGE(STATUS "Using VisTrails zlib")
+   SET(ZLIB_DLLS "${VISTRAILS_APP_DIR}/${VISTRAILS_APP_NAME}/zlib1.dll")  
+   SET(ZLIB_FOUND TRUE)  
+ENDIF(ALPS_USE_VISTRAILS AND WIN32 AND NOT UNIX)

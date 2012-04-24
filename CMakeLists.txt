@@ -136,9 +136,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
 
-if (ALPS_BUILD_PYTHON)
+if (ALPS_BUILD_PYTHON OR WIN32)
   find_package(Vistrails)
-endif (ALPS_BUILD_PYTHON)
+endif (ALPS_BUILD_PYTHON OR WIN32)
 
 if (ALPS_BUILD_SOURCE)
   set (CMAKE_INSTALL_PREFIX .)
@@ -337,6 +337,7 @@ find_package(LPSolve)
 
 # Zlib
 find_package(ZLIB)
+message (STATUS "ZLIB ${ZLIB_DLLS}")
 if(ZLIB_FOUND AND NOT ALPS_USE_VISTRAILS)
   include_directories(${ZLIB_INCLUDE_DIR})
   link_libraries(${ZLIB_LIBRARIES})
@@ -345,7 +346,11 @@ if(ZLIB_FOUND AND NOT ALPS_USE_VISTRAILS)
     file(COPY ${ZLIB_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
 endif(ZLIB_FOUND AND NOT ALPS_USE_VISTRAILS)
-  
+
+if(ALPS_USE_VISTRAILS AND MSVC)
+ file(COPY ${ZLIB_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
+endif(ALPS_USE_VISTRAILS AND MSVC)
+
 # SZip
 find_package(SZIP)
 if(SZIP_FOUND AND NOT ALPS_USE_VISTRAILS)
@@ -356,7 +361,11 @@ if(SZIP_FOUND AND NOT ALPS_USE_VISTRAILS)
     file(COPY ${SZIP_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
   endif(MSVC)
 endif(SZIP_FOUND AND NOT ALPS_USE_VISTRAILS)
-  
+
+if(ALPS_USE_VISTRAILS AND MSVC)
+ file(COPY ${SZIP_DLLS} DESTINATION ${PROJECT_BINARY_DIR}/bin)
+endif(ALPS_USE_VISTRAILS AND MSVC)
+ 
 # HDF5
 find_package(HDF5)
 IF(HDF5_FOUND)
@@ -701,7 +710,9 @@ else (ALPS_BUILD_SOURCE)
   if(ALPS_PACKAGE_LIBRARIES)
     install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION . COMPONENT dependentlibraries)
     FILE(GLOB depfiles "${PROJECT_BINARY_DIR}/deplibs/bin/*")
-    install(PROGRAMS ${depfiles} DESTINATION bin COMPONENT dependentlibraries)
+    if(ALPS_USE_VISTRAILS)
+      install(PROGRAMS ${HDF5DLLS} ${ZLIBDLLS} ${SZIPDLLS} DESTINATION bin COMPONENT dependentlibraries)
+    endif(ALPS_USE_VISTRAILS)
   endif(ALPS_PACKAGE_LIBRARIES)
 
   if (ALPS_FOR_VISTRAILS)
@@ -754,6 +765,7 @@ else (ALPS_BUILD_SOURCE)
             DESTINATION share/alps COMPONENT libraries)
             
     if (VISTRAILS_FOUND AND (APPLE OR WIN32))
+      message (STATUS "VisTrails found.")
       set(PYTHONEXEC "${CMAKE_INSTALL_PREFIX}/bin/vispython")
     else (VISTRAILS_FOUND AND (APPLE OR WIN32))
       set(PYTHONEXEC python)
