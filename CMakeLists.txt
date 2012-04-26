@@ -254,7 +254,7 @@ if(ALPS_ENABLE_MPI)
       set(MPI_COMPILER ${CMAKE_INSTALL_PREFIX}/bin/mpicxx)
       message (STATUS "MPI compiler is ${MPI_COMPILER}")
     ENDIF(ALPS_PACKAGE_LIBRARIES AND NOT ALPS_USE_VISTRAILS AND APPLE)
-    find_package(MPI)
+    find_package(MPIForALPS)
       message (STATUS "MPI compiler was ${MPI_COMPILER}")
   ENDIF(NOT MPI_FOUND)
 
