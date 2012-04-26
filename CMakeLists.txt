@@ -337,7 +337,6 @@ find_package(LPSolve)
 
 # Zlib
 find_package(ZLIB)
-message (STATUS "ZLIB ${ZLIB_DLLS}")
 if(ZLIB_FOUND AND NOT ALPS_USE_VISTRAILS)
   include_directories(${ZLIB_INCLUDE_DIR})
   link_libraries(${ZLIB_LIBRARIES})
@@ -703,9 +702,9 @@ else (ALPS_BUILD_SOURCE)
   if(ALPS_PACKAGE_LIBRARIES)
     install(DIRECTORY ${PROJECT_BINARY_DIR}/deplibs/lib DESTINATION . COMPONENT dependentlibraries)
     FILE(GLOB depfiles "${PROJECT_BINARY_DIR}/deplibs/bin/*")
-    if(ALPS_USE_VISTRAILS AND NOT ALPS_FOR_VISTRAILS)
+    if(ALPS_USE_VISTRAILS AND NOT ALPS_FOR_VISTRAILS AND MSVC)
       install(PROGRAMS ${HDF5_DLLS} ${PYTHON_DLLS} ${ZLIB_DLLS} ${SZIP_DLLS} DESTINATION bin COMPONENT dependentlibraries)
-    endif(ALPS_USE_VISTRAILS  AND NOT ALPS_FOR_VISTRAILS)
+    endif(ALPS_USE_VISTRAILS  AND NOT ALPS_FOR_VISTRAILS AND MSVC)
   endif(ALPS_PACKAGE_LIBRARIES)
 
   if (ALPS_FOR_VISTRAILS)
@@ -717,7 +716,9 @@ else (ALPS_BUILD_SOURCE)
           FILES_MATCHING PATTERN "*.py" PATTERN "*.pyc"
           PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.C" EXCLUDE)
 
-      install(PROGRAMS ${HDF5_DLLS} ${ZLIB_DLLS} ${SZIP_DLLS} DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps  COMPONENT vistrails)
+      if (MSVC)
+        install(PROGRAMS ${HDF5_DLLS} ${ZLIB_DLLS} ${SZIP_DLLS} DESTINATION ${VISTRAILS_PYTHON_EXTENSION_DIR}/pyalps  COMPONENT vistrails)
+      endif(MSVC)
 
     install(DIRECTORY vistrails/alps DESTINATION ${VISTRAILS_PACKAGE_DIR} COMPONENT vistrails
         FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml" PATTERN "*.pyc"
@@ -795,7 +796,7 @@ if(ALPS_PATCH_VISTRAILS)
                 DESTINATION .
                 PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE PATTERN "*.pyc" EXCLUDE)
     else (WIN32)
-      message(ERROR "Cannot patch VisTrails on this system. Probably you can just install the latest Vistrails nightly snapshot.")
+      message(ERROR "Cannot patch VisTrails on this system. Just install the latest Vistrails nightly snapshot.")
     endif (WIN32)
   endif(APPLE)
 endif(ALPS_PATCH_VISTRAILS)
