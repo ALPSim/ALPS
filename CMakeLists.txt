@@ -136,9 +136,9 @@ list(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/config)
 # set default CMAKE_INSTALL_PREFIX
 ######################################################################
 
-if (ALPS_BUILD_PYTHON OR WIN32)
+if (ALPS_BUILD_PYTHON OR WIN32 OR APPLE)
   find_package(Vistrails)
-endif (ALPS_BUILD_PYTHON OR WIN32)
+endif (ALPS_BUILD_PYTHON OR WIN32 OR APPLE)
 
 if (ALPS_BUILD_SOURCE)
   set (CMAKE_INSTALL_PREFIX .)
