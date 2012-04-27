@@ -13,7 +13,7 @@ from core.configuration import ConfigurationObject
 import platform
 
 identifier = 'org.comp-phys.alps'
-version = '2.0.4' # version 2.0.2 release candidate
+version = '2.1.0' # release 2.1.0
 name = 'ALPS'
 
 
@@ -29,4 +29,4 @@ else:
   if platform.system()=='Darwin':
     configuration = ConfigurationObject(alpspath="/opt/alps/bin",toolpath="/opt/local/bin",mpirun="['mpirun','-np']",mpiprocs=0,browser="['open', '-a', 'Safari']",archives="{}",xdisplay=":0.",gnuplot_term="aqua")
   else:
-    configuration = ConfigurationObject(alpspath="/opt/alps/bin",toolpath="/opt/local/bin",mpirun="['mpirun','-np']",mpiprocs=0,browser="['firefox']",archives="{}",xdisplay=":0.",gnuplot_term="x11 enhanced")
+    configuration = ConfigurationObject(alpspath="@CMAKE_INSTALL_PREFIX@/bin",toolpath="",mpirun="['mpirun','-np']",mpiprocs=0,browser="['firefox']",archives="{}",xdisplay=":0.",gnuplot_term="x11 enhanced")

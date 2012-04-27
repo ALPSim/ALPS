@@ -470,6 +470,8 @@ configure_file(src/alps/version.h.in ${PROJECT_BINARY_DIR}/src/alps/version.h)
 configure_file(lib/xml/lattices.xml.in ${PROJECT_BINARY_DIR}/lib/xml/lattices.xml)
 configure_file(lib/xml/models.xml.in ${PROJECT_BINARY_DIR}/lib/xml/models.xml)
 
+configure_file(vistrails/alps/__init__.py.in ${PROJECT_BINARY_DIR}/vistrails/alps/__init__.py)
+
 ######################################################################
 # include directories
 ######################################################################
@@ -723,6 +725,7 @@ else (ALPS_BUILD_SOURCE)
     install(DIRECTORY vistrails/alps DESTINATION ${VISTRAILS_PACKAGE_DIR} COMPONENT vistrails
         FILES_MATCHING PATTERN "*.py"  PATTERN "*.xml" PATTERN "*.pyc"
         PATTERN ".svn" EXCLUDE PATTERN "CVS" EXCLUDE)
+    install(FILES ${PROJECT_BINARY_DIR}/vistrails/alps/__init__.py DESTINATION ${VISTRAILS_PACKAGE_DIR}/alps COMPONENT vistrails)
   endif (ALPS_FOR_VISTRAILS)
 
   if (NOT ALPS_FOR_VISTRAILS)
