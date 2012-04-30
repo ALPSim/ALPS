@@ -28,10 +28,11 @@
 
 import sys, os, subprocess, glob, platform
 
+
 vistrailspath = '/root/gamperl/git/vistrails/vistrails/vistrails.py'
-vtapp = ['python', vistrailspath]
+vtapp = [sys.executable, vistrailspath]
 if platform.system()=='Windows':
-  vtapp = ['C:\\Program Files\\VisTrails\\vistrails\\\\Python27_64\\python.exe', 'C:\\Program Files\\VisTrails\\vistrails\\vistrails.py']
+  vtapp = [sys.executable, 'C:\\Program Files\\VisTrails\\vistrails\\vistrails.py']
 
 
 if platform.system()=='Darwin':
