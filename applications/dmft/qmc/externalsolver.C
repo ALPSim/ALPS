@@ -147,7 +147,7 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
 {
   
   // call the external solver program
-  std::string command = exe_.string() + " " + infile + " " + outfile;
+  std::string command = "\""+exe_.string() + "\" " + infile + " " + outfile;
   std::cerr << "Calling external solver " << exe_.string() << " as: "<<command<<std::endl;
   int result = std::system(command.c_str());
   if (result)
