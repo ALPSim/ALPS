@@ -1258,3 +1258,75 @@ def saveMeasurements(measurements,outfile,respath='/simulation/results'):
             except AttributeError:
                 pass
 
+def SetLabels (data, proplist):
+    """
+    Set labels according to the properties given in 'proplist'.
+    """
+    if type(proplist) == str:
+        proplist = [proplist]
+    for d in flatten(data):
+        if 'label' in d.props:
+            del d.props['label']
+        label_items = []
+        for propname in proplist:
+            try:
+                label_items.append(propname+' = %s' % (d.props[propname]))
+            except:
+                pass
+        d.props['label'] = ', '.join(label_items)
+    return data
+
+def CycleColors (data, foreach,
+                 colors=['k','b','g','m','c','y']):
+    """
+    Cyclically assign colors to the lines/markers that will be used to
+    display the DataSets, based on the properties in 'foreach'. This means
+    that DataSet instances that have the same values for the properties
+    in 'foreach' will receive the same color.
+    """
+    all = {}
+    for q in flatten(data):
+        key = tuple([q.props[k] for k in foreach])
+        all[key] = ''
+
+    icolor = 0
+    for k in all.keys():
+        all[k] = colors[icolor]
+        icolor = (icolor+1)%len(colors)
+
+    for q in flatten(data):
+        key = tuple([q.props[k] for k in foreach])
+        q.props['color'] = all[key]
+
+    return data
+
+def CycleMarkers (data, foreach,
+                  markers=['s', 'o', '^', '>', 'v', '<', 'd', 'p', 'h', '+', 'x']):
+    """
+    Cyclically assign markers to the lines/markers that will be used to
+    display the DataSets, based on the properties in 'foreach'. This means
+    that DataSet instances that have the same values for the properties
+    in 'foreach' will receive the same marker.
+    """
+    all = {}
+    for q in flatten(data):
+        key = tuple([q.props[k] for k in foreach])
+        all[key] = ''
+
+    imarker = 0
+    for k in all.keys():
+        all[k] = markers[imarker]
+        imarker = (imarker+1)%len(markers)
+
+    for q in flatten(data):
+        key = tuple([q.props[k] for k in foreach])
+        q.props['marker'] = all[key]
+        if 'line' in q.props:
+            ll = list(q.props['line'])
+            ll[0] = all[key]
+            q.props['line'] = ''.join(ll)
+        else:
+            q.props['line'] = all[key] + '-'
+
+    return data
+
