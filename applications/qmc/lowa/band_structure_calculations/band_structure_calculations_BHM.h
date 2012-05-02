@@ -158,13 +158,24 @@ public:
   ~band_structure_calculations_BHM()
   {
     delete [] x;
-    delete [] x_bloch, bloch, global_bloch_real, global_bloch_imag;
-    delete [] x_wannier, wannier;
+    delete [] x_bloch;
+    delete [] bloch;
+    delete [] global_bloch_real;
+    delete [] global_bloch_imag;
+    delete [] x_wannier;
+    delete [] wannier;
 
     delete [] energy_q;
 #ifdef SITE_DEPENDENT_T_U
-    delete [] _tx_raw, _ty_raw, _tz_raw;
-    delete [] _tx_plus, _tx_minus, _ty_plus, _ty_minus, _tz_plus, _tz_minus;
+    delete [] _tx_raw
+    delete [] _ty_raw
+    delete [] _tz_raw;
+    delete [] _tx_plus;
+    delete [] _tx_minus;
+    delete [] _ty_plus;
+    delete [] _ty_minus;
+    delete [] _tz_plus;
+    delete [] _tz_minus;
     delete [] _U;
 #endif
     delete [] _V;

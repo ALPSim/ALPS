@@ -1013,9 +1013,9 @@ VectorState<T>::get_qn_space(QN qn1, QN qn2, QN qn3, QN qn4) const
     if(s[1].qn() == qn1 && s[2].qn() == qn2 && 
                            s[3].qn() == qn3 && s[4].qn() == qn4) return s; 
     if(s[1].qn() > qn1 ||
-       s[1].qn() == qn1 && s[2].qn() > qn2 ||
-       s[1].qn() == qn1 && s[2].qn() == qn2 && s[3].qn() > qn3 ||
-       s[1].qn() == qn1 && s[2].qn() == qn2 && s[3].qn() == qn3 && s[4].qn() > qn4) 
+       (s[1].qn() == qn1 && s[2].qn() > qn2) ||
+       (s[1].qn() == qn1 && s[2].qn() == qn2 && s[3].qn() > qn3) ||
+       (s[1].qn() == qn1 && s[2].qn() == qn2 && s[3].qn() == qn3 && s[4].qn() > qn4)) 
       end = index;
     else
       origin = index;

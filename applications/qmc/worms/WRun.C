@@ -686,7 +686,7 @@ bool WRun::create_worm()
   // determine states
   state_type state1 = (start.valid() ? start->state() : initial_state_[s]);
   bool do_create=(random_real()<0.5);
- if(do_create && state1==max_state() || !do_create && state1==min_state())
+ if((do_create && state1==max_state()) || (!do_create && state1==min_state()))
     return false;
     
   state_type state2 = (do_create ? create(state1) : annihilate(state1));

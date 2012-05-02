@@ -313,9 +313,14 @@ public:
     delete [] dummy_kink_it;
     delete [] site_it;
     delete [] _proj_binnr;
-    delete [] nbs, local_transition_weight, cummulative_local_transition_weight;
+    delete [] nbs;
+    delete [] local_transition_weight;
+    delete [] cummulative_local_transition_weight;
     delete [] _mu_eff;
-    delete [] _state, av_dns, av_dnsmat, av_dnsmat_inf;
+    delete [] _state;
+    delete [] av_dns;
+    delete [] av_dnsmat;
+    delete [] av_dnsmat_inf;
   }
     
   // constructors
