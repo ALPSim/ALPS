@@ -376,7 +376,9 @@ public:
   std::map<double, std::complex<double> > local_green_function_from_selfenergies(const std::map<double, 
                                                                                  std::vector<std::complex<double> > >& selfenergies, 
                                                                                  const double mu, const double delta);
-  
+  void construct_green_function(double mu, double beta, double eta1, double eta2, const std::vector<std::vector<double> > &epsilon_kckl, const std::vector<std::vector<double> > &dwave_prefactor_kckl, const std::vector<double> &weight_kl, const nambu_matsubara_green_function_t &selfenergy,nambu_matsubara_green_function_t &G_omega_lattice_kav);
+  double compute_density(const nambu_matsubara_green_function_t &G_omega_lattice_kav, double beta);
+
 private:
   template<typename T, class D>
   green_function<T> transform_coordinates(const       green_function<T>& G) const;

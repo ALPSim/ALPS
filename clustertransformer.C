@@ -267,7 +267,7 @@ matsubara_green_function_t SimpleDCATransformer::operator()(const matsubara_gree
         }
       }
     }
-    density=(density/beta+0.5*nflavor*n_cluster_sites())/n_cluster_sites(); //density such that 'half filling' corresponds to 1
+    density=(density/beta+0.5*n_cluster_sites())/n_cluster_sites()*nflavor; //density such that 'half filling' corresponds to 1
     if (compute_filling_) {
       std::cout<<"mu: "<<mu<<" filling "<<density<<" it: "<<mu_it<<" converged: "<<converged<<std::endl;
       //compute new chemical potential
@@ -806,6 +806,61 @@ bool adjust_chemical_potential(const double &n_tot,
 }
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 //////////////////////////////////FUNCTIONS FOR NAMBU SPACE//////////////////////////////////////////////////////////////////////////////////
+void SimpleDCATransformer::construct_green_function(double mu, double beta, double eta1, double eta2, const std::vector<std::vector<double> > &epsilon_kckl, const std::vector<std::vector<double> > &dwave_prefactor_kckl, const std::vector<double> &weight_kl, const nambu_matsubara_green_function_t &selfenergy,nambu_matsubara_green_function_t &G_omega_lattice_kav){
+  
+  unsigned int nflavor=G_omega_lattice_kav.nflavor();
+  unsigned int nfreq=G_omega_lattice_kav.nfreq();
+  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
+    for (frequency_t freq=0; freq<nfreq; ++freq) {
+      G_omega_lattice_kav(freq, kc, kc, 0,0) = 0.;
+      G_omega_lattice_kav(freq, kc, kc, 0,1) = 0.;
+      G_omega_lattice_kav(freq, kc, kc, 1,0) = 0.;
+      G_omega_lattice_kav(freq, kc, kc, 1,1) = 0.;
+      std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
+      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
+        //double prefactor=1.;//(k[0]==0 && k[1]==0)?1.:0.; //cos kx - cos ky
+        double prefactor=dwave_prefactor_kckl[kc][kl];
+        //this is the self consistency formula!!!
+        //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
+        std::complex<double> G_omega_latt_inv[4]=
+        {iomega_n + mu -epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, 0,0),
+          -selfenergy(freq, kc, kc, 0,1) - prefactor*std::complex<double>( eta1, eta2),
+          -selfenergy(freq, kc, kc, 1,0) - prefactor*std::complex<double>( eta1,-eta2),
+          iomega_n - mu +epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, 1,1)};
+        
+        std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
+        G_omega_lattice_kav(freq, kc, kc, 0,0) += weight_kl[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 0,1) -= weight_kl[kl]*G_omega_latt_inv[1]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 1,0) -= weight_kl[kl]*G_omega_latt_inv[2]/G0omega_latt_inv_det;
+        G_omega_lattice_kav(freq, kc, kc, 1,1) += weight_kl[kl]*G_omega_latt_inv[0]/G0omega_latt_inv_det;
+      }
+      G_omega_lattice_kav(freq, kc, kc, 0,0) /= n_cluster_cells();
+      G_omega_lattice_kav(freq, kc, kc, 0,1) /= n_cluster_cells();
+      G_omega_lattice_kav(freq, kc, kc, 1,0) /= n_cluster_cells();
+      G_omega_lattice_kav(freq, kc, kc, 1,1) /= n_cluster_cells();
+    }
+  }
+}
+double SimpleDCATransformer::compute_density(const nambu_matsubara_green_function_t &G_omega_lattice_kav, double beta){
+  double density=0;
+  double density_up_part=0;
+  double density_dn_hole=0;
+  //std::cout<<"density part and hole: "<<density_up_part<<" "<<density_dn_hole<<" "<<std::endl;
+  for(site_t kc=0;kc<n_cluster_sites();++kc){
+    for(frequency_t freq=0;freq<G_omega_lattice_kav.nfreq();++freq){
+      //we could make this more accurate by using hi freq moments
+      density_up_part+=2./beta*G_omega_lattice_kav(freq,kc,kc,0,0).real(); //particles
+      density_dn_hole-=2./beta*G_omega_lattice_kav(freq,kc,kc,1,1).real(); //holes
+    }
+  }
+  //compute density
+  density_up_part=(density_up_part+n_cluster_sites()/2.)/n_cluster_sites(); //density such that 'half filling' corresponds to 1
+  density_dn_hole=(density_dn_hole+n_cluster_sites()/2.)/n_cluster_sites(); //density such that 'half filling' corresponds to 1
+  density=density_dn_hole+density_up_part;
+  //std::cout<<"density total: "<<density<<std::endl;
+
+  return density;
+}
 nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_matsubara_green_function_t &G_omega, 
                                                                   const nambu_matsubara_green_function_t &G0_omega, 
                                                                   nambu_matsubara_green_function_t &selfenergy, 
@@ -854,38 +909,45 @@ nambu_matsubara_green_function_t SimpleDCATransformer::operator()(const nambu_ma
       }
     }
   }
-  //compute the lattice Green's function
-  for (site_t kc=0; kc<n_cluster_sites(); ++kc) {
-    for (frequency_t freq=0; freq<nfreq; ++freq) {
-      G_omega_lattice_kav(freq, kc, kc, 0,0) = 0.;
-      G_omega_lattice_kav(freq, kc, kc, 0,1) = 0.;
-      G_omega_lattice_kav(freq, kc, kc, 1,0) = 0.;
-      G_omega_lattice_kav(freq, kc, kc, 1,1) = 0.;
-      std::complex<double> iomega_n(0, (2.*freq+1.)*M_PI/beta);
-      for (site_t kl=0; kl<n_lattice_momenta(); ++kl) { 
-        //double prefactor=1.;//(k[0]==0 && k[1]==0)?1.:0.; //cos kx - cos ky
-        double prefactor=dwave_prefactor_kckl[kc][kl];
-        //this is the self consistency formula!!!
-        //note the pairing field eta + i eta2 on the 0,1 component, eta - i eta2 on the 1,0 component.
-        std::complex<double> G_omega_latt_inv[4]=
-        {iomega_n + mu -epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, 0,0),
-          -selfenergy(freq, kc, kc, 0,1) - prefactor*std::complex<double>( eta1, eta2),
-          -selfenergy(freq, kc, kc, 1,0) - prefactor*std::complex<double>( eta1,-eta2),
-          iomega_n - mu +epsilon_kckl[kc][kl]-selfenergy(freq, kc, kc, 1,1)};
-        
-        std::complex<double> G0omega_latt_inv_det=G_omega_latt_inv[0]*G_omega_latt_inv[3]-G_omega_latt_inv[1]*G_omega_latt_inv[2];
-        G_omega_lattice_kav(freq, kc, kc, 0,0) += weight_kl[kl]*G_omega_latt_inv[3]/G0omega_latt_inv_det;
-        G_omega_lattice_kav(freq, kc, kc, 0,1) -= weight_kl[kl]*G_omega_latt_inv[1]/G0omega_latt_inv_det;
-        G_omega_lattice_kav(freq, kc, kc, 1,0) -= weight_kl[kl]*G_omega_latt_inv[2]/G0omega_latt_inv_det;
-        G_omega_lattice_kav(freq, kc, kc, 1,1) += weight_kl[kl]*G_omega_latt_inv[0]/G0omega_latt_inv_det;
+  if(compute_filling_){
+    double mu_min=-10.;
+    double mu_max=10;
+    double mu_upper=mu_max;
+    double mu_lower=mu_min;
+    double tol = 1.e-8;
+    double density_upper=0., density_lower=0., density_now;
+    
+    std::cout<<"entering dyson lattice chem pot search."<<std::endl;
+    //find upper density
+    construct_green_function( mu_upper,  beta,  eta1,  eta2, epsilon_kckl, dwave_prefactor_kckl, weight_kl, selfenergy,G_omega_lattice_kav);
+    density_upper=compute_density(G_omega_lattice_kav, beta);
+    //find lower density
+    construct_green_function( mu_lower,  beta,  eta1,  eta2, epsilon_kckl, dwave_prefactor_kckl, weight_kl, selfenergy,G_omega_lattice_kav);
+    density_lower=compute_density(G_omega_lattice_kav, beta);
+    
+    //perform bisection to adjust chem. pot.
+    do{
+      mu=mu_lower+(mu_upper-mu_lower)/2.;
+      construct_green_function( mu,  beta,  eta1,  eta2, epsilon_kckl, dwave_prefactor_kckl, weight_kl, selfenergy,G_omega_lattice_kav);
+      density_now=compute_density(G_omega_lattice_kav, beta);
+      if(density_now>n_target_){
+        density_upper=density_now;
+        mu_upper=mu;
+        //std::cout<<"bisection found upper bound: "<<mu<<" "<<density_now<<std::endl;
+      }else{
+        density_lower=density_now;
+        mu_lower=mu;
+        //std::cout<<"bisection found lower bound: "<<mu<<" "<<density_now<<std::endl;
       }
-      G_omega_lattice_kav(freq, kc, kc, 0,0) /= n_cluster_cells();
-      G_omega_lattice_kav(freq, kc, kc, 0,1) /= n_cluster_cells();
-      G_omega_lattice_kav(freq, kc, kc, 1,0) /= n_cluster_cells();
-      G_omega_lattice_kav(freq, kc, kc, 1,1) /= n_cluster_cells();
-      //      std::cout<<"G_omega_lattice is: "<<G_omega_lattice(freq,kc,kc,0,0)<<" "<<G_omega_lattice(freq,kc,kc,0,1)<<" "<<G_omega_lattice(freq,kc,kc,1,0)<<" "<<G_omega_lattice(freq,kc,kc,1,1)<<std::endl;
-    }
+    }while(std::abs(density_upper-density_lower)>tol);
+    
+    std::cout<<"bisection converged for mu: "<<mu<<" "<<density_lower<<" "<<density_upper<<" "<<density_now<<std::endl;
+    (*const_cast<alps::Parameters*>(params_ptr_))["MU"]=mu; //write the chemical potential back to the parameter file
+  }else{
+    construct_green_function( mu,  beta,  eta1,  eta2, epsilon_kckl, dwave_prefactor_kckl, weight_kl, selfenergy,G_omega_lattice_kav);
   }
+  
+  
   
   
   //compute the bath Green's function G0
@@ -1002,7 +1064,7 @@ nambu_matsubara_green_function_t SimpleDCATransformer::initial_G0_nambu(const al
     }
     G_omega = G0_omega; 
     //invoke transformation with G_omega==G0_omega (selfenergy=0)
-    std::cout<<"invoking free transform."<<std::endl;
+    std::cout<<"invoking free transform in initial."<<std::endl;
     G0_omega_new = operator()(G_omega, G0_omega, selfenergy, mu, h_init, eta1_init, eta2_init, beta, false);
   }
   nambu_itime_green_function_t G0_tau(n_tau+1, n_cluster_sites(), n_flavor, diagonal);

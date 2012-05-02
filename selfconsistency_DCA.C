@@ -2,8 +2,8 @@
  *
  * ALPS DMFT Project
  *
- * Copyright (C) 2005-2008 by Philipp Werner <werner@comp-phys.org>,
- *                            Emanuel Gull <gullc@comp-phys.org>
+ * Copyright (C) 2005-2012 by Emanuel Gull <gullc@comp-phys.org>
+ *                            Philipp Werner <werner@comp-phys.org>
  *                            Sebastian Fuchs <fuchs@comp-phys.org>
  *                            Matthias Troyer <troyer@comp-phys.org>
  *
@@ -209,7 +209,8 @@ void selfconsistency_loop_DCA(const alps::Parameters& parms, NambuImpuritySolver
     
     std::cout<<"running cluster transform"<<std::endl<<std::flush;
     G0_omega = clustertrans(G_omega, G0_omega, selfenergy, mu, h, eta1, eta2, beta, false);
-    
+
+
     G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
