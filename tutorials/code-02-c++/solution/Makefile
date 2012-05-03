@@ -11,6 +11,6 @@ include $(ALPS_ROOT)/share/alps/include.mk
 all:	ising
 
 ising: ising.o
-	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ ising.o $(LDFLAGS) $(LIBS)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -o $@ ising.o $(LDFLAGS) $(LIBS) 
 clean:
 	$(RM) $(RMFLAGS) *.o ising
