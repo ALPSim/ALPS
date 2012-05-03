@@ -60,17 +60,7 @@ class UnzipDirectory(Module):
         
         input_file = self.getInputFromPort('zipfile').name
         zf = zipfile.ZipFile(input_file,'r')
-        # ugly, but necessary in Python 2.5
-        filelist = zf.namelist()
-        for f in filelist:
-            if f[-1] == '/':
-                os.mkdir(f)
-            else:
-                file = open(f,'w')
-                file.write(zf.read(f))
-                file.close()
-        # This will work when VisTrails moves to Python 2.6
-        # zf.extractall()
+        zf.extractall()
         zf.close()
         # chdir outside of the temporary directories to let VisTrails clean up
         os.chdir(current_directory)
