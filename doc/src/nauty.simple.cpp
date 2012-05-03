@@ -78,18 +78,18 @@ int main() {
    
   // compute the isomprphism between the two grphas
   typedef std::map<
-  	boost::graph_traits<graph_type>::vertex_descriptor, 
-  	boost::graph_traits<graph_type>::vertex_descriptor 
+      boost::graph_traits<graph_type>::vertex_descriptor, 
+      boost::graph_traits<graph_type>::vertex_descriptor 
   > isomorphism_type;
   isomorphism_type iso(isomorphism(ng, nh));
   
   // write the isomprphism to cout
   std::cout << std::endl << "Isomorphism G => H" << std::endl;
   for (isomorphism_type::iterator it = iso.begin(); it != iso.end(); ++it)
-  	std::cout << "(" << it->first << "->" << it->second << ") ";
+      std::cout << "(" << it->first << "->" << it->second << ") ";
   std::cout << std::endl;
 
-  return EXIT_SUCCESS;	
+  return EXIT_SUCCESS;    
 }
 
 //]

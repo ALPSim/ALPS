@@ -11,7 +11,7 @@ template <class graph_type> class graph_generator {
   >::vertex_iterator vertex_iterator;  
   public:
     // Iterator over all graphs with given #edges
-  	typedef typename std::vector<graph_type>::const_iterator iterator;
+      typedef typename std::vector<graph_type>::const_iterator iterator;
     // Defaultconstructor
     graph_generator()
       : graphs_(1, std::vector<graph_type>(1, graph_type()))
@@ -38,7 +38,7 @@ template <class graph_type> class graph_generator {
               if (*it1 < *it2 && !edge(*it1, *it2, *graph).second) {
                 new_graph = graph_type(*graph);
                 add_edge(*it1, *it2, new_graph);
-	            check_graph(new_graph);
+                check_graph(new_graph);
             }
           }
       }

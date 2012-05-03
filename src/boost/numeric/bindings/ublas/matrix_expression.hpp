@@ -74,21 +74,21 @@ struct adaptor< boost::numeric::ublas::matrix_unary2< T, U >, Id, Enable > {
         mpl::pair<tag::value_type, typename mpl::at<map, tag::value_type>::type>,
         mpl::pair<tag::entity, typename mpl::at<map, tag::entity>::type>,
         mpl::pair<tag::size_type<1>, typename mpl::at<map, tag::size_type<1> >::type>,
-	mpl::pair<tag::size_type<2>, typename mpl::at<map, tag::size_type<2> >::type>,
-	mpl::pair<tag::data_structure, typename mpl::at<map, tag::data_structure>::type>,
+    mpl::pair<tag::size_type<2>, typename mpl::at<map, tag::size_type<2> >::type>,
+    mpl::pair<tag::data_structure, typename mpl::at<map, tag::data_structure>::type>,
 
         mpl::pair<tag::data_order,
-		  typename mpl::if_<
-		      is_same<
-			  typename mpl::at<map, tag::data_order>::type,
-			  tag::row_major>,
-		      tag::column_major,
-		      tag::row_major
-		      >::type>,
+          typename mpl::if_<
+              is_same<
+              typename mpl::at<map, tag::data_order>::type,
+              tag::row_major>,
+              tag::column_major,
+              tag::row_major
+              >::type>,
 
         mpl::pair<tag::stride_type<1>, typename mpl::at<map, tag::stride_type<2> >:: type>,
         mpl::pair<tag::stride_type<2>, typename mpl::at<map, tag::stride_type<1> >:: type>
-	> property_map;
+    > property_map;
 
     static std::ptrdiff_t size1( const Id& id ) {
         return id.size1();

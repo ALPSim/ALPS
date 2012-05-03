@@ -76,7 +76,7 @@ template <class subgraph_type, class graph_type> class embedding_counter
       , std::size_t count_emb = 0
     ) {
       for (; it_pair.first != it_pair.second; ++it_pair.first)
-        ++count_emb;    	
+        ++count_emb;        
       return count_emb;
     }
 

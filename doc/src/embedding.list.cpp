@@ -36,7 +36,7 @@ int main() {
       >(*it, lattice).count(0, 0);
       emb_cnt += cnt;
       if (cnt)
-      	 ++gr_cnt;
+           ++gr_cnt;
     }
     // write the result to cout
     std::cout << std::setw(6) << i << " "

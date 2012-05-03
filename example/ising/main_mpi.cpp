@@ -42,7 +42,7 @@ int main(int argc, char *argv[]) {
         hdf5::archive ar(options.input_file);
         ar >> make_pvp("/parameters", params);
     }
-	broadcast(c, params);
+    broadcast(c, params);
 
     sim_type sim(params, c);
 

@@ -29,12 +29,12 @@
 #include <alps/ngs/params.hpp>
 
 int main(int argc, char **argv){
-	std::string infile=argv[1];
-	std::cout<<"building parameters."<<std::endl;
-	alps::hdf5::archive ar(infile);
-	alps::params parms(ar);
-	std::cout<<"done building parameters."<<std::endl;
-	std::cout<<"parms N is:" << parms["N"] << std::endl;
-	int n_tau = parms["N"];
-	std::cout<<"survived N."<< n_tau << std::endl;
+    std::string infile=argv[1];
+    std::cout<<"building parameters."<<std::endl;
+    alps::hdf5::archive ar(infile);
+    alps::params parms(ar);
+    std::cout<<"done building parameters."<<std::endl;
+    std::cout<<"parms N is:" << parms["N"] << std::endl;
+    int n_tau = parms["N"];
+    std::cout<<"survived N."<< n_tau << std::endl;
 }

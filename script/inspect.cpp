@@ -716,13 +716,13 @@ int cpp_main( int argc_param, char * argv_param[] )
   bool copyright_ck = true;
   bool crlf_ck = true;
   bool end_ck = true;
-  bool link_ck = true;
-  bool path_name_ck = true;
+  bool link_ck = false;
+  bool path_name_ck = false;
   bool tab_ck = true;
   bool ascii_ck = true;
   bool apple_ok = true;
-  bool assert_ok = true;
-  bool minmax_ck = true;
+  bool assert_ok = false;
+  bool minmax_ck = false;
   bool unnamed_ck = true;
   bool cvs = false;
 

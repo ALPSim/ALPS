@@ -28,6 +28,6 @@ int main() {
   // count embedings if the vertices 0 and 0 are glued together
   std::cout << "Number of embeddings with 0 and 0 glued together: ";
   std::cout << counter.count(0, 0) <<  std::endl;
-  return EXIT_SUCCESS;	
+  return EXIT_SUCCESS;
 }
 //]

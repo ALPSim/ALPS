@@ -31,91 +31,91 @@
 
 template<typename Base> class ising_sim : public Base {
 
-	public:
+    public:
 
-		ising_sim(typename Base::parameters_type const & params, std::size_t seed_offset = 42)
-			: Base(params, seed_offset)
-			, length(params["L"])
-			, thermalization_sweeps(int(params["THERMALIZATION"]))
-			, total_sweeps(int(params["SWEEPS"]))
-			, beta(1. / double(params["T"]))
-			, spins(length)
-		{
-			init();
-		}
+        ising_sim(typename Base::parameters_type const & params, std::size_t seed_offset = 42)
+            : Base(params, seed_offset)
+            , length(params["L"])
+            , thermalization_sweeps(int(params["THERMALIZATION"]))
+            , total_sweeps(int(params["SWEEPS"]))
+            , beta(1. / double(params["T"]))
+            , spins(length)
+        {
+            init();
+        }
 
-		template <typename Arg> ising_sim(typename Base::parameters_type const & params, Arg comm)
-			: Base(params, comm)
-			, length(params["L"])
-			, thermalization_sweeps(int(params["THERMALIZATION"]))
-			, total_sweeps(int(params["SWEEPS"]))
-			, beta(1. / double(params["T"]))
-			, spins(length)
-		{
-			init();
-		}
+        template <typename Arg> ising_sim(typename Base::parameters_type const & params, Arg comm)
+            : Base(params, comm)
+            , length(params["L"])
+            , thermalization_sweeps(int(params["THERMALIZATION"]))
+            , total_sweeps(int(params["SWEEPS"]))
+            , beta(1. / double(params["T"]))
+            , spins(length)
+        {
+            init();
+        }
 
 // TODO: rename to update()
-		void do_update() {
-			for (int j = 0; j < length; ++j) {
-				using std::exp;
-				int i = int(double(length) * this->random());
-				int right = ( i + 1 < length ? i + 1 : 0 );
-				int left = ( i - 1 < 0 ? length - 1 : i - 1 );
-				double p = exp( 2. * beta * spins[i] * ( spins[right] + spins[left] ));
-				if ( p >= 1. || this->random() < p )
-					spins[i] = -spins[i];
-			}
-		};
+        void do_update() {
+            for (int j = 0; j < length; ++j) {
+                using std::exp;
+                int i = int(double(length) * this->random());
+                int right = ( i + 1 < length ? i + 1 : 0 );
+                int left = ( i - 1 < 0 ? length - 1 : i - 1 );
+                double p = exp( 2. * beta * spins[i] * ( spins[right] + spins[left] ));
+                if ( p >= 1. || this->random() < p )
+                    spins[i] = -spins[i];
+            }
+        };
 
 // TODO: rename to measure() ... use verbs
-		void do_measurements() {
-			sweeps++;
-			if (sweeps > thermalization_sweeps) {
-				double tmag = 0;
-				double ten = 0;
-				double sign = 1;
-				std::vector<double> corr(length);
-				for (int i = 0; i < length; ++i) {
-					tmag += spins[i];
-					sign *= spins[i];
-					ten += -spins[i] * spins[ i + 1 < length ? i + 1 : 0 ];
-					for (int d = 0; d < length; ++d)
-						corr[d] += spins[i] * spins[( i + d ) % length ];
-				}
-				std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
-				ten /= length;
-				tmag /= length;
-				this->measurements["Energy"] << ten;
-				this->measurements["Magnetization"] << tmag;
-				this->measurements["Magnetization^2"] << tmag * tmag;
-				this->measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
-				this->measurements["Correlations"] << corr;
-			}
-		};
+        void do_measurements() {
+            sweeps++;
+            if (sweeps > thermalization_sweeps) {
+                double tmag = 0;
+                double ten = 0;
+                double sign = 1;
+                std::vector<double> corr(length);
+                for (int i = 0; i < length; ++i) {
+                    tmag += spins[i];
+                    sign *= spins[i];
+                    ten += -spins[i] * spins[ i + 1 < length ? i + 1 : 0 ];
+                    for (int d = 0; d < length; ++d)
+                        corr[d] += spins[i] * spins[( i + d ) % length ];
+                }
+                std::transform(corr.begin(), corr.end(), corr.begin(), boost::lambda::_1 / double(length));
+                ten /= length;
+                tmag /= length;
+                this->measurements["Energy"] << ten;
+                this->measurements["Magnetization"] << tmag;
+                this->measurements["Magnetization^2"] << tmag * tmag;
+                this->measurements["Magnetization^4"] << tmag * tmag * tmag * tmag;
+                this->measurements["Correlations"] << corr;
+            }
+        };
 
-		double fraction_completed() const {
-			return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
-		}
+        double fraction_completed() const {
+            return (sweeps < thermalization_sweeps ? 0. : ( sweeps - thermalization_sweeps ) / double(total_sweeps));
+        }
 
-	private:
+    private:
 
-		void init() {
-			for(int i = 0; i < length; ++i)
-				spins[i] = (this->random() < 0.5 ? 1 : -1);
-			this->measurements
-				<< alps::ngs::RealObservable("Energy")
-				<< alps::ngs::RealObservable("Magnetization")
-				<< alps::ngs::RealObservable("Magnetization^2")
-				<< alps::ngs::RealObservable("Magnetization^4")
-				<< alps::ngs::RealVectorObservable("Correlations")
-			;
-		}
+        void init() {
+            for(int i = 0; i < length; ++i)
+                spins[i] = (this->random() < 0.5 ? 1 : -1);
+            this->measurements
+                << alps::ngs::RealObservable("Energy")
+                << alps::ngs::RealObservable("Magnetization")
+                << alps::ngs::RealObservable("Magnetization^2")
+                << alps::ngs::RealObservable("Magnetization^4")
+                << alps::ngs::RealVectorObservable("Correlations")
+            ;
+        }
 
-		int length;
-		int sweeps;
-		int thermalization_sweeps;
-		int total_sweeps;
-		double beta;
-		std::vector<int> spins;
+        int length;
+        int sweeps;
+        int thermalization_sweeps;
+        int total_sweeps;
+        double beta;
+        std::vector<int> spins;
 };

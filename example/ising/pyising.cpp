@@ -42,27 +42,27 @@
 
 namespace alps {
     namespace detail {
-		// TODO: make ngs macro to export a simulation to python
+        // TODO: make ngs macro to export a simulation to python
         class ising_export : public ising_sim<alps::base> {
 
             public:
 
-				// TODO: move to base class
+                // TODO: move to base class
                 ising_export(boost::python::dict arg, std::size_t seed_offset = 42)
                     : ising_sim<alps::base>(alps::params(arg), seed_offset)
                 {}
 
-				// TODO: move to base class
+                // TODO: move to base class
                 bool run(boost::python::object stop_callback) {
                     return ising_sim<alps::base>::run(boost::bind(ising_export::callback_wrapper, stop_callback));
                 }
 
-				// TODO: move to base class
+                // TODO: move to base class
                 base::parameters_type & get_params() {
                     return base::params;
                 }
 
-				// TODO: move to base class
+                // TODO: move to base class
                 mcobservables & get_measurements() {
                     return base::measurements;
                 }
@@ -71,7 +71,7 @@ namespace alps {
                     return alps::base::random();
                 }
 
-				// TODO: make make_pvp in python
+                // TODO: make make_pvp in python
                 void load(alps::hdf5::archive & ar, std::string const & path) {
                     std::string current = ar.get_context();
                     ar.set_context(path);

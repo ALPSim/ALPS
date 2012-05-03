@@ -5,7 +5,7 @@
  *
  * ALPS Libraries
  *
- * Copyright (C) 2011 by Robin Jäger <jaegerr@phys.ethz.ch>
+ * Copyright (C) 2011 by Robin Jaeger <jaegerr@phys.ethz.ch>
  *
  * This software is part of the ALPS libraries, published under the ALPS
  * Library License; you can use, redistribute it and/or modify it under
@@ -182,14 +182,14 @@ namespace ietl{
             assert(vecset.size() == mat.size1());
             for (std::size_t i = 0; i < vecset[0].size(); ++i) 
             {
-	            ublas::vector<T> tmp(mat.size2(), 0);
+                ublas::vector<T> tmp(mat.size2(), 0);
 
-	            for (std::size_t j = 0; j < mat.size2(); ++j)
-		            for (std::size_t k = 0; k < vecset.size(); ++k)
-			            tmp(j) += vecset[k](i) * mat(k, j);
+                for (std::size_t j = 0; j < mat.size2(); ++j)
+                    for (std::size_t k = 0; k < vecset.size(); ++k)
+                        tmp(j) += vecset[k](i) * mat(k, j);
 
-	            for (std::size_t j = 0; j < mat.size2(); ++j)
-		            vecset[j](i) = tmp(j);
+                for (std::size_t j = 0; j < mat.size2(); ++j)
+                    vecset[j](i) = tmp(j);
             }
 
             vecset.resize(mat.size2());

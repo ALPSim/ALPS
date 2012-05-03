@@ -41,8 +41,8 @@ int main(int argc, char *argv[]) {
     alps::hdf5::archive ar("param.h5");
     alps::params params_h5(ar);
 
-	for (alps::params::const_iterator it = params_h5.begin(); it != params_h5.end(); ++it)
-		std::cout << it->first << ":" << it->second << std::endl;
+    for (alps::params::const_iterator it = params_h5.begin(); it != params_h5.end(); ++it)
+        std::cout << it->first << ":" << it->second << std::endl;
 
     std::cout << std::endl;
 
@@ -52,8 +52,8 @@ int main(int argc, char *argv[]) {
         ar << make_pvp("/parameters", params_h5);
     }
 
-	// TODO: fixit!
-	/*
+    // TODO: fixit!
+    /*
     // load a text file into a parameter object
     std::ifstream file;
     file.open("param.txt");
@@ -66,17 +66,17 @@ int main(int argc, char *argv[]) {
     file.close();
     alps::params params_txt(txt);
 
-	for (alps::params::const_iterator it = params_txt.begin(); it != params_txt.end(); ++it)
-		std::cout << it->first << ":" << it->second << std::endl;
+    for (alps::params::const_iterator it = params_txt.begin(); it != params_txt.end(); ++it)
+        std::cout << it->first << ":" << it->second << std::endl;
 
-	std::cout << std::endl;
+    std::cout << std::endl;
     params_txt["dbl"] = 1e-8;
     std::cout << params_txt["dbl"] << " " << static_cast<double>(params_txt["dbl"]) << std::endl;
 
-	std::cout << std::endl;
-	params_txt["NOT_EXISTING_PARAM"] = "";
+    std::cout << std::endl;
+    params_txt["NOT_EXISTING_PARAM"] = "";
     int i = params_txt["NOT_EXISTING_PARAM"] | 2048;
     int j(params_txt["NOT_EXISTING_PARAM"] | 2048);
     std::cout << static_cast<int>(params_txt["NOT_EXISTING_PARAM"] | 2048) << " " << i << " " << j << std::endl;
-	*/
+    */
 }
