@@ -236,7 +236,8 @@ private:
         diag_vertex_indices.resize(ndstates, invalid_vertex);
         
         unsigned vertex_index = 0;
-        std::set<unsigned> site_types_done;
+        std::set<unsigned> site_types;
+        std::set<std::string> allops;
         
         bool have_diagonal = false;
         _max_diag_me.resize(lattice.nlat_unit_types());
@@ -247,7 +248,7 @@ private:
             lat_unit_bonds_type bonds;
             lattice.lat_unit_type2bondi(i, bonds);
             
-            // fix me: the following line is not good; should be btype = i?
+            // fix me: the following line might not be good; should we have btype = i?
             unsigned btype = lattice.bondi2alps_type(bonds[0]);
             unsigned stype0 = lattice.sitei2alps_type(sites[0]);
             unsigned stype1 = lattice.sitei2alps_type(sites[1]);
@@ -273,22 +274,10 @@ private:
                     model.site_basis(stype1), p);
             check_bond_tensor(bond_tensor, sites[0], sites[1]);
             
-            bool ndone0 = site_types_done.find(stype0) == site_types_done.end();
-            bool ndone1 = site_types_done.find(stype1) == site_types_done.end();
-            if (ndone0 || ndone1) {
-                std::set<std::string> ops =
-                        model.bond_term(btype).operator_names(params);
-
-                if (ndone0) {
-                    site_types_done.insert(stype0);
-                    lowering_and_rasing_operators(ops, stype0);
-                }
-                
-                if (ndone1 && stype1 != stype0) {
-                    site_types_done.insert(stype1);
-                    lowering_and_rasing_operators(ops, stype1);
-                }
-            }
+            std::set<std::string> ops = model.bond_term(btype).operator_names(params);
+            allops.insert(ops.begin(), ops.end());
+            site_types.insert(stype0);
+            site_types.insert(stype1);
             
             unsigned nneighbors0 = lattice.nneighbors(sites[0]);
             unsigned nneighbors1 = lattice.nneighbors(sites[1]);
@@ -342,6 +331,10 @@ private:
         if (epsilon == 0.0 && !have_diagonal)
             throw std::runtime_error("Hamiltonian looks purely off-diagonal. "
                 "Parameter EPSILON has to be non zero for SSE to work.");
+        
+        std::set<unsigned>::const_iterator sti = site_types.begin();
+        for (; sti != site_types.end(); ++sti)
+                lowering_and_rasing_operators(allops, *sti);
     }
     
     double bond_matrix_element(vertex_type const& vertex,

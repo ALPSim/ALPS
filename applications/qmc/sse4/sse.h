@@ -133,7 +133,7 @@ public:
     
     static void print_copyright(std::ostream& out)
     {
-        out << "Quantum Monte Carlo simulations using the SSE algorithm v. 4.1\n"
+        out << "Quantum Monte Carlo simulations using the SSE algorithm v. 4.1.1\n"
             << "  available from http://alps.comp-phys.org/\n"
             << "  copyright (c) 2003-2010 by Sergei Isakov <isakov@itp.phys.ethz.ch>\n\n";
     }
