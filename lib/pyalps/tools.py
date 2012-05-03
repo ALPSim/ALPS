@@ -287,8 +287,6 @@ def writeTaskXMLFile(filename,parms):
     f.write('  </PARAMETERS>\n')
     f.write('</SIMULATION>\n')
     f.close()
-    for fn in  glob.glob(filename.replace('.in.xml','.out.*')) + glob.glob(filename.replace('.in.xml','.clone*')):
-      os.remove(fn)
 
 def generateSeed():
     """ generate a random seed based on the current time
@@ -339,7 +337,7 @@ def writeInputFiles(fname,parms, baseseed=None):
       f.write('    <INPUT file="'+taskname+'.in.xml"/>\n')
       f.write('    <OUTPUT file="'+taskname+'.out.xml"/>\n')
       f.write('  </TASK>\n')
-      writeTaskXMLFile(os.path.join(dirname,taskname+'.in.xml'),p)
+      writeTaskXMLFile(os.path.join(dirname,taskname+'.in.xml'),p) 
 
     f.write('</JOB>\n')
     f.close()
