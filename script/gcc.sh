@@ -62,7 +62,7 @@ echo "building mpc ... " && \
 (cd "$BUILD_DIR/mpc-$MPCVERSION" && ./configure --prefix=$PREFIX --with-gmp=$PREFIX --with-mpfr=$PREFIX && make install) 2>&1 | tee -a "$LOG"
 ( \
 echo "configuring..." && \
-(cd "$BUILD_DIR/gcc-$VERSION" && ./configure --prefix="$PREFIX" --with-gmp=$PREFIX --with-mpfr=$PREFIX --with-mpc=$PREFIX ) && \
+(cd "$BUILD_DIR/gcc-$VERSION" && ./configure --enable-languages=fortran --prefix="$PREFIX" --with-gmp=$PREFIX --with-mpfr=$PREFIX --with-mpc=$PREFIX ) && \
 echo "building..." && \
 (cd "$BUILD_DIR/gcc-$VERSION" && make bootstrap) && \
 echo "installing..." && \
