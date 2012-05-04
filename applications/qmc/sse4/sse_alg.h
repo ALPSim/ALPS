@@ -319,7 +319,8 @@ private:
 
         if (worker.is_thermalized() && nnonzero == nops)
             throw std::runtime_error("nnonzero reached the maximum value. "
-                    "Please increase THERMALIZATION.");
+                    "Please increase THERMALIZATION or set INITIAL_CUTOFF "
+                    "to some large enough value.");
     }
     
     boost::uint64_t worm_update()
