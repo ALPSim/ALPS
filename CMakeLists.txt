@@ -649,7 +649,7 @@ endforeach(l)
  if(PYTHON_FOUND)
   set(PYTHON_CPP_FLAGS "-I${PYTHON_INCLUDE_DIRS}")
 endif(PYTHON_FOUND)
-configure_file(config/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake)
+configure_file(config/ALPSConfig.cmake.in ${PROJECT_BINARY_DIR}/config/ALPSConfig.cmake @ONLY)
 configure_file(config/include.mk.in ${PROJECT_BINARY_DIR}/config/include.mk)
 
 set (HDF5_LIBRARIES ${HDF5_LIBRARIES_SAVE})
