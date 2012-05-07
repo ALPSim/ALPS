@@ -5,6 +5,7 @@
  * ALPS Libraries                                                                  *
  *                                                                                 *
  * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
+ *                              Matthias Troyer <troyer@comp-phys.org>             *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,64 +26,28 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/stacktrace.hpp>
+#include <alps/ngs/params.hpp>
 
-#ifndef ALPS_NGS_NO_STACKTRACE
+int main() {
 
-#include <sstream>
+    alps::params parms;
+    parms["char"] = static_cast<char>(1);
+    parms["signed char"] = static_cast<signed char>(1);
+    parms["unsigned char"] = static_cast<unsigned char>(1);
+    parms["short"] = static_cast<short>(1);
+    parms["unsigned short"] = static_cast<unsigned short>(1);
+    parms["int"] = static_cast<int>(1);
+    parms["unsigned"] = static_cast<unsigned>(1);
+    parms["long"] = static_cast<long>(1);
+    parms["unsigned long"] = static_cast<unsigned long>(1);
+    parms["long long"] = static_cast<long long>(1);
+    parms["unsigned long long"] = static_cast<unsigned long long>(1);
+    parms["float"] = static_cast<float>(1);
+    parms["double"] = static_cast<double>(1);
+    parms["long double"] = static_cast<long double>(1);
+    parms["bool"] = static_cast<bool>(1);
+    parms["std::string"] = std::string("asdf");
 
-#include <cxxabi.h>
-#include <stdlib.h>
-#include <execinfo.h>
+    std::cout << parms << std::endl;
 
-#endif
-
-namespace alps {
-    namespace ngs {
-
-#ifndef ALPS_NGS_NO_STACKTRACE
-
-        // TODO: ues boost::units::detail::demangle
-        // in #include <boost/units/detail/utility.hpp>
-        std::string stacktrace() {
-            std::ostringstream buffer;
-            void * stack[ALPS_NGS_MAX_FRAMES + 1];
-            std::size_t depth = backtrace(stack, ALPS_NGS_MAX_FRAMES + 1);
-            if (!depth)
-                buffer << "  <empty, possibly corrupt>" << std::endl;
-            else {
-                char * * symbols = backtrace_symbols(stack, depth);
-                for (std::size_t i = 1; i < depth; ++i) {
-                    std::string symbol = symbols[i];
-                    // TODO: use alps::ngs::stacktrace to find the position of the demangling name
-                    if (symbol.find_first_of(' ', 59) != std::string::npos) {
-                        std::string name = symbol.substr(59, symbol.find_first_of(' ', 59) - 59);
-                        int status;
-                        char * demangled = abi::__cxa_demangle(name.c_str(), NULL, NULL, &status);
-                        if (!status) {
-                            buffer << "    " 
-                                   << symbol.substr(0, 59) 
-                                   << demangled
-                                   << symbol.substr(59 + name.size())
-                                   << std::endl;
-                            free(demangled);
-                        } else
-                            buffer << "    " << symbol << std::endl;
-                    } else
-                        buffer << "    " << symbol << std::endl;
-                }
-                free(symbols);
-            }
-            return buffer.str();
-        }
-
-#else
-
-        std::string stacktrace() {
-            return "";
-        }
-
-#endif
-
-    }
 }

@@ -29,6 +29,7 @@
 #include <alps/ngs/params.hpp>
 
 // TODO: make an in-file for all types!
+// TODO: make reference output file!
 
 int main() {
 
