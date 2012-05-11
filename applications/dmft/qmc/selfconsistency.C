@@ -147,7 +147,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
 /// @param G0_omega is the bare Green's function in Matsubara frequency. It has to be provided as an initial guess
 /// @param G_omega is the dressed Green's function, it does not have to be initialized but reasonable values will be returned upon completion of the loop
 
-void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
+void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver& solver, 
                                 FrequencySpaceHilbertTransformer& hilbert) 
 {
   unsigned int n_tau=boost::lexical_cast<unsigned int>(parms["N"]);
@@ -166,31 +166,27 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
   std::string basename=parms["BASENAME"];
   
   matsubara_green_function_t G0_omega = hilbert.initial_G0(parms);
+  G0_omega = hilbert.symmetrize(G0_omega, symmetrization);
   matsubara_green_function_t G_omega = G0_omega;
 
-  int iteration_ctr = 0;
   //define multiple vectors
   matsubara_green_function_t G_old_omega(G0_omega);
-  matsubara_green_function_t G_omega_shifted(G0_omega);
   matsubara_green_function_t G0_old_omega(G0_omega);
   itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
   itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
-  itime_green_function_t G_old_tau(n_tau+1, n_site, n_orbital);
-  itime_green_function_t G0_old_tau(n_tau+1, n_site, n_orbital);
-  //initialize space for multiple vectors
+  
   boost::shared_ptr<FourierTransformer> fourier_ptr;
+  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  double mu = static_cast<double>(parms["MU"]);
+  //fourier.setmu(mu);
+  
   double max_diff;	
+  int iteration_ctr = 0;
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-    double mu = static_cast<double>(parms["MU"]);
     G_old_omega = G_omega;
     G0_old_omega = G0_omega;
-    G_old_tau = G_tau;
-    G0_old_tau = G0_tau;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
-    fourier_ptr->backward_ft(G0_tau, G0_omega);
-    //fourier.setmu(mu);
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
     G_tau = hilbert.symmetrize(G_tau, symmetrization);
@@ -200,28 +196,27 @@ void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpurity
     //relaxation to speed up /slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
-      for(unsigned int orbital=0;orbital<n_orbital;++orbital){
-        for(unsigned int site1=0;site1<n_site;++site1){
-          for(unsigned int site2=0;site2<n_site;++site2){
-            for(unsigned int i=0;i<n_matsubara;++i){
-              G0_omega(i, site1, site2, orbital)=relax_rate* G0_omega(i, site1, site2, orbital)+
-              (1-relax_rate)*G0_old_omega(i, site1, site2, orbital);
+      for(unsigned int o=0;o<n_orbital;++o){
+        for(unsigned int i2=0;i2<n_site;++i2){
+          for(unsigned int i1=0;i1<n_site;++i1){
+            for(unsigned int w=0;w<n_matsubara;++w){
+              G0_omega(w, i1, i2, o)=relax_rate*G0_omega(w, i1, i2, o) + (1.-relax_rate)*G0_old_omega(w, i1, i2, o);
             }
           }
         }
       }
     }
+    fourier_ptr->backward_ft(G0_tau, G0_omega);
     std::cout<<"comparing old and new result."<<std::endl<<std::flush;
     max_diff=0;
     if(iteration_ctr>1){
       //comparison for the dressed Green's function in Matsubara freq.
-      for(unsigned int w=0; w<n_matsubara; w++) {
-        for(unsigned int i1=0; i1<n_site; i1++) {
-          for(unsigned int i2=0; i2<n_site; i2++) {
-            for(unsigned int o=0; o<n_orbital; o++) {
-              if (std::abs(G_omega(w,i1, i2, o)-G_old_omega(w, i1, i2, o)) > max_diff)
-                max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));
-            }
+      for(unsigned int o=0;o<n_orbital;++o){
+        for(unsigned int i2=0;i2<n_site;++i2){
+          for(unsigned int i1=0;i1<n_site;++i1){
+            for(unsigned int w=0;w<n_matsubara;++w){
+              if (std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o)) > max_diff)
+                max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));            }
           }
         }
       }
