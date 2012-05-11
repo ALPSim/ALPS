@@ -215,7 +215,7 @@ public:
 class FSDOSHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
   /// the constructor reads in the DOS from a file
-  FSDOSHilbertTransformer(const alps::Parameters& params);
+  FSDOSHilbertTransformer(alps::Parameters& params);
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// using integration over D(epsilon).
   /// We perform the HT G <- \int \frac{D(e)}{A - e} de
@@ -242,7 +242,7 @@ inline std::complex<double> integrand(int n, const std::vector<double> &dos, con
 //this can do Antiferromagnetism according to Georges et. al.
 class AFM_FSDOSHilbertTransformer: public FSDOSHilbertTransformer{
 public:
-  AFM_FSDOSHilbertTransformer(const alps::Parameters &parms)
+  AFM_FSDOSHilbertTransformer(alps::Parameters &parms)
   :FSDOSHilbertTransformer(parms){}
   virtual ~AFM_FSDOSHilbertTransformer(){}
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega,
