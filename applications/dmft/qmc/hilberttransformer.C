@@ -256,7 +256,7 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps
 
 
 
-FSDOSHilbertTransformer::FSDOSHilbertTransformer(const alps::Parameters& params)
+FSDOSHilbertTransformer::FSDOSHilbertTransformer(alps::Parameters& params)
 {
   if(!params.defined("DOSFILE")) throw std::invalid_argument("please define DOSFILE parameter!");
   std::ifstream dos_file(params["DOSFILE"].c_str());
@@ -294,6 +294,22 @@ FSDOSHilbertTransformer::FSDOSHilbertTransformer(const alps::Parameters& params)
   epssqav+=dos[0]*epsilon[0]*epsilon[0]+dos[epsilon.size()-1]*epsilon[epsilon.size()-1]*epsilon[epsilon.size()-1]+4.*dos[epsilon.size()-2]*epsilon[epsilon.size()-2]*epsilon[epsilon.size()-2];
   epssqav/=(3.);
   std::cout<<"second moment of band structure: "<<epssqav<<std::endl;
+  
+  // set parameters for the FourierTransformer if they are not set by the user
+  bool is_set = params.defined("EPSSQAV");
+  unsigned int n_flavors = params.value_or_default("FLAVORS", 2);
+  for (unsigned int i=0; i < n_flavors; i++) {
+    if (params.defined("EPS_"+boost::lexical_cast<std::string>(i)) || params.defined("EPSSQ_"+boost::lexical_cast<std::string>(i)))
+      is_set = true;
+  }
+  if (! is_set) {
+    std::cout << "FSDOSHilbertTransformer: writing the values for bandstructure-parameters needed in FourierTransformer." << std::endl;
+    params["EPSSQAV"] = epssqav;
+    for (unsigned int i=0; i < n_flavors; i++) {
+      params["EPS_"+boost::lexical_cast<std::string>(i)] = 0;
+      params["EPSSQ_"+boost::lexical_cast<std::string>(i)] = epssqav;
+    }
+  }
 }
 
 
