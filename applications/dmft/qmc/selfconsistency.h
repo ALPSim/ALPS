@@ -59,7 +59,7 @@ extern void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solv
 /// @param parms The input parameters for the simulation.
 /// @param solver   An impurity solver that takes both the bare GF in imaginary time AND in Matsubara freqencies, but returns
 /// @param hilbert  a Hilbert transformation object. It performs the Hilbert transformation, taking its arguments in Frequency space.
-void selfconsistency_loop_omega(const alps::Parameters& parms, MatsubaraImpuritySolver& solver,  FrequencySpaceHilbertTransformer& hilbert);
+void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver& solver,  FrequencySpaceHilbertTransformer& hilbert);
 
 
 //void selfconsistency_loop_DCA(const alps::Parameters& parms, MatsubaraImpuritySolver& solver, DCATransformer& clustertrans);
