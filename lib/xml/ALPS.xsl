@@ -8,6 +8,116 @@
    http://www.boost.org/LICENSE_1_0.txt)
   -->
 
+  <xsl:template match="/TEST">
+    <html>
+      <head/>
+      <body>
+        <H1>ALPS Job Test</H1>
+          <xsl:for-each select="INPUT">
+            <table border="0"> <tbody>
+            <tr> <td> Test Input File </td> <td> <A href="{@file}"><xsl:value-of select="@file"/> </A> </td> </tr>
+            </tbody> </table>
+          </xsl:for-each>
+
+          <xsl:for-each select="EXECUTED">
+          <H2>Execution information</H2>
+            <table border="1"><thead><tr><td><b>Executed from</b></td><td><b>to</b></td>
+              <td><b>on</b></td></tr></thead><tbody>
+              <tr>
+                <td><xsl:for-each select="FROM"><xsl:apply-templates/></xsl:for-each></td>
+                <td><xsl:for-each select="TO"><xsl:apply-templates/></xsl:for-each></td>
+                <td><xsl:for-each select="MACHINE">
+                      <xsl:for-each select="NAME"><xsl:apply-templates/></xsl:for-each>
+                    </xsl:for-each></td>
+              </tr>
+            </tbody></table>
+          </xsl:for-each>
+
+          <xsl:for-each select="TESTINFOS">
+            <H2>Test Information</H2>
+            <p>
+            <table border="0"> <tbody>
+              <xsl:for-each select="SCRIPT">
+                <tr> <td>Executable</td> <td> <A href="{@file}"> <xsl:value-of select="@file"/> </A> </td> </tr>
+              </xsl:for-each>
+            </tbody> </table>
+            </p>
+            <table border="1"> <tbody>
+            <xsl:for-each select="TESTINFO">
+              <tr> <td><xsl:value-of select="@name"/></td> <td> <xsl:apply-templates/> </td> </tr>
+            </xsl:for-each>
+            </tbody> </table>
+          </xsl:for-each>
+
+          <xsl:for-each select="REFERENCE">
+            <H2>Reference Data</H2>
+            <table border="0"> <tbody>
+            <xsl:for-each select="FILE">
+              <tr> <td> <A href="{@file}"> <xsl:value-of select="@file"/> </A> </td> </tr>
+            </xsl:for-each>
+            </tbody> </table>
+          </xsl:for-each>
+
+          <xsl:for-each select="OBSERVABLES">
+            <H2>List Of Tested Observables</H2>
+            <table border="0"> <tbody>
+            <xsl:for-each select="OBSERVABLE">
+              <tr> <td> <xsl:apply-templates/> </td> </tr>
+            </xsl:for-each>
+            </tbody> </table>
+          </xsl:for-each>
+
+          <H2>Test Results</H2>
+          <xsl:for-each select="OUTPUT">
+            <A href="{@file}"><xsl:value-of select="@file"/></A>
+          </xsl:for-each>
+          <xsl:for-each select="TESTTASK">
+              <p>
+              <table border="1">
+                  <thead><tr><td><b>File</b></td><td><b>Result</b></td>
+                      </tr></thead>
+                  <tbody>
+                    <tr>
+                       <td><xsl:value-of select="@file"/></td>
+                       <xsl:choose>
+                         <xsl:when test="@status = 'PASS'">
+                           <td bgcolor="#00ff00"><xsl:value-of select="@status"/></td>
+                         </xsl:when>
+                         <xsl:otherwise>
+                           <td bgcolor="#ff0000"><xsl:value-of select="@status"/></td>
+                         </xsl:otherwise>
+                       </xsl:choose>
+                    </tr>
+                  </tbody>
+              </table>
+              </p>
+              <p style='margin-left:40px;'>
+              <table border="1">
+                <xsl:for-each select="OBSERVABLES">
+                  <thead><tr><td><b>Observable</b></td><td><b>|test-ref|</b></td><td><b>max. tolerance</b></td></tr>
+                  </thead>
+                  <tbody>
+                    <xsl:for-each select="OBSERVABLE">
+                      <tr> <td><xsl:value-of select="@name"/></td>
+                           <td><xsl:value-of select="@diff"/></td>
+                           <td><xsl:value-of select="@tol"/></td>
+                      </tr>
+                    </xsl:for-each>
+                  </tbody>
+                </xsl:for-each>
+              </table>
+              </p>
+          </xsl:for-each>
+
+          <xsl:for-each select="OARCHIVE">
+              <H2> Compressed Output </H2>
+              <A href="{@file}"> <xsl:value-of select="@file"/> </A>
+          </xsl:for-each>
+          
+      </body>
+    </html>
+  </xsl:template>
+
   <xsl:template match="/JOB">
     <html>
       <head/>
