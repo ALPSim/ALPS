@@ -576,6 +576,9 @@ def runTest(script, testinputfile, outputs='auto', compMethod='auto'):
     cmdline = [sys.executable, os.path.basename(script)]
     pyalps.executeCommand(cmdline)
     os.chdir( pardir )
+    
+    # copy stylesheet
+    pyalps.tools.copyStylesheet(pardir)
 
     # Guess outputs from reference files
     if outputs == 'auto':
@@ -674,7 +677,7 @@ def createTest( script, outputs=None, prefix=None, refdir='./ref' ):
     os.chdir(pardir)
 
     if prefix is None:
-        reffiles = outputs
+        eigenstatedata = pyalps.loadEigenstateMeasurements(reffiles)
     else:
         reffiles = pyalps.getResultFiles( prefix=prefix, dirname=refdir )
 
@@ -685,7 +688,7 @@ def createTest( script, outputs=None, prefix=None, refdir='./ref' ):
     # acquire a list of all observables
     allobs = []
     try:
-        eigenstatedata = pyalps.loadEigenstateMeasurements(reffiles)    
+        eigenstatedata = pyalps.loadEigenstateMeasurements(reffiles)   
     except RuntimeError:
         pass
     else:
@@ -716,12 +719,13 @@ def createTest( script, outputs=None, prefix=None, refdir='./ref' ):
         "SAVE_OUT_IF_FAIL"      : "yes"
     }
 
-    testinputfile = writeTestInputFile( script, refparms, reffiles, allobs ) 
+    testinputfile = writeTestInputFile( script, refparms, reffiles, allobs )
+    pyalps.tools.copyStylesheet(pardir)
 
     # Write .py test-start script
     f = file( scriptname_prefixed, 'w' )
     f.write( '#!/usr/bin/env python\n\n' )
-    f.write( 'import apptest\nimport pyalps\n' )
+    f.write( 'from pyalps import apptest\n' )
     f.write( 'Script = "%s"\n' % script  )
 
     f.write('# Explicitly specify "compMethod=..." and "outputs=..." if needed\n')
