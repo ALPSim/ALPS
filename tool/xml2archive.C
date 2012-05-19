@@ -4,7 +4,7 @@
 *
 * ALPS Libraries
 *
-* Copyright (C) 1997-2010 by Synge Todo <wistaria@comp-phys.org>
+* Copyright (C) 1997-2012 by Synge Todo <wistaria@comp-phys.org>
 *
 * This software is part of the ALPS libraries, published under the ALPS
 * Library License; you can use, redistribute it and/or modify it under
@@ -52,7 +52,7 @@ int main(int argc, char** argv) {
   std::string simname;
   std::vector<alps::task> tasks;
 
-  alps::parapack::load_tasks(file_in, file_out, basedir, simname, tasks, false);
+  alps::parapack::load_tasks(file_in, file_out, basedir, simname, tasks, false, false);
 
   os << alps::start_tag("ARCHIVE")
      << alps::xml_namespace("xsi","http://www.w3.org/2001/XMLSchema-instance")
