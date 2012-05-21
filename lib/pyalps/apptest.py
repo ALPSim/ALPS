@@ -45,11 +45,12 @@ from time import gmtime, strftime
 
 def read_testprop_xml(testinput):
     """ Returns a dictionary with the
-    testinfo contents of the test xml file 
-    and a list of reference files """
+    testinfo contents of the test xml file, 
+    a list of reference files and a list of observables"""
 
     root = ElementTree.parse(testinput).getroot()
     props = {}
+    props['SCRIPT'] = root.find('SCRIPT').attrib['file']
     infos = root.find('TESTINFOS')
     for tinfo in infos.getchildren():
         if tinfo.tag == 'TESTINFO':
@@ -66,7 +67,13 @@ def read_testprop_xml(testinput):
     if obsentries is not None:
         obslist = [ obs.text for obs in obsentries.getchildren() ]
 
-    return props, refFileList, obslist
+    try:
+        inputs = [ inpf.attrib['file'] for inpf in root.find('SCRIPTINPUTFILES').getchildren() ]
+
+    except AttributeError:
+        inputs = None
+
+    return props, inputs, refFileList, obslist
 
 def tasknr( fname ):
     """ Extract the task number from alps filenames """
@@ -93,12 +100,13 @@ def recursive_mkdir( path ):
 # Output
 #*******************************************************************************
 
-def writeTest2stdout( comparelist ):
+def writeTest2stdout(comparelist, fobj):
     """ Write test results to stdout in XML Format
 
     compare_list[task][obs] is a nested list of dicts, which hold the
     test results """
     
+    sys.stdout = fobj
     for comptask in comparelist:
 
         obs_list = []
@@ -120,6 +128,8 @@ def writeTest2stdout( comparelist ):
 
             print "\t</OBSERVABLES>"
             print "</TESTTASK>"
+
+    sys.stdout = sys.__stdout__
 
 
 #*******************************************************************************
@@ -203,14 +213,14 @@ def compareMC( testfiles, reffiles, tol_factor='auto', whatlist=None ):
                 tol = tol_list[ diff_list.index(maxdiff) ] * tol_factor
                 compare_obs.append( obsdict(tol, maxdiff, testobs.props) )
 
-        compare_list.append( compare_obs )
+        compare_list.append(compare_obs)
 
-    writeTest2stdout( compare_list ) # or a file, if that has been specified
+    #writeTest2stdout(compare_list) # or a file, if that has been specified
     succeed_list = [ obs['passed'] for obs_list in compare_list for obs in obs_list ]
-    return False not in succeed_list
+    return False not in succeed_list, compare_list
 
 def compareMixed( testfiles, reffiles, tol_factor='auto', whatlist = None ):
-    """ Compare results of QWL, DMRG
+    """ Compare results of QWL, DMRG (ALPS)
 
     returns True if test succeeded"""
      
@@ -226,7 +236,6 @@ def compareMixed( testfiles, reffiles, tol_factor='auto', whatlist = None ):
     try:
        testeig = pyalps.loadEigenstateMeasurements( testfiles )
        refeig = pyalps.loadEigenstateMeasurements( reffiles )
-       print "going to add observables from loadEigenstateMeasurements"
        for ttask,rtask,teig,reig in zip(testdata,refdata,testeig,refeig):
            ttask += teig
            rtask += reig
@@ -311,11 +320,11 @@ def compareMixed( testfiles, reffiles, tol_factor='auto', whatlist = None ):
                     tol = tol_list[ diff_list.index(maxdiff) ] * tol_factor
                     compare_obs.append( obsdict(tol, maxdiff, testobs.props) )
 
-        compare_list.append( compare_obs )
+        compare_list.append(compare_obs)
 
-    writeTest2stdout( compare_list ) # or a file, if that has been specified
+    #writeTest2stdout(compare_list) # or a file, if that has been specified
     succeed_list = [ obs['passed'] for obs_list in compare_list for obs in obs_list ]
-    return False not in succeed_list
+    return False not in succeed_list, compare_list
 
 def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
     """ Compare results from diagonalization applications 
@@ -325,8 +334,8 @@ def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
     if tol_factor == 'auto':
         tol_factor = 1.0
 
-    testdata = pyalps.loadEigenstateMeasurements( testfiles ) 
-    refdata = pyalps.loadEigenstateMeasurements( reffiles ) 
+    testdata = pyalps.loadEigenstateMeasurements(testfiles) 
+    refdata = pyalps.loadEigenstateMeasurements(reffiles) 
     if not testdata or not refdata:
         if not testdata:
             print "loadEigenstateMeasurements of file %s returned an empty list" % testfiles
@@ -339,14 +348,23 @@ def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
     # File level
     compare_list = []
     for testtask, reftask in zip(testdata, refdata):
-        testfile = testtask[0][0].props['filename']
-        reffile = reftask[0][0].props['filename']
+        try:
+            # ALPS applications
+            testfile = testtask[0][0].props['filename']
+            reffile = reftask[0][0].props['filename']
+
+        except AttributeError:
+            # workaround for MAQUIS DMRG which doesn't have sectors
+            testtask = [testtask]
+            reftask = [reftask]
+            testfile = testtask[0][0].props['filename']
+            reffile = reftask[0][0].props['filename']
 
         # Ensure we compare equivalent tasks
         if len(testtask) != len(reftask):
             raise Exception( "Comparison Error: test and reference data have \
-                different number of sectors\n\
-                (Have both reference and test data been evaluated?)" )
+                              different number of sectors\n\
+                              (Have both reference and test data been pyalps.evaluate'd?)" )
 
         # Sector level
         #print("\ncomparing file " + testfile + " against file " + reffile)
@@ -359,14 +377,16 @@ def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
             if whatlist:
                 notfoundtest = [ w for w in whatlist if w not in [ o.props['observable'] for o in testsector] ]
                 if notfoundtest:
-                    print "The following observables specified for comparison\nhave not been found in test results:"
+                    print "The following observables specified for comparison\n\
+                           have not been found in test results:"
                     print "File:", testfile
                     print notfoundtest
                     sys.exit(1)
 
                 notfoundref = [ w for w in whatlist if w not in [ o.props['observable'] for o in refsector] ]
                 if notfoundref:
-                    print "The following observables specified for comparison\nhave not been found in reference results:"
+                    print "The following observables specified for comparison\n\
+                           have not been found in reference results:"
                     print "File:", reffile
                     print notfoundref
                     sys.exit(1)
@@ -394,11 +414,11 @@ def compareEpsilon( testfiles, reffiles, tol_factor='auto', whatlist = None ):
                     tol = tol_list[ diff_list.index(maxdiff) ] * tol_factor
                     compare_sector.append( obsdict(tol, maxdiff, testobs.props) )
 
-        compare_list.append( compare_sector )
+        compare_list.append(compare_sector)
 
-    writeTest2stdout( compare_list ) # or a file, if that has been specified
+    #writeTest2stdout(compare_list) # or a file, if that has been specified
     succeed_list = [ obs['passed'] for obs_list in compare_list for obs in obs_list ]
-    return False not in succeed_list
+    return False not in succeed_list, compare_list
 
 #*******************************************************************************
 
@@ -470,7 +490,7 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
 
     # read input
     testinputfile = os.path.expandvars( testinputfile )
-    props, refFileList, whatlist = read_testprop_xml( testinputfile )
+    props, inputs, refFileList, whatlist = read_testprop_xml(testinputfile)
     try:
         tol = float(props['TOLERANCE'])
     except ValueError:
@@ -482,12 +502,12 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
         #sys.stdout = open( testname+'.testout.xml','w' ) 
     # Redirect stdout to a file to include all information in the .testout.xml file
     outfile = os.path.join(tmpdir, testname+'.testout.xml')
-    sys.stdout = open(outfile, 'w') 
+    fobj = open(outfile, 'w') 
 
-    print '<?xml version="1.0" encoding="UTF-8"?>'
-    print '<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>'
-    print '<TEST xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2002/10/ALPS.xsd">'
-    print '<INPUT file="%s"/>' % testinputfile
+    fobj.write('<?xml version="1.0" encoding="UTF-8"?>\n')
+    fobj.write('<?xml-stylesheet type="text/xsl" href="ALPS.xsl"?>\n')
+    fobj.write('<TEST xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2002/10/ALPS.xsd">\n')
+    fobj.write('<INPUT file="%s"/>\n' % testinputfile)
 
     # call comparison functions
     test_success = True
@@ -500,7 +520,8 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
         else:
             for tfile, rfile in zip(outputs, refFileList):
                 # call the function object returned by detectDataType()
-                Success = detectDataType(tfile)([tfile], [rfile], tol, whatlist = whatlist)
+                Success, compare_list = detectDataType(tfile)([tfile], [rfile], tol, whatlist = whatlist)
+                writeTest2stdout(compare_list, fobj)
                 if not Success: test_success = False
     else:
         missmatch = [(tf,rf) for (tf,rf) in zip(outputs,refFileList) if not checkProperties(tf,rf)]
@@ -513,28 +534,29 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
                 # call the function specified by compMethod (input by user)
                 string2fobj = { 'compareMC' : compareMC, 'compareMixed' : compareMixed, \
                                 'compareEpsilon' : compareEpsilon }
-                Success = string2fobj[compMethod](outputs, refFileList, tol, whatlist = whatlist)
+                Success, compare_list = string2fobj[compMethod](outputs, refFileList, tol, whatlist = whatlist)
+                writeTest2stdout(compare_list, fobj)
                 if not Success: test_success = False
 
-    print '<EXECUTED>'
-    print '    <FROM>%s</FROM>' % tstart
-    print '    <TO>%s</TO>' % strftime("%Y-%b-%d %H:%M:%S", gmtime())
-    print '    <MACHINE><NAME>%s</NAME></MACHINE>' % socket.gethostname()
-    print '</EXECUTED>'
+    fobj.write('<EXECUTED>\n')
+    fobj.write('    <FROM>%s</FROM>\n' % tstart)
+    fobj.write('    <TO>%s</TO>\n' % strftime("%Y-%b-%d %H:%M:%S", gmtime()))
+    fobj.write('    <MACHINE><NAME>%s</NAME></MACHINE>\n' % socket.gethostname())
+    fobj.write('</EXECUTED>\n')
 
 
     # if test unsuccessful, archive all test data
     if not test_success and 'yes' in props['SAVE_OUT_IF_FAIL'].lower():
-
         archive_name = props['TESTNAME'] + '.failed'
         shutil.make_archive(archive_name, 'bztar', tmpdir)
-        print '<OARCHIVE file="%s"/>' % (archive_name+'.tar.bz2')
+        fobj.write('<OARCHIVE file="%s"/>\n' % (archive_name+'.tar.bz2'))
 
-    print '</TEST>'
+    fobj.write('</TEST>\n')
 
     # reset stdout, otherwise interactive usage doesn't work anymore
-    sys.stdout.close()
-    sys.stdout = sys.__stdout__
+    fobj.close()
+    #sys.stdout.close()
+    #sys.stdout = sys.__stdout__
 
     # write test results to a file or to stdout
     if 'yes' in props['WRITE_RESULTS_TO_FILE'].lower():
@@ -545,8 +567,9 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
         f.close()
 
 
-def runTest(script, testinputfile, outputs='auto', compMethod='auto'):
-    """ Run script and compare its outputs against reference files
+def runTest(testinputfile, outputs='auto', compMethod='auto'):
+    """ Run the test according to testinputfile and compare
+        its output against reference files
 
 	inputs are:
 	-----------
@@ -563,19 +586,25 @@ def runTest(script, testinputfile, outputs='auto', compMethod='auto'):
 		      to be used (e.g. Monte Carlo or epsilon precise data)
     """
     tstart = strftime("%Y-%b-%d %H:%M:%S", gmtime())
-    script = os.path.expandvars(script)
-    testinputfile = os.path.expandvars( testinputfile )
-    props, refFileList, whatlist = read_testprop_xml( testinputfile )
+    testinputfile = os.path.expandvars(testinputfile)
+    props, inputs, refFileList, whatlist = read_testprop_xml(testinputfile)
+    script = props['SCRIPT']
 
     tmpdir = tempfile.mkdtemp()
 
     # execute given script in tmpdir
     pardir = os.getcwd()
     shutil.copy(script, tmpdir)
+    if inputs is not None:
+        for f in inputs: shutil.copy(f, tmpdir)
+
     os.chdir( tmpdir )
     cmdline = [sys.executable, os.path.basename(script)]
     pyalps.executeCommand(cmdline)
-    os.chdir( pardir )
+    if inputs is not None:
+        for f in inputs: os.remove(f)
+
+    os.chdir(pardir)
     
     # copy stylesheet
     pyalps.tools.copyStylesheet(pardir)
@@ -609,7 +638,7 @@ def runTest(script, testinputfile, outputs='auto', compMethod='auto'):
 # Test creation
 #*******************************************************************************
 
-def writeTestInputFile( script, refparms, refFileList, what, dirname='.', postfix='' ):
+def writeTestInputFile( script, inputs, refparms, refFileList, what, dirname='.', postfix='' ):
     """ Write a *.testin.xml input file """
 
     refparms['TESTNAME'] = refparms['TESTNAME'].replace('.in.xml','') + postfix
@@ -620,8 +649,15 @@ def writeTestInputFile( script, refparms, refFileList, what, dirname='.', postfi
     f.write('<TEST xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://xml.comp-phys.org/2002/10/ALPS.xsd">\n') 
 
     f.write('   <OUTPUT file="%s"/>\n' % (refparms['TESTNAME'] + '.testout.xml'))
+    f.write('   <SCRIPT file="%s"/>\n' % script)
+    if inputs is not None:
+        f.write('   <SCRIPTINPUTFILES>\n')
+        for inpf in inputs:
+            f.write('       <SCRIPTINPUTFILE file="%s"/>\n' % inpf)
+
+        f.write('   </SCRIPTINPUTFILES>\n')
+        
     f.write('   <TESTINFOS>\n')
-    f.write('       <SCRIPT file="%s"/>\n' % script)
     for key in refparms:
         f.write('       <TESTINFO name="%s">%s</TESTINFO>\n' % (key, refparms[key]) )
         #f.write('      <TESTINFO name="TOLERANCE">%s</TESTINFO>\n' % refparms['TOLERANCE'])
@@ -647,12 +683,17 @@ def writeTestInputFile( script, refparms, refFileList, what, dirname='.', postfi
 
     return testinfile
 
-def createTest( script, outputs=None, prefix=None, refdir='./ref' ):
+def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' ):
     """ Create reference data, .testin.xml file and execute_test.py
 
 	inputs are:
 	-----------
 	script: computes results to be tested 
+
+    inputs: Optional list of input files if the application(s)
+            called in 'script' rely on them and the input files are in the
+            same directory as 'script'. If you specified
+            relative paths to another directory, it won't work.
 
 	outputs or prefix: outputs of script can either be specified with
 			   a complete list of output files or as a prefix 
@@ -669,17 +710,29 @@ def createTest( script, outputs=None, prefix=None, refdir='./ref' ):
 
     if not os.path.exists(refdir):  recursive_mkdir(refdir)
 
+    # Copy input files to refdir to allow execution of script there
+    if inputs is not None:
+
+        for f in inputs:
+            if not os.path.expandvars(os.path.dirname(f)) == scriptdir:
+                print "Input files to %s should be in the same directory as %s" % (script, script)
+                sys.exit(1)
+
+            shutil.copy(f, refdir)
+
     # execute given script in refdir ( creates reference data )
     pardir = os.getcwd()
-    os.chdir( refdir )
-    cmdline = [sys.executable, os.path.join(pardir, script) ]
-    pyalps.executeCommand( cmdline )
+    os.chdir(refdir)
+    cmdline = [ sys.executable, os.path.join(pardir, script) ]
+    pyalps.executeCommand(cmdline)
+    if inputs is not None:
+        for f in inputs: os.remove(f)
     os.chdir(pardir)
 
     if prefix is None:
-        eigenstatedata = pyalps.loadEigenstateMeasurements(reffiles)
+        reffiles = [ os.path.join(refdir, os.path.basename(f)) for f in outputs ]
     else:
-        reffiles = pyalps.getResultFiles( prefix=prefix, dirname=refdir )
+        reffiles = pyalps.getResultFiles(prefix=prefix, dirname=refdir)
 
     if not reffiles:
         print "Reference files not found. (If you use 'loop' or 'dmrg', try to delete old result files.)"
@@ -694,6 +747,7 @@ def createTest( script, outputs=None, prefix=None, refdir='./ref' ):
     else:
         try:
             allobs += [ o.props['observable'] for o in eigenstatedata[0][0] ]
+
         # DMRG eigenstate data has one level of nesting less
         except TypeError:
             allobs += [ o.props['observable'] for o in eigenstatedata[0] ]
@@ -719,17 +773,16 @@ def createTest( script, outputs=None, prefix=None, refdir='./ref' ):
         "SAVE_OUT_IF_FAIL"      : "yes"
     }
 
-    testinputfile = writeTestInputFile( script, refparms, reffiles, allobs )
+    testinputfile = writeTestInputFile(script, inputs, refparms, reffiles, allobs)
     pyalps.tools.copyStylesheet(pardir)
 
     # Write .py test-start script
     f = file( scriptname_prefixed, 'w' )
     f.write( '#!/usr/bin/env python\n\n' )
     f.write( 'from pyalps import apptest\n' )
-    f.write( 'Script = "%s"\n' % script  )
 
     f.write('# Explicitly specify "compMethod=..." and "outputs=..." if needed\n')
-    f.write("apptest.runTest( Script, '%s', outputs='auto', compMethod='auto' )\n" % testinputfile)
+    f.write("apptest.runTest( '%s', outputs='auto', compMethod='auto' )\n" % testinputfile)
 
     f.close()
     os.chmod(scriptname_prefixed, 0755)

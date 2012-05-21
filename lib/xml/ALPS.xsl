@@ -33,15 +33,26 @@
             </tbody></table>
           </xsl:for-each>
 
-          <xsl:for-each select="TESTINFOS">
+          <xsl:for-each select="SCRIPT">
             <H2>Test Information</H2>
             <p>
+            <H3>Executable</H3>
+              <A href="{@file}"> <xsl:value-of select="@file"/> </A>
+            </p>
+          </xsl:for-each>
+
+          <xsl:for-each select="SCRIPTINPUTFILES">
+            <p>
             <table border="0"> <tbody>
-              <xsl:for-each select="SCRIPT">
-                <tr> <td>Executable</td> <td> <A href="{@file}"> <xsl:value-of select="@file"/> </A> </td> </tr>
-              </xsl:for-each>
+            <xsl:for-each select="SCRIPTINPUTFILE">
+                <tr> <td>Input File</td> <td> <A href="{@file}"> <xsl:value-of select="@file"/> </A> </td> </tr>
+            </xsl:for-each>
             </tbody> </table>
             </p>
+          </xsl:for-each>
+
+          <xsl:for-each select="TESTINFOS">
+          <H3>Test Settings</H3>
             <table border="1"> <tbody>
             <xsl:for-each select="TESTINFO">
               <tr> <td><xsl:value-of select="@name"/></td> <td> <xsl:apply-templates/> </td> </tr>
