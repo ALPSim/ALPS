@@ -69,13 +69,13 @@ std::complex<double> twodsimpson(const integrand &f, double ax, double ay, doubl
       result+=16.*f(ax+h*(2*i-1), ay+k*(2*j-1));
     }
   }
-  for(int i=1;i<N;++i){
-    for(int j=1;j<=N;++j){
+  for(int i=1;i<=N;++i){
+    for(int j=1;j<N;++j){
       result+=8.*f(ax+h*(2*i-1), ay+k*(2*j));
     }
   }
-  for(int i=1;i<=N;++i){
-    for(int j=1;j<N;++j){
+  for(int i=1;i<N;++i){
+    for(int j=1;j<=N;++j){
       result+=8.*f(ax+h*(2*i), ay+k*(2*j-1));
     }
   }
