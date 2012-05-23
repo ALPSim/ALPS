@@ -3385,11 +3385,13 @@ product_default(const System<T>& ss, const VectorState<T>& vv, const Hami<T>* ha
         continue;
       }
 
-      if(((b1 == BLOCK1 && ss.leftblock.lattice().size() != 1) || (b1 == BLOCK4 && ss.rightblock.lattice().size() != 1)) && t.type() != TERM_LOCAL && t.type() != TERM_EXTERN) continue;
+//      if(((b1 == BLOCK1 && ss.leftblock.lattice().size() != 1) || (b1 == BLOCK4 && ss.rightblock.lattice().size() != 1)) && t.type() != TERM_LOCAL && t.type() != TERM_EXTERN) continue;
+//      if(((b1 == BLOCK1 && ss.leftblock.lattice().size() != 1) || (b1 == BLOCK4 && ss.rightblock.lattice().size() != 1))) continue;
 //      if((b1 == BLOCK1 || b1 == BLOCK4) && t.type() != TERM_LOCAL && t.type() != TERM_EXTERN) continue;
 
 
       if(((b1 == BLOCK1 && ss.leftblock.lattice().size() != 1) || (b1 == BLOCK4 && ss.rightblock.lattice().size() != 1))) continue;
+
       if(b1 != BLOCK_NONE && top.name() != h.name() && !top.is_hami()){
         const BasicOp<T>* op1 = ss(top);
         bool calc_hc = h.use_hc();

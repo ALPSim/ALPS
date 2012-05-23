@@ -442,6 +442,7 @@ void DMRGTask<value_type>::dostep()
   }
   S.qnt = qn;
   S.set_qn_mask(qnmask);
+  dmtk::QN::set_qn_mask(qnmask);
   S.set_use_hc(false);
 //  S.set_store_products(false);
   S.set_grow_symmetric(false);

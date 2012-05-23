@@ -42,6 +42,7 @@ class QN
   private:
     static Vector<std::string> _qn_name;
     static int _qn_fermion;
+    static int _qn_mask;
     static size_t QN_LAST;
 
     typedef alps::half_integer<short> half_integer_type;
@@ -178,8 +179,14 @@ class QN
     static int qn_index_fermion(size_t idx) { return (IBITS(_qn_fermion,idx)); } 
 
     static int default_mask() { return ((1 << QN_LAST)-1); }
+    static int get_qn_mask() { return (_qn_mask); }
     static int mask(const std::string &str) { return (1 << get_qn_index(str)); }
     static void init() { _qn_name = std::string(""); _qn_fermion = 0; QN_LAST = 0; }
+
+    static void set_qn_mask(int qn_mask)
+    {
+     _qn_mask = qn_mask;
+    }
 
     // Streams
 
@@ -204,23 +211,19 @@ class QN
 
 size_t QN::QN_LAST = 0;
 dmtk::Vector<std::string> QN::_qn_name = dmtk::Vector<std::string>(4);
+int QN::_qn_mask = 0;
 int QN::_qn_fermion = 0;
 
 inline bool
 QN::operator==(const QN &qn) const
 {
-  return equal(qn, QN::default_mask());
+  return equal(qn, QN::get_qn_mask());
 }
 
 inline bool
 QN::operator!=(const QN &qn) const
 {
-  QN qn1 = *this;
-//  QN qn2 = qn;
-  for(int i = 0; i < QN_LAST; i++){
-    if(qn1[i] != qn[i]) return true;
-  }
-  return false;
+  return (!equal(qn, QN::get_qn_mask()));
 }
 
 inline bool
@@ -241,14 +244,16 @@ op(const QN &qn) const \
   QN qn1 = *this; \
   QN qn2 = qn; \
   for(int i = 0; i < QN_LAST; i++){ \
-    alps::half_integer<short>  i1 = qn1[i]; \
-    alps::half_integer<short>  i2 = qn2[i]; \
-    if(i1 == i2)  \
-      continue; \
-    else if(i1 ap i2)  \
-      return true; \
-    else; \
-      return false; \
+    if(_qn_mask & (1 << i)){ \
+      alps::half_integer<short>  i1 = qn1[i]; \
+      alps::half_integer<short>  i2 = qn2[i]; \
+      if(i1 == i2)  \
+        continue; \
+      else if(i1 ap i2)  \
+        return true; \
+      else; \
+        return false; \
+    }\
   } \
   \
   return false; \
@@ -265,14 +270,16 @@ op(const QN &qn) const \
   QN qn1 = *this; \
   QN qn2 = qn; \
   for(int i = 0; i < QN_LAST; i++){ \
-    alps::half_integer<short>  i1 = qn1[i]; \
-    alps::half_integer<short>  i2 = qn2[i]; \
-    if(i1 == i2)  \
-      continue; \
-    else if(i1 ap i2)  \
-      return true; \
-    else; \
-      return false; \
+    if(_qn_mask & (1 << i)){ \
+      alps::half_integer<short>  i1 = qn1[i]; \
+      alps::half_integer<short>  i2 = qn2[i]; \
+      if(i1 == i2)  \
+        continue; \
+      else if(i1 ap i2)  \
+        return true; \
+      else; \
+        return false; \
+    }\
   } \
   \
   return true; \
