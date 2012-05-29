@@ -198,7 +198,7 @@ class BasicOp: public dmtk::BMatrix<T>
 
     bool fermion() const { return (dqn.fermion_sign() == -1); }
     bool apply_sign() const { return fermion(); }
-    bool is_diagonal() const { return (dqn == QN()); }
+    bool is_diagonal() const { return (dqn.equal(QN(),QN::default_mask())); }
 
     std::string const& name() const { return _name; }
     int site() const { return _site; }
@@ -1335,10 +1335,6 @@ product(const BasicOp<T> &op,
     StateSpace ss = *siter;
 
     const SubMatrix<T> *_block;
-//    if(!hc)
-//      _block = op.block(ss[m].qn());
-//    else
-//      _block = op.block(ss[m].qn()-op.dqn);
 
     if(!hc)
       _block = get_block(auxv, ss[m].qn());
@@ -1346,7 +1342,6 @@ product(const BasicOp<T> &op,
       _block = get_block(auxv, ss[m].qn()-op.dqn);
 
     if(!_block) continue;
-
     const SubMatrix<T> &block(*_block);
 
     cstate_slice<T> v_slice = v(ss);

@@ -262,7 +262,19 @@ void DMRGTask<value_type>::dostep()
   dmtk::Lattice l(num_sites(),dmtk::OBC);
   hami = dmtk::Hami<value_type >(l);
   site_block.resize(alps::maximum_vertex_type(graph())+1);
-  
+
+// define quantum numbers first: we need to know which are conserved before we build operators
+
+  dmtk::QN qn;
+  qnmask = 0;
+  for(int i = 0; i < quantumnumber_names.size(); i++) {
+    if(conserved_quantumnumber[i]){
+      qn[quantumnumber_names[i]] = conserved_quantumnumber_value[i];
+      qnmask |= (1 << (dmtk::QN::get_qn_index(quantumnumber_names[i])));
+    }
+  }
+  dmtk::QN::set_qn_mask(qnmask);
+
 //  Iterating over sites: create site blocks
   for (site_iterator it = sites().first ; it != sites().second ; ++it) {
     hami.sites(*it) = &site_block[site_type(*it)];
@@ -432,17 +444,9 @@ void DMRGTask<value_type>::dostep()
   
   S.set_calc_gap(num_eigenvalues-1); 
   dmtk::Matrix<size_t> nstates(2,num_sweeps);
-  dmtk::QN qn;
-  qnmask = 0;
-  for(int i = 0; i < quantumnumber_names.size(); i++) {
-    if(conserved_quantumnumber[i]){
-      qn[quantumnumber_names[i]] = conserved_quantumnumber_value[i];
-      qnmask |= (1 << (dmtk::QN::get_qn_index(quantumnumber_names[i])));
-    }
-  }
+
   S.qnt = qn;
   S.set_qn_mask(qnmask);
-  dmtk::QN::set_qn_mask(qnmask);
   S.set_use_hc(false);
 //  S.set_store_products(false);
   S.set_grow_symmetric(false);
