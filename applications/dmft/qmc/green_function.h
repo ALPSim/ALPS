@@ -32,6 +32,8 @@
 #include "types.h"
 #include <fstream>
 #include <iostream>
+#include <cstring>
+
 
 #ifdef USE_MPI
 #include <mpi.h>
