@@ -35,7 +35,7 @@ parms=[]
 for u in [4.,5.,6.,8.]: 
     parms.append(
             { 
-              'ANTIFERROMAGNET'         : 1,
+              'ANTIFERROMAGNET'         : 0,
               'CHECKPOINT'              : 'dump',
               'CONVERGED'               : 0.01,
               'FLAVORS'                 : 2,
@@ -51,7 +51,7 @@ for u in [4.,5.,6.,8.]:
               'OMEGA_LOOP'              : 1,
               'SEED'                    : 0, 
               'SOLVER'                  : 'Hybridization',
-              'SYMMETRIZATION'          : 0,
+              'SYMMETRIZATION'          : 1,
               'TOLERANCE'               : 0.01,
               't'                       : 1,
               'SWEEPS'                  : 100000000,
