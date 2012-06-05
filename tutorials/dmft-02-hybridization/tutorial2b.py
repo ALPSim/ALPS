@@ -63,10 +63,13 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'G0TAU_INPUT'         : 'G0_tau_input_beta_'+str(b)            }
         )
         
-#write the input file and run the simulation
-for p in parms:
-    input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
-    res = pyalps.runDMFT(input_file)
+## Please run the tutorial2a.py before this one or uncomment the following lines.
+## This tutorial relies on the results created there.
+
+# #write the input file and run the simulation
+# for p in parms:
+#     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
+#     res = pyalps.runDMFT(input_file)
 
 flavors=parms[0]['FLAVORS']
 listobs=[]   
@@ -88,7 +91,7 @@ for p in parms:
     plt.figure()
     plt.xlabel(r'$\tau$')
     plt.ylabel(r'$G(\tau)$')
-    plt.title(r'\beta = %.4s' %nd[0].props['BETA'])
+    plt.title(r'$\beta = %.4s$' %nd[0].props['BETA'])
     pyalps.plot.plot(nd)
     plt.legend()
     plt.show()

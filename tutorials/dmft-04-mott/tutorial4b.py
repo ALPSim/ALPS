@@ -62,10 +62,14 @@ for u in [4.,5.,6.,8.]:
             }
         )
 
-#write the input file and run the simulation
-for p in parms:
-    input_file = pyalps.writeParameterFile('parm_u_'+str(p['U']),p)
-    res = pyalps.runDMFT(input_file)
+
+## Please run the tutorial4a.py before this one or uncomment the following lines.
+## This tutorial relies on the results created there.
+
+# #write the input file and run the simulation
+# for p in parms:
+#     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U']),p)
+#     res = pyalps.runDMFT(input_file)
 
 flavors=parms[0]['FLAVORS']
 listobs=[]   
