@@ -112,7 +112,7 @@ def runApplication(appname, parmfile, Tmin=None, Tmax=None, writexml=False, MPI=
     if Tmin:
       cmdline += ['--Tmin',str(Tmin)]
     if Tmax:
-      cmdline += ['--TMax',str(TMax)]
+      cmdline += ['--TMax',str(Tmax)]
     if writexml:
       cmdline += ['--write-xml']
     return (executeCommand(cmdline),parmfile.replace('.in.xml','.out.xml'))
