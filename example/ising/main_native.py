@@ -26,7 +26,6 @@
  # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # #
 
 import pyalps.ngs as ngs
-#TODO: make mpi module somehow usable under pyalps
 import mpi
 import numpy as np
 import sys, time
@@ -44,7 +43,7 @@ def main(limit, resume, output):
     }, mpi.world if mpi.size > 1 else None)
 
     if resume == 't':
-        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), ngs.h5ar.READ)
+        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'r')
         sim.load(ar)
         del ar
 
@@ -54,7 +53,7 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + int(limit))
 
-    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), "a")
+    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump') + str(mpi.rank) if mpi.size > 1 else '', 'a')
     sim.save(ar)
     del ar
 
@@ -75,7 +74,7 @@ def main(limit, resume, output):
         print "Sin(Energy):            ", results["Energy"].sin()
         print "Tanh(Correlations):     ", results["Correlations"].tanh()
 
-        ngs.saveResults(results, sim.params, ngs.h5ar(output, ngs.h5ar.REPLACE), "/simulation/results")
+        ngs.saveResults(results, sim.params, ngs.h5ar(output, 'a'), "/simulation/results")
 
 if __name__ == "__main__":
     apply(main, sys.argv[1:])

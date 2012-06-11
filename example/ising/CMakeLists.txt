@@ -106,29 +106,25 @@ if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
                 -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_single_test.cmake
         )
 
-# TODO: implement
-#        add_test(ngs_ising_python_native
-#            ${CMAKE_COMMAND}
-#                -Dpython_interpreter=${PYTHON_INTERPRETER}
-#                -Dsourcedir=${PROJECT_SOURCE_DIR}
-#                -Dbinarydir=${PROJECT_BINARY_DIR}
-#                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-#                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_native_test.cmake
-#        )
+        add_test(ngs_ising_python_native
+            ${CMAKE_COMMAND}
+                -Dpython_interpreter=${PYTHON_INTERPRETER}
+                -Dsourcedir=${PROJECT_SOURCE_DIR}
+                -Dbinarydir=${PROJECT_BINARY_DIR}
+                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_native_test.cmake
+        )
 
-# TODO: implement
-#        if(MPI_FOUND)
-#        
-#            add_test(ngs_ising_python_native_mpi
-#                ${CMAKE_COMMAND}
-#                    -Dpython_interpreter=${PYTHON_INTERPRETER}
-#                    -Dsourcedir=${PROJECT_SOURCE_DIR}
-#                    -Dbinarydir=${PROJECT_BINARY_DIR}
-#                    -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
-#                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_native_mpi_test.cmake
-#            )
-#
-#        endif(MPI_FOUND)
+        if(MPI_FOUND)
+            add_test(ngs_ising_python_native_mpi
+                ${CMAKE_COMMAND}
+                    -Dpython_interpreter=${PYTHON_INTERPRETER}
+                    -Dsourcedir=${PROJECT_SOURCE_DIR}
+                    -Dbinarydir=${PROJECT_BINARY_DIR}
+                    -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                    -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_python_native_mpi_test.cmake
+            )
+        endif(MPI_FOUND)
 
     endif (ALPS_HAVE_PYTHON)
 
