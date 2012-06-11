@@ -137,7 +137,7 @@ def evaluateLoop(infiles, appname='loop', write_xml=False):
     """
     cmdline = [appname,'--evaluate']
     if write_xml:
-      cmdline += ['--write_xml']
+      cmdline += ['--write-xml']
     cmdline += make_list(infiles)
     return executeCommand(cmdline)
 
@@ -152,7 +152,7 @@ def evaluateSpinMC(infiles, appname='spinmc_evaluate', write_xml=False):
     """
     cmdline = [appname]
     if write_xml:
-      cmdline += ['--write_xml']
+      cmdline += ['--write-xml']
     cmdline += make_list(infiles)
     return executeCommand(cmdline)
 
