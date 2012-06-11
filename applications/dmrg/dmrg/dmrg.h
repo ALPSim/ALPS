@@ -662,11 +662,14 @@ DMRGTask<value_type>::build_bond_operator(alps::BondOperator const& bondop, bond
     op2 = create_site_operator(s_name2,tit->get<2>(),site_type(target(b)));
     op1.set_site(source(b));
     op2.set_site(target(b));
-    dmtk::Term<value_type > real_t = op1*op2;
     tit->get<0>().partial_evaluate(coords);
+    dmtk::Term<value_type > real_t = op1*op2;
+    if (s_name1=="0")    
+      real_t = op2;
+    else if (s_name2=="0")
+      real_t = op1;
     real_t.coef() = tit->get<0>().value();
     this_hami += real_t;
-
   }
 }
 
