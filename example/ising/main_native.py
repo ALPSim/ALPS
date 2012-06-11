@@ -43,7 +43,7 @@ def main(limit, resume, output):
     }, mpi.world if mpi.size > 1 else None)
 
     if resume == 't':
-        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump'), 'r')
+        ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump.h5'), 'r')
         sim.load(ar)
         del ar
 
@@ -53,7 +53,9 @@ def main(limit, resume, output):
         start = time.time()
         sim.run(lambda: time.time() > start + int(limit))
 
-    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump') + str(mpi.rank) if mpi.size > 1 else '', 'a')
+    print sim.params.valueOrDefault('DUMP', 'dump.h5') + ('.' + str(mpi.rank) if mpi.size > 1 else '')
+
+    ar = ngs.h5ar(sim.params.valueOrDefault('DUMP', 'dump.h5') + ('.' + str(mpi.rank) if mpi.size > 1 else ''), 'a')
     sim.save(ar)
     del ar
 
