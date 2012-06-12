@@ -565,9 +565,10 @@ def compareTest( testinputfile, outputs, tmpdir, tstart, compMethod='auto' ):
         f = open(outfile)
         print f.read()
         f.close()
+    return test_success
 
 
-def runTest(testinputfile, outputs='auto', compMethod='auto'):
+def runTest(testinputfile, outputs='auto', compMethod='auto', pyexec='auto'):
     """ Run the test according to testinputfile and compare
         its output against reference files
 
@@ -597,9 +598,13 @@ def runTest(testinputfile, outputs='auto', compMethod='auto'):
     shutil.copy(script, tmpdir)
     if inputs is not None:
         for f in inputs: shutil.copy(f, tmpdir)
-
+    
+    # get python executable
+    if pyexec == 'auto':
+        pyexec = sys.executable
+    
     os.chdir( tmpdir )
-    cmdline = [sys.executable, os.path.basename(script)]
+    cmdline = [pyexec, os.path.basename(script)]
     pyalps.executeCommand(cmdline)
     if inputs is not None:
         for f in inputs: os.remove(f)
@@ -620,19 +625,22 @@ def runTest(testinputfile, outputs='auto', compMethod='auto'):
 
     if not outputs:
         print "\nList of output files of %s is empty\n" % script
+        test_success = False
 
     else:
         missing = [ x for x in outputs if not os.path.exists(x) ]
         if missing:
             for f in missing:
                 print "Output file '%s' does not exist" % f
+            test_success = False
         else:
             # Start test
-            compareTest( testinputfile, outputs, tmpdir, tstart, compMethod=compMethod )
+            test_success = compareTest( testinputfile, outputs, tmpdir, tstart, compMethod=compMethod )
     
     # if something goes wrong above, tmpdir will not be removed
     # for the moment this is useful, later maybe use try/except
     shutil.rmtree(tmpdir)
+    return test_success
 
 #*******************************************************************************
 # Test creation
@@ -779,10 +787,12 @@ def createTest( script, inputs=None, outputs=None, prefix=None, refdir='./ref' )
     # Write .py test-start script
     f = file( scriptname_prefixed, 'w' )
     f.write( '#!/usr/bin/env python\n\n' )
+    f.write( 'import sys\n' )
     f.write( 'from pyalps import apptest\n' )
 
     f.write('# Explicitly specify "compMethod=..." and "outputs=..." if needed\n')
-    f.write("apptest.runTest( '%s', outputs='auto', compMethod='auto' )\n" % testinputfile)
+    f.write("ret = apptest.runTest( '%s', outputs='auto', compMethod='auto', pyexec='auto' )\n" % testinputfile)
+    f.write('if not ret: sys.exit(1)\n')
 
     f.close()
     os.chmod(scriptname_prefixed, 0755)
