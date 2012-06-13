@@ -451,7 +451,7 @@ class Hdf5Loader:
 
     # Pre: file is a hdf5 file descriptor
     # Post: returns DataSet with all parameters set
-    def ReadDMFTIterations(self,flist,measurements=None,proppath='/parameters',respath='/simulation/iteration',verbose=False):
+    def ReadDMFTIterations(self,flist,observable='G_tau',measurements=None,proppath='/parameters',respath='/simulation/iteration',verbose=False):
         fs = self.GetFileNames(flist)
         fileset = []
         for f in fs:
@@ -459,7 +459,7 @@ class Hdf5Loader:
                 self.h5f = h5.iArchive(f)
                 self.h5fname = f
                 if verbose: log("Loading from file "+ f)
-                list_ = self.GetObservableList(respath+'/1/results/G_tau/')
+                list_ = self.GetObservableList(respath+'/1/results/'+observable+'/')
                 #grp = self.h5f.require_group(respath)
                 params = self.ReadParameters(proppath)
                 obslist = []
@@ -475,7 +475,7 @@ class Hdf5Loader:
                             if verbose: log( "Loading "+ m)
                             d = DataSet()
                             size=0
-                            path=it+"/results/G_tau/"+m
+                            path=it+'/results/'+observable+'/'+m
                             if "mean" in self.h5f.list_children(respath+'/'+path):
                                 if self.h5f.is_scalar(respath+'/'+path+'/mean/value'):
                                     size=1
