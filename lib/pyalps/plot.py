@@ -110,10 +110,10 @@ def plot(data):
         
         if 'line' in q.props and q.props['line'] == 'scatter':
             if fillmarkers:
-                plt.scatter(xmeans, ymeans, c=thiscolor, marker=markers[imarker], label=lab)
+                plt.scatter(xmeans, ymeans, color=thiscolor, marker=markers[imarker], label=lab)
             else:
                 plt.scatter(xmeans, ymeans, label=lab,
-                            marker=markers[imarker], c=thiscolor, facecolors='none')
+                            marker=markers[imarker], color=thiscolor, facecolors='none')
             imarker = (imarker+1)%len(markers)
         else:
             line_props = '-'
