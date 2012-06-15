@@ -4,6 +4,7 @@
 # ALPS Libraries
 # 
 # Copyright (C) 2012 by Jakub Imriska <jimriska@phys.ethz.ch> 
+#               2010 by Brigitte Surer <surerb@phys.ethz.ch> 
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
