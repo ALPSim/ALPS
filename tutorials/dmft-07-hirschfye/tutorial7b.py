@@ -92,4 +92,5 @@ for p in parms:
     plt.title(r'$\beta$ = %.4s' %nd[0].props['BETA'])
     pyalps.plot.plot(nd)
     plt.legend()
-    plt.show()
+
+plt.show()
