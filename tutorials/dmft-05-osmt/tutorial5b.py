@@ -96,7 +96,5 @@ for p in parms:
     plt.title(r'$U$ = %.4s' %nd[0].props['U'])
     pyalps.plot.plot(nd)
     plt.legend()
-    plt.show()
 
-
-
+plt.show()
