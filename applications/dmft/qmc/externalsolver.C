@@ -80,7 +80,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
     alps::hdf5::archive ar(outfile, "r");
     g.read_hdf5(ar, "/G0");
   }
-  boost::filesystem::remove(boost::filesystem::absolute(outfile));
+  boost::filesystem::remove(outfile);
   return g;
 }
 
@@ -181,7 +181,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       }
     }
   }
-  boost::filesystem::remove(boost::filesystem::absolute(outfile));
+  boost::filesystem::remove(outfile);
   return std::make_pair(G_omega, G_tau);
 }
 
