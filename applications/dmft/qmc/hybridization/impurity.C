@@ -77,15 +77,17 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
     //std::cout << "U is: " << u << std::endl;
     //find the second moment of the band structure
     double epssqav ;
-    if (parms.defined("DOSFILE")) {
+    if (parms.defined("DOSFILE") || parms.defined("TWODBS")) {
       if (!parms.defined("EPSSQAV")) {
-        throw std::logic_error("error: you specify a DOS file, please also specify the second moment of the band structure EPSSQAV!");
+        throw std::logic_error("error: you specify bandstructure via DOSFILE or TWODBS, so please specify the second moment of the band structure EPSSQAV as well!");
       } else {
         epssqav = parms["EPSSQAV"];
       }
+    }else if (parms.defined("EPSSQAV")) {
+      epssqav = parms["EPSSQAV"];
     }else{
       t=parms["t"]; //this is essentially an energy unit.
-      epssqav = t * t;
+      epssqav = t * t;  // Bethe lattice assumed
     }
     std::istringstream in_omega(parms["G0(omega)"]);
     read_freq(in_omega, bare_green_matsubara);
