@@ -66,7 +66,7 @@ std::pair<matsubara_green_function_t,itime_green_function_t> InteractionExpansio
     std::string fns=parms["CHECKPOINT"];
     fns+=".xml";
     boost::filesystem::path fn(fns);
-    checkpoint(boost::filesystem::absolute(fn));
+    checkpoint(fn);
   }
   clock_t time1=clock();
   std::cout<<"time for writing checkpoint was: "<<(time1-time0)/(double)CLOCKS_PER_SEC<<std::endl;
