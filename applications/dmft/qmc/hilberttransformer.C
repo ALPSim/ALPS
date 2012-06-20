@@ -3,9 +3,10 @@
  * ALPS DMFT Project
  *
  * Copyright (C) 2005-2007 by Philipp Werner <werner@comp-phys.org>,
- *                         Matthias Troyer <troyer@comp-phys.org>,
- *                         Emanuel Gull <gullc@comp-phys.org>,
- *                         Sebastian Fuchs <fuchs@comp-phys.org>
+ *                            Matthias Troyer <troyer@comp-phys.org>,
+ *                            Emanuel Gull <gullc@comp-phys.org>,
+ *                            Sebastian Fuchs <fuchs@comp-phys.org>
+ *               2012      by Jakub Imriska <jimriska@phys.ethz.ch>
  *
  * This software is part of the ALPS Applications, published under the ALPS
  * Application License; you can use, redistribute it and/or modify it under
@@ -128,19 +129,16 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
 
 matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const alps::Parameters& parms) 
 {
-  std::cout<<"reading initial G0_omega"<<std::endl;
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  int n_time=boost::lexical_cast<int>(parms["N"]);
   int n_orbital=parms.value_or_default("FLAVORS", 2);
+  double beta = static_cast<double>(parms["BETA"]);
+  double mu = static_cast<double>(parms["MU"]);
+  double h = (parms.defined("H_INIT") ? static_cast<double>(parms["H_INIT"]) : static_cast<double>(parms.value_or_default("H",0.)));
   matsubara_green_function_t G0_omega(n_matsubara, n_orbital);
+
   if (parms.defined("INSULATING")) {
-    std::cout<<"calculating initial G0_omega"<<std::endl;
-    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-    int n_time=boost::lexical_cast<int>(parms["N"]);
-    int n_flavor=parms.value_or_default("FLAVORS", 2);
-    double beta = static_cast<double>(parms["BETA"]);
-    double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H_INIT"]);
-    matsubara_green_function_t G0_omega(n_matsubara,n_flavor);
+    std::cout<<"calculating insulating initial G0_omega"<<std::endl;
     for(unsigned i=0; i<G0_omega.nfreq(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
       for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
@@ -148,20 +146,20 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
         G0_omega(i, flavor) = 1./zeta;
       }
     }
-    G0_omega.write("G0_omega_input");
-    boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
-    itime_green_function_t G0_tau(n_time,n_flavor);
-    fourier_ptr->backward_ft(G0_tau, G0_omega);
-    G0_tau.write("G0_tau_input");
-    return G0_omega;
+  }
+  else if (parms.defined("G0OMEGA_INPUT") && parms["G0OMEGA_INPUT"].length()>0) {
+	std::cout<<"reading initial G0_omega"<<std::endl;
+    std::ifstream check(parms["G0OMEGA_INPUT"].c_str());
+    if(!check.is_open()) {
+      std::cerr << "ERROR: could not open inital G0 file "<<parms["G0OMEGA_INPUT"]<<std::endl;
+      throw std::runtime_error("FrequencySpaceHilbertTransformer::initial_G0: could not open inital G0 file");
+    }
+    else
+      G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
   }
   else {
-    std::ifstream check(parms["G0OMEGA_INPUT"].c_str());
-    int n_time=boost::lexical_cast<int>(parms["N"]);
-    int n_flavor=parms.value_or_default("FLAVORS", 2);
-    if(!check.is_open()){
-      std::cout<<"could not open inital G0 file "<<parms["G0OMEGA_INPUT"]<<"; proceeding with free solution. "<<std::endl;
+	std::cout<<"calculating non-interacting initial G0_omega"<<std::endl;
+	if (parms.defined("DOSFILE") || parms.defined("TWODBS")) {
       matsubara_green_function_t G_omega(n_matsubara, n_orbital);
       for(int i=0;i<n_matsubara;++i){
         for(int f=0;f<n_orbital;++f){
@@ -169,20 +167,26 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
           G0_omega(i,f)=1;
         }
       }
-      double h     =parms.value_or_default("H_INIT",0.);
-      double mu    =parms.value_or_default("MU",0.);
-      double beta  =parms.value_or_default("BETA",0.);
       G0_omega=this->operator()(G_omega, G0_omega, mu, h, beta);
-      G0_omega.write("G0_omega_input");
-      boost::shared_ptr<FourierTransformer> fourier_ptr;
-      FourierTransformer::generate_transformer(parms, fourier_ptr);
-      itime_green_function_t G0_tau(n_time,n_flavor);
-      fourier_ptr->backward_ft(G0_tau, G0_omega);
-      G0_tau.write("G0_tau_input");
     }
-    else
-      G0_omega.read(parms["G0OMEGA_INPUT"].c_str());
+    else {   // Bethe lattice 
+      double t_ = boost::lexical_cast<double>(parms["t"]);
+      double tsq=t_*t_;
+      for(unsigned i=0; i<n_matsubara; i++) {
+        std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
+        for(spin_t flavor=0;flavor<n_orbital; flavor++) {
+          std::complex<double> zeta = iw+mu+(flavor%2 ? h : -h);
+          std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
+          tmp *= tmp.imag()<0 ? -1 : 1;
+          G0_omega(i, flavor) = (zeta - tmp)/(2*tsq);
+        }
+      }
+    }
   }
+  
+  if (parms.defined("G0OMEGA_input"))   // it is not needed to store it by default, as it will be stored in the 1st iteration as G0_omega_1, G0_omegareal_1
+    G0_omega.write((parms["G0OMEGA_input"]).c_str());
+
   return G0_omega;
 }
 
@@ -217,99 +221,55 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
 }
 
 
-
-
-matsubara_green_function_t FSSemicircleHilbertTransformer::initial_G0(const alps::Parameters& parms)
-{
-  if (parms.defined("G0OMEGA_INPUT") || parms.defined("INSULATING"))
-    return FrequencySpaceHilbertTransformer::initial_G0(parms);
-  else {
-    std::cout<<"calculating initial G0_omega"<<std::endl;
-    int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
-    int n_time=boost::lexical_cast<int>(parms["N"]);
-    int n_flavor=parms.value_or_default("FLAVORS", 2);
-    double beta = static_cast<double>(parms["BETA"]);
-    double mu = static_cast<double>(parms["MU"]);
-    double h = static_cast<double>(parms["H_INIT"]);
-    double tsq=t_*t_;
-    matsubara_green_function_t G0_omega(n_matsubara,n_flavor);
-    for(unsigned i=0; i<G0_omega.nfreq(); i++) {
-      std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-      for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
-        std::complex<double> zeta = iw+mu+(flavor%2 ? -h : h);
-        std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
-        tmp *= tmp.imag()<0 ? -1 : 1;
-        G0_omega(i, flavor) = (zeta - tmp)/(2*tsq);
-        //std::cout << zeta << " " << sqrt(zeta*zeta) << std::endl;
-      }
-    }
-    G0_omega.write("G0_omega_input");
-    boost::shared_ptr<FourierTransformer> fourier_ptr;
-    FourierTransformer::generate_transformer(parms, fourier_ptr);
-    itime_green_function_t G0_tau(n_time,n_flavor);
-    fourier_ptr->backward_ft(G0_tau, G0_omega);
-    G0_tau.write("G0_tau_input");
-    return G0_omega;
-  }
-}
-
-
-
-
-FSDOSHilbertTransformer::FSDOSHilbertTransformer(alps::Parameters& params)
-{
-  if(!params.defined("DOSFILE")) throw std::invalid_argument("please define DOSFILE parameter!");
-  std::ifstream dos_file(params["DOSFILE"].c_str());
-  if(!dos_file.good()) throw std::runtime_error("DOSFILE is not good!");
-  double eps, d;
-  std::cout<<"using density of states "<<params["DOSFILE"]<<std::endl;
-  while(dos_file>>eps>>d){
-    epsilon.push_back(eps);
-    dos.push_back(d);
-    //std::cout<<eps<<" "<<d<<std::endl;
-  }
-  if(dos.size()%2!=1){ throw std::runtime_error("please use odd number of DOS points (due to Simpson integration)"); }
-  //normalize DOS to one:
-  double s=0;
-  for(unsigned i=1;i<epsilon.size()-2;i+=2){
-    s+=4.*dos[i]+2*dos[i+1];                   // Assuming equidistant epsilon points
-  }
-  s+=dos[0]+dos[epsilon.size()-1]+4.*dos[epsilon.size()-2];
-  s/=(3.);
-  std::cout<<"normalization constant: "<<s<<std::endl;
-  std::cout<<"step size h is: " << (epsilon[1]-epsilon[0]) << "   (Note: Assuming equidistant energy intervals.)" << std::endl;
-  for(unsigned i=0;i<epsilon.size();++i){
-    dos[i]/=s;
-  }
-  double S=0;
-  for(unsigned i=0;i<epsilon.size()-1;++i){
-    S+=dos[i];
-  }
-  std::cout<<"check: total sum is: "<<S<<std::endl;
-  //find second moment of band structure:
-  double epssqav=0;
-  for(unsigned i=1;i<epsilon.size()-2;i+=2){
-    epssqav+=4.*(epsilon[i]*epsilon[i]*dos[i])+2*(dos[i+1]*epsilon[i+1]*epsilon[i+1]);
-  } 
-  epssqav+=dos[0]*epsilon[0]*epsilon[0]+dos[epsilon.size()-1]*epsilon[epsilon.size()-1]*epsilon[epsilon.size()-1]+4.*dos[epsilon.size()-2]*epsilon[epsilon.size()-2]*epsilon[epsilon.size()-2];
-  epssqav/=(3.);
-  std::cout<<"second moment of band structure: "<<epssqav<<std::endl;
-  
+void SetBandstructureParms(alps::Parameters& parms, double eps, double epssq) {
   // set parameters for the FourierTransformer if they are not set by the user
-  bool is_set = params.defined("EPSSQAV");
-  unsigned int n_flavors = params.value_or_default("FLAVORS", 2);
+  bool is_set = parms.defined("EPSSQAV");
+  unsigned int n_flavors = parms.value_or_default("FLAVORS", 2);
   for (unsigned int i=0; i < n_flavors; i++) {
-    if (params.defined("EPS_"+boost::lexical_cast<std::string>(i)) || params.defined("EPSSQ_"+boost::lexical_cast<std::string>(i)))
+    if (parms.defined("EPS_"+boost::lexical_cast<std::string>(i)) || parms.defined("EPSSQ_"+boost::lexical_cast<std::string>(i)))
       is_set = true;
   }
   if (! is_set) {
-    std::cout << "FSDOSHilbertTransformer: writing the values for bandstructure-parameters needed in FourierTransformer." << std::endl;
-    params["EPSSQAV"] = epssqav;
+    std::cout << "initialization of a the Hilbert transformer: writing the values for bandstructure-parameters needed in FourierTransformer." << std::endl;
+    parms["EPSSQAV"] = epssq;
     for (unsigned int i=0; i < n_flavors; i++) {
-      params["EPS_"+boost::lexical_cast<std::string>(i)] = 0;
-      params["EPSSQ_"+boost::lexical_cast<std::string>(i)] = epssqav;
+      parms["EPS_"+boost::lexical_cast<std::string>(i)] = 0;
+      parms["EPSSQ_"+boost::lexical_cast<std::string>(i)] = epssq;
     }
   }
+}
+
+FSDOSHilbertTransformer::FSDOSHilbertTransformer(alps::Parameters& parms)
+{
+  if(!parms.defined("DOSFILE")) throw std::invalid_argument("please define DOSFILE parameter!");
+  std::ifstream dos_file(parms["DOSFILE"].c_str());
+  if(!dos_file.good()) throw std::runtime_error("DOSFILE is not good!");
+  double eps, d;
+  std::cout<<"using density of states "<<parms["DOSFILE"]<<std::endl;
+  std::cout<<"(Note: Assuming equidistant energy intervals.)"<<std::endl;
+  while(dos_file>>eps>>d){
+    epsilon.push_back(eps);
+    dos.push_back(d);
+  }
+  //normalize DOS to one:  simpson integral: dos[n]
+  DOS_integrand integrand0(0,dos,epsilon);
+  double s=(simpson_integrate(integrand0)).real();
+  double S=0;
+  for(unsigned i=0;i<dos.size();++i){
+    dos[i]/=s;
+    S+=dos[i];
+  }
+  std::cout<<"check: total sum after normalization is: "<<S<<" (should close to 1)"<<std::endl;
+
+  //find second moment of band structure: simpson integrate: dos[n]*epsilon[n]*epsilon[n]
+  DOS_integrand integrand1(1,dos,epsilon);
+  DOS_integrand integrand2(2,dos,epsilon);
+  double eps_=(simpson_integrate(integrand1)).real();
+  double epssq=(simpson_integrate(integrand2)).real();
+  std::cout<<"first moment of bandstructure: "<<eps_<<std::endl;
+  std::cout<<"second moment of bandstructure: "<<epssq<<std::endl;
+  
+  SetBandstructureParms(parms,eps_,epssq);
 }
 
 
@@ -319,30 +279,29 @@ matsubara_green_function_t FSDOSHilbertTransformer::operator()(const matsubara_g
                                                                matsubara_green_function_t &G0_omega, 
                                                                const double mu, const double h, const double beta)
 {
-  assert(G_omega.nsite()==1);
-  if(h!=0){throw std::invalid_argument(" we don't yet handle magnetic fields!"); }
-  
+  if(G_omega.nsite()!=1){throw std::logic_error("FSDOSHilbertTransformer::operator(): don't know how to handle != 1 site.");}
+  if(G_omega.nflavor()!=2){throw std::logic_error("FSDOSHilbertTransformer::operator(): don't know how to handle != 2 flavors.");}
+  if(h!=0){throw std::invalid_argument("FSDOSHilbertTransformer::operator(): don't yet handle magnetic fields!");}
+  std::cout<<"PM FS DOS Hilbert Transformer"<<std::endl;
   matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
-  matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
-  matsubara_green_function_t sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+  matsubara_green_function_t Sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+  
   for(spin_t f=0;f<G_omega.nflavor();++f){
     for(frequency_t w=0;w<G_omega.nfreq();++w){
-      std::complex<double> g=0;
-      sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); 
-      std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu -sigma(w, f);
-      for(unsigned n=0;n<dos.size()-1;++n){
-        g+=dos[n]/(A-epsilon[n]); //go back to higher order integrator!!
-      }
-      G_omega_new(w, f)=g;
+      Sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); 
+      std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu - Sigma(w,f);
+      // simpson integrate: dos[n]/(A - epsilon[n])
+      DOS_integrand integrand(dos,epsilon,A);
+      G_omega_new(w, f)=simpson_integrate(integrand);
     }
   }
-  if(G_omega.nflavor() !=2){throw std::logic_error("don't know how to handle != 2 flavors.");}
+  
   for(spin_t f=0;f<G_omega.nflavor();++f){
     for(frequency_t w=0;w<G_omega.nfreq();++w){
-      G0_omega_new(w,f)=1./(sigma(w,f)+1./G_omega_new(w,f));
+      G0_omega(w,f)=1./(Sigma(w,f)+1./G_omega_new(w,f));
     }
   }
-  return G0_omega_new;
+  return G0_omega;
 }
 
 
@@ -352,12 +311,12 @@ matsubara_green_function_t AFM_FSDOSHilbertTransformer::operator()(const matsuba
                                                                    matsubara_green_function_t &G0_omega, 
                                                                    const double mu, const double h, const double beta)
 {
-  if(G_omega.nsite()!=1){ throw std::invalid_argument("don't know how to handle n_site >1. Use Sebastian's cluster loop for that. aborting.");}
-  if(G_omega.nflavor()!=2){ throw std::invalid_argument("don't know how to handle n_flavor!=2. aborting.");}
+  if(G_omega.nsite()!=1){ throw std::invalid_argument("AFM_FSDOSHilbertTransformer::operator(): don't know how to handle n_site >1. Use Sebastian's cluster loop for that. aborting.");}
+  if(G_omega.nflavor()!=2){ throw std::invalid_argument("AFM_FSDOSHilbertTransformer::operator(): don't know how to handle n_flavor!=2. aborting.");}
   std::cout<<"AFM FS DOS Hilbert Transformer"<<std::endl;
   matsubara_green_function_t Sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
   matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
-  matsubara_green_function_t G0_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+
   //compute self energy
   for(frequency_t w=0;w<G_omega.nfreq();++w){
     double wn=(2.*w+1)*M_PI/beta;
@@ -369,58 +328,100 @@ matsubara_green_function_t AFM_FSDOSHilbertTransformer::operator()(const matsuba
     std::complex<double>zeta_B=std::complex<double>(mu+h,wn)-Sigma(w,1);
     
     //Simpson: integrate dos(e)/(zeta_A zeta_B-e^2)
-    if(dos.size()%2 !=1){throw std::runtime_error("for Simpson precision: use a DOS with odd number of integration points. "); }
-    std::complex<double> I=0;
-    for(unsigned i=1;i<dos.size()-2;i+=2){
-      I+=4.*integrand(i,dos,epsilon,zeta_A,zeta_B)+2.*integrand(i+1,dos,epsilon,zeta_A,zeta_B);
-    }
-    I+=integrand(0,dos,epsilon,zeta_A,zeta_B)+integrand(dos.size()-1,dos,epsilon,zeta_A,zeta_B)+4.*integrand(dos.size()-2,dos,epsilon,zeta_A,zeta_B);
-    I/=3.;
+    DOS_integrand integrand(dos,epsilon,zeta_A,zeta_B);
+    std::complex<double> I = simpson_integrate(integrand);
+
     //compute the new G's:
     G_omega_new(w,0)=zeta_B*I; //formula 97 in review
     G_omega_new(w,1)=zeta_A*I;
-    G0_omega_new(w,0)=1./(1./G_omega_new(w,0)+Sigma(w,0));
-    G0_omega_new(w,1)=1./(1./G_omega_new(w,1)+Sigma(w,1));
-  }
-  return G0_omega_new;
-}
-
-
-
-
-
-
-matsubara_green_function_t TwoDAFMHilbertTransformer::operator()(const matsubara_green_function_t & G_omega, 
-                                                                 matsubara_green_function_t &G0_omega, 
-                                                                 const double mu, const double h, const double beta)
-{
-  //compute sigma 
-  matsubara_green_function_t sigma(G_omega);
-  matsubara_green_function_t G(G_omega);
-  for(unsigned i=0;i<G_omega.nfreq();++i){
-    sigma(i,0)=1./G0_omega(i,0)-1./G_omega(i,0);
-    sigma(i,1)=1./G0_omega(i,1)-1./G_omega(i,1);
-  }
-  //perform integration over bz
-  for(unsigned i=0;i<G_omega.nfreq();++i){
-    G(i,0)=0.;
-    G(i,1)=0.;
-    std::complex<double> iomegan(0,(2*i+1)*M_PI/beta);
-    std::complex<double> zeta_A=iomegan + mu -h -sigma(i,0);
-    std::complex<double> zeta_B=iomegan + mu +h -sigma(i,1);
-    afm_integrand integrand(t_,tprime_,zeta_A, zeta_B);
-    std::complex<double> I=twodsimpson(integrand, -M_PI, -M_PI, M_PI, M_PI, L_);
-    G(i,0)=1./(4*M_PI*M_PI)*zeta_B*I;
-    G(i,1)=1./(4*M_PI*M_PI)*zeta_A*I;
-  }
-  //compute the new G0 
-  for(unsigned i=0;i<G_omega.nfreq();++i){
-    G0_omega(i,0)=1./(sigma(i,0)+1./G(i,0));
-    G0_omega(i,1)=1./(sigma(i,1)+1./G(i,1));
+    G0_omega(w,0)=1./(1./G_omega_new(w,0)+Sigma(w,0));
+    G0_omega(w,1)=1./(1./G_omega_new(w,1)+Sigma(w,1));
   }
   return G0_omega;
 }
 
 
+TwoDHilbertTransformer::TwoDHilbertTransformer(alps::Parameters& parms) 
+    : bandstruct_(parms),
+      L_(parms.value_or_default("L",200))
+{
+  // set parameters for the FourierTransformer if they are not set by the user
+  double epssq = bandstruct_.second_moment();
+  std::cout<<"second moment of bandstructure: "<<epssq<<std::endl;
+  if (epssq>0) SetBandstructureParms(parms,0,epssq);
+}
 
 
+matsubara_green_function_t TwoDHilbertTransformer::operator() (const matsubara_green_function_t & G_omega, 
+                                                                 matsubara_green_function_t &G0_omega, 
+                                                                 const double mu, const double h, const double beta)
+{
+  if(G_omega.nsite()!=1){throw std::logic_error("TwoDHilbertTransformer::operator(): don't know how to handle != 1 site.");}
+  if(G_omega.nflavor() !=2){throw std::logic_error("TwoDHilbertTransformer::operator(): don't know how to handle != 2 flavors.");}
+  if(h!=0){throw std::invalid_argument("TwoDHilbertTransformer::operator(): don't yet handle magnetic fields!"); }
+  std::cout<<"PM TwoD BS FS Hilbert Transformer"<<std::endl;
+  matsubara_green_function_t Sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+  matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+
+  //perform integration over bz
+  for(unsigned f=0;f<G_omega.nflavor();++f){
+    for(unsigned i=0;i<G_omega.nfreq();++i){
+      Sigma(i,f)=1./G0_omega(i,f)-1./G_omega(i,f);
+      std::complex<double> iomegan(0,(2*i+1)*M_PI/beta);
+      std::complex<double> zeta_A=iomegan + mu - Sigma(i,f);
+      std::complex<double> I;
+      if (bandstruct_.single_band()) {
+        pm_band_integrand integrand(bandstruct_,zeta_A);
+        I=twodsimpson(integrand, bandstruct_.kx_min(), bandstruct_.ky_min(), bandstruct_.kx_max(), bandstruct_.ky_max(), L_) / bandstruct_.k_area();
+      }
+      else { // double band: plus/minus
+        pm_band_integrand integrand_plus(bandstruct_,zeta_A);
+        pm_band_integrand integrand_minus(bandstruct_,zeta_A, -1);
+        I=twodsimpson(integrand_plus, bandstruct_.kx_min(), bandstruct_.ky_min(), bandstruct_.kx_max(), bandstruct_.ky_max(), L_);  //upper band
+        I+=twodsimpson(integrand_minus, bandstruct_.kx_min(), bandstruct_.ky_min(), bandstruct_.kx_max(), bandstruct_.ky_max(), L_); // lower band
+        I/=2.*bandstruct_.k_area();
+      }
+      G_omega_new(i,f)=I;
+    }
+  }
+  //compute the new G0 
+  for(unsigned f=0;f<G_omega.nflavor();++f)
+    for(unsigned i=0;i<G_omega.nfreq();++i)
+      G0_omega(i,f)=1./(Sigma(i,f)+1./G_omega_new(i,f));
+
+  return G0_omega;
+}
+
+
+matsubara_green_function_t TwoDAFMHilbertTransformer::operator() (const matsubara_green_function_t & G_omega, 
+                                                                 matsubara_green_function_t &G0_omega, 
+                                                                 const double mu, const double h, const double beta)
+{
+  if(G_omega.nsite()!=1){throw std::logic_error("TwoDHilbertTransformer::operator(): don't know how to handle != 1 site.");}
+  if(G_omega.nflavor() !=2){throw std::logic_error("TwoDHilbertTransformer::operator(): don't know how to handle != 2 flavors.");}
+  std::cout<<"AFM TwoD BS FS Hilbert Transformer"<<std::endl;
+  matsubara_green_function_t Sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+  matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
+
+  for(unsigned i=0;i<G_omega.nfreq();++i){
+    Sigma(i,0)=1./G0_omega(i,0)-1./G_omega(i,0);
+    Sigma(i,1)=1./G0_omega(i,1)-1./G_omega(i,1);
+  }
+  //perform integration over bz
+  for(unsigned i=0;i<G_omega.nfreq();++i){
+    std::complex<double> iomegan(0,(2*i+1)*M_PI/beta);
+    std::complex<double> zeta_A=iomegan + mu -h - Sigma(i,0);
+    std::complex<double> zeta_B=iomegan + mu +h - Sigma(i,1);
+    std::complex<double> I;
+    afm_band_integrand integrand(bandstruct_,zeta_A,zeta_B);   // here the plus/minus band does give the same
+    I=twodsimpson(integrand, bandstruct_.kx_min(), bandstruct_.ky_min(), bandstruct_.kx_max(), bandstruct_.ky_max(), L_) / bandstruct_.k_area();
+    G_omega_new(i,0)=zeta_B*I;
+    G_omega_new(i,1)=zeta_A*I;
+  }
+  //compute the new G0 
+  for(unsigned i=0;i<G_omega.nfreq();++i){
+    G0_omega(i,0)=1./(Sigma(i,0)+1./G_omega_new(i,0));
+    G0_omega(i,1)=1./(Sigma(i,1)+1./G_omega_new(i,1));
+  }
+  return G0_omega;
+}

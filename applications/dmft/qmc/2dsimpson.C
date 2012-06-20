@@ -3,6 +3,7 @@
  * ALPS DMFT Project
  *
  * Copyright (C) 2005 - 2009 by Emanuel Gull <gull@phys.columbia.edu>
+ *               2012        by Jakub Imriska <jimriska@phys.ethz.ch>
  *
  *
 * This software is part of the ALPS Applications, published under the ALPS
@@ -26,6 +27,8 @@
  
 #include<iostream>
 #include "2dsimpson.h"
+
+
 //implementation of 2d simpson for DCA and Single site AFM self consistency
 std::complex<double> twodsimpson(const integrand &f, double ax, double ay, double bx, double by, int N){
   std::complex<double>       result=0.;
@@ -84,12 +87,34 @@ std::complex<double> twodsimpson(const integrand &f, double ax, double ay, doubl
       result+=4.*f(ax+h*(2*i), ay+k*(2*j));
     }
   }
-
+  
   result *= h*k/9.;
   return result;
 }
 
+// 1D Simpson integration
+std::complex<double> simpson_integrate(const DOS_integrand & integrand) {
+  if (integrand.size() % 2 != 1) { throw std::runtime_error("simpson_integrate: ERROR: use odd number of DOS points for higher precision (due to Simpson integration)"); }
+
+  std::complex<double> s=0;
+  // Simpson integration
+  for(unsigned i=1;i<integrand.size()-2;i+=2){
+    s+=4.*integrand(i)+2.*integrand(i+1);                   // Assuming equidistant epsilon points
+  }
+  s+=integrand(0)+integrand(integrand.size()-1)+4.*integrand(integrand.size()-2);
+  s/=3.;
+  return s;
+}
+
+
 double dispersion(double kx, double ky, double t, double tprime){
- return -2.*t*(cos(kx)+cos(ky)) -4.*tprime*cos(kx)*cos(ky);
+ return -2.*t*(cos(kx)+cos(ky)) -4.*tprime*cos(kx)*cos(ky);   // for square lattice
+}
+
+double dispersion_hexagonal(double kx_tilde, double ky_tilde, double t){
+  /* kx_tilde = 3/2*kx;  ky_tilde = sqrt(3)/2*ky
+     BZ may be chosen rectangular: kx_tilde in <-pi,pi);  ky in <-pi/2,pi/2)   */
+  double c = cos(ky_tilde);
+  return t*sqrt(1. + 4.*c*(c+cos(kx_tilde)));
 }
 

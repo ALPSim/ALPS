@@ -41,7 +41,7 @@
 #include "fouriertransform.h"
 #include "green_function.h"
 
-/// performs a DMFT self-conistency loop until convergence
+/// performs a DMFT self-consistency loop until convergence
 ///
 /// @param parms The input parameters for the simulation.
 /// @param solver   The impurity solver. It is left in the state after the final iteration to 
@@ -54,7 +54,7 @@ extern void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver
 extern void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, itime_green_function_t& G_tau);
 
 
-/// performs a DMFT self-conistency loop until convergence
+/// performs a DMFT self-consistency loop until convergence
 ///
 /// @param parms The input parameters for the simulation.
 /// @param solver   An impurity solver that takes both the bare GF in imaginary time AND in Matsubara freqencies, but returns

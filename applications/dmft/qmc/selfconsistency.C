@@ -6,6 +6,7 @@
  *                              Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
+ *               2012        by Jakub Imriska <jimriska@phys.ethz.ch>
  *
  *
 * This software is part of the ALPS Applications, published under the ALPS
@@ -85,9 +86,9 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
     std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
     if (iteration_ctr == 0) 
       (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
-    print_tau_green_functions(iteration_ctr++, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
+    print_tau_green_functions(++iteration_ctr, G0_tau.to_multiple_vector(), G_tau.to_multiple_vector(), beta);
   } while (max_diff > converged  && iteration_ctr < max_it);
-  std::cout<<"converged!"<<std::endl;
+  std::cout<<(max_diff > converged ? "NOT " : "")<<"converged!"<<std::endl;
   // write G0 (to be read in as an input for a new simulation)
   G0_tau.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
 }
@@ -104,6 +105,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool symmetrization = (bool)(parms["SYMMETRIZATION"]);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
+  int max_it=static_cast<int>(parms.value_or_default("MAX_IT", 1000));
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G_tau_old(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
   int iteration_ctr=0;
@@ -130,9 +132,9 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
       }
     }
     std::cout<<"maximum difference in G is: "<<max_diff<<std::endl;
-    print_dressed_tau_green_functions(iteration_ctr++, G_tau, beta);
-  } while (max_diff > converged);
-  std::cout<<"converged!"<<std::endl;
+    print_dressed_tau_green_functions(++iteration_ctr, G_tau, beta);
+  } while (max_diff > converged && iteration_ctr < max_it);
+  std::cout<<(max_diff > converged ? "NOT " : "")<<"converged!"<<std::endl;
   // write G (to be read in as an input for a new simulation)
   G_tau.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
 
@@ -158,6 +160,7 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   double beta = static_cast<double>(parms["BETA"]);
   double h_old = static_cast<double>(parms["H"]);
   double h = parms.value_or_default("H", 0.);
+  double mu = static_cast<double>(parms["MU"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool symmetrization = (bool)(parms["SYMMETRIZATION"]);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
@@ -167,63 +170,69 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   
   matsubara_green_function_t G0_omega = hilbert.initial_G0(parms);
   G0_omega = hilbert.symmetrize(G0_omega, symmetrization);
-  matsubara_green_function_t G_omega = G0_omega;
 
   //define multiple vectors
-  matsubara_green_function_t G_old_omega(G0_omega);
-  matsubara_green_function_t G0_old_omega(G0_omega);
+  matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
+  matsubara_green_function_t G_omega_old(n_matsubara, n_site, n_orbital);
+  matsubara_green_function_t G0_omega_old(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau +1, n_site, n_orbital);
   itime_green_function_t G0_tau(n_tau+1, n_site, n_orbital);
+  itime_green_function_t G0_tau_old(n_tau+1, n_site, n_orbital);
   
   boost::shared_ptr<FourierTransformer> fourier_ptr;
   FourierTransformer::generate_transformer(parms, fourier_ptr);
-  double mu = static_cast<double>(parms["MU"]);
   //fourier.setmu(mu);
+  fourier_ptr->backward_ft(G0_tau, G0_omega);
+  
+  if (parms.defined("G0TAU_input"))           // it is not needed to store it by default, as it will be stored in the 1st iteration as G0_tau_1
+    G0_tau.write((parms["G0TAU_input"]).c_str());
   
   double max_diff;	
   int iteration_ctr = 0;
   do {
     iteration_ctr++;
     std::cout<<"starting iteration nr. "<<iteration_ctr<<std::endl;
-    G_old_omega = G_omega;
-    G0_old_omega = G0_omega;
+    G_omega_old = G_omega;
+    G0_omega_old = G0_omega;
+    G0_tau_old = G0_tau;
     std::cout<<"running solver."<<std::endl<<std::flush;
     boost::tie(G_omega, G_tau) = solver.solve_omega(G0_omega,parms);
     G_tau = hilbert.symmetrize(G_tau, symmetrization);
     G_omega = hilbert.symmetrize(G_omega, symmetrization);
     std::cout<<"running Hilbert transform"<<std::endl<<std::flush;
     G0_omega = hilbert(G_omega, G0_omega, mu, h, beta);
-    //relaxation to speed up /slow down convergence
+    //relaxation to speed up/slow down convergence
     if(relax_rate !=1){
       std::cout<<"using over/underrelaxation with rate: "<<relax_rate<<std::endl;
       for(unsigned int o=0;o<n_orbital;++o){
         for(unsigned int i2=0;i2<n_site;++i2){
           for(unsigned int i1=0;i1<n_site;++i1){
             for(unsigned int w=0;w<n_matsubara;++w){
-              G0_omega(w, i1, i2, o)=relax_rate*G0_omega(w, i1, i2, o) + (1.-relax_rate)*G0_old_omega(w, i1, i2, o);
+              G0_omega(w, i1, i2, o)=relax_rate*G0_omega(w, i1, i2, o) + (1.-relax_rate)*G0_omega_old(w, i1, i2, o);
             }
           }
         }
       }
     }
     fourier_ptr->backward_ft(G0_tau, G0_omega);
-    std::cout<<"comparing old and new result."<<std::endl<<std::flush;
-    max_diff=0;
     if(iteration_ctr>1){
       //comparison for the dressed Green's function in Matsubara freq.
+      std::cout<<"comparing old and new result."<<std::endl;
+      max_diff=0;
       for(unsigned int o=0;o<n_orbital;++o){
         for(unsigned int i2=0;i2<n_site;++i2){
           for(unsigned int i1=0;i1<n_site;++i1){
             for(unsigned int w=0;w<n_matsubara;++w){
-              if (std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o)) > max_diff)
-                max_diff = std::abs(G_omega(w,i1,i2,o)-G_old_omega(w,i1,i2,o));            }
+              if (std::abs(G_omega(w,i1,i2,o)-G_omega_old(w,i1,i2,o)) > max_diff)
+                max_diff = std::abs(G_omega(w,i1,i2,o)-G_omega_old(w,i1,i2,o));
+            }
           }
         }
       }
       std::cout<<"convergence loop: max diff in dressed Green (Matsubara freq): "
-      <<max_diff<<"\tconverged: "<<converged<<std::endl;
+      <<max_diff<<"\t(convergency criterion: "<<converged<<")"<<std::endl<<std::flush;
     }
-    print_all_green_functions(basename, iteration_ctr, G0_omega, G_omega, G0_tau, G_tau, beta);
+    print_all_green_functions(basename, iteration_ctr, G0_omega_old, G_omega, G0_tau_old, G_tau, beta);
     if (iteration_ctr == 1) 
       (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           

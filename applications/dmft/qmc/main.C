@@ -3,7 +3,7 @@
  * ALPS DMFT Project
  *
  * Copyright (C) 2005 - 2009 by Emanuel Gull <gull@phys.columbia.edu>
- *                              Philipp  <werner@itp.phys.ethz.ch>,
+ *                              Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
  *
@@ -78,7 +78,7 @@ int main(int argc, char** argv)
       std::cerr<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
       exit(1);
     }
-    std::cout << "ALPS DMFT framework for the single site impurity problem.       "<<std::endl;;
+    std::cout << "ALPS DMFT framework for the single site impurity problem.       "<<std::endl;
     std::cout << "  For further information see the ALPS DMFT paper:              "<<std::endl;
     std::cout << "  Computer Physics Communications 182, 1078 (2011)              "<<std::endl;
     std::cout << "                                                                "<<std::endl;
@@ -140,8 +140,7 @@ int main(int argc, char** argv)
             if((bool)(parms["SYMMETRIZATION"])==false){ 
               std::cerr<<"ANTIFERROMAGNET==false  and  SYMMETRIZATION==false? redundant parameters! Set SYMMETRIZATION=1 (true) for a paramagnetic solution."<<std::endl; abort();
             }
-            std::cerr<<"implement PM DOS integration!!"<<std::endl;
-            abort();
+            transform_ptr=new TwoDHilbertTransformer(parms);
           }else{
             if((bool)(parms["SYMMETRIZATION"])==true){ 
               std::cerr<<"ANTIFERROMAGNET==true  and  SYMMETRIZATION==true? redundant parameters! Set SYMMETRIZATION=0 (false) for an antiferromagnetic solution."<<std::endl; abort(); 

@@ -6,6 +6,7 @@
  *                              Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
+ *               2012        by Jakub Imriska <jimriska@phys.ethz.ch>
  *
  *
 * This software is part of the ALPS Applications, published under the ALPS
@@ -191,7 +192,6 @@ public:
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t& G_omega, 
                                                 matsubara_green_function_t &G0_omega_ignored, 
                                                 const double mu, const double h, const double beta);
-  matsubara_green_function_t initial_G0(const alps::Parameters& parms);
   
 private:
   double t_; 
@@ -202,7 +202,7 @@ private:
 class FSHamiltonianHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
   /// the constructor reads in the LDA Hamiltonian from a file
-  FSHamiltonianHilbertTransformer(const alps::Parameters& params);
+  FSHamiltonianHilbertTransformer(const alps::Parameters& parms);
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// via summation in k-space. The k-points are defined in the Hamiltonian.
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t &G_omega, 
@@ -215,7 +215,7 @@ public:
 class FSDOSHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
   /// the constructor reads in the DOS from a file
-  FSDOSHilbertTransformer(alps::Parameters& params);
+  FSDOSHilbertTransformer(alps::Parameters& parms);
   /// take G_iomegan as the input and construct G0_iomegan out of it. Do this
   /// using integration over D(epsilon).
   /// We perform the HT G <- \int \frac{D(e)}{A - e} de
@@ -224,19 +224,10 @@ public:
                                                 const double mu, const double h, const double beta);
   
 protected:
+
   std::vector<double> epsilon;
   std::vector<double> dos;
 };
-
-
-
-inline std::complex<double> integrand(int n, const std::vector<double> &dos, const std::vector<double> &epsilon, 
-                                      const std::complex<double> &zeta_A,
-                                      const std::complex<double> &zeta_B)
-{ 
-  return dos[n]/(zeta_A*zeta_B - epsilon[n]*epsilon[n]); 
-}
-
 
 
 //this can do Antiferromagnetism according to Georges et. al.
@@ -251,31 +242,31 @@ public:
 };
 
 
-
-inline double disp_2d(double kx, double ky, double t, double tprime)
-{ 
-  return -2.*t*(cos(kx)+cos(ky)) - 4*tprime*cos(kx)*cos(ky);
-}
-
-
-
-class TwoDAFMHilbertTransformer: public FrequencySpaceHilbertTransformer{
+// for 2-dimensional Hubbard (more than nearest-neighbor hoppings possible), currently for square and hexagonal lattice
+/// We perform the HT G <- \int \frac{1}{A - e(kx,ky)} dkx dky
+class TwoDHilbertTransformer: public FrequencySpaceHilbertTransformer{
 public:
-  TwoDAFMHilbertTransformer(const alps::Parameters& params){
-    t_=params["t"];
-    tprime_=params.value_or_default("tprime",0);
-    L_=params.value_or_default("L",200);
-  }
+  TwoDHilbertTransformer(alps::Parameters& parms);
   
-  
-  matsubara_green_function_t operator()(const matsubara_green_function_t & G_omega, 
+  matsubara_green_function_t operator() (const matsubara_green_function_t & G_omega, 
                                         matsubara_green_function_t &G0_omega, 
                                         const double mu, const double h, const double beta);
   
-private:
-  double t_;
-  double tprime_;
-  int L_;
+protected:
+  TwoDBandstructure bandstruct_;   // there is the bandstructure information
+  const int L_;
+};
+
+
+class TwoDAFMHilbertTransformer: public TwoDHilbertTransformer{
+public:
+  TwoDAFMHilbertTransformer(alps::Parameters& parms)
+    : TwoDHilbertTransformer(parms)
+    {}
+  
+  matsubara_green_function_t operator() (const matsubara_green_function_t & G_omega, 
+                                        matsubara_green_function_t &G0_omega, 
+                                        const double mu, const double h, const double beta);
 };
 
 
