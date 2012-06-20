@@ -33,6 +33,7 @@
 /// @brief implements the external solver
 /// @sa ExternalSolver
 #include "externalsolver.h"
+#include "fouriertransform.h"
 #include <cstdlib>
 #include <fstream>
 #ifdef BOOST_MSVC
@@ -44,11 +45,11 @@
 #include "alps/utility/temporary_filename.hpp"
 #include "alps/numeric/isnan.hpp"
 #include "alps/numeric/isinf.hpp"
-
+void print_green_itime(std::ostream &os, const itime_green_function_t &v, const double beta, const shape_t shape);
 ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& G0, const alps::Parameters& parms) 
 {
   alps::Parameters p(parms);
-//   BOOST_ASSERT(alps::is_master());
+  //   BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile; 
   if(p.defined("TMPNAME")){
@@ -69,7 +70,7 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
   } 
   
   call(infile,outfile);
-
+  
   // read the output
   unsigned int N=(unsigned int)p["N"];
   unsigned int sites     =(unsigned int)p.value_or_default("SITES", 1);
@@ -86,7 +87,6 @@ ImpuritySolver::result_type ExternalSolver::solve(const itime_green_function_t& 
 MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara_green_function_t& G0_omega, const alps::Parameters &parms)
 {
   alps::Parameters p(parms);
-//  BOOST_ASSERT(alps::is_master());
   std::string infile;
   std::string outfile;
   if(p.defined("TMPNAME")){
@@ -100,12 +100,55 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   p["OUTFILE"]=outfile;
   {
     alps::hdf5::archive solver_input(infile, "a");
+    if(p.value_or_default("SC_WRITE_DELTA", false)){
+      //write Delta(i\omega_n) along with \Delta(\tau)
+      
+      //find the second moment of the band structure
+      double epssqav ;
+      if (parms.defined("DOSFILE")) {
+        if (!parms.defined("EPSSQAV")) {
+          throw std::logic_error("error: you specify a DOS file, please also specify the second moment of the band structure EPSSQAV!");
+        } else {
+          epssqav = parms["EPSSQAV"];
+        }
+      }else{
+        double t=parms["t"]; //this is the default: semicircular density of states
+        epssqav = t * t; //...and its moment.
+      }
+      double beta=p["BETA"];
+      double n_orbital=p["FLAVORS"];
+      double mu=p["MU"];
+      double N=p["NMATSUBARA"];
+      double N_tau=p["N"];
+      double U=p["U"];
+      FFunctionFourierTransformer Fourier(beta , 0, epssqav , n_orbital, 1);
+      matsubara_green_function_t Delta_matsubara(N, 1, n_orbital);
+      itime_green_function_t Delta_itime(N_tau+1, 1, n_orbital);
+      for (int f = 0; f < n_orbital; ++f) {
+        for (int i = 0; i < N; ++i) {
+          Delta_matsubara(i, f) = -1. / G0_omega(i, f) + (std::complex < double >(mu, (2. * i + 1) * M_PI / beta));
+        }
+      }
+      Fourier.backward_ft(Delta_itime, Delta_matsubara);
+      Delta_matsubara.write_hdf5(solver_input, "/Delta_omega");
+      Delta_itime.write_hdf5(solver_input, "/Delta");
+      std::ofstream Delta_matsubara_file("Im_delta_matsubara.dat"); print_imag_green_matsubara(Delta_matsubara_file, Delta_matsubara, beta, diagonal);
+      std::ofstream Delta_itime_file("Delta_itime.dat"); print_green_itime(Delta_itime_file,Delta_itime, beta, diagonal);
+      
+      //changed convention in the hybridization solvers:
+      p["N_MATSUBARA"]=p["NMATSUBARA"];
+      p["N_TAU"]=p["N"];
+      p["N_ORBITALS"]=p["FLAVORS"];
+      p["DELTA_IN_HDF5"]=1;
+      p["DELTA"]=infile;
+      p["MU"]=mu+U/2.;
+    }
     solver_input<<alps::make_pvp("/parameters", p);
     G0_omega.write_hdf5(solver_input, "/G0");
   }
-
+  
   call(infile,outfile);
-
+  
   unsigned int n_matsubara=(unsigned int)p["NMATSUBARA"];
   unsigned int n_tau=(unsigned int)p["N"];
   unsigned int n_site     =(unsigned int)p.value_or_default("SITES", 1);
@@ -147,14 +190,16 @@ void ExternalSolver::call(std::string const& infile, std::string const& outfile)
 {
   
   // call the external solver program
-  std::string command = "\""+exe_.string() + "\" " + infile + " " + outfile;
+  std::string command = exe_.string() + " " + infile + " " + outfile;
+  //std::string command = "\""+exe_.string() + "\" " + infile + " " + outfile;
+  //the line above won't work if the exe string has spaces in it.
   std::cerr << "Calling external solver " << exe_.string() << " as: "<<command<<std::endl;
   int result = std::system(command.c_str());
   if (result)
     boost::throw_exception(std::runtime_error("System error code " +boost::lexical_cast<std::string>(result) + " encountered when executing command:\n"+command));
-	                                           
+  
   boost::filesystem::remove(infile);
-
+  
   if (!boost::filesystem::exists(outfile))
     boost::throw_exception(std::runtime_error("The external impurity solver failed to write the output file named " + outfile));
 }

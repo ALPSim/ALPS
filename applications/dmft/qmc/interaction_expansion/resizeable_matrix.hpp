@@ -84,12 +84,12 @@ public:
   inline double &operator()(const unsigned int i, const unsigned int j){return *(values_+(i*memory_size_+j));}
   inline const double &operator()(const unsigned int i, const unsigned int j) const {return *(values_+(i*memory_size_+j));}
 
-  void resize(const unsigned int new_size)
+  void resize(int new_size)
   {
     if(new_size<=size_){ //down is easy
-      if((int)new_size < (int)(size_-5) && (int) new_size > 10){
+      if(new_size < (int)(size_-5) &&  new_size > 10){
         double *new_values=new double[new_size*new_size];
-        for(unsigned int i=0;i<size_;++i){
+        for(int i=0;i<size_;++i){
           memcpy(new_values+i*new_size, values_+i*memory_size_, sizeof(double)*new_size); //for each row: copy the entire row.
         }
         delete[] values_;       //free memory
@@ -103,7 +103,7 @@ public:
       size_=new_size;
     } else{ //get new memory
       double *new_values=new double[new_size*new_size];
-      for(unsigned int i=0;i<size_;++i){
+      for(int i=0;i<size_;++i){
         memcpy(new_values+i*new_size, values_+i*memory_size_, sizeof(double)*size_); //for each row: copy the entire row.
       }
       delete[] values_;    //free memory

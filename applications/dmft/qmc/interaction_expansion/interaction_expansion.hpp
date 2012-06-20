@@ -36,6 +36,7 @@
 #include <complex>
 #include <cassert>
 #include <cmath>
+#include <string.h>
 #include "types.h"
 #include "green_function.h"
 #include "solver.h"

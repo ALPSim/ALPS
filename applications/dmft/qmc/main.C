@@ -183,8 +183,9 @@ int main(int argc, char** argv)
           }
           else
           {
-              /*boost::filesystem::path*/ std::string p(parms["SOLVER"]/**/);
-            solver_ptr.reset(new ExternalSolver(/*boost::filesystem::absolute(*/p/*)*/));
+            std::string p(parms["SOLVER"]);
+            std::cout<<"using external solver: "<<p<<std::endl;
+            solver_ptr.reset(new ExternalSolver(p));
           }
         selfconsistency_loop_omega(parms, *solver_ptr, *transform_ptr);
       }

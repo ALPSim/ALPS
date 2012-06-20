@@ -31,21 +31,21 @@
 //#include "exponential.h"
 
 /*
-implements the measurement of Green's function in the Legendre orthogonal
-polynomial basis, PRB 84, 075145 (2011) and the improved estimators for
-the self-energy and vertex function, arXiv:1108.1936.
-*/
+ implements the measurement of Green's function in the Legendre orthogonal
+ polynomial basis, PRB 84, 075145 (2011) and the improved estimators for
+ the self-energy and vertex function, arXiv:1108.1936.
+ */
 
 using namespace std;
 
 void hybridization::create_measurements(){
   //basic measurements
   measurements << alps::ngs::RealVectorObservable("n")
-               << alps::ngs::RealVectorObservable("order")
-               << alps::ngs::RealVectorObservable("Greens")
-               << alps::ngs::RealObservable("sign")
-               << alps::ngs::RealVectorObservable("matrix_size");
-
+  << alps::ngs::RealVectorObservable("order")
+  << alps::ngs::RealVectorObservable("Greens")
+  << alps::ngs::RealObservable("sign")
+  << alps::ngs::RealVectorObservable("matrix_size");
+  
   //additional measurements
   if(MEASURE_gw){ 
     measurements << alps::ngs::RealVectorObservable("gw_re");
@@ -72,63 +72,63 @@ void hybridization::create_measurements(){
     measurements << alps::ngs::RealVectorObservable("nn");
   if(MEASURE_nnt) 
     measurements << alps::ngs::RealVectorObservable("nnt");
-
-return;
+  
+  return;
 }
 
 
 void hybridization::resize_measurement_vectors(int crank){
-
+  
   //basic measurements
   n_meas.resize(FLAVORS, 0.);
   order_meas.resize(N_order*FLAVORS, 0.);
   n_vectors.resize(FLAVORS);
   matrix_size.resize(FLAVORS, 0.);
-
+  
   //additional measurements
   if(MEASURE_gw){ gw_meas_re.resize(FLAVORS*N_w, 0.); gw_meas_im.resize(FLAVORS*N_w); if(!crank) cout << "measuring g(w)" << endl;}
   if(MEASURE_fw){ fw_meas_re.resize(FLAVORS*N_w, 0.); fw_meas_im.resize(FLAVORS*N_w); if(!crank) cout << "measuring f(w)" << endl;}
   if(MEASURE_gl){ gl_meas.resize(FLAVORS*N_l, 0.); if(!crank) cout << "measuring g(l)" << endl;}
   if(MEASURE_fl){ fl_meas.resize(FLAVORS*N_l, 0.); if(!crank) cout << "measuring f(l)" << endl;}
-
-//  if(MEASURE_nn || MEASURE_nnt) n_vectors.resize(FLAVORS,std::vector<double>(N_nn+1));
+  
+  //  if(MEASURE_nn || MEASURE_nnt) n_vectors.resize(FLAVORS,std::vector<double>(N_nn+1));
   if(MEASURE_nn || MEASURE_nnt){ n_vectors.resize(FLAVORS);
     for(int f=0; f<FLAVORS; ++f) n_vectors[f].resize(N_nn+1);
   }
-
-//  if(MEASURE_nn) nn_meas.resize(FLAVORS*FLAVORS, 0.);
+  
+  //  if(MEASURE_nn) nn_meas.resize(FLAVORS*FLAVORS, 0.);
   if(MEASURE_nn){ nn_meas.resize((FLAVORS*(FLAVORS+1))/2, 0.); if(!crank) cout << "measuring <nn>" << endl; }
   if(MEASURE_nnt){
     nnt_meas.resize(((FLAVORS*(FLAVORS+1))/2)*(N_nn+1));//store only for f1>=f2
     if(!crank) cout << "measuring <n(tau)n(0)>" << endl;
   }
-
+  
   N_w_aux=N_w2+N_W-1;
   if(MEASURE_g2w){ g2w_meas_re.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-                   g2w_meas_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-                   mw_meas.resize(FLAVORS*N_w_aux*N_w_aux); 
-                   if(!crank) cout << "measuring g2(w)" << endl;
-                 }
+    g2w_meas_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
+    mw_meas.resize(FLAVORS*N_w_aux*N_w_aux); 
+    if(!crank) cout << "measuring g2(w)" << endl;
+  }
   if(MEASURE_hw){
-                  hw_meas_re.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-                  hw_meas_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
-                  nmw_meas.resize(FLAVORS*N_w_aux*N_w_aux); 
-                  if(!crank) cout << "measuring h(w)" << endl; 
-                }
-
-return;
+    hw_meas_re.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
+    hw_meas_im.resize(FLAVORS*FLAVORS*N_w2*N_w2*N_W, 0.);
+    nmw_meas.resize(FLAVORS*N_w_aux*N_w_aux); 
+    if(!crank) cout << "measuring h(w)" << endl; 
+  }
+  
+  return;
 }
 
 
 void hybridization::set_measurement_vectors(){
-
-//  int fine_grid=1000*BETA;
-//  static TABULATED_FERMIONIC_IMAGINARY_EXPONENTIALS EXP(BETA,N_w,fine_grid); //elements can be accessed as exp(wn,tau)
-//  static TABULATED_BOSONIC_IMAGINARY_EXPONENTIALS EXPW(BETA,N_W,fine_grid); //elements can be accessed as exp(Wn,tau)
-
+  
+  //  int fine_grid=1000*BETA;
+  //  static TABULATED_FERMIONIC_IMAGINARY_EXPONENTIALS EXP(BETA,N_w,fine_grid); //elements can be accessed as exp(wn,tau)
+  //  static TABULATED_BOSONIC_IMAGINARY_EXPONENTIALS EXPW(BETA,N_W,fine_grid); //elements can be accessed as exp(Wn,tau)
+  
   double s=1;
   static const std::complex<double> I(0.,1.);
-
+  
   if(MEASURE_g2w){//measure <T c c^* c c^*> (a1 c1 a2 c2)
     memset(&( mw_meas[0]),0,  mw_meas.size()*sizeof(std::complex<double>));
     memset(&(nmw_meas[0]),0, nmw_meas.size()*sizeof(std::complex<double>));
@@ -149,7 +149,7 @@ void hybridization::set_measurement_vectors(){
         if(MEASURE_fw || MEASURE_fl || MEASURE_hw)
           for(int f1=0; f1<FLAVORS; f1++)
             pref += 0.5*(u(f1,f)+u(f,f1))*get_occupation(segments[f1],full_line[f1],tau_1,BETA);
-
+        
         for(int c1=0; c1<(int)M[f].size1(); c1++){
           (c1==0 ? itc1 = segments[f].begin() : itc1++); //1st creator
           tau_2=itc1->t_start();
@@ -176,7 +176,7 @@ void hybridization::set_measurement_vectors(){
                 legendre_p=((2*l-1)*x*pl_1-(l-1)*pl_2)/static_cast<double>(l);//l
                 pl_2=pl_1; //l-2
                 pl_1=legendre_p; //l-1
-               }
+              }
               gl_meas[f*N_l+l] -= m_matrix*legendre_p*bubble_sign;
               if(MEASURE_fl){
                 fl_meas[f*N_l+l] -= m_matrix*pref*legendre_p*bubble_sign;
@@ -189,12 +189,12 @@ void hybridization::set_measurement_vectors(){
             for(int wn=0; wn<N_w; wn++){
               exp_*=dexp;
               std::complex<double> meas = -m_matrix*exp_;//note the -
-//              std::complex<double> meas = -m_matrix*EXP(wn,arg);//note the -
+              //              std::complex<double> meas = -m_matrix*EXP(wn,arg);//note the -
               gw_meas_re[f*N_w+wn] += meas.real();
               gw_meas_im[f*N_w+wn] += meas.imag();
               if(MEASURE_fw){
                 std::complex<double> fmeas(0.0);
-//                fmeas -= m_matrix*pref*EXP(wn,arg);
+                //                fmeas -= m_matrix*pref*EXP(wn,arg);
                 fmeas -= m_matrix*pref*exp_;
                 fw_meas_re[f*N_w+wn] += fmeas.real();
                 fw_meas_im[f*N_w+wn] += fmeas.imag();
@@ -224,7 +224,7 @@ void hybridization::set_measurement_vectors(){
       }
     }//segments.size()>0
   }//f
-
+  
   if(MEASURE_g2w){
     for(int f1=0; f1<FLAVORS; f1++)
       for(int f2=0; f2<FLAVORS; f2++)//measure updn and dnup for averaging
@@ -232,7 +232,7 @@ void hybridization::set_measurement_vectors(){
           for(int w3n=0; w3n<N_w2; w3n++)
             for(int Wn=0; Wn<N_W; Wn++){
               int w1n=w2n+Wn; int w4n=w3n+Wn;
-//              int index=(FLAVORS*f1+f2) *N_w2*N_w2*N_W + w2n *N_w2*N_W + w3n *N_W + Wn;
+              //              int index=(FLAVORS*f1+f2) *N_w2*N_w2*N_W + w2n *N_w2*N_W + w3n *N_W + Wn;
               int index=Wn*FLAVORS*FLAVORS*N_w2*N_w2 + (FLAVORS*f1+f2) *N_w2*N_w2 + w2n*N_w2 + w3n;
               std::complex<double> meas =mw_meas[f1*N_w_aux*N_w_aux+w1n*N_w_aux+w2n]*mw_meas[f2*N_w_aux*N_w_aux+w3n*N_w_aux+w4n];
               if(f1==f2)   meas-=mw_meas[f1*N_w_aux*N_w_aux+w1n*N_w_aux+w4n]*mw_meas[f1*N_w_aux*N_w_aux+w3n*N_w_aux+w2n];
@@ -246,17 +246,17 @@ void hybridization::set_measurement_vectors(){
               }
             }//Wn
   }//end::MEASURE_g2w
-
+  
   sign_meas += s;
-
+  
   if(MEASURE_nn || MEASURE_nnt){  
     segment_container_t::iterator it;
     for(int flavor=0; flavor<FLAVORS; ++flavor){
       for(int i=0; i<N_nn+1; i++) n_vectors[flavor][i]=1;//reset
       if(segments[flavor].size()==0){
         if(full_line[flavor]==0){
-        for(std::size_t i=0; i<n_vectors[flavor].size(); ++i)
-          n_vectors[flavor][i]=0;
+          for(std::size_t i=0; i<n_vectors[flavor].size(); ++i)
+            n_vectors[flavor][i]=0;
         }
       }
       else{
@@ -278,20 +278,20 @@ void hybridization::set_measurement_vectors(){
         }
       }
     }
-
-  //this gives the same result, but is somewhat slower
-  /*
-  for(int flavor=0; flavor<FLAVORS; ++flavor){
-    for(int i=0; i<N_nn+1; i++){ 
-      double tau = i*BETA/static_cast<double>(N_nn);
-      n_vectors[flavor][i]=get_occupation(segments[flavor],full_line[flavor],tau,BETA);
-  }
-  }
-*/
+    
+    //this gives the same result, but is somewhat slower
+    /*
+     for(int flavor=0; flavor<FLAVORS; ++flavor){
+     for(int i=0; i<N_nn+1; i++){ 
+     double tau = i*BETA/static_cast<double>(N_nn);
+     n_vectors[flavor][i]=get_occupation(segments[flavor],full_line[flavor],tau,BETA);
+     }
+     }
+     */
   }//end MEASURE_nn || MEASURE_nnt
-
+  
   if(MEASURE_nn){
-  // compute n(0)n(0)
+    // compute n(0)n(0)
     int pos=0;
     for(int flavor1=0; flavor1<FLAVORS; ++flavor1){
       for(int flavor2=0; flavor2<=flavor1; ++flavor2){
@@ -302,32 +302,32 @@ void hybridization::set_measurement_vectors(){
       }
     }
   }//end::MEASURE_nn
-
+  
   if(MEASURE_nnt){
     // compute n(\tau)n(0)
     int pos=0;
     for(int flavor1=0; flavor1<FLAVORS; ++flavor1){
       for(int flavor2=0; flavor2<=flavor1; ++flavor2){
-      //for(int i=0; i<N_nn+1; ++i){// COMPUTING ALL PAIRS i,j MAY BE TOO SLOW
+        //for(int i=0; i<N_nn+1; ++i){// COMPUTING ALL PAIRS i,j MAY BE TOO SLOW
         int i=0;
         for(int index=0; index<N_nn+1; ++index){
           int j=i+index;
           if(j>N_nn) j -= N_nn; //no sign change, this correlator is bosonic
           nnt_meas[pos+index] += n_vectors[flavor1][j]*n_vectors[flavor2][i];
         }
-      //}
+        //}
         pos += (N_nn+1);
       }
     }
   }//end::MEASURE_nnt
-
-return;
+  
+  return;
 }//set_measurements
 
 
 void hybridization::do_measurements(){
   if(is_thermalized()){
-  //basic measurements
+    //basic measurements
     order_meas /= N_meas;
     measurements["order"] << order_meas;
     
@@ -340,10 +340,10 @@ void hybridization::do_measurements(){
     
     matrix_size /= N_meas;
     measurements["matrix_size"]<< matrix_size;
-
+    
     G_meas *= (1.*N)/N_meas/(BETA*BETA);
     measurements["Greens"] << (G_meas); //*sign;
-
+    
     //additional measurements
     if(MEASURE_gw){
       gw_meas_re *= 1./(N_meas*BETA);
@@ -385,11 +385,11 @@ void hybridization::do_measurements(){
       measurements["hw_re"] << hw_meas_re;
       measurements["hw_im"] << hw_meas_im;
     }
-}//if thermalized
-
-    //reset
-    reset_measurement_vectors();
-return;
+  }//if thermalized
+  
+  //reset
+  reset_measurement_vectors();
+  return;
 }
 
 
@@ -400,28 +400,28 @@ void hybridization::reset_measurement_vectors(){
   memset(&(matrix_size[0]),0, matrix_size.size()*sizeof(double));
   memset(&(G_meas[0]),0, G_meas.size()*sizeof(double));
   sign_meas=0;
-
+  
   //additional measurements
   if(MEASURE_gw){ memset(&(gw_meas_re[0]),0, gw_meas_re.size()*sizeof(double));
-		  memset(&(gw_meas_im[0]),0, gw_meas_im.size()*sizeof(double));
+    memset(&(gw_meas_im[0]),0, gw_meas_im.size()*sizeof(double));
   }
   if(MEASURE_fw){ memset(&(fw_meas_re[0]),0, fw_meas_re.size()*sizeof(double));
-		  memset(&(fw_meas_im[0]),0, fw_meas_im.size()*sizeof(double));
+    memset(&(fw_meas_im[0]),0, fw_meas_im.size()*sizeof(double));
   }
   if(MEASURE_gl) memset(&(gl_meas[0]),0, gl_meas.size()*sizeof(double));
   if(MEASURE_fl) memset(&(fl_meas[0]),0, fl_meas.size()*sizeof(double));
-
+  
   if(MEASURE_nn) memset(&(nn_meas[0]), 0, nn_meas.size()*sizeof(double));
   if(MEASURE_nnt) memset(&(nnt_meas[0]), 0, nnt_meas.size()*sizeof(double));
-
+  
   if(MEASURE_g2w){ memset(&(g2w_meas_re[0]),0, g2w_meas_re.size()*sizeof(double));
-		   memset(&(g2w_meas_im[0]),0, g2w_meas_im.size()*sizeof(double));
+    memset(&(g2w_meas_im[0]),0, g2w_meas_im.size()*sizeof(double));
   }
   if(MEASURE_hw){ memset(&(hw_meas_re[0]),0, hw_meas_re.size()*sizeof(double));
-		  memset(&(hw_meas_im[0]),0, hw_meas_im.size()*sizeof(double));
+    memset(&(hw_meas_im[0]),0, hw_meas_im.size()*sizeof(double));
   }
-
-return;
+  
+  return;
 }
 
 
