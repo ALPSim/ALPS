@@ -26,28 +26,20 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include <alps/ngs.hpp>
+#ifndef ALPS_NGS_ALEA_HISTOGRAM_TRAIT_HEADER
+#define ALPS_NGS_ALEA_HISTOGRAM_TRAIT_HEADER
 
-//these two flags will create the int main() together with unit_test.hpp
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-
-
-BOOST_AUTO_TEST_CASE(test_wrapper_for_modular_accum)
+#include <vector>
+//= = = = = = = = = = H I S T O G R A M   T R A I T = = = = = = = = = = = = = = = =
+namespace alps
 {
-    typedef alps::alea::accumulator<int, alps::alea::features<alps::alea::tag::mean> > accum;
-    accum acci;
-    
-    alps::alea::detail::accumulator_wrapper m(acci);
-    
-    for(int i = 0; i < 101; ++i)
+    namespace alea
     {
-        m << i;
-    }
-        //~ 
-    BOOST_REQUIRE( m.get<int>().mean() == 50);
-    BOOST_REQUIRE( alps::alea::mean(alps::alea::extract<accum>(m)) == 50);
-    BOOST_REQUIRE( alps::alea::mean(m.extract<accum>()) == 50);
-    
-}
+        template <typename T>
+        struct histogram_type
+        {
+            typedef double type;
+        };
+    }//end alea namespace 
+}//end alps namespace
+#endif // ALPS_NGS_ALEA_HISTOGRAM_TRAIT_HEADER

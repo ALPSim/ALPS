@@ -26,28 +26,50 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include <alps/ngs.hpp>
+#ifndef ALPS_NGS_ALEA_ACCUMULATOR_WRAPPER_FWD_HEADER
+#define ALPS_NGS_ALEA_ACCUMULATOR_WRAPPER_FWD_HEADER
 
-//these two flags will create the int main() together with unit_test.hpp
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/cstdint.hpp>
+#include <alps/ngs/alea/accumulator.hpp>
 
-
-BOOST_AUTO_TEST_CASE(test_wrapper_for_modular_accum)
+namespace alps
 {
-    typedef alps::alea::accumulator<int, alps::alea::features<alps::alea::tag::mean> > accum;
-    accum acci;
-    
-    alps::alea::detail::accumulator_wrapper m(acci);
-    
-    for(int i = 0; i < 101; ++i)
+    namespace alea
     {
-        m << i;
-    }
-        //~ 
-    BOOST_REQUIRE( m.get<int>().mean() == 50);
-    BOOST_REQUIRE( alps::alea::mean(alps::alea::extract<accum>(m)) == 50);
-    BOOST_REQUIRE( alps::alea::mean(m.extract<accum>()) == 50);
-    
-}
+        namespace detail
+        {
+            class base_wrapper;
+            template<typename Accum>
+            class result_type_wrapper;
+
+            //class that holds the base_wrapper pointer
+            class accumulator_wrapper {
+                public:
+                    template<typename T> 
+                    accumulator_wrapper(T arg);
+                    
+                    accumulator_wrapper(accumulator_wrapper const & arg);
+                    
+                    template<typename T>
+                    accumulator_wrapper& operator<<(const T& value);
+                        
+                    
+                    template<typename T>
+                    detail::result_type_wrapper<T> &get();//TODO
+                    
+                    friend std::ostream& operator<<(std::ostream &out, const accumulator_wrapper& wrapper);
+                    
+                    template <typename T>
+                    T & extract();
+                    
+                    boost::uint64_t count() const;
+                    
+                private:
+                    boost::shared_ptr<base_wrapper> base_;
+            };
+        }//end detail namespace 
+    }//end alea namespace 
+}//end alps namespace
+#endif // ALPS_NGS_ALEA_ACCUMULATOR_WRAPPER_FWD_HEADER
+

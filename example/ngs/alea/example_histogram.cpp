@@ -37,25 +37,25 @@ int main()
     cout << "test int histo" << endl;
     cout << "--------------" << endl;
     
-    /*                                                                        updated: 18.12.2011
-     * in the histogram the first template parameter stands for the 
+    /*                                                              updated: 18.12.2011
+     * in the histogram_old the first template parameter stands for the 
      * value_type and the second for the weight_type
      * 
      * histo[value_type(1)] += weight_type(1)
      * adds weight_type(1) to the interval where value_type(1) lies in
      */
      
-    /*                                                                        updated: 18.12.2011 
+    /*                                                              updated: 18.12.2011 
      * a normal dice for example:
      * the constructor takes ctor(interval_start, interval_end, sections in interval)
      * 
      * NOTE: the ctor for int-types (checked with boost::is_integrale<>) is slightly
-     *       different than the one for float_types (checked with boost::is_floating_point<>)
-     *       This ctor gets the section length by (end - start) / (amount of sections - 1)
-     *       so that the start and endpoint are valid points
+     *     different than the one for float_types (checked with boost::is_floating_point<>)
+     *     This ctor gets the section length by (end - start) / (amount of sections - 1)
+     *     so that the start and endpoint are valid points
      */
     
-    histogram<int, int> a(1, 6, 6); 
+    histogram_old<int, int> a(1, 6, 6); 
     
     // put in a value via stream op
     a << 1;
@@ -69,14 +69,15 @@ int main()
     a[1]++;
     ++a[1];
     
-    // one can also stream in a pair where the first position is the location and the second the weigth
+    // one can also stream in a pair where the first position 
+    // is the location and the second the weigth
     a << pair<int, int>(1, 1);
     
     // print
     cout << "a[1] = " << a[1] << endl;
     
     //copy ctor
-    histogram<int, int> b(a);
+    histogram_old<int, int> b(a);
     
     cout << a << endl;
     cout << b << endl;
@@ -84,16 +85,16 @@ int main()
     cout << "test double histo" << endl;
     cout << "-----------------" << endl;
     
-    /*                                                                        updated: 18.12.2011
+    /*                                                                  updated: 18.12.2011
      * NOTE: the ctor for int-types (checked with boost::is_integrale<>) is slightly
-     *       different than the one for float_types (checked with boost::is_floating_point<>)
-     *       This ctor gets the section length by (end - start) / (amount of sections)
-     *       the startpoint is also valid but is put in the first interval, regardless
-     *       that a previouse interval would end there. This could mess up statistcs
+     *     different than the one for float_types (checked with boost::is_floating_point<>)
+     *     This ctor gets the section length by (end - start) / (amount of sections)
+     *     the startpoint is also valid but is put in the first interval, regardless
+           that a previouse interval would end there. This could mess up statistcs
      */
      
-    histogram<double, double> fail(0, 10, 100); //calls int-ctor ==> messes up statistics
-    histogram<double, double> c(0., 10., 100); //important to give double values to the ctor
+    histogram_old<double, double> fail(0, 10, 100); //calls int-ctor ==> messes up statistics
+    histogram_old<double, double> c(0., 10., 100);//important to give double values to the ctor
     
     //these two values end up in the same interval
     c << 0; //startpoint
@@ -115,7 +116,8 @@ int main()
     c[2]++;
     ++c[2.000001];
     
-    // one can also stream in a pair where the first position is the location and the second the weigth
+    // one can also stream in a pair where the first position is 
+    // the location and the second the weigth
     c << pair<double, double>(1.02, 1.4);
     
     // print
@@ -127,8 +129,27 @@ int main()
     cout << "c[10] = " << c[10] << endl;
     
     //copy ctor
-    histogram<double, double> d(c);
+    histogram_old<double, double> d(c);
     
     cout << c << endl;
     cout << d << endl;
+    
+    //output:
+    /*  
+        test int histo
+        --------------
+        a[1] = 6
+        histogram_old: mean: 1.75
+        histogram_old: mean: 1.75
+        test double histo
+        -----------------
+        c[1] = 5.5
+        c[1.05] = 5.5
+        c[1.05] = 5.5
+        c[1.1] = 1
+        c[0] = 2
+        c[10] = 2
+        histogram_old: mean: 2.5
+        histogram_old: mean: 2.5
+    */
 }

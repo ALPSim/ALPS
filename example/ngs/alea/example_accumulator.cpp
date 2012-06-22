@@ -26,21 +26,20 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- *                                             updated: 20.12.2011                 *
+ *                                             updated: 21.05.2012                 *
  * the accumulator is built modular                                                *
- * one can choose which adapters are needed                                        *
- * some adapter require others and include them automatically                      *
+ * one can choose which implementations are needed                                 *
+ * some implementation require others and include them automatically               *
  *                                                                                 *
  * -----------------+-----------------------+----------------------                *
- * possible adapter | includes also         | name of the function                 *
+ * possible impl    | includes also         | name of the function                 *
  * -----------------+-----------------------+----------------------                *
- * Count            |                       | count(x) or x.count()                *
- * Mean             | Count                 | mean(x)  or x.mean()                 *
- * Error            | Count, Mean           | error(x) or x.error()                *
- * FixSizeBinning   | Count, Mean, Error    | fix_size_bin(x) or ..                *
- * MaxNumBinning    | Count, Mean, Error    | max_num_bin(x) or ...                *
- * LogBinning       | Count, Mean, Error    | log_bin(x) or ...                    *
- * Autocorrelation  | Count, Mean, Error    | autocorr(x)    or ...                *
+ * mean             | Count                 | mean(x)                              *
+ * error            | Count, mean           | error(x)                             *
+ * fixed_size_binn  | Count, mean, error    | fixed_size_bin(x)                    *
+ * MaxNumBinning    | Count, mean, error    | max_num_bin(x)                       *
+ * log_binning      | Count, mean, error    | log_bin(x)                           *
+ * autocorrelation  | Count, mean, error    | autocorr(x)                          *
  * -----------------+-----------------------+----------------------                *
  *                                                                                 *
  * NOTE: the first template parameter MUST be the value_type                       *
@@ -49,6 +48,7 @@
 
 #include <iostream>
 #include <alps/ngs.hpp>
+#include <alps/ngs/alea/detail/any.hpp>
 
 using namespace std;
 using namespace alps::alea;
@@ -56,116 +56,157 @@ using namespace alps::alea;
 int main()
 {
 
-    //is an accum with count, mean, error and fix_size_bin functions
-    typedef accumulator<int, FixSizeBinning> accum; 
+    //accumulator with all the features so far
+    typedef accumulator<  int
+                        , features<  tag::fixed_size_binning
+                                , tag::max_num_binning
+                                , tag::log_binning
+                                , tag::autocorrelation
+                                //~ , tag::converged
+                                //~ , tag::tau
+                                , tag::histogram
+                                >
+                        > accum;
     
-    /*                                             updated: 20.12.2011 
+    /*                                             updated: 21.05.12 
      * initialisation with boost::parameter
-     * the tree parameter are:
-     * bin_size for FixSizeBinning with default 128
-     * bin_number for MaxNumBinning with default 128
-     * bin_log for LogBinning with default 10
-     * bin_auto for Autocorrelation with default 10
+     * the two parameter are:
+     * bin_size for tag::fixed_size_binning with default 128
+     * bin_num for MaxNumBinning with default 128
      */
-
-    accum demo_all(bin_size = 2, bin_number = 4);
+    
+    //------------------- constructor -------------------
+    accum demo_all_default;
+    accum demo_partial_1(bin_size = 2);     //bin_num is default 128
+    accum demo_partial_2(bin_num = 2);   //bin_size is default 128
+    accum demo(bin_size = 2, bin_num = 2);
+    
     //order with boost::parameter doesn't matter
-    accum demo_all_order(bin_number = 4, bin_size = 2);
-    accum demo_all_default();
+    accum demo_all_order(bin_num = 4, bin_size = 2);
     
-    //ctor
-    accum a(bin_size = 2);
+    //------------------- stream operator -------------------
+    demo << 1;
+    demo << 3;
+    demo << 5;
+    demo << 7;
+    demo << 9;
     
-    //put in values
-    a << 1;
-    a << 3;
-    a << 5;
-    a << 7;
-    a << 9;
+    //------------------- get informations -------------------
+    cout << count(demo) << endl; 
+    //output:   5
+    cout << mean(demo) << endl;
+    //output:   5
+    cout << error(demo) << endl;
+    //output:   1.41421
+    cout << fixed_size_bin(demo).bins()[0] << endl;
+    //output:   2     //(1+3)/2
+    cout << max_num_bin(demo).bins()[0] << endl;
+    //output:   2     //(1+3)/2
+    cout << log_bin(demo).bins()[0] << endl;
+    //output:   1     //first element
+    cout << autocorr(demo).error(2) << endl;
+    cout << autocorr(demo).bins()[1] << endl;
+    cout << autocorr(demo).sum()[1] << endl;
     
-    //get informations
-    count(a);
-    mean(a);
-    error(a);
-    fix_size_bin(a);
+    cout << converged(demo) << endl;
+    //output:   2 (alps::alea::error_convergence maybe)   //not jet implemented
+    cout << tau(demo) << endl;
+    //output:   42    //not jet implemented
+    cout << histogram(demo) << endl;
+    //output:   272.15    //not jet implemented
     
-    //print
-    cout << a << endl;
+    //------------------- copy constructor -------------------
+    accum copy(demo);
     
-    //copy ctor
-    accum b(a);
+    //------------------- print to an ostream -------------------
+    cout << demo << endl;
+    //output:   ValueType: i Count: 5 tag::mean: 5 tag::error: 1.41421 FixBinSize->BinNumber: 2 
+    //          MaxBinningNumber->MaxBinNumber: 2 Log Binning: tag::autocorrelation:
+    cout << copy << endl;
+    //output:   ValueType: i Count: 5 tag::mean: 5 tag::error: 1.41421 FixBinSize->BinNumber: 2 
+    //          MaxBinningNumber->MaxBinNumber: 2 Log Binning: tag::autocorrelation:
     
-    //print
-    cout << b << endl;
     
-    //put it in a measurement-wrapper
-    measurement m(accum(bin_size = 2));
+    //------------------- detail::accumulator_wrapper -------------------
+    //put an accumulator in a detail::accumulator_wrapper-wrapper (copy)
+    detail::accumulator_wrapper m_from_accum(demo);
+    //construct in initialization
+    detail::accumulator_wrapper m(accum(bin_size = 4, bin_num = 10));
     
-    //values
-    m << 1;
-    m << 2;
-    m << 3;
-    m << 4;
+    //------------------- stream operator -------------------
+    for(int i = 0; i < 64; ++i)
+        m << 1;
     
-    //get informations
-    m.get<int>().count();
-    m.get<int>().mean();
-    m.get<int>().error();
-    m.get<int>().fix_size_bin();
+    //------------------- get informations -------------------
+    cout << count(m.get<int>()) << endl;
+    //output:   64
+    cout << mean(m.get<int>()) << endl;
+    //output:   1
+    cout << error(m.get<int>()) << endl;
+    //output:   0
+    cout << tau(m.get<int>()) << endl;
+    cout << histogram(m.get<int>()) << endl;
     
-    //extract accum
-    m.extract<accum>();
-    extract<accum>(m);
+    //------------------- extract accum -------------------
+    accum extraction(m.extract<accum>());
+    accum extraction_free(extract<accum>(m));
     
-    //copy ctor
-    measurement n(m);
+    //------------------- copy constructor -------------------
+    detail::accumulator_wrapper n(m);
     
-    //print
+    
+    //------------------- print -------------------
     cout << m << endl;
+    //output:   ValueType: i Count: 64 tag::mean: 1 tag::error: 0 FixBinSize->BinNumber: 16 
+    //          MaxBinningNumber->MaxBinNumber: 10 Log Binning: tag::autocorrelation: 
     cout << n << endl;
+    //output:   ValueType: i Count: 64 tag::mean: 1 tag::error: 0 FixBinSize->BinNumber: 16 
+    //          MaxBinningNumber->MaxBinNumber: 10 Log Binning: tag::autocorrelation: 
     
-    accumulator<int, Autocorrelation> v(bin_log = 1);
+    //------------------- binnings -------------------    
     
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
-    v << 1;
-    cout << v << endl;
+    cout << n.count() << endl;
+    cout << fixed_size_bin(n.get<int>()).bins()[0] << " ";
+    cout << n.get<int>().fixed_size_bin().bins()[1] << " ";
+    cout << n.get<int>().fixed_size_bin().bins()[2] << " ";
+    cout << n.get<int>().fixed_size_bin().bin_size() << endl;
+    //~ //output: 1 1 1 1
+    cout << n.get<int>().max_num_bin().bins()[0] << " ";
+    cout << n.get<int>().max_num_bin().bins()[1] << " ";
+    cout << n.get<int>().max_num_bin().bins()[2] << " ";
+    cout << n.get<int>().max_num_bin().bins()[3] << endl;
+    //~ //output: 1 1 1 1
+    cout << n.get<int>().log_bin().bins()[0] << " ";
+    cout << n.get<int>().log_bin().bins()[1] << " ";
+    cout << n.get<int>().log_bin().bins()[2] << " ";
+    cout << n.get<int>().log_bin().bins()[3] << endl;
+    //~ //output: 1 1 1 1
+    cout << n.get<int>().autocorr() << " ";
+    cout << n.get<int>().autocorr() << " ";
+    cout << n.get<int>().autocorr() << " ";
+    cout << n.get<int>().autocorr() << endl;
+    //output: 64 128 256 512
+
+    //------------------- doesn't work jet -------------------
+    //~ //need to adjust resulttype-wrapper
+    //~ cout << converged(n.get<int>()) << endl;
+    //~ cout << tau(n.get<int>()) << endl;
+    
+    
+    int i = 0;
+    
+    cout << i << endl;
+    
+    detail::weak_type_ptr a(i);
+    
+    detail::make_data<int> b(5);
+    
+    ++b().cast<int>();
+    
+    cout << b.get() << endl;
+    
+    ++a.cast<int>();
+    
+    cout << i << endl;
+    
 }

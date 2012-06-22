@@ -26,28 +26,61 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include <alps/ngs.hpp>
+#ifndef ALPS_NGS_ALEA_ACCUMULATOR_WRAPPER_HEADER
+#define ALPS_NGS_ALEA_ACCUMULATOR_WRAPPER_HEADER
 
-//these two flags will create the int main() together with unit_test.hpp
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
+#include <alps/ngs/alea/detail/accum_wrapper.hpp>
+#include <alps/ngs/alea/extern_function.hpp>
+#include <alps/ngs/stacktrace.hpp>
+#include <alps/ngs/alea/accumulator_wrapper_fwd.hpp>
+
+#include <boost/shared_ptr.hpp>
 
 
-BOOST_AUTO_TEST_CASE(test_wrapper_for_modular_accum)
+namespace alps
 {
-    typedef alps::alea::accumulator<int, alps::alea::features<alps::alea::tag::mean> > accum;
-    accum acci;
-    
-    alps::alea::detail::accumulator_wrapper m(acci);
-    
-    for(int i = 0; i < 101; ++i)
+    namespace alea
     {
-        m << i;
-    }
-        //~ 
-    BOOST_REQUIRE( m.get<int>().mean() == 50);
-    BOOST_REQUIRE( alps::alea::mean(alps::alea::extract<accum>(m)) == 50);
-    BOOST_REQUIRE( alps::alea::mean(m.extract<accum>()) == 50);
-    
-}
+        namespace detail
+        {
+            //class that holds the base_wrapper pointer
+            template<typename T> 
+            accumulator_wrapper::accumulator_wrapper(T arg): base_(new accumulator_wrapper_derived<T>(arg)) 
+            {}
+
+            template<typename T>
+            accumulator_wrapper& accumulator_wrapper::operator<<(const T& value) 
+            {
+                (*base_) << value; return *this;
+            }
+
+            template<typename T>
+            result_type_wrapper<T> &accumulator_wrapper::get() 
+            {
+                return (*base_).get<T>();
+            }
+
+            template <typename T>
+            T & accumulator_wrapper::extract() 
+            {
+                return (dynamic_cast<detail::accumulator_wrapper_derived<T>& >(*base_)).accum_;
+            }
+            
+            //TODO
+            boost::uint64_t accumulator_wrapper::count() const
+            {
+                return (*base_).count();
+            }
+            
+            accumulator_wrapper::accumulator_wrapper(accumulator_wrapper const & arg): base_(arg.base_->clone()) 
+            {}
+                
+            std::ostream& operator<<(std::ostream &out, const accumulator_wrapper& m)
+            {
+                (*(m.base_)).print(out);
+                return out;
+            }
+        }//end detail namespace 
+    }//end alea namespace 
+}//end alps namespace
+#endif // ALPS_NGS_ALEA_ACCUMULATOR_WRAPPER_HEADER

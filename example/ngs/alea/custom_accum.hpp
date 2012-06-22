@@ -59,7 +59,7 @@ namespace alps
         typedef myVector custom_accum;
 
 
-        // with this specialisation the measurement knows, that custom_accum has a mean function
+        // with this specialisation the detail::accumulator_wrapper knows, that custom_accum has a mean function
         template<> struct has_mean<custom_accum> 
         {
             enum{value = true};
@@ -85,7 +85,7 @@ namespace alps
         }
 
         //the count op returns the count of the accum
-        boost::int64_t count(custom_accum const & arg)
+        boost::uint64_t count(custom_accum const & arg)
         {
             return arg.size();
         }

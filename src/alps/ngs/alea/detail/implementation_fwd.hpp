@@ -26,28 +26,29 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 
-#include <alps/ngs.hpp>
+#ifndef ALPS_NGS_ALEA_DETAIL_IMPLEMENTATION_FWD_HEADER
+#define ALPS_NGS_ALEA_DETAIL_IMPLEMENTATION_FWD_HEADER
 
-//these two flags will create the int main() together with unit_test.hpp
-#define BOOST_TEST_MAIN
-#define BOOST_TEST_DYN_LINK
-#include <boost/test/unit_test.hpp>
-
-
-BOOST_AUTO_TEST_CASE(test_wrapper_for_modular_accum)
+namespace alps
 {
-    typedef alps::alea::accumulator<int, alps::alea::features<alps::alea::tag::mean> > accum;
-    accum acci;
-    
-    alps::alea::detail::accumulator_wrapper m(acci);
-    
-    for(int i = 0; i < 101; ++i)
+    namespace alea
     {
-        m << i;
-    }
-        //~ 
-    BOOST_REQUIRE( m.get<int>().mean() == 50);
-    BOOST_REQUIRE( alps::alea::mean(alps::alea::extract<accum>(m)) == 50);
-    BOOST_REQUIRE( alps::alea::mean(m.extract<accum>()) == 50);
-    
-}
+        // = = = = = = = = = = I M P L E M E N T A T I O N   D E F I N I T I O N = = = = = = = = = =
+        namespace tag
+        {
+            struct mean;
+            struct error;
+            struct fixed_size_binning;
+            struct max_num_binning;
+            struct log_binning;
+            struct autocorrelation;
+            namespace detail
+            {
+                struct converged;
+                struct tau;
+            }
+            struct histogram;
+        }
+    }//end alea namespace 
+}//end alps namespace
+#endif // ALPS_NGS_ALEA_DETAIL_IMPLEMENTATION_FWD_HEADER
