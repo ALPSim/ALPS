@@ -33,10 +33,10 @@
 
 #include <alps/numeric/is_nonzero.hpp>
 #include <alps/type_traits/is_symbolic.hpp>
+#include <alps/multi_array.hpp>
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_comparison.hpp>
-#include <boost/multi_array.hpp>
 #include <boost/numeric/ublas/matrix.hpp>
 #include <boost/numeric/ublas/matrix_sparse.hpp>
 #include <boost/numeric/ublas/io.hpp>
@@ -99,7 +99,7 @@ void HamiltonianMatrix<T,M>::build() const
   alps::HamiltonianDescriptor<short> ham(models_.get_hamiltonian(*this,parms_,alps::is_symbolic<T>::type::value));
     
   // get all site matrices
-  std::map<unsigned int,boost::multi_array<T,2> > site_matrix;
+  std::map<unsigned int,alps::multi_array<T,2> > site_matrix;
   std::map<unsigned int,bool> site_visited;
   
   alps::Disorder::seed(parms_.value_or_default("DISORDER_SEED",0));
@@ -121,7 +121,7 @@ void HamiltonianMatrix<T,M>::build() const
     }
 
   // get all bond matrices
-  std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,boost::multi_array<std::pair<T,bool>,4> > bond_matrix;
+  std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,alps::multi_array<std::pair<T,bool>,4> > bond_matrix;
   std::map<boost::tuple<unsigned int,unsigned int,unsigned int>,bool> bond_visited;
   for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
     unsigned int inhomogeneous_btype  = inhomogeneous_bond_type(*it);
@@ -161,7 +161,7 @@ void HamiltonianMatrix<T,M>::build() const
       state_type state=states[i];              // get source state
   int s=0;
   for (site_iterator it=sites().first; it!=sites().second ; ++it,++s) {
-    boost::multi_array<T,2>& mat = site_matrix[inhomogeneous_site_type(*it)];
+    alps::multi_array<T,2>& mat = site_matrix[inhomogeneous_site_type(*it)];
       int is=state[s];                         // get site basis index
       for (int js=0;js<basis[s].size();++js) { // loop over target site states
         T val=mat[is][js];                     // get matrix element
@@ -184,7 +184,7 @@ void HamiltonianMatrix<T,M>::build() const
     for (bond_iterator it=bonds().first; it!=bonds().second ; ++it) {
       int s1=source(*it);
       int s2=target(*it);
-      boost::multi_array<std::pair<T,bool>,4>& mat = bond_matrix[boost::make_tuple(inhomogeneous_bond_type(*it),site_type(s1),site_type(s2))];
+      alps::multi_array<std::pair<T,bool>,4>& mat = bond_matrix[boost::make_tuple(inhomogeneous_bond_type(*it),site_type(s1),site_type(s2))];
       int is1=state[s1];                           // get source site states
       int is2=state[s2];
       for (int js1=0;js1<basis[s1].size();++js1) { // loop over target site states
