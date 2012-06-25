@@ -294,8 +294,8 @@ void print_all_green_functions(std::string const &basename, const int iteration_
 }
 
 
-
-void print_tau_green_functions(const int iteration_ctr, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta){
+void print_tau_green_functions(std::string const &basename, const int iteration_ctr, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta,
+                               const shape_t shape, const std::string suffix){
   std::ostringstream G0tau_name, Gtau_name, Gtau_name_2;
   G0tau_name<<"G0_tau_"<<iteration_ctr;//<<"_"<<process_id;
   Gtau_name<<"G_tau_"<<iteration_ctr;//<<"_"<<process_id;
@@ -303,12 +303,23 @@ void print_tau_green_functions(const int iteration_ctr, const multiple_vector_ty
   std::ofstream G0_tau_file(G0tau_name.str().c_str());
   std::ofstream G_tau_file(Gtau_name.str().c_str());
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
-  print_green_itime(G0_tau_file,G0_tau,beta);
-  print_green_itime(G_tau_file,G_tau,beta);
-  print_green_itime(G_tau_file_2,G_tau,beta);
+  print_green_itime(G0_tau_file,G0_tau,beta,shape);
+  print_green_itime(G_tau_file,G_tau,beta,shape);
+  print_green_itime(G_tau_file_2,G_tau,beta,shape);
+  
+  alps::hdf5::archive ar(basename+".h5", "a");
+  //writeout into hf5 file, using /simulation/iteration/ path
+  std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
+  G_tau.write_hdf5_ss(ar,basepath.str()+"G_tau");
+  G0_tau.write_hdf5_ss(ar,basepath.str()+"G0_tau");
+  
+  //writeout into hf5 file, using /simulation/results/ path
+  std::stringstream basepath2; basepath2<<"/simulation/results/";
+  G_tau.write_hdf5_ss(ar,basepath2.str()+"G_tau");
+  G0_tau.write_hdf5_ss(ar,basepath2.str()+"G0_tau");
 }
 
-void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
+void print_dressed_tau_green_functions(std::string const &basename, const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
                                        const shape_t shape, const std::string suffix){
   std::ostringstream Gtau_name, Gtau_name_2;
   Gtau_name<<"G_tau"<<suffix<<"_"<<iteration_ctr;//<<"_"<<process_id;
@@ -317,6 +328,15 @@ void print_dressed_tau_green_functions(const int iteration_ctr, const itime_gree
   std::ofstream G_tau_file_2(Gtau_name_2.str().c_str());
   print_green_itime(G_tau_file,G_tau,beta,shape);
   print_green_itime(G_tau_file_2,G_tau,beta,shape);
+  
+  alps::hdf5::archive ar(basename+".h5", "a");
+  //writeout into hf5 file, using /simulation/iteration/ path
+  std::stringstream basepath; basepath<<"/simulation/iteration/"<<iteration_ctr<<"/results/";
+  G_tau.write_hdf5_ss(ar,basepath.str()+"G_tau");
+  
+  //writeout into hf5 file, using /simulation/results/ path
+  std::stringstream basepath2; basepath2<<"/simulation/results/";
+  G_tau.write_hdf5_ss(ar,basepath2.str()+"G_tau");
 }
 
 std::ostream &operator<<(std::ostream &os, const green_function<double> &v){

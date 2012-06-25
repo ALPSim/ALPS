@@ -101,7 +101,7 @@ int main(int argc, char** argv)
     if(!parms.defined("CLUSTER_LOOP")) {
       if(!parms.defined("OMEGA_LOOP") || (bool)(parms["OMEGA_LOOP"])==false){
         //...imaginary time tau
-        SemicircleHilbertTransformer transform(boost::lexical_cast<double>(parms["t"]));
+        SemicircleHilbertTransformer transform(parms);
         boost::shared_ptr<ImpuritySolver> solver_ptr;
         if (parms["SOLVER"]=="Hirsch-Fye"){
           std::cout<<"solving Hirsch Fye"<<std::endl;

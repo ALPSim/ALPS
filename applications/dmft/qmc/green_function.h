@@ -264,6 +264,8 @@ void print_all_green_functions(std::string const &basename, const int iteration_
                                const std::string suffix="");
 void print_real_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape=diagonal);
 void print_imag_green_matsubara(std::ostream &os, const matsubara_green_function_t &v, const double beta, const shape_t shape=diagonal);
-void print_dressed_tau_green_functions(const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
+void print_tau_green_functions(std::string const &basename, const int iteration_ctr, const itime_green_function_t &G0_tau, const itime_green_function_t &G_tau, const double beta,
+                               const shape_t shape=nondiagonal, const std::string suffix="");
+void print_dressed_tau_green_functions(std::string const &basename, const int iteration_ctr, const itime_green_function_t &G_tau, const double beta, 
                                        const shape_t shape=nondiagonal, const std::string suffix="");
 #endif

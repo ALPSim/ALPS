@@ -84,8 +84,6 @@ void print_imag_green_matsubara(std::ostream &os, const multiple_complex_vector_
 void print_real_green_matsubara(std::ostream &os, const multiple_complex_vector_type &v, const double beta);
   
 void print_green_itime(std::ostream &os, const multiple_vector_type &v, const double beta);
-void print_all_green_functions(const int iteration_ctr, const multiple_complex_vector_type &bare_green_matsubara, const multiple_complex_vector_type &dressed_green_matsubara, const multiple_vector_type &bare_green_itime, const multiple_vector_type &dressed_green_itime, const double beta);
-void print_tau_green_functions(const int iteration_ctr, const multiple_vector_type &G0_tau, const multiple_vector_type &G_tau, const double beta);
 
 struct hifreq_moments{
   std::vector<std::vector<std::vector<double> > >c0;

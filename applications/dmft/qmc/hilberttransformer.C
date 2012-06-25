@@ -62,7 +62,6 @@ itime_green_function_t HilbertTransformer::initial_G0(const alps::Parameters& pa
 itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_green_function_t& G_tau, 
                                                                 double mu, double h, double beta)
 {
-  double tsq=t_*t_;
   matsubara_green_function_t G_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   matsubara_green_function_t G0_omega(G_tau.ntime()-1, G_tau.nsite(), G_tau.nflavor());
   itime_green_function_t G0_tau(G_tau.ntime(), G_tau.nsite(), G_tau.nflavor());
@@ -77,7 +76,7 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
     std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
     for(spin_t flavor=0;flavor<G_omega.nflavor(); flavor++){
       std::complex<double> zeta = iw + mu + (flavor%2 ? -h : h);
-      G0_omega(i, flavor) = 1./(zeta - tsq*G_omega(i, flavor%2==0?flavor+1:flavor-1));
+      G0_omega(i, flavor) = 1./(zeta - tsq[flavor]*G_omega(i, flavor%2==0?flavor+1:flavor-1));
     }
   }
   //std::cout<<"symmetrized G0 omega real: "<<std::endl;
@@ -98,15 +97,6 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
   double beta = static_cast<double>(parms["BETA"]);
   double mu = static_cast<double>(parms["MU"]);
   double h = static_cast<double>(parms.value_or_default("H_INIT",0.));
-  std::vector<double> tsq(n_flavor, t_*t_);
-  for(int i=0;i<n_flavor;++i){
-    std::stringstream ti; ti<<"t"<<i/2;
-    if(parms.defined(ti.str())){
-      double t=static_cast<double>(parms[ti.str()]);
-      tsq[i]=t*t;
-      std::cout<<"for flavor: "<<i<<" using bw: "<<t<<std::endl;
-    }
-  }
   matsubara_green_function_t G0_omega(n_matsubara,n_flavor);  
   itime_green_function_t G0_tau(n_time+1, n_flavor);
   for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
@@ -221,8 +211,8 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
 }
 
 
-void SetBandstructureParms(alps::Parameters& parms, double eps, double epssq) {
-  // set parameters for the FourierTransformer if they are not set by the user
+void FrequencySpaceHilbertTransformer::SetBandstructureParms(alps::Parameters& parms, double eps, double epssq) {
+  // set parameters for the FourierTransformer if none of them is set by the user
   bool is_set = parms.defined("EPSSQAV");
   unsigned int n_flavors = parms.value_or_default("FLAVORS", 2);
   for (unsigned int i=0; i < n_flavors; i++) {

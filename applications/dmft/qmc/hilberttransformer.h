@@ -37,6 +37,7 @@
 /// @file hilberttransformer.h
 /// @brief Hilbert transformations
 ///
+
 /// declares the abstract base class and concrete realizations for the Hilbert transformations
 /// @sa HilbertTransformer, SemicircleHilbertTransformer, SquarelatticeHilbertTransformer, 
 ///     GeneralHilbertTransformer, DCATransformer
@@ -75,7 +76,16 @@ class SemicircleHilbertTransformer : public HilbertTransformer
 {
 public:
   /// the constructor accepts the bandwidth
-  SemicircleHilbertTransformer(double t) : t_(t) {}
+  SemicircleHilbertTransformer(const alps::Parameters& parms) {
+    unsigned int n_flavor = parms.value_or_default("FLAVORS", 2);
+    tsq.resize(n_flavor);
+    for(int i=0;i<n_flavor;++i){
+      std::stringstream t_i; t_i<<"t"<<i/2;  // flavors (2m) and (2m+1) assumed to have the same bandwidth
+      double t = (parms.defined(t_i.str()) ? static_cast<double>(parms[t_i.str()]) : static_cast<double>(parms["t"]));
+      tsq[i]=t*t;
+      std::cout<<"for flavor: "<<i<<" using bw: "<<t<<std::endl;
+    }
+  }
   
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
@@ -84,7 +94,7 @@ public:
   itime_green_function_t initial_G0(const alps::Parameters& parms);
   
 private:
-  double t_; 
+  std::vector<double> tsq; // second moment of the Bethe DOS is t^2 [4t=2W=D]
 };
 
 
@@ -177,6 +187,7 @@ public:
     }
     return G_new;
   }
+  void SetBandstructureParms(alps::Parameters& parms, double eps, double epssq);
 };
 
 
