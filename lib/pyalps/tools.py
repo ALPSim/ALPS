@@ -1220,8 +1220,9 @@ def mergeDataSets(dsets):
         if len(d.y) != len(merged.y): raise ValueError('cannot merge datasets: y shape mismatch')
         if isinstance(merged.y,alea.MCVectorData):
             merged.y.merge(d.y)
-        for i in range(len(merged.y)):
-            merged.y[i].merge(d.y[i])
+        else:
+            for i in range(len(merged.y)):
+                merged.y[i].merge(d.y[i])
     merged.props = props
     return merged
 
