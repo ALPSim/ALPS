@@ -39,6 +39,8 @@
 #include <utility>
 #include <sstream>
 
+#define DEFAULT_CHECK_TIME 300
+
 alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc, char** argv)
 {
 #ifdef ALPS_HAVE_MPI
@@ -48,7 +50,19 @@ alps::ImpuritySolver::ImpuritySolver(const scheduler::Factory& factory, int argc
 #endif
 	if(is_master()){
     alps::scheduler::NoJobfileOptions opt(1,argv);
-    opt.max_check_time=60;
+    unsigned int max_time;
+    {
+      alps::Parameters parms;
+      std::ifstream is(argv[1]);
+      is>>parms;
+      max_time = (unsigned int)(parms.value_or_default("MAX_TIME",DEFAULT_CHECK_TIME));
+    }
+    if (max_time < DEFAULT_CHECK_TIME) { opt.checkpoint_time=max_time; opt.max_check_time=max_time; opt.min_check_time=max_time; }
+    else {
+      unsigned int checks = (max_time + DEFAULT_CHECK_TIME - 1) / DEFAULT_CHECK_TIME;
+      opt.checkpoint_time=(max_time+checks-1)/checks;
+      opt.max_check_time=opt.checkpoint_time; opt.min_check_time=opt.checkpoint_time; 
+    }
     master_scheduler = new alps::scheduler::SingleScheduler(opt,factory);
 	} else{ //a slave lives for many iterations...
     alps::scheduler::NoJobfileOptions opt(1,argv);
