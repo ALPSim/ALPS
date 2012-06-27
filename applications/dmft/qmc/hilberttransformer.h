@@ -76,16 +76,8 @@ class SemicircleHilbertTransformer : public HilbertTransformer
 {
 public:
   /// the constructor accepts the bandwidth
-  SemicircleHilbertTransformer(const alps::Parameters& parms) {
-    unsigned int n_flavor = parms.value_or_default("FLAVORS", 2);
-    tsq.resize(n_flavor);
-    for(int i=0;i<n_flavor;++i){
-      std::stringstream t_i; t_i<<"t"<<i/2;  // flavors (2m) and (2m+1) assumed to have the same bandwidth
-      double t = (parms.defined(t_i.str()) ? static_cast<double>(parms[t_i.str()]) : static_cast<double>(parms["t"]));
-      tsq[i]=t*t;
-      std::cout<<"for flavor: "<<i<<" using bw: "<<t<<std::endl;
-    }
-  }
+  SemicircleHilbertTransformer(const alps::Parameters& parms) 
+    : bethe_parms(parms,true) {}
   
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
@@ -94,7 +86,7 @@ public:
   itime_green_function_t initial_G0(const alps::Parameters& parms);
   
 private:
-  std::vector<double> tsq; // second moment of the Bethe DOS is t^2 [4t=2W=D]
+  BetheBandstructure bethe_parms;
 };
 
 
@@ -197,7 +189,7 @@ public:
 class FSSemicircleHilbertTransformer : public FrequencySpaceHilbertTransformer {
 public:
   /// the constructor accepts the bandwidth
-  FSSemicircleHilbertTransformer(double t) : t_(t) {}
+  FSSemicircleHilbertTransformer(const alps::Parameters& parms) : bethe_parms(parms,true) {}
   ///operator() implements abstract virtual operator() of base class HilbertTransformer 
   ///and performs the actual Hilbert transformation.
   virtual matsubara_green_function_t operator()(const matsubara_green_function_t& G_omega, 
@@ -205,7 +197,7 @@ public:
                                                 const double mu, const double h, const double beta);
   
 private:
-  double t_; 
+  BetheBandstructure bethe_parms;
 };
 
 

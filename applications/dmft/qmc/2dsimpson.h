@@ -34,6 +34,32 @@
 #include <alps/parameter.h>
 
 
+class BetheBandstructure {
+  /* does load the hopping amplitudes 't' for different flavors;
+     4t=2W=D, where D is the bandwidth;
+     assumes, that the flavors (2m) and (2m+1) have the same bandwidth;
+     thus 't0' sets the bandwidth for flavors 0 and 1
+          't1' sets the bandwidth for flavors 2 and 3, etc.;
+     second moment of the semicicular DOS is 't^2'
+  */
+  public:
+    BetheBandstructure(const alps::Parameters& parms, bool verbose=false) {
+      unsigned int n_flavor = parms.value_or_default("FLAVORS", 2);
+      tsq_.resize(n_flavor/2);
+      for(int i=0;i<n_flavor/2;++i){
+        std::stringstream t_i; t_i<<"t"<<i;  // flavors (2m) and (2m+1) assumed to have the same bandwidth
+        double t = (parms.defined(t_i.str()) ? static_cast<double>(parms[t_i.str()]) : static_cast<double>(parms["t"]));
+        tsq_[i]=t*t;   // second moment of the Bethe DOS is t^2 [4t=2W=D]
+        if (verbose)
+          std::cout<<"Semicircular DOS: for flavor "<<i<<" using hopping t = "<<t<<std::endl;
+      }
+    }
+    double tsq(unsigned int f=0) const { return tsq_[f/2]; }
+  private:
+    std::vector<double> tsq_;
+};
+
+
 class TwoDBandstructure {
   /* This class contains all the non-interacting 2-dimensional lattice information for DMFT with option TWODBS, which 
      specifies that the Hilbert transformation is performed by integration over k-space.

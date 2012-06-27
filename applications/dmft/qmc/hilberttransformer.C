@@ -76,7 +76,7 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
     std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
     for(spin_t flavor=0;flavor<G_omega.nflavor(); flavor++){
       std::complex<double> zeta = iw + mu + (flavor%2 ? -h : h);
-      G0_omega(i, flavor) = 1./(zeta - tsq[flavor]*G_omega(i, flavor%2==0?flavor+1:flavor-1));
+      G0_omega(i, flavor) = 1./(zeta - bethe_parms.tsq(flavor)*G_omega(i, flavor%2==0?flavor+1:flavor-1));
     }
   }
   //std::cout<<"symmetrized G0 omega real: "<<std::endl;
@@ -90,27 +90,31 @@ itime_green_function_t SemicircleHilbertTransformer::operator()(const itime_gree
 
 itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Parameters& parms) 
 {
-  std::cout<<"calculating initial G0_tau for semicircular DOS"<<std::endl;
-  int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
+  std::cout<<"SemicircularHilbertTransformer::initial_G0: ";
   int n_time=boost::lexical_cast<int>(parms["N"]);
   int n_flavor=parms.value_or_default("FLAVORS", 2);
-  double beta = static_cast<double>(parms["BETA"]);
-  double mu = static_cast<double>(parms["MU"]);
-  double h = static_cast<double>(parms.value_or_default("H_INIT",0.));
-  matsubara_green_function_t G0_omega(n_matsubara,n_flavor);  
   itime_green_function_t G0_tau(n_time+1, n_flavor);
-  for(spin_t flavor=0;flavor<G0_omega.nflavor(); flavor++) {
-    for(unsigned i=0; i<G0_omega.nfreq(); i++) {
-      std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-      std::complex<double> zeta = iw+mu+(flavor%2 ? -h : h);
-      G0_omega(i, flavor) = (zeta - sqrt(zeta*zeta-4*tsq[flavor]))/(2*tsq[flavor]);
+  
+  if (parms.defined("G0TAU_INPUT") && parms["G0TAU_INPUT"].length()>0) {
+	std::cout<<"reading initial G0_tau"<<std::endl;
+    std::ifstream check(parms["G0TAU_INPUT"].c_str());
+    if(!check.is_open()) {
+      std::cerr << "ERROR: could not open inital G0 file "<<parms["G0TAU_INPUT"]<<std::endl;
+      throw std::runtime_error("SemicircleHilbertTransformer::initial_G0: could not open inital G0 file");
     }
+    else
+      G0_tau.read(parms["G0TAU_INPUT"].c_str());
   }
-  G0_omega.write("G0_omega_input");
-  boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_transformer(parms, fourier_ptr);
-  fourier_ptr->backward_ft(G0_tau, G0_omega);
-  G0_tau.write("G0_tau_input");
+  else {
+    FSSemicircleHilbertTransformer hilbert(parms);
+    boost::shared_ptr<FourierTransformer> fourier_ptr;
+    FourierTransformer::generate_transformer(parms, fourier_ptr,true);   // with H_INIT (if provided)
+    fourier_ptr->backward_ft(G0_tau, hilbert.initial_G0(parms));
+  }
+  
+  if (parms.defined("G0TAU_input"))
+    G0_tau.write((parms["G0TAU_input"]).c_str());
+  
   return G0_tau;
 }
 
@@ -119,6 +123,7 @@ itime_green_function_t SemicircleHilbertTransformer::initial_G0(const alps::Para
 
 matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const alps::Parameters& parms) 
 {
+  std::cout<<"FrequencySpaceHilbertTransformer::initial_G0: ";
   int n_matsubara=boost::lexical_cast<int>(parms["NMATSUBARA"]);
   int n_time=boost::lexical_cast<int>(parms["N"]);
   int n_orbital=parms.value_or_default("FLAVORS", 2);
@@ -160,15 +165,14 @@ matsubara_green_function_t FrequencySpaceHilbertTransformer::initial_G0(const al
       G0_omega=this->operator()(G_omega, G0_omega, mu, h, beta);
     }
     else {   // Bethe lattice 
-      double t_ = boost::lexical_cast<double>(parms["t"]);
-      double tsq=t_*t_;
+      BetheBandstructure bethe_parms(parms);
       for(unsigned i=0; i<n_matsubara; i++) {
         std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
         for(spin_t flavor=0;flavor<n_orbital; flavor++) {
           std::complex<double> zeta = iw+mu+(flavor%2 ? h : -h);
-          std::complex<double> tmp = sqrt(zeta*zeta-4*tsq);
+          std::complex<double> tmp = sqrt(zeta*zeta-4*bethe_parms.tsq(flavor));
           tmp *= tmp.imag()<0 ? -1 : 1;
-          G0_omega(i, flavor) = (zeta - tmp)/(2*tsq);
+          G0_omega(i, flavor) = (zeta - tmp)/(2*bethe_parms.tsq(flavor));
         }
       }
     }
@@ -188,13 +192,12 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
                                                                       const double mu, const double h, const double beta)
 {
   std::cout<<"Semicircular Hilbert Transform: using: mu:"<<mu<<" h: "<<h<<"beta: "<<beta<<" "<<G0_omega_ignored.nfreq()<<std::endl;
-  double tsq=t_*t_;
   matsubara_green_function_t G0_omega(G_omega);
   //formula according to review, p. 61, formula 221. 
   if(G_omega.nflavor()==1){ //special case. 
     for(unsigned i=0; i<G_omega.ntime(); i++) {
       std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-      G0_omega(i,0) =1./(iw + mu - tsq*G_omega(i,0));
+      G0_omega(i,0) =1./(iw + mu - bethe_parms.tsq(0)*G_omega(i,0));
     }
   }
   else{
@@ -202,8 +205,8 @@ matsubara_green_function_t FSSemicircleHilbertTransformer::operator()(const mats
     for(unsigned flavor=0;flavor<G_omega.nflavor();flavor+=2){
       for(unsigned i=0; i<G_omega.nfreq(); i++) {
         std::complex<double> iw(0.,(2*i+1)*M_PI/beta);
-        G0_omega(i,flavor  ) =1./(iw + mu -h - tsq*G_omega(i,flavor+1)); 
-        G0_omega(i,flavor+1) =1./(iw + mu +h - tsq*G_omega(i,flavor  )); 
+        G0_omega(i,flavor  ) =1./(iw + mu -h - bethe_parms.tsq(flavor)*G_omega(i,flavor+1)); 
+        G0_omega(i,flavor+1) =1./(iw + mu +h - bethe_parms.tsq(flavor)*G_omega(i,flavor  )); 
       }
     }
   }

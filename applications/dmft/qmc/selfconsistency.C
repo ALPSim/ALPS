@@ -53,7 +53,6 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   int N = static_cast<int>(parms["N"]);
   int flavors = parms.value_or_default("FLAVORS", 2);
   double beta = static_cast<double>(parms["BETA"]);
-  double h_old = static_cast<double>(parms["H"]);
   double h = parms.value_or_default("H", 0.);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool symmetrization = (bool)(parms["SYMMETRIZATION"]);
@@ -85,9 +84,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
       }
     }	
     std::cout<<"maximum difference in G0 is: "<<max_diff<<std::endl;
-    if (iteration_ctr == 0) 
-      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
-    print_tau_green_functions(basename, ++iteration_ctr, G0_tau, G_tau, beta);
+    print_tau_green_functions(basename, ++iteration_ctr, G0_tau_old, G_tau, beta);
   } while (max_diff > converged  && iteration_ctr < max_it);
   std::cout<<(max_diff > converged ? "NOT " : "")<<"converged!"<<std::endl;
   // write G0 (to be read in as an input for a new simulation)
@@ -101,8 +98,8 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
   int N = static_cast<int>(parms["N"]);
   int flavors = parms.value_or_default("FLAVORS", 2);;
   double beta = static_cast<double>(parms["BETA"]);
-  //double mu = static_cast<double>(parms["MU"]);
-  //double h = parms.value_or_default("H", 0);;
+  if (static_cast<double>(parms.value_or_default("MU",0.))!=0) { throw std::runtime_error("ERROR: unsupported option: MU is non-zero"); } //double mu = static_cast<double>(parms["MU"]);
+  if (static_cast<double>(parms.value_or_default("H",0.))!=0) { throw std::runtime_error("ERROR: unsupported option: H is non-zero"); } //double h = parms.value_or_default("H", 0);
   double converged = static_cast<double>(parms["CONVERGED"]);
   bool symmetrization = (bool)(parms["SYMMETRIZATION"]);
   //bool degenerate = parms.value_or_default("DEGENERATE", false);
@@ -160,7 +157,6 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   unsigned int n_site=parms.value_or_default("SITES", 1);
   
   double beta = static_cast<double>(parms["BETA"]);
-  double h_old = static_cast<double>(parms["H"]);
   double h = parms.value_or_default("H", 0.);
   double mu = static_cast<double>(parms["MU"]);
   double converged = static_cast<double>(parms["CONVERGED"]);
@@ -182,13 +178,14 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
   itime_green_function_t G0_tau_old(n_tau+1, n_site, n_orbital);
   
   boost::shared_ptr<FourierTransformer> fourier_ptr;
-  FourierTransformer::generate_transformer(parms, fourier_ptr);
+  FourierTransformer::generate_transformer(parms, fourier_ptr,true);  // with H_INIT (if provided)
   //fourier.setmu(mu);
   fourier_ptr->backward_ft(G0_tau, G0_omega);
   
   if (parms.defined("G0TAU_input"))           // it is not needed to store it by default, as it will be stored in the 1st iteration as G0_tau_1
     G0_tau.write((parms["G0TAU_input"]).c_str());
   
+  FourierTransformer::generate_transformer(parms, fourier_ptr);    // with H
   double max_diff;	
   int iteration_ctr = 0;
   do {
@@ -235,8 +232,6 @@ void selfconsistency_loop_omega(alps::Parameters& parms, MatsubaraImpuritySolver
       <<max_diff<<"\t(convergency criterion: "<<converged<<")"<<std::endl<<std::flush;
     }
     print_all_green_functions(basename, iteration_ctr, G0_omega_old, G_omega, G0_tau_old, G_tau, beta);
-    if (iteration_ctr == 1) 
-      (*const_cast<alps::Parameters*>(&parms))["H"] = h_old;
   }while ((max_diff > converged || iteration_ctr <= 1) && iteration_ctr < max_it);           
   // write G0 (to be read as an input Green function)
   G0_omega.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());

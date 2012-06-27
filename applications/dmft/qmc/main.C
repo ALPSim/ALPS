@@ -6,6 +6,7 @@
  *                              Philipp Werner <werner@itp.phys.ethz.ch>,
  *                              Sebastian Fuchs <fuchs@theorie.physik.uni-goettingen.de>
  *                              Matthias Troyer <troyer@comp-phys.org>
+ *               2012           Jakub Imriska <jimriska@phys.ethz.ch>
  *
  *
  * This software is part of the ALPS Applications, published under the ALPS
@@ -132,7 +133,7 @@ int main(int argc, char** argv)
         //perform self consistency loop in Matsubara frequency omega
         FrequencySpaceHilbertTransformer *transform_ptr;
         if(!parms.defined("DOSFILE") && !parms.defined("TWODBS")){
-          transform_ptr= new FSSemicircleHilbertTransformer(boost::lexical_cast<double>(parms["t"]));
+          transform_ptr= new FSSemicircleHilbertTransformer(parms);
           std::cout<<"using Bethe lattice Hilbert transform"<<std::endl;
         } 
         else if(parms.defined("TWODBS")) {

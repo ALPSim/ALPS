@@ -94,7 +94,7 @@ public:
                            const int nfreq_measured) const;
   
   static void generate_transformer(const alps::Parameters &parms,
-                                   boost::shared_ptr<FourierTransformer> &fourier_ptr);
+                                   boost::shared_ptr<FourierTransformer> &fourier_ptr, bool initial=false);
   static void generate_transformer_U(const alps::Parameters &parms,
                                      boost::shared_ptr<FourierTransformer> &fourier_ptr,
                                      const std::vector<double> &densities);

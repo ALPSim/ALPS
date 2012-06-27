@@ -33,6 +33,7 @@
 #include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 
 #include "fouriertransform.h"
+#include "2dsimpson.h"
 #include <valarray>
 #include <boost/numeric/ublas/io.hpp>
 #include <alps/parameter.h>
@@ -214,10 +215,11 @@ void FourierTransformer::append_tail(matsubara_green_function_t& G_omega,
 }
 
 void FourierTransformer::generate_transformer(const alps::Parameters &parms,
-                                              boost::shared_ptr<FourierTransformer> &fourier_ptr)
+                                              boost::shared_ptr<FourierTransformer> &fourier_ptr, bool initial)
 {
   int n_flavors = parms.value_or_default("FLAVORS", 2); 
-  int n_site = parms.value_or_default("SITES", 1); 
+  int n_site = parms.value_or_default("SITES", 1);
+  double h = (initial && parms.defined("H_INIT") ? static_cast<double>(parms["H_INIT"]) : static_cast<double>(parms.value_or_default("H",0.)));
   if (parms.defined("GENERAL_FOURIER_TRANSFORMER")) {
     std::cout << "using general fourier transformer" << "\n";
     std::vector<double> eps(n_flavors);
@@ -226,7 +228,7 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
       eps[f] = parms["EPS_"+boost::lexical_cast<std::string>(f)];
       epssq[f] = parms["EPSSQ_"+boost::lexical_cast<std::string>(f)];
     }
-    fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"], 
+    fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], h,
                                                      n_flavors, eps, epssq));
   } 
   else if (n_site>1) {
@@ -235,12 +237,12 @@ void FourierTransformer::generate_transformer(const alps::Parameters &parms,
     std::cout << "using Bethe lattice fourier transformer for G0" << "\n";
     std::vector<double> eps(n_flavors);
     std::vector<double> epssq(n_flavors);
-    double t = parms["t"];
+    BetheBandstructure bethe_parms(parms);
     for (int f=0; f<n_flavors; ++f) {
       eps[f] = 0.;
-      epssq[f] = t*t;
+      epssq[f] = bethe_parms.tsq(f);
     }
-    fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], (double)parms["H"],
+    fourier_ptr.reset(new SimpleG0FourierTransformer((double)parms["BETA"], (double)parms["MU"], h,
                                                      n_flavors, eps, epssq));
   }
 }
@@ -274,13 +276,13 @@ void FourierTransformer::generate_transformer_U(const alps::Parameters &parms,
   else {
     std::cout << "using Bethe lattice fourier transformer for G" << "\n";
     std::vector<std::vector<double> > eps(n_flavors);
-    std::vector<std::vector<double> >epssq(n_flavors);
-    double t = parms["t"];
+    std::vector<std::vector<double> > epssq(n_flavors);
+    BetheBandstructure bethe_parms(parms);
     for (int f=0; f<n_flavors; ++f) {
-      eps[f].resize(1);      
+      eps[f].resize(1);
       epssq[f].resize(1);
       eps[f][0] = 0.;
-      epssq[f][0] = t*t;
+      epssq[f][0] = bethe_parms.tsq(f);
     }
     fourier_ptr.reset(new GFourierTransformer((double)parms["BETA"], (double)parms["MU"]+U/2., U, 
                                               n_flavors, 1, densities, eps, epssq));
