@@ -4,6 +4,7 @@
 # ALPS Libraries
 # 
 # Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -36,7 +37,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
     parms.append(
             { 
               'ANTIFERROMAGNET'     : 1,
-              'CONVERGED'           : 0.03,
+              'CONVERGED'           : 0.003,
               'FLAVORS'             : 2,
               'H'                   : 0,
               'MAX_IT'              : 10,
@@ -49,17 +50,19 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'SITES'               : 1,
               'SOLVER'              : 'hirschfye',
               'SYMMETRIZATION'      : 0,
-              'TOLERANCE'           : 0.01,
+              'TOLERANCE'           : 0.001,
               'U'                   : 3,
               't'                   : 0.707106781186547,
               'SWEEPS'              : 1000000,
               'THERMALIZATION'      : 10000,
               'BETA'                : b,
               'G0OMEGA_INPUT'       : 'G0_omega_input_beta_'+str(b),
-              'BASENAME'            : 'hirschfye.param'
+              'BASENAME'            : 'parm_beta_'+str(b)
             }
         )
 
+# For more precise simulation we propose to you to:
+#   lower CONVERGED (to 0.0003) and TOLERANCE (to 0.0001)
 
 ## Please run the tutorial7a.py before this one or uncomment the following lines.
 ## This tutorial relies on the results created there.
@@ -69,10 +72,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
 #     input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
 #     res = pyalps.runDMFT(input_file)
 
-flavors=parms[0]['FLAVORS']
-listobs=[]   
-for f in range(0,flavors):
-    listobs.append('Green_'+str(f))
+listobs=['Green_0']   # we look at convergence of a single flavor (=0)
 
 ll=pyalps.load.Hdf5Loader()
 for p in parms:
@@ -84,12 +84,12 @@ for p in parms:
         r.y = np.array(group[0].y)
         r.x = np.array([e*group[0].props['BETA']/float(group[0].props['N']) for e in group[0].x])
         r.props = group[0].props
-        r.props['label'] = r.props['iteration']
+        r.props['label'] = 'it'+r.props['iteration']
         nd.append( r )
     plt.figure()
     plt.xlabel(r'$\tau$')
-    plt.ylabel(r'$G(\tau)$')
-    plt.title(r'$\beta$ = %.4s' %nd[0].props['BETA'])
+    plt.ylabel(r'$G_{flavor=0}(\tau)$')
+    plt.title('DMFT-07: ' + r'$\beta = %.4s$' %nd[0].props['BETA'])
     pyalps.plot.plot(nd)
     plt.legend()
 

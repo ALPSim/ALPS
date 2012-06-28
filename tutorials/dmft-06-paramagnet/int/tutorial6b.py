@@ -4,6 +4,7 @@
 # ALPS Libraries
 # 
 # Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -31,14 +32,14 @@ parms=[]
 parms.append(
         { 
           'ANTIFERROMAGNET'         : 0,
-          'CHECKPOINT'              : 'dump',
-          'CONVERGED'               : 0.0003,
+          'CHECKPOINT'              : 'dump_int',
+          'CONVERGED'               : 0.0025,
           'CONVERGENCE_CHECK_PERIOD': 500,
           'FLAVORS'                 : 2,
           'H'                       : 0,
           'H_INIT'                  : 0.,
-          'MAX_IT'                  : 500,
-          'MAX_TIME'                : 1000,
+          'MAX_IT'                  : 12,
+          'MAX_TIME'                : 120,
           'MU'                      : 0,
           'N'                       : 500,
           'NMATSUBARA'              : 500,
@@ -56,15 +57,15 @@ parms.append(
           'RECALC_PERIOD'           : 3000,
           'SWEEPS'                  : 100000000,
           'THERMALIZATION'          : 1000,
-          'TOLERANCE'               : 0.0001,
           'ALPHA'                   : -0.01,
           'HISTOGRAM_MEASUREMENT'   : 1,
           'BETA'                    : 32
         }
     )
+    
+# For more precise calculations we propose to you to:
+#   enhance the MAX_TIME, MAX_IT and lower CONVERGED
 
 #write the input file and run the simulation
-input_file = pyalps.writeParameterFile('parm_CTINT',parms[0])
-print "THIS TUTORIAL WILL RUN FOR A VERY LONG TIME ON A SINGLE WORKSTATION!" 
-print "IF YOU REALLY WANT TO RUN THE SIMULATION YOU CAN COMMENT OUT THE LINE BELOW"
-#res = pyalps.runDMFT(input_file)
+input_file = pyalps.writeParameterFile('parm_int',parms[0])
+res = pyalps.runDMFT(input_file)

@@ -4,6 +4,7 @@
 # ALPS Libraries
 # 
 # Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -31,35 +32,34 @@ parms=[]
 parms.append(
         {
           'ANTIFERROMAGNET'     : 0,
-          'CHECKPOINT'          : 'dump',
-          'CONVERGED'           : 0.0003,
+          'CHECKPOINT'          : 'dump_hyb',
+          'CONVERGED'           : 0.0025,
           'FLAVORS'             : 2,
           'H'                   : 0,
           'H_INIT'              : 0.0,
-          'MAX_IT'              : 10,
-          'MAX_TIME'            : 100,
+          'MAX_IT'              : 12,
+          'MAX_TIME'            : 120,
           'MU'                  : 0,
           'N'                   : 1000,
           'NMATSUBARA'          : 1000,
           'N_MEAS'              : 10000,
           'N_ORDER'             : 50,
           'OMEGA_LOOP'          : 1,
-          'OVERLAP'             : 0,
           'SEED'                : 0,
           'SITES'               : 1,
           'SOLVER'              : 'Hybridization',
           'SYMMETRIZATION'      : 1,
-          'TOLERANCE'           : 0.0001,
           'U'                   : 3,
           't'                   : 0.707106781186547,
-          'SWEEPS'              : 1000000000,
+          'SWEEPS'              : 100000000,
           'THERMALIZATION'      : 1000,
           'BETA'                : 32
         }
     )
+
+# For more precise calculations we propose to you to:
+#   enhance the MAX_TIME, MAX_IT and lower CONVERGED
         
 #write the input file and run the simulation
-input_file = pyalps.writeParameterFile('parm_CTHYB',parms[0])
-print "THIS TUTORIAL WILL RUN FOR A VERY LONG TIME ON A SINGLE WORKSTATION!" 
-print "IF YOU REALLY WANT TO RUN THE SIMULATION YOU CAN COMMENT OUT THE LINE BELOW"
-#res = pyalps.runDMFT(input_file)
+input_file = pyalps.writeParameterFile('parm_hyb',parms[0])
+res = pyalps.runDMFT(input_file)

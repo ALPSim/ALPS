@@ -4,6 +4,7 @@
 # ALPS Libraries
 # 
 # Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -36,7 +37,7 @@ for b in [6.,8.,10.,12.,14.,16.]:
     parms.append(
             { 
               'ANTIFERROMAGNET'     : 1,
-              'CONVERGED'           : 0.03,
+              'CONVERGED'           : 0.003,
               'FLAVORS'             : 2,
               'H'                   : 0,
               'MAX_IT'              : 10,
@@ -49,20 +50,23 @@ for b in [6.,8.,10.,12.,14.,16.]:
               'SITES'               : 1,
               'SOLVER'              : 'hirschfye',
               'SYMMETRIZATION'      : 0,
-              'TOLERANCE'           : 0.01,
+              'TOLERANCE'           : 0.001,
               'U'                   : 3,
               't'                   : 0.707106781186547,
               'SWEEPS'              : 1000000,
               'THERMALIZATION'      : 10000,
               'BETA'                : b,
               'G0OMEGA_INPUT'       : 'G0_omega_input_beta_'+str(b),
-              'BASENAME'            : 'hirschfye.param'
+              'BASENAME'            : 'parm_beta_'+str(b)
             }
         )
 
+# For more precise simulation we propose to you to:
+#   lower CONVERGED (to 0.0003) and TOLERANCE (to 0.0001)
+
 #write the input file and run the simulation
 for p in parms:
-    input_file = pyalps.writeParameterFile('parm_beta_'+str(p['BETA']),p)
+    input_file = pyalps.writeParameterFile(p['BASENAME'],p)
     res = pyalps.runDMFT(input_file)
 
 flavors=parms[0]['FLAVORS']
@@ -74,11 +78,11 @@ ll=pyalps.load.Hdf5Loader()
 data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_beta_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)
 for d in pyalps.flatten(data):
     d.x = d.x*d.props["BETA"]/float(d.props["N"])
-    d.props['label'] = r'$\beta=$'+str(d.props['BETA'])
+    d.props['label'] = r'$\beta=$'+str(d.props['BETA'])+'; flavor='+str(d.props['observable'][len(d.props['observable'])-1])
 plt.figure()
 plt.xlabel(r'$\tau$')
-plt.ylabel(r'$G(\tau)$')
-plt.title('Hubbard model on the Bethe lattice')
+plt.ylabel(r'$G_{flavor}(\tau)$')
+plt.title('DMFT-07: Neel transition for the Hubbard model on the Bethe lattice\n(using the Hirsch-Fye impurity solver)')
 pyalps.plot.plot(data)
 plt.legend()
 plt.show()
