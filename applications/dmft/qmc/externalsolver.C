@@ -143,7 +143,7 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
       p["DELTA"]=infile;
       p["MU"]=mu+U/2.;
     }
-    solver_input<<alps::make_pvp("/parameters", p);
+    solver_input<<alps::make_pvp("/parameters", p);//hier problem
     G0_omega.write_hdf5(solver_input, "/G0");
   }
   
@@ -155,11 +155,25 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
-  {
+  if(p.value_or_default("G_OMEGA", false)){//if G_omega is measured take the measured data ...
     alps::hdf5::archive ar(outfile, "r");
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
   }
+  else //... else FT G_tau into G_omega
+  {
+    alps::hdf5::archive ar(outfile, "r");
+    G_tau.read_hdf5(ar, "/G_tau");
+    boost::shared_ptr < FourierTransformer > fourier_ptr;
+    std::cout<<"converting ALPS parameters"<<std::endl;
+    std::vector<double>n(n_orbital,0.);
+    for(unsigned int u=0;u<n_orbital;u++){
+      n[(int)u]=G_tau(p["N"],0,0,u);
+    }
+    FourierTransformer::generate_transformer_U(p, fourier_ptr, n); //still takes old alps parameter class.
+    fourier_ptr->forward_ft(G_tau,G_omega);
+  }
+    
   //this is a safety check for impurity solvers.
   for(std::size_t i=0;i<n_orbital; ++i){
     for(std::size_t j=0;j<n_site;++j){
