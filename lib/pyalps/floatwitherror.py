@@ -46,18 +46,21 @@ def get_error(f):
 class FloatWithError:
 
 
-  def __init__(self,mean_=0,error_=0):
+  def __init__(self,mean_=0,error_=0,jackbins=[],binsize=0,timeseries=[]):
     self.mean  = mean_
     self.error = error_
+    self.jackbins = list(jackbins)
+    self.binsize = binsize
+    self.timeseries = list(timeseries)
     try:
       self.shape = self.mean.shape
     except AttributeError,ValueError:
       pass
 
   def __str__(self):
-    return str(self.mean) + '\t' + str(self.error)
+    return str(self.mean) + ' +/- ' + str(self.error)
   def __expr__(self):
-    return expr(self.mean) + '\t' + expr(self.error)
+    return expr(self.mean) + ' +/- ' + expr(self.error)
   def __repr__(self):
     return self.__str__()
   
