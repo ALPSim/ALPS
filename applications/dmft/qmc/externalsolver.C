@@ -155,7 +155,9 @@ MatsubaraImpuritySolver::result_type ExternalSolver::solve_omega(const matsubara
   unsigned int n_orbital  =(unsigned int)p.value_or_default("FLAVORS", 2);
   matsubara_green_function_t G_omega(n_matsubara, n_site, n_orbital);
   itime_green_function_t G_tau(n_tau+1, n_site, n_orbital);
-  if(p.value_or_default("G_OMEGA", false)){//if G_omega is measured take the measured data ...
+  if(!p.value_or_default("SC_WRITE_DELTA", false) || p.value_or_default("MEASURE_freq", false)){
+    //per default: read in G(omega) and G(tau). In hyb code: read in G(omega)
+    //if it is measured.
     alps::hdf5::archive ar(outfile, "r");
     G_omega.read_hdf5(ar, "/G_omega");
     G_tau.read_hdf5(ar, "/G_tau");
