@@ -4,6 +4,7 @@
 # ALPS Libraries
 # 
 # Copyright (C) 2010 by Brigitte Surer <surerb@phys.ethz.ch> 
+#               2012 by Jakub Imriska  <jimriska@phys.ethz.ch>
 # 
 # This software is part of the ALPS libraries, published under the ALPS
 # Library License; you can use, redistribute it and/or modify it under
@@ -36,24 +37,20 @@ coulombparam=[[1.8,0.45],[2.2,0.55],[2.8,0.7]]
 for cp in coulombparam: 
     parms.append(
             { 
-              'CHECKPOINT'          : 'dump',
-              'CONVERGED'           : 0.01,
+              'CONVERGED'           : 0.001,
               'FLAVORS'             : 4,
               'H'                   : 0,
               'H_INIT'              : 0.,
-              'MAX_IT'              : 20,
-              'MAX_TIME'            : 180,
+              'MAX_IT'              : 15,
+              'MAX_TIME'            : 20,
               'MU'                  : 0,
               'N'                   : 1000,
               'NMATSUBARA'          : 1000,
               'N_MEAS'              : 10000,
               'N_ORDER'             : 50,
-              'OMEGA_LOOP'          : 1,
               'SEED'                : 0,
               'SOLVER'              : 'Hybridization',
               'SYMMETRIZATION'      : 1,
-              'TOLERANCE'           : 0.3,
-              't'                   : 1,
               'SWEEPS'              : 100000000,
               'BETA'                : 30,
               'THERMALIZATION'      : 10,
@@ -61,9 +58,18 @@ for cp in coulombparam:
               'J'                   : cp[1],
               't0'                  : 0.5,
               't1'                  : 1,
-              'G0TAU_INPUT'         :'G0_tau_input_u_'+str(cp[0])+'_j_'+str(cp[1])
-            }
+              'CHECKPOINT'          : 'dump'
+        }
         )
+
+# NOTE: this script will not be running if your ALPS repository version is older than 6243
+#       ( In that case, you have to run the program from command line. )
+#       WARNING: in the previous script version the parameters 't0' and 't1' were ignored (they are not supported with OMEGA_LOOP=1);
+#                Thus one has simulated a totally different system!
+
+# For more precise calculations we propose to you to:
+#   enhance the MAX_TIME (to 60), 
+# ( the runtime of the script with changed parameters will be roughly 45 minutes )
 
 ## Please run the tutorial5a.py before this one or uncomment the following lines.
 ## This tutorial relies on the results created there.
@@ -73,27 +79,27 @@ for cp in coulombparam:
 #     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U'])+'_j_'+str(p['J']),p)
 #     res = pyalps.runDMFT(input_file)
 
-flavors=parms[0]['FLAVORS']
-listobs=[]   
-for f in range(0,flavors):
-    listobs.append('Green_'+str(f))
+listobs_ = ['Green_0', 'Green_2']
     
 ll=pyalps.load.Hdf5Loader()
-for p in parms:
+for obs in listobs_:
+  listobs = [obs]
+  for p in parms:
     data = ll.ReadDMFTIterations(pyalps.getResultFiles(pattern='parm_u_'+str(p['U'])+'_j_'+str(p['J'])+'.h5'), measurements=listobs, verbose=True)
     grouped = pyalps.groupSets(pyalps.flatten(data), ['iteration'])
     nd=[]
     for group in grouped:
         r = pyalps.DataSet()
-        r.y = np.array(group[0].y)
+        r.y = -np.array(group[0].y)
         r.x = np.array([e*group[0].props['BETA']/float(group[0].props['N']) for e in group[0].x])
         r.props = group[0].props
-        r.props['label'] = r.props['iteration']
+        r.props['label'] = 'it'+r.props['iteration']
         nd.append( r )
     plt.figure()
+    plt.yscale('log')
     plt.xlabel(r'$\tau$')
-    plt.ylabel(r'$G(\tau)$')
-    plt.title(r'$U$ = %.4s' %nd[0].props['U'])
+    plt.ylabel(r'$G_{flavor}(\tau)$')
+    plt.title('DMFT-05: ' + r'$U = %.4s$' %nd[0].props['U'] +'; flavor='+obs[len(obs)-1])
     pyalps.plot.plot(nd)
     plt.legend()
 
