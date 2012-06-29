@@ -30,7 +30,7 @@
 typedef alps::mcmpisim<HubbardInteractionExpansion> sim_type;
 
 bool stop_callback(boost::posix_time::ptime const & end_time) {
-  static alps::mcsignal signal;
+  static alps::ngs::signal signal;
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 void compute_greens_functions(const alps::results_type<HubbardInteractionExpansion>::type &results, const alps::parameters_type<HubbardInteractionExpansion>::type& parms, const std::string &output_file);

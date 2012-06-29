@@ -55,8 +55,7 @@ template<typename Base> class ising_sim : public Base {
             init();
         }
 
-// TODO: rename to update()
-        void do_update() {
+        void update() {
             for (int j = 0; j < length; ++j) {
                 using std::exp;
                 int i = int(double(length) * this->random());
@@ -68,8 +67,7 @@ template<typename Base> class ising_sim : public Base {
             }
         };
 
-// TODO: rename to measure() ... use verbs
-        void do_measurements() {
+        void measure() {
             sweeps++;
             if (sweeps > thermalization_sweeps) {
                 double tmag = 0;

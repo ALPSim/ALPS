@@ -121,7 +121,7 @@ double hybridization::work_done() const
   return (is_thermalized() ? (sweeps-thermalization_sweeps)/double(total_sweeps) : 0.);
 }
 
-void hybridization::do_update()
+void hybridization::update()
 {
   // increment sweep count
   sweeps++;

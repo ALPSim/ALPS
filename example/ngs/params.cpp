@@ -27,7 +27,7 @@
 
 #include <alps/ngs/hdf5.hpp>
 #include <alps/ngs/params.hpp>
-#include <alps/ngs/mcsignal.hpp>
+#include <alps/ngs/signal.hpp>
 
 #include <fstream>
 #include <iostream>
@@ -35,7 +35,7 @@
 
 int main(int argc, char *argv[]) {
 
-    alps::mcsignal signal;
+    alps::ngs::signal sig;
 
     // load a hdf5 file into a parameter object
     alps::hdf5::archive ar("param.h5");

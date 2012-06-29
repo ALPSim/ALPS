@@ -28,11 +28,9 @@
 import pyalps.ngs as ngs
 import numpy as np
 
-class sim(ngs.base):
+class sim(ngs.mcbase):
     def __init__(self, par, comm = None, seed = 42):
-        apply(ngs.base.__init__, [self, par])
-# TODO:
-#        apply(ngs.base.__init__, [self, par, seed, comm] if comm != None else [self, par, seed])
+        ngs.mcbase.__init__(*((self, par, seed, comm) if comm != None else (self, par, seed)))
         self.length = int(par['L']);
         self.sweeps = 0
         self.thermalization_sweeps = long(par["THERMALIZATION"])
@@ -44,7 +42,7 @@ class sim(ngs.base):
         self.measurements << ngs.RealObservable("Magnetization^2")
         self.measurements << ngs.RealObservable("Magnetization^4")
         self.measurements << ngs.RealVectorObservable("Correlations")
-    def do_update(self):
+    def update(self):
         for j in range(self.length):
             i = int(float(self.length) * self.random());
             right = i + 1 if i + 1 < self.length else 0
@@ -52,7 +50,7 @@ class sim(ngs.base):
             p = np.exp(2. * self.beta * self.spins[i] * (self.spins[right] + self.spins[left]))
             if p >= 1. or self.random() < p:
                 self.spins[i] =- self.spins[i]
-    def do_measurements(self):
+    def measure(self):
         self.sweeps += 1
         if self.sweeps > self.thermalization_sweeps:
             tmag = 0

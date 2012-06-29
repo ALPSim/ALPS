@@ -29,7 +29,7 @@ if (ALPS_HAVE_PYTHON)
 
       set(PYNGSPARAMS_SOURCES ../../src/alps/ngs/python/params.cpp)
       set(PYNGSHDF5_SOURCES ../../src/alps/ngs/python/hdf5.cpp)
-      set(PYNGSBASE_SOURCES ../../src/alps/ngs/python/base.cpp)
+      set(PYNGSBASE_SOURCES ../../src/alps/ngs/python/mcbase.cpp)
       set(PYNGSOBSERVABLE_SOURCES ../../src/alps/ngs/python/observable.cpp)
       set(PYNGSOBSERVABLES_SOURCES ../../src/alps/ngs/python/observables.cpp)
       set(PYNGSRESULT_SOURCES ../../src/alps/ngs/python/result.cpp)

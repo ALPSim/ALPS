@@ -63,9 +63,9 @@ from pyngsresults_c import *
 results.__bases__ = (MutableMapping, ) + results.__bases__
 
 from pyngsbase_c import *
-class base(base_impl):
+class mcbase(mcbase_impl):
     def run(self, callback = lambda: True):
-        base_impl.run(self, callback)
+        mcbase_impl.run(self, callback)
 
 from pyngshdf5_c import *
 class h5ar(hdf5_archive_impl):

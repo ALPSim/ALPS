@@ -214,8 +214,8 @@ public:
   InteractionExpansion(const alps::params& p, int rank);
   ~InteractionExpansion() {}
   bool is_thermalized() const {return true;} //thermalization is done in the constructor. It's not a big deal here.
-  void do_update();
-  void do_measurements();
+  void update();
+  void measure();
   double fraction_completed() const;
     
 protected:

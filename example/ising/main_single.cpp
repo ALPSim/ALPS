@@ -29,12 +29,12 @@
 
 using namespace alps;
 
-typedef ising_sim<base> sim_type;
+typedef ising_sim<mcbase> sim_type;
 
 int main(int argc, char *argv[]) {
 
     mcoptions options(argc, argv);
-    // create other examples using text (or XML)
+// TODO: create other examples using text (or XML)
     parameters_type<sim_type>::type params(hdf5::archive(options.input_file));
     sim_type sim(params);
 
@@ -55,6 +55,7 @@ int main(int argc, char *argv[]) {
     std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
     std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
     std::cout << "Mean of Correlations:   " << short_print(results["Correlations"].mean<std::vector<double> >()) << std::endl;
+    std::cout << "Covariance E/M:         " << short_print(results["Energy"].covariance<double>(results["Magnetization"])) << std::endl;
 
     std::cout << "-2 * Energy / 13:       " << -2. * results["Energy"] / 13. << std::endl;
     std::cout << "1 / Correlations        " << 1. / results["Correlations"] << std::endl;

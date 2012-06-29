@@ -43,7 +43,7 @@ int main(int argc, char *argv[]) {
     threaded_callback_wrapper stopper(boost::bind<bool>(&basic_stop_callback, options.time_limit));
     boost::thread thread(&sim_type::run, boost::ref(sim), static_cast<boost::function<bool()> >(boost::ref(stopper)));
 
-  // create one sensible exampel: progress every 5 minutes, checkpoint every hour
+  //TODO: create one sensible exampel: progress every 5 minutes, checkpoint every hour
   // and call this a "tiny" example main_threaded_tiny
   
     boost::posix_time::ptime progress_time = boost::posix_time::second_clock::local_time();
@@ -55,13 +55,13 @@ int main(int argc, char *argv[]) {
         xt.nsec += 0.1 * 1e9;
         boost::thread::sleep(xt);
 
-        // print progress every 5s
+        //TODO: print progress every 5s
         if (boost::posix_time::second_clock::local_time() > progress_time + boost::posix_time::seconds(5)) {
             std::cout << "progress: " << sim.fraction_completed() << std::endl;
             progress_time = boost::posix_time::second_clock::local_time();
         }
 
-        // checkpoint every 15 s
+        //TODO: checkpoint every 15 s
         if (boost::posix_time::second_clock::local_time() > checkpoint_time + boost::posix_time::seconds(15)) {
             std::cout << "checkpointing ... " << std::endl;
             sim.save(params["DUMP"] | "dump");

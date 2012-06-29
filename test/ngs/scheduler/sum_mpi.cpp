@@ -25,47 +25,75 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include "ising_parallel.hpp"
+#include <alps/ngs.hpp>
 
-using namespace alps;
+#include <boost/lambda/lambda.hpp>
 
-typedef parallel2<parallel_ising_sim<mcbase> > sim_type;
+// Simulation to measure e^(-x*x)
+class my_sim_type : public alps::mcbase {
+
+    public:
+
+        my_sim_type(parameters_type const & params, std::size_t seed_offset = 42)
+            : alps::mcbase(params, seed_offset)
+            , total_count(params["COUNT"])
+
+        {
+            measurements << alps::ngs::RealObservable("Value");
+        }
+
+        // if not compiled with mpi boost::mpi::communicator does not exists, 
+        // so template the function
+        template <typename Arg> my_sim_type(parameters_type const & params, Arg comm)
+            : alps::mcbase(params, comm)
+            , total_count(params["COUNT"])
+        {
+            measurements << alps::ngs::RealObservable("Value");
+        }
+
+        // do the calculation in this function
+        void update() {
+            double x = random();
+            value = exp(-x * x);
+        };
+
+        // do the measurements here
+        void measure() {
+            ++count;
+            measurements["Value"] << value;
+        };
+
+        double fraction_completed() const {
+            return count / double(total_count);
+        }
+
+    private:
+        int count;
+        int total_count;
+        double value;
+};
 
 int main(int argc, char *argv[]) {
 
-    mcoptions options(argc, argv);
+    alps::mcoptions options(argc, argv);
     boost::mpi::environment env(argc, argv);
     boost::mpi::communicator c;
 
-    parameters_type<sim_type>::type params;
-    if (c.rank() == 0) {
-        hdf5::archive ar(options.input_file);
+    alps::parameters_type<alps::mcmpisim<my_sim_type> >::type params;
+    if (c.rank() == 0) { // read parameters only in master
+        alps::hdf5::archive ar(options.input_file);
         ar >> make_pvp("/parameters", params);
     }
-    broadcast(c, params);
+    broadcast(c, params); // send parameters to all clones
 
-    sim_type sim(params, c);
+    alps::mcmpisim<my_sim_type> my_sim(params, c); // creat a simulation
+    my_sim.run(boost::bind(&alps::basic_stop_callback, options.time_limit)); // run the simulation
 
-    if (options.resume)
-        sim.load((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
+    alps::results_type<alps::mcmpisim<my_sim_type> >::type results = collect_results(my_sim); // collect the results
 
-    sim.run(boost::bind(&basic_stop_callback, options.time_limit));
-
-    sim.save((params["DUMP"] | "dump") + "." + boost::lexical_cast<std::string>(c.rank()));
-
-    results_type<sim_type>::type results = collect_results(sim);
-
-    if (c.rank() == 0) {
-        std::cout << "Energy:                 " << results["Energy"] << std::endl;
-
-        std::cout << "Mean of Energy:         " << results["Energy"].mean<double>() << std::endl;
-        std::cout << "Error of Energy:        " << results["Energy"].error<double>() << std::endl;
-        std::cout << "Energy^2:               " << results["Energy^2"] << std::endl;
-        std::cout << "Magnetization           " << results["Magnetization"] << std::endl;
-        std::cout << "Binder Cumulant         " << results["Magnetization^2"] * results["Magnetization^2"] / results["Magnetization^4"]<< std::endl;
-
+    if (c.rank() == 0) { // print the results and save it to hdf5
+        std::cout << "e^(-x*x): " << results["Value"] << std::endl;
         save_results(results, params, options.output_file, "/simulation/results");
-
     }
 
 }

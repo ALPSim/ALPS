@@ -81,8 +81,8 @@ class hybridization : public alps::mcbase
 {
 public:
   hybridization(const alps::params& p, int rank);
-  void do_update();
-  void do_measurements();
+  void update();
+  void measure();
   //getting data into the ALPS solver
   //...from an external program
   void read_external_input_data(const parameters_type &parms); 

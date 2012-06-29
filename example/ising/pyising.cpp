@@ -43,39 +43,39 @@
 namespace alps {
     namespace detail {
         // TODO: make ngs macro to export a simulation to python
-        class ising_export : public ising_sim<alps::base> {
+        class ising_export : public ising_sim<alps::mcbase> {
 
             public:
 
                 // TODO: move to base class
                 ising_export(boost::python::dict arg, std::size_t seed_offset = 42)
-                    : ising_sim<alps::base>(alps::params(arg), seed_offset)
+                    : ising_sim<alps::mcbase>(alps::params(arg), seed_offset)
                 {}
 
                 // TODO: move to base class
                 bool run(boost::python::object stop_callback) {
-                    return ising_sim<alps::base>::run(boost::bind(ising_export::callback_wrapper, stop_callback));
+                    return ising_sim<alps::mcbase>::run(boost::bind(ising_export::callback_wrapper, stop_callback));
                 }
 
                 // TODO: move to base class
-                base::parameters_type & get_params() {
-                    return base::params;
+                mcbase::parameters_type & get_params() {
+                    return mcbase::params;
                 }
 
                 // TODO: move to base class
                 mcobservables & get_measurements() {
-                    return base::measurements;
+                    return mcbase::measurements;
                 }
 
                 double get_random() {
-                    return alps::base::random();
+                    return alps::mcbase::random();
                 }
 
                 // TODO: make make_pvp in python
                 void load(alps::hdf5::archive & ar, std::string const & path) {
                     std::string current = ar.get_context();
                     ar.set_context(path);
-                    alps::base::load(ar);
+                    alps::mcbase::load(ar);
                     ar.set_context(current);
                 }
 
@@ -92,7 +92,7 @@ namespace alps {
 
 BOOST_PYTHON_MODULE(pyising) {
 
-    boost::python::class_<alps::detail::ising_export, boost::noncopyable, boost::python::bases<alps::base> >(
+    boost::python::class_<alps::detail::ising_export, boost::noncopyable, boost::python::bases<alps::mcbase> >(
           "sim",
           boost::python::init<boost::python::dict, boost::python::optional<std::size_t> >()
     )

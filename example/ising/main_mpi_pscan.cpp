@@ -30,7 +30,7 @@
 
 using namespace alps;
 
-typedef parallel<ising_sim<base> > sim_type;
+typedef mcmpisim<ising_sim<mcbase> > sim_type;
 
 int main(int argc, char *argv[]) {
 

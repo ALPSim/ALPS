@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,43 +25,65 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+#include <alps/ngs.hpp>
 
-#ifndef ALPS_NGS_HISTOGRAMOBSERVABLE_HPP
-#define ALPS_NGS_HISTOGRAMOBSERVABLE_HPP
+#include <boost/lambda/lambda.hpp>
 
-#include <alps/ngs/hdf5.hpp>
-#include <alps/ngs/hdf5/vector.hpp>
+// Simulation to measure e^(-x*x)
+class my_sim_type : public alps::mcbase {
 
+    public:
 
-namespace alps {
-   namespace ngs {
+        my_sim_type(parameters_type const & params, std::size_t seed_offset = 42)
+            : alps::mcbase(params, seed_offset)
+            , total_count(params["COUNT"])
 
-       template<class T>
-       class histogram_observable
-       {
-       public:
-           typedef T value_type;
-           typedef std::vector<value_type> container_type;
-           typedef typename container_type::size_type size_type;
+        {
+            measurements << alps::ngs::RealObservable("Value");
+        }
 
-           histogram_observable(const std::string& name="", size_type size=0) : name_(name), values_(size) {};
-           
-           const std::string& name() const { return name_; }
-           size_type size() const { return values_.size(); }
+        // if not compiled with mpi boost::mpi::communicator does not exists, 
+        // so template the function
+        template <typename Arg> my_sim_type(parameters_type const & params, Arg comm)
+            : alps::mcbase(params, comm)
+            , total_count(params["COUNT"])
+        {
+            measurements << alps::ngs::RealObservable("Value");
+        }
 
-           histogram_observable& operator<<(const std::pair<size_type,value_type>& v)   { values_[v.first] += v.second; return *this; }
-           value_type& operator[](size_type i)  { return values_[i]; }
-           value_type operator[](size_type i) const { return values_[i]; }
+        // do the calculation in this function
+        void update() {
+            double x = random();
+            value = exp(-x * x);
+        };
 
-           void save(hdf5::archive & ar) const  { ar << make_pvp("name",name_) << make_pvp("values",values_); }
-           void load(hdf5::archive & ar)        { ar >> make_pvp("name",name_) >> make_pvp("values",values_); }
+        // do the measurements here
+        void measure() {
+            ++count;
+            measurements["Value"] << value;
+        };
 
-       private:
-           std::string name_;
-           container_type values_;
-       };
+        double fraction_completed() const {
+            return count / double(total_count);
+        }
 
-   }
+    private:
+        int count;
+        int total_count;
+        double value;
+};
+
+int main(int argc, char *argv[]) {
+
+    alps::mcoptions options(argc, argv);
+
+    alps::parameters_type<my_sim_type>::type params(alps::hdf5::archive(options.input_file));
+
+    my_sim_type my_sim(params); // creat a simulation
+    my_sim.run(boost::bind(&alps::basic_stop_callback, options.time_limit)); // run the simulation
+
+    alps::results_type<my_sim_type>::type results = collect_results(my_sim); // collect the results
+
+    std::cout << "e^(-x*x): " << results["Value"] << std::endl;
+    save_results(results, params, options.output_file, "/simulation/results");
 }
-
-#endif

@@ -32,7 +32,7 @@
 typedef alps::mcmpisim<hybridization> sim_type;
 
 bool stop_callback(boost::posix_time::ptime const & end_time) {
-  static alps::mcsignal signal;
+  static alps::ngs::signal signal;
   return !signal.empty() || boost::posix_time::second_clock::local_time() > end_time;
 }
 

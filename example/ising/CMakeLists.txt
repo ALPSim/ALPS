@@ -72,7 +72,15 @@ if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
         add_executable(ngs_ising_mpi2 main_mpi2.cpp)
         add_dependencies(ngs_ising_mpi2 alps)
         target_link_libraries(ngs_ising_mpi2 alps)
-    
+   
+        add_test(ngs_ising_mpi2
+            ${CMAKE_COMMAND}
+                -Dsourcedir=${PROJECT_SOURCE_DIR}
+                -Dbinarydir=${PROJECT_BINARY_DIR}
+                -Dcurrentdir=${CMAKE_CURRENT_SOURCE_DIR}
+                -P ${CMAKE_CURRENT_SOURCE_DIR}/tests/run_ngs_ising_mpi_test.cmake
+        )
+
     endif(MPI_FOUND)
 
     if (ALPS_HAVE_PYTHON)

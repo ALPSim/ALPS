@@ -325,7 +325,7 @@ void hybridization::set_measurement_vectors(){
 }//set_measurements
 
 
-void hybridization::do_measurements(){
+void hybridization::measure(){
   if(is_thermalized()){
     //basic measurements
     order_meas /= N_meas;

@@ -122,7 +122,7 @@ pert_hist(max_order)
 
 
 
-void InteractionExpansion::do_update()
+void InteractionExpansion::update()
 {
   for(std::size_t i=0;i<measurement_period;++i){
     step++;
@@ -133,7 +133,7 @@ void InteractionExpansion::do_update()
       reset_perturbation_series();
   }
 }
-void InteractionExpansion::do_measurements(){
+void InteractionExpansion::measure(){
   measure_observables();
 }
 
