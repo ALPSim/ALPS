@@ -76,7 +76,7 @@ for p in parms:
     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U'])+'_j_'+str(p['J']),p)
     res = pyalps.runDMFT(input_file)
 
-listobs = ['Green_0', 'Green_2']
+listobs = ['Green_0', 'Green_2']   # flavor 0 is SYMMETRIZED with 1, flavor 2 is SYMMETRIZED with 3
     
 ll=pyalps.load.Hdf5Loader()
 data = ll.ReadMeasurementFromFile(pyalps.getResultFiles(pattern='parm_u_*h5'), respath='/simulation/results/G_tau', measurements=listobs, verbose=True)

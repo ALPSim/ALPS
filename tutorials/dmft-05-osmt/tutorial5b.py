@@ -79,7 +79,7 @@ for cp in coulombparam:
 #     input_file = pyalps.writeParameterFile('parm_u_'+str(p['U'])+'_j_'+str(p['J']),p)
 #     res = pyalps.runDMFT(input_file)
 
-listobs_ = ['Green_0', 'Green_2']
+listobs_ = ['Green_0', 'Green_2']   # flavor 0 is SYMMETRIZED with 1, flavor 2 is SYMMETRIZED with 3
     
 ll=pyalps.load.Hdf5Loader()
 for obs in listobs_:
