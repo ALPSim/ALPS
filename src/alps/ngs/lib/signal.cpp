@@ -41,6 +41,22 @@ namespace alps {
     namespace ngs {
 
         signal::signal() {
+            listen();
+        }
+
+        bool signal::empty() {
+            return !signals_.size();
+        }
+
+        int signal::top() {
+            return signals_.back();
+        }
+
+        void signal::pop() {
+            return signals_.pop_back();
+        }
+
+        void signal::listen() {
             #if not ( defined BOOST_MSVC || defined ALPS_NGS_NO_SIGNALS )
                 static bool initialized;
                 if (!initialized) {
@@ -65,18 +81,6 @@ namespace alps {
                     sigaction(SIGBUS, &segv, NULL);
                 }
             #endif
-        }
-
-        bool signal::empty() {
-            return !signals_.size();
-        }
-
-        int signal::top() {
-            return signals_.back();
-        }
-
-        void signal::pop() {
-            return signals_.pop_back();
         }
 
         void signal::slot(int signal) {

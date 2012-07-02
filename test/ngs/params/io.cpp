@@ -27,14 +27,44 @@
 
 #include <alps/ngs/hdf5.hpp>
 #include <alps/ngs/params.hpp>
+#include <alps/ngs/signal.hpp>
 
-int main(int argc, char **argv){
-    std::string infile=argv[1];
-    std::cout<<"building parameters."<<std::endl;
-    alps::hdf5::archive ar(infile);
-    alps::params parms(ar);
-    std::cout<<"done building parameters."<<std::endl;
-    std::cout<<"parms N is:" << parms["N"] << std::endl;
-    int n_tau = parms["N"];
-    std::cout<<"survived N."<< n_tau << std::endl;
+#include <fstream>
+#include <iostream>
+#include <iterator>
+
+int main(int argc, char *argv[]) {
+
+    alps::ngs::signal::listen();
+
+    // load a hdf5 file into a parameter object
+    alps::hdf5::archive ar("param.h5");
+    alps::params params_h5(ar);
+
+    for (alps::params::const_iterator it = params_h5.begin(); it != params_h5.end(); ++it)
+        std::cout << it->first << ":" << it->second << std::endl;
+
+    std::cout << std::endl;
+
+    // save params to file
+    {
+        alps::hdf5::archive ar("param.out.h5", "w");
+        ar << make_pvp("/parameters", params_h5);
+    }
+
+    // load a text file into a parameter object
+    alps::params params_txt(boost::filesystem::path("param.txt"));
+
+    for (alps::params::const_iterator it = params_txt.begin(); it != params_txt.end(); ++it)
+        std::cout << it->first << ":" << it->second << std::endl;
+
+    std::cout << std::endl;
+    params_txt["dbl"] = 1e-8;
+    std::cout << params_txt["dbl"] << " " << static_cast<double>(params_txt["dbl"]) << std::endl;
+
+    std::cout << std::endl;
+    params_txt["NOT_EXISTING_PARAM"] = "";
+    int i = params_txt["NOT_EXISTING_PARAM"] | 2048;
+    int j(params_txt["NOT_EXISTING_PARAM"] | 2048);
+    std::cout << static_cast<int>(params_txt["NOT_EXISTING_PARAM"] | 2048) << " " << i << " " << j << std::endl;
 }

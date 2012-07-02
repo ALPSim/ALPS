@@ -5,11 +5,6 @@
 
 if (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)
 
-    foreach(program params params2)
-        add_executable(ngs_${program} ${program}.cpp)
-        target_link_libraries(ngs_${program} alps)
-    endforeach(program)
-    
     add_subdirectory(alea)
-    
+
 endif (ALPS_BUILD_NGS AND ALPS_BUILD_EXAMPLES)

@@ -25,58 +25,37 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <alps/ngs/hdf5.hpp>
-#include <alps/ngs/params.hpp>
-#include <alps/ngs/signal.hpp>
+#ifndef ALPS_NGS_ARGPARSE_HPP
+#define ALPS_NGS_ARGPARSE_HPP
 
-#include <fstream>
-#include <iostream>
-#include <iterator>
+#include <alps/ngs/config.hpp>
 
-int main(int argc, char *argv[]) {
+#include <string>
 
-    alps::ngs::signal sig;
+namespace alps {
 
-    // load a hdf5 file into a parameter object
-    alps::hdf5::archive ar("param.h5");
-    alps::params params_h5(ar);
+      class ALPS_DECL argparse {
 
-    for (alps::params::const_iterator it = params_h5.begin(); it != params_h5.end(); ++it)
-        std::cout << it->first << ":" << it->second << std::endl;
+        public:
 
-    std::cout << std::endl;
+            argparse(int argc, char* argv[], std::string title = "Allowed options")
+                : desc(title)
+            {}
 
-    // save params to file
-    {
-        alps::hdf5::archive ar("param.out.h5", "w");
-        ar << make_pvp("/parameters", params_h5);
-    }
+            bool valid; // TODO: which options do we need?
+            bool resume;
+            std::size_t time_limit;
+            std::string input_file;
+            std::string output_file;
 
-    // TODO: fixit!
-    /*
-    // load a text file into a parameter object
-    std::ifstream file;
-    file.open("param.txt");
-    std::string txt;
-    while(file.good()) {
-        std::string line;
-        file >> line;
-        txt += line + "\n";
-    }
-    file.close();
-    alps::params params_txt(txt);
+        protected:
 
-    for (alps::params::const_iterator it = params_txt.begin(); it != params_txt.end(); ++it)
-        std::cout << it->first << ":" << it->second << std::endl;
+            void parse();
 
-    std::cout << std::endl;
-    params_txt["dbl"] = 1e-8;
-    std::cout << params_txt["dbl"] << " " << static_cast<double>(params_txt["dbl"]) << std::endl;
+            boost::program_options::options_description description;
+            boost::program_options::positional_options_description positional;
 
-    std::cout << std::endl;
-    params_txt["NOT_EXISTING_PARAM"] = "";
-    int i = params_txt["NOT_EXISTING_PARAM"] | 2048;
-    int j(params_txt["NOT_EXISTING_PARAM"] | 2048);
-    std::cout << static_cast<int>(params_txt["NOT_EXISTING_PARAM"] | 2048) << " " << i << " " << j << std::endl;
-    */
+    };
 }
+
+#endif
