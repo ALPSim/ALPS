@@ -79,7 +79,7 @@ int main(int argc, char** argv)
       std::cerr<<"mpi-run mpi_options program_name -- parameter_file"<<std::endl;
       exit(1);
     }
-    std::cout << "ALPS DMFT solver for the single site impurity problem.\n\n";
+    std::cout << "ALPS DMFT self-consistency condition.\n\n";
     alps::print_copyright(std::cout);
     alps::Parameters parms;
     {
