@@ -246,6 +246,13 @@ endif(MSVC)
 
 # Boost Libraries
 find_package(BoostForALPS REQUIRED)
+if(Boost_ROOT_DIR)
+  message(STATUS "Adding Boost dir: ${Boost_ROOT_DIR} " )
+  include_directories(${Boost_ROOT_DIR})
+else(Boost_ROOT_DIR)
+  message(STATUS "Adding Boost dir: ${Boost_INCLUDE_DIR} " )
+  include_directories(${Boost_INCLUDE_DIR})
+endif(Boost_ROOT_DIR)
 
 # MPI
 if(ALPS_ENABLE_MPI)
@@ -477,13 +484,10 @@ configure_file(vistrails/alps/__init__.py.in ${PROJECT_BINARY_DIR}/vistrails/alp
 ######################################################################
 include_directories(${PROJECT_BINARY_DIR}/src)
 include_directories(src)
-if(Boost_ROOT_DIR)
-  message(STATUS "Adding Boost dir: ${Boost_ROOT_DIR} " )
-  include_directories(${Boost_ROOT_DIR})
-else(Boost_ROOT_DIR)
-  message(STATUS "Adding Boost dir: ${Boost_INCLUDE_DIR} " )
-  include_directories(${Boost_INCLUDE_DIR})
-endif(Boost_ROOT_DIR)
+
+# order the include directories so that directories which are in the
+# source or build tree always come before directories outside the project.
+set(CMAKE_INCLUDE_DIRECTORIES_PROJECT_BEFORE ON)
 
 ######################################################################
 # RPATH setting
