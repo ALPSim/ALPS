@@ -43,7 +43,7 @@ namespace alps {
             typedef boost::int_t<sizeof(enum_type) * 8>::exact type;
         };
 
-        template<> struct is_continous<enum_type> : public boost::false_type {};
+        template<> struct is_continuous<enum_type> : public boost::false_type {};
 
         template<> struct has_complex_elements<enum_type> : public boost::false_type {};
 

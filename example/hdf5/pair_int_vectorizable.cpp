@@ -41,7 +41,7 @@ namespace alps {
             typedef int type;
         };
 
-        template<> struct is_continous<std::pair<int, int> > : public boost::true_type {};
+        template<> struct is_continuous<std::pair<int, int> > : public boost::true_type {};
 
         template<> struct has_complex_elements<std::pair<int, int> > : public boost::false_type {};
 
