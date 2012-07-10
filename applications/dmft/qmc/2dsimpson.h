@@ -142,6 +142,7 @@ class DOS_integrand {
       return dos_[n] * (mode_==0 ? 1. : (mode_==1 ? eps_[n] : eps_[n]*eps_[n]));
   }
     unsigned int size() const { return dos_.size(); }
+
   private:
     const std::vector<double> & dos_, eps_;
     const std::complex<double> zeta_A_, zeta_B_;

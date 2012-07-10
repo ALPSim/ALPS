@@ -179,7 +179,7 @@ public:
     }
     return G_new;
   }
-  void SetBandstructureParms(alps::Parameters& parms, double eps, double epssq);
+  void SetBandstructureParms(alps::Parameters& parms, std::vector<double> eps, std::vector<double> epssq);
 };
 
 
@@ -228,8 +228,8 @@ public:
   
 protected:
 
-  std::vector<double> epsilon;
-  std::vector<double> dos;
+  std::vector<std::vector<double> > epsilon;
+  std::vector<std::vector<double> > dos;
 };
 
 
