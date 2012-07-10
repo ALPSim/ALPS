@@ -1,29 +1,29 @@
 /*****************************************************************************
-*
-* ALPS Project Applications
-*
-* Copyright (C) 2010 by Sebastian  Fuchs <fuchs@comp-phys.org>
-*                       Thomas Pruschke <pruschke@comp-phys.org>
-*                       Matthias Troyer <troyer@comp-phys.org>
-*
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ *
+ * ALPS Project Applications
+ *
+ * Copyright (C) 2010 by Sebastian  Fuchs <fuchs@comp-phys.org>
+ *                       Thomas Pruschke <pruschke@comp-phys.org>
+ *                       Matthias Troyer <troyer@comp-phys.org>
+ *
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 #include "maxent.hpp"
 #include <alps/config.h> // needed to set up correct bindings
@@ -37,19 +37,19 @@
 
 
 MaxEntSimulation::MaxEntSimulation(const alps::ProcessList& w, const boost::filesystem::path& fn) 
- : alps::scheduler::Task(w,fn)
- , MaxEntHelper(parms)
- , alpha(parms["N_ALPHA"])                                                              //This is the # of \alpha parameters that should be tried.
- , norm(parms.value_or_default("NORM", 1.))                                             //The integral is normalized to NORM (use e.g. for self-energies
- , max_it(parms.value_or_default("MAX_IT", 1000))                                       //The number of iterations done in the root finding procedure
- , name(fn.filename().string(),0,fn.filename().string().size()-6)
- , dir(fn.branch_path())
- , spex_str(boost::filesystem::absolute(name+"spex.dat", dir).string().c_str())
- , chisq_str(boost::filesystem::absolute(name+"chi2.dat", dir).string().c_str())
- , avspec_str(boost::filesystem::absolute(name+"avspec.dat", dir).string().c_str())
- , maxspec_str(boost::filesystem::absolute(name+"maxspec.dat", dir).string().c_str())
- , chispec_str(boost::filesystem::absolute(name+"chispec.dat", dir).string().c_str())
- , prob_str(boost::filesystem::absolute(name+"prob.dat", dir).string().c_str())
+: alps::scheduler::Task(w,fn)
+, MaxEntHelper(parms)
+, alpha(parms["N_ALPHA"])                                                              //This is the # of \alpha parameters that should be tried.
+, norm(parms.value_or_default("NORM", 1.))                                             //The integral is normalized to NORM (use e.g. for self-energies
+, max_it(parms.value_or_default("MAX_IT", 1000))                                       //The number of iterations done in the root finding procedure
+, name(fn.filename().string(),0,fn.filename().string().size()-6)
+, dir(fn.branch_path())
+, spex_str(boost::filesystem::absolute(name+"spex.dat", dir).string().c_str())
+, chisq_str(boost::filesystem::absolute(name+"chi2.dat", dir).string().c_str())
+, avspec_str(boost::filesystem::absolute(name+"avspec.dat", dir).string().c_str())
+, maxspec_str(boost::filesystem::absolute(name+"maxspec.dat", dir).string().c_str())
+, chispec_str(boost::filesystem::absolute(name+"chispec.dat", dir).string().c_str())
+, prob_str(boost::filesystem::absolute(name+"prob.dat", dir).string().c_str())
 {
   if(norm != 1.) std::cerr<<"WARNING: Redefinition of parameter NORM: Input (and output) data are assumed to be normalized to NORM."<<std::endl;
   const double alpha_min = parms["ALPHA_MIN"];                                          //Smallest value of \alpha that is tried
@@ -75,20 +75,30 @@ void MaxEntSimulation::dostep()
   vector_type chi_sq(alpha.size());
   std::vector<vector_type> spectra(alpha.size());
   vector_type u = transform_into_singular_space(Default());
+  
+  //this loop is the 'core' of the maxent program: iterate over all alphas, compute the spectra, normalization, and probabilities
+  //loop over all alpha values
   for (std::size_t a=0; a<alpha.size(); ++a) {
     std::cerr << "alpha it: " << a << "\t";
+    //fitting procedure for 'u'
     u = levenberg_marquardt(u, alpha[a]);
+    //computation of spectral function out of 'u'
     vector_type A = get_spectrum(u);
+    //computation of normalization
     std::cerr << "norm: " << boost::numeric::ublas::sum(transform_into_real_space(u)) << "\t";
     for (std::size_t i=0; i<A.size(); ++i) 
       spex_str << alpha[a] << " " << omega_coord(i) << " " << A[i] << "\n";
     spex_str << "\n";
+    //computation of probability
     lprob[a] = log_prob(u, alpha[a]);
     spectra[a] = A;
+    //computation of chi2
     double chi_squared = chi2(transform_into_real_space(u));
     chi_sq[a] = chi_squared;
     std::cerr << "chi2  : " << chi_squared << std::endl;
   }
+  
+  //everything from here on down is evaluation.
   spex_str << "\n";
   for (std::size_t a=0; a<chi_sq.size(); ++a) 
     chisq_str << alpha[a] << " " << chi_sq[a] << std::endl;
@@ -108,7 +118,7 @@ void MaxEntSimulation::dostep()
   const int max_a = max_lprob-lprob.begin();
   const double factor = chi_scale_factor(spectra[max_a], chi_sq[max_a], alpha[max_a]);
   std::cerr << "chi scale factor: " << factor << std::endl;
-
+  
   //output 'maximum' spectral function (classical maxent metod)
   for (std::size_t i=0; i<spectra[0].size(); ++i) 
     maxspec_str << omega_coord(i) << " " << spectra[max_a][i]*norm << " " << def[i]*norm << std::endl;
@@ -126,7 +136,7 @@ void MaxEntSimulation::dostep()
   for (std::size_t a=0; a<lprob.size()-1; ++a) 
     postprobdef += 0.5*(exp(lprob[a])+exp(lprob[a+1]))*(alpha[a]-alpha[a+1]);
   std::cout << "posterior probability of the default model: " << postprobdef << std::endl;
- 
+  
   //compute 'average' spectral function (Brian's metod)
   vector_type avspec(spectra[0].size());
   for (std::size_t i=0; i<avspec.size(); ++i) {
@@ -136,26 +146,26 @@ void MaxEntSimulation::dostep()
   }
   for (std::size_t  i=0; i<avspec.size(); ++i) 
     avspec_str << omega_coord(i) << " " << avspec[i]*norm << " " << def[i]*norm << std::endl;
-  if(parms["KERNEL"]=="anomalous"){ //for the anomalous function: use A(omega)=Im Sigma(omega)/pi omega. 
+  if(parms["KERNEL"]=="anomalous"){ //for the anomalous function: use A(omega)=Im Sigma(omega)/(pi omega). 
     std::ofstream maxspec_anom_str(boost::filesystem::absolute(name+"maxspec_anom.dat", dir).string().c_str());
     std::ofstream avspec_anom_str (boost::filesystem::absolute(name+"avspec_anom.dat", dir).string().c_str());
     for (std::size_t  i=0; i<avspec.size(); ++i){ 
       //if(omega_coord(i)>=0.)
-        avspec_anom_str << omega_coord(i) << " " << avspec[i]*norm*omega_coord(i)*M_PI<<std::endl;
+      avspec_anom_str << omega_coord(i) << " " << avspec[i]*norm*omega_coord(i)*M_PI<<std::endl;
     }
     for (std::size_t i=0; i<spectra[0].size(); ++i){
       //if(omega_coord(i)>=0.)
-        maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
+      maxspec_anom_str << omega_coord(i) << " " << spectra[max_a][i]*norm*omega_coord(i)*M_PI << std::endl;
     }
   }
   if(parms.defined("SELF")){ //for the self energy: use Im Sigma(omega)=-A(omega)*pi
     std::ofstream maxspec_self_str(boost::filesystem::absolute(name+"maxspec_self.dat", dir).string().c_str());
     std::ofstream avspec_self_str (boost::filesystem::absolute(name+"avspec_self.dat", dir).string().c_str());
     for (std::size_t  i=0; i<avspec.size(); ++i){ 
-        avspec_self_str << omega_coord(i) << " " << -avspec[i]*norm*M_PI<<std::endl;
+      avspec_self_str << omega_coord(i) << " " << -avspec[i]*norm*M_PI<<std::endl;
     }
     for (std::size_t i=0; i<spectra[0].size(); ++i){
-        maxspec_self_str << omega_coord(i) << " " << -spectra[max_a][i]*norm*M_PI << std::endl;
+      maxspec_self_str << omega_coord(i) << " " << -spectra[max_a][i]*norm*M_PI << std::endl;
     }
   }
   finish();
@@ -163,7 +173,8 @@ void MaxEntSimulation::dostep()
 
 
 
-
+//this is the levenberg marquardt fitting procedure. It minimizes the quantity Q = 1/2 chi^2 - \alpha S
+// 
 MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type u, const double alpha) const 
 {
   using namespace boost::numeric;
@@ -175,7 +186,14 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
   for (; it<max_it; it++) {
     vector_type delta;
     for (it2=0; it2<max_it; ++it2) {
+      //compute change vector delta to u
       delta = iteration(u, alpha, mu);
+      std::cout<<"delta is: "<<delta<<std::endl;
+      vector_type z=transform_into_real_space(delta);
+      for(int i=0;i<z.size();++i){
+        std::cout<<omega_coord(i)<<" "<<z(i)<<std::endl;
+      }
+      //compute Q = 1/2 chi^2 - \alpha S
       Q1 = Q(u+delta, alpha);
       if (step_length(delta, u)<=0.02) {
         break;
@@ -189,13 +207,14 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
       break;
   }
   std::cerr <<"Iterations: " << it+1 << "\t"
-            << "Q: " << Q1 << "\t";
+  << "Q: " << Q1 << "\t";
   return u;
 }
 
 
 
-
+//this function computes the change delta to the vector 'u' 
+//to be used in the Levenberg Marquardt fitting procedure
 MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const double alpha, const double mu) const 
 {
   using namespace boost::numeric;
@@ -213,14 +232,14 @@ MaxEntSimulation::vector_type MaxEntSimulation::iteration(vector_type u, const d
 
 
 
-//this function is crap. Why do we need it? It has zero content!
+//this function is nonsensical. Why do we need it? It has zero content!
 void MaxEntSimulation::write_xml_body(alps::oxstream& out, const boost::filesystem::path&, bool write_all_xml) const
 {
   if (write_all_xml) {
     out << alps::start_tag("AVERAGES");
     out << alps::start_tag("SCALAR_AVERAGE") << alps::attribute("name","Zeug") << alps::no_linebreak
-        << alps::start_tag("MEAN") << 42 << alps::end_tag("MEAN")
-        << alps::end_tag("SCALAR_AVERAGE");
+    << alps::start_tag("MEAN") << 42 << alps::end_tag("MEAN")
+    << alps::end_tag("SCALAR_AVERAGE");
     out << alps::end_tag("AVERAGES");
   }
 }

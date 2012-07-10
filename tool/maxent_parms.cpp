@@ -1,29 +1,29 @@
 /*****************************************************************************
-*
-* ALPS Project Applications
-*
-* Copyright (C) 2010 by Sebastian Fuchs <fuchs@comp-phys.org>
-*                       Thomas Pruschke <pruschke@comp-phys.org>
-*                       Matthias Troyer <troyer@comp-phys.org>
-*
-* This software is part of the ALPS Applications, published under the ALPS
-* Application License; you can use, redistribute it and/or modify it under
-* the terms of the license, either version 1 or (at your option) any later
-* version.
-* 
-* You should have received a copy of the ALPS Application License along with
-* the ALPS Applications; see the file LICENSE.txt. If not, the license is also
-* available from http://alps.comp-phys.org/.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
-* FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
-* SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
-* FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
-* ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
-* DEALINGS IN THE SOFTWARE.
-*
-*****************************************************************************/
+ *
+ * ALPS Project Applications
+ *
+ * Copyright (C) 2010 by Sebastian Fuchs <fuchs@comp-phys.org>
+ *                       Thomas Pruschke <pruschke@comp-phys.org>
+ *                       Matthias Troyer <troyer@comp-phys.org>
+ *
+ * This software is part of the ALPS Applications, published under the ALPS
+ * Application License; you can use, redistribute it and/or modify it under
+ * the terms of the license, either version 1 or (at your option) any later
+ * version.
+ * 
+ * You should have received a copy of the ALPS Application License along with
+ * the ALPS Applications; see the file LICENSE.txt. If not, the license is also
+ * available from http://alps.comp-phys.org/.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR 
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE, TITLE AND NON-INFRINGEMENT. IN NO EVENT 
+ * SHALL THE COPYRIGHT HOLDERS OR ANYONE DISTRIBUTING THE SOFTWARE BE LIABLE 
+ * FOR ANY DAMAGES OR OTHER LIABILITY, WHETHER IN CONTRACT, TORT OR OTHERWISE, 
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER 
+ * DEALINGS IN THE SOFTWARE.
+ *
+ *****************************************************************************/
 
 #include "maxent_parms.hpp"
 #include <alps/config.h> // needed to set up correct bindings
@@ -36,10 +36,10 @@
 
 
 ContiParameters::ContiParameters(const alps::Parameters& p) : 
-  Default_(make_default_model(p, "DEFAULT_MODEL")), 
-  T_(p.value_or_default("T", 1./static_cast<double>(p["BETA"]))),
-  ndat_(p["NDAT"]), nfreq_(p["NFREQ"]),
-  y_(ndat_), K_(),   t_array_(nfreq_+1)
+Default_(make_default_model(p, "DEFAULT_MODEL")), 
+T_(p.value_or_default("T", 1./static_cast<double>(p["BETA"]))),
+ndat_(p["NDAT"]), nfreq_(p["NFREQ"]),
+y_(ndat_), K_(),   t_array_(nfreq_+1)
 {
   if (ndat_<4) 
     boost::throw_exception(std::invalid_argument("NDAT too small"));
@@ -83,8 +83,10 @@ ContiParameters::ContiParameters(const alps::Parameters& p) :
   }
   else 
     boost::throw_exception(std::invalid_argument("No valid frequency grid specified"));
-  for (int i=0; i<ndat(); ++i) 
+  for (int i=0; i<ndat(); ++i){ 
+    if(!p.defined("X_"+boost::lexical_cast<std::string>(i))){ throw std::runtime_error("parameter X_i missing!"); }
     y_(i) = static_cast<double>(p["X_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
+  }
 }
 
 
@@ -103,11 +105,11 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       if (alps::is_master())
         std::cerr << "Using fermionic kernel" << std::endl;
       for (int i=0; i<ndat(); ++i) {
-    double tau;
-    if (p.defined("TAU_"+boost::lexical_cast<std::string>(i)))
-      tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
-    else 
-      tau = i / (ndat() * T_);
+        double tau;
+        if (p.defined("TAU_"+boost::lexical_cast<std::string>(i)))
+          tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
+        else 
+          tau = i / (ndat() * T_);
         for (int j=0; j<ntab; ++j) {
           double omega = freq[j]; //Default().omega_of_t(double(j)/(ntab-1));
           K_(i,j) =  -1. / (std::exp(omega*tau) + std::exp(-omega*(1./T_-tau)));
@@ -118,11 +120,11 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       if (alps::is_master())
         std::cerr << "Using bosonic kernel" << std::endl;
       for (int i=0; i<ndat(); ++i) {
-    double tau;
-    if (p.defined("TAU_"+boost::lexical_cast<std::string>(i)))
-      tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
-    else 
-      tau = i / (ndat() * T_);
+        double tau;
+        if (p.defined("TAU_"+boost::lexical_cast<std::string>(i)))
+          tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
+        else 
+          tau = i / (ndat() * T_);
         K_(i,0) = T_;
         for (int j=1; j<ntab; ++j) {
           double omega = freq[j];
@@ -134,7 +136,7 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       if (alps::is_master())
         std::cerr << "Using Boris' kernel" << std::endl;
       for (int i=0; i<ndat(); ++i) {
-    double tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
+        double tau = p["TAU_"+boost::lexical_cast<std::string>(i)]; 
         for (int j=0; j<ntab; ++j) {
           double omega = freq[j];
           K_(i,j) = std::exp(-omega*tau);
@@ -152,6 +154,17 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
       for (int j=0; j<ntab; ++j) {
         double omega = freq[j]; 
         K_(i,j) =  -omegan / (omegan*omegan + omega*omega);
+      }
+    }
+  } 
+  else if (p["DATASPACE"]=="frequency" && p["KERNEL"] == "bosonic" &&
+           p.value_or_default("PARTICLE_HOLE_SYMMETRY", false)) {
+    std::cerr << "using particle hole symmetric kernel for bosonic data" << std::endl;
+    for (int i=0; i<ndat(); ++i) {
+      double omegan = (2*i+1)*M_PI*T_;
+      for (int j=0; j<ntab; ++j) {
+        double omega = freq[j]; 
+        K_(i,j) =  -omega*omega / (omegan*omegan + omega*omega);
       }
     }
   } 
@@ -188,7 +201,8 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
         std::complex<double> iomegan(0, 2*i*M_PI*T_);
         for (int j=1; j<ntab; ++j) {
           double omega = freq[j]; 
-          Kc(i,j) =  -1. / (iomegan - omega);
+          //Kc(i,j) =  -1. / (iomegan - omega);
+          Kc(i,j) =  -omega / (iomegan - omega);
         }
       }    
     }
@@ -235,15 +249,18 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
     for (int i=0; i<ndat(); ++i) 
       sigma[i] = static_cast<double>(p["SIGMA_"+boost::lexical_cast<std::string>(i)])/static_cast<double>(p["NORM"]);
   }
+  //Look around Eq. D.5 in Sebastian's thesis. We have sigma = sqrt(eigenvalues of covariance matrix) or, in case of a diagonal covariance matrix, we have sigma=SIGMA_X. The then define y := \bar{G}/sigma and K := (1/sigma)\tilde{K}
   for (int i=0; i<ndat(); ++i) {
     y_[i] /= sigma[i];
     for (int j=0; j<ntab; ++j) 
       K_(i,j) /= sigma[i];
   }
-  //this enforces the normalization
+
+  //this enforces a strict normalization if needed.
+  //not sure that this is done properly. recheck!
   if(p.value_or_default("ENFORCE_STRICT_NORMALIZATION",false)){
     std::cout<<"enforcing strict normalization."<<std::endl;
-    double artificial_norm_enforcement_sigma=1.e-5;
+    double artificial_norm_enforcement_sigma=1.e-4;
     for(int j=0;j<ntab;++j){
       K_(ndat()-1,j) = 1./artificial_norm_enforcement_sigma;
     }
@@ -252,12 +269,10 @@ void ContiParameters::setup_kernel(const alps::Parameters& p, const int ntab, co
 }
 
 
-
-
 MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
-  ContiParameters(p), 
-  U_(ndat(), ndat()), Vt_(ndat(), nfreq()), Sigma_(ndat(), ndat()), 
-  omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
+ContiParameters(p), 
+U_(ndat(), ndat()), Vt_(ndat(), nfreq()), Sigma_(ndat(), ndat()), 
+omega_coord_(nfreq()), delta_omega_(nfreq()), ns_(0)
 {
   using namespace boost::numeric;
   if (ndat() > nfreq()) 
@@ -266,7 +281,10 @@ MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
     omega_coord_[i] = (Default().omega_of_t(t_array_[i]) + Default().omega_of_t(t_array_[i+1]))/2.;
     delta_omega_[i] = Default().omega_of_t(t_array_[i+1]) - Default().omega_of_t(t_array_[i]);
   }
+  //compute the kernel K of G = K*A
   setup_kernel(p, nfreq(), omega_coord_);
+  
+  //perform the SVD decomposition K = U Sigma V^T
   vector_type S(ndat());
   matrix_type Kt = K_; // gesvd destroys K!
   bindings::lapack::gesvd('S','S',Kt, S, U_, Vt_); 
@@ -276,6 +294,12 @@ MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
     ns_ = (S[s] >= prec) ? s : ns_;
   if (ns() == 0) 
     boost::throw_exception(std::logic_error("all singular values smaller than the precision"));
+  
+  //(truncated) U has dimension ndat() * ns_; ndat() is # of input (matsubara frequency/imag time) points
+  //(truncated) Sigma has dimension ns_*ns_ (number of singular eigenvalues)
+  //(truncated) V^T has dimensions ns_* nfreq(); nfreq() is number of output (real) frequencies
+  //ns_ is the dimension of the singular space.
+  
   U_.resize(ndat(), ns_, true);
   Vt_.resize(ns_, nfreq(), true);
   Sigma_.resize(ns_, ns_);
@@ -284,10 +308,11 @@ MaxEntParameters::MaxEntParameters(const alps::Parameters& p) :
     std::cout << "# " << s << "\t" << S[s] <<"\n";
     Sigma_(s,s) = S[s];
   }
-  matrix_type Ut = ublas::trans(U_);
-  vector_type t = ublas::prec_prod(Ut, y_);
-  vector_type y2 = ublas::prec_prod(U_, t);
-  double chi = ublas::norm_2(y_-y2);
+  //compute Ut and 
+  matrix_type Ut = ublas::trans(U_);             //U^T has dimension ns_*ndat()
+  vector_type t = ublas::prec_prod(Ut, y_);      //t has dimension ns_
+  vector_type y2 = ublas::prec_prod(U_, t);      //y2 has dimension ndat(), which is dimension of y
+  double chi = ublas::norm_2(y_-y2);             //this measures the loss of precision when transforming to singular space and back.
   std::cout << "minimal chi2: " << chi*chi/y_.size() << std::endl;
 }
 

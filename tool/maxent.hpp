@@ -63,6 +63,7 @@ public :
   double Default(const int i) const { return def_[i]; }  
   const vector_type& Default() const { return def_; }
 
+  //compute the 'free energy' Q (eq. 6.8 in Sebastian's thesis) according to equation D.8 in Sebastian's thesis
   double Q(const vector_type& u, const double alpha) const {
     using namespace boost::numeric::ublas;
     vector_type A = transform_into_real_space(u);

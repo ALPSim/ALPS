@@ -49,7 +49,8 @@ MaxEntHelper::MaxEntHelper(const alps::Parameters& p) :
 }
 
 
-
+//the opposite of 'transform_into_real_space'; takes a vector 'A' and makes a vector 'u' out of it:
+// u = V^T* log(A/Default)
 MaxEntHelper::vector_type MaxEntHelper::transform_into_singular_space(vector_type A) const
 {
   for (unsigned int i=0; i<A.size(); ++i) {
@@ -61,7 +62,7 @@ MaxEntHelper::vector_type MaxEntHelper::transform_into_singular_space(vector_typ
 
 
 
-
+//returns exp(V^T*u)*Default(i). This quantity is then usually called 'A'
 MaxEntHelper::vector_type MaxEntHelper::transform_into_real_space(vector_type u) const
 {
   u = prec_prod(trans(Vt()), u);
@@ -85,7 +86,7 @@ MaxEntHelper::vector_type MaxEntHelper::get_spectrum(const vector_type& u) const
 
 
 
-
+//'left side' is defined as Sigma*Sigma*(V^T*RealSpace(u)*V)*2/ndat
 MaxEntHelper::matrix_type MaxEntHelper::left_side(const vector_type& u) const 
 {
   vector_type A = transform_into_real_space(u);
@@ -101,8 +102,9 @@ MaxEntHelper::matrix_type MaxEntHelper::left_side(const vector_type& u) const
 }
 
 
-
-
+//this function computes
+//Sigma*U^T*(K*RealSpace(u)-y)
+//up to a factor of 2./ndat(). Compare this to Eq. D.12 in Sebastian's thesis
 MaxEntHelper::vector_type MaxEntHelper::right_side(const vector_type& u) const 
 {
   vector_type b = 2./ndat()*(prec_prod(K(), transform_into_real_space(u)) - y());
@@ -113,7 +115,7 @@ MaxEntHelper::vector_type MaxEntHelper::right_side(const vector_type& u) const
 
 
 
-
+//this function constructs delta \dot (V^T*RealSpace(u)*V)
 double MaxEntHelper::step_length(const vector_type& delta, const vector_type& u) const 
 {
   vector_type A = transform_into_real_space(u);
@@ -187,7 +189,7 @@ double MaxEntHelper::chi_scale_factor(vector_type A, const double chi_sq, const 
 }
 
 
-
+//This function computes chi^2 as in equation D.6 in Sebastian's thesis
 double MaxEntHelper::chi2(const vector_type& A) const 
 {
   vector_type del_G = prec_prod(K(), A) - y();
@@ -198,7 +200,7 @@ double MaxEntHelper::chi2(const vector_type& A) const
 }
 
 
-
+//This function computes the entropy as in Eq. D.7 in Sebastian's thesis
 double MaxEntHelper::entropy(const vector_type& A) const 
 {
   double S = 0;
