@@ -188,11 +188,11 @@ MaxEntSimulation::vector_type MaxEntSimulation::levenberg_marquardt(vector_type 
     for (it2=0; it2<max_it; ++it2) {
       //compute change vector delta to u
       delta = iteration(u, alpha, mu);
-      std::cout<<"delta is: "<<delta<<std::endl;
+      /*std::cout<<"delta is: "<<delta<<std::endl;
       vector_type z=transform_into_real_space(delta);
       for(int i=0;i<z.size();++i){
         std::cout<<omega_coord(i)<<" "<<z(i)<<std::endl;
-      }
+      }*/
       //compute Q = 1/2 chi^2 - \alpha S
       Q1 = Q(u+delta, alpha);
       if (step_length(delta, u)<=0.02) {
