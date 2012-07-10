@@ -19,4 +19,10 @@ SET(CMAKE_CXX_FLAGS_RELEASE "-ipo -O3 -no-prec-div -xHost -mkl -DNDEBUG -DBOOST_
 SET(CMAKE_CXX_FLAGS_DEBUG "-g -mkl" CACHE STRING "" FORCE)
 SET(CMAKE_AR "/cluster/apps/intel/composerxe-2011.3.174/bin/intel64/xiar" CACHE STRING "" FORCE) 
 SET(CMAKE_LINKER "/cluster/apps/intel/composerxe-2011.3.174/bin/intel64/xild" CACHE STRING "" FORCE)
+
 SET(LAPACK_FOUND 1) # with -mkl we have lapack no matter what cmake thinks
+SET(HAVE_MKL 1)
+SET(BLAS_LIBRARY_INIT 1)
+SET(LAPACK_LIBRARY_INIT 1)
+SET(BLAS_LIBRARY "")
+SET(LAPACK_LIBRARY "")
