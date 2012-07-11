@@ -244,7 +244,8 @@ FSDOSHilbertTransformer::FSDOSHilbertTransformer(alps::Parameters& parms)
   double eps, d;
   std::cout<<"using density of states "<<parms["DOSFILE"]<<std::endl;
   std::cout<<"(Note: Assuming equidistant energy intervals.)"<<std::endl;
-  while(dos_file>>eps>>d){
+  if (n_flavors>2) std::cout<<"(Note: Assuming the same number of bins for all bands.)"<<std::endl;
+  while(dos_file>>eps>>d){   
     epsilon[0].push_back(eps);
     dos[0].push_back(d);
     for(unsigned int band = 1; band<n_flavors/2; band++){
@@ -253,7 +254,7 @@ FSDOSHilbertTransformer::FSDOSHilbertTransformer(alps::Parameters& parms)
       dos[band].push_back(d);
     }
   }
-
+  
   double s, S;
   std::vector<double> eps_,epssq_;
 
@@ -292,17 +293,16 @@ matsubara_green_function_t FSDOSHilbertTransformer::operator()(const matsubara_g
   std::cout<<"PM FS DOS Hilbert Transformer"<<std::endl;
   matsubara_green_function_t G_omega_new(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
   matsubara_green_function_t Sigma(G_omega.nfreq(), G_omega.nsite(), G_omega.nflavor());
-  
+
   for(spin_t f=0;f<G_omega.nflavor();++f){
     for(frequency_t w=0;w<G_omega.nfreq();++w){
       Sigma(w,f)= 1./G0_omega(w,f)-1./G_omega(w,f); 
       std::complex<double> A=std::complex<double>(0, (2*w+1)*M_PI/beta) + mu - Sigma(w,f);
       // simpson integrate: dos[n]/(A - epsilon[n])
-      DOS_integrand integrand(dos[f],epsilon[f],A);
+      DOS_integrand integrand(dos[f/2],epsilon[f/2],A);
       G_omega_new(w, f)=simpson_integrate(integrand);
     }
   }
-  
   for(spin_t f=0;f<G_omega.nflavor();++f){
     for(frequency_t w=0;w<G_omega.nfreq();++w){
       G0_omega(w,f)=1./(Sigma(w,f)+1./G_omega_new(w,f));
@@ -334,7 +334,7 @@ matsubara_green_function_t AFM_FSDOSHilbertTransformer::operator()(const matsuba
 	    std::complex<double>zeta_B=std::complex<double>(mu+h,wn)-Sigma(w,f);
 	    
 	    //Simpson: integrate dos[f](e)/(zeta_A zeta_B-e^2)
-	    DOS_integrand integrand(dos[f],epsilon[f],zeta_A,zeta_B);
+	    DOS_integrand integrand(dos[f/2],epsilon[f/2],zeta_A,zeta_B);
     	std::complex<double> I = simpson_integrate(integrand);
     	
     	//compute the new G's:
