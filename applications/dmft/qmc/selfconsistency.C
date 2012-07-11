@@ -88,7 +88,7 @@ void selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver, Hilbe
   } while (max_diff > converged  && iteration_ctr < max_it);
   std::cout<<(max_diff > converged ? "NOT " : "")<<"converged!"<<std::endl;
   // write G0 (to be read in as an input for a new simulation)
-  G0_tau.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+  G0_tau.write(parms.value_or_default("G0TAU_output", "G0tau_output").c_str());
 }
 
 
@@ -135,7 +135,7 @@ void F_selfconsistency_loop(alps::Parameters& parms, ImpuritySolver& solver,  it
   } while (max_diff > converged && iteration_ctr < max_it);
   std::cout<<(max_diff > converged ? "NOT " : "")<<"converged!"<<std::endl;
   // write G (to be read in as an input for a new simulation)
-  G_tau.write(parms.value_or_default("G0OMEGA_output", "G0omega_output").c_str());
+  G_tau.write(parms.value_or_default("G0TAU_output", "G0tau_output").c_str());
 
 }
 

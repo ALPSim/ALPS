@@ -94,7 +94,7 @@ void update_single_spin(RNG & rng, dense_matrix & Green_up, dense_matrix & Green
   fortran_int_t N(spins.size());
   
   // choose random site
-  unsigned int site = (unsigned int)(N*rng());
+  int site = (unsigned int)(N*rng());
   // calculate ratio of determinants
   double r_up = 1 + (1-Green_up(site,site))*(exp(-2*lambda*spins[site])-1);
   double r_down = 1 + (1-Green_down(site,site))*(exp(2*lambda*spins[site])-1);

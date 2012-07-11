@@ -30,6 +30,7 @@
 #include <alps/lattice.h>
 #include "impurity.h"
 #include "moves.h"
+#include "2dsimpson.h"
 #include "fouriertransform.h"
 #include "xml.h"
 #include <alps/alea.h>
@@ -85,9 +86,9 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
       }
     }else if (parms.defined("EPSSQAV")) {
       epssqav = parms["EPSSQAV"];
-    }else{
+    }else{          // Bethe lattice assumed; only simple single bandwidth case
       t=parms["t"]; //this is essentially an energy unit.
-      epssqav = t * t;  // Bethe lattice assumed
+      epssqav = t * t;  
     }
     std::istringstream in_omega(parms["G0(omega)"]);
     read_freq(in_omega, bare_green_matsubara);
@@ -110,17 +111,10 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
     std::istringstream in_tau(parms["G0"]);     //this is not G0 but G(tau). See solver.solve in F_selfconsistency_loop()
     itime_green_function_t green_itime(Np1, 1, FLAVORS);
     read_itime(in_tau, green_itime);
+    BetheBandstructure bethe_parm(parms);
     for (int f = 0; f < FLAVORS; ++f) {
-      int orbital=f/2;
-      std::stringstream tname; tname<<"t"<<orbital;
-      if(parms.defined(tname.str())) {
-        t=parms[tname.str()]; 
-        std::cout<<"orbital: "<<f/2<<" flavor: "<<f<<" using t: "<<t<<std::endl;
-      }
-      else 
-        t=parms["t"];
       for (int i = 0; i < Np1; ++i) {
-        f_itime(i, f) = -t * t * green_itime(N - i, f);  //this is the self consistency loop, for Bethe lattice!
+        f_itime(i, f) = -bethe_parm.tsq(f) * green_itime(N - i, f);  //this is the self consistency loop, for Bethe lattice!
       }
     }
     //std::cout<<green_itime<<std::endl;

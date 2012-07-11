@@ -46,12 +46,12 @@ class BetheBandstructure {
     BetheBandstructure(const alps::Parameters& parms, bool verbose=false) {
       unsigned int n_flavor = parms.value_or_default("FLAVORS", 2);
       tsq_.resize(n_flavor/2);
-      for(int i=0;i<n_flavor/2;++i){
+      for(unsigned int i=0; i<n_flavor/2; ++i){
         std::stringstream t_i; t_i<<"t"<<i;  // flavors (2m) and (2m+1) assumed to have the same bandwidth
         double t = (parms.defined(t_i.str()) ? static_cast<double>(parms[t_i.str()]) : static_cast<double>(parms["t"]));
         tsq_[i]=t*t;   // second moment of the Bethe DOS is t^2 [4t=2W=D]
         if (verbose)
-          std::cout<<"Semicircular DOS: for flavor "<<i<<" using hopping t = "<<t<<std::endl;
+          std::cout<<"Semicircular DOS: for flavors "<<2*i<<" and "<<2*i+1<<" using hopping t = "<<t<<std::endl;
       }
     }
     double tsq(unsigned int f=0) const { return tsq_[f/2]; }
