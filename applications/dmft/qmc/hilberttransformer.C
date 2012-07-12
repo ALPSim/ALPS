@@ -224,10 +224,10 @@ void FrequencySpaceHilbertTransformer::SetBandstructureParms(alps::Parameters& p
   }
   if (! is_set) { // if the user did not set it manually
     std::cout << "initialization of a the Hilbert transformer: writing the values for bandstructure-parameters needed in FourierTransformer." << std::endl;
-    parms["EPSSQAV"] = epssq[0];
+    parms["EPSSQAV"] = epssq[0];  // good only for single band, is loaded by Hybridization
     for (unsigned int i=0; i < n_flavors; i++) {
-      parms["EPS_"+boost::lexical_cast<std::string>(i)] = 0;  // eps[0] ?
-      parms["EPSSQ_"+boost::lexical_cast<std::string>(i)] = epssq[0];
+      parms["EPS_"+boost::lexical_cast<std::string>(i)] = 0;  // eps[i/2] ?
+      parms["EPSSQ_"+boost::lexical_cast<std::string>(i)] = epssq[i/2];
     }
   }
 }
@@ -239,16 +239,15 @@ FSDOSHilbertTransformer::FSDOSHilbertTransformer(alps::Parameters& parms)
   if(!parms.defined("DOSFILE")) throw std::invalid_argument("please define DOSFILE parameter!");
   std::ifstream dos_file(parms["DOSFILE"].c_str());
   if(!dos_file.good()) throw std::runtime_error("DOSFILE is not good!");
-  unsigned int n_flavors = parms.value_or_default("FLAVORS", 2);
-  if(n_flavors%2==1)n_flavors++;   // applicable only for PM version
+  unsigned int n_bands = (static_cast<unsigned int>(parms.value_or_default("FLAVORS", 2))+1)/2;  // case with odd number of flavors applicable only for PM
   double eps, d;
   std::cout<<"using density of states "<<parms["DOSFILE"]<<std::endl;
   std::cout<<"(Note: Assuming equidistant energy intervals.)"<<std::endl;
-  if (n_flavors>2) std::cout<<"(Note: Assuming the same number of bins for all bands.)"<<std::endl;
+  if (n_bands>1) std::cout<<"(Note: Assuming the same number of bins for all bands.)"<<std::endl;
   while(dos_file>>eps>>d){   
     epsilon[0].push_back(eps);
     dos[0].push_back(d);
-    for(unsigned int band = 1; band<n_flavors/2; band++){
+    for(unsigned int band = 1; band<n_bands; band++){
       if(!(dos_file>>eps>>d))throw std::runtime_error("DOSFILE is not good!");
       epsilon[band].push_back(eps);
       dos[band].push_back(d);
@@ -258,7 +257,7 @@ FSDOSHilbertTransformer::FSDOSHilbertTransformer(alps::Parameters& parms)
   double s, S;
   std::vector<double> eps_,epssq_;
 
-  for(unsigned int band=0; band<n_flavors/2; band++){
+  for(unsigned int band=0; band<n_bands; band++){
     DOS_integrand integrand0(0, dos[band], epsilon[band]);
     s=(simpson_integrate(integrand0)).real();
     S=0;
