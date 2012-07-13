@@ -34,7 +34,7 @@
 #ifndef EXAMPLE_NGS_CUSTOM_ACCUM_HEADER
 #define EXAMPLE_NGS_CUSTOM_ACCUM_HEADER
 
-#include <alps/ngs/alea/detail/properties.hpp>
+#include <alps/ngs.hpp>
 
 #include <iostream>
 #include <vector>

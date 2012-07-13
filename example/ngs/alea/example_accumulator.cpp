@@ -48,7 +48,6 @@
 
 #include <iostream>
 #include <alps/ngs.hpp>
-#include <alps/ngs/alea/detail/any.hpp>
 
 using namespace std;
 using namespace alps::alea;
