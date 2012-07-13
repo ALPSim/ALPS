@@ -495,26 +495,27 @@ DMRGTask<value_type>::save_results()
   typename dmtk::Hami<value_type>::iterator iter = S.corr.begin();
   typedef std::pair<std::string,std::string> string_pair;
   typedef std::pair<std::string,std::pair<std::string,std::string> > string_string_pair_pair;
-
+  using alps::numeric::real;
+  
   // store local measurements
   BOOST_FOREACH (string_pair const& ex, this->local_expressions) {
     std::vector<value_type> av;
     for (int i=0; i< (has_bond_operator(ex.second) ? num_bonds() : num_sites());++i)
-      av.push_back(alps::numeric::real(iter++->value()));   
+      av.push_back(real(iter++->value()));   
     this->local_values[ex.first].push_back(av);
   }
   
   // average measurements will be identical loops, but all terms added instead of stored separately
 
    BOOST_FOREACH (string_pair const& ex, this->average_expressions) {
-    this->average_values[ex.first].push_back(alps::numeric::real(iter++->value()));
+    this->average_values[ex.first].push_back(real(iter++->value()));
   }
   
   // correlations
   BOOST_FOREACH (string_string_pair_pair const& ex, this->correlation_expressions) {
     std::vector<value_type> av;
     for (int i=0; i<num_distances();++i)
-      av.push_back(alps::numeric::real(iter++->value()));   
+      av.push_back(real(iter++->value()));   
     this->correlation_values[ex.first].push_back(av);
   }
 
@@ -526,10 +527,11 @@ DMRGTask<value_type>::save_results()
 template<class value_type>
 void DMRGTask<value_type>::save(alps::hdf5::archive & ar) const
 {
+  using alps::numeric::real;
   alps::scheduler::Task::save(ar);
   typename std::map<std::string,std::vector<value_type> >::const_iterator it = this->average_values.find("Energy");
   if (it != this->average_values.end()) {
-    std::vector<double> energies = alps::numeric::real(it->second);
+    std::vector<double> energies = real(it->second);
     ar << alps::make_pvp("spectrum/energies",energies);
   }
   

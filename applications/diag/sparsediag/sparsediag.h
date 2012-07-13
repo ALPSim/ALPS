@@ -108,6 +108,7 @@ template <class T>
 void SparseDiagMatrix<T>::do_subspace()
 {
   typedef ietl::vectorspace<vector_type> vectorspace_type;
+  using alps::numeric::real;
   boost::lagged_fibonacci607 generator;
   mag_vector_type ev;
   this->build();
@@ -133,7 +134,7 @@ void SparseDiagMatrix<T>::do_subspace()
   else
   {
     ev.resize(1);
-    ev[0]=alps::numeric::real(value_type(this->matrix()(0,0)));
+    ev[0]=real(value_type(this->matrix()(0,0)));
   }
   if (this->calc_vectors()) {
     if  (this->dimension()>1) {
