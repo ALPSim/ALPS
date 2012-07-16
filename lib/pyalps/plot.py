@@ -104,16 +104,25 @@ def plot(data):
         if 'color' in q.props:
             thiscolor = q.props['color']
         
+        thismarker = markers[imarker]
+        if 'marker' in q.props:
+            thismarker = q.props['marker']
+        imarker = (imarker+1)%len(markers)
+        
         fillmarkers = True
         if 'fillmarkers' in q.props and q.props['fillmarkers'] == False:
             fillmarkers = False
         
+        linewidth = plt.rcParams['lines.linewidth']
+        if 'line.linewidth' in q.props:
+            linewidth = q.props['line.linewidth']
+        
         if 'line' in q.props and q.props['line'] == 'scatter':
             if fillmarkers:
-                plt.scatter(xmeans, ymeans, color=thiscolor, marker=markers[imarker], label=lab)
+                plt.scatter(xmeans, ymeans, color=thiscolor, marker=thismarker, label=lab)
             else:
                 plt.scatter(xmeans, ymeans, label=lab,
-                            marker=markers[imarker], color=thiscolor, facecolors='none')
+                            marker=thismarker, color=thiscolor, facecolors='none')
             imarker = (imarker+1)%len(markers)
         else:
             line_props = '-'
@@ -121,10 +130,10 @@ def plot(data):
                 line_props = q.props['line']
             
             if fillmarkers:
-                plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props,color=thiscolor,label=lab)
+                plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,fmt=line_props,linewidth=linewidth,color=thiscolor,label=lab)
             else:
                 plt.errorbar(xmeans,ymeans,yerr=yerrors,xerr=xerrors,label=lab,
-                            fmt=line_props,color=thiscolor, mfc='none', mec=thiscolor)
+                            fmt=line_props,linewidth=linewidth,color=thiscolor, mfc='none', mec=thiscolor)
 
 
 
