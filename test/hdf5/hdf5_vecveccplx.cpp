@@ -4,7 +4,7 @@
  *                                                                                 *
  * ALPS Libraries                                                                  *
  *                                                                                 *
- * Copyright (C) 2010 - 2011 by Lukas Gamper <gamperl@gmail.com>                   *
+ * Copyright (C) 2010 - 2012 by Lukas Gamper <gamperl@gmail.com>                   *
  *                                                                                 *
  * This software is part of the ALPS libraries, published under the ALPS           *
  * Library License; you can use, redistribute it and/or modify it under            *
@@ -25,35 +25,26 @@
  *                                                                                 *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef ALPS_NGS_HDF5_ERROR_HPP
-#define ALPS_NGS_HDF5_ERROR_HPP
+#include <alps/hdf5.hpp>
+#include <alps/hdf5/vector.hpp>
 
-#include <string>
-#include <stdexcept>
+#include <boost/filesystem.hpp>
 
-namespace alps {
-    namespace hdf5 {
+#include <vector>
+#include <complex>
 
-        class archive_error : public std::runtime_error {
-            public:
-                archive_error(std::string const & what)
-                    : std::runtime_error(what) 
-                {}
-        };
+using namespace std;
 
-        #define DEFINE_ALPS_HDF5_EXCEPTION(name)                                    \
-            class name : public archive_error {                                     \
-                public:                                                             \
-                    name (std::string const & what)                                 \
-                        : archive_error(what)                                       \
-                    {}                                                              \
-            };
-        DEFINE_ALPS_HDF5_EXCEPTION(archive_not_found)
-        DEFINE_ALPS_HDF5_EXCEPTION(invalid_path)
-        DEFINE_ALPS_HDF5_EXCEPTION(path_not_found)
-        DEFINE_ALPS_HDF5_EXCEPTION(wrong_type)
-        #undef DEFINE_ALPS_HDF5_EXCEPTION
-    }
-};
+int main()
+{
+    if (boost::filesystem::exists(boost::filesystem::path("vvcplx")))
+        boost::filesystem::remove(boost::filesystem::path("vvcplx.h5"));
 
-#endif
+    vector< vector< complex<double> > > v;
+    for( int i = 0; i < 3; ++i )
+        v.push_back(vector< complex<double> >(i+1, complex<double>(i,2*i)));
+    alps::hdf5::archive ar("vvcplx.h5",alps::hdf5::archive::WRITE);
+    ar << alps::make_pvp("v",v);
+
+    boost::filesystem::remove(boost::filesystem::path("vvcplx.h5"));
+}
