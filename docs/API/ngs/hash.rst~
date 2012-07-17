@@ -1,4 +1,0 @@
-In header #include <alps/ngs/hash.hpp>
-
-The alps hash functions are an extention of  boost::hash 
-

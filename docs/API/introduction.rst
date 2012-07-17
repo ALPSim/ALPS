@@ -9,4 +9,5 @@ The following documents the API for C++.
    ngs/scheduler
    ngs/signals
    ngs/hash
+   numeric/matrix/matrix
    
