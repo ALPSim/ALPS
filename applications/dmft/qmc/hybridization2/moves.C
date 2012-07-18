@@ -2,7 +2,7 @@
 #include "update.h"
 #include "moves.h"
 
-void insert_remove_full_line(prng_t& rng, double mu, double BETA, blas_matrix &u, int& full_line, std::vector<segment_container_t>& other_segments, std::vector<int>& other_full_line, int this_flavor) {
+void insert_remove_full_line(prng_t& rng, double mu, double BETA, alps_matrix const& u, int& full_line, std::vector<segment_container_t>& other_segments, std::vector<int>& other_full_line, int this_flavor) {
   
   int insert = (rng() < 0.5);
   
@@ -37,7 +37,7 @@ void insert_remove_full_line(prng_t& rng, double mu, double BETA, blas_matrix &u
 }
 
 
-void insert_remove_segment(prng_t& rng, double t, double BETA, double mu, blas_matrix &u, hybridization_t& F, segment_container_t& segments, blas_matrix & M, double & sign, std::vector<segment_container_t>& other_segments, std::vector<int> other_full_line, int this_flavor) {
+void insert_remove_segment(prng_t& rng, double t, double BETA, double mu, alps_matrix const& u, hybridization_t& F, segment_container_t& segments, alps_matrix & M, double & sign, std::vector<segment_container_t>& other_segments, std::vector<int> other_full_line, int this_flavor) {
   
   double t_up; // distance to next segment up
   double t_down; // distance to next segment down
@@ -67,7 +67,7 @@ void insert_remove_segment(prng_t& rng, double t, double BETA, double mu, blas_m
         otherlength_u += other_length*u(i, this_flavor);
       }
       double log_prob, overlap, det_rat, det_rat_sign;
-      std::vector<double> Fs(segments.size()), Fe(segments.size());
+      vector_t Fs(segments.size()), Fe(segments.size());
       
       det_rat = det_rat_up(segment_insert, M, segments, F, Fs, Fe, BETA, det_rat_sign, overlap);
       
@@ -126,7 +126,7 @@ void insert_remove_segment(prng_t& rng, double t, double BETA, double mu, blas_m
 }
 
 
-void insert_remove_antisegment(prng_t& rng, double t, double BETA, double mu,blas_matrix &u, hybridization_t& F, int& full_line, segment_container_t& segments, blas_matrix& M, double & sign,std::vector<segment_container_t>& other_segments, std::vector<int> other_full_line, int this_flavor) {
+void insert_remove_antisegment(prng_t& rng, double t, double BETA, double mu, alps_matrix const& u, hybridization_t& F, int& full_line, segment_container_t& segments, alps_matrix& M, double & sign, std::vector<segment_container_t>& other_segments, std::vector<int> other_full_line, int this_flavor) {
   
   double t_up; // distance to next segment up (t_start)
   double t_down; // distance to next segment down (t_end)
@@ -143,7 +143,7 @@ void insert_remove_antisegment(prng_t& rng, double t, double BETA, double mu,bla
       times segment_remove(t,t_end);
       
       double log_prob, overlap, det_rat, det_rat_sign;
-      std::vector<double> Fs(segments.size()), Fe(segments.size());
+      vector_t Fs(segments.size()), Fe(segments.size());
       det_rat = det_rat_up(segment_insert, M, segments, F, Fs, Fe, BETA, det_rat_sign, overlap);
       
       double otherlength_u=0;
@@ -192,7 +192,7 @@ void insert_remove_antisegment(prng_t& rng, double t, double BETA, double mu,bla
           otherlength_u += other_length*u(i, this_flavor);
         }
         double log_prob, overlap, det_rat, det_rat_sign;
-        std::vector<double> R(segments.size());
+        vector_t R(segments.size());
         det_rat = det_rat_insert_anti(anti_segment, M, segments, F, BETA, det_rat_sign, overlap, R);
         
         log_prob = log(BETA*(-t_down)/(segments.size()+1)*det_rat)-length*mu+otherlength_u;
@@ -328,6 +328,9 @@ void insert_remove_antisegment(prng_t& rng, double t, double BETA, double mu,bla
 }
 
 /*
+ 
+ // TODO can this code be removed? (2012-07-18)
+ 
  // move segment without changing its length
  template <class RNG, class S, class G> void move_segment(RNG& rng, S& segments, int N, double BETA, double mu, double u, G& F, blas_matrix& M, double & sign, S& other_segments, int other_full_line) {
  
@@ -408,7 +411,7 @@ void insert_remove_antisegment(prng_t& rng, double t, double BETA, double mu,bla
 
 
 // shift segment
-void shift_segment(prng_t& rng, segment_container_t& segments, double BETA, double mu, blas_matrix &u, hybridization_t& F, blas_matrix & M, double & sign, std::vector<segment_container_t>& other_segments, std::vector<int>& other_full_line, int this_flavor) {
+void shift_segment(prng_t& rng, segment_container_t& segments, double BETA, double mu, alps_matrix const& u, hybridization_t& F, alps_matrix & M, double & sign, std::vector<segment_container_t>& other_segments, std::vector<int>& other_full_line, int this_flavor) {
   
   int size = segments.size();
   
@@ -463,9 +466,9 @@ void shift_segment(prng_t& rng, segment_container_t& segments, double BETA, doub
 }
 
 // swap segment configurations
-void swap_segments(prng_t& rng, double BETA, hybridization_t& F_up, hybridization_t & F_down, segment_container_t& segments_up, segment_container_t& segments_down, int& full_line_up, int& full_line_down, double & sign_up, double & sign_down, blas_matrix & M_up, blas_matrix& M_down) {
+void swap_segments(prng_t& rng, double BETA, hybridization_t& F_up, hybridization_t & F_down, segment_container_t& segments_up, segment_container_t& segments_down, int& full_line_up, int& full_line_down, double & sign_up, double & sign_down, alps_matrix & M_up, alps_matrix & M_down) {
   
-  blas_matrix M_new_up, M_new_down;
+  alps_matrix M_new_up, M_new_down;
   
   // before swap
   double det_old_up = construct_inverse(M_new_up, segments_up, BETA,  F_up); // here M_new_up is just a dummy
@@ -489,6 +492,9 @@ void swap_segments(prng_t& rng, double BETA, hybridization_t& F_up, hybridizatio
 }
 
 /*
+
+ // TODO can this code be removed? (2012-07-18)
+
  // flip segment between up/down
  template <class RNG, class S, class G> void flip_segment(RNG& rng, S& segments, int N, double BETA, blas_matrix& M, double & sign, double & other_sign, G& other_F, blas_matrix& other_M, S& other_segments, int other_full_line) {
  
@@ -538,7 +544,7 @@ void swap_segments(prng_t& rng, double BETA, hybridization_t& F_up, hybridizatio
  }
  */
 
-void measure_GF_imp(prng_t& rng, int N, double BETA, double mu, blas_matrix &u, hybridization_t& F, segment_container_t& segments, blas_matrix & M, std::vector<segment_container_t>& other_segments, std::vector<int> other_full_line, int this_flavor, std::valarray<double> & G_meas) {
+void measure_GF_imp(prng_t& rng, int N, double BETA, double mu, alps_matrix const& u, hybridization_t& F, segment_container_t& segments, alps_matrix const& M, std::vector<segment_container_t>& other_segments, std::vector<int> other_full_line, int this_flavor, std::valarray<double> & G_meas) {
   
   if (segments.size()==0) {
     
@@ -570,7 +576,7 @@ void measure_GF_imp(prng_t& rng, int N, double BETA, double mu, blas_matrix &u, 
       full_other_length_u += full_other_length*u(i, this_flavor);
     }
     double prob, overlap, det_rat, det_rat_sign;
-    std::vector<double> Fs(segments.size()), Fe(segments.size());
+    vector_t Fs(segments.size()), Fe(segments.size());
     
     // note: det_rat>0 by def. 
     det_rat = det_rat_up(segment_insert, M, segments, F, Fs, Fe, BETA, det_rat_sign, overlap);
@@ -629,10 +635,10 @@ void measure_GF_imp(prng_t& rng, int N, double BETA, double mu, blas_matrix &u, 
   else {
     
     segment_container_t::iterator it1, it2;
-    
-    for (int i=0; i<M.size1(); i++) {
+    assert(num_rows(M) == num_cols(M));
+    for (int i=0; i<num_cols(M); i++) {
       (i==0 ? it1 = segments.begin() : it1++);
-      for (int k=0; k<M.size1(); k++) {
+      for (int k=0; k<num_rows(M); k++) {
         (k==0 ? it2 = segments.begin() : it2++);
         if (M(k,i)!=0) {
           double argument = it1->t_end()-it2->t_start();

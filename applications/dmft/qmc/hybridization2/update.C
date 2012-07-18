@@ -1,38 +1,33 @@
 #include "impurity.h"
 #include "update.h"
+#include <boost/numeric/bindings/lapack/driver/gesv.hpp>
 
 //these updates should be replaced by the blas updates (dger, dgemv, etc) ASAP
 
 // invert matrix A and calculate its determinant
-void invert(blas_matrix & A, double & det) {
-  if(A.size1()==0){ det=0; return;} 
-  blas_matrix B(A.size1(), A.size1()); B.set_to_identity();
+void invert(alps_matrix & A, double & det) {
+  assert(num_rows(A) == num_cols(A));
+  using std::fill;
+  using alps::numeric::diagonal;
+  using boost::numeric::bindings::lapack::gesv;
+  if(num_rows(A)==0){ det=0; return;} 
+  alps_matrix B(num_rows(A), num_cols(A));
+  fill(diagonal(B).first,diagonal(B).second,1.);
   
-  std::vector<int> ipivot(A.size1(),0.);
-  int size=A.size1();
-  int info;
+  alps::numeric::vector<int> ipivot(num_rows(A),0.);
   //LU factorization
-  FORTRAN_ID(dgesv)(&size, &size, &(A(0,0)), &size, &(ipivot[0]), &(B(0,0)), &size,&info);
-  if(info < 0) {
-    std::cout << "LAPACK ERROR !" << std::endl;
-    std::cout << "INFO:" << info << std::endl;
-    throw std::runtime_error("encountered LAPACK problem!");
-  } else if(info > 0){
-    //check dgesv page: that means that we haven an exactly singular
-    //matrix and the det is therefore =0: 
-    throw std::runtime_error("encountered singular matrix!");
-  }
-  A.swap(B);
+  gesv(A,ipivot,B);
+  swap(A,B);
   det = 1;
-  for (int i=0; i<A.size1(); i++) {
+  for (int i=0; i<num_rows(B); i++) {
     det *= B(i,i);
-  }  
+  }
   det = std::fabs(det);
 }
 
-void construct_matrix(blas_matrix & M, segment_container_t & segments, double BETA,  hybridization_t& F) {
+void construct_matrix(alps_matrix & M, segment_container_t & segments, double BETA,  hybridization_t& F) {
   int N = segments.size();
-  M.resize(N,N);
+  resize(M,N,N);
   int row=-1;
   int column=-1;
   for (segment_container_t::iterator it1=segments.begin(); it1!=segments.end(); it1++) {
@@ -53,7 +48,7 @@ void construct_matrix(blas_matrix & M, segment_container_t & segments, double BE
   
 }
 
-double construct_inverse(blas_matrix & M, segment_container_t & segments, double BETA,  hybridization_t& F) {
+double construct_inverse(alps_matrix & M, segment_container_t & segments, double BETA,  hybridization_t& F) {
   construct_matrix(M, segments, BETA, F);
   double dummy;
   invert(M, dummy);
@@ -174,7 +169,7 @@ double compute_overlap(times segment, segment_container_t& other_segments, int o
 }
 
 // functions required to compute determinant ratios and perform fast matrix updates 
-double det_rat_up(times & new_segment, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, vector_t& Fs, vector_t& Fe, double BETA, double & det_rat_sign, double & overlap) {
+double det_rat_up(times & new_segment, alps_matrix const& M, segment_container_t& segments_old, hybridization_t& F, vector_t& Fs, vector_t& Fe, double BETA, double & det_rat_sign, double & overlap) {
   
   segment_container_t::iterator it=segments_old.begin();
   for (std::size_t i=0; i<segments_old.size(); i++) {
@@ -184,12 +179,8 @@ double det_rat_up(times & new_segment, blas_matrix & M, segment_container_t& seg
   }
   
   double det_rat = interpolate_F(new_segment.t_end()-new_segment.t_start(), BETA, F);
-  
-  for (int i=0; i<M.size1(); i++) {
-    for (int j=0; j<M.size1(); j++) {
-      det_rat -= Fe[i]*M(i,j)*Fs[j];
-    }
-  }
+
+  det_rat -= scalar_product(Fe,M*Fs);
   
   // take care of sign changes produced by segments which "wind around"
   if (new_segment.t_end() < new_segment.t_start()) {
@@ -211,21 +202,21 @@ double det_rat_up(times & new_segment, blas_matrix & M, segment_container_t& seg
   return det_rat;
 }
 
-void compute_M_up(int k, blas_matrix & M, vector_t& Fs, vector_t &Fe, double det_rat) {
-  
-  blas_matrix M_new(M.size1()+1,M.size1()+1);
+void compute_M_up(int k, alps_matrix & M, vector_t& Fs, vector_t &Fe, double det_rat) {
+  assert( num_rows(M) == num_cols(M) );
+  alps_matrix M_new(num_rows(M)+1,num_cols(M)+1);
   int i_new, j_new;
   
   // element (k,k)
   M_new(k,k) = 1./det_rat;
   
   // row k and column k
-  for (int i=0; i<M.size1(); i++) {
+  for (int i=0; i < num_rows(M); i++) {
     i_new = (i<k ? i : i+1);
     M_new(i_new,k) = 0;
     M_new(k,i_new) = 0;
     
-    for (int n=0; n<M.size1(); n++) {
+    for (int n=0; n<num_rows(M); n++) {
       M_new(i_new,k) -= M(i,n)*Fs[n];
       M_new(k,i_new) -= M(n,i)*Fe[n];  
     } 
@@ -234,10 +225,10 @@ void compute_M_up(int k, blas_matrix & M, vector_t& Fs, vector_t &Fe, double det
   }
   
   // remaining elements
-  for (int i=0; i<M.size1(); i++) {
-    i_new = (i<k ? i : i+1);
-    for (int j=0; j<M.size1(); j++) {
-      j_new = (j<k ? j : j+1);
+  for (int j=0; j<num_cols(M); j++) {
+    j_new = (j<k ? j : j+1);
+    for (int i=0; i<num_rows(M); i++) {
+      i_new = (i<k ? i : i+1);
       M_new(i_new,j_new) = M(i,j) + det_rat*M_new(i_new,k)*M_new(k,j_new);
     }
   }
@@ -247,7 +238,7 @@ void compute_M_up(int k, blas_matrix & M, vector_t& Fs, vector_t &Fe, double det
 }  
 
 
-double det_rat_down(std::size_t k, blas_matrix & M, segment_container_t& segments_old, double & det_rat_sign) {
+double det_rat_down(std::size_t k, alps_matrix const& M, segment_container_t& segments_old, double & det_rat_sign) {
   
   double det_rat = M(k,k);
   
@@ -270,15 +261,15 @@ double det_rat_down(std::size_t k, blas_matrix & M, segment_container_t& segment
 }
 
 
-void compute_M_down(int k, blas_matrix & M) {
+void compute_M_down(int k, alps_matrix & M) {
+  assert(num_rows(M) == num_cols(M));
+  assert(num_rows(M) > 0);
+  alps_matrix M_new(num_rows(M)-1, num_cols(M)-1);
   
-  blas_matrix M_new(M.size1()-1, M.size1()-1);
-  int i_old, j_old;
-  
-  for (int i=0; i<M_new.size1(); i++) {
-    i_old = (i<k ? i : i+1);
-    for (int j=0; j<M_new.size1(); j++) {
-      j_old = (j<k ? j : j+1);
+  for (int j=0; j<num_cols(M_new); j++) {
+    int j_old = (j<k ? j : j+1);
+    for (int i=0; i<num_rows(M_new); i++) {
+      int i_old = (i<k ? i : i+1);
       M_new(i,j) = M(i_old, j_old)-M(i_old,k)*M(k,j_old)/M(k,k);
     }
   }
@@ -288,20 +279,20 @@ void compute_M_down(int k, blas_matrix & M) {
 }
 
 // move segment without changin its length
-double det_rat_move(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap) {
-  
+double det_rat_move(times & new_segment, std::size_t k, alps_matrix const& M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap) {
+  assert(num_rows(M) == num_cols(M));
   double F_i, F_j;
   segment_container_t::iterator it1, it2;
   
   double det_rat = M(k,k)*interpolate_F(new_segment.t_end()-new_segment.t_start(), BETA, F);
   
   it1=segments_old.begin();
-  for (std::size_t i=0; i<(std::size_t)M.size1(); i++) {
+  for (std::size_t i=0; i<num_rows(M); i++) {
     if (i != k) {
       F_i = interpolate_F(new_segment.t_end()-it1->t_start(), BETA, F);
       
       it2=segments_old.begin();
-      for (std::size_t j=0; j<(std::size_t)M.size1(); j++) {
+      for (std::size_t j=0; j<num_cols(M); j++) {
         if (j != k) {
           F_j = interpolate_F(it2->t_end()-new_segment.t_start(), BETA, F);
           det_rat -= F_i*(M(k,k)*M(i,j)-M(i,k)*M(k,j))*F_j;
@@ -335,19 +326,19 @@ double det_rat_move(times & new_segment, std::size_t k, blas_matrix & M, segment
 }
 
 
-void compute_M_move(times & new_segment, int k, blas_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat) {
-  
-  blas_matrix M_new(M.size1(),M.size1());
+void compute_M_move(times & new_segment, int k, alps_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat) {
+  assert(num_rows(M) == num_cols(M)); 
+  alps_matrix M_new(num_rows(M),num_cols(M));
   //double argument;
   
   // row k and column k
-  for (int i=0; i<M.size1(); i++) {
+  for (int i=0; i<num_rows(M); i++) {
     if (i!=k) {
       M_new(i,k) = 0;
       M_new(k,i) = 0;
       
       segment_container_t::iterator it=segments_old.begin();
-      for (int n=0; n<M.size1(); n++) {
+      for (int n=0; n<num_rows(M); n++) {
         if (n!=k) {
           M_new(i,k) -= 1/det_rat*(M(k,k)*M(i,n)-M(i,k)*M(k,n))*interpolate_F(it->t_end()-new_segment.t_start(), BETA, F);
           M_new(k,i) -= 1/det_rat*(M(k,k)*M(n,i)-M(n,k)*M(k,i))*interpolate_F(new_segment.t_end()-it->t_start(), BETA, F);    
@@ -361,10 +352,10 @@ void compute_M_move(times & new_segment, int k, blas_matrix & M, segment_contain
   }
   
   // remaining elements
-  for (int i=0; i<M.size1(); i++) {
-    if (i!=k) {
-      for (int j=0; j<M.size1(); j++) {
-        if (j!=k)
+  for (int j=0; j<num_cols(M); j++) {
+    if (j!=k) {
+      for (int i=0; i<num_rows(M); i++) {
+        if (i!=k)
           M_new(i,j) = M(i,j) + (-M(i,k)*M(k,j)+det_rat*M_new(i,k)*M_new(k,j))/M(k,k);
       }
     }
@@ -375,13 +366,13 @@ void compute_M_move(times & new_segment, int k, blas_matrix & M, segment_contain
 }  
 
 // shift end point of segment
-double det_rat_shift(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap) {
+double det_rat_shift(times & new_segment, std::size_t k, alps_matrix const& M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap) {
   
   segment_container_t::iterator it;
   double det_rat = 0;
   
   it=segments_old.begin();
-  for (int i=0; i<M.size1(); i++) {
+  for (int i=0; i<num_rows(M); i++) {
     det_rat += interpolate_F(new_segment.t_end()-it->t_start(), BETA, F)*M(i,k);
     it++;
   }
@@ -409,9 +400,10 @@ double det_rat_shift(times & new_segment, std::size_t k, blas_matrix & M, segmen
 }
 
 
-void compute_M_shift(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat) {
-  
-  std::vector<double> R(M.size1(),0), M_k(M.size1(),0), Fe(M.size1(),0);
+void compute_M_shift(times & new_segment, std::size_t k, alps_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat) {
+ 
+  assert(num_rows(M) == num_cols(M));
+  std::vector<double> R(num_rows(M),0), M_k(num_rows(M),0), Fe(num_rows(M),0);
   
   segment_container_t::iterator it=segments_old.begin();
   for (std::size_t i=0; i<M_k.size(); i++) {
@@ -427,14 +419,14 @@ void compute_M_shift(times & new_segment, std::size_t k, blas_matrix & M, segmen
     }
   }
   
-  for (std::size_t m=0; m<(std::size_t)M.size1(); m++) {
+  for (std::size_t m=0; m<num_cols(M); m++) {
     if (m!=k) {
-      for (int n=0; n<M.size1(); n++) {
+      for (int n=0; n<num_rows(M); n++) {
         M(n,m) -= M_k[n]*R[m]/det_rat;
       }
     }
     else {
-      for (int n=0; n<M.size1(); n++) {
+      for (int n=0; n<num_rows(M); n++) {
         M(n,m) = M_k[n]/det_rat;
       }    
     }
@@ -444,7 +436,7 @@ void compute_M_shift(times & new_segment, std::size_t k, blas_matrix & M, segmen
 }  
 
 
-double det_rat_insert_anti(times & anti_segment, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap, vector_t& R) {
+double det_rat_insert_anti(times & anti_segment, alps_matrix const& M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap, vector_t& R) {
   
   std::vector<double> F_k(R.size());
   
@@ -491,10 +483,11 @@ inline int cycle(int i, int size) {
   return (i>0 ? i-1 : size-1); 
 }
 
-void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat, vector_t& R) {
-  
-  blas_matrix M_new(M.size1()+1,M.size1()+1);
-  std::vector<double> F_kp1(R.size()), L(R.size());
+void compute_M_insert_anti(times & anti_segment, int s, int r, alps_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat, vector_t& R) {
+  assert(num_rows(M) == num_cols(M));
+  assert(num_rows(M) == R.size());
+  alps_matrix M_new(num_rows(M)+1,num_cols(M)+1);
+  alps::numeric::vector<double> F_kp1(R.size()), L(R.size());
   
   segment_container_t::iterator it=segments_old.begin();
   for (std::size_t i=0; i<F_kp1.size(); i++) {
@@ -502,15 +495,10 @@ void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, 
     it++;
   }
   
-  for (std::size_t i=0; i<L.size(); i++) {
-    L[i]=0;
-    for (std::size_t l=0; l<L.size(); l++) {  
-      L[i] += M(i,l)*F_kp1[l];
-    }
-  }
+  L = M*F_kp1;
   
   int i_new, j_new;
-  int size=M.size1();
+  int size=num_rows(M);
   
   // element (k+1,k)
   M_new(r,s) = -1./det_rat;
@@ -527,10 +515,10 @@ void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, 
     }
     
     // remaining elements
-    for (int i=0; i<size; i++) {
-      i_new = (i<r ? i : i+1);
-      for (int j=0; j<size; j++) {
-        j_new = (j<s ? j : j+1);
+    for (int j=0; j<size; j++) {
+      j_new = (j<s ? j : j+1);
+      for (int i=0; i<size; i++) {
+        i_new = (i<r ? i : i+1);
         M_new(i_new,j_new) = M(i,j) - L[i]*R[j]/det_rat;
       }
     }
@@ -547,10 +535,10 @@ void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, 
     }
     
     // remaining elements
-    for (int i=0; i<size; i++) {
-      i_new = (i<r ? i : i+1);
-      for (int j=0; j<size; j++) {
-        j_new = (j<s ? j : j+1);
+    for (int j=0; j<size; j++) {
+      j_new = (j<s ? j : j+1);
+      for (int i=0; i<size; i++) {
+        i_new = (i<r ? i : i+1);
         M_new(i_new,j_new) = M(i,cycle(j,size)) - L[i]*R[cycle(j,size)]/det_rat;
       }
     }  
@@ -560,7 +548,7 @@ void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, 
   return;
 }
 
-double det_rat_remove_anti(times anti_segment, int r, std::size_t s, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign) {
+double det_rat_remove_anti(times anti_segment, int r, std::size_t s, alps_matrix const& M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign) {
   
   // r is the index of the segment which is removed
   // s is the index of the segment which is shifted
@@ -597,25 +585,25 @@ double det_rat_remove_anti(times anti_segment, int r, std::size_t s, blas_matrix
 }
 
 
-void compute_M_remove_anti(blas_matrix & M, int s, int r) {
+void compute_M_remove_anti(alps_matrix & M, int s, int r) {
+  assert(num_rows(M) == num_cols(M));
+  assert(num_rows(M) > 0); 
+  alps_matrix M_new(num_rows(M)-1,num_cols(M)-1);
   
-  blas_matrix M_new(M.size1()-1,M.size1()-1);
-  
-  int i_old, j_old;
-  int size=M_new.size1();
+  int size=num_rows(M_new);
   
   if(r!=0) { // order of segments remains unchanged
-    for (int i=0; i<size; i++) {
-      i_old = (i<r ? i : i+1);
-      for (int j=0; j<size; j++) {
-        j_old = (j<s ? j : j+1);
+    for (int j=0; j<size; j++) {
+      int j_old = (j<s ? j : j+1);
+      for (int i=0; i<size; i++) {
+        int i_old = (i<r ? i : i+1);
         M_new(i,j) = M(i_old,j_old) - M(i_old, s)*M(r, j_old)/M(r, s);
       }
     }
   }
   else { // need to permute indices of M
-    for (int i=0; i<size; i++) {
-      for (int j=0; j<size; j++) {
+    for (int j=0; j<size; j++) {
+      for (int i=0; i<size; i++) {
         M_new(i,cycle(j,size)) = M(i+1,j) - M(i+1, s)*M(r, j)/M(r, s);
       }
     }  

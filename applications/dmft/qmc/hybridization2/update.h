@@ -34,11 +34,11 @@
 
 
 // invert matrix A and calculate its determinant
-void invert(blas_matrix & A, double & det);
+void invert(alps_matrix & A, double & det);
 
-void construct_matrix(blas_matrix & M, segment_container_t & segments, double BETA,  hybridization_t & F);
+void construct_matrix(alps_matrix & M, segment_container_t & segments, double BETA,  hybridization_t & F);
 
-double construct_inverse(blas_matrix & M, segment_container_t& segments, double BETA,  hybridization_t &F) ;
+double construct_inverse(alps_matrix & M, segment_container_t& segments, double BETA,  hybridization_t &F) ;
 
 // determine F(\tau)
 inline double interpolate_F(double t, double BETA, hybridization_t& F) {
@@ -70,31 +70,31 @@ double compute_overlap(times segment, segment_container_t& other_segments, int o
 
 // functions required to compute determinant ratios and perform fast matrix updates 
 
-double det_rat_up(times & new_segment, blas_matrix & M, segment_container_t& segments_old, hybridization_t & F, vector_t& Fs, vector_t& Fe, double BETA, double & det_rat_sign, double & overlap); 
+double det_rat_up(times & new_segment, alps_matrix const& M, segment_container_t& segments_old, hybridization_t & F, vector_t& Fs, vector_t& Fe, double BETA, double & det_rat_sign, double & overlap); 
 
-void compute_M_up(int k, blas_matrix & M, vector_t& Fs, vector_t& Fe, double det_rat);
+void compute_M_up(int k, alps_matrix & M, vector_t& Fs, vector_t& Fe, double det_rat);
 
-double det_rat_down(std::size_t k, blas_matrix & M, segment_container_t& segments_old, double & det_rat_sign);
+double det_rat_down(std::size_t k, alps_matrix const& M, segment_container_t& segments_old, double & det_rat_sign);
 
-void compute_M_down(int k, blas_matrix & M);
+void compute_M_down(int k, alps_matrix & M);
 
 // move segment without changin its length
-double det_rat_move(times & new_segment, int k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap);
+double det_rat_move(times & new_segment, int k, alps_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap);
 
-void compute_M_move(times & new_segment, int k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat);
+void compute_M_move(times & new_segment, int k, alps_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat);
 
 // shift end point of segment
-double det_rat_shift(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap);
+double det_rat_shift(times & new_segment, std::size_t k, alps_matrix const& M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap);
 
-void compute_M_shift(times & new_segment, std::size_t k, blas_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat);
+void compute_M_shift(times & new_segment, std::size_t k, alps_matrix & M, segment_container_t & segments_old, hybridization_t& F, double BETA, double det_rat);
 
-double det_rat_insert_anti(times & anti_segment, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap, vector_t& R);
+double det_rat_insert_anti(times & anti_segment, alps_matrix const& M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign, double & overlap, vector_t& R);
 
-void compute_M_insert_anti(times & anti_segment, int s, int r, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat, vector_t& R);
+void compute_M_insert_anti(times & anti_segment, int s, int r, alps_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double det_rat, vector_t& R);
 
-double det_rat_remove_anti(times anti_segment, int r, std::size_t s, blas_matrix & M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign);
+double det_rat_remove_anti(times anti_segment, int r, std::size_t s, alps_matrix const& M, segment_container_t& segments_old, hybridization_t& F, double BETA, double & det_rat_sign);
 
-void compute_M_remove_anti(blas_matrix & M, int s, int r); 
+void compute_M_remove_anti(alps_matrix & M, int s, int r);
 
 double get_occupation(segment_container_t &segments, int full_line, double tau, double BETA);
 

@@ -140,17 +140,17 @@ void hybridization::set_measurement_vectors(){
     n_meas[f] += compute_overlap(full_segment, segments[f], full_line[f], BETA)/BETA;//measure density
     if(segments[f].size()<(std::size_t)N_order)
       order_meas[f*N_order+segments[f].size()]++; // measure perturbation order
-    matrix_size[f]+=M[f].size(); //measure Matrix size
+    matrix_size[f]+=num_rows(M[f]); //measure Matrix size
     double tau_1, tau_2;
     if(segments[f].size()>0){//at least one segment in the configuration
-      for(int a1=0; a1<(int)M[f].size1(); a1++){
+      for(int a1=0; a1<(int)num_rows(M[f]); a1++){
         (a1==0 ? ita1 = segments[f].begin() : ita1++); //1st annihilator
         tau_1=ita1->t_end(); double pref(0.0);
         if(MEASURE_fw || MEASURE_fl || MEASURE_hw)
           for(int f1=0; f1<FLAVORS; f1++)
             pref += 0.5*(u(f1,f)+u(f,f1))*get_occupation(segments[f1],full_line[f1],tau_1,BETA);
         
-        for(int c1=0; c1<(int)M[f].size1(); c1++){
+        for(int c1=0; c1<(int)num_rows(M[f]); c1++){
           (c1==0 ? itc1 = segments[f].begin() : itc1++); //1st creator
           tau_2=itc1->t_start();
           double m_matrix = M[f](c1,a1);

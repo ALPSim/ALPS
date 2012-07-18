@@ -34,8 +34,6 @@
 
 #include <alps/alea.h>
 #include <cmath>
-#include <alps/numeric/detail/matrix.hpp>
-#include <alps/numeric/detail/vector.hpp>
 #include "green_function.h"
 #include "alps_solver.h"
 #include "types.h"

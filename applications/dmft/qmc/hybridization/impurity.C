@@ -132,6 +132,7 @@ G_meas(static_cast < int >(parms["FLAVORS"]) * (static_cast < int >(parms["N"]) 
   // initialize list of segments
   for (int i = 0; i < FLAVORS; i++) {
     segments[i].clear();
+    M[i].clear();
   }
 
   // create measurement objects

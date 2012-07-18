@@ -156,7 +156,7 @@ std::ostream &operator<<(std::ostream & os, segment_container_t segments){
 
 void hybridization::read_external_input_data(const parameters_type &parms){
   // define interactions between flavors. Read in interaction file.
-  u.resize(FLAVORS, FLAVORS);
+  resize(u, FLAVORS, FLAVORS);
   if(parms.defined("U_MATRIX")){
     std::string fname=parms["U_MATRIX"].cast<std::string>();
     size_t found=fname.find(".h5",fname.size()-3);

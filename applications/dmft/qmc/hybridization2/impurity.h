@@ -33,15 +33,13 @@
 
 #include <alps/alea.h>
 #include <cmath>
-#include <alps/numeric/detail/matrix.hpp>
-#include <alps/numeric/detail/vector.hpp>
+#include <alps/numeric/matrix.hpp>
 #include "green_function.h"
 #include "alps_solver.h"
 
-//typedef boost::numeric::ublas::matrix<double,boost::numeric::ublas::column_major> blas_matrix;
-typedef blas::matrix blas_matrix;
+typedef alps::numeric::matrix<double> alps_matrix;
+typedef alps::numeric::vector<double> vector_t;
 typedef boost::variate_generator<boost::mt19937, boost::uniform_real<> > prng_t;
-typedef std::vector<double> vector_t;
 
 class times
 {
@@ -105,14 +103,14 @@ private:
   int total_sweeps;                                  // sweeps to be done after equilibration
   //double mu;                                       // chemical potential
   std::vector<double> mu_e;                          // mu-<\epsilon>
-  blas_matrix u;                                    // interaction matrix
+  alps_matrix u;                                    // interaction matrix
   double t;                                          // energy unit
   hybridization_container_t F;                       // F_up(\tau) = -G_{0,down}^{-1}(-\tau) + (iw + mu) hybridization function
   hybridization_container_t Fomega_imag;
   std::vector<segment_container_t >  segments;       // stores configurations with 0,1,... segments (but not full line)
   std::vector<int>          full_line;               // if 1 means that particle occupies full time-line
   std::vector<double>        sign;                   // sign of Z_n_up
-  std::vector<blas_matrix>      M;                   // inverse matrix for up-spins
+  std::vector<alps_matrix>      M;                   // inverse matrix for up-spins
   std::valarray<double> G_meas;
   std::valarray<double> order_meas;
   std::valarray<double> n_meas;
