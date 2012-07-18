@@ -30,7 +30,6 @@ add_custom_target(doxygendocs ALL
     "${CMAKE_CURRENT_BINARY_DIR}/doxygen.conf"
     COMMENT "Building Doxygen XML documentation for Sphinx")
 
-message(STATUS "Sphinx settings. source_dir: ${CMAKE_CURRENT_SOURCE_DIR}")
 
 ## Sphinx targets
 add_custom_target(html ALL
