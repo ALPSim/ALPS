@@ -88,6 +88,7 @@ set(ALPS_INSTALL_HEADERS  ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Install headers 
 set(ALPS_BUILD_EXAMPLES ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS examples")
 set(ALPS_BUILD_TESTS ${NOT_ALPS_FOR_VISTRAILS} CACHE BOOL "Build ALPS tests")
 set(ALPS_BUILD_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS documentation")
+set(ALPS_BUILD_NEW_DOC ${ALPS_BUILD_SOURCE} CACHE BOOL "Build ALPS Sphinx documentation")
 set(ALPS_INCLUDE_BOOST_SOURCE OFF CACHE BOOL "Include Boost sources in the source tarball")
 set(ALPS_SYSTEM_NAME "" CACHE STRING "Override the package name")
 set(ALPS_PACKAGE_VERSION "" CACHE STRING "Override the package version")
@@ -819,6 +820,11 @@ endif(ALPS_PATCH_VISTRAILS)
 if (ALPS_BUILD_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
 add_subdirectory(doc)
 endif (ALPS_BUILD_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+
+if (ALPS_BUILD_NEW_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+add_subdirectory(docs)
+endif (ALPS_BUILD_NEW_DOC AND NOT ALPS_BUILD_TUTORIALS_PACKAGE)
+
 
 ######################################################################
 # libraries

@@ -52,7 +52,7 @@ PROJECT_LOGO           =
 # If a relative path is entered, it will be relative to the location
 # where doxygen was started. If left blank the current directory will be used.
 
-OUTPUT_DIRECTORY       = doxygen/
+OUTPUT_DIRECTORY       = @DOXYGENDOCS_DIR@
 
 # If the CREATE_SUBDIRS tag is set to YES, then doxygen will create
 # 4096 sub-directories (in 2 levels) under the output directory of each output
@@ -650,7 +650,7 @@ WARN_LOGFILE           =
 # directories like "/usr/src/myproject". Separate the files or directories
 # with spaces.
 
-INPUT                  = "../src/alps" "../src/alps/ngs" "../src/alps/numeric/" "../src/alps/numeric/matrix/"
+INPUT                  = "@CMAKE_SOURCE_DIR@/src/alps" "@CMAKE_SOURCE_DIR@/src/alps/ngs" "@CMAKE_SOURCE_DIR@/src/alps/numeric/" "@CMAKE_SOURCE_DIR@/src/alps/numeric/matrix/"
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding, which is
